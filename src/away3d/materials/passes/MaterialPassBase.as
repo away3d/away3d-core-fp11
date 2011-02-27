@@ -1,0 +1,304 @@
+package away3d.materials.passes
+{
+	import away3d.arcane;
+	import away3d.cameras.Camera3D;
+	import away3d.animators.data.AnimationBase;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.AGALProgram3DAssembler;
+	import away3d.errors.AbstractMethodError;
+	import away3d.lights.LightBase;
+	import away3d.materials.MaterialBase;
+
+	import flash.display.BitmapData;
+	import flash.display3D.Context3D;
+	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTriangleFace;
+	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.display3D.Program3D;
+
+	use namespace arcane;
+
+	/**
+	 * MaterialPassBase provides an abstract base class for material shader passes.
+	 */
+	public class MaterialPassBase
+	{
+		private var _material : MaterialBase;
+		private var _animation : AnimationBase;
+
+		private var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
+		private var _programInvalids : Vector.<Boolean> = new Vector.<Boolean>(8);
+
+		// agal props. these NEED to be set by subclasses!
+		protected var _numUsedStreams : uint;
+		protected var _numUsedVertexConstants : uint;
+
+		protected var _smooth : Boolean = true;
+		protected var _repeat : Boolean = false;
+		protected var _mipmap : Boolean = false;
+
+		private var _mipmapBitmap : BitmapData;
+		private var _bothSides : Boolean;
+
+		protected var _animatableAttributes : Array = ["va0"];
+		protected var _targetRegisters : Array = ["vt0"];
+		protected var _projectedTargetRegister : String;
+
+		protected var _lights : Vector.<LightBase>;
+		protected var _numLights : uint;
+
+		/**
+		 * Creates a new MaterialPassBase object.
+		 */
+		public function MaterialPassBase()
+		{
+			_numUsedStreams = 1;
+			_numUsedVertexConstants = 4;
+		}
+
+		/**
+		 * The material to which this pass belongs.
+		 */
+		public function get material() : MaterialBase
+		{
+			return _material;
+		}
+
+		public function set material(value : MaterialBase) : void
+		{
+			_material = value;
+		}
+
+		/**
+		 * Defines whether any used textures should use mipmapping.
+		 */
+		public function get mipmap() : Boolean
+		{
+			return _mipmap;
+		}
+
+		public function set mipmap(value : Boolean) : void
+		{
+			if (_mipmap == value) return;
+			_mipmap = value;
+			if (_mipmapBitmap) _mipmapBitmap.dispose();
+			else _mipmapBitmap = null;
+			invalidateShaderProgram();
+		}
+
+		/**
+		 * Defines whether smoothing should be applied to any used textures.
+		 */
+		public function get smooth() : Boolean
+		{
+			return _smooth;
+		}
+
+		public function set smooth(value : Boolean) : void
+		{
+			if (_smooth == value) return;
+			_smooth = value;
+			invalidateShaderProgram();
+		}
+
+		/**
+		 * Defines whether textures should be tiled.
+		 */
+		public function get repeat() : Boolean
+		{
+			return _repeat;
+		}
+
+		public function set repeat(value : Boolean) : void
+		{
+			if (_repeat == value) return;
+			_repeat = value;
+			invalidateShaderProgram();
+		}
+
+		/**
+		 * Defines whether or not the material should perform backface culling.
+		 */
+		public function get bothSides() : Boolean
+		{
+			return _bothSides;
+		}
+
+		public function set bothSides(value : Boolean) : void
+		{
+			_bothSides = value;
+		}
+
+		/**
+		 * The animation used to add vertex code to the shader code.
+		 */
+		public function get animation() : AnimationBase
+		{
+			return _animation;
+		}
+
+		public function set animation(value : AnimationBase) : void
+		{
+			if (_animation == value) return;
+			_animation = value;
+			invalidateShaderProgram();
+		}
+
+		/**
+		 * Cleans up any resources used by the current object.
+		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
+		 */
+		public function dispose(deep : Boolean) : void
+		{
+			for (var i : uint = 0; i < 8; ++i) {
+				if (_program3Ds[i]) _program3Ds[i].dispose();
+			}
+		}
+
+// AGAL RELATED STUFF
+
+		/**
+		 * The amount of used vertex streams in the vertex code. Used by the animation code generation to know from which index on streams are available.
+		 */
+		public function get numUsedStreams() : uint
+		{
+			return _numUsedStreams;
+		}
+
+		/**
+		 * The amount of used vertex constants in the vertex code. Used by the animation code generation to know from which index on registers are available.
+		 */
+		public function get numUsedVertexConstants() : uint
+		{
+			return _numUsedVertexConstants;
+		}
+
+		/**
+		 * Renders an object to the current render target.
+		 * @param renderable The IRenderable object to render.
+		 * @param context The context which is performing the rendering.
+		 * @param camera The camera from which the scene is viewed.
+		 * @param lights The lights which influence the rendered scene.
+		 *
+		 * @private
+		 */
+		arcane function render(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		{
+			context.setCulling(_bothSides? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
+
+			context.setVertexBufferAt(0, renderable.getVertexBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
+
+			context.drawTriangles(renderable.getIndexBuffer(context, contextIndex), 0, renderable.numTriangles);
+		}
+
+		/**
+		 * If the pass requires the projected position, this method will return the target register's name, or null otherwise.
+		 * @private
+		 */
+		arcane function getProjectedTargetRegister() : String
+		{
+			return _projectedTargetRegister;
+		}
+
+		/**
+		 * Lists the attribute registers that need to be transformed by animation first
+ 		 * position always needs to be listed first! Typical use cases are vertex normals and tangents.
+		 * @private
+		 */
+		arcane function getAnimationSourceRegisters() : Array
+		{
+			return _animatableAttributes;
+		}
+
+		/**
+		 * Specifies which registers to store the respective animated attributes in, so it can be used in the material's
+		 * vertex shader code (as well as the projection, which takes the first one for position projection)
+		 * For vertex normals, it's possible to simply set a varying register instead of a temporary one, if the
+		 * material's vertex shader code doesn't have to do anything with it
+		 * @private
+		 */
+		arcane function getAnimationTargetRegisters() : Array
+		{
+			return _targetRegisters;
+		}
+
+		arcane function getVertexCode() : String
+		{
+			throw new AbstractMethodError();
+		}
+
+		arcane function getFragmentCode() : String
+		{
+			throw new AbstractMethodError();
+		}
+
+		arcane function activate(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		{
+			if (!_program3Ds[contextIndex]) {
+				initPass(context, contextIndex);
+			}
+			if (_programInvalids[contextIndex]) {
+				updateProgram(context, contextIndex);
+				_programInvalids[contextIndex] = false;
+			}
+
+			_animation.activate(context, this);
+			context.setProgram(_program3Ds[contextIndex]);
+		}
+
+		/**
+		 * Turns off streams starting from a certain offset
+		 *
+		 * @private
+		 */
+		arcane function deactivate(context : Context3D) : void
+		{
+			for (var i : uint = 1; i < _numUsedStreams; ++i)
+				context.setVertexBufferAt(i, null);
+
+			if (_animation) _animation.deactivate(context, this);
+		}
+
+		/**
+		 * Marks the shader program as invalid, so it will be recompiled before the next render.
+		 */
+		arcane function invalidateShaderProgram() : void
+		{
+			for (var i : int = 0; i < 8; ++i)
+				_programInvalids[i] = true;
+		}
+
+		/**
+		 * Compiles the shader program.
+		 * @param context The context for which to compile the shader program.
+		 * @param polyOffsetReg An optional register that contains an amount by which to inflate the model (used in single object depth map rendering).
+		 */
+		protected function updateProgram(context : Context3D, contextIndex : uint, polyOffsetReg : String = null) : void
+		{
+			var assembler : AGALProgram3DAssembler = AGALProgram3DAssembler.instance;
+			assembler.assemble(context, this, _animation, _program3Ds[contextIndex], polyOffsetReg);
+		}
+
+		/**
+		 * Initializes the shader program object.
+		 * @param context
+		 */
+		protected function initPass(context : Context3D, contextIndex : uint) : void
+		{
+			_program3Ds[contextIndex] = context.createProgram();
+			_programInvalids[contextIndex] = true;
+		}
+
+		public function get lights() : Vector.<LightBase>
+		{
+			return _lights;
+		}
+
+		public function set lights(value : Vector.<LightBase>) : void
+		{
+			_lights = value;
+			_numLights = value? lights.length : 0;
+		}
+	}
+}
