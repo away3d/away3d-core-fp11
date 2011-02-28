@@ -43,6 +43,11 @@ package away3d.animators
 			_additiveNodes = [];
 		}
 
+        public function get rootDelta() : Vector3D
+        {
+            return _mainNode? _mainNode.rootDelta : null;
+        }
+
 		public function get updateRootPosition() : Boolean
 		{
 			return _updateRootPosition;
