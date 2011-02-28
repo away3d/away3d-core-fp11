@@ -40,6 +40,11 @@ package away3d.animators
 			_fadeOutSpeeds = new Vector.<Number>();
 		}
 
+        public function get rootDelta() : Vector3D
+        {
+            return SkeletonAnimationState(_animationState).blendTree.rootDelta;
+        }
+
 		public function get updateRootPosition() : Boolean
 		{
 			return _updateRootPosition;

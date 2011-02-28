@@ -31,6 +31,11 @@ package away3d.animators
 			_sequences = [];
 		}
 
+        public function get rootDelta() : Vector3D
+        {
+            return SkeletonAnimationState(_animationState).blendTree.rootDelta;
+        }
+
 		public function get updateRootPosition() : Boolean
 		{
 			return _updateRootPosition;
@@ -115,8 +120,8 @@ package away3d.animators
 		 */
 		override arcane function updateAnimation(dt : uint) : void
 		{
-			var blendTree: SkeletonTreeNode;
-			var delta: Vector3D;
+			var blendTree : SkeletonTreeNode;
+			var delta : Vector3D;
 
 			// keep trying to play
 			if (_sequenceAbsent)
