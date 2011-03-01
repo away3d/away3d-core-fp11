@@ -37,7 +37,17 @@ package away3d.materials.methods
 			_baseDiffuseMethod.dispose(deep);
 		}
 
-		/**
+        override public function get alphaThreshold() : Number
+        {
+            return _baseDiffuseMethod.alphaThreshold;
+        }
+
+        override public function set alphaThreshold(value : Number) : void
+        {
+            _baseDiffuseMethod.alphaThreshold = value;
+        }
+
+        /**
 		 * @inheritDoc
 		 */
 		override public function invalidateBitmapData() : void

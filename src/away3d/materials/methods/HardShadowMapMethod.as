@@ -94,7 +94,7 @@ package away3d.materials.methods
 			var code : String = "";
             _decIndex = decReg.index;
 
-			code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
+			code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.add(targetReg.toString(), _depthMapVar+".z", epsReg+".x");    // offset by epsilon
 

@@ -208,5 +208,10 @@ package away3d.materials.utils
 		{
 			return "sge "+tgt+", " + src1 + ", "+src2 +"\n";
 		}
+
+        public static function kill(src : String) : String
+        {
+            return "kil "+src+"\n";
+        }
     }
 }
