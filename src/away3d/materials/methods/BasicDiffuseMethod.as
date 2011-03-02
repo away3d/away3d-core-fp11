@@ -22,16 +22,19 @@ package away3d.materials.methods
 
 		protected var _diffuseInputRegister : ShaderRegisterElement;
 		protected var _diffuseInputIndex : int;
+        private var _cutOffIndex : int;
 
 		private var _texture : Texture3DProxy;
 		private var _mipmapBitmap : BitmapData;
 		private var _diffuseColor : uint = 0xffffff;
 
 		private var _diffuseData : Vector.<Number>;
+		private var _cutOffData : Vector.<Number>;
 
 		private var _diffuseR : Number, _diffuseG : Number = 0, _diffuseB : Number = 0, _diffuseA : Number;
 		private var _shadowRegister : ShaderRegisterElement;
 
+        private var _alphaThreshold : Number = 0;
 
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -40,6 +43,7 @@ package away3d.materials.methods
 		{
 			super(true, false);
 			_diffuseData = Vector.<Number>([1, 1, 1, 1]);
+			_cutOffData = new Vector.<Number>(4, true);
 		}
 
 		/**
@@ -96,7 +100,26 @@ package away3d.materials.methods
 			}
 		}
 
-		/**
+        // todo: provide support for alpha map?
+        public function get alphaThreshold() : Number
+        {
+            return _alphaThreshold;
+        }
+
+        public function set alphaThreshold(value : Number) : void
+        {
+            if (value < 0) value = 0;
+            else if (value > 1) value = 1;
+            if (value == _alphaThreshold) return;
+
+            if (value == 0 || _alphaThreshold == 0)
+                invalidateShaderProgram();
+
+            _alphaThreshold = value;
+            _cutOffData[0] = _alphaThreshold;
+        }
+
+        /**
 		 * Marks the texture for update next on the next render.
 		 */
 		public function invalidateBitmapData() : void
@@ -204,6 +227,7 @@ package away3d.materials.methods
 		{
             var code : String = "";
 			var temp : ShaderRegisterElement;
+			var cutOffReg : ShaderRegisterElement;
 
 			// incorporate input from ambient
 			if (_numLights > 0) {
@@ -219,6 +243,14 @@ package away3d.materials.methods
             if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
 				code += getTexSampleCode(temp, _diffuseInputRegister);
+                if (_alphaThreshold > 0) {
+                    cutOffReg = regCache.getFreeFragmentConstant();
+                    _cutOffIndex = cutOffReg.index;
+                    code += AGAL.sub(temp+".w", temp+".w", cutOffReg+".x");
+                    code += AGAL.kill(temp+".w");
+                    code += AGAL.add(temp+".w", temp+".w", cutOffReg+".x");
+                    code += AGAL.div(temp.toString(), temp.toString(), temp+".w");
+                }
 			}
 			else {
 				_diffuseInputRegister = regCache.getFreeFragmentConstant();
@@ -244,6 +276,9 @@ package away3d.materials.methods
 		{
 			if (_useTexture) {
 				context.setTextureAt(_diffuseInputIndex, _texture.getTextureForContext(context, contextIndex));
+                if (_alphaThreshold > 0) {
+                    context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _cutOffIndex, _cutOffData, 1);
+                }
 			}
 			else context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _diffuseInputIndex, _diffuseData, 1);
 		}

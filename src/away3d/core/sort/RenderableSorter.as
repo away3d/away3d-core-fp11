@@ -41,7 +41,7 @@ package away3d.core.sort
 				var za : Number = a.zIndex;
 				var zb : Number = b.zIndex;
 				if (za == zb) return 0;
-				else if (za > zb) return 1;
+				else if (za < zb) return 1;
 				else return -1;
 			}
 			else if (aid > bid) return 1;
@@ -60,7 +60,7 @@ package away3d.core.sort
 				var za : Number = a.zIndex;
 				var zb : Number = b.zIndex;
 				if (za == zb) return 0;
-				else if (za > zb) return -1;
+				else if (za < zb) return -1;
 				else return 1;
 			}
 			else if (aid > bid) return 1;
