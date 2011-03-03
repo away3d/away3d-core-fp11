@@ -619,7 +619,7 @@ package away3d.core.base
 				cy = dx1*dz2 - dz1*dx2;
 				cz = dy1*dx2 - dx1*dy2;
 				d = Math.sqrt(cx*cx+cy*cy+cz*cz);
-				// length of crossproduct = 2*triangle size
+				// length of cross product = 2*triangle area
 				if (_useFaceWeights) {
 					var w : Number = d*10000;
 					if (w < 1) w = 1;

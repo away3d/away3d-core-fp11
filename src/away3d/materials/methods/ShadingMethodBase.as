@@ -282,7 +282,7 @@ package away3d.materials.methods
 		 * @param inputReg The texture stream register.
 		 * @return The fragment code that performs the sampling.
 		 */
-		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement) : String
+		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
 		{
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var filter : String;
@@ -290,7 +290,8 @@ package away3d.materials.methods
 			if (_smooth) filter = _mipmap ? "trilinear" : "bilinear";
 			else filter = _mipmap ? "nearestMip" : "nearestNoMip";
 
-			return AGAL.sample(targetReg.toString(), _uvFragmentReg.toString(), "2d", inputReg.toString(), filter, wrap);
+            uvReg ||= _uvFragmentReg;
+			return AGAL.sample(targetReg.toString(), uvReg.toString(), "2d", inputReg.toString(), filter, wrap);
 		}
 
 		/**

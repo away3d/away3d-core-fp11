@@ -3,7 +3,8 @@ package away3d.bounds
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
-	import away3d.errors.AbstractMethodError;
+    import away3d.core.math.Plane3D;
+    import away3d.errors.AbstractMethodError;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -163,6 +164,12 @@ package away3d.bounds
 			throw new AbstractMethodError();
 			return false;
 		}
+
+        public function classifyAgainstPlane(plane : Plane3D) : int
+        {
+            throw new AbstractMethodError();
+            return -1;
+        }
 
 		/**
 		 * Clones the current BoundingVolume object

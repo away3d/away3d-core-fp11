@@ -288,6 +288,7 @@ package away3d.core.render
 			if (target) _context.setRenderToTexture(target, _enableDepthAndStencil, _antiAlias, surfaceSelector);
 			else _context.setRenderToBackBuffer();
 
+            // todo: remove try/catch and make sure this can't be called before back buffer is created!!!
             try {
 			    _context.clear(_backgroundR, _backgroundG, _backgroundB, 1, 1, 0, additionalClearMask);
 
@@ -295,7 +296,9 @@ package away3d.core.render
 
 			    if (_swapBackBuffer && !target) _context.present();
             }
-            catch (error : Error) {}
+            catch (error : Error) {
+
+            }
 		}
 
 		/**
