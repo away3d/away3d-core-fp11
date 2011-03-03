@@ -5,7 +5,7 @@ package away3d.animators.skeleton
 	 *
 	 * @see away3d.core.animation.skeleton.Skeleton
 	 */
-	public class Joint
+	public class SkeletonJoint
 	{
 		/**
 		 * The parent joint's index
@@ -25,7 +25,7 @@ package away3d.animators.skeleton
 		/**
 		 * Creates a new Joint object
 		 */
-		public function Joint()
+		public function SkeletonJoint()
 		{
 		}
 	}

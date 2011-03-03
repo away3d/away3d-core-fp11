@@ -38,10 +38,10 @@ package away3d.animators.skeleton
 		{
 			var globalPoses : Vector.<JointPose> = targetPose.jointPoses;
 			var globalJointPose : JointPose;
-			var joints : Vector.<Joint> = skeleton.joints;
+			var joints : Vector.<SkeletonJoint> = skeleton.joints;
 			var len : uint = _numJoints;
 			var parentIndex : int;
-			var joint : Joint;
+			var joint : SkeletonJoint;
 			var parentPose : JointPose;
 			var pose : JointPose;
 			var or : Quaternion;
