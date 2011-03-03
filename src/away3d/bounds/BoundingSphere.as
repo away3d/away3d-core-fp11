@@ -1,9 +1,16 @@
 package away3d.bounds
 {
-	import away3d.core.math.Matrix3DUtils;
+    import away3d.arcane;
+    import away3d.core.math.Matrix3DUtils;
 
-	import flash.geom.Matrix3D;
+    import away3d.core.math.Plane3D;
+
+    import away3d.core.math.PlaneClassification;
+
+    import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
+
+    use namespace arcane;
 
 	/**
 	 * BoundingSphere represents a spherical bounding volume defined by a center point and a radius?
@@ -87,7 +94,28 @@ package away3d.bounds
 			return true;
 		}
 
-		/**
+
+        override public function classifyAgainstPlane(plane : Plane3D) : int
+        {
+            var align : int = plane._alignment;
+            var dist : Number;
+
+			if (align == 1/*Plane3D.ALIGN_XY_AXIS*/)
+                dist = plane.c*_centerZ + plane.d;
+            else if (align == 3/*Plane3D.ALIGN_XZ_AXIS*/)
+                dist = plane.b*_centerY + plane.d;
+            else if (align == 2/*Plane3D.ALIGN_YZ_AXIS*/)
+                dist = plane.a*_centerX + plane.d;
+            else
+                dist = plane.a*_centerX + plane.b*_centerY + plane.c*_centerZ + plane.d;
+
+            return  dist > _radius      ? 	1 /*PlaneClassification.FRONT*/     :
+                    dist < -_radius     ? 	0 /*PlaneClassification.BACK*/      :
+											2 /*PlaneClassification.INTERSECT*/;
+
+        }
+
+        /**
 		 * @inheritDoc
 		 */
 		override public function fromSphere(center : Vector3D, radius : Number) : void

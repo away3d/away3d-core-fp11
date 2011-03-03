@@ -19,7 +19,6 @@ package away3d.materials.methods
 		private var _fogColor : uint;
 		private var _fogDataIndex : int;
 		private var _fogData : Vector.<Number>;
-		private var _linearFallOff : Boolean = true;
 
 		public function FogMethod(fogDistance : Number, fogColor : uint = 0x808080)
 		{
@@ -27,18 +26,6 @@ package away3d.materials.methods
 			_fogData = new Vector.<Number>(4, true);
 			this.fogDistance = fogDistance;
 			this.fogColor = fogColor;
-		}
-
-		public function get linearFallOff() : Boolean
-		{
-			return _linearFallOff;
-		}
-
-		public function set linearFallOff(value : Boolean) : void
-		{
-			_linearFallOff = value;
-			_fogData[3] = _linearFallOff? 1/_fogDistance : 1/(_fogDistance*_fogDistance);
-			invalidateShaderProgram();
 		}
 
 		public function get fogDistance() : Number
@@ -49,7 +36,7 @@ package away3d.materials.methods
 		public function set fogDistance(value : Number) : void
 		{
 			_fogDistance = value;
-			_fogData[3] = _linearFallOff? 1/value : 1/(value*value);
+			_fogData[3] = 1/value;
 		}
 
 		public function get fogColor() : uint
@@ -79,12 +66,13 @@ package away3d.materials.methods
 
 
 			code += AGAL.dp3(temp+".w", _viewDirVaryingReg+".xyz", _viewDirVaryingReg+".xyz");	// dist²
-			if (_linearFallOff) code += AGAL.sqrt(temp+".w", temp+".w");	// dist²
+			code += AGAL.sqrt(temp+".w", temp+".w");	// dist²
 			code += AGAL.mul(temp+".w", temp+".w", fogDataRegister+".w");						// fogRatio = dist²/maxDist²
-			code += AGAL.sat(temp+".w", temp+".w");												// fogRatio € [0, 1]
-			code += AGAL.sub(temp+".xyz", fogDataRegister+".xyz", targetReg+".xyz");						// (fogColor- col)
+			code += AGAL.neg(temp+".w", temp+".w");						// fogRatio = dist²/maxDist²
+			code += AGAL.exp(temp+".w", temp+".w");						// fogRatio = dist²/maxDist²
+			code += AGAL.sub(temp+".xyz", targetReg+".xyz", fogDataRegister+".xyz");						// (fogColor- col)
 			code += AGAL.mul(temp+".xyz", temp+".xyz", temp+".w");								// (fogColor- col)*fogRatio
-			code += AGAL.add(targetReg+".xyz", targetReg+".xyz", temp+".xyz");					// fogRatio*(fogColor- col) + col
+			code += AGAL.add(targetReg+".xyz", fogDataRegister+".xyz", temp+".xyz");					// fogRatio*(fogColor- col) + col
 
 
 			return code;

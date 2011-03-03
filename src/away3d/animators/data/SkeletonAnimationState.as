@@ -104,6 +104,12 @@ package away3d.animators.data
 			_globalMatricesInvalid = true;
 		}
 
+        arcane function validateGlobalMatrices() : void
+        {
+            _stateInvalid = false;
+            _globalMatricesInvalid = false;
+        }
+
 		/**
 		 * The local skeleton blend tree that will be used to generate the global pose.
 		 */

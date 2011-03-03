@@ -138,7 +138,7 @@ package away3d.core.math
 		public function classifyPoint(p : Vector3D, epsilon : Number = 0.01) : int
 		{
 			// check NaN
-			if (d != d) return PointClassification.FRONT;
+			if (d != d) return PlaneClassification.FRONT;
 
 			var len : Number;
 			if (_alignment == ALIGN_YZ_AXIS)
@@ -151,11 +151,11 @@ package away3d.core.math
 				len = a*p.x + b*p.y + c*p.z - d;
 
 			if (len < -epsilon)
-				return PointClassification.BACK;
+				return PlaneClassification.BACK;
 			else if (len > epsilon)
-				return PointClassification.FRONT;
+				return PlaneClassification.FRONT;
 			else
-				return PointClassification.INTERSECT;
+				return PlaneClassification.INTERSECT;
 		}
 
 		public function toString() : String
