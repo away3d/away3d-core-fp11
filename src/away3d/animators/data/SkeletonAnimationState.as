@@ -12,7 +12,7 @@ package away3d.animators.data
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
-	import away3d.animators.skeleton.Joint;
+	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonPose;
@@ -215,7 +215,7 @@ package away3d.animators.data
 			var m11 : Number, m12 : Number, m13 : Number, m14 : Number;
 			var m21 : Number, m22 : Number, m23 : Number, m24 : Number;
 			var m31 : Number, m32 : Number, m33 : Number, m34 : Number;
-			var joints : Vector.<Joint> = _skeleton.joints;
+			var joints : Vector.<SkeletonJoint> = _skeleton.joints;
 			var pose : JointPose;
 			var quat : Quaternion;
 			var vec : Vector3D;
