@@ -196,7 +196,5 @@ package away3d.core.managers
 
 			renderable.sourceEntity.dispatchEvent(event3D);
 		}
-
-
 	}
 }

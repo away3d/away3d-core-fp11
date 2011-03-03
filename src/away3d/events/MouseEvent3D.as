@@ -161,6 +161,9 @@ package away3d.events
 			result.renderable = renderable;
             result.material = material;
             result.uv = uv;
+            result.localX = localX;
+            result.localY = localY;
+            result.localZ = localZ;
 
             result.ctrlKey = ctrlKey;
             result.shiftKey = shiftKey;
