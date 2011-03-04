@@ -71,15 +71,21 @@ package away3d.core.render
 		 */
 		arcane override function render(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
-			updateLights(entityCollector);
-
 			if (_depthPrePass) {
 				_depthRenderer.render(entityCollector, target, surfaceSelector, Context3DClearMask.DEPTH);
 				super.render(entityCollector, target, surfaceSelector, Context3DClearMask.COLOR | Context3DClearMask.STENCIL);
 			}
 			else
 				super.render(entityCollector, target, surfaceSelector, additionalClearMask);
+		}
 
+		/**
+		 * @inheritDoc
+		 */
+		protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		{
+			updateLights(entityCollector);
+			super.executeRender(entityCollector, target, surfaceSelector, additionalClearMask);
 		}
 
 		/**

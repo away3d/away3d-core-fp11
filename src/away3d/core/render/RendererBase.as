@@ -283,22 +283,28 @@ package away3d.core.render
 			if (_backBufferInvalid) updateBackBuffer();
 			if (!_context) return;
 
+			executeRender(entityCollector, target, surfaceSelector, additionalClearMask);
+		}
+
+		/**
+		 * Renders the potentially visible geometry to the back buffer or texture. Only executed if everything is set up.
+		 * @param entityCollector The EntityCollector object containing the potentially visible geometry.
+		 * @param target An option target texture to render to.
+		 * @param surfaceSelector The index of a CubeTexture's face to render to.
+		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
+		 */
+		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		{
 			_renderableSorter.sort(entityCollector);
 
 			if (target) _context.setRenderToTexture(target, _enableDepthAndStencil, _antiAlias, surfaceSelector);
 			else _context.setRenderToBackBuffer();
 
-            // todo: remove try/catch and make sure this can't be called before back buffer is created!!!
-            try {
-			    _context.clear(_backgroundR, _backgroundG, _backgroundB, 1, 1, 0, additionalClearMask);
+			_context.clear(_backgroundR, _backgroundG, _backgroundB, 1, 1, 0, additionalClearMask);
 
-			    draw(entityCollector);
+			draw(entityCollector);
 
-			    if (_swapBackBuffer && !target) _context.present();
-            }
-            catch (error : Error) {
-
-            }
+			if (_swapBackBuffer && !target) _context.present();
 		}
 
 		/**
