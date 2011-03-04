@@ -57,7 +57,7 @@ package away3d.core.base
 
 		/**
 		 * Adds a new SubGeometry object to the list.
-		 * @param subGeometry
+		 * @param subGeometry The SubGeometry object to be added.
 		 *
 		 * todo: consider signals instead of events?
 		 */
@@ -67,6 +67,20 @@ package away3d.core.base
 			subGeometry.parentGeometry = this;
 			if (hasEventListener(GeometryEvent.SUB_GEOMETRY_ADDED))
 				dispatchEvent(new GeometryEvent(GeometryEvent.SUB_GEOMETRY_ADDED, subGeometry));
+		}
+
+		/**
+		 * Removes a new SubGeometry object from the list.
+		 * @param subGeometry The SubGeometry object to be removed.
+		 *
+		 * todo: consider signals instead of events?
+		 */
+		public function removeSubGeometry(subGeometry : SubGeometry) : void
+		{
+			_subGeometries.splice(_subGeometries.indexOf(subGeometry), 1);
+			subGeometry.parentGeometry = null;
+			if (hasEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED))
+				dispatchEvent(new GeometryEvent(GeometryEvent.SUB_GEOMETRY_REMOVED, subGeometry));
 		}
 
 		/**
