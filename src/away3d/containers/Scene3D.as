@@ -1,5 +1,6 @@
 package away3d.containers
 {
+	import flash.events.EventDispatcher;
 	import away3d.arcane;
 	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.core.traverse.PartitionTraverser;
@@ -17,7 +18,7 @@ package away3d.containers
 	 * Internally, the Scene3D object also manages any space partition objects that have been assigned to objects in
 	 * the scene graph, of which there is at least 1.
 	 */
-	public class Scene3D
+	public class Scene3D extends EventDispatcher
 	{
 		arcane var _bounds : AxisAlignedBoundingBox;
 

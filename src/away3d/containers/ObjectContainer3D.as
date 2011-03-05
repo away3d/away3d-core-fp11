@@ -1,5 +1,6 @@
 package away3d.containers
 {
+	import away3d.events.Scene3DEvent;
 	import away3d.arcane;
 	import away3d.core.base.*;
 	import away3d.core.partition.Partition3D;
@@ -380,7 +381,12 @@ package away3d.containers
 		// end of stupid partition test code
 
 			_scene = value;
-
+			
+			if(_scene) {
+				_scene.dispatchEvent(new Scene3DEvent(Scene3DEvent.ADDED_TO_SCENE, this));
+			} else if(_oldScene) {
+				_oldScene.dispatchEvent(new Scene3DEvent(Scene3DEvent.REMOVED_FROM_SCENE, this));
+			}
 		}
 
 		/**
