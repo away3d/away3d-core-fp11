@@ -105,6 +105,14 @@ package away3d.containers
 		}
 
 		/**
+		 * Set camera that's used to render the scene for this viewport
+		 */
+		public function set camera(camera:Camera3D) : void
+		{
+			_camera = camera
+		}
+		
+		/**
 		 * The scene that's used to render for this viewport
 		 */
 		public function get scene() : Scene3D
