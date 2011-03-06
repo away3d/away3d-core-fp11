@@ -109,7 +109,7 @@ package away3d.containers
 		 */
 		public function set camera(camera:Camera3D) : void
 		{
-			_camera = camera
+			_camera = camera;
 		}
 		
 		/**
