@@ -18,6 +18,8 @@ package away3d.bounds
 	{
 		protected var _min : Vector3D;
 		protected var _max : Vector3D;
+		protected var _aabbPoints : Vector.<Number> = new Vector.<Number>();
+		protected var _aabbPointsDirty : Boolean = true;
 
 		/**
 		 * Creates a new BoundingVolumeBase object
@@ -35,6 +37,7 @@ package away3d.bounds
 		{
 			_min.x = _min.y = _min.z = 0;
 			_max.x = _max.y = _max.z = 0;
+			_aabbPointsDirty = true;
 		}
 
 		/**
@@ -152,6 +155,7 @@ package away3d.bounds
 			_max.x = maxX;
 			_max.y = maxY;
 			_max.z = maxZ;
+			_aabbPointsDirty = true;
 		}
 
 		/**
@@ -165,11 +169,11 @@ package away3d.bounds
 			return false;
 		}
 
-        public function classifyAgainstPlane(plane : Plane3D) : int
+        /*public function classifyAgainstPlane(plane : Plane3D) : int
         {
             throw new AbstractMethodError();
             return -1;
-        }
+        }*/
 
 		/**
 		 * Clones the current BoundingVolume object
@@ -178,6 +182,30 @@ package away3d.bounds
 		public function clone() : BoundingVolumeBase
 		{
 			throw new AbstractMethodError();
+		}
+
+		public function get aabbPoints() : Vector.<Number>
+		{
+			if (_aabbPointsDirty)
+				updateAABBPoints();
+
+			return _aabbPoints;
+		}
+
+		protected function updateAABBPoints() : void
+		{
+			var i : uint;
+			var maxX : Number = _max.x, maxY : Number = _max.y, maxZ : Number = _max.z;
+			var minX : Number = _min.x, minY : Number = _min.y, minZ : Number = _min.z;
+			_aabbPoints[i++] = minX; _aabbPoints[i++] = minY; _aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = maxX; _aabbPoints[i++] = minY; _aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = minX; _aabbPoints[i++] = maxY; _aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = maxX; _aabbPoints[i++] = maxY; _aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = minX; _aabbPoints[i++] = minY; _aabbPoints[i++] = maxZ;
+			_aabbPoints[i++] = maxX; _aabbPoints[i++] = minY; _aabbPoints[i++] = maxZ;
+			_aabbPoints[i++] = minX; _aabbPoints[i++] = maxY; _aabbPoints[i++] = maxZ;
+			_aabbPoints[i++] = maxX; _aabbPoints[i++] = maxY; _aabbPoints[i] = maxZ;
+			_aabbPointsDirty = false;
 		}
 	}
 }

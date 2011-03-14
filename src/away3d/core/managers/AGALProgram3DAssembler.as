@@ -48,10 +48,10 @@ package away3d.core.managers
 			var materialFragmentCode : String = pass.getFragmentCode();
 			var projectionVertexCode : String = getProjectionCode(targetRegisters[uint(0)], pass.getProjectedTargetRegister(), polyOffsetReg, targetRegisters.length > 1? targetRegisters[1] : null);
 
-//			trace (animationVertexCode+projectionVertexCode+materialVertexCode);
-//			trace ("---");
-//			trace (materialFragmentCode);
-//			trace ("---");
+			trace (animationVertexCode+projectionVertexCode+materialVertexCode);
+			trace ("---");
+			trace (materialFragmentCode);
+			trace ("---");
 			var vertexCode : ByteArray = new AGALMiniAssembler().assemble(Context3DProgramType.VERTEX, animationVertexCode+projectionVertexCode+materialVertexCode);
 			var fragmentCode : ByteArray = new AGALMiniAssembler().assemble(Context3DProgramType.FRAGMENT, materialFragmentCode);
 			program.upload(vertexCode, fragmentCode);

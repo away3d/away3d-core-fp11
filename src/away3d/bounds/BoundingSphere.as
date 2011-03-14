@@ -95,25 +95,25 @@ package away3d.bounds
 		}
 
 
-        override public function classifyAgainstPlane(plane : Plane3D) : int
+        /*override public function classifyAgainstPlane(plane : Plane3D) : int
         {
             var align : int = plane._alignment;
             var dist : Number;
 
-			if (align == 1/*Plane3D.ALIGN_XY_AXIS*/)
+			if (align == 1*//*Plane3D.ALIGN_XY_AXIS*//*)
                 dist = plane.c*_centerZ + plane.d;
-            else if (align == 3/*Plane3D.ALIGN_XZ_AXIS*/)
+            else if (align == 3*//*Plane3D.ALIGN_XZ_AXIS*//*)
                 dist = plane.b*_centerY + plane.d;
-            else if (align == 2/*Plane3D.ALIGN_YZ_AXIS*/)
+            else if (align == 2*//*Plane3D.ALIGN_YZ_AXIS*//*)
                 dist = plane.a*_centerX + plane.d;
             else
                 dist = plane.a*_centerX + plane.b*_centerY + plane.c*_centerZ + plane.d;
 
-            return  dist > _radius      ? 	1 /*PlaneClassification.FRONT*/     :
-                    dist < -_radius     ? 	0 /*PlaneClassification.BACK*/      :
-											2 /*PlaneClassification.INTERSECT*/;
+            return  dist > _radius      ? 	1 :
+                    dist < -_radius     ? 	0 :
+											2 ;
 
-        }
+        }*/
 
         /**
 		 * @inheritDoc
@@ -124,6 +124,13 @@ package away3d.bounds
 			_centerY = center.y;
 			_centerZ = center.z;
 			_radius = radius;
+			_max.x = _centerX+radius;
+			_max.y = _centerY+radius;
+			_max.z = _centerZ+radius;
+			_min.x = _centerX-radius;
+			_min.y = _centerY-radius;
+			_min.z = _centerZ-radius;
+			_aabbPointsDirty = true;
 		}
 
 		/**

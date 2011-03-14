@@ -636,7 +636,6 @@ package away3d.materials.passes
 
 		private function compileUVCode() : void
 		{
-			var len : uint;
 			var uvAttributeReg : ShaderRegisterElement = _registerCache.getFreeVertexAttribute();
 
 			_uvVaryingReg = _registerCache.getFreeVarying();
@@ -853,7 +852,8 @@ package away3d.materials.passes
 					lightDirReg = _registerCache.getFreeFragmentVectorTemp();
 					_registerCache.addFragmentTempUsages(lightDirReg, 1);
 					_fragmentCode += AGAL.normalize(lightDirReg+".xyz", _lightDirFragmentRegs[i]+".xyz");
-					_fragmentCode += AGAL.mov(lightDirReg+".w", _lightDirFragmentRegs[i]+".w");
+//					_fragmentCode += AGAL.mov(lightDirReg+".w", _lightDirFragmentRegs[i]+".w");
+					_fragmentCode += light.getAttenuationCode(_registerCache, lightDirReg);
 				}
 				else lightDirReg = _lightDirFragmentRegs[i];
 
@@ -925,7 +925,7 @@ package away3d.materials.passes
 		private function updateLights(context : Context3D) : void
 		{
 			var light : LightBase;
-			var i : uint, j : uint, k : uint, len : uint;
+			var i : uint, k : uint;
 			var spec : BasicSpecularMethod = specularMethod;
 
 			// update vertex data

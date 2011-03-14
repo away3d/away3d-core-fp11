@@ -130,7 +130,7 @@ package away3d.materials.utils
 					comp = COMPONENTS[j];
 					_registerComponents[comp] ||= [];
 					_usedSingleCount[comp] ||= [];
-					_registerComponents[comp][i] = new ShaderRegisterElement(regName, i, comp)
+					_registerComponents[comp][i] = new ShaderRegisterElement(regName, i, comp);
 					_usedSingleCount[comp][i] = 0;
 				}
 			}

@@ -235,7 +235,7 @@ package away3d.materials.methods
             else t = _totalLightColorReg;
 
 			// half vector
-			code += AGAL.add(t.toString(), lightDirReg.toString(), _viewDirFragmentReg.toString());
+			code += AGAL.add(t+".xyz", lightDirReg+".xyz", _viewDirFragmentReg+".xyz");
 			code += AGAL.normalize(t+".xyz", t+".xyz");
             code += AGAL.dp3(t+".w", _normalFragmentReg+".xyz", t+".xyz");
 			code += AGAL.sat(t+".w", t+".w");
@@ -246,6 +246,9 @@ package away3d.materials.methods
 			}
 			else
 				code += AGAL.pow(t+".w", t+".w", _specularDataRegister+".w");
+
+			// attenuate
+			code += AGAL.mul(t+".w", t+".w", lightDirReg+".w");
 
 			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 

@@ -26,7 +26,7 @@ package away3d.lights.shadowmaps
 		public function DirectionalShadowMapper(light : DirectionalLight)
 		{
 			super(light);
-			_depthCamera.lens = _depthLens = new OrthographicOffCenterLens(-10, -10, 10, 10)
+			_depthCamera.lens = _depthLens = new OrthographicOffCenterLens(-10, -10, 10, 10);
 			_localFrustum = new Vector.<Number>(8*3);
 			_frustumSegment = new Vector.<Number>(8*3);
 		}

@@ -95,9 +95,8 @@ package away3d.bounds
 			return true;
 		}
 
-		override public function classifyAgainstPlane(plane : Plane3D) : int
+		/*override public function classifyAgainstPlane(plane : Plane3D) : int
         {
-            var align : int = plane._alignment;
             var dist : Number;
 			var a : Number = plane.a, b : Number = plane.b, c : Number = plane.c, d : Number = plane.d;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
@@ -105,11 +104,11 @@ package away3d.bounds
 
 			var rr : Number = a*_halfExtentsX + b*_halfExtentsY+ c*_halfExtentsZ;
 
-            return  dist > rr	? 	1 /*PlaneClassification.FRONT*/     :
-                    dist < -rr	? 	0 /*PlaneClassification.BACK*/      :
-									2 /*PlaneClassification.INTERSECT*/;
+            return  dist > rr	? 	1 :
+                    dist < -rr	? 	0 :
+									2;
 
-        }
+        }*/
 
 		/**
 		 * @inheritDoc

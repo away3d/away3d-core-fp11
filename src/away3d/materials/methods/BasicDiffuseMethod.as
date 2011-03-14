@@ -206,6 +206,8 @@ package away3d.materials.methods
 
 			code += AGAL.dp3(t+".x", lightDirReg+".xyz", _normalFragmentReg+".xyz");
 			code += AGAL.sat(t+".w", t+".x");
+			// attenuation
+			code += AGAL.mul(t+".w", t+".w", lightDirReg+".w");
 
 			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 

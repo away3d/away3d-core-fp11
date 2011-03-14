@@ -1,12 +1,7 @@
 package away3d.lights
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.containers.Scene3D;
 	import away3d.core.base.IRenderable;
-	import away3d.core.render.DepthRenderer;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.core.traverse.ShadowCasterCollector;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.utils.ShaderRegisterCache;
@@ -16,8 +11,6 @@ package away3d.lights
 	import away3d.entities.Entity;
 
 	import flash.display3D.Context3D;
-	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -177,6 +170,11 @@ package away3d.lights
 		}
 
 		arcane function getFragmentCode(regCache : ShaderRegisterCache) : String
+		{
+			return "";
+		}
+
+		arcane function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			return "";
 		}

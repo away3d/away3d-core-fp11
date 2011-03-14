@@ -45,7 +45,7 @@ package away3d.core.traverse
 		 */
 		public function applyRenderable(renderable : IRenderable) : void
 		{
-			throw new AbstractMethodError()
+			throw new AbstractMethodError();
 		}
 
 		/**
@@ -53,7 +53,7 @@ package away3d.core.traverse
 		 */
 		public function applyLight(light : LightBase) : void
 		{
-			throw new AbstractMethodError()
+			throw new AbstractMethodError();
 		}
 
 		/**
@@ -61,7 +61,7 @@ package away3d.core.traverse
 		 */
 		public function applyEntity(entity : Entity) : void
 		{
-			throw new AbstractMethodError()
+			throw new AbstractMethodError();
 		}
 	}
 }

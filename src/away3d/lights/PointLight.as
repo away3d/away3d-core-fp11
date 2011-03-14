@@ -6,8 +6,10 @@ package away3d.lights
 	import away3d.core.base.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
 
+	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 
+	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.materials.utils.ShaderRegisterElement;
 
 	import flash.display3D.Context3D;
@@ -22,12 +24,15 @@ package away3d.lights
 	 */
 	public class PointLight extends LightBase
 	{
-		private static var _pos : Vector3D = new Vector3D();
-		protected var _radius : Number = 500000;
-		protected var _fallOff : Number = Number.MAX_VALUE;
+		//private static var _pos : Vector3D = new Vector3D();
+		protected var _radius : Number = 50000;
+		protected var _fallOff : Number = 100000;
 		private var _positionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
+		private var _attenuationData : Vector.<Number>;
 		private var _vertexPosReg : ShaderRegisterElement;
 		private var _varyingReg : ShaderRegisterElement;
+		private var _attenuationIndex : int;
+		private var _attenuationRegister : ShaderRegisterElement;
 
 		/**
 		 * Creates a new PointLight object.
@@ -35,6 +40,7 @@ package away3d.lights
 		public function PointLight()
 		{
 			super();
+			_attenuationData = Vector.<Number>([_radius, 1/(_fallOff-_radius), 0, 1]);
 		}
 
 		/**
@@ -53,6 +59,9 @@ package away3d.lights
 				_fallOff = _radius;
 				invalidateBounds();
 			}
+
+			_attenuationData[0] = _radius;
+			_attenuationData[1] = 1/(_fallOff-_radius);
 		}
 
 		/**
@@ -69,6 +78,8 @@ package away3d.lights
 			if (_fallOff < 0) _fallOff = 0;
 			if (_fallOff < _radius) _radius = _fallOff;
 			invalidateBounds();
+			_attenuationData[0] = _radius;
+			_attenuationData[1] = 1/(_fallOff-_radius);
 		}
 
 		/**
@@ -77,7 +88,7 @@ package away3d.lights
 		override protected function updateBounds() : void
 		{
 //			super.updateBounds();
-			_bounds.fromExtremes(-_radius, -_radius, -_radius, _radius, _radius, _radius);
+			_bounds.fromExtremes(-_fallOff, -_fallOff, -_fallOff, _fallOff, _fallOff, _fallOff);
 			_boundsInvalid = false;
 		}
 
@@ -162,14 +173,35 @@ package away3d.lights
 
 		arcane override function getFragmentCode(regCache : ShaderRegisterCache) : String
 		{
+			_attenuationRegister = regCache.getFreeFragmentConstant();
+			_attenuationIndex = _attenuationRegister.index;
 			_fragmentDirReg = _varyingReg;
-
 			return 	"";
+		}
+
+
+		arcane override function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		{
+			var code : String = "";
+
+			// w = sqrt(dir . dir) = len(dir)
+			code += AGAL.dp3(targetReg+".w", _varyingReg+".xyz", _varyingReg+".xyz");
+			code += AGAL.sqrt(targetReg+".w", targetReg+".w");
+			// w = d - min
+			code += AGAL.sub(targetReg+".w", targetReg+".w", _attenuationRegister+".x");
+			// w = (d - min)/(max-min)
+			code += AGAL.mul(targetReg+".w", targetReg+".w", _attenuationRegister+".y");
+			// w = clamp(w, 0, 1)
+			code += AGAL.sat(targetReg+".w", targetReg+".w");
+			code += AGAL.sub(targetReg+".w", _attenuationRegister+".w", targetReg+".w");
+
+			return code;
 		}
 
 		arcane override function setRenderState(context : Context3D, inputIndex : int) : void
 		{
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, inputIndex, _positionData, 1);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _attenuationIndex, _attenuationData, 1);
 		}
 	}
 }

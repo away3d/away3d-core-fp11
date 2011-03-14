@@ -163,7 +163,6 @@ package away3d.core.render
 		private function drawRenderables(renderables : Vector.<IRenderable>, entityCollector : EntityCollector) : void
 		{
 			var renderable : IRenderable;
-			var lights : Vector.<LightBase> = entityCollector.lights;
 			var i : uint, j : uint, k : uint;
 			var numPasses : uint;
 			var numRenderables : uint = renderables.length;

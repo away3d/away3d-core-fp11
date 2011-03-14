@@ -28,7 +28,7 @@ package away3d.entities
 		private var _partitionNode : EntityNode;
 
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
-		private var _zIndices : Vector.<Number> = new Vector.<Number>();
+		protected var _zIndices : Vector.<Number> = new Vector.<Number>();
 		protected var _mvpIndex : int = -1;
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;

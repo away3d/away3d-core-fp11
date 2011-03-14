@@ -101,7 +101,7 @@ package away3d.animators.data
 						code += AGAL.mul(temp2, "va" + (_streamIndex + k), "vc" + pass.numUsedVertexConstants + "." + regs[j]);
 						if (j < _numPoses - 1) code += AGAL.add(temp1, temp1, temp2);
 						else code += AGAL.add(targets[i], temp1, temp2);
-						k++
+						++k;
 					}
 				}
 			}

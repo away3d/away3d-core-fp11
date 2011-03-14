@@ -105,9 +105,6 @@ package away3d.animators.data
 			var attributes : Array = pass.getAnimationSourceRegisters();
 			var len : uint = attributes.length;
 
-			var useNormals : Boolean = len > 1;
-			var useTangents : Boolean = len > 2;
-
 			// if too many bones to fit in the constants, fall back to cpu animation :(
 			if (_jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
 				_usesCPU = true;

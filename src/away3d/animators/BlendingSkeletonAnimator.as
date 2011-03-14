@@ -90,7 +90,7 @@ package away3d.animators
 			if (_tempAbsSequences) {
 				len = _tempAbsSequences.length;
 				for (i = 0; i < len; ++i)
-					createLERPInput(_tempAbsSequences[i])
+					createLERPInput(_tempAbsSequences[i]);
 			}
 
 			if (_tempAddSequences) {

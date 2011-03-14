@@ -100,11 +100,11 @@ package away3d.materials.methods
             for (var i : int = 0; i < _numSplattingLayers; ++i) {
                 splatTexReg = regCache.getFreeTextureReg();
                 if (i == 0) _splatTextureIndex = splatTexReg.index;
-                code += AGAL.mul(uv.toString(), _uvFragmentReg.toString(), scaleRegister + comps[i]);
+                code += AGAL.mul(uv.toString(), _uvFragmentReg.toString(), scaleRegister.toString() + comps[i]);
                 code += getSplatSampleCode(uv, splatTexReg, uv);
 //                code += AGAL.add(albedo.toString(), albedo.toString(), uv.toString());
                 code += AGAL.sub(uv.toString(), uv.toString(), albedo.toString());
-                code += AGAL.mul(uv.toString(), uv.toString(), temp + comps[i]);
+                code += AGAL.mul(uv.toString(), uv.toString(), temp.toString() + comps[i]);
                 code += AGAL.add(albedo.toString(), albedo.toString(), uv.toString());
             }
             regCache.removeFragmentTempUsage(uv);

@@ -644,9 +644,8 @@ package away3d.core.base
 			var index1 : uint, index2 : uint, index3 : uint;
 			var len : uint = _indices.length;
 			var ui : uint, vi : uint;
-			var u0 : Number, v0 : Number;
-			var du1 : Number, dv1 : Number;
-			var du2 : Number, dv2 : Number;
+			var v0 : Number;
+			var dv1 : Number, dv2 : Number;
 			var denom : Number;
 			var x0 : Number, y0 : Number, z0 : Number;
 			var dx1 : Number, dy1 : Number, dz1 : Number;

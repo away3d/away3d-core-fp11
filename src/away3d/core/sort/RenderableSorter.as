@@ -53,18 +53,11 @@ package away3d.core.sort
 		 */
 		private function blendedSortFunction(a : IRenderable, b : IRenderable) : int
 		{
-			var aid : uint  = a.material.uniqueId;
-			var bid : uint  = b.material.uniqueId;
-
-			if (aid == bid) {
-				var za : Number = a.zIndex;
-				var zb : Number = b.zIndex;
-				if (za == zb) return 0;
-				else if (za < zb) return -1;
-				else return 1;
-			}
-			else if (aid > bid) return 1;
-			else return -1;
+			var za : Number = a.zIndex;
+			var zb : Number = b.zIndex;
+			if (za == zb) return 0;
+			else if (za < zb) return -1;
+			else return 1;
 		}
 	}
 }

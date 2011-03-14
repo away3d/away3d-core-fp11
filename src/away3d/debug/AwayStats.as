@@ -190,7 +190,7 @@ package away3d.debug
 		
 	    public function get fps():int
         {
-            return _fps
+            return _fps;
         }
 		
 		private function _init() : void

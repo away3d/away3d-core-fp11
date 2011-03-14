@@ -138,6 +138,8 @@ package away3d.entities
 			rot.x = rot.y = rot.z = 0;
 			mvp.recompose(comps);
 			mvp.append(camera.lens.matrix);
+			mvp.copyRowTo(3, _pos);
+			_zIndices[_mvpIndex] = -_pos.z;
 		}
 
 		public function get numTriangles() : uint
