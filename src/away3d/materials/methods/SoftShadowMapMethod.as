@@ -37,7 +37,7 @@ package away3d.materials.methods
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
-		public function SoftShadowMapMethod(castingLight : LightBase, stepSize : Number = .0005)
+		public function SoftShadowMapMethod(castingLight : LightBase, stepSize : Number = .00025)
 		{
 			super(false, false);
 			_stepSize = stepSize;
@@ -118,56 +118,56 @@ package away3d.materials.methods
 			uvReg = regCache.getFreeFragmentVectorTemp();
 			code += AGAL.mov(uvReg.toString(), _depthMapVar.toString());
 
-			code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.add(uvReg+".z", _depthMapVar+".z", dataReg+".x");    // offset by epsilon
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(targetReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 
 			code += AGAL.sub(uvReg+".x", _depthMapVar+".x", dataReg+".z");	// (-1, 0)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".x", _depthMapVar+".x", dataReg+".z");		// (1, 0)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.mov(uvReg+".x", _depthMapVar+".x");
 			code += AGAL.sub(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (0, -1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (0, 1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.sub(uvReg+".xy", _depthMapVar+".xy", dataReg+".zz"); // (0, -1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (-1, 1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".xy", _depthMapVar+".xy", dataReg+".zz");  // (1, 1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.sub(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (1, -1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearestNoMip", "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
