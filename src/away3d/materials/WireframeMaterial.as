@@ -23,7 +23,7 @@ package away3d.materials {
 		  * @param color The material's diffuse surface color.
 		 * @param alpha The material's surface alpha.
 		 */
-		public function WireframeMaterial(){
+		public function WireframeMaterial(w:int=1000,h:int=700){
 			super();
 			/*super(color,alpha);
 			_wirePass = new WireFramePass();
@@ -35,7 +35,7 @@ package away3d.materials {
 			this.bothSides=true;
 			
 			
-			addPass(_screenPass1 = new WireFramePass());
+			addPass(_screenPass1 = new WireFramePass(w,h));
 			_screenPass1.material = this;
 			//addPass(_screenPass = new DefaultScreenPass());
 			//_screenPass.material = this;
