@@ -32,14 +32,13 @@ package away3d.materials.methods
 		private var _specular : Number = 1;
 		private var _specularColor : uint = 0xffffff;
 		arcane var _specularR : Number = 1, _specularG : Number = 1, _specularB : Number = 1;
-		private var _shadowRegister : ShaderRegisterElement;
 
 		/**
 		 * Creates a new BasicSpecularMethod object.
 		 */
 		public function BasicSpecularMethod()
 		{
-			super(true, false);
+			super(true, false, false);
 			_specularData = Vector.<Number>([1, 1, 1, 50]);
 		}
 
@@ -185,7 +184,6 @@ package away3d.materials.methods
 		arcane override function reset() : void
 		{
 			super.reset();
-			_shadowRegister = null;
 		}
 
 		/**
@@ -274,9 +272,6 @@ package away3d.materials.methods
 				return "";
 			}
 
-			if (_shadowRegister)
-				code += AGAL.mul(_totalLightColorReg+".xyz", _totalLightColorReg+".xyz", _shadowRegister+".w");
-
 			if (_useTexture) {
 				code += AGAL.mul(_totalLightColorReg+".xyz", _totalLightColorReg+".xyz", _specularTexData+".x");
 				regCache.removeFragmentTempUsage(_specularTexData);
@@ -334,11 +329,6 @@ package away3d.materials.methods
 			_specularData[0] = _specularR = ((_specularColor >> 16) & 0xff)/0xff*_specular;
 			_specularData[1] = _specularG = ((_specularColor >> 8) & 0xff)/0xff*_specular;
 			_specularData[2] = _specularB = (_specularColor & 0xff)/0xff*_specular;
-		}
-
-		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
-		{
-			_shadowRegister = shadowReg;
 		}
 	}
 }

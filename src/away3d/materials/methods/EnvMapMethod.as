@@ -24,7 +24,7 @@ package away3d.materials.methods
 
 		public function EnvMapMethod(envMap : CubeMap, alpha : Number = 1)
 		{
-			super(true, true);
+			super(true, true, false);
 			_cubeTexture = new CubeTexture3DProxy();
 			_cubeTexture.cubeMap = envMap;
 			_data = new Vector.<Number>(4, true);

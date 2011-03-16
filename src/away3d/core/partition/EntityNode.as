@@ -66,9 +66,6 @@ package away3d.core.partition
 		 */
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
-			if (_entity is Sprite3D) {
-				trace ("moo");
-			}
 			_entity.pushModelViewProjection(camera);
 			return _entity.bounds.isInFrustum(_entity.modelViewProjection);
 		}

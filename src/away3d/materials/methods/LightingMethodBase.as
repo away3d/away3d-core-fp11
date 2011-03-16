@@ -22,9 +22,9 @@ package away3d.materials.methods
 		 * @param needsNormals Defines whether or not the method requires normals.
 		 * @param needsView Defines whether or not the method requires the view direction.
 		 */
-		public function LightingMethodBase(needsNormals : Boolean, needsView : Boolean)
+		public function LightingMethodBase(needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean)
 		{
-			super(needsNormals, needsView);
+			super(needsNormals, needsView, needsGlobalPos);
 		}
 
 		/**

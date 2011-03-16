@@ -36,7 +36,6 @@ package away3d.materials.passes
 		// todo: remove color transform method, and apply directly on diffuse?
 		private var _colorTransformMethod : ColorTransformMethod;
 		private var _ambientMethod : BasicAmbientMethod;
-		private var _shadowMethod : ShadingMethodBase;
 		private var _diffuseMethod : BasicDiffuseMethod;
 		private var _specularMethod : BasicSpecularMethod;
 		private var _methods : Vector.<ShadingMethodBase>;
@@ -144,7 +143,6 @@ package away3d.materials.passes
 
 			_normalMapTexture.dispose(deep);
 			_diffuseMethod.dispose(deep);
-			if (_shadowMethod) _shadowMethod.dispose(deep);
 			_ambientMethod.dispose(deep);
 			if (_specularMethod) _specularMethod.dispose(deep);
 			if (_colorTransformMethod) _colorTransformMethod.dispose(deep);
@@ -225,19 +223,6 @@ package away3d.materials.passes
 			value.copyFrom(_ambientMethod);
 			value.parentPass = this;
 			_ambientMethod = value;
-			invalidateShaderProgram();
-		}
-
-		public function get shadowMethod() : ShadingMethodBase
-		{
-			return _shadowMethod;
-		}
-
-		public function set shadowMethod(value : ShadingMethodBase) : void
-		{
-			if (_shadowMethod) _shadowMethod.parentPass = null;
-			if (value) value.parentPass = this;
-			_shadowMethod = value;
 			invalidateShaderProgram();
 		}
 
@@ -329,7 +314,6 @@ package away3d.materials.passes
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
 
 			_ambientMethod.activate(context, contextIndex);
-			if (_shadowMethod) _shadowMethod.activate(context, contextIndex);
 			_diffuseMethod.activate(context, contextIndex);
 			if (_specularMethod) _specularMethod.activate(context, contextIndex);
 			if (_colorTransformMethod) _colorTransformMethod.activate(context, contextIndex);
@@ -356,7 +340,6 @@ package away3d.materials.passes
 			var len : uint = _methods.length;
 
 			_ambientMethod.deactivate(context);
-			if (_shadowMethod) _shadowMethod.deactivate(context);
 			_diffuseMethod.deactivate(context);
 			if (_specularMethod) _specularMethod.deactivate(context);
 			if (_colorTransformMethod) _colorTransformMethod.deactivate(context);
@@ -392,7 +375,6 @@ package away3d.materials.passes
 			}
 
 			_ambientMethod.setRenderState(renderable, context, contextIndex, camera, lights);
-			if (_shadowMethod) _shadowMethod.setRenderState(renderable, context, contextIndex, camera, lights);
 			_diffuseMethod.setRenderState(renderable, context, contextIndex, camera, lights);
 			if (_specularMethod) _specularMethod.setRenderState(renderable, context, contextIndex, camera, lights);
 			if (_colorTransformMethod) _colorTransformMethod.setRenderState(renderable, context, contextIndex, camera, lights);
@@ -430,7 +412,6 @@ package away3d.materials.passes
 
 			_passes = new Vector.<MaterialPassBase>();
 			addPasses(_ambientMethod.passes);
-			if (_shadowMethod) addPasses(_shadowMethod.passes);
 			addPasses(_diffuseMethod.passes);
 			if (_specularMethod) addPasses(_specularMethod.passes);
 			if (_colorTransformMethod) addPasses(_colorTransformMethod.passes);
@@ -475,7 +456,6 @@ package away3d.materials.passes
 			_lightInputIndices = new Vector.<uint>(_numLights, true);
 
 			setMethodProps(_diffuseMethod);
-			if (_shadowMethod) setMethodProps(_shadowMethod);
 			setMethodProps(_ambientMethod);
 			if (_specularMethod) setMethodProps(_specularMethod);
 			if (_colorTransformMethod) setMethodProps(_colorTransformMethod);
@@ -523,7 +503,6 @@ package away3d.materials.passes
 			if (_viewDirDependencies > 0) compileViewDirCode();
 
 			setMethodRegs(_diffuseMethod);
-			if (_shadowMethod) setMethodRegs(_shadowMethod);
 			setMethodRegs(_ambientMethod);
 			if (_specularMethod) setMethodRegs(_specularMethod);
 			if (_colorTransformMethod) setMethodRegs(_colorTransformMethod);
@@ -547,6 +526,7 @@ package away3d.materials.passes
 
 		private function setMethodRegs(method : ShadingMethodBase) : void
 		{
+			method.globalPosVertexReg = _globalPositionReg;
 			method.normalFragmentReg = _normalFragmentReg;
 			method.UVFragmentReg = _uvVaryingReg;
 			method.viewDirFragmentReg = _viewDirFragmentReg;
@@ -593,7 +573,6 @@ package away3d.materials.passes
 			len = _methods.length;
 
 			countMethodDependencies(_diffuseMethod);
-			if (_shadowMethod) countMethodDependencies(_shadowMethod);
 			countMethodDependencies(_ambientMethod);
 			if (_specularMethod) countMethodDependencies(_specularMethod);
 			if (_colorTransformMethod) countMethodDependencies(_colorTransformMethod);
@@ -611,6 +590,7 @@ package away3d.materials.passes
 
 		private function countMethodDependencies(method : ShadingMethodBase) : void
 		{
+			if (method.needsGlobalPos) ++_globalPosDependencies;
 			if (method.needsNormals) ++_normalDependencies;
 			if (method.needsView) ++_viewDirDependencies;
 			if (method.needsUV) ++_uvDependencies;
@@ -870,27 +850,12 @@ package away3d.materials.passes
 
 			_vertexCode += _ambientMethod.getVertexCode(_registerCache);
 			_fragmentCode += _ambientMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
-			if (_shadowMethod) {
-				_vertexCode += _shadowMethod.getVertexCode(_registerCache);
-//				shadowReg = _registerCache.getFreeFragmentSingleTemp();
-				// risky :s
-				if (_normalDependencies == 0) {
-					shadowReg = _registerCache.getFreeFragmentVectorTemp();
-					_registerCache.addFragmentTempUsages(shadowReg, 1);
-				}
-				else
-					shadowReg = _normalFragmentReg;
-
-				_diffuseMethod.shadowRegister = shadowReg;
-				_fragmentCode += _shadowMethod.getFragmentPostLightingCode(_registerCache, shadowReg);
-			}
 			_fragmentCode += _diffuseMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
 
 			if (_diffuseMethod.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
 			if (_diffuseMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 
 			if (_specularMethod) {
-				_specularMethod.shadowRegister = shadowReg;
 				_fragmentCode += _specularMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
 				if (_specularMethod.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
 				if (_specularMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
@@ -905,6 +870,8 @@ package away3d.materials.passes
 
 			for (var i : uint = 0; i < numMethods; ++i) {
 				_vertexCode += _methods[i].getVertexCode(_registerCache);
+				if (_methods[i].needsGlobalPos) _registerCache.removeVertexTempUsage(_globalPositionReg);
+
 				_fragmentCode += _methods[i].getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
 				if (_methods[i].needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
 				if (_methods[i].needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);

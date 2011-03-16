@@ -22,11 +22,13 @@ package away3d.materials.methods
 		protected var _needsView : Boolean;
 		protected var _needsNormals : Boolean;
 		protected var _needsUV : Boolean;
+		protected var _needsGlobalPos : Boolean;
 
 		protected var _viewDirVaryingReg : ShaderRegisterElement;
 		protected var _viewDirFragmentReg : ShaderRegisterElement;
 		protected var _normalFragmentReg : ShaderRegisterElement;
 		protected var _uvFragmentReg : ShaderRegisterElement;
+		protected var _globalPosVertexReg : ShaderRegisterElement;
 
 		protected var _mipmap : Boolean = true;
 		protected var _smooth : Boolean = true;
@@ -43,10 +45,11 @@ package away3d.materials.methods
 		 * @param needsNormals Defines whether or not the method requires normals.
 		 * @param needsView Defines whether or not the method requires the view direction.
 		 */
-		public function ShadingMethodBase(needsNormals : Boolean, needsView : Boolean)
+		public function ShadingMethodBase(needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean)
 		{
 			_needsNormals = needsNormals;
 			_needsView = needsView;
+			_needsGlobalPos = needsGlobalPos;
 		}
 
 		/**
@@ -174,6 +177,25 @@ package away3d.materials.methods
 		arcane function get needsNormals() : Boolean
 		{
 			return _needsNormals;
+		}
+
+		arcane function get needsGlobalPos() : Boolean
+		{
+			return _needsGlobalPos;
+		}
+
+		/**
+		 * The fragment register in which the uv coordinates are stored.
+		 * @private
+		 */
+		arcane function get globalPosVertexReg() : ShaderRegisterElement
+		{
+			return _globalPosVertexReg;
+		}
+
+		arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		{
+			_globalPosVertexReg = value;
 		}
 
 		/**

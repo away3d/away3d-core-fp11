@@ -26,7 +26,7 @@ package away3d.materials.methods
 		 */
 		public function ColorTransformMethod()
 		{
-			super(false, false);
+			super(false, false, false);
 			_colorTransformData = new Vector.<Number>(8, true);
 		}
 

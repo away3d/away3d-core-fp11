@@ -207,14 +207,32 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get UVFragmentReg() : ShaderRegisterElement
+		override arcane function get needsGlobalPos() : Boolean
 		{
-			return _baseSpecularMethod.UVFragmentReg;
+			return _baseSpecularMethod.needsGlobalPos || _needsGlobalPos;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
+		override arcane function get globalPosVertexReg() : ShaderRegisterElement
+		{
+			return _globalPosVertexReg;
+		}
+
+		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		{
+			_baseSpecularMethod.globalPosVertexReg = _globalPosVertexReg = value;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function get UVFragmentReg() : ShaderRegisterElement
+		{
+			return _baseSpecularMethod.UVFragmentReg;
+		}
+
 		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_baseSpecularMethod.UVFragmentReg = value;
@@ -228,9 +246,6 @@ package away3d.materials.methods
 			return _baseSpecularMethod.viewDirFragmentReg;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_viewDirFragmentReg = _baseSpecularMethod.viewDirFragmentReg = value;
@@ -288,12 +303,6 @@ package away3d.materials.methods
 		arcane override function reset() : void
 		{
 			_baseSpecularMethod.reset();
-		}
-
-		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
-		{
-			super.shadowRegister = shadowReg;
-			_baseSpecularMethod.shadowRegister = shadowReg;
 		}
 	}
 }

@@ -22,7 +22,7 @@ package away3d.materials.methods
 
 		public function FogMethod(fogDistance : Number, fogColor : uint = 0x808080)
 		{
-			super(false, true);
+			super(false, true, false);
 			_fogData = new Vector.<Number>(4, true);
 			this.fogDistance = fogDistance;
 			this.fogColor = fogColor;
@@ -63,7 +63,6 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 			_fogDataIndex = fogDataRegister.index;
-
 
 			code += AGAL.dp3(temp+".w", _viewDirVaryingReg+".xyz", _viewDirVaryingReg+".xyz");	// dist²
 			code += AGAL.sqrt(temp+".w", temp+".w");	// dist²

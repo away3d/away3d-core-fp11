@@ -29,7 +29,7 @@ package away3d.materials.methods
 		 */
 		public function BasicAmbientMethod()
 		{
-			super(false, false);
+			super(false, false, false);
 			_ambientData = Vector.<Number>([0, 0, 0, 1]);
 		}
 

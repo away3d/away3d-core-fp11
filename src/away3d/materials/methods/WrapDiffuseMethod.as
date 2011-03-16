@@ -242,6 +242,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
+		override arcane function get needsGlobalPos() : Boolean
+		{
+			return _baseDiffuseMethod.needsGlobalPos || _needsGlobalPos;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function get needsView() : Boolean
 		{
 			return _baseDiffuseMethod.needsView || _needsView;
@@ -253,6 +261,22 @@ package away3d.materials.methods
 		override arcane function get needsNormals() : Boolean
 		{
 			return _baseDiffuseMethod.needsNormals || _needsNormals;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function get globalPosVertexReg() : ShaderRegisterElement
+		{
+			return _globalPosVertexReg;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		{
+			_baseDiffuseMethod.globalPosVertexReg = _globalPosVertexReg = value;
 		}
 
 		/**
@@ -306,13 +330,6 @@ package away3d.materials.methods
 		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_baseDiffuseMethod.normalFragmentReg = _normalFragmentReg = value;
-		}
-
-		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
-		{
-
-			super.shadowRegister = shadowReg;
-			_baseDiffuseMethod.shadowRegister = shadowReg;
 		}
 	}
 }

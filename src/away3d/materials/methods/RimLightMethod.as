@@ -21,7 +21,7 @@ package away3d.materials.methods
 
 		public function RimLightMethod(color : uint = 0xffffff, strength : Number = .4, power : Number = 2)
 		{
-			super(true, true);
+			super(true, true, false);
 			_data = new Vector.<Number>(8, true);
 			_data[3] = 1;
 			_data[4] = strength;
