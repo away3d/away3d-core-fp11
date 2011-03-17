@@ -2,14 +2,12 @@ package away3d.containers
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.animators.AnimationManager;
 	import away3d.core.managers.Mouse3DManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.HitTestRenderer;
 	import away3d.core.render.RendererBase;
-	import away3d.core.sort.RenderableSorter;
 	import away3d.core.traverse.EntityCollector;
 
 	import flash.display.Sprite;
@@ -237,14 +235,14 @@ package away3d.containers
 		/**
 		 * Renders the view.
 		 */
-		public function render(update : Boolean = true) : void
+		public function render() : void
 		{
 			var time : Number = getTimer();
 			if (_time == 0) _time = time;
 			_deltaTime = time - _time;
 			_time = time;
 
-			if (update) AnimationManager.getInstance().updateAnimations(_deltaTime);
+//			if (update) AnimationManager.getInstance().updateAnimations(_deltaTime);
 			_entityCollector.clear();
 
 			_camera.lens.aspectRatio = _aspectRatio;

@@ -77,6 +77,8 @@ package away3d.animators
 				_sequenceAbsent = null;
 				_activeClip.time = 0;
 			}
+
+			start();
 		}
 
 		/**

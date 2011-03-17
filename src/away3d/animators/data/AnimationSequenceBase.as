@@ -1,7 +1,7 @@
 package away3d.animators.data
 {
 	import away3d.arcane;
-	import away3d.events.AnimationEvent;
+	import away3d.events.AnimatorEvent;
 	import away3d.loading.IResource;
 
 	import flash.events.EventDispatcher;
@@ -28,7 +28,7 @@ package away3d.animators.data
 		arcane var _fixedFrameRate : Boolean = true;
 		arcane var _durations : Vector.<uint>;
 
-		private var _animationEvent : AnimationEvent;
+		private var _animationEvent : AnimatorEvent;
 
 		/**
 		 * Creates a new AnimationSequenceBase object.
@@ -39,7 +39,7 @@ package away3d.animators.data
 			_name = name;
 			_durations = new Vector.<uint>();
 			_rootDelta = new Vector3D();
-			_animationEvent = new AnimationEvent(AnimationEvent.PLAYBACK_ENDED, this);
+			_animationEvent = new AnimatorEvent(AnimatorEvent.SEQUENCE_DONE, null, this);
 		}
 
 		/**

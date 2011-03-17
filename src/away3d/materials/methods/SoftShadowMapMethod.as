@@ -139,7 +139,7 @@ package away3d.materials.methods
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
 			var shadow : ShaderRegisterElement;
-			var mode : String = "nearest";
+			var mode : String = "nearestNoMip";
 
             _decIndex = decReg.index;
 
@@ -186,8 +186,8 @@ package away3d.materials.methods
 			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
 
 			code += AGAL.mov(uvReg+".x", _depthMapVar+".x");
-			if (_dither) code += AGAL.add(uvReg+".x", uvReg+".x", shadow+".x");
 			code += AGAL.sub(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (0, -1)
+			if (_dither) code += AGAL.add(uvReg+".xy", uvReg+".xy", shadow+".xy");
 			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
@@ -200,7 +200,7 @@ package away3d.materials.methods
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
 
-			code += AGAL.sub(uvReg+".xy", _depthMapVar+".xy", dataReg+".zz"); // (0, -1)
+			code += AGAL.sub(uvReg+".xy", _depthMapVar+".xy", dataReg+".zz"); // (-1, -1)
 			if (_dither) code += AGAL.add(uvReg+".xy", uvReg+".xy", shadow+".xy");
 			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());

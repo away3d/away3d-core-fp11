@@ -25,8 +25,8 @@ package away3d.lights
 	public class PointLight extends LightBase
 	{
 		//private static var _pos : Vector3D = new Vector3D();
-		protected var _radius : Number = 50000;
-		protected var _fallOff : Number = 100000;
+		protected var _radius : Number = Number.MAX_VALUE;
+		protected var _fallOff : Number = Number.MAX_VALUE;
 		private var _positionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
 		private var _attenuationData : Vector.<Number>;
 		private var _vertexPosReg : ShaderRegisterElement;

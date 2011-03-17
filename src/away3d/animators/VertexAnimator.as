@@ -45,6 +45,8 @@ package away3d.animators
 //				_activeSequence.timeScale = _timeScale;
 				_sequenceAbsent = null;
 			}
+
+			start();
 		}
 
 		private function reset() : void
