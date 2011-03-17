@@ -5,12 +5,12 @@ package away3d.entities {
 	import flash.geom.Vector3D;
 
 
-	public class WireFrameGrid  {
+	public class WireFrameGrid extends SegmentsBase {
 		public function WireFrameGrid(_view : View3D,ceil:uint=10,size:uint=1000, color:uint = 0xCCCCCC, thickness:Number = 1) {
 			
 			
-			var seg:SegmentsBase=new SegmentsBase(_view);
-			_view.scene.addChild(seg);
+			super(_view);
+			
 			var ceilSize:uint = size/ ceil;
 			var v0 : Vector3D = new Vector3D(0, 0, 0) ;
 			var v1 : Vector3D = new Vector3D(0, 0, 0) ;
@@ -24,7 +24,7 @@ package away3d.entities {
 				v1.x=-size;
 				v1.y=0;
 				v1.z=i*ceilSize;
-					seg.addSegment( new LineSegment(v0 , v1,color,color,thickness));
+					addSegment( new LineSegment(v0 , v1,color,color,thickness));
 				v0.x=i*ceilSize;
 				v0.y=0;
 				v0.z=size;
@@ -32,7 +32,7 @@ package away3d.entities {
 				v1.x=i*ceilSize;
 				v1.y=0;
 				v1.z=-size;
-					seg.addSegment(new LineSegment(v0 , v1,color,color,thickness ));
+					addSegment(new LineSegment(v0 , v1,color,color,thickness ));
 			}
 		}
 	}
