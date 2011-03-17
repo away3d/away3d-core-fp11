@@ -1,27 +1,39 @@
 package away3d.entities {
-	import away3d.materials.WireframeMaterial;
+	import away3d.containers.View3D;
+	import away3d.primitives.LineSegment;
 
 	import flash.geom.Vector3D;
 
-	/**
-	 * @author jerome BIREMBAUT  Twitter: Seraf_NSS
-	 */
-	public class WireFrameGrid extends Lines {
-		public function WireFrameGrid(material : WireframeMaterial = null, ceil:uint=10,size:uint=1000) {
-			super(material);
 
-			var ceilSize:uint = size/ceil;
-			for ( var i:int = -ceil; i <= ceil; i++ )
-			{
-
-				addLine( new Vector3D( size, 0, i*ceilSize ), new Vector3D( -size, 0, i*ceilSize ), .3 );
-
-				addLine(  new Vector3D( i*ceilSize, 0, size ), new Vector3D( i*ceilSize, 0, -size ), .3 );
+	public class WireFrameGrid  {
+		public function WireFrameGrid(_view : View3D,ceil:uint=10,size:uint=1000, color:uint = 0xCCCCCC, thickness:Number = 1) {
+			
+			
+			var seg:SegmentsBase=new SegmentsBase(_view);
+			_view.scene.addChild(seg);
+			var ceilSize:uint = size/ ceil;
+			var v0 : Vector3D = new Vector3D(0, 0, 0) ;
+			var v1 : Vector3D = new Vector3D(0, 0, 0) ;
+			for ( var i:int = -ceil; i <= ceil; i++ ){
 				
+				
+				v0.x=size;
+				v0.y=0;
+				v0.z=i*ceilSize;
+				
+				v1.x=-size;
+				v1.y=0;
+				v1.z=i*ceilSize;
+					seg.addSegment( new LineSegment(v0 , v1,color,color,thickness));
+				v0.x=i*ceilSize;
+				v0.y=0;
+				v0.z=size;
+				
+				v1.x=i*ceilSize;
+				v1.y=0;
+				v1.z=-size;
+					seg.addSegment(new LineSegment(v0 , v1,color,color,thickness ));
 			}
-			
-			
-			
 		}
 	}
 }
