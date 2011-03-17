@@ -213,5 +213,15 @@ package away3d.materials.utils
         {
             return "kil "+src+"\n";
         }
-    }
+
+		public static function sin(tgt : String, src : String) : String
+		{
+			return "sin "+tgt+", " + src +"\n";
+		}
+
+		public static function cos(tgt : String, src : String) : String
+		{
+			return "cos "+tgt+", " + src +"\n";
+		}
+	}
 }
