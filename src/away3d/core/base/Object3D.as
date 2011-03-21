@@ -609,14 +609,14 @@ package away3d.core.base
 
 			if (_pivotZero) {
 				Matrix3DUtils.quaternion2matrix(_quaternion, _transform);
-				_transform.appendScale(_scaleX, _scaleY, _scaleZ);
+				_transform.prependScale(_scaleX, _scaleY, _scaleZ);
 				_transform.appendTranslation(_x, _y, _z);
 			}
 			else {
 				_transform.identity();
 				_transform.appendTranslation(_pivotPoint.x, _pivotPoint.y, _pivotPoint.z);
-				_transform.append(Matrix3DUtils.quaternion2matrix(_quaternion));
 				_transform.appendScale(_scaleX, _scaleY, _scaleZ);
+				_transform.append(Matrix3DUtils.quaternion2matrix(_quaternion));
 				_transform.appendTranslation(_x - _pivotPoint.x, _y - _pivotPoint.y, _z - _pivotPoint.z);
 			}
 

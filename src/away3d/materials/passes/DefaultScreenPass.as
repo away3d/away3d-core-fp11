@@ -872,10 +872,12 @@ package away3d.materials.passes
 
 			_vertexCode += _ambientMethod.getVertexCode(_registerCache);
 			_fragmentCode += _ambientMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
+
 			if (_shadowMethod) {
 				_vertexCode += _shadowMethod.getVertexCode(_registerCache);
 //				shadowReg = _registerCache.getFreeFragmentSingleTemp();
 				// risky :s
+				// todo: improve compilation with lifetime analysis so this isn't necessary
 				if (_normalDependencies == 0) {
 					shadowReg = _registerCache.getFreeFragmentVectorTemp();
 					_registerCache.addFragmentTempUsages(shadowReg, 1);
