@@ -304,5 +304,11 @@ package away3d.materials.methods
 		{
 			_baseSpecularMethod.reset();
 		}
+
+		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		{
+			super.shadowRegister = shadowReg;
+			_baseSpecularMethod.shadowRegister = shadowReg;
+		}
 	}
 }

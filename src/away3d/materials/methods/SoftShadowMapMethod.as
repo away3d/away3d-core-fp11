@@ -31,47 +31,17 @@ package away3d.materials.methods
 		private var _decIndex : uint;
 		private var _projMatrix : Matrix3D = new Matrix3D();
 		private var _stepSize : Number;
-		private var _shadowColor : uint;
-		private var _dither : Boolean;
 
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
-		public function SoftShadowMapMethod(castingLight : LightBase, shadowColor : uint = 0x808080, dither : Boolean = true, stepSize : Number = .00025)
+		public function SoftShadowMapMethod(castingLight : LightBase, stepSize : Number = .00025)
 		{
 			super(false, false, false);
 			_stepSize = stepSize;
 			castingLight.castsShadows = true;
 			_castingLight = castingLight;
-			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/160581375.0, -.003, 1/9, stepSize, 10000, 0, 0, 0, 1]);
-			this.shadowColor = shadowColor;
-			_needsUV = true;
-			_dither = dither;
-		}
-
-		public function get dither() : Boolean
-		{
-			return _dither;
-		}
-
-		public function set dither(value : Boolean) : void
-		{
-			if (_dither == value) return;
-			_dither = value;
-			invalidateShaderProgram();
-		}
-
-		public function get shadowColor() : uint
-		{
-			return _shadowColor;
-		}
-
-		public function set shadowColor(value : uint) : void
-		{
-			_data[8] = ((value >> 16) & 0xff)/0xff;
-			_data[9] = ((value >> 8) & 0xff)/0xff;
-			_data[10] = (value & 0xff)/0xff;
-			_shadowColor = value;
+			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/160581375.0, -.003, 1/9, stepSize, 0]);
 		}
 
 		public function get epsilon() : Number
@@ -118,10 +88,12 @@ package away3d.materials.methods
 			_toTexIndex = toTexReg.index;
 
 			code += AGAL.m44(temp.toString(), "vt0", depthMapProj.toString());
-			code += AGAL.div(temp.toString(), temp.toString(), temp+".w");
+			code += AGAL.rcp(temp+".w", temp+".w");
+			code += AGAL.mul(temp+".xyz", temp+".xyz", temp+".w");
 			code += AGAL.mul(temp+".xy", temp+".xy", toTexReg+".xy");
 			code += AGAL.add(temp+".xy", temp+".xy", toTexReg+".xx");
-			code += AGAL.mov(_depthMapVar.toString(), temp.toString());
+			code += AGAL.mov(_depthMapVar+".xyz", temp+".xyz");
+			code += AGAL.mov(_depthMapVar+".w", "va0.w");
 
 			return code;
 		}
@@ -134,107 +106,72 @@ package away3d.materials.methods
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			var colReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
-			var shadow : ShaderRegisterElement;
-			var mode : String = "nearestNoMip";
-
             _decIndex = decReg.index;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 
 			uvReg = regCache.getFreeFragmentVectorTemp();
-			regCache.addFragmentTempUsages(uvReg, 1);
-			shadow = regCache.getFreeFragmentVectorTemp();
 			code += AGAL.mov(uvReg.toString(), _depthMapVar.toString());
 
-			if (_dither) {
-				// pseudorandom dither
-				code += AGAL.mul(shadow+".xy", _uvFragmentReg+".xy", dataReg+".w");
-				code += AGAL.cos(shadow+".xy", shadow+".xy");
-				code += AGAL.mul(shadow+".xy", shadow+".xy", dataReg+".w");
-				code += AGAL.fract(shadow+".xy", shadow+".xy");
-				code += AGAL.sin(shadow+".xy", shadow+".xy");
-				code += AGAL.mul(shadow+".xy", shadow+".xy", dataReg+".z");
-			}
-
-			if (_dither) {
-				code += AGAL.add(uvReg+".xy", _depthMapVar+".xy", shadow+".xy");
-				code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
-			}
-			else
-				code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
-
+			code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.add(uvReg+".z", _depthMapVar+".z", dataReg+".x");    // offset by epsilon
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
-			code += AGAL.lessThan(shadow+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
+			code += AGAL.lessThan(targetReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
 
 			code += AGAL.sub(uvReg+".x", _depthMapVar+".x", dataReg+".z");	// (-1, 0)
-			if (_dither) code += AGAL.add(uvReg+".x", uvReg+".x", shadow+".x");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".x", _depthMapVar+".x", dataReg+".z");		// (1, 0)
-			if (_dither) code += AGAL.add(uvReg+".x", uvReg+".x", shadow+".x");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.mov(uvReg+".x", _depthMapVar+".x");
 			code += AGAL.sub(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (0, -1)
-			if (_dither) code += AGAL.add(uvReg+".xy", uvReg+".xy", shadow+".xy");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (0, 1)
-			if (_dither) code += AGAL.add(uvReg+".y", uvReg+".y", shadow+".y");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
-			code += AGAL.sub(uvReg+".xy", _depthMapVar+".xy", dataReg+".zz"); // (-1, -1)
-			if (_dither) code += AGAL.add(uvReg+".xy", uvReg+".xy", shadow+".xy");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sub(uvReg+".xy", _depthMapVar+".xy", dataReg+".zz"); // (0, -1)
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (-1, 1)
-			if (_dither) code += AGAL.add(uvReg+".y", uvReg+".y", shadow+".y");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.add(uvReg+".xy", _depthMapVar+".xy", dataReg+".zz");  // (1, 1)
-			if (_dither) code += AGAL.add(uvReg+".xy", uvReg+".xy", shadow+".xy");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			code += AGAL.sub(uvReg+".y", _depthMapVar+".y", dataReg+".z");	// (1, -1)
-			if (_dither) code += AGAL.add(uvReg+".y", uvReg+".y", shadow+".y");
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), mode, "clamp");
+			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "bilinear", "clamp");
 			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
 			code += AGAL.lessThan(uvReg+".w", uvReg+".z", depthCol+".z");   // 0 if in shadow
-			code += AGAL.add(shadow+".w", shadow+".w", uvReg+".w");
-
-			code += AGAL.mul(shadow+".w", shadow+".w", dataReg+".y");   // average
-			code += AGAL.add(depthCol+".xyz", colReg+".xyz", shadow+".www");
-			code += AGAL.sat(depthCol+".xyz", depthCol+".xyz");
-			code += AGAL.mul(targetReg+".xyz", targetReg+".xyz", depthCol+".xyz");
+			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
 
 			regCache.removeFragmentTempUsage(depthCol);
-			regCache.removeFragmentTempUsage(uvReg);
+			code += AGAL.mul(targetReg+".w", targetReg+".w", dataReg+".y");   // average
 
 			_depthMapIndex = depthMapRegister.index;
 
@@ -254,7 +191,7 @@ package away3d.materials.methods
 		override arcane function activate(context : Context3D, contextIndex : uint) : void
 		{
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _data, 3);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _data, 2);
 			context.setTextureAt(_depthMapIndex, _castingLight.shadowMapper.getDepthMap(contextIndex));
 		}
 

@@ -10,6 +10,8 @@ package away3d.containers
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 
+	import away3d.materials.MaterialBase;
+
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.utils.getTimer;

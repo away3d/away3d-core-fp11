@@ -331,5 +331,12 @@ package away3d.materials.methods
 		{
 			_baseDiffuseMethod.normalFragmentReg = _normalFragmentReg = value;
 		}
+
+		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		{
+
+			super.shadowRegister = shadowReg;
+			_baseDiffuseMethod.shadowRegister = shadowReg;
+		}
 	}
 }

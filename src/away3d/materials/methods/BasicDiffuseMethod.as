@@ -32,6 +32,7 @@ package away3d.materials.methods
 		private var _cutOffData : Vector.<Number>;
 
 		private var _diffuseR : Number, _diffuseG : Number = 0, _diffuseB : Number = 0, _diffuseA : Number;
+		protected var _shadowRegister : ShaderRegisterElement;
 
         private var _alphaThreshold : Number = 0;
 
@@ -170,6 +171,7 @@ package away3d.materials.methods
 		arcane override function reset() : void
 		{
 			super.reset();
+			_shadowRegister = null;
 		}
 
 		/**
@@ -231,6 +233,8 @@ package away3d.materials.methods
 
 			// incorporate input from ambient
 			if (_numLights > 0) {
+				if (_shadowRegister)
+					code += AGAL.mul(_totalLightColorReg+".xyz", _totalLightColorReg+".xyz", _shadowRegister+".w");
 				code += AGAL.add(targetReg+".xyz", _totalLightColorReg+".xyz", targetReg+".xyz");
 				code += AGAL.sat(targetReg+".xyz", targetReg+".xyz");
 				regCache.removeFragmentTempUsage(_totalLightColorReg);
@@ -295,6 +299,11 @@ package away3d.materials.methods
 			_diffuseData[uint(0)] = _diffuseR = ((_diffuseColor >> 16) & 0xff)/0xff;
 			_diffuseData[uint(1)] = _diffuseG = ((_diffuseColor >> 8) & 0xff)/0xff;
 			_diffuseData[uint(2)] = _diffuseB = (_diffuseColor & 0xff)/0xff;
+		}
+
+		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		{
+			_shadowRegister = shadowReg;
 		}
 	}
 }
