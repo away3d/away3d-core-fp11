@@ -614,10 +614,10 @@ package away3d.core.base
 			}
 			else {
 				_transform.identity();
-				_transform.appendScale(_scaleX, _scaleY, _scaleZ);
-				_transform.appendTranslation(_pivotPoint.x, _pivotPoint.y, _pivotPoint.z);
+				_transform.appendTranslation(-_pivotPoint.x, -_pivotPoint.y, -_pivotPoint.z);
 				_transform.append(Matrix3DUtils.quaternion2matrix(_quaternion));
-				_transform.appendTranslation(_x - _pivotPoint.x, _y - _pivotPoint.y, _z - _pivotPoint.z);
+				_transform.appendTranslation(_x + _pivotPoint.x, _y + _pivotPoint.y, _z + _pivotPoint.z);
+				_transform.prependScale(_scaleX, _scaleY, _scaleZ);
 			}
 
 			_transformDirty = false;
