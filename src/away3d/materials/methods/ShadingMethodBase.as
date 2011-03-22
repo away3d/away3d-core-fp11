@@ -19,6 +19,7 @@ package away3d.materials.methods
 	 */
 	public class ShadingMethodBase
 	{
+		protected var _needsProjection : Boolean;
 		protected var _needsView : Boolean;
 		protected var _needsNormals : Boolean;
 		protected var _needsUV : Boolean;
@@ -29,14 +30,15 @@ package away3d.materials.methods
 		protected var _normalFragmentReg : ShaderRegisterElement;
 		protected var _uvFragmentReg : ShaderRegisterElement;
 		protected var _globalPosVertexReg : ShaderRegisterElement;
+		protected var _projectionReg : ShaderRegisterElement;
 
 		protected var _mipmap : Boolean = true;
 		protected var _smooth : Boolean = true;
+
 		protected var _repeat : Boolean;
-
 		protected var _passes : Vector.<MaterialPassBase>;
-		private var _parentPass : MaterialPassBase;
 
+		private var _parentPass : MaterialPassBase;
 		protected var _numLights : int;
 
 
@@ -184,6 +186,11 @@ package away3d.materials.methods
 			return _needsGlobalPos;
 		}
 
+		arcane function get needsProjection() : Boolean
+		{
+			return _needsProjection;
+		}
+
 		/**
 		 * The fragment register in which the uv coordinates are stored.
 		 * @private
@@ -196,6 +203,16 @@ package away3d.materials.methods
 		arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
 		{
 			_globalPosVertexReg = value;
+		}
+
+		arcane function get projectionReg() : ShaderRegisterElement
+		{
+			return _projectionReg;
+		}
+
+		arcane function set projectionReg(value : ShaderRegisterElement) : void
+		{
+			_projectionReg = value;
 		}
 
 		/**

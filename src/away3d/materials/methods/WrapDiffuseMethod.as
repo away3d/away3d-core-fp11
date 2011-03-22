@@ -263,6 +263,11 @@ package away3d.materials.methods
 			return _baseDiffuseMethod.needsNormals || _needsNormals;
 		}
 
+		arcane override function get needsProjection() : Boolean
+		{
+			return _baseDiffuseMethod.needsProjection || _needsProjection;
+		}
+
 		/**
 		 * @inheritDoc
 		 */
@@ -271,9 +276,6 @@ package away3d.materials.methods
 			return _globalPosVertexReg;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
 		{
 			_baseDiffuseMethod.globalPosVertexReg = _globalPosVertexReg = value;
@@ -287,9 +289,6 @@ package away3d.materials.methods
 			return _uvFragmentReg;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_baseDiffuseMethod.UVFragmentReg = _uvFragmentReg = value;
@@ -303,9 +302,6 @@ package away3d.materials.methods
 			return _viewDirFragmentReg;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_baseDiffuseMethod.viewDirFragmentReg = _viewDirFragmentReg = value;
@@ -314,6 +310,12 @@ package away3d.materials.methods
 		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
 		{
 			_viewDirVaryingReg = _baseDiffuseMethod.viewDirVaryingReg = value;
+		}
+
+
+		arcane override function set projectionReg(value : ShaderRegisterElement) : void
+		{
+			_projectionReg = _baseDiffuseMethod.projectionReg = value;
 		}
 
 		/**

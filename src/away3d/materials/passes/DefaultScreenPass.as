@@ -43,6 +43,7 @@ package away3d.materials.passes
 		private var _registerCache : ShaderRegisterCache;
 		private var _vertexCode : String;
 		private var _fragmentCode : String;
+		private var _projectionDependencies : uint;
 		private var _normalDependencies : uint;
 		private var _viewDirDependencies : uint;
 		private var _uvDependencies : uint;
@@ -59,6 +60,7 @@ package away3d.materials.passes
 		protected var _normalMapIndex : int;
 		protected var _cameraPositionIndex : int;
 
+		private var _projectionFragmentReg : ShaderRegisterElement;
 		private var _normalFragmentReg : ShaderRegisterElement;
 		private var _viewDirFragmentReg : ShaderRegisterElement;
 		private var _lightDirFragmentRegs : Vector.<ShaderRegisterElement>;
@@ -490,6 +492,7 @@ package away3d.materials.passes
 			_targetRegisters = ["vt0"];
 			_vertexCode = "";
 			_fragmentCode = "";
+			_projectedTargetRegister = null;
 
 			_localPositionRegister = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(_localPositionRegister, 1);
@@ -517,6 +520,7 @@ package away3d.materials.passes
 		{
 			calcDependencies();
 
+			if (_projectionDependencies > 0) compileProjCode();
 			if (_uvDependencies > 0) compileUVCode();
 			if (_normalDependencies > 0) compileNormalCode();
 			if (_globalPosDependencies > 0) compileGlobalPositionCode();
@@ -545,10 +549,19 @@ package away3d.materials.passes
 			_registerCache.removeFragmentTempUsage(_shadedTargetReg);
 		}
 
+		private function compileProjCode() : void
+		{
+			_projectionFragmentReg = _registerCache.getFreeVarying();
+			_projectedTargetRegister = _registerCache.getFreeVertexVectorTemp().toString();
+
+			_vertexCode += AGAL.mov(_projectionFragmentReg.toString(), _projectedTargetRegister);
+		}
+
 		private function setMethodRegs(method : ShadingMethodBase) : void
 		{
 			method.globalPosVertexReg = _globalPositionReg;
 			method.normalFragmentReg = _normalFragmentReg;
+			method.projectionReg = _projectionFragmentReg;
 			method.UVFragmentReg = _uvVaryingReg;
 			method.viewDirFragmentReg = _viewDirFragmentReg;
 			method.viewDirVaryingReg = _viewDirVaryingReg;
@@ -612,6 +625,7 @@ package away3d.materials.passes
 
 		private function countMethodDependencies(method : ShadingMethodBase) : void
 		{
+			if (method.needsProjection) ++_projectionDependencies;
 			if (method.needsGlobalPos) ++_globalPosDependencies;
 			if (method.needsNormals) ++_normalDependencies;
 			if (method.needsView) ++_viewDirDependencies;

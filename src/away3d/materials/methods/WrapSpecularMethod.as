@@ -124,6 +124,11 @@ package away3d.materials.methods
 			return _baseSpecularMethod.needsNormals;
 		}
 
+		arcane override function get needsProjection() : Boolean
+		{
+			return _baseSpecularMethod.needsProjection || _needsProjection;
+		}
+
 		/**
 		 * @inheritDoc
 		 */
@@ -215,11 +220,6 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get globalPosVertexReg() : ShaderRegisterElement
-		{
-			return _globalPosVertexReg;
-		}
-
 		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
 		{
 			_baseSpecularMethod.globalPosVertexReg = _globalPosVertexReg = value;
@@ -228,11 +228,6 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get UVFragmentReg() : ShaderRegisterElement
-		{
-			return _baseSpecularMethod.UVFragmentReg;
-		}
-
 		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_baseSpecularMethod.UVFragmentReg = value;
@@ -241,14 +236,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get viewDirFragmentReg() : ShaderRegisterElement
-		{
-			return _baseSpecularMethod.viewDirFragmentReg;
-		}
-
 		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_viewDirFragmentReg = _baseSpecularMethod.viewDirFragmentReg = value;
+		}
+
+		arcane override function set projectionReg(value : ShaderRegisterElement) : void
+		{
+			_projectionReg = _baseSpecularMethod.projectionReg = value;
 		}
 
 		/**

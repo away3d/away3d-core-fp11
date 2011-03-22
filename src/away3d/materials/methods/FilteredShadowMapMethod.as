@@ -32,33 +32,18 @@ package away3d.materials.methods
 		private var _projMatrix : Matrix3D = new Matrix3D();
 		private var _stepSize : Number;
 
-		private var _hardEdges : Boolean;
-
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 *
 		 * @param castingLight The light casting the shadow
 		 */
-		public function FilteredShadowMapMethod(castingLight : LightBase, hardEdges : Boolean = false)
+		public function FilteredShadowMapMethod(castingLight : LightBase)
 		{
-			super(false, false, false);
-			_hardEdges = hardEdges;
+			super(false, true, false);
 			_stepSize = stepSize;
 			castingLight.castsShadows = true;
 			_castingLight = castingLight;
 			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/160581375.0, -.003, .5, castingLight.shadowMapper.depthMapSize, 1/castingLight.shadowMapper.depthMapSize]);
-		}
-
-	public function get hardEdges() : Boolean
-		{
-			return _hardEdges;
-		}
-
-		public function set hardEdges(value : Boolean) : void
-		{
-			if (_hardEdges == value) return;
-			_hardEdges = value;
-			invalidateShaderProgram();
 		}
 
 		public function get epsilon() : Number
@@ -132,7 +117,7 @@ package away3d.materials.methods
 
 			uvReg = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uvReg, 1);
-//			regCache.getFreeFragmentVectorTemp();
+
 			code += AGAL.mov(uvReg.toString(), _depthMapVar.toString());
 
 			code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), "nearest", "clamp");
@@ -177,9 +162,6 @@ package away3d.materials.methods
 			code += AGAL.sub(uvReg+".w", uvReg+".w", targetReg+".w");
 			code += AGAL.mul(uvReg+".w", uvReg+".w", depthCol+".x");
 			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
-
-			if (_hardEdges)
-				code += AGAL.greaterOrEqualTo(targetReg+".w", targetReg+".w", dataReg+".y");
 
 			regCache.removeFragmentTempUsage(depthCol);
 			regCache.removeFragmentTempUsage(uvReg);
