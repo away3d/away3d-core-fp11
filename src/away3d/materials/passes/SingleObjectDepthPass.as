@@ -127,8 +127,6 @@ package away3d.materials.passes
 		 * Gets the depth maps rendered for this object from all lights.
 		 * @param renderable The renderable for which to retrieve the depth maps
 		 * @return A list of depth map textures for all supported lights.
-		 *
-		 * todo: provide support for the actual renderable
 		 */
 		arcane function getDepthMaps(renderable : IRenderable, contextIndex : int) : Vector.<Texture>
 		{

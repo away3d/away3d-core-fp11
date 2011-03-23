@@ -33,7 +33,6 @@ package away3d.materials.passes
 		private var _cameraPositionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
 		private var _lightColorData : Vector.<Number>;
 
-		// todo: remove color transform method, and apply directly on diffuse?
 		private var _colorTransformMethod : ColorTransformMethod;
 		private var _ambientMethod : BasicAmbientMethod;
 		private var _shadowMethod : ShadingMethodBase;
@@ -383,11 +382,8 @@ package away3d.materials.passes
 			if (_numLights > 0) {
 				var len : uint = lights.length;
 
-				if (len > _numLights) {
+				if (len > _numLights)
 					len = _numLights;
-					// more lights than inputs:
-					// todo: sort lights on "brightness" from renderable
-				}
 
 				updateLights(context);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _lightsColorIndex, _lightColorData, _numLights*2);

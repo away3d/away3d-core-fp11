@@ -150,7 +150,6 @@ package away3d.materials.methods
 				lightProjection[3] = regCache.getFreeVertexConstant();
 				if (_lightMatrixsConstsIndex < 0) _lightMatrixsConstsIndex = lightProjection[0].index;
 
-				// todo: see if just temp+z is enough, so we might not even need whole matrices
 				code += AGAL.m44(temp.toString(), "vt0", lightProjection[0].toString());
 				code += AGAL.rcp(temp+".w", temp+".w");
 				code += AGAL.mul(temp+".xyz", temp+".xyz", temp+".w");
@@ -217,7 +216,6 @@ package away3d.materials.methods
 			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, contextIndex);
 			var projections : Vector.<Matrix3D> = _depthPass.getProjections(renderable);
 
-			// todo: put back multiple light support when possible?
 			for (var i : int = 0; i < 1; ++i) {
 				context.setTextureAt(_depthMapRegs[i], depthMaps[i]);
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _lightMatrixsConstsIndex+i*4, projections[i], true);

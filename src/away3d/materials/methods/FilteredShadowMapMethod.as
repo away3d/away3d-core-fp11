@@ -14,11 +14,6 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	/**
-	 * BasicDiffuseMethod provides the default shading method for Lambert (dot3) diffuse lighting.
-	 *
-	 * todo: provide abstract DiffuseMethodBase and rename this to DefaultDiffuseMethod
-	 */
 	public class FilteredShadowMapMethod extends ShadingMethodBase
 	{
 		private var _castingLight : LightBase;

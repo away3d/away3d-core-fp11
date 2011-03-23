@@ -5,6 +5,7 @@ package away3d.primitives
 	import away3d.core.base.Object3D;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
+	import away3d.debug.Debug;
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.MaterialBase;
 	import away3d.entities.Mesh;
@@ -70,8 +71,8 @@ package away3d.primitives
 			if (_geomDirty) updateGeometry();
 			if (_uvDirty) updateUVs();
 
-			// todo: add if debug check
-			trace("Warning: clone method of AbstractPrimitive subtype wasn't overridden. Cloned object will be typed as Mesh.");
+			if (Debug.active)
+				Debug.warning("clone method of AbstractPrimitive subtype wasn't overridden. Cloned object will be typed as Mesh.");
 
 			return super.clone();
 		}

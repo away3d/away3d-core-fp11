@@ -48,10 +48,8 @@ package away3d.lights.shadowmaps
 			_casterCollector.cleanUp();
 		}
 
-		// todo: move to shadow mapper class
 		override protected function updateDepthProjection(viewCamera : Camera3D) : void
 		{
-			// maybe try and fix this
 			var corners : Vector.<Number> = viewCamera.lens.frustumCorners;
 			var x : Number, y : Number, z : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number = Number.POSITIVE_INFINITY;

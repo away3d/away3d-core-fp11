@@ -302,7 +302,6 @@ package away3d.materials
 		 */
 		arcane function renderPass(index : uint, renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
 		{
-			// todo: select most important lights here
 			if (renderable.animationState)
 				renderable.animationState.setRenderState(context, contextIndex, _passes[index], renderable);
 

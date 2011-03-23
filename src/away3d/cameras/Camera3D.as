@@ -36,7 +36,7 @@ package away3d.cameras
 		}
 
 		// todo: no idea if this is correct. Also, there's no view port size knowledge, so normalized coords
-		public function unproject(mX:Number, mY:Number):Vector3D
+		public function unproject(mX : Number, mY : Number):Vector3D
 		{
 			return sceneTransform.transformVector(lens.unproject(mX, mY, 0));
 
