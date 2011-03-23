@@ -14,6 +14,7 @@ package away3d.containers
 
 	import flash.display.Sprite;
 	import flash.events.Event;
+	import flash.geom.Vector3D;
 	import flash.utils.getTimer;
 
 	use namespace arcane;
@@ -260,6 +261,11 @@ package away3d.containers
 		public function dispose() : void
 		{
 			_renderer.dispose();
+		}
+
+		public function unproject(mX : Number, mY : Number) : Vector3D
+		{
+			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height );
 		}
 
 		/**

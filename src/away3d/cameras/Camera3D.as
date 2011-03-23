@@ -20,8 +20,6 @@ package away3d.cameras
 		private var _viewProjectionInvalid : Boolean = true;
 		private var _viewProjection : Matrix3D = new Matrix3D();
 		private var _lens : LensBase;
-		private var _unprojection : Matrix3D = new Matrix3D();
-		private var _unprojectionInvalid : Boolean = true;
 
 		/**
 		 * Creates a new Camera3D object
@@ -40,15 +38,13 @@ package away3d.cameras
 		// todo: no idea if this is correct. Also, there's no view port size knowledge, so normalized coords
 		public function unproject(mX:Number, mY:Number):Vector3D
 		{
-			if (_unprojectionInvalid) {
-				_unprojection.copyFrom(_lens.matrix);
-				_unprojection.invert();
-				_unprojectionInvalid = false;
-			}
-			var vector : Vector3D = new Vector3D(mX, -mY, 0);
-			vector = _unprojection.transformVector(vector);
-			sceneTransform.transformVector(vector);
-			return vector;
+			return sceneTransform.transformVector(lens.unproject(mX, mY, 0));
+
+//			var vector : Vector3D = new Vector3D(mX, -mY, 0);
+//			vector = _unprojection.transformVector(vector);
+//			sceneTransform.transformVector(vector);
+//			return vector;
+
 		}
 
 		/**
@@ -110,7 +106,6 @@ package away3d.cameras
 		private function onLensUpdate() : void
 		{
 			_viewProjectionInvalid = true;
-			_unprojectionInvalid = true;
 		}
 	}
 }

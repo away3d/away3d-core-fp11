@@ -234,7 +234,7 @@ package away3d.primitives
 			target.updateIndexData(indices);
 		}
 
-		public function get shadowCaster() : Boolean
+		public function get castsShadows() : Boolean
 		{
 			return false;
 		}

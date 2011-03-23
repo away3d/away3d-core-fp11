@@ -90,6 +90,6 @@ package away3d.core.base
 		/**
 		 * Indicates whether the renderable can cast shadows
 		 */
-		function get shadowCaster() : Boolean;
+		function get castsShadows() : Boolean;
 	}
 }

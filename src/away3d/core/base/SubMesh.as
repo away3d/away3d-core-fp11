@@ -189,7 +189,6 @@ package away3d.core.base
 		 */
 		public function get mouseEnabled() : Boolean
 		{
-			// todo: also check if there's actually a mouse event registered
 			return _parentMesh.mouseEnabled;
 		}
 
@@ -201,10 +200,14 @@ package away3d.core.base
 			return _parentMesh.mouseDetails;
 		}
 
+		public function get castsShadows() : Boolean
+		{
+			return _parentMesh.castsShadows;
+		}
+
 		/**
 		 * A reference to the owning Mesh object
 		 *
-		 * todo: remove? seems unused
 		 * @private
 		 */
 		arcane function get parentMesh() : Mesh
@@ -215,11 +218,6 @@ package away3d.core.base
 		arcane function set parentMesh(value : Mesh) : void
 		{
 			_parentMesh = value;
-		}
-
-		public function get shadowCaster() : Boolean
-		{
-			return _parentMesh.castsShadows;
 		}
 	}
 }

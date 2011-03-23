@@ -175,7 +175,7 @@ package away3d.entities
 			return _animationState;
 		}
 
-		public function get shadowCaster() : Boolean
+		public function get castsShadows() : Boolean
 		{
 			return _shadowCaster;
 		}

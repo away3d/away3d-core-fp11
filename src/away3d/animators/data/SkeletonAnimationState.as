@@ -267,7 +267,6 @@ package away3d.animators.data
 		 * @param subGeom The subgeometry containing the weights and joint index data per vertex.
 		 * @param pass The material pass for which we need to transform the vertices
 		 *
-		 * todo: remove pass reference, but then always transform normals + tangents?
 		 * todo: we may be able to transform tangents more easily, similar to how it happens on gpu
 		 */
 		private function morphGeometry(subGeom : SkinnedSubGeometry) : void

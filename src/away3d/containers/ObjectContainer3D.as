@@ -17,8 +17,7 @@ package away3d.containers
 	 *
 	 * TODO: polycount updates
 	 * TODO: all the event-based stuff is not done (onDimensionsUpdate etc) Trying to avoid bubbling here :s
-	 * TODO: names not implemented yet (will be related too closely to a Library)
-	 * TODO: pivot stuff --> pass pivot point to appendRotation
+	 * TODO: names not implemented yet
 	 *
 	 */
 	public class ObjectContainer3D extends Object3D

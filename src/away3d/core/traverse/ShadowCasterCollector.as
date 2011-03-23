@@ -38,7 +38,7 @@ package away3d.core.traverse
 		 */
 		override public function applyRenderable(renderable : IRenderable) : void
 		{
-			if (renderable.shadowCaster)
+			if (renderable.castsShadows)
 				_opaqueRenderables[_numOpaques++] = renderable;
 		}
 

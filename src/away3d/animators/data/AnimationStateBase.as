@@ -10,8 +10,6 @@ package away3d.animators.data
 	 * AnimationStateBase provides an abstract base class for all animation states. This defines the actual state of the
 	 * animation data (such as the matrices to be used for skinning) for an entire Mesh. The AnimationController is the
 	 * class that inputs the values.
-	 *
-	 * todo ? this should have some update mechanism that assigns data to submeshes if necessary (fe: morph target assigns subgeoms)
 	 */
 	public class AnimationStateBase
 	{

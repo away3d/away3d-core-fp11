@@ -4,6 +4,7 @@ package away3d.cameras.lenses
 	import away3d.errors.AbstractMethodError;
 
 	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -21,8 +22,11 @@ package away3d.cameras.lenses
 		private var _matrixInvalid : Boolean = true;
 		protected var _frustumCorners : Vector.<Number> = new Vector.<Number>(8*3, true);
 
-		// todo: consider signals instead
+		// todo: consider signals instead, single callback is dirty
 		arcane var onMatrixUpdate : Function;
+
+		private var _unprojection : Matrix3D = new Matrix3D();
+		private var _unprojectionInvalid : Boolean = true;
 
 		/**
 		 * Creates a new LensBase object.
@@ -83,6 +87,28 @@ package away3d.cameras.lenses
 			invalidateMatrix();
 		}
 
+		public function unproject(mX:Number, mY:Number, mZ : Number):Vector3D
+		{
+			if (_unprojectionInvalid) {
+				_unprojection.copyFrom(matrix);
+				_unprojection.invert();
+				_unprojectionInvalid = false;
+			}
+
+			var v : Vector3D = new Vector3D(mX, -mY, mZ, 1.0);
+
+			v = _unprojection.transformVector(v);
+
+			var inv : Number = 1/v.w;
+
+            v.x *= inv;
+            v.y *= inv;
+            v.z *= inv;
+			v.w = 1.0;
+
+			return v;
+		}
+
 		/**
 		 * The aspect ratio (width/height) of the view. Set by the renderer.
 		 * @private
@@ -105,6 +131,7 @@ package away3d.cameras.lenses
 		protected function invalidateMatrix() : void
 		{
 			_matrixInvalid = true;
+			_unprojectionInvalid = true;
 		}
 
 		/**

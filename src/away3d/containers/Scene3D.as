@@ -19,8 +19,6 @@ package away3d.containers
 	 */
 	public class Scene3D
 	{
-		arcane var _bounds : AxisAlignedBoundingBox;
-
 		private var _sceneGraphRoot : ObjectContainer3D;
 		private var _partitions : Vector.<Partition3D>;
 
@@ -33,9 +31,6 @@ package away3d.containers
 			_sceneGraphRoot = new ObjectContainer3D();
 			_sceneGraphRoot.scene = this;
 			_sceneGraphRoot.partition = new Partition3D(new NodeBase());
-			_bounds = new AxisAlignedBoundingBox();
-			// todo: automatic scene bound updates?
-			_bounds.fromExtremes(-1000, -100, -1000, 1000, 1000, 1000);
 		}
 
 		/**

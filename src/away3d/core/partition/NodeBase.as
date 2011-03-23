@@ -92,8 +92,6 @@ package away3d.core.partition
 		 * @param traverser The traverser visiting the node.
 		 *
 		 * @see away3d.core.traverse.PartitionTraverser
-		 *
-		 * todo: do inline instead of calling methods?
 		 */
 		public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
