@@ -10,7 +10,9 @@ package away3d.materials.methods
 
     import flash.display.BitmapData;
     import flash.display.BitmapDataChannel;
-    import flash.display3D.Context3D;
+	import flash.display.Shader;
+	import flash.display.ShaderJob;
+	import flash.display3D.Context3D;
     import flash.display3D.Context3DProgramType;
     import flash.geom.Point;
 
@@ -26,6 +28,9 @@ package away3d.materials.methods
         private var _tileRegisterIndex : int;
         private var _splatTextureIndex : int;
         private var _blendingTextureIndex : int;
+
+		[Embed(source="../../pbks/NormalizeSplats.pbj", mimeType="application/octet-stream")]
+		private var NormalizeKernel : Class;
 
         public function TerrainDiffuseMethod()
         {
@@ -60,6 +65,16 @@ package away3d.materials.methods
             _splats[index].bitmapData = texture;
             _tileData[index] = tile;
         }
+
+		public function normalizeSplats() : void
+		{
+			if (_numSplattingLayers <= 1) return;
+			var shader : Shader = new Shader(new NormalizeKernel());
+			shader.data.numLayers = _numSplattingLayers;
+			shader.data.src.input = _blendData;
+			new ShaderJob(shader, _blendData).start(true);
+			_blendingTexture.invalidateContent();
+		}
 
 
         arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String

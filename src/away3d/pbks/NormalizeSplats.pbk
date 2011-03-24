@@ -1,0 +1,24 @@
+<languageVersion : 1.0;>
+
+kernel NormalizeSplats
+<   namespace : "com.away3d";
+    vendor : "Away3D";
+    version : 1;
+    description : "Normalizes the content of splat alpha maps for up to 3 layers.";
+>
+{
+    input image3 src;
+    output pixel3 dst;
+    
+    parameter int numLayers <   minValue: 1;
+                                maxValue: 3;
+                                defaultValue: 3;
+                            >;
+
+    void evaluatePixel()
+    {
+        dst = sampleNearest(src, outCoord());
+        if (numLayers >= 3) dst.y += dst.z;
+        if (numLayers >= 2) dst.x += dst.y;
+    }
+}
