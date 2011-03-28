@@ -143,6 +143,9 @@ package away3d.core.render
 
 		arcane function set stage3DProxy(value : Stage3DProxy) : void
 		{
+			if (value == _stage3DProxy)
+				return;
+			
 			if (!value) {
 				if (_stage3DProxy) _stage3DProxy.removeEventListener(Event.CONTEXT3D_CREATE, onContextUpdate);
 				_stage3DProxy = null;

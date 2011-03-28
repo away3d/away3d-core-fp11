@@ -9,9 +9,8 @@ package away3d.containers
 	import away3d.core.render.HitTestRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
-
 	import away3d.materials.MaterialBase;
-
+	
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Vector3D;
@@ -41,7 +40,8 @@ package away3d.containers
 
 		private var _renderer : RendererBase;
 		private var _hitTestRenderer : HitTestRenderer;
-
+		public var _addedToStage:Boolean;
+		
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
 			super();
@@ -284,6 +284,11 @@ package away3d.containers
 		 */
 		private function onAddedToStage(event : Event) : void
 		{
+			if (_addedToStage)
+				return;
+			
+			_addedToStage = true;
+			
 			_stage3DManager = Stage3DManager.getInstance(stage);
 
 			// TO DO: have a stage3D manager?
@@ -301,6 +306,11 @@ package away3d.containers
 		 */
 		private function onRemovedFromStage(event : Event) : void
 		{
+			if (!_addedToStage)
+				return;
+			
+			_addedToStage = false;
+			
 			_renderer.stage3DProxy.dispose();
 			_hitTestRenderer.dispose();
 			_hitManager.dispose();
