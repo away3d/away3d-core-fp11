@@ -5,19 +5,17 @@ package away3d.primitives {
 	 */
 	public class Cone extends Cylinder {
 		
-		private var _radius:Number;
-		
 		/**
 		 * The radius of the bottom end of the cone.
 		 */
 		public function get radius() : Number
 		{
-			return _radius;
+			return _bottomRadius;
 		}
 		
 		public function set radius(value : Number) : void
 		{
-			_radius = value;
+			_bottomRadius = value;
 			invalidateGeometry();
 		}
 
@@ -33,8 +31,6 @@ package away3d.primitives {
 		public function Cone(material : MaterialBase = null, radius : Number = 50, height : Number = 100, segmentsW : uint = 16, segmentsH : uint = 1, closed:Boolean = true, yUp : Boolean = true)
 		{
 			super(material, 0, radius, height, segmentsW, segmentsH, false, closed, yUp);
-			
-			_radius = radius;
 		}
 	}
 }
