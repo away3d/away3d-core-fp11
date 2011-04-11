@@ -18,7 +18,7 @@ package away3d.materials.methods
 		arcane var _modulateMethod : Function;
 
 		/**
-		 * Create a new ShadingMethodBase object.
+		 * Create a new ShadingMethodBase ob	ject.
 		 * @param needsNormals Defines whether or not the method requires normals.
 		 * @param needsView Defines whether or not the method requires the view direction.
 		 */

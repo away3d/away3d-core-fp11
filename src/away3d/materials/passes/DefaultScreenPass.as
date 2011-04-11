@@ -363,7 +363,8 @@ package away3d.materials.passes
 			if (_colorTransformMethod) _colorTransformMethod.deactivate(context);
 
 			for (var i : uint = 0; i < len; ++i){
-				if (_methods[i]) _methods[i].deactivate(context);}
+				if (_methods[i]) _methods[i].deactivate(context);
+			}
 
 			if (_normalMapIndex >= 0) context.setTextureAt(_normalMapIndex, null);
 		}

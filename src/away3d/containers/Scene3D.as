@@ -1,7 +1,6 @@
 package away3d.containers
 {
 	import away3d.arcane;
-	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.core.partition.Partition3D;
 	import away3d.core.partition.NodeBase;

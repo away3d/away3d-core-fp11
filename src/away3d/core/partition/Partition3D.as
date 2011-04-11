@@ -47,7 +47,14 @@ package away3d.core.partition
 		{
 			var node : EntityNode = entity.getEntityPartitionNode();
 			// already marked to be updated
-			if (node._updateQueueNext) return;
+			var t : EntityNode = _updatedEntityList;
+
+			// if already updated
+			while (t) {
+				if (node == t) return;
+				t = t._updateQueueNext;
+			}
+
 			node._updateQueueNext = _updatedEntityList;
 			_updatedEntityList = node;
 			_updatesMade = true;
@@ -61,20 +68,21 @@ package away3d.core.partition
 		{
 			var node : EntityNode = entity.getEntityPartitionNode();
 			var t : EntityNode;
-			if (node) node.removeFromParent();
+
+			node.removeFromParent();
 
 			// remove from update list if it's in
-			if (node._updateQueueNext) {
-				if (node == _updatedEntityList)
-					_updatedEntityList = node._updateQueueNext;
-				else {
-					t = _updatedEntityList;
-					while (t && t._updateQueueNext != node) t = t._updateQueueNext;
-					if (t) t._updateQueueNext = node._updateQueueNext;
-				}
-
-				node._updateQueueNext = null;
+			if (node == _updatedEntityList)
+				_updatedEntityList = node._updateQueueNext;
+			else {
+				t = _updatedEntityList;
+				while (t && t._updateQueueNext != node)
+					t = t._updateQueueNext;
+				if (t)
+					t._updateQueueNext = node._updateQueueNext;
 			}
+
+			node._updateQueueNext = null;
 		}
 
 		/**
