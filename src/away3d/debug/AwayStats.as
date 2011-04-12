@@ -201,7 +201,7 @@ package away3d.debug
 			_initDiagrams();
 			_initInteraction();
 			
-			_reset();
+			reset();
 			_redrawWindow();
 			
 			addEventListener(Event.ADDED_TO_STAGE, _onAddedToStage);
@@ -666,7 +666,7 @@ package away3d.debug
 		
 		
 		
-		private function _reset() : void
+		public function reset() : void
 		{
 			var i : int;
 		
@@ -832,7 +832,7 @@ package away3d.debug
 		
 		private function _onCountersClick_reset(ev : MouseEvent) : void
 		{
-			_reset();
+			reset();
 		}
 		
 		private function _onMinMaxBtnClick(ev : MouseEvent) : void
