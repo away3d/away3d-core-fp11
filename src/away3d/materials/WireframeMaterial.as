@@ -1,6 +1,6 @@
 package away3d.materials {
 	import away3d.arcane;
-	import away3d.materials.passes.WireFramePass;
+	import away3d.materials.passes.WireframePass;
 
 	/**
 	 * @author jerome BIREMBAUT  Twitter: Seraf_NSS
@@ -16,7 +16,7 @@ package away3d.materials {
 	public class WireframeMaterial extends MaterialBase
 	{
 		//private var _screenPass : DefaultScreenPass;
-		private var _screenPass1 : WireFramePass;
+		private var _screenPass1 : WireframePass;
 
 		/**
 		 * Creates a new WireframeMaterial object.
@@ -35,7 +35,7 @@ package away3d.materials {
 			this.bothSides=true;
 			
 			
-			addPass(_screenPass1 = new WireFramePass(w,h));
+			addPass(_screenPass1 = new WireframePass(w,h));
 			_screenPass1.material = this;
 			//addPass(_screenPass = new DefaultScreenPass());
 			//_screenPass.material = this;
