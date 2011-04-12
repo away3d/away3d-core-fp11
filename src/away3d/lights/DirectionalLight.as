@@ -11,6 +11,8 @@ package away3d.lights
 
 	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
+	import away3d.materials.MaterialBase;
+	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -109,19 +111,19 @@ package away3d.lights
 			super.invalidateSceneTransform();
 		}
 
-		arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement) : String
+		arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
 		{
-			return super.getVertexCode(regCache, globalPositionRegister);
+			return super.getVertexCode(regCache, globalPositionRegister, pass);
 		}
 
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
 		{
 			_fragmentDirReg = regCache.getFreeFragmentConstant();
 			_shaderConstantIndex = _fragmentDirReg.index;
 			return "";
 		}
 
-		arcane override function setRenderState(context : Context3D, inputIndex : int) : void
+		arcane override function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
 		{
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, inputIndex, _directionData, 1);
 		}

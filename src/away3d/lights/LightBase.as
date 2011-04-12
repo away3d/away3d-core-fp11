@@ -4,6 +4,8 @@ package away3d.lights
 	import away3d.core.base.IRenderable;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
+	import away3d.materials.MaterialBase;
+	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.core.partition.EntityNode;
@@ -164,17 +166,17 @@ package away3d.lights
 			_diffuseB = _colorB*_diffuse;
 		}
 
-		arcane function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement) : String
+		arcane function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
 		{
 			return "";
 		}
 
-		arcane function getFragmentCode(regCache : ShaderRegisterCache) : String
+		arcane function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
 		{
 			return "";
 		}
 
-		arcane function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement, pass : MaterialPassBase) : String
 		{
 			return "";
 		}
@@ -189,7 +191,7 @@ package away3d.lights
 			return _shaderConstantIndex;
 		}
 
-		arcane function setRenderState(context : Context3D, inputIndex : int) : void
+		arcane function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
 		{
 
 		}

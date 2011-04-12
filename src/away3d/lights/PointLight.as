@@ -6,6 +6,9 @@ package away3d.lights
 	import away3d.core.base.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
 
+	import away3d.materials.ColorMaterial;
+	import away3d.materials.MaterialBase;
+	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 
@@ -16,6 +19,7 @@ package away3d.lights
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
+	import flash.utils.Dictionary;
 
 	use namespace arcane;
 
@@ -31,7 +35,7 @@ package away3d.lights
 		private var _attenuationData : Vector.<Number>;
 		private var _vertexPosReg : ShaderRegisterElement;
 		private var _varyingReg : ShaderRegisterElement;
-		private var _attenuationIndex : int;
+		private var _attenuationIndices : Dictionary;
 		private var _attenuationRegister : ShaderRegisterElement;
 
 		/**
@@ -41,6 +45,7 @@ package away3d.lights
 		{
 			super();
 			_attenuationData = Vector.<Number>([_radius, 1/(_fallOff-_radius), 0, 1]);
+			_attenuationIndices = new Dictionary(true);
 		}
 
 		/**
@@ -162,7 +167,7 @@ package away3d.lights
 		}
 
 
-		arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement) : String
+		arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
 		{
 			_vertexPosReg = regCache.getFreeVertexConstant();
 			_varyingReg = regCache.getFreeVarying();
@@ -171,16 +176,17 @@ package away3d.lights
 			return "sub "+_varyingReg.toString()+", "+_vertexPosReg.toString()+", "+  globalPositionRegister.toString()+"\n";
 		}
 
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
 		{
 			_attenuationRegister = regCache.getFreeFragmentConstant();
-			_attenuationIndex = _attenuationRegister.index;
+			// setting this causes the material bug
+			_attenuationIndices[pass] = _attenuationRegister.index;
 			_fragmentDirReg = _varyingReg;
 			return 	"";
 		}
 
 
-		arcane override function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement, pass : MaterialPassBase) : String
 		{
 			var code : String = "";
 
@@ -198,10 +204,10 @@ package away3d.lights
 			return code;
 		}
 
-		arcane override function setRenderState(context : Context3D, inputIndex : int) : void
+		arcane override function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
 		{
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, inputIndex, _positionData, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _attenuationIndex, _attenuationData, 1);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _attenuationIndices[pass], _attenuationData, 1);
 		}
 	}
 }

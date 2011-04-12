@@ -74,7 +74,7 @@ package away3d.containers
 			_renderer.viewPortY = _y;
 			_renderer.backBufferWidth = _width;
 			_renderer.backBufferHeight = _height;
-			_renderer.viewPortHeight = _width*_scaleX;
+			_renderer.viewPortWidth = _width*_scaleX;
 			_renderer.viewPortHeight = _height*_scaleY;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;

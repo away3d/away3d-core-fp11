@@ -5,6 +5,7 @@ package away3d.materials.passes
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.lights.LightBase;
+	import away3d.materials.ColorMaterial;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
@@ -498,7 +499,6 @@ package away3d.materials.passes
 
 			_numUsedVertexConstants = _registerCache.numUsedVertexConstants;
 			_numUsedStreams = _registerCache.numUsedStreams;
-
 		}
 
 		private function setMethodProps(method : ShadingMethodBase) : void
@@ -815,8 +815,9 @@ package away3d.materials.passes
 			for (var i : int = 0; i < _numLights; ++i) {
 				light = _lights[i];
 
-				_vertexCode += light.getVertexCode(_registerCache, _globalPositionReg);
-				_fragmentCode += light.getFragmentCode(_registerCache);
+				_vertexCode += light.getVertexCode(_registerCache, _globalPositionReg, this);
+				_fragmentCode += light.getFragmentCode(_registerCache, this);
+
 				_lightDirFragmentRegs[i] = light.fragmentDirectionRegister;
 				_lightInputIndices[i] = light.shaderConstantIndex;
 
@@ -866,7 +867,7 @@ package away3d.materials.passes
 					_registerCache.addFragmentTempUsages(lightDirReg, 1);
 					_fragmentCode += AGAL.normalize(lightDirReg+".xyz", _lightDirFragmentRegs[i]+".xyz");
 //					_fragmentCode += AGAL.mov(lightDirReg+".w", _lightDirFragmentRegs[i]+".w");
-					_fragmentCode += light.getAttenuationCode(_registerCache, lightDirReg);
+					_fragmentCode += light.getAttenuationCode(_registerCache, lightDirReg, this);
 				}
 				else lightDirReg = _lightDirFragmentRegs[i];
 
@@ -948,7 +949,7 @@ package away3d.materials.passes
 			// update vertex data
 			for (i = 0; i < _numLights; ++i) {
 				light = _lights[i];
-				light.setRenderState(context, _lightInputIndices[i]);
+				light.setRenderState(context, _lightInputIndices[i], this);
 
 				_lightColorData[k++] = light._diffuseR;
 				_lightColorData[k++] = light._diffuseG;
