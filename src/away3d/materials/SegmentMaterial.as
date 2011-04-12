@@ -1,6 +1,6 @@
 package away3d.materials {
 	import away3d.arcane;
-	import away3d.materials.passes.WireframePass;
+	import away3d.materials.passes.SegmentPass;
 
 	/**
 	 * @author jerome BIREMBAUT  Twitter: Seraf_NSS
@@ -13,17 +13,17 @@ package away3d.materials {
 	 *
 	 * @see away3d.entities.Lines
 	 */
-	public class WireframeMaterial extends MaterialBase
+	public class SegmentMaterial extends MaterialBase
 	{
 		//private var _screenPass : DefaultScreenPass;
-		private var _screenPass1 : WireframePass;
+		private var _screenPass1 : SegmentPass;
 
 		/**
 		 * Creates a new WireframeMaterial object.
 		  * @param color The material's diffuse surface color.
 		 * @param alpha The material's surface alpha.
 		 */
-		public function WireframeMaterial(w:int=1000,h:int=700){
+		public function SegmentMaterial(w:int=1000,h:int=700){
 			super();
 			/*super(color,alpha);
 			_wirePass = new WireFramePass();
@@ -35,7 +35,7 @@ package away3d.materials {
 			this.bothSides=true;
 			
 			
-			addPass(_screenPass1 = new WireframePass(w,h));
+			addPass(_screenPass1 = new SegmentPass(w,h));
 			_screenPass1.material = this;
 			//addPass(_screenPass = new DefaultScreenPass());
 			//_screenPass.material = this;
