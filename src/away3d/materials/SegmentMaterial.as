@@ -15,46 +15,17 @@ package away3d.materials {
 	 */
 	public class SegmentMaterial extends MaterialBase
 	{
-		//private var _screenPass : DefaultScreenPass;
-		private var _screenPass1 : SegmentPass;
+		private var _screenPass : SegmentPass;
 
 		/**
 		 * Creates a new WireframeMaterial object.
-		  * @param color The material's diffuse surface color.
-		 * @param alpha The material's surface alpha.
 		 */
-		public function SegmentMaterial(w:int=1000,h:int=700){
+		public function SegmentMaterial(thickness : Number = 1.25){
 			super();
-			/*super(color,alpha);
-			_wirePass = new WireFramePass();
-			
-			addPass(_wirePass);	
-			Logger.log("1");
-			_wirePass.material = this;
-			Logger.log("2");*/
-			this.bothSides=true;
-			
-			
-			addPass(_screenPass1 = new SegmentPass(w,h));
-			_screenPass1.material = this;
-			//addPass(_screenPass = new DefaultScreenPass());
-			//_screenPass.material = this;
-			
-			
-			//this.color = color;
-		}
-		/*	
-		public function get color() : uint
-		{
-			return _screenPass.diffuseMethod.diffuseColor;
-		}
 
-		public function set color(value : uint) : void
-		{
-			_screenPass.diffuseMethod.diffuseColor = value;
+			bothSides = true;
+			addPass(_screenPass = new SegmentPass(thickness));
+			_screenPass.material = this;
 		}
-		*/
-
-		
 	}
 }
