@@ -144,17 +144,17 @@ package away3d.core.render
 			return _localHitPosition;
 		}
 
-		/**
-		 * Unsupported
-		 * @private
-		 */
-		arcane override function set viewPortX(value : Number) : void {}
+//		/**
+//		 * Unsupported
+//		 * @private
+//		 */
+//		arcane override function set viewPortX(value : Number) : void {}
 
-		/**
-		 * Unsupported
-		 * @private
-		 */
-		arcane override function set viewPortY(value : Number) : void {}
+//		/**
+//		 * Unsupported
+//		 * @private
+//		 */
+//		arcane override function set viewPortY(value : Number) : void {}
 
 		/**
 		 * @inheritDoc

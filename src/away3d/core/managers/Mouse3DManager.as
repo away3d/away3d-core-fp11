@@ -11,6 +11,7 @@ package away3d.core.managers
 
 	import flash.display.Stage;
 	import flash.events.MouseEvent;
+	import flash.geom.Rectangle;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -75,11 +76,20 @@ package away3d.core.managers
 			_stage.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		}
 
+		private function mouseInView() : Boolean
+		{
+			var mx : Number = _view.mouseX;
+			var my : Number = _view.mouseY;
+
+			return mx >= 0 && my >= 0 && mx < _view.width && my < _view.height;
+		}
+
 		/**
 		 * Called when the mouse clicks on the stage.
 		 */
 		private function onClick(event : MouseEvent) : void
 		{
+			if (!mouseInView()) return;
 			// todo: implement invalidation and only rerender if view is invalid?
 			getObjectHitData();
 			if (_activeRenderable) dispatch(_mouseClick, event, _activeRenderable);
@@ -90,6 +100,7 @@ package away3d.core.managers
 		 */
 		private function onDoubleClick(event : MouseEvent) : void
 		{
+			if (!mouseInView()) return;
 			getObjectHitData();
 			if (_activeRenderable) dispatch(_mouseDoubleClick, event, _activeRenderable);
 		}
@@ -99,6 +110,7 @@ package away3d.core.managers
 		 */
 		private function onMouseDown(event : MouseEvent) : void
 		{
+			if (!mouseInView()) return;
 			getObjectHitData();
 			if (_activeRenderable) dispatch(_mouseDown, event, _activeRenderable);
 		}
@@ -108,6 +120,7 @@ package away3d.core.managers
 		 */
 		private function onMouseMove(event : MouseEvent) : void
 		{
+			if (!mouseInView()) return;
 			getObjectHitData();
 
 			if (_activeObject == _previousActiveObject) {
@@ -124,6 +137,7 @@ package away3d.core.managers
 		 */
 		private function onMouseUp(event : MouseEvent) : void
 		{
+			if (!mouseInView()) return;
 			getObjectHitData();
 			dispatch(_mouseUp, event, _activeRenderable);
 		}
@@ -133,6 +147,7 @@ package away3d.core.managers
 		 */
 		private function onMouseWheel(event : MouseEvent) : void
 		{
+			if (!mouseInView()) return;
 			getObjectHitData();
 			if (_activeRenderable) dispatch(_mouseWheel, event, _activeRenderable);
 		}
@@ -150,7 +165,7 @@ package away3d.core.managers
 			// todo: would it be faster to run a custom ray-intersect collector instead of using entity collector's data?
 			// todo: shouldn't render it every time, only when invalidated (on move or view render)
 			if (collector.numMouseEnableds > 0) {
-				_hitTestRenderer.update(_stage.mouseX/_stage.stageWidth, _stage.mouseY/_stage.stageHeight, collector);
+				_hitTestRenderer.update((_view.mouseX-_view.x)/_view.width, (_view.mouseY-_view.y)/_view.height, collector);
 				_activeRenderable = _hitTestRenderer.hitRenderable;
 				_activeObject = (_activeRenderable && _activeRenderable.mouseEnabled)? _activeRenderable.sourceEntity : null;
 			}

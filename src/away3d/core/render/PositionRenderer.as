@@ -3,6 +3,8 @@ package away3d.core.render
 	import away3d.core.base.IRenderable;
 	import away3d.core.traverse.EntityCollector;
 
+	import away3d.debug.Debug;
+
 	import com.adobe.utils.AGALMiniAssembler;
 
 	import flash.display3D.Context3D;
@@ -85,8 +87,8 @@ package away3d.core.render
 							"mul v0, vt0, vt1.x	\n";
 			fragmentCode = "mov oc, v0\n";
 
-			_program3D.upload(	new AGALMiniAssembler().assemble(Context3DProgramType.VERTEX, vertexCode),
-								new AGALMiniAssembler().assemble(Context3DProgramType.FRAGMENT, fragmentCode));
+			_program3D.upload(	new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode),
+								new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, fragmentCode));
 		}
 	}
 }

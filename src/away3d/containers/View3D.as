@@ -9,9 +9,14 @@ package away3d.containers
 	import away3d.core.render.HitTestRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.filters.Filter3DBase;
+	import away3d.filters.Filter3DBase;
+	import away3d.filters.Filter3DBase;
 	import away3d.materials.MaterialBase;
 	
 	import flash.display.Sprite;
+	import flash.display3D.Context3D;
+	import flash.display3D.textures.Texture;
 	import flash.events.Event;
 	import flash.geom.Vector3D;
 	import flash.utils.getTimer;
@@ -41,6 +46,8 @@ package away3d.containers
 		private var _renderer : RendererBase;
 		private var _hitTestRenderer : HitTestRenderer;
 		public var _addedToStage:Boolean;
+
+		private var _filters3d : Array;
 		
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
@@ -54,6 +61,34 @@ package away3d.containers
 
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage, false, 0, true);
+		}
+
+		/**
+		 * Not supported. Use filters3d instead.
+		 */
+		override public function get filters() : Array
+		{
+			throw new Error("filters is not supported in View3D. Use filters3d instead.");
+			return super.filters;
+		}
+
+		/**
+		 * Not supported. Use filters3d instead.
+		 */
+		override public function set filters(value : Array) : void
+		{
+			throw new Error("filters is not supported in View3D. Use filters3d instead.");
+		}
+
+
+		public function get filters3d() : Array
+		{
+			return _filters3d;
+		}
+
+		public function set filters3d(value : Array) : void
+		{
+			_filters3d = value;
 		}
 
 		/**
@@ -196,6 +231,7 @@ package away3d.containers
 
 		override public function set x(value : Number) : void
 		{
+			_hitTestRenderer.viewPortX = value;
 			_renderer.viewPortX = value;
 			_x = value;
 		}
@@ -210,6 +246,7 @@ package away3d.containers
 
 		override public function set y(value : Number) : void
 		{
+			_hitTestRenderer.viewPortY = value;
 			_renderer.viewPortY = value;
 			_y = value;
 		}
@@ -241,6 +278,10 @@ package away3d.containers
 		public function render() : void
 		{
 			var time : Number = getTimer();
+			var targetTexture : Texture;
+			var numFilters : uint = _filters3d? _filters3d.length : 0;
+			var context : Context3D = _renderer.context;
+
 			if (_time == 0) _time = time;
 			_deltaTime = time - _time;
 			_time = time;
@@ -251,7 +292,23 @@ package away3d.containers
 			_camera.lens.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
 			_scene.traversePartitions(_entityCollector);
-			_renderer.render(_entityCollector);
+
+			if (numFilters > 0 && context) {
+				var nextFilter : Filter3DBase;
+				var filter : Filter3DBase = Filter3DBase(_filters3d[0]);
+				targetTexture = filter.getInputTexture(context, this);
+				_renderer.render(_entityCollector, targetTexture);
+
+				for (var i : uint = 1; i <= numFilters; ++i) {
+					nextFilter = i < numFilters? Filter3DBase(_filters3d[i]) : null;
+					filter.render(context, nextFilter? nextFilter.getInputTexture(context, this) : null);
+					filter = nextFilter;
+				}
+				context.present();
+			}
+			else
+				_renderer.render(_entityCollector);
+
 			_entityCollector.cleanUp();
 		}
 

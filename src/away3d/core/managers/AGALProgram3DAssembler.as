@@ -2,6 +2,7 @@ package away3d.core.managers
 {
 	import away3d.arcane;
 	import away3d.animators.data.AnimationBase;
+	import away3d.debug.Debug;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import com.adobe.utils.AGALMiniAssembler;
@@ -48,12 +49,12 @@ package away3d.core.managers
 			var materialFragmentCode : String = pass.getFragmentCode();
 			var projectionVertexCode : String = getProjectionCode(targetRegisters[uint(0)], pass.getProjectedTargetRegister(), polyOffsetReg, targetRegisters.length > 1? targetRegisters[1] : null);
 
-			trace (animationVertexCode+projectionVertexCode+materialVertexCode);
-			trace ("---");
-			trace (materialFragmentCode);
-			trace ("---");
-			var vertexCode : ByteArray = new AGALMiniAssembler().assemble(Context3DProgramType.VERTEX, animationVertexCode+projectionVertexCode+materialVertexCode);
-			var fragmentCode : ByteArray = new AGALMiniAssembler().assemble(Context3DProgramType.FRAGMENT, materialFragmentCode);
+//			trace (animationVertexCode+projectionVertexCode+materialVertexCode);
+//			trace ("---");
+//			trace (materialFragmentCode);
+//			trace ("---");
+			var vertexCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, animationVertexCode+projectionVertexCode+materialVertexCode);
+			var fragmentCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, materialFragmentCode);
 			program.upload(vertexCode, fragmentCode);
 		}
 
