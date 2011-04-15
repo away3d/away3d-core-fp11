@@ -4,6 +4,7 @@ package away3d.filters{
 
 	import com.adobe.utils.AGALMiniAssembler;
 
+	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
@@ -32,6 +33,7 @@ package away3d.filters{
 		{
 			var w : int = _textureWidth;
 			var h : int = _textureHeight;
+			var dummy : BitmapData;
 
 			super.initTextures(context, view);
 
@@ -45,6 +47,11 @@ package away3d.filters{
 			_accumTexture2 = context.createTexture(_textureWidth, _textureHeight, Context3DTextureFormat.BGRA, true);
 			_sourceAccum = _accumTexture1;
 			_dstAccum = _accumTexture2;
+
+			dummy = new BitmapData(_textureWidth, _textureHeight, false, 0);
+			_accumTexture1.uploadFromBitmapData(dummy);
+			_accumTexture2.uploadFromBitmapData(dummy);
+			dummy.dispose();
 		}
 
 		public function get strength() : Number
