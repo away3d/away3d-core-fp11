@@ -11,7 +11,7 @@ package away3d.filters{
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.Texture;
 
-	public class MotionBlurFilter extends Filter3DBase
+	public class MotionBlurFilter3D extends Filter3DBase
 	{
 		private var _blurFilter : Program3D;
 		private var _copyProgram3D : Program3D;
@@ -22,7 +22,7 @@ package away3d.filters{
 		private var _sourceAccum : Texture;
 		private var _dstAccum : Texture;
 
-		public function MotionBlurFilter(strength : Number = .65)
+		public function MotionBlurFilter3D(strength : Number = .65)
 		{
 			_data = new Vector.<Number>(4, true);
 			this.strength = strength;
