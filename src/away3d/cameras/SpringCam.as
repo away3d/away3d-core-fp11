@@ -2,31 +2,13 @@
 {
   import away3d.cameras.Camera3D;
   import away3d.cameras.lenses.LensBase;
-  import away3d.containers.ObjectContainer3D;
-  import away3d.containers.Scene3D;
-  import away3d.containers.View3D;
-  import away3d.core.base.Geometry;
-  import away3d.core.base.IMaterialOwner;
-  import away3d.core.base.IRenderable;
   import away3d.core.base.Object3D;
-  import away3d.core.base.SkinnedSubGeometry;
-  import away3d.core.base.SubGeometry;
-  import away3d.core.base.SubMesh;
-  import flash.geom.ColorTransform;
-  import flash.geom.Matrix;
   import flash.geom.Matrix3D;
-  import flash.geom.Orientation3D;
-  import flash.geom.PerspectiveProjection;
-  import flash.geom.Point;
-  import flash.geom.Rectangle;
-  import flash.geom.Transform;
-  import flash.geom.Utils3D;
   import flash.geom.Vector3D;
   
-  
-	/** b at turbulent dot ca - http://agit8.turbulent.ca 
-   * v1 - 2009-01-21
-   * v2 - 2011-03-06 Ringo - http://www.ringo.nl
+	/**  
+   * v1 - 2009-01-21 b at turbulent dot ca - http://agit8.turbulent.ca
+   * v2 - 2011-03-06 Ringo - http://www.ringo.nl/en/
    **/
    
   /**
