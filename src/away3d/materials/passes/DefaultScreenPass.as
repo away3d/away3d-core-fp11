@@ -6,6 +6,7 @@ package away3d.materials.passes
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.lights.LightBase;
 	import away3d.materials.ColorMaterial;
+	import away3d.materials.MaterialBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
@@ -93,9 +94,10 @@ package away3d.materials.passes
 		/**
 		 * Creates a new DefaultScreenPass objects.
 		 */
-		public function DefaultScreenPass()
+		public function DefaultScreenPass(material : MaterialBase)
 		{
 			super();
+			_material = material;
 			_registerCache = new ShaderRegisterCache();
 			_registerCache.vertexConstantOffset = 4;
 			_registerCache.vertexAttributesOffset = 1;
@@ -437,6 +439,7 @@ package away3d.materials.passes
 			for (var i : uint = 0; i < _methods.length; ++i) {
 				addPasses(_methods[i].passes);
 			}
+			_material.invalidateDepthShaderProgram();
 		}
 
 		/**
@@ -529,9 +532,8 @@ package away3d.materials.passes
 			if (_specularMethod) setMethodRegs(_specularMethod);
 			if (_colorTransformMethod) setMethodRegs(_colorTransformMethod);
 
-			for (var i : uint = 0; i < _methods.length; ++i) {
+			for (var i : uint = 0; i < _methods.length; ++i)
 				setMethodRegs(_methods[i]);
-			}
 
 			if (_numLights > 0) compileLightDirCode();
 

@@ -267,7 +267,7 @@ package away3d.materials.passes
 		 */
 		arcane function invalidateShaderProgram() : void
 		{
-			for (var i : int = 0; i < 8; ++i)
+			for (var i : uint = 0; i < 8; ++i)
 				_programInvalids[i] = true;
 		}
 
@@ -278,8 +278,7 @@ package away3d.materials.passes
 		 */
 		protected function updateProgram(context : Context3D, contextIndex : uint, polyOffsetReg : String = null) : void
 		{
-			var assembler : AGALProgram3DAssembler = AGALProgram3DAssembler.instance;
-			assembler.assemble(context, this, _animation, _program3Ds[contextIndex], polyOffsetReg);
+			AGALProgram3DAssembler.instance.assemble(context, this, _animation, _program3Ds[contextIndex], polyOffsetReg);
 		}
 
 		/**

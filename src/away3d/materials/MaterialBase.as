@@ -7,6 +7,7 @@ package away3d.materials
 	import away3d.core.base.IRenderable;
 	import away3d.lights.LightBase;
 	import away3d.loading.IResource;
+	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display.BitmapData;
@@ -57,6 +58,7 @@ package away3d.materials
 		private var _lights : Array;
 
 		private var _mipmapBitmap : BitmapData;
+		private var _depthPass : DepthMapPass;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -67,6 +69,9 @@ package away3d.materials
 			_materialLibrary.registerMaterial(this);
 			_owners = new Vector.<IMaterialOwner>();
 			_passes = new Vector.<MaterialPassBase>();
+			_depthPass = new DepthMapPass();
+
+			invalidateDepthShaderProgram();
 		}
 
 		public function get lights() : Array
@@ -141,9 +146,15 @@ package away3d.materials
 		 */
 		public function dispose(deep : Boolean) : void
 		{
+			var i : uint;
+
 			_materialLibrary.unregisterMaterial(this);
-			for (var i : int = 0; i < _numPasses; ++i) _passes[i].dispose(deep);
+
+			for (i = 0; i < _numPasses; ++i) _passes[i].dispose(deep);
+
 			if (_mipmapBitmap) _mipmapBitmap.dispose();
+
+			_depthPass.dispose(deep);
 		}
 
 		/**
@@ -263,6 +274,24 @@ package away3d.materials
 			return _numPasses;
 		}
 
+		arcane function activateForDepth(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		{
+			_depthPass.activate(context, contextIndex, camera);
+		}
+
+		arcane function deactivateForDepth(context : Context3D) : void
+		{
+			_depthPass.deactivate(context);
+		}
+
+		arcane function renderDepth(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		{
+			if (renderable.animationState)
+				renderable.animationState.setRenderState(context, contextIndex, _depthPass, renderable);
+
+			_depthPass.render(renderable, context, contextIndex, camera);
+		}
+
 		/**
 		 * Sets the render state for a pass that is independent of the rendered object.
 		 * @param index The index of the pass to activate.
@@ -332,6 +361,7 @@ package away3d.materials
 				_animation = owner.animation;
 				for (var i : int = 0; i < _numPasses; ++i)
 					_passes[i].animation = _animation;
+				_depthPass.animation = _animation;
 			}
 
 			_owners.push(owner);
@@ -383,6 +413,14 @@ package away3d.materials
 		arcane function deactivate(context : Context3D) : void
 		{
 			_passes[_numPasses-1].deactivate(context);
+		}
+
+		/**
+		 * Marks the depth shader program as invalid, so it will be recompiled before the next render.
+		 */
+		arcane function invalidateDepthShaderProgram() : void
+		{
+			_depthPass.invalidateShaderProgram();
 		}
 
 		/**

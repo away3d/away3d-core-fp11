@@ -1,8 +1,11 @@
 package away3d.core.render
 {
+	import away3d.arcane;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.sort.DepthSorter;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.materials.MaterialBase;
 	import away3d.materials.utils.AGAL;
 
 	import com.adobe.utils.AGALMiniAssembler;
@@ -14,13 +17,14 @@ package away3d.core.render
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 
+	use namespace arcane;
+
 	/**
 	 * The DepthRenderer class renders 32-bit depth information encoded as RGBA
 	 */
 	public class DepthRenderer extends RendererBase
 	{
-		private var _program3D : Program3D;
-		private var _enc : Vector.<Number>;
+		private var _activeMaterial : MaterialBase;
 		private var _renderBlended : Boolean;
 
 		/**
@@ -33,12 +37,10 @@ package away3d.core.render
 		{
 			super(antiAlias, true, renderMode);
 			_renderBlended = renderBlended;
-			_enc = Vector.<Number>([	1.0, 255.0, 65025.0, 160581375.0,
-										1.0 / 255.0,1.0 / 255.0,1.0 / 255.0,0.0]);
 			_backgroundR = 1;
 			_backgroundG = 1;
 			_backgroundB = 1;
-			_renderableSorter = new DepthSorter();
+//			_renderableSorter = new DepthSorter();
 		}
 
 		/**
@@ -46,60 +48,41 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector) : void
 		{
-			var opaques : Vector.<IRenderable> = entityCollector.opaqueRenderables;
-			var blendeds : Vector.<IRenderable> = entityCollector.blendedRenderables;
-			var len : uint = opaques.length;
-			var renderable : IRenderable;
-
-			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+			drawRenderables(entityCollector.opaqueRenderables, entityCollector);
 
-			if (!_program3D) initProgram3D(_context);
-			_context.setProgram(_program3D);
-			_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
+			if (_renderBlended)
+				drawRenderables(entityCollector.blendedRenderables, entityCollector);
 
-			for (var i : uint = 0; i < len; ++i) {
-				renderable = opaques[i];
-				_context.setVertexBufferAt(0, renderable.getVertexBuffer(_context, _contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
-				_context.drawTriangles(renderable.getIndexBuffer(_context, _contextIndex), 0, renderable.numTriangles);
-			}
-
-			if (!_renderBlended) return;
-
-			len = blendeds.length;
-			for (i = 0; i < len; ++i) {
-				renderable = blendeds[i];
-				_context.setVertexBufferAt(0, renderable.getVertexBuffer(_context, _contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
-				_context.drawTriangles(renderable.getIndexBuffer(_context, _contextIndex), 0, renderable.numTriangles);
-			}
+			if (_activeMaterial) _activeMaterial.deactivate(_context);
+			_activeMaterial = null;
 		}
 
 		/**
-		 * Creates the depth rendering Program3D.
-		 * @param context The Context3D object for which the Program3D needs to be created.
+		 * Draw a list of renderables.
+		 * @param renderables The renderables to draw.
+		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function initProgram3D(context : Context3D) : void
+		private function drawRenderables(renderables : Vector.<IRenderable>, entityCollector : EntityCollector) : void
 		{
-			var vertexCode : String;
-			var fragmentCode : String;
+			var renderable : IRenderable;
+			var i : uint, j : uint, k : uint;
+			var numRenderables : uint = renderables.length;
+			var camera : Camera3D = entityCollector.camera;
 
-			_program3D = context.createProgram();
+			while (i < numRenderables) {
+				_activeMaterial = renderables[i].material;
 
-			vertexCode = 	"m44 vt0, va0, vc0	\n" +
-							"mov op, vt0		\n" +
-							"rcp vt1.x, vt0.w	\n" +
-							"mul v0, vt0, vt1.x	\n";
+				k = i;
+				_activeMaterial.activateForDepth(_context, _contextIndex, camera);
+				do {
+					renderable = renderables[k];
+					_activeMaterial.renderDepth(renderable, _context, _contextIndex, camera);
+				} while(++k < numRenderables && renderable.material != _activeMaterial);
+				_activeMaterial.deactivateForDepth(_context);
 
-			fragmentCode =  AGAL.mul("ft0", "fc0", "v0.z") +
-							AGAL.fract("ft0", "ft0") +
-							AGAL.mul("ft1", "ft0.yzww", "fc1") +
-							AGAL.sub("ft0", "ft0", "ft1") +
-							AGAL.mov("oc", "ft0");
-
-			_program3D.upload(	new AGALMiniAssembler().assemble(Context3DProgramType.VERTEX, vertexCode),
-								new AGALMiniAssembler().assemble(Context3DProgramType.FRAGMENT, fragmentCode));
+				i = k;
+			}
 		}
 	}
 }
