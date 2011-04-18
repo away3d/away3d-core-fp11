@@ -24,9 +24,9 @@ package away3d.loading.parsers
 		 * @param uri The url or id of the data or file to be parsed.
 		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
-		public function ImageParser(uri : String, extra : Object)
+		public function ImageParser(uri : String)
 		{
-			super(uri, ParserDataFormat.BINARY, extra);
+			super(uri, ParserDataFormat.BINARY);
 		}
 		
 		/**
