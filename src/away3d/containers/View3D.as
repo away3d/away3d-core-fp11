@@ -10,8 +10,6 @@ package away3d.containers
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.filters.Filter3DBase;
-	import away3d.filters.Filter3DBase;
-	import away3d.filters.Filter3DBase;
 	import away3d.materials.MaterialBase;
 	
 	import flash.display.Sprite;
@@ -263,7 +261,7 @@ package away3d.containers
 		{
 			_renderer.antiAlias = value;
 		}
-
+		
 		/**
 		 * The amount of faces that were pushed through the render pipeline on the last frame render.
 		 */
@@ -271,6 +269,8 @@ package away3d.containers
 		{
 			return _entityCollector.numTriangles;
 		}
+		
+		public var mouseZeroMove:Boolean;
 
 		/**
 		 * Renders the view.
@@ -310,6 +310,8 @@ package away3d.containers
 				_renderer.render(_entityCollector);
 
 			_entityCollector.cleanUp();
+			
+			
 		}
 
 		/**
