@@ -60,7 +60,7 @@ package away3d.core.managers
 			_stage.addEventListener(MouseEvent.CLICK, onClick);
 			_stage.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
 			_stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			_stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, 1);	// mark moves as most important
+			//_stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, 1);	// mark moves as most important
 			_stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			_stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		}
