@@ -177,8 +177,8 @@ package away3d.core.managers
 			event3D.object = renderable.sourceEntity;
 			event3D.renderable = renderable;
 			event3D.delta = sourceEvent.delta;
-			event3D.screenX = sourceEvent.stageX;
-			event3D.screenY = sourceEvent.stageY;
+			event3D.screenX = _view.stage.mouseX;
+			event3D.screenY = _view.stage.mouseY;
 
 			if (renderable.mouseDetails && local) {
 				event3D.uv = _hitTestRenderer.hitUV;
@@ -208,8 +208,6 @@ package away3d.core.managers
 			var _mouseMoveEvent:MouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
 			var _mouseX:Number = _mouseMoveEvent.localX = _view.mouseX;
 			var _mouseY:Number = _mouseMoveEvent.localY = _view.mouseY;
-			_mouseMoveEvent.stageX = _view.stage.mouseX;
-			_mouseMoveEvent.stageY = _view.stage.mouseY;
 			
 			if (!(_view.mouseZeroMove || force))
 				if ((_mouseX == _lastmove_mouseX) && (_mouseY == _lastmove_mouseY))
