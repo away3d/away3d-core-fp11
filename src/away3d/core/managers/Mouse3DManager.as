@@ -6,9 +6,9 @@ package away3d.core.managers
 	import away3d.core.base.Object3D;
 	import away3d.core.render.HitTestRenderer;
 	import away3d.core.traverse.EntityCollector;
-	import away3d.events.MouseEvent3D;
 	import away3d.entities.Entity;
-
+	import away3d.events.MouseEvent3D;
+	
 	import flash.display.Stage;
 	import flash.events.MouseEvent;
 	import flash.geom.Rectangle;
@@ -27,6 +27,8 @@ package away3d.core.managers
 		private var _previousActiveRenderable : IRenderable;
 		private var _activeObject : Entity;
 		private var _activeRenderable : IRenderable;
+		private var _lastmove_mouseX:Number;
+		private var _lastmove_mouseY:Number;
 
 		private var _stage : Stage;
 		private var _hitTestRenderer : HitTestRenderer;
@@ -71,7 +73,6 @@ package away3d.core.managers
 			_stage.removeEventListener(MouseEvent.CLICK, onClick);
 			_stage.removeEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
 			_stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			_stage.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			_stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			_stage.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		}
@@ -113,23 +114,6 @@ package away3d.core.managers
 			if (!mouseInView()) return;
 			getObjectHitData();
 			if (_activeRenderable) dispatch(_mouseDown, event, _activeRenderable);
-		}
-
-		/**
-		 * Called when a mouseMove event occurs on the stage
-		 */
-		private function onMouseMove(event : MouseEvent) : void
-		{
-			if (!mouseInView()) return;
-			getObjectHitData();
-
-			if (_activeObject == _previousActiveObject) {
-				if (_activeRenderable) dispatch(_mouseMove, event, _activeRenderable);
-			}
-			else {
-				if (_previousActiveRenderable) dispatch(_mouseOut, event, _previousActiveRenderable);
-				if (_activeRenderable) dispatch(_mouseOver, event, _activeRenderable);
-			}
 		}
 
 		/**
@@ -210,6 +194,36 @@ package away3d.core.managers
 			}
 
 			renderable.sourceEntity.dispatchEvent(event3D);
+		}
+		
+		/**
+		 * Manually fires a mouseMove3D event.
+		 */
+		public function fireMouseMoveEvent(force:Boolean = false):void
+		{
+			if (!mouseInView()) return;
+			
+			getObjectHitData();
+			
+			var _mouseMoveEvent:MouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
+			var _mouseX:Number = _mouseMoveEvent.localX = _view.mouseX;
+			var _mouseY:Number = _mouseMoveEvent.localY = _view.mouseY;
+			_mouseMoveEvent.stageX = _view.stage.mouseX;
+			_mouseMoveEvent.stageY = _view.stage.mouseY;
+			
+			if (!(_view.mouseZeroMove || force))
+				if ((_mouseX == _lastmove_mouseX) && (_mouseY == _lastmove_mouseY))
+					return;
+			
+			if (_activeObject == _previousActiveObject) {
+				if (_activeRenderable) dispatch(_mouseMove, _mouseMoveEvent, _activeRenderable);
+			} else {
+				if (_previousActiveRenderable) dispatch(_mouseOut, _mouseMoveEvent, _previousActiveRenderable);
+				if (_activeRenderable) dispatch(_mouseOver, _mouseMoveEvent, _activeRenderable);
+			}
+			
+			_lastmove_mouseX = _mouseX;
+			_lastmove_mouseY = _mouseY;
 		}
 	}
 }

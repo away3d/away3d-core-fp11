@@ -311,9 +311,17 @@ package away3d.containers
 
 			_entityCollector.cleanUp();
 			
-			
+			fireMouseMoveEvent();
 		}
-
+		
+		/**
+		 * Manually fires a mouseMove3D event.
+		 */
+		public function fireMouseMoveEvent(force:Boolean = false):void
+		{
+			_hitManager.fireMouseMoveEvent(force);
+		}
+		
 		/**
 		 * Disposes all memory occupied by the view. This will also dispose the renderer.
 		 */
