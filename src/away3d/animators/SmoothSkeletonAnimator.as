@@ -2,14 +2,12 @@ package away3d.animators
 {
 	import away3d.arcane;
 
-	import flash.geom.Vector3D;
 	import away3d.animators.skeleton.SkeletonNaryLERPNode;
 	import away3d.animators.skeleton.SkeletonTimelineClipNode;
 	import away3d.animators.skeleton.SkeletonTreeNode;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.data.SkeletonAnimationState;
 	import away3d.animators.data.AnimationSequenceBase;
-	import away3d.animators.data.AnimationStateBase;
 
 	use namespace arcane;
 
@@ -19,10 +17,7 @@ package away3d.animators
 	public class SmoothSkeletonAnimator extends AnimatorBase
 	{
 		private var _clips : Array;
-		private var _tempSequences : Vector.<SkeletonAnimationSequence>;
 		private var _activeClipIndex : int = -1;
-		private var _sequenceAbsent : String;
-		private var _timeScale : Number = 1;
 		private var _fadeOutClips : Vector.<int>;
 		private var _fadeOutSpeeds : Vector.<Number>;
 		private var _lerpNode : SkeletonNaryLERPNode;
@@ -30,20 +25,19 @@ package away3d.animators
 		private var _mainWeight : Number = 1;
 		private var _updateRootPosition : Boolean = true;
 
+		private var _target : SkeletonAnimationState;
+
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function SmoothSkeletonAnimator()
+		public function SmoothSkeletonAnimator(target : SkeletonAnimationState)
 		{
 			_clips = [];
 			_fadeOutClips = new Vector.<int>();
 			_fadeOutSpeeds = new Vector.<Number>();
+			_target = target;
+			initTree(target);
 		}
-
-        public function get rootDelta() : Vector3D
-        {
-            return SkeletonAnimationState(_animationState).blendTree.rootDelta;
-        }
 
 		public function get updateRootPosition() : Boolean
 		{
@@ -55,44 +49,11 @@ package away3d.animators
 			_updateRootPosition = value;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function set animationState(value : AnimationStateBase) : void
-		{
-			var state : SkeletonAnimationState = SkeletonAnimationState(value);
-			super.animationState = value;
-
-			if (state.numJoints > 0) {
-				if (!_lerpNode) initTree(state);
-			}
-		}
 
 		private function initTree(state : SkeletonAnimationState) : void
 		{
-			if (!_lerpNode) {
-				_lerpNode = new SkeletonNaryLERPNode(state.numJoints);
-				state.blendTree = _lerpNode;
-				// sequences were added when there wasn't a state available
-				if (_tempSequences) convertSequences();
-			}
-		}
-
-		private function convertSequences() : void
-		{
-			var len : uint = _tempSequences.length;
-			var seq : SkeletonAnimationSequence;
-			var node : SkeletonTimelineClipNode;
-
-			for (var i : uint = 0; i < len; ++i) {
-				seq = _tempSequences[i];
-				node = new SkeletonTimelineClipNode(SkeletonAnimationState(_animationState).numJoints);
-				_clips[seq.name] = node;
-				node.clip = seq;
-				_lerpNode.addInput(node);
-			}
-
-			_tempSequences = null;
+			_lerpNode = new SkeletonNaryLERPNode(state.numJoints);
+			state.blendTree = _lerpNode;
 		}
 
 		/**
@@ -111,39 +72,21 @@ package away3d.animators
 				_fadeOutSpeeds.push(_mainWeight / crossFadeTime / 1000);
 			}
 
-			if (_lerpNode) {
-				clip = _clips[sequenceName];
-				clip.reset();
-				if (clip && clip.duration > 0) {
-					_activeClipIndex = _lerpNode.getInputIndex(clip);
-					var i : int = _fadeOutClips.indexOf(_activeClipIndex);
-					if (i != -1) {
-						_fadeOutClips.splice(i, 1);
-						_fadeOutSpeeds.splice(i, 1);
-					}
+			clip = _clips[sequenceName];
+			clip.reset();
+			if (clip && clip.duration > 0) {
+				_activeClipIndex = _lerpNode.getInputIndex(clip);
+				var i : int = _fadeOutClips.indexOf(_activeClipIndex);
+				if (i != -1) {
+					_fadeOutClips.splice(i, 1);
+					_fadeOutSpeeds.splice(i, 1);
 				}
 			}
 
-			if (_activeClipIndex == -1) {
-				_sequenceAbsent = sequenceName;
-			}
-			else {
-				_sequenceAbsent = null;
-//				_lerpNode.time = 0;
-			}
-		}
+			if (_activeClipIndex == -1)
+				throw new Error("Clip not found!");
 
-		/**
-		 * The amount by which passed time should be scaled. Used to slow down or speed up animations.
-		 */
-		public function get timeScale() : Number
-		{
-			return _timeScale;
-		}
-
-		public function set timeScale(value : Number) : void
-		{
-			_timeScale = value;
+			start();
 		}
 
 		/**
@@ -151,70 +94,31 @@ package away3d.animators
 		 */
 		public function addSequence(sequence : SkeletonAnimationSequence) : void
 		{
-			var node : SkeletonTimelineClipNode;
-			if (_lerpNode) {
-				node = new SkeletonTimelineClipNode(SkeletonAnimationState(_animationState).numJoints);
-				_clips[sequence.name] = node;
-				node.clip = sequence;
-				_lerpNode.addInput(node);
-			}
-			else {
-//				_clips[sequence.name] = sequence;
-				_tempSequences ||= new Vector.<SkeletonAnimationSequence>();
-				_tempSequences.push(sequence);
-			}
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function clone() : AnimatorBase
-		{
-			var clone : SmoothSkeletonAnimator = new SmoothSkeletonAnimator();
-
-			for each (var clip : SkeletonTimelineClipNode in _clips)
-				clone.addSequence(clip.clip);
-
-			return clone;
+			var node : SkeletonTimelineClipNode = new SkeletonTimelineClipNode(SkeletonAnimationState(_target).numJoints);
+			_clips[sequence.name] = node;
+			node.clip = sequence;
+			_lerpNode.addInput(node);
 		}
 
 		/**
 		 * @inheritDoc
 		 * @private
-		 *
-		 * todo: remove animationState reference, change target to something "IAnimatable" that provides the state?
 		 */
-		override arcane function updateAnimation(dt : uint) : void
+		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
 			var blendTree : SkeletonTreeNode;
-			var delta : Vector3D;
 
-			// keep trying to play
-			if (_sequenceAbsent)
-				play(_sequenceAbsent, _crossFadeTime);
+			updateWeights(realDT);
 
-			if (_activeClipIndex != -1) {
-				updateWeights(dt);
+			blendTree = _target.blendTree;
 
-				blendTree = SkeletonAnimationState(_animationState).blendTree;
+			_lerpNode.time += scaledDT / _lerpNode.duration;
 
-				_lerpNode.time += dt / _lerpNode.duration * _timeScale;
+			_target.invalidateState();
+			blendTree.updatePositionData();
 
-				_animationState.invalidateState();
-				blendTree.updatePositionData();
-
-				if (_updateRootPosition) {
-					delta = blendTree.rootDelta;
-					var dist : Number = delta.length;
-					var len : uint;
-
-					if (dist > 0) {
-						len = _targets.length;
-						for (var i : uint = 0; i < len; ++i)
-							_targets[i].translateLocal(delta, dist);
-					}
-				}
-			}
+			if (_updateRootPosition)
+				_target.applyRootDelta();
 		}
 
 		private function updateWeights(dt : Number) : void
@@ -236,9 +140,8 @@ package away3d.animators
 					_fadeOutSpeeds.splice(i, 1);
 					--len;
 				}
-				else {
-					++i;
-				}
+				else ++i;
+
 				weights[index] = weight;
 				total += weight;
 			}

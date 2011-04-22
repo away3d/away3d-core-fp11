@@ -21,9 +21,6 @@ package away3d.animators
 	public class BlendingSkeletonAnimator extends AnimatorBase
 	{
 		private var _clips : Array;
-		private var _tempAbsSequences : Vector.<SkeletonAnimationSequence>;
-		private var _tempAddSequences : Vector.<SkeletonAnimationSequence>;
-		private var _timeScale : Number = 1;
 		private var _lerpNode : SkeletonNaryLERPNode;
 		private var _mainNode : SkeletonTreeNode;
 		private var _additiveNodes : Array;
@@ -32,18 +29,22 @@ package away3d.animators
 		private var _blendWeights : Vector.<Number>;
 		private var _updateRootPosition : Boolean = true;
 
+		private var _target : SkeletonAnimationState;
+
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function BlendingSkeletonAnimator()
+		public function BlendingSkeletonAnimator(target : SkeletonAnimationState)
 		{
 			_clips = [];
 			_activeAbsClips = new Vector.<int>();
 			_blendWeights = new Vector.<Number>();
 			_additiveNodes = [];
+			_target = target;
+			initTree(target);
 		}
 
-        public function get rootDelta() : Vector3D
+		public function get rootDelta() : Vector3D
         {
             return _mainNode? _mainNode.rootDelta : null;
         }
@@ -58,49 +59,14 @@ package away3d.animators
 			_updateRootPosition = value;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function set animationState(value : AnimationStateBase) : void
-		{
-			var state : SkeletonAnimationState = SkeletonAnimationState(value);
-			super.animationState = value;
-
-			if (state.numJoints > 0) {
-				if (!_lerpNode) initTree(state);
-			}
-		}
-
 		private function initTree(state : SkeletonAnimationState) : void
 		{
 			_lerpNode = new SkeletonNaryLERPNode(state.numJoints);
 
 			state.blendTree = _lerpNode;
-//				sequences were added when there wasn't a state available
+
+//			mainNode also necessary since might be different from lerpNode when using additive blending
 			_mainNode = _lerpNode;
-
-			convertSequences();
-		}
-
-		private function convertSequences() : void
-		{
-			var len : uint;
-			var i : uint;
-
-			if (_tempAbsSequences) {
-				len = _tempAbsSequences.length;
-				for (i = 0; i < len; ++i)
-					createLERPInput(_tempAbsSequences[i]);
-			}
-
-			if (_tempAddSequences) {
-				len = _tempAddSequences.length;
-				for (i = 0; i < len; ++i)
-					createAdditiveNode(_tempAddSequences[i]);
-			}
-
-			_tempAbsSequences = null;
-			_tempAddSequences = null;
 		}
 
 		public function setWeight(clipName : String, weight : Number) : void
@@ -159,19 +125,6 @@ package away3d.animators
 		}
 
 		/**
-		 * The amount by which passed time should be scaled. Used to slow down or speed up animations.
-		 */
-		public function get timeScale() : Number
-		{
-			return _timeScale;
-		}
-
-		public function set timeScale(value : Number) : void
-		{
-			_timeScale = value;
-		}
-
-		/**
 		 * Adds a sequence to the controller.
 		 * Differentiate between timeline based and phase? Or should be property of sequence?
 		 */
@@ -187,46 +140,24 @@ package away3d.animators
 
 		private function addAdditiveSequence(sequence : SkeletonAnimationSequence) : void
 		{
-			if (_mainNode) {
-				createAdditiveNode(sequence);
-			}
-			else {
-				_tempAddSequences ||= new Vector.<SkeletonAnimationSequence>();
-				_tempAddSequences.push(sequence);
-			}
-		}
-
-		private function createAdditiveNode(sequence : SkeletonAnimationSequence) : void
-		{
 			var node : SkeletonTimelineClipNode;
 			var additive : SkeletonAdditiveNode;
-			additive = new SkeletonAdditiveNode(SkeletonAnimationState(_animationState).numJoints);
-			node = new SkeletonTimelineClipNode(SkeletonAnimationState(_animationState).numJoints);
+			additive = new SkeletonAdditiveNode(_target.numJoints);
+			node = new SkeletonTimelineClipNode(_target.numJoints);
 			node.clip = sequence;
 			_clips[sequence.name] = node;
 			_additiveNodes[sequence.name] = additive;
 			additive.differenceInput = node;
 			additive.baseInput = _mainNode;
 			_mainNode = additive;
-			SkeletonAnimationState(_animationState).blendTree = _mainNode;
+			_target.blendTree = _mainNode;
 		}
 
 		private function addAbsoluteSequence(sequence : SkeletonAnimationSequence) : void
 		{
 			_blendWeights[_blendWeights.length] = 0;
 
-			if (_lerpNode) {
-				createLERPInput(sequence);
-			}
-			else {
-				_tempAbsSequences ||= new Vector.<SkeletonAnimationSequence>();
-				_tempAbsSequences.push(sequence);
-			}
-		}
-
-		private function createLERPInput(sequence : SkeletonAnimationSequence) : void
-		{
-			var node : SkeletonTimelineClipNode = new SkeletonTimelineClipNode(SkeletonAnimationState(_animationState).numJoints);
+			var node : SkeletonTimelineClipNode = new SkeletonTimelineClipNode(_target.numJoints);
 			_clips[sequence.name] = node;
 			node.clip = sequence;
 			_lerpNode.addInput(node);
@@ -234,46 +165,18 @@ package away3d.animators
 
 		/**
 		 * @inheritDoc
-		 */
-		override public function clone() : AnimatorBase
-		{
-			var clone : SmoothSkeletonAnimator = new SmoothSkeletonAnimator();
-
-			for each (var clip : SkeletonTimelineClipNode in _clips)
-				clone.addSequence(clip.clip);
-
-			return clone;
-		}
-
-		/**
-		 * @inheritDoc
 		 * @private
-		 *
-		 * todo: remove animationState reference, change target to something "IAnimatable" that provides the state?
 		 */
-		override arcane function updateAnimation(dt : uint) : void
+		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			var delta : Vector3D;
-
-			if (!_mainNode && SkeletonAnimationState(_animationState).numJoints > 0)
-				initTree(SkeletonAnimationState(_animationState));
-
 			if (_mainNode && _numActiveClips > 0) {
-				_mainNode.time += dt / _mainNode.duration * _timeScale;
+				_mainNode.time += scaledDT / _mainNode.duration;
 
-				_animationState.invalidateState();
+				_target.invalidateState();
 				_mainNode.updatePositionData();
-				if (_updateRootPosition) {
-					delta = _mainNode.rootDelta;
-					var dist : Number = delta.length;
-					var len : uint;
 
-					if (dist > 0) {
-						len = _targets.length;
-						for (var i : uint = 0; i < len; ++i)
-							_targets[i].translateLocal(delta, dist);
-					}
-				}
+				if (_updateRootPosition)
+					_target.applyRootDelta();
 			}
 		}
 
@@ -284,6 +187,11 @@ package away3d.animators
 		arcane function getSequence(sequenceName : String) : AnimationSequenceBase
 		{
 			return _clips[sequenceName];
+		}
+
+		public function play() : void
+		{
+			start();
 		}
 	}
 }

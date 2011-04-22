@@ -48,6 +48,7 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector) : void
 		{
+			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			drawRenderables(entityCollector.opaqueRenderables, entityCollector);
 

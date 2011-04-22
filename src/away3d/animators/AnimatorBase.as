@@ -1,16 +1,12 @@
 package away3d.animators
 {
 	import away3d.arcane;
-	import away3d.core.base.Object3D;
 	import away3d.errors.AbstractMethodError;
-	import away3d.animators.data.AnimationStateBase;
-
 	import away3d.events.AnimatorEvent;
 
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.utils.Timer;
 	import flash.utils.getTimer;
 
 	use namespace arcane;
@@ -23,42 +19,54 @@ package away3d.animators
 	 */
 	public class AnimatorBase extends EventDispatcher
 	{
-		protected var _targets : Vector.<Object3D>;
-
-		private var _broadcaster:Sprite = new Sprite();
-		protected var _animationState : AnimationStateBase;
-		private var _numTargets : uint;
-		private var _isPlaying:Boolean;
-		private var _startEvent:AnimatorEvent;
-		private var _stopEvent:AnimatorEvent;
+		private var _broadcaster : Sprite = new Sprite();
+		private var _isPlaying : Boolean;
+		private var _startEvent : AnimatorEvent;
+		private var _stopEvent : AnimatorEvent;
 		private var _time : int;
-//		private var _animationManager : AnimationManager;
+		private var _timeScale : Number = 1;
 
 		public function AnimatorBase()
 		{
-			_targets = new Vector.<Object3D>();
-			start();
-//			_animationManager = AnimationManager.getInstance();
+//			start();
 		}
 
-		private function notifyStart():void
-        {
+		/**
+		 * The amount by which passed time should be scaled. Used to slow down or speed up animations.
+		 */
+		public function get timeScale() : Number
+		{
+			return _timeScale;
+		}
+
+		public function set timeScale(value : Number) : void
+		{
+			_timeScale = value;
+		}
+
+		public function stop() : void
+		{
+			notifyStop();
+		}
+
+		private function notifyStart() : void
+		{
 			if (_isPlaying)
 				return;
 
 			_isPlaying = true;
 
-            if (!hasEventListener(AnimatorEvent.START))
-                return;
+			if (!hasEventListener(AnimatorEvent.START))
+				return;
 
-            if (!_startEvent)
-                _startEvent = new AnimatorEvent(AnimatorEvent.START, this);
+			if (!_startEvent)
+				_startEvent = new AnimatorEvent(AnimatorEvent.START, this);
 
-            dispatchEvent(_startEvent);
-        }
+			dispatchEvent(_startEvent);
+		}
 
-		private function notifyStop():void
-        {
+		private function notifyStop() : void
+		{
 			if (!_isPlaying)
 				return;
 
@@ -67,66 +75,26 @@ package away3d.animators
 			if (_broadcaster.hasEventListener(Event.ENTER_FRAME))
 				_broadcaster.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
 
-            if (!hasEventListener(AnimatorEvent.STOP))
-                return;
+			if (!hasEventListener(AnimatorEvent.STOP))
+				return;
 
-            if (!_stopEvent)
-                _stopEvent = new AnimatorEvent(AnimatorEvent.STOP, this);
+			if (!_stopEvent)
+				_stopEvent = new AnimatorEvent(AnimatorEvent.STOP, this);
 
-            dispatchEvent(_stopEvent);
-        }
-
-		/**
-		 * The animation state on which this controller acts
-		 */
-		public function get animationState() : AnimationStateBase
-		{
-			return _animationState;
-		}
-
-		public function set animationState(value : AnimationStateBase) : void
-		{
-			_animationState = value;
-		}
-
-		/**
-		 * Clones the current object.
-		 * @return An exact duplicate of this object.
-		 */
-		public function clone() : AnimatorBase
-		{
-			throw new AbstractMethodError();
+			dispatchEvent(_stopEvent);
 		}
 
 		/**
 		 * Updates the animation state.
-		 * @param deltaTime The time step passed since the last update
-		 * @param target The target on which to perform the animation
 		 * @private
 		 */
-		arcane function updateAnimation(deltaTime : uint) : void
+		protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
 			throw new AbstractMethodError();
 		}
 
-		arcane function addTarget(object : Object3D) : void
-		{
-			// if first target, add to manager so it can be updated.
-//			if (_numTargets == 0) _animationManager.registerController(this);
 
-			_targets[_numTargets++] = object;
-		}
-
-
-		arcane function removeTarget(object : Object3D) : void
-		{
-			_targets.splice(_targets.indexOf(object), 1);
-
-			// if no targets triggered anymore, add to manager so it can be updated.
-//			if (--_numTargets == 0) _animationManager.unregisterController(this);
-		}
-
-		protected function start():void
+		protected function start() : void
 		{
 			_time = getTimer();
 
@@ -136,10 +104,11 @@ package away3d.animators
 			notifyStart();
 		}
 
-		private function onEnterFrame(event:Event = null):void
+		private function onEnterFrame(event : Event = null) : void
 		{
 			var time : int = getTimer();
-			updateAnimation(getTimer() - _time);
+			var dt : Number = time-_time;
+			updateAnimation(dt, dt*_timeScale);
 			_time = time;
 		}
 	}

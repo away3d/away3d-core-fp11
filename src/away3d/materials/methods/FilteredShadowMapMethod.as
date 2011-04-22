@@ -38,7 +38,7 @@ package away3d.materials.methods
 			_stepSize = stepSize;
 			castingLight.castsShadows = true;
 			_castingLight = castingLight;
-			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/160581375.0, -.003, .5, castingLight.shadowMapper.depthMapSize, 1/castingLight.shadowMapper.depthMapSize]);
+			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, -.003, .5, castingLight.shadowMapper.depthMapSize, 1/castingLight.shadowMapper.depthMapSize]);
 		}
 
 		public function get epsilon() : Number

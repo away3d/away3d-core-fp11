@@ -14,20 +14,20 @@ package away3d.animators
 	{
 		private var _sequences : Array;
 		private var _activeSequence : VertexAnimationSequence;
-		private var _sequenceAbsent : String;
-		private var _timeScale : Number = 1;
-		private var _absoluteTime : uint;
+		private var _absoluteTime : Number;
 		private var _frame1 : uint;
 		private var _frame2 : uint;
 		private var _blendWeight : Number;
+		private var _target : VertexAnimationState;
 
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function VertexAnimator()
+		public function VertexAnimator(target : VertexAnimationState)
 		{
 			super();
 			_sequences = [];
+			_target = target;
 		}
 
 		/**
@@ -37,35 +37,16 @@ package away3d.animators
 		public function play(sequenceName : String) : void
 		{
 			_activeSequence = _sequences[sequenceName];
-			if (!_activeSequence) {
-				_sequenceAbsent = sequenceName;
-			}
-			else {
-				reset();
-//				_activeSequence.timeScale = _timeScale;
-				_sequenceAbsent = null;
-			}
+			if (!_activeSequence)
+				throw new Error("Clip not found!");
 
+			reset();
 			start();
 		}
 
 		private function reset() : void
 		{
 			_absoluteTime = 0;
-		}
-
-		/**
-		 * The amount by which passed time should be scaled. Used to slow down or speed up animations.
-		 */
-		public function get timeScale() : Number
-		{
-			return _timeScale;
-		}
-
-		public function set timeScale(value : Number) : void
-		{
-			_timeScale = value;
-//			if (_activeSequence) _activeSequence.timeScale = value;
 		}
 
 		/**
@@ -79,53 +60,19 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function clone() : AnimatorBase
+		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			var clone : VertexAnimator = new VertexAnimator();
+			var poses : Vector.<Geometry> = _target.poses;
+			var weights : Vector.<Number> = _target.weights;
 
-			clone._sequences = _sequences;
-			clone._activeSequence = _activeSequence;
-			clone._timeScale = _timeScale;
+			_absoluteTime += scaledDT;
+			updateFrames(_absoluteTime);
 
-			return clone;
-		}
+			poses[uint(0)] = _activeSequence._frames[_frame1];
+			poses[uint(1)] = _activeSequence._frames[_frame2];
+			weights[uint(0)] = 1 - (weights[uint(1)] = _blendWeight);
 
-		/**
-		 * @inheritDoc
-		 *
-		 * todo: remove animationState reference, change target to something "IAnimatable" that provides the state?
-		 */
-		override arcane function updateAnimation(dt : uint) : void
-		{
-			var animState : VertexAnimationState = VertexAnimationState(_animationState);
-			var poses : Vector.<Geometry> = animState.poses;
-			var weights : Vector.<Number> = animState.weights;
-
-			// keep trying to play
-			if (_sequenceAbsent)
-				play(_sequenceAbsent);
-
-			if (_activeSequence) {
-				_absoluteTime += dt*_timeScale;
-				updateFrames(_absoluteTime);
-
-				var dist : Number = _activeSequence.rootDelta.length;
-				var len : uint;
-				if (dist > 0) {
-					len = _targets.length;
-					for (var i : uint = 0; i < len; ++i)
-						_targets[i].translateLocal(_activeSequence.rootDelta, dist);
-				}
-
-				poses[uint(0)] = _activeSequence._frames[_frame1];
-				poses[uint(1)] = _activeSequence._frames[_frame2];
-				weights[uint(0)] = 1 - (weights[uint(1)] = _blendWeight);
-
-				animState.invalidateState();
-
-				_animationState.invalidateState();
-			}
-
+			_target.invalidateState();
 		}
 
 		/**

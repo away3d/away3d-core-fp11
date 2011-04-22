@@ -1,22 +1,22 @@
 package away3d.animators.data
 {
+	import away3d.animators.skeleton.JointPose;
+	import away3d.animators.skeleton.Skeleton;
+	import away3d.animators.skeleton.SkeletonJoint;
+	import away3d.animators.skeleton.SkeletonPose;
+	import away3d.animators.skeleton.SkeletonTreeNode;
 	import away3d.arcane;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SkinnedSubGeometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.core.math.Quaternion;
+	import away3d.entities.Mesh;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
-	import away3d.animators.skeleton.SkeletonJoint;
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.SkeletonPose;
-	import away3d.animators.skeleton.SkeletonTreeNode;
 
 	use namespace arcane;
 
@@ -304,6 +304,7 @@ package away3d.animators.data
 
 				k = 0;
 				while (k < _jointsPerVertex) {
+					weight = jointWeights[j]
 					if ((weight = jointWeights[j]) == 0) {
 						j += _jointsPerVertex - k;
 						k = _jointsPerVertex;
@@ -337,6 +338,20 @@ package away3d.animators.data
 			subGeom.animatedVertexData = targetVerts;
 			subGeom.animatedNormalData = targetNormals;
 			subGeom.animatedTangentData = targetTangents;
+		}
+
+		public function applyRootDelta() : void
+		{
+			var delta : Vector3D = blendTree.rootDelta;
+
+			var dist : Number = delta.length;
+			var len : uint;
+
+			if (dist > 0) {
+				len = _owners.length;
+				for (var i : uint = 0; i < len; ++i)
+					_owners[i].translateLocal(delta, dist);
+			}
 		}
 	}
 }

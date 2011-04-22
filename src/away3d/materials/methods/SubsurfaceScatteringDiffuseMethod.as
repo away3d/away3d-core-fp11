@@ -60,7 +60,7 @@ package away3d.materials.methods
 			_passes.push(_depthPass);
 			_commonProps = Vector.<Number>([.5, -.5, 0, 1.0]);
 			_scatterColorData = Vector.<Number>([1.0, 1.0, 1.0, 1.0]);
-			_dec = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/160581375.0]);
+			_dec = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0]);
 			_fragmentProps = new Vector.<Number>(4, true);
 			_fragmentProps[2] = .5;
 			_fragmentProps[3] = -.1;

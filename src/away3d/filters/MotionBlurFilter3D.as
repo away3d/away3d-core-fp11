@@ -1,4 +1,5 @@
 package away3d.filters{
+	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
 	import away3d.debug.Debug;
 
@@ -25,6 +26,7 @@ package away3d.filters{
 
 		public function MotionBlurFilter3D(strength : Number = .65)
 		{
+			super(false);
 			_data = new Vector.<Number>(4, true);
 			this.strength = strength;
 		}
@@ -65,9 +67,9 @@ package away3d.filters{
 			_data[0] = _strength;
 		}
 
-		override public function render(context : Context3D, target : Texture) : void
+		override public function render(context : Context3D, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
 		{
-			super.render(context, target);
+			super.render(context, target, camera);
 
 			if (!_blurFilter) initPrograms(context);
 

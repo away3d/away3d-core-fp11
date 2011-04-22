@@ -1,4 +1,5 @@
 package away3d.filters{
+	import away3d.cameras.Camera3D;
 	import away3d.debug.Debug;
 	import away3d.filters.Filter3DBase;
 
@@ -22,6 +23,7 @@ package away3d.filters{
 
 		public function BlurFilter3D(blurX : uint = 3, blurY : uint = 3)
 		{
+			super(false);
 			_blurX = blurX;
 			_blurY = blurY;
 			if (_blurX > 7) _stepX = _blurX/7;
@@ -63,12 +65,12 @@ package away3d.filters{
 			}
 		}
 
-		override public function render(context : Context3D, target : Texture) : void
+		override public function render(context : Context3D, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
 		{
 			var invW : Number = 1/_textureWidth;
 			var invH : Number = 1/_textureHeight;
 
-			super.render(context, target);
+			super.render(context, target, camera);
 
 			_data[0] = _blurX*.5*invW;
 			_data[1] = _blurY*.5*invH;

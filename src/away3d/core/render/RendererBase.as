@@ -64,6 +64,11 @@ package away3d.core.render
 			return _context;
 		}
 
+		public function get contextIndex() : int
+		{
+			return _contextIndex;
+		}
+
 		/**
 		 * Indicates whether or not the back buffer should be swapped when rendering is complete.
 		 */

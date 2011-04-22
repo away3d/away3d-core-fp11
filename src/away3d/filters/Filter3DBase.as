@@ -1,6 +1,9 @@
 package away3d.filters
 {
+	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
+
+//	import away3d.filters.Filter3DBase.requireDepthRender;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -13,13 +16,20 @@ package away3d.filters
 		protected var _inputTexture : Texture;
 		private var _viewWidth : Number = -1;
 		private var _viewHeight : Number = -1;
+		private var _requireDepthBuffer : Boolean;
 		protected var _textureWidth : int = -1;
 		protected var _textureHeight : int = -1;
 		protected var _vertexBuffer : VertexBuffer3D;	// contains the screen-tris	and uvs
 		protected var _indexBuffer : IndexBuffer3D;
 
-		public function Filter3DBase()
+		public function Filter3DBase(requireDepthBuffer : Boolean)
 		{
+			_requireDepthBuffer = requireDepthBuffer;
+		}
+
+		public function get requireDepthRender() : Boolean
+		{
+			return _requireDepthBuffer;
 		}
 
 		public function getInputTexture(context : Context3D, view : View3D) : Texture
@@ -30,7 +40,7 @@ package away3d.filters
 			return _inputTexture;
 		}
 
-		public function render(context : Context3D, target : Texture) : void
+		public function render(context : Context3D, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
 		{
 			if (!_vertexBuffer)
 				initBuffers(context);
@@ -40,9 +50,9 @@ package away3d.filters
 		{
 			_vertexBuffer = context.createVertexBuffer(4, 4);
 			_vertexBuffer.uploadFromVector(Vector.<Number>([	-1, -1, 0, 1,
-				1, -1, 1, 1,
-				1,  1, 1, 0,
-				-1,  1, 0, 0 ]), 0, 4);
+																1, -1, 1, 1,
+																1,  1, 1, 0,
+																-1,  1, 0, 0 ]), 0, 4);
 			_indexBuffer = context.createIndexBuffer(6);
 			_indexBuffer.uploadFromVector(Vector.<uint>([2, 1, 0, 3, 2, 0]), 0, 6);
 		}

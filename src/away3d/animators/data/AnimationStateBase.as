@@ -1,6 +1,8 @@
 package away3d.animators.data
 {
+	import away3d.arcane;
 	import away3d.core.base.IRenderable;
+	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.passes.MaterialPassBase;
 
@@ -16,12 +18,15 @@ package away3d.animators.data
 		protected var _animation : AnimationBase;
 		protected var _stateInvalid : Boolean;
 
+		protected var _owners : Vector.<Mesh>;
+
 		/**
 		 * Creates a new AnimationStateBase object
 		 * @param animation The animation on which this AnimationStateBase object is based.
 		 */
 		public function AnimationStateBase(animation : AnimationBase)
 		{
+			_owners = new Vector.<Mesh>();
 			_animation = animation;
 		}
 
@@ -59,6 +64,16 @@ package away3d.animators.data
 		public function clone() : AnimationStateBase
 		{
 			throw new AbstractMethodError();
+		}
+
+		arcane function addOwner(mesh : Mesh) : void
+		{
+			_owners.push(mesh);
+		}
+
+		arcane function removeOwner(mesh : Mesh) : void
+		{
+			_owners.splice(_owners.indexOf(mesh), 1);
 		}
 	}
 }

@@ -22,8 +22,8 @@ package away3d.core.render
 	public class DefaultRenderer extends RendererBase
 	{
 		private var _activeMaterial : MaterialBase;
-		private var _depthPrePass : Boolean;
-		private var _depthRenderer : DepthRenderer;
+//		private var _depthPrePass : Boolean;
+//		private var _depthRenderer : DepthRenderer;
 
 		/**
 		 * Creates a new DefaultRenderer object.
@@ -33,13 +33,13 @@ package away3d.core.render
 		public function DefaultRenderer(antiAlias : uint = 0, renderMode : String = "auto")
 		{
 			super(antiAlias, true, renderMode);
-			_depthRenderer = new DepthRenderer();
+//			_depthRenderer = new DepthRenderer();
 		}
 
 		/**
 		 * Indicates whether or not the depth buffer should be rendered first in a separate pass.
 		 */
-		public function get depthPrePass() : Boolean
+		/*public function get depthPrePass() : Boolean
 		{
 			return _depthPrePass;
 		}
@@ -58,12 +58,12 @@ package away3d.core.render
 				_depthRenderer.viewPortX = _viewPortX;
 				_depthRenderer.viewPortY = _viewPortY;
 			}
-		}
+		}           */
 
 
 		arcane override function set stage3DProxy(value : Stage3DProxy) : void
 		{
-			super.stage3DProxy = _depthRenderer.stage3DProxy = value;
+			super.stage3DProxy = /*_depthRenderer.stage3DProxy = */value;
 		}
 
 		/**
@@ -71,29 +71,30 @@ package away3d.core.render
 		 */
 		arcane override function render(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
-			if (_depthPrePass) {
+			/*if (_depthPrePass) {
 				_depthRenderer.render(entityCollector, target, surfaceSelector, Context3DClearMask.DEPTH);
 				super.render(entityCollector, target, surfaceSelector, Context3DClearMask.COLOR | Context3DClearMask.STENCIL);
 			}
-			else
+			else*/
 				super.render(entityCollector, target, surfaceSelector, additionalClearMask);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		/*protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
 			updateLights(entityCollector);
 			super.executeRender(entityCollector, target, surfaceSelector, additionalClearMask);
-		}
+		} */
 
 		/**
 		 * @inheritDoc
 		 */
 		override protected function draw(entityCollector : EntityCollector) : void
 		{
-			_context.setDepthTest(true, _depthPrePass? Context3DCompareMode.LESS_EQUAL : Context3DCompareMode.LESS);
+			_context.setDepthTest(true, Context3DCompareMode.LESS);
+//			_context.setDepthTest(true, _depthPrePass? Context3DCompareMode.LESS_EQUAL : Context3DCompareMode.LESS);
 
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			drawRenderables(entityCollector.opaqueRenderables, entityCollector);
@@ -112,32 +113,18 @@ package away3d.core.render
 			_activeMaterial = null;
 		}
 
-		private function updateLights(entityCollector : EntityCollector) : void
-		{
-			var lights : Vector.<LightBase> = entityCollector.lights;
-			var len : uint = lights.length;
-			var light : LightBase;
-
-			for (var i : int = 0; i < len; ++i) {
-				light = lights[i];
-				if (light.castsShadows) {
-					light.shadowMapper.renderDepthMap(_context, _contextIndex, entityCollector, _depthRenderer);
-				}
-			}
-		}
-
 		/**
 		 * @inheritDoc
 		 */
 		override protected function updateViewPort() : void
 		{
 			super.updateViewPort();
-			if (_depthPrePass) {
+			/*if (_depthPrePass) {
 				_depthRenderer.viewPortWidth = _viewPortWidth;
 				_depthRenderer.viewPortHeight = _viewPortHeight;
 				_depthRenderer.viewPortX = _viewPortX;
 				_depthRenderer.viewPortY = _viewPortY;
-			}
+			}  */
 		}
 
 		/**
