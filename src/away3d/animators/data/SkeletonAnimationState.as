@@ -304,8 +304,8 @@ package away3d.animators.data
 
 				k = 0;
 				while (k < _jointsPerVertex) {
-					weight = jointWeights[j]
-					if ((weight = jointWeights[j]) == 0) {
+					weight = jointWeights[j];
+					if (weight == 0) {
 						j += _jointsPerVertex - k;
 						k = _jointsPerVertex;
 					}

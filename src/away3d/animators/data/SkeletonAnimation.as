@@ -9,7 +9,7 @@ package away3d.animators.data
 	use namespace arcane;
 
 	/**
-	 * SkinnedAnimation defines an animation type that blends different skeletal poses into a final pose and transforms
+	 * SkeletonAnimation defines an animation type that blends different skeletal poses into a final pose and transforms
 	 * the geometries' vertices along the skeleton. Each vertex is bound to a number of skeleton joints with a number of
 	 * weights, which define how the skeleton influences the vertex position.
 	 *
@@ -24,8 +24,8 @@ package away3d.animators.data
 		private var _jointsPerVertex : uint;
 
 		/**
-		 * Creates a SkinnedAnimation instance.
-		 * @param skeleton The skeleton that's used for this SkinnedAnimation instance.
+		 * Creates a SkeletonAnimation instance.
+		 * @param skeleton The skeleton that's used for this SkeletonAnimation instance.
 		 * @param jointsPerVertex The amount of joints that can be linked to a vertex.
 		 */
 		public function SkeletonAnimation(skeleton : Skeleton, jointsPerVertex : uint = 4)
@@ -44,7 +44,7 @@ package away3d.animators.data
 		}
 
 		/**
-		 * The amount of joints that can be linked t oa vertex.
+		 * The amount of joints that can be linked to a vertex.
 		 */
 		public function get jointsPerVertex() : uint
 		{
@@ -57,7 +57,7 @@ package away3d.animators.data
 		}
 
 		/**
-		 * The skeleton that's used for this SkinnedAnimation instance.
+		 * The skeleton that's used for this SkeletonAnimation instance.
 		 */
 		public function get skeleton() : Skeleton
 		{
