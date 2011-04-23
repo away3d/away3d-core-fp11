@@ -1,7 +1,8 @@
 package away3d.debug
 {
 	import away3d.containers.View3D;
-
+	import away3d.core.managers.Stage3DManager;
+	
 	import flash.display.BitmapData;
 	import flash.display.CapsStyle;
 	import flash.display.Graphics;
@@ -16,7 +17,7 @@ package away3d.debug
 	import flash.text.TextFormat;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-
+	
 	/**
 	 * <p>Stats monitor for Away3D or general use in any project. The widget was designed to
 	 * display all the necessary data in ways that are easily readable, while maintaining a
@@ -51,7 +52,7 @@ package away3d.debug
 	 * frame rate values on which the average is based can be configured. This has a tiny
 	 * impact on CPU usage, which is the reason why the default number is zero, denoting that
 	 * the average is calculated from a running sum since the widget was last reset.</p>
-	*/
+	 */
 	public class AwayStats extends Sprite
 	{
 		private var _views : Vector.<View3D>;
@@ -94,6 +95,7 @@ package away3d.debug
 		private var _afps_tf : TextField;
 		private var _ram_tf : TextField;
 		private var _poly_tf : TextField;
+		private var _swhw_tf : TextField;
 		
 		private var _drag_dx : Number;
 		private var _drag_dy : Number;
@@ -108,10 +110,13 @@ package away3d.debug
 		private var _minimized : Boolean;
 		
 		private static const _WIDTH : Number = 125;
-		private static const _MAX_HEIGHT : Number = 75;
-		private static const _MIN_HEIGHT : Number = 41;
+		private static const _MAX_HEIGHT : Number = 85;
+		private static const _MIN_HEIGHT : Number = 51;
 		private static const _UPPER_Y : Number = -1;
-		private static const _LOWER_Y : Number = 9;
+		private static const _MID_Y : Number = 9;
+		private static const _LOWER_Y : Number = 19;
+		private static const _DIAG_HEIGHT : Number = _MAX_HEIGHT - 50;
+		private static const _BOTTOM_BAR_HEIGHT : Number = 31;
 		
 		private static const _POLY_COL : uint = 0xffcc00;
 		private static const _MEM_COL : uint = 0xff00cc;
@@ -153,7 +158,7 @@ package away3d.debug
 		 * @param enableModifyFramerate When enabled, allows you to click the upper
 		 * and lower parts of the graph area to increase and decrease SWF frame rate
 		 * respectively.
-		*/
+		 */
 		public function AwayStats(view3d : View3D = null, minimized : Boolean = false, transparent : Boolean = false, meanDataLength : uint = 0, enableClickToReset : Boolean = true, enableModifyFrameRate : Boolean = true)
 		{
 			super();
@@ -188,10 +193,10 @@ package away3d.debug
 			_init();
 		}
 		
-	    public function get fps():int
-        {
-            return _fps;
-        }
+		public function get fps():int
+		{
+			return _fps;
+		}
 		
 		private function _init() : void
 		{
@@ -208,8 +213,8 @@ package away3d.debug
 			addEventListener(Event.REMOVED_FROM_STAGE, _onRemovedFromStage);
 		}
 		
-
-
+		
+		
 		
 		
 		
@@ -217,7 +222,7 @@ package away3d.debug
 		 * Holds a reference to the stats widget (or if several have been created
 		 * during session, the one that was last instantiated.) Allows you to set
 		 * properties and register views from anywhere in your code.
-		*/
+		 */
 		public static function get instance() : AwayStats
 		{
 			return _INSTANCE;
@@ -231,7 +236,7 @@ package away3d.debug
 		 * stats widget is not instantiated in the same place as where you create
 		 * your view, or when using several views, or when views are created and
 		 * destroyed dynamically at runtime.
-		*/
+		 */
 		public function registerView(view3d : View3D) : void
 		{
 			if (view3d && _views.indexOf(view3d)<0)
@@ -244,7 +249,7 @@ package away3d.debug
 		 * calculating on-screen and total poly counts. If the supplied view is
 		 * the only one known to the stats widget, calling this will leave the
 		 * list empty, disabling poly count statistics altogether.
-		*/
+		 */
 		public function unregisterView(view3d : View3D) : void
 		{
 			if (view3d) {
@@ -256,7 +261,7 @@ package away3d.debug
 		
 		
 		
-
+		
 		
 		
 		private function _initMisc() : void
@@ -282,7 +287,7 @@ package away3d.debug
 		/**
 		 * @private
 		 * Draw logo and create title textfield.
-		*/
+		 */
 		private function _initTopBar() : void
 		{
 			var logo : Shape;
@@ -370,7 +375,6 @@ package away3d.debug
 			_afps_tf.selectable = false;
 			_top_bar.addChild(_afps_tf);
 			
-			
 			// Minimize / maximize button
 			_min_max_btn = new Sprite;
 			_min_max_btn.x = _WIDTH-8;
@@ -391,17 +395,18 @@ package away3d.debug
 			var markers : Shape;
 			var ram_label_tf : TextField;
 			var poly_label_tf : TextField;
+			var swhw_label_tf : TextField;
 			
 			_btm_bar = new Sprite();
 			_btm_bar.graphics.beginFill(0, 0.2);
-			_btm_bar.graphics.drawRect(0, 0, _WIDTH, 21);
+			_btm_bar.graphics.drawRect(0, 0, _WIDTH, _BOTTOM_BAR_HEIGHT);
 			addChild(_btm_bar);
 			
 			// Hit area for bottom bar (to avoid having textfields
 			// affect interaction badly.)
 			_btm_bar_hit = new Sprite;
 			_btm_bar_hit.graphics.beginFill(0xffcc00, 0);
-			_btm_bar_hit.graphics.drawRect(0, 1, _WIDTH, 20);
+			_btm_bar_hit.graphics.drawRect(0, 1, _WIDTH, _BOTTOM_BAR_HEIGHT-1);
 			addChild(_btm_bar_hit);
 			
 			
@@ -439,7 +444,7 @@ package away3d.debug
 			poly_label_tf.autoSize = TextFieldAutoSize.LEFT;
 			poly_label_tf.text = 'POLY:';
 			poly_label_tf.x = 10;
-			poly_label_tf.y = _LOWER_Y;
+			poly_label_tf.y = _MID_Y;
 			poly_label_tf.selectable = false;
 			poly_label_tf.mouseEnabled = false;
 			_btm_bar.addChild(poly_label_tf);
@@ -452,13 +457,23 @@ package away3d.debug
 			_poly_tf.selectable = false;
 			_poly_tf.mouseEnabled = false;
 			_btm_bar.addChild(_poly_tf);
+			
+			// SOFTWARE RENDERER WARNING
+			_swhw_tf = new TextField;
+			_swhw_tf.defaultTextFormat = _label_format;
+			_swhw_tf.autoSize = TextFieldAutoSize.LEFT;
+			_swhw_tf.x = 10;
+			_swhw_tf.y = _LOWER_Y;
+			_swhw_tf.selectable = false;
+			_swhw_tf.mouseEnabled = false;
+			_btm_bar.addChild(_swhw_tf);
 		}
 		
 		
 		private function _initDiagrams() : void
 		{
 			
-			_dia_bmp = new BitmapData(_WIDTH, _MAX_HEIGHT-40, true, 0);
+			_dia_bmp = new BitmapData(_WIDTH, _DIAG_HEIGHT, true, 0);
 			_diagram = new Sprite;
 			_diagram.graphics.beginBitmapFill(_dia_bmp);
 			_diagram.graphics.drawRect(0, 0, _dia_bmp.width, _dia_bmp.height);
@@ -529,7 +544,7 @@ package away3d.debug
 			}
 		}
 		
-
+		
 		
 		
 		private function _redrawWindow() : void
@@ -549,7 +564,7 @@ package away3d.debug
 			_min_max_btn.rotation = _minimized? 180 : 0;
 			
 			// Position counters
-			_btm_bar.y = plate_height-21;
+			_btm_bar.y = plate_height-_BOTTOM_BAR_HEIGHT;
 			_btm_bar_hit.y = _btm_bar.y;
 			
 			// Hide/show diagram for minimized/maximized view respectively
@@ -574,11 +589,11 @@ package away3d.debug
 			_fps_tf.text = _fps.toString().concat('/', stage.frameRate);
 			_afps_tf.text = Math.round(_avg_fps).toString();
 			_ram_tf.text = _getRamString(_ram).concat(' / ', _getRamString(_max_ram));
-
+			
 			
 			// Move entire diagram
 			_dia_bmp.scroll(1, 0);
-
+			
 			
 			// Only redraw polycount if there is a  view available
 			// or they won't have been calculated properly
@@ -592,6 +607,9 @@ package away3d.debug
 			else {
 				_poly_tf.text = 'n/a (no view)';
 			}
+			
+			// Show software (SW) or hardware (HW)
+			_swhw_tf.text = Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D.driverInfo	== "Software" ? 'SW' : 'HW';
 			
 			// Plot current framerate
 			dia_y = _dia_bmp.height - Math.floor(_fps/stage.frameRate * _dia_bmp.height);
@@ -669,7 +687,7 @@ package away3d.debug
 		public function reset() : void
 		{
 			var i : int;
-		
+			
 			// Reset all values
 			_updates = 0;
 			_num_frames = 0;
@@ -715,7 +733,7 @@ package away3d.debug
 			// whole pixels to avoid weird anti-aliasing
 			this.x = Math.round(this.x);
 			this.y = Math.round(this.y);
-
+			
 			
 			_dragging = false; 
 			stage.removeEventListener(Event.MOUSE_LEAVE, _onMouseUpOrLeave);
@@ -813,7 +831,7 @@ package away3d.debug
 		/**
 		 * @private
 		 * Reset just the average FPS counter.
-		*/
+		 */
 		private function _onAverageFpsClick_reset(ev : MouseEvent) : void
 		{
 			if (!_dragging) {
