@@ -609,7 +609,14 @@ package away3d.debug
 			}
 			
 			// Show software (SW) or hardware (HW)
-			_swhw_tf.text = Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D.driverInfo	== "Software" ? 'SW' : 'HW';
+			_swhw_tf.text = "?";
+			if (stage &&
+					Stage3DManager.getInstance(stage) &&
+					Stage3DManager.getInstance(stage).getStage3DProxy(0) &&
+					Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D)
+			{
+				_swhw_tf.text = Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D.driverInfo	== "Software" ? "SW" : "HW";
+			}
 			
 			// Plot current framerate
 			dia_y = _dia_bmp.height - Math.floor(_fps/stage.frameRate * _dia_bmp.height);
