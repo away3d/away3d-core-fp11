@@ -40,7 +40,19 @@ package away3d.core.render
 			_backgroundR = 1;
 			_backgroundG = 1;
 			_backgroundB = 1;
-//			_renderableSorter = new DepthSorter();
+		}
+
+
+		arcane override function set backgroundR(value : Number) : void
+		{
+		}
+
+		arcane override function set backgroundG(value : Number) : void
+		{
+		}
+
+		arcane override function set backgroundB(value : Number) : void
+		{
 		}
 
 		/**
@@ -48,8 +60,14 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector) : void
 		{
-			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+
+			_context.setDepthTest(false, Context3DCompareMode.LESS);
+
+			if (entityCollector.skyBox)
+				drawSkyBox(entityCollector);
+
+			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			drawRenderables(entityCollector.opaqueRenderables, entityCollector);
 
 			if (_renderBlended)
@@ -57,6 +75,17 @@ package away3d.core.render
 
 			if (_activeMaterial) _activeMaterial.deactivate(_context);
 			_activeMaterial = null;
+		}
+
+		private function drawSkyBox(entityCollector : EntityCollector) : void
+		{
+			var skyBox : IRenderable = entityCollector.skyBox;
+			var material : MaterialBase = skyBox.material;
+			var camera : Camera3D = entityCollector.camera;
+
+			material.activateForDepth(_context, _contextIndex, camera);
+			material.renderDepth(skyBox, _context, _contextIndex, camera);
+			material.deactivateForDepth(_context);
 		}
 
 		/**
