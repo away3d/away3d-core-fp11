@@ -1,6 +1,5 @@
 package away3d.animators
 {
-	import away3d.animators.data.AnimationSequenceBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.data.SkeletonAnimationState;
 	import away3d.animators.skeleton.SkeletonTimelineClipNode;
@@ -12,32 +11,24 @@ package away3d.animators
 	/**
 	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
 	 */
-	public class SkeletonAnimator extends AnimatorBase
+	public class SkeletonAnimator extends SkeletonAnimatorBase
 	{
 		private var _sequences : Array;
 		private var _clipNode : SkeletonTimelineClipNode;
-		private var _updateRootPosition : Boolean = true;
-		private var _target : SkeletonAnimationState;
 
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
 		public function SkeletonAnimator(target : SkeletonAnimationState)
 		{
+			super(target);
 			_sequences = [];
-			_target = target;
-			_clipNode = new SkeletonTimelineClipNode(target.numJoints);
-			target.blendTree = _clipNode;
 		}
 
-		public function get updateRootPosition() : Boolean
-		{
-			return _updateRootPosition;
-		}
 
-		public function set updateRootPosition(value : Boolean) : void
+		override protected function createBlendTree() : SkeletonTreeNode
 		{
-			_updateRootPosition = value;
+			return new SkeletonTimelineClipNode(_target.numJoints)
 		}
 
 		/**
@@ -70,21 +61,17 @@ package away3d.animators
 		 */
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			var blendTree : SkeletonTreeNode = SkeletonAnimationState(_target).blendTree;
 			_clipNode.time += scaledDT / _clipNode.clip.duration;
-			_target.invalidateState();
-			blendTree.updatePositionData();
-			if (_updateRootPosition)
-				_target.applyRootDelta();
+			super.updateAnimation(realDT, scaledDT);
 		}
 
 		/**
 		 * Retrieves a sequence with a given name.
 		 * @private
 		 */
-		arcane function getSequence(sequenceName : String) : AnimationSequenceBase
-		{
-			return _sequences[sequenceName];
-		}
+		/*arcane function getSequence(sequenceName : String) : AnimationSequenceBase
+		 {
+		 return _sequences[sequenceName];
+		 } */
 	}
 }

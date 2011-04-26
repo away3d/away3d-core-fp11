@@ -18,7 +18,7 @@ package away3d.animators
 	/**
 	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
 	 */
-	public class BlendingSkeletonAnimator extends AnimatorBase
+	public class BlendingSkeletonAnimator extends SkeletonAnimatorBase
 	{
 		private var _clips : Array;
 		private var _lerpNode : SkeletonNaryLERPNode;
@@ -27,46 +27,28 @@ package away3d.animators
 		private var _activeAbsClips : Vector.<int>;
 		private var _numActiveClips : uint;
 		private var _blendWeights : Vector.<Number>;
-		private var _updateRootPosition : Boolean = true;
-
-		private var _target : SkeletonAnimationState;
 
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
 		public function BlendingSkeletonAnimator(target : SkeletonAnimationState)
 		{
+			super(target);
 			_clips = [];
 			_activeAbsClips = new Vector.<int>();
 			_blendWeights = new Vector.<Number>();
 			_additiveNodes = [];
-			_target = target;
-			initTree(target);
 		}
 
-		public function get rootDelta() : Vector3D
-        {
-            return _mainNode? _mainNode.rootDelta : null;
-        }
 
-		public function get updateRootPosition() : Boolean
+		override protected function createBlendTree() : SkeletonTreeNode
 		{
-			return _updateRootPosition;
-		}
-
-		public function set updateRootPosition(value : Boolean) : void
-		{
-			_updateRootPosition = value;
-		}
-
-		private function initTree(state : SkeletonAnimationState) : void
-		{
-			_lerpNode = new SkeletonNaryLERPNode(state.numJoints);
-
-			state.blendTree = _lerpNode;
+			_lerpNode = new SkeletonNaryLERPNode(_target.numJoints);
 
 //			mainNode also necessary since might be different from lerpNode when using additive blending
 			_mainNode = _lerpNode;
+
+			return _lerpNode;
 		}
 
 		public function setWeight(clipName : String, weight : Number) : void
@@ -169,14 +151,10 @@ package away3d.animators
 		 */
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			if (_mainNode && _numActiveClips > 0) {
+			if (_numActiveClips > 0) {
 				_mainNode.time += scaledDT / _mainNode.duration;
 
-				_target.invalidateState();
-				_mainNode.updatePositionData();
-
-				if (_updateRootPosition)
-					_target.applyRootDelta();
+				super.updateAnimation(realDT, scaledDT);
 			}
 		}
 

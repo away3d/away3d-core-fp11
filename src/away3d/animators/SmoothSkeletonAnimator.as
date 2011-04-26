@@ -14,7 +14,7 @@ package away3d.animators
 	/**
 	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
 	 */
-	public class SmoothSkeletonAnimator extends AnimatorBase
+	public class SmoothSkeletonAnimator extends SkeletonAnimatorBase
 	{
 		private var _clips : Array;
 		private var _activeClipIndex : int = -1;
@@ -25,35 +25,22 @@ package away3d.animators
 		private var _mainWeight : Number = 1;
 		private var _updateRootPosition : Boolean = true;
 
-		private var _target : SkeletonAnimationState;
-
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
 		public function SmoothSkeletonAnimator(target : SkeletonAnimationState)
 		{
+			super(target);
 			_clips = [];
 			_fadeOutClips = new Vector.<int>();
 			_fadeOutSpeeds = new Vector.<Number>();
-			_target = target;
-			initTree(target);
-		}
-
-		public function get updateRootPosition() : Boolean
-		{
-			return _updateRootPosition;
-		}
-
-		public function set updateRootPosition(value : Boolean) : void
-		{
-			_updateRootPosition = value;
 		}
 
 
-		private function initTree(state : SkeletonAnimationState) : void
+		override protected function createBlendTree() : SkeletonTreeNode
 		{
-			_lerpNode = new SkeletonNaryLERPNode(state.numJoints);
-			state.blendTree = _lerpNode;
+			_lerpNode = new SkeletonNaryLERPNode(_target.numJoints);
+			return _lerpNode;
 		}
 
 		/**
@@ -114,11 +101,7 @@ package away3d.animators
 
 			_lerpNode.time += scaledDT / _lerpNode.duration;
 
-			_target.invalidateState();
-			blendTree.updatePositionData();
-
-			if (_updateRootPosition)
-				_target.applyRootDelta();
+			super.updateAnimation(realDT, scaledDT);
 		}
 
 		private function updateWeights(dt : Number) : void
@@ -153,9 +136,9 @@ package away3d.animators
 		 * Retrieves a sequence with a given name.
 		 * @private
 		 */
-		arcane function getSequence(sequenceName : String) : AnimationSequenceBase
+		/*arcane function getSequence(sequenceName : String) : AnimationSequenceBase
 		{
 			return _clips[sequenceName];
-		}
+		}  */
 	}
 }

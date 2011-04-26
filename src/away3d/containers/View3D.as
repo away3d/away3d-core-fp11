@@ -12,8 +12,7 @@ package away3d.containers
 	import away3d.core.traverse.EntityCollector;
 	import away3d.filters.Filter3DBase;
 	import away3d.lights.LightBase;
-	import away3d.materials.MaterialBase;
-	
+
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -122,10 +121,10 @@ package away3d.containers
 			_depthRenderer.stage3DProxy = stage3DProxy;
 			_renderer.viewPortX = _x;
 			_renderer.viewPortY = _y;
-			_renderer.backBufferWidth = _width;
-			_renderer.backBufferHeight = _height;
-			_renderer.viewPortWidth = _width*_scaleX;
-			_renderer.viewPortHeight = _height*_scaleY;
+			_depthRenderer.backBufferWidth = _renderer.backBufferWidth = _width;
+			_depthRenderer.backBufferHeight = _renderer.backBufferHeight = _height;
+			_depthRenderer.viewPortWidth = _renderer.viewPortWidth = _width*_scaleX;
+			_depthRenderer.viewPortHeight = _renderer.viewPortHeight = _height*_scaleY;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
@@ -193,6 +192,8 @@ package away3d.containers
 			_hitTestRenderer.viewPortWidth = value;
 			_renderer.viewPortWidth = value*_scaleX;
 			_renderer.backBufferWidth = value;
+			_depthRenderer.viewPortWidth = value;
+			_depthRenderer.backBufferWidth = value;
 			_width = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
@@ -211,6 +212,8 @@ package away3d.containers
 			_hitTestRenderer.viewPortHeight = value;
 			_renderer.viewPortHeight = value*_scaleY;
 			_renderer.backBufferHeight = value;
+			_depthRenderer.viewPortHeight = value;
+			_depthRenderer.backBufferHeight = value;
 			_height = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
@@ -313,9 +316,8 @@ package away3d.containers
 
 			updateLights(_entityCollector);
 
-			if (_requireDepthRender) {
+			if (_requireDepthRender)
 				renderSceneDepth(_entityCollector);
-			}
 
 			if (numFilters > 0 && context) {
 				var nextFilter : Filter3DBase;

@@ -59,6 +59,7 @@ package away3d.core.partition
 		public function removeFromParent() : void
 		{
 			if (_parent) _parent.removeNode(this);
+			_parent = null;
 		}
 
 		/**
