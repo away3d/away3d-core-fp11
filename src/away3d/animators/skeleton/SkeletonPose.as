@@ -1,7 +1,10 @@
 package away3d.animators.skeleton
 {
 	import away3d.core.math.Quaternion;
-
+	import away3d.loading.assets.AssetType;
+	import away3d.loading.assets.IAsset;
+	import away3d.loading.assets.NamedAssetBase;
+	
 	import flash.geom.Vector3D;
 
 	/**
@@ -10,7 +13,7 @@ package away3d.animators.skeleton
 	 * reference to a Skeleton instance, since several skeletons could be influenced by the same pose (fe: animation
 	 * sequences that can apply to any target with a valid skeleton)
 	 */
-	public class SkeletonPose
+	public class SkeletonPose extends NamedAssetBase implements IAsset
 	{
 		/**
 		 * The joint poses for the skeleton. The JointPoses indices correspond to the target skeleton's joints.
@@ -27,6 +30,12 @@ package away3d.animators.skeleton
 			_numJoints = numJoints;
 			jointPoses = new Vector.<JointPose>(_numJoints, true);
 			for (var i : uint = 0; i < _numJoints; ++i) jointPoses[i] = new JointPose();
+		}
+		
+		
+		public function get assetType() : String
+		{
+			return AssetType.SKELETON_POSE;
 		}
 
 		/**

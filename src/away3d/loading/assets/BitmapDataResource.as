@@ -1,6 +1,7 @@
-package away3d.loading
+package away3d.loading.assets
 {
 	import flash.display.BitmapData;
+	import away3d.loading.IResource;
 
 	/**
 	 * BitmapDataResource is a wrapper for loaded BitmapData, allowing it to be used uniformly as a resource when
