@@ -24,6 +24,8 @@ package away3d.animators.data
 
 		/**
 		 * Adds a frame with a given duration to the sequence.
+		 * @param geometry The Geometry for this frame of the sequence
+		 * @param duration milliseconds to show this frame of the sequence
 		 */
 		arcane function addFrame(geometry : Geometry, duration : uint) : void
 		{
