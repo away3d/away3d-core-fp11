@@ -20,6 +20,7 @@ package away3d.materials.passes
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -34,6 +35,7 @@ package away3d.materials.passes
 		private var _normalMapTexture : Texture3DProxy;
 		private var _cameraPositionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
 		private var _lightColorData : Vector.<Number>;
+		private var _uvTransformData : Vector.<Number>;
 
 		private var _colorTransformMethod : ColorTransformMethod;
 		private var _ambientMethod : BasicAmbientMethod;
@@ -60,6 +62,7 @@ package away3d.materials.passes
 		protected var _lightsColorIndex : int;
 		protected var _normalMapIndex : int;
 		protected var _cameraPositionIndex : int;
+		protected var _uvTransformIndex : int;
 
 		private var _projectionFragmentReg : ShaderRegisterElement;
 		private var _normalFragmentReg : ShaderRegisterElement;
@@ -84,11 +87,12 @@ package away3d.materials.passes
 		private var _commonsReg : ShaderRegisterElement;
 		private var _commonsRegIndex : int;
 
+		private var _uvTransform : Matrix;
+
 		private var _commonsData : Vector.<Number> = Vector.<Number>([.5, 0, 0, 1]);
 
 		arcane var _passes : Vector.<MaterialPassBase>;
 		arcane var _passesDirty : Boolean;
-
 
 
 		/**
@@ -107,6 +111,18 @@ package away3d.materials.passes
 			_diffuseMethod = new BasicDiffuseMethod();
 			_specularMethod = new BasicSpecularMethod();
 			_diffuseMethod.parentPass = _specularMethod.parentPass = this;
+		}
+
+		public function get uvTransform() : Matrix
+		{
+			return _uvTransform;
+		}
+
+		public function set uvTransform(value : Matrix) : void
+		{
+			if ((value && !_uvTransform) || (!value && _uvTransform)) invalidateShaderProgram();
+			_uvTransform = value;
+			_uvTransformData = value? Vector.<Number>([1, 0, 0, 0, 0, 1, 0, 0]) : null;
 		}
 
 		/**
@@ -331,6 +347,12 @@ package away3d.materials.passes
 			super.activate(context, contextIndex, camera);
 
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
+
+			if (_uvTransformIndex >= 0) {
+				_uvTransformData[0] = _uvTransform.a; _uvTransformData[1] = _uvTransform.b; _uvTransformData[3] = _uvTransform.tx;
+				_uvTransformData[4] = _uvTransform.c; _uvTransformData[5] = _uvTransform.d; _uvTransformData[7] = _uvTransform.ty;
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _uvTransformIndex, _uvTransformData, 2);
+			}
 
 			_ambientMethod.activate(context, contextIndex);
 			if (_shadowMethod) _shadowMethod.activate(context, contextIndex);
@@ -593,6 +615,7 @@ package away3d.materials.passes
 			_uvDependencies = 0;
 			_globalPosDependencies = 0;
 
+			_uvTransformIndex = -1;
 			_normalMapIndex = -1;
 			_cameraPositionIndex = -1;
 			_commonsRegIndex = -1;
@@ -657,12 +680,20 @@ package away3d.materials.passes
 			_uvBufferIndex = uvAttributeReg.index;
 			++_numUsedStreams;
 
-			_vertexCode += AGAL.mov(_uvVaryingReg.toString(), uvAttributeReg.toString());
+			if (_uvTransform) {
+				// a, b, 0, tx
+				// c, d, 0, ty
+				var uvTransform1 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
+				var uvTransform2 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
+				_uvTransformIndex = uvTransform1.index;
 
-//			len = _methods.length;
-
-//			for (var i : uint = 0; i < len; ++i)
-//				if (_methods[i]) _methods[i].UVFragmentReg = _uvVaryingReg;
+				_vertexCode += AGAL.dp4(_uvVaryingReg+".x", uvAttributeReg.toString(), uvTransform1.toString());
+				_vertexCode += AGAL.dp4(_uvVaryingReg+".y", uvAttributeReg.toString(), uvTransform2.toString());
+				_vertexCode += AGAL.mov(_uvVaryingReg+".zw", uvAttributeReg+".zw");
+			}
+			else {
+				_vertexCode += AGAL.mov(_uvVaryingReg.toString(), uvAttributeReg.toString());
+			}
 		}
 
 		private function compileNormalCode() : void
