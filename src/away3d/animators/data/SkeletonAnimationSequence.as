@@ -32,6 +32,8 @@ package away3d.animators.data
 
 		/**
 		 * Adds a frame with a given duration to the sequence.
+		 * @param frame The SkeletonPose for this frame of the sequence
+		 * @param duration milliseconds to show this frame of the sequence
 		 */
 		arcane function addFrame(frame : SkeletonPose, duration : uint) : void
 		{

@@ -24,6 +24,8 @@ package away3d.animators.data
 
 		/**
 		 * Adds a frame with a given duration to the sequence.
+		 * @param geometry The Geometry for this frame of the sequence
+		 * @param duration milliseconds to show this frame of the sequence
 		 */
 		arcane function addFrame(geometry : Geometry, duration : uint) : void
 		{
@@ -31,25 +33,5 @@ package away3d.animators.data
 			_frames.push(geometry);
 			_durations.push(duration);
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		/*arcane override function applyState(state : AnimationStateBase, dt : uint) : void
-		 {
-		 super.applyState(state, dt);
-		 updateFrames(_animationTimes[state]);
-
-		 var animState : VertexAnimationState = VertexAnimationState(state);
-		 var poses : Vector.<Geometry> = animState.poses;
-		 var weights : Vector.<Number> = animState.weights;
-
-		 poses[uint(0)] = _frames[_frame1];
-		 poses[uint(1)] = _frames[_frame2];
-		 weights[uint(0)] = 1 - _blendWeight;
-		 weights[uint(1)] = _blendWeight;
-
-		 state.invalidateState();
-		 }     */
 	}
 }
