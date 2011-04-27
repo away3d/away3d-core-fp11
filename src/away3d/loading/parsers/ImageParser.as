@@ -24,9 +24,9 @@ package away3d.loading.parsers
 		 * @param uri The url or id of the data or file to be parsed.
 		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
-		public function ImageParser(uri : String)
+		public function ImageParser()
 		{
-			super(uri, ParserDataFormat.BINARY);
+			super(ParserDataFormat.BINARY);
 		}
 		
 		/**
@@ -37,7 +37,7 @@ package away3d.loading.parsers
 		public static function supportsType(extension : String) : Boolean
 		{
 			extension = extension.toLowerCase();
-			return extension == "jpg" || extension == "png";
+			return extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "gif";
 		}
 		
 		/**
@@ -51,14 +51,6 @@ package away3d.loading.parsers
 			return false;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function initHandle() : IResource
-		{
-			_bitmapDataResource = new BitmapDataAsset();
-			return _bitmapDataResource;
-		}
 		
 		/**
 		 * @inheritDoc
