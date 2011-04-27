@@ -1,6 +1,6 @@
 package away3d.loading.parsers
 {
-	import away3d.loading.assets.BitmapDataResource;
+	import away3d.loading.assets.BitmapDataAsset;
 	import away3d.loading.IResource;
 	
 	import flash.display.Bitmap;
@@ -17,7 +17,7 @@ package away3d.loading.parsers
 		private var _startedParsing : Boolean;
 		private var _doneParsing : Boolean;
 		private var _loader : Loader;
-		private var _bitmapDataResource : BitmapDataResource;
+		private var _bitmapDataResource : BitmapDataAsset;
 		
 		/**
 		 * Creates a new ImageParser object.
@@ -56,7 +56,7 @@ package away3d.loading.parsers
 		 */
 		override protected function initHandle() : IResource
 		{
-			_bitmapDataResource = new BitmapDataResource();
+			_bitmapDataResource = new BitmapDataAsset();
 			return _bitmapDataResource;
 		}
 		

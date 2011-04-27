@@ -7,7 +7,7 @@ package away3d.loading.assets
 	 * BitmapDataResource is a wrapper for loaded BitmapData, allowing it to be used uniformly as a resource when
 	 * loading, parsing, and listing/resolving dependencies.
 	 */
-	public class BitmapDataResource implements IResource
+	public class BitmapDataAsset implements IResource
 	{
 		private var _name : String;
 		private var _bitmapData : BitmapData;
@@ -16,7 +16,7 @@ package away3d.loading.assets
 		 * Creates a new BitmapDataResource object.
 		 * @param bitmapData An optional BitmapData object to use as the resource data.
 		 */
-		public function BitmapDataResource(bitmapData : BitmapData = null)
+		public function BitmapDataAsset(bitmapData : BitmapData = null)
 		{
 			_bitmapData = bitmapData;
 		}
