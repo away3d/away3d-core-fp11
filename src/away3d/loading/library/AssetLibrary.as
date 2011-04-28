@@ -135,14 +135,14 @@ package away3d.loading.library
 		 * @param parser An optional parser object that will translate the data into a usable resource.
 		 * @return A handle to the retrieved resource.
 		 */
-		private function parseResource(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, ns : String = null) : ResourceLoadSession
+		private function parseResource(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : ResourceLoadSession
 		{
 			var session : ResourceLoadSession = new ResourceLoadSession();
 			_loadingSessions.push(session);
 			session.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
 			session.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 			session.addEventListener(ResourceEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
-			session.parse(data, ns, ignoreDependencies, parser);
+			session.parse(data, '', ignoreDependencies, parser, namespace);
 			
 			return session;
 		}

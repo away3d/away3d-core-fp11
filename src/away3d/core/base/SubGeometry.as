@@ -25,6 +25,7 @@ package away3d.core.base
 		// raw data:
 		protected var _vertices : Vector.<Number>;
 		protected var _uvs : Vector.<Number>;
+		protected var _secondaryUvs : Vector.<Number>;
 		protected var _vertexNormals : Vector.<Number>;
 		protected var _vertexTangents : Vector.<Number>;
 		protected var _indices : Vector.<uint>;
@@ -35,6 +36,7 @@ package away3d.core.base
 		// buffers:
 		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _uvBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
+		protected var _secondaryUvBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _vertexNormalBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _vertexTangentBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _indexBuffer : Vector.<IndexBuffer3D> = new Vector.<IndexBuffer3D>(8);
@@ -53,6 +55,7 @@ package away3d.core.base
 		// buffer dirty flags, per context:
 		protected var _vertexBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _uvBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
+		protected var _secondaryUvBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _indexBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexNormalBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexTangentBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
@@ -176,6 +179,18 @@ package away3d.core.base
 			return _uvBuffer[contextIndex];
 		}
 
+		public function getSecondaryUVBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		{
+			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
+
+			if (_secondaryUvBufferDirty[contextIndex] || !_secondaryUvBuffer[contextIndex]) {
+				(_secondaryUvBuffer[contextIndex] ||= context.createVertexBuffer(_numVertices, 2)).uploadFromVector(_secondaryUvs, 0, _numVertices);
+				_secondaryUvBufferDirty[contextIndex] = false;
+			}
+
+			return _secondaryUvBuffer[contextIndex];
+		}
+
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex normals.
 		 * @param context The Context3D for which we request the buffer
@@ -241,6 +256,7 @@ package away3d.core.base
 			var clone : SubGeometry = new SubGeometry();
 			clone.updateVertexData(_vertices.concat());
 			clone.updateUVData(_uvs.concat());
+			clone.updateSecondaryUVData(_secondaryUvs.concat());
 			clone.updateIndexData(_indices.concat());
 			if (!_autoDeriveVertexNormals) clone.updateVertexNormalData(_vertexNormals.concat());
 			if (!_autoDeriveVertexTangents) clone.updateVertexTangentData(_vertexTangents.concat());
@@ -279,6 +295,7 @@ package away3d.core.base
 			disposeVertexBuffers(_vertexBuffer);
 			disposeVertexBuffers(_vertexNormalBuffer);
 			disposeVertexBuffers(_uvBuffer);
+			disposeVertexBuffers(_secondaryUvBuffer);
 			disposeVertexBuffers(_vertexTangentBuffer);
 			disposeIndexBuffers(_indexBuffer);
 		}
@@ -317,6 +334,11 @@ package away3d.core.base
 			return _uvs;
 		}
 
+		public function get secondaryUVData() : Vector.<Number>
+		{
+			return _secondaryUvs;
+		}
+
 		/**
 		 * Updates the uv coordinates of the SubGeometry.
 		 * @param uvs The uv coordinates to upload.
@@ -328,6 +350,12 @@ package away3d.core.base
 			_faceTangentsDirty = true;
 			_uvs = uvs;
 			invalidateBuffers(_uvBufferDirty);
+		}
+
+		public function updateSecondaryUVData(uvs : Vector.<Number>) : void
+		{
+			_secondaryUvs = uvs;
+			invalidateBuffers(_secondaryUvBufferDirty);
 		}
 
 		/**

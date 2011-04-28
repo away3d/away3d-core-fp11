@@ -135,7 +135,7 @@ package away3d.animators.skeleton
 
 			lastFrame = numFrames - 1;
 			if (looping) {
-				if (time >= 1) time -= int(time);
+				if (time > 1) time -= int(time);
 				if (time < 0) time -= int(time)-1;
 
 				if (_clip._fixedFrameRate) {
