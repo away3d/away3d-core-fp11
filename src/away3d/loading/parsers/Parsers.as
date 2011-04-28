@@ -14,10 +14,14 @@ package away3d.loading.parsers
 		 * file formats are used, SWF file size can be saved by adding the parsers
 		 * individually using ResourceManager.addParser().
 		 * 
-		 * @see away3d.loading.ResourceManager.addParser()
+		 * A third way is to specify a parser for each loaded file, thereby bypassing
+		 * the auto-detection mechanisms altogether, while at the same time allowing
+		 * any properties that are unique to that parser to be set for that load.
+		 * 
+		 * @see away3d.loading.library.AssetLibrary.addParser()
 		*/
 		public static const ALL_BUNDLED : Vector.<Class> = Vector.<Class>([
-			AC3DParser, AWD1Parser, AWD2Parser, ColladaParser, Max3DSParser,
+			AC3DParser, AWDParser, ColladaParser, Max3DSParser,
 			MD2Parser, MD5AnimParser, MD5MeshParser, OBJParser
 		]);
 	}
