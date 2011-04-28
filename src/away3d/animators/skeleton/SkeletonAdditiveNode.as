@@ -5,7 +5,7 @@ package away3d.animators.skeleton
 {
 
 	import away3d.core.math.Quaternion;
-
+	
 	import flash.geom.Vector3D;
 
 	public class SkeletonAdditiveNode extends SkeletonTreeNode
@@ -16,9 +16,9 @@ package away3d.animators.skeleton
 
 		private static var _tempQuat : Quaternion = new Quaternion();
 
-		public function SkeletonAdditiveNode(numJoints : uint)
+		public function SkeletonAdditiveNode()
 		{
-			super(numJoints);
+			super();
 		}
 
 		override public function get duration() : Number
@@ -54,6 +54,13 @@ package away3d.animators.skeleton
 		// todo: return whether or not update was performed
 		override public function updatePose(skeleton : Skeleton) : void
 		{
+			/*if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
+			    (skeleton.numJoints != baseInput.skeletonPose.numJointPoses) ||
+					(skeleton.numJoints != differenceInput.skeletonPose.numJointPoses))
+			{
+				throw new Error("joint counts don't match!");
+			}*/
+			
 			// todo: should only update if blendWeight dirty, or if either child returns false
 			baseInput.updatePose(skeleton);
 			differenceInput.updatePose(skeleton);
@@ -65,9 +72,13 @@ package away3d.animators.skeleton
 			var base : JointPose, diff : JointPose;
 			var basePos : Vector3D, diffPos : Vector3D;
 			var tr : Vector3D;
+			var numJoints : uint = skeleton.numJoints;
 
-			for (var i : uint = 0; i < _numJoints; ++i) {
-				endPose = endPoses[i];
+			// :s
+			if (endPoses.length != numJoints) endPoses.length = numJoints;
+
+			for (var i : uint = 0; i < numJoints; ++i) {
+				endPose = endPoses[i] ||= new JointPose();
 				base = basePoses[i];
 				diff = diffPoses[i];
 				basePos = base.translation;
