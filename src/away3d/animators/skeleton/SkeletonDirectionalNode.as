@@ -20,9 +20,9 @@ package away3d.animators.skeleton
 		private var _blendWeight : Number;
 		private var _blendDirty : Boolean;
 
-		public function SkeletonDirectionalNode(numJoints : uint)
+		public function SkeletonDirectionalNode()
 		{
-			super(numJoints);
+			super();
 		}
 
 		override public function set time(value : Number) : void
@@ -47,6 +47,13 @@ package away3d.animators.skeleton
 
 		override public function updatePose(skeleton : Skeleton) : void
 		{
+			if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
+				  (skeleton.numJoints != _inputA.skeletonPose.numJointPoses) ||
+				  (skeleton.numJoints != _inputB.skeletonPose.numJointPoses))
+			{
+				throw new Error("joint counts don't match!");
+			}
+			
 			if (_blendDirty) updateBlend();
 			_inputA.updatePose(skeleton);
 			_inputB.updatePose(skeleton);
@@ -62,7 +69,7 @@ package away3d.animators.skeleton
 
 			_duration = durA + _blendWeight*(_inputB.duration - durA);
 
-			for (var i : uint = 0; i < _numJoints; ++i) {
+			for (var i : uint = 0; i < skeleton.numJoints; ++i) {
 				endPose = endPoses[i];
 				pose1 = poses1[i];
 				pose2 = poses2[i];

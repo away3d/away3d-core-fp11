@@ -40,14 +40,13 @@ package away3d.animators
 			_additiveNodes = [];
 		}
 
-
 		override protected function createBlendTree() : SkeletonTreeNode
 		{
-			_lerpNode = new SkeletonNaryLERPNode(_target.numJoints);
+			_lerpNode = new SkeletonNaryLERPNode();
+
 
 //			mainNode also necessary since might be different from lerpNode when using additive blending
 			_mainNode = _lerpNode;
-
 			return _lerpNode;
 		}
 
@@ -124,8 +123,8 @@ package away3d.animators
 		{
 			var node : SkeletonTimelineClipNode;
 			var additive : SkeletonAdditiveNode;
-			additive = new SkeletonAdditiveNode(_target.numJoints);
-			node = new SkeletonTimelineClipNode(_target.numJoints);
+			additive = new SkeletonAdditiveNode();
+			node = new SkeletonTimelineClipNode();
 			node.clip = sequence;
 			_clips[sequence.name] = node;
 			_additiveNodes[sequence.name] = additive;
@@ -139,7 +138,7 @@ package away3d.animators
 		{
 			_blendWeights[_blendWeights.length] = 0;
 
-			var node : SkeletonTimelineClipNode = new SkeletonTimelineClipNode(_target.numJoints);
+			var node : SkeletonTimelineClipNode = new SkeletonTimelineClipNode();
 			_clips[sequence.name] = node;
 			node.clip = sequence;
 			_lerpNode.addInput(node);
