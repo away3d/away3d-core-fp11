@@ -17,7 +17,6 @@ package away3d.animators.skeleton
 		protected var _duration : Number = 0;
 		public var name : String;
 		public var skeletonPose : SkeletonPose;
-		protected var _numJoints : uint;
 
 		public var rootDelta : Vector3D;
 
@@ -25,11 +24,10 @@ package away3d.animators.skeleton
 		 * Creates a new SkeletonTreeNode object.
 		 * @param numJoints The amount of joint in the target skeleton.
 		 */
-		public function SkeletonTreeNode(numJoints : uint)
+		public function SkeletonTreeNode()
 		{
 			rootDelta = new Vector3D();
-			_numJoints = numJoints;
-			skeletonPose = new SkeletonPose(numJoints);
+			skeletonPose = new SkeletonPose();
 		}
 
 		/**
