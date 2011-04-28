@@ -3,6 +3,7 @@ package away3d.loading.library
 	import away3d.events.AssetPathEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.events.ResourceEvent;
+	import away3d.loading.AssetLoader;
 	import away3d.loading.assets.IAsset;
 	import away3d.loading.parsers.ParserBase;
 	
@@ -15,8 +16,6 @@ package away3d.loading.library
 	{
 		private static var _instances : Object = {};
 			
-		private static var _parsers : Vector.<Class>; // TODO: replace with prioritized list
-		
 		private var _loadingSessions : Vector.<ResourceLoadSession>;
 		
 		private var _assets : Vector.<IAsset>;
@@ -91,18 +90,12 @@ package away3d.loading.library
 		
 		public static function enableParser(parserClass : Class) : void
 		{
-			if (!_parsers)
-				_parsers = new Vector.<Class>;
-			
-			_parsers.push(parserClass);
+			AssetLoader.enableParser(parserClass);
 		}
 		
 		public static function enableParsers(parserClasses : Vector.<Class>) : void
 		{
-			if (_parsers)
-				_parsers = _parsers.concat(parserClasses);
-			else
-				_parsers = parserClasses;
+			AssetLoader.enableParsers(parserClasses);
 		}
 		
 		
@@ -121,7 +114,7 @@ package away3d.loading.library
 		 */
 		private function loadResource(req : URLRequest, ignoreDependencies : Boolean, parser : ParserBase, namespace : String) : ResourceLoadSession
 		{
-			var session : ResourceLoadSession = new ResourceLoadSession(_parsers);
+			var session : ResourceLoadSession = new ResourceLoadSession();
 			_loadingSessions.push(session);
 			session.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
 			session.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
@@ -144,7 +137,7 @@ package away3d.loading.library
 		 */
 		private function parseResource(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, ns : String = null) : ResourceLoadSession
 		{
-			var session : ResourceLoadSession = new ResourceLoadSession(_parsers);
+			var session : ResourceLoadSession = new ResourceLoadSession();
 			_loadingSessions.push(session);
 			session.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
 			session.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);

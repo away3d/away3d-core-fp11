@@ -8,5 +8,6 @@ package away3d.loading.assets
 		public static const SKELETON_POSE : String = 'skeletonPose';
 		public static const CONTAINER : String = 'container';
 		public static const ANIMATION : String = 'animation';
+		public static const BITMAP : String = 'bitmap';
 	}
 }

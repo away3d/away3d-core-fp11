@@ -14,31 +14,30 @@ package away3d.loading
 	
 	public class Loader3D extends ObjectContainer3D
 	{
-		private var _parsers : Vector.<Class>;
+		private var _useAssetLib : Boolean;
+		private var _assetLibId : String;
 		
-		
-		public function Loader3D(autoDetectParsers : Vector.<Class> = null)
+		public function Loader3D(useAssetLibrary : Boolean = true, assetLibraryId : String = null)
 		{
 			super();
 			
-			_parsers = autoDetectParsers || new Vector.<Class>;
+			_useAssetLib = useAssetLibrary;
+			_assetLibId = assetLibraryId;
 		}
 		
 		
-		public function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, useAssetLibrary : Boolean = true, assetLibraryId : String = null, namespace : String = null) : void
+		public function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : void
 		{
-			if (useAssetLibrary) {
+			if (_useAssetLib) {
 				var lib : AssetLibrary;
 				
-				AssetLibrary.enableParsers(_parsers);
-				
-				lib = AssetLibrary.getInstance(assetLibraryId);
+				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				lib.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 				lib.load(req, ignoreDependencies, parser, namespace);
 			}
 			else {
-				var loader : AssetLoader = new AssetLoader(_parsers);
+				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				loader.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 				loader.load(req, parser);
@@ -46,9 +45,34 @@ package away3d.loading
 		}
 		
 		
-		public function enableParser(parserClass : Class) : void
+		public function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : void
 		{
-			_parsers.push(parserClass);
+			if (_useAssetLib) {
+				var lib : AssetLibrary;
+				
+				lib = AssetLibrary.getInstance(_assetLibId);
+				lib.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
+				lib.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+				lib.parseData(data, ignoreDependencies, parser, namespace);
+			}
+			else {
+				var loader : AssetLoader = new AssetLoader();
+				loader.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
+				loader.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+				loader.parseData(data, parser);
+			}
+		}
+		
+		
+		public static function enableParser(parserClass : Class) : void
+		{
+			AssetLoader.enableParser(parserClass);
+		}
+		
+		
+		public static function enableParsers(parserClasses : Vector.<Class>) : void
+		{
+			AssetLoader.enableParsers(parserClasses);
 		}
 		
 		

@@ -1,7 +1,6 @@
 package away3d.loading.parsers
 {
 	import away3d.loading.assets.BitmapDataAsset;
-	import away3d.loading.IResource;
 	
 	import flash.display.Bitmap;
 	import flash.display.Loader;
@@ -17,7 +16,6 @@ package away3d.loading.parsers
 		private var _startedParsing : Boolean;
 		private var _doneParsing : Boolean;
 		private var _loader : Loader;
-		private var _bitmapDataResource : BitmapDataAsset;
 		
 		/**
 		 * Creates a new ImageParser object.
@@ -71,10 +69,11 @@ package away3d.loading.parsers
 		 * Called when "loading" is complete.
 		 */
 		private function onLoadComplete(event : Event) : void
-		{
-			_bitmapDataResource.bitmapData = Bitmap(_loader.content).bitmapData;
+		{			var asset : BitmapDataAsset = new BitmapDataAsset(Bitmap(_loader.content).bitmapData);
 			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoadComplete);
 			_doneParsing = true;
+			
+			finalizeAsset(asset, 'bitmap');
 		}
 		
 	}

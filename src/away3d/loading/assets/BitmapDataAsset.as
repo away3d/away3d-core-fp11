@@ -1,15 +1,16 @@
 package away3d.loading.assets
 {
-	import flash.display.BitmapData;
 	import away3d.loading.IResource;
+	
+	import flash.display.BitmapData;
+	import flash.events.EventDispatcher;
 
 	/**
 	 * BitmapDataResource is a wrapper for loaded BitmapData, allowing it to be used uniformly as a resource when
 	 * loading, parsing, and listing/resolving dependencies.
 	 */
-	public class BitmapDataAsset implements IResource
+	public class BitmapDataAsset extends NamedAssetBase implements IResource, IAsset
 	{
-		private var _name : String;
 		private var _bitmapData : BitmapData;
 
 		/**
@@ -33,18 +34,11 @@ package away3d.loading.assets
 		{
 			_bitmapData = value;
 		}
-
-		/**
-		 * The name of the resource.
-		 */
-		public function get name() : String
+		
+		
+		public function get assetType() : String
 		{
-			return _name;
-		}
-
-		public function set name(value : String) : void
-		{
-			_name = value;
+			return AssetType.BITMAP;
 		}
 
 		/**
