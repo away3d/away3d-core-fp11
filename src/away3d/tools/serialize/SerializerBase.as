@@ -1,4 +1,4 @@
-package away3d.debug
+package away3d.tools.serialize
 {
 	import away3d.core.math.Quaternion;
 	import away3d.entities.Mesh;

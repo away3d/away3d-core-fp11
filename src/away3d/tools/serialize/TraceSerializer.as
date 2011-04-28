@@ -1,19 +1,11 @@
-package away3d.debug
+package away3d.tools.serialize
 {
-	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.containers.Scene3D;
-	import away3d.core.base.SubGeometry;
-	import away3d.entities.Mesh;
+	import away3d.core.math.Quaternion;
+	
+	import flash.geom.Vector3D;
 	
 	use namespace arcane;
-  
-  import flash.utils.getQualifiedClassName;
-  import away3d.animators.skeleton.SkeletonPose;
-  import away3d.animators.skeleton.JointPose;
-  import away3d.core.math.Quaternion;
-  import flash.geom.Vector3D;
 
   public class TraceSerializer extends SerializerBase
   {
