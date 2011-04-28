@@ -10,5 +10,6 @@ package away3d.loading.assets
 		public static const ANIMATION : String = 'animation';
 		public static const BITMAP : String = 'bitmap';
 		public static const MATERIAL : String = 'material';
+		public static const ANIMATOR : String = 'animator';
 	}
 }
