@@ -41,10 +41,10 @@ package away3d.animators.skeleton
 
 		override public function updatePose(skeleton : Skeleton) : void
 		{
-			if (skeleton.numJoints != skeletonPose.numJointPoses)
-			{
-				throw new Error("joint counts don't match!");
-			}
+//			if (skeleton.numJoints != skeletonPose.numJointPoses)
+//			{
+//				throw new Error("joint counts don't match!");
+//			}
 			
 			var input : SkeletonTreeNode;
 			var weight : Number;
@@ -57,6 +57,10 @@ package away3d.animators.skeleton
 			var i : uint;
 			var w0 : Number, x0 : Number, y0 : Number, z0 : Number;
 			var w1 : Number, x1 : Number, y1 : Number, z1 : Number;
+			var numJoints : uint = skeleton.numJoints;
+
+			// :s
+			if (endPoses.length != numJoints) endPoses.length = numJoints;
 
 			for (var j : uint = 0; j < _numInputs; ++j) {
 				weight = _blendWeights[j];
@@ -70,8 +74,8 @@ package away3d.animators.skeleton
 
 				if (!firstPose) {
 					firstPose = poses;
-					for (i = 0; i < skeleton.numJoints; ++i) {
-						endPose = endPoses[i];
+					for (i = 0; i < numJoints; ++i) {
+						endPose = endPoses[i] ||= new JointPose();
 						pose = poses[i];
 						q = pose.orientation;
 						tr = pose.translation;
