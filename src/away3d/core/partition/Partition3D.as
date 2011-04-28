@@ -83,6 +83,9 @@ package away3d.core.partition
 			}
 
 			node._updateQueueNext = null;
+
+			// any updates have been made undone
+			if (!_updateQueue) _updatesMade = false;
 		}
 
 		/**
