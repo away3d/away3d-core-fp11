@@ -1,15 +1,12 @@
 package away3d.loading.assets
 {
-	import away3d.loading.IResource;
-	
 	import flash.display.BitmapData;
-	import flash.events.EventDispatcher;
 
 	/**
 	 * BitmapDataResource is a wrapper for loaded BitmapData, allowing it to be used uniformly as a resource when
 	 * loading, parsing, and listing/resolving dependencies.
 	 */
-	public class BitmapDataAsset extends NamedAssetBase implements IResource, IAsset
+	public class BitmapDataAsset extends NamedAssetBase implements IAsset
 	{
 		private var _bitmapData : BitmapData;
 

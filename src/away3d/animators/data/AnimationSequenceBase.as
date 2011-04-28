@@ -2,12 +2,10 @@ package away3d.animators.data
 {
 	import away3d.arcane;
 	import away3d.events.AnimatorEvent;
-	import away3d.loading.IResource;
 	import away3d.loading.assets.AssetType;
 	import away3d.loading.assets.IAsset;
 	import away3d.loading.assets.NamedAssetBase;
 	
-	import flash.events.EventDispatcher;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;

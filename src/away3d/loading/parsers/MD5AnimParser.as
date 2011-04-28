@@ -1,11 +1,10 @@
 package away3d.loading.parsers
 {
-	import away3d.arcane;
-	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.data.SkeletonAnimationSequence;
+	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.SkeletonPose;
+	import away3d.arcane;
 	import away3d.core.math.Quaternion;
-	import away3d.loading.IResource;
 	
 	import flash.geom.Vector3D;
 	
