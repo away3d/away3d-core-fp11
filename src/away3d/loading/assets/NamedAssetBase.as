@@ -1,7 +1,7 @@
 package away3d.loading.assets
 {
 	import away3d.arcane;
-	import away3d.events.AssetPathEvent;
+	import away3d.events.AssetEvent;
 	
 	import flash.events.EventDispatcher;
 
@@ -44,8 +44,8 @@ package away3d.loading.assets
 			_name = val;
 			update();
 			
-			if (hasEventListener(AssetPathEvent.ASSET_RENAME))
-				dispatchEvent(new AssetPathEvent(AssetPathEvent.ASSET_RENAME));
+			if (hasEventListener(AssetEvent.ASSET_RENAME))
+				dispatchEvent(new AssetEvent(AssetEvent.ASSET_RENAME));
 		}
 		
 		

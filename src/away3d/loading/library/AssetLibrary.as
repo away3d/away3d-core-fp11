@@ -1,8 +1,8 @@
 package away3d.loading.library
 {
-	import away3d.events.AssetPathEvent;
+	import away3d.events.AssetEvent;
+	import away3d.events.LibraryEvent;
 	import away3d.events.LoaderEvent;
-	import away3d.events.ResourceEvent;
 	import away3d.loading.AssetLoader;
 	import away3d.loading.assets.IAsset;
 	import away3d.loading.parsers.ParserBase;
@@ -116,9 +116,9 @@ package away3d.loading.library
 		{
 			var session : ResourceLoadSession = new ResourceLoadSession();
 			_loadingSessions.push(session);
-			session.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-			session.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
-			session.addEventListener(ResourceEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
+			session.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
+			session.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+			session.addEventListener(LibraryEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
 			session.addEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
 			session.load(req, ignoreDependencies, parser, namespace);
 			
@@ -139,9 +139,9 @@ package away3d.loading.library
 		{
 			var session : ResourceLoadSession = new ResourceLoadSession();
 			_loadingSessions.push(session);
-			session.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-			session.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
-			session.addEventListener(ResourceEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
+			session.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
+			session.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+			session.addEventListener(LibraryEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
 			session.parse(data, '', ignoreDependencies, parser, namespace);
 			
 			return session;
@@ -152,9 +152,9 @@ package away3d.loading.library
 		/**
 		 * Called when a dependency was retrieved.
 		 */
-		private function onDependencyRetrieved(event : ResourceEvent) : void
+		private function onDependencyRetrieved(event : LibraryEvent) : void
 		{
-			if (hasEventListener(ResourceEvent.DEPENDENCY_RETRIEVED))
+			if (hasEventListener(LibraryEvent.DEPENDENCY_RETRIEVED))
 				dispatchEvent(event);
 		}
 		
@@ -174,26 +174,26 @@ package away3d.loading.library
 			else throw new Error(event.message);
 		}
 		
-		private function onAssetRetrieved(event : ResourceEvent) : void
+		private function onAssetRetrieved(event : AssetEvent) : void
 		{
 			_assets.push(event.asset);
-			event.asset.addEventListener(AssetPathEvent.ASSET_RENAME, onAssetRename);
+			event.asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
 			dispatchEvent(event.clone());
 		}
 		
 		/**
 		 * Called when the resource and all of its dependencies was retrieved.
 		 */
-		private function onResourceRetrieved(event : ResourceEvent) : void
+		private function onResourceRetrieved(event : LibraryEvent) : void
 		{
 			var session : ResourceLoadSession = ResourceLoadSession(event.target);
 			
 			var index : int = _loadingSessions.indexOf(session);
-			session.removeEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
-			session.removeEventListener(ResourceEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
 			session.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
-			session.removeEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-			session.removeEventListener(ResourceEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
+			session.removeEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+			session.removeEventListener(LibraryEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
+			session.removeEventListener(LibraryEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
+			session.removeEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 			
 			_loadingSessions.splice(index, 1);
 			
@@ -214,8 +214,8 @@ package away3d.loading.library
 		private function onResourceError() : void
 		{
 			var msg:String = "Unexpected parser error";
-			if(hasEventListener(ResourceEvent.DEPENDENCY_ERROR)){
-				var re:ResourceEvent = new ResourceEvent(ResourceEvent.DEPENDENCY_ERROR, null, "");
+			if(hasEventListener(LibraryEvent.DEPENDENCY_ERROR)){
+				var re:LibraryEvent = new LibraryEvent(LibraryEvent.DEPENDENCY_ERROR, "");
 				dispatchEvent(re);
 			} else{
 				throw new Error(msg);
@@ -223,7 +223,7 @@ package away3d.loading.library
 		}
 		
 		
-		private function onAssetRename(ev : AssetPathEvent) : void
+		private function onAssetRename(ev : AssetEvent) : void
 		{
 			//trace('renaming', ev.asset.assetFullPath);
 		}

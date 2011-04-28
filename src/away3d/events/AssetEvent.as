@@ -4,13 +4,15 @@ package away3d.events
 	
 	import flash.events.Event;
 
-	public class AssetPathEvent extends Event
+	public class AssetEvent extends Event
 	{
+		public static const ASSET_RETRIEVED : String = 'assetRetrieved';
+		
 		public static const ASSET_RENAME : String = 'assetRename';
 		
 		private var _asset : IAsset;
 		
-		public function AssetPathEvent(type : String, asset : IAsset = null)
+		public function AssetEvent(type : String, asset : IAsset = null)
 		{
 			super(type);
 			
@@ -26,7 +28,7 @@ package away3d.events
 		
 		public override function clone() : Event
 		{
-			return new AssetPathEvent(type, asset);
+			return new AssetEvent(type, asset);
 		}
 	}
 }

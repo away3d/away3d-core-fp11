@@ -2,13 +2,16 @@ package away3d.loading
 {
 	import away3d.containers.ObjectContainer3D;
 	import away3d.entities.Mesh;
-	import away3d.events.ResourceEvent;
+	import away3d.events.AssetEvent;
+	import away3d.events.LibraryEvent;
+	import away3d.events.LoaderEvent;
 	import away3d.loading.assets.AssetType;
 	import away3d.loading.library.AssetLibrary;
 	import away3d.loading.parsers.AWD2Parser;
 	import away3d.loading.parsers.ParserBase;
 	import away3d.materials.ColorMaterial;
 	
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	
@@ -32,14 +35,14 @@ package away3d.loading
 				var lib : AssetLibrary;
 				
 				lib = AssetLibrary.getInstance(_assetLibId);
-				lib.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-				lib.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+				lib.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
+				lib.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 				lib.load(req, ignoreDependencies, parser, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
-				loader.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-				loader.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+				loader.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
+				loader.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 				loader.load(req, parser);
 			}
 		}
@@ -51,14 +54,14 @@ package away3d.loading
 				var lib : AssetLibrary;
 				
 				lib = AssetLibrary.getInstance(_assetLibId);
-				lib.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-				lib.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+				lib.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
+				lib.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 				lib.parseData(data, ignoreDependencies, parser, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
-				loader.addEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-				loader.addEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+				loader.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
+				loader.addEventListener(LoaderEvent.LOAD_COMPLETE, onResourceRetrieved);
 				loader.parseData(data, parser);
 			}
 		}
@@ -77,7 +80,7 @@ package away3d.loading
 		
 		
 		
-		private function onAssetRetrieved(ev : ResourceEvent) : void
+		private function onAssetRetrieved(ev : AssetEvent) : void
 		{
 			var type : String = ev.asset.assetType;
 			if (type == AssetType.CONTAINER) {
@@ -93,13 +96,14 @@ package away3d.loading
 		}
 		
 		
-		private function onResourceRetrieved(ev : ResourceEvent) : void
+		private function onResourceRetrieved(ev : Event) : void
 		{
 			var dispatcher : EventDispatcher;
 			
 			dispatcher = EventDispatcher(ev.currentTarget);
-			dispatcher.removeEventListener(ResourceEvent.ASSET_RETRIEVED, onAssetRetrieved);
-			dispatcher.removeEventListener(ResourceEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+			dispatcher.removeEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
+			dispatcher.removeEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
+			dispatcher.removeEventListener(LoaderEvent.LOAD_COMPLETE, onResourceRetrieved);
 			
 			this.dispatchEvent(ev.clone());
 		}
