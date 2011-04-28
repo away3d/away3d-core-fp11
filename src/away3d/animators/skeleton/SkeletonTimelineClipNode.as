@@ -56,26 +56,28 @@ package away3d.animators.skeleton
 		 */
 		override public function updatePose(skeleton : Skeleton) : void
 		{
-			if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
-				  (skeleton.numJoints != clip._frames[_frame1].numJointPoses) ||
-				  (skeleton.numJoints != clip._frames[_frame2].numJointPoses))
-			{
-				throw new Error("joint counts don't match!");
-			}
-			
 			if (_clip.duration == 0) return;
 			if (_framesInvalid) updateFrames(_time-_startTime);
 
 			var poses1 : Vector.<JointPose> = clip._frames[_frame1].jointPoses;
 			var poses2 : Vector.<JointPose> = clip._frames[_frame2].jointPoses;
-			var numJoints : uint = poses1.length;
+			var numJoints : uint = skeleton.numJoints;
 			var p1 : Vector3D, p2 : Vector3D;
 			var pose1 : JointPose, pose2 : JointPose;
 			var endPoses : Vector.<JointPose> = skeletonPose.jointPoses;
 			var endPose : JointPose;
 			var tr : Vector3D;
+
+			// :s
+			if (endPoses.length != numJoints) endPoses.length = numJoints;
+
+			// todo: test this upon adding
+			if (  /*(skeleton.numJoints != skeletonPose.numJointPoses) ||*/
+				  (numJoints != poses1.length) || (numJoints != poses2.length))
+				throw new Error("joint counts don't match!");
+
 			for (var i : uint = 0; i < numJoints; ++i) {
-				endPose = endPoses[i];
+				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
 				pose2 = poses2[i];
 				p1 = pose1.translation; p2 = pose2.translation;
@@ -141,7 +143,7 @@ package away3d.animators.skeleton
 
 			lastFrame = numFrames - 1;
 			if (looping) {
-				if (time > 1) time -= int(time);
+				if (time >= 1) time -= int(time);
 				if (time < 0) time -= int(time)-1;
 
 				if (_clip._fixedFrameRate) {

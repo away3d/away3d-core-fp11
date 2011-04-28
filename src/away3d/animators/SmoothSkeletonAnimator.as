@@ -23,8 +23,6 @@ package away3d.animators
 		private var _lerpNode : SkeletonNaryLERPNode;
 		private var _crossFadeTime : Number;
 		private var _mainWeight : Number = 1;
-		private var _updateRootPosition : Boolean = true;
-
 
 		/**
 		 * Creates a new AnimationSequenceController object.

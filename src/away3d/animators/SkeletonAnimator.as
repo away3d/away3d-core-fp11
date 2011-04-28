@@ -27,7 +27,7 @@ package away3d.animators
 
 		override protected function createBlendTree() : SkeletonTreeNode
 		{
-			return new SkeletonTimelineClipNode()
+			return _clipNode = new SkeletonTimelineClipNode();
 		}
 
 		/**

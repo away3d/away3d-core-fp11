@@ -85,11 +85,11 @@ package away3d.animators.skeleton
 		 */
 		public function toGlobalPose(targetPose : SkeletonPose, skeleton : Skeleton) : void
 		{
-			if ((numJointPoses != targetPose.numJointPoses) ||
-				  (numJointPoses != skeleton.numJoints))
-			{
-				throw new Error("joint counts don't match!");
-			}
+//			if ((numJointPoses != targetPose.numJointPoses) ||
+//				  (numJointPoses != skeleton.numJoints))
+//			{
+//				throw new Error("joint counts don't match!");
+//			}
 			
 			var globalPoses : Vector.<JointPose> = targetPose.jointPoses;
 			var globalJointPose : JointPose;
@@ -108,8 +108,11 @@ package away3d.animators.skeleton
 			var x2 : Number, y2 : Number, z2 : Number, w2 : Number;
 			var x3 : Number, y3 : Number, z3 : Number;
 
+			// :s
+			if (globalPoses.length != len) globalPoses.length = len;
+
 			for (var i : uint = 0; i < len; ++i) {
-				globalJointPose = globalPoses[i];
+				globalJointPose = globalPoses[i] ||= new JointPose();
 				joint = joints[i];
 				parentIndex = joint.parentIndex;
 				pose = jointPoses[i];

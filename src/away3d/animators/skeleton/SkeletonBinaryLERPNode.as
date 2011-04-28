@@ -45,12 +45,12 @@ package away3d.animators.skeleton
 // todo: return whether or not update was performed
 		override public function updatePose(skeleton : Skeleton) : void
 		{
-			if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
+			/*if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
 				  (skeleton.numJoints != inputA.skeletonPose.numJointPoses) ||
 				  (skeleton.numJoints != inputB.skeletonPose.numJointPoses))
 			{
 				throw new Error("joint counts don't match!");
-			}
+			}      */
 			
 			// todo: should only update if blendWeight dirty, or if either child returns false
 			inputA.updatePose(skeleton);
@@ -63,8 +63,13 @@ package away3d.animators.skeleton
 			var pose1 : JointPose, pose2 : JointPose;
 			var p1 : Vector3D, p2 : Vector3D;
 			var tr : Vector3D;
-			for (var i : uint = 0; i < skeleton.numJoints; ++i) {
-				endPose = endPoses[i];
+			var numJoints : uint = skeleton.numJoints;
+
+			// :s
+			if (endPoses.length != numJoints) endPoses.length = numJoints;
+
+			for (var i : uint = 0; i < numJoints; ++i) {
+				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
 				pose2 = poses2[i];
 				p1 = pose1.translation; p2 = pose2.translation;
