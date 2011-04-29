@@ -5,6 +5,7 @@ package away3d.loading.parsers
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
+	import flash.utils.ByteArray;
 	
 	/**
 	 * ImageParser provides a "parser" for natively supported image types (jpg, png). While it simply loads bytes into
@@ -45,7 +46,26 @@ package away3d.loading.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			// todo: implement
+			var ba : ByteArray;
+			
+			ba = ByteArray(data);
+			
+			ba.position = 0;
+			if (ba.readUnsignedShort() == 0xffd8)
+				return true; // JPEG, maybe check for "JFIF" as well?
+			
+			ba.position = 0;
+			if (ba.readShort() == 0x424D)
+				return true; // BMP 
+			
+			ba.position = 1;
+			if (ba.readUTFBytes(3) == 'PNG')
+				return true;
+			
+			ba.position = 0;
+			if (ba.readUTFBytes(3) == 'GIF' && ba.readShort() == 0x3839 && ba.readByte() == 0x61)
+				return true;
+			
 			return false;
 		}
 		
