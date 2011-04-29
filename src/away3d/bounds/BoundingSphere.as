@@ -7,7 +7,13 @@ package away3d.bounds
 
     import away3d.core.math.PlaneClassification;
 
-    import flash.geom.Matrix3D;
+	import away3d.primitives.WireframeCube;
+
+	import away3d.primitives.WireframePrimitiveBase;
+
+	import away3d.primitives.WireframeSphere;
+
+	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
     use namespace arcane;
@@ -28,6 +34,24 @@ package away3d.bounds
 		 */
 		public function BoundingSphere()
 		{
+		}
+
+		override protected function updateBoundingRenderable() : void
+		{
+			var sc : Number = _radius*2;
+			if (sc == 0) sc = 0.001;
+			_boundingRenderable.scaleX = sc;
+			_boundingRenderable.scaleY = sc;
+			_boundingRenderable.scaleZ = sc;
+			_boundingRenderable.x = _centerX;
+			_boundingRenderable.y = _centerY;
+			_boundingRenderable.z = _centerZ;
+		}
+
+		override protected function createBoundingRenderable() : WireframePrimitiveBase
+		{
+			// TODO: change to sphere
+			return new WireframeSphere(1);
 		}
 
 		/**
@@ -131,6 +155,7 @@ package away3d.bounds
 			_min.y = _centerY-radius;
 			_min.z = _centerZ-radius;
 			_aabbPointsDirty = true;
+			if (_boundingRenderable) updateBoundingRenderable();
 		}
 
 		/**
@@ -138,7 +163,6 @@ package away3d.bounds
 		 */
 		override public function fromExtremes(minX : Number, minY : Number, minZ : Number, maxX : Number, maxY : Number, maxZ : Number) : void
 		{
-			super.fromExtremes(minX, minY, minZ, maxX, maxY, maxZ);
 			_centerX = (maxX + minX)*.5;
 			_centerY = (maxY + minY)*.5;
 			_centerZ = (maxZ + minZ)*.5;
@@ -149,6 +173,7 @@ package away3d.bounds
 			if (y > _radius) _radius = y;
 			if (z > _radius) _radius = z;
 			_radius *= .5;
+			super.fromExtremes(minX, minY, minZ, maxX, maxY, maxZ);
 		}
 
 		/**
