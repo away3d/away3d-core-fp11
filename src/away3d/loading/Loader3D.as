@@ -6,6 +6,7 @@ package away3d.loading
 	import away3d.events.LibraryEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.loading.assets.AssetType;
+	import away3d.loading.misc.AssetLoaderContext;
 	import away3d.loading.misc.SingleResourceLoader;
 	import away3d.loading.parsers.ParserBase;
 	
@@ -27,7 +28,7 @@ package away3d.loading
 		}
 		
 		
-		public function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : void
+		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : void
 		{
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
@@ -35,18 +36,18 @@ package away3d.loading
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				lib.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
-				lib.load(req, ignoreDependencies, parser, namespace);
+				lib.load(req, parser, context, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				loader.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
-				loader.load(req, ignoreDependencies, parser, namespace);
+				loader.load(req, parser, context, namespace);
 			}
 		}
 		
 		
-		public function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : void
+		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  namespace : String = null) : void
 		{
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
@@ -54,13 +55,13 @@ package away3d.loading
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				lib.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
-				lib.parseData(data, ignoreDependencies, parser, namespace);
+				lib.parseData(data, parser, context, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				loader.addEventListener(LoaderEvent.LOAD_COMPLETE, onResourceRetrieved);
-				loader.parseData(data, '', ignoreDependencies, parser, namespace);
+				loader.parseData(data, '', parser, context, namespace);
 			}
 		}
 		

@@ -3,8 +3,9 @@ package away3d.loading
 	import away3d.events.AssetEvent;
 	import away3d.events.LibraryEvent;
 	import away3d.events.LoaderEvent;
-	import away3d.loading.misc.SingleResourceLoader;
 	import away3d.loading.assets.IAsset;
+	import away3d.loading.misc.AssetLoaderContext;
+	import away3d.loading.misc.SingleResourceLoader;
 	import away3d.loading.parsers.ParserBase;
 	
 	import flash.events.EventDispatcher;
@@ -43,26 +44,26 @@ package away3d.loading
 		}
 		
 		
-		public function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : AssetLoader
+		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoader
 		{
-			return loadResource(req, ignoreDependencies, parser, namespace);
+			return loadResource(req, parser, context, namespace);
 		}
 		
-		public static function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : AssetLoader
+		public static function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoader
 		{
-			return getInstance().load(req, ignoreDependencies, parser, namespace);
+			return getInstance().load(req, parser, context, namespace);
 		}
 		
 		
 		
-		public function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : AssetLoader
+		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoader
 		{
-			return parseResource(data, ignoreDependencies, parser, namespace);
+			return parseResource(data, parser, context, namespace);
 		}
 		
-		public static function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : AssetLoader
+		public static function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoader
 		{
-			return getInstance().parseData(data, ignoreDependencies, parser, namespace);
+			return getInstance().parseData(data, parser, context, namespace);
 		}
 		
 		
@@ -107,12 +108,8 @@ package away3d.loading
 				
 		/**
 		 * Loads a yet unloaded resource file from the given url.
-		 * @param url The url of the file to be loaded.
-		 * @param ignoreDependencies Indicates whether or not dependencies should be ignored or loaded.
-		 * @param parser An optional parser object that will translate the data into a usable resource.
-		 * @return A handle to the retrieved resource.
 		 */
-		private function loadResource(req : URLRequest, ignoreDependencies : Boolean, parser : ParserBase, namespace : String) : AssetLoader
+		private function loadResource(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoader
 		{
 			var session : AssetLoader = new AssetLoader();
 			_loadingSessions.push(session);
@@ -120,7 +117,7 @@ package away3d.loading
 			session.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 			session.addEventListener(LibraryEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
 			session.addEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
-			session.load(req, ignoreDependencies, parser, namespace);
+			session.load(req, parser, context, namespace);
 			
 			return session;
 		}
@@ -135,14 +132,14 @@ package away3d.loading
 		 * @param parser An optional parser object that will translate the data into a usable resource.
 		 * @return A handle to the retrieved resource.
 		 */
-		private function parseResource(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : AssetLoader
+		private function parseResource(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoader
 		{
 			var session : AssetLoader = new AssetLoader();
 			_loadingSessions.push(session);
 			session.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 			session.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 			session.addEventListener(LibraryEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
-			session.parseData(data, '', ignoreDependencies, parser, namespace);
+			session.parseData(data, '', parser, context, namespace);
 			
 			return session;
 		}
