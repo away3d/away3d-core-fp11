@@ -1,9 +1,9 @@
-package away3d.loading.library
+package away3d.loading
 {
 	import away3d.events.AssetEvent;
 	import away3d.events.LibraryEvent;
 	import away3d.events.LoaderEvent;
-	import away3d.loading.AssetLoader;
+	import away3d.loading.misc.SingleResourceLoader;
 	import away3d.loading.assets.IAsset;
 	import away3d.loading.parsers.ParserBase;
 	
@@ -16,7 +16,7 @@ package away3d.loading.library
 	{
 		private static var _instances : Object = {};
 			
-		private var _loadingSessions : Vector.<ResourceLoadSession>;
+		private var _loadingSessions : Vector.<AssetLoader>;
 		
 		private var _assets : Vector.<IAsset>;
 		private var _namespaces : Object;
@@ -26,7 +26,7 @@ package away3d.loading.library
 		{
 			_assets = new Vector.<IAsset>;
 			_namespaces = {};
-			_loadingSessions = new Vector.<ResourceLoadSession>;
+			_loadingSessions = new Vector.<AssetLoader>;
 		}
 		
 		
@@ -43,24 +43,24 @@ package away3d.loading.library
 		}
 		
 		
-		public function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : ResourceLoadSession
+		public function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : AssetLoader
 		{
 			return loadResource(req, ignoreDependencies, parser, namespace);
 		}
 		
-		public static function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : ResourceLoadSession
+		public static function load(req : URLRequest, ignoreDependencies : Boolean = false, parser : ParserBase = null, namespace : String = null) : AssetLoader
 		{
 			return getInstance().load(req, ignoreDependencies, parser, namespace);
 		}
 		
 		
 		
-		public function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : ResourceLoadSession
+		public function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : AssetLoader
 		{
 			return parseResource(data, ignoreDependencies, parser, namespace);
 		}
 		
-		public static function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : ResourceLoadSession
+		public static function parseData(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : AssetLoader
 		{
 			return getInstance().parseData(data, ignoreDependencies, parser, namespace);
 		}
@@ -90,12 +90,12 @@ package away3d.loading.library
 		
 		public static function enableParser(parserClass : Class) : void
 		{
-			AssetLoader.enableParser(parserClass);
+			SingleResourceLoader.enableParser(parserClass);
 		}
 		
 		public static function enableParsers(parserClasses : Vector.<Class>) : void
 		{
-			AssetLoader.enableParsers(parserClasses);
+			SingleResourceLoader.enableParsers(parserClasses);
 		}
 		
 		
@@ -112,9 +112,9 @@ package away3d.loading.library
 		 * @param parser An optional parser object that will translate the data into a usable resource.
 		 * @return A handle to the retrieved resource.
 		 */
-		private function loadResource(req : URLRequest, ignoreDependencies : Boolean, parser : ParserBase, namespace : String) : ResourceLoadSession
+		private function loadResource(req : URLRequest, ignoreDependencies : Boolean, parser : ParserBase, namespace : String) : AssetLoader
 		{
-			var session : ResourceLoadSession = new ResourceLoadSession();
+			var session : AssetLoader = new AssetLoader();
 			_loadingSessions.push(session);
 			session.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 			session.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
@@ -135,14 +135,14 @@ package away3d.loading.library
 		 * @param parser An optional parser object that will translate the data into a usable resource.
 		 * @return A handle to the retrieved resource.
 		 */
-		private function parseResource(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : ResourceLoadSession
+		private function parseResource(data : *, ignoreDependencies : Boolean = true, parser : ParserBase = null, namespace : String = null) : AssetLoader
 		{
-			var session : ResourceLoadSession = new ResourceLoadSession();
+			var session : AssetLoader = new AssetLoader();
 			_loadingSessions.push(session);
 			session.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 			session.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
 			session.addEventListener(LibraryEvent.DEPENDENCY_RETRIEVED, onDependencyRetrieved);
-			session.parse(data, '', ignoreDependencies, parser, namespace);
+			session.parseData(data, '', ignoreDependencies, parser, namespace);
 			
 			return session;
 		}
@@ -186,7 +186,7 @@ package away3d.loading.library
 		 */
 		private function onResourceRetrieved(event : LibraryEvent) : void
 		{
-			var session : ResourceLoadSession = ResourceLoadSession(event.target);
+			var session : AssetLoader = AssetLoader(event.target);
 			
 			var index : int = _loadingSessions.indexOf(session);
 			session.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);

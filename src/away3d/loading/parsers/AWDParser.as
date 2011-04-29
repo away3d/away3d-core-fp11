@@ -4,7 +4,7 @@ package away3d.loading.parsers
 	import away3d.events.AssetEvent;
 	import away3d.events.LibraryEvent;
 	import away3d.events.LoaderEvent;
-	import away3d.loading.library.ResourceDependency;
+	import away3d.loading.misc.ResourceDependency;
 	
 	import flash.utils.ByteArray;
 	

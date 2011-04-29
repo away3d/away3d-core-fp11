@@ -6,10 +6,8 @@ package away3d.loading
 	import away3d.events.LibraryEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.loading.assets.AssetType;
-	import away3d.loading.library.AssetLibrary;
-	import away3d.loading.parsers.AWD2Parser;
+	import away3d.loading.misc.SingleResourceLoader;
 	import away3d.loading.parsers.ParserBase;
-	import away3d.materials.ColorMaterial;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -43,7 +41,7 @@ package away3d.loading
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				loader.addEventListener(LibraryEvent.RESOURCE_RETRIEVED, onResourceRetrieved);
-				loader.load(req, parser);
+				loader.load(req, ignoreDependencies, parser, namespace);
 			}
 		}
 		
@@ -62,20 +60,20 @@ package away3d.loading
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
 				loader.addEventListener(LoaderEvent.LOAD_COMPLETE, onResourceRetrieved);
-				loader.parseData(data, parser);
+				loader.parseData(data, '', ignoreDependencies, parser, namespace);
 			}
 		}
 		
 		
 		public static function enableParser(parserClass : Class) : void
 		{
-			AssetLoader.enableParser(parserClass);
+			SingleResourceLoader.enableParser(parserClass);
 		}
 		
 		
 		public static function enableParsers(parserClasses : Vector.<Class>) : void
 		{
-			AssetLoader.enableParsers(parserClasses);
+			SingleResourceLoader.enableParsers(parserClasses);
 		}
 		
 		
