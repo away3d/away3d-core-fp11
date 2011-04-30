@@ -2,8 +2,8 @@ package away3d.loading.parsers
 {
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
-	import away3d.events.LibraryEvent;
-	import away3d.events.LoaderEvent;
+	import away3d.events.LoadingEvent;
+	import away3d.events.LoadingEvent;
 	import away3d.loading.misc.ResourceDependency;
 	
 	import flash.utils.ByteArray;
@@ -93,8 +93,8 @@ package away3d.loading.parsers
 					_parser = new AWD1Parser();
 			
 				// Listen for events that need to be bubbled
-				_parser.addEventListener(AssetEvent.ASSET_RETRIEVED, onAssetRetrieved);
-				_parser.addEventListener(LoaderEvent.PARSE_COMPLETE, onParseComplete);
+				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+				_parser.addEventListener(LoadingEvent.DATA_PARSED, onParseComplete);
 				
 				// Start parsing using concrete parser
 				switch (_parser.dataFormat) {
@@ -138,7 +138,7 @@ package away3d.loading.parsers
 		 * @private
 		 * Just bubble events from concrete parser.
 		*/
-		private function onParseComplete(ev : LoaderEvent) : void
+		private function onParseComplete(ev : LoadingEvent) : void
 		{
 			dispatchEvent(ev.clone());
 		}

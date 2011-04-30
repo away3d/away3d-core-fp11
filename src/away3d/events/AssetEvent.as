@@ -6,7 +6,7 @@ package away3d.events
 
 	public class AssetEvent extends Event
 	{
-		public static const ASSET_RETRIEVED : String = 'assetRetrieved';
+		public static const ASSET_COMPLETE : String = 'assetRetrieved';
 		
 		public static const ASSET_RENAME : String = 'assetRename';
 		
