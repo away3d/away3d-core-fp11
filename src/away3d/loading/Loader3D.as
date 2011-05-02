@@ -7,7 +7,7 @@ package away3d.loading
 	import away3d.events.LoadingEvent;
 	import away3d.loading.assets.AssetType;
 	import away3d.loading.misc.AssetLoaderContext;
-	import away3d.loading.misc.SingleResourceLoader;
+	import away3d.loading.misc.SingleFileLoader;
 	import away3d.loading.parsers.ParserBase;
 	
 	import flash.events.Event;
@@ -84,13 +84,13 @@ package away3d.loading
 		
 		public static function enableParser(parserClass : Class) : void
 		{
-			SingleResourceLoader.enableParser(parserClass);
+			SingleFileLoader.enableParser(parserClass);
 		}
 		
 		
 		public static function enableParsers(parserClasses : Vector.<Class>) : void
 		{
-			SingleResourceLoader.enableParsers(parserClasses);
+			SingleFileLoader.enableParsers(parserClasses);
 		}
 		
 		
