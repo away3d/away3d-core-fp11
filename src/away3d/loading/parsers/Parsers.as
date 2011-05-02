@@ -21,7 +21,7 @@ package away3d.loading.parsers
 		 * @see away3d.loading.library.AssetLibrary.addParser()
 		*/
 		public static const ALL_BUNDLED : Vector.<Class> = Vector.<Class>([
-			AC3DParser, AWDParser, ColladaParser, Max3DSParser,
+			AC3DParser, AWDParser, Max3DSParser,
 			MD2Parser, MD5AnimParser, MD5MeshParser, OBJParser
 		]);
 	}
