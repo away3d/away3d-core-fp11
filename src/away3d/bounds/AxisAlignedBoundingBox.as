@@ -5,6 +5,9 @@ package away3d.bounds
 
 	import away3d.core.math.Plane3D;
 
+	import away3d.primitives.WireframeCube;
+	import away3d.primitives.WireframePrimitiveBase;
+
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -29,11 +32,27 @@ package away3d.bounds
 		{
 		}
 
+		override protected function updateBoundingRenderable() : void
+		{
+			_boundingRenderable.scaleX = Math.max(_halfExtentsX*2, 0.001);
+			_boundingRenderable.scaleY = Math.max(_halfExtentsY*2, 0.001);
+			_boundingRenderable.scaleZ = Math.max(_halfExtentsZ*2, 0.001);
+			_boundingRenderable.x = _centerX;
+			_boundingRenderable.y = _centerY;
+			_boundingRenderable.z = _centerZ;
+		}
+
+		override protected function createBoundingRenderable() : WireframePrimitiveBase
+		{
+			return new WireframeCube(1, 1, 1);
+		}
+
 		/**
 		 * @inheritDoc
 		 */
 		override public function nullify() : void
 		{
+			super.nullify();
 			_centerX = _centerY = _centerZ = 0;
 			_halfExtentsX = _halfExtentsY = _halfExtentsZ = 0;
 		}
@@ -115,13 +134,13 @@ package away3d.bounds
 		 */
 		override public function fromExtremes(minX : Number, minY : Number, minZ : Number, maxX : Number, maxY : Number, maxZ : Number) : void
 		{
-			super.fromExtremes(minX, minY, minZ, maxX, maxY, maxZ);
 			_centerX = (maxX + minX)*.5;
 			_centerY = (maxY + minY)*.5;
 			_centerZ = (maxZ + minZ)*.5;
 			_halfExtentsX = (maxX - minX)*.5;
 			_halfExtentsY = (maxY - minY)*.5;
 			_halfExtentsZ = (maxZ - minZ)*.5;
+			super.fromExtremes(minX, minY, minZ, maxX, maxY, maxZ);
 		}
 
 		/**

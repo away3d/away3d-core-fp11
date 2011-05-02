@@ -4,7 +4,10 @@ package away3d.bounds
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
     import away3d.core.math.Plane3D;
-    import away3d.errors.AbstractMethodError;
+	import away3d.entities.Entity;
+	import away3d.errors.AbstractMethodError;
+
+	import away3d.primitives.WireframePrimitiveBase;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -20,6 +23,7 @@ package away3d.bounds
 		protected var _max : Vector3D;
 		protected var _aabbPoints : Vector.<Number> = new Vector.<Number>();
 		protected var _aabbPointsDirty : Boolean = true;
+		protected var _boundingRenderable : WireframePrimitiveBase;
 
 		/**
 		 * Creates a new BoundingVolumeBase object
@@ -30,6 +34,26 @@ package away3d.bounds
 			_max = new Vector3D();
 		}
 
+		public function get boundingRenderable() : WireframePrimitiveBase
+		{
+			if (!_boundingRenderable) {
+				_boundingRenderable = createBoundingRenderable();
+				updateBoundingRenderable();
+			}
+
+			return _boundingRenderable;
+		}
+
+		protected function updateBoundingRenderable() : void
+		{
+			throw new AbstractMethodError();
+		}
+
+		protected function createBoundingRenderable() : WireframePrimitiveBase
+		{
+			throw new AbstractMethodError();
+		}
+
 		/**
 		 * Sets the bounds to zero size.
 		 */
@@ -38,6 +62,13 @@ package away3d.bounds
 			_min.x = _min.y = _min.z = 0;
 			_max.x = _max.y = _max.z = 0;
 			_aabbPointsDirty = true;
+			if (_boundingRenderable) updateBoundingRenderable();
+		}
+
+		public function disposeRenderable() : void
+		{
+			if (_boundingRenderable) _boundingRenderable.dispose(true);
+			_boundingRenderable = null;
 		}
 
 		/**
@@ -129,6 +160,8 @@ package away3d.bounds
 				}
 			}
 
+			if (minX == Number.POSITIVE_INFINITY)
+				minX = minY = minZ = maxX = maxY = maxZ = 0;
 			fromExtremes(minX, minY, minZ, maxX, maxY, maxZ);
 		}
 
@@ -145,7 +178,7 @@ package away3d.bounds
 		}
 
 		/**
-		 * Sets the bounds to the given extrema
+		 * Sets the bounds to the given extrema.
 		 */
 		public function fromExtremes(minX : Number, minY : Number, minZ : Number, maxX : Number, maxY : Number, maxZ : Number) : void
 		{
@@ -156,6 +189,7 @@ package away3d.bounds
 			_max.y = maxY;
 			_max.z = maxZ;
 			_aabbPointsDirty = true;
+			if (_boundingRenderable) updateBoundingRenderable();
 		}
 
 		/**
