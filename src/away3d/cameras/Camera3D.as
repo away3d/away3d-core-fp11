@@ -31,7 +31,7 @@ package away3d.cameras
 		{
 			super();
 			_lens = lens || new PerspectiveLens();
-			_lens.onMatrixUpdate = onLensUpdate;
+			_lens.onInvalidateMatrix = onInvalidateLensMatrix;
 			z = -500;
 		}
 
@@ -59,9 +59,9 @@ package away3d.cameras
 		{
 			if (_lens == value) return;
 			if (!value) throw new Error("Lens cannot be null!");
-			_lens.onMatrixUpdate = null;
+			_lens.onInvalidateMatrix = null;
 			_lens = value;
-			_lens.onMatrixUpdate = onLensUpdate;
+			_lens.onInvalidateMatrix = onInvalidateLensMatrix;
 		}
 
 		/**
@@ -103,7 +103,7 @@ package away3d.cameras
 			return new CameraNode(this);
 		}
 
-		private function onLensUpdate() : void
+		private function onInvalidateLensMatrix() : void
 		{
 			_viewProjectionInvalid = true;
 		}
