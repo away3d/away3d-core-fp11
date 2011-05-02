@@ -4,7 +4,7 @@
 package away3d.animators.skeleton
 {
 	import away3d.arcane;
-
+	
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -28,9 +28,9 @@ package away3d.animators.skeleton
 		 * Creates a new SkeletonTimelineClipNode object.
 		 * @param numJoints The amount of joints in the target skeleton.
 		 */
-		public function SkeletonTimelineClipNode(numJoints : uint)
+		public function SkeletonTimelineClipNode()
 		{
-			super(numJoints);
+			super();
 		}
 
 		public function reset() : void
@@ -61,15 +61,23 @@ package away3d.animators.skeleton
 
 			var poses1 : Vector.<JointPose> = clip._frames[_frame1].jointPoses;
 			var poses2 : Vector.<JointPose> = clip._frames[_frame2].jointPoses;
-			var numJoints : uint = poses1.length;
+			var numJoints : uint = skeleton.numJoints;
 			var p1 : Vector3D, p2 : Vector3D;
 			var pose1 : JointPose, pose2 : JointPose;
 			var endPoses : Vector.<JointPose> = skeletonPose.jointPoses;
 			var endPose : JointPose;
 			var tr : Vector3D;
 
+			// :s
+			if (endPoses.length != numJoints) endPoses.length = numJoints;
+
+			// todo: test this upon adding
+			if (  /*(skeleton.numJoints != skeletonPose.numJointPoses) ||*/
+				  (numJoints != poses1.length) || (numJoints != poses2.length))
+				throw new Error("joint counts don't match!");
+
 			for (var i : uint = 0; i < numJoints; ++i) {
-				endPose = endPoses[i];
+				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
 				pose2 = poses2[i];
 				p1 = pose1.translation; p2 = pose2.translation;

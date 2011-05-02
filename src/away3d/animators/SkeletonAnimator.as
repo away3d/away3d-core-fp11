@@ -25,7 +25,6 @@ package away3d.animators
 			_sequences = [];
 		}
 
-
 		override protected function createBlendTree() : SkeletonTreeNode
 		{
 			return _clipNode = new SkeletonTimelineClipNode(_target.numJoints)
@@ -70,8 +69,8 @@ package away3d.animators
 		 * @private
 		 */
 		/*arcane function getSequence(sequenceName : String) : AnimationSequenceBase
-		 {
-		 return _sequences[sequenceName];
+		{
+			return _sequences[sequenceName];
 		 } */
 	}
 }

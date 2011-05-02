@@ -23,7 +23,6 @@ package away3d.animators
 		private var _lerpNode : SkeletonNaryLERPNode;
 		private var _crossFadeTime : Number;
 		private var _mainWeight : Number = 1;
-		private var _updateRootPosition : Boolean = true;
 
 		/**
 		 * Creates a new AnimationSequenceController object.
@@ -36,10 +35,9 @@ package away3d.animators
 			_fadeOutSpeeds = new Vector.<Number>();
 		}
 
-
 		override protected function createBlendTree() : SkeletonTreeNode
 		{
-			_lerpNode = new SkeletonNaryLERPNode(_target.numJoints);
+			_lerpNode = new SkeletonNaryLERPNode();
 			return _lerpNode;
 		}
 
@@ -81,7 +79,7 @@ package away3d.animators
 		 */
 		public function addSequence(sequence : SkeletonAnimationSequence) : void
 		{
-			var node : SkeletonTimelineClipNode = new SkeletonTimelineClipNode(SkeletonAnimationState(_target).numJoints);
+			var node : SkeletonTimelineClipNode = new SkeletonTimelineClipNode();
 			_clips[sequence.name] = node;
 			node.clip = sequence;
 			_lerpNode.addInput(node);
@@ -102,6 +100,7 @@ package away3d.animators
 			_lerpNode.time += scaledDT / _lerpNode.duration;
 
 			super.updateAnimation(realDT, scaledDT);
+
 		}
 
 		private function updateWeights(dt : Number) : void

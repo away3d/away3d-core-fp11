@@ -1,7 +1,7 @@
 package away3d.animators.skeleton
 {
 	import away3d.core.math.Quaternion;
-
+	
 	import flash.geom.Vector3D;
 
 	/**
@@ -16,19 +16,68 @@ package away3d.animators.skeleton
 		 * The joint poses for the skeleton. The JointPoses indices correspond to the target skeleton's joints.
 		 */
 		public var jointPoses : Vector.<JointPose>;
-		private var _numJoints : uint;
-
+		
 		/**
 		 * Creates a new SkeletonPose object.
-		 * @param numJoints The amount of joint in the target skeleton.
+		 * @param numJoints The number of joints in the target skeleton.
 		 */
-		public function SkeletonPose(numJoints : uint)
+		public function SkeletonPose()
 		{
-			_numJoints = numJoints;
-			jointPoses = new Vector.<JointPose>(_numJoints, true);
-			for (var i : uint = 0; i < _numJoints; ++i) jointPoses[i] = new JointPose();
+			jointPoses = new Vector.<JointPose>();
 		}
 
+		/**
+		 * Returns the JointPose, given the joint name.
+		 * @param jointName is the name of the JointPose to be found.
+		 * @return JointPose 
+		 */
+		public function jointPoseFromName(jointName:String):JointPose
+		{
+			var jointPoseIndex:int = jointPoseIndexFromName(jointName);
+			if (jointPoseIndex != -1)
+			{
+				return jointPoses[jointPoseIndex];
+			}
+			else
+			{
+				return null;
+			}
+		}
+		
+		/**
+		 * Returns the joint index, given the joint name. -1 is returned if joint name not found.
+		 * @param jointName is the name of the JointPose to be found.
+		 * @return jointIndex 
+		 */
+		public function jointPoseIndexFromName(jointName:String):int
+		{
+			// this function is implemented as a linear search, rather than a possibly
+			// more optimal method (Dictionary lookup, for example) because:
+			// a) it is assumed that it will be called once for each joint
+			// b) it is assumed that it will be called only during load, and not during main loop
+			// c) maintaining a dictionary (for safety) would dictate an interface to access JointPoses,
+			//    rather than direct array access.  this would be sub-optimal.
+			var jointPoseIndex:int;
+			for each (var jointPose:JointPose in jointPoses)
+			{
+				if (jointPose.name == jointName)
+				{
+					return jointPoseIndex;
+				}
+				jointPoseIndex++;
+			}
+			
+			return -1;
+		}
+		
+		/**
+		 * The amount of joints in the Skeleton
+		 */
+		public function get numJointPoses() : uint
+		{
+			return jointPoses.length;
+		}
+		
 		/**
 		 * Converts a local hierarchical skeleton pose to a global pose
 		 * @param targetPose The SkeletonPose object that will contain the global pose.
@@ -36,10 +85,16 @@ package away3d.animators.skeleton
 		 */
 		public function toGlobalPose(targetPose : SkeletonPose, skeleton : Skeleton) : void
 		{
+//			if ((numJointPoses != targetPose.numJointPoses) ||
+//				  (numJointPoses != skeleton.numJoints))
+//			{
+//				throw new Error("joint counts don't match!");
+//			}
+			
 			var globalPoses : Vector.<JointPose> = targetPose.jointPoses;
 			var globalJointPose : JointPose;
 			var joints : Vector.<SkeletonJoint> = skeleton.joints;
-			var len : uint = _numJoints;
+			var len : uint = numJointPoses;
 			var parentIndex : int;
 			var joint : SkeletonJoint;
 			var parentPose : JointPose;
@@ -53,8 +108,11 @@ package away3d.animators.skeleton
 			var x2 : Number, y2 : Number, z2 : Number, w2 : Number;
 			var x3 : Number, y3 : Number, z3 : Number;
 
+			// :s
+			if (globalPoses.length != len) globalPoses.length = len;
+
 			for (var i : uint = 0; i < len; ++i) {
-				globalJointPose = globalPoses[i];
+				globalJointPose = globalPoses[i] ||= new JointPose();
 				joint = joints[i];
 				parentIndex = joint.parentIndex;
 				pose = jointPoses[i];

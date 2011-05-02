@@ -16,6 +16,11 @@ package away3d.animators.skeleton
 	public class JointPose
 	{
 		/**
+		 * The name of the joint this pose is for
+		 */
+		public var name : String; // intention is that this should be used only at load time, not in the main loop
+		
+		/**
 		 * The rotation of the joint stored as a quaternion
 		 */
 		public var orientation : Quaternion = new Quaternion();
