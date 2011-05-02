@@ -6,6 +6,13 @@ package away3d.loading.misc
 		private var _dependencyBaseUrl : String;
 		private var _embeddedDataByUrl : Object;
 		
+		/**
+		 * AssetLoaderContext provides configuration for the AssetLoader load() and parse() operations.
+		 * Use it to configure how (and if) dependencies are loaded, or to map dependency URLs to
+		 * embedded data.
+		 * 
+		 * @see away3d.loading.AssetLoader
+		*/
 		public function AssetLoaderContext(ignoreDependencies : Boolean = false, dependencyBaseUrl : String = null)
 		{
 			_ignoreDependencies = ignoreDependencies;
@@ -26,7 +33,7 @@ package away3d.loading.misc
 		}
 		
 		
-		public function mapUrlToEmbed(url : String, data : Class) : void
+		public function mapUrlToEmbededData(url : String, data : Class) : void
 		{
 			_embeddedDataByUrl[url] = data;
 		}

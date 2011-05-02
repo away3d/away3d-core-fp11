@@ -14,6 +14,22 @@ package away3d.loading
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 	
+	/**
+	 * Loader3D can load any file format that Away3D supports (or for which a third-party parser
+	 * has been plugged in) and be added directly to the scene. As assets are encountered
+	 * they are added to the Loader3D container. Assets that can not be displayed in the scene
+	 * graph (e.g. unused bitmaps/materials, skeletons et c) will be ignored.
+	 * 
+	 * This provides a fast and easy way to load models (no need for event listeners) but is not
+	 * very versatile since many types of assets are ignored.
+	 * 
+	 * Loader3D by default uses the AssetLibrary to load all assets, which means that they also
+	 * ends up in the library. To circumvent this, Loader3D can be configured to not use the 
+	 * AssetLibrary in which case it will use the AssetLoader directly.
+	 * 
+	 * @see away3d.loading.AssetLoader
+	 * @see away3d.loading.AssetLibrary
+	*/
 	public class Loader3D extends ObjectContainer3D
 	{
 		private var _useAssetLib : Boolean;
