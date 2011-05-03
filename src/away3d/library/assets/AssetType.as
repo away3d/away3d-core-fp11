@@ -1,4 +1,4 @@
-package away3d.loading.assets
+package away3d.library.assets
 {
 	public class AssetType
 	{

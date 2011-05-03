@@ -2,9 +2,9 @@ package away3d.animators.data
 {
 	import away3d.arcane;
 	import away3d.events.AnimatorEvent;
-	import away3d.loading.assets.AssetType;
-	import away3d.loading.assets.IAsset;
-	import away3d.loading.assets.NamedAssetBase;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 	
 	import flash.geom.Vector3D;
 

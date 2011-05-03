@@ -3,9 +3,9 @@ package away3d.animators
 	import away3d.arcane;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.AnimatorEvent;
-	import away3d.loading.assets.AssetType;
-	import away3d.loading.assets.IAsset;
-	import away3d.loading.assets.NamedAssetBase;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 	
 	import flash.display.Sprite;
 	import flash.events.Event;

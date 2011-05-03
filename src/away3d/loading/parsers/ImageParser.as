@@ -1,6 +1,6 @@
 package away3d.loading.parsers
 {
-	import away3d.loading.assets.BitmapDataAsset;
+	import away3d.library.assets.BitmapDataAsset;
 	
 	import flash.display.Bitmap;
 	import flash.display.Loader;

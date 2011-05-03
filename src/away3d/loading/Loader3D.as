@@ -5,7 +5,7 @@ package away3d.loading
 	import away3d.events.AssetEvent;
 	import away3d.events.LoadingEvent;
 	import away3d.events.LoadingEvent;
-	import away3d.loading.assets.AssetType;
+	import away3d.library.assets.AssetType;
 	import away3d.loading.misc.AssetLoaderContext;
 	import away3d.loading.misc.SingleFileLoader;
 	import away3d.loading.parsers.ParserBase;
@@ -13,6 +13,7 @@ package away3d.loading
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
+	import away3d.library.AssetLibrary;
 	
 	/**
 	 * Loader3D can load any file format that Away3D supports (or for which a third-party parser

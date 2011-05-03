@@ -4,8 +4,8 @@ package away3d.containers
 	import away3d.core.base.*;
 	import away3d.core.partition.Partition3D;
 	import away3d.events.Scene3DEvent;
-	import away3d.loading.assets.AssetType;
-	import away3d.loading.assets.IAsset;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
 	
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;

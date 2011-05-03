@@ -1,9 +1,9 @@
-package away3d.loading
+package away3d.library
 {
 	import away3d.events.AssetEvent;
 	import away3d.events.LoadingEvent;
-	import away3d.events.LoadingEvent;
-	import away3d.loading.assets.IAsset;
+	import away3d.library.assets.IAsset;
+	import away3d.loading.AssetLoader;
 	import away3d.loading.misc.AssetLoaderContext;
 	import away3d.loading.misc.SingleFileLoader;
 	import away3d.loading.parsers.ParserBase;

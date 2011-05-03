@@ -1,9 +1,9 @@
 package away3d.animators.skeleton
 {
 	import away3d.core.math.Quaternion;
-	import away3d.loading.assets.AssetType;
-	import away3d.loading.assets.IAsset;
-	import away3d.loading.assets.NamedAssetBase;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 	
 	import flash.geom.Vector3D;
 
