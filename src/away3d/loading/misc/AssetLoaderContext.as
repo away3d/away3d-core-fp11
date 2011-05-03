@@ -25,11 +25,19 @@ package away3d.loading.misc
 		{
 			return _ignoreDependencies;
 		}
+		public function set ignoreDependencies(val : Boolean) : void
+		{
+			_ignoreDependencies = val;
+		}
 		
 		
 		public function get dependencyBaseUrl() : String
 		{
 			return _dependencyBaseUrl;
+		}
+		public function set dependencyBaseUrl(val : String) : void
+		{
+			_dependencyBaseUrl = val;
 		}
 		
 		
