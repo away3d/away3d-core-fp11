@@ -1,8 +1,10 @@
 package away3d.loading.misc
 {
+	import away3d.arcane;
+	
 	public class AssetLoaderContext
 	{
-		private var _ignoreDependencies : Boolean;
+		private var _includeDependencies : Boolean;
 		private var _dependencyBaseUrl : String;
 		private var _embeddedDataByUrl : Object;
 		
@@ -13,21 +15,21 @@ package away3d.loading.misc
 		 * 
 		 * @see away3d.loading.AssetLoader
 		*/
-		public function AssetLoaderContext(ignoreDependencies : Boolean = false, dependencyBaseUrl : String = null)
+		public function AssetLoaderContext(includeDependencies : Boolean = true, dependencyBaseUrl : String = null)
 		{
-			_ignoreDependencies = ignoreDependencies;
+			_includeDependencies = includeDependencies;
 			_dependencyBaseUrl = dependencyBaseUrl || '';
 			_embeddedDataByUrl = {};
 		}
 		
 		
-		public function get ignoreDependencies() : Boolean
+		public function get includeDependencies() : Boolean
 		{
-			return _ignoreDependencies;
+			return _includeDependencies;
 		}
-		public function set ignoreDependencies(val : Boolean) : void
+		public function set includeDependencies(val : Boolean) : void
 		{
-			_ignoreDependencies = val;
+			_includeDependencies = val;
 		}
 		
 		
@@ -41,19 +43,19 @@ package away3d.loading.misc
 		}
 		
 		
-		public function mapUrlToEmbededData(url : String, data : Class) : void
+		public function mapUrlToData(url : String, data : Class) : void
 		{
 			_embeddedDataByUrl[url] = data;
 		}
 		
 		
-		public function hasAssetForUrl(url : String) : Boolean
+		arcane function hasDataForUrl(url : String) : Boolean
 		{
 			return _embeddedDataByUrl.hasOwnProperty(url);
 		}
 		
 		
-		public function resolveEmbedFromUrl(url : String) : Class
+		arcane function getDataForUrl(url : String) : Class
 		{
 			return _embeddedDataByUrl[url];
 		}
