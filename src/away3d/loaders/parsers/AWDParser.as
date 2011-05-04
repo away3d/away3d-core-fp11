@@ -1,10 +1,10 @@
-package away3d.loading.parsers
+package away3d.loaders.parsers
 {
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoadingEvent;
 	import away3d.events.LoadingEvent;
-	import away3d.loading.misc.ResourceDependency;
+	import away3d.loaders.misc.ResourceDependency;
 	
 	import flash.utils.ByteArray;
 	

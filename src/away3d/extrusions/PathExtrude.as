@@ -7,7 +7,7 @@
 	import away3d.core.base.SubMesh;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.BitmapMaterial;
-	import away3d.loading.parsers.data.DefaultBitmapData;
+	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.materials.utils.MultipleMaterials;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.entities.Mesh;

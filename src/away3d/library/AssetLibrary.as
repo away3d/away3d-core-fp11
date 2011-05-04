@@ -3,10 +3,10 @@ package away3d.library
 	import away3d.events.AssetEvent;
 	import away3d.events.LoadingEvent;
 	import away3d.library.assets.IAsset;
-	import away3d.loading.AssetLoader;
-	import away3d.loading.misc.AssetLoaderContext;
-	import away3d.loading.misc.SingleFileLoader;
-	import away3d.loading.parsers.ParserBase;
+	import away3d.loaders.AssetLoader;
+	import away3d.loaders.misc.AssetLoaderContext;
+	import away3d.loaders.misc.SingleFileLoader;
+	import away3d.loaders.parsers.ParserBase;
 	
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;

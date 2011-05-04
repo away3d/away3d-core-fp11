@@ -1,4 +1,4 @@
-package away3d.loading
+package away3d.loaders
 {
 	import away3d.containers.ObjectContainer3D;
 	import away3d.entities.Mesh;
@@ -6,9 +6,9 @@ package away3d.loading
 	import away3d.events.LoadingEvent;
 	import away3d.events.LoadingEvent;
 	import away3d.library.assets.AssetType;
-	import away3d.loading.misc.AssetLoaderContext;
-	import away3d.loading.misc.SingleFileLoader;
-	import away3d.loading.parsers.ParserBase;
+	import away3d.loaders.misc.AssetLoaderContext;
+	import away3d.loaders.misc.SingleFileLoader;
+	import away3d.loaders.parsers.ParserBase;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;

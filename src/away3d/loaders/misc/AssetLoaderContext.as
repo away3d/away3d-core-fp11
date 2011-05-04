@@ -1,4 +1,4 @@
-package away3d.loading.misc
+package away3d.loaders.misc
 {
 	import away3d.arcane;
 	

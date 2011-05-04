@@ -1,4 +1,4 @@
-package away3d.loading.parsers
+package away3d.loaders.parsers
 {
 	public class Parsers
 	{

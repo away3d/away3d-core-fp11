@@ -1,4 +1,4 @@
-package away3d.loading.parsers
+package away3d.loaders.parsers
 {
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
