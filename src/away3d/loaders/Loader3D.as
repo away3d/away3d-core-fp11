@@ -3,8 +3,8 @@ package away3d.loaders
 	import away3d.containers.ObjectContainer3D;
 	import away3d.entities.Mesh;
 	import away3d.events.AssetEvent;
-	import away3d.events.LoadingEvent;
-	import away3d.events.LoadingEvent;
+	import away3d.events.LoaderEvent;
+	import away3d.events.LoaderEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.loaders.misc.AssetLoaderContext;
 	import away3d.loaders.misc.SingleFileLoader;
@@ -52,13 +52,13 @@ package away3d.loaders
 				
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				lib.addEventListener(LoadingEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+				lib.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 				lib.load(req, parser, context, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				loader.addEventListener(LoadingEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 				loader.load(req, parser, context, namespace);
 			}
 		}
@@ -71,13 +71,13 @@ package away3d.loaders
 				
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				lib.addEventListener(away3d.events.LoadingEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+				lib.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 				lib.parseData(data, parser, context, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				loader.addEventListener(LoadingEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 				loader.parseData(data, '', parser, context, namespace);
 			}
 		}
@@ -118,8 +118,8 @@ package away3d.loaders
 			
 			dispatcher = EventDispatcher(ev.currentTarget);
 			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-			dispatcher.removeEventListener(LoadingEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-			dispatcher.removeEventListener(LoadingEvent.DATA_LOADED, onResourceRetrieved);
+			dispatcher.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+			dispatcher.removeEventListener(LoaderEvent.DATA_LOADED, onResourceRetrieved);
 			
 			this.dispatchEvent(ev.clone());
 		}
