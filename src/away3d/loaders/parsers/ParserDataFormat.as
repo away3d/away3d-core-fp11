@@ -1,4 +1,4 @@
-package away3d.loading.parsers
+package away3d.loaders.parsers
 {
 	/**
 	 * An enumeration providing values to describe the data format of parsed data.

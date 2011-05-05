@@ -1,18 +1,20 @@
 ﻿package away3d.entities
 {
-	import away3d.arcane;
-	import away3d.animators.data.AnimationBase;
 	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
+	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.Object3D;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
-	import away3d.events.GeometryEvent;
-	import away3d.materials.MaterialBase;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.MeshNode;
+	import away3d.events.GeometryEvent;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.materials.MaterialBase;
 
 	use namespace arcane;
 
@@ -21,7 +23,7 @@
 	 * state. It consists out of SubMeshes, which in turn correspond to SubGeometries. SubMeshes allow different parts
 	 * of the geometry to be assigned different materials.
 	 */
-	public class Mesh extends Entity implements IMaterialOwner
+	public class Mesh extends Entity implements IMaterialOwner, IAsset
 	{
 		private var _subMeshes : Vector.<SubMesh>;
 		protected var _geometry : Geometry;
@@ -47,6 +49,14 @@
 			this.material = material;
 			if (geometry) initGeometry();
 		}
+		
+		
+		
+		public override function get assetType() : String
+		{
+			return AssetType.MESH;
+		}
+		
 
 		private function onGeometryBoundsInvalid(event : GeometryEvent) : void
 		{

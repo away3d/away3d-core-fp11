@@ -1,11 +1,11 @@
-package away3d.loading.parsers
+package away3d.loaders.parsers
 {
-	import away3d.loading.BitmapDataResource;
-	import away3d.loading.IResource;
+	import away3d.library.assets.BitmapDataAsset;
 	
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
+	import flash.utils.ByteArray;
 	
 	/**
 	 * ImageParser provides a "parser" for natively supported image types (jpg, png). While it simply loads bytes into
@@ -17,16 +17,15 @@ package away3d.loading.parsers
 		private var _startedParsing : Boolean;
 		private var _doneParsing : Boolean;
 		private var _loader : Loader;
-		private var _bitmapDataResource : BitmapDataResource;
 		
 		/**
 		 * Creates a new ImageParser object.
 		 * @param uri The url or id of the data or file to be parsed.
 		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
-		public function ImageParser(uri : String)
+		public function ImageParser()
 		{
-			super(uri, ParserDataFormat.BINARY);
+			super(ParserDataFormat.BINARY);
 		}
 		
 		/**
@@ -37,7 +36,7 @@ package away3d.loading.parsers
 		public static function supportsType(extension : String) : Boolean
 		{
 			extension = extension.toLowerCase();
-			return extension == "jpg" || extension == "png";
+			return extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "gif";
 		}
 		
 		/**
@@ -47,18 +46,29 @@ package away3d.loading.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			// todo: implement
+			var ba : ByteArray;
+			
+			ba = ByteArray(data);
+			
+			ba.position = 0;
+			if (ba.readUnsignedShort() == 0xffd8)
+				return true; // JPEG, maybe check for "JFIF" as well?
+			
+			ba.position = 0;
+			if (ba.readShort() == 0x424D)
+				return true; // BMP 
+			
+			ba.position = 1;
+			if (ba.readUTFBytes(3) == 'PNG')
+				return true;
+			
+			ba.position = 0;
+			if (ba.readUTFBytes(3) == 'GIF' && ba.readShort() == 0x3839 && ba.readByte() == 0x61)
+				return true;
+			
 			return false;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function initHandle() : IResource
-		{
-			_bitmapDataResource = new BitmapDataResource();
-			return _bitmapDataResource;
-		}
 		
 		/**
 		 * @inheritDoc
@@ -79,10 +89,11 @@ package away3d.loading.parsers
 		 * Called when "loading" is complete.
 		 */
 		private function onLoadComplete(event : Event) : void
-		{
-			_bitmapDataResource.bitmapData = Bitmap(_loader.content).bitmapData;
+		{			var asset : BitmapDataAsset = new BitmapDataAsset(Bitmap(_loader.content).bitmapData);
 			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoadComplete);
 			_doneParsing = true;
+			
+			finalizeAsset(asset, 'bitmap');
 		}
 		
 	}

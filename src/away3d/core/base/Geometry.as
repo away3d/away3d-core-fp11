@@ -1,10 +1,13 @@
 ﻿package away3d.core.base
 {
-	import away3d.arcane;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.NullAnimation;
+	import away3d.arcane;
 	import away3d.events.GeometryEvent;
-
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	
 	import flash.events.EventDispatcher;
 
 	use namespace arcane;
@@ -18,7 +21,7 @@
 	 * @see away3d.core.base.SubGeometry
 	 * @see away3d.scenegraph.Mesh
 	 */
-	public class Geometry extends EventDispatcher
+	public class Geometry extends NamedAssetBase implements IAsset
 	{
 		private var _subGeometries : Vector.<SubGeometry>;
 		arcane var _animation : AnimationBase;
@@ -30,6 +33,12 @@
 		{
 			_subGeometries = new Vector.<SubGeometry>();
 			_animation = new NullAnimation();
+		}
+		
+		
+		public function get assetType() : String
+		{
+			return AssetType.GEOMETRY;
 		}
 
 		/**
