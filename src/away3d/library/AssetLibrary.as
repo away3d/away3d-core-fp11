@@ -159,15 +159,9 @@ package away3d.library
 		private function onDependencyRetrievingError(event : LoaderEvent) : void
 		{
 			var ext:String = event.url.substring(event.url.length-4, event.url.length).toLowerCase();
-			if (!(ext== ".jpg" || ext == ".png") && hasEventListener(LoaderEvent.LOAD_ERROR)){
+			if (hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(event);
 			}
-			/*
-			else if(hasEventListener(LoadingEvent.LOAD_MAP_ERROR)){
-				var le:LoadingEvent = new LoadingEvent(LoadingEvent.LOAD_MAP_ERROR, event.url, event.message);
-				dispatchEvent(le);
-			}
-			*/
 			else throw new Error(event.message);
 		}
 		
