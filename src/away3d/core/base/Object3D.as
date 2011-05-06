@@ -6,13 +6,36 @@ package away3d.core.base
 	import away3d.core.math.Vector3DUtils;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
-	
+
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
 	/**
 	 * Object3D provides a base class for any 3D object that has a (local) transformation.
+	 * 
+	 * Standard Transform:
+	 * - The standard order for transformation is [child transform]->Scale->Pivot->Rotate->Translate->[parent transform] (based on code in updateTransform).
+	 * - The order listed here is the order of matrix multiplications. However, conceptually, transformation order is right to left.
+	 *   - e.g. Pivot is "post-rotate".  Translate is "pre-rotate".
+	 * 
+	 * To affect Scale:
+	 * - set scaleX/Y/Z directly, or call scale(delta)
+	 * 
+	 * To affect Pivot (post-rotate translate)
+	 * - set pivotPoint directly, or call movePivot()
+	 * 
+	 * To affect Rotate:
+	 * - set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()
+	 * 
+	 * To affect Translate (pre-rotate translate):
+	 * - set x/y/z/position or call moveTo().
+	 * - call translate(), which modifies x/y/z based on a delta vector.
+	 * - call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to prepend an
+	 *     additional transformation in front of the present transform.
+	 *
+	 * Additional one-time behavior - state not stored in Object3D. If transform is invalidated it must be reapplied.
+	 * - call pitch()/yaw()/roll()/rotate() to prepend an additional rotation in front of the present transform.
 	 */
 	public class Object3D extends NamedAssetBase
 	{
@@ -20,7 +43,7 @@ package away3d.core.base
 		 * An object that can contain any extra data.
 		 */
 		public var extra : Object;
-		
+
 		protected var _transform : Matrix3D = new Matrix3D();
 		private var _transformDirty : Boolean = true;
 		private var _rotationValuesDirty : Boolean;
@@ -62,8 +85,7 @@ package away3d.core.base
 			_transform.identity();
 			_flipY.appendScale(1, -1, 1);
 		}
-		
-		
+
 		/**
 		 * The transformation of the 3d object, relative to the local coordinates of the parent <code>ObjectContainer3D</code>.
 		 */
@@ -641,5 +663,5 @@ package away3d.core.base
 				_scaleValuesDirty = false;
 			}
 		}
-    }
+		}
 }
