@@ -12,23 +12,23 @@ package away3d.tools.serialize
 	import flash.utils.getQualifiedClassName;
 	
 	use namespace arcane;
-  
-  public class Serialize
-  {
+	
+	public class Serialize
+	{
 		public static var tabSize:uint = 2;
 		
-    public function Serialize()
-    {
-    }
-    
-    public static function serializeScene(scene:Scene3D, serializer:SerializerBase):void
-    {
-      for (var i:uint = 0; i < scene.numChildren; i++)
-      {
+		public function Serialize()
+		{
+		}
+		
+		public static function serializeScene(scene:Scene3D, serializer:SerializerBase):void
+		{
+			for (var i:uint = 0; i < scene.numChildren; i++)
+			{
 				serializeObjectContainer(scene.getChildAt(i), serializer);
-      }
-    }
-    
+			}
+		}
+		
 		public static function serializeObjectContainer(objectContainer3D:ObjectContainer3D, serializer:SerializerBase):void
 		{
 			if (objectContainer3D is Mesh)
@@ -41,24 +41,24 @@ package away3d.tools.serialize
 			}
 		}
 		
-    public static function serializeMesh(mesh:Mesh, serializer:SerializerBase):void
-    {
+		public static function serializeMesh(mesh:Mesh, serializer:SerializerBase):void
+		{
 			serializeObjectContainerInternal(mesh as ObjectContainer3D, serializer, false /* serializeChildrenAndEnd */);
-      
-      if (mesh.geometry.subGeometries.length)
-      {
-        for (var i:uint = 0; i < mesh.geometry.subGeometries.length; i++)
-        {
+			
+			if (mesh.geometry.subGeometries.length)
+			{
+				for (var i:uint = 0; i < mesh.geometry.subGeometries.length; i++)
+				{
 					serializeSubGeometry(mesh.geometry.subGeometries[i], serializer);
-        }
-      }
-      
+				}
+			}
+			
 			serializeChildren(mesh as ObjectContainer3D, serializer);
 			serializer.endObject();
-    }
-    
-    public static function serializeSubGeometry(subGeometry:SubGeometry, serializer:SerializerBase):void
-    {
+		}
+		
+		public static function serializeSubGeometry(subGeometry:SubGeometry, serializer:SerializerBase):void
+		{
 			serializer.beginObject(classNameFromInstance(subGeometry), null);
 			serializer.writeUint("numTriangles", subGeometry.numTriangles);
 			if (subGeometry.indexData)
@@ -71,7 +71,7 @@ package away3d.tools.serialize
 				serializer.writeUint("numUVs", subGeometry.UVData.length);
 			}
 			serializer.endObject();
-    }
+		}
 		
 		public static function serializeJointPose(jointPose:JointPose, serializer:SerializerBase):void
 		{
@@ -104,7 +104,7 @@ package away3d.tools.serialize
 			}
 			serializer.endObject();
 		}
-
+		
 		// private stuff - shouldn't ever need to call externally
 		
 		private static function serializeChildren(parent:ObjectContainer3D, serializer:SerializerBase):void
@@ -130,5 +130,5 @@ package away3d.tools.serialize
 				serializer.endObject();
 			}
 		}
-  }
+	}
 }
