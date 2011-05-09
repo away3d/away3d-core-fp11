@@ -62,7 +62,7 @@ package away3d.animators.data
             _numJoints = _skinnedAnimation.numJoints;
 			_globalMatrices = new Vector.<Number>(_numJoints*12, true);
 			_bufferFormat = "float"+_jointsPerVertex;
-            _globalPose = new SkeletonPose(_numJoints);
+            _globalPose = new SkeletonPose();
 
 			var j : int;
 			for (var i : uint = 0; i < _numJoints; ++i) {
@@ -339,14 +339,11 @@ package away3d.animators.data
 			subGeom.animatedNormalData = targetNormals;
 			subGeom.animatedTangentData = targetTangents;
 		}
-
 		public function applyRootDelta() : void
 		{
 			var delta : Vector3D = blendTree.rootDelta;
-
 			var dist : Number = delta.length;
 			var len : uint;
-
 			if (dist > 0) {
 				len = _owners.length;
 				for (var i : uint = 0; i < len; ++i)

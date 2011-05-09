@@ -12,9 +12,9 @@ package away3d.animators.skeleton
 		public var inputB : SkeletonTreeNode;
 		private var _blendWeight : Number;
 
-		public function SkeletonBinaryLERPNode(numJoints : uint)
+		public function SkeletonBinaryLERPNode()
 		{
-			super(numJoints);
+			super();
 		}
 
 		override public function set time(value : Number) : void
@@ -45,6 +45,13 @@ package away3d.animators.skeleton
 // todo: return whether or not update was performed
 		override public function updatePose(skeleton : Skeleton) : void
 		{
+			/*if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
+				  (skeleton.numJoints != inputA.skeletonPose.numJointPoses) ||
+				  (skeleton.numJoints != inputB.skeletonPose.numJointPoses))
+			{
+				throw new Error("joint counts don't match!");
+			}      */
+			
 			// todo: should only update if blendWeight dirty, or if either child returns false
 			inputA.updatePose(skeleton);
 			inputB.updatePose(skeleton);
@@ -56,9 +63,13 @@ package away3d.animators.skeleton
 			var pose1 : JointPose, pose2 : JointPose;
 			var p1 : Vector3D, p2 : Vector3D;
 			var tr : Vector3D;
+			var numJoints : uint = skeleton.numJoints;
 
-			for (var i : uint = 0; i < _numJoints; ++i) {
-				endPose = endPoses[i];
+			// :s
+			if (endPoses.length != numJoints) endPoses.length = numJoints;
+
+			for (var i : uint = 0; i < numJoints; ++i) {
+				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
 				pose2 = poses2[i];
 				p1 = pose1.translation; p2 = pose2.translation;

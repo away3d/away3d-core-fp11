@@ -2,12 +2,11 @@ package away3d.core.base
 {
 	import away3d.core.math.MathConsts;
 	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Quaternion;
 	import away3d.core.math.Vector3DUtils;
-	import away3d.loading.IResource;
-
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -15,13 +14,13 @@ package away3d.core.base
 	/**
 	 * Object3D provides a base class for any 3D object that has a (local) transformation.
 	 */
-	public class Object3D extends EventDispatcher implements IResource
+	public class Object3D extends NamedAssetBase
 	{
 		/**
 		 * An object that can contain any extra data.
 		 */
 		public var extra : Object;
-
+		
 		protected var _transform : Matrix3D = new Matrix3D();
 		private var _transformDirty : Boolean = true;
 		private var _rotationValuesDirty : Boolean;
@@ -50,8 +49,6 @@ package away3d.core.base
 		protected var _y : Number = 0;
 		protected var _z : Number = 0;
 
-		private var _name : String;
-
 		/**
 		 * A calculation placeholder.
 		 */
@@ -65,20 +62,8 @@ package away3d.core.base
 			_transform.identity();
 			_flipY.appendScale(1, -1, 1);
 		}
-
-		/**
-		 * The name of the object.
-		 */
-		public function get name() : String
-		{
-			return _name;
-		}
-
-		public function set name(value : String) : void
-		{
-			_name = value;
-		}
-
+		
+		
 		/**
 		 * The transformation of the 3d object, relative to the local coordinates of the parent <code>ObjectContainer3D</code>.
 		 */
