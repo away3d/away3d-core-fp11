@@ -26,9 +26,9 @@ package away3d.animators.skeleton
 		 * Creates a new SkeletonPhaseClipNode object.
 		 * @param numJoints The amount of joints in the target skeleton.
 		 */
-		public function SkeletonClipNodeBase(numJoints : uint)
+		public function SkeletonClipNodeBase()
 		{
-			super(numJoints);
+			super();
 			_rootPos = new Vector3D();
 		}
 

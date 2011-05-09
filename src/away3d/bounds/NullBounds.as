@@ -2,6 +2,10 @@ package away3d.bounds
 {
 	import away3d.core.base.Geometry;
 
+	import away3d.primitives.WireframePrimitiveBase;
+
+	import away3d.primitives.WireframeSphere;
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
@@ -12,11 +16,18 @@ package away3d.bounds
 	public class NullBounds extends BoundingVolumeBase
 	{
 		private var _alwaysIn : Boolean;
+		private var _renderable : WireframePrimitiveBase;
 
-		public function NullBounds(alwaysIn : Boolean = true)
+		public function NullBounds(alwaysIn : Boolean = true, renderable : WireframePrimitiveBase = null)
 		{
 			super();
 			_alwaysIn = alwaysIn;
+			_renderable = renderable;
+		}
+
+		override protected function createBoundingRenderable() : WireframePrimitiveBase
+		{
+			return _renderable || new WireframeSphere(100);
 		}
 
 		/**

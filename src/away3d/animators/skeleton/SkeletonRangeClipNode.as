@@ -4,7 +4,7 @@
 package away3d.animators.skeleton
 {
 	import away3d.arcane;
-
+	
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -28,9 +28,9 @@ package away3d.animators.skeleton
 		 * Creates a new SkeletonPhaseClipNode object.
 		 * @param numJoints The amount of joints in the target skeleton.
 		 */
-		public function SkeletonRangeClipNode(numJoints : uint)
+		public function SkeletonRangeClipNode()
 		{
-			super(numJoints);
+			super();
 			_rootPos = new Vector3D();
 		}
 
@@ -55,6 +55,13 @@ package away3d.animators.skeleton
 		 */
 		override public function updatePose(skeleton : Skeleton) : void
 		{
+			/*if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
+				  (skeleton.numJoints != clip._frames[_frame1].numJointPoses) ||
+				  (skeleton.numJoints != clip._frames[_frame2].numJointPoses))
+			{
+				throw new Error("joint counts don't match!");
+			}      */
+			
 			if (_clip.duration == 0) return;
 			if (_framesInvalid) updateFrames(_phase);
 
@@ -67,8 +74,11 @@ package away3d.animators.skeleton
 			var endPose : JointPose;
 			var tr : Vector3D;
 
+			// :s
+			if (endPoses.length != numJoints) endPoses.length = numJoints;
+
 			for (var i : uint = 0; i < numJoints; ++i) {
-				endPose = endPoses[i];
+				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
 				pose2 = poses2[i];
 				p1 = pose1.translation; p2 = pose2.translation;

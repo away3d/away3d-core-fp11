@@ -1,15 +1,14 @@
 package away3d.materials
 {
+	import away3d.animators.data.AnimationBase;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.animators.data.AnimationBase;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
 	import away3d.lights.LightBase;
-	import away3d.loading.IResource;
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
-
+	
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
@@ -23,7 +22,7 @@ package away3d.materials
 	 * Vertex stream index 0 is reserved for vertex positions.
 	 * Vertex shader constants index 0-3 are reserved for projections
 	 */
-	public class MaterialBase implements IResource
+	public class MaterialBase 
 	{
 		/**
 		 * An object to contain any extra data
