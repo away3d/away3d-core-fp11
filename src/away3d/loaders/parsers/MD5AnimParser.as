@@ -156,7 +156,9 @@ package away3d.loaders.parsers
 				}
 				
 				if (_reachedEOF) {
+					_sequence = new SkeletonAnimationSequence('md5sequence');
 					translateSequence();
+					finalizeAsset(_sequence);
 					return ParserBase.PARSING_DONE;
 				}
 			}
