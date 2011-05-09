@@ -6,6 +6,7 @@ package away3d.library
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.misc.AssetLoaderContext;
 	import away3d.loaders.misc.AssetLoaderToken;
+	
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
 	
@@ -159,6 +160,7 @@ package away3d.library
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(event);
 			}
+			
 			else throw new Error(event.message);
 		}
 		
