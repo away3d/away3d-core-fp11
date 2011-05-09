@@ -4,16 +4,16 @@ package away3d.loaders
 	import away3d.entities.Mesh;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
-	import away3d.events.LoaderEvent;
+	import away3d.library.AssetLibrary;
 	import away3d.library.assets.AssetType;
 	import away3d.loaders.misc.AssetLoaderContext;
+	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
-	import away3d.library.AssetLibrary;
 	
 	/**
 	 * Loader3D can load any file format that Away3D supports (or for which a third-party parser
@@ -45,7 +45,7 @@ package away3d.loaders
 		}
 		
 		
-		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : void
+		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoaderToken
 		{
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
@@ -53,18 +53,18 @@ package away3d.loaders
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				lib.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				lib.load(req, parser, context, namespace);
+				return lib.load(req, parser, context, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				loader.load(req, parser, context, namespace);
+				return loader.load(req, parser, context, namespace);
 			}
 		}
 		
 		
-		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  namespace : String = null) : void
+		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  namespace : String = null) : AssetLoaderToken
 		{
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
@@ -72,13 +72,13 @@ package away3d.loaders
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				lib.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				lib.parseData(data, parser, context, namespace);
+				return lib.parseData(data, parser, context, namespace);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				loader.parseData(data, '', parser, context, namespace);
+				return loader.parseData(data, '', parser, context, namespace);
 			}
 		}
 		
