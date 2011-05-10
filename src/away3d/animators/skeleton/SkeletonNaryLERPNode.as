@@ -41,11 +41,6 @@ package away3d.animators.skeleton
 
 		override public function updatePose(skeleton : Skeleton) : void
 		{
-//			if (skeleton.numJoints != skeletonPose.numJointPoses)
-//			{
-//				throw new Error("joint counts don't match!");
-//			}
-			
 			var input : SkeletonTreeNode;
 			var weight : Number;
 			var endPoses : Vector.<JointPose> = skeletonPose.jointPoses;

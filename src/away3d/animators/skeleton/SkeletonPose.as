@@ -94,12 +94,6 @@ package away3d.animators.skeleton
 		 */
 		public function toGlobalPose(targetPose : SkeletonPose, skeleton : Skeleton) : void
 		{
-//			if ((numJointPoses != targetPose.numJointPoses) ||
-//				  (numJointPoses != skeleton.numJoints))
-//			{
-//				throw new Error("joint counts don't match!");
-//			}
-			
 			var globalPoses : Vector.<JointPose> = targetPose.jointPoses;
 			var globalJointPose : JointPose;
 			var joints : Vector.<SkeletonJoint> = skeleton.joints;

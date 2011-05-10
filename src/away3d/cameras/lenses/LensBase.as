@@ -23,7 +23,7 @@ package away3d.cameras.lenses
 		protected var _frustumCorners : Vector.<Number> = new Vector.<Number>(8*3, true);
 
 		// todo: consider signals instead, single callback is dirty
-		arcane var onMatrixUpdate : Function;
+		arcane var onInvalidateMatrix : Function;
 
 		private var _unprojection : Matrix3D = new Matrix3D();
 		private var _unprojectionInvalid : Boolean = true;
@@ -51,7 +51,6 @@ package away3d.cameras.lenses
 		{
 			if (_matrixInvalid) {
 				updateMatrix();
-				if (onMatrixUpdate != null) onMatrixUpdate();
 				_matrixInvalid = false;
 			}
 			return _matrix;
@@ -132,6 +131,10 @@ package away3d.cameras.lenses
 		{
 			_matrixInvalid = true;
 			_unprojectionInvalid = true;
+			// notify the camera that the lens matrix is changing. this will mark the 
+			// viewProjectionMatrix in the camera as invalid, and force the matrix to
+			// be re-queried from the lens, and therefore rebuilt.
+			if (onInvalidateMatrix != null) onInvalidateMatrix();
 		}
 
 		/**

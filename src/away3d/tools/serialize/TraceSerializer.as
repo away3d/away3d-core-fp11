@@ -7,17 +7,28 @@ package away3d.tools.serialize
 	
 	use namespace arcane;
 
+	/**
+	 * TraceSerializer is a concrete Serializer that will output its results to trace().  It has user settable tabSize and separator vars.
+	 * 
+	 * @see away3d.tools.serialize.Serialize
+	 */
   public class TraceSerializer extends SerializerBase
   {
 		private var _indent:uint = 0;
 		public var separator:String = ": ";
 		public var tabSize:uint = 2;
 		
+		/**
+		 * Creates a new TraceSerializer object.
+		 */
     public function TraceSerializer()
     {
 			super();
     }
     
+		/**
+		 * @inheritDoc
+		 */
 		public override function beginObject(className:String, instanceName:String):void
 		{
 			var outputString:String = _indentString();
@@ -28,6 +39,9 @@ package away3d.tools.serialize
 			_indent += tabSize;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public override function writeUint(name:String, value:uint):void
 		{
 			var outputString:String = _indentString();
@@ -37,6 +51,9 @@ package away3d.tools.serialize
 			trace(outputString);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public override function writeBoolean(name:String, value:Boolean):void
 		{
 			var outputString:String = _indentString();
@@ -46,6 +63,9 @@ package away3d.tools.serialize
 			trace(outputString);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public override function writeString(name:String, value:String):void
 		{
 			var outputString:String = _indentString();
@@ -55,6 +75,9 @@ package away3d.tools.serialize
 			trace(outputString);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public override function writeVector3D(name:String, value:Vector3D):void
 		{
 			var outputString:String = _indentString();
@@ -64,6 +87,9 @@ package away3d.tools.serialize
 			trace(outputString);
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		public override function writeTransform(name:String, value:Vector.<Number>):void
 		{
 			var outputString:String = _indentString();
@@ -91,6 +117,9 @@ package away3d.tools.serialize
 			trace(outputString);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public override function writeQuaternion(name:String, value:Quaternion):void
 		{
 			var outputString:String = _indentString();
@@ -100,6 +129,9 @@ package away3d.tools.serialize
 			trace(outputString);
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		public override function endObject():void
 		{
 			_indent -= tabSize;			
