@@ -162,7 +162,7 @@ package away3d.materials.passes
 		{
 			super.dispose(deep);
 
-			_normalMapTexture.dispose(deep);
+			if (_normalMapTexture) _normalMapTexture.dispose(deep);
 			_diffuseMethod.dispose(deep);
 			if (_shadowMethod) _shadowMethod.dispose(deep);
 			_ambientMethod.dispose(deep);
