@@ -7,7 +7,9 @@ package away3d.tools.serialize
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
 	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
+	import away3d.materials.MaterialBase;
 	
 	import flash.utils.getQualifiedClassName;
 	
@@ -45,15 +47,44 @@ package away3d.tools.serialize
 		{
 			serializeObjectContainerInternal(mesh as ObjectContainer3D, serializer, false /* serializeChildrenAndEnd */);
 			
-			if (mesh.geometry.subGeometries.length)
+			if (mesh.subMeshes.length)
 			{
-				for (var i:uint = 0; i < mesh.geometry.subGeometries.length; i++)
+				for each (var subMesh:SubMesh in mesh.subMeshes)
 				{
-					serializeSubGeometry(mesh.geometry.subGeometries[i], serializer);
+					serializeSubMesh(subMesh, serializer);
 				}
 			}
 			
 			serializeChildren(mesh as ObjectContainer3D, serializer);
+			serializer.endObject();
+		}
+		
+		public static function serializeSubMesh(subMesh:SubMesh, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(subMesh), null);
+			if (subMesh.material)
+			{
+				serializeMaterial(subMesh.material, serializer);
+			}
+			if (subMesh.subGeometry)
+			{
+				serializeSubGeometry(subMesh.subGeometry, serializer);
+			}
+			serializer.endObject();
+		}
+		
+		public static function serializeMaterial(material:MaterialBase, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(material), material.name);
+			serializer.writeString("lights", String(material.lights));
+			serializer.writeBoolean("mipmap", material.mipmap);
+			serializer.writeBoolean("smooth", material.smooth);
+			serializer.writeBoolean("repeat", material.repeat);
+			serializer.writeBoolean("bothSides", material.bothSides);
+			serializer.writeString("blendMode", material.blendMode);
+			serializer.writeBoolean("requiresBlending", material.requiresBlending);
+			serializer.writeUint("uniqueId", material.uniqueId);
+			serializer.writeUint("numPasses", material.numPasses);
 			serializer.endObject();
 		}
 		
