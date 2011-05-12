@@ -1,6 +1,8 @@
 package away3d.loaders.parsers
 {
 	import away3d.animators.data.SkeletonAnimationSequence;
+	import away3d.animators.data.UVAnimationFrame;
+	import away3d.animators.data.UVAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;
@@ -17,13 +19,15 @@ package away3d.loaders.parsers
 	import away3d.materials.MaterialBase;
 	
 	import flash.display.BitmapData;
+	import flash.display.Sprite;
+	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-
+	
 	use namespace arcane;
-
+	
 	/**
 	 * AWDParser provides a parser for the AWD data type.
 	 */
@@ -31,7 +35,7 @@ package away3d.loaders.parsers
 	{
 		private var _cur_block_id : uint;
 		private var _blocks : Vector.<AWDBlock>;
-
+		
 		private var _version : Array;
 		private var _compression : uint;
 		private var _streaming : Boolean;
@@ -42,7 +46,7 @@ package away3d.loaders.parsers
 		
 		private var _parsed_header : Boolean;
 		private var _body : ByteArray;
-
+		
 		public static const UNCOMPRESSED : uint = 0;
 		public static const DEFLATE : uint = 1;
 		public static const LZMA : uint = 2;
@@ -56,9 +60,9 @@ package away3d.loaders.parsers
 		public static const AWD_ATTR_STRING : uint = 5;
 		public static const AWD_ATTR_BADDR : uint = 6;
 		public static const AWD_ATTR_MTX4 : uint = 7;
-
-			
-			
+		
+		
+		
 		/**
 		 * Creates a new AWDParser object.
 		 * @param uri The url or id of the data or file to be parsed.
@@ -69,12 +73,12 @@ package away3d.loaders.parsers
 			super(ParserDataFormat.BINARY);
 			
 			_blocks = new Vector.<AWDBlock>;
-			_blocks[0] = new AWDBlock;
+			_blocks[0] = new AWDBlock;
 			_blocks[0].data = null; // Zero address means null in AWD
-
+			
 			_version = [];
 		}
-
+		
 		/**
 		 * Indicates whether or not a given file extension is supported by the parser.
 		 * @param extension The file extension of a potential file to be parsed.
@@ -112,7 +116,7 @@ package away3d.loaders.parsers
 			// apply system default
 			//BitmapMaterial(mesh.material).bitmapData = defaultBitmapData;
 		}*/
-
+		
 		/**
 		 * Tests whether a data block can be parsed by the parser.
 		 * @param data The data block to potentially be parsed.
@@ -122,18 +126,18 @@ package away3d.loaders.parsers
 		{
 			var magic : String;
 			var bytes : ByteArray = ByteArray(data);
-
+			
 			bytes.position = 0;
 			magic = data.readUTFBytes(3);
 			bytes.position = 0;
-
+			
 			if (magic == 'AWD')
 				return true;
-
+			
 			return false;
 		}
-
-
+		
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -165,7 +169,7 @@ package away3d.loaders.parsers
 						
 						properties = new Vector.<int>(5, true);
 						for(var i: int = 0; i < 5; ++i) {
-							properties[i] = _byteData.readUnsignedByte()
+						properties[i] = _byteData.readUnsignedByte()
 						}
 						
 						out_size = _byteData.readUnsignedInt();
@@ -195,7 +199,7 @@ package away3d.loaders.parsers
 			// Return complete status
 			if (_body.bytesAvailable==0) {
 				return PARSING_DONE;
-            }
+			}
 			else return MORE_TO_PARSE;
 		}
 		
@@ -268,8 +272,12 @@ package away3d.loaders.parsers
 					assetData = parseSkeletonPose(len);
 					break;
 				case 103:
-					trace('Parsing animation');
+					trace('Parsing skelanim');
 					assetData = parseSkeletonAnimation(len);
+					break;
+				case 121:
+					trace('Parsing uvanim');
+					assetData = parseUVAnimation(len);
 					break;
 				default:
 					//trace('Ignoring block!');
@@ -281,6 +289,47 @@ package away3d.loaders.parsers
 			_blocks[_cur_block_id] = new AWDBlock();
 			_blocks[_cur_block_id].data = assetData;
 			_blocks[_cur_block_id].id = _cur_block_id;
+		}
+		
+		
+		
+		private function parseUVAnimation(blockLength : uint) : UVAnimationSequence
+		{
+			var name : String;
+			var num_frames : uint;
+			var frames_parsed : uint;
+			var props : AWDProperties;
+			var dummy : Sprite;
+			var seq : UVAnimationSequence;
+			
+			name = parseVarStr();
+			num_frames = _body.readUnsignedShort();
+			
+			trace('name', name);
+			trace('nf', num_frames);
+			
+			props = parseProperties(null);
+			
+			seq = new UVAnimationSequence(name);
+			
+			frames_parsed = 0;
+			dummy = new Sprite;
+			while (frames_parsed < num_frames) {
+				var frame : UVAnimationFrame;
+				dummy.transform.matrix = parseMatrix2D();
+				
+				frame = new UVAnimationFrame(dummy.x, dummy.y, dummy.scaleX, dummy.scaleY, dummy.rotation);
+				seq.addFrame(frame, 25);
+				
+				frames_parsed++;
+			}
+			
+			// Ignore for now
+			parseUserAttributes();
+			
+			finalizeAsset(seq, name);
+			
+			return seq;
 		}
 		
 		
@@ -312,7 +361,8 @@ package away3d.loaders.parsers
 				}
 				
 				mat = new BitmapMaterial(bmp);
-				_texture_users[tex_addr.toString()].push(mat);
+				if (tex_addr > 0)
+					_texture_users[tex_addr.toString()].push(mat);
 			}
 			
 			finalizeAsset(mat, name);
@@ -356,7 +406,7 @@ package away3d.loaders.parsers
 			finalizeAsset(asset, name);
 			return asset
 		}
-
+		
 		
 		private function parseSkeleton(blockLength : uint) : Skeleton
 		{
@@ -373,7 +423,7 @@ package away3d.loaders.parsers
 			parseProperties(null);
 			
 			trace('name:', name,'joints:', num_joints);
- 			joints_parsed = 0;
+			joints_parsed = 0;
 			while (joints_parsed < num_joints) {
 				var parent_id : uint;
 				var joint_name : String;
@@ -382,18 +432,18 @@ package away3d.loaders.parsers
 				
 				// Ignore joint id
 				_body.readUnsignedInt();
-
+				
 				joint = new SkeletonJoint();
 				joint.parentIndex = _body.readUnsignedInt() -1; // 0=null in AWD
 				joint.name = parseVarStr();
 				
 				ibp = parseMatrix3D();
 				joint.inverseBindPose = ibp.rawData;
-
+				
 				skeleton.joints.push(joint);
 				joints_parsed++;
 			}
-
+			
 			// Discard attributes for now
 			parseUserAttributes();
 			
@@ -432,7 +482,7 @@ package away3d.loaders.parsers
 					var mtx : Matrix3D = new Matrix3D(mtx_data);
 					joint_pose.orientation.fromMatrix(mtx);
 					joint_pose.translation.copyFrom(mtx.position);
-
+					
 					pose.jointPoses[joints_parsed] = joint_pose;
 				}
 				
@@ -484,7 +534,7 @@ package away3d.loaders.parsers
 			
 			return animation;
 		}
-
+		
 		private function parseMeshInstance(blockLength : uint) : Mesh
 		{
 			var name : String;
@@ -517,7 +567,7 @@ package away3d.loaders.parsers
 			mesh = new Mesh(null, geom);
 			mesh.transform = mtx;
 			
-			if (materials.length == 1) {
+			if (materials.length >= 1 && mesh.subMeshes.length == 1) {
 				mesh.material = materials[0];
 			}
 			else if (materials.length > 1) {
@@ -534,7 +584,7 @@ package away3d.loaders.parsers
 			parseUserAttributes();
 			
 			finalizeAsset(mesh, name);
-
+			
 			return mesh;
 		}
 		
@@ -564,18 +614,14 @@ package away3d.loaders.parsers
 			}
 			
 			geom = new Geometry();
-
+			
 			// Loop through sub meshes
 			subs_parsed = 0;
 			while (subs_parsed < num_subs) {
 				var mat_id : uint, sm_len : uint, sm_end : uint;
-				var sub_geom : SubGeometry;
-				var skinned_sub_geom : SkinnedSubGeometry;
-				
-				if (skeleton || true)
-					sub_geom = skinned_sub_geom = new SkinnedSubGeometry(3); // TODO: Don't hard code this
-				else
-					sub_geom = new SubGeometry();
+				var sub_geom : SubGeometry;				var skinned_sub_geom : SkinnedSubGeometry;				var w_indices : Vector.<Number>;
+				var weights : Vector.<Number>;
+								sub_geom = new SubGeometry();
 				
 				sm_len = _body.readUnsignedInt();
 				sm_end = _body.position + sm_len;
@@ -632,24 +678,25 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateUVData(uvs);
 					}
-					else if (str_type == 7 && skinned_sub_geom) {
-						var w_indices : Vector.<Number> = new Vector.<Number>;
+					else if (str_type == 7) {						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
 							w_indices[idx++] = read_int()*3;
-						}
-						skinned_sub_geom.jointIndexData = w_indices;
-					}
-					else if (str_type == 8 && skinned_sub_geom) {
-							var weights : Vector.<Number> = new Vector.<Number>;
+						}					}
+					else if (str_type == 8) {						weights = new Vector.<Number>;
 						while (_body.position < str_end) {
 							weights[idx++] = read_float();
 						}
-						skinned_sub_geom.jointWeightsData = weights;
 					}
 					else {
 						trace('unknown str type:', str_type);
 						_body.position = str_end;
-					}
+					}				}
+									// If there were weights and joint indices defined, this
+				// is a skinned mesh and needs to be built from skinned
+				// sub-geometries, so copy data across.
+				if (w_indices && weights) {					skinned_sub_geom = new SkinnedSubGeometry(weights.length / sub_geom.numVertices);					skinned_sub_geom.updateVertexData(sub_geom.vertexData);					skinned_sub_geom.updateIndexData(sub_geom.indexData);
+					skinned_sub_geom.updateUVData(sub_geom.UVData);					skinned_sub_geom.jointIndexData = w_indices;
+					skinned_sub_geom.jointWeightsData = weights;					sub_geom = skinned_sub_geom;
 				}
 				
 				subs_parsed++;
@@ -690,12 +737,12 @@ package away3d.loaders.parsers
 					var len : uint;
 					var key : uint;
 					var type : uint;
-				
+					
 					key = _body.readUnsignedShort();
 					len = _body.readUnsignedShort();
 					if (expected.hasOwnProperty(key))
 						type = expected[key];
-				
+					
 					props.set(key, parseAttrValue(type, len));
 				}
 			}
@@ -758,17 +805,26 @@ package away3d.loaders.parsers
 			}
 		}
 		
+		private function parseMatrix2D() : Matrix
+		{
+			var mtx : Matrix;
+			var mtx_raw : Vector.<Number> = parseMatrixRawData(6);
+			
+			mtx = new Matrix(mtx_raw[0], mtx_raw[1], mtx_raw[2], mtx_raw[3], mtx_raw[4], mtx_raw[5]);
+			return mtx;
+		}
+		
 		private function parseMatrix3D() : Matrix3D
 		{
 			var mtx : Matrix3D = new Matrix3D(parseMatrixRawData());
 			return mtx;
 		}
 		
-		private function parseMatrixRawData() : Vector.<Number>
+		private function parseMatrixRawData(len : uint = 16) : Vector.<Number>
 		{
 			var i : uint;
 			var mtx_raw : Vector.<Number> = new Vector.<Number>;
-			for (i=0; i<16; i++) {
+			for (i=0; i<len; i++) {
 				mtx_raw[i] = _body.readDouble();
 			}
 			
