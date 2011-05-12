@@ -1,10 +1,10 @@
 package away3d.animators.data
 {
-	import away3d.animators.skeleton.Skeleton;
 	import away3d.arcane;
 	import away3d.materials.passes.MaterialPassBase;
-	
+
 	import flash.display3D.Context3D;
+	import away3d.animators.skeleton.Skeleton;
 
 	use namespace arcane;
 
@@ -18,9 +18,8 @@ package away3d.animators.data
 	 */
 	public class SkeletonAnimation extends AnimationBase
 	{
-		private var _forceCPU : Boolean;
-		private var _usesCPU : Boolean;
 		private var _skeleton : Skeleton;
+		private var _usesCPU : Boolean;
 		private var _nullAnimation : NullAnimation;
 		private var _jointsPerVertex : uint;
 
@@ -29,9 +28,8 @@ package away3d.animators.data
 		 * @param skeleton The skeleton that's used for this SkeletonAnimation instance.
 		 * @param jointsPerVertex The amount of joints that can be linked to a vertex.
 		 */
-		public function SkeletonAnimation(skeleton : Skeleton, jointsPerVertex : uint = 4, forceCPU : Boolean = false)
+		public function SkeletonAnimation(skeleton : Skeleton, jointsPerVertex : uint = 4)
 		{
-			_forceCPU = _usesCPU = forceCPU;
 			_skeleton = skeleton;
 			_jointsPerVertex = jointsPerVertex;
 		}
@@ -108,7 +106,7 @@ package away3d.animators.data
 			var len : uint = attributes.length;
 
 			// if too many bones to fit in the constants, fall back to cpu animation :(
-			if (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
+			if (_jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
 				_usesCPU = true;
 				_nullAnimation = new NullAnimation();
 				return _nullAnimation.getAGALVertexCode(pass);
