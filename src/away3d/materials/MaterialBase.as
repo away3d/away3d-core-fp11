@@ -5,6 +5,9 @@ package away3d.materials
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 	import away3d.lights.LightBase;
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
@@ -22,7 +25,7 @@ package away3d.materials
 	 * Vertex stream index 0 is reserved for vertex positions.
 	 * Vertex shader constants index 0-3 are reserved for projections
 	 */
-	public class MaterialBase 
+	public class MaterialBase extends NamedAssetBase implements IAsset
 	{
 		/**
 		 * An object to contain any extra data
@@ -71,6 +74,12 @@ package away3d.materials
 			_depthPass = new DepthMapPass();
 
 			invalidateDepthShaderProgram();
+		}
+		
+		
+		public function get assetType() : String
+		{
+			return AssetType.MATERIAL;
 		}
 
 		public function get lights() : Array
@@ -247,15 +256,12 @@ package away3d.materials
 			_materialLibrary.setName(this);
 		}
 
-		/**
-		 * The name of the material.
-		 */
-		public function get name() : String
+		public override function get name() : String
 		{
 			return _name;
 		}
 
-		public function set name(value : String) : void
+		public override function set name(value : String) : void
 		{
 			_materialLibrary.unsetName(this);
 			_name = value;
