@@ -1,5 +1,7 @@
 package away3d.tools.serialize
 {
+	import away3d.animators.data.AnimationBase;
+	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.SkeletonPose;
@@ -46,6 +48,18 @@ package away3d.tools.serialize
 		public static function serializeMesh(mesh:Mesh, serializer:SerializerBase):void
 		{
 			serializeObjectContainerInternal(mesh as ObjectContainer3D, serializer, false /* serializeChildrenAndEnd */);
+			serializer.writeBoolean("mouseDetails", mesh.mouseDetails);
+			serializer.writeBoolean("castsShadows", mesh.castsShadows);
+			
+			if (mesh.animationState)
+			{
+				serializeAnimationState(mesh.animationState, serializer);
+			}
+			
+			if (mesh.material)
+			{
+				serializeMaterial(mesh.material, serializer);
+			}
 			
 			if (mesh.subMeshes.length)
 			{
@@ -54,8 +68,20 @@ package away3d.tools.serialize
 					serializeSubMesh(subMesh, serializer);
 				}
 			}
-			
 			serializeChildren(mesh as ObjectContainer3D, serializer);
+			serializer.endObject();
+		}
+		
+		public static function serializeAnimationState(animationState:AnimationStateBase, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(animationState), null);
+			serializeAnimation(animationState.animation, serializer);
+			serializer.endObject();
+		}
+		
+		public static function serializeAnimation(animation:AnimationBase, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(animation), null);
 			serializer.endObject();
 		}
 		
