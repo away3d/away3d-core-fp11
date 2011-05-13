@@ -8,6 +8,7 @@ package away3d.tools.serialize
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
+	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
@@ -127,6 +128,18 @@ package away3d.tools.serialize
 			{
 				serializer.writeUint("numUVs", subGeometry.UVData.length);
 			}
+      var skinnedSubGeometry:SkinnedSubGeometry = subGeometry as SkinnedSubGeometry;
+      if (skinnedSubGeometry)
+      {
+        if (skinnedSubGeometry.jointWeightsData)
+        {
+          serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length)
+        }
+        if (skinnedSubGeometry.jointIndexData)
+        {
+          serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length)
+        }
+      }
 			serializer.endObject();
 		}
 		
