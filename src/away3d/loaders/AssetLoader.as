@@ -154,9 +154,9 @@ package away3d.loaders
 			_loadingDependency = dependency;
 
 			// Get already loaded (or mapped) data if available
-			data = _context.hasDataForUrl(_loadingDependency.request.url)?
-				_context.getDataForUrl(_loadingDependency.request.url) : 
-				_loadingDependency.data;
+			data = _loadingDependency.data;
+			if (_context && _loadingDependency.request && _context.hasDataForUrl(_loadingDependency.request.url))
+				data = _context.getDataForUrl(_loadingDependency.request.url);
 			
 			if (data) {
 				if (_loadingDependency.retrieveAsRawData) {
