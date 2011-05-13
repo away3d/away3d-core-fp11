@@ -51,18 +51,16 @@ package away3d.loaders.parsers
 		private var _uvs : Vector.<UV>;
 		
 		private var _scale : Number;
-		private var _resourcesUrl : String;
 		
 		/**
 		 * Creates a new OBJParser object.
 		 * @param uri The url or id of the data or file to be parsed.
 		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
-		public function OBJParser(resourcesUrl:String = "", scale:Number = 1)
+		public function OBJParser(scale:Number = 1)
 		{
 			super(ParserDataFormat.PLAIN_TEXT);
 			_scale = scale;
-			_resourcesUrl = resourcesUrl;
 		}
 		
 		/**
@@ -72,25 +70,6 @@ package away3d.loaders.parsers
 		public function set scale(value:Number):void
 		{
 			_scale = value;
-		}
-		
-		/**
-		 * To allow a the loading of resources defined in mtl from another location
-		 *
-		 * The material bitmaps url defined in mtl file are by default loaded from the compositing of url obj file + the adress stored in mtl.
-		 * example: obj file is at myDisc/projects/models/myFile.obj, the format expectts the mtl to be next to obj file in same directory
-		 * the mtl has one material with a map_Kd tag set to image.jpg.
-		 * by default the parser load the source at: 'myDisc/projects/models/image.jpg'
-		 * If you set a resourceUrl, you override this compositing, for example: 'myDisc/projects/sources/images/';
-		 * The parser will still use the mtl information but will use this url as base. In this case, it would atempt to load the bitmap
-		 * at 'myDisc/projects/sources/images/image.jpg'.
-		 * Note that the mt file must remain next to this obj file.
-		 *
-		 * @param uri 	The url to load the resources from
-		 */
-		public function set resourcesUrl(url:String):void
-		{
-			_resourcesUrl = url;
 		}
 		
 		/**
