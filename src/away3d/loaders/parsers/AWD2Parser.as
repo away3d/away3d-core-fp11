@@ -307,9 +307,6 @@ package away3d.loaders.parsers
 			name = parseVarStr();
 			num_frames = _body.readUnsignedShort();
 			
-			trace('name', name);
-			trace('nf', num_frames);
-			
 			props = parseProperties(null);
 			
 			seq = new UVAnimationSequence(name);

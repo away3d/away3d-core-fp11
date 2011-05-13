@@ -131,7 +131,6 @@ package away3d.loaders
 				retrieveDependency(_currentDependencies[idx], parser);
 			} 
 			else if (_currentLoader.parser.parsingComplete) {
-				trace('DOOOONE!');
 				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
 			}
 		}
@@ -200,7 +199,6 @@ package away3d.loaders
 		
 		private function retrieveLoaderDependencies(loader : SingleFileLoader) : void
 		{
-			trace('RETRIEVING LOADER DEPS');
 			_loaderStack.push(loader);
 			_dependencyStack.push(_currentDependencies);
 			_dependencyIndexStack.push(_currentDependencyIndex);
