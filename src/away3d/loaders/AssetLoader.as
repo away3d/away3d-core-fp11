@@ -113,7 +113,9 @@ package away3d.loaders
 					_currentDependencies = _dependencyStack.pop();
 					_currentDependencyIndex = _dependencyIndexStack.pop();
 					
-					if (!_currentLoader.parser.parsingComplete) {
+					// If this load operation is one that needs to be parsed, and the parsing has
+					// not completed yet, resume parsing after having loaded it's dependency queue
+					if (_currentLoader.parser && !_currentLoader.parser.parsingComplete) {
 						_currentLoader.parser.resumeParsingAfterDependencies();
 						break;
 					}
@@ -130,7 +132,9 @@ package away3d.loaders
 				_currentDependencyIndex++;
 				retrieveDependency(_currentDependencies[idx], parser);
 			} 
-			else if (_currentLoader.parser.parsingComplete) {
+			else if (_loaderStack.length==0 && _currentLoader.parser.parsingComplete) {
+				// This was the first (base) loader in the stack. Since it has been completed the
+				// entire resource must be done.
 				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
 			}
 		}
@@ -141,6 +145,7 @@ package away3d.loaders
 		 */
 		private function retrieveDependency(dependency : ResourceDependency, parser : ParserBase = null) : void
 		{
+			var data : *;
 			var loader : SingleFileLoader = new SingleFileLoader();
 			loader.addEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
@@ -148,16 +153,30 @@ package away3d.loaders
 			loader.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_loadingDependency = dependency;
 
-			if (_loadingDependency.data) {
-				loader.parseData(_loadingDependency.data, parser);
-			}
-			else if (_context && _context.hasDataForUrl(_loadingDependency.request.url)) {
-				loader.parseData(_context.getDataForUrl(_loadingDependency.request.url));
+			// Get already loaded (or mapped) data if available
+			data = _context.hasDataForUrl(_loadingDependency.request.url)?
+				_context.getDataForUrl(_loadingDependency.request.url) : 
+				_loadingDependency.data;
+			
+			if (data) {
+				if (_loadingDependency.retrieveAsRawData) {
+					// No need to parse. The parent parser is expecting this
+					// to be raw data so it can be passed directly.
+					dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, _loadingDependency.request.url));
+					_loadingDependency.setData(data);
+					_loadingDependency.resolve();
+					
+					// Move on to next dependency
+					retrieveNext();
+				}
+				else {
+					loader.parseData(data, parser);
+				}
 			}
 			else {
 				// Resolve URL and start loading
 				dependency.request.url = resolveDependencyUrl(dependency);
-				loader.load(dependency.request, parser);
+				loader.load(dependency.request, parser, _loadingDependency.retrieveAsRawData);
 			}
 		}
 		
@@ -281,6 +300,7 @@ package away3d.loaders
 		{
 			dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, event.url));
 			
+			_loadingDependency.setData(loader.data);
 			if(resolve) _loadingDependency.resolve();
 			
 			if (_context && !_context.includeDependencies){
