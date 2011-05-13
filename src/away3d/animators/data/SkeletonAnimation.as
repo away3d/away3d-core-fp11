@@ -108,7 +108,7 @@ package away3d.animators.data
 			var len : uint = attributes.length;
 
 			// if too many bones to fit in the constants, fall back to cpu animation :(
-			if (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
+			if (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
 				_usesCPU = true;
 				_nullAnimation = new NullAnimation();
 				return _nullAnimation.getAGALVertexCode(pass);
