@@ -59,6 +59,15 @@ package away3d.loaders.parsers
 		
 		
 		/**
+		 * @inheritDoc
+		*/
+		public override function get parsingComplete():Boolean
+		{
+			return _parser? _parser.parsingComplete : false;
+		}
+		
+		
+		/**
 		 * @private
 		 * Delegate to the concrete parser.
 		*/
@@ -75,6 +84,12 @@ package away3d.loaders.parsers
 		arcane override function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
 			if (_parser) _parser.resolveDependencyFailure(resourceDependency);
+		}
+		
+		
+		arcane override function resumeParsingAfterDependencies():void
+		{
+			if (_parser) _parser.resumeParsingAfterDependencies();
 		}
 		
 		
@@ -95,6 +110,7 @@ package away3d.loaders.parsers
 				// Listen for events that need to be bubbled
 				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
+				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 				
 				// Start parsing using concrete parser
 				switch (_parser.dataFormat) {
@@ -123,6 +139,8 @@ package away3d.loaders.parsers
 		{
 			// Do nothing.
 		}
+		
+		
 		
 		
 		/**

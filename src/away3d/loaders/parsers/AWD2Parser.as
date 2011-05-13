@@ -97,12 +97,14 @@ package away3d.loaders.parsers
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length == 1) {
-				var bmp : BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
-				if (bmp) {
-					var mat : BitmapMaterial;
-					var users : Array = _texture_users[resourceDependency.id];
-					for each (mat in users) {
-						mat.bitmapData = bmp.bitmapData;
+				var loaded_asset : BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
+				if (loaded_asset) {					var mat : BitmapMaterial;
+					var users : Array;
+					var stored_asset : BitmapDataAsset;
+					
+					stored_asset = _blocks[parseInt(resourceDependency.id)].data;					stored_asset.bitmapData = loaded_asset.bitmapData;					
+					users = _texture_users[resourceDependency.id];					for each (mat in users) {
+						mat.bitmapData = loaded_asset.bitmapData;						finalizeAsset(mat);
 					}
 				}
 			}
@@ -192,7 +194,7 @@ package away3d.loaders.parsers
 				_parsed_header = true;
 			}
 			
-			while (_body.bytesAvailable > 0 && hasTime()) {
+			while (_body.bytesAvailable > 0 && !parsingPaused && hasTime()) {
 				parseNextBlock();
 			}
 			
@@ -305,9 +307,6 @@ package away3d.loaders.parsers
 			name = parseVarStr();
 			num_frames = _body.readUnsignedShort();
 			
-			trace('name', name);
-			trace('nf', num_frames);
-			
 			props = parseProperties(null);
 			
 			seq = new UVAnimationSequence(name);
@@ -355,17 +354,18 @@ package away3d.loaders.parsers
 				
 				tex_addr = props.get(2, 0);
 				trace('texture addr: ', tex_addr);
-				bmp_asset = _blocks[tex_addr].data;
-				if (bmp_asset) {
+				bmp_asset = _blocks[tex_addr].data;				
+				// If bitmap asset has already been loaded
+				if (bmp_asset && bmp_asset.bitmapData) {
 					bmp = bmp_asset.bitmapData;
+					mat = new BitmapMaterial(bmp);					finalizeAsset(mat, name);
+				}				else {					// No bitmap available yet. Material will be finalized
+					// when texture finishes loading.
+					mat = new BitmapMaterial(null);
+					if (tex_addr > 0)
+						_texture_users[tex_addr.toString()].push(mat);
 				}
-				
-				mat = new BitmapMaterial(bmp);
-				if (tex_addr > 0)
-					_texture_users[tex_addr.toString()].push(mat);
 			}
-			
-			finalizeAsset(mat, name);
 			
 			return mat;
 		}
@@ -401,10 +401,10 @@ package away3d.loaders.parsers
 			parseUserAttributes();
 			
 			
-			// TODO: Don't do this. Get texture properly
-			asset = new BitmapDataAsset(defaultBitmapData);
-			finalizeAsset(asset, name);
-			return asset
+			// TODO: Don't do this. Get texture properly			asset = new BitmapDataAsset();
+			/*
+			finalizeAsset(asset, name);			*/			
+			pauseAndRetrieveDependencies();						return asset
 		}
 		
 		

@@ -1,5 +1,7 @@
 package away3d.loaders.parsers
 {
+	import away3d.loaders.misc.SingleFileLoader;
+
 	public class Parsers
 	{
 		/**
@@ -38,5 +40,14 @@ package away3d.loaders.parsers
 			AC3DParser, AWDParser, Max3DSParser,
 			MD2Parser, MD5AnimParser, MD5MeshParser, OBJParser
 		]);
+		
+		
+		/**
+		 * Short-hand function for SingleFileLoader.enableParsers(Parsers.ALL_BUNDLED).
+		*/
+		public static function enableAllBundled() : void
+		{
+			SingleFileLoader.enableParsers(ALL_BUNDLED);
+		}
 	}
 }
