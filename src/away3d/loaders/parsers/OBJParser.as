@@ -80,7 +80,7 @@ package away3d.loaders.parsers
 		public static function supportsType(extension : String) : Boolean
 		{
 			extension = extension.toLowerCase();
-			return extension == "obj" || extension == "mtl";
+			return extension == "obj";
 		}
 		
 		/**
