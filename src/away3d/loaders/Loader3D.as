@@ -45,7 +45,7 @@ package away3d.loaders
 		}
 		
 		
-		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoaderToken
+		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
@@ -53,18 +53,18 @@ package away3d.loaders
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				lib.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return lib.load(req, parser, context, namespace);
+				return lib.load(req, parser, context, ns);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return loader.load(req, parser, context, namespace);
+				return loader.load(req, parser, context, ns);
 			}
 		}
 		
 		
-		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  namespace : String = null) : AssetLoaderToken
+		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  ns : String = null) : AssetLoaderToken
 		{
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
@@ -72,13 +72,13 @@ package away3d.loaders
 				lib = AssetLibrary.getInstance(_assetLibId);
 				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				lib.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return lib.parseData(data, parser, context, namespace);
+				return lib.parseData(data, parser, context, ns);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
 				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return loader.parseData(data, '', parser, context, namespace);
+				return loader.parseData(data, '', parser, context, ns);
 			}
 		}
 		

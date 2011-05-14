@@ -67,13 +67,13 @@ package away3d.loaders
 		/**
 		 * Loads a file and (optionally) all of its dependencies.
 		 */
-		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoaderToken
+		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken = new AssetLoaderToken(this);
 			
 			_uri = req.url = req.url.replace(/\\/g, "/");
 			_context = context;
-			_namespace = namespace;
+			_namespace = ns;
 			_currentDependencies = new Vector.<ResourceDependency>();
 			_currentDependencies.push(new ResourceDependency('', req, null, null));
 			retrieveNext(parser);
@@ -84,13 +84,13 @@ package away3d.loaders
 		/**
 		 * Loads a resource from already loaded data.
 		 */
-		public function parseData(data : *, id : String, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoaderToken
+		public function parseData(data : *, id : String, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken = new AssetLoaderToken(this);
 			
 			_uri = id;
 			_context = context;
-			_namespace = namespace;
+			_namespace = ns;
 			_currentDependencies = new Vector.<ResourceDependency>();
 			_currentDependencies.push(new ResourceDependency(id, null, data, null));
 			retrieveNext(parser);

@@ -10,7 +10,7 @@ package away3d.library.assets
 		function get assetType() : String;
 		function get assetFullPath() : Array;
 		
-		function assetPathEquals(name : String, namespace : String) : Boolean;
-		function resetAssetPath(name : String, namespace : String=null, overrideOriginal : Boolean = true) : void;
+		function assetPathEquals(name : String, ns : String) : Boolean;
+		function resetAssetPath(name : String, ns : String=null, overrideOriginal : Boolean = true) : void;
 	}
 }
