@@ -5,10 +5,6 @@ package away3d.library.strategies
 
 	public class NamingStrategyBase
 	{
-		// Helper constants used by concrete naming strategies
-		protected static const PERFORMED_RENAME : Boolean = true;
-		protected static const NAMES_UNTOUCHED : Boolean = false;
-		
 		public static const PREFER_OLD : String = 'preferOld';
 		public static const PREFER_NEW : String = 'preferNew';
 		

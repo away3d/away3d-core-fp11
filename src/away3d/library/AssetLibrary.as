@@ -4,6 +4,7 @@ package away3d.library
 	import away3d.events.LoaderEvent;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
+	import away3d.library.strategies.ErrorNamingStrategy;
 	import away3d.library.strategies.NamingStrategyBase;
 	import away3d.library.strategies.NumSuffixNamingStrategy;
 	import away3d.loaders.AssetLoader;
@@ -29,6 +30,7 @@ package away3d.library
 		
 		
 		public static const NUM_SUFFIX : NamingStrategyBase = new NumSuffixNamingStrategy();
+		public static const THROW_ERROR : NamingStrategyBase = new ErrorNamingStrategy();
 		
 		
 		public function AssetLibrary(se : SingletonEnforcer)
