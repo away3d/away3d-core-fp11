@@ -23,8 +23,8 @@ package away3d.library.strategies
 		{
 			var winner : IAsset, loser : IAsset;
 			
-			winner = PREFER_NEW? newAsset : oldAsset;
-			loser =  PREFER_NEW? oldAsset : newAsset;
+			winner = (preference==PREFER_NEW)? newAsset : oldAsset;
+			loser =  (preference==PREFER_NEW)? oldAsset : newAsset;
 			
 			assetsDictionary[winner.name] = winner
 			assetsDictionary[nonConflictingName] = loser;

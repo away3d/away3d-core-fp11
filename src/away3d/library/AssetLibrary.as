@@ -24,6 +24,7 @@ package away3d.library
 		private var _loadingSessions : Vector.<AssetLoader>;
 		
 		private var _strategy : NamingStrategyBase;
+		private var _strategyPreference : String;
 		
 		private var _assets : Vector.<IAsset>;
 		private var _assetDictionary : Object;
@@ -42,6 +43,7 @@ package away3d.library
 			_loadingSessions = new Vector.<AssetLoader>;
 			
 			_strategy = NUM_SUFFIX;
+			_strategyPreference = NamingStrategyBase.PREFER_NEW;
 		}
 		
 		
@@ -77,6 +79,26 @@ package away3d.library
 		public static function set namingStrategy(val : NamingStrategyBase) : void
 		{
 			getInstance().namingStrategy = val;
+		}
+		
+		
+		public function get namingStrategyPreference() : String
+		{
+			return _strategyPreference;
+		}
+		public function set namingStrategyPreference(val : String) : void
+		{
+			_strategyPreference = val;
+		}
+		
+		
+		public static function get namingStrategyPreference() : String
+		{
+			return getInstance().namingStrategyPreference;
+		}
+		public static function set namingStrategyPreference(val : String) : void
+		{
+			getInstance().namingStrategyPreference = val;
 		}
 		
 		
@@ -187,7 +209,7 @@ package away3d.library
 			old = getAsset(asset.name, asset.assetNamespace);
 			if (old != null) {
 				trace('had old! Resolving');
-				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], NamingStrategyBase.PREFER_NEW);
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
 				trace('RESOLVED: ===================================');
 				trace('old: ', old.assetFullPath);
 				trace('new: ', asset.assetFullPath);
@@ -301,7 +323,7 @@ package away3d.library
 			var old : IAsset = getAsset(asset.assetNamespace, asset.name);
 			
 			if (old != null)
-				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], NamingStrategyBase.PREFER_NEW);
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
 		}
 	}
 }
