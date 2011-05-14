@@ -2,34 +2,52 @@ package away3d.library.strategies
 {
 	import away3d.arcane;
 	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
 
 	use namespace arcane;
 	
 	public class NumSuffixNamingStrategy extends NamingStrategyBase
 	{
-		public function NumSuffixNamingStrategy()
+		private var _separator : String;
+		
+		public function NumSuffixNamingStrategy(separator : String = '.')
 		{
 			super();
+			
+			_separator = separator;
 		}
 		
 		
-		public override function handleRename(changedAsset:IAsset, oldAsset:IAsset, assetsDictionary:Object, preference:String) : Boolean
+		public override function resolveConflict(changedAsset:IAsset, oldAsset:IAsset, assetsDictionary:Object, preference:String) : void
 		{
-			if (!oldAsset)
-				return NAMES_UNTOUCHED;
+			var orig : String;
+			var new_name : String;
+			var base : String, suffix : int;
 			
-			/*
-			NamedAssetBase(oldAsset).resetAssetPath(oldAsset.name+'-old', oldAsset.assetNamespace, false);
-			assetsDictionary[changedAsset.assetNamespace][changedAsset.name] = changedAsset;
-			assetsDictionary[oldAsset.assetNamespace][oldAsset.name] = oldAsset;
+			orig = changedAsset.name;
+			if (orig.indexOf(_separator) >= 0) {
+				// Name has an ocurrence of the separator, so get base name and suffix,
+				// unless suffix is non-numerical, in which case revert to zero and 
+				// use entire name as base
+				base = orig.substring(0, orig.lastIndexOf(_separator));
+				suffix = parseInt(orig.substring(base.length-1));
+				if (isNaN(suffix)) {
+					base = orig;
+					suffix = 0;
+				}
+			}
+			else {
+				base = orig;
+				suffix = 0;
+			}
 			
-			trace('RENAME COLLISION HANDLED!');
-			trace('old:', oldAsset.assetFullPath);
-			trace('new:', changedAsset.assetFullPath);
-			*/
+			// Find the first suffixed name that does
+			// not collide with other names.
+			do {
+				suffix++;
+				new_name = base.concat(_separator, suffix);
+			} while (assetsDictionary.hasOwnProperty(new_name));
 			
-			return NAMES_UNTOUCHED;
+			updateNames(oldAsset.assetNamespace, new_name, oldAsset, changedAsset, assetsDictionary, preference);
 		}
 	}
 }

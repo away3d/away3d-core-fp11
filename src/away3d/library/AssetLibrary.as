@@ -179,21 +179,23 @@ package away3d.library
 		{
 			var old : IAsset;
 			
-			_assets.push(asset);
+			trace('addAsset()');
 			
 			old = getAsset(asset.name, asset.assetNamespace);
-			
-			// No collission, just add it
-			if (!old) {
-				if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
-					_assetDictionary[asset.assetNamespace] = {};
-				
-				_assetDictionary[asset.assetNamespace][asset.name] = asset;
+			if (old != null) {
+				trace('had old! Resolving');
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], NamingStrategyBase.PREFER_NEW);
+				trace('RESOLVED: ===================================');
+				trace('old: ', old.assetFullPath);
+				trace('new: ', asset.assetFullPath);
+				trace('=============================================');
 			}
 			
-			// Treat this as if it was a rename (since it effectively also means that a
-			// new name has been introduced).
-			_assetDictDirty = _strategy.handleRename(asset, old, _assetDictionary, NamingStrategyBase.PREFER_NEW);
+			// Add it
+			_assets.push(asset);
+			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
+				_assetDictionary[asset.assetNamespace] = {};
+			_assetDictionary[asset.assetNamespace][asset.name] = asset;
 			
 			
 			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
@@ -291,14 +293,12 @@ package away3d.library
 		
 		private function onAssetRename(ev : AssetEvent) : void
 		{
+			trace('onAssetRename()');
 			var asset : IAsset = IAsset(ev.currentTarget);
-			/*
 			var old : IAsset = getAsset(asset.assetNamespace, asset.name);
-			_assetDictDirty ||= _strategy.handleRename(asset, old, _assetDictionary, NamingStrategyBase.PREFER_NEW);
-			*/
-			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
-				_assetDictionary[asset.assetNamespace] = {};
-			_assetDictionary[asset.assetNamespace][asset.name] = asset;
+			
+			if (old != null)
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], NamingStrategyBase.PREFER_NEW);
 		}
 	}
 }

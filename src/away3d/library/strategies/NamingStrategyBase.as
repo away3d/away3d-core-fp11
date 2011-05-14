@@ -17,9 +17,22 @@ package away3d.library.strategies
 		}
 		
 		
-		public function handleRename(changedAsset : IAsset, oldAsset : IAsset, assetsDictionary : Object, preference : String) : Boolean
+		public function resolveConflict(changedAsset : IAsset, oldAsset : IAsset, assetsDictionary : Object, preference : String) : void
 		{
 			throw new AbstractMethodError();
+		}
+		
+		
+		protected function updateNames(ns : String, nonConflictingName : String, oldAsset : IAsset, newAsset : IAsset, assetsDictionary : Object, preference : String) : void
+		{
+			var winner : IAsset, loser : IAsset;
+			
+			winner = PREFER_NEW? newAsset : oldAsset;
+			loser =  PREFER_NEW? oldAsset : newAsset;
+			
+			assetsDictionary[winner.name] = winner
+			assetsDictionary[nonConflictingName] = loser;
+			loser.resetAssetPath(nonConflictingName, ns, false);
 		}
 	}
 }
