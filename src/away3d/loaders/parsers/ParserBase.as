@@ -265,16 +265,12 @@ package away3d.loaders.parsers
 			return true;
 		}
 		
-		/**
-		 * Finish parsing the data.
-		 */
-		protected function finishParsing() : void
+		protected function dieWithError(message : String = 'Unknown parsing error') : void
 		{
 			_timer.removeEventListener(TimerEvent.TIMER, onInterval);
 			_timer.stop();
 			_timer = null;
-			_parsingComplete = true;
-			dispatchEvent(new ParserEvent(ParserEvent.PARSE_COMPLETE));
+			dispatchEvent(new ParserEvent(ParserEvent.PARSE_ERROR, message));
 		}
 		
 		
@@ -319,6 +315,19 @@ package away3d.loaders.parsers
 			_timer.start();
 			// synchronously right away
 			onInterval();
+		}
+		
+		
+		/**
+		 * Finish parsing the data.
+		 */
+		protected function finishParsing() : void
+		{
+			_timer.removeEventListener(TimerEvent.TIMER, onInterval);
+			_timer.stop();
+			_timer = null;
+			_parsingComplete = true;
+			dispatchEvent(new ParserEvent(ParserEvent.PARSE_COMPLETE));
 		}
 	}
 }
