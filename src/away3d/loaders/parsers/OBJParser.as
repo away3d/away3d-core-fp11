@@ -652,7 +652,7 @@ package away3d.loaders.parsers
 						_materialSpecularData.push(specularData);
 					}
 					
-					_dependencies.push(new ResourceDependency(_lastMtlID, new URLRequest(mapkd), null , this));
+					addDependency(_lastMtlID, new URLRequest(mapkd));
 					
 					
 				} else if(useColor && !isNaN(diffuseColor)){
@@ -730,7 +730,9 @@ package away3d.loaders.parsers
 		
 		private function loadMtl(mtlurl:String):void
 		{
-			_dependencies.push( new ResourceDependency('mtl', new URLRequest(mtlurl), null, this, true));
+			// Add raw-data dependency to queue and load dependencies now,
+			// which will pause the parsing in the meantime.
+			addDependency('mtl', new URLRequest(mtlurl), true);
 			pauseAndRetrieveDependencies();
 		}
 		

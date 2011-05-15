@@ -12,6 +12,7 @@ package away3d.loaders.parsers
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
+	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
@@ -46,6 +47,7 @@ package away3d.loaders.parsers
 		protected var _frameLimit : Number;
 		protected var _lastFrameTime : Number;
 		
+		private var _dependencies : Vector.<ResourceDependency>;
 		private var _parsingPaused : Boolean;
 		private var _parsingComplete : Boolean;
 		private var _parsingFailure:Boolean;
@@ -61,17 +63,9 @@ package away3d.loaders.parsers
 		 */
 		protected static const MORE_TO_PARSE : Boolean = false;
 		
-		/**
-		 * A list of dependencies that need to be loaded and resolved for the object being parsed.
-		 *
-		 * @see away3d.loading.ResourceDependency
-		 */
-		protected var _dependencies : Vector.<ResourceDependency>;
 		
 		/**
 		 * Creates a new ParserBase object
-		 * @param uri The url or id of the data or file to be parsed.
-		 * @param extra The holder for extra contextual data that the parser might need.
 		 * @param format The data format of the file data to be parsed. Can be either <code>ParserDataFormat.BINARY</code> or <code>ParserDataFormat.PLAIN_TEXT</code>, and should be provided by the concrete subtype.
 		 *
 		 * @see away3d.loading.parsers.ParserDataFormat
@@ -212,6 +206,8 @@ package away3d.loaders.parsers
 			_timer.start();
 		}
 		
+		
+		
 		protected function finalizeAsset(asset : IAsset, name : String=null) : void
 		{
 			if (name)
@@ -271,6 +267,12 @@ package away3d.loaders.parsers
 			_timer.stop();
 			_timer = null;
 			dispatchEvent(new ParserEvent(ParserEvent.PARSE_ERROR, message));
+		}
+		
+		
+		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false) : void
+		{
+			_dependencies.push(new ResourceDependency(id, req, null, this, retrieveAsRawData));
 		}
 		
 		

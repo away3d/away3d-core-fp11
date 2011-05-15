@@ -54,7 +54,7 @@ package away3d.loaders.parsers
 		*/
 		public override function get dependencies():Vector.<ResourceDependency>
 		{
-			return _parser? _parser.dependencies : _dependencies;
+			return _parser? _parser.dependencies : super.dependencies;
 		}
 		
 		

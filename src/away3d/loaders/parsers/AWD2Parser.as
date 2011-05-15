@@ -391,7 +391,7 @@ package away3d.loaders.parsers
 				
 				// TODO: Create dependency
 				_texture_users[_cur_block_id.toString()] = [];
-				_dependencies.push(new ResourceDependency(_cur_block_id.toString(), new URLRequest(url), null, this));
+				addDependency(_cur_block_id.toString(), new URLRequest(url));
 			}
 			else {
 			}
