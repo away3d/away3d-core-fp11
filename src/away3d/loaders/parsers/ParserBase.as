@@ -245,7 +245,7 @@ package away3d.loaders.parsers
 					case AssetType.SKELETON:
 						asset.name = 'skeleton';
 						break;
-					case AssetType.SKELETON_POSE;
+					case AssetType.SKELETON_POSE:
 						asset.name = 'skelpose';
 						break;
 				}
