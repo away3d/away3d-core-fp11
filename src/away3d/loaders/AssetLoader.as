@@ -67,13 +67,13 @@ package away3d.loaders
 		/**
 		 * Loads a file and (optionally) all of its dependencies.
 		 */
-		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoaderToken
+		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken = new AssetLoaderToken(this);
 			
 			_uri = req.url = req.url.replace(/\\/g, "/");
 			_context = context;
-			_namespace = namespace;
+			_namespace = ns;
 			_currentDependencies = new Vector.<ResourceDependency>();
 			_currentDependencies.push(new ResourceDependency('', req, null, null));
 			retrieveNext(parser);
@@ -84,13 +84,13 @@ package away3d.loaders
 		/**
 		 * Loads a resource from already loaded data.
 		 */
-		public function parseData(data : *, id : String, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoaderToken
+		public function parseData(data : *, id : String, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken = new AssetLoaderToken(this);
 			
 			_uri = id;
 			_context = context;
-			_namespace = namespace;
+			_namespace = ns;
 			_currentDependencies = new Vector.<ResourceDependency>();
 			_currentDependencies.push(new ResourceDependency(id, null, data, null));
 			retrieveNext(parser);
@@ -116,6 +116,8 @@ package away3d.loaders
 					// If this load operation is one that needs to be parsed, and the parsing has
 					// not completed yet, resume parsing after having loaded it's dependency queue
 					if (_currentLoader.parser && !_currentLoader.parser.parsingComplete) {
+						// Back to loading the one we thought was complete
+						_loadingDependency = _currentDependencies[_currentDependencyIndex-1];
 						_currentLoader.parser.resumeParsingAfterDependencies();
 						break;
 					}

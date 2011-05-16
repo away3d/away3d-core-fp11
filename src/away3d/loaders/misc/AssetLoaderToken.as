@@ -1,5 +1,6 @@
 package away3d.loaders.misc
 {
+	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.loaders.AssetLoader;
 	
@@ -37,6 +38,7 @@ package away3d.loaders.misc
 			_loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onLoaderEvent);
 			_loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onLoaderEvent);
 			_loader.addEventListener(LoaderEvent.DEPENDENCY_ERROR, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.ASSET_COMPLETE, onLoaderEvent);
 		}
 		
 		

@@ -61,16 +61,16 @@ package away3d.library.assets
 		}
 		
 		
-		public function assetPathEquals(name : String, namespace : String) : Boolean
+		public function assetPathEquals(name : String, ns : String) : Boolean
 		{
-			return (_name == name && (!namespace || _namespace==namespace));
+			return (_name == name && (!ns || _namespace==ns));
 		}
 		
 		
-		public function resetAssetPath(name : String, namespace : String = null, overrideOriginal : Boolean = true) : void
+		public function resetAssetPath(name : String, ns : String = null, overrideOriginal : Boolean = true) : void
 		{
 			_name = name? name : 'untitled';
-			_namespace = namespace? namespace : 'default';
+			_namespace = ns? ns : 'default';
 			if (overrideOriginal)
 				_originalName = _name;
 		

@@ -36,7 +36,7 @@ package away3d.loaders.parsers
 		public static function supportsType(extension : String) : Boolean
 		{
 			extension = extension.toLowerCase();
-			return extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "gif";
+			return extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "gif" || extension == "bmp";
 		}
 		
 		/**
