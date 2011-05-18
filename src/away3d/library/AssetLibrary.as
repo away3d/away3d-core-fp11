@@ -221,8 +221,8 @@ package away3d.library
 				_assetDictionary[asset.assetNamespace] = {};
 			_assetDictionary[asset.assetNamespace][asset.name] = asset;
 			
-			
 			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
+			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
 		}
 		
 		
@@ -317,7 +317,6 @@ package away3d.library
 		
 		private function onAssetRename(ev : AssetEvent) : void
 		{
-			trace('onAssetRename()');
 			var asset : IAsset = IAsset(ev.currentTarget);
 			var old : IAsset = getAsset(asset.assetNamespace, asset.name);
 			
@@ -331,6 +330,12 @@ package away3d.library
 				dict[ev.assetPrevName] = null;
 				dict[ev.asset.name] = ev.asset;
 			}
+		}
+		
+		
+		private function onAssetConflictResolved(ev : AssetEvent) : void
+		{
+			dispatchEvent(ev.clone());
 		}
 	}
 }
