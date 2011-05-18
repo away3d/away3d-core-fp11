@@ -43,11 +43,14 @@ package away3d.library.assets
 		}
 		public function set name(val : String) : void
 		{
+			var prev : String;
+			
+			prev = _name;
 			_name = val;
 			update();
 			
 			if (hasEventListener(AssetEvent.ASSET_RENAME))
-				dispatchEvent(new AssetEvent(AssetEvent.ASSET_RENAME));
+				dispatchEvent(new AssetEvent(AssetEvent.ASSET_RENAME, IAsset(this), prev));
 		}
 		
 		

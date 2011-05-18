@@ -324,6 +324,14 @@ package away3d.library
 			
 			if (old != null)
 				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
+			else {
+				var dict : Object = _assetDictionary[ev.asset.assetNamespace];
+				if (dict == null)
+					return;
+				
+				dict[ev.assetPrevName] = null;
+				dict[ev.asset.name] = ev.asset;
+			}
 		}
 	}
 }
