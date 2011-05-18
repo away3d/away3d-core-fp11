@@ -1,16 +1,16 @@
-package away3d.library.strategies
+package away3d.library.naming
 {
 	import away3d.arcane;
 	import away3d.library.assets.IAsset;
 
 	use namespace arcane;
 	
-	public class NumSuffixNamingStrategy extends NamingStrategyBase
+	public class NumSuffixConflictStrategy extends ConflictStrategyBase
 	{
 		private var _separator : String;
 		private var _next_suffix : Object;
 		
-		public function NumSuffixNamingStrategy(separator : String = '.')
+		public function NumSuffixConflictStrategy(separator : String = '.')
 		{
 			super();
 			
@@ -58,9 +58,9 @@ package away3d.library.strategies
 		}
 		
 		
-		public override function create() : NamingStrategyBase
+		public override function create() : ConflictStrategyBase
 		{
-			return new NumSuffixNamingStrategy(_separator);
+			return new NumSuffixConflictStrategy(_separator);
 		}
 	}
 }

@@ -1,14 +1,12 @@
-package away3d.library.strategies
+package away3d.library.naming
 {
 	import away3d.errors.AbstractMethodError;
 	import away3d.library.assets.IAsset;
 
-	public class NamingStrategyBase
+	public class ConflictStrategyBase
 	{
-		public static const PREFER_OLD : String = 'preferOld';
-		public static const PREFER_NEW : String = 'preferNew';
 		
-		public function NamingStrategyBase()
+		public function ConflictStrategyBase()
 		{
 		}
 		
@@ -19,7 +17,7 @@ package away3d.library.strategies
 		}
 		
 		
-		public function create() : NamingStrategyBase
+		public function create() : ConflictStrategyBase
 		{
 			throw new AbstractMethodError();
 		}
@@ -29,8 +27,8 @@ package away3d.library.strategies
 		{
 			var winner : IAsset, loser : IAsset;
 			
-			winner = (preference==PREFER_NEW)? newAsset : oldAsset;
-			loser =  (preference==PREFER_NEW)? oldAsset : newAsset;
+			winner = (preference==ConflictPrecedence.FAVOR_NEW)? newAsset : oldAsset;
+			loser =  (preference==ConflictPrecedence.FAVOR_NEW)? oldAsset : newAsset;
 			
 			assetsDictionary[winner.name] = winner
 			assetsDictionary[nonConflictingName] = loser;

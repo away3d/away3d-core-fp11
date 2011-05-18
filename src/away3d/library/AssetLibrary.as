@@ -4,10 +4,12 @@ package away3d.library
 	import away3d.events.LoaderEvent;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
-	import away3d.library.strategies.ErrorNamingStrategy;
-	import away3d.library.strategies.IgnoreNamingStrategy;
-	import away3d.library.strategies.NamingStrategyBase;
-	import away3d.library.strategies.NumSuffixNamingStrategy;
+	import away3d.library.naming.ConflictPrecedence;
+	import away3d.library.naming.ConflictStrategy;
+	import away3d.library.naming.ConflictStrategyBase;
+	import away3d.library.naming.ErrorConflictStrategy;
+	import away3d.library.naming.IgnoreConflictStrategy;
+	import away3d.library.naming.NumSuffixConflictStrategy;
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.misc.AssetLoaderContext;
 	import away3d.loaders.misc.AssetLoaderToken;
@@ -23,17 +25,13 @@ package away3d.library
 			
 		private var _loadingSessions : Vector.<AssetLoader>;
 		
-		private var _strategy : NamingStrategyBase;
+		private var _strategy : ConflictStrategyBase;
 		private var _strategyPreference : String;
 		
 		private var _assets : Vector.<IAsset>;
 		private var _assetDictionary : Object;
 		private var _assetDictDirty : Boolean;
 		
-		
-		public static const IGNORE_CONFLICTS : NamingStrategyBase = new IgnoreNamingStrategy();
-		public static const NUM_SUFFIX : NamingStrategyBase = new NumSuffixNamingStrategy();
-		public static const THROW_ERROR : NamingStrategyBase = new ErrorNamingStrategy();
 		
 		
 		public function AssetLibrary(se : SingletonEnforcer)
@@ -42,8 +40,8 @@ package away3d.library
 			_assetDictionary = {};
 			_loadingSessions = new Vector.<AssetLoader>;
 			
-			_strategy = NUM_SUFFIX.create();
-			_strategyPreference = NamingStrategyBase.PREFER_NEW;
+			conflictStrategy = ConflictStrategy.APPEND_NUM_SUFFIX.create();
+			conflictStrategyPrecedence = ConflictPrecedence.FAVOR_NEW;
 		}
 		
 		
@@ -60,11 +58,11 @@ package away3d.library
 		}
 		
 		
-		public function get namingStrategy() : NamingStrategyBase
+		public function get conflictStrategy() : ConflictStrategyBase
 		{
 			return _strategy;
 		}
-		public function set namingStrategy(val : NamingStrategyBase) : void
+		public function set conflictStrategy(val : ConflictStrategyBase) : void
 		{
 			if (!val)
 				throw new Error('namingStrategy must not be null. To ignore naming, use AssetLibrary.IGNORE');
@@ -73,33 +71,33 @@ package away3d.library
 		}
 		
 		
-		public static function get namingStrategy() : NamingStrategyBase
+		public static function get conflictStrategy() : ConflictStrategyBase
 		{
-			return getInstance().namingStrategy;
+			return getInstance().conflictStrategy;
 		}
-		public static function set namingStrategy(val : NamingStrategyBase) : void
+		public static function set conflictStrategy(val : ConflictStrategyBase) : void
 		{
-			getInstance().namingStrategy = val;
+			getInstance().conflictStrategy = val;
 		}
 		
 		
-		public function get namingStrategyPreference() : String
+		public function get conflictStrategyPrecedence() : String
 		{
 			return _strategyPreference;
 		}
-		public function set namingStrategyPreference(val : String) : void
+		public function set conflictStrategyPrecedence(val : String) : void
 		{
 			_strategyPreference = val;
 		}
 		
 		
-		public static function get namingStrategyPreference() : String
+		public static function get conflictStrategyPrecedence() : String
 		{
-			return getInstance().namingStrategyPreference;
+			return getInstance().conflictStrategyPrecedence;
 		}
-		public static function set namingStrategyPreference(val : String) : void
+		public static function set conflictStrategyPrecedence(val : String) : void
 		{
-			getInstance().namingStrategyPreference = val;
+			getInstance().conflictStrategyPrecedence = val;
 		}
 		
 		

@@ -1,10 +1,10 @@
-package away3d.library.strategies
+package away3d.library.naming
 {
 	import away3d.library.assets.IAsset;
 
-	public class ErrorNamingStrategy extends NamingStrategyBase
+	public class ErrorConflictStrategy extends ConflictStrategyBase
 	{
-		public function ErrorNamingStrategy()
+		public function ErrorConflictStrategy()
 		{
 			super();
 		}
@@ -15,9 +15,9 @@ package away3d.library.strategies
 		}
 		
 		
-		public override function create():NamingStrategyBase
+		public override function create():ConflictStrategyBase
 		{
-			return new ErrorNamingStrategy();
+			return new ErrorConflictStrategy();
 		}
 	}
 }
