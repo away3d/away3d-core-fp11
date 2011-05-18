@@ -19,7 +19,7 @@ package away3d.library.naming
 		}
 		
 		
-		public override function resolveConflict(changedAsset:IAsset, oldAsset:IAsset, assetsDictionary:Object, preference:String) : void
+		public override function resolveConflict(changedAsset:IAsset, oldAsset:IAsset, assetsDictionary:Object, precedence:String) : void
 		{
 			var orig : String;
 			var new_name : String;
@@ -54,7 +54,7 @@ package away3d.library.naming
 			
 			_next_suffix[base] = suffix;
 			
-			updateNames(oldAsset.assetNamespace, new_name, oldAsset, changedAsset, assetsDictionary, preference);
+			updateNames(oldAsset.assetNamespace, new_name, oldAsset, changedAsset, assetsDictionary, precedence);
 		}
 		
 		

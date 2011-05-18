@@ -203,16 +203,9 @@ package away3d.library
 		{
 			var old : IAsset;
 			
-			trace('addAsset()');
-			
 			old = getAsset(asset.name, asset.assetNamespace);
 			if (old != null) {
-				trace('had old! Resolving');
 				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
-				trace('RESOLVED: ===================================');
-				trace('old: ', old.assetFullPath);
-				trace('new: ', asset.assetFullPath);
-				trace('=============================================');
 			}
 			
 			// Add it
