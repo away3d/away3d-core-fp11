@@ -15,5 +15,11 @@ package away3d.library.strategies
 			// Do nothing, ignore the fact that there is a conflict.
 			return;
 		}
+		
+		
+		public override function create():NamingStrategyBase
+		{
+			return new IgnoreNamingStrategy();
+		}
 	}
 }

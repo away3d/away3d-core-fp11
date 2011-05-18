@@ -42,7 +42,7 @@ package away3d.library
 			_assetDictionary = {};
 			_loadingSessions = new Vector.<AssetLoader>;
 			
-			_strategy = NUM_SUFFIX;
+			_strategy = NUM_SUFFIX.create();
 			_strategyPreference = NamingStrategyBase.PREFER_NEW;
 		}
 		
@@ -66,9 +66,10 @@ package away3d.library
 		}
 		public function set namingStrategy(val : NamingStrategyBase) : void
 		{
-			_strategy = val;
-			if (!_strategy)
+			if (!val)
 				throw new Error('namingStrategy must not be null. To ignore naming, use AssetLibrary.IGNORE');
+			
+			_strategy = val.create();
 		}
 		
 		

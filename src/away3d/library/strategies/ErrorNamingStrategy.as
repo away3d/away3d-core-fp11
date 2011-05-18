@@ -13,5 +13,11 @@ package away3d.library.strategies
 		{
 			throw new Error('Asset name collision while AssetLibrary.namingStrategy set to AssetLibrary.THROW_ERROR. Asset path: ' + changedAsset.assetFullPath);
 		}
+		
+		
+		public override function create():NamingStrategyBase
+		{
+			return new ErrorNamingStrategy();
+		}
 	}
 }

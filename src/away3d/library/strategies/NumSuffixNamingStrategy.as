@@ -8,12 +8,14 @@ package away3d.library.strategies
 	public class NumSuffixNamingStrategy extends NamingStrategyBase
 	{
 		private var _separator : String;
+		private var _next_suffix : Object;
 		
 		public function NumSuffixNamingStrategy(separator : String = '.')
 		{
 			super();
 			
 			_separator = separator;
+			_next_suffix = {};
 		}
 		
 		
@@ -40,6 +42,9 @@ package away3d.library.strategies
 				suffix = 0;
 			}
 			
+			if (suffix == 0 && _next_suffix.hasOwnProperty(base))
+				suffix = _next_suffix[base];
+			
 			// Find the first suffixed name that does
 			// not collide with other names.
 			do {
@@ -47,7 +52,15 @@ package away3d.library.strategies
 				new_name = base.concat(_separator, suffix);
 			} while (assetsDictionary.hasOwnProperty(new_name));
 			
+			_next_suffix[base] = suffix;
+			
 			updateNames(oldAsset.assetNamespace, new_name, oldAsset, changedAsset, assetsDictionary, preference);
+		}
+		
+		
+		public override function create() : NamingStrategyBase
+		{
+			return new NumSuffixNamingStrategy(_separator);
 		}
 	}
 }

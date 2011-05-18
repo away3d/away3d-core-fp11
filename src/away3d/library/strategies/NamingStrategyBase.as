@@ -19,6 +19,12 @@ package away3d.library.strategies
 		}
 		
 		
+		public function create() : NamingStrategyBase
+		{
+			throw new AbstractMethodError();
+		}
+		
+		
 		protected function updateNames(ns : String, nonConflictingName : String, oldAsset : IAsset, newAsset : IAsset, assetsDictionary : Object, preference : String) : void
 		{
 			var winner : IAsset, loser : IAsset;
