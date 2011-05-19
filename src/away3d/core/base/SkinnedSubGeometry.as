@@ -119,7 +119,7 @@ package away3d.core.base
 
 			if (_animatedVertexData) {
 				if (_vertexBufferDirty[contextIndex] || !_vertexBuffer[contextIndex]) {
-					VertexBuffer3D(_vertexBuffer[contextIndex] ||= context.createVertexBuffer(_animatedVertexData.length, 3)).uploadFromVector(_animatedVertexData, 0, _animatedVertexData.length/3);
+					VertexBuffer3D(_vertexBuffer[contextIndex] ||= context.createVertexBuffer(_animatedVertexData.length/3, 3)).uploadFromVector(_animatedVertexData, 0, _animatedVertexData.length/3);
 					_vertexBufferDirty[contextIndex] = false;
 				}
 			    return _vertexBuffer[contextIndex];
@@ -137,7 +137,7 @@ package away3d.core.base
 
 			if (_animatedNormalData) {
 				if (_vertexNormalBufferDirty[contextIndex] || !_vertexNormalBuffer[contextIndex]) {
-					(_vertexNormalBuffer[contextIndex] ||= context.createVertexBuffer(_animatedNormalData.length, 3)).uploadFromVector(_animatedNormalData, 0, _animatedNormalData.length/3);
+					(_vertexNormalBuffer[contextIndex] ||= context.createVertexBuffer(_animatedNormalData.length/3, 3)).uploadFromVector(_animatedNormalData, 0, _animatedNormalData.length/3);
 					_vertexNormalBufferDirty[contextIndex] = false;
 				}
 			    return _vertexNormalBuffer[contextIndex];
@@ -155,7 +155,7 @@ package away3d.core.base
 
 			if (_animatedTangentData) {
 				if (_vertexTangentBufferDirty[contextIndex] || !_vertexTangentBuffer[contextIndex]) {
-					(_vertexTangentBuffer[contextIndex] ||= context.createVertexBuffer(_animatedTangentData.length, 3)).uploadFromVector(_animatedTangentData, 0, _animatedTangentData.length/3);
+					(_vertexTangentBuffer[contextIndex] ||= context.createVertexBuffer(_animatedTangentData.length/3, 3)).uploadFromVector(_animatedTangentData, 0, _animatedTangentData.length/3);
 					_vertexTangentBufferDirty[contextIndex] = false;
 				}
 			    return _vertexTangentBuffer[contextIndex];
@@ -173,8 +173,8 @@ package away3d.core.base
 			clone.updateVertexData(_vertices.concat());
 			clone.updateUVData(_uvs.concat());
 			clone.updateIndexData(_indices.concat());
-			clone.jointIndexData = _jointIndexData.concat();
-			clone.jointWeightsData = _jointWeightsData.concat();
+			clone.updateJointIndexData(_jointIndexData.concat());
+			clone.updateJointWeightsData(_jointWeightsData.concat());
 			if (!autoDeriveVertexNormals) clone.updateVertexNormalData(_vertexNormals.concat());
 			if (!autoDeriveVertexTangents) clone.updateVertexTangentData(_vertexTangents.concat());
 			return clone;
@@ -199,7 +199,7 @@ package away3d.core.base
 			return _jointWeightsData;
 		}
 
-		arcane function set jointWeightsData(value : Vector.<Number>) : void
+		arcane function updateJointWeightsData(value : Vector.<Number>) : void
 		{
 			_jointWeightsData = value;
 			invalidateBuffers(_jointWeightBufferDirty);
@@ -213,7 +213,7 @@ package away3d.core.base
 			return _jointIndexData;
 		}
 
-		arcane function set jointIndexData(value : Vector.<Number>) : void
+		arcane function updateJointIndexData(value : Vector.<Number>) : void
 		{
 			_jointIndexData = value;
 			invalidateBuffers(_jointIndexBufferDirty);
