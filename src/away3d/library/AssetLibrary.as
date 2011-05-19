@@ -47,7 +47,13 @@ package away3d.library
 		
 		
 		/**
-		 * Gets the singleton instance of the ResourceManager.
+		 * Gets an AssetLibrary instance. If no key is given, returns the default instance (which is
+		 * similar to using the AssetLibrary as a singleton.) To keep several separated libraries,
+		 * pass a string key to this method to define which instance should be returned. This is
+		 * referred to as using the AssetLibrary as a multiton.
+		 * 
+		 * @param key Defines which multiton instance should be returned.
+		 * @return An instance of the asset library
 		 */
 		public static function getInstance(key : String = 'default') : AssetLibrary
 		{
@@ -58,6 +64,16 @@ package away3d.library
 		}
 		
 		
+		/**
+		 * Defines which strategy should be used for resolving naming conflicts, when two library
+		 * assets are given the same name. By default, <code>ConflictStrategy.APPEND_NUM_SUFFIX</code>
+		 * is used which means that a numeric suffix is appended to one of the assets. The
+		 * <code>conflictPrecedence</code> property defines which of the two conflicting assets will
+		 * be renamed.
+		 * 
+		 * @see away3d.library.naming.ConflictStrategy
+		 * @see away3d.library.AssetLibrary.conflictPrecedence
+		*/
 		public function get conflictStrategy() : ConflictStrategyBase
 		{
 			return _strategy;
@@ -71,6 +87,9 @@ package away3d.library
 		}
 		
 		
+		/**
+		 * Short-hand for conflictStrategy property on default asset library instance.
+		*/
 		public static function get conflictStrategy() : ConflictStrategyBase
 		{
 			return getInstance().conflictStrategy;
@@ -81,6 +100,18 @@ package away3d.library
 		}
 		
 		
+		/**
+		 * Defines which asset should have precedence when resolving a naming conflict between
+		 * two assets of which one has just been renamed by the user or by a parser. By default
+		 * <code>ConflictPrecedence.FAVOR_NEW</code> is user, meaning that the newly renamed
+		 * asset will keep it's new name while the older asset gets renamed to not conflict.
+		 * 
+		 * This property is ignored for conflict strategies that do not actually rename an
+		 * asset automatically, such as ConflictStrategy.IGNORE and ConflictStrategy.THROW_ERROR.
+		 * 
+		 * @see away3d.library.naming.ConflictPrecedence
+		 * @see away3d.library.naming.ConflictStrategy
+		*/
 		public function get conflictPrecedence() : String
 		{
 			return _strategyPreference;
@@ -91,6 +122,11 @@ package away3d.library
 		}
 		
 		
+		/**
+		 * Short-hand for conflictPrecedence property on default asset library instance.
+		 *
+		 * @see away3d.library.AssetLibrary.conflictPrecedence
+		*/
 		public static function get conflictPrecedence() : String
 		{
 			return getInstance().conflictPrecedence;
