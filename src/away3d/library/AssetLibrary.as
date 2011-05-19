@@ -41,7 +41,7 @@ package away3d.library
 			_loadingSessions = new Vector.<AssetLoader>;
 			
 			conflictStrategy = ConflictStrategy.APPEND_NUM_SUFFIX.create();
-			conflictStrategyPrecedence = ConflictPrecedence.FAVOR_NEW;
+			conflictPrecedence = ConflictPrecedence.FAVOR_NEW;
 		}
 		
 		
@@ -81,23 +81,23 @@ package away3d.library
 		}
 		
 		
-		public function get conflictStrategyPrecedence() : String
+		public function get conflictPrecedence() : String
 		{
 			return _strategyPreference;
 		}
-		public function set conflictStrategyPrecedence(val : String) : void
+		public function set conflictPrecedence(val : String) : void
 		{
 			_strategyPreference = val;
 		}
 		
 		
-		public static function get conflictStrategyPrecedence() : String
+		public static function get conflictPrecedence() : String
 		{
-			return getInstance().conflictStrategyPrecedence;
+			return getInstance().conflictPrecedence;
 		}
-		public static function set conflictStrategyPrecedence(val : String) : void
+		public static function set conflictPrecedence(val : String) : void
 		{
-			getInstance().conflictStrategyPrecedence = val;
+			getInstance().conflictPrecedence = val;
 		}
 		
 		
