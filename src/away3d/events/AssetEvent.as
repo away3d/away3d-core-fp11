@@ -9,14 +9,17 @@ package away3d.events
 		public static const ASSET_COMPLETE : String = 'assetRetrieved';
 		
 		public static const ASSET_RENAME : String = 'assetRename';
+		public static const ASSET_CONFLICT_RESOLVED : String = 'assetConflictResolved';
 		
 		private var _asset : IAsset;
+		private var _prevName : String;
 		
-		public function AssetEvent(type : String, asset : IAsset = null)
+		public function AssetEvent(type : String, asset : IAsset = null, prevName : String = null)
 		{
 			super(type);
 			
 			_asset = asset;
+			_prevName = prevName || (_asset? _asset.name : null);
 		}
 		
 		
@@ -26,9 +29,15 @@ package away3d.events
 		}
 		
 		
+		public function get assetPrevName() : String
+		{
+			return _prevName;
+		}
+		
+		
 		public override function clone() : Event
 		{
-			return new AssetEvent(type, asset);
+			return new AssetEvent(type, asset, assetPrevName);
 		}
 	}
 }

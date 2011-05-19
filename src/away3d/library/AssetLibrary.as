@@ -3,10 +3,16 @@ package away3d.library
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	import away3d.library.naming.ConflictPrecedence;
+	import away3d.library.naming.ConflictStrategy;
+	import away3d.library.naming.ConflictStrategyBase;
+	import away3d.library.naming.ErrorConflictStrategy;
+	import away3d.library.naming.IgnoreConflictStrategy;
+	import away3d.library.naming.NumSuffixConflictStrategy;
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.misc.AssetLoaderContext;
 	import away3d.loaders.misc.AssetLoaderToken;
-	
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
 	
@@ -19,15 +25,23 @@ package away3d.library
 			
 		private var _loadingSessions : Vector.<AssetLoader>;
 		
+		private var _strategy : ConflictStrategyBase;
+		private var _strategyPreference : String;
+		
 		private var _assets : Vector.<IAsset>;
-		private var _namespaces : Object;
+		private var _assetDictionary : Object;
+		private var _assetDictDirty : Boolean;
+		
 		
 		
 		public function AssetLibrary(se : SingletonEnforcer)
 		{
 			_assets = new Vector.<IAsset>;
-			_namespaces = {};
+			_assetDictionary = {};
 			_loadingSessions = new Vector.<AssetLoader>;
+			
+			conflictStrategy = ConflictStrategy.APPEND_NUM_SUFFIX.create();
+			conflictPrecedence = ConflictPrecedence.FAVOR_NEW;
 		}
 		
 		
@@ -41,6 +55,49 @@ package away3d.library
 				_instances[key] = new AssetLibrary(new SingletonEnforcer());
 			
 			return _instances[key];
+		}
+		
+		
+		public function get conflictStrategy() : ConflictStrategyBase
+		{
+			return _strategy;
+		}
+		public function set conflictStrategy(val : ConflictStrategyBase) : void
+		{
+			if (!val)
+				throw new Error('namingStrategy must not be null. To ignore naming, use AssetLibrary.IGNORE');
+			
+			_strategy = val.create();
+		}
+		
+		
+		public static function get conflictStrategy() : ConflictStrategyBase
+		{
+			return getInstance().conflictStrategy;
+		}
+		public static function set conflictStrategy(val : ConflictStrategyBase) : void
+		{
+			getInstance().conflictStrategy = val;
+		}
+		
+		
+		public function get conflictPrecedence() : String
+		{
+			return _strategyPreference;
+		}
+		public function set conflictPrecedence(val : String) : void
+		{
+			_strategyPreference = val;
+		}
+		
+		
+		public static function get conflictPrecedence() : String
+		{
+			return getInstance().conflictPrecedence;
+		}
+		public static function set conflictPrecedence(val : String) : void
+		{
+			getInstance().conflictPrecedence = val;
 		}
 		
 		
@@ -72,14 +129,14 @@ package away3d.library
 		{
 			var asset : IAsset;
 			
-			// TODO: Improve this using look-up tables, but make sure
-			// they deal with renaming assets
-			for each (asset in _assets) {
-				if (asset.assetPathEquals(name, ns))
-					return asset;
-			}
+			if (_assetDictDirty)
+				rehashAssetDict();
 			
-			return null;
+			ns ||= NamedAssetBase.DEFAULT_NAMESPACE;
+			if (!_assetDictionary.hasOwnProperty(ns))
+				return null;
+			
+			return _assetDictionary[ns][name];
 		}
 		
 		public static function getAsset(name : String, ns : String = null) : IAsset
@@ -113,7 +170,7 @@ package away3d.library
 		{
 			var loader : AssetLoader = new AssetLoader();
 			_loadingSessions.push(loader);
-			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
@@ -134,12 +191,51 @@ package away3d.library
 		{
 			var loader : AssetLoader = new AssetLoader();
 			_loadingSessions.push(loader);
-			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			return loader.parseData(data, '', parser, context, ns);
 		}
 		
+		
+		
+		private function addAsset(asset : IAsset) : void
+		{
+			var old : IAsset;
+			
+			old = getAsset(asset.name, asset.assetNamespace);
+			if (old != null) {
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
+			}
+			
+			// Add it
+			_assets.push(asset);
+			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
+				_assetDictionary[asset.assetNamespace] = {};
+			_assetDictionary[asset.assetNamespace][asset.name] = asset;
+			
+			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
+			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
+		}
+		
+		
+		private function rehashAssetDict() : void
+		{
+			var asset : IAsset;
+			
+			_assetDictionary = {};
+			
+			_assets.fixed = true;
+			for each (asset in _assets) {
+				if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
+					_assetDictionary[asset.assetNamespace] = {};
+				
+				_assetDictionary[asset.assetNamespace][asset.name] = asset;
+			}
+			_assets.fixed = false;
+			
+			_assetDictDirty = false;
+		}
 		
 		
 		/**
@@ -164,10 +260,9 @@ package away3d.library
 			else throw new Error(event.message);
 		}
 		
-		private function onAssetRetrieved(event : AssetEvent) : void
+		private function onAssetComplete(event : AssetEvent) : void
 		{
-			_assets.push(event.asset);
-			event.asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
+			addAsset(event.asset);
 			dispatchEvent(event.clone());
 		}
 		
@@ -183,7 +278,7 @@ package away3d.library
 			session.removeEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			session.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			session.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
-			session.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			session.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			
 			_loadingSessions.splice(index, 1);
 			
@@ -215,7 +310,25 @@ package away3d.library
 		
 		private function onAssetRename(ev : AssetEvent) : void
 		{
-			//trace('renaming', ev.asset.assetFullPath);
+			var asset : IAsset = IAsset(ev.currentTarget);
+			var old : IAsset = getAsset(asset.assetNamespace, asset.name);
+			
+			if (old != null)
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
+			else {
+				var dict : Object = _assetDictionary[ev.asset.assetNamespace];
+				if (dict == null)
+					return;
+				
+				dict[ev.assetPrevName] = null;
+				dict[ev.asset.name] = ev.asset;
+			}
+		}
+		
+		
+		private function onAssetConflictResolved(ev : AssetEvent) : void
+		{
+			dispatchEvent(ev.clone());
 		}
 	}
 }
