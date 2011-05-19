@@ -172,3 +172,4 @@ package away3d.loaders.parsers
 		}
 	}
 }
+
