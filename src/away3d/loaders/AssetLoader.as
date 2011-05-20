@@ -183,9 +183,19 @@ package away3d.loaders
 		}
 		
 		
+		private function joinUrl(base : String, end : String) : String
+		{
+			if (base.charAt(base.length-1)=='/')
+				base = base.substr(0, base.length-1);
+			if (end.charAt(0)=='/')
+				end = end.substr(1);
+			
+			return base.concat('/', end);
+		}
+		
 		private function resolveDependencyUrl(dependency : ResourceDependency) : String
 		{
-			var abs_re : RegExp;
+			var scheme_re : RegExp;
 			var base : String;
 			var url : String = dependency.request.url;
 			
@@ -201,20 +211,35 @@ package away3d.loaders
 			
 			// Absolute URL? Check if starts with slash or a URL
 			// scheme definition (e.g. ftp://, http://, file://)
-			abs_re = new RegExp(/^[a-zA-Z]{3,4}:\/\//);
-			if (url.charAt(0)=='/' || abs_re.test(url))
-				return url;
+			scheme_re = new RegExp(/^[a-zA-Z]{3,4}:\/\//);
+			if (url.charAt(0) == '/') {
+				if (_context && _context.overrideAbsolutePaths) {
+					return joinUrl(_context.dependencyBaseUrl, url);
+				}
+				else {
+					return url;
+				}
+			}
+			else if (scheme_re.test(url)) {
+				// If overriding full URLs, get rid of scheme (e.g. "http://")
+				// and replace with the dependencyBaseUrl defined by user.
+				if (_context && _context.overrideFullURLs) {
+					var noscheme_url : String;
+					
+					noscheme_url = url.replace(scheme_re);
+					return joinUrl(_context.dependencyBaseUrl, noscheme_url);
+				}
+			}
 			
 			// Since not absolute, just get rid of base file name to find it's
 			// folder and then concatenate dynamic URL
 			if (_context && _context.dependencyBaseUrl) {
 				base = _context.dependencyBaseUrl;
-				return base.charAt(base.length-1)=='/'? 
-					base.concat(url) : base.concat('/', url);
+				return joinUrl(base, url);
 			}
 			else {
 				base = _uri.substring(0, _uri.lastIndexOf('/')+1);
-				return base.concat(url);
+				return joinUrl(base, url);
 			}
 		}
 		
