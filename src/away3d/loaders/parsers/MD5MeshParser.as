@@ -614,3 +614,4 @@ class MeshData
 	public var weightData : Vector.<JointData>;
 	public var indices : Vector.<uint>;
 }
+

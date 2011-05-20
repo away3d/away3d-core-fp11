@@ -317,11 +317,16 @@ package away3d.loaders.parsers
 			frames_parsed = 0;
 			dummy = new Sprite;
 			while (frames_parsed < num_frames) {
+				var mtx : Matrix;
 				var frame : UVAnimationFrame;
-				dummy.transform.matrix = parseMatrix2D();
 				
-				frame = new UVAnimationFrame(dummy.x, dummy.y, dummy.scaleX, dummy.scaleY, dummy.rotation);
-				seq.addFrame(frame, 25);
+				// TODO: Replace this with some reliable way to decompose a 2d matrix
+				mtx = parseMatrix2D();
+				mtx.scale(100, 100);
+				dummy.transform.matrix = mtx;
+				
+				frame = new UVAnimationFrame(dummy.x*0.01, dummy.y*0.01, dummy.scaleX/100, dummy.scaleY/100, dummy.rotation);
+				seq.addFrame(frame, 40);
 				
 				frames_parsed++;
 			}
@@ -398,7 +403,7 @@ package away3d.loaders.parsers
 				
 				// TODO: Create dependency
 				_texture_users[_cur_block_id.toString()] = [];
-				_dependencies.push(new ResourceDependency(_cur_block_id.toString(), new URLRequest(url), null, this));
+				addDependency(_cur_block_id.toString(), new URLRequest(url));
 			}
 			else {
 			}
@@ -693,6 +698,13 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateUVData(uvs);
 					}
+					else if (str_type == 4) {
+						var normals : Vector.<Number> = new Vector.<Number>;
+						while (_body.position < str_end) {
+							normals[idx++] = read_float();
+						}
+						sub_geom.updateVertexNormalData(normals);
+					}
 					else if (str_type == 7) {
 						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
@@ -879,5 +891,6 @@ internal dynamic class AWDProperties
 		else return fallback;
 	}
 }
+
 
 

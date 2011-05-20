@@ -9,6 +9,9 @@ package away3d.loaders.misc
 		private var _embeddedDataByUrl : Object;
 		private var _remappedUrls : Object;
 		
+		private var _overrideAbsPath : Boolean;
+		private var _overrideFullUrls : Boolean;
+		
 		/**
 		 * AssetLoaderContext provides configuration for the AssetLoader load() and parse() operations.
 		 * Use it to configure how (and if) dependencies are loaded, or to map dependency URLs to
@@ -50,6 +53,37 @@ package away3d.loaders.misc
 		public function set dependencyBaseUrl(val : String) : void
 		{
 			_dependencyBaseUrl = val;
+		}
+		
+		
+		
+		/**
+		 * Defines whether absolute paths (defined as paths that begin with a "/") should be overridden
+		 * with the dependencyBaseUrl defined in this context. If this is true, and the base path is
+		 * "base", /path/to/asset.jpg will be resolved as base/path/to/asset.jpg.
+		*/
+		public function get overrideAbsolutePaths() : Boolean
+		{
+			return _overrideAbsPath;
+		}
+		public function set overrideAbsolutePaths(val : Boolean) : void
+		{
+			_overrideAbsPath = val;
+		}
+		
+		
+		/**
+		 * Defines whether "full" URLs (defined as a URL that includes a scheme, e.g. http://) should be
+		 * overridden with the dependencyBaseUrl defined in this context. If this is true, and the base
+		 * path is "base", http://example.com/path/to/asset.jpg will be resolved as base/path/to/asset.jpg.
+		*/
+		public function get overrideFullURLs() : Boolean
+		{
+			return _overrideFullUrls;
+		}
+		public function set overrideFullURLs(val : Boolean) : void
+		{
+			_overrideFullUrls = val;
 		}
 		
 		

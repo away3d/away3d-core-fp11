@@ -16,3 +16,4 @@ package away3d.loaders.parsers
 		public static const PLAIN_TEXT : String = "plainText";
 	}
 }
+

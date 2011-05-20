@@ -59,8 +59,17 @@ package away3d.loaders
 				token = loader.load(req, parser, context, ns);
 			}
 			
-			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			return token;
 		}
@@ -80,8 +89,17 @@ package away3d.loaders
 				token = loader.parseData(data, '', parser, context, ns);
 			}
 			
+			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			token.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			return token;
 		}
@@ -121,8 +139,17 @@ package away3d.loaders
 			var dispatcher : EventDispatcher;
 			
 			dispatcher = EventDispatcher(ev.currentTarget);
-			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			this.dispatchEvent(ev.clone());
 		}
