@@ -2,6 +2,7 @@ package away3d.library
 {
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
+	import away3d.library.access.AssetLibraryIterator;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.library.naming.ConflictPrecedence;
@@ -134,6 +135,38 @@ package away3d.library
 		public static function set conflictPrecedence(val : String) : void
 		{
 			getInstance().conflictPrecedence = val;
+		}
+		
+		
+		
+		/**
+		 * Create an AssetLibraryIterator instance that can be used to iterate over the assets
+		 * in this asset library instance. The iterator can filter assets on asset type and/or
+		 * namespace. A "null" filter value means no filter of that type is used.
+		 * 
+		 * @param assetTypeFilter Asset type to filter on (from the AssetType enum class.) Use
+		 * null to not filter on asset type.
+		 * @param namespaceFilter Namespace to filter on. Use null to not filter on namespace.
+		 * @param filterFunc Callback function to use when deciding whether an asset should be
+		 * included in the iteration or not. This needs to be a function that takes a single
+		 * parameter of type IAsset and returns a boolean where true means it should be included.
+		 * 
+		 * @see away3d.library.assets.AssetType
+		*/
+		public function createIterator(assetTypeFilter : String = null, namespaceFilter : String = null, filterFunc : Function = null) : AssetLibraryIterator
+		{
+			return new AssetLibraryIterator(_assets, assetTypeFilter, namespaceFilter, filterFunc);
+		}
+		
+		
+		/**
+		 * Short-hand for createIterator() method on default asset library instance.
+		 * 
+		 * @see away3d.library.AssetLibrary.createIterator()
+		*/
+		public static function createIterator(assetTypeFilter : String = null, namespaceFilter : String = null, filterFunc : Function = null) : AssetLibraryIterator
+		{
+			return getInstance().createIterator(assetTypeFilter, namespaceFilter, filterFunc);
 		}
 		
 		
