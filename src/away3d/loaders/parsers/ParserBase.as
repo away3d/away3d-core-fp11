@@ -210,43 +210,60 @@ package away3d.loaders.parsers
 		
 		protected function finalizeAsset(asset : IAsset, name : String=null) : void
 		{
+			var type_event : String;
+			var type_name : String;
+			
 			if (name)
 				asset.name = name;
 			
+			switch (asset.assetType) {
+				case AssetType.ANIMATION:
+					type_name = 'animation';
+					type_event = AssetEvent.ANIMATION_COMPLETE;
+					break;
+				case AssetType.ANIMATOR:
+					type_name = 'animator';
+					type_event = AssetEvent.ANIMATOR_COMPLETE;
+					break;
+				case AssetType.BITMAP:
+					type_name = 'bitmap';
+					type_event = AssetEvent.BITMAP_COMPLETE;
+					break;
+				case AssetType.CONTAINER:
+					type_name = 'container';
+					type_event = AssetEvent.CONTAINER_COMPLETE;
+					break;
+				case AssetType.GEOMETRY:
+					type_name = 'geometry';
+					type_event = AssetEvent.GEOMETRY_COMPLETE;
+					break;
+				case AssetType.MATERIAL:
+					type_name = 'material';
+					type_event = AssetEvent.MATERIAL_COMPLETE;
+					break;
+				case AssetType.MESH:
+					type_name = 'mesh';
+					type_event = AssetEvent.MESH_COMPLETE;
+					break;
+				case AssetType.SKELETON:
+					type_name = 'skeleton';
+					type_event = AssetEvent.SKELETON_COMPLETE;
+					break;
+				case AssetType.SKELETON_POSE:
+					type_name = 'skelpose';
+					type_event = AssetEvent.SKELETON_POSE_COMPLETE;
+					break;
+				default:
+					throw new Error('Unhandled asset type '+asset.assetType+'. Report as bug!');
+					break;
+			}
+				
 			// If the asset has no name, give it
 			// a per-type default name.
-			if (!asset.name) {
-				switch (asset.assetType) {
-					case AssetType.ANIMATION:
-						asset.name = 'animation';
-						break;
-					case AssetType.ANIMATOR:
-						asset.name = 'animator';
-						break;
-					case AssetType.BITMAP:
-						asset.name = 'bitmap';
-						break;
-					case AssetType.CONTAINER:
-						asset.name = 'container';
-						break;
-					case AssetType.GEOMETRY:
-						asset.name = 'geometry';
-						break;
-					case AssetType.MATERIAL:
-						asset.name = 'material';
-						break;
-					case AssetType.MESH:
-						asset.name = 'mesh';
-						break;
-					case AssetType.SKELETON:
-						asset.name = 'skeleton';
-						break;
-					case AssetType.SKELETON_POSE:
-						asset.name = 'skelpose';
-						break;
-				}
-			}
+			if (!asset.name)
+				asset.name = type_name;
 			
+			dispatchEvent(new AssetEvent(type_event, asset));
 			dispatchEvent(new AssetEvent(AssetEvent.ASSET_COMPLETE, asset));
 		}
 		

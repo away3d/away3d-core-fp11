@@ -239,10 +239,19 @@ package away3d.library
 		{
 			var loader : AssetLoader = new AssetLoader();
 			_loadingSessions.push(loader);
-			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-			loader.addEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
+			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
+			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			return loader.load(req, parser, context, ns);
 		}
 		
@@ -260,9 +269,18 @@ package away3d.library
 		{
 			var loader : AssetLoader = new AssetLoader();
 			_loadingSessions.push(loader);
+			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-			loader.addEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
+			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			return loader.parseData(data, '', parser, context, ns);
 		}
 		
@@ -340,14 +358,23 @@ package away3d.library
 		 */
 		private function onResourceRetrieved(event : away3d.events.LoaderEvent) : void
 		{
-			var session : AssetLoader = AssetLoader(event.target);
+			var loader : AssetLoader = AssetLoader(event.target);
 			
-			var index : int = _loadingSessions.indexOf(session);
-			session.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
-			session.removeEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-			session.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
-			session.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
-			session.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			var index : int = _loadingSessions.indexOf(loader);
+			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
+			loader.removeEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+			loader.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
+			loader.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
+			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			_loadingSessions.splice(index, 1);
 			
@@ -369,7 +396,7 @@ package away3d.library
 		{
 			var msg:String = "Unexpected parser error";
 			if(hasEventListener(away3d.events.LoaderEvent.DEPENDENCY_ERROR)){
-				var re:away3d.events.LoaderEvent = new away3d.events.LoaderEvent(away3d.events.LoaderEvent.DEPENDENCY_ERROR, "");
+				var re:LoaderEvent = new LoaderEvent(away3d.events.LoaderEvent.DEPENDENCY_ERROR, "");
 				dispatchEvent(re);
 			} else{
 				throw new Error(msg);

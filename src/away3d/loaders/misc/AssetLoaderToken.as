@@ -34,11 +34,22 @@ package away3d.loaders.misc
 			_eventBuffer = {};
 			
 			_loader = loader;
-			_loader.addEventListener(LoaderEvent.LOAD_ERROR, onLoaderEvent);
-			_loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(LoaderEvent.DEPENDENCY_ERROR, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.ASSET_COMPLETE, onLoaderEvent);
+			
+			// Set weak listeners, in case the token is never actually even used.
+			_loader.addEventListener(LoaderEvent.LOAD_ERROR, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(LoaderEvent.DEPENDENCY_ERROR, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.ASSET_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.MESH_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onLoaderEvent, false, 0, true);
+			_loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onLoaderEvent, false, 0, true);
 		}
 		
 		

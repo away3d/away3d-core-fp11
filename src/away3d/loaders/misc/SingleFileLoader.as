@@ -271,8 +271,17 @@ package away3d.loaders.misc
 			
 			if(_parser){
 				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
-				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, handleParserParseComplete);
-				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, handleParserAssetRetrieved);
+				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
+				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				switch (_parser.dataFormat) {
 					case ParserDataFormat.BINARY:
 						_parser.parseBytesAsync( ByteArray(data) );
@@ -297,19 +306,28 @@ package away3d.loaders.misc
 			dispatchEvent(event.clone());
 		}
 		
-		private function handleParserAssetRetrieved(event : AssetEvent) : void
+		private function onAssetComplete(event : AssetEvent) : void
 		{
-			this.dispatchEvent(new AssetEvent(AssetEvent.ASSET_COMPLETE, event.asset));
+			this.dispatchEvent(event.clone());
 		}
 		
 		/**
 		 * Called when parsing is complete.
 		 */
-		private function handleParserParseComplete(event : ParserEvent) : void
+		private function onParseComplete(event : ParserEvent) : void
 		{
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
-			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, handleParserParseComplete);
-			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, handleParserAssetRetrieved);
+			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
+			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			this.dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED, this.url));
 		}
 	}

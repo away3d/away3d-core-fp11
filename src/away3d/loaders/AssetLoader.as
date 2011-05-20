@@ -151,7 +151,16 @@ package away3d.loaders
 			var loader : SingleFileLoader = new SingleFileLoader();
 			loader.addEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
-			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			loader.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_loadingDependency = dependency;
 
@@ -263,7 +272,16 @@ package away3d.loaders
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
-			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			if(hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, loader.url, event.message));
@@ -280,15 +298,21 @@ package away3d.loaders
 		}
 		
 		
-		private function onAssetRetrieved(event : AssetEvent) : void
+		private function onAssetComplete(event : AssetEvent) : void
 		{
-			// Add loaded asset to list of assets retrieved as part
-			// of the current dependency. This list will be inspected
-			// by the parent parser when dependency is resolved
-			if (_loadingDependency)
-				_loadingDependency.assets.push(event.asset);
+			// Event is dispatched twice per asset (once as generic ASSET_COMPLETE,
+			// and once as type-specific, e.g. MESH_COMPLETE.) Do this only once.
+			if (event.type == AssetEvent.ASSET_COMPLETE) {
+				
+				// Add loaded asset to list of assets retrieved as part
+				// of the current dependency. This list will be inspected
+				// by the parent parser when dependency is resolved
+				if (_loadingDependency)
+					_loadingDependency.assets.push(event.asset);
+				
+				event.asset.resetAssetPath(event.asset.name, _namespace);
+			}
 			
-			event.asset.resetAssetPath(event.asset.name, _namespace);
 			dispatchEvent(event.clone());
 		}
 		
@@ -315,7 +339,16 @@ package away3d.loaders
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
-			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			prepareNextRetrieve(loader, event);
 		}
 		
