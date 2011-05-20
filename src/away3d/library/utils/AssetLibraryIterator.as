@@ -1,4 +1,4 @@
-package away3d.library.access
+package away3d.library.utils
 {
 	import away3d.library.AssetLibrary;
 	import away3d.library.assets.IAsset;

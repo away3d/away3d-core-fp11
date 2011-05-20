@@ -2,7 +2,7 @@ package away3d.library
 {
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
-	import away3d.library.access.AssetLibraryIterator;
+	import away3d.library.utils.AssetLibraryIterator;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.library.naming.ConflictPrecedence;
