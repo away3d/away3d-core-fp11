@@ -134,10 +134,15 @@ package away3d.loaders
 				_currentDependencyIndex++;
 				retrieveDependency(_currentDependencies[idx], parser);
 			} 
-			else if (_loaderStack.length==0 && _currentLoader.parser.parsingComplete) {
-				// This was the first (base) loader in the stack. Since it has been completed the
-				// entire resource must be done.
-				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
+			else if (_loaderStack.length==0) {
+				if (_currentLoader.parser.parsingComplete) {
+					// This was the first (base) loader in the stack. Since it has been completed the
+					// entire resource must be done.
+					dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
+				}
+				else {
+					_currentLoader.parser.resumeParsingAfterDependencies();
+				}
 			}
 		}
 		
