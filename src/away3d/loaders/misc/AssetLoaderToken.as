@@ -39,6 +39,15 @@ package away3d.loaders.misc
 			_loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onLoaderEvent);
 			_loader.addEventListener(LoaderEvent.DEPENDENCY_ERROR, onLoaderEvent);
 			_loader.addEventListener(AssetEvent.ASSET_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.MESH_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onLoaderEvent);
+			_loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onLoaderEvent);
 		}
 		
 		
@@ -64,6 +73,8 @@ package away3d.loaders.misc
 		
 		private function onLoaderEvent(ev : Event) : void
 		{
+			// If someone is listening for this event, bubble it. Otherwise,
+			// buffer it so that it can be dispatched when a listener is added.
 			if (hasEventListener(ev.type)) {
 				dispatchEvent(ev.clone());
 			}
@@ -74,6 +85,23 @@ package away3d.loaders.misc
 				
 				// Add event to buffer.
 				_eventBuffer[ev.type].push(ev);
+			}
+			
+			if (ev.type == LoaderEvent.RESOURCE_COMPLETE) {
+				_loader.removeEventListener(LoaderEvent.LOAD_ERROR, onLoaderEvent);
+				_loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(LoaderEvent.DEPENDENCY_ERROR, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.MESH_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onLoaderEvent);
+				_loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onLoaderEvent);
 			}
 		}
 	}

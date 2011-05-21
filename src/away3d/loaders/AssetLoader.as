@@ -134,10 +134,15 @@ package away3d.loaders
 				_currentDependencyIndex++;
 				retrieveDependency(_currentDependencies[idx], parser);
 			} 
-			else if (_loaderStack.length==0 && _currentLoader.parser.parsingComplete) {
-				// This was the first (base) loader in the stack. Since it has been completed the
-				// entire resource must be done.
-				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
+			else if (_loaderStack.length==0) {
+				if (_currentLoader.parser.parsingComplete) {
+					// This was the first (base) loader in the stack. Since it has been completed the
+					// entire resource must be done.
+					dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
+				}
+				else {
+					_currentLoader.parser.resumeParsingAfterDependencies();
+				}
 			}
 		}
 		
@@ -151,7 +156,16 @@ package away3d.loaders
 			var loader : SingleFileLoader = new SingleFileLoader();
 			loader.addEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
-			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			loader.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_loadingDependency = dependency;
 
@@ -183,9 +197,19 @@ package away3d.loaders
 		}
 		
 		
+		private function joinUrl(base : String, end : String) : String
+		{
+			if (base.charAt(base.length-1)=='/')
+				base = base.substr(0, base.length-1);
+			if (end.charAt(0)=='/')
+				end = end.substr(1);
+			
+			return base.concat('/', end);
+		}
+		
 		private function resolveDependencyUrl(dependency : ResourceDependency) : String
 		{
-			var abs_re : RegExp;
+			var scheme_re : RegExp;
 			var base : String;
 			var url : String = dependency.request.url;
 			
@@ -201,20 +225,35 @@ package away3d.loaders
 			
 			// Absolute URL? Check if starts with slash or a URL
 			// scheme definition (e.g. ftp://, http://, file://)
-			abs_re = new RegExp(/^[a-zA-Z]{3,4}:\/\//);
-			if (url.charAt(0)=='/' || abs_re.test(url))
-				return url;
+			scheme_re = new RegExp(/^[a-zA-Z]{3,4}:\/\//);
+			if (url.charAt(0) == '/') {
+				if (_context && _context.overrideAbsolutePaths) {
+					return joinUrl(_context.dependencyBaseUrl, url);
+				}
+				else {
+					return url;
+				}
+			}
+			else if (scheme_re.test(url)) {
+				// If overriding full URLs, get rid of scheme (e.g. "http://")
+				// and replace with the dependencyBaseUrl defined by user.
+				if (_context && _context.overrideFullURLs) {
+					var noscheme_url : String;
+					
+					noscheme_url = url.replace(scheme_re);
+					return joinUrl(_context.dependencyBaseUrl, noscheme_url);
+				}
+			}
 			
 			// Since not absolute, just get rid of base file name to find it's
 			// folder and then concatenate dynamic URL
 			if (_context && _context.dependencyBaseUrl) {
 				base = _context.dependencyBaseUrl;
-				return base.charAt(base.length-1)=='/'? 
-					base.concat(url) : base.concat('/', url);
+				return joinUrl(base, url);
 			}
 			else {
 				base = _uri.substring(0, _uri.lastIndexOf('/')+1);
-				return base.concat(url);
+				return joinUrl(base, url);
 			}
 		}
 		
@@ -238,7 +277,16 @@ package away3d.loaders
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
-			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			if(hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, loader.url, event.message));
@@ -255,15 +303,21 @@ package away3d.loaders
 		}
 		
 		
-		private function onAssetRetrieved(event : AssetEvent) : void
+		private function onAssetComplete(event : AssetEvent) : void
 		{
-			// Add loaded asset to list of assets retrieved as part
-			// of the current dependency. This list will be inspected
-			// by the parent parser when dependency is resolved
-			if (_loadingDependency)
-				_loadingDependency.assets.push(event.asset);
+			// Event is dispatched twice per asset (once as generic ASSET_COMPLETE,
+			// and once as type-specific, e.g. MESH_COMPLETE.) Do this only once.
+			if (event.type == AssetEvent.ASSET_COMPLETE) {
+				
+				// Add loaded asset to list of assets retrieved as part
+				// of the current dependency. This list will be inspected
+				// by the parent parser when dependency is resolved
+				if (_loadingDependency)
+					_loadingDependency.assets.push(event.asset);
+				
+				event.asset.resetAssetPath(event.asset.name, _namespace);
+			}
 			
-			event.asset.resetAssetPath(event.asset.name, _namespace);
 			dispatchEvent(event.clone());
 		}
 		
@@ -290,7 +344,16 @@ package away3d.loaders
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
-			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
+			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			prepareNextRetrieve(loader, event);
 		}
 		
