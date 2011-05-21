@@ -731,8 +731,8 @@ package away3d.loaders.parsers
 					skinned_sub_geom.updateVertexData(sub_geom.vertexData);
 					skinned_sub_geom.updateIndexData(sub_geom.indexData);
 					skinned_sub_geom.updateUVData(sub_geom.UVData);
-					skinned_sub_geom.jointIndexData = w_indices;
-					skinned_sub_geom.jointWeightsData = weights;
+					skinned_sub_geom.updateJointIndexData(w_indices);
+					skinned_sub_geom.updateJointWeightsData(weights);
 					sub_geom = skinned_sub_geom;
 				}
 				
@@ -891,6 +891,5 @@ internal dynamic class AWDProperties
 		else return fallback;
 	}
 }
-
 
 

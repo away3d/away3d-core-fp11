@@ -62,8 +62,6 @@ package away3d.loaders.parsers
 
 		/**
 		 * Creates a new MD5MeshParser object.
-		 * @param uri The url or id of the data or file to be parsed.
-		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
 		public function MD5MeshParser(additionalRotationAxis : Vector3D = null, additionalRotationRadians : Number = 0)
 		{
@@ -341,8 +339,8 @@ package away3d.loaders.parsers
 			subGeom.updateVertexData(vertices);
 			subGeom.updateUVData(uvs);
 			subGeom.updateIndexData(indices);
-			subGeom.jointIndexData = jointIndices;
-			subGeom.jointWeightsData = jointWeights;
+			subGeom.updateJointIndexData(jointIndices);
+			subGeom.updateJointWeightsData(jointWeights);
 
 			return subGeom;
 		}
