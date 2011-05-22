@@ -15,27 +15,32 @@ package away3d.core.base
 	 * Object3D provides a base class for any 3D object that has a (local) transformation.
 	 * 
 	 * Standard Transform:
-	 * - The standard order for transformation is [child transform]->Scale->Pivot->Rotate->Translate->[parent transform] (based on code in updateTransform).
-	 * - The order listed here is the order of matrix multiplications. However, conceptually, transformation order is right to left.
-	 *   - e.g. Pivot is "post-rotate".  Translate is "pre-rotate".
+	 * - The standard order for transformation is [parent transform] * (Translate+Pivot) * (Rotate) * (-Pivot) * (Scale) * [child transform]
+	 *   - This is the order of matrix multiplications, left-to-right.
+	 *   - The order of transformation is right-to-left, however!
+	 *       (Scale) happens before (-Pivot) happens before (Rotate) happens before (Translate+Pivot)
+	 *   - with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform] 
+	 *       (Scale) happens before (Rotate) happens before (Translate)
+	 *   - This is based on code in updateTransform and ObjectContainer3D.updateSceneTransform().
+	 *   - Matrix3D prepend = operator on rhs - e.g. transform' = transform * rhs;
+	 *   - Matrix3D append =  operator on lhr - e.g. transform' = lhs * transform;
 	 * 
 	 * To affect Scale:
 	 * - set scaleX/Y/Z directly, or call scale(delta)
 	 * 
-	 * To affect Pivot (post-rotate translate)
+	 * To affect Pivot:
 	 * - set pivotPoint directly, or call movePivot()
 	 * 
 	 * To affect Rotate:
 	 * - set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()
+	 * - call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.  
+	 *     rotationX/Y/Z will be reset based on these operations.
 	 * 
-	 * To affect Translate (pre-rotate translate):
+	 * To affect Translate (post-rotate translate):
 	 * - set x/y/z/position or call moveTo().
 	 * - call translate(), which modifies x/y/z based on a delta vector.
-	 * - call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to prepend an
-	 *     additional transformation in front of the present transform.
-	 *
-	 * Additional one-time behavior - state not stored in Object3D. If transform is invalidated it must be reapplied.
-	 * - call pitch()/yaw()/roll()/rotate() to prepend an additional rotation in front of the present transform.
+	 * - call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to add an
+	 *     additional translate *before* the current transform. x/y/z will be reset based on these operations.
 	 */
 	public class Object3D extends NamedAssetBase
 	{
