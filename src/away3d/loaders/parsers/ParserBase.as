@@ -263,8 +263,8 @@ package away3d.loaders.parsers
 			if (!asset.name)
 				asset.name = type_name;
 			
-			dispatchEvent(new AssetEvent(type_event, asset));
 			dispatchEvent(new AssetEvent(AssetEvent.ASSET_COMPLETE, asset));
+			dispatchEvent(new AssetEvent(type_event, asset));
 		}
 		
 		/**

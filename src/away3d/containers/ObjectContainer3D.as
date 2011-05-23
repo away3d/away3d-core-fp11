@@ -6,7 +6,8 @@ package away3d.containers
 	import away3d.events.Scene3DEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
-	
+
+	import flash.events.Event;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	
@@ -437,6 +438,26 @@ package away3d.containers
 			}
 			
 			_sceneTransformDirty = false;
+		}
+
+
+		/**
+		 * @inheritDoc
+		 */
+		// maybe not the best way to fake bubbling?
+		override public function dispatchEvent(event : Event) : Boolean
+		{
+			var ret : Boolean =  super.dispatchEvent(event);
+
+			if (event.bubbles) {
+				if (_parent)
+					_parent.dispatchEvent(event);
+				// if it's scene root
+				else if (_scene)
+					_scene.dispatchEvent(event);
+			}
+
+			return ret;
 		}
 	}
 }
