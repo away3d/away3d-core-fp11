@@ -65,6 +65,8 @@ package away3d.loaders.parsers
 		
 		/**
 		 * Creates a new AWDParser object.
+		 * @param uri The url or id of the data or file to be parsed.
+		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
 		public function AWD2Parser()
 		{
@@ -610,7 +612,6 @@ package away3d.loaders.parsers
 		{
 			var name : String;
 			var geom : Geometry;
-			var skeleton : Skeleton;
 			var num_subs : uint;
 			var subs_parsed : uint;
 			var props : AWDProperties;
@@ -621,11 +622,10 @@ package away3d.loaders.parsers
 			num_subs = _body.readUnsignedShort();
 			
 			// Read optional properties
-			props = parseProperties({ 1:AWD_ATTR_BADDR }); 
-			skeleton = _blocks[props.get(1, 0)].data;
+			props = parseProperties({ 1:AWD_ATTR_MTX4 }); 
 			
 			var mtx : Matrix3D;
-			var bsm_data : Array = props.get(2, null);
+			var bsm_data : Array = props.get(1, null);
 			if (bsm_data) {
 				bsm = new Matrix3D(Vector.<Number>(bsm_data));
 			}
@@ -891,6 +891,5 @@ internal dynamic class AWDProperties
 		else return fallback;
 	}
 }
-
 
 

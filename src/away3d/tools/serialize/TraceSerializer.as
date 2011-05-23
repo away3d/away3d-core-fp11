@@ -35,6 +35,18 @@ package away3d.tools.serialize
 			_indent += tabSize;
 		}
 		
+    /**
+		 * @inheritDoc
+     */
+    public override function writeInt(name:String, value:int):void
+    {
+      var outputString:String = _indentString();
+      outputString += name;
+      outputString += separator;
+      outputString += value;
+      trace(outputString);
+    }
+    
 		/**
 		 * @inheritDoc
 		 */

@@ -4,6 +4,8 @@ package away3d.tools.serialize
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
+	import away3d.animators.skeleton.Skeleton;
+	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
@@ -128,18 +130,36 @@ package away3d.tools.serialize
 			{
 				serializer.writeUint("numUVs", subGeometry.UVData.length);
 			}
-      var skinnedSubGeometry:SkinnedSubGeometry = subGeometry as SkinnedSubGeometry;
-      if (skinnedSubGeometry)
-      {
-        if (skinnedSubGeometry.jointWeightsData)
-        {
-          serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length)
-        }
-        if (skinnedSubGeometry.jointIndexData)
-        {
-          serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length)
-        }
-      }
+			var skinnedSubGeometry:SkinnedSubGeometry = subGeometry as SkinnedSubGeometry;
+			if (skinnedSubGeometry)
+			{
+				if (skinnedSubGeometry.jointWeightsData)
+				{
+					serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length)
+				}
+				if (skinnedSubGeometry.jointIndexData)
+				{
+					serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length)
+				}
+			}
+			serializer.endObject();
+		}
+		
+		public static function serializeSkeletonJoint(skeletonJoint:SkeletonJoint, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(skeletonJoint), skeletonJoint.name);
+      serializer.writeInt("parentIndex", skeletonJoint.parentIndex);
+			serializer.writeTransform("inverseBindPose", skeletonJoint.inverseBindPose);
+			serializer.endObject();
+		}
+		
+		public static function serializeSkeleton(skeleton:Skeleton, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(skeleton), skeleton.name);
+			for each (var skeletonJoint:SkeletonJoint in skeleton.joints)
+			{
+				serializeSkeletonJoint(skeletonJoint, serializer);
+			}
 			serializer.endObject();
 		}
 		
