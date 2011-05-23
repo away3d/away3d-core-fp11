@@ -2,6 +2,7 @@ package away3d.containers
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
+	import away3d.cameras.SpringCam;
 	import away3d.core.managers.Mouse3DManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
@@ -55,6 +56,8 @@ package away3d.containers
 		private var _depthTextureHeight : int = -1;
 		private var _depthTextureInvalid : Boolean = true;
 
+		private var _hitField : Sprite;
+
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
 			super();
@@ -65,9 +68,19 @@ package away3d.containers
 			_hitTestRenderer = new HitTestRenderer();
 			_depthRenderer = new DepthRenderer();
 			_entityCollector = new EntityCollector();
-
+			initHitField();
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage, false, 0, true);
+		}
+
+		private function initHitField() : void
+		{
+			_hitField = new Sprite();
+			_hitField.alpha = 0;
+			_hitField.doubleClickEnabled = true;
+			_hitField.graphics.beginFill(0x000000);
+			_hitField.graphics.drawRect(0, 0, 100, 100);
+			addChild(_hitField);
 		}
 
 		/**
@@ -194,6 +207,7 @@ package away3d.containers
 			_renderer.backBufferWidth = value;
 			_depthRenderer.viewPortWidth = value;
 			_depthRenderer.backBufferWidth = value;
+			_hitField.width = value;
 			_width = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
@@ -214,6 +228,7 @@ package away3d.containers
 			_renderer.backBufferHeight = value;
 			_depthRenderer.viewPortHeight = value;
 			_depthRenderer.backBufferHeight = value;
+			_hitField.height = value;
 			_height = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
@@ -431,8 +446,6 @@ package away3d.containers
 			
 			_addedToStage = true;
 
-			// todo: expect user to set this?
-			stage.doubleClickEnabled = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
 
