@@ -619,9 +619,12 @@ package away3d.loaders.parsers
 			subs_parsed = 0;
 			while (subs_parsed < num_subs) {
 				var mat_id : uint, sm_len : uint, sm_end : uint;
-				var sub_geom : SubGeometry;				var skinned_sub_geom : SkinnedSubGeometry;				var w_indices : Vector.<Number>;
+				var sub_geom : SubGeometry;
+				var skinned_sub_geom : SkinnedSubGeometry;
+				var w_indices : Vector.<Number>;
 				var weights : Vector.<Number>;
-								sub_geom = new SubGeometry();
+				
+				sub_geom = new SubGeometry();
 				
 				sm_len = _body.readUnsignedInt();
 				sm_end = _body.position + sm_len;
@@ -678,11 +681,14 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateUVData(uvs);
 					}
-					else if (str_type == 7) {						w_indices = new Vector.<Number>;
+					else if (str_type == 7) {
+						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
 							w_indices[idx++] = read_int()*3;
-						}					}
-					else if (str_type == 8) {						weights = new Vector.<Number>;
+						}
+					}
+					else if (str_type == 8) {
+						weights = new Vector.<Number>;
 						while (_body.position < str_end) {
 							weights[idx++] = read_float();
 						}
@@ -690,13 +696,20 @@ package away3d.loaders.parsers
 					else {
 						trace('unknown str type:', str_type);
 						_body.position = str_end;
-					}				}
-									// If there were weights and joint indices defined, this
+					}
+				}
+					
+				// If there were weights and joint indices defined, this
 				// is a skinned mesh and needs to be built from skinned
 				// sub-geometries, so copy data across.
-				if (w_indices && weights) {					skinned_sub_geom = new SkinnedSubGeometry(weights.length / sub_geom.numVertices);					skinned_sub_geom.updateVertexData(sub_geom.vertexData);					skinned_sub_geom.updateIndexData(sub_geom.indexData);
-					skinned_sub_geom.updateUVData(sub_geom.UVData);					skinned_sub_geom.jointIndexData = w_indices;
-					skinned_sub_geom.jointWeightsData = weights;					sub_geom = skinned_sub_geom;
+				if (w_indices && weights) {
+					skinned_sub_geom = new SkinnedSubGeometry(weights.length / sub_geom.numVertices);
+					skinned_sub_geom.updateVertexData(sub_geom.vertexData);
+					skinned_sub_geom.updateIndexData(sub_geom.indexData);
+					skinned_sub_geom.updateUVData(sub_geom.UVData);
+					skinned_sub_geom.jointIndexData = w_indices;
+					skinned_sub_geom.jointWeightsData = weights;
+					sub_geom = skinned_sub_geom;
 				}
 				
 				subs_parsed++;
