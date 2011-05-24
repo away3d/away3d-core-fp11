@@ -45,41 +45,63 @@ package away3d.loaders
 		}
 		
 		
-		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, namespace : String = null) : AssetLoaderToken
+		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
+			var token : AssetLoaderToken;
+			
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
-				
 				lib = AssetLibrary.getInstance(_assetLibId);
-				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				lib.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return lib.load(req, parser, context, namespace);
+				token = lib.load(req, parser, context, ns);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
-				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return loader.load(req, parser, context, namespace);
+				token = loader.load(req, parser, context, ns);
 			}
+			
+			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			return token;
 		}
 		
 		
-		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  namespace : String = null) : AssetLoaderToken
+		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  ns : String = null) : AssetLoaderToken
 		{
+			var token : AssetLoaderToken;
+			
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
-				
 				lib = AssetLibrary.getInstance(_assetLibId);
-				lib.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				lib.addEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return lib.parseData(data, parser, context, namespace);
+				token = lib.parseData(data, parser, context, ns);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
-				loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-				loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-				return loader.parseData(data, '', parser, context, namespace);
+				token = loader.parseData(data, '', parser, context, ns);
 			}
+			
+			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			return token;
 		}
 		
 		
@@ -96,7 +118,7 @@ package away3d.loaders
 		
 		
 		
-		private function onAssetRetrieved(ev : AssetEvent) : void
+		private function onAssetComplete(ev : AssetEvent) : void
 		{
 			var type : String = ev.asset.assetType;
 			if (type == AssetType.CONTAINER) {
@@ -112,14 +134,22 @@ package away3d.loaders
 		}
 		
 		
-		private function onResourceRetrieved(ev : Event) : void
+		private function onResourceComplete(ev : Event) : void
 		{
 			var dispatcher : EventDispatcher;
 			
 			dispatcher = EventDispatcher(ev.currentTarget);
-			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
-			dispatcher.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-			dispatcher.removeEventListener(LoaderEvent.DATA_LOADED, onResourceRetrieved);
+			dispatcher.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			this.dispatchEvent(ev.clone());
 		}

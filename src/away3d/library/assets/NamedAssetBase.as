@@ -15,6 +15,8 @@ package away3d.library.assets
 		private var _full_path : Array;
 		
 		
+		public static const DEFAULT_NAMESPACE : String = 'default';
+		
 		public function NamedAssetBase(name : String='')
 		{
 			_name = name;
@@ -41,11 +43,14 @@ package away3d.library.assets
 		}
 		public function set name(val : String) : void
 		{
+			var prev : String;
+			
+			prev = _name;
 			_name = val;
 			update();
 			
 			if (hasEventListener(AssetEvent.ASSET_RENAME))
-				dispatchEvent(new AssetEvent(AssetEvent.ASSET_RENAME));
+				dispatchEvent(new AssetEvent(AssetEvent.ASSET_RENAME, IAsset(this), prev));
 		}
 		
 		
@@ -61,16 +66,16 @@ package away3d.library.assets
 		}
 		
 		
-		public function assetPathEquals(name : String, namespace : String) : Boolean
+		public function assetPathEquals(name : String, ns : String) : Boolean
 		{
-			return (_name == name && (!namespace || _namespace==namespace));
+			return (_name == name && (!ns || _namespace==ns));
 		}
 		
 		
-		public function resetAssetPath(name : String, namespace : String = null, overrideOriginal : Boolean = true) : void
+		public function resetAssetPath(name : String, ns : String = null, overrideOriginal : Boolean = true) : void
 		{
 			_name = name? name : 'untitled';
-			_namespace = namespace? namespace : 'default';
+			_namespace = ns? ns: DEFAULT_NAMESPACE;
 			if (overrideOriginal)
 				_originalName = _name;
 		

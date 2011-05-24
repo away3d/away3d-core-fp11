@@ -430,7 +430,10 @@ package away3d.containers
 				return;
 			
 			_addedToStage = true;
-			
+
+			// todo: expect user to set this?
+			stage.doubleClickEnabled = true;
+
 			_stage3DManager = Stage3DManager.getInstance(stage);
 
 			// TO DO: have a stage3D manager?

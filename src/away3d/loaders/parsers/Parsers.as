@@ -1,11 +1,13 @@
 package away3d.loaders.parsers
 {
+	import away3d.loaders.misc.SingleFileLoader;
+
 	public class Parsers
 	{
 		/**
-		 * A list of all parsers that come bundled with Away3D. Use it to quickly
-		 * enable support for all bundled parsers to the ResourceManager file format
-		 * auto-detect feature, using ResourceManager.addParsers():
+		 * A list of all parsers that come bundled with Away3D. Use this to quickly
+		 * enable support for all bundled parsers to the file format auto-detection
+		 * feature, using any of the enableParsers() methods on loaders, e.g.:
 		 * 
 		 * <code>AssetLibrary.enableParsers(Parsers.ALL_BUNDLED);</code>
 		 * 
@@ -38,5 +40,21 @@ package away3d.loaders.parsers
 			AC3DParser, AWDParser, Max3DSParser,
 			MD2Parser, MD5AnimParser, MD5MeshParser, OBJParser
 		]);
+		
+		
+		/**
+		 * Short-hand function to enable all bundled parsers for auto-detection. In practice,
+		 * this is the same as invoking enableParsers(Parsers.ALL_BUNDLED) on any of the
+		 * loader classes SingleFileLoader, AssetLoader, AssetLibrary or Loader3D. 
+		 * 
+		 * See notes about file size in the documentation for the ALL_BUNDLED constant.
+		 * 
+		 * @see away3d.loaders.parsers.Parsers.ALL_BUNDLED
+		*/
+		public static function enableAllBundled() : void
+		{
+			SingleFileLoader.enableParsers(ALL_BUNDLED);
+		}
 	}
 }
+

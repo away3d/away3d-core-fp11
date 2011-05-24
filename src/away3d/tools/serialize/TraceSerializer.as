@@ -12,8 +12,8 @@ package away3d.tools.serialize
 	 * 
 	 * @see away3d.tools.serialize.Serialize
 	 */
-  public class TraceSerializer extends SerializerBase
-  {
+	public class TraceSerializer extends SerializerBase
+	{
 		private var _indent:uint = 0;
 		public var separator:String = ": ";
 		public var tabSize:uint = 2;
@@ -21,24 +21,32 @@ package away3d.tools.serialize
 		/**
 		 * Creates a new TraceSerializer object.
 		 */
-    public function TraceSerializer()
-    {
+		public function TraceSerializer()
+		{
 			super();
-    }
-    
+		}
+		
 		/**
 		 * @inheritDoc
 		 */
 		public override function beginObject(className:String, instanceName:String):void
 		{
-			var outputString:String = _indentString();
-			outputString += className;
-			outputString += separator;
-			outputString += instanceName;
-			trace(outputString);
+			writeString(className, instanceName);
 			_indent += tabSize;
 		}
 		
+    /**
+		 * @inheritDoc
+     */
+    public override function writeInt(name:String, value:int):void
+    {
+      var outputString:String = _indentString();
+      outputString += name;
+      outputString += separator;
+      outputString += value;
+      trace(outputString);
+    }
+    
 		/**
 		 * @inheritDoc
 		 */
@@ -70,8 +78,11 @@ package away3d.tools.serialize
 		{
 			var outputString:String = _indentString();
 			outputString += name;
-			outputString += separator;
-			outputString += value;
+			if (value)
+			{
+				outputString += separator;
+				outputString += value;
+			}
 			trace(outputString);
 		}
 		
@@ -82,8 +93,11 @@ package away3d.tools.serialize
 		{
 			var outputString:String = _indentString();
 			outputString += name;
-			outputString += separator;
-			outputString += value;
+			if (value)
+			{
+				outputString += separator;
+				outputString += value;
+			}
 			trace(outputString);
 		}
 
@@ -94,24 +108,27 @@ package away3d.tools.serialize
 		{
 			var outputString:String = _indentString();
 			outputString += name;
-			outputString += separator;
-			
-			var matrixIndent:uint = outputString.length;
-			
-			for (var i:uint = 0; i < value.length; i++)
+			if (value)
 			{
-				outputString += value[i];
-				if (((i + 1) % 4) == 0)
+				outputString += separator;
+				
+				var matrixIndent:uint = outputString.length;
+				
+				for (var i:uint = 0; i < value.length; i++)
 				{
-					outputString += "\n";
-					for (var j:uint = 0; j < matrixIndent; j++)
+					outputString += value[i];
+					if ((i < (value.length - 1)) && (((i + 1) % 4) == 0))
+					{
+						outputString += "\n";
+						for (var j:uint = 0; j < matrixIndent; j++)
+						{
+							outputString += " ";
+						}
+					}
+					else
 					{
 						outputString += " ";
 					}
-				}
-				else
-				{
-					outputString += " ";
 				}
 			}
 			trace(outputString);
@@ -124,8 +141,11 @@ package away3d.tools.serialize
 		{
 			var outputString:String = _indentString();
 			outputString += name;
-			outputString += separator;
-			outputString += value;
+			if (value)
+			{
+				outputString += separator;
+				outputString += value;
+			}
 			trace(outputString);
 		}
 
@@ -146,5 +166,5 @@ package away3d.tools.serialize
 			}
 			return indentString;
 		}
-  }
+	}
 }

@@ -1,13 +1,20 @@
 package away3d.tools.serialize
 {
+	import away3d.animators.data.AnimationBase;
+	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
+	import away3d.animators.skeleton.Skeleton;
+	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
+	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
+	import away3d.materials.MaterialBase;
 	
 	import flash.utils.getQualifiedClassName;
 	
@@ -44,16 +51,69 @@ package away3d.tools.serialize
 		public static function serializeMesh(mesh:Mesh, serializer:SerializerBase):void
 		{
 			serializeObjectContainerInternal(mesh as ObjectContainer3D, serializer, false /* serializeChildrenAndEnd */);
+			serializer.writeBoolean("mouseDetails", mesh.mouseDetails);
+			serializer.writeBoolean("castsShadows", mesh.castsShadows);
 			
-			if (mesh.geometry.subGeometries.length)
+			if (mesh.animationState)
 			{
-				for (var i:uint = 0; i < mesh.geometry.subGeometries.length; i++)
-				{
-					serializeSubGeometry(mesh.geometry.subGeometries[i], serializer);
-				}
+				serializeAnimationState(mesh.animationState, serializer);
 			}
 			
+			if (mesh.material)
+			{
+				serializeMaterial(mesh.material, serializer);
+			}
+			
+			if (mesh.subMeshes.length)
+			{
+				for each (var subMesh:SubMesh in mesh.subMeshes)
+				{
+					serializeSubMesh(subMesh, serializer);
+				}
+			}
 			serializeChildren(mesh as ObjectContainer3D, serializer);
+			serializer.endObject();
+		}
+		
+		public static function serializeAnimationState(animationState:AnimationStateBase, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(animationState), null);
+			serializeAnimation(animationState.animation, serializer);
+			serializer.endObject();
+		}
+		
+		public static function serializeAnimation(animation:AnimationBase, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(animation), null);
+			serializer.endObject();
+		}
+		
+		public static function serializeSubMesh(subMesh:SubMesh, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(subMesh), null);
+			if (subMesh.material)
+			{
+				serializeMaterial(subMesh.material, serializer);
+			}
+			if (subMesh.subGeometry)
+			{
+				serializeSubGeometry(subMesh.subGeometry, serializer);
+			}
+			serializer.endObject();
+		}
+		
+		public static function serializeMaterial(material:MaterialBase, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(material), material.name);
+			serializer.writeString("lights", String(material.lights));
+			serializer.writeBoolean("mipmap", material.mipmap);
+			serializer.writeBoolean("smooth", material.smooth);
+			serializer.writeBoolean("repeat", material.repeat);
+			serializer.writeBoolean("bothSides", material.bothSides);
+			serializer.writeString("blendMode", material.blendMode);
+			serializer.writeBoolean("requiresBlending", material.requiresBlending);
+			serializer.writeUint("uniqueId", material.uniqueId);
+			serializer.writeUint("numPasses", material.numPasses);
 			serializer.endObject();
 		}
 		
@@ -69,6 +129,36 @@ package away3d.tools.serialize
 			if (subGeometry.UVData)
 			{
 				serializer.writeUint("numUVs", subGeometry.UVData.length);
+			}
+			var skinnedSubGeometry:SkinnedSubGeometry = subGeometry as SkinnedSubGeometry;
+			if (skinnedSubGeometry)
+			{
+				if (skinnedSubGeometry.jointWeightsData)
+				{
+					serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length)
+				}
+				if (skinnedSubGeometry.jointIndexData)
+				{
+					serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length)
+				}
+			}
+			serializer.endObject();
+		}
+		
+		public static function serializeSkeletonJoint(skeletonJoint:SkeletonJoint, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(skeletonJoint), skeletonJoint.name);
+      serializer.writeInt("parentIndex", skeletonJoint.parentIndex);
+			serializer.writeTransform("inverseBindPose", skeletonJoint.inverseBindPose);
+			serializer.endObject();
+		}
+		
+		public static function serializeSkeleton(skeleton:Skeleton, serializer:SerializerBase):void
+		{
+			serializer.beginObject(classNameFromInstance(skeleton), skeleton.name);
+			for each (var skeletonJoint:SkeletonJoint in skeleton.joints)
+			{
+				serializeSkeletonJoint(skeletonJoint, serializer);
 			}
 			serializer.endObject();
 		}

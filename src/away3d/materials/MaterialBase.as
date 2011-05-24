@@ -380,6 +380,7 @@ package away3d.materials
 		arcane function removeOwner(owner : IMaterialOwner) : void
 		{
 			_owners.splice(_owners.indexOf(owner), 1);
+			if (_owners.length == 0) _animation = null;
 		}
 
 		/**

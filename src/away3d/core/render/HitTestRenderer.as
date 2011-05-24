@@ -187,7 +187,8 @@ package away3d.core.render
 			// todo: do a fast ray intersection test first?
 			for (var i : uint = 0; i < len; ++i) {
 				renderable = renderables[i];
-				if (!renderable.mouseEnabled) continue;
+				// it's possible that the renderable was already removed from the scene
+				if (!renderable.sourceEntity.scene || !renderable.mouseEnabled) continue;
 				_context.setCulling(renderable.material.bothSides? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
 
 				_interactives[_interactiveId++] = renderable;

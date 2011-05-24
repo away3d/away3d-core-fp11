@@ -32,6 +32,16 @@ package away3d.tools.serialize
 			throw new AbstractMethodError();
 		}
 		
+    /**
+     * Serialize int
+     * @param name name of value being serialized
+     * @param value value being serialized
+     */
+    public function writeInt(name:String, value:int):void
+    {
+      throw new AbstractMethodError();
+    }
+    
 		/**
 		 * Serialize uint
 		 * @param name name of value being serialized

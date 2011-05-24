@@ -54,7 +54,16 @@ package away3d.loaders.parsers
 		*/
 		public override function get dependencies():Vector.<ResourceDependency>
 		{
-			return _parser? _parser.dependencies : _dependencies;
+			return _parser? _parser.dependencies : super.dependencies;
+		}
+		
+		
+		/**
+		 * @inheritDoc
+		*/
+		public override function get parsingComplete():Boolean
+		{
+			return _parser? _parser.parsingComplete : false;
 		}
 		
 		
@@ -78,6 +87,12 @@ package away3d.loaders.parsers
 		}
 		
 		
+		arcane override function resumeParsingAfterDependencies():void
+		{
+			if (_parser) _parser.resumeParsingAfterDependencies();
+		}
+		
+		
 		/**
 		 * Find the right conrete parser (AWD1Parser or AWD2Parser) and delegate actual
 		 * parsing to it.
@@ -93,8 +108,18 @@ package away3d.loaders.parsers
 					_parser = new AWD1Parser();
 			
 				// Listen for events that need to be bubbled
-				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetRetrieved);
 				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
+				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
+				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				
 				// Start parsing using concrete parser
 				switch (_parser.dataFormat) {
@@ -125,6 +150,8 @@ package away3d.loaders.parsers
 		}
 		
 		
+		
+		
 		/**
 		 * @private
 		 * Just bubble events from concrete parser.
@@ -139,7 +166,7 @@ package away3d.loaders.parsers
 		 * @private
 		 * Just bubble events from concrete parser.
 		*/
-		private function onAssetRetrieved(ev : AssetEvent) : void
+		private function onAssetComplete(ev : AssetEvent) : void
 		{
 			dispatchEvent(ev.clone());
 		}
@@ -150,7 +177,21 @@ package away3d.loaders.parsers
 		*/
 		private function onParseComplete(ev : ParserEvent) : void
 		{
+			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
+			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
+			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
 			dispatchEvent(ev.clone());
 		}
 	}
 }
+
