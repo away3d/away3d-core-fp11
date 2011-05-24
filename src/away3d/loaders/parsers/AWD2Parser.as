@@ -97,12 +97,19 @@ package away3d.loaders.parsers
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length == 1) {
-				var bmp : BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
-				if (bmp) {
+				var loaded_asset : BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
+				if (loaded_asset) {
 					var mat : BitmapMaterial;
-					var users : Array = _texture_users[resourceDependency.id];
+					var users : Array;
+					var stored_asset : BitmapDataAsset;
+					
+					stored_asset = _blocks[parseInt(resourceDependency.id)].data;
+					stored_asset.bitmapData = loaded_asset.bitmapData;
+					
+					users = _texture_users[resourceDependency.id];
 					for each (mat in users) {
-						mat.bitmapData = bmp.bitmapData;
+						mat.bitmapData = loaded_asset.bitmapData;
+						finalizeAsset(mat);
 					}
 				}
 			}
@@ -192,7 +199,7 @@ package away3d.loaders.parsers
 				_parsed_header = true;
 			}
 			
-			while (_body.bytesAvailable > 0 && hasTime()) {
+			while (_body.bytesAvailable > 0 && !parsingPaused && hasTime()) {
 				parseNextBlock();
 			}
 			
@@ -305,9 +312,6 @@ package away3d.loaders.parsers
 			name = parseVarStr();
 			num_frames = _body.readUnsignedShort();
 			
-			trace('name', name);
-			trace('nf', num_frames);
-			
 			props = parseProperties(null);
 			
 			seq = new UVAnimationSequence(name);
@@ -315,11 +319,16 @@ package away3d.loaders.parsers
 			frames_parsed = 0;
 			dummy = new Sprite;
 			while (frames_parsed < num_frames) {
+				var mtx : Matrix;
 				var frame : UVAnimationFrame;
-				dummy.transform.matrix = parseMatrix2D();
 				
-				frame = new UVAnimationFrame(dummy.x, dummy.y, dummy.scaleX, dummy.scaleY, dummy.rotation);
-				seq.addFrame(frame, 25);
+				// TODO: Replace this with some reliable way to decompose a 2d matrix
+				mtx = parseMatrix2D();
+				mtx.scale(100, 100);
+				dummy.transform.matrix = mtx;
+				
+				frame = new UVAnimationFrame(dummy.x*0.01, dummy.y*0.01, dummy.scaleX/100, dummy.scaleY/100, dummy.rotation);
+				seq.addFrame(frame, 40);
 				
 				frames_parsed++;
 			}
@@ -356,16 +365,21 @@ package away3d.loaders.parsers
 				tex_addr = props.get(2, 0);
 				trace('texture addr: ', tex_addr);
 				bmp_asset = _blocks[tex_addr].data;
-				if (bmp_asset) {
-					bmp = bmp_asset.bitmapData;
-				}
 				
-				mat = new BitmapMaterial(bmp);
-				if (tex_addr > 0)
-					_texture_users[tex_addr.toString()].push(mat);
+				// If bitmap asset has already been loaded
+				if (bmp_asset && bmp_asset.bitmapData) {
+					bmp = bmp_asset.bitmapData;
+					mat = new BitmapMaterial(bmp);
+					finalizeAsset(mat, name);
+				}
+				else {
+					// No bitmap available yet. Material will be finalized
+					// when texture finishes loading.
+					mat = new BitmapMaterial(null);
+					if (tex_addr > 0)
+						_texture_users[tex_addr.toString()].push(mat);
+				}
 			}
-			
-			finalizeAsset(mat, name);
 			
 			return mat;
 		}
@@ -391,7 +405,7 @@ package away3d.loaders.parsers
 				
 				// TODO: Create dependency
 				_texture_users[_cur_block_id.toString()] = [];
-				_dependencies.push(new ResourceDependency(_cur_block_id.toString(), new URLRequest(url), null, this));
+				addDependency(_cur_block_id.toString(), new URLRequest(url));
 			}
 			else {
 			}
@@ -402,8 +416,13 @@ package away3d.loaders.parsers
 			
 			
 			// TODO: Don't do this. Get texture properly
-			asset = new BitmapDataAsset(defaultBitmapData);
+			asset = new BitmapDataAsset();
+			/*
 			finalizeAsset(asset, name);
+			*/
+			
+			pauseAndRetrieveDependencies();
+			
 			return asset
 		}
 		
@@ -593,7 +612,6 @@ package away3d.loaders.parsers
 		{
 			var name : String;
 			var geom : Geometry;
-			var skeleton : Skeleton;
 			var num_subs : uint;
 			var subs_parsed : uint;
 			var props : AWDProperties;
@@ -604,11 +622,10 @@ package away3d.loaders.parsers
 			num_subs = _body.readUnsignedShort();
 			
 			// Read optional properties
-			props = parseProperties({ 1:AWD_ATTR_BADDR }); 
-			skeleton = _blocks[props.get(1, 0)].data;
+			props = parseProperties({ 1:AWD_ATTR_MTX4 }); 
 			
 			var mtx : Matrix3D;
-			var bsm_data : Array = props.get(2, null);
+			var bsm_data : Array = props.get(1, null);
 			if (bsm_data) {
 				bsm = new Matrix3D(Vector.<Number>(bsm_data));
 			}
@@ -681,6 +698,13 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateUVData(uvs);
 					}
+					else if (str_type == 4) {
+						var normals : Vector.<Number> = new Vector.<Number>;
+						while (_body.position < str_end) {
+							normals[idx++] = read_float();
+						}
+						sub_geom.updateVertexNormalData(normals);
+					}
 					else if (str_type == 7) {
 						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
@@ -707,8 +731,8 @@ package away3d.loaders.parsers
 					skinned_sub_geom.updateVertexData(sub_geom.vertexData);
 					skinned_sub_geom.updateIndexData(sub_geom.indexData);
 					skinned_sub_geom.updateUVData(sub_geom.UVData);
-					skinned_sub_geom.jointIndexData = w_indices;
-					skinned_sub_geom.jointWeightsData = weights;
+					skinned_sub_geom.updateJointIndexData(w_indices);
+					skinned_sub_geom.updateJointWeightsData(weights);
 					sub_geom = skinned_sub_geom;
 				}
 				
