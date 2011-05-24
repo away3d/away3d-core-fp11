@@ -698,7 +698,6 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateUVData(uvs);
 					}
-<<<<<<< HEAD
 					else if (str_type == 4) {
 						var normals : Vector.<Number> = new Vector.<Number>;
 						while (_body.position < str_end) {
@@ -706,8 +705,6 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateVertexNormalData(normals);
 					}
-=======
->>>>>>> c40245c49823c96b2ab8bd679515f32678268c93
 					else if (str_type == 7) {
 						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
@@ -734,13 +731,8 @@ package away3d.loaders.parsers
 					skinned_sub_geom.updateVertexData(sub_geom.vertexData);
 					skinned_sub_geom.updateIndexData(sub_geom.indexData);
 					skinned_sub_geom.updateUVData(sub_geom.UVData);
-<<<<<<< HEAD
 					skinned_sub_geom.updateJointIndexData(w_indices);
 					skinned_sub_geom.updateJointWeightsData(weights);
-=======
-					skinned_sub_geom.jointIndexData = w_indices;
-					skinned_sub_geom.jointWeightsData = weights;
->>>>>>> c40245c49823c96b2ab8bd679515f32678268c93
 					sub_geom = skinned_sub_geom;
 				}
 				
