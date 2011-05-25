@@ -3,6 +3,8 @@ package away3d.core.base
 	import away3d.arcane;
 	import away3d.animators.data.AnimationBase;
 
+	import away3d.events.GeometryEvent;
+
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -323,7 +325,12 @@ package away3d.core.base
 			_numVertices = vertices.length / 3;
             invalidateBuffers(_vertexBufferDirty);
 
-			// todo: send out bounds invalid
+			invalidateBounds();
+		}
+
+		private function invalidateBounds() : void
+		{
+			if (_parentGeometry) _parentGeometry.invalidateBounds(this);
 		}
 
 		/**

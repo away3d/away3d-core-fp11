@@ -2,9 +2,10 @@ package away3d.animators.data
 {
 	import away3d.arcane;
 	import away3d.events.AnimatorEvent;
-	import away3d.loading.IResource;
-
-	import flash.events.EventDispatcher;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -14,14 +15,12 @@ package away3d.animators.data
 	 *
 	 * todo: support frame bounds
 	 */
-	public class AnimationSequenceBase extends EventDispatcher implements IResource
+	public class AnimationSequenceBase extends NamedAssetBase implements IAsset
 	{
 		/**
 		 * Indicates whether or not the animation sequence loops.
 		 */
 		public var looping : Boolean = true;
-
-		protected var _name : String;
 
 		protected var _rootDelta : Vector3D;
 		arcane var _totalDuration : uint;
@@ -36,10 +35,16 @@ package away3d.animators.data
 		 */
 		public function AnimationSequenceBase(name : String)
 		{
-			_name = name;
+			super(name);
 			_durations = new Vector.<uint>();
 			_rootDelta = new Vector3D();
 			_animationEvent = new AnimatorEvent(AnimatorEvent.SEQUENCE_DONE, null, this);
+		}
+		
+		
+		public function get assetType() : String
+		{
+			return AssetType.ANIMATION;
 		}
 
 		/**
@@ -63,18 +68,6 @@ package away3d.animators.data
 			return _rootDelta;
 		}
 
-		/**
-		 * The name of the animation clip. It will be used as the identifier by sequence controller classes.
-		 */
-		public function get name() : String
-		{
-			return _name;
-		}
-
-		public function set name(value : String) : void
-		{
-			_name = value;
-		}
 
 		/**
 		 * Cleans up any resources used by the current object.

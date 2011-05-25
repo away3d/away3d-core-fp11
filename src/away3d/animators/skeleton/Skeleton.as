@@ -1,5 +1,8 @@
 package away3d.animators.skeleton
 {
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 
 
 	/**
@@ -7,7 +10,7 @@ package away3d.animators.skeleton
 	 *
 	 * @see away3d.core.animation.skeleton.Joint
 	 */
-	public class Skeleton
+	public class Skeleton extends NamedAssetBase implements IAsset
 	{
 		/**
 		 * A flat list of Joint objects that comprise the skeleton. Every joint except for the root has a parentIndex
@@ -75,6 +78,12 @@ package away3d.animators.skeleton
 		public function get numJoints() : uint
 		{
 			return joints.length;
+		}
+		
+		
+		public function get assetType() : String
+		{
+			return AssetType.SKELETON;
 		}
 	}
 }

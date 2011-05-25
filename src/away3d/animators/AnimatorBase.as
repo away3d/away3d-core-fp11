@@ -3,7 +3,10 @@ package away3d.animators
 	import away3d.arcane;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.AnimatorEvent;
-
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -17,7 +20,7 @@ package away3d.animators
 	 * @see away3d.core.animation.AnimationStateBase
 	 *
 	 */
-	public class AnimatorBase extends EventDispatcher
+	public class AnimatorBase extends NamedAssetBase implements IAsset
 	{
 		private var _broadcaster : Sprite = new Sprite();
 		private var _isPlaying : Boolean;
@@ -42,6 +45,11 @@ package away3d.animators
 		public function set timeScale(value : Number) : void
 		{
 			_timeScale = value;
+		}
+		
+		public function get assetType() : String
+		{
+			return AssetType.ANIMATOR;
 		}
 
 		public function stop() : void

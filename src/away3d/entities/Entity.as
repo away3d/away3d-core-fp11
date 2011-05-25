@@ -33,6 +33,7 @@ package away3d.entities
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
+		private var _showBoundingBox : Boolean;
 
 		private var _mouseEnabled : Boolean;
 
@@ -43,6 +44,22 @@ package away3d.entities
 		{
 			super();
 			_bounds = getDefaultBoundingVolume();
+		}
+
+		public function get showBoundingBox() : Boolean
+		{
+			return _showBoundingBox;
+		}
+
+		public function set showBoundingBox(value : Boolean) : void
+		{
+			if (value == _showBoundingBox) return;
+			_showBoundingBox = value;
+			if (value) addChild(_bounds.boundingRenderable);
+			else {
+				removeChild(_bounds.boundingRenderable);
+				_bounds.disposeRenderable();
+			}
 		}
 
 		/**

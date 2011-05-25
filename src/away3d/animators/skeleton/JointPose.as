@@ -59,11 +59,5 @@ package away3d.animators.skeleton
 			translation.y = tr.y;
 			translation.z = tr.z;
 		}
-
-
-		public function toString() : String
-		{
-			return "JOINT POSE: Orientation: "+orientation.toString()+" - Translation: "+translation.toString();
-		}
 	}
 }

@@ -55,13 +55,6 @@ package away3d.animators.skeleton
 		 */
 		override public function updatePose(skeleton : Skeleton) : void
 		{
-			/*if ((skeleton.numJoints != skeletonPose.numJointPoses) ||
-				  (skeleton.numJoints != clip._frames[_frame1].numJointPoses) ||
-				  (skeleton.numJoints != clip._frames[_frame2].numJointPoses))
-			{
-				throw new Error("joint counts don't match!");
-			}      */
-			
 			if (_clip.duration == 0) return;
 			if (_framesInvalid) updateFrames(_phase);
 

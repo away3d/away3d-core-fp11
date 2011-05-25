@@ -23,7 +23,7 @@ package away3d.entities
 		public function TextureProjector(bitmapData : BitmapData)
 		{
 			_lens = new PerspectiveLens();
-			_lens.onMatrixUpdate = onLensUpdate;
+			_lens.onInvalidateMatrix = onInvalidateLensMatrix;
 			_texture = new Texture3DProxy();
 			_texture.bitmapData = bitmapData;
 			_lens.aspectRatio = bitmapData.width/bitmapData.height;
@@ -85,7 +85,7 @@ package away3d.entities
 			_viewProjectionInvalid = true;
 		}
 
-		private function onLensUpdate() : void
+		private function onInvalidateLensMatrix() : void
 		{
 			_viewProjectionInvalid = true;
 		}

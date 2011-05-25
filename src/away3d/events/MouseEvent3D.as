@@ -140,7 +140,7 @@ package away3d.events
 		 */
 		public function MouseEvent3D(type : String)
 		{
-			super(type, false, true);
+			super(type, true, true);
 		}
 
 		/**

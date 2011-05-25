@@ -1,8 +1,8 @@
 package away3d.events {
 	import away3d.containers.ObjectContainer3D;
-
+	
 	import flash.events.Event;
-
+	
 	/**
 	 * @author Paul Tondeur
 	 */
@@ -14,13 +14,13 @@ package away3d.events {
 		override public function get target() : Object {
 			return objectContainer3D;
 		}
-
+		
 		public function Scene3DEvent(type : String, objectContainer : ObjectContainer3D) {
 			objectContainer3D = objectContainer;
 			super(type);
 		}
 		
-        public override function clone() : Event
+		public override function clone() : Event
 		{
 			return new Scene3DEvent(type, objectContainer3D);
 		}

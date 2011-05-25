@@ -1,9 +1,10 @@
 package away3d.animators
 {
-	import away3d.arcane;
-	import away3d.core.base.Geometry;
 	import away3d.animators.data.VertexAnimationSequence;
 	import away3d.animators.data.VertexAnimationState;
+	import away3d.animators.utils.TimelineUtil;
+	import away3d.arcane;
+	import away3d.core.base.Geometry;
 
 	use namespace arcane;
 
@@ -15,10 +16,8 @@ package away3d.animators
 		private var _sequences : Array;
 		private var _activeSequence : VertexAnimationSequence;
 		private var _absoluteTime : Number;
-		private var _frame1 : uint;
-		private var _frame2 : uint;
-		private var _blendWeight : Number;
 		private var _target : VertexAnimationState;
+		private var _tlUtil : TimelineUtil;
 
 		/**
 		 * Creates a new AnimationSequenceController object.
@@ -28,6 +27,7 @@ package away3d.animators
 			super();
 			_sequences = [];
 			_target = target;
+			_tlUtil = new TimelineUtil();
 		}
 
 		/**
@@ -66,11 +66,11 @@ package away3d.animators
 			var weights : Vector.<Number> = _target.weights;
 
 			_absoluteTime += scaledDT;
-			updateFrames(_absoluteTime);
+			_tlUtil.updateFrames(_absoluteTime, _activeSequence);
 
-			poses[uint(0)] = _activeSequence._frames[_frame1];
-			poses[uint(1)] = _activeSequence._frames[_frame2];
-			weights[uint(0)] = 1 - (weights[uint(1)] = _blendWeight);
+			poses[uint(0)] = _activeSequence._frames[_tlUtil.frame0];
+			poses[uint(1)] = _activeSequence._frames[_tlUtil.frame1];
+			weights[uint(0)] = 1 - (weights[uint(1)] = _tlUtil.blendWeight);
 
 			_target.invalidateState();
 		}
@@ -84,60 +84,6 @@ package away3d.animators
 			return _sequences[sequenceName];
 		}
 
-		/**
-		 * Calculates the frames between which to interpolate.
-		 * @param time The absolute time of the animation sequence.
-		 */
-		private function updateFrames(time : Number) : void
-		{
-			var lastFrame : uint, frame : uint, nextFrame : uint;
-			var dur : uint, frameTime : uint;
-			var frames : Vector.<Geometry> = _activeSequence._frames;
-			var durations : Vector.<uint> = _activeSequence._durations;
-			var duration : uint = _activeSequence._totalDuration;
-			var looping : Boolean = _activeSequence.looping;
-			var numFrames : uint = frames.length;
-			var w : Number;
 
-			if (numFrames == 0) return;
-
-			if ((time > duration || time < 0) && looping) {
-				time %= duration;
-				if (time < 0) time += duration;
-			}
-
-			lastFrame = numFrames - 1;
-
-			if (!looping && time > duration - durations[lastFrame]) {
-				_activeSequence.notifyPlaybackComplete();
-				frame = lastFrame;
-				nextFrame = lastFrame;
-				w = 0;
-			}
-			else if (_activeSequence._fixedFrameRate) {
-				var t : Number = time/duration * numFrames;
-				frame = t;
-				nextFrame = frame + 1;
-				w = t - frame;
-				if (frame == numFrames) frame = 0;
-				if (nextFrame >= numFrames) nextFrame -= numFrames;
-			}
-			else {
-				do {
-					frameTime = dur;
-					dur += durations[frame];
-					frame = nextFrame;
-					if (++nextFrame == numFrames) {
-						nextFrame = 0;
-					}
-				} while (time > dur);
-
-				w = (time - frameTime) / durations[frame];
-			}
-
-			_frame1 = frame;
-			_frame2 = nextFrame;
-			_blendWeight = w;
-		}
 	}
 }

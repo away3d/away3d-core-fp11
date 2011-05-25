@@ -26,6 +26,8 @@ package away3d.events
 		 */
 		public static const ANIMATION_CHANGED : String = "AnimationChanged";
 
+		public static const BOUNDS_INVALID : String = "BoundsInvalid";
+
 		private var _subGeometry : SubGeometry;
 
 		/**

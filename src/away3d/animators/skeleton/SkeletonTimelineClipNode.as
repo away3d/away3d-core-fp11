@@ -71,9 +71,7 @@ package away3d.animators.skeleton
 			// :s
 			if (endPoses.length != numJoints) endPoses.length = numJoints;
 
-			// todo: test this upon adding
-			if (  /*(skeleton.numJoints != skeletonPose.numJointPoses) ||*/
-				  (numJoints != poses1.length) || (numJoints != poses2.length))
+			if ((numJoints != poses1.length) || (numJoints != poses2.length))
 				throw new Error("joint counts don't match!");
 
 			for (var i : uint = 0; i < numJoints; ++i) {

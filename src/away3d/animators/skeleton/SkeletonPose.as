@@ -1,6 +1,9 @@
 package away3d.animators.skeleton
 {
 	import away3d.core.math.Quaternion;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 	
 	import flash.geom.Vector3D;
 
@@ -10,7 +13,7 @@ package away3d.animators.skeleton
 	 * reference to a Skeleton instance, since several skeletons could be influenced by the same pose (fe: animation
 	 * sequences that can apply to any target with a valid skeleton)
 	 */
-	public class SkeletonPose
+	public class SkeletonPose extends NamedAssetBase implements IAsset
 	{
 		/**
 		 * The joint poses for the skeleton. The JointPoses indices correspond to the target skeleton's joints.
@@ -24,6 +27,12 @@ package away3d.animators.skeleton
 		public function SkeletonPose()
 		{
 			jointPoses = new Vector.<JointPose>();
+		}
+		
+		
+		public function get assetType() : String
+		{
+			return AssetType.SKELETON_POSE;
 		}
 
 		/**
@@ -78,6 +87,25 @@ package away3d.animators.skeleton
 			return jointPoses.length;
 		}
 		
+    /**
+     * Clones this SkeletonPose, with all of its component jointPoses. 
+		 * @return SkeletonPose 
+     */
+    public function clone() : SkeletonPose
+    {
+      var clone : SkeletonPose = new SkeletonPose();
+      var numJointPoses : uint = this.jointPoses.length;
+      for (var i:uint = 0; i < numJointPoses; i++)
+      {
+        var cloneJointPose:JointPose = new JointPose();
+        var thisJointPose:JointPose = this.jointPoses[i];
+        cloneJointPose.name = thisJointPose.name;
+        cloneJointPose.copyFrom(thisJointPose);
+        clone.jointPoses[i] = cloneJointPose;
+      }
+      return clone;
+    }
+    
 		/**
 		 * Converts a local hierarchical skeleton pose to a global pose
 		 * @param targetPose The SkeletonPose object that will contain the global pose.
@@ -85,12 +113,6 @@ package away3d.animators.skeleton
 		 */
 		public function toGlobalPose(targetPose : SkeletonPose, skeleton : Skeleton) : void
 		{
-//			if ((numJointPoses != targetPose.numJointPoses) ||
-//				  (numJointPoses != skeleton.numJoints))
-//			{
-//				throw new Error("joint counts don't match!");
-//			}
-			
 			var globalPoses : Vector.<JointPose> = targetPose.jointPoses;
 			var globalJointPose : JointPose;
 			var joints : Vector.<SkeletonJoint> = skeleton.joints;

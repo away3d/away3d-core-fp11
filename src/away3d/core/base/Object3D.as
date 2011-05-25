@@ -2,11 +2,10 @@ package away3d.core.base
 {
 	import away3d.core.math.MathConsts;
 	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Quaternion;
 	import away3d.core.math.Vector3DUtils;
-	import away3d.loading.IResource;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 
 	import flash.events.EventDispatcher;
 	import flash.geom.Matrix3D;
@@ -14,8 +13,36 @@ package away3d.core.base
 
 	/**
 	 * Object3D provides a base class for any 3D object that has a (local) transformation.
+	 * 
+	 * Standard Transform:
+	 * - The standard order for transformation is [parent transform] * (Translate+Pivot) * (Rotate) * (-Pivot) * (Scale) * [child transform]
+	 *   - This is the order of matrix multiplications, left-to-right.
+	 *   - The order of transformation is right-to-left, however!
+	 *       (Scale) happens before (-Pivot) happens before (Rotate) happens before (Translate+Pivot)
+	 *   - with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform] 
+	 *       (Scale) happens before (Rotate) happens before (Translate)
+	 *   - This is based on code in updateTransform and ObjectContainer3D.updateSceneTransform().
+	 *   - Matrix3D prepend = operator on rhs - e.g. transform' = transform * rhs;
+	 *   - Matrix3D append =  operator on lhr - e.g. transform' = lhs * transform;
+	 * 
+	 * To affect Scale:
+	 * - set scaleX/Y/Z directly, or call scale(delta)
+	 * 
+	 * To affect Pivot:
+	 * - set pivotPoint directly, or call movePivot()
+	 * 
+	 * To affect Rotate:
+	 * - set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()
+	 * - call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.  
+	 *     rotationX/Y/Z will be reset based on these operations.
+	 * 
+	 * To affect Translate (post-rotate translate):
+	 * - set x/y/z/position or call moveTo().
+	 * - call translate(), which modifies x/y/z based on a delta vector.
+	 * - call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to add an
+	 *     additional translate *before* the current transform. x/y/z will be reset based on these operations.
 	 */
-	public class Object3D extends EventDispatcher implements IResource
+	public class Object3D extends NamedAssetBase
 	{
 		/**
 		 * An object that can contain any extra data.
@@ -50,8 +77,6 @@ package away3d.core.base
 		protected var _y : Number = 0;
 		protected var _z : Number = 0;
 
-		private var _name : String;
-
 		/**
 		 * A calculation placeholder.
 		 */
@@ -64,19 +89,6 @@ package away3d.core.base
 		{
 			_transform.identity();
 			_flipY.appendScale(1, -1, 1);
-		}
-
-		/**
-		 * The name of the object.
-		 */
-		public function get name() : String
-		{
-			return _name;
-		}
-
-		public function set name(value : String) : void
-		{
-			_name = value;
 		}
 
 		/**
@@ -656,5 +668,5 @@ package away3d.core.base
 				_scaleValuesDirty = false;
 			}
 		}
-    }
+		}
 }
