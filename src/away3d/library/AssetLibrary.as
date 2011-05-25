@@ -104,7 +104,7 @@ package away3d.library
 		/**
 		 * Defines which asset should have precedence when resolving a naming conflict between
 		 * two assets of which one has just been renamed by the user or by a parser. By default
-		 * <code>ConflictPrecedence.FAVOR_NEW</code> is user, meaning that the newly renamed
+		 * <code>ConflictPrecedence.FAVOR_NEW</code> is used, meaning that the newly renamed
 		 * asset will keep it's new name while the older asset gets renamed to not conflict.
 		 * 
 		 * This property is ignored for conflict strategies that do not actually rename an
