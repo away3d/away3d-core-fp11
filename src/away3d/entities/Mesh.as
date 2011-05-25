@@ -152,7 +152,10 @@
 		{
 			if (deep) {
 				_geometry.dispose();
-				_material.dispose(true);
+				if (_material) {
+					_material.dispose(true);
+					material = null;
+				}
 			}
 		}
 
@@ -219,14 +222,20 @@
 		private function onSubGeometryRemoved(event : GeometryEvent) : void
 		{
 			var subMesh : SubMesh;
-			var subGeom : SubGeometry;
-			var len : uint;
-			for (var i : uint = 0; i < len; ++i) {
+			var subGeom : SubGeometry = event.subGeometry;
+			var len : uint = _subMeshes.length;
+			var i : uint;
+			for (i = 0; i < len; ++i) {
 				subMesh = _subMeshes[i];
 				if (subMesh.subGeometry == subGeom) {
 					_subMeshes.splice(i, 1);
-					return;
+					break;
 				}
+			}
+			
+			--len;
+			for (; i < len; ++i) {
+				_subMeshes[i]._index = i;
 			}
 		}
 
