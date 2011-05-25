@@ -349,7 +349,10 @@ package away3d.library
 		
 		private function onAssetComplete(event : AssetEvent) : void
 		{
-			addAsset(event.asset);
+			// Only add asset to library the first time.
+			if (event.type == AssetEvent.ASSET_COMPLETE)
+				addAsset(event.asset);
+			
 			dispatchEvent(event.clone());
 		}
 		
