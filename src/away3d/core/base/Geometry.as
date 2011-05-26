@@ -9,9 +9,9 @@
 	import away3d.library.assets.NamedAssetBase;
 	
 	import flash.events.EventDispatcher;
-
+	
 	use namespace arcane;
-
+	
 	/**
 	 * Geometry is a collection of SubGeometries, each of which contain the actual geometrical data such as vertices,
 	 * normals, uvs, etc. It also contains a reference to an animation class, which defines how the geometry moves.
@@ -25,7 +25,7 @@
 	{
 		private var _subGeometries : Vector.<SubGeometry>;
 		arcane var _animation : AnimationBase;
-
+		
 		/**
 		 * Creates a new Geometry object.
 		 */
@@ -40,7 +40,7 @@
 		{
 			return AssetType.GEOMETRY;
 		}
-
+		
 		/**
 		 * The AnimationBase object used to animate the geometry.
 		 */
@@ -48,14 +48,14 @@
 		{
 			return _animation;
 		}
-
+		
 		public function set animation(value : AnimationBase) : void
 		{
 			_animation = value;
 			if (hasEventListener(GeometryEvent.ANIMATION_CHANGED))
 				dispatchEvent(new GeometryEvent(GeometryEvent.ANIMATION_CHANGED));
 		}
-
+		
 		/**
 		 * A collection of SubGeometry objects, each of which contain geometrical data such as vertices, normals, etc.
 		 */
@@ -63,7 +63,7 @@
 		{
 			return _subGeometries;
 		}
-
+		
 		/**
 		 * Adds a new SubGeometry object to the list.
 		 * @param subGeometry The SubGeometry object to be added.
@@ -71,14 +71,14 @@
 		public function addSubGeometry(subGeometry : SubGeometry) : void
 		{
 			_subGeometries.push(subGeometry);
-
+			
 			subGeometry.parentGeometry = this;
 			if (hasEventListener(GeometryEvent.SUB_GEOMETRY_ADDED))
 				dispatchEvent(new GeometryEvent(GeometryEvent.SUB_GEOMETRY_ADDED, subGeometry));
-
+			
 			invalidateBounds(subGeometry);
 		}
-
+		
 		/**
 		 * Removes a new SubGeometry object from the list.
 		 * @param subGeometry The SubGeometry object to be removed.
@@ -91,10 +91,10 @@
 			subGeometry.parentGeometry = null;
 			if (hasEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED))
 				dispatchEvent(new GeometryEvent(GeometryEvent.SUB_GEOMETRY_REMOVED, subGeometry));
-
+			
 			invalidateBounds(subGeometry);
 		}
-
+		
 		/**
 		 * Clones the geometry.
 		 * @return An exact duplicate of the current Geometry object.
@@ -109,28 +109,32 @@
 			}
 			return clone;
 		}
-
+		
 		/**
 		 * Scales the geometry.
 		 * @param scale The amount by which to scale.
 		 */
-        public function scale(scale : Number):void
-        {
-            var numSubGeoms : uint = _subGeometries.length;
-            for (var i : uint = 0; i < numSubGeoms; ++i)
-                _subGeometries[i].scale(scale);
-        }
-
+		public function scale(scale : Number):void
+		{
+			var numSubGeoms : uint = _subGeometries.length;
+			for (var i : uint = 0; i < numSubGeoms; ++i)
+				_subGeometries[i].scale(scale);
+		}
+		
 		/**
 		 * Clears all resources used by the Geometry object, including SubGeometries.
 		 */
 		public function dispose() : void
 		{
 			var numSubGeoms : uint = _subGeometries.length;
-            for (var i : uint = 0; i < numSubGeoms; ++i)
-                _subGeometries[i].dispose();
+			for (var i : uint = 0; i < numSubGeoms; ++i)
+			{
+				var subGeom:SubGeometry = _subGeometries.shift();
+				removeSubGeometry(subGeom);
+				subGeom.dispose();
+			}
 		}
-
+		
 		/**
 		 * Scales the uv coordinates.
 		 * @param scale The amount by which to scale.
@@ -138,10 +142,10 @@
 		public function scaleUV(scale : Number) : void
 		{
 			var numSubGeoms : uint = _subGeometries.length;
-            for (var i : uint = 0; i < numSubGeoms; ++i)
-                _subGeometries[i].scaleUV(scale);
+			for (var i : uint = 0; i < numSubGeoms; ++i)
+				_subGeometries[i].scaleUV(scale);
 		}
-
+		
 		arcane function invalidateBounds(subGeom : SubGeometry) : void
 		{
 			if (hasEventListener(GeometryEvent.BOUNDS_INVALID))
