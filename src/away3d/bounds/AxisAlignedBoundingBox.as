@@ -9,6 +9,7 @@ package away3d.bounds
 	import away3d.primitives.WireframePrimitiveBase;
 
 	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -114,20 +115,29 @@ package away3d.bounds
 			return true;
 		}
 
-		/*override public function classifyAgainstPlane(plane : Plane3D) : int
-        {
-            var dist : Number;
-			var a : Number = plane.a, b : Number = plane.b, c : Number = plane.c, d : Number = plane.d;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			dist = a*_centerX + b*_centerY + c*_centerZ + d;
+		override public function intersectsLine(p : Vector3D, dir : Vector3D) : Boolean
+		{
+			var diffX : Number = p.x - _centerX, diffY : Number = p.y - _centerY, diffZ : Number = p.z - _centerZ;
+			var dx : Number = dir.x, dy : Number = dir.y,  dz : Number = dir.z;
+			var crossX : Number = dy*diffZ - dz*diffY;
+			var crossY : Number = dz*diffX - dx*diffZ;
+			var crossZ : Number = dx*diffY - dy*diffX;
 
-			var rr : Number = a*_halfExtentsX + b*_halfExtentsY+ c*_halfExtentsZ;
+			if (dx < 0) dx = -dx;
+			if (dy < 0) dy = -dy;
+			if (dz < 0) dz = -dz;
+			if (crossX < 0) crossX = -crossX;
+			if (crossY < 0) crossY = -crossY;
+			if (crossZ < 0) crossZ = -crossZ;
 
-            return  dist > rr	? 	1 :
-                    dist < -rr	? 	0 :
-									2;
+			if (crossX > _halfExtentsY * dz + _halfExtentsZ * dy) return false;
+			if (crossY > _halfExtentsX * dz + _halfExtentsZ * dx) return false;
+			if (crossZ > _halfExtentsX * dy + _halfExtentsY * dx) return false;
 
-        }*/
+			return true;
+		}
+
+		// todo: support intersectsRay
 
 		/**
 		 * @inheritDoc

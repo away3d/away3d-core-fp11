@@ -3,6 +3,7 @@ package away3d.core.partition
 	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.cameras.Camera3D;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
 
 	import flash.geom.Matrix3D;
@@ -54,55 +55,56 @@ package away3d.core.partition
 
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
-			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			var mvpMatrix : Matrix3D = camera.viewProjection;
-			mvpMatrix.copyRawDataTo(raw);
-			var c11 : Number = raw[uint(0)], c12 : Number = raw[uint(4)], c13 : Number = raw[uint(8)], c14 : Number = raw[uint(12)];
-			var c21 : Number = raw[uint(1)], c22 : Number = raw[uint(5)], c23 : Number = raw[uint(9)], c24 : Number = raw[uint(13)];
-			var c31 : Number = raw[uint(2)], c32 : Number = raw[uint(6)], c33 : Number = raw[uint(10)], c34 : Number = raw[uint(14)];
-			var c41 : Number = raw[uint(3)], c42 : Number = raw[uint(7)], c43 : Number = raw[uint(11)], c44 : Number = raw[uint(15)];
-			var a : Number, b : Number, c : Number, d : Number;
+			var a : Number, b : Number, c : Number;
 			var dd : Number, rr : Number;
+			var plane : Plane3D;
+			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
 
 			// this is basically a p/n vertex test in object space against the frustum planes derived from the mvp
 			// with a lot of inlining
 
 		// left plane
-			a = c41 + c11; b = c42 + c12; c = c43 + c13; d = c44 + c14;
+			plane = frustum[0];
+			a = plane.a; b = plane.b; c = plane.c;
 			dd = a*_centerX + b*_centerY + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
 			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -d) return false;
+			if (dd + rr < -plane.d) return false;
 		// right plane
-			a = c41 - c11; b = c42 - c12; c = c43 - c13; d = c44 - c14;
+			plane = frustum[1];
+			a = plane.a; b = plane.b; c = plane.c;
 			dd = a*_centerX + b*_centerY + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
 			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -d) return false;
+			if (dd + rr < -plane.d) return false;
 		// bottom plane
-			a = c41 + c21; b = c42 + c22; c = c43 + c23; d = c44 + c24;
+			plane = frustum[2];
+			a = plane.a; b = plane.b; c = plane.c;
 			dd = a*_centerX + b*_centerY + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
 			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -d) return false;
+			if (dd + rr < -plane.d) return false;
 		// top plane
-			a = c41 - c21; b = c42 - c22; c = c43 - c23; d = c44 - c24;
+			plane = frustum[3];
+			a = plane.a; b = plane.b; c = plane.c;
 			dd = a*_centerX + b*_centerY + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
 			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -d) return false;
+			if (dd + rr < -plane.d) return false;
 		// near plane
-			a = c31; b = c32; c = c33; d = c34;
+			plane = frustum[4];
+			a = plane.a; b = plane.b; c = plane.c;
 			dd = a*_centerX + b*_centerY + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
 			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -d) return false;
+			if (dd + rr < -plane.d) return false;
 		// far plane
-			a = c41 - c31; b = c42 - c32; c = c43 - c33; d = c44 - c34;
+			plane = frustum[5];
+			a = plane.a; b = plane.b; c = plane.c;
 			dd = a*_centerX + b*_centerY + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
 			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -d) return false;
+			if (dd + rr < -plane.d) return false;
 
 			return true;
 		}
