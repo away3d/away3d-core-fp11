@@ -1,6 +1,7 @@
 package away3d.core.partition
 {
 	import away3d.cameras.Camera3D;
+	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
 
@@ -66,7 +67,7 @@ package away3d.core.partition
 
 		/**
 		 * Tests if the current node is at least partly inside the frustum.
-		 * @param camera The camera providing the view frustum to test against.
+		 * @param viewProjectionRaw The raw data of the view projection matrix
 		 *
 		 * @return Whether or not the node is at least partly inside the view frustum.
 		 */

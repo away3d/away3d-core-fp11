@@ -45,8 +45,12 @@ package away3d.containers
 		// this allows not having to traverse the scene graph to figure out what partition is set
 		protected var _explicitPartition : Partition3D;
 		protected var _implicitPartition : Partition3D;
-		
-		
+
+		private var _explicitVisibility : Boolean = true;
+
+		// visibility passed on from parents
+		private var _implicitVisibility : Boolean = true;
+
 		/**
 		 * Creates a new ObjectContainer3D object.
 		 */
@@ -55,8 +59,28 @@ package away3d.containers
 			super();
 			_children = new Vector.<ObjectContainer3D>();
 		}
-		
-		
+
+		public function get visible() : Boolean
+		{
+			return _explicitVisibility;
+		}
+
+		public function set visible(value : Boolean) : void
+		{
+			var len : uint = _children.length;
+
+			_explicitVisibility = value;
+
+			for (var i : uint = 0; i < len; ++i) {
+				_children[i]._implicitVisibility = _explicitVisibility && _implicitVisibility;
+			}
+		}
+
+		arcane function get isVisible() : Boolean
+		{
+			return _implicitVisibility && _explicitVisibility;
+		}
+
 		public function get assetType() : String
 		{
 			return AssetType.CONTAINER;

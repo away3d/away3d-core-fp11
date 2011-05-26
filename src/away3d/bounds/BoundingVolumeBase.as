@@ -3,10 +3,7 @@ package away3d.bounds
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
-    import away3d.core.math.Plane3D;
-	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
-
 	import away3d.primitives.WireframePrimitiveBase;
 
 	import flash.geom.Matrix3D;
@@ -174,7 +171,7 @@ package away3d.bounds
 		{
 			// this is BETTER overridden, because most volumes will have shortcuts for this
 			// but then again, sphere already overrides it, and if we'd call "fromSphere", it'd probably need a sphere bound anyway
-			fromExtremes(center.x-radius, center.y-radius, center.z-radius, center.x+radius, center.y+radius, center.z+radius);
+			fromExtremes(center.x - radius, center.y - radius, center.z - radius, center.x + radius, center.y + radius, center.z + radius);
 		}
 
 		/**
@@ -203,11 +200,11 @@ package away3d.bounds
 			return false;
 		}
 
-        /*public function classifyAgainstPlane(plane : Plane3D) : int
-        {
-            throw new AbstractMethodError();
-            return -1;
-        }*/
+		/*public function classifyAgainstPlane(plane : Plane3D) : int
+		 {
+		 throw new AbstractMethodError();
+		 return -1;
+		 }*/
 
 		/**
 		 * Clones the current BoundingVolume object
@@ -226,19 +223,47 @@ package away3d.bounds
 			return _aabbPoints;
 		}
 
+		public function intersectsLine(p : Vector3D, dir : Vector3D) : Boolean
+		{
+			throw new AbstractMethodError();
+			return false;
+		}
+
+		public function intersectsRay(p : Vector3D, dir : Vector3D) : Boolean
+		{
+			throw new AbstractMethodError();
+			return false;
+		}
+
 		protected function updateAABBPoints() : void
 		{
 			var i : uint;
 			var maxX : Number = _max.x, maxY : Number = _max.y, maxZ : Number = _max.z;
 			var minX : Number = _min.x, minY : Number = _min.y, minZ : Number = _min.z;
-			_aabbPoints[i++] = minX; _aabbPoints[i++] = minY; _aabbPoints[i++] = minZ;
-			_aabbPoints[i++] = maxX; _aabbPoints[i++] = minY; _aabbPoints[i++] = minZ;
-			_aabbPoints[i++] = minX; _aabbPoints[i++] = maxY; _aabbPoints[i++] = minZ;
-			_aabbPoints[i++] = maxX; _aabbPoints[i++] = maxY; _aabbPoints[i++] = minZ;
-			_aabbPoints[i++] = minX; _aabbPoints[i++] = minY; _aabbPoints[i++] = maxZ;
-			_aabbPoints[i++] = maxX; _aabbPoints[i++] = minY; _aabbPoints[i++] = maxZ;
-			_aabbPoints[i++] = minX; _aabbPoints[i++] = maxY; _aabbPoints[i++] = maxZ;
-			_aabbPoints[i++] = maxX; _aabbPoints[i++] = maxY; _aabbPoints[i] = maxZ;
+			_aabbPoints[i++] = minX;
+			_aabbPoints[i++] = minY;
+			_aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = maxX;
+			_aabbPoints[i++] = minY;
+			_aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = minX;
+			_aabbPoints[i++] = maxY;
+			_aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = maxX;
+			_aabbPoints[i++] = maxY;
+			_aabbPoints[i++] = minZ;
+			_aabbPoints[i++] = minX;
+			_aabbPoints[i++] = minY;
+			_aabbPoints[i++] = maxZ;
+			_aabbPoints[i++] = maxX;
+			_aabbPoints[i++] = minY;
+			_aabbPoints[i++] = maxZ;
+			_aabbPoints[i++] = minX;
+			_aabbPoints[i++] = maxY;
+			_aabbPoints[i++] = maxZ;
+			_aabbPoints[i++] = maxX;
+			_aabbPoints[i++] = maxY;
+			_aabbPoints[i] = maxZ;
 			_aabbPointsDirty = false;
 		}
 	}

@@ -2,6 +2,7 @@ package away3d.core.partition
 {
 	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.cameras.Camera3D;
+	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
 
 	public class QuadTreeNode extends NodeBase
@@ -11,26 +12,29 @@ package away3d.core.partition
 		private var _quadSize : Number;
 		private var _depth : Number;
 		private var _leaf : Boolean;
+		private var _height : Number;
 
 		private var _rightFar : QuadTreeNode;
 		private var _leftFar : QuadTreeNode;
 		private var _rightNear : QuadTreeNode;
 		private var _leftNear : QuadTreeNode;
 
-		private var _aabb : AxisAlignedBoundingBox;
-
 		private var _entityWorldBounds : Vector.<Number> = new Vector.<Number>();
+		private var _halfExtentXZ : Number;
+		private var _halfExtentY : Number;
+
 
 		public function QuadTreeNode(maxDepth : int = 5, size : Number = 10000, height : Number = 1000000, centerX : Number = 0, centerZ : Number = 0, depth : int = 0)
 		{
 			var hs : Number = size * .5;
-			// todo: replace aabb & frustum test with proper quadtree testing code
-			_aabb = new AxisAlignedBoundingBox();
-			_aabb.fromExtremes(centerX - hs, -height*.5, centerZ - hs, centerX + hs, height*.5, centerZ + hs);
+
 			_centerX = centerX;
 			_centerZ = centerZ;
+			_height = height;
 			_quadSize = size;
 			_depth = depth;
+			_halfExtentXZ = size*.5;
+			_halfExtentY = height*.5;
 
 			_leaf = depth == maxDepth;
 
@@ -43,12 +47,58 @@ package away3d.core.partition
 			}
 		}
 
+		// todo: fix to infinite height so that height needn't be passed in constructor
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
-			if (_aabb.isInFrustum(camera.viewProjection))
-				return true;
-			else
-				return false;
+			var a : Number, b : Number, c : Number, d : Number;
+			var dd : Number, rr : Number;
+			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
+			var plane : Plane3D;
+
+			// this is basically a p/n vertex test in object space against the frustum planes with a lot of inlining
+			plane = frustum[0];
+			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
+			dd = a*_centerX + c*_centerZ;
+			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
+			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			if (dd + rr < -d) return false;
+
+			plane = frustum[1];
+			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
+			dd = a*_centerX + c*_centerZ;
+			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
+			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			if (dd + rr < -d) return false;
+
+			plane = frustum[2];
+			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
+			dd = a*_centerX + c*_centerZ;
+			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
+			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			if (dd + rr < -d) return false;
+
+			plane = frustum[3];
+			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
+			dd = a*_centerX + c*_centerZ;
+			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
+			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			if (dd + rr < -d) return false;
+
+			plane = frustum[4];
+			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
+			dd = a*_centerX + c*_centerZ;
+			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
+			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			if (dd + rr < -d) return false;
+
+			plane = frustum[5];
+			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
+			dd = a*_centerX + c*_centerZ;
+			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
+			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			if (dd + rr < -d) return false;
+
+			return true;
 		}
 
 		override public function findPartitionForEntity(entity : Entity) : NodeBase

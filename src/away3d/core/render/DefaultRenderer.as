@@ -5,13 +5,10 @@ package away3d.core.render
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.traverse.EntityCollector;
-	import away3d.lights.LightBase;
 	import away3d.materials.MaterialBase;
 
 	import flash.display3D.Context3DBlendFactor;
-	import flash.display3D.Context3DClearMask;
 	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;
 
@@ -22,8 +19,6 @@ package away3d.core.render
 	public class DefaultRenderer extends RendererBase
 	{
 		private var _activeMaterial : MaterialBase;
-//		private var _depthPrePass : Boolean;
-//		private var _depthRenderer : DepthRenderer;
 
 		/**
 		 * Creates a new DefaultRenderer object.
@@ -36,57 +31,11 @@ package away3d.core.render
 //			_depthRenderer = new DepthRenderer();
 		}
 
-		/**
-		 * Indicates whether or not the depth buffer should be rendered first in a separate pass.
-		 */
-		/*public function get depthPrePass() : Boolean
-		{
-			return _depthPrePass;
-		}
-
-		public function set depthPrePass(value : Boolean) : void
-		{
-			if (value == _depthPrePass) return;
-
-			_depthPrePass = value;
-
-			if (value) {
-				// don't call present
-				_depthRenderer.swapBackBuffer = false;
-				_depthRenderer.viewPortWidth = _viewPortWidth;
-				_depthRenderer.viewPortHeight = _viewPortHeight;
-				_depthRenderer.viewPortX = _viewPortX;
-				_depthRenderer.viewPortY = _viewPortY;
-			}
-		}           */
-
 
 		arcane override function set stage3DProxy(value : Stage3DProxy) : void
 		{
-			super.stage3DProxy = /*_depthRenderer.stage3DProxy = */value;
+			super.stage3DProxy = value;
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function render(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
-		{
-			/*if (_depthPrePass) {
-				_depthRenderer.render(entityCollector, target, surfaceSelector, Context3DClearMask.DEPTH);
-				super.render(entityCollector, target, surfaceSelector, Context3DClearMask.COLOR | Context3DClearMask.STENCIL);
-			}
-			else*/
-				super.render(entityCollector, target, surfaceSelector, additionalClearMask);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		/*protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
-		{
-			updateLights(entityCollector);
-			super.executeRender(entityCollector, target, surfaceSelector, additionalClearMask);
-		} */
 
 		/**
 		 * @inheritDoc
@@ -94,7 +43,6 @@ package away3d.core.render
 		override protected function draw(entityCollector : EntityCollector) : void
 		{
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
-//			_context.setDepthTest(true, _depthPrePass? Context3DCompareMode.LESS_EQUAL : Context3DCompareMode.LESS);
 
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			drawRenderables(entityCollector.opaqueRenderables, entityCollector);
@@ -111,20 +59,6 @@ package away3d.core.render
 
 			if (_activeMaterial) _activeMaterial.deactivate(_context);
 			_activeMaterial = null;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateViewPort() : void
-		{
-			super.updateViewPort();
-			/*if (_depthPrePass) {
-				_depthRenderer.viewPortWidth = _viewPortWidth;
-				_depthRenderer.viewPortHeight = _viewPortHeight;
-				_depthRenderer.viewPortX = _viewPortX;
-				_depthRenderer.viewPortY = _viewPortY;
-			}  */
 		}
 
 		/**
@@ -169,7 +103,7 @@ package away3d.core.render
 						renderable = renderables[k];
 
 						_activeMaterial.renderPass(j, renderable, _context, _contextIndex, camera);
-					} while(++k < numRenderables && renderable.material != _activeMaterial);
+					} while (++k < numRenderables && renderable.material != _activeMaterial);
 					_activeMaterial.deactivatePass(j, _context);
 				} while (++j < numPasses);
 
