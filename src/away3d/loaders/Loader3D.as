@@ -35,6 +35,7 @@ package away3d.loaders
 	{
 		private var _useAssetLib : Boolean;
 		private var _assetLibId : String;
+		private var _handle:ObjectContainer3D;
 		
 		public function Loader3D(useAssetLibrary : Boolean = true, assetLibraryId : String = null)
 		{
@@ -44,6 +45,10 @@ package away3d.loaders
 			_assetLibId = assetLibraryId;
 		}
 		
+		public function get handle():ObjectContainer3D
+		{
+			return _handle;
+		}
 		
 		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
@@ -123,11 +128,15 @@ package away3d.loaders
 			var type : String = ev.asset.assetType;
 			if (type == AssetType.CONTAINER) {
 				this.addChild(ObjectContainer3D(ev.asset));
+				
+				_handle = ev.asset as ObjectContainer3D;				
 			}
 			else if (type == AssetType.MESH) {
 				var mesh : Mesh = Mesh(ev.asset);
 				if (mesh.parent == null)
 					this.addChild(mesh);
+				
+				_handle = ev.asset as ObjectContainer3D;
 			}
 			
 			this.dispatchEvent(ev.clone());
