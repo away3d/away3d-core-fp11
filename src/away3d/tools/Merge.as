@@ -152,12 +152,11 @@ package away3d.tools
 			var i : uint;
 			var vecLength : uint;
 			var subGeom : SubGeometry;
+			var ds:DataSubGeometry;
 			
 			var geometry:Geometry = destMesh.geometry;
 			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
-			
-			if(numSubGeoms == 0) return;
 			
 			var vertices:Vector.<Number>;
 			var normals:Vector.<Number>;
@@ -165,7 +164,23 @@ package away3d.tools
 			var uvs:Vector.<Number>;
 			var vectors:Vector.<DataSubGeometry> = new Vector.<DataSubGeometry>();
 			
-			var ds:DataSubGeometry;
+			//empty mesh receiver case
+			if(numSubGeoms == 0){
+				subGeom = new SubGeometry();
+				subGeom.autoDeriveVertexNormals = false;
+				subGeom.autoDeriveVertexTangents = true;
+				vertices = new Vector.<Number>();
+				normals = new Vector.<Number>();
+				indices = new Vector.<uint>();
+				uvs = new Vector.<Number>();
+						
+				subGeom.updateVertexData(vertices);
+				subGeom.updateIndexData(indices);
+				subGeom.updateUVData(uvs);
+				subGeom.updateVertexNormalData(normals);
+				geometry.addSubGeometry(subGeom);
+				numSubGeoms = 1;
+			}
 			
 			for (i = 0; i<numSubGeoms; ++i){					 
 				vertices = geometries[i].vertexData;
@@ -391,13 +406,15 @@ package away3d.tools
 			var ds:DataSubGeometry;
 			var geom:Geometry = m.geometry;
 			var geoms:Vector.<SubGeometry> = geom.subGeometries;
+			
+			if(geoms.length == 0) return;
 			 
 			for (var i:uint = 0; i<geoms.length; ++i){					 
 				ds = new DataSubGeometry();
-				ds.vertices = SubGeometry(geoms[i]).vertexData;
-				ds.indices = SubGeometry(geoms[i]).indexData;
-				ds.uvs = SubGeometry(geoms[i]).UVData;
-				ds.normals = SubGeometry(geoms[i]).vertexNormalData;
+				ds.vertices = SubGeometry(geoms[i]).vertexData.concat();
+				ds.indices = SubGeometry(geoms[i]).indexData.concat();
+				ds.uvs = SubGeometry(geoms[i]).UVData.concat();
+				ds.normals = SubGeometry(geoms[i]).vertexNormalData.concat();
 				
 				ds.vertices.fixed = false;
 				ds.normals.fixed = false;
