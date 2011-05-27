@@ -26,6 +26,16 @@ package away3d.core.partition
 			_rootNode = rootNode || new NullNode();
 		}
 
+		public function get showDebugBounds() : Boolean
+		{
+			return _rootNode.showDebugBounds;
+		}
+
+		public function set showDebugBounds(value : Boolean) : void
+		{
+
+		}
+
 		/**
 		 * Sends a traverser through the partition tree.
 		 * @param traverser

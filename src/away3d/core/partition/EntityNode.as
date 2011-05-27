@@ -7,6 +7,7 @@ package away3d.core.partition
 	import away3d.entities.Sprite3D;
 	import away3d.errors.AbstractMethodError;
 	import away3d.entities.Entity;
+	import away3d.primitives.WireframePrimitiveBase;
 
 	use namespace arcane;
 
