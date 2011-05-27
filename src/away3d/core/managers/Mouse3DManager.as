@@ -30,7 +30,6 @@ package away3d.core.managers
 		private var _lastmove_mouseX:Number;
 		private var _lastmove_mouseY:Number;
 
-		private var _stage : Stage;
 		private var _hitTestRenderer : HitTestRenderer;
 		private var _view : View3D;
 
@@ -53,16 +52,15 @@ package away3d.core.managers
 		public function Mouse3DManager(view : View3D, hitTestRenderer : HitTestRenderer)
 		{
 			_view = view;
-			_stage = view.stage;
 			_hitTestRenderer = hitTestRenderer;
 
 			// to do: add invisible container?
-			_stage.addEventListener(MouseEvent.CLICK, onClick);
-			_stage.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
-			_stage.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			_view.addEventListener(MouseEvent.CLICK, onClick);
+			_view.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
+			_view.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
 			//_stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, 1);	// mark moves as most important
-			_stage.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			_stage.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+			_view.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			_view.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		}
 
 		/**
@@ -70,11 +68,11 @@ package away3d.core.managers
 		 */
 		public function dispose() : void
 		{
-			_stage.removeEventListener(MouseEvent.CLICK, onClick);
-			_stage.removeEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
-			_stage.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			_stage.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			_stage.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+			_view.removeEventListener(MouseEvent.CLICK, onClick);
+			_view.removeEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
+			_view.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			_view.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			_view.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		}
 
 		private function mouseInView() : Boolean

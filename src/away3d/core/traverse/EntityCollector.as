@@ -2,6 +2,7 @@ package away3d.core.traverse
 {
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.math.Plane3D;
 	import away3d.lights.LightBase;
 	import away3d.materials.MaterialBase;
 	import away3d.core.partition.NodeBase;
@@ -29,11 +30,15 @@ package away3d.core.traverse
 		protected var _numMouseEnableds : uint;
 		protected var _camera : Camera3D;
 
-
 		/**
 		 * Creates a new EntityCollector object.
 		 */
 		public function EntityCollector()
+		{
+			init();
+		}
+
+		private function init() : void
 		{
 			_opaqueRenderables = new Vector.<IRenderable>();
 			_blendedRenderables = new Vector.<IRenderable>();

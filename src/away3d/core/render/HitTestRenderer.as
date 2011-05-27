@@ -50,6 +50,12 @@ package away3d.core.render
 		private var _localHitPosition : Vector3D;
 		private var _hitUV : Point;
 
+		private var _rayPos : Vector3D = new Vector3D();
+		private var _rayDir : Vector3D = new Vector3D();
+		private var _localRayPos : Vector3D = new Vector3D();
+		private var _localRayDir : Vector3D = new Vector3D();
+		private var _potentialFound : Boolean;
+
 
 		/**
 		 * Creates a new HitTestRenderer object.
@@ -94,12 +100,14 @@ package away3d.core.render
 
 			_viewportData[0] = _viewPortWidth;
 			_viewportData[1] = _viewPortHeight;
-			_viewportData[2] = _projX = 1 - ratioX*2;
+			_viewportData[2] = -(_projX = ratioX*2 - 1);
 			_viewportData[3] = _projY = ratioY*2 - 1;
 
+			// _potentialFound will be set to true if any object is actually rendered
+			_potentialFound = false;
 			render(entityCollector);
 
-			if (!_context) return;
+			if (!_context && !_potentialFound) return;
 			_context.drawToBitmapData(_bitmapData);
 			_hitColor = _bitmapData.getPixel(0, 0);
 
@@ -145,17 +153,17 @@ package away3d.core.render
 		}
 
 //		/**
+
 //		 * Unsupported
 //		 * @private
 //		 */
 //		arcane override function set viewPortX(value : Number) : void {}
-
 //		/**
+
 //		 * Unsupported
 //		 * @private
 //		 */
 //		arcane override function set viewPortY(value : Number) : void {}
-
 		/**
 		 * @inheritDoc
 		 */
@@ -183,12 +191,40 @@ package away3d.core.render
 		{
 			var renderable : IRenderable;
 			var len : uint = renderables.length;
+			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			var ox : Number, oy  : Number, oz : Number;
 
 			// todo: do a fast ray intersection test first?
+			updateRay(camera);
+
 			for (var i : uint = 0; i < len; ++i) {
 				renderable = renderables[i];
+
 				// it's possible that the renderable was already removed from the scene
 				if (!renderable.sourceEntity.scene || !renderable.mouseEnabled) continue;
+
+				// todo: reenable raycast this and make optional? :s
+				/*ox = _rayDir.x;
+				oy = _rayDir.y;
+				oz = _rayDir.z;
+
+				// use the transpose of the inverse to keep unit length
+				renderable.sceneTransform.copyRawDataTo(raw);
+				_localRayDir.x = raw[0]*ox + raw[1]*oy + raw[2]*oz;
+				_localRayDir.y = raw[4]*ox + raw[5]*oy + raw[6]*oz;
+				_localRayDir.z = raw[8]*ox + raw[9]*oy + raw[10]*oz;
+
+				renderable.inverseSceneTransform.copyRawDataTo(raw);
+				ox = _rayPos.x;
+				oy = _rayPos.y;
+				oz = _rayPos.z;
+				_localRayPos.x = raw[0]*ox + raw[4]*oy + raw[8]*oz + raw[12];
+				_localRayPos.y = raw[1]*ox + raw[5]*oy + raw[9]*oz + raw[13];
+				_localRayPos.z = raw[2]*ox + raw[6]*oy + raw[10]*oz + raw[14];
+				if (!renderable.sourceEntity.bounds.intersectsLine(_localRayPos, _localRayDir)) continue;*/
+
+				_potentialFound = true;
+
 				_context.setCulling(renderable.material.bothSides? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
 
 				_interactives[_interactiveId++] = renderable;
@@ -203,6 +239,20 @@ package away3d.core.render
 			}
 		}
 
+		private function updateRay(camera : Camera3D) : void
+		{
+			var p1 : Vector3D = camera.scenePosition;
+			var p2 : Vector3D = camera.unproject(_projX, _projY);
+
+			_rayPos.x = p1.x;
+			_rayPos.y = p1.y;
+			_rayPos.z = p1.z;
+			_rayDir.x = p2.x - p1.x;
+			_rayDir.y = p2.y - p1.y;
+			_rayDir.z = p2.z - p1.z;
+			_rayDir.normalize();
+		}
+
 		/**
 		 * Creates the Program3D that color-codes objects.
 		 */
@@ -213,7 +263,7 @@ package away3d.core.render
 
 			_objectProgram3D = _context.createProgram();
 
-			vertexCode = 	"m44 vt0, va0, vc0	\n" +
+			vertexCode = 	"m44 vt0, va0, vc0			\n" +
 							"mul vt1.xy, vt0.w, vc4.zw	\n" +
 							"add vt0.xy, vt0.xy, vt1.xy	\n" +
 							"mul vt0.xy, vt0.xy, vc4.xy	\n" +
@@ -403,35 +453,25 @@ package away3d.core.render
 		{
 			// calculate screen ray and find exact intersection position with triangle
 			var rx : Number, ry : Number, rz : Number;
-			var ox : Number, oy : Number, oz : Number, ow : Number;
+			var ox : Number, oy : Number, oz : Number;
 			var t : Number;
-			var raw : Vector.<Number>;
-
-			_inverse.copyFrom(camera.lens.matrix);
-			_inverse.invert();
-			raw = Matrix3DUtils.RAW_DATA_CONTAINER;
-			_inverse.copyRawDataTo(raw);
+			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			var cx : Number = _rayPos.x, cy : Number = _rayPos.y, cz : Number = _rayPos.z;
 
 			// unproject projection point, gives ray dir in cam space
-			ox = raw[0]*_projX + raw[4]*_projY + raw[12];
-			oy = raw[1]*_projX + raw[5]*_projY + raw[13];
-			oz = raw[2]*_projX + raw[6]*_projY + raw[14];
-			ow = raw[3]*_projX + raw[7]*_projY + raw[15];
-			ox /= -ow;
-			oy /= -ow;
-			oz /= ow;
+			ox = _rayDir.x;
+			oy = _rayDir.y;
+			oz = _rayDir.z;
 
 			// transform ray dir and origin (cam pos) to object space
-			_inverse.copyFrom(camera.sceneTransform);
-			_inverse.append(invSceneTransform);
-			_inverse.copyRawDataTo(raw);
+			invSceneTransform.copyRawDataTo(raw);
 			rx = raw[0]*ox + raw[4]*oy + raw[8]*oz;
 			ry = raw[1]*ox + raw[5]*oy + raw[9]*oz;
 			rz = raw[2]*ox + raw[6]*oy + raw[10]*oz;
 
-			ox = raw[12];
-			oy = raw[13];
-			oz = raw[14];
+			ox = raw[0]*cx + raw[4]*cy + raw[8]*cz + raw[12];
+			oy = raw[1]*cx + raw[5]*cy + raw[9]*cz + raw[13];
+			oz = raw[2]*cx + raw[6]*cy + raw[10]*cz + raw[14];
 
 			t = ((px - ox)*nx + (py - oy)*ny + (pz - oz)*nz) / (rx*nx + ry*ny + rz*nz);
 
