@@ -1,6 +1,7 @@
 package away3d.core.render
 {
 	import away3d.core.base.IRenderable;
+	import away3d.core.data.RenderableListItem;
 	import away3d.core.traverse.EntityCollector;
 
 	import away3d.debug.Debug;
@@ -41,9 +42,7 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector) : void
 		{
-			var opaques : Vector.<IRenderable> = entityCollector.opaqueRenderables;
-			var blendeds : Vector.<IRenderable> = entityCollector.blendedRenderables;
-			var len : uint = opaques.length;
+			var item : RenderableListItem;
 			var renderable : IRenderable;
 
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
@@ -52,21 +51,24 @@ package away3d.core.render
 			if (!_program3D) initProgram3D(_context);
 			_context.setProgram(_program3D);
 
-			for (var i : uint = 0; i < len; ++i) {
-				renderable = opaques[i];
+			item = entityCollector.opaqueRenderableHead;
+			while (item) {
+				renderable = item.renderable
 				_context.setVertexBufferAt(0, renderable.getVertexBuffer(_context, _contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_context, _contextIndex), 0, renderable.numTriangles);
+				item = item.next;
 			}
 
 			if (!_renderBlended) return;
 
-			len = blendeds.length;
-			for (i = 0; i < len; ++i) {
-				renderable = blendeds[i];
+			item = entityCollector.blendedRenderableHead;
+			while (item) {
+				renderable = item.renderable;
 				_context.setVertexBufferAt(0, renderable.getVertexBuffer(_context, _contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_context, _contextIndex), 0, renderable.numTriangles);
+				item = item.next
 			}
 		}
 

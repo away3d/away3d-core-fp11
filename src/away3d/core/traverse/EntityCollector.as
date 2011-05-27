@@ -1,12 +1,17 @@
 package away3d.core.traverse
 {
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.data.RenderableListItem;
+	import away3d.core.data.RenderableListItemPool;
 	import away3d.core.math.Plane3D;
 	import away3d.lights.LightBase;
 	import away3d.materials.MaterialBase;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
+
+	use namespace arcane;
 
 	/**
 	 * The EntityCollector class is a traverser for scene partitions that collects all scene graph entities that are
@@ -19,8 +24,9 @@ package away3d.core.traverse
 	{
 		protected var _skyBox : IRenderable;
 		protected var _entities : Vector.<Entity>;
-		protected var _opaqueRenderables : Vector.<IRenderable>;
-		protected var _blendedRenderables : Vector.<IRenderable>;
+		protected var _opaqueRenderableHead : RenderableListItem;
+		protected var _blendedRenderableHead : RenderableListItem;
+		protected var _renderableListItemPool : RenderableListItemPool;
 		protected var _lights : Vector.<LightBase>;
 		protected var _numEntities : uint;
 		protected var _numOpaques : uint;
@@ -40,10 +46,21 @@ package away3d.core.traverse
 
 		private function init() : void
 		{
-			_opaqueRenderables = new Vector.<IRenderable>();
-			_blendedRenderables = new Vector.<IRenderable>();
+//			_opaqueRenderables = new Vector.<IRenderable>();
+//			_blendedRenderables = new Vector.<IRenderable>();
 			_lights = new Vector.<LightBase>();
 			_entities = new Vector.<Entity>();
+			_renderableListItemPool = new RenderableListItemPool();
+		}
+
+		public function get numOpaques() : uint
+		{
+			return _numOpaques;
+		}
+
+		public function get numBlended() : uint
+		{
+			return _numBlended;
 		}
 
 		/**
@@ -78,33 +95,29 @@ package away3d.core.traverse
 		/**
 		 * The list of opaque IRenderable objects that are considered potentially visible.
 		 * @param value
-		 *
-		 * todo: remove setter once we have in place sorting
 		 */
-		public function get opaqueRenderables() : Vector.<IRenderable>
+		public function get opaqueRenderableHead() : RenderableListItem
 		{
-			return _opaqueRenderables;
+			return _opaqueRenderableHead;
 		}
 
-		public function set opaqueRenderables(value : Vector.<IRenderable>) : void
+		public function set opaqueRenderableHead(value : RenderableListItem) : void
 		{
-			_opaqueRenderables = value;
+			_opaqueRenderableHead = value;
 		}
 
 		/**
 		 * The list of IRenderable objects that require blending and are considered potentially visible.
 		 * @param value
-		 *
-		 * todo: remove setter once we have in place sorting
 		 */
-		public function get blendedRenderables() : Vector.<IRenderable>
+		public function get blendedRenderableHead() : RenderableListItem
 		{
-			return _blendedRenderables;
+			return _blendedRenderableHead;
 		}
 
-		public function set blendedRenderables(value : Vector.<IRenderable>) : void
+		public function set blendedRenderableHead(value : RenderableListItem) : void
 		{
-			_blendedRenderables = value;
+			_blendedRenderableHead = value;
 		}
 
 		/**
@@ -123,8 +136,9 @@ package away3d.core.traverse
 		public function clear() : void
 		{
 			_numTriangles = _numMouseEnableds = 0;
-			if (_numOpaques > 0) _opaqueRenderables.length = _numOpaques = 0;
-			if (_numBlended > 0) _blendedRenderables.length = _numBlended = 0;
+			_blendedRenderableHead = null;
+			_opaqueRenderableHead = null;
+			_renderableListItemPool.freeAll();
 			if (_numLights > 0) _lights.length = _numLights = 0;
 		}
 
@@ -160,10 +174,20 @@ package away3d.core.traverse
 
 			material = renderable.material;
 			if (material) {
-				if (material.requiresBlending)
-					_blendedRenderables[_numBlended++] = renderable;
-				else
-					_opaqueRenderables[_numOpaques++] = renderable;
+				var item : RenderableListItem = _renderableListItemPool.getItem();
+				item.renderable = renderable;
+				item.materialId = material._uniqueId;
+				item.zIndex = renderable.zIndex;
+				if (material.requiresBlending) {
+					item.next = _blendedRenderableHead;
+					_blendedRenderableHead = item;
+					++_numBlended;
+				}
+				else {
+					item.next = _opaqueRenderableHead;
+					_opaqueRenderableHead = item;
+					++_numOpaques;
+				}
 			}
 		}
 

@@ -5,6 +5,7 @@ package away3d.core.render
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
+	import away3d.core.data.RenderableListItem;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
@@ -178,8 +179,8 @@ package away3d.core.render
 			if (!_objectProgram3D) initObjectProgram3D();
 			_context.setProgram(_objectProgram3D);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _viewportData, 1);
-			drawRenderables(entityCollector.opaqueRenderables, camera);
-			drawRenderables(entityCollector.blendedRenderables, camera);
+			drawRenderables(entityCollector.opaqueRenderableHead, camera);
+			drawRenderables(entityCollector.blendedRenderableHead, camera);
 		}
 
 		/**
@@ -187,21 +188,23 @@ package away3d.core.render
 		 * @param renderables The renderables to draw.
 		 * @param camera The camera for which to render.
 		 */
-		private function drawRenderables(renderables : Vector.<IRenderable>, camera : Camera3D) : void
+		private function drawRenderables(item : RenderableListItem, camera : Camera3D) : void
 		{
 			var renderable : IRenderable;
-			var len : uint = renderables.length;
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var ox : Number, oy  : Number, oz : Number;
 
 			// todo: do a fast ray intersection test first?
 			updateRay(camera);
 
-			for (var i : uint = 0; i < len; ++i) {
-				renderable = renderables[i];
+			while (item) {
+				renderable = item.renderable;
 
 				// it's possible that the renderable was already removed from the scene
-				if (!renderable.sourceEntity.scene || !renderable.mouseEnabled) continue;
+				if (!renderable.sourceEntity.scene || !renderable.mouseEnabled) {
+					item = item.next;
+					continue;
+				}
 
 				// todo: reenable raycast this and make optional? :s
 				/*ox = _rayDir.x;
@@ -236,6 +239,8 @@ package away3d.core.render
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
 				_context.setVertexBufferAt(0, renderable.getVertexBuffer(_context, _contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
 				_context.drawTriangles(renderable.getIndexBuffer(_context, _contextIndex), 0, renderable.numTriangles);
+
+				item = item.next;
 			}
 		}
 

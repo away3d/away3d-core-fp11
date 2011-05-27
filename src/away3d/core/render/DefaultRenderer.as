@@ -3,6 +3,7 @@ package away3d.core.render
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.data.RenderableListItem;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.materials.MaterialBase;
@@ -28,7 +29,6 @@ package away3d.core.render
 		public function DefaultRenderer(antiAlias : uint = 0, renderMode : String = "auto")
 		{
 			super(antiAlias, true, renderMode);
-//			_depthRenderer = new DepthRenderer();
 		}
 
 
@@ -45,7 +45,7 @@ package away3d.core.render
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-			drawRenderables(entityCollector.opaqueRenderables, entityCollector);
+			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector);
 
 			_context.setDepthTest(false, Context3DCompareMode.LESS);
 
@@ -55,7 +55,7 @@ package away3d.core.render
 				drawSkyBox(entityCollector);
 			}
 
-			drawRenderables(entityCollector.blendedRenderables, entityCollector);
+			drawRenderables(entityCollector.blendedRenderableHead, entityCollector);
 
 			if (_activeMaterial) _activeMaterial.deactivate(_context);
 			_activeMaterial = null;
@@ -81,33 +81,32 @@ package away3d.core.render
 		 * @param renderables The renderables to draw.
 		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function drawRenderables(renderables : Vector.<IRenderable>, entityCollector : EntityCollector) : void
+		private function drawRenderables(item : RenderableListItem, entityCollector : EntityCollector) : void
 		{
 			var renderable : IRenderable;
-			var i : uint, j : uint, k : uint;
 			var numPasses : uint;
-			var numRenderables : uint = renderables.length;
+			var j : uint;
 			var camera : Camera3D = entityCollector.camera;
+			var item2 : RenderableListItem;
 
-			while (i < numRenderables) {
-				_activeMaterial = renderables[i].material;
+			while (item) {
+				_activeMaterial = item.renderable.material;
 				_activeMaterial.updateMaterial(_context);
 
 				numPasses = _activeMaterial.numPasses;
 				j = 0;
 
 				do {
-					k = i;
+					item2 = item;
 					_activeMaterial.activatePass(j, _context, _contextIndex, camera);
 					do {
-						renderable = renderables[k];
-
-						_activeMaterial.renderPass(j, renderable, _context, _contextIndex, camera);
-					} while (++k < numRenderables && renderable.material != _activeMaterial);
+						_activeMaterial.renderPass(j, item2.renderable, _context, _contextIndex, camera);
+						item2 = item2.next;
+					} while (item2 && item2.renderable.material == _activeMaterial);
 					_activeMaterial.deactivatePass(j, _context);
 				} while (++j < numPasses);
 
-				i = k;
+				item = item2;
 			}
 		}
 	}
