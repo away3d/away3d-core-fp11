@@ -19,6 +19,7 @@
 	 * the SubGeometries to its respective SubMesh objects.
 	 *
 	 * 
+	 * 
 	 * @see away3d.core.base.SubGeometry
 	 * @see away3d.scenegraph.Mesh
 	 */
