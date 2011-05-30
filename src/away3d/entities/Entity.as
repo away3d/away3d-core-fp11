@@ -168,7 +168,7 @@ package away3d.entities
 		public function get modelViewProjection() : Matrix3D
 		{
 			// assume base if popped
-			return _mvpTransformStack[_mvpIndex < 0? 0 : _mvpIndex];
+			return _mvpTransformStack[uint(uint(_mvpIndex > 0)*_mvpIndex)];
 		}
 
 		/**
@@ -184,7 +184,7 @@ package away3d.entities
 		 */
 		public function get zIndex() : Number
 		{
-			return _zIndices[int(int(_mvpIndex > 0)*_mvpIndex)];
+			return _zIndices[uint(uint(_mvpIndex > 0)*_mvpIndex)];
 		}
 
 		/**
