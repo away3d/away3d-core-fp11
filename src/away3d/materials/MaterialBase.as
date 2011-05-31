@@ -35,7 +35,7 @@ package away3d.materials
 		private var _materialLibrary : MaterialLibrary;
 
 		// this value is usually derived from other settings
-		private var _uniqueId : int;
+		arcane var _uniqueId : int;
 		arcane var _name : String = "material";
 		private var _namespace : String = "";
 

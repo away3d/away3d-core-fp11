@@ -1,9 +1,10 @@
 package away3d.core.render
 {
 	import away3d.arcane;
+	import away3d.core.data.RenderableListItem;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.sort.EntitySorterBase;
-	import away3d.core.sort.RenderableSorter;
+	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.errors.AbstractMethodError;
 
@@ -27,7 +28,7 @@ package away3d.core.render
 		private var _backBufferWidth : int;
 		private var _backBufferHeight : int;
 		protected var _backBufferInvalid : Boolean;
-		private var _antiAlias : uint;
+		protected var _antiAlias : uint;
 		private var _renderMode : String;
 
 		protected var _backgroundR : Number = 0;
@@ -40,8 +41,8 @@ package away3d.core.render
 		protected var _viewPortY : Number = 0;
 
 		private var _viewPortInvalid : Boolean;
-		private var _enableDepthAndStencil : Boolean;
-		private var _swapBackBuffer : Boolean = true;
+		protected var _enableDepthAndStencil : Boolean;
+		protected var _swapBackBuffer : Boolean = true;
 
 		protected var _renderableSorter : EntitySorterBase;
 
@@ -56,7 +57,7 @@ package away3d.core.render
 			_antiAlias = antiAlias;
 			_renderMode = renderMode;
 			_enableDepthAndStencil = enableDepthAndStencil;
-			_renderableSorter = new RenderableSorter();
+			_renderableSorter = new RenderableMergeSort();
 		}
 
 		public function get context() : Context3D

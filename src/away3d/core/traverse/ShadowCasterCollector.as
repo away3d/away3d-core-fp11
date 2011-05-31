@@ -1,14 +1,13 @@
 package away3d.core.traverse
 {
-	import away3d.cameras.Camera3D;
+	import away3d.arcane;
 	import away3d.core.base.IRenderable;
-	import away3d.lights.LightBase;
-	import away3d.materials.MaterialBase;
-	import away3d.core.partition.NodeBase;
+	import away3d.core.data.RenderableListItem;
 	import away3d.entities.Entity;
+	import away3d.lights.LightBase;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	use namespace arcane;
+
 
 	/**
 	 * The EntityCollector class is a traverser for scene partitions that collects all scene graph entities that are
@@ -30,7 +29,9 @@ package away3d.core.traverse
 		/**
 		 * @inheritDoc
 		 */
-		override public function applySkyBox(renderable : IRenderable) : void {}
+		override public function applySkyBox(renderable : IRenderable) : void
+		{
+		}
 
 		/**
 		 * Adds an IRenderable object to the potentially visible objects.
@@ -38,13 +39,22 @@ package away3d.core.traverse
 		 */
 		override public function applyRenderable(renderable : IRenderable) : void
 		{
-			if (renderable.castsShadows)
-				_opaqueRenderables[_numOpaques++] = renderable;
+			if (renderable.castsShadows) {
+				_numOpaques++;
+				var item : RenderableListItem = _renderableListItemPool.getItem();
+				item.renderable = renderable;
+				item.next = _opaqueRenderableHead;
+				item.zIndex = renderable.zIndex;
+				item.materialId = renderable.material._uniqueId;
+				_opaqueRenderableHead = item;
+			}
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function applyLight(light : LightBase) : void {}
+		override public function applyLight(light : LightBase) : void
+		{
+		}
 	}
 }
