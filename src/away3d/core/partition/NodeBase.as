@@ -4,6 +4,8 @@ package away3d.core.partition
 	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
+	import away3d.errors.AbstractMethodError;
+	import away3d.primitives.WireframePrimitiveBase;
 
 	/**
 	 * The NodeBase class is an abstract base class for any type of space partition tree node. The concrete
@@ -19,6 +21,7 @@ package away3d.core.partition
 		protected var _parent : NodeBase;
 		protected var _childNodes : Vector.<NodeBase>;
 		protected var _numChildNodes : uint;
+		private var _debugPrimitive : WireframePrimitiveBase;
 
 		/**
 		 * Creates a new NodeBase object.
@@ -26,6 +29,28 @@ package away3d.core.partition
 		public function NodeBase()
 		{
 			_childNodes = new Vector.<NodeBase>();
+		}
+
+		public function get showDebugBounds() : Boolean
+		{
+			return _debugPrimitive != null;
+		}
+
+		public function set showDebugBounds(value : Boolean) : void
+		{
+			if (Boolean(_debugPrimitive) == value) return;
+
+			if (value) {
+				_debugPrimitive = createDebugBounds();
+			}
+			else {
+				_debugPrimitive.dispose(true);
+				_debugPrimitive = null;
+			}
+
+			for (var i : uint = 0; i < _numChildNodes; ++i)  {
+				_childNodes[i].showDebugBounds = value;
+			}
 		}
 
 		/**
@@ -47,6 +72,7 @@ package away3d.core.partition
 		{
 			node._parent = this;
 			_childNodes[_numChildNodes++] = node;
+			node.showDebugBounds = showDebugBounds;
 		}
 
 		/**
@@ -99,9 +125,17 @@ package away3d.core.partition
 			if (traverser.enterNode(this)) {
 				var i : uint;
 				while (i < _numChildNodes) _childNodes[i++].acceptTraverser(traverser);
+
+				if (_debugPrimitive)
+					traverser.applyRenderable(_debugPrimitive);
 			}
 
 			traverser.leaveNode(this);
+		}
+
+		protected function createDebugBounds() : WireframePrimitiveBase
+		{
+			return null;
 		}
 	}
 }

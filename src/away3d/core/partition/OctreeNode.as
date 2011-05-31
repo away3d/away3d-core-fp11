@@ -1,18 +1,22 @@
 package away3d.core.partition
 {
-	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.cameras.Camera3D;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
-
-	import flash.geom.Matrix3D;
+	import away3d.primitives.WireframeCube;
+	import away3d.primitives.WireframePrimitiveBase;
 
 	public class OctreeNode extends NodeBase
 	{
 		private var _centerX : Number;
 		private var _centerY : Number;
 		private var _centerZ : Number;
+		private var _minX : Number;
+		private var _minY : Number;
+		private var _minZ : Number;
+		private var _maxX : Number;
+		private var _maxY : Number;
+		private var _maxZ : Number;
 		private var _quadSize : Number;
 		private var _depth : Number;
 		private var _leaf : Boolean;
@@ -31,17 +35,28 @@ package away3d.core.partition
 
 		public function OctreeNode(maxDepth : int = 5, size : Number = 10000, centerX : Number = 0, centerY : Number = 0, centerZ : Number = 0, depth : int = 0)
 		{
+			init(size, centerX, centerY, centerZ, depth, maxDepth);
+		}
+
+		private function init(size : Number, centerX : Number, centerY : Number, centerZ : Number, depth : int, maxDepth : int) : void
+		{
 			_halfExtent = size * .5;
 			_centerX = centerX;
 			_centerY = centerY;
 			_centerZ = centerZ;
 			_quadSize = size;
 			_depth = depth;
+			_minX = centerX - _halfExtent;
+			_minY = centerY - _halfExtent;
+			_minZ = centerZ - _halfExtent;
+			_maxX = centerX + _halfExtent;
+			_maxY = centerY + _halfExtent;
+			_maxZ = centerZ + _halfExtent;
 
 			_leaf = depth == maxDepth;
 
 			if (!_leaf) {
-				var hhs : Number = _halfExtent*.5;
+				var hhs : Number = _halfExtent * .5;
 				addNode(_leftTopNear = new OctreeNode(maxDepth, _halfExtent, centerX - hhs, centerY + hhs, centerZ - hhs, depth + 1));
 				addNode(_rightTopNear = new OctreeNode(maxDepth, _halfExtent, centerX + hhs, centerY + hhs, centerZ - hhs, depth + 1));
 				addNode(_leftBottomNear = new OctreeNode(maxDepth, _halfExtent, centerX - hhs, centerY - hhs, centerZ - hhs, depth + 1));
@@ -53,6 +68,17 @@ package away3d.core.partition
 			}
 		}
 
+
+		override protected function createDebugBounds() : WireframePrimitiveBase
+		{
+			var cube : WireframeCube = new WireframeCube(_quadSize, _quadSize, _quadSize);
+			cube.x = _centerX;
+			cube.y = _centerY;
+			cube.z = _centerZ;
+			return cube;
+		}
+
+
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
 			var a : Number, b : Number, c : Number;
@@ -60,51 +86,18 @@ package away3d.core.partition
 			var plane : Plane3D;
 			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
 
-			// this is basically a p/n vertex test in object space against the frustum planes derived from the mvp
-			// with a lot of inlining
-
-		// left plane
-			plane = frustum[0];
-			a = plane.a; b = plane.b; c = plane.c;
-			dd = a*_centerX + b*_centerY + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -plane.d) return false;
-		// right plane
-			plane = frustum[1];
-			a = plane.a; b = plane.b; c = plane.c;
-			dd = a*_centerX + b*_centerY + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -plane.d) return false;
-		// bottom plane
-			plane = frustum[2];
-			a = plane.a; b = plane.b; c = plane.c;
-			dd = a*_centerX + b*_centerY + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -plane.d) return false;
-		// top plane
-			plane = frustum[3];
-			a = plane.a; b = plane.b; c = plane.c;
-			dd = a*_centerX + b*_centerY + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -plane.d) return false;
-		// near plane
-			plane = frustum[4];
-			a = plane.a; b = plane.b; c = plane.c;
-			dd = a*_centerX + b*_centerY + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -plane.d) return false;
-		// far plane
-			plane = frustum[5];
-			a = plane.a; b = plane.b; c = plane.c;
-			dd = a*_centerX + b*_centerY + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtent*(a + b + c);
-			if (dd + rr < -plane.d) return false;
+			for (var i : uint = 0; i < 6; ++i) {
+				plane = frustum[i];
+				a = plane.a;
+				b = plane.b;
+				c = plane.c;
+				dd = a * _centerX + b * _centerY + c * _centerZ;
+				if (a < 0) a = -a;
+				if (b < 0) b = -b;
+				if (c < 0) c = -c;
+				rr = _halfExtent * (a + b + c);
+				if (dd + rr < -plane.d) return false;
+			}
 
 			return true;
 		}
