@@ -44,7 +44,7 @@ package away3d.core.render
 		protected var _enableDepthAndStencil : Boolean;
 		protected var _swapBackBuffer : Boolean = true;
 
-		protected var _renderableSorter : EntitySorterBase;
+		private var _renderableSorter : EntitySorterBase;
 
 		/**
 		 * Creates a new RendererBase object.
@@ -58,6 +58,16 @@ package away3d.core.render
 			_renderMode = renderMode;
 			_enableDepthAndStencil = enableDepthAndStencil;
 			_renderableSorter = new RenderableMergeSort();
+		}
+
+		public function get renderableSorter() : EntitySorterBase
+		{
+			return _renderableSorter;
+		}
+
+		public function set renderableSorter(value : EntitySorterBase) : void
+		{
+			_renderableSorter = value;
 		}
 
 		public function get context() : Context3D
