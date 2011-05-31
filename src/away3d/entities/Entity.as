@@ -184,7 +184,7 @@ package away3d.entities
 		 */
 		public function get zIndex() : Number
 		{
-			return _zIndices[_mvpIndex < 0? 0 : _mvpIndex];
+			return _zIndices[int(int(_mvpIndex > 0)*_mvpIndex)];
 		}
 
 		/**
