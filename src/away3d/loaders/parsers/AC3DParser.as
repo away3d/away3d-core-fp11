@@ -13,6 +13,7 @@ package away3d.loaders.parsers
 	
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
 	
 	use namespace arcane;
 	
@@ -72,7 +73,24 @@ package away3d.loaders.parsers
 		 * @param data The data block to potentially be parsed.
 		 * @return Whether or not the given data is supported.
 		 */
-		public static function supportsData(data : *) : Boolean {return false;}
+		public static function supportsData(data : *) : Boolean
+		{
+			var ba : ByteArray;
+			var str : String;
+			
+			ba = data as ByteArray;
+			if (ba) {
+				ba.position = 0;
+				str = ba.readUTFBytes(4);
+			}
+			else {
+				str = (data is String)? String(data).substr(0, 4) : null;
+			}
+			
+			if (str == 'AC3D')
+				return true;
+			return false;
+		}
 		
 		/**
 		 * @inheritDoc
