@@ -11,6 +11,7 @@ package away3d.loaders.parsers
 	
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
 	
 	use namespace arcane;
 	
@@ -65,7 +66,24 @@ package away3d.loaders.parsers
 		 * @param data The data block to potentially be parsed.
 		 * @return Whether or not the given data is supported.
 		 */
-		public static function supportsData(data : *) : Boolean {return false;}
+		public static function supportsData(data : *) : Boolean {
+			var ba : ByteArray;
+			var str : String;
+			
+			ba = data as ByteArray;
+			if (ba) {
+				ba.position = 0;
+				str = ba.readUTFBytes(5);
+			}
+			else {
+				str = (data is String)? String(data).substr(0, 5) : null;
+			}
+			
+			if (str == '//AWD')
+				return true;
+			
+			return false;
+		}
 		
 		/**
 		 * @inheritDoc
