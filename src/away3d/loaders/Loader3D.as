@@ -119,14 +119,24 @@ package away3d.loaders
 		
 		private function onAssetComplete(ev : AssetEvent) : void
 		{
-			var type : String = ev.asset.assetType;
-			if (type == AssetType.CONTAINER) {
-				this.addChild(ObjectContainer3D(ev.asset));
-			}
-			else if (type == AssetType.MESH) {
-				var mesh : Mesh = Mesh(ev.asset);
-				if (mesh.parent == null)
-					this.addChild(mesh);
+			if (ev.type == AssetEvent.ASSET_COMPLETE) {
+				var type : String = ev.asset.assetType;
+				var obj : ObjectContainer3D;
+				
+				switch (ev.asset.assetType) {
+					case AssetType.CONTAINER:
+						obj = ObjectContainer3D(ev.asset);
+						break;
+					case AssetType.MESH:
+						obj = Mesh(ev.asset);
+						break;
+				}
+				
+				// If asset was of fitting type, and doesn't
+				// already have a parent, add to loader container
+				if (obj && obj.parent==null) {
+					addChild(obj);
+				}
 			}
 			
 			this.dispatchEvent(ev.clone());
