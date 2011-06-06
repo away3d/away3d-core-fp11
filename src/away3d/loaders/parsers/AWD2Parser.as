@@ -435,7 +435,7 @@ package away3d.loaders.parsers
 			var skeleton : Skeleton;
 			
 			name = parseVarStr();
-			num_joints = _body.readUnsignedInt();
+			num_joints = _body.readUnsignedShort();
 			skeleton = new Skeleton();
 			
 			// Discard properties for now
