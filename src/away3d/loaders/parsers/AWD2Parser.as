@@ -47,6 +47,9 @@ package away3d.loaders.parsers
 		private var _parsed_header : Boolean;
 		private var _body : ByteArray;
 		
+		private var read_float : Function;
+		private var read_uint : Function;
+		
 		public static const UNCOMPRESSED : uint = 0;
 		public static const DEFLATE : uint = 1;
 		public static const LZMA : uint = 2;
@@ -196,6 +199,14 @@ package away3d.loaders.parsers
 						break;
 				}
 				
+				// Define which methods to use when reading floating
+				// point and integer numbers respectively. This way, 
+				// the optimization test and ByteArray dot-lookup
+				// won't have to be made every iteration in the loop.
+				read_float = _optimized_for_accuracy? _body.readDouble : _body.readFloat;
+				read_uint = _optimized_for_accuracy? _body.readUnsignedInt : _body.readUnsignedShort;
+			
+				
 				_parsed_header = true;
 			}
 			
@@ -225,6 +236,7 @@ package away3d.loaders.parsers
 			_streaming 					= (flags & 0x1) == 0x1;
 			_optimized_for_accuracy 	= (flags & 0x2) == 0x2;
 			
+			
 			_compression = _byteData.readUnsignedByte();
 			
 			trace('HEADER:');
@@ -251,6 +263,7 @@ package away3d.loaders.parsers
 			ns = _body.readUnsignedByte();
 			type = _body.readUnsignedByte();
 			len = _body.readUnsignedInt();
+			
 			
 			trace('block:', ns, _cur_block_id, type, len);
 			switch (type) {
@@ -649,25 +662,11 @@ package away3d.loaders.parsers
 				// Loop through data streams
 				while (_body.position < sm_end) {
 					var idx : uint = 0;
-					var read_float : Function, read_int : Function;
 					var str_type : uint, str_len : uint, str_end : uint;
 					
 					str_type = _body.readUnsignedByte();
 					str_len = _body.readUnsignedInt();
 					str_end = _body.position + str_len;
-					
-					// Define which methods to use when reading floating
-					// point and integer numbers respectively. This way, 
-					// the optimization test and ByteArray dot-lookup
-					// won't have to be made every iteration in the loop.
-					if (_optimized_for_accuracy) {
-						read_float = _body.readDouble;
-						read_int = _body.readUnsignedInt;
-					}
-					else {
-						read_float = _body.readFloat;
-						read_int = _body.readUnsignedShort;
-					}
 					
 					var x:Number, y:Number, z:Number;
 					
@@ -687,7 +686,7 @@ package away3d.loaders.parsers
 					else if (str_type == 2) {
 						var indices : Vector.<uint> = new Vector.<uint>;
 						while (_body.position < str_end) {
-							indices[idx++] = read_int();
+							indices[idx++] = read_uint();
 						}
 						sub_geom.updateIndexData(indices);
 					}
@@ -708,7 +707,7 @@ package away3d.loaders.parsers
 					else if (str_type == 7) {
 						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
-							w_indices[idx++] = read_int()*3;
+							w_indices[idx++] = read_uint()*3;
 						}
 					}
 					else if (str_type == 8) {
@@ -862,7 +861,7 @@ package away3d.loaders.parsers
 			var i : uint;
 			var mtx_raw : Vector.<Number> = new Vector.<Number>;
 			for (i=0; i<len; i++) {
-				mtx_raw[i] = _body.readDouble();
+				mtx_raw[i] = read_float();
 			}
 			
 			return mtx_raw;
