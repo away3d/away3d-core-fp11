@@ -239,18 +239,10 @@ package away3d.loaders.parsers
 			
 			_compression = _byteData.readUnsignedByte();
 			
-			trace('HEADER:');
-			trace('version:', _version[0], _version[1]);
-			trace('streaming?', _streaming);
-			trace('accurate?', _optimized_for_accuracy);
-			trace('compression:', _compression);
-			
 			// Check file integrity
 			body_len = _byteData.readUnsignedInt();
-			trace('body len: ', body_len);
 			if (!_streaming && body_len != _byteData.bytesAvailable) {
-				trace('error: body len does not match file length');
-				// TODO: Throw error since size does not match
+				dieWithError('AWD2 body length does not match header integrity field');
 			}
 		}
 		
@@ -264,39 +256,29 @@ package away3d.loaders.parsers
 			type = _body.readUnsignedByte();
 			len = _body.readUnsignedInt();
 			
-			
-			trace('block:', ns, _cur_block_id, type, len);
 			switch (type) {
 				case 1:
-					trace('Parsing mesh data');
 					assetData = parseMeshData(len);
 					break;
 				case 24:
-					//trace('Parsing mesh instance');
 					assetData = parseMeshInstance(len);
 					break;
 				case 81:
-					trace('Parsing material');
 					assetData = parseMaterial(len);
 					break;
 				case 82:
-					trace('Parsing texture');
 					assetData = parseTexture(len);
 					break;
 				case 101:
-					trace('Parsing skeleton');
 					assetData = parseSkeleton(len);
 					break;
 				case 102:
-					trace('Parsing pose');
 					assetData = parseSkeletonPose(len);
 					break;
 				case 103:
-					trace('Parsing skelanim');
 					assetData = parseSkeletonAnimation(len);
 					break;
 				case 121:
-					trace('Parsing uvanim');
 					assetData = parseUVAnimation(len);
 					break;
 				default:
@@ -376,7 +358,6 @@ package away3d.loaders.parsers
 				var tex_addr : uint;
 				
 				tex_addr = props.get(2, 0);
-				trace('texture addr: ', tex_addr);
 				bmp_asset = _blocks[tex_addr].data;
 				
 				// If bitmap asset has already been loaded
@@ -414,7 +395,6 @@ package away3d.loaders.parsers
 				var url : String;
 				
 				url = _body.readUTFBytes(data_len);
-				trace('tex url:', url);
 				
 				// TODO: Create dependency
 				_texture_users[_cur_block_id.toString()] = [];
@@ -454,7 +434,6 @@ package away3d.loaders.parsers
 			// Discard properties for now
 			parseProperties(null);
 			
-			trace('name:', name,'joints:', num_joints);
 			joints_parsed = 0;
 			while (joints_parsed < num_joints) {
 				var parent_id : uint;
@@ -717,7 +696,6 @@ package away3d.loaders.parsers
 						}
 					}
 					else {
-						trace('unknown str type:', str_type);
 						_body.position = str_end;
 					}
 				}
