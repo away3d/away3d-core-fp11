@@ -115,7 +115,7 @@ package away3d.loaders
 					
 					// If this load operation is one that needs to be parsed, and the parsing has
 					// not completed yet, resume parsing after having loaded it's dependency queue
-					if (_currentLoader.parser && !_currentLoader.parser.parsingComplete) {
+					if (_currentLoader.parser && _currentLoader.parser.parsingPaused) {
 						// Back to loading the one we thought was complete
 						_loadingDependency = _currentDependencies[_currentDependencyIndex-1];
 						_currentLoader.parser.resumeParsingAfterDependencies();

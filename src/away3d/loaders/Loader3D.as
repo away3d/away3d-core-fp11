@@ -35,7 +35,6 @@ package away3d.loaders
 	{
 		private var _useAssetLib : Boolean;
 		private var _assetLibId : String;
-		private var _handle:ObjectContainer3D;
 		
 		public function Loader3D(useAssetLibrary : Boolean = true, assetLibraryId : String = null)
 		{
@@ -43,11 +42,6 @@ package away3d.loaders
 			
 			_useAssetLib = useAssetLibrary;
 			_assetLibId = assetLibraryId;
-		}
-		
-		public function get handle():ObjectContainer3D
-		{
-			return _handle;
 		}
 		
 		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
@@ -65,6 +59,7 @@ package away3d.loaders
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			token.addEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
@@ -95,6 +90,7 @@ package away3d.loaders
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			token.addEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
@@ -123,32 +119,10 @@ package away3d.loaders
 		
 		
 		
-		private function onAssetComplete(ev : AssetEvent) : void
+		private function removeListeners(dispatcher : EventDispatcher) : void
 		{
-			var type : String = ev.asset.assetType;
-			if (type == AssetType.CONTAINER) {
-				this.addChild(ObjectContainer3D(ev.asset));
-				
-				_handle = ev.asset as ObjectContainer3D;				
-			}
-			else if (type == AssetType.MESH) {
-				var mesh : Mesh = Mesh(ev.asset);
-				if (mesh.parent == null)
-					this.addChild(mesh);
-				
-				_handle = ev.asset as ObjectContainer3D;
-			}
-			
-			this.dispatchEvent(ev.clone());
-		}
-		
-		
-		private function onResourceComplete(ev : Event) : void
-		{
-			var dispatcher : EventDispatcher;
-			
-			dispatcher = EventDispatcher(ev.currentTarget);
 			dispatcher.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
+			dispatcher.removeEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
@@ -159,7 +133,51 @@ package away3d.loaders
 			dispatcher.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+		}
+		
+		
+		
+		private function onAssetComplete(ev : AssetEvent) : void
+		{
+			if (ev.type == AssetEvent.ASSET_COMPLETE) {
+				var type : String = ev.asset.assetType;
+				var obj : ObjectContainer3D;
+				
+				switch (ev.asset.assetType) {
+					case AssetType.CONTAINER:
+						obj = ObjectContainer3D(ev.asset);
+						break;
+					case AssetType.MESH:
+						obj = Mesh(ev.asset);
+						break;
+				}
+				
+				// If asset was of fitting type, and doesn't
+				// already have a parent, add to loader container
+				if (obj && obj.parent==null) {
+					addChild(obj);
+				}
+			}
 			
+			this.dispatchEvent(ev.clone());
+		}
+		
+		
+		private function onLoadError(ev : LoaderEvent) : void
+		{
+			removeListeners(EventDispatcher(ev.currentTarget));
+			
+			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
+				dispatchEvent(ev.clone());
+			}
+			else {
+				throw new Error(ev.message);
+			}
+		}
+
+		private function onResourceComplete(ev : Event) : void
+		{
+			removeListeners(EventDispatcher(ev.currentTarget));
 			this.dispatchEvent(ev.clone());
 		}
 	}
