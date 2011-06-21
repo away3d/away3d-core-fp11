@@ -10,6 +10,7 @@ package away3d.cameras
 	import away3d.entities.Entity;
 
 	import flash.geom.Matrix3D;
+	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -50,6 +51,11 @@ package away3d.cameras
 		public function unproject(mX : Number, mY : Number):Vector3D
 		{
 			return sceneTransform.transformVector(lens.unproject(mX, mY, 0));
+		}
+
+		public function project(point3d : Vector3D) : Point
+		{
+			return lens.project(inverseSceneTransform.transformVector(point3d));
 		}
 
 		/**

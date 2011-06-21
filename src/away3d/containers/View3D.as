@@ -19,6 +19,7 @@ package away3d.containers
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
+	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	import flash.utils.getTimer;
 
@@ -418,6 +419,16 @@ package away3d.containers
 		{
 			_renderer.dispose();
 			if (_depthRender) _depthRender.dispose();
+		}
+
+		public function project(point3d : Vector3D) : Point
+		{
+			var p : Point = _camera.project(point3d);
+
+			p.x = (p.x + 1.0)*_width/2.0;
+			p.y = (p.y + 1.0)*_height/2.0;
+
+			return p;
 		}
 
 		public function unproject(mX : Number, mY : Number) : Vector3D
