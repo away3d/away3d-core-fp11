@@ -87,12 +87,11 @@ package away3d.materials.passes
 		private var _commonsReg : ShaderRegisterElement;
 		private var _commonsRegIndex : int;
 
-		private var _uvTransform : Matrix;
-
 		private var _commonsData : Vector.<Number> = Vector.<Number>([.5, 0, 0, 1]);
 
 		arcane var _passes : Vector.<MaterialPassBase>;
 		arcane var _passesDirty : Boolean;
+		private var _animateUVs : Boolean;
 
 
 		/**
@@ -113,15 +112,15 @@ package away3d.materials.passes
 			_diffuseMethod.parentPass = _specularMethod.parentPass = this;
 		}
 
-		public function get uvTransform() : Matrix
+		public function get animateUVs() : Boolean
 		{
-			return _uvTransform;
+			return _animateUVs;
 		}
 
-		public function set uvTransform(value : Matrix) : void
+		public function set animateUVs(value : Boolean) : void
 		{
-			if ((value && !_uvTransform) || (!value && _uvTransform)) invalidateShaderProgram();
-			_uvTransform = value;
+			_animateUVs = value;
+			if ((value && !_animateUVs) || (!value && _animateUVs)) invalidateShaderProgram();
 			_uvTransformData = value? Vector.<Number>([1, 0, 0, 0, 0, 1, 0, 0]) : null;
 		}
 
@@ -348,12 +347,6 @@ package away3d.materials.passes
 
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
 
-			if (_uvTransformIndex >= 0) {
-				_uvTransformData[0] = _uvTransform.a; _uvTransformData[1] = _uvTransform.b; _uvTransformData[3] = _uvTransform.tx;
-				_uvTransformData[4] = _uvTransform.c; _uvTransformData[5] = _uvTransform.d; _uvTransformData[7] = _uvTransform.ty;
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _uvTransformIndex, _uvTransformData, 2);
-			}
-
 			_ambientMethod.activate(context, contextIndex);
 			if (_shadowMethod) _shadowMethod.activate(context, contextIndex);
 			_diffuseMethod.activate(context, contextIndex);
@@ -403,6 +396,21 @@ package away3d.materials.passes
 			if (_tangentBufferIndex >= 0) context.setVertexBufferAt(_tangentBufferIndex, renderable.getVertexTangentBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
 			if (_sceneMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneMatrixIndex, renderable.sceneTransform, true);
 			if (_sceneNormalMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneNormalMatrixIndex, renderable.inverseSceneTransform);
+
+			var uvTransform : Matrix;
+			if (_animateUVs) {
+				uvTransform = renderable.uvTransform;
+				if (uvTransform) {
+					_uvTransformData[0] = uvTransform.a; _uvTransformData[1] = uvTransform.b; _uvTransformData[3] = uvTransform.tx;
+					_uvTransformData[4] = uvTransform.c; _uvTransformData[5] = uvTransform.d; _uvTransformData[7] = uvTransform.ty;
+				}
+				else {
+					trace ("Warning: animateUVs is set to true with an IRenderable without a uvTransform. Identity matrix assumed.");
+					_uvTransformData[0] = 1; _uvTransformData[1] = 0; _uvTransformData[3] = 0;
+					_uvTransformData[4] = 0; _uvTransformData[5] = 1; _uvTransformData[7] = 0;
+				}
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _uvTransformIndex, _uvTransformData, 2);
+			}
 
 			if (_numLights > 0) {
 				var len : uint = lights.length;
@@ -679,7 +687,7 @@ package away3d.materials.passes
 			_uvBufferIndex = uvAttributeReg.index;
 			++_numUsedStreams;
 
-			if (_uvTransform) {
+			if (_animateUVs) {
 				// a, b, 0, tx
 				// c, d, 0, ty
 				var uvTransform1 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();

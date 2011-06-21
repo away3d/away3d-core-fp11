@@ -17,6 +17,7 @@
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.geom.Matrix;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -267,6 +268,11 @@
 		override protected function createEntityPartitionNode() : EntityNode
 		{
 			return new RenderableNode(this);
+		}
+
+		public function get uvTransform() : Matrix
+		{
+			return null;
 		}
 	}
 }
