@@ -5,6 +5,7 @@ package away3d.core.base
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 
 	/**
@@ -91,5 +92,8 @@ package away3d.core.base
 		 * Indicates whether the renderable can cast shadows
 		 */
 		function get castsShadows() : Boolean;
+
+
+		function get uvTransform() : Matrix;
 	}
 }

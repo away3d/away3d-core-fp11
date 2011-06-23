@@ -16,6 +16,7 @@ package away3d.entities
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
@@ -201,6 +202,11 @@ package away3d.entities
 		{
 			super.updateTransform();
 			_transform.prependScale(_width, _height, 1);
+		}
+
+		public function get uvTransform() : Matrix
+		{
+			return null;
 		}
 	}
 }
