@@ -4,6 +4,7 @@ package away3d.cameras.lenses
 	import away3d.errors.AbstractMethodError;
 
 	import flash.geom.Matrix3D;
+	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -84,6 +85,15 @@ package away3d.cameras.lenses
 			if (value == _far) return;
 			_far = value;
 			invalidateMatrix();
+		}
+
+		public function project(point3d : Vector3D) : Point
+		{
+			var p : Point = new Point();
+			var v : Vector3D = matrix.transformVector(point3d);
+			p.x = v.x/v.w;
+			p.y = -v.y/v.w;
+			return p;
 		}
 
 		public function unproject(mX:Number, mY:Number, mZ : Number):Vector3D

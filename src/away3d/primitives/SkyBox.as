@@ -19,6 +19,7 @@ package away3d.primitives
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -33,6 +34,7 @@ package away3d.primitives
 		private var _geometry : SubGeometry;
 		private var _material : SkyBoxMaterial;
 		private var _nullAnimation : AnimationBase = new NullAnimation();
+		private var _uvTransform : Matrix = new Matrix();
 
 		/**
 		 * Create a new SkyBox object.
@@ -237,6 +239,11 @@ package away3d.primitives
 		public function get castsShadows() : Boolean
 		{
 			return false;
+		}
+
+		public function get uvTransform() : Matrix
+		{
+			return _uvTransform;
 		}
 	}
 }
