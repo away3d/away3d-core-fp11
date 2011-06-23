@@ -8,6 +8,7 @@ package away3d.loaders.parsers
 	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.arcane;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
@@ -259,6 +260,9 @@ package away3d.loaders.parsers
 			switch (type) {
 				case 1:
 					assetData = parseMeshData(len);
+					break;
+				case 22:
+					assetData = parseContainer(len);
 					break;
 				case 24:
 					assetData = parseMeshInstance(len);
@@ -546,6 +550,34 @@ package away3d.loaders.parsers
 			return animation;
 		}
 		
+		private function parseContainer(blockLength : uint) : ObjectContainer3D
+		{
+			var name : String;
+			var par_id : uint;
+			var mtx : Matrix3D;
+			var ctr : ObjectContainer3D;
+			var parent : ObjectContainer3D;
+			
+			par_id = _body.readUnsignedInt();
+			mtx = parseMatrix3D();
+			name = parseVarStr();
+			
+			ctr = new ObjectContainer3D();
+			ctr.transform = mtx;
+			
+			parent = _blocks[par_id].data as ObjectContainer3D;
+			if (parent) {
+				parent.addChild(ctr);
+			}
+			
+			finalizeAsset(ctr, name);
+			
+			parseProperties(null);
+			parseUserAttributes();
+		
+			return ctr;
+		}
+		
 		private function parseMeshInstance(blockLength : uint) : Mesh
 		{
 			var name : String;
@@ -555,6 +587,7 @@ package away3d.loaders.parsers
 			var materials : Vector.<MaterialBase>;
 			var num_materials : uint;
 			var materials_parsed : uint;
+			var parent : ObjectContainer3D;
 			
 			par_id = _body.readUnsignedInt();
 			mtx = parseMatrix3D();
@@ -577,6 +610,12 @@ package away3d.loaders.parsers
 			
 			mesh = new Mesh(null, geom);
 			mesh.transform = mtx;
+			
+			// Add to parent if one exists
+			parent = _blocks[par_id].data as ObjectContainer3D;
+			if (parent) {
+				parent.addChild(mesh);
+			}
 			
 			if (materials.length >= 1 && mesh.subMeshes.length == 1) {
 				mesh.material = materials[0];
