@@ -200,7 +200,6 @@ package away3d.loaders.parsers
 		
 		arcane function resumeParsingAfterDependencies() : void
 		{
-			trace ('RESUMING PARSE');
 			_dependencies.length = 0;
 			_parsingPaused = false;
 			_timer.start();
@@ -297,7 +296,6 @@ package away3d.loaders.parsers
 		{
 			_timer.stop();
 			_parsingPaused = true;
-			trace ('PAUSING PARSE!');
 			dispatchEvent(new ParserEvent(ParserEvent.READY_FOR_DEPENDENCIES));
 		}
 		
