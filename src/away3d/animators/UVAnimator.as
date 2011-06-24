@@ -25,6 +25,9 @@ package away3d.animators
 			super();
 			
 			_target = target;
+            // disable transform warning
+            _target.uvRotation = 1;
+            _target.uvRotation = 0;
 			_sequences = {};
 			_deltaFrame = new UVAnimationFrame();
 			_tlUtil = new TimelineUtil();
