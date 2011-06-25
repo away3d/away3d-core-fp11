@@ -286,9 +286,9 @@ package away3d.loaders.parsers
 		}
 		
 		
-		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false) : void
+		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false, data : * = null) : void
 		{
-			_dependencies.push(new ResourceDependency(id, req, null, this, retrieveAsRawData));
+			_dependencies.push(new ResourceDependency(id, req, data, this, retrieveAsRawData));
 		}
 		
 		

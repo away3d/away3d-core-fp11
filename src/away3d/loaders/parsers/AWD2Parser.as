@@ -20,6 +20,7 @@ package away3d.loaders.parsers
 	import away3d.materials.MaterialBase;
 	
 	import flash.display.BitmapData;
+	import flash.display.Loader;
 	import flash.display.Sprite;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
@@ -400,11 +401,17 @@ package away3d.loaders.parsers
 				
 				url = _body.readUTFBytes(data_len);
 				
-				// TODO: Create dependency
 				_texture_users[_cur_block_id.toString()] = [];
 				addDependency(_cur_block_id.toString(), new URLRequest(url));
 			}
 			else {
+				var data : ByteArray;
+				var loader : Loader;
+				
+				data = new ByteArray();
+				_body.readBytes(data, 0, data_len);
+				
+				addDependency(_cur_block_id.toString(), null, false, data);
 			}
 			
 			// Ignore for now
@@ -747,6 +754,7 @@ package away3d.loaders.parsers
 					skinned_sub_geom.updateVertexData(sub_geom.vertexData);
 					skinned_sub_geom.updateIndexData(sub_geom.indexData);
 					skinned_sub_geom.updateUVData(sub_geom.UVData);
+					skinned_sub_geom.updateVertexNormalData(sub_geom.vertexNormalData);
 					skinned_sub_geom.updateJointIndexData(w_indices);
 					skinned_sub_geom.updateJointWeightsData(weights);
 					sub_geom = skinned_sub_geom;
