@@ -164,37 +164,13 @@ package away3d.loaders.parsers
 				parseHeader();
 				switch (_compression) {
 					case DEFLATE:
-						// TODO: Decompress deflate into _body;
 						_body = new ByteArray;
 						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
-						_body.inflate();
-						_body.position = 0;
+						_body.uncompress();
 						break;
 					case LZMA:
 						// TODO: Decompress LZMA into _body
-						/*
-						var decoder : LZMADecoder;
-						var properties : Vector.<int>;
-						var out_size : int;
-						
-						_body = new ByteArray;
-						
-						properties = new Vector.<int>(5, true);
-						for(var i: int = 0; i < 5; ++i) {
-						properties[i] = _byteData.readUnsignedByte()
-						}
-						
-						out_size = _byteData.readUnsignedInt();
-						trace('out size: ', out_size);
-						
-						decoder = new LZMADecoder;
-						decoder.setDecoderProperties(properties);
-						//decoder.setDecoderProperties(Vector.<int>([0x5d, 0, 0, 0, 1]));
-						decoder.code(_byteData, _body, out_size);
-						_body.position = 0;
-						*/
-						_body.position = _body.length;
-						trace('LZMA decoding not yet supported in AWD parser.');
+						dieWithError('LZMA decoding not yet supported in AWD parser.');
 						break;
 					case UNCOMPRESSED:
 						_body = _byteData;
