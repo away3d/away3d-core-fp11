@@ -508,8 +508,6 @@ package away3d.loaders.parsers
 			animation = new SkeletonAnimationSequence(name);
 			
 			num_frames = _body.readUnsignedShort();
-			frame_rate = _body.readUnsignedByte();
-			frame_dur = 1000/frame_rate;
 			
 			// Ignore properties for now (none in spec)
 			parseProperties(null);
@@ -520,6 +518,7 @@ package away3d.loaders.parsers
 				
 				//TODO: Check for null?
 				pose_addr = _body.readUnsignedInt();
+				frame_dur = _body.readUnsignedShort();
 				animation.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
 				
 				frames_parsed++;
