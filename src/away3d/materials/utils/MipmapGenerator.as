@@ -33,16 +33,23 @@ package away3d.materials.utils
 			_rect.width = w;
 			_rect.height = h;
 			               
-			while (w >= 1 && h >= 1) {
+			while (w >= 1 || h >= 1) {
 				if (alpha) mipmap.fillRect(_rect, 0);
 				mipmap.draw(source, _matrix, null, null, null, true);
 				target.uploadFromBitmapData(mipmap, i++);
+
+				if (w > 1)
+					_matrix.a *= .5;
+
 				w >>= 1;
+
+				if (h > 1)
+					_matrix.d *= .5;
+
 				h >>= 1;
-				_matrix.a *= .5;
-				_matrix.d *= .5;
-				_rect.width = w;
-				_rect.height = h;
+
+				_rect.width = w > 1? w : 1;
+				_rect.height = h > 1? h : 1;
 			}
 
 			if (!regen)
