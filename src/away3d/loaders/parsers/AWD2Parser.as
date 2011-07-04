@@ -164,37 +164,13 @@ package away3d.loaders.parsers
 				parseHeader();
 				switch (_compression) {
 					case DEFLATE:
-						// TODO: Decompress deflate into _body;
 						_body = new ByteArray;
 						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
-						_body.inflate();
-						_body.position = 0;
+						_body.uncompress();
 						break;
 					case LZMA:
 						// TODO: Decompress LZMA into _body
-						/*
-						var decoder : LZMADecoder;
-						var properties : Vector.<int>;
-						var out_size : int;
-						
-						_body = new ByteArray;
-						
-						properties = new Vector.<int>(5, true);
-						for(var i: int = 0; i < 5; ++i) {
-						properties[i] = _byteData.readUnsignedByte()
-						}
-						
-						out_size = _byteData.readUnsignedInt();
-						trace('out size: ', out_size);
-						
-						decoder = new LZMADecoder;
-						decoder.setDecoderProperties(properties);
-						//decoder.setDecoderProperties(Vector.<int>([0x5d, 0, 0, 0, 1]));
-						decoder.code(_byteData, _body, out_size);
-						_body.position = 0;
-						*/
-						_body.position = _body.length;
-						trace('LZMA decoding not yet supported in AWD parser.');
+						dieWithError('LZMA decoding not yet supported in AWD parser.');
 						break;
 					case UNCOMPRESSED:
 						_body = _byteData;
@@ -462,6 +438,10 @@ package away3d.loaders.parsers
 				ibp = parseMatrix3D();
 				joint.inverseBindPose = ibp.rawData;
 				
+				// Ignore joint props/attributes for now
+				parseProperties(null);
+				parseUserAttributes();
+				
 				skeleton.joints.push(joint);
 				joints_parsed++;
 			}
@@ -532,8 +512,6 @@ package away3d.loaders.parsers
 			animation = new SkeletonAnimationSequence(name);
 			
 			num_frames = _body.readUnsignedShort();
-			frame_rate = _body.readUnsignedByte();
-			frame_dur = 1000/frame_rate;
 			
 			// Ignore properties for now (none in spec)
 			parseProperties(null);
@@ -544,6 +522,7 @@ package away3d.loaders.parsers
 				
 				//TODO: Check for null?
 				pose_addr = _body.readUnsignedInt();
+				frame_dur = _body.readUnsignedShort();
 				animation.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
 				
 				frames_parsed++;
@@ -729,13 +708,13 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateVertexNormalData(normals);
 					}
-					else if (str_type == 7) {
+					else if (str_type == 6) {
 						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
 							w_indices[idx++] = read_uint()*3;
 						}
 					}
-					else if (str_type == 8) {
+					else if (str_type == 7) {
 						weights = new Vector.<Number>;
 						while (_body.position < str_end) {
 							weights[idx++] = read_float();
