@@ -438,6 +438,10 @@ package away3d.loaders.parsers
 				ibp = parseMatrix3D();
 				joint.inverseBindPose = ibp.rawData;
 				
+				// Ignore joint props/attributes for now
+				parseProperties(null);
+				parseUserAttributes();
+				
 				skeleton.joints.push(joint);
 				joints_parsed++;
 			}
@@ -704,13 +708,13 @@ package away3d.loaders.parsers
 						}
 						sub_geom.updateVertexNormalData(normals);
 					}
-					else if (str_type == 7) {
+					else if (str_type == 6) {
 						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
 							w_indices[idx++] = read_uint()*3;
 						}
 					}
-					else if (str_type == 8) {
+					else if (str_type == 7) {
 						weights = new Vector.<Number>;
 						while (_body.position < str_end) {
 							weights[idx++] = read_float();
