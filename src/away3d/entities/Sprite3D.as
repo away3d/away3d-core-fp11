@@ -1,17 +1,17 @@
 package away3d.entities
 {
+	import away3d.animators.data.AnimationBase;
+	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.data.NullAnimation;
 	import away3d.arcane;
 	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.cameras.Camera3D;
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
-	import away3d.animators.data.NullAnimation;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubGeometry;
-	import away3d.materials.MaterialBase;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.RenderableNode;
+	import away3d.materials.MaterialBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;

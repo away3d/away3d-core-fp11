@@ -2,7 +2,6 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.CubeTexture3DProxy;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -102,9 +101,9 @@ package away3d.materials.methods
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
-			code += AGAL.sample(temp.toString(), _normalFragmentReg.toString(), "cube", cubeMapReg.toString(), "bilinear", "clamp");
-			code += AGAL.add(temp+".xyz", temp+".xyz", targetReg+".xyz");
-			code += AGAL.sat(temp+".xyz", temp+".xyz");
+			code += "tex " + temp + ", " + _normalFragmentReg + ", " + cubeMapReg + " <cube, bilinear,clamp>\n" +
+					"add " + temp+".xyz, " + temp+".xyz, " + targetReg+".xyz\n" +
+					"sat " + temp+".xyz, " + temp+".xyz\n";
 
 			_cubeMapIndex = cubeMapReg.index;
 
@@ -114,12 +113,12 @@ package away3d.materials.methods
 			}
 			else {
 				_diffuseInputRegister = regCache.getFreeFragmentConstant();
-				code += AGAL.mov(targetReg.toString(), _diffuseInputRegister.toString());
+				code += "mov " + targetReg + ", " + _diffuseInputRegister + "\n";
 			}
 
 			_diffuseInputIndex = _diffuseInputRegister.index;
 
-			code += AGAL.mul(targetReg.toString(), targetReg.toString(), temp.toString());
+			code += "mul " + targetReg + ", " + targetReg + ", " + temp + " \n";
 
 			return code;
 		}

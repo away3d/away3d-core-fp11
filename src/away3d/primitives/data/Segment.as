@@ -2,8 +2,9 @@
 {
 	import away3d.arcane;
 	import away3d.entities.SegmentSet;
+
 	import flash.geom.Vector3D;
-	
+
 	use namespace arcane;
 	
 	public class Segment

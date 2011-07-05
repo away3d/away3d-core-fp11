@@ -1,8 +1,8 @@
 package away3d.events {
 	import away3d.containers.ObjectContainer3D;
-	
+
 	import flash.events.Event;
-	
+
 	/**
 	 * @author Paul Tondeur
 	 */

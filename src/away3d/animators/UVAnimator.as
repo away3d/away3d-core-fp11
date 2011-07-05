@@ -6,7 +6,7 @@ package away3d.animators
 	import away3d.arcane;
 	import away3d.core.base.SubMesh;
 	import away3d.materials.BitmapMaterial;
-	
+
 	use namespace arcane;
 	
 	public class UVAnimator extends AnimatorBase

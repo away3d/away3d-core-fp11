@@ -4,7 +4,6 @@ package away3d.library.naming
 	import away3d.events.AssetEvent;
 	import away3d.library.assets.IAsset;
 
-	
 	/**
 	 * Abstract base class for naming conflict resolution classes. Extend this to create a
 	 * strategy class which the asset library can use to resolve asset naming conflicts, or

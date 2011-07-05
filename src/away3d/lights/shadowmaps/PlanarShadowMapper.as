@@ -7,7 +7,6 @@ package away3d.lights.shadowmaps
 	import away3d.cameras.Camera3D;
 	import away3d.containers.Scene3D;
 	import away3d.core.render.DepthRenderer;
-
 	import away3d.lights.LightBase;
 
 	import flash.display3D.textures.TextureBase;

@@ -1,10 +1,8 @@
 package away3d.core.partition
 {
 	import away3d.cameras.Camera3D;
-	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
-	import away3d.errors.AbstractMethodError;
 	import away3d.primitives.WireframePrimitiveBase;
 
 	/**

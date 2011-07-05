@@ -3,11 +3,10 @@ package away3d.loaders.misc
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.loaders.AssetLoader;
-	
+
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.events.IEventDispatcher;
-	
+
 	/**
 	 * Instances of this class are returned as tokens by loading operations
 	 * to provide an object on which events can be listened for in cases where

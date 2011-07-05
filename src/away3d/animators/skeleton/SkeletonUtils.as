@@ -5,7 +5,7 @@ package away3d.animators.skeleton
 {
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.arcane;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Orientation3D;
 	import flash.geom.Vector3D;

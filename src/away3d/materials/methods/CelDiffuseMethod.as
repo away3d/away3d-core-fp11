@@ -1,7 +1,6 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -85,31 +84,27 @@ package away3d.materials.methods
 		 */
 		private function clampDiffuse(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = "";
-
-			code += AGAL.mul(t+".w", t+".w", _dataReg+".x");
-			code += AGAL.fract(t+".z", t+".w");
-			code += AGAL.sub(t+".y", t+".w", t+".z");
-			code += AGAL.mov(t+".x", _dataReg+".x");
-			code += AGAL.sub(t+".x", t+".x", _dataReg+".y");
-			code += AGAL.rcp(t+".x", t+".x");
-			code += AGAL.mul(t+".w", t+".y", t+".x");
+			return 	"mul " + t+".w, " + t+".w, " + _dataReg+".x\n" +
+					"frc " + t+".z, " + t+".w\n" +
+					"sub " + t+".y, " +  t+".w, " + t+".z\n" +
+					"mov " + t+".x, " + _dataReg+".x\n" +
+					"sub " + t+".x, " + t+".x, " + _dataReg+".y\n" +
+					"rcp " + t+".x," + t+".x\n" +
+					"mul " + t+".w, " + t+".y, " + t+".x\n" +
 
 			// previous clamped strength
-			code += AGAL.sub(t+".y", t+".w", t+".x");
+					"sub "  + t+".y, " + t+".w, " + t+".x\n" +
 
 			// fract/epsilon (so 0 - epsilon will become 0 - 1)
-			code += AGAL.div(t+".z", t+".z", _dataReg+".w");
-			code += AGAL.sat(t+".z", t+".z");
+					"div " + t+".z, " + t+".z, " + _dataReg+".w\n" +
+					"sat " + t+".z, " + t+".z\n" +
 
-			code += AGAL.mul(t+".w", t+".w", t+".z");
+					"mul " + t+".w, " + t+".w, " + t+".z\n" +
 			// 1-z
-			code += AGAL.sub(t+".z", _dataReg+".y", t+".z");
-			code += AGAL.mul(t+".y", t+".y", t+".z");
-			code += AGAL.add(t+".w", t+".w", t+".y");
-			code += AGAL.sat(t+".w", t+".w");
-
-			return code;
+					"sub " + t+".z, " + _dataReg+".y, " + t+".z\n" +
+					"mul " + t+".y, " + t+".y, " + t+".z\n" +
+					"add " + t+".w, " + t+".w, " + t+".y\n" +
+					"sat " + t+".w, " + t+".w\n";
 		}
 	}
 }

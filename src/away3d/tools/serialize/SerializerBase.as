@@ -1,11 +1,9 @@
 package away3d.tools.serialize
 {
 	import away3d.core.math.Quaternion;
-	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
-	
+
 	import flash.geom.Vector3D;
-	import flash.utils.getQualifiedClassName;
 
 	/**
 	 * SerializerBase is the abstract class for all Serializers. It provides an interface for basic data type writing.

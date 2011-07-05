@@ -2,7 +2,7 @@ package away3d.materials
 {
 	import away3d.arcane;
 	import away3d.events.LoaderEvent;
-	
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -12,7 +12,7 @@ package away3d.materials
 	import flash.events.ProgressEvent;
 	import flash.net.*;
 	import flash.system.LoaderContext;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -107,8 +107,8 @@ package away3d.materials
 		{
 			bitmapData = Bitmap(_loader.content).bitmapData;
 			
-			if(_dispatcher.hasEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE))
-				_dispatcher.dispatchEvent(new away3d.events.LoaderEvent(away3d.events.LoaderEvent.RESOURCE_COMPLETE, _uri));
+			if(_dispatcher.hasEventListener(LoaderEvent.RESOURCE_COMPLETE))
+				_dispatcher.dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
 		}
 	}
 }

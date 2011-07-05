@@ -4,16 +4,10 @@ package away3d.loaders.parsers
 
 	import away3d.library.assets.BitmapDataAsset;
 
-	
-
 	import flash.display.Bitmap;
-
 	import flash.display.Loader;
-
 	import flash.events.Event;
-
 	import flash.utils.ByteArray;
-	
 
 	/**
 

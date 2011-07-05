@@ -10,11 +10,11 @@ package away3d.loaders
 	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
-	
+
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
-	
+
 	/**
 	 * Loader3D can load any file format that Away3D supports (or for which a third-party parser
 	 * has been plugged in) and be added directly to the scene. As assets are encountered

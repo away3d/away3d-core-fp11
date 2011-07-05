@@ -1,7 +1,6 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -81,17 +80,17 @@ package away3d.materials.methods
 
 			// use view dir and normal fragment .w as temp
             // use normal or half vector? :s
-            code += AGAL.dp3(_viewDirFragmentReg+".w", _viewDirFragmentReg+".xyz", _incidentLight? target+".xyz" : _normalFragmentReg+".xyz");   // dot(V, H)
-            code += AGAL.sub(_viewDirFragmentReg+".w", _dataReg+".z", _viewDirFragmentReg+".w");             // base = 1-dot(V, H)
+            code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + (_incidentLight? target+".xyz\n" : _normalFragmentReg+".xyz\n") +   // dot(V, H)
+            		"sub " + _viewDirFragmentReg+".w, " + _dataReg+".z, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
 
-            code += AGAL.mul(_normalFragmentReg+".w", _viewDirFragmentReg+".w", _viewDirFragmentReg+".w");             // exp = pow(base, 2)
-            code += AGAL.mul(_normalFragmentReg+".w", _normalFragmentReg+".w", _normalFragmentReg+".w");             // exp = pow(base, 4)
-            code += AGAL.mul(_viewDirFragmentReg+".w", _normalFragmentReg+".w", _viewDirFragmentReg+".w");             // exp = pow(base, 5)
+            		"mul " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 2)
+					"mul " + _normalFragmentReg+".w, " + _normalFragmentReg+".w, " + _normalFragmentReg+".w\n" +             // exp = pow(base, 4)
+					"mul " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 5)
 
-            code += AGAL.sub(_normalFragmentReg+".w", _dataReg+".z", _viewDirFragmentReg+".w");             // 1 - exp
-            code += AGAL.mul(_normalFragmentReg+".w", _dataReg+".x", _normalFragmentReg+".w");             // f0*(1 - exp)
-            code += AGAL.add(_viewDirFragmentReg+".w", _viewDirFragmentReg+".w", _normalFragmentReg+".w");          // exp + f0*(1 - exp)
-            code += AGAL.mul(target+".w", target+".w", _viewDirFragmentReg+".w");
+					"sub " + _normalFragmentReg+".w, " + _dataReg+".z, " + _viewDirFragmentReg+".w\n" +             // 1 - exp
+					"mul " + _normalFragmentReg+".w, " + _dataReg+".x, " + _normalFragmentReg+".w\n" +             // f0*(1 - exp)
+					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
+					"mul " + target+".w, " + target+".w, " + _viewDirFragmentReg+".w\n";
 //            code += AGAL.sat(target+".w", target+".w");
 
 			return code;

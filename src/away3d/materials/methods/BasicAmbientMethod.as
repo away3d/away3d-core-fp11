@@ -1,7 +1,6 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -91,7 +90,7 @@ package away3d.materials.methods
 			_ambientInputRegister = regCache.getFreeFragmentConstant();
 			_ambientInputIndex = _ambientInputRegister.index;
 
-			return AGAL.mov(targetReg.toString(), _ambientInputRegister.toString());
+			return "mov " + targetReg.toString() + ", " + _ambientInputRegister.toString() + "	\n";
 		}
 
 		/**

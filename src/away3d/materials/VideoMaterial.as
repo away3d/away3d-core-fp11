@@ -1,14 +1,15 @@
 package away3d.materials
 {
-	
-	
+
+
+	import away3d.materials.utils.IVideoPlayer;
+	import away3d.materials.utils.SimpleVideoPlayer;
+
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
-	import away3d.materials.utils.IVideoPlayer;
-	import away3d.materials.utils.SimpleVideoPlayer;
-	
+
 	public class VideoMaterial extends BitmapMaterial
 	{
 		

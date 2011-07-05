@@ -1,7 +1,6 @@
 package away3d.core.sort
 {
 	import away3d.arcane;
-	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.traverse.EntityCollector;
 

@@ -7,7 +7,6 @@ package away3d.lights.shadowmaps
 	import away3d.core.traverse.EntityCollector;
 	import away3d.core.traverse.ShadowCasterCollector;
 	import away3d.errors.AbstractMethodError;
-
 	import away3d.lights.LightBase;
 
 	import flash.display3D.Context3D;

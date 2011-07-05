@@ -3,8 +3,6 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.CubeTexture3DProxy;
-	import away3d.materials.SkyBoxMaterial;
-	import away3d.materials.utils.AGAL;
 
 	import flash.display3D.Context3D;
 
@@ -51,8 +49,8 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode() : String
 		{
-			return 	AGAL.sample("ft0", "v0", "cube", "fs0", "bilinear", "clamp") +
-					AGAL.mov("oc", "ft0");
+			return 	"tex ft0, v0, fs0 <cube,linear,clamp>	\n" +
+					"mov oc, ft0							\n";
 		}
 
 		/**

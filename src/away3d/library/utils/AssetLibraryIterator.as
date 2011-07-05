@@ -1,6 +1,5 @@
 package away3d.library.utils
 {
-	import away3d.library.AssetLibrary;
 	import away3d.library.assets.IAsset;
 
 	public class AssetLibraryIterator

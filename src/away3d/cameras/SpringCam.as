@@ -1,12 +1,12 @@
 ﻿package away3d.cameras
 {
-  import away3d.cameras.Camera3D;
-  import away3d.cameras.lenses.LensBase;
-  import away3d.core.base.Object3D;
-  import flash.geom.Matrix3D;
-  import flash.geom.Vector3D;
-  
-	/**  
+	import away3d.cameras.lenses.LensBase;
+	import away3d.core.base.Object3D;
+
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+
+	/**
    * v1 - 2009-01-21 b at turbulent dot ca - http://agit8.turbulent.ca
    * v2 - 2011-03-06 Ringo - http://www.ringo.nl/en/
    **/

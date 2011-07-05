@@ -1,11 +1,11 @@
 package away3d.core.base
 {
-	import away3d.arcane;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
-	import away3d.materials.MaterialBase;
+	import away3d.arcane;
 	import away3d.entities.Entity;
 	import away3d.entities.Mesh;
+	import away3d.materials.MaterialBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;

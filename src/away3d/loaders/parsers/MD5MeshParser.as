@@ -8,7 +8,7 @@ package away3d.loaders.parsers
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.math.Quaternion;
 	import away3d.entities.Mesh;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 

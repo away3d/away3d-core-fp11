@@ -1,7 +1,6 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -61,8 +60,8 @@ package away3d.materials.methods
 			var colorMultReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var colorOffsReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			_colorTransformIndex = colorMultReg.index;
-			code += AGAL.mul(targetReg.toString(), targetReg.toString(), colorMultReg.toString());
-			code += AGAL.add(targetReg.toString(), targetReg.toString(), colorOffsReg.toString());
+			code += "mul " + targetReg + ", " + targetReg.toString() + ", " + colorMultReg + "\n" +
+					"add " + targetReg + ", " + targetReg.toString() + ", " + colorOffsReg + "\n";
 			return code;
 		}
 

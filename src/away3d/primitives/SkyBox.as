@@ -1,20 +1,20 @@
 package away3d.primitives
 {
-	import away3d.arcane;
-	import away3d.bounds.NullBounds;
-	import away3d.cameras.Camera3D;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.NullAnimation;
+	import away3d.arcane;
+	import away3d.bounds.NullBounds;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubGeometry;
+	import away3d.core.partition.EntityNode;
+	import away3d.core.partition.SkyBoxNode;
+	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
 	import away3d.materials.utils.CubeMap;
-	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.SkyBoxNode;
-	import away3d.entities.Entity;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;

@@ -4,13 +4,13 @@ package away3d.entities
 	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.cameras.Camera3D;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
-	import away3d.errors.AbstractMethodError;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.Partition3D;
+	import away3d.errors.AbstractMethodError;
 
 	import flash.geom.Matrix3D;
-	import away3d.containers.ObjectContainer3D;
 
 	use namespace arcane;
 

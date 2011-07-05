@@ -1,7 +1,6 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -61,14 +60,14 @@ package away3d.materials.methods
 			var code : String = "";
 			_fogDataIndex = fogDataRegister.index;
 
-			code += AGAL.dp3(temp+".w", _viewDirVaryingReg+".xyz", _viewDirVaryingReg+".xyz");	// dist²
-			code += AGAL.sqrt(temp+".w", temp+".w");	// dist²
-			code += AGAL.mul(temp+".w", temp+".w", fogDataRegister+".w");						// fogRatio = dist²/maxDist²
-			code += AGAL.neg(temp+".w", temp+".w");						// fogRatio = dist²/maxDist²
-			code += AGAL.exp(temp+".w", temp+".w");						// fogRatio = dist²/maxDist²
-			code += AGAL.sub(temp+".xyz", targetReg+".xyz", fogDataRegister+".xyz");						// (fogColor- col)
-			code += AGAL.mul(temp+".xyz", temp+".xyz", temp+".w");								// (fogColor- col)*fogRatio
-			code += AGAL.add(targetReg+".xyz", fogDataRegister+".xyz", temp+".xyz");					// fogRatio*(fogColor- col) + col
+			code += "dp3 " + temp + ".w, " + _viewDirVaryingReg+".xyz, " + _viewDirVaryingReg + ".xyz		\n" + 	// dist²
+					"sqt " + temp + ".w, " + temp + ".w										\n" + 	// dist²
+					"mul " + temp + ".w, " + temp + ".w, " + fogDataRegister + ".w			\n" + 			// fogRatio = dist²/maxDist²
+					"neg " + temp + ".w, " + temp + ".w										\n" +			// fogRatio = dist²/maxDist²
+					"exp " + temp + ".w, " + temp + ".w										\n" + 			// fogRatio = dist²/maxDist²
+					"sub " + temp + ".xyz, " + targetReg + ".xyz, " + fogDataRegister + ".xyz\n" + 			// (fogColor- col)
+					"mul " + temp + ".xyz, " + temp+".xyz, " + temp + ".w					\n" +			// (fogColor- col)*fogRatio
+					"add " + targetReg + ".xyz, " + fogDataRegister + ".xyz, " + temp + ".xyz\n";			// fogRatio*(fogColor- col) + col
 
 
 			return code;

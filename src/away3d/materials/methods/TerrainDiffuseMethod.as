@@ -1,22 +1,19 @@
 package away3d.materials.methods
 {
-    import away3d.arcane;
-    import away3d.core.managers.Texture3DProxy;
+	import away3d.arcane;
+	import away3d.core.managers.Texture3DProxy;
+	import away3d.materials.utils.ShaderRegisterCache;
+	import away3d.materials.utils.ShaderRegisterElement;
 
-    import away3d.materials.utils.AGAL;
-    import away3d.materials.utils.ShaderRegisterCache;
-
-    import away3d.materials.utils.ShaderRegisterElement;
-
-    import flash.display.BitmapData;
-    import flash.display.BitmapDataChannel;
+	import flash.display.BitmapData;
+	import flash.display.BitmapDataChannel;
 	import flash.display.Shader;
 	import flash.display.ShaderJob;
 	import flash.display3D.Context3D;
-    import flash.display3D.Context3DProgramType;
-    import flash.geom.Point;
+	import flash.display3D.Context3DProgramType;
+	import flash.geom.Point;
 
-    use namespace arcane;
+	use namespace arcane;
 
     public class TerrainDiffuseMethod extends BasicDiffuseMethod
     {
@@ -85,8 +82,8 @@ package away3d.materials.methods
 
 			// incorporate input from ambient
 	        if (_numLights > 0) {
-				code += AGAL.add(targetReg+".xyz", _totalLightColorReg+".xyz", targetReg+".xyz");
-				code += AGAL.sat(targetReg+".xyz", targetReg+".xyz");
+				code += "add " + targetReg+".xyz, " + _totalLightColorReg+".xyz, " + targetReg+".xyz\n" +
+						"sat " + targetReg+".xyz, " + targetReg+".xyz\n";
 				regCache.removeFragmentTempUsage(_totalLightColorReg);
 
                 albedo = regCache.getFreeFragmentVectorTemp();
@@ -113,12 +110,11 @@ package away3d.materials.methods
             for (var i : int = 0; i < _numSplattingLayers; ++i) {
                 splatTexReg = regCache.getFreeTextureReg();
                 if (i == 0) _splatTextureIndex = splatTexReg.index;
-                code += AGAL.mul(uv.toString(), _uvFragmentReg.toString(), scaleRegister.toString() + comps[i]);
-                code += getSplatSampleCode(uv, splatTexReg, uv);
-//                code += AGAL.add(albedo.toString(), albedo.toString(), uv.toString());
-                code += AGAL.sub(uv.toString(), uv.toString(), albedo.toString());
-                code += AGAL.mul(uv.toString(), uv.toString(), temp.toString() + comps[i]);
-                code += AGAL.add(albedo.toString(), albedo.toString(), uv.toString());
+                code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + comps[i] + "\n" +
+						getSplatSampleCode(uv, splatTexReg, uv) +
+                		"sub " + uv + ", " + uv + ", " + albedo + "\n" +
+						"mul " + uv + ", " + uv + ", " + temp + comps[i] + "\n" +
+						"add " + albedo + ", " + albedo + ", " + uv + "\n";
             }
             regCache.removeFragmentTempUsage(uv);
 
@@ -127,8 +123,8 @@ package away3d.materials.methods
 			if (_numLights == 0)
 				return code;
 
-			code += AGAL.mul(targetReg+".xyz", albedo+".xyz", targetReg+".xyz");
-            code += AGAL.mov(targetReg+".w", albedo+".w");
+			code += "mul " + targetReg+".xyz, " + albedo+".xyz, " + targetReg+".xyz\n" +
+					"mov " + targetReg+".w, " + albedo+".w\n";
 
             regCache.removeFragmentTempUsage(albedo);
 
@@ -172,11 +168,11 @@ package away3d.materials.methods
 			var wrap : String = "wrap";
 			var filter : String;
 
-			if (_smooth) filter = _mipmap ? "trilinear" : "bilinear";
-			else filter = _mipmap ? "nearestMip" : "nearestNoMip";
+			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
+			else filter = _mipmap ? "nearest,mipnearest" : "nearest";
 
             uvReg ||= _uvFragmentReg;
-			return AGAL.sample(targetReg.toString(), uvReg.toString(), "2d", inputReg.toString(), filter, wrap);
+			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + ",wrap>\n";
 		}
     }
 }

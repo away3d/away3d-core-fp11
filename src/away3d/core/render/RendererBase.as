@@ -1,7 +1,6 @@
 package away3d.core.render
 {
 	import away3d.arcane;
-	import away3d.core.data.RenderableListItem;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.sort.EntitySorterBase;
 	import away3d.core.sort.RenderableMergeSort;

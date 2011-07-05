@@ -7,7 +7,6 @@ package away3d.core.render
 	import away3d.core.traverse.EntityCollector;
 	import away3d.materials.MaterialBase;
 
-
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 

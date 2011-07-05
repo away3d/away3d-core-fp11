@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.core.base.IRenderable;
 	import away3d.lights.LightBase;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -326,11 +325,11 @@ package away3d.materials.methods
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var filter : String;
 
-			if (_smooth) filter = _mipmap ? "trilinear" : "bilinear";
-			else filter = _mipmap ? "nearestMip" : "nearestNoMip";
+			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
+			else filter = _mipmap ? "nearest,mipnearest" : "nearest";
 
             uvReg ||= _uvFragmentReg;
-			return AGAL.sample(targetReg.toString(), uvReg.toString(), "2d", inputReg.toString(), filter, wrap);
+            return "tex "+targetReg.toString()+", "+uvReg.toString()+", "+inputReg.toString()+" <2d,"+filter+","+wrap+">\n";
 		}
 
 		/**

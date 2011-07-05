@@ -1,7 +1,7 @@
 package away3d.events
 {
 	import away3d.library.assets.IAsset;
-	
+
 	import flash.events.Event;
 
 	public class AssetEvent extends Event

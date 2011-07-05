@@ -4,7 +4,6 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.lights.LightBase;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -84,13 +83,13 @@ package away3d.materials.methods
 			_depthMapVar = regCache.getFreeVarying();
 			_toTexIndex = toTexReg.index;
 
-			code += AGAL.m44(temp.toString(), "vt0", depthMapProj.toString());
-			code += AGAL.rcp(temp+".w", temp+".w");
-			code += AGAL.mul(temp+".xyz", temp+".xyz", temp+".w");
-			code += AGAL.mul(temp+".xy", temp+".xy", toTexReg+".xy");
-			code += AGAL.add(temp+".xy", temp+".xy", toTexReg+".xx");
-			code += AGAL.mov(_depthMapVar+".xyz", temp+".xyz");
-			code += AGAL.mov(_depthMapVar+".w", "va0.w");
+			code += "m44 " + temp + ", vt0, " + depthMapProj + "				\n" +
+					"rcp " + temp + ".w, " + temp + ".w							\n" +
+					"mul " + temp + ".xyz, " + temp + ".xyz, " + temp + ".w		\n" +
+					"mul " + temp + ".xy, " + temp + ".xy, " + toTexReg + ".xy	\n" +
+					"add " + temp + ".xy, " + temp + ".xy, " + toTexReg + ".xx	\n" +
+					"mov " + _depthMapVar + ".xyz, " + temp + ".xyz				\n" +
+					"mov " + _depthMapVar + ".w, va0.w							\n";
 
 			return code;
 		}
@@ -113,50 +112,50 @@ package away3d.materials.methods
 			uvReg = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uvReg, 1);
 
-			code += AGAL.mov(uvReg.toString(), _depthMapVar.toString());
+			code += "mov " + uvReg + ", " + _depthMapVar + "\n" +
 
-			code += AGAL.sample(depthCol.toString(), _depthMapVar.toString(), "2d", depthMapRegister.toString(), "nearest", "clamp");
-			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
-			code += AGAL.sub(depthCol+".z", depthCol+".z", dataReg+".x");	// offset by epsilon
-			code += AGAL.lessThan(uvReg+".z", _depthMapVar+".z", depthCol+".z");   // 0 if in shadow
+					"tex " + depthCol + ", " + _depthMapVar + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg+".x\n" + 	// offset by epsilon
+					"slt " + uvReg+".z, " + _depthMapVar+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
-			code += AGAL.add(uvReg+".x", _depthMapVar+".x", dataReg+".w");	// (1, 0)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearest", "clamp");
-			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
-			code += AGAL.sub(depthCol+".z", depthCol+".z", dataReg+".x");	// offset by epsilon
-			code += AGAL.lessThan(uvReg+".w", _depthMapVar+".z", depthCol+".z");   // 0 if in shadow
+					"add " + uvReg+".x, " + _depthMapVar+".x, " + dataReg+".w\n" + 	// (1, 0)
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg+".x\n" +	// offset by epsilon
+					"slt " + uvReg+".w, " + _depthMapVar+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
-			code += AGAL.div(depthCol+".x", _depthMapVar+".x", dataReg+".w");
-			code += AGAL.fract(depthCol+".x", depthCol+".x");
-			code += AGAL.sub(uvReg+".w", uvReg+".w", uvReg+".z");
-			code += AGAL.mul(uvReg+".w", uvReg+".w", depthCol+".x");
-			code += AGAL.add(targetReg+".w", uvReg+".z", uvReg+".w");
+					"div " + depthCol+".x, " + _depthMapVar+".x, " + dataReg+".w\n" +
+					"frc " + depthCol+".x, " + depthCol+".x\n" +
+					"sub " + uvReg+".w, " + uvReg+".w, " + uvReg+".z\n" +
+					"mul " + uvReg+".w, " + uvReg+".w, " + depthCol+".x\n" +
+					"add " + targetReg+".w, " + uvReg+".z, " + uvReg+".w\n" +
 
-			code += AGAL.mov(uvReg+".x", _depthMapVar+".x");
-			code += AGAL.add(uvReg+".y", _depthMapVar+".y", dataReg+".w");	// (0, 1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearest", "clamp");
-			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
-			code += AGAL.sub(depthCol+".z", depthCol+".z", dataReg+".x");	// offset by epsilon
-			code += AGAL.lessThan(uvReg+".z", _depthMapVar+".z", depthCol+".z");   // 0 if in shadow
+					"mov " + uvReg+".x, " + _depthMapVar+".x\n" +
+					"add " + uvReg+".y, " + _depthMapVar+".y, " + dataReg+".w\n" +	// (0, 1)
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg+".x\n" +	// offset by epsilon
+					"slt " + uvReg+".z, " + _depthMapVar+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
-			code += AGAL.add(uvReg+".x", _depthMapVar+".x", dataReg+".w");	// (1, 1)
-			code += AGAL.sample(depthCol.toString(), uvReg.toString(), "2d", depthMapRegister.toString(), "nearest", "clamp");
-			code += AGAL.dp4(depthCol+".z", depthCol.toString(), decReg.toString());
-			code += AGAL.sub(depthCol+".z", depthCol+".z", dataReg+".x");	// offset by epsilon
-			code += AGAL.lessThan(uvReg+".w", _depthMapVar+".z", depthCol+".z");   // 0 if in shadow
+					"add " + uvReg+".x, " + _depthMapVar+".x, " + dataReg+".w\n" +	// (1, 1)
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg+".x\n" +	// offset by epsilon
+					"slt " + uvReg+".w, " + _depthMapVar+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
-			// recalculate fraction, since we ran out of registers :(
-			code += AGAL.mul(depthCol+".x", _depthMapVar+".x", dataReg+".z");
-			code += AGAL.fract(depthCol+".x", depthCol+".x");
-			code += AGAL.sub(uvReg+".w", uvReg+".w", uvReg+".z");
-			code += AGAL.mul(uvReg+".w", uvReg+".w", depthCol+".x");
-			code += AGAL.add(uvReg+".w", uvReg+".z", uvReg+".w");
+					// recalculate fraction, since we ran out of registers :(
+					"mul " + depthCol+".x, " + _depthMapVar+".x, " + dataReg+".z\n" +
+					"frc " + depthCol+".x, " + depthCol+".x\n" +
+					"sub " + uvReg+".w, " + uvReg+".w, " + uvReg+".z\n" +
+					"mul " + uvReg+".w, " + uvReg+".w, " + depthCol+".x\n" +
+					"add " + uvReg+".w, " + uvReg+".z, " + uvReg+".w\n" +
 
-			code += AGAL.mul(depthCol+".x", _depthMapVar+".y", dataReg+".z");
-			code += AGAL.fract(depthCol+".x", depthCol+".x");
-			code += AGAL.sub(uvReg+".w", uvReg+".w", targetReg+".w");
-			code += AGAL.mul(uvReg+".w", uvReg+".w", depthCol+".x");
-			code += AGAL.add(targetReg+".w", targetReg+".w", uvReg+".w");
+					"mul " + depthCol+".x, " + _depthMapVar+".y, " + dataReg+".z\n" +
+					"frc " + depthCol+".x, " + depthCol+".x\n" +
+					"sub " + uvReg+".w, " + uvReg+".w, " + targetReg+".w\n" +
+					"mul " + uvReg+".w, " + uvReg+".w, " + depthCol+".x\n" +
+					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n";
 
 			regCache.removeFragmentTempUsage(depthCol);
 			regCache.removeFragmentTempUsage(uvReg);

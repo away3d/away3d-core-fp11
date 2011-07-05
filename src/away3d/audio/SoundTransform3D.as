@@ -1,12 +1,11 @@
 package away3d.audio
 {
 	import away3d.containers.ObjectContainer3D;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.media.SoundTransform;
 
-	
 	/**
 	 * SoundTransform3D is a convinience class that helps adjust a Soundtransform's volume and pan according
 	 * position and distance of a listener and emitter object. See SimplePanVolumeDriver for the limitations

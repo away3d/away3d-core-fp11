@@ -5,7 +5,7 @@ package away3d.animators.skeleton
 {
 
 	import away3d.core.math.Quaternion;
-	
+
 	import flash.geom.Vector3D;
 
 	public class SkeletonAdditiveNode extends SkeletonTreeNode

@@ -1,9 +1,7 @@
 package away3d.core.base
 {
-	import away3d.arcane;
 	import away3d.animators.data.AnimationBase;
-
-	import away3d.events.GeometryEvent;
+	import away3d.arcane;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;

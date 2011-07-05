@@ -2,7 +2,7 @@ package away3d.debug
 {
 	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DManager;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.CapsStyle;
 	import flash.display.Graphics;
@@ -17,7 +17,7 @@ package away3d.debug
 	import flash.text.TextFormat;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-	
+
 	/**
 	 * <p>Stats monitor for Away3D or general use in any project. The widget was designed to
 	 * display all the necessary data in ways that are easily readable, while maintaining a

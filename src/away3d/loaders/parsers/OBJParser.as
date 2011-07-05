@@ -10,11 +10,11 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
-	
+
 	import flash.display.BitmapData;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -787,6 +787,10 @@ package away3d.loaders.parsers
 	}
 }
 
+import away3d.materials.methods.BasicSpecularMethod;
+
+import flash.display.BitmapData;
+
 // value objects:
 class ObjectGroup
 {
@@ -809,8 +813,6 @@ class MaterialGroup
 
 class SpecularData
 {
-	import away3d.materials.methods.BasicSpecularMethod;
-	
 	public var materialID : String;
 	public var basicSpecularMethod : BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
@@ -818,9 +820,6 @@ class SpecularData
 
 class LoadedMaterial
 {
-	import flash.display.BitmapData;
-	import away3d.materials.methods.BasicSpecularMethod;
-	
 	public var materialID:String;
 	public var bitmapData:BitmapData;
 	

@@ -1,13 +1,12 @@
 package away3d.materials.passes
 {
+	import away3d.animators.data.AnimationBase;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.animators.data.AnimationBase;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.AGALProgram3DAssembler;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.LightBase;
-	import away3d.materials.ColorMaterial;
 	import away3d.materials.MaterialBase;
 
 	import flash.display.BitmapData;

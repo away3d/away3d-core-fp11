@@ -4,7 +4,6 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -75,16 +74,16 @@ package away3d.materials.methods
 			var code : String = "";
 			_dataIndex = dataRegister.index;
 
-			code += AGAL.dp3(temp+".x", _viewDirFragmentReg+".xyz", _normalFragmentReg+".xyz");
-			code += AGAL.sat(temp+".x", temp+".x");
-			code += AGAL.sub(temp+".x", dataRegister+".w", temp+".x");
-			code += AGAL.pow(temp+".x", temp+".x", dataRegister2+".y");
-			code += AGAL.mul(temp+".x", temp+".x", dataRegister2+".x");
-			code += AGAL.sub(temp+".x", dataRegister+".w", temp+".x");
-			code += AGAL.mul(targetReg+".xyz", targetReg+".xyz", temp+".x");
-			code += AGAL.sub(temp+".x", dataRegister+".w", temp+".x");
-			code += AGAL.mul(temp+".xyz", temp+".x", dataRegister+".xyz");
-			code += AGAL.add(targetReg+".xyz", targetReg+".xyz", temp+".xyz");
+			code += "dp3 " + temp + ".x, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz	\n" +
+					"sat " + temp + ".x, " + temp + ".x														\n" +
+					"sub " + temp + ".x, " + dataRegister + ".w, " + temp + ".x								\n" +
+					"pow " + temp + ".x, " + temp + ".x, " + dataRegister2 + ".y							\n" +
+					"mul " + temp + ".x, " + temp + ".x, " + dataRegister2 + ".x							\n" +
+					"sub " + temp + ".x, " + dataRegister + ".w, " + temp + ".x								\n" +
+					"mul " + targetReg + ".xyz, " + targetReg + ".xyz, " + temp + ".x						\n" +
+					"sub " + temp + ".x, " + dataRegister + ".w, " + temp + ".x								\n" +
+					"mul " + temp + ".xyz, " + temp + ".x, " + dataRegister + ".xyz							\n" +
+					"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz						\n";
 
 			return code;
 		}

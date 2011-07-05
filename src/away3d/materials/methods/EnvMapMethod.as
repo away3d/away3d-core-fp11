@@ -5,7 +5,6 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.CubeTexture3DProxy;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -70,15 +69,15 @@ package away3d.materials.methods
 			_dataIndex = dataRegister.index;
 
 			// r = V - 2(V.N)*N
-			code += AGAL.dp3(temp+".w", _viewDirFragmentReg+".xyz", _normalFragmentReg+".xyz");
-			code += AGAL.add(temp+".w", temp+".w", temp+".w");
-			code += AGAL.mul(temp+".xyz", _normalFragmentReg+".xyz", temp+".w");
-			code += AGAL.sub(temp+".xyz", _viewDirFragmentReg+".xyz", temp+".xyz");
-			code += AGAL.neg(temp+".xyz", temp+".xyz");
-			code += AGAL.sample(temp.toString(), temp.toString(), "cube", cubeMapReg.toString(), _smooth? "bilinear" : "nearestNoMip", "clamp");
-			code += AGAL.sub(temp+".xyz", temp+".xyz", targetReg+".xyz");
-			code += AGAL.mul(temp+".xyz", temp+".xyz", dataRegister+".x");
-			code += AGAL.add(targetReg+".xyz", targetReg+".xyz", temp+".xyz");
+			code += "dp3 " + temp + ".w, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz		\n" +
+					"add " + temp + ".w, " + temp + ".w, " + temp + ".w											\n" +
+					"mul " + temp + ".xyz, " + _normalFragmentReg + ".xyz, " + temp + ".w						\n" +
+					"sub " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz, " + temp + ".xyz					\n" +
+					"neg " + temp + ".xyz, " + temp + ".xyz														\n" +
+					"tex " + temp.toString() + ", " + temp.toString() + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",clamp>\n" +
+					"sub " + temp + ".xyz, " + temp + ".xyz, " + targetReg + ".xyz								\n" +
+					"mul " + temp + ".xyz, " + temp + ".xyz, " + dataRegister + ".x								\n" +
+					"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz							\n";
 
 			return code;
 		}

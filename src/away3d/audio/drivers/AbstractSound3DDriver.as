@@ -2,7 +2,7 @@ package away3d.audio.drivers
 {
 	import flash.geom.*;
 	import flash.media.*;
-	
+
 	public class AbstractSound3DDriver
 	{
 		protected var _ref_v:Vector3D;

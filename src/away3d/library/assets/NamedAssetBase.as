@@ -2,7 +2,7 @@ package away3d.library.assets
 {
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
-	
+
 	import flash.events.EventDispatcher;
 
 	use namespace arcane;

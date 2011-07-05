@@ -3,24 +3,14 @@ package away3d.lights
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.bounds.NullBounds;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.OrthographicOffCenterLens;
-	import away3d.containers.Scene3D;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.render.DepthRenderer;
-
 	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.materials.MaterialBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
-
 	import away3d.materials.utils.ShaderRegisterElement;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
-	import flash.display3D.textures.TextureBase;
-	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;

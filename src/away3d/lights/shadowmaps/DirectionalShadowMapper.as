@@ -8,7 +8,6 @@ package away3d.lights.shadowmaps
 	import away3d.cameras.lenses.OrthographicOffCenterLens;
 	import away3d.containers.Scene3D;
 	import away3d.core.render.DepthRenderer;
-
 	import away3d.lights.DirectionalLight;
 
 	import flash.display3D.textures.TextureBase;

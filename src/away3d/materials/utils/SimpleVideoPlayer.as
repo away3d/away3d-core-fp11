@@ -9,7 +9,7 @@ package away3d.materials.utils
 	import flash.media.Video;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
-	
+
 	public class SimpleVideoPlayer implements IVideoPlayer
 	{
 		

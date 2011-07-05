@@ -1,8 +1,8 @@
 package away3d.audio.drivers
 {
-	import flash.media.*;
 	import flash.geom.*;
-	
+	import flash.media.*;
+
 	public interface ISound3DDriver
 	{
 		/**

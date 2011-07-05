@@ -1,7 +1,7 @@
 package away3d.animators.data
 {
 	import away3d.arcane;
-	
+
 	use namespace arcane;
 
 	public class UVAnimationSequence extends AnimationSequenceBase

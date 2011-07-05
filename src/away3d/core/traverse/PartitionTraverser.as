@@ -2,10 +2,10 @@ package away3d.core.traverse
 {
 	import away3d.containers.Scene3D;
 	import away3d.core.base.IRenderable;
-	import away3d.errors.AbstractMethodError;
-	import away3d.lights.LightBase;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
+	import away3d.errors.AbstractMethodError;
+	import away3d.lights.LightBase;
 
 	/**
 	 * IPartitionTraverser is a hierarchical visitor pattern that traverses through a Partition3D data structure.

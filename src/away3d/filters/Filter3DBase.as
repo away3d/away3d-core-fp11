@@ -3,13 +3,13 @@ package away3d.filters
 	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
 
-//	import away3d.filters.Filter3DBase.requireDepthRender;
-
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.Texture;
+
+//	import away3d.filters.Filter3DBase.requireDepthRender;
 
 	public class Filter3DBase
 	{

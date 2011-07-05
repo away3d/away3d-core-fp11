@@ -1,7 +1,6 @@
 package away3d.filters{
 	import away3d.cameras.Camera3D;
 	import away3d.debug.Debug;
-	import away3d.filters.Filter3DBase;
 
 	import com.adobe.utils.AGALMiniAssembler;
 

@@ -15,9 +15,9 @@ package away3d.tools.serialize
 	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
-	
+
 	import flash.utils.getQualifiedClassName;
-	
+
 	use namespace arcane;
 	
 	public class Serialize
@@ -207,7 +207,7 @@ package away3d.tools.serialize
 		
 		private static function classNameFromInstance(instance:*):String
 		{
-			return flash.utils.getQualifiedClassName(instance).split("::").pop()
+			return getQualifiedClassName(instance).split("::").pop()
 		}
 		
 		private static function serializeObjectContainerInternal(objectContainer:ObjectContainer3D, serializer:SerializerBase, serializeChildrenAndEnd:Boolean):void

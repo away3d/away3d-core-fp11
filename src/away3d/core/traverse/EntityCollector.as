@@ -5,11 +5,10 @@ package away3d.core.traverse
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.data.RenderableListItemPool;
-	import away3d.core.math.Plane3D;
-	import away3d.lights.LightBase;
-	import away3d.materials.MaterialBase;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
+	import away3d.lights.LightBase;
+	import away3d.materials.MaterialBase;
 
 	use namespace arcane;
 

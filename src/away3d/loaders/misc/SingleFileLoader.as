@@ -6,7 +6,7 @@ package away3d.loaders.misc
 	import away3d.loaders.parsers.ImageParser;
 	import away3d.loaders.parsers.ParserBase;
 	import away3d.loaders.parsers.ParserDataFormat;
-	
+
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
@@ -14,7 +14,7 @@ package away3d.loaders.misc
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-	
+
 	/**
 	 * The SingleFileLoader is used to load a single file, as part of a resource.
 	 *

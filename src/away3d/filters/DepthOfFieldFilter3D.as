@@ -1,7 +1,6 @@
 package away3d.filters{
 	import away3d.cameras.Camera3D;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.Object3D;
 	import away3d.debug.Debug;
 
 	import com.adobe.utils.AGALMiniAssembler;

@@ -10,7 +10,7 @@ package away3d.containers
 	import flash.events.Event;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
-	
+
 	use namespace arcane;
 	
 	/**

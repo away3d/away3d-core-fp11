@@ -11,7 +11,7 @@ package away3d.materials
 	import away3d.lights.LightBase;
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;

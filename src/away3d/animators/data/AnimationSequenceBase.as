@@ -5,7 +5,7 @@ package away3d.animators.data
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
-	
+
 	import flash.geom.Vector3D;
 
 	use namespace arcane;

@@ -1,9 +1,9 @@
 package away3d.animators.data
 {
+	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.arcane;
 
 	import flash.geom.Vector3D;
-	import away3d.animators.skeleton.SkeletonPose;
 
 	use namespace arcane;
 

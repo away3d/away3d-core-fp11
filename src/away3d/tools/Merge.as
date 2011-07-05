@@ -1,12 +1,11 @@
 package away3d.tools
 {
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubMesh;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
-	import away3d.containers.ObjectContainer3D;
 	import away3d.materials.MaterialBase;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
@@ -526,12 +525,13 @@ package away3d.tools
 	}
 }
 
+import away3d.core.base.SubGeometry;
+import away3d.entities.Mesh;
+import away3d.materials.MaterialBase;
+
+import flash.geom.Matrix3D;
+
 class DataSubGeometry {
-	import away3d.core.base.SubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.materials.MaterialBase;
-	import flash.geom.Matrix3D;
-	
 	public var uvs:Vector.<Number>;
 	public var vertices:Vector.<Number>;
 	public var normals:Vector.<Number>;

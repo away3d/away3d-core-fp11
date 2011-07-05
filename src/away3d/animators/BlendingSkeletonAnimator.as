@@ -1,17 +1,14 @@
 package away3d.animators
 {
-	import away3d.arcane;
-
-	import flash.geom.Vector3D;
+	import away3d.animators.data.AnimationSequenceBase;
+	import away3d.animators.data.SkeletonAnimationSequence;
+	import away3d.animators.data.SkeletonAnimationState;
 	import away3d.animators.skeleton.SkeletonAdditiveNode;
 	import away3d.animators.skeleton.SkeletonClipNodeBase;
 	import away3d.animators.skeleton.SkeletonNaryLERPNode;
 	import away3d.animators.skeleton.SkeletonTimelineClipNode;
 	import away3d.animators.skeleton.SkeletonTreeNode;
-	import away3d.animators.data.SkeletonAnimationSequence;
-	import away3d.animators.data.SkeletonAnimationState;
-	import away3d.animators.data.AnimationSequenceBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.arcane;
 
 	use namespace arcane;
 

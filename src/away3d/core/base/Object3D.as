@@ -4,10 +4,8 @@ package away3d.core.base
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Quaternion;
 	import away3d.core.math.Vector3DUtils;
-	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 
-	import flash.events.EventDispatcher;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 

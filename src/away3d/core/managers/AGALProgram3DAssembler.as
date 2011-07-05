@@ -1,7 +1,7 @@
 package away3d.core.managers
 {
-	import away3d.arcane;
 	import away3d.animators.data.AnimationBase;
+	import away3d.arcane;
 	import away3d.debug.Debug;
 	import away3d.materials.passes.MaterialPassBase;
 

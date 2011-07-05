@@ -6,7 +6,6 @@ package away3d.materials.methods
 	import away3d.lights.LightBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.SingleObjectDepthPass;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -150,13 +149,13 @@ package away3d.materials.methods
 				lightProjection[3] = regCache.getFreeVertexConstant();
 				if (_lightMatrixsConstsIndex < 0) _lightMatrixsConstsIndex = lightProjection[0].index;
 
-				code += AGAL.m44(temp.toString(), "vt0", lightProjection[0].toString());
-				code += AGAL.rcp(temp+".w", temp+".w");
-				code += AGAL.mul(temp+".xyz", temp+".xyz", temp+".w");
-				code += AGAL.mul(temp+".xy", temp+".xy", _toTexRegister+".xy");
-				code += AGAL.add(temp+".xy", temp+".xy", _toTexRegister+".xx");
-				code += AGAL.mov(_lightProjVaryings[i]+".xyz", temp+".xyz");
-				code += AGAL.mov(_lightProjVaryings[i]+".w", "va0.w");
+				code += "m44 " + temp+ ", vt0, " + lightProjection[0] + "\n" +
+						"rcp " + temp+".w, " + temp+".w\n" +
+						"mul " + temp+".xyz, " + temp+".xyz, " + temp+".w\n" +
+						"mul " + temp+".xy, " + temp+".xy, " + _toTexRegister+".xy\n" +
+						"add " + temp+".xy, " + temp+".xy, " + _toTexRegister+".xx\n" +
+						"mov " + _lightProjVaryings[i]+".xyz, " + temp+".xyz\n" +
+						"mov " + _lightProjVaryings[i]+".w, va0.w\n";
 			}
 
 			return code;
@@ -191,7 +190,7 @@ package away3d.materials.methods
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = super.getFragmentPostLightingCode(regCache, targetReg);
-			code += AGAL.add(targetReg+".xyz", targetReg+".xyz", _totalScatterColorReg+".xyz");
+			code += "add " + targetReg+".xyz, " + targetReg+".xyz, " + _totalScatterColorReg+".xyz\n";
 //			code += AGAL.mov(targetReg+".xyz", _totalScatterColorReg+".xyz");
 			regCache.removeFragmentTempUsage(_totalScatterColorReg);
 			return code;
@@ -254,29 +253,29 @@ package away3d.materials.methods
 			}
 
 //			temp = regCache.getFreeFragmentVectorTemp();
-			code += AGAL.sample(_totalScatterColorReg.toString(), projReg.toString(), "2d", depthReg.toString(), "bilinear", "clamp");
+			code += "tex " + _totalScatterColorReg + ", " + projReg + ", " + depthReg +  " <2d,linear,clamp>\n" +
 			// reencode RGBA
-			code += AGAL.dp4(_totalScatterColorReg+".z", _totalScatterColorReg.toString(), _decReg.toString());
+					"dp4 " + _totalScatterColorReg+".z, " + _totalScatterColorReg + ", " + _decReg + "\n" +
 			// currentDistanceToLight - closestDistanceToLight
-			code += AGAL.sub(_totalScatterColorReg+".w", projReg+".z", _totalScatterColorReg+".z");
+					"sub " + _totalScatterColorReg+".w, " + projReg+".z, " + _totalScatterColorReg+".z\n" +
 //			code += AGAL.sat(temp+".w", temp+".w");
-			code += AGAL.sub(_totalScatterColorReg+".w", _invRegister+".x", _totalScatterColorReg+".w");
-			code += AGAL.mul(_totalScatterColorReg+".w", _invRegister+".y", _totalScatterColorReg+".w");
-			code += AGAL.sat(_totalScatterColorReg+".w", _totalScatterColorReg+".w");
+					"sub " + _totalScatterColorReg+".w, " + _invRegister+".x, " + _totalScatterColorReg+".w\n" +
+					"mul " + _totalScatterColorReg+".w, " + _invRegister+".y, " + _totalScatterColorReg+".w\n" +
+					"sat " + _totalScatterColorReg+".w, " + _totalScatterColorReg+".w\n" +
 
 			// targetReg.x contains dot(lightDir, normal)
 			// modulate according to incident light angle (scatter = scatter*(-.5*dot(light, normal) + .5)
-			code += AGAL.neg(targetReg+".y", targetReg+".x");
-			code += AGAL.mul(targetReg+".y", targetReg+".y", _invRegister+".z");
-			code += AGAL.add(targetReg+".y", targetReg+".y", _invRegister+".z");
-			code += AGAL.mul(_totalScatterColorReg+".w", _totalScatterColorReg+".w", targetReg+".y");
+					"neg " + targetReg+".y, " + targetReg+".x\n" +
+					"mul " + targetReg+".y, " + targetReg+".y, " + _invRegister+".z\n" +
+					"add " + targetReg+".y, " + targetReg+".y, " + _invRegister+".z\n" +
+					"mul " + _totalScatterColorReg+".w, " + _totalScatterColorReg+".w, " + targetReg+".y\n" +
 
 			// blend diffuse: d' = (1-s)*d + s*1
-			code += AGAL.sub(_totalScatterColorReg+".y", _colorReg+".w", _totalScatterColorReg+".w");
-			code += AGAL.mul(targetReg+".w", targetReg+".w", _totalScatterColorReg+".y");
+					"sub " + _totalScatterColorReg+".y, " + _colorReg+".w, " + _totalScatterColorReg+".w\n" +
+					"mul " + targetReg+".w, " + targetReg+".w, " + _totalScatterColorReg+".y\n" +
 
-			code += AGAL.mul(_totalScatterColorReg+".xyz", _lightColorReg+".xyz", _totalScatterColorReg+".w");
-			code += AGAL.mul(_totalScatterColorReg+".xyz", _totalScatterColorReg+".xyz", _colorReg+".xyz");
+					"mul " + _totalScatterColorReg+".xyz, " + _lightColorReg+".xyz, " + _totalScatterColorReg+".w\n" +
+					"mul " + _totalScatterColorReg+".xyz, " + _totalScatterColorReg+".xyz, " + _colorReg+".xyz\n";
 
 			++_lightIndex;
 

@@ -8,10 +8,8 @@ package away3d.core.managers
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
-	
-	import flash.display.Stage;
+
 	import flash.events.MouseEvent;
-	import flash.geom.Rectangle;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;

@@ -4,7 +4,6 @@ package away3d.animators.skeleton
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 
-
 	/**
 	 * A Skeleton object is a hierarchical grouping of Joint objects that can be used for skeletal animation.
 	 *

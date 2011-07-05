@@ -2,7 +2,7 @@ package away3d.animators.utils
 {
 	import away3d.animators.data.AnimationSequenceBase;
 	import away3d.arcane;
-	
+
 	use namespace arcane;
 
 	public class TimelineUtil

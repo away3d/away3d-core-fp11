@@ -3,10 +3,10 @@
  */
 package away3d.animators.skeleton
 {
+	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.arcane;
 
 	import flash.geom.Vector3D;
-	import away3d.animators.data.SkeletonAnimationSequence;
 
 	use namespace arcane;
 

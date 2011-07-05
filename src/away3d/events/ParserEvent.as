@@ -1,7 +1,7 @@
 package away3d.events
 {
 	import flash.events.Event;
-	
+
 	public class ParserEvent extends Event
 	{
 		private var _message : String;

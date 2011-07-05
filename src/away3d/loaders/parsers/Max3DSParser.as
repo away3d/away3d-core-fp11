@@ -1,21 +1,20 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
-	
+
 	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -821,6 +820,10 @@ package away3d.loaders.parsers
 	}
 }
 
+import away3d.entities.Mesh;
+
+import flash.display.BitmapData;
+
 class Chunk3ds
 {	
 	public var id:int;
@@ -829,9 +832,8 @@ class Chunk3ds
 }
 
 class MaterialDefinition
-{	
-	import flash.display.BitmapData;
-	
+{
+
 	public var materialID:String;
 	public var url:String;
 	public var bitmapData:BitmapData;
@@ -851,8 +853,6 @@ class FaceData
 
 class MaterialRef
 {
-	import away3d.entities.Mesh;
-	
 	public var mesh:Mesh;
 	public var materialID:String;
 }

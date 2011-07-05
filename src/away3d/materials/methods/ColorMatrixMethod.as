@@ -1,10 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	
+
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.filters.ColorMatrixFilter;
@@ -71,8 +70,8 @@ package away3d.materials.methods
 			_colorIndex = colorMultReg.index;
 			_offsetIndex = colorOffsetReg.index;
 
-			code += AGAL.m44(targetReg.toString(), targetReg.toString(), colorMultReg.toString());
-			code += AGAL.add(targetReg.toString(), targetReg.toString(), colorOffsetReg.toString());
+			code += "m44 " + targetReg + ", " + targetReg + ", " + colorMultReg + "\n" +
+					"add " + targetReg + ", " + targetReg + ", " + colorOffsetReg + "\n";
 			
 			return code;
 		}

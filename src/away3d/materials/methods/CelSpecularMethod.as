@@ -1,7 +1,6 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -75,15 +74,11 @@ package away3d.materials.methods
 		 */
 		private function clampSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = "";
-
-			code += AGAL.sub(target+".y", target+".w", _dataReg+".y"); // x - cutoff
-			code += AGAL.div(target+".y", target+".y", _dataReg+".x"); // (x - cutoff)/epsilon
-			code += AGAL.sat(target+".y", target+".y");
-			code += AGAL.step(target+".w", target+".w", _dataReg+".y");
-			code += AGAL.mul(target+".w", target+".w", target+".y");
-
-			return code;
+			return 	"sub " + target+".y, " + target+".w, " + _dataReg+".y\n" + // x - cutoff
+					"div " + target+".y, " + target+".y, " + _dataReg+".x\n" + // (x - cutoff)/epsilon
+					"sat " + target+".y, " + target+".y\n" +
+					"sge " + target+".w, " + target+".w, " + _dataReg+".y\n" +
+					"mul " + target+".w, " + target+".w, " + target+".y\n";
 		}
 
 		/**

@@ -2,7 +2,6 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Texture3DProxy;
-	import away3d.materials.utils.AGAL;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -235,27 +234,27 @@ package away3d.materials.methods
             else t = _totalLightColorReg;
 
 			// half vector
-			code += AGAL.add(t+".xyz", lightDirReg+".xyz", _viewDirFragmentReg+".xyz");
-			code += AGAL.normalize(t+".xyz", t+".xyz");
-            code += AGAL.dp3(t+".w", _normalFragmentReg+".xyz", t+".xyz");
-			code += AGAL.sat(t+".w", t+".w");
+			code += "add " + t+".xyz, " + lightDirReg+".xyz, " + _viewDirFragmentReg+".xyz\n" +
+					"nrm " + t+".xyz, " + t+".xyz\n" +
+					"dp3 " + t+".w, " + _normalFragmentReg+".xyz, " + t+".xyz\n" +
+					"sat " + t+".w, " + t+".w\n";
 
 			if (_useTexture) {
-				code += AGAL.mul(_specularTexData+".w", _specularTexData+".y", _specularDataRegister+".w");
-				code += AGAL.pow(t+".w", t+".w", _specularTexData+".w");
+				code += "mul " + _specularTexData+".w, " + _specularTexData+".y, " + _specularDataRegister+".w\n" +
+						"pow " + t+".w, " + t+".w, " + _specularTexData+".w\n";
 			}
 			else
-				code += AGAL.pow(t+".w", t+".w", _specularDataRegister+".w");
+				code += "pow " + t+".w, " + t+".w, " + _specularDataRegister+".w\n";
 
 			// attenuate
-			code += AGAL.mul(t+".w", t+".w", lightDirReg+".w");
+			code += "mul " + t+".w, " + t+".w, " + lightDirReg+".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 
-			code += AGAL.mul(t+".xyz", lightColReg+".xyz", t+".w");
+			code += "mul " + t+".xyz, " + lightColReg+".xyz, " + t+".w\n";
 
 			if (lightIndex > 0) {
-                code += AGAL.add(_totalLightColorReg+".xyz", _totalLightColorReg+".xyz", t+".xyz");
+                code += "add " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + t+".xyz\n";
                 regCache.removeFragmentTempUsage(t);
             }
 
@@ -275,15 +274,15 @@ package away3d.materials.methods
 			}
 
 			if (_shadowRegister)
-				code += AGAL.mul(_totalLightColorReg+".xyz", _totalLightColorReg+".xyz", _shadowRegister+".w");
+				code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _shadowRegister+".w\n";
 
 			if (_useTexture) {
-				code += AGAL.mul(_totalLightColorReg+".xyz", _totalLightColorReg+".xyz", _specularTexData+".x");
+				code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _specularTexData+".x\n";
 				regCache.removeFragmentTempUsage(_specularTexData);
 			}
 
-			code += AGAL.mul(_totalLightColorReg+".xyz", _totalLightColorReg+".xyz", _specularDataRegister+".xyz");
-			code += AGAL.add(targetReg+".xyz", targetReg+".xyz", _totalLightColorReg+".xyz");
+			code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _specularDataRegister+".xyz\n" +
+					"add " + targetReg+".xyz, " + targetReg+".xyz, " + _totalLightColorReg+".xyz\n";
 			regCache.removeFragmentTempUsage(_totalLightColorReg);
 
 			return code;

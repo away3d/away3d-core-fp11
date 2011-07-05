@@ -4,7 +4,6 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.lights.LightBase;
-	import away3d.materials.utils.AGAL;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -99,9 +98,9 @@ package away3d.materials.passes
 			_projectedTargetRegister = "vt2";
 			var code : String = "";
 
-			code += AGAL.rcp("vt2.w", "vt2.w");
-			code += AGAL.mul("v0.xyz", "vt2.xyz", "vt2.w");
-			code += AGAL.mov("v0.w", "vt0.w");
+			code += "rcp vt2.w, vt2.w           \n" +
+                    "mul v0.xyz, vt2.xyz, vt2.w \n" +
+                    "mov v0.w, vt0.w            \n";
 
 			return code;
 		}
@@ -114,11 +113,11 @@ package away3d.materials.passes
 			var code : String = "";
 
 			// encode float -> rgba
-			code += AGAL.mul("ft0", "fc0", "v0.z");
-			code += AGAL.fract("ft0", "ft0");
-			code += AGAL.mul("ft1", "ft0.yzww", "fc1");
-			code += AGAL.sub("ft0", "ft0", "ft1");
-			code += AGAL.mov("oc", "ft0");
+			code += "mul ft0, fc0, v0.z     \n" +
+                    "frc ft0, ft0           \n" +
+                    "mul ft1, ft0.yzww, fc1 \n" +
+                    "sub ft0, ft0, ft1      \n" +
+                    "mov oc, ft0            \n";
 
 			return code;
 		}

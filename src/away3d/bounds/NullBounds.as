@@ -1,9 +1,7 @@
 package away3d.bounds
 {
 	import away3d.core.base.Geometry;
-
 	import away3d.primitives.WireframePrimitiveBase;
-
 	import away3d.primitives.WireframeSphere;
 
 	import flash.geom.Matrix3D;

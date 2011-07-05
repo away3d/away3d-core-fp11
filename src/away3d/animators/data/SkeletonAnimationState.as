@@ -10,7 +10,6 @@ package away3d.animators.data
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.core.math.Quaternion;
-	import away3d.entities.Mesh;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display3D.Context3D;

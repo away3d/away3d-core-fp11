@@ -3,12 +3,10 @@ package away3d.entities
 	import away3d.arcane;
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
-
 	import away3d.core.managers.Texture3DProxy;
 
 	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
 
 	use namespace arcane;
 

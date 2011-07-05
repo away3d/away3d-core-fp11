@@ -1,6 +1,5 @@
 ﻿package away3d.entities
 {
-	import away3d.animators.AnimatorBase;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.arcane;

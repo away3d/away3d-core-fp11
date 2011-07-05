@@ -2,21 +2,18 @@ package away3d.library
 {
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
-	import away3d.library.utils.AssetLibraryIterator;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.library.naming.ConflictPrecedence;
 	import away3d.library.naming.ConflictStrategy;
 	import away3d.library.naming.ConflictStrategyBase;
-	import away3d.library.naming.ErrorConflictStrategy;
-	import away3d.library.naming.IgnoreConflictStrategy;
-	import away3d.library.naming.NumSuffixConflictStrategy;
+	import away3d.library.utils.AssetLibraryIterator;
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.misc.AssetLoaderContext;
 	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
-	
+
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 
@@ -228,10 +225,35 @@ package away3d.library
 		
 		
 		
-		public static function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void		{			getInstance().addEventListener(type, listener, useCapture, priority, useWeakReference);		}								public static function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void		{			getInstance().removeEventListener(type, listener,useCapture);		}								public static function hasEventListener(type : String) : Boolean		{			return getInstance().hasEventListener(type);		}								public static function willTrigger(type : String) : Boolean		{			return getInstance().willTrigger(type);		}
+		public static function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		{
+			getInstance().addEventListener(type, listener, useCapture, priority, useWeakReference);
+		}
 		
 		
-				
+		
+		public static function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void
+		{
+			getInstance().removeEventListener(type, listener,useCapture);
+		}
+		
+		
+		
+		public static function hasEventListener(type : String) : Boolean
+		{
+			return getInstance().hasEventListener(type);
+		}
+		
+		
+		
+		public static function willTrigger(type : String) : Boolean
+		{
+			return getInstance().willTrigger(type);
+		}
+		
+		
+		
+		
 		/**
 		 * Loads a yet unloaded resource file from the given url.
 		 */
@@ -328,9 +350,9 @@ package away3d.library
 		/**
 		 * Called when a dependency was retrieved.
 		 */
-		private function onDependencyRetrieved(event : away3d.events.LoaderEvent) : void
+		private function onDependencyRetrieved(event : LoaderEvent) : void
 		{
-			if (hasEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE))
+			if (hasEventListener(LoaderEvent.DEPENDENCY_COMPLETE))
 				dispatchEvent(event);
 		}
 		
@@ -359,15 +381,15 @@ package away3d.library
 		/**
 		 * Called when the resource and all of its dependencies was retrieved.
 		 */
-		private function onResourceRetrieved(event : away3d.events.LoaderEvent) : void
+		private function onResourceRetrieved(event : LoaderEvent) : void
 		{
 			var loader : AssetLoader = AssetLoader(event.target);
 			
 			var index : int = _loadingSessions.indexOf(loader);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
-			loader.removeEventListener(away3d.events.LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
-			loader.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
-			loader.removeEventListener(away3d.events.LoaderEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
+			loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
+			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
+			loader.removeEventListener(LoaderEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
@@ -398,8 +420,8 @@ package away3d.library
 		private function onResourceError() : void
 		{
 			var msg:String = "Unexpected parser error";
-			if(hasEventListener(away3d.events.LoaderEvent.DEPENDENCY_ERROR)){
-				var re:LoaderEvent = new LoaderEvent(away3d.events.LoaderEvent.DEPENDENCY_ERROR, "");
+			if(hasEventListener(LoaderEvent.DEPENDENCY_ERROR)){
+				var re:LoaderEvent = new LoaderEvent(LoaderEvent.DEPENDENCY_ERROR, "");
 				dispatchEvent(re);
 			} else{
 				throw new Error(msg);

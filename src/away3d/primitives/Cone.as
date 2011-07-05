@@ -1,5 +1,6 @@
 package away3d.primitives {
 	import away3d.materials.MaterialBase;
+
 	/**
 	 * A UV Cone primitive mesh.
 	 */

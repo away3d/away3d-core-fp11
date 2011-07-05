@@ -1,7 +1,5 @@
 ﻿package away3d.primitives
 {
-	import away3d.primitives.data.Segment;
-
 	import flash.geom.Vector3D;
 
 	/**

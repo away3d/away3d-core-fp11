@@ -1,8 +1,9 @@
 ﻿package away3d.primitives
 {
-	import flash.geom.Vector3D;
 	import away3d.primitives.data.Segment;
-	
+
+	import flash.geom.Vector3D;
+
 	public class LineSegment extends Segment {
 		
 		private var _index:uint;
