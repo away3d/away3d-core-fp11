@@ -28,8 +28,6 @@ package away3d.containers
 	{
 		private var _width : Number = 0;
 		private var _height : Number = 0;
-		private var _scaleX : Number = 1;
-		private var _scaleY : Number = 1;
 		private var _x : Number = 0;
 		private var _y : Number = 0;
 		private var _scene : Scene3D;
@@ -136,8 +134,8 @@ package away3d.containers
 			_renderer.viewPortY = _y;
 			_depthRenderer.backBufferWidth = _renderer.backBufferWidth = _width;
 			_depthRenderer.backBufferHeight = _renderer.backBufferHeight = _height;
-			_depthRenderer.viewPortWidth = _renderer.viewPortWidth = _width*_scaleX;
-			_depthRenderer.viewPortHeight = _renderer.viewPortHeight = _height*_scaleY;
+			_depthRenderer.viewPortWidth = _renderer.viewPortWidth = _width;
+			_depthRenderer.viewPortHeight = _renderer.viewPortHeight = _height;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
@@ -203,7 +201,7 @@ package away3d.containers
 		override public function set width(value : Number) : void
 		{
 			_hitTestRenderer.viewPortWidth = value;
-			_renderer.viewPortWidth = value*_scaleX;
+			_renderer.viewPortWidth = value;
 			_renderer.backBufferWidth = value;
 			_depthRenderer.viewPortWidth = value;
 			_depthRenderer.backBufferWidth = value;
@@ -224,7 +222,7 @@ package away3d.containers
 		override public function set height(value : Number) : void
 		{
 			_hitTestRenderer.viewPortHeight = value;
-			_renderer.viewPortHeight = value*_scaleY;
+			_renderer.viewPortHeight = value;
 			_renderer.backBufferHeight = value;
 			_depthRenderer.viewPortHeight = value;
 			_depthRenderer.backBufferHeight = value;
@@ -236,24 +234,20 @@ package away3d.containers
 
 		override public function get scaleX() : Number
 		{
-			return _scaleX;
+			return 1;
 		}
 
 		override public function set scaleX(value : Number) : void
 		{
-			_scaleX = value;
-			_renderer.viewPortWidth = _width*_scaleX;
 		}
 
 		override public function get scaleY() : Number
 		{
-			return _scaleY;
+			return 1;
 		}
 
 		override public function set scaleY(value : Number) : void
 		{
-			_scaleY = value;
-			_renderer.viewPortHeight = _height*_scaleY;
 		}
 
 		/**
