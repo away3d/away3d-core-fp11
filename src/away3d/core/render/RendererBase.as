@@ -351,7 +351,8 @@ package away3d.core.render
 		 */
 		protected function updateViewPort() : void
 		{
-			_stage3DProxy.viewPort = new Rectangle(_viewPortX, _viewPortY, _viewPortWidth, _viewPortHeight);
+			_stage3DProxy.x = _viewPortX;
+			_stage3DProxy.y = _viewPortY;
 			_viewPortInvalid = false;
 		}
 

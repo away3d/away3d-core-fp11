@@ -54,7 +54,8 @@ package away3d.core.managers
 		{
 			_stage3DIndex = stage3DIndex;
 			_stage3D = stage3D;
-			_stage3D.viewPort = new Rectangle(0, 0, 1, 1);
+			_stage3D.x = 0;
+			_stage3D.y = 0;
 			_stage3DManager = stage3DManager;
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate);
 			requestContext();
@@ -133,16 +134,29 @@ package away3d.core.managers
 		}
 
 		/**
-		 * The viewport which dictates the region to which is rendered.
+		 * The x position of the Stage3D.
 		 */
-		public function get viewPort() : Rectangle
+		public function get x() : Number
 		{
-			return _stage3D.viewPort;
+			return _stage3D.x;
 		}
 
-		public function set viewPort(value : Rectangle) : void
+		public function set x(value : Number) : void
 		{
-			_stage3D.viewPort = value;
+			_stage3D.x = value;
+		}
+
+		/**
+		 * The y position of the Stage3D.
+		 */
+		public function get y() : Number
+		{
+			return _stage3D.y;
+		}
+
+		public function set y(value : Number) : void
+		{
+			_stage3D.y = value;
 		}
 
 		/**
