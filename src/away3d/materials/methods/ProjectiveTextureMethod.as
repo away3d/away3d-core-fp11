@@ -73,7 +73,7 @@ package away3d.materials.methods
 			_projectionIndex = projReg.index;
 			_uvVarying = regCache.getFreeVarying();
 			_toTexIndex = toTexReg.index;
-			code += "m44 " + temp + ", vt0", projReg + "						\n" +
+			code += "m44 " + temp + ", vt0, " + projReg + "						\n" +
 					"div " + temp + ", " + temp + ", " + temp + ".w				\n" +
 					"mul " + temp + ".xy, " + temp + ".xy, " + toTexReg+".xy	\n" +
 					"add " + temp + ".xy, " + temp + ".xy, " + toTexReg+".xx	\n" +
