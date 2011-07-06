@@ -4,6 +4,7 @@ package away3d.entities
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.managers.Texture3DProxy;
+	import away3d.events.LensEvent;
 
 	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
@@ -21,7 +22,7 @@ package away3d.entities
 		public function TextureProjector(bitmapData : BitmapData)
 		{
 			_lens = new PerspectiveLens();
-			_lens.onInvalidateMatrix = onInvalidateLensMatrix;
+			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onInvalidateLensMatrix, false, 0, true);
 			_texture = new Texture3DProxy();
 			_texture.bitmapData = bitmapData;
 			_lens.aspectRatio = bitmapData.width/bitmapData.height;
@@ -83,7 +84,7 @@ package away3d.entities
 			_viewProjectionInvalid = true;
 		}
 
-		private function onInvalidateLensMatrix() : void
+		private function onInvalidateLensMatrix(event : LensEvent) : void
 		{
 			_viewProjectionInvalid = true;
 		}

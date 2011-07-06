@@ -26,20 +26,20 @@ package away3d.containers
 
 	public class View3D extends Sprite
 	{
-		private var _width : Number = 0;
-		private var _height : Number = 0;
+		protected var _width : Number = 0;
+		protected var _height : Number = 0;
 		private var _scaleX : Number = 1;
 		private var _scaleY : Number = 1;
-		private var _x : Number = 0;
-		private var _y : Number = 0;
-		private var _scene : Scene3D;
-		private var _camera : Camera3D;
+		protected var _x : Number = 0;
+		protected var _y : Number = 0;
+		protected var _scene : Scene3D;
+		protected var _camera : Camera3D;
 		private var _entityCollector : EntityCollector;
 
-		private var _aspectRatio : Number;
-		private var _time : Number = 0;
-		private var _deltaTime : uint;
-		private var _backgroundColor : uint = 0x000000;
+		protected var _aspectRatio : Number;
+		protected var _time : Number = 0;
+		protected var _deltaTime : uint;
+		protected var _backgroundColor : uint = 0x000000;
 
 		private var _hitManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
@@ -47,9 +47,9 @@ package away3d.containers
 		private var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
 		private var _hitTestRenderer : HitTestRenderer;
-		public var _addedToStage:Boolean;
+		private var _addedToStage:Boolean;
 
-		private var _filters3d : Array;
+		protected var _filters3d : Array;
 		private var _requireDepthRender : Boolean;
 		private var _depthRender : Texture;
 		private var _depthTextureWidth : int = -1;
@@ -57,6 +57,7 @@ package away3d.containers
 		private var _depthTextureInvalid : Boolean = true;
 
 		private var _hitField : Sprite;
+		arcane var mouseZeroMove : Boolean;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
@@ -108,13 +109,15 @@ package away3d.containers
 
 		public function set filters3d(value : Array) : void
 		{
-			var len : uint = value.length;
+			var len : uint;
 			_filters3d = value;
-
 			_requireDepthRender = false;
 
-			for (var i : uint = 0; i < len; ++i)
-				_requireDepthRender ||= _filters3d[i].requireDepthRender;
+			if (value) {
+				len = value.length;
+				for (var i : uint = 0; i < len; ++i)
+					_requireDepthRender ||= _filters3d[i].requireDepthRender;
+			}
 		}
 
 		/**
@@ -202,6 +205,10 @@ package away3d.containers
 
 		override public function set width(value : Number) : void
 		{
+			if (value > 2048) {
+				trace("Warning: Width higher than 2048 is not allowed. Use MegaView3D to support higher values.");
+				value = 2048;
+			}
 			_hitTestRenderer.viewPortWidth = value;
 			_renderer.viewPortWidth = value*_scaleX;
 			_renderer.backBufferWidth = value;
@@ -223,6 +230,10 @@ package away3d.containers
 
 		override public function set height(value : Number) : void
 		{
+			if (value > 2048) {
+				trace("Warning: Height higher than 2048 is not allowed.");
+				value = 2048;
+			}
 			_hitTestRenderer.viewPortHeight = value;
 			_renderer.viewPortHeight = value*_scaleY;
 			_renderer.backBufferHeight = value;
@@ -307,7 +318,7 @@ package away3d.containers
 			return _entityCollector.numTriangles;
 		}
 		
-		public var mouseZeroMove:Boolean;
+//		public var mouseZeroMove:Boolean;
 
 		/**
 		 * Renders the view.

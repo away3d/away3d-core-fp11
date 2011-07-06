@@ -2,6 +2,9 @@ package away3d.cameras.lenses
 {
 	import away3d.arcane;
 	import away3d.errors.AbstractMethodError;
+	import away3d.events.LensEvent;
+
+	import flash.events.EventDispatcher;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Point;
@@ -12,7 +15,7 @@ package away3d.cameras.lenses
 	/**
 	 * An abstract base class for all lens classes. Lens objects provides a projection matrix that transforms 3D geometry to normalized homogeneous coordinates.
 	 */
-	public class LensBase
+	public class LensBase extends EventDispatcher
 	{
 		protected var _matrix : Matrix3D;
 
@@ -22,9 +25,6 @@ package away3d.cameras.lenses
 
 		private var _matrixInvalid : Boolean = true;
 		protected var _frustumCorners : Vector.<Number> = new Vector.<Number>(8*3, true);
-
-		// todo: consider signals instead, single callback is dirty
-		arcane var onInvalidateMatrix : Function;
 
 		private var _unprojection : Matrix3D = new Matrix3D();
 		private var _unprojectionInvalid : Boolean = true;
@@ -144,13 +144,21 @@ package away3d.cameras.lenses
 			// notify the camera that the lens matrix is changing. this will mark the 
 			// viewProjectionMatrix in the camera as invalid, and force the matrix to
 			// be re-queried from the lens, and therefore rebuilt.
-			if (onInvalidateMatrix != null) onInvalidateMatrix();
+			dispatchEvent(new LensEvent(LensEvent.MATRIX_CHANGED, this));
 		}
 
 		/**
 		 * Updates the matrix
 		 */
 		protected function updateMatrix() : void
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
+		 * Calculates a projectionmatrix for an (potientally off-centre) subfrustum
+		 */
+		public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
 		{
 			throw new AbstractMethodError();
 		}

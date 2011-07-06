@@ -27,7 +27,7 @@ package away3d.core.managers
 		 */
 		public function Stage3DManager(stage : Stage, singletonEnforcer : SingletonEnforcer)
 		{
-			if (!singletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.instance instead.");
+			if (!singletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
 			_stage = stage;
 			_stageProxies = new Vector.<Stage3DProxy>(_stage.stage3Ds.length, true);
 		}
