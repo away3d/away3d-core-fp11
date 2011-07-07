@@ -413,12 +413,12 @@ package away3d.containers
 			var len : uint = lights.length;
 			var light : LightBase;
 			var context : Context3D = _renderer.context;
-			var contextIndex : int = _renderer.contextIndex;
+			var contextIndex : int = _renderer.stage3DProxy._stage3DIndex;
 
 			for (var i : int = 0; i < len; ++i) {
 				light = lights[i];
 				if (light.castsShadows)
-					light.shadowMapper.renderDepthMap(context, contextIndex, entityCollector, _depthRenderer);
+					light.shadowMapper.renderDepthMap(_renderer.stage3DProxy, entityCollector, _depthRenderer);
 			}
 		}
 

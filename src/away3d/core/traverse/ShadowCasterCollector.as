@@ -45,7 +45,7 @@ package away3d.core.traverse
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
 				item.zIndex = renderable.zIndex;
-				item.materialId = renderable.material._uniqueId;
+				item.renderOrderId = renderable.material._uniqueId;
 				_opaqueRenderableHead = item;
 			}
 		}

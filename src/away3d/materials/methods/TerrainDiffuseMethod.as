@@ -1,6 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -131,21 +132,23 @@ package away3d.materials.methods
 			return code;
         }
 
-        arcane override function activate(context : Context3D, contextIndex : uint) : void
+        arcane override function activate(stage3DProxy : Stage3DProxy) : void
         {
-            super.activate(context, contextIndex);
-            context.setTextureAt(_blendingTextureIndex, _blendingTexture.getTextureForContext(context, contextIndex));
+			var context : Context3D = stage3DProxy._context3D;
+            super.activate(stage3DProxy);
+            context.setTextureAt(_blendingTextureIndex, _blendingTexture.getTextureForStage3D(stage3DProxy));
 
             for (var i : int = 0; i < _numSplattingLayers; ++i)
-                context.setTextureAt(i+_splatTextureIndex, _splats[i].getTextureForContext(context, contextIndex));
+                context.setTextureAt(i+_splatTextureIndex, _splats[i].getTextureForStage3D(stage3DProxy));
 
             context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _tileRegisterIndex, _tileData, 1);
         }
 
 
-        arcane override function deactivate(context : Context3D) : void
+        arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
         {
-            super.deactivate(context);
+			var context : Context3D = stage3DProxy._context3D;
+            super.deactivate(stage3DProxy);
             context.setTextureAt(_blendingTextureIndex, null);
             for (var i : int = 0; i < _numSplattingLayers; ++i)
                 context.setTextureAt(i+_splatTextureIndex, null);

@@ -5,6 +5,7 @@ package away3d.materials
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
@@ -279,22 +280,22 @@ package away3d.materials
 			return _numPasses;
 		}
 
-		arcane function activateForDepth(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			_depthPass.activate(context, contextIndex, camera);
+			_depthPass.activate(stage3DProxy, camera);
 		}
 
-		arcane function deactivateForDepth(context : Context3D) : void
+		arcane function deactivateForDepth(stage3DProxy : Stage3DProxy) : void
 		{
-			_depthPass.deactivate(context);
+			_depthPass.deactivate(stage3DProxy);
 		}
 
-		arcane function renderDepth(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane function renderDepth(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (renderable.animationState)
-				renderable.animationState.setRenderState(context, contextIndex, _depthPass, renderable);
+				renderable.animationState.setRenderState(stage3DProxy, _depthPass, renderable);
 
-			_depthPass.render(renderable, context, contextIndex, camera);
+			_depthPass.render(renderable, stage3DProxy, camera);
 		}
 
 		/**
@@ -304,14 +305,14 @@ package away3d.materials
 		 * @param camera The camera from which the scene is viewed.
 		 * @private
 		 */
-		arcane function activatePass(index : uint, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (index == _numPasses-1) {
 				if (requiresBlending)
-					context.setBlendFactors(_srcBlend, _destBlend);
+					stage3DProxy._context3D.setBlendFactors(_srcBlend, _destBlend);
 			}
 
-			_passes[index].activate(context, contextIndex, camera);
+			_passes[index].activate(stage3DProxy, camera);
 		}
 
 		/**
@@ -320,9 +321,9 @@ package away3d.materials
 		 * @param context The Context3D object that is currently rendering.
 		 * @private
 		 */
-		arcane function deactivatePass(index : uint, context : Context3D) : void
+		arcane function deactivatePass(index : uint, stage3DProxy : Stage3DProxy) : void
 		{
-			_passes[index].deactivate(context);
+			_passes[index].deactivate(stage3DProxy);
 		}
 
 		/**
@@ -334,12 +335,12 @@ package away3d.materials
 		 * @param lights The lights which are influencing the lighting of the scene.
 		 * @private
 		 */
-		arcane function renderPass(index : uint, renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (renderable.animationState)
-				renderable.animationState.setRenderState(context, contextIndex, _passes[index], renderable);
+				renderable.animationState.setRenderState(stage3DProxy, _passes[index], renderable);
 
-			_passes[index].render(renderable, context, contextIndex, camera);
+			_passes[index].render(renderable, stage3DProxy, camera);
 		}
 
 
@@ -416,9 +417,9 @@ package away3d.materials
 		 * Deactivates the material (in effect, its last pass)
 		 * @private
 		 */
-		arcane function deactivate(context : Context3D) : void
+		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			_passes[_numPasses-1].deactivate(context);
+			_passes[_numPasses-1].deactivate(stage3DProxy);
 		}
 
 		/**

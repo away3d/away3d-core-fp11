@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.CubeTexture3DProxy;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -64,18 +65,18 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(context : Context3D, contextIndex : uint) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(context, contextIndex);
+			super.activate(stage3DProxy);
 
-			context.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(context, contextIndex));
+			stage3DProxy._context3D.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
 		}
 
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			super.deactivate(context);
+			super.deactivate(stage3DProxy);
 
-			context.setTextureAt(_cubeMapIndex, null);
+			stage3DProxy._context3D.setTextureAt(_cubeMapIndex, null);
 		}
 
 		/**

@@ -68,8 +68,8 @@ package away3d.core.sort
 			while (head && headB) {
 
 				if (useMaterial) {
-					var aid : uint = head.materialId;
-					var bid : uint = headB.materialId;
+					var aid : uint = head.renderOrderId;
+					var bid : uint = headB.renderOrderId;
 
 					if (aid == bid) {
 						if (head.zIndex < headB.zIndex) cmp = 1;

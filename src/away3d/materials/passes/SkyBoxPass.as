@@ -3,6 +3,7 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.CubeTexture3DProxy;
+	import away3d.core.managers.Stage3DProxy;
 
 	import flash.display3D.Context3D;
 
@@ -56,16 +57,16 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			super.activate(context, contextIndex, camera);
-			context.setTextureAt(0, _cubeTexture.getTextureForContext(context, contextIndex));
+			super.activate(stage3DProxy, camera);
+			stage3DProxy._context3D.setTextureAt(0, _cubeTexture.getTextureForContext(stage3DProxy));
 		}
 
 
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			context.setTextureAt(0, null);
+			stage3DProxy._context3D.setTextureAt(0, null);
 		}
 	}
 

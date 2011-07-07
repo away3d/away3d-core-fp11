@@ -2,6 +2,7 @@ package away3d.animators.data
 {
 	import away3d.arcane;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.passes.MaterialPassBase;
@@ -52,7 +53,7 @@ package away3d.animators.data
 		 * @param pass The material pass which is currently used to render the geometry.
 		 * @param renderable The object currently being rendered.
 		 */
-		public function setRenderState(context : Context3D, contextIndex : uint, pass : MaterialPassBase, renderable : IRenderable) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
 			throw new AbstractMethodError();
 		}

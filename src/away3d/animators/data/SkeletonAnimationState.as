@@ -9,6 +9,7 @@ package away3d.animators.data
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubMesh;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Quaternion;
 	import away3d.materials.passes.MaterialPassBase;
 
@@ -137,7 +138,7 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-        override public function setRenderState(context : Context3D, contextIndex : uint, pass : MaterialPassBase, renderable : IRenderable) : void
+        override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
 			if (_numJoints == 0) {
 				// delayed skeleton instantiation
@@ -161,12 +162,13 @@ package away3d.animators.data
 			}
 
 			var skinnedGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
+			var context : Context3D = stage3DProxy._context3D;
 
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, pass.numUsedVertexConstants, _globalMatrices, _numJoints*3);
 
 			var streamOffset : uint = pass.numUsedStreams;
-			context.setVertexBufferAt(streamOffset, skinnedGeom.getJointIndexBuffer(context, contextIndex), 0, _bufferFormat);
-			context.setVertexBufferAt(streamOffset+1, skinnedGeom.getJointWeightsBuffer(context, contextIndex), 0, _bufferFormat);
+			context.setVertexBufferAt(streamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), 0, _bufferFormat);
+			context.setVertexBufferAt(streamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), 0, _bufferFormat);
 		}
 
 		private function updateGlobalPose() : void

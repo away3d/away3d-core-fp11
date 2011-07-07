@@ -10,6 +10,7 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -123,9 +124,10 @@ package away3d.materials.passes
 		 * @inheritDoc
 		 * todo: keep maps in dictionary per renderable
 		 */
-		arcane override function render(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(context, contextIndex);
+			var context : Context3D = stage3DProxy._context3D;
+			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);
 			context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 			context.setVertexBufferAt(1, vertexBuffer, 3, Context3DVertexBufferFormat.FLOAT_3);
 			context.setVertexBufferAt(2, vertexBuffer, 6, Context3DVertexBufferFormat.FLOAT_1);
@@ -135,16 +137,17 @@ package away3d.materials.passes
 			_calcMatrix.append(camera.inverseSceneTransform);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 3, _calcMatrix, true);
 
-			context.drawTriangles(renderable.getIndexBuffer(context, contextIndex), 0, renderable.numTriangles);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			super.activate(context, contextIndex, camera);
+			var context : Context3D = stage3DProxy._context3D;
+			super.activate(stage3DProxy, camera);
 
 			// value to convert distance from camera to model length per pixel width
 			_constants[2] = camera.lens.near;
@@ -160,8 +163,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			context.setVertexBufferAt(0, null);
 			context.setVertexBufferAt(1, null);
 			context.setVertexBufferAt(2, null);

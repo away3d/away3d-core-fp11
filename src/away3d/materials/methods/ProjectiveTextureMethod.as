@@ -3,6 +3,7 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.TextureProjector;
 	import away3d.lights.LightBase;
 	import away3d.materials.utils.ShaderRegisterCache;
@@ -110,25 +111,26 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
 		{
 			_projMatrix.copyFrom(_projector.viewProjection);
 			_projMatrix.prepend(renderable.sceneTransform);
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _projectionIndex, _projMatrix, true);
+			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _projectionIndex, _projMatrix, true);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(context : Context3D, contextIndex : uint) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
-			context.setTextureAt(_mapIndex, _projector.texture.getTextureForContext(context, contextIndex));
+			context.setTextureAt(_mapIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
 		}
 
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			context.setTextureAt(_mapIndex, null);
+			stage3DProxy._context3D.setTextureAt(_mapIndex, null);
 		}
 	}
 }

@@ -67,7 +67,7 @@ package away3d.core.render
 			if (_renderBlended)
 				drawRenderables(entityCollector.blendedRenderableHead, entityCollector);
 
-			if (_activeMaterial) _activeMaterial.deactivate(_context);
+			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 			_activeMaterial = null;
 		}
 
@@ -77,9 +77,9 @@ package away3d.core.render
 			var material : MaterialBase = skyBox.material;
 			var camera : Camera3D = entityCollector.camera;
 
-			material.activateForDepth(_context, _contextIndex, camera);
-			material.renderDepth(skyBox, _context, _contextIndex, camera);
-			material.deactivateForDepth(_context);
+			material.activateForDepth(_stage3DProxy, camera);
+			material.renderDepth(skyBox, _stage3DProxy, camera);
+			material.deactivateForDepth(_stage3DProxy);
 		}
 
 		/**
@@ -95,13 +95,13 @@ package away3d.core.render
 			while (item) {
 				_activeMaterial = item.renderable.material;
 
-				_activeMaterial.activateForDepth(_context, _contextIndex, camera);
+				_activeMaterial.activateForDepth(_stage3DProxy, camera);
 				item2 = item;
 				do {
-					_activeMaterial.renderDepth(item2.renderable, _context, _contextIndex, camera);
+					_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);
 					item2 = item2.next;
 				} while(item2 && item2.renderable.material == _activeMaterial);
-				_activeMaterial.deactivateForDepth(_context);
+				_activeMaterial.deactivateForDepth(_stage3DProxy);
 				item = item2;
 			}
 		}

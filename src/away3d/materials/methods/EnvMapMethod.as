@@ -5,6 +5,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.CubeTexture3DProxy;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -48,15 +49,16 @@ package away3d.materials.methods
 			_data[0] = value;
 		}
 
-		arcane override function activate(context : Context3D, contextIndex : uint) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
-			context.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(context, contextIndex));
+			context.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
 		}
 
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			context.setTextureAt(_cubeMapIndex, null);
+			stage3DProxy._context3D.setTextureAt(_cubeMapIndex, null);
 		}
 
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String

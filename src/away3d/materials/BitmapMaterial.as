@@ -59,10 +59,10 @@
 			colorTransform.alphaMultiplier = value;
 		}
 
-		arcane override function activatePass(index : uint, context : Context3D, contextIndex : uint, camera : Camera3D) : void
-		{
-			super.arcane::activatePass(index, context, contextIndex, camera);
-		}
+//		arcane override function activatePass(index : uint, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+//		{
+//			super.arcane::activatePass(index, context, contextIndex, camera);
+//		}
 
 		/**
 		 * The BitmapData object to use as the texture.

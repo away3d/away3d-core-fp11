@@ -1,6 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -68,7 +69,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(context : Context3D, contextIndex : uint) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
 			_colorTransformData[0] = _colorTransform.redMultiplier;
 			_colorTransformData[1] = _colorTransform.greenMultiplier;
@@ -78,7 +79,7 @@ package away3d.materials.methods
 			_colorTransformData[5] = _colorTransform.greenOffset;
 			_colorTransformData[6] = _colorTransform.blueOffset;
 			_colorTransformData[7] = _colorTransform.alphaOffset;
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _colorTransformIndex, _colorTransformData, 2);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _colorTransformIndex, _colorTransformData, 2);
 		}
 	}
 }

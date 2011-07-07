@@ -3,6 +3,8 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.events.Stage3DEvent;
 	import away3d.lights.LightBase;
 
 	import flash.display3D.Context3D;
@@ -28,6 +30,7 @@ package away3d.materials.passes
 		private var _lightPosData : Vector.<Number>;
 		private var _polyOffset : Vector.<Number>;
 		private var _enc : Vector.<Number>;
+		private var _listensForDispose : Vector.<Boolean>;
 
 		/**
 		 * Creates a new SingleObjectDepthPass object.
@@ -127,9 +130,9 @@ package away3d.materials.passes
 		 * @param renderable The renderable for which to retrieve the depth maps
 		 * @return A list of depth map textures for all supported lights.
 		 */
-		arcane function getDepthMaps(renderable : IRenderable, contextIndex : int) : Vector.<Texture>
+		arcane function getDepthMaps(renderable : IRenderable, stage3DProxy : Stage3DProxy) : Vector.<Texture>
 		{
-			return _textures[contextIndex][renderable];
+			return _textures[stage3DProxy._stage3DIndex][renderable];
 		}
 
 		/**
@@ -146,15 +149,14 @@ package away3d.materials.passes
 		 * @inheritDoc
 		 * todo: keep maps in dictionary per renderable
 		 */
-		arcane override function render(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var matrix : Matrix3D;
 			var len : int = lights.length;
-			var lightPos : Vector3D;
-			var lightDir : Vector3D;
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
 			var j : uint, i : uint;
 			var light : LightBase;
-			var posMult : Number;
 			var vec : Vector.<Matrix3D>;
 
 			if (_numLights < len) len = _numLights;
@@ -162,6 +164,10 @@ package away3d.materials.passes
 			_textures[contextIndex] ||= new Dictionary();
 			_textures[contextIndex][renderable] ||= new Vector.<Texture>(_numLights);
 
+			if (!_listensForDispose[contextIndex]) {
+				_listensForDispose[contextIndex] = true;
+				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
+			}
 
 			if (!_projections[renderable]) {
 				vec = _projections[renderable] = new Vector.<Matrix3D>();
@@ -179,16 +185,9 @@ package away3d.materials.passes
 
 				matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable][i]);
 
+				// todo: clean up when context is disposed or does this happen automatically?
 				_textures[contextIndex][renderable][i] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);
 				j = 0;
-//				_lightPosData[j++] = lightPos.x;
-//				_lightPosData[j++] = lightPos.y;
-//				_lightPosData[j++] = lightPos.z;
-//				_lightPosData[j++] = 1;
-//				_lightPosData[j++] = lightDir.x;
-//				_lightPosData[j++] = lightDir.y;
-//				_lightPosData[j++] = lightDir.z;
-//				_lightPosData[j++] = posMult;
 
 				context.setRenderToTexture(_textures[contextIndex][renderable][i], true, 0, 0);
 				context.clear(1.0, 1.0, 1.0);
@@ -196,27 +195,45 @@ package away3d.materials.passes
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _lightPosData, 2);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
-				context.setVertexBufferAt(0, renderable.getVertexBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
-				context.setVertexBufferAt(1, renderable.getVertexNormalBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
-				context.drawTriangles(renderable.getIndexBuffer(context, contextIndex), 0, renderable.numTriangles);
+				context.setVertexBufferAt(0, renderable.getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+				context.setVertexBufferAt(1, renderable.getVertexNormalBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 			}
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function activate(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		private function onContext3DDisposed(event : Stage3DEvent) : void
 		{
-			super.activate(context, contextIndex, camera);
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, _polyOffset, 1);
+			var stage3DProxy : Stage3DProxy = Stage3DProxy(event.target);
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+
+			if (_textures) {
+				for each(var vec : Vector.<Texture> in _textures[contextIndex]) {
+					for (var j : uint = 0; j < vec.length; ++j) {
+						vec[j].dispose();
+					}
+				}
+			}
+
+			_listensForDispose[contextIndex] = false;
+
+			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateProgram(context : Context3D, contextIndex : uint, polyOffsetReg : String = null) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			super.updateProgram(context, contextIndex, "vc6.x");
+			super.activate(stage3DProxy, camera);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, _polyOffset, 1);
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		{
+			super.updateProgram(stage3DProxy, "vc6.x");
 		}
 	}
 }

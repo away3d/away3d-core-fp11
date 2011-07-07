@@ -3,6 +3,7 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.lights.LightBase;
 	import away3d.materials.MaterialBase;
@@ -337,23 +338,24 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			var len : uint = _methods.length;
 
-			super.activate(context, contextIndex, camera);
+			super.activate(stage3DProxy, camera);
 
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
 
-			_ambientMethod.activate(context, contextIndex);
-			if (_shadowMethod) _shadowMethod.activate(context, contextIndex);
-			_diffuseMethod.activate(context, contextIndex);
-			if (_specularMethod) _specularMethod.activate(context, contextIndex);
-			if (_colorTransformMethod) _colorTransformMethod.activate(context, contextIndex);
+			_ambientMethod.activate(stage3DProxy);
+			if (_shadowMethod) _shadowMethod.activate(stage3DProxy);
+			_diffuseMethod.activate(stage3DProxy);
+			if (_specularMethod) _specularMethod.activate(stage3DProxy);
+			if (_colorTransformMethod) _colorTransformMethod.activate(stage3DProxy);
 			for (var i : int = 0; i < len; ++i)
-				_methods[i].activate(context, contextIndex);
+				_methods[i].activate(stage3DProxy);
 
-			if (_normalMapIndex >= 0) context.setTextureAt(_normalMapIndex, _normalMapTexture.getTextureForContext(context, contextIndex));
+			if (_normalMapIndex >= 0) context.setTextureAt(_normalMapIndex, _normalMapTexture.getTextureForStage3D(stage3DProxy));
 
 			if (_cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;
@@ -367,31 +369,32 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			super.deactivate(context);
+			super.deactivate(stage3DProxy);
 			var len : uint = _methods.length;
 
-			_ambientMethod.deactivate(context);
-			if (_shadowMethod) _shadowMethod.deactivate(context);
-			_diffuseMethod.deactivate(context);
-			if (_specularMethod) _specularMethod.deactivate(context);
-			if (_colorTransformMethod) _colorTransformMethod.deactivate(context);
+			_ambientMethod.deactivate(stage3DProxy);
+			if (_shadowMethod) _shadowMethod.deactivate(stage3DProxy);
+			_diffuseMethod.deactivate(stage3DProxy);
+			if (_specularMethod) _specularMethod.deactivate(stage3DProxy);
+			if (_colorTransformMethod) _colorTransformMethod.deactivate(stage3DProxy);
 
 			for (var i : uint = 0; i < len; ++i)
-				if (_methods[i]) _methods[i].deactivate(context);
+				if (_methods[i]) _methods[i].deactivate(stage3DProxy);
 
-			if (_normalMapIndex >= 0) context.setTextureAt(_normalMapIndex, null);
+			if (_normalMapIndex >= 0) stage3DProxy._context3D.setTextureAt(_normalMapIndex, null);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			if (_uvBufferIndex >= 0) context.setVertexBufferAt(_uvBufferIndex, renderable.getUVBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_2);
-			if (_normalBufferIndex >= 0) context.setVertexBufferAt(_normalBufferIndex, renderable.getVertexNormalBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
-			if (_tangentBufferIndex >= 0) context.setVertexBufferAt(_tangentBufferIndex, renderable.getVertexTangentBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
+			var context : Context3D = stage3DProxy._context3D;
+			if (_uvBufferIndex >= 0) context.setVertexBufferAt(_uvBufferIndex, renderable.getUVBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_2);
+			if (_normalBufferIndex >= 0) context.setVertexBufferAt(_normalBufferIndex, renderable.getVertexNormalBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+			if (_tangentBufferIndex >= 0) context.setVertexBufferAt(_tangentBufferIndex, renderable.getVertexTangentBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
 			if (_sceneMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneMatrixIndex, renderable.sceneTransform, true);
 			if (_sceneNormalMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneNormalMatrixIndex, renderable.inverseSceneTransform);
 
@@ -420,17 +423,17 @@ package away3d.materials.passes
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _lightsColorIndex, _lightColorData, _numLights*2);
 			}
 
-			_ambientMethod.setRenderState(renderable, context, contextIndex, camera, lights);
-			if (_shadowMethod) _shadowMethod.setRenderState(renderable, context, contextIndex, camera, lights);
-			_diffuseMethod.setRenderState(renderable, context, contextIndex, camera, lights);
-			if (_specularMethod) _specularMethod.setRenderState(renderable, context, contextIndex, camera, lights);
-			if (_colorTransformMethod) _colorTransformMethod.setRenderState(renderable, context, contextIndex, camera, lights);
+			_ambientMethod.setRenderState(renderable, stage3DProxy, camera, lights);
+			if (_shadowMethod) _shadowMethod.setRenderState(renderable, stage3DProxy, camera, lights);
+			_diffuseMethod.setRenderState(renderable, stage3DProxy, camera, lights);
+			if (_specularMethod) _specularMethod.setRenderState(renderable, stage3DProxy, camera, lights);
+			if (_colorTransformMethod) _colorTransformMethod.setRenderState(renderable, stage3DProxy, camera, lights);
 
 			len = _methods.length;
 			for (var i : uint = 0; i < len; ++i)
-				_methods[i].setRenderState(renderable, context, contextIndex, camera, lights);
+				_methods[i].setRenderState(renderable, stage3DProxy, camera, lights);
 
-			super.render(renderable, context, contextIndex, camera);
+			super.render(renderable, stage3DProxy, camera);
 		}
 
 		/**
@@ -472,11 +475,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateProgram(context : Context3D, contextIndex : uint, polyOffsetReg : String = null) : void
+		override protected function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
 			reset();
 
-			super.updateProgram(context, contextIndex, polyOffsetReg);
+			super.updateProgram(stage3DProxy, polyOffsetReg);
 		}
 
 		/**

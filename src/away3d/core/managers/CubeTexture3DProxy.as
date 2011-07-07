@@ -4,6 +4,7 @@
 package away3d.core.managers
 {
 	import away3d.arcane;
+	import away3d.events.Stage3DEvent;
 	import away3d.materials.utils.CubeMap;
 
 	import flash.display3D.Context3D;
@@ -18,11 +19,13 @@ package away3d.core.managers
 		private var _textures : Vector.<CubeTexture>;
 		private var _dirty : Vector.<Boolean>;
 		private var _maxIndex : int = -1;
+		private var _listensForDispose : Vector.<Boolean>;
 
 		public function CubeTexture3DProxy()
 		{
 			_textures = new Vector.<CubeTexture>(8);
 			_dirty = new Vector.<Boolean>(8);
+			_listensForDispose = new Vector.<Boolean>(8);
 		}
 
 		public function get cubeMap() : CubeMap
@@ -75,10 +78,18 @@ package away3d.core.managers
 				if (_textures[i]) _textures[i].dispose();
 		}
 
-		public function getTextureForContext(context : Context3D, contextIndex : int) : CubeTexture
+		public function getTextureForContext(stage3DProxy : Stage3DProxy) : CubeTexture
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 			var tex : CubeTexture = _textures[contextIndex];
+
+			if (!_listensForDispose[contextIndex]) {
+				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
+				_listensForDispose[contextIndex] = true;
+			}
 
 			if (!tex || _dirty[contextIndex]) {
 				if (!tex) _textures[contextIndex] = tex = context.createCubeTexture(_cubeMap.size, Context3DTextureFormat.BGRA, false);
@@ -87,6 +98,21 @@ package away3d.core.managers
 			}
 
 			return tex;
+		}
+
+		private function onContext3DDisposed(event : Stage3DEvent) : void
+		{
+			var stage3DProxy : Stage3DProxy = Stage3DProxy(event.target);
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+
+			if (_textures[contextIndex]) {
+				_textures[contextIndex].dispose();
+				_textures[contextIndex] = null;
+			}
+
+			_listensForDispose[contextIndex] = false;
+
+			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
 		}
 	}
 }

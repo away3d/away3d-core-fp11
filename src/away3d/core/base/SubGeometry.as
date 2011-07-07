@@ -2,6 +2,8 @@ package away3d.core.base
 {
 	import away3d.animators.data.AnimationBase;
 	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.events.Stage3DEvent;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
@@ -44,6 +46,7 @@ package away3d.core.base
 		private var _autoDeriveVertexNormals : Boolean = true;
 		private var _autoDeriveVertexTangents : Boolean = true;
 		private var _useFaceWeights : Boolean = false;
+
 		protected var _maxIndex : int = -1;
 
 		// raw data dirty flags:
@@ -59,6 +62,7 @@ package away3d.core.base
 		protected var _indexBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexNormalBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexTangentBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
+		protected var _listeningForDispose : Vector.<Stage3DProxy> = new Vector.<Stage3DProxy>(8);
 
 		protected var _numVertices : uint;
 		protected var _numIndices : uint;
@@ -150,12 +154,15 @@ package away3d.core.base
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex positions.
 		 */
-		public function getVertexBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
+			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
+
 			if (_vertexBufferDirty[contextIndex] || !_vertexBuffer[contextIndex]) {
-				VertexBuffer3D(_vertexBuffer[contextIndex] ||= context.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertices, 0, _numVertices);
+				VertexBuffer3D(_vertexBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertices, 0, _numVertices);
 				_vertexBufferDirty[contextIndex] = false;
 			}
 
@@ -167,24 +174,30 @@ package away3d.core.base
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains texture coordinates.
 		 */
-		public function getUVBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
+			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
+
 			if (_uvBufferDirty[contextIndex] || !_uvBuffer[contextIndex]) {
-				(_uvBuffer[contextIndex] ||= context.createVertexBuffer(_numVertices, 2)).uploadFromVector(_uvs, 0, _numVertices);
+				(_uvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_uvs, 0, _numVertices);
 				_uvBufferDirty[contextIndex] = false;
 			}
 
 			return _uvBuffer[contextIndex];
 		}
 
-		public function getSecondaryUVBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
+			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
+
 			if (_secondaryUvBufferDirty[contextIndex] || !_secondaryUvBuffer[contextIndex]) {
-				(_secondaryUvBuffer[contextIndex] ||= context.createVertexBuffer(_numVertices, 2)).uploadFromVector(_secondaryUvs, 0, _numVertices);
+				(_secondaryUvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_secondaryUvs, 0, _numVertices);
 				_secondaryUvBufferDirty[contextIndex] = false;
 			}
 
@@ -196,15 +209,18 @@ package away3d.core.base
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex normals.
 		 */
-		public function getVertexNormalBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
+
+			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 
 			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
 				updateVertexNormals();
 
 			if (_vertexNormalBufferDirty[contextIndex] || !_vertexNormalBuffer[contextIndex]) {
-				(_vertexNormalBuffer[contextIndex] ||= context.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertexNormals, 0, _numVertices);
+				(_vertexNormalBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertexNormals, 0, _numVertices);
 				_vertexNormalBufferDirty[contextIndex] = false;
 			}
 
@@ -216,15 +232,18 @@ package away3d.core.base
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex tangents.
 		 */
-		public function getVertexTangentBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
+
+			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 
 			if (_vertexTangentsDirty)
 				updateVertexTangents();
 
 			if (_vertexTangentBufferDirty[contextIndex] || !_vertexTangentBuffer[contextIndex]) {
-				(_vertexTangentBuffer[contextIndex] ||= context.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertexTangents, 0, _numVertices);
+				(_vertexTangentBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertexTangents, 0, _numVertices);
 				_vertexTangentBufferDirty[contextIndex] = false;
 			}
 			return _vertexTangentBuffer[contextIndex];
@@ -235,12 +254,15 @@ package away3d.core.base
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains triangle indices.
 		 */
-		public function getIndexBuffer(context : Context3D, contextIndex : uint) : IndexBuffer3D
+		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
+			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
+
 			if (_indexBufferDirty[contextIndex] || !_indexBuffer[contextIndex]) {
-				(_indexBuffer[contextIndex] ||= context.createIndexBuffer(_numIndices)).uploadFromVector(_indices, 0, _numIndices);
+				(_indexBuffer[contextIndex] ||= stage3DProxy._context3D.createIndexBuffer(_numIndices)).uploadFromVector(_indices, 0, _numIndices);
 				_indexBufferDirty[contextIndex] = false;
 			}
 
@@ -298,6 +320,11 @@ package away3d.core.base
 			disposeVertexBuffers(_secondaryUvBuffer);
 			disposeVertexBuffers(_vertexTangentBuffer);
 			disposeIndexBuffers(_indexBuffer);
+
+			for (var i : int = 0; i < 8; ++i) {
+				_listeningForDispose[i].removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
+				_listeningForDispose[i] = null;
+			}
 		}
 
 		/**
@@ -478,7 +505,10 @@ package away3d.core.base
 		protected function disposeVertexBuffers(buffers : Vector.<VertexBuffer3D>) : void
 		{
 			for (var i : int = 0; i <= _maxIndex; ++i) {
-				if (buffers[i]) buffers[i].dispose();
+				if (buffers[i]) {
+					buffers[i].dispose();
+					buffers[i] = null;
+				}
 			}
 		}
 
@@ -489,7 +519,10 @@ package away3d.core.base
 		protected function disposeIndexBuffers(buffers : Vector.<IndexBuffer3D>) : void
 		{
 			for (var i : int = 0; i <= _maxIndex; ++i) {
-				if (buffers[i]) buffers[i].dispose();
+				if (buffers[i]) {
+					buffers[i].dispose();
+					buffers[i] = null;
+				}
 			}
 		}
 
@@ -721,6 +754,50 @@ package away3d.core.base
 			}
 
 			_faceTangentsDirty = false;
+		}
+
+		protected function initDisposeListener(stage3DProxy : Stage3DProxy) : void
+		{
+			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
+			_listeningForDispose[stage3DProxy._stage3DIndex] = stage3DProxy;
+		}
+
+		private function onContextDisposed(event : Stage3DEvent) : void
+		{
+			var stage3DProxy : Stage3DProxy = Stage3DProxy(event.target);
+			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
+			_listeningForDispose[stage3DProxy._stage3DIndex] = null;
+
+			disposeForStage3D(stage3DProxy);
+		}
+
+		protected function disposeForStage3D(stage3DProxy : Stage3DProxy) : void
+		{
+			var index : int = stage3DProxy._stage3DIndex;
+			if (_vertexBuffer[index]) {
+				_vertexBuffer[index].dispose();
+				_vertexBuffer[index] = null;
+			}
+			if (_uvBuffer[index]) {
+				_uvBuffer[index].dispose();
+				_uvBuffer[index] = null;
+			}
+			if (_secondaryUvBuffer[index]) {
+				_secondaryUvBuffer[index].dispose();
+				_secondaryUvBuffer[index] = null;
+			}
+			if (_vertexNormalBuffer[index]) {
+				_vertexNormalBuffer[index].dispose();
+				_vertexNormalBuffer[index] = null;
+			}
+			if (_vertexTangentBuffer[index]) {
+				_vertexTangentBuffer[index].dispose();
+				_vertexTangentBuffer[index] = null;
+			}
+			if (_indexBuffer[index]) {
+				_indexBuffer[index].dispose();
+				_indexBuffer[index] = null;
+			}
 		}
 	}
 }

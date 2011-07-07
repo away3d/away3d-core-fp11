@@ -1,6 +1,7 @@
 package away3d.core.managers
 {
 	import away3d.arcane;
+	import away3d.events.Stage3DEvent;
 
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
@@ -16,12 +17,15 @@ package away3d.core.managers
 	 * but requested through Stage3DManager.
 	 *
 	 * @see away3d.core.managers.Stage3DProxy
+	 *
+	 * todo: consider moving all creation methods (createVertexBuffer etc) in here, so that disposal can occur here
+	 * along with the context, instead of scattered throughout the framework
 	 */
 	public class Stage3DProxy extends EventDispatcher
 	{
 		private var _stage3D : Stage3D;
-		private var _context3D : Context3D;
-		private var _stage3DIndex : int = -1;
+		arcane var _context3D : Context3D;
+		arcane var _stage3DIndex : int = -1;
 		private var _stage3DManager : Stage3DManager;
 		private var _backBufferWidth : int;
 		private var _backBufferHeight : int;
@@ -111,7 +115,10 @@ package away3d.core.managers
 		 */
 		private function freeContext3D() : void
 		{
-			if (_context3D) _context3D.dispose();
+			if (_context3D) {
+				_context3D.dispose();
+				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_DISPOSED));
+			}
 			_context3D = null;
 		}
 
@@ -125,7 +132,7 @@ package away3d.core.managers
 				_context3D = _stage3D.context3D;
 				_context3D.enableErrorChecking = true;
 				_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
-				dispatchEvent(event);
+				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
 			}
 			else {
 				throw new Error("Rendering context lost!");

@@ -4,7 +4,8 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
-	import away3d.core.managers.AGALProgram3DAssembler;
+	import away3d.core.managers.AGALProgram3DCache;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.LightBase;
 	import away3d.materials.MaterialBase;
@@ -26,7 +27,8 @@ package away3d.materials.passes
 		protected var _material : MaterialBase;
 		private var _animation : AnimationBase;
 
-		private var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
+		arcane var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
+		arcane var _program3Dids : Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
 		private var _programInvalids : Vector.<Boolean> = new Vector.<Boolean>(8);
 
 		// agal props. these NEED to be set by subclasses!
@@ -182,14 +184,16 @@ package away3d.materials.passes
 		 *
 		 * @private
 		 */
-		arcane function render(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
+
 			context.setCulling(_bothSides? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
 
-			context.setVertexBufferAt(0, renderable.getVertexBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(0, renderable.getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
 
-			context.drawTriangles(renderable.getIndexBuffer(context, contextIndex), 0, renderable.numTriangles);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		/**
@@ -233,14 +237,17 @@ package away3d.materials.passes
 			throw new AbstractMethodError();
 		}
 
-		arcane function activate(context : Context3D, contextIndex : uint, camera : Camera3D) : void
+		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
 			if (!_program3Ds[contextIndex]) {
-				initPass(context, contextIndex);
+				initPass(stage3DProxy);
 			}
 
 			if (_programInvalids[contextIndex]) {
-				updateProgram(context, contextIndex);
+				updateProgram(stage3DProxy);
 				_programInvalids[contextIndex] = false;
 			}
 
@@ -253,8 +260,10 @@ package away3d.materials.passes
 		 *
 		 * @private
 		 */
-		arcane function deactivate(context : Context3D) : void
+		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
+
 			for (var i : uint = 1; i < _numUsedStreams; ++i)
 				context.setVertexBufferAt(i, null);
 
@@ -275,18 +284,19 @@ package away3d.materials.passes
 		 * @param context The context for which to compile the shader program.
 		 * @param polyOffsetReg An optional register that contains an amount by which to inflate the model (used in single object depth map rendering).
 		 */
-		protected function updateProgram(context : Context3D, contextIndex : uint, polyOffsetReg : String = null) : void
+		protected function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
-			AGALProgram3DAssembler.instance.assemble(context, this, _animation, _program3Ds[contextIndex], polyOffsetReg);
+			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, _animation, polyOffsetReg);
 		}
 
 		/**
 		 * Initializes the shader program object.
 		 * @param context
 		 */
-		protected function initPass(context : Context3D, contextIndex : uint) : void
+		protected function initPass(stage3DProxy : Stage3DProxy) : void
 		{
-			_program3Ds[contextIndex] = context.createProgram();
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			_program3Ds[contextIndex] = stage3DProxy._context3D.createProgram();
 			_programInvalids[contextIndex] = true;
 		}
 

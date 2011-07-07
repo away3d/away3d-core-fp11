@@ -3,6 +3,7 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.LightBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.SingleObjectDepthPass;
@@ -199,10 +200,11 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(context : Context3D, contextIndex : uint) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			context.setRenderToBackBuffer();
-			super.activate(context, contextIndex);
+			super.activate(stage3DProxy);
 
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _commonProps, 1);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _invIndex, _fragmentProps, 1);
@@ -210,9 +212,10 @@ package away3d.materials.methods
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _dec, 1);
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, context : Context3D, contextIndex : uint, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
 		{
-			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, contextIndex);
+			var context : Context3D = stage3DProxy._context3D;
+			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, stage3DProxy);
 			var projections : Vector.<Matrix3D> = _depthPass.getProjections(renderable);
 
 			for (var i : int = 0; i < 1; ++i) {
@@ -225,12 +228,12 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			super.deactivate(context);
+			super.deactivate(stage3DProxy);
 
 			for (var i : int = 0; i < 1; ++i)
-				context.setTextureAt(_depthMapRegs[i], null);
+				stage3DProxy._context3D.setTextureAt(_depthMapRegs[i], null);
 		}
 
 		/**

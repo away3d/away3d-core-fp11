@@ -175,7 +175,7 @@ package away3d.core.traverse
 			if (material) {
 				var item : RenderableListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;
-				item.materialId = material._uniqueId;
+				item.renderOrderId = material._uniqueId;
 				item.zIndex = renderable.zIndex;
 				if (material.requiresBlending) {
 					item.next = _blendedRenderableHead;
