@@ -167,8 +167,8 @@ package away3d.animators.data
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, pass.numUsedVertexConstants, _globalMatrices, _numJoints*3);
 
 			var streamOffset : uint = pass.numUsedStreams;
-			context.setVertexBufferAt(streamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), 0, _bufferFormat);
-			context.setVertexBufferAt(streamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), 0, _bufferFormat);
+			stage3DProxy.setSimpleVertexBuffer(streamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), _bufferFormat);
+			stage3DProxy.setSimpleVertexBuffer(streamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), _bufferFormat);
 		}
 
 		private function updateGlobalPose() : void

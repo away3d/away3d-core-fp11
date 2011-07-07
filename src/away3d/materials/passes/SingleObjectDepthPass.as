@@ -195,8 +195,8 @@ package away3d.materials.passes
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _lightPosData, 2);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
-				context.setVertexBufferAt(0, renderable.getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
-				context.setVertexBufferAt(1, renderable.getVertexNormalBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 			}
 		}

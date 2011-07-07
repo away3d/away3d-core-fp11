@@ -4,6 +4,7 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.base.SubGeometry;
 	import away3d.core.managers.AGALProgram3DCache;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
@@ -16,13 +17,16 @@ package away3d.materials.passes
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
+	import flash.display3D.VertexBuffer3D;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 
 	use namespace arcane;
 
 	/**
 	 * MaterialPassBase provides an abstract base class for material shader passes.
 	 */
-	public class MaterialPassBase
+	public class MaterialPassBase extends EventDispatcher
 	{
 		protected var _material : MaterialBase;
 		private var _animation : AnimationBase;
@@ -48,6 +52,10 @@ package away3d.materials.passes
 
 		protected var _lights : Vector.<LightBase>;
 		protected var _numLights : uint;
+
+		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
+		private static var _previousVertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
+
 
 		/**
 		 * Creates a new MaterialPassBase object.
@@ -191,7 +199,7 @@ package away3d.materials.passes
 			context.setCulling(_bothSides? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
 
-			context.setVertexBufferAt(0, renderable.getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
@@ -251,8 +259,14 @@ package away3d.materials.passes
 				_programInvalids[contextIndex] = false;
 			}
 
-			_animation.activate(context, this);
-			context.setProgram(_program3Ds[contextIndex]);
+			var prevUsed : int = _previousUsedStreams[contextIndex];
+			for (var  i : int = _numUsedStreams; i < prevUsed; ++i) {
+				stage3DProxy.setSimpleVertexBuffer(i, null);
+			}
+
+			_animation.activate(stage3DProxy, this);
+			stage3DProxy.setProgram(_program3Ds[contextIndex]);
+			dispatchEvent(new Event(Event.CHANGE));
 		}
 
 		/**
@@ -262,12 +276,12 @@ package away3d.materials.passes
 		 */
 		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
+//			for (var i : uint = 1; i < _numUsedStreams; ++i)
+//				context.setVertexBufferAt(i, null);
 
-			for (var i : uint = 1; i < _numUsedStreams; ++i)
-				context.setVertexBufferAt(i, null);
+			_previousUsedStreams[stage3DProxy._stage3DIndex] = _numUsedStreams;
 
-			if (_animation) _animation.deactivate(context, this);
+			if (_animation) _animation.deactivate(stage3DProxy, this);
 		}
 
 		/**

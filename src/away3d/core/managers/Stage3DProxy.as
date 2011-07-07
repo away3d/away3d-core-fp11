@@ -5,9 +5,13 @@ package away3d.core.managers
 
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
+	import flash.display3D.Program3D;
+	import flash.display3D.VertexBuffer3D;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
+
+	import org.osmf.events.BufferEvent;
 
 	use namespace arcane;
 
@@ -26,12 +30,14 @@ package away3d.core.managers
 		private var _stage3D : Stage3D;
 		arcane var _context3D : Context3D;
 		arcane var _stage3DIndex : int = -1;
+		private var _activeProgram3D : Program3D;
 		private var _stage3DManager : Stage3DManager;
 		private var _backBufferWidth : int;
 		private var _backBufferHeight : int;
 		private var _antiAlias : int;
 		private var _enableDepthAndStencil : Boolean;
 		private var _contextRequested : Boolean;
+		private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 
 		/**
 		 * Creates a Stage3DProxy object. This method should not be called directly. Creation of Stage3DProxy objects should
@@ -48,6 +54,22 @@ package away3d.core.managers
 			_stage3DManager = stage3DManager;
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate);
 			requestContext();
+		}
+
+		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String = null) : void
+		{
+			// force setting null
+			if (buffer && _activeVertexBuffers[index] == buffer) return;
+
+			_context3D.setVertexBufferAt(index, buffer, 0, format);
+			_activeVertexBuffers[index] = buffer;
+		}
+
+		public function setProgram(program3D : Program3D) : void
+		{
+			if (_activeProgram3D == program3D) return;
+			_context3D.setProgram(program3D);
+			_activeProgram3D = program3D;
 		}
 
 		/**

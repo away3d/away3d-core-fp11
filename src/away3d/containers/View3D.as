@@ -328,6 +328,7 @@ package away3d.containers
 			var time : Number = getTimer();
 			var targetTexture : Texture;
 			var numFilters : uint = _filters3d? _filters3d.length : 0;
+			var stage3DProxy : Stage3DProxy = _renderer.stage3DProxy;
 			var context : Context3D = _renderer.context;
 
 			if (_time == 0) _time = time;
@@ -353,7 +354,7 @@ package away3d.containers
 
 				for (var i : uint = 1; i <= numFilters; ++i) {
 					nextFilter = i < numFilters? Filter3DBase(_filters3d[i]) : null;
-					filter.render(context, nextFilter? nextFilter.getInputTexture(context, this) : null, _camera, _depthRender);
+					filter.render(stage3DProxy, nextFilter? nextFilter.getInputTexture(context, this) : null, _camera, _depthRender);
 					filter = nextFilter;
 				}
 				context.present();

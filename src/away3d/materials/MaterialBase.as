@@ -5,6 +5,7 @@ package away3d.materials
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
+	import away3d.core.base.SubGeometry;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
@@ -17,6 +18,7 @@ package away3d.materials
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
+	import flash.events.Event;
 
 	use namespace arcane;
 
@@ -37,6 +39,8 @@ package away3d.materials
 
 		// this value is usually derived from other settings
 		arcane var _uniqueId : int;
+
+		arcane var _renderOrderId : int;
 		arcane var _name : String = "material";
 		private var _namespace : String = "";
 
@@ -76,7 +80,8 @@ package away3d.materials
 
 			invalidateDepthShaderProgram();
 		}
-		
+
+
 		
 		public function get assetType() : String
 		{
@@ -435,8 +440,12 @@ package away3d.materials
 		 */
 		protected function clearPasses() : void
 		{
+			for (var i : int = 0; i < _numPasses; ++i) {
+				_passes[i].removeEventListener(Event.CHANGE, onPassChange);
+			}
 			_passes.length = 0;
 			_numPasses = 0;
+
 		}
 
 		/**
@@ -451,6 +460,33 @@ package away3d.materials
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
 			pass.lights = _lights? Vector.<LightBase>(_lights) : null;
+			pass.addEventListener(Event.CHANGE, onPassChange);
+			calculateRenderId();
+		}
+
+		private function calculateRenderId() : void
+		{
+		}
+
+		private function onPassChange(event : Event) : void
+		{
+			var mult : Number = 1;
+			var ids : Vector.<int>;
+			var len : int;
+
+			_renderOrderId = 0;
+
+			for (var i : int = 0; i < _numPasses; ++i) {
+				ids = _passes[i]._program3Dids;
+				len = ids.length;
+				for (var j : int = 0; j < len; ++j) {
+					if (ids[j] != -1) {
+						_renderOrderId += mult*ids[j];
+						j = len;
+					}
+				}
+				mult *= 1000;
+			}
 		}
 	}
 }

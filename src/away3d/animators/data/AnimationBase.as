@@ -1,6 +1,7 @@
 package away3d.animators.data
 {
 	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.passes.MaterialPassBase;
 
@@ -50,7 +51,7 @@ package away3d.animators.data
 		 *
 		 * @private
 		 */
-		arcane function activate(context : Context3D, pass : MaterialPassBase) : void {}
+		arcane function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void {}
 
 		/**
 		 * Clears the GPU render state that has been set by the current animation.
@@ -59,7 +60,7 @@ package away3d.animators.data
 		 *
 		 * @private
 		 */
-		arcane function deactivate(context : Context3D, pass : MaterialPassBase) : void {}
+		arcane function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void {}
 
 		/**
 		 * Returns true if the provided AnimationBase instance is considered equivalent to the current AnimationBase instance.

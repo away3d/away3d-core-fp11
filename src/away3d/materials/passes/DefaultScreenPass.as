@@ -392,9 +392,9 @@ package away3d.materials.passes
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			if (_uvBufferIndex >= 0) context.setVertexBufferAt(_uvBufferIndex, renderable.getUVBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_2);
-			if (_normalBufferIndex >= 0) context.setVertexBufferAt(_normalBufferIndex, renderable.getVertexNormalBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
-			if (_tangentBufferIndex >= 0) context.setVertexBufferAt(_tangentBufferIndex, renderable.getVertexTangentBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+			if (_uvBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_uvBufferIndex, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
+			if (_normalBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_normalBufferIndex, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			if (_tangentBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_tangentBufferIndex, renderable.getVertexTangentBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 			if (_sceneMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneMatrixIndex, renderable.sceneTransform, true);
 			if (_sceneNormalMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneNormalMatrixIndex, renderable.inverseSceneTransform);
 

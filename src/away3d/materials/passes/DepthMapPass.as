@@ -72,9 +72,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			super.deactivate(stage3DProxy);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy, nextUsedStreams : int) : void
+//		{
+//			super.deactivate(stage3DProxy, nextUsedStreams);
+//		}
 	}
 }

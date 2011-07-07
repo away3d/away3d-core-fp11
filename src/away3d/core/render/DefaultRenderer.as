@@ -83,12 +83,12 @@ package away3d.core.render
 		 */
 		private function drawRenderables(item : RenderableListItem, entityCollector : EntityCollector) : void
 		{
-			var renderable : IRenderable;
 			var numPasses : uint;
 			var j : uint;
 			var camera : Camera3D = entityCollector.camera;
 			var item2 : RenderableListItem;
 
+			// todo: is a rendercommand way possible, respecting pass order, but allowing passes with same Program3D to be chained?
 			while (item) {
 				_activeMaterial = item.renderable.material;
 				_activeMaterial.updateMaterial(_context);
@@ -98,6 +98,7 @@ package away3d.core.render
 
 				do {
 					item2 = item;
+
 					_activeMaterial.activatePass(j, _stage3DProxy, camera);
 					do {
 						_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, camera);
