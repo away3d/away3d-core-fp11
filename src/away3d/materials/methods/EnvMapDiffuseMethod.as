@@ -67,15 +67,15 @@ package away3d.materials.methods
 		{
 			super.activate(stage3DProxy);
 
-			stage3DProxy._context3D.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
+			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
 		}
 
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			super.deactivate(stage3DProxy);
-
-			stage3DProxy._context3D.setTextureAt(_cubeMapIndex, null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			super.deactivate(stage3DProxy);
+//
+//			stage3DProxy.setTextureAt(_cubeMapIndex, null);
+//		}
 
 		/**
 		 * @inheritDoc

@@ -49,6 +49,10 @@ package away3d.core.render
 
 			_context.setDepthTest(false, Context3DCompareMode.LESS);
 
+//			for (var i : int = 0; i < 8; ++i) {
+//				_stage3DProxy.setTextureAt(i,  null);
+//			}
+
 			if (entityCollector.skyBox) {
 				if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 				_activeMaterial = null;

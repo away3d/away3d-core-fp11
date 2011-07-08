@@ -7,6 +7,9 @@ package away3d.core.managers
 	import flash.display3D.Context3D;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.display3D.textures.Texture;
+	import flash.display3D.textures.TextureBase;
+	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
@@ -38,6 +41,7 @@ package away3d.core.managers
 		private var _enableDepthAndStencil : Boolean;
 		private var _contextRequested : Boolean;
 		private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
+		private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
 
 		/**
 		 * Creates a Stage3DProxy object. This method should not be called directly. Creation of Stage3DProxy objects should
@@ -63,6 +67,15 @@ package away3d.core.managers
 
 			_context3D.setVertexBufferAt(index, buffer, 0, format);
 			_activeVertexBuffers[index] = buffer;
+		}
+
+		public function setTextureAt(index : int, texture : TextureBase) : void
+		{
+			if (_activeTextures[index] == texture) return;
+
+			_context3D.setTextureAt(index,  texture);
+
+			_activeTextures[index] = texture;
 		}
 
 		public function setProgram(program3D : Program3D) : void

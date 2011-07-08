@@ -1,7 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.BitmapDataTextureCache;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.managers.Texture3DProxy;
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -59,8 +61,10 @@ package away3d.materials.methods
             _blendData.copyChannel(alpha, alpha.rect, new Point(), BitmapDataChannel.RED, targetChannel);
             _blendingTexture.invalidateContent();
 
-            _splats[index] ||= new Texture3DProxy();
-            _splats[index].bitmapData = texture;
+			if (_splats[index])
+				BitmapDataTextureCache.getInstance().freeTexture(_splats[index]);
+
+            _splats[index] = BitmapDataTextureCache.getInstance().getTexture(texture);
             _tileData[index] = tile;
         }
 
@@ -134,31 +138,37 @@ package away3d.materials.methods
 
         arcane override function activate(stage3DProxy : Stage3DProxy) : void
         {
-			var context : Context3D = stage3DProxy._context3D;
             super.activate(stage3DProxy);
-            context.setTextureAt(_blendingTextureIndex, _blendingTexture.getTextureForStage3D(stage3DProxy));
+            stage3DProxy.setTextureAt(_blendingTextureIndex, _blendingTexture.getTextureForStage3D(stage3DProxy));
 
             for (var i : int = 0; i < _numSplattingLayers; ++i)
-                context.setTextureAt(i+_splatTextureIndex, _splats[i].getTextureForStage3D(stage3DProxy));
+                stage3DProxy.setTextureAt(i+_splatTextureIndex, _splats[i].getTextureForStage3D(stage3DProxy));
 
-            context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _tileRegisterIndex, _tileData, 1);
+            stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _tileRegisterIndex, _tileData, 1);
         }
 
 
-        arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-        {
-			var context : Context3D = stage3DProxy._context3D;
-            super.deactivate(stage3DProxy);
-            context.setTextureAt(_blendingTextureIndex, null);
-            for (var i : int = 0; i < _numSplattingLayers; ++i)
-                context.setTextureAt(i+_splatTextureIndex, null);
-
-        }
+//        arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//        {
+//            super.deactivate(stage3DProxy);
+//
+//            stage3DProxy.setTextureAt(_blendingTextureIndex, null);
+//            for (var i : int = 0; i < _numSplattingLayers; ++i)
+//                stage3DProxy.setTextureAt(i+_splatTextureIndex, null);
+//
+//        }
 
         override public function dispose(deep : Boolean) : void
         {
-            super.dispose(deep);
-            _blendData.dispose();
+			super.dispose(deep);
+			_blendingTexture.dispose(true);
+
+			var len : int = _splats.length;
+
+			for (var i : int = 0; i < len; ++i) {
+				if (_splats[i])
+					BitmapDataTextureCache.getInstance().freeTexture(_splats[i]);
+			}
         }
 
         override public function set alphaThreshold(value : Number) : void

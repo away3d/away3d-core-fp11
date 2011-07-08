@@ -181,12 +181,12 @@ package away3d.materials.methods
 			var context : Context3D = stage3DProxy._context3D;
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _data, 2);
-			context.setTextureAt(_depthMapIndex, _castingLight.shadowMapper.getDepthMap(stage3DProxy));
+			stage3DProxy.setTextureAt(_depthMapIndex, _castingLight.shadowMapper.getDepthMap(stage3DProxy));
 		}
 
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			stage3DProxy._context3D.setTextureAt(_depthMapIndex, null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			stage3DProxy.setTextureAt(_depthMapIndex, null);
+//		}
 	}
 }

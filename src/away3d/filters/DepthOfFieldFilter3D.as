@@ -139,12 +139,12 @@ package away3d.filters{
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
-			context.setTextureAt(0, _inputTexture);
-			context.setTextureAt(1, depthRender);
+			stage3DProxy.setTextureAt(0, _inputTexture);
+			stage3DProxy.setTextureAt(1, depthRender);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 4);
 			context.drawTriangles(_indexBuffer, 0, 2);
-			context.setTextureAt(0, null);
-			context.setTextureAt(1, null);
+			stage3DProxy.setTextureAt(0, null);
+			stage3DProxy.setTextureAt(1, null);
 			stage3DProxy.setSimpleVertexBuffer(0, null);
 			stage3DProxy.setSimpleVertexBuffer(1, null);
 		}

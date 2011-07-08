@@ -1,6 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.BitmapDataTextureCache;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
@@ -104,21 +105,20 @@ package away3d.materials.methods
 
 		public function set bitmapData(value : BitmapData) : void
 		{
+			if (value == bitmapData) return;
+
 			if (!value || !_useTexture)
 				invalidateShaderProgram();
 
+			if (_useTexture) {
+				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				_texture = null;
+			}
+
 			_useTexture = Boolean(value);
 
-			if (_useTexture) {
-				_texture ||= new Texture3DProxy(_mipmapBitmap);
-				_texture.bitmapData = value;
-			}
-			else {
-				if (_texture) {
-					_texture.dispose(false);
-					_texture = null;
-				}
-			}
+			if (_useTexture)
+				_texture = BitmapDataTextureCache.getInstance().getTexture(value);
 		}
 
 		/**
@@ -126,7 +126,7 @@ package away3d.materials.methods
 		 */
 		public function invalidateBitmapData() : void
 		{
-			_texture.invalidateContent();
+			if (_texture) _texture.invalidateContent();
 		}
 
 		/**
@@ -150,7 +150,10 @@ package away3d.materials.methods
 		 */
 		override public function dispose(deep : Boolean) : void
 		{
-			if (_texture) _texture.dispose(deep);
+			if (_useTexture) {
+				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				_texture = null;
+			}
 			if (_mipmapBitmap) _mipmapBitmap.dispose();
 		}
 
@@ -318,14 +321,14 @@ package away3d.materials.methods
 			super.activate(stage3DProxy);
 			if (_numLights == 0) return;
 
-			if (_useTexture) context.setTextureAt(_specularTexIndex, _texture.getTextureForStage3D(stage3DProxy));
+			if (_useTexture) stage3DProxy.setTextureAt(_specularTexIndex, _texture.getTextureForStage3D(stage3DProxy));
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _specularDataIndex, _specularData, 1);
 		}
 
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			if (_useTexture) stage3DProxy._context3D.setTextureAt(_specularTexIndex, null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			if (_useTexture) stage3DProxy.setTextureAt(_specularTexIndex, null);
+//		}
 
 		/**
 		 * Updates the specular color data used by the render state.

@@ -21,14 +21,19 @@
 		{
 			var w:int = bitmapData.width;
 			var h:int = bitmapData.height;
-			
+
 			if(w<2 || h<2 || w>MAX || h>MAX) return false;
-			
+
 			if(isPowerOfTwo(w) && isPowerOfTwo(h)) return true;
-			
+
 			return false;
 		}
-		
+
+		private static function isPowerOfTwo(value:int): Boolean
+		{
+			return value ? ((value & -value) == value) : false;
+		}
+
 		private static function build() : void
 		{
 			var size:uint = 256;
@@ -50,11 +55,5 @@
 				_bitmapData.copyPixels(_bitmapData,rect,destpt);
 			}
 		}
-		
-		private static function isPowerOfTwo(value:int): Boolean
-		{
-			return value ? ((value & -value) == value) : false;
-		}
-
 	}
 }

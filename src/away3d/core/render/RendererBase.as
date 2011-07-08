@@ -308,6 +308,12 @@ package away3d.core.render
 			if (!_context) return;
 
 			executeRender(entityCollector, target, surfaceSelector, additionalClearMask);
+
+			// clear buffers
+			for (var i : uint = 0; i < 8; ++i) {
+				_stage3DProxy.setSimpleVertexBuffer(i, null);
+				_stage3DProxy.setTextureAt(i, null);
+			}
 		}
 
 		/**

@@ -355,7 +355,7 @@ package away3d.materials.passes
 			for (var i : int = 0; i < len; ++i)
 				_methods[i].activate(stage3DProxy);
 
-			if (_normalMapIndex >= 0) context.setTextureAt(_normalMapIndex, _normalMapTexture.getTextureForStage3D(stage3DProxy));
+			if (_normalMapIndex >= 0) stage3DProxy.setTextureAt(_normalMapIndex, _normalMapTexture.getTextureForStage3D(stage3DProxy));
 
 			if (_cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;
@@ -383,7 +383,7 @@ package away3d.materials.passes
 			for (var i : uint = 0; i < len; ++i)
 				if (_methods[i]) _methods[i].deactivate(stage3DProxy);
 
-			if (_normalMapIndex >= 0) stage3DProxy._context3D.setTextureAt(_normalMapIndex, null);
+//			if (_normalMapIndex >= 0) stage3DProxy.setTextureAt(_normalMapIndex, null);
 		}
 
 		/**
@@ -532,6 +532,7 @@ package away3d.materials.passes
 
 			_numUsedVertexConstants = _registerCache.numUsedVertexConstants;
 			_numUsedStreams = _registerCache.numUsedStreams;
+			_numUsedTextures = _registerCache.numUsedTextures;
 		}
 
 		private function setMethodProps(method : ShadingMethodBase) : void

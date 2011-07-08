@@ -1,6 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.BitmapDataTextureCache;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
@@ -25,7 +26,6 @@ package away3d.materials.methods
         private var _cutOffIndex : int;
 
 		private var _texture : Texture3DProxy;
-		private var _mipmapBitmap : BitmapData;
 		private var _diffuseColor : uint = 0xffffff;
 
 		private var _diffuseData : Vector.<Number>;
@@ -83,21 +83,21 @@ package away3d.materials.methods
 
 		public function set bitmapData(value : BitmapData) : void
 		{
+			if (value == bitmapData) return;
+
 			if (!value || !_useTexture)
 				invalidateShaderProgram();
 
+			if (_useTexture) {
+				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				_texture = null;
+			}
+
 			_useTexture = Boolean(value);
 
-			if (_useTexture) {
-				_texture ||= new Texture3DProxy(_mipmapBitmap);
-				_texture.bitmapData = value;
-			}
-			else {
-				if (_texture) {
-					_texture.dispose(false);
-					_texture = null;
-				}
-			}
+			if (_useTexture)
+				_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+
 		}
 
         // todo: provide support for alpha map?
@@ -124,7 +124,7 @@ package away3d.materials.methods
 		 */
 		public function invalidateBitmapData() : void
 		{
-			_texture.invalidateContent();
+			if (_texture) _texture.invalidateContent();
 		}
 
 		/**
@@ -132,8 +132,10 @@ package away3d.materials.methods
 		 */
 		override public function dispose(deep : Boolean) : void
 		{
-			if (_texture) _texture.dispose(deep);
-			if (_mipmapBitmap) _mipmapBitmap.dispose();
+			if (_texture) {
+				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				_texture = null;
+			}
 		}
 
 		/**
@@ -278,7 +280,7 @@ package away3d.materials.methods
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			if (_useTexture) {
-				context.setTextureAt(_diffuseInputIndex, _texture.getTextureForStage3D(stage3DProxy));
+				stage3DProxy.setTextureAt(_diffuseInputIndex, _texture.getTextureForStage3D(stage3DProxy));
                 if (_alphaThreshold > 0) {
                     context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _cutOffIndex, _cutOffData, 1);
                 }
@@ -287,10 +289,10 @@ package away3d.materials.methods
 		}
 
 
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			if (_useTexture) stage3DProxy._context3D.setTextureAt(_diffuseInputIndex, null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			if (_useTexture) stage3DProxy.setTextureAt(_diffuseInputIndex, null);
+//		}
 
 		/**
 		 * Updates the diffuse color data used by the render state.

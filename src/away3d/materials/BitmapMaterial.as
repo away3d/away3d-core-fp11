@@ -74,10 +74,7 @@
 
 		public function set bitmapData(value : BitmapData) : void
 		{
-			if(isBitmapDataValid(value))
-				_screenPass.diffuseMethod.bitmapData = value;
-			else
-				throw new Error("Invalid bitmapData! Must be power of 2 and not exceeding 2048");
+			_screenPass.diffuseMethod.bitmapData = value;
 		}
 
 		/**

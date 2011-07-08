@@ -19,7 +19,7 @@ package away3d.animators.skeleton
 		 * The joint poses for the skeleton. The JointPoses indices correspond to the target skeleton's joints.
 		 */
 		public var jointPoses : Vector.<JointPose>;
-		
+
 		/**
 		 * Creates a new SkeletonPose object.
 		 * @param numJoints The number of joints in the target skeleton.
@@ -28,8 +28,8 @@ package away3d.animators.skeleton
 		{
 			jointPoses = new Vector.<JointPose>();
 		}
-		
-		
+
+
 		public function get assetType() : String
 		{
 			return AssetType.SKELETON_POSE;
@@ -38,27 +38,25 @@ package away3d.animators.skeleton
 		/**
 		 * Returns the JointPose, given the joint name.
 		 * @param jointName is the name of the JointPose to be found.
-		 * @return JointPose 
+		 * @return JointPose
 		 */
-		public function jointPoseFromName(jointName:String):JointPose
+		public function jointPoseFromName(jointName : String) : JointPose
 		{
-			var jointPoseIndex:int = jointPoseIndexFromName(jointName);
-			if (jointPoseIndex != -1)
-			{
+			var jointPoseIndex : int = jointPoseIndexFromName(jointName);
+			if (jointPoseIndex != -1) {
 				return jointPoses[jointPoseIndex];
 			}
-			else
-			{
+			else {
 				return null;
 			}
 		}
-		
+
 		/**
 		 * Returns the joint index, given the joint name. -1 is returned if joint name not found.
 		 * @param jointName is the name of the JointPose to be found.
-		 * @return jointIndex 
+		 * @return jointIndex
 		 */
-		public function jointPoseIndexFromName(jointName:String):int
+		public function jointPoseIndexFromName(jointName : String) : int
 		{
 			// this function is implemented as a linear search, rather than a possibly
 			// more optimal method (Dictionary lookup, for example) because:
@@ -66,19 +64,17 @@ package away3d.animators.skeleton
 			// b) it is assumed that it will be called only during load, and not during main loop
 			// c) maintaining a dictionary (for safety) would dictate an interface to access JointPoses,
 			//    rather than direct array access.  this would be sub-optimal.
-			var jointPoseIndex:int;
-			for each (var jointPose:JointPose in jointPoses)
-			{
-				if (jointPose.name == jointName)
-				{
+			var jointPoseIndex : int;
+			for each (var jointPose : JointPose in jointPoses) {
+				if (jointPose.name == jointName) {
 					return jointPoseIndex;
 				}
 				jointPoseIndex++;
 			}
-			
+
 			return -1;
 		}
-		
+
 		/**
 		 * The amount of joints in the Skeleton
 		 */
@@ -86,26 +82,25 @@ package away3d.animators.skeleton
 		{
 			return jointPoses.length;
 		}
-		
-    /**
-     * Clones this SkeletonPose, with all of its component jointPoses. 
-		 * @return SkeletonPose 
-     */
-    public function clone() : SkeletonPose
-    {
-      var clone : SkeletonPose = new SkeletonPose();
-      var numJointPoses : uint = this.jointPoses.length;
-      for (var i:uint = 0; i < numJointPoses; i++)
-      {
-        var cloneJointPose:JointPose = new JointPose();
-        var thisJointPose:JointPose = this.jointPoses[i];
-        cloneJointPose.name = thisJointPose.name;
-        cloneJointPose.copyFrom(thisJointPose);
-        clone.jointPoses[i] = cloneJointPose;
-      }
-      return clone;
-    }
-    
+
+		/**
+		 * Clones this SkeletonPose, with all of its component jointPoses.
+		 * @return SkeletonPose
+		 */
+		public function clone() : SkeletonPose
+		{
+			var clone : SkeletonPose = new SkeletonPose();
+			var numJointPoses : uint = this.jointPoses.length;
+			for (var i : uint = 0; i < numJointPoses; i++) {
+				var cloneJointPose : JointPose = new JointPose();
+				var thisJointPose : JointPose = this.jointPoses[i];
+				cloneJointPose.name = thisJointPose.name;
+				cloneJointPose.copyFrom(thisJointPose);
+				clone.jointPoses[i] = cloneJointPose;
+			}
+			return clone;
+		}
+
 		/**
 		 * Converts a local hierarchical skeleton pose to a global pose
 		 * @param targetPose The SkeletonPose object that will contain the global pose.
@@ -145,8 +140,13 @@ package away3d.animators.skeleton
 				if (parentIndex < 0) {
 					tr = pose.translation;
 					or = pose.orientation;
-					q.x = or.x;	q.y = or.y;	q.z = or.z;	q.w = or.w;
-					t.x = tr.x;	t.y = tr.y;	t.z = tr.z;
+					q.x = or.x;
+					q.y = or.y;
+					q.z = or.z;
+					q.w = or.w;
+					t.x = tr.x;
+					t.y = tr.y;
+					t.z = tr.z;
 				}
 				else {
 					// append parent pose
@@ -155,24 +155,35 @@ package away3d.animators.skeleton
 					// rotate point
 					or = parentPose.orientation;
 					tr = pose.translation;
-					x2 = or.x; y2 = or.y; z2 = or.z; w2 = or.w;
-					x3 = tr.x; y3 = tr.y; z3 = tr.z;
+					x2 = or.x;
+					y2 = or.y;
+					z2 = or.z;
+					w2 = or.w;
+					x3 = tr.x;
+					y3 = tr.y;
+					z3 = tr.z;
 
-					w1 = -x2*x3 - y2*y3 - z2*z3;
-					x1 = w2*x3 + y2*z3 - z2*y3;
-					y1 = w2*y3 - x2*z3 + z2*x3;
-					z1 = w2*z3 + x2*y3 - y2*x3;
+					w1 = -x2 * x3 - y2 * y3 - z2 * z3;
+					x1 = w2 * x3 + y2 * z3 - z2 * y3;
+					y1 = w2 * y3 - x2 * z3 + z2 * x3;
+					z1 = w2 * z3 + x2 * y3 - y2 * x3;
 
 					// append parent translation
 					tr = parentPose.translation;
-					t.x = -w1*x2 + x1*w2 - y1*z2 + z1*y2 + tr.x;
-					t.y = -w1*y2 + x1*z2 + y1*w2 - z1*x2 + tr.y;
-					t.z = -w1*z2 - x1*y2 + y1*x2 + z1*w2 + tr.z;
+					t.x = -w1 * x2 + x1 * w2 - y1 * z2 + z1 * y2 + tr.x;
+					t.y = -w1 * y2 + x1 * z2 + y1 * w2 - z1 * x2 + tr.y;
+					t.z = -w1 * z2 - x1 * y2 + y1 * x2 + z1 * w2 + tr.z;
 
 					// append parent orientation
-					x1 = or.x;	y1 = or.y;	z1 = or.z;	w1 = or.w;
+					x1 = or.x;
+					y1 = or.y;
+					z1 = or.z;
+					w1 = or.w;
 					or = pose.orientation;
-					x2 = or.x;	y2 = or.y;	z2 = or.z;	w2 = or.w;
+					x2 = or.x;
+					y2 = or.y;
+					z2 = or.z;
+					w2 = or.w;
 
 					q.w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;
 					q.x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;

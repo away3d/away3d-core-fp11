@@ -130,14 +130,14 @@ package away3d.filters{
 			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
 			stage3DProxy.setProgram(_brightpassProgram3D);
-			context.setTextureAt(0, _inputTexture);
+			stage3DProxy.setTextureAt(0, _inputTexture);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _brightPassData, 1);
 			context.drawTriangles(_indexBuffer, 0, 2);
 
 
 			context.setRenderToTexture(_blurTexture, false, 0, 0);
 			stage3DProxy.setProgram(_blurProgram3D);
-			context.setTextureAt(0, _brightPassTexture);
+			stage3DProxy.setTextureAt(0, _brightPassTexture);
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _blurData, 2);
 			context.drawTriangles(_indexBuffer, 0, 2);
@@ -148,14 +148,14 @@ package away3d.filters{
 				context.setRenderToBackBuffer();
 
 			stage3DProxy.setProgram(_compositeProgram3D);
-			context.setTextureAt(0, _blurTexture);
-			context.setTextureAt(1, _inputTexture);
+			stage3DProxy.setTextureAt(0, _blurTexture);
+			stage3DProxy.setTextureAt(1, _inputTexture);
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.drawTriangles(_indexBuffer, 0, 2);
 
 
-			context.setTextureAt(0, null);
-			context.setTextureAt(1, null);
+			stage3DProxy.setTextureAt(0, null);
+			stage3DProxy.setTextureAt(1, null);
 			stage3DProxy.setSimpleVertexBuffer(0, null);
 			stage3DProxy.setSimpleVertexBuffer(1, null);
 		}

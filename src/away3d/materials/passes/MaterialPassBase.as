@@ -37,6 +37,7 @@ package away3d.materials.passes
 
 		// agal props. these NEED to be set by subclasses!
 		protected var _numUsedStreams : uint;
+		protected var _numUsedTextures : uint;
 		protected var _numUsedVertexConstants : uint;
 
 		protected var _smooth : Boolean = true;
@@ -53,8 +54,9 @@ package away3d.materials.passes
 		protected var _lights : Vector.<LightBase>;
 		protected var _numLights : uint;
 
+		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
 		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
-		private static var _previousVertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
+		private static var _previousUsedTexs : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
 
 
 		/**
@@ -260,9 +262,18 @@ package away3d.materials.passes
 			}
 
 			var prevUsed : int = _previousUsedStreams[contextIndex];
-			for (var  i : int = _numUsedStreams; i < prevUsed; ++i) {
+			var i : uint;
+			for (i = _numUsedStreams; i < prevUsed; ++i) {
 				stage3DProxy.setSimpleVertexBuffer(i, null);
 			}
+
+			prevUsed = _previousUsedTexs[contextIndex];
+
+			for (i = _numUsedTextures; i < prevUsed; ++i) {
+				stage3DProxy.setTextureAt(i, null);
+			}
+
+			// todo: do same for textures
 
 			_animation.activate(stage3DProxy, this);
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
@@ -279,7 +290,9 @@ package away3d.materials.passes
 //			for (var i : uint = 1; i < _numUsedStreams; ++i)
 //				context.setVertexBufferAt(i, null);
 
-			_previousUsedStreams[stage3DProxy._stage3DIndex] = _numUsedStreams;
+			var index : uint = stage3DProxy._stage3DIndex;
+			_previousUsedStreams[index] = _numUsedStreams;
+			_previousUsedTexs[index] = _numUsedTextures;
 
 			if (_animation) _animation.deactivate(stage3DProxy, this);
 		}

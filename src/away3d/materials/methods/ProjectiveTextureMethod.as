@@ -123,14 +123,13 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
-			context.setTextureAt(_mapIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
+			stage3DProxy.setTextureAt(_mapIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
 		}
 
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			stage3DProxy._context3D.setTextureAt(_mapIndex, null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			stage3DProxy.setTextureAt(_mapIndex, null);
+//		}
 	}
 }

@@ -219,7 +219,7 @@ package away3d.materials.methods
 			var projections : Vector.<Matrix3D> = _depthPass.getProjections(renderable);
 
 			for (var i : int = 0; i < 1; ++i) {
-				context.setTextureAt(_depthMapRegs[i], depthMaps[i]);
+				stage3DProxy.setTextureAt(_depthMapRegs[i], depthMaps[i]);
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _lightMatrixsConstsIndex+i*4, projections[i], true);
 			}
 		}
@@ -228,13 +228,13 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			super.deactivate(stage3DProxy);
-
-			for (var i : int = 0; i < 1; ++i)
-				stage3DProxy._context3D.setTextureAt(_depthMapRegs[i], null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			super.deactivate(stage3DProxy);
+//
+//			for (var i : int = 0; i < 1; ++i)
+//				stage3DProxy.setTextureAt(_depthMapRegs[i], null);
+//		}
 
 		/**
 		 * Generates the code for this method

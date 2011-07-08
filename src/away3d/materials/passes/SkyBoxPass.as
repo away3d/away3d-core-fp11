@@ -23,6 +23,7 @@ package away3d.materials.passes
 		{
 			super();
 			mipmap = false;
+			_numUsedTextures = 1;
 		}
 		/**
 		 * The cube texture to use as the skybox.
@@ -60,14 +61,14 @@ package away3d.materials.passes
 		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			super.activate(stage3DProxy, camera);
-			stage3DProxy._context3D.setTextureAt(0, _cubeTexture.getTextureForContext(stage3DProxy));
+			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForContext(stage3DProxy));
 		}
 
 
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			stage3DProxy._context3D.setTextureAt(0, null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			stage3DProxy.setTextureAt(0, null);
+//		}
 	}
 
 }
