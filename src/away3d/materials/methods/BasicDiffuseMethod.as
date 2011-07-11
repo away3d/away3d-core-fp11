@@ -242,7 +242,7 @@ package away3d.materials.methods
 				regCache.removeFragmentTempUsage(_totalLightColorReg);
 			}
 
-			temp = _numLights > 0? regCache.getFreeFragmentVectorTemp() : targetReg;
+			temp = _numLights > 0? regCache.	getFreeFragmentVectorTemp() : targetReg;
 
             if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
@@ -250,9 +250,9 @@ package away3d.materials.methods
                 if (_alphaThreshold > 0) {
                     cutOffReg = regCache.getFreeFragmentConstant();
                     _cutOffIndex = cutOffReg.index;
-                    code += "sub " + (temp+".w", temp+".w", cutOffReg+".x") +
-							"kil " + temp+ ".w\n" +
-							"add " + temp+".w, " + temp+".w, " + cutOffReg+".x\n" +
+                    code += "sub " + temp +".w, " +  temp+".w, " + cutOffReg+".x\n" +
+							"kil " + temp +".w\n" +
+							"add " + temp +".w, " + temp+".w, " + cutOffReg+".x\n" +
 							"div " + temp + ", " + temp + ", " + temp+".w\n";
                 }
 			}
