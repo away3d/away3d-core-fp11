@@ -322,8 +322,10 @@ package away3d.core.base
 			disposeIndexBuffers(_indexBuffer);
 
 			for (var i : int = 0; i < 8; ++i) {
-				_listeningForDispose[i].removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
-				_listeningForDispose[i] = null;
+				if (_listeningForDispose[i]) {
+					_listeningForDispose[i].removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
+					_listeningForDispose[i] = null;
+				}
 			}
 		}
 
