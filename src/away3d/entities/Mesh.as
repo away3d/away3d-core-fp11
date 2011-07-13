@@ -177,7 +177,7 @@
 
 			len = numChildren;
 			for (i = 0; i < len; ++i) {
-				addChild(ObjectContainer3D(getChildAt(i).clone()));
+				clone.addChild(ObjectContainer3D(getChildAt(i).clone()));
 			}
 
 			return clone;

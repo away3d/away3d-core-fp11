@@ -398,7 +398,7 @@ package away3d.containers
 
 			var len : uint = _children.length;
 			for (var i : uint = 0; i < len; ++i) {
-				addChild(ObjectContainer3D(_children[i].clone()));
+				clone.addChild(ObjectContainer3D(_children[i].clone()));
 			}
 
 			// todo: implement for all subtypes
