@@ -175,8 +175,8 @@
 				clone._subMeshes[i]._material = _subMeshes[i]._material;
 			}
 
-			var len : uint = numChildren;
-			for (var i : uint = 0; i < len; ++i) {
+			len = numChildren;
+			for (i = 0; i < len; ++i) {
 				addChild(ObjectContainer3D(getChildAt(i).clone()));
 			}
 
