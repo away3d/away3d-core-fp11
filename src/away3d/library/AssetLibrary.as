@@ -13,7 +13,7 @@ package away3d.library
 	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
-
+	
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 
@@ -254,6 +254,123 @@ package away3d.library
 		
 		
 		
+		public static function addAsset(asset : IAsset) : void
+		{
+			getInstance().addAsset(asset);
+		}
+		
+		public function addAsset(asset : IAsset) : void
+		{
+			var old : IAsset;
+			
+			old = getAsset(asset.name, asset.assetNamespace);
+			if (old != null) {
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
+			}
+			
+			// Add it
+			_assets.push(asset);
+			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
+				_assetDictionary[asset.assetNamespace] = {};
+			_assetDictionary[asset.assetNamespace][asset.name] = asset;
+			
+			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
+			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
+		}
+		
+		
+		public static function removeAsset(asset : IAsset) : void
+		{
+			getInstance().removeAsset(asset);
+		}
+		
+		public function removeAsset(asset : IAsset) : void
+		{
+			var idx : int;
+			
+			removeAssetFromDict(asset);
+			
+			idx = _assets.indexOf(asset);
+			if (idx >= 0)
+				_assets.splice(idx, 1);
+		}
+		
+		
+		public static function removeAssetByName(name : String, ns : String = null) : IAsset
+		{
+			return getInstance().removeAssetByName(name, ns);
+		}
+		
+		public function removeAssetByName(name : String, ns : String = null) : IAsset
+		{
+			var asset : IAsset = getAsset(name, ns);
+			if (asset) 
+				removeAsset(asset);
+			
+			return asset;
+		}
+		
+		
+		
+		public static function removeAllAssets() : void
+		{
+			getInstance().removeAllAssets();
+		}
+		
+		public function removeAllAssets() : void
+		{
+			_assets.length = 0;
+			rehashAssetDict();
+		}
+		
+		
+		
+		public static function removeNamespaceAssets(ns : String=null) : void
+		{
+			getInstance().removeNamespaceAssets(ns);
+		}
+		
+		public function removeNamespaceAssets(ns : String=null) : void
+		{
+			var idx : uint = 0;
+			var asset : IAsset;
+			var old_assets : Vector.<IAsset>;
+			
+			// Empty the assets vector after having stored a copy of it.
+			// The copy will be filled with all assets which weren't removed.
+			old_assets = _assets.concat();
+			_assets.length = 0;
+			
+			ns ||= NamedAssetBase.DEFAULT_NAMESPACE;
+			for each (asset in _assets) {
+				// Remove from dict if in the supplied namespace. If not,
+				// transfer over to the new vector.
+				if (asset.assetNamespace == ns) {
+					removeAssetFromDict(asset);
+				}
+				else {
+					_assets[idx++] = asset;
+				}
+			}
+		}
+		
+		
+		
+		
+			
+		private function removeAssetFromDict(asset : IAsset) : void
+		{
+			if (_assetDictDirty)
+				rehashAssetDict();
+			
+			if (_assetDictionary.hasOwnProperty(asset.assetNamespace)) {
+				if (_assetDictionary.hasOwnProperty(asset.name))
+					delete _assetDictionary[asset.assetNamespace][asset.name];
+				
+			}
+		}
+		
+		
 		/**
 		 * Loads a yet unloaded resource file from the given url.
 		 */
@@ -306,26 +423,6 @@ package away3d.library
 			return loader.parseData(data, '', parser, context, ns);
 		}
 		
-		
-		
-		private function addAsset(asset : IAsset) : void
-		{
-			var old : IAsset;
-			
-			old = getAsset(asset.name, asset.assetNamespace);
-			if (old != null) {
-				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
-			}
-			
-			// Add it
-			_assets.push(asset);
-			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
-				_assetDictionary[asset.assetNamespace] = {};
-			_assetDictionary[asset.assetNamespace][asset.name] = asset;
-			
-			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
-			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
-		}
 		
 		
 		private function rehashAssetDict() : void
