@@ -3,6 +3,7 @@
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.arcane;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.Object3D;
@@ -164,16 +165,21 @@
 		override public function clone() : Object3D
 		{
 			var clone : Mesh = new Mesh(_material, geometry);
-//			clone._animationState = _animationState? _animationState.clone() : null;
 			clone.transform = transform;
 			clone.pivotPoint = pivotPoint;
+			clone.partition = partition;
 			clone.bounds = _bounds.clone();
 
 			var len : int = _subMeshes.length;
 			for (var i : int = 0; i < len; ++i) {
 				clone._subMeshes[i]._material = _subMeshes[i]._material;
 			}
-			// todo: is there more to be cloned?
+
+			var len : uint = numChildren;
+			for (var i : uint = 0; i < len; ++i) {
+				addChild(ObjectContainer3D(getChildAt(i).clone()));
+			}
+
 			return clone;
 		}
 
