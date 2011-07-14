@@ -53,8 +53,8 @@ package away3d.core.render
 
 		private var _rayPos : Vector3D = new Vector3D();
 		private var _rayDir : Vector3D = new Vector3D();
-		private var _localRayPos : Vector3D = new Vector3D();
-		private var _localRayDir : Vector3D = new Vector3D();
+//		private var _localRayPos : Vector3D = new Vector3D();
+//		private var _localRayDir : Vector3D = new Vector3D();
 		private var _potentialFound : Boolean;
 
 
@@ -66,8 +66,8 @@ package away3d.core.render
 		{
 			super(0, true, renderMode);
 			swapBackBuffer = false;
-			backBufferWidth = 1;
-			backBufferHeight = 1;
+			backBufferWidth = 32;
+			backBufferHeight = 32;
 
 			init();
 		}
