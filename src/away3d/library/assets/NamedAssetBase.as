@@ -83,6 +83,12 @@ package away3d.library.assets
 		}
 		
 		
+		public function disposeAsset() : void
+		{
+			// TODO: Should be overridden by sub-types
+		}
+		
+		
 		private function update() : void
 		{
 			_full_path = [ _namespace, _name ];

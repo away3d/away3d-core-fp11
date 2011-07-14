@@ -12,5 +12,12 @@ package away3d.library.assets
 		
 		function assetPathEquals(name : String, ns : String) : Boolean;
 		function resetAssetPath(name : String, ns : String=null, overrideOriginal : Boolean = true) : void;
+		
+		/**
+		 * Provides a default general method to dispose of this asset, the
+		 * concrete class of which may or may not provide a type-specific
+		 * dispose() method with more options.
+		*/
+		function disposeAsset() : void;
 	}
 }
