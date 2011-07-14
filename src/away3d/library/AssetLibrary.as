@@ -279,12 +279,12 @@ package away3d.library
 		}
 		
 		
-		public static function removeAsset(asset : IAsset) : void
+		public static function removeAsset(asset : IAsset, dispose : Boolean = true) : void
 		{
-			getInstance().removeAsset(asset);
+			getInstance().removeAsset(asset, dispose);
 		}
 		
-		public function removeAsset(asset : IAsset) : void
+		public function removeAsset(asset : IAsset, dispose : Boolean = true) : void
 		{
 			var idx : int;
 			
@@ -293,44 +293,53 @@ package away3d.library
 			idx = _assets.indexOf(asset);
 			if (idx >= 0)
 				_assets.splice(idx, 1);
+			
+			if (dispose)
+				asset.disposeAsset();
 		}
 		
 		
-		public static function removeAssetByName(name : String, ns : String = null) : IAsset
+		public static function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
 		{
-			return getInstance().removeAssetByName(name, ns);
+			return getInstance().removeAssetByName(name, ns, dispose);
 		}
 		
-		public function removeAssetByName(name : String, ns : String = null) : IAsset
+		public function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
 		{
 			var asset : IAsset = getAsset(name, ns);
 			if (asset) 
-				removeAsset(asset);
+				removeAsset(asset, dispose);
 			
 			return asset;
 		}
 		
 		
 		
-		public static function removeAllAssets() : void
+		public static function removeAllAssets(dispose : Boolean = true) : void
 		{
-			getInstance().removeAllAssets();
+			getInstance().removeAllAssets(dispose);
 		}
 		
-		public function removeAllAssets() : void
+		public function removeAllAssets(dispose : Boolean = true) : void
 		{
+			if (dispose) {
+				var asset : IAsset;
+				for each (asset in _assets)
+					asset.disposeAsset();
+			}
+			
 			_assets.length = 0;
 			rehashAssetDict();
 		}
 		
 		
 		
-		public static function removeNamespaceAssets(ns : String=null) : void
+		public static function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
 		{
-			getInstance().removeNamespaceAssets(ns);
+			getInstance().removeNamespaceAssets(ns, dispose);
 		}
 		
-		public function removeNamespaceAssets(ns : String=null) : void
+		public function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
 		{
 			var idx : uint = 0;
 			var asset : IAsset;
@@ -346,6 +355,8 @@ package away3d.library
 				// Remove from dict if in the supplied namespace. If not,
 				// transfer over to the new vector.
 				if (asset.assetNamespace == ns) {
+					if (dispose) 
+						asset.disposeAsset();
 					removeAssetFromDict(asset);
 				}
 				else {
