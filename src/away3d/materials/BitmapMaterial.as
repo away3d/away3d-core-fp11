@@ -59,10 +59,10 @@
 			colorTransform.alphaMultiplier = value;
 		}
 
-		arcane override function activatePass(index : uint, context : Context3D, contextIndex : uint, camera : Camera3D) : void
-		{
-			super.arcane::activatePass(index, context, contextIndex, camera);
-		}
+//		arcane override function activatePass(index : uint, context : Context3D, contextIndex : uint, camera : Camera3D) : void
+//		{
+//			super.arcane::activatePass(index, context, contextIndex, camera);
+//		}
 
 		/**
 		 * The BitmapData object to use as the texture.
@@ -74,10 +74,7 @@
 
 		public function set bitmapData(value : BitmapData) : void
 		{
-			if(isBitmapDataValid(value))
-				_screenPass.diffuseMethod.bitmapData = value;
-			else
-				throw new Error("Invalid bitmapData! Must be power of 2 and not exceeding 2048");
+			_screenPass.diffuseMethod.bitmapData = value;
 		}
 
 		/**

@@ -8,6 +8,7 @@ package away3d.cameras
 	import away3d.core.partition.CameraNode;
 	import away3d.core.partition.EntityNode;
 	import away3d.entities.Entity;
+	import away3d.events.LensEvent;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Point;
@@ -36,7 +37,7 @@ package away3d.cameras
 		{
 			super();
 			_lens = lens || new PerspectiveLens();
-			_lens.onInvalidateMatrix = onInvalidateLensMatrix;
+			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
 			_frustumPlanes = new Vector.<Plane3D>(6, true);
 			for (var i : int = 0; i < 6; ++i) _frustumPlanes[i] = new Plane3D();
 			z = -500;
@@ -70,9 +71,11 @@ package away3d.cameras
 		{
 			if (_lens == value) return;
 			if (!value) throw new Error("Lens cannot be null!");
-			_lens.onInvalidateMatrix = null;
+			_lens.removeEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
 			_lens = value;
-			_lens.onInvalidateMatrix = onInvalidateLensMatrix;
+			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
+
+			dispatchEvent(new LensEvent(LensEvent.MATRIX_CHANGED, value));
 		}
 
 		/**
@@ -188,12 +191,11 @@ package away3d.cameras
 			return new CameraNode(this);
 		}
 
-		private function onInvalidateLensMatrix() : void
+		private function onLensMatrixChanged(event : LensEvent) : void
 		{
 			_viewProjectionInvalid = true;
 			_frustumPlanesInvalid = true;
+			dispatchEvent(event);
 		}
-
-
 	}
 }

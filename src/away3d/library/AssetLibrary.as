@@ -13,7 +13,7 @@ package away3d.library
 	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
-
+	
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 
@@ -254,6 +254,215 @@ package away3d.library
 		
 		
 		
+		
+		/**
+		 * Adds an asset to the asset library, first making sure that it's name is unique
+		 * using the method defined by the <code>conflictStrategy</code> and 
+		 * <code>conflictPrecedence</code> properties.
+		*/
+		public function addAsset(asset : IAsset) : void
+		{
+			var old : IAsset;
+			
+			old = getAsset(asset.name, asset.assetNamespace);
+			if (old != null) {
+				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
+			}
+			
+			// Add it
+			_assets.push(asset);
+			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
+				_assetDictionary[asset.assetNamespace] = {};
+			_assetDictionary[asset.assetNamespace][asset.name] = asset;
+			
+			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
+			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
+		}
+		
+		/**
+		 * Short-hand for addAsset() method on default asset library instance.
+		 * 
+		 * @see away3d.library.AssetLibrary.addAsset()
+		*/
+		public static function addAsset(asset : IAsset) : void
+		{
+			getInstance().addAsset(asset);
+		}
+		
+		
+		
+		
+		/**
+		 * Removes an asset from the library, and optionally disposes that asset by calling
+		 * it's disposeAsset() method (which for most assets is implemented as a default
+		 * version of that type's dispose() method.
+		 * 
+		 * @param asset The asset which should be removed from this library.
+		 * @param dispose Defines whether the assets should also be disposed.
+		*/
+		public function removeAsset(asset : IAsset, dispose : Boolean = true) : void
+		{
+			var idx : int;
+			
+			removeAssetFromDict(asset);
+			
+			asset.removeEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
+			asset.removeEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
+			
+			idx = _assets.indexOf(asset);
+			if (idx >= 0)
+				_assets.splice(idx, 1);
+			
+			if (dispose)
+				asset.disposeAsset();
+		}
+		
+		/**
+		 * Short-hand for removeAsset() method on default asset library instance.
+		 * 
+		 * @param asset The asset which should be removed from the library.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAsset()
+		*/
+		public static function removeAsset(asset : IAsset, dispose : Boolean = true) : void
+		{
+			getInstance().removeAsset(asset, dispose);
+		}
+		
+		
+		
+		
+		/**
+		 * Removes an asset which is specified using name and namespace.
+		 * 
+		 * @param name The name of the asset to be removed.
+		 * @param ns The namespace to which the desired asset belongs.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAsset()
+		*/
+		public function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
+		{
+			var asset : IAsset = getAsset(name, ns);
+			if (asset) 
+				removeAsset(asset, dispose);
+			
+			return asset;
+		}
+		
+		/**
+		 * Short-hand for removeAssetByName() method on default asset library instance.
+		 * 
+		 * @param name The name of the asset to be removed.
+		 * @param ns The namespace to which the desired asset belongs.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAssetByName()
+		*/
+		public static function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
+		{
+			return getInstance().removeAssetByName(name, ns, dispose);
+		}
+		
+		
+		
+		
+		/**
+		 * Removes all assets from the asset library, optionally disposing them as they
+		 * are removed.
+		 * 
+		 * @param dispose Defines whether the assets should also be disposed.
+		*/
+		public function removeAllAssets(dispose : Boolean = true) : void
+		{
+			if (dispose) {
+				var asset : IAsset;
+				for each (asset in _assets)
+					asset.disposeAsset();
+			}
+			
+			_assets.length = 0;
+			rehashAssetDict();
+		}
+		
+		/**
+		 * Short-hand for removeAllAssets() method on default asset library instance.
+		 * 
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAllAssets()
+		*/
+		public static function removeAllAssets(dispose : Boolean = true) : void
+		{
+			getInstance().removeAllAssets(dispose);
+		}
+		
+		
+		
+		/**
+		 * Removes all assets belonging to a particular namespace (null for default) 
+		 * from the asset library, and optionall disposes them by calling their
+		 * disposeAsset() method.
+		 * 
+		 * @param ns The namespace from which all assets should be removed.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAsset()
+		*/
+		public function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
+		{
+			var idx : uint = 0;
+			var asset : IAsset;
+			var old_assets : Vector.<IAsset>;
+			
+			// Empty the assets vector after having stored a copy of it.
+			// The copy will be filled with all assets which weren't removed.
+			old_assets = _assets.concat();
+			_assets.length = 0;
+			
+			ns ||= NamedAssetBase.DEFAULT_NAMESPACE;
+			for each (asset in _assets) {
+				// Remove from dict if in the supplied namespace. If not,
+				// transfer over to the new vector.
+				if (asset.assetNamespace == ns) {
+					if (dispose) 
+						asset.disposeAsset();
+					removeAssetFromDict(asset);
+				}
+				else {
+					_assets[idx++] = asset;
+				}
+			}
+		}
+		
+		/**
+		 * Short-hand for removeNamespaceAssets() method on default asset library instance.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeNamespaceAssets()
+		*/
+		public static function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
+		{
+			getInstance().removeNamespaceAssets(ns, dispose);
+		}
+		
+		
+		
+		
+			
+		private function removeAssetFromDict(asset : IAsset) : void
+		{
+			if (_assetDictDirty)
+				rehashAssetDict();
+			
+			if (_assetDictionary.hasOwnProperty(asset.assetNamespace)) {
+				if (_assetDictionary.hasOwnProperty(asset.name))
+					delete _assetDictionary[asset.assetNamespace][asset.name];
+				
+			}
+		}
+		
+		
 		/**
 		 * Loads a yet unloaded resource file from the given url.
 		 */
@@ -306,26 +515,6 @@ package away3d.library
 			return loader.parseData(data, '', parser, context, ns);
 		}
 		
-		
-		
-		private function addAsset(asset : IAsset) : void
-		{
-			var old : IAsset;
-			
-			old = getAsset(asset.name, asset.assetNamespace);
-			if (old != null) {
-				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
-			}
-			
-			// Add it
-			_assets.push(asset);
-			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
-				_assetDictionary[asset.assetNamespace] = {};
-			_assetDictionary[asset.assetNamespace][asset.name] = asset;
-			
-			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
-			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
-		}
 		
 		
 		private function rehashAssetDict() : void

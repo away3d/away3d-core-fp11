@@ -9,6 +9,7 @@ package away3d.entities
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubGeometry;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.RenderableNode;
 	import away3d.materials.MaterialBase;
@@ -99,29 +100,29 @@ package away3d.entities
 			_mouseDetails = value;
 		}
 
-		public function getVertexBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			return _geometry.getVertexBuffer(context, contextIndex);
+			return _geometry.getVertexBuffer(stage3DProxy);
 		}
 
-		public function getUVBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			return _geometry.getUVBuffer(context, contextIndex);
+			return _geometry.getUVBuffer(stage3DProxy);
 		}
 
-		public function getVertexNormalBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			return _geometry.getVertexNormalBuffer(context, contextIndex);
+			return _geometry.getVertexNormalBuffer(stage3DProxy);
 		}
 
-		public function getVertexTangentBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			return _geometry.getVertexTangentBuffer(context, contextIndex);
+			return _geometry.getVertexTangentBuffer(stage3DProxy);
 		}
 
-		public function getIndexBuffer(context : Context3D, contextIndex : uint) : IndexBuffer3D
+		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
-			return _geometry.getIndexBuffer(context, contextIndex);
+			return _geometry.getIndexBuffer(stage3DProxy);
 		}
 
 		override public function pushModelViewProjection(camera : Camera3D) : void

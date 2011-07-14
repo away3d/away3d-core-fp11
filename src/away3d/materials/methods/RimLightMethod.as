@@ -4,10 +4,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
@@ -61,9 +61,9 @@ package away3d.materials.methods
 			_data[5] = value;
 		}
 
-		arcane override function activate(context : Context3D, contextIndex : uint) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 2);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 2);
 		}
 
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String

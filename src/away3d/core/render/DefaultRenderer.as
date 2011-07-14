@@ -49,15 +49,19 @@ package away3d.core.render
 
 			_context.setDepthTest(false, Context3DCompareMode.LESS);
 
+//			for (var i : int = 0; i < 8; ++i) {
+//				_stage3DProxy.setTextureAt(i,  null);
+//			}
+
 			if (entityCollector.skyBox) {
-				if (_activeMaterial) _activeMaterial.deactivate(_context);
+				if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 				_activeMaterial = null;
 				drawSkyBox(entityCollector);
 			}
 
 			drawRenderables(entityCollector.blendedRenderableHead, entityCollector);
 
-			if (_activeMaterial) _activeMaterial.deactivate(_context);
+			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 			_activeMaterial = null;
 		}
 
@@ -71,9 +75,9 @@ package away3d.core.render
 			var material : MaterialBase = skyBox.material;
 			var camera : Camera3D = entityCollector.camera;
 
-			material.activatePass(0, _context, _contextIndex, camera);
-			material.renderPass(0, skyBox, _context, _contextIndex, camera);
-			material.deactivatePass(0, _context);
+			material.activatePass(0, _stage3DProxy, camera);
+			material.renderPass(0, skyBox, _stage3DProxy, camera);
+			material.deactivatePass(0, _stage3DProxy);
 		}
 
 		/**
@@ -83,12 +87,12 @@ package away3d.core.render
 		 */
 		private function drawRenderables(item : RenderableListItem, entityCollector : EntityCollector) : void
 		{
-			var renderable : IRenderable;
 			var numPasses : uint;
 			var j : uint;
 			var camera : Camera3D = entityCollector.camera;
 			var item2 : RenderableListItem;
 
+			// todo: is a rendercommand way possible, respecting pass order, but allowing passes with same Program3D to be chained?
 			while (item) {
 				_activeMaterial = item.renderable.material;
 				_activeMaterial.updateMaterial(_context);
@@ -98,12 +102,13 @@ package away3d.core.render
 
 				do {
 					item2 = item;
-					_activeMaterial.activatePass(j, _context, _contextIndex, camera);
+
+					_activeMaterial.activatePass(j, _stage3DProxy, camera);
 					do {
-						_activeMaterial.renderPass(j, item2.renderable, _context, _contextIndex, camera);
+						_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, camera);
 						item2 = item2.next;
 					} while (item2 && item2.renderable.material == _activeMaterial);
-					_activeMaterial.deactivatePass(j, _context);
+					_activeMaterial.deactivatePass(j, _stage3DProxy);
 				} while (++j < numPasses);
 
 				item = item2;

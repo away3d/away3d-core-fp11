@@ -177,7 +177,7 @@ package away3d.core.render
 			_interactives.length = _interactiveId = 0;
 
 			if (!_objectProgram3D) initObjectProgram3D();
-			_context.setProgram(_objectProgram3D);
+			_stage3DProxy.setProgram(_objectProgram3D);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _viewportData, 1);
 			drawRenderables(entityCollector.opaqueRenderableHead, camera);
 			drawRenderables(entityCollector.blendedRenderableHead, camera);
@@ -237,8 +237,8 @@ package away3d.core.render
 
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
-				_context.setVertexBufferAt(0, renderable.getVertexBuffer(_context, _contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
-				_context.drawTriangles(renderable.getIndexBuffer(_context, _contextIndex), 0, renderable.numTriangles);
+				_stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
 
 				item = item.next;
 			}
@@ -335,13 +335,13 @@ package away3d.core.render
 			_boundOffset[1] = offsY = -entity.minY;
 			_boundOffset[2] = offsZ = -entity.minZ;
 
-			_context.setProgram(_triangleProgram3D);
+			_stage3DProxy.setProgram(_triangleProgram3D);
 			_context.clear(0, 0, 0, 0, 1, 0, Context3DClearMask.DEPTH);
 			_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, localViewProjection, true);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _boundOffset, 1);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, _boundScale, 1);
-			_context.setVertexBufferAt(0, _hitRenderable.getVertexBuffer(_context, _contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
-			_context.drawTriangles(_hitRenderable.getIndexBuffer(_context, _contextIndex), 0, _hitRenderable.numTriangles);
+			_stage3DProxy.setSimpleVertexBuffer(0, _hitRenderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			_context.drawTriangles(_hitRenderable.getIndexBuffer(_stage3DProxy), 0, _hitRenderable.numTriangles);
 			_context.drawToBitmapData(_bitmapData);
 
 			col = _bitmapData.getPixel(0, 0);

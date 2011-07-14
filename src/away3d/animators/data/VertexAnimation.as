@@ -1,6 +1,7 @@
 package away3d.animators.data
 {
 	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display3D.Context3D;
@@ -53,13 +54,13 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function deactivate(context : Context3D, pass : MaterialPassBase) : void
+		override arcane function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			context.setVertexBufferAt(_streamIndex, null);
+			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null);
 			if (_useNormals)
-				context.setVertexBufferAt(_streamIndex + 1, null);
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null);
 			if (_useTangents)
-				context.setVertexBufferAt(_streamIndex + 2, null);
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null);
 		}
 
 		/**

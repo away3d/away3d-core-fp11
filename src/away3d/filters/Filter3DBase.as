@@ -1,7 +1,9 @@
 package away3d.filters
 {
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
+	import away3d.core.managers.Stage3DProxy;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -10,6 +12,8 @@ package away3d.filters
 	import flash.display3D.textures.Texture;
 
 //	import away3d.filters.Filter3DBase.requireDepthRender;
+
+	use namespace arcane;
 
 	public class Filter3DBase
 	{
@@ -40,14 +44,16 @@ package away3d.filters
 			return _inputTexture;
 		}
 
-		public function render(context : Context3D, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
+		public function render(stage3DProxy : Stage3DProxy, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
 		{
 			if (!_vertexBuffer)
-				initBuffers(context);
+				initBuffers(stage3DProxy);
 		}
 
-		private function initBuffers(context : Context3D) : void
+		private function initBuffers(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
+
 			_vertexBuffer = context.createVertexBuffer(4, 4);
 			_vertexBuffer.uploadFromVector(Vector.<Number>([	-1, -1, 0, 1,
 																1, -1, 1, 1,

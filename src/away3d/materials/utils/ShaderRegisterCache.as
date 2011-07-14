@@ -23,6 +23,7 @@ package away3d.materials.utils
 		private var _vertexOutputRegister : ShaderRegisterElement;
 		private var _numUsedVertexConstants : uint;
 		private var _numUsedStreams : uint;
+		private var _numUsedTextures : uint;
 
 		/**
 		 * Create a new ShaderRegisterCache object.
@@ -47,6 +48,7 @@ package away3d.materials.utils
 			_vertexOutputRegister = new ShaderRegisterElement("op", -1);
 			_numUsedVertexConstants = 0;
 			_numUsedStreams = 0;
+			_numUsedTextures = 0;
 			var i : int;
 			for (i = 0; i < _vertexAttributesOffset; ++i) getFreeVertexAttribute();
 			for (i = 0; i < _vertexConstantOffset; ++i) getFreeVertexConstant();
@@ -161,6 +163,7 @@ package away3d.materials.utils
 		 */
 		public function getFreeTextureReg() : ShaderRegisterElement
 		{
+			++_numUsedTextures;
 			return _textureCache.requestFreeVectorReg();
 		}
 
@@ -236,6 +239,11 @@ package away3d.materials.utils
 		public function get numUsedStreams() : uint
 		{
 			return _numUsedStreams;
+		}
+
+		public function get numUsedTextures() : uint
+		{
+			return _numUsedTextures;
 		}
 	}
 }

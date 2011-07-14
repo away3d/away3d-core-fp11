@@ -1,8 +1,8 @@
 package away3d.core.base
 {
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
@@ -48,35 +48,35 @@ package away3d.core.base
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex positions.
 		 */
-		function getVertexBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D;
+		function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains texture coordinates.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains texture coordinates.
 		 */
-		function getUVBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D;
+		function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex normals.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex normals.
 		 */
-		function getVertexNormalBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D;
+		function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex tangents.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex tangents.
 		 */
-		function getVertexTangentBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D;
+		function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains triangle indices.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains triangle indices.
 		 */
-		function getIndexBuffer(context : Context3D, contextIndex : uint) : IndexBuffer3D;
+		function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D;
 
 		/**
 		 * The amount of triangles that comprise the IRenderable geometry.

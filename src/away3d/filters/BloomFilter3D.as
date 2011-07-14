@@ -1,6 +1,8 @@
 package away3d.filters{
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
 
 	import com.adobe.utils.AGALMiniAssembler;
@@ -11,6 +13,8 @@ package away3d.filters{
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.Texture;
+
+	use namespace arcane;
 
 	public class BloomFilter3D extends Filter3DBase
 	{
@@ -105,12 +109,14 @@ package away3d.filters{
 			}
 		}
 
-		override public function render(context : Context3D, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
+		override public function render(stage3DProxy : Stage3DProxy, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
+
 			var invW : Number = 1/_textureWidth;
 			var invH : Number = 1/_textureHeight;
 
-			super.render(context, target, camera);
+			super.render(stage3DProxy, target, camera);
 
 			_blurData[0] = _blurX*.5*invW;
 			_blurData[1] = _blurY*.5*invH;
@@ -123,15 +129,15 @@ package away3d.filters{
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
-			context.setProgram(_brightpassProgram3D);
-			context.setTextureAt(0, _inputTexture);
+			stage3DProxy.setProgram(_brightpassProgram3D);
+			stage3DProxy.setTextureAt(0, _inputTexture);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _brightPassData, 1);
 			context.drawTriangles(_indexBuffer, 0, 2);
 
 
 			context.setRenderToTexture(_blurTexture, false, 0, 0);
-			context.setProgram(_blurProgram3D);
-			context.setTextureAt(0, _brightPassTexture);
+			stage3DProxy.setProgram(_blurProgram3D);
+			stage3DProxy.setTextureAt(0, _brightPassTexture);
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _blurData, 2);
 			context.drawTriangles(_indexBuffer, 0, 2);
@@ -141,17 +147,17 @@ package away3d.filters{
 			else
 				context.setRenderToBackBuffer();
 
-			context.setProgram(_compositeProgram3D);
-			context.setTextureAt(0, _blurTexture);
-			context.setTextureAt(1, _inputTexture);
+			stage3DProxy.setProgram(_compositeProgram3D);
+			stage3DProxy.setTextureAt(0, _blurTexture);
+			stage3DProxy.setTextureAt(1, _inputTexture);
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.drawTriangles(_indexBuffer, 0, 2);
 
 
-			context.setTextureAt(0, null);
-			context.setTextureAt(1, null);
-			context.setVertexBufferAt(0, null);
-			context.setVertexBufferAt(1, null);
+			stage3DProxy.setTextureAt(0, null);
+			stage3DProxy.setTextureAt(1, null);
+			stage3DProxy.setSimpleVertexBuffer(0, null);
+			stage3DProxy.setSimpleVertexBuffer(1, null);
 		}
 
 		override protected function initTextures(context : Context3D, view : View3D) : void

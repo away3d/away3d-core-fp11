@@ -5,6 +5,7 @@ package away3d.animators.data
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display3D.Context3D;
@@ -58,21 +59,22 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(context : Context3D, contextIndex : uint, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
 			var i : uint;
 			var len : uint = _vertexAnimation._numPoses;
 			var index : uint = _vertexAnimation._streamIndex;
+			var context : Context3D = stage3DProxy._context3D;
 
 			// if no poses defined, set temp data
 			if (!_poses.length) {
 				if (_vertexAnimation.blendMode == VertexAnimationMode.ABSOLUTE) {
 					for (i = 1; i < len; ++i) {
-						context.setVertexBufferAt(index + (j++), renderable.getVertexBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
+						stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 						context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, pass.numUsedVertexConstants, _weights, 1);
 
 						if (_vertexAnimation._useNormals)
-							context.setVertexBufferAt(index + (j++), renderable.getVertexNormalBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
+							stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 					}
 				}
 					// todo: set temp data for additive?
@@ -96,11 +98,11 @@ package away3d.animators.data
 
 			for (; i < len; ++i) {
 				subGeom = _poses[i].subGeometries[subMesh._index] || subMesh.subGeometry;
-				context.setVertexBufferAt(index + (j++), subGeom.getVertexBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, pass.numUsedVertexConstants, _weights, 1);
 
 				if (_vertexAnimation._useNormals)
-					context.setVertexBufferAt(index + (j++), subGeom.getVertexNormalBuffer(context, contextIndex), 0, Context3DVertexBufferFormat.FLOAT_3);
+					stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 
 			}
 		}

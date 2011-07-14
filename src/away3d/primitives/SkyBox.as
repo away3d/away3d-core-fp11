@@ -8,6 +8,7 @@ package away3d.primitives
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubGeometry;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.SkyBoxNode;
 	import away3d.entities.Entity;
@@ -63,9 +64,9 @@ package away3d.primitives
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex positions.
 		 */
-		public function getVertexBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			return _geometry.getVertexBuffer(context, contextIndex);
+			return _geometry.getVertexBuffer(stage3DProxy);
 		}
 
 		/**
@@ -73,7 +74,7 @@ package away3d.primitives
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains texture coordinates.
 		 */
-		public function getUVBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			return null;
 		}
@@ -83,7 +84,7 @@ package away3d.primitives
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex normals.
 		 */
-		public function getVertexNormalBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			return null;
 		}
@@ -93,7 +94,7 @@ package away3d.primitives
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex tangents.
 		 */
-		public function getVertexTangentBuffer(context : Context3D, contextIndex : uint) : VertexBuffer3D
+		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			return null;
 		}
@@ -103,9 +104,9 @@ package away3d.primitives
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains triangle indices.
 		 */
-		public function getIndexBuffer(context : Context3D, contextIndex : uint) : IndexBuffer3D
+		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
-			return _geometry.getIndexBuffer(context, contextIndex);
+			return _geometry.getIndexBuffer(stage3DProxy);
 		}
 
 		/**

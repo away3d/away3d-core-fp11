@@ -68,11 +68,21 @@ package away3d.core.sort
 			while (head && headB) {
 
 				if (useMaterial) {
-					var aid : uint = head.materialId;
-					var bid : uint = headB.materialId;
+					// first sort per render order id (reduces program3D switches),
+					// then on material id (reduces setting props),
+					// then on zIndex (reduces overdraw)
+					var aid : uint = head.renderOrderId;
+					var bid : uint = headB.renderOrderId;
 
 					if (aid == bid) {
-						if (head.zIndex < headB.zIndex) cmp = 1;
+						var ma : uint = head.materialId;
+						var mb : uint = headB.materialId;
+
+						if (ma == mb) {
+							if (head.zIndex < headB.zIndex) cmp = 1;
+							else cmp = -1;
+						}
+						else if (ma > mb) cmp = 1;
 						else cmp = -1;
 					}
 					else if (aid > bid) cmp = 1;

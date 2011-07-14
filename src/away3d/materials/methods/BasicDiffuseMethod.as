@@ -1,6 +1,8 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.BitmapDataTextureCache;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Texture3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -24,7 +26,6 @@ package away3d.materials.methods
         private var _cutOffIndex : int;
 
 		private var _texture : Texture3DProxy;
-		private var _mipmapBitmap : BitmapData;
 		private var _diffuseColor : uint = 0xffffff;
 
 		private var _diffuseData : Vector.<Number>;
@@ -82,21 +83,21 @@ package away3d.materials.methods
 
 		public function set bitmapData(value : BitmapData) : void
 		{
+			if (value == bitmapData) return;
+
 			if (!value || !_useTexture)
 				invalidateShaderProgram();
 
+			if (_useTexture) {
+				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				_texture = null;
+			}
+
 			_useTexture = Boolean(value);
 
-			if (_useTexture) {
-				_texture ||= new Texture3DProxy(_mipmapBitmap);
-				_texture.bitmapData = value;
-			}
-			else {
-				if (_texture) {
-					_texture.dispose(false);
-					_texture = null;
-				}
-			}
+			if (_useTexture)
+				_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+
 		}
 
         // todo: provide support for alpha map?
@@ -123,7 +124,7 @@ package away3d.materials.methods
 		 */
 		public function invalidateBitmapData() : void
 		{
-			_texture.invalidateContent();
+			if (_texture) _texture.invalidateContent();
 		}
 
 		/**
@@ -131,8 +132,10 @@ package away3d.materials.methods
 		 */
 		override public function dispose(deep : Boolean) : void
 		{
-			if (_texture) _texture.dispose(deep);
-			if (_mipmapBitmap) _mipmapBitmap.dispose();
+			if (_texture) {
+				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				_texture = null;
+			}
 		}
 
 		/**
@@ -239,7 +242,7 @@ package away3d.materials.methods
 				regCache.removeFragmentTempUsage(_totalLightColorReg);
 			}
 
-			temp = _numLights > 0? regCache.getFreeFragmentVectorTemp() : targetReg;
+			temp = _numLights > 0? regCache.	getFreeFragmentVectorTemp() : targetReg;
 
             if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
@@ -247,9 +250,9 @@ package away3d.materials.methods
                 if (_alphaThreshold > 0) {
                     cutOffReg = regCache.getFreeFragmentConstant();
                     _cutOffIndex = cutOffReg.index;
-                    code += "sub " + (temp+".w", temp+".w", cutOffReg+".x") +
-							"kil " + temp+ ".w\n" +
-							"add " + temp+".w, " + temp+".w, " + cutOffReg+".x\n" +
+                    code += "sub " + temp +".w, " +  temp+".w, " + cutOffReg+".x\n" +
+							"kil " + temp +".w\n" +
+							"add " + temp +".w, " + temp+".w, " + cutOffReg+".x\n" +
 							"div " + temp + ", " + temp + ", " + temp+".w\n";
                 }
 			}
@@ -273,10 +276,11 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(context : Context3D, contextIndex : uint) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			if (_useTexture) {
-				context.setTextureAt(_diffuseInputIndex, _texture.getTextureForContext(context, contextIndex));
+				stage3DProxy.setTextureAt(_diffuseInputIndex, _texture.getTextureForStage3D(stage3DProxy));
                 if (_alphaThreshold > 0) {
                     context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _cutOffIndex, _cutOffData, 1);
                 }
@@ -285,10 +289,10 @@ package away3d.materials.methods
 		}
 
 
-		arcane override function deactivate(context : Context3D) : void
-		{
-			if (_useTexture) context.setTextureAt(_diffuseInputIndex, null);
-		}
+//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+//		{
+//			if (_useTexture) stage3DProxy.setTextureAt(_diffuseInputIndex, null);
+//		}
 
 		/**
 		 * Updates the diffuse color data used by the render state.

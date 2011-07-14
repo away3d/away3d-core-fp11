@@ -1,6 +1,8 @@
 package away3d.filters{
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
 
 	import com.adobe.utils.AGALMiniAssembler;
@@ -12,6 +14,8 @@ package away3d.filters{
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.Texture;
+
+	use namespace arcane;
 
 	public class MotionBlurFilter3D extends Filter3DBase
 	{
@@ -67,19 +71,20 @@ package away3d.filters{
 			_data[0] = _strength;
 		}
 
-		override public function render(context : Context3D, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
+		override public function render(stage3DProxy : Stage3DProxy, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
 		{
-			super.render(context, target, camera);
+			var context : Context3D = stage3DProxy._context3D;
+			super.render(stage3DProxy, target, camera);
 
 			if (!_blurFilter) initPrograms(context);
 
 			context.setRenderToTexture(_dstAccum, false, 0, 0);
-			context.setProgram(_blurFilter);
+			stage3DProxy.setProgram(_blurFilter);
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
-			context.setTextureAt(0, _inputTexture);
-			context.setTextureAt(1, _sourceAccum);
+			stage3DProxy.setTextureAt(0, _inputTexture);
+			stage3DProxy.setTextureAt(1, _sourceAccum);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 1);
 			context.drawTriangles(_indexBuffer, 0, 2);
 
@@ -92,15 +97,15 @@ package away3d.filters{
 			else
 				context.setRenderToBackBuffer();
 
-			context.setProgram(_copyProgram3D);
+			stage3DProxy.setProgram(_copyProgram3D);
 			context.clear(0.0, 0.0, 0.0, 1.0);
-			context.setTextureAt(0, _sourceAccum);
-			context.setTextureAt(1, null);
+			stage3DProxy.setTextureAt(0, _sourceAccum);
+			stage3DProxy.setTextureAt(1, null);
 			context.drawTriangles(_indexBuffer, 0, 2);
 
-			context.setTextureAt(0, null);
-			context.setVertexBufferAt(0, null);
-			context.setVertexBufferAt(1, null);
+			stage3DProxy.setTextureAt(0, null);
+			stage3DProxy.setSimpleVertexBuffer(0, null);
+			stage3DProxy.setSimpleVertexBuffer(1, null);
 		}
 
 		private function initPrograms(context : Context3D) : void

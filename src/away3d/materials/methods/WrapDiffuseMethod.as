@@ -1,6 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -133,14 +134,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(context : Context3D, contextIndex : uint) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			_baseDiffuseMethod.activate(context, contextIndex);
+			_baseDiffuseMethod.activate(stage3DProxy);
 		}
 
-		arcane override function deactivate(context : Context3D) : void
+		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			_baseDiffuseMethod.deactivate(context);
+			_baseDiffuseMethod.deactivate(stage3DProxy);
 		}
 
 		/**

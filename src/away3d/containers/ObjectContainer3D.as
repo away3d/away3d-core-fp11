@@ -1,7 +1,7 @@
 package away3d.containers
 {
 	import away3d.arcane;
-	import away3d.core.base.*;
+	import away3d.core.base.Object3D;
 	import away3d.core.partition.Partition3D;
 	import away3d.events.Scene3DEvent;
 	import away3d.library.assets.AssetType;
@@ -208,8 +208,8 @@ package away3d.containers
 		{
 			_explicitPartition = value;
 			implicitPartition = value 	? value :
-				_parent	? parent.implicitPartition
-				: null;
+								_parent	? parent.implicitPartition
+										: null;
 		}
 		
 		/**
@@ -305,8 +305,7 @@ package away3d.containers
 			child._parent = this;
 			child.scene = _scene;
 			child.invalidateSceneTransform();
-			
-			
+
 			_children.push(child);
 			return child;
 		}
@@ -388,6 +387,22 @@ package away3d.containers
 			if (deep)
 				for (var i : uint = 0; i < _children.length; ++i)
 					_children[i].dispose(true);
+		}
+
+		override public function clone() : Object3D
+		{
+			var clone : ObjectContainer3D = new ObjectContainer3D();
+			clone.pivotPoint = pivotPoint;
+			clone.transform = transform;
+			clone.partition = partition;
+
+			var len : uint = _children.length;
+			for (var i : uint = 0; i < len; ++i) {
+				clone.addChild(ObjectContainer3D(_children[i].clone()));
+			}
+
+			// todo: implement for all subtypes
+			return clone;
 		}
 		
 		/**

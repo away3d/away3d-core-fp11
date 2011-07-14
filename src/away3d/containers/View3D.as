@@ -26,18 +26,18 @@ package away3d.containers
 
 	public class View3D extends Sprite
 	{
-		private var _width : Number = 0;
-		private var _height : Number = 0;
-		private var _x : Number = 0;
-		private var _y : Number = 0;
-		private var _scene : Scene3D;
-		private var _camera : Camera3D;
+		protected var _width : Number = 0;
+		protected var _height : Number = 0;
+		protected var _x : Number = 0;
+		protected var _y : Number = 0;
+		protected var _scene : Scene3D;
+		protected var _camera : Camera3D;
 		private var _entityCollector : EntityCollector;
 
-		private var _aspectRatio : Number;
-		private var _time : Number = 0;
-		private var _deltaTime : uint;
-		private var _backgroundColor : uint = 0x000000;
+		protected var _aspectRatio : Number;
+		protected var _time : Number = 0;
+		protected var _deltaTime : uint;
+		protected var _backgroundColor : uint = 0x000000;
 
 		private var _hitManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
@@ -45,9 +45,9 @@ package away3d.containers
 		private var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
 		private var _hitTestRenderer : HitTestRenderer;
-		public var _addedToStage:Boolean;
+		private var _addedToStage:Boolean;
 
-		private var _filters3d : Array;
+		protected var _filters3d : Array;
 		private var _requireDepthRender : Boolean;
 		private var _depthRender : Texture;
 		private var _depthTextureWidth : int = -1;
@@ -55,6 +55,7 @@ package away3d.containers
 		private var _depthTextureInvalid : Boolean = true;
 
 		private var _hitField : Sprite;
+		arcane var mouseZeroMove : Boolean;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
@@ -106,13 +107,15 @@ package away3d.containers
 
 		public function set filters3d(value : Array) : void
 		{
-			var len : uint = value.length;
+			var len : uint;
 			_filters3d = value;
-
 			_requireDepthRender = false;
 
-			for (var i : uint = 0; i < len; ++i)
-				_requireDepthRender ||= _filters3d[i].requireDepthRender;
+			if (value) {
+				len = value.length;
+				for (var i : uint = 0; i < len; ++i)
+					_requireDepthRender ||= _filters3d[i].requireDepthRender;
+			}
 		}
 
 		/**
@@ -200,6 +203,10 @@ package away3d.containers
 
 		override public function set width(value : Number) : void
 		{
+			if (value > 2048) {
+				trace("Warning: Width higher than 2048 is not allowed. Use MegaView3D to support higher values.");
+				value = 2048;
+			}
 			_hitTestRenderer.viewPortWidth = value;
 			_renderer.viewPortWidth = value;
 			_renderer.backBufferWidth = value;
@@ -221,6 +228,10 @@ package away3d.containers
 
 		override public function set height(value : Number) : void
 		{
+			if (value > 2048) {
+				trace("Warning: Height higher than 2048 is not allowed.");
+				value = 2048;
+			}
 			_hitTestRenderer.viewPortHeight = value;
 			_renderer.viewPortHeight = value;
 			_renderer.backBufferHeight = value;
@@ -301,7 +312,7 @@ package away3d.containers
 			return _entityCollector.numTriangles;
 		}
 		
-		public var mouseZeroMove:Boolean;
+//		public var mouseZeroMove:Boolean;
 
 		/**
 		 * Renders the view.
@@ -311,6 +322,7 @@ package away3d.containers
 			var time : Number = getTimer();
 			var targetTexture : Texture;
 			var numFilters : uint = _filters3d? _filters3d.length : 0;
+			var stage3DProxy : Stage3DProxy = _renderer.stage3DProxy;
 			var context : Context3D = _renderer.context;
 
 			if (_time == 0) _time = time;
@@ -336,7 +348,7 @@ package away3d.containers
 
 				for (var i : uint = 1; i <= numFilters; ++i) {
 					nextFilter = i < numFilters? Filter3DBase(_filters3d[i]) : null;
-					filter.render(context, nextFilter? nextFilter.getInputTexture(context, this) : null, _camera, _depthRender);
+					filter.render(stage3DProxy, nextFilter? nextFilter.getInputTexture(context, this) : null, _camera, _depthRender);
 					filter = nextFilter;
 				}
 				context.present();
@@ -396,12 +408,12 @@ package away3d.containers
 			var len : uint = lights.length;
 			var light : LightBase;
 			var context : Context3D = _renderer.context;
-			var contextIndex : int = _renderer.contextIndex;
+			var contextIndex : int = _renderer.stage3DProxy._stage3DIndex;
 
 			for (var i : int = 0; i < len; ++i) {
 				light = lights[i];
 				if (light.castsShadows)
-					light.shadowMapper.renderDepthMap(context, contextIndex, entityCollector, _depthRenderer);
+					light.shadowMapper.renderDepthMap(_renderer.stage3DProxy, entityCollector, _depthRenderer);
 			}
 		}
 
