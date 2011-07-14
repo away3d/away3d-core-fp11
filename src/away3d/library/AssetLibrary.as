@@ -254,11 +254,12 @@ package away3d.library
 		
 		
 		
-		public static function addAsset(asset : IAsset) : void
-		{
-			getInstance().addAsset(asset);
-		}
 		
+		/**
+		 * Adds an asset to the asset library, first making sure that it's name is unique
+		 * using the method defined by the <code>conflictStrategy</code> and 
+		 * <code>conflictPrecedence</code> properties.
+		*/
 		public function addAsset(asset : IAsset) : void
 		{
 			var old : IAsset;
@@ -278,17 +279,35 @@ package away3d.library
 			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
 		}
 		
-		
-		public static function removeAsset(asset : IAsset, dispose : Boolean = true) : void
+		/**
+		 * Short-hand for addAsset() method on default asset library instance.
+		 * 
+		 * @see away3d.library.AssetLibrary.addAsset()
+		*/
+		public static function addAsset(asset : IAsset) : void
 		{
-			getInstance().removeAsset(asset, dispose);
+			getInstance().addAsset(asset);
 		}
 		
+		
+		
+		
+		/**
+		 * Removes an asset from the library, and optionally disposes that asset by calling
+		 * it's disposeAsset() method (which for most assets is implemented as a default
+		 * version of that type's dispose() method.
+		 * 
+		 * @param asset The asset which should be removed from this library.
+		 * @param dispose Defines whether the assets should also be disposed.
+		*/
 		public function removeAsset(asset : IAsset, dispose : Boolean = true) : void
 		{
 			var idx : int;
 			
 			removeAssetFromDict(asset);
+			
+			asset.removeEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
+			asset.removeEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
 			
 			idx = _assets.indexOf(asset);
 			if (idx >= 0)
@@ -298,12 +317,31 @@ package away3d.library
 				asset.disposeAsset();
 		}
 		
-		
-		public static function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
+		/**
+		 * Short-hand for removeAsset() method on default asset library instance.
+		 * 
+		 * @param asset The asset which should be removed from the library.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAsset()
+		*/
+		public static function removeAsset(asset : IAsset, dispose : Boolean = true) : void
 		{
-			return getInstance().removeAssetByName(name, ns, dispose);
+			getInstance().removeAsset(asset, dispose);
 		}
 		
+		
+		
+		
+		/**
+		 * Removes an asset which is specified using name and namespace.
+		 * 
+		 * @param name The name of the asset to be removed.
+		 * @param ns The namespace to which the desired asset belongs.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAsset()
+		*/
 		public function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
 		{
 			var asset : IAsset = getAsset(name, ns);
@@ -313,13 +351,29 @@ package away3d.library
 			return asset;
 		}
 		
-		
-		
-		public static function removeAllAssets(dispose : Boolean = true) : void
+		/**
+		 * Short-hand for removeAssetByName() method on default asset library instance.
+		 * 
+		 * @param name The name of the asset to be removed.
+		 * @param ns The namespace to which the desired asset belongs.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAssetByName()
+		*/
+		public static function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
 		{
-			getInstance().removeAllAssets(dispose);
+			return getInstance().removeAssetByName(name, ns, dispose);
 		}
 		
+		
+		
+		
+		/**
+		 * Removes all assets from the asset library, optionally disposing them as they
+		 * are removed.
+		 * 
+		 * @param dispose Defines whether the assets should also be disposed.
+		*/
 		public function removeAllAssets(dispose : Boolean = true) : void
 		{
 			if (dispose) {
@@ -332,13 +386,30 @@ package away3d.library
 			rehashAssetDict();
 		}
 		
-		
-		
-		public static function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
+		/**
+		 * Short-hand for removeAllAssets() method on default asset library instance.
+		 * 
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAllAssets()
+		*/
+		public static function removeAllAssets(dispose : Boolean = true) : void
 		{
-			getInstance().removeNamespaceAssets(ns, dispose);
+			getInstance().removeAllAssets(dispose);
 		}
 		
+		
+		
+		/**
+		 * Removes all assets belonging to a particular namespace (null for default) 
+		 * from the asset library, and optionall disposes them by calling their
+		 * disposeAsset() method.
+		 * 
+		 * @param ns The namespace from which all assets should be removed.
+		 * @param dispose Defines whether the assets should also be disposed.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeAsset()
+		*/
 		public function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
 		{
 			var idx : uint = 0;
@@ -363,6 +434,16 @@ package away3d.library
 					_assets[idx++] = asset;
 				}
 			}
+		}
+		
+		/**
+		 * Short-hand for removeNamespaceAssets() method on default asset library instance.
+		 * 
+		 * @see away3d.library.AssetLibrary.removeNamespaceAssets()
+		*/
+		public static function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
+		{
+			getInstance().removeNamespaceAssets(ns, dispose);
 		}
 		
 		
