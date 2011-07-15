@@ -395,6 +395,7 @@ package away3d.containers
 			clone.pivotPoint = pivotPoint;
 			clone.transform = transform;
 			clone.partition = partition;
+			clone.name = name;
 
 			var len : uint = _children.length;
 			for (var i : uint = 0; i < len; ++i) {

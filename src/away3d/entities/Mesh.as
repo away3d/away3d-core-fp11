@@ -169,6 +169,7 @@
 			clone.pivotPoint = pivotPoint;
 			clone.partition = partition;
 			clone.bounds = _bounds.clone();
+			clone.name = name;
 
 			var len : int = _subMeshes.length;
 			for (var i : int = 0; i < len; ++i) {

@@ -324,6 +324,7 @@ package away3d.core.base
 			var clone : Object3D = new Object3D();
 			clone.pivotPoint = pivotPoint;
 			clone.transform = transform;
+			clone.name = name;
 			// todo: implement for all subtypes
 			return clone;
 		}
