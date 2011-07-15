@@ -206,10 +206,6 @@ package away3d.containers
 
 		override public function set width(value : Number) : void
 		{
-			if (value > 2048) {
-				trace("Warning: Width higher than 2048 is not allowed. Use MegaView3D to support higher values.");
-				value = 2048;
-			}
 			_hitTestRenderer.viewPortWidth = value;
 			_renderer.viewPortWidth = value;
 			_renderer.backBufferWidth = value;
@@ -231,10 +227,6 @@ package away3d.containers
 
 		override public function set height(value : Number) : void
 		{
-			if (value > 2048) {
-				trace("Warning: Height higher than 2048 is not allowed.");
-				value = 2048;
-			}
 			_hitTestRenderer.viewPortHeight = value;
 			_renderer.viewPortHeight = value;
 			_renderer.backBufferHeight = value;
@@ -376,8 +368,10 @@ package away3d.containers
 		{
 			var p : int = 1;
 
-			while (p < value)
+			while (p < value && p < 2048)
 				p <<= 1;
+
+			if (p > 2048) p = 2048;
 
 			return p;
 		}

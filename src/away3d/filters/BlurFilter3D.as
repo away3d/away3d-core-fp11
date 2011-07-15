@@ -16,6 +16,7 @@ package away3d.filters{
 
 	public class BlurFilter3D extends Filter3DBase
 	{
+		private static const MAX_BLUR : int = 6;
 		private var _program3d : Program3D;
 		private var _blurX : uint;
 		private var _blurY : uint;
@@ -29,8 +30,8 @@ package away3d.filters{
 			super(false);
 			_blurX = blurX;
 			_blurY = blurY;
-			if (_blurX > 7) _stepX = _blurX/7;
-			if (_blurY > 7) _stepY = _blurY/7;
+			if (_blurX > MAX_BLUR) _stepX = _blurX/MAX_BLUR;
+			if (_blurY > MAX_BLUR) _stepY = _blurY/MAX_BLUR;
 			_data = Vector.<Number>([0, 0, 0, 1, 0, 0, 0, 0]);
 		}
 
@@ -43,7 +44,7 @@ package away3d.filters{
 		{
 			invalidateProgram();
 			_blurX = value;
-			if (_blurX > 7) _stepX = _blurX/7;
+			if (_blurX > MAX_BLUR) _stepX = _blurX/MAX_BLUR;
 			else _stepX = 1;
 		}
 
@@ -56,7 +57,7 @@ package away3d.filters{
 		{
 			invalidateProgram();
 			_blurY = value;
-			if (_blurY > 7) _stepY = _blurY/7;
+			if (_blurY > MAX_BLUR) _stepY = _blurY/MAX_BLUR;
 			else _stepY = 1;
 		}
 

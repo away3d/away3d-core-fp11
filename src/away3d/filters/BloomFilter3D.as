@@ -18,6 +18,7 @@ package away3d.filters{
 
 	public class BloomFilter3D extends Filter3DBase
 	{
+		private static const MAX_BLUR : int = 6;
 		private var _brightpassProgram3D : Program3D;
 		private var _blurProgram3D : Program3D;
 		private var _compositeProgram3D : Program3D;
@@ -41,8 +42,8 @@ package away3d.filters{
 			super(false);
 			_blurX = blurX;
 			_blurY = blurY;
-			_stepX = _blurX > 8? _blurX/8 : 1;
-			_stepY = _blurY > 8? _blurY/8 : 1;
+			_stepX = _blurX > MAX_BLUR? _blurX/MAX_BLUR : 1;
+			_stepY = _blurY > MAX_BLUR? _blurY/MAX_BLUR : 1;
 			_threshold = threshold;
 			_exposure = exposure;
 			if (quality > 4) quality = 4;
@@ -61,7 +62,7 @@ package away3d.filters{
 		{
 			invalidateBlurProgram();
 			_blurX = value;
-			if (_blurX > 7) _stepX = _blurX/7;
+			if (_blurX > MAX_BLUR) _stepX = _blurX/MAX_BLUR;
 			else _stepX = 1;
 		}
 
@@ -74,7 +75,7 @@ package away3d.filters{
 		{
 			invalidateBlurProgram();
 			_blurY = value;
-			if (_blurY > 7) _stepY = _blurY/7;
+			if (_blurY > MAX_BLUR) _stepY = _blurY/MAX_BLUR;
 			else _stepY = 1;
 		}
 
@@ -189,6 +190,7 @@ package away3d.filters{
 		private function initPrograms(context : Context3D) : void
 		{
 			_blurProgram3D = context.createProgram();
+
 			_blurProgram3D.upload(	new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, getVertexCode()),
 									new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, getBlurFragmentCode())
 								);

@@ -90,6 +90,8 @@ package away3d.filters
 			while (p < value)
 				p <<= 1;
 
+			if (p > 2048) p = 2048;
+
 			return p;
 		}
 	}
