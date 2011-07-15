@@ -181,6 +181,7 @@ package away3d.core.render
 
 			if (value.context3D) {
 				_context = value.context3D;
+				_context.setScissorRectangle(new Rectangle(0, 0, 1, 1));
 //				_contextIndex = value.stage3DIndex;
 			}
 			else

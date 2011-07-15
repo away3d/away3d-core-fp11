@@ -89,6 +89,29 @@ package away3d.core.render
 			_inverse = new Matrix3D();
 		}
 
+		// bypass invalidation routine
+		arcane override function set viewPortX(value : Number) : void
+		{
+			if (_stage3DProxy) {
+				_viewPortX = value;
+				_stage3DProxy.x = value;
+			}
+			else {
+				super.viewPortX = value;
+			}
+		}
+
+		arcane override function set viewPortY(value : Number) : void
+		{
+			if (_stage3DProxy) {
+				_viewPortY = value;
+				_stage3DProxy.y = value;
+			}
+			else {
+				super.viewPortY = value;
+			}
+		}
+
 		/**
 		 * Updates the object information at the given position for the given visible objects.
 		 * @param ratioX A ratio between 0 and 1 of the horizontal hit-test position relative to the viewport width.
@@ -105,6 +128,8 @@ package away3d.core.render
 			_viewportData[3] = _projY = ratioY*2 - 1;
 
 			// _potentialFound will be set to true if any object is actually rendered
+			_hitRenderable = null;
+			_hitUV = null;
 			_potentialFound = false;
 			render(entityCollector);
 
@@ -112,10 +137,7 @@ package away3d.core.render
 			_context.drawToBitmapData(_bitmapData);
 			_hitColor = _bitmapData.getPixel(0, 0);
 
-			if (_hitColor == 0) {
-				_hitRenderable = null;
-			}
-			else {
+			if (_hitColor != 0) {
 				_hitRenderable = _interactives[_hitColor-1];
 
 				if (_hitRenderable.mouseDetails)
@@ -153,18 +175,6 @@ package away3d.core.render
 			return _localHitPosition;
 		}
 
-//		/**
-
-//		 * Unsupported
-//		 * @private
-//		 */
-//		arcane override function set viewPortX(value : Number) : void {}
-//		/**
-
-//		 * Unsupported
-//		 * @private
-//		 */
-//		arcane override function set viewPortY(value : Number) : void {}
 		/**
 		 * @inheritDoc
 		 */
@@ -191,8 +201,8 @@ package away3d.core.render
 		private function drawRenderables(item : RenderableListItem, camera : Camera3D) : void
 		{
 			var renderable : IRenderable;
-			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			var ox : Number, oy  : Number, oz : Number;
+//			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+//			var ox : Number, oy  : Number, oz : Number;
 
 			// todo: do a fast ray intersection test first?
 			updateRay(camera);

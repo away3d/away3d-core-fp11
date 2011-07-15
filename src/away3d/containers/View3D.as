@@ -19,6 +19,7 @@ package away3d.containers
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Transform;
 	import flash.geom.Vector3D;
 	import flash.utils.getTimer;
 
@@ -28,8 +29,8 @@ package away3d.containers
 	{
 		protected var _width : Number = 0;
 		protected var _height : Number = 0;
-		protected var _x : Number = 0;
-		protected var _y : Number = 0;
+		private var _localPos : Point = new Point();
+		private var _globalPos : Point = new Point();
 		protected var _scene : Scene3D;
 		protected var _camera : Camera3D;
 		private var _entityCollector : EntityCollector;
@@ -56,6 +57,7 @@ package away3d.containers
 
 		private var _hitField : Sprite;
 		arcane var mouseZeroMove : Boolean;
+		private var _parentIsStage : Boolean;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
@@ -70,6 +72,7 @@ package away3d.containers
 			initHitField();
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage, false, 0, true);
+			addEventListener(Event.ADDED, onAdded, false, 0, true);
 		}
 
 		private function initHitField() : void
@@ -133,8 +136,8 @@ package away3d.containers
 			_renderer = value;
 			_renderer.stage3DProxy = stage3DProxy;
 			_depthRenderer.stage3DProxy = stage3DProxy;
-			_renderer.viewPortX = _x;
-			_renderer.viewPortY = _y;
+			_renderer.viewPortX = _globalPos.x;
+			_renderer.viewPortY = _globalPos.y;
 			_depthRenderer.backBufferWidth = _renderer.backBufferWidth = _width;
 			_depthRenderer.backBufferHeight = _renderer.backBufferHeight = _height;
 			_depthRenderer.viewPortWidth = _renderer.viewPortWidth = _width;
@@ -243,52 +246,21 @@ package away3d.containers
 			_depthTextureInvalid = true;
 		}
 
-		override public function get scaleX() : Number
-		{
-			return 1;
-		}
-
-		override public function set scaleX(value : Number) : void
-		{
-		}
-
-		override public function get scaleY() : Number
-		{
-			return 1;
-		}
-
-		override public function set scaleY(value : Number) : void
-		{
-		}
-
-		/**
-		 * The horizontal coordinate of the top-left position of the viewport.
-		 */
-		override public function get x() : Number
-		{
-			return _x;
-		}
 
 		override public function set x(value : Number) : void
 		{
-			_hitTestRenderer.viewPortX = value;
-			_renderer.viewPortX = value;
-			_x = value;
-		}
-
-		/**
-		 * The vertical coordinate of the top-left position of the viewport.
-		 */
-		override public function get y() : Number
-		{
-			return _y;
+			super.x = value;
+			_localPos.x = value;
+			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
+			_renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
 		}
 
 		override public function set y(value : Number) : void
 		{
-			_hitTestRenderer.viewPortY = value;
-			_renderer.viewPortY = value;
-			_y = value;
+			super.y = value;
+			_localPos.y = value;
+			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
+			_renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
 		}
 
 		/**
@@ -324,6 +296,14 @@ package away3d.containers
 			var numFilters : uint = _filters3d? _filters3d.length : 0;
 			var stage3DProxy : Stage3DProxy = _renderer.stage3DProxy;
 			var context : Context3D = _renderer.context;
+			var globalPos : Point;
+
+			if (!_parentIsStage) {
+				globalPos = parent.localToGlobal(_localPos);
+				if (_globalPos.x != globalPos.x) _renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
+				if (_globalPos.y != globalPos.y) _renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
+				_globalPos = globalPos;
+			}
 
 			if (_time == 0) _time = time;
 			_deltaTime = time - _time;
@@ -457,6 +437,8 @@ package away3d.containers
 		 */
 		private function onAddedToStage(event : Event) : void
 		{
+			if (parent != stage) trace ("Warning: View not added directly to the Stage. Any rotations or scale applied in the display list hierarchy will not function correctly (yet?)");
+
 			if (_addedToStage)
 				return;
 			
@@ -489,5 +471,24 @@ package away3d.containers
 			_hitTestRenderer.dispose();
 			_hitManager.dispose();
 		}
+
+		private function onAdded(event : Event) : void
+		{
+			_parentIsStage = (parent == stage);
+			_globalPos = parent.localToGlobal(new Point(x, y));
+			_renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
+			_renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
+		}
+
+		// dead ends:
+		override public function set z(value : Number) : void {}
+		override public function set scaleZ(value : Number) : void {}
+		override public function set rotation(value : Number) : void {}
+		override public function set rotationX(value : Number) : void {}
+		override public function set rotationY(value : Number) : void {}
+		override public function set rotationZ(value : Number) : void {}
+		override public function set transform(value : Transform) : void {}
+		override public function set scaleX(value : Number) : void {}
+		override public function set scaleY(value : Number) : void {}
 	}
 }

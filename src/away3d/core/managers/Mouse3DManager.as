@@ -39,8 +39,8 @@ package away3d.core.managers
 		private static var _mouseUp : MouseEvent3D = new MouseEvent3D(MouseEvent3D.MOUSE_UP);
 		private static var _mouseDown : MouseEvent3D = new MouseEvent3D(MouseEvent3D.MOUSE_DOWN);
 		private static var _mouseWheel : MouseEvent3D = new MouseEvent3D(MouseEvent3D.MOUSE_WHEEL);
-		private static var _rollOver : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OVER);
-		private static var _rollOut : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OUT);
+//		private static var _rollOver : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OVER);
+//		private static var _rollOut : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OUT);
 
 		/**
 		 * Creates a Mouse3DManager object.
@@ -145,7 +145,7 @@ package away3d.core.managers
 			// todo: would it be faster to run a custom ray-intersect collector instead of using entity collector's data?
 			// todo: shouldn't render it every time, only when invalidated (on move or view render)
 			if (collector.numMouseEnableds > 0) {
-				_hitTestRenderer.update((_view.mouseX-_view.x)/_view.width, (_view.mouseY-_view.y)/_view.height, collector);
+				_hitTestRenderer.update(_view.mouseX/_view.width, _view.mouseY/_view.height, collector);
 				_activeRenderable = _hitTestRenderer.hitRenderable;
 				_activeObject = (_activeRenderable && _activeRenderable.mouseEnabled)? _activeRenderable.sourceEntity : null;
 			}
