@@ -27,6 +27,7 @@ package away3d.core.managers
 		private var _program3Ds : Array;
 		private var _ids : Array;
 		private var _usages : Array;
+		private var _keys : Array;
 
 		private var _currentId : int;
 
@@ -39,6 +40,7 @@ package away3d.core.managers
 			_program3Ds = [];
 			_ids = [];
 			_usages = [];
+			_keys = [];
 		}
 
 		public static function getInstance(stage3DProxy : Stage3DProxy) : AGALProgram3DCache
@@ -52,6 +54,12 @@ package away3d.core.managers
 				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
 			}
 
+			return _instances[index];
+		}
+
+		public static function getInstanceFromIndex(index : int) : AGALProgram3DCache
+		{
+			if (!_instances[index]) throw new Error("Instance not created yet!");
 			return _instances[index];
 		}
 
@@ -76,6 +84,7 @@ package away3d.core.managers
 				program3D.dispose();
 			}
 
+			_keys = null;
 			_program3Ds = null;
 			_usages = null;
 		}
@@ -91,11 +100,12 @@ package away3d.core.managers
 			var vertexCode : String = animationVertexCode+projectionVertexCode+materialVertexCode;
 			var program : Program3D;
 			var key : String = getKey(vertexCode, materialFragmentCode);
-			var oldId : int = pass._program3Dids[stageIndex];
 
-			if (!_program3Ds[key]) {
+			if (_program3Ds[key] == null) {
+				_keys[_currentId] = key;
 				_usages[_currentId] = 0;
-				_ids[key] = _currentId++;
+				_ids[key] = _currentId;
+				++_currentId;
 				program = _stage3DProxy._context3D.createProgram();
 
 				var vertexByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode);
@@ -105,16 +115,22 @@ package away3d.core.managers
 				_program3Ds[key] = program;
 			}
 
+			var oldId : int = pass._program3Dids[stageIndex];
 			var newId : int = _ids[key];
 
 			if (oldId != newId) {
-				if (oldId > 0) _usages[oldId]--;
-				if (_usages[oldId] == 0) destroyProgram(key);
+				if (oldId >= 0) freeProgram3D(oldId);
 				_usages[newId]++;
 			}
 
 			pass._program3Dids[stageIndex] = newId;
 			pass._program3Ds[stageIndex] = _program3Ds[key];
+		}
+
+		public function freeProgram3D(programId : int) : void
+		{
+			_usages[programId]--;
+			if (_usages[programId] == 0) destroyProgram(_keys[programId]);
 		}
 
 		private function destroyProgram(key : String) : void

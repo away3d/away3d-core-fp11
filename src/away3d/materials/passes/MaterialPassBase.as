@@ -163,7 +163,7 @@ package away3d.materials.passes
 		public function dispose(deep : Boolean) : void
 		{
 			for (var i : uint = 0; i < 8; ++i) {
-				if (_program3Ds[i]) _program3Ds[i].dispose();
+				if (_program3Ds[i]) AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
 			}
 		}
 
@@ -311,7 +311,7 @@ package away3d.materials.passes
 		 * @param context The context for which to compile the shader program.
 		 * @param polyOffsetReg An optional register that contains an amount by which to inflate the model (used in single object depth map rendering).
 		 */
-		protected function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		protected function  updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, _animation, polyOffsetReg);
 		}
