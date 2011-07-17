@@ -133,7 +133,7 @@ package away3d.core.render
 			_potentialFound = false;
 			render(entityCollector);
 
-			if (!_context && !_potentialFound) return;
+			if (!_context || !_potentialFound) return;
 			_context.drawToBitmapData(_bitmapData);
 			_hitColor = _bitmapData.getPixel(0, 0);
 
