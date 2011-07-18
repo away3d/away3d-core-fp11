@@ -26,8 +26,8 @@ package away3d.core.partition
 		 */
 		override public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
-			super.acceptTraverser(traverser);
 			if (traverser.enterNode(this)) {
+				super.acceptTraverser(traverser);
 				traverser.applySkyBox(_skyBox);
 			}
 			traverser.leaveNode(this);
@@ -39,7 +39,7 @@ package away3d.core.partition
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
 			_skyBox.pushModelViewProjection(camera);
-			return _skyBox.bounds.isInFrustum(_skyBox.modelViewProjection);
+			return _skyBox.bounds.isInFrustum(_skyBox.getModelViewProjectionUnsafe());
 		}
 	}
 }

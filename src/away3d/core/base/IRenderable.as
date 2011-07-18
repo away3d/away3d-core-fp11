@@ -29,6 +29,14 @@ package away3d.core.base
 		function get modelViewProjection() : Matrix3D;
 
 		/**
+		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
+		 * NOT guarded, should never be called outside the render loop.
+		 *
+		 * @private
+		 */
+		function getModelViewProjectionUnsafe() : Matrix3D;
+
+		/**
 		 * The distance of the IRenderable object to the view, used to sort per object.
 		 */
 		function get zIndex() : Number;

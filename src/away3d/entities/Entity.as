@@ -167,8 +167,17 @@ package away3d.entities
 		 */
 		public function get modelViewProjection() : Matrix3D
 		{
-			// assume base if popped
+			// assume base if popped (only happens when all rendering is complete, and no matrices are on the stack)
 			return _mvpTransformStack[uint(uint(_mvpIndex > 0)*_mvpIndex)];
+		}
+
+		/**
+		 * Same as before, but not guarding against bounds. Only to be used inside the render loop
+		 * @private
+		 */
+		public function getModelViewProjectionUnsafe() : Matrix3D
+		{
+			return _mvpTransformStack[_mvpIndex];
 		}
 
 		/**
@@ -180,11 +189,13 @@ package away3d.entities
 		}
 
 		/**
-		 * The distance of the IRenderable object to the view, used to sort per object.
+		 * The distance of the IRenderable object to the view, used to sort per object. Should never be called manually.
+		 *
+		 * @private
 		 */
 		public function get zIndex() : Number
 		{
-			return _zIndices[uint(uint(_mvpIndex > 0)*_mvpIndex)];
+			return _zIndices[_mvpIndex];
 		}
 
 		/**

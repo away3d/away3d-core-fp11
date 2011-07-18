@@ -67,7 +67,13 @@ package away3d.core.partition
 		{
 			if (_entity.isVisible == false) return false;
 			_entity.pushModelViewProjection(camera);
-			return _entity.bounds.isInFrustum(_entity.modelViewProjection);
+			if (_entity.bounds.isInFrustum(_entity.getModelViewProjectionUnsafe())) {
+				return true;
+			}
+			else {
+				_entity.popModelViewProjection();
+				return false;
+			}
 		}
 	}
 }
