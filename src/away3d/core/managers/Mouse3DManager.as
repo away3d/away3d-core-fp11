@@ -147,7 +147,7 @@ package away3d.core.managers
 			if (collector.numMouseEnableds > 0) {
 				_hitTestRenderer.update(_view.mouseX/_view.width, _view.mouseY/_view.height, collector);
 				_activeRenderable = _hitTestRenderer.hitRenderable;
-				_activeObject = (_activeRenderable && _activeRenderable.mouseEnabled)? _activeRenderable.sourceEntity : null;
+				_activeObject = (_activeRenderable && _activeRenderable.isMouseInteractive)? _activeRenderable.sourceEntity : null;
 			}
 			else {
 				_activeObject = null;

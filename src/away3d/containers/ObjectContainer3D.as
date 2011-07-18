@@ -28,6 +28,9 @@ package away3d.containers
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		private var _children : Vector.<ObjectContainer3D>;
+
+		private var _mouseChildren : Boolean = true;
+		protected var _implicitMouseEnabled : Boolean = true;
 		
 		protected var _scene : Scene3D;
 		private var _oldScene : Scene3D;
@@ -58,6 +61,20 @@ package away3d.containers
 		{
 			super();
 			_children = new Vector.<ObjectContainer3D>();
+		}
+
+		public function get mouseChildren() : Boolean
+		{
+			return _mouseChildren;
+		}
+
+		public function set mouseChildren(value : Boolean) : void
+		{
+			_mouseChildren = value;
+
+			var len : uint = _children.length;
+			for (var i : uint = 0; i < len; ++i)
+				_children[i].updateMouseChildren();
 		}
 
 		public function get visible() : Boolean
@@ -280,7 +297,9 @@ package away3d.containers
 		arcane function setParent(value : ObjectContainer3D) : void
 		{
 			_parent = value;
-			
+
+			updateMouseChildren();
+
 			if (value == null) {
 				scene = null;
 				return;
@@ -305,6 +324,7 @@ package away3d.containers
 			child._parent = this;
 			child.scene = _scene;
 			child.invalidateSceneTransform();
+			child.updateMouseChildren();
 
 			_children.push(child);
 			return child;
@@ -498,6 +518,17 @@ package away3d.containers
 			}
 
 			return ret;
+		}
+
+		protected function updateMouseChildren() : void
+		{
+			if (_parent) {
+				_implicitMouseEnabled = _parent._implicitMouseEnabled && _parent._mouseChildren;
+				var len : uint = _children.length;
+				for (var i : uint = 0; i < len; ++i)
+					_children[i].updateMouseChildren();
+			}
+			else _implicitMouseEnabled = true;
 		}
 	}
 }

@@ -211,7 +211,7 @@ package away3d.core.render
 				renderable = item.renderable;
 
 				// it's possible that the renderable was already removed from the scene
-				if (!renderable.sourceEntity.scene || !renderable.mouseEnabled) {
+				if (!renderable.sourceEntity.scene || !renderable.isMouseInteractive) {
 					item = item.next;
 					continue;
 				}
