@@ -71,7 +71,6 @@ package away3d.containers
 			_entityCollector = new EntityCollector();
 			initHitField();
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
-			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
 		}
 
@@ -381,8 +380,6 @@ package away3d.containers
 			var lights : Vector.<LightBase> = entityCollector.lights;
 			var len : uint = lights.length;
 			var light : LightBase;
-			var context : Context3D = _renderer.context;
-			var contextIndex : int = _renderer.stage3DProxy._stage3DIndex;
 
 			for (var i : int = 0; i < len; ++i) {
 				light = lights[i];
@@ -396,7 +393,10 @@ package away3d.containers
 		 */
 		public function dispose() : void
 		{
+			_renderer.stage3DProxy.dispose();
 			_renderer.dispose();
+			_hitTestRenderer.dispose();
+			_hitManager.dispose();
 			if (_depthRender) _depthRender.dispose();
 		}
 
@@ -431,17 +431,13 @@ package away3d.containers
 		 */
 		private function onAddedToStage(event : Event) : void
 		{
-			if (parent != stage) trace ("Warning: View not added directly to the Stage. Any rotations or scale applied in the display list hierarchy will not function correctly (yet?)");
-
 			if (_addedToStage)
 				return;
 			
 			_addedToStage = true;
 
-
 			_stage3DManager = Stage3DManager.getInstance(stage);
 
-			// TO DO: have a stage3D manager?
 			if (_width == 0) width = stage.stageWidth;
 			if (_height == 0) height = stage.stageHeight;
 
@@ -449,21 +445,6 @@ package away3d.containers
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DManager.getFreeStage3DProxy();
 
 			_hitManager = new Mouse3DManager(this, _hitTestRenderer);
-		}
-
-		/**
-		 * When removed from the stage, detach from the Stage3D and dispose renderers.
-		 */
-		private function onRemovedFromStage(event : Event) : void
-		{
-			if (!_addedToStage)
-				return;
-			
-			_addedToStage = false;
-			
-			_renderer.stage3DProxy.dispose();
-			_hitTestRenderer.dispose();
-			_hitManager.dispose();
 		}
 
 		private function onAdded(event : Event) : void
