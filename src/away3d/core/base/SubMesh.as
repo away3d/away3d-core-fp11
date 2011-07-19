@@ -271,11 +271,6 @@ package away3d.core.base
 			return _parentMesh.mouseEnabled;
 		}
 
-		public function get isMouseInteractive() : Boolean
-		{
-			return _parentMesh.isMouseInteractive;
-		}
-
 		/**
 		 * Indicates whether the SubMesh needs to provide mouse event details, such as position and uv coordinates.
 		 */

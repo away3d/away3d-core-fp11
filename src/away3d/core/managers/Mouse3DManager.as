@@ -1,6 +1,7 @@
 package away3d.core.managers
 {
 	import away3d.arcane;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
@@ -147,7 +148,7 @@ package away3d.core.managers
 			if (collector.numMouseEnableds > 0) {
 				_hitTestRenderer.update(_view.mouseX/_view.width, _view.mouseY/_view.height, collector);
 				_activeRenderable = _hitTestRenderer.hitRenderable;
-				_activeObject = (_activeRenderable && _activeRenderable.isMouseInteractive)? _activeRenderable.sourceEntity : null;
+				_activeObject = (_activeRenderable && _activeRenderable.mouseEnabled)? _activeRenderable.sourceEntity : null;
 			}
 			else {
 				_activeObject = null;
@@ -189,7 +190,12 @@ package away3d.core.managers
 				event3D.localZ = -1;
 			}
 
-			renderable.sourceEntity.dispatchEvent(event3D);
+			// only dispatch from first implicitly enabled object (one that is not a child of a mouseChildren=false hierarchy)
+			var dispatcher : ObjectContainer3D = renderable.sourceEntity;
+
+			while (dispatcher && !dispatcher._implicitMouseEnabled) dispatcher = dispatcher.parent;
+
+			if (dispatcher) dispatcher.dispatchEvent(event3D);
 		}
 		
 		/**

@@ -75,11 +75,6 @@ package away3d.entities
 			_mouseEnabled = value;
 		}
 
-		public function get isMouseInteractive() : Boolean
-		{
-			return _mouseEnabled && _implicitMouseEnabled;
-		}
-
 		/**
 		 * @inheritDoc
 		 */

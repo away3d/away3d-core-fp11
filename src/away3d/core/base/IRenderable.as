@@ -52,13 +52,6 @@ package away3d.core.base
 		function get mouseDetails() : Boolean;
 
 		/**
-		 * Indicates whether the object can dispatch mouse events (if any ancestor has mouseChildren set to false or if
-		 * mouseEnabled is false, this will return false). Only used in the render loop.
-		 * @private
-		 */
-		function get isMouseInteractive() : Boolean;
-
-		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex positions.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex positions.

@@ -30,7 +30,7 @@ package away3d.containers
 		private var _children : Vector.<ObjectContainer3D>;
 
 		private var _mouseChildren : Boolean = true;
-		protected var _implicitMouseEnabled : Boolean = true;
+		arcane var _implicitMouseEnabled : Boolean = true;
 		
 		protected var _scene : Scene3D;
 		private var _oldScene : Scene3D;

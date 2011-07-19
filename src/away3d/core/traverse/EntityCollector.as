@@ -168,7 +168,7 @@ package away3d.core.traverse
 		{
 			var material : MaterialBase;
 
-			if (renderable.isMouseInteractive) ++_numMouseEnableds;
+			if (renderable.mouseEnabled) ++_numMouseEnableds;
 			_numTriangles += renderable.numTriangles;
 
 			material = renderable.material;
