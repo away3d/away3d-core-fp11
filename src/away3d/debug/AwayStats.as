@@ -635,7 +635,7 @@ package away3d.debug
 					Stage3DManager.getInstance(stage).getStage3DProxy(0) &&
 					Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D)
 			{
-				_swhw_tf.text = Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D.driverInfo	== "Software" ? "SW" : "HW";
+				_swhw_tf.text = Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D.driverInfo == "Software (Embedded)" ? "SW" : "HW";
 			}
 			
 			// Plot current framerate
