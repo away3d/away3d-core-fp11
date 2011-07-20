@@ -14,7 +14,7 @@
 	 */
 	public class BitmapMaterial extends DefaultMaterialBase
 	{
-		private var _transparent : Boolean;
+		private var _alphaBlending : Boolean;
 
 		/**
 		 * Creates a new BitmapMaterial.
@@ -87,20 +87,21 @@
 
 		override public function get requiresBlending() : Boolean
 		{
-			return super.requiresBlending || _transparent;
+			return super.requiresBlending || _alphaBlending;
 		}
 
 		/**
-		 * Indicate whether or not the BitmapData contains transparency.
+		 * Indicate whether or not the BitmapData contains semi-transparency. If binary transparency is sufficient, for
+		 * example when using textures of foliage, consider using alphaThreshold instead.
 		 */
-		public function get transparent() : Boolean
+		public function get alphaBlending() : Boolean
 		{
-			return _transparent;
+			return _alphaBlending;
 		}
 
-		public function set transparent(value : Boolean) : void
+		public function set alphaBlending(value : Boolean) : void
 		{
-			_transparent = value;
+			_alphaBlending = value;
 		}
 
 		/**
