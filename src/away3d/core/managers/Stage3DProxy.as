@@ -7,14 +7,9 @@ package away3d.core.managers
 	import flash.display3D.Context3D;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
-	import flash.display3D.textures.Texture;
-	import flash.display3D.textures.TextureBase;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.geom.Rectangle;
-
-	import org.osmf.events.BufferEvent;
 
 	use namespace arcane;
 
