@@ -17,6 +17,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
+	import away3d.materials.ColorMaterial;
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	
@@ -339,6 +340,10 @@ package away3d.loaders.parsers
 			parseUserAttributes();
 			
 			if (type == 1) { // Color material
+				var color : uint;
+				
+				color = props.get(1, 0xcccccc);
+				mat = new ColorMaterial(color);
 			}
 			else if (type == 2) { // Bitmap material
 				var bmp : BitmapData;
