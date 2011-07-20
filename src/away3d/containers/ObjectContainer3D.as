@@ -307,6 +307,11 @@ package away3d.containers
 			
 			invalidateSceneTransform();
 		}
+
+		public function contains(child : ObjectContainer3D) : Boolean
+		{
+			return _children.indexOf(child) >= 0;
+		}
 		
 		/**
 		 * Adds a child ObjectContainer3D to the current object. The child's transformation will become relative to the
