@@ -74,14 +74,10 @@ package away3d.core.managers
 
 		public function dispose() : void
 		{
-			var program3D : Program3D;
-
 			for (var key : String in _program3Ds) {
 				_program3Ds[key].dispose();
-				_program3Ds[key] = null;
+				delete _program3Ds[key];
 				_ids[key] = -1;
-
-				program3D.dispose();
 			}
 
 			_keys = null;
@@ -137,6 +133,7 @@ package away3d.core.managers
 		{
 			_program3Ds[key].dispose();
 			_program3Ds[key] = null;
+			delete _program3Ds[key];
 			_ids[key] = -1;
 		}
 

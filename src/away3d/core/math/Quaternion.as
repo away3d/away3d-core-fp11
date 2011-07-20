@@ -53,10 +53,10 @@ package away3d.core.math
 	    }
 	    
         /**
-        * Fills the quaternion object with the result from a multipication of two quaternion objects.
+        * Fills the quaternion object with the result from a multiplication of two quaternion objects.
         * 
-        * @param	qa	The first quaternion in the multipication.
-        * @param	qb	The second quaternion in the multipication.
+        * @param	qa	The first quaternion in the multiplication.
+        * @param	qb	The second quaternion in the multiplication.
         */
 	    public function multiply(qa:Quaternion, qb:Quaternion):void
 	    {
