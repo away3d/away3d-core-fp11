@@ -66,6 +66,7 @@ package away3d.core.partition
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
 			if (_entity.isVisible == false) return false;
+
 			_entity.pushModelViewProjection(camera);
 			if (_entity.bounds.isInFrustum(_entity.getModelViewProjectionUnsafe())) {
 				return true;

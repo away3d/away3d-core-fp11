@@ -151,8 +151,10 @@ package away3d.entities
 		 */
 		public function pushModelViewProjection(camera : Camera3D) : void
 		{
-			if (++_mvpIndex == _stackLen++)
+			if (++_mvpIndex == _stackLen) {
 				_mvpTransformStack[_mvpIndex] = new Matrix3D();
+				_stackLen++;
+			}
 
 			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
 			mvp.copyFrom(sceneTransform);
