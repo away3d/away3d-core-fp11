@@ -258,6 +258,7 @@ package away3d.materials.passes
 
 			if (_programInvalids[contextIndex]) {
 				updateProgram(stage3DProxy);
+				dispatchEvent(new Event(Event.CHANGE));
 				_programInvalids[contextIndex] = false;
 			}
 
@@ -273,11 +274,8 @@ package away3d.materials.passes
 				stage3DProxy.setTextureAt(i, null);
 			}
 
-			// todo: do same for textures
-
 			_animation.activate(stage3DProxy, this);
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
-			dispatchEvent(new Event(Event.CHANGE));
 		}
 
 		/**
