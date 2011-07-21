@@ -278,7 +278,7 @@ package away3d.core.base
 		public function get position() : Vector3D
 		{
 			transform.copyRowTo(3, _pos);
-			return _pos;
+			return _pos.clone();
 		}
 
 		public function set position(value : Vector3D) : void
