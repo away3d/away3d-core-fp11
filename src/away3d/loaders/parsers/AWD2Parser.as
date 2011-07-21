@@ -60,14 +60,29 @@ package away3d.loaders.parsers
 		
 		
 		
-		public static const AWD_ATTR_INT16 : uint = 1;
-		public static const AWD_ATTR_INT32 : uint = 2;
-		public static const AWD_ATTR_FLOAT32 : uint = 3;
-		public static const AWD_ATTR_FLOAT64 : uint = 4;
-		public static const AWD_ATTR_STRING : uint = 5;
-		public static const AWD_ATTR_BADDR : uint = 6;
-		public static const AWD_ATTR_MTX4 : uint = 7;
-		public static const AWD_ATTR_BOOL : uint = 8;
+		public static const AWD_FIELD_INT8 : uint = 1;
+		public static const AWD_FIELD_INT16 : uint = 2;
+		public static const AWD_FIELD_INT32 : uint = 3;
+		public static const AWD_FIELD_UINT8 : uint = 4;
+		public static const AWD_FIELD_UINT16 : uint = 5;
+		public static const AWD_FIELD_UINT32 : uint = 6;
+		public static const AWD_FIELD_FLOAT32 : uint = 7;
+		public static const AWD_FIELD_FLOAT64 : uint = 8;
+		
+		public static const AWD_FIELD_BOOL : uint = 21;
+		public static const AWD_FIELD_COLOR : uint = 22;
+		public static const AWD_FIELD_BADDR : uint = 23;
+		
+		public static const AWD_FIELD_STRING : uint = 31;
+		public static const AWD_FIELD_BYTEARRAY : uint = 32;
+		
+		public static const AWD_FIELD_VECTOR2x1 : uint = 41;
+		public static const AWD_FIELD_VECTOR3x1 : uint = 42;
+		public static const AWD_FIELD_VECTOR4x1 : uint = 43;
+		public static const AWD_FIELD_MTX3x2 : uint = 44;
+		public static const AWD_FIELD_MTX3x3 : uint = 45;
+		public static const AWD_FIELD_MTX4x3 : uint = 46;
+		public static const AWD_FIELD_MTX4x4 : uint = 47;
 		
 		
 		
@@ -334,8 +349,8 @@ package away3d.loaders.parsers
 			
 			// Read material numerical properties
 			// (1=color, 2=bitmap url, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
-			props = parseProperties({ 1:AWD_ATTR_INT32, 2:AWD_ATTR_BADDR, 
-				11:AWD_ATTR_BOOL, 12:AWD_ATTR_FLOAT32, 13:AWD_ATTR_BOOL });
+			props = parseProperties({ 1:AWD_FIELD_INT32, 2:AWD_FIELD_BADDR, 
+				11:AWD_FIELD_BOOL, 12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
 			
 			parseUserAttributes();
 			
@@ -662,7 +677,7 @@ package away3d.loaders.parsers
 			num_subs = _body.readUnsignedShort();
 			
 			// Read optional properties
-			props = parseProperties({ 1:AWD_ATTR_MTX4 }); 
+			props = parseProperties({ 1:AWD_FIELD_MTX4x4 }); 
 			
 			var mtx : Matrix3D;
 			var bsm_data : Array = props.get(1, null);
@@ -685,6 +700,9 @@ package away3d.loaders.parsers
 				
 				sm_len = _body.readUnsignedInt();
 				sm_end = _body.position + sm_len;
+				
+				// Ignore for now
+				parseProperties(null);
 				
 				// Loop through data streams
 				while (_body.position < sm_end) {
@@ -748,6 +766,9 @@ package away3d.loaders.parsers
 					}
 				}
 					
+				// Ignore sub-mesh attributes for now
+				parseUserAttributes();
+				
 				// If there were weights and joint indices defined, this
 				// is a skinned mesh and needs to be built from skinned
 				// sub-geometries, so copy data across.
@@ -834,30 +855,49 @@ package away3d.loaders.parsers
 			var read_func : Function;
 			
 			switch (type) {
-				case AWD_ATTR_INT16:
+				case AWD_FIELD_INT8:
+					elem_len = 1;
+					read_func = _body.readByte;
+					break;
+				case AWD_FIELD_INT16:
 					elem_len = 2;
 					read_func = _body.readShort;
 					break;
-				case AWD_ATTR_INT32:
-				case AWD_ATTR_BADDR:
+				case AWD_FIELD_INT32:
+					elem_len = 4;
+					read_func = _body.readInt;
+					break;
+				case AWD_FIELD_BOOL:
+				case AWD_FIELD_UINT8:
+					elem_len = 1;
+					read_func = _body.readUnsignedByte;
+					break;
+				case AWD_FIELD_UINT16:
+					elem_len = 2;
+					read_func = _body.readUnsignedShort;
+					break;
+				case AWD_FIELD_UINT32:
+				case AWD_FIELD_BADDR:
 					elem_len = 4;
 					read_func = _body.readUnsignedInt;
 					break;
-				case AWD_ATTR_FLOAT32:
+				case AWD_FIELD_FLOAT32:
 					elem_len = 4;
 					read_func = _body.readFloat;
 					break;
-				case AWD_ATTR_FLOAT64:
+				case AWD_FIELD_FLOAT64:
 					elem_len = 8;
 					read_func = _body.readDouble;
 					break;
-				case AWD_ATTR_MTX4:
+				case AWD_FIELD_VECTOR2x1:
+				case AWD_FIELD_VECTOR3x1:
+				case AWD_FIELD_VECTOR4x1:
+				case AWD_FIELD_MTX3x2:
+				case AWD_FIELD_MTX3x3:
+				case AWD_FIELD_MTX4x3:
+				case AWD_FIELD_MTX4x4:
 					elem_len = 8;
 					read_func = _body.readDouble;
-					break;
-				case AWD_ATTR_BOOL:
-					elem_len = 1;
-					read_func = _body.readUnsignedByte;
 					break;
 			}
 			
