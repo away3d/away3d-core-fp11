@@ -181,6 +181,11 @@ package away3d.materials.passes
 			invalidateShaderProgram();
 		}
 
+		public function hasMethod(method : ShadingMethodBase) : Boolean
+		{
+			return _methods.indexOf(method) >= 0;
+		}
+
 		/**
 		 * Inserts a method to change the material after all lighting is performed at the given index.
 		 * @param method The method to be added.
@@ -221,6 +226,7 @@ package away3d.materials.passes
 			generateTangents = Boolean(value);
 		}
 
+
 		/**
 		 * @inheritDoc
 		 */
@@ -230,7 +236,6 @@ package away3d.materials.passes
 			_lightColorData = new Vector.<Number>(_numLights*8, true);
 			invalidateShaderProgram();
 		}
-
 
 		public function get ambientMethod() : BasicAmbientMethod
 		{
@@ -654,6 +659,7 @@ package away3d.materials.passes
 			if (_generateTangents && _normalMapTexture) ++_uvDependencies;
 		}
 
+
 		private function countMethodDependencies(method : ShadingMethodBase) : void
 		{
 			if (method.needsProjection) ++_projectionDependencies;
@@ -662,7 +668,6 @@ package away3d.materials.passes
 			if (method.needsView) ++_viewDirDependencies;
 			if (method.needsUV) ++_uvDependencies;
 		}
-
 
 		private function compileGlobalPositionCode() : void
 		{

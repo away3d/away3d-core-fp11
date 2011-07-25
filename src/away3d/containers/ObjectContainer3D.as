@@ -323,7 +323,9 @@ package away3d.containers
 		{
 			if (child == null)
 				throw new Error("Parameter child cannot be null.");
-			
+
+			if (child._parent) throw new Error("Child ObjectContainer3D was already added as a child to an ObjectContainer3D");
+
 			if (!child._explicitPartition) child.implicitPartition = _implicitPartition;
 			
 			child._parent = this;

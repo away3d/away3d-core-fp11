@@ -8,6 +8,7 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterElement;
 
 	import flash.display.BitmapData;
+	import flash.display.BitmapDataChannel;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
@@ -26,7 +27,6 @@ package away3d.materials.methods
 		protected var _specularDataRegister : ShaderRegisterElement;
 		protected var _specularDataIndex : uint;
 
-		protected var _mipmapBitmap : BitmapData;
 		private var _texture : Texture3DProxy;
 
 		protected var _specularData : Vector.<Number>;
@@ -34,6 +34,12 @@ package away3d.materials.methods
 		private var _specularColor : uint = 0xffffff;
 		arcane var _specularR : Number = 1, _specularG : Number = 1, _specularB : Number = 1;
 		private var _shadowRegister : ShaderRegisterElement;
+
+		private var _specularMap : BitmapData;
+		private var _glossMap : BitmapData;
+		private var _specularGlossMap : BitmapData;
+		private var _specularGlossMapDirty : Boolean;
+
 
 		/**
 		 * Creates a new BasicSpecularMethod object.
@@ -96,7 +102,8 @@ package away3d.materials.methods
 
 		/**
 		 * The bitmapData that encodes the specular highlight strength per texel in the red channel, and the sharpness
-		 * in the green channel.
+		 * in the green channel. Alternatively, use the specularMap and glossMap properties if the maps are present in
+		 * seperate BitmapData objects.
 		 */
 		public function get bitmapData() : BitmapData
 		{
@@ -119,6 +126,62 @@ package away3d.materials.methods
 
 			if (_useTexture)
 				_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+		}
+
+		/**
+		 * A specular map that defines the strength of specular reflections for each texel.
+		 */
+		public function get specularMap() : BitmapData
+		{
+			return _specularMap;
+		}
+
+		public function set specularMap(value : BitmapData) : void
+		{
+			var newMap : BitmapData;
+
+			if (_specularMap == value) return;
+
+			_specularMap = value;
+
+			newMap = _specularGlossMap;
+			if (value)
+				newMap ||= new BitmapData(_specularMap.width, _specularMap.height, false);
+			else if (!_glossMap && newMap) {
+				newMap.dispose();
+				newMap = null;
+			}
+
+			_specularGlossMap = newMap;
+			_specularGlossMapDirty = true;
+		}
+
+		/**
+		 * A specular map that defines the power of specular reflections for each texel.
+		 */
+		public function get glossMap() : BitmapData
+		{
+			return _specularMap;
+		}
+
+		public function set glossMap(value : BitmapData) : void
+		{
+			var newMap : BitmapData;
+
+			if (_glossMap == value) return;
+
+			_glossMap = value;
+
+			newMap = _specularGlossMap;
+			if (value)
+				newMap ||= new BitmapData(_glossMap.width, _glossMap.height, false);
+			else if (!_specularMap && newMap) {
+				newMap.dispose();
+				newMap = null;
+			}
+
+			_specularGlossMap = newMap;
+			_specularGlossMapDirty = true;
 		}
 
 		/**
@@ -154,7 +217,8 @@ package away3d.materials.methods
 				BitmapDataTextureCache.getInstance().freeTexture(_texture);
 				_texture = null;
 			}
-			if (_mipmapBitmap) _mipmapBitmap.dispose();
+
+			if (_specularGlossMap) _specularGlossMap.dispose();
 		}
 
 		/**
@@ -318,6 +382,12 @@ package away3d.materials.methods
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
+
+			if (_specularGlossMapDirty) {
+				updateSpecularGlossMap(context);
+				_specularGlossMapDirty = false;
+			}
+
 			super.activate(stage3DProxy);
 			if (_numLights == 0) return;
 
@@ -343,6 +413,25 @@ package away3d.materials.methods
 		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
 		{
 			_shadowRegister = shadowReg;
+		}
+
+
+		/**
+		 * Updates the specular gloss map
+		 */
+		private function updateSpecularGlossMap(context : Context3D) : void
+		{
+			if (!_specularGlossMap) return;
+
+			_specularGlossMap.fillRect(_specularGlossMap.rect, 0xffffff);
+
+			if (_specularMap)
+				_specularGlossMap.copyChannel(_specularMap, _specularGlossMap.rect, _specularGlossMap.rect.topLeft, BitmapDataChannel.BLUE, BitmapDataChannel.RED);
+
+			if (_glossMap)
+				_specularGlossMap.copyChannel(_glossMap, _specularGlossMap.rect, _specularGlossMap.rect.topLeft, BitmapDataChannel.GREEN, BitmapDataChannel.GREEN);
+
+			bitmapData = _specularGlossMap;
 		}
 	}
 }

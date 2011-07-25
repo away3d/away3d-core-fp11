@@ -63,12 +63,30 @@ package away3d.materials.methods
 			return _baseSpecularMethod.bitmapData;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
 		override public function set bitmapData(value : BitmapData) : void
 		{
 			_baseSpecularMethod.bitmapData = value;
+		}
+
+
+		override public function get specularMap() : BitmapData
+		{
+			return _baseSpecularMethod.specularMap;
+		}
+
+		override public function set specularMap(value : BitmapData) : void
+		{
+			_baseSpecularMethod.specularMap = value;
+		}
+
+		override public function get glossMap() : BitmapData
+		{
+			return _baseSpecularMethod.glossMap;
+		}
+
+		override public function set glossMap(value : BitmapData) : void
+		{
+			_baseSpecularMethod.glossMap = value;
 		}
 
 		/**
