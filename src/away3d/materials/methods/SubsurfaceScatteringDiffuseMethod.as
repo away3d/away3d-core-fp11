@@ -68,6 +68,19 @@ package away3d.materials.methods
 			translucency = 1;
 		}
 
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+
+			_lightProjVaryings = null;
+			_toTexRegister = null;
+			_invRegister = null;
+			_totalScatterColorReg = null;
+			_lightColorReg = null;
+			_colorReg = null;
+			_decReg = null;
+		}
+
 		/**
 		 * The amount by which the light scatters. It can be used to set the translucent surface's thickness. Use low
 		 * values for skin.

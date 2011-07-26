@@ -23,9 +23,9 @@ package away3d.materials.methods
 		protected var _totalLightColorReg : ShaderRegisterElement;
 		protected var _specularTextureRegister : ShaderRegisterElement;
 		protected var _specularTexData : ShaderRegisterElement;
-		protected var _specularTexIndex : uint;
+		protected var _specularTexIndex : int;
 		protected var _specularDataRegister : ShaderRegisterElement;
-		protected var _specularDataIndex : uint;
+		protected var _specularDataIndex : int;
 
 		private var _texture : Texture3DProxy;
 
@@ -246,13 +246,26 @@ package away3d.materials.methods
 			return _useTexture;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
+
 		arcane override function reset() : void
 		{
 			super.reset();
+
+			_specularTexIndex = -1;
+			_specularDataIndex = -1;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
 			_shadowRegister = null;
+			_totalLightColorReg = null;
+			_specularTextureRegister = null;
+			_specularTexData = null;
+			_specularDataRegister = null;
 		}
 
 		/**
@@ -354,26 +367,6 @@ package away3d.materials.methods
 			regCache.removeFragmentTempUsage(_totalLightColorReg);
 
 			return code;
-		}
-
-		/**
-		 * The register element containing the specular data.
-		 *
-		 * @private
-		 */
-		arcane function get specularDataRegister() : ShaderRegisterElement
-		{
-			return _specularDataRegister;
-		}
-
-		/**
-		 * The register element containing the specular map data.
-		 *
-		 * @private
-		 */
-		arcane function get specularTextureRegister() : ShaderRegisterElement
-		{
-			return _specularTextureRegister;
 		}
 
 		/**

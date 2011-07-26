@@ -176,6 +176,13 @@ package away3d.materials.methods
 			_baseDiffuseMethod.reset();
 		}
 
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_baseDiffuseMethod.cleanCompilationData();
+		}
+
 		/**
 		 * @inheritDoc
 		 */

@@ -68,6 +68,15 @@ package away3d.materials.methods
 		}
 
 		/**
+		 * @inheritDoc
+		 */
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_dataReg = null;
+		}
+
+		/**
 		 * Snaps the specular shading strength of the wrapped method to zero or one, depending on whether or not it exceeds the specularCutOff
 		 * @param t The register containing the specular strength in the "w" component, and either the half-vector or the reflection vector in "xyz".
 		 * @param regCache The register cache used for the shader compilation.

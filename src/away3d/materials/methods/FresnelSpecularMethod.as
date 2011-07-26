@@ -36,6 +36,18 @@ package away3d.materials.methods
             _incidentLight = !basedOnSurface;
 		}
 
+		arcane override function reset() : void
+		{
+			super.reset();
+			_dataIndex = -1;
+		}
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_dataReg = null;
+		}
+
 		/**
 		 * The minimum amount of reflectance, ie the reflectance when the view direction is normal to the surface or light direction.
 		 */

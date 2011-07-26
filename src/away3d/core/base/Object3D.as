@@ -643,7 +643,6 @@ package away3d.core.base
 			var x : Number, y : Number, z : Number;
 
 			if (_rotationValuesDirty) {
-//				_quaternion.fromMatrix(_transform);
 				rot = Vector3DUtils.matrix2euler(_transform);
 				_rotationX = rot.x;
 				_rotationY = rot.y;

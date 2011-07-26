@@ -100,9 +100,6 @@ package away3d.materials.passes
 		{
 			super();
 			_material = material;
-			_registerCache = new ShaderRegisterCache();
-			_registerCache.vertexConstantOffset = 4;
-			_registerCache.vertexAttributesOffset = 1;
 
 			_methods = new Vector.<ShadingMethodBase>();
 			_ambientMethod = new BasicAmbientMethod();
@@ -509,6 +506,11 @@ package away3d.materials.passes
 		 */
 		private function reset() : void
 		{
+			_registerCache = new ShaderRegisterCache();
+			_registerCache.vertexConstantOffset = 4;
+			_registerCache.vertexAttributesOffset = 1;
+			_registerCache.reset();
+
 			_lightDirFragmentRegs = new Vector.<ShaderRegisterElement>(_numLights, true);
 			_lightInputIndices = new Vector.<uint>(_numLights, true);
 
@@ -523,7 +525,7 @@ package away3d.materials.passes
 			_commonsReg = null;
 			_numUsedVertexConstants = 0;
 			_numUsedStreams = 1;
-			_registerCache.reset();
+
 			_animatableAttributes = ["va0"];
 			_targetRegisters = ["vt0"];
 			_vertexCode = "";
@@ -538,6 +540,52 @@ package away3d.materials.passes
 			_numUsedVertexConstants = _registerCache.numUsedVertexConstants;
 			_numUsedStreams = _registerCache.numUsedStreams;
 			_numUsedTextures = _registerCache.numUsedTextures;
+
+			cleanUp();
+		}
+
+		private function cleanUp() : void
+		{
+			_projectionFragmentReg = null;
+			_normalFragmentReg = null;
+			_viewDirFragmentReg = null;
+			_lightDirFragmentRegs = null;
+
+			_normalVarying = null;
+			_tangentVarying = null;
+			_bitangentVarying = null;
+			_uvVaryingReg = null;
+			_viewDirVaryingReg = null;
+
+			_shadedTargetReg = null;
+			_globalPositionReg = null;
+			_localPositionRegister = null;
+			_positionMatrixRegs = null;
+			_normalInput = null;
+			_tangentInput = null;
+			_animatedNormalReg = null;
+			_animatedTangentReg = null;
+			_commonsReg = null;
+
+			_registerCache = null;
+
+			if (_diffuseMethod) _diffuseMethod.cleanCompilationData();
+			if (_ambientMethod) _ambientMethod.cleanCompilationData();
+			if (_specularMethod) _specularMethod.cleanCompilationData();
+			if (_shadowMethod) _shadowMethod.cleanCompilationData();
+			if (_colorTransformMethod) _colorTransformMethod.cleanCompilationData();
+
+			var len : uint = _methods.length;
+			for (var i : uint = 0; i < len; ++i) {
+				_methods[i].cleanCompilationData();
+			}
+
+			if (_lights) {
+				len = _lights.length;
+				for (i = 0; i < len; ++i) {
+					_lights[i].cleanCompilationData();
+				}
+			}
 		}
 
 		private function setMethodProps(method : ShadingMethodBase) : void
@@ -546,7 +594,6 @@ package away3d.materials.passes
 			method.repeat = _repeat;
 			method.mipmap = _mipmap;
 			method.numLights = _numLights;
-			method.reset();
 		}
 
 		/**

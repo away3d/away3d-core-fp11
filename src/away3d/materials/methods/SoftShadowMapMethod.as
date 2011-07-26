@@ -23,7 +23,7 @@ package away3d.materials.methods
 		private var _offsetData : Vector.<Number> = Vector.<Number>([.5, -.5, 1.0, 1.0]);
 		private var _toTexIndex : int;
 		private var _data : Vector.<Number>;
-		private var _decIndex : uint;
+		private var _decIndex : int;
 		private var _projMatrix : Matrix3D = new Matrix3D();
 		private var _stepSize : Number;
 
@@ -37,6 +37,23 @@ package away3d.materials.methods
 			castingLight.castsShadows = true;
 			_castingLight = castingLight;
 			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, -.003, 1/9, stepSize, 0]);
+		}
+
+
+		arcane override function reset() : void
+		{
+			super.reset();
+			_depthMapIndex = -1;
+			_depthProjIndex = -1;
+			_toTexIndex = -1;
+			_decIndex = -1;
+		}
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+
+			_depthMapVar = null;
 		}
 
 		public function get epsilon() : Number

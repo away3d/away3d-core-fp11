@@ -122,14 +122,6 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get specularDataRegister() : ShaderRegisterElement
-		{
-			return _baseSpecularMethod.specularDataRegister;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function get needsUV() : Boolean
 		{
 			return _baseSpecularMethod.needsUV;
@@ -265,15 +257,6 @@ package away3d.materials.methods
 			_projectionReg = _baseSpecularMethod.projectionReg = value;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get specularTextureRegister() : ShaderRegisterElement
-		{
-			return _baseSpecularMethod.specularTextureRegister;
-		}
-
-
 		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
 		{
 			_viewDirVaryingReg = _baseSpecularMethod.viewDirVaryingReg = value;
@@ -317,6 +300,12 @@ package away3d.materials.methods
 		arcane override function reset() : void
 		{
 			_baseSpecularMethod.reset();
+		}
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_baseSpecularMethod.cleanCompilationData();
 		}
 
 		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void

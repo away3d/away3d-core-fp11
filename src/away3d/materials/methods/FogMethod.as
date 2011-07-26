@@ -25,6 +25,12 @@ package away3d.materials.methods
 			this.fogColor = fogColor;
 		}
 
+		arcane override function reset() : void
+		{
+			super.reset();
+			_fogDataIndex = -1;
+		}
+
 		public function get fogDistance() : Number
 		{
 			return _fogDistance;
