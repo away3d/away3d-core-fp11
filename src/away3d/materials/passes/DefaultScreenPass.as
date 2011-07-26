@@ -594,6 +594,7 @@ package away3d.materials.passes
 			method.repeat = _repeat;
 			method.mipmap = _mipmap;
 			method.numLights = _numLights;
+			method.reset();
 		}
 
 		/**
