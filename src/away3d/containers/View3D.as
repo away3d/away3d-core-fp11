@@ -27,18 +27,19 @@ package away3d.containers
 
 	public class View3D extends Sprite
 	{
-		protected var _width : Number = 0;
-		protected var _height : Number = 0;
+		private var _width : Number = 0;
+		private var _height : Number = 0;
 		private var _localPos : Point = new Point();
 		private var _globalPos : Point = new Point();
-		protected var _scene : Scene3D;
-		protected var _camera : Camera3D;
+		private var _scene : Scene3D;
+		private var _camera : Camera3D;
 		private var _entityCollector : EntityCollector;
 
-		protected var _aspectRatio : Number;
-		protected var _time : Number = 0;
-		protected var _deltaTime : uint;
-		protected var _backgroundColor : uint = 0x000000;
+		private var _aspectRatio : Number;
+		private var _time : Number = 0;
+		private var _deltaTime : uint;
+		private var _backgroundColor : uint = 0x000000;
+		private var _backgroundAlpha : Number = 1;
 
 		private var _hitManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
@@ -48,7 +49,7 @@ package away3d.containers
 		private var _hitTestRenderer : HitTestRenderer;
 		private var _addedToStage:Boolean;
 
-		protected var _filters3d : Array;
+		private var _filters3d : Array;
 		private var _requireDepthRender : Boolean;
 		private var _depthRender : Texture;
 		private var _depthTextureWidth : int = -1;
@@ -160,6 +161,19 @@ package away3d.containers
 			_renderer.backgroundR = ((value >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((value >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (value & 0xff) / 0xff;
+		}
+
+		public function get backgroundAlpha() : Number
+		{
+			return _backgroundAlpha;
+		}
+
+		public function set backgroundAlpha(value : Number) : void
+		{
+			if (value > 1) value = 1;
+			else if (value < 0) value = 0;
+			_renderer.backgroundAlpha = value;
+			_backgroundAlpha = value;
 		}
 
 		/**

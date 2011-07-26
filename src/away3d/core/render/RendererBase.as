@@ -23,7 +23,6 @@ package away3d.core.render
 	{
 		protected var _context : Context3D;
 		protected var _stage3DProxy : Stage3DProxy;
-//		protected var _contextIndex : int = -1;
 
 		private var _backBufferWidth : int;
 		private var _backBufferHeight : int;
@@ -34,6 +33,7 @@ package away3d.core.render
 		protected var _backgroundR : Number = 0;
 		protected var _backgroundG : Number = 0;
 		protected var _backgroundB : Number = 0;
+		protected var _backgroundAlpha : Number = 1;
 
 		protected var _viewPortWidth : Number = 1;
 		protected var _viewPortHeight : Number = 1;
@@ -177,6 +177,7 @@ package away3d.core.render
 			else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
 
 			_stage3DProxy = value;
+			_stage3DProxy.transparent = _backgroundAlpha < 1;
 			updateViewPort();
 
 			if (value.context3D) {
@@ -331,7 +332,7 @@ package away3d.core.render
 			if (target) _context.setRenderToTexture(target, _enableDepthAndStencil, _antiAlias, surfaceSelector);
 			else _context.setRenderToBackBuffer();
 
-			_context.clear(_backgroundR, _backgroundG, _backgroundB, 1, 1, 0, additionalClearMask);
+			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 
 			draw(entityCollector);
 
@@ -375,5 +376,15 @@ package away3d.core.render
 //			_contextIndex = _stage3DProxy.stage3DIndex;
 		}
 
+		arcane function get backgroundAlpha() : Number
+		{
+			return _backgroundAlpha;
+		}
+
+		arcane function set backgroundAlpha(value : Number) : void
+		{
+			_backgroundAlpha = value;
+			if (_stage3DProxy) _stage3DProxy.transparent = value < 1;
+		}
 	}
 }

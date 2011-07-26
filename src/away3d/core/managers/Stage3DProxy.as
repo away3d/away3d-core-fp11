@@ -38,6 +38,7 @@ package away3d.core.managers
 		private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 		private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
 
+
 		/**
 		 * Creates a Stage3DProxy object. This method should not be called directly. Creation of Stage3DProxy objects should
 		 * be handled by Stage3DManager.
@@ -139,6 +140,16 @@ package away3d.core.managers
 		public function set x(value : Number) : void
 		{
 			_stage3D.x = value;
+		}
+
+		public function get transparent() : Boolean
+		{
+			return _stage3D.transparent;
+		}
+
+		public function set transparent(value : Boolean) : void
+		{
+			_stage3D.transparent = value;
 		}
 
 		/**
