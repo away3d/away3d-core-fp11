@@ -154,6 +154,8 @@ package away3d.materials.methods
 
 			_specularGlossMap = newMap;
 			_specularGlossMapDirty = true;
+
+			_useTexture = Boolean(_glossMap) || Boolean(_specularMap);
 		}
 
 		/**
@@ -182,6 +184,8 @@ package away3d.materials.methods
 
 			_specularGlossMap = newMap;
 			_specularGlossMapDirty = true;
+
+			_useTexture = Boolean(_glossMap) || Boolean(_specularMap);
 		}
 
 		/**
