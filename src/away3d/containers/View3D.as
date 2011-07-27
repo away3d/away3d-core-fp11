@@ -13,6 +13,8 @@ package away3d.containers
 	import away3d.filters.Filter3DBase;
 	import away3d.lights.LightBase;
 
+	import flash.display.BitmapData;
+
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -60,6 +62,8 @@ package away3d.containers
 		arcane var mouseZeroMove : Boolean;
 		private var _parentIsStage : Boolean;
 
+		private var _backgroundImage : BitmapData;
+
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
 			super();
@@ -73,6 +77,17 @@ package away3d.containers
 			initHitField();
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
+		}
+
+		public function get backgroundImage() : BitmapData
+		{
+			return _backgroundImage;
+		}
+
+		public function set backgroundImage(value : BitmapData) : void
+		{
+			_backgroundImage = value;
+			_renderer.backgroundImage = _backgroundImage;
 		}
 
 		private function initHitField() : void
@@ -145,6 +160,8 @@ package away3d.containers
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
+			_renderer.backgroundAlpha = _backgroundAlpha;
+			_renderer.backgroundImage = _backgroundImage;
 		}
 
 		/**

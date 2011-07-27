@@ -7,8 +7,7 @@
 	public class DefaultBitmapData {
 		
 		private static var _bitmapData:BitmapData;
-		private static const MAX:uint = 2048;
-		
+
 		public static function get bitmapData() : BitmapData
 		{
 			if(!_bitmapData)
@@ -17,23 +16,6 @@
 			return _bitmapData;
 		}
 		
-		public static function isBitmapDataValid(bitmapData : BitmapData) : Boolean
-		{
-			var w:int = bitmapData.width;
-			var h:int = bitmapData.height;
-
-			if(w<2 || h<2 || w>MAX || h>MAX) return false;
-
-			if(isPowerOfTwo(w) && isPowerOfTwo(h)) return true;
-
-			return false;
-		}
-
-		private static function isPowerOfTwo(value:int): Boolean
-		{
-			return value ? ((value & -value) == value) : false;
-		}
-
 		private static function build() : void
 		{
 			var size:uint = 256;

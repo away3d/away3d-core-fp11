@@ -250,7 +250,6 @@ package away3d.materials.passes
 		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
 
 			if (!_program3Ds[contextIndex]) {
 				initPass(stage3DProxy);
