@@ -18,12 +18,6 @@ package away3d.containers
 	 *
 	 * ObjectContainer3D can have its own scene partition assigned. However, when assigned to a different scene,
 	 * it will loose any partition information, since partitions are tied to a scene.
-	 *
-	 * TODO: polycount updates
-	 * TODO: all the event-based stuff is not done (onDimensionsUpdate etc) Trying to avoid bubbling here :s
-	 * TODO: names not implemented yet (will be related too closely to a Library)
-	 * TODO: pivot stuff --> pass pivot point to appendRotation
-	 *
 	 */
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
@@ -89,7 +83,7 @@ package away3d.containers
 			_explicitVisibility = value;
 
 			for (var i : uint = 0; i < len; ++i) {
-				_children[i]._implicitVisibility = _explicitVisibility && _implicitVisibility;
+				_children[i].updateImplicitVisibility();
 			}
 		}
 
@@ -332,6 +326,7 @@ package away3d.containers
 			child.scene = _scene;
 			child.invalidateSceneTransform();
 			child.updateMouseChildren();
+			child.updateImplicitVisibility();
 
 			_children.push(child);
 			return child;
@@ -536,6 +531,17 @@ package away3d.containers
 					_children[i].updateMouseChildren();
 			}
 			else _implicitMouseEnabled = true;
+		}
+
+		public function updateImplicitVisibility() : void
+		{
+			var len : uint = _children.length;
+
+			_implicitVisibility = _parent._explicitVisibility && _parent._implicitVisibility;
+
+			for (var i : uint = 0; i < len; ++i) {
+				_children[i].updateImplicitVisibility();
+			}
 		}
 	}
 }
