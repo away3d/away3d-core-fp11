@@ -278,7 +278,7 @@ package away3d.core.base
 		public function get position() : Vector3D
 		{
 			transform.copyRowTo(3, _pos);
-			return _pos;
+			return _pos.clone();
 		}
 
 		public function set position(value : Vector3D) : void
@@ -618,7 +618,7 @@ package away3d.core.base
 		{
 			if (_rotationValuesDirty || _scaleValuesDirty) updateTransformValues();
 
-			_quaternion.fromEulerAngles(_rotationY, _rotationZ, -_rotationX); // Swapped
+			_quaternion.fromEulerAngles(_rotationX, _rotationY, _rotationZ); // Swapped
 
 			if (_pivotZero) {
 				Matrix3DUtils.quaternion2matrix(_quaternion, _transform);
@@ -643,7 +643,6 @@ package away3d.core.base
 			var x : Number, y : Number, z : Number;
 
 			if (_rotationValuesDirty) {
-//				_quaternion.fromMatrix(_transform);
 				rot = Vector3DUtils.matrix2euler(_transform);
 				_rotationX = rot.x;
 				_rotationY = rot.y;

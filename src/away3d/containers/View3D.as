@@ -13,6 +13,8 @@ package away3d.containers
 	import away3d.filters.Filter3DBase;
 	import away3d.lights.LightBase;
 
+	import flash.display.BitmapData;
+
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -27,18 +29,19 @@ package away3d.containers
 
 	public class View3D extends Sprite
 	{
-		protected var _width : Number = 0;
-		protected var _height : Number = 0;
+		private var _width : Number = 0;
+		private var _height : Number = 0;
 		private var _localPos : Point = new Point();
 		private var _globalPos : Point = new Point();
-		protected var _scene : Scene3D;
-		protected var _camera : Camera3D;
+		private var _scene : Scene3D;
+		private var _camera : Camera3D;
 		private var _entityCollector : EntityCollector;
 
-		protected var _aspectRatio : Number;
-		protected var _time : Number = 0;
-		protected var _deltaTime : uint;
-		protected var _backgroundColor : uint = 0x000000;
+		private var _aspectRatio : Number;
+		private var _time : Number = 0;
+		private var _deltaTime : uint;
+		private var _backgroundColor : uint = 0x000000;
+		private var _backgroundAlpha : Number = 1;
 
 		private var _hitManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
@@ -48,7 +51,7 @@ package away3d.containers
 		private var _hitTestRenderer : HitTestRenderer;
 		private var _addedToStage:Boolean;
 
-		protected var _filters3d : Array;
+		private var _filters3d : Array;
 		private var _requireDepthRender : Boolean;
 		private var _depthRender : Texture;
 		private var _depthTextureWidth : int = -1;
@@ -58,6 +61,8 @@ package away3d.containers
 		private var _hitField : Sprite;
 		arcane var mouseZeroMove : Boolean;
 		private var _parentIsStage : Boolean;
+
+		private var _backgroundImage : BitmapData;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
@@ -72,6 +77,17 @@ package away3d.containers
 			initHitField();
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
+		}
+
+		public function get backgroundImage() : BitmapData
+		{
+			return _backgroundImage;
+		}
+
+		public function set backgroundImage(value : BitmapData) : void
+		{
+			_backgroundImage = value;
+			_renderer.backgroundImage = _backgroundImage;
 		}
 
 		private function initHitField() : void
@@ -144,6 +160,8 @@ package away3d.containers
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
+			_renderer.backgroundAlpha = _backgroundAlpha;
+			_renderer.backgroundImage = _backgroundImage;
 		}
 
 		/**
@@ -160,6 +178,19 @@ package away3d.containers
 			_renderer.backgroundR = ((value >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((value >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (value & 0xff) / 0xff;
+		}
+
+		public function get backgroundAlpha() : Number
+		{
+			return _backgroundAlpha;
+		}
+
+		public function set backgroundAlpha(value : Number) : void
+		{
+			if (value > 1) value = 1;
+			else if (value < 0) value = 0;
+			_renderer.backgroundAlpha = value;
+			_backgroundAlpha = value;
 		}
 
 		/**

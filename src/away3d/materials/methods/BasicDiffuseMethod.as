@@ -177,7 +177,17 @@ package away3d.materials.methods
 		arcane override function reset() : void
 		{
 			super.reset();
+
+			_diffuseInputIndex = -1;
+			_cutOffIndex = -1;
+		}
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
 			_shadowRegister = null;
+			_totalLightColorReg = null;
+			_diffuseInputRegister = null;
 		}
 
 		/**

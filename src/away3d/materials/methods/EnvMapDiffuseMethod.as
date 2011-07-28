@@ -7,8 +7,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
-
 	use namespace arcane;
 
 	/**
@@ -28,6 +26,12 @@ package away3d.materials.methods
 		{
 			_cubeTexture = new CubeTexture3DProxy();
 			_cubeTexture.cubeMap = envMap;
+		}
+
+		arcane override function reset() : void
+		{
+			super.reset();
+			_cubeMapIndex = -1;
 		}
 
 		/**

@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
@@ -56,6 +55,23 @@ package away3d.materials.methods
 		public function set smoothness(value : Number) : void
 		{
 			_data[3] = value;
+		}
+
+
+		arcane override function reset() : void
+		{
+			super.reset();
+
+			_dataIndex = -1;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_dataReg = null;
 		}
 
 		/**

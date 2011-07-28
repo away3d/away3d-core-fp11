@@ -1,9 +1,12 @@
 package away3d.core.partition
 {
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframePrimitiveBase;
+
+	use namespace arcane;
 
 	/**
 	 * The NodeBase class is an abstract base class for any type of space partition tree node. The concrete
@@ -20,6 +23,8 @@ package away3d.core.partition
 		protected var _childNodes : Vector.<NodeBase>;
 		protected var _numChildNodes : uint;
 		private var _debugPrimitive : WireframePrimitiveBase;
+
+		arcane var _numEntities : int;
 
 		/**
 		 * Creates a new NodeBase object.
@@ -69,8 +74,17 @@ package away3d.core.partition
 		public function addNode(node : NodeBase) : void
 		{
 			node._parent = this;
+			_numEntities += node._numEntities;
 			_childNodes[_numChildNodes++] = node;
 			node.showDebugBounds = showDebugBounds;
+
+			// update numEntities in the tree
+			var numEntities : int = node._numEntities;
+			var node : NodeBase = this;
+
+			do {
+				node._numEntities += numEntities;
+			} while (node = node._parent);
 		}
 
 		/**
@@ -79,14 +93,21 @@ package away3d.core.partition
 		 */
 		public function removeNode(node : NodeBase) : void
 		{
-			var index : uint = _childNodes.indexOf(node);
-
 			// a bit faster than splice(i, 1), works only if order is not important
 			// override item to be removed with the last in the list, then remove that last one
 			// Also, the "real partition nodes" of the tree will always remain unmoved, first in the list, so if there's
 			// an order dependency for them, it's still okay
+			var index : uint = _childNodes.indexOf(node);
 			_childNodes[index] = _childNodes[--_numChildNodes];
 			_childNodes.pop();
+
+			// update numEntities in the tree
+			var numEntities : int = node._numEntities;
+			var node : NodeBase = this;
+
+			do {
+				node._numEntities -= numEntities;
+			} while (node = node._parent);
 		}
 
 		/**
@@ -120,6 +141,8 @@ package away3d.core.partition
 		 */
 		public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
+			if (_numEntities == 0) return;
+
 			if (traverser.enterNode(this)) {
 				var i : uint;
 				while (i < _numChildNodes) _childNodes[i++].acceptTraverser(traverser);

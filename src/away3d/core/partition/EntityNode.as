@@ -33,6 +33,7 @@ package away3d.core.partition
 		{
 			super();
 			_entity = entity;
+			_numEntities = 1;
 		}
 
 		/**
@@ -57,6 +58,7 @@ package away3d.core.partition
 		public function removeFromParent() : void
 		{
 			if (_parent) _parent.removeNode(this);
+
 			_parent = null;
 		}
 

@@ -195,6 +195,11 @@ package away3d.lights
 
 		}
 
+		arcane function cleanCompilationData() : void
+		{
+			_fragmentDirReg = null;
+		}
+
 		arcane function get positionBased() : Boolean
 		{
 			return false;

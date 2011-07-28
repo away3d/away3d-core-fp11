@@ -278,8 +278,8 @@ package away3d.core.base
 			var clone : SubGeometry = new SubGeometry();
 			clone.updateVertexData(_vertices.concat());
 			clone.updateUVData(_uvs.concat());
-			clone.updateSecondaryUVData(_secondaryUvs.concat());
 			clone.updateIndexData(_indices.concat());
+			if (_secondaryUvs) clone.updateSecondaryUVData(_secondaryUvs.concat());
 			if (!_autoDeriveVertexNormals) clone.updateVertexNormalData(_vertexNormals.concat());
 			if (!_autoDeriveVertexTangents) clone.updateVertexTangentData(_vertexTangents.concat());
 			return clone;

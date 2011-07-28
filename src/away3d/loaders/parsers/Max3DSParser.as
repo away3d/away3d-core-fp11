@@ -7,6 +7,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
+	import away3d.tools.utils.TextureUtils;
 
 	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;

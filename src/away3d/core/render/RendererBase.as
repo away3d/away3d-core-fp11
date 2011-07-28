@@ -2,13 +2,19 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.managers.Texture3DProxy;
 	import away3d.core.sort.EntitySorterBase;
 	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.Stage3DEvent;
 
+	import flash.display.BitmapData;
+
+	import flash.display.BitmapData;
+
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
@@ -23,7 +29,6 @@ package away3d.core.render
 	{
 		protected var _context : Context3D;
 		protected var _stage3DProxy : Stage3DProxy;
-//		protected var _contextIndex : int = -1;
 
 		private var _backBufferWidth : int;
 		private var _backBufferHeight : int;
@@ -34,6 +39,7 @@ package away3d.core.render
 		protected var _backgroundR : Number = 0;
 		protected var _backgroundG : Number = 0;
 		protected var _backgroundB : Number = 0;
+		protected var _backgroundAlpha : Number = 1;
 
 		protected var _viewPortWidth : Number = 1;
 		protected var _viewPortHeight : Number = 1;
@@ -45,6 +51,8 @@ package away3d.core.render
 		protected var _swapBackBuffer : Boolean = true;
 
 		private var _renderableSorter : EntitySorterBase;
+		private var _backgroundImageRenderer : BackgroundImageRenderer;
+		private var _backgroundImage : BitmapData;
 
 		/**
 		 * Creates a new RendererBase object.
@@ -171,12 +179,15 @@ package away3d.core.render
 				if (_stage3DProxy) _stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 				_stage3DProxy = null;
 				_context = null;
+
 //				_contextIndex = -1;
 				return;
 			}
 			else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
 
 			_stage3DProxy = value;
+			_stage3DProxy.transparent = _backgroundAlpha < 1;
+			if (_backgroundImageRenderer) _backgroundImageRenderer.stage3DProxy = value;
 			updateViewPort();
 
 			if (value.context3D) {
@@ -292,6 +303,10 @@ package away3d.core.render
 		arcane function dispose() : void
 		{
 			stage3DProxy = null;
+			if (_backgroundImageRenderer) {
+				_backgroundImageRenderer.dispose();
+				_backgroundImageRenderer = null;
+			}
 		}
 
 		/**
@@ -331,7 +346,10 @@ package away3d.core.render
 			if (target) _context.setRenderToTexture(target, _enableDepthAndStencil, _antiAlias, surfaceSelector);
 			else _context.setRenderToBackBuffer();
 
-			_context.clear(_backgroundR, _backgroundG, _backgroundB, 1, 1, 0, additionalClearMask);
+			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+
+			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
+			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
 			draw(entityCollector);
 
@@ -372,8 +390,38 @@ package away3d.core.render
 		private function onContextUpdate(event : Event) : void
 		{
 			_context = _stage3DProxy.context3D;
+
 //			_contextIndex = _stage3DProxy.stage3DIndex;
 		}
 
+		arcane function get backgroundAlpha() : Number
+		{
+			return _backgroundAlpha;
+		}
+
+		arcane function set backgroundAlpha(value : Number) : void
+		{
+			_backgroundAlpha = value;
+			if (_stage3DProxy) _stage3DProxy.transparent = value < 1;
+		}
+
+		arcane function get backgroundImage() : BitmapData
+		{
+			return _backgroundImage;
+		}
+
+		arcane function set backgroundImage(value : BitmapData) : void
+		{
+			if (_backgroundImageRenderer && !value) {
+				_backgroundImageRenderer.dispose();
+				_backgroundImageRenderer = null;
+			}
+
+			if (!_backgroundImageRenderer && value)
+				_backgroundImageRenderer = new BackgroundImageRenderer(_stage3DProxy);
+
+			_backgroundImage = value;
+			if (_backgroundImageRenderer) _backgroundImageRenderer.bitmapData = value;
+		}
 	}
 }

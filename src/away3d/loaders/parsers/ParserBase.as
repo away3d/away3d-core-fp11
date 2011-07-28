@@ -8,6 +8,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.data.DefaultBitmapData;
+	import away3d.tools.utils.TextureUtils;
 
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
@@ -89,7 +90,7 @@ package away3d.loaders.parsers
 		 */
 		public function isBitmapDataValid(bitmapData: BitmapData) : Boolean
 		{
-			var isValid:Boolean = DefaultBitmapData.isBitmapDataValid(bitmapData);
+			var isValid:Boolean = TextureUtils.isBitmapDataValid(bitmapData);
 			if(!isValid) trace(">> bitmap loaded is not having power of 2 dimensions or is higher than 4096");
 			
 			return isValid;

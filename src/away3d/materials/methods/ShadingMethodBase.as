@@ -9,8 +9,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
-
 	use namespace arcane;
 
 	/**
@@ -100,16 +98,23 @@ package away3d.materials.methods
 			_parentPass = value;
 		}
 
+		arcane function reset() : void
+		{
+			cleanCompilationData();
+		}
+
 		/**
 		 * Resets the method's state for compilation.
 		 * @private
 		 */
-		arcane function reset() : void
+		arcane function cleanCompilationData() : void
 		{
-			_viewDirFragmentReg = null;
+			_viewDirVaryingReg = null;
 			_viewDirFragmentReg = null;
 			_normalFragmentReg = null;
 			_uvFragmentReg = null;
+			_globalPosVertexReg = null;
+			_projectionReg = null;
 		}
 
 		/**

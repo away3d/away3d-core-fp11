@@ -42,6 +42,15 @@ package away3d.lights
 			_attenuationIndices = new Dictionary(true);
 		}
 
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_attenuationRegister = null;
+			_vertexPosReg = null;
+			_varyingReg = null;
+		}
+
 		/**
 		 * The maximum distance of the light's reach.
 		 */
