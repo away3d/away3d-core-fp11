@@ -618,7 +618,7 @@ package away3d.core.base
 		{
 			if (_rotationValuesDirty || _scaleValuesDirty) updateTransformValues();
 
-			_quaternion.fromEulerAngles(_rotationY, _rotationZ, -_rotationX); // Swapped
+			_quaternion.fromEulerAngles(_rotationX, _rotationY, _rotationZ); // Swapped
 
 			if (_pivotZero) {
 				Matrix3DUtils.quaternion2matrix(_quaternion, _transform);
