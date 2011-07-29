@@ -314,6 +314,7 @@ package away3d.loaders.parsers
 			dummy = new Sprite;
 			while (frames_parsed < num_frames) {
 				var mtx : Matrix;
+				var frame_dur : uint;
 				var frame : UVAnimationFrame;
 				
 				// TODO: Replace this with some reliable way to decompose a 2d matrix
@@ -321,8 +322,10 @@ package away3d.loaders.parsers
 				mtx.scale(100, 100);
 				dummy.transform.matrix = mtx;
 				
+				frame_dur = _body.readUnsignedShort();
+				
 				frame = new UVAnimationFrame(dummy.x*0.01, dummy.y*0.01, dummy.scaleX/100, dummy.scaleY/100, dummy.rotation);
-				seq.addFrame(frame, 40);
+				seq.addFrame(frame, frame_dur);
 				
 				frames_parsed++;
 			}
@@ -342,17 +345,30 @@ package away3d.loaders.parsers
 			var type : uint;
 			var props : AWDProperties;
 			var mat : DefaultMaterialBase;
+			var attributes : Object;
 			var finalize : Boolean;
+			var num_methods : uint;
+			var methods_parsed : uint;
 			
 			name = parseVarStr();
 			type = _body.readUnsignedByte();
+			num_methods = _body.readUnsignedByte();
 			
 			// Read material numerical properties
 			// (1=color, 2=bitmap url, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
 			props = parseProperties({ 1:AWD_FIELD_INT32, 2:AWD_FIELD_BADDR, 
 				11:AWD_FIELD_BOOL, 12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
 			
-			parseUserAttributes();
+			methods_parsed = 0;
+			while (methods_parsed < num_methods) {
+				var method_type : uint;
+				
+				method_type = _body.readUnsignedShort();
+				parseProperties(null);
+				parseUserAttributes();
+			}
+			
+			attributes = parseUserAttributes();
 			
 			if (type == 1) { // Color material
 				var color : uint;
@@ -386,6 +402,7 @@ package away3d.loaders.parsers
 				}
 			}
 			
+			mat.extra = attributes;
 			mat.alphaThreshold = props.get(12, 0.0);
 			mat.repeat = props.get(13, false);
 			
@@ -597,7 +614,7 @@ package away3d.loaders.parsers
 			finalizeAsset(ctr, name);
 			
 			parseProperties(null);
-			parseUserAttributes();
+			ctr.extra = parseUserAttributes();
 		
 			return ctr;
 		}
@@ -655,7 +672,7 @@ package away3d.loaders.parsers
 			
 			// Ignore for now
 			parseProperties(null);
-			parseUserAttributes();
+			mesh.extra = parseUserAttributes();
 			
 			finalizeAsset(mesh, name);
 			
@@ -840,13 +857,44 @@ package away3d.loaders.parsers
 		
 		private function parseUserAttributes() : Object
 		{
+			var attributes : Object;
 			var list_len : uint;
 			
-			// TODO: Implement user attributes
 			list_len = _body.readUnsignedInt();
-			_body.position += list_len; // Skip for now
+			if (list_len > 0) {
+				var list_end : uint;
+				
+				attributes = {};
+				
+				list_end = _body.position + list_len;
+				while (_body.position < list_end) {
+					var ns_id : uint;
+					var attr_key : String;
+					var attr_type : uint;
+					var attr_len : uint;
+					var attr_val : *;
+					
+					// TODO: Properly tend to namespaces in attributes
+					ns_id = _body.readUnsignedByte();
+					attr_key = parseVarStr();
+					attr_type = _body.readUnsignedByte();
+					attr_len = _body.readUnsignedShort();
+					
+					switch (attr_type) {
+						case AWD_FIELD_STRING:
+							attr_val = _body.readUTFBytes(attr_len);
+							break;
+						default:
+							attr_val = 'unimplemented attribute type '+attr_type;
+							_body.position += attr_len;
+							break;
+					}
+					
+					attributes[attr_key] = attr_val;
+				}
+			}
 			
-			return null;
+			return attributes;
 		}
 		
 		private function parseAttrValue(type : uint, len : uint) : *
