@@ -2,6 +2,8 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.passes.MaterialPassBase;
+	import away3d.materials.passes.OutlinePass;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -12,11 +14,44 @@ package away3d.materials.methods
 
 	public class OutlineMethod extends ShadingMethodBase
 	{
-		private var _outlineColor : uint = 0x000000;
+		private var _outlinePass : OutlinePass;
 
-		public function OutlineMethod(fogDistance : Number, fogColor : uint = 0x808080)
+		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 20, showInnerLines : Boolean = true)
 		{
-			super(false, true, false);
+			super(true, false, false);
+			_passes = new Vector.<MaterialPassBase>();
+			_outlinePass = new OutlinePass(outlineColor, outlineSize, showInnerLines);
+			_passes.push(_outlinePass);
+		}
+
+		public function get showInnerLines() : Boolean
+		{
+			return _outlinePass.showInnerLines;
+		}
+
+		public function set showInnerLines(value : Boolean) : void
+		{
+			_outlinePass.showInnerLines = value;
+		}
+
+		public function get outlineColor() : uint
+		{
+			return _outlinePass.outlineColor;
+		}
+
+		public function set outlineColor(value : uint) : void
+		{
+			_outlinePass.outlineColor = value;
+		}
+
+		public function get outlineSize() : Number
+		{
+			return _outlinePass.outlineSize;
+		}
+
+		public function set outlineSize(value : Number) : void
+		{
+			_outlinePass.outlineSize = value;
 		}
 
 		arcane override function reset() : void

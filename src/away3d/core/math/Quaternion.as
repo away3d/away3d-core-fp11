@@ -88,9 +88,7 @@ package away3d.core.math
 		/**
 		 * Fills the quaternion object with values representing the given rotation around a vector.
 		 *
-		 * @param	x		The x value of the rotation vector.
-		 * @param	y		The y value of the rotation vector.
-		 * @param	z		The z value of the rotation vector.
+		 * @param	axis	The axis around which to rotate
 		 * @param	angle	The angle in radians of the rotation.
 		 */
 		public function fromAxisAngle(axis : Vector3D, angle : Number) : void

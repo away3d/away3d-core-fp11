@@ -13,7 +13,6 @@ package away3d.materials.passes
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.textures.Texture;
 	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
 
 	use namespace arcane;
@@ -43,7 +42,7 @@ package away3d.materials.passes
 			_listensForDispose = new Vector.<Boolean>(8, true);
 			_textureSize = textureSize;
 			_numUsedStreams = 2;
-			_numUsedVertexConstants = 6;
+			_numUsedVertexConstants = 7;
 			_lightPosData = new Vector.<Number>(8, true);
 			_animatableAttributes = ["va0", "va1"];
 			_targetRegisters = ["vt0", "vt1"];

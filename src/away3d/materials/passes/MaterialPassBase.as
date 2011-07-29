@@ -57,6 +57,7 @@ package away3d.materials.passes
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
 		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
 		private static var _previousUsedTexs : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
+		protected var _defaultCulling : String = Context3DTriangleFace.BACK;
 
 
 		/**
@@ -198,7 +199,6 @@ package away3d.materials.passes
 		{
 			var context : Context3D = stage3DProxy._context3D;
 
-			context.setCulling(_bothSides? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
 
 			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
@@ -275,6 +275,8 @@ package away3d.materials.passes
 
 			_animation.activate(stage3DProxy, this);
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
+
+			stage3DProxy._context3D.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
 		}
 
 		/**
