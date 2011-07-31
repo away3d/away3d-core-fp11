@@ -3,7 +3,7 @@ package away3d.loaders.misc
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.loaders.AssetLoader;
-
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 
@@ -76,6 +76,9 @@ package away3d.loaders.misc
 			// buffer it so that it can be dispatched when a listener is added.
 			if (hasEventListener(ev.type)) {
 				dispatchEvent(ev.clone());
+			}
+			else if (ev.type == LoaderEvent.DEPENDENCY_ERROR || ev.type == LoaderEvent.LOAD_ERROR) {
+				throw new Error(LoaderEvent(ev).message);
 			}
 			else {
 				// If no buffer exists for this type, create it.
