@@ -611,11 +611,11 @@ package away3d.loaders.parsers
 				parent.addChild(ctr);
 			}
 			
-			finalizeAsset(ctr, name);
-			
 			parseProperties(null);
 			ctr.extra = parseUserAttributes();
 		
+			finalizeAsset(ctr, name);
+			
 			return ctr;
 		}
 		
