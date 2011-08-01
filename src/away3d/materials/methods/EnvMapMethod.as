@@ -83,7 +83,7 @@ package away3d.materials.methods
 					"mul " + temp + ".xyz, " + _normalFragmentReg + ".xyz, " + temp + ".w						\n" +
 					"sub " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz, " + temp + ".xyz					\n" +
 					"neg " + temp + ".xyz, " + temp + ".xyz														\n" +
-					"tex " + temp.toString() + ", " + temp.toString() + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",clamp>\n" +
+					"tex " + temp.toString() + ", " + temp.toString() + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n" +
 					"sub " + temp + ".xyz, " + temp + ".xyz, " + targetReg + ".xyz								\n" +
 					"mul " + temp + ", " + temp + ", " + dataRegister + ".x								\n" +
 					"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz							\n";

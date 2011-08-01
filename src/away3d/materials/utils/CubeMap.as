@@ -1,6 +1,7 @@
 package away3d.materials.utils
 {
 	import away3d.arcane;
+	import away3d.materials.utils.MipmapGenerator;
 
 	import flash.display.BitmapData;
 	import flash.display3D.textures.CubeTexture;
@@ -148,7 +149,7 @@ package away3d.materials.utils
 		arcane function upload(cubeTexture : CubeTexture) : void
 		{
 			for (var i : int = 0; i < 6; ++i)
-				cubeTexture.uploadFromBitmapData(_bitmapDatas[i], i);
+				MipmapGenerator.generateMipMaps(_bitmapDatas[i], cubeTexture, null, false, i);
 		}
 	}
 }

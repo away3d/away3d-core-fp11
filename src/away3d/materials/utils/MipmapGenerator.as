@@ -1,7 +1,9 @@
 package away3d.materials.utils
 {
 	import flash.display.*;
+	import flash.display3D.textures.CubeTexture;
 	import flash.display3D.textures.Texture;
+	import flash.display3D.textures.TextureBase;
 	import flash.geom.*;
 
 	/**
@@ -19,7 +21,7 @@ package away3d.materials.utils
 		 * @param mipmap An optional mip map holder to avoids creating new instances for fe animated materials.
 		 * @param alpha Indicate whether or not the uploaded bitmapData is transparent.
 		 */
-		public static function generateMipMaps(source : BitmapData, target : Texture, mipmap : BitmapData = null, alpha : Boolean = false) : void
+		public static function generateMipMaps(source : BitmapData, target : TextureBase, mipmap : BitmapData = null, alpha : Boolean = false, side : int = -1) : void
 		{
 			var w : uint = source.width,
 				h : uint = source.height;
@@ -36,7 +38,10 @@ package away3d.materials.utils
 			while (w >= 1 || h >= 1) {
 				if (alpha) mipmap.fillRect(_rect, 0);
 				mipmap.draw(source, _matrix, null, null, null, true);
-				target.uploadFromBitmapData(mipmap, i++);
+				if (target is Texture)
+					Texture(target).uploadFromBitmapData(mipmap, i++);
+				else
+					CubeTexture(target).uploadFromBitmapData(mipmap, side, i++);
 
 				if (w > 1)
 					_matrix.a *= .5;

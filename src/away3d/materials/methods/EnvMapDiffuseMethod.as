@@ -106,7 +106,7 @@ package away3d.materials.methods
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
-			code += "tex " + temp + ", " + _normalFragmentReg + ", " + cubeMapReg + " <cube, bilinear,clamp>\n" +
+			code += "tex " + temp + ", " + _normalFragmentReg + ", " + cubeMapReg + " <cube,miplinear,linear,clamp>\n" +
 					"add " + temp+".xyz, " + temp+".xyz, " + targetReg+".xyz\n" +
 					"sat " + temp+".xyz, " + temp+".xyz\n";
 
