@@ -15,22 +15,24 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class EnvMapMethod extends ShadingMethodBase
+	public class FresnelEnvMapMethod extends ShadingMethodBase
 	{
 		private var _cubeTexture : CubeTexture3DProxy;
 		private var _cubeMapIndex : int;
 		private var _data : Vector.<Number>;
 		private var _dataIndex : int;
 
-		public function EnvMapMethod(envMap : CubeMap, alpha : Number = 1)
+		public function FresnelEnvMapMethod(envMap : CubeMap, alpha : Number = 1)
 		{
 			super(true, true, false);
 			_cubeTexture = new CubeTexture3DProxy();
 			_cubeTexture.cubeMap = envMap;
 			_data = new Vector.<Number>(4, true);
 			_data[0] = alpha;
+			_data[1] = 0;
+			_data[2] = 5; // exponent
+            _data[3] = 1;
 		}
-
 
 		arcane override function reset() : void
 		{
@@ -55,6 +57,19 @@ package away3d.materials.methods
 		public function set alpha(value : Number) : void
 		{
 			_data[0] = value;
+		}
+
+		/**
+		 * The minimum amount of reflectance, ie the reflectance when the view direction is normal to the surface or light direction.
+		 */
+		public function get normalReflectance() : Number
+		{
+			return _data[1];
+		}
+
+		public function set normalReflectance(value : Number) : void
+		{
+			_data[1] = value;
 		}
 
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
@@ -84,9 +99,27 @@ package away3d.materials.methods
 					"sub " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz, " + temp + ".xyz					\n" +
 					"neg " + temp + ".xyz, " + temp + ".xyz														\n" +
 					"tex " + temp.toString() + ", " + temp.toString() + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",clamp>\n" +
-					"sub " + temp + ".xyz, " + temp + ".xyz, " + targetReg + ".xyz								\n" +
-					"mul " + temp + ", " + temp + ", " + dataRegister + ".x								\n" +
-					"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz							\n";
+					"sub " + temp + ".xyz, " + temp + ".xyz, " + targetReg + ".xyz								\n";
+
+			// calculate fresnel term
+			code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + _normalFragmentReg+".xyz\n" +   // dot(V, H)
+            		"sub " + _viewDirFragmentReg+".w, " + dataRegister+".w, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
+
+            		"mul " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 2)
+					"mul " + _normalFragmentReg+".w, " + _normalFragmentReg+".w, " + _normalFragmentReg+".w\n" +             // exp = pow(base, 4)
+					"mul " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 5)
+
+					"sub " + _normalFragmentReg+".w, " + dataRegister+".w, " + _viewDirFragmentReg+".w\n" +             // 1 - exp
+					"mul " + _normalFragmentReg+".w, " + dataRegister+".y, " + _normalFragmentReg+".w\n" +             // f0*(1 - exp)
+					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
+
+					// total alpha
+					"mul " + _viewDirFragmentReg+".w, " + dataRegister+".x, " + _viewDirFragmentReg+".w\n" +
+
+					// blend
+					"mul " + temp + ", " + temp + ", " + _viewDirFragmentReg + ".w						\n" +
+					"add " + targetReg + ".xyzw, " + targetReg+".xyzw, " + temp + ".xyzw						\n";
+
 
 			return code;
 		}

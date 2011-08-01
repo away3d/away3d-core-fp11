@@ -4,16 +4,18 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
 	import away3d.lights.LightBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
+	import away3d.materials.methods.BasicNormalMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.ColorTransformMethod;
 	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+
+	import flash.display.BitmapData;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -31,12 +33,12 @@ package away3d.materials.passes
 	 */
 	public class DefaultScreenPass extends MaterialPassBase
 	{
-		private var _normalMapTexture : Texture3DProxy;
 		private var _cameraPositionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
 		private var _lightColorData : Vector.<Number>;
 		private var _uvTransformData : Vector.<Number>;
 
 		private var _colorTransformMethod : ColorTransformMethod;
+		private var _normalMethod : BasicNormalMethod;
 		private var _ambientMethod : BasicAmbientMethod;
 		private var _shadowMethod : ShadingMethodBase;
 		private var _diffuseMethod : BasicDiffuseMethod;
@@ -50,7 +52,6 @@ package away3d.materials.passes
 		private var _viewDirDependencies : uint;
 		private var _uvDependencies : uint;
 		private var _globalPosDependencies : uint;
-		private var _generateTangents : Boolean;
 
 		// registers
 		protected var _uvBufferIndex : int;
@@ -59,7 +60,6 @@ package away3d.materials.passes
 		protected var _sceneMatrixIndex : int;
 		protected var _sceneNormalMatrixIndex : int;
 		protected var _lightsColorIndex : int;
-		protected var _normalMapIndex : int;
 		protected var _cameraPositionIndex : int;
 		protected var _uvTransformIndex : int;
 
@@ -102,10 +102,11 @@ package away3d.materials.passes
 			_material = material;
 
 			_methods = new Vector.<ShadingMethodBase>();
+			_normalMethod = new BasicNormalMethod();
 			_ambientMethod = new BasicAmbientMethod();
 			_diffuseMethod = new BasicDiffuseMethod();
 			_specularMethod = new BasicSpecularMethod();
-			_diffuseMethod.parentPass = _specularMethod.parentPass = this;
+			_normalMethod.parentPass = _diffuseMethod.parentPass = _specularMethod.parentPass = _ambientMethod.parentPass = this;
 		}
 
 		public function get animateUVs() : Boolean
@@ -157,7 +158,8 @@ package away3d.materials.passes
 		{
 			super.dispose(deep);
 
-			if (_normalMapTexture) _normalMapTexture.dispose(deep);
+//			if (_normalMapTexture) _normalMapTexture.dispose(deep);
+			_normalMethod.dispose(deep);
 			_diffuseMethod.dispose(deep);
 			if (_shadowMethod) _shadowMethod.dispose(deep);
 			_ambientMethod.dispose(deep);
@@ -210,17 +212,14 @@ package away3d.materials.passes
 		/**
 		 * The tangent space normal map to influence the direction of the surface for each texel.
 		 */
-		public function get normalMap() : Texture3DProxy
+		public function get normalMap() : BitmapData
 		{
-			return _normalMapTexture;
+			return _normalMethod.normalMap;
 		}
 
-		public function set normalMap(value : Texture3DProxy) : void
+		public function set normalMap(value : BitmapData) : void
 		{
-			if (_normalMapTexture == value) return;
-			if (!_normalMapTexture || !value) invalidateShaderProgram();
-			_normalMapTexture = value;
-			generateTangents = Boolean(value);
+			_normalMethod.normalMap = value;
 		}
 
 
@@ -231,6 +230,20 @@ package away3d.materials.passes
 		{
 			super.lights = value;
 			_lightColorData = new Vector.<Number>(_numLights*8, true);
+			invalidateShaderProgram();
+		}
+
+		public function get normalMethod() : BasicNormalMethod
+		{
+			return _normalMethod;
+		}
+
+		public function set normalMethod(value : BasicNormalMethod) : void
+		{
+			_normalMethod.parentPass = null;
+			value.copyFrom(_normalMethod);
+			value.parentPass = this;
+			_normalMethod = value;
 			invalidateShaderProgram();
 		}
 
@@ -349,6 +362,7 @@ package away3d.materials.passes
 
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
 
+			_normalMethod.activate(stage3DProxy);
 			_ambientMethod.activate(stage3DProxy);
 			if (_shadowMethod) _shadowMethod.activate(stage3DProxy);
 			_diffuseMethod.activate(stage3DProxy);
@@ -356,8 +370,6 @@ package away3d.materials.passes
 			if (_colorTransformMethod) _colorTransformMethod.activate(stage3DProxy);
 			for (var i : int = 0; i < len; ++i)
 				_methods[i].activate(stage3DProxy);
-
-			if (_normalMapIndex >= 0) stage3DProxy.setTextureAt(_normalMapIndex, _normalMapTexture.getTextureForStage3D(stage3DProxy));
 
 			if (_cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;
@@ -376,6 +388,7 @@ package away3d.materials.passes
 			super.deactivate(stage3DProxy);
 			var len : uint = _methods.length;
 
+			_normalMethod.deactivate(stage3DProxy);
 			_ambientMethod.deactivate(stage3DProxy);
 			if (_shadowMethod) _shadowMethod.deactivate(stage3DProxy);
 			_diffuseMethod.deactivate(stage3DProxy);
@@ -425,6 +438,7 @@ package away3d.materials.passes
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _lightsColorIndex, _lightColorData, _numLights*2);
 			}
 
+			_normalMethod.setRenderState(renderable, stage3DProxy, camera, lights);
 			_ambientMethod.setRenderState(renderable, stage3DProxy, camera, lights);
 			if (_shadowMethod) _shadowMethod.setRenderState(renderable, stage3DProxy, camera, lights);
 			_diffuseMethod.setRenderState(renderable, stage3DProxy, camera, lights);
@@ -438,21 +452,6 @@ package away3d.materials.passes
 			super.render(renderable, stage3DProxy, camera);
 		}
 
-		/**
-		 * Indicates whether or not vertex tangents should be calculated.
-		 * @private
-		 */
-		arcane function get generateTangents() : Boolean
-		{
-			return _generateTangents;
-		}
-
-		arcane function set generateTangents(value : Boolean) : void
-		{
-			if (value == _generateTangents) return;
-			invalidateShaderProgram();
-			_generateTangents = value;
-		}
 
 		/**
 		 * Marks the shader program as invalid, so it will be recompiled before the next render.
@@ -463,6 +462,7 @@ package away3d.materials.passes
 			_passesDirty = true;
 
 			_passes = new Vector.<MaterialPassBase>();
+			addPasses(_normalMethod.passes);
 			addPasses(_ambientMethod.passes);
 			if (_shadowMethod) addPasses(_shadowMethod.passes);
 			addPasses(_diffuseMethod.passes);
@@ -485,23 +485,6 @@ package away3d.materials.passes
 		}
 
 		/**
-		 * A helper method that generates standard code for sampling from a texture using the normal uv coordinates.
-		 * @param targetReg The register in which to store the sampled colour.
-		 * @param inputReg The texture stream register.
-		 * @return The fragment code that performs the sampling.
-		 */
-		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement) : String
-		{
-			var wrap : String = _repeat? "wrap" : "clamp";
-			var filter : String;
-
-            if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
-			else filter = _mipmap ? "nearest,mipnearest" : "nearest";
-
-            return "tex "+targetReg.toString()+", "+_uvVaryingReg.toString()+", "+inputReg.toString()+" <2d,"+filter+","+wrap+">\n";
-		}
-
-		/**
 		 * Resets the compilation state.
 		 */
 		private function reset() : void
@@ -514,6 +497,7 @@ package away3d.materials.passes
 			_lightDirFragmentRegs = new Vector.<ShaderRegisterElement>(_numLights, true);
 			_lightInputIndices = new Vector.<uint>(_numLights, true);
 
+			setMethodProps(_normalMethod);
 			setMethodProps(_diffuseMethod);
 			if (_shadowMethod) setMethodProps(_shadowMethod);
 			setMethodProps(_ambientMethod);
@@ -547,7 +531,6 @@ package away3d.materials.passes
 		private function cleanUp() : void
 		{
 			_projectionFragmentReg = null;
-			_normalFragmentReg = null;
 			_viewDirFragmentReg = null;
 			_lightDirFragmentRegs = null;
 
@@ -569,6 +552,7 @@ package away3d.materials.passes
 
 			_registerCache = null;
 
+			if (_normalMethod) _normalMethod.cleanCompilationData();
 			if (_diffuseMethod) _diffuseMethod.cleanCompilationData();
 			if (_ambientMethod) _ambientMethod.cleanCompilationData();
 			if (_specularMethod) _specularMethod.cleanCompilationData();
@@ -606,9 +590,11 @@ package away3d.materials.passes
 
 			if (_projectionDependencies > 0) compileProjCode();
 			if (_uvDependencies > 0) compileUVCode();
-			if (_normalDependencies > 0) compileNormalCode();
 			if (_globalPosDependencies > 0) compileGlobalPositionCode();
 			if (_viewDirDependencies > 0) compileViewDirCode();
+			setMethodRegs(_normalMethod);
+			if (_normalDependencies > 0) compileNormalCode();
+
 
 			setMethodRegs(_diffuseMethod);
 			if (_shadowMethod) setMethodRegs(_shadowMethod);
@@ -678,7 +664,6 @@ package away3d.materials.passes
 			_globalPosDependencies = 0;
 
 			_uvTransformIndex = -1;
-			_normalMapIndex = -1;
 			_cameraPositionIndex = -1;
 			_commonsRegIndex = -1;
 			_uvBufferIndex = -1;
@@ -690,6 +675,7 @@ package away3d.materials.passes
 
 			len = _methods.length;
 
+			if (_normalMethod.hasOutput) countMethodDependencies(_normalMethod);
 			countMethodDependencies(_diffuseMethod);
 			if (_shadowMethod) countMethodDependencies(_shadowMethod);
 			countMethodDependencies(_ambientMethod);
@@ -704,7 +690,7 @@ package away3d.materials.passes
 				if (_lights[i].positionBased)
 					++_globalPosDependencies;
 			}
-			if (_generateTangents && _normalMapTexture) ++_uvDependencies;
+//			if (_generateTangents && normalMap) ++_uvDependencies;
 		}
 
 
@@ -740,7 +726,6 @@ package away3d.materials.passes
 
 			_uvVaryingReg = _registerCache.getFreeVarying();
 			_uvBufferIndex = uvAttributeReg.index;
-			++_numUsedStreams;
 
 			if (_animateUVs) {
 				// a, b, 0, tx
@@ -765,9 +750,6 @@ package away3d.materials.passes
             _normalFragmentReg = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_normalFragmentReg, _normalDependencies);
 
-			// vertex normals
-			++_numUsedStreams;
-
 			_normalInput = _registerCache.getFreeVertexAttribute();
 			_normalBufferIndex = _normalInput.index;
 
@@ -784,9 +766,8 @@ package away3d.materials.passes
 			_registerCache.getFreeVertexConstant();
 			_sceneNormalMatrixIndex = normalMatrix[0].index;
 
-			if (_generateTangents) {
+			if (_normalMethod.hasOutput) {
 				// tangent stream required
-				++_numUsedStreams;
 				compileTangentVertexCode(normalMatrix);
 				compileTangentNormalMapFragmentCode();
 			}
@@ -863,7 +844,6 @@ package away3d.materials.passes
 			var t : ShaderRegisterElement;
 			var b : ShaderRegisterElement;
 			var n : ShaderRegisterElement;
-			var normalMap : ShaderRegisterElement;
 
 			createCommons();
 
@@ -880,16 +860,17 @@ package away3d.materials.passes
 								"nrm " + b + ".xyz, " + _bitangentVarying + ".xyz	\n" +
 								"nrm " + n + ".xyz, " + _normalVarying    + ".xyz	\n";
 
-			normalMap = _registerCache.getFreeTextureReg();
-			_normalMapIndex = normalMap.index;
-
 			var temp : ShaderRegisterElement = _registerCache.getFreeFragmentVectorTemp();
-			_fragmentCode += 	getTexSampleCode(temp, normalMap) +
+			_registerCache.addFragmentTempUsages(temp,  1);
+			_fragmentCode += 	_normalMethod.getFragmentPostLightingCode(_registerCache, temp) +
 								"sub " + temp				+ ".xyz, " + temp 			+ ".xyz, " + _commonsReg+".xxx	\n" +
 								"nrm " + temp 				+ ".xyz, " + temp 			+ ".xyz							\n" +
 								"m33 " + _normalFragmentReg	+ ".xyz, " + temp 			+ ".xyz, " + t.toString() + "	\n" +
 								"mov " + _normalFragmentReg	+ ".w,   " + _normalVarying + ".w							\n";
 
+			_registerCache.removeFragmentTempUsage(temp);
+
+			if (_normalMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 //			_fragmentCode += AGAL.mov("oc", _normalFragmentReg+"");
 
 			_registerCache.removeFragmentTempUsage(b);
@@ -978,6 +959,9 @@ package away3d.materials.passes
 
 			_vertexCode += _ambientMethod.getVertexCode(_registerCache);
 			_fragmentCode += _ambientMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
+			if (_ambientMethod.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
+			if (_ambientMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
+
 
 			if (_shadowMethod) {
 				_vertexCode += _shadowMethod.getVertexCode(_registerCache);
