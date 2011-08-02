@@ -67,6 +67,7 @@ package away3d.core.base
 		protected var _numVertices : uint;
 		protected var _numIndices : uint;
 		protected var _numTriangles : uint;
+		private var _uvScale : Number = 1;
 
 		/**
 		 * Creates a new SubGeometry object.
@@ -303,6 +304,7 @@ package away3d.core.base
 		 */
 		public function scaleUV(scale : Number):void
 		{
+			_uvScale *= scale;
 			var len : uint = _uvs.length;
 			for (var i : uint = 0; i < len; ++i)
 				_uvs[i] *= scale;
@@ -719,6 +721,7 @@ package away3d.core.base
 			var dx1 : Number, dy1 : Number, dz1 : Number;
 			var dx2 : Number, dy2 : Number, dz2 : Number;
 			var cx : Number, cy : Number, cz : Number;
+			var invScale : Number = 1/_uvScale;
 
 			_faceTangents ||= new Vector.<Number>(_indices.length, true);
 
@@ -729,9 +732,9 @@ package away3d.core.base
 
 				v0 = _uvs[uint((index1 << 1) + 1)];
 				ui = index2 << 1;
-				dv1 = _uvs[uint((index2 << 1) + 1)] - v0;
+				dv1 = (_uvs[uint((index2 << 1) + 1)] - v0)*invScale;
 				ui = index3 << 1;
-				dv2 = _uvs[uint((index3 << 1) + 1)] - v0;
+				dv2 = (_uvs[uint((index3 << 1) + 1)] - v0)*invScale;
 
 				vi = index1*3;
 				x0 = _vertices[vi];

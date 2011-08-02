@@ -362,7 +362,7 @@ package away3d.materials.passes
 
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
 
-			_normalMethod.activate(stage3DProxy);
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.activate(stage3DProxy);
 			_ambientMethod.activate(stage3DProxy);
 			if (_shadowMethod) _shadowMethod.activate(stage3DProxy);
 			_diffuseMethod.activate(stage3DProxy);
@@ -388,7 +388,7 @@ package away3d.materials.passes
 			super.deactivate(stage3DProxy);
 			var len : uint = _methods.length;
 
-			_normalMethod.deactivate(stage3DProxy);
+			if (_normalMethod.hasOutput && _normalDependencies > 0) _normalMethod.deactivate(stage3DProxy);
 			_ambientMethod.deactivate(stage3DProxy);
 			if (_shadowMethod) _shadowMethod.deactivate(stage3DProxy);
 			_diffuseMethod.deactivate(stage3DProxy);
@@ -438,7 +438,7 @@ package away3d.materials.passes
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _lightsColorIndex, _lightColorData, _numLights*2);
 			}
 
-			_normalMethod.setRenderState(renderable, stage3DProxy, camera, lights);
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.setRenderState(renderable, stage3DProxy, camera, lights);
 			_ambientMethod.setRenderState(renderable, stage3DProxy, camera, lights);
 			if (_shadowMethod) _shadowMethod.setRenderState(renderable, stage3DProxy, camera, lights);
 			_diffuseMethod.setRenderState(renderable, stage3DProxy, camera, lights);
@@ -462,7 +462,7 @@ package away3d.materials.passes
 			_passesDirty = true;
 
 			_passes = new Vector.<MaterialPassBase>();
-			addPasses(_normalMethod.passes);
+			if (_normalMethod.hasOutput) addPasses(_normalMethod.passes);
 			addPasses(_ambientMethod.passes);
 			if (_shadowMethod) addPasses(_shadowMethod.passes);
 			addPasses(_diffuseMethod.passes);
@@ -673,19 +673,20 @@ package away3d.materials.passes
 			_sceneMatrixIndex = -1;
 			_sceneNormalMatrixIndex = -1;
 
-			len = _methods.length;
-
-			if (_normalMethod.hasOutput) countMethodDependencies(_normalMethod);
 			countMethodDependencies(_diffuseMethod);
 			if (_shadowMethod) countMethodDependencies(_shadowMethod);
 			countMethodDependencies(_ambientMethod);
 			if (_specularMethod) countMethodDependencies(_specularMethod);
 			if (_colorTransformMethod) countMethodDependencies(_colorTransformMethod);
 
+			len = _methods.length;
 			for (var i : uint = 0; i < len; ++i)
 				countMethodDependencies(_methods[i]);
 
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) countMethodDependencies(_normalMethod);
+
 			if (_viewDirDependencies > 0) ++_globalPosDependencies;
+
 			for (i = 0; i < _numLights; ++i) {
 				if (_lights[i].positionBased)
 					++_globalPosDependencies;
@@ -871,6 +872,7 @@ package away3d.materials.passes
 			_registerCache.removeFragmentTempUsage(temp);
 
 			if (_normalMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
+			if (_normalMethod.needsGlobalPos) _registerCache.removeVertexTempUsage(_globalPositionReg);
 //			_fragmentCode += AGAL.mov("oc", _normalFragmentReg+"");
 
 			_registerCache.removeFragmentTempUsage(b);

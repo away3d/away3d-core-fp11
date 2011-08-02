@@ -37,7 +37,6 @@ package away3d.materials.methods
 
 		public function set water1OffsetX(value : Number) : void
 		{
-			value -= int(value);
 			_data[4] = value;
 		}
 
@@ -48,7 +47,6 @@ package away3d.materials.methods
 
 		public function set water1OffsetY(value : Number) : void
 		{
-			value -= int(value);
 			_data[5] = value;
 		}
 
@@ -59,7 +57,6 @@ package away3d.materials.methods
 
 		public function set water2OffsetX(value : Number) : void
 		{
-			value -= int(value);
 			_data[6] = value;
 		}
 
@@ -70,7 +67,6 @@ package away3d.materials.methods
 
 		public function set water2OffsetY(value : Number) : void
 		{
-			value -= int(value);
 			_data[7] = value;
 		}
 
@@ -125,8 +121,11 @@ package away3d.materials.methods
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(stage3DProxy)
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data,  2);
-			stage3DProxy.setTextureAt(_normalMapIndex2, _texture2.getTextureForStage3D(stage3DProxy));
+
+			if (_normalMapIndex2 >= 0) {
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data,  2);
+				stage3DProxy.setTextureAt(_normalMapIndex2, _texture2.getTextureForStage3D(stage3DProxy));
+			}
 		}
 
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
