@@ -98,8 +98,8 @@ package away3d.materials.methods
 					"mul " + temp + ".xyz, " + _normalFragmentReg + ".xyz, " + temp + ".w						\n" +
 					"sub " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz, " + temp + ".xyz					\n" +
 					"neg " + temp + ".xyz, " + temp + ".xyz														\n" +
-					"tex " + temp.toString() + ", " + temp.toString() + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n" +
-					"sub " + temp + ".xyz, " + temp + ".xyz, " + targetReg + ".xyz								\n";
+					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n" +
+					"sub " + temp + ", " + temp + ", " + targetReg + "											\n";
 
 			// calculate fresnel term
 			code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + _normalFragmentReg+".xyz\n" +   // dot(V, H)

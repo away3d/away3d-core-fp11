@@ -80,7 +80,6 @@ package away3d.materials.methods
 		arcane override function getVertexCode(regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
-			var toTexReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
 			var projReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
@@ -88,12 +87,8 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeVertexVectorTemp();
 			_projectionIndex = projReg.index;
 			_uvVarying = regCache.getFreeVarying();
-			_toTexIndex = toTexReg.index;
-			code += "m44 " + temp + ", vt0, " + projReg + "						\n" +
-					"div " + temp + ", " + temp + ", " + temp + ".w				\n" +
-					"mul " + temp + ".xy, " + temp + ".xy, " + toTexReg+".xy	\n" +
-					"add " + temp + ".xy, " + temp + ".xy, " + toTexReg+".xx	\n" +
-					"mov " + _uvVarying + ", " + temp + "						\n";
+
+			code += "m44 " + _uvVarying + ", vt0, " + projReg + "\n";
 			return code;
 		}
 
@@ -105,10 +100,15 @@ package away3d.materials.methods
 			var code : String = "";
 			var mapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var col : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			var toTexReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			_toTexIndex = toTexReg.index;
 
 			_mapIndex = mapRegister.index;
 
-			code += "tex " + col + ", " + _uvVarying + ", " + mapRegister + " <2d,linear,miplinear,clamp>\n";
+			code += "div " + col + ", " + _uvVarying + ", " + _uvVarying + ".w						\n" +
+					"mul " + col + ".xy, " + col + ".xy, " + toTexReg+".xy	\n" +
+					"add " + col + ".xy, " + col + ".xy, " + toTexReg+".xx	\n" +
+					"tex " + col + ", " + col + ", " + mapRegister + " <2d,linear,miplinear,clamp>\n";
 
 			if (_mode == MULTIPLY)
 				code += "mul " + targetReg + ".xyz, " + targetReg + ".xyz, " + col + ".xyz			\n";
@@ -138,7 +138,7 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _toTexIndex, _offsetData, 1);
 			stage3DProxy.setTextureAt(_mapIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
 		}
 

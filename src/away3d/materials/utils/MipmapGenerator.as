@@ -29,28 +29,23 @@ package away3d.materials.utils
 			var regen : Boolean = mipmap != null;
 			mipmap ||= new BitmapData(w, h, alpha);
 
-			_matrix.a = 1;
-			_matrix.d = 1;
-
 			_rect.width = w;
 			_rect.height = h;
 			               
 			while (w >= 1 || h >= 1) {
 				if (alpha) mipmap.fillRect(_rect, 0);
+
+				_matrix.a = _rect.width/source.width;
+				_matrix.d = _rect.height/source.height;
+
 				mipmap.draw(source, _matrix, null, null, null, true);
+
 				if (target is Texture)
 					Texture(target).uploadFromBitmapData(mipmap, i++);
 				else
 					CubeTexture(target).uploadFromBitmapData(mipmap, side, i++);
 
-				if (w > 1)
-					_matrix.a *= .5;
-
 				w >>= 1;
-
-				if (h > 1)
-					_matrix.d *= .5;
-
 				h >>= 1;
 
 				_rect.width = w > 1? w : 1;
