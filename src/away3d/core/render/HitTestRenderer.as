@@ -20,6 +20,7 @@ package away3d.core.render
 	import flash.display3D.Program3D;
 	import flash.geom.Matrix3D;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -56,6 +57,7 @@ package away3d.core.render
 //		private var _localRayPos : Vector3D = new Vector3D();
 //		private var _localRayDir : Vector3D = new Vector3D();
 		private var _potentialFound : Boolean;
+		private static const MOUSE_SCISSOR_RECT : Rectangle = new Rectangle(0, 0, 1, 1);
 
 
 		/**
@@ -347,6 +349,7 @@ package away3d.core.render
 
 			_stage3DProxy.setProgram(_triangleProgram3D);
 			_context.clear(0, 0, 0, 0, 1, 0, Context3DClearMask.DEPTH);
+			_context.setScissorRectangle(MOUSE_SCISSOR_RECT);
 			_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, localViewProjection, true);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _boundOffset, 1);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, _boundScale, 1);

@@ -192,7 +192,9 @@ package away3d.core.render
 
 			if (value.context3D) {
 				_context = value.context3D;
-				_context.setScissorRectangle(new Rectangle(0, 0, 1, 1));
+
+				// todo: does this belong here?
+//				_context.setScissorRectangle(new Rectangle(0, 0, 1, 1));
 //				_contextIndex = value.stage3DIndex;
 			}
 			else
@@ -347,7 +349,6 @@ package away3d.core.render
 			else _context.setRenderToBackBuffer();
 
 			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
-
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
