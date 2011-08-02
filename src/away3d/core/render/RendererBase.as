@@ -30,24 +30,13 @@ package away3d.core.render
 		protected var _context : Context3D;
 		protected var _stage3DProxy : Stage3DProxy;
 
-		private var _backBufferWidth : int;
-		private var _backBufferHeight : int;
-		protected var _backBufferInvalid : Boolean;
 		protected var _antiAlias : uint;
-		private var _renderMode : String;
 
 		protected var _backgroundR : Number = 0;
 		protected var _backgroundG : Number = 0;
 		protected var _backgroundB : Number = 0;
 		protected var _backgroundAlpha : Number = 1;
 
-		protected var _viewPortWidth : Number = 1;
-		protected var _viewPortHeight : Number = 1;
-		protected var _viewPortX : Number = 0;
-		protected var _viewPortY : Number = 0;
-
-		private var _viewPortInvalid : Boolean;
-		protected var _enableDepthAndStencil : Boolean;
 		protected var _swapBackBuffer : Boolean = true;
 
 		private var _renderableSorter : EntitySorterBase;
@@ -60,11 +49,9 @@ package away3d.core.render
 		 * @param antiAlias The amount of anti-aliasing to be used.
 		 * @param renderMode The render mode to be used.
 		 */
-		public function RendererBase(antiAlias : uint = 0, enableDepthAndStencil : Boolean = true, renderMode : String = "auto")
+		public function RendererBase()
 		{
-			_antiAlias = antiAlias;
-			_renderMode = renderMode;
-			_enableDepthAndStencil = enableDepthAndStencil;
+//			_enableDepthAndStencil = enableDepthAndStencil;
 			_renderableSorter = new RenderableMergeSort();
 		}
 
@@ -111,7 +98,6 @@ package away3d.core.render
 
 		public function set antiAlias(value : uint) : void
 		{
-			_backBufferInvalid = true;
 			_antiAlias = value;
 		}
 
@@ -186,17 +172,10 @@ package away3d.core.render
 			else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
 
 			_stage3DProxy = value;
-			_stage3DProxy.transparent = _backgroundAlpha < 1;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.stage3DProxy = value;
-			updateViewPort();
 
-			if (value.context3D) {
+			if (value.context3D)
 				_context = value.context3D;
-
-				// todo: does this belong here?
-//				_context.setScissorRectangle(new Rectangle(0, 0, 1, 1));
-//				_contextIndex = value.stage3DIndex;
-			}
 			else
 				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 		}
@@ -206,7 +185,7 @@ package away3d.core.render
 		 *
 		 * @private
 		 */
-		arcane function get backBufferWidth() : int
+		/*arcane function get backBufferWidth() : int
 		{
 			return _backBufferWidth;
 		}
@@ -215,14 +194,14 @@ package away3d.core.render
 		{
 			_backBufferWidth = value;
 			_backBufferInvalid = true;
-		}
+		}    */
 
 		/**
 		 * The height of the back buffer.
 		 *
 		 * @private
 		 */
-		arcane function get backBufferHeight() : int
+		/*arcane function get backBufferHeight() : int
 		{
 			return _backBufferHeight;
 		}
@@ -231,71 +210,8 @@ package away3d.core.render
 		{
 			_backBufferHeight = value;
 			_backBufferInvalid = true;
-		}
+		}  */
 
-		/**
-		 * The horizontal coordinate of the top-left corner of the viewport.
-		 *
-		 * @private
-		 */
-		arcane function get viewPortX() : Number
-		{
-			return _viewPortX;
-		}
-
-		arcane function set viewPortX(value : Number) : void
-		{
-			_viewPortX = value;
-			_viewPortInvalid = true;
-		}
-
-		/**
-		 * The vertical coordinate of the top-left corner of the viewport.
-		 *
-		 * @private
-		 */
-		arcane function get viewPortY() : Number
-		{
-			return _viewPortY;
-		}
-
-		arcane function set viewPortY(value : Number) : void
-		{
-			_viewPortY = value;
-			_viewPortInvalid = true;
-		}
-
-		/**
-		 * The width of the viewport.
-		 *
-		 * @private
-		 */
-		arcane function get viewPortWidth() : Number
-		{
-			return _viewPortWidth;
-		}
-
-		arcane function set viewPortWidth(value : Number) : void
-		{
-			_viewPortWidth = value;
-			_viewPortInvalid = true;
-		}
-
-		/**
-		 * The height of the viewport.
-		 *
-		 * @private
-		 */
-		arcane function get viewPortHeight() : Number
-		{
-			return _viewPortHeight;
-		}
-
-		arcane function set viewPortHeight(value : Number) : void
-		{
-			_viewPortHeight = value;
-			_viewPortInvalid = true;
-		}
 
 		/**
 		 * Disposes the resources used by the RendererBase.
@@ -320,10 +236,7 @@ package away3d.core.render
 		 */
 		arcane function render(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
-			if (!_stage3DProxy) return;
-			if (_viewPortInvalid) updateViewPort();
-			if (_backBufferInvalid) updateBackBuffer();
-			if (!_context) return;
+			if (!_stage3DProxy || !_context) return;
 
 			executeRender(entityCollector, target, surfaceSelector, additionalClearMask);
 
@@ -343,13 +256,15 @@ package away3d.core.render
 		 */
 		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
-			_renderableSorter.sort(entityCollector);
+			// todo: move sorting to view? Prevent sorting twice
+			if (_renderableSorter) _renderableSorter.sort(entityCollector);
 
-			if (target) _context.setRenderToTexture(target, _enableDepthAndStencil, _antiAlias, surfaceSelector);
+			if (target) _context.setRenderToTexture(target, true, _antiAlias, surfaceSelector);
 			else _context.setRenderToBackBuffer();
 
 			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
+			_context.setScissorRectangle(null);
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
 			draw(entityCollector);
@@ -369,21 +284,12 @@ package away3d.core.render
 		/**
 		 * Updates the viewport dimensions;
 		 */
-		protected function updateViewPort() : void
+		/*protected function updateViewPort() : void
 		{
 			_stage3DProxy.x = _viewPortX;
 			_stage3DProxy.y = _viewPortY;
 			_viewPortInvalid = false;
-		}
-
-		/**
-		 * Updates the backbuffer dimensions.
-		 */
-		private function updateBackBuffer() : void
-		{
-			_stage3DProxy.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
-			_backBufferInvalid = false;
-		}
+		}   */
 
 		/**
 		 * Assign the context once retrieved

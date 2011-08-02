@@ -26,9 +26,9 @@ package away3d.core.render
 		 * @param antiAlias The amount of anti-aliasing to be used.
 		 * @param renderMode The render mode to be used.
 		 */
-		public function DepthRenderer(renderBlended : Boolean = false, antiAlias : uint = 0, renderMode : String = "auto")
+		public function DepthRenderer(renderBlended : Boolean = false)
 		{
-			super(antiAlias, true, renderMode);
+			super();
 			_renderBlended = renderBlended;
 			_backgroundR = 1;
 			_backgroundG = 1;

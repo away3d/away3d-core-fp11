@@ -7,7 +7,6 @@ package away3d.containers
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.DepthRenderer;
-	import away3d.core.render.HitTestRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.filters.Filter3DBase;
@@ -48,7 +47,6 @@ package away3d.containers
 
 		private var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
-		private var _hitTestRenderer : HitTestRenderer;
 		private var _addedToStage:Boolean;
 
 		private var _filters3d : Array;
@@ -59,10 +57,12 @@ package away3d.containers
 		private var _depthTextureInvalid : Boolean = true;
 
 		private var _hitField : Sprite;
-		arcane var mouseZeroMove : Boolean;
 		private var _parentIsStage : Boolean;
 
 		private var _backgroundImage : BitmapData;
+		private var _stage3DProxy : Stage3DProxy;
+		private var _backBufferInvalid : Boolean = true;
+		private var _antiAlias : uint;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
@@ -70,13 +70,27 @@ package away3d.containers
 
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
-			_renderer = renderer || new DefaultRenderer(0);
-			_hitTestRenderer = new HitTestRenderer();
+			_renderer = renderer || new DefaultRenderer();
+			_hitManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
 			_entityCollector = new EntityCollector();
 			initHitField();
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
+		}
+
+		/**
+		 * Forces mouse-move related events even when the mouse hasn't moved. This allows mouseOver and mouseOut events
+		 * etc to be triggered due to changes in the scene graph.
+		 */
+		public function get forceMouseMove() : Boolean
+		{
+			return _hitManager.forceMouseMove;
+		}
+
+		public function set forceMouseMove(value : Boolean) : void
+		{
+			_hitManager.forceMouseMove = value;
 		}
 
 		public function get backgroundImage() : BitmapData
@@ -151,17 +165,19 @@ package away3d.containers
 			_renderer = value;
 			_renderer.stage3DProxy = stage3DProxy;
 			_depthRenderer.stage3DProxy = stage3DProxy;
-			_renderer.viewPortX = _globalPos.x;
-			_renderer.viewPortY = _globalPos.y;
-			_depthRenderer.backBufferWidth = _renderer.backBufferWidth = _width;
-			_depthRenderer.backBufferHeight = _renderer.backBufferHeight = _height;
-			_depthRenderer.viewPortWidth = _renderer.viewPortWidth = _width;
-			_depthRenderer.viewPortHeight = _renderer.viewPortHeight = _height;
+			_stage3DProxy.x = _globalPos.x;
+			_stage3DProxy.y = _globalPos.y;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
 			_renderer.backgroundAlpha = _backgroundAlpha;
 			_renderer.backgroundImage = _backgroundImage;
+			invalidateBackBuffer();
+		}
+
+		private function invalidateBackBuffer() : void
+		{
+			_backBufferInvalid = true;
 		}
 
 		/**
@@ -191,6 +207,7 @@ package away3d.containers
 			else if (value < 0) value = 0;
 			_renderer.backgroundAlpha = value;
 			_backgroundAlpha = value;
+			_stage3DProxy.transparent = value < 1;
 		}
 
 		/**
@@ -236,15 +253,11 @@ package away3d.containers
 
 		override public function set width(value : Number) : void
 		{
-			_hitTestRenderer.viewPortWidth = value;
-			_renderer.viewPortWidth = value;
-			_renderer.backBufferWidth = value;
-			_depthRenderer.viewPortWidth = value;
-			_depthRenderer.backBufferWidth = value;
 			_hitField.width = value;
 			_width = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
+			invalidateBackBuffer();
 		}
 
 		/**
@@ -257,15 +270,11 @@ package away3d.containers
 
 		override public function set height(value : Number) : void
 		{
-			_hitTestRenderer.viewPortHeight = value;
-			_renderer.viewPortHeight = value;
-			_renderer.backBufferHeight = value;
-			_depthRenderer.viewPortHeight = value;
-			_depthRenderer.backBufferHeight = value;
 			_hitField.height = value;
 			_height = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
+			invalidateBackBuffer();
 		}
 
 
@@ -274,7 +283,8 @@ package away3d.containers
 			super.x = value;
 			_localPos.x = value;
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
-			_renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
+			if (_stage3DProxy)
+				_stage3DProxy.x = _globalPos.x;
 		}
 
 		override public function set y(value : Number) : void
@@ -282,7 +292,8 @@ package away3d.containers
 			super.y = value;
 			_localPos.y = value;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
-			_renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
+			if (_stage3DProxy)
+				_stage3DProxy.y = _globalPos.y;
 		}
 
 		/**
@@ -295,7 +306,9 @@ package away3d.containers
 
 		public function set antiAlias(value : uint) : void
 		{
+			_antiAlias = value;
 			_renderer.antiAlias = value;
+			invalidateBackBuffer();
 		}
 		
 		/**
@@ -305,14 +318,23 @@ package away3d.containers
 		{
 			return _entityCollector.numTriangles;
 		}
-		
-//		public var mouseZeroMove:Boolean;
 
+		/**
+		 * Updates the backbuffer dimensions.
+		 */
+		private function updateBackBuffer() : void
+		{
+			_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
+			_backBufferInvalid = false;
+		}
+		
 		/**
 		 * Renders the view.
 		 */
 		public function render() : void
 		{
+			if (_backBufferInvalid) updateBackBuffer();
+
 			var time : Number = getTimer();
 			var targetTexture : Texture;
 			var numFilters : uint = _filters3d? _filters3d.length : 0;
@@ -322,8 +344,8 @@ package away3d.containers
 
 			if (!_parentIsStage) {
 				globalPos = parent.localToGlobal(_localPos);
-				if (_globalPos.x != globalPos.x) _renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
-				if (_globalPos.y != globalPos.y) _renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
+				if (_globalPos.x != globalPos.x) _stage3DProxy.x = globalPos.x;
+				if (_globalPos.y != globalPos.y) _stage3DProxy.y = globalPos.y;
 				_globalPos = globalPos;
 			}
 
@@ -336,6 +358,8 @@ package away3d.containers
 			_camera.lens.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
 			_scene.traversePartitions(_entityCollector);
+
+			if (_entityCollector.numMouseEnableds > 0) _hitManager.updateHitData();
 
 			updateLights(_entityCollector);
 
@@ -360,15 +384,7 @@ package away3d.containers
 
 			_entityCollector.cleanUp();
 			
-			fireMouseMoveEvent();
-		}
-		
-		/**
-		 * Manually fires a mouseMove3D event.
-		 */
-		public function fireMouseMoveEvent(force:Boolean = false):void
-		{
-			_hitManager.fireMouseMoveEvent(force);
+			_hitManager.fireMouseEvents();
 		}
 		
 		private function renderSceneDepth(entityCollector : EntityCollector) : void
@@ -424,9 +440,10 @@ package away3d.containers
 		 */
 		public function dispose() : void
 		{
-			_renderer.stage3DProxy.dispose();
+			_stage3DProxy.dispose();
 			_renderer.dispose();
-			_hitTestRenderer.dispose();
+			_hitManager.dispose();
+			if (_depthRenderer) _depthRenderer.dispose();
 			_hitManager.dispose();
 			if (_depthRender) _depthRender.dispose();
 		}
@@ -472,18 +489,20 @@ package away3d.containers
 			if (_width == 0) width = stage.stageWidth;
 			if (_height == 0) height = stage.stageHeight;
 
-			_hitTestRenderer.stage3DProxy = _stage3DManager.getStage3DProxy(0);
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DManager.getFreeStage3DProxy();
-
-			_hitManager = new Mouse3DManager(this, _hitTestRenderer);
+			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
+			_stage3DProxy.x = _globalPos.x;
+			_stage3DProxy.y = _globalPos.y;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _hitManager.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void
 		{
 			_parentIsStage = (parent == stage);
 			_globalPos = parent.localToGlobal(new Point(x, y));
-			_renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
-			_renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
+			if (_stage3DProxy) {
+				_stage3DProxy.x = _globalPos.x;
+				_stage3DProxy.y = _globalPos.y;
+			}
 		}
 
 		// dead ends:

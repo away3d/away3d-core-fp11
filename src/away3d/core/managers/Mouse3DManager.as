@@ -26,8 +26,8 @@ package away3d.core.managers
 		private var _previousActiveRenderable : IRenderable;
 		private var _activeObject : Entity;
 		private var _activeRenderable : IRenderable;
-		private var _lastmove_mouseX:Number;
-		private var _lastmove_mouseY:Number;
+		private var _oldMouseX:Number;
+		private var _oldMouseY:Number;
 
 		private var _hitTestRenderer : HitTestRenderer;
 		private var _view : View3D;
@@ -40,6 +40,10 @@ package away3d.core.managers
 		private static var _mouseUp : MouseEvent3D = new MouseEvent3D(MouseEvent3D.MOUSE_UP);
 		private static var _mouseDown : MouseEvent3D = new MouseEvent3D(MouseEvent3D.MOUSE_DOWN);
 		private static var _mouseWheel : MouseEvent3D = new MouseEvent3D(MouseEvent3D.MOUSE_WHEEL);
+
+		private var _queuedEvents : Vector.<MouseEvent3D> = new Vector.<MouseEvent3D>();
+		private var _forceMouseMove : Boolean;
+
 //		private static var _rollOver : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OVER);
 //		private static var _rollOut : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OUT);
 
@@ -48,18 +52,45 @@ package away3d.core.managers
 		 * @param view The View3D object for which the mouse will be detected.
 		 * @param hitTestRenderer The hitTestRenderer that will perform hit-test rendering.
 		 */
-		public function Mouse3DManager(view : View3D, hitTestRenderer : HitTestRenderer)
+		public function Mouse3DManager(view : View3D)
 		{
 			_view = view;
-			_hitTestRenderer = hitTestRenderer;
+			_hitTestRenderer = new HitTestRenderer(view);
 
 			// to do: add invisible container?
 			_view.addEventListener(MouseEvent.CLICK, onClick);
 			_view.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
 			_view.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			//_stage.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove, false, 1);	// mark moves as most important
+			_view.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);	// mark moves as most important
 			_view.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			_view.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+		}
+
+		public function get forceMouseMove() : Boolean
+		{
+			return _forceMouseMove;
+		}
+
+		public function set forceMouseMove(value : Boolean) : void
+		{
+			_forceMouseMove = value;
+		}
+
+		private function onMouseMove(event : MouseEvent) : void
+		{
+			if (!_forceMouseMove)
+				queueDispatch(_mouseMove, event);
+		}
+
+
+		arcane function get stage3DProxy() : Stage3DProxy
+		{
+			return _hitTestRenderer.stage3DProxy;
+		}
+
+		arcane function set stage3DProxy(value : Stage3DProxy) : void
+		{
+			_hitTestRenderer.stage3DProxy = value;
 		}
 
 		/**
@@ -67,9 +98,11 @@ package away3d.core.managers
 		 */
 		public function dispose() : void
 		{
+			_hitTestRenderer.dispose();
 			_view.removeEventListener(MouseEvent.CLICK, onClick);
 			_view.removeEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
 			_view.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			_view.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
 			_view.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
 			_view.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
 		}
@@ -87,10 +120,16 @@ package away3d.core.managers
 		 */
 		private function onClick(event : MouseEvent) : void
 		{
-			if (!mouseInView()) return;
-			// todo: implement invalidation and only rerender if view is invalid?
-			getObjectHitData();
-			if (_activeRenderable) dispatch(_mouseClick, event, _activeRenderable);
+			if (mouseInView())
+				queueDispatch(_mouseClick, event);
+		}
+
+		public function updateHitData() : void
+		{
+			if (mouseInView())
+				getObjectHitData();
+			else
+				_activeRenderable = null;
 		}
 
 		/**
@@ -98,9 +137,8 @@ package away3d.core.managers
 		 */
 		private function onDoubleClick(event : MouseEvent) : void
 		{
-			if (!mouseInView()) return;
-			getObjectHitData();
-			if (_activeRenderable) dispatch(_mouseDoubleClick, event, _activeRenderable);
+			if (mouseInView())
+				queueDispatch(_mouseDoubleClick, event);
 		}
 
 		/**
@@ -108,9 +146,8 @@ package away3d.core.managers
 		 */
 		private function onMouseDown(event : MouseEvent) : void
 		{
-			if (!mouseInView()) return;
-			getObjectHitData();
-			if (_activeRenderable) dispatch(_mouseDown, event, _activeRenderable);
+			if (mouseInView())
+				queueDispatch(_mouseDown, event);
 		}
 
 		/**
@@ -118,9 +155,8 @@ package away3d.core.managers
 		 */
 		private function onMouseUp(event : MouseEvent) : void
 		{
-			if (!mouseInView()) return;
-			getObjectHitData();
-			dispatch(_mouseUp, event, _activeRenderable);
+			if (mouseInView())
+				queueDispatch(_mouseUp, event);
 		}
 
 		/**
@@ -128,9 +164,8 @@ package away3d.core.managers
 		 */
 		private function onMouseWheel(event : MouseEvent) : void
 		{
-			if (!mouseInView()) return;
-			getObjectHitData();
-			if (_activeRenderable) dispatch(_mouseWheel, event, _activeRenderable);
+			if (mouseInView())
+				queueDispatch(_mouseWheel, event);
 		}
 
 		/**
@@ -138,6 +173,11 @@ package away3d.core.managers
 		 */
 		private function getObjectHitData() : void
 		{
+			if (!_forceMouseMove && _queuedEvents.length == 0) {
+				_activeObject = null;
+				return;
+			}
+
 			var collector : EntityCollector = _view.entityCollector;
 
 			_previousActiveObject = _activeObject;
@@ -161,21 +201,16 @@ package away3d.core.managers
 		 * @param sourceEvent The MouseEvent that triggered the dispatch.
 		 * @param renderable The IRenderable object that is the subject of the MouseEvent3D.
 		 */
-		private function dispatch(event3D : MouseEvent3D, sourceEvent : MouseEvent, renderable : IRenderable) : void
+		private function dispatch(event3D : MouseEvent3D) : void
 		{
-			if (!renderable) return;
-
+			var renderable : IRenderable;
 			var local : Vector3D = _hitTestRenderer.localHitPosition;
 
-			event3D.ctrlKey = sourceEvent.ctrlKey;
-			event3D.altKey = sourceEvent.altKey;
-			event3D.shiftKey = sourceEvent.shiftKey;
+			// assign default renderable if it wasn't provide on queue time
+			if (!(renderable = (event3D.renderable ||= _activeRenderable))) return;
+
 			event3D.material = renderable.material;
 			event3D.object = renderable.sourceEntity;
-			event3D.renderable = renderable;
-			event3D.delta = sourceEvent.delta;
-			event3D.screenX = _view.stage.mouseX;
-			event3D.screenY = _view.stage.mouseY;
 
 			if (renderable.mouseDetails && local) {
 				event3D.uv = _hitTestRenderer.hitUV;
@@ -194,36 +229,48 @@ package away3d.core.managers
 			var dispatcher : ObjectContainer3D = renderable.sourceEntity;
 
 			while (dispatcher && !dispatcher._implicitMouseEnabled) dispatcher = dispatcher.parent;
+			dispatcher.dispatchEvent(event3D);
+		}
 
-			if (dispatcher) dispatcher.dispatchEvent(event3D);
+		private function queueDispatch(event : MouseEvent3D, sourceEvent : MouseEvent, renderable : IRenderable = null) : void
+		{
+			event.ctrlKey = sourceEvent.ctrlKey;
+			event.altKey = sourceEvent.altKey;
+			event.shiftKey = sourceEvent.shiftKey;
+			event.renderable = renderable;
+			event.delta = sourceEvent.delta;
+			event.screenX = _view.stage.mouseX;
+			event.screenY = _view.stage.mouseY;
+
+			_queuedEvents.push(event);
 		}
 		
-		/**
-		 * Manually fires a mouseMove3D event.
-		 */
-		public function fireMouseMoveEvent(force:Boolean = false):void
+		public function fireMouseEvents():void
 		{
-			if (!mouseInView()) return;
+			var mouseMoveEvent:MouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
+			var mouseX:Number = mouseMoveEvent.localX = _view.mouseX;
+			var mouseY:Number = mouseMoveEvent.localY = _view.mouseY;
 			
-			getObjectHitData();
-			
-			var _mouseMoveEvent:MouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
-			var _mouseX:Number = _mouseMoveEvent.localX = _view.mouseX;
-			var _mouseY:Number = _mouseMoveEvent.localY = _view.mouseY;
-			
-			if (!(_view.mouseZeroMove || force))
-				if ((_mouseX == _lastmove_mouseX) && (_mouseY == _lastmove_mouseY))
-					return;
-			
-			if (_activeObject == _previousActiveObject) {
-				if (_activeRenderable) dispatch(_mouseMove, _mouseMoveEvent, _activeRenderable);
-			} else {
-				if (_previousActiveRenderable) dispatch(_mouseOut, _mouseMoveEvent, _previousActiveRenderable);
-				if (_activeRenderable) dispatch(_mouseOver, _mouseMoveEvent, _activeRenderable);
+			if (_forceMouseMove) {
+				if ((mouseX == _oldMouseX) && (mouseY == _oldMouseY)) return;
+
+				if (_activeObject == _previousActiveObject) {
+					if (_activeRenderable) queueDispatch(_mouseMove, mouseMoveEvent, _activeRenderable);
+				} else {
+					if (_previousActiveRenderable) queueDispatch(_mouseOut, mouseMoveEvent, _previousActiveRenderable);
+					if (_activeRenderable) queueDispatch(_mouseOver, mouseMoveEvent, _activeRenderable);
+				}
+
+				_oldMouseX = mouseX;
+				_oldMouseY = mouseY;
 			}
-			
-			_lastmove_mouseX = _mouseX;
-			_lastmove_mouseY = _mouseY;
+
+			var len : uint = _queuedEvents.length;
+
+			for (var i : uint = 0; i < len; ++i)
+				dispatch(_queuedEvents[i]);
+
+			_queuedEvents.length = 0;
 		}
 	}
 }

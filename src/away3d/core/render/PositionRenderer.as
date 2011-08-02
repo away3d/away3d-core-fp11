@@ -29,11 +29,11 @@ package away3d.core.render
 		 * @param antiAlias The amount of anti-aliasing to be used
 		 * @param renderMode The render mode to be used.
 		 */
-		public function PositionRenderer(renderBlended : Boolean = false, antiAlias : uint = 0, renderMode : String = Context3DRenderMode.AUTO)
+		public function PositionRenderer(renderBlended : Boolean = false)
 		{
 			// todo: request context in here
 			_renderBlended = renderBlended;
-			super(antiAlias, true, renderMode);
+			super();
 		}
 
 		/**

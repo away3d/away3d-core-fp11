@@ -26,9 +26,9 @@ package away3d.core.render
 		 * @param antiAlias The amount of anti-aliasing to use.
 		 * @param renderMode The render mode to use.
 		 */
-		public function DefaultRenderer(antiAlias : uint = 0, renderMode : String = "auto")
+		public function DefaultRenderer()
 		{
-			super(antiAlias, true, renderMode);
+			super();
 		}
 
 
