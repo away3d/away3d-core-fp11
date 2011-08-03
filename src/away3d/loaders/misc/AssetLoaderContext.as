@@ -43,7 +43,7 @@ package away3d.loaders.misc
 		
 		
 		/**
-		 * A base URL that will be appended to all relative dependency URLs found in a loaded resource.
+		 * A base URL that will be prepended to all relative dependency URLs found in a loaded resource.
 		 * Absolute paths will not be affected by the value of this property.
 		*/
 		public function get dependencyBaseUrl() : String
