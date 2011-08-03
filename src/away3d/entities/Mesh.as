@@ -169,6 +169,7 @@
 			clone.pivotPoint = pivotPoint;
 			clone.partition = partition;
 			clone.bounds = _bounds.clone();
+			clone.name = name;
 
 			var len : int = _subMeshes.length;
 			for (var i : int = 0; i < len; ++i) {
@@ -228,8 +229,9 @@
 		{
 			var subMesh : SubMesh;
 			var subGeom : SubGeometry = event.subGeometry;
-			var len : uint = _subMeshes.length;
+			var len : int = _subMeshes.length;
 			var i : uint;
+
 			for (i = 0; i < len; ++i) {
 				subMesh = _subMeshes[i];
 				if (subMesh.subGeometry == subGeom) {
@@ -261,6 +263,11 @@
 		private function onAnimationChanged(event : GeometryEvent) : void
 		{
 			animationState = _geometry.animation.createAnimationState();
+		}
+
+		public function getSubMeshForSubGeometry(subGeometry : SubGeometry) : SubMesh
+		{
+			return _subMeshes[_geometry.subGeometries.indexOf(subGeometry)];
 		}
 	}
 }

@@ -33,6 +33,7 @@ package away3d.core.partition
 		{
 			super();
 			_entity = entity;
+			_numEntities = 1;
 		}
 
 		/**
@@ -57,6 +58,7 @@ package away3d.core.partition
 		public function removeFromParent() : void
 		{
 			if (_parent) _parent.removeNode(this);
+
 			_parent = null;
 		}
 
@@ -66,8 +68,15 @@ package away3d.core.partition
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
 			if (_entity.isVisible == false) return false;
+
 			_entity.pushModelViewProjection(camera);
-			return _entity.bounds.isInFrustum(_entity.modelViewProjection);
+			if (_entity.bounds.isInFrustum(_entity.getModelViewProjectionUnsafe())) {
+				return true;
+			}
+			else {
+				_entity.popModelViewProjection();
+				return false;
+			}
 		}
 	}
 }

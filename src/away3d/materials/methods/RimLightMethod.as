@@ -28,6 +28,12 @@ package away3d.materials.methods
 			this.color = color;
 		}
 
+		arcane override function reset() : void
+		{
+			super.reset();
+			_dataIndex = -1;
+		}
+
 		public function get color() : uint
 		{
 			return _color;

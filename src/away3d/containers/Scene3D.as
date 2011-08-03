@@ -65,6 +65,11 @@ package away3d.containers
 			_sceneGraphRoot.partition = value;
 		}
 
+		public function contains(child : ObjectContainer3D) : Boolean
+		{
+			return _sceneGraphRoot.contains(child);
+		}
+
 		/**
 		 * Adds a child to the scene's root.
 		 * @param child The child to be added to the scene

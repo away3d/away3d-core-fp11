@@ -129,8 +129,10 @@ package away3d.entities
 		{
 			var comps : Vector.<Vector3D>;
 			var rot : Vector3D;
-			if (++_mvpIndex == _stackLen++)
+			if (++_mvpIndex == _stackLen) {
 				_mvpTransformStack[_mvpIndex] = new Matrix3D();
+				++_stackLen;
+			}
 
 			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
 			mvp.copyFrom(sceneTransform);

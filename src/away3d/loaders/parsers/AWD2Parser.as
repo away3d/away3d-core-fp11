@@ -17,8 +17,10 @@ package away3d.loaders.parsers
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
+	import away3d.materials.ColorMaterial;
+	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
-
+	
 	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.display.Sprite;
@@ -65,6 +67,7 @@ package away3d.loaders.parsers
 		public static const AWD_ATTR_STRING : uint = 5;
 		public static const AWD_ATTR_BADDR : uint = 6;
 		public static const AWD_ATTR_MTX4 : uint = 7;
+		public static const AWD_ATTR_BOOL : uint = 8;
 		
 		
 		
@@ -323,15 +326,24 @@ package away3d.loaders.parsers
 			var name : String;
 			var type : uint;
 			var props : AWDProperties;
-			var mat : MaterialBase;
+			var mat : DefaultMaterialBase;
+			var finalize : Boolean;
 			
 			name = parseVarStr();
 			type = _body.readUnsignedByte();
 			
-			props = parseProperties({ 1:AWD_ATTR_INT32, 2:AWD_ATTR_BADDR });
+			// Read material numerical properties
+			// (1=color, 2=bitmap url, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
+			props = parseProperties({ 1:AWD_ATTR_INT32, 2:AWD_ATTR_BADDR, 
+				11:AWD_ATTR_BOOL, 12:AWD_ATTR_FLOAT32, 13:AWD_ATTR_BOOL });
+			
 			parseUserAttributes();
 			
 			if (type == 1) { // Color material
+				var color : uint;
+				
+				color = props.get(1, 0xcccccc);
+				mat = new ColorMaterial(color);
 			}
 			else if (type == 2) { // Bitmap material
 				var bmp : BitmapData;
@@ -345,7 +357,8 @@ package away3d.loaders.parsers
 				if (bmp_asset && bmp_asset.bitmapData) {
 					bmp = bmp_asset.bitmapData;
 					mat = new BitmapMaterial(bmp);
-					finalizeAsset(mat, name);
+					BitmapMaterial(mat).alphaBlending = props.get(11, false);
+					finalize = true;
 				}
 				else {
 					// No bitmap available yet. Material will be finalized
@@ -353,7 +366,16 @@ package away3d.loaders.parsers
 					mat = new BitmapMaterial(null);
 					if (tex_addr > 0)
 						_texture_users[tex_addr.toString()].push(mat);
+					
+					finalize = false;
 				}
+			}
+			
+			mat.alphaThreshold = props.get(12, 0.0);
+			mat.repeat = props.get(13, false);
+			
+			if (finalize) {
+				finalizeAsset(mat, name);
 			}
 			
 			return mat;
@@ -371,13 +393,14 @@ package away3d.loaders.parsers
 			type = _body.readUnsignedByte();
 			data_len = _body.readUnsignedInt();
 			
+			_texture_users[_cur_block_id.toString()] = [];
+			
 			// External
 			if (type == 0) {
 				var url : String;
 				
 				url = _body.readUTFBytes(data_len);
 				
-				_texture_users[_cur_block_id.toString()] = [];
 				addDependency(_cur_block_id.toString(), new URLRequest(url));
 			}
 			else {
@@ -780,10 +803,14 @@ package away3d.loaders.parsers
 					
 					key = _body.readUnsignedShort();
 					len = _body.readUnsignedShort();
-					if (expected.hasOwnProperty(key))
+					if (expected.hasOwnProperty(key)) {
 						type = expected[key];
+						props.set(key, parseAttrValue(type, len));
+					}
+					else {
+						_body.position += len;
+					}
 					
-					props.set(key, parseAttrValue(type, len));
 				}
 			}
 			
@@ -807,18 +834,30 @@ package away3d.loaders.parsers
 			var read_func : Function;
 			
 			switch (type) {
-				case 1:
+				case AWD_ATTR_INT16:
 					elem_len = 2;
 					read_func = _body.readShort;
 					break;
-				case 2:
-				case 6:
+				case AWD_ATTR_INT32:
+				case AWD_ATTR_BADDR:
 					elem_len = 4;
 					read_func = _body.readUnsignedInt;
 					break;
-				case 7:
+				case AWD_ATTR_FLOAT32:
+					elem_len = 4;
+					read_func = _body.readFloat;
+					break;
+				case AWD_ATTR_FLOAT64:
 					elem_len = 8;
 					read_func = _body.readDouble;
+					break;
+				case AWD_ATTR_MTX4:
+					elem_len = 8;
+					read_func = _body.readDouble;
+					break;
+				case AWD_ATTR_BOOL:
+					elem_len = 1;
+					read_func = _body.readUnsignedByte;
 					break;
 			}
 			

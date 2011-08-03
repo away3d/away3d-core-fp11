@@ -18,6 +18,7 @@ package away3d.filters{
 
 	public class DepthOfFieldFilter3D extends Filter3DBase
 	{
+		private static const MAX_BLUR : int = 6;
 		private var _program3d : Program3D;
 		private var _maxBlurX : uint;
 		private var _maxBlurY : uint;
@@ -34,8 +35,8 @@ package away3d.filters{
 			super(true);
 			_maxBlurX = maxBlurX;
 			_maxBlurY = maxBlurY;
-			if (_maxBlurX > 7) _stepX = _maxBlurX/7;
-			if (_maxBlurY > 7) _stepY = _maxBlurY/7;
+			if (_maxBlurX > MAX_BLUR) _stepX = _maxBlurX/MAX_BLUR;
+			if (_maxBlurY > MAX_BLUR) _stepY = _maxBlurY/MAX_BLUR;
 			_data = Vector.<Number>([0, 0, 0, _focusDistance, 0, 0, 0, 0, _range, 0, 0, 0, 1.0, 1/255.0, 1/65025.0, 1/16581375.0]);
 		}
 
@@ -82,7 +83,7 @@ package away3d.filters{
 		{
 			invalidateProgram();
 			_maxBlurX = value;
-			if (_maxBlurX > 7) _stepX = _maxBlurX/7;
+			if (_maxBlurX > MAX_BLUR) _stepX = _maxBlurX/MAX_BLUR;
 			else _stepX = 1;
 		}
 
@@ -95,7 +96,7 @@ package away3d.filters{
 		{
 			invalidateProgram();
 			_maxBlurY = value;
-			if (_maxBlurY > 7) _stepY = _maxBlurY/7;
+			if (_maxBlurY > MAX_BLUR) _stepY = _maxBlurY/MAX_BLUR;
 			else _stepY = 1;
 		}
 

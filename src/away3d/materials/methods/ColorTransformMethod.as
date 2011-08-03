@@ -71,14 +71,15 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
+			var inv : Number = 1/0xff;
 			_colorTransformData[0] = _colorTransform.redMultiplier;
 			_colorTransformData[1] = _colorTransform.greenMultiplier;
 			_colorTransformData[2] = _colorTransform.blueMultiplier;
 			_colorTransformData[3] = _colorTransform.alphaMultiplier;
-			_colorTransformData[4] = _colorTransform.redOffset;
-			_colorTransformData[5] = _colorTransform.greenOffset;
-			_colorTransformData[6] = _colorTransform.blueOffset;
-			_colorTransformData[7] = _colorTransform.alphaOffset;
+			_colorTransformData[4] = _colorTransform.redOffset*inv;
+			_colorTransformData[5] = _colorTransform.greenOffset*inv;
+			_colorTransformData[6] = _colorTransform.blueOffset*inv;
+			_colorTransformData[7] = _colorTransform.alphaOffset*inv;
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _colorTransformIndex, _colorTransformData, 2);
 		}
 	}

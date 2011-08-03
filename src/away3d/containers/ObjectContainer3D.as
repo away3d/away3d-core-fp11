@@ -18,16 +18,13 @@ package away3d.containers
 	 *
 	 * ObjectContainer3D can have its own scene partition assigned. However, when assigned to a different scene,
 	 * it will loose any partition information, since partitions are tied to a scene.
-	 *
-	 * TODO: polycount updates
-	 * TODO: all the event-based stuff is not done (onDimensionsUpdate etc) Trying to avoid bubbling here :s
-	 * TODO: names not implemented yet (will be related too closely to a Library)
-	 * TODO: pivot stuff --> pass pivot point to appendRotation
-	 *
 	 */
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		private var _children : Vector.<ObjectContainer3D>;
+
+		private var _mouseChildren : Boolean = true;
+		arcane var _implicitMouseEnabled : Boolean = true;
 		
 		protected var _scene : Scene3D;
 		private var _oldScene : Scene3D;
@@ -60,6 +57,20 @@ package away3d.containers
 			_children = new Vector.<ObjectContainer3D>();
 		}
 
+		public function get mouseChildren() : Boolean
+		{
+			return _mouseChildren;
+		}
+
+		public function set mouseChildren(value : Boolean) : void
+		{
+			_mouseChildren = value;
+
+			var len : uint = _children.length;
+			for (var i : uint = 0; i < len; ++i)
+				_children[i].updateMouseChildren();
+		}
+
 		public function get visible() : Boolean
 		{
 			return _explicitVisibility;
@@ -72,7 +83,7 @@ package away3d.containers
 			_explicitVisibility = value;
 
 			for (var i : uint = 0; i < len; ++i) {
-				_children[i]._implicitVisibility = _explicitVisibility && _implicitVisibility;
+				_children[i].updateImplicitVisibility();
 			}
 		}
 
@@ -280,13 +291,20 @@ package away3d.containers
 		arcane function setParent(value : ObjectContainer3D) : void
 		{
 			_parent = value;
-			
+
+			updateMouseChildren();
+
 			if (value == null) {
 				scene = null;
 				return;
 			}
 			
 			invalidateSceneTransform();
+		}
+
+		public function contains(child : ObjectContainer3D) : Boolean
+		{
+			return _children.indexOf(child) >= 0;
 		}
 		
 		/**
@@ -299,12 +317,16 @@ package away3d.containers
 		{
 			if (child == null)
 				throw new Error("Parameter child cannot be null.");
-			
+
+			if (child._parent) throw new Error("Child ObjectContainer3D was already added as a child to an ObjectContainer3D");
+
 			if (!child._explicitPartition) child.implicitPartition = _implicitPartition;
 			
 			child._parent = this;
 			child.scene = _scene;
 			child.invalidateSceneTransform();
+			child.updateMouseChildren();
+			child.updateImplicitVisibility();
 
 			_children.push(child);
 			return child;
@@ -395,6 +417,7 @@ package away3d.containers
 			clone.pivotPoint = pivotPoint;
 			clone.transform = transform;
 			clone.partition = partition;
+			clone.name = name;
 
 			var len : uint = _children.length;
 			for (var i : uint = 0; i < len; ++i) {
@@ -497,6 +520,28 @@ package away3d.containers
 			}
 
 			return ret;
+		}
+
+		protected function updateMouseChildren() : void
+		{
+			if (_parent) {
+				_implicitMouseEnabled = _parent._implicitMouseEnabled && _parent._mouseChildren;
+				var len : uint = _children.length;
+				for (var i : uint = 0; i < len; ++i)
+					_children[i].updateMouseChildren();
+			}
+			else _implicitMouseEnabled = true;
+		}
+
+		public function updateImplicitVisibility() : void
+		{
+			var len : uint = _children.length;
+
+			_implicitVisibility = _parent._explicitVisibility && _parent._implicitVisibility;
+
+			for (var i : uint = 0; i < len; ++i) {
+				_children[i].updateImplicitVisibility();
+			}
 		}
 	}
 }

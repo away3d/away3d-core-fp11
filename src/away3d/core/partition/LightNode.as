@@ -33,8 +33,8 @@ package away3d.core.partition
 		 */
 		override public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
-			super.acceptTraverser(traverser);
 			if (traverser.enterNode(this)) {
+				super.acceptTraverser(traverser);
 				traverser.applyLight(_light);
 			}
 			traverser.leaveNode(this);

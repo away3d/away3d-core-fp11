@@ -192,7 +192,27 @@ package away3d.debug
 			
 			_init();
 		}
-		
+
+		public function get max_ram() : Number
+		{
+			return _max_ram;
+		}
+
+		public function get ram() : Number
+		{
+			return _ram;
+		}
+
+		public function get avg_fps() : Number
+		{
+			return _avg_fps;
+		}
+
+		public function get max_fps() : uint
+		{
+			return _max_fps;
+		}
+
 		public function get fps():int
 		{
 			return _fps;
@@ -615,7 +635,7 @@ package away3d.debug
 					Stage3DManager.getInstance(stage).getStage3DProxy(0) &&
 					Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D)
 			{
-				_swhw_tf.text = Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D.driverInfo	== "Software" ? "SW" : "HW";
+				_swhw_tf.text = Stage3DManager.getInstance(stage).getStage3DProxy(0).context3D.driverInfo == "Software (Embedded)" ? "SW" : "HW";
 			}
 			
 			// Plot current framerate

@@ -82,8 +82,6 @@
 		/**
 		 * Removes a new SubGeometry object from the list.
 		 * @param subGeometry The SubGeometry object to be removed.
-		 *
-		 * todo: consider signals instead of events?
 		 */
 		public function removeSubGeometry(subGeometry : SubGeometry) : void
 		{

@@ -13,12 +13,14 @@ package away3d.materials.methods
 	/**
 	 * BasicAmbientMethod provides the default shading method for uniform ambient lighting.
 	 */
+
+
 	public class BasicAmbientMethod extends ShadingMethodBase
 	{
-		private var _ambientColor : uint = 0x000000;
+		private var _ambientColor : uint = 0xffffff;
 		private var _ambientData : Vector.<Number>;
 		private var _ambientR : Number = 0, _ambientG : Number = 0, _ambientB : Number = 0;
-		private var _ambient : Number = 1;
+		private var _ambient : Number = 0;
 
 		protected var _ambientInputRegister : ShaderRegisterElement;
 		protected var _ambientInputIndex : int;
@@ -92,6 +94,18 @@ package away3d.materials.methods
 			_ambientInputIndex = _ambientInputRegister.index;
 
 			return "mov " + targetReg.toString() + ", " + _ambientInputRegister.toString() + "	\n";
+		}
+
+		arcane override function reset() : void
+		{
+			super.reset();
+			_ambientInputIndex = -1;
+		}
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_ambientInputRegister = null;
 		}
 
 		/**

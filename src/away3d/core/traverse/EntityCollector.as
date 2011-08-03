@@ -138,6 +138,7 @@ package away3d.core.traverse
 			_blendedRenderableHead = null;
 			_opaqueRenderableHead = null;
 			_renderableListItemPool.freeAll();
+			_skyBox = null;
 			if (_numLights > 0) _lights.length = _numLights = 0;
 		}
 

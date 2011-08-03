@@ -4,14 +4,13 @@ package away3d.filters
 	import away3d.cameras.Camera3D;
 	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.tools.utils.TextureUtils;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.Texture;
-
-//	import away3d.filters.Filter3DBase.requireDepthRender;
 
 	use namespace arcane;
 
@@ -70,8 +69,8 @@ package away3d.filters
 
 		protected function initTextures(context : Context3D, view : View3D) : void
 		{
-			var w : int = getPowerOf2Exceeding(view.width);
-			var h : int = getPowerOf2Exceeding(view.height);
+			var w : int = TextureUtils.getBestPowerOf2(view.width);
+			var h : int = TextureUtils.getBestPowerOf2(view.height);
 
 			if (w == _textureWidth && h == _textureHeight) return;
 
@@ -83,14 +82,6 @@ package away3d.filters
 			_inputTexture = context.createTexture(w, h, Context3DTextureFormat.BGRA, true);
 		}
 
-		private function getPowerOf2Exceeding(value : int) : Number
-		{
-			var p : int = 1;
 
-			while (p < value)
-				p <<= 1;
-
-			return p;
-		}
 	}
 }

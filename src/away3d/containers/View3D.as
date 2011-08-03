@@ -13,12 +13,15 @@ package away3d.containers
 	import away3d.filters.Filter3DBase;
 	import away3d.lights.LightBase;
 
+	import flash.display.BitmapData;
+
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Transform;
 	import flash.geom.Vector3D;
 	import flash.utils.getTimer;
 
@@ -26,18 +29,19 @@ package away3d.containers
 
 	public class View3D extends Sprite
 	{
-		protected var _width : Number = 0;
-		protected var _height : Number = 0;
-		protected var _x : Number = 0;
-		protected var _y : Number = 0;
-		protected var _scene : Scene3D;
-		protected var _camera : Camera3D;
+		private var _width : Number = 0;
+		private var _height : Number = 0;
+		private var _localPos : Point = new Point();
+		private var _globalPos : Point = new Point();
+		private var _scene : Scene3D;
+		private var _camera : Camera3D;
 		private var _entityCollector : EntityCollector;
 
-		protected var _aspectRatio : Number;
-		protected var _time : Number = 0;
-		protected var _deltaTime : uint;
-		protected var _backgroundColor : uint = 0x000000;
+		private var _aspectRatio : Number;
+		private var _time : Number = 0;
+		private var _deltaTime : uint;
+		private var _backgroundColor : uint = 0x000000;
+		private var _backgroundAlpha : Number = 1;
 
 		private var _hitManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
@@ -47,7 +51,7 @@ package away3d.containers
 		private var _hitTestRenderer : HitTestRenderer;
 		private var _addedToStage:Boolean;
 
-		protected var _filters3d : Array;
+		private var _filters3d : Array;
 		private var _requireDepthRender : Boolean;
 		private var _depthRender : Texture;
 		private var _depthTextureWidth : int = -1;
@@ -56,6 +60,9 @@ package away3d.containers
 
 		private var _hitField : Sprite;
 		arcane var mouseZeroMove : Boolean;
+		private var _parentIsStage : Boolean;
+
+		private var _backgroundImage : BitmapData;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
 		{
@@ -69,7 +76,18 @@ package away3d.containers
 			_entityCollector = new EntityCollector();
 			initHitField();
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
-			addEventListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage, false, 0, true);
+			addEventListener(Event.ADDED, onAdded, false, 0, true);
+		}
+
+		public function get backgroundImage() : BitmapData
+		{
+			return _backgroundImage;
+		}
+
+		public function set backgroundImage(value : BitmapData) : void
+		{
+			_backgroundImage = value;
+			_renderer.backgroundImage = _backgroundImage;
 		}
 
 		private function initHitField() : void
@@ -133,8 +151,8 @@ package away3d.containers
 			_renderer = value;
 			_renderer.stage3DProxy = stage3DProxy;
 			_depthRenderer.stage3DProxy = stage3DProxy;
-			_renderer.viewPortX = _x;
-			_renderer.viewPortY = _y;
+			_renderer.viewPortX = _globalPos.x;
+			_renderer.viewPortY = _globalPos.y;
 			_depthRenderer.backBufferWidth = _renderer.backBufferWidth = _width;
 			_depthRenderer.backBufferHeight = _renderer.backBufferHeight = _height;
 			_depthRenderer.viewPortWidth = _renderer.viewPortWidth = _width;
@@ -142,6 +160,8 @@ package away3d.containers
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
+			_renderer.backgroundAlpha = _backgroundAlpha;
+			_renderer.backgroundImage = _backgroundImage;
 		}
 
 		/**
@@ -158,6 +178,19 @@ package away3d.containers
 			_renderer.backgroundR = ((value >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((value >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (value & 0xff) / 0xff;
+		}
+
+		public function get backgroundAlpha() : Number
+		{
+			return _backgroundAlpha;
+		}
+
+		public function set backgroundAlpha(value : Number) : void
+		{
+			if (value > 1) value = 1;
+			else if (value < 0) value = 0;
+			_renderer.backgroundAlpha = value;
+			_backgroundAlpha = value;
 		}
 
 		/**
@@ -203,10 +236,6 @@ package away3d.containers
 
 		override public function set width(value : Number) : void
 		{
-			if (value > 2048) {
-				trace("Warning: Width higher than 2048 is not allowed. Use MegaView3D to support higher values.");
-				value = 2048;
-			}
 			_hitTestRenderer.viewPortWidth = value;
 			_renderer.viewPortWidth = value;
 			_renderer.backBufferWidth = value;
@@ -228,10 +257,6 @@ package away3d.containers
 
 		override public function set height(value : Number) : void
 		{
-			if (value > 2048) {
-				trace("Warning: Height higher than 2048 is not allowed.");
-				value = 2048;
-			}
 			_hitTestRenderer.viewPortHeight = value;
 			_renderer.viewPortHeight = value;
 			_renderer.backBufferHeight = value;
@@ -243,52 +268,21 @@ package away3d.containers
 			_depthTextureInvalid = true;
 		}
 
-		override public function get scaleX() : Number
-		{
-			return 1;
-		}
-
-		override public function set scaleX(value : Number) : void
-		{
-		}
-
-		override public function get scaleY() : Number
-		{
-			return 1;
-		}
-
-		override public function set scaleY(value : Number) : void
-		{
-		}
-
-		/**
-		 * The horizontal coordinate of the top-left position of the viewport.
-		 */
-		override public function get x() : Number
-		{
-			return _x;
-		}
 
 		override public function set x(value : Number) : void
 		{
-			_hitTestRenderer.viewPortX = value;
-			_renderer.viewPortX = value;
-			_x = value;
-		}
-
-		/**
-		 * The vertical coordinate of the top-left position of the viewport.
-		 */
-		override public function get y() : Number
-		{
-			return _y;
+			super.x = value;
+			_localPos.x = value;
+			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
+			_renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
 		}
 
 		override public function set y(value : Number) : void
 		{
-			_hitTestRenderer.viewPortY = value;
-			_renderer.viewPortY = value;
-			_y = value;
+			super.y = value;
+			_localPos.y = value;
+			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
+			_renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
 		}
 
 		/**
@@ -324,6 +318,14 @@ package away3d.containers
 			var numFilters : uint = _filters3d? _filters3d.length : 0;
 			var stage3DProxy : Stage3DProxy = _renderer.stage3DProxy;
 			var context : Context3D = _renderer.context;
+			var globalPos : Point;
+
+			if (!_parentIsStage) {
+				globalPos = parent.localToGlobal(_localPos);
+				if (_globalPos.x != globalPos.x) _renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
+				if (_globalPos.y != globalPos.y) _renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
+				_globalPos = globalPos;
+			}
 
 			if (_time == 0) _time = time;
 			_deltaTime = time - _time;
@@ -396,8 +398,10 @@ package away3d.containers
 		{
 			var p : int = 1;
 
-			while (p < value)
+			while (p < value && p < 2048)
 				p <<= 1;
+
+			if (p > 2048) p = 2048;
 
 			return p;
 		}
@@ -407,8 +411,6 @@ package away3d.containers
 			var lights : Vector.<LightBase> = entityCollector.lights;
 			var len : uint = lights.length;
 			var light : LightBase;
-			var context : Context3D = _renderer.context;
-			var contextIndex : int = _renderer.stage3DProxy._stage3DIndex;
 
 			for (var i : int = 0; i < len; ++i) {
 				light = lights[i];
@@ -422,7 +424,10 @@ package away3d.containers
 		 */
 		public function dispose() : void
 		{
+			_renderer.stage3DProxy.dispose();
 			_renderer.dispose();
+			_hitTestRenderer.dispose();
+			_hitManager.dispose();
 			if (_depthRender) _depthRender.dispose();
 		}
 
@@ -462,10 +467,8 @@ package away3d.containers
 			
 			_addedToStage = true;
 
-
 			_stage3DManager = Stage3DManager.getInstance(stage);
 
-			// TO DO: have a stage3D manager?
 			if (_width == 0) width = stage.stageWidth;
 			if (_height == 0) height = stage.stageHeight;
 
@@ -475,19 +478,23 @@ package away3d.containers
 			_hitManager = new Mouse3DManager(this, _hitTestRenderer);
 		}
 
-		/**
-		 * When removed from the stage, detach from the Stage3D and dispose renderers.
-		 */
-		private function onRemovedFromStage(event : Event) : void
+		private function onAdded(event : Event) : void
 		{
-			if (!_addedToStage)
-				return;
-			
-			_addedToStage = false;
-			
-			_renderer.stage3DProxy.dispose();
-			_hitTestRenderer.dispose();
-			_hitManager.dispose();
+			_parentIsStage = (parent == stage);
+			_globalPos = parent.localToGlobal(new Point(x, y));
+			_renderer.viewPortX = _hitTestRenderer.viewPortX = _globalPos.x;
+			_renderer.viewPortY = _hitTestRenderer.viewPortY = _globalPos.y;
 		}
+
+		// dead ends:
+		override public function set z(value : Number) : void {}
+		override public function set scaleZ(value : Number) : void {}
+		override public function set rotation(value : Number) : void {}
+		override public function set rotationX(value : Number) : void {}
+		override public function set rotationY(value : Number) : void {}
+		override public function set rotationZ(value : Number) : void {}
+		override public function set transform(value : Transform) : void {}
+		override public function set scaleX(value : Number) : void {}
+		override public function set scaleY(value : Number) : void {}
 	}
 }

@@ -238,6 +238,16 @@ package away3d.core.base
 		}
 
 		/**
+		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
+		 *
+		 * @private
+		 */
+		public function getModelViewProjectionUnsafe() : Matrix3D
+		{
+			return _parentMesh.getModelViewProjectionUnsafe();
+		}
+
+		/**
 		 * The amount of triangles that make up this SubMesh.
 		 */
 		public function get numTriangles() : uint

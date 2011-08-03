@@ -34,9 +34,8 @@ package away3d.core.partition
 		 */
 		override public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
-			super.acceptTraverser(traverser);
-
 			if (traverser.enterNode(this)) {
+				super.acceptTraverser(traverser);
 				var subs : Vector.<SubMesh> = _mesh.subMeshes;
 				var i : uint;
 				var len : uint = subs.length;

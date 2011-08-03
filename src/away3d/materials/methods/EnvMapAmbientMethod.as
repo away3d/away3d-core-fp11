@@ -32,6 +32,13 @@ package away3d.materials.methods
 			_needsNormals = true;
 		}
 
+
+		arcane override function reset() : void
+		{
+			super.reset();
+			_cubeMapIndex = -1;
+		}
+
 		/**
 		 * @inheritDoc
 		 */

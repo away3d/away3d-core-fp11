@@ -7,14 +7,9 @@ package away3d.core.managers
 	import flash.display3D.Context3D;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
-	import flash.display3D.textures.Texture;
-	import flash.display3D.textures.TextureBase;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
-	import flash.geom.Rectangle;
-
-	import org.osmf.events.BufferEvent;
 
 	use namespace arcane;
 
@@ -42,6 +37,7 @@ package away3d.core.managers
 		private var _contextRequested : Boolean;
 		private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 		private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
+
 
 		/**
 		 * Creates a Stage3DProxy object. This method should not be called directly. Creation of Stage3DProxy objects should
@@ -93,10 +89,10 @@ package away3d.core.managers
 		{
 			_stage3DManager.removeStage3DProxy(this);
 			_stage3D.removeEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate);
+			freeContext3D();
 			_stage3D = null;
 			_stage3DManager = null;
 			_stage3DIndex = -1;
-			freeContext3D();
 		}
 
 		/**
@@ -144,6 +140,16 @@ package away3d.core.managers
 		public function set x(value : Number) : void
 		{
 			_stage3D.x = value;
+		}
+
+		public function get transparent() : Boolean
+		{
+			return _stage3D.transparent;
+		}
+
+		public function set transparent(value : Boolean) : void
+		{
+			_stage3D.transparent = value;
 		}
 
 		/**

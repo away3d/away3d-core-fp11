@@ -163,7 +163,7 @@ package away3d.materials.passes
 		public function dispose(deep : Boolean) : void
 		{
 			for (var i : uint = 0; i < 8; ++i) {
-				if (_program3Ds[i]) _program3Ds[i].dispose();
+				if (_program3Ds[i]) AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
 			}
 		}
 
@@ -250,7 +250,6 @@ package away3d.materials.passes
 		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
 
 			if (!_program3Ds[contextIndex]) {
 				initPass(stage3DProxy);
@@ -258,6 +257,7 @@ package away3d.materials.passes
 
 			if (_programInvalids[contextIndex]) {
 				updateProgram(stage3DProxy);
+				dispatchEvent(new Event(Event.CHANGE));
 				_programInvalids[contextIndex] = false;
 			}
 
@@ -273,11 +273,8 @@ package away3d.materials.passes
 				stage3DProxy.setTextureAt(i, null);
 			}
 
-			// todo: do same for textures
-
 			_animation.activate(stage3DProxy, this);
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
-			dispatchEvent(new Event(Event.CHANGE));
 		}
 
 		/**
@@ -311,7 +308,7 @@ package away3d.materials.passes
 		 * @param context The context for which to compile the shader program.
 		 * @param polyOffsetReg An optional register that contains an amount by which to inflate the model (used in single object depth map rendering).
 		 */
-		protected function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		protected function  updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, _animation, polyOffsetReg);
 		}

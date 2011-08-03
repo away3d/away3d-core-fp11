@@ -40,6 +40,7 @@ package away3d.materials.passes
 		public function SingleObjectDepthPass(textureSize : uint = 512, polyOffset : Number = 15)
 		{
 			super();
+			_listensForDispose = new Vector.<Boolean>(8, true);
 			_textureSize = textureSize;
 			_numUsedStreams = 2;
 			_numUsedVertexConstants = 6;
@@ -49,7 +50,7 @@ package away3d.materials.passes
 			_polyOffset = Vector.<Number>([polyOffset, 0, 0, 0]);
 			_enc = Vector.<Number>([	1.0, 255.0, 65025.0, 16581375.0,
 										1.0 / 255.0,1.0 / 255.0,1.0 / 255.0,0.0
-			]);
+									]);
 		}
 
 		/**

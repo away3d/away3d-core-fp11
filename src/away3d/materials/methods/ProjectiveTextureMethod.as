@@ -40,6 +40,21 @@ package away3d.materials.methods
 			_mode = mode;
 		}
 
+
+		arcane override function reset() : void
+		{
+			super.reset();
+			_projectionIndex = -1;
+			_toTexIndex = -1;
+			_mapIndex = -1;
+		}
+
+		arcane override function cleanCompilationData() : void
+		{
+			super.cleanCompilationData();
+			_uvVarying = null;
+		}
+
 		public function get mode() : String
 		{
 			return _mode;
