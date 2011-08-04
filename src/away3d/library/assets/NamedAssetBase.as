@@ -17,8 +17,11 @@ package away3d.library.assets
 		
 		public static const DEFAULT_NAMESPACE : String = 'default';
 		
-		public function NamedAssetBase(name : String='')
+		public function NamedAssetBase(name : String=null)
 		{
+			if (name == null)
+				name = 'null';
+			
 			_name = name;
 			_originalName = name;
 			
@@ -47,6 +50,9 @@ package away3d.library.assets
 			
 			prev = _name;
 			_name = val;
+			if (_name == null)
+				_name = 'null';
+			
 			update();
 			
 			if (hasEventListener(AssetEvent.ASSET_RENAME))
@@ -74,7 +80,7 @@ package away3d.library.assets
 		
 		public function resetAssetPath(name : String, ns : String = null, overrideOriginal : Boolean = true) : void
 		{
-			_name = name? name : 'untitled';
+			_name = name? name : 'null';
 			_namespace = ns? ns: DEFAULT_NAMESPACE;
 			if (overrideOriginal)
 				_originalName = _name;
