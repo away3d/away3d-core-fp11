@@ -75,9 +75,6 @@ package away3d.materials.methods
 		{
 			if (value == _specular) return;
 
-			// specular is now either disabled or enabled
-			if (_specular == 0 || value == 0) invalidateShaderProgram();
-
 			_specular = value;
 			updateSpecular();
 		}
@@ -155,7 +152,7 @@ package away3d.materials.methods
 			_specularGlossMap = newMap;
 			_specularGlossMapDirty = true;
 
-			_useTexture = Boolean(_glossMap) || Boolean(_specularMap);
+			_needsUV = _useTexture = Boolean(_glossMap) || Boolean(_specularMap);
 		}
 
 		/**
@@ -185,7 +182,7 @@ package away3d.materials.methods
 			_specularGlossMap = newMap;
 			_specularGlossMapDirty = true;
 
-			_useTexture = Boolean(_glossMap) || Boolean(_specularMap);
+			_needsUV = _useTexture = Boolean(_glossMap) || Boolean(_specularMap);
 		}
 
 		/**
@@ -231,6 +228,7 @@ package away3d.materials.methods
 		override arcane function set numLights(value : int) : void
 		{
 			_needsNormals = value > 0;
+			_needsView = value > 0;
 			super.numLights = value;
 		}
 
@@ -385,7 +383,6 @@ package away3d.materials.methods
 				_specularGlossMapDirty = false;
 			}
 
-			super.activate(stage3DProxy);
 			if (_numLights == 0) return;
 
 			if (_useTexture) stage3DProxy.setTextureAt(_specularTexIndex, _texture.getTextureForStage3D(stage3DProxy));

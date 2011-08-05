@@ -388,7 +388,7 @@ package away3d.materials.passes
 			super.deactivate(stage3DProxy);
 			var len : uint = _methods.length;
 
-			if (_normalMethod.hasOutput && _normalDependencies > 0) _normalMethod.deactivate(stage3DProxy);
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.deactivate(stage3DProxy);
 			_ambientMethod.deactivate(stage3DProxy);
 			if (_shadowMethod) _shadowMethod.deactivate(stage3DProxy);
 			_diffuseMethod.deactivate(stage3DProxy);
@@ -591,6 +591,11 @@ package away3d.materials.passes
 			if (_projectionDependencies > 0) compileProjCode();
 			if (_uvDependencies > 0) compileUVCode();
 			if (_globalPosDependencies > 0) compileGlobalPositionCode();
+			if (_normalDependencies > 0) {
+				// needs to be created before view
+				_animatedNormalReg = _registerCache.getFreeVertexVectorTemp();
+				_registerCache.addVertexTempUsages(_animatedNormalReg, 1);
+			}
 			if (_viewDirDependencies > 0) compileViewDirCode();
 			setMethodRegs(_normalMethod);
 			if (_normalDependencies > 0) compileNormalCode();
@@ -756,8 +761,6 @@ package away3d.materials.passes
 
 			_normalVarying = _registerCache.getFreeVarying();
 
-			_animatedNormalReg = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(_animatedNormalReg, 1);
 			_animatableAttributes.push(_normalInput.toString());
 			_targetRegisters.push(_animatedNormalReg.toString());
 
