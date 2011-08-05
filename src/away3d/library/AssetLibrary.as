@@ -55,6 +55,9 @@ package away3d.library
 		 */
 		public static function getInstance(key : String = 'default') : AssetLibrary
 		{
+			if (!key)
+				key = 'default';
+			
 			if (!_instances.hasOwnProperty(key))
 				_instances[key] = new AssetLibrary(new SingletonEnforcer());
 			
