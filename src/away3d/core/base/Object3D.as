@@ -588,9 +588,9 @@ package away3d.core.base
 
 		public function set eulers(value : Vector3D) : void
 		{
-			_rotationX = value.x * MathConsts.RADIANS_TO_DEGREES;
-			_rotationY = value.y * MathConsts.RADIANS_TO_DEGREES;
-			_rotationZ = value.z * MathConsts.RADIANS_TO_DEGREES;
+			_rotationX = value.x * MathConsts.DEGREES_TO_RADIANS;
+			_rotationY = value.y * MathConsts.DEGREES_TO_RADIANS;
+			_rotationZ = value.z * MathConsts.DEGREES_TO_RADIANS;
 			_rotationValuesDirty = false;
 			invalidateTransform();
 		}
