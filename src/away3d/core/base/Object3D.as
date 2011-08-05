@@ -356,10 +356,7 @@ package away3d.core.base
 		 */
 		public function rotate(axis : Vector3D, angle : Number) : void
 		{
-			// notify
-			invalidateTransform();
-
-			axis.normalize();
+//			axis.normalize();
 
 			transform.prependRotation(angle, axis);
 

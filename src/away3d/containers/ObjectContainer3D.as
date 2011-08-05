@@ -459,7 +459,13 @@ package away3d.containers
 				_oldScene.dispatchEvent(new Scene3DEvent(Scene3DEvent.REMOVED_FROM_SCENE, this));
 			}
 		}
-		
+
+		override public function rotate(axis : Vector3D, angle : Number) : void
+		{
+			super.rotate(axis, angle);
+			invalidateSceneTransform();
+		}
+
 		/**
 		 * @inheritDoc
 		 */
