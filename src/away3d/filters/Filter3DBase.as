@@ -37,8 +37,11 @@ package away3d.filters
 
 		public function getInputTexture(context : Context3D, view : View3D) : Texture
 		{
-			if (_viewWidth != view.width || _viewHeight != view.height)
+			if (_viewWidth != view.width || _viewHeight != view.height) {
 				initTextures(context, view);
+				_viewWidth = view.width;
+				_viewHeight = view.height;
+			}
 
 			return _inputTexture;
 		}
