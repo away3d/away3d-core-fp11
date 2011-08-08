@@ -65,6 +65,9 @@ package away3d.core.base
 		 */
 		function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
 
+
+		function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
+
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex normals.
 		 * @param context The Context3D for which we request the buffer

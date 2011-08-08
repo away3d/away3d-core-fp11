@@ -314,5 +314,10 @@ package away3d.core.base
 			_uvTransform.translate(_offsetU, _offsetV);
 			_uvTransformDirty = false;
 		}
+
+		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			return _subGeometry.getSecondaryUVBuffer(stage3DProxy);
+		}
 	}
 }
