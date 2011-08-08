@@ -265,18 +265,25 @@ package away3d.library
 		*/
 		public function addAsset(asset : IAsset) : void
 		{
+			var ns : String;
 			var old : IAsset;
 			
+			// Bail if asset has already been added.
+			if (_assets.indexOf(asset) >= 0)
+				return;
+			
 			old = getAsset(asset.name, asset.assetNamespace);
+			ns = asset.assetNamespace || NamedAssetBase.DEFAULT_NAMESPACE;
+			
 			if (old != null) {
-				_strategy.resolveConflict(asset, old, _assetDictionary[asset.assetNamespace], _strategyPreference);
+				_strategy.resolveConflict(asset, old, _assetDictionary[ns], _strategyPreference);
 			}
 			
 			// Add it
 			_assets.push(asset);
-			if (!_assetDictionary.hasOwnProperty(asset.assetNamespace))
-				_assetDictionary[asset.assetNamespace] = {};
-			_assetDictionary[asset.assetNamespace][asset.name] = asset;
+			if (!_assetDictionary.hasOwnProperty(ns))
+				_assetDictionary[ns] = {};
+			_assetDictionary[ns][asset.name] = asset;
 			
 			asset.addEventListener(AssetEvent.ASSET_RENAME, onAssetRename);
 			asset.addEventListener(AssetEvent.ASSET_CONFLICT_RESOLVED, onAssetConflictResolved);
