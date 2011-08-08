@@ -248,5 +248,10 @@ package away3d.primitives
 		{
 			return _uvTransform;
 		}
+
+		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			return null;
+		}
 	}
 }
