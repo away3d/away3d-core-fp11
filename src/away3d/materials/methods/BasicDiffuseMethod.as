@@ -256,7 +256,7 @@ package away3d.materials.methods
 				regCache.removeFragmentTempUsage(_totalLightColorReg);
 			}
 
-			temp = _numLights > 0? regCache.	getFreeFragmentVectorTemp() : targetReg;
+			temp = _numLights > 0? regCache.getFreeFragmentVectorTemp() : targetReg;
 
             if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();

@@ -14,6 +14,7 @@ package away3d.core.render
 	import com.adobe.utils.AGALMiniAssembler;
 
 	import flash.display.BitmapData;
+	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DClearMask;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
@@ -172,6 +173,7 @@ package away3d.core.render
 			_interactives.length = _interactiveId = 0;
 
 			if (!_objectProgram3D) initObjectProgram3D();
+			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			_stage3DProxy.setProgram(_objectProgram3D);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _viewportData, 1);
 			drawRenderables(entityCollector.opaqueRenderableHead, camera);
@@ -186,11 +188,6 @@ package away3d.core.render
 		private function drawRenderables(item : RenderableListItem, camera : Camera3D) : void
 		{
 			var renderable : IRenderable;
-//			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-//			var ox : Number, oy  : Number, oz : Number;
-
-			// todo: do a fast ray intersection test first?
-			updateRay(camera);
 
 			while (item) {
 				renderable = item.renderable;
@@ -200,26 +197,6 @@ package away3d.core.render
 					item = item.next;
 					continue;
 				}
-
-				// todo: reenable raycast this and make optional? :s
-				/*ox = _rayDir.x;
-				oy = _rayDir.y;
-				oz = _rayDir.z;
-
-				// use the transpose of the inverse to keep unit length
-				renderable.sceneTransform.copyRawDataTo(raw);
-				_localRayDir.x = raw[0]*ox + raw[1]*oy + raw[2]*oz;
-				_localRayDir.y = raw[4]*ox + raw[5]*oy + raw[6]*oz;
-				_localRayDir.z = raw[8]*ox + raw[9]*oy + raw[10]*oz;
-
-				renderable.inverseSceneTransform.copyRawDataTo(raw);
-				ox = _rayPos.x;
-				oy = _rayPos.y;
-				oz = _rayPos.z;
-				_localRayPos.x = raw[0]*ox + raw[4]*oy + raw[8]*oz + raw[12];
-				_localRayPos.y = raw[1]*ox + raw[5]*oy + raw[9]*oz + raw[13];
-				_localRayPos.z = raw[2]*ox + raw[6]*oy + raw[10]*oz + raw[14];
-				if (!renderable.sourceEntity.bounds.intersectsLine(_localRayPos, _localRayDir)) continue;*/
 
 				_potentialFound = true;
 
@@ -372,6 +349,8 @@ package away3d.core.render
 			var x : Number = _localHitPosition.x, y : Number = _localHitPosition.y, z : Number = _localHitPosition.z;
 			var u : Number, v : Number;
 			var ui1 : uint, ui2 : uint, ui3 : uint;
+
+			updateRay(camera);
 
 			_hitUV = new Point();
 
