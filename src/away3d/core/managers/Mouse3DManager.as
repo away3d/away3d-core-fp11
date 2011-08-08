@@ -26,8 +26,9 @@ package away3d.core.managers
 		private var _previousActiveRenderable : IRenderable;
 		private var _activeObject : Entity;
 		private var _activeRenderable : IRenderable;
-		private var _oldMouseX:Number;
-		private var _oldMouseY:Number;
+		private var _oldLocalX : Number;
+		private var _oldLocalY : Number;
+		private var _oldLocalZ : Number;
 
 		private var _hitTestRenderer : HitTestRenderer;
 		private var _view : View3D;
@@ -43,6 +44,8 @@ package away3d.core.managers
 
 		private var _queuedEvents : Vector.<MouseEvent3D> = new Vector.<MouseEvent3D>();
 		private var _forceMouseMove : Boolean;
+		private var _mouseMoveEvent : MouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
+
 
 //		private static var _rollOver : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OVER);
 //		private static var _rollOut : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OUT);
@@ -186,9 +189,9 @@ package away3d.core.managers
 			// todo: would it be faster to run a custom ray-intersect collector instead of using entity collector's data?
 			// todo: shouldn't render it every time, only when invalidated (on move or view render)
 			if (collector.numMouseEnableds > 0) {
-				_hitTestRenderer.update(_view.mouseX/_view.width, _view.mouseY/_view.height, collector);
+				_hitTestRenderer.update(_view.mouseX / _view.width, _view.mouseY / _view.height, collector);
 				_activeRenderable = _hitTestRenderer.hitRenderable;
-				_activeObject = (_activeRenderable && _activeRenderable.mouseEnabled)? _activeRenderable.sourceEntity : null;
+				_activeObject = (_activeRenderable && _activeRenderable.mouseEnabled) ? _activeRenderable.sourceEntity : null;
 			}
 			else {
 				_activeObject = null;
@@ -244,25 +247,35 @@ package away3d.core.managers
 
 			_queuedEvents.push(event);
 		}
-		
-		public function fireMouseEvents():void
-		{
-			var mouseMoveEvent:MouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
-			var mouseX:Number = mouseMoveEvent.localX = _view.mouseX;
-			var mouseY:Number = mouseMoveEvent.localY = _view.mouseY;
-			
-			if (_forceMouseMove) {
-				if ((mouseX == _oldMouseX) && (mouseY == _oldMouseY)) return;
 
-				if (_activeObject == _previousActiveObject) {
-					if (_activeRenderable) queueDispatch(_mouseMove, mouseMoveEvent, _activeRenderable);
-				} else {
-					if (_previousActiveRenderable) queueDispatch(_mouseOut, mouseMoveEvent, _previousActiveRenderable);
-					if (_activeRenderable) queueDispatch(_mouseOver, mouseMoveEvent, _activeRenderable);
+		public function fireMouseEvents() : void
+		{
+			if (_activeObject != _previousActiveObject) {
+				if (_previousActiveRenderable) queueDispatch(_mouseOut, _mouseMoveEvent, _previousActiveRenderable);
+				if (_activeRenderable) queueDispatch(_mouseOver, _mouseMoveEvent, _activeRenderable);
+			}
+
+			if (_forceMouseMove && _activeRenderable) {
+				var localX : Number;
+				var localY : Number;
+				var localZ : Number;
+
+				if (_activeRenderable.mouseDetails) {
+					localX = _hitTestRenderer.localHitPosition.x;
+					localY = _hitTestRenderer.localHitPosition.y;
+					localZ = _hitTestRenderer.localHitPosition.z;
+				}
+				else {
+					localX = localY = localZ = -1;
 				}
 
-				_oldMouseX = mouseX;
-				_oldMouseY = mouseY;
+				if ((localX != _oldLocalX) || (localY != _oldLocalY) || (localZ != _oldLocalZ)) {
+					queueDispatch(_mouseMove, _mouseMoveEvent, _activeRenderable);
+
+					_oldLocalX = localX;
+					_oldLocalY = localY;
+					_oldLocalZ = localZ;
+				}
 			}
 
 			var len : uint = _queuedEvents.length;
