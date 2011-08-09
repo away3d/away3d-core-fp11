@@ -1,90 +1,84 @@
 package away3d.filters
 {
-	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.tools.utils.TextureUtils;
+	import away3d.filters.tasks.Filter3DTaskBase;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.Texture;
-
-	use namespace arcane;
 
 	public class Filter3DBase
 	{
-		protected var _inputTexture : Texture;
-		private var _viewWidth : Number = -1;
-		private var _viewHeight : Number = -1;
-		private var _requireDepthBuffer : Boolean;
-		protected var _textureWidth : int = -1;
-		protected var _textureHeight : int = -1;
-		protected var _vertexBuffer : VertexBuffer3D;	// contains the screen-tris	and uvs
-		protected var _indexBuffer : IndexBuffer3D;
+		private var _tasks : Vector.<Filter3DTaskBase>;
+		private var _requireDepthRender : Boolean;
+		private var _textureWidth : int;
+		private var _textureHeight : int;
 
-		public function Filter3DBase(requireDepthBuffer : Boolean)
+		public function Filter3DBase()
 		{
-			_requireDepthBuffer = requireDepthBuffer;
+			_tasks = new Vector.<Filter3DTaskBase>();
 		}
 
 		public function get requireDepthRender() : Boolean
 		{
-			return _requireDepthBuffer;
+			return _requireDepthRender;
 		}
 
-		public function getInputTexture(context : Context3D, view : View3D) : Texture
+		protected function addTask(filter : Filter3DTaskBase) : void
 		{
-			if (_viewWidth != view.width || _viewHeight != view.height) {
-				initTextures(context, view);
-				_viewWidth = view.width;
-				_viewHeight = view.height;
-			}
-
-			return _inputTexture;
+			_tasks.push(filter);
+			_requireDepthRender ||= filter.requireDepthRender;
 		}
 
-		public function render(stage3DProxy : Stage3DProxy, target : Texture, camera : Camera3D, depthRender : Texture = null) : void
+		public function get tasks() : Vector.<Filter3DTaskBase>
 		{
-			if (!_vertexBuffer)
-				initBuffers(stage3DProxy);
+			return _tasks;
 		}
 
-		private function initBuffers(stage3DProxy : Stage3DProxy) : void
+		public function getMainInputTexture(stage3DProxy : Stage3DProxy) : Texture
 		{
-			var context : Context3D = stage3DProxy._context3D;
+			return _tasks[0].getMainInputTexture(stage3DProxy);
+		}
 
-			_vertexBuffer = context.createVertexBuffer(4, 4);
-			_vertexBuffer.uploadFromVector(Vector.<Number>([	-1, -1, 0, 1,
-																1, -1, 1, 1,
-																1,  1, 1, 0,
-																-1,  1, 0, 0 ]), 0, 4);
-			_indexBuffer = context.createIndexBuffer(6);
-			_indexBuffer.uploadFromVector(Vector.<uint>([2, 1, 0, 3, 2, 0]), 0, 6);
+		public function get textureWidth() : int
+		{
+			return _textureWidth;
+		}
+
+		public function set textureWidth(value : int) : void
+		{
+			_textureWidth = value;
+
+			for (var i : int = 0; i < _tasks.length; ++i)
+				_tasks[i].textureWidth = value;
+		}
+
+		public function get textureHeight() : int
+		{
+			return _textureHeight;
+		}
+
+		public function set textureHeight(value : int) : void
+		{
+			_textureHeight = value;
+			for (var i : int = 0; i < _tasks.length; ++i)
+				_tasks[i].textureHeight = value;
+		}
+
+		// link up the filters correctly with the next filter
+		public function setRenderTargets(target : Texture, stage3DProxy : Stage3DProxy) : void
+		{
+			_tasks[_tasks.length-1].target = target;
 		}
 
 		public function dispose() : void
 		{
-			if (_inputTexture) _inputTexture.dispose();
+			for (var i : int = 0; i < _tasks.length; ++i)
+				_tasks[i].dispose();
 		}
 
-		protected function initTextures(context : Context3D, view : View3D) : void
+		public function update(stage : Stage3DProxy, camera : Camera3D) : void
 		{
-			var w : int = TextureUtils.getBestPowerOf2(view.width);
-			var h : int = TextureUtils.getBestPowerOf2(view.height);
 
-			if (w == _textureWidth && h == _textureHeight) return;
-
-			_textureWidth = w;
-			_textureHeight = h;
-
-			if (_inputTexture) _inputTexture.dispose();
-
-			_inputTexture = context.createTexture(w, h, Context3DTextureFormat.BGRA, true);
 		}
-
-
 	}
 }

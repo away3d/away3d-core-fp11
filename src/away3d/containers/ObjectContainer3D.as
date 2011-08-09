@@ -512,9 +512,9 @@ package away3d.containers
 		/**
 		 * @inheritDoc
 		 */
-		// maybe not the best way to fake bubbling?
 		override public function dispatchEvent(event : Event) : Boolean
 		{
+			// maybe not the best way to fake bubbling?
 			var ret : Boolean =  super.dispatchEvent(event);
 
 			if (event.bubbles) {

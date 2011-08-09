@@ -7,9 +7,9 @@ package away3d.containers
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.DepthRenderer;
+	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
-	import away3d.filters.Filter3DBase;
 	import away3d.lights.LightBase;
 
 	import flash.display.BitmapData;
@@ -49,7 +49,7 @@ package away3d.containers
 		private var _depthRenderer : DepthRenderer;
 		private var _addedToStage:Boolean;
 
-		private var _filters3d : Array;
+		private var _filter3DRenderer : Filter3DRenderer;
 		private var _requireDepthRender : Boolean;
 		private var _depthRender : Texture;
 		private var _depthTextureWidth : int = -1;
@@ -134,19 +134,33 @@ package away3d.containers
 
 		public function get filters3d() : Array
 		{
-			return _filters3d;
+			return _filter3DRenderer? _filter3DRenderer.filters : null;
 		}
 
 		public function set filters3d(value : Array) : void
 		{
 			var len : uint;
-			_filters3d = value;
-			_requireDepthRender = false;
 
-			if (value) {
-				len = value.length;
-				for (var i : uint = 0; i < len; ++i)
-					_requireDepthRender ||= _filters3d[i].requireDepthRender;
+
+			if (_filter3DRenderer && !value) {
+				_filter3DRenderer.dispose();
+				_filter3DRenderer = null;
+			}
+			else if (!_filter3DRenderer && value) {
+				_filter3DRenderer = new Filter3DRenderer(_width, _height);
+				_filter3DRenderer.filters = value;
+			}
+
+			if (_filter3DRenderer) {
+				_filter3DRenderer.filters = value;
+				_requireDepthRender = _filter3DRenderer.requireDepthRender;
+			}
+			else {
+				_requireDepthRender = false;
+				if (_depthRender) {
+					_depthRender.dispose();
+					_depthRender = null;
+				}
 			}
 		}
 
@@ -253,10 +267,12 @@ package away3d.containers
 
 		override public function set width(value : Number) : void
 		{
+			if (_width == value) return;
 			_hitField.width = value;
 			_width = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
+			if (_filter3DRenderer) _filter3DRenderer.viewWidth = value;
 			invalidateBackBuffer();
 		}
 
@@ -270,10 +286,12 @@ package away3d.containers
 
 		override public function set height(value : Number) : void
 		{
+			if (_height == value) return;
 			_hitField.height = value;
 			_height = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
+			if (_filter3DRenderer) _filter3DRenderer.viewHeight = value;
 			invalidateBackBuffer();
 		}
 
@@ -337,7 +355,6 @@ package away3d.containers
 
 			var time : Number = getTimer();
 			var targetTexture : Texture;
-			var numFilters : uint = _filters3d? _filters3d.length : 0;
 			var stage3DProxy : Stage3DProxy = _renderer.stage3DProxy;
 			var context : Context3D = _renderer.context;
 			var globalPos : Point;
@@ -366,17 +383,10 @@ package away3d.containers
 			if (_requireDepthRender)
 				renderSceneDepth(_entityCollector);
 
-			if (numFilters > 0 && context) {
-				var nextFilter : Filter3DBase;
-				var filter : Filter3DBase = Filter3DBase(_filters3d[0]);
-				targetTexture = filter.getInputTexture(context, this);
-				_renderer.render(_entityCollector, targetTexture);
+			if (_filter3DRenderer && context) {
+				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(stage3DProxy));
+				_filter3DRenderer.render(stage3DProxy, camera,  _depthRender);
 
-				for (var i : uint = 1; i <= numFilters; ++i) {
-					nextFilter = i < numFilters? Filter3DBase(_filters3d[i]) : null;
-					filter.render(stage3DProxy, nextFilter? nextFilter.getInputTexture(context, this) : null, _camera, _depthRender);
-					filter = nextFilter;
-				}
 				context.present();
 			}
 			else
@@ -389,7 +399,7 @@ package away3d.containers
 		
 		private function renderSceneDepth(entityCollector : EntityCollector) : void
 		{
-			if (_depthTextureInvalid) initDepthTexture(_renderer.context);
+			if (_depthTextureInvalid || !_depthRender) initDepthTexture(_renderer.context);
 			_depthRenderer.render(entityCollector, _depthRender);
 		}
 
