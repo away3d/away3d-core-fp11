@@ -16,6 +16,7 @@ package away3d.core.render
 	import flash.display.BitmapData;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DClearMask;
+	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Context3DVertexBufferFormat;
@@ -174,6 +175,7 @@ package away3d.core.render
 
 			if (!_objectProgram3D) initObjectProgram3D();
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			_stage3DProxy.setProgram(_objectProgram3D);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _viewportData, 1);
 			drawRenderables(entityCollector.opaqueRenderableHead, camera);
