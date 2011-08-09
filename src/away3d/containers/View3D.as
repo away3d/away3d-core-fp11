@@ -42,7 +42,7 @@ package away3d.containers
 		private var _backgroundColor : uint = 0x000000;
 		private var _backgroundAlpha : Number = 1;
 
-		private var _hitManager : Mouse3DManager;
+		private var _mouse3DManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
 
 		private var _renderer : RendererBase;
@@ -71,7 +71,7 @@ package away3d.containers
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
-			_hitManager = new Mouse3DManager(this);
+			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
 			_entityCollector = new EntityCollector();
 			initHitField();
@@ -85,12 +85,12 @@ package away3d.containers
 		 */
 		public function get forceMouseMove() : Boolean
 		{
-			return _hitManager.forceMouseMove;
+			return _mouse3DManager.forceMouseMove;
 		}
 
 		public function set forceMouseMove(value : Boolean) : void
 		{
-			_hitManager.forceMouseMove = value;
+			_mouse3DManager.forceMouseMove = value;
 		}
 
 		public function get backgroundImage() : BitmapData
@@ -139,9 +139,6 @@ package away3d.containers
 
 		public function set filters3d(value : Array) : void
 		{
-			var len : uint;
-
-
 			if (_filter3DRenderer && !value) {
 				_filter3DRenderer.dispose();
 				_filter3DRenderer = null;
@@ -174,13 +171,9 @@ package away3d.containers
 
 		public function set renderer(value : RendererBase) : void
 		{
-			var stage3DProxy : Stage3DProxy = _renderer.stage3DProxy;
 			_renderer.dispose();
 			_renderer = value;
-			_renderer.stage3DProxy = stage3DProxy;
-			_depthRenderer.stage3DProxy = stage3DProxy;
-			_stage3DProxy.x = _globalPos.x;
-			_stage3DProxy.y = _globalPos.y;
+			_renderer.stage3DProxy = _stage3DProxy;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
@@ -351,55 +344,73 @@ package away3d.containers
 		 */
 		public function render() : void
 		{
+			// reset or update render settings
 			if (_backBufferInvalid) updateBackBuffer();
-
-			var time : Number = getTimer();
-			var targetTexture : Texture;
-			var stage3DProxy : Stage3DProxy = _renderer.stage3DProxy;
-			var context : Context3D = _renderer.context;
-			var globalPos : Point;
-
-			if (!_parentIsStage) {
-				globalPos = parent.localToGlobal(_localPos);
-				if (_globalPos.x != globalPos.x) _stage3DProxy.x = globalPos.x;
-				if (_globalPos.y != globalPos.y) _stage3DProxy.y = globalPos.y;
-				_globalPos = globalPos;
-			}
-
-			if (_time == 0) _time = time;
-			_deltaTime = time - _time;
-			_time = time;
-
+			if (!_parentIsStage) updateGlobalPos();
+			updateTime();
 			_entityCollector.clear();
+			updateCamera();
 
-			_camera.lens.aspectRatio = _aspectRatio;
-			_entityCollector.camera = _camera;
+			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
 
-			if (_entityCollector.numMouseEnableds > 0) _hitManager.updateHitData();
+			// render things
+			if (_entityCollector.numMouseEnableds > 0) _mouse3DManager.updateHitData();
 
 			updateLights(_entityCollector);
 
 			if (_requireDepthRender)
 				renderSceneDepth(_entityCollector);
 
-			if (_filter3DRenderer && context) {
-				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(stage3DProxy));
-				_filter3DRenderer.render(stage3DProxy, camera,  _depthRender);
-
-				context.present();
+			if (_filter3DRenderer && _stage3DProxy._context3D) {
+				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _filter3DRenderer.renderRect);
+				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
+				_stage3DProxy._context3D.present();
 			}
 			else
 				_renderer.render(_entityCollector);
 
+			// clean up data for this render
 			_entityCollector.cleanUp();
-			
-			_hitManager.fireMouseEvents();
+
+			// fire collected mouse events
+			_mouse3DManager.fireMouseEvents();
+		}
+
+		private function updateGlobalPos() : void
+		{
+			var globalPos : Point = parent.localToGlobal(_localPos);
+			if (_globalPos.x != globalPos.x) _stage3DProxy.x = globalPos.x;
+			if (_globalPos.y != globalPos.y) _stage3DProxy.y = globalPos.y;
+			_globalPos = globalPos;
+		}
+
+		private function updateTime() : void
+		{
+			var time : Number = getTimer();
+			if (_time == 0) _time = time;
+			_deltaTime = time - _time;
+			_time = time;
+		}
+
+		private function updateCamera() : void
+		{
+			_camera.lens.aspectRatio = _aspectRatio;
+			_entityCollector.camera = _camera;
+
+			if (_filter3DRenderer) {
+				_camera.textureRatioX = _width/_filter3DRenderer.textureWidth;
+				_camera.textureRatioY = _height/_filter3DRenderer.textureHeight;
+			}
+			else {
+				_camera.textureRatioX = 1;
+				_camera.textureRatioY = 1;
+			}
 		}
 		
 		private function renderSceneDepth(entityCollector : EntityCollector) : void
 		{
-			if (_depthTextureInvalid || !_depthRender) initDepthTexture(_renderer.context);
+			if (_depthTextureInvalid || !_depthRender) initDepthTexture(_stage3DProxy._context3D);
 			_depthRenderer.render(entityCollector, _depthRender);
 		}
 
@@ -452,9 +463,9 @@ package away3d.containers
 		{
 			_stage3DProxy.dispose();
 			_renderer.dispose();
-			_hitManager.dispose();
+			_mouse3DManager.dispose();
 			if (_depthRenderer) _depthRenderer.dispose();
-			_hitManager.dispose();
+			_mouse3DManager.dispose();
 			if (_depthRender) _depthRender.dispose();
 		}
 
@@ -503,7 +514,7 @@ package away3d.containers
 			_stage3DProxy.transparent = _backgroundAlpha < 1;
 			_stage3DProxy.x = _globalPos.x;
 			_stage3DProxy.y = _globalPos.y;
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _hitManager.stage3DProxy = _stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void

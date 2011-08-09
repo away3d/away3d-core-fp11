@@ -45,13 +45,9 @@ package away3d.core.render
 
 		/**
 		 * Creates a new RendererBase object.
-		 * @param renderBlended Indicates whether semi-transparent objects should be rendered.
-		 * @param antiAlias The amount of anti-aliasing to be used.
-		 * @param renderMode The render mode to be used.
 		 */
 		public function RendererBase()
 		{
-//			_enableDepthAndStencil = enableDepthAndStencil;
 			_renderableSorter = new RenderableMergeSort();
 		}
 
@@ -64,16 +60,6 @@ package away3d.core.render
 		{
 			_renderableSorter = value;
 		}
-
-		public function get context() : Context3D
-		{
-			return _context;
-		}
-
-//		public function get contextIndex() : int
-//		{
-//			return _contextIndex;
-//		}
 
 		/**
 		 * Indicates whether or not the back buffer should be swapped when rendering is complete.
@@ -234,11 +220,11 @@ package away3d.core.render
 		 * @param surfaceSelector The index of a CubeTexture's face to render to.
 		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
 		 */
-		arcane function render(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		arcane function render(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
 			if (!_stage3DProxy || !_context) return;
 
-			executeRender(entityCollector, target, surfaceSelector, additionalClearMask);
+			executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
 
 			// clear buffers
 			for (var i : uint = 0; i < 8; ++i) {
@@ -254,7 +240,7 @@ package away3d.core.render
 		 * @param surfaceSelector The index of a CubeTexture's face to render to.
 		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
 		 */
-		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
 			// todo: move sorting to view? Prevent sorting twice
 			if (_renderableSorter) _renderableSorter.sort(entityCollector);
@@ -264,7 +250,7 @@ package away3d.core.render
 
 			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
-			_context.setScissorRectangle(null);
+			_context.setScissorRectangle(scissorRect);
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
 			draw(entityCollector);

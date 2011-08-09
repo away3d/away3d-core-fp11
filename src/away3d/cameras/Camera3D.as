@@ -22,10 +22,14 @@ package away3d.cameras
 	public class Camera3D extends Entity
 	{
 		private var _viewProjectionInvalid : Boolean = true;
+		private var _renderToTextureProjectionInvalid : Boolean = true;
+		private var _renderToTextureProjection : Matrix3D = new Matrix3D();
 		private var _viewProjection : Matrix3D = new Matrix3D();
 		private var _lens : LensBase;
 		private var _frustumPlanes : Vector.<Plane3D>;
 		private var _frustumPlanesInvalid : Boolean = true;
+		private var _textureRatioX : Number = 1;
+		private var _textureRatioY : Number = 1;
 
 		/**
 		 * Creates a new Camera3D object
@@ -89,6 +93,15 @@ package away3d.cameras
 				_viewProjectionInvalid = false;
 			}
 			return _viewProjection;
+		}
+
+		public function get renderToTextureProjection() : Matrix3D
+		{
+			if (_renderToTextureProjectionInvalid) {
+				_renderToTextureProjection.copyFrom(viewProjection);
+				_renderToTextureProjection.appendScale(_textureRatioX, _textureRatioY, 1);
+			}
+			return _renderToTextureProjection;
 		}
 
 		private function updateFrustumPlanes() : void
@@ -171,6 +184,7 @@ package away3d.cameras
 		{
 			super.invalidateSceneTransform();
 			_viewProjectionInvalid = true;
+			_renderToTextureProjectionInvalid = true;
 			_frustumPlanesInvalid = true;
 		}
 
@@ -194,8 +208,33 @@ package away3d.cameras
 		private function onLensMatrixChanged(event : LensEvent) : void
 		{
 			_viewProjectionInvalid = true;
+			_renderToTextureProjectionInvalid = true;
 			_frustumPlanesInvalid = true;
 			dispatchEvent(event);
+		}
+
+		arcane function get textureRatioX() : Number
+		{
+			return _textureRatioX;
+		}
+
+		arcane function set textureRatioX(value : Number) : void
+		{
+			if (_textureRatioX == value) return;
+			_textureRatioX = value;
+			_renderToTextureProjectionInvalid = true;
+		}
+
+		arcane function get textureRatioY() : Number
+		{
+			return _textureRatioY;
+		}
+
+		arcane function set textureRatioY(value : Number) : void
+		{
+			if (_textureRatioY == value) return;
+			_textureRatioY = value;
+			_renderToTextureProjectionInvalid = true;
 		}
 	}
 }

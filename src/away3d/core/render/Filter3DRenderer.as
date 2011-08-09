@@ -18,6 +18,7 @@ package away3d.core.render
 
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
+	import flash.geom.Rectangle;
 
 	import spark.effects.Resize;
 
@@ -34,12 +35,16 @@ package away3d.core.render
 		private var _textureHeight : int = -1;
 
 		private var _vertexBufferInvalid : Boolean = true;
-		private var _vertexBuffer : VertexBuffer3D;
+		private var _vertexBufferToTexture : VertexBuffer3D;
+		private var _vertexBufferToScreen : VertexBuffer3D;
 		private var _indexBuffer : IndexBuffer3D;
 		private var _requireDepthRender : Boolean;
 
+		private var _renderRect : Rectangle;
+
 		public function Filter3DRenderer(viewWidth : int, viewHeight : int)
 		{
+			_renderRect = new Rectangle();
 			this.viewWidth = viewWidth;
 			this.viewHeight = viewHeight;
 		}
@@ -115,15 +120,21 @@ package away3d.core.render
 
 			len = _tasks.length;
 
-			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
-			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
+			if (len > 1) {
+				context.setVertexBufferAt(0, _vertexBufferToTexture, 0, Context3DVertexBufferFormat.FLOAT_2);
+				context.setVertexBufferAt(1, _vertexBufferToTexture, 2, Context3DVertexBufferFormat.FLOAT_2);
+			}
 
 			for (i = 0; i < len; ++i) {
 				task = _tasks[i];
 				if (task.target)
 					context.setRenderToTexture(task.target);
-				else
+				else {
 					context.setRenderToBackBuffer();
+					context.setScissorRectangle(null);
+					context.setVertexBufferAt(0, _vertexBufferToScreen, 0, Context3DVertexBufferFormat.FLOAT_2);
+					context.setVertexBufferAt(1, _vertexBufferToScreen, 2, Context3DVertexBufferFormat.FLOAT_2);
+				}
 				stage3DProxy.setTextureAt(0, task.getMainInputTexture(stage3DProxy));
 				stage3DProxy.setProgram(task.getProgram3D(stage3DProxy));
 				context.clear(0.0, 0.0, 0.0, 1.0);
@@ -140,13 +151,42 @@ package away3d.core.render
 		private function updateBuffers(stage3DProxy : Stage3DProxy) : void
 		{
 			var context : Context3D = stage3DProxy.context3D;
-
+			var textureVerts : Vector.<Number>;
+			var screenVerts : Vector.<Number>;
+			var x : Number,  y : Number,  u : Number,  v : Number;
 			// todo: will be diff for r2t and screen
-			_vertexBuffer ||= context.createVertexBuffer(4, 4);
-			_vertexBuffer.uploadFromVector(Vector.<Number>([	-1, -1, 0, 1,
-																1, -1, 1, 1,
-																1,  1, 1, 0,
-																-1,  1, 0, 0 ]), 0, 4);
+
+			_vertexBufferToTexture ||= context.createVertexBuffer(4, 4);
+			_vertexBufferToScreen ||= context.createVertexBuffer(4, 4);
+
+			if (_viewWidth > _textureWidth) {
+				x = 1;
+				u = 0;
+			}
+			else {
+				x = _viewWidth/_textureWidth;
+				u = (_textureWidth - _viewWidth)*.5/_textureWidth;
+			}
+			if (_viewHeight > _textureHeight) {
+				y = 1;
+				v = 0;
+			}
+			else {
+				y = _viewHeight/_textureHeight;
+				v = (_textureHeight - _viewHeight)*.5/_textureHeight;
+			}
+
+			textureVerts = Vector.<Number>([	-x, -y, u, 1-v,
+												x, -y, 1-u, 1-v,
+												x,  y, 1-u, v,
+												-x,  y, u, v ]);
+			screenVerts = Vector.<Number>([		-1, -1, u, 1-v,
+												1, -1, 1-u, 1-v,
+												1,  1, 1-u, v,
+												-1,  1, u, v ]);
+
+			_vertexBufferToTexture.uploadFromVector(textureVerts, 0, 4);
+			_vertexBufferToScreen.uploadFromVector(screenVerts, 0, 4);
 
 			if (!_indexBuffer) {
 				_indexBuffer = context.createIndexBuffer(6);
@@ -176,6 +216,15 @@ package away3d.core.render
 					for (var i : int = 0; i < _filters.length; ++i)
 						_filters[i].textureWidth = w;
 				}
+
+				if (_textureWidth > _viewWidth) {
+					_renderRect.x = (w-_viewWidth)*.5;
+					_renderRect.width = _viewWidth;
+				}
+				else {
+					_renderRect.x = 0;
+					_renderRect.height = _textureHeight;
+				}
 			}
 		}
 
@@ -195,7 +244,32 @@ package away3d.core.render
 					for (var i : int = 0; i < _filters.length; ++i)
 						_filters[i].textureHeight = h;
 				}
+
+				if (_textureHeight > _viewHeight) {
+					_renderRect.y = (h-_viewHeight)*.5;
+					_renderRect.height = _viewHeight;
+				}
+				else {
+					_renderRect.y = 0;
+					_renderRect.height = _textureHeight;
+				}
 			}
+		}
+
+		public function get renderRect() : Rectangle
+		{
+			return _renderRect;
+		}
+
+		public function get textureWidth() : int
+		{
+			return _textureWidth;
+		}
+
+
+		public function get textureHeight() : int
+		{
+			return _textureHeight;
 		}
 	}
 }
