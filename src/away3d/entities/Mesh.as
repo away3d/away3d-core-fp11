@@ -150,8 +150,14 @@
 		 */
 		override public function dispose(deep : Boolean) : void
 		{
+			_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
+			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
+			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
+			_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+
 			if (deep) {
 				_geometry.dispose();
+
 				if (_material) {
 					_material.dispose(true);
 					material = null;
