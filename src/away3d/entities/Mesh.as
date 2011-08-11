@@ -255,7 +255,7 @@
 		/**
 		 * Adds a SubMesh wrapping a SubGeometry.
 		 */
-		protected function addSubMesh(subGeometry : SubGeometry) : void
+		private function addSubMesh(subGeometry : SubGeometry) : void
 		{
 			var subMesh : SubMesh = new SubMesh(subGeometry, this, null);
 			var len : uint = _subMeshes.length;
