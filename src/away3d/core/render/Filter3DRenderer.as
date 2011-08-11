@@ -3,24 +3,17 @@
 package away3d.core.render
 {
 	import away3d.cameras.Camera3D;
-	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.filters.Filter3DBase;
 	import away3d.filters.tasks.Filter3DTaskBase;
 	import away3d.tools.utils.TextureUtils;
-
+	
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DVertexBufferFormat;
-
 	import flash.display3D.IndexBuffer3D;
-
 	import flash.display3D.VertexBuffer3D;
-
 	import flash.display3D.textures.Texture;
-	import flash.events.Event;
 	import flash.geom.Rectangle;
-
-	import spark.effects.Resize;
 
 	public class Filter3DRenderer
 	{
