@@ -242,7 +242,7 @@ package away3d.materials
 		/**
 		 * The unique id assigned to the material by the MaterialLibrary.
 		 */
-		public function get uniqueId() : uint
+		public function get uniqueId() : int
 		{
 			return _uniqueId;
 		}
