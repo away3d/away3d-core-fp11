@@ -89,7 +89,6 @@ package away3d.core.render
 			var camera : Camera3D = entityCollector.camera;
 			var item2 : RenderableListItem;
 
-			// todo: is a rendercommand way possible, respecting pass order, but allowing passes with same Program3D to be chained?
 			while (item) {
 				_activeMaterial = item.renderable.material;
 				_activeMaterial.updateMaterial(_context);
@@ -106,6 +105,7 @@ package away3d.core.render
 						item2 = item2.next;
 					} while (item2 && item2.renderable.material == _activeMaterial);
 					_activeMaterial.deactivatePass(j, _stage3DProxy);
+
 				} while (++j < numPasses);
 
 				item = item2;

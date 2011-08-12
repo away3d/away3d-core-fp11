@@ -38,7 +38,7 @@ package away3d.materials.passes
 		 */
 		public function SingleObjectDepthPass(textureSize : uint = 512, polyOffset : Number = 15)
 		{
-			super();
+			super(true);
 			_listensForDispose = new Vector.<Boolean>(8, true);
 			_textureSize = textureSize;
 			_numUsedStreams = 2;
@@ -179,9 +179,6 @@ package away3d.materials.passes
 			for (i = 0; i < len; ++i) {
 				// local position = enough
 				light = _lights[i];
-//				posMult = light.positionBasedMultiplier;
-//				lightPos = renderable.inverseSceneTransform.transformVector(light.scenePosition);
-//				lightDir = renderable.inverseSceneTransform.deltaTransformVector(light.sceneDirection);
 
 				matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable][i]);
 
@@ -189,7 +186,7 @@ package away3d.materials.passes
 				_textures[contextIndex][renderable][i] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);
 				j = 0;
 
-				context.setRenderToTexture(_textures[contextIndex][renderable][i], true, 0, 0);
+				stage3DProxy.setRenderTarget(_textures[contextIndex][renderable][i], true);
 				context.clear(1.0, 1.0, 1.0);
 
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);

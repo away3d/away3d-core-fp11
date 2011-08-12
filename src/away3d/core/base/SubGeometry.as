@@ -316,11 +316,7 @@ package away3d.core.base
 		 */
 		public function dispose() : void
 		{
-			disposeVertexBuffers(_vertexBuffer);
-			disposeVertexBuffers(_vertexNormalBuffer);
-			disposeVertexBuffers(_uvBuffer);
-			disposeVertexBuffers(_secondaryUvBuffer);
-			disposeVertexBuffers(_vertexTangentBuffer);
+			disposeAllVertexBuffers();
 			disposeIndexBuffers(_indexBuffer);
 
 			for (var i : int = 0; i < 8; ++i) {
@@ -329,6 +325,15 @@ package away3d.core.base
 					_listeningForDispose[i] = null;
 				}
 			}
+		}
+
+		protected function disposeAllVertexBuffers() : void
+		{
+			disposeVertexBuffers(_vertexBuffer);
+			disposeVertexBuffers(_vertexNormalBuffer);
+			disposeVertexBuffers(_uvBuffer);
+			disposeVertexBuffers(_secondaryUvBuffer);
+			disposeVertexBuffers(_vertexTangentBuffer);
 		}
 
 		/**
@@ -351,7 +356,9 @@ package away3d.core.base
 			_faceNormalsDirty = true;
 
 			_vertices = vertices;
-			_numVertices = vertices.length / 3;
+			var numVertices : int = vertices.length / 3;
+			if (numVertices != _numVertices) disposeAllVertexBuffers();
+			_numVertices = numVertices;
             invalidateBuffers(_vertexBufferDirty);
 
 			invalidateBounds();
@@ -458,7 +465,11 @@ package away3d.core.base
 		{
 			_indices = indices;
 			_numIndices = indices.length;
-			_numTriangles = _numIndices/3;
+
+			var numTriangles : int = _numIndices/3;
+			if (_numTriangles != numTriangles)
+				disposeIndexBuffers(_indexBuffer);
+			_numTriangles = numTriangles;
 			invalidateBuffers(_indexBufferDirty);
 			_faceNormalsDirty = true;
 

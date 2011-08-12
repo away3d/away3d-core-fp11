@@ -19,14 +19,14 @@ package away3d.filters.tasks
 
 		private var _data : Vector.<Number>;
 
-		private var _intensity:Number = 8.0;
-		private var _glowGamma:Number = 1.6;
+		private var _intensity:Number = 1.0;
+		private var _glowGamma:Number = 1.0;
 		private var _blurStart:Number = 1.0;
 		private var _blurWidth:Number = -0.3;
 		private var _cx:Number = 0.5;
 		private var _cy:Number = 0.5;
 
-		public function Filter3DRadialBlurTask(intensity:Number = 8.0, glowGamma:Number = 1.6, blurStart:Number = 1.0, blurWidth:Number = -0.3, cx:Number = 0.5, cy:Number = 0.5)
+		public function Filter3DRadialBlurTask(intensity:Number = 1.0, glowGamma:Number = 1.0, blurStart:Number = 1.0, blurWidth:Number = -0.3, cx:Number = 0.5, cy:Number = 0.5)
 		{
 			super();
 			_intensity = intensity;
@@ -95,7 +95,8 @@ package away3d.filters.tasks
 				   blurred.rgb = saturate(blurred.rgb);
 			*/
 			code += "div ft1, ft1, fc2.z\n";
-			code += "pow ft1.xyz, ft1.xyz, fc.yyy\n";
+			code += "pow ft1.xyz, ft1.xyz, fc0.y\n";
+			code += "mul ft1.xyz, ft1.xyz, fc0.x\n";
 			code += "sat ft1.xyz, ft1.xyz \n";
 	 		// var origTex = tex2D(tex, IN.UV.xy + ctrPt );
  			code += "add ft0.xy, v0.xy, fc1.xy \n";

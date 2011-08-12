@@ -169,7 +169,7 @@ package away3d.core.render
 			var camera : Camera3D = entityCollector.camera;
 
 			_context.clear(0, 0, 0, 1);
-			_context.setScissorRectangle(MOUSE_SCISSOR_RECT);
+			_stage3DProxy.scissorRect = MOUSE_SCISSOR_RECT;
 
 			_interactives.length = _interactiveId = 0;
 

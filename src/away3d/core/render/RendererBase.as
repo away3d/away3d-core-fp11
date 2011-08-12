@@ -15,6 +15,7 @@ package away3d.core.render
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
@@ -30,14 +31,15 @@ package away3d.core.render
 		protected var _context : Context3D;
 		protected var _stage3DProxy : Stage3DProxy;
 
-		protected var _antiAlias : uint;
-
 		protected var _backgroundR : Number = 0;
 		protected var _backgroundG : Number = 0;
 		protected var _backgroundB : Number = 0;
 		protected var _backgroundAlpha : Number = 1;
 
 		protected var _swapBackBuffer : Boolean = true;
+
+		protected var _renderTarget : TextureBase;
+		protected var _renderTargetSurface : int;
 
 		private var _renderableSorter : EntitySorterBase;
 		private var _backgroundImageRenderer : BackgroundImageRenderer;
@@ -72,19 +74,6 @@ package away3d.core.render
 		public function set swapBackBuffer(value : Boolean) : void
 		{
 			_swapBackBuffer = value;
-		}
-
-		/**
-		 * The amount of anti-aliasing to use.
-		 */
-		public function get antiAlias() : uint
-		{
-			return _antiAlias;
-		}
-
-		public function set antiAlias(value : uint) : void
-		{
-			_antiAlias = value;
 		}
 
 		/**
@@ -224,6 +213,8 @@ package away3d.core.render
 		{
 			if (!_stage3DProxy || !_context) return;
 
+			_renderTarget = target;
+			_renderTargetSurface = surfaceSelector;
 			executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
 
 			// clear buffers
@@ -245,12 +236,11 @@ package away3d.core.render
 			// todo: move sorting to view? Prevent sorting twice
 			if (_renderableSorter) _renderableSorter.sort(entityCollector);
 
-			if (target) _context.setRenderToTexture(target, true, _antiAlias, surfaceSelector);
-			else _context.setRenderToBackBuffer();
+			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
 			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
-			_context.setScissorRectangle(scissorRect);
+			_stage3DProxy.scissorRect = scissorRect;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
 			draw(entityCollector);

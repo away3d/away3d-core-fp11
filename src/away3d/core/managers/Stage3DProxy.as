@@ -10,6 +10,7 @@ package away3d.core.managers
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.geom.Rectangle;
 
 	use namespace arcane;
 
@@ -37,6 +38,9 @@ package away3d.core.managers
 		private var _contextRequested : Boolean;
 		private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 		private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
+		private var _renderTarget : TextureBase;
+		private var _renderSurfaceSelector : int;
+		private var _scissorRect : Rectangle;
 
 
 		/**
@@ -112,6 +116,47 @@ package away3d.core.managers
 			if (_context3D)
 				_context3D.configureBackBuffer(backBufferWidth, backBufferHeight, antiAlias, enableDepthAndStencil);
 		}
+
+		public function get enableDepthAndStencil() : Boolean
+		{
+			return _enableDepthAndStencil;
+		}
+
+		public function get renderTarget() : TextureBase
+		{
+			return _renderTarget;
+		}
+
+		public function get renderSurfaceSelector() : int
+		{
+			return _renderSurfaceSelector;
+		}
+
+		public function setRenderTarget(target : TextureBase, enableDepthAndStencil : Boolean = false, surfaceSelector : int = 0) : void
+		{
+			if (_renderTarget == target && surfaceSelector == _renderSurfaceSelector) return;
+			_renderTarget = target;
+			_renderSurfaceSelector = surfaceSelector;
+			_enableDepthAndStencil = enableDepthAndStencil;
+
+			if (target)
+				_context3D.setRenderToTexture(target, enableDepthAndStencil, _antiAlias, surfaceSelector);
+			else
+				_context3D.setRenderToBackBuffer();
+		}
+
+		public function get scissorRect() : Rectangle
+		{
+			return _scissorRect;
+		}
+
+		public function set scissorRect(value : Rectangle) : void
+		{
+			_scissorRect = value;
+			_context3D.setScissorRectangle(_scissorRect);
+		}
+
+
 
 		/**
 		 * The index of the Stage3D which is managed by this instance of Stage3DProxy.

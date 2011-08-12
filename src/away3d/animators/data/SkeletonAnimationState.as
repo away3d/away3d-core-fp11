@@ -340,6 +340,7 @@ package away3d.animators.data
 			subGeom.animatedNormalData = targetNormals;
 			subGeom.animatedTangentData = targetTangents;
 		}
+
 		public function applyRootDelta() : void
 		{
 			var delta : Vector3D = blendTree.rootDelta;

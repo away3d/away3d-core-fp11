@@ -312,13 +312,12 @@ package away3d.containers
 		 */
 		public function get antiAlias() : uint
 		{
-			return _renderer.antiAlias;
+			return _antiAlias;
 		}
 
 		public function set antiAlias(value : uint) : void
 		{
 			_antiAlias = value;
-			_renderer.antiAlias = value;
 			invalidateBackBuffer();
 		}
 		

@@ -18,8 +18,11 @@ package away3d.materials.passes
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.display3D.textures.Texture;
+	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.geom.Rectangle;
 
 	use namespace arcane;
 
@@ -59,12 +62,18 @@ package away3d.materials.passes
 		private static var _previousUsedTexs : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
 		protected var _defaultCulling : String = Context3DTriangleFace.BACK;
 
+		private var _renderToTexture : Boolean;
+		private var _oldTarget : TextureBase;
+		private var _oldSurface : int;
+		private var _oldDepthStencil : Boolean;
+		private var _oldRect : Rectangle;
 
 		/**
 		 * Creates a new MaterialPassBase object.
 		 */
-		public function MaterialPassBase()
+		public function MaterialPassBase(renderToTexture : Boolean = false)
 		{
+			_renderToTexture = renderToTexture;
 			_numUsedStreams = 1;
 			_numUsedVertexConstants = 4;
 		}
@@ -277,6 +286,13 @@ package away3d.materials.passes
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
 
 			stage3DProxy._context3D.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
+
+			if (_renderToTexture) {
+				_oldTarget = stage3DProxy.renderTarget;
+				_oldSurface = stage3DProxy.renderSurfaceSelector;
+				_oldDepthStencil = stage3DProxy.enableDepthAndStencil;
+				_oldRect = stage3DProxy.scissorRect;
+			}
 		}
 
 		/**
@@ -294,6 +310,12 @@ package away3d.materials.passes
 			_previousUsedTexs[index] = _numUsedTextures;
 
 			if (_animation) _animation.deactivate(stage3DProxy, this);
+
+			if (_renderToTexture) {
+				// kindly restore state
+				stage3DProxy.setRenderTarget(_oldTarget, _oldDepthStencil, _oldSurface);
+				stage3DProxy.scissorRect = _oldRect;
+			}
 		}
 
 		/**

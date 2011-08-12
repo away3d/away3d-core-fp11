@@ -68,6 +68,8 @@ package away3d.core.render
 
 			for (var i : int = 0; i < _filters.length; ++i) {
 				_requireDepthRender ||= _filters[i].requireDepthRender;
+				_filters[i].textureWidth = _textureWidth;
+				_filters[i].textureHeight = _textureHeight;
 			}
 		}
 
@@ -120,11 +122,10 @@ package away3d.core.render
 
 			for (i = 0; i < len; ++i) {
 				task = _tasks[i];
-				if (task.target)
-					context.setRenderToTexture(task.target);
-				else {
-					context.setRenderToBackBuffer();
-					context.setScissorRectangle(null);
+				stage3DProxy.setRenderTarget(task.target);
+
+				if (!task.target) {
+					stage3DProxy.scissorRect = null;
 					context.setVertexBufferAt(0, _vertexBufferToScreen, 0, Context3DVertexBufferFormat.FLOAT_2);
 					context.setVertexBufferAt(1, _vertexBufferToScreen, 2, Context3DVertexBufferFormat.FLOAT_2);
 				}
@@ -206,8 +207,9 @@ package away3d.core.render
 				if (_textureWidth != w) {
 					_textureSizeInvalid = true;
 					_textureWidth = w;
-					for (var i : int = 0; i < _filters.length; ++i)
-						_filters[i].textureWidth = w;
+					if (_filters)
+						for (var i : int = 0; i < _filters.length; ++i)
+							_filters[i].textureWidth = w;
 				}
 
 				if (_textureWidth > _viewWidth) {
@@ -234,8 +236,9 @@ package away3d.core.render
 				if (_textureHeight != h) {
 					_textureSizeInvalid = true;
 					_textureHeight = h;
-					for (var i : int = 0; i < _filters.length; ++i)
-						_filters[i].textureHeight = h;
+					if (_filters)
+						for (var i : int = 0; i < _filters.length; ++i)
+							_filters[i].textureHeight = h;
 				}
 
 				if (_textureHeight > _viewHeight) {

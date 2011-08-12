@@ -67,7 +67,7 @@ package away3d.core.render
 			if (_renderBlended)
 				drawRenderables(entityCollector.blendedRenderableHead, entityCollector);
 
-			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
+			if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
 			_activeMaterial = null;
 		}
 

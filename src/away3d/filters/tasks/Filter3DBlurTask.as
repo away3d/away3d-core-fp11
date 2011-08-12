@@ -100,7 +100,7 @@ package away3d.filters.tasks
 
 		private function updateBlurData() : void
 		{
-			// todo: replace with view width once texture rendering is scissored?
+			// todo: must be normalized using view size ratio
 			var invW : Number = 1/_textureWidth;
 			var invH : Number = 1/_textureHeight;
 

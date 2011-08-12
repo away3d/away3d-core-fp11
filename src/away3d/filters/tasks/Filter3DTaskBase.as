@@ -20,6 +20,8 @@ package away3d.filters.tasks
 	{
 		protected var _mainInputTexture : Texture;
 
+		protected var _scaledTextureWidth : int = -1;
+		protected var _scaledTextureHeight : int = -1;
 		protected var _textureWidth : int = -1;
 		protected var _textureHeight : int = -1;
 		private var _textureDimensionsInvalid : Boolean = true;
@@ -43,6 +45,8 @@ package away3d.filters.tasks
 		{
 			if (_textureScale == value) return;
 			_textureScale = value;
+			_scaledTextureWidth = _textureWidth >> _textureScale;
+			_scaledTextureHeight = _textureHeight >> _textureScale;
 			_textureDimensionsInvalid = true;
 		}
 
@@ -65,6 +69,7 @@ package away3d.filters.tasks
 		{
 			if (_textureWidth == value) return;
 			_textureWidth = value;
+			_scaledTextureWidth = _textureWidth >> _textureScale;
 			_textureDimensionsInvalid = true;
 		}
 
@@ -77,6 +82,7 @@ package away3d.filters.tasks
 		{
 			if (_textureHeight == value) return;
 			_textureHeight = value;
+			_scaledTextureHeight = _textureHeight >> _textureScale;
 			_textureDimensionsInvalid = true;
 		}
 
@@ -123,7 +129,7 @@ package away3d.filters.tasks
 		{
 			if (_mainInputTexture) _mainInputTexture.dispose();
 
-			_mainInputTexture = stage.context3D.createTexture(_textureWidth >> _textureScale, _textureHeight >> _textureScale, Context3DTextureFormat.BGRA, true);
+			_mainInputTexture = stage.context3D.createTexture(_scaledTextureWidth, _scaledTextureHeight, Context3DTextureFormat.BGRA, true);
 
 			_textureDimensionsInvalid = false;
 		}
