@@ -3,15 +3,17 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
-	import away3d.core.managers.CubeTexture3DProxy;
+	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.entities.Mesh;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.display3D.Program3D;
+	import flash.utils.Dictionary;
 
 	use namespace arcane;
 
@@ -21,14 +23,17 @@ package away3d.materials.passes
 		private var _colorData : Vector.<Number>;
 		private var _offsetData : Vector.<Number>;
 		private var _showInnerLines : Boolean;
+		private var _outlineMeshes : Dictionary;
+		private var _dedicatedMeshes : Boolean;
 
 		/**
 		 *
 		 * @param outlineColor
 		 * @param outlineSize
 		 * @param showInnerLines
+		 * @param dedicatedMeshes Create a Mesh specifically for the outlines. This is only useful if the outlines of the existing mesh appear
 		 */
-		public function OutlinePass(outlineColor : uint = 0x000000,  outlineSize : Number = 20, showInnerLines : Boolean = true)
+		public function OutlinePass(outlineColor : uint = 0x000000,  outlineSize : Number = 20, showInnerLines : Boolean = true, dedicatedMeshes : Boolean = false)
 		{
 			super();
 			mipmap = false;
@@ -43,6 +48,34 @@ package away3d.materials.passes
 			_numUsedStreams = 2;
 			_numUsedVertexConstants = 5;
 			_showInnerLines = showInnerLines;
+			_dedicatedMeshes = dedicatedMeshes;
+			if (dedicatedMeshes)
+				_outlineMeshes = new Dictionary();
+		}
+
+		/**
+		 * Clears mesh, will also cause invalidation
+		 */
+		public function clearDedicatedMesh(mesh : Mesh) : void
+		{
+			if (_dedicatedMeshes) {
+				for (var i : int = 0; i < mesh.subMeshes.length; ++i) {
+					var key : SubMesh = mesh.subMeshes[i];
+					Mesh(_dedicatedMeshes[key]).dispose(true);
+					delete _dedicatedMeshes[key];
+				}
+			}
+		}
+
+		override public function dispose(deep : Boolean) : void
+		{
+			super.dispose(deep);
+			if (_dedicatedMeshes) {
+				for (var key : Object in _outlineMeshes) {
+					Mesh(_dedicatedMeshes[key]).dispose(true);
+					delete _dedicatedMeshes[key];
+				}
+			}
 		}
 
 		public function get showInnerLines() : Boolean
@@ -121,8 +154,69 @@ package away3d.materials.passes
 
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-			super.render(renderable, stage3DProxy, camera);
+			var mesh : Mesh, dedicatedRenderable : IRenderable;
+			if (_dedicatedMeshes) {
+				mesh = _outlineMeshes[renderable] ||= createDedicatedMesh(SubMesh(renderable).subGeometry);
+				dedicatedRenderable = mesh.subMeshes[0];
+
+				var context : Context3D = stage3DProxy._context3D;
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
+				stage3DProxy.setSimpleVertexBuffer(0, dedicatedRenderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(1, dedicatedRenderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				context.drawTriangles(dedicatedRenderable.getIndexBuffer(stage3DProxy), 0, dedicatedRenderable.numTriangles);
+			}
+			else {
+				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+
+				super.render(renderable, stage3DProxy, camera);
+			}
+		}
+
+		// creates a new mesh in which all vertices are unique
+		private function createDedicatedMesh(source : SubGeometry) : Mesh
+		{
+			var mesh : Mesh = new Mesh();
+			var dest : SubGeometry = new SubGeometry();
+			var indexLookUp : Array = [];
+			var srcIndices : Vector.<uint> = source.indexData;
+			var srcVertices : Vector.<Number> = source.vertexData;
+			var dstIndices : Vector.<uint> = new Vector.<uint>();
+			var dstVertices : Vector.<Number> = new Vector.<Number>();
+			var index : int;
+			var x : Number, y : Number, z : Number;
+			var key : String;
+			var indexCount : int;
+			var vertexCount : int;
+			var len : int = srcIndices.length;
+			var maxIndex : int;
+
+			for (var i : int = 0; i < len; ++i) {
+				index = srcIndices[i]*3;
+				x = srcVertices[index];
+				y = srcVertices[index+1];
+				z = srcVertices[index+2];
+				key = x.toPrecision(5)+"/"+y.toPrecision(5)+"/"+z.toPrecision(5);
+
+				if (indexLookUp[key]) {
+					index = indexLookUp[key] - 1;
+				}
+				else {
+					index = vertexCount/3;
+					indexLookUp[key] = index + 1;
+					dstVertices[vertexCount++] = x;
+					dstVertices[vertexCount++] = y;
+					dstVertices[vertexCount++] = z;
+				}
+
+				if (index > maxIndex) maxIndex = index;
+				dstIndices[indexCount++] = index;
+			}
+
+			dest.autoDeriveVertexNormals = true;
+			dest.updateVertexData(dstVertices);
+			dest.updateIndexData(dstIndices);
+			mesh.geometry.addSubGeometry(dest);
+			return mesh;
 		}
 
 		/**

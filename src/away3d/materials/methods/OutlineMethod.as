@@ -9,6 +9,7 @@ package away3d.materials.methods
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
+	import flash.utils.Dictionary;
 
 	use namespace arcane;
 
@@ -16,11 +17,11 @@ package away3d.materials.methods
 	{
 		private var _outlinePass : OutlinePass;
 
-		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 20, showInnerLines : Boolean = true)
+		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 20, showInnerLines : Boolean = true, dedicatedMeshes : Boolean = false)
 		{
 			super(true, false, false);
 			_passes = new Vector.<MaterialPassBase>();
-			_outlinePass = new OutlinePass(outlineColor, outlineSize, showInnerLines);
+			_outlinePass = new OutlinePass(outlineColor, outlineSize, showInnerLines, dedicatedMeshes);
 			_passes.push(_outlinePass);
 		}
 
