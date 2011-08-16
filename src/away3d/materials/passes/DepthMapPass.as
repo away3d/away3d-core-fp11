@@ -52,7 +52,6 @@ package away3d.materials.passes
 
 		/**
 		 * @inheritDoc
-		 * todo: keep maps in dictionary per renderable
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{

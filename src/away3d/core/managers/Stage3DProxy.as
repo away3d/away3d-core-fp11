@@ -57,7 +57,8 @@ package away3d.core.managers
 			_stage3D.x = 0;
 			_stage3D.y = 0;
 			_stage3DManager = stage3DManager;
-			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate);
+			// whatever happens, be sure this has highest priority
+			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
 			requestContext();
 		}
 

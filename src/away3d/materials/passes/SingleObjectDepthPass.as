@@ -60,7 +60,7 @@ package away3d.materials.passes
 			if (_textures) {
 				for (var i : uint = 0; i < _textures.length; ++i) {
 					for each(var vec : Vector.<Texture> in _textures[i]) {
-						for (var j : uint = 0; j < vec.length; ++i) {
+						for (var j : uint = 0; j < vec.length; ++j) {
 							vec[j].dispose();
 						}
 					}
@@ -228,7 +228,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
 			super.updateProgram(stage3DProxy, "vc6.x");
 		}

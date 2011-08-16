@@ -59,6 +59,7 @@ package away3d.filters.tasks
 
 		public function set maxBlurX(value : uint) : void
 		{
+			if (_maxBlurX == value) return;
 			_maxBlurX = value;
 
 			if (_maxBlurX > MAX_BLUR) _stepX = _maxBlurX / MAX_BLUR;
@@ -75,6 +76,7 @@ package away3d.filters.tasks
 
 		public function set maxBlurY(value : uint) : void
 		{
+			if (_maxBlurY == value) return;
 			_maxBlurY = value;
 
 			invalidateProgram3D();

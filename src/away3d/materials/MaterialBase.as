@@ -56,7 +56,7 @@ package away3d.materials
 		private var _destBlend : String = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
 
 		protected var _numPasses : uint;
-		private var _passes : Vector.<MaterialPassBase>;
+		protected var _passes : Vector.<MaterialPassBase>;
 
 		protected var _mipmap : Boolean;
 		private var _smooth : Boolean;

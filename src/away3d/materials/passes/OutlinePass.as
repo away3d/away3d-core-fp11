@@ -222,7 +222,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
 			super.updateProgram(stage3DProxy, "vc4.x");
 		}

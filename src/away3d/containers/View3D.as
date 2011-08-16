@@ -79,6 +79,11 @@ package away3d.containers
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
 		}
 
+		public function get stage3DProxy() : Stage3DProxy
+		{
+			return _stage3DProxy;
+		}
+
 		/**
 		 * Forces mouse-move related events even when the mouse hasn't moved. This allows mouseOver and mouseOut events
 		 * etc to be triggered due to changes in the scene graph.

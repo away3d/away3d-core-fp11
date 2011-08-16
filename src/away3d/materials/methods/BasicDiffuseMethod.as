@@ -260,7 +260,9 @@ package away3d.materials.methods
 
             if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
-				code += getTexSampleCode(temp, _diffuseInputRegister);
+				code += getTexSampleCode(temp, _diffuseInputRegister) +
+						// apparently, still needs to un-premultiply :s
+						"div " + temp + ".xyz, " + temp + ".xyz, " + temp + ".w\n";
                 if (_alphaThreshold > 0) {
                     cutOffReg = regCache.getFreeFragmentConstant();
                     _cutOffIndex = cutOffReg.index;

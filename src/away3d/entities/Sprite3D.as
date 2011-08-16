@@ -134,6 +134,7 @@ package away3d.entities
 				++_stackLen;
 			}
 
+			// todo: find better way
 			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
 			mvp.copyFrom(sceneTransform);
 			mvp.append(camera.inverseSceneTransform);
@@ -212,6 +213,7 @@ package away3d.entities
 			return null;
 		}
 
+		// not supported for sprites
 		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			return null;

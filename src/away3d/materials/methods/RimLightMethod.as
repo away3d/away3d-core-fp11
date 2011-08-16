@@ -14,13 +14,19 @@ package away3d.materials.methods
 
 	public class RimLightMethod extends ShadingMethodBase
 	{
+		public static const ADD : String = "add";
+		public static const MULTIPLY : String = "multiply";
+		public static const MIX : String = "mix";
+
 		private var _color : uint;
 		private var _data : Vector.<Number>;
 		private var _dataIndex : int;
+		private var _blend : String;
 
-		public function RimLightMethod(color : uint = 0xffffff, strength : Number = .4, power : Number = 2)
+		public function RimLightMethod(color : uint = 0xffffff, strength : Number = .4, power : Number = 2, blend : String = "mix")
 		{
 			super(true, true, false);
+			_blend = blend;
 			_data = new Vector.<Number>(8, true);
 			_data[3] = 1;
 			_data[4] = strength;
@@ -87,9 +93,22 @@ package away3d.materials.methods
 					"mul " + temp + ".x, " + temp + ".x, " + dataRegister2 + ".x							\n" +
 					"sub " + temp + ".x, " + dataRegister + ".w, " + temp + ".x								\n" +
 					"mul " + targetReg + ".xyz, " + targetReg + ".xyz, " + temp + ".x						\n" +
-					"sub " + temp + ".x, " + dataRegister + ".w, " + temp + ".x								\n" +
-					"mul " + temp + ".xyz, " + temp + ".x, " + dataRegister + ".xyz							\n" +
-					"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz						\n";
+					"sub " + temp + ".w, " + dataRegister + ".w, " + temp + ".x								\n";
+
+
+			if (_blend == ADD) {
+				code += "mul " + temp + ".xyz, " + temp + ".w, " + dataRegister + ".xyz							\n" +
+						"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz						\n";
+			}
+			else if (_blend == MULTIPLY) {
+				code += "mul " + temp + ".xyz, " + temp + ".w, " + dataRegister + ".xyz							\n" +
+						"mul " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz						\n";
+			}
+			else {
+				code += "sub " + temp + ".xyz, " + dataRegister + ".xyz, " + targetReg + ".xyz				\n" +
+						"mul " + temp + ".xyz, " + temp + ".xyz, " + temp + ".w								\n" +
+						"add " + targetReg + ".xyz, " + targetReg + ".xyz, " + temp + ".xyz					\n";
+			}
 
 			return code;
 		}

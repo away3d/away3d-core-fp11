@@ -261,6 +261,7 @@
 			var len : uint = _subMeshes.length;
 			subMesh._index = len;
 			_subMeshes[len] = subMesh;
+			invalidateBounds();
 		}
 
 		/**

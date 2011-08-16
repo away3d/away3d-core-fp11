@@ -233,7 +233,6 @@ package away3d.core.render
 		 */
 		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
-			// todo: move sorting to view? Prevent sorting twice
 			if (_renderableSorter) _renderableSorter.sort(entityCollector);
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);

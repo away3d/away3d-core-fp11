@@ -58,8 +58,8 @@ package away3d.core.render
 
 			_context.setDepthTest(false, Context3DCompareMode.LESS);
 
-			if (entityCollector.skyBox)
-				drawSkyBox(entityCollector);
+//			if (entityCollector.skyBox)
+//				drawSkyBox(entityCollector);
 
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector);
@@ -71,7 +71,7 @@ package away3d.core.render
 			_activeMaterial = null;
 		}
 
-		private function drawSkyBox(entityCollector : EntityCollector) : void
+		/*private function drawSkyBox(entityCollector : EntityCollector) : void
 		{
 			var skyBox : IRenderable = entityCollector.skyBox;
 			var material : MaterialBase = skyBox.material;
@@ -80,7 +80,7 @@ package away3d.core.render
 			material.activateForDepth(_stage3DProxy, camera);
 			material.renderDepth(skyBox, _stage3DProxy, camera);
 			material.deactivateForDepth(_stage3DProxy);
-		}
+		}           */
 
 		/**
 		 * Draw a list of renderables.

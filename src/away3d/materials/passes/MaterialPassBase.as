@@ -4,7 +4,6 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.managers.AGALProgram3DCache;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
@@ -17,8 +16,6 @@ package away3d.materials.passes
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
-	import flash.display3D.VertexBuffer3D;
-	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
@@ -260,14 +257,13 @@ package away3d.materials.passes
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
-			if (!_program3Ds[contextIndex]) {
-				initPass(stage3DProxy);
-			}
+//			if (!_program3Ds[contextIndex]) {
+//				initPass(stage3DProxy);
+//			}
 
-			if (_programInvalids[contextIndex]) {
+			if (_programInvalids[contextIndex] || !_program3Ds[contextIndex]) {
 				updateProgram(stage3DProxy);
 				dispatchEvent(new Event(Event.CHANGE));
-				_programInvalids[contextIndex] = false;
 			}
 
 			var prevUsed : int = _previousUsedStreams[contextIndex];
@@ -329,23 +325,12 @@ package away3d.materials.passes
 
 		/**
 		 * Compiles the shader program.
-		 * @param context The context for which to compile the shader program.
 		 * @param polyOffsetReg An optional register that contains an amount by which to inflate the model (used in single object depth map rendering).
 		 */
-		protected function  updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, _animation, polyOffsetReg);
-		}
-
-		/**
-		 * Initializes the shader program object.
-		 * @param context
-		 */
-		protected function initPass(stage3DProxy : Stage3DProxy) : void
-		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			_program3Ds[contextIndex] = stage3DProxy._context3D.createProgram();
-			_programInvalids[contextIndex] = true;
+			_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 
 		public function get lights() : Vector.<LightBase>
