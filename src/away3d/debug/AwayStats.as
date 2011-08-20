@@ -644,7 +644,7 @@ package away3d.debug
 			
 			// Show software (SW) or hardware (HW)
 			if (!_showing_driv_info) {
-				if (_views && _views.length && _views[0].renderer.stage3DProxy) {
+				if (_views && _views.length && _views[0].renderer.stage3DProxy && _views[0].renderer.stage3DProxy.context3D) {
 					var di : String = _views[0].renderer.stage3DProxy.context3D.driverInfo;
 					_swhw_tf.text = di.substr(0, di.indexOf(' '));
 					_showing_driv_info = true;
