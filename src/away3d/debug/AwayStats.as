@@ -485,6 +485,7 @@ package away3d.debug
 			// SOFTWARE RENDERER WARNING
 			swhw_label_tf = new TextField;
 			swhw_label_tf.defaultTextFormat = _label_format;
+            swhw_label_tf.autoSize = TextFieldAutoSize.LEFT;
 			swhw_label_tf.text = 'DRIV:';
 			swhw_label_tf.x = 10;
 			swhw_label_tf.y = _LOWER_Y;
