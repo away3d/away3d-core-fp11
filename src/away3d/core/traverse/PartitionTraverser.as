@@ -1,11 +1,16 @@
 package away3d.core.traverse
 {
+	import away3d.arcane;
 	import away3d.containers.Scene3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.LightBase;
+
+	import flash.geom.Vector3D;
+
+	use namespace arcane;
 
 	/**
 	 * IPartitionTraverser is a hierarchical visitor pattern that traverses through a Partition3D data structure.
@@ -18,6 +23,8 @@ package away3d.core.traverse
 		 * The scene being traversed.
 		 */
 		public var scene : Scene3D;
+
+		arcane var _entryPoint : Vector3D;
 
 		/**
 		 * Called when the traversers enters a node. At minimum, it notifies the currently visited Partition3DNode whether or not further recursion is necessary.
@@ -62,6 +69,15 @@ package away3d.core.traverse
 		public function applyEntity(entity : Entity) : void
 		{
 			throw new AbstractMethodError();
+		}
+
+		/**
+		 * The entry point for scene graph traversal, ie the point that will be used for traversing the graph
+		 * position-dependently. For example: BSP visibility determination or collision detection.
+		 */
+		public function get entryPoint() : Vector3D
+		{
+			return _entryPoint;
 		}
 	}
 }

@@ -11,6 +11,8 @@ package away3d.materials.utils
 	/**
 	 * CubeMap represents a cube map texture, consisting out of 6 BitmapData objects. All BitmapData objects should be
 	 * of the same size.
+	 *
+	 * todo: provide abstract form for render to texture cubemaps, dds, etc
 	 */
 	public class CubeMap
 	{

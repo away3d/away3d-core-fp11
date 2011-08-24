@@ -11,29 +11,29 @@ package away3d.core.base
 
 	/**
 	 * Object3D provides a base class for any 3D object that has a (local) transformation.
-	 * 
+	 *
 	 * Standard Transform:
 	 * - The standard order for transformation is [parent transform] * (Translate+Pivot) * (Rotate) * (-Pivot) * (Scale) * [child transform]
 	 *   - This is the order of matrix multiplications, left-to-right.
 	 *   - The order of transformation is right-to-left, however!
 	 *       (Scale) happens before (-Pivot) happens before (Rotate) happens before (Translate+Pivot)
-	 *   - with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform] 
+	 *   - with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform]
 	 *       (Scale) happens before (Rotate) happens before (Translate)
 	 *   - This is based on code in updateTransform and ObjectContainer3D.updateSceneTransform().
 	 *   - Matrix3D prepend = operator on rhs - e.g. transform' = transform * rhs;
 	 *   - Matrix3D append =  operator on lhr - e.g. transform' = lhs * transform;
-	 * 
+	 *
 	 * To affect Scale:
 	 * - set scaleX/Y/Z directly, or call scale(delta)
-	 * 
+	 *
 	 * To affect Pivot:
 	 * - set pivotPoint directly, or call movePivot()
-	 * 
+	 *
 	 * To affect Rotate:
 	 * - set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()
-	 * - call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.  
+	 * - call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.
 	 *     rotationX/Y/Z will be reset based on these operations.
-	 * 
+	 *
 	 * To affect Translate (post-rotate translate):
 	 * - set x/y/z/position or call moveTo().
 	 * - call translate(), which modifies x/y/z based on a delta vector.
@@ -635,33 +635,22 @@ package away3d.core.base
 
 		private function updateTransformValues() : void
 		{
-			var raw : Vector.<Number>;
-			var rot : Vector3D;
-			var x : Number, y : Number, z : Number;
+			var elements : Vector.<Vector3D> = _transform.decompose();
+			var vec : Vector3D;
 
 			if (_rotationValuesDirty) {
-				rot = Vector3DUtils.matrix2euler(_transform);
-				_rotationX = rot.x;
-				_rotationY = rot.y;
-				_rotationZ = rot.z;
+				vec = elements[1];
+				_rotationX = vec.x;
+				_rotationY = vec.y;
+				_rotationZ = vec.z;
 				_rotationValuesDirty = false;
 			}
 
 			if (_scaleValuesDirty) {
-				raw = Matrix3DUtils.RAW_DATA_CONTAINER;
-				_transform.copyRawDataTo(raw);
-				x = raw[uint(0)];
-				y = raw[uint(1)];
-				z = raw[uint(2)];
-				_scaleX = Math.sqrt(x * x + y * y + z * z);
-				x = raw[uint(4)];
-				y = raw[uint(5)];
-				z = raw[uint(6)];
-				_scaleY = Math.sqrt(x * x + y * y + z * z);
-				x = raw[uint(8)];
-				y = raw[uint(9)];
-				z = raw[uint(10)];
-				_scaleZ = Math.sqrt(x * x + y * y + z * z);
+				vec = elements[2];
+				_scaleX = vec.x;
+				_scaleY = vec.y;
+				_scaleZ = vec.z;
 				_scaleValuesDirty = false;
 			}
 		}

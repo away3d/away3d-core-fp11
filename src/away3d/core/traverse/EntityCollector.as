@@ -73,6 +73,7 @@ package away3d.core.traverse
 		public function set camera(value : Camera3D) : void
 		{
 			_camera = value;
+			_entryPoint = _camera.scenePosition;
 		}
 
 		/**
