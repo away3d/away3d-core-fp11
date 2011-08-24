@@ -107,7 +107,7 @@ package away3d.core.base
 			_transformDirty = false;
 			_rotationValuesDirty = true;
 			_scaleValuesDirty = true;
-			value.copyRowTo(3, _pos);
+			_transform.copyRowTo(3, _pos);
 			_x = _pos.x;
 			_y = _pos.y;
 			_z = _pos.z;
@@ -119,6 +119,7 @@ package away3d.core.base
 		 */
 		public function scale(value : Number) : void
 		{
+			if (_scaleValuesDirty) updateTransformValues();
 			_scaleX *= value;
 			_scaleY *= value;
 			_scaleZ *= value;
@@ -283,8 +284,6 @@ package away3d.core.base
 
 		public function set position(value : Vector3D) : void
 		{
-			if (_rotationValuesDirty) updateTransformValues();
-
 			_x = value.x;
 			_y = value.y;
 			_z = value.z;
@@ -356,8 +355,6 @@ package away3d.core.base
 		 */
 		public function rotate(axis : Vector3D, angle : Number) : void
 		{
-//			axis.normalize();
-
 			transform.prependRotation(angle, axis);
 
 			_rotationValuesDirty = true;
@@ -391,19 +388,26 @@ package away3d.core.base
 			yAxis = zAxis.crossProduct(xAxis);
 
 			raw = Matrix3DUtils.RAW_DATA_CONTAINER;
-			_transform.copyRawDataTo(raw);
 
 			raw[uint(0)] = _scaleX*xAxis.x;
 			raw[uint(1)] = _scaleX*xAxis.y;
 			raw[uint(2)] = _scaleX*xAxis.z;
+			raw[uint(3)] = 0;
 
 			raw[uint(4)] = _scaleY*yAxis.x;
 			raw[uint(5)] = _scaleY*yAxis.y;
 			raw[uint(6)] = _scaleY*yAxis.z;
+			raw[uint(7)] = 0;
 
 			raw[uint(8)] = _scaleZ*zAxis.x;
 			raw[uint(9)] = _scaleZ*zAxis.y;
 			raw[uint(10)] = _scaleZ*zAxis.z;
+			raw[uint(11)] = 0;
+
+			raw[uint(12)] = _x;
+			raw[uint(13)] = _y;
+			raw[uint(14)] = _z;
+			raw[uint(15)] = 1;
 
 			_transform.copyRawDataFrom(raw);
 
@@ -421,8 +425,6 @@ package away3d.core.base
 
 		public function set x(value : Number) : void
 		{
-			if (_x == value) return;
-			if (value != value) throw new Error("isNaN(x)");
 			_x = value;
 			invalidateTransform();
 		}
@@ -437,8 +439,6 @@ package away3d.core.base
 
 		public function set y(value : Number) : void
 		{
-			if (_y == value) return;
-			if (!(value > 0) && !(value <= 0)) throw new Error("isNaN(x)");
 			_y = value;
 			invalidateTransform();
 		}
@@ -453,8 +453,6 @@ package away3d.core.base
 
 		public function set z(value : Number) : void
 		{
-			if (_z == value) return;
-			if (!(value > 0) && !(value <= 0)) throw new Error("isNaN(x)");
 			_z = value;
 			invalidateTransform();
 		}
@@ -464,14 +462,14 @@ package away3d.core.base
 		 */
 		public function get rotationX() : Number
 		{
-			if (_rotationValuesDirty || _scaleValuesDirty) updateTransformValues();
+			if (_rotationValuesDirty) updateTransformValues();
 
 			return _rotationX * MathConsts.RADIANS_TO_DEGREES;
 		}
 
 		public function set rotationX(rot : Number) : void
 		{
-			if (rotationX == rot) return;
+			if (_rotationValuesDirty) updateTransformValues();
 
 			_rotationX = rot * MathConsts.DEGREES_TO_RADIANS;
 
@@ -490,7 +488,7 @@ package away3d.core.base
 
 		public function set rotationY(rot : Number) : void
 		{
-			if (rotationY == rot) return;
+			if (_rotationValuesDirty) updateTransformValues();
 
 			_rotationY = rot * MathConsts.DEGREES_TO_RADIANS;
 
@@ -509,7 +507,7 @@ package away3d.core.base
 
 		public function set rotationZ(rot : Number) : void
 		{
-			if (rotationZ == rot) return;
+			if (_rotationValuesDirty) updateTransformValues();
 
 			_rotationZ = rot * MathConsts.DEGREES_TO_RADIANS;
 
@@ -527,10 +525,8 @@ package away3d.core.base
 
 		public function set scaleX(scale : Number) : void
 		{
-			if (scaleX == scale) return;
-
+			if (_scaleValuesDirty) updateTransformValues();
 			_scaleX = scale;
-
 			invalidateTransform();
 		}
 
@@ -545,10 +541,8 @@ package away3d.core.base
 
 		public function set scaleY(scale : Number) : void
 		{
-			if (scaleY == scale) return;
-
+			if (_scaleValuesDirty) updateTransformValues();
 			_scaleY = scale;
-
 			invalidateTransform();
 		}
 
@@ -563,12 +557,8 @@ package away3d.core.base
 
 		public function set scaleZ(scale : Number) : void
 		{
-			if (scaleZ == scale) return;
-
+			if (_scaleValuesDirty) updateTransformValues();
 			_scaleZ = scale;
-
-			_transformDirty = true;
-
 			invalidateTransform();
 		}
 
