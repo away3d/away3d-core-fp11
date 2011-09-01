@@ -246,6 +246,14 @@ package away3d.containers
 			return _scene;
 		}
 
+		/**
+		 * Set the scene that's used to render for this viewport
+		 */
+		public function set scene(scene:Scene3D) : void
+		{
+			_scene = scene;
+		}
+
 		// todo: probably temporary:
 		/**
 		 * The amount of milliseconds the last render call took
