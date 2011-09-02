@@ -31,7 +31,7 @@ package away3d.materials.methods
 		private var _diffuseData : Vector.<Number>;
 		private var _cutOffData : Vector.<Number>;
 
-		private var _diffuseR : Number, _diffuseG : Number = 0, _diffuseB : Number = 0, _diffuseA : Number;
+		private var _diffuseR : Number = 1, _diffuseG : Number = 1, _diffuseB : Number = 1, _diffuseA : Number = 1;
 		protected var _shadowRegister : ShaderRegisterElement;
 
         private var _alphaThreshold : Number = 0;
