@@ -176,15 +176,14 @@ package away3d.core.managers
 		 */
 		private function getObjectHitData() : void
 		{
-			if (!_forceMouseMove && _queuedEvents.length == 0) {
-				_activeObject = null;
+			if (!_forceMouseMove && _queuedEvents.length == 0)
 				return;
-			}
-
-			var collector : EntityCollector = _view.entityCollector;
 
 			_previousActiveObject = _activeObject;
 			_previousActiveRenderable = _activeRenderable;
+
+
+			var collector : EntityCollector = _view.entityCollector;
 
 			// todo: would it be faster to run a custom ray-intersect collector instead of using entity collector's data?
 			// todo: shouldn't render it every time, only when invalidated (on move or view render)
@@ -195,6 +194,7 @@ package away3d.core.managers
 			}
 			else {
 				_activeObject = null;
+				_activeRenderable = null;
 			}
 		}
 

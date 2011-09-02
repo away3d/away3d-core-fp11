@@ -16,7 +16,6 @@ package away3d.cameras.lenses
 
 		/**
 		 * Creates a new OrthogonalLens object.
-		 * @param fieldOfView The vertical field of view of the projection.
 		 */
 		public function OrthographicLens(projectionHeight : Number = 500)
 		{
@@ -71,7 +70,7 @@ package away3d.cameras.lenses
 		/**
 		 * @inheritDoc
 		 */
-		override public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
+		/*override public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
 		{
 			var source : Matrix3D = this.matrix;
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
@@ -101,6 +100,6 @@ package away3d.cameras.lenses
 			corners[7] = corners[10] = corners[19] = corners[22] = b;
 			corners[2] = corners[5] = corners[8] = corners[11] = _near;
 			corners[14] = corners[17] = corners[20] = corners[23] = _far;
-		}
+		}              */
 	}
 }

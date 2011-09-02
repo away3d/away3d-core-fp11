@@ -144,6 +144,8 @@ package away3d.containers
 
 		public function set filters3d(value : Array) : void
 		{
+			if (value && value.length == 0) value = null;
+
 			if (_filter3DRenderer && !value) {
 				_filter3DRenderer.dispose();
 				_filter3DRenderer = null;

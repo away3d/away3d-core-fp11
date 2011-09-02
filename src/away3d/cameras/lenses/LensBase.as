@@ -158,9 +158,9 @@ package away3d.cameras.lenses
 		/**
 		 * Calculates a projectionmatrix for an (potientally off-centre) subfrustum
 		 */
-		public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
-		{
-			throw new AbstractMethodError();
-		}
+//		public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
+//		{
+//			throw new AbstractMethodError();
+//		}
 	}
 }

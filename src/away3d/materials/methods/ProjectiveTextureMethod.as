@@ -79,7 +79,6 @@ package away3d.materials.methods
 
 		arcane override function getVertexCode(regCache : ShaderRegisterCache) : String
 		{
-			var code : String = "";
 			var projReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
@@ -88,8 +87,7 @@ package away3d.materials.methods
 			_projectionIndex = projReg.index;
 			_uvVarying = regCache.getFreeVarying();
 
-			code += "m44 " + _uvVarying + ", vt0, " + projReg + "\n";
-			return code;
+			return "m44 " + _uvVarying + ", vt0, " + projReg + "\n";
 		}
 
 		/**

@@ -50,8 +50,6 @@
 			if (geometry) initGeometry();
 		}
 		
-		
-		
 		public override function get assetType() : String
 		{
 			return AssetType.MESH;

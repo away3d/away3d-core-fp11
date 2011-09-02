@@ -21,12 +21,14 @@ package away3d.materials.methods
 		protected var _needsView : Boolean;
 		protected var _needsNormals : Boolean;
 		protected var _needsUV : Boolean;
+		protected var _needsSecondaryUV : Boolean;
 		protected var _needsGlobalPos : Boolean;
 
 		protected var _viewDirVaryingReg : ShaderRegisterElement;
 		protected var _viewDirFragmentReg : ShaderRegisterElement;
 		protected var _normalFragmentReg : ShaderRegisterElement;
 		protected var _uvFragmentReg : ShaderRegisterElement;
+		protected var _secondaryUVFragmentReg : ShaderRegisterElement;
 		protected var _globalPosVertexReg : ShaderRegisterElement;
 		protected var _projectionReg : ShaderRegisterElement;
 
@@ -38,6 +40,7 @@ package away3d.materials.methods
 
 		private var _parentPass : MaterialPassBase;
 		protected var _numLights : int;
+
 
 
 		/**
@@ -169,6 +172,15 @@ package away3d.materials.methods
 		}
 
 		/**
+		 * Indicates whether the material requires uv coordinates.
+		 * @private
+		 */
+		arcane function get needsSecondaryUV() : Boolean
+		{
+			return _needsSecondaryUV;
+		}
+
+		/**
 		 * Indicates whether the material requires the view direction.
 		 * @private
 		 */
@@ -232,6 +244,20 @@ package away3d.materials.methods
 		arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_uvFragmentReg = value;
+		}
+
+		/**
+		 * The fragment register in which the uv coordinates are stored.
+		 * @private
+		 */
+		arcane function get secondaryUVFragmentReg() : ShaderRegisterElement
+		{
+			return _secondaryUVFragmentReg;
+		}
+
+		arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
+		{
+			_secondaryUVFragmentReg = value;
 		}
 
 		/**

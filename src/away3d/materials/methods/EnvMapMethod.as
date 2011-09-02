@@ -76,11 +76,12 @@ package away3d.materials.methods
 			_cubeMapIndex = cubeMapReg.index;
 			_dataIndex = dataRegister.index;
 
-			// r = V - 2(V.N)*N
+			// r = I - 2(I.N)*N
 			code += "dp3 " + temp + ".w, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz		\n" +
 					"add " + temp + ".w, " + temp + ".w, " + temp + ".w											\n" +
 					"mul " + temp + ".xyz, " + _normalFragmentReg + ".xyz, " + temp + ".w						\n" +
 					"sub " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz, " + temp + ".xyz					\n" +
+			// 	(I = -V, so invert vector)
 					"neg " + temp + ".xyz, " + temp + ".xyz														\n" +
 					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n" +
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n" +

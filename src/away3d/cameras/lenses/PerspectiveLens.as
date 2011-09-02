@@ -84,7 +84,7 @@ package away3d.cameras.lenses
 		/**
 		 * @inheritDoc
 		 */
-		override public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
+		/*override public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
 		{
 			// trigger rebuild
 			var source : Matrix3D = this.matrix;
@@ -126,6 +126,6 @@ package away3d.cameras.lenses
 
 			corners[2] = corners[5] = corners[8] = corners[11] = _near;
 			corners[14] = corners[17] = corners[20] = corners[23] = _far;
-		}
+		}               */
 	}
 }

@@ -87,6 +87,8 @@ package away3d.materials.methods
 
 			// incorporate input from ambient
 	        if (_numLights > 0) {
+				if (_shadowRegister)
+					code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _shadowRegister+".w\n";
 				code += "add " + targetReg+".xyz, " + _totalLightColorReg+".xyz, " + targetReg+".xyz\n" +
 						"sat " + targetReg+".xyz, " + targetReg+".xyz\n";
 				regCache.removeFragmentTempUsage(_totalLightColorReg);

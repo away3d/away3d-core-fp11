@@ -14,6 +14,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
+	// doesn't work anymore
 	public class SlowFilteredShadowMapMethod extends ShadingMethodBase
 	{
 		private var _castingLight : LightBase;

@@ -17,7 +17,6 @@ package away3d.lights.shadowmaps
 
 	public class DirectionalShadowMapper extends PlanarShadowMapper
 	{
-		private var _frustumSegment : Vector.<Number>;
 		private var _depthLens : OrthographicOffCenterLens;
 		private var _mtx : Matrix3D = new Matrix3D();
 		private var _localFrustum : Vector.<Number>;
@@ -27,7 +26,6 @@ package away3d.lights.shadowmaps
 			super(light);
 			_depthCamera.lens = _depthLens = new OrthographicOffCenterLens(-10, -10, 10, 10);
 			_localFrustum = new Vector.<Number>(8*3);
-			_frustumSegment = new Vector.<Number>(8*3);
 		}
 
 		/**
@@ -74,8 +72,8 @@ package away3d.lights.shadowmaps
 			_depthLens.near = minZ;
 			_depthLens.far = maxZ;
 			_depthLens.minX = minX-10;
-			_depthLens.maxX = maxX+10;
 			_depthLens.minY = minY-10;
+			_depthLens.maxX = maxX+10;
 			_depthLens.maxY = maxY+10;
 			_depthCamera.transform = _light.sceneTransform;
 		}

@@ -51,10 +51,12 @@ package away3d.materials.passes
 		private var _normalDependencies : uint;
 		private var _viewDirDependencies : uint;
 		private var _uvDependencies : uint;
+		private var _secondaryUVDependencies : uint;
 		private var _globalPosDependencies : uint;
 
 		// registers
 		protected var _uvBufferIndex : int;
+		protected var _secondaryUVBufferIndex : int;
 		protected var _normalBufferIndex : int;
 		protected var _tangentBufferIndex : int;
 		protected var _sceneMatrixIndex : int;
@@ -73,6 +75,7 @@ package away3d.materials.passes
 		private var _tangentVarying : ShaderRegisterElement;
 		private var _bitangentVarying : ShaderRegisterElement;
 		private var _uvVaryingReg : ShaderRegisterElement;
+		private var _secondaryUVVaryingReg : ShaderRegisterElement;
 		private var _viewDirVaryingReg : ShaderRegisterElement;
 
 		private var _shadedTargetReg : ShaderRegisterElement;
@@ -91,6 +94,7 @@ package away3d.materials.passes
 		arcane var _passes : Vector.<MaterialPassBase>;
 		arcane var _passesDirty : Boolean;
 		private var _animateUVs : Boolean;
+
 
 
 		/**
@@ -408,6 +412,7 @@ package away3d.materials.passes
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			if (_uvBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_uvBufferIndex, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
+			if (_secondaryUVBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_secondaryUVBufferIndex, renderable.getSecondaryUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
 			if (_normalBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_normalBufferIndex, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 			if (_tangentBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_tangentBufferIndex, renderable.getVertexTangentBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 			if (_sceneMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneMatrixIndex, renderable.sceneTransform, true);
@@ -538,6 +543,7 @@ package away3d.materials.passes
 			_tangentVarying = null;
 			_bitangentVarying = null;
 			_uvVaryingReg = null;
+			_secondaryUVVaryingReg = null;
 			_viewDirVaryingReg = null;
 
 			_shadedTargetReg = null;
@@ -590,6 +596,7 @@ package away3d.materials.passes
 
 			if (_projectionDependencies > 0) compileProjCode();
 			if (_uvDependencies > 0) compileUVCode();
+			if (_secondaryUVDependencies > 0) compileSecondaryUVCode();
 			if (_globalPosDependencies > 0) compileGlobalPositionCode();
 			if (_normalDependencies > 0) {
 				// needs to be created before view
@@ -628,7 +635,7 @@ package away3d.materials.passes
 			_projectionFragmentReg = _registerCache.getFreeVarying();
 			_projectedTargetRegister = _registerCache.getFreeVertexVectorTemp().toString();
 
-			_vertexCode += "mov " + _projectionFragmentReg.toString() +", " + _projectedTargetRegister + "\n";
+			_vertexCode += "mov " + _projectionFragmentReg + ", " + _projectedTargetRegister + "\n";
 		}
 
 		private function setMethodRegs(method : ShadingMethodBase) : void
@@ -637,6 +644,7 @@ package away3d.materials.passes
 			method.normalFragmentReg = _normalFragmentReg;
 			method.projectionReg = _projectionFragmentReg;
 			method.UVFragmentReg = _uvVaryingReg;
+			method.secondaryUVFragmentReg = _secondaryUVVaryingReg;
 			method.viewDirFragmentReg = _viewDirFragmentReg;
 			method.viewDirVaryingReg = _viewDirVaryingReg;
 		}
@@ -666,12 +674,14 @@ package away3d.materials.passes
 			_normalDependencies = 0;
 			_viewDirDependencies = 0;
 			_uvDependencies = 0;
+			_secondaryUVDependencies = 0;
 			_globalPosDependencies = 0;
 
 			_uvTransformIndex = -1;
 			_cameraPositionIndex = -1;
 			_commonsRegIndex = -1;
 			_uvBufferIndex = -1;
+			_secondaryUVBufferIndex = -1;
 			_normalBufferIndex = -1;
 			_tangentBufferIndex = -1;
 			_lightsColorIndex = -1;
@@ -707,6 +717,7 @@ package away3d.materials.passes
 			if (method.needsNormals) ++_normalDependencies;
 			if (method.needsView) ++_viewDirDependencies;
 			if (method.needsUV) ++_uvDependencies;
+			if (method.needsSecondaryUV) ++_secondaryUVDependencies;
 		}
 
 		private function compileGlobalPositionCode() : void
@@ -747,6 +758,16 @@ package away3d.materials.passes
 			else {
 				_vertexCode += "mov " + _uvVaryingReg + ", " + uvAttributeReg + "\n";
 			}
+		}
+
+		private function compileSecondaryUVCode() : void
+		{
+			var uvAttributeReg : ShaderRegisterElement = _registerCache.getFreeVertexAttribute();
+
+			_secondaryUVVaryingReg = _registerCache.getFreeVarying();
+			_secondaryUVBufferIndex = uvAttributeReg.index;
+
+			_vertexCode += "mov " + _secondaryUVVaryingReg + ", " + uvAttributeReg + "\n";
 		}
 
 		private function compileNormalCode() : void
@@ -971,8 +992,8 @@ package away3d.materials.passes
 			if (_shadowMethod) {
 				_vertexCode += _shadowMethod.getVertexCode(_registerCache);
 //				shadowReg = _registerCache.getFreeFragmentSingleTemp();
-				// risky :s
-				// todo: improve compilation with lifetime analysis so this isn't necessary
+				// using normal to contain shadow data if available is perhaps risky :s
+				// todo: improve compilation with lifetime analysis so this isn't necessary?
 				if (_normalDependencies == 0) {
 					shadowReg = _registerCache.getFreeFragmentVectorTemp();
 					_registerCache.addFragmentTempUsages(shadowReg, 1);

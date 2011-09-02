@@ -247,6 +247,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
+		override arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
+		{
+			_baseSpecularMethod.secondaryUVFragmentReg = _secondaryUVFragmentReg = value;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_viewDirFragmentReg = _baseSpecularMethod.viewDirFragmentReg = value;

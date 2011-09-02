@@ -78,12 +78,12 @@ package away3d.cameras.lenses
 		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 
-			raw[0] = 2/(_maxX-_minX);
-			raw[5] = 2/(_maxY-_minY);
-			raw[10] = 1/(_far-_near);
-			raw[12] = (_maxX + _minX)/(_minX-_maxX);
-			raw[13] = (_maxY + _minY)/(_minY-_maxY);
-			raw[14] = _near/(_near-_far);
+			raw[0] = 2/(_maxX - _minX);
+			raw[5] = 2/(_maxY - _minY);
+			raw[10] = 1/(_far - _near);
+			raw[12] = (_maxX + _minX)/(_minX - _maxX);
+			raw[13] = (_maxY + _minY)/(_minY - _maxY);
+			raw[14] = _near/(_near - _far);
 			raw[15] = 1;
 			raw[1] = raw[2] = raw[3] = raw[4] =
 			raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;

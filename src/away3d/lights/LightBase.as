@@ -209,5 +209,10 @@ package away3d.lights
 		{
 			return _shadowMapper;
 		}
+
+		public function set shadowMapper(value : ShadowMapperBase) : void
+		{
+			_shadowMapper = value;
+		}
 	}
 }

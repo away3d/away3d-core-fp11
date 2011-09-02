@@ -135,9 +135,10 @@ use namespace arcane;
 		public function dispose() : void
 		{
 			var numSubGeoms : uint = _subGeometries.length;
+
 			for (var i : uint = 0; i < numSubGeoms; ++i)
 			{
-				var subGeom:SubGeometry = _subGeometries.shift();
+				var subGeom:SubGeometry = _subGeometries[0];
 				removeSubGeometry(subGeom);
 				subGeom.dispose();
 			}
