@@ -72,6 +72,12 @@ package away3d.animators
 			start();
 		}
 
+		public function hasSequence(sequenceName:String):Boolean
+		{
+			if(_clips[sequenceName] == null) return false;
+			return true;
+		}
+
 		/**
 		 * Adds a sequence to the controller.
 		 */
