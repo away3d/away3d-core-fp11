@@ -159,7 +159,7 @@ package away3d.entities
 			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
 			mvp.copyFrom(sceneTransform);
 			mvp.append(camera.renderToTextureProjection);
-			mvp.copyRowTo(3, _pos);
+			mvp.copyColumnTo(3, _pos);
 			_zIndices[_mvpIndex] = -_pos.z;
 		}
 

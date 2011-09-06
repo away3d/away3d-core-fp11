@@ -284,7 +284,6 @@ package away3d.core.render
 		arcane function set backgroundAlpha(value : Number) : void
 		{
 			_backgroundAlpha = value;
-			if (_stage3DProxy) _stage3DProxy.transparent = value < 1;
 		}
 
 		arcane function get backgroundImage() : BitmapData

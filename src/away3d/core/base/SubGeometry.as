@@ -115,8 +115,7 @@ use namespace arcane;
 		{
 			_autoDeriveVertexNormals = value;
 
-			if (!value)
-				_vertexNormalsDirty = false;
+			_vertexNormalsDirty = value;
 		}
 
 		/**
@@ -148,8 +147,7 @@ use namespace arcane;
 		{
 			_autoDeriveVertexTangents = value;
 
-			if (!value)
-				_vertexTangentsDirty = false;
+			_vertexTangentsDirty = value;
 		}
 
 		/**

@@ -221,7 +221,6 @@ package away3d.containers
 			else if (value < 0) value = 0;
 			_renderer.backgroundAlpha = value;
 			_backgroundAlpha = value;
-			if (_stage3DProxy) _stage3DProxy.transparent = value < 1;
 		}
 
 		/**
@@ -525,7 +524,6 @@ package away3d.containers
 			if (_height == 0) height = stage.stageHeight;
 
 			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
-			_stage3DProxy.transparent = _backgroundAlpha < 1;
 			_stage3DProxy.x = _globalPos.x;
 			_stage3DProxy.y = _globalPos.y;
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;

@@ -188,17 +188,6 @@ package away3d.core.managers
 			_stage3D.x = value;
 		}
 
-		public function get transparent() : Boolean
-		{
-//			return _stage3D.transparent;
-			return false;
-		}
-
-		public function set transparent(value : Boolean) : void
-		{
-//			_stage3D.transparent = value;
-		}
-
 		/**
 		 * The y position of the Stage3D.
 		 */

@@ -103,7 +103,7 @@ package away3d.containers
 		public function get scenePosition() : Vector3D
 		{
 			if (_scenePositionDirty) {
-				sceneTransform.copyRowTo(3, _scenePosition);
+				sceneTransform.copyColumnTo(3, _scenePosition);
 				_scenePositionDirty = false;
 			}
 			return _scenePosition;

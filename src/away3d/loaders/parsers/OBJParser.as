@@ -41,7 +41,7 @@ package away3d.loaders.parsers
 		private var _objectIndex : uint;
 		private var _realIndices : Array;
 		private var _vertexIndex : uint;
-		
+
 		private var _mtlLib : Boolean;
 		private var _mtlLibLoaded : Boolean = true;
 		private var _idCount : uint;

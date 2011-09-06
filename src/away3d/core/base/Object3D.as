@@ -107,7 +107,7 @@ package away3d.core.base
 			_transformDirty = false;
 			_rotationValuesDirty = true;
 			_scaleValuesDirty = true;
-			_transform.copyRowTo(3, _pos);
+			_transform.copyColumnTo(3, _pos);
 			_x = _pos.x;
 			_y = _pos.y;
 			_z = _pos.z;
@@ -267,7 +267,7 @@ package away3d.core.base
 			var len : Number = distance / Math.sqrt(x * x + y * y + z * z);
 
 			transform.prependTranslation(x*len, y*len, z*len);
-			_transform.copyRowTo(3, _pos);
+			_transform.copyColumnTo(3, _pos);
 			_x = _pos.x;
 			_y = _pos.y;
 			_z = _pos.z;
@@ -278,7 +278,7 @@ package away3d.core.base
 		 */
 		public function get position() : Vector3D
 		{
-			transform.copyRowTo(3, _pos);
+			transform.copyColumnTo(3, _pos);
 			return _pos.clone();
 		}
 

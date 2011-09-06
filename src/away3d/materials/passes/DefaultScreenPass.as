@@ -1016,7 +1016,7 @@ package away3d.materials.passes
 				if (_specularMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 			}
 
-			if (shadowReg && _normalDependencies > 0) _registerCache.removeFragmentTempUsage(shadowReg);
+//			if (shadowReg && _normalDependencies > 0) _registerCache.removeFragmentTempUsage(shadowReg);
 		}
 
 		private function compileMethods() : void
