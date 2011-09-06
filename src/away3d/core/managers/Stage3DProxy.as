@@ -190,12 +190,13 @@ package away3d.core.managers
 
 		public function get transparent() : Boolean
 		{
-			return _stage3D.transparent;
+//			return _stage3D.transparent;
+			return false;
 		}
 
 		public function set transparent(value : Boolean) : void
 		{
-			_stage3D.transparent = value;
+//			_stage3D.transparent = value;
 		}
 
 		/**
