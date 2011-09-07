@@ -168,10 +168,10 @@ package away3d.animators.skeleton
 				if (time >= 1) {
 					clip.notifyPlaybackComplete();
 					//if the animation has different frame count, set the frame to the lastframe return an error
-					//_frame1 = lastFrame;
-					//_frame2 = lastFrame;
-					_frame1 = 0;
-					_frame2 = 0;
+					_frame1 = lastFrame;
+					_frame2 = lastFrame;
+//					_frame1 = 0;
+//					_frame2 = 0;
 					_blendWeight = 0;
 				}
 				else if (_clip._fixedFrameRate) {
