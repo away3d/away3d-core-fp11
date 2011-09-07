@@ -104,9 +104,9 @@
 		}
 		
 		/**
-		*  Merges all the meshes found into the Vector.<Mesh> parameter with the receiver Mesh.
+		*  Merges all the meshes found into the Vector.&lt;Mesh&gt; parameter with the receiver Mesh.
 		* @param	 receiver 	Mesh. The Mesh receiver.
-		* @param	 meshes		Vector.<Mesh>. A series of Meshes to be merged with the reciever mesh.
+		* @param	 meshes		Vector.&lt;Mesh&gt;. A series of Meshes to be merged with the reciever mesh.
 		*
 		* @return The merged receiver Mesh instance.
 		*/

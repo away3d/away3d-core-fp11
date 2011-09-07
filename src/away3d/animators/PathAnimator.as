@@ -34,14 +34,14 @@
 		private var _basePosition:Vector3D = new Vector3D(0,0,0);
 		 
 		/**
-		* Creates a new <PathAnimator>PathAnimator</code>
+		* Creates a new <code>PathAnimator</code>
 		* 
 		* @param	 			[optional] path					The path to animate onto.
 		* @param	 			[optional] target					An Object3D, the object to animate along the path. It can be Mesh, Camera, ObjectContainer3D...
 		* @param	 			[optional] alignToPath			Defines if the object animated along the path is orientated to the path. Default is true.
 		* @param	 			[optional] lookAtTarget		An Object3D that the target will constantly look at during animation.
 		* @param	 			[optional] offset					A Vector3D to define the target offset to its location on the path.
-		* @param	 			[optional] rotations				A Vector.<Vector3D> to define rotations per pathsegments. If PathExtrude is used to simulate the "road", use the very same rotations vector.
+		* @param	 			[optional] rotations				A Vector.&lt;Vector3D&gt; to define rotations per pathsegments. If PathExtrude is used to simulate the "road", use the very same rotations vector.
 		*/
 		function PathAnimator(path:Path = null, target:Object3D = null, offset:Vector3D = null, alignToPath:Boolean = true, lookAtTarget:Object3D = null, rotations:Vector.<Vector3D> = null)
 		{
@@ -300,7 +300,7 @@
 		}
 		
 		/**
-    	* sets an optional Vector.<Vector3D> of rotations. if the object3d is animated along a PathExtrude object, use the very same vector to follow the "curves".
+    	* sets an optional Vector.&lt;Vector3D&gt; of rotations. if the object3d is animated along a PathExtrude object, use the very same vector to follow the "curves".
     	*/
 		public function set rotations(vRot:Vector.<Vector3D>):void
 		{
@@ -348,7 +348,7 @@
         }
 		
 		/**
-		* Default method for adding a range event listener. Event fired when the time is >= from and <= to variables.
+		* Default method for adding a range event listener. Event fired when the time is &gt;= from and &lt;= to variables.
 		* 
 		* @param		listener		The listener function
 		*/

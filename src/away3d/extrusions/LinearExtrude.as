@@ -64,7 +64,7 @@
 		 *  Class LinearExtrusion generates walls like meshes with or without thickness from a series of Vector3D's
 		 *
 		 *@param		material						[optional] MaterialBase. The LatheExtrude (Mesh) material. Optional in constructor, material must be set before LatheExtrude object is render.
-		 * @param		vectors						[optional] Vector.<Vector3D>. A series of Vector3D's representing the profile information to be repeated/rotated around a given axis.
+		 * @param		vectors						[optional] Vector.&lt;Vector3D&gt;. A series of Vector3D's representing the profile information to be repeated/rotated around a given axis.
 		 * @param		axis							[optional] String. The axis to elevate along: X_AXIS, Y_AXIS or Z_AXIS. Default is LinearExtrusion.Y_AXIS.
 		 * @param		offset							[optional] Number. The elevation offset along the defined axis.
 		 * @param		subdivision					[optional] uint. The subdivision of the geometry between 2 vector3D. Default is 32.

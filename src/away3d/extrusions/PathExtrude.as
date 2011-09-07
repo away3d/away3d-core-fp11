@@ -70,7 +70,7 @@ package away3d.extrusions{
 		*
 		* @param	material				[optional] 	MaterialBase. The PathExtrude (Mesh) material. Optional in constructor, material must be set before PathExtrude object is rendered. Required for the class to work.
 		* @param	path					[optional] 	Path. Defines the <code>Path</code> object representing path to extrude along. Required for the class to work.
-		* @param	profile				[optional] 	Vector.<Vector3D>. Defines an Vector.<Vector3D> of Vector3D objects representing the profile information to be projected along the Path object. Required for the class to work.
+		* @param	profile				[optional] 	Vector.&lt;Vector3D&gt;. Defines an Vector.&lt;Vector3D&gt; of Vector3D objects representing the profile information to be projected along the Path object. Required for the class to work.
 		* @param	subdivision			[optional]	uint. Howmany steps between each PathSegment. If the path holds curves, the higher this value, the higher the curve fidelity. Default and minimum is 2;
 		* @param	coverall				[optional] 	Boolean. Defines the uv mapping, when true a unique material is stretched along the entire path/shape. Default is true.
 		* @param	coverSegment	[optional] 	Boolean. Defines the uv mapping, when true and coverall is false a unique material is stretched along one PathSegment. Default is false.
@@ -79,10 +79,10 @@ package away3d.extrusions{
 		* @param	mapfit				[optional]	Boolean. The UV mapping is percentually spreaded over the width of the path, making texture looking nicer and edits for applications such as a race track, road, more easy.
 		* @param	flip					[optional]	Boolean. If the faces must be reversed depending on Vector3D's orientation. Default is false.
 		* @param	closePath			[optional]	Boolean. If the last PathSegment entered must be welded back to first one. Executed in a straight manner, its recommanded to pass the first entry to the Path again, as last entry if curves are involved.
-		* @param	materials			[optional]	Vector.<MaterialBase>. An optional Vector.<MaterialBase> of different materials that can be alternated along the path if coverAll is false.
-		* @param	scales				[optional]	An optional Vector.<Vector3D> of <code>Vector3D</code> objects that defines a series of scales to be set on each PathSegment.
+		* @param	materials			[optional]	Vector.&lt;MaterialBase&gt;. An optional Vector.&lt;MaterialBase&gt; of different materials that can be alternated along the path if coverAll is false.
+		* @param	scales				[optional]	An optional Vector.&lt;Vector3D&gt; of <code>Vector3D</code> objects that defines a series of scales to be set on each PathSegment.
 		* @param	smoothScale		[optional]	Boolean. Defines if the scale must be interpolated between values or keep their full aspect on each PathSegment.
-		* @param	rotations			[optional]	An optional Vector.<Vector3D> of <code>Vector3D</code> objects that defines a series of rotations to be set on each PathSegment.
+		* @param	rotations			[optional]	An optional Vector.&lt;Vector3D&gt; of <code>Vector3D</code> objects that defines a series of rotations to be set on each PathSegment.
 		* @param	smoothSurface	[optional]	An optional Boolean. Defines if the surface of the mesh must be smoothed or not. Default is true.
 		*/
 		function PathExtrude(	material:MaterialBase = null, path:Path = null, profile:Vector.<Vector3D> = null, subdivision:uint = 2, coverAll:Boolean = true, coverSegment:Boolean = false, alignToPath:Boolean = true, centerMesh:Boolean = false, mapfit:Boolean = false,
@@ -187,7 +187,7 @@ package away3d.extrusions{
     	}
     	
 		/**
-    	 * Defines a Vector.<Vector3D> of Vector3D objects representing the profile information to be projected along the Path object. Required.
+    	 * Defines a Vector.&lt;Vector3D&gt; of Vector3D objects representing the profile information to be projected along the Path object. Required.
     	 */
 		public function get profile():Vector.<Vector3D>
     	{
@@ -205,7 +205,7 @@ package away3d.extrusions{
     	}
     	
 		/**
-    	 * An optional Vector.<Vector3D> of <code>Vector3D</code> objects that defines a series of scales to be set on each PathSegment.
+    	 * An optional Vector.&lt;Vector3D&gt; of <code>Vector3D</code> objects that defines a series of scales to be set on each PathSegment.
     	 */
 		public function get scales():Vector.<Vector3D>
     	{
@@ -219,7 +219,7 @@ package away3d.extrusions{
     	}
 		
 		/**
-    	 * An optional Vector.<Vector3D> of <code>Vector3D</code> objects that defines a series of rotations to be set on each PathSegment.
+    	 * An optional Vector.&lt;Vector3D&gt; of <code>Vector3D</code> objects that defines a series of rotations to be set on each PathSegment.
     	 */
 		public function get rotations():Vector.<Vector3D>
     	{
@@ -233,7 +233,7 @@ package away3d.extrusions{
     	}
 		
 		/**
-		 * An optional Vector.<MaterialBase>. It defines a series of materials to be set on each PathSegment if coverAll is set to false.
+		 * An optional Vector.&lt;MaterialBase&gt;. It defines a series of materials to be set on each PathSegment if coverAll is set to false.
     	 */
 		public function get materials():Vector.<MaterialBase>
     	{

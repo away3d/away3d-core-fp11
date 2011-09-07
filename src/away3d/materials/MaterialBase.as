@@ -190,10 +190,10 @@ package away3d.materials
 		/**
 		 * The blend mode to use when drawing this renderable. The following blend modes are supported:
 		 * <ul>
-		 * <li>BlendMode.NORMAL<li>
-		 * <li>BlendMode.MULTIPLY<li>
-		 * <li>BlendMode.ADD<li>
-		 * <li>BlendMode.ALPHA<li>
+		 * <li>BlendMode.NORMAL</li>
+		 * <li>BlendMode.MULTIPLY</li>
+		 * <li>BlendMode.ADD</li>
+		 * <li>BlendMode.ALPHA</li>
 		 * </ul>
 		 */
 		public function get blendMode() : String
