@@ -45,8 +45,8 @@
 		}
 		
 		/**
-		* Calculate the bounds from a vector of number representing the vertices. <x,y,z,x,y,z.....>
-		* @param vertices		Vector.<Number>. The vertices to get the bounds from.
+		* Calculate the bounds from a vector of number representing the vertices. &lt;x,y,z,x,y,z.....&gt;
+		* @param vertices		Vector.&lt;Number&gt;. The vertices to get the bounds from.
 		* Use the getters of this class to retrieve the results
 		*/
 		public static function getVerticesVectorBounds(vertices:Vector.<Number>):void

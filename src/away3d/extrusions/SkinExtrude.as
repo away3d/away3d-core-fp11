@@ -41,7 +41,7 @@
 		/*
 		* Class SkinExtrude generates (and becomes) a mesh from a multidimentional vector of vector3D's . <code>SkinExtrude</code>
 		*@param	material			MaterialBase. The SkinExtrude (Mesh) material
-		*@param	profiles			Vector.<Vector.<Vector3D>> Multidimentional vector of vectors holding the vector3d's defining the shape. < <va0, va1>, <vb0, vb1> >
+		*@param	profiles			Vector.&;t;Vector.&lt;Vector3D&gt;&gt; Multidimentional vector of vectors holding the vector3d's defining the shape. &lt; &lt;va0, va1&gt;, &lt;vb0, vb1&gt; &gt;
 		*@param	subdivision		[optional] uint. The _subdivision between vectors. Default is 1.
 		*@param	centerMesh	[optional] Boolean. If the final mesh must be _centerMeshed. Default is false.
 		*@param	closeShape		[optional] Boolean. If the last vector must be linked to the first vector. Default is false.
@@ -94,7 +94,7 @@
 		}
 		
 		/**
-		* Defines if the last vector of Vector3D are joined to the first one, closing the shape. works from 3 vector.<Vector3D> entered.
+		* Defines if the last vector of Vector3D are joined to the first one, closing the shape. works from 3 vector.&lt;Vector3D&gt; entered.
 		*/
     	public function get closeShape():Boolean
     	{

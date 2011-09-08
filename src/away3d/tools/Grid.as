@@ -38,8 +38,8 @@
 		}
 		
 		/**
-		*  Snaps to grid a given Vector.<Number> of vertices
-		* @param	 vertices		Vector.<Number>. The vertices vector
+		*  Snaps to grid a given Vector.&lt;Number&gt; of vertices
+		* @param	 vertices		Vector.&lt;Number&gt;. The vertices vector
 		*/		
 		public function snapVertices(vertices:Vector.<Number>):Vector.<Number>
 		{

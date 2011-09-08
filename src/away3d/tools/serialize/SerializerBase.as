@@ -81,7 +81,7 @@ package away3d.tools.serialize
 		}
 		
 		/**
-		 * Serialize Transform, in the form of Vector.<Number>
+		 * Serialize Transform, in the form of Vector.&lt;Number&gt;
 		 * @param name name of value being serialized
 		 * @param value value being serialized
 		 */

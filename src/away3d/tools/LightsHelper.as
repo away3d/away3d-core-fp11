@@ -20,7 +20,7 @@
 		* Applys a series of lights to all materials found into an objectcontainer and its children.
 		* The lights eventually set previously are replaced by the new ones.
 		* @param	 objectContainer3D 	ObjectContainer3D. The target ObjectContainer3D object to be inspected.
-		* @param	 lights						Vector.<LightBase>. A series of lights to be set to all materials found during parsing of the target ObjectContainer3D.
+		* @param	 lights						Vector.&lt;LightBase&gt;. A series of lights to be set to all materials found during parsing of the target ObjectContainer3D.
 		*/
 		public static function addLightsToMaterials(objectContainer3D:ObjectContainer3D, lights:Vector.<LightBase> ):void
 		{

@@ -20,8 +20,6 @@ package away3d.loaders.parsers
 		 * the auto-detection mechanisms altogether, while at the same time allowing
 		 * any properties that are unique to that parser to be set for that load.
 		 * 
-		 * @see away3d.loading.AssetLibrary.enableParser()
-		 * 
 		 * The bundled parsers are:
 		 * 
 		 * <ul>
@@ -35,6 +33,8 @@ package away3d.loaders.parsers
 		 * <li>3DMax (.3ds)</li>
 		 * <li>Images (.jpg, .png)</li>
 		 * </ul>
+		 * 
+		 * @see away3d.loading.AssetLibrary.enableParser
 		*/
 		public static const ALL_BUNDLED : Vector.<Class> = Vector.<Class>([
 			AC3DParser, AWDParser, Max3DSParser,
