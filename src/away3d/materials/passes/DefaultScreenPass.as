@@ -201,6 +201,11 @@ package away3d.materials.passes
 			invalidateShaderProgram();
 		}
 
+		public function getMethodAt(index : int) : ShadingMethodBase
+		{
+			return _methods[index];
+		}
+
 		/**
 		 * Removes a method from the pass.
 		 * @param method The method to be removed.

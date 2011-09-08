@@ -155,6 +155,11 @@
 			return _screenPass.hasMethod(method);
 		}
 
+		public function getMethodAt(index : int) : ShadingMethodBase
+		{
+			_screenPass.getMethodAt(index);
+		}
+
 		public function addMethodAt(method : ShadingMethodBase, index : int) : void
 		{
 			_screenPass.addMethodAt(method, index);
