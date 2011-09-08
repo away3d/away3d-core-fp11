@@ -206,6 +206,11 @@ package away3d.materials.passes
 			return _methods[index];
 		}
 
+		public function get numMethods() : int
+		{
+			return _methods.length;
+		}
+
 		/**
 		 * Removes a method from the pass.
 		 * @param method The method to be removed.

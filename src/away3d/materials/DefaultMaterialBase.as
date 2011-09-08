@@ -150,6 +150,11 @@
 			_screenPass.addMethod(method);
 		}
 
+		public function get numMethods() : int
+		{
+			return _screenPass.numMethods;
+		}
+
 		public function hasMethod(method : ShadingMethodBase) : Boolean
 		{
 			return _screenPass.hasMethod(method);
