@@ -72,7 +72,7 @@
 		*  Class LatheExtrude generates circular meshes such as donuts, pipes, pyramids etc.. from a series of Vector3D's
 		*
 		*@param		material				[optional] MaterialBase. The LatheExtrude (Mesh) material. Optional in constructor, material must be set before LatheExtrude object is render.
-		* @param		profile				[optional] Vector.<Vector3D>. A series of Vector3D's representing the profile information to be repeated/rotated around a given axis.
+		* @param		profile				[optional] Vector.&lt;Vector3D&gt;. A series of Vector3D's representing the profile information to be repeated/rotated around a given axis.
 		* @param		axis					[optional] String. The axis to rotate around: X_AXIS, Y_AXIS or Z_AXIS. Default is LatheExtrude.Y_AXIS.
 		* @param		revolutions			[optional] Number. The LatheExtrude object can have less than one revolution, like 0.6 for a piechart or greater than 1 if a tweek object is passed. Minimum is 0.01. Default is 1.	
 		* @param		subdivision			[optional] uint. Howmany segments will compose the mesh in its rotational construction. Minimum is 3. Default is 10.

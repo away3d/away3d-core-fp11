@@ -121,9 +121,9 @@
         }
 		
 		/**
-		 * returns the Vector.<PathSegment> holding the elements (PathSegment) of the path
+		 * returns the Vector.&lt;PathSegment&gt; holding the elements (PathSegment) of the path
 		 * 
-		 * @return	a Vector.<PathSegment>: holding the elements (PathSegment) of the path
+		 * @return	a Vector.&lt;PathSegment&gt;: holding the elements (PathSegment) of the path
 		 */
 		public function get segments():Vector.<PathSegment>
         {

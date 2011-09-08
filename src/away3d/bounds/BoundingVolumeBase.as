@@ -69,7 +69,7 @@ package away3d.bounds
 		}
 
 		/**
-		 * The maximum extrema of the bounds
+		 * The maximum extreme of the bounds
 		 */
 		public function get max() : Vector3D
 		{
@@ -77,7 +77,7 @@ package away3d.bounds
 		}
 
 		/**
-		 * The minimum extrema of the bounds
+		 * The minimum extreme of the bounds
 		 */
 		public function get min() : Vector3D
 		{
@@ -86,7 +86,7 @@ package away3d.bounds
 
 		/**
 		 * Updates the bounds to fit a list of vertices
-		 * @param vertices A Vector.<Number> of vertex data to be bounded.
+		 * @param vertices A Vector.&lt;Number&gt; of vertex data to be bounded.
 		 */
 		public function fromVertices(vertices : Vector.<Number>) : void
 		{
