@@ -632,8 +632,9 @@ package away3d.debug
 			// Only redraw polycount if there is a  view available
 			// or they won't have been calculated properly
 			if (_views.length > 0) {
-				_poly_tf.text = _rfaces.toString().concat(' / ', _tfaces);
-				
+//				_poly_tf.text = _rfaces.toString().concat(' / ', _tfaces); // TODO: Total faces not yet available in 4.x
+				_poly_tf.text = _rfaces + "";
+
 				// Plot rendered faces
 				dia_y = _dia_bmp.height - Math.floor(_rfaces/_tfaces * _dia_bmp.height);
 				_dia_bmp.setPixel32(1, dia_y, _POLY_COL+0xff000000);
