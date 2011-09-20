@@ -14,7 +14,6 @@
 	import away3d.materials.SegmentMaterial;
 	import away3d.primitives.data.Segment;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
@@ -24,11 +23,12 @@
 
 	public class SegmentSet extends Entity implements IRenderable
 	{
+		protected var _segments : Vector.<Segment>;
+
 		private var _material : MaterialBase;
 		private var _nullAnimation : NullAnimation;
 		private var _animationState : AnimationStateBase;
 		private var _vertices : Vector.<Number>;
-		protected var _segments : Vector.<Segment>;
 
 		private var _numVertices : uint;
 		private var _indices : Vector.<uint>;
@@ -164,6 +164,11 @@
 			}
 			_vertexBufferDirty = true;
 			_indexBufferDirty = true;
+		}
+
+		public function getSegment(index:uint):Segment
+		{
+			return _segments[index];
 		}
 
 		protected function clearSegments() : void
