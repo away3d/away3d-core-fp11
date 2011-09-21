@@ -39,8 +39,8 @@ package away3d.animators.data
 		}
 
 		/**
-		 * Indicates whether or not the vertex transformation happens on CPU or GPU. Returns false if it cannot run on GPU,
-		 * due to too many joints or too many joints per vertex.
+		 * Indicates whether or not the vertex transformation happens on CPU or GPU. Returns true if running on the CPU.
+		 * This can happen when the animation cannot run on GPU, due to too many joints or too many joints per vertex.
 		 */
 		public function get usesCPU() : Boolean
 		{
