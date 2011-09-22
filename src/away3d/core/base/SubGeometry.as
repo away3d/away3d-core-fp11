@@ -193,20 +193,40 @@ use namespace arcane;
 		public function applyTransformation(transform:Matrix3D):void
 		{
 			var len : uint = _vertices.length/3;
-			var i:uint, index:uint;
+			var i:uint, i0:uint, i1:uint, i2:uint;
 			var v3:Vector3D = new Vector3D();
 			for (i = 0; i < len; ++i) {
 
-				index = 3 * i;
-				v3.x = _vertices[index];
-				v3.y = _vertices[index + 1];
-				v3.z = _vertices[index + 2];
+				i0 = 3 * i;
+				i1 = i0 + 1;
+				i2 = i0 + 2;
 
+				// bake position
+				v3.x = _vertices[i0];
+				v3.y = _vertices[i1];
+				v3.z = _vertices[i2];
 				v3 = transform.transformVector(v3);
+				_vertices[i0] = v3.x;
+				_vertices[i1] = v3.y;
+				_vertices[i2] = v3.z;
 
-				_vertices[index] = v3.x;
-				_vertices[index + 1] = v3.y;
-				_vertices[index + 2] = v3.z;
+				// bake normal
+				v3.x = _vertexNormals[i0];
+				v3.y = _vertexNormals[i1];
+				v3.z = _vertexNormals[i2];
+				v3 = transform.deltaTransformVector(v3);
+				_vertexNormals[i0] = v3.x;
+				_vertexNormals[i1] = v3.y;
+				_vertexNormals[i2] = v3.z;
+
+				// bake tangent
+				v3.x = _vertexTangents[i0];
+				v3.y = _vertexTangents[i1];
+				v3.z = _vertexTangents[i2];
+				v3 = transform.deltaTransformVector(v3);
+				_vertexTangents[i0] = v3.x;
+				_vertexTangents[i1] = v3.y;
+				_vertexTangents[i2] = v3.z;
 			}
 		}
 
