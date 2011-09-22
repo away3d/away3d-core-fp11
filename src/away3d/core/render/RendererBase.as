@@ -304,5 +304,10 @@ package away3d.core.render
 			_backgroundImage = value;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.bitmapData = value;
 		}
+
+		public function get backgroundImageRenderer():BackgroundImageRenderer
+		{
+			return _backgroundImageRenderer;
+		}
 	}
 }
