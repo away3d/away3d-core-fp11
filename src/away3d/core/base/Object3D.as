@@ -100,6 +100,42 @@ package away3d.core.base
 			return _transform;
 		}
 
+		public function get forwardVector():Vector3D
+		{
+			return Matrix3DUtils.getForward(transform);
+		}
+
+		public function get rightVector():Vector3D
+		{
+			return Matrix3DUtils.getRight(transform);
+		}
+
+		public function get upVector():Vector3D
+		{
+			return Matrix3DUtils.getUp(transform);
+		}
+
+		public function get backVector():Vector3D
+		{
+			var director:Vector3D = Matrix3DUtils.getForward(transform);
+			director.negate();
+			return director;
+		}
+
+		public function get leftVector():Vector3D
+		{
+			var director:Vector3D = Matrix3DUtils.getRight(transform);
+			director.negate();
+			return director;
+		}
+
+		public function get downVector():Vector3D
+		{
+			var director:Vector3D = Matrix3DUtils.getUp(transform);
+			director.negate();
+			return director;
+		}
+
 		public function set transform(value : Matrix3D) : void
 		{
 			_transform.copyFrom(value);
