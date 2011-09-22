@@ -15,6 +15,7 @@ package away3d.core.render
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.Texture;
+	import flash.geom.Matrix3D;
 
 	public class BackgroundImageRenderer
 	{
@@ -25,10 +26,11 @@ package away3d.core.render
 		private var _texHeight : Number = -1;
 		private var _indexBuffer : IndexBuffer3D;
 		private var _vertexBuffer : VertexBuffer3D;
-		private var _ratioX : Number = -1;
-		private var _ratioY : Number = -1;
 		private var _stage3DProxy : Stage3DProxy;
 		private var _textureInvalid : Boolean = true;
+		private var _fitToViewPort:Boolean = true;
+		private var _viewWidth:Number;
+		private var _viewHeight:Number;
 
 		public function BackgroundImageRenderer(stage3DProxy : Stage3DProxy)
 		{
@@ -117,15 +119,13 @@ package away3d.core.render
 
 			var ratioX : Number = _bitmapData.width/_texWidth;
 			var ratioY : Number = _bitmapData.height/_texHeight;
-
-			if (_ratioX != ratioX || _ratioY != ratioY) {
-			    _ratioX = ratioX;
-				_ratioY = ratioY;
-				_vertexBuffer.uploadFromVector(Vector.<Number>([	-1, -1, 0, ratioY,
-																	1, -1, ratioX, ratioY,
-																	1,  1, ratioX, 0,
-																	-1,  1, 0, 0 ]), 0, 4);
-			}
+			var w:Number = _fitToViewPort ? 1 : _bitmapData.width / _viewWidth;
+			var h:Number = _fitToViewPort ? 1 : _bitmapData.height / _viewHeight;
+			_vertexBuffer.uploadFromVector(Vector.<Number>([	-w, -h,   0,      ratioY,
+																 w, -h,   ratioX, ratioY,
+																 w,  h,   ratioX, 0,
+																-w,  h,   0,      0
+														   ]), 0, 4);
 		}
 
 		public function get bitmapData() : BitmapData
@@ -150,6 +150,31 @@ package away3d.core.render
 			_textureInvalid = true;
 
 			_bitmapData = value;
+		}
+
+		public function get viewWidth():Number
+		{
+			return _viewWidth;
+		}
+
+		public function set viewWidth(value:Number):void
+		{
+			_viewWidth = value;
+		}
+
+		public function get viewHeight():Number
+		{
+			return _viewHeight;
+		}
+
+		public function set viewHeight(value:Number):void
+		{
+			_viewHeight = value;
+		}
+
+		public function set fitToViewPort(value:Boolean):void
+		{
+			_fitToViewPort = value;
 		}
 	}
 }

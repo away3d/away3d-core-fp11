@@ -19,6 +19,7 @@ package away3d.containers
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
+	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
@@ -60,6 +61,7 @@ package away3d.containers
 		private var _parentIsStage : Boolean;
 
 		private var _backgroundImage : BitmapData;
+		private var _bgImageFitToViewPort:Boolean = true;
 		private var _stage3DProxy : Stage3DProxy;
 		private var _backBufferInvalid : Boolean = true;
 		private var _antiAlias : uint;
@@ -103,10 +105,23 @@ package away3d.containers
 			return _backgroundImage;
 		}
 
+		public function set backgroundImageFitToViewPort(value:Boolean):void
+		{
+			_bgImageFitToViewPort = value;
+
+			if(_renderer.backgroundImageRenderer == null)
+				return;
+
+			_renderer.backgroundImageRenderer.fitToViewPort = value;
+		}
+
 		public function set backgroundImage(value : BitmapData) : void
 		{
 			_backgroundImage = value;
 			_renderer.backgroundImage = _backgroundImage;
+			_renderer.backgroundImageRenderer.viewWidth = _width;
+			_renderer.backgroundImageRenderer.viewHeight = _height;
+			_renderer.backgroundImageRenderer.fitToViewPort = _bgImageFitToViewPort;
 		}
 
 		private function initHitField() : void
@@ -280,6 +295,11 @@ package away3d.containers
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
 			if (_filter3DRenderer) _filter3DRenderer.viewWidth = value;
+			if (_renderer.backgroundImageRenderer != null)
+			{
+				_renderer.backgroundImageRenderer.viewWidth = _width;
+				_renderer.backgroundImageRenderer.viewHeight = _height;
+			}
 			invalidateBackBuffer();
 		}
 
