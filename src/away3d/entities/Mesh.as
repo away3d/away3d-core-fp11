@@ -49,6 +49,12 @@
 			this.material = material;
 			if (geometry) initGeometry();
 		}
+
+		public function bakeTransformations():void
+		{
+			geometry.applyTransformation(transform);
+			transform.identity();
+		}
 		
 		public override function get assetType() : String
 		{
