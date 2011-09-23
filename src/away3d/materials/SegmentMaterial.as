@@ -9,7 +9,7 @@ package away3d.materials {
 	use namespace arcane;
 
 	/**
-	 * WireframeMaterial is a material exclusively used to render wireframe object
+	 * SegmentMaterial is a material exclusively used to render wireframe object
 	 *
 	 * @see away3d.entities.Lines
 	 */
