@@ -182,14 +182,14 @@ package away3d.library
 		
 		
 		
-		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public function parse(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
 			return parseResource(data, parser, context, ns);
 		}
 		
-		public static function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public static function parse(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
-			return getInstance().parseData(data, parser, context, ns);
+			return getInstance().parse(data, parser, context, ns);
 		}
 		
 		
@@ -522,7 +522,7 @@ package away3d.library
 			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
-			return loader.parseData(data, '', parser, context, ns);
+			return loader.parse(data, '', parser, context, ns);
 		}
 		
 		

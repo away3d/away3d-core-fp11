@@ -75,18 +75,18 @@ package away3d.loaders
 		}
 		
 		
-		public function parseData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  ns : String = null) : AssetLoaderToken
+		public function parse(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  ns : String = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken;
 			
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
 				lib = AssetLibrary.getInstance(_assetLibId);
-				token = lib.parseData(data, parser, context, ns);
+				token = lib.parse(data, parser, context, ns);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
-				token = loader.parseData(data, '', parser, context, ns);
+				token = loader.parse(data, '', parser, context, ns);
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
