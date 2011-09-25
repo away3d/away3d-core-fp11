@@ -11,9 +11,8 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
 	import away3d.tools.utils.TextureUtils;
-
+	
 	import flash.display3D.textures.Texture;
-
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -27,6 +26,7 @@ package away3d.loaders.parsers
 	 */
 	public class AC3DParser extends ParserBase
 	{
+		private var _textData:String;
 		private var _container:ObjectContainer3D;
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
@@ -131,6 +131,8 @@ package away3d.loaders.parsers
 			// instead return each asset individually using finalizeAsset()
 			if (!_container)
 				_container = new ObjectContainer3D;
+			
+			_textData = getTextData();
 			
 			if(_textData.indexOf(creturn) == -1 || _textData.indexOf(creturn)> 10)
 				creturn = String.fromCharCode(13);

@@ -23,6 +23,7 @@ package away3d.loaders.parsers
 	 */
 	public class Max3DSParser extends ParserBase
 	{
+		private var _byteData : ByteArray;
 		private const LIMIT:uint = 64998;
 		private var _startedParsing : Boolean;
 		private var _mesh:Mesh;
@@ -184,6 +185,8 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing() : Boolean
 		{
+			_byteData = getByteData();
+			
 			if(!_startedParsing){
 				_startedParsing = true;
 				_byteData.position = 0;

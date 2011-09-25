@@ -22,6 +22,7 @@ package away3d.loaders.parsers
 	 */
 	public class AWD1Parser extends ParserBase
 	{
+		private var _textData:String;
 		private var _objs:Array;
 		private var _geos:Array;
 		private var _oList:Array;
@@ -123,6 +124,8 @@ package away3d.loaders.parsers
 		{
 			var line:String;
 			var creturn:String = String.fromCharCode(10);
+			
+			_textData = getTextData();
 			
 			if(_textData.indexOf("#t:bsp") != -1)
 				throw new Error("AWD1 holding BSP information is not supported");

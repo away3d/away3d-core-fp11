@@ -3,11 +3,13 @@ package away3d.loaders.parsers
 {
 
 	import away3d.library.assets.BitmapDataAsset;
-
+	
 	import flash.display.Bitmap;
 	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.utils.ByteArray;
+	
+	import mx.core.BitmapAsset;
 
 	/**
 
@@ -22,11 +24,9 @@ package away3d.loaders.parsers
 	public class ImageParser extends ParserBase
 
 	{
-
+		private var _byteData : ByteArray;
 		private var _startedParsing : Boolean;
-
 		private var _doneParsing : Boolean;
-
 		private var _loader : Loader;
 
 		
@@ -84,17 +84,16 @@ package away3d.loaders.parsers
 		 */
 
 		public static function supportsData(data : *) : Boolean
-
 		{
-
-			var ba : ByteArray;
-
+			//shortcut if asset is IFlexAsset
+			if (data is BitmapAsset)
+				return true;
 			
-
-			ba = ByteArray(data);
-
+			if (!(data is ByteArray))
+				return false;
 			
-
+			var ba : ByteArray = data as ByteArray;
+			
 			ba.position = 0;
 
 			if (ba.readUnsignedShort() == 0xffd8)
@@ -144,7 +143,17 @@ package away3d.loaders.parsers
 		protected override function proceedParsing() : Boolean
 
 		{
-
+			if (_data is BitmapAsset) {
+				var bitmapAsset:BitmapAsset = _data as BitmapAsset;
+				
+				var asset : BitmapDataAsset = new BitmapDataAsset(bitmapAsset.bitmapData);
+				finalizeAsset(asset, 'bitmap');
+				
+				return true;
+			}
+			
+			_byteData = getByteData();
+			
 			if (!_startedParsing) {
 
 				_loader = new Loader();

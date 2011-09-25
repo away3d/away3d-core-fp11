@@ -12,8 +12,9 @@ package away3d.loaders.parsers
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
-
+	
 	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 
 	use namespace arcane;
@@ -25,6 +26,7 @@ package away3d.loaders.parsers
 	{
 		public static var FPS : int = 6;
 		
+		private var _byteData : ByteArray;
 		private var _parsedHeader : Boolean;
 		private var _parsedUV : Boolean;
 		private var _parsedFaces : Boolean;
@@ -127,6 +129,8 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing() : Boolean
 		{
+			_byteData = getByteData();
+			
 			while (hasTime()) {
 				if (!_parsedHeader) {
 					_byteData.endian = Endian.LITTLE_ENDIAN;

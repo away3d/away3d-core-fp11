@@ -101,7 +101,7 @@ package away3d.loaders.parsers
 			if (!_parser) {
 				// Inspect data to find correct parser. AWD2 parser
 				// file inspection is the most reliable
-				if (AWD2Parser.supportsData(_byteData))
+				if (AWD2Parser.supportsData(_data))
 					_parser = new AWD2Parser();
 				else
 					_parser = new AWD1Parser();
@@ -120,15 +120,7 @@ package away3d.loaders.parsers
 				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				
-				// Start parsing using concrete parser
-				switch (_parser.dataFormat) {
-					case ParserDataFormat.BINARY:
-						_parser.parseBytesAsync(_byteData);
-						break;
-					case ParserDataFormat.PLAIN_TEXT:
-						_parser.parseTextAsync(_byteData.readUTFBytes(_byteData.bytesAvailable));
-						break;
-				}
+				_parser.parseASync(_data);
 			}
 			
 			// Because finishParsing() is overriden, we can stop

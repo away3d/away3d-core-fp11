@@ -282,14 +282,8 @@ package away3d.loaders.misc
 				_parser.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
-				switch (_parser.dataFormat) {
-					case ParserDataFormat.BINARY:
-						_parser.parseBytesAsync( ByteArray(data) );
-						break;
-					case ParserDataFormat.PLAIN_TEXT:
-						_parser.parseTextAsync( String(data) );
-						break;
-				}
+				
+				_parser.parseASync(data);
 			} else{
 				var msg:String = "No parser defined. To enable all parsers for auto-detection, use Parsers.enableAllBundled()";
 				if(hasEventListener(LoaderEvent.LOAD_ERROR)){

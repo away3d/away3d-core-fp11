@@ -23,6 +23,7 @@ package away3d.loaders.parsers
 	 */
 	public class OBJParser extends ParserBase
 	{
+		private var _textData:String;
 		private var _startedParsing : Boolean;
 		private var _charIndex:uint;
 		private var _oldIndex:uint;
@@ -152,6 +153,8 @@ package away3d.loaders.parsers
 			var line:String;
 			var creturn:String = String.fromCharCode(10);
 			var trunk:Array;
+			
+			_textData = getTextData();
 			
 			if(_textData.indexOf(creturn) == -1)
 				creturn = String.fromCharCode(13);
