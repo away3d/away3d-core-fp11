@@ -222,7 +222,7 @@ package away3d.entities
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set scene(value : Scene3D) : void
+		override public function set scene(value : Scene3D) : void
 		{
 			if (value == _scene) return;
 
