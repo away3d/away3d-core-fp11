@@ -195,6 +195,10 @@ use namespace arcane;
 			var len : uint = _vertices.length/3;
 			var i:uint, i0:uint, i1:uint, i2:uint;
 			var v3:Vector3D = new Vector3D();
+
+			var bakeNormals:Boolean = _vertexNormals != null;
+			var bakeTangents:Boolean = _vertexTangents != null;
+
 			for (i = 0; i < len; ++i) {
 
 				i0 = 3 * i;
@@ -211,22 +215,28 @@ use namespace arcane;
 				_vertices[i2] = v3.z;
 
 				// bake normal
-				v3.x = _vertexNormals[i0];
-				v3.y = _vertexNormals[i1];
-				v3.z = _vertexNormals[i2];
-				v3 = transform.deltaTransformVector(v3);
-				_vertexNormals[i0] = v3.x;
-				_vertexNormals[i1] = v3.y;
-				_vertexNormals[i2] = v3.z;
+				if(bakeNormals)
+				{
+					v3.x = _vertexNormals[i0];
+					v3.y = _vertexNormals[i1];
+					v3.z = _vertexNormals[i2];
+					v3 = transform.deltaTransformVector(v3);
+					_vertexNormals[i0] = v3.x;
+					_vertexNormals[i1] = v3.y;
+					_vertexNormals[i2] = v3.z;
+				}
 
 				// bake tangent
-				v3.x = _vertexTangents[i0];
-				v3.y = _vertexTangents[i1];
-				v3.z = _vertexTangents[i2];
-				v3 = transform.deltaTransformVector(v3);
-				_vertexTangents[i0] = v3.x;
-				_vertexTangents[i1] = v3.y;
-				_vertexTangents[i2] = v3.z;
+				if(bakeTangents)
+				{
+					v3.x = _vertexTangents[i0];
+					v3.y = _vertexTangents[i1];
+					v3.z = _vertexTangents[i2];
+					v3 = transform.deltaTransformVector(v3);
+					_vertexTangents[i0] = v3.x;
+					_vertexTangents[i1] = v3.y;
+					_vertexTangents[i2] = v3.z;
+				}
 			}
 		}
 
