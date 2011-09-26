@@ -2,6 +2,7 @@ package away3d.core.render
 {
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
+	import away3d.errors.InvalidTextureError;
 	import away3d.tools.utils.TextureUtils;
 
 	import com.adobe.utils.AGALMiniAssembler;
@@ -121,6 +122,8 @@ package away3d.core.render
 			var ratioY : Number = _bitmapData.height/_texHeight;
 			var w:Number = _fitToViewPort ? 1 : _bitmapData.width / _viewWidth;
 			var h:Number = _fitToViewPort ? 1 : _bitmapData.height / _viewHeight;
+			w = w > 1 ? 1 : w;
+			h = h > 1 ? 1 : h;
 			_vertexBuffer.uploadFromVector(Vector.<Number>([	-w, -h,   0,      ratioY,
 																 w, -h,   ratioX, ratioY,
 																 w,  h,   ratioX, 0,
@@ -135,6 +138,9 @@ package away3d.core.render
 
 		public function set bitmapData(value : BitmapData) : void
 		{
+			if (!TextureUtils.isBitmapDataValid(value))
+				throw new InvalidTextureError();
+
 			var w : Number = TextureUtils.getBestPowerOf2(value.width);
 			var h : Number = TextureUtils.getBestPowerOf2(value.height);
 
