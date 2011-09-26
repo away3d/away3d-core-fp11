@@ -1,7 +1,7 @@
 package away3d.loaders.parsers
 
 {
-
+	import away3d.arcane;
 	import away3d.library.assets.BitmapDataAsset;
 	
 	import flash.display.Bitmap;
@@ -10,7 +10,9 @@ package away3d.loaders.parsers
 	import flash.utils.ByteArray;
 	
 	import mx.core.BitmapAsset;
-
+	
+	use namespace arcane;
+	
 	/**
 
 	 * ImageParser provides a "parser" for natively supported image types (jpg, png). While it simply loads bytes into
@@ -141,13 +143,12 @@ package away3d.loaders.parsers
 		 */
 
 		protected override function proceedParsing() : Boolean
-
 		{
 			if (_data is BitmapAsset) {
 				var bitmapAsset:BitmapAsset = _data as BitmapAsset;
 				
 				var asset : BitmapDataAsset = new BitmapDataAsset(bitmapAsset.bitmapData);
-				finalizeAsset(asset, 'bitmap');
+				finalizeAsset(asset, _fileName);
 				
 				return true;
 			}
@@ -191,7 +192,7 @@ package away3d.loaders.parsers
 
 			
 
-			finalizeAsset(asset, 'bitmap');
+			finalizeAsset(asset, _fileName);
 
 		}
 

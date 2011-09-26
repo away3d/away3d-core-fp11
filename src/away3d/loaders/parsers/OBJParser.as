@@ -11,7 +11,7 @@ package away3d.loaders.parsers
 	import away3d.materials.BitmapMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.tools.utils.TextureUtils;
-
+	
 	import flash.display.BitmapData;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -173,8 +173,8 @@ package away3d.loaders.parsers
 				_objects = new Vector.<ObjectGroup>();
 				_objectIndex = 0;
 			}
-			
-			while(_charIndex<_stringLength && hasTime()){
+			var ht:Boolean = hasTime()
+			while(_charIndex<_stringLength && ht){
 				_charIndex = _textData.indexOf(creturn, _oldIndex);
 				
 				if(_charIndex == -1)
@@ -201,7 +201,7 @@ package away3d.loaders.parsers
 					
 				} catch(e:Error){
 					parsingFailure = true;
-					trace("parsing failure");
+					trace("parsing failure: " + e.message);
 					
 					//TODO: DEAL WITH THIS ERROR!
 					return PARSING_DONE;

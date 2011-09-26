@@ -1,12 +1,13 @@
 package away3d.loaders.misc
 {
+	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.events.ParserEvent;
 	import away3d.loaders.parsers.ImageParser;
 	import away3d.loaders.parsers.ParserBase;
 	import away3d.loaders.parsers.ParserDataFormat;
-
+	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.events.IOErrorEvent;
@@ -14,7 +15,9 @@ package away3d.loaders.misc
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
-
+	
+	use namespace arcane;
+	
 	/**
 	 * The SingleFileLoader is used to load a single file, as part of a resource.
 	 *
@@ -135,12 +138,16 @@ package away3d.loaders.misc
 		 * @param uri The identifier (url or id) of the object to be loaded, mainly used for resource management.
 		 * @param parser An optional parser object that will translate the data into a usable resource. If not provided, AssetLoader will attempt to auto-detect the file type.
 		 */
-		public function parseData(data : *, parser : ParserBase = null) : void
+		public function parseData(data : *, parser : ParserBase = null, req : URLRequest = null) : void
 		{
 			if (data is Class)
 				data = new data();
 			
-			if (parser) _parser = parser;
+			if (parser)
+				_parser = parser;
+			
+			_req = req;
+			
 			parse(data);
 		}
 		
@@ -254,7 +261,7 @@ package away3d.loaders.misc
 				dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED));
 			}
 			else {
-				parse(urlLoader.data);
+				parse(_data);
 			}
 		}
 		
@@ -283,6 +290,9 @@ package away3d.loaders.misc
 				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				
+				if (_req && _req.url)
+					_parser._fileName = _req.url;
+				
 				_parser.parseASync(data);
 			} else{
 				var msg:String = "No parser defined. To enable all parsers for auto-detection, use Parsers.enableAllBundled()";
@@ -310,6 +320,8 @@ package away3d.loaders.misc
 		 */
 		private function onParseComplete(event : ParserEvent) : void
 		{
+			this.dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED, this.url));//dispatch in front of removing listeners to allow any remaining asset events to propagate
+			
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
@@ -322,7 +334,6 @@ package away3d.loaders.misc
 			_parser.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
-			this.dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED, this.url));
 		}
 	}
 }

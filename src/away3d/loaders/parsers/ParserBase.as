@@ -42,6 +42,7 @@ package away3d.loaders.parsers
 	 */
 	public class ParserBase extends EventDispatcher
 	{
+		arcane var _fileName:String;
 		protected var _dataFormat : String;
 		protected var _data : *;
 		protected var _frameLimit : Number;

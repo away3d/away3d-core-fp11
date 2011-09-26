@@ -168,7 +168,7 @@ package away3d.loaders
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			loader.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_loadingDependency = dependency;
-
+			
 			// Get already loaded (or mapped) data if available
 			data = _loadingDependency.data;
 			if (_context && _loadingDependency.request && _context.hasDataForUrl(_loadingDependency.request.url))
@@ -186,7 +186,7 @@ package away3d.loaders
 					retrieveNext();
 				}
 				else {
-					loader.parseData(data, parser);
+					loader.parseData(data, parser, _loadingDependency.request);
 				}
 			}
 			else {
@@ -341,6 +341,8 @@ package away3d.loaders
 		private function onRetrievalComplete(event : LoaderEvent) : void
 		{
 			var loader : SingleFileLoader = SingleFileLoader(event.target);
+			prepareNextRetrieve(loader, event); //prepare next in front of removing listeners to allow any remaining asset events to propagate
+			
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
@@ -354,7 +356,6 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
-			prepareNextRetrieve(loader, event);
 		}
 		
 		/**
