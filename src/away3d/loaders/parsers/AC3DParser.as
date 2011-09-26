@@ -27,6 +27,7 @@ package away3d.loaders.parsers
 	public class AC3DParser extends ParserBase
 	{
 		private var _textData:String;
+		private var _startedParsing : Boolean;
 		private var _container:ObjectContainer3D;
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
@@ -132,7 +133,10 @@ package away3d.loaders.parsers
 			if (!_container)
 				_container = new ObjectContainer3D;
 			
-			_textData = getTextData();
+			if(!_startedParsing) {
+				_textData = getTextData();
+				_startedParsing = true;
+			}
 			
 			if(_textData.indexOf(creturn) == -1 || _textData.indexOf(creturn)> 10)
 				creturn = String.fromCharCode(13);

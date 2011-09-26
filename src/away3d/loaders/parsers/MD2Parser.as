@@ -27,6 +27,7 @@ package away3d.loaders.parsers
 		public static var FPS : int = 6;
 		
 		private var _byteData : ByteArray;
+		private var _startedParsing : Boolean;
 		private var _parsedHeader : Boolean;
 		private var _parsedUV : Boolean;
 		private var _parsedFaces : Boolean;
@@ -129,7 +130,10 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing() : Boolean
 		{
-			_byteData = getByteData();
+			if(!_startedParsing) {
+				_byteData = getByteData();
+				_startedParsing = true;
+			}
 			
 			while (hasTime()) {
 				if (!_parsedHeader) {

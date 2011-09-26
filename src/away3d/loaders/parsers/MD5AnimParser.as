@@ -20,6 +20,7 @@ package away3d.loaders.parsers
 	public class MD5AnimParser extends ParserBase
 	{
 		private var _textData:String;
+		private var _startedParsing : Boolean;
 		private static const VERSION_TOKEN : String = "MD5Version";
 		private static const COMMAND_LINE_TOKEN : String = "commandline";
 		private static const NUM_FRAMES_TOKEN : String = "numFrames";
@@ -107,7 +108,10 @@ package away3d.loaders.parsers
 		{
 			var token : String;
 			
-			_textData = getTextData();
+			if(!_startedParsing) {
+				_textData = getTextData();
+				_startedParsing = true;
+			}
 			
 			while (hasTime()) {
 				token = getNextToken();

@@ -154,7 +154,8 @@ package away3d.loaders.parsers
 			var creturn:String = String.fromCharCode(10);
 			var trunk:Array;
 			
-			_textData = getTextData();
+			if(!_startedParsing)
+				_textData = getTextData();
 			
 			if(_textData.indexOf(creturn) == -1)
 				creturn = String.fromCharCode(13);
@@ -173,8 +174,8 @@ package away3d.loaders.parsers
 				_objects = new Vector.<ObjectGroup>();
 				_objectIndex = 0;
 			}
-			var ht:Boolean = hasTime()
-			while(_charIndex<_stringLength && ht){
+			
+			while(_charIndex<_stringLength && hasTime()){
 				_charIndex = _textData.indexOf(creturn, _oldIndex);
 				
 				if(_charIndex == -1)

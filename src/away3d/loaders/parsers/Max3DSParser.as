@@ -185,9 +185,9 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing() : Boolean
 		{
-			_byteData = getByteData();
 			
 			if(!_startedParsing){
+				_byteData = getByteData();
 				_startedParsing = true;
 				_byteData.position = 0;
 				_byteData.endian = Endian.LITTLE_ENDIAN;

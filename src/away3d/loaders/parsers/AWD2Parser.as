@@ -38,6 +38,7 @@ package away3d.loaders.parsers
 	public class AWD2Parser extends ParserBase
 	{
 		private var _byteData : ByteArray;
+		private var _startedParsing : Boolean;
 		private var _cur_block_id : uint;
 		private var _blocks : Vector.<AWDBlock>;
 		
@@ -174,7 +175,10 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing() : Boolean
 		{
-			_byteData = getByteData();
+			if(!_startedParsing) {
+				_byteData = getByteData();
+				_startedParsing = true;
+			}
 			
 			if (!_parsed_header) {
 				_byteData.endian = Endian.BIG_ENDIAN;
