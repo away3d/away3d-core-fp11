@@ -5,7 +5,6 @@ package away3d.materials
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
@@ -35,14 +34,11 @@ package away3d.materials
 		 */
 		public var extra : Object;
 
-		private var _materialLibrary : MaterialLibrary;
-
 		// this value is usually derived from other settings
 		arcane var _uniqueId : int;
 
 		arcane var _renderOrderId : int;
 		arcane var _name : String = "material";
-		private var _namespace : String = "";
 
 		private var _bothSides : Boolean;
 		private var _animation : AnimationBase;
@@ -72,8 +68,6 @@ package away3d.materials
 		 */
 		public function MaterialBase()
 		{
-			_materialLibrary = MaterialLibrary.getInstance();
-			_materialLibrary.registerMaterial(this);
 			_owners = new Vector.<IMaterialOwner>();
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
@@ -141,28 +135,12 @@ package away3d.materials
 		}
 
 		/**
-		 * Sets the materials name and namespace.
-		 * @param name The name of the material.
-		 * @param materialNameSpace The name space of the material.
-		 */
-		public function setNameAndSpace(name : String, materialNameSpace : String) : void
-		{
-			materialNameSpace ||= "";
-			_materialLibrary.unsetName(this);
-			_namespace = materialNameSpace;
-			_name = name;
-			_materialLibrary.setName(this);
-		}
-
-		/**
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
 		public function dispose(deep : Boolean) : void
 		{
 			var i : uint;
-
-			_materialLibrary.unregisterMaterial(this);
 
 			for (i = 0; i < _numPasses; ++i) _passes[i].dispose(deep);
 
@@ -247,21 +225,6 @@ package away3d.materials
 			return _uniqueId;
 		}
 
-		/**
-		 * The namespace of the material, used by the MaterialLibrary.
-		 */
-		public function get materialNamespace() : String
-		{
-			return _namespace;
-		}
-
-		public function set materialNamespace(value : String) : void
-		{
-			_materialLibrary.unsetName(this);
-			_namespace = value;
-			_materialLibrary.setName(this);
-		}
-
 		public override function get name() : String
 		{
 			return _name;
@@ -269,9 +232,7 @@ package away3d.materials
 
 		public override function set name(value : String) : void
 		{
-			_materialLibrary.unsetName(this);
 			_name = value;
-			_materialLibrary.setName(this);
 		}
 
 
@@ -353,8 +314,7 @@ package away3d.materials
 // MATERIAL MANAGEMENT
 //
 		/**
-		 * Mark an IMaterialOwner as owner of this material. It's also used by the material library to ensure materials
-		 * are correctly replaced.
+		 * Mark an IMaterialOwner as owner of this material.
 		 * Assures we're not using the same material across renderables with different animations, since the
 		 * Program3Ds depend on animation. This method needs to be called when a material is assigned.
 		 *

@@ -1,10 +1,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.BitmapDataTextureCache;
+	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -21,8 +21,8 @@ package away3d.materials.methods
     public class TerrainDiffuseMethod extends BasicDiffuseMethod
     {
         private var _blendData : BitmapData;
-        private var _blendingTexture : Texture3DProxy;
-        private var _splats : Vector.<Texture3DProxy>;
+        private var _blendingTexture : BitmapTexture;
+        private var _splats : Vector.<BitmapTexture>;
         private var _tileData : Vector.<Number>;
         private var _numSplattingLayers : uint;
         private var _tileRegisterIndex : int;
@@ -36,7 +36,7 @@ package away3d.materials.methods
         {
             super();
             _tileData = new Vector.<Number>(4, true);
-            _splats = new Vector.<Texture3DProxy>(3, true);
+            _splats = new Vector.<BitmapTexture>(3, true);
         }
 
         public function setSplattingLayer(index : uint, texture : BitmapData, alpha : BitmapData, tile : Number = 50) : void
@@ -48,8 +48,8 @@ package away3d.materials.methods
 				_numSplattingLayers = index+1;
 
             _blendData ||= new BitmapData(alpha.width, alpha.height, false, 0);
-            _blendingTexture ||= new Texture3DProxy();
-            _blendingTexture.bitmapData = _blendData;
+            if (_blendingTexture) _blendingTexture.bitmapData = _blendData;
+			else _blendingTexture = new BitmapTexture(_blendData);
 
             if (_blendData.width != alpha.width || _blendData.height != alpha.height)
                 throw new Error("Alpha maps for each splatting layer need to be of equal size!");
@@ -62,9 +62,9 @@ package away3d.materials.methods
             _blendingTexture.invalidateContent();
 
 			if (_splats[index])
-				BitmapDataTextureCache.getInstance().freeTexture(_splats[index]);
+				BitmapTextureCache.getInstance().freeTexture(_splats[index]);
 
-            _splats[index] = BitmapDataTextureCache.getInstance().getTexture(texture);
+            _splats[index] = BitmapTextureCache.getInstance().getTexture(texture);
             _tileData[index] = tile;
         }
 
@@ -163,13 +163,14 @@ package away3d.materials.methods
         override public function dispose(deep : Boolean) : void
         {
 			super.dispose(deep);
-			_blendingTexture.dispose(true);
+			_blendingTexture.dispose();
+			_blendingTexture.bitmapData.dispose();
 
 			var len : int = _splats.length;
 
 			for (var i : int = 0; i < len; ++i) {
 				if (_splats[i])
-					BitmapDataTextureCache.getInstance().freeTexture(_splats[i]);
+					BitmapTextureCache.getInstance().freeTexture(_splats[i]);
 			}
         }
 

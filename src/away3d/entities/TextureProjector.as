@@ -3,8 +3,8 @@ package away3d.entities
 	import away3d.arcane;
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.managers.BitmapDataTextureCache;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTextureCache;
+	import away3d.textures.BitmapTexture;
 	import away3d.events.LensEvent;
 
 	import flash.display.BitmapData;
@@ -18,7 +18,7 @@ package away3d.entities
 		private var _lens : PerspectiveLens;
 		private var _viewProjectionInvalid : Boolean = true;
 		private var _viewProjection : Matrix3D = new Matrix3D();
-		private var _texture : Texture3DProxy;
+		private var _texture : BitmapTexture;
 
 		public function TextureProjector(bitmapData : BitmapData)
 		{
@@ -26,7 +26,7 @@ package away3d.entities
 			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onInvalidateLensMatrix, false, 0, true);
 //			_texture = new Texture3DProxy();
 //			_texture.bitmapData = bitmapData;
-			_texture = BitmapDataTextureCache.getInstance().getTexture(bitmapData);
+			_texture = BitmapTextureCache.getInstance().getTexture(bitmapData);
 			_lens.aspectRatio = bitmapData.width/bitmapData.height;
 //			lookAt(new Vector3D(0, -1000, 0));
 			rotationX = -90;
@@ -60,8 +60,8 @@ package away3d.entities
 		public function set bitmapData(value : BitmapData) : void
 		{
 			if (value == _texture.bitmapData) return;
-			BitmapDataTextureCache.getInstance().freeTexture(_texture);
-			_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+			BitmapTextureCache.getInstance().freeTexture(_texture);
+			_texture = BitmapTextureCache.getInstance().getTexture(value);
 		}
 
 		public function get viewProjection() : Matrix3D
@@ -77,7 +77,7 @@ package away3d.entities
 		override public function dispose(deep : Boolean) : void
 		{
 			super.dispose(deep);
-			BitmapDataTextureCache.getInstance().freeTexture(_texture);
+			BitmapTextureCache.getInstance().freeTexture(_texture);
 		}
 
 		/**
@@ -94,7 +94,7 @@ package away3d.entities
 			_viewProjectionInvalid = true;
 		}
 
-		arcane function get texture() : Texture3DProxy
+		arcane function get texture() : BitmapTexture
 		{
 			return _texture;
 		}

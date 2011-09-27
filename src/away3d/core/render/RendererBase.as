@@ -2,7 +2,7 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTexture;
 	import away3d.core.sort.EntitySorterBase;
 	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;

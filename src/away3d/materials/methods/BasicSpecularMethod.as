@@ -1,9 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.BitmapDataTextureCache;
+	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -27,7 +27,7 @@ package away3d.materials.methods
 		protected var _specularDataRegister : ShaderRegisterElement;
 		protected var _specularDataIndex : int;
 
-		private var _texture : Texture3DProxy;
+		private var _texture : BitmapTexture;
 
 		protected var _specularData : Vector.<Number>;
 		private var _specular : Number = 1;
@@ -115,14 +115,14 @@ package away3d.materials.methods
 				invalidateShaderProgram();
 
 			if (_useTexture) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				BitmapTextureCache.getInstance().freeTexture(_texture);
 				_texture = null;
 			}
 
 			_useTexture = Boolean(value);
 
 			if (_useTexture)
-				_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+				_texture = BitmapTextureCache.getInstance().getTexture(value);
 		}
 
 		/**
@@ -215,7 +215,7 @@ package away3d.materials.methods
 		override public function dispose(deep : Boolean) : void
 		{
 			if (_useTexture) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				BitmapTextureCache.getInstance().freeTexture(_texture);
 				_texture = null;
 			}
 

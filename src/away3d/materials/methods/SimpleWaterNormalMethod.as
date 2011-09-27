@@ -1,9 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.BitmapDataTextureCache;
+	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTexture;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -16,7 +16,7 @@ package away3d.materials.methods
 
 	public class SimpleWaterNormalMethod extends BasicNormalMethod
 	{
-		private var _texture2 : Texture3DProxy;
+		private var _texture2 : BitmapTexture;
 		private var _normalTextureRegister2 : ShaderRegisterElement;
 		private var _normalMapIndex2 : int;
 		private var _data : Vector.<Number>;
@@ -92,9 +92,9 @@ package away3d.materials.methods
 			if (value == normalMap) return;
 
 			if (_texture2)
-				BitmapDataTextureCache.getInstance().freeTexture(_texture2);
+				BitmapTextureCache.getInstance().freeTexture(_texture2);
 
-			_texture2 = BitmapDataTextureCache.getInstance().getTexture(value);
+			_texture2 = BitmapTextureCache.getInstance().getTexture(value);
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -113,7 +113,7 @@ package away3d.materials.methods
 		{
 			super.dispose(deep);
 			if (_texture2) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture2);
+				BitmapTextureCache.getInstance().freeTexture(_texture2);
 				_texture2 = null;
 			}
 		}

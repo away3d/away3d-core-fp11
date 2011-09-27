@@ -1,11 +1,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.CubeTexture3DProxy;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.CubeTextureProxyBase;
 
 	use namespace arcane;
 
@@ -15,17 +14,16 @@ package away3d.materials.methods
 	 */
 	public class EnvMapDiffuseMethod extends BasicDiffuseMethod
 	{
-		private var _cubeTexture : CubeTexture3DProxy;
+		private var _cubeTexture : CubeTextureProxyBase;
 		private var _cubeMapIndex : int;
 
 		/**
 		 * Creates a new EnvMapDiffuseMethod object.
 		 * @param envMap The cube environment map to use for the diffuse lighting.
 		 */
-		public function EnvMapDiffuseMethod(envMap : CubeMap)
+		public function EnvMapDiffuseMethod(envMap : CubeTextureProxyBase)
 		{
-			_cubeTexture = new CubeTexture3DProxy();
-			_cubeTexture.cubeMap = envMap;
+			_cubeTexture = envMap;
 		}
 
 		arcane override function reset() : void
@@ -39,20 +37,19 @@ package away3d.materials.methods
 		 */
 		override public function dispose(deep : Boolean) : void
 		{
-			_cubeTexture.dispose(deep);
 		}
 
 		/**
 		 * The cube environment map to use for the diffuse lighting.
 		 */
-		public function get envMap() : CubeMap
+		public function get envMap() : CubeTextureProxyBase
 		{
-			return _cubeTexture.cubeMap;
+			return _cubeTexture;
 		}
 
-		public function set envMap(value : CubeMap) : void
+		public function set envMap(value : CubeTextureProxyBase) : void
 		{
-			_cubeTexture.cubeMap = value;
+			_cubeTexture = value;
 		}
 
 		/**
@@ -71,7 +68,7 @@ package away3d.materials.methods
 		{
 			super.activate(stage3DProxy);
 
-			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
+			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 //		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void

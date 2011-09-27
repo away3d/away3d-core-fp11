@@ -4,11 +4,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.CubeTexture3DProxy;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.CubeTextureProxyBase;
 
 	import flash.display3D.Context3DProgramType;
 
@@ -16,18 +15,30 @@ package away3d.materials.methods
 
 	public class EnvMapMethod extends ShadingMethodBase
 	{
-		private var _cubeTexture : CubeTexture3DProxy;
+		private var _cubeTexture : CubeTextureProxyBase;
 		private var _cubeMapIndex : int;
 		private var _data : Vector.<Number>;
 		private var _dataIndex : int;
 
-		public function EnvMapMethod(envMap : CubeMap, alpha : Number = 1)
+		public function EnvMapMethod(envMap : CubeTextureProxyBase, alpha : Number = 1)
 		{
 			super(true, true, false);
-			_cubeTexture = new CubeTexture3DProxy();
-			_cubeTexture.cubeMap = envMap;
+			_cubeTexture = envMap;
 			_data = new Vector.<Number>(4, true);
 			_data[0] = alpha;
+		}
+
+		/**
+		 * The cube environment map to use for the diffuse lighting.
+		 */
+		public function get envMap() : CubeTextureProxyBase
+		{
+			return _cubeTexture;
+		}
+
+		public function set envMap(value : CubeTextureProxyBase) : void
+		{
+			_cubeTexture = value;
 		}
 
 
@@ -43,7 +54,6 @@ package away3d.materials.methods
 		 */
 		override public function dispose(deep : Boolean) : void
 		{
-			_cubeTexture.dispose(deep);
 		}
 
 		public function get alpha() : Number
@@ -59,7 +69,7 @@ package away3d.materials.methods
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
-			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
+			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 //		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void

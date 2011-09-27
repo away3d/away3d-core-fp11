@@ -1,9 +1,9 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.BitmapDataTextureCache;
+	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -13,7 +13,7 @@ package away3d.materials.methods
 
 	public class BasicNormalMethod extends ShadingMethodBase
 	{
-		private var _texture : Texture3DProxy;
+		private var _texture : BitmapTexture;
 		private var _useTexture : Boolean;
 		protected var _normalMapIndex : int = -1;
 		protected var _normalTextureRegister : ShaderRegisterElement;
@@ -54,14 +54,14 @@ package away3d.materials.methods
 				invalidateShaderProgram();
 
 			if (_useTexture) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				BitmapTextureCache.getInstance().freeTexture(_texture);
 				_texture = null;
 			}
 
 			_useTexture = Boolean(value);
 
 			if (_useTexture)
-				_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+				_texture = BitmapTextureCache.getInstance().getTexture(value);
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -78,7 +78,7 @@ package away3d.materials.methods
 		override public function dispose(deep : Boolean) : void
 		{
 			if (_texture) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture);
+				BitmapTextureCache.getInstance().freeTexture(_texture);
 				_texture = null;
 			}
 		}
