@@ -293,7 +293,7 @@ package away3d.loaders.misc
 				if (_req && _req.url)
 					_parser._fileName = _req.url;
 				
-				_parser.parseASync(data);
+				_parser.parseAsync(data);
 			} else{
 				var msg:String = "No parser defined. To enable all parsers for auto-detection, use Parsers.enableAllBundled()";
 				if(hasEventListener(LoaderEvent.LOAD_ERROR)){

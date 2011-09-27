@@ -157,7 +157,7 @@ package away3d.loaders.parsers
 		 * actual time spent on a frame can exceed this number since time-checks can
 		 * only be performed between logical sections of the parsing procedure.
 		 */
-		public function parseASync(data : *, frameLimit : Number = 30) : void
+		public function parseAsync(data : *, frameLimit : Number = 30) : void
 		{
 			_data = data;
 			
