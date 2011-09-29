@@ -10,9 +10,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
-	import away3d.tools.utils.TextureUtils;
-	
-	import flash.display3D.textures.Texture;
+
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;

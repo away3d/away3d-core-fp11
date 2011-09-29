@@ -1,15 +1,11 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
-	import flash.display.BitmapDataChannel;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
@@ -107,14 +103,6 @@ package away3d.materials.methods
 			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
 			_texture = value
-		}
-
-		/**
-		 * Marks the texture for update next on the next render.
-		 */
-		public function invalidateBitmapData() : void
-		{
-			if (_texture) _texture.invalidateContent();
 		}
 
 		/**
@@ -221,36 +209,36 @@ package away3d.materials.methods
 			var code : String = "";
 			var t : ShaderRegisterElement;
 
-            if (lightIndex > 0) {
-                t = regCache.getFreeFragmentVectorTemp();
-                regCache.addFragmentTempUsages(t, 1);
-            }
-            else t = _totalLightColorReg;
+			if (lightIndex > 0) {
+				t = regCache.getFreeFragmentVectorTemp();
+				regCache.addFragmentTempUsages(t, 1);
+			}
+			else t = _totalLightColorReg;
 
 			// half vector
-			code += "add " + t+".xyz, " + lightDirReg+".xyz, " + _viewDirFragmentReg+".xyz\n" +
-					"nrm " + t+".xyz, " + t+".xyz\n" +
-					"dp3 " + t+".w, " + _normalFragmentReg+".xyz, " + t+".xyz\n" +
-					"sat " + t+".w, " + t+".w\n";
+			code += "add " + t + ".xyz, " + lightDirReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n" +
+					"nrm " + t + ".xyz, " + t + ".xyz\n" +
+					"dp3 " + t + ".w, " + _normalFragmentReg + ".xyz, " + t + ".xyz\n" +
+					"sat " + t + ".w, " + t + ".w\n";
 
 			if (_useTexture) {
-				code += "mul " + _specularTexData+".w, " + _specularTexData+".y, " + _specularDataRegister+".w\n" +
-						"pow " + t+".w, " + t+".w, " + _specularTexData+".w\n";
+				code += "mul " + _specularTexData + ".w, " + _specularTexData + ".y, " + _specularDataRegister + ".w\n" +
+						"pow " + t + ".w, " + t + ".w, " + _specularTexData + ".w\n";
 			}
 			else
-				code += "pow " + t+".w, " + t+".w, " + _specularDataRegister+".w\n";
+				code += "pow " + t + ".w, " + t + ".w, " + _specularDataRegister + ".w\n";
 
 			// attenuate
-			code += "mul " + t+".w, " + t+".w, " + lightDirReg+".w\n";
+			code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 
-			code += "mul " + t+".xyz, " + lightColReg+".xyz, " + t+".w\n";
+			code += "mul " + t + ".xyz, " + lightColReg + ".xyz, " + t + ".w\n";
 
 			if (lightIndex > 0) {
-                code += "add " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + t+".xyz\n";
-                regCache.removeFragmentTempUsage(t);
-            }
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
+				regCache.removeFragmentTempUsage(t);
+			}
 
 			return code;
 		}
@@ -268,15 +256,15 @@ package away3d.materials.methods
 			}
 
 			if (_shadowRegister)
-				code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _shadowRegister+".w\n";
+				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
 
 			if (_useTexture) {
-				code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _specularTexData+".x\n";
+				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _specularTexData + ".x\n";
 				regCache.removeFragmentTempUsage(_specularTexData);
 			}
 
-			code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _specularDataRegister+".xyz\n" +
-					"add " + targetReg+".xyz, " + targetReg+".xyz, " + _totalLightColorReg+".xyz\n";
+			code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _specularDataRegister + ".xyz\n" +
+					"add " + targetReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n";
 			regCache.removeFragmentTempUsage(_totalLightColorReg);
 
 			return code;
@@ -305,9 +293,9 @@ package away3d.materials.methods
 		 */
 		private function updateSpecular() : void
 		{
-			_specularData[0] = _specularR = ((_specularColor >> 16) & 0xff)/0xff*_specular;
-			_specularData[1] = _specularG = ((_specularColor >> 8) & 0xff)/0xff*_specular;
-			_specularData[2] = _specularB = (_specularColor & 0xff)/0xff*_specular;
+			_specularData[0] = _specularR = ((_specularColor >> 16) & 0xff) / 0xff * _specular;
+			_specularData[1] = _specularG = ((_specularColor >> 8) & 0xff) / 0xff * _specular;
+			_specularData[2] = _specularB = (_specularColor & 0xff) / 0xff * _specular;
 		}
 
 		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void

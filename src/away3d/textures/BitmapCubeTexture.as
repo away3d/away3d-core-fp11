@@ -1,6 +1,3 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.textures
 {
 	import away3d.arcane;
@@ -8,7 +5,6 @@ package away3d.textures
 	import away3d.tools.utils.TextureUtils;
 
 	import flash.display.BitmapData;
-	import flash.display3D.textures.CubeTexture;
 	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;
@@ -17,9 +13,7 @@ package away3d.textures
 	{
 		private var _bitmapDatas : Vector.<BitmapData>;
 
-		public function BitmapCubeTexture(	posX : BitmapData, negX : BitmapData,
-											posY : BitmapData, negY : BitmapData,
-											posZ : BitmapData, negZ : BitmapData)
+		public function BitmapCubeTexture(posX : BitmapData, negX : BitmapData, posY : BitmapData, negY : BitmapData, posZ : BitmapData, negZ : BitmapData)
 		{
 			super();
 
@@ -46,7 +40,7 @@ package away3d.textures
 		{
 			testSize(value);
 			invalidateContent();
-			setSize(value.width,  value.height);
+			setSize(value.width, value.height);
 			_bitmapDatas[0] = value;
 		}
 
@@ -62,7 +56,7 @@ package away3d.textures
 		{
 			testSize(value);
 			invalidateContent();
-			setSize(value.width,  value.height);
+			setSize(value.width, value.height);
 			_bitmapDatas[1] = value;
 		}
 
@@ -78,7 +72,7 @@ package away3d.textures
 		{
 			testSize(value);
 			invalidateContent();
-			setSize(value.width,  value.height);
+			setSize(value.width, value.height);
 			_bitmapDatas[2] = value;
 		}
 
@@ -94,7 +88,7 @@ package away3d.textures
 		{
 			testSize(value);
 			invalidateContent();
-			setSize(value.width,  value.height);
+			setSize(value.width, value.height);
 			_bitmapDatas[3] = value;
 		}
 
@@ -110,7 +104,7 @@ package away3d.textures
 		{
 			testSize(value);
 			invalidateContent();
-			setSize(value.width,  value.height);
+			setSize(value.width, value.height);
 			_bitmapDatas[4] = value;
 		}
 
@@ -126,7 +120,7 @@ package away3d.textures
 		{
 			testSize(value);
 			invalidateContent();
-			setSize(value.width,  value.height);
+			setSize(value.width, value.height);
 			_bitmapDatas[5] = value;
 		}
 

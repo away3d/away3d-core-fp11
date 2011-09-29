@@ -418,6 +418,12 @@ package away3d.core.render
 			}
 		}
 
+		arcane override function dispose() : void
+		{
+			super.dispose();
+			_bitmapData.dispose();
+		}
+
 		/**
 		 * Finds the precise hit position by unprojecting the screen coordinate back unto the hit face's plane and
 		 * calculating the intersection point.

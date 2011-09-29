@@ -8,18 +8,14 @@
 	use namespace arcane;
 
 	/**
-	 * BitmapMaterial is a material that uses a BitmapData texture as the surface's diffuse colour.
+	 * TextureMaterial is a material that uses a texture as the surface's diffuse colour.
 	 */
 	public class TextureMaterial extends DefaultMaterialBase
 	{
 		private var _alphaBlending : Boolean;
 
 		/**
-		 * Creates a new BitmapMaterial.
-		 * @param bitmapData The BitmapData object to use as the texture.
-		 * @param smooth Indicates whether or not the texture should use smoothing.
-		 * @param repeat Indicates whether or not the texture should be tiled.
-		 * @param mipmap Indicates whether or not the texture should use mipmapping.
+		 * Creates a new TextureMaterial.
 		 */
 		public function TextureMaterial(texture : Texture2DProxyBase = null, smooth : Boolean = true, repeat : Boolean = false, mipmap : Boolean = true)
 		{
@@ -63,7 +59,7 @@
 //		}
 
 		/**
-		 * The BitmapData object to use as the texture.
+		 * The texture object to use for the albedo colour.
 		 */
 		public function get texture() : Texture2DProxyBase
 		{

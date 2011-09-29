@@ -2,20 +2,15 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.textures.BitmapTexture;
 	import away3d.core.sort.EntitySorterBase;
 	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.Stage3DEvent;
-
-	import flash.display.BitmapData;
-
-	import flash.display.BitmapData;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
@@ -43,7 +38,7 @@ package away3d.core.render
 
 		private var _renderableSorter : EntitySorterBase;
 		private var _backgroundImageRenderer : BackgroundImageRenderer;
-		private var _backgroundImage : BitmapData;
+		private var _background : Texture2DProxyBase;
 
 		/**
 		 * Creates a new RendererBase object.
@@ -286,12 +281,12 @@ package away3d.core.render
 			_backgroundAlpha = value;
 		}
 
-		arcane function get backgroundImage() : BitmapData
+		arcane function get background() : Texture2DProxyBase
 		{
-			return _backgroundImage;
+			return _background;
 		}
 
-		arcane function set backgroundImage(value : BitmapData) : void
+		arcane function set background(value : Texture2DProxyBase) : void
 		{
 			if (_backgroundImageRenderer && !value) {
 				_backgroundImageRenderer.dispose();
@@ -301,8 +296,8 @@ package away3d.core.render
 			if (!_backgroundImageRenderer && value)
 				_backgroundImageRenderer = new BackgroundImageRenderer(_stage3DProxy);
 
-			_backgroundImage = value;
-			if (_backgroundImageRenderer) _backgroundImageRenderer.bitmapData = value;
+			_background = value;
+			if (_backgroundImageRenderer) _backgroundImageRenderer.texture = value;
 		}
 
 		public function get backgroundImageRenderer():BackgroundImageRenderer

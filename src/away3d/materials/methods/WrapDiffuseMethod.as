@@ -7,9 +7,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
-	import flash.display3D.Context3D;
-
 	use namespace arcane;
 
 	/**

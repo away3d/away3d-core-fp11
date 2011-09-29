@@ -1,14 +1,11 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
@@ -24,7 +21,7 @@ package away3d.materials.methods
 
 		protected var _diffuseInputRegister : ShaderRegisterElement;
 		protected var _diffuseInputIndex : int;
-        private var _cutOffIndex : int;
+		private var _cutOffIndex : int;
 
 		private var _texture : Texture2DProxyBase;
 		private var _diffuseColor : uint = 0xffffff;
@@ -35,7 +32,7 @@ package away3d.materials.methods
 		private var _diffuseR : Number = 1, _diffuseG : Number = 1, _diffuseB : Number = 1, _diffuseA : Number = 1;
 		protected var _shadowRegister : ShaderRegisterElement;
 
-        private var _alphaThreshold : Number = 0;
+		private var _alphaThreshold : Number = 0;
 
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -94,23 +91,23 @@ package away3d.materials.methods
 		 * invisible or entirely opaque, often used with textures for foliage, etc.
 		 * Recommended values are 0 to disable alpha, or 0.5 to create smooth edges. Default value is 0 (disabled).
 		 */
-        public function get alphaThreshold() : Number
-        {
-            return _alphaThreshold;
-        }
+		public function get alphaThreshold() : Number
+		{
+			return _alphaThreshold;
+		}
 
-        public function set alphaThreshold(value : Number) : void
-        {
-            if (value < 0) value = 0;
-            else if (value > 1) value = 1;
-            if (value == _alphaThreshold) return;
+		public function set alphaThreshold(value : Number) : void
+		{
+			if (value < 0) value = 0;
+			else if (value > 1) value = 1;
+			if (value == _alphaThreshold) return;
 
-            if (value == 0 || _alphaThreshold == 0)
-                invalidateShaderProgram();
+			if (value == 0 || _alphaThreshold == 0)
+				invalidateShaderProgram();
 
-            _alphaThreshold = value;
-            _cutOffData[0] = _alphaThreshold;
-        }
+			_alphaThreshold = value;
+			_cutOffData[0] = _alphaThreshold;
+		}
 
 		/**
 		 * @inheritDoc
@@ -198,18 +195,18 @@ package away3d.materials.methods
 				t = _totalLightColorReg;
 			}
 
-			code += "dp3 " + t+".x, " + lightDirReg+".xyz, " + _normalFragmentReg+".xyz\n" +
-					"sat " + t+".w, " + t+".x\n" +
-			// attenuation
-					"mul " + t+".w, " + t+".w, " + lightDirReg+".w\n";
+			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
+					"sat " + t + ".w, " + t + ".x\n" +
+				// attenuation
+					"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 
-			code += "mul " + t + ", " + t+".w, " + lightColReg + "\n";
+			code += "mul " + t + ", " + t + ".w, " + lightColReg + "\n";
 
 
 			if (lightIndex > 0) {
-				code += "add " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + t+".xyz\n";
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
 				regCache.removeFragmentTempUsage(t);
 			}
 
@@ -221,48 +218,48 @@ package away3d.materials.methods
 		 */
 		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-            var code : String = "";
+			var code : String = "";
 			var temp : ShaderRegisterElement;
 			var cutOffReg : ShaderRegisterElement;
 
 			// incorporate input from ambient
 			if (_numLights > 0) {
 				if (_shadowRegister)
-					code += "mul " + _totalLightColorReg+".xyz, " + _totalLightColorReg+".xyz, " + _shadowRegister+".w\n";
-				code += "add " + targetReg+".xyz, " + _totalLightColorReg+".xyz, " + targetReg+".xyz\n" +
-						"sat " + targetReg+".xyz, " + targetReg+".xyz\n";
+					code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
+				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz\n" +
+						"sat " + targetReg + ".xyz, " + targetReg + ".xyz\n";
 				regCache.removeFragmentTempUsage(_totalLightColorReg);
 			}
 
-			temp = _numLights > 0? regCache.getFreeFragmentVectorTemp() : targetReg;
+			temp = _numLights > 0 ? regCache.getFreeFragmentVectorTemp() : targetReg;
 
-            if (_useTexture) {
+			if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
 				code += getTexSampleCode(temp, _diffuseInputRegister) +
-						// apparently, still needs to un-premultiply :s
+					// apparently, still needs to un-premultiply :s
 						"div " + temp + ".xyz, " + temp + ".xyz, " + temp + ".w\n";
-                if (_alphaThreshold > 0) {
-                    cutOffReg = regCache.getFreeFragmentConstant();
-                    _cutOffIndex = cutOffReg.index;
-                    code += "sub " + temp +".w, " +  temp+".w, " + cutOffReg+".x\n" +
-							"kil " + temp +".w\n" +
-							"add " + temp +".w, " + temp+".w, " + cutOffReg+".x\n" +
-							"div " + temp + ", " + temp + ", " + temp+".w\n";
-                }
+				if (_alphaThreshold > 0) {
+					cutOffReg = regCache.getFreeFragmentConstant();
+					_cutOffIndex = cutOffReg.index;
+					code += "sub " + temp + ".w, " + temp + ".w, " + cutOffReg + ".x\n" +
+							"kil " + temp + ".w\n" +
+							"add " + temp + ".w, " + temp + ".w, " + cutOffReg + ".x\n" +
+							"div " + temp + ", " + temp + ", " + temp + ".w\n";
+				}
 			}
 			else {
 				_diffuseInputRegister = regCache.getFreeFragmentConstant();
-				code += "mov " +temp + ", " + _diffuseInputRegister + "\n";
+				code += "mov " + temp + ", " + _diffuseInputRegister + "\n";
 			}
 
-            _diffuseInputIndex = _diffuseInputRegister.index;
+			_diffuseInputIndex = _diffuseInputRegister.index;
 
 			if (_numLights == 0)
 				return code;
 
 
-			code += "mul " + targetReg+".xyz, " + temp+".xyz, " + targetReg+".xyz\n" +
-					"mov " + targetReg+".w, " + temp+".w\n";
+			code += "mul " + targetReg + ".xyz, " + temp + ".xyz, " + targetReg + ".xyz\n" +
+					"mov " + targetReg + ".w, " + temp + ".w\n";
 
 			return code;
 		}
@@ -275,9 +272,9 @@ package away3d.materials.methods
 			var context : Context3D = stage3DProxy._context3D;
 			if (_useTexture) {
 				stage3DProxy.setTextureAt(_diffuseInputIndex, _texture.getTextureForStage3D(stage3DProxy));
-                if (_alphaThreshold > 0) {
-                    context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _cutOffIndex, _cutOffData, 1);
-                }
+				if (_alphaThreshold > 0) {
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _cutOffIndex, _cutOffData, 1);
+				}
 			}
 			else context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _diffuseInputIndex, _diffuseData, 1);
 		}
@@ -293,9 +290,9 @@ package away3d.materials.methods
 		 */
 		private function updateDiffuse() : void
 		{
-			_diffuseData[uint(0)] = _diffuseR = ((_diffuseColor >> 16) & 0xff)/0xff;
-			_diffuseData[uint(1)] = _diffuseG = ((_diffuseColor >> 8) & 0xff)/0xff;
-			_diffuseData[uint(2)] = _diffuseB = (_diffuseColor & 0xff)/0xff;
+			_diffuseData[uint(0)] = _diffuseR = ((_diffuseColor >> 16) & 0xff) / 0xff;
+			_diffuseData[uint(1)] = _diffuseG = ((_diffuseColor >> 8) & 0xff) / 0xff;
+			_diffuseData[uint(2)] = _diffuseB = (_diffuseColor & 0xff) / 0xff;
 		}
 
 		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void

@@ -14,8 +14,6 @@
 	import away3d.materials.passes.DefaultScreenPass;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
-	import flash.display.BitmapDataChannel;
 	import flash.display3D.Context3D;
 	import flash.geom.ColorTransform;
 

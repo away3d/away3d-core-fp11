@@ -16,8 +16,6 @@ package away3d.materials.passes
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
-
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
@@ -97,7 +95,6 @@ package away3d.materials.passes
 		private var _animateUVs : Boolean;
 
 
-
 		/**
 		 * Creates a new DefaultScreenPass objects.
 		 */
@@ -123,13 +120,13 @@ package away3d.materials.passes
 		{
 			_animateUVs = value;
 			if ((value && !_animateUVs) || (!value && _animateUVs)) invalidateShaderProgram();
-			_uvTransformData = value? Vector.<Number>([1, 0, 0, 0, 0, 1, 0, 0]) : null;
+			_uvTransformData = value ? Vector.<Number>([1, 0, 0, 0, 0, 1, 0, 0]) : null;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-        override public function set mipmap(value : Boolean) : void
+		override public function set mipmap(value : Boolean) : void
 		{
 			if (_mipmap == value) return;
 			super.mipmap = value;
@@ -140,7 +137,7 @@ package away3d.materials.passes
 		 */
 		public function get colorTransform() : ColorTransform
 		{
-			return _colorTransformMethod? _colorTransformMethod.colorTransform : null;
+			return _colorTransformMethod ? _colorTransformMethod.colorTransform : null;
 		}
 
 		public function set colorTransform(value : ColorTransform) : void
@@ -244,7 +241,7 @@ package away3d.materials.passes
 		override public function set lights(value : Vector.<LightBase>) : void
 		{
 			super.lights = value;
-			_lightColorData = new Vector.<Number>(_numLights*8, true);
+			_lightColorData = new Vector.<Number>(_numLights * 8, true);
 			invalidateShaderProgram();
 		}
 
@@ -433,13 +430,21 @@ package away3d.materials.passes
 			if (_animateUVs) {
 				uvTransform = renderable.uvTransform;
 				if (uvTransform) {
-					_uvTransformData[0] = uvTransform.a; _uvTransformData[1] = uvTransform.b; _uvTransformData[3] = uvTransform.tx;
-					_uvTransformData[4] = uvTransform.c; _uvTransformData[5] = uvTransform.d; _uvTransformData[7] = uvTransform.ty;
+					_uvTransformData[0] = uvTransform.a;
+					_uvTransformData[1] = uvTransform.b;
+					_uvTransformData[3] = uvTransform.tx;
+					_uvTransformData[4] = uvTransform.c;
+					_uvTransformData[5] = uvTransform.d;
+					_uvTransformData[7] = uvTransform.ty;
 				}
 				else {
-					trace ("Warning: animateUVs is set to true with an IRenderable without a uvTransform. Identity matrix assumed.");
-					_uvTransformData[0] = 1; _uvTransformData[1] = 0; _uvTransformData[3] = 0;
-					_uvTransformData[4] = 0; _uvTransformData[5] = 1; _uvTransformData[7] = 0;
+					trace("Warning: animateUVs is set to true with an IRenderable without a uvTransform. Identity matrix assumed.");
+					_uvTransformData[0] = 1;
+					_uvTransformData[1] = 0;
+					_uvTransformData[3] = 0;
+					_uvTransformData[4] = 0;
+					_uvTransformData[5] = 1;
+					_uvTransformData[7] = 0;
 				}
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _uvTransformIndex, _uvTransformData, 2);
 			}
@@ -451,7 +456,7 @@ package away3d.materials.passes
 					len = _numLights;
 
 				updateLights(context);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _lightsColorIndex, _lightColorData, _numLights*2);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _lightsColorIndex, _lightColorData, _numLights * 2);
 			}
 
 			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.setRenderState(renderable, stage3DProxy, camera, lights);
@@ -636,7 +641,7 @@ package away3d.materials.passes
 			compileLightingCode();
 			compileMethods();
 
-			_fragmentCode += "mov "+_registerCache.fragmentOutputRegister.toString() +", "+ _shadedTargetReg.toString() + "\n";
+			_fragmentCode += "mov " + _registerCache.fragmentOutputRegister.toString() + ", " + _shadedTargetReg.toString() + "\n";
 
 			_registerCache.removeFragmentTempUsage(_shadedTargetReg);
 		}
@@ -743,8 +748,8 @@ package away3d.materials.passes
 			_registerCache.getFreeVertexConstant();
 			_sceneMatrixIndex = _positionMatrixRegs[0].index;
 
-			_vertexCode += 	"m34 " + _globalPositionReg + ".xyz, " + _localPositionRegister.toString() +", "+ _positionMatrixRegs[0].toString() + "\n" +
-							"mov "+_globalPositionReg+".w, "+ _localPositionRegister+".w     \n";
+			_vertexCode += "m34 " + _globalPositionReg + ".xyz, " + _localPositionRegister.toString() + ", " + _positionMatrixRegs[0].toString() + "\n" +
+					"mov " + _globalPositionReg + ".w, " + _localPositionRegister + ".w     \n";
 //			_registerCache.removeVertexTempUsage(_localPositionRegister);
 		}
 
@@ -762,9 +767,9 @@ package away3d.materials.passes
 				var uvTransform2 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
 				_uvTransformIndex = uvTransform1.index;
 
-				_vertexCode += 	"dp4 " + _uvVaryingReg+".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
-                            	"dp4 " + _uvVaryingReg+".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
-                            	"mov " + _uvVaryingReg+".zw, " + uvAttributeReg+".zw \n";
+				_vertexCode += "dp4 " + _uvVaryingReg + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
+						"dp4 " + _uvVaryingReg + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
+						"mov " + _uvVaryingReg + ".zw, " + uvAttributeReg + ".zw \n";
 			}
 			else {
 				_vertexCode += "mov " + _uvVaryingReg + ", " + uvAttributeReg + "\n";
@@ -785,7 +790,7 @@ package away3d.materials.passes
 		{
 			var normalMatrix : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>(3, true);
 
-            _normalFragmentReg = _registerCache.getFreeFragmentVectorTemp();
+			_normalFragmentReg = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_normalFragmentReg, _normalDependencies);
 
 			_normalInput = _registerCache.getFreeVertexAttribute();
@@ -808,11 +813,11 @@ package away3d.materials.passes
 				compileTangentNormalMapFragmentCode();
 			}
 			else {
-				_vertexCode += 	"m33 " + _normalVarying+".xyz, " + _animatedNormalReg+".xyz, " + normalMatrix[0] + "\n" +
-								"mov " + _normalVarying+".w, " + _animatedNormalReg+".w	\n";
+				_vertexCode += "m33 " + _normalVarying + ".xyz, " + _animatedNormalReg + ".xyz, " + normalMatrix[0] + "\n" +
+						"mov " + _normalVarying + ".w, " + _animatedNormalReg + ".w	\n";
 
-                _fragmentCode +=    "nrm " + _normalFragmentReg+".xyz, " + _normalVarying+".xyz	\n" +
-									"mov " + _normalFragmentReg+".w, " + _normalVarying+".w		\n";
+				_fragmentCode += "nrm " + _normalFragmentReg + ".xyz, " + _normalVarying + ".xyz	\n" +
+						"mov " + _normalFragmentReg + ".w, " + _normalVarying + ".w		\n";
 			}
 
 			_registerCache.removeVertexTempUsage(_animatedNormalReg);
@@ -839,35 +844,35 @@ package away3d.materials.passes
 			normalTemp = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(normalTemp, 1);
 
-			_vertexCode += 	"m33 " + normalTemp + ".xyz, " + _animatedNormalReg + ".xyz, " + matrix[0].toString() + "\n" +
-							"nrm " + normalTemp + ".xyz, " + normalTemp + ".xyz	\n";
+			_vertexCode += "m33 " + normalTemp + ".xyz, " + _animatedNormalReg + ".xyz, " + matrix[0].toString() + "\n" +
+					"nrm " + normalTemp + ".xyz, " + normalTemp + ".xyz	\n";
 
 			tanTemp = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(tanTemp, 1);
 
-			_vertexCode += 	"m33 " + tanTemp + ".xyz, " + _animatedTangentReg + ".xyz, " + matrix[0].toString() + "\n" +
-							"nrm " + tanTemp + ".xyz, " + tanTemp + ".xyz	\n";
+			_vertexCode += "m33 " + tanTemp + ".xyz, " + _animatedTangentReg + ".xyz, " + matrix[0].toString() + "\n" +
+					"nrm " + tanTemp + ".xyz, " + tanTemp + ".xyz	\n";
 
 			bitanTemp1 = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(bitanTemp1, 1);
 			bitanTemp2 = _registerCache.getFreeVertexVectorTemp();
 
-			_vertexCode += 	"mul " + bitanTemp1 + ".xyz, " + normalTemp + ".yzx, " + tanTemp + ".zxy	\n" +
-							"mul " + bitanTemp2 + ".xyz, " + normalTemp + ".zxy, " + tanTemp + ".yzx	\n" +
-							"sub " + bitanTemp2 + ".xyz, " + bitanTemp1 + ".xyz, " + bitanTemp2 + ".xyz	\n" +
+			_vertexCode += "mul " + bitanTemp1 + ".xyz, " + normalTemp + ".yzx, " + tanTemp + ".zxy	\n" +
+					"mul " + bitanTemp2 + ".xyz, " + normalTemp + ".zxy, " + tanTemp + ".yzx	\n" +
+					"sub " + bitanTemp2 + ".xyz, " + bitanTemp1 + ".xyz, " + bitanTemp2 + ".xyz	\n" +
 
-							"mov " + _tangentVarying   +".x, " + tanTemp		+ ".x	\n" +
-							"mov " + _tangentVarying   +".y, " + bitanTemp2		+ ".x	\n" +
-							"mov " + _tangentVarying   +".z, " + normalTemp  	+ ".x	\n" +
-							"mov " + _tangentVarying   +".w, " + _normalInput	+ ".w	\n" +
-							"mov " + _bitangentVarying +".x, " + tanTemp		+ ".y	\n" +
-							"mov " + _bitangentVarying +".y, " + bitanTemp2		+ ".y	\n" +
-							"mov " + _bitangentVarying +".z, " + normalTemp		+ ".y	\n" +
-							"mov " + _bitangentVarying +".w, " + _normalInput	+ ".w	\n" +
-							"mov " + _normalVarying    +".x, " + tanTemp 		+ ".z	\n" +
-							"mov " + _normalVarying    +".y, " + bitanTemp2		+ ".z	\n" +
-							"mov " + _normalVarying    +".z, " + normalTemp		+ ".z	\n" +
-							"mov " + _normalVarying    +".w, " + _normalInput	+ ".w	\n";
+					"mov " + _tangentVarying + ".x, " + tanTemp + ".x	\n" +
+					"mov " + _tangentVarying + ".y, " + bitanTemp2 + ".x	\n" +
+					"mov " + _tangentVarying + ".z, " + normalTemp + ".x	\n" +
+					"mov " + _tangentVarying + ".w, " + _normalInput + ".w	\n" +
+					"mov " + _bitangentVarying + ".x, " + tanTemp + ".y	\n" +
+					"mov " + _bitangentVarying + ".y, " + bitanTemp2 + ".y	\n" +
+					"mov " + _bitangentVarying + ".z, " + normalTemp + ".y	\n" +
+					"mov " + _bitangentVarying + ".w, " + _normalInput + ".w	\n" +
+					"mov " + _normalVarying + ".x, " + tanTemp + ".z	\n" +
+					"mov " + _normalVarying + ".y, " + bitanTemp2 + ".z	\n" +
+					"mov " + _normalVarying + ".z, " + normalTemp + ".z	\n" +
+					"mov " + _normalVarying + ".w, " + _normalInput + ".w	\n";
 
 			_registerCache.removeVertexTempUsage(normalTemp);
 			_registerCache.removeVertexTempUsage(tanTemp);
@@ -890,19 +895,19 @@ package away3d.materials.passes
 			n = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(n, 1);
 
-			_fragmentCode += 	"nrm " + t + ".xyz, " + _tangentVarying   + ".xyz	\n" +
-								"mov " + t + ".w, "   + _tangentVarying   + ".w		\n" +
-								"nrm " + t + ".xyz, " + _tangentVarying   + ".xyz	\n" +
-								"nrm " + b + ".xyz, " + _bitangentVarying + ".xyz	\n" +
-								"nrm " + n + ".xyz, " + _normalVarying    + ".xyz	\n";
+			_fragmentCode += "nrm " + t + ".xyz, " + _tangentVarying + ".xyz	\n" +
+					"mov " + t + ".w, " + _tangentVarying + ".w		\n" +
+					"nrm " + t + ".xyz, " + _tangentVarying + ".xyz	\n" +
+					"nrm " + b + ".xyz, " + _bitangentVarying + ".xyz	\n" +
+					"nrm " + n + ".xyz, " + _normalVarying + ".xyz	\n";
 
 			var temp : ShaderRegisterElement = _registerCache.getFreeFragmentVectorTemp();
-			_registerCache.addFragmentTempUsages(temp,  1);
-			_fragmentCode += 	_normalMethod.getFragmentPostLightingCode(_registerCache, temp) +
-								"sub " + temp				+ ".xyz, " + temp 			+ ".xyz, " + _commonsReg+".xxx	\n" +
-								"nrm " + temp 				+ ".xyz, " + temp 			+ ".xyz							\n" +
-								"m33 " + _normalFragmentReg	+ ".xyz, " + temp 			+ ".xyz, " + t.toString() + "	\n" +
-								"mov " + _normalFragmentReg	+ ".w,   " + _normalVarying + ".w							\n";
+			_registerCache.addFragmentTempUsages(temp, 1);
+			_fragmentCode += _normalMethod.getFragmentPostLightingCode(_registerCache, temp) +
+					"sub " + temp + ".xyz, " + temp + ".xyz, " + _commonsReg + ".xxx	\n" +
+					"nrm " + temp + ".xyz, " + temp + ".xyz							\n" +
+					"m33 " + _normalFragmentReg + ".xyz, " + temp + ".xyz, " + t.toString() + "	\n" +
+					"mov " + _normalFragmentReg + ".w,   " + _normalVarying + ".w							\n";
 
 			_registerCache.removeFragmentTempUsage(temp);
 
@@ -947,9 +952,9 @@ package away3d.materials.passes
 
 			_cameraPositionIndex = cameraPositionReg.index;
 
-			_vertexCode += "sub " + _viewDirVaryingReg.toString() +", " + cameraPositionReg.toString() + ", " + _globalPositionReg + "\n";
-			_fragmentCode += 	"nrm " + _viewDirFragmentReg+".xyz, " + _viewDirVaryingReg + ".xyz		\n" +
-								"mov " + _viewDirFragmentReg+".w,   " + _viewDirVaryingReg + ".w 		\n";
+			_vertexCode += "sub " + _viewDirVaryingReg.toString() + ", " + cameraPositionReg.toString() + ", " + _globalPositionReg + "\n";
+			_fragmentCode += "nrm " + _viewDirFragmentReg + ".xyz, " + _viewDirVaryingReg + ".xyz		\n" +
+					"mov " + _viewDirFragmentReg + ".w,   " + _viewDirVaryingReg + ".w 		\n";
 
 			_registerCache.removeVertexTempUsage(_globalPositionReg);
 		}
@@ -978,8 +983,8 @@ package away3d.materials.passes
 				if (light.positionBased) {
 					lightDirReg = _registerCache.getFreeFragmentVectorTemp();
 					_registerCache.addFragmentTempUsages(lightDirReg, 1);
-					_fragmentCode += 	"nrm " + lightDirReg + ".xyz, " + _lightDirFragmentRegs[i] + ".xyz	\n" +
-										light.getAttenuationCode(_registerCache, lightDirReg, this);
+					_fragmentCode += "nrm " + lightDirReg + ".xyz, " + _lightDirFragmentRegs[i] + ".xyz	\n" +
+							light.getAttenuationCode(_registerCache, lightDirReg, this);
 				}
 				else lightDirReg = _lightDirFragmentRegs[i];
 

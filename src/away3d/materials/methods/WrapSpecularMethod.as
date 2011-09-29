@@ -7,9 +7,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
-	import flash.display3D.Context3D;
-
 	use namespace arcane;
 
 	/**
@@ -46,14 +43,6 @@ package away3d.materials.methods
 		override public function dispose(deep : Boolean) : void
 		{
 			_baseSpecularMethod.dispose(deep);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function invalidateBitmapData() : void
-		{
-			_baseSpecularMethod.invalidateBitmapData();
 		}
 
 		/**
@@ -133,7 +122,7 @@ package away3d.materials.methods
 		 */
 		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
 		{
-            _normalFragmentReg = _baseSpecularMethod.normalFragmentReg = value;
+			_normalFragmentReg = _baseSpecularMethod.normalFragmentReg = value;
 		}
 
 		/**

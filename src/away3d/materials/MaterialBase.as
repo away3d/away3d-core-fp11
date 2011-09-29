@@ -13,7 +13,6 @@ package away3d.materials
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
 
-	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
@@ -55,12 +54,11 @@ package away3d.materials
 		protected var _passes : Vector.<MaterialPassBase>;
 
 		protected var _mipmap : Boolean;
-		private var _smooth : Boolean;
+		private var _smooth : Boolean = true;
 		private var _repeat : Boolean;
 
 		private var _lights : Array;
 
-		private var _mipmapBitmap : BitmapData;
 		private var _depthPass : DepthMapPass;
 
 		/**
@@ -143,8 +141,6 @@ package away3d.materials
 			var i : uint;
 
 			for (i = 0; i < _numPasses; ++i) _passes[i].dispose(deep);
-
-			if (_mipmapBitmap) _mipmapBitmap.dispose();
 
 			_depthPass.dispose(deep);
 		}

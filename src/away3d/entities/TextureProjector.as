@@ -8,7 +8,6 @@ package away3d.entities
 	import away3d.events.LensEvent;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;

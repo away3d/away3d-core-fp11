@@ -11,15 +11,13 @@ package away3d.containers
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.lights.LightBase;
-
-	import flash.display.BitmapData;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
-	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
@@ -60,8 +58,7 @@ package away3d.containers
 		private var _hitField : Sprite;
 		private var _parentIsStage : Boolean;
 
-		private var _backgroundImage : BitmapData;
-		private var _bgImageFitToViewPort:Boolean = true;
+		private var _background : Texture2DProxyBase;
 		private var _stage3DProxy : Stage3DProxy;
 		private var _backBufferInvalid : Boolean = true;
 		private var _antiAlias : uint;
@@ -100,28 +97,15 @@ package away3d.containers
 			_mouse3DManager.forceMouseMove = value;
 		}
 
-		public function get backgroundImage() : BitmapData
+		public function get background() : Texture2DProxyBase
 		{
-			return _backgroundImage;
+			return _background;
 		}
 
-		public function set backgroundImageFitToViewPort(value:Boolean):void
+		public function set background(value : Texture2DProxyBase) : void
 		{
-			_bgImageFitToViewPort = value;
-
-			if(_renderer.backgroundImageRenderer == null)
-				return;
-
-			_renderer.backgroundImageRenderer.fitToViewPort = value;
-		}
-
-		public function set backgroundImage(value : BitmapData) : void
-		{
-			_backgroundImage = value;
-			_renderer.backgroundImage = _backgroundImage;
-			_renderer.backgroundImageRenderer.viewWidth = _width;
-			_renderer.backgroundImageRenderer.viewHeight = _height;
-			_renderer.backgroundImageRenderer.fitToViewPort = _bgImageFitToViewPort;
+			_background = value;
+			_renderer.background = _background;
 		}
 
 		private function initHitField() : void
@@ -200,7 +184,6 @@ package away3d.containers
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
 			_renderer.backgroundAlpha = _backgroundAlpha;
-			_renderer.backgroundImage = _backgroundImage;
 			invalidateBackBuffer();
 		}
 
@@ -295,11 +278,6 @@ package away3d.containers
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
 			if (_filter3DRenderer) _filter3DRenderer.viewWidth = value;
-			if (_renderer.backgroundImageRenderer != null)
-			{
-				_renderer.backgroundImageRenderer.viewWidth = _width;
-				_renderer.backgroundImageRenderer.viewHeight = _height;
-			}
 			invalidateBackBuffer();
 		}
 

@@ -2,35 +2,27 @@ package away3d.core.render
 {
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
-	import away3d.tools.utils.TextureUtils;
+	import away3d.textures.Texture2DProxyBase;
 
 	import com.adobe.utils.AGALMiniAssembler;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
-	import flash.display3D.textures.Texture;
-	import flash.geom.Matrix3D;
 
 	public class BackgroundImageRenderer
 	{
-		private var _bitmapData : BitmapData;
 		private var _program3d : Program3D;
-		private var _texture : Texture;
-		private var _texWidth : Number = -1;
-		private var _texHeight : Number = -1;
+		private var _texture : Texture2DProxyBase;
 		private var _indexBuffer : IndexBuffer3D;
 		private var _vertexBuffer : VertexBuffer3D;
 		private var _stage3DProxy : Stage3DProxy;
 		private var _textureInvalid : Boolean = true;
-		private var _fitToViewPort:Boolean = true;
-		private var _viewWidth:Number;
-		private var _viewHeight:Number;
+		private var _fitToViewPort : Boolean = true;
+		private var _vertexBufferInvalid : Boolean = true;
 
 		public function BackgroundImageRenderer(stage3DProxy : Stage3DProxy)
 		{
@@ -66,7 +58,7 @@ package away3d.core.render
 
 		private function getVertexCode() : String
 		{
-			return 	"mov op, va0\n"+
+			return	 "mov op, va0\n" +
 					"mov v0, va1";
 		}
 
@@ -90,10 +82,9 @@ package away3d.core.render
 			if (!context) return;
 
 			if (!_vertexBuffer) initBuffers(context);
-			if (_textureInvalid) updateTexture(context);
 
 			_stage3DProxy.setProgram(_program3d);
-			_stage3DProxy.setTextureAt(0, _texture);
+			_stage3DProxy.setTextureAt(0, _texture.getTextureForStage3D(_stage3DProxy));
 			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
 			context.drawTriangles(_indexBuffer, 0, 2);
@@ -110,71 +101,23 @@ package away3d.core.render
 			_indexBuffer.uploadFromVector(Vector.<uint>([2, 1, 0, 3, 2, 0]), 0, 6);
 			_program3d.upload(	new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, getVertexCode()),
 								new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, getFragmentCode())
-							);
+			);
+
+			_vertexBuffer.uploadFromVector(Vector.<Number>([	-1, -1, 0, 1,
+																1, -1, 1, 1,
+																1,  1, 1, 0,
+																-1,  1, 0, 0
+															]), 0, 4);
 		}
 
-		private function updateTexture(context : Context3D) : void
+		public function get texture() : Texture2DProxyBase
 		{
-			(_texture ||= context.createTexture(_texWidth, _texHeight, Context3DTextureFormat.BGRA, true)).uploadFromBitmapData(_bitmapData);
-
-			var ratioX : Number = _bitmapData.width/_texWidth;
-			var ratioY : Number = _bitmapData.height/_texHeight;
-			var w:Number = _fitToViewPort ? 1 : _bitmapData.width / _viewWidth;
-			var h:Number = _fitToViewPort ? 1 : _bitmapData.height / _viewHeight;
-			_vertexBuffer.uploadFromVector(Vector.<Number>([	-w, -h,   0,      ratioY,
-																 w, -h,   ratioX, ratioY,
-																 w,  h,   ratioX, 0,
-																-w,  h,   0,      0
-														   ]), 0, 4);
+			return _texture;
 		}
 
-		public function get bitmapData() : BitmapData
+		public function set texture(value : Texture2DProxyBase) : void
 		{
-			return _bitmapData;
-		}
-
-		public function set bitmapData(value : BitmapData) : void
-		{
-			var w : Number = TextureUtils.getBestPowerOf2(value.width);
-			var h : Number = TextureUtils.getBestPowerOf2(value.height);
-
-			if (w != _texWidth || h != _texHeight) {
-				if (_texture) {
-					_texture.dispose();
-					_texture = null;
-				}
-				_texWidth = w;
-				_texHeight = h;
-			}
-
-			_textureInvalid = true;
-
-			_bitmapData = value;
-		}
-
-		public function get viewWidth():Number
-		{
-			return _viewWidth;
-		}
-
-		public function set viewWidth(value:Number):void
-		{
-			_viewWidth = value;
-		}
-
-		public function get viewHeight():Number
-		{
-			return _viewHeight;
-		}
-
-		public function set viewHeight(value:Number):void
-		{
-			_viewHeight = value;
-		}
-
-		public function set fitToViewPort(value:Boolean):void
-		{
-			_fitToViewPort = value;
+			_texture = value;
 		}
 	}
 }

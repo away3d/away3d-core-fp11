@@ -1,16 +1,11 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.textures.BitmapTexture;
-	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DProxyBase;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
@@ -116,7 +111,7 @@ package away3d.materials.methods
 			super.activate(stage3DProxy)
 
 			if (_normalMapIndex2 >= 0) {
-				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data,  2);
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data, 2);
 				stage3DProxy.setTextureAt(_normalMapIndex2, _texture2.getTextureForStage3D(stage3DProxy));
 			}
 		}
@@ -132,12 +127,12 @@ package away3d.materials.methods
 			_normalMapIndex2 = _normalTextureRegister2.index;
 
 			_dataRegIndex = dataReg.index;
-			return 	"add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".xyxy\n" +
+			return	 "add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".xyxy\n" +
 					getTexSampleCode(targetReg, _normalTextureRegister, temp) +
 					"add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".zwzw\n" +
 					getTexSampleCode(temp, _normalTextureRegister2, temp) +
-					"add "+targetReg+", "+targetReg+", "+temp +"		\n" +
-					"mul "+targetReg+", "+targetReg+", "+dataReg+".x	\n";
+					"add " + targetReg + ", " + targetReg + ", " + temp + "		\n" +
+					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n";
 		}
 	}
 }

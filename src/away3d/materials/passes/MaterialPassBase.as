@@ -10,7 +10,6 @@ package away3d.materials.passes
 	import away3d.lights.LightBase;
 	import away3d.materials.MaterialBase;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
@@ -44,7 +43,6 @@ package away3d.materials.passes
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = false;
 
-		private var _mipmapBitmap : BitmapData;
 		private var _bothSides : Boolean;
 
 		protected var _animatableAttributes : Array = ["va0"];
@@ -100,8 +98,6 @@ package away3d.materials.passes
 		{
 			if (_mipmap == value) return;
 			_mipmap = value;
-			if (_mipmapBitmap) _mipmapBitmap.dispose();
-			else _mipmapBitmap = null;
 			invalidateShaderProgram();
 		}
 

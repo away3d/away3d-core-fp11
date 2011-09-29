@@ -1,14 +1,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.textures.BitmapTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DProxyBase;
-
-	import flash.display.BitmapData;
 
 	use namespace arcane;
 
