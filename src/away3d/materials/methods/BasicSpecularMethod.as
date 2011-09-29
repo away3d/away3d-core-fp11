@@ -6,6 +6,7 @@ package away3d.materials.methods
 	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.BitmapData;
 	import flash.display.BitmapDataChannel;
@@ -27,19 +28,13 @@ package away3d.materials.methods
 		protected var _specularDataRegister : ShaderRegisterElement;
 		protected var _specularDataIndex : int;
 
-		private var _texture : BitmapTexture;
+		private var _texture : Texture2DProxyBase;
 
 		protected var _specularData : Vector.<Number>;
 		private var _specular : Number = 1;
 		private var _specularColor : uint = 0xffffff;
 		arcane var _specularR : Number = 1, _specularG : Number = 1, _specularB : Number = 1;
 		private var _shadowRegister : ShaderRegisterElement;
-
-		private var _specularMap : BitmapData;
-		private var _glossMap : BitmapData;
-		private var _specularGlossMap : BitmapData;
-		private var _specularGlossMapDirty : Boolean;
-
 
 		/**
 		 * Creates a new BasicSpecularMethod object.
@@ -99,90 +94,19 @@ package away3d.materials.methods
 
 		/**
 		 * The bitmapData that encodes the specular highlight strength per texel in the red channel, and the sharpness
-		 * in the green channel. Alternatively, use the specularMap and glossMap properties if the maps are present in
-		 * seperate BitmapData objects.
+		 * in the green channel. You can use SpecularBitmapTexture if you want to easily set specular and gloss maps
+		 * from greyscale images, but prepared images are preffered.
 		 */
-		public function get bitmapData() : BitmapData
+		public function get texture() : Texture2DProxyBase
 		{
-			return _texture? _texture.bitmapData : null;
+			return _texture;
 		}
 
-		public function set bitmapData(value : BitmapData) : void
+		public function set texture(value : Texture2DProxyBase) : void
 		{
-			if (value == bitmapData) return;
-
-			if (!value || !_useTexture)
-				invalidateShaderProgram();
-
-			if (_useTexture) {
-				BitmapTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
-
+			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
-
-			if (_useTexture)
-				_texture = BitmapTextureCache.getInstance().getTexture(value);
-		}
-
-		/**
-		 * A specular map that defines the strength of specular reflections for each texel.
-		 */
-		public function get specularMap() : BitmapData
-		{
-			return _specularMap;
-		}
-
-		public function set specularMap(value : BitmapData) : void
-		{
-			var newMap : BitmapData;
-
-			if (_specularMap == value) return;
-
-			_specularMap = value;
-
-			newMap = _specularGlossMap;
-			if (value)
-				newMap ||= new BitmapData(_specularMap.width, _specularMap.height, false);
-			else if (!_glossMap && newMap) {
-				newMap.dispose();
-				newMap = null;
-			}
-
-			_specularGlossMap = newMap;
-			_specularGlossMapDirty = true;
-
-			_needsUV = _useTexture = Boolean(_glossMap) || Boolean(_specularMap);
-		}
-
-		/**
-		 * A specular map that defines the power of specular reflections for each texel.
-		 */
-		public function get glossMap() : BitmapData
-		{
-			return _specularMap;
-		}
-
-		public function set glossMap(value : BitmapData) : void
-		{
-			var newMap : BitmapData;
-
-			if (_glossMap == value) return;
-
-			_glossMap = value;
-
-			newMap = _specularGlossMap;
-			if (value)
-				newMap ||= new BitmapData(_glossMap.width, _glossMap.height, false);
-			else if (!_specularMap && newMap) {
-				newMap.dispose();
-				newMap = null;
-			}
-
-			_specularGlossMap = newMap;
-			_specularGlossMapDirty = true;
-
-			_needsUV = _useTexture = Boolean(_glossMap) || Boolean(_specularMap);
+			_texture = value
 		}
 
 		/**
@@ -203,23 +127,10 @@ package away3d.materials.methods
 			repeat = spec.repeat;
 			mipmap = spec.mipmap;
 			numLights = spec.numLights;
-			bitmapData = spec.bitmapData;
+			texture = spec.texture;
 			specular = spec.specular;
 			specularColor = spec.specularColor;
 			gloss = spec.gloss;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose(deep : Boolean) : void
-		{
-			if (_useTexture) {
-				BitmapTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
-
-			if (_specularGlossMap) _specularGlossMap.dispose();
 		}
 
 		/**
@@ -378,11 +289,6 @@ package away3d.materials.methods
 		{
 			var context : Context3D = stage3DProxy._context3D;
 
-			if (_specularGlossMapDirty) {
-				updateSpecularGlossMap(context);
-				_specularGlossMapDirty = false;
-			}
-
 			if (_numLights == 0) return;
 
 			if (_useTexture) stage3DProxy.setTextureAt(_specularTexIndex, _texture.getTextureForStage3D(stage3DProxy));
@@ -407,25 +313,6 @@ package away3d.materials.methods
 		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
 		{
 			_shadowRegister = shadowReg;
-		}
-
-
-		/**
-		 * Updates the specular gloss map
-		 */
-		private function updateSpecularGlossMap(context : Context3D) : void
-		{
-			if (!_specularGlossMap) return;
-
-			_specularGlossMap.fillRect(_specularGlossMap.rect, 0xffffff);
-
-			if (_specularMap)
-				_specularGlossMap.copyChannel(_specularMap, _specularGlossMap.rect, _specularGlossMap.rect.topLeft, BitmapDataChannel.BLUE, BitmapDataChannel.RED);
-
-			if (_glossMap)
-				_specularGlossMap.copyChannel(_glossMap, _specularGlossMap.rect, _specularGlossMap.rect.topLeft, BitmapDataChannel.GREEN, BitmapDataChannel.GREEN);
-
-			bitmapData = _specularGlossMap;
 		}
 	}
 }

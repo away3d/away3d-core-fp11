@@ -5,6 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
@@ -48,28 +49,20 @@ package away3d.materials.methods
             _baseDiffuseMethod.alphaThreshold = value;
         }
 
-        /**
+		/**
 		 * @inheritDoc
 		 */
-		override public function invalidateBitmapData() : void
+		override public function get texture() : Texture2DProxyBase
 		{
-			_baseDiffuseMethod.invalidateBitmapData();
+			return _baseDiffuseMethod.texture;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function get bitmapData() : BitmapData
+		override public function set texture(value : Texture2DProxyBase) : void
 		{
-			return _baseDiffuseMethod.bitmapData;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function set bitmapData(value : BitmapData) : void
-		{
-			_baseDiffuseMethod.bitmapData = value;
+			_baseDiffuseMethod.texture = value;
 		}
 
 		/**

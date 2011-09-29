@@ -6,6 +6,7 @@ package away3d.materials.methods
 	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
@@ -25,7 +26,7 @@ package away3d.materials.methods
 		protected var _diffuseInputIndex : int;
         private var _cutOffIndex : int;
 
-		private var _texture : BitmapTexture;
+		private var _texture : Texture2DProxyBase;
 		private var _diffuseColor : uint = 0xffffff;
 
 		private var _diffuseData : Vector.<Number>;
@@ -76,28 +77,16 @@ package away3d.materials.methods
 		/**
 		 * The bitmapData to use to define the diffuse reflection color per texel.
 		 */
-		public function get bitmapData() : BitmapData
+		public function get texture() : Texture2DProxyBase
 		{
-			return _texture? _texture.bitmapData : null;
+			return _texture;
 		}
 
-		public function set bitmapData(value : BitmapData) : void
+		public function set texture(value : Texture2DProxyBase) : void
 		{
-			if (value == bitmapData) return;
-
-			if (!value || !_useTexture)
-				invalidateShaderProgram();
-
-			if (_useTexture) {
-				BitmapTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
-
+			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
-
-			if (_useTexture)
-				_texture = BitmapTextureCache.getInstance().getTexture(value);
-
+			_texture = value;
 		}
 
 		/**
@@ -123,23 +112,12 @@ package away3d.materials.methods
             _cutOffData[0] = _alphaThreshold;
         }
 
-        /**
-		 * Marks the texture for update next on the next render.
-		 */
-		public function invalidateBitmapData() : void
-		{
-			if (_texture) _texture.invalidateContent();
-		}
-
 		/**
 		 * @inheritDoc
 		 */
 		override public function dispose(deep : Boolean) : void
 		{
-			if (_texture) {
-				BitmapTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
+			_texture = null;
 		}
 
 		/**
@@ -152,7 +130,7 @@ package away3d.materials.methods
 			repeat = diff.repeat;
 			mipmap = diff.mipmap;
 			numLights = diff.numLights;
-			bitmapData = diff.bitmapData;
+			texture = diff.texture;
 			diffuseAlpha = diff.diffuseAlpha;
 			diffuseColor = diff.diffuseColor;
 		}

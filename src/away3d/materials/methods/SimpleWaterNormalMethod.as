@@ -8,6 +8,7 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.BitmapData;
 	import flash.display3D.Context3DProgramType;
@@ -16,13 +17,13 @@ package away3d.materials.methods
 
 	public class SimpleWaterNormalMethod extends BasicNormalMethod
 	{
-		private var _texture2 : BitmapTexture;
+		private var _texture2 : Texture2DProxyBase;
 		private var _normalTextureRegister2 : ShaderRegisterElement;
 		private var _normalMapIndex2 : int;
 		private var _data : Vector.<Number>;
 		private var _dataRegIndex : int;
 
-		public function SimpleWaterNormalMethod(waveMap1 : BitmapData, waveMap2 : BitmapData)
+		public function SimpleWaterNormalMethod(waveMap1 : Texture2DProxyBase, waveMap2 : Texture2DProxyBase)
 		{
 			super();
 			normalMap = waveMap1;
@@ -76,25 +77,20 @@ package away3d.materials.methods
 			normalMap = BasicNormalMethod(method).normalMap;
 		}
 
-		override public function set normalMap(value : BitmapData) : void
+		override public function set normalMap(value : Texture2DProxyBase) : void
 		{
 			if (!value) return;
 			super.normalMap = value;
 		}
 
-		public function get secondaryNormalMap() : BitmapData
+		public function get secondaryNormalMap() : Texture2DProxyBase
 		{
-			return _texture2? _texture2.bitmapData : null;
+			return _texture2;
 		}
 
-		public function set secondaryNormalMap(value : BitmapData) : void
+		public function set secondaryNormalMap(value : Texture2DProxyBase) : void
 		{
-			if (value == normalMap) return;
-
-			if (_texture2)
-				BitmapTextureCache.getInstance().freeTexture(_texture2);
-
-			_texture2 = BitmapTextureCache.getInstance().getTexture(value);
+			_texture2 = value
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -112,10 +108,7 @@ package away3d.materials.methods
 		override public function dispose(deep : Boolean) : void
 		{
 			super.dispose(deep);
-			if (_texture2) {
-				BitmapTextureCache.getInstance().freeTexture(_texture2);
-				_texture2 = null;
-			}
+			_texture2 = null;
 		}
 
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void

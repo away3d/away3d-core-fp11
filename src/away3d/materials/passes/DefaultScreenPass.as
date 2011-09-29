@@ -14,6 +14,7 @@ package away3d.materials.passes
 	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.BitmapData;
 
@@ -226,12 +227,12 @@ package away3d.materials.passes
 		/**
 		 * The tangent space normal map to influence the direction of the surface for each texel.
 		 */
-		public function get normalMap() : BitmapData
+		public function get normalMap() : Texture2DProxyBase
 		{
 			return _normalMethod.normalMap;
 		}
 
-		public function set normalMap(value : BitmapData) : void
+		public function set normalMap(value : Texture2DProxyBase) : void
 		{
 			_normalMethod.normalMap = value;
 		}

@@ -67,9 +67,8 @@ package away3d.materials
 				
 				bitmapData.lock();
 				bitmapData.draw( _player.container, null, null, null, _clippingRect);
-				updateTexture();
+				updateBitmapData();
 				bitmapData.unlock();
-				
 			}
 			
 		}

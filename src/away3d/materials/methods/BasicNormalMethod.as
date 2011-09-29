@@ -6,6 +6,7 @@ package away3d.materials.methods
 	import away3d.textures.BitmapTexture;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.BitmapData;
 
@@ -13,7 +14,7 @@ package away3d.materials.methods
 
 	public class BasicNormalMethod extends ShadingMethodBase
 	{
-		private var _texture : BitmapTexture;
+		private var _texture : Texture2DProxyBase;
 		private var _useTexture : Boolean;
 		protected var _normalMapIndex : int = -1;
 		protected var _normalTextureRegister : ShaderRegisterElement;
@@ -41,27 +42,16 @@ package away3d.materials.methods
 			return Boolean(_texture);
 		}
 
-		public function get normalMap() : BitmapData
+		public function get normalMap() : Texture2DProxyBase
 		{
-			return _texture? _texture.bitmapData : null;
+			return _texture;
 		}
 
-		public function set normalMap(value : BitmapData) : void
+		public function set normalMap(value : Texture2DProxyBase) : void
 		{
-			if (value == normalMap) return;
-
-			if (!value || !_useTexture)
-				invalidateShaderProgram();
-
-			if (_useTexture) {
-				BitmapTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
-
+			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
-
-			if (_useTexture)
-				_texture = BitmapTextureCache.getInstance().getTexture(value);
+			_texture = value
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -77,10 +67,7 @@ package away3d.materials.methods
 
 		override public function dispose(deep : Boolean) : void
 		{
-			if (_texture) {
-				BitmapTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
+			if (_texture) _texture = null;
 		}
 
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void

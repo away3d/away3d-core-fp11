@@ -5,6 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DProxyBase;
 
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
@@ -58,35 +59,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function get bitmapData() : BitmapData
+		override public function get texture() : Texture2DProxyBase
 		{
-			return _baseSpecularMethod.bitmapData;
+			return _baseSpecularMethod.texture;
 		}
 
-		override public function set bitmapData(value : BitmapData) : void
+		override public function set texture(value : Texture2DProxyBase) : void
 		{
-			_baseSpecularMethod.bitmapData = value;
-		}
-
-
-		override public function get specularMap() : BitmapData
-		{
-			return _baseSpecularMethod.specularMap;
-		}
-
-		override public function set specularMap(value : BitmapData) : void
-		{
-			_baseSpecularMethod.specularMap = value;
-		}
-
-		override public function get glossMap() : BitmapData
-		{
-			return _baseSpecularMethod.glossMap;
-		}
-
-		override public function set glossMap(value : BitmapData) : void
-		{
-			_baseSpecularMethod.glossMap = value;
+			_baseSpecularMethod.texture = value;
 		}
 
 		/**

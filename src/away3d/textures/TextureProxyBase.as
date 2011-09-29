@@ -18,13 +18,33 @@ package away3d.textures
 		protected var _textures : Vector.<TextureBase>;
 		protected var _dirty : Vector.<Boolean>;
 
-		protected var _width : int;
-		protected var _height : int;
+		private var _width : int;
+		private var _height : int;
 
 		public function TextureProxyBase()
 		{
 			_textures = new Vector.<TextureBase>(8);
 			_dirty = new Vector.<Boolean>(8);
+		}
+
+		public function get width() : int
+		{
+			return _width;
+		}
+
+		public function set width(value : int) : void
+		{
+			_width = value;
+		}
+
+		public function get height() : int
+		{
+			return _height;
+		}
+
+		public function set height(value : int) : void
+		{
+			_height = value;
 		}
 
 		public function getTextureForStage3D(stage3DProxy : Stage3DProxy) : TextureBase
