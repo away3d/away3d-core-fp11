@@ -61,7 +61,7 @@ package away3d.materials.methods
 			_normalMapIndex = -1;
 		}
 
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
 			if (_texture) _texture = null;
 		}

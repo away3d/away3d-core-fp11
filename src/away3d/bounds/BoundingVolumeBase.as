@@ -64,7 +64,9 @@ package away3d.bounds
 
 		public function disposeRenderable() : void
 		{
-			if (_boundingRenderable) _boundingRenderable.dispose(true);
+			if (_boundingRenderable) {
+				_boundingRenderable.dispose();
+			}
 			_boundingRenderable = null;
 		}
 

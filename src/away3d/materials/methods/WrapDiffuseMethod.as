@@ -31,9 +31,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			_baseDiffuseMethod.dispose(deep);
+			_baseDiffuseMethod.dispose();
 		}
 
         override public function get alphaThreshold() : Number

@@ -74,7 +74,7 @@ package away3d.materials
 		}
 		
 		
-		override public function dispose(deep:Boolean):void
+		override public function dispose():void
 		{
 			
 			autoUpdate = false;
@@ -83,7 +83,7 @@ package away3d.materials
 			_broadcaster = null;
 			_clippingRect = null;
 			
-			super.dispose(deep);
+			super.dispose();
 		}
 		
 		private function autoUpdateHandler( e:Event ):void

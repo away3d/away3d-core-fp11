@@ -66,10 +66,9 @@
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			_screenPass.dispose(deep);
-			super.dispose(deep);
+			super.dispose();
 
 			BitmapTextureCache.getInstance().freeTexture(BitmapTexture(texture));
 		}

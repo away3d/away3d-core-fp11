@@ -136,13 +136,13 @@ package away3d.materials
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose(deep : Boolean) : void
+		public function dispose() : void
 		{
 			var i : uint;
 
-			for (i = 0; i < _numPasses; ++i) _passes[i].dispose(deep);
+			for (i = 0; i < _numPasses; ++i) _passes[i].dispose();
 
-			_depthPass.dispose(deep);
+			_depthPass.dispose();
 		}
 
 		/**

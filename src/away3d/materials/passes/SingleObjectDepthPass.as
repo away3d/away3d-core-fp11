@@ -55,7 +55,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
 			if (_textures) {
 				for (var i : uint = 0; i < _textures.length; ++i) {

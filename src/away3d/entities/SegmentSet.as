@@ -190,6 +190,13 @@
 			return _vertexBuffer;
 		}
 
+		override public function dispose() : void
+		{
+			super.dispose();
+			_vertexBuffer.dispose();
+			_indexBuffer.dispose();
+		}
+
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			return null;

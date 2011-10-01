@@ -390,7 +390,8 @@
 					if(_keepMaterial){
 						ds.mesh.geometry.dispose();
 					} else if(ds.material != destMesh.material){
-						ds.mesh.dispose(ds.material? true : false);
+						ds.mesh.dispose();
+						if (ds.material) ds.material.dispose();
 					}
 					ds.mesh = null;
 				}

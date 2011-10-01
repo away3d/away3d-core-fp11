@@ -93,11 +93,10 @@
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			if (deep)
-				_screenPass.dispose(deep);
-			super.dispose(deep);
+			_screenPass.dispose();
+			super.dispose();
 		}
 	}
 }

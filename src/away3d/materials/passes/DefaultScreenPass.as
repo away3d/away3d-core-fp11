@@ -156,19 +156,19 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			super.dispose(deep);
+			super.dispose();
 
-//			if (_normalMapTexture) _normalMapTexture.dispose(deep);
-			_normalMethod.dispose(deep);
-			_diffuseMethod.dispose(deep);
-			if (_shadowMethod) _shadowMethod.dispose(deep);
-			_ambientMethod.dispose(deep);
-			if (_specularMethod) _specularMethod.dispose(deep);
-			if (_colorTransformMethod) _colorTransformMethod.dispose(deep);
+//			if (_normalMapTexture) _normalMapTexture.dispose();
+			_normalMethod.dispose();
+			_diffuseMethod.dispose();
+			if (_shadowMethod) _shadowMethod.dispose();
+			_ambientMethod.dispose();
+			if (_specularMethod) _specularMethod.dispose();
+			if (_colorTransformMethod) _colorTransformMethod.dispose();
 			for (var i : int = 0; i < _methods.length; ++i)
-				_methods[i].dispose(deep);
+				_methods[i].dispose();
 		}
 
 		/**
