@@ -9,8 +9,6 @@ package away3d.loaders.parsers
 	import flash.events.Event;
 	import flash.utils.ByteArray;
 	
-	import mx.core.BitmapAsset;
-	
 	use namespace arcane;
 	
 	/**
@@ -88,7 +86,7 @@ package away3d.loaders.parsers
 		public static function supportsData(data : *) : Boolean
 		{
 			//shortcut if asset is IFlexAsset
-			if (data is BitmapAsset)
+			if (data is Bitmap)
 				return true;
 			
 			if (!(data is ByteArray))
@@ -144,13 +142,11 @@ package away3d.loaders.parsers
 
 		protected override function proceedParsing() : Boolean
 		{
-			if (_data is BitmapAsset) {
-				var bitmapAsset:BitmapAsset = _data as BitmapAsset;
-				
-				var asset : BitmapDataAsset = new BitmapDataAsset(bitmapAsset.bitmapData);
+			if (_data is Bitmap) {
+				var asset : BitmapDataAsset = new BitmapDataAsset(Bitmap(_data).bitmapData);
 				finalizeAsset(asset, _fileName);
 				
-				return true;
+				return PARSING_DONE;
 			}
 			
 			_byteData = getByteData();
