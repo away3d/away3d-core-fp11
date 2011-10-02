@@ -265,6 +265,11 @@
 		private function onAnimationChanged(event : GeometryEvent) : void
 		{
 			animationState = _geometry.animation.createAnimationState();
+
+			// cause material to be unregistered and registered again to work with the new animation type (if possible)
+			var oldMaterial : MaterialBase = material;
+			material = null;
+			material = oldMaterial;
 		}
 
 		public function getSubMeshForSubGeometry(subGeometry : SubGeometry) : SubMesh
