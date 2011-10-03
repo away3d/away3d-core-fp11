@@ -3,15 +3,67 @@ package away3d.containers
 	import away3d.arcane;
 	import away3d.core.base.Object3D;
 	import away3d.core.partition.Partition3D;
+	import away3d.events.Object3DEvent;
 	import away3d.events.Scene3DEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
-
+	
 	import flash.events.Event;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
+	
+	/**
+	 * Dispatched when the scene transform matrix of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 * @see	#sceneTransform
+	 */
+	[Event(name="scenetransformChanged",type="away3d.events.Object3DEvent")]
+	
+	/**
+	 * Dispatched when the parent scene of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 * @see	#scene
+	 */
+	[Event(name="sceneChanged",type="away3d.events.Object3DEvent")]
+	
+	/**
+	 * Dispatched when a user moves the cursor while it is over the 3d object.
+	 * 
+	 * @eventType away3d.events.MouseEvent3D
+	 */
+	[Event(name="mouseMove",type="away3d.events.MouseEvent3D")]
+	
+	/**
+	 * Dispatched when a user presses the left hand mouse button while the cursor is over the 3d object.
+	 * 
+	 * @eventType away3d.events.MouseEvent3D
+	 */
+	[Event(name="mouseDown",type="away3d.events.MouseEvent3D")]
+	
+	/**
+	 * Dispatched when a user releases the left hand mouse button while the cursor is over the 3d object.
+	 * 
+	 * @eventType away3d.events.MouseEvent3D
+	 */
+	[Event(name="mouseUp",type="away3d.events.MouseEvent3D")]
+	
+	/**
+	 * Dispatched when a user moves the cursor over the 3d object.
+	 * 
+	 * @eventType away3d.events.MouseEvent3D
+	 */
+	[Event(name="mouseOver",type="away3d.events.MouseEvent3D")]
+	
+	/**
+	 * Dispatched when a user moves the cursor away from the 3d object.
+	 * 
+	 * @eventType away3d.events.MouseEvent3D
+	 */
+	[Event(name="mouseOut",type="away3d.events.MouseEvent3D")]
 	
 	/**
 	 * ObjectContainer3D is the most basic scene graph node. It can contain other ObjectContainer3Ds.
@@ -22,7 +74,10 @@ package away3d.containers
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		/** @private */
+		arcane var _sceneTransformDirty:Boolean = true;
+		/** @private */
 		arcane var _implicitMouseEnabled : Boolean = true;
+		
 		/**
 		 * @private
 		 * The space partition used for this object, possibly inherited from its parent.
@@ -34,7 +89,8 @@ package away3d.containers
 		
 		arcane function set implicitPartition(value : Partition3D) : void
 		{
-			if (value == _implicitPartition) return;
+			if (value == _implicitPartition)
+				return;
 			
 			var i : uint;
 			var len : uint = _children.length;
@@ -44,11 +100,18 @@ package away3d.containers
 			
 			while (i < len) {
 				child = _children[i++];
+				
 				// assign implicit partition if no explicit one is given
-				if (!child._explicitPartition) child.implicitPartition = value;
+				if (!child._explicitPartition)
+					child.implicitPartition = value;
 			}
 		}
-		
+		/** @private */
+		arcane function get isVisible() : Boolean
+		{
+			return _implicitVisibility && _explicitVisibility;
+		}
+		/** @private */
 		arcane function setParent(value : ObjectContainer3D) : void
 		{
 			_parent = value;
@@ -60,9 +123,11 @@ package away3d.containers
 				return;
 			}
 			
-			invalidateSceneTransform();
+			notifySceneTransformChange();
 		}
 		
+		private var _scenetransformchanged:Object3DEvent;
+		private var _scenechanged:Object3DEvent;
 		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
 		private var _mouseChildren : Boolean = true;
 		private var _oldScene : Scene3D;
@@ -72,6 +137,52 @@ package away3d.containers
 		private var _scenePositionDirty : Boolean = true;
 		private var _explicitVisibility : Boolean = true;
 		private var _implicitVisibility : Boolean = true; // visibility passed on from parents
+		
+		private function notifySceneTransformChange():void
+		{
+			if (_sceneTransformDirty)
+				return;
+			
+			invalidateSceneTransform();
+			
+			var i : uint;
+			var len : uint = _children.length;
+			
+			
+			//act recursively on child objects
+			while (i < len)
+				_children[i++].notifySceneTransformChange();
+			
+			//trigger event if listener exists
+			if (!hasEventListener(Object3DEvent.SCENETRANSFORM_CHANGED))
+				return;
+			
+			if (!_scenetransformchanged)
+				_scenetransformchanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
+			
+			dispatchEvent(_scenetransformchanged);
+		}
+		
+		private function notifySceneChange():void
+		{
+			notifySceneTransformChange();
+			
+			var i : uint;
+			var len : uint = _children.length;
+			
+			
+			//act recursively on child objects
+			while (i < len)
+				_children[i++].notifySceneChange();
+			
+			if (!hasEventListener(Object3DEvent.SCENE_CHANGED))
+				return;
+			
+			if (!_scenechanged)
+				_scenechanged = new Object3DEvent(Object3DEvent.SCENE_CHANGED, this);
+			
+			dispatchEvent(_scenechanged);
+		}
 		
 		protected var _scene : Scene3D;
 		protected var _parent : ObjectContainer3D;
@@ -94,6 +205,41 @@ package away3d.containers
 		}
 		
 		/**
+		 * @inheritDoc
+		 */
+		override arcane function invalidateTransform() : void
+		{
+			super.invalidateTransform();
+			
+			notifySceneTransformChange();
+		}
+		
+		/**
+		 * Invalidates the scene transformation matrix, causing it to be updated the next time it's requested.
+		 */
+		protected function invalidateSceneTransform() : void
+		{
+			_sceneTransformDirty = true;
+			_inverseSceneTransformDirty = true;
+			_scenePositionDirty = true;
+		}
+		
+		/**
+		 * Updates the scene transformation matrix.
+		 */
+		protected function updateSceneTransform():void
+		{
+			if (_parent) {
+				_sceneTransform.copyFrom(_parent.sceneTransform);
+				_sceneTransform.prepend(transform);
+			} else {
+				_sceneTransform.copyFrom(transform);
+			}
+			
+			_sceneTransformDirty = false;
+		}
+		
+		/**
 		 * 
 		 */
 		public function get mouseChildren() : Boolean
@@ -109,7 +255,9 @@ package away3d.containers
 			for (var i : uint = 0; i < len; ++i)
 				_children[i].updateMouseChildren();
 		}
-
+		/**
+		 * 
+		 */
 		public function get visible() : Boolean
 		{
 			return _explicitVisibility;
@@ -124,12 +272,7 @@ package away3d.containers
 			for (var i : uint = 0; i < len; ++i)
 				_children[i].updateImplicitVisibility();
 		}
-
-		arcane function get isVisible() : Boolean
-		{
-			return _implicitVisibility && _explicitVisibility;
-		}
-
+		
 		public function get assetType() : String
 		{
 			return AssetType.CONTAINER;
@@ -276,20 +419,7 @@ package away3d.containers
 		{
 			_explicitPartition = value;
 			
-			implicitPartition = value 	? value :
-								_parent	? parent.implicitPartition
-										: null;
-		}
-		
-		/**
-		 * The local transformation matrix that transforms to the parent object's space.
-		 * @param value
-		 */
-		override public function set transform(value : Matrix3D) : void
-		{
-			super.transform = value;
-			
-			invalidateSceneTransform();
+			implicitPartition = value? value : (_parent? _parent.implicitPartition : null);
 		}
 		
 		/**
@@ -396,7 +526,7 @@ package away3d.containers
 			
 			child._parent = this;
 			child.scene = _scene;
-			child.invalidateSceneTransform();
+			child.notifySceneTransformChange();
 			child.updateMouseChildren();
 			child.updateImplicitVisibility();
 
@@ -436,7 +566,9 @@ package away3d.containers
 			
 			// this needs to be nullified before the callbacks!
 			child.setParent(null);
-			if (!child._explicitPartition) child.implicitPartition = null;
+			
+			if (!child._explicitPartition)
+				child.implicitPartition = null;
 		}
 		
 		/**
@@ -464,14 +596,14 @@ package away3d.containers
 		{
 			super.lookAt(target, upAxis);
 			
-			invalidateSceneTransform();
+			notifySceneTransformChange();
 		}
 		
 		override public function translateLocal(axis : Vector3D, distance : Number) : void
 		{
 			super.translateLocal(axis, distance);
 			
-			invalidateSceneTransform();
+			notifySceneTransformChange();
 		}
 		
 		/**
@@ -508,54 +640,8 @@ package away3d.containers
 		{
 			super.rotate(axis, angle);
 			
-			invalidateSceneTransform();
+			notifySceneTransformChange();
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override protected function invalidateTransform() : void
-		{
-			super.invalidateTransform();
-			
-			invalidateSceneTransform();
-		}
-		
-		/**
-		 * Invalidates the scene transformation matrix, causing it to be updated the next time it's requested.
-		 */
-		protected function invalidateSceneTransform() : void
-		{
-			_scenePositionDirty = true;
-			_inverseSceneTransformDirty = true;
-			
-			if (_sceneTransformDirty)
-				return;
-			
-			_sceneTransformDirty = true;
-			
-			var i : uint;
-			var len : uint = _children.length;
-			
-			while (i < len)
-				_children[i++].invalidateSceneTransform();
-		}
-		
-		/**
-		 * Updates the scene transformation matrix.
-		 */
-		protected function updateSceneTransform():void
-		{
-			if (_parent) {
-				_sceneTransform.copyFrom(_parent.sceneTransform);
-				_sceneTransform.prepend(transform);
-			} else {
-				_sceneTransform.copyFrom(transform);
-			}
-			
-			_sceneTransformDirty = false;
-		}
-
 
 		/**
 		 * @inheritDoc
