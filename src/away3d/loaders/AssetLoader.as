@@ -84,7 +84,7 @@ package away3d.loaders
 		/**
 		 * Loads a resource from already loaded data.
 		 */
-		public function parse(data : *, id : String, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public function loadData(data : *, id : String, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken = new AssetLoaderToken(this);
 			
