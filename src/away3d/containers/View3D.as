@@ -76,9 +76,13 @@ package away3d.containers
 			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
 			_entityCollector = new EntityCollector();
+			
 			initHitField();
+			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
+			
+			_camera.partition = _scene.partition;
 		}
 
 		public function get stage3DProxy() : Stage3DProxy
