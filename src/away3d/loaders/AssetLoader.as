@@ -199,10 +199,14 @@ package away3d.loaders
 		
 		private function joinUrl(base : String, end : String) : String
 		{
-			if (base.charAt(base.length-1)=='/')
-				base = base.substr(0, base.length-1);
 			if (end.charAt(0)=='/')
 				end = end.substr(1);
+			
+			if (base.length==0)
+				return end;
+			
+			if (base.charAt(base.length-1)=='/')
+				base = base.substr(0, base.length-1);
 			
 			return base.concat('/', end);
 		}
