@@ -34,7 +34,7 @@ package away3d.materials.methods
 			super(false, true, false);
 			_castingLight = castingLight;
 			castingLight.castsShadows = true;
-			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, -.003, 0, 0, 1]);
+			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, -.0007, 0, 0, 1]);
 		}
 
 		public function get epsilon() : Number

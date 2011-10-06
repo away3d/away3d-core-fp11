@@ -17,8 +17,6 @@ package away3d.materials.methods
 	// doesn't work anymore
 	public class TripleFilteredShadowMapMethod extends ShadowMapMethodBase
 	{
-		private var _stepSize : Number;
-
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 *
@@ -27,21 +25,9 @@ package away3d.materials.methods
 		public function TripleFilteredShadowMapMethod(castingLight : LightBase)
 		{
 			super(castingLight);
-			_stepSize = stepSize;
 			_data[5] = 1/3;
 			_data[6] = castingLight.shadowMapper.depthMapSize;
-			_data[7] = _stepSize = 1/castingLight.shadowMapper.depthMapSize;
-		}
-
-		public function get stepSize() : Number
-		{
-			return _stepSize;
-		}
-
-		public function set stepSize(value : Number) : void
-		{
-			_stepSize = value;
-			_data[7] = _stepSize;
+			_data[7] = 1/castingLight.shadowMapper.depthMapSize;
 		}
 
 		/**

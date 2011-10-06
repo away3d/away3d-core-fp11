@@ -17,29 +17,15 @@ package away3d.materials.methods
 
 	public class SoftShadowMapMethod extends ShadowMapMethodBase
 	{
-		private var _stepSize : Number;
-
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
-		public function SoftShadowMapMethod(castingLight : LightBase, stepSize : Number = .00025)
+		public function SoftShadowMapMethod(castingLight : LightBase)
 		{
 			super(castingLight);
-			_stepSize = stepSize;
 			_data[5] = 1/9;
-			_data[6] = stepSize;
+			_data[6] = 1/castingLight.shadowMapper.depthMapSize;
 			_data[7] = 0;
-		}
-
-		public function get stepSize() : Number
-		{
-			return _stepSize;
-		}
-
-		public function set stepSize(value : Number) : void
-		{
-			_stepSize = value;
-			_data[6] = _stepSize;
 		}
 
 		/**
