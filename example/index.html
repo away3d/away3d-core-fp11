@@ -1,0 +1,53 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>test</title>
+	<meta name="language" content="en" />
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	
+	<script src="js/swfobject.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		var flashvars = {
+		};
+		var params = {
+			menu: "false",
+			scale: "noScale",
+			allowFullscreen: "true",
+			allowScriptAccess: "always",
+			bgcolor: "",
+			wmode: "direct"
+		};
+		var attributes = {
+			id:"test"
+		};
+		//swfobject.embedSWF("test.swf", "altContent", "100%", "100%", "10.0.0", "expressInstall.swf", flashvars, params, attributes);
+		
+		function change(){
+			var select=document.getElementById("select");
+			
+			var name=select.options[select.selectedIndex].value;
+			swfobject.embedSWF(name+".swf", "test", "100%", "90%", "10.0.0", "expressInstall.swf", flashvars, params, attributes);
+		}
+	</script>
+	<style type="text/css">
+		html, body { height:100%; overflow:hidden; }
+		body { margin:0; }
+	</style>
+</head>
+<body>
+	<div id="test">
+		<p>select a example</p>	
+	</div>
+	<input type="button" onclick="change();" value="load"/>
+	<select id="select">
+  <option value ="Fire">Fire</option>
+  <option value ="Snowstorm">Snowstorm</option>
+ 
+  
+  
+</select>
+
+</body>
+</html>
