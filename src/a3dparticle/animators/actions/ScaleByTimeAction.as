@@ -7,7 +7,7 @@ package a3dparticle.animators.actions
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	
-	
+	import away3d.arcane;
 	use namespace arcane;
 	/**
 	 * ...

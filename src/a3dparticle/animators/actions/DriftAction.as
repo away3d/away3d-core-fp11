@@ -7,7 +7,7 @@ package a3dparticle.animators.actions
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 	
-	
+	import away3d.arcane;
 	use namespace arcane;
 	/**
 	 * ...
