@@ -170,26 +170,26 @@ package away3d.library
 		}
 		
 		
-		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public function load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
-			return loadResource(req, parser, context, ns);
+			return loadResource(req, context, ns, parser);
 		}
 		
-		public static function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public static function load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
-			return getInstance().load(req, parser, context, ns);
+			return getInstance().load(req, context, ns, parser);
 		}
 		
 		
 		
-		public function loadData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public function loadData(data : *, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
-			return parseResource(data, parser, context, ns);
+			return parseResource(data, context, ns, parser);
 		}
 		
-		public static function loadData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public static function loadData(data : *, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
-			return getInstance().loadData(data, parser, context, ns);
+			return getInstance().loadData(data, context, ns, parser);
 		}
 		
 		
@@ -476,7 +476,7 @@ package away3d.library
 		/**
 		 * Loads a yet unloaded resource file from the given url.
 		 */
-		private function loadResource(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		private function loadResource(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			var loader : AssetLoader = new AssetLoader();
 			_loadingSessions.push(loader);
@@ -493,7 +493,7 @@ package away3d.library
 			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
-			return loader.load(req, parser, context, ns);
+			return loader.load(req, context, ns, parser);
 		}
 		
 		
@@ -506,7 +506,7 @@ package away3d.library
 		 * @param parser An optional parser object that will translate the data into a usable resource.
 		 * @return A handle to the retrieved resource.
 		 */
-		private function parseResource(data : *, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		private function parseResource(data : *, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			var loader : AssetLoader = new AssetLoader();
 			_loadingSessions.push(loader);
@@ -522,7 +522,7 @@ package away3d.library
 			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
-			return loader.loadData(data, '', parser, context, ns);
+			return loader.loadData(data, '', context, ns, parser);
 		}
 		
 		
