@@ -16,6 +16,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
+	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.BitmapMaterial;
 	import away3d.materials.ColorMaterial;
 	import away3d.materials.DefaultMaterialBase;
@@ -156,15 +157,18 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			var magic : String;
-			var bytes : ByteArray = ByteArray(data);
+			var bytes : ByteArray = ParserUtil.toByteArray(data);
 			
-			bytes.position = 0;
-			magic = data.readUTFBytes(3);
-			bytes.position = 0;
-			
-			if (magic == 'AWD')
-				return true;
+			if (bytes) {
+				var magic : String;
+				
+				bytes.position = 0;
+				magic = data.readUTFBytes(3);
+				bytes.position = 0;
+				
+				if (magic == 'AWD')
+					return true;
+			}
 			
 			return false;
 		}

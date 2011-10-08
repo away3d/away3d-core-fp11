@@ -6,9 +6,10 @@ package away3d.loaders.parsers
 	import away3d.entities.Mesh;
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
+	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.BitmapMaterial;
 	import away3d.tools.utils.TextureUtils;
-
+	
 	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -139,11 +140,14 @@ package away3d.loaders.parsers
 		{
 			var ba : ByteArray;
 			
-			ba = ByteArray(data);
-			ba.position = 0;
+			ba = ParserUtil.toByteArray(data);
+			if (ba) {
+				ba.position = 0;
+				if (ba.readShort() == 0x4d4d)
+					return true;
+			}
 			
-			// "Magic" two first bytes of 3DS are 0x4d4d
-			return (ba.readShort() == 0x4d4d);
+			return false;
 		}
 		
 		/**
