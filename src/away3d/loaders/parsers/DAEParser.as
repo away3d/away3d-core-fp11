@@ -211,7 +211,7 @@ package away3d.loaders.parsers
 				
 				instance_geometry.bind_material = instance_controller.bind_material;
 				
-				if (controller)
+				while (controller)
 				{
 					var source:String = controller.skin ? 
 						controller.skin.source : 
@@ -223,18 +223,6 @@ package away3d.loaders.parsers
 						return instance_geometry;
 					}
 					controller = _libControllers[source];
-					
-					while (controller)
-					{
-						source = controller.skin ? controller.skin.source : 
-							(controller.morph ? controller.morph.source : "");
-						if (_libGeometries[source])
-						{
-							instance_geometry.url = source;
-							return instance_geometry;
-						}
-						controller = _libControllers[source];
-					}
 				}
 			}
 			return null;
