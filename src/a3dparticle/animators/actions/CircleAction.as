@@ -1,0 +1,99 @@
+package a3dparticle.animators.actions 
+{
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.passes.MaterialPassBase;
+	import away3d.materials.utils.ShaderRegisterElement;
+	import flash.display3D.Context3D;
+	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	
+	import away3d.arcane;
+	use namespace arcane;
+	/**
+	 * ...
+	 * @author ...
+	 */
+	public class CircleAction extends PerParticleAction
+	{
+		//the function return a Vector3D. Vector3D.x is radius,Vector3D.y is cycle
+		private var _dataFun:Function;
+		
+		private var _eulers:Vector3D;
+		private var _tempVelocity:Vector3D;
+		
+		private var _radius:Number;
+		private var _cycle:Number;
+		private var _eulersMatrix:Matrix3D;
+		
+		private var circleAttribute:ShaderRegisterElement;
+		private var eulersMatrixRegister:ShaderRegisterElement;
+		
+		public function CircleAction(fun:Function,eulers:Vector3D=null) 
+		{
+			dataLenght = 2;
+			_dataFun = fun;
+			_eulers = new Vector3D();
+			if (eulers)_eulers = eulers.clone();
+			_eulersMatrix = new Matrix3D();
+			_eulersMatrix.appendRotation(_eulers.x, new Vector3D(1, 0, 0));
+			_eulersMatrix.appendRotation(_eulers.y, new Vector3D(0, 1, 0));
+			_eulersMatrix.appendRotation(_eulers.z, new Vector3D(0, 0, 1));
+		}
+		
+		override public function genOne(index:uint):void
+		{
+			var temp:Vector3D = _dataFun(index);
+			_radius = temp.x;
+			_cycle = temp.y;
+		}
+		
+		override public function distributeOne(index:int, verticeIndex:uint):void
+		{
+			_vertices.push(_radius);
+			_vertices.push(Math.PI*2/_cycle);
+		}
+		
+		override public function getAGALVertexCode(pass : MaterialPassBase) : String
+		{
+			circleAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			eulersMatrixRegister = shaderRegisterCache.getFreeVertexConstant();
+			shaderRegisterCache.getFreeVertexConstant();
+			shaderRegisterCache.getFreeVertexConstant();
+			shaderRegisterCache.getFreeVertexConstant();
+			
+			var temp1:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
+			shaderRegisterCache.addVertexTempUsages(temp1,1);
+			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp1.regName, temp1.index);
+			
+			
+			var temp2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
+			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "x");
+			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "y");
+			var degree:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "z");
+			shaderRegisterCache.removeVertexTempUsage(temp1);
+			
+			var code:String = "";
+			code += "mul " + degree.toString() + "," + _animation.vertexTime.toString() + "," + circleAttribute.toString() + ".y\n";
+			code += "cos " + cos.toString() +"," + degree.toString() + "\n";
+			code += "sin " + sin.toString() +"," + degree.toString() + "\n";
+			code += "mul " + distance.toString() +".x," + cos.toString() +"," + circleAttribute.toString() + ".x\n";
+			code += "mul " + distance.toString() +".y," + sin.toString() +"," + circleAttribute.toString() + ".x\n";
+			code += "mov " + distance.toString() + ".wz" + _animation.zeroConst.toString() + "\n";
+			code += "m44 " + distance.toString() + "," + distance.toString() + "," +eulersMatrixRegister.toString() + "\n";
+			code += "add " + _animation.postionTarget.toString() + ".xyz," + distance.toString() + ".xyz," + _animation.postionTarget.toString() + ".xyz\n";
+			return code;
+		}
+		
+		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		{
+			var context : Context3D = stage3DProxy._context3D;
+			stage3DProxy.setSimpleVertexBuffer(circleAttribute.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, eulersMatrixRegister.index, _eulersMatrix.rawData, 4);
+		}
+		
+	}
+
+}
