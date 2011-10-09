@@ -136,7 +136,7 @@
 		}
 
 
-		private function remove(index : uint) : void
+		private function removeSegmentByIndex(index : uint) : void
 		{
 			var indVert : uint = _indices[index] * 11;
 			_indices.splice(index, 6);
@@ -155,7 +155,7 @@
 			for (var i : uint = 0; i < _segments.length; ++i) {
 				if (_segments[i] == segment) {
 					_segments.splice(i, 1);
-					remove(segment.index);
+					removeSegmentByIndex(segment.index);
 					_lineCount--;
 				} else {
 					_segments[i].index = index;
@@ -171,7 +171,7 @@
 			return _segments[index];
 		}
 
-		protected function clearSegments() : void
+		public function clearSegments() : void
 		{
 			_vertices.length = 0;
 			_indices.length = 0;
