@@ -66,7 +66,7 @@
 		public function set segmentsW(value : int) : void
 		{
 			_segmentsW = value;
-			clearSegments();
+			removeAllSegments();
 			invalidateGeometry();
 		}
 
@@ -78,7 +78,7 @@
 		public function set segmentsH(value : int) : void
 		{
 			_segmentsH = value;
-			clearSegments();
+			removeAllSegments();
 			invalidateGeometry();
 		}
 
