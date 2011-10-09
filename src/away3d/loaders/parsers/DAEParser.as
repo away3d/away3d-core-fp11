@@ -3,11 +3,13 @@ package away3d.loaders.parsers
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.BitmapMaterial;
 	import away3d.materials.ColorMaterial;
+	import away3d.materials.MaterialBase;
 	
 	import flash.display.BitmapData;
 	import flash.geom.Matrix;
@@ -21,10 +23,6 @@ package away3d.loaders.parsers
 	 */
 	public class DAEParser extends ParserBase
 	{	
-		public static const FLAG_FLIP_FACES:int = 1;
-		public static const FLAG_FLIP_IMAGES:int = 2;
-		public static const FLAG_DEFAULT:int = 3;
-		
 		private var _doc : XML;
 		private var _ns : Namespace;
 		private var _parseState : uint = 0;
@@ -32,7 +30,7 @@ package away3d.loaders.parsers
 		private var _imageCount : uint;
 		private var _currentImage : uint;
 		private var _dependencyCount : uint = 0;
-		private var _flags : int;
+		private var _flipFaces : Boolean = true;
 		
 		private var _libImages : Object;
 		private var _libMaterials : Object;
@@ -49,8 +47,6 @@ package away3d.loaders.parsers
 		
 		public function DAEParser()
 		{
-			_flags = FLAG_DEFAULT;
-			
 			super(ParserDataFormat.PLAIN_TEXT);
 		}
 		
@@ -91,16 +87,6 @@ package away3d.loaders.parsers
 			if (resource && resource.bitmapData)
 			{
 				var image:DAEImage = _libImages[ resourceDependency.id ] as DAEImage;
-				
-				if (_flags & FLAG_FLIP_IMAGES)
-				{
-					var clone:BitmapData = resource.bitmapData.clone();
-					var matrix:Matrix = new Matrix(1, 0, 0, -1, 0, clone.height);
-					
-					resource.bitmapData.draw(clone, matrix);
-					
-					clone.dispose();
-				}
 				
 				if (image)
 				{
@@ -143,7 +129,6 @@ package away3d.loaders.parsers
 					_doc = new XML(getTextData());
 					_ns = _doc.namespace();
 					
-					_libImages = new Object();
 					_imageList = _doc._ns::library_images._ns::image;
 					_imageCount = _dependencyCount = _imageList.length();
 					_currentImage = 0;
@@ -152,17 +137,24 @@ package away3d.loaders.parsers
 					break;
 				
 				case DAEParserState.PARSE_IMAGES:
-					parseLibImages();
+					_libImages = parseLibrary(_doc._ns::library_images._ns::image, DAEImage);
+					for (var imageId:String in _libImages)
+					{
+						var image:DAEImage = _libImages[imageId] as DAEImage;
+						
+						addDependency(image.id, new URLRequest(image.init_from));
+					}
+					pauseAndRetrieveDependencies();
 					break;
 				
 				case DAEParserState.PARSE_MATERIALS:
-					parseLibMaterials();
-					parseLibEffects();
+					_libMaterials = parseLibrary(_doc._ns::library_materials._ns::material, DAEMaterial);
+					_libEffects = parseLibrary(_doc._ns::library_effects._ns::effect, DAEEffect);
 					_parseState = DAEParserState.PARSE_GEOMETRIES;
 					break;
 				
 				case DAEParserState.PARSE_GEOMETRIES:
-					parseLibGeometries();
+					_libGeometries = parseLibrary(_doc._ns::library_geometries._ns::geometry, DAEGeometry);
 					_parseState = DAEParserState.PARSE_VISUAL_SCENE;
 					break;
 				
@@ -236,7 +228,7 @@ package away3d.loaders.parsers
 							}
 						}
 					}
-					geom.mesh.createGeometry(mesh.geometry, Boolean(_flags & FLAG_FLIP_FACES != 0));
+					geom.mesh.createGeometry(mesh.geometry, _flipFaces);
 				}
 			}
 			
@@ -244,30 +236,7 @@ package away3d.loaders.parsers
 			{
 				for(j = 0; j < mesh.subMeshes.length; j++)
 				{	
-					var effect : DAEEffect = effects[j];
-					
-					var cot:DAEColorOrTexture = effect.shader.props["diffuse"];
-					
-					if(cot && cot.texture && effect.surface)
-					{
-						var image:DAEImage = _libImages[effect.surface.init_from];
-						if (isBitmapDataValid(image.resource.bitmapData))
-						{
-							mesh.subMeshes[j].material = new BitmapMaterial(image.resource.bitmapData);
-						}
-						else
-						{
-							mesh.subMeshes[j].material = _defaultColorMaterial;
-						}
-					}
-					else if (cot && cot.color)
-					{
-						mesh.subMeshes[j].material = effect.colorMaterial;
-					}
-					else
-					{
-						mesh.subMeshes[j].material = _defaultColorMaterial;
-					}
+					applyMaterial(mesh.subMeshes[j], effects[j]);
 				}
 			}
 		
@@ -281,62 +250,44 @@ package away3d.loaders.parsers
 			finalizeAsset(o, node.id);
 		}
 		
-		private function parseLibEffects() : void
+		/**
+		 * Applies a material to a submesh.
+		 * 
+		 * @param	subMesh
+		 * @param	effect
+		 */ 
+		private function applyMaterial(subMesh : SubMesh, effect : DAEEffect) : void
 		{
-			var list:XMLList = _doc._ns::library_effects._ns::effect;
-			var count:uint = list.length();
+			var material:MaterialBase = _defaultColorMaterial;
+			var diffuse:DAEColorOrTexture = effect.shader.props["diffuse"];
 			
-			_libEffects = new Object();
-			
-			for (var i:int = 0; i < count; i++)
+			if(diffuse && diffuse.texture && effect.surface)
 			{
-				var effect:DAEEffect = new DAEEffect(list[i]);
-				
-				_libEffects[effect.id] = effect;
+				var image:DAEImage = _libImages[effect.surface.init_from];
+				if (isBitmapDataValid(image.resource.bitmapData))
+				{
+					material = new BitmapMaterial(image.resource.bitmapData);
+				}
 			}
+			else if (diffuse && diffuse.color)
+			{
+				material = effect.colorMaterial;
+			}
+
+			subMesh.material = material;
 		}
 		
-		private function parseLibGeometries() : void
+		private function parseLibrary(list : XMLList, clas : Class) : Object
 		{
-			var list:XMLList = _doc._ns::library_geometries._ns::geometry;
-			var count:uint = list.length();
+			var library:Object = new Object();
 			
-			_libGeometries = new Object();
-			
-			for (var i:int = 0; i < count; i++)
+			for (var i:int = 0; i < list.length(); i++)
 			{
-				var geometry:DAEGeometry = new DAEGeometry(list[i]);
-				
-				_libGeometries[geometry.id] = geometry;
+				var obj : * = new clas(list[i]);
+				library[ obj.id ] = obj;
 			}
-		}
-		
-		private function parseLibImages() : void
-		{
-			for (var i:int = 0; i < _dependencyCount; i++)
-			{
-				var image : DAEImage = new DAEImage(_imageList[i]);	
-				
-				_libImages[image.id] = image;
-				
-				addDependency(image.id, new URLRequest(image.init_from));
-			}
-			pauseAndRetrieveDependencies();
-		}
-		
-		private function parseLibMaterials() : void
-		{
-			var list:XMLList = _doc._ns::library_materials._ns::material;
-			var count:uint = list.length();
 			
-			_libMaterials = new Object();
-			
-			for (var i:int = 0; i < count; i++)
-			{
-				var material:DAEMaterial = new DAEMaterial(list[i]);
-				
-				_libMaterials[material.id] = material;
-			}
+			return library;
 		}
 		
 		public function get geometries() : Object
@@ -1024,9 +975,9 @@ class DAEMesh extends DAEElement
 						
 						if (v.numTexcoordSets > 0)
 						{
-							uvData.push(v.uvx, v.uvy);
+							uvData.push(v.uvx, 1.0 - v.uvy);
 							if (v.numTexcoordSets > 1)
-								uvData2.push(v.uvx2, v.uvy2);
+								uvData2.push(v.uvx2, 1.0 - v.uvy2);
 						}
 					}
 				}
