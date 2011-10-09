@@ -51,7 +51,7 @@ package away3d.primitives
 				_segments[i].thickness = _segments[i].thickness = value;
 		}
 
-		override protected function clearSegments() : void
+		override public function clearSegments() : void
 		{
 			super.clearSegments();
 		}
