@@ -23,6 +23,7 @@ package away3d.loaders.parsers.utils
 			
 			ba = toByteArray(data);
 			if (ba) {
+				ba.position = 0;
 				return ba.readUTFBytes(ba.bytesAvailable);
 			}
 			

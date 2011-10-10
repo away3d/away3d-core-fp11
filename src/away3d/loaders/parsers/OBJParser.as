@@ -199,12 +199,13 @@ package away3d.loaders.parsers
 				if(_mtlLib  && !_mtlLibLoaded)
 					return MORE_TO_PARSE;
 				
-				try {
+				//try {
 					translate();
 					applyMaterials();
 					
 					return PARSING_DONE;
 					
+					/*
 				} catch(e:Error){
 					parsingFailure = true;
 					trace("parsing failure: " + e.message);
@@ -212,6 +213,7 @@ package away3d.loaders.parsers
 					//TODO: DEAL WITH THIS ERROR!
 					return PARSING_DONE;
 				}
+					*/
 			}
 			
 			return MORE_TO_PARSE;
