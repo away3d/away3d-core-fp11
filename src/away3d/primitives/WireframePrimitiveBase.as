@@ -51,9 +51,9 @@ package away3d.primitives
 				_segments[i].thickness = _segments[i].thickness = value;
 		}
 
-		override protected function clearSegments() : void
+		override public function removeAllSegments() : void
 		{
-			super.clearSegments();
+			super.removeAllSegments();
 		}
 
 		override public function pushModelViewProjection(camera : Camera3D) : void
