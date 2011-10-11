@@ -8,6 +8,7 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	
+	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
@@ -17,10 +18,11 @@ package away3d.loaders.parsers
 	{
 		private var _byteData : ByteArray;
 		
-		private var _cur_obj_end : uint;
-		private var _cur_obj : ObjectVO;
+		private var _textures : Object;
 		
-		private var _cur_mat_name : String;
+		private var _cur_section_end : uint;
+		private var _cur_obj : ObjectVO;
+		private var _cur_mat : MaterialVO;
 		
 		
 		public function Max3DSParser()
@@ -70,26 +72,29 @@ package away3d.loaders.parsers
 				_byteData = ParserUtil.toByteArray(_data);
 				_byteData.position = 0;
 				_byteData.endian = Endian.LITTLE_ENDIAN;
+				
+				_textures = {};
 			}
 			
 			// If we are currently working on an object, and the most recent chunk was
 			// the last one in that object, finalize the current object.
-			if (_cur_obj_end && _byteData.position >= _cur_obj_end)
-				finalizeCurrentObject();
+			if ((_cur_obj || _cur_mat) && _byteData.position >= _cur_section_end)
+				finalizeCurrentSection();
 			
 			while (_byteData.bytesAvailable && true) {
 				var cid : uint;
 				var len : uint;
+				var end : uint;
 				
 				cid = _byteData.readUnsignedShort();
 				len = _byteData.readUnsignedInt();
+				end = _byteData.position + (len-6);
 				
 				trace('chunk:', cid.toString(16), len);
 				
 				switch (cid) {
 					case 0x4D4D: // MAIN3DS
 					case 0x3D3D: // EDIT3DS
-					case 0xAFFF: // MATERIAL
 						// This types are "container chunks" and contain only
 						// sub-chunks (no data on their own.) This means that
 						// there is nothing more to parse at this point, and 
@@ -98,13 +103,29 @@ package away3d.loaders.parsers
 						continue;
 						break;
 					
+					case 0xAFFF: // MATERIAL
+						_cur_section_end = _byteData.position + (len-6);
+						_cur_mat = new MaterialVO();
+						break;
 					
 					case 0xA000: // Material name
-						_cur_mat_name = readNulTermString();
+						_cur_mat.name = readNulTermString();
+						break;
+					
+					case 0xA200: // Main (color) texture 
+						_cur_mat.colorMap = parseTexture(end);
+						break;
+					
+					case 0xA204: // Specular map
+						_cur_mat.specularMap = parseTexture(end);
+						break;
+					
+					case 0xA220: // Reflection map
+						_cur_mat.reflectionMap = parseTexture(end);
 						break;
 					
 					case 0x4000: // EDIT_OBJECT
-						_cur_obj_end = _byteData.position + (len-6);
+						_cur_section_end = end;
 						_cur_obj = new ObjectVO();
 						_cur_obj.name = readNulTermString();
 						_cur_obj.numMaterials = 0;
@@ -137,16 +158,60 @@ package away3d.loaders.parsers
 						_byteData.position += (len-6);
 						break;
 				}
+				
+				
+				// Pause parsing if there were any dependencies found during this
+				// iteration (i.e. if there are any dependencies that need to be
+				// retrieved at this time.)
+				if (dependencies.length) {
+					pauseAndRetrieveDependencies();
+					break;
+				}
 			}
 			
 			
 			// More parsing is required if the entire byte array has not yet
 			// been read, or if there is a currently non-finalized object in
 			// the pipeline.
-			if (_byteData.bytesAvailable || _cur_obj)
+			if (_byteData.bytesAvailable || _cur_obj || _cur_mat)
 				return MORE_TO_PARSE;
 			else
 				return PARSING_DONE;
+		}
+		
+		
+		private function parseTexture(end : uint) : TextureVO
+		{
+			var tex : TextureVO;
+			
+			tex = new TextureVO();
+			
+			trace('beginning to parse texture');
+			
+			while (_byteData.position < end) {
+				var cid : uint;
+				var len : uint;
+				
+				cid = _byteData.readUnsignedShort();
+				len = _byteData.readUnsignedInt();
+				
+				switch (cid) {
+					case 0xA300:
+						tex.url = readNulTermString();
+						trace(tex.url);
+						break;
+						
+					default:
+						// Skip this unknown texture sub-chunk
+						_byteData.position += (len-6);
+						break;
+				}
+			}
+			
+			_textures[tex.url] = tex;
+			addDependency(tex.url, new URLRequest(tex.url));
+			
+			return tex;
 		}
 		
 		
@@ -242,13 +307,12 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function finalizeCurrentObject() : void
+		private function finalizeCurrentSection() : void
 		{
-			if (_cur_mat_name) {
-				
+			if (_cur_mat) {
+				_cur_mat = null;
 			}
-			
-			if (_cur_obj) {
+			else if (_cur_obj) {
 				if (_cur_obj.type == AssetType.MESH) {
 					var geom : Geometry;
 					var sub : SubGeometry;
@@ -289,6 +353,22 @@ package away3d.loaders.parsers
 			return str;
 		}
 	}
+}
+
+import flash.display.BitmapData;
+
+internal class TextureVO
+{
+	public var url : String;
+	public var bitmap : BitmapData;
+}
+
+internal class MaterialVO
+{
+	public var name : String;
+	public var colorMap : TextureVO;
+	public var specularMap : TextureVO;
+	public var reflectionMap : TextureVO;
 }
 
 internal class ObjectVO
