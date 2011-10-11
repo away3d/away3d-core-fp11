@@ -22,6 +22,7 @@ package away3d.loaders.parsers
 		private var _cur_obj_type : String;
 		private var _cur_obj_verts : Vector.<Number>;
 		private var _cur_obj_inds : Vector.<uint>;
+		private var _cur_obj_uvs : Vector.<Number>;
 		
 		
 		public function Max3DSParser()
@@ -75,7 +76,7 @@ package away3d.loaders.parsers
 			
 			// If we are currently working on an object, and the most recent chunk was
 			// the last one in that object, finalize the current object.
-			if (_cur_obj_end && _byteData.position > _cur_obj_end)
+			if (_cur_obj_end && _byteData.position >= _cur_obj_end)
 				finalizeCurrentObject();
 			
 			while (_byteData.bytesAvailable && true) {
@@ -103,7 +104,6 @@ package away3d.loaders.parsers
 					
 					case 0x4000: // EDIT_OBJECT
 						_cur_obj_end = _byteData.position + (len-6);
-						trace('cur obj end:', _cur_obj_end);
 						_cur_obj_name = readNulTermString();
 						break;
 					
@@ -120,9 +120,7 @@ package away3d.loaders.parsers
 						break;
 					
 					case 0x4140: // TRI_MAPPINGCOORDS
-						break;
-					
-					case 0x4170: // TRI_MAPPINGSTANDARD
+						parseUVList();
 						break;
 					
 					case 0x4111: // TRI_VERTEXOPTIONS
@@ -193,6 +191,22 @@ package away3d.loaders.parsers
 		}
 		
 		
+		private function parseUVList() : void
+		{
+			var i : uint;
+			var count : uint;
+			
+			count = _byteData.readUnsignedShort();
+			_cur_obj_uvs = new Vector.<Number>(count*2, true);
+			
+			i = 0;
+			while (i < _cur_obj_uvs.length) {
+				_cur_obj_uvs[i++] = _byteData.readFloat();
+				_cur_obj_uvs[i++] = 1.0 - _byteData.readFloat();
+			}
+		}
+		
+		
 		private function finalizeCurrentObject() : void
 		{
 			if (_cur_obj_type == AssetType.MESH) {
@@ -201,8 +215,11 @@ package away3d.loaders.parsers
 				var mesh : Mesh;
 				
 				sub = new SubGeometry();
+				sub.autoDeriveVertexNormals = true;
+				sub.autoDeriveVertexTangents = true;
 				sub.updateVertexData(_cur_obj_verts);
 				sub.updateIndexData(_cur_obj_inds);
+				sub.updateUVData(_cur_obj_uvs);
 				
 				geom = new Geometry();
 				geom.subGeometries.push(sub);
@@ -216,6 +233,7 @@ package away3d.loaders.parsers
 			_cur_obj_name = null;
 			_cur_obj_verts = null;
 			_cur_obj_inds = null;
+			_cur_obj_uvs = null;
 			_cur_obj_end = 0;
 		}
 		
