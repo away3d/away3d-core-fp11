@@ -95,82 +95,86 @@ package away3d.loaders.parsers
 				_materials = {};
 			}
 			
-			// If we are currently working on an object, and the most recent chunk was
-			// the last one in that object, finalize the current object.
-			if (_cur_mat && _byteData.position >= _cur_mat_end)
-				finalizeCurrentMaterial();
-			else if (_cur_obj && _byteData.position >= _cur_obj_end)
-				finalizeCurrentObject();
+			while (hasTime()) {
+				
+				// If we are currently working on an object, and the most recent chunk was
+				// the last one in that object, finalize the current object.
+				if (_cur_mat && _byteData.position >= _cur_mat_end)
+					finalizeCurrentMaterial();
+				else if (_cur_obj && _byteData.position >= _cur_obj_end)
+					finalizeCurrentObject();
 			
-			while (_byteData.bytesAvailable && true) {
-				var cid : uint;
-				var len : uint;
-				var end : uint;
-				
-				cid = _byteData.readUnsignedShort();
-				len = _byteData.readUnsignedInt();
-				end = _byteData.position + (len-6);
-				
-				trace('chunk:', cid.toString(16), len);
-				
-				switch (cid) {
-					case 0x4D4D: // MAIN3DS
-					case 0x3D3D: // EDIT3DS
-						// This types are "container chunks" and contain only
-						// sub-chunks (no data on their own.) This means that
-						// there is nothing more to parse at this point, and 
-						// instead we should progress to the next chunk, which
-						// will be the first sub-chunk of this one.
-						continue;
-						break;
+				if (_byteData.bytesAvailable) {
+					var cid : uint;
+					var len : uint;
+					var end : uint;
 					
-					case 0xAFFF: // MATERIAL
-						_cur_mat_end = end;
-						_cur_mat = parseMaterial();
-						break;
+					cid = _byteData.readUnsignedShort();
+					len = _byteData.readUnsignedInt();
+					end = _byteData.position + (len-6);
 					
-					case 0x4000: // EDIT_OBJECT
-						_cur_obj_end = end;
-						_cur_obj = new ObjectVO();
-						_cur_obj.name = readNulTermString();
-						_cur_obj.materials = new Vector.<String>();
-						_cur_obj.materialFaces = {};
-						break;
-					
-					case 0x4100: // OBJ_TRIMESH 
-						_cur_obj.type = AssetType.MESH;
-						break;
-					
-					case 0x4110: // TRI_VERTEXL
-						parseVertexList();
-						break;
-					
-					case 0x4120: // TRI_FACELIST
-						parseFaceList();
-						break;
-					
-					case 0x4140: // TRI_MAPPINGCOORDS
-						parseUVList();
-						break;
-					
-					case 0x4130: // Face materials
-						parseFaceMaterialList();
-						break;
-					
-					case 0x4111: // TRI_VERTEXOPTIONS
-					default:
-						// Skip this (unknown) chunk
-						_byteData.position += (len-6);
-						break;
-				}
+					trace('chunk:', cid.toString(16), len);
 				
 				
-				// Pause parsing if there were any dependencies found during this
-				// iteration (i.e. if there are any dependencies that need to be
-				// retrieved at this time.)
-				if (dependencies.length) {
-					pauseAndRetrieveDependencies();
-					break;
+					switch (cid) {
+						case 0x4D4D: // MAIN3DS
+						case 0x3D3D: // EDIT3DS
+							// This types are "container chunks" and contain only
+							// sub-chunks (no data on their own.) This means that
+							// there is nothing more to parse at this point, and 
+							// instead we should progress to the next chunk, which
+							// will be the first sub-chunk of this one.
+							continue;
+							break;
+						
+						case 0xAFFF: // MATERIAL
+							_cur_mat_end = end;
+							_cur_mat = parseMaterial();
+							break;
+						
+						case 0x4000: // EDIT_OBJECT
+							_cur_obj_end = end;
+							_cur_obj = new ObjectVO();
+							_cur_obj.name = readNulTermString();
+							_cur_obj.materials = new Vector.<String>();
+							_cur_obj.materialFaces = {};
+							break;
+						
+						case 0x4100: // OBJ_TRIMESH 
+							_cur_obj.type = AssetType.MESH;
+							break;
+						
+						case 0x4110: // TRI_VERTEXL
+							parseVertexList();
+							break;
+						
+						case 0x4120: // TRI_FACELIST
+							parseFaceList();
+							break;
+						
+						case 0x4140: // TRI_MAPPINGCOORDS
+							parseUVList();
+							break;
+						
+						case 0x4130: // Face materials
+							parseFaceMaterialList();
+							break;
+						
+						case 0x4111: // TRI_VERTEXOPTIONS
+						default:
+							// Skip this (unknown) chunk
+							_byteData.position += (len-6);
+							break;
+					}
+					
+					
+					// Pause parsing if there were any dependencies found during this
+					// iteration (i.e. if there are any dependencies that need to be
+					// retrieved at this time.)
+					if (dependencies.length) {
+						pauseAndRetrieveDependencies();
+						break;
+					}
 				}
 			}
 			
