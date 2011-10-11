@@ -56,6 +56,7 @@ package a3dparticle.animators
 		public var textSample : ShaderRegisterElement;
 		public var uvVar:ShaderRegisterElement;
 		public var fragmentZeroConst:ShaderRegisterElement;
+		public var fragmentPiConst:ShaderRegisterElement;
 		
 		
 		public function ParticleAnimation()
@@ -158,6 +159,7 @@ package a3dparticle.animators
 			textSample = shaderRegisterCache.getFreeTextureReg();
 			colorDefalut = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
+			fragmentPiConst = shaderRegisterCache.getFreeFragmentConstant();
 
 		}
 		/**
