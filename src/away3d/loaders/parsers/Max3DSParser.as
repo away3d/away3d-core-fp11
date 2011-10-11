@@ -18,11 +18,9 @@ package away3d.loaders.parsers
 		private var _byteData : ByteArray;
 		
 		private var _cur_obj_end : uint;
-		private var _cur_obj_name : String;
-		private var _cur_obj_type : String;
-		private var _cur_obj_verts : Vector.<Number>;
-		private var _cur_obj_inds : Vector.<uint>;
-		private var _cur_obj_uvs : Vector.<Number>;
+		private var _cur_obj : ObjectVO;
+		
+		private var _cur_mat_name : String;
 		
 		
 		public function Max3DSParser()
@@ -83,7 +81,7 @@ package away3d.loaders.parsers
 				var cid : uint;
 				var len : uint;
 				
-				cid = _byteData.readShort();
+				cid = _byteData.readUnsignedShort();
 				len = _byteData.readUnsignedInt();
 				
 				trace('chunk:', cid.toString(16), len);
@@ -91,6 +89,7 @@ package away3d.loaders.parsers
 				switch (cid) {
 					case 0x4D4D: // MAIN3DS
 					case 0x3D3D: // EDIT3DS
+					case 0xAFFF: // MATERIAL
 						// This types are "container chunks" and contain only
 						// sub-chunks (no data on their own.) This means that
 						// there is nothing more to parse at this point, and 
@@ -99,16 +98,20 @@ package away3d.loaders.parsers
 						continue;
 						break;
 					
-					case 0xAFFF: // EDIT_MATERIAL
+					
+					case 0xA000: // Material name
+						_cur_mat_name = readNulTermString();
 						break;
 					
 					case 0x4000: // EDIT_OBJECT
 						_cur_obj_end = _byteData.position + (len-6);
-						_cur_obj_name = readNulTermString();
+						_cur_obj = new ObjectVO();
+						_cur_obj.name = readNulTermString();
+						_cur_obj.materialFaces = {};
 						break;
 					
 					case 0x4100: // OBJ_TRIMESH 
-						_cur_obj_type = AssetType.MESH;
+						_cur_obj.type = AssetType.MESH;
 						break;
 					
 					case 0x4110: // TRI_VERTEXL
@@ -123,6 +126,10 @@ package away3d.loaders.parsers
 						parseUVList();
 						break;
 					
+					case 0x4130: // Face materials
+						parseFaceMaterialList();
+						break;
+					
 					case 0x4111: // TRI_VERTEXOPTIONS
 					default:
 						// Skip this (unknown) chunk
@@ -135,7 +142,7 @@ package away3d.loaders.parsers
 			// More parsing is required if the entire byte array has not yet
 			// been read, or if there is a currently non-finalized object in
 			// the pipeline.
-			if (_byteData.bytesAvailable || _cur_obj_type)
+			if (_byteData.bytesAvailable || _cur_obj)
 				return MORE_TO_PARSE;
 			else
 				return PARSING_DONE;
@@ -145,22 +152,24 @@ package away3d.loaders.parsers
 		private function parseVertexList() : void
 		{
 			var i : uint;
+			var len : uint;
 			var count : uint;
 			
 			count = _byteData.readUnsignedShort();
-			_cur_obj_verts = new Vector.<Number>(count*3, true);
+			_cur_obj.verts = new Vector.<Number>(count*3, true);
 			
 			i = 0;
-			while (i<_cur_obj_verts.length) {
+			len = _cur_obj.verts.length;
+			while (i<len) {
 				var x : Number, y : Number, z : Number;
 				
 				x = _byteData.readFloat();
 				y = _byteData.readFloat();
 				z = _byteData.readFloat();
 				
-				_cur_obj_verts[i++] = x;
-				_cur_obj_verts[i++] = z;
-				_cur_obj_verts[i++] = y;
+				_cur_obj.verts[i++] = x;
+				_cur_obj.verts[i++] = z;
+				_cur_obj.verts[i++] = y;
 			}
 		}
 		
@@ -168,22 +177,24 @@ package away3d.loaders.parsers
 		private function parseFaceList() : void
 		{
 			var i : uint;
+			var len : uint;
 			var count : uint;
 			
 			count = _byteData.readUnsignedShort();
-			_cur_obj_inds = new Vector.<uint>(count*3, true);
+			_cur_obj.indices = new Vector.<uint>(count*3, true);
 			
 			i = 0;
-			while (i < _cur_obj_inds.length) {
+			len = _cur_obj.indices.length;
+			while (i < len) {
 				var i0 : uint, i1 : uint, i2 : uint;
 				
 				i0 = _byteData.readUnsignedShort(); 
 				i1 = _byteData.readUnsignedShort(); 
 				i2 = _byteData.readUnsignedShort(); 
 				
-				_cur_obj_inds[i++] = i0;
-				_cur_obj_inds[i++] = i2;
-				_cur_obj_inds[i++] = i1;
+				_cur_obj.indices[i++] = i0;
+				_cur_obj.indices[i++] = i2;
+				_cur_obj.indices[i++] = i1;
 				
 				// Skip "face info", irrelevant in Away3D
 				_byteData.position += 2;
@@ -194,47 +205,70 @@ package away3d.loaders.parsers
 		private function parseUVList() : void
 		{
 			var i : uint;
+			var len : uint;
 			var count : uint;
 			
 			count = _byteData.readUnsignedShort();
-			_cur_obj_uvs = new Vector.<Number>(count*2, true);
+			_cur_obj.uvs = new Vector.<Number>(count*2, true);
 			
 			i = 0;
-			while (i < _cur_obj_uvs.length) {
-				_cur_obj_uvs[i++] = _byteData.readFloat();
-				_cur_obj_uvs[i++] = 1.0 - _byteData.readFloat();
+			len = _cur_obj.uvs.length;
+			while (i < len) {
+				_cur_obj.uvs[i++] = _byteData.readFloat();
+				_cur_obj.uvs[i++] = 1.0 - _byteData.readFloat();
 			}
+		}
+		
+		
+		private function parseFaceMaterialList() : void
+		{
+			var mat : String;
+			var count : uint;
+			var i : uint;
+			var faces : Vector.<uint>;
+				
+			mat = readNulTermString();
+			count = _byteData.readUnsignedShort();
+			
+			faces = new Vector.<uint>(count, true);
+			i = 0;
+			while (i<faces.length) {
+				faces[i++] = _byteData.readUnsignedShort();
+			}
+			
+			_cur_obj.materialFaces[mat] = faces;
 		}
 		
 		
 		private function finalizeCurrentObject() : void
 		{
-			if (_cur_obj_type == AssetType.MESH) {
-				var geom : Geometry;
-				var sub : SubGeometry;
-				var mesh : Mesh;
+			if (_cur_mat_name) {
 				
-				sub = new SubGeometry();
-				sub.autoDeriveVertexNormals = true;
-				sub.autoDeriveVertexTangents = true;
-				sub.updateVertexData(_cur_obj_verts);
-				sub.updateIndexData(_cur_obj_inds);
-				sub.updateUVData(_cur_obj_uvs);
-				
-				geom = new Geometry();
-				geom.subGeometries.push(sub);
-				finalizeAsset(geom, _cur_obj_name.concat('_geom'));
-				
-				mesh = new Mesh(null, geom);
-				finalizeAsset(mesh, _cur_obj_name);
 			}
 			
-			_cur_obj_type = null;
-			_cur_obj_name = null;
-			_cur_obj_verts = null;
-			_cur_obj_inds = null;
-			_cur_obj_uvs = null;
-			_cur_obj_end = 0;
+			if (_cur_obj) {
+				if (_cur_obj.type == AssetType.MESH) {
+					var geom : Geometry;
+					var sub : SubGeometry;
+					var mesh : Mesh;
+					
+					sub = new SubGeometry();
+					sub.autoDeriveVertexNormals = true;
+					sub.autoDeriveVertexTangents = true;
+					sub.updateVertexData(_cur_obj.verts);
+					sub.updateIndexData(_cur_obj.indices);
+					sub.updateUVData(_cur_obj.uvs);
+					
+					geom = new Geometry();
+					geom.subGeometries.push(sub);
+					finalizeAsset(geom, _cur_obj.name.concat('_geom'));
+					
+					mesh = new Mesh(null, geom);
+					finalizeAsset(mesh, _cur_obj.name);
+				}
+				
+				_cur_obj = null;
+			}
 		}
 		
 		
@@ -251,3 +285,14 @@ package away3d.loaders.parsers
 		}
 	}
 }
+
+internal class ObjectVO
+{
+	public var name : String;
+	public var type : String;
+	public var verts : Vector.<Number>;
+	public var indices : Vector.<uint>;
+	public var uvs : Vector.<Number>;
+	public var materialFaces : Object;
+}
+
