@@ -95,6 +95,12 @@ package away3d.loaders.parsers
 				_materials = {};
 			}
 			
+			
+			// TODO: With this construct, the loop will run no-op for as long
+			// as there is time once file has finished reading. Consider a nice
+			// way to stop loop when byte array is empty, without putting it in
+			// the while-conditional, which will prevent finalizations from
+			// happening after the last chunk.
 			while (hasTime()) {
 				
 				// If we are currently working on an object, and the most recent chunk was
