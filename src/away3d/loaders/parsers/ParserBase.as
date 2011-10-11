@@ -316,8 +316,6 @@ package away3d.loaders.parsers
 			_timer = new Timer(_frameLimit, 0);
 			_timer.addEventListener(TimerEvent.TIMER, onInterval);
 			_timer.start();
-			// synchronously right away
-			onInterval();
 		}
 		
 		
