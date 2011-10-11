@@ -47,6 +47,7 @@ package a3dparticle.animators
 		public var vertexLife:ShaderRegisterElement;
 		public var zeroConst:ShaderRegisterElement;
 		public var piConst:ShaderRegisterElement;
+		public var OneConst:ShaderRegisterElement;
 		//vary
 		public var fragmentTime:ShaderRegisterElement;
 		public var fragmentLife:ShaderRegisterElement;
@@ -151,6 +152,7 @@ package a3dparticle.animators
 			
 			zeroConst = shaderRegisterCache.getFreeVertexConstant();
 			piConst = shaderRegisterCache.getFreeVertexConstant();
+			OneConst = shaderRegisterCache.getFreeVertexConstant();
 			
 			
 			colorTarget = shaderRegisterCache.getFreeFragmentVectorTemp();
