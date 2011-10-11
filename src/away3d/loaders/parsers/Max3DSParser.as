@@ -10,6 +10,8 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.BitmapMaterial;
+	import away3d.materials.ColorMaterial;
+	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	
 	import flash.net.URLRequest;
@@ -25,7 +27,8 @@ package away3d.loaders.parsers
 		private var _textures : Object;
 		private var _materials : Object;
 		
-		private var _cur_section_end : uint;
+		private var _cur_obj_end : uint;
+		private var _cur_mat_end : uint;
 		private var _cur_obj : ObjectVO;
 		private var _cur_mat : MaterialVO;
 		
@@ -94,8 +97,10 @@ package away3d.loaders.parsers
 			
 			// If we are currently working on an object, and the most recent chunk was
 			// the last one in that object, finalize the current object.
-			if ((_cur_obj || _cur_mat) && _byteData.position >= _cur_section_end)
-				finalizeCurrentSection();
+			if (_cur_mat && _byteData.position >= _cur_mat_end)
+				finalizeCurrentMaterial();
+			else if (_cur_obj && _byteData.position >= _cur_obj_end)
+				finalizeCurrentObject();
 			
 			while (_byteData.bytesAvailable && true) {
 				var cid : uint;
@@ -120,28 +125,12 @@ package away3d.loaders.parsers
 						break;
 					
 					case 0xAFFF: // MATERIAL
-						_cur_section_end = _byteData.position + (len-6);
-						_cur_mat = new MaterialVO();
-						break;
-					
-					case 0xA000: // Material name
-						_cur_mat.name = readNulTermString();
-						break;
-					
-					case 0xA200: // Main (color) texture 
-						_cur_mat.colorMap = parseTexture(end);
-						break;
-					
-					case 0xA204: // Specular map
-						_cur_mat.specularMap = parseTexture(end);
-						break;
-					
-					case 0xA220: // Reflection map
-						_cur_mat.reflectionMap = parseTexture(end);
+						_cur_mat_end = end;
+						_cur_mat = parseMaterial();
 						break;
 					
 					case 0x4000: // EDIT_OBJECT
-						_cur_section_end = end;
+						_cur_obj_end = end;
 						_cur_obj = new ObjectVO();
 						_cur_obj.name = readNulTermString();
 						_cur_obj.materials = new Vector.<String>();
@@ -193,6 +182,58 @@ package away3d.loaders.parsers
 				return MORE_TO_PARSE;
 			else
 				return PARSING_DONE;
+		}
+		
+		
+		private function parseMaterial() : MaterialVO
+		{
+			var mat : MaterialVO;
+			
+			mat = new MaterialVO();
+			
+			while (_byteData.position < _cur_mat_end) {
+				var cid : uint;
+				var len : uint;
+				var end : uint;
+				
+				cid = _byteData.readUnsignedShort();
+				len = _byteData.readUnsignedInt();
+				end = _byteData.position + (len-6);
+				
+				switch (cid) {
+					case 0xA000: // Material name
+						mat.name = readNulTermString();
+						trace('mat name', mat.name);
+						break;
+					
+					case 0xA010: // Ambient color
+						mat.ambientColor = readColor();
+						break;
+					
+					case 0xA020: // Diffuse color
+						mat.diffuseColor = readColor();
+						break;
+					
+					case 0xA030: // Specular color
+						mat.specularColor = readColor();
+						break;
+					
+					case 0xA081: // Two-sided, existence indicates "true"
+						trace('twosided!');
+						mat.twoSided = true;
+						break;
+					
+					case 0xA200: // Main (color) texture 
+						mat.colorMap = parseTexture(end);
+						break;
+					
+					case 0xA204: // Specular map
+						mat.specularMap = parseTexture(end);
+						break;
+				}
+			}
+			
+			return mat;
 		}
 		
 		
@@ -323,57 +364,63 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function finalizeCurrentSection() : void
+		private function finalizeCurrentObject() : void
 		{
-			if (_cur_mat) {
-				if (_cur_mat.colorMap) {
-					var bmat : BitmapMaterial;
-					
-					bmat = new BitmapMaterial(_cur_mat.colorMap.bitmap.bitmapData);
-					finalizeAsset(bmat, _cur_mat.name);
-					
-				}
-				else {
-					// TODO: Implement color materials
+			if (_cur_obj.type == AssetType.MESH) {
+				var geom : Geometry;
+				var sub : SubGeometry;
+				var mat : MaterialBase;
+				var mesh : Mesh;
+				
+				if (_cur_obj.materials.length > 1)
+					dieWithError('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
+				
+				sub = new SubGeometry();
+				sub.autoDeriveVertexNormals = true;
+				sub.autoDeriveVertexTangents = true;
+				sub.updateVertexData(_cur_obj.verts);
+				sub.updateIndexData(_cur_obj.indices);
+				sub.updateUVData(_cur_obj.uvs);
+				
+				geom = new Geometry();
+				geom.subGeometries.push(sub);
+				finalizeAsset(geom, _cur_obj.name.concat('_geom'));
+				
+				if (_cur_obj.materials.length==1) {
+					var mname : String;
+					mname = _cur_obj.materials[0];
+					mat = _materials[mname].material;
 				}
 				
-				_materials[_cur_mat.name] = _cur_mat;
-				_cur_mat.material = bmat;
-				_cur_mat = null;
+				mesh = new Mesh(mat, geom);
+				finalizeAsset(mesh, _cur_obj.name);
 			}
-			else if (_cur_obj) {
-				if (_cur_obj.type == AssetType.MESH) {
-					var geom : Geometry;
-					var sub : SubGeometry;
-					var mat : MaterialBase;
-					var mesh : Mesh;
-					
-					if (_cur_obj.materials.length > 1)
-						dieWithError('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
-					
-					sub = new SubGeometry();
-					sub.autoDeriveVertexNormals = true;
-					sub.autoDeriveVertexTangents = true;
-					sub.updateVertexData(_cur_obj.verts);
-					sub.updateIndexData(_cur_obj.indices);
-					sub.updateUVData(_cur_obj.uvs);
-					
-					geom = new Geometry();
-					geom.subGeometries.push(sub);
-					finalizeAsset(geom, _cur_obj.name.concat('_geom'));
-					
-					if (_cur_obj.materials.length==1) {
-						var mname : String;
-						mname = _cur_obj.materials[0];
-						mat = _materials[mname].material;
-					}
-					
-					mesh = new Mesh(mat, geom);
-					finalizeAsset(mesh, _cur_obj.name);
-				}
-				
-				_cur_obj = null;
+			
+			_cur_obj = null;
+		}
+		
+		
+		private function finalizeCurrentMaterial() : void
+		{
+			var mat : DefaultMaterialBase;
+			
+			if (_cur_mat.colorMap) {
+				mat = new BitmapMaterial(_cur_mat.colorMap.bitmap.bitmapData);
 			}
+			else {
+				mat = new ColorMaterial(_cur_mat.diffuseColor);
+			}
+			
+			mat.ambientColor = _cur_mat.ambientColor;
+			mat.specularColor = _cur_mat.specularColor;
+			mat.bothSides = _cur_mat.twoSided;
+			
+			finalizeAsset(mat, _cur_mat.name);
+			
+			_materials[_cur_mat.name] = _cur_mat;
+			_cur_mat.material = mat;
+			
+			_cur_mat = null;
 		}
 		
 		
@@ -387,6 +434,35 @@ package away3d.loaders.parsers
 			}
 			
 			return str;
+		}
+		
+		
+		private function readColor() : uint
+		{
+			var cid : uint;
+			var len : uint;
+			var r : uint, g : uint, b : uint;
+			
+			cid = _byteData.readUnsignedShort();
+			len = _byteData.readUnsignedInt();
+			
+			switch (cid) {
+				case 0x0010: // Floats
+					r = _byteData.readFloat() * 255;
+					g = _byteData.readFloat() * 255;
+					b = _byteData.readFloat() * 255;
+					break;
+				case 0x0011: // 24-bit color
+					r = _byteData.readUnsignedByte();
+					g = _byteData.readUnsignedByte();
+					b = _byteData.readUnsignedByte();
+					break;
+				default:
+					_byteData.position += (len-6);
+					break;
+			}
+			
+			return (r<<16) | (g<<8) | b;
 		}
 	}
 }
@@ -404,9 +480,12 @@ internal class TextureVO
 internal class MaterialVO
 {
 	public var name : String;
+	public var ambientColor : uint;
+	public var diffuseColor : uint;
+	public var specularColor : uint;
+	public var twoSided : Boolean;
 	public var colorMap : TextureVO;
 	public var specularMap : TextureVO;
-	public var reflectionMap : TextureVO;
 	public var material : MaterialBase;
 }
 
