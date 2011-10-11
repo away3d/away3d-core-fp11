@@ -5,8 +5,12 @@ package away3d.loaders.parsers
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.AssetType;
+	import away3d.library.assets.BitmapDataAsset;
+	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
+	import away3d.materials.BitmapMaterial;
+	import away3d.materials.MaterialBase;
 	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -19,6 +23,7 @@ package away3d.loaders.parsers
 		private var _byteData : ByteArray;
 		
 		private var _textures : Object;
+		private var _materials : Object;
 		
 		private var _cur_section_end : uint;
 		private var _cur_obj : ObjectVO;
@@ -56,13 +61,23 @@ package away3d.loaders.parsers
 		
 		arcane override function resolveDependency(resourceDependency:ResourceDependency):void
 		{
-			
+			if (resourceDependency.assets.length == 1) {
+				var asset : IAsset;
+				
+				asset = resourceDependency.assets[0];
+				if (asset.assetType == AssetType.BITMAP) {
+					var tex : TextureVO;
+					
+					tex = _textures[resourceDependency.id];
+					tex.bitmap = asset as BitmapDataAsset;
+				}
+			}
 		}
 		
 		
 		arcane override function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			
+			// TODO: Implement
 		}
 		
 		
@@ -74,6 +89,7 @@ package away3d.loaders.parsers
 				_byteData.endian = Endian.LITTLE_ENDIAN;
 				
 				_textures = {};
+				_materials = {};
 			}
 			
 			// If we are currently working on an object, and the most recent chunk was
@@ -128,7 +144,7 @@ package away3d.loaders.parsers
 						_cur_section_end = end;
 						_cur_obj = new ObjectVO();
 						_cur_obj.name = readNulTermString();
-						_cur_obj.numMaterials = 0;
+						_cur_obj.materials = new Vector.<String>();
 						_cur_obj.materialFaces = {};
 						break;
 					
@@ -302,7 +318,7 @@ package away3d.loaders.parsers
 				faces[i++] = _byteData.readUnsignedShort();
 			}
 			
-			_cur_obj.numMaterials++;
+			_cur_obj.materials.push(mat);
 			_cur_obj.materialFaces[mat] = faces;
 		}
 		
@@ -310,15 +326,29 @@ package away3d.loaders.parsers
 		private function finalizeCurrentSection() : void
 		{
 			if (_cur_mat) {
+				if (_cur_mat.colorMap) {
+					var bmat : BitmapMaterial;
+					
+					bmat = new BitmapMaterial(_cur_mat.colorMap.bitmap.bitmapData);
+					finalizeAsset(bmat, _cur_mat.name);
+					
+				}
+				else {
+					// TODO: Implement color materials
+				}
+				
+				_materials[_cur_mat.name] = _cur_mat;
+				_cur_mat.material = bmat;
 				_cur_mat = null;
 			}
 			else if (_cur_obj) {
 				if (_cur_obj.type == AssetType.MESH) {
 					var geom : Geometry;
 					var sub : SubGeometry;
+					var mat : MaterialBase;
 					var mesh : Mesh;
 					
-					if (_cur_obj.numMaterials > 1)
+					if (_cur_obj.materials.length > 1)
 						dieWithError('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
 					
 					sub = new SubGeometry();
@@ -332,7 +362,13 @@ package away3d.loaders.parsers
 					geom.subGeometries.push(sub);
 					finalizeAsset(geom, _cur_obj.name.concat('_geom'));
 					
-					mesh = new Mesh(null, geom);
+					if (_cur_obj.materials.length==1) {
+						var mname : String;
+						mname = _cur_obj.materials[0];
+						mat = _materials[mname].material;
+					}
+					
+					mesh = new Mesh(mat, geom);
 					finalizeAsset(mesh, _cur_obj.name);
 				}
 				
@@ -355,12 +391,14 @@ package away3d.loaders.parsers
 	}
 }
 
-import flash.display.BitmapData;
+
+import away3d.library.assets.BitmapDataAsset;
+import away3d.materials.MaterialBase;
 
 internal class TextureVO
 {
 	public var url : String;
-	public var bitmap : BitmapData;
+	public var bitmap : BitmapDataAsset;
 }
 
 internal class MaterialVO
@@ -369,6 +407,7 @@ internal class MaterialVO
 	public var colorMap : TextureVO;
 	public var specularMap : TextureVO;
 	public var reflectionMap : TextureVO;
+	public var material : MaterialBase;
 }
 
 internal class ObjectVO
@@ -379,6 +418,6 @@ internal class ObjectVO
 	public var indices : Vector.<uint>;
 	public var uvs : Vector.<Number>;
 	public var materialFaces : Object;
-	public var numMaterials : uint;
+	public var materials : Vector.<String>;
 }
 
