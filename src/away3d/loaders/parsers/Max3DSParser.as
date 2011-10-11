@@ -107,6 +107,7 @@ package away3d.loaders.parsers
 						_cur_obj_end = _byteData.position + (len-6);
 						_cur_obj = new ObjectVO();
 						_cur_obj.name = readNulTermString();
+						_cur_obj.numMaterials = 0;
 						_cur_obj.materialFaces = {};
 						break;
 					
@@ -236,6 +237,7 @@ package away3d.loaders.parsers
 				faces[i++] = _byteData.readUnsignedShort();
 			}
 			
+			_cur_obj.numMaterials++;
 			_cur_obj.materialFaces[mat] = faces;
 		}
 		
@@ -251,6 +253,9 @@ package away3d.loaders.parsers
 					var geom : Geometry;
 					var sub : SubGeometry;
 					var mesh : Mesh;
+					
+					if (_cur_obj.numMaterials > 1)
+						dieWithError('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
 					
 					sub = new SubGeometry();
 					sub.autoDeriveVertexNormals = true;
@@ -294,5 +299,6 @@ internal class ObjectVO
 	public var indices : Vector.<uint>;
 	public var uvs : Vector.<Number>;
 	public var materialFaces : Object;
+	public var numMaterials : uint;
 }
 
