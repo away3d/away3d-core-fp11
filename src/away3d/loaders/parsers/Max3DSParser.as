@@ -130,9 +130,6 @@ package away3d.loaders.parsers
 					cid = _byteData.readUnsignedShort();
 					len = _byteData.readUnsignedInt();
 					end = _byteData.position + (len-6);
-					
-					trace('chunk:', cid.toString(16), len);
-				
 				
 					switch (cid) {
 						case 0x4D4D: // MAIN3DS
@@ -465,18 +462,8 @@ package away3d.loaders.parsers
 				sub.updateIndexData(obj.indices);
 				sub.updateUVData(obj.uvs);
 				
-				var i : uint;
-				var count : uint = 0;
-				var accum : Vector3D = new Vector3D;
-				for (i=0; i<obj.verts.length; i+=3) {
-					accum.x += obj.verts[i+0];
-					accum.y += obj.verts[i+1];
-					accum.z += obj.verts[i+2];
-					count++;
-				}
-				accum.scaleBy(1/count);
-				trace('actual pivot', accum);
-				trace('found pivot', pivot);
+				geom = new Geometry();
+				geom.subGeometries.push(sub);
 				
 				if (obj.materials.length>0) {
 					var mname : String;
@@ -484,43 +471,42 @@ package away3d.loaders.parsers
 					mat = _materials[mname].material;
 				}
 				
-				geom = new Geometry();
-				geom.subGeometries.push(sub);
-				finalizeAsset(geom, obj.name.concat('_geom'));
-				
-				if (obj.transform) {
-					var dat : Vector.<Number> = obj.transform.concat();
-					dat[12] = 0;
-					dat[13] = 0;
-					dat[14] = 0;
-					mtx = new Matrix3D(dat);
-				}
-				
+				// Apply pivot translation to geometry if a pivot was
+				// found while parsing the keyframe chunk earlier.
 				if (pivot) {
-					pivot = mtx.transformVector(pivot);
+					if (obj.transform) {
+						// If a transform was found while parsing the
+						// object chunk, use it to find the local pivot vector
+						var dat : Vector.<Number> = obj.transform.concat();
+						dat[12] = 0;
+						dat[13] = 0;
+						dat[14] = 0;
+						mtx = new Matrix3D(dat);
+						pivot = mtx.transformVector(pivot);
+					}
+					
 					pivot.scaleBy(-1);
-					trace('trans pivot', pivot);
 					
 					mtx = new Matrix3D();
 					mtx.appendTranslation(pivot.x, pivot.y, pivot.z);
 					geom.applyTransformation(mtx);
 				}
 				
-				mtx = new Matrix3D(obj.transform);
-				mtx.invert();
-				geom.applyTransformation(mtx);
+				// Apply transformation to geometry if a transformation
+				// was found while parsing the object chunk earlier.
+				if (obj.transform) {
+					mtx = new Matrix3D(obj.transform);
+					mtx.invert();
+					geom.applyTransformation(mtx);
+				}
 				
+				// Final transform applied to geometry. Finalize the geometry,
+				// which will no longer be modified after this point.
+				finalizeAsset(geom, obj.name.concat('_geom'));
 				
-				//var mtx2 : Matrix3D = new Matrix3D();
-				//mtx2.appendTranslation(mtx.position.x, mtx.position.y, mtx.position.z);
-				
-				
+				// Build mesh and return it
 				mesh = new Mesh(mat, geom);
 				mesh.transform = new Matrix3D(obj.transform);
-				trace('obj', obj.name);
-				trace('position', mesh.x, mesh.y, mesh.z);
-				trace('rotation', mesh.rotationX, mesh.rotationY, mesh.rotationZ);
-				
 				return mesh;
 			}
 			
