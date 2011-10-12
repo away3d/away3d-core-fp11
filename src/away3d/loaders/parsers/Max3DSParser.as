@@ -316,8 +316,8 @@ package away3d.loaders.parsers
 				z = _byteData.readFloat();
 				
 				_cur_obj.verts[i++] = x;
-				_cur_obj.verts[i++] = y;
 				_cur_obj.verts[i++] = z;
+				_cur_obj.verts[i++] = y;
 			}
 		}
 		
@@ -341,8 +341,8 @@ package away3d.loaders.parsers
 				i2 = _byteData.readUnsignedShort(); 
 				
 				_cur_obj.indices[i++] = i0;
-				_cur_obj.indices[i++] = i1;
 				_cur_obj.indices[i++] = i2;
+				_cur_obj.indices[i++] = i1;
 				
 				// Skip "face info", irrelevant in Away3D
 				_byteData.position += 2;
@@ -416,8 +416,8 @@ package away3d.loaders.parsers
 					
 					case 0xb013: // Pivot
 						pivot.x = _byteData.readFloat();
-						pivot.y = _byteData.readFloat();
 						pivot.z = _byteData.readFloat();
+						pivot.y = _byteData.readFloat();
 						break;
 					
 					default:
@@ -554,47 +554,34 @@ package away3d.loaders.parsers
 		private function readTransform() : Vector.<Number>
 		{
 			var data : Vector.<Number>;
-			var mtx : Matrix3D;
-			var comp : Vector.<Vector3D>;
-			var tmp : Number;
 			
-			//*
-			data = new Vector.<Number>();
-			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 0);
-			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 0);
-			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 0);
-			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 1);
+			data = new Vector.<Number>(16, true);
 			
-			var x : Number, y : Number, z : Number;
+			// X axis
+			data[0] = _byteData.readFloat(); // X
+			data[2] = _byteData.readFloat(); // Z
+			data[1] = _byteData.readFloat(); // Y
+			data[3] = 0;
 			
-			/*
-			x = _byteData.readFloat();
-			z = _byteData.readFloat();
-			y = _byteData.readFloat();
-			*/
-			//data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 1);
-				/*/
-			trace('0:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
-			trace('1:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
-			trace('2:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
-			trace('C:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
-				//*/
+			// Z axis
+			data[8] = _byteData.readFloat(); // X
+			data[10] = _byteData.readFloat(); // Z
+			data[9] = _byteData.readFloat(); // Y
+			data[11] = 0;
 			
-			mtx = new Matrix3D(data);
-			/*
-			comp = mtx.decompose();
+			// Y Axis
+			data[4] = _byteData.readFloat(); // X 
+			data[6] = _byteData.readFloat(); // Z
+			data[5] = _byteData.readFloat(); // Y
+			data[7] = 0;
 			
-			// Swap rotation axes
-			tmp = comp[1].y;
-			comp[1].x = comp[1].x;
-			comp[1].y = -comp[1].z;
-			comp[1].z = -tmp;
+			// Translation
+			data[12] = _byteData.readFloat(); // X
+			data[14] = _byteData.readFloat(); // Z
+			data[13] = _byteData.readFloat(); // Y
+			data[15] = 1;
 			
-			mtx.recompose(comp);
-			mtx.appendTranslation(x, y, z);
-			*/
-			
-			return mtx.rawData;
+			return data;
 		}
 		
 		
