@@ -3,17 +3,16 @@ package away3d.textures
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
-
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	
 	import flash.display3D.Context3D;
-
-	import flash.display3D.Context3DTextureFormat;
-
-	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;
 
-	public class TextureProxyBase
+	public class TextureProxyBase extends NamedAssetBase implements IAsset
 	{
 		protected var _textures : Vector.<TextureBase>;
 		protected var _dirty : Vector.<Boolean>;
@@ -25,6 +24,12 @@ package away3d.textures
 		{
 			_textures = new Vector.<TextureBase>(8);
 			_dirty = new Vector.<Boolean>(8);
+		}
+		
+		
+		public function get assetType() : String
+		{
+			return AssetType.TEXTURE;
 		}
 
 		public function get width() : int

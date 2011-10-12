@@ -220,8 +220,8 @@ package away3d.loaders.parsers
 					type_name = 'animator';
 					type_event = AssetEvent.ANIMATOR_COMPLETE;
 					break;
-				case AssetType.BITMAP:
-					type_name = 'bitmap';
+				case AssetType.TEXTURE:
+					type_name = 'texture';
 					type_event = AssetEvent.BITMAP_COMPLETE;
 					break;
 				case AssetType.CONTAINER:

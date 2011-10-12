@@ -35,7 +35,7 @@ package away3d.library.assets
 		
 		public function get assetType() : String
 		{
-			return AssetType.BITMAP;
+			return AssetType.TEXTURE;
 		}
 
 		/**
