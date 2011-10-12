@@ -8,15 +8,17 @@ package away3d.filters.tasks
 	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 
-	public class Filter3DBloomCompositeTask extends Filter3DTaskBase
+	public class Filter3DCompositeTask extends Filter3DTaskBase
 	{
 		private var _data : Vector.<Number>;
 		private var _overlayTexture : TextureBase;
+		private var _blendMode : String;
 
-		public function Filter3DBloomCompositeTask(exposure : Number)
+		public function Filter3DCompositeTask(blendMode : String, exposure : Number = 1)
 		{
 			super();
 			_data = Vector.<Number>([ exposure, 0, 0, 0 ]);
+			_blendMode = blendMode;
 		}
 
 		public function get overlayTexture() : TextureBase
@@ -42,10 +44,33 @@ package away3d.filters.tasks
 
 		override protected function getFragmentCode() : String
 		{
-			return	"tex ft0, v0, fs0 <2d,linear,clamp>	\n" +
+			var code : String;
+			var op : String;
+			code = 	"tex ft0, v0, fs0 <2d,linear,clamp>	\n" +
 					"tex ft1, v0, fs1 <2d,linear,clamp>	\n" +
-					"mul ft1, ft1, fc0.x				\n" +
-					"add oc, ft0, ft1					\n";
+					"mul ft1, ft1, fc0.x				\n";
+			switch (_blendMode) {
+				case "multiply":
+					op = "mul";
+					break;
+				case "add":
+					op = "add";
+					break;
+				case "subtract":
+					op = "sub";
+					break;
+				case "normal":
+						// for debugging purposes
+					op = "mov";
+					break;
+				default:
+					throw new Error("Unknown blend mode");
+			}
+			if (op != "mov")
+				code += op + " oc, ft0, ft1					\n";
+			else
+				code += "mov oc, ft0						\n";
+			return code;
 		}
 
 		override public function activate(stage3DProxy : Stage3DProxy, camera3D : Camera3D, depthTexture : Texture) : void

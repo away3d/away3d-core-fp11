@@ -1,24 +1,26 @@
 package away3d.filters
 {
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.filters.tasks.Filter3DBloomCompositeTask;
+	import away3d.filters.tasks.Filter3DCompositeTask;
 	import away3d.filters.tasks.Filter3DBlurTask;
 	import away3d.filters.tasks.Filter3DBrightPassTask;
+
+	import flash.display.BlendMode;
 
 	import flash.display3D.textures.Texture;
 
 	public class BloomFilter3D extends Filter3DBase
 	{
-		private var _blurTask : Filter3DBlurTask;
 		private var _brightPassTask : Filter3DBrightPassTask;
-		private var _compositeTask : Filter3DBloomCompositeTask;
+		private var _blurTask : Filter3DBlurTask;
+		private var _compositeTask : Filter3DCompositeTask;
 
 		public function BloomFilter3D(blurX : uint = 15, blurY : uint = 15, threshold : Number = .75, exposure : Number = 3, quality : int = 3)
 		{
 			super();
 			_brightPassTask = new Filter3DBrightPassTask(threshold);
 			_blurTask = new Filter3DBlurTask(blurX, blurY);
-		   	_compositeTask = new Filter3DBloomCompositeTask(exposure);
+		   	_compositeTask = new Filter3DCompositeTask(BlendMode.ADD, exposure);
 
 			if (quality > 4) quality = 4;
 			else if (quality < 0) quality = 0;
