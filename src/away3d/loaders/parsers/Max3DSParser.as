@@ -1,6 +1,7 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
@@ -14,6 +15,8 @@ package away3d.loaders.parsers
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
@@ -26,10 +29,12 @@ package away3d.loaders.parsers
 		
 		private var _textures : Object;
 		private var _materials : Object;
+		private var _unfinalized_objects : Object;
 		
 		private var _cur_obj_end : uint;
-		private var _cur_mat_end : uint;
 		private var _cur_obj : ObjectVO;
+		
+		private var _cur_mat_end : uint;
 		private var _cur_mat : MaterialVO;
 		
 		
@@ -93,6 +98,7 @@ package away3d.loaders.parsers
 				
 				_textures = {};
 				_materials = {};
+				_unfinalized_objects = {};
 			}
 			
 			
@@ -105,10 +111,16 @@ package away3d.loaders.parsers
 				
 				// If we are currently working on an object, and the most recent chunk was
 				// the last one in that object, finalize the current object.
-				if (_cur_mat && _byteData.position >= _cur_mat_end)
+				if (_cur_mat && _byteData.position >= _cur_mat_end) {
 					finalizeCurrentMaterial();
-				else if (_cur_obj && _byteData.position >= _cur_obj_end)
-					finalizeCurrentObject();
+				}
+				else if (_cur_obj && _byteData.position >= _cur_obj_end) {
+					// Can't finalize at this point, because we have to wait until the full
+					// animation section has been parsed for any potential pivot definitions
+					_unfinalized_objects[_cur_obj.name] = _cur_obj;
+					_cur_obj_end = uint.MAX_VALUE;
+					_cur_obj = null;
+				}
 			
 				if (_byteData.bytesAvailable) {
 					var cid : uint;
@@ -125,6 +137,7 @@ package away3d.loaders.parsers
 					switch (cid) {
 						case 0x4D4D: // MAIN3DS
 						case 0x3D3D: // EDIT3DS
+						case 0xB000: // KEYF3DS
 							// This types are "container chunks" and contain only
 							// sub-chunks (no data on their own.) This means that
 							// there is nothing more to parse at this point, and 
@@ -166,7 +179,14 @@ package away3d.loaders.parsers
 							parseFaceMaterialList();
 							break;
 						
-						case 0x4111: // TRI_VERTEXOPTIONS
+						case 0x4160: // Transform
+							_cur_obj.transform = readTransform();
+							break;
+						
+						case 0xB002: // Object animation (including pivot)
+							parseObjectAnimation(end);
+							break;
+						
 						default:
 							// Skip this (unknown) chunk
 							_byteData.position += (len-6);
@@ -213,7 +233,6 @@ package away3d.loaders.parsers
 				switch (cid) {
 					case 0xA000: // Material name
 						mat.name = readNulTermString();
-						trace('mat name', mat.name);
 						break;
 					
 					case 0xA010: // Ambient color
@@ -229,7 +248,6 @@ package away3d.loaders.parsers
 						break;
 					
 					case 0xA081: // Two-sided, existence indicates "true"
-						trace('twosided!');
 						mat.twoSided = true;
 						break;
 					
@@ -253,8 +271,6 @@ package away3d.loaders.parsers
 			
 			tex = new TextureVO();
 			
-			trace('beginning to parse texture');
-			
 			while (_byteData.position < end) {
 				var cid : uint;
 				var len : uint;
@@ -265,7 +281,6 @@ package away3d.loaders.parsers
 				switch (cid) {
 					case 0xA300:
 						tex.url = readNulTermString();
-						trace(tex.url);
 						break;
 						
 					default:
@@ -301,8 +316,8 @@ package away3d.loaders.parsers
 				z = _byteData.readFloat();
 				
 				_cur_obj.verts[i++] = x;
-				_cur_obj.verts[i++] = z;
 				_cur_obj.verts[i++] = y;
+				_cur_obj.verts[i++] = z;
 			}
 		}
 		
@@ -326,8 +341,8 @@ package away3d.loaders.parsers
 				i2 = _byteData.readUnsignedShort(); 
 				
 				_cur_obj.indices[i++] = i0;
-				_cur_obj.indices[i++] = i2;
 				_cur_obj.indices[i++] = i1;
+				_cur_obj.indices[i++] = i2;
 				
 				// Skip "face info", irrelevant in Away3D
 				_byteData.position += 2;
@@ -374,39 +389,128 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function finalizeCurrentObject() : void
+		private function parseObjectAnimation(end : Number) : void
 		{
-			if (_cur_obj.type == AssetType.MESH) {
+			var vo : ObjectVO;
+			var obj : ObjectContainer3D;
+			var pivot : Vector3D;
+			var name : String;
+			var hier : int;
+			
+			// Pivot defaults to origin
+			pivot = new Vector3D;
+			
+			while (_byteData.position < end) {
+				var cid : uint;
+				var len : uint;
+				
+				cid = _byteData.readUnsignedShort();
+				len = _byteData.readUnsignedInt();
+				
+				switch (cid) {
+					case 0xb010: // Name/hierarchy
+						name = readNulTermString();
+						_byteData.position += 4;
+						hier = _byteData.readShort();
+						break;
+					
+					case 0xb013: // Pivot
+						pivot.x = _byteData.readFloat();
+						pivot.y = _byteData.readFloat();
+						pivot.z = _byteData.readFloat();
+						break;
+					
+					default:
+						_byteData.position += (len-6);
+						break;
+				}
+			}
+			
+			vo = _unfinalized_objects[name];
+			obj = constructObject(vo, pivot);
+			
+			finalizeAsset(obj, vo.name);
+			
+			delete _unfinalized_objects[name];
+		}
+		
+		
+		private function constructObject(obj : ObjectVO, pivot : Vector3D) : ObjectContainer3D
+		{
+			if (obj.type == AssetType.MESH) {
 				var geom : Geometry;
 				var sub : SubGeometry;
 				var mat : MaterialBase;
 				var mesh : Mesh;
+				var mtx : Matrix3D;
 				
-				if (_cur_obj.materials.length > 1)
+				if (obj.materials.length > 1)
 					dieWithError('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
 				
 				sub = new SubGeometry();
 				sub.autoDeriveVertexNormals = true;
 				sub.autoDeriveVertexTangents = true;
-				sub.updateVertexData(_cur_obj.verts);
-				sub.updateIndexData(_cur_obj.indices);
-				sub.updateUVData(_cur_obj.uvs);
+				sub.updateVertexData(obj.verts);
+				sub.updateIndexData(obj.indices);
+				sub.updateUVData(obj.uvs);
 				
-				geom = new Geometry();
-				geom.subGeometries.push(sub);
-				finalizeAsset(geom, _cur_obj.name.concat('_geom'));
+				var i : uint;
+				var count : uint = 0;
+				var accum : Vector3D = new Vector3D;
+				for (i=0; i<obj.verts.length; i+=3) {
+					accum.x += obj.verts[i+0];
+					accum.y += obj.verts[i+1];
+					accum.z += obj.verts[i+2];
+					count++;
+				}
+				accum.scaleBy(1/count);
+				trace('actual pivot', accum);
+				trace('found pivot', pivot);
 				
-				if (_cur_obj.materials.length==1) {
+				if (obj.materials.length==1) {
 					var mname : String;
-					mname = _cur_obj.materials[0];
+					mname = obj.materials[0];
 					mat = _materials[mname].material;
 				}
 				
+				geom = new Geometry();
+				geom.subGeometries.push(sub);
+				finalizeAsset(geom, obj.name.concat('_geom'));
+				
+				var dat : Vector.<Number> = obj.transform.concat();
+				dat[12] = 0;
+				dat[13] = 0;
+				dat[14] = 0;
+				mtx = new Matrix3D(dat);
+				
+				pivot = mtx.transformVector(pivot);
+				pivot.scaleBy(-1);
+				trace('trans pivot', pivot);
+				
+				mtx = new Matrix3D();
+				mtx.appendTranslation(pivot.x, pivot.y, pivot.z);
+				geom.applyTransformation(mtx);
+				
+				mtx = new Matrix3D(obj.transform);
+				mtx.invert();
+				geom.applyTransformation(mtx);
+				
+				
+				//var mtx2 : Matrix3D = new Matrix3D();
+				//mtx2.appendTranslation(mtx.position.x, mtx.position.y, mtx.position.z);
+				
+				
 				mesh = new Mesh(mat, geom);
-				finalizeAsset(mesh, _cur_obj.name);
+				mesh.transform = new Matrix3D(obj.transform);
+				trace('obj', obj.name);
+				trace('position', mesh.x, mesh.y, mesh.z);
+				trace('rotation', mesh.rotationX, mesh.rotationY, mesh.rotationZ);
+				
+				return mesh;
 			}
 			
-			_cur_obj = null;
+			// If reached, unknown
+			return null;
 		}
 		
 		
@@ -444,6 +548,53 @@ package away3d.loaders.parsers
 			}
 			
 			return str;
+		}
+		
+		
+		private function readTransform() : Vector.<Number>
+		{
+			var data : Vector.<Number>;
+			var mtx : Matrix3D;
+			var comp : Vector.<Vector3D>;
+			var tmp : Number;
+			
+			//*
+			data = new Vector.<Number>();
+			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 0);
+			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 0);
+			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 0);
+			data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 1);
+			
+			var x : Number, y : Number, z : Number;
+			
+			/*
+			x = _byteData.readFloat();
+			z = _byteData.readFloat();
+			y = _byteData.readFloat();
+			*/
+			//data.push(_byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat(), 1);
+				/*/
+			trace('0:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
+			trace('1:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
+			trace('2:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
+			trace('C:', _byteData.readFloat(), _byteData.readFloat(), _byteData.readFloat());
+				//*/
+			
+			mtx = new Matrix3D(data);
+			/*
+			comp = mtx.decompose();
+			
+			// Swap rotation axes
+			tmp = comp[1].y;
+			comp[1].x = comp[1].x;
+			comp[1].y = -comp[1].z;
+			comp[1].z = -tmp;
+			
+			mtx.recompose(comp);
+			mtx.appendTranslation(x, y, z);
+			*/
+			
+			return mtx.rawData;
 		}
 		
 		
@@ -503,6 +654,10 @@ internal class ObjectVO
 {
 	public var name : String;
 	public var type : String;
+	public var pivotX : Number;
+	public var pivotY : Number;
+	public var pivotZ : Number;
+	public var transform : Vector.<Number>;
 	public var verts : Vector.<Number>;
 	public var indices : Vector.<uint>;
 	public var uvs : Vector.<Number>;
