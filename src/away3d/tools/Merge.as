@@ -14,8 +14,7 @@
 	*/
 	public class Merge{
 		
-		private const LIMIT:uint = 64998;
-		private var _m1:Mesh;
+		private const LIMIT:uint = 196605;		private var _m1:Mesh;
 		private var _objectSpace:Boolean;
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;

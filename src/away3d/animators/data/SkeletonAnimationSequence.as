@@ -31,6 +31,14 @@ package away3d.animators.data
 		}
 
 		/**
+		 * This can be used to patch up looping animations in which the final frame does not equal the first, causing a noticable jump.
+		 */
+		public function stitchFinalFrame() : void
+		{
+			addFrame(_frames[0], _durations[0]);
+		}
+
+		/**
 		 * Adds a frame with a given duration to the sequence.
 		 * @param frame The SkeletonPose for this frame of the sequence
 		 * @param duration milliseconds to show this frame of the sequence

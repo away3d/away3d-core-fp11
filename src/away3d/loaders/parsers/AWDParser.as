@@ -120,7 +120,7 @@ package away3d.loaders.parsers
 				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				
-				_parser.parseASync(_data);
+				_parser.parseAsync(_data);
 			}
 			
 			// Because finishParsing() is overriden, we can stop

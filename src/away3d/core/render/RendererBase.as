@@ -297,6 +297,7 @@ package away3d.core.render
 				_backgroundImageRenderer = new BackgroundImageRenderer(_stage3DProxy);
 
 			_background = value;
+
 			if (_backgroundImageRenderer) _backgroundImageRenderer.texture = value;
 		}
 

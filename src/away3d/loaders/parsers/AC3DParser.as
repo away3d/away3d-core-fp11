@@ -1,5 +1,4 @@
-package away3d.loaders.parsers
-{
+package away3d.loaders.parsers{
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -255,8 +254,7 @@ package away3d.loaders.parsers
 							quadCount = 0;
 						} else if( refscount<3 || refscount > 4){
 							trace("AC3D Parser: Unsupported polygon type with "+refscount+" sides found. Triangulate in AC3D!");
-							invalidPoly = true;
-						} else{
+							//invalidPoly = true;							continue;						} else{
 							isQuad = false;
 						}
 						parsesV = false;
@@ -407,7 +405,7 @@ package away3d.loaders.parsers
 			mesh.x = tmpos.x;
 			mesh.y = tmpos.y;
 			mesh.z = tmpos.z;
-		}
+						finalizeAsset(mesh);		}
 		
 		private function retrieveMeshFromID(id:String):Mesh
 		{
