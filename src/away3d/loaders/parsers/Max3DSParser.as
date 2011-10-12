@@ -208,10 +208,21 @@ package away3d.loaders.parsers
 			// More parsing is required if the entire byte array has not yet
 			// been read, or if there is a currently non-finalized object in
 			// the pipeline.
-			if (_byteData.bytesAvailable || _cur_obj || _cur_mat)
+			if (_byteData.bytesAvailable || _cur_obj || _cur_mat) {
 				return MORE_TO_PARSE;
-			else
+			}
+			else {
+				var name : String;
+				
+				// Finalize any remaining objects before ending.
+				for (name in _unfinalized_objects) {
+					var obj : ObjectContainer3D;
+					obj = constructObject(_unfinalized_objects[name]);
+					finalizeAsset(obj, name);
+				}
+				
 				return PARSING_DONE;
+			}
 		}
 		
 		
@@ -435,7 +446,7 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function constructObject(obj : ObjectVO, pivot : Vector3D) : ObjectContainer3D
+		private function constructObject(obj : ObjectVO, pivot : Vector3D = null) : ObjectContainer3D
 		{
 			if (obj.type == AssetType.MESH) {
 				var geom : Geometry;
@@ -445,7 +456,7 @@ package away3d.loaders.parsers
 				var mtx : Matrix3D;
 				
 				if (obj.materials.length > 1)
-					dieWithError('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
+					trace('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
 				
 				sub = new SubGeometry();
 				sub.autoDeriveVertexNormals = true;
@@ -467,7 +478,7 @@ package away3d.loaders.parsers
 				trace('actual pivot', accum);
 				trace('found pivot', pivot);
 				
-				if (obj.materials.length==1) {
+				if (obj.materials.length>0) {
 					var mname : String;
 					mname = obj.materials[0];
 					mat = _materials[mname].material;
@@ -477,19 +488,23 @@ package away3d.loaders.parsers
 				geom.subGeometries.push(sub);
 				finalizeAsset(geom, obj.name.concat('_geom'));
 				
-				var dat : Vector.<Number> = obj.transform.concat();
-				dat[12] = 0;
-				dat[13] = 0;
-				dat[14] = 0;
-				mtx = new Matrix3D(dat);
+				if (obj.transform) {
+					var dat : Vector.<Number> = obj.transform.concat();
+					dat[12] = 0;
+					dat[13] = 0;
+					dat[14] = 0;
+					mtx = new Matrix3D(dat);
+				}
 				
-				pivot = mtx.transformVector(pivot);
-				pivot.scaleBy(-1);
-				trace('trans pivot', pivot);
-				
-				mtx = new Matrix3D();
-				mtx.appendTranslation(pivot.x, pivot.y, pivot.z);
-				geom.applyTransformation(mtx);
+				if (pivot) {
+					pivot = mtx.transformVector(pivot);
+					pivot.scaleBy(-1);
+					trace('trans pivot', pivot);
+					
+					mtx = new Matrix3D();
+					mtx.appendTranslation(pivot.x, pivot.y, pivot.z);
+					geom.applyTransformation(mtx);
+				}
 				
 				mtx = new Matrix3D(obj.transform);
 				mtx.invert();
