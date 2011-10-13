@@ -1,27 +1,23 @@
 package 
 {
-	import a3dparticle.animators.actions.AccelerateAction;
-	import a3dparticle.animators.actions.ChangeColorByLifeAction;
-	import a3dparticle.animators.actions.DriftAction;
-	import a3dparticle.animators.actions.OffestDistanceAction;
-	import a3dparticle.animators.actions.PerParticleAction;
-	import a3dparticle.animators.actions.RandomColorAction;
-	import a3dparticle.animators.actions.ScaleByTimeAction;
-	import a3dparticle.animators.actions.VelocityAction;
+	import a3dparticle.animators.actions.acceleration.AccelerateGlobal;
+	import a3dparticle.animators.actions.ActionBase;
+	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
+	import a3dparticle.animators.actions.drift.DriftLocal;
+	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.velocity.VelocityLocal;
 	import a3dparticle.materials.SimpleParticleMaterial;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
 	import away3d.primitives.Sphere;
 	import away3d.primitives.WireframeAxesGrid;
-	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
-	import flash.utils.setTimeout;
 	
 	/**
 	 * ...
@@ -65,7 +61,7 @@ package
 		
 		private function initScene():void
 		{
-			var material:SimpleParticleMaterial = new SimpleParticleMaterial(new BitmapData(2, 2, true, 0xFFFFFFFF));
+			var material:SimpleParticleMaterial = new SimpleParticleMaterial();
 			//the amount of particles are 2000
 			particle = new ParticlesContainer(2000,material);
 			_view.scene.addChild(particle);
@@ -93,21 +89,22 @@ package
 				return new Vector3D(x, 900, z);
 			}
 			
-			var action:PerParticleAction = new VelocityAction(velocit_pos);
-			particle.addPerParticleAction(action);
+			var action:ActionBase = new VelocityLocal(velocit_pos);
+			particle.addAction(action);
 			
 			
-			var action2:AccelerateAction = new AccelerateAction(new Vector3D(0, -400, 0));
-			particle.addAllParticleAction(action2);
+			var action2:AccelerateGlobal = new AccelerateGlobal(new Vector3D(0, -400, 0));
+			particle.addAction(action2);
 			
-			var action3:OffestDistanceAction = new OffestDistanceAction(offset_pos);
-			particle.addPerParticleAction(action3);
+			var action3:OffestPositionLocal = new OffestPositionLocal(offset_pos);
+			particle.addAction(action3);
 			
-			var action4:ChangeColorByLifeAction = new ChangeColorByLifeAction(new ColorTransform(1,0.6,1,0.5,0,0),new ColorTransform(1,0.8,1,0.3,0,0) );
-			particle.addAllParticleAction(action4);
+			var action4:ChangeColorByLifeGlobal = new ChangeColorByLifeGlobal(new ColorTransform(1,0.6,1,0.5,0,0),new ColorTransform(1,0.8,1,0.3,0,0) );
+			particle.addAction(action4);
 			
-			var action5:DriftAction = new DriftAction(function(index:uint):Vector3D { return new Vector3D(-100,0,0,1); } );
-			particle.addPerParticleAction(action5);
+			var action5:DriftLocal = new DriftLocal(function(index:uint):Vector3D { return new Vector3D(-100,0,0,1); } );
+			particle.addAction(action5);
+			
 			particle.generate(sphere.geometry.subGeometries[0]);
 			particle.start();
 		}

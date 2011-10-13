@@ -1,11 +1,10 @@
 package 
 {
-	import a3dparticle.animators.actions.DriftAction;
-	import a3dparticle.animators.actions.OffestDistanceAction;
-	import a3dparticle.animators.actions.PerParticleAction;
-	import a3dparticle.animators.actions.RandomScaleAction;
-	import a3dparticle.animators.actions.RotateAction;
-	import a3dparticle.animators.actions.VelocityAction;
+	import a3dparticle.animators.actions.drift.DriftLocal;
+	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.rotation.RandomRotateLocal;
+	import a3dparticle.animators.actions.scale.RandomScaleLocal;
+	import a3dparticle.animators.actions.velocity.VelocityGlobal;
 	import a3dparticle.materials.SimpleParticleMaterial;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
@@ -94,31 +93,31 @@ package
 		private function initScene(e:Event):void
 		{
 			var material:SimpleParticleMaterial = new SimpleParticleMaterial();
-			particle = new ParticlesContainer(200,material);
+			particle = new ParticlesContainer(50,material);
 			//_view.scene.addChild(particle);
 			
 			particle.startTimeFun = function(index:uint):Number { return Math.random()*20-20; };
 			particle.endTimeFun = function(index:uint):Number { return 20; };
 			particle.loop = true;
 			
-			var action1:PerParticleAction = new VelocityAction(function(index:uint):Vector3D { return new Vector3D(0,-100,0); } );
-			particle.addPerParticleAction(action1);
+			var action1:VelocityGlobal = new VelocityGlobal( new Vector3D(0,-100,0) );
+			particle.addAction(action1);
 			
-			var action2:DriftAction = new DriftAction(function(index:uint):Vector3D { return new Vector3D(Math.random()*50-25,0,Math.random()*50-25,Math.random()*2+3); } );
-			particle.addPerParticleAction(action2);
+			var action2:DriftLocal = new DriftLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*50-25,0,Math.random()*50-25,Math.random()*2+3); } );
+			particle.addAction(action2);
 			
-			var action3:OffestDistanceAction = new OffestDistanceAction(function(index:uint):Vector3D { return new Vector3D(Math.random()*1000-500,1000,Math.random()*10000-500); } );
-			particle.addPerParticleAction(action3);
+			var action3:OffestPositionLocal = new OffestPositionLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*1000-500,1000,Math.random()*1000-500); } );
+			particle.addAction(action3);
 			
-			var action4:RotateAction = new RotateAction(function(index:uint):Vector3D { return new Vector3D(Math.random(),Math.random(),Math.random(),Math.random()*2+2); } );
-			particle.addPerParticleAction(action4);
+			var action4:RandomRotateLocal = new RandomRotateLocal(function(index:uint):Vector3D { return new Vector3D(Math.random(),Math.random(),Math.random(),Math.random()*2+2); } );
+			particle.addAction(action4);
 			
-			var action5:RandomScaleAction = new RandomScaleAction(function(index:uint):Vector3D 
+			var action5:RandomScaleLocal = new RandomScaleLocal(function(index:uint):Vector3D 
 				{
 					var scale:Number = Math.random()*3;
 					return new Vector3D(scale, scale, scale); 
 				});
-			particle.addPerParticleAction(action5);
+			particle.addAction(action5);
 			
 
 			particle.generate(mesh.geometry.subGeometries[0]);
