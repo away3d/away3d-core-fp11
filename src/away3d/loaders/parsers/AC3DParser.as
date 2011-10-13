@@ -1,4 +1,4 @@
-package away3d.loaders.parsers{
+﻿package away3d.loaders.parsers{
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -8,12 +8,11 @@ package away3d.loaders.parsers{
 	import away3d.entities.Mesh;
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.materials.BitmapMaterial;
+	import away3d.loaders.parsers.utils.ParserUtil;	import away3d.materials.BitmapMaterial;
 
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-
+	import flash.utils.ByteArray;
 	use namespace arcane;
 	
 	/**
@@ -79,8 +78,7 @@ package away3d.loaders.parsers{
 			var ba : ByteArray;
 			var str : String;
 			
-			ba = data as ByteArray;
-			if (ba) {
+			ba = ParserUtil.toByteArray(data);			if (ba) {
 				ba.position = 0;
 				str = ba.readUTFBytes(4);
 			}

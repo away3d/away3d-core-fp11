@@ -8,6 +8,7 @@ package away3d.loaders.parsers
 	import away3d.entities.Mesh;
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
+	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.BitmapMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.tools.utils.TextureUtils;
@@ -92,10 +93,14 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			var content : String = String(data);
+			var content : String = ParserUtil.toString(data);
+			var hasV : Boolean
+			var hasF : Boolean
 			
-			var hasV : Boolean = content.indexOf("\nv ") != -1;
-			var hasF : Boolean = content.indexOf("\nf ") != -1;
+			if (content) {
+				hasV = content.indexOf("\nv ") != -1;
+				hasF = content.indexOf("\nf ") != -1;
+			}
 			
 			return hasV && hasF;
 		}
@@ -194,12 +199,13 @@ package away3d.loaders.parsers
 				if(_mtlLib  && !_mtlLibLoaded)
 					return MORE_TO_PARSE;
 				
-				try {
+				//try {
 					translate();
 					applyMaterials();
 					
 					return PARSING_DONE;
 					
+					/*
 				} catch(e:Error){
 					parsingFailure = true;
 					trace("parsing failure: " + e.message);
@@ -207,6 +213,7 @@ package away3d.loaders.parsers
 					//TODO: DEAL WITH THIS ERROR!
 					return PARSING_DONE;
 				}
+					*/
 			}
 			
 			return MORE_TO_PARSE;

@@ -5,7 +5,7 @@
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
-
+	import away3d.tools.MeshHelper;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
@@ -14,8 +14,7 @@
 	*/
 	public class Merge{
 		
-		private const LIMIT:uint = 196605;		private var _m1:Mesh;
-		private var _objectSpace:Boolean;
+		private const LIMIT:uint = 196605;		private var _baseReceiver:Mesh;		private var _objectSpace:Boolean;
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;
 		private var _holder:Vector3D;
@@ -88,19 +87,12 @@
 		public function applyToContainer(object:ObjectContainer3D, name:String = ""):Mesh
 		{
 			initHolders();
-			_m1 = null;
-			parseContainer(object);
-			
-			if(_m1){
-				merge(_m1);
-				if(name != "") _m1.name = name;
-			}
-			
+			_baseReceiver = new Mesh(null, new Geometry());			_baseReceiver.position = object.position;						parseContainer(object);
+			merge(_baseReceiver);			if(name != "") _baseReceiver.name = name;			
 			if(_disposeSources)
 				object = null;
 			
-			return _m1;
-		}
+			return _baseReceiver;		}
 		
 		/**
 		*  Merges all the meshes found into the Vector.&lt;Mesh&gt; parameter with the receiver Mesh.
@@ -136,8 +128,7 @@
 		private function initHolders():void
 		{
 			_vectorsSource= new Vector.<DataSubGeometry>();
-			
-			if(!_objectSpace && !_v){
+			_baseReceiver = null;			if(!_objectSpace && !_v){
 				_holder = new Vector3D();
 				_v = new Vector3D();
 				_vn = new Vector3D();
@@ -165,9 +156,7 @@
 			//empty mesh receiver case
 			if(numSubGeoms == 0){
 				subGeom = new SubGeometry();
-				subGeom.autoDeriveVertexNormals = false;
-				subGeom.autoDeriveVertexTangents = true;
-				vertices = new Vector.<Number>();
+				subGeom.autoDeriveVertexNormals = true;				subGeom.autoDeriveVertexTangents = false;				vertices = new Vector.<Number>();
 				normals = new Vector.<Number>();
 				indices = new Vector.<uint>();
 				uvs = new Vector.<Number>();
@@ -219,7 +208,6 @@
 			var index:uint;
 			var indexY:uint;
 			var indexZ:uint;
-			
 			var indexuv:uint;
 			var indexind:uint;
 			var destDs:DataSubGeometry;
@@ -244,15 +232,7 @@
 						if(!_objectSpace){
 						 	vecLength = destDs.vertices.length;
 							rotate = ( destDs.mesh.rotationX != 0 || destDs.mesh.rotationY != 0 || destDs.mesh.rotationZ != 0);
-							/*destDs.transform.appendTranslation(destDs.mesh.x, destDs.mesh.y, destDs.mesh.z);
-				
-							if(rotate){
-								destDs.transform.appendRotation(destDs.mesh.rotationX, Vector3D.X_AXIS);
-								destDs.transform.appendRotation(destDs.mesh.rotationY, Vector3D.Y_AXIS); 
-								destDs.transform.appendRotation(destDs.mesh.rotationZ, Vector3D.Z_AXIS); 
-							}
-							*/
-							for (j = 0; j < vecLength;j+=3){
+							 							for (j = 0; j < vecLength;j+=3){
 								indexY = j+1;
 								indexZ = indexY+1;
 								_v.x = destDs.vertices[j];
@@ -299,16 +279,7 @@
 				vecLength = indices.length;
 				
 				rotate = (ds.mesh.rotationX != 0 || ds.mesh.rotationY != 0 || ds.mesh.rotationZ != 0);
-				/*
-				ds.transform.appendTranslation(ds.mesh.x, ds.mesh.y, ds.mesh.z);
-				
-				if(rotate){
-					ds.transform.appendRotation(ds.mesh.rotationX, Vector3D.X_AXIS);
-					ds.transform.appendRotation(ds.mesh.rotationY, Vector3D.Y_AXIS); 
-					ds.transform.appendRotation(ds.mesh.rotationZ, Vector3D.Z_AXIS); 
-				}
-				*/
-				for (j = 0; j < vecLength;++j){
+				 				for (j = 0; j < vecLength;++j){
 					 
 					if(nvertices.length+9 > LIMIT && nindices.length % 3 == 0){
 
@@ -372,8 +343,6 @@
 				ds = vectors[i];
 				if(ds.vertices.length == 0) continue;
 				subGeom = ds.subGeometry;
-				subGeom.autoDeriveVertexNormals = false;
-				subGeom.autoDeriveVertexTangents = true;
 				subGeom.updateVertexData(ds.vertices);
 				subGeom.updateIndexData(ds.indices);
 				subGeom.updateUVData(ds.uvs);
@@ -410,7 +379,6 @@
 				
 			return false;
 		}
-		
 		 
 		private function collect(m:Mesh):void
 		{
@@ -426,14 +394,11 @@
 				ds.indices = SubGeometry(geoms[i]).indexData.concat();
 				ds.uvs = SubGeometry(geoms[i]).UVData.concat();
 				ds.normals = SubGeometry(geoms[i]).vertexNormalData.concat();
-				
 				ds.vertices.fixed = false;
 				ds.normals.fixed = false;
 				ds.indices.fixed = false;
 				ds.uvs.fixed = false;
-				 
 				ds.material = (m.subMeshes[i].material)? m.subMeshes[i].material : m.material;
-				
 				ds.subGeometry = SubGeometry(geoms[i]);
 				ds.transform = m.transform;
 				ds.mesh = m;
@@ -461,62 +426,9 @@
 			var child:ObjectContainer3D;
 			var i:uint;
 			
-			if(object is Mesh && object.numChildren == 0){
-				var m:Mesh = Mesh(object);
-				
-				if(!_m1){
-					var geometry:Geometry = new Geometry();
-					var geomm:Geometry = m.geometry;
-					var geometries:Vector.<SubGeometry> = geomm.subGeometries;
-					var numSubGeoms:uint = geometries.length;
-					
-					var vertices:Vector.<Number>;
-					var normals:Vector.<Number>;
-					var tangents:Vector.<Number>;
-					var indices:Vector.<uint>;
-					var uvs:Vector.<Number>;
-					
-					var subGeom:SubGeometry;
-					
-					for (i = 0; i<numSubGeoms; ++i){					
-						
-						vertices = new Vector.<Number>();
-						normals = new Vector.<Number>();
-						tangents = new Vector.<Number>();
-						indices = new Vector.<uint>();
-						uvs = new Vector.<Number>();
-					
-						vertices = vertices.concat(geometries[i].vertexData);
-						normals = normals.concat(geometries[i].vertexNormalData);
-						tangents = tangents.concat(geometries[i].vertexTangentData);
-						indices = indices.concat(geometries[i].indexData);
-						uvs = uvs.concat(geometries[i].UVData);
-
-						subGeom = new SubGeometry();
-						
-						subGeom.autoDeriveVertexNormals = false;
-						subGeom.autoDeriveVertexTangents = false;
-						subGeom.updateVertexData(vertices);
-						subGeom.updateIndexData(indices);
-						subGeom.updateUVData(uvs);
-						subGeom.updateVertexNormalData(normals);
-						subGeom.updateVertexTangentData(tangents);
-						
-						geometry.addSubGeometry(subGeom);
-					}
-					
-					_m1 = new Mesh(m.material, geometry);
-					_m1.transform = m.transform;
-	
-				} else {
-					collect(m);
-				}
-			}
-			 
-			for(i = 0;i<object.numChildren;++i){
+			if(object is Mesh && object.numChildren == 0)				collect(Mesh(object));						for(i = 0;i<object.numChildren;++i){
 				child = object.getChildAt(i);
-				if(child!=_m1)
-					parseContainer(child);
+				if(child!=_baseReceiver)					parseContainer(child);
 			}
 		}
 		
