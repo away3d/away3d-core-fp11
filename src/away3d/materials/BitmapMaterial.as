@@ -2,6 +2,7 @@
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
+	import away3d.errors.DeprecationError;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.BitmapTextureCache;
@@ -17,6 +18,7 @@
 	/**
 	 * BitmapMaterial is a material that uses a BitmapData texture as the surface's diffuse colour.
 	 */
+	[Deprecated(message="Use texture composition instead of inheritance", replacement="TextureMaterial", since="4.0a")]
 	public class BitmapMaterial extends TextureMaterial
 	{
 		private var _alphaBlending : Boolean;
@@ -32,9 +34,8 @@
 		public function BitmapMaterial(bitmapData : BitmapData = null, smooth : Boolean = true, repeat : Boolean = false, mipmap : Boolean = true)
 		{
 			super(null, smooth, repeat, mipmap);
+			throw new DeprecationError("BitmapMaterial", "4.0a", "Please use new TextureMaterial(new BitmapTexture(bitmapData)) instead.");
 			this.bitmapData = bitmapData;
-
-			trace ("Warning! BitmapMaterial has been marked as deprecated. Please use new TextureMaterial(new BitmapTexture(bitmapData)) instead.");
 		}
 
 		/**

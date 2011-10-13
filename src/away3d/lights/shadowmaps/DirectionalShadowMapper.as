@@ -12,6 +12,7 @@ package away3d.lights.shadowmaps
 
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -21,11 +22,23 @@ package away3d.lights.shadowmaps
 		private var _mtx : Matrix3D = new Matrix3D();
 		private var _localFrustum : Vector.<Number>;
 
+		private var _lightOffset : Number = 10000;
+
 		public function DirectionalShadowMapper(light : DirectionalLight)
 		{
 			super(light);
 			_depthCamera.lens = _depthLens = new OrthographicOffCenterLens(-10, -10, 10, 10);
 			_localFrustum = new Vector.<Number>(8*3);
+		}
+
+		public function get lightOffset() : Number
+		{
+			return _lightOffset;
+		}
+
+		public function set lightOffset(value : Number) : void
+		{
+			_lightOffset = value;
 		}
 
 		/**
@@ -47,12 +60,20 @@ package away3d.lights.shadowmaps
 
 		override protected function updateDepthProjection(viewCamera : Camera3D) : void
 		{
+			var dir : Vector3D;
 			var corners : Vector.<Number> = viewCamera.lens.frustumCorners;
 			var x : Number, y : Number, z : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number = Number.POSITIVE_INFINITY;
 			var maxX : Number = Number.NEGATIVE_INFINITY, maxY : Number = Number.NEGATIVE_INFINITY, maxZ : Number = Number.NEGATIVE_INFINITY;
 			var i : uint;
-			_mtx.copyFrom(_light.inverseSceneTransform);
+
+			_depthCamera.transform = _light.sceneTransform;
+			dir = DirectionalLight(_light).direction;
+			_depthCamera.x = viewCamera.x - dir.x*_lightOffset;
+			_depthCamera.y = viewCamera.y - dir.y*_lightOffset;
+			_depthCamera.z = viewCamera.z - dir.z*_lightOffset;
+
+			_mtx.copyFrom(_depthCamera.inverseSceneTransform);
 			_mtx.prepend(viewCamera.sceneTransform);
 			_mtx.transformVectors(corners, _localFrustum);
 
@@ -75,7 +96,6 @@ package away3d.lights.shadowmaps
 			_depthLens.minY = minY-10;
 			_depthLens.maxX = maxX+10;
 			_depthLens.maxY = maxY+10;
-			_depthCamera.transform = _light.sceneTransform;
 		}
 	}
 }

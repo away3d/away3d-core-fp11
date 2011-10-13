@@ -20,9 +20,6 @@ package away3d.core.render
 		private var _indexBuffer : IndexBuffer3D;
 		private var _vertexBuffer : VertexBuffer3D;
 		private var _stage3DProxy : Stage3DProxy;
-		private var _textureInvalid : Boolean = true;
-		private var _fitToViewPort : Boolean = true;
-		private var _vertexBufferInvalid : Boolean = true;
 
 		public function BackgroundImageRenderer(stage3DProxy : Stage3DProxy)
 		{
@@ -47,13 +44,6 @@ package away3d.core.render
 				_indexBuffer.dispose();
 				_indexBuffer = null;
 			}
-
-			if (_texture) {
-				_texture.dispose();
-				_texture = null;
-				_textureInvalid = true;
-			}
-
 		}
 
 		private function getVertexCode() : String
@@ -72,7 +62,6 @@ package away3d.core.render
 		{
 			if (_vertexBuffer) _vertexBuffer.dispose();
 			if (_program3d) _program3d.dispose();
-			if (_texture) _texture.dispose();
 		}
 
 		public function render() : void

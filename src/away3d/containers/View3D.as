@@ -73,9 +73,13 @@ package away3d.containers
 			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
 			_entityCollector = new EntityCollector();
+			
 			initHitField();
+			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
+			
+			_camera.partition = _scene.partition;
 		}
 
 		public function get stage3DProxy() : Stage3DProxy
@@ -143,13 +147,13 @@ package away3d.containers
 
 		public function set filters3d(value : Array) : void
 		{
-			if (value && value.length == 0) value = null;
+			if (value && value.length == 0)
+				value = null;
 
 			if (_filter3DRenderer && !value) {
 				_filter3DRenderer.dispose();
 				_filter3DRenderer = null;
-			}
-			else if (!_filter3DRenderer && value) {
+			} else if (!_filter3DRenderer && value) {
 				_filter3DRenderer = new Filter3DRenderer(_width, _height);
 				_filter3DRenderer.filters = value;
 			}
@@ -157,8 +161,7 @@ package away3d.containers
 			if (_filter3DRenderer) {
 				_filter3DRenderer.filters = value;
 				_requireDepthRender = _filter3DRenderer.requireDepthRender;
-			}
-			else {
+			} else {
 				_requireDepthRender = false;
 				if (_depthRender) {
 					_depthRender.dispose();
@@ -184,6 +187,7 @@ package away3d.containers
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
 			_renderer.backgroundAlpha = _backgroundAlpha;
+			
 			invalidateBackBuffer();
 		}
 
@@ -215,8 +219,11 @@ package away3d.containers
 
 		public function set backgroundAlpha(value : Number) : void
 		{
-			if (value > 1) value = 1;
-			else if (value < 0) value = 0;
+			if (value > 1)
+				value = 1;
+			else if (value < 0)
+				value = 0;
+			
 			_renderer.backgroundAlpha = value;
 			_backgroundAlpha = value;
 		}
@@ -235,6 +242,9 @@ package away3d.containers
 		public function set camera(camera:Camera3D) : void
 		{
 			_camera = camera;
+			
+			if (_scene)
+				_camera.partition = _scene.partition;
 		}
 		
 		/**
@@ -251,6 +261,9 @@ package away3d.containers
 		public function set scene(scene:Scene3D) : void
 		{
 			_scene = scene;
+			
+			if (_camera)
+				_camera.partition = _scene.partition;
 		}
 
 		// todo: probably temporary:
@@ -272,12 +285,17 @@ package away3d.containers
 
 		override public function set width(value : Number) : void
 		{
-			if (_width == value) return;
+			if (_width == value)
+				return;
+			
 			_hitField.width = value;
 			_width = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
-			if (_filter3DRenderer) _filter3DRenderer.viewWidth = value;
+
+			if (_filter3DRenderer)
+				_filter3DRenderer.viewWidth = value;
+			
 			invalidateBackBuffer();
 		}
 
@@ -291,12 +309,17 @@ package away3d.containers
 
 		override public function set height(value : Number) : void
 		{
-			if (_height == value) return;
+			if (_height == value)
+				return;
+			
 			_hitField.height = value;
 			_height = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
-			if (_filter3DRenderer) _filter3DRenderer.viewHeight = value;
+			
+			if (_filter3DRenderer)
+				_filter3DRenderer.viewHeight = value;
+			
 			invalidateBackBuffer();
 		}
 
@@ -304,8 +327,10 @@ package away3d.containers
 		override public function set x(value : Number) : void
 		{
 			super.x = value;
+			
 			_localPos.x = value;
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
+			
 			if (_stage3DProxy)
 				_stage3DProxy.x = _globalPos.x;
 		}
@@ -313,8 +338,10 @@ package away3d.containers
 		override public function set y(value : Number) : void
 		{
 			super.y = value;
+			
 			_localPos.y = value;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
+			
 			if (_stage3DProxy)
 				_stage3DProxy.y = _globalPos.y;
 		}
@@ -330,6 +357,7 @@ package away3d.containers
 		public function set antiAlias(value : uint) : void
 		{
 			_antiAlias = value;
+			
 			invalidateBackBuffer();
 		}
 		
@@ -347,6 +375,7 @@ package away3d.containers
 		private function updateBackBuffer() : void
 		{
 			_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
+			
 			_backBufferInvalid = false;
 		}
 		
@@ -356,17 +385,24 @@ package away3d.containers
 		public function render() : void
 		{
 			// reset or update render settings
-			if (_backBufferInvalid) updateBackBuffer();
-			if (!_parentIsStage) updateGlobalPos();
+			if (_backBufferInvalid)
+				updateBackBuffer();
+			
+			if (!_parentIsStage)
+				updateGlobalPos();
+			
 			updateTime();
+			
 			_entityCollector.clear();
+			
 			updateCamera();
 
 			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
 
 			// render things
-			if (_entityCollector.numMouseEnableds > 0) _mouse3DManager.updateHitData();
+			if (_entityCollector.numMouseEnableds > 0)
+				_mouse3DManager.updateHitData();
 
 			updateLights(_entityCollector);
 
@@ -377,10 +413,10 @@ package away3d.containers
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _filter3DRenderer.renderRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
 				_stage3DProxy._context3D.present();
-			}
-			else
+			} else {
 				_renderer.render(_entityCollector);
-
+			}
+			
 			// clean up data for this render
 			_entityCollector.cleanUp();
 
