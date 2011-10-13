@@ -70,7 +70,7 @@ package a3dparticle.animators.actions.color
 			
 			if (_hasMult)
 			{
-				code += "mul " + temp.toString() + ".," + deltaMultiplierConst.toString() + "," +  _animation.fragmentLife.toString()+ "\n";
+				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  _animation.fragmentLife.toString()+ "\n";
 				code += "add " + temp.toString() + "," + temp.toString() + "," + startMultiplierConst.toString() + "\n";
 				code += "mul " + _animation.colorTarget.toString() +"," + temp.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
