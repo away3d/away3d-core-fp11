@@ -1,8 +1,8 @@
 package 
 {
-	import a3dparticle.animators.actions.ChangeColorByLifeAction;
-	import a3dparticle.animators.actions.CircleAction;
-	import a3dparticle.animators.actions.VelocityAction;
+	import a3dparticle.animators.actions.circle.CircleLocal;
+	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
+	import a3dparticle.animators.actions.velocity.VelocityGlobal;
 	import a3dparticle.materials.SimpleParticleMaterial;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
@@ -69,14 +69,14 @@ package
 			particle.endTimeFun = function(index:uint):Number { return 5; };
 			particle.loop = true;
 			
-			var action:CircleAction = new CircleAction(function(index:uint):Vector3D { return new Vector3D(200, 1);},new Vector3D(90 ));
-			particle.addPerParticleAction(action);
+			var action:CircleLocal = new CircleLocal(function(index:uint):Vector3D { return new Vector3D(200, 1);},new Vector3D(90 ));
+			particle.addAction(action);
 			
-			var action2:VelocityAction = new VelocityAction(function(index:uint):Vector3D { return new Vector3D(0,100,0);});
-			particle.addPerParticleAction(action2);
+			var action2:VelocityGlobal = new VelocityGlobal(new Vector3D(0, 100, 0));
+			particle.addAction(action2);
 			
-			var action3:ChangeColorByLifeAction = new ChangeColorByLifeAction(new ColorTransform(0.2,0.2,0.2,0.2),new ColorTransform(1,1,1,1));
-			particle.addAllParticleAction(action3);
+			var action3:ChangeColorByLifeGlobal = new ChangeColorByLifeGlobal(new ColorTransform(0.2,0.2,0.2,1),new ColorTransform(1,1,1,1));
+			particle.addAction(action3);
 			
 			
 			particle.generate(sphere.geometry.subGeometries[0]);
