@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.circle 
 {
+	import a3dparticle.animators.actions.PerParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -16,9 +17,8 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class CircleAction extends PerParticleAction
+	public class CircleLocal extends PerParticleAction
 	{
-		//the function return a Vector3D. Vector3D.x is radius,Vector3D.y is cycle
 		private var _dataFun:Function;
 		
 		private var _eulers:Vector3D;
@@ -30,8 +30,12 @@ package a3dparticle.animators.actions
 		
 		private var circleAttribute:ShaderRegisterElement;
 		private var eulersMatrixRegister:ShaderRegisterElement;
-		
-		public function CircleAction(fun:Function,eulers:Vector3D=null) 
+		/**
+		 * 
+		 * @param	fun Function.The fun return a a Vector3D. Vector3D.x is radius,Vector3D.y is cycle
+		 * @param	eulers Vector3D.The eulers of the rotate.
+		 */
+		public function CircleLocal(fun:Function,eulers:Vector3D=null) 
 		{
 			dataLenght = 2;
 			_dataFun = fun;
@@ -83,7 +87,19 @@ package a3dparticle.animators.actions
 			code += "mul " + distance.toString() +".y," + sin.toString() +"," + circleAttribute.toString() + ".x\n";
 			code += "mov " + distance.toString() + ".wz" + _animation.zeroConst.toString() + "\n";
 			code += "m44 " + distance.toString() + "," + distance.toString() + "," +eulersMatrixRegister.toString() + "\n";
-			code += "add " + _animation.postionTarget.toString() + ".xyz," + distance.toString() + ".xyz," + _animation.postionTarget.toString() + ".xyz\n";
+			code += "add " + _animation.offestTarget.toString() + ".xyz," + distance.toString() + ".xyz," + _animation.offestTarget.toString() + ".xyz\n";
+			
+			if (_animation.needVelocity)
+			{
+				code += "neg " + distance.toString() + ".x," + sin.toString() + "\n";
+				code += "mov " + distance.toString() + ".y," + cos.toString() + "\n";
+				code += "mov " + distance.toString() + ".zw," + _animation.zeroConst.toString() + "\n";
+				code += "m44 " + distance.toString() + "," + distance.toString() + "," +eulersMatrixRegister.toString() + "\n";
+				code += "mul " + distance.toString() + "," + distance.toString() + "," +_animation.piConst.toString() + "\n";
+				code += "mul " + distance.toString() + "," + distance.toString() + "," +circleAttribute.toString() + ".x\n";
+				code += "div " + distance.toString() + "," + distance.toString() + "," +circleAttribute.toString() + ".y\n";
+				code += "add " + _animation.velocityTarget.toString() + ".xyz," + _animation.velocityTarget.toString() + ".xyz," +distance.toString() + ".xyz\n";
+			}
 			return code;
 		}
 		

@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.scale 
 {
+	import a3dparticle.animators.actions.PerParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -10,16 +11,20 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class RandomScaleAction extends PerParticleAction
+	public class RandomScaleLocal extends PerParticleAction
 	{
 		private var _scaleFun:Function;
 		
 		private var _tempScale:Vector3D;
 		
 		private var scaleAttribute:ShaderRegisterElement;
-		
-		public function RandomScaleAction(fun:Function) 
+		/**
+		 * 
+		 * @param	fun Function.The fun return a Vector3D which (x,y,z) is a (scaleX,scaleY,scaleZ)
+		 */
+		public function RandomScaleLocal(fun:Function) 
 		{
+			priority = 3;
 			dataLenght = 3;
 			_scaleFun = fun;
 		}
@@ -38,14 +43,9 @@ package a3dparticle.animators.actions
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			
-			var distance:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-			distance = new ShaderRegisterElement(distance.regName, distance.index, "xyz");
 			scaleAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
-			code += "mul " + distance.toString() + "," + scaleAttribute.toString() +".xyz," + _animation.positionAttribute.toString() + ".xyz\n";
-			code += "sub " + distance.toString() + "," + distance.toString() +"," + _animation.positionAttribute.toString() + ".xyz\n";
-			code += "add " + _animation.postionTarget.toString() +".xyz," +_animation.postionTarget.toString() + ".xyz," + distance.toString() + "\n";
+			code += "mul " + _animation.scaleAndRotateTarget.toString() +"," +_animation.scaleAndRotateTarget.toString() + "," + scaleAttribute.toString() + "\n";
 			return code;
 		}
 		

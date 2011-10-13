@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.color 
 {
+	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -15,9 +16,8 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class FlickerAction extends AllParticleAction
+	public class FlickerLocal extends AllParticleAction
 	{
-		
 		private var _startColor:ColorTransform;
 		private var _endColor:ColorTransform;
 		private var _cycle:Number;
@@ -31,7 +31,12 @@ package a3dparticle.animators.actions
 		private var deltaOffestConst:ShaderRegisterElement;
 		private var cycleConst:ShaderRegisterElement;
 		
-		public function FlickerAction(startColor:ColorTransform,endColor:ColorTransform,cycle:Number) 
+		private var startMultiplier:Vector.<Number>;
+		private var deltaMultiplier:Vector.<Number>;
+		private var startOffest:Vector.<Number>;
+		private var deltaOffest:Vector.<Number>;
+		
+		public function FlickerLocal(startColor:ColorTransform,endColor:ColorTransform,cycle:Number) 
 		{
 			_startColor = startColor;
 			_endColor = endColor;
@@ -42,6 +47,11 @@ package a3dparticle.animators.actions
 			if (_startColor.alphaOffset != 0 || _startColor.blueOffset != 0 || _startColor.greenOffset != 0 || _startColor.redOffset != 0 ||
 				_endColor.alphaOffset != 0 || _endColor.blueOffset != 0 || _endColor.greenOffset != 0 || _endColor.redOffset != 0)
 				_hasOffset = true;
+				
+			startMultiplier = Vector.<Number>([_startColor.redMultiplier , _startColor.greenMultiplier , _startColor.blueMultiplier , _startColor.alphaMultiplier ]);
+			deltaMultiplier = Vector.<Number>([(_endColor.redMultiplier - _startColor.redMultiplier) , (_endColor.greenMultiplier - _startColor.greenMultiplier) , (_endColor.blueMultiplier - _startColor.blueMultiplier) , (_endColor.alphaMultiplier - _startColor.alphaMultiplier)]);
+			startOffest = Vector.<Number>([_startColor.redOffset / 256, _startColor.greenOffset / 256, _startColor.blueOffset / 256, _startColor.alphaOffset / 256]);
+			deltaOffest = Vector.<Number>([(_endColor.greenOffset - _startColor.redOffset) / 256, (_endColor.greenOffset - _startColor.greenOffset) / 256, (_endColor.blueOffset - _startColor.blueOffset ) / 256, (_endColor.alphaOffset - _startColor.alphaOffset) / 256]);
 		}
 		
 		override public function getAGALFragmentCode(pass : MaterialPassBase) : String
@@ -87,10 +97,6 @@ package a3dparticle.animators.actions
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			var startMultiplier:Vector.<Number> = Vector.<Number>([_startColor.redMultiplier , _startColor.greenMultiplier , _startColor.blueMultiplier , _startColor.alphaMultiplier ]);
-			var deltaMultiplier:Vector.<Number> = Vector.<Number>([(_endColor.redMultiplier - _startColor.redMultiplier) , (_endColor.greenMultiplier - _startColor.greenMultiplier) , (_endColor.blueMultiplier - _startColor.blueMultiplier) , (_endColor.alphaMultiplier - _startColor.alphaMultiplier)]);
-			var startOffest:Vector.<Number> = Vector.<Number>([_startColor.redOffset / 256, _startColor.greenOffset / 256, _startColor.blueOffset / 256, _startColor.alphaOffset / 256]);
-			var deltaOffest:Vector.<Number> = Vector.<Number>([(_endColor.greenOffset - _startColor.redOffset) / 256, (_endColor.greenOffset - _startColor.greenOffset) / 256, (_endColor.blueOffset - _startColor.blueOffset ) / 256, (_endColor.alphaOffset - _startColor.alphaOffset) / 256]);
 			
 			var context : Context3D = stage3DProxy._context3D;
 			if (_hasMult)

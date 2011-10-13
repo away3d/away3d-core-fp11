@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.scale 
 {
+	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -13,7 +14,7 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class ScaleByTimeAction extends AllParticleAction
+	public class ScaleByTimeGlobal extends AllParticleAction
 	{
 		private var _min:Number;
 		private var _max:Number;
@@ -21,8 +22,9 @@ package a3dparticle.animators.actions
 		
 		private var scaleByTimeConst:ShaderRegisterElement;
 		
-		public function ScaleByTimeAction(min:Number,max:Number,time:Number) 
+		public function ScaleByTimeGlobal(min:Number,max:Number,time:Number) 
 		{
+			priority = 3;
 			_min = min;
 			_max = max;
 			_time = time;
@@ -34,7 +36,6 @@ package a3dparticle.animators.actions
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var frc:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index,"w");
-			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "xyz");
 			
 			var code:String = "";
 			code += "div " + frc.toString() + "," + _animation.vertexTime.toString() + "," + scaleByTimeConst.toString() + ".w\n";
@@ -44,10 +45,7 @@ package a3dparticle.animators.actions
 			code += "mul " + frc.toString() + "," + frc.toString() + "," + scaleByTimeConst.toString() + ".y\n";
 			code += "add " + frc.toString() + "," + frc.toString() + "," + scaleByTimeConst.toString() + ".x\n";
 			
-			code += "mul " + distance.toString() + "," + frc.toString() +"," + _animation.positionAttribute.toString() + ".xyz\n";
-			code += "sub " + distance.toString() + "," + distance.toString() +"," + _animation.positionAttribute.toString() + ".xyz\n";
-			
-			code += "add " + _animation.postionTarget.toString() +".xyz," +_animation.postionTarget.toString() + ".xyz," + distance.toString() + "\n";
+			code += "mul " + _animation.scaleAndRotateTarget.toString() +"," +_animation.scaleAndRotateTarget.toString() + "," + frc.toString() + "\n";
 			return code;
 		}
 		

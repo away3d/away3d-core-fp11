@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.drift 
 {
+	import a3dparticle.animators.actions.PerParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -13,7 +14,7 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class DriftAction extends PerParticleAction
+	public class DriftLocal extends PerParticleAction
 	{
 		private var driftAttribute:ShaderRegisterElement;
 		
@@ -22,7 +23,7 @@ package a3dparticle.animators.actions
 		
 		private var _driftData:Vector3D;
 		
-		public function DriftAction(fun:Function) 
+		public function DriftLocal(fun:Function) 
 		{
 			dataLenght = 4;
 			_driftFun = fun;
@@ -45,16 +46,29 @@ package a3dparticle.animators.actions
 		{
 			driftAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-			
 			var frc:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index,"w");
-			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index,"xyz");
+			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
+			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
+			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
+			shaderRegisterCache.addVertexTempUsages(temp, 1);
+			var temp2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
+			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "xyz");
+			shaderRegisterCache.removeVertexTempUsage(temp);
+			
 			var code:String = "";
 			code += "div " + frc.toString() + "," + _animation.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
 			code += "frc " + frc.toString() + "," + frc.toString() + "\n";
-			code += "mul " + frc.toString() + "," + frc.toString() + ","+_animation.piConst.toString()+".x\n";
-			code += "sin " + frc.toString() + "," + frc.toString() + "\n";
-			code += "mul " + distance.toString() + "," + frc.toString() + "," + driftAttribute.toString() + ".xyz\n";
-			code += "add " + _animation.postionTarget.toString() +".xyz," + distance.toString() + "," + _animation.postionTarget.toString() + ".xyz\n";
+			code += "mul " + dgree.toString() + "," + frc.toString() + "," + _animation.piConst.toString() + ".x\n";
+			code += "sin " + sin.toString() + "," + dgree.toString() + "\n";
+			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
+			code += "add " + _animation.offestTarget.toString() +".xyz," + distance.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
+			
+			if (_animation.needVelocity)
+			{	code += "cos " + cos.toString() + "," + dgree.toString() + "\n";
+				code += "mul " + distance.toString() + "," + cos.toString() + "," + driftAttribute.toString() + ".xyz\n";
+				code += "add " + _animation.velocityTarget.toString() + ".xyz," + distance.toString() + "," + _animation.velocityTarget.toString() + ".xyz\n";
+			}
+			
 			return code;
 		}
 		

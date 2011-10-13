@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.velocity 
 {
+	import a3dparticle.animators.actions.PerParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -10,15 +11,18 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class VelocityAction extends PerParticleAction
+	public class VelocityLocal extends PerParticleAction
 	{
 		private var _velFun:Function;
 		
 		private var _tempVelocity:Vector3D;
 		
 		private var velocityAttribute:ShaderRegisterElement;
-		
-		public function VelocityAction(fun:Function) 
+		/**
+		 * 
+		 * @param	fun Function.The fun should return a Vector3D whick (x,y,z) is the velocity.
+		 */
+		public function VelocityLocal(fun:Function) 
 		{
 			dataLenght = 3;
 			_velFun = fun;
@@ -44,7 +48,11 @@ package a3dparticle.animators.actions
 			velocityAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
 			code += "mul " + distance.toString() + "," + _animation.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
-			code += "add " + _animation.postionTarget.toString() +".xyz," + distance.toString() + "," + _animation.postionTarget.toString() + ".xyz\n";
+			code += "add " + _animation.offestTarget.toString() +".xyz," + distance.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
+			if (_animation.needVelocity)
+			{
+				code += "add " + _animation.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";
+			}
 			return code;
 		}
 		

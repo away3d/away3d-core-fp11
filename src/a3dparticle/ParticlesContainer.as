@@ -1,5 +1,6 @@
 package a3dparticle 
 {
+	import a3dparticle.animators.actions.ActionBase;
 	import a3dparticle.animators.actions.AllParticleAction;
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.animators.ParticleAnimation;
@@ -59,15 +60,10 @@ package a3dparticle
 			}
 		}
 		
-		public function addPerParticleAction(action:PerParticleAction):void
+		public function addAction(action:ActionBase):void
 		{
 			if (_hasGen) throw(new Error("can't add action after gen!"));
-			_particleAnimation.addPerParticleAction(action);
-		}
-		public function addAllParticleAction(action:AllParticleAction):void
-		{
-			if (_hasGen) throw(new Error("can't add action after gen!"));
-			_particleAnimation.addAllParticleAction(action);
+			_particleAnimation.addAction(action);
 		}
 		
 		public function set startTimeFun(fun:Function):void
@@ -94,6 +90,8 @@ package a3dparticle
 			
 			_numTriangles = _count * subGem.numTriangles;
 			
+			_particleAnimation.startGen();
+			
 			for (var i:int=0; i < _count; i++)
 			{
 				var j:uint = 0;
@@ -112,7 +110,7 @@ package a3dparticle
 					_particleAnimation.distributeOne(i, j);
 				}
 			}
-			_particleAnimation.hasGen = true;
+			_particleAnimation.finishGen();
 			_hasGen = true;
 			
 		}

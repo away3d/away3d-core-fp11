@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.color 
 {
+	import a3dparticle.animators.actions.PerParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -14,7 +15,7 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class RandomColorAction extends PerParticleAction
+	public class RandomColorLocal extends PerParticleAction
 	{
 		private var _colorFun:Function;
 		
@@ -29,7 +30,7 @@ package a3dparticle.animators.actions
 		private var offsetVary:ShaderRegisterElement;
 		
 		
-		public function RandomColorAction(fun:Function,hasMult:Boolean=true,hasOffest:Boolean=true) 
+		public function RandomColorLocal(fun:Function,hasMult:Boolean=true,hasOffest:Boolean=true) 
 		{
 			_colorFun = fun;
 			_hasMult = hasMult;

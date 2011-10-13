@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.position 
 {
+	import a3dparticle.animators.actions.PerParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -13,7 +14,7 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class OffestDistanceAction extends PerParticleAction
+	public class OffestPositionLocal extends PerParticleAction
 	{
 		private var _offestFun:Function;
 		
@@ -21,7 +22,11 @@ package a3dparticle.animators.actions
 		
 		private var _offectAttribute:ShaderRegisterElement;
 		
-		public function OffestDistanceAction(offest:Function) 
+		/**
+		 * 
+		 * @param	offest Function.It return a Vector3D that the (x,y,z) is the position.
+		 */
+		public function OffestPositionLocal(offest:Function) 
 		{
 			dataLenght = 3;
 			_offestFun = offest;
@@ -43,7 +48,7 @@ package a3dparticle.animators.actions
 		{
 			_offectAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
-			code += "add " + _animation.postionTarget.toString() +".xyz," + _offectAttribute.toString() + "," + _animation.postionTarget.toString() + ".xyz\n";
+			code += "add " + _animation.offestTarget.toString() +".xyz," + _offectAttribute.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
 			return code;
 		}
 		

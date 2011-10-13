@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.scale 
 {
+	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -13,17 +14,20 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class ScaleByLifeAction extends AllParticleAction
+	public class ScaleByLifeGlobal extends AllParticleAction
 	{
 		private var _startScale:Number;
 		private var _endScale:Number;
+		private var _delta:Number;
 		
 		private var scaleByLifeConst:ShaderRegisterElement;
 		
-		public function ScaleByLifeAction(startScale:Number,endScale:Number) 
+		public function ScaleByLifeGlobal(startScale:Number,endScale:Number) 
 		{
+			priority = 3;
 			_startScale = startScale;
 			_endScale = endScale;
+			_delta = _endScale - _startScale;
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -32,15 +36,12 @@ package a3dparticle.animators.actions
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var scale:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index,"w");
-			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "xyz");
 			
 			var code:String = "";
 			code += "mul " + scale.toString() + "," + _animation.vertexLife.toString() + "," + scaleByLifeConst.toString() + ".y\n";
 			code += "add " + scale.toString() + "," + scale.toString() + "," + scaleByLifeConst.toString() + ".x\n";
 			
-			code += "mul " + distance.toString() + "," + scale.toString() +"," + _animation.positionAttribute.toString() + ".xyz\n";
-			code += "sub " + distance.toString() + "," + distance.toString() +"," + _animation.positionAttribute.toString() + ".xyz\n";
-			code += "add " + _animation.postionTarget.toString() +".xyz," +_animation.postionTarget.toString() + ".xyz," + distance.toString() + "\n";
+			code += "mul " + _animation.scaleAndRotateTarget.toString() +"," +_animation.scaleAndRotateTarget.toString() + "," + scale.toString() + "\n";
 			return code;
 			
 		}
@@ -48,7 +49,6 @@ package a3dparticle.animators.actions
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			var _delta:Number = _endScale - _startScale;
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, scaleByLifeConst.index, Vector.<Number>([_startScale,_delta,0,0]));
 		}
 		

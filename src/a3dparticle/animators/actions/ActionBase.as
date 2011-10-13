@@ -14,6 +14,8 @@ package a3dparticle.animators.actions
 	{
 		public var _animation:ParticleAnimation
 		
+		public var priority:int=1;
+		
 		public function ActionBase() 
 		{
 			

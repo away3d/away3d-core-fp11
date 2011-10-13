@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions.acceleration 
 {
+	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -14,13 +15,13 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class AccelerateAction extends AllParticleAction
+	public class AccelerateGlobal extends AllParticleAction
 	{
 		private var _acc:Vector3D;
 		
 		private var accVelConst:ShaderRegisterElement;
 		
-		public function AccelerateAction(acc:Vector3D) 
+		public function AccelerateGlobal(acc:Vector3D) 
 		{
 			_acc = acc;
 		}
@@ -29,13 +30,20 @@ package a3dparticle.animators.actions
 		{
 			accVelConst = shaderRegisterCache.getFreeVertexConstant();
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-			
-			var accDistance:ShaderRegisterElement = new ShaderRegisterElement(temp.regName,temp.index,"xyz");
-			var squDeltaTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName,temp.index,"w");
+			shaderRegisterCache.addVertexTempUsages(temp,1);
 			var code:String = "";
-			code += "mul " + squDeltaTime.toString() +"," + _animation.vertexTime.toString() + "," + _animation.vertexTime.toString() + "\n";
-			code += "mul " + accDistance.toString() +"," + squDeltaTime.toString() + "," + accVelConst.toString() + "\n";
-			code += "add " + _animation.postionTarget.toString() +".xyz," + accDistance.toString() + "," + _animation.postionTarget.toString() + ".xyz\n";
+			code += "mul " + temp.toString() +"," + _animation.vertexTime.toString() + "," + accVelConst.toString() + "\n";
+			
+			if (_animation.needVelocity)
+			{
+				var temp2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
+				code += "mul " + temp2.toString() + "," + temp.toString() + "," + _animation.TwoConst.toString() + "\n";
+				code += "add " + _animation.velocityTarget.toString() + ".xyz," + temp2.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";
+			}
+			shaderRegisterCache.removeVertexTempUsage(temp);
+			
+			code += "mul " + temp.toString() +"," + temp.toString() + "," + _animation.vertexTime.toString() + "\n";
+			code += "add " + _animation.offestTarget.toString() +".xyz," + temp.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
 			return code;
 		}
 		
