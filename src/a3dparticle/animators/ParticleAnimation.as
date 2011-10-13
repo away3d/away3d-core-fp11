@@ -185,6 +185,7 @@ package a3dparticle.animators
 			}
 			
 			colorTarget = shaderRegisterCache.getFreeFragmentVectorTemp();
+			shaderRegisterCache.addFragmentTempUsages(colorTarget,1);
 			
 			//allot vary register
 			varyTime = shaderRegisterCache.getFreeVarying();
