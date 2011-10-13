@@ -8,6 +8,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.data.DefaultBitmapData;
+	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.tools.utils.TextureUtils;
 	
 	import flash.display.BitmapData;
@@ -50,23 +51,12 @@ package away3d.loaders.parsers
 		
 		protected function getTextData():String
 		{
-			if (_data is String) {
-				return _data as String;
-			} else if (_data is ByteArray) {
-				var bytes:ByteArray = _data as ByteArray;
-				return bytes.readUTFBytes(bytes.bytesAvailable);
-			} else {
-				throw new Error('Data cannot be converted to String');
-			}
+			return ParserUtil.toString(_data);
 		}
 		
 		protected function getByteData():ByteArray
 		{
-			if (_data is ByteArray) {
-				return _data as ByteArray;
-			} else {
-				throw new Error('Data cannot be converted to ByteArray');
-			}
+			return ParserUtil.toByteArray(_data);
 		}
 		
 		private var _dependencies : Vector.<ResourceDependency>;
@@ -326,8 +316,6 @@ package away3d.loaders.parsers
 			_timer = new Timer(_frameLimit, 0);
 			_timer.addEventListener(TimerEvent.TIMER, onInterval);
 			_timer.start();
-			// synchronously right away
-			onInterval();
 		}
 		
 		

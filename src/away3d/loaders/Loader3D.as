@@ -44,18 +44,18 @@ package away3d.loaders
 			_assetLibId = assetLibraryId;
 		}
 		
-		public function load(req : URLRequest, parser : ParserBase = null, context : AssetLoaderContext = null, ns : String = null) : AssetLoaderToken
+		public function load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken;
 			
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
 				lib = AssetLibrary.getInstance(_assetLibId);
-				token = lib.load(req, parser, context, ns);
+				token = lib.load(req, context, ns, parser);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
-				token = loader.load(req, parser, context, ns);
+				token = loader.load(req, context, ns, parser);
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
@@ -75,18 +75,18 @@ package away3d.loaders
 		}
 		
 		
-		public function loadData(data : *, parser : ParserBase = null, context : AssetLoaderContext = null,  ns : String = null) : AssetLoaderToken
+		public function loadData(data : *, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			var token : AssetLoaderToken;
 			
 			if (_useAssetLib) {
 				var lib : AssetLibrary;
 				lib = AssetLibrary.getInstance(_assetLibId);
-				token = lib.loadData(data, parser, context, ns);
+				token = lib.loadData(data, context, ns, parser);
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
-				token = loader.loadData(data, '', parser, context, ns);
+				token = loader.loadData(data, '', context, ns, parser);
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);

@@ -4,7 +4,7 @@ package away3d.loaders.parsers
 	import away3d.events.AssetEvent;
 	import away3d.events.ParserEvent;
 	import away3d.loaders.misc.ResourceDependency;
-
+	
 	import flash.utils.ByteArray;
 
 	use namespace arcane;
@@ -31,19 +31,7 @@ package away3d.loaders.parsers
 		
 		public static function supportsData(data : *) : Boolean
 		{
-			var ba : ByteArray;
-			var str : String;
-			
-			// Data will be byte array since this parser
-			// has data format = BINARY
-			ba = ByteArray(data);
-			if (AWD2Parser.supportsData(ba))
-				return true;
-			
-			// If not AWD2, convert to string and let
-			// AWD1Parser check if data is supported
-			str = ba.readUTFBytes(ba.bytesAvailable);
-			return AWD1Parser.supportsData(str);
+			return (AWD1Parser.supportsData(data) || AWD2Parser.supportsData(data));
 		}
 		
 		
