@@ -1,10 +1,6 @@
 ﻿package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.containers.View3D;
-	import away3d.textures.BitmapTextureCache;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.textures.BitmapTexture;
 	import away3d.lights.LightBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
