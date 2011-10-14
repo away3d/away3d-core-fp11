@@ -60,6 +60,23 @@ package a3dparticle
 			}
 		}
 		
+		public function set timeScale(value:Number):void
+		{
+			__controller.timeScale = value;
+		}
+		public function get timeScale():Number
+		{
+			return __controller.timeScale;
+		}
+		public function set time(value:Number):void
+		{
+			__controller.time = value;
+		}
+		public function get time():Number
+		{
+			return __controller.time;
+		}
+		
 		public function addAction(action:ActionBase):void
 		{
 			if (_hasGen) throw(new Error("can't add action after gen!"));
