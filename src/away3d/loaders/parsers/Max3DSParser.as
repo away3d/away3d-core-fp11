@@ -434,12 +434,17 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			vo = _unfinalized_objects[name];
-			obj = constructObject(vo, pivot);
-			
-			finalizeAsset(obj, vo.name);
-			
-			delete _unfinalized_objects[name];
+			// If name is "$$$DUMMY" this is an empty object (e.g. a container)
+			// and will be ignored in this version of the parser
+			// TODO: Implement containers in 3DS parser.
+			if (name != '$$$DUMMY') {
+				vo = _unfinalized_objects[name];
+				obj = constructObject(vo, pivot);
+				
+				finalizeAsset(obj, vo.name);
+				
+				delete _unfinalized_objects[name];
+			}
 		}
 		
 		
