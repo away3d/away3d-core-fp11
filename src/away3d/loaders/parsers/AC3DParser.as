@@ -6,13 +6,16 @@
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;	import away3d.materials.BitmapMaterial;
-
+	import away3d.loaders.parsers.utils.ParserUtil;
+	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DProxyBase;
+	
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
+	import flash.utils.ByteArray;
+
 	use namespace arcane;
 	
 	/**
@@ -97,15 +100,14 @@
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			var mesh : Mesh;
-			var resource : BitmapDataAsset;
+			var asset : Texture2DProxyBase;
 			
 			if (resourceDependency.assets.length == 1) {
-				resource = resourceDependency.assets[0] as BitmapDataAsset;
+				asset = resourceDependency.assets[0] as Texture2DProxyBase;
 				mesh = retrieveMeshFromID(resourceDependency.id);
 			}
 			
-			if(mesh && resource && resource.bitmapData && isBitmapDataValid(resource.bitmapData))
-				BitmapMaterial(mesh.material).bitmapData = resource.bitmapData;
+			if(mesh && asset)				TextureMaterial(mesh.material).texture = asset;
 		}
 		
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
@@ -205,7 +207,7 @@
 						if(trunk[1] == "poly"){
 							var geometry:Geometry = new Geometry();
 							activeMesh = new Mesh(null, geometry);
-							activeMesh.material = new BitmapMaterial(defaultBitmapData);
+							activeMesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
 							vertexes = [];
 							uvs = [];
 							activeMesh.name = "m_"+_meshList.length;
