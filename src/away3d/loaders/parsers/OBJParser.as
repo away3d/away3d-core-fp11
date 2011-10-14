@@ -6,12 +6,14 @@ package away3d.loaders.parsers
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.BitmapDataAsset;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.BitmapMaterial;
+	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
-	import away3d.tools.utils.TextureUtils;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DProxyBase;
 	
 	import flash.display.BitmapData;
 	import flash.net.URLRequest;
@@ -117,15 +119,17 @@ package away3d.loaders.parsers
 				parseMtl(ba.readUTFBytes(ba.bytesAvailable));
 			}
 			else {
+				var asset : IAsset;
+				
 				if (resourceDependency.assets.length != 1)
 					return;
 				
-				var asset:BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
+				asset = resourceDependency.assets[0];
 				
-				if (asset){
+				if (asset.assetType == AssetType.TEXTURE){
 					var lm:LoadedMaterial = new LoadedMaterial();
 					lm.materialID = resourceDependency.id;
-					lm.bitmapData = isBitmapDataValid(asset.bitmapData)? asset.bitmapData : defaultBitmapData ;
+					lm.texture = asset as Texture2DProxyBase;
 					
 					_materialLoaded.push(lm);
 					
@@ -142,7 +146,7 @@ package away3d.loaders.parsers
 		{
 			var lm:LoadedMaterial = new LoadedMaterial();
 			lm.materialID = resourceDependency.id;
-			lm.bitmapData = defaultBitmapData;
+			lm.texture = new BitmapTexture(defaultBitmapData);
 			
 			_materialLoaded.push(lm);
 			
@@ -272,7 +276,7 @@ package away3d.loaders.parsers
 			
 			var m : uint;
 			var sm : uint;
-			var bmMaterial:BitmapMaterial;
+			var bmMaterial:TextureMaterial;
 
 			for (var g : uint = 0; g < numGroups; ++g) {
 				geometry = new Geometry();
@@ -281,7 +285,7 @@ package away3d.loaders.parsers
 				for (m = 0; m < numMaterialGroups; ++m) {
 					translateMaterialGroup(materialGroups[m], geometry);
 				}
-				bmMaterial = new BitmapMaterial(defaultBitmapData);
+				bmMaterial = new TextureMaterial( new BitmapTexture( defaultBitmapData ) );
 				mesh = new Mesh(bmMaterial, geometry);
 				meshid = _meshes.length;
 				mesh.name = "obj"+meshid;
@@ -675,7 +679,8 @@ package away3d.loaders.parsers
 					if(alpha == 0)
 						trace("Warning: an alpha value of 0 was found in mtl color tag (Tr or d) ref:"+_lastMtlID+", mesh(es) using it will be invisible!");
 					
-					lm.bitmapData = new BitmapData(256, 256, (alpha == 1)? false : true, diffuseColor); 
+					//TODO: OMG This has to be cleaned up.
+					lm.texture = new BitmapTexture(new BitmapData(256, 256, (alpha == 1)? false : true, diffuseColor)); 
 					lm.ambientColor = ambientColor;
 					
 					if(useSpecular){
@@ -753,7 +758,7 @@ package away3d.loaders.parsers
 			var meshID:String;
 			var decomposeID:Array;
 			var mesh:Mesh;
-			var mat:BitmapMaterial;
+			var mat:TextureMaterial;
 			var j:uint;
 			var specularData:SpecularData;
 			
@@ -763,8 +768,8 @@ package away3d.loaders.parsers
 				
 				if(decomposeID[0] == lm.materialID){
 					mesh.material.name = decomposeID[1];
-					mat = BitmapMaterial(mesh.material);
-					mat.bitmapData = lm.bitmapData;
+					mat = TextureMaterial(mesh.material);
+					mat.texture = lm.texture;
 					mat.ambientColor = lm.ambientColor;
 					
 					if(lm.specularMethod){
@@ -800,10 +805,8 @@ package away3d.loaders.parsers
 }
 
 import away3d.materials.methods.BasicSpecularMethod;
+import away3d.textures.Texture2DProxyBase;
 
-import flash.display.BitmapData;
-
-// value objects:
 class ObjectGroup
 {
 	public var name : String;
@@ -833,7 +836,7 @@ class SpecularData
 class LoadedMaterial
 {
 	public var materialID:String;
-	public var bitmapData:BitmapData;
+	public var texture:Texture2DProxyBase;
 	
 	public var specularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
