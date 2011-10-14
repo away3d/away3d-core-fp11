@@ -51,9 +51,13 @@ package
 			addChild(_view);
 			addEventListener(Event.ENTER_FRAME, onRender);
 			addChild(new AwayStats(_view));
-			new HoverDragController(_view.camera, stage);
+			new HoverDragController(_view.camera, _view);
 			_view.scene.addChild(new WireframeAxesGrid(4,1000));
 			initScene();
+			var ui:PlayUI = new PlayUI(particle,3);
+			ui.y = 700;
+			ui.x = 260;
+			addChild(ui);
 		}
 		
 		
