@@ -15,6 +15,16 @@ package a3dparticle.animators
 			_target = target;
 		}
 		
+		public function get time():Number
+		{
+			return _target.time;
+		}
+		
+		public function set time(value:Number):void
+		{
+			_target.time = value;
+		}
+		
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
 			_target.time += scaledDT / 1000;
