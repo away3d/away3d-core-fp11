@@ -30,9 +30,10 @@ package
 			slider.maximum = max;
 			slider.setSize(500, slider.height);
 			check = new CheckBox(this, 500, 5, "reverTime", onReverTime);
-			play = new PushButton(this, 200, 20, "play", onPlay);
+			play = new PushButton(this, 200, 20, "pause", onPlay);
 			play.toggle = true;
 			play.selected = true;
+			
 			addEventListener(Event.ENTER_FRAME, onUpdate);
 		}
 		
@@ -46,20 +47,24 @@ package
 			{
 				target.timeScale = 1;
 			}
-			e.stopPropagation();
 		}
 		
 		private function onPlay(e:Event):void
 		{
 			if (play.selected)
 			{
+				if (target.time > max) target.time = max;
+				if (target.time < min) target.time = min;
+				play.label = "pause";
+				play.selected = true;
 				target.start();
 			}
 			else
 			{
+				play.label = "play";
+				play.selected = false;
 				target.stop();
 			}
-			e.stopPropagation();
 		}
 		
 		public function get value():Number
@@ -69,10 +74,15 @@ package
 		
 		private function onUpdate(e:Event):void
 		{
-			slider.value = target.time;
-			if (target.time >= max && target.time <= min)
+			if (target.time > max || target.time < min)
 			{
+				play.label = "play";
+				play.selected = false;
 				target.stop();
+			}
+			else
+			{
+				slider.value = target.time;
 			}
 			
 		}
@@ -80,7 +90,6 @@ package
 		private function onChange(e:Event):void
 		{
 			target.time = slider.value;
-			e.stopImmediatePropagation();
 		}
 		
 	}

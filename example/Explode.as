@@ -54,7 +54,7 @@ package
 			new HoverDragController(_view.camera, _view);
 			_view.scene.addChild(new WireframeAxesGrid(4,1000));
 			initScene();
-			var ui:PlayUI = new PlayUI(particle,3);
+			var ui:PlayUI = new PlayUI(particle,2);
 			ui.y = 700;
 			ui.x = 260;
 			addChild(ui);
