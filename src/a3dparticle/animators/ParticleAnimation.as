@@ -37,6 +37,8 @@ package a3dparticle.animators
 		//set if it need to share velocity in other actions
 		public var needVelocity:Boolean;
 		
+		public var needVelocityInFragment:Boolean;
+		
 		
 		//vertex
 		public var timeConst:ShaderRegisterElement;
@@ -63,6 +65,7 @@ package a3dparticle.animators
 		public var uvVar:ShaderRegisterElement;
 		public var fragmentZeroConst:ShaderRegisterElement;
 		public var fragmentPiConst:ShaderRegisterElement;
+		public var fragmentOneConst:ShaderRegisterElement;
 		
 		
 		public function ParticleAnimation()
@@ -170,6 +173,7 @@ package a3dparticle.animators
 			colorDefalut = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentPiConst = shaderRegisterCache.getFreeFragmentConstant();
+			fragmentOneConst = shaderRegisterCache.getFreeFragmentConstant();
 			//allot attribute register
 			uvAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			//allot temp register
@@ -220,6 +224,11 @@ package a3dparticle.animators
 			for each(action in _particleActions)
 			{
 				_AGALVertexCode += action.getAGALVertexCode(pass);
+			}
+			if (needVelocity && needVelocityInFragment)
+			{
+				_AGALVertexCode += "dp3 " + velocityTarget.toString() + ".x," + velocityTarget.toString() + "," + velocityTarget.toString() + "\n";
+				_AGALVertexCode += "sqt " + fragmentVelocity.toString() + "," + velocityTarget.toString() + ".x\n";
 			}
 			_AGALVertexCode += "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offestTarget.toString() + "\n";
 			_AGALVertexCode += "mov " + scaleAndRotateTarget.regName +scaleAndRotateTarget.index.toString() + ".w," + OneConst.toString() + "\n";

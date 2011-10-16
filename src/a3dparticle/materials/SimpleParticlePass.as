@@ -67,6 +67,8 @@ package a3dparticle.materials
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.TwoConst.index, Vector.<Number>([ 2, 2, 2, 2 ]));
 				
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.fragmentPiConst.index, Vector.<Number>([ Math.PI * 2, Math.PI * 2, Math.PI * 2, Math.PI * 2 ]));
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.fragmentOneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
+				
 				if (_texture) 
 				{
 					_numUsedTextures = 1;
