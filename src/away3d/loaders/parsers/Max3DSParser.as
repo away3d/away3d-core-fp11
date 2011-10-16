@@ -266,6 +266,10 @@ package away3d.loaders.parsers
 					case 0xA204: // Specular map
 						mat.specularMap = parseTexture(end);
 						break;
+					
+					default:
+						_byteData.position = end;
+						break;
 				}
 			}
 			
