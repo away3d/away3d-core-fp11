@@ -215,17 +215,12 @@ package away3d.loaders.parsers
 							_animationInfo = parseAnimationInfo();
 							
 							parseSceneGraph(_root, _rootContainer);
-							
-							//if (_flipFaces)
-							//	_rootContainer.scaleZ = -_rootContainer.scaleZ;
 						}
 					}
 					_parseState = isAnimated ? DAEParserState.PARSE_ANIMATIONS : DAEParserState.PARSE_COMPLETE;
 					break;
 				
 				case DAEParserState.PARSE_ANIMATIONS:
-					//_libAnimations = parseLibrary(_doc._ns::library_animations._ns::animation, DAEAnimation);
-					
 					_parseState = DAEParserState.PARSE_COMPLETE;
 					break;
 				
@@ -320,14 +315,12 @@ package away3d.loaders.parsers
 			var i:int, j:int, k:int;
 			var bindShapeMatrix : Matrix3D;
 
-			
 			if (instance_controller) {
 				controller = _libControllers[instance_controller.url];	
 				if (controller.skin) {
 					skin = controller.skin;
 					skeleton = parseSkeleton(instance_controller);
-					bindShapeMatrix = skin.bind_shape_matrix.clone();
-					convertMatrix(bindShapeMatrix);
+					bindShapeMatrix = skin.bind_shape_matrix;
 					if (_libControllers[skin.source]) {
 						controller = _libControllers[skin.source];
 					}
@@ -359,7 +352,7 @@ package away3d.loaders.parsers
 							vec.x = v.x;
 							vec.y = v.y;
 							vec.z = v.z;
-							vec = skin.bind_shape_matrix.transformVector(vec);
+							vec = bindShapeMatrix.transformVector(vec);
 							v.x = vec.x;
 							v.y = vec.y;
 							v.z = vec.z;
@@ -453,10 +446,8 @@ package away3d.loaders.parsers
 						var pose : JointPose = new JointPose();
 						var matrix : Matrix3D;
 						
-						matrix = node.getAnimatedMatrix(t).clone() || node.matrix.clone();
+						matrix = node.getAnimatedMatrix(t) || node.matrix;
 						
-						convertMatrix(matrix);
-
 						pose.name = skin.joints[j];
 						pose.orientation.fromMatrix(matrix);
 						pose.translation.copyFrom(matrix.position);
@@ -564,7 +555,6 @@ package away3d.loaders.parsers
 			} 
 
 			o.transform.rawData = node.matrix.rawData;
-			convertMatrix(o.transform);
 			o.name = node.id;
 			
 			for (i = 0; i < node.nodes.length; i++) {
@@ -608,8 +598,7 @@ package away3d.loaders.parsers
 			joint.parentIndex = parent;
 			joint.name = skin.joints[jointIndex];
 			
-			ibm = skin.inv_bind_matrix[jointIndex].clone();
-			convertMatrix(ibm);
+			ibm = skin.inv_bind_matrix[jointIndex];
 			
 			joint.inverseBindPose = ibm.rawData;
 			
@@ -731,6 +720,8 @@ class DAEAnimationInfo
 
 class DAEElement
 {
+	public static var USE_LEFT_HANDED : Boolean = true;
+	
 	public var id : String;
 	public var name : String;
 	public var sid : String;
@@ -754,6 +745,17 @@ class DAEElement
 	public function dispose() : void
 	{
 		
+	}
+	
+	protected function convertMatrix(matrix : Matrix3D) : void
+	{
+		var indices : Vector.<int> = Vector.<int>([2, 6, 8, 9, 11, 14]);
+		var raw : Vector.<Number> = matrix.rawData;
+		var i : int;
+		for (i = 0; i < indices.length; i++) {
+			raw[indices[i]] *= -1.0;
+		}
+		matrix.rawData = raw;
 	}
 	
 	protected function getRootElement(element : XML) : XML
@@ -1122,7 +1124,11 @@ class DAEPrimitive extends DAEElement
 						case "VERTEX":
 							vertex.x = source.floats[idx32+0];
 							vertex.y = source.floats[idx32+1];
-							vertex.z = -source.floats[idx32+2];
+							if (DAEElement.USE_LEFT_HANDED) {
+								vertex.z = -source.floats[idx32+2];
+							} else {
+								vertex.z = source.floats[idx32+2];
+							}
 							vertex.daeIndex = index;
 							break;
 						case "NORMAL":
@@ -2165,6 +2171,10 @@ class DAENode extends DAEElement
 			}
 		}
 		
+		if (DAEElement.USE_LEFT_HANDED) {
+			convertMatrix(matrix);
+		}
+		
 		return matrix;
 	}
 	
@@ -2174,6 +2184,10 @@ class DAENode extends DAEElement
 		
 		for (var i:int = 0; i < this.transforms.length; i++) {
 			matrix.prepend(this.transforms[i].matrix);
+		}
+		
+		if (DAEElement.USE_LEFT_HANDED) {
+			convertMatrix(matrix);
 		}
 		
 		return matrix;
@@ -2432,7 +2446,9 @@ class DAESkin extends DAEEffect
 		
 		this.bind_shape_matrix = new Matrix3D(values);
 		this.bind_shape_matrix.transpose();
-		//this.bind_shape_matrix = getLeftHandedMatrix(this.bind_shape_matrix);
+		if (DAEElement.USE_LEFT_HANDED) {
+			convertMatrix(this.bind_shape_matrix);
+		}
 	}
 	
 	private function parseJoints(element : XML, sources : Object) : void
@@ -2455,7 +2471,9 @@ class DAESkin extends DAEEffect
 					for (j = 0; j < source.floats.length; j += source.accessor.stride) {
 						var matrix:Matrix3D = new Matrix3D(source.floats.slice(j, j+source.accessor.stride));
 						matrix.transpose();
-						//matrix = getLeftHandedMatrix(matrix);
+						if (DAEElement.USE_LEFT_HANDED) {
+							convertMatrix(matrix);
+						}
 						inv_bind_matrix.push(matrix);
 					}
 					break;
