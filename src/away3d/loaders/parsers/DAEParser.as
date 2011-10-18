@@ -25,6 +25,7 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.primitives.Sphere;
 	
 	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
@@ -48,8 +49,7 @@ package away3d.loaders.parsers
 		private var _dependencyCount : uint = 0;
 		
 		private var _useGPU : Boolean;
-		private var _flipFaces : Boolean;
-		
+
 		private var _libImages : Object;
 		private var _libMaterials : Object;
 		private var _libEffects : Object;
@@ -73,13 +73,11 @@ package away3d.loaders.parsers
 		/**
 		 * Constructor
 		 * 
-		 * @param	useGPU
-		 * @param	flipFaces
+		 * @param	useGPU	Whether to use GPU for skinning
 		 */ 
-		public function DAEParser(useGPU : Boolean = true, flipFaces : Boolean = true)
+		public function DAEParser(useGPU : Boolean = true)
 		{
 			_useGPU = useGPU;
-			_flipFaces = flipFaces;
 			
  			super(ParserDataFormat.PLAIN_TEXT);
 		}
@@ -218,8 +216,8 @@ package away3d.loaders.parsers
 							
 							parseSceneGraph(_root, _rootContainer);
 							
-							if (_flipFaces)
-								_rootContainer.scaleX = -_rootContainer.scaleX;
+							//if (_flipFaces)
+							//	_rootContainer.scaleZ = -_rootContainer.scaleZ;
 						}
 					}
 					_parseState = isAnimated ? DAEParserState.PARSE_ANIMATIONS : DAEParserState.PARSE_COMPLETE;
@@ -292,7 +290,6 @@ package away3d.loaders.parsers
 		{
 			var info : DAEAnimationInfo = new DAEAnimationInfo();
 			
-			info.channelsByNode = new Dictionary();
 			info.minTime = Number.MAX_VALUE;
 			info.maxTime = -info.minTime;
 			info.numFrames = 0;
@@ -301,14 +298,7 @@ package away3d.loaders.parsers
 				for each (var channel:DAEChannel in animation.channels) {
 					var node : DAENode = _root.findNodeById(channel.targetId);
 					if (node) {
-						if (!info.channelsByNode[node])
-							info.channelsByNode[node] = new Vector.<DAEChannel>();
-						var channels:Vector.<DAEChannel> = info.channelsByNode[node] as Vector.<DAEChannel>;
-						
 						node.channels.push(channel);
-						
-						channels.push(channel);
-						
 						info.minTime = Math.min(info.minTime, channel.sampler.minTime);
 						info.maxTime = Math.max(info.maxTime, channel.sampler.maxTime);
 						info.numFrames = Math.max(info.numFrames, channel.sampler.input.length);
@@ -320,8 +310,7 @@ package away3d.loaders.parsers
 		}
 		
 		private function parseGeometry(mesh : DAEMesh, m : Mesh, 
-									   instance_controller : DAEInstanceController = null, 
-									   flipFaces : Boolean = true) : void
+									   instance_controller : DAEInstanceController = null) : void
 		{
 			var controller:DAEController = null;
 			var skin:DAESkin = null;
@@ -329,12 +318,16 @@ package away3d.loaders.parsers
 			var skeleton:Skeleton;
 			var sequence:SkeletonAnimationSequence;
 			var i:int, j:int, k:int;
+			var bindShapeMatrix : Matrix3D;
+
 			
 			if (instance_controller) {
 				controller = _libControllers[instance_controller.url];	
 				if (controller.skin) {
 					skin = controller.skin;
 					skeleton = parseSkeleton(instance_controller);
+					bindShapeMatrix = skin.bind_shape_matrix.clone();
+					convertMatrix(bindShapeMatrix);
 					if (_libControllers[skin.source]) {
 						controller = _libControllers[skin.source];
 					}
@@ -354,6 +347,7 @@ package away3d.loaders.parsers
 					var sub:SubGeometry = new SubGeometry();
 					var indexData:Vector.<uint> = new Vector.<uint>();
 					var vertexData:Vector.<Number> = new Vector.<Number>();
+					var normalData:Vector.<Number> = new Vector.<Number>();
 					var uvData:Vector.<Number> = new Vector.<Number>();
 					var uvData2:Vector.<Number> = new Vector.<Number>();
 					var v:DAEVertex;
@@ -371,6 +365,7 @@ package away3d.loaders.parsers
 							v.z = vec.z;
 						}
 						vertexData.push(v.x, v.y, v.z);
+						normalData.push(v.nx, v.ny, v.nz);
 						if (v.numTexcoordSets > 0) {
 							uvData.push(v.uvx, 1.0 - v.uvy);
 							if (v.numTexcoordSets > 1)
@@ -388,6 +383,7 @@ package away3d.loaders.parsers
 					
 					sub.autoDeriveVertexNormals = true;
 					sub.autoDeriveVertexTangents = true;
+					sub.updateVertexNormalData(normalData);
 					sub.updateVertexData(vertexData);
 					if (vertexData.length == uvData.length*(3/2)) {
 						sub.updateUVData(uvData);
@@ -400,8 +396,7 @@ package away3d.loaders.parsers
 						}
 						sub.updateUVData(uvData);
 					}
-					if (flipFaces)
-						indexData.reverse();
+					indexData.reverse();
 					sub.updateIndexData(indexData);
 					
 					if (skin && skeleton) {
@@ -458,12 +453,14 @@ package away3d.loaders.parsers
 						var pose : JointPose = new JointPose();
 						var matrix : Matrix3D;
 						
-						matrix = node.getAnimatedMatrix(t) || node.matrix;
+						matrix = node.getAnimatedMatrix(t).clone() || node.matrix.clone();
 						
+						convertMatrix(matrix);
+
 						pose.name = skin.joints[j];
 						pose.orientation.fromMatrix(matrix);
 						pose.translation.copyFrom(matrix.position);
-						
+
 						if (isNaN(pose.orientation.x)) {
 							pose.orientation.fromMatrix(new Matrix3D());
 						}
@@ -556,7 +553,7 @@ package away3d.loaders.parsers
 							}
 						}
 					}
-					parseGeometry(geom.mesh, mesh, instance_controller, _flipFaces);
+					parseGeometry(geom.mesh, mesh, instance_controller);
 				}
 			}
 			
@@ -564,16 +561,15 @@ package away3d.loaders.parsers
 				for(j = 0; j < mesh.subMeshes.length; j++) {	
 					mesh.subMeshes[j].material = effects[j].material;
 				}
-			}
+			} 
 
-			o.transform = node.matrix;
+			o.transform.rawData = node.matrix.rawData;
+			convertMatrix(o.transform);
 			o.name = node.id;
 			
 			for (i = 0; i < node.nodes.length; i++) {
 				parseSceneGraph(node.nodes[i], o);
 			}
-			
-			//finalizeAsset(o, node.id);
 		}
 
 		private function parseSkeleton(instance_controller : DAEInstanceController) : Skeleton
@@ -611,9 +607,10 @@ package away3d.loaders.parsers
 			
 			joint.parentIndex = parent;
 			joint.name = skin.joints[jointIndex];
-
-			ibm = skin.inv_bind_matrix[jointIndex];
-
+			
+			ibm = skin.inv_bind_matrix[jointIndex].clone();
+			convertMatrix(ibm);
+			
 			joint.inverseBindPose = ibm.rawData;
 			
 			skeleton.joints[jointIndex] = joint;
@@ -682,6 +679,17 @@ package away3d.loaders.parsers
 			}
 		}
 		
+		public function convertMatrix(matrix : Matrix3D) : void
+		{
+			var indices : Vector.<int> = Vector.<int>([2, 6, 8, 9, 11, 14]);
+			var raw : Vector.<Number> = matrix.rawData;
+			var i : int;
+			for (i = 0; i < indices.length; i++) {
+				raw[indices[i]] *= -1.0;
+			}
+			matrix.rawData = raw;
+		}
+		
 		public function get geometries() : Object
 		{
 			return _libGeometries;
@@ -713,14 +721,12 @@ import away3d.loaders.parsers.DAEParser;
 
 import flash.geom.Matrix3D;
 import flash.geom.Vector3D;
-import flash.utils.Dictionary;
 
 class DAEAnimationInfo
 {
 	public var minTime : Number;
 	public var maxTime : Number;
 	public var numFrames : uint;
-	public var channelsByNode : Dictionary;
 }
 
 class DAEElement
@@ -743,6 +749,11 @@ class DAEElement
 		id = element.@id.toString();
 		name = element.@name.toString();
 		sid = element.@sid.toString();
+	}
+	
+	public function dispose() : void
+	{
+		
 	}
 	
 	protected function getRootElement(element : XML) : XML
@@ -1111,7 +1122,7 @@ class DAEPrimitive extends DAEElement
 						case "VERTEX":
 							vertex.x = source.floats[idx32+0];
 							vertex.y = source.floats[idx32+1];
-							vertex.z = source.floats[idx32+2];
+							vertex.z = -source.floats[idx32+2];
 							vertex.daeIndex = index;
 							break;
 						case "NORMAL":
@@ -1886,6 +1897,7 @@ class DAETransform extends DAEElement
 	public function get matrix() : Matrix3D
 	{
 		var matrix : Matrix3D = new Matrix3D();
+		//trace(this.type);
 		
 		switch (this.type) {
 			case "matrix":
@@ -2163,7 +2175,7 @@ class DAENode extends DAEElement
 		for (var i:int = 0; i < this.transforms.length; i++) {
 			matrix.prepend(this.transforms[i].matrix);
 		}
-
+		
 		return matrix;
 	}
 }
@@ -2420,6 +2432,7 @@ class DAESkin extends DAEEffect
 		
 		this.bind_shape_matrix = new Matrix3D(values);
 		this.bind_shape_matrix.transpose();
+		//this.bind_shape_matrix = getLeftHandedMatrix(this.bind_shape_matrix);
 	}
 	
 	private function parseJoints(element : XML, sources : Object) : void
@@ -2442,6 +2455,7 @@ class DAESkin extends DAEEffect
 					for (j = 0; j < source.floats.length; j += source.accessor.stride) {
 						var matrix:Matrix3D = new Matrix3D(source.floats.slice(j, j+source.accessor.stride));
 						matrix.transpose();
+						//matrix = getLeftHandedMatrix(matrix);
 						inv_bind_matrix.push(matrix);
 					}
 					break;
@@ -2782,6 +2796,46 @@ class DAEAnimation extends DAEElement
 				}
 			}
 		}
+	}
+}
+
+class DAELibrary extends DAEElement
+{
+	public function DAELibrary(element : XML = null) 
+	{
+		super(element);
+	}
+	
+	public override function deserialize(element:XML):void
+	{
+		super.deserialize(element);
+	}
+}
+
+class DAELibraryCameras extends DAELibrary
+{
+	
+}
+
+class DAEDocument extends DAEElement
+{
+	public static const LIBRARY_CAMERAS : uint = 0;
+	
+	public var library : Vector.<DAELibrary>;
+	
+	public function DAEDocument(element : XML = null) 
+	{
+		super(element);
+	}
+	
+	public override function deserialize(element:XML):void
+	{
+		super.deserialize(element);
+	}
+	
+	public override function dispose():void
+	{
+		super.dispose();
 	}
 }
 
