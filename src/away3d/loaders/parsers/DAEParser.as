@@ -668,17 +668,6 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		public function convertMatrix(matrix : Matrix3D) : void
-		{
-			var indices : Vector.<int> = Vector.<int>([2, 6, 8, 9, 11, 14]);
-			var raw : Vector.<Number> = matrix.rawData;
-			var i : int;
-			for (i = 0; i < indices.length; i++) {
-				raw[indices[i]] *= -1.0;
-			}
-			matrix.rawData = raw;
-		}
-		
 		public function get geometries() : Object
 		{
 			return _libGeometries;
@@ -745,6 +734,22 @@ class DAEElement
 	public function dispose() : void
 	{
 		
+	}
+	
+	protected function traverseChildHandler(child : XML, nodeName : String) : void 
+	{
+		
+	}
+	
+	protected function traverseChildren(element : XML, name : String = null) : void
+	{
+		var children : XMLList = name ? element.ns::[name] : element.children();
+		var count : int = children.length();
+		var i : int;
+		
+		for (i = 0; i < count; i++) {
+			traverseChildHandler(children[i], children[i].name().localName);
+		}
 	}
 	
 	protected function convertMatrix(matrix : Matrix3D) : void
@@ -894,10 +899,13 @@ class DAEAccessor extends DAEElement
 		this.stride = readIntAttr(element, "stride", 1);
 		this.count = readIntAttr(element, "count", 0);
 		
-		var list:XMLList = element.ns::param;
-		
-		for (var i:int = 0; i < list.length(); i++) {
-			this.params.push(new DAEParam(list[i]));			
+		traverseChildren(element, "param");
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		if (nodeName == "param") {
+			this.params.push(new DAEParam(child));
 		}
 	}
 }
@@ -923,35 +931,33 @@ class DAESource extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var list:XMLList = element.children();
-		
-		for (var i:int = 0; i < list.length(); i++) {
-			var child:XML = list[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "float_array":
-					this.type = name;
-					this.floats = readFloatArray(child);
-					break;
-				case "int_array":
-					this.type = name;
-					this.ints = readIntArray(child);
-					break;
-				case "bool_array":
-					throw new Error("Cannot handle bool_array");
-					break;
-				case "Name_array":
-				case "IDREF_array":
-					this.type = name;
-					this.strings = readStringArray(child);
-					break;
-				case "technique_common":
-					this.accessor = new DAEAccessor(child.ns::accessor[0]);
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "float_array":
+				this.type = nodeName;
+				this.floats = readFloatArray(child);
+				break;
+			case "int_array":
+				this.type = nodeName;
+				this.ints = readIntArray(child);
+				break;
+			case "bool_array":
+				throw new Error("Cannot handle bool_array");
+				break;
+			case "Name_array":
+			case "IDREF_array":
+				this.type = nodeName;
+				this.strings = readStringArray(child);
+				break;
+			case "technique_common":
+				this.accessor = new DAEAccessor(child.ns::accessor[0]);
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1234,14 +1240,14 @@ class DAEVertices extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var list:XMLList = element.ns::input;
-		var i:int;
-		
 		this.inputs = new Vector.<DAEInput>();
 		
-		for (i = 0; i < list.length(); i++) {
-			this.inputs.push(new DAEInput(list[i]));
-		}
+		traverseChildren(element, "input");
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		this.inputs.push(new DAEInput(child));
 	}
 }
 
@@ -1263,8 +1269,21 @@ class DAEGeometry extends DAEElement
 		
 		this.mesh = null;
 		
-		if (element.ns::mesh && element.ns::mesh.length()) {
-			this.mesh = new DAEMesh(this, element.ns::mesh[0]);
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "mesh":
+				this.mesh = new DAEMesh(this, child);
+				break;
+			case "convex_mesh":
+				break;
+			case "spline":
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1294,29 +1313,26 @@ class DAEMesh extends DAEElement
 		this.vertices = null;
 		this.primitives = new Vector.<DAEPrimitive>();
 		
-		var list:XMLList = element.children();
-		var i:int;
-		
-		for (i = 0; i < list.length(); i++) {
-			var child:XML = list[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "source":
-					var source:DAESource = new DAESource(child);
-					this.sources[source.id] = source;
-					break;
-				case "vertices":
-					this.vertices = new DAEVertices(this, child);
-					break;
-				case "triangles":
-				case "polylist":
-				case "polygon":
-					this.primitives.push(new DAEPrimitive(child));
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "source":
+				var source:DAESource = new DAESource(child);
+				this.sources[source.id] = source;
+				break;
+			case "vertices":
+				this.vertices = new DAEVertices(this, child);
+				break;
+			case "triangles":
+			case "polylist":
+			case "polygon":
+				this.primitives.push(new DAEPrimitive(child));
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1339,22 +1355,19 @@ class DAEBindMaterial extends DAEElement
 		
 		this.instance_material = new Vector.<DAEInstanceMaterial>();
 		
-		var children:XMLList = element.children();
-		var i:int, j:int;
-		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "technique_common":
-					for (j = 0; j < child.children().length(); j++) {
-						this.instance_material.push(new DAEInstanceMaterial(child.children()[j]));
-					}
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "technique_common":
+				for (var j:int = 0; j < child.children().length(); j++) {
+					this.instance_material.push(new DAEInstanceMaterial(child.children()[j]));
+				}
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1428,23 +1441,20 @@ class DAEInstanceController extends DAEInstance
 		this.bind_material = null;
 		this.skeleton = new Vector.<String>();
 		
-		var children:XMLList = element.children();
-		var i:int;
-		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "skeleton":
-					this.skeleton.push(readText(child).replace(/^#/, ""));
-					break;
-				case "bind_material":
-					this.bind_material = new DAEBindMaterial(child);
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "skeleton":
+				this.skeleton.push(readText(child).replace(/^#/, ""));
+				break;
+			case "bind_material":
+				this.bind_material = new DAEBindMaterial(child);
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1475,20 +1485,17 @@ class DAEInstanceGeometry extends DAEInstance
 		
 		this.bind_material = null;
 		
-		var children:XMLList = element.children();
-		var i:int;
-		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "bind_material":
-					this.bind_material = new DAEBindMaterial(child);
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "bind_material":
+				this.bind_material = new DAEBindMaterial(child);
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1515,20 +1522,17 @@ class DAEInstanceMaterial extends DAEInstance
 		this.symbol = element.@symbol.toString();
 		this.bind_vertex_input = new Vector.<DAEBindVertexInput>();
 		
-		var list : XMLList = element.children();
-		var i : int;
-		
-		for (i = 0; i < list.length(); i++) {
-			var child : XML = list[i];
-			var name : String = child.name().localName;
-			
-			switch (name) {
-				case "bind_vertex_input":
-					this.bind_vertex_input.push(new DAEBindVertexInput(child));
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "bind_vertex_input":
+				this.bind_vertex_input.push(new DAEBindVertexInput(child));
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1604,33 +1608,30 @@ class DAEColorOrTexture extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var children:XMLList = element.children();
-		var i:int;
-		
 		this.color = null;
 		this.texture = null;
 		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "color":
-					var values:Vector.<Number> = readFloatArray(child);
-					this.color = new DAEColor();
-					this.color.r = values[0];
-					this.color.g = values[1];
-					this.color.b = values[2];
-					this.color.a = values.length > 3 ? values[3] : 1.0;
-					break;
-				case "texture":
-					this.texture = new DAETexture();
-					this.texture.texcoord = child.@texcoord.toString();
-					this.texture.texture = child.@texture.toString();
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "color":
+				var values:Vector.<Number> = readFloatArray(child);
+				this.color = new DAEColor();
+				this.color.r = values[0];
+				this.color.g = values[1];
+				this.color.b = values[2];
+				this.color.a = values.length > 3 ? values[3] : 1.0;
+				break;
+			case "texture":
+				this.texture = new DAETexture();
+				this.texture.texcoord = child.@texcoord.toString();
+				this.texture.texture = child.@texture.toString();
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1697,32 +1698,29 @@ class DAEShader extends DAEElement
 		this.type = element.name().localName;
 		this.props = new Object();
 		
-		var children:XMLList = element.children();
-		var i:int;
-		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "ambient":
-				case "diffuse":
-				case "specular":
-				case "emission":
-				case "transparent":
-				case "reflective":
-					this.props[name] = new DAEColorOrTexture(child);
-					break;
-				case "shininess":
-				case "reflectivity":
-				case "transparency":
-				case "index_of_refraction":
-					this.props[name] = parseFloat(readText(child.ns::float[0]));
-					break;
-				default:
-					trace("[WARNING] unhandled DAEShader property: " + name);
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "ambient":
+			case "diffuse":
+			case "specular":
+			case "emission":
+			case "transparent":
+			case "reflective":
+				this.props[nodeName] = new DAEColorOrTexture(child);
+				break;
+			case "shininess":
+			case "reflectivity":
+			case "transparency":
+			case "index_of_refraction":
+				this.props[nodeName] = parseFloat(readText(child.ns::float[0]));
+				break;
+			default:
+				trace("[WARNING] unhandled DAEShader property: " + nodeName);
+				break;
 		}
 	}
 }
@@ -1746,26 +1744,23 @@ class DAEEffect extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var children:XMLList = element.children();
-		var i:int;
-		
 		this.shader = null;
 		this.surface = null;
 		this.sampler = null;
 		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "profile_COMMON":
-					deserializeProfile(child);
-					break;
-				case "extra":
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "profile_COMMON":
+				deserializeProfile(child);
+				break;
+			case "extra":
+				break;
+			default:
+				break;
 		}
 	}
 	
@@ -1859,22 +1854,19 @@ class DAEMaterial extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var children:XMLList = element.children();
-		var i:int;
-		
 		this.instance_effect = null;
 		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "instance_effect":
-					this.instance_effect = new DAEInstanceEffect(child);
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "instance_effect":
+				this.instance_effect = new DAEInstanceEffect(child);
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -1942,6 +1934,8 @@ class DAENode extends DAEElement
 	public var world : Matrix3D;
 	public var channels : Vector.<DAEChannel>;
 	
+	private var _root : XML;
+	
 	public function DAENode(parser : DAEParser, element : XML = null, parent : DAENode = null)
 	{
 		this.parser = parser;
@@ -1958,11 +1952,7 @@ class DAENode extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var root : XML = getRootElement(element);
-		var instances : XMLList;
-		var instance : DAEInstance;
-		var children:XMLList = element.children();
-		var i:int;
+		_root = getRootElement(element);
 		
 		this.type = element.@type.toString().length ? element.@type.toString() : "NODE";
 		this.nodes = new Vector.<DAENode>();
@@ -1971,47 +1961,50 @@ class DAENode extends DAEElement
 		this.instance_controllers = new Vector.<DAEInstanceController>();
 		this.instance_geometries = new Vector.<DAEInstanceGeometry>();
 		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "node":
-					this.nodes.push(new DAENode(this.parser, child, this));
-					break;
-				case "instance_camera":
-					this.instance_cameras.push(new DAEInstanceCamera(child));
-					break;
-				case "instance_controller":
-					instance = new DAEInstanceController(child);
-					this.instance_controllers.push(instance);
-					break;
-				case "instance_geometry":
-					this.instance_geometries.push(new DAEInstanceGeometry(child));
-					break;
-				case "instance_light":
-					break;
-				case "instance_node":
-					instance = new DAEInstanceNode(child);
-					instances = root.ns::library_nodes.ns::node.(@id == instance.url);
-					if (instances.length())
-						this.nodes.push(new DAENode(this.parser, instances[0], this));
-					break;
-				case "matrix":
-				case "translate":
-				case "scale":
-				case "rotate":
-					this.transforms.push(new DAETransform(child));
-					break;
-				case "lookat":
-				case "skew":
-					break;
-				case "extra":
-					break;
-				default:
-					trace(name);
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		var instances : XMLList;
+		var instance : DAEInstance;
+		
+		switch (nodeName) {
+			case "node":
+				this.nodes.push(new DAENode(this.parser, child, this));
+				break;
+			case "instance_camera":
+				this.instance_cameras.push(new DAEInstanceCamera(child));
+				break;
+			case "instance_controller":
+				instance = new DAEInstanceController(child);
+				this.instance_controllers.push(instance);
+				break;
+			case "instance_geometry":
+				this.instance_geometries.push(new DAEInstanceGeometry(child));
+				break;
+			case "instance_light":
+				break;
+			case "instance_node":
+				instance = new DAEInstanceNode(child);
+				instances = _root.ns::library_nodes.ns::node.(@id == instance.url);
+				if (instances.length())
+					this.nodes.push(new DAENode(this.parser, instances[0], this));
+				break;
+			case "matrix":
+			case "translate":
+			case "scale":
+			case "rotate":
+				this.transforms.push(new DAETransform(child));
+				break;
+			case "lookat":
+			case "skew":
+				break;
+			case "extra":
+				break;
+			default:
+				trace(nodeName);
+				break;
 		}
 	}
 	
@@ -2063,14 +2056,7 @@ class DAENode extends DAEElement
 				
 				channel = channelsBySID[transform.sid] as DAEChannel;
 				frameData = channel.sampler.getFrameData(time);
-				/*
-				for (frame = 0; frame < channel.sampler.input.length; frame++) {
-					if (channel.sampler.input[frame] >= time) {
-						found = true;
-						break;
-					}
-				}
-				*/
+
 				if (frameData) {
 					odata = frameData.data;
 	
@@ -2285,26 +2271,23 @@ class DAEScene extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var children:XMLList = element.children();
-		var i:int;
-		
 		this.instance_visual_scene = null;
 		this.instance_physics_scene = null;
 		
-		for (i = 0; i < children.length(); i++) {
-			var child:XML = children[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "instance_visual_scene":
-					this.instance_visual_scene = new DAEInstanceVisualScene(child);
-					break;
-				case "instance_physics_scene":
-					this.instance_physics_scene = new DAEInstancePhysicsScene(child);
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "instance_visual_scene":
+				this.instance_visual_scene = new DAEInstanceVisualScene(child);
+				break;
+			case "instance_physics_scene":
+				this.instance_physics_scene = new DAEInstancePhysicsScene(child);
+				break;
+			default:
+				break;
 		}
 	}
 }
@@ -2763,6 +2746,7 @@ class DAEAnimation extends DAEElement
 {
 	public var samplers:Vector.<DAESampler>;
 	public var channels:Vector.<DAEChannel>;
+	public var sources : Object;
 	
 	public function DAEAnimation(element : XML = null)
 	{
@@ -2773,34 +2757,31 @@ class DAEAnimation extends DAEElement
 	{
 		super.deserialize(element);
 		
-		var list:XMLList = element.children();
-		var sources:Object = new Object();
-		var i:int;
-		
 		this.samplers = new Vector.<DAESampler>();
 		this.channels = new Vector.<DAEChannel>();
+		this.sources = new Object();
 		
-		for (i = 0; i < list.length(); i++) {
-			var child:XML = list[i];
-			var name:String = child.name().localName;
-			
-			switch (name) {
-				case "source":
-					var source:DAESource = new DAESource(child);
-					sources[source.id] = source;
-					break;
-				case "sampler":
-					this.samplers.push(new DAESampler(child));
-					break;
-				case "channel":
-					this.channels.push(new DAEChannel(child));
-					break;
-				default:
-					break;
-			}
+		traverseChildren(element);
+
+		setupChannels(this.sources);
+	}
+	
+	protected override function traverseChildHandler(child:XML, nodeName:String):void
+	{
+		switch (nodeName) {
+			case "source":
+				var source:DAESource = new DAESource(child);
+				this.sources[source.id] = source;
+				break;
+			case "sampler":
+				this.samplers.push(new DAESampler(child));
+				break;
+			case "channel":
+				this.channels.push(new DAEChannel(child));
+				break;
+			default:
+				break;
 		}
-		
-		setupChannels(sources);
 	}
 	
 	private function setupChannels(sources:Object) : void
@@ -2814,46 +2795,6 @@ class DAEAnimation extends DAEElement
 				}
 			}
 		}
-	}
-}
-
-class DAELibrary extends DAEElement
-{
-	public function DAELibrary(element : XML = null) 
-	{
-		super(element);
-	}
-	
-	public override function deserialize(element:XML):void
-	{
-		super.deserialize(element);
-	}
-}
-
-class DAELibraryCameras extends DAELibrary
-{
-	
-}
-
-class DAEDocument extends DAEElement
-{
-	public static const LIBRARY_CAMERAS : uint = 0;
-	
-	public var library : Vector.<DAELibrary>;
-	
-	public function DAEDocument(element : XML = null) 
-	{
-		super(element);
-	}
-	
-	public override function deserialize(element:XML):void
-	{
-		super.deserialize(element);
-	}
-	
-	public override function dispose():void
-	{
-		super.dispose();
 	}
 }
 
