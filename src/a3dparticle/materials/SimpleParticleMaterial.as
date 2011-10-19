@@ -21,9 +21,9 @@ package a3dparticle.materials
 		public function SimpleParticleMaterial(bitmapData:BitmapData=null) 
 		{
 			super();
-			bothSides = true;
 			addPass(_screenPass = new SimpleParticlePass(bitmapData));
 			_screenPass.material = this;
+			bothSides = true;
 		}
 		
 		/**
