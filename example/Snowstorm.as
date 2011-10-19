@@ -1,11 +1,10 @@
 package 
 {
-	import a3dparticle.animators.actions.AccelerateAction;
-	import a3dparticle.animators.actions.DriftAction;
-	import a3dparticle.animators.actions.OffestDistanceAction;
-	import a3dparticle.animators.actions.PerParticleAction;
-	import a3dparticle.animators.actions.ScaleByTimeAction;
-	import a3dparticle.animators.actions.VelocityAction;
+	import a3dparticle.animators.actions.acceleration.AccelerateGlobal;
+	import a3dparticle.animators.actions.drift.DriftLocal;
+	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.scale.ScaleByTimeGlobal;
+	import a3dparticle.animators.actions.velocity.VelocityLocal;
 	import a3dparticle.materials.SimpleParticleMaterial;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
@@ -71,20 +70,20 @@ package
 			particle.endTimeFun = function(index:uint):Number { return Math.random() * 2; };
 			particle.loop = true;
 			
-			var action:PerParticleAction = new VelocityAction(function(index:uint):Vector3D { return new Vector3D(Math.random()*1000-500,Math.random()*1000-500,Math.random()*1000-500); } );
-			particle.addPerParticleAction(action);
+			var action:VelocityLocal = new VelocityLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*1000-500,Math.random()*1000-500,Math.random()*1000-500); } );
+			particle.addAction(action);
 			
-			var action2:AccelerateAction = new AccelerateAction(new Vector3D(Math.random() * 20 - 10, -50, Math.random() * 20 - 10));
-			particle.addAllParticleAction(action2);
+			var action2:AccelerateGlobal = new AccelerateGlobal(new Vector3D(10, -50, 10));
+			particle.addAction(action2);
 			
-			var action3:PerParticleAction = new DriftAction(function(index:uint):Vector3D { return new Vector3D(100,100, 200, 2); } );
-			particle.addPerParticleAction(action3);
+			var action3:DriftLocal = new DriftLocal(function(index:uint):Vector3D { return new Vector3D(100,100, 200, 2); } );
+			particle.addAction(action3);
 			
-			var action4:ScaleByTimeAction = new ScaleByTimeAction(1,2,2);
-			particle.addAllParticleAction(action4);
+			var action4:ScaleByTimeGlobal = new ScaleByTimeGlobal(1,2,2);
+			particle.addAction(action4);
 			
-			var action5:OffestDistanceAction = new OffestDistanceAction(function(index:uint):Vector3D { return new Vector3D(Math.random()*500-250,Math.random()*500,Math.random()*500-250);} );
-			particle.addPerParticleAction(action5);
+			var action5:OffestPositionLocal = new OffestPositionLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*500-250,Math.random()*500,Math.random()*500-250);} );
+			particle.addAction(action5);
 			
 			particle.generate(sphere.geometry.subGeometries[0]);
 			particle.start();

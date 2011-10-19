@@ -1,10 +1,6 @@
 package 
 {
-	import a3dparticle.animators.actions.AccelerateAction;
-	import a3dparticle.animators.actions.ChangeColorByLifeAction;
-	import a3dparticle.animators.actions.OffestDistanceAction;
-	import a3dparticle.animators.actions.PerParticleAction;
-	import a3dparticle.animators.actions.VelocityAction;
+	import a3dparticle.animators.actions.velocity.VelocityLocal;
 	import a3dparticle.materials.SimpleParticleMaterial;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
@@ -16,7 +12,6 @@ package
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
-	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
 	
 	/**
@@ -71,8 +66,8 @@ package
 			particle.endTimeFun = function(index:uint):Number { return Math.random() * 2; };
 			particle.loop = true;
 			
-			var action:PerParticleAction = new VelocityAction(function(index:uint):Vector3D { return new Vector3D(Math.random()*100-50,Math.random()*20+150,Math.random()*100-50); } );
-			particle.addPerParticleAction(action);
+			var action:VelocityLocal = new VelocityLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*100-50,Math.random()*20+150,Math.random()*100-50); } );
+			particle.addAction(action);
 			
 			particle.generate(sphere.geometry.subGeometries[0]);
 			particle.start();
