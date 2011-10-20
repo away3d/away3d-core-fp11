@@ -2,6 +2,7 @@ package away3d.loaders.parsers
 {
 	import away3d.animators.AnimatorBase;
 	import away3d.animators.SmoothSkeletonAnimator;
+	import away3d.animators.VertexAnimator;
 	import away3d.animators.data.AnimationSequenceBase;
 	import away3d.animators.data.SkeletonAnimation;
 	import away3d.animators.data.SkeletonAnimationSequence;
@@ -31,8 +32,10 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.primitives.Sphere;
+	import away3d.tools.utils.TextureUtils;
 	
 	import flash.display.BitmapData;
+	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
@@ -44,7 +47,12 @@ package away3d.loaders.parsers
 	 */
 	public class DAEParser extends ParserBase
 	{	
+		/** Whether to use GPU skinning. */
 		public static const CONFIG_USE_GPU 		: uint = 1;
+		/** Whether to fix images with invalid size */
+		public static const CONFIG_FIX_IMAGES	: uint = 2;
+		/** Default configuration is CONFIG_USE_GPU */
+		public static const CONFIG_DEFAULT		: uint = CONFIG_USE_GPU;
 		
 		public static const PARSE_GEOMETRIES 	: uint = 1;
 		public static const PARSE_IMAGES		: uint = 2;
@@ -93,12 +101,12 @@ package away3d.loaders.parsers
 		/**
 		 * Constructor
 		 * 
-		 * @param	useGPU	Whether to use GPU for skinning
+		 * @param	configFlags	Bitfield to configure the parser. @see DAEParser.CONFIG_USE_GPU etc.
 		 */ 
-		public function DAEParser(configFlags : uint = 0, parseFlags : uint = 0)
+		public function DAEParser(configFlags : uint = 0)
 		{
-			_configFlags = configFlags > 0 ? configFlags : CONFIG_USE_GPU;
-			_parseFlags = parseFlags > 0 ? parseFlags : PARSE_DEFAULT;
+			_configFlags = configFlags > 0 ? configFlags : CONFIG_DEFAULT;
+			_parseFlags = PARSE_DEFAULT;
 			
  			super(ParserDataFormat.PLAIN_TEXT);
 		}
@@ -163,8 +171,18 @@ package away3d.loaders.parsers
 				
 				if (image) {
 					image.resource = resource;
-					if (!isBitmapDataValid(resource.bitmapData)) {
-						// TODO: handle odd-sized bitmaps
+					if (!isBitmapDataValid(resource.bitmapData) && (_configFlags & CONFIG_FIX_IMAGES)) {
+						// TODO: let Away3D take care of this elsewhere 
+						var w : int = TextureUtils.getBestPowerOf2(resource.bitmapData.width);
+						var h : int = TextureUtils.getBestPowerOf2(resource.bitmapData.height);
+
+						var m : Matrix = new Matrix(w / resource.bitmapData.width, 0, 0, h / resource.bitmapData.height);
+						var original : BitmapData = resource.bitmapData.clone();
+						
+						resource.bitmapData = new BitmapData(w, h, original.transparent);
+						resource.bitmapData.draw(original, m);
+						
+						original.dispose();
 					}
 				}
 			}
@@ -362,42 +380,6 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		private function findControllerGeometry(node : DAENode) : DAEInstanceGeometry
-		{
-			var instance_geometry : DAEInstanceGeometry = new DAEInstanceGeometry();
-			
-			for (var i:int = 0; i < node.instance_controllers.length; i++) {
-				var instance_controller : DAEInstanceController = node.instance_controllers[i];
-				var controller : DAEController = _libControllers[instance_controller.url];
-				
-				instance_geometry.bind_material = instance_controller.bind_material;
-				
-				while (controller) {
-					var source:String = controller.skin ? 
-						controller.skin.source : 
-						(controller.morph ? controller.morph.source : "");
-					
-					if (_libGeometries[source]) {
-						instance_geometry.url = source;
-						return instance_geometry;
-					}
-					controller = _libControllers[source];
-				}
-			}
-			return null;
-		}
-		
-		private function hasGeometry(node : DAENode) : Boolean
-		{
-			if (node.instance_geometries.length > 0)
-				return true;
-			
-			if (findControllerGeometry(node) != null)
-				return true;
-			
-			return false;
-		}
-		
 		private function parseAnimationInfo() : DAEAnimationInfo
 		{
 			var info : DAEAnimationInfo = new DAEAnimationInfo();
@@ -422,54 +404,6 @@ package away3d.loaders.parsers
 		}
 		
 		/**
-		 * 
-		 */
-		private function parseCamera(node : DAENode, instance_camera : DAEInstanceCamera) : Camera3D {
-			var cam : DAECamera;
-			var perspective : DAEPerspective;
-			var orthographic : DAEOrthographic;
-			var camera : Camera3D;
-			var lens : LensBase;
-			
-			if (!_libCameras.hasOwnProperty(instance_camera.url))
-				return null;
-			
-			cam = _libCameras[instance_camera.url] as DAECamera;
-			if (cam.optics.orthographic) {
-				trace ("orthographic cameras not supported yet");
-				return null;
-			} else if (cam.optics.perspective) {
-				perspective = cam.optics.perspective;
-				if (!isNaN(perspective.yfov)) {
-					lens = new PerspectiveLens(cam.optics.perspective.yfov);
-				} else {
-					trace ("unhandled camera instance");
-					return null;
-				}
-			} else {
-				return null;
-			}
-			
-			camera = new Camera3D(lens);
-			camera.name = "daeCamera_" + node.id;
-			return camera;
-		}
-		
-		private function parseCameras(container : ObjectContainer3D, node : DAENode) : void
-		{
-			if (!node.instance_cameras || node.instance_cameras.length == 0)
-				return;
-			
-			for (var i:int = 0; i < node.instance_cameras.length; i++) {
-				var camera : Camera3D = parseCamera(node, node.instance_cameras[i]);
-				if (camera) {
-					container.addChild(camera);
-					finalizeAsset(camera);
-				}
-			}
-		}
-		
-		/**
 		 * Parses a COLLADA library element.
 		 * 
 		 * @param	list
@@ -490,57 +424,6 @@ package away3d.loaders.parsers
 		/**
 		 * 
 		 */ 
-		private function parseLight(node : DAENode, instance : DAEInstanceLight) : LightBase
-		{
-			if (!_libLights.hasOwnProperty(instance.url))
-				return null;
-			
-			var daeLight : DAELight = _libLights[instance.url] as DAELight;
-			var light : LightBase;
-			var directional : DirectionalLight;
-			var point : PointLight;
-			
-			if (daeLight.light is DAEAmbient) {
-				trace ("[WARNING] DAEParser: ambient lights not supported");
-			} else if (daeLight.light is DAEDirectional) {
-				 light = directional = new DirectionalLight();
-
-			} else if (daeLight.light is DAEPoint) {
-				 light = point = new PointLight();
-				
-				
-			} else if (daeLight.light is DAESpot) {
-				trace ("[WARNING] DAEParser: spot lights not supported");
-			}
-			
-			if (light is LightBase) {
-				light.name = "daeLight_" + node.id;
-				light.transform.rawData = node.matrix.rawData;
-			}
-			
-			return light;
-		}
-		
-		/**
-		 * 
-		 */ 
-		private function parseLights(container : ObjectContainer3D, node : DAENode) : void
-		{
-			if (!node.instance_lights || node.instance_lights.length == 0)
-				return;
-			
-			for (var i:int = 0; i < node.instance_lights.length; i++) {
-				var light : LightBase = parseLight(node, node.instance_lights[i]);
-				if (light) {
-					container.addChild(light);
-					finalizeAsset(light);
-				}
-			}
-		}
-		
-		/**
-		 * 
-		 */ 
 		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D = null):void
 		{
 			var container : ObjectContainer3D;
@@ -553,6 +436,8 @@ package away3d.loaders.parsers
 				container.transform.rawData = node.matrix.rawData;	
 				
 				processGeometries(node, container);
+				processCameras(node, container);
+				processLights(node, container);
 				processControllers(node, container);
 				
 				if (parent) {
@@ -568,21 +453,27 @@ package away3d.loaders.parsers
 		/**
 		 * 
 		 */ 
-		private function processController(controller : DAEController) : Geometry
+		private function processController(controller : DAEController, instance : DAEInstanceController) : Geometry
 		{
+			var geometry : Geometry;
+			
+			if (!controller)
+				return null;
+			
 			if (controller.morph) {
-				return processMorphController(controller);
+				geometry = processControllerMorph(controller, instance);
 			}
 			else if (controller.skin) {
-				
+				geometry = processControllerSkin(controller, instance);
 			}
-			return null;
+			
+			return geometry;
 		}
 		
 		/**
 		 * 
 		 */ 
-		private function processMorphController(controller : DAEController) : Geometry
+		private function processControllerMorph(controller : DAEController, instance : DAEInstanceController) : Geometry
 		{
 			var morph : DAEMorph = controller.morph;
 			var targets : Vector.<Geometry> = new Vector.<Geometry>();
@@ -593,9 +484,7 @@ package away3d.loaders.parsers
 			var i : int, j : int, k : int;
 			
 			if (!base) {
-				if (_libControllers[morph.source]) {
-					base = processController(_libControllers[morph.source]);
-				} 	
+				base = processController(_libControllers[morph.source], instance); 	
 			}
 			
 			if  (!base) {
@@ -629,10 +518,35 @@ package away3d.loaders.parsers
 		/**
 		 * 
 		 */ 
+		private function processControllerSkin(controller : DAEController, instance : DAEInstanceController) : Geometry
+		{
+			var geometry : Geometry = getGeometryByName(controller.skin.source);
+			var skeleton : Skeleton;
+			var daeGeometry : DAEGeometry;
+			
+			if (!geometry) {
+				geometry = processController(_libControllers[controller.skin.source], instance);
+			}
+			
+			if (!geometry) {
+				return null;
+			}
+			
+			daeGeometry = _libGeometries[geometry.name];
+			skeleton = parseSkeleton(instance);
+			applySkinBindShape(geometry, controller.skin);
+			applySkinController(geometry, daeGeometry.mesh, controller.skin, skeleton);
+			controller.skin.userData = skeleton;
+			
+			return geometry;
+		}
+		
+		/**
+		 * 
+		 */ 
 		private function processControllers(node : DAENode, container : ObjectContainer3D) : void
 		{
 			var instance : DAEInstanceController;
-			var instance_geometry : DAEInstanceGeometry;
 			var daeGeometry : DAEGeometry;
 			var controller : DAEController;
 			var effects : Vector.<DAEEffect>;
@@ -647,36 +561,27 @@ package away3d.loaders.parsers
 				return;
 			}
 			
-			instance_geometry = findControllerGeometry(node);
-			daeGeometry = _libGeometries[instance_geometry.url] as DAEGeometry;
-
 			for (i = 0; i < node.instance_controllers.length; i++) {
 				instance = node.instance_controllers[i];
 				controller = _libControllers[instance.url] as DAEController;
 				
-				if (controller.skin) {
-					geometry = getGeometryByName(controller.skin.source);
-					if (!geometry) {
-						if (_libControllers[controller.skin.source] is DAEController) {
-							geometry = processController(_libControllers[controller.skin.source]);
-						}
-					}
-				}
+				geometry = processController(controller, instance);
+				
 				if (!geometry) {
-					return;
+					continue;
 				}
-				if (controller.skin && daeGeometry && daeGeometry.mesh) {
-					skeleton = parseSkeleton(instance);
-					geometry = geometry.clone();
-					applySkinBindShape(geometry, controller.skin);
-					applySkinController(geometry, daeGeometry.mesh, controller.skin, skeleton);
-					effects = getMeshEffects(instance.bind_material, daeGeometry.mesh);
-					mesh = new Mesh(null, geometry);
-					for (j = 0; j < mesh.subMeshes.length; j++) {
-						mesh.subMeshes[j].material = effects[j].material;
-					}
-					container.addChild(mesh);
-					finalizeAsset(mesh);
+				
+				daeGeometry = _libGeometries[geometry.name] as DAEGeometry;
+				effects = getMeshEffects(instance.bind_material, daeGeometry.mesh);
+				mesh = new Mesh(null, geometry);
+				for (j = 0; j < mesh.subMeshes.length; j++) {
+					mesh.subMeshes[j].material = effects[j].material;
+				}
+				container.addChild(mesh);
+				finalizeAsset(mesh);
+				
+				if (controller.skin && controller.skin.userData is Skeleton) {
+					skeleton = controller.skin.userData as Skeleton;
 					
 					sequence = processSkinAnimation(controller.skin, mesh, skeleton);
 					animator = new SmoothSkeletonAnimator(SkeletonAnimationState(mesh.animationState));
@@ -695,6 +600,108 @@ package away3d.loaders.parsers
 			}
 		}
 		
+		/**
+		 * 
+		 */
+		private function processCamera(node : DAENode, instance_camera : DAEInstanceCamera) : Camera3D {
+			var cam : DAECamera;
+			var perspective : DAEPerspective;
+			var orthographic : DAEOrthographic;
+			var camera : Camera3D;
+			var lens : LensBase;
+			
+			if (!_libCameras.hasOwnProperty(instance_camera.url))
+				return null;
+			
+			cam = _libCameras[instance_camera.url] as DAECamera;
+			if (cam.optics.orthographic) {
+				trace ("orthographic cameras not supported yet");
+				return null;
+			} else if (cam.optics.perspective) {
+				perspective = cam.optics.perspective;
+				if (!isNaN(perspective.yfov)) {
+					lens = new PerspectiveLens(cam.optics.perspective.yfov);
+				} else {
+					trace ("unhandled camera instance");
+					return null;
+				}
+			} else {
+				return null;
+			}
+			
+			camera = new Camera3D(lens);
+			camera.name = "daeCamera_" + node.id;
+			return camera;
+		}
+		
+		private function processCameras(node : DAENode, container : ObjectContainer3D) : void
+		{
+			if (!node.instance_cameras || node.instance_cameras.length == 0)
+				return;
+			
+			for (var i:int = 0; i < node.instance_cameras.length; i++) {
+				var camera : Camera3D = processCamera(node, node.instance_cameras[i]);
+				if (camera) {
+					container.addChild(camera);
+					finalizeAsset(camera);
+				}
+			}
+		}
+		
+		/**
+		 * 
+		 */ 
+		private function processLight(node : DAENode, instance : DAEInstanceLight) : LightBase
+		{
+			if (!_libLights.hasOwnProperty(instance.url))
+				return null;
+			
+			var daeLight : DAELight = _libLights[instance.url] as DAELight;
+			var light : LightBase;
+			var directional : DirectionalLight;
+			var point : PointLight;
+			
+			if (daeLight.light is DAEAmbient) {
+				trace ("[WARNING] DAEParser: ambient lights not supported");
+			} else if (daeLight.light is DAEDirectional) {
+				light = directional = new DirectionalLight();
+				
+			} else if (daeLight.light is DAEPoint) {
+				light = point = new PointLight();
+				
+				
+			} else if (daeLight.light is DAESpot) {
+				trace ("[WARNING] DAEParser: spot lights not supported");
+			}
+			
+			if (light is LightBase) {
+				light.name = "daeLight_" + node.id;
+				light.transform.rawData = node.matrix.rawData;
+			}
+			
+			return light;
+		}
+		
+		/**
+		 * 
+		 */ 
+		private function processLights(node : DAENode, container : ObjectContainer3D) : void
+		{
+			if (!node.instance_lights || node.instance_lights.length == 0)
+				return;
+			
+			for (var i:int = 0; i < node.instance_lights.length; i++) {
+				var light : LightBase = processLight(node, node.instance_lights[i]);
+				if (light) {
+					container.addChild(light);
+					finalizeAsset(light);
+				}
+			}
+		}
+		
+		/**
+		 * 
+		 */ 
 		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonAnimationSequence
 		{
 			var useGPU : Boolean = _configFlags & CONFIG_USE_GPU ? true : false;
@@ -1075,6 +1082,7 @@ class DAEElement
 	public var id : String;
 	public var name : String;
 	public var sid : String;
+	public var userData : *;
 	
 	protected var ns : Namespace;
 	
@@ -2729,7 +2737,7 @@ class DAEVertexWeight
 	public var weight:Number;
 }
 
-class DAESkin extends DAEEffect
+class DAESkin extends DAEElement
 {
 	public var source : String;
 	public var bind_shape_matrix : Matrix3D;
@@ -3360,7 +3368,6 @@ class DAEPerspective extends DAEElement
 				break;
 			case "yfov":
 				this.yfov = parseFloat(readText(child));
-				trace("FOV: " + this.yfov);
 				break;
 			case "aspect_ratio":
 				this.aspect_ratio = parseFloat(readText(child));
