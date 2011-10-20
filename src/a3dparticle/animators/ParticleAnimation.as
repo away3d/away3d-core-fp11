@@ -111,6 +111,12 @@ package a3dparticle.animators
 			timeAction.endTimeFun = fun;
 		}
 		
+		public function set sleepTimeFun(fun:Function):void
+		{
+			timeAction.loop = true;
+			timeAction.sleepTimeFun = fun;
+		}
+		
 		public function set loop(value:Boolean):void
 		{
 			timeAction.loop = value;

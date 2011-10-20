@@ -17,9 +17,11 @@ package a3dparticle.animators.actions
 	{
 		private var _startTimeFun:Function;
 		private var _endTimeFun:Function;
+		private var _sleepTimeFun:Function;
 		
 		private var _tempStartTime:Number;
 		private var _tempEndTime:Number;
+		private var _tempSleepTime:Number;
 		
 		
 		private var timeAtt:ShaderRegisterElement;
@@ -31,7 +33,7 @@ package a3dparticle.animators.actions
 		public function TimeAction() 
 		{
 			priority = 0;
-			dataLenght = 2;
+			dataLenght = 3;
 		}
 		
 		public function set startTimeFun(fun:Function):void
@@ -43,6 +45,11 @@ package a3dparticle.animators.actions
 		{
 			_endTimeFun = fun;
 			hasEndTime = true;
+		}
+		
+		public function set sleepTimeFun(fun:Function):void
+		{
+			_sleepTimeFun = fun;
 		}
 		
 		public function set loop(value:Boolean):void
@@ -66,12 +73,18 @@ package a3dparticle.animators.actions
 			{
 				_tempEndTime = _endTimeFun(index);
 			}
+			_tempSleepTime = 0;
+			if (_sleepTimeFun != null)
+			{
+				_tempSleepTime = _sleepTimeFun(index);
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint):void
 		{
 			_vertices.push(_tempStartTime);
 			_vertices.push(_tempEndTime);
+			_vertices.push(_tempSleepTime+_tempEndTime);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -86,9 +99,11 @@ package a3dparticle.animators.actions
 				if (_loop)
 				{
 					var div:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-					code += "div " + div.toString() + ".xyz," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
-					code += "frc " + div.toString() + ".xyz," + div.toString() + ".xyz\n";
-					code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".xyz," + timeAtt.toString() + ".y\n";
+					code += "div " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".z\n";
+					code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
+					code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".z\n";
+					code += "slt " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
+					code += "mul " + _animation.vertexTime.toString() + "," + _animation.vertexTime.toString() + "," + div.toString() + ".x\n";
 				}
 				else
 				{
@@ -105,7 +120,7 @@ package a3dparticle.animators.actions
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(timeAtt.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
+			stage3DProxy.setSimpleVertexBuffer(timeAtt.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

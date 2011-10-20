@@ -93,6 +93,11 @@ package a3dparticle
 			_particleAnimation.endTimeFun = fun;
 		}
 		
+		public function set sleepTimeFun(fun:Function):void
+		{
+			_particleAnimation.sleepTimeFun = fun;
+		}
+		
 		public function set loop(value:Boolean):void
 		{
 			_particleAnimation.loop = value;
