@@ -2,7 +2,6 @@ package away3d.loaders.parsers
 {
 	import away3d.animators.AnimatorBase;
 	import away3d.animators.SmoothSkeletonAnimator;
-	import away3d.animators.VertexAnimator;
 	import away3d.animators.data.AnimationSequenceBase;
 	import away3d.animators.data.SkeletonAnimation;
 	import away3d.animators.data.SkeletonAnimationSequence;
@@ -31,7 +30,6 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
-	import away3d.primitives.Sphere;
 	import away3d.tools.utils.TextureUtils;
 	
 	import flash.display.BitmapData;
