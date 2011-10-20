@@ -39,6 +39,8 @@ package a3dparticle.animators
 		
 		public var needVelocityInFragment:Boolean;
 		
+		public var needCameraPosition:Boolean;
+		
 		
 		//vertex
 		public var timeConst:ShaderRegisterElement;
@@ -53,6 +55,7 @@ package a3dparticle.animators
 		public var piConst:ShaderRegisterElement;
 		public var OneConst:ShaderRegisterElement;
 		public var TwoConst:ShaderRegisterElement;
+		public var cameraPosConst:ShaderRegisterElement;
 		//vary
 		private var varyTime:ShaderRegisterElement;
 		public var fragmentTime:ShaderRegisterElement;
@@ -151,6 +154,8 @@ package a3dparticle.animators
 			}
 		}
 		
+		
+		
 		private function reset(simpleParticlePass:SimpleParticlePass):void
 		{
 			shaderRegisterCache = new ShaderRegisterCache();
@@ -169,6 +174,7 @@ package a3dparticle.animators
 			piConst = shaderRegisterCache.getFreeVertexConstant();
 			OneConst = shaderRegisterCache.getFreeVertexConstant();
 			TwoConst = shaderRegisterCache.getFreeVertexConstant();
+			if (needCameraPosition) cameraPosConst = shaderRegisterCache.getFreeVertexConstant();
 			
 			colorDefalut = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();

@@ -13,6 +13,8 @@ package a3dparticle.materials
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
+	import flash.geom.Utils3D;
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 	/**
@@ -117,6 +119,12 @@ package a3dparticle.materials
 		{
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
+				if (_particleAnimation.needCameraPosition)
+				{
+					var context : Context3D = stage3DProxy._context3D;
+					var pos:Vector3D = Utils3D.projectVector(renderable.inverseSceneTransform, camera.scenePosition);
+					context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.cameraPosConst.index, Vector.<Number>([pos.x,pos.y,pos.z,0]));
+				}
 				super.render(renderable, stage3DProxy , camera );
 			}
 		}
