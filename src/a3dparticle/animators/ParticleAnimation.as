@@ -88,13 +88,13 @@ package a3dparticle.animators
 		
 		public function startGen():void
 		{
-			_particleActions = _particleActions.sort(sortFn);
+			//_particleActions = _particleActions.sort(sortFn);
 		}
-		private function sortFn(action1:ActionBase, action2:ActionBase):Number
+		/*private function sortFn(action1:ActionBase, action2:ActionBase):Number
 		{
 			if (action1.priority > action2.priority) return 1;
 			else return -1;
-		}
+		}*/
 		
 		public function finishGen():void
 		{
@@ -124,7 +124,15 @@ package a3dparticle.animators
 		
 		public function addAction(action:ActionBase):void
 		{
-			_particleActions.push(action);
+			var i:int;
+			for (i = _particleActions.length - 1; i >= 0; i--)
+			{
+				if (_particleActions[i].priority <= action.priority)
+				{
+					break;
+				}
+			}
+			_particleActions.splice(i + 1, 0, action);
 			action.animation = this;
 		}
 		
