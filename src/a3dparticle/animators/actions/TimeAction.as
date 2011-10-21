@@ -99,11 +99,20 @@ package a3dparticle.animators.actions
 				if (_loop)
 				{
 					var div:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-					code += "div " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".z\n";
-					code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
-					code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".z\n";
-					code += "slt " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
-					code += "mul " + _animation.vertexTime.toString() + "," + _animation.vertexTime.toString() + "," + div.toString() + ".x\n";
+					if (_sleepTimeFun != null)
+					{
+						code += "div " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".z\n";
+						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
+						code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".z\n";
+						code += "slt " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
+						code += "mul " + _animation.vertexTime.toString() + "," + _animation.vertexTime.toString() + "," + div.toString() + ".x\n";
+					}
+					else
+					{
+						code += "div " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
+						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
+						code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".y\n";
+					}
 				}
 				else
 				{

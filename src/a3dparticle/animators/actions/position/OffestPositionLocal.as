@@ -48,7 +48,7 @@ package a3dparticle.animators.actions.position
 		{
 			_offectAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
-			code += "add " + _animation.offestTarget.toString() +".xyz," + _offectAttribute.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
+			code += "add " + _animation.offestTarget.toString() +"," + _offectAttribute.toString() + ".xyz," + _animation.offestTarget.toString() + "\n";
 			return code;
 		}
 		

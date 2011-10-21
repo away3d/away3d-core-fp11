@@ -161,26 +161,32 @@ package a3dparticle.animators.actions.rotation
 			
 			
 			code += "mul " + R.toString() + ".xyz," + sin.toString() +"," + nrmVel.toString() + ".xyz\n";
-			code += "mov " + R.toString() + ".w," + cos.toString() + "\n";
+			//code += "mov " + R.toString() + ".w," + cos.toString() + "\n";
+			//use cos as R.w
 			
 			code += "mul " + R_rev.toString() + ".xyz," + sin.toString() + "," + nrmVel.toString() + ".xyz\n";
 			code += "neg " + R_rev.toString() + ".xyz," + R_rev.toString() + ".xyz\n";
-			code += "mov " + R_rev.toString() + ".w," + cos.toString() + "\n";
+			//code += "mov " + R_rev.toString() + ".w," + cos.toString() + "\n";
+			//use cos as R_rev.w
 			
 			//nrmVel and xAxis are used as temp register
 			code += "crs " + nrmVel.toString() + ".xyz," + R.toString() + ".xyz," +_animation.scaleAndRotateTarget.toString() + ".xyz\n";
-			code += "mul " + xAxis.toString() + ".xyz," + R.toString() +".w," + _animation.scaleAndRotateTarget.toString() + ".xyz\n";
+			//code += "mul " + xAxis.toString() + ".xyz," + R.toString() +".w," + _animation.scaleAndRotateTarget.toString() + ".xyz\n";
+			//use cos as R.w
+			code += "mul " + xAxis.toString() + ".xyz," + cos.toString() +"," + _animation.scaleAndRotateTarget.toString() + ".xyz\n";
 			code += "add " + nrmVel.toString() + ".xyz," + nrmVel.toString() +".xyz," + xAxis.toString() + ".xyz\n";
 			code += "dp3 " + xAxis.toString() + ".w," + R.toString() + ".xyz," +_animation.scaleAndRotateTarget.toString() + ".xyz\n";
 			code += "neg " + nrmVel.toString() + ".w," + xAxis.toString() + ".w\n";
 			
 			
 			code += "crs " + R.toString() + ".xyz," + nrmVel.toString() + ".xyz," +R_rev.toString() + ".xyz\n";
-			code += "mul " + xAxis.toString() + ".xyzw," + nrmVel.toString() + ".xyzw," +R_rev.toString() + ".w\n";
-			code += "add " + R.toString() + "," + R.toString() + "," + xAxis.toString() + "\n";
+			//code += "mul " + xAxis.toString() + ".xyzw," + nrmVel.toString() + ".xyzw," +R_rev.toString() + ".w\n";
+			//use cos as R_rev.w
+			code += "mul " + xAxis.toString() + ".xyzw," + nrmVel.toString() + ".xyzw," +cos.toString() + ".w\n";
+			code += "add " + R.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
 			code += "mul " + xAxis.toString() + ".xyz," + nrmVel.toString() + ".w," +R_rev.toString() + ".xyz\n";
 			
-			code += "add " + _animation.scaleAndRotateTarget.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+			code += "add " + _animation.scaleAndRotateTarget.toString() + "," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
 			
 			return code;
 		}
