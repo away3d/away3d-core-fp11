@@ -52,15 +52,15 @@ package a3dparticle.animators.actions.color
 			if (_hasMult)
 			{
 				_vertices.push(_tempColor.redMultiplier);
-				_vertices.push(_tempColor.blueMultiplier);
 				_vertices.push(_tempColor.greenMultiplier);
+				_vertices.push(_tempColor.blueMultiplier);
 				_vertices.push(_tempColor.alphaMultiplier);
 			}
 			if (_hasOffest)
 			{
 				_vertices.push(_tempColor.redOffset);
-				_vertices.push(_tempColor.blueOffset);
 				_vertices.push(_tempColor.greenOffset);
+				_vertices.push(_tempColor.blueOffset);
 				_vertices.push(_tempColor.alphaOffset);
 			}
 		}
