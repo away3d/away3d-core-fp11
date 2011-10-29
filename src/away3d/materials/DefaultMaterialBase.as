@@ -196,12 +196,12 @@
 		 * A specular map that defines the strength of specular reflections for each texel in the red channel, and the gloss factor in the green channel.
 		 * You can use SpecularBitmapTexture if you want to easily set specular and gloss maps from greyscale images, but prepared images are preffered.
 		 */
-		public function get specularGlossMap() : Texture2DProxyBase
+		public function get specularMap() : Texture2DProxyBase
 		{
 			return _screenPass.specularMethod.texture;
 		}
 
-		public function set specularGlossMap(value : Texture2DProxyBase) : void
+		public function set specularMap(value : Texture2DProxyBase) : void
 		{
 			if (_screenPass.specularMethod) _screenPass.specularMethod.texture = value;
 			else throw new Error("No specular method was set to assign the specularGlossMap to");
