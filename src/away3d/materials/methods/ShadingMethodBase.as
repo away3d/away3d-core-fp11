@@ -331,7 +331,7 @@ package away3d.materials.methods
 		/**
 		 * Sets the render state for a single renderable.
 		 */
-		arcane function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 
 		}

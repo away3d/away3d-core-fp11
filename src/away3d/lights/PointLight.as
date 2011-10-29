@@ -23,14 +23,10 @@ package away3d.lights
 	public class PointLight extends LightBase
 	{
 		//private static var _pos : Vector3D = new Vector3D();
-		protected var _radius : Number = Number.MAX_VALUE;
-		protected var _fallOff : Number = Number.MAX_VALUE;
+		arcane var _radius : Number = Number.MAX_VALUE;
+		arcane var _fallOff : Number = Number.MAX_VALUE;
 		private var _positionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
-		private var _attenuationData : Vector.<Number>;
-		private var _vertexPosReg : ShaderRegisterElement;
-		private var _varyingReg : ShaderRegisterElement;
-		private var _attenuationIndices : Dictionary;
-		private var _attenuationRegister : ShaderRegisterElement;
+		arcane var _fallOffFactor : Number;
 
 		/**
 		 * Creates a new PointLight object.
@@ -38,17 +34,6 @@ package away3d.lights
 		public function PointLight()
 		{
 			super();
-			_attenuationData = Vector.<Number>([_radius, 1 / (_fallOff - _radius), 0, 1]);
-			_attenuationIndices = new Dictionary(true);
-		}
-
-
-		arcane override function cleanCompilationData() : void
-		{
-			super.cleanCompilationData();
-			_attenuationRegister = null;
-			_vertexPosReg = null;
-			_varyingReg = null;
 		}
 
 		/**
@@ -68,8 +53,12 @@ package away3d.lights
 				invalidateBounds();
 			}
 
-			_attenuationData[0] = _radius;
-			_attenuationData[1] = 1 / (_fallOff - _radius);
+			_fallOffFactor = 1 / (_fallOff - _radius);
+		}
+
+		arcane function fallOffFactor() : Number
+		{
+			return _fallOffFactor;
 		}
 
 		/**
@@ -85,9 +74,8 @@ package away3d.lights
 			_fallOff = value;
 			if (_fallOff < 0) _fallOff = 0;
 			if (_fallOff < _radius) _radius = _fallOff;
+			_fallOffFactor = 1 / (_fallOff - _radius);
 			invalidateBounds();
-			_attenuationData[0] = _radius;
-			_attenuationData[1] = 1 / (_fallOff - _radius);
 		}
 
 		/**
@@ -164,13 +152,13 @@ package away3d.lights
 			return target;
 		}
 
-		override arcane function get positionBased() : Boolean
-		{
-			return true;
-		}
+//		override arcane function get positionBased() : Boolean
+//		{
+//			return true;
+//		}
 
 
-		arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
+		/*arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
 		{
 			_vertexPosReg = regCache.getFreeVertexConstant();
 			_varyingReg = regCache.getFreeVarying();
@@ -207,6 +195,6 @@ package away3d.lights
 		{
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, inputIndex, _positionData, 1);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _attenuationIndices[pass], _attenuationData, 1);
-		}
+		}    */
 	}
 }

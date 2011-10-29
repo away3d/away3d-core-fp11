@@ -1,9 +1,11 @@
 ﻿package away3d.tools
 {
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
 	import away3d.lights.LightBase;
+	import away3d.materials.lightpickers.StaticLightPicker;
 
 	/**
 	* Helper Class for the LightBase objects <code>LightsHelper</code>
@@ -22,7 +24,7 @@
 		* @param	 objectContainer3D 	ObjectContainer3D. The target ObjectContainer3D object to be inspected.
 		* @param	 lights						Vector.&lt;LightBase&gt;. A series of lights to be set to all materials found during parsing of the target ObjectContainer3D.
 		*/
-		public static function addLightsToMaterials(objectContainer3D:ObjectContainer3D, lights:Vector.<LightBase> ):void
+		public static function addStaticLightsToMaterials(objectContainer3D:ObjectContainer3D, lights:Vector.<LightBase> ):void
 		{
 			if(lights.length == 0)
 				return;
@@ -30,7 +32,7 @@
 			_lightsArray = [];
 
 			for(var i:uint = 0;i<lights.length;++i)
-				_lightsArray.push(lights[i]);
+				_lightsArray[i] = lights[i];
 			
 			_state = 0;
 			parseContainer(objectContainer3D);
@@ -43,7 +45,7 @@
 		* @param	 objectContainer3D 	ObjectContainer3D. The target ObjectContainer3D object to be inspected.
 		* @param	 light							LightBase. The light to add to all materials found during the parsing of the target ObjectContainer3D.
 		*/
-		public static function addLightToMaterials(objectContainer3D:ObjectContainer3D, light:LightBase):void
+		public static function addStaticLightToMaterials(objectContainer3D:ObjectContainer3D, light:LightBase):void
 		{
 			parse(objectContainer3D, light, 1);
 		}
@@ -53,7 +55,7 @@
 		* @param	 objectContainer3D 	ObjectContainer3D. The target ObjectContainer3D object to be inspected.
 		* @param	 light							LightBase. The light to be removed from all materials found during the parsing of the target ObjectContainer3D.
 		*/
-		public static function removeLightFromMaterials(objectContainer3D:ObjectContainer3D, light:LightBase):void
+		public static function removeStaticLightFromMaterials(objectContainer3D:ObjectContainer3D, light:LightBase):void
 		{
 			parse(objectContainer3D, light, 2);
 		}
@@ -75,111 +77,79 @@
 			for(var i:uint = 0;i<objectContainer3D.numChildren;++i)
 				parseContainer(ObjectContainer3D(objectContainer3D.getChildAt(i) ) );
 		}
-		
-		private static function parseMesh(mesh:Mesh):void
+
+		private static function apply(materialOwner:IMaterialOwner) : void
 		{
-			var hasLight:Boolean;
-			var i :uint;
-			var j :uint;
-			var aLights:Array;
-			
-			if(mesh.material){
+			var picker : StaticLightPicker;
+			var aLights : Array;
+			var hasLight : Boolean;
+			var i : uint;
+			var j : uint;
+
+			if(materialOwner.material){
 				switch(_state){
 					case 0:
-						mesh.material.lights = _lightsArray;
+						picker = materialOwner.material.lightPicker as StaticLightPicker;
+						if (!picker || picker.lights != _lightsArray)
+							materialOwner.material.lightPicker = new StaticLightPicker(_lightsArray);
 						break;
-						
-					case 1:
-						aLights = mesh.material.lights;
-						if(aLights && aLights.length> 0){
-							for (i = 0; i<aLights.length; ++i){
-								if(aLights[i] == _light){
-									hasLight = true;
-									break;
-								}
-							}
 
-							if(!hasLight) {
-								aLights.push(_light);
-								mesh.material.lights = aLights;
-							} else {
-								hasLight = false;
-								break;
-							}
-							
-							
-						} else {
-							mesh.material.lights = [_light];
-						}
-						
-						break;
-						
-					case 2:
-						aLights = mesh.material.lights;
-						if(aLights){
-							for (i = 0; i<aLights.length; ++i){
-								if(aLights[i] == _light){
-									aLights.splice(i, 1);
-									mesh.material.lights = aLights;
-									break;
-								}
-							}
-						}
-				}
-			}
-				
-			var subMeshes:Vector.<SubMesh> = mesh.subMeshes;
-			var subMesh:SubMesh;
-			for (i = 0; i<subMeshes.length; ++i){
-				subMesh = subMeshes[i];
-				if(subMesh.material){
-					switch(_state){
-						case 0:
-							if(subMesh.material.lights !=_lightsArray )
-								subMesh.material.lights = _lightsArray;
-							break;
-							
-						case 1:
-							aLights = subMesh.material.lights;
-							
+					case 1:
+						materialOwner.material.lightPicker ||= new StaticLightPicker([]);
+						picker = materialOwner.material.lightPicker as StaticLightPicker;
+						if (picker) {
+							aLights = picker.lights;
 							if(aLights && aLights.length> 0){
-								for (j = 0; j<aLights.length; ++j){
-									if(aLights[j] == _light){
+								for (i = 0; i<aLights.length; ++i){
+									if(aLights[i] == _light){
 										hasLight = true;
 										break;
 									}
 								}
-								 
-								if(!hasLight){
+
+								if(!hasLight) {
 									aLights.push(_light);
-									subMesh.material.lights = aLights;
-								} else{
+									picker.lights = aLights;
+								} else {
 									hasLight = false;
 									break;
 								}
+
+
 							} else {
-								subMesh.material.lights = [_light];
+								picker.lights = [_light];
 							}
-							break;
-							
-						case 2:
-							aLights = subMesh.material.lights;
+						}
+						break;
+
+					case 2:
+						materialOwner.material.lightPicker ||= new StaticLightPicker([]);
+						picker = materialOwner.material.lightPicker as StaticLightPicker;
+						if (picker) {
+							aLights = picker.lights;
 							if(aLights){
-								for (j = 0; j<aLights.length; ++j){
-									if(aLights[j] == _light){
-										aLights.splice(j, 1);
-										subMesh.material.lights = aLights;
+								for (i = 0; i<aLights.length; ++i){
+									if(aLights[i] == _light){
+										aLights.splice(i, 1);
+										picker.lights = aLights;
 										break;
 									}
 								}
 							}
-							
-					}
-					
+						}
 				}
-				
 			}
 		}
 		
+		private static function parseMesh(mesh:Mesh):void
+		{
+			var i :uint;
+			var subMeshes:Vector.<SubMesh> = mesh.subMeshes;
+
+			apply(mesh);
+
+			for (i = 0; i<subMeshes.length; ++i)
+				apply(subMeshes[i]);
+		}
 	}
 }

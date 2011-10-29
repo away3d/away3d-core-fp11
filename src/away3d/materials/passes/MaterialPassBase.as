@@ -7,8 +7,10 @@ package away3d.materials.passes
 	import away3d.core.managers.AGALProgram3DCache;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
-	import away3d.lights.LightBase;
+	import away3d.lights.DirectionalLight;
+	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.lightpickers.ILightPicker;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -49,8 +51,8 @@ package away3d.materials.passes
 		protected var _targetRegisters : Array = ["vt0"];
 		protected var _projectedTargetRegister : String;
 
-		protected var _lights : Vector.<LightBase>;
-		protected var _numLights : uint;
+		protected var _numPointLights : uint;
+		protected var _numDirectionalLights : uint;
 
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
 		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
@@ -190,14 +192,10 @@ package away3d.materials.passes
 
 		/**
 		 * Renders an object to the current render target.
-		 * @param renderable The IRenderable object to render.
-		 * @param context The context which is performing the rendering.
-		 * @param camera The camera from which the scene is viewed.
-		 * @param lights The lights which influence the rendered scene.
 		 *
 		 * @private
 		 */
-		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : ILightPicker) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 
@@ -329,15 +327,24 @@ package away3d.materials.passes
 			_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 
-		public function get lights() : Vector.<LightBase>
+		arcane function get numPointLights() : uint
 		{
-			return _lights;
+			return _numPointLights;
 		}
 
-		public function set lights(value : Vector.<LightBase>) : void
+		arcane function set numPointLights(value : uint) : void
 		{
-			_lights = value;
-			_numLights = value? lights.length : 0;
+			_numPointLights = value;
+		}
+
+		arcane function get numDirectionalLights() : uint
+		{
+			return _numDirectionalLights;
+		}
+
+		arcane function set numDirectionalLights(value : uint) : void
+		{
+			_numDirectionalLights = value;
 		}
 	}
 }

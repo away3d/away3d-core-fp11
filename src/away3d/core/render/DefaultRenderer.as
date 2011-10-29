@@ -73,7 +73,7 @@ package away3d.core.render
 			var camera : Camera3D = entityCollector.camera;
 
 			material.activatePass(0, _stage3DProxy, camera);
-			material.renderPass(0, skyBox, _stage3DProxy, camera);
+			material.renderPass(0, skyBox, _stage3DProxy, entityCollector);
 			material.deactivatePass(0, _stage3DProxy);
 		}
 
@@ -101,7 +101,7 @@ package away3d.core.render
 
 					_activeMaterial.activatePass(j, _stage3DProxy, camera);
 					do {
-						_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, camera);
+						_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector);
 						item2 = item2.next;
 					} while (item2 && item2.renderable.material == _activeMaterial);
 					_activeMaterial.deactivatePass(j, _stage3DProxy);

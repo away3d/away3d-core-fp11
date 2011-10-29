@@ -11,6 +11,7 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.lightpickers.ILightPicker;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -53,9 +54,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : ILightPicker) : void
 		{
-			super.render(renderable, stage3DProxy, camera);
+			super.render(renderable, stage3DProxy, camera, lightPicker);
 		}
 
 		/**

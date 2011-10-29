@@ -15,6 +15,8 @@ package away3d.tools.serialize
 	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.lightpickers.StaticLightPicker;
+	import away3d.materials.lightpickers.StaticLightPicker;
 
 	import flash.utils.getQualifiedClassName;
 
@@ -105,7 +107,10 @@ package away3d.tools.serialize
 		public static function serializeMaterial(material:MaterialBase, serializer:SerializerBase):void
 		{
 			serializer.beginObject(classNameFromInstance(material), material.name);
-			serializer.writeString("lights", String(material.lights));
+
+			if (material.lightPicker is StaticLightPicker) {
+				serializer.writeString("lights", String(StaticLightPicker(material.lightPicker).lights));
+			}
 			serializer.writeBoolean("mipmap", material.mipmap);
 			serializer.writeBoolean("smooth", material.smooth);
 			serializer.writeBoolean("repeat", material.repeat);

@@ -34,7 +34,7 @@ package away3d.materials.methods
 			super(false, true, false);
 			_castingLight = castingLight;
 			castingLight.castsShadows = true;
-			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, -.0007, 0, 0, 1]);
+			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, -.0012, 0, 0, 1]);
 		}
 
 		public function get epsilon() : Number
@@ -95,7 +95,7 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			_projMatrix.copyFrom(_castingLight.shadowMapper.depthProjection);
 			_projMatrix.prepend(renderable.sceneTransform);

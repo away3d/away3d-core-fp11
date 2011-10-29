@@ -6,10 +6,12 @@ package away3d.materials
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.traverse.EntityCollector;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.lights.LightBase;
+	import away3d.materials.lightpickers.ILightPicker;
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
 
@@ -57,9 +59,8 @@ package away3d.materials
 		private var _smooth : Boolean = true;
 		private var _repeat : Boolean;
 
-		private var _lights : Array;
-
 		private var _depthPass : DepthMapPass;
+		private var _lightPicker : ILightPicker;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -80,14 +81,30 @@ package away3d.materials
 			return AssetType.MATERIAL;
 		}
 
-		public function get lights() : Array
+		public function get lightPicker() : ILightPicker
 		{
-			return _lights;
+			return _lightPicker;
 		}
 
-		public function set lights(value : Array) : void
+		public function set lightPicker(value : ILightPicker) : void
 		{
-			_lights = value;
+			if (_lightPicker)
+				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+
+			_lightPicker = value;
+
+			if (_lightPicker)
+				_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
+		}
+
+		private function onLightsChange(event : Event) : void
+		{
+			var pass : MaterialPassBase;
+			for (var i : uint = 0; i < _numPasses; ++i) {
+				pass = _passes[i];
+				pass.numPointLights = _lightPicker.numPointLights;
+				pass.numDirectionalLights = _lightPicker.numDirectionalLights;
+			}
 		}
 
 		/**
@@ -143,6 +160,9 @@ package away3d.materials
 			for (i = 0; i < _numPasses; ++i) _passes[i].dispose();
 
 			_depthPass.dispose();
+
+			if (_lightPicker)
+				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
 		}
 
 		/**
@@ -257,7 +277,7 @@ package away3d.materials
 			if (renderable.animationState)
 				renderable.animationState.setRenderState(stage3DProxy, _depthPass, renderable);
 
-			_depthPass.render(renderable, stage3DProxy, camera);
+			_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
 		}
 
 		/**
@@ -291,18 +311,17 @@ package away3d.materials
 		/**
 		 * Renders a renderable with a pass.
 		 * @param index The pass to render with.
-		 * @param renderable The renderable to render.
-		 * @param context The Context3D object which is currently rendering.
-		 * @param camera The camera from which the scene is rendered.
-		 * @param lights The lights which are influencing the lighting of the scene.
 		 * @private
 		 */
-		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, entityCollector : EntityCollector) : void
 		{
 			if (renderable.animationState)
 				renderable.animationState.setRenderState(stage3DProxy, _passes[index], renderable);
 
-			_passes[index].render(renderable, stage3DProxy, camera);
+			if (_lightPicker)
+				_lightPicker.collectLights(renderable, entityCollector);
+
+			_passes[index].render(renderable, stage3DProxy, entityCollector.camera, _lightPicker);
 		}
 
 
@@ -415,7 +434,8 @@ package away3d.materials
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
-			pass.lights = _lights? Vector.<LightBase>(_lights) : null;
+			pass.numPointLights = _lightPicker? _lightPicker.numPointLights : 0;
+			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			calculateRenderId();
 		}

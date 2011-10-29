@@ -5,7 +5,9 @@ package away3d.materials.passes
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.events.Stage3DEvent;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.materials.lightpickers.ILightPicker;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -29,7 +31,7 @@ package away3d.materials.passes
 		private var _lightPosData : Vector.<Number>;
 		private var _polyOffset : Vector.<Number>;
 		private var _enc : Vector.<Number>;
-		private var _listensForDispose : Vector.<Boolean>;
+		private var _projectionTexturesInvalid : Boolean = true;
 
 		/**
 		 * Creates a new SingleObjectDepthPass object.
@@ -39,7 +41,6 @@ package away3d.materials.passes
 		public function SingleObjectDepthPass(textureSize : uint = 512, polyOffset : Number = 15)
 		{
 			super(true);
-			_listensForDispose = new Vector.<Boolean>(8, true);
 			_textureSize = textureSize;
 			_numUsedStreams = 2;
 			_numUsedVertexConstants = 7;
@@ -69,13 +70,21 @@ package away3d.materials.passes
 			}
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function set lights(value : Vector.<LightBase>) : void
-		{
-			super.lights = value;
 
+		arcane override function set numPointLights(value : uint) : void
+		{
+			super.numPointLights = value;
+			_projectionTexturesInvalid = true;
+		}
+
+		arcane override function set numDirectionalLights(value : uint) : void
+		{
+			super.numDirectionalLights = value;
+			_projectionTexturesInvalid = true;
+		}
+
+		private function updateProjectionTextures() : void
+		{
 			if (_textures) {
 				for (var i : uint = 0; i < _textures.length; ++i) {
 					for each(var vec : Vector.<Texture> in _textures[i]) {
@@ -88,9 +97,7 @@ package away3d.materials.passes
 
 			_textures = new Vector.<Dictionary>(8);
 			_projections = new Dictionary();
-//			_textures = new Vector.<Texture>(value, true);
-
-//			for (i = 0; i < _numLights; ++i) _projections[i] = new Matrix3D();
+			_projectionTexturesInvalid = false;
 		}
 
 		/**
@@ -149,36 +156,31 @@ package away3d.materials.passes
 		 * @inheritDoc
 		 * todo: keep maps in dictionary per renderable
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : ILightPicker) : void
 		{
 			var matrix : Matrix3D;
-			var len : int = lights.length;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
-			var j : uint, i : uint;
+			var j : uint, i : uint, len : uint;
 			var light : LightBase;
 			var vec : Vector.<Matrix3D>;
-
-			if (_numLights < len) len = _numLights;
+			var lights : Vector.<LightBase> = lightPicker.allPickedLights;
 
 			_textures[contextIndex] ||= new Dictionary();
-			_textures[contextIndex][renderable] ||= new Vector.<Texture>(_numLights);
-
-			if (!_listensForDispose[contextIndex]) {
-				_listensForDispose[contextIndex] = true;
-				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
-			}
+			_textures[contextIndex][renderable] ||= new Vector.<Texture>(_numPointLights+_numDirectionalLights);
 
 			if (!_projections[renderable]) {
 				vec = _projections[renderable] = new Vector.<Matrix3D>();
-				for (i = 0; i < _numLights; ++i) {
-					vec[i] = new Matrix3D();
-				}
+				for (i = 0; i < _numDirectionalLights; ++i)
+					vec[j++] = new Matrix3D();
+				for (i = 0; i < _numPointLights; ++i)
+					vec[j++] = new Matrix3D();
 			}
 
+			len = lights.length;
 			for (i = 0; i < len; ++i) {
 				// local position = enough
-				light = _lights[i];
+				light = lights[i];
 
 				matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable][i]);
 
@@ -198,29 +200,12 @@ package away3d.materials.passes
 			}
 		}
 
-		private function onContext3DDisposed(event : Stage3DEvent) : void
-		{
-			var stage3DProxy : Stage3DProxy = Stage3DProxy(event.target);
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-
-			if (_textures) {
-				for each(var vec : Vector.<Texture> in _textures[contextIndex]) {
-					for (var j : uint = 0; j < vec.length; ++j) {
-						vec[j].dispose();
-					}
-				}
-			}
-
-			_listensForDispose[contextIndex] = false;
-
-			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
-		}
-
 		/**
 		 * @inheritDoc
 		 */
 		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			if (_projectionTexturesInvalid) updateProjectionTextures();
 			super.activate(stage3DProxy, camera);
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, _polyOffset, 1);
 		}

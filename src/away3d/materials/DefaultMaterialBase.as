@@ -32,13 +32,6 @@
 			addPass(_screenPass = new DefaultScreenPass(this));
 		}
 
-
-		override public function set lights(value : Array) : void
-		{
-			super.lights = value;
-			_screenPass.lights = value? Vector.<LightBase>(value) : null;
-		}
-
 		/**
 		 * The minimum alpha value for which pixels should be drawn. This is used for transparency that is either
 		 * invisible or entirely opaque, often used with textures for foliage, etc.
