@@ -5,7 +5,6 @@ package away3d.materials.passes
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.ILightPicker;
@@ -83,7 +82,7 @@ package away3d.materials.passes
 
 		private var _shadedTargetReg : ShaderRegisterElement;
 		private var _globalPositionVertexReg : ShaderRegisterElement;
-		private var _globalPositionFragmentReg : ShaderRegisterElement;
+		private var _globalPositionVaryingReg : ShaderRegisterElement;
 		private var _localPositionRegister : ShaderRegisterElement;
 		private var _positionMatrixRegs : Vector.<ShaderRegisterElement>;
 		private var _normalInput : ShaderRegisterElement;
@@ -101,6 +100,10 @@ package away3d.materials.passes
 
 		private var _numLights : int;
 		private var _lightDataLength : int;
+
+		private var _pointLightRegisters : Vector.<ShaderRegisterElement>;
+		private var _dirLightRegisters : Vector.<ShaderRegisterElement>;
+		private var _lightIndex : int;
 
 
 		/**
@@ -533,8 +536,10 @@ package away3d.materials.passes
 			_sceneNormalMatrixIndex = -1;
 
 
-			_lightDataLength = specularMethod ? _numLights*3 : _numLights*2;
-
+			var elemsPerLight : int  = _specularMethod? 3 : 2;
+			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights*elemsPerLight, true);
+			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights*elemsPerLight, true);
+			_lightDataLength = _numLights*elemsPerLight;
 			_lightData = new Vector.<Number>(_lightDataLength*4, true);
 
 			_registerCache = new ShaderRegisterCache();
@@ -558,7 +563,7 @@ package away3d.materials.passes
 			_numUsedStreams = 1;
 
 			_animatableAttributes = ["va0"];
-			_targetRegisters = ["vt0"];
+			_animationTargetRegisters = ["vt0"];
 			_vertexCode = "";
 			_fragmentCode = "";
 			_projectedTargetRegister = null;
@@ -567,7 +572,7 @@ package away3d.materials.passes
 			_registerCache.addVertexTempUsages(_localPositionRegister, 1);
 
 			compile();
-//			_fragmentCode += "mov oc, " + _globalPositionFragmentReg;
+//			_fragmentCode += "mov oc, " + _globalPositionVaryingReg;
 
 			_numUsedVertexConstants = _registerCache.numUsedVertexConstants;
 			_numUsedStreams = _registerCache.numUsedStreams;
@@ -578,6 +583,9 @@ package away3d.materials.passes
 
 		private function cleanUp() : void
 		{
+			_pointLightRegisters = null;
+			_dirLightRegisters = null;
+
 			_projectionFragmentReg = null;
 			_viewDirFragmentReg = null;
 
@@ -590,7 +598,7 @@ package away3d.materials.passes
 
 			_shadedTargetReg = null;
 			_globalPositionVertexReg = null;
-			_globalPositionFragmentReg = null;
+			_globalPositionVaryingReg = null;
 			_localPositionRegister = null;
 			_positionMatrixRegs = null;
 			_normalInput = null;
@@ -634,14 +642,16 @@ package away3d.materials.passes
 			if (_uvDependencies > 0) compileUVCode();
 			if (_secondaryUVDependencies > 0) compileSecondaryUVCode();
 			if (_globalPosDependencies > 0) compileGlobalPositionCode();
+
+			setMethodRegs(_normalMethod);
 			if (_normalDependencies > 0) {
 				// needs to be created before view
 				_animatedNormalReg = _registerCache.getFreeVertexVectorTemp();
 				_registerCache.addVertexTempUsages(_animatedNormalReg, 1);
+				if (_normalDependencies > 0) compileNormalCode();
 			}
 			if (_viewDirDependencies > 0) compileViewDirCode();
-			setMethodRegs(_normalMethod);
-			if (_normalDependencies > 0) compileNormalCode();
+
 
 			setMethodRegs(_diffuseMethod);
 			if (_shadowMethod) setMethodRegs(_shadowMethod);
@@ -652,13 +662,6 @@ package away3d.materials.passes
 			for (var i : uint = 0; i < _methods.length; ++i)
 				setMethodRegs(_methods[i]);
 
-//			if (_numLights > 0) compileLightDirCode();
-
-			// todo: add spotlight check as well
-			if (_numPointLights > 0) {
-				compileGlobalFragmentCode();
-			}
-
 			_shadedTargetReg = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_shadedTargetReg, 1);
 
@@ -668,13 +671,6 @@ package away3d.materials.passes
 			_fragmentCode += "mov " + _registerCache.fragmentOutputRegister + ", " + _shadedTargetReg + "\n";
 
 			_registerCache.removeFragmentTempUsage(_shadedTargetReg);
-		}
-
-		private function compileGlobalFragmentCode() : void
-		{
-			_globalPositionFragmentReg = _registerCache.getFreeVarying();
-			_vertexCode += "mov " + _globalPositionFragmentReg + ", " + _globalPositionVertexReg + "\n";
-			_registerCache.removeVertexTempUsage(_globalPositionVertexReg);
 		}
 
 		private function compileProjCode() : void
@@ -762,9 +758,16 @@ package away3d.materials.passes
 			_registerCache.getFreeVertexConstant();
 			_sceneMatrixIndex = _positionMatrixRegs[0].index;
 
-			_vertexCode += "m34 " + _globalPositionVertexReg + ".xyz, " + _localPositionRegister.toString() + ", " + _positionMatrixRegs[0].toString() + "\n" +
-					"mov " + _globalPositionVertexReg + ".w, " + _localPositionRegister + ".w     \n";
+			_vertexCode += 	"m34 " + _globalPositionVertexReg + ".xyz, " + _localPositionRegister.toString() + ", " + _positionMatrixRegs[0].toString() + "\n" +
+							"mov " + _globalPositionVertexReg + ".w, " + _localPositionRegister + ".w     \n";
 //			_registerCache.removeVertexTempUsage(_localPositionRegister);
+
+			// todo: add spotlight check as well
+			if (_numPointLights > 0) {
+				_globalPositionVaryingReg = _registerCache.getFreeVarying();
+				_vertexCode += "mov " + _globalPositionVaryingReg + ", " + _globalPositionVertexReg + "\n";
+				_registerCache.removeVertexTempUsage(_globalPositionVertexReg);
+			}
 		}
 
 		private function compileUVCode() : void
@@ -781,9 +784,9 @@ package away3d.materials.passes
 				var uvTransform2 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
 				_uvTransformIndex = uvTransform1.index;
 
-				_vertexCode += "dp4 " + _uvVaryingReg + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
-						"dp4 " + _uvVaryingReg + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
-						"mov " + _uvVaryingReg + ".zw, " + uvAttributeReg + ".zw \n";
+				_vertexCode += 	"dp4 " + _uvVaryingReg + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
+								"dp4 " + _uvVaryingReg + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
+								"mov " + _uvVaryingReg + ".zw, " + uvAttributeReg + ".zw \n";
 			}
 			else {
 				_vertexCode += "mov " + _uvVaryingReg + ", " + uvAttributeReg + "\n";
@@ -813,7 +816,7 @@ package away3d.materials.passes
 			_normalVarying = _registerCache.getFreeVarying();
 
 			_animatableAttributes.push(_normalInput.toString());
-			_targetRegisters.push(_animatedNormalReg.toString());
+			_animationTargetRegisters.push(_animatedNormalReg.toString());
 
 			normalMatrix[0] = _registerCache.getFreeVertexConstant();
 			normalMatrix[1] = _registerCache.getFreeVertexConstant();
@@ -853,19 +856,19 @@ package away3d.materials.passes
 			_animatedTangentReg = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(_animatedTangentReg, 1);
 			_animatableAttributes.push(_tangentInput.toString());
-			_targetRegisters.push(_animatedTangentReg.toString());
+			_animationTargetRegisters.push(_animatedTangentReg.toString());
 
 			normalTemp = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(normalTemp, 1);
 
-			_vertexCode += "m33 " + normalTemp + ".xyz, " + _animatedNormalReg + ".xyz, " + matrix[0].toString() + "\n" +
-					"nrm " + normalTemp + ".xyz, " + normalTemp + ".xyz	\n";
+			_vertexCode += 	"m33 " + normalTemp + ".xyz, " + _animatedNormalReg + ".xyz, " + matrix[0].toString() + "\n" +
+							"nrm " + normalTemp + ".xyz, " + normalTemp + ".xyz	\n";
 
 			tanTemp = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(tanTemp, 1);
 
-			_vertexCode += "m33 " + tanTemp + ".xyz, " + _animatedTangentReg + ".xyz, " + matrix[0].toString() + "\n" +
-					"nrm " + tanTemp + ".xyz, " + tanTemp + ".xyz	\n";
+			_vertexCode += 	"m33 " + tanTemp + ".xyz, " + _animatedTangentReg + ".xyz, " + matrix[0].toString() + "\n" +
+							"nrm " + tanTemp + ".xyz, " + tanTemp + ".xyz	\n";
 
 			bitanTemp1 = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(bitanTemp1, 1);
@@ -909,19 +912,18 @@ package away3d.materials.passes
 			n = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(n, 1);
 
-			_fragmentCode += "nrm " + t + ".xyz, " + _tangentVarying + ".xyz	\n" +
-					"mov " + t + ".w, " + _tangentVarying + ".w		\n" +
-					"nrm " + t + ".xyz, " + _tangentVarying + ".xyz	\n" +
-					"nrm " + b + ".xyz, " + _bitangentVarying + ".xyz	\n" +
-					"nrm " + n + ".xyz, " + _normalVarying + ".xyz	\n";
+			_fragmentCode += 	"nrm " + t + ".xyz, " + _tangentVarying + ".xyz	\n" +
+								"mov " + t + ".w, " + _tangentVarying + ".w	\n" +
+								"nrm " + b + ".xyz, " + _bitangentVarying + ".xyz	\n" +
+								"nrm " + n + ".xyz, " + _normalVarying + ".xyz	\n";
 
 			var temp : ShaderRegisterElement = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(temp, 1);
 			_fragmentCode += _normalMethod.getFragmentPostLightingCode(_registerCache, temp) +
-					"sub " + temp + ".xyz, " + temp + ".xyz, " + _commonsReg + ".xxx	\n" +
-					"nrm " + temp + ".xyz, " + temp + ".xyz							\n" +
-					"m33 " + _normalFragmentReg + ".xyz, " + temp + ".xyz, " + t.toString() + "	\n" +
-					"mov " + _normalFragmentReg + ".w,   " + _normalVarying + ".w							\n";
+							"sub " + temp + ".xyz, " + temp + ".xyz, " + _commonsReg + ".xxx	\n" +
+							"nrm " + temp + ".xyz, " + temp + ".xyz							\n" +
+							"m33 " + _normalFragmentReg + ".xyz, " + temp + ".xyz, " + t + "	\n" +
+							"mov " + _normalFragmentReg + ".w,   " + _normalVarying + ".w			\n";
 
 			_registerCache.removeFragmentTempUsage(temp);
 
@@ -947,9 +949,9 @@ package away3d.materials.passes
 
 			_cameraPositionIndex = cameraPositionReg.index;
 
-			_vertexCode += "sub " + _viewDirVaryingReg.toString() + ", " + cameraPositionReg.toString() + ", " + _globalPositionVertexReg + "\n";
-			_fragmentCode += "nrm " + _viewDirFragmentReg + ".xyz, " + _viewDirVaryingReg + ".xyz		\n" +
-					"mov " + _viewDirFragmentReg + ".w,   " + _viewDirVaryingReg + ".w 		\n";
+			_vertexCode += "sub " + _viewDirVaryingReg + ", " + cameraPositionReg + ", " + _globalPositionVertexReg + "\n";
+			_fragmentCode += 	"nrm " + _viewDirFragmentReg + ".xyz, " + _viewDirVaryingReg + ".xyz		\n" +
+								"mov " + _viewDirFragmentReg + ".w,   " + _viewDirVaryingReg + ".w 		\n";
 
 			_registerCache.removeVertexTempUsage(_globalPositionVertexReg);
 		}
@@ -957,6 +959,8 @@ package away3d.materials.passes
 		private function compileLightingCode() : void
 		{
 			var shadowReg : ShaderRegisterElement;
+
+			initLightRegisters();
 
 			_vertexCode += _diffuseMethod.getVertexCode(_registerCache);
 			_fragmentCode += _diffuseMethod.getFragmentAGALPreLightingCode(_registerCache);
@@ -966,6 +970,7 @@ package away3d.materials.passes
 				_fragmentCode += _specularMethod.getFragmentAGALPreLightingCode(_registerCache);
 			}
 
+			_lightIndex = 0;
 			compileDirectionalLightCode();
 			compilePointLightCode();
 
@@ -1006,21 +1011,38 @@ package away3d.materials.passes
 //			if (shadowReg && _normalDependencies > 0) _registerCache.removeFragmentTempUsage(shadowReg);
 		}
 
+		private function initLightRegisters() : void
+		{
+			// init these first so we're sure they're in sequence
+			var i : uint, len : uint;
+
+			len = _dirLightRegisters.length;
+			for (i = 0; i < len; ++i) {
+				_dirLightRegisters[i] = _registerCache.getFreeFragmentConstant();
+				if (_lightDataIndex == -1) _lightDataIndex = _dirLightRegisters[i].index;
+			}
+
+			len = _pointLightRegisters.length;
+			for (i = 0; i < len; ++i) {
+				_pointLightRegisters[i] = _registerCache.getFreeFragmentConstant();
+				if (_lightDataIndex == -1) _lightDataIndex = _pointLightRegisters[i].index;
+			}
+		}
+
 		private function compileDirectionalLightCode() : void
 		{
-			// light data will be triplets
 			var diffuseColorReg : ShaderRegisterElement;
 			var specularColorReg : ShaderRegisterElement;
 			var lightDirReg : ShaderRegisterElement;
+			var regIndex : int;
 
 			for (var i : uint = 0; i < _numDirectionalLights; ++i) {
-				lightDirReg = _registerCache.getFreeFragmentConstant();
-				diffuseColorReg = _registerCache.getFreeFragmentConstant();
-				if (specularMethod) specularColorReg = _registerCache.getFreeFragmentConstant();
-
-				if (_lightDataIndex == -1) _lightDataIndex = lightDirReg.index;
-				_fragmentCode += _diffuseMethod.getFragmentCodePerLight(i, lightDirReg, diffuseColorReg, _registerCache);
-				if (_specularMethod) _fragmentCode += specularMethod.getFragmentCodePerLight(i, lightDirReg, specularColorReg, _registerCache);
+				lightDirReg = _dirLightRegisters[regIndex++];
+				diffuseColorReg = _dirLightRegisters[regIndex++];
+				if (_specularMethod) specularColorReg = _dirLightRegisters[regIndex++];
+				_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_lightIndex, lightDirReg, diffuseColorReg, _registerCache);
+				if (_specularMethod) _fragmentCode += _specularMethod.getFragmentCodePerLight(_lightIndex, lightDirReg, specularColorReg, _registerCache);
+				++_lightIndex;
 			}
 		}
 
@@ -1030,17 +1052,18 @@ package away3d.materials.passes
 			var specularColorReg : ShaderRegisterElement;
 			var lightPosReg : ShaderRegisterElement;
 			var lightDirReg : ShaderRegisterElement;
-			var specMethod : ShadingMethodBase = specularMethod;
+			var specMethod : ShadingMethodBase = _specularMethod;
+			var regIndex : int;
 
 			for (var i : uint = 0; i < _numPointLights; ++i) {
-				lightPosReg = _registerCache.getFreeFragmentConstant();
-				diffuseColorReg = _registerCache.getFreeFragmentConstant();
-				if (specMethod) specularColorReg = _registerCache.getFreeFragmentConstant();
+				lightPosReg = _pointLightRegisters[regIndex++];
+				diffuseColorReg = _pointLightRegisters[regIndex++];
+				if (specMethod) specularColorReg = _pointLightRegisters[regIndex++];
 				lightDirReg = _registerCache.getFreeFragmentVectorTemp();
 				_registerCache.addFragmentTempUsages(lightDirReg, 1);
 
 				// calculate direction
-				_fragmentCode += "sub " + lightDirReg + ", " + lightPosReg + ", " + _globalPositionFragmentReg + "\n" +
+				_fragmentCode += "sub " + lightDirReg + ", " + lightPosReg + ", " + _globalPositionVaryingReg + "\n" +
 				// attenuate
 								"dp3 " + lightDirReg + ".w, " + lightDirReg + ".xyz, " + lightDirReg + ".xyz\n" +
 								"sqt " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
@@ -1056,10 +1079,11 @@ package away3d.materials.passes
 								"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
 
 				if (_lightDataIndex == -1) _lightDataIndex = lightPosReg.index;
-				_fragmentCode += _diffuseMethod.getFragmentCodePerLight(i, lightDirReg, diffuseColorReg, _registerCache);
-				if (_specularMethod) _fragmentCode += specularMethod.getFragmentCodePerLight(i, lightDirReg, specularColorReg, _registerCache);
+				_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_lightIndex, lightDirReg, diffuseColorReg, _registerCache);
+				if (_specularMethod) _fragmentCode += _specularMethod.getFragmentCodePerLight(_lightIndex, lightDirReg, specularColorReg, _registerCache);
 
 				_registerCache.removeFragmentTempUsage(lightDirReg);
+				++_lightIndex;
 			}
 		}
 
@@ -1094,16 +1118,9 @@ package away3d.materials.passes
 			var dirLight : DirectionalLight;
 			var pointLight : PointLight;
 			var i : uint, k : uint;
-			var specMethod : BasicSpecularMethod = specularMethod;
+			var specMethod : BasicSpecularMethod = _specularMethod;
 			var len : int;
 			var dirPos : Vector3D;
-			var specR : Number, specG : Number, specB : Number;
-
-			if (specMethod) {
-				specR = specMethod._specularR;
-				specG = specMethod._specularR;
-				specB = specMethod._specularR;
-			}
 
 			len = directionalLights.length;
 			for (i = 0; i < len; ++i) {
@@ -1121,18 +1138,18 @@ package away3d.materials.passes
 				_lightData[k++] = 1;
 
 				if (specMethod) {
-					_lightData[k++] = dirLight._specularR * specR;
-					_lightData[k++] = dirLight._specularG * specG;
-					_lightData[k++] = dirLight._specularB * specB;
+					_lightData[k++] = dirLight._specularR;
+					_lightData[k++] = dirLight._specularG;
+					_lightData[k++] = dirLight._specularB;
 					_lightData[k++] = 1;
 				}
 			}
 
 			// more directional supported than currently picked, need to clamp all to 0
 			if (_numDirectionalLights > len) {
-				i = k + (len - _numDirectionalLights) * (specMethod? 12 : 8);
-				for (; k < i; ++k)
-					_lightData[k] = 0;
+				i = k + (_numDirectionalLights - len) * (specMethod? 12 : 8);
+				while (k < i)
+					_lightData[k++] = 0;
 			}
 
 			len = pointLights.length;
@@ -1150,9 +1167,9 @@ package away3d.materials.passes
 				_lightData[k++] = pointLight._radius;
 
 				if (specMethod) {
-					_lightData[k++] = pointLight._specularR * specR;
-					_lightData[k++] = pointLight._specularG * specG;
-					_lightData[k++] = pointLight._specularB * specB;
+					_lightData[k++] = pointLight._specularR;
+					_lightData[k++] = pointLight._specularG;
+					_lightData[k++] = pointLight._specularB;
 					_lightData[k++] = pointLight._fallOffFactor;
 				}
 			}

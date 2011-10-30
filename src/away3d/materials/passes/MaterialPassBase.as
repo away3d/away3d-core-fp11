@@ -48,7 +48,7 @@ package away3d.materials.passes
 		private var _bothSides : Boolean;
 
 		protected var _animatableAttributes : Array = ["va0"];
-		protected var _targetRegisters : Array = ["vt0"];
+		protected var _animationTargetRegisters : Array = ["vt0"];
 		protected var _projectedTargetRegister : String;
 
 		protected var _numPointLights : uint;
@@ -234,7 +234,7 @@ package away3d.materials.passes
 		 */
 		arcane function getAnimationTargetRegisters() : Array
 		{
-			return _targetRegisters;
+			return _animationTargetRegisters;
 		}
 
 		arcane function getVertexCode() : String

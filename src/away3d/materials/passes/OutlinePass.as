@@ -45,7 +45,7 @@ package away3d.materials.passes
 			this.outlineSize = outlineSize;
 			_defaultCulling = Context3DTriangleFace.FRONT;
 			_animatableAttributes = ["va0", "va1"];
-			_targetRegisters = ["vt0", "vt1"];
+			_animationTargetRegisters = ["vt0", "vt1"];
 			_numUsedStreams = 2;
 			_numUsedVertexConstants = 5;
 			_showInnerLines = showInnerLines;

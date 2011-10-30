@@ -187,6 +187,8 @@ package away3d.materials.methods
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
+
+			// write in temporary if not first light, so we can add to total diffuse colour
 			if (lightIndex > 0) {
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);

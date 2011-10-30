@@ -37,7 +37,7 @@ package away3d.materials.methods
 		 */
 		public function BasicSpecularMethod()
 		{
-			super(true, false, false);
+			super(true, true, false);
 			_specularData = Vector.<Number>([1, 1, 1, 50]);
 		}
 
@@ -134,14 +134,6 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get needsView() : Boolean
-		{
-			return true;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function get needsUV() : Boolean
 		{
 			return _useTexture;
@@ -193,10 +185,6 @@ package away3d.materials.methods
 				_totalLightColorReg = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(_totalLightColorReg, 1);
 			}
-			else {
-				_specularDataRegister = null;
-				_specularTextureRegister = null;
-			}
 
 			return code;
 		}
@@ -222,6 +210,7 @@ package away3d.materials.methods
 					"sat " + t + ".w, " + t + ".w\n";
 
 			if (_useTexture) {
+				// apply gloss modulation from texture
 				code += "mul " + _specularTexData + ".w, " + _specularTexData + ".y, " + _specularDataRegister + ".w\n" +
 						"pow " + t + ".w, " + t + ".w, " + _specularTexData + ".w\n";
 			}
@@ -250,19 +239,19 @@ package away3d.materials.methods
 		{
 			var code : String = "";
 
-			if (_numLights == 0) {
-				_specularTextureRegister = null;
-				return "";
-			}
+			if (_numLights == 0)
+				return code;
 
 			if (_shadowRegister)
 				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
 
 			if (_useTexture) {
+				// apply strength modulation from texture
 				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _specularTexData + ".x\n";
 				regCache.removeFragmentTempUsage(_specularTexData);
 			}
 
+			// apply material's specular reflection
 			code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _specularDataRegister + ".xyz\n" +
 					"add " + targetReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n";
 			regCache.removeFragmentTempUsage(_totalLightColorReg);
