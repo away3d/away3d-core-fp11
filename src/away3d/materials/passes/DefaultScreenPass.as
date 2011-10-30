@@ -521,6 +521,18 @@ package away3d.materials.passes
 		{
 			_numLights = _numPointLights + _numDirectionalLights;
 
+			_uvTransformIndex = -1;
+			_cameraPositionIndex = -1;
+			_commonsRegIndex = -1;
+			_uvBufferIndex = -1;
+			_secondaryUVBufferIndex = -1;
+			_normalBufferIndex = -1;
+			_tangentBufferIndex = -1;
+			_lightDataIndex = -1;
+			_sceneMatrixIndex = -1;
+			_sceneNormalMatrixIndex = -1;
+
+
 			_lightDataLength = specularMethod ? _numLights*3 : _numLights*2;
 
 			_lightData = new Vector.<Number>(_lightDataLength*4, true);
@@ -600,13 +612,6 @@ package away3d.materials.passes
 			for (var i : uint = 0; i < len; ++i) {
 				_methods[i].cleanCompilationData();
 			}
-
-//			if (_lights) {
-//				len = _lights.length;
-//				for (i = 0; i < len; ++i) {
-//					_lights[i].cleanCompilationData();
-//				}
-//			}
 		}
 
 		private function setMethodProps(method : ShadingMethodBase) : void
@@ -637,7 +642,6 @@ package away3d.materials.passes
 			if (_viewDirDependencies > 0) compileViewDirCode();
 			setMethodRegs(_normalMethod);
 			if (_normalDependencies > 0) compileNormalCode();
-
 
 			setMethodRegs(_diffuseMethod);
 			if (_shadowMethod) setMethodRegs(_shadowMethod);
@@ -719,17 +723,6 @@ package away3d.materials.passes
 			_uvDependencies = 0;
 			_secondaryUVDependencies = 0;
 			_globalPosDependencies = 0;
-
-			_uvTransformIndex = -1;
-			_cameraPositionIndex = -1;
-			_commonsRegIndex = -1;
-			_uvBufferIndex = -1;
-			_secondaryUVBufferIndex = -1;
-			_normalBufferIndex = -1;
-			_tangentBufferIndex = -1;
-			_lightDataIndex = -1;
-			_sceneMatrixIndex = -1;
-			_sceneNormalMatrixIndex = -1;
 
 			countMethodDependencies(_diffuseMethod);
 			if (_shadowMethod) countMethodDependencies(_shadowMethod);
@@ -945,23 +938,6 @@ package away3d.materials.passes
 			_commonsRegIndex = _commonsReg.index;
 		}
 
-		/*private function compileLightDirCode() : void
-		{
-			var light : LightBase;
-
-			for (var i : int = 0; i < _numLights; ++i) {
-				light = _lights[i];
-
-				_vertexCode += light.getVertexCode(_registerCache, _globalPositionVertexReg, this);
-				_fragmentCode += light.getFragmentCode(_registerCache, this);
-
-				_lightPosFragmentRegs[i] = light.fragmentDirectionRegister;
-				_lightInputIndices[i] = light.shaderConstantIndex;
-
-				if (light.positionBased) _registerCache.removeVertexTempUsage(_globalPositionVertexReg);
-			}
-		}         */
-
 		private function compileViewDirCode() : void
 		{
 			var cameraPositionReg : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
@@ -980,11 +956,7 @@ package away3d.materials.passes
 
 		private function compileLightingCode() : void
 		{
-			var diffuseColorReg : ShaderRegisterElement;
-			var specularColorReg : ShaderRegisterElement;
 			var shadowReg : ShaderRegisterElement;
-			var lightDirReg : ShaderRegisterElement;
-			var light : LightBase;
 
 			_vertexCode += _diffuseMethod.getVertexCode(_registerCache);
 			_fragmentCode += _diffuseMethod.getFragmentAGALPreLightingCode(_registerCache);
@@ -1070,7 +1042,7 @@ package away3d.materials.passes
 				// calculate direction
 				_fragmentCode += "sub " + lightDirReg + ", " + lightPosReg + ", " + _globalPositionFragmentReg + "\n" +
 				// attenuate
-								/*"dp3 " + lightDirReg + ".w, " + lightDirReg + ".xyz, " + lightDirReg + ".xyz\n" +
+								"dp3 " + lightDirReg + ".w, " + lightDirReg + ".xyz, " + lightDirReg + ".xyz\n" +
 								"sqt " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
 							// w = d - radis
 								"sub " + lightDirReg + ".w, " + lightDirReg + ".w, " + diffuseColorReg + ".w\n" +
@@ -1079,10 +1051,9 @@ package away3d.materials.passes
 							// w = clamp(w, 0, 1)
 								"sat " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
 							// w = 1-w
-								"sub " + lightDirReg + ".w, " + lightPosReg + ".w, " + lightDirReg + ".w\n" +   */
+								"sub " + lightDirReg + ".w, " + lightPosReg + ".w, " + lightDirReg + ".w\n" +
 				// normalize
-								"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n" +
-								"mov " + lightDirReg + ".w, " + lightPosReg + ".w		\n";
+								"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
 
 				if (_lightDataIndex == -1) _lightDataIndex = lightPosReg.index;
 				_fragmentCode += _diffuseMethod.getFragmentCodePerLight(i, lightDirReg, diffuseColorReg, _registerCache);
@@ -1119,26 +1090,26 @@ package away3d.materials.passes
 		 */
 		private function updateLights(directionalLights : Vector.<DirectionalLight>, pointLights : Vector.<PointLight>) : void
 		{
-			// todo: add position/direction in front of data per light
 			// first dirs, then points
 			var dirLight : DirectionalLight;
 			var pointLight : PointLight;
 			var i : uint, k : uint;
-			var spec : BasicSpecularMethod = specularMethod;
+			var specMethod : BasicSpecularMethod = specularMethod;
 			var len : int;
 			var dirPos : Vector3D;
 			var specR : Number, specG : Number, specB : Number;
 
-			if (spec) {
-				specR = spec._specularR;
-				specG = spec._specularR;
-				specB = spec._specularR;
+			if (specMethod) {
+				specR = specMethod._specularR;
+				specG = specMethod._specularR;
+				specB = specMethod._specularR;
 			}
 
 			len = directionalLights.length;
 			for (i = 0; i < len; ++i) {
 				dirLight = directionalLights[i];
-				dirPos = dirLight.direction;
+				dirPos = dirLight.sceneDirection;
+
 				_lightData[k++] = -dirPos.x;
 				_lightData[k++] = -dirPos.y;
 				_lightData[k++] = -dirPos.z;
@@ -1147,22 +1118,19 @@ package away3d.materials.passes
 				_lightData[k++] = dirLight._diffuseR;
 				_lightData[k++] = dirLight._diffuseG;
 				_lightData[k++] = dirLight._diffuseB;
-
-				// todo: for point lights, this will contain radius
 				_lightData[k++] = 1;
 
-				if (spec) {
+				if (specMethod) {
 					_lightData[k++] = dirLight._specularR * specR;
 					_lightData[k++] = dirLight._specularG * specG;
 					_lightData[k++] = dirLight._specularB * specB;
-				// todo: for point lights, this will contain 1 / (_fallOff - _radius)
 					_lightData[k++] = 1;
 				}
 			}
 
 			// more directional supported than currently picked, need to clamp all to 0
 			if (_numDirectionalLights > len) {
-				i = k + (len - _numDirectionalLights) * (spec? 12 : 8);
+				i = k + (len - _numDirectionalLights) * (specMethod? 12 : 8);
 				for (; k < i; ++k)
 					_lightData[k] = 0;
 			}
@@ -1181,7 +1149,7 @@ package away3d.materials.passes
 				_lightData[k++] = pointLight._diffuseB;
 				_lightData[k++] = pointLight._radius;
 
-				if (spec) {
+				if (specMethod) {
 					_lightData[k++] = pointLight._specularR * specR;
 					_lightData[k++] = pointLight._specularG * specG;
 					_lightData[k++] = pointLight._specularB * specB;
@@ -1191,7 +1159,7 @@ package away3d.materials.passes
 
 			// more directional supported than currently picked, need to clamp all to 0
 			if (_numPointLights > len) {
-				i = k + (len - _numPointLights) * (spec? 12 : 8);
+				i = k + (len - _numPointLights) * (specMethod? 12 : 8);
 				for (; k < i; ++k)
 					_lightData[k] = 0;
 			}

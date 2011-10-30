@@ -38,8 +38,6 @@ package away3d.lights
 
 		private var _castsShadows : Boolean;
 
-//		protected var _fragmentDirReg : ShaderRegisterElement;
-		protected var _shaderConstantIndex : uint;
 		private var _shadowMapper : ShadowMapperBase;
 
 
@@ -164,46 +162,6 @@ package away3d.lights
 			_diffuseG = _colorG*_diffuse;
 			_diffuseB = _colorB*_diffuse;
 		}
-
-//		arcane function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
-//		{
-//			return "";
-//		}
-
-//		arcane function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
-//		{
-//			return "";
-//		}
-
-//		arcane function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement, pass : MaterialPassBase) : String
-//		{
-//			return "";
-//		}
-
-//		arcane function get fragmentDirectionRegister() : ShaderRegisterElement
-//		{
-//			return _fragmentDirReg;
-//		}
-
-//		arcane function get shaderConstantIndex() : uint
-//		{
-//			return _shaderConstantIndex;
-//		}
-
-//		arcane function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
-//		{
-//
-//		}
-
-//		arcane function cleanCompilationData() : void
-//		{
-//			_fragmentDirReg = null;
-//		}
-
-//		arcane function get positionBased() : Boolean
-//		{
-//			return false;
-//		}
 
 		public function get shadowMapper() : ShadowMapperBase
 		{

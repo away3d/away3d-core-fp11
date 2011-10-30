@@ -27,10 +27,6 @@
 		private var _tmpLookAt : Vector3D;
 		private var _sceneDirection : Vector3D;
 
-
-		// shader-related
-		private var _directionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
-
 		/**
 		 * Creates a new DirectionalLight object.
 		 * @param xDir The x-component of the light's directional vector.
@@ -41,7 +37,7 @@
 		{
 			super();
 			direction = new Vector3D(xDir, yDir, zDir);
-			_sceneDirection = new Vector3D(0, 0, 0);
+			_sceneDirection = new Vector3D();
 		}
 
 		/**
@@ -95,33 +91,8 @@
 		{
 			super.updateSceneTransform();
 			sceneTransform.copyColumnTo(2, _sceneDirection);
-			_directionData[0] = -_sceneDirection.x;
-			_directionData[1] = -_sceneDirection.y;
-			_directionData[2] = -_sceneDirection.z;
+			_sceneDirection.normalize();
 		}
-
-		/*arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
-		{
-			return super.getVertexCode(regCache, globalPositionRegister, pass);
-		}
-
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
-		{
-			_fragmentDirReg = regCache.getFreeFragmentConstant();
-			_shaderConstantIndex = _fragmentDirReg.index;
-			return "";
-		}
-
-		arcane override function cleanCompilationData() : void
-		{
-			_fragmentDirReg = null;
-		}
-
-		arcane override function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
-		{
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, inputIndex, _directionData, 1);
-		} */
-
 
 		override protected function createShadowMapper() : ShadowMapperBase
 		{

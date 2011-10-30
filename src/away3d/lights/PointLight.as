@@ -25,7 +25,6 @@ package away3d.lights
 		//private static var _pos : Vector3D = new Vector3D();
 		arcane var _radius : Number = Number.MAX_VALUE;
 		arcane var _fallOff : Number = Number.MAX_VALUE;
-		private var _positionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
 		arcane var _fallOffFactor : Number;
 
 		/**
@@ -34,6 +33,7 @@ package away3d.lights
 		public function PointLight()
 		{
 			super();
+			_fallOffFactor = 1 / (_fallOff - _radius);
 		}
 
 		/**
@@ -88,17 +88,6 @@ package away3d.lights
 			_boundsInvalid = false;
 		}
 
-
-		override protected function updateSceneTransform() : void
-		{
-			super.updateSceneTransform();
-			var pos : Vector3D = scenePosition;
-
-			_positionData[0] = pos.x;
-			_positionData[1] = pos.y;
-			_positionData[2] = pos.z;
-		}
-
 		/**
 		 * @inheritDoc
 		 */
@@ -118,8 +107,6 @@ package away3d.lights
 
 			m.copyFrom(renderable.sceneTransform);
 			m.append(_parent.inverseSceneTransform);
-// todo: why doesn't this work?
-//			m.copyRowTo(3, _pos);
 			lookAt(m.position);
 
 			m.copyFrom(renderable.sceneTransform);
@@ -151,50 +138,5 @@ package away3d.lights
 
 			return target;
 		}
-
-//		override arcane function get positionBased() : Boolean
-//		{
-//			return true;
-//		}
-
-
-		/*arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
-		{
-			_vertexPosReg = regCache.getFreeVertexConstant();
-			_varyingReg = regCache.getFreeVarying();
-			_shaderConstantIndex = _vertexPosReg.index;
-
-			return "sub " + _varyingReg.toString() + ", " + _vertexPosReg.toString() + ", " + globalPositionRegister.toString() + "\n";
-		}
-
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
-		{
-			_attenuationRegister = regCache.getFreeFragmentConstant();
-			// setting this causes the material bug
-			_attenuationIndices[pass] = _attenuationRegister.index;
-			_fragmentDirReg = _varyingReg;
-			return	 "";
-		}
-
-
-		arcane override function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement, pass : MaterialPassBase) : String
-		{
-			// w = sqrt(dir . dir) = len(dir)
-			return	"dp3 " + targetReg + ".w, " + _varyingReg + ".xyz, " + _varyingReg + ".xyz\n" +
-					"sqt " + targetReg + ".w, " + targetReg + ".w\n" +
-				// w = d - min
-					"sub " + targetReg + ".w, " + targetReg + ".w, " + _attenuationRegister + ".x\n" +
-				// w = (d - min)/(max-min)
-					"mul " + targetReg + ".w, " + targetReg + ".w, " + _attenuationRegister + ".y\n" +
-				// w = clamp(w, 0, 1)
-					"sat " + targetReg + ".w, " + targetReg + ".w\n" +
-					"sub " + targetReg + ".w, " + _attenuationRegister + ".w, " + targetReg + ".w\n";
-		}
-
-		arcane override function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
-		{
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, inputIndex, _positionData, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _attenuationIndices[pass], _attenuationData, 1);
-		}    */
 	}
 }
