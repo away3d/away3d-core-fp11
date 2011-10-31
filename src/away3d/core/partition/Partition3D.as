@@ -1,7 +1,9 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
+	import away3d.core.traverse.EntityCollector;
 	import away3d.core.traverse.PartitionTraverser;
+	import away3d.core.traverse.ShadowCasterCollector;
 	import away3d.entities.Entity;
 
 	use namespace arcane;
@@ -44,7 +46,7 @@ package away3d.core.partition
 		 */
 		public function traverse(traverser : PartitionTraverser) : void
 		{
-			if (_updatesMade)
+			if (_updatesMade && traverser is EntityCollector && !(traverser is ShadowCasterCollector))
 				updateEntities();
 			
 			_rootNode.acceptTraverser(traverser);
@@ -83,9 +85,9 @@ package away3d.core.partition
 		{
 			var node : EntityNode = entity.getEntityPartitionNode();
 			var t : EntityNode;
-
+			
 			node.removeFromParent();
-
+			
 			// remove from update list if it's in
 			if (node == _updateQueue)
 				_updateQueue = node._updateQueueNext;
@@ -96,14 +98,14 @@ package away3d.core.partition
 				if (t)
 					t._updateQueueNext = node._updateQueueNext;
 			}
-
+			
 			node._updateQueueNext = null;
-
+			
 			// any updates have been made undone
 			if (!_updateQueue)
 				_updatesMade = false;
 		}
-
+		
 		/**
 		 * Updates all entities that were marked for update.
 		 */
@@ -115,6 +117,8 @@ package away3d.core.partition
 			
 			//clear updateQueue early to allow for newly marked entity updates
 			_updateQueue = null;
+			
+			_updatesMade = false;
 
 			do {
 				//call an internal update on the entity to fire any attached logic
@@ -134,8 +138,6 @@ package away3d.core.partition
 				node._updateQueueNext = null;
 				
 			} while (node = t);
-
-			_updatesMade = false;
 		}
 	}
 }
