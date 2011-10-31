@@ -10,7 +10,7 @@ package away3d.materials.passes
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.lightpickers.ILightPicker;
+	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -53,6 +53,7 @@ package away3d.materials.passes
 
 		protected var _numPointLights : uint;
 		protected var _numDirectionalLights : uint;
+		protected var _numLightProbes : uint;
 
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
 		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
@@ -195,7 +196,7 @@ package away3d.materials.passes
 		 *
 		 * @private
 		 */
-		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : ILightPicker) : void
+		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 
@@ -345,6 +346,11 @@ package away3d.materials.passes
 		arcane function set numDirectionalLights(value : uint) : void
 		{
 			_numDirectionalLights = value;
+		}
+
+		arcane function set numLightProbes(value : uint) : void
+		{
+			_numLightProbes = value;
 		}
 	}
 }

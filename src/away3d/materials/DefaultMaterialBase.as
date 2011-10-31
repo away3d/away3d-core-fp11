@@ -47,6 +47,27 @@
 			_screenPass.diffuseMethod.alphaThreshold = value;
 		}
 
+
+		public function get specularLightSources() : uint
+		{
+			return _screenPass.specularLightSources;
+		}
+
+		public function set specularLightSources(value : uint) : void
+		{
+			_screenPass.specularLightSources = value;
+		}
+
+		public function get diffuseLightSources() : uint
+		{
+			return _screenPass.diffuseLightSources;
+		}
+
+		public function set diffuseLightSources(value : uint) : void
+		{
+			_screenPass.diffuseLightSources = value;
+		}
+
 		/**
 		 * The ColorTransform object to transform the colour of the material with.
 		 */

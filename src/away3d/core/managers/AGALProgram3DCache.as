@@ -18,6 +18,7 @@ package away3d.core.managers
 
 	use namespace arcane;
 
+	// todo: seperate "compiler" from "cache" functionality
 	public class AGALProgram3DCache
 	{
 		private static var _instances : Vector.<AGALProgram3DCache>;
@@ -97,6 +98,8 @@ package away3d.core.managers
 			var program : Program3D;
 			var key : String = getKey(vertexCode, materialFragmentCode);
 
+			trace (vertexCode + "\n\n\n\n-----\n\n\n\n" + materialFragmentCode);
+
 			if (_program3Ds[key] == null) {
 				_keys[_currentId] = key;
 				_usages[_currentId] = 0;
@@ -106,6 +109,7 @@ package away3d.core.managers
 
 				var vertexByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode);
 				var fragmentByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, materialFragmentCode);
+
 				program.upload(vertexByteCode, fragmentByteCode);
 
 				_program3Ds[key] = program;

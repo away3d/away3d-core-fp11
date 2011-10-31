@@ -121,6 +121,17 @@ package away3d.materials.methods
 			return code;
 		}
 
+
+		/**
+		 * @inheritDoc
+		 */
+		arcane override function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		{
+			var code : String = _baseDiffuseMethod.getFragmentCodePerProbe(lightIndex, cubeMapReg, weightRegister, regCache);
+			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
+			return code;
+		}
+
 		/**
 		 * @inheritDoc
 		 */

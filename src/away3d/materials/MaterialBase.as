@@ -11,7 +11,7 @@ package away3d.materials
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.lights.LightBase;
-	import away3d.materials.lightpickers.ILightPicker;
+	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
 
@@ -60,7 +60,7 @@ package away3d.materials
 		private var _repeat : Boolean;
 
 		private var _depthPass : DepthMapPass;
-		private var _lightPicker : ILightPicker;
+		private var _lightPicker : LightPickerBase;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -81,12 +81,12 @@ package away3d.materials
 			return AssetType.MATERIAL;
 		}
 
-		public function get lightPicker() : ILightPicker
+		public function get lightPicker() : LightPickerBase
 		{
 			return _lightPicker;
 		}
 
-		public function set lightPicker(value : ILightPicker) : void
+		public function set lightPicker(value : LightPickerBase) : void
 		{
 			if (_lightPicker)
 				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
@@ -104,6 +104,7 @@ package away3d.materials
 				pass = _passes[i];
 				pass.numPointLights = _lightPicker.numPointLights;
 				pass.numDirectionalLights = _lightPicker.numDirectionalLights;
+				pass.numLightProbes = _lightPicker.numLightProbes;
 			}
 		}
 
@@ -436,6 +437,7 @@ package away3d.materials
 			pass.repeat = _repeat;
 			pass.numPointLights = _lightPicker? _lightPicker.numPointLights : 0;
 			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights : 0;
+			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			calculateRenderId();
 		}

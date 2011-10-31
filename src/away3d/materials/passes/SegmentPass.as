@@ -11,7 +11,7 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.lightpickers.ILightPicker;
+	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -125,7 +125,7 @@ package away3d.materials.passes
 		 * @inheritDoc
 		 * todo: keep maps in dictionary per renderable
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : ILightPicker) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);

@@ -138,5 +138,11 @@ package away3d.lights
 
 			return target;
 		}
+
+		override public function set castsShadows(value : Boolean) : void
+		{
+			throw new Error("Shadow casting is not yet available for PointLight objects.");
+			super.castsShadows = value;
+		}
 	}
 }

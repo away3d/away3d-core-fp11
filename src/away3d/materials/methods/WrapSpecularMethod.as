@@ -265,6 +265,15 @@ package away3d.materials.methods
 
 		/**
 		 * @inheritDoc
+		 * @return
+		 */
+		arcane override function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		{
+			return _baseSpecularMethod.getFragmentCodePerProbe(lightIndex, cubeMapReg, weightRegister, regCache);
+		}
+
+		/**
+		 * @inheritDoc
 		 */
 		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{

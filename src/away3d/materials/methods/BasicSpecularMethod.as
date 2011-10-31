@@ -235,6 +235,39 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
+		arcane override function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		{
+			var code : String = "";
+			var t : ShaderRegisterElement;
+
+			// write in temporary if not first light, so we can add to total diffuse colour
+			if (lightIndex > 0) {
+				t = regCache.getFreeFragmentVectorTemp();
+				regCache.addFragmentTempUsages(t, 1);
+			}
+			else {
+				t = _totalLightColorReg;
+			}
+
+			code += "tex " + t + ", " + _viewDirFragmentReg + ", " + cubeMapReg + " <cube,linear,miplinear>\n" +
+					"mul " + t + ", " + t + ", " + weightRegister + "\n";
+
+//			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
+
+//			code += "mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n";
+
+			if (lightIndex > 0) {
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
+				regCache.removeFragmentTempUsage(t);
+			}
+
+			return code;
+		}
+
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";

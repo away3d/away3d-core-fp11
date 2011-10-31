@@ -7,7 +7,7 @@ package away3d.materials.passes
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
-	import away3d.materials.lightpickers.ILightPicker;
+	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
@@ -161,7 +161,7 @@ package away3d.materials.passes
 		}
 
 
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : ILightPicker) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var mesh : Mesh, dedicatedRenderable : IRenderable;
 			if (_dedicatedMeshes) {
