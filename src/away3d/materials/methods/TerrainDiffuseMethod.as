@@ -4,7 +4,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3DProgramType;
 
@@ -12,8 +12,8 @@ package away3d.materials.methods
 
 	public class TerrainDiffuseMethod extends BasicDiffuseMethod
 	{
-		private var _blendingTexture : Texture2DProxyBase;
-		private var _splats : Vector.<Texture2DProxyBase>;
+		private var _blendingTexture : Texture2DBase;
+		private var _splats : Vector.<Texture2DBase>;
 		private var _tileData : Vector.<Number>;
 		private var _numSplattingLayers : uint;
 		private var _tileRegisterIndex : int;
@@ -26,10 +26,10 @@ package away3d.materials.methods
 		 * @param blendData The texture containing the blending data. The red, green, and blue channels contain the blending values for each of the textures in splatTextures, respectively.
 		 * @param tileData The amount of times each splat texture needs to be tiled. If omitted, the default value of 50 is assumed for each.
 		 */
-		public function TerrainDiffuseMethod(splatTextures : Array, blendingTexture : Texture2DProxyBase, tileData : Array)
+		public function TerrainDiffuseMethod(splatTextures : Array, blendingTexture : Texture2DBase, tileData : Array)
 		{
 			super();
-			_splats = Vector.<Texture2DProxyBase>(splatTextures);
+			_splats = Vector.<Texture2DBase>(splatTextures);
 
 			_tileData = new Vector.<Number>(4, true);
 			for (var i : int = 0; i < 4; ++i) {

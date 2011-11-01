@@ -4,7 +4,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -23,7 +23,7 @@ package away3d.materials.methods
 		protected var _diffuseInputIndex : int;
 		private var _cutOffIndex : int;
 
-		private var _texture : Texture2DProxyBase;
+		private var _texture : Texture2DBase;
 		private var _diffuseColor : uint = 0xffffff;
 
 		private var _diffuseData : Vector.<Number>;
@@ -74,12 +74,12 @@ package away3d.materials.methods
 		/**
 		 * The bitmapData to use to define the diffuse reflection color per texel.
 		 */
-		public function get texture() : Texture2DProxyBase
+		public function get texture() : Texture2DBase
 		{
 			return _texture;
 		}
 
-		public function set texture(value : Texture2DProxyBase) : void
+		public function set texture(value : Texture2DBase) : void
 		{
 			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);

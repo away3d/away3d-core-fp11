@@ -4,7 +4,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.CubeTextureProxyBase;
+	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.Context3D;
 
@@ -16,14 +16,14 @@ package away3d.materials.methods
 	 */
 	public class EnvMapAmbientMethod extends BasicAmbientMethod
 	{
-		private var _cubeTexture : CubeTextureProxyBase;
+		private var _cubeTexture : CubeTextureBase;
 		private var _cubeMapIndex : int;
 
 		/**
 		 * Creates a new EnvMapDiffuseMethod object.
 		 * @param envMap The cube environment map to use for the diffuse lighting.
 		 */
-		public function EnvMapAmbientMethod(envMap : CubeTextureProxyBase)
+		public function EnvMapAmbientMethod(envMap : CubeTextureBase)
 		{
 			super();
 			_cubeTexture = envMap;
@@ -47,12 +47,12 @@ package away3d.materials.methods
 		/**
 		 * The cube environment map to use for the diffuse lighting.
 		 */
-		public function get envMap() : CubeTextureProxyBase
+		public function get envMap() : CubeTextureBase
 		{
 			return _cubeTexture;
 		}
 
-		public function set envMap(value : CubeTextureProxyBase) : void
+		public function set envMap(value : CubeTextureBase) : void
 		{
 			_cubeTexture = value;
 		}

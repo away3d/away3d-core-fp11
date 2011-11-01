@@ -1,4 +1,5 @@
-﻿package away3d.loaders.parsers{
+﻿package away3d.loaders.parsers
+{
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -10,7 +11,7 @@
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
@@ -81,7 +82,8 @@
 			var ba : ByteArray;
 			var str : String;
 			
-			ba = ParserUtil.toByteArray(data);			if (ba) {
+			ba = ParserUtil.toByteArray(data);
+			if (ba) {
 				ba.position = 0;
 				str = ba.readUTFBytes(4);
 			}
@@ -100,14 +102,15 @@
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			var mesh : Mesh;
-			var asset : Texture2DProxyBase;
+			var asset : Texture2DBase;
 			
 			if (resourceDependency.assets.length == 1) {
-				asset = resourceDependency.assets[0] as Texture2DProxyBase;
+				asset = resourceDependency.assets[0] as Texture2DBase;
 				mesh = retrieveMeshFromID(resourceDependency.id);
 			}
 			
-			if(mesh && asset)				TextureMaterial(mesh.material).texture = asset;
+			if(mesh && asset)
+				TextureMaterial(mesh.material).texture = asset;
 		}
 		
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
@@ -254,7 +257,9 @@
 							quadCount = 0;
 						} else if( refscount<3 || refscount > 4){
 							trace("AC3D Parser: Unsupported polygon type with "+refscount+" sides found. Triangulate in AC3D!");
-							//invalidPoly = true;							continue;						} else{
+							//invalidPoly = true;
+							continue;
+						} else{
 							isQuad = false;
 						}
 						parsesV = false;
@@ -405,7 +410,9 @@
 			mesh.x = tmpos.x;
 			mesh.y = tmpos.y;
 			mesh.z = tmpos.z;
-						finalizeAsset(mesh);		}
+			
+			finalizeAsset(mesh);
+		}
 		
 		private function retrieveMeshFromID(id:String):Mesh
 		{

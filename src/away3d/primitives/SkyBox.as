@@ -15,7 +15,7 @@ package away3d.primitives
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
-	import away3d.textures.CubeTextureProxyBase;
+	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -40,7 +40,7 @@ package away3d.primitives
 		 * Create a new SkyBox object.
 		 * @param cubeMap The CubeMap to use for the sky box's texture.
 		 */
-		public function SkyBox(cubeMap : CubeTextureProxyBase)
+		public function SkyBox(cubeMap : CubeTextureBase)
 		{
 			super();
 			_material = new SkyBoxMaterial(cubeMap);

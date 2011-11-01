@@ -3,7 +3,7 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.textures.CubeTextureProxyBase;
+	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.Context3D;
 
@@ -14,7 +14,7 @@ package away3d.materials.passes
 	 */
 	public class SkyBoxPass extends MaterialPassBase
 	{
-		private var _cubeTexture : CubeTextureProxyBase;
+		private var _cubeTexture : CubeTextureBase;
 
 		/**
 		 * Creates a new SkyBoxPass object.
@@ -28,12 +28,12 @@ package away3d.materials.passes
 		/**
 		 * The cube texture to use as the skybox.
 		 */
-		public function get cubeTexture() : CubeTextureProxyBase
+		public function get cubeTexture() : CubeTextureBase
 		{
 			return _cubeTexture;
 		}
 
-		public function set cubeTexture(value : CubeTextureProxyBase) : void
+		public function set cubeTexture(value : CubeTextureBase) : void
 		{
 			_cubeTexture = value;
 		}

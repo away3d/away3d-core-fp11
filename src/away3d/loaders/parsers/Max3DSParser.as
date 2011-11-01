@@ -13,7 +13,7 @@ package away3d.loaders.parsers
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -77,7 +77,7 @@ package away3d.loaders.parsers
 					var tex : TextureVO;
 					
 					tex = _textures[resourceDependency.id];
-					tex.texture = asset as Texture2DProxyBase;
+					tex.texture = asset as Texture2DBase;
 				}
 			}
 		}
@@ -618,12 +618,12 @@ package away3d.loaders.parsers
 
 
 import away3d.materials.MaterialBase;
-import away3d.textures.Texture2DProxyBase;
+import away3d.textures.Texture2DBase;
 
 internal class TextureVO
 {
 	public var url : String;
-	public var texture : Texture2DProxyBase;
+	public var texture : Texture2DBase;
 }
 
 internal class MaterialVO

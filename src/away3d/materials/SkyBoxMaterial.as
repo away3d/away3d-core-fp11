@@ -2,7 +2,7 @@ package away3d.materials
 {
 	import away3d.arcane;
 	import away3d.materials.passes.SkyBoxPass;
-	import away3d.textures.CubeTextureProxyBase;
+	import away3d.textures.CubeTextureBase;
 
 	use namespace arcane;
 
@@ -13,14 +13,14 @@ package away3d.materials
 	 */
 	public class SkyBoxMaterial extends MaterialBase
 	{
-		private var _cubeMap : CubeTextureProxyBase;
+		private var _cubeMap : CubeTextureBase;
 		private var _skyboxPass : SkyBoxPass;
 
 		/**
 		 * Creates a new SkyBoxMaterial object.
 		 * @param cubeMap The CubeMap to use as the skybox.
 		 */
-		public function SkyBoxMaterial(cubeMap : CubeTextureProxyBase)
+		public function SkyBoxMaterial(cubeMap : CubeTextureBase)
 		{
 			_cubeMap = cubeMap;
 			addPass(_skyboxPass = new SkyBoxPass());
@@ -30,12 +30,12 @@ package away3d.materials
 		/**
 		 * The CubeMap to use as the skybox.
 		 */
-		public function get cubeMap() : CubeTextureProxyBase
+		public function get cubeMap() : CubeTextureBase
 		{
 			return _cubeMap;
 		}
 
-		public function set cubeMap(value : CubeTextureProxyBase) : void
+		public function set cubeMap(value : CubeTextureBase) : void
 		{
 			_cubeMap = value;
 		}

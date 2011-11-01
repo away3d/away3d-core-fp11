@@ -4,7 +4,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3DProgramType;
 
@@ -12,13 +12,13 @@ package away3d.materials.methods
 
 	public class SimpleWaterNormalMethod extends BasicNormalMethod
 	{
-		private var _texture2 : Texture2DProxyBase;
+		private var _texture2 : Texture2DBase;
 		private var _normalTextureRegister2 : ShaderRegisterElement;
 		private var _normalMapIndex2 : int;
 		private var _data : Vector.<Number>;
 		private var _dataRegIndex : int;
 
-		public function SimpleWaterNormalMethod(waveMap1 : Texture2DProxyBase, waveMap2 : Texture2DProxyBase)
+		public function SimpleWaterNormalMethod(waveMap1 : Texture2DBase, waveMap2 : Texture2DBase)
 		{
 			super();
 			normalMap = waveMap1;
@@ -72,18 +72,18 @@ package away3d.materials.methods
 			normalMap = BasicNormalMethod(method).normalMap;
 		}
 
-		override public function set normalMap(value : Texture2DProxyBase) : void
+		override public function set normalMap(value : Texture2DBase) : void
 		{
 			if (!value) return;
 			super.normalMap = value;
 		}
 
-		public function get secondaryNormalMap() : Texture2DProxyBase
+		public function get secondaryNormalMap() : Texture2DBase
 		{
 			return _texture2;
 		}
 
-		public function set secondaryNormalMap(value : Texture2DProxyBase) : void
+		public function set secondaryNormalMap(value : Texture2DBase) : void
 		{
 			_texture2 = value
 		}

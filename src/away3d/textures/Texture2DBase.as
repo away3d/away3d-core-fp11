@@ -8,16 +8,16 @@ package away3d.textures
 
 	use namespace arcane;
 
-	public class CubeTextureProxyBase extends TextureProxyBase
+	public class Texture2DBase extends TextureProxyBase
 	{
-		public function CubeTextureProxyBase()
+		public function Texture2DBase()
 		{
 			super();
 		}
 
 		override final protected function createTexture(context : Context3D) : TextureBase
 		{
-			return context.createCubeTexture(width, Context3DTextureFormat.BGRA, false);
+			return context.createTexture(width, height, Context3DTextureFormat.BGRA, false);
 		}
 	}
 }

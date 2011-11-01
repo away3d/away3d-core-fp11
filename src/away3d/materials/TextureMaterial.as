@@ -1,7 +1,7 @@
 ﻿package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.geom.ColorTransform;
 
@@ -17,7 +17,7 @@
 		/**
 		 * Creates a new TextureMaterial.
 		 */
-		public function TextureMaterial(texture : Texture2DProxyBase = null, smooth : Boolean = true, repeat : Boolean = false, mipmap : Boolean = true)
+		public function TextureMaterial(texture : Texture2DBase = null, smooth : Boolean = true, repeat : Boolean = false, mipmap : Boolean = true)
 		{
 			super();
 			this.texture = texture;
@@ -61,12 +61,12 @@
 		/**
 		 * The texture object to use for the albedo colour.
 		 */
-		public function get texture() : Texture2DProxyBase
+		public function get texture() : Texture2DBase
 		{
 			return _screenPass.diffuseMethod.texture;
 		}
 
-		public function set texture(value : Texture2DProxyBase) : void
+		public function set texture(value : Texture2DBase) : void
 		{
 			_screenPass.diffuseMethod.texture = value;
 		}

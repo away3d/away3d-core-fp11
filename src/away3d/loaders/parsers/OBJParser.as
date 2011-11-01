@@ -13,7 +13,7 @@ package away3d.loaders.parsers
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.display.BitmapData;
 	import flash.net.URLRequest;
@@ -129,7 +129,7 @@ package away3d.loaders.parsers
 				if (asset.assetType == AssetType.TEXTURE){
 					var lm:LoadedMaterial = new LoadedMaterial();
 					lm.materialID = resourceDependency.id;
-					lm.texture = asset as Texture2DProxyBase;
+					lm.texture = asset as Texture2DBase;
 					
 					_materialLoaded.push(lm);
 					
@@ -805,7 +805,7 @@ package away3d.loaders.parsers
 }
 
 import away3d.materials.methods.BasicSpecularMethod;
-import away3d.textures.Texture2DProxyBase;
+import away3d.textures.Texture2DBase;
 
 class ObjectGroup
 {
@@ -836,7 +836,7 @@ class SpecularData
 class LoadedMaterial
 {
 	public var materialID:String;
-	public var texture:Texture2DProxyBase;
+	public var texture:Texture2DBase;
 	
 	public var specularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;

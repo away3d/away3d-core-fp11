@@ -4,7 +4,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -24,7 +24,7 @@ package away3d.materials.methods
 		protected var _specularDataRegister : ShaderRegisterElement;
 		protected var _specularDataIndex : int;
 
-		private var _texture : Texture2DProxyBase;
+		private var _texture : Texture2DBase;
 
 		protected var _specularData : Vector.<Number>;
 		private var _specular : Number = 1;
@@ -93,12 +93,12 @@ package away3d.materials.methods
 		 * in the green channel. You can use SpecularBitmapTexture if you want to easily set specular and gloss maps
 		 * from greyscale images, but prepared images are preffered.
 		 */
-		public function get texture() : Texture2DProxyBase
+		public function get texture() : Texture2DBase
 		{
 			return _texture;
 		}
 
-		public function set texture(value : Texture2DProxyBase) : void
+		public function set texture(value : Texture2DBase) : void
 		{
 			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
@@ -240,6 +240,8 @@ package away3d.materials.methods
 			var code : String = "";
 			var t : ShaderRegisterElement;
 
+			// todo: add property that defines the indexing mode of the probe map: through view vector or reflectance vector
+
 			// write in temporary if not first light, so we can add to total diffuse colour
 			if (lightIndex > 0) {
 				t = regCache.getFreeFragmentVectorTemp();
@@ -252,8 +254,9 @@ package away3d.materials.methods
 			code += "tex " + t + ", " + _viewDirFragmentReg + ", " + cubeMapReg + " <cube,linear,miplinear>\n" +
 					"mul " + t + ", " + t + ", " + weightRegister + "\n";
 
-//			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
-
+//			if (_modulateMethod != null) {
+// 				code += _modulateMethod(t, regCache);
+//			}
 //			code += "mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n";
 
 			if (lightIndex > 0) {

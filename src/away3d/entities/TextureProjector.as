@@ -6,7 +6,7 @@ package away3d.entities
 	import away3d.textures.BitmapTextureCache;
 	import away3d.textures.BitmapTexture;
 	import away3d.events.LensEvent;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.geom.Matrix3D;
 
@@ -18,9 +18,9 @@ package away3d.entities
 		private var _lens : PerspectiveLens;
 		private var _viewProjectionInvalid : Boolean = true;
 		private var _viewProjection : Matrix3D = new Matrix3D();
-		private var _texture : Texture2DProxyBase;
+		private var _texture : Texture2DBase;
 
-		public function TextureProjector(texture : Texture2DProxyBase)
+		public function TextureProjector(texture : Texture2DBase)
 		{
 			_lens = new PerspectiveLens();
 			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onInvalidateLensMatrix, false, 0, true);
@@ -49,12 +49,12 @@ package away3d.entities
 			_lens.fieldOfView = value;
 		}
 
-		public function get texture() : Texture2DProxyBase
+		public function get texture() : Texture2DBase
 		{
 			return _texture;
 		}
 
-		public function set bitmapData(value : Texture2DProxyBase) : void
+		public function set bitmapData(value : Texture2DBase) : void
 		{
 			if (value == _texture) return;
 			_texture = value

@@ -12,7 +12,7 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -110,7 +110,7 @@ package away3d.loaders.parsers
 			if (resourceDependency.assets.length != 1)
 				return;
 			
-			var asset : Texture2DProxyBase = resourceDependency.assets[0] as Texture2DProxyBase;
+			var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
 			
 			if (asset)
 				TextureMaterial(_mesh.material).texture = asset;

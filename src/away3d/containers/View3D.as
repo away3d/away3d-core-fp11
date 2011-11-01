@@ -11,7 +11,7 @@ package away3d.containers
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.lights.LightBase;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
@@ -58,7 +58,7 @@ package away3d.containers
 		private var _hitField : Sprite;
 		private var _parentIsStage : Boolean;
 
-		private var _background : Texture2DProxyBase;
+		private var _background : Texture2DBase;
 		private var _stage3DProxy : Stage3DProxy;
 		private var _backBufferInvalid : Boolean = true;
 		private var _antiAlias : uint;
@@ -101,12 +101,12 @@ package away3d.containers
 			_mouse3DManager.forceMouseMove = value;
 		}
 
-		public function get background() : Texture2DProxyBase
+		public function get background() : Texture2DBase
 		{
 			return _background;
 		}
 
-		public function set background(value : Texture2DProxyBase) : void
+		public function set background(value : Texture2DBase) : void
 		{
 			_background = value;
 			_renderer.background = _background;

@@ -8,7 +8,7 @@
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.passes.DefaultScreenPass;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
 	import flash.geom.ColorTransform;
@@ -196,12 +196,12 @@
 		/**
 		 * The tangent space normal map to influence the direction of the surface for each texel.
 		 */
-		public function get normalMap() : Texture2DProxyBase
+		public function get normalMap() : Texture2DBase
 		{
 			return _screenPass.normalMap;
 		}
 
-		public function set normalMap(value : Texture2DProxyBase) : void
+		public function set normalMap(value : Texture2DBase) : void
 		{
 			_screenPass.normalMap = value;
 		}
@@ -210,12 +210,12 @@
 		 * A specular map that defines the strength of specular reflections for each texel in the red channel, and the gloss factor in the green channel.
 		 * You can use SpecularBitmapTexture if you want to easily set specular and gloss maps from greyscale images, but prepared images are preffered.
 		 */
-		public function get specularMap() : Texture2DProxyBase
+		public function get specularMap() : Texture2DBase
 		{
 			return _screenPass.specularMethod.texture;
 		}
 
-		public function set specularMap(value : Texture2DProxyBase) : void
+		public function set specularMap(value : Texture2DBase) : void
 		{
 			if (_screenPass.specularMethod) _screenPass.specularMethod.texture = value;
 			else throw new Error("No specular method was set to assign the specularGlossMap to");

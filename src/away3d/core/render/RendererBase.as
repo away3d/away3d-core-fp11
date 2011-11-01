@@ -7,7 +7,7 @@ package away3d.core.render
 	import away3d.core.traverse.EntityCollector;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.Stage3DEvent;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
@@ -38,7 +38,7 @@ package away3d.core.render
 
 		private var _renderableSorter : EntitySorterBase;
 		private var _backgroundImageRenderer : BackgroundImageRenderer;
-		private var _background : Texture2DProxyBase;
+		private var _background : Texture2DBase;
 
 		/**
 		 * Creates a new RendererBase object.
@@ -281,12 +281,12 @@ package away3d.core.render
 			_backgroundAlpha = value;
 		}
 
-		arcane function get background() : Texture2DProxyBase
+		arcane function get background() : Texture2DBase
 		{
 			return _background;
 		}
 
-		arcane function set background(value : Texture2DProxyBase) : void
+		arcane function set background(value : Texture2DBase) : void
 		{
 			if (_backgroundImageRenderer && !value) {
 				_backgroundImageRenderer.dispose();

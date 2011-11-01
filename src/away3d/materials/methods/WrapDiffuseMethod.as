@@ -5,7 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
@@ -49,7 +49,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function get texture() : Texture2DProxyBase
+		override public function get texture() : Texture2DBase
 		{
 			return _baseDiffuseMethod.texture;
 		}
@@ -57,7 +57,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function set texture(value : Texture2DProxyBase) : void
+		override public function set texture(value : Texture2DBase) : void
 		{
 			_baseDiffuseMethod.texture = value;
 		}

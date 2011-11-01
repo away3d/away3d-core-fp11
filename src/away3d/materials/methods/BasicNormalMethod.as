@@ -4,13 +4,13 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
 	public class BasicNormalMethod extends ShadingMethodBase
 	{
-		private var _texture : Texture2DProxyBase;
+		private var _texture : Texture2DBase;
 		private var _useTexture : Boolean;
 		protected var _normalMapIndex : int = -1;
 		protected var _normalTextureRegister : ShaderRegisterElement;
@@ -38,12 +38,12 @@ package away3d.materials.methods
 			return Boolean(_texture);
 		}
 
-		public function get normalMap() : Texture2DProxyBase
+		public function get normalMap() : Texture2DBase
 		{
 			return _texture;
 		}
 
-		public function set normalMap(value : Texture2DProxyBase) : void
+		public function set normalMap(value : Texture2DBase) : void
 		{
 			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);

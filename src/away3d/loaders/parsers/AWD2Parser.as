@@ -20,7 +20,7 @@ package away3d.loaders.parsers
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -123,7 +123,7 @@ package away3d.loaders.parsers
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length == 1) {
-				var asset : Texture2DProxyBase = resourceDependency.assets[0] as Texture2DProxyBase;
+				var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
 				if (asset) {
 					var mat : TextureMaterial;
 					var users : Array;
@@ -388,7 +388,7 @@ package away3d.loaders.parsers
 			}
 			else if (type == 2) { // Bitmap material
 				var bmp : BitmapData;
-				var texture : Texture2DProxyBase;
+				var texture : Texture2DBase;
 				var tex_addr : uint;
 				
 				tex_addr = props.get(2, 0);
@@ -423,12 +423,12 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function parseTexture(blockLength : uint) : Texture2DProxyBase
+		private function parseTexture(blockLength : uint) : Texture2DBase
 		{
 			var name : String;
 			var type : uint;
 			var data_len : uint;
-			var asset : Texture2DProxyBase;
+			var asset : Texture2DBase;
 			
 			name = parseVarStr();
 			type = _body.readUnsignedByte();

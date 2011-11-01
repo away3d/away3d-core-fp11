@@ -9,7 +9,7 @@ package away3d.textures
 
 	use namespace arcane;
 
-	public class BitmapCubeTexture extends CubeTextureProxyBase
+	public class BitmapCubeTexture extends CubeTextureBase
 	{
 		private var _bitmapDatas : Vector.<BitmapData>;
 

@@ -2,7 +2,7 @@ package away3d.core.render
 {
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 
 	import com.adobe.utils.AGALMiniAssembler;
 
@@ -16,7 +16,7 @@ package away3d.core.render
 	public class BackgroundImageRenderer
 	{
 		private var _program3d : Program3D;
-		private var _texture : Texture2DProxyBase;
+		private var _texture : Texture2DBase;
 		private var _indexBuffer : IndexBuffer3D;
 		private var _vertexBuffer : VertexBuffer3D;
 		private var _stage3DProxy : Stage3DProxy;
@@ -99,12 +99,12 @@ package away3d.core.render
 															]), 0, 4);
 		}
 
-		public function get texture() : Texture2DProxyBase
+		public function get texture() : Texture2DBase
 		{
 			return _texture;
 		}
 
-		public function set texture(value : Texture2DProxyBase) : void
+		public function set texture(value : Texture2DBase) : void
 		{
 			_texture = value;
 		}

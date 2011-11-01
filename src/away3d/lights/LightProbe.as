@@ -9,7 +9,7 @@ package away3d.lights
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.CubeTextureProxyBase;
+	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -22,35 +22,35 @@ package away3d.lights
 
 	public class LightProbe extends LightBase
 	{
-		private var _diffuseMap : CubeTextureProxyBase;
-		private var _specularMap : CubeTextureProxyBase;
+		private var _diffuseMap : CubeTextureBase;
+		private var _specularMap : CubeTextureBase;
 
 		/**
 		 * Creates a new LightProbe object.
 		 */
-		public function LightProbe(diffuseMap : CubeTextureProxyBase, specularMap : CubeTextureProxyBase = null)
+		public function LightProbe(diffuseMap : CubeTextureBase, specularMap : CubeTextureBase = null)
 		{
 			super();
 			_diffuseMap = diffuseMap;
 			_specularMap = specularMap;
 		}
 
-		public function get diffuseMap() : CubeTextureProxyBase
+		public function get diffuseMap() : CubeTextureBase
 		{
 			return _diffuseMap;
 		}
 
-		public function set diffuseMap(value : CubeTextureProxyBase) : void
+		public function set diffuseMap(value : CubeTextureBase) : void
 		{
 			_diffuseMap = value;
 		}
 
-		public function get specularMap() : CubeTextureProxyBase
+		public function get specularMap() : CubeTextureBase
 		{
 			return _specularMap;
 		}
 
-		public function set specularMap(value : CubeTextureProxyBase) : void
+		public function set specularMap(value : CubeTextureBase) : void
 		{
 			_specularMap = value;
 		}

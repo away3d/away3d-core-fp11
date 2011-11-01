@@ -9,7 +9,7 @@ package away3d.loaders.parsers
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DProxyBase;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
@@ -94,13 +94,13 @@ package away3d.loaders.parsers
 		 */
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
-			var asset : Texture2DProxyBase;
+			var asset : Texture2DBase;
 			var m:Mesh; 
 			
 			if (resourceDependency.assets.length != 1)
 				return;
 			
-			asset = resourceDependency.assets[0] as Texture2DProxyBase;
+			asset = resourceDependency.assets[0] as Texture2DBase;
 			m = retrieveMeshFromID(resourceDependency.id);
 			
 			if(m && asset)
