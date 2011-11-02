@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions.rotation 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -29,6 +30,7 @@ package a3dparticle.animators.actions.rotation
 		public function RandomRotateLocal(fun:Function) 
 		{
 			dataLenght = 4;
+			_name = "RandomRotateLocal";
 			_genFun = fun;
 		}
 		
@@ -40,12 +42,12 @@ package a3dparticle.animators.actions.rotation
 			_tempRotateRate = Math.PI/temp.w;
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			_vertices.push(_tempRotateAxis.x);
-			_vertices.push(_tempRotateAxis.y);
-			_vertices.push(_tempRotateAxis.z);
-			_vertices.push(_tempRotateRate);
+			getExtraData(subContainer).push(_tempRotateAxis.x);
+			getExtraData(subContainer).push(_tempRotateAxis.y);
+			getExtraData(subContainer).push(_tempRotateAxis.z);
+			getExtraData(subContainer).push(_tempRotateRate);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -193,7 +195,7 @@ package a3dparticle.animators.actions.rotation
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(roatateAttribute.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_4);
+			stage3DProxy.setSimpleVertexBuffer(roatateAttribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_4);
 		}
 		
 	}

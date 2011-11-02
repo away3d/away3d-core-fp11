@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions.drift 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -26,6 +27,7 @@ package a3dparticle.animators.actions.drift
 		public function DriftLocal(fun:Function) 
 		{
 			dataLenght = 4;
+			_name = "DriftLocal";
 			_driftFun = fun;
 		}
 		
@@ -34,12 +36,12 @@ package a3dparticle.animators.actions.drift
 			_driftData = _driftFun(index);
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			_vertices.push(_driftData.x);
-			_vertices.push(_driftData.y);
-			_vertices.push(_driftData.z);
-			_vertices.push(_driftData.w);
+			getExtraData(subContainer).push(_driftData.x);
+			getExtraData(subContainer).push(_driftData.y);
+			getExtraData(subContainer).push(_driftData.z);
+			getExtraData(subContainer).push(_driftData.w);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -74,7 +76,7 @@ package a3dparticle.animators.actions.drift
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(driftAttribute.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_4);
+			stage3DProxy.setSimpleVertexBuffer(driftAttribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_4);
 		}
 	}
 

@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions.color 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -35,7 +36,7 @@ package a3dparticle.animators.actions.color
 			_colorFun = fun;
 			_hasMult = hasMult;
 			_hasOffest = hasOffest;
-			
+			_name = "RandomColorLocal";
 			if (_hasMult && _hasOffest) dataLenght = 8;
 			if (_hasMult && !_hasOffest) dataLenght = 4;
 			if (!_hasMult && _hasOffest) dataLenght = 4;
@@ -47,21 +48,21 @@ package a3dparticle.animators.actions.color
 			_tempColor = _colorFun(index);
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
 			if (_hasMult)
 			{
-				_vertices.push(_tempColor.redMultiplier);
-				_vertices.push(_tempColor.greenMultiplier);
-				_vertices.push(_tempColor.blueMultiplier);
-				_vertices.push(_tempColor.alphaMultiplier);
+				getExtraData(subContainer).push(_tempColor.redMultiplier);
+				getExtraData(subContainer).push(_tempColor.greenMultiplier);
+				getExtraData(subContainer).push(_tempColor.blueMultiplier);
+				getExtraData(subContainer).push(_tempColor.alphaMultiplier);
 			}
 			if (_hasOffest)
 			{
-				_vertices.push(_tempColor.redOffset);
-				_vertices.push(_tempColor.greenOffset);
-				_vertices.push(_tempColor.blueOffset);
-				_vertices.push(_tempColor.alphaOffset);
+				getExtraData(subContainer).push(_tempColor.redOffset);
+				getExtraData(subContainer).push(_tempColor.greenOffset);
+				getExtraData(subContainer).push(_tempColor.blueOffset);
+				getExtraData(subContainer).push(_tempColor.alphaOffset);
 			}
 		}
 		
@@ -105,13 +106,13 @@ package a3dparticle.animators.actions.color
 			var context : Context3D = stage3DProxy._context3D;
 			if (_hasMult)
 			{
-				context.setVertexBufferAt(multiplierAtt.index, getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_4);
+				context.setVertexBufferAt(multiplierAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
 				if (_hasOffest)
-					context.setVertexBufferAt(offsetAtt.index, getVertexBuffer(stage3DProxy), 4, Context3DVertexBufferFormat.FLOAT_4);
+					context.setVertexBufferAt(offsetAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 4, Context3DVertexBufferFormat.FLOAT_4);
 			}
 			else
 			{
-				context.setVertexBufferAt(offsetAtt.index, getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_4);
+				context.setVertexBufferAt(offsetAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
 			}
 		}
 		

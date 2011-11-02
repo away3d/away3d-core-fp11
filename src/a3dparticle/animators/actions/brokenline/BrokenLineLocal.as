@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions.brokenline 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -37,6 +38,8 @@ package a3dparticle.animators.actions.brokenline
 		{
 			_brokenCount = brokenCount;
 			_genFun = fun;
+			dataLenght = 4;
+			_name = "BrokenLineLocal";
 			for (var i:int; i < _brokenCount; i++)
 			{
 				vertices_vec[i] = new Vector.<Number>();
@@ -49,15 +52,34 @@ package a3dparticle.animators.actions.brokenline
 			_brokenData = Vector.<Vector3D>(_genFun(index));
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
 			for(var i:int = 0; i < _brokenCount; i++)
 			{
-				vertices_vec[i].push(_brokenData[i].x)
-				vertices_vec[i].push(_brokenData[i].y)
-				vertices_vec[i].push(_brokenData[i].z)
-				vertices_vec[i].push(_brokenData[i].w)
+				getExtraDataByIndex(subContainer,i).push(_brokenData[i].x)
+				getExtraDataByIndex(subContainer,i).push(_brokenData[i].y)
+				getExtraDataByIndex(subContainer,i).push(_brokenData[i].z)
+				getExtraDataByIndex(subContainer,i).push(_brokenData[i].w)
 			}
+		}
+		
+		public function getExtraDataByIndex(subContainer:SubContainer,index:uint):Vector.<Number>
+		{
+			if (!subContainer.extraDatas[_name+index])
+			{
+				subContainer.extraDatas[_name+index] = new Vector.<Number>;
+			}
+			return subContainer.extraDatas[_name+index];
+		}
+		
+		public function getExtraBufferByIndex(stage3DProxy : Stage3DProxy,subContainer:SubContainer,index:uint) : VertexBuffer3D
+		{
+			if (!subContainer.extraBuffers[_name+index])
+			{
+				subContainer.extraBuffers[_name+index] = stage3DProxy._context3D.createVertexBuffer(subContainer.extraDatas[_name+index].length / dataLenght, dataLenght);
+				subContainer.extraBuffers[_name+index].uploadFromVector(subContainer.extraDatas[_name+index], 0, subContainer.extraDatas[_name+index].length / dataLenght);
+			}
+			return subContainer.extraBuffers[_name+index];
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -111,12 +133,7 @@ package a3dparticle.animators.actions.brokenline
 		{
 			for (var i:int = 0; i < _brokenCount; i++)
 			{
-				if (!vertices_buffer[i])
-				{
-					vertices_buffer[i]= stage3DProxy._context3D.createVertexBuffer(vertices_vec[i].length/4,4);
-					vertices_buffer[i].uploadFromVector(vertices_vec[i], 0, vertices_vec[i].length/4);
-				}
-				stage3DProxy.setSimpleVertexBuffer(_brokenRegisters[i].index, vertices_buffer[i], Context3DVertexBufferFormat.FLOAT_4);
+				stage3DProxy.setSimpleVertexBuffer(_brokenRegisters[i].index, getExtraBufferByIndex(stage3DProxy, SubContainer(renderable), i), Context3DVertexBufferFormat.FLOAT_4);
 			}
 		}
 		

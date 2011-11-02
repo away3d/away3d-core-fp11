@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions.scale 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -26,6 +27,7 @@ package a3dparticle.animators.actions.scale
 		{
 			priority = 3;
 			dataLenght = 3;
+			_name = "RandomScaleLocal";
 			_scaleFun = fun;
 		}
 		
@@ -34,11 +36,11 @@ package a3dparticle.animators.actions.scale
 			_tempScale = _scaleFun(index);
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			_vertices.push(_tempScale.x);
-			_vertices.push(_tempScale.y);
-			_vertices.push(_tempScale.z);
+			getExtraData(subContainer).push(_tempScale.x);
+			getExtraData(subContainer).push(_tempScale.y);
+			getExtraData(subContainer).push(_tempScale.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -51,7 +53,7 @@ package a3dparticle.animators.actions.scale
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(scaleAttribute.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.setSimpleVertexBuffer(scaleAttribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

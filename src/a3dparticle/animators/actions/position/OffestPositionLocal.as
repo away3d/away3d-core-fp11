@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions.position 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -29,6 +30,7 @@ package a3dparticle.animators.actions.position
 		public function OffestPositionLocal(offest:Function) 
 		{
 			dataLenght = 3;
+			_name = "OffestPositionLocal";
 			_offestFun = offest;
 		}
 		
@@ -37,11 +39,11 @@ package a3dparticle.animators.actions.position
 			_tempOffest = _offestFun(index);
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			_vertices.push(_tempOffest.x);
-			_vertices.push(_tempOffest.y);
-			_vertices.push(_tempOffest.z);
+			getExtraData(subContainer).push(_tempOffest.x);
+			getExtraData(subContainer).push(_tempOffest.y);
+			getExtraData(subContainer).push(_tempOffest.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -54,7 +56,7 @@ package a3dparticle.animators.actions.position
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(_offectAttribute.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.setSimpleVertexBuffer(_offectAttribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

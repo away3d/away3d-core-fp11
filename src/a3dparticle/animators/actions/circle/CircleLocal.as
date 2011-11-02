@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions.circle 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -38,6 +39,7 @@ package a3dparticle.animators.actions.circle
 		public function CircleLocal(fun:Function,eulers:Vector3D=null) 
 		{
 			dataLenght = 2;
+			_name = "CircleLocal";
 			_dataFun = fun;
 			_eulers = new Vector3D();
 			if (eulers)_eulers = eulers.clone();
@@ -54,10 +56,10 @@ package a3dparticle.animators.actions.circle
 			_cycle = temp.y;
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			_vertices.push(_radius);
-			_vertices.push(Math.PI*2/_cycle);
+			getExtraData(subContainer).push(_radius);
+			getExtraData(subContainer).push(Math.PI*2/_cycle);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -106,7 +108,7 @@ package a3dparticle.animators.actions.circle
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			stage3DProxy.setSimpleVertexBuffer(circleAttribute.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
+			stage3DProxy.setSimpleVertexBuffer(circleAttribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_2);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, eulersMatrixRegister.index, _eulersMatrix.rawData, 4);
 		}
 		

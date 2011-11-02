@@ -1,5 +1,6 @@
 package a3dparticle.animators.actions 
 {
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -34,6 +35,7 @@ package a3dparticle.animators.actions
 		{
 			priority = 0;
 			dataLenght = 3;
+			_name = "TimeAction";
 		}
 		
 		public function set startTimeFun(fun:Function):void
@@ -80,11 +82,11 @@ package a3dparticle.animators.actions
 			}
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			_vertices.push(_tempStartTime);
-			_vertices.push(_tempEndTime);
-			_vertices.push(_tempSleepTime+_tempEndTime);
+			getExtraData(subContainer).push(_tempStartTime);
+			getExtraData(subContainer).push(_tempEndTime);
+			getExtraData(subContainer).push(_tempSleepTime+_tempEndTime);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -129,7 +131,7 @@ package a3dparticle.animators.actions
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(timeAtt.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.setSimpleVertexBuffer(timeAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

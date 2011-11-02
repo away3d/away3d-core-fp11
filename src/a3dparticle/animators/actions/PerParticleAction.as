@@ -1,5 +1,6 @@
 package a3dparticle.animators.actions 
 {
+	import a3dparticle.core.SubContainer;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.VertexBuffer3D;
 	
@@ -16,6 +17,7 @@ package a3dparticle.animators.actions
 		protected var _vertices : Vector.<Number> = new Vector.<Number>();
 		
 		protected var dataLenght:uint = 1;
+		protected var _name:String="PerParticleAction";
 		
 		public function PerParticleAction()
 		{
@@ -27,18 +29,28 @@ package a3dparticle.animators.actions
 			
 		}
 		
-		public function distributeOne(index:int, verticeIndex:uint):void
+		public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
 			
 		}
 		
-		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function getExtraData(subContainer:SubContainer):Vector.<Number>
 		{
-			if (!_vertexBuffer) {
-				_vertexBuffer = stage3DProxy._context3D.createVertexBuffer(_vertices.length/dataLenght,dataLenght);
-				_vertexBuffer.uploadFromVector(_vertices, 0, _vertices.length/dataLenght);
+			if (!subContainer.extraDatas[_name])
+			{
+				subContainer.extraDatas[_name] = new Vector.<Number>;
 			}
-			return _vertexBuffer;
+			return subContainer.extraDatas[_name];
+		}
+		
+		public function getExtraBuffer(stage3DProxy : Stage3DProxy,subContainer:SubContainer) : VertexBuffer3D
+		{
+			if (!subContainer.extraBuffers[_name])
+			{
+				subContainer.extraBuffers[_name] = stage3DProxy._context3D.createVertexBuffer(subContainer.extraDatas[_name].length / dataLenght, dataLenght);
+				subContainer.extraBuffers[_name].uploadFromVector(subContainer.extraDatas[_name], 0, subContainer.extraDatas[_name].length / dataLenght);
+			}
+			return subContainer.extraBuffers[_name];
 		}
 		
 	}

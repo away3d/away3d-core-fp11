@@ -1,7 +1,6 @@
 package a3dparticle.animators 
 {
 	import a3dparticle.animators.actions.ActionBase;
-	import a3dparticle.materials.SimpleParticlePass;
 	import a3dparticle.ParticlesContainer;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.arcane;
@@ -14,7 +13,7 @@ package a3dparticle.animators
 	import flash.display3D.Context3DVertexBufferFormat;
 	
 	
-
+	import away3d.arcane;
 	use namespace arcane;
 	/**
 	 * ...
@@ -24,7 +23,6 @@ package a3dparticle.animators
 	{
 		public var time:Number = 0;
 		private var _particleAnimation:ParticleAnimation;
-		
 		
 		
 		public function ParticleAnimationState(animation : ParticleAnimation) 
@@ -38,17 +36,10 @@ package a3dparticle.animators
 		 */
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
-			
-			var particlesContainer:ParticlesContainer = ParticlesContainer(renderable);
 			if (_particleAnimation.hasGen)
 			{
+				var context : Context3D = stage3DProxy._context3D;
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.timeConst.index, Vector.<Number>([ time, time, time, 0 ]));
-				if (SimpleParticlePass(pass)._texture)
-				{
-					context.setVertexBufferAt(_particleAnimation.uvAttribute.index, particlesContainer.getUVBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_2);
-				}
-				var action:ActionBase;
 				_particleAnimation.setRenderState(stage3DProxy, pass , renderable);
 			}
 		}

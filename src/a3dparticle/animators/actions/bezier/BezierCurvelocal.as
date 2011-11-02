@@ -1,10 +1,12 @@
 package a3dparticle.animators.actions.bezier 
 {
 	import a3dparticle.animators.actions.PerParticleAction;
+	import a3dparticle.core.SubContainer;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import flash.display3D.Context3D;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Vector3D;
@@ -33,7 +35,8 @@ package a3dparticle.animators.actions.bezier
 		 */
 		public function BezierCurvelocal(fun:Function) 
 		{
-			dataLenght = 3;
+			dataLenght = 6;
+			_name = "BezierCurvelocal";
 			_fun = fun;
 		}
 		
@@ -44,23 +47,14 @@ package a3dparticle.animators.actions.bezier
 			_p2 = temp[1];
 		}
 		
-		override public function distributeOne(index:int, verticeIndex:uint):void
+		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			_vertices.push(_p1.x);
-			_vertices.push(_p1.y);
-			_vertices.push(_p1.z);
-			_vertices2.push(_p2.x);
-			_vertices2.push(_p2.y);
-			_vertices2.push(_p2.z);
-		}
-		
-		private function getVertexBuffer2(stage3DProxy : Stage3DProxy) : VertexBuffer3D
-		{
-			if (!_vertexBuffer2) {
-				_vertexBuffer2 = stage3DProxy._context3D.createVertexBuffer(_vertices2.length/dataLenght,dataLenght);
-				_vertexBuffer2.uploadFromVector(_vertices2, 0, _vertices2.length/dataLenght);
-			}
-			return _vertexBuffer2;
+			getExtraData(subContainer).push(_p1.x);
+			getExtraData(subContainer).push(_p1.y);
+			getExtraData(subContainer).push(_p1.z);
+			getExtraData(subContainer).push(_p2.x);
+			getExtraData(subContainer).push(_p2.y);
+			getExtraData(subContainer).push(_p2.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -104,8 +98,9 @@ package a3dparticle.animators.actions.bezier
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(p1Attribute.index, getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-			stage3DProxy.setSimpleVertexBuffer(p2Attribute.index, getVertexBuffer2(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			var context : Context3D = stage3DProxy._context3D;
+			context.setVertexBufferAt(p1Attribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(p2Attribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 3, Context3DVertexBufferFormat.FLOAT_3);
 		}
 	}
 

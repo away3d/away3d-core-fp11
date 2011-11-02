@@ -1,6 +1,7 @@
-package a3dparticle.materials 
+package a3dparticle.core 
 {
 	import a3dparticle.animators.ParticleAnimation;
+	import a3dparticle.particle.ParticleMaterialBase;
 	import away3d.animators.data.AnimationBase;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -13,25 +14,23 @@ package a3dparticle.materials
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Utils3D;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
 	/**
 	 * ...
-	 * @author ...
+	 * @author liaocheng
 	 */
 	public class SimpleParticlePass extends MaterialPassBase
 	{
-		public var _texture:Texture3DProxy;
+		private var _particleMaterial:ParticleMaterialBase;
 		
-		public function SimpleParticlePass(bitmap:BitmapData=null) 
+		public function SimpleParticlePass(particleMaterial:ParticleMaterialBase) 
 		{
 			super();
-			if (bitmap)
-			{
-				_texture = BitmapDataTextureCache.getInstance().getTexture(bitmap);
-			}
+			this._particleMaterial = particleMaterial;
 		}
 		
 		override public function set animation(value : AnimationBase) : void
@@ -39,6 +38,7 @@ package a3dparticle.materials
 			if (animation == value) return;
 			if (value is ParticleAnimation)
 			{
+				_particleMaterial.initAnimation(value as ParticleAnimation);
 				super.animation = value;
 			}
 			else
@@ -61,25 +61,7 @@ package a3dparticle.materials
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
 				super.activate(stage3DProxy, camera);
-				var context : Context3D = stage3DProxy._context3D;
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.zeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.fragmentZeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.piConst.index, Vector.<Number>([ Math.PI * 2, Math.PI * 2, Math.PI * 2, Math.PI * 2 ]));
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.OneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.TwoConst.index, Vector.<Number>([ 2, 2, 2, 2 ]));
-				
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.fragmentPiConst.index, Vector.<Number>([ Math.PI * 2, Math.PI * 2, Math.PI * 2, Math.PI * 2 ]));
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.fragmentOneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
-				
-				if (_texture) 
-				{
-					_numUsedTextures = 1;
-					stage3DProxy.setTextureAt(_particleAnimation.textSample.index, _texture.getTextureForStage3D(stage3DProxy));
-				}
-				else 
-				{
-					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.colorDefalut.index, Vector.<Number>([1,1,1,1]), 1);
-				}
+				_numUsedTextures = _particleMaterial.numUsedTextures;
 			}
 		}
 		
@@ -98,20 +80,13 @@ package a3dparticle.materials
 			code += "neg " + temp.toString() + "," + temp.toString() + "\n";
 			code += "kil " + temp.toString() + "\n";
 			
-			
-			if (_texture)
-			{
-				code += "tex " + _particleAnimation.colorTarget.toString() + "," + _particleAnimation.uvVar.toString() + "," + _particleAnimation.textSample.toString() + "<2d,linear,miplinear,clamp>\n";
-			}
-			else
-			{
-				code += "mov " + _particleAnimation.colorTarget.toString() + "," +_particleAnimation.colorDefalut.toString() + "\n";
-			}
-			
+			//set the init color
+			code += _particleMaterial.getFragmentCode(_particleAnimation);
+			//change the colorTarget
 			code += _particleAnimation.getAGALFragmentCode(this);
 			
 			code += "mov oc," + _particleAnimation.colorTarget.toString() + "\n";
-			trace("***************\n", code);
+
 			return code;
 		}
 		
@@ -125,18 +100,12 @@ package a3dparticle.materials
 					var pos:Vector3D = Utils3D.projectVector(renderable.inverseSceneTransform, camera.scenePosition);
 					context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.cameraPosConst.index, Vector.<Number>([pos.x,pos.y,pos.z,0]));
 				}
+				if (_particleAnimation.needUV)
+				{
+					stage3DProxy.setSimpleVertexBuffer(_particleAnimation.uvAttribute.index, renderable.getUVBuffer(stage3DProxy),Context3DVertexBufferFormat.FLOAT_2);
+				}
+				_particleMaterial.render(_particleAnimation, renderable, stage3DProxy , camera );
 				super.render(renderable, stage3DProxy , camera );
-			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose(deep : Boolean) : void
-		{
-			if (_texture) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
 			}
 		}
 		

@@ -1,10 +1,10 @@
 package a3dparticle.animators 
 {
 	import a3dparticle.animators.actions.ActionBase;
-	import a3dparticle.animators.actions.AllParticleAction;
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.animators.actions.TimeAction;
-	import a3dparticle.materials.SimpleParticlePass;
+	import a3dparticle.core.SimpleParticlePass;
+	import a3dparticle.core.SubContainer;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.core.base.IRenderable;
@@ -12,6 +12,8 @@ package a3dparticle.animators
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import flash.display3D.Context3D;
+	import flash.display3D.Context3DProgramType;
 	
 	import away3d.arcane;
 	use namespace arcane;
@@ -40,6 +42,8 @@ package a3dparticle.animators
 		public var needVelocityInFragment:Boolean;
 		
 		public var needCameraPosition:Boolean;
+		
+		public var needUV:Boolean;
 		
 		
 		//vertex
@@ -147,13 +151,13 @@ package a3dparticle.animators
 			}
 		}
 		
-		public function distributeOne(index:uint, verticeIndex:uint):void
+		public function distributeOne(index:uint, verticeIndex:uint, subContainer:SubContainer):void
 		{
 			for each (var action:ActionBase in _particleActions)
 			{
 				if (action is PerParticleAction)
 				{
-					PerParticleAction(action).distributeOne(index, verticeIndex);
+					PerParticleAction(action).distributeOne(index, verticeIndex, subContainer);
 				}
 			}
 		}
@@ -161,6 +165,18 @@ package a3dparticle.animators
 		
 		public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
 		{
+			//set some const
+			var context : Context3D = stage3DProxy._context3D;
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, zeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, fragmentZeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, piConst.index, Vector.<Number>([ Math.PI * 2, Math.PI * 2, Math.PI * 2, Math.PI * 2 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, OneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, TwoConst.index, Vector.<Number>([ 2, 2, 2, 2 ]));
+			
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentPiConst.index, Vector.<Number>([ Math.PI * 2, Math.PI * 2, Math.PI * 2, Math.PI * 2 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentOneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
+			
+			
 			var action:ActionBase;
 			for each(action in _particleActions)
 			{
@@ -168,6 +184,10 @@ package a3dparticle.animators
 			}
 		}
 		
+		public function render():void
+		{
+			
+		}
 		
 		
 		private function reset(simpleParticlePass:SimpleParticlePass):void
@@ -195,7 +215,10 @@ package a3dparticle.animators
 			fragmentPiConst = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentOneConst = shaderRegisterCache.getFreeFragmentConstant();
 			//allot attribute register
-			uvAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			if (needUV)
+			{
+				uvAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			}
 			//allot temp register
 			var tempTime:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			offestTarget = new ShaderRegisterElement(tempTime.regName, tempTime.index, "xyz");
@@ -216,7 +239,10 @@ package a3dparticle.animators
 			fragmentTime = new ShaderRegisterElement(varyTime.regName, varyTime.index, "x");
 			fragmentLife = new ShaderRegisterElement(varyTime.regName, varyTime.index, "y");
 			fragmentVelocity = new ShaderRegisterElement(varyTime.regName, varyTime.index, "z");
-			uvVar = shaderRegisterCache.getFreeVarying();
+			if (needUV)
+			{
+				uvVar = shaderRegisterCache.getFreeVarying();
+			}
 			//allot fs register
 			textSample = shaderRegisterCache.getFreeTextureReg();
 		}
@@ -233,7 +259,7 @@ package a3dparticle.animators
 			{
 				_AGALVertexCode += "mov " + velocityTarget.toString() + "," + zeroConst.toString() + "\n";
 			}
-			if (simpleParticlePass._texture)
+			if (needUV)
 			{
 				_AGALVertexCode += "mov " + uvVar.toString() + "," + uvAttribute.toString() + "\n";
 			}
