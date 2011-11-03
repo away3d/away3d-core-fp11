@@ -13,6 +13,7 @@ package a3dparticle.particle
 		//use for SimpleParticlePas clean the texture.
 		public var numUsedTextures:int = 0;
 		
+		private var _bothSides:Boolean;
 		
 		/**
 		 * init the particleAnimation state.set the needUV for example.
@@ -22,6 +23,16 @@ package a3dparticle.particle
 		public function initAnimation(particleAnimation:ParticleAnimation):void
 		{
 			
+		}
+		
+		public function get bothSides() : Boolean
+		{
+			return _bothSides;
+		}
+
+		public function set bothSides(value : Boolean) : void
+		{
+			_bothSides = value;
 		}
 		
 		/**

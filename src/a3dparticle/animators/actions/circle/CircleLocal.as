@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.circle
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -36,7 +37,7 @@ package a3dparticle.animators.actions.circle
 		 * @param	fun Function.The fun return a a Vector3D. Vector3D.x is radius,Vector3D.y is cycle
 		 * @param	eulers Vector3D.The eulers of the rotate.
 		 */
-		public function CircleLocal(fun:Function,eulers:Vector3D=null) 
+		public function CircleLocal(fun:Function=null,eulers:Vector3D=null) 
 		{
 			dataLenght = 2;
 			_name = "CircleLocal";
@@ -49,9 +50,18 @@ package a3dparticle.animators.actions.circle
 			_eulersMatrix.appendRotation(_eulers.z, new Vector3D(0, 0, 1));
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			var temp:Vector3D = _dataFun(index);
+			var temp:Vector3D;
+			if (_velFun != null)
+			{
+				temp = _dataFun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				temp = param[_name];
+			}
 			_radius = temp.x;
 			_cycle = temp.y;
 		}

@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.bezier
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -33,18 +34,25 @@ package a3dparticle.animators.actions.bezier
 		 * 
 		 * @param	fun Function.The function return a [p1:Vector3D,p2:Vector3D].
 		 */
-		public function BezierCurvelocal(fun:Function) 
+		public function BezierCurvelocal(fun:Function=null) 
 		{
 			dataLenght = 6;
 			_name = "BezierCurvelocal";
 			_fun = fun;
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			var temp:Array = _fun(index);
-			_p1 = temp[0];
-			_p2 = temp[1];
+			var temp:Array;
+			if (_velFun != null)
+			{
+				temp = _fun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				temp = param[_name];
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void

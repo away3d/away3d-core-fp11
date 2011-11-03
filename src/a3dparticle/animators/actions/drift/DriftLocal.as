@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.drift
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -24,16 +25,24 @@ package a3dparticle.animators.actions.drift
 		
 		private var _driftData:Vector3D;
 		
-		public function DriftLocal(fun:Function) 
+		public function DriftLocal(fun:Function=null) 
 		{
 			dataLenght = 4;
 			_name = "DriftLocal";
 			_driftFun = fun;
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			_driftData = _driftFun(index);
+			if (_driftFun != null)
+			{
+				_driftData = _driftFun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				_driftData = param[_name];
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void

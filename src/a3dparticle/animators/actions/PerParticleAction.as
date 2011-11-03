@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions 
 {
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.VertexBuffer3D;
 	
@@ -24,7 +25,7 @@ package a3dparticle.animators.actions
 
 		}
 		
-		public function genOne(index:uint):void
+		public function genOne(param:ParticleParam):void
 		{
 			
 		}

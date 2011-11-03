@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.acceleration
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -24,16 +25,24 @@ package a3dparticle.animators.actions.acceleration
 		 * 
 		 * @param	fun Function.The fun return a Vector3D that (x,y,z) is a acceleration.
 		 */
-		public function AccelerateLocal(fun:Function) 
+		public function AccelerateLocal(fun:Function=null) 
 		{
 			dataLenght = 3;
 			_name = "AccelerateLocal";
 			_accFun = fun;
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			_tempAcc = _accFun(index);
+			if (_velFun != null)
+			{
+				_tempAcc = _accFun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				_tempAcc = param[_name];
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void

@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.brokenline
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -34,7 +35,7 @@ package a3dparticle.animators.actions.brokenline
 		 * @param	brokenCount uint.Becasue the number of attribute registers is only 8,the broken should be less 4.
 		 * @param	fun Function.It should return a [Vector3D],(Vector3D.x,Vector3D.y,Vector3D.z) is the velocity,Vector3D.w is the during time.
 		 */
-		public function BrokenLineLocal(brokenCount:uint,fun:Function) 
+		public function BrokenLineLocal(brokenCount:uint,fun:Function=null) 
 		{
 			_brokenCount = brokenCount;
 			_genFun = fun;
@@ -47,9 +48,17 @@ package a3dparticle.animators.actions.brokenline
 			}
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			_brokenData = Vector.<Vector3D>(_genFun(index));
+			if (_velFun != null)
+			{
+				_brokenData = Vector.<Vector3D>(_genFun(param));
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				_brokenData = param[_name];
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void

@@ -7,6 +7,7 @@ package a3dparticle
 	import a3dparticle.core.ParticlesNode;
 	import a3dparticle.core.SubContainer;
 	import a3dparticle.generater.GeneraterBase;
+	import a3dparticle.particle.ParticleParam;
 	import a3dparticle.particle.ParticleSample;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
@@ -19,10 +20,12 @@ package a3dparticle
 	use namespace arcane;
 	/**
 	 * A container of particles
-	 * 
+	 * @author liaocheng.Email:liaocheng210@126.com.
 	 */
 	public class ParticlesContainer extends Entity
 	{
+		public var initParticleFun:Function;
+		
 		private var __controller:ParticleAnimationtor;
 		private var _animationState:ParticleAnimationState;
 		private var _particleAnimation : ParticleAnimation;
@@ -70,9 +73,19 @@ package a3dparticle
 			_particleAnimation.startTimeFun = fun;
 		}
 		
-		public function set endTimeFun(fun:Function):void
+		public function set hasDuringTime(value:Boolean):void
 		{
-			_particleAnimation.endTimeFun = fun;
+			_particleAnimation.hasDuringTime = value;
+		}
+		
+		public function set hasSleepTime(value:Boolean):void
+		{
+			_particleAnimation.hasSleepTime = value;
+		}
+		
+		public function set duringTimeFun(fun:Function):void
+		{
+			_particleAnimation.duringTimeFun = fun;
 		}
 		
 		public function set sleepTimeFun(fun:Function):void
@@ -98,6 +111,7 @@ package a3dparticle
 			var indexData:Vector.<uint>;
 			var j:uint;
 			var length:uint;
+			var param:ParticleParam;
 			
 			for (var i:uint = 0; i < _vec.length; i++)
 			{
@@ -117,7 +131,15 @@ package a3dparticle
 				_subContainers[j].numTriangles+= _vec[i].subGem.numTriangles;
 				indexData.forEach(function(index:uint, ...rest):void { _subContainers[j].indices.push(index + _subContainers[j].vertexData.length / 3); } );
 				uvData.forEach(function(uv:Number, ...rest):void { _subContainers[j].uvData.push(uv); } );
-				_particleAnimation.genOne(i);
+				
+				param = new ParticleParam;
+				param.total = _vec.length;
+				param.index = i;
+				param.sample = _vec[i];
+				
+				if (initParticleFun != null) initParticleFun(param);
+				
+				_particleAnimation.genOne(param);
 				for (var k:uint = 0; k < length; k += 3)
 				{
 					_subContainers[j].vertexData.push(vertexData[k]);
@@ -189,12 +211,16 @@ package a3dparticle
 		override public function clone() : Object3D
 		{
 			if (!_hasGen) throw(new Error("can't not clone a object that has not gen!"));
-			var clone : ParticlesContainer = new ParticlesContainer();
+			var clone : ParticlesContainer = new ParticlesContainer(true);
 			clone._hasGen = _hasGen;
 			clone._particleAnimation = _particleAnimation;
-			clone._subContainers = _subContainers;
 			clone._animationState = new ParticleAnimationState(_particleAnimation);
 			clone.__controller = new ParticleAnimationtor(clone._animationState);
+			clone._subContainers = new Vector.<SubContainer>();
+			for (var j:uint = 0; j < _subContainers.length; j++)
+			{
+				clone._subContainers[j] = _subContainers[j].clone(clone);
+			}
 			
 			clone.pivotPoint = pivotPoint;
 			clone.partition = partition;

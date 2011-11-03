@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.rotation
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -27,16 +28,25 @@ package a3dparticle.animators.actions.rotation
 		 * 
 		 * @param	fun Function.the function return a Vector3D. (Vector3d.x,Vector3d.y,Vector3d.z) is roatate axis,Vector3d.w is cycle time
 		 */
-		public function RandomRotateLocal(fun:Function) 
+		public function RandomRotateLocal(fun:Function=null) 
 		{
 			dataLenght = 4;
 			_name = "RandomRotateLocal";
 			_genFun = fun;
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			var temp:Vector3D = _genFun(index);
+			var temp:Vector3D;
+			if (_velFun != null)
+			{
+				temp = _genFun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				temp = param[_name];
+			}
 			_tempRotateAxis = new Vector3D(temp.x, temp.y, temp.z);
 			_tempRotateAxis.normalize();
 			_tempRotateRate = Math.PI/temp.w;

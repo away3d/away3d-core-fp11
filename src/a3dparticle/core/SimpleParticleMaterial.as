@@ -17,14 +17,26 @@ package a3dparticle.core
 	public class SimpleParticleMaterial extends MaterialBase
 	{
 		public var _screenPass : SimpleParticlePass;
-		
+		private var _particleMaterial:ParticleMaterialBase;
 		
 		public function SimpleParticleMaterial(particleMaterial:ParticleMaterialBase) 
 		{
 			super();
+			this._particleMaterial = particleMaterial;
 			addPass(_screenPass = new SimpleParticlePass(particleMaterial));
 			_screenPass.material = this;
-			bothSides = true;
+			//bothSides = true;
+		}
+		
+
+		override  public function get bothSides() : Boolean
+		{
+			return _particleMaterial.bothSides;
+		}
+
+		override public function set bothSides(value : Boolean) : void
+		{
+			throw(new Error("don't set it directly"));
 		}
 		
 		/**

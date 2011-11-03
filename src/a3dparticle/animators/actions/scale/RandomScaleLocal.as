@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.scale
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -23,7 +24,7 @@ package a3dparticle.animators.actions.scale
 		 * 
 		 * @param	fun Function.The fun return a Vector3D which (x,y,z) is a (scaleX,scaleY,scaleZ)
 		 */
-		public function RandomScaleLocal(fun:Function) 
+		public function RandomScaleLocal(fun:Function = null)
 		{
 			priority = 3;
 			dataLenght = 3;
@@ -31,9 +32,17 @@ package a3dparticle.animators.actions.scale
 			_scaleFun = fun;
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			_tempScale = _scaleFun(index);
+			if (_velFun != null)
+			{
+				_tempScale = _scaleFun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				_tempScale = param[_name];
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void

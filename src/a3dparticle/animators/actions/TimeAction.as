@@ -1,6 +1,7 @@
 package a3dparticle.animators.actions 
 {
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -27,7 +28,8 @@ package a3dparticle.animators.actions
 		
 		private var timeAtt:ShaderRegisterElement;
 		
-		private var hasEndTime:Boolean;
+		public var hasDuringTime:Boolean;
+		public var hasSleepTime:Boolean;
 		
 		private var _loop:Boolean;
 		
@@ -43,15 +45,16 @@ package a3dparticle.animators.actions
 			_startTimeFun = fun;
 		}
 		
-		public function set endTimeFun(fun:Function):void
+		public function set duringTimeFun(fun:Function):void
 		{
 			_endTimeFun = fun;
-			hasEndTime = true;
+			hasDuringTime = true;
 		}
 		
 		public function set sleepTimeFun(fun:Function):void
 		{
 			_sleepTimeFun = fun;
+			hasSleepTime = true;
 		}
 		
 		public function set loop(value:Boolean):void
@@ -59,27 +62,52 @@ package a3dparticle.animators.actions
 			_loop = value;
 			if (value)
 			{
-				hasEndTime = true;
+				hasDuringTime = true;
 			}
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
 			_tempStartTime = 0;
 			if (_startTimeFun != null)
 			{
-				_tempStartTime = _startTimeFun(index);
+				_tempStartTime = _startTimeFun(param);
+				param.startTime = _tempStartTime;
+			}
+			else
+			{
+				if (isNaN(param.startTime)) throw("there is no startTime in param!");
+				_tempStartTime = param.startTime;
 			}
 			_tempEndTime = 1000;
-			if (_endTimeFun != null)
+			if (hasDuringTime)
 			{
-				_tempEndTime = _endTimeFun(index);
+				if (_endTimeFun != null)
+				{
+					_tempEndTime = _endTimeFun(param);
+					param.duringTime = _tempEndTime;
+				}
+				else
+				{
+					if (isNaN(param.duringTime)) throw("there is no hasDuringTime in param!");
+					_tempEndTime = param.duringTime;
+				}
 			}
 			_tempSleepTime = 0;
-			if (_sleepTimeFun != null)
+			if (hasSleepTime)
 			{
-				_tempSleepTime = _sleepTimeFun(index);
+				if (_sleepTimeFun != null)
+				{
+					_tempSleepTime = _sleepTimeFun(param);
+					param.sleepTime = _tempSleepTime;
+				}
+				else
+				{
+					if (isNaN(param.sleepTime)) throw("there is no sleepTime in param!");
+					_tempSleepTime = param.sleepTime;
+				}
 			}
+			
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
@@ -96,12 +124,12 @@ package a3dparticle.animators.actions
 			var code:String = "";
 			code += "sub " + _animation.vertexTime.toString() + "," + _animation.timeConst.toString() + ".x," + timeAtt.toString() + ".x\n";
 			code += "max " + _animation.vertexTime.toString() + "," + _animation.zeroConst.toString() + "," +  _animation.vertexTime.toString() + "\n";
-			if (hasEndTime)
+			if (hasDuringTime)
 			{
 				if (_loop)
 				{
 					var div:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-					if (_sleepTimeFun != null)
+					if (hasSleepTime)
 					{
 						code += "div " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".z\n";
 						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";

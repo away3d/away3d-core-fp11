@@ -5,6 +5,7 @@ package a3dparticle.animators
 	import a3dparticle.animators.actions.TimeAction;
 	import a3dparticle.core.SimpleParticlePass;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.core.base.IRenderable;
@@ -31,7 +32,9 @@ package a3dparticle.animators
 		
 		public var shaderRegisterCache:ShaderRegisterCache;
 		
-		private var _particleActions:Vector.<ActionBase>=new Vector.<ActionBase>();
+		private var _particleActions:Vector.<ActionBase> = new Vector.<ActionBase>();
+		
+		private var _pushOrderActions:Vector.<ActionBase> = new Vector.<ActionBase>();
 		
 		//dependent and global action
 		private var timeAction:TimeAction;
@@ -92,13 +95,8 @@ package a3dparticle.animators
 		
 		public function startGen():void
 		{
-			//_particleActions = _particleActions.sort(sortFn);
+
 		}
-		/*private function sortFn(action1:ActionBase, action2:ActionBase):Number
-		{
-			if (action1.priority > action2.priority) return 1;
-			else return -1;
-		}*/
 		
 		public function finishGen():void
 		{
@@ -110,9 +108,19 @@ package a3dparticle.animators
 			timeAction.startTimeFun = fun;
 		}
 		
-		public function set endTimeFun(fun:Function):void
+		public function set hasDuringTime(value:Boolean):void
 		{
-			timeAction.endTimeFun = fun;
+			timeAction.hasDuringTime = value;
+		}
+		
+		public function set hasSleepTime(value:Boolean):void
+		{
+			timeAction.hasSleepTime = value;
+		}
+		
+		public function set duringTimeFun(fun:Function):void
+		{
+			timeAction.duringTimeFun = fun;
 		}
 		
 		public function set sleepTimeFun(fun:Function):void
@@ -129,6 +137,8 @@ package a3dparticle.animators
 		public function addAction(action:ActionBase):void
 		{
 			var i:int;
+			_pushOrderActions.push(action);
+			
 			for (i = _particleActions.length - 1; i >= 0; i--)
 			{
 				if (_particleActions[i].priority <= action.priority)
@@ -140,20 +150,20 @@ package a3dparticle.animators
 			action.animation = this;
 		}
 		
-		public function genOne(index:uint):void
+		public function genOne(param:ParticleParam):void
 		{
-			for each (var action:ActionBase in _particleActions)
+			for each (var action:ActionBase in _pushOrderActions)
 			{
 				if (action is PerParticleAction)
 				{
-					PerParticleAction(action).genOne(index);
+					PerParticleAction(action).genOne(param);
 				}
 			}
 		}
 		
 		public function distributeOne(index:uint, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			for each (var action:ActionBase in _particleActions)
+			for each (var action:ActionBase in _pushOrderActions)
 			{
 				if (action is PerParticleAction)
 				{

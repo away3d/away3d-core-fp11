@@ -28,13 +28,26 @@ package a3dparticle.core
 		private var _numTriangles:uint;
 		private var _parent:ParticlesContainer;
 		
-		public function SubContainer(parent:ParticlesContainer,particleMaterial:ParticleMaterialBase) 
+		public function SubContainer(parent:ParticlesContainer, particleMaterial:ParticleMaterialBase, clone:Boolean = false ) 
 		{
 			this._parent = parent;
 			this._particleMaterial = particleMaterial;
-			this._shareAtt = new cloneShareAtt;
-			this._material = new SimpleParticleMaterial(particleMaterial);
-			this._material.animation = animation;
+			if (!clone)
+			{
+				this._shareAtt = new cloneShareAtt;
+				this._material = new SimpleParticleMaterial(particleMaterial);
+				this._material.animation = animation;
+			}
+		}
+		
+		public function clone(parent:ParticlesContainer):SubContainer
+		{
+			
+			var clone:SubContainer = new SubContainer(parent, _particleMaterial, true);
+			clone._shareAtt = _shareAtt;
+			clone._material = _material;
+			clone.numTriangles = numTriangles;
+			return clone;
 		}
 		
 		public function get particleMaterial():ParticleMaterialBase

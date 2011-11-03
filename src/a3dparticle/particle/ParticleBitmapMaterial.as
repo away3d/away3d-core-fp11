@@ -18,9 +18,16 @@ package a3dparticle.particle
 	{
 		private var _texture:Texture3DProxy;
 		
-		public function ParticleBitmapMaterial(bitmap:BitmapData)
+		private var _smooth:Boolean;
+		private var _repeat:Boolean;
+		private var _mipmap:Boolean;
+		
+		public function ParticleBitmapMaterial(bitmap:BitmapData,smooth:Boolean=true, repeat : Boolean = false, mipmap : Boolean = true)
 		{
 			this.numUsedTextures = 1;
+			this._smooth = smooth;
+			this._repeat = repeat;
+			this._mipmap = mipmap;
 			_texture = new Texture3DProxy(bitmap);
 		}
 		
@@ -37,7 +44,19 @@ package a3dparticle.particle
 		override public function getFragmentCode(_particleAnimation:ParticleAnimation):String
 		{
 			var code:String = "";
-			code += "tex " + _particleAnimation.colorTarget.toString() + "," + _particleAnimation.uvVar.toString() + "," + _particleAnimation.textSample.toString() + "<2d,linear,miplinear,clamp>\n";
+			var wrap : String = _repeat ? "wrap" : "clamp";
+			var tex:String = "";
+			if (_smooth)
+			{
+				if (_mipmap) tex = "<2d," + wrap + "," + "linear,miplinear>";
+				else tex = "<2d," + wrap + "," + "linear,nomip>";
+			}
+			else
+			{
+				if (_mipmap) tex = "<2d," + wrap + "," + "nearest,mipnearest>";
+				else tex = "<2d," + wrap + "," + "nearest,nomip>";
+			}
+			code += "tex " + _particleAnimation.colorTarget.toString() + "," + _particleAnimation.uvVar.toString() + "," + _particleAnimation.textSample.toString() + tex + "\n";
 			return code;
 		}
 		

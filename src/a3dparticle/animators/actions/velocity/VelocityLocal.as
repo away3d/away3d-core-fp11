@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.velocity
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -23,16 +24,24 @@ package a3dparticle.animators.actions.velocity
 		 * 
 		 * @param	fun Function.The fun should return a Vector3D whick (x,y,z) is the velocity.
 		 */
-		public function VelocityLocal(fun:Function) 
+		public function VelocityLocal(fun:Function=null) 
 		{
 			dataLenght = 3;
 			_velFun = fun;
 			_name = "VelocityLocal";
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			_tempVelocity = _velFun(index);
+			if (_velFun != null)
+			{
+				_tempVelocity = _velFun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				_tempVelocity = param[_name];
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void

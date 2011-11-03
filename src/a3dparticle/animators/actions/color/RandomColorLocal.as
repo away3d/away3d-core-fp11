@@ -2,6 +2,7 @@ package a3dparticle.animators.actions.color
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
+	import a3dparticle.particle.ParticleParam;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -31,7 +32,7 @@ package a3dparticle.animators.actions.color
 		private var offsetVary:ShaderRegisterElement;
 		
 		
-		public function RandomColorLocal(fun:Function,hasMult:Boolean=true,hasOffest:Boolean=true) 
+		public function RandomColorLocal(fun:Function=null,hasMult:Boolean=true,hasOffest:Boolean=true) 
 		{
 			_colorFun = fun;
 			_hasMult = hasMult;
@@ -43,9 +44,17 @@ package a3dparticle.animators.actions.color
 			if (!_hasMult && !_hasOffest) throw(new Error("no change!"));
 		}
 		
-		override public function genOne(index:uint):void
+		override public function genOne(param:ParticleParam):void
 		{
-			_tempColor = _colorFun(index);
+			if (_velFun != null)
+			{
+				_tempColor = _colorFun(param);
+			}
+			else
+			{
+				if (!param[_name]) throw("there is no ", _name, " in param!");
+				_tempColor = param[_name];
+			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
