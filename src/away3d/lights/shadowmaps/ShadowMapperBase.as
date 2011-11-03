@@ -23,7 +23,7 @@ package away3d.lights.shadowmaps
 		protected var _casterCollector : ShadowCasterCollector;
 
 		private var _depthMaps : Vector.<TextureBase>;
-		private var _depthMapSize : uint = 2048;
+		protected var _depthMapSize : uint = 2048;
 		protected var _light : LightBase;
 		private var _listeningForDisposal : Vector.<Stage3DProxy> = new Vector.<Stage3DProxy>(8, true);
 

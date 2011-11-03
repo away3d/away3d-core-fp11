@@ -77,13 +77,16 @@ package away3d.cameras.lenses
 		override protected function updateMatrix() : void
 		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			var w : Number = 1/(_maxX - _minX);
+			var h : Number = 1/(_maxY - _minY);
+			var d : Number = 1/(far - _near);
 
-			raw[0] = 2/(_maxX - _minX);
-			raw[5] = 2/(_maxY - _minY);
-			raw[10] = 1/(_far - _near);
-			raw[12] = (_maxX + _minX)/(_minX - _maxX);
-			raw[13] = (_maxY + _minY)/(_minY - _maxY);
-			raw[14] = _near/(_near - _far);
+			raw[0] = 2*w;
+			raw[5] = 2*h;
+			raw[10] = 1*d;
+			raw[12] = -(_maxX + _minX)*w;
+			raw[13] = -(_maxY + _minY)*h;
+			raw[14] = -_near*d;
 			raw[15] = 1;
 			raw[1] = raw[2] = raw[3] = raw[4] =
 			raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;

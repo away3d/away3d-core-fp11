@@ -98,8 +98,6 @@ package away3d.core.managers
 			var program : Program3D;
 			var key : String = getKey(vertexCode, materialFragmentCode);
 
-			trace (vertexCode + "\n\n\n\n-----\n\n\n\n" + materialFragmentCode);
-
 			if (_program3Ds[key] == null) {
 				_keys[_currentId] = key;
 				_usages[_currentId] = 0;

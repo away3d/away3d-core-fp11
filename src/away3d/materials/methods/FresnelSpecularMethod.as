@@ -36,6 +36,16 @@ package away3d.materials.methods
             _incidentLight = !basedOnSurface;
 		}
 
+		public function get fresnelPower() : Number
+		{
+			return _data[1];
+		}
+
+		public function set fresnelPower(value : Number) : void
+		{
+			_data[1] = value;
+		}
+
 		arcane override function reset() : void
 		{
 			super.reset();

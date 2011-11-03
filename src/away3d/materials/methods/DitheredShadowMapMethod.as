@@ -20,6 +20,7 @@ package away3d.materials.methods
 		private var _highRes : Boolean;
 		private var _depthMapSize : int;
 		private var _range : Number = 2;
+
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
