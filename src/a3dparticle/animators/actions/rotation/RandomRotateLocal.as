@@ -38,7 +38,7 @@ package a3dparticle.animators.actions.rotation
 		override public function genOne(param:ParticleParam):void
 		{
 			var temp:Vector3D;
-			if (_velFun != null)
+			if (_genFun != null)
 			{
 				temp = _genFun(param);
 			}

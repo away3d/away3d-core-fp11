@@ -46,7 +46,7 @@ package a3dparticle.animators.actions.color
 		
 		override public function genOne(param:ParticleParam):void
 		{
-			if (_velFun != null)
+			if (_colorFun != null)
 			{
 				_tempColor = _colorFun(param);
 			}

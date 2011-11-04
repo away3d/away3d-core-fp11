@@ -34,7 +34,7 @@ package a3dparticle.animators.actions.scale
 		
 		override public function genOne(param:ParticleParam):void
 		{
-			if (_velFun != null)
+			if (_scaleFun != null)
 			{
 				_tempScale = _scaleFun(param);
 			}
