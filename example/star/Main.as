@@ -1,11 +1,14 @@
 package 
 {
-	import a3dparticle.animators.actions.drift.DriftLocal;
+	import a3dparticle.animators.actions.color.FlickerGlobal;
+	import a3dparticle.animators.actions.color.RandomColorLocal;
+	import a3dparticle.animators.actions.fog.FogByDistanceGlobal;
 	import a3dparticle.animators.actions.position.OffestPositionLocal;
-	import a3dparticle.animators.actions.rotation.RandomRotateLocal;
 	import a3dparticle.animators.actions.scale.RandomScaleLocal;
-	import a3dparticle.animators.actions.velocity.VelocityGlobal;
-	import a3dparticle.materials.SimpleParticleMaterial;
+	import a3dparticle.generater.MutiWeightGenerater;
+	import a3dparticle.particle.ParticleColorMaterial;
+	import a3dparticle.particle.ParticleParam;
+	import a3dparticle.particle.ParticleSample;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
 	import away3d.core.base.SubGeometry;
@@ -17,21 +20,23 @@ package
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.parsers.Max3DSParser;
 	import away3d.primitives.WireframeAxesGrid;
+	import away3d.tools.MeshHelper;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
-	import flash.utils.setTimeout;
 	/**
 	 * ...
 	 * @author liaocheng
 	 */
 	[SWF(width="1024", height="768", frameRate="60")]
-	public class SnowModel extends Sprite 
+	public class Main extends Sprite 
 	{
-		[Embed(source = "model/snow.3ds", mimeType = "application/octet-stream")]
-		private var Snow:Class;
+		
+		[Embed(source = "model/star.3ds", mimeType = "application/octet-stream")]
+		private var Star:Class;
 		
 		protected var _view:View3D;
 		
@@ -41,7 +46,7 @@ package
 		
 		private var mesh:Mesh;
 		
-		public function SnowModel():void 
+		public function Main():void 
 		{
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
@@ -60,6 +65,7 @@ package
 			_view.width = 1024;
 			_view.height = 768;
 			_view.antiAlias = 4;
+			_view.camera.lens.far = 5000;
 			addChild(_view);
 			addEventListener(Event.ENTER_FRAME, onRender);
 			addChild(new AwayStats(_view));
@@ -68,8 +74,7 @@ package
 			var loader:AssetLoader = new AssetLoader();
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, initScene);
-			loader.loadData(new Snow(), '', new Max3DSParser());
-			//initScene();
+			loader.loadData(new Star(), '', null, null, new Max3DSParser());
 		}
 		
 		private function onAssetComplete(e:AssetEvent):void
@@ -78,63 +83,58 @@ package
 			{
 				case AssetType.MESH:
 					mesh = Mesh(e.asset);
-					//initScene();
+					mesh.rotationX = 180;
+					MeshHelper.applyRotations(mesh);
 					break;
 			}
 		}
 		
-		private function start():void
-		{
-			trace(mesh.geometry);
-		}
-		
-		
 		
 		private function initScene(e:Event):void
 		{
-			var material:SimpleParticleMaterial = new SimpleParticleMaterial();
-			particle = new ParticlesContainer(50,material);
-			//_view.scene.addChild(particle);
+			var material1:ParticleColorMaterial = new ParticleColorMaterial();
+			var sample1:ParticleSample = new ParticleSample(mesh.geometry.subGeometries[0], material1);
 			
-			particle.startTimeFun = function(index:uint):Number { return Math.random()*20-20; };
-			particle.endTimeFun = function(index:uint):Number { return 20; };
-			particle.loop = true;
+			var generater:MutiWeightGenerater = new MutiWeightGenerater([sample1], [1], 800);
 			
-			var action1:VelocityGlobal = new VelocityGlobal( new Vector3D(0,-100,0) );
+			particle = new ParticlesContainer();
+			particle.loop = false;
+			
+			var action1:OffestPositionLocal = new OffestPositionLocal();
 			particle.addAction(action1);
 			
-			var action2:DriftLocal = new DriftLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*50-25,0,Math.random()*50-25,Math.random()*2+3); } );
+			var action2:RandomScaleLocal = new RandomScaleLocal();
 			particle.addAction(action2);
 			
-			var action3:OffestPositionLocal = new OffestPositionLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*1000-500,1000,Math.random()*1000-500); } );
+			var action3:FlickerGlobal = new FlickerGlobal(new ColorTransform(1, 1, 1), new ColorTransform(0, 0, 0), 2);
 			particle.addAction(action3);
 			
-			var action4:RandomRotateLocal = new RandomRotateLocal(function(index:uint):Vector3D { return new Vector3D(Math.random(),Math.random(),Math.random(),Math.random()*2+2); } );
+			var action4:RandomColorLocal = new RandomColorLocal(null,true,false);
 			particle.addAction(action4);
 			
-			var action5:RandomScaleLocal = new RandomScaleLocal(function(index:uint):Vector3D 
-				{
-					var scale:Number = Math.random()*3;
-					return new Vector3D(scale, scale, scale); 
-				});
+			var action5:FogByDistanceGlobal = new FogByDistanceGlobal(2500,0x202020);
 			particle.addAction(action5);
 			
-
-			particle.generate(mesh.geometry.subGeometries[0]);
+			particle.initParticleFun = initParticleParam;
+			
+			particle.generate(generater);
 			particle.start();
 			
-			for (var i:int = -5; i <= 5; i++)
-			{
-				for (var j:int = -5; j <= 5; j++)
-				{
-					var clone:ParticlesContainer = particle.clone() as ParticlesContainer;
-					clone.position = new Vector3D(i * 500+Math.random()*100, 0, j * 500+Math.random()*100);
-					setTimeout(clone.start,Math.random()*1000);
-					_view.scene.addChild(clone);
-				}
-			}
+			_view.scene.addChild(particle);
+			
 		}
-
+		
+		private function initParticleParam(param:ParticleParam):void
+		{
+			param.startTime = Math.random();
+			var degree1:Number = Math.random() * Math.PI * 2;
+			var degree2:Number = Math.random() * Math.PI / 2;
+			var r:Number = 2000 + Math.random() * 1000;
+			param["OffestPositionLocal"] = new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.sin(degree2), r * Math.cos(degree1) * Math.cos(degree2) );
+			var scale:Number = 0.3 + Math.random() * 0.7;
+			param["RandomScaleLocal"] = new Vector3D(scale, scale, scale);
+			param["RandomColorLocal"] = new ColorTransform(Math.random(),Math.random(),Math.random());
+		}
 		
 		private function onRender(e:Event):void
 		{

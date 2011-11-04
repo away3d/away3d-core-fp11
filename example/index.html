@@ -28,7 +28,7 @@
 			var select=document.getElementById("select");
 			
 			var name=select.options[select.selectedIndex].value;
-			swfobject.embedSWF(name+".swf", "test", "1024", "768", "10.0.0", "expressInstall.swf", flashvars, params, attributes);
+			swfobject.embedSWF(name, "test", "1024", "768", "10.0.0", "expressInstall.swf", flashvars, params, attributes);
 		}
 	</script>
 	<style type="text/css">
@@ -43,20 +43,11 @@
 	<div>
 	<input type="button" onclick="change();" value="load"/>
 	<select id="select">
-  <option value ="Fire">Fire</option>
-  <option value ="Snowstorm">Snowstorm</option>
-   <option value ="Fountain">Fountain</option>
-    <option value ="Flutter">Flutter</option>
-	<option value ="SnowModel">SnowModel</option>
-	<option value ="Spiral">Spiral</option>
-	<option value ="Explode">Explode</option>
-	<option value ="Smoke">Smoke</option>
-	<option value ="Bezier">Bezier</option>
-	<option value ="ColorVelocity">ColorVelocity</option>
-	<option value ="Bubbles">Bubbles</option>
-	<option value ="Lightning">Lightning</option>
-	<option value ="BrokenLineExample">BrokenLineExample</option>
- 
+  <option value ="fire/main.swf">Fire</option>
+  <option value ="fountain/main.swf">fountain</option>
+   <option value ="snow/main.swf">snow</option>
+    <option value ="explode/main.swf">explode</option>
+	<option value ="star/main.swf">stars</option>
 </select>
 </div>
 </body>

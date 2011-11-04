@@ -1,12 +1,13 @@
 package 
 {
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
-	import a3dparticle.animators.actions.drift.DriftLocal;
 	import a3dparticle.animators.actions.rotation.AutoRotateGlobal;
-	import a3dparticle.animators.actions.rotation.RandomRotateLocal;
 	import a3dparticle.animators.actions.scale.ScaleByLifeGlobal;
 	import a3dparticle.animators.actions.velocity.VelocityLocal;
-	import a3dparticle.materials.SimpleParticleMaterial;
+	import a3dparticle.generater.MutiWeightGenerater;
+	import a3dparticle.particle.ParticleColorMaterial;
+	import a3dparticle.particle.ParticleParam;
+	import a3dparticle.particle.ParticleSample;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
@@ -26,16 +27,15 @@ package
 	 * @author liaocheng
 	 */
 	[SWF(width="1024", height="768", frameRate="60")]
-	public class Smoke extends Sprite 
+	public class Main extends Sprite 
 	{
 		protected var _view:View3D;
 		
 		private var particle:ParticlesContainer;
+		private var sample1:ParticleSample;
+		private var sample2:ParticleSample;
 		
-		[Embed(source = "yan.png")]
-		private var Img:Class;
-		
-		public function Smoke():void 
+		public function Main():void 
 		{
 			if (stage) init();
 			else addEventListener(Event.ADDED_TO_STAGE, init);
@@ -60,57 +60,62 @@ package
 			new HoverDragController(_view.camera, _view);
 			_view.scene.addChild(new WireframeAxesGrid(4,1000));
 			initScene();
-			var ui:PlayUI = new PlayUI(particle,5);
-			ui.y = 700;
-			ui.x = 260;
-			addChild(ui);
 		}
 		
 		
 		
 		private function initScene():void
 		{
-			var material:SimpleParticleMaterial = new SimpleParticleMaterial(new Img().bitmapData);
-			particle = new ParticlesContainer(2500,material);
-			_view.scene.addChild(particle);
+			var material:ParticleColorMaterial = new ParticleColorMaterial();
 			
-			var sphere:Sphere = new Sphere(null, 10,3,3);
-
+			var cy:Cylinder = new Cylinder(null, 1, 1, 20);
+			cy.rotationZ = 90;
+			MeshHelper.applyRotations(cy);
+			var sphere:Sphere = new Sphere(null, 1, 6, 6);
 			
-			particle.startTimeFun = function(index:uint):Number { return Math.random()*4; };
-			particle.endTimeFun = function(index:uint):Number { return 4; };
-			particle.loop = true;
+			sample1 = new ParticleSample(cy.geometry.subGeometries[0], material);
+			sample2 = new ParticleSample(sphere.geometry.subGeometries[0], material);
 			
-			var circle_fn:Function = function(index:uint):Vector3D
-			{
-				var degree:Number = Math.random() * Math.PI * 2;
-				var r:Number = Math.random()*20;
-				return new Vector3D(r * Math.cos(degree), 50, r * Math.sin(degree));
-			}
+			var generater:MutiWeightGenerater = new MutiWeightGenerater([sample1, sample2], [5, 1], 400);
 			
-			var action:VelocityLocal = new VelocityLocal(circle_fn);
+			particle = new ParticlesContainer();
+			particle.loop = false;
+			particle.hasDuringTime = true;
+			
+			var action:VelocityLocal = new VelocityLocal();
 			particle.addAction(action);
 			
-			var action2:ChangeColorByLifeGlobal = new ChangeColorByLifeGlobal(new ColorTransform(2, 2, 2,1),new ColorTransform(2, 2, 2,0));
+			var action2:ChangeColorByLifeGlobal = new ChangeColorByLifeGlobal(new ColorTransform(1, 0.9, 0,1),new ColorTransform(0.5, 0, 0,0));
 			particle.addAction(action2);
 			
-			var action3:RandomRotateLocal = new RandomRotateLocal(function(index:uint):Vector3D { return new Vector3D(Math.random(), Math.random(), Math.random(), Math.random()*5+5);} );
+			var action3:AutoRotateGlobal = new AutoRotateGlobal();
 			particle.addAction(action3);
 			
-			var action4:ScaleByLifeGlobal = new ScaleByLifeGlobal(1,2);
+			var action4:ScaleByLifeGlobal = new ScaleByLifeGlobal(2,0.5);
 			particle.addAction(action4);
 			
-			var action5:DriftLocal = new DriftLocal(function(index:uint):Vector3D { return new Vector3D(Math.random()*10, Math.random()*10, Math.random()*10, Math.random()*5+2);});
-			particle.addAction(action5);
-			
-			
-			particle.generate(sphere.geometry.subGeometries[0]);
+			particle.initParticleFun = initParticleParam;
+			particle.generate(generater);
 			particle.start();
+			
+			_view.scene.addChild(particle);
 		}
-
+		
+		private function initParticleParam(param:ParticleParam):void
+		{
+			param.startTime = 0;
+			param.duringTime = 1;
+			
+			var degree1:Number = Math.random() * Math.PI * 2;
+			var degree2:Number = Math.random() * Math.PI * 2;
+			var r:Number = 400 + Math.random() * 50;
+			param["VelocityLocal"] = new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.cos(degree1) * Math.cos(degree2), r * Math.sin(degree2));
+			if (param.sample == sample2) Vector3D(param["VelocityLocal"]).scaleBy(0.5);
+		}
 		
 		private function onRender(e:Event):void
 		{
+			if (particle.time > 2) particle.time = 0;
 			_view.render();
 		}
 		private function onStageResize(e:Event):void
