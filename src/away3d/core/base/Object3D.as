@@ -342,9 +342,6 @@ package away3d.core.base
 		
 		public function set transform(val:Matrix3D) : void
 		{
-			//if (_transformDirty)
-			//	updateTransform();
-			
 			var elements : Vector.<Vector3D> = val.decompose();
 			var vec : Vector3D;
 			
@@ -705,9 +702,37 @@ package away3d.core.base
 		 */
 		public function lookAt(target : Vector3D, upAxis : Vector3D = null) : void
 		{
+			var constrainedRotationY:Number = rotationY % 360;
+			
+			if (constrainedRotationY > 180) {
+				constrainedRotationY -= 360;
+			} else if (constrainedRotationY < -180) {
+				constrainedRotationY += 360;
+			}
+			
+			if (constrainedRotationY > 90) {
+				rotationY = (180 - constrainedRotationY);
+				rotationX += 180;
+				rotationZ += 180;
+			} else if (constrainedRotationY < -90) {
+				rotationY = (-180 - constrainedRotationY);
+				rotationX -= 180;
+				rotationZ -= 180;
+			}
+			
 			transform.pointAt(target, Vector3D.Z_AXIS, upAxis || new Vector3D(0, -1, 0));
 			
 			transform = transform;
+			
+			if (constrainedRotationY > 90) {
+				rotationY = (180 - rotationY);
+				rotationX -= 180;
+				rotationZ -= 180;
+			} else if (constrainedRotationY < -90) {
+				rotationY = (-180 - rotationY);
+				rotationX += 180;
+				rotationZ += 180;
+			}
 		}
 		
 		/**
