@@ -44,7 +44,7 @@ package a3dparticle.animators.actions.bezier
 		override public function genOne(param:ParticleParam):void
 		{
 			var temp:Array;
-			if (_velFun != null)
+			if (_fun != null)
 			{
 				temp = _fun(param);
 			}

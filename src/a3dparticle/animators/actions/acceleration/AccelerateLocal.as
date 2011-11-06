@@ -34,7 +34,7 @@ package a3dparticle.animators.actions.acceleration
 		
 		override public function genOne(param:ParticleParam):void
 		{
-			if (_velFun != null)
+			if (_accFun != null)
 			{
 				_tempAcc = _accFun(param);
 			}

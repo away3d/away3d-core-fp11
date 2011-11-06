@@ -53,7 +53,7 @@ package a3dparticle.animators.actions.circle
 		override public function genOne(param:ParticleParam):void
 		{
 			var temp:Vector3D;
-			if (_velFun != null)
+			if (_dataFun != null)
 			{
 				temp = _dataFun(param);
 			}

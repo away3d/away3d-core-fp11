@@ -50,14 +50,14 @@ package a3dparticle.animators.actions.brokenline
 		
 		override public function genOne(param:ParticleParam):void
 		{
-			if (_velFun != null)
+			if (_genFun != null)
 			{
 				_brokenData = Vector.<Vector3D>(_genFun(param));
 			}
 			else
 			{
 				if (!param[_name]) throw("there is no ", _name, " in param!");
-				_brokenData = param[_name];
+				_brokenData = Vector.<Vector3D>(param[_name]);
 			}
 		}
 		
