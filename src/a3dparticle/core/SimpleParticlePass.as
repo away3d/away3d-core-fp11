@@ -62,7 +62,7 @@ package a3dparticle.core
 			{
 				bothSides = _particleMaterial.bothSides;
 				super.activate(stage3DProxy, camera);
-				_numUsedTextures = _particleMaterial.numUsedTextures;
+				_numUsedTextures = _particleAnimation.shaderRegisterCache.numUsedTextures;
 			}
 		}
 		
