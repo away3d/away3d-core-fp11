@@ -39,7 +39,8 @@ package away3d.core.traverse
 		 */
 		override public function applyRenderable(renderable : IRenderable) : void
 		{
-			if (renderable.castsShadows) {
+			// the test for material is temporary, you SHOULD be hammered with errors if you try to render anything without a material
+			if (renderable.castsShadows && renderable.material) {
 				_numOpaques++;
 				var item : RenderableListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;

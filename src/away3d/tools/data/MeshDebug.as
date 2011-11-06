@@ -20,7 +20,7 @@
 		 
 		public function clearAll():void
 		{
-			super.clearSegments();
+			super.removeAllSegments();
 		}
 		
 		public function displayNormals(mesh:Mesh, color:uint = 0xFF3399 , length:Number = 30):void
