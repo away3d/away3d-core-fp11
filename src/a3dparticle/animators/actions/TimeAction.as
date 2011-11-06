@@ -89,7 +89,7 @@ package a3dparticle.animators.actions
 				}
 				else
 				{
-					if (isNaN(param.duringTime)) throw("there is no hasDuringTime in param!");
+					if (isNaN(param.duringTime)) throw("there is no duringTime in param!");
 					_tempEndTime = param.duringTime;
 				}
 			}
