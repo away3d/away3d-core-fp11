@@ -13,14 +13,14 @@ package away3d.loaders.parsers
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.BitmapDataAsset;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.BitmapMaterial;
 	import away3d.materials.ColorMaterial;
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.TextureMaterial;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -123,18 +123,17 @@ package away3d.loaders.parsers
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length == 1) {
-				var loaded_asset : BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
-				if (loaded_asset) {
-					var mat : BitmapMaterial;
+				var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
+				if (asset) {
+					var mat : TextureMaterial;
 					var users : Array;
-					var stored_asset : BitmapDataAsset;
 					
-					stored_asset = _blocks[parseInt(resourceDependency.id)].data;
-					stored_asset.bitmapData = loaded_asset.bitmapData;
+					// Store finished asset
+					_blocks[parseInt(resourceDependency.id)].data = asset;
 					
 					users = _texture_users[resourceDependency.id];
 					for each (mat in users) {
-						mat.bitmapData = loaded_asset.bitmapData;
+						mat.texture = asset;
 						finalizeAsset(mat);
 					}
 				}
@@ -389,23 +388,22 @@ package away3d.loaders.parsers
 			}
 			else if (type == 2) { // Bitmap material
 				var bmp : BitmapData;
-				var bmp_asset : BitmapDataAsset;
+				var texture : Texture2DBase;
 				var tex_addr : uint;
 				
 				tex_addr = props.get(2, 0);
-				bmp_asset = _blocks[tex_addr].data;
+				texture = _blocks[tex_addr].data;
 				
 				// If bitmap asset has already been loaded
-				if (bmp_asset && bmp_asset.bitmapData) {
-					bmp = bmp_asset.bitmapData;
-					mat = new BitmapMaterial(bmp);
-					BitmapMaterial(mat).alphaBlending = props.get(11, false);
+				if (texture) {
+					mat = new TextureMaterial(texture);
+					TextureMaterial(mat).alphaBlending = props.get(11, false);
 					finalize = true;
 				}
 				else {
 					// No bitmap available yet. Material will be finalized
 					// when texture finishes loading.
-					mat = new BitmapMaterial(null);
+					mat = new TextureMaterial(null);
 					if (tex_addr > 0)
 						_texture_users[tex_addr.toString()].push(mat);
 					
@@ -425,12 +423,12 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function parseTexture(blockLength : uint) : BitmapDataAsset
+		private function parseTexture(blockLength : uint) : Texture2DBase
 		{
 			var name : String;
 			var type : uint;
 			var data_len : uint;
-			var asset : BitmapDataAsset;
+			var asset : Texture2DBase;
 			
 			name = parseVarStr();
 			type = _body.readUnsignedByte();
@@ -462,7 +460,6 @@ package away3d.loaders.parsers
 			
 			
 			// TODO: Don't do this. Get texture properly
-			asset = new BitmapDataAsset();
 			/*
 			finalizeAsset(asset, name);
 			*/

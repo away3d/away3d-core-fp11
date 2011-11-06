@@ -5,16 +5,16 @@ package away3d.materials
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.traverse.EntityCollector;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.lights.LightBase;
+	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.MaterialPassBase;
 
-	import flash.display.BitmapData;
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
@@ -35,14 +35,11 @@ package away3d.materials
 		 */
 		public var extra : Object;
 
-		private var _materialLibrary : MaterialLibrary;
-
 		// this value is usually derived from other settings
 		arcane var _uniqueId : int;
 
 		arcane var _renderOrderId : int;
 		arcane var _name : String = "material";
-		private var _namespace : String = "";
 
 		private var _bothSides : Boolean;
 		private var _animation : AnimationBase;
@@ -59,21 +56,17 @@ package away3d.materials
 		protected var _passes : Vector.<MaterialPassBase>;
 
 		protected var _mipmap : Boolean;
-		private var _smooth : Boolean;
+		private var _smooth : Boolean = true;
 		private var _repeat : Boolean;
 
-		private var _lights : Array;
-
-		private var _mipmapBitmap : BitmapData;
 		private var _depthPass : DepthMapPass;
+		private var _lightPicker : LightPickerBase;
 
 		/**
 		 * Creates a new MaterialBase object.
 		 */
 		public function MaterialBase()
 		{
-			_materialLibrary = MaterialLibrary.getInstance();
-			_materialLibrary.registerMaterial(this);
 			_owners = new Vector.<IMaterialOwner>();
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
@@ -88,14 +81,31 @@ package away3d.materials
 			return AssetType.MATERIAL;
 		}
 
-		public function get lights() : Array
+		public function get lightPicker() : LightPickerBase
 		{
-			return _lights;
+			return _lightPicker;
 		}
 
-		public function set lights(value : Array) : void
+		public function set lightPicker(value : LightPickerBase) : void
 		{
-			_lights = value;
+			if (_lightPicker)
+				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+
+			_lightPicker = value;
+
+			if (_lightPicker)
+				_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
+		}
+
+		private function onLightsChange(event : Event) : void
+		{
+			var pass : MaterialPassBase;
+			for (var i : uint = 0; i < _numPasses; ++i) {
+				pass = _passes[i];
+				pass.numPointLights = _lightPicker.numPointLights;
+				pass.numDirectionalLights = _lightPicker.numDirectionalLights;
+				pass.numLightProbes = _lightPicker.numLightProbes;
+			}
 		}
 
 		/**
@@ -141,34 +151,19 @@ package away3d.materials
 		}
 
 		/**
-		 * Sets the materials name and namespace.
-		 * @param name The name of the material.
-		 * @param materialNameSpace The name space of the material.
-		 */
-		public function setNameAndSpace(name : String, materialNameSpace : String) : void
-		{
-			materialNameSpace ||= "";
-			_materialLibrary.unsetName(this);
-			_namespace = materialNameSpace;
-			_name = name;
-			_materialLibrary.setName(this);
-		}
-
-		/**
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose(deep : Boolean) : void
+		public function dispose() : void
 		{
 			var i : uint;
 
-			_materialLibrary.unregisterMaterial(this);
+			for (i = 0; i < _numPasses; ++i) _passes[i].dispose();
 
-			for (i = 0; i < _numPasses; ++i) _passes[i].dispose(deep);
+			_depthPass.dispose();
 
-			if (_mipmapBitmap) _mipmapBitmap.dispose();
-
-			_depthPass.dispose(deep);
+			if (_lightPicker)
+				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
 		}
 
 		/**
@@ -247,21 +242,6 @@ package away3d.materials
 			return _uniqueId;
 		}
 
-		/**
-		 * The namespace of the material, used by the MaterialLibrary.
-		 */
-		public function get materialNamespace() : String
-		{
-			return _namespace;
-		}
-
-		public function set materialNamespace(value : String) : void
-		{
-			_materialLibrary.unsetName(this);
-			_namespace = value;
-			_materialLibrary.setName(this);
-		}
-
 		public override function get name() : String
 		{
 			return _name;
@@ -269,9 +249,7 @@ package away3d.materials
 
 		public override function set name(value : String) : void
 		{
-			_materialLibrary.unsetName(this);
 			_name = value;
-			_materialLibrary.setName(this);
 		}
 
 
@@ -300,7 +278,7 @@ package away3d.materials
 			if (renderable.animationState)
 				renderable.animationState.setRenderState(stage3DProxy, _depthPass, renderable);
 
-			_depthPass.render(renderable, stage3DProxy, camera);
+			_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
 		}
 
 		/**
@@ -334,18 +312,17 @@ package away3d.materials
 		/**
 		 * Renders a renderable with a pass.
 		 * @param index The pass to render with.
-		 * @param renderable The renderable to render.
-		 * @param context The Context3D object which is currently rendering.
-		 * @param camera The camera from which the scene is rendered.
-		 * @param lights The lights which are influencing the lighting of the scene.
 		 * @private
 		 */
-		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, entityCollector : EntityCollector) : void
 		{
 			if (renderable.animationState)
 				renderable.animationState.setRenderState(stage3DProxy, _passes[index], renderable);
 
-			_passes[index].render(renderable, stage3DProxy, camera);
+			if (_lightPicker)
+				_lightPicker.collectLights(renderable, entityCollector);
+
+			_passes[index].render(renderable, stage3DProxy, entityCollector.camera, _lightPicker);
 		}
 
 
@@ -353,8 +330,7 @@ package away3d.materials
 // MATERIAL MANAGEMENT
 //
 		/**
-		 * Mark an IMaterialOwner as owner of this material. It's also used by the material library to ensure materials
-		 * are correctly replaced.
+		 * Mark an IMaterialOwner as owner of this material.
 		 * Assures we're not using the same material across renderables with different animations, since the
 		 * Program3Ds depend on animation. This method needs to be called when a material is assigned.
 		 *
@@ -459,7 +435,9 @@ package away3d.materials
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
-			pass.lights = _lights? Vector.<LightBase>(_lights) : null;
+			pass.numPointLights = _lightPicker? _lightPicker.numPointLights : 0;
+			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights : 0;
+			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			calculateRenderId();
 		}

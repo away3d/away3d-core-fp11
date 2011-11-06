@@ -11,15 +11,14 @@ package away3d.containers
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.lights.LightBase;
-
-	import flash.display.BitmapData;
+	import away3d.textures.Texture2DBase;
+	import away3d.tools.utils.TextureUtils;
 
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
-	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
@@ -53,20 +52,19 @@ package away3d.containers
 		private var _filter3DRenderer : Filter3DRenderer;
 		private var _requireDepthRender : Boolean;
 		private var _depthRender : Texture;
-		private var _depthTextureWidth : int = -1;
-		private var _depthTextureHeight : int = -1;
 		private var _depthTextureInvalid : Boolean = true;
 
 		private var _hitField : Sprite;
 		private var _parentIsStage : Boolean;
 
-		private var _backgroundImage : BitmapData;
-		private var _bgImageFitToViewPort:Boolean = true;
+		private var _background : Texture2DBase;
 		private var _stage3DProxy : Stage3DProxy;
 		private var _backBufferInvalid : Boolean = true;
 		private var _antiAlias : uint;
+		private var _renderTextureWidth : Number;
+		private var _renderTextureHeight : Number;
 
-		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : DefaultRenderer = null)
+		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null)
 		{
 			super();
 
@@ -76,7 +74,7 @@ package away3d.containers
 			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
 			_entityCollector = new EntityCollector();
-			
+
 			initHitField();
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
@@ -104,28 +102,15 @@ package away3d.containers
 			_mouse3DManager.forceMouseMove = value;
 		}
 
-		public function get backgroundImage() : BitmapData
+		public function get background() : Texture2DBase
 		{
-			return _backgroundImage;
+			return _background;
 		}
 
-		public function set backgroundImageFitToViewPort(value:Boolean):void
+		public function set background(value : Texture2DBase) : void
 		{
-			_bgImageFitToViewPort = value;
-
-			if(_renderer.backgroundImageRenderer == null)
-				return;
-
-			_renderer.backgroundImageRenderer.fitToViewPort = value;
-		}
-
-		public function set backgroundImage(value : BitmapData) : void
-		{
-			_backgroundImage = value;
-			_renderer.backgroundImage = _backgroundImage;
-			_renderer.backgroundImageRenderer.viewWidth = _width;
-			_renderer.backgroundImageRenderer.viewHeight = _height;
-			_renderer.backgroundImageRenderer.fitToViewPort = _bgImageFitToViewPort;
+			_background = value;
+			_renderer.background = _background;
 		}
 
 		private function initHitField() : void
@@ -199,12 +184,14 @@ package away3d.containers
 			_renderer.dispose();
 			_renderer = value;
 			_renderer.stage3DProxy = _stage3DProxy;
+			_renderer.antiAlias = _antiAlias;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff) / 0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff) / 0xff;
 			_renderer.backgroundAlpha = _backgroundAlpha;
-			_renderer.backgroundImage = _backgroundImage;
-			
+			_renderer.viewWidth = _width;
+			_renderer.viewHeight = _height;
+
 			invalidateBackBuffer();
 		}
 
@@ -309,15 +296,14 @@ package away3d.containers
 			_width = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
-			
+
+			_renderTextureWidth = TextureUtils.getBestPowerOf2(value);
+
 			if (_filter3DRenderer)
 				_filter3DRenderer.viewWidth = value;
-			
-			if (_renderer.backgroundImageRenderer != null) {
-				_renderer.backgroundImageRenderer.viewWidth = _width;
-				_renderer.backgroundImageRenderer.viewHeight = _height;
-			}
-			
+
+			_renderer.viewWidth = value;
+
 			invalidateBackBuffer();
 		}
 
@@ -338,9 +324,13 @@ package away3d.containers
 			_height = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
-			
+
+			_renderTextureHeight = TextureUtils.getBestPowerOf2(value);
+
 			if (_filter3DRenderer)
 				_filter3DRenderer.viewHeight = value;
+
+			_renderer.viewHeight = value;
 			
 			invalidateBackBuffer();
 		}
@@ -379,6 +369,7 @@ package away3d.containers
 		public function set antiAlias(value : uint) : void
 		{
 			_antiAlias = value;
+			_renderer.antiAlias = value;
 			
 			invalidateBackBuffer();
 		}
@@ -467,9 +458,9 @@ package away3d.containers
 			_camera.lens.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
 
-			if (_filter3DRenderer) {
-				_camera.textureRatioX = _width/_filter3DRenderer.textureWidth;
-				_camera.textureRatioY = _height/_filter3DRenderer.textureHeight;
+			if (_filter3DRenderer || _renderer.renderToTexture) {
+				_camera.textureRatioX = _width/_renderTextureWidth;
+				_camera.textureRatioY = _height/_renderTextureHeight;
 			}
 			else {
 				_camera.textureRatioX = 1;
@@ -485,31 +476,11 @@ package away3d.containers
 
 		private function initDepthTexture(context : Context3D) : void
 		{
-			var w : int = getPowerOf2Exceeding(_width);
-			var h : int = getPowerOf2Exceeding(_height);
-
 			_depthTextureInvalid = false;
-
-			if (w == _depthTextureWidth && h == _depthTextureHeight) return;
-
-			_depthTextureWidth = w;
-			_depthTextureHeight = h;
 
 			if (_depthRender) _depthRender.dispose();
 
-			_depthRender = context.createTexture(w, h, Context3DTextureFormat.BGRA, true);
-		}
-
-		private function getPowerOf2Exceeding(value : int) : Number
-		{
-			var p : int = 1;
-
-			while (p < value && p < 2048)
-				p <<= 1;
-
-			if (p > 2048) p = 2048;
-
-			return p;
+			_depthRender = context.createTexture(_renderTextureWidth, _renderTextureHeight, Context3DTextureFormat.BGRA, true);
 		}
 
 		private function updateLights(entityCollector : EntityCollector) : void

@@ -56,11 +56,11 @@ package away3d.animators.data
 		 */
 		override arcane function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null);
+			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null);
 			if (_useNormals)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null);
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null);
 			if (_useTangents)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null);
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null);
 		}
 
 		/**

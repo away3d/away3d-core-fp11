@@ -8,8 +8,8 @@
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.passes.DefaultScreenPass;
+	import away3d.textures.Texture2DBase;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.geom.ColorTransform;
 
@@ -32,13 +32,6 @@
 			addPass(_screenPass = new DefaultScreenPass(this));
 		}
 
-
-		override public function set lights(value : Array) : void
-		{
-			super.lights = value;
-			_screenPass.lights = value? Vector.<LightBase>(value) : null;
-		}
-
 		/**
 		 * The minimum alpha value for which pixels should be drawn. This is used for transparency that is either
 		 * invisible or entirely opaque, often used with textures for foliage, etc.
@@ -52,6 +45,27 @@
 		public function set alphaThreshold(value : Number) : void
 		{
 			_screenPass.diffuseMethod.alphaThreshold = value;
+		}
+
+
+		public function get specularLightSources() : uint
+		{
+			return _screenPass.specularLightSources;
+		}
+
+		public function set specularLightSources(value : uint) : void
+		{
+			_screenPass.specularLightSources = value;
+		}
+
+		public function get diffuseLightSources() : uint
+		{
+			return _screenPass.diffuseLightSources;
+		}
+
+		public function set diffuseLightSources(value : uint) : void
+		{
+			_screenPass.diffuseLightSources = value;
 		}
 
 		/**
@@ -182,46 +196,30 @@
 		/**
 		 * The tangent space normal map to influence the direction of the surface for each texel.
 		 */
-		public function get normalMap() : BitmapData
+		public function get normalMap() : Texture2DBase
 		{
 			return _screenPass.normalMap;
 		}
 
-		public function set normalMap(value : BitmapData) : void
+		public function set normalMap(value : Texture2DBase) : void
 		{
 			_screenPass.normalMap = value;
 		}
 
 		/**
-		 * A specular map that defines the strength of specular reflections for each texel.
+		 * A specular map that defines the strength of specular reflections for each texel in the red channel, and the gloss factor in the green channel.
+		 * You can use SpecularBitmapTexture if you want to easily set specular and gloss maps from greyscale images, but prepared images are preffered.
 		 */
-		public function get specularMap() : BitmapData
+		public function get specularMap() : Texture2DBase
 		{
-			return _screenPass.specularMethod? _screenPass.specularMethod.specularMap : null;
+			return _screenPass.specularMethod.texture;
 		}
 
-		public function set specularMap(value : BitmapData) : void
+		public function set specularMap(value : Texture2DBase) : void
 		{
-			if (_screenPass.specularMethod) _screenPass.specularMethod.specularMap = value;
+			if (_screenPass.specularMethod) _screenPass.specularMethod.texture = value;
+			else throw new Error("No specular method was set to assign the specularGlossMap to");
 		}
-
-		/**
-		 * A specular map that defines the power of specular reflections for each texel.
-		 */
-		public function get glossMap() : BitmapData
-		{
-			return _screenPass.specularMethod? _screenPass.specularMethod.glossMap : null;
-		}
-
-		public function set glossMap(value : BitmapData) : void
-		{
-			if (_screenPass.specularMethod) _screenPass.specularMethod.glossMap = value;
-		}
-
-//		override public function dispose(deep : Boolean) : void
-//		{
-//			super.dispose(deep);
-//		}
 
 		/**
 		 * The sharpness of the specular highlight.

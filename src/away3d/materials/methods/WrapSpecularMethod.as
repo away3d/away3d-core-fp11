@@ -5,9 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-
-	import flash.display.BitmapData;
-	import flash.display3D.Context3D;
+	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
@@ -42,51 +40,22 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			_baseSpecularMethod.dispose(deep);
+			_baseSpecularMethod.dispose();
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function invalidateBitmapData() : void
+		override public function get texture() : Texture2DBase
 		{
-			_baseSpecularMethod.invalidateBitmapData();
+			return _baseSpecularMethod.texture;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function get bitmapData() : BitmapData
+		override public function set texture(value : Texture2DBase) : void
 		{
-			return _baseSpecularMethod.bitmapData;
-		}
-
-		override public function set bitmapData(value : BitmapData) : void
-		{
-			_baseSpecularMethod.bitmapData = value;
-		}
-
-
-		override public function get specularMap() : BitmapData
-		{
-			return _baseSpecularMethod.specularMap;
-		}
-
-		override public function set specularMap(value : BitmapData) : void
-		{
-			_baseSpecularMethod.specularMap = value;
-		}
-
-		override public function get glossMap() : BitmapData
-		{
-			return _baseSpecularMethod.glossMap;
-		}
-
-		override public function set glossMap(value : BitmapData) : void
-		{
-			_baseSpecularMethod.glossMap = value;
+			_baseSpecularMethod.texture = value;
 		}
 
 		/**
@@ -153,7 +122,7 @@ package away3d.materials.methods
 		 */
 		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
 		{
-            _normalFragmentReg = _baseSpecularMethod.normalFragmentReg = value;
+			_normalFragmentReg = _baseSpecularMethod.normalFragmentReg = value;
 		}
 
 		/**
@@ -231,9 +200,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
 		{
-			_baseSpecularMethod.globalPosVertexReg = _globalPosVertexReg = value;
+			_baseSpecularMethod.globalPosReg = _globalPosReg = value;
 		}
 
 		/**
@@ -292,6 +261,15 @@ package away3d.materials.methods
 		override arcane function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			return _baseSpecularMethod.getFragmentCodePerLight(lightIndex, lightDirReg, lightColReg, regCache);
+		}
+
+		/**
+		 * @inheritDoc
+		 * @return
+		 */
+		arcane override function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		{
+			return _baseSpecularMethod.getFragmentCodePerProbe(lightIndex, cubeMapReg, weightRegister, regCache);
 		}
 
 		/**

@@ -5,9 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-
-	import flash.display.BitmapData;
-	import flash.display3D.Context3D;
+	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
@@ -33,9 +31,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			_baseDiffuseMethod.dispose(deep);
+			_baseDiffuseMethod.dispose();
 		}
 
         override public function get alphaThreshold() : Number
@@ -48,28 +46,20 @@ package away3d.materials.methods
             _baseDiffuseMethod.alphaThreshold = value;
         }
 
-        /**
+		/**
 		 * @inheritDoc
 		 */
-		override public function invalidateBitmapData() : void
+		override public function get texture() : Texture2DBase
 		{
-			_baseDiffuseMethod.invalidateBitmapData();
+			return _baseDiffuseMethod.texture;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function get bitmapData() : BitmapData
+		override public function set texture(value : Texture2DBase) : void
 		{
-			return _baseDiffuseMethod.bitmapData;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function set bitmapData(value : BitmapData) : void
-		{
-			_baseDiffuseMethod.bitmapData = value;
+			_baseDiffuseMethod.texture = value;
 		}
 
 		/**
@@ -127,6 +117,17 @@ package away3d.materials.methods
 		override arcane function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = _baseDiffuseMethod.getFragmentCodePerLight(lightIndex, lightDirReg, lightColReg, regCache);
+			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
+			return code;
+		}
+
+
+		/**
+		 * @inheritDoc
+		 */
+		arcane override function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		{
+			var code : String = _baseDiffuseMethod.getFragmentCodePerProbe(lightIndex, cubeMapReg, weightRegister, regCache);
 			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
 			return code;
 		}
@@ -279,9 +280,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
 		{
-			_baseDiffuseMethod.globalPosVertexReg = _globalPosVertexReg = value;
+			_baseDiffuseMethod.globalPosReg = _globalPosReg = value;
 		}
 
 		/**

@@ -23,14 +23,9 @@ package away3d.lights
 	public class PointLight extends LightBase
 	{
 		//private static var _pos : Vector3D = new Vector3D();
-		protected var _radius : Number = Number.MAX_VALUE;
-		protected var _fallOff : Number = Number.MAX_VALUE;
-		private var _positionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
-		private var _attenuationData : Vector.<Number>;
-		private var _vertexPosReg : ShaderRegisterElement;
-		private var _varyingReg : ShaderRegisterElement;
-		private var _attenuationIndices : Dictionary;
-		private var _attenuationRegister : ShaderRegisterElement;
+		arcane var _radius : Number = Number.MAX_VALUE;
+		arcane var _fallOff : Number = Number.MAX_VALUE;
+		arcane var _fallOffFactor : Number;
 
 		/**
 		 * Creates a new PointLight object.
@@ -38,17 +33,7 @@ package away3d.lights
 		public function PointLight()
 		{
 			super();
-			_attenuationData = Vector.<Number>([_radius, 1 / (_fallOff - _radius), 0, 1]);
-			_attenuationIndices = new Dictionary(true);
-		}
-
-
-		arcane override function cleanCompilationData() : void
-		{
-			super.cleanCompilationData();
-			_attenuationRegister = null;
-			_vertexPosReg = null;
-			_varyingReg = null;
+			_fallOffFactor = 1 / (_fallOff - _radius);
 		}
 
 		/**
@@ -68,8 +53,12 @@ package away3d.lights
 				invalidateBounds();
 			}
 
-			_attenuationData[0] = _radius;
-			_attenuationData[1] = 1 / (_fallOff - _radius);
+			_fallOffFactor = 1 / (_fallOff - _radius);
+		}
+
+		arcane function fallOffFactor() : Number
+		{
+			return _fallOffFactor;
 		}
 
 		/**
@@ -85,9 +74,8 @@ package away3d.lights
 			_fallOff = value;
 			if (_fallOff < 0) _fallOff = 0;
 			if (_fallOff < _radius) _radius = _fallOff;
+			_fallOffFactor = 1 / (_fallOff - _radius);
 			invalidateBounds();
-			_attenuationData[0] = _radius;
-			_attenuationData[1] = 1 / (_fallOff - _radius);
 		}
 
 		/**
@@ -98,17 +86,6 @@ package away3d.lights
 //			super.updateBounds();
 			_bounds.fromExtremes(-_fallOff, -_fallOff, -_fallOff, _fallOff, _fallOff, _fallOff);
 			_boundsInvalid = false;
-		}
-
-
-		override protected function updateSceneTransform() : void
-		{
-			super.updateSceneTransform();
-			var pos : Vector3D = scenePosition;
-
-			_positionData[0] = pos.x;
-			_positionData[1] = pos.y;
-			_positionData[2] = pos.z;
 		}
 
 		/**
@@ -130,8 +107,6 @@ package away3d.lights
 
 			m.copyFrom(renderable.sceneTransform);
 			m.append(_parent.inverseSceneTransform);
-// todo: why doesn't this work?
-//			m.copyRowTo(3, _pos);
 			lookAt(m.position);
 
 			m.copyFrom(renderable.sceneTransform);
@@ -164,49 +139,10 @@ package away3d.lights
 			return target;
 		}
 
-		override arcane function get positionBased() : Boolean
+		override public function set castsShadows(value : Boolean) : void
 		{
-			return true;
-		}
-
-
-		arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
-		{
-			_vertexPosReg = regCache.getFreeVertexConstant();
-			_varyingReg = regCache.getFreeVarying();
-			_shaderConstantIndex = _vertexPosReg.index;
-
-			return "sub " + _varyingReg.toString() + ", " + _vertexPosReg.toString() + ", " + globalPositionRegister.toString() + "\n";
-		}
-
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
-		{
-			_attenuationRegister = regCache.getFreeFragmentConstant();
-			// setting this causes the material bug
-			_attenuationIndices[pass] = _attenuationRegister.index;
-			_fragmentDirReg = _varyingReg;
-			return	 "";
-		}
-
-
-		arcane override function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement, pass : MaterialPassBase) : String
-		{
-			// w = sqrt(dir . dir) = len(dir)
-			return	"dp3 " + targetReg + ".w, " + _varyingReg + ".xyz, " + _varyingReg + ".xyz\n" +
-					"sqt " + targetReg + ".w, " + targetReg + ".w\n" +
-				// w = d - min
-					"sub " + targetReg + ".w, " + targetReg + ".w, " + _attenuationRegister + ".x\n" +
-				// w = (d - min)/(max-min)
-					"mul " + targetReg + ".w, " + targetReg + ".w, " + _attenuationRegister + ".y\n" +
-				// w = clamp(w, 0, 1)
-					"sat " + targetReg + ".w, " + targetReg + ".w\n" +
-					"sub " + targetReg + ".w, " + _attenuationRegister + ".w, " + targetReg + ".w\n";
-		}
-
-		arcane override function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
-		{
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, inputIndex, _positionData, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _attenuationIndices[pass], _attenuationData, 1);
+			throw new Error("Shadow casting is not yet available for PointLight objects.");
+			super.castsShadows = value;
 		}
 	}
 }

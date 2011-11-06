@@ -45,7 +45,7 @@ package away3d.debug
 	 * 
 	 * <p>All data can be reset at any time, by clicking the lower part of the widget (where
 	 * the RAM and POLY counters are located. The average FPS can be reset separately by
-	 * clicking it's displayed value. Furthermore, the stage frame rate can be increased or
+	 * clicking it's ²displayed value. Furthermore, the stage frame rate can be increased or
 	 * decreased by clicking the upper and lower parts of the graph, respectively. Clicking close
 	 * to the center will increment in small values, and further away will increase the steps. 
 	 * The graph itself is only visible in standard (as opposed to minimized) display mode.</p>

@@ -10,6 +10,7 @@ package away3d.core.render
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;
 
@@ -31,16 +32,10 @@ package away3d.core.render
 			super();
 		}
 
-
-		arcane override function set stage3DProxy(value : Stage3DProxy) : void
-		{
-			super.stage3DProxy = value;
-		}
-
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector : EntityCollector) : void
+		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 
@@ -73,7 +68,7 @@ package away3d.core.render
 			var camera : Camera3D = entityCollector.camera;
 
 			material.activatePass(0, _stage3DProxy, camera);
-			material.renderPass(0, skyBox, _stage3DProxy, camera);
+			material.renderPass(0, skyBox, _stage3DProxy, entityCollector);
 			material.deactivatePass(0, _stage3DProxy);
 		}
 
@@ -101,7 +96,7 @@ package away3d.core.render
 
 					_activeMaterial.activatePass(j, _stage3DProxy, camera);
 					do {
-						_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, camera);
+						_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector);
 						item2 = item2.next;
 					} while (item2 && item2.renderable.material == _activeMaterial);
 					_activeMaterial.deactivatePass(j, _stage3DProxy);

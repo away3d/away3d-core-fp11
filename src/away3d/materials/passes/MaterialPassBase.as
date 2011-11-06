@@ -5,12 +5,14 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.AGALProgram3DCache;
+	import away3d.core.managers.AGALProgram3DCompiler;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
-	import away3d.lights.LightBase;
+	import away3d.lights.DirectionalLight;
+	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.lightpickers.LightPickerBase;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
@@ -42,17 +44,17 @@ package away3d.materials.passes
 
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
-		protected var _mipmap : Boolean = false;
+		protected var _mipmap : Boolean = true;
 
-		private var _mipmapBitmap : BitmapData;
 		private var _bothSides : Boolean;
 
 		protected var _animatableAttributes : Array = ["va0"];
-		protected var _targetRegisters : Array = ["vt0"];
+		protected var _animationTargetRegisters : Array = ["vt0"];
 		protected var _projectedTargetRegister : String;
 
-		protected var _lights : Vector.<LightBase>;
-		protected var _numLights : uint;
+		protected var _numPointLights : uint;
+		protected var _numDirectionalLights : uint;
+		protected var _numLightProbes : uint;
 
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
 		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
@@ -100,8 +102,6 @@ package away3d.materials.passes
 		{
 			if (_mipmap == value) return;
 			_mipmap = value;
-			if (_mipmapBitmap) _mipmapBitmap.dispose();
-			else _mipmapBitmap = null;
 			invalidateShaderProgram();
 		}
 
@@ -167,7 +167,7 @@ package away3d.materials.passes
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose(deep : Boolean) : void
+		public function dispose() : void
 		{
 			for (var i : uint = 0; i < 8; ++i) {
 				if (_program3Ds[i]) AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
@@ -194,14 +194,10 @@ package away3d.materials.passes
 
 		/**
 		 * Renders an object to the current render target.
-		 * @param renderable The IRenderable object to render.
-		 * @param context The context which is performing the rendering.
-		 * @param camera The camera from which the scene is viewed.
-		 * @param lights The lights which influence the rendered scene.
 		 *
 		 * @private
 		 */
-		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 
@@ -240,7 +236,7 @@ package away3d.materials.passes
 		 */
 		arcane function getAnimationTargetRegisters() : Array
 		{
-			return _targetRegisters;
+			return _animationTargetRegisters;
 		}
 
 		arcane function getVertexCode() : String
@@ -257,10 +253,6 @@ package away3d.materials.passes
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
-//			if (!_program3Ds[contextIndex]) {
-//				initPass(stage3DProxy);
-//			}
-
 			if (_programInvalids[contextIndex] || !_program3Ds[contextIndex]) {
 				updateProgram(stage3DProxy);
 				dispatchEvent(new Event(Event.CHANGE));
@@ -269,7 +261,7 @@ package away3d.materials.passes
 			var prevUsed : int = _previousUsedStreams[contextIndex];
 			var i : uint;
 			for (i = _numUsedStreams; i < prevUsed; ++i) {
-				stage3DProxy.setSimpleVertexBuffer(i, null);
+				stage3DProxy.setSimpleVertexBuffer(i, null, null);
 			}
 
 			prevUsed = _previousUsedTexs[contextIndex];
@@ -298,9 +290,6 @@ package away3d.materials.passes
 		 */
 		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-//			for (var i : uint = 1; i < _numUsedStreams; ++i)
-//				context.setVertexBufferAt(i, null);
-
 			var index : uint = stage3DProxy._stage3DIndex;
 			_previousUsedStreams[index] = _numUsedStreams;
 			_previousUsedTexs[index] = _numUsedTextures;
@@ -329,19 +318,35 @@ package away3d.materials.passes
 		 */
 		arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
-			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, _animation, polyOffsetReg);
+			var compiler : AGALProgram3DCompiler = new AGALProgram3DCompiler();
+			compiler.compile(this, _animation, polyOffsetReg);
+			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, compiler.vertexCode, compiler.fragmentCode);
 			_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 
-		public function get lights() : Vector.<LightBase>
+		arcane function get numPointLights() : uint
 		{
-			return _lights;
+			return _numPointLights;
 		}
 
-		public function set lights(value : Vector.<LightBase>) : void
+		arcane function set numPointLights(value : uint) : void
 		{
-			_lights = value;
-			_numLights = value? lights.length : 0;
+			_numPointLights = value;
+		}
+
+		arcane function get numDirectionalLights() : uint
+		{
+			return _numDirectionalLights;
+		}
+
+		arcane function set numDirectionalLights(value : uint) : void
+		{
+			_numDirectionalLights = value;
+		}
+
+		arcane function set numLightProbes(value : uint) : void
+		{
+			_numLightProbes = value;
 		}
 	}
 }

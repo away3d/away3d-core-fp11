@@ -14,6 +14,7 @@ package away3d.core.render
 	import flash.display3D.Context3DRenderMode;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
+	import flash.display3D.textures.TextureBase;
 
 	/**
 	 * The PositionRenderer renders normalized position coordinates.
@@ -39,7 +40,7 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector : EntityCollector) : void
+		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
 			var item : RenderableListItem;
 			var renderable : IRenderable;

@@ -8,11 +8,12 @@
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
 	import away3d.loaders.parsers.data.DefaultBitmapData;
-	import away3d.materials.BitmapMaterial;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.TextureMaterial;
 	import away3d.materials.utils.MultipleMaterials;
+	import away3d.textures.BitmapTexture;
 	import away3d.tools.MeshHelper;
-
+	
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
@@ -86,7 +87,7 @@
 			_subGeometry = new SubGeometry();
 			
 			if(!material && materials && materials.front) material = materials.front;
-			super((!material)? new BitmapMaterial(DefaultBitmapData.bitmapData) : material, geom);
+			super((!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material, geom);
 			
 			_aVectors = vectors;
 			_axis = axis;

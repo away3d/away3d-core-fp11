@@ -712,9 +712,8 @@ package away3d.core.base
 		
 		/**
 		 * Cleans up any resources used by the current object.
-		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose(deep : Boolean) : void
+		public function dispose() : void
 		{
 		}
 

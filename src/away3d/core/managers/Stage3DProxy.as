@@ -1,6 +1,7 @@
 package away3d.core.managers
 {
 	import away3d.arcane;
+	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
 
 	import flash.display.Stage3D;
@@ -62,7 +63,7 @@ package away3d.core.managers
 			requestContext();
 		}
 
-		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String = null) : void
+		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String) : void
 		{
 			// force setting null
 			if (buffer && _activeVertexBuffers[index] == buffer) return;
@@ -221,7 +222,7 @@ package away3d.core.managers
 		{
 			if (_stage3D.context3D) {
 				_context3D = _stage3D.context3D;
-				_context3D.enableErrorChecking = true;
+				_context3D.enableErrorChecking = Debug.active;
 				_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
 				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
 			}

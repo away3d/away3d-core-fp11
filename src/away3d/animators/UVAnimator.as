@@ -5,7 +5,7 @@ package away3d.animators
 	import away3d.animators.utils.TimelineUtil;
 	import away3d.arcane;
 	import away3d.core.base.SubMesh;
-	import away3d.materials.BitmapMaterial;
+	import away3d.materials.TextureMaterial;
 
 	use namespace arcane;
 	
@@ -42,7 +42,7 @@ package away3d.animators
 		
 		public function play(sequenceName : String) : void
 		{
-			var material : BitmapMaterial = _target.material as BitmapMaterial;
+			var material : TextureMaterial = _target.material as TextureMaterial;
 
 			_activeSequence = _sequences[sequenceName];
 

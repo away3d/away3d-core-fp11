@@ -124,7 +124,7 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			_projMatrix.copyFrom(_projector.viewProjection);
 			_projMatrix.prepend(renderable.sceneTransform);

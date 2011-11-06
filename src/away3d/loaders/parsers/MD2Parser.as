@@ -9,9 +9,10 @@ package away3d.loaders.parsers
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.materials.BitmapMaterial;
+	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -109,10 +110,10 @@ package away3d.loaders.parsers
 			if (resourceDependency.assets.length != 1)
 				return;
 			
-			var asset : BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
+			var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
 			
-			if (asset && asset.bitmapData && isBitmapDataValid(asset.bitmapData))
-				BitmapMaterial(_mesh.material).bitmapData = asset.bitmapData;
+			if (asset)
+				TextureMaterial(_mesh.material).texture = asset;
 			
 		}
 		/**
@@ -121,7 +122,7 @@ package away3d.loaders.parsers
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
 			// apply system default
-			BitmapMaterial(_mesh.material).bitmapData = defaultBitmapData;
+			TextureMaterial(_mesh.material).texture = new BitmapTexture(defaultBitmapData);
 		} 
 		
 		
@@ -142,7 +143,7 @@ package away3d.loaders.parsers
 					// TODO: Create a mesh only when encountered (if it makes sense
 					// for this file format) and return it using finalizeAsset()
 					_mesh = new Mesh;
-					_mesh.material = new BitmapMaterial(defaultBitmapData);
+					_mesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
 					
 					_geometry = _mesh.geometry;
 					_geometry.animation = new VertexAnimation(2, VertexAnimationMode.ABSOLUTE);

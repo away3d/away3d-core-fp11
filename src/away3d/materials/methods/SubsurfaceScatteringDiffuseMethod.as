@@ -225,7 +225,7 @@ package away3d.materials.methods
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _dec, 1);
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, stage3DProxy);

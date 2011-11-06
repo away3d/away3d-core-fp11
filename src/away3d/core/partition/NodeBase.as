@@ -47,7 +47,7 @@ package away3d.core.partition
 				_debugPrimitive = createDebugBounds();
 			}
 			else {
-				_debugPrimitive.dispose(true);
+				_debugPrimitive.dispose();
 				_debugPrimitive = null;
 			}
 

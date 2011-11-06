@@ -152,21 +152,12 @@
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
 			_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
 			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
 			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
 			_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
-
-			if (deep) {
-				_geometry.dispose();
-
-				if (_material) {
-					_material.dispose(true);
-					material = null;
-				}
-			}
 		}
 
 		/**
@@ -274,6 +265,11 @@
 		private function onAnimationChanged(event : GeometryEvent) : void
 		{
 			animationState = _geometry.animation.createAnimationState();
+
+			// cause material to be unregistered and registered again to work with the new animation type (if possible)
+			var oldMaterial : MaterialBase = material;
+			material = null;
+			material = oldMaterial;
 		}
 
 		public function getSubMeshForSubGeometry(subGeometry : SubGeometry) : SubMesh

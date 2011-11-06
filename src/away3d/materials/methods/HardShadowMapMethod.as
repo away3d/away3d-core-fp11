@@ -4,6 +4,7 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -14,12 +15,12 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class HardShadowMapMethod extends ShadowMapMethodBase
+	public class HardShadowMapMethod extends DirectionalShadowMapMethodBase
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
-		public function HardShadowMapMethod(castingLight : LightBase)
+		public function HardShadowMapMethod(castingLight : DirectionalLight)
 		{
 			super(castingLight);
 		}
@@ -37,9 +38,9 @@ package away3d.materials.methods
 
 			_decIndex = decReg.index;
 
-			code += "tex " + depthCol + ", " + _depthMapVar + ", " + depthMapRegister + " <2d, nearestNoMip, clamp>\n" +
+			code += "tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d, nearestNoMip, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"add " + targetReg + ".w, " + _depthMapVar+".z, " + epsReg+".x\n" +    // offset by epsilon
+					"add " + targetReg + ".w, " + _depthMapCoordReg+".z, " + epsReg+".x\n" +    // offset by epsilon
 
 					"slt " + targetReg + ".w, " + targetReg + ".w, " + depthCol+".z\n";   // 0 if in shadow
 

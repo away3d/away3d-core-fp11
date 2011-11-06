@@ -2,7 +2,7 @@ package away3d.loaders.parsers
 
 {
 	import away3d.arcane;
-	import away3d.library.assets.BitmapDataAsset;
+	import away3d.textures.BitmapTexture;
 	
 	import flash.display.Bitmap;
 	import flash.display.Loader;
@@ -143,7 +143,7 @@ package away3d.loaders.parsers
 		protected override function proceedParsing() : Boolean
 		{
 			if (_data is Bitmap) {
-				var asset : BitmapDataAsset = new BitmapDataAsset(Bitmap(_data).bitmapData);
+				var asset : BitmapTexture = new BitmapTexture(Bitmap(_data).bitmapData);
 				finalizeAsset(asset, _fileName);
 				
 				return PARSING_DONE;
@@ -180,7 +180,7 @@ package away3d.loaders.parsers
 		private function onLoadComplete(event : Event) : void
 
 		{
-			var asset : BitmapDataAsset = new BitmapDataAsset(Bitmap(_loader.content).bitmapData);
+			var asset : BitmapTexture = new BitmapTexture(Bitmap(_loader.content).bitmapData);
 
 			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoadComplete);
 

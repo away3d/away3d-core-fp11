@@ -21,6 +21,7 @@ package away3d.core.render
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
+	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
@@ -114,10 +115,10 @@ package away3d.core.render
 			_hitUV = null;
 			_potentialFound = false;
 
-			draw(entityCollector);
+			draw(entityCollector, null);
 
 			// clear buffers
-			_stage3DProxy.setSimpleVertexBuffer(0, null);
+			_stage3DProxy.setSimpleVertexBuffer(0, null, null);
 
 			if (!_context || !_potentialFound) return;
 			_context.drawToBitmapData(_bitmapData);
@@ -164,7 +165,7 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector : EntityCollector) : void
+		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
 			var camera : Camera3D = entityCollector.camera;
 
@@ -416,6 +417,12 @@ package away3d.core.render
 				j += 3;
 				k += 3;
 			}
+		}
+
+		arcane override function dispose() : void
+		{
+			super.dispose();
+			_bitmapData.dispose();
 		}
 
 		/**

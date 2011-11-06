@@ -29,7 +29,7 @@ package away3d.materials.methods
 		protected var _normalFragmentReg : ShaderRegisterElement;
 		protected var _uvFragmentReg : ShaderRegisterElement;
 		protected var _secondaryUVFragmentReg : ShaderRegisterElement;
-		protected var _globalPosVertexReg : ShaderRegisterElement;
+		protected var _globalPosReg : ShaderRegisterElement;
 		protected var _projectionReg : ShaderRegisterElement;
 
 		protected var _mipmap : Boolean = true;
@@ -67,7 +67,7 @@ package away3d.materials.methods
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose(deep : Boolean) : void
+		public function dispose() : void
 		{
 
 		}
@@ -116,7 +116,7 @@ package away3d.materials.methods
 			_viewDirFragmentReg = null;
 			_normalFragmentReg = null;
 			_uvFragmentReg = null;
-			_globalPosVertexReg = null;
+			_globalPosReg = null;
 			_projectionReg = null;
 		}
 
@@ -212,14 +212,14 @@ package away3d.materials.methods
 		 * The fragment register in which the uv coordinates are stored.
 		 * @private
 		 */
-		arcane function get globalPosVertexReg() : ShaderRegisterElement
+		arcane function get globalPosReg() : ShaderRegisterElement
 		{
-			return _globalPosVertexReg;
+			return _globalPosReg;
 		}
 
-		arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		arcane function set globalPosReg(value : ShaderRegisterElement) : void
 		{
-			_globalPosVertexReg = value;
+			_globalPosReg = value;
 		}
 
 		arcane function get projectionReg() : ShaderRegisterElement
@@ -331,7 +331,7 @@ package away3d.materials.methods
 		/**
 		 * Sets the render state for a single renderable.
 		 */
-		arcane function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 
 		}

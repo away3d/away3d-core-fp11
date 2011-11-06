@@ -7,6 +7,7 @@ package away3d.materials.passes
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
+	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
@@ -44,7 +45,7 @@ package away3d.materials.passes
 			this.outlineSize = outlineSize;
 			_defaultCulling = Context3DTriangleFace.FRONT;
 			_animatableAttributes = ["va0", "va1"];
-			_targetRegisters = ["vt0", "vt1"];
+			_animationTargetRegisters = ["vt0", "vt1"];
 			_numUsedStreams = 2;
 			_numUsedVertexConstants = 5;
 			_showInnerLines = showInnerLines;
@@ -54,26 +55,34 @@ package away3d.materials.passes
 		}
 
 		/**
-		 * Clears mesh, will also cause invalidation
+		 * Clears mesh.
+		 * TODO: have Object3D broadcast dispose event, so this can be handled automatically?
 		 */
 		public function clearDedicatedMesh(mesh : Mesh) : void
 		{
 			if (_dedicatedMeshes) {
 				for (var i : int = 0; i < mesh.subMeshes.length; ++i) {
-					var key : SubMesh = mesh.subMeshes[i];
-					Mesh(_dedicatedMeshes[key]).dispose(true);
-					delete _dedicatedMeshes[key];
+					disposeDedicated(mesh.subMeshes[i]);
 				}
 			}
 		}
 
-		override public function dispose(deep : Boolean) : void
+		private function disposeDedicated(keySubMesh : Object) : void
 		{
-			super.dispose(deep);
+			var mesh : Mesh;
+			mesh = Mesh(_dedicatedMeshes[keySubMesh]);
+			mesh.geometry.dispose();
+			mesh.dispose();
+			delete _dedicatedMeshes[keySubMesh];
+		}
+
+		override public function dispose() : void
+		{
+			super.dispose();
+
 			if (_dedicatedMeshes) {
 				for (var key : Object in _outlineMeshes) {
-					Mesh(_dedicatedMeshes[key]).dispose(true);
-					delete _dedicatedMeshes[key];
+					disposeDedicated(key)
 				}
 			}
 		}
@@ -152,7 +161,7 @@ package away3d.materials.passes
 		}
 
 
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var mesh : Mesh, dedicatedRenderable : IRenderable;
 			if (_dedicatedMeshes) {
@@ -168,7 +177,7 @@ package away3d.materials.passes
 			else {
 				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 
-				super.render(renderable, stage3DProxy, camera);
+				super.render(renderable, stage3DProxy, camera, lightPicker);
 			}
 		}
 

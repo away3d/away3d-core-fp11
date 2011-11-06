@@ -89,8 +89,8 @@ package away3d.animators.data
 			if (_usesCPU) return;
 			var streamOffset : uint = pass.numUsedStreams;
 
-			stage3DProxy.setSimpleVertexBuffer(streamOffset, null);
-			stage3DProxy.setSimpleVertexBuffer(streamOffset + 1, null);
+			stage3DProxy.setSimpleVertexBuffer(streamOffset, null, null);
+			stage3DProxy.setSimpleVertexBuffer(streamOffset + 1, null, null);
 		}
 
 		/**
