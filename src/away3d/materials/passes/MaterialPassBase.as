@@ -5,6 +5,7 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.AGALProgram3DCache;
+	import away3d.core.managers.AGALProgram3DCompiler;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.DirectionalLight;
@@ -324,7 +325,9 @@ package away3d.materials.passes
 		 */
 		arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
-			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, _animation, polyOffsetReg);
+			var compiler : AGALProgram3DCompiler = new AGALProgram3DCompiler();
+			compiler.compile(this, _animation, polyOffsetReg);
+			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, compiler.vertexCode, compiler.fragmentCode);
 			_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 

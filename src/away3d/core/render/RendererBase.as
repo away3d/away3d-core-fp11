@@ -232,7 +232,8 @@ package away3d.core.render
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+			if (additionalClearMask != 0)
+				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			_stage3DProxy.scissorRect = scissorRect;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
@@ -250,16 +251,6 @@ package away3d.core.render
 		{
 			throw new AbstractMethodError();
 		}
-
-		/**
-		 * Updates the viewport dimensions;
-		 */
-		/*protected function updateViewPort() : void
-		{
-			_stage3DProxy.x = _viewPortX;
-			_stage3DProxy.y = _viewPortY;
-			_viewPortInvalid = false;
-		}   */
 
 		/**
 		 * Assign the context once retrieved

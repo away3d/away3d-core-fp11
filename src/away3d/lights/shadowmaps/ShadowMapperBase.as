@@ -10,6 +10,9 @@ package away3d.lights.shadowmaps
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.Stage3DEvent;
 	import away3d.lights.LightBase;
+	import away3d.textures.RenderTexture;
+	import away3d.textures.Texture2DBase;
+	import away3d.textures.TextureProxyBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -22,30 +25,20 @@ package away3d.lights.shadowmaps
 	{
 		protected var _casterCollector : ShadowCasterCollector;
 
-		private var _depthMaps : Vector.<TextureBase>;
+		// todo: change into Away Texture type so this can be used for easy debug rendering
+		private var _depthMap : TextureProxyBase;
 		protected var _depthMapSize : uint = 2048;
 		protected var _light : LightBase;
-		private var _listeningForDisposal : Vector.<Stage3DProxy> = new Vector.<Stage3DProxy>(8, true);
 
 		public function ShadowMapperBase(light : LightBase)
 		{
 			_light = light;
 			_casterCollector = new ShadowCasterCollector();
-			_depthMaps = new Vector.<TextureBase>(8);
 		}
 
-		/**
-		 * Depth projection matrix that projects from scene space to depth map.
-		 */
-		arcane function get depthProjection() : Matrix3D
+		public function get depthMap() : TextureProxyBase
 		{
-			throw new AbstractMethodError();
-			return null;
-		}
-
-		public function getDepthMap(stage3DProxy : Stage3DProxy) : TextureBase
-		{
-			return _depthMaps[stage3DProxy._stage3DIndex];
+			return _depthMap ||= createDepthTexture();
 		}
 
 		public function get depthMapSize() : uint
@@ -57,30 +50,21 @@ package away3d.lights.shadowmaps
 		{
 			if (value == _depthMapSize) return;
 			_depthMapSize = value;
-
-			for (var i : int = 0; i < _depthMaps.length; ++i) {
-				if (_depthMaps[i]) _depthMaps[i].dispose();
-				_depthMaps[i] = null;
-			}
+			_depthMap.dispose();
+			_depthMap = null;
 		}
 
 		public function dispose() : void
 		{
 			_casterCollector = null;
-			for (var i : int = 0; i < _depthMaps.length; ++i) {
-				if (_depthMaps[i]) _depthMaps[i].dispose();
-			}
-			_depthMaps = null;
-
-			for (i = 0; i < 8; ++i) {
-				if (_listeningForDisposal[i]) _listeningForDisposal[i].removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
-			}
+			_depthMap.dispose();
+			_depthMap = null;
 		}
 
 
-		private function createDepthTexture(stage3DProxy : Stage3DProxy) : TextureBase
+		private function createDepthTexture() : TextureProxyBase
 		{
-			return stage3DProxy._context3D.createTexture(_depthMapSize, _depthMapSize, Context3DTextureFormat.BGRA, true);
+			return new RenderTexture(_depthMapSize, _depthMapSize);
 		}
 
 
@@ -93,25 +77,9 @@ package away3d.lights.shadowmaps
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
-			if (!_listeningForDisposal[contextIndex]) {
-				_listeningForDisposal[contextIndex] = stage3DProxy;
-				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
-			}
-
-			if (!_depthMaps[contextIndex]) _depthMaps[contextIndex] = createDepthTexture(stage3DProxy);
 			updateDepthProjection(entityCollector.camera);
-			drawDepthMap(_depthMaps[contextIndex], entityCollector.scene, renderer);
-		}
-
-		private function onContext3DDisposed(event : Stage3DEvent) : void
-		{
-			var stage3DProxy : Stage3DProxy = Stage3DProxy(event.target);
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
-			_listeningForDisposal[contextIndex] = null;
-
-			_depthMaps[contextIndex].dispose();
-			_depthMaps[contextIndex] = null;
+			_depthMap ||= createDepthTexture();
+			drawDepthMap(_depthMap.getTextureForStage3D(stage3DProxy), entityCollector.scene, renderer);
 		}
 
 		protected function updateDepthProjection(viewCamera : Camera3D) : void

@@ -118,6 +118,7 @@ package away3d.materials.passes
 		private var _probeWeightsIndex : int;
 		private var _numProbeRegisters : uint;
 		private var _usingSpecularMethod : Boolean;
+		private var _usesGlobalPosFragment : Boolean = true;
 
 
 		/**
@@ -735,7 +736,7 @@ package away3d.materials.passes
 
 		private function setMethodRegs(method : ShadingMethodBase) : void
 		{
-			method.globalPosVertexReg = _globalPositionVertexReg;
+			method.globalPosReg = _globalPositionVaryingReg;
 			method.normalFragmentReg = _normalFragmentReg;
 			method.projectionReg = _projectionFragmentReg;
 			method.UVFragmentReg = _uvVaryingReg;
@@ -784,14 +785,22 @@ package away3d.materials.passes
 
 			if (_normalDependencies > 0 && _normalMethod.hasOutput) countMethodDependencies(_normalMethod);
 			if (_viewDirDependencies > 0) ++_globalPosDependencies;
-			if (_numPointLights > 0 && (_combinedLightSources & LightSources.LIGHTS)) ++_globalPosDependencies;
+
+			// todo: add spotlight check
+			if (_numPointLights > 0 && (_combinedLightSources & LightSources.LIGHTS)) {
+				++_globalPosDependencies;
+				_usesGlobalPosFragment = true;
+			}
 		}
 
 
 		private function countMethodDependencies(method : ShadingMethodBase) : void
 		{
 			if (method.needsProjection) ++_projectionDependencies;
-			if (method.needsGlobalPos) ++_globalPosDependencies;
+			if (method.needsGlobalPos) {
+				++_globalPosDependencies;
+				_usesGlobalPosFragment = true;
+			}
 			if (method.needsNormals) ++_normalDependencies;
 			if (method.needsView) ++_viewDirDependencies;
 			if (method.needsUV) ++_uvDependencies;
@@ -815,10 +824,10 @@ package away3d.materials.passes
 //			_registerCache.removeVertexTempUsage(_localPositionRegister);
 
 			// todo: add spotlight check as well
-			if (_numPointLights > 0 && (_combinedLightSources & LightSources.LIGHTS)) {
+			if (_usesGlobalPosFragment) {
 				_globalPositionVaryingReg = _registerCache.getFreeVarying();
 				_vertexCode += "mov " + _globalPositionVaryingReg + ", " + _globalPositionVertexReg + "\n";
-				_registerCache.removeVertexTempUsage(_globalPositionVertexReg);
+//				_registerCache.removeVertexTempUsage(_globalPositionVertexReg);
 			}
 		}
 

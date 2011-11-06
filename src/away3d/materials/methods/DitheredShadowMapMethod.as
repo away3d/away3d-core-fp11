@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -11,7 +12,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class DitheredShadowMapMethod extends ShadowMapMethodBase
+	public class DitheredShadowMapMethod extends DirectionalShadowMapMethodBase
 	{
 		private static var _grainTexture : BitmapTexture;
 		private static var _grainUsages : int;
@@ -24,7 +25,7 @@ package away3d.materials.methods
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
-		public function DitheredShadowMapMethod(castingLight : LightBase, highRes : Boolean = false)
+		public function DitheredShadowMapMethod(castingLight : DirectionalLight, highRes : Boolean = false)
 		{
 			super(castingLight);
 
@@ -102,44 +103,44 @@ package away3d.materials.methods
 			uvReg = regCache.getFreeFragmentVectorTemp();
 
 			code += // keep grain in uvReg.xy
-					"div " + uvReg + ", " + _depthMapVar + ", " + dataReg + ".z\n" +
+					"div " + uvReg + ", " + _depthMapCoordReg + ", " + dataReg + ".z\n" +
 					"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
 					"sub " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".ww\n" + 	// uv-.5
 					"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +      // 2*(uv-.5)
 					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".z\n" +
 
-					"tex " + depthCol + ", " + _depthMapVar + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"add " + uvReg+".z, " + _depthMapVar+".z, " + dataReg+".x\n" +     // offset by epsilon
+					"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
 					"slt " + targetReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 
 					"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 
 					"mov " + uvReg+".xy, " + uvReg+".yx\n" +
 					"neg " + uvReg+".x, " + uvReg+".x\n" +
 
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 
 					"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
@@ -147,40 +148,40 @@ package away3d.materials.methods
 
 			if (_highRes) {
 					// reseed
-				code +=	"div " + uvReg + ".xy, " + _depthMapVar + ".xy, " + dataReg + ".z\n" +
+				code +=	"div " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + dataReg + ".z\n" +
 						"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
 						"sub " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".ww\n" +
 						"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +
 						"mul " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".z\n" +
-						"add " + uvReg+".z, " + _depthMapVar+".z, " + dataReg+".x\n" +     // offset by epsilon
+						"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
 
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 
 						"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 
 						"mov " + uvReg+".xy, " + uvReg+".yx\n" +
 						"neg " + uvReg+".x, " + uvReg+".x\n" +
 
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 
 						"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapVar+".xy\n" +
+						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow

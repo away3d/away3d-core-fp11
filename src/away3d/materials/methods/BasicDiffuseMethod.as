@@ -26,7 +26,7 @@ package away3d.materials.methods
 		private var _texture : Texture2DBase;
 		private var _diffuseColor : uint = 0xffffff;
 
-		private var _diffuseData : Vector.<Number>;
+		protected var _diffuseData : Vector.<Number>;
 		private var _cutOffData : Vector.<Number>;
 
 		private var _diffuseR : Number = 1, _diffuseG : Number = 1, _diffuseB : Number = 1, _diffuseA : Number = 1;
@@ -126,6 +126,7 @@ package away3d.materials.methods
 			smooth = diff.smooth;
 			repeat = diff.repeat;
 			mipmap = diff.mipmap;
+			alphaThreshold = diff.alphaThreshold;
 			numLights = diff.numLights;
 			texture = diff.texture;
 			diffuseAlpha = diff.diffuseAlpha;

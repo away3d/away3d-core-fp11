@@ -17,8 +17,8 @@ package away3d.textures
 		protected var _textures : Vector.<TextureBase>;
 		protected var _dirty : Vector.<Boolean>;
 
-		private var _width : int;
-		private var _height : int;
+		protected var _width : int;
+		protected var _height : int;
 
 		public function TextureProxyBase()
 		{

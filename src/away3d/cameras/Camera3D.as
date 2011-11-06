@@ -21,37 +21,6 @@ package away3d.cameras
 	 */
 	public class Camera3D extends Entity
 	{
-		/** @private */
-		arcane function get textureRatioX() : Number
-		{
-			return _textureRatioX;
-		}
-		/** @private */
-		arcane function set textureRatioX(value : Number) : void
-		{
-			if (_textureRatioX == value)
-				return;
-			
-			_textureRatioX = value
-			
-			_renderToTextureProjectionDirty = true;
-		}
-		/** @private */
-		arcane function get textureRatioY() : Number
-		{
-			return _textureRatioY;
-		}
-		/** @private */
-		arcane function set textureRatioY(value : Number) : void
-		{
-			if (_textureRatioY == value)
-				return;
-			
-			_textureRatioY = value;
-			
-			_renderToTextureProjectionDirty = true;
-		}
-		
 		private var _viewProjection : Matrix3D = new Matrix3D();
 		private var _viewProjectionDirty : Boolean = true;
 		private var _renderToTextureProjection : Matrix3D = new Matrix3D();
@@ -61,7 +30,32 @@ package away3d.cameras
 		private var _frustumPlanesDirty : Boolean = true;
 		private var _textureRatioX : Number = 1;
 		private var _textureRatioY : Number = 1;
-		
+
+
+
+		/**
+		 * Creates a new Camera3D object
+		 * @param lens An optional lens object that will perform the projection. Defaults to PerspectiveLens.
+		 *
+		 * @see away3d.cameras.lenses.PerspectiveLens
+		 */
+		public function Camera3D(lens : LensBase = null)
+		{
+			super();
+
+			//setup default lens
+			_lens = lens || new PerspectiveLens();
+			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
+
+			//setup default frustum planes
+			_frustumPlanes = new Vector.<Plane3D>(6, true);
+
+			for (var i : int = 0; i < 6; ++i)
+				_frustumPlanes[i] = new Plane3D();
+
+			z = -1000;
+		}
+
 		private function onLensMatrixChanged(event : LensEvent) : void
 		{
 			_viewProjectionDirty = true;
@@ -229,38 +223,49 @@ package away3d.cameras
 			if (_renderToTextureProjectionDirty) {
 				_renderToTextureProjection.copyFrom(viewProjection);
 				_renderToTextureProjection.appendScale(_textureRatioX, _textureRatioY, 1);
-				
+
 				_renderToTextureProjectionDirty = false;
 			}
 			
 			return _renderToTextureProjection;
 		}
-		
-		/**
-		 * Creates a new Camera3D object
-		 * @param lens An optional lens object that will perform the projection. Defaults to PerspectiveLens.
-		 *
-		 * @see away3d.cameras.lenses.PerspectiveLens
-		 */
-		public function Camera3D(lens : LensBase = null)
+
+		/** @private */
+		arcane function get textureRatioX() : Number
 		{
-			super();
-			
-			//setup default lens
-			_lens = lens || new PerspectiveLens();
-			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
-			
-			//setup default frustum planes
-			_frustumPlanes = new Vector.<Plane3D>(6, true);
-			
-			for (var i : int = 0; i < 6; ++i)
-				_frustumPlanes[i] = new Plane3D();
-			
-			z = -1000;
+			return _textureRatioX;
 		}
-		
+
+		/** @private */
+		arcane function set textureRatioX(value : Number) : void
+		{
+			if (_textureRatioX == value)
+				return;
+
+			_textureRatioX = value
+
+			_renderToTextureProjectionDirty = true;
+		}
+
+		/** @private */
+		arcane function get textureRatioY() : Number
+		{
+			return _textureRatioY;
+		}
+		/** @private */
+		arcane function set textureRatioY(value : Number) : void
+		{
+			if (_textureRatioY == value)
+				return;
+
+			_textureRatioY = value;
+
+			_renderToTextureProjectionDirty = true;
+		}
+
+
 		/**
-		 * 
+		 *
 		 */
 		public function unproject(mX : Number, mY : Number):Vector3D
 		{

@@ -29,7 +29,7 @@ package away3d.materials.methods
 		protected var _normalFragmentReg : ShaderRegisterElement;
 		protected var _uvFragmentReg : ShaderRegisterElement;
 		protected var _secondaryUVFragmentReg : ShaderRegisterElement;
-		protected var _globalPosVertexReg : ShaderRegisterElement;
+		protected var _globalPosReg : ShaderRegisterElement;
 		protected var _projectionReg : ShaderRegisterElement;
 
 		protected var _mipmap : Boolean = true;
@@ -116,7 +116,7 @@ package away3d.materials.methods
 			_viewDirFragmentReg = null;
 			_normalFragmentReg = null;
 			_uvFragmentReg = null;
-			_globalPosVertexReg = null;
+			_globalPosReg = null;
 			_projectionReg = null;
 		}
 
@@ -212,14 +212,14 @@ package away3d.materials.methods
 		 * The fragment register in which the uv coordinates are stored.
 		 * @private
 		 */
-		arcane function get globalPosVertexReg() : ShaderRegisterElement
+		arcane function get globalPosReg() : ShaderRegisterElement
 		{
-			return _globalPosVertexReg;
+			return _globalPosReg;
 		}
 
-		arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		arcane function set globalPosReg(value : ShaderRegisterElement) : void
 		{
-			_globalPosVertexReg = value;
+			_globalPosReg = value;
 		}
 
 		arcane function get projectionReg() : ShaderRegisterElement

@@ -280,9 +280,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
 		{
-			_baseDiffuseMethod.globalPosVertexReg = _globalPosVertexReg = value;
+			_baseDiffuseMethod.globalPosReg = _globalPosReg = value;
 		}
 
 		/**

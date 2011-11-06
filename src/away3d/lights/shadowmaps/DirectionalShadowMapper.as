@@ -1,6 +1,3 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.lights.shadowmaps
 {
 	import away3d.arcane;
@@ -17,21 +14,22 @@ package away3d.lights.shadowmaps
 
 	use namespace arcane;
 
-	public class DirectionalShadowMapper extends PlanarShadowMapper
+	public class DirectionalShadowMapper extends ShadowMapperBase
 	{
-		private var _mtx : Matrix3D = new Matrix3D();
+		private var _depthCamera : Camera3D;
 		private var _localFrustum : Vector.<Number>;
 
 		private var _lightOffset : Number = 10000;
-		private var _depthProjection : Matrix3D;
+		private var _matrix : Matrix3D;
 		private var _depthLens : FreeMatrixLens;
 
 		public function DirectionalShadowMapper(light : DirectionalLight)
 		{
 			super(light);
+			_depthCamera = new Camera3D();
 			_depthCamera.lens = _depthLens = new FreeMatrixLens();
 			_localFrustum = new Vector.<Number>(8 * 3);
-			_depthProjection = new Matrix3D();
+			_matrix = new Matrix3D();
 		}
 
 		public function get lightOffset() : Number
@@ -47,7 +45,7 @@ package away3d.lights.shadowmaps
 		/**
 		 * Depth projection matrix that projects from scene space to depth map.
 		 */
-		override arcane function get depthProjection() : Matrix3D
+		arcane function get depthProjection() : Matrix3D
 		{
 			return _depthCamera.viewProjection;
 		}
@@ -81,9 +79,9 @@ package away3d.lights.shadowmaps
 			_depthCamera.y = viewCamera.y - dir.y * _lightOffset;
 			_depthCamera.z = viewCamera.z - dir.z * _lightOffset;
 
-			_mtx.copyFrom(_depthCamera.inverseSceneTransform);
-			_mtx.prepend(viewCamera.sceneTransform);
-			_mtx.transformVectors(corners, _localFrustum);
+			_matrix.copyFrom(_depthCamera.inverseSceneTransform);
+			_matrix.prepend(viewCamera.sceneTransform);
+			_matrix.transformVectors(corners, _localFrustum);
 
 			i = 0;
 			while (i < 24) {
@@ -110,11 +108,11 @@ package away3d.lights.shadowmaps
 			raw[14] = -minZ * d;
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = raw[12] = raw[13] = 0;
 
-			_depthProjection.copyRawDataFrom(raw);
-			_depthProjection.appendTranslation(offsX, offsY, 0);
-			_depthProjection.appendScale(scaleX, scaleY, 1);
+			_matrix.copyRawDataFrom(raw);
+			_matrix.appendTranslation(offsX, offsY, 0);
+			_matrix.appendScale(scaleX, scaleY, 1);
 
-			_depthLens.matrix = _depthProjection;
+			_depthLens.matrix = _matrix;
 		}
 	}
 }
