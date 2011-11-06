@@ -26,12 +26,12 @@ package away3d.tools.utils
 
 		public static function getBestPowerOf2(value : int) : Number
 		{
-			var p : int = 1;
+			var p : uint = 1;
 
 			while (p < value)
 				p <<= 1;
 
-			if (p > 2048) p = 2048;
+			if (p > MAX_SIZE) p = MAX_SIZE;
 
 			return p;
 		}

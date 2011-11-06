@@ -506,7 +506,6 @@ package away3d.materials.passes
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _uvTransformIndex, _uvTransformData, 2);
 			}
 
-			// todo: switch to point lights, directional lights
 			if (_numLights > 0 && (_combinedLightSources & LightSources.LIGHTS)) {
 				updateLights(lightPicker.directionalLights, lightPicker.pointLights, stage3DProxy);
 			}

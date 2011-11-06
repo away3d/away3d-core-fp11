@@ -48,6 +48,12 @@ package away3d.core.managers
 			_fragmentCode = pass.getFragmentCode();
 			var projectionVertexCode : String = getProjectionCode(targetRegisters[uint(0)], pass.getProjectedTargetRegister(), polyOffsetReg, targetRegisters.length > 1? targetRegisters[1] : null);
 			_vertexCode = animationVertexCode+projectionVertexCode+materialVertexCode;
+
+			if (Debug.active) {
+				trace (_vertexCode);
+				trace ("------");
+				trace (_fragmentCode);
+			}
 		}
 
 		private function getProjectionCode(positionRegister : String, projectionRegister : String, polyOffsetReg : String, normalRegister : String) : String

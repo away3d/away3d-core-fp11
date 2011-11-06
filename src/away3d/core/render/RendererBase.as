@@ -36,16 +36,48 @@ package away3d.core.render
 		protected var _renderTarget : TextureBase;
 		protected var _renderTargetSurface : int;
 
+		// only used by renderers that need to render geometry to textures
+		protected var _viewWidth : Number;
+		protected var _viewHeight : Number;
+
 		private var _renderableSorter : EntitySorterBase;
 		private var _backgroundImageRenderer : BackgroundImageRenderer;
 		private var _background : Texture2DBase;
+		protected var _renderToTexture : Boolean;
+		protected var _antiAlias : uint;
 
 		/**
 		 * Creates a new RendererBase object.
 		 */
-		public function RendererBase()
+		public function RendererBase(renderToTexture : Boolean = false)
 		{
 			_renderableSorter = new RenderableMergeSort();
+			_renderToTexture = renderToTexture;
+		}
+
+		arcane function get viewWidth() : Number
+		{
+			return _viewWidth;
+		}
+
+		arcane function set viewWidth(value : Number) : void
+		{
+			_viewWidth = value;
+		}
+
+		arcane function get viewHeight() : Number
+		{
+			return _viewHeight;
+		}
+
+		arcane function set viewHeight(value : Number) : void
+		{
+			_viewHeight = value;
+		}
+
+		arcane function get renderToTexture() : Boolean
+		{
+			return _renderToTexture;
 		}
 
 		public function get renderableSorter() : EntitySorterBase
@@ -150,38 +182,6 @@ package away3d.core.render
 				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 		}
 
-		/**
-		 * The width of the back buffer.
-		 *
-		 * @private
-		 */
-		/*arcane function get backBufferWidth() : int
-		{
-			return _backBufferWidth;
-		}
-
-		arcane function set backBufferWidth(value : int) : void
-		{
-			_backBufferWidth = value;
-			_backBufferInvalid = true;
-		}    */
-
-		/**
-		 * The height of the back buffer.
-		 *
-		 * @private
-		 */
-		/*arcane function get backBufferHeight() : int
-		{
-			return _backBufferHeight;
-		}
-
-		arcane function set backBufferHeight(value : int) : void
-		{
-			_backBufferHeight = value;
-			_backBufferInvalid = true;
-		}  */
-
 
 		/**
 		 * Disposes the resources used by the RendererBase.
@@ -214,7 +214,7 @@ package away3d.core.render
 
 			// clear buffers
 			for (var i : uint = 0; i < 8; ++i) {
-				_stage3DProxy.setSimpleVertexBuffer(i, null);
+				_stage3DProxy.setSimpleVertexBuffer(i, null, null);
 				_stage3DProxy.setTextureAt(i, null);
 			}
 		}
@@ -230,6 +230,9 @@ package away3d.core.render
 		{
 			if (_renderableSorter) _renderableSorter.sort(entityCollector);
 
+			if (_renderToTexture)
+				executeRenderToTexturePass(entityCollector);
+
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
 			if (additionalClearMask != 0)
@@ -238,16 +241,21 @@ package away3d.core.render
 			_stage3DProxy.scissorRect = scissorRect;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
-			draw(entityCollector);
+			draw(entityCollector, target);
 
 			if (_swapBackBuffer && !target) _context.present();
+		}
+
+		protected function executeRenderToTexturePass(entityCollector : EntityCollector) : void
+		{
+			throw new AbstractMethodError();
 		}
 
 		/**
 		 * Performs the actual drawing of geometry to the target.
 		 * @param entityCollector The EntityCollector object containing the potentially visible geometry.
 		 */
-		protected function draw(entityCollector : EntityCollector) : void
+		protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
 			throw new AbstractMethodError();
 		}
@@ -295,6 +303,16 @@ package away3d.core.render
 		public function get backgroundImageRenderer():BackgroundImageRenderer
 		{
 			return _backgroundImageRenderer;
+		}
+
+		public function get antiAlias() : uint
+		{
+			return _antiAlias;
+		}
+
+		public function set antiAlias(antiAlias : uint) : void
+		{
+			_antiAlias = antiAlias;
 		}
 	}
 }

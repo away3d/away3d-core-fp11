@@ -10,6 +10,7 @@ package away3d.core.render
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;
 
@@ -31,16 +32,10 @@ package away3d.core.render
 			super();
 		}
 
-
-		arcane override function set stage3DProxy(value : Stage3DProxy) : void
-		{
-			super.stage3DProxy = value;
-		}
-
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector : EntityCollector) : void
+		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 

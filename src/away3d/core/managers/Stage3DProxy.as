@@ -63,7 +63,7 @@ package away3d.core.managers
 			requestContext();
 		}
 
-		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String = null) : void
+		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String) : void
 		{
 			// force setting null
 			if (buffer && _activeVertexBuffers[index] == buffer) return;

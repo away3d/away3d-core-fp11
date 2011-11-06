@@ -138,8 +138,8 @@ package away3d.core.render
 			}
 
 			stage3DProxy.setTextureAt(0, null);
-			stage3DProxy.setSimpleVertexBuffer(0, null);
-			stage3DProxy.setSimpleVertexBuffer(1, null);
+			stage3DProxy.setSimpleVertexBuffer(0, null, null);
+			stage3DProxy.setSimpleVertexBuffer(1, null, null);
 		}
 
 		private function updateBuffers(stage3DProxy : Stage3DProxy) : void
@@ -186,6 +186,8 @@ package away3d.core.render
 				_indexBuffer = context.createIndexBuffer(6);
 				_indexBuffer.uploadFromVector(Vector.<uint>([2, 1, 0, 3, 2, 0]), 0, 6);
 			}
+
+			_vertexBufferInvalid = false;
 		}
 
 		public function dispose() : void
@@ -210,6 +212,8 @@ package away3d.core.render
 					if (_filters)
 						for (var i : int = 0; i < _filters.length; ++i)
 							_filters[i].textureWidth = w;
+
+					_vertexBufferInvalid = true;
 				}
 
 				if (_textureWidth > _viewWidth) {
@@ -239,6 +243,8 @@ package away3d.core.render
 					if (_filters)
 						for (var i : int = 0; i < _filters.length; ++i)
 							_filters[i].textureHeight = h;
+
+					_vertexBufferInvalid = true;
 				}
 
 				if (_textureHeight > _viewHeight) {

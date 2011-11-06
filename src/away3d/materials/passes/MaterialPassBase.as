@@ -44,7 +44,7 @@ package away3d.materials.passes
 
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
-		protected var _mipmap : Boolean = false;
+		protected var _mipmap : Boolean = true;
 
 		private var _bothSides : Boolean;
 
@@ -253,10 +253,6 @@ package away3d.materials.passes
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
-//			if (!_program3Ds[contextIndex]) {
-//				initPass(stage3DProxy);
-//			}
-
 			if (_programInvalids[contextIndex] || !_program3Ds[contextIndex]) {
 				updateProgram(stage3DProxy);
 				dispatchEvent(new Event(Event.CHANGE));
@@ -265,7 +261,7 @@ package away3d.materials.passes
 			var prevUsed : int = _previousUsedStreams[contextIndex];
 			var i : uint;
 			for (i = _numUsedStreams; i < prevUsed; ++i) {
-				stage3DProxy.setSimpleVertexBuffer(i, null);
+				stage3DProxy.setSimpleVertexBuffer(i, null, null);
 			}
 
 			prevUsed = _previousUsedTexs[contextIndex];
@@ -294,9 +290,6 @@ package away3d.materials.passes
 		 */
 		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-//			for (var i : uint = 1; i < _numUsedStreams; ++i)
-//				context.setVertexBufferAt(i, null);
-
 			var index : uint = stage3DProxy._stage3DIndex;
 			_previousUsedStreams[index] = _numUsedStreams;
 			_previousUsedTexs[index] = _numUsedTextures;

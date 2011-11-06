@@ -63,12 +63,6 @@ package away3d.materials.passes
 			super.activate(stage3DProxy, camera);
 			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
-
-
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			stage3DProxy.setTextureAt(0, null);
-//		}
 	}
 
 }

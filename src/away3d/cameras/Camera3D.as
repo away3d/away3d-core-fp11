@@ -11,6 +11,8 @@ package away3d.cameras
 	import away3d.events.LensEvent;
 
 	import flash.geom.Matrix3D;
+
+	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
@@ -30,6 +32,8 @@ package away3d.cameras
 		private var _frustumPlanesDirty : Boolean = true;
 		private var _textureRatioX : Number = 1;
 		private var _textureRatioY : Number = 1;
+		private var _unprojection : Matrix3D;
+		private var _unprojectionInvalid : Boolean = true;
 
 
 
@@ -58,16 +62,14 @@ package away3d.cameras
 
 		private function onLensMatrixChanged(event : LensEvent) : void
 		{
+			_unprojectionInvalid = true;
 			_viewProjectionDirty = true;
 			_renderToTextureProjectionDirty = true;
 			_frustumPlanesDirty = true;
 			
 			dispatchEvent(event);
 		}
-		
-		protected const toRADIANS:Number = Math.PI/180;
-		protected const toDEGREES:Number = 180/Math.PI;
-		
+
 		/**
 		 * 
 		 */
@@ -154,7 +156,8 @@ package away3d.cameras
 		override protected function invalidateSceneTransform() : void
 		{
 			super.invalidateSceneTransform();
-			
+
+			_unprojectionInvalid = true;
 			_viewProjectionDirty = true;
 			_renderToTextureProjectionDirty = true;
 			_frustumPlanesDirty = true;
@@ -202,6 +205,8 @@ package away3d.cameras
 
 			dispatchEvent(new LensEvent(LensEvent.MATRIX_CHANGED, value));
 		}
+
+
 		
 		/**
 		 * The view projection matrix of the camera.
@@ -211,7 +216,6 @@ package away3d.cameras
 			if (_viewProjectionDirty) {
 				_viewProjection.copyFrom(inverseSceneTransform);
 				_viewProjection.append(_lens.matrix);
-				
 				_viewProjectionDirty = false;
 			}
 			
@@ -262,7 +266,6 @@ package away3d.cameras
 
 			_renderToTextureProjectionDirty = true;
 		}
-
 
 		/**
 		 *
