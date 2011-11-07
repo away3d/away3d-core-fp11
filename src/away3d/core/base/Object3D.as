@@ -702,6 +702,24 @@ package away3d.core.base
 		 */
 		public function lookAt(target : Vector3D, upAxis : Vector3D = null) : void
 		{
+			var constrainedRotationY:Number = rotationY % 360;
+			
+			if (constrainedRotationY > 180) {
+				constrainedRotationY -= 360;
+			} else if (constrainedRotationY < -180) {
+				constrainedRotationY += 360;
+			}
+			
+			if (constrainedRotationY > 90) {
+				rotationY = (180 - constrainedRotationY);
+				rotationX += 180;
+				rotationZ += 180;
+			} else if (constrainedRotationY < -90) {
+				rotationY = (-180 - constrainedRotationY);
+				rotationX -= 180;
+				rotationZ -= 180;
+			}
+			
 			var yAxis : Vector3D, zAxis : Vector3D, xAxis : Vector3D;
 			var raw : Vector.<Number>;
 			
@@ -744,6 +762,16 @@ package away3d.core.base
 			_transform.copyRawDataFrom(raw);
 			
 			transform = transform;
+			
+			if (constrainedRotationY > 90) {
+				rotationY = (180 - rotationY);
+				rotationX -= 180;
+				rotationZ -= 180;
+			} else if (constrainedRotationY < -90) {
+				rotationY = (-180 - rotationY);
+				rotationX += 180;
+				rotationZ += 180;
+			}
 		}
 		
 		/**
