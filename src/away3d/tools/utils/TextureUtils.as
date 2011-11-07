@@ -24,7 +24,7 @@ package away3d.tools.utils
 			return value ? ((value & -value) == value) : false;
 		}
 
-		public static function getBestPowerOf2(value : int) : Number
+		public static function getBestPowerOf2(value : uint) : Number
 		{
 			var p : uint = 1;
 

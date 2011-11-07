@@ -17,15 +17,12 @@
 		public function RenderTexture(width : Number, height : Number)
 		{
 			super();
-			this.width = width;
-			this.height = height;
+			setSize(width, height);
 		}
 
 		override public function set width(value : int) : void
 		{
 			if (value == _width) return;
-
-			super.width = value;
 
 			if (!TextureUtils.isDimensionValid(value))
 				throw new Error("Invalid size: Width and height must be power of 2 and cannot exceed 2048");
@@ -38,13 +35,11 @@
 		{
 			if (value == _height) return;
 
-			super.height = value;
-
 			if (!TextureUtils.isDimensionValid(value))
 				throw new Error("Invalid size: Width and height must be power of 2 and cannot exceed 2048");
 
 			invalidateContent();
-			setSize(_width, height);
+			setSize(_width, value);
 		}
 
 		override protected function uploadContent(texture : TextureBase) : void
