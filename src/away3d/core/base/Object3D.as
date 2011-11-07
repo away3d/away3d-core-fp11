@@ -702,37 +702,48 @@ package away3d.core.base
 		 */
 		public function lookAt(target : Vector3D, upAxis : Vector3D = null) : void
 		{
-			var constrainedRotationY:Number = rotationY % 360;
+			var yAxis : Vector3D, zAxis : Vector3D, xAxis : Vector3D;
+			var raw : Vector.<Number>;
 			
-			if (constrainedRotationY > 180) {
-				constrainedRotationY -= 360;
-			} else if (constrainedRotationY < -180) {
-				constrainedRotationY += 360;
-			}
+			upAxis ||= Vector3D.Y_AXIS;
 			
-			if (constrainedRotationY > 90) {
-				rotationY = (180 - constrainedRotationY);
-				rotationX += 180;
-				rotationZ += 180;
-			} else if (constrainedRotationY < -90) {
-				rotationY = (-180 - constrainedRotationY);
-				rotationX -= 180;
-				rotationZ -= 180;
-			}
+			zAxis = target.subtract(position);
+			zAxis.normalize();
 			
-			transform.pointAt(target, Vector3D.Z_AXIS, upAxis || new Vector3D(0, -1, 0));
+			xAxis = upAxis.crossProduct(zAxis);
+			xAxis.normalize();
+			
+			//			if (xAxis.length < .05) {
+			//				xAxis = upAxis.crossProduct(Vector3D.Z_AXIS);
+			//			}
+			
+			yAxis = zAxis.crossProduct(xAxis);
+			
+			raw = Matrix3DUtils.RAW_DATA_CONTAINER;
+			
+			raw[uint(0)] = _scaleX*xAxis.x;
+			raw[uint(1)] = _scaleX*xAxis.y;
+			raw[uint(2)] = _scaleX*xAxis.z;
+			raw[uint(3)] = 0;
+			
+			raw[uint(4)] = _scaleY*yAxis.x;
+			raw[uint(5)] = _scaleY*yAxis.y;
+			raw[uint(6)] = _scaleY*yAxis.z;
+			raw[uint(7)] = 0;
+			
+			raw[uint(8)] = _scaleZ*zAxis.x;
+			raw[uint(9)] = _scaleZ*zAxis.y;
+			raw[uint(10)] = _scaleZ*zAxis.z;
+			raw[uint(11)] = 0;
+			
+			raw[uint(12)] = _x;
+			raw[uint(13)] = _y;
+			raw[uint(14)] = _z;
+			raw[uint(15)] = 1;
+			
+			_transform.copyRawDataFrom(raw);
 			
 			transform = transform;
-			
-			if (constrainedRotationY > 90) {
-				rotationY = (180 - rotationY);
-				rotationX -= 180;
-				rotationZ -= 180;
-			} else if (constrainedRotationY < -90) {
-				rotationY = (-180 - rotationY);
-				rotationX += 180;
-				rotationZ += 180;
-			}
 		}
 		
 		/**
