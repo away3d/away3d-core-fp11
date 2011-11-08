@@ -43,6 +43,8 @@ package a3dparticle.particle
 		
 		override public function getFragmentCode(_particleAnimation:ParticleAnimation):String
 		{
+			_particleAnimation.textSample = _particleAnimation.shaderRegisterCache.getFreeTextureReg();
+			
 			var code:String = "";
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var tex:String = "";

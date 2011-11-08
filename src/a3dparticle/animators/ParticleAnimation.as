@@ -254,7 +254,7 @@ package a3dparticle.animators
 				uvVar = shaderRegisterCache.getFreeVarying();
 			}
 			//allot fs register
-			textSample = shaderRegisterCache.getFreeTextureReg();
+			
 		}
 		/**
 		 * @inheritDoc
