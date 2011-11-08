@@ -48,6 +48,7 @@ package away3d.core.base
 		/** @private */
 		arcane var _controller:ControllerBase;
 		
+		private var _smallestNumber:Number = 0.0000000000000000000001;
 		private var _transformDirty : Boolean = true;
 		
 		private var _positionDirty:Boolean;
@@ -342,6 +343,14 @@ package away3d.core.base
 		
 		public function set transform(val:Matrix3D) : void
 		{
+			//ridiculous matrix error
+			if (!val.rawData[uint(0)]) {
+				var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+				val.copyRawDataTo(raw)
+				raw[uint(0)] = _smallestNumber;
+				val.copyRawDataFrom(raw);
+			}
+			
 			var elements : Vector.<Vector3D> = val.decompose();
 			var vec : Vector3D;
 			
@@ -702,24 +711,6 @@ package away3d.core.base
 		 */
 		public function lookAt(target : Vector3D, upAxis : Vector3D = null) : void
 		{
-			var constrainedRotationY:Number = rotationY % 360;
-			
-			if (constrainedRotationY > 180) {
-				constrainedRotationY -= 360;
-			} else if (constrainedRotationY < -180) {
-				constrainedRotationY += 360;
-			}
-			
-			if (constrainedRotationY > 90) {
-				rotationY = (180 - constrainedRotationY);
-				rotationX += 180;
-				rotationZ += 180;
-			} else if (constrainedRotationY < -90) {
-				rotationY = (-180 - constrainedRotationY);
-				rotationX -= 180;
-				rotationZ -= 180;
-			}
-			
 			var yAxis : Vector3D, zAxis : Vector3D, xAxis : Vector3D;
 			var raw : Vector.<Number>;
 			
@@ -731,9 +722,9 @@ package away3d.core.base
 			xAxis = upAxis.crossProduct(zAxis);
 			xAxis.normalize();
 			
-			//			if (xAxis.length < .05) {
-			//				xAxis = upAxis.crossProduct(Vector3D.Z_AXIS);
-			//			}
+			if (xAxis.length < .05) {
+				xAxis = upAxis.crossProduct(Vector3D.Z_AXIS);
+			}
 			
 			yAxis = zAxis.crossProduct(xAxis);
 			
@@ -763,14 +754,10 @@ package away3d.core.base
 			
 			transform = transform;
 			
-			if (constrainedRotationY > 90) {
+			if (zAxis.z < 0) {
 				rotationY = (180 - rotationY);
 				rotationX -= 180;
 				rotationZ -= 180;
-			} else if (constrainedRotationY < -90) {
-				rotationY = (-180 - rotationY);
-				rotationX += 180;
-				rotationZ += 180;
 			}
 		}
 		
