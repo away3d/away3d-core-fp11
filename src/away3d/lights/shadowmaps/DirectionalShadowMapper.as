@@ -23,9 +23,9 @@ package away3d.lights.shadowmaps
 		private var _matrix : Matrix3D;
 		private var _depthLens : FreeMatrixLens;
 
-		public function DirectionalShadowMapper(light : DirectionalLight)
+		public function DirectionalShadowMapper()
 		{
-			super(light);
+			super();
 			_depthCamera = new Camera3D();
 			_depthCamera.lens = _depthLens = new FreeMatrixLens();
 			_localFrustum = new Vector.<Number>(8 * 3);

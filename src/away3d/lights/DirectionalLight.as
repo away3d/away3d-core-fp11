@@ -96,7 +96,7 @@
 
 		override protected function createShadowMapper() : ShadowMapperBase
 		{
-			return new DirectionalShadowMapper(this);
+			return new DirectionalShadowMapper();
 		}
 	}
 }

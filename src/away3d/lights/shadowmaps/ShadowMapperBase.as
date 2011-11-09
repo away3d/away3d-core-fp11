@@ -30,10 +30,19 @@ package away3d.lights.shadowmaps
 		protected var _depthMapSize : uint = 2048;
 		protected var _light : LightBase;
 
-		public function ShadowMapperBase(light : LightBase)
+		public function ShadowMapperBase()
 		{
-			_light = light;
 			_casterCollector = new ShadowCasterCollector();
+		}
+
+		public function get light() : LightBase
+		{
+			return _light;
+		}
+
+		public function set light(value : LightBase) : void
+		{
+			_light = value;
 		}
 
 		public function get depthMap() : TextureProxyBase

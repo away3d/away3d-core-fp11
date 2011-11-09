@@ -63,6 +63,7 @@ package away3d.lights
 
 			if (value) {
 				_shadowMapper ||= createShadowMapper();
+				_shadowMapper.light = this;
 			} else {
 				_shadowMapper.dispose();
 				_shadowMapper = null;
@@ -171,6 +172,7 @@ package away3d.lights
 		public function set shadowMapper(value : ShadowMapperBase) : void
 		{
 			_shadowMapper = value;
+			_shadowMapper.light = this;
 		}
 	}
 }
