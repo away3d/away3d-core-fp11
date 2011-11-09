@@ -76,8 +76,7 @@ package a3dparticle.core
 			var code:String = "";
 			//if time=0,discard the fragment
 			var temp:ShaderRegisterElement = _particleAnimation.shaderRegisterCache.getFreeFragmentSingleTemp();
-			code += "neg " + temp.toString() + "," + _particleAnimation.fragmentTime + "\n";
-			code += "sge " + temp.toString() + "," + temp.toString() + "," + _particleAnimation.fragmentZeroConst.toString() + "\n";
+			code += "sge " + temp.toString() + "," + _particleAnimation.fragmentZeroConst.toString() + "," + _particleAnimation.fragmentTime + "\n";
 			code += "neg " + temp.toString() + "," + temp.toString() + "\n";
 			code += "kil " + temp.toString() + "\n";
 			
