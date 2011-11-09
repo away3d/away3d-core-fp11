@@ -185,6 +185,8 @@ package a3dparticle.animators
 			
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentPiConst.index, Vector.<Number>([ Math.PI * 2, Math.PI * 2, Math.PI * 2, Math.PI * 2 ]));
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentOneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentZeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
+			
 			
 			
 			var action:ActionBase;
