@@ -70,11 +70,11 @@ package away3d.lights.shadowmaps
 			var maxX : Number = Number.NEGATIVE_INFINITY, maxY : Number = Number.NEGATIVE_INFINITY, maxZ : Number = Number.NEGATIVE_INFINITY;
 			var scaleX : Number, scaleY : Number;
 			var offsX : Number, offsY : Number;
-			var halfSize : Number = 2/_depthMapSize;
+			var halfSize : Number = _depthMapSize*.5;
 			var i : uint;
 
 			_depthCamera.transform = _light.sceneTransform;
-			dir = DirectionalLight(_light).direction;
+			dir = DirectionalLight(_light).sceneDirection;
 			_depthCamera.x = viewCamera.x - dir.x * _lightOffset;
 			_depthCamera.y = viewCamera.y - dir.y * _lightOffset;
 			_depthCamera.z = viewCamera.z - dir.z * _lightOffset;
@@ -99,8 +99,11 @@ package away3d.lights.shadowmaps
 			// counter shadow map swimming
 			scaleX = 64 / Math.ceil((maxX - minX)*32);
 			scaleY = 64 / Math.ceil((maxY - minY)*32);
-			offsX = Math.ceil(-.5*(maxX + minX)*scaleX*halfSize) * halfSize;
-			offsY = Math.ceil(-.5*(maxY + minY)*scaleY*halfSize) * halfSize;
+
+			offsX = Math.ceil(-.5*(maxX + minX)*scaleX*halfSize) / halfSize;
+			offsY = Math.ceil(-.5*(maxY + minY)*scaleY*halfSize) / halfSize;
+
+			minZ = 10;
 
 			d = 1 / (maxZ - minZ);
 			raw[0] = raw[5] = raw[15] = 1;
@@ -109,8 +112,8 @@ package away3d.lights.shadowmaps
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = raw[12] = raw[13] = 0;
 
 			_matrix.copyRawDataFrom(raw);
-			_matrix.appendTranslation(offsX, offsY, 0);
-			_matrix.appendScale(scaleX, scaleY, 1);
+			_matrix.prependTranslation(offsX, offsY, 0);
+			_matrix.prependScale(scaleX, scaleY, 1);
 
 			_depthLens.matrix = _matrix;
 		}

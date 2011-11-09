@@ -32,7 +32,6 @@ package away3d.cameras
 		private var _frustumPlanesDirty : Boolean = true;
 		private var _textureRatioX : Number = 1;
 		private var _textureRatioY : Number = 1;
-		private var _unprojection : Matrix3D;
 		private var _unprojectionInvalid : Boolean = true;
 
 

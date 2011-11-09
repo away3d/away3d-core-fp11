@@ -20,7 +20,7 @@ package away3d.materials.methods
 		private var _grainMapIndex : int;
 		private var _highRes : Boolean;
 		private var _depthMapSize : int;
-		private var _range : Number = 2;
+		private var _range : Number = 1;
 
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -42,6 +42,17 @@ package away3d.materials.methods
 			if (!_grainTexture) {
 				initGrainTexture();
 			}
+		}
+
+		public function get range() : Number
+		{
+			return _range;
+		}
+
+		public function set range(value : Number) : void
+		{
+			_range = value;
+			_data[6] = _range/_depthMapSize;
 		}
 
 		private function initGrainTexture() : void
