@@ -92,7 +92,7 @@ package away3d.lights.shadowmaps
 				if (x > maxX) maxX = x;
 				if (y < minY) minY = y;
 				if (y > maxY) maxY = y;
-				if (z < minZ) minZ = z;
+//				if (z < minZ) minZ = z;
 				if (z > maxZ) maxZ = z;
 			}
 
@@ -112,8 +112,8 @@ package away3d.lights.shadowmaps
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = raw[12] = raw[13] = 0;
 
 			_matrix.copyRawDataFrom(raw);
-			_matrix.prependTranslation(offsX, offsY, 0);
 			_matrix.prependScale(scaleX, scaleY, 1);
+			_matrix.prependTranslation(offsX, offsY, 0);
 
 			_depthLens.matrix = _matrix;
 		}

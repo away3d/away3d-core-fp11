@@ -3,6 +3,7 @@ package away3d.containers
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Mouse3DManager;
+	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.render.DefaultRenderer;
@@ -61,8 +62,8 @@ package away3d.containers
 		private var _stage3DProxy : Stage3DProxy;
 		private var _backBufferInvalid : Boolean = true;
 		private var _antiAlias : uint;
-		private var _renderTextureWidth : Number;
-		private var _renderTextureHeight : Number;
+
+		private var _rttBufferManager : RTTBufferManager;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null)
 		{
@@ -155,7 +156,7 @@ package away3d.containers
 				_filter3DRenderer.dispose();
 				_filter3DRenderer = null;
 			} else if (!_filter3DRenderer && value) {
-				_filter3DRenderer = new Filter3DRenderer(_width, _height);
+				_filter3DRenderer = new Filter3DRenderer(stage3DProxy);
 				_filter3DRenderer.filters = value;
 			}
 
@@ -291,16 +292,14 @@ package away3d.containers
 		{
 			if (_width == value)
 				return;
-			
+
+			if (_rttBufferManager)
+				_rttBufferManager.viewWidth = value;
+
 			_hitField.width = value;
 			_width = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
-
-			_renderTextureWidth = TextureUtils.getBestPowerOf2(value);
-
-			if (_filter3DRenderer)
-				_filter3DRenderer.viewWidth = value;
 
 			_renderer.viewWidth = value;
 
@@ -319,16 +318,14 @@ package away3d.containers
 		{
 			if (_height == value)
 				return;
-			
+
+			if (_rttBufferManager)
+				_rttBufferManager.viewHeight = value;
+
 			_hitField.height = value;
 			_height = value;
 			_aspectRatio = _width/_height;
 			_depthTextureInvalid = true;
-
-			_renderTextureHeight = TextureUtils.getBestPowerOf2(value);
-
-			if (_filter3DRenderer)
-				_filter3DRenderer.viewHeight = value;
 
 			_renderer.viewHeight = value;
 			
@@ -423,7 +420,7 @@ package away3d.containers
 				renderSceneDepth(_entityCollector);
 
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
-				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _filter3DRenderer.renderRect);
+				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
 				_stage3DProxy._context3D.present();
 			} else {
@@ -459,8 +456,8 @@ package away3d.containers
 			_entityCollector.camera = _camera;
 
 			if (_filter3DRenderer || _renderer.renderToTexture) {
-				_camera.textureRatioX = _width/_renderTextureWidth;
-				_camera.textureRatioY = _height/_renderTextureHeight;
+				_camera.textureRatioX = _width/_rttBufferManager.textureWidth;
+				_camera.textureRatioY = _height/_rttBufferManager.textureHeight;
 			}
 			else {
 				_camera.textureRatioX = 1;
@@ -480,7 +477,7 @@ package away3d.containers
 
 			if (_depthRender) _depthRender.dispose();
 
-			_depthRender = context.createTexture(_renderTextureWidth, _renderTextureHeight, Context3DTextureFormat.BGRA, true);
+			_depthRender = context.createTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight, Context3DTextureFormat.BGRA, true);
 		}
 
 		private function updateLights(entityCollector : EntityCollector) : void
@@ -507,6 +504,14 @@ package away3d.containers
 			if (_depthRenderer) _depthRenderer.dispose();
 			_mouse3DManager.dispose();
 			if (_depthRender) _depthRender.dispose();
+			if (_rttBufferManager) _rttBufferManager.dispose();
+
+			_rttBufferManager = null;
+			_depthRender = null;
+			_mouse3DManager = null;
+			_depthRenderer = null;
+			_stage3DProxy = null;
+			_renderer = null;
 		}
 
 		public function project(point3d : Vector3D) : Point
@@ -546,13 +551,16 @@ package away3d.containers
 			_addedToStage = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
-
-			if (_width == 0) width = stage.stageWidth;
-			if (_height == 0) height = stage.stageHeight;
-
 			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
 			_stage3DProxy.x = _globalPos.x;
 			_stage3DProxy.y = _globalPos.y;
+			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
+
+			if (_width == 0) width = stage.stageWidth;
+			else _rttBufferManager.viewWidth = _width;
+			if (_height == 0) height = stage.stageHeight;
+			else _rttBufferManager.viewHeight = _height;
+
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
 		}
 

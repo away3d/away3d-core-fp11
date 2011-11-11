@@ -125,6 +125,7 @@ package away3d.core.traverse
 		 */
 		public function get lights() : Vector.<LightBase>
 		{
+			// todo: provide separate containers per default light type, otherwise store here
 			return _lights;
 		}
 
