@@ -51,6 +51,7 @@ package away3d.materials.lightpickers
 			_numDirectionalLights = numDirectionalLights;
 			_numPointLights = numPointLights;
 			_numLightProbes = numLightProbes;
+
 			// MUST HAVE MULTIPLE OF 4 ELEMENTS!
 			_lightProbeWeights = new Vector.<Number>(Math.ceil(numLightProbes/4)*4, true);
 

@@ -17,7 +17,7 @@ package away3d.textures
 
 		override protected function createTexture(context : Context3D) : TextureBase
 		{
-			return context.createTexture(width, height, Context3DTextureFormat.BGRA, false);
+			return context.createTexture(_width, _height, Context3DTextureFormat.BGRA, false);
 		}
 	}
 }

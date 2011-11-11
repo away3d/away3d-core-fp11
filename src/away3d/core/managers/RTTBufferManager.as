@@ -177,6 +177,7 @@ package away3d.core.managers
 				v = _renderToTextureRect.y/_textureHeight;
 			}
 
+			// last element contains indices for data per vertex that can be passed to the vertex shader if necessary (ie: frustum corners for deferred rendering)
 			textureVerts = new <Number>[	-x, -y, u,   1-v, 0,
 											 x, -y, 1-u, 1-v, 1,
 											 x,  y, 1-u, v,   2,

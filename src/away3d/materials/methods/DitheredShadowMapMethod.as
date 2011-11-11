@@ -29,7 +29,7 @@ package away3d.materials.methods
 		{
 			super(castingLight);
 
-			_data[5] = highRes? 1/9 : 1/5;
+			_data[5] = highRes? 1/8 : 1/4;
 			// area to sample in texture space
 			_depthMapSize = castingLight.shadowMapper.depthMapSize;
 			_data[6] = _range/_depthMapSize;
@@ -120,16 +120,15 @@ package away3d.materials.methods
 					"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +      // 2*(uv-.5)
 					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".z\n" +
 
-					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+//					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+//					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
-					"slt " + targetReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
+//					"slt " + targetReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 
 					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
+					"slt " + targetReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 
 					"neg " + uvReg+".xy, " + uvReg+".xy\n" +

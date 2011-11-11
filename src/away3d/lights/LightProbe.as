@@ -6,6 +6,8 @@ package away3d.lights
 	import away3d.bounds.NullBounds;
 	import away3d.core.base.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.partition.EntityNode;
+	import away3d.core.partition.LightProbeNode;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -33,6 +35,11 @@ package away3d.lights
 			super();
 			_diffuseMap = diffuseMap;
 			_specularMap = specularMap;
+		}
+
+		override protected function createEntityPartitionNode() : EntityNode
+		{
+			return new LightProbeNode(this);
 		}
 
 		public function get diffuseMap() : CubeTextureBase

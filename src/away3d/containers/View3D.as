@@ -74,6 +74,8 @@ package away3d.containers
 			_renderer = renderer || new DefaultRenderer();
 			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
+
+			// todo: entity collector should be defined by renderer
 			_entityCollector = new EntityCollector();
 
 			initHitField();
@@ -553,8 +555,8 @@ package away3d.containers
 			_stage3DManager = Stage3DManager.getInstance(stage);
 			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
 			_stage3DProxy.x = _globalPos.x;
-			_stage3DProxy.y = _globalPos.y;
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
+			_stage3DProxy.y = _globalPos.y;
 
 			if (_width == 0) width = stage.stageWidth;
 			else _rttBufferManager.viewWidth = _width;

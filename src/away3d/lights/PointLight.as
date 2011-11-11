@@ -5,6 +5,8 @@ package away3d.lights
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.partition.EntityNode;
+	import away3d.core.partition.PointLightNode;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -34,6 +36,12 @@ package away3d.lights
 		{
 			super();
 			_fallOffFactor = 1 / (_fallOff - _radius);
+		}
+
+
+		override protected function createEntityPartitionNode() : EntityNode
+		{
+			return new PointLightNode(this);
 		}
 
 		/**

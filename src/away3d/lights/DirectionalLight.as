@@ -3,6 +3,8 @@
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.bounds.NullBounds;
+	import away3d.core.partition.DirectionalLightNode;
+	import away3d.core.partition.EntityNode;
 	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.passes.MaterialPassBase;
@@ -38,6 +40,11 @@
 			super();
 			direction = new Vector3D(xDir, yDir, zDir);
 			_sceneDirection = new Vector3D();
+		}
+
+		override protected function createEntityPartitionNode() : EntityNode
+		{
+			return new DirectionalLightNode(this);
 		}
 
 		/**

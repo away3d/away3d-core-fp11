@@ -1,20 +1,20 @@
 package away3d.core.partition
 {
 	import away3d.core.traverse.PartitionTraverser;
-	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 
 	/**
-	 * LightNode is a space partitioning leaf node that contains a LightBase object. Used for lights that are not of default supported type.
+	 * LightNode is a space partitioning leaf node that contains a LightBase object.
 	 */
-	public class LightNode extends EntityNode
+	public class PointLightNode extends EntityNode
 	{
-		private var _light : LightBase;
+		private var _light : PointLight;
 
 		/**
 		 * Creates a new LightNode object.
 		 * @param light The light to be contained in the node.
 		 */
-		public function LightNode(light : LightBase)
+		public function PointLightNode(light : PointLight)
 		{
 			super(light);
 			_light = light;
@@ -23,7 +23,7 @@ package away3d.core.partition
 		/**
 		 * The light object contained in this node.
 		 */
-		public function get light() : LightBase
+		public function get light() : PointLight
 		{
 			return _light;
 		}
@@ -35,7 +35,7 @@ package away3d.core.partition
 		{
 			if (traverser.enterNode(this)) {
 				super.acceptTraverser(traverser);
-				traverser.applyUnknownLight(_light);
+				traverser.applyPointLight(_light);
 			}
 			traverser.leaveNode(this);
 		}
