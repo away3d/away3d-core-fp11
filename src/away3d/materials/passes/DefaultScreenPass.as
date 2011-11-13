@@ -120,6 +120,10 @@ package away3d.materials.passes
 		private var _usingSpecularMethod : Boolean;
 		private var _usesGlobalPosFragment : Boolean = true;
 
+		private var _ambientLightR : Number;
+		private var _ambientLightG : Number;
+		private var _ambientLightB : Number;
+
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
@@ -516,6 +520,9 @@ package away3d.materials.passes
 
 			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.setRenderState(renderable, stage3DProxy, camera);
 			_ambientMethod.setRenderState(renderable, stage3DProxy, camera);
+			_ambientMethod._lightAmbientR = _ambientLightR;
+			_ambientMethod._lightAmbientG = _ambientLightG;
+			_ambientMethod._lightAmbientB = _ambientLightB;
 			if (_shadowMethod) _shadowMethod.setRenderState(renderable, stage3DProxy, camera);
 			_diffuseMethod.setRenderState(renderable, stage3DProxy, camera);
 			if (_usingSpecularMethod) _specularMethod.setRenderState(renderable, stage3DProxy, camera);
@@ -1246,10 +1253,16 @@ package away3d.materials.passes
 			var len : int;
 			var dirPos : Vector3D;
 
+			_ambientLightR = _ambientLightG = _ambientLightB = 0;
+
 			len = directionalLights.length;
 			for (i = 0; i < len; ++i) {
 				dirLight = directionalLights[i];
 				dirPos = dirLight.sceneDirection;
+
+				_ambientLightR += dirLight._ambientR;
+				_ambientLightG += dirLight._ambientG;
+				_ambientLightB += dirLight._ambientB;
 
 				_lightData[k++] = -dirPos.x;
 				_lightData[k++] = -dirPos.y;
@@ -1278,6 +1291,11 @@ package away3d.materials.passes
 			for (i = 0; i < len; ++i) {
 				pointLight = pointLights[i];
 				dirPos = pointLight.scenePosition;
+
+				_ambientLightR += pointLight._ambientR;
+				_ambientLightG += pointLight._ambientG;
+				_ambientLightB += pointLight._ambientB;
+
 				_lightData[k++] = dirPos.x;
 				_lightData[k++] = dirPos.y;
 				_lightData[k++] = dirPos.z;

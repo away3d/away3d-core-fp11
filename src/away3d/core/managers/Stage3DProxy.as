@@ -136,7 +136,7 @@ package away3d.core.managers
 
 		public function setRenderTarget(target : TextureBase, enableDepthAndStencil : Boolean = false, surfaceSelector : int = 0) : void
 		{
-			if (_renderTarget == target && surfaceSelector == _renderSurfaceSelector) return;
+			if (_renderTarget == target && surfaceSelector == _renderSurfaceSelector && _enableDepthAndStencil == enableDepthAndStencil) return;
 			_renderTarget = target;
 			_renderSurfaceSelector = surfaceSelector;
 			_enableDepthAndStencil = enableDepthAndStencil;

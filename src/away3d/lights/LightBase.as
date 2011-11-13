@@ -26,6 +26,12 @@ package away3d.lights
 		private var _colorG : Number = 1;
 		private var _colorB : Number = 1;
 
+		private var _ambientColor : uint = 0xffffff;
+		private var _ambient : Number = 0;
+		arcane var _ambientR : Number = 0;
+		arcane var _ambientG : Number = 0;
+		arcane var _ambientB : Number = 0;
+
 		private var _specular : Number = 1;
 		arcane var _specularR : Number = 1;
 		arcane var _specularG : Number = 1;
@@ -76,7 +82,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The specular reflection strength of the light.
+		 * The specular emission strength of the light.
 		 */
 		public function get specular() : Number
 		{
@@ -92,7 +98,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The diffuse reflection strength of the light.
+		 * The diffuse emission strength of the light.
 		 */
 		public function get diffuse() : Number
 		{
@@ -124,6 +130,44 @@ package away3d.lights
 			updateDiffuse();
 			updateSpecular();
 		}
+
+		/**
+		 * The ambient emission strength of the light.
+		 */
+		public function get ambient() : Number
+		{
+			return _diffuse;
+		}
+
+		public function set ambient(value : Number) : void
+		{
+			if (value < 0) value = 0;
+			else if (value > 1) value = 1;
+			_ambient = value;
+			updateAmbient();
+		}
+
+		public function get ambientColor() : uint
+		{
+			return _ambientColor;
+		}
+
+		public function set ambientColor(value : uint) : void
+		{
+			_ambientColor = value;
+			updateAmbient();
+		}
+
+		private function updateAmbient() : void
+		{
+			_ambientR = ((_ambientColor >> 16) & 0xff)/0xff*_ambient;
+			_ambientG = ((_ambientColor >> 8) & 0xff)/0xff*_ambient;
+			_ambientB = (_ambientColor & 0xff)/0xff*_ambient;
+		}
+
+		/**
+		 * The ambient emission colour of the light
+		 */
 
 		/**
 		 * Gets the optimal projection matrix to render a light-based depth map for a single object.
