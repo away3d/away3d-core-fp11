@@ -37,6 +37,11 @@ package away3d.materials.methods
 			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, -.003, 0, 0, 1]);
 		}
 
+		public function get castingLight() : LightBase
+		{
+			return _castingLight;
+		}
+
 		public function get epsilon() : Number
 		{
 			return -_data[4];
