@@ -45,7 +45,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The maximum distance of the light's reach.
+		 * The minimum distance of the light's reach.
 		 */
 		public function get radius() : Number
 		{
@@ -70,7 +70,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The fallOff component of the light.
+		 * The maximum distance of the light's reach
 		 */
 		public function get fallOff() : Number
 		{
