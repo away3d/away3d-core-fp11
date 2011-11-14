@@ -315,11 +315,6 @@ package away3d.materials.methods
 		}
 
 
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			if (_useTexture) stage3DProxy.setTextureAt(_diffuseInputIndex, null);
-//		}
-
 		/**
 		 * Updates the diffuse color data used by the render state.
 		 */

@@ -60,8 +60,8 @@ package away3d.materials
 		private var _smooth : Boolean = true;
 		private var _repeat : Boolean;
 
-		private var _depthPass : DepthMapPass;
-		private var _distancePass : DistanceMapPass;
+		protected var _depthPass : DepthMapPass;
+		protected var _distancePass : DistanceMapPass;
 		private var _lightPicker : LightPickerBase;
 		private var _distanceBased : Boolean;
 
@@ -185,6 +185,9 @@ package away3d.materials
 
 			for (var i : int = 0; i < _numPasses; ++i)
 				_passes[i].bothSides = value;
+
+			_depthPass.bothSides = value;
+			_distancePass.bothSides = value;
 		}
 
 		/**

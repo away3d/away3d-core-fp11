@@ -1,6 +1,8 @@
 ﻿package away3d.materials
 {
 	import away3d.arcane;
+	import away3d.cameras.Camera3D;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.LightBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
@@ -45,8 +47,20 @@
 		public function set alphaThreshold(value : Number) : void
 		{
 			_screenPass.diffuseMethod.alphaThreshold = value;
+			_depthPass.alphaThreshold = value;
+			_distancePass.alphaThreshold = value;
 		}
 
+		arcane override function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false) : void
+		{
+			super.activateForDepth(stage3DProxy, camera, distanceBased);
+			if (distanceBased) {
+				_distancePass.alphaMask = _screenPass.diffuseMethod.texture;
+			}
+			else {
+				_depthPass.alphaMask = _screenPass.diffuseMethod.texture;
+			}
+		}
 
 		public function get specularLightSources() : uint
 		{
