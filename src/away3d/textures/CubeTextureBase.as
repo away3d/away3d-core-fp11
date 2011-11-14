@@ -1,6 +1,7 @@
 package away3d.textures
 {
 	import away3d.arcane;
+	import away3d.tools.utils.TextureUtils;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -15,7 +16,12 @@ package away3d.textures
 			super();
 		}
 
-		override final protected function createTexture(context : Context3D) : TextureBase
+		public function get size() : int
+		{
+			return _width;
+		}
+
+		override protected function createTexture(context : Context3D) : TextureBase
 		{
 			return context.createCubeTexture(width, Context3DTextureFormat.BGRA, false);
 		}

@@ -5,6 +5,7 @@ package away3d.core.render
 	import away3d.core.sort.EntitySorterBase;
 	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;
@@ -53,6 +54,11 @@ package away3d.core.render
 		{
 			_renderableSorter = new RenderableMergeSort();
 			_renderToTexture = renderToTexture;
+		}
+
+		arcane function createEntityCollector() : EntityCollector
+		{
+			return new EntityCollector();
 		}
 
 		arcane function get viewWidth() : Number
@@ -244,6 +250,7 @@ package away3d.core.render
 			draw(entityCollector, target);
 
 			if (_swapBackBuffer && !target) _context.present();
+			_stage3DProxy.scissorRect = null;
 		}
 
 		protected function executeRenderToTexturePass(entityCollector : EntityCollector) : void

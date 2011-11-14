@@ -22,7 +22,7 @@ package away3d.materials.passes
 	{
 		private var _enc : Vector.<Number>;
 
-		// to do: accept alpha mask
+		// to do: accept alpha mask/alpha threshold
 		public function DepthMapPass()
 		{
 			super();

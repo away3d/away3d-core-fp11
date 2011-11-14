@@ -21,18 +21,31 @@ package away3d.lights.shadowmaps
 
 	use namespace arcane;
 
+	// todo: deferred renderers can support a shared depth map for several lights. Allow an external depth map to be set.
 	public class ShadowMapperBase
 	{
 		protected var _casterCollector : ShadowCasterCollector;
 
-		// todo: change into Away Texture type so this can be used for easy debug rendering
 		private var _depthMap : TextureProxyBase;
 		protected var _depthMapSize : uint = 2048;
 		protected var _light : LightBase;
+		private var _explicitDepthMap : Boolean;
 
 		public function ShadowMapperBase()
 		{
 			_casterCollector = new ShadowCasterCollector();
+		}
+
+		/**
+		 * This is used by renderers that can support depth maps to be shared across instances
+		 * @param depthMap
+		 */
+		arcane function setDepthMap(depthMap : TextureProxyBase) : void
+		{
+			if (_depthMap == depthMap) return;
+			if (_depthMap && !_explicitDepthMap) _depthMap.dispose();
+			_depthMap = depthMap;
+			_explicitDepthMap = depthMap? true : false;
 		}
 
 		public function get light() : LightBase
@@ -59,19 +72,25 @@ package away3d.lights.shadowmaps
 		{
 			if (value == _depthMapSize) return;
 			_depthMapSize = value;
-			_depthMap.dispose();
-			_depthMap = null;
+
+			if (_explicitDepthMap) {
+				throw Error("Cannot set depth map size for the current renderer.");
+			}
+			else {
+				_depthMap.dispose();
+				_depthMap = null;
+			}
 		}
 
 		public function dispose() : void
 		{
 			_casterCollector = null;
-			_depthMap.dispose();
+			if (_depthMap && !_explicitDepthMap) _depthMap.dispose();
 			_depthMap = null;
 		}
 
 
-		private function createDepthTexture() : TextureProxyBase
+		protected function createDepthTexture() : TextureProxyBase
 		{
 			return new RenderTexture(_depthMapSize, _depthMapSize);
 		}
@@ -84,8 +103,6 @@ package away3d.lights.shadowmaps
 		 */
 		arcane function renderDepthMap(stage3DProxy : Stage3DProxy, entityCollector : EntityCollector, renderer : DepthRenderer) : void
 		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-
 			updateDepthProjection(entityCollector.camera);
 			_depthMap ||= createDepthTexture();
 			drawDepthMap(_depthMap.getTextureForStage3D(stage3DProxy), entityCollector.scene, renderer);

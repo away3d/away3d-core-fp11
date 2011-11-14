@@ -7,12 +7,7 @@
 	import away3d.core.partition.EntityNode;
 	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;

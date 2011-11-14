@@ -37,19 +37,9 @@ package away3d.textures
 			return _width;
 		}
 
-		public function set width(value : int) : void
-		{
-			_width = value;
-		}
-
 		public function get height() : int
 		{
 			return _height;
-		}
-
-		public function set height(value : int) : void
-		{
-			_height = value;
 		}
 
 		public function getTextureForStage3D(stage3DProxy : Stage3DProxy) : TextureBase
@@ -99,6 +89,8 @@ package away3d.textures
 				}
 			}
 		}
+
+
 
 		protected function createTexture(context : Context3D) : TextureBase
 		{

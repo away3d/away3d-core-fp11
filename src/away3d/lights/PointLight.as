@@ -7,6 +7,9 @@ package away3d.lights
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.PointLightNode;
+	import away3d.lights.shadowmaps.CubeMapShadowMapper;
+	import away3d.lights.shadowmaps.CubeMapShadowMapper;
+	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -36,6 +39,11 @@ package away3d.lights
 		{
 			super();
 			_fallOffFactor = 1 / (_fallOff - _radius);
+		}
+
+		override protected function createShadowMapper() : ShadowMapperBase
+		{
+			return new CubeMapShadowMapper();
 		}
 
 
@@ -136,8 +144,8 @@ package away3d.lights
 			raw[uint(10)] = zMax / (zMax - zMin);
 			raw[uint(11)] = 1;
 			raw[uint(1)] = raw[uint(2)] = raw[uint(3)] = raw[uint(4)] =
-					raw[uint(6)] = raw[uint(7)] = raw[uint(8)] = raw[uint(9)] =
-							raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
+			raw[uint(6)] = raw[uint(7)] = raw[uint(8)] = raw[uint(9)] =
+			raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
 			raw[uint(14)] = -zMin * raw[uint(10)];
 
 			target ||= new Matrix3D();
@@ -145,12 +153,6 @@ package away3d.lights
 			target.prepend(m);
 
 			return target;
-		}
-
-		override public function set castsShadows(value : Boolean) : void
-		{
-			throw new Error("Shadow casting is not yet available for PointLight objects.");
-			super.castsShadows = value;
 		}
 	}
 }

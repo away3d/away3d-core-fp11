@@ -11,7 +11,9 @@ package away3d.containers
 	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.TextureUtils;
 
@@ -76,7 +78,7 @@ package away3d.containers
 			_depthRenderer = new DepthRenderer();
 
 			// todo: entity collector should be defined by renderer
-			_entityCollector = new EntityCollector();
+			_entityCollector = _renderer.createEntityCollector();
 
 			initHitField();
 			
@@ -186,6 +188,7 @@ package away3d.containers
 		{
 			_renderer.dispose();
 			_renderer = value;
+			_entityCollector = _renderer.createEntityCollector();
 			_renderer.stage3DProxy = _stage3DProxy;
 			_renderer.antiAlias = _antiAlias;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
@@ -416,7 +419,7 @@ package away3d.containers
 			if (_entityCollector.numMouseEnableds > 0)
 				_mouse3DManager.updateHitData();
 
-			updateLights(_entityCollector);
+//			updateLights(_entityCollector);
 
 			if (_requireDepthRender)
 				renderSceneDepth(_entityCollector);
@@ -482,19 +485,6 @@ package away3d.containers
 			_depthRender = context.createTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight, Context3DTextureFormat.BGRA, true);
 		}
 
-		private function updateLights(entityCollector : EntityCollector) : void
-		{
-			var lights : Vector.<LightBase> = entityCollector.lights;
-			var len : uint = lights.length;
-			var light : LightBase;
-
-			for (var i : int = 0; i < len; ++i) {
-				light = lights[i];
-				if (light.castsShadows)
-					light.shadowMapper.renderDepthMap(_renderer.stage3DProxy, entityCollector, _depthRenderer);
-			}
-		}
-
 		/**
 		 * Disposes all memory occupied by the view. This will also dispose the renderer.
 		 */
@@ -503,7 +493,7 @@ package away3d.containers
 			_stage3DProxy.dispose();
 			_renderer.dispose();
 			_mouse3DManager.dispose();
-			if (_depthRenderer) _depthRenderer.dispose();
+			_depthRenderer.dispose();
 			_mouse3DManager.dispose();
 			if (_depthRender) _depthRender.dispose();
 			if (_rttBufferManager) _rttBufferManager.dispose();
@@ -514,6 +504,7 @@ package away3d.containers
 			_depthRenderer = null;
 			_stage3DProxy = null;
 			_renderer = null;
+			_entityCollector = null;
 		}
 
 		public function project(point3d : Vector3D) : Point

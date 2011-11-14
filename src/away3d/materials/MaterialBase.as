@@ -13,6 +13,7 @@ package away3d.materials
 	import away3d.lights.LightBase;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.passes.DepthMapPass;
+	import away3d.materials.passes.DistanceMapPass;
 	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display.BlendMode;
@@ -60,7 +61,9 @@ package away3d.materials
 		private var _repeat : Boolean;
 
 		private var _depthPass : DepthMapPass;
+		private var _distancePass : DistanceMapPass;
 		private var _lightPicker : LightPickerBase;
+		private var _distanceBased : Boolean;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -70,6 +73,7 @@ package away3d.materials
 			_owners = new Vector.<IMaterialOwner>();
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
+			_distancePass = new DistanceMapPass();
 
 			invalidateDepthShaderProgram();
 		}
@@ -161,6 +165,7 @@ package away3d.materials
 			for (i = 0; i < _numPasses; ++i) _passes[i].dispose();
 
 			_depthPass.dispose();
+			_distancePass.dispose();
 
 			if (_lightPicker)
 				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
@@ -263,22 +268,36 @@ package away3d.materials
 			return _numPasses;
 		}
 
-		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false) : void
 		{
-			_depthPass.activate(stage3DProxy, camera);
+			_distanceBased = distanceBased;
+
+			if (distanceBased)
+				_distancePass.activate(stage3DProxy, camera);
+			else
+				_depthPass.activate(stage3DProxy, camera);
 		}
 
 		arcane function deactivateForDepth(stage3DProxy : Stage3DProxy) : void
 		{
-			_depthPass.deactivate(stage3DProxy);
+			if (_distanceBased)
+				_distancePass.deactivate(stage3DProxy);
+			else
+				_depthPass.deactivate(stage3DProxy);
 		}
 
 		arcane function renderDepth(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			if (renderable.animationState)
-				renderable.animationState.setRenderState(stage3DProxy, _depthPass, renderable);
-
-			_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
+			if (_distanceBased) {
+				if (renderable.animationState)
+					renderable.animationState.setRenderState(stage3DProxy, _distancePass, renderable);
+				_distancePass.render(renderable, stage3DProxy, camera, _lightPicker);
+			}
+			else {
+				if (renderable.animationState)
+					renderable.animationState.setRenderState(stage3DProxy, _depthPass, renderable);
+				_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
+			}
 		}
 
 		/**
@@ -349,6 +368,7 @@ package away3d.materials
 				for (var i : int = 0; i < _numPasses; ++i)
 					_passes[i].animation = _animation;
 				_depthPass.animation = _animation;
+				_distancePass.animation = _animation;
 			}
 
 			_owners.push(owner);
@@ -409,6 +429,7 @@ package away3d.materials
 		arcane function invalidateDepthShaderProgram() : void
 		{
 			_depthPass.invalidateShaderProgram();
+			_distancePass.invalidateShaderProgram();
 		}
 
 		/**

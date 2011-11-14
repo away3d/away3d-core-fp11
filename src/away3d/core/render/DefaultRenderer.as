@@ -6,11 +6,15 @@ package away3d.core.render
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.lights.DirectionalLight;
+	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
+	import flash.geom.Rectangle;
 
 	use namespace arcane;
 
@@ -21,6 +25,8 @@ package away3d.core.render
 	public class DefaultRenderer extends RendererBase
 	{
 		private var _activeMaterial : MaterialBase;
+		private var _distanceRenderer : DepthRenderer;
+		private var _depthRenderer : DepthRenderer;
 
 		/**
 		 * Creates a new DefaultRenderer object.
@@ -30,6 +36,42 @@ package away3d.core.render
 		public function DefaultRenderer()
 		{
 			super();
+			_depthRenderer = new DepthRenderer();
+			_distanceRenderer = new DepthRenderer(false, true);
+		}
+
+		arcane override function set stage3DProxy(value : Stage3DProxy) : void
+		{
+			super.stage3DProxy = value;
+			_distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
+		}
+
+		arcane override function render(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		{
+			updateLights(entityCollector);
+			super.render(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
+		}
+
+		private function updateLights(entityCollector : EntityCollector) : void
+		{
+			var dirLights : Vector.<DirectionalLight> = entityCollector.directionalLights;
+			var pointLights : Vector.<PointLight> = entityCollector.pointLights;
+			var len : uint, i : uint;
+			var light : LightBase;
+
+			len = dirLights.length;
+			for (i = 0; i < len; ++i) {
+				light = dirLights[i];
+				if (light.castsShadows)
+					light.shadowMapper.renderDepthMap(_stage3DProxy, entityCollector, _depthRenderer);
+			}
+
+			len = pointLights.length;
+			for (i = 0; i < len; ++i) {
+				light = pointLights[i];
+				if (light.castsShadows)
+					light.shadowMapper.renderDepthMap(_stage3DProxy, entityCollector, _distanceRenderer);
+			}
 		}
 
 		/**
@@ -105,6 +147,16 @@ package away3d.core.render
 
 				item = item2;
 			}
+		}
+
+
+		arcane override function dispose() : void
+		{
+			super.dispose();
+			_depthRenderer.dispose();
+			_distanceRenderer.dispose();
+			_depthRenderer = null;
+			_distanceRenderer = null;
 		}
 	}
 }

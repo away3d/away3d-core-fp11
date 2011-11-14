@@ -20,6 +20,7 @@ package away3d.core.render
 	{
 		private var _activeMaterial : MaterialBase;
 		private var _renderBlended : Boolean;
+		private var _distanceBased : Boolean;
 
 		/**
 		 * Creates a new DepthRenderer object.
@@ -27,10 +28,11 @@ package away3d.core.render
 		 * @param antiAlias The amount of anti-aliasing to be used.
 		 * @param renderMode The render mode to be used.
 		 */
-		public function DepthRenderer(renderBlended : Boolean = false)
+		public function DepthRenderer(renderBlended : Boolean = false, distanceBased : Boolean = false)
 		{
 			super();
 			_renderBlended = renderBlended;
+			_distanceBased = distanceBased;
 			_backgroundR = 1;
 			_backgroundG = 1;
 			_backgroundB = 1;
@@ -57,7 +59,7 @@ package away3d.core.render
 		{
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
-			_context.setDepthTest(false, Context3DCompareMode.LESS);
+//			_context.setDepthTest(false, Context3DCompareMode.LESS);
 
 //			if (entityCollector.skyBox)
 //				drawSkyBox(entityCollector);
@@ -72,17 +74,6 @@ package away3d.core.render
 			_activeMaterial = null;
 		}
 
-		/*private function drawSkyBox(entityCollector : EntityCollector) : void
-		{
-			var skyBox : IRenderable = entityCollector.skyBox;
-			var material : MaterialBase = skyBox.material;
-			var camera : Camera3D = entityCollector.camera;
-
-			material.activateForDepth(_stage3DProxy, camera);
-			material.renderDepth(skyBox, _stage3DProxy, camera);
-			material.deactivateForDepth(_stage3DProxy);
-		}           */
-
 		/**
 		 * Draw a list of renderables.
 		 * @param renderables The renderables to draw.
@@ -96,7 +87,7 @@ package away3d.core.render
 			while (item) {
 				_activeMaterial = item.renderable.material;
 
-				_activeMaterial.activateForDepth(_stage3DProxy, camera);
+				_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased);
 				item2 = item;
 				do {
 					_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);
