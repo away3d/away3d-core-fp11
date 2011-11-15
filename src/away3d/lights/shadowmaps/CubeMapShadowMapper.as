@@ -50,7 +50,7 @@ package away3d.lights.shadowmaps
 			cam.rotationX = rotationX;
 			cam.rotationY = rotationY;
 			cam.rotationZ = rotationZ;
-			cam.lens.near = 1;
+			cam.lens.near = .01;
 			PerspectiveLens(cam.lens).fieldOfView = 90;
 			_lenses.push(PerspectiveLens(cam.lens));
 			cam.lens.aspectRatio = 1;
