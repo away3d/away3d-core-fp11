@@ -36,6 +36,10 @@ package away3d.materials
 		 */
 		public var extra : Object;
 
+		// can be used by other renderers to determine how to render this particular material
+		// in practice, this can be checked by a custom EntityCollector
+		arcane var _classification : String;
+
 		// this value is usually derived from other settings
 		arcane var _uniqueId : int;
 
@@ -276,9 +280,9 @@ package away3d.materials
 			_distanceBased = distanceBased;
 
 			if (distanceBased)
-				_distancePass.activate(stage3DProxy, camera);
+				_distancePass.activate(stage3DProxy, camera, 1, 1);
 			else
-				_depthPass.activate(stage3DProxy, camera);
+				_depthPass.activate(stage3DProxy, camera, 1, 1);
 		}
 
 		arcane function deactivateForDepth(stage3DProxy : Stage3DProxy) : void
@@ -310,14 +314,14 @@ package away3d.materials
 		 * @param camera The camera from which the scene is viewed.
 		 * @private
 		 */
-		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			if (index == _numPasses-1) {
 				if (requiresBlending)
 					stage3DProxy._context3D.setBlendFactors(_srcBlend, _destBlend);
 			}
 
-			_passes[index].activate(stage3DProxy, camera);
+			_passes[index].activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 		}
 
 		/**

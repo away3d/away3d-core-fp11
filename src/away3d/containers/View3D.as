@@ -410,7 +410,7 @@ package away3d.containers
 			
 			_entityCollector.clear();
 			
-			updateCamera();
+			updateViewSizeData();
 
 			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
@@ -455,18 +455,18 @@ package away3d.containers
 			_time = time;
 		}
 
-		private function updateCamera() : void
+		private function updateViewSizeData() : void
 		{
 			_camera.lens.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
 
 			if (_filter3DRenderer || _renderer.renderToTexture) {
-				_camera.textureRatioX = _width/_rttBufferManager.textureWidth;
-				_camera.textureRatioY = _height/_rttBufferManager.textureHeight;
+				_renderer.textureRatioX = _rttBufferManager.textureRatioX;
+				_renderer.textureRatioY = _rttBufferManager.textureRatioY;
 			}
 			else {
-				_camera.textureRatioX = 1;
-				_camera.textureRatioY = 1;
+				_renderer.textureRatioX = 1;
+				_renderer.textureRatioY = 1;
 			}
 		}
 		

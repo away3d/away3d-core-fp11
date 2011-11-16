@@ -66,6 +66,7 @@ package away3d.materials.passes
 		private var _oldSurface : int;
 		private var _oldDepthStencil : Boolean;
 		private var _oldRect : Rectangle;
+		private static var _rttData : Vector.<Number>;
 
 		/**
 		 * Creates a new MaterialPassBase object.
@@ -74,7 +75,8 @@ package away3d.materials.passes
 		{
 			_renderToTexture = renderToTexture;
 			_numUsedStreams = 1;
-			_numUsedVertexConstants = 4;
+			_numUsedVertexConstants = 5;
+			if (!_rttData) _rttData = new <Number>[1, 1, 1, 1];
 		}
 
 		/**
@@ -201,7 +203,7 @@ package away3d.materials.passes
 		{
 			var context : Context3D = stage3DProxy._context3D;
 
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
 
 			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 
@@ -249,7 +251,7 @@ package away3d.materials.passes
 			throw new AbstractMethodError();
 		}
 
-		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
@@ -274,13 +276,22 @@ package away3d.materials.passes
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
 
 			stage3DProxy._context3D.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
-
 			if (_renderToTexture) {
+				_rttData[0] = 1;
+				_rttData[1] = 1;
+
 				_oldTarget = stage3DProxy.renderTarget;
 				_oldSurface = stage3DProxy.renderSurfaceSelector;
 				_oldDepthStencil = stage3DProxy.enableDepthAndStencil;
 				_oldRect = stage3DProxy.scissorRect;
 			}
+			else {
+				_rttData[0] = textureRatioX;
+				_rttData[1] = textureRatioY;
+			}
+
+
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _rttData, 1);
 		}
 
 		/**

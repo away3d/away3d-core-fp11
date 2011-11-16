@@ -25,13 +25,9 @@ package away3d.cameras
 	{
 		private var _viewProjection : Matrix3D = new Matrix3D();
 		private var _viewProjectionDirty : Boolean = true;
-		private var _renderToTextureProjection : Matrix3D = new Matrix3D();
-		private var _renderToTextureProjectionDirty : Boolean = true;
 		private var _lens : LensBase;
 		private var _frustumPlanes : Vector.<Plane3D>;
 		private var _frustumPlanesDirty : Boolean = true;
-		private var _textureRatioX : Number = 1;
-		private var _textureRatioY : Number = 1;
 		private var _unprojectionInvalid : Boolean = true;
 
 
@@ -63,7 +59,6 @@ package away3d.cameras
 		{
 			_unprojectionInvalid = true;
 			_viewProjectionDirty = true;
-			_renderToTextureProjectionDirty = true;
 			_frustumPlanesDirty = true;
 			
 			dispatchEvent(event);
@@ -158,7 +153,6 @@ package away3d.cameras
 
 			_unprojectionInvalid = true;
 			_viewProjectionDirty = true;
-			_renderToTextureProjectionDirty = true;
 			_frustumPlanesDirty = true;
 		}
 		
@@ -219,51 +213,6 @@ package away3d.cameras
 			}
 			
 			return _viewProjection;
-		}
-
-		public function get renderToTextureProjection() : Matrix3D
-		{
-			if (_renderToTextureProjectionDirty) {
-				_renderToTextureProjection.copyFrom(viewProjection);
-				_renderToTextureProjection.appendScale(_textureRatioX, _textureRatioY, 1);
-
-				_renderToTextureProjectionDirty = false;
-			}
-			
-			return _renderToTextureProjection;
-		}
-
-		/** @private */
-		arcane function get textureRatioX() : Number
-		{
-			return _textureRatioX;
-		}
-
-		/** @private */
-		arcane function set textureRatioX(value : Number) : void
-		{
-			if (_textureRatioX == value)
-				return;
-
-			_textureRatioX = value
-
-			_renderToTextureProjectionDirty = true;
-		}
-
-		/** @private */
-		arcane function get textureRatioY() : Number
-		{
-			return _textureRatioY;
-		}
-		/** @private */
-		arcane function set textureRatioY(value : Number) : void
-		{
-			if (_textureRatioY == value)
-				return;
-
-			_textureRatioY = value;
-
-			_renderToTextureProjectionDirty = true;
 		}
 
 		/**

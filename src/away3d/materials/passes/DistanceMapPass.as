@@ -28,7 +28,6 @@ package away3d.materials.passes
 		private var _alphaThreshold : Number;
 		private var _alphaMask : Texture2DBase;
 
-		// to do: accept alpha mask
 		public function DistanceMapPass()
 		{
 			super();
@@ -37,6 +36,7 @@ package away3d.materials.passes
 												0.0, 0.0, 0.0, 0.0]);
 			_vertexData = new Vector.<Number>(4, true);
 			_vertexData[3] = 1;
+			_numUsedVertexConstants = 9;
 		}
 
 		/**
@@ -78,8 +78,8 @@ package away3d.materials.passes
 		arcane override function getVertexCode() : String
 		{
 			var code : String =
-					"m44 vt1, vt0, vc4\n" +
-					"sub v0, vt1, vc8\n";
+					"m44 vt1, vt0, vc5\n" +
+					"sub v0, vt1, vc9\n";
 
 			if (_alphaThreshold > 0) {
 				code += "mov v1, va1\n";
@@ -135,8 +135,8 @@ package away3d.materials.passes
 			_vertexData[2] = pos.z;
 			_vertexData[3] = 1;
 
-			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 4, renderable.sceneTransform, true);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 8, _vertexData, 1);
+			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 5, renderable.sceneTransform, true);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 9, _vertexData, 1);
 
 			if (_alphaThreshold > 0)
 				stage3DProxy.setSimpleVertexBuffer(1, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
@@ -147,9 +147,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			super.activate(stage3DProxy, camera);
+			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
 			var f : Number = camera.lens.far;
 

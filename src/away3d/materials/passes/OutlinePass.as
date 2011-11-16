@@ -47,7 +47,7 @@ package away3d.materials.passes
 			_animatableAttributes = ["va0", "va1"];
 			_animationTargetRegisters = ["vt0", "vt1"];
 			_numUsedStreams = 2;
-			_numUsedVertexConstants = 5;
+			_numUsedVertexConstants = 6;
 			_showInnerLines = showInnerLines;
 			_dedicatedMeshes = dedicatedMeshes;
 			if (dedicatedMeshes)
@@ -139,17 +139,17 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera);
+			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
 			// do not write depth if not drawing inner lines (will cause the overdraw to hide inner lines)
 			if (!_showInnerLines)
 				context.setDepthTest(false, Context3DCompareMode.LESS);
 
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _colorData, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _offsetData, 1);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _offsetData, 1);
 		}
 
 
@@ -233,7 +233,7 @@ package away3d.materials.passes
 		 */
 		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
-			super.updateProgram(stage3DProxy, "vc4.x");
+			super.updateProgram(stage3DProxy, "vc5.x");
 		}
 	}
 

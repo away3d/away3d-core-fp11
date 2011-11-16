@@ -19,6 +19,7 @@ package away3d.core.managers
 
 		private var _renderToTextureVertexBuffer : VertexBuffer3D;
 		private var _renderToScreenVertexBuffer : VertexBuffer3D;
+
 		private var _indexBuffer : IndexBuffer3D;
 		private var _stage3DProxy : Stage3DProxy;
 		private var _viewWidth : int = -1;
@@ -27,6 +28,9 @@ package away3d.core.managers
 		private var _textureHeight : int = -1;
 		private var _renderToTextureRect : Rectangle;
 		private var _buffersInvalid : Boolean = true;
+
+		private var _textureRatioX : Number;
+		private var _textureRatioY : Number;
 
 		public function RTTBufferManager(se : SingletonEnforcer, stage3DProxy : Stage3DProxy)
 		{
@@ -42,6 +46,17 @@ package away3d.core.managers
 			if (!stage3DProxy) throw new Error("stage3DProxy key cannot be null!");
 			_instances ||= new Dictionary();
 			return _instances[stage3DProxy] ||= new RTTBufferManager(new SingletonEnforcer(), stage3DProxy);
+		}
+
+
+		public function get textureRatioX() : Number
+		{
+			return _textureRatioX;
+		}
+
+		public function get textureRatioY() : Number
+		{
+			return _textureRatioY;
 		}
 
 		public function get viewWidth() : int
@@ -176,6 +191,9 @@ package away3d.core.managers
 				y = _viewHeight/_textureHeight;
 				v = _renderToTextureRect.y/_textureHeight;
 			}
+
+			_textureRatioX = x;
+			_textureRatioY = y;
 
 			// last element contains indices for data per vertex that can be passed to the vertex shader if necessary (ie: frustum corners for deferred rendering)
 			textureVerts = new <Number>[	-x, -y, u,   1-v, 0,

@@ -41,7 +41,7 @@ package away3d.entities
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
-		
+
 		/**
 		 * 
 		 */
@@ -239,7 +239,7 @@ package away3d.entities
 
 			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
 			mvp.copyFrom(sceneTransform);
-			mvp.append(camera.renderToTextureProjection);
+			mvp.append(camera.viewProjection);
 			mvp.copyColumnTo(3, _pos);
 			_zIndices[_mvpIndex] = -_pos.z;
 		}

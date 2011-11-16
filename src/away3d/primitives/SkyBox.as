@@ -165,7 +165,7 @@ package away3d.primitives
 			mvp.identity();
 			mvp.appendScale(size, size, size);
 			mvp.appendTranslation(camera.x, camera.y, camera.z);
-			mvp.append(camera.renderToTextureProjection);
+			mvp.append(camera.viewProjection);
 		}
 
 		/**

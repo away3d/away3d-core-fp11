@@ -145,10 +145,10 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera);
+			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
 			// value to convert distance from camera to model length per pixel width
 			_constants[2] = camera.lens.near;

@@ -426,12 +426,12 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			var len : uint = _methods.length;
 
-			super.activate(stage3DProxy, camera);
+			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
 
@@ -602,7 +602,7 @@ package away3d.materials.passes
 			_lightData = new Vector.<Number>(_lightDataLength*4, true);
 
 			_registerCache = new ShaderRegisterCache();
-			_registerCache.vertexConstantOffset = 4;
+			_registerCache.vertexConstantOffset = 5;
 			_registerCache.vertexAttributesOffset = 1;
 			_registerCache.reset();
 

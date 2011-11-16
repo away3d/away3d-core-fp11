@@ -1,11 +1,4 @@
-﻿// AGAL CODE CREDITS
-//	ADOBE SYSTEMS INCORPORATED
-//	Copyright 2011 Adobe Systems Incorporated.All Rights Reserved.
-//
-//	NOTICE: Adobe permits you to use, modify, and distribute this file
-//	in accordance with the terms of the license agreement accompanying it.
-
-package away3d.materials.passes
+﻿package away3d.materials.passes
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -130,9 +123,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			super.activate(stage3DProxy, camera);
+			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
 			if (_alphaThreshold > 0) {
 				stage3DProxy.setTextureAt(0, _alphaMask.getTextureForStage3D(stage3DProxy));

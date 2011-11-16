@@ -72,11 +72,13 @@ package away3d.core.managers
 			}
 
 			if (projectionRegister) {
-				code += "m44 "+projectionRegister+", " + pos + ", vc0		\n";
-				code += "mov op, " + projectionRegister + "\n";
+				code += "m44 "+projectionRegister+", " + pos + ", vc0		\n" +
+						"mov vt7, " + projectionRegister + "\n" +
+						"mul op, vt7, vc4\n";
 			}
 			else {
-				code += "m44 op, "+pos+", vc0		\n";	// 4x4 matrix transform from stream 0 to output clipspace
+				code += "m44 vt7, "+pos+", vc0		\n" +
+						"mul op, vt7, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
 			}
 			return code;
 		}

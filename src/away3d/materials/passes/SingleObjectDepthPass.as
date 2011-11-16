@@ -203,10 +203,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			if (_projectionTexturesInvalid) updateProjectionTextures();
-			super.activate(stage3DProxy, camera);
+			// never scale
+			super.activate(stage3DProxy, camera, 1, 1);
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, _polyOffset, 1);
 		}
 

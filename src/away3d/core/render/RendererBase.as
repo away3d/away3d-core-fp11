@@ -46,6 +46,8 @@ package away3d.core.render
 		private var _background : Texture2DBase;
 		protected var _renderToTexture : Boolean;
 		protected var _antiAlias : uint;
+		protected var _textureRatioX : Number = 1;
+		protected var _textureRatioY : Number = 1;
 
 		/**
 		 * Creates a new RendererBase object.
@@ -320,6 +322,26 @@ package away3d.core.render
 		public function set antiAlias(antiAlias : uint) : void
 		{
 			_antiAlias = antiAlias;
+		}
+
+		arcane function get textureRatioX() : Number
+		{
+			return _textureRatioX;
+		}
+
+		arcane function set textureRatioX(value : Number) : void
+		{
+			_textureRatioX = value;
+		}
+
+		arcane function get textureRatioY() : Number
+		{
+			return _textureRatioY;
+		}
+
+		arcane function set textureRatioY(value : Number) : void
+		{
+			_textureRatioY = value;
 		}
 	}
 }
