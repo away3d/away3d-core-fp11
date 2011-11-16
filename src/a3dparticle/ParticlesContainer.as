@@ -222,6 +222,7 @@ package a3dparticle
 				clone._subContainers[j] = _subContainers[j].clone(clone);
 			}
 			
+			clone.transform = transform;
 			clone.pivotPoint = pivotPoint;
 			clone.partition = partition;
 			clone.bounds = _bounds.clone();
