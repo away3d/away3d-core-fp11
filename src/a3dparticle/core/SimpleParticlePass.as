@@ -3,21 +3,18 @@ package a3dparticle.core
 	import a3dparticle.animators.ParticleAnimation;
 	import a3dparticle.particle.ParticleMaterialBase;
 	import away3d.animators.data.AnimationBase;
-	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
-	import away3d.core.managers.BitmapDataTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Utils3D;
 	import flash.geom.Vector3D;
-
+	
+	import away3d.arcane;
 	use namespace arcane;
 	/**
 	 * ...
