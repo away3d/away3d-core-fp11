@@ -100,7 +100,8 @@ package away3d.lights
 		override protected function updateBounds() : void
 		{
 //			super.updateBounds();
-			_bounds.fromExtremes(-_fallOff, -_fallOff, -_fallOff, _fallOff, _fallOff, _fallOff);
+//			_bounds.fromExtremes(-_fallOff, -_fallOff, -_fallOff, _fallOff, _fallOff, _fallOff);
+			_bounds.fromSphere(new Vector3D(), _fallOff);
 			_boundsInvalid = false;
 		}
 
