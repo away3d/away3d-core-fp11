@@ -30,7 +30,7 @@ package away3d.cameras.lenses
 
 		override protected function updateMatrix() : void
 		{
-			// do nothing
+			_matrixInvalid = false;
 		}
 
 

@@ -74,7 +74,7 @@ package away3d.core.managers
 			_textureWidth = TextureUtils.getBestPowerOf2(_viewWidth);
 
 			if (_textureWidth > _viewWidth) {
-				_renderToTextureRect.x = (_textureWidth-_viewWidth)*.5;
+				_renderToTextureRect.x = uint((_textureWidth-_viewWidth)*.5);
 				_renderToTextureRect.width = _viewWidth;
 			}
 			else {
@@ -100,7 +100,7 @@ package away3d.core.managers
 			_textureHeight = TextureUtils.getBestPowerOf2(_viewHeight);
 
 			if (_textureHeight > _viewHeight) {
-				_renderToTextureRect.y = (_textureHeight-_viewHeight)*.5;
+				_renderToTextureRect.y = uint((_textureHeight-_viewHeight)*.5);
 				_renderToTextureRect.height = _viewHeight;
 			}
 			else {

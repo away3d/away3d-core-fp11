@@ -23,7 +23,7 @@ package away3d.cameras.lenses
 		protected var _far : Number = 3000;
 		protected var _aspectRatio : Number = 1;
 
-		private var _matrixInvalid : Boolean = true;
+		protected var _matrixInvalid : Boolean = true;
 		protected var _frustumCorners : Vector.<Number> = new Vector.<Number>(8*3, true);
 
 		private var _unprojection : Matrix3D;

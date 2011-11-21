@@ -65,6 +65,8 @@ package away3d.cameras.lenses
 			_frustumCorners[14] = _frustumCorners[17] = _frustumCorners[20] = _frustumCorners[23] = _far;
 
 			_matrix.copyRawDataFrom(raw);
+
+			_matrixInvalid = false;
 		}
 	}
 }

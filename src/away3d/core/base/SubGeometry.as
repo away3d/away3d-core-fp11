@@ -3,15 +3,13 @@
 	import away3d.animators.data.AnimationBase;
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.events.Stage3DEvent;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
-import flash.geom.Matrix3D;
-import flash.geom.Vector3D;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
-use namespace arcane;
+	use namespace arcane;
 
 	/**
 	 * The SubGeometry class is a collections of geometric data that describes a triangle mesh. It is owned by a
@@ -64,7 +62,6 @@ use namespace arcane;
 		protected var _indexBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexNormalBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexTangentBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
-		protected var _listeningForDispose : Vector.<Stage3DProxy> = new Vector.<Stage3DProxy>(8);
 
 		protected var _numVertices : uint;
 		protected var _numIndices : uint;
@@ -160,8 +157,6 @@ use namespace arcane;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
-
 			if (_vertexBufferDirty[contextIndex] || !_vertexBuffer[contextIndex]) {
 				VertexBuffer3D(_vertexBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertices, 0, _numVertices);
 				_vertexBufferDirty[contextIndex] = false;
@@ -179,8 +174,6 @@ use namespace arcane;
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
-
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 
 			if (_uvBufferDirty[contextIndex] || !_uvBuffer[contextIndex]) {
 				(_uvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_uvs, 0, _numVertices);
@@ -245,8 +238,6 @@ use namespace arcane;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
-
 			if (_secondaryUvBufferDirty[contextIndex] || !_secondaryUvBuffer[contextIndex]) {
 				(_secondaryUvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_secondaryUvs, 0, _numVertices);
 				_secondaryUvBufferDirty[contextIndex] = false;
@@ -264,8 +255,6 @@ use namespace arcane;
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
-
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 
 			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
 				updateVertexNormals();
@@ -288,8 +277,6 @@ use namespace arcane;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
-
 			if (_vertexTangentsDirty)
 				updateVertexTangents();
 
@@ -309,8 +296,6 @@ use namespace arcane;
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
-
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 
 			if (_indexBufferDirty[contextIndex] || !_indexBuffer[contextIndex]) {
 				(_indexBuffer[contextIndex] ||= stage3DProxy._context3D.createIndexBuffer(_numIndices)).uploadFromVector(_indices, 0, _numIndices);
@@ -372,13 +357,6 @@ use namespace arcane;
 		{
 			disposeAllVertexBuffers();
 			disposeIndexBuffers(_indexBuffer);
-
-			for (var i : int = 0; i < 8; ++i) {
-				if (_listeningForDispose[i]) {
-					_listeningForDispose[i].removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
-					_listeningForDispose[i] = null;
-				}
-			}
 		}
 
 		protected function disposeAllVertexBuffers() : void
@@ -824,21 +802,6 @@ use namespace arcane;
 			}
 
 			_faceTangentsDirty = false;
-		}
-
-		protected function initDisposeListener(stage3DProxy : Stage3DProxy) : void
-		{
-			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
-			_listeningForDispose[stage3DProxy._stage3DIndex] = stage3DProxy;
-		}
-
-		private function onContextDisposed(event : Stage3DEvent) : void
-		{
-			var stage3DProxy : Stage3DProxy = Stage3DProxy(event.target);
-			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContextDisposed);
-			_listeningForDispose[stage3DProxy._stage3DIndex] = null;
-
-			disposeForStage3D(stage3DProxy);
 		}
 
 		protected function disposeForStage3D(stage3DProxy : Stage3DProxy) : void

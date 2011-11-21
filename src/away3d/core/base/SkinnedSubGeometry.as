@@ -89,8 +89,6 @@ package away3d.core.base
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
-
 			if (_jointWeightBufferDirty[contextIndex] || !_jointWeightsBuffer[contextIndex]) {
 				VertexBuffer3D(_jointWeightsBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, _jointsPerVertex)).uploadFromVector(_jointWeightsData, 0, _jointWeightsData.length/_jointsPerVertex);
 				_jointWeightBufferDirty[contextIndex] = false;
@@ -108,8 +106,6 @@ package away3d.core.base
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
-
 			if (_jointIndexBufferDirty[contextIndex] || !_jointIndexBuffer[contextIndex]) {
 				VertexBuffer3D(_jointIndexBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, _jointsPerVertex)).uploadFromVector(_jointIndexData, 0, _jointIndexData.length/_jointsPerVertex);
 				_jointIndexBufferDirty[contextIndex] = false;
@@ -125,10 +121,7 @@ package away3d.core.base
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
-			if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
-
 			if (_animatedVertexData) {
-				if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 				if (_vertexBufferDirty[contextIndex] || !_vertexBuffer[contextIndex]) {
 					VertexBuffer3D(_vertexBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_animatedVertexData.length/3, 3)).uploadFromVector(_animatedVertexData, 0, _animatedVertexData.length/3);
 					_vertexBufferDirty[contextIndex] = false;
@@ -148,7 +141,6 @@ package away3d.core.base
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_animatedNormalData) {
-				if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 				if (_vertexNormalBufferDirty[contextIndex] || !_vertexNormalBuffer[contextIndex]) {
 					(_vertexNormalBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_animatedNormalData.length/3, 3)).uploadFromVector(_animatedNormalData, 0, _animatedNormalData.length/3);
 					_vertexNormalBufferDirty[contextIndex] = false;
@@ -168,7 +160,6 @@ package away3d.core.base
 			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_animatedTangentData) {
-				if (!_listeningForDispose[contextIndex]) initDisposeListener(stage3DProxy);
 				if (_vertexTangentBufferDirty[contextIndex] || !_vertexTangentBuffer[contextIndex]) {
 					(_vertexTangentBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_animatedTangentData.length/3, 3)).uploadFromVector(_animatedTangentData, 0, _animatedTangentData.length/3);
 					_vertexTangentBufferDirty[contextIndex] = false;

@@ -79,7 +79,7 @@ package away3d.cameras.lenses
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var w : Number = 1/(_maxX - _minX);
 			var h : Number = 1/(_maxY - _minY);
-			var d : Number = 1/(far - _near);
+			var d : Number = 1/(_far - _near);
 
 			raw[0] = 2*w;
 			raw[5] = 2*h;
@@ -98,6 +98,8 @@ package away3d.cameras.lenses
 			_frustumCorners[7] = _frustumCorners[10] = _frustumCorners[19] = _frustumCorners[22] = _maxY;
 			_frustumCorners[2] = _frustumCorners[5] = _frustumCorners[8] = _frustumCorners[11] = _near;
 			_frustumCorners[14] = _frustumCorners[17] = _frustumCorners[20] = _frustumCorners[23] = _far;
+
+			_matrixInvalid = false;
 		}
 	}
 }
