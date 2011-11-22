@@ -25,8 +25,6 @@ package
 		protected var _view:View3D;
 		
 		private var particle:ParticlesContainer;
-		[Embed(source = "./pp.png")]
-		private var IMG:Class;
 		
 		private var target:Vector3D = new Vector3D();
 		private var speed:Number = 1;
