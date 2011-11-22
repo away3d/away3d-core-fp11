@@ -40,6 +40,11 @@ package a3dparticle.core
 			}
 		}
 		
+		public function get shareAtt():cloneShareAtt
+		{
+			return _shareAtt;
+		}
+		
 		public function clone(parent:ParticlesContainer):SubContainer
 		{
 			

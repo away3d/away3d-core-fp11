@@ -21,14 +21,24 @@ package a3dparticle.animators
 	 */
 	public class ParticleAnimationState extends AnimationStateBase
 	{
-		public var time:Number = 0;
-		private var _particleAnimation:ParticleAnimation;
+		protected var _time:Number = 0;
+		protected var _particleAnimation:ParticleAnimation;
 		
 		
 		public function ParticleAnimationState(animation : ParticleAnimation) 
 		{
 			super(animation);
 			_particleAnimation = animation;
+		}
+		
+		public function get time():Number
+		{
+			return _time;
+		}
+		
+		public function set time(value:Number):void
+		{
+			_time = value;
 		}
 		
 		/**
@@ -50,7 +60,7 @@ package a3dparticle.animators
 		override public function clone() : AnimationStateBase
 		{
 			var clone : ParticleAnimationState = new ParticleAnimationState(ParticleAnimation(_animation));
-			clone.time = 0;
+			clone.time = time;
 			return clone;
 		}
 		

@@ -24,7 +24,7 @@ package a3dparticle.animators
 	 */
 	public class ParticleAnimation extends AnimationBase
 	{
-		
+		public static const POST_PRIORITY:int = 9;
 		private var _hasGen:Boolean;
 		
 		private var _AGALVertexCode:String;
@@ -281,7 +281,10 @@ package a3dparticle.animators
 			var action:ActionBase;
 			for each(action in _particleActions)
 			{
-				_AGALVertexCode += action.getAGALVertexCode(pass);
+				if (action.priority < POST_PRIORITY)
+				{
+					_AGALVertexCode += action.getAGALVertexCode(pass);
+				}
 			}
 			if (needVelocity && needVelocityInFragment)
 			{
@@ -289,6 +292,15 @@ package a3dparticle.animators
 				_AGALVertexCode += "sqt " + fragmentVelocity.toString() + "," + velocityTarget.toString() + ".x\n";
 			}
 			_AGALVertexCode += "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offestTarget.toString() + "\n";
+			
+			for each(action in _particleActions)
+			{
+				if (action.priority >= POST_PRIORITY)
+				{
+					_AGALVertexCode += action.getAGALVertexCode(pass);
+				}
+			}
+			
 			_AGALVertexCode += "mov " + scaleAndRotateTarget.regName +scaleAndRotateTarget.index.toString() + ".w," + OneConst.toString() + "\n";
 			return _AGALVertexCode;
 		}		
