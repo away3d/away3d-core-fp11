@@ -3,12 +3,13 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
 	use namespace arcane;
 
-	public class TripleFilteredShadowMapMethod extends DirectionalShadowMapMethodBase
+	public class TripleFilteredShadowMapMethod extends ShadowMapMethodBase
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -18,6 +19,7 @@ package away3d.materials.methods
 		public function TripleFilteredShadowMapMethod(castingLight : DirectionalLight)
 		{
 			super(castingLight);
+			if (castingLight is PointLight) throw new Error("FilteredShadowMapMethod not supported for Point Lights");
 			_data[5] = 1/3;
 			_data[6] = castingLight.shadowMapper.depthMapSize;
 			_data[7] = 1/castingLight.shadowMapper.depthMapSize;
@@ -26,7 +28,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();

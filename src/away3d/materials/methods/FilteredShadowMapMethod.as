@@ -6,6 +6,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -15,7 +16,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class FilteredShadowMapMethod extends DirectionalShadowMapMethodBase
+	public class FilteredShadowMapMethod extends ShadowMapMethodBase
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -33,7 +34,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();

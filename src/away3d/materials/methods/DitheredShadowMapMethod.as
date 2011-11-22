@@ -4,6 +4,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.BitmapTexture;
@@ -12,7 +13,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class DitheredShadowMapMethod extends DirectionalShadowMapMethodBase
+	public class DitheredShadowMapMethod extends ShadowMapMethodBase
 	{
 		private static var _grainTexture : BitmapTexture;
 		private static var _grainUsages : int;
@@ -23,10 +24,11 @@ package away3d.materials.methods
 		private var _range : Number = 1;
 
 		/**
-		 * Creates a new BasicDiffuseMethod object.
+		 * Creates a new DitheredShadowMapMethod object.
 		 */
 		public function DitheredShadowMapMethod(castingLight : DirectionalLight, highRes : Boolean = false)
 		{
+			// todo: implement for point lights
 			super(castingLight);
 
 			_data[5] = highRes? 1/8 : 1/4;
@@ -97,7 +99,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var grainRegister : ShaderRegisterElement = regCache.getFreeTextureReg();

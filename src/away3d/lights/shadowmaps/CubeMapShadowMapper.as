@@ -25,7 +25,7 @@ package away3d.lights.shadowmaps
 		{
 			super();
 
-			_depthMapSize = 256;
+			_depthMapSize = 512;
 
 			_needsRender = new Vector.<Boolean>(6, true);
 			initCameras();

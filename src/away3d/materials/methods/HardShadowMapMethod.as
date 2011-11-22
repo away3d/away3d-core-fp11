@@ -6,6 +6,7 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -15,12 +16,12 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class HardShadowMapMethod extends DirectionalShadowMapMethodBase
+	public class HardShadowMapMethod extends ShadowMapMethodBase
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
-		public function HardShadowMapMethod(castingLight : DirectionalLight)
+		public function HardShadowMapMethod(castingLight : PointLight)
 		{
 			super(castingLight);
 		}
@@ -28,7 +29,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -46,6 +47,36 @@ package away3d.materials.methods
 
 
 			_depthMapIndex = depthMapRegister.index;
+
+			return code;
+		}
+
+		override protected function getPointFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		{
+			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
+			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var epsReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var posReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var depthSampleCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			regCache.addFragmentTempUsages(depthSampleCol, 1);
+			var lightDir : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			var code : String = "";
+
+			_decIndex = decReg.index;
+			_depthMapIndex = depthMapRegister.index;
+
+			code += "sub " + lightDir + ", " + _globalPosReg + ", " + posReg + "\n" +
+					"dp3 " + lightDir + ".w, " + lightDir + ".xyz, " + lightDir + ".xyz\n" +
+					"mul " + lightDir + ".w, " + lightDir + ".w, " + posReg + ".w\n" +
+					"nrm " + lightDir + ".xyz, " + lightDir + ".xyz\n" +
+
+					"tex " + depthSampleCol + ", " + lightDir + ", " + depthMapRegister + " <cube, nearest, clamp>\n" +
+					"dp4 " + depthSampleCol+".z, " + depthSampleCol + ", " + decReg + "\n" +
+					"add " + targetReg + ".w, " + lightDir+".w, " + epsReg+".x\n" +    // offset by epsilon
+
+					"slt " + targetReg + ".w, " + targetReg + ".w, " + depthSampleCol+".z\n";   // 0 if in shadow
+
+			regCache.removeFragmentTempUsage(depthSampleCol);
 
 			return code;
 		}
