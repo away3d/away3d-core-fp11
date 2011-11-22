@@ -15,7 +15,7 @@ package a3dparticle
 	import away3d.core.base.Object3D;
 	import away3d.core.partition.EntityNode;
 	import away3d.entities.Entity;
-
+	
 	import away3d.arcane;
 	use namespace arcane;
 	/**
@@ -26,10 +26,12 @@ package a3dparticle
 	{
 		public var initParticleFun:Function;
 		
-		private var __controller:ParticleAnimationtor;
-		private var _animationState:ParticleAnimationState;
-		private var _particleAnimation : ParticleAnimation;
-		private var _hasGen:Boolean;
+		protected var __controller:ParticleAnimationtor;
+		protected var _animationState:ParticleAnimationState;
+		protected var _particleAnimation : ParticleAnimation;
+		
+		protected var _isStart:Boolean;
+		protected var _hasGen:Boolean;
 		
 		public var _subContainers : Vector.<SubContainer>;
 		
@@ -39,11 +41,14 @@ package a3dparticle
 			if (!isClone)
 			{
 				_particleAnimation = new ParticleAnimation();
+				
 				_animationState = new ParticleAnimationState(_particleAnimation);
+				
 				__controller = new ParticleAnimationtor(_animationState);
 				_subContainers = new Vector.<SubContainer>();
 			}
 		}
+		
 		
 		public function set timeScale(value:Number):void
 		{
@@ -132,7 +137,7 @@ package a3dparticle
 				indexData.forEach(function(index:uint, ...rest):void { _subContainers[j].indices.push(index + _subContainers[j].vertexData.length / 3); } );
 				uvData.forEach(function(uv:Number, ...rest):void { _subContainers[j].uvData.push(uv); } );
 				
-				param = new ParticleParam;
+				param = initParticleParam();
 				param.total = _vec.length;
 				param.index = i;
 				param.sample = _vec[i];
@@ -153,13 +158,20 @@ package a3dparticle
 			
 		}
 		
+		protected function initParticleParam():ParticleParam
+		{
+			return new ParticleParam; 
+		}
+		
 		public function start():void
 		{
+			_isStart = true;
 			__controller.play();
 		}
 		
 		public function stop():void
 		{
+			_isStart = false;
 			__controller.stop();
 		}
 				
@@ -214,9 +226,11 @@ package a3dparticle
 			var clone : ParticlesContainer = new ParticlesContainer(true);
 			clone._hasGen = _hasGen;
 			clone._particleAnimation = _particleAnimation;
-			clone._animationState = new ParticleAnimationState(_particleAnimation);
+			clone._animationState = _animationState.clone() as ParticleAnimationState;
 			clone.__controller = new ParticleAnimationtor(clone._animationState);
 			clone._subContainers = new Vector.<SubContainer>();
+			clone._isStart = _isStart;
+			if (_isStart) clone.start();
 			for (var j:uint = 0; j < _subContainers.length; j++)
 			{
 				clone._subContainers[j] = _subContainers[j].clone(clone);
