@@ -32,11 +32,14 @@ package away3d.materials.passes
 		private var _polyOffset : Vector.<Number>;
 		private var _enc : Vector.<Number>;
 		private var _projectionTexturesInvalid : Boolean = true;
+		private var _scaleData : Vector.<Number>;
 
 		/**
 		 * Creates a new SingleObjectDepthPass object.
 		 * @param textureSize The size of the depth map texture to render to.
 		 * @param polyOffset The amount by which the rendered object will be inflated, to prevent depth map rounding errors.
+		 *
+		 * todo: provide custom vertex code to assembler
 		 */
 		public function SingleObjectDepthPass(textureSize : uint = 512, polyOffset : Number = 15)
 		{
@@ -47,7 +50,8 @@ package away3d.materials.passes
 			_lightPosData = new Vector.<Number>(8, true);
 			_animatableAttributes = ["va0", "va1"];
 			_animationTargetRegisters = ["vt0", "vt1"];
-			_polyOffset = Vector.<Number>([polyOffset, 0, 0, 0]);
+			_polyOffset = new <Number>[polyOffset, 0, 0, 0];
+			_scaleData = new <Number>[1, 1, 1, 1];
 			_enc = Vector.<Number>([	1.0, 255.0, 65025.0, 16581375.0,
 										1.0 / 255.0,1.0 / 255.0,1.0 / 255.0,0.0
 									]);
@@ -154,7 +158,6 @@ package away3d.materials.passes
 
 		/**
 		 * @inheritDoc
-		 * todo: keep maps in dictionary per renderable
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
@@ -184,7 +187,7 @@ package away3d.materials.passes
 
 				matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable][i]);
 
-				// todo: clean up when context is disposed or does this happen automatically?
+				// todo: use texture proxy?
 				_textures[contextIndex][renderable][i] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);
 				j = 0;
 
@@ -192,7 +195,8 @@ package away3d.materials.passes
 				context.clear(1.0, 1.0, 1.0);
 
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _lightPosData, 2);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _scaleData, 1);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _lightPosData, 2);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
 				stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
@@ -208,7 +212,7 @@ package away3d.materials.passes
 			if (_projectionTexturesInvalid) updateProjectionTextures();
 			// never scale
 			super.activate(stage3DProxy, camera, 1, 1);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, _polyOffset, 1);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 7, _polyOffset, 1);
 		}
 
 		/**
@@ -216,7 +220,7 @@ package away3d.materials.passes
 		 */
 		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
-			super.updateProgram(stage3DProxy, "vc6.x");
+			super.updateProgram(stage3DProxy, "vc7.x");
 		}
 	}
 }

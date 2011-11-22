@@ -15,6 +15,7 @@ package away3d.core.managers
 
 	use namespace arcane;
 
+	// todo: remove this, this is pretty useless and very inflexible! move all assembly code into materials
 	public class AGALProgram3DCompiler
 	{
 		private var _vertexCode : String;
