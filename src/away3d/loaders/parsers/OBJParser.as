@@ -393,9 +393,10 @@ package away3d.loaders.parsers
 						uvind = ind*2;
 						nindices.push(nvertices.length/3);
 						nvertices.push(vertices[vind], vertices[vind+1], vertices[vind+2]);
-						nuvs.push(uvs[uvind], uvs[uvind+1]);
+						if (uvs.length > 0)
+							nuvs.push(uvs[uvind], uvs[uvind+1]);
 						
-						if(normals[vind]) nnormals.push(normals[vind], normals[vind+1], normals[vind+2]);
+						if(normals.length > 0 && normals[vind]) nnormals.push(normals[vind], normals[vind+1], normals[vind+2]);
 						 
 						vlength+=3;
 					}
@@ -418,12 +419,12 @@ package away3d.loaders.parsers
 			
 			subGeom.updateVertexData(vertices);
 			subGeom.updateIndexData(indices);
-			subGeom.updateUVData(uvs);
+			if (uvs) subGeom.updateUVData(uvs);
 			
-			var deriveVN:Boolean = normals.length>0? true :false;
+			var deriveVN:Boolean = normals.length>0? false :true;
 			subGeom.autoDeriveVertexNormals = deriveVN;
 			
-			if(deriveVN) subGeom.updateVertexNormalData(normals);
+			if(!deriveVN) subGeom.updateVertexNormalData(normals);
 			
 			geometry.addSubGeometry(subGeom);
 		}
