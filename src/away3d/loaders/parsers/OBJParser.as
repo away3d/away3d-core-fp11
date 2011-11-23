@@ -159,13 +159,11 @@ package away3d.loaders.parsers
 			var creturn:String = String.fromCharCode(10);
 			var trunk:Array;
 			
-			if(!_startedParsing)
-				_textData = getTextData();
-			
-			if(_textData.indexOf(creturn) == -1)
-				creturn = String.fromCharCode(13);
-			
 			if(!_startedParsing){
+				_textData = getTextData();
+				var re:RegExp = new RegExp(String.fromCharCode(13),"g");
+				_textData = _textData.replace(re, "");
+
 				_startedParsing = true;
 				_vertices = new Vector.<Vertex>();
 				_vertexNormals = new Vector.<Vertex>();
