@@ -32,6 +32,32 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
+		override public function get gloss() : Number
+		{
+			return _baseSpecularMethod.gloss;
+		}
+
+		override public function set gloss(value : Number) : void
+		{
+			_baseSpecularMethod.gloss = value;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override public function get specular() : Number
+		{
+			return _baseSpecularMethod.specular;
+		}
+
+		override public function set specular(value : Number) : void
+		{
+			_baseSpecularMethod.specular = value;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function get passes() : Vector.<MaterialPassBase>
 		{
 			return _baseSpecularMethod.passes;
