@@ -102,7 +102,7 @@ package away3d.loaders.parsers
 		public function isBitmapDataValid(bitmapData: BitmapData) : Boolean
 		{
 			var isValid:Boolean = TextureUtils.isBitmapDataValid(bitmapData);
-			if(!isValid) trace(">> bitmap loaded is not having power of 2 dimensions or is higher than 4096");
+			if(!isValid) trace(">> Bitmap loaded is not having power of 2 dimensions or is higher than 2048");
 			
 			return isValid;
 		}
