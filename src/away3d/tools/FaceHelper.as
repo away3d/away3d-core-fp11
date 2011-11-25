@@ -608,7 +608,7 @@
 		private static function getUsedIndice(vertices:Vector.<Number>, x:Number, y:Number, z:Number):int
 		{
 			for(var i:uint = 0; i<vertices.length;i+=3){
-				if(vertices[i] == x && vertices[i+1] == y && vertices[i+1] == z)
+				if(vertices[i] == x && vertices[i+1] == y && vertices[i+2] == z)
 					return i/3;
 			}
 			return -1;
