@@ -20,7 +20,7 @@ package away3d.tools.utils
 			return false;
 		}
 
-		private static function isPowerOfTwo(value : int) : Boolean
+		public static function isPowerOfTwo(value : int) : Boolean
 		{
 			return value ? ((value & -value) == value) : false;
 		}
