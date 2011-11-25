@@ -32,6 +32,7 @@ package a3dparticle
 		
 		protected var _isStart:Boolean;
 		protected var _hasGen:Boolean;
+		protected var _alwaysInFrustum:Boolean;
 		
 		public var _subContainers : Vector.<SubContainer>;
 		
@@ -47,6 +48,16 @@ package a3dparticle
 				__controller = new ParticleAnimationtor(_animationState);
 				_subContainers = new Vector.<SubContainer>();
 			}
+		}
+		
+		public function set alwaysInFrustum(value:Boolean):void
+		{
+			_alwaysInFrustum = value;
+		}
+		
+		public function get alwaysInFrustum():Boolean
+		{
+			return _alwaysInFrustum;
 		}
 		
 		

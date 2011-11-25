@@ -1,8 +1,12 @@
 package a3dparticle.core 
 {
 	import a3dparticle.ParticlesContainer;
+	import away3d.cameras.Camera3D;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.traverse.PartitionTraverser;
+	
+	import away3d.arcane;
+	use namespace arcane;
 	/**
 	 * ...
 	 * @author liaocheng
@@ -31,6 +35,32 @@ package a3dparticle.core
 					traverser.applyRenderable(subs[i++]);
 			}
 			traverser.leaveNode(this);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function isInFrustum(camera : Camera3D) : Boolean
+		{
+			if (_particlesContainer.isVisible == false) return false;
+			_particlesContainer.pushModelViewProjection(camera);
+			if (_particlesContainer.alwaysInFrustum) 
+			{
+				return true;
+			}
+			else
+			{
+				if (_particlesContainer.bounds.isInFrustum(_particlesContainer.getModelViewProjectionUnsafe()))
+				{
+					return true;
+				}
+				else 
+				{
+					_particlesContainer.popModelViewProjection();
+					return false;
+				}
+			}
+			
 		}
 		
 	}
