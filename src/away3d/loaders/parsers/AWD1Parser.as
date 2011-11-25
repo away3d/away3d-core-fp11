@@ -23,6 +23,8 @@ package away3d.loaders.parsers
 	 */
 	public class AWD1Parser extends ParserBase
 	{
+        private const LIMIT:uint = 65535;
+
 		private var _textData:String;
 		private var _startedParsing : Boolean;
 		private var _objs:Array;
@@ -305,65 +307,79 @@ package away3d.loaders.parsers
 			var j:int;
 			var av:Array;
 			var au:Array;
-			
+
 			var aRef:Array;
 			var mRef:Array;
-			
+
 			var vertices:Vector.<Number> = new Vector.<Number>();
 			var indices:Vector.<uint> = new Vector.<uint>();
-			var _uvs:Vector.<Number> = new Vector.<Number>();
+			var uvs:Vector.<Number> = new Vector.<Number>();
 			var index:uint;
-			var iindex:uint;
+			var vindex:uint;
 			var uindex:uint;
-			
+
 			aRef = geo.f.split(",");
 			if (geo.m)
 				mRef = geo.m.split(",");
-			
+
+			var sub_geom:SubGeometry;
+			var geom:Geometry = mesh.geometry;
+
 			for(j = 0;j<aRef.length;j+=6){
-				indices[iindex] = iindex;
-				iindex++;
-				indices[iindex] = iindex;
-				iindex++;
-				indices[iindex] = iindex;
-				iindex++;
-				
+
+				if(indices.length+3 > LIMIT ){
+					sub_geom = new SubGeometry();
+					sub_geom.updateVertexData(vertices);
+					sub_geom.updateIndexData(indices);
+					sub_geom.updateUVData(uvs);
+					geom.addSubGeometry(sub_geom);
+
+					vertices = new Vector.<Number>();
+					indices = new Vector.<uint>();
+					uvs = new Vector.<Number>();
+					vindex = index = uindex = 0;
+				}
+
+				indices[vindex] = vindex;
+				vindex++;
+				indices[vindex] = vindex;
+				vindex++;
+				indices[vindex] = vindex;
+				vindex++;
+
 				//face is inverted compared to f10 awd generator
 				av = geo.aV[parseInt(aRef[j+1],16)].split("/");
 				vertices[index++] = parseFloat(av[0]);
 				vertices[index++] = parseFloat(av[1]);
 				vertices[index++] = parseFloat(av[2]);
-				
+
 				av = geo.aV[parseInt(aRef[j], 16)].split("/");
 				vertices[index++] = parseFloat(av[0]);
 				vertices[index++] = parseFloat(av[1]);
 				vertices[index++] = parseFloat(av[2]);
-				
+
 				av = geo.aV[parseInt(aRef[j+2],16)].split("/");
 				vertices[index++] = parseFloat(av[0]);
 				vertices[index++] = parseFloat(av[1]);
 				vertices[index++] = parseFloat(av[2]);
-				
+
 				au = geo.aU[parseInt(aRef[j+4],16)].split("/");
-				_uvs[uindex++] = parseFloat(au[0]);
-				_uvs[uindex++] = 1-parseFloat(au[1]);
-				
+				uvs[uindex++] = parseFloat(au[0]);
+				uvs[uindex++] = 1-parseFloat(au[1]);
+
 				au = geo.aU[parseInt(aRef[j+3],16)].split("/");
-				_uvs[uindex++] = parseFloat(au[0]);
-				_uvs[uindex++] = 1-parseFloat(au[1]);
-				
+				uvs[uindex++] = parseFloat(au[0]);
+				uvs[uindex++] = 1-parseFloat(au[1]);
+
 				au = geo.aU[parseInt(aRef[j+5],16)].split("/");
-				_uvs[uindex++] = parseFloat(au[0]);
-				_uvs[uindex++] = 1-parseFloat(au[1]);
+				uvs[uindex++] = parseFloat(au[0]);
+				uvs[uindex++] = 1-parseFloat(au[1]);
 			}
-			
-			var sub_geom:SubGeometry;
-			var geom:Geometry = mesh.geometry;
-			
+
 			sub_geom = new SubGeometry();
 			sub_geom.updateVertexData(vertices);
 			sub_geom.updateIndexData(indices);
-			sub_geom.updateUVData(_uvs);
+			sub_geom.updateUVData(uvs);
 			geom.addSubGeometry(sub_geom);
 		}
 		
