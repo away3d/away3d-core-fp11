@@ -241,6 +241,8 @@ package a3dparticle
 			clone.__controller = new ParticleAnimationtor(clone._animationState);
 			clone._subContainers = new Vector.<SubContainer>();
 			clone._isStart = _isStart;
+			clone.alwaysInFrustum = alwaysInFrustum;
+			
 			if (_isStart) clone.start();
 			for (var j:uint = 0; j < _subContainers.length; j++)
 			{
