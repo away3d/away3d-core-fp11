@@ -27,7 +27,7 @@ package away3d.materials
 	 * MaterialBase forms an abstract base class for any material.
 	 *
 	 * Vertex stream index 0 is reserved for vertex positions.
-	 * Vertex shader constants index 0-3 are reserved for projections
+	 * Vertex shader constants index 0-3 are reserved for projections, constant 4 for viewport positioning
 	 */
 	public class MaterialBase extends NamedAssetBase implements IAsset
 	{
@@ -61,13 +61,14 @@ package away3d.materials
 		protected var _passes : Vector.<MaterialPassBase>;
 
 		protected var _mipmap : Boolean;
-		private var _smooth : Boolean = true;
-		private var _repeat : Boolean;
+		protected var _smooth : Boolean = true;
+		protected var _repeat : Boolean;
 
 		protected var _depthPass : DepthMapPass;
 		protected var _distancePass : DistanceMapPass;
+
 		private var _lightPicker : LightPickerBase;
-		private var _distanceBased : Boolean;
+		private var _distanceBasedDepthRender : Boolean;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -275,7 +276,7 @@ package away3d.materials
 
 		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false) : void
 		{
-			_distanceBased = distanceBased;
+			_distanceBasedDepthRender = distanceBased;
 
 			if (distanceBased)
 				_distancePass.activate(stage3DProxy, camera, 1, 1);
@@ -285,7 +286,7 @@ package away3d.materials
 
 		arcane function deactivateForDepth(stage3DProxy : Stage3DProxy) : void
 		{
-			if (_distanceBased)
+			if (_distanceBasedDepthRender)
 				_distancePass.deactivate(stage3DProxy);
 			else
 				_depthPass.deactivate(stage3DProxy);
@@ -293,7 +294,7 @@ package away3d.materials
 
 		arcane function renderDepth(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			if (_distanceBased) {
+			if (_distanceBasedDepthRender) {
 				_distancePass.render(renderable, stage3DProxy, camera, _lightPicker);
 			}
 			else {
