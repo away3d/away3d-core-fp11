@@ -1,11 +1,4 @@
-﻿// AGAL CODE CREDITS
-//	ADOBE SYSTEMS INCORPORATED
-//	Copyright 2011 Adobe Systems Incorporated.All Rights Reserved.
-//
-//	NOTICE: Adobe permits you to use, modify, and distribute this file
-//	in accordance with the terms of the license agreement accompanying it.
-
-package away3d.materials.passes
+﻿package away3d.materials.passes
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -13,8 +6,6 @@ package away3d.materials.passes
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.textures.Texture2DBase;
-
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
@@ -77,9 +68,13 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			var code : String =
-					"m44 vt1, vt0, vc5\n" +
-					"sub v0, vt1, vc9\n";
+			// todo: only use gpu code if main pass also runs on gpu, determine on assignment
+			var code : String = animation.getAGALVertexCode(this, ["va0"], ["vt0"]);
+
+			code += "m44 vt7, vt0, vc0		\n" +
+					"mul op, vt7, vc4		\n" +
+					"m44 vt1, vt0, vc5		\n" +
+					"sub v0, vt1, vc9		\n";
 
 			if (_alphaThreshold > 0) {
 				code += "mov v1, va1\n";

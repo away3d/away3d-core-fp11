@@ -82,8 +82,6 @@ package away3d.materials
 			invalidateDepthShaderProgram();
 		}
 
-
-		
 		public function get assetType() : String
 		{
 			return AssetType.MATERIAL;
@@ -296,13 +294,9 @@ package away3d.materials
 		arcane function renderDepth(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (_distanceBased) {
-				if (renderable.animationState)
-					renderable.animationState.setRenderState(stage3DProxy, _distancePass, renderable);
 				_distancePass.render(renderable, stage3DProxy, camera, _lightPicker);
 			}
 			else {
-				if (renderable.animationState)
-					renderable.animationState.setRenderState(stage3DProxy, _depthPass, renderable);
 				_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
 			}
 		}
@@ -342,9 +336,6 @@ package away3d.materials
 		 */
 		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, entityCollector : EntityCollector) : void
 		{
-			if (renderable.animationState)
-				renderable.animationState.setRenderState(stage3DProxy, _passes[index], renderable);
-
 			if (_lightPicker)
 				_lightPicker.collectLights(renderable, entityCollector);
 

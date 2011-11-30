@@ -21,6 +21,14 @@ package away3d.animators.data
 	public class AnimationBase
 	{
 		/**
+		 * Indicates whether or not this animation runs on CPU or GPU.
+		 */
+		public function get usesCPU() : Boolean
+		{
+			return true;
+		}
+
+		/**
 		 * Factory method which creates an animation state specific to this animation type.
 		 * @return A concrete subtype of AnimationStateBase that is specific to the concrete subtype of AnimationStateBase
 		 *
@@ -38,7 +46,7 @@ package away3d.animators.data
 		 *
 		 * @private
 		 */
-		arcane function getAGALVertexCode(pass : MaterialPassBase) : String
+		arcane function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
 			throw new AbstractMethodError();
 			return null;

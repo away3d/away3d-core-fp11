@@ -6,7 +6,6 @@ package away3d.animators.data
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.passes.MaterialPassBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -59,8 +58,9 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int = -1, vertexStreamOffset : int = -1) : void
 		{
+			// todo: add code for when running on cpu
 			var i : uint;
 			var len : uint = _vertexAnimation._numPoses;
 			var index : uint = _vertexAnimation._streamIndex;
@@ -71,7 +71,7 @@ package away3d.animators.data
 				if (_vertexAnimation.blendMode == VertexAnimationMode.ABSOLUTE) {
 					for (i = 1; i < len; ++i) {
 						stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-						context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, pass.numUsedVertexConstants, _weights, 1);
+						context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 
 						if (_vertexAnimation._useNormals)
 							stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
@@ -99,7 +99,7 @@ package away3d.animators.data
 			for (; i < len; ++i) {
 				subGeom = _poses[i].subGeometries[subMesh._index] || subMesh.subGeometry;
 				stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, pass.numUsedVertexConstants, _weights, 1);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 
 				if (_vertexAnimation._useNormals)
 					stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);

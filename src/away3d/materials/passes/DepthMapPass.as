@@ -7,7 +7,6 @@
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.textures.Texture2DBase;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 
@@ -19,14 +18,12 @@
 		private var _alphaThreshold : Number = 0;
 		private var _alphaMask : Texture2DBase;
 
-		// to do: accept alpha mask/alpha threshold
 		public function DepthMapPass()
 		{
 			super();
 			_data = Vector.<Number>([	1.0, 255.0, 65025.0, 16581375.0,
 										1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0, 0.0,
 										0.0, 0.0, 0.0, 0.0]);
-			_projectedTargetRegister = "vt1";
 		}
 
 		/**
@@ -67,18 +64,26 @@
 		 */
 		arcane override function getVertexCode() : String
 		{
+			var code : String = animation.getAGALVertexCode(this, ["va0"], ["vt0"]);
+
+			// project
+			code += "m44 vt1, vt0, vc0		\n" +
+					"mul op, vt1, vc4\n";
+
 			if (_alphaThreshold > 0) {
 				_numUsedTextures = 1;
 				_numUsedStreams = 2;
-				return 	"mov v0, vt1\n" +
+				code +=	"mov v0, vt1\n" +
 						"mov v1, va1\n";
 
 			}
 			else {
 				_numUsedTextures = 0;
 				_numUsedStreams = 1;
-				return "mov v0, vt1\n";
+				code += "mov v0, vt1\n";
 			}
+
+			return code;
 		}
 
 		/**

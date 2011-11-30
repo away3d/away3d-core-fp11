@@ -6,6 +6,7 @@ package away3d.materials.passes
 	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
@@ -43,7 +44,10 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			return "mov v0, vt0\n";
+			return  "m44 vt7, va0, vc0		\n" +
+					// fit within texture range
+					"mul op, vt7, vc4\n" +
+					"mov v0, va0\n";
 		}
 
 		/**
@@ -61,6 +65,7 @@ package away3d.materials.passes
 		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+
 			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 	}

@@ -124,6 +124,10 @@ package away3d.materials.passes
 		private var _ambientLightG : Number;
 		private var _ambientLightB : Number;
 
+		private var _animatableAttributes : Array = ["va0"];
+		private var _animationTargetRegisters : Array = ["vt0"];
+
+
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
@@ -412,7 +416,29 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
+			var normal : String = _animationTargetRegisters.length > 1? _animationTargetRegisters[1] : null;
+			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0], _projectedTargetRegister, normal);
+			_vertexCode = animation.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters) + projectionVertexCode + _vertexCode;
+
 			return _vertexCode;
+		}
+
+		private function getProjectionCode(positionRegister : String, projectionRegister : String, normalRegister : String) : String
+		{
+			var code : String = "";
+			var pos : String = positionRegister;
+
+			// if we need projection somewhere
+			if (projectionRegister) {
+				code += "m44 "+projectionRegister+", " + pos + ", vc0		\n" +
+						"mov vt7, " + projectionRegister + "\n" +
+						"mul op, vt7, vc4\n";
+			}
+			else {
+				code += "m44 vt7, "+pos+", vc0		\n" +
+						"mul op, vt7, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
+			}
+			return code;
 		}
 
 		/**
@@ -560,11 +586,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		override arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
 			reset();
 
-			super.updateProgram(stage3DProxy, polyOffsetReg);
+			super.updateProgram(stage3DProxy);
 		}
 
 		/**

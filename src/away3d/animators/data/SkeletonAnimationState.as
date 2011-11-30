@@ -137,8 +137,10 @@ package away3d.animators.data
 
 		/**
 		 * @inheritDoc
+		 *
+		 * todo: make vertexConstantOffset a parameter, if -1, it will assume cpu needs to be used
 		 */
-        override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+        override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int = -1, vertexStreamOffset : int = -1) : void
 		{
 			if (_numJoints == 0) {
 				// delayed skeleton instantiation
@@ -152,7 +154,7 @@ package away3d.animators.data
 			if (_stateInvalid) updateGlobalPose();
 			if (_globalMatricesInvalid) convertToMatrices();
 
-			if (_skinnedAnimation.usesCPU) {
+			if (vertexConstantOffset < 0) {
 				var subGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
 				if (!_buffersValid[subGeom]) {
 					morphGeometry(subGeom);
@@ -164,11 +166,10 @@ package away3d.animators.data
 			var skinnedGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
 			var context : Context3D = stage3DProxy._context3D;
 
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, pass.numUsedVertexConstants, _globalMatrices, _numJoints*3);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
 
-			var streamOffset : uint = pass.numUsedStreams;
-			stage3DProxy.setSimpleVertexBuffer(streamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), _bufferFormat);
-			stage3DProxy.setSimpleVertexBuffer(streamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), _bufferFormat);
+			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), _bufferFormat);
+			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), _bufferFormat);
 		}
 
 		private function updateGlobalPose() : void

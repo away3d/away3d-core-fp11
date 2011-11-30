@@ -44,8 +44,6 @@ package away3d.materials.passes
 			this.outlineColor = outlineColor;
 			this.outlineSize = outlineSize;
 			_defaultCulling = Context3DTriangleFace.FRONT;
-			_animatableAttributes = ["va0", "va1"];
-			_animationTargetRegisters = ["vt0", "vt1"];
 			_numUsedStreams = 2;
 			_numUsedVertexConstants = 6;
 			_showInnerLines = showInnerLines;
@@ -125,7 +123,17 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			return "";
+			var code : String = animation.getAGALVertexCode(this, ["va0", "va1"], ["vt0", "vt1"]);
+
+			// offset
+			code += "mul vt7, vt1, vc5.x\n" +
+					"add vt7, vt7, vt0\n" +
+					"mov vt7.w, vt0.w\n" +
+			// project and scale to viewport
+					"m44 vt7, vt7, vc0		\n" +
+					"mul op, vt7, vc4\n";
+
+			return code;
 		}
 
 		/**
@@ -227,14 +235,5 @@ package away3d.materials.passes
 			mesh.geometry.addSubGeometry(dest);
 			return mesh;
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
-		{
-			super.updateProgram(stage3DProxy, "vc5.x");
-		}
 	}
-
 }

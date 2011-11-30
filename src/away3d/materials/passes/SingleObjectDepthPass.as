@@ -4,8 +4,6 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.events.Stage3DEvent;
-	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.materials.lightpickers.LightPickerBase;
 
@@ -28,11 +26,9 @@ package away3d.materials.passes
 		private var _textures : Vector.<Dictionary>;
 		private var _projections : Dictionary;
 		private var _textureSize : uint;
-		private var _lightPosData : Vector.<Number>;
 		private var _polyOffset : Vector.<Number>;
 		private var _enc : Vector.<Number>;
 		private var _projectionTexturesInvalid : Boolean = true;
-		private var _scaleData : Vector.<Number>;
 
 		/**
 		 * Creates a new SingleObjectDepthPass object.
@@ -47,11 +43,7 @@ package away3d.materials.passes
 			_textureSize = textureSize;
 			_numUsedStreams = 2;
 			_numUsedVertexConstants = 7;
-			_lightPosData = new Vector.<Number>(8, true);
-			_animatableAttributes = ["va0", "va1"];
-			_animationTargetRegisters = ["vt0", "vt1"];
 			_polyOffset = new <Number>[polyOffset, 0, 0, 0];
-			_scaleData = new <Number>[1, 1, 1, 1];
 			_enc = Vector.<Number>([	1.0, 255.0, 65025.0, 16581375.0,
 										1.0 / 255.0,1.0 / 255.0,1.0 / 255.0,0.0
 									]);
@@ -109,12 +101,19 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			_projectedTargetRegister = "vt2";
-			var code : String = "";
+			var code : String = animation.getAGALVertexCode(this, ["va0", "va1"], ["vt0", "vt1"]);
+//			code += getProjectionCode("vt0", "vt2", "vc7.x", "vt1");
 
-			code += "rcp vt2.w, vt2.w           \n" +
-                    "mul v0.xyz, vt2.xyz, vt2.w \n" +
-                    "mov v0.w, vt0.w            \n";
+			// offset
+			code += "mul vt7, vt1, vc4.x	\n" +
+					"add vt7, vt7, vt0		\n" +
+					"mov vt7.w, vt0.w		\n";
+			// project
+			code += "m44 vt2, vt7, vc0		\n" +
+					"mov op, vt2			\n";
+
+			// perspective divide
+			code += "div v0, vt2, vt2.w \n";
 
 			return code;
 		}
@@ -195,8 +194,6 @@ package away3d.materials.passes
 				context.clear(1.0, 1.0, 1.0);
 
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _scaleData, 1);
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _lightPosData, 2);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
 				stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
@@ -212,15 +209,7 @@ package away3d.materials.passes
 			if (_projectionTexturesInvalid) updateProjectionTextures();
 			// never scale
 			super.activate(stage3DProxy, camera, 1, 1);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 7, _polyOffset, 1);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
-		{
-			super.updateProgram(stage3DProxy, "vc7.x");
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _polyOffset, 1);
 		}
 	}
 }

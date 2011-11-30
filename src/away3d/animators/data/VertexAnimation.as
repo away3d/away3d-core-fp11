@@ -18,6 +18,7 @@ package away3d.animators.data
 		arcane var _useTangents : Boolean;
 		arcane var _numPoses : uint;
 		private var _blendMode : String;
+		private var _usesCPU : Boolean;
 
 		/**
 		 * Creates a new VertexAnimation object
@@ -33,6 +34,11 @@ package away3d.animators.data
 			super();
 			_numPoses = numPoses;
 			_blendMode = blendMode;
+		}
+
+		override public function get usesCPU() : Boolean
+		{
+			return _usesCPU;
 		}
 
 		/**
@@ -66,26 +72,26 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getAGALVertexCode(pass : MaterialPassBase) : String
+		override arcane function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
+			_usesCPU = true;
+
 			if (_blendMode == VertexAnimationMode.ABSOLUTE)
-				return getAbsoluteAGALCode(pass);
+				return getAbsoluteAGALCode(pass, sourceRegisters, targetRegisters);
 			else
-				return getAdditiveAGALCode(pass);
+				return getAdditiveAGALCode(pass, sourceRegisters, targetRegisters);
 		}
 
 		/**
 		 * Generates the vertex AGAL code for absolute blending.
 		 */
-		private function getAbsoluteAGALCode(pass : MaterialPassBase) : String
+		private function getAbsoluteAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
-			var attribs : Array = pass.getAnimationSourceRegisters();
-			var targets : Array = pass.getAnimationTargetRegisters();
 			var code : String = "";
-			var temp1 : String = findTempReg(targets);
-			var temp2 : String = findTempReg(targets, temp1);
+			var temp1 : String = findTempReg(targetRegisters);
+			var temp2 : String = findTempReg(targetRegisters, temp1);
 			var regs : Array = ["x", "y", "z", "w"];
-			var len : uint = attribs.length;
+			var len : uint = sourceRegisters.length;
 			_useNormals = len > 1;
 			_useTangents = len > 2;
 			if (len > 2) len = 2;
@@ -95,33 +101,31 @@ package away3d.animators.data
 			for (var i : uint = 0; i < len; ++i) {
 				for (var j : uint = 0; j < _numPoses; ++j) {
 					if (j == 0) {
-						code += "mul " + temp1 + ", " + attribs[i] + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
+						code += "mul " + temp1 + ", " + sourceRegisters[i] + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
 					}
 					else {
 						code += "mul " + temp2 + ", va" + (_streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
 						if (j < _numPoses - 1) code += "add " + temp1 + ", " + temp1 + ", " + temp2 + "\n";
-						else code += "add " + targets[i] + ", " + temp1 + ", " + temp2 + "\n";
+						else code += "add " + targetRegisters[i] + ", " + temp1 + ", " + temp2 + "\n";
 						++k;
 					}
 				}
 			}
 
 			if (_useTangents) {
-				code += "dp3 " + temp1 + ".x, " + attribs[uint(2)] + ", " + targets[uint(1)] + "\n" +
-						"mul " + temp1 + ", " + targets[uint(1)] + ", " + temp1 + ".x			 \n" +
-						"sub " + targets[uint(2)] + ", " + attribs[uint(2)] + ", " + temp1 + "\n";
+				code += "dp3 " + temp1 + ".x, " + sourceRegisters[uint(2)] + ", " + targetRegisters[uint(1)] + "\n" +
+						"mul " + temp1 + ", " + targetRegisters[uint(1)] + ", " + temp1 + ".x			 \n" +
+						"sub " + targetRegisters[uint(2)] + ", " + sourceRegisters[uint(2)] + ", " + temp1 + "\n";
 			}
 			return code;
 		}
 
-		private function getAdditiveAGALCode(pass : MaterialPassBase) : String
+		private function getAdditiveAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
-			var attribs : Array = pass.getAnimationSourceRegisters();
-			var targets : Array = pass.getAnimationTargetRegisters();
 			var code : String = "";
-			var len : uint = attribs.length;
+			var len : uint = sourceRegisters.length;
 			var regs : Array = ["x", "y", "z", "w"];
-			var temp1 : String = findTempReg(targets);
+			var temp1 : String = findTempReg(targetRegisters);
 			var k : uint;
 
 			_useNormals = len > 1;
@@ -129,21 +133,21 @@ package away3d.animators.data
 
 			if (len > 2) len = 2;
 
-			code += "mov  " + targets[0] + ", " + attribs[0] + "\n";
-			if (_useNormals) code += "mov " + targets[1] + ", " + attribs[1] + "\n";
+			code += "mov  " + targetRegisters[0] + ", " + sourceRegisters[0] + "\n";
+			if (_useNormals) code += "mov " + targetRegisters[1] + ", " + sourceRegisters[1] + "\n";
 
 			for (var i : uint = 0; i < len; ++i) {
 				for (var j : uint = 0; j < _numPoses; ++j) {
 					code += "mul " + temp1 + ", va" + (_streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n" +
-							"add " + targets[i] + ", " + targets[i] + ", " + temp1 + "\n";
+							"add " + targetRegisters[i] + ", " + targetRegisters[i] + ", " + temp1 + "\n";
 					k++;
 				}
 			}
 
 			if (_useTangents) {
-				code += "dp3 " + temp1 + ".x, " + attribs[uint(2)] + ", " + targets[uint(1)] + "\n" +
-						"mul " + temp1 + ", " + targets[uint(1)] + ", " + temp1 + ".x			 \n" +
-						"sub " + targets[uint(2)] + ", " + attribs[uint(2)] + ", " + temp1 + "\n";
+				code += "dp3 " + temp1 + ".x, " + sourceRegisters[uint(2)] + ", " + targetRegisters[uint(1)] + "\n" +
+						"mul " + temp1 + ", " + targetRegisters[uint(1)] + ", " + temp1 + ".x			 \n" +
+						"sub " + targetRegisters[uint(2)] + ", " + sourceRegisters[uint(2)] + ", " + temp1 + "\n";
 			}
 
 			return code;

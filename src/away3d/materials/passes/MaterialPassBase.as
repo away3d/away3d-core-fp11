@@ -5,11 +5,9 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.AGALProgram3DCache;
-	import away3d.core.managers.AGALProgram3DCompiler;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.debug.Debug;
 	import away3d.errors.AbstractMethodError;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.LightPickerBase;
 
@@ -38,6 +36,7 @@ package away3d.materials.passes
 		private var _programInvalids : Vector.<Boolean> = new Vector.<Boolean>(8);
 
 		// agal props. these NEED to be set by subclasses!
+		// todo: can we perhaps figure these out manually by checking read operations in the bytecode, so other sources can be safely updated?
 		protected var _numUsedStreams : uint;
 		protected var _numUsedTextures : uint;
 		protected var _numUsedVertexConstants : uint;
@@ -48,8 +47,6 @@ package away3d.materials.passes
 
 		private var _bothSides : Boolean;
 
-		protected var _animatableAttributes : Array = ["va0"];
-		protected var _animationTargetRegisters : Array = ["vt0"];
 		protected var _projectedTargetRegister : String;
 
 		protected var _numPointLights : uint;
@@ -207,6 +204,13 @@ package away3d.materials.passes
 
 			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 
+			if (renderable.animationState) {
+				if (renderable.animation.usesCPU)
+					renderable.animationState.setRenderState(stage3DProxy, renderable);
+				else
+					renderable.animationState.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
+			}
+
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
@@ -217,28 +221,6 @@ package away3d.materials.passes
 		arcane function getProjectedTargetRegister() : String
 		{
 			return _projectedTargetRegister;
-		}
-
-		/**
-		 * Lists the attribute registers that need to be transformed by animation first
- 		 * position always needs to be listed first! Typical use cases are vertex normals and tangents.
-		 * @private
-		 */
-		arcane function getAnimationSourceRegisters() : Array
-		{
-			return _animatableAttributes;
-		}
-
-		/**
-		 * Specifies which registers to store the respective animated attributes in, so it can be used in the material's
-		 * vertex shader code (as well as the projection, which takes the first one for position projection)
-		 * For vertex normals, it's possible to simply set a varying register instead of a temporary one, if the
-		 * material's vertex shader code doesn't have to do anything with it
-		 * @private
-		 */
-		arcane function getAnimationTargetRegisters() : Array
-		{
-			return _animationTargetRegisters;
 		}
 
 		arcane function getVertexCode() : String
@@ -276,10 +258,9 @@ package away3d.materials.passes
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
 
 			stage3DProxy._context3D.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
-			if (_renderToTexture) {
-				_rttData[0] = 1;
-				_rttData[1] = 1;
 
+			if (_renderToTexture) {
+				// don't bother setting rtt status, shouldn't be referenced anyway
 				_oldTarget = stage3DProxy.renderTarget;
 				_oldSurface = stage3DProxy.renderSurfaceSelector;
 				_oldDepthStencil = stage3DProxy.enableDepthAndStencil;
@@ -288,10 +269,8 @@ package away3d.materials.passes
 			else {
 				_rttData[0] = textureRatioX;
 				_rttData[1] = textureRatioY;
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _rttData, 1);
 			}
-
-
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _rttData, 1);
 		}
 
 		/**
@@ -327,11 +306,18 @@ package away3d.materials.passes
 		 * Compiles the shader program.
 		 * @param polyOffsetReg An optional register that contains an amount by which to inflate the model (used in single object depth map rendering).
 		 */
-		arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
+		arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
-			var compiler : AGALProgram3DCompiler = new AGALProgram3DCompiler();
-			compiler.compile(this, _animation, polyOffsetReg);
-			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, compiler.vertexCode, compiler.fragmentCode);
+			var vertexCode : String = getVertexCode();
+			var fragmentCode : String = getFragmentCode();
+			if (Debug.active) {
+				trace ("Compiling AGAL Code:");
+				trace ("--------------------")
+				trace (vertexCode);
+				trace ("--------------------")
+				trace (fragmentCode);
+			}
+			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);
 			_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 
