@@ -10,7 +10,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class LightMapDiffuseMethod extends WrapDiffuseMethod
+	public class LightMapDiffuseMethod extends CompositeDiffuseMethod
 	{
 		public static const MULTIPLY : String = "multiply";
 		public static const ADD : String = "add";

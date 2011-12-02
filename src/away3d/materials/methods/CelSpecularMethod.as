@@ -13,7 +13,7 @@ package away3d.materials.methods
 	/**
 	 * CelSpecularMethod provides a shading method to add diffuse cel (cartoon) shading.
 	 */
-	public class CelSpecularMethod extends WrapSpecularMethod
+	public class CelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
 		private var _dataIndex : int;

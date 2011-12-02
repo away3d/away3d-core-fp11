@@ -13,7 +13,7 @@ package away3d.materials.methods
 	 * WrapSpecularMethod provides a base class for specular methods that wrap a specular method to alter the strength
 	 * of its calculated strength.
 	 */
-	public class WrapSpecularMethod extends BasicSpecularMethod
+	public class CompositeSpecularMethod extends BasicSpecularMethod
 	{
 		private var _baseSpecularMethod : BasicSpecularMethod;
 
@@ -22,7 +22,7 @@ package away3d.materials.methods
 		 * @param modulateMethod The method which will add the code to alter the base method's strength. It needs to have the signature modSpecular(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String, in which t.w will contain the specular strength and t.xyz will contain the half-vector or the reflection vector.
 		 * @param baseSpecularMethod The base specular method on which this method's shading is based.
 		 */
-		public function WrapSpecularMethod(modulateMethod : Function, baseSpecularMethod : BasicSpecularMethod = null)
+		public function CompositeSpecularMethod(modulateMethod : Function, baseSpecularMethod : BasicSpecularMethod = null)
 		{
 			super();
 			_baseSpecularMethod = baseSpecularMethod || new BasicSpecularMethod();

@@ -13,7 +13,7 @@ package away3d.materials.methods
 	/**
 	 * FresnelSpecularMethod provides a specular shading method that is stronger on shallow view angles.
 	 */
-	public class FresnelSpecularMethod extends WrapSpecularMethod
+	public class FresnelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
 		private var _dataIndex : int;

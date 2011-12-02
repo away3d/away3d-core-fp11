@@ -5,7 +5,6 @@
 	import away3d.tools.utils.TextureUtils;
 
 	import flash.display.BitmapData;
-	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;

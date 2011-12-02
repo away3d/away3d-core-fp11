@@ -16,7 +16,6 @@ package away3d.tools.utils
 		public static function isDimensionValid(d : uint) : Boolean
 		{
 			return d >= 2 && d <= MAX_SIZE && isPowerOfTwo(d);
-
 		}
 
 		private static function isPowerOfTwo(value : int) : Boolean

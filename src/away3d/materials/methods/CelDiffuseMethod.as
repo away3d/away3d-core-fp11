@@ -12,7 +12,7 @@ package away3d.materials.methods
 	/**
 	 * CelDiffuseMethod provides a shading method to add specular cel (cartoon) shading.
 	 */
-	public class CelDiffuseMethod extends WrapDiffuseMethod
+	public class CelDiffuseMethod extends CompositeDiffuseMethod
 	{
 		private var _levels : uint;
 		private var _dataReg : ShaderRegisterElement;
