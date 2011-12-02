@@ -119,6 +119,7 @@ package away3d.materials.passes
 		private var _numProbeRegisters : uint;
 		private var _usingSpecularMethod : Boolean;
 		private var _usesGlobalPosFragment : Boolean = true;
+		private var _tangentDependencies : int;
 
 		private var _ambientLightR : Number;
 		private var _ambientLightG : Number;
@@ -772,6 +773,7 @@ package away3d.materials.passes
 			method.normalFragmentReg = _normalFragmentReg;
 			method.projectionReg = _projectionFragmentReg;
 			method.UVFragmentReg = _uvVaryingReg;
+			method.tangentVaryingReg = _tangentVarying;
 			method.secondaryUVFragmentReg = _secondaryUVVaryingReg;
 			method.viewDirFragmentReg = _viewDirFragmentReg;
 			method.viewDirVaryingReg = _viewDirVaryingReg;
@@ -834,6 +836,7 @@ package away3d.materials.passes
 				_usesGlobalPosFragment = true;
 			}
 			if (method.needsNormals) ++_normalDependencies;
+			if (method.needsTangents) ++_tangentDependencies;
 			if (method.needsView) ++_viewDirDependencies;
 			if (method.needsUV) ++_uvDependencies;
 			if (method.needsSecondaryUV) ++_secondaryUVDependencies;
@@ -928,6 +931,14 @@ package away3d.materials.passes
 
 				_fragmentCode += "nrm " + _normalFragmentReg + ".xyz, " + _normalVarying + ".xyz	\n" +
 						"mov " + _normalFragmentReg + ".w, " + _normalVarying + ".w		\n";
+
+
+				if (_tangentDependencies > 0) {
+					_tangentInput = _registerCache.getFreeVertexAttribute();
+					_tangentBufferIndex = _tangentInput.index;
+					_tangentVarying = _registerCache.getFreeVarying();
+					_vertexCode += "mov " + _tangentVarying + ", " + _tangentInput + "\n";
+				}
 			}
 
 			_registerCache.removeVertexTempUsage(_animatedNormalReg);

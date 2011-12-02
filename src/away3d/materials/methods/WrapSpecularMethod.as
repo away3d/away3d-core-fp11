@@ -325,5 +325,21 @@ package away3d.materials.methods
 			super.shadowRegister = shadowReg;
 			_baseSpecularMethod.shadowRegister = shadowReg;
 		}
+
+		override public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		{
+			super.tangentVaryingReg = tangentVaryingReg;
+			_baseSpecularMethod.shadowRegister = tangentVaryingReg;
+		}
+
+		arcane override function get needsSecondaryUV() : Boolean
+		{
+			return _needsSecondaryUV || _baseSpecularMethod.needsSecondaryUV;
+		}
+
+		arcane override function get needsTangents() : Boolean
+		{
+			return _needsTangents || _baseSpecularMethod.needsTangents;
+		}
 	}
 }

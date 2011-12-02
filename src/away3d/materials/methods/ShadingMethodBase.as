@@ -20,6 +20,7 @@ package away3d.materials.methods
 		protected var _needsProjection : Boolean;
 		protected var _needsView : Boolean;
 		protected var _needsNormals : Boolean;
+		protected var _needsTangents : Boolean;
 		protected var _needsUV : Boolean;
 		protected var _needsSecondaryUV : Boolean;
 		protected var _needsGlobalPos : Boolean;
@@ -29,6 +30,7 @@ package away3d.materials.methods
 		protected var _normalFragmentReg : ShaderRegisterElement;
 		protected var _uvFragmentReg : ShaderRegisterElement;
 		protected var _secondaryUVFragmentReg : ShaderRegisterElement;
+		protected var _tangentVaryingReg : ShaderRegisterElement;
 		protected var _globalPosReg : ShaderRegisterElement;
 		protected var _projectionReg : ShaderRegisterElement;
 
@@ -196,6 +198,11 @@ package away3d.materials.methods
 		arcane function get needsNormals() : Boolean
 		{
 			return _needsNormals;
+		}
+
+		arcane function get needsTangents() : Boolean
+		{
+			return _needsTangents;
 		}
 
 		arcane function get needsGlobalPos() : Boolean
@@ -378,6 +385,17 @@ package away3d.materials.methods
 		 */
 		public function copyFrom(method : ShadingMethodBase) : void
 		{
+		}
+
+		public function get tangentVaryingReg() : ShaderRegisterElement
+		{
+			return _tangentVaryingReg;
+		}
+
+
+		public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		{
+			_tangentVaryingReg = tangentVaryingReg;
 		}
 	}
 }
