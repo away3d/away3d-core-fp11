@@ -56,7 +56,8 @@ package away3d.core.base
 		private var _scaleDirty:Boolean;
 		
 		private var _positionValuesDirty:Boolean;
-		private var _rotationValuesDirty:Boolean;
+		// TODO: not used
+		// private var _rotationValuesDirty:Boolean;
 		private var _scaleValuesDirty:Boolean;
 		
 		private var _positionChanged:Object3DEvent;
@@ -346,7 +347,7 @@ package away3d.core.base
 			//ridiculous matrix error
 			if (!val.rawData[uint(0)]) {
 				var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-				val.copyRawDataTo(raw)
+				val.copyRawDataTo(raw);
 				raw[uint(0)] = _smallestNumber;
 				val.copyRawDataFrom(raw);
 			}

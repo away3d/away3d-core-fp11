@@ -14,7 +14,8 @@
 	public class MeshDebug extends SegmentSet{
 		 
 		private var _normal : Vector3D = new Vector3D();
-		private const NORMALS : uint = 0;
+		// TODO: not used
+		//	private const NORMALS : uint = 0;
 		private const VERTEXNORMALS : uint = 1;
 		private const TANGENTS : uint = 2;
 		 
@@ -32,7 +33,8 @@
 			var vertices:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var index:uint;
-			var indexV:uint;
+			// TODO: not used
+			//var indexV:uint;
 			var j:uint;
 			
 			var v0 : Vector3D = new Vector3D();
@@ -92,11 +94,13 @@
 			
 			var vertices:Vector.<Number>; 
 			var vertorTarget:Vector.<Number>;
-			var tangents:Vector.<Number>;
+			// TODO: not used
+			//	var tangents:Vector.<Number>;
 			 
 			var indices:Vector.<uint>;
 			var index:uint;
-			var indexV:uint;
+			// TODO: not used
+			//	var indexV:uint;
 			var j:uint;
 			
 			var v0 : Vector3D = new Vector3D();

@@ -49,10 +49,11 @@
 		private var _uvb:UV;
 		private var _uvc:UV;
 		private var _uvd:UV;
-		private var _va:Vertex;
-		private var _vb:Vertex;
-		private var _vc:Vertex;
-		private var _vd:Vertex;
+		// TODO: not used
+		// private var _va:Vertex;
+		// private var _vb:Vertex;
+		// private var _vc:Vertex;
+		// private var _vd:Vertex;
 		private var _maxIndProfile:uint;
 		private var _uvs : Vector.<Number>;
 		private var _vertices : Vector.<Number>;
@@ -333,7 +334,8 @@
 			var subGeom:SubGeometry;
 			var uvs:Vector.<Number>;
 			var vertices:Vector.<Number>;
-			var normals:Vector.<Number>;
+			// TODO: not used
+			// var normals:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var sglist:SubGeometryList;
 			
@@ -758,7 +760,7 @@
 					_uva.v = v1;
 					_uvb.u = u1;
 					_uvb.v = v2;
-					_uvc.u = u2
+					_uvc.u = u2;
 					_uvc.v = v2;
 					_uvd.u = u2;
 					_uvd.v = v1;

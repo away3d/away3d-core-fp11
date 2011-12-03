@@ -4,7 +4,6 @@ package away3d.core.render
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
-	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.materials.MaterialBase;
 
@@ -37,6 +36,9 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
+			// TODO: not used
+			target = null;
+					
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);

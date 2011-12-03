@@ -68,11 +68,11 @@ package away3d.library.utils
 				for each (asset in _assets) {
 					// Skip this assets if filtering on type and this is wrong type
 					if (assetTypeFilter && asset.assetType != assetTypeFilter)
-						continue
+						continue;
 						
 					// Skip this asset if filtering on namespace and this is wrong namespace
 					if (namespaceFilter && asset.assetNamespace != namespaceFilter)
-						continue
+						continue;
 						
 					// Skip this asset if a filter func has been provided and it returns false
 					if (filterFunc != null && !filterFunc(asset))

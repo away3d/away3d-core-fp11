@@ -118,6 +118,8 @@ package away3d.core.partition
 		 */
 		public function isInFrustum(camera : Camera3D) : Boolean
 		{
+			// TODO: not used
+			camera = null; 
 			return true;
 		}
 
@@ -126,6 +128,8 @@ package away3d.core.partition
 		 */
 		public function findPartitionForEntity(entity : Entity) : NodeBase
 		{
+			// TODO: not used
+			entity = null; 
 			return this;
 		}
 

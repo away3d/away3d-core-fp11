@@ -5,8 +5,6 @@ package away3d.loaders.parsers
 	import away3d.events.ParserEvent;
 	import away3d.loaders.misc.ResourceDependency;
 	
-	import flash.utils.ByteArray;
-
 	use namespace arcane;
 
 	/**

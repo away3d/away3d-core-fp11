@@ -1,13 +1,11 @@
 package away3d.materials.methods
 {
+	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.shadowmaps.DirectionalShadowMapper;
-	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -122,6 +120,8 @@ package away3d.materials.methods
 
 		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			camera = null; 
 			_projMatrix.copyFrom(DirectionalShadowMapper(_shadowMapper).depthProjection);
 			_projMatrix.prepend(renderable.sceneTransform);
 			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _depthProjIndex, _projMatrix, true);

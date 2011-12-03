@@ -82,7 +82,7 @@ package away3d.materials.passes
 
 			if (_dedicatedMeshes) {
 				for (var key : Object in _outlineMeshes) {
-					disposeDedicated(key)
+					disposeDedicated(key);
 				}
 			}
 		}

@@ -84,7 +84,8 @@
 			var aLights : Array;
 			var hasLight : Boolean;
 			var i : uint;
-			var j : uint;
+			// TODO: not used
+			//	var j : uint;
 
 			if(materialOwner.material){
 				switch(_state){

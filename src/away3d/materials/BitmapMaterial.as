@@ -1,17 +1,11 @@
 ﻿package away3d.materials
 {
+	import away3d.textures.BitmapTexture;
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
 	import away3d.errors.DeprecationError;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.BitmapTexture;
 	import away3d.textures.BitmapTextureCache;
 
 	import flash.display.BitmapData;
-
-	import flash.display.BitmapData;
-	import flash.display3D.Context3D;
-	import flash.geom.ColorTransform;
 
 	use namespace arcane;
 

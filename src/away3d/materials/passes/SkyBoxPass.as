@@ -5,8 +5,6 @@ package away3d.materials.passes
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.textures.CubeTextureBase;
 
-	import flash.display3D.Context3D;
-
 	use namespace arcane;
 
 	/**

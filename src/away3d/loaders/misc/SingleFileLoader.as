@@ -14,8 +14,7 @@ package away3d.loaders.misc
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	
+
 	use namespace arcane;
 	
 	/**

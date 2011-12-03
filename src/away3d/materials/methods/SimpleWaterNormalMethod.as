@@ -85,7 +85,7 @@ package away3d.materials.methods
 
 		public function set secondaryNormalMap(value : Texture2DBase) : void
 		{
-			_texture2 = value
+			_texture2 = value;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -108,7 +108,7 @@ package away3d.materials.methods
 
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy)
+			super.activate(stage3DProxy);
 
 			if (_normalMapIndex2 >= 0) {
 				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data, 2);

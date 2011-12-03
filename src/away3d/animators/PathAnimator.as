@@ -15,7 +15,8 @@
 		private var _time:Number;
 		private var _index:uint = 0;
 		private var _rotations:Vector.<Vector3D>;
-		private var _lookAt:Boolean;
+		// TODO:not used
+		// private var _lookAt:Boolean;
 		private var _alignToPath:Boolean;
 		private var _target:Object3D;
 		private var _lookAtTarget:Object3D;

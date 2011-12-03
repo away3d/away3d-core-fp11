@@ -5,13 +5,12 @@
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.events.Stage3DEvent;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
-import flash.geom.Matrix3D;
-import flash.geom.Vector3D;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
-use namespace arcane;
+	use namespace arcane;
 
 	/**
 	 * The SubGeometry class is a collections of geometric data that describes a triangle mesh. It is owned by a

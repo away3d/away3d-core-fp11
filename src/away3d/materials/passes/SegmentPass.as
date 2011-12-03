@@ -166,7 +166,8 @@ package away3d.materials.passes
 		 */
 		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
+			// TODO: not used
+			//var context : Context3D = stage3DProxy._context3D;
 			stage3DProxy.setSimpleVertexBuffer(0, null, null);
 			stage3DProxy.setSimpleVertexBuffer(1, null, null);
 			stage3DProxy.setSimpleVertexBuffer(2, null, null);

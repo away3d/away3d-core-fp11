@@ -94,7 +94,8 @@
 			var vInd:uint;
 			
 			var i:uint;
-			var j:uint;
+			// TODO: not used
+			//	var j:uint;
 			
 			var nvertices:Vector.<Number> = new Vector.<Number>();
 			var nindices:Vector.<uint> = new Vector.<uint>();
@@ -374,7 +375,8 @@
 			var ind:uint = vlength/3;
 			
 			indices[(indice*3)+2] =  (vertices.length-1)/3;
-			var targetIndice:uint = indices[(indice*3)+2];
+			// TODO: not used
+			// var targetIndice:uint = indices[(indice*3)+2];
 			
 			indices[vlength++] = ind;
 			indices[vlength++] = indices[pointer];

@@ -3,8 +3,6 @@ package away3d.entities
 	import away3d.arcane;
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.textures.BitmapTextureCache;
-	import away3d.textures.BitmapTexture;
 	import away3d.events.LensEvent;
 	import away3d.textures.Texture2DBase;
 
@@ -57,7 +55,7 @@ package away3d.entities
 		public function set bitmapData(value : Texture2DBase) : void
 		{
 			if (value == _texture) return;
-			_texture = value
+			_texture = value;
 		}
 
 		public function get viewProjection() : Matrix3D

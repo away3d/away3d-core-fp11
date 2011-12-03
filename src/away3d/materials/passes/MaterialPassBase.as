@@ -8,8 +8,6 @@ package away3d.materials.passes
 	import away3d.core.managers.AGALProgram3DCompiler;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.LightPickerBase;
 
@@ -199,6 +197,8 @@ package away3d.materials.passes
 		 */
 		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
+			// TODO: not used
+			camera = null; 
 			var context : Context3D = stage3DProxy._context3D;
 
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
@@ -251,6 +251,8 @@ package away3d.materials.passes
 
 		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			camera = null; 
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
 			if (_programInvalids[contextIndex] || !_program3Ds[contextIndex]) {

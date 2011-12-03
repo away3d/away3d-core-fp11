@@ -8,16 +8,11 @@ package away3d.lights.shadowmaps
 	import away3d.core.traverse.EntityCollector;
 	import away3d.core.traverse.ShadowCasterCollector;
 	import away3d.errors.AbstractMethodError;
-	import away3d.events.Stage3DEvent;
 	import away3d.lights.LightBase;
 	import away3d.textures.RenderTexture;
-	import away3d.textures.Texture2DBase;
 	import away3d.textures.TextureProxyBase;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.TextureBase;
-	import flash.geom.Matrix3D;
 
 	use namespace arcane;
 
@@ -84,7 +79,8 @@ package away3d.lights.shadowmaps
 		 */
 		arcane function renderDepthMap(stage3DProxy : Stage3DProxy, entityCollector : EntityCollector, renderer : DepthRenderer) : void
 		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
+			// TODO: not used
+			//var contextIndex : int = stage3DProxy._stage3DIndex;
 
 			updateDepthProjection(entityCollector.camera);
 			_depthMap ||= createDepthTexture();

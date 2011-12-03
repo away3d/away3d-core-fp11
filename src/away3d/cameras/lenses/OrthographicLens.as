@@ -2,8 +2,6 @@ package away3d.cameras.lenses
 {
 	import away3d.core.math.Matrix3DUtils;
 
-	import flash.geom.Matrix3D;
-
 	/**
 	 * The PerspectiveLens object provides a projection matrix that projects 3D geometry isometrically. This entails
 	 * there is no perspective distortion, and lines that are parallel in the scene will remain parallel on the screen.

@@ -2,7 +2,6 @@ package away3d.debug
 {
 	import away3d.arcane;
 	import away3d.containers.View3D;
-	import away3d.core.managers.Stage3DManager;
 	
 	import flash.display.BitmapData;
 	import flash.display.CapsStyle;

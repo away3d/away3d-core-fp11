@@ -54,6 +54,9 @@ package away3d.materials.methods
 		 */
 		arcane function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			cubeMapReg = null;
+					
 			// lightIndex will just continue on from code per light
 			return "";
 		}

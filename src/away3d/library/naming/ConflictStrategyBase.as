@@ -64,7 +64,7 @@ package away3d.library.naming
 			
 			loser_prev_name = loser.name;
 			
-			assetsDictionary[winner.name] = winner
+			assetsDictionary[winner.name] = winner;
 			assetsDictionary[nonConflictingName] = loser;
 			loser.resetAssetPath(nonConflictingName, ns, false);
 			

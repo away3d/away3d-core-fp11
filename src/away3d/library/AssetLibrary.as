@@ -196,7 +196,8 @@ package away3d.library
 		
 		public function getAsset(name : String, ns : String = null) : IAsset
 		{
-			var asset : IAsset;
+			// TODO not used
+			//var asset : IAsset;
 			
 			if (_assetDictDirty)
 				rehashAssetDict();
@@ -560,7 +561,8 @@ package away3d.library
 		 */
 		private function onDependencyRetrievingError(event : LoaderEvent) : void
 		{
-			var ext:String = event.url.substring(event.url.length-4, event.url.length).toLowerCase();
+			// TODO: not used
+			//var ext:String = event.url.substring(event.url.length-4, event.url.length).toLowerCase();
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(event);
 			}
@@ -616,6 +618,7 @@ package away3d.library
 		/**
 		 * Called when unespected error occurs
 		 */
+		/*
 		private function onResourceError() : void
 		{
 			var msg:String = "Unexpected parser error";
@@ -626,7 +629,7 @@ package away3d.library
 				throw new Error(msg);
 			}
 		}
-		
+		*/
 		
 		private function onAssetRename(ev : AssetEvent) : void
 		{

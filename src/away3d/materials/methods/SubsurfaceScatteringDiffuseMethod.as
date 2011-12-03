@@ -4,7 +4,6 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.LightBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.SingleObjectDepthPass;
 	import away3d.materials.utils.ShaderRegisterCache;
@@ -227,6 +226,8 @@ package away3d.materials.methods
 
 		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			camera = null; 
 			var context : Context3D = stage3DProxy._context3D;
 			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, stage3DProxy);
 			var projections : Vector.<Matrix3D> = _depthPass.getProjections(renderable);

@@ -62,8 +62,9 @@ package away3d.animators
 			if (_absoluteTime >= _activeSequence._totalDuration)
 				_absoluteTime %= _activeSequence._totalDuration;
 			
-			var frame : UVAnimationFrame;
-			var idx : uint;
+			// TODO: not used
+			//var frame : UVAnimationFrame;
+			//var idx : uint;
 			
 			_tlUtil.updateFrames(_absoluteTime, _activeSequence);
 			frame0 = _activeSequence._frames[_tlUtil.frame0];

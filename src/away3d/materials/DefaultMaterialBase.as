@@ -1,7 +1,6 @@
 ﻿package away3d.materials
 {
 	import away3d.arcane;
-	import away3d.lights.LightBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
@@ -291,6 +290,8 @@
 		 */
 		arcane override function updateMaterial(context : Context3D) : void
 		{
+			// TODO: not used
+			context = null; 
 			if (_screenPass._passesDirty) {
 				clearPasses();
 				if (_screenPass._passes) {

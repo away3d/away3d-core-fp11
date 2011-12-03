@@ -4,8 +4,6 @@ package away3d.animators.data
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
 
-	import flash.display3D.Context3D;
-
 	use namespace arcane;
 
 	/**

@@ -48,7 +48,8 @@ package away3d.loaders.parsers
 
 		private var _mtlLib : Boolean;
 		private var _mtlLibLoaded : Boolean = true;
-		private var _idCount : uint;
+		// TODO: not used
+		// private var _idCount : uint;
 		private var _activeMaterialID:String = "";
 		
 		private var _vertices : Vector.<Vertex>;
@@ -96,8 +97,8 @@ package away3d.loaders.parsers
 		public static function supportsData(data : *) : Boolean
 		{
 			var content : String = ParserUtil.toString(data);
-			var hasV : Boolean
-			var hasF : Boolean
+			var hasV : Boolean;
+			var hasF : Boolean;
 			
 			if (content) {
 				hasV = content.indexOf("\nv ") != -1;
@@ -755,7 +756,8 @@ package away3d.loaders.parsers
 		
 		private function applyMaterial(lm:LoadedMaterial) : void
 		{
-			var meshID:String;
+			// TODO: not used
+			// var meshID:String;
 			var decomposeID:Array;
 			var mesh:Mesh;
 			var mat:TextureMaterial;

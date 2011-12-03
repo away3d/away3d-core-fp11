@@ -11,8 +11,6 @@ package away3d.cameras
 	import away3d.events.LensEvent;
 
 	import flash.geom.Matrix3D;
-
-	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
@@ -245,7 +243,7 @@ package away3d.cameras
 			if (_textureRatioX == value)
 				return;
 
-			_textureRatioX = value
+			_textureRatioX = value;
 
 			_renderToTextureProjectionDirty = true;
 		}

@@ -105,6 +105,8 @@
 		 */
 		public function set uv1Index(ind:uint):void
   		{
+			// TODO: not used			
+			ind = ind;
 			_uv1Index;
 		}
 		/**
@@ -203,6 +205,8 @@
 		 */
 		public function set v0Index(ind:uint):void
   		{
+			// TODO: not used
+			ind = ind;
 			_v0Index;
 		}
 		/**

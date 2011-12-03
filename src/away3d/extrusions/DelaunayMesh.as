@@ -409,8 +409,10 @@ package away3d.extrusions
 				var y2:Number;
 				var x3:Number;
 				var y3:Number;
-				var xc:Number;
-				var yc:Number;
+				// TODO: not used
+				// var xc:Number;
+				// TODO: not used
+				// var yc:Number;
 				
 				var sortMin:Number;
 				var sortMax:Number;
