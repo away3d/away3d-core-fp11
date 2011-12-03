@@ -55,6 +55,8 @@ package away3d.animators.skeleton
 		 */
 		override public function updatePose(skeleton : Skeleton) : void
 		{
+			// TODO: not used
+			skeleton  = skeleton;			
 			if (_clip.duration == 0) return;
 			if (_framesInvalid) updateFrames(_phase);
 

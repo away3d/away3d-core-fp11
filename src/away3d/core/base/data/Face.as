@@ -64,6 +64,8 @@
 		 */
 		public function set uv0Index(ind:uint):void
   		{
+			// TODO: not used
+			ind = ind;			
 			_uv0Index;
 		}
 		/**
@@ -148,6 +150,8 @@
 		 */
 		public function set uv2Index(ind:uint):void
   		{
+			// TODO: not used
+			ind = ind;
 			_uv2Index;
 		}
 		/**
@@ -252,6 +256,8 @@
 		 */
 		public function set v1Index(ind:uint):void
   		{
+			// TODO: not used
+			ind = ind;
 			_v1Index;
 		}
 		/**
@@ -297,6 +303,8 @@
 		 */
 		public function set v2Index(ind:uint):void
   		{
+			// TODO: not used
+			ind = ind;
 			_v2Index;
 		}
 		/**

@@ -304,6 +304,8 @@ package away3d.materials.methods
 		 */
 		arcane function getVertexCode(regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			regCache = regCache;			
 			return "";
 		}
 
@@ -314,6 +316,9 @@ package away3d.materials.methods
 		 */
 		arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
+			// TODO: not used
+			regCache = regCache;
+			targetReg = targetReg;			
 			return "";
 		}
 

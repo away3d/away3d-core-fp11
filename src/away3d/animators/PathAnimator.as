@@ -280,6 +280,8 @@
     	*/
 		public function set target(object3d:Object3D):void
 		{
+			// TODO: not used
+			object3d = object3d;
 			_target = target;
 		}
 		public function get target():Object3D

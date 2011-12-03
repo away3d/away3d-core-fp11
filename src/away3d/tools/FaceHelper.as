@@ -19,7 +19,8 @@
 		private static const TRI:uint = 3;
 		private static const QUARTER:uint = 4;
 		private static const SPIKE:uint = 32;
-		private static const HOLE:uint = 42;
+		// TODO not used
+		// private static const HOLE:uint = 42;
 		 
 		public static function addFace(mesh:Mesh, v0:Vertex, v1:Vertex, v2:Vertex, uv0:UV, uv1:UV, uv2:UV, subGeomIndice:uint):void
 		{
@@ -480,6 +481,8 @@
 		*/
 		public static function spikeFace(mesh:Mesh, indice:uint, subGeomIndice:uint, distance:Number):void
 		{
+			// TODO: not used
+			distance = distance;
 			var pointer:uint = indice*3;
 			var subGeom:SubGeometry = getSubGeometry(mesh, subGeomIndice);
 			var indices:Vector.<uint> = subGeom.indexData.concat();

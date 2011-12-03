@@ -121,7 +121,7 @@ package away3d.materials.methods
 		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			// TODO: not used
-			camera = null; 
+			camera = camera; 
 			_projMatrix.copyFrom(DirectionalShadowMapper(_shadowMapper).depthProjection);
 			_projMatrix.prepend(renderable.sceneTransform);
 			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _depthProjIndex, _projMatrix, true);

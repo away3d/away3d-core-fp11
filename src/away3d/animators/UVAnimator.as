@@ -55,6 +55,9 @@ package away3d.animators
 		
 		override protected function updateAnimation(realDT:Number, scaledDT:Number):void
 		{
+			// TODO: not used
+			realDT = realDT;
+			
 			var w : Number;
 			var frame0 : UVAnimationFrame, frame1 : UVAnimationFrame;
 			

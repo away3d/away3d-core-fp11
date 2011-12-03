@@ -6,7 +6,8 @@
 
 	public class LineSegment extends Segment {
 		
-		private var _index:uint;
+		// TODO not used
+		// private var _index:uint;
 		public const TYPE:String = "line";
 		
 		public function LineSegment(v0:Vector3D, v1:Vector3D, color0:uint = 0x333333, color1:uint = 0x333333, thickness:Number = 1):void

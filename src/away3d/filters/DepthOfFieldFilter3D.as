@@ -72,6 +72,8 @@ package away3d.filters
 
 		override public function update(stage : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			stage = stage;
 			if (_focusTarget)
 				updateFocus(camera);
 		}

@@ -78,6 +78,9 @@ package away3d.materials.lightpickers
 		 */
 		public function collectLights(renderable : IRenderable, entityCollector : EntityCollector) : void
 		{
+			// TODO: not used
+			entityCollector = entityCollector;
+			
 			updateProbeWeights(renderable);
 		}
 

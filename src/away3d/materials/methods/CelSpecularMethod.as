@@ -83,6 +83,8 @@ package away3d.materials.methods
 		 */
 		private function clampSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			regCache = regCache;			
 			return 	"sub " + target+".y, " + target+".w, " + _dataReg+".y\n" + // x - cutoff
 					"div " + target+".y, " + target+".y, " + _dataReg+".x\n" + // (x - cutoff)/epsilon
 					"sat " + target+".y, " + target+".y\n" +

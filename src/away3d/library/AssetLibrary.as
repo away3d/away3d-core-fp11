@@ -34,6 +34,8 @@ package away3d.library
 		
 		public function AssetLibrary(se : SingletonEnforcer)
 		{
+			// TODO: not used
+			se = se;			
 			_assets = new Vector.<IAsset>;
 			_assetDictionary = {};
 			_loadingSessions = new Vector.<AssetLoader>;
@@ -562,7 +564,8 @@ package away3d.library
 		private function onDependencyRetrievingError(event : LoaderEvent) : void
 		{
 			// TODO: not used
-			//var ext:String = event.url.substring(event.url.length-4, event.url.length).toLowerCase();
+			//var ext:String = 
+			event.url.substring(event.url.length-4, event.url.length).toLowerCase();
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(event);
 			}

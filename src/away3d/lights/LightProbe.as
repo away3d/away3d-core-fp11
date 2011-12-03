@@ -75,6 +75,10 @@ package away3d.lights
 		 */
 		override arcane function getObjectProjectionMatrix(renderable : IRenderable, target : Matrix3D = null) : Matrix3D
 		{
+			// TODO: not used
+			renderable = renderable;
+			target = target;	
+
 			throw new Error("Object projection matrices are not supported for LightProbe objects!");
 			return null;
 		}

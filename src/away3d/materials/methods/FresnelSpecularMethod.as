@@ -98,6 +98,8 @@ package away3d.materials.methods
 		 */
 		private function modulateSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			regCache = regCache;			
 			var code : String = "";
 
 			// use view dir and normal fragment .w as temp

@@ -167,6 +167,9 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
+			// TODO: not used
+			target = target; 
+			
 			var camera : Camera3D = entityCollector.camera;
 
 			_context.clear(0, 0, 0, 1);
@@ -191,7 +194,8 @@ package away3d.core.render
 		private function drawRenderables(item : RenderableListItem, camera : Camera3D) : void
 		{
 			// TODO: not used
-			camera = null; 
+			camera = camera; 
+			
 			var renderable : IRenderable;
 
 			while (item) {
@@ -298,7 +302,8 @@ package away3d.core.render
 		private function getApproximatePosition(camera : Camera3D) : void
 		{
 			// TODO: not used
-			camera = null; 
+			camera = camera;
+			 
 			var entity : Entity = _hitRenderable.sourceEntity;
 			var col : uint;
 			var scX : Number, scY : Number, scZ : Number;
@@ -444,7 +449,8 @@ package away3d.core.render
 		private function getPrecisePosition(camera : Camera3D, invSceneTransform : Matrix3D, nx : Number, ny : Number, nz : Number, px : Number, py : Number, pz : Number) : void
 		{
 			// TODO: not used
-			camera = null; 
+			camera = camera;
+			 
 			// calculate screen ray and find exact intersection position with triangle
 			var rx : Number, ry : Number, rz : Number;
 			var ox : Number, oy : Number, oz : Number;

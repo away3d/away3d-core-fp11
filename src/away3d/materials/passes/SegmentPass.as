@@ -127,6 +127,8 @@ package away3d.materials.passes
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
+			// TODO: not used
+			lightPicker = lightPicker; 
 			var context : Context3D = stage3DProxy._context3D;
 			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);
 			context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);

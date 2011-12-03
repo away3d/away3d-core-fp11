@@ -55,10 +55,10 @@ package away3d.core.base
 		private var _rotationDirty:Boolean;
 		private var _scaleDirty:Boolean;
 		
-		private var _positionValuesDirty:Boolean;
 		// TODO: not used
+		// private var _positionValuesDirty:Boolean;
 		// private var _rotationValuesDirty:Boolean;
-		private var _scaleValuesDirty:Boolean;
+		// private var _scaleValuesDirty:Boolean;
 		
 		private var _positionChanged:Object3DEvent;
 		private var _rotationChanged:Object3DEvent;

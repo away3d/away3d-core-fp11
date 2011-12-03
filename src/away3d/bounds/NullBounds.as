@@ -33,11 +33,16 @@ package away3d.bounds
 		 */
 		override public function isInFrustum(mvpMatrix : Matrix3D) : Boolean
 		{
+			// TODO: not used
+			mvpMatrix = mvpMatrix; 
 			return _alwaysIn;
 		}
 
 		override public function intersectsLine(p : Vector3D, dir : Vector3D) : Boolean
 		{
+			// TODO: not used
+			p = p;
+			dir = dir;
 			return _alwaysIn;
 		}
 

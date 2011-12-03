@@ -80,7 +80,7 @@ package away3d.core.partition
 
 			// update numEntities in the tree
 			var numEntities : int = node._numEntities;
-			var node : NodeBase = this;
+			node = this;
 
 			do {
 				node._numEntities += numEntities;
@@ -103,7 +103,7 @@ package away3d.core.partition
 
 			// update numEntities in the tree
 			var numEntities : int = node._numEntities;
-			var node : NodeBase = this;
+			node = this;
 
 			do {
 				node._numEntities -= numEntities;

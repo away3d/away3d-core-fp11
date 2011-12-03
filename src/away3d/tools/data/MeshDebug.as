@@ -101,6 +101,7 @@
 			var index:uint;
 			// TODO: not used
 			//	var indexV:uint;
+			
 			var j:uint;
 			
 			var v0 : Vector3D = new Vector3D();

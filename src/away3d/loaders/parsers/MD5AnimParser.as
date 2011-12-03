@@ -98,7 +98,7 @@ package away3d.loaders.parsers
 		public static function supportsData(data : *) : Boolean
 		{
 			// TODO: not used
-			data = null;
+			data = data;
 			// todo: implement
 			return false;
 		}

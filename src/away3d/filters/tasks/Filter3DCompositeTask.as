@@ -76,8 +76,9 @@ package away3d.filters.tasks
 		override public function activate(stage3DProxy : Stage3DProxy, camera3D : Camera3D, depthTexture : Texture) : void
 		{
 			// TODO: not used
-			camera3D = null;
-			depthTexture =  null; 
+			camera3D = camera3D;
+			depthTexture =  depthTexture;
+			 
 			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 1);
 			stage3DProxy.setTextureAt(1, _overlayTexture);
 		}

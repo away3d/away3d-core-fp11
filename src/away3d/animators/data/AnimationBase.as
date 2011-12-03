@@ -38,6 +38,8 @@ package away3d.animators.data
 		 */
 		arcane function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
+			// TODO: not used
+			pass = pass;
 			throw new AbstractMethodError();
 			return null;
 		}

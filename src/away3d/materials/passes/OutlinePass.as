@@ -233,6 +233,8 @@ package away3d.materials.passes
 		 */
 		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
 		{
+			// TODO: not used
+			polyOffsetReg = polyOffsetReg;
 			super.updateProgram(stage3DProxy, "vc4.x");
 		}
 	}

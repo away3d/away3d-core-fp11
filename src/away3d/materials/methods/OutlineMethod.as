@@ -62,6 +62,9 @@ package away3d.materials.methods
 
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
+			// TODO: not used
+			regCache = regCache;
+			targetReg = targetReg;			
 			return "";
 		}
 	}

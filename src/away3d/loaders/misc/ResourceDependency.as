@@ -20,7 +20,8 @@
 		private var _assets : Vector.<IAsset>;
 		private var _parentParser : ParserBase;
 		private var _data : *;
-		private var _base : Boolean;
+		// TODO: not used
+		// private var _base : Boolean;
 		private var _retrieveAsRawData : Boolean;
 		
 		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false)

@@ -1194,7 +1194,7 @@ package away3d.materials.passes
 			}
 
 			for (i = 0; i < _numLightProbes; ++i) {
-				weightReg = weightRegisters[Math.floor(i/4)] + weightComponents[i % 4];
+				weightReg = weightRegisters[Math.floor(i/4)].toString() + weightComponents[i % 4];
 
 				if (addDiff) {
 					texReg = _registerCache.getFreeTextureReg();
