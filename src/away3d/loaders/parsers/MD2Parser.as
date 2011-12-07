@@ -37,18 +37,18 @@ package away3d.loaders.parsers
 		private var _version : uint;
 		private var _skinWidth : uint;
 		private var _skinHeight : uint;
-		private var _frameSize : uint;
+		//private var _frameSize : uint;
 		private var _numSkins : uint;
 		private var _numVertices : uint;
 		private var _numST : uint;
 		private var _numTris : uint;
-		private var _numGlCmds : uint;
+		//private var _numGlCmds : uint;
 		private var _numFrames : uint;
 		private var _offsetSkins : uint;
 		private var _offsetST : uint;
 		private var _offsetTris : uint;
 		private var _offsetFrames : uint;
-		private var _offsetGlCmds : uint;
+		//private var _offsetGlCmds : uint;
 		private var _offsetEnd : uint;
 		
 		private var _uvIndices : Vector.<Number>;
@@ -201,19 +201,22 @@ package away3d.loaders.parsers
 			_version = _byteData.readInt();
 			_skinWidth = _byteData.readInt();
 			_skinHeight = _byteData.readInt();
-			_frameSize = _byteData.readInt();
-			_numSkins = _byteData.readInt();
-			_numVertices = _byteData.readInt();
-			_numST = _byteData.readInt();
-			_numTris = _byteData.readInt();
-			_numGlCmds = _byteData.readInt();
-			_numFrames = _byteData.readInt();
-			_offsetSkins = _byteData.readInt();
-			_offsetST = _byteData.readInt();
-			_offsetTris = _byteData.readInt();
-			_offsetFrames = _byteData.readInt();
-			_offsetGlCmds = _byteData.readInt();
-			_offsetEnd = _byteData.readInt();
+            //skip _frameSize
+            _byteData.readInt();
+            _numSkins = _byteData.readInt();
+            _numVertices = _byteData.readInt();
+            _numST = _byteData.readInt();
+            _numTris = _byteData.readInt();
+            //skip _numGlCmds
+            _byteData.readInt();
+            _numFrames = _byteData.readInt();
+            _offsetSkins = _byteData.readInt();
+            _offsetST = _byteData.readInt();
+            _offsetTris = _byteData.readInt();
+            _offsetFrames = _byteData.readInt();
+            //skip _offsetGlCmds
+            _byteData.readInt();
+            _offsetEnd = _byteData.readInt();
 			
 			_parsedHeader = true;
 		}
@@ -237,10 +240,13 @@ package away3d.loaders.parsers
 					slashIndex = name.lastIndexOf("/");
 					if (slashIndex < 0) slashIndex = 0;
 				}
-				
-				name = name.substring(slashIndex+1, extIndex);
-				url = name+"."+_textureType;
-				
+                if(name.toLowerCase().indexOf(".jpg") == -1 && name.toLowerCase().indexOf(".png") == -1){
+                    name = name.substring(slashIndex+1, extIndex);
+                    url = name+"."+_textureType;
+                } else{
+                    url = name;
+                }
+
 				_materialNames[i] = name;
 				// only support 1 skin
 				if (dependencies.length == 0)
