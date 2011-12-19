@@ -18,7 +18,6 @@ package away3d.animators.data
 		arcane var _useTangents : Boolean;
 		arcane var _numPoses : uint;
 		private var _blendMode : String;
-		private var _usesCPU : Boolean;
 
 		/**
 		 * Creates a new VertexAnimation object
@@ -34,11 +33,6 @@ package away3d.animators.data
 			super();
 			_numPoses = numPoses;
 			_blendMode = blendMode;
-		}
-
-		override public function get usesCPU() : Boolean
-		{
-			return _usesCPU;
 		}
 
 		/**
@@ -74,8 +68,6 @@ package away3d.animators.data
 		 */
 		override arcane function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
-			_usesCPU = true;
-
 			if (_blendMode == VertexAnimationMode.ABSOLUTE)
 				return getAbsoluteAGALCode(pass, sourceRegisters, targetRegisters);
 			else

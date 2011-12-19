@@ -202,14 +202,10 @@ package away3d.materials.passes
 
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
 
-			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			if (renderable.animationState)
+				renderable.animationState.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
 
-			if (renderable.animationState) {
-				if (renderable.animation.usesCPU)
-					renderable.animationState.setRenderState(stage3DProxy, renderable);
-				else
-					renderable.animationState.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
-			}
+			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
 
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
@@ -300,6 +296,9 @@ package away3d.materials.passes
 		{
 			for (var i : uint = 0; i < 8; ++i)
 				_programInvalids[i] = true;
+
+			if (_material)
+				_material.invalidatePasses(this);
 		}
 
 		/**

@@ -581,7 +581,6 @@ package away3d.materials.passes
 			for (var i : uint = 0; i < _methods.length; ++i) {
 				addPasses(_methods[i].passes);
 			}
-			_material.invalidateDepthShaderProgram();
 		}
 
 		/**

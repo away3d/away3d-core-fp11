@@ -80,7 +80,7 @@ package away3d.materials
 			_depthPass = new DepthMapPass();
 			_distancePass = new DistanceMapPass();
 
-			invalidateDepthShaderProgram();
+//			invalidatePasses(null);
 		}
 
 		public function get assetType() : String
@@ -368,6 +368,7 @@ package away3d.materials
 					_passes[i].animation = _animation;
 				_depthPass.animation = _animation;
 				_distancePass.animation = _animation;
+				invalidatePasses(null);
 			}
 
 			_owners.push(owner);
@@ -424,11 +425,25 @@ package away3d.materials
 
 		/**
 		 * Marks the depth shader program as invalid, so it will be recompiled before the next render.
+		 * @param triggerPass The pass triggering the invalidation, if any, so no infinite loop will occur.
 		 */
-		arcane function invalidateDepthShaderProgram() : void
+		arcane function invalidatePasses(triggerPass : MaterialPassBase) : void
 		{
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
+
+			if (_animation) {
+				_animation.resetGPUCompatibility();
+				_animation.testGPUCompatibility(_depthPass);
+				_animation.testGPUCompatibility(_distancePass);
+			}
+
+			for (var i : int = 0; i < _numPasses; ++i) {
+				if (_passes[i] != triggerPass) _passes[i].invalidateShaderProgram();
+				// test if animation will be able to run on gpu BEFORE compiling materials
+				if (_animation)
+					_animation.testGPUCompatibility(_passes[i]);
+			}
 		}
 
 		/**
@@ -460,6 +475,7 @@ package away3d.materials
 			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			calculateRenderId();
+			invalidatePasses(null);
 		}
 
 		private function calculateRenderId() : void

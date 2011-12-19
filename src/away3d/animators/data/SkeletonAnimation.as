@@ -21,7 +21,6 @@ package away3d.animators.data
 	public class SkeletonAnimation extends AnimationBase
 	{
 		private var _forceCPU : Boolean;
-		private var _usesCPU : Boolean;
 		private var _skeleton : Skeleton;
 		private var _nullAnimation : NullAnimation;
 		private var _jointsPerVertex : uint;
@@ -36,6 +35,18 @@ package away3d.animators.data
 			_forceCPU = _usesCPU = forceCPU;
 			_skeleton = skeleton;
 			_jointsPerVertex = jointsPerVertex;
+		}
+
+		override arcane function resetGPUCompatibility() : void
+		{
+			_usesCPU = _forceCPU;
+		}
+
+		override arcane function testGPUCompatibility(pass : MaterialPassBase) : void
+		{
+			if (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
+				_usesCPU = true;
+			}
 		}
 
 		/**
@@ -110,12 +121,10 @@ package away3d.animators.data
 			var len : uint = sourceRegisters.length;
 
 			// if too many bones to fit in the constants, fall back to cpu animation :(
-			if (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
-				_usesCPU = true;
-				_nullAnimation = new NullAnimation();
+			if (_usesCPU) {
+				_nullAnimation ||= new NullAnimation();
 				return _nullAnimation.getAGALVertexCode(pass, sourceRegisters, targetRegisters);
 			}
-			else _usesCPU = false;
 
 			var indexOffset0 : uint = pass.numUsedVertexConstants;
 			var indexOffset1 : uint = indexOffset0 + 1;

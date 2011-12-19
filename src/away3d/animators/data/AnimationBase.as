@@ -20,13 +20,29 @@ package away3d.animators.data
 	 */
 	public class AnimationBase
 	{
+        protected var _usesCPU : Boolean;
+
 		/**
 		 * Indicates whether or not this animation runs on CPU or GPU.
 		 */
 		public function get usesCPU() : Boolean
 		{
-			return true;
+			return _usesCPU;
 		}
+
+		arcane function resetGPUCompatibility() : void
+        {
+            _usesCPU = false;
+        }
+
+        /**
+         * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
+		 * Needs to be called if gpu code is potentially required.
+         */
+        arcane function testGPUCompatibility(pass : MaterialPassBase) : void
+        {
+			// by default, let it run on gpu
+        }
 
 		/**
 		 * Factory method which creates an animation state specific to this animation type.

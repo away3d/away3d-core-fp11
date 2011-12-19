@@ -137,10 +137,8 @@ package away3d.animators.data
 
 		/**
 		 * @inheritDoc
-		 *
-		 * todo: make vertexConstantOffset a parameter, if -1, it will assume cpu needs to be used
 		 */
-        override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int = -1, vertexStreamOffset : int = -1) : void
+        override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			if (_numJoints == 0) {
 				// delayed skeleton instantiation
@@ -154,7 +152,7 @@ package away3d.animators.data
 			if (_stateInvalid) updateGlobalPose();
 			if (_globalMatricesInvalid) convertToMatrices();
 
-			if (vertexConstantOffset < 0) {
+			if (_animation.usesCPU) {
 				var subGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
 				if (!_buffersValid[subGeom]) {
 					morphGeometry(subGeom);

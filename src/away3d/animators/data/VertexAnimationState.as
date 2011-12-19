@@ -58,7 +58,7 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int = -1, vertexStreamOffset : int = -1) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			// todo: add code for when running on cpu
 			var i : uint;

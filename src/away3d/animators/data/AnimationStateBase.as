@@ -52,10 +52,10 @@ package away3d.animators.data
 		 * @param context The context which is currently performing the rendering.
 		 * @param pass The material pass which is currently used to render the geometry.
 		 * @param renderable The object currently being rendered.
-		 * @param vertexConstantOffset The first available vertex register to write data to. If -1, the animation will be forced to run on cpu (if material has no animation code).
-		 * @param vertexStreamOffset The first available vertex stream to write vertex data to.
+		 * @param vertexConstantOffset The first available vertex register to write data to if running on the gpu.
+		 * @param vertexStreamOffset The first available vertex stream to write vertex data to if running on the gpu.
 		 */
-		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int = -1, vertexStreamOffset : int = -1) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			throw new AbstractMethodError();
 		}

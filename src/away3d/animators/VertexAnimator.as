@@ -83,7 +83,5 @@ package away3d.animators
 		{
 			return _sequences[sequenceName];
 		}
-
-
 	}
 }
