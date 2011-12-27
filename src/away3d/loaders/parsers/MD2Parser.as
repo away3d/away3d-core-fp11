@@ -98,6 +98,8 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
+			// TODO: not used
+			data = data;
 			// todo: implement
 			return false;
 		}
@@ -121,6 +123,8 @@ package away3d.loaders.parsers
 		 */
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
+			// TODO: not used
+			resourceDependency = resourceDependency; 			
 			// apply system default
 			TextureMaterial(_mesh.material).texture = new BitmapTexture(defaultBitmapData);
 		} 

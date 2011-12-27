@@ -118,7 +118,8 @@ package away3d.materials.methods
 
 		protected function getSplatSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
 		{
-			var wrap : String = "wrap";
+			// TODO: not used
+			// var wrap : String = "wrap";
 			var filter : String;
 
 			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";

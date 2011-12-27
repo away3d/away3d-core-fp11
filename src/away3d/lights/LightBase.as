@@ -7,11 +7,7 @@ package away3d.lights
 	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;

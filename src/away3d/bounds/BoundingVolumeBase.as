@@ -198,6 +198,7 @@ package away3d.bounds
 		 */
 		public function isInFrustum(mvpMatrix : Matrix3D) : Boolean
 		{
+			mvpMatrix = null;
 			throw new AbstractMethodError();
 			return false;
 		}
@@ -227,12 +228,16 @@ package away3d.bounds
 
 		public function intersectsLine(p : Vector3D, dir : Vector3D) : Boolean
 		{
+			p = null;
+			dir = null;
 			throw new AbstractMethodError();
 			return false;
 		}
 
 		public function intersectsRay(p : Vector3D, dir : Vector3D) : Boolean
 		{
+			p = null;
+			dir = null;
 			throw new AbstractMethodError();
 			return false;
 		}

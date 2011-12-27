@@ -160,6 +160,8 @@ package away3d.materials.passes
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
+			// TODO: not used
+			camera = null; 
 			var matrix : Matrix3D;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;

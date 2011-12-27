@@ -176,7 +176,9 @@ package away3d.loaders.parsers
 					_buffer = 0;
 					//unused in f11
 					if(_state == "#v")
-						var version:String = line.substring(3,line.length-1);
+						// TODO: not used
+						// var version:String = 
+						line.substring(3,line.length-1);
 					
 					if(_state == "#f")
 						_isMaterial = (parseInt(line.substring(3,4)) == 2) as Boolean;

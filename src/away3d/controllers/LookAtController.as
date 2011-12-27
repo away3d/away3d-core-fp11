@@ -4,9 +4,6 @@ package away3d.controllers
 	import away3d.entities.*;
 	import away3d.events.*;
 	
-	import flash.geom.*;
-	
-	
     /**
     * Extended camera used to automatically look at a specified target object.
     * 

@@ -127,7 +127,8 @@ package away3d.containers
 		}
 		
 		private var _scenetransformchanged:Object3DEvent;
-		private var _scenechanged:Object3DEvent;
+		// TODO: not used
+		// private var _scenechanged:Object3DEvent;
 		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
 		private var _mouseChildren : Boolean = true;
 		private var _oldScene : Scene3D;
@@ -163,6 +164,8 @@ package away3d.containers
 			dispatchEvent(_scenetransformchanged);
 		}
 		
+		/*
+		// TODO: not used
 		private function notifySceneChange():void
 		{
 			notifySceneTransformChange();
@@ -183,7 +186,8 @@ package away3d.containers
 			
 			dispatchEvent(_scenechanged);
 		}
-		
+		*/
+				
 		protected var _scene : Scene3D;
 		protected var _parent : ObjectContainer3D;
 		protected var _sceneTransform : Matrix3D = new Matrix3D();

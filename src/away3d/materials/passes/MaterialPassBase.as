@@ -196,6 +196,10 @@ package away3d.materials.passes
 		 */
 		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
+			// TODO: not used
+			camera = camera;
+			lightPicker = lightPicker; 
+			
 			var context : Context3D = stage3DProxy._context3D;
 
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
@@ -220,6 +224,9 @@ package away3d.materials.passes
 
 		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
+			// TODO: not used
+			camera = camera;
+			 
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
 			if (_programInvalids[contextIndex] || !_program3Ds[contextIndex]) {

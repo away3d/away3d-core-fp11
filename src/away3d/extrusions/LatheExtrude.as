@@ -569,6 +569,9 @@ package away3d.extrusions
 
 		private function generate(vectors:Vector.<Vector3D>, axis:String, tweek:Object, render:Boolean = true, id:uint = 0):void
 		{
+			// TODO: not used
+			axis = axis;
+			
 			if (!tweek)
 				tweek = {};
 			 

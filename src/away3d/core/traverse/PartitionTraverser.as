@@ -34,7 +34,11 @@ package away3d.core.traverse
 		 * @param node The currently entered node.
 		 * @return true if further recursion down children is necessary, false if not.
 		 */
-		public function enterNode(node : NodeBase) : Boolean { return true; }
+		public function enterNode(node : NodeBase) : Boolean { 
+			// TODO: not used;
+		 	node=node; 
+		 	return true; 
+		}
 
 		/**
 		 * Called when the traverser leaves a node. This method is still called when enterNode returned false.

@@ -2,7 +2,6 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.materials.MaterialBase;
@@ -57,6 +56,9 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
+			// TODO: not used
+			target = target; 
+			
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
 //			_context.setDepthTest(false, Context3DCompareMode.LESS);

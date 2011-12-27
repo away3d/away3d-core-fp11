@@ -15,7 +15,6 @@ package away3d.containers
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
 	import away3d.textures.Texture2DBase;
-	import away3d.tools.utils.TextureUtils;
 
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;

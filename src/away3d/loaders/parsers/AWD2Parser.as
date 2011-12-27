@@ -22,8 +22,6 @@ package away3d.loaders.parsers
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.Texture2DBase;
 	
-	import flash.display.BitmapData;
-	import flash.display.Loader;
 	import flash.display.Sprite;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
@@ -306,6 +304,8 @@ package away3d.loaders.parsers
 		
 		private function parseUVAnimation(blockLength : uint) : UVAnimationSequence
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var num_frames : uint;
 			var frames_parsed : uint;
@@ -351,6 +351,8 @@ package away3d.loaders.parsers
 		
 		private function parseMaterial(blockLength : uint) : MaterialBase
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var type : uint;
 			var props : AWDProperties;
@@ -387,7 +389,8 @@ package away3d.loaders.parsers
 				mat = new ColorMaterial(color);
 			}
 			else if (type == 2) { // Bitmap material
-				var bmp : BitmapData;
+				//TODO: not used
+				//var bmp : BitmapData;
 				var texture : Texture2DBase;
 				var tex_addr : uint;
 				
@@ -425,6 +428,8 @@ package away3d.loaders.parsers
 		
 		private function parseTexture(blockLength : uint) : Texture2DBase
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var type : uint;
 			var data_len : uint;
@@ -446,7 +451,8 @@ package away3d.loaders.parsers
 			}
 			else {
 				var data : ByteArray;
-				var loader : Loader;
+				// TODO: not used
+				// var loader : Loader;
 				
 				data = new ByteArray();
 				_body.readBytes(data, 0, data_len);
@@ -466,12 +472,14 @@ package away3d.loaders.parsers
 			
 			pauseAndRetrieveDependencies();
 			
-			return asset
+			return asset;
 		}
 		
 		
 		private function parseSkeleton(blockLength : uint) : Skeleton
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var num_joints : uint;
 			var joints_parsed : uint;
@@ -486,8 +494,10 @@ package away3d.loaders.parsers
 			
 			joints_parsed = 0;
 			while (joints_parsed < num_joints) {
-				var parent_id : uint;
-				var joint_name : String;
+				// TODO: not used
+				//	var parent_id : uint;
+				// TODO: not used
+				//var joint_name : String;
 				var joint : SkeletonJoint;
 				var ibp : Matrix3D;
 				
@@ -519,6 +529,8 @@ package away3d.loaders.parsers
 		
 		private function parseSkeletonPose(blockLength : uint) : SkeletonPose
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var pose : SkeletonPose;
 			var num_joints : uint;
@@ -541,7 +553,8 @@ package away3d.loaders.parsers
 				
 				has_transform = _body.readUnsignedByte();
 				if (has_transform == 1) {
-					var mtx0 : Matrix3D;
+					// TODO: not used
+					// var mtx0 : Matrix3D;
 					var mtx_data : Vector.<Number> = parseMatrixRawData();
 					
 					var mtx : Matrix3D = new Matrix3D(mtx_data);
@@ -564,10 +577,13 @@ package away3d.loaders.parsers
 		
 		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationSequence
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var num_frames : uint;
 			var frames_parsed : uint;
-			var frame_rate : uint;
+			// TODO: not used
+			//var frame_rate : uint;
 			var frame_dur : Number;
 			var animation : SkeletonAnimationSequence;
 			
@@ -601,6 +617,8 @@ package away3d.loaders.parsers
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var par_id : uint;
 			var mtx : Matrix3D;
@@ -629,6 +647,8 @@ package away3d.loaders.parsers
 		
 		private function parseMeshInstance(blockLength : uint) : Mesh
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var mesh : Mesh, geom : Geometry;
 			var par_id : uint, data_id : uint;
@@ -690,6 +710,8 @@ package away3d.loaders.parsers
 		
 		private function parseMeshData(blockLength : uint) : Geometry
 		{
+			// TODO: not used
+			blockLength = blockLength; 
 			var name : String;
 			var geom : Geometry;
 			var num_subs : uint;
@@ -704,7 +726,8 @@ package away3d.loaders.parsers
 			// Read optional properties
 			props = parseProperties({ 1:AWD_FIELD_MTX4x4 }); 
 			
-			var mtx : Matrix3D;
+			// TODO: not used
+			// var mtx : Matrix3D;
 			var bsm_data : Array = props.get(1, null);
 			if (bsm_data) {
 				bsm = new Matrix3D(Vector.<Number>(bsm_data));
@@ -715,7 +738,9 @@ package away3d.loaders.parsers
 			// Loop through sub meshes
 			subs_parsed = 0;
 			while (subs_parsed < num_subs) {
-				var mat_id : uint, sm_len : uint, sm_end : uint;
+				// TODO: not used
+				// var mat_id : uint
+				var sm_len : uint, sm_end : uint;
 				var sub_geom : SubGeometry;
 				var skinned_sub_geom : SkinnedSubGeometry;
 				var w_indices : Vector.<Number>;

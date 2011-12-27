@@ -3,10 +3,7 @@ package away3d.animators.data
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.MaterialBase;
 	import away3d.materials.passes.MaterialPassBase;
-
-	import flash.display3D.Context3D;
 
 	use namespace arcane;
 

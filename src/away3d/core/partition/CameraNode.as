@@ -30,6 +30,8 @@ package away3d.core.partition
 		 */
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
+			// TODO: not used
+			camera = camera; 
 			// todo: maybe test the debug mesh when present
 			return true;
 		}

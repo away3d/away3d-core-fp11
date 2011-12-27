@@ -80,7 +80,7 @@ package away3d.core.partition
 
 			// update numEntities in the tree
 			var numEntities : int = node._numEntities;
-			var node : NodeBase = this;
+			node = this;
 
 			do {
 				node._numEntities += numEntities;
@@ -103,7 +103,7 @@ package away3d.core.partition
 
 			// update numEntities in the tree
 			var numEntities : int = node._numEntities;
-			var node : NodeBase = this;
+			node = this;
 
 			do {
 				node._numEntities -= numEntities;
@@ -118,6 +118,8 @@ package away3d.core.partition
 		 */
 		public function isInFrustum(camera : Camera3D) : Boolean
 		{
+			// TODO: not used
+			camera = null; 
 			return true;
 		}
 
@@ -126,6 +128,8 @@ package away3d.core.partition
 		 */
 		public function findPartitionForEntity(entity : Entity) : NodeBase
 		{
+			// TODO: not used
+			entity = null; 
 			return this;
 		}
 

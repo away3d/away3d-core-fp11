@@ -361,19 +361,25 @@
 		/**
 		 * Updates the geometry when invalid.
 		 */
+		 /*
 		private function updateGeometry() : void
 		{
 			buildGeometry();
 			_geomDirty = false;
 		}
+		 * 
+		 */
 
 		/**
 		 * Updates the uv coordinates when invalid.
 		 */
+		 /*
 		private function updateUVs() : void
 		{
 			buildUVs();
 			_uvDirty = false;
 		}
+		 * 
+		 */
     }
 }

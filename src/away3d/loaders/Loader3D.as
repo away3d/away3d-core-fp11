@@ -140,7 +140,8 @@ package away3d.loaders
 		private function onAssetComplete(ev : AssetEvent) : void
 		{
 			if (ev.type == AssetEvent.ASSET_COMPLETE) {
-				var type : String = ev.asset.assetType;
+				// TODO: not used
+				// var type : String = ev.asset.assetType;
 				var obj : ObjectContainer3D;
 				
 				switch (ev.asset.assetType) {

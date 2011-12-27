@@ -1,5 +1,6 @@
 package away3d.tools.serialize
 {
+	import away3d.materials.lightpickers.StaticLightPicker;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
@@ -15,8 +16,6 @@ package away3d.tools.serialize
 	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.lightpickers.StaticLightPicker;
-	import away3d.materials.lightpickers.StaticLightPicker;
 
 	import flash.utils.getQualifiedClassName;
 
@@ -140,11 +139,11 @@ package away3d.tools.serialize
 			{
 				if (skinnedSubGeometry.jointWeightsData)
 				{
-					serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length)
+					serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length);
 				}
 				if (skinnedSubGeometry.jointIndexData)
 				{
-					serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length)
+					serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length);
 				}
 			}
 			serializer.endObject();
@@ -212,7 +211,7 @@ package away3d.tools.serialize
 		
 		private static function classNameFromInstance(instance:*):String
 		{
-			return getQualifiedClassName(instance).split("::").pop()
+			return getQualifiedClassName(instance).split("::").pop();
 		}
 		
 		private static function serializeObjectContainerInternal(objectContainer:ObjectContainer3D, serializer:SerializerBase, serializeChildrenAndEnd:Boolean):void

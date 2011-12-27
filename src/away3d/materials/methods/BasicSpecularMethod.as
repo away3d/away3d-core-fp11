@@ -102,7 +102,7 @@ package away3d.materials.methods
 		{
 			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
-			_texture = value
+			_texture = value;
 		}
 
 		/**

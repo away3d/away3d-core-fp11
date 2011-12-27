@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
@@ -99,6 +98,8 @@ package away3d.materials.methods
 		 */
 		private function modulateSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			regCache = regCache;			
 			var code : String = "";
 
 			// use view dir and normal fragment .w as temp
