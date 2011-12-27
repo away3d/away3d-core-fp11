@@ -47,8 +47,6 @@ package away3d.materials.passes
 
 		private var _bothSides : Boolean;
 
-		protected var _projectedTargetRegister : String;
-
 		protected var _numPointLights : uint;
 		protected var _numDirectionalLights : uint;
 		protected var _numLightProbes : uint;
@@ -210,15 +208,6 @@ package away3d.materials.passes
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
-		/**
-		 * If the pass requires the projected position, this method will return the target register's name, or null otherwise.
-		 * @private
-		 */
-		arcane function getProjectedTargetRegister() : String
-		{
-			return _projectedTargetRegister;
-		}
-
 		arcane function getVertexCode() : String
 		{
 			throw new AbstractMethodError();
@@ -291,13 +280,15 @@ package away3d.materials.passes
 
 		/**
 		 * Marks the shader program as invalid, so it will be recompiled before the next render.
+		 *
+		 * @param updateMaterial Indicates whether the invalidation should be performed on the entire material. Should always pass "true" unless it's called from the material itself.
 		 */
-		arcane function invalidateShaderProgram() : void
+		arcane function invalidateShaderProgram(updateMaterial : Boolean = true) : void
 		{
 			for (var i : uint = 0; i < 8; ++i)
 				_programInvalids[i] = true;
 
-			if (_material)
+			if (_material && updateMaterial)
 				_material.invalidatePasses(this);
 		}
 

@@ -122,6 +122,7 @@ package away3d.lights
 			var bounds : BoundingVolumeBase = renderable.sourceEntity.bounds;
 			var m : Matrix3D = new Matrix3D();
 
+			// todo: do not use lookAt on Light
 			m.copyFrom(renderable.sceneTransform);
 			m.append(_parent.inverseSceneTransform);
 			lookAt(m.position);

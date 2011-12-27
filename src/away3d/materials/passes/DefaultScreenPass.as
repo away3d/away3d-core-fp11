@@ -127,6 +127,7 @@ package away3d.materials.passes
 
 		private var _animatableAttributes : Array = ["va0"];
 		private var _animationTargetRegisters : Array = ["vt0"];
+		private var _projectedTargetRegister : String;
 
 
 
@@ -566,9 +567,9 @@ package away3d.materials.passes
 		/**
 		 * Marks the shader program as invalid, so it will be recompiled before the next render.
 		 */
-		arcane override function invalidateShaderProgram() : void
+		arcane override function invalidateShaderProgram(updateMaterial : Boolean = true) : void
 		{
-			super.invalidateShaderProgram();
+			super.invalidateShaderProgram(updateMaterial);
 			_passesDirty = true;
 
 			_passes = new Vector.<MaterialPassBase>();

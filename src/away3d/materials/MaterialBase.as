@@ -439,7 +439,7 @@ package away3d.materials
 			}
 
 			for (var i : int = 0; i < _numPasses; ++i) {
-				if (_passes[i] != triggerPass) _passes[i].invalidateShaderProgram();
+				if (_passes[i] != triggerPass) _passes[i].invalidateShaderProgram(false);
 				// test if animation will be able to run on gpu BEFORE compiling materials
 				if (_animation)
 					_animation.testGPUCompatibility(_passes[i]);
