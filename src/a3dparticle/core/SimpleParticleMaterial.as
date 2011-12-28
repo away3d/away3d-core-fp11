@@ -6,7 +6,7 @@ package a3dparticle.core
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.materials.MaterialBase;
-	import flash.display.BitmapData;
+	import flash.display3D.Context3D;
 	
 	
 	use namespace arcane;
@@ -25,7 +25,13 @@ package a3dparticle.core
 			this._particleMaterial = particleMaterial;
 			addPass(_screenPass = new SimpleParticlePass(particleMaterial));
 			_screenPass.material = this;
-			//bothSides = true;
+			cpoyParam();
+		}
+		
+		private function cpoyParam():void
+		{
+			bothSides = _particleMaterial.bothSides;
+			blendMode = _particleMaterial.blendMode;
 		}
 		
 
@@ -34,17 +40,17 @@ package a3dparticle.core
 			return _particleMaterial.bothSides;
 		}
 
-		override public function set bothSides(value : Boolean) : void
+		/*override public function set bothSides(value : Boolean) : void
 		{
 			throw(new Error("don't set it directly"));
-		}
+		}*/
 		
 		/**
 		 * @inheritDoc
 		 */
 		override public function get requiresBlending() : Boolean
 		{
-			return true;
+			return _particleMaterial.requiresBlending;
 		}
 		
 		override arcane function addOwner(owner : IMaterialOwner) : void
@@ -61,6 +67,12 @@ package a3dparticle.core
 		override arcane function removeOwner(owner : IMaterialOwner) : void
 		{
 			return;
+		}
+		
+		override arcane function updateMaterial(context : Context3D) : void
+		{
+			cpoyParam();
+			super.updateMaterial(context);
 		}
 		
 	}

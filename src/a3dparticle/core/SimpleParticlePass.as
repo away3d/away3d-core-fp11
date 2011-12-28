@@ -57,7 +57,6 @@ package a3dparticle.core
 			var _particleAnimation:ParticleAnimation = ParticleAnimation(animation);
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
-				bothSides = _particleMaterial.bothSides;
 				super.activate(stage3DProxy, camera);
 				_numUsedTextures = _particleAnimation.shaderRegisterCache.numUsedTextures;
 			}
