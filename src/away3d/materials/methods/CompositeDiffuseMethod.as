@@ -10,7 +10,7 @@ package away3d.materials.methods
 	use namespace arcane;
 
 	/**
-	 * WrapDiffuseMethod provides a base class for diffuse methods that wrap a diffuse method to alter the strength
+	 * CompositeDiffuseMethod provides a base class for diffuse methods that wrap a diffuse method to alter the strength
 	 * of its calculated strength.
 	 */
 	public class CompositeDiffuseMethod extends BasicDiffuseMethod

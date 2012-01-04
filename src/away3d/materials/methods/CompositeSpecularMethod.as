@@ -10,7 +10,7 @@ package away3d.materials.methods
 	use namespace arcane;
 
 	/**
-	 * WrapSpecularMethod provides a base class for specular methods that wrap a specular method to alter the strength
+	 * CompositeSpecularMethod provides a base class for specular methods that wrap a specular method to alter the strength
 	 * of its calculated strength.
 	 */
 	public class CompositeSpecularMethod extends BasicSpecularMethod

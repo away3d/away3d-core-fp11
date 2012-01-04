@@ -2,6 +2,7 @@ package away3d.bounds
 {
 	import away3d.arcane;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.errors.AbstractMethodError;
 	import away3d.primitives.WireframeCube;
 	import away3d.primitives.WireframePrimitiveBase;
 
@@ -158,6 +159,29 @@ package away3d.bounds
 			var clone : AxisAlignedBoundingBox = new AxisAlignedBoundingBox();
 			clone.fromExtremes(_min.x, _min.y, _min.z, _max.x, _max.y, _max.z);
 			return clone;
+		}
+
+		public function closestPointToPoint(point : Vector3D, target : Vector3D = null) : Vector3D
+		{
+			var p : Number;
+			target ||= new Vector3D();
+				
+			p = point.x;
+			if (p < _min.x) p = _min.x;
+			if (p > _max.x) p = _max.x;
+			target.x = p;
+
+			p = point.y;
+			if (p < _min.y) p = _min.y;
+			if (p > _max.y) p = _max.y;
+			target.y = p;
+
+			p = point.z;
+			if (p < _min.z) p = _min.z;
+			if (p > _max.z) p = _max.z;
+			target.z = p;
+			
+			return target;
 		}
 	}
 }

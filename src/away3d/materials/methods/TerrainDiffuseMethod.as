@@ -24,7 +24,7 @@ package away3d.materials.methods
 		 *
 		 * @param splatTextures An array of Texture2DProxyBase containing the detailed textures to be tiled.
 		 * @param blendData The texture containing the blending data. The red, green, and blue channels contain the blending values for each of the textures in splatTextures, respectively.
-		 * @param tileData The amount of times each splat texture needs to be tiled. If omitted, the default value of 50 is assumed for each.
+		 * @param tileData The amount of times each splat texture needs to be tiled. The first entry in the array applies to the base texture, the others to the splats. If omitted, the default value of 50 is assumed for each.
 		 */
 		public function TerrainDiffuseMethod(splatTextures : Array, blendingTexture : Texture2DBase, tileData : Array)
 		{
@@ -32,13 +32,13 @@ package away3d.materials.methods
 			_splats = Vector.<Texture2DBase>(splatTextures);
 
 			_tileData = new Vector.<Number>(4, true);
-			for (var i : int = 0; i < 4; ++i) {
+			_tileData[0] = tileData ? tileData[0] : 1;
+			for (var i : int = 1; i < 4; ++i) {
 				_tileData[i] = tileData ? tileData[i] : 50;
 			}
 			_blendingTexture = blendingTexture;
 			_numSplattingLayers = _splats.length;
 			if (_numSplattingLayers > 3) throw new Error("More than 3 splatting layers is not supported!");
-			if (tileData.length != _numSplattingLayers) throw new Error("Length of tileData must be equal to that in splatTextures!");
 		}
 
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
@@ -63,23 +63,29 @@ package away3d.materials.methods
 
 			if (!_useTexture) throw new Error("TerrainDiffuseMethod requires a diffuse texture!");
 			_diffuseInputRegister = regCache.getFreeTextureReg();
-			code += getTexSampleCode(albedo, _diffuseInputRegister);
 
 			var uv : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uv, 1);
+
+			scaleRegister = regCache.getFreeFragmentConstant();
+
+			code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + ".x\n" +
+					getSplatSampleCode(albedo, _diffuseInputRegister, uv);
+
+
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var blendTexReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			_blendingTextureIndex = blendTexReg.index;
 			code += getTexSampleCode(temp, blendTexReg);
 			var splatTexReg : ShaderRegisterElement;
-			scaleRegister = regCache.getFreeFragmentConstant();
+
 			_tileRegisterIndex = scaleRegister.index;
-			var comps : Array = [ ".x",".y",".z" ];
+			var comps : Array = [ ".x",".y",".z",".w" ];
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
 				splatTexReg = regCache.getFreeTextureReg();
 				if (i == 0) _splatTextureIndex = splatTexReg.index;
-				code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + comps[i] + "\n" +
+				code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + comps[i+1] + "\n" +
 						getSplatSampleCode(uv, splatTexReg, uv) +
 						"sub " + uv + ", " + uv + ", " + albedo + "\n" +
 						"mul " + uv + ", " + uv + ", " + temp + comps[i] + "\n" +
@@ -113,7 +119,8 @@ package away3d.materials.methods
 
 		override public function set alphaThreshold(value : Number) : void
 		{
-			throw new Error("Alpha threshold not supported for TerrainDiffuseMethod");
+			if (value > 0)
+				throw new Error("Alpha threshold not supported for TerrainDiffuseMethod");
 		}
 
 		protected function getSplatSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String

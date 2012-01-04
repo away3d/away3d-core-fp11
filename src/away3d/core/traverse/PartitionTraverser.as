@@ -96,6 +96,7 @@ package away3d.core.traverse
 		/**
 		 * The entry point for scene graph traversal, ie the point that will be used for traversing the graph
 		 * position-dependently. For example: BSP visibility determination or collision detection.
+		 * For the EntityCollector, this is the camera's scene position for example.
 		 */
 		public function get entryPoint() : Vector3D
 		{

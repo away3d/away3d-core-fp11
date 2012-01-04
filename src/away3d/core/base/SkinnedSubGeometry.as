@@ -86,7 +86,6 @@ package away3d.core.base
 		public function getJointWeightsBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_jointWeightBufferDirty[contextIndex] || !_jointWeightsBuffer[contextIndex]) {
 				VertexBuffer3D(_jointWeightsBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, _jointsPerVertex)).uploadFromVector(_jointWeightsData, 0, _jointWeightsData.length/_jointsPerVertex);
@@ -103,7 +102,6 @@ package away3d.core.base
 		public function getJointIndexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_jointIndexBufferDirty[contextIndex] || !_jointIndexBuffer[contextIndex]) {
 				VertexBuffer3D(_jointIndexBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, _jointsPerVertex)).uploadFromVector(_jointIndexData, 0, _jointIndexData.length/_jointsPerVertex);
@@ -118,7 +116,6 @@ package away3d.core.base
 		override public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_animatedVertexData) {
 				if (_vertexBufferDirty[contextIndex] || !_vertexBuffer[contextIndex]) {
@@ -137,7 +134,6 @@ package away3d.core.base
 		override public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_animatedNormalData) {
 				if (_vertexNormalBufferDirty[contextIndex] || !_vertexNormalBuffer[contextIndex]) {
@@ -156,7 +152,6 @@ package away3d.core.base
 		override public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_animatedTangentData) {
 				if (_vertexTangentBufferDirty[contextIndex] || !_vertexTangentBuffer[contextIndex]) {

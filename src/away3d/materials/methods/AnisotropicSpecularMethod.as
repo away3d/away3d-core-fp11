@@ -35,19 +35,6 @@ package away3d.materials.methods
 					"dp3 " + t + ".w, " + t + ".xyz, " + lightDirReg + ".xyz\n" +
 					"dp3 " + t + ".z, " + t + ".xyz, " + _viewDirFragmentReg + ".xyz\n";
 
-			/*
-			// t.w = cos(l,t)
-			// t.z = cos(v,t)
-
-			// calc sin(x) = sqrt(1 - cos²(x));
-			code += "mul " + t + ".xy, " + t + ".zw, " + t + ".zw\n" +
-					"sub " + t + ".xy, " + _tangentVaryingReg + ".ww, " + t + ".xy\n" +
-					"sqt " + t + ".xy, " + t + ".xy\n";
-
-			code += "mul " + t + ".x, " + t + ".x, " + t + ".y\n" +
-					"mul " + t + ".w, " + t + ".w, " + t + ".z\n" +
-					"sub " + t + ".w, " + t + ".x, " + t + ".w\n";      */
-
 			// (sin(t.w) * sin(t.z) - cos(t.w)*cos(t.z)) ^ k
 			code += "sin " + t + ".x, " + t + ".w\n" +
 					"sin " + t + ".y, " + t + ".z\n" +

@@ -38,7 +38,7 @@ package away3d.materials.methods
 		public function set fogDistance(value : Number) : void
 		{
 			_fogDistance = value;
-			_fogData[3] = 1/value;
+			_fogData[3] = 4/(value*value);
 		}
 
 		public function get fogColor() : uint
@@ -67,13 +67,14 @@ package away3d.materials.methods
 			_fogDataIndex = fogDataRegister.index;
 
 			code += "dp3 " + temp + ".w, " + _viewDirVaryingReg+".xyz, " + _viewDirVaryingReg + ".xyz		\n" + 	// dist²
-					"sqt " + temp + ".w, " + temp + ".w										\n" + 	// dist²
+//					"sqt " + temp + ".w, " + temp + ".w										\n" + 	// dist²
 					"mul " + temp + ".w, " + temp + ".w, " + fogDataRegister + ".w			\n" + 			// fogRatio = dist²/maxDist²
-					"neg " + temp + ".w, " + temp + ".w										\n" +			// fogRatio = dist²/maxDist²
-					"exp " + temp + ".w, " + temp + ".w										\n" + 			// fogRatio = dist²/maxDist²
-					"sub " + temp + ".xyz, " + targetReg + ".xyz, " + fogDataRegister + ".xyz\n" + 			// (fogColor- col)
+					"sat " + temp + ".w, " + temp + ".w										\n" +			// fogRatio = dist²/maxDist²
+//					"neg " + temp + ".w, " + temp + ".w										\n" +			// fogRatio = dist²/maxDist²
+//					"exp " + temp + ".w, " + temp + ".w										\n" + 			// fogRatio = dist²/maxDist²
+					"sub " + temp + ".xyz, " + fogDataRegister + ".xyz, " + targetReg + ".xyz\n" + 			// (fogColor- col)
 					"mul " + temp + ".xyz, " + temp+".xyz, " + temp + ".w					\n" +			// (fogColor- col)*fogRatio
-					"add " + targetReg + ".xyz, " + fogDataRegister + ".xyz, " + temp + ".xyz\n";			// fogRatio*(fogColor- col) + col
+					"add " + targetReg + ".xyz, " + targetReg + ".xyz, " + temp + ".xyz\n";			// fogRatio*(fogColor- col) + col
 
 
 			return code;

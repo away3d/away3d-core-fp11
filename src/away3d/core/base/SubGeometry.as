@@ -25,6 +25,7 @@
 		private var _parentGeometry : Geometry;
 
 		// raw data:
+		protected var _customData : Vector.<Number>;
 		protected var _vertices : Vector.<Number>;
 		protected var _uvs : Vector.<Number>;
 		protected var _secondaryUvs : Vector.<Number>;
@@ -41,13 +42,12 @@
 		protected var _secondaryUvBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _vertexNormalBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _vertexTangentBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
+		protected var _customBuffer : Vector.<VertexBuffer3D>;
 		protected var _indexBuffer : Vector.<IndexBuffer3D> = new Vector.<IndexBuffer3D>(8);
 
 		private var _autoDeriveVertexNormals : Boolean = true;
 		private var _autoDeriveVertexTangents : Boolean = true;
 		private var _useFaceWeights : Boolean = false;
-
-		protected var _maxIndex : int = -1;
 
 		// raw data dirty flags:
 		protected var _faceNormalsDirty : Boolean = true;
@@ -62,11 +62,14 @@
 		protected var _indexBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexNormalBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		protected var _vertexTangentBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
+		protected var _customBufferDirty : Vector.<Boolean>;
 
 		protected var _numVertices : uint;
 		protected var _numIndices : uint;
 		protected var _numTriangles : uint;
 		private var _uvScaleV : Number = 1;
+		private var _customElementsPerVertex : int;
+
 
 		/**
 		 * Creates a new SubGeometry object.
@@ -147,6 +150,31 @@
 			_vertexTangentsDirty = value;
 		}
 
+		public function initCustomBuffer(numVertices : int, elementsPerVertex : int) : void
+		{
+			_numVertices = numVertices;
+			_customElementsPerVertex = elementsPerVertex;
+			_customBuffer = new Vector.<VertexBuffer3D>(8);
+			_customBufferDirty = new Vector.<Boolean>(8);
+		}
+
+		/**
+		 * A buffer allowing you any sort of data. Needs to be initialized by calling initCustomBuffer
+		 * @param stage3DProxy
+		 * @return
+		 */
+		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+
+			if (_customBufferDirty[contextIndex] || !_customBuffer[contextIndex]) {
+				VertexBuffer3D(_customBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, _customElementsPerVertex)).uploadFromVector(_customData, 0, _numVertices);
+				_customBufferDirty[contextIndex] = false;
+			}
+
+			return _customBuffer[contextIndex];
+		}
+
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex positions.
 		 * @param context The Context3D for which we request the buffer
@@ -155,7 +183,6 @@
 		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_vertexBufferDirty[contextIndex] || !_vertexBuffer[contextIndex]) {
 				VertexBuffer3D(_vertexBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertices, 0, _numVertices);
@@ -173,7 +200,6 @@
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_uvBufferDirty[contextIndex] || !_uvBuffer[contextIndex]) {
 				(_uvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_uvs, 0, _numVertices);
@@ -236,7 +262,6 @@
 		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_secondaryUvBufferDirty[contextIndex] || !_secondaryUvBuffer[contextIndex]) {
 				(_secondaryUvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_secondaryUvs, 0, _numVertices);
@@ -254,7 +279,6 @@
 		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
 				updateVertexNormals();
@@ -275,7 +299,6 @@
 		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_vertexTangentsDirty)
 				updateVertexTangents();
@@ -295,7 +318,6 @@
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			if (contextIndex > _maxIndex) _maxIndex = contextIndex;
 
 			if (_indexBufferDirty[contextIndex] || !_indexBuffer[contextIndex]) {
 				(_indexBuffer[contextIndex] ||= stage3DProxy._context3D.createIndexBuffer(_numIndices)).uploadFromVector(_indices, 0, _numIndices);
@@ -357,6 +379,30 @@
 		{
 			disposeAllVertexBuffers();
 			disposeIndexBuffers(_indexBuffer);
+			_customBuffer = null;
+			_vertexBuffer = null;
+			_vertexNormalBuffer = null;
+			_uvBuffer = null;
+			_secondaryUvBuffer = null;
+			_vertexTangentBuffer = null;
+			_indexBuffer = null;
+			_vertices = null;
+			_uvs = null;
+			_secondaryUvs = null;
+			_vertexNormals = null;
+			_vertexTangents = null;
+			_indices = null;
+			_faceNormalsData = null;
+			_faceWeights = null;
+			_faceTangents = null;
+			_customData = null;
+			_vertexBufferDirty = null;
+			_uvBufferDirty = null;
+			_secondaryUvBufferDirty = null;
+			_indexBufferDirty = null;
+			_vertexNormalBufferDirty = null;
+			_vertexTangentBufferDirty = null;
+			_customBufferDirty = null;
 		}
 
 		protected function disposeAllVertexBuffers() : void
@@ -366,6 +412,7 @@
 			disposeVertexBuffers(_uvBuffer);
 			disposeVertexBuffers(_secondaryUvBuffer);
 			disposeVertexBuffers(_vertexTangentBuffer);
+			if (_customBuffer) disposeVertexBuffers(_customBuffer);
 		}
 
 		/**
@@ -374,6 +421,11 @@
 		public function get vertexData() : Vector.<Number>
 		{
 			return _vertices;
+		}
+
+		public function updateCustomData(data : Vector.<Number>) : void
+		{
+			invalidateBuffers(_customBufferDirty);
 		}
 
 		/**
@@ -541,7 +593,7 @@
 		 */
 		protected function invalidateBuffers(buffers : Vector.<Boolean>) : void
 		{
-			for (var i : int = 0; i <= _maxIndex; ++i)
+			for (var i : int = 0; i < 8; ++i)
 				buffers[i] = true;
 		}
 
@@ -551,7 +603,7 @@
 		 */
 		protected function disposeVertexBuffers(buffers : Vector.<VertexBuffer3D>) : void
 		{
-			for (var i : int = 0; i <= _maxIndex; ++i) {
+			for (var i : int = 0; i < 8; ++i) {
 				if (buffers[i]) {
 					buffers[i].dispose();
 					buffers[i] = null;
@@ -565,7 +617,7 @@
 		 */
 		protected function disposeIndexBuffers(buffers : Vector.<IndexBuffer3D>) : void
 		{
-			for (var i : int = 0; i <= _maxIndex; ++i) {
+			for (var i : int = 0; i < 8; ++i) {
 				if (buffers[i]) {
 					buffers[i].dispose();
 					buffers[i] = null;

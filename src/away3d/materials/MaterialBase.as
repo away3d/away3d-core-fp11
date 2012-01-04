@@ -59,7 +59,7 @@ package away3d.materials
 		protected var _numPasses : uint;
 		protected var _passes : Vector.<MaterialPassBase>;
 
-		protected var _mipmap : Boolean;
+		protected var _mipmap : Boolean = true;
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean;
 

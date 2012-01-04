@@ -74,9 +74,28 @@ package away3d.containers
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		/** @private */
-		arcane var _sceneTransformDirty:Boolean = true;
-		/** @private */
 		arcane var _implicitMouseEnabled : Boolean = true;
+
+		protected var _scene : Scene3D;
+		protected var _parent : ObjectContainer3D;
+		protected var _sceneTransform : Matrix3D = new Matrix3D();
+		protected var _sceneTransformDirty : Boolean = true;
+		// these vars allow not having to traverse the scene graph to figure out what partition is set
+		protected var _explicitPartition : Partition3D; // what the user explicitly set as the partition
+		protected var _implicitPartition : Partition3D; // what is inherited from the parents if it doesn't have its own explicitPartition
+
+		private var _scenetransformchanged:Object3DEvent;
+		// TODO: not used
+		// private var _scenechanged:Object3DEvent;
+		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
+		private var _mouseChildren : Boolean = true;
+		private var _oldScene : Scene3D;
+		private var _inverseSceneTransform : Matrix3D = new Matrix3D();
+		private var _inverseSceneTransformDirty : Boolean = true;
+		private var _scenePosition : Vector3D = new Vector3D();
+		private var _scenePositionDirty : Boolean = true;
+		private var _explicitVisibility : Boolean = true;
+		private var _implicitVisibility : Boolean = true; // visibility passed on from parents
 		
 		/**
 		 * @private
@@ -125,19 +144,6 @@ package away3d.containers
 			
 			notifySceneTransformChange();
 		}
-		
-		private var _scenetransformchanged:Object3DEvent;
-		// TODO: not used
-		// private var _scenechanged:Object3DEvent;
-		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
-		private var _mouseChildren : Boolean = true;
-		private var _oldScene : Scene3D;
-		private var _inverseSceneTransform : Matrix3D = new Matrix3D();
-		private var _inverseSceneTransformDirty : Boolean = true;
-		private var _scenePosition : Vector3D = new Vector3D();
-		private var _scenePositionDirty : Boolean = true;
-		private var _explicitVisibility : Boolean = true;
-		private var _implicitVisibility : Boolean = true; // visibility passed on from parents
 		
 		private function notifySceneTransformChange():void
 		{
@@ -188,14 +194,6 @@ package away3d.containers
 		}
 		*/
 				
-		protected var _scene : Scene3D;
-		protected var _parent : ObjectContainer3D;
-		protected var _sceneTransform : Matrix3D = new Matrix3D();
-		protected var _sceneTransformDirty : Boolean = true;
-		// these vars allow not having to traverse the scene graph to figure out what partition is set
-		protected var _explicitPartition : Partition3D; // what the user explicitly set as the partition
-		protected var _implicitPartition : Partition3D; // what is inherited from the parents if it doesn't have its own explicitPartition
-		
 		protected function updateMouseChildren() : void
 		{
 			if (_parent) {
