@@ -21,17 +21,29 @@ package away3d.animators.data
 		private var _skeleton : Skeleton;
 		private var _nullAnimation : NullAnimation;
 		private var _jointsPerVertex : uint;
+		private var _useCondensedIndices : Boolean;
 
 		/**
 		 * Creates a SkeletonAnimation instance.
 		 * @param skeleton The skeleton that's used for this SkeletonAnimation instance.
 		 * @param jointsPerVertex The amount of joints that can be linked to a vertex.
+		 * @param forceCPU Forces the animation to be performed on CPU, even if it could be done in the vertex shader.
 		 */
 		public function SkeletonAnimation(skeleton : Skeleton, jointsPerVertex : uint = 4, forceCPU : Boolean = false)
 		{
 			_forceCPU = _usesCPU = forceCPU;
 			_skeleton = skeleton;
 			_jointsPerVertex = jointsPerVertex;
+		}
+
+		public function get useCondensedIndices() : Boolean
+		{
+			return _useCondensedIndices;
+		}
+
+		public function set useCondensedIndices(value : Boolean) : void
+		{
+			_useCondensedIndices = value;
 		}
 
 		override arcane function resetGPUCompatibility() : void
@@ -41,7 +53,7 @@ package away3d.animators.data
 
 		override arcane function testGPUCompatibility(pass : MaterialPassBase) : void
 		{
-			if (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128) {
+			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128)) {
 				_usesCPU = true;
 			}
 		}

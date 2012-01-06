@@ -1,5 +1,6 @@
 package away3d.animators.data
 {
+	import away3d.animators.data.SkeletonAnimation;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;
@@ -11,9 +12,7 @@ package away3d.animators.data
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Quaternion;
-	import away3d.materials.passes.MaterialPassBase;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
@@ -37,8 +36,11 @@ package away3d.animators.data
         private var _blendTree : SkeletonTreeNode;
         private var _globalPose : SkeletonPose;
         private var _globalInput : Boolean;
-		private var _buffersValid : Dictionary = new Dictionary(true);
+		private var _buffersValid : Dictionary = new Dictionary();
 		private var _globalMatricesInvalid : Boolean;
+		private var _useCondensedIndices : Boolean;
+		private var _condensedMatrices : Vector.<Number>;
+
 
 		/**
 		 * Creates a SkeletonAnimationState object.
@@ -130,8 +132,8 @@ package away3d.animators.data
 		{
 			super.invalidateState();
 
-			for (var key : Object in _buffersValid) {
-			    _buffersValid[key] = false;
+			for(var key : Object in _buffersValid) {
+			    delete _buffersValid[key];
 			}
 		}
 
@@ -152,22 +154,46 @@ package away3d.animators.data
 			if (_stateInvalid) updateGlobalPose();
 			if (_globalMatricesInvalid) convertToMatrices();
 
-			if (_animation.usesCPU) {
-				var subGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
-				if (!_buffersValid[subGeom]) {
-					morphGeometry(subGeom);
-					_buffersValid[subGeom] = true;
-				}
-				return;
-			}
-
 			var skinnedGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
-			var context : Context3D = stage3DProxy._context3D;
 
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
+			// using condensed data
+			var numCondensedJoints : uint = skinnedGeom.numCondensedJoints;
+			if (SkeletonAnimation(_animation).useCondensedIndices) {
+				if (skinnedGeom.numCondensedJoints == 0)
+					skinnedGeom.condenseIndexData();
+				updateCondensedMatrices(skinnedGeom.condensedIndexLookUp, numCondensedJoints);
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _condensedMatrices, numCondensedJoints*3);
+			}
+			else {
+				if (_animation.usesCPU) {
+					if (!_buffersValid[skinnedGeom]) {
+						morphGeometry(skinnedGeom);
+						_buffersValid[skinnedGeom] = skinnedGeom;
+					}
+					return;
+				}
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
+			}
 
 			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), _bufferFormat);
 			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), _bufferFormat);
+		}
+
+		private function updateCondensedMatrices(condensedIndexLookUp : Vector.<uint>, numJoints : uint) : void
+		{
+			var i : uint = 0, j : uint = 0;
+			var len : uint;
+			var srcIndex : uint;
+
+			_condensedMatrices = new Vector.<Number>();
+
+			do {
+				srcIndex = condensedIndexLookUp[i*3]*4;
+				len = srcIndex+12;
+				// copy into condensed
+				while (srcIndex < len)
+					_condensedMatrices[j++] = _globalMatrices[srcIndex++];
+			} while (++i < numJoints);
 		}
 
 		private function updateGlobalPose() : void
@@ -301,6 +327,8 @@ package away3d.animators.data
 				nx = 0; ny = 0; nz = 0;
 				tangX = tangents[i1]; tangY = tangents[i2]; tangZ = tangents[i3];
 				tx = 0; ty = 0; tz = 0;
+
+				// todo: can we use actual matrices when using cpu + using matrix.transformVectors, then adding them in loop?
 
 				k = 0;
 				while (k < _jointsPerVertex) {

@@ -357,9 +357,8 @@ package away3d.materials
 		 */
 		arcane function addOwner(owner : IMaterialOwner) : void
 		{
-			if (_animation) {
-				if (!owner.animation.equals(_animation))
-					throw new Error("A Material instance cannot be shared across renderables with different animation instances");
+			if (_animation && !owner.animation.equals(_animation)) {
+				throw new Error("A Material instance cannot be shared across renderables with different animation instances");
 			}
 			else {
 				_animation = owner.animation;
