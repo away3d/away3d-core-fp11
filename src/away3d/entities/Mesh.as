@@ -270,6 +270,19 @@
 			var oldMaterial : MaterialBase = material;
 			material = null;
 			material = oldMaterial;
+
+			var len : uint = _subMeshes.length;
+			var subMesh : SubMesh;
+
+			// reassign for each SubMesh
+			for (var i : int = 0; i < len; ++i) {
+				subMesh = _subMeshes[i];
+				oldMaterial = subMesh._material;
+				if (oldMaterial) {
+					subMesh.material = null;
+					subMesh.material = oldMaterial;
+				}
+			}
 		}
 
 		public function getSubMeshForSubGeometry(subGeometry : SubGeometry) : SubMesh

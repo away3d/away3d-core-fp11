@@ -1,6 +1,5 @@
 package away3d.animators.data
 {
-	import away3d.animators.data.SkeletonAnimation;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;

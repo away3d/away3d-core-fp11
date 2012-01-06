@@ -199,6 +199,9 @@ package away3d.core.base
 			clone.updateJointWeightsData(_jointWeightsData.concat());
 			if (!autoDeriveVertexNormals) clone.updateVertexNormalData(_vertexNormals.concat());
 			if (!autoDeriveVertexTangents) clone.updateVertexTangentData(_vertexTangents.concat());
+			clone._numCondensedJoints = _numCondensedJoints;
+			clone._condensedIndexLookUp = _condensedIndexLookUp;
+			clone._condensedJointIndexData = _condensedJointIndexData;
 			return clone;
 		}
 
