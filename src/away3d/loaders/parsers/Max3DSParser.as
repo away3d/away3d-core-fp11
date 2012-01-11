@@ -514,7 +514,7 @@ package away3d.loaders.parsers
 				finalizeAsset(geom, obj.name.concat('_geom'));
 				
 				// Build mesh and return it
-				mesh = new Mesh(mat, geom);
+				mesh = new Mesh(geom, mat);
 				mesh.transform = new Matrix3D(obj.transform);
 				return mesh;
 			}

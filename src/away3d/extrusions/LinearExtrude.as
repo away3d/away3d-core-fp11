@@ -88,7 +88,7 @@
 			_subGeometry = new SubGeometry();
 			
 			if(!material && materials && materials.front) material = materials.front;
-			super((!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material, geom);
+			super(geom, (!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material);
 			
 			_aVectors = vectors;
 			_axis = axis;

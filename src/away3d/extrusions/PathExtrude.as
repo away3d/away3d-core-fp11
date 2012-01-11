@@ -91,7 +91,7 @@ package away3d.extrusions{
 		{
 			var geom : Geometry = new Geometry();
 			_subGeometry = new SubGeometry();
-			super((!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material, geom);
+			super(geom, (!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material);
 			
 			_activeMaterial = this.material;
 			_path = path;

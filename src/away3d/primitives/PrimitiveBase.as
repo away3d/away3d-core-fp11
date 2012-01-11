@@ -29,7 +29,7 @@ package away3d.primitives
 			var geom : Geometry = new Geometry();
 			_subGeometry = new SubGeometry();
 			geom.addSubGeometry(_subGeometry);
-			super(material, geom);
+			super(geom, material);
 		}
 
 		/**
