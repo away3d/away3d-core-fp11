@@ -54,8 +54,8 @@ package away3d.primitives {
 		 * @param sides Defines the number of sides of the regular polygon. Defaults to 16.
 		 * @param yUp Defines whether the regular polygon should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function RegularPolygon(material : MaterialBase = null, radius : Number = 100, sides : uint = 16, yUp : Boolean = true) {
-			super(material, radius, 0, 0, sides, 1, true, false, false, yUp);
+		public function RegularPolygon(radius : Number = 100, sides : uint = 16, yUp : Boolean = true) {
+			super(radius, 0, 0, sides, 1, true, false, false, yUp);
 		}
 	}
 }

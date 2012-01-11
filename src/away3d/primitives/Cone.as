@@ -29,9 +29,9 @@ package away3d.primitives {
 		 * @param segmentsH Defines the number of vertical segments that make up the cone. Defaults to 1.
 		 * @param yUp Defines whether the cone poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function Cone(material : MaterialBase = null, radius : Number = 50, height : Number = 100, segmentsW : uint = 16, segmentsH : uint = 1, closed:Boolean = true, yUp : Boolean = true)
+		public function Cone(radius : Number = 50, height : Number = 100, segmentsW : uint = 16, segmentsH : uint = 1, closed:Boolean = true, yUp : Boolean = true)
 		{
-			super(material, 0, radius, height, segmentsW, segmentsH, false, closed, yUp);
+			super(0, radius, height, segmentsW, segmentsH, false, closed, yUp);
 		}
 	}
 }

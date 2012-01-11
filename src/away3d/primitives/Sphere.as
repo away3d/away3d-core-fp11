@@ -24,9 +24,9 @@
 		 * @param segmentsH Defines the number of vertical segments that make up the sphere. Defaults to 12.
 		 * @param yUp Defines whether the sphere poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function Sphere(material : MaterialBase = null, radius : Number = 50, segmentsW : uint = 16, segmentsH : uint = 12, yUp : Boolean = true)
+		public function Sphere(radius : Number = 50, segmentsW : uint = 16, segmentsH : uint = 12, yUp : Boolean = true)
 		{
-			super(material);
+			super();
 
 			_radius = radius;
 			_segmentsW = segmentsW;

@@ -24,9 +24,9 @@ package away3d.primitives
 		 * @param segmentsH Defines the number of vertical segments that make up the capsule. Defaults to 12.
 		 * @param yUp Defines whether the capsule poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function Capsule(material:MaterialBase, radius:Number = 50, height:Number = 100, segmentsW:uint = 16, segmentsH:uint = 12, yUp:Boolean = true)
+		public function Capsule(radius:Number = 50, height:Number = 100, segmentsW:uint = 16, segmentsH:uint = 12, yUp:Boolean = true)
 		{
-			super(material);
+			super();
 
 			_radius = radius;
 			_height = height;
