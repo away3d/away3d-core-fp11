@@ -42,12 +42,12 @@
 		{
 			var code : String =
 					"m44 vt0, va0, vc8				\n" + // transform Q0 to eye space
-					"m44 vt1, va1, vc8				\n" + // transform Q1 to eye space
+							"m44 vt1, va1, vc8				\n" + // transform Q1 to eye space
 
-					"sub vt2, vt1, vt0 				\n" + // L = Q1 - Q0
+							"sub vt2, vt1, vt0 				\n" + // L = Q1 - Q0
 
-				// test if behind camera near plane
-				// if 0 - Q0.z < Camera.near then the point needs to be clipped
+						// test if behind camera near plane
+						// if 0 - Q0.z < Camera.near then the point needs to be clipped
 //					"neg vt5.x, vt0.z				\n" + // 0 - Q0.z
 					"slt vt5.x, vt0.z, vc7.z		\n" + // behind = ( 0 - Q0.z < -Camera.near ) ? 1 : 0
 					"sub vt5.y, vc5.x, vt5.x		\n" + // !behind = 1 - behind
@@ -115,7 +115,7 @@
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			// TODO: not used
-			lightPicker = lightPicker; 
+			lightPicker = lightPicker;
 			var context : Context3D = stage3DProxy._context3D;
 			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);
 			context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
@@ -125,7 +125,7 @@
 
 			_calcMatrix.copyFrom(renderable.sourceEntity.sceneTransform);
 			_calcMatrix.append(camera.inverseSceneTransform);
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 3, _calcMatrix, true);
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 8, _calcMatrix, true);
 
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 
