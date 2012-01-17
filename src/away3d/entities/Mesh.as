@@ -40,14 +40,10 @@
 		public function Mesh(material : MaterialBase = null, geometry : Geometry = null)
 		{
 			super();
-			_geometry = geometry || new Geometry();
-			_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
-			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
-			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-			_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
 			_subMeshes = new Vector.<SubMesh>();
+
+			this.geometry = geometry || new Geometry();
 			this.material = material;
-			if (geometry) initGeometry();
 		}
 
 		public function bakeTransformations():void
@@ -116,6 +112,36 @@
 			return _geometry;
 		}
 
+		public function set geometry(value : Geometry) : void
+		{
+			if (_geometry) {
+				_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
+				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
+				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
+				_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+
+				for (var i : uint = 0; i < _subMeshes.length; ++i) {
+					_subMeshes[i].dispose();
+				}
+				_subMeshes.length = 0;
+			}
+
+			_geometry = value;
+			if (_geometry) {
+				_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
+				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
+				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
+				_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+				initGeometry();
+			}
+
+			if (_material) {
+				// reregister material in case geometry has a different animation
+				_material.removeOwner(this);
+				_material.addOwner(this);
+			}
+		}
+
 		/**
 		 * The material with which to render the Mesh.
 		 */
@@ -154,10 +180,8 @@
 		 */
 		override public function dispose() : void
 		{
-			_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
-			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
-			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-			_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+			material = null;
+			geometry = null;
 		}
 
 		/**
@@ -236,6 +260,7 @@
 			for (i = 0; i < len; ++i) {
 				subMesh = _subMeshes[i];
 				if (subMesh.subGeometry == subGeom) {
+					subMesh.dispose();
 					_subMeshes.splice(i, 1);
 					break;
 				}

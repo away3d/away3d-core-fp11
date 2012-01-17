@@ -401,14 +401,14 @@ package away3d.containers
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();
-			
+
 			if (!_parentIsStage)
 				updateGlobalPos();
-			
+
 			updateTime();
-			
+
 			_entityCollector.clear();
-			
+
 			updateViewSizeData();
 
 			// collect stuff to render
@@ -430,7 +430,7 @@ package away3d.containers
 			} else {
 				_renderer.render(_entityCollector);
 			}
-			
+
 			// clean up data for this render
 			_entityCollector.cleanUp();
 

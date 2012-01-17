@@ -252,7 +252,8 @@ package away3d.materials.passes
 			stage3DProxy._context3D.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
 
 			if (_renderToTexture) {
-				// don't bother setting rtt status, shouldn't be referenced anyway
+				_rttData[0] = 1;
+				_rttData[1] = 1;
 				_oldTarget = stage3DProxy.renderTarget;
 				_oldSurface = stage3DProxy.renderSurfaceSelector;
 				_oldDepthStencil = stage3DProxy.enableDepthAndStencil;
