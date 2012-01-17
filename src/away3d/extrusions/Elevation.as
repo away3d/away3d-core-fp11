@@ -4,7 +4,7 @@
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
-
+	
 	import flash.display.BitmapData;
 
 	public class Elevation extends Mesh
@@ -41,7 +41,7 @@
         public function Elevation(material : MaterialBase, heightMap : BitmapData, width : Number = 1000, height : Number = 100, depth : Number = 1000, segmentsW : uint = 30, segmentsH : uint = 30, maxElevation:uint = 255, minElevation:uint = 0, smoothMap:Boolean = false)
         {
 			_subGeometry = new SubGeometry();
-			super(material, new Geometry());
+			super(new Geometry(), material);
 			this.geometry.addSubGeometry(_subGeometry);
 			
             _heightMap = heightMap;

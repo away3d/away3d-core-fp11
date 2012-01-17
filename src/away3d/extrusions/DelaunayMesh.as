@@ -66,7 +66,7 @@ package away3d.extrusions
 		 	var geom:Geometry = new Geometry();
 			_subGeometry = new SubGeometry();
 			geom.addSubGeometry(_subGeometry);
-			super(material, geom);
+			super(geom, material);
 			 
 			_vectors = vectors;
 			_centerMesh = centerMesh;

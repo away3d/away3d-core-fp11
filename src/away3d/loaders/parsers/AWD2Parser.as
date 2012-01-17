@@ -677,7 +677,7 @@ package away3d.loaders.parsers
 				materials_parsed++;
 			}
 			
-			mesh = new Mesh(null, geom);
+			mesh = new Mesh(geom);
 			mesh.transform = mtx;
 			
 			// Add to parent if one exists

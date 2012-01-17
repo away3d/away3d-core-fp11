@@ -34,37 +34,37 @@ package away3d.containers
 		private var _height : Number = 0;
 		private var _localPos : Point = new Point();
 		private var _globalPos : Point = new Point();
-		private var _scene : Scene3D;
-		private var _camera : Camera3D;
-		private var _entityCollector : EntityCollector;
+		protected var _scene : Scene3D;
+		protected var _camera : Camera3D;
+		protected var _entityCollector : EntityCollector;
 
-		private var _aspectRatio : Number;
+		protected var _aspectRatio : Number;
 		private var _time : Number = 0;
 		private var _deltaTime : uint;
 		private var _backgroundColor : uint = 0x000000;
 		private var _backgroundAlpha : Number = 1;
 
-		private var _mouse3DManager : Mouse3DManager;
+		protected var _mouse3DManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
 
-		private var _renderer : RendererBase;
+		protected var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
 		private var _addedToStage:Boolean;
 
-		private var _filter3DRenderer : Filter3DRenderer;
-		private var _requireDepthRender : Boolean;
-		private var _depthRender : Texture;
+		protected var _filter3DRenderer : Filter3DRenderer;
+		protected var _requireDepthRender : Boolean;
+		protected var _depthRender : Texture;
 		private var _depthTextureInvalid : Boolean = true;
 
 		private var _hitField : Sprite;
-		private var _parentIsStage : Boolean;
+		protected var _parentIsStage : Boolean;
 
 		private var _background : Texture2DBase;
-		private var _stage3DProxy : Stage3DProxy;
-		private var _backBufferInvalid : Boolean = true;
+		protected var _stage3DProxy : Stage3DProxy;
+		protected var _backBufferInvalid : Boolean = true;
 		private var _antiAlias : uint;
 
-		private var _rttBufferManager : RTTBufferManager;
+		protected var _rttBufferManager : RTTBufferManager;
 
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null)
 		{
@@ -386,7 +386,7 @@ package away3d.containers
 		/**
 		 * Updates the backbuffer dimensions.
 		 */
-		private function updateBackBuffer() : void
+		protected function updateBackBuffer() : void
 		{
 			_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
 			
@@ -438,7 +438,7 @@ package away3d.containers
 			_mouse3DManager.fireMouseEvents();
 		}
 
-		private function updateGlobalPos() : void
+		protected function updateGlobalPos() : void
 		{
 			var globalPos : Point = parent.localToGlobal(_localPos);
 			if (_globalPos.x != globalPos.x) _stage3DProxy.x = globalPos.x;
@@ -446,7 +446,7 @@ package away3d.containers
 			_globalPos = globalPos;
 		}
 
-		private function updateTime() : void
+		protected function updateTime() : void
 		{
 			var time : Number = getTimer();
 			if (_time == 0) _time = time;
@@ -469,7 +469,7 @@ package away3d.containers
 			}
 		}
 		
-		private function renderSceneDepth(entityCollector : EntityCollector) : void
+		protected function renderSceneDepth(entityCollector : EntityCollector) : void
 		{
 			if (_depthTextureInvalid || !_depthRender) initDepthTexture(_stage3DProxy._context3D);
 			_depthRenderer.render(entityCollector, _depthRender);

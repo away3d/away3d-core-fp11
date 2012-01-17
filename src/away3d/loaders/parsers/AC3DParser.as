@@ -210,7 +210,7 @@
 						
 						if(trunk[1] == "poly"){
 							var geometry:Geometry = new Geometry();
-							activeMesh = new Mesh(null, geometry);
+							activeMesh = new Mesh(geometry, null);
 							activeMesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
 							vertexes = [];
 							uvs = [];

@@ -37,7 +37,7 @@
 		 * @param material The material with which to render the Mesh.
 		 * @param geometry The geometry used by the mesh that provides it with its shape.
 		 */
-		public function Mesh(material : MaterialBase = null, geometry : Geometry = null)
+		public function Mesh(geometry : Geometry = null, material : MaterialBase = null)
 		{
 			super();
 			_subMeshes = new Vector.<SubMesh>();
@@ -189,7 +189,7 @@
 		 */
 		override public function clone() : Object3D
 		{
-			var clone : Mesh = new Mesh(_material, geometry);
+			var clone : Mesh = new Mesh(geometry, _material);
 			clone.transform = transform;
 			clone.pivotPoint = pivotPoint;
 			clone.partition = partition;

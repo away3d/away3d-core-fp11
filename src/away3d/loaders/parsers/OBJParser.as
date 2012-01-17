@@ -287,7 +287,7 @@ package away3d.loaders.parsers
 					translateMaterialGroup(materialGroups[m], geometry);
 				}
 				bmMaterial = new TextureMaterial( new BitmapTexture( defaultBitmapData ) );
-				mesh = new Mesh(bmMaterial, geometry);
+				mesh = new Mesh(geometry, bmMaterial);
 				meshid = _meshes.length;
 				mesh.name = "obj"+meshid;
 				_meshes[meshid] = mesh;

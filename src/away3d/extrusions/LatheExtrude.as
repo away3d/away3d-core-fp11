@@ -98,7 +98,7 @@ package away3d.extrusions
 			_subGeometry = new SubGeometry();
 			
 			if(!material && materials && materials.front) material = materials.front;
-			super((!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material, geom);
+			super(geom, (!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material);
 			 
 			_profile = profile;
 			_axis = axis;
