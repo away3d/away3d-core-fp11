@@ -40,12 +40,9 @@
 		public function Mesh(geometry : Geometry = null, material : MaterialBase = null)
 		{
 			super();
-			_geometry = geometry || new Geometry();
-			_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
-			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
-			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-			_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+			
 			_subMeshes = new Vector.<SubMesh>();
+			this.geometry = geometry || new Geometry();
 			this.material = material;
 			if (geometry) initGeometry();
 		}
@@ -114,6 +111,34 @@
 		public function get geometry() : Geometry
 		{
 			return _geometry;
+		}
+		public function set geometry(value : Geometry) : void
+		{
+			var i : uint;
+			
+			if (_geometry) {
+				_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
+				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
+				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
+				_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+				
+				// Remove all sub-meshes
+				while (_subMeshes.pop()) {
+					// No need to do anything.
+				}
+			}
+			
+			_geometry = value;
+			_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
+			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
+			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
+			_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+			
+			for (i=0; i<_geometry.subGeometries.length; i++) {
+				addSubMesh(_geometry.subGeometries[i]);
+			}
+			
+			invalidateBounds();
 		}
 
 		/**
