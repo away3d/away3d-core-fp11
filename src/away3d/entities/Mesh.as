@@ -134,9 +134,7 @@
 			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
 			_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
 			
-			for (i=0; i<_geometry.subGeometries.length; i++) {
-				addSubMesh(_geometry.subGeometries[i]);
-			}
+			initGeometry();
 			
 			invalidateBounds();
 		}
