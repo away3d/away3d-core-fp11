@@ -114,8 +114,6 @@
 		}
 		public function set geometry(value : Geometry) : void
 		{
-			var i : uint;
-			
 			if (_geometry) {
 				_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
 				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
