@@ -282,5 +282,9 @@ package away3d.bounds
 
 			return dot * dot - det >= 0;
 		}
+
+		public function get radius():Number {
+			return _radius;
+		}
 	}
 }

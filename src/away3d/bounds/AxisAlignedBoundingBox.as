@@ -159,5 +159,17 @@ package away3d.bounds
 			clone.fromExtremes(_min.x, _min.y, _min.z, _max.x, _max.y, _max.z);
 			return clone;
 		}
+
+		public function get halfExtentsX():Number {
+			return _halfExtentsX;
+		}
+
+		public function get halfExtentsY():Number {
+			return _halfExtentsY;
+		}
+
+		public function get halfExtentsZ():Number {
+			return _halfExtentsZ;
+		}
 	}
 }
