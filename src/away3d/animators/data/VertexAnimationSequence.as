@@ -10,7 +10,7 @@ package away3d.animators.data
 	 */
 	public class VertexAnimationSequence extends AnimationSequenceBase
 	{
-		public var _frames : Vector.<Geometry>;
+		arcane var _frames : Vector.<Geometry>;
 
 		/**
 		 * Creates a new VertexAnimationSequence object.
@@ -32,6 +32,15 @@ package away3d.animators.data
 			_totalDuration += duration;
 			_frames.push(geometry);
 			_durations.push(duration);
+		}
+
+		
+		/**
+		 * returns the sequence frames
+		 */
+		arcane function get frames() : Vector.<Geometry>
+		{
+			return _frames;
 		}
 	}
 }
