@@ -86,5 +86,30 @@ package away3d.animators
 		{
 			return _sequences[sequenceName];
 		}
+		/**
+		* Retrieves all sequences names.
+		* @private
+		*/
+		arcane function get sequencesNames() : Array
+		{
+			var seqsNames:Array = [];
+			for(var key:String in _sequences)
+				seqsNames.push(key);
+			 
+			return seqsNames;
+		}
+		
+		/**
+		 * Retrieves all the sequences
+		 * @private
+		 */
+		arcane function get sequences() : Array
+		{
+			var seqs:Array = [];
+			for(var key:String in _sequences)
+				seqs.push(_sequences[key]);
+			
+			return seqs;
+		}
 	}
 }
