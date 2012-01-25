@@ -223,16 +223,10 @@ package away3d.bounds
 			return _aabbPoints;
 		}
 
-		public function intersectsLine(p : Vector3D, dir : Vector3D) : Boolean
+		public function intersectsRay(p : Vector3D, dir : Vector3D) : Number
 		{
 			throw new AbstractMethodError();
-			return false;
-		}
-
-		public function intersectsRay(p : Vector3D, dir : Vector3D) : Boolean
-		{
-			throw new AbstractMethodError();
-			return false;
+			return -1;
 		}
 
 		protected function updateAABBPoints() : void
