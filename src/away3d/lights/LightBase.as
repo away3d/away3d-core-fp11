@@ -132,7 +132,7 @@ package away3d.lights
 		 */
 		public function get ambient() : Number
 		{
-			return _diffuse;
+			return _ambient;
 		}
 
 		public function set ambient(value : Number) : void
