@@ -32,7 +32,7 @@
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
 		private var _inited:Boolean;
-		private const LIMIT:uint = 64998;
+		private const LIMIT:uint = 65535;
 		private var trunk:Array;
 		private var materialIndexList:Array = [];
 		private var containersList:Array = [];
@@ -135,11 +135,10 @@
 			
 			if(!_startedParsing) {
 				_textData = getTextData();
+				var re:RegExp = new RegExp(String.fromCharCode(13),"g");
+				_textData = _textData.replace(re, "");
 				_startedParsing = true;
 			}
-			
-			if(_textData.indexOf(creturn) == -1 || _textData.indexOf(creturn)> 10)
-				creturn = String.fromCharCode(13);
 			
 			if(!_inited){
 				_inited = true;
@@ -159,8 +158,7 @@
 			var nameid:String;
 			var refscount:int;
 			var tUrl:String = "";
-			// TODO: not used
-			// var m:Mesh;
+			var m:Mesh;
 			var cont:ObjectContainer3D;
 			
 			while(charIndex<stringLength && hasTime()){
@@ -386,12 +384,12 @@
 				v1 = vertexes[uvs[i+2]];
 				v2 = vertexes[uvs[i+4]];
 				
-				vertices.push(v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+				vertices.push(-v1.x, v1.y, v1.z, -v0.x, v0.y, v0.z, -v2.x, v2.y, v2.z);
 				for(j=0; j<3;++j){
 					indices[index] = index;
 					index++;
 				}
-				vuv.push(uv0.u, uv0.v, uv1.u, uv1.v, uv2.u, uv2.v);
+				vuv.push(uv1.u, uv1.v, uv0.u, uv0.v, uv2.u, uv2.v);
 				vertLength+=9;
 			}
 			
@@ -408,7 +406,7 @@
 			
 			_activeContainer.addChild(mesh);
 			
-			mesh.x = tmpos.x;
+			mesh.x = -tmpos.x;
 			mesh.y = tmpos.y;
 			mesh.z = tmpos.z;
 			
@@ -423,35 +421,32 @@
 			
 			return null;
 		}
-		
-		/*
+		 
 		private function getVersionFromHex(char:String):int
 		{
-		switch (char) 
-		{
-		case "A": 
-		case "a":           
-		return 10;
-		case "B":
-		case "b":
-		return 11;
-		case "C":
-		case "c":
-		return 12;
-		case "D":
-		case "d":
-		return 13;
-		case "E":
-		case "e":
-		return 14;                
-		case "F":
-		case "f":
-		return 15;
-		default:
-		return new Number(char);
-		}    
+			switch (char) 
+			{
+				case "A": 
+				case "a":           
+					return 10;
+				case "B":
+				case "b":
+					return 11;
+				case "C":
+				case "c":
+					return 12;
+				case "D":
+				case "d":
+					return 13;
+				case "E":
+				case "e":
+					return 14;                
+				case "F":
+				case "f":
+					return 15;
+				default:
+					return new Number(char);
+			}    
 		}
-		*/
 	}
 }
-

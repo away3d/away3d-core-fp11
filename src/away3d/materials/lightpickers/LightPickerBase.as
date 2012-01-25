@@ -24,6 +24,8 @@ package away3d.materials.lightpickers
 		protected var _lightProbes : Vector.<LightProbe>;
 		protected var _lightProbeWeights : Vector.<Number>;
 
+		public var name : String;
+
 		/**
 		 * The maximum amount of directional lights that will be provided
 		 */

@@ -231,7 +231,6 @@
 			
 			for(i = 0; i<tmp.length; i+=3)
 				_segments.push( new PathSegment(tmp[i], tmp[i+1], tmp[i+2]) );
-				tmp[i] = tmp[i+1] = tmp[i+2] = null;
 			 
 			tmp = null;
 		}
