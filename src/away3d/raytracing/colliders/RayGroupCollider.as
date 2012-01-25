@@ -4,6 +4,7 @@ package away3d.raytracing.colliders
 	import away3d.entities.Mesh;
 
 	import flash.geom.Vector3D;
+	import flash.utils.getTimer;
 
 	public class RayGroupCollider extends RayCollider
 	{
@@ -16,12 +17,21 @@ package away3d.raytracing.colliders
 			_meshCollider = new RayMeshCollider();
 		}
 
+		// TODO: remove these on release
+		public var boundsTestTime:uint;
+		public var meshTestTime:uint;
+
 		override public function evaluate( ...params ):Boolean {
 			
 			var meshes:Vector.<Mesh> = params[ 0 ];
 
+			boundsTestTime = getTimer();
+			var boundsCollision:Boolean = _boundsCollider.evaluate( meshes );
+			boundsTestTime = getTimer() - boundsTestTime;
+
 			// triangle mesh collision test
-			if( _boundsCollider.evaluate( meshes ) ) {
+			meshTestTime = getTimer();
+			if( boundsCollision ) {
 
 				// sort colliders, closest first
 				_boundsCollider.sortColliders();
@@ -35,10 +45,12 @@ package away3d.raytracing.colliders
 					_meshCollider.updateRay( transformedRayPosition, transformedRayDirection );
 					if( _meshCollider.evaluate() ) {
 						_collides = true;
+						meshTestTime = getTimer() - meshTestTime;
 						return true;
 					}
 				}
 			}
+			meshTestTime = getTimer() - meshTestTime;
 
 			_collides = false;
 			return false;
