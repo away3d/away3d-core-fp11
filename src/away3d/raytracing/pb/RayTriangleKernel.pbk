@@ -47,45 +47,41 @@ kernel WaveDisplacement
         float t = -1.0; // a negative t will mean no intersection
         float3 intersection = float3( 0.0, 0.0, 0.0 );
 
-		// ignore triangles whose 3 vertices are 0, 0, 0,
-		// these might be null grid space
-		if( !( p0 == intersection && p1 == intersection && p2 == intersection ) ) {
-            // evaluate triangle sides and normal
-			float3 s0 = p1 - p0;
-			float3 s1 = p2 - p0;
-			float3 normal = cross( s0, s1 );
-			normal = normalize( normal );
+		// evaluate triangle sides and normal
+		float3 s0 = p1 - p0;
+		float3 s1 = p2 - p0;
+		float3 normal = cross( s0, s1 );
+		normal = normalize( normal );
 
-			float u = 0.0;
-			float v = 0.0;
-			float w = 0.0;
+		float u = 0.0;
+		float v = 0.0;
+		float w = 0.0;
 
-			// evaluate ray-plane intersection
-			float nDotV = dot( normal, rayDirection );
-			if( nDotV < 0.0 ) { // ray-plane intersection exists
-				float D = -dot( normal, p0 );
-				float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
-				t = distanceToPlane / nDotV;
+		// evaluate ray-plane intersection
+		float nDotV = dot( normal, rayDirection );
+		if( nDotV < 0.0 ) { // ray-plane intersection exists
+			float D = -dot( normal, p0 );
+			float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
+			t = distanceToPlane / nDotV;
+		}
+
+		// evaluate ray-triangle intersection
+		if( t > 0.0 ) { // if ray-plane intersection exists
+			intersection = rayStartPoint + t * rayDirection;
+			float3 R = intersection - p0;
+			float Q1Q2 = dot( s0, s1 );
+			float Q1Q1 = dot( s0, s0 );
+			float Q2Q2 = dot( s1, s1 );
+			float RQ1 = dot( R, s0 );
+			float RQ2 = dot( R, s1 );
+			float coeff = 1.0 / ( Q1Q1 * Q2Q2 - Q1Q2 * Q1Q2 );
+			v = coeff * ( Q2Q2 * RQ1 - Q1Q2 * RQ2 );
+			w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
+			u = 1.0 - v - w;
+			if( u < 0.0 || v < 0.0 || w < 0.0 ) { // if all 3 barycentric coords are >= 0, intersection is in triangle
+				t = -1.0;
 			}
-
-			// evaluate ray-triangle intersection
-			if( t > 0.0 ) { // if ray-plane intersection exists
-				intersection = rayStartPoint + t * rayDirection;
-				float3 R = intersection - p0;
-				float Q1Q2 = dot( s0, s1 );
-				float Q1Q1 = dot( s0, s0 );
-				float Q2Q2 = dot( s1, s1 );
-				float RQ1 = dot( R, s0 );
-				float RQ2 = dot( R, s1 );
-				float coeff = 1.0 / ( Q1Q1 * Q2Q2 - Q1Q2 * Q1Q2 );
-				v = coeff * ( Q2Q2 * RQ1 - Q1Q2 * RQ2 );
-				w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
-				u = 1.0 - v - w;
-				if( u < 0.0 || v < 0.0 || w < 0.0 ) { // if all 3 barycentric coords are >= 0, intersection is in triangle
-        	        t = -1.0;
-        	    }
-			}
-        }
+		}
 
 		intersectionBuffer = float4( t, intersection.x, intersection.y, intersection.z );
     }
