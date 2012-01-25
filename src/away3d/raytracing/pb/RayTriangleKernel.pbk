@@ -53,13 +53,9 @@ kernel WaveDisplacement
 		float3 normal = cross( s0, s1 );
 		normal = normalize( normal );
 
-		float u = 0.0;
-		float v = 0.0;
-		float w = 0.0;
-
 		// evaluate ray-plane intersection
 		float nDotV = dot( normal, rayDirection );
-		if( nDotV < 0.0 ) { // ray-plane intersection exists
+		if( nDotV < 0.0 ) { // ray-plane intersection exists on the proper side
 			float D = -dot( normal, p0 );
 			float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
 			t = distanceToPlane / nDotV;
@@ -75,9 +71,9 @@ kernel WaveDisplacement
 			float RQ1 = dot( R, s0 );
 			float RQ2 = dot( R, s1 );
 			float coeff = 1.0 / ( Q1Q1 * Q2Q2 - Q1Q2 * Q1Q2 );
-			v = coeff * ( Q2Q2 * RQ1 - Q1Q2 * RQ2 );
-			w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
-			u = 1.0 - v - w;
+			float v = coeff * ( Q2Q2 * RQ1 - Q1Q2 * RQ2 );
+			float w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
+			float u = 1.0 - v - w;
 			if( u < 0.0 || v < 0.0 || w < 0.0 ) { // if all 3 barycentric coords are >= 0, intersection is in triangle
 				t = -1.0;
 			}
