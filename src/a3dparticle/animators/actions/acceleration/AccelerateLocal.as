@@ -40,7 +40,7 @@ package a3dparticle.animators.actions.acceleration
 			}
 			else
 			{
-				if (!param[_name]) throw("there is no ", _name, " in param!");
+				if (!param[_name]) throw(Error("there is no " + _name + " in param!"));
 				_tempAcc = param[_name];
 			}
 		}

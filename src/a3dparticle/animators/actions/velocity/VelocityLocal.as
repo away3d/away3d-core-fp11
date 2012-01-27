@@ -39,7 +39,7 @@ package a3dparticle.animators.actions.velocity
 			}
 			else
 			{
-				if (!param[_name]) throw("there is no ", _name, " in param!");
+				if (!param[_name]) throw new Error("there is no " + _name + " in param!");
 				_tempVelocity = param[_name];
 			}
 		}

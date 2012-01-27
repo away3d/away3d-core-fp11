@@ -56,7 +56,7 @@ package a3dparticle.animators.actions.brokenline
 			}
 			else
 			{
-				if (!param[_name]) throw("there is no ", _name, " in param!");
+				if (!param[_name]) throw new Error("there is no " + _name + " in param!");
 				_brokenData = Vector.<Vector3D>(param[_name]);
 			}
 		}
