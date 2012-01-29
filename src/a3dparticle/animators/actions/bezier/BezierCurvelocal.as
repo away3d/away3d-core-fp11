@@ -53,6 +53,8 @@ package a3dparticle.animators.actions.bezier
 				if (!param[_name]) throw new Error("there is no " + _name + " in param!");
 				temp = param[_name];
 			}
+			_p1 = temp[0];
+			_p2 = temp[1];
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
