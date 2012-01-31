@@ -1,5 +1,6 @@
 package away3d.containers
 {
+
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Mouse3DManager;
@@ -13,13 +14,11 @@ package away3d.containers
 	import away3d.lights.LightBase;
 
 	import flash.display.BitmapData;
-
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.events.Event;
-	import flash.geom.Matrix3D;
 	import flash.geom.Point;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
@@ -582,7 +581,7 @@ package away3d.containers
 			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
 			_stage3DProxy.x = _globalPos.x;
 			_stage3DProxy.y = _globalPos.y;
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void
@@ -605,5 +604,9 @@ package away3d.containers
 		override public function set transform(value : Transform) : void {}
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
+
+		public function get mouse3DManager():Mouse3DManager {
+			return _mouse3DManager;
+		}
 	}
 }

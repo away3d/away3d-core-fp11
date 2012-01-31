@@ -11,7 +11,7 @@ package away3d.core.traverse
 
 	/**
 	 * The EntityCollector class is a traverser for scene partitions that collects all scene graph entities that are
-	 * considered potientially visible.
+	 * considered potentially visible.
 	 *
 	 * @see away3d.partition.Partition3D
 	 * @see away3d.partition.Entity

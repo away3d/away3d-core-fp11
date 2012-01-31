@@ -46,10 +46,7 @@ package away3d.core.base
 		 */
 		function get mouseEnabled() : Boolean;
 
-		/**
-		 * Indicates whether the IRenderable needs to provide mouse event details, such as position and uv coordinates.
-		 */
-		function get mouseDetails() : Boolean;
+		function get mousePickingPrecision():uint;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex positions.
@@ -104,6 +101,11 @@ package away3d.core.base
 		 */
 		function get castsShadows() : Boolean;
 
+		// TODO: add docs
+		function get vertexData():Vector.<Number>;
+		function get indexData():Vector.<uint>;
+		function get UVData():Vector.<Number>;
+		function get numericIndexData():Vector.<Number>;
 
 		function get uvTransform() : Matrix;
 	}
