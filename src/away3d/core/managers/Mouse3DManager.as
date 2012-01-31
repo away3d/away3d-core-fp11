@@ -90,8 +90,6 @@ package away3d.core.managers
 		 * Clear all resources and listeners used by this Mouse3DManager.
 		 */
 		public function dispose():void {
-//			_hitTestRenderer.dispose();
-			// TODO: dispose of ray collider
 			_view.removeEventListener( MouseEvent.CLICK, onClick );
 			_view.removeEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
 			_view.removeEventListener( MouseEvent.MOUSE_DOWN, onMouseDown );

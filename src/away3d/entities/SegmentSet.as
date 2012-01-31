@@ -41,6 +41,7 @@
 		private var _vertexBuffer:VertexBuffer3D;
 		private var _indexBuffer:IndexBuffer3D;
 		private var _lineCount:uint;
+		private var _numericIndexData:Vector.<Number>;
 
 		public function SegmentSet() {
 			super();
@@ -271,23 +272,28 @@
 		}
 
 		public function get vertexData():Vector.<Number> {
-			// TODO
-			return null;
+			return _vertices;
 		}
 
 		public function get indexData():Vector.<uint> {
-			// TODO
-						return null;
+			return _indices;
 		}
 
 		public function get UVData():Vector.<Number> {
-			// TODO
-						return null;
+			return null;
 		}
 
 		public function get numericIndexData():Vector.<Number> {
-			// TODO
-			return null;
+			// TODO: refresh when sub geometry changes
+			if( _numericIndexData == null ) {
+				_numericIndexData = new Vector.<Number>();
+				var i:uint;
+				var len:uint = _indices.length;
+				for( i = 0; i < len; ++i ) {
+					_numericIndexData.push( Number( _indices[ i ] ) );
+				}
+			}
+			return _numericIndexData;
 		}
 	}
 }

@@ -46,14 +46,14 @@ package away3d.raytracing.colliders
 				return;
 			}
 			// send vertices to pb
-			var vertices:Vector.<Number> = renderable.vertexData.concat(); // TODO: need concat?
+			var vertices:Vector.<Number> = renderable.vertexData; // TODO: need concat? could affect rendering by introducing null triangles
 			var vertexBufferDims:Point = fitArrayToNearestGridDimensions( vertices );
 			_rayTriangleKernel.data.vertexBuffer.width = vertexBufferDims.x;
 			_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
 			_rayTriangleKernel.data.vertexBufferWidth.value = [ vertexBufferDims.x ];
 			_rayTriangleKernel.data.vertexBuffer.input = vertices;
 			// send indices to pb
-			var indices:Vector.<Number> = renderable.numericIndexData; // TODO: need concat?
+			var indices:Vector.<Number> = renderable.numericIndexData;
 			_indexBufferDims = fitArrayToNearestGridDimensions( indices );
 			_rayTriangleKernel.data.indexBuffer.width = _indexBufferDims.x;
 			_rayTriangleKernel.data.indexBuffer.height = _indexBufferDims.y;

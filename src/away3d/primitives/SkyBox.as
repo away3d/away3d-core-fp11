@@ -38,6 +38,7 @@ package away3d.primitives
 		private var _material:SkyBoxMaterial;
 		private var _nullAnimation:AnimationBase = new NullAnimation();
 		private var _uvTransform:Matrix = new Matrix();
+		private var _numericIndexData:Vector.<Number>;
 
 		/**
 		 * Create a new SkyBox object.
@@ -241,23 +242,28 @@ package away3d.primitives
 		}
 
 		public function get vertexData():Vector.<Number> {
-			// TODO
-			return null;
+			return _geometry.vertexData;
 		}
 
 		public function get indexData():Vector.<uint> {
-			// TODO
-			return null;
+			return _geometry.indexData;
 		}
 
 		public function get UVData():Vector.<Number> {
-			// TODO
-			return null;
+			return _geometry.UVData;
 		}
 
 		public function get numericIndexData():Vector.<Number> {
-			// TODO
-			return null;
+			// TODO: refresh when sub geometry changes
+			if( _numericIndexData == null ) {
+				_numericIndexData = new Vector.<Number>();
+				var i:uint;
+				var len:uint = _geometry.indexData.length;
+				for( i = 0; i < len; ++i ) {
+					_numericIndexData.push( Number( _geometry.indexData[ i ] ) );
+				}
+			}
+			return _numericIndexData;
 		}
 	}
 }

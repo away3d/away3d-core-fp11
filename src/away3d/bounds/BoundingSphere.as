@@ -276,6 +276,11 @@ package away3d.bounds
 			return -1;
 		}
 
+		override public function containsPoint( p:Vector3D ):Boolean {
+			var distance:Number = Math.sqrt( p.x * p.x + p.y * p.y + p.z * p.z );
+			return distance <= _radius;
+		}
+
 		public function get radius():Number {
 			return _radius;
 		}

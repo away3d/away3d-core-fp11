@@ -1,5 +1,6 @@
 package away3d.core.base
 {
+
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 
@@ -16,17 +17,17 @@ package away3d.core.base
 		/**
 		 * The transformation matrix that transforms from model to world space.
 		 */
-		function get sceneTransform() : Matrix3D;
+		function get sceneTransform():Matrix3D;
 
 		/**
 		 * The inverse scene transform object that transforms from world to model space.
 		 */
-		function get inverseSceneTransform() : Matrix3D;
+		function get inverseSceneTransform():Matrix3D;
 
 		/**
 		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
 		 */
-		function get modelViewProjection() : Matrix3D;
+		function get modelViewProjection():Matrix3D;
 
 		/**
 		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
@@ -34,17 +35,17 @@ package away3d.core.base
 		 *
 		 * @private
 		 */
-		function getModelViewProjectionUnsafe() : Matrix3D;
+		function getModelViewProjectionUnsafe():Matrix3D;
 
 		/**
 		 * The distance of the IRenderable object to the view, used to sort per object.
 		 */
-		function get zIndex() : Number;
+		function get zIndex():Number;
 
 		/**
 		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
 		 */
-		function get mouseEnabled() : Boolean;
+		function get mouseEnabled():Boolean;
 
 		function get mousePickingPrecision():uint;
 
@@ -53,60 +54,75 @@ package away3d.core.base
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex positions.
 		 */
-		function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
+		function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains texture coordinates.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains texture coordinates.
 		 */
-		function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
+		function getUVBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
 
 
-		function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
+		function getSecondaryUVBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex normals.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex normals.
 		 */
-		function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
+		function getVertexNormalBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex tangents.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex tangents.
 		 */
-		function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
+		function getVertexTangentBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains triangle indices.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains triangle indices.
 		 */
-		function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D;
+		function getIndexBuffer( stage3DProxy:Stage3DProxy ):IndexBuffer3D;
 
 		/**
 		 * The amount of triangles that comprise the IRenderable geometry.
 		 */
-		function get numTriangles() : uint;
+		function get numTriangles():uint;
 
 		/**
 		 * The entity that that initially provided the IRenderable to the render pipeline.
 		 */
-		function get sourceEntity() : Entity;
+		function get sourceEntity():Entity;
 
 		/**
 		 * Indicates whether the renderable can cast shadows
 		 */
-		function get castsShadows() : Boolean;
+		function get castsShadows():Boolean;
 
-		// TODO: add docs
+		/**
+		 * Retrieves the object's vertices as a Number array.
+		 */
 		function get vertexData():Vector.<Number>;
+
+		/**
+		 * Retrieves the object's indices as a uint array.
+		 */
 		function get indexData():Vector.<uint>;
+
+		/**
+		 * Retrieves the object's uvs as a Number array.
+		 */
 		function get UVData():Vector.<Number>;
+
+		/**
+		 * Retrieves the object's indices as a Number array instead of a uint array.
+		 * This is needed for passing index data to pixel bender.
+		 */
 		function get numericIndexData():Vector.<Number>;
 
-		function get uvTransform() : Matrix;
+		function get uvTransform():Matrix;
 	}
 }

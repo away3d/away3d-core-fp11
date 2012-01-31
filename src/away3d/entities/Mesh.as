@@ -64,7 +64,6 @@
 			invalidateBounds();
 		}
 
-		// TODO: deprecate mouse details with new picking implementation?
 		/**
 		 * Indicates whether or not mouse events contain UV and position coordinates. Setting this to true can affect performance. Defaults to false.
 		 */

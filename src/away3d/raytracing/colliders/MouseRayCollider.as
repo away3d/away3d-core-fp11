@@ -55,10 +55,10 @@ package away3d.raytracing.colliders
 						objectSpaceRayPositions[ entity ] = transformedRayPosition;
 						objectSpaceRayDirections[ entity ] = transformedRayDirection;
 						_t = bounds.intersectsRay( transformedRayPosition, transformedRayDirection );
-						if( _t > 0 ) {
+						if( _t > 0 || bounds.containsPoint( transformedRayPosition ) ) {
 							boundsCollisionTs.push( _t );
 							entitiesWhoseBoundsAreHitByRay[ _t ] = entity;
-							var point:Vector3D = new Vector3D(); // TODO: can ask bounds itself for intersection?
+							var point:Vector3D = new Vector3D();
 							point.x = transformedRayPosition.x + _t * transformedRayDirection.x;
 							point.y = transformedRayPosition.y + _t * transformedRayDirection.y;
 							point.z = transformedRayPosition.z + _t * transformedRayDirection.z;

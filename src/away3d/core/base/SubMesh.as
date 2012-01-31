@@ -36,6 +36,7 @@ package away3d.core.base
 		private var _scaleV:Number = 1;
 		private var _offsetU:Number = 0;
 		private var _offsetV:Number = 0;
+		private var _numericIndexData:Vector.<Number>;
 
 		/**
 		 * Creates a new SubMesh object
@@ -296,8 +297,6 @@ package away3d.core.base
 			return _subGeometry.UVData;
 		}
 
-		// TODO: tidy up and document
-		private var _numericIndexData:Vector.<Number>;
 		public function get numericIndexData():Vector.<Number> {
 			// TODO: refresh when sub geometry changes
 			if( _numericIndexData == null ) {

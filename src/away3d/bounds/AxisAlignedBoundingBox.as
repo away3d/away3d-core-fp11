@@ -240,6 +240,13 @@ package away3d.bounds
 			return -1;
 		}
 
+		override public function containsPoint( p:Vector3D ):Boolean {
+			if( p.x > _halfExtentsX || p.x < -_halfExtentsX ) return false;
+			if( p.y > _halfExtentsY || p.y < -_halfExtentsY ) return false;
+			if( p.z > _halfExtentsZ || p.z < -_halfExtentsZ ) return false;
+			return true;
+		}
+
 		/**
 		 * @inheritDoc
 		 */

@@ -197,7 +197,6 @@ package away3d.bounds
 		public function isInFrustum(mvpMatrix : Matrix3D) : Boolean
 		{
 			throw new AbstractMethodError();
-			return false;
 		}
 
 		/*public function classifyAgainstPlane(plane : Plane3D) : int
@@ -226,7 +225,10 @@ package away3d.bounds
 		public function intersectsRay(p : Vector3D, dir : Vector3D) : Number
 		{
 			throw new AbstractMethodError();
-			return -1;
+		}
+
+		public function containsPoint( p:Vector3D ):Boolean {
+			throw new AbstractMethodError();
 		}
 
 		protected function updateAABBPoints() : void
