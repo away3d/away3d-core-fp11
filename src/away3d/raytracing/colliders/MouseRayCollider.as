@@ -57,7 +57,8 @@ package away3d.raytracing.colliders
 						objectSpaceRayDirections[ entity ] = transformedRayDirection;
 						_t = bounds.intersectsRay( transformedRayPosition, transformedRayDirection );
 						// TODO: allow collisions if inside bounds or not? maybe add a property to Entities
-						if( _t > 0 /*&& !bounds.containsPoint( transformedRayPosition )*/ ) {
+						// TODO: David says: we might just have to settle for when the camera is inside the bounds, the geometry would need to be checked :/
+						if( _t > 0 || bounds.containsPoint( transformedRayPosition ) ) {
 							boundsCollisionTs.push( _t );
 							entitiesWhoseBoundsAreHitByRay[ _t ] = entity;
 							var point:Vector3D = new Vector3D();
