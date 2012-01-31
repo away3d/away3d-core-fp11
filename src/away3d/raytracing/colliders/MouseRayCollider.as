@@ -17,6 +17,7 @@ package away3d.raytracing.colliders
 	{
 		private var _triangleCollider:RayTriangleCollider;
 		private var _view:View3D;
+		private var _numBoundHits:uint;
 
 		public function MouseRayCollider( view:View3D ) {
 			super();
@@ -55,7 +56,8 @@ package away3d.raytracing.colliders
 						objectSpaceRayPositions[ entity ] = transformedRayPosition;
 						objectSpaceRayDirections[ entity ] = transformedRayDirection;
 						_t = bounds.intersectsRay( transformedRayPosition, transformedRayDirection );
-						if( _t > 0 || bounds.containsPoint( transformedRayPosition ) ) {
+						// TODO: allow collisions if inside bounds or not? maybe add a property to Entities
+						if( _t > 0 /*&& !bounds.containsPoint( transformedRayPosition )*/ ) {
 							boundsCollisionTs.push( _t );
 							entitiesWhoseBoundsAreHitByRay[ _t ] = entity;
 							var point:Vector3D = new Vector3D();
@@ -71,8 +73,8 @@ package away3d.raytracing.colliders
 			}
 
 			// no bound hits?
-			var numBoundsHits:uint = boundsCollisionTs.length;
-			if( numBoundsHits == 0 ) {
+			_numBoundHits = boundsCollisionTs.length;
+			if( _numBoundHits == 0 ) {
 				return _collisionExists = false;
 			}
 
@@ -80,7 +82,7 @@ package away3d.raytracing.colliders
 			boundsCollisionTs = boundsCollisionTs.sort( Array.NUMERIC );
 
 			// perform triangle tests on the entities, from closest to furthest
-			for( i = 0; i < numBoundsHits; ++i ) {
+			for( i = 0; i < _numBoundHits; ++i ) {
 				_t = boundsCollisionTs[ i ];
 				entity = entitiesWhoseBoundsAreHitByRay[ _t ];
 				var items:Vector.<RenderableListItem> = entityRenderableItems[ entity ];
@@ -108,6 +110,10 @@ package away3d.raytracing.colliders
 
 		public function get collisionUV():Point {
 			return _triangleCollider.collisionUV;
+		}
+
+		public function get numBoundHits():uint {
+			return _numBoundHits;
 		}
 	}
 }

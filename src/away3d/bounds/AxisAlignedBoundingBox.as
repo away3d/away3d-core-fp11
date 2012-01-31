@@ -140,7 +140,7 @@ package away3d.bounds
 
 		override public function intersectsRay( p:Vector3D, v:Vector3D ):Number {
 
-			var px:Number = p.x, py:Number = p.y, pz:Number = p.z;
+			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
 			var vx:Number = v.x, vy:Number = v.y, vz:Number = v.z;
 			var ix:Number, iy:Number, iz:Number;
 			var containedInAxis1:Boolean, containedInAxis2:Boolean;

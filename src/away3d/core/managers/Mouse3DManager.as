@@ -151,6 +151,7 @@ package away3d.core.managers
 				queueDispatch( _mouseWheel, event );
 		}
 
+		// TODO: (Li) remove test time on release
 		private var _testTime:uint;
 		public function get testTime():uint {
 			return _testTime;
@@ -172,7 +173,7 @@ package away3d.core.managers
 
 			if( collector.numMouseEnableds > 0 ) {
 				_mouseRayCollider.evaluate( collector.opaqueRenderableHead );
-				// TODO: also check collector.blendedRenderableHead
+				// TODO: (Li) also check collector.blendedRenderableHead
 				_activeRenderable = _mouseRayCollider.collidingRenderable;
 				_activeObject = ( _activeRenderable && _activeRenderable.mouseEnabled ) ? _activeRenderable.sourceEntity : null;
 			}
@@ -282,6 +283,10 @@ package away3d.core.managers
 				dispatch( _queuedEvents[i] );
 
 			_queuedEvents.length = 0;
+		}
+
+		public function get mouseRayCollider():MouseRayCollider {
+			return _mouseRayCollider;
 		}
 	}
 }

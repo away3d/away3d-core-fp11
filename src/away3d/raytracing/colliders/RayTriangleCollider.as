@@ -46,7 +46,7 @@ package away3d.raytracing.colliders
 				return;
 			}
 			// send vertices to pb
-			var vertices:Vector.<Number> = renderable.vertexData; // TODO: need concat? could affect rendering by introducing null triangles
+			var vertices:Vector.<Number> = renderable.vertexData; // TODO: (Li) need concat? could affect rendering by introducing null triangles
 			var vertexBufferDims:Point = fitArrayToNearestGridDimensions( vertices );
 			_rayTriangleKernel.data.vertexBuffer.width = vertexBufferDims.x;
 			_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
