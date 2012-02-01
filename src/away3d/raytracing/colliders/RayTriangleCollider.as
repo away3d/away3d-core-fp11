@@ -42,18 +42,18 @@ package away3d.raytracing.colliders
 
 		private function uploadRenderableData( renderable:IRenderable ):void {
 			// if working on a clone, no need to resend data to pb
-			if( _lastRenderableUploaded && _lastRenderableUploaded == renderable ) {
+			if( _lastRenderableUploaded && _lastRenderableUploaded == renderable ) { // TODO: avoid upload is not working, renderables are not geometries
 				return;
 			}
 			// send vertices to pb
-			var vertices:Vector.<Number> = renderable.vertexData; // TODO: (Li) need concat? could affect rendering by introducing null triangles
+			var vertices:Vector.<Number> = renderable.vertexData.concat(); // TODO: (Li) need concat? if not could affect rendering by introducing null triangles, or uncontrolled index buffer growth
 			var vertexBufferDims:Point = fitArrayToNearestGridDimensions( vertices );
 			_rayTriangleKernel.data.vertexBuffer.width = vertexBufferDims.x;
 			_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
 			_rayTriangleKernel.data.vertexBufferWidth.value = [ vertexBufferDims.x ];
 			_rayTriangleKernel.data.vertexBuffer.input = vertices;
 			// send indices to pb
-			var indices:Vector.<Number> = renderable.numericIndexData;
+			var indices:Vector.<Number> = renderable.numericIndexData.concat();
 			_indexBufferDims = fitArrayToNearestGridDimensions( indices );
 			_rayTriangleKernel.data.indexBuffer.width = _indexBufferDims.x;
 			_rayTriangleKernel.data.indexBuffer.height = _indexBufferDims.y;

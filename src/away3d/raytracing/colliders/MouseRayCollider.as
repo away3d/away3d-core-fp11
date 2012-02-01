@@ -27,6 +27,8 @@ package away3d.raytracing.colliders
 
 		override public function evaluate( item:RenderableListItem ):Boolean {
 
+			// TODO: implement without these dictionaries
+
 			// init
 			var i:uint, j:uint;
 			var entityRenderableItems:Dictionary = new Dictionary();
@@ -36,6 +38,7 @@ package away3d.raytracing.colliders
 			var alreadyCheckedEntityBounds:Dictionary = new Dictionary();
 			var objectSpaceRayPositions:Dictionary = new Dictionary();
 			var objectSpaceRayDirections:Dictionary = new Dictionary();
+			var cameraInBounds:Dictionary = new Dictionary();
 			var entity:Entity;
 
 			// update ray to shoot from mouse
@@ -56,9 +59,10 @@ package away3d.raytracing.colliders
 						objectSpaceRayPositions[ entity ] = transformedRayPosition;
 						objectSpaceRayDirections[ entity ] = transformedRayDirection;
 						_t = bounds.intersectsRay( transformedRayPosition, transformedRayDirection );
-						// TODO: allow collisions if inside bounds or not? maybe add a property to Entities
-						// TODO: David says: we might just have to settle for when the camera is inside the bounds, the geometry would need to be checked :/
-						if( _t > 0 || bounds.containsPoint( transformedRayPosition ) ) {
+						var cameraIsInsideBounds:Boolean = bounds.containsPoint( transformedRayPosition );
+						if( cameraIsInsideBounds ) _t = 0;
+						cameraInBounds[ entity ] = cameraIsInsideBounds;
+						if( _t >= 0 ) {
 							boundsCollisionTs.push( _t );
 							entitiesWhoseBoundsAreHitByRay[ _t ] = entity;
 							var point:Vector3D = new Vector3D();
@@ -91,7 +95,7 @@ package away3d.raytracing.colliders
 				_triangleCollider.updateRay( objectSpaceRayPositions[ entity ], objectSpaceRayDirections[ entity ] );
 				for( j = 0; j < numItems; ++j ) {
 					item = items[ j ];
-					if( item.renderable.mousePickingPrecision == MousePickingPrecision.MESH ) { // need triangle intersection?
+					if( cameraInBounds[ entity ] || item.renderable.mousePickingPrecision == MousePickingPrecision.MESH ) { // need triangle intersection?
 						if( _triangleCollider.evaluate( item ) ) {
 							_collidingRenderable = _triangleCollider.collidingRenderable;
 							_collisionPoint = _triangleCollider.collisionPoint;
