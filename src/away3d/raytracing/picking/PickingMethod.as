@@ -1,4 +1,4 @@
-package away3d.raytracing.data
+package away3d.raytracing.picking
 {
 
 	public class PickingMethod

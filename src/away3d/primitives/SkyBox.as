@@ -17,7 +17,7 @@ package away3d.primitives
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
 	import away3d.materials.utils.CubeMap;
-	import away3d.raytracing.data.PickingMethod;
+	import away3d.raytracing.picking.PickingMethod;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
