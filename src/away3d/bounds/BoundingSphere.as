@@ -277,7 +277,8 @@ package away3d.bounds
 		}
 
 		override public function containsPoint( p:Vector3D ):Boolean {
-			var distance:Number = Math.sqrt( p.x * p.x + p.y * p.y + p.z * p.z );
+			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
+			var distance:Number = Math.sqrt( px * px + py * py + pz * pz );
 			return distance <= _radius;
 		}
 
