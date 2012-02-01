@@ -27,7 +27,9 @@ package away3d.raytracing.colliders
 
 		override public function evaluate( item:RenderableListItem ):Boolean {
 
-			// TODO: implement without these dictionaries
+			// TODO: implement without these dictionaries, introduce a vo and use array.sortOn()?
+			// TODO: the complication is that bounds need to be checked and then ordered from closest
+			// TODO: to furthest before performing any triangle collision tests.
 
 			// init
 			var i:uint, j:uint;
@@ -59,7 +61,10 @@ package away3d.raytracing.colliders
 						objectSpaceRayPositions[ entity ] = transformedRayPosition;
 						objectSpaceRayDirections[ entity ] = transformedRayDirection;
 						_t = bounds.intersectsRay( transformedRayPosition, transformedRayDirection );
-						var cameraIsInsideBounds:Boolean = bounds.containsPoint( transformedRayPosition );
+						var cameraIsInsideBounds:Boolean = false;
+						if( _t == -1 ) {
+							cameraIsInsideBounds = bounds.containsPoint( transformedRayPosition );
+						}
 						if( cameraIsInsideBounds ) _t = 0;
 						cameraInBounds[ entity ] = cameraIsInsideBounds;
 						if( _t >= 0 ) {
