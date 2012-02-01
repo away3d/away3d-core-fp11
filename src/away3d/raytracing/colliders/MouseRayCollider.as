@@ -27,9 +27,9 @@ package away3d.raytracing.colliders
 
 		override public function evaluate( item:RenderableListItem ):Boolean {
 
-			// TODO: implement without these dictionaries, introduce a vo and use array.sortOn()?
+			// TODO: implement without these dictionaries - introduce a vo and use array.sortOn()?
 			// TODO: the complication is that bounds need to be checked and then ordered from closest
-			// TODO: to furthest before performing any triangle collision tests.
+			// TODO: to furthest "t" value, before performing any triangle collision tests.
 
 			// init
 			var i:uint, j:uint;
@@ -50,6 +50,7 @@ package away3d.raytracing.colliders
 			while(item) {
 				var renderable:IRenderable = item.renderable;
 				if( renderable.mouseEnabled ) {
+					// identify the renderable's entity
 					entity = renderable.sourceEntity;
 					if( entity.visible && !alreadyCheckedEntity[ entity ] ) {
 						// remember which renderables are associated with this entity
