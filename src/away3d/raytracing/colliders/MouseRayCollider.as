@@ -37,7 +37,7 @@ package away3d.raytracing.colliders
 			var boundsCollisionPoints:Dictionary = new Dictionary();
 			var boundsCollisionTs:Vector.<Number> = new Vector.<Number>();
 			var entitiesWhoseBoundsAreHitByRay:Dictionary = new Dictionary();
-			var alreadyCheckedEntityBounds:Dictionary = new Dictionary();
+			var alreadyCheckedEntity:Dictionary = new Dictionary();
 			var objectSpaceRayPositions:Dictionary = new Dictionary();
 			var objectSpaceRayDirections:Dictionary = new Dictionary();
 			var cameraInBounds:Dictionary = new Dictionary();
@@ -51,15 +51,17 @@ package away3d.raytracing.colliders
 				var renderable:IRenderable = item.renderable;
 				if( renderable.mouseEnabled ) {
 					entity = renderable.sourceEntity;
-					if( entity.visible && !alreadyCheckedEntityBounds[ entity ] ) {
+					if( entity.visible && !alreadyCheckedEntity[ entity ] ) {
+						// remember which renderables are associated with this entity
 						if( !entityRenderableItems[ entity ] ) entityRenderableItems[ entity ] = new Vector.<RenderableListItem>;
 						entityRenderableItems[ entity ].push( item );
-						var bounds:BoundingVolumeBase = entity.bounds;
 						// transform ray to object space
 						var transformedRayPosition:Vector3D = entity.inverseSceneTransform.transformVector( _rayPosition );
 						var transformedRayDirection:Vector3D = entity.inverseSceneTransform.deltaTransformVector( _rayDirection );
 						objectSpaceRayPositions[ entity ] = transformedRayPosition;
 						objectSpaceRayDirections[ entity ] = transformedRayDirection;
+						// perform collision check on bounds ( camera inside bounds counts as a hit and is a special case )
+						var bounds:BoundingVolumeBase = entity.bounds;
 						_t = bounds.intersectsRay( transformedRayPosition, transformedRayDirection );
 						var cameraIsInsideBounds:Boolean = false;
 						if( _t == -1 ) {
@@ -67,7 +69,7 @@ package away3d.raytracing.colliders
 						}
 						if( cameraIsInsideBounds ) _t = 0;
 						cameraInBounds[ entity ] = cameraIsInsideBounds;
-						if( _t >= 0 ) {
+						if( _t >= 0 ) { // if passed, store entity and some data
 							boundsCollisionTs.push( _t );
 							entitiesWhoseBoundsAreHitByRay[ _t ] = entity;
 							var point:Vector3D = new Vector3D();
@@ -76,8 +78,8 @@ package away3d.raytracing.colliders
 							point.z = transformedRayPosition.z + _t * transformedRayDirection.z;
 							boundsCollisionPoints[ _t ] = point;
 						}
-						alreadyCheckedEntityBounds[ entity ] = true;
 					}
+					alreadyCheckedEntity[ entity ] = true;
 				}
 				item = item.next;
 			}
@@ -93,14 +95,18 @@ package away3d.raytracing.colliders
 
 			// perform triangle tests on the entities, from closest to furthest
 			for( i = 0; i < _numBoundHits; ++i ) {
+				// retrieve entity
 				_t = boundsCollisionTs[ i ];
 				entity = entitiesWhoseBoundsAreHitByRay[ _t ];
 				var items:Vector.<RenderableListItem> = entityRenderableItems[ entity ];
 				var numItems:uint = items.length;
+				// update triangle collider ray
 				_triangleCollider.updateRay( objectSpaceRayPositions[ entity ], objectSpaceRayDirections[ entity ] );
+				// sweep renderables
 				for( j = 0; j < numItems; ++j ) {
 					item = items[ j ];
-					if( cameraInBounds[ entity ] || item.renderable.mousePickingPrecision == MousePickingPrecision.MESH ) { // need triangle intersection?
+					// need triangle collision test?
+					if( cameraInBounds[ entity ] || item.renderable.mousePickingPrecision == MousePickingPrecision.MESH ) {
 						if( _triangleCollider.evaluate( item ) ) {
 							_collidingRenderable = _triangleCollider.collidingRenderable;
 							_collisionPoint = _triangleCollider.collisionPoint;
