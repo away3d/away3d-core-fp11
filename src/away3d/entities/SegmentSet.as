@@ -15,7 +15,7 @@
 	import away3d.materials.SegmentMaterial;
 	import away3d.primitives.LineSegment;
 	import away3d.primitives.data.Segment;
-	import away3d.raytracing.data.MousePickingPrecision;
+	import away3d.raytracing.data.PickingMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -214,8 +214,8 @@
 			return null;
 		}
 
-		public function get mousePickingPrecision():uint {
-			return MousePickingPrecision.BOUNDS;
+		public function get pickingMethod():uint {
+			return PickingMethod.BOUNDS;
 		}
 
 		public function get numTriangles():uint {

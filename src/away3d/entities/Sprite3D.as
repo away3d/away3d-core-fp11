@@ -34,7 +34,7 @@ package away3d.entities
 		private static var _geometry:SubGeometry;
 
 		private static var _nullAnimation:NullAnimation;
-		private var _mousePickingPrecision:uint;
+		private var _pickingMethod:uint;
 		private var _material:MaterialBase;
 		private var _animationState:AnimationStateBase;
 		private var _spriteMatrix:Matrix3D;
@@ -87,12 +87,12 @@ package away3d.entities
 		 _transform.appendScale(_width, _height, 1);
 		 }*/
 
-		public function get mousePickingPrecision():uint {
-			return _mousePickingPrecision;
+		public function get pickingMethod():uint {
+			return _pickingMethod;
 		}
 
-		public function set mousePickingPrecision( value:uint ):void {
-			_mousePickingPrecision = value;
+		public function set pickingMethod( value:uint ):void {
+			_pickingMethod = value;
 		}
 
 		public function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {

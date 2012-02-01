@@ -1,13 +1,11 @@
 package away3d.raytracing.colliders
 {
 
-	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.entities.Entity;
-	import away3d.raytracing.data.MouseCollisionVO;
-	import away3d.raytracing.data.MousePickingPrecision;
+	import away3d.raytracing.data.PickingMethod;
 
 	import flash.geom.Point;
 
@@ -86,7 +84,7 @@ package away3d.raytracing.colliders
 				for( j = 0; j < numItems; ++j ) {
 					item = collisionVO.renderableItems[ j ];
 					// need triangle collision test?
-					if( collisionVO.cameraIsInEntityBounds || item.renderable.mousePickingPrecision == MousePickingPrecision.MESH ) {
+					if( collisionVO.cameraIsInEntityBounds || item.renderable.pickingMethod == PickingMethod.MESH ) {
 						if( _triangleCollider.evaluate( item ) ) {
 							_collidingRenderable = _triangleCollider.collidingRenderable;
 							_collisionPoint = _triangleCollider.collisionPoint;
@@ -118,5 +116,24 @@ package away3d.raytracing.colliders
 		public function get numBoundHits():uint {
 			return _numBoundHits;
 		}
+	}
+}
+
+import away3d.core.data.RenderableListItem;
+import away3d.entities.Entity;
+
+import flash.geom.Vector3D;
+
+class MouseCollisionVO
+{
+	public var entity:Entity;
+	public var renderableItems:Vector.<RenderableListItem>;
+	public var t:Number;
+	public var localRayPosition:Vector3D;
+	public var localRayDirection:Vector3D;
+	public var cameraIsInEntityBounds:Boolean;
+
+	public function MouseCollisionVO() {
+		renderableItems = new Vector.<RenderableListItem>();
 	}
 }

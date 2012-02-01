@@ -31,7 +31,7 @@
 		private var _material:MaterialBase;
 		arcane var _animationState:AnimationStateBase;
 		private var _castsShadows:Boolean = true;
-		private var _mousePickingPrecision:uint;
+		private var _pickingMethod:uint;
 
 		/**
 		 * Create a new Mesh object.
@@ -67,12 +67,12 @@
 		/**
 		 * Indicates whether or not mouse events contain UV and position coordinates. Setting this to true can affect performance. Defaults to false.
 		 */
-		public function get mousePickingPrecision():uint {
-			return _mousePickingPrecision;
+		public function get pickingMethod():uint {
+			return _pickingMethod;
 		}
 
-		public function set mousePickingPrecision( value:uint ):void {
-			_mousePickingPrecision = value;
+		public function set pickingMethod( value:uint ):void {
+			_pickingMethod = value;
 		}
 
 		/**
