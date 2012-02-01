@@ -48,37 +48,40 @@ kernel RayTriangleKernel
 		float v = 0.0;
 		float w = 0.0;
 
-		// evaluate triangle sides and normal
-		float3 s0 = p1 - p0;
-		float3 s1 = p2 - p0;
-		float3 normal = cross( s0, s1 );
-		normal = normalize( normal );
+		float3 zero = float3( 0.0, 0.0, 0.0 );
+		if( !( p0 == zero && p1 == zero && p2 == zero ) ) { // check if its fill up data
+			// evaluate triangle sides and normal
+			float3 s0 = p1 - p0;
+			float3 s1 = p2 - p0;
+			float3 normal = cross( s0, s1 );
+			normal = normalize( normal );
 
-		// evaluate ray-plane intersection
-		float nDotV = dot( normal, rayDirection );
-		if( nDotV < 0.0 ) { // ray-plane intersection exists on the proper side
-			float D = -dot( normal, p0 );
-			float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
-			t = distanceToPlane / nDotV;
-		}
-
-		// evaluate ray-triangle intersection
-		if( t > 0.0 ) { // if ray-plane intersection exists
-			float3 intersection = rayStartPoint + t * rayDirection;
-			float3 R = intersection - p0;
-			float Q1Q2 = dot( s0, s1 );
-			float Q1Q1 = dot( s0, s0 );
-			float Q2Q2 = dot( s1, s1 );
-			float RQ1 = dot( R, s0 );
-			float RQ2 = dot( R, s1 );
-			float coeff = 1.0 / ( Q1Q1 * Q2Q2 - Q1Q2 * Q1Q2 );
-			v = coeff * ( Q2Q2 * RQ1 - Q1Q2 * RQ2 );
-			w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
-			if( v < 0.0 || w < 0.0 ) { // if all 3 barycentric coords are >= 0, intersection is in triangle
-				t = -1.0;
+			// evaluate ray-plane intersection
+			float nDotV = dot( normal, rayDirection );
+			if( nDotV < 0.0 ) { // ray-plane intersection exists on the proper side
+				float D = -dot( normal, p0 );
+				float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
+				t = distanceToPlane / nDotV;
 			}
-			else if( 1.0 - v - w < 0.0 ) { // last barycentric coord
-				t = -1.0;
+
+			// evaluate ray-triangle intersection
+			if( t > 0.0 ) { // if ray-plane intersection exists
+				float3 intersection = rayStartPoint + t * rayDirection;
+				float3 R = intersection - p0;
+				float Q1Q2 = dot( s0, s1 );
+				float Q1Q1 = dot( s0, s0 );
+				float Q2Q2 = dot( s1, s1 );
+				float RQ1 = dot( R, s0 );
+				float RQ2 = dot( R, s1 );
+				float coeff = 1.0 / ( Q1Q1 * Q2Q2 - Q1Q2 * Q1Q2 );
+				v = coeff * ( Q2Q2 * RQ1 - Q1Q2 * RQ2 );
+				w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
+				if( v < 0.0 || w < 0.0 ) { // if all 3 barycentric coords are >= 0, intersection is in triangle
+					t = -1.0;
+				}
+				else if( 1.0 - v - w < 0.0 ) { // last barycentric coord
+					t = -1.0;
+				}
 			}
 		}
 
