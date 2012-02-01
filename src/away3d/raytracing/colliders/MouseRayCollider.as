@@ -46,7 +46,7 @@ package away3d.raytracing.colliders
 			// update ray to shoot from mouse
 			updateRay( _view.camera.position, _view.unproject( _view.mouseX, _view.mouseY ) );
 
-			// filter entities whose bounds are hit by ray
+			// sweep renderables and collect entities whose bounds are hit by ray
 			while(item) {
 				var renderable:IRenderable = item.renderable;
 				if( renderable.mouseEnabled ) {
@@ -94,7 +94,7 @@ package away3d.raytracing.colliders
 			// sort collisions from closest to furthest
 			boundsCollisionTs = boundsCollisionTs.sort( Array.NUMERIC );
 
-			// perform triangle tests on the entities, from closest to furthest
+			// sweep hit entities and perform triangle tests on the entities, from closest to furthest
 			for( i = 0; i < _numBoundHits; ++i ) {
 				// retrieve entity
 				_t = boundsCollisionTs[ i ];
