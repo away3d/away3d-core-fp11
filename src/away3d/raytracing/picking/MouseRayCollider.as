@@ -13,6 +13,7 @@ package away3d.raytracing.picking
 
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 
 	public class MouseRayCollider extends RayCollider
 	{

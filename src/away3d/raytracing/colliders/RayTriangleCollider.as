@@ -9,6 +9,7 @@ package away3d.raytracing.colliders
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
+	import flash.utils.getTimer;
 
 	public class RayTriangleCollider extends RayCollider
 	{
@@ -42,18 +43,17 @@ package away3d.raytracing.colliders
 
 		private function uploadRenderableData( renderable:IRenderable ):void {
 			// if working on a clone, no need to resend data to pb
-			if( _lastRenderableUploaded && _lastRenderableUploaded == renderable ) { // TODO: avoid upload is not working, renderables are not geometries
-				return;
-			}
+			// TODO: next line avoids re-upload if its the same renderable, but not if its 2 renderables referring to the same geometry or source
+			if( _lastRenderableUploaded && _lastRenderableUploaded == renderable ) return;
 			// send vertices to pb
-			var vertices:Vector.<Number> = renderable.vertexData.concat(); // TODO: (Li) need concat? if not could affect rendering by introducing null triangles, or uncontrolled index buffer growth
+			var vertices:Vector.<Number> = renderable.vertexData.concat(); // TODO: need concat? if not could affect rendering by introducing null triangles, or uncontrolled index buffer growth
 			var vertexBufferDims:Point = fitArrayToNearestGridDimensions( vertices );
 			_rayTriangleKernel.data.vertexBuffer.width = vertexBufferDims.x;
 			_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
 			_rayTriangleKernel.data.vertexBufferWidth.value = [ vertexBufferDims.x ];
 			_rayTriangleKernel.data.vertexBuffer.input = vertices;
 			// send indices to pb
-			var indices:Vector.<Number> = renderable.numericIndexData.concat();
+			var indices:Vector.<Number> = Vector.<Number>( renderable.indexData );
 			_indexBufferDims = fitArrayToNearestGridDimensions( indices );
 			_rayTriangleKernel.data.indexBuffer.width = _indexBufferDims.x;
 			_rayTriangleKernel.data.indexBuffer.height = _indexBufferDims.y;
@@ -115,12 +115,28 @@ package away3d.raytracing.colliders
 			super.updateRay( position, direction );
 		}
 
+		private function fitArrayToNearestGridDimensionsUINT( array:Vector.<uint>, unit:uint = 3 ):Point {
+			var count:uint = array.length / unit;
+			var w:uint = Math.floor( Math.sqrt( count ) );
+			var h:uint = w;
+			var i:uint, j:uint;
+			while( w * h < count ) {
+				for( i = 0; i < w; ++i ) {
+					for( j = 0; j < unit; ++j ) {
+						array.push( 0.0 );
+					}
+				}
+				h++;
+			}
+			return new Point( w, h );
+		}
+
 		private function fitArrayToNearestGridDimensions( array:Vector.<Number>, unit:uint = 3 ):Point {
 			var count:uint = array.length / unit;
 			var w:uint = Math.floor( Math.sqrt( count ) );
 			var h:uint = w;
 			var i:uint, j:uint;
-			while(w * h < count) {
+			while( w * h < count ) {
 				for( i = 0; i < w; ++i ) {
 					for( j = 0; j < unit; ++j ) {
 						array.push( 0.0 );

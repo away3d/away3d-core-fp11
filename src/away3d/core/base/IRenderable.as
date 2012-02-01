@@ -117,12 +117,6 @@ package away3d.core.base
 		 */
 		function get UVData():Vector.<Number>;
 
-		/**
-		 * Retrieves the object's indices as a Number array instead of a uint array.
-		 * This is needed for passing index data to pixel bender.
-		 */
-		function get numericIndexData():Vector.<Number>;
-
 		function get uvTransform():Matrix;
 	}
 }

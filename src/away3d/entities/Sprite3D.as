@@ -42,7 +42,6 @@ package away3d.entities
 		private var _width:Number;
 		private var _height:Number;
 		private var _shadowCaster:Boolean = false;
-		private var _numericIndexData:Vector.<Number>;
 
 		public function Sprite3D( material:MaterialBase, width:Number, height:Number ) {
 			super();
@@ -205,19 +204,6 @@ package away3d.entities
 
 		public function get UVData():Vector.<Number> {
 			return _geometry.UVData;
-		}
-
-		public function get numericIndexData():Vector.<Number> {
-			// TODO: refresh when sub geometry changes
-			if( _numericIndexData == null ) {
-				_numericIndexData = new Vector.<Number>();
-				var i:uint;
-				var len:uint = _geometry.indexData.length;
-				for( i = 0; i < len; ++i ) {
-					_numericIndexData.push( Number( _geometry.indexData[ i ] ) );
-				}
-			}
-			return _numericIndexData;
 		}
 	}
 }
