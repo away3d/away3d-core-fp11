@@ -5,8 +5,10 @@ package a3dparticle.particle
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Texture3DProxy;
+	import away3d.materials.utils.ShaderRegisterElement;
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DProgramType;
 	
 	import away3d.arcane;
 	use namespace arcane;
@@ -22,13 +24,23 @@ package a3dparticle.particle
 		private var _repeat:Boolean;
 		private var _mipmap:Boolean;
 		
-		public function ParticleBitmapMaterial(bitmap:BitmapData,smooth:Boolean=true, repeat : Boolean = false, mipmap : Boolean = true)
+		private var _alphaThreshold:Number;
+		private var _cutOffData : Vector.<Number>;
+		private var cutOffReg:ShaderRegisterElement;
+		
+		public function ParticleBitmapMaterial(bitmap:BitmapData, smooth:Boolean = true, repeat : Boolean = false, mipmap : Boolean = true, alphaThreshold:Number = 0)
 		{
 			this.numUsedTextures = 1;
 			this._smooth = smooth;
 			this._repeat = repeat;
 			this._mipmap = mipmap;
 			_texture = new Texture3DProxy(bitmap);
+			_cutOffData = new Vector.<Number>(4, true);
+			
+			if (alphaThreshold < 0) alphaThreshold = 0;
+            else if (alphaThreshold > 1) alphaThreshold = 1;
+			_alphaThreshold = alphaThreshold;
+            _cutOffData[0] = _alphaThreshold;
 		}
 		
 		override public function initAnimation(particleAnimation:ParticleAnimation):void
@@ -59,6 +71,13 @@ package a3dparticle.particle
 				else tex = "<2d," + wrap + "," + "nearest,nomip>";
 			}
 			code += "tex " + _particleAnimation.colorTarget.toString() + "," + _particleAnimation.uvVar.toString() + "," + _particleAnimation.textSample.toString() + tex + "\n";
+			if (_alphaThreshold > 0) 
+			{
+				cutOffReg = _particleAnimation.shaderRegisterCache.getFreeFragmentConstant();
+				var temp:ShaderRegisterElement = _particleAnimation.shaderRegisterCache.getFreeFragmentSingleTemp();
+				code += "sub " + temp +", " +  _particleAnimation.colorTarget.toString() + ".w, " + cutOffReg.toString() + ".x\n";
+				code += "kil " + temp +"\n";
+            }
 			return code;
 		}
 		
@@ -66,7 +85,12 @@ package a3dparticle.particle
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			stage3DProxy.setTextureAt(_particleAnimation.textSample.index, _texture.getTextureForStage3D(stage3DProxy));
+			if (_alphaThreshold > 0)
+			{
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, cutOffReg.index, _cutOffData);
+			}
 		}
+		
 		
 	}
 
