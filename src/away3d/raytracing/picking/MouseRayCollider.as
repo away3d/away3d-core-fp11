@@ -25,6 +25,8 @@ package away3d.raytracing.picking
 
 		override public function evaluate( item:RenderableListItem ):Boolean {
 
+			if( !item ) return _collisionExists = false;
+
 			// init
 			var i:uint, j:uint;
 			var entity:Entity;
@@ -85,12 +87,14 @@ package away3d.raytracing.picking
 					// need triangle collision test?
 					if( collisionVO.cameraIsInEntityBounds || item.renderable.mouseHitMethod == MouseHitMethod.MESH ) {
 						if( _triangleCollider.evaluate( item ) ) {
+							_t = collisionVO.t;
 							_collidingRenderable = _triangleCollider.collidingRenderable;
 							_collisionPoint = _triangleCollider.collisionPoint;
 							return _collisionExists = true; // exit at first triangle hit success
 						}
 					}
 					else {
+						_t = collisionVO.t;
 						_collidingRenderable = item.renderable;
 						_collisionPoint = new Vector3D();
 						_collisionPoint.x = collisionVO.localRayPosition.x + collisionVO.t * collisionVO.localRayDirection.x;

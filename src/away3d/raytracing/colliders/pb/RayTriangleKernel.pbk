@@ -48,8 +48,8 @@ kernel RayTriangleKernel
 		float v = 0.0;
 		float w = 0.0;
 
-		float3 zero = float3( 0.0, 0.0, 0.0 );
-		if( !( p0 == zero && p1 == zero && p2 == zero ) ) { // check if its fill up data
+		// float3 zero = float3( 0.0, 0.0, 0.0 );
+		// if( !( p0 == zero && p1 == zero && p2 == zero ) ) { // check if its fill up data ( NOT IMPLEMENTED, CAUSES BUG )
 			// evaluate triangle sides and normal
 			float3 s0 = p1 - p0;
 			float3 s1 = p2 - p0;
@@ -79,7 +79,7 @@ kernel RayTriangleKernel
 					t = -1.0;
 				}
 			}
-		}
+		// }
 		intersectionBuffer = float3( t, v, w );
     }
 }

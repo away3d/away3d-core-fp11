@@ -13,6 +13,7 @@ package away3d.core.managers
 	import away3d.raytracing.picking.MouseHitMethod;
 
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	import flash.utils.getTimer;
 
@@ -33,8 +34,9 @@ package away3d.core.managers
 		private var _oldLocalY:Number;
 		private var _oldLocalZ:Number;
 
-//		private var _hitTestRenderer : HitTestRenderer;
-		private var _mouseRayCollider:MouseRayCollider;
+		private var _opaqueCollider:MouseRayCollider;
+		private var _blendedCollider:MouseRayCollider;
+		private var _activeCollider:MouseRayCollider;
 		private var _view:View3D;
 
 		private static var _mouseClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.CLICK );
@@ -61,9 +63,9 @@ package away3d.core.managers
 		 */
 		public function Mouse3DManager( view:View3D ) {
 			_view = view;
-			_mouseRayCollider = new MouseRayCollider( view );
-
-			// to do: add invisible container?
+			_opaqueCollider = new MouseRayCollider( view );
+			_blendedCollider = new MouseRayCollider( view );
+			// TODO: add invisible container?
 			_view.addEventListener( MouseEvent.CLICK, onClick );
 			_view.addEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
 			_view.addEventListener( MouseEvent.MOUSE_DOWN, onMouseDown );
@@ -84,7 +86,6 @@ package away3d.core.managers
 			if( !_forceMouseMove )
 				queueDispatch( _mouseMove, event );
 		}
-
 
 		/**
 		 * Clear all resources and listeners used by this Mouse3DManager.
@@ -164,9 +165,15 @@ package away3d.core.managers
 			var collector:EntityCollector = _view.entityCollector;
 
 			if( collector.numMouseEnableds > 0 ) {
-				_mouseRayCollider.evaluate( collector.opaqueRenderableHead );
-				// TODO: (Li) also check collector.blendedRenderableHead
-				_activeRenderable = _mouseRayCollider.collidingRenderable;
+				var opaqueCollides:Boolean = _opaqueCollider.evaluate( collector.opaqueRenderableHead );
+				var blendedCollides:Boolean = _blendedCollider.evaluate( collector.blendedRenderableHead );
+				if( opaqueCollides && blendedCollides ) {
+					_activeCollider = _opaqueCollider.collisionT < _blendedCollider.collisionT ? _opaqueCollider : _blendedCollider;
+				}
+				else if( opaqueCollides ) _activeCollider = _opaqueCollider;
+				else if( blendedCollides ) _activeCollider = _blendedCollider;
+				else _activeCollider = null;
+				_activeRenderable = _activeCollider ? _activeCollider.collidingRenderable : null;
 				_activeObject = ( _activeRenderable && _activeRenderable.mouseEnabled ) ? _activeRenderable.sourceEntity : null;
 			}
 			else {
@@ -183,22 +190,24 @@ package away3d.core.managers
 		 */
 		private function dispatch( event3D:MouseEvent3D ):void {
 			var renderable:IRenderable;
-			var local:Vector3D = _mouseRayCollider.collisionPoint;
 			// assign default renderable if it wasn't provide on queue time
 			if( !(renderable = (event3D.renderable ||= _activeRenderable)) ) return;
+
+			var local:Vector3D;
 
 			event3D.material = renderable.material;
 			event3D.object = renderable.sourceEntity;
 
-			if( renderable.mouseHitMethod == MouseHitMethod.MESH ) {
-				event3D.uv = _mouseRayCollider.collisionUV;
+			if( _activeCollider && renderable.mouseHitMethod == MouseHitMethod.MESH ) {
+				event3D.uv = _activeCollider.collisionUV;
 			}
 			else {
 				event3D.uv = null;
 			}
 
-			if( local ) {
-				event3D.uv = _mouseRayCollider.collisionUV;
+			if( _activeCollider ) {
+				local = _activeCollider.collisionPoint
+				event3D.uv = _activeCollider.collisionUV;
 				event3D.localX = local.x;
 				event3D.localY = local.y;
 				event3D.localZ = local.z;
@@ -250,7 +259,7 @@ package away3d.core.managers
 				var localZ:Number;
 
 				if( _activeRenderable ) {
-					var point:Vector3D = _mouseRayCollider.collisionPoint;
+					var point:Vector3D = _activeCollider.collisionPoint;
 					localX = point.x;
 					localY = point.y;
 					localZ = point.z;
@@ -261,7 +270,6 @@ package away3d.core.managers
 
 				if( (localX != _oldLocalX) || (localY != _oldLocalY) || (localZ != _oldLocalZ) ) {
 					queueDispatch( _mouseMove, _mouseMoveEvent, _activeRenderable );
-
 					_oldLocalX = localX;
 					_oldLocalY = localY;
 					_oldLocalZ = localZ;

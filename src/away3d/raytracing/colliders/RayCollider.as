@@ -44,5 +44,9 @@ package away3d.raytracing.colliders
 			if( !_collisionExists ) return null;
 			return _collidingRenderable;
 		}
+
+		public function get collisionT():Number {
+			return _t;
+		}
 	}
 }

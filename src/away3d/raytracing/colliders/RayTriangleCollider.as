@@ -9,7 +9,6 @@ package away3d.raytracing.colliders
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
-	import flash.utils.getTimer;
 
 	public class RayTriangleCollider extends RayCollider
 	{
@@ -35,9 +34,7 @@ package away3d.raytracing.colliders
 			var renderable:IRenderable = item.renderable;
 			uploadRenderableData( renderable );
 			executeKernel();
-			if( _collisionExists ) {
-				_collidingRenderable = renderable;
-			}
+			if( _collisionExists ) _collidingRenderable = renderable;
 			return _collisionExists;
 		}
 
@@ -67,7 +64,7 @@ package away3d.raytracing.colliders
 			var rayTriangleKernelJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, _indexBufferDims.x, _indexBufferDims.y );
 			rayTriangleKernelJob.start( true );
 			// evaluate kernel output and smallest intersecting t parameter
-			var len:uint = _kernelOutputBuffer.length;
+			var len:int = _kernelOutputBuffer.length;
 			var smallestNonNegativeT:Number = Number.MAX_VALUE;
 			var t:Number;
 			var collisionTriangleIndex:int = -1;
