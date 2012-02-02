@@ -1,19 +1,15 @@
 package away3d.raytracing.picking
 {
 
-	import away3d.raytracing.colliders.*;
-
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.entities.Entity;
-	import away3d.raytracing.picking.PickingMethod;
+	import away3d.raytracing.colliders.*;
 
 	import flash.geom.Point;
-
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
-	import flash.utils.getTimer;
 
 	public class MouseRayCollider extends RayCollider
 	{

@@ -604,9 +604,5 @@ package away3d.containers
 		override public function set transform(value : Transform) : void {}
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
-
-		public function get mouse3DManager():Mouse3DManager {
-			return _mouse3DManager;
-		}
 	}
 }

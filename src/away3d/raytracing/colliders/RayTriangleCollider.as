@@ -35,7 +35,6 @@ package away3d.raytracing.colliders
 			var renderable:IRenderable = item.renderable;
 			uploadRenderableData( renderable );
 			executeKernel();
-			evaluateKernelOutput();
 			if( _collisionExists ) {
 				_collidingRenderable = renderable;
 			}
@@ -67,42 +66,21 @@ package away3d.raytracing.colliders
 			// run kernel.
 			var rayTriangleKernelJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, _indexBufferDims.x, _indexBufferDims.y );
 			rayTriangleKernelJob.start( true );
-
-		}
-
-		// TODO: this is the bottleneck, actually many times slower than the kernel itself!
-		private function evaluateKernelOutput():void {
-//			var time:uint = getTimer();
-
-			// TODO: valid but slow
 			// evaluate kernel output and smallest intersecting t parameter
-			var len:uint = _kernelOutputBuffer.length / 3;
+			var len:uint = _kernelOutputBuffer.length;
 			var smallestNonNegativeT:Number = Number.MAX_VALUE;
-			for( var i:uint; i < len; ++i ) {
-				var index:uint = i * 3;
-				_t = _kernelOutputBuffer[ index ];
-				if( _t != 9999 && _t < smallestNonNegativeT ) {
-					smallestNonNegativeT = _t;
-					_collisionTriangleIndex = index;
-					_collisionExists = true;
+			var t:Number;
+			var collisionTriangleIndex:int = -1;
+			for( var i:uint; i < len; i += 3 ) {
+				t = _kernelOutputBuffer[ i ];
+				if( t > 0 && t < smallestNonNegativeT ) {
+					smallestNonNegativeT = t;
+					collisionTriangleIndex = i;
 				}
 			}
-
-			// TODO: this *would* be REALLY fast, if there were a fast way to cast a vector as an array
-			/*var asArray:Array = []; // cant cast =(
-			 var i:uint;
-			 var len:uint = _kernelOutputBuffer.length;
-			 for( i = 0; i < len; ++i ) {
-			 asArray.push( _kernelOutputBuffer[ i ] );
-			 }
-			 _t = Math.min.apply( this, asArray ); // this is FAST! =)
-			 trace( _t );
-			 if( _t < 9999 ) {
-			 _collisionExists = true;
-			 }*/
-
-//			time = getTimer() - time;
-//			trace( "time: " + time );
+			_t = smallestNonNegativeT;
+			_collisionTriangleIndex = collisionTriangleIndex;
+			_collisionExists = collisionTriangleIndex >= 0;
 		}
 
 		override public function get collisionPoint():Vector3D {
@@ -119,8 +97,8 @@ package away3d.raytracing.colliders
 			var indices:Vector.<uint> = _collidingRenderable.indexData;
 			var uvs:Vector.<Number> = _collidingRenderable.UVData;
 			var index:uint = _collisionTriangleIndex;
-			var v:Number = _kernelOutputBuffer[ index + 1 ] - 9999; // barycentric coord 1
-			var w:Number = _kernelOutputBuffer[ index + 2 ] - 9999; // barycentric coord 2
+			var v:Number = _kernelOutputBuffer[ index + 1 ]; // barycentric coord 1
+			var w:Number = _kernelOutputBuffer[ index + 2 ]; // barycentric coord 2
 			var u:Number = 1.0 - v - w;
 			var uvIndex:uint = indices[ index ] * 2;
 			var uv0:Vector3D = new Vector3D( uvs[ uvIndex ], uvs[ uvIndex + 1 ] );

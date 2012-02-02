@@ -151,20 +151,12 @@ package away3d.core.managers
 				queueDispatch( _mouseWheel, event );
 		}
 
-		// TODO: (Li) remove test time on release
-		private var _testTime:uint;
-		public function get testTime():uint {
-			return _testTime;
-		}
-
 		/**
 		 * Get the object hit information at the mouse position.
 		 */
 		private function getObjectHitData():void {
 			if( !_forceMouseMove && _queuedEvents.length == 0 )
 				return;
-
-			_testTime = getTimer();
 
 			_previousActiveObject = _activeObject;
 			_previousActiveRenderable = _activeRenderable;
@@ -181,7 +173,6 @@ package away3d.core.managers
 				_activeObject = null;
 				_activeRenderable = null;
 			}
-			_testTime = getTimer() - _testTime;
 		}
 
 		/**
@@ -283,10 +274,6 @@ package away3d.core.managers
 				dispatch( _queuedEvents[i] );
 
 			_queuedEvents.length = 0;
-		}
-
-		public function get mouseRayCollider():MouseRayCollider {
-			return _mouseRayCollider;
 		}
 	}
 }

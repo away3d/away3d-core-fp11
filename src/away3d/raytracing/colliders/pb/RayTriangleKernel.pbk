@@ -44,7 +44,7 @@ kernel RayTriangleKernel
         width = currentTriangleIndices.z - height * vertexBufferWidth;
         float3 p2 = sampleNearest( vertexBuffer, float2( width, height ) );
 
-        float t = 9999.0; // this t will mean no intersection
+        float t = -1.0; // this t will mean no intersection
 		float v = 0.0;
 		float w = 0.0;
 
@@ -76,13 +76,10 @@ kernel RayTriangleKernel
 				w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
                 float u = 1.0 - v - w;
 				if( v < 0.0 || w < 0.0 || u < 0.0 ) { // if all 3 barycentric coords are >= 0, intersection is in triangle
-					t = 9999.0;
+					t = -1.0;
 				}
 			}
-            else {
-                t = 9999.0;
-            }
 		}
-		intersectionBuffer = float3( t, 9999.0 + v, 9999.0 + w );
+		intersectionBuffer = float3( t, v, w );
     }
 }
