@@ -251,10 +251,6 @@ package away3d.bounds
 
 		override public function intersectsRay( p:Vector3D, v:Vector3D ):Number {
 
-			trace( "center: " + _centerX, _centerY, _centerZ );
-			trace( "p: " + p );
-			trace( "v: " + v );
-
 			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
 			var vx:Number = v.x, vy:Number = v.y, vz:Number = v.z;
 			var t:Number;
@@ -263,7 +259,6 @@ package away3d.bounds
 			var b:Number = 2 * ( px * vx + py * vy + pz * vz );
 			var c:Number = px * px + py * py + pz * pz - _radius * _radius;
 			var det:Number = b * b - 4 * a * c;
-			trace( "det: " + det );
 			if( det > 0 ) { // ray goes through sphere
 				t = ( -b - Math.sqrt( det ) ) / ( 2 * a ); // smaller value = closer intersection ( further one ignored )
 				if( t > 0 ) {

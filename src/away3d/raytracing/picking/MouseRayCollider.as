@@ -25,8 +25,6 @@ package away3d.raytracing.picking
 
 		override public function evaluate( item:RenderableListItem ):Boolean {
 
-			trace( "evaluating -----------------------" );
-
 			if( !item ) return _collisionExists = false;
 
 			// init
@@ -71,7 +69,6 @@ package away3d.raytracing.picking
 
 			// no bound hits?
 			_numBoundHits = collisionVOs.length;
-			trace( "bound hits: " + _numBoundHits );
 			if( _numBoundHits == 0 ) {
 				return _collisionExists = false;
 			}
