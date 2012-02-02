@@ -83,7 +83,7 @@ package away3d.raytracing.picking
 				for( j = 0; j < numItems; ++j ) {
 					item = collisionVO.renderableItems[ j ];
 					// need triangle collision test?
-					if( collisionVO.cameraIsInEntityBounds || item.renderable.pickingMethod == PickingMethod.MESH ) {
+					if( collisionVO.cameraIsInEntityBounds || item.renderable.mouseHitMethod == MouseHitMethod.MESH ) {
 						if( _triangleCollider.evaluate( item ) ) {
 							_collidingRenderable = _triangleCollider.collidingRenderable;
 							_collisionPoint = _triangleCollider.collisionPoint;

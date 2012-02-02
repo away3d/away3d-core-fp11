@@ -10,7 +10,7 @@ package away3d.core.managers
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
 	import away3d.raytracing.picking.MouseRayCollider;
-	import away3d.raytracing.picking.PickingMethod;
+	import away3d.raytracing.picking.MouseHitMethod;
 
 	import flash.events.MouseEvent;
 	import flash.geom.Vector3D;
@@ -190,7 +190,7 @@ package away3d.core.managers
 			event3D.material = renderable.material;
 			event3D.object = renderable.sourceEntity;
 
-			if( renderable.pickingMethod == PickingMethod.MESH ) {
+			if( renderable.mouseHitMethod == MouseHitMethod.MESH ) {
 				event3D.uv = _mouseRayCollider.collisionUV;
 			}
 			else {

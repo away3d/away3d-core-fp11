@@ -17,7 +17,7 @@ package away3d.primitives
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
 	import away3d.materials.utils.CubeMap;
-	import away3d.raytracing.picking.PickingMethod;
+	import away3d.raytracing.picking.MouseHitMethod;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
@@ -55,8 +55,8 @@ package away3d.primitives
 		/**
 		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
 		 */
-		public function get pickingMethod():uint {
-			return PickingMethod.BOUNDS;
+		public function get mouseHitMethod():uint {
+			return MouseHitMethod.BOUNDS;
 		}
 
 		/**

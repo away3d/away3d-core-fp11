@@ -51,7 +51,7 @@ package away3d.tools.serialize
 		public static function serializeMesh(mesh:Mesh, serializer:SerializerBase):void
 		{
 			serializeObjectContainerInternal(mesh as ObjectContainer3D, serializer, false /* serializeChildrenAndEnd */);
-			serializer.writeBoolean("pickingMethod", mesh.pickingMethod);
+			serializer.writeBoolean("mouseHitMethod", mesh.mouseHitMethod);
 			serializer.writeBoolean("castsShadows", mesh.castsShadows);
 			
 			if (mesh.animationState)

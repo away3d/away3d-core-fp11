@@ -31,7 +31,7 @@
 		private var _material:MaterialBase;
 		arcane var _animationState:AnimationStateBase;
 		private var _castsShadows:Boolean = true;
-		private var _pickingMethod:uint;
+		private var _mouseHitMethod:uint;
 
 		/**
 		 * Create a new Mesh object.
@@ -67,12 +67,12 @@
 		/**
 		 * Indicates whether or not mouse events contain UV and position coordinates. Setting this to true can affect performance. Defaults to false.
 		 */
-		public function get pickingMethod():uint {
-			return _pickingMethod;
+		public function get mouseHitMethod():uint {
+			return _mouseHitMethod;
 		}
 
-		public function set pickingMethod( value:uint ):void {
-			_pickingMethod = value;
+		public function set mouseHitMethod( value:uint ):void {
+			_mouseHitMethod = value;
 		}
 
 		/**

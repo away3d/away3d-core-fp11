@@ -47,7 +47,7 @@ package away3d.core.base
 		 */
 		function get mouseEnabled():Boolean;
 
-		function get pickingMethod():uint;
+		function get mouseHitMethod():uint;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex positions.
