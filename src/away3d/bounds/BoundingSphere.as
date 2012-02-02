@@ -259,18 +259,18 @@ package away3d.bounds
 			var b:Number = 2 * ( px * vx + py * vy + pz * vz );
 			var c:Number = px * px + py * py + pz * pz - _radius * _radius;
 			var det:Number = b * b - 4 * a * c;
-			if( det > 0 ) { // ray goes through sphere
+			if( det >= 0 ) { // ray goes through sphere
 				t = ( -b - Math.sqrt( det ) ) / ( 2 * a ); // smaller value = closer intersection ( further one ignored )
 				if( t > 0 ) {
 					return t;
 				}
 			}
-			else if( det == 0 ) { // ray touches the sphere at a tangent ( very rare )
+			/*else if( det == 0 ) { // ray touches the sphere at a tangent ( very rare )
 				t = -b / ( 2 * a );
 				if( t > 0 ) {
 					return t;
 				}
-			}
+			}*/
 
 			// ray misses sphere
 			return -1;
