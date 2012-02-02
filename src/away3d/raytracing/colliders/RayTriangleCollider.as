@@ -62,6 +62,7 @@ package away3d.raytracing.colliders
 			_lastRenderableUploaded = renderable;
 		}
 
+		// TODO: profiling shows that this is the heaviest method of the picking process, logically...
 		private function evaluateRenderable():void {
 			// run kernel.
 			var rayTriangleKernelJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, _indexBufferDims.x, _indexBufferDims.y );
@@ -76,6 +77,8 @@ package away3d.raytracing.colliders
 					smallestNonNegativeT = _t;
 					_collisionTriangleIndex = index;
 					_collisionExists = true;
+					// TODO: could break here, but wouldn't guarantee that the collision is the closest one
+//					return;
 				}
 			}
 		}
