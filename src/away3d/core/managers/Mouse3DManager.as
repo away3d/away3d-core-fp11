@@ -177,6 +177,7 @@ package away3d.core.managers
 				_activeObject = ( _activeRenderable && _activeRenderable.mouseEnabled ) ? _activeRenderable.sourceEntity : null;
 			}
 			else {
+				_activeCollider = null;
 				_activeObject = null;
 				_activeRenderable = null;
 			}
