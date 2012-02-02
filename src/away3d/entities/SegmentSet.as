@@ -14,6 +14,7 @@
 	import away3d.materials.SegmentMaterial;
 	import away3d.primitives.LineSegment;
 	import away3d.primitives.data.Segment;
+	import away3d.raytracing.picking.MouseHitMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -230,9 +231,8 @@
 			return null;
 		}
 
-		public function get mouseDetails() : Boolean
-		{
-			return false;
+		public function get mouseHitMethod():uint {
+			return MouseHitMethod.BOUNDS;
 		}
 
 		public function get numTriangles() : uint
@@ -295,8 +295,19 @@
 			return null;
 		}
 
-		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
-		{
+		public function getSecondaryUVBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {
+			return null;
+		}
+
+		public function get vertexData():Vector.<Number> {
+			return _vertices;
+		}
+
+		public function get indexData():Vector.<uint> {
+			return _indices;
+		}
+
+		public function get UVData():Vector.<Number> {
 			return null;
 		}
 	}
