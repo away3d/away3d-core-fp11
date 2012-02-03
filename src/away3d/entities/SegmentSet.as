@@ -14,7 +14,7 @@
 	import away3d.materials.SegmentMaterial;
 	import away3d.primitives.LineSegment;
 	import away3d.primitives.data.Segment;
-	import away3d.rays.picking.MouseHitMethod;
+	import away3d.core.raytracing.picking.MouseHitMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -212,8 +212,8 @@
 		override public function dispose() : void
 		{
 			super.dispose();
-			_vertexBuffer.dispose();
-			_indexBuffer.dispose();
+			if( _vertexBuffer ) _vertexBuffer.dispose();
+			if( _indexBuffer ) _indexBuffer.dispose();
 		}
 
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
@@ -232,7 +232,7 @@
 		}
 
 		public function get mouseHitMethod():uint {
-			return MouseHitMethod.BOUNDS;
+			return MouseHitMethod.BOUNDS_ONLY;
 		}
 
 		public function get numTriangles() : uint

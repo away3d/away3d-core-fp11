@@ -9,8 +9,8 @@ package away3d.core.managers
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
-	import away3d.rays.picking.MouseRayCollider;
-	import away3d.rays.picking.MouseHitMethod;
+	import away3d.core.raytracing.picking.MouseRayCollider;
+	import away3d.core.raytracing.picking.MouseHitMethod;
 
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
@@ -210,7 +210,7 @@ package away3d.core.managers
 			event3D.material = renderable.material;
 			event3D.object = renderable.sourceEntity;
 
-			if( _activeCollider && renderable.mouseHitMethod == MouseHitMethod.MESH ) {
+			if( _activeCollider && renderable.mouseHitMethod == MouseHitMethod.MESH_CLOSEST_HIT ) {
 				event3D.uv = _activeCollider.collisionUV;
 			}
 			else {
