@@ -9,7 +9,6 @@ package away3d.core.raytracing.colliders
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
-	import flash.utils.getTimer;
 
 	public class RayTriangleCollider extends RayCollider
 	{
@@ -133,6 +132,7 @@ package away3d.core.raytracing.colliders
 			super.updateRay( position, direction );
 		}
 
+		// TODO: this is not necessarily the most efficient way to pass data to pb
 		static private function evaluateArrayAsGrid( array:Vector.<Number> ):Point {
 			var count:uint = array.length / 3;
 			var w:uint = Math.floor( Math.sqrt( count ) );
