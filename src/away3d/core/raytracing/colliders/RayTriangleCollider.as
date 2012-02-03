@@ -66,6 +66,7 @@ package away3d.core.raytracing.colliders
 			var rayTriangleKernelJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, _indexBufferDims.x, _indexBufferDims.y );
 			rayTriangleKernelJob.start( true );
 
+			// find a proper collision from pb's output
 			var i:uint;
 			var t:Number;
 			var collisionTriangleIndex:int = -1;
@@ -90,7 +91,6 @@ package away3d.core.raytracing.colliders
 					}
 				}
 			}
-
 			_t = smallestNonNegativeT;
 			_collisionTriangleIndex = collisionTriangleIndex;
 			_collisionExists = collisionTriangleIndex >= 0;
@@ -145,10 +145,6 @@ package away3d.core.raytracing.colliders
 				h++;
 			}
 			return new Point( w, h );
-		}
-
-		public function get breakOnFirstTriangleHit():Boolean {
-			return _breakOnFirstTriangleHit;
 		}
 
 		public function set breakOnFirstTriangleHit( value:Boolean ):void {
