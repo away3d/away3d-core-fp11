@@ -41,7 +41,6 @@ package away3d.core.raytracing.colliders
 		}
 
 		private function uploadRenderableData( renderable:IRenderable ):void {
-			var time:uint = getTimer();
 			// if working on a clone, no need to resend data to pb
 			// TODO: next line avoids re-upload if its the same renderable, but not if its 2 renderables referring to the same geometry or source
 			// TODO: perhaps implement a geom id?
@@ -60,21 +59,13 @@ package away3d.core.raytracing.colliders
 			_rayTriangleKernel.data.indexBuffer.height = _indexBufferDims.y;
 			_rayTriangleKernel.data.indexBuffer.input = indices;
 			_lastRenderableUploaded = renderable;
-			time = getTimer() - time;
-			trace( "pre-kernel time: " + time );
 		}
 
 		private function executeKernel():void {
 
-			var time:uint = getTimer();
-
 			// run kernel.
 			var rayTriangleKernelJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, _indexBufferDims.x, _indexBufferDims.y );
 			rayTriangleKernelJob.start( true );
-			time = getTimer() - time;
-			trace( "kernel time: " + time );
-
-			time = getTimer();
 
 			var i:uint;
 			var t:Number;
@@ -100,8 +91,6 @@ package away3d.core.raytracing.colliders
 					}
 				}
 			}
-			time = getTimer() - time;
-			trace( "post-kernel time: " + time );
 
 			_t = smallestNonNegativeT;
 			_collisionTriangleIndex = collisionTriangleIndex;

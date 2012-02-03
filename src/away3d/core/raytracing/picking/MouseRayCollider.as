@@ -26,10 +26,6 @@ package away3d.core.raytracing.picking
 
 			if( !item ) return _collisionExists = false;
 
-			trace( "collision check ------------------------" );
-
-			var totalTime:uint = getTimer();
-
 			// init
 			var i:uint, j:uint;
 			var entity:Entity;
@@ -40,7 +36,6 @@ package away3d.core.raytracing.picking
 			var t:Number;
 			var rp:Vector3D, rd:Vector3D;
 
-			var time:uint = getTimer();
 			// sweep renderables and collect entities whose bounds are hit by ray
 			while( item ) {
 				if( item.renderable.mouseEnabled ) {
@@ -73,14 +68,10 @@ package away3d.core.raytracing.picking
 				}
 				item = item.next;
 			}
-			time = getTimer() - time;
-			trace( "bounds check time: " + time + ", " + _numBoundHits + " hits." );
+			_numBoundHits = collisionVOs.length;
 
 			// no bound hits?
-			_numBoundHits = collisionVOs.length;
 			if( _numBoundHits == 0 ) {
-				totalTime = getTimer() - totalTime;
-				trace( "TOTAL time: " + totalTime );
 				return _collisionExists = false;
 			}
 
@@ -88,9 +79,10 @@ package away3d.core.raytracing.picking
 			collisionVOs = collisionVOs.sort( onSmallestT );
 
 			// sweep hit entities and perform triangle tests on the entities, from closest to furthest
+			var numItems:uint;
 			for( i = 0; i < _numBoundHits; ++i ) {
 				collisionVO = collisionVOs[ i ];
-				var numItems:uint = collisionVO.renderableItems.length;
+				numItems = collisionVO.renderableItems.length;
 				if( numItems > 0 ) _triangleCollider.updateRay( collisionVO.localRayPosition, collisionVO.localRayDirection );
 				// sweep renderables
 				for( j = 0; j < numItems; ++j ) {
@@ -103,8 +95,6 @@ package away3d.core.raytracing.picking
 							_t = collisionVO.t;
 							_collidingRenderable = _triangleCollider.collidingRenderable;
 							_collisionPoint = _triangleCollider.collisionPoint;
-							totalTime = getTimer() - totalTime;
-							trace( "TOTAL time: " + totalTime );
 							return _collisionExists = true; // exit at first triangle hit success
 						}
 					}
@@ -115,15 +105,11 @@ package away3d.core.raytracing.picking
 						_collisionPoint.x = collisionVO.localRayPosition.x + collisionVO.t * collisionVO.localRayDirection.x;
 						_collisionPoint.y = collisionVO.localRayPosition.y + collisionVO.t * collisionVO.localRayDirection.y;
 						_collisionPoint.z = collisionVO.localRayPosition.z + collisionVO.t * collisionVO.localRayDirection.z;
-						totalTime = getTimer() - totalTime;
-						trace( "TOTAL time: " + totalTime );
 						return _collisionExists = true; // or exit at first end-bound collision
 					}
 				}
 			}
 
-			totalTime = getTimer() - totalTime;
-			trace( "TOTAL time: " + totalTime );
 			return _collisionExists = false;
 		}
 
