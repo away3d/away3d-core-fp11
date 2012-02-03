@@ -14,12 +14,10 @@ package away3d.raytracing.picking
 	public class MouseRayCollider extends RayCollider
 	{
 		private var _triangleCollider:RayTriangleCollider;
-		private var _view:View3D;
-		private var _numBoundHits:uint;
+		private var _numBoundHits:int;
 
-		public function MouseRayCollider( view:View3D ) {
+		public function MouseRayCollider() {
 			super();
-			_view = view;
 			_triangleCollider = new RayTriangleCollider();
 		}
 
@@ -33,9 +31,6 @@ package away3d.raytracing.picking
 			var collisionVO:MouseCollisionVO;
 			var entityToCollisionVoDictionary:Dictionary = new Dictionary();
 			var collisionVOs:Vector.<MouseCollisionVO> = new Vector.<MouseCollisionVO>();
-
-			// update ray to shoot from mouse
-			updateRay( _view.camera.position, _view.unproject( _view.mouseX, _view.mouseY ) );
 
 			// sweep renderables and collect entities whose bounds are hit by ray
 			while( item ) {
@@ -74,7 +69,7 @@ package away3d.raytracing.picking
 			}
 
 			// sort collisions from closest to furthest
-			collisionVOs = collisionVOs.sort( smallestT );
+			collisionVOs = collisionVOs.sort( onSmallestT );
 
 			// sweep hit entities and perform triangle tests on the entities, from closest to furthest
 			for( i = 0; i < _numBoundHits; ++i ) {
@@ -85,7 +80,9 @@ package away3d.raytracing.picking
 				for( j = 0; j < numItems; ++j ) {
 					item = collisionVO.renderableItems[ j ];
 					// need triangle collision test?
-					if( collisionVO.cameraIsInEntityBounds || item.renderable.mouseHitMethod == MouseHitMethod.MESH ) {
+					if( collisionVO.cameraIsInEntityBounds || item.renderable.mouseHitMethod == MouseHitMethod.MESH
+							|| item.renderable.mouseHitMethod == MouseHitMethod.MESH_FAST ) {
+						_triangleCollider.breakOnFirstTriangleHit = item.renderable.mouseHitMethod == MouseHitMethod.MESH_FAST;
 						if( _triangleCollider.evaluate( item ) ) {
 							_t = collisionVO.t;
 							_collidingRenderable = _triangleCollider.collidingRenderable;
@@ -100,7 +97,7 @@ package away3d.raytracing.picking
 						_collisionPoint.x = collisionVO.localRayPosition.x + collisionVO.t * collisionVO.localRayDirection.x;
 						_collisionPoint.y = collisionVO.localRayPosition.y + collisionVO.t * collisionVO.localRayDirection.y;
 						_collisionPoint.z = collisionVO.localRayPosition.z + collisionVO.t * collisionVO.localRayDirection.z;
-						return _collisionExists = true;
+						return _collisionExists = true; // or exit at first end-bound collision
 					}
 				}
 			}
@@ -108,16 +105,12 @@ package away3d.raytracing.picking
 			return _collisionExists = false;
 		}
 
-		private function smallestT( a:MouseCollisionVO, b:MouseCollisionVO ):Number {
+		private function onSmallestT( a:MouseCollisionVO, b:MouseCollisionVO ):Number {
 			return a.t < b.t ? -1 : 1;
 		}
 
 		public function get collisionUV():Point {
 			return _triangleCollider.collisionUV;
-		}
-
-		public function get numBoundHits():uint {
-			return _numBoundHits;
 		}
 	}
 }

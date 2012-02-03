@@ -21,6 +21,7 @@ package away3d.raytracing.colliders
 		private var _lastRenderableUploaded:IRenderable;
 		private var _collisionUV:Point;
 		private var _collisionTriangleIndex:uint;
+		private var _breakOnFirstTriangleHit:Boolean = false;
 
 		public function RayTriangleCollider() {
 			super();
@@ -73,6 +74,7 @@ package away3d.raytracing.colliders
 				if( t > 0 && t < smallestNonNegativeT ) {
 					smallestNonNegativeT = t;
 					collisionTriangleIndex = i;
+					if( _breakOnFirstTriangleHit ) break;
 				}
 			}
 			_t = smallestNonNegativeT;
@@ -128,6 +130,14 @@ package away3d.raytracing.colliders
 				h++;
 			}
 			return new Point( w, h );
+		}
+
+		public function get breakOnFirstTriangleHit():Boolean {
+			return _breakOnFirstTriangleHit;
+		}
+
+		public function set breakOnFirstTriangleHit( value:Boolean ):void {
+			_breakOnFirstTriangleHit = value;
 		}
 	}
 }

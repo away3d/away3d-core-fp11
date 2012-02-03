@@ -63,8 +63,8 @@ package away3d.core.managers
 		 */
 		public function Mouse3DManager( view:View3D ) {
 			_view = view;
-			_opaqueCollider = new MouseRayCollider( view );
-			_blendedCollider = new MouseRayCollider( view );
+			_opaqueCollider = new MouseRayCollider();
+			_blendedCollider = new MouseRayCollider();
 			// TODO: add invisible container?
 			_view.addEventListener( MouseEvent.CLICK, onClick );
 			_view.addEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
@@ -152,6 +152,9 @@ package away3d.core.managers
 				queueDispatch( _mouseWheel, event );
 		}
 
+		// TODO: remove
+		public var testTime:uint;
+
 		/**
 		 * Get the object hit information at the mouse position.
 		 */
@@ -159,12 +162,18 @@ package away3d.core.managers
 			if( !_forceMouseMove && _queuedEvents.length == 0 )
 				return;
 
+			testTime = getTimer();
+
 			_previousActiveObject = _activeObject;
 			_previousActiveRenderable = _activeRenderable;
 
 			var collector:EntityCollector = _view.entityCollector;
 
 			if( collector.numMouseEnableds > 0 ) {
+				var rayPosition:Vector3D = _view.camera.position;
+				var rayDirection:Vector3D = _view.unproject( _view.mouseX, _view.mouseY );
+				_opaqueCollider.updateRay( rayPosition, rayDirection );
+				_blendedCollider.updateRay( rayPosition, rayDirection );
 				var opaqueCollides:Boolean = _opaqueCollider.evaluate( collector.opaqueRenderableHead );
 				var blendedCollides:Boolean = _blendedCollider.evaluate( collector.blendedRenderableHead );
 				if( opaqueCollides && blendedCollides ) {
@@ -181,6 +190,8 @@ package away3d.core.managers
 				_activeObject = null;
 				_activeRenderable = null;
 			}
+
+			testTime = getTimer() - testTime;
 		}
 
 		/**
