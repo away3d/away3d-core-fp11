@@ -1,4 +1,4 @@
-package away3d.raytracing.colliders
+package away3d.rays.colliders
 {
 
 	import away3d.core.base.IRenderable;

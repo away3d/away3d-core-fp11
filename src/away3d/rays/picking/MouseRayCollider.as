@@ -1,11 +1,11 @@
-package away3d.raytracing.picking
+package away3d.rays.picking
 {
 
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.entities.Entity;
-	import away3d.raytracing.colliders.*;
+	import away3d.rays.colliders.*;
 
 	import flash.geom.Point;
 	import flash.geom.Vector3D;

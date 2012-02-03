@@ -9,8 +9,8 @@ package away3d.core.managers
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
-	import away3d.raytracing.picking.MouseRayCollider;
-	import away3d.raytracing.picking.MouseHitMethod;
+	import away3d.rays.picking.MouseRayCollider;
+	import away3d.rays.picking.MouseHitMethod;
 
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
