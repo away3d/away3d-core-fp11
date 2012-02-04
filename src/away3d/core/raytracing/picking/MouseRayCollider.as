@@ -100,21 +100,14 @@ package away3d.core.raytracing.picking
 						if( _triangleCollider.evaluate( item ) ) { // triangle collision exists?
 							collisionVO.t = _triangleCollider.collisionT;
 							collisionVO.collidingRenderable = item.renderable;
-							collisionVO.collisionPoint = _triangleCollider.collisionPoint.clone(); // TODO: avoid calc for all hits?
 							collisionVO.collisionUV = _triangleCollider.collisionUV.clone();
+							collisionVO.isTriangleHit = true;
 							if( collisionVO.t < _nearestCollisionVO.t ) _nearestCollisionVO = collisionVO;
 						}
 						// if there is no triangle hit the collisionVO is not eligible for nearest hit ( its a miss )
 					}
 					else {
 						collisionVO.collidingRenderable = item.renderable;
-						// find hit position for bound collision if necessary
-						// TODO: avoid calc for all hits?
-						var point:Vector3D = new Vector3D();
-						point.x = collisionVO.localRayPosition.x + collisionVO.t * collisionVO.localRayDirection.x;
-						point.y = collisionVO.localRayPosition.y + collisionVO.t * collisionVO.localRayDirection.y;
-						point.z = collisionVO.localRayPosition.z + collisionVO.t * collisionVO.localRayDirection.z;
-						collisionVO.collisionPoint = point;
 						if( collisionVO.t < _nearestCollisionVO.t ) _nearestCollisionVO = collisionVO;
 					}
 				}
@@ -123,16 +116,21 @@ package away3d.core.raytracing.picking
 			// use nearest collision found
 			_t = _nearestCollisionVO.t;
 			_collidingRenderable = _nearestCollisionVO.collidingRenderable;
-			_collisionPoint = _nearestCollisionVO.collisionPoint;
 
-			return _collisionExists;
+			return _collisionExists = _nearestCollisionVO.t != Number.MAX_VALUE;
 		}
 
 		override public function get collisionPoint():Vector3D {
-			return _nearestCollisionVO.collisionPoint;
+			if( !_collisionExists ) return null;
+			var point:Vector3D = new Vector3D();
+			point.x = _nearestCollisionVO.localRayPosition.x + _nearestCollisionVO.t * _nearestCollisionVO.localRayDirection.x;
+			point.y = _nearestCollisionVO.localRayPosition.y + _nearestCollisionVO.t * _nearestCollisionVO.localRayDirection.y;
+			point.z = _nearestCollisionVO.localRayPosition.z + _nearestCollisionVO.t * _nearestCollisionVO.localRayDirection.z;
+			return point;
 		}
 
 		public function get collisionUV():Point {
+			if( !_collisionExists || !_nearestCollisionVO.isTriangleHit ) return null;
 			return _nearestCollisionVO.collisionUV;
 		}
 	}
@@ -155,8 +153,8 @@ class MouseCollisionVO
 	public var localRayPosition:Vector3D;
 	public var localRayDirection:Vector3D;
 	public var cameraIsInEntityBounds:Boolean;
-	public var collisionPoint:Vector3D;
 	public var collisionUV:Point;
+	public var isTriangleHit:Boolean;
 
 	public function MouseCollisionVO() {
 		renderableItems = new Vector.<RenderableListItem>();
