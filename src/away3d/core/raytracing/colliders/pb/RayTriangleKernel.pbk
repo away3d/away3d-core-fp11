@@ -4,7 +4,7 @@ kernel RayTriangleKernel
 <   namespace : "";
     vendor : "Away3D";
     version : 1;
-    description : "Evaluates collision between a ray and a potentially large set of triangles.";
+    description : "Evaluates collisions between a ray and a potentially large set of triangles.";
 >
 {
     input image3 indexBuffer;

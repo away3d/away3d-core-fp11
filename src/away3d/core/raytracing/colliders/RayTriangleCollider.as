@@ -43,7 +43,7 @@ package away3d.core.raytracing.colliders
 			// if working on a clone, no need to resend data to pb
 			// TODO: next line avoids re-upload if its the same renderable, but not if its 2 renderables referring to the same geometry or source
 			// TODO: perhaps implement a geom id?
-			if( _lastRenderableUploaded && _lastRenderableUploaded == renderable ) return;
+			if( _lastRenderableUploaded && _lastRenderableUploaded === renderable ) return;
 			// send vertices to pb
 			var vertices:Vector.<Number> = renderable.vertexData.concat(); // TODO: need concat? if not could affect rendering by introducing null triangles, or uncontrolled index buffer growth
 			var vertexBufferDims:Point = evaluateArrayAsGrid( vertices );

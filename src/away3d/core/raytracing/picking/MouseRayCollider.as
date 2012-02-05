@@ -4,7 +4,6 @@ package away3d.core.raytracing.picking
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.raytracing.colliders.*;
 	import away3d.entities.Entity;
-	import away3d.entities.SegmentSet;
 
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
@@ -14,7 +13,6 @@ package away3d.core.raytracing.picking
 	{
 		private var _triangleCollider:RayTriangleCollider;
 		private var _nearestCollisionVO:MouseCollisionVO;
-		private var _numBoundHits:uint;
 
 		public function MouseRayCollider() {
 			super();
@@ -26,20 +24,20 @@ package away3d.core.raytracing.picking
 			if( !item ) return _collisionExists = false;
 
 			// init
-			var i:uint, j:uint;
-			var entity:Entity;
-			var collisionVO:MouseCollisionVO;
-			var entityToCollisionVoDictionary:Dictionary = new Dictionary();
-			var entityHasBeenChecked:Dictionary = new Dictionary();
-			var collisionVOs:Vector.<MouseCollisionVO> = new Vector.<MouseCollisionVO>();
-			var cameraIsInEntityBounds:Boolean;
 			var t:Number;
+			var entity:Entity;
+			var i:uint, j:uint;
 			var rp:Vector3D, rd:Vector3D;
+			var collisionVO:MouseCollisionVO;
+			var cameraIsInEntityBounds:Boolean;
+			var entityHasBeenChecked:Dictionary = new Dictionary();
+			var entityToCollisionVoDictionary:Dictionary = new Dictionary();
+			var collisionVOs:Vector.<MouseCollisionVO> = new Vector.<MouseCollisionVO>();
 
 			// sweep renderables and collect entities whose bounds are hit by ray
 			while( item ) {
 				entity = item.renderable.sourceEntity;
-				if( entity.visible && entity.mouseEnabled && !( entity is SegmentSet ) ) { // TODO: remove "is" check
+				if( entity.visible && entity.mouseEnabled ) {
 					if( !entityHasBeenChecked[ entity ] ) {
 						// convert ray to object space
 						rp = entity.inverseSceneTransform.transformVector( _rayPosition );
@@ -60,6 +58,7 @@ package away3d.core.raytracing.picking
 							collisionVO.localRayDirection = rd;
 							collisionVO.renderableItems.push( item );
 							collisionVO.cameraIsInEntityBounds = cameraIsInEntityBounds;
+							collisionVO.collidingRenderable = item.renderable;
 							entityToCollisionVoDictionary[ entity ] = collisionVO;
 							collisionVOs.push( collisionVO );
 						}
@@ -75,18 +74,14 @@ package away3d.core.raytracing.picking
 			}
 
 			// no bound hits?
-			_numBoundHits = collisionVOs.length;
-			if( _numBoundHits == 0 ) {
-				return _collisionExists = false;
-			}
+			var numBoundHits:uint = collisionVOs.length;
+			if( numBoundHits == 0 ) return _collisionExists = false;
 
-			_collisionExists = true;
-
-			// sweep all hit entities and find more info about the collisions, also find nearest collision
+			// find nearest collision and perform triangle collision tests where necessary
+			var numItems:uint;
 			_nearestCollisionVO = new MouseCollisionVO();
 			_nearestCollisionVO.t = Number.MAX_VALUE;
-			var numItems:uint;
-			for( i = 0; i < _numBoundHits; ++i ) {
+			for( i = 0; i < numBoundHits; ++i ) {
 				collisionVO = collisionVOs[ i ];
 				numItems = collisionVO.renderableItems.length;
 				if( numItems > 0 ) _triangleCollider.updateRay( collisionVO.localRayPosition, collisionVO.localRayDirection );
@@ -94,7 +89,8 @@ package away3d.core.raytracing.picking
 				for( j = 0; j < numItems; ++j ) {
 					item = collisionVO.renderableItems[ j ];
 					// need triangle collision test?
-					if( collisionVO.cameraIsInEntityBounds || item.renderable.mouseHitMethod == MouseHitMethod.MESH_CLOSEST_HIT
+					if( collisionVO.cameraIsInEntityBounds
+							|| item.renderable.mouseHitMethod == MouseHitMethod.MESH_CLOSEST_HIT
 							|| item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT ) {
 						_triangleCollider.breakOnFirstTriangleHit = item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT;
 						if( _triangleCollider.evaluate( item ) ) { // triangle collision exists?
@@ -104,10 +100,9 @@ package away3d.core.raytracing.picking
 							collisionVO.isTriangleHit = true;
 							if( collisionVO.t < _nearestCollisionVO.t ) _nearestCollisionVO = collisionVO;
 						}
-						// if there is no triangle hit the collisionVO is not eligible for nearest hit ( its a miss )
+						// on required tri hit, if there is no triangle hit the collisionVO is not eligible for nearest hit ( its a miss )
 					}
-					else {
-						collisionVO.collidingRenderable = item.renderable;
+					else { // on required bounds hit, consider t position for nearest hit
 						if( collisionVO.t < _nearestCollisionVO.t ) _nearestCollisionVO = collisionVO;
 					}
 				}
@@ -116,7 +111,6 @@ package away3d.core.raytracing.picking
 			// use nearest collision found
 			_t = _nearestCollisionVO.t;
 			_collidingRenderable = _nearestCollisionVO.collidingRenderable;
-
 			return _collisionExists = _nearestCollisionVO.t != Number.MAX_VALUE;
 		}
 
@@ -141,20 +135,19 @@ import away3d.core.data.RenderableListItem;
 import away3d.entities.Entity;
 
 import flash.geom.Point;
-
 import flash.geom.Vector3D;
 
 class MouseCollisionVO
 {
-	public var entity:Entity;
-	public var renderableItems:Vector.<RenderableListItem>;
 	public var t:Number;
-	public var collidingRenderable:IRenderable;
+	public var entity:Entity;
+	public var collisionUV:Point;
+	public var isTriangleHit:Boolean;
 	public var localRayPosition:Vector3D;
 	public var localRayDirection:Vector3D;
 	public var cameraIsInEntityBounds:Boolean;
-	public var collisionUV:Point;
-	public var isTriangleHit:Boolean;
+	public var collidingRenderable:IRenderable;
+	public var renderableItems:Vector.<RenderableListItem>;
 
 	public function MouseCollisionVO() {
 		renderableItems = new Vector.<RenderableListItem>();
