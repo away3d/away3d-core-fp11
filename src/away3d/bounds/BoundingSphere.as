@@ -260,7 +260,9 @@ package away3d.bounds
 			var c:Number = px * px + py * py + pz * pz - _radius * _radius;
 			var det:Number = b * b - 4 * a * c;
 			if( det >= 0 ) { // ray goes through sphere
-				t = ( -b - Math.sqrt( det ) ) / ( 2 * a ); // smaller value = closer intersection ( further one ignored )
+				var sqrtDet:Number = Math.sqrt( det )
+				t = ( -b - sqrtDet ) / ( 2 * a );
+				_rayFarT = ( -b + sqrtDet ) / ( 2 * a );
 				if( t > 0 ) {
 					return t;
 				}

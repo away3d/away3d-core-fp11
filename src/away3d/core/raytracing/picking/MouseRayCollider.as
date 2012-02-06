@@ -52,7 +52,8 @@ package away3d.core.raytracing.picking
 						if( t >= 0 ) { // collision exists for this renderable's entity bounds
 							// store collision VO
 							collisionVO = new MouseCollisionVO();
-							collisionVO.t = t;
+							collisionVO.boundsCollisionT = t;
+							collisionVO.boundsCollisionFarT = entity.bounds.rayFarT;
 							collisionVO.entity = entity;
 							collisionVO.localRayPosition = rp;
 							collisionVO.localRayDirection = rd;
@@ -77,50 +78,64 @@ package away3d.core.raytracing.picking
 			var numBoundHits:uint = collisionVOs.length;
 			if( numBoundHits == 0 ) return _collisionExists = false;
 
+			// sort collision vos
+			collisionVOs = collisionVOs.sort( onSmallestT );
+
 			// find nearest collision and perform triangle collision tests where necessary
 			var numItems:uint;
 			_nearestCollisionVO = new MouseCollisionVO();
-			_nearestCollisionVO.t = Number.MAX_VALUE;
+			_nearestCollisionVO.finalCollisionT = Number.MAX_VALUE;
+			_nearestCollisionVO.boundsCollisionT = Number.MAX_VALUE;
+			_nearestCollisionVO.boundsCollisionFarT = Number.MAX_VALUE;
 			for( i = 0; i < numBoundHits; ++i ) {
 				collisionVO = collisionVOs[ i ];
-				numItems = collisionVO.renderableItems.length;
-				if( numItems > 0 ) _triangleCollider.updateRay( collisionVO.localRayPosition, collisionVO.localRayDirection );
-				// sweep renderables
-				for( j = 0; j < numItems; ++j ) {
-					item = collisionVO.renderableItems[ j ];
-					// need triangle collision test?
-					if( collisionVO.cameraIsInEntityBounds
-							|| item.renderable.mouseHitMethod == MouseHitMethod.MESH_CLOSEST_HIT
-							|| item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT ) {
-						_triangleCollider.breakOnFirstTriangleHit = item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT;
-						if( _triangleCollider.evaluate( item ) ) { // triangle collision exists?
-							collisionVO.t = _triangleCollider.collisionT;
-							collisionVO.collidingRenderable = item.renderable;
-							collisionVO.collisionUV = _triangleCollider.collisionUV.clone();
-							collisionVO.isTriangleHit = true;
-							if( collisionVO.t < _nearestCollisionVO.t ) _nearestCollisionVO = collisionVO;
+				// this collision could only be closer if the bounds collision t is closer, otherwise, no need to test ( except if bounds intersect )
+				if( collisionVO.boundsCollisionT < _nearestCollisionVO.finalCollisionT
+						|| ( collisionVO.boundsCollisionT > _nearestCollisionVO.boundsCollisionT && collisionVO.boundsCollisionT < _nearestCollisionVO.boundsCollisionFarT ) ) { // bounds intersection test
+					numItems = collisionVO.renderableItems.length;
+					if( numItems > 0 ) _triangleCollider.updateRay( collisionVO.localRayPosition, collisionVO.localRayDirection );
+					// sweep renderables
+					for( j = 0; j < numItems; ++j ) {
+						item = collisionVO.renderableItems[ j ];
+						// need triangle collision test?
+						if( collisionVO.cameraIsInEntityBounds
+								|| item.renderable.mouseHitMethod == MouseHitMethod.MESH_CLOSEST_HIT
+								|| item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT ) {
+							_triangleCollider.breakOnFirstTriangleHit = item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT;
+							if( _triangleCollider.evaluate( item ) ) { // triangle collision exists?
+								collisionVO.finalCollisionT = _triangleCollider.collisionT;
+								collisionVO.collidingRenderable = item.renderable;
+								collisionVO.collisionUV = _triangleCollider.collisionUV.clone();
+								collisionVO.isTriangleHit = true;
+								if( collisionVO.finalCollisionT < _nearestCollisionVO.finalCollisionT ) _nearestCollisionVO = collisionVO;
+							}
+							// on required tri hit, if there is no triangle hit the collisionVO is not eligible for nearest hit ( its a miss )
 						}
-						// on required tri hit, if there is no triangle hit the collisionVO is not eligible for nearest hit ( its a miss )
-					}
-					else { // on required bounds hit, consider t position for nearest hit
-						if( collisionVO.t < _nearestCollisionVO.t ) _nearestCollisionVO = collisionVO;
+						else { // on required bounds hit, consider t for nearest hit
+							collisionVO.finalCollisionT = collisionVO.boundsCollisionT;
+							if( collisionVO.finalCollisionT < _nearestCollisionVO.finalCollisionT ) _nearestCollisionVO = collisionVO;
+						}
 					}
 				}
 			}
 
 			// use nearest collision found
-			_t = _nearestCollisionVO.t;
+			_t = _nearestCollisionVO.boundsCollisionT;
 			_collidingRenderable = _nearestCollisionVO.collidingRenderable;
-			return _collisionExists = _nearestCollisionVO.t != Number.MAX_VALUE;
+			return _collisionExists = _nearestCollisionVO.boundsCollisionT != Number.MAX_VALUE;
 		}
 
 		override public function get collisionPoint():Vector3D {
 			if( !_collisionExists ) return null;
 			var point:Vector3D = new Vector3D();
-			point.x = _nearestCollisionVO.localRayPosition.x + _nearestCollisionVO.t * _nearestCollisionVO.localRayDirection.x;
-			point.y = _nearestCollisionVO.localRayPosition.y + _nearestCollisionVO.t * _nearestCollisionVO.localRayDirection.y;
-			point.z = _nearestCollisionVO.localRayPosition.z + _nearestCollisionVO.t * _nearestCollisionVO.localRayDirection.z;
+			point.x = _nearestCollisionVO.localRayPosition.x + _nearestCollisionVO.boundsCollisionT * _nearestCollisionVO.localRayDirection.x;
+			point.y = _nearestCollisionVO.localRayPosition.y + _nearestCollisionVO.boundsCollisionT * _nearestCollisionVO.localRayDirection.y;
+			point.z = _nearestCollisionVO.localRayPosition.z + _nearestCollisionVO.boundsCollisionT * _nearestCollisionVO.localRayDirection.z;
 			return point;
+		}
+
+		private function onSmallestT( a:MouseCollisionVO, b:MouseCollisionVO ):Number {
+			return a.boundsCollisionT < b.boundsCollisionT ? -1 : 1;
 		}
 
 		public function get collisionUV():Point {
@@ -139,7 +154,9 @@ import flash.geom.Vector3D;
 
 class MouseCollisionVO
 {
-	public var t:Number;
+	public var boundsCollisionT:Number;
+	public var boundsCollisionFarT:Number;
+	public var finalCollisionT:Number;
 	public var entity:Entity;
 	public var collisionUV:Point;
 	public var isTriangleHit:Boolean;
