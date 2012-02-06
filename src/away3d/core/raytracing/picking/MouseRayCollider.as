@@ -90,11 +90,13 @@ package away3d.core.raytracing.picking
 			for( i = 0; i < numBoundHits; ++i ) {
 				collisionVO = collisionVOs[ i ];
 				// this collision could only be closer if the bounds collision t is closer, otherwise, no need to test ( except if bounds intersect )
-				if( collisionVO.boundsCollisionT < _nearestCollisionVO.finalCollisionT
+				if( collisionVO.cameraIsInEntityBounds
+						|| collisionVO.boundsCollisionT < _nearestCollisionVO.finalCollisionT
 						|| ( collisionVO.boundsCollisionT > _nearestCollisionVO.boundsCollisionT && collisionVO.boundsCollisionT < _nearestCollisionVO.boundsCollisionFarT ) ) { // bounds intersection test
 					numItems = collisionVO.renderableItems.length;
 					if( numItems > 0 ) _triangleCollider.updateRay( collisionVO.localRayPosition, collisionVO.localRayDirection );
 					// sweep renderables
+					var triHitFound:Boolean = false;
 					for( j = 0; j < numItems; ++j ) {
 						item = collisionVO.renderableItems[ j ];
 						// need triangle collision test?
@@ -108,10 +110,11 @@ package away3d.core.raytracing.picking
 								collisionVO.collisionUV = _triangleCollider.collisionUV.clone();
 								collisionVO.isTriangleHit = true;
 								if( collisionVO.finalCollisionT < _nearestCollisionVO.finalCollisionT ) _nearestCollisionVO = collisionVO;
+								triHitFound = true;
 							}
 							// on required tri hit, if there is no triangle hit the collisionVO is not eligible for nearest hit ( its a miss )
 						}
-						else { // on required bounds hit, consider t for nearest hit
+						else if( !triHitFound ) { // on required bounds hit, consider t for nearest hit
 							collisionVO.finalCollisionT = collisionVO.boundsCollisionT;
 							if( collisionVO.finalCollisionT < _nearestCollisionVO.finalCollisionT ) _nearestCollisionVO = collisionVO;
 						}
@@ -120,17 +123,17 @@ package away3d.core.raytracing.picking
 			}
 
 			// use nearest collision found
-			_t = _nearestCollisionVO.boundsCollisionT;
+			_t = _nearestCollisionVO.finalCollisionT;
 			_collidingRenderable = _nearestCollisionVO.collidingRenderable;
-			return _collisionExists = _nearestCollisionVO.boundsCollisionT != Number.MAX_VALUE;
+			return _collisionExists = _nearestCollisionVO.finalCollisionT != Number.MAX_VALUE;
 		}
 
 		override public function get collisionPoint():Vector3D {
 			if( !_collisionExists ) return null;
 			var point:Vector3D = new Vector3D();
-			point.x = _nearestCollisionVO.localRayPosition.x + _nearestCollisionVO.boundsCollisionT * _nearestCollisionVO.localRayDirection.x;
-			point.y = _nearestCollisionVO.localRayPosition.y + _nearestCollisionVO.boundsCollisionT * _nearestCollisionVO.localRayDirection.y;
-			point.z = _nearestCollisionVO.localRayPosition.z + _nearestCollisionVO.boundsCollisionT * _nearestCollisionVO.localRayDirection.z;
+			point.x = _nearestCollisionVO.localRayPosition.x + _nearestCollisionVO.finalCollisionT * _nearestCollisionVO.localRayDirection.x;
+			point.y = _nearestCollisionVO.localRayPosition.y + _nearestCollisionVO.finalCollisionT * _nearestCollisionVO.localRayDirection.y;
+			point.z = _nearestCollisionVO.localRayPosition.z + _nearestCollisionVO.finalCollisionT * _nearestCollisionVO.localRayDirection.z;
 			return point;
 		}
 
