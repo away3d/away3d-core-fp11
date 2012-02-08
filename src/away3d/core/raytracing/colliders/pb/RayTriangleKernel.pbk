@@ -1,0 +1,85 @@
+<languageVersion : 1.0;>
+
+kernel RayTriangleKernel
+<   namespace : "";
+    vendor : "Away3D";
+    version : 1;
+    description : "Evaluates collisions between a ray and a potentially large set of triangles.";
+>
+{
+    input image3 indexBuffer;
+    input image3 vertexBuffer;
+    output pixel3 intersectionBuffer;
+
+    parameter float3 rayStartPoint
+    <
+        defaultValue : float3( 0.0, 0.0, 0.0 );
+    >;
+
+    parameter float3 rayDirection
+    <
+        defaultValue : float3( 0.0, 0.0, 0.0 );
+    >;
+
+    parameter float vertexBufferWidth
+    <
+    	defaultValue : 0.0;
+    >;
+
+    void evaluatePixel()
+    {
+    	// read current triangle indices ( r, g, b = i0, i1, i2 )
+		float2 currentTriangle = outCoord();
+		float3 currentTriangleIndices = sampleNearest( indexBuffer, currentTriangle );
+
+		// read current triangle vertices
+		float width, height;
+        height = floor( currentTriangleIndices.x / vertexBufferWidth );
+        width = currentTriangleIndices.x - height * vertexBufferWidth;
+        float3 p0 = sampleNearest( vertexBuffer, float2( width, height ) );
+        height = floor( currentTriangleIndices.y / vertexBufferWidth );
+        width = currentTriangleIndices.y - height * vertexBufferWidth;
+        float3 p1 = sampleNearest( vertexBuffer, float2( width, height ) );
+        height = floor( currentTriangleIndices.z / vertexBufferWidth );
+        width = currentTriangleIndices.z - height * vertexBufferWidth;
+        float3 p2 = sampleNearest( vertexBuffer, float2( width, height ) );
+
+        float t = -1.0; // this t will mean no intersection
+		float v = 0.0;
+		float w = 0.0;
+
+		// float3 zero = float3( 0.0, 0.0, 0.0 );
+		// if( !( p0 == zero && p1 == zero && p2 == zero ) ) { // check if its fill up data ( NOT IMPLEMENTED, CAUSES BUG )
+			// evaluate triangle sides and normal
+			float3 s0 = p1 - p0;
+			float3 s1 = p2 - p0;
+			float3 normal = cross( s0, s1 );
+			normal = normalize( normal );
+			// evaluate ray-plane intersection
+			float nDotV = dot( normal, rayDirection );
+			if( nDotV < 0.0 ) { // ray-plane intersection exists on the proper side
+				float D = -dot( normal, p0 );
+				float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
+				t = distanceToPlane / nDotV;
+			}
+			// evaluate ray-triangle intersection
+			if( t > 0.0 ) { // if ray-plane intersection exists
+				float3 intersection = rayStartPoint + t * rayDirection;
+				float3 R = intersection - p0;
+				float Q1Q2 = dot( s0, s1 );
+				float Q1Q1 = dot( s0, s0 );
+				float Q2Q2 = dot( s1, s1 );
+				float RQ1 = dot( R, s0 );
+				float RQ2 = dot( R, s1 );
+				float coeff = 1.0 / ( Q1Q1 * Q2Q2 - Q1Q2 * Q1Q2 );
+				v = coeff * ( Q2Q2 * RQ1 - Q1Q2 * RQ2 );
+				w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
+                float u = 1.0 - v - w;
+				if( v < 0.0 || w < 0.0 || u < 0.0 ) { // if all 3 barycentric coords are >= 0, intersection is in triangle
+					t = -1.0;
+				}
+			}
+		// }
+		intersectionBuffer = float3( t, v, w );
+    }
+}

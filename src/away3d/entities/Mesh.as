@@ -29,8 +29,8 @@
 		protected var _geometry : Geometry;
 		private var _material : MaterialBase;
 		arcane var _animationState : AnimationStateBase;
-		private var _mouseDetails : Boolean;
 		private var _castsShadows : Boolean = true;
+		private var _mouseHitMethod:uint;
 
 		/**
 		 * Create a new Mesh object.
@@ -66,14 +66,12 @@
 		/**
 		 * Indicates whether or not mouse events contain UV and position coordinates. Setting this to true can affect performance. Defaults to false.
 		 */
-		public function get mouseDetails() : Boolean
-		{
-			return _mouseDetails;
+		public function get mouseHitMethod():uint {
+			return _mouseHitMethod;
 		}
 
-		public function set mouseDetails(value : Boolean) : void
-		{
-			_mouseDetails = value;
+		public function set mouseHitMethod( value:uint ):void {
+			_mouseHitMethod = value;
 		}
 
 		/**

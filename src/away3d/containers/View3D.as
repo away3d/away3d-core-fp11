@@ -44,7 +44,7 @@ package away3d.containers
 		private var _backgroundColor : uint = 0x000000;
 		private var _backgroundAlpha : Number = 1;
 
-		protected var _mouse3DManager : Mouse3DManager;
+		private var _mouse3DManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
 
 		protected var _renderer : RendererBase;
@@ -576,5 +576,10 @@ package away3d.containers
 		override public function set transform(value : Transform) : void {}
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
+
+		// TODO: remove
+		public function get mouse3DManager():Mouse3DManager {
+			return _mouse3DManager;
+		}
 	}
 }

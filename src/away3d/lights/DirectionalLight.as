@@ -14,7 +14,7 @@
 
 	/**
 	 * DirectionalLight represents an idealized light "at infinity", to be used for distant light sources such as the sun.
-	 * In any position in the scene, the light rays will always be parallel.
+	 * In any position in the scene, the light raytracing will always be parallel.
 	 * Although the position of the light does not impact its effect, it can be used along with lookAt to intuitively
 	 * create day cycles by orbiting the position around a center point and using lookAt at that position.
 	 */

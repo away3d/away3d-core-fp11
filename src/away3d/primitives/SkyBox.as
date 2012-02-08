@@ -16,6 +16,7 @@ package away3d.primitives
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
 	import away3d.textures.CubeTextureBase;
+	import away3d.core.raytracing.picking.MouseHitMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -54,9 +55,8 @@ package away3d.primitives
 		/**
 		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
 		 */
-		public function get mouseDetails() : Boolean
-		{
-			return false;
+		public function get mouseHitMethod():uint {
+			return MouseHitMethod.BOUNDS_ONLY;
 		}
 
 		/**
@@ -249,8 +249,7 @@ package away3d.primitives
 			return _uvTransform;
 		}
 
-		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
-		{
+		public function getSecondaryUVBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {
 			return null;
 		}
 
@@ -282,6 +281,18 @@ package away3d.primitives
 		public function get secondaryUVBufferOffset() : int
 		{
 			return 0;
+		}
+
+		public function get vertexData():Vector.<Number> {
+			return _geometry.vertexData;
+		}
+
+		public function get indexData():Vector.<uint> {
+			return _geometry.indexData;
+		}
+
+		public function get UVData():Vector.<Number> {
+			return _geometry.UVData;
 		}
 	}
 }

@@ -216,8 +216,6 @@ package away3d.core.render
 		{
 			if (!_stage3DProxy || !_context) return;
 
-			_renderTarget = target;
-			_renderTargetSurface = surfaceSelector;
 			executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
 
 			// clear buffers
@@ -236,7 +234,11 @@ package away3d.core.render
 		 */
 		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
-			if (_renderableSorter) _renderableSorter.sort(entityCollector);
+			_renderTarget = target;
+			_renderTargetSurface = surfaceSelector;
+			
+			if (_renderableSorter)
+				_renderableSorter.sort(entityCollector);
 
 			if (_renderToTexture)
 				executeRenderToTexturePass(entityCollector);

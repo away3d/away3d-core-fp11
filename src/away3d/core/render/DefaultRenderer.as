@@ -46,10 +46,11 @@ package away3d.core.render
 			_distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
 		}
 
-		arcane override function render(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
 			updateLights(entityCollector);
-			super.render(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
+			
+			super.executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
 		}
 
 		private function updateLights(entityCollector : EntityCollector) : void
