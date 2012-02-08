@@ -63,18 +63,18 @@ package away3d.core.managers
 			requestContext();
 		}
 
-		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String) : void
+		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int) : void
 		{
 			// force setting null
 			if (buffer && _activeVertexBuffers[index] == buffer) return;
 
-			_context3D.setVertexBufferAt(index, buffer, 0, format);
+			_context3D.setVertexBufferAt(index, buffer, offset, format);
 			_activeVertexBuffers[index] = buffer;
 		}
 
 		public function setTextureAt(index : int, texture : TextureBase) : void
 		{
-			if (_activeTextures[index] == texture) return;
+			if (texture != null && _activeTextures[index] == texture) return;
 
 			_context3D.setTextureAt(index,  texture);
 

@@ -299,5 +299,35 @@
 		{
 			return null;
 		}
+
+		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			return null;
+		}
+
+		public function get vertexBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get normalBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get tangentBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get UVBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get secondaryUVBufferOffset() : int
+		{
+			return 0;
+		}
 	}
 }

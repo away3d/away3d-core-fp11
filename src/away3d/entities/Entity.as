@@ -9,6 +9,7 @@ package away3d.entities
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.Partition3D;
 	import away3d.errors.AbstractMethodError;
+	import away3d.library.assets.AssetType;
 
 	import flash.geom.Matrix3D;
 
@@ -343,6 +344,12 @@ package away3d.entities
 		{
 			if (_scene)
 				_scene.unregisterPartition(this);
+		}
+
+
+		override public function get assetType() : String
+		{
+			return AssetType.ENTITY;
 		}
 	}
 }

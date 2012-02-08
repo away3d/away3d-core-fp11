@@ -469,6 +469,7 @@ package away3d.materials.passes
 			_diffuseMethod.activate(stage3DProxy);
 			if (_usingSpecularMethod) _specularMethod.activate(stage3DProxy);
 			if (_colorTransformMethod) _colorTransformMethod.activate(stage3DProxy);
+
 			for (var i : int = 0; i < len; ++i)
 				_methods[i].activate(stage3DProxy);
 
@@ -508,10 +509,10 @@ package away3d.materials.passes
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			if (_uvBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_uvBufferIndex, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
-			if (_secondaryUVBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_secondaryUVBufferIndex, renderable.getSecondaryUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2);
-			if (_normalBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_normalBufferIndex, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-			if (_tangentBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_tangentBufferIndex, renderable.getVertexTangentBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			if (_uvBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_uvBufferIndex, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.UVBufferOffset);
+			if (_secondaryUVBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_secondaryUVBufferIndex, renderable.getSecondaryUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.secondaryUVBufferOffset);
+			if (_normalBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_normalBufferIndex, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
+			if (_tangentBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_tangentBufferIndex, renderable.getVertexTangentBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.tangentBufferOffset);
 			if (_sceneMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneMatrixIndex, renderable.sceneTransform, true);
 			if (_sceneNormalMatrixIndex >= 0) context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _sceneNormalMatrixIndex, renderable.inverseSceneTransform);
 
@@ -906,6 +907,12 @@ package away3d.materials.passes
 			_normalFragmentReg = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_normalFragmentReg, _normalDependencies);
 
+			if (_normalMethod.hasOutput && !_normalMethod.tangentSpace) {
+				_vertexCode += _normalMethod.getVertexCode(_registerCache);
+				_fragmentCode += _normalMethod.getFragmentPostLightingCode(_registerCache, _normalFragmentReg);
+				return;
+			}
+
 			_normalInput = _registerCache.getFreeVertexAttribute();
 			_normalBufferIndex = _normalInput.index;
 
@@ -927,10 +934,10 @@ package away3d.materials.passes
 			}
 			else {
 				_vertexCode += "m33 " + _normalVarying + ".xyz, " + _animatedNormalReg + ".xyz, " + normalMatrix[0] + "\n" +
-						"mov " + _normalVarying + ".w, " + _animatedNormalReg + ".w	\n";
+								"mov " + _normalVarying + ".w, " + _animatedNormalReg + ".w	\n";
 
 				_fragmentCode += "nrm " + _normalFragmentReg + ".xyz, " + _normalVarying + ".xyz	\n" +
-						"mov " + _normalFragmentReg + ".w, " + _normalVarying + ".w		\n";
+								"mov " + _normalFragmentReg + ".w, " + _normalVarying + ".w		\n";
 
 
 				if (_tangentDependencies > 0) {

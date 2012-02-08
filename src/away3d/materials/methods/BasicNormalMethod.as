@@ -20,6 +20,11 @@ package away3d.materials.methods
 			super(false, false, false);
 		}
 
+		arcane function get tangentSpace() : Boolean
+		{
+			return true;
+		}
+
 		/**
 		 * Override this is normal method output is not based on a texture (if not, it will usually always return true)
 		 */

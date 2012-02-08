@@ -26,7 +26,6 @@ package away3d.cameras
 		private var _lens : LensBase;
 		private var _frustumPlanes : Vector.<Plane3D>;
 		private var _frustumPlanesDirty : Boolean = true;
-		private var _unprojectionInvalid : Boolean = true;
 
 
 
@@ -55,7 +54,6 @@ package away3d.cameras
 
 		private function onLensMatrixChanged(event : LensEvent) : void
 		{
-			_unprojectionInvalid = true;
 			_viewProjectionDirty = true;
 			_frustumPlanesDirty = true;
 			
@@ -149,7 +147,6 @@ package away3d.cameras
 		{
 			super.invalidateSceneTransform();
 
-			_unprojectionInvalid = true;
 			_viewProjectionDirty = true;
 			_frustumPlanesDirty = true;
 		}

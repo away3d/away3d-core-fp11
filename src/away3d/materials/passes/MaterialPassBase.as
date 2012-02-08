@@ -207,7 +207,7 @@ package away3d.materials.passes
 			if (renderable.animationState)
 				renderable.animationState.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
 
-			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
 
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
@@ -237,7 +237,7 @@ package away3d.materials.passes
 			var prevUsed : int = _previousUsedStreams[contextIndex];
 			var i : uint;
 			for (i = _numUsedStreams; i < prevUsed; ++i) {
-				stage3DProxy.setSimpleVertexBuffer(i, null, null);
+				stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
 			}
 
 			prevUsed = _previousUsedTexs[contextIndex];

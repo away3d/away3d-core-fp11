@@ -56,11 +56,11 @@ package away3d.animators.data
 		{
 			// TODO: not used
 			pass = pass;
-			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null);
+			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null, 0);
 			if (_useNormals)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null);
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null, 0);
 			if (_useTangents)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null);
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null, 0);
 		}
 
 		/**

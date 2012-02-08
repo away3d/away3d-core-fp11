@@ -363,9 +363,9 @@ package away3d.materials.methods
 		 * @param inputReg The texture stream register.
 		 * @return The fragment code that performs the sampling.
 		 */
-		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
+		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null, forceWrap : String = null) : String
 		{
-			var wrap : String = _repeat ? "wrap" : "clamp";
+			var wrap : String = forceWrap || (_repeat ? "wrap" : "clamp");
 			var filter : String;
 
 			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";

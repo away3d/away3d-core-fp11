@@ -319,9 +319,39 @@ package away3d.core.base
 			return _subGeometry.getSecondaryUVBuffer(stage3DProxy);
 		}
 
+		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			return _subGeometry.getCustomBuffer(stage3DProxy);
+		}
+
 		public function dispose() : void
 		{
 			material = null;
+		}
+
+		public function get vertexBufferOffset() : int
+		{
+			return _subGeometry.vertexBufferOffset;
+		}
+
+		public function get normalBufferOffset() : int
+		{
+			return _subGeometry.normalBufferOffset;
+		}
+
+		public function get tangentBufferOffset() : int
+		{
+			return _subGeometry.tangentBufferOffset;
+		}
+
+		public function get UVBufferOffset() : int
+		{
+			return _subGeometry.UVBufferOffset;
+		}
+
+		public function get secondaryUVBufferOffset() : int
+		{
+			return _subGeometry.secondaryUVBufferOffset;
 		}
 	}
 }

@@ -212,10 +212,39 @@ package away3d.entities
 			return null;
 		}
 
-		// not supported for sprites
 		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			return null;
+			return _geometry.getSecondaryUVBuffer(stage3DProxy);
+		}
+
+		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			return _geometry.getCustomBuffer(stage3DProxy);
+		}
+
+		public function get vertexBufferOffset() : int
+		{
+			return _geometry.vertexBufferOffset;
+		}
+
+		public function get normalBufferOffset() : int
+		{
+			return _geometry.normalBufferOffset;
+		}
+
+		public function get tangentBufferOffset() : int
+		{
+			return _geometry.tangentBufferOffset;
+		}
+
+		public function get UVBufferOffset() : int
+		{
+			return _geometry.UVBufferOffset;
+		}
+
+		public function get secondaryUVBufferOffset() : int
+		{
+			return _geometry.secondaryUVBufferOffset;
 		}
 	}
 }

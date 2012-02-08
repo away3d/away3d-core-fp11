@@ -66,12 +66,6 @@ package away3d.materials.methods
 			_data[7] = value;
 		}
 
-
-		override public function copyFrom(method : ShadingMethodBase) : void
-		{
-			normalMap = BasicNormalMethod(method).normalMap;
-		}
-
 		override public function set normalMap(value : Texture2DBase) : void
 		{
 			if (!value) return;

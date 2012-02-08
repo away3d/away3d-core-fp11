@@ -286,6 +286,7 @@ package away3d.loaders.misc
 				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				
@@ -331,6 +332,7 @@ package away3d.loaders.misc
 			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 		}

@@ -70,11 +70,11 @@ package away3d.animators.data
 			if (!_poses.length) {
 				if (_vertexAnimation.blendMode == VertexAnimationMode.ABSOLUTE) {
 					for (i = 1; i < len; ++i) {
-						stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+						stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
 						context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 
 						if (_vertexAnimation._useNormals)
-							stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+							stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
 					}
 				}
 					// todo: set temp data for additive?
@@ -98,11 +98,11 @@ package away3d.animators.data
 
 			for (; i < len; ++i) {
 				subGeom = _poses[i].subGeometries[subMesh._index] || subMesh.subGeometry;
-				stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.vertexBufferOffset);
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 
 				if (_vertexAnimation._useNormals)
-					stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+					stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.normalBufferOffset);
 
 			}
 		}

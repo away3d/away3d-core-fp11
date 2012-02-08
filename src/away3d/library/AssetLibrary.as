@@ -494,6 +494,7 @@ package away3d.library
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			return loader.load(req, context, ns, parser);
@@ -523,6 +524,7 @@ package away3d.library
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			return loader.loadData(data, '', context, ns, parser);
@@ -602,6 +604,7 @@ package away3d.library
 			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			

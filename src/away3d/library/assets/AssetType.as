@@ -2,6 +2,7 @@ package away3d.library.assets
 {
 	public class AssetType
 	{
+		public static const ENTITY : String = 'entity';
 		public static const MESH : String = 'mesh';
 		public static const GEOMETRY : String = 'geometry';
 		public static const SKELETON : String = 'skeleton';

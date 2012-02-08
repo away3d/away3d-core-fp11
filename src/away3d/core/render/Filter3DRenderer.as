@@ -140,8 +140,8 @@ package away3d.core.render
 			}
 
 			stage3DProxy.setTextureAt(0, null);
-			stage3DProxy.setSimpleVertexBuffer(0, null, null);
-			stage3DProxy.setSimpleVertexBuffer(1, null, null);
+			stage3DProxy.setSimpleVertexBuffer(0, null, null, 0);
+			stage3DProxy.setSimpleVertexBuffer(1, null, null, 0);
 		}
 
 		private function updateFilterSizes() : void

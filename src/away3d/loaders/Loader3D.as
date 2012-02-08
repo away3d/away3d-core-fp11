@@ -68,6 +68,7 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
@@ -99,6 +100,7 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
@@ -131,6 +133,7 @@ package away3d.loaders
 			dispatcher.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 		}

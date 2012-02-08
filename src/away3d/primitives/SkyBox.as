@@ -31,6 +31,7 @@ package away3d.primitives
 	 */
 	public class SkyBox extends Entity implements IRenderable
 	{
+		// todo: remove SubGeometry, use a simple single buffer with offsets
 		private var _geometry : SubGeometry;
 		private var _material : SkyBoxMaterial;
 		private var _nullAnimation : AnimationBase = new NullAnimation();
@@ -251,6 +252,36 @@ package away3d.primitives
 		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			return null;
+		}
+
+		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			return null;
+		}
+
+		public function get vertexBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get normalBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get tangentBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get UVBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get secondaryUVBufferOffset() : int
+		{
+			return 0;
 		}
 	}
 }

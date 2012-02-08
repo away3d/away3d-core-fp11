@@ -118,7 +118,7 @@ package away3d.core.render
 			draw(entityCollector, null);
 
 			// clear buffers
-			_stage3DProxy.setSimpleVertexBuffer(0, null, null);
+			_stage3DProxy.setSimpleVertexBuffer(0, null, null, 0);
 
 			if (!_context || !_potentialFound) return;
 			_context.drawToBitmapData(_bitmapData);
@@ -218,7 +218,7 @@ package away3d.core.render
 
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
-				_stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				_stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
 
 				item = item.next;
@@ -324,7 +324,7 @@ package away3d.core.render
 			_context.setScissorRectangle(MOUSE_SCISSOR_RECT);
 			_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, localViewProjection, true);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _boundOffsetScale, 2);
-			_stage3DProxy.setSimpleVertexBuffer(0, _hitRenderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+			_stage3DProxy.setSimpleVertexBuffer(0, _hitRenderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, _hitRenderable.vertexBufferOffset);
 			_context.drawTriangles(_hitRenderable.getIndexBuffer(_stage3DProxy), 0, _hitRenderable.numTriangles);
 			_context.drawToBitmapData(_bitmapData);
 

@@ -178,12 +178,12 @@ package away3d.materials.passes
 
 				var context : Context3D = stage3DProxy._context3D;
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
-				stage3DProxy.setSimpleVertexBuffer(0, dedicatedRenderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-				stage3DProxy.setSimpleVertexBuffer(1, dedicatedRenderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(0, dedicatedRenderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, dedicatedRenderable.vertexBufferOffset);
+				stage3DProxy.setSimpleVertexBuffer(1, dedicatedRenderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, dedicatedRenderable.normalBufferOffset);
 				context.drawTriangles(dedicatedRenderable.getIndexBuffer(stage3DProxy), 0, dedicatedRenderable.numTriangles);
 			}
 			else {
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
 
 				super.render(renderable, stage3DProxy, camera, lightPicker);
 			}

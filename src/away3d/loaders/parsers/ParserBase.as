@@ -238,6 +238,10 @@ package away3d.loaders.parsers
 					type_name = 'skelpose';
 					type_event = AssetEvent.SKELETON_POSE_COMPLETE;
 					break;
+				case AssetType.ENTITY:
+					type_name = 'entity';
+					type_event = AssetEvent.ENTITY_COMPLETE;
+					break;
 				default:
 					throw new Error('Unhandled asset type '+asset.assetType+'. Report as bug!');
 					break;

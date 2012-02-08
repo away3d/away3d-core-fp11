@@ -884,5 +884,30 @@
 				_indexBuffer[index] = null;
 			}
 		}
+
+		public function get vertexBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get normalBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get tangentBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get UVBufferOffset() : int
+		{
+			return 0;
+		}
+
+		public function get secondaryUVBufferOffset() : int
+		{
+			return 0;
+		}
 	}
 }
