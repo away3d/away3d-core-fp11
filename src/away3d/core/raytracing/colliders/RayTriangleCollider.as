@@ -61,11 +61,9 @@ package away3d.core.raytracing.colliders
 		}
 
 		private function executeKernel():void {
-
 			// run kernel.
 			var rayTriangleKernelJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, _indexBufferDims.x, _indexBufferDims.y );
 			rayTriangleKernelJob.start( true );
-
 			// find a proper collision from pb's output
 			var i:uint;
 			var t:Number;

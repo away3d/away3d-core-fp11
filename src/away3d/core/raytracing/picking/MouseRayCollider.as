@@ -78,7 +78,7 @@ package away3d.core.raytracing.picking
 			var numBoundHits:uint = collisionVOs.length;
 			if( numBoundHits == 0 ) return _collisionExists = false;
 
-			// sort collision vos
+			// sort collision vos, closest to furthest
 			collisionVOs = collisionVOs.sort( onSmallestT );
 
 			// find nearest collision and perform triangle collision tests where necessary
