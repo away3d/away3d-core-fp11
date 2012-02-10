@@ -12,7 +12,7 @@
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.utils.MultipleMaterials;
 	import away3d.textures.BitmapTexture;
-	import away3d.tools.MeshHelper;
+	import away3d.tools.helpers.MeshHelper;
 	
 	import flash.geom.Point;
 	import flash.geom.Vector3D;

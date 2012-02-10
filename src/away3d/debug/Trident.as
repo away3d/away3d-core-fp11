@@ -4,7 +4,7 @@
 	import away3d.entities.Mesh;
 	import away3d.extrusions.LatheExtrude;
 	import away3d.materials.ColorMaterial;
-	import away3d.tools.Merge;
+	import away3d.tools.commands.Merge;
 
 	import flash.geom.Vector3D;
 

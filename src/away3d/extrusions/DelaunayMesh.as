@@ -11,7 +11,7 @@ package away3d.extrusions
 	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
-	import away3d.tools.MeshHelper;
+	import away3d.tools.helpers.MeshHelper;
 
 	import flash.geom.Vector3D;
 
