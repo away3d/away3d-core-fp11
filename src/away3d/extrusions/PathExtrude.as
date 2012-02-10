@@ -562,7 +562,7 @@ package away3d.extrusions{
 				
 			} else {
 				var bu:Number = 0;
-				var bincu:Number = 1/countloop;
+				var bincu:Number = 1/(countloop-1);
 			}
 			
 			function getDouble(x:Number, y:Number, z:Number ):Vertex
@@ -589,7 +589,7 @@ package away3d.extrusions{
 				}
 			}
 			 
-			if(_coverSegment) var floored:uint = indexp;
+			var floored:uint = _coverSegment? indexp : 0;
 			
 			if(_materials && _materials.length>0){
 				
