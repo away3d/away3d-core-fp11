@@ -55,7 +55,7 @@ package away3d.textures
 		 * Draws the video and updates the bitmap texture
 		 * If autoUpdate is false and this function is not called the bitmap texture will not update!
 		 */
-		public function update() : void
+		public function updateTexture() : void
 		{
 
 			if (_player.playing && !_player.paused) {
@@ -81,7 +81,7 @@ package away3d.textures
 
 		private function autoUpdateHandler(event : Event) : void
 		{
-			update();
+			updateTexture();
 		}
 
 		/**

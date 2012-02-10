@@ -27,9 +27,9 @@ package away3d.core.managers
 		private var _currentId : int;
 
 
-		public function AGALProgram3DCache(stage3DProxy : Stage3DProxy, singletonEnforcer : SingletonEnforcer)
+		public function AGALProgram3DCache(stage3DProxy : Stage3DProxy, AGALProgram3DCacheSingletonEnforcer : AGALProgram3DCacheSingletonEnforcer)
 		{
-			if (!singletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
+			if (!AGALProgram3DCacheSingletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
 			_stage3DProxy = stage3DProxy;
 
 			_program3Ds = [];
@@ -45,7 +45,7 @@ package away3d.core.managers
 			_instances ||= new Vector.<AGALProgram3DCache>(8, true);
 
 			if (!_instances[index]) {
-				_instances[index] = new AGALProgram3DCache(stage3DProxy, new SingletonEnforcer());
+				_instances[index] = new AGALProgram3DCache(stage3DProxy, new AGALProgram3DCacheSingletonEnforcer());
 				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
 			}
 
@@ -134,6 +134,6 @@ package away3d.core.managers
 	}
 }
 
-class SingletonEnforcer
+class AGALProgram3DCacheSingletonEnforcer
 {
 }

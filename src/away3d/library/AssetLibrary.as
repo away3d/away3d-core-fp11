@@ -32,7 +32,7 @@ package away3d.library
 		
 		
 		
-		public function AssetLibrary(se : SingletonEnforcer)
+		public function AssetLibrary(se : AssetLibrarySingletonEnforcer)
 		{
 			// TODO: not used
 			se = se;			
@@ -61,7 +61,7 @@ package away3d.library
 				key = 'default';
 			
 			if (!_instances.hasOwnProperty(key))
-				_instances[key] = new AssetLibrary(new SingletonEnforcer());
+				_instances[key] = new AssetLibrary(new AssetLibrarySingletonEnforcer());
 			
 			return _instances[key];
 		}
@@ -663,6 +663,6 @@ package away3d.library
 }
 
 // singleton enforcer
-class SingletonEnforcer
+class AssetLibrarySingletonEnforcer
 {
 }

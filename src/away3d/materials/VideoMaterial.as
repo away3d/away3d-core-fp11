@@ -62,7 +62,7 @@ package away3d.materials
 		 * Draws the video and updates the bitmap material
 		 * If this function is not called the bitmap material will not update! 
 		 */
-		public function update():void
+		public function updateVideo():void
 		{
 			
 			if(_player.playing && !_player.paused)
@@ -91,7 +91,7 @@ package away3d.materials
 		
 		private function autoUpdateHandler( e:Event ):void
 		{
-			update();
+			updateVideo();
 		}
 		
 		//////////////////////////////////////////////////////

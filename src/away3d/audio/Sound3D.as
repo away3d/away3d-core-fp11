@@ -196,7 +196,7 @@ package away3d.audio
 		 */
 		
 		// WORK AROUND WHILE EVENTS ARE ADDED
-		public function update():void
+		public function updateSound():void
 		{
 			_inv_ref_mtx.rawData = _reference.sceneTransform.rawData;
 			_inv_ref_mtx.invert();
