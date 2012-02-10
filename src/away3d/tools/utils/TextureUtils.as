@@ -18,7 +18,7 @@ package away3d.tools.utils
 			return d >= 2 && d <= MAX_SIZE && isPowerOfTwo(d);
 		}
 
-		private static function isPowerOfTwo(value : int) : Boolean
+		public static function isPowerOfTwo(value : int) : Boolean
 		{
 			return value ? ((value & -value) == value) : false;
 		}
