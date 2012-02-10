@@ -36,5 +36,13 @@
 			return pStart + ", " + pControl + ", " + pEnd;
 		}
 		
+		/**
+		* nulls the 3 vectors
+		*/
+		public function dispose():void
+		{
+			pStart = pControl = pEnd = null;
+		}
+		
 	}
 }
