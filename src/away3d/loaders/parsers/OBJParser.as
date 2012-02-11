@@ -267,43 +267,59 @@ package away3d.loaders.parsers
 		*/
 		private function translate() :void
 		{
-			var groups : Vector.<Group> = _objects[_objectIndex].groups;
-			var numGroups : uint = groups.length;
-			var materialGroups : Vector.<MaterialGroup>;
-			var numMaterialGroups : uint;
-			var geometry : Geometry;
-			var mesh : Mesh;
-			var meshid:uint;
-			
-			var m : uint;
-			var sm : uint;
-			var bmMaterial:TextureMaterial;
+			for (var objIndex:int = 0; objIndex < _objects.length; ++objIndex)
+			{
+				var groups : Vector.<Group> = _objects[objIndex].groups;
+				var numGroups : uint = groups.length;
+				var materialGroups : Vector.<MaterialGroup>;
+				var numMaterialGroups : uint;
+				var geometry : Geometry;
+				var mesh : Mesh;
+				var meshid:uint;
+				
+				var m : uint;
+				var sm : uint;
+				var bmMaterial:TextureMaterial;
 
-			for (var g : uint = 0; g < numGroups; ++g) {
-				geometry = new Geometry();
-				materialGroups = groups[g].materialGroups;
-				numMaterialGroups = materialGroups.length;
-				for (m = 0; m < numMaterialGroups; ++m) {
-					translateMaterialGroup(materialGroups[m], geometry);
+				for (var g : uint = 0; g < numGroups; ++g) {
+					geometry = new Geometry();
+					materialGroups = groups[g].materialGroups;
+					numMaterialGroups = materialGroups.length;
+					for (m = 0; m < numMaterialGroups; ++m) {
+						translateMaterialGroup(materialGroups[m], geometry);
+					}
+					bmMaterial = new TextureMaterial( new BitmapTexture( defaultBitmapData ) );
+					mesh = new Mesh(geometry, bmMaterial);
+					meshid = _meshes.length;
+					
+					if (_objects[objIndex].name != null) {
+						// this is a full independent object ('o' tag in OBJ file)
+						mesh.name = _objects[objIndex].name;
+					}
+					else if(groups[g].name != null) {
+						// this is a group so the sub groups contain the actual mesh object names ('g' tag in OBJ file)
+						mesh.name = groups[g].name;
+					}
+					else {
+						// no name and tahts unfortunate, lets make one up
+						mesh.name = "obj" + meshid;
+					}
+						
+					_meshes[meshid] = mesh;
+					
+					if(groups[g].materialID != ""){
+						bmMaterial.name = groups[g].materialID+"~"+mesh.name;
+					} else {
+						bmMaterial.name = _lastMtlID+"~"+mesh.name;
+					}
+					
+					if(mesh.subMeshes.length >1){
+						for (sm = 1; sm<mesh.subMeshes.length; ++sm)
+							mesh.subMeshes[sm].material = bmMaterial;
+					}
+					
+					finalizeAsset(mesh);
 				}
-				bmMaterial = new TextureMaterial( new BitmapTexture( defaultBitmapData ) );
-				mesh = new Mesh(geometry, bmMaterial);
-				meshid = _meshes.length;
-				mesh.name = "obj"+meshid;
-				_meshes[meshid] = mesh;
-				
-				if(groups[g].materialID != ""){
-					bmMaterial.name = groups[g].materialID+"~"+mesh.name;
-				} else {
-					bmMaterial.name = _lastMtlID+"~"+mesh.name;
-				}
-				
-				if(mesh.subMeshes.length >1){
-					for (sm = 1; sm<mesh.subMeshes.length; ++sm)
-						mesh.subMeshes[sm].material = bmMaterial;
-				}
-				
-				finalizeAsset(mesh);
 			}
 		}
 		
