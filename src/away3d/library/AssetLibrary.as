@@ -166,7 +166,7 @@ package away3d.library
 		 * 
 		 * @see away3d.library.AssetLibrary.createIterator()
 		*/
-		public static function createIterator(assetTypeFilter : String = null, namespaceFilter : String = null, filterFunc : Function = null) : AssetLibraryIterator
+		public static function CreateIterator(assetTypeFilter : String = null, namespaceFilter : String = null, filterFunc : Function = null) : AssetLibraryIterator
 		{
 			return getInstance().createIterator(assetTypeFilter, namespaceFilter, filterFunc);
 		}
@@ -177,7 +177,7 @@ package away3d.library
 			return loadResource(req, context, ns, parser);
 		}
 		
-		public static function load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
+		public static function Load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			return getInstance().load(req, context, ns, parser);
 		}
@@ -189,7 +189,7 @@ package away3d.library
 			return parseResource(data, context, ns, parser);
 		}
 		
-		public static function loadData(data : *, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
+		public static function LoadData(data : *, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			return getInstance().loadData(data, context, ns, parser);
 		}
@@ -211,7 +211,7 @@ package away3d.library
 			return _assetDictionary[ns][name];
 		}
 		
-		public static function getAsset(name : String, ns : String = null) : IAsset
+		public static function GetAsset(name : String, ns : String = null) : IAsset
 		{
 			return getInstance().getAsset(name, ns);
 		}
@@ -223,7 +223,7 @@ package away3d.library
 			SingleFileLoader.enableParser(parserClass);
 		}
 		
-		public static function enableParsers(parserClasses : Vector.<Class>) : void
+		public static function EnableParsers(parserClasses : Vector.<Class>) : void
 		{
 			SingleFileLoader.enableParsers(parserClasses);
 		}
@@ -297,7 +297,7 @@ package away3d.library
 		 * 
 		 * @see away3d.library.AssetLibrary.addAsset()
 		*/
-		public static function addAsset(asset : IAsset) : void
+		public static function AddAsset(asset : IAsset) : void
 		{
 			getInstance().addAsset(asset);
 		}
@@ -338,7 +338,7 @@ package away3d.library
 		 * 
 		 * @see away3d.library.AssetLibrary.removeAsset()
 		*/
-		public static function removeAsset(asset : IAsset, dispose : Boolean = true) : void
+		public static function RemoveAsset(asset : IAsset, dispose : Boolean = true) : void
 		{
 			getInstance().removeAsset(asset, dispose);
 		}
@@ -373,7 +373,7 @@ package away3d.library
 		 * 
 		 * @see away3d.library.AssetLibrary.removeAssetByName()
 		*/
-		public static function removeAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
+		public static function RemoveAssetByName(name : String, ns : String = null, dispose : Boolean = true) : IAsset
 		{
 			return getInstance().removeAssetByName(name, ns, dispose);
 		}
@@ -406,7 +406,7 @@ package away3d.library
 		 * 
 		 * @see away3d.library.AssetLibrary.removeAllAssets()
 		*/
-		public static function removeAllAssets(dispose : Boolean = true) : void
+		public static function RemoveAllAssets(dispose : Boolean = true) : void
 		{
 			getInstance().removeAllAssets(dispose);
 		}
@@ -454,7 +454,7 @@ package away3d.library
 		 * 
 		 * @see away3d.library.AssetLibrary.removeNamespaceAssets()
 		*/
-		public static function removeNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
+		public static function RemoveNamespaceAssets(ns : String=null, dispose : Boolean = true) : void
 		{
 			getInstance().removeNamespaceAssets(ns, dispose);
 		}
