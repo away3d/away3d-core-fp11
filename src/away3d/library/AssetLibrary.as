@@ -40,8 +40,8 @@ package away3d.library
 			_assetDictionary = {};
 			_loadingSessions = new Vector.<AssetLoader>;
 			
-			conflictStrategy = ConflictStrategy.APPEND_NUM_SUFFIX.create();
-			conflictPrecedence = ConflictPrecedence.FAVOR_NEW;
+			conflictStrategy = away3d.library.naming.ConflictStrategy.APPEND_NUM_SUFFIX.create();
+			conflictPrecedence = away3d.library.naming.ConflictPrecedence.FAVOR_NEW;
 		}
 		
 		
@@ -93,11 +93,11 @@ package away3d.library
 		/**
 		 * Short-hand for conflictStrategy property on default asset library instance.
 		*/
-		public static function get conflictStrategy() : ConflictStrategyBase
+		public static function get ConflictStrategy() : ConflictStrategyBase
 		{
 			return getInstance().conflictStrategy;
 		}
-		public static function set conflictStrategy(val : ConflictStrategyBase) : void
+		public static function set ConflictStrategy(val : ConflictStrategyBase) : void
 		{
 			getInstance().conflictStrategy = val;
 		}
@@ -130,11 +130,11 @@ package away3d.library
 		 *
 		 * @see away3d.library.AssetLibrary.conflictPrecedence
 		*/
-		public static function get conflictPrecedence() : String
+		public static function get ConflictPrecedence() : String
 		{
 			return getInstance().conflictPrecedence;
 		}
-		public static function set conflictPrecedence(val : String) : void
+		public static function set ConflictPrecedence(val : String) : void
 		{
 			getInstance().conflictPrecedence = val;
 		}
