@@ -72,11 +72,7 @@ package away3d.controllers
         {
             super(targetObject);
 			
-			if(lookAtPosition){
-				_lookAtPosition = lookAtPosition;
-			} else{
-				_lookAtObject = lookAtObject || new ObjectContainer3D();
-			}
+			this.lookAtObject = lookAtObject || new ObjectContainer3D();
         }
         
 		/**
@@ -84,12 +80,12 @@ package away3d.controllers
 		 */
 		public override function update():void
 		{
-			if (targetObject || lookAtObject || _lookAtPosition){
+			if (_targetObject || _lookAtObject || _lookAtPosition){
 				
 				if(_lookAtPosition){
-					targetObject.lookAt(_lookAtPosition);
+					_targetObject.lookAt(_lookAtPosition);
 				} else {
-					targetObject.lookAt(lookAtObject.scene ? lookAtObject.scenePosition : lookAtObject.position);
+					_targetObject.lookAt(_lookAtObject.scene ? _lookAtObject.scenePosition : _lookAtObject.position);
 				}
 			}
 		}
