@@ -206,7 +206,8 @@ package away3d.core.managers
 			if( !(renderable = (event3D.renderable ||= _activeRenderable)) ) return;
 
 			var local:Vector3D;
-
+			var scene:Vector3D;
+			
 			event3D.material = renderable.material;
 			event3D.object = renderable.sourceEntity;
 
@@ -219,15 +220,21 @@ package away3d.core.managers
 
 			if( _activeCollider ) {
 				local = _activeCollider.collisionPoint;
-				event3D.uv = _activeCollider.collisionUV;
 				event3D.localX = local.x;
 				event3D.localY = local.y;
 				event3D.localZ = local.z;
+				scene = _activeCollider.entity.transform.transformVector(local);
+				event3D.sceneX = scene.x;
+				event3D.sceneY = scene.y;
+				event3D.sceneZ = scene.z;
 			}
 			else {
 				event3D.localX = -1;
 				event3D.localY = -1;
 				event3D.localZ = -1;
+				event3D.sceneX = -1;
+				event3D.sceneY = -1;
+				event3D.sceneZ = -1;
 			}
 
 			// only dispatch from first implicitly enabled object (one that is not a child of a mouseChildren=false hierarchy)
@@ -269,12 +276,12 @@ package away3d.core.managers
 				var localX:Number;
 				var localY:Number;
 				var localZ:Number;
-
+				
 				if( _activeRenderable ) {
-					var point:Vector3D = _activeCollider.collisionPoint;
-					localX = point.x;
-					localY = point.y;
-					localZ = point.z;
+					var local:Vector3D = _activeCollider.collisionPoint;
+					localX = local.x;
+					localY = local.y;
+					localZ = local.z;
 				}
 				else {
 					localX = localY = localZ = -1;

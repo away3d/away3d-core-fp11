@@ -128,15 +128,27 @@ package away3d.core.raytracing.picking
 			return _collisionExists = _nearestCollisionVO.finalCollisionT != Number.MAX_VALUE;
 		}
 
-		override public function get collisionPoint():Vector3D {
-			if( !_collisionExists ) return null;
+		override public function get collisionPoint():Vector3D
+		{
+			if( !_collisionExists )
+				return null;
+			
 			var point:Vector3D = new Vector3D();
 			point.x = _nearestCollisionVO.localRayPosition.x + _nearestCollisionVO.finalCollisionT * _nearestCollisionVO.localRayDirection.x;
 			point.y = _nearestCollisionVO.localRayPosition.y + _nearestCollisionVO.finalCollisionT * _nearestCollisionVO.localRayDirection.y;
 			point.z = _nearestCollisionVO.localRayPosition.z + _nearestCollisionVO.finalCollisionT * _nearestCollisionVO.localRayDirection.z;
 			return point;
 		}
-
+		
+		
+		public function get entity():Entity
+		{
+			if( !_collisionExists )
+				return null;
+			
+			return _nearestCollisionVO.entity;
+		}
+		
 		private function onSmallestT( a:MouseCollisionVO, b:MouseCollisionVO ):Number {
 			return a.boundsCollisionT < b.boundsCollisionT ? -1 : 1;
 		}
