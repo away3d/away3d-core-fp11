@@ -69,6 +69,8 @@ package away3d.extrusions{
 		
 		private var _keepExtremes:Boolean;
 		private var _distribute:Boolean;
+		private var _distributeU:Boolean;
+		private var _distributedU : Vector.<Number>;
 		private var _startPoints:Vector.<Vector3D>;
 		private var _endPoints:Vector.<Vector3D>;
 		
@@ -83,7 +85,7 @@ package away3d.extrusions{
 		* @param	coverSegment	[optional] 	Boolean. Defines the uv mapping, when true and coverall is false a unique material is stretched along one PathSegment. Default is false.
 		* @param	alignToPath		[optional]	Boolean. If the profile must follow the path or keep its original orientation.
 		* @param	centerMesh		[optional] 	Boolean. If the geometry needs to be recentered in its own object space. If the position after generation is set to 0,0,0, the object would be centered in worldspace. Default is false.
-		* @param	mapFit				[optional]	Boolean. The UV mapping is percentually spreaded over the width of the path, making texture looking nicer and edits for applications such as a race track, road, more easy.
+		* @param	mapFit				[optional]	Boolean. The UV mapping is percentually spreaded over the width of the path, making texture looking nicer and edits for applications such as a race track, road, more easy. Affects the uv's u values and set distributeU to false. Default is false.
 		* @param	flip					[optional]	Boolean. If the faces must be reversed depending on Vector3D's orientation. Default is false.
 		* @param	closePath			[optional]	Boolean. If the last PathSegment entered must be welded back to first one. Executed in a straight manner, its recommanded to pass the first entry to the Path again, as last entry if curves are involved.
 		* @param	materials			[optional]	Vector.&lt;MaterialBase&gt;. An optional Vector.&lt;MaterialBase&gt; of different materials that can be alternated along the path if coverAll is false.
@@ -92,10 +94,11 @@ package away3d.extrusions{
 		* @param	rotations			[optional]	An optional Vector.&lt;Vector3D&gt; of <code>Vector3D</code> objects that defines a series of rotations to be set on each PathSegment.
 		* @param	smoothSurface	[optional]	An optional Boolean. Defines if the surface of the mesh must be smoothed or not. Default is true.
 		* @param	distribute			[optional]	Boolean. If the mesh subdivision is evenly spreaded over the entire mesh. Depending on path definition, segments are possibly not having the same amount of subdivision.
+		* @param	distributeU			[optional]	Boolean. If the mesh uv' u value is procentually spreaded over the entire mesh surface. Prevents the source map to be stretched. Default is true.
 		* @param	keepExtremes		[optional]	Boolean. If the the first and last profile coordinates must be kept accessible, in order to feed classes such as DelaunayMesh. Default is false;
 		*/
 		function PathExtrude(	material:MaterialBase = null, path:Path = null, profile:Vector.<Vector3D> = null, subdivision:uint = 2, coverAll:Boolean = true, coverSegment:Boolean = false, alignToPath:Boolean = true, centerMesh:Boolean = false, mapFit:Boolean = false,
-							 			flip:Boolean = false, closePath:Boolean = false, materials:Vector.<MaterialBase> = null, scales:Vector.<Vector3D> = null, smoothScale:Boolean = true, rotations:Vector.<Vector3D> = null, smoothSurface:Boolean = true, distribute:Boolean = false, keepExtremes:Boolean = false)
+							 			flip:Boolean = false, closePath:Boolean = false, materials:Vector.<MaterialBase> = null, scales:Vector.<Vector3D> = null, smoothScale:Boolean = true, rotations:Vector.<Vector3D> = null, smoothSurface:Boolean = true, distribute:Boolean = false, distributeU:Boolean = true, keepExtremes:Boolean = false)
 		{
 			var geom : Geometry = new Geometry();
 			_subGeometry = new SubGeometry();
@@ -117,6 +120,7 @@ package away3d.extrusions{
 			_smoothScale = smoothScale;
 			_rotations = rotations;
 			_smoothSurface = smoothSurface;
+			_distributeU = distributeU;
 			_keepExtremes = keepExtremes;
 		}
 		
@@ -171,6 +175,27 @@ package away3d.extrusions{
 			}else{
 				invalidateGeometry();
 			}
+    	}
+
+    	/**
+    	 * Defines the uv's u values are spreaded procentually over the entire surface to prevent the maps to be stretched.
+    	 */
+    	public function get distributeU():Boolean
+    	{
+    		return _distributeU;
+    	}
+    	
+    	public function set distributeU(val:Boolean):void
+    	{
+    		if (_distributeU == val)
+    			return;
+    		
+    		_distributeU = val;
+			
+			if(val && _mapFit) _mapFit = false;
+			if(!val && _distributedU) _distributedU = null;
+			
+			invalidateGeometry();
     	}
 		
 		/**
@@ -355,6 +380,8 @@ package away3d.extrusions{
 		{
 			if (_mapFit == val)
 				return;
+			
+			if(val && _distributeU) _distributeU = false;
 			
 			_mapFit = val;
 			_geomDirty = true;
@@ -607,7 +634,11 @@ package away3d.extrusions{
 			 
 			for( i = 0; i < countloop-1; ++i){
 				
-				if(_mapFit){
+				if(_distributeU){
+					u1 = _distributedU[i];
+					u2 = _distributedU[i+1];
+
+				} else if(_mapFit){
 					u1 = 1-Vector3D.distance(points1[i], bleft) /dist;
 					u2 = 1-Vector3D.distance(points1[i+1], bleft) /dist;
 					
@@ -1004,6 +1035,24 @@ package away3d.extrusions{
 			
 			return nSegs;
 		}
+
+		private function generateUlist():void
+    	{
+			_distributedU = Vector.<Number>([0]);
+			var tdist:Number = 0;
+			var dist:Number = 0;
+			var tmpDists:Vector.<Number> = new Vector.<Number>();
+			for(var i:uint = 0;i<_profile.length-1;++i){
+				tmpDists[i] = Vector3D.distance(_profile[i], _profile[i+1]);
+				tdist += tmpDists[i];
+			}
+			for(i = 1;i<_profile.length;++i){
+				_distributedU[i] = (tmpDists[i-1]+dist)/tdist;
+				dist += tmpDists[i-1];
+			}
+			
+			tmpDists = null;
+		}
 		
     	private function buildExtrude():void
     	{
@@ -1024,6 +1073,8 @@ package away3d.extrusions{
 				} else{
 					vSegPts = PathUtils.getPointsOnCurve(_path, _subdivision);
 				}
+
+				if(_distributeU) generateUlist();
 				
 				var vPtsList:Vector.<Vector3D> = new Vector.<Vector3D>();
 				var vSegResults:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
