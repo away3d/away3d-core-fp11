@@ -1,4 +1,4 @@
-package away3d.core.raytracing.picking
+package away3d.core.raycast
 {
 
 	public class MouseHitMethod

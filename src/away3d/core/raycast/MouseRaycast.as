@@ -1,22 +1,22 @@
-package away3d.core.raytracing.picking
+package away3d.core.raycast
 {
 
 	import away3d.core.data.RenderableListItem;
-	import away3d.core.raytracing.colliders.*;
+	import away3d.core.raycast.colliders.*;
 	import away3d.entities.Entity;
 
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
 
-	public class MouseRayCollider extends RayCollider
+	public class MouseRaycast extends ColliderBase
 	{
-		private var _triangleCollider:RayTriangleCollider;
+		private var _triangleCollider:TriangleCollider;
 		private var _nearestCollisionVO:MouseCollisionVO;
 
-		public function MouseRayCollider() {
+		public function MouseRaycast() {
 			super();
-			_triangleCollider = new RayTriangleCollider();
+			_triangleCollider = new TriangleCollider();
 		}
 
 		override public function evaluate( item:RenderableListItem ):Boolean {

@@ -1,4 +1,4 @@
-package away3d.core.raytracing.colliders
+package away3d.core.raycast.colliders
 {
 
 	import away3d.core.base.IRenderable;
@@ -7,7 +7,7 @@ package away3d.core.raytracing.colliders
 
 	import flash.geom.Vector3D;
 
-	public class RayCollider
+	public class ColliderBase
 	{
 		protected var _collisionExists:Boolean;
 		protected var _rayPosition:Vector3D;
@@ -16,7 +16,7 @@ package away3d.core.raytracing.colliders
 		protected var _t:Number;
 		protected var _collidingRenderable:IRenderable;
 
-		public function RayCollider() {
+		public function ColliderBase() {
 			_rayPosition = new Vector3D();
 			_rayDirection = new Vector3D();
 			_collisionPoint = new Vector3D();

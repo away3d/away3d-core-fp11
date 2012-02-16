@@ -1,4 +1,4 @@
-package away3d.core.raytracing.colliders
+package away3d.core.raycast.colliders
 {
 
 	import away3d.core.base.IRenderable;
@@ -10,7 +10,7 @@ package away3d.core.raytracing.colliders
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
 
-	public class RayTriangleCollider extends RayCollider
+	public class TriangleCollider extends ColliderBase
 	{
 		[Embed("/../pb/RayTriangleKernel.pbj", mimeType="application/octet-stream")]
 		private var RayTriangleKernelClass:Class;
@@ -23,7 +23,7 @@ package away3d.core.raytracing.colliders
 		private var _collisionTriangleIndex:uint;
 		private var _breakOnFirstTriangleHit:Boolean = false;
 
-		public function RayTriangleCollider() {
+		public function TriangleCollider() {
 			super();
 			_kernelOutputBuffer = new Vector.<Number>();
 			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );

@@ -9,8 +9,8 @@ package away3d.core.managers
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
-	import away3d.core.raytracing.picking.MouseRayCollider;
-	import away3d.core.raytracing.picking.MouseHitMethod;
+	import away3d.core.raycast.MouseRaycast;
+	import away3d.core.raycast.MouseHitMethod;
 
 	import flash.events.MouseEvent;
 	import flash.geom.Point;
@@ -34,9 +34,9 @@ package away3d.core.managers
 		private var _oldLocalY:Number;
 		private var _oldLocalZ:Number;
 
-		private var _opaqueCollider:MouseRayCollider;
-		private var _blendedCollider:MouseRayCollider;
-		private var _activeCollider:MouseRayCollider;
+		private var _opaqueCollider:MouseRaycast;
+		private var _blendedCollider:MouseRaycast;
+		private var _activeCollider:MouseRaycast;
 		private var _view:View3D;
 
 		private static var _mouseClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.CLICK );
@@ -63,8 +63,8 @@ package away3d.core.managers
 		 */
 		public function Mouse3DManager( view:View3D ) {
 			_view = view;
-			_opaqueCollider = new MouseRayCollider();
-			_blendedCollider = new MouseRayCollider();
+			_opaqueCollider = new MouseRaycast();
+			_blendedCollider = new MouseRaycast();
 			// TODO: add invisible container?
 			_view.addEventListener( MouseEvent.CLICK, onClick );
 			_view.addEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
