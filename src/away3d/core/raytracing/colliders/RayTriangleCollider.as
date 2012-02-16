@@ -12,7 +12,7 @@ package away3d.core.raytracing.colliders
 
 	public class RayTriangleCollider extends RayCollider
 	{
-		[Embed("pb/RayTriangleKernel.pbj", mimeType="application/octet-stream")]
+		[Embed("/../pb/RayTriangleKernel.pbj", mimeType="application/octet-stream")]
 		private var RayTriangleKernelClass:Class;
 
 		private var _rayTriangleKernel:Shader;
