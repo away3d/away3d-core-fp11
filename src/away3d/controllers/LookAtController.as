@@ -31,8 +31,10 @@ package away3d.controllers
 		
 		public function set lookAtPosition(val:Vector3D):void
 		{
-			if (_lookAtObject)
+			if (_lookAtObject){
 				_lookAtObject.removeEventListener(Object3DEvent.SCENETRANSFORM_CHANGED, onLookAtObjectChanged);
+				_lookAtObject = null;
+			}
 				
 			_lookAtPosition = val;
 			
