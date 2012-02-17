@@ -72,7 +72,7 @@ package away3d.containers
 
 		protected var _rttBufferManager : RTTBufferManager;
 		
-		private var _rightClickMenu:Boolean = true;
+		private var _rightClickMenuEnabled:Boolean = true;
 		private var _sourceURL:String;
 		private var _menu0:ContextMenuItem;
 		private var _menu1:ContextMenuItem;
@@ -88,7 +88,7 @@ package away3d.containers
 			}
 		}
 		
-		public function visitWebsite(e:ContextMenuEvent):void 
+		private function visitWebsite(e:ContextMenuEvent):void 
 		{
 			var url:String = Away3D.WEBSITE_URL;
 			var request:URLRequest = new URLRequest(url);
@@ -112,7 +112,7 @@ package away3d.containers
 		
 		private function updateRightClickMenu():void
 		{
-			if (_rightClickMenu)
+			if (_rightClickMenuEnabled)
 				_ViewContextMenu.customItems = _sourceURL? [_menu0, _menu1] : [_menu0];
 			else
 				_ViewContextMenu.customItems = [];
@@ -144,14 +144,14 @@ package away3d.containers
 			initRightClickMenu();
 		}
 		
-		public function get rightClickMenu() : Boolean
+		public function get rightClickMenuEnabled() : Boolean
 		{
-			return _rightClickMenu;
+			return _rightClickMenuEnabled;
 		}
 		
-		public function set rightClickMenu(val:Boolean) : void
+		public function set rightClickMenuEnabled(val:Boolean) : void
 		{
-			_rightClickMenu = val;
+			_rightClickMenuEnabled = val;
 			
 			updateRightClickMenu();
 		}
