@@ -64,7 +64,7 @@
 		}
 
 		/**
-		 * Indicates whether or not mouse events contain UV and position coordinates. Setting this to true can affect performance. Defaults to false.
+		 * Indicates what picking method to use on this mesh. See MouseHitMethod for available options.
 		 */
 		public function get mouseHitMethod():uint {
 			return _mouseHitMethod;
