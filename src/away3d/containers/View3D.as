@@ -1,5 +1,6 @@
 package away3d.containers
 {
+	import away3d.Away3D;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Mouse3DManager;
@@ -15,15 +16,20 @@ package away3d.containers
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
 	import away3d.textures.Texture2DBase;
-
+	
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
+	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.geom.Point;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
+	import flash.ui.ContextMenu;
+	import flash.ui.ContextMenuItem;
 	import flash.utils.getTimer;
 
 	use namespace arcane;
@@ -65,7 +71,56 @@ package away3d.containers
 		private var _antiAlias : uint;
 
 		protected var _rttBufferManager : RTTBufferManager;
-
+		
+		private var _rightClickMenu:Boolean = true;
+		private var _sourceURL:String;
+		private var _menu0:ContextMenuItem;
+		private var _menu1:ContextMenuItem;
+		private var _ViewContextMenu:ContextMenu;
+		
+		private function viewSource(e:ContextMenuEvent):void 
+		{
+			var request:URLRequest = new URLRequest(_sourceURL);
+			try {
+				navigateToURL(request, "_blank");
+			} catch (error:Error) {
+				
+			}
+		}
+		
+		public function visitWebsite(e:ContextMenuEvent):void 
+		{
+			var url:String = Away3D.WEBSITE_URL;
+			var request:URLRequest = new URLRequest(url);
+			try {
+				navigateToURL(request);
+			} catch (error:Error) {
+				
+			}
+		}
+		
+		private function initRightClickMenu():void
+		{
+			_menu0 = new ContextMenuItem("Away3D.com\tv" + Away3D.MAJOR_VERSION +"." + Away3D.MINOR_VERSION +"."+ Away3D.REVISION, true, true, true);
+			_menu1 = new ContextMenuItem("View Source", true, true, true); 
+			_menu0.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, visitWebsite);
+			_menu1.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, viewSource);
+			_ViewContextMenu = new ContextMenu();
+			
+			updateRightClickMenu();
+		}
+		
+		private function updateRightClickMenu():void
+		{
+			if (_rightClickMenu)
+				_ViewContextMenu.customItems = _sourceURL? [_menu0, _menu1] : [_menu0];
+			else
+				_ViewContextMenu.customItems = [];
+			
+			contextMenu = _ViewContextMenu;
+		}
+		
+		
 		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null)
 		{
 			super();
@@ -85,8 +140,22 @@ package away3d.containers
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
 			
 			_camera.partition = _scene.partition;
+			
+			initRightClickMenu();
 		}
-
+		
+		public function get rightClickMenu() : Boolean
+		{
+			return _rightClickMenu;
+		}
+		
+		public function set rightClickMenu(val:Boolean) : void
+		{
+			_rightClickMenu = val;
+			
+			updateRightClickMenu();
+		}
+		
 		public function get stage3DProxy() : Stage3DProxy
 		{
 			return _stage3DProxy;
@@ -391,6 +460,20 @@ package away3d.containers
 			_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
 			
 			_backBufferInvalid = false;
+		}
+		
+		/**
+		 * Defines a source url string that can be accessed though a View Source option in the right-click menu.
+		 * 
+		 * Requires the stats panel to be enabled.
+		 * 
+		 * @param	url		The url to the source files.
+		 */
+		public function addSourceURL(url:String):void
+		{
+			_sourceURL = url;
+			
+			updateRightClickMenu();
 		}
 		
 		/**
