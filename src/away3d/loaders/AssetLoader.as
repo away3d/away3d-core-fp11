@@ -294,17 +294,17 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
+			// TODO: Investigate this. Why is this done?
+			var ext:String = loader.url.substring(loader.url.length-4, loader.url.length).toLowerCase();
+			if(ext ==".jpg" || ext ==".png"){
+				_loadingDependency.resolveFailure();
+				prepareNextRetrieve(loader, event, false);
+			}
+
 			if(hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, loader.url, event.message));
 			} else{
 				trace("Unable to load "+loader.url);
-			}
-			
-			// TODO: Investigate this. Why is this done?
-			var ext:String = loader.url.substring(loader.url.length-4, loader.url.length).toLowerCase();
-			if(ext == ".mtl" || ext ==".jpg" || ext ==".png"){
-				_loadingDependency.resolveFailure();
-				prepareNextRetrieve(loader, event, false);
 			}
 		}
 		

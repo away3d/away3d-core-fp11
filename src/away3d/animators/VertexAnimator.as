@@ -62,9 +62,6 @@ package away3d.animators
 		 */
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			// TODO: not used
-			realDT = realDT;
-			
 			var poses : Vector.<Geometry> = _target.poses;
 			var weights : Vector.<Number> = _target.weights;
 

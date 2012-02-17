@@ -467,9 +467,9 @@ package away3d.loaders.parsers
 				sub = new SubGeometry();
 				sub.autoDeriveVertexNormals = true;
 				sub.autoDeriveVertexTangents = true;
-				sub.updateVertexData(obj.verts);
-				sub.updateIndexData(obj.indices);
-				sub.updateUVData(obj.uvs);
+				if(obj.verts) sub.updateVertexData(obj.verts);
+				if(obj.indices) sub.updateIndexData(obj.indices);
+				if(obj.uvs) sub.updateUVData(obj.uvs);
 				
 				geom = new Geometry();
 				geom.subGeometries.push(sub);

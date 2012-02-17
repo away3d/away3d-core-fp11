@@ -32,7 +32,7 @@
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
 		private var _inited:Boolean;
-		private const LIMIT:uint = 65535;
+		private const LIMIT:uint = 64998;
 		private var trunk:Array;
 		private var materialIndexList:Array = [];
 		private var containersList:Array = [];
@@ -384,12 +384,12 @@
 				v1 = vertexes[uvs[i+2]];
 				v2 = vertexes[uvs[i+4]];
 				
-				vertices.push(-v1.x, v1.y, v1.z, -v0.x, v0.y, v0.z, -v2.x, v2.y, v2.z);
+				vertices.push(v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
 				for(j=0; j<3;++j){
 					indices[index] = index;
 					index++;
 				}
-				vuv.push(uv1.u, uv1.v, uv0.u, uv0.v, uv2.u, uv2.v);
+				vuv.push(uv0.u, uv0.v, uv1.u, uv1.v, uv2.u, uv2.v);
 				vertLength+=9;
 			}
 			
