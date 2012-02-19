@@ -11,8 +11,9 @@ package
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
-	import away3d.primitives.Sphere;
+	import away3d.primitives.SphereGeometry;
 	import away3d.primitives.WireframeAxesGrid;
+	import flash.display.BlendMode;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -61,11 +62,11 @@ package
 		
 		private function initScene():void
 		{
-			var material:ParticleColorMaterial = new ParticleColorMaterial(0xFFFFB151);
+			var material:ParticleColorMaterial = new ParticleColorMaterial(0x66FFB151);
+			material.blendMode = BlendMode.ADD;
+			var sphere:SphereGeometry = new SphereGeometry( 2, 5, 5);
 			
-			var sphere:Sphere = new Sphere(null, 2, 5, 5);
-			
-			var sample:ParticleSample = new ParticleSample(sphere.geometry.subGeometries[0], material);
+			var sample:ParticleSample = new ParticleSample(sphere.subGeometries[0], material);
 			
 			var generater:SingleGenerater = new SingleGenerater(sample, 500);
 			

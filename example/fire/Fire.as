@@ -10,7 +10,7 @@ package
 	import a3dparticle.particle.ParticleSample;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.primitives.Sphere;
+	import away3d.primitives.SphereGeometry;
 	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
 	
@@ -31,11 +31,11 @@ package
 		{
 			//step 1:we create two samples
 			var material:ParticleColorMaterial = new ParticleColorMaterial();
-			var sphereLarge:Sphere = new Sphere(null, 5, 6, 6);
-			sphereLarge.scaleY = 1.5;
-			var sphereSmall:Sphere = new Sphere(null, 2, 4, 4);
-			sample1 = new ParticleSample(sphereLarge.geometry.subGeometries[0], material);
-			sample2 = new ParticleSample(sphereSmall.geometry.subGeometries[0], material);
+			var sphereLarge:SphereGeometry = new SphereGeometry(5, 6, 6);
+			//sphereLarge.scaleY = 1.5;
+			var sphereSmall:SphereGeometry = new SphereGeometry(2, 4, 4);
+			sample1 = new ParticleSample(sphereLarge.subGeometries[0], material);
+			sample2 = new ParticleSample(sphereSmall.subGeometries[0], material);
 			
 			//step 2:we create a generater which will group the samples.
 			var generater:MutiWeightGenerater = new MutiWeightGenerater([sample1, sample2], [5, 1], 500);

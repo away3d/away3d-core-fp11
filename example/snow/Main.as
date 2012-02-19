@@ -20,9 +20,9 @@ package
 	import away3d.library.assets.AssetType;
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.parsers.Max3DSParser;
-	import away3d.materials.utils.CubeMap;
 	import away3d.primitives.SkyBox;
 	import away3d.primitives.WireframeAxesGrid;
+	import away3d.textures.BitmapCubeTexture;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -91,7 +91,7 @@ package
 			loader.loadData(new Snow(), '', null, null, new Max3DSParser());
 			
 			
-			var _cubeMap:CubeMap = new CubeMap(new EnvPosX().bitmapData, new EnvNegX().bitmapData,
+			var _cubeMap:BitmapCubeTexture = new BitmapCubeTexture(new EnvPosX().bitmapData, new EnvNegX().bitmapData,
 					new EnvPosY().bitmapData, new EnvNegY().bitmapData,
 					new EnvPosZ().bitmapData, new EnvNegZ().bitmapData);
 

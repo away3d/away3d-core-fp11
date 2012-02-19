@@ -11,8 +11,9 @@ package
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
-	import away3d.primitives.Cylinder;
-	import away3d.primitives.Sphere;
+	import away3d.entities.Mesh;
+	import away3d.primitives.CylinderGeometry;
+	import away3d.primitives.SphereGeometry;
 	import away3d.primitives.WireframeAxesGrid;
 	import away3d.tools.MeshHelper;
 	import flash.display.Sprite;
@@ -68,13 +69,13 @@ package
 		{
 			var material:ParticleColorMaterial = new ParticleColorMaterial();
 			
-			var cy:Cylinder = new Cylinder(null, 1, 1, 20);
+			var cy:Mesh = new Mesh(new CylinderGeometry( 1, 1, 20));
 			cy.rotationZ = 90;
 			MeshHelper.applyRotations(cy);
-			var sphere:Sphere = new Sphere(null, 1, 6, 6);
+			var sphere:SphereGeometry = new SphereGeometry(1, 6, 6);
 			
 			sample1 = new ParticleSample(cy.geometry.subGeometries[0], material);
-			sample2 = new ParticleSample(sphere.geometry.subGeometries[0], material);
+			sample2 = new ParticleSample(sphere.subGeometries[0], material);
 			
 			var generater:MutiWeightGenerater = new MutiWeightGenerater([sample1, sample2], [5, 1], 400);
 			

@@ -13,7 +13,7 @@ package
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
-	import away3d.primitives.Plane;
+	import away3d.primitives.PlaneGeometry;
 	import away3d.primitives.WireframeAxesGrid;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -72,9 +72,9 @@ package
 		private function initScene():void
 		{
 			var material:ParticleBitmapMaterial = new ParticleBitmapMaterial(new IMG().bitmapData);
-			var plane:Plane = new Plane(null, 20, 20, 1, 1, false);
+			var plane:PlaneGeometry = new PlaneGeometry( 20, 20, 1, 1, false);
 			
-			var sample:ParticleSample = new ParticleSample(plane.geometry.subGeometries[0], material);
+			var sample:ParticleSample = new ParticleSample(plane.subGeometries[0], material);
 			var generater:SingleGenerater = new SingleGenerater(sample, 1000);
 			
 			particle = new ParticlesContainer();
