@@ -178,7 +178,6 @@ package a3dparticle.animators
 			//set some const
 			var context : Context3D = stage3DProxy._context3D;
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, zeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, fragmentZeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, piConst.index, Vector.<Number>([ Math.PI * 2, Math.PI * 2, Math.PI * 2, Math.PI * 2 ]));
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, OneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, TwoConst.index, Vector.<Number>([ 2, 2, 2, 2 ]));
