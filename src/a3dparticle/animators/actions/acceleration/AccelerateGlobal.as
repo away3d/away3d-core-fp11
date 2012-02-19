@@ -47,7 +47,7 @@ package a3dparticle.animators.actions.acceleration
 			return code;
 		}
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, accVelConst.index, Vector.<Number>([ _acc.x/2, _acc.y/2, _acc.z/2, 0 ]));

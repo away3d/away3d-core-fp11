@@ -49,7 +49,7 @@ package a3dparticle.animators.actions.scale
 			return code;
 		}
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			var delta:Number = Math.abs(_max - _min) / 2;

@@ -1,7 +1,7 @@
 package a3dparticle.animators.actions.texture 
 {
 	import a3dparticle.animators.actions.AllParticleAction;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTexture;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import flash.display.BitmapData;
@@ -21,7 +21,7 @@ package a3dparticle.animators.actions.texture
 	 */
 	public class ColorTextureByLifeGlobal extends AllParticleAction 
 	{
-		private var _texture:Texture3DProxy;
+		private var _texture:BitmapTexture;
 		private var _smooth:Boolean;
 		private var _mode:String;
 		private var _textureRegister:ShaderRegisterElement;
@@ -36,7 +36,7 @@ package a3dparticle.animators.actions.texture
 		{
 			this._mode = mode;
 			this._smooth = smooth;
-			_texture = new Texture3DProxy(bitmap);
+			_texture = new BitmapTexture(bitmap);
 		}
 		
 		override public function getAGALFragmentCode(pass : MaterialPassBase) : String
@@ -54,7 +54,7 @@ package a3dparticle.animators.actions.texture
 			return code;
 		}
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			stage3DProxy.setTextureAt(_textureRegister.index, _texture.getTextureForStage3D(stage3DProxy));
 		}

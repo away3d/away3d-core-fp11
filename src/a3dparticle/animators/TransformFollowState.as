@@ -65,7 +65,7 @@ package a3dparticle.animators
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			var subContainer:SubContainer = renderable as SubContainer;
 			if (_followAction.particlesData[subContainer.shareAtt])
@@ -83,7 +83,7 @@ package a3dparticle.animators
 					precessRotation(stage3DProxy,subContainer);
 				}
 			}
-			super.setRenderState(stage3DProxy, pass, renderable);
+			super.setRenderState(stage3DProxy, renderable, vertexConstantOffset, vertexStreamOffset);
 		}
 		
 		private function processOffest(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
@@ -113,7 +113,7 @@ package a3dparticle.animators
 			}
 			var buffer:VertexBuffer3D = stage3DProxy._context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 3, 3);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 3);
-			stage3DProxy.setSimpleVertexBuffer(_followAction.offestAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.setSimpleVertexBuffer(_followAction.offestAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
 		
 		private function precessRotation(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
@@ -145,7 +145,7 @@ package a3dparticle.animators
 			}
 			var buffer:VertexBuffer3D = stage3DProxy._context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 3, 3);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 3);
-			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
 		
 		private function processOffestAndRotation(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void

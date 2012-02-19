@@ -4,7 +4,7 @@ package a3dparticle.particle
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
+	import away3d.textures.BitmapTexture
 	import away3d.materials.utils.ShaderRegisterElement;
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
@@ -18,7 +18,7 @@ package a3dparticle.particle
 	 */
 	public class ParticleBitmapMaterial extends ParticleMaterialBase
 	{
-		private var _texture:Texture3DProxy;
+		private var _texture:BitmapTexture;
 		
 		private var _smooth:Boolean;
 		private var _repeat:Boolean;
@@ -34,7 +34,7 @@ package a3dparticle.particle
 			this._smooth = smooth;
 			this._repeat = repeat;
 			this._mipmap = mipmap;
-			_texture = new Texture3DProxy(bitmap);
+			_texture = new BitmapTexture(bitmap);
 			_cutOffData = new Vector.<Number>(4, true);
 			
 			if (alphaThreshold < 0) alphaThreshold = 0;

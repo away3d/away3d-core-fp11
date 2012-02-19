@@ -203,9 +203,9 @@ package a3dparticle.animators.actions.rotation
 			return code;
 		}
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(roatateAttribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_4);
+			stage3DProxy.setSimpleVertexBuffer(roatateAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_4, 0);
 		}
 		
 	}

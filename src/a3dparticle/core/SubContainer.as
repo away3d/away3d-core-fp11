@@ -161,11 +161,11 @@ package a3dparticle.core
 			return _shareAtt._extraDatas;
 		}
 		
-		public function get indices():Vector.<uint>
+		public function get indexData():Vector.<uint>
 		{
 			return _shareAtt._indices;
 		}
-		public function get uvData():Vector.<Number>
+		public function get UVData():Vector.<Number>
 		{
 			return _shareAtt._uvData;
 		}
@@ -200,6 +200,37 @@ package a3dparticle.core
 		public function get mouseEnabled() : Boolean
 		{
 			return _parent.mouseEnabled;
+		}
+		public function get mouseHitMethod():uint
+		{
+			return _parent.mouseHitMethod;
+		}
+		
+		
+		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		{
+			return null;
+		}
+		
+		public function get vertexBufferOffset() : int
+		{
+			return 0;
+		}
+		public function get normalBufferOffset() : int
+		{
+			return 0;
+		}
+		public function get tangentBufferOffset() : int
+		{
+			return 0;
+		}
+		public function get UVBufferOffset() : int
+		{
+			return 0;
+		}
+		public function get secondaryUVBufferOffset() : int
+		{
+			return 0;
 		}
 		
 	}

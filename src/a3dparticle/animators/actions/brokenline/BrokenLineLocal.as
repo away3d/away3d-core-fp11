@@ -138,11 +138,11 @@ package a3dparticle.animators.actions.brokenline
 			return code;
 		}
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			for (var i:int = 0; i < _brokenCount; i++)
 			{
-				stage3DProxy.setSimpleVertexBuffer(_brokenRegisters[i].index, getExtraBufferByIndex(stage3DProxy, SubContainer(renderable), i), Context3DVertexBufferFormat.FLOAT_4);
+				stage3DProxy.setSimpleVertexBuffer(_brokenRegisters[i].index, getExtraBufferByIndex(stage3DProxy, SubContainer(renderable), i), Context3DVertexBufferFormat.FLOAT_4, 0);
 			}
 		}
 		

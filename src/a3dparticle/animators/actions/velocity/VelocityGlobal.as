@@ -40,7 +40,7 @@ package a3dparticle.animators.actions.velocity
 			return code;
 		}
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, velocityConst.index, Vector.<Number>([ _velocity.x, _velocity.y, _velocity.z, 0 ]));

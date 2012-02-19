@@ -6,6 +6,7 @@ package a3dparticle.core
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import flash.display3D.Context3D;
@@ -23,6 +24,8 @@ package a3dparticle.core
 	public class SimpleParticlePass extends MaterialPassBase
 	{
 		private var _particleMaterial:ParticleMaterialBase;
+		private var _animatableAttributes : Array = ["va0"];
+		private var _animationTargetRegisters : Array = ["vt0"];
 		
 		public function SimpleParticlePass(particleMaterial:ParticleMaterialBase) 
 		{
@@ -52,19 +55,30 @@ package a3dparticle.core
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			var _particleAnimation:ParticleAnimation = ParticleAnimation(animation);
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
-				super.activate(stage3DProxy, camera);
+				super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 				_numUsedTextures = _particleAnimation.shaderRegisterCache.numUsedTextures;
 			}
 		}
 		
 		arcane override function getVertexCode() : String
 		{
-			return "";
+			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0]);
+			var code:String =  animation.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters) + projectionVertexCode;
+			trace(code);
+			return code;
+		}
+		
+		private function getProjectionCode(positionRegister : String) : String
+		{
+			var code : String = "";
+			var pos : String = positionRegister;
+			code += "m44 op, vt0, vc0\n";
+			return code;
 		}
 		
 		arcane override function getFragmentCode() : String
@@ -82,11 +96,11 @@ package a3dparticle.core
 			code += _particleAnimation.getAGALFragmentCode(this);
 			
 			code += "mov oc," + _particleAnimation.colorTarget.toString() + "\n";
-
+			trace("----\n", code);
 			return code;
 		}
 		
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
@@ -98,10 +112,10 @@ package a3dparticle.core
 				}
 				if (_particleAnimation.needUV)
 				{
-					stage3DProxy.setSimpleVertexBuffer(_particleAnimation.uvAttribute.index, renderable.getUVBuffer(stage3DProxy),Context3DVertexBufferFormat.FLOAT_2);
+					stage3DProxy.setSimpleVertexBuffer(_particleAnimation.uvAttribute.index, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, 0);
 				}
 				_particleMaterial.render(_particleAnimation, renderable, stage3DProxy , camera );
-				super.render(renderable, stage3DProxy , camera );
+				super.render(renderable, stage3DProxy , camera , lightPicker);
 			}
 		}
 		

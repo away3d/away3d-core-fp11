@@ -173,7 +173,7 @@ package a3dparticle.animators
 		}
 		
 		
-		public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			//set some const
 			var context : Context3D = stage3DProxy._context3D;
@@ -191,7 +191,7 @@ package a3dparticle.animators
 			var action:ActionBase;
 			for each(action in _particleActions)
 			{
-				action.setRenderState(stage3DProxy,pass,renderable);
+				action.setRenderState(stage3DProxy,renderable);
 			}
 		}
 		
@@ -260,7 +260,7 @@ package a3dparticle.animators
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getAGALVertexCode(pass : MaterialPassBase) : String
+		override arcane function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
 			var simpleParticlePass:SimpleParticlePass = SimpleParticlePass(pass);
 			reset(simpleParticlePass);
@@ -324,7 +324,7 @@ package a3dparticle.animators
 			var i:int;0
 			for (i = pass.numUsedStreams; i < shaderRegisterCache.numUsedStreams; i++)
 			{
-				stage3DProxy.setSimpleVertexBuffer(i, null);
+				stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
 			}
 			super.deactivate(stage3DProxy , pass );
 		}

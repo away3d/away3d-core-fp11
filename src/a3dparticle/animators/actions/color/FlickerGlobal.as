@@ -102,7 +102,7 @@ package a3dparticle.animators.actions.color
 		}
 		
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			
 			var context : Context3D = stage3DProxy._context3D;

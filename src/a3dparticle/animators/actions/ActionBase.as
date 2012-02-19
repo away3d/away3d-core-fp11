@@ -49,7 +49,7 @@ package a3dparticle.animators.actions
 			return "";
 		}
 		
-		public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			
 		}

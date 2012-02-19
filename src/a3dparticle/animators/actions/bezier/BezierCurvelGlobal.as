@@ -68,7 +68,7 @@ package a3dparticle.animators.actions.bezier
 			return code;
 		}
 		
-		override public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _controlConst.index, Vector.<Number>([ _controlPoint.x, _controlPoint.y, _controlPoint.z, 0 ]));

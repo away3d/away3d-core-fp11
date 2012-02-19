@@ -34,6 +34,8 @@ package a3dparticle
 		protected var _hasGen:Boolean;
 		protected var _alwaysInFrustum:Boolean;
 		
+		private var _mouseHitMethod:uint;
+		
 		public var _subContainers : Vector.<SubContainer>;
 		
 		public function ParticlesContainer(isClone:Boolean=false) 
@@ -145,8 +147,8 @@ package a3dparticle
 				uvData = _vec[i].subGem.UVData;
 				
 				_subContainers[j].numTriangles+= _vec[i].subGem.numTriangles;
-				indexData.forEach(function(index:uint, ...rest):void { _subContainers[j].indices.push(index + _subContainers[j].vertexData.length / 3); } );
-				uvData.forEach(function(uv:Number, ...rest):void { _subContainers[j].uvData.push(uv); } );
+				indexData.forEach(function(index:uint, ...rest):void { _subContainers[j].indexData.push(index + _subContainers[j].vertexData.length / 3); } );
+				uvData.forEach(function(uv:Number, ...rest):void { _subContainers[j].UVData.push(uv); } );
 				
 				param = initParticleParam();
 				param.total = _vec.length;
@@ -226,6 +228,19 @@ package a3dparticle
 		override public function set mouseEnabled(value : Boolean) : void
 		{
 			throw(new Error("the particlesContainer is not interactive!"));
+		}
+		
+		/**
+		 * Indicates what picking method to use on this mesh. See MouseHitMethod for available options.
+		 */
+		public function get mouseHitMethod():uint 
+		{
+			return _mouseHitMethod;
+		}
+
+		public function set mouseHitMethod( value:uint ):void 
+		{
+			_mouseHitMethod = value;
 		}
 		
 		/**
