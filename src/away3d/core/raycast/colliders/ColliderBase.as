@@ -2,7 +2,6 @@ package away3d.core.raycast.colliders
 {
 
 	import away3d.core.base.IRenderable;
-	import away3d.core.data.RenderableListItem;
 	import away3d.errors.AbstractMethodError;
 
 	import flash.geom.Vector3D;
@@ -15,6 +14,7 @@ package away3d.core.raycast.colliders
 		protected var _collisionPoint:Vector3D;
 		protected var _t:Number;
 		protected var _collidingRenderable:IRenderable;
+		protected var _target:*;
 
 		public function ColliderBase() {
 			_rayPosition = new Vector3D();
@@ -27,7 +27,11 @@ package away3d.core.raycast.colliders
 			_rayDirection = direction;
 		}
 
-		public function evaluate( item:RenderableListItem ):Boolean {
+		public function updateTarget( target:* ):void {
+			_target = target;
+		}
+
+		public function evaluate():Boolean {
 			throw new AbstractMethodError();
 		}
 

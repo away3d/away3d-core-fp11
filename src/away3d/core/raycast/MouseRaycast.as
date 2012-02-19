@@ -1,13 +1,13 @@
 package away3d.core.raycast {
 
-import away3d.core.data.RenderableListItem;
+	import away3d.core.base.SubMesh;
+	import away3d.core.data.RenderableListItem;
 import away3d.core.raycast.colliders.*;
 import away3d.entities.Entity;
 
 import flash.geom.Point;
 import flash.geom.Vector3D;
 import flash.utils.Dictionary;
-import flash.utils.getTimer;
 
 public class MouseRaycast extends ColliderBase {
     private var _triangleCollider:TriangleCollider;
@@ -18,7 +18,9 @@ public class MouseRaycast extends ColliderBase {
         _triangleCollider = new TriangleCollider();
     }
 
-    override public function evaluate( item:RenderableListItem ):Boolean {
+    override public function evaluate():Boolean {
+
+		var item:RenderableListItem = _target as RenderableListItem;
 
         if( !item ) return _collisionExists = false;
 
@@ -113,7 +115,8 @@ public class MouseRaycast extends ColliderBase {
                             || item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT ) {
 //                        triTests++;
                         _triangleCollider.breakOnFirstTriangleHit = item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT;
-                        if( _triangleCollider.evaluate( item ) ) { // triangle collision exists?
+						_triangleCollider.updateTarget( item.renderable as SubMesh );
+						if( _triangleCollider.evaluate() ) { // triangle collision exists?
                             collisionVO.finalCollisionT = _triangleCollider.collisionT;
                             collisionVO.collidingRenderable = item.renderable;
                             collisionVO.collisionUV = _triangleCollider.collisionUV.clone();

@@ -174,8 +174,10 @@ package away3d.core.managers
 				var rayDirection:Vector3D = _view.unproject( _view.mouseX, _view.mouseY );
 				_opaqueCollider.updateRay( rayPosition, rayDirection );
 				_blendedCollider.updateRay( rayPosition, rayDirection );
-				var opaqueCollides:Boolean = _opaqueCollider.evaluate( collector.opaqueRenderableHead );
-				var blendedCollides:Boolean = _blendedCollider.evaluate( collector.blendedRenderableHead );
+				_opaqueCollider.updateTarget( collector.opaqueRenderableHead );
+				var opaqueCollides:Boolean = _opaqueCollider.evaluate();
+				_blendedCollider.updateTarget( collector.blendedRenderableHead );
+				var blendedCollides:Boolean = _blendedCollider.evaluate();
 				if( opaqueCollides && blendedCollides ) {
 					_activeCollider = _opaqueCollider.collisionT < _blendedCollider.collisionT ? _opaqueCollider : _blendedCollider;
 				}
