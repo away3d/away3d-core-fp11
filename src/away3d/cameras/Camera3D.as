@@ -215,7 +215,7 @@ package away3d.cameras
 		 */
 		public function unproject(mX : Number, mY : Number):Vector3D
 		{
-			return sceneTransform.deltaTransformVector(lens.unproject(mX, mY, 0));
+			return sceneTransform.transformVector(lens.unproject(mX, mY, 0));
 		}
 		
 		/**
