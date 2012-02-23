@@ -47,6 +47,7 @@ package a3dparticle.animators
 		public var needCameraPosition:Boolean;
 		
 		public var needUV:Boolean;
+		public var hasUVAction:Boolean;
 		
 		
 		//vertex
@@ -63,6 +64,7 @@ package a3dparticle.animators
 		public var OneConst:ShaderRegisterElement;
 		public var TwoConst:ShaderRegisterElement;
 		public var cameraPosConst:ShaderRegisterElement;
+		public var uvTarget:ShaderRegisterElement
 		//vary
 		private var varyTime:ShaderRegisterElement;
 		public var fragmentTime:ShaderRegisterElement;
@@ -233,6 +235,9 @@ package a3dparticle.animators
 			//allot temp register
 			var tempTime:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			offestTarget = new ShaderRegisterElement(tempTime.regName, tempTime.index, "xyz");
+			//uv action is processed after normal actions,so use offestTarget as uvTarget
+			uvTarget = new ShaderRegisterElement(offestTarget.regName, offestTarget.index, "xy");
+			
 			shaderRegisterCache.addVertexTempUsages(tempTime, 1);
 			vertexTime = new ShaderRegisterElement(tempTime.regName, tempTime.index, "w");
 			vertexLife = new ShaderRegisterElement(scaleAndRotateTarget.regName, scaleAndRotateTarget.index, "w");
@@ -270,10 +275,7 @@ package a3dparticle.animators
 			{
 				_AGALVertexCode += "mov " + velocityTarget.toString() + "," + zeroConst.toString() + "\n";
 			}
-			if (needUV)
-			{
-				_AGALVertexCode += "mov " + uvVar.toString() + "," + uvAttribute.toString() + "\n";
-			}
+			
 			_AGALVertexCode += "mov " + varyTime.toString() + ".zw," + zeroConst.toString() + "\n";
 			_AGALVertexCode += "mov " + offestTarget.toString() + "," + zeroConst.toString() + "\n";
 			_AGALVertexCode += "mov " + scaleAndRotateTarget.toString() + "," + positionAttribute.toString() + "\n";
@@ -291,6 +293,21 @@ package a3dparticle.animators
 				_AGALVertexCode += "sqt " + fragmentVelocity.toString() + "," + velocityTarget.toString() + ".x\n";
 			}
 			_AGALVertexCode += "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offestTarget.toString() + "\n";
+			//in post_priority stage,the offestTarget temp register if free for use,we use is as uv temp register
+			
+			if (needUV)
+			{
+				if (hasUVAction)
+				{
+					//if has uv action,mov uv attribute to the uvTarget temp register
+					_AGALVertexCode += "mov " + uvTarget.toString() + "," + uvAttribute.toString() + "\n";
+				}
+				else
+				{
+					//if has not uv action,mov uv attribute to uvVar vary register directly
+					_AGALVertexCode += "mov " + uvVar.toString() + "," + uvAttribute.toString() + "\n";
+				}
+			}
 			
 			for each(action in _particleActions)
 			{
@@ -298,6 +315,11 @@ package a3dparticle.animators
 				{
 					_AGALVertexCode += action.getAGALVertexCode(pass);
 				}
+			}
+			
+			if (needUV && hasUVAction)
+			{
+				_AGALVertexCode += "mov " + uvVar.toString() + "," + uvTarget.toString() + "\n";
 			}
 			
 			_AGALVertexCode += "mov " + scaleAndRotateTarget.regName +scaleAndRotateTarget.index.toString() + ".w," + OneConst.toString() + "\n";
