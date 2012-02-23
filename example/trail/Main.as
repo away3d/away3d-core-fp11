@@ -1,13 +1,13 @@
 package 
 {
-	import a3dparticle.particle.ParticleParam;
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
+	import away3d.entities.Mesh;
 	import away3d.materials.ColorMaterial;
-	import away3d.primitives.Plane;
-	import away3d.primitives.Sphere;
+	import away3d.primitives.PlaneGeometry;
+	import away3d.primitives.SphereGeometry;
 	import away3d.tools.utils.Drag3D;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -85,11 +85,11 @@ package
 		
 		private function initScene():void
 		{
-			var plane:Plane = new Plane(new ColorMaterial(0x880000), 2000, 2000);
+			var plane:Mesh = new Mesh(new PlaneGeometry(2000, 2000), new ColorMaterial(0x880000));
 			_view.scene.addChild(plane);
 			var smoke:Smoke = new Smoke();
 			_view.scene.addChild(smoke);
-			object = new Sphere(new ColorMaterial(0x00ff00),3);
+			object = new Mesh(new SphereGeometry(3),new ColorMaterial(0x00ff00));
 			_view.scene.addChild(object);
 			smoke.target = object;
 			drag=new Drag3D(_view);

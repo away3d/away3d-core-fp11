@@ -13,8 +13,7 @@ package
 	import a3dparticle.TransformFollowContainer;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Object3D;
-	import away3d.primitives.Plane;
-	import away3d.tools.MeshHelper;
+	import away3d.primitives.PlaneGeometry;
 	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
 	
@@ -33,10 +32,9 @@ package
 		{
 			//step 1:we create one sample
 			var material:ParticleBitmapMaterial = new ParticleBitmapMaterial(new Img().bitmapData);
-			var plane:Plane = new Plane(null, 20, 20);
-			plane.rotationX = -90;
-			MeshHelper.applyRotations(plane);
-			var sample:ParticleSample = new ParticleSample(plane.geometry.subGeometries[0], material);
+			var plane:PlaneGeometry = new PlaneGeometry( 20, 20, 1, 1, false);
+
+			var sample:ParticleSample = new ParticleSample(plane.subGeometries[0], material);
 			
 			//step 2:we create a generater which will group the samples.
 			var generater:SingleGenerater = new SingleGenerater(sample, 1500);
