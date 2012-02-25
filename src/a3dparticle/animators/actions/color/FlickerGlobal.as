@@ -20,8 +20,8 @@ package a3dparticle.animators.actions.color
 	{
 		private var _minColor:ColorTransform;
 		private var _maxColor:ColorTransform;
-		private var _cycle:Number;
-		private var _phaseAngle:Number;
+
+		private var _hasPhaseAngle:Boolean;
 		
 		private var _hasMult:Boolean;
 		private var _hasOffset:Boolean;
@@ -37,12 +37,12 @@ package a3dparticle.animators.actions.color
 		private var startOffest:Vector.<Number>;
 		private var deltaOffest:Vector.<Number>;
 		
+		private var cycleData:Vector.<Number>;
+		
 		public function FlickerGlobal(minColor:ColorTransform,maxColor:ColorTransform,cycle:Number,phaseAngle:Number=0) 
 		{
 			_minColor = minColor;
 			_maxColor = maxColor;
-			_cycle = cycle;
-			_phaseAngle = phaseAngle * Math.PI / 180;
 			
 			if (_minColor.alphaMultiplier != 1 || _minColor.blueMultiplier != 1 || _minColor.greenMultiplier != 1 || _minColor.redMultiplier != 1 ||
 				_maxColor.alphaMultiplier != 1 || _maxColor.blueMultiplier != 1 || _maxColor.greenMultiplier != 1 || _maxColor.redMultiplier != 1)
@@ -55,6 +55,9 @@ package a3dparticle.animators.actions.color
 			deltaMultiplier = Vector.<Number>([(_maxColor.redMultiplier - _minColor.redMultiplier) / 2 , (_maxColor.greenMultiplier - _minColor.greenMultiplier) / 2 , (_maxColor.blueMultiplier - _minColor.blueMultiplier) / 2 , (_maxColor.alphaMultiplier - _minColor.alphaMultiplier) / 2]);
 			startOffest = Vector.<Number>([(_minColor.redOffset + _maxColor.redOffset) / (256 * 2), (_minColor.greenOffset + _maxColor.greenOffset) / (256 * 2), (_minColor.blueOffset + _maxColor.blueOffset) / (256 * 2), (_minColor.alphaOffset + _maxColor.alphaOffset) / (256 * 2)]);
 			deltaOffest = Vector.<Number>([(_maxColor.redOffset - _minColor.redOffset) / (256 * 2), (_maxColor.greenOffset - _minColor.greenOffset) / (256 * 2), (_maxColor.blueOffset - _minColor.blueOffset) / (256 * 2), (_maxColor.alphaOffset - _minColor.alphaOffset) / (256 * 2)]);
+			
+			if (phaseAngle != 0) _hasPhaseAngle = true;
+			cycleData = Vector.<Number>([Math.PI * 2 / cycle, phaseAngle * Math.PI / 180, 0, 0]);
 		}
 		
 		override public function getAGALFragmentCode(pass : MaterialPassBase) : String
@@ -72,29 +75,27 @@ package a3dparticle.animators.actions.color
 			cycleConst = shaderRegisterCache.getFreeFragmentConstant();
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentVectorTemp();
 			shaderRegisterCache.addFragmentTempUsages(temp,1);
-			var frc:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentSingleTemp();
+			var sin:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentSingleTemp();
 			shaderRegisterCache.removeFragmentTempUsage(temp);
 			
 			var code:String = "";
 			
-			code += "div " + frc.toString() + "," + _animation.fragmentTime.toString() + "," + cycleConst.toString() + ".x\n";
-			code += "frc " + frc.toString() + "," + frc.toString() + "\n";
-			code += "mul " + frc.toString() + "," + frc.toString() + "," + _animation.fragmentPiConst.toString() + "\n";
-			if (_phaseAngle != 0)
+			code += "mul " + sin.toString() + "," + _animation.fragmentTime.toString() + "," + cycleConst.toString() + ".x\n";
+			if (_hasPhaseAngle)
 			{
-				code += "add " + frc.toString() + "," + frc.toString() + "," + cycleConst.toString() + ".y\n";
+				code += "add " + sin.toString() + "," + sin.toString() + "," + cycleConst.toString() + ".y\n";
 			}
-			code += "sin " + frc.toString() + "," + frc.toString() + "\n";
+			code += "sin " + sin.toString() + "," + sin.toString() + "\n";
 			
 			if (_hasMult)
 			{
-				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  frc.toString()+ "\n";
+				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  sin.toString()+ "\n";
 				code += "add " + temp.toString() + "," + temp.toString() + "," + startMultiplierConst.toString() + "\n";
 				code += "mul " + _animation.colorTarget.toString() +"," + temp.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
 			if (_hasOffset)
 			{
-				code += "mul " + temp.toString() + "," + deltaOffestConst.toString() +"," + frc.toString() + "\n";
+				code += "mul " + temp.toString() + "," + deltaOffestConst.toString() +"," + sin.toString() + "\n";
 				code += "add " + temp.toString() + "," + temp.toString() +"," + startOffestConst.toString() + "\n";
 				code += "add " + _animation.colorTarget.toString() +"," +temp.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
@@ -116,7 +117,7 @@ package a3dparticle.animators.actions.color
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, startOffestConst.index, startOffest);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffestConst.index, deltaOffest);
 			}
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, cycleConst.index, Vector.<Number>([ _cycle, _phaseAngle, 0, 0 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, cycleConst.index, cycleData);
 		}
 		
 	}
