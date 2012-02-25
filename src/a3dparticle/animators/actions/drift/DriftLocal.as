@@ -50,14 +50,13 @@ package a3dparticle.animators.actions.drift
 			getExtraData(subContainer).push(_driftData.x);
 			getExtraData(subContainer).push(_driftData.y);
 			getExtraData(subContainer).push(_driftData.z);
-			getExtraData(subContainer).push(_driftData.w);
+			getExtraData(subContainer).push( Math.PI * 2 / _driftData.w);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
 			driftAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-			var frc:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index,"w");
 			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
 			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
 			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
@@ -67,9 +66,7 @@ package a3dparticle.animators.actions.drift
 			shaderRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "div " + frc.toString() + "," + _animation.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
-			code += "frc " + frc.toString() + "," + frc.toString() + "\n";
-			code += "mul " + dgree.toString() + "," + frc.toString() + "," + _animation.piConst.toString() + ".x\n";
+			code += "mul " + dgree.toString() + "," + _animation.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
 			code += "sin " + sin.toString() + "," + dgree.toString() + "\n";
 			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
 			code += "add " + _animation.offestTarget.toString() +"," + distance.toString() + "," + _animation.offestTarget.toString() + "\n";
