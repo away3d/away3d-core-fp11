@@ -26,11 +26,6 @@ package a3dparticle.animators.actions.uv
 		
 		private var _data:Vector.<Number>;
 		
-		private var _fullUse:Boolean;
-		
-		private var _cuttingNum:int;
-		private var _usingNum:int;
-		
 		/**
 		 *
 		 * @param	fun Function.The fun should return a Vector3D which x is the uv offest,y is the cycle,z is start time.
