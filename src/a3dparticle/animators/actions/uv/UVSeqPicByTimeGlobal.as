@@ -26,10 +26,6 @@ package a3dparticle.animators.actions.uv
 		
 		private var _data:Vector.<Number>;
 		
-		/**
-		 *
-		 * @param	fun Function.The fun should return a Vector3D which x is the uv offest,y is the cycle,z is start time.
-		 */
 		public function UVSeqPicByTimeGlobal(columns:int, rows:int , cycle:Number, usingNum:int = int.MAX_VALUE, startTime:Number = 0, loop:Boolean = true)
 		{
 			priority = ParticleAnimation.POST_PRIORITY + 5;
