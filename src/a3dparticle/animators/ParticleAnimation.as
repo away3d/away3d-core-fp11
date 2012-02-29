@@ -318,7 +318,12 @@ package a3dparticle.animators
 				_AGALVertexCode += "mov " + uvVar.toString() + "," + uvTarget.toString() + "\n";
 			}
 			
-			_AGALVertexCode += "mov " + scaleAndRotateTarget.regName +scaleAndRotateTarget.index.toString() + ".w," + OneConst.toString() + "\n";
+			_AGALVertexCode += "mov " + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + ".w," + OneConst.toString() + "\n";
+			//if time=0,set the final position to zero.
+			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexSingleTemp();
+			_AGALVertexCode += "neg " + temp.toString() + "," + vertexTime.toString() + "\n";
+			_AGALVertexCode += "slt " + temp.toString() + "," + temp.toString() + "," + zeroConst.toString() + "\n";
+			_AGALVertexCode += "mul " + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + "," + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + "," + temp.toString() + "\n";
 			return _AGALVertexCode;
 		}		
 		
