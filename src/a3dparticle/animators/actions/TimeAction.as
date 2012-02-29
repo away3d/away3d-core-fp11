@@ -36,7 +36,7 @@ package a3dparticle.animators.actions
 		public function TimeAction() 
 		{
 			priority = 0;
-			dataLenght = 3;
+			dataLenght = 4;
 			_name = "TimeAction";
 		}
 		
@@ -114,7 +114,8 @@ package a3dparticle.animators.actions
 		{
 			getExtraData(subContainer).push(_tempStartTime);
 			getExtraData(subContainer).push(_tempEndTime);
-			getExtraData(subContainer).push(_tempSleepTime+_tempEndTime);
+			getExtraData(subContainer).push(_tempSleepTime + _tempEndTime);
+			getExtraData(subContainer).push(1 / _tempEndTime);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -139,7 +140,7 @@ package a3dparticle.animators.actions
 					}
 					else
 					{
-						code += "div " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
+						code += "mul " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".w\n";
 						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
 						code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".y\n";
 					}
@@ -151,7 +152,7 @@ package a3dparticle.animators.actions
 					code += "mul " + _animation.vertexTime.toString() + "," +sge.toString() + ".x," + _animation.vertexTime.toString() + "\n";
 				}
 			}
-			code += "div " + _animation.vertexLife.toString() + "," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
+			code += "mul " + _animation.vertexLife.toString() + "," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".w\n";
 			code += "mov " + _animation.fragmentTime.toString() + "," + _animation.vertexTime.toString() +"\n";
 			code += "mov " + _animation.fragmentLife.toString() + "," + _animation.vertexLife.toString() +"\n";
 			return code;
@@ -159,7 +160,7 @@ package a3dparticle.animators.actions
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(timeAtt.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.setSimpleVertexBuffer(timeAtt.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_4, 0);
 		}
 		
 	}
