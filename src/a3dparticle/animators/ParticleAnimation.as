@@ -25,6 +25,10 @@ package a3dparticle.animators
 	public class ParticleAnimation extends AnimationBase
 	{
 		public static const POST_PRIORITY:int = 9;
+		
+		private static const VERTEX_CONST:Vector.<Number> = Vector.<Number>([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2]);
+		private static const FRAGMENT_CONST:Vector.<Number> = Vector.<Number>([0, 0, 0, 0, 1, 1, 1, 1]);
+		
 		private var _hasGen:Boolean;
 		
 		private var _AGALVertexCode:String;
@@ -177,14 +181,11 @@ package a3dparticle.animators
 		{
 			//set some const
 			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, zeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, OneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, TwoConst.index, Vector.<Number>([ 2, 2, 2, 2 ]));
 			
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentOneConst.index, Vector.<Number>([ 1, 1, 1, 1 ]));
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentZeroConst.index, Vector.<Number>([ 0, 0, 0, 0 ]));
-			
-			
+			//set zeroConst,OneConst,TwoConst
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, zeroConst.index, VERTEX_CONST, 3);
+			//set fragmentZeroConst,fragmentOneConst
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentZeroConst.index, FRAGMENT_CONST, 2);
 			
 			var action:ActionBase;
 			for each(action in _particleActions)
@@ -214,14 +215,12 @@ package a3dparticle.animators
 			//allot const register
 			timeConst = shaderRegisterCache.getFreeVertexConstant();
 			zeroConst = shaderRegisterCache.getFreeVertexConstant();
-			//piConst = shaderRegisterCache.getFreeVertexConstant();
 			OneConst = shaderRegisterCache.getFreeVertexConstant();
 			TwoConst = shaderRegisterCache.getFreeVertexConstant();
 			if (needCameraPosition) cameraPosConst = shaderRegisterCache.getFreeVertexConstant();
 			
 			colorDefalut = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
-			//fragmentPiConst = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentOneConst = shaderRegisterCache.getFreeFragmentConstant();
 			//allot attribute register
 			if (needUV)
