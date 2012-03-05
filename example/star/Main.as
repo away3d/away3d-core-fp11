@@ -20,13 +20,14 @@ package
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.parsers.Max3DSParser;
 	import away3d.primitives.WireframeAxesGrid;
-	import away3d.tools.MeshHelper;
+	import away3d.tools.helpers.MeshHelper
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
+	import flash.utils.setTimeout;
 	/**
 	 * ...
 	 * @author liaocheng
@@ -48,7 +49,7 @@ package
 		
 		public function Main():void 
 		{
-			if (stage) init();
+			if (stage) setTimeout(init, 0);
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		

@@ -8,6 +8,7 @@ package
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
+	import flash.utils.setTimeout;
 	
 	/**
 	 * ...
@@ -22,7 +23,7 @@ package
 		
 		public function Main():void 
 		{
-			if (stage) init();
+			if (stage) setTimeout(init, 0);
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		

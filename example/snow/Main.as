@@ -28,6 +28,7 @@ package
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.geom.Vector3D;
+	import flash.utils.setTimeout;
 	/**
 	 * ...
 	 * @author liaocheng
@@ -62,7 +63,7 @@ package
 		
 		public function Main():void 
 		{
-			if (stage) init();
+			if (stage) setTimeout(init, 0);
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		

@@ -16,12 +16,14 @@ package
 	import away3d.primitives.SphereGeometry;
 	import away3d.primitives.WireframeAxesGrid;
 	import away3d.tools.MeshHelper;
+	import flash.display.BlendMode;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.Event;
 	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
+	import flash.utils.setTimeout;
 	
 	/**
 	 * ...
@@ -38,7 +40,7 @@ package
 		
 		public function Main():void 
 		{
-			if (stage) init();
+			if (stage) setTimeout(init, 0);
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		
@@ -68,7 +70,7 @@ package
 		private function initScene():void
 		{
 			var material:ParticleColorMaterial = new ParticleColorMaterial();
-			
+			material.blendMode = BlendMode.ADD;
 			var cy:Mesh = new Mesh(new CylinderGeometry( 1, 1, 20));
 			cy.rotationZ = 90;
 			MeshHelper.applyRotations(cy);
