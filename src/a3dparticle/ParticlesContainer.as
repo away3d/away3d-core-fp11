@@ -11,6 +11,8 @@ package a3dparticle
 	import a3dparticle.particle.ParticleSample;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
+	import away3d.bounds.AxisAlignedBoundingBox;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Object3D;
 	import away3d.core.partition.EntityNode;
@@ -193,6 +195,17 @@ package a3dparticle
 			return new ParticlesNode(this);
 		}
 		
+		override protected function getDefaultBoundingVolume():BoundingVolumeBase
+		{
+			return new AxisAlignedBoundingBox();
+		}
+
+		override protected function updateBounds():void 
+		{
+			_bounds.fromExtremes( -100, -100, -100, 100, 100, 100 );
+			_boundsInvalid = false;
+		}
+		
 		public function get animation() : AnimationBase
 		{
 			return _particleAnimation;
@@ -204,22 +217,6 @@ package a3dparticle
 		}
 		
 		
-		override protected function updateBounds() : void
-		{
-
-		}
-		
-		override public function get showBounds() : Boolean
-		{
-			return false;
-		}
-
-		override public function set showBounds(value : Boolean) : void
-		{
-			throw(new Error("the particlesContainer can't show bounds!"));
-		}
-		
-
 		override public function get mouseEnabled() : Boolean
 		{
 			return false;
