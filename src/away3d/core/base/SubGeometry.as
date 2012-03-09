@@ -367,6 +367,7 @@
 		{
 			return _scaleU;
 		}
+		
 		public function get scaleV():Number
 		{
 			return _scaleV;
