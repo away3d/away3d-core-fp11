@@ -48,7 +48,6 @@ package away3d.loaders.parsers
 		private var _vertexNormals:Vector.<Vertex>;
 		private var _uvs:Vector.<UV>;
 		private var _scale:Number;
-		
 		private var _mtlLib:Boolean;
 		private var _mtlLibLoaded:Boolean = true;
 		private var _activeMaterialID:String = "";
@@ -805,7 +804,6 @@ package away3d.loaders.parsers
 			for(var i:uint = 0; i <_materialLoaded.length;++i)
 				applyMaterial(_materialLoaded[i]);
 		}
-		
 	}
 }
 
