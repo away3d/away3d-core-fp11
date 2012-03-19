@@ -57,7 +57,6 @@ package a3dparticle.core
 		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			var _particleAnimation:ParticleAnimation = ParticleAnimation(animation);
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
 				super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
