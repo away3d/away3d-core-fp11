@@ -12,6 +12,7 @@ package away3d.loaders.parsers
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.materials.ColorMaterial;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
@@ -683,18 +684,17 @@ package away3d.loaders.parsers
 					lm.materialID = _lastMtlID;
 					
 					if(alpha == 0) trace("Warning: an alpha value of 0 was found in mtl color tag (Tr or d) ref:"+_lastMtlID+", mesh(es) using it will be invisible!");
-						
-					var bmd:BitmapData = new BitmapData(128, 128, Boolean(alpha < 1) , diffuseColor);
-					lm.texture = new BitmapTexture(bmd); 
-					lm.ambientColor = ambientColor;
+					
+					var cm:ColorMaterial = new ColorMaterial(diffuseColor);
+					cm.alpha = alpha;
+					cm.ambientColor = ambientColor;
 					
 					if(useSpecular){
-						basicSpecularMethod = new BasicSpecularMethod();
-						basicSpecularMethod.specularColor = specularColor;
-						basicSpecularMethod.specular = specular;
-						lm.specularMethod = basicSpecularMethod;
+						cm.specularColor = specularColor;
+						cm.specular = specular;
 					}
 					
+					lm.cm = cm;
 					_materialLoaded.push(lm);
 					
 					if(_meshes.length>0)
@@ -771,25 +771,31 @@ package away3d.loaders.parsers
 				decomposeID = mesh.material.name.split("~");
 				
 				if(decomposeID[0] == lm.materialID){
-					mesh.material.name = decomposeID[1];
-					mat = TextureMaterial(mesh.material);
-					mat.texture = lm.texture;
-					mat.ambientColor = lm.ambientColor;
 					
-					if(lm.specularMethod){
-						mat.specularMethod = lm.specularMethod;
-					} else if(_materialSpecularData){
-						for(j = 0;j<_materialSpecularData.length;++j){
-							specularData = _materialSpecularData[j];
-							if(specularData.materialID == lm.materialID){
-								mat.specularMethod = specularData.basicSpecularMethod;
-								mat.ambientColor = specularData.ambientColor;
-								_materialSpecularData.splice(j,1);
-								break;
+					if(lm.cm){
+						if(mesh.material) mesh.material = null;
+						mesh.material = lm.cm;
+					} else {
+						mat = TextureMaterial(mesh.material);
+						mat.texture = lm.texture;
+						mat.ambientColor = lm.ambientColor;
+						
+						if(lm.specularMethod){
+							mat.specularMethod = lm.specularMethod;
+						} else if(_materialSpecularData){
+							for(j = 0;j<_materialSpecularData.length;++j){
+								specularData = _materialSpecularData[j];
+								if(specularData.materialID == lm.materialID){
+									mat.specularMethod = specularData.basicSpecularMethod;
+									mat.ambientColor = specularData.ambientColor;
+									_materialSpecularData.splice(j,1);
+									break;
+								}
 							}
 						}
 					}
 					
+					mesh.material.name = decomposeID[1];
 					_meshes.splice(i, 1);
 					--i;
 				}
@@ -838,9 +844,11 @@ class SpecularData
 
 class LoadedMaterial
 {
+	import away3d.materials.ColorMaterial;
+	
 	public var materialID:String;
 	public var texture:Texture2DBase;
-	
+	public var cm:ColorMaterial;
 	public var specularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
 }
