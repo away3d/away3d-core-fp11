@@ -360,14 +360,31 @@
 		 * @param scaleU The amount by which to scale on the u axis. Default is 1;
 		 * @param scaleV The amount by which to scale on the v axis. Default is 1;
 		 */
+		private var _scaleU : Number = 1;
+		private var _scaleV : Number = 1;
+		
+		public function get scaleU():Number
+		{
+			return _scaleU;
+		}
+		
+		public function get scaleV():Number
+		{
+			return _scaleV;
+		}
+		 
 		public function scaleUV(scaleU : Number = 1, scaleV : Number = 1):void
 		{
-//			_uvScaleV *= scaleV;
-			var len : uint = _uvs.length;
-			for (var i : uint = 0; i < len;) {
-				_uvs[i++] *= scaleU;
-				_uvs[i++] *= scaleV;
+			for (var i : uint = 0; i < _uvs.length;++i) {
+				_uvs[i] /= _scaleU;
+				_uvs[i] *= scaleU;
+				i++;
+				_uvs[i] /= _scaleV;
+				_uvs[i] *= scaleV;
 			}
+			
+			_scaleU = scaleU;
+			_scaleV = scaleV;
 			 
 			invalidateBuffers(_uvBufferDirty);
 		}
