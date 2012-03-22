@@ -140,12 +140,16 @@ package away3d.loaders.parsers
 		*/
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			var lm:LoadedMaterial = new LoadedMaterial();
-			lm.materialID = resourceDependency.id;
-			lm.texture = new BitmapTexture(defaultBitmapData);
-			
-			_materialLoaded.push(lm);
-			
+			if(resourceDependency.id == "mtl"){
+				_mtlLib = false;
+				_mtlLibLoaded = false;
+			} else {
+				var lm:LoadedMaterial = new LoadedMaterial();
+				lm.materialID = resourceDependency.id;
+				lm.texture = new BitmapTexture(defaultBitmapData);
+				_materialLoaded.push(lm);
+			}
+		
 			if(_meshes.length>0)
 				applyMaterial(lm);
 		}
