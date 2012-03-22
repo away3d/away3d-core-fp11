@@ -121,9 +121,6 @@ package away3d.core.partition
 			_updatesMade = false;
 
 			do {
-				//call an internal update on the entity to fire any attached logic
-				node.entity.internalUpdate();
-				
 				targetNode = _rootNode.findPartitionForEntity(node.entity);
 
 				// if changed, find and attach the mesh node to the best suited partition node
@@ -136,6 +133,9 @@ package away3d.core.partition
 				
 				t = node._updateQueueNext;
 				node._updateQueueNext = null;
+				
+				//call an internal update on the entity to fire any attached logic
+				node.entity.internalUpdate();
 				
 			} while (node = t);
 		}
