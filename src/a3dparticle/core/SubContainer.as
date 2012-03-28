@@ -126,27 +126,33 @@ package a3dparticle.core
 		
 		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._vertexBuffer) {
+			if (!_shareAtt._vertexBuffer || _shareAtt._vertexContex3D != stage3DProxy.context3D) 
+			{
 				_shareAtt._vertexBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._vertices.length/3, 3);
-				_shareAtt._vertexBuffer.uploadFromVector(_shareAtt._vertices, 0, _shareAtt._vertices.length/3);
+				_shareAtt._vertexBuffer.uploadFromVector(_shareAtt._vertices, 0, _shareAtt._vertices.length / 3);
+				_shareAtt._vertexContex3D = stage3DProxy.context3D;
 			}
 			return _shareAtt._vertexBuffer;
 		}
 		
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
-			if (!_shareAtt._indexBuffer) {
+			if (!_shareAtt._indexBuffer || _shareAtt._indexContex3D != stage3DProxy.context3D) 
+			{
 				_shareAtt._indexBuffer = stage3DProxy._context3D.createIndexBuffer(_shareAtt._indices.length);
 				_shareAtt._indexBuffer.uploadFromVector(_shareAtt._indices, 0, _shareAtt._indices.length);
+				_shareAtt._indexContex3D = stage3DProxy.context3D;
 			}
 			return _shareAtt._indexBuffer;
 		}
 		
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._uvBuffer) {
+			if (!_shareAtt._uvBuffer || _shareAtt._uvContex3D != stage3DProxy.context3D) 
+			{
 				_shareAtt._uvBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._uvData.length/2, 2);
-				_shareAtt._uvBuffer.uploadFromVector(_shareAtt._uvData, 0, _shareAtt._uvData.length/2);
+				_shareAtt._uvBuffer.uploadFromVector(_shareAtt._uvData, 0, _shareAtt._uvData.length / 2);
+				_shareAtt._uvContex3D = stage3DProxy.context3D;
 			}
 			return _shareAtt._uvBuffer;
 		}
@@ -236,6 +242,7 @@ package a3dparticle.core
 	}
 }
 
+import flash.display3D.Context3D;
 import flash.display3D.IndexBuffer3D;
 import flash.display3D.VertexBuffer3D;
 
@@ -247,6 +254,9 @@ class cloneShareAtt
 	public var _vertices : Vector.<Number>=new Vector.<Number>();
 	public var _indices : Vector.<uint> = new Vector.<uint>;
 	public var _uvData:Vector.<Number> = new Vector.<Number>();
+	public var _vertexContex3D:Context3D;
+	public var _indexContex3D:Context3D;
+	public var _uvContex3D:Context3D;
 	public var _extraDatas:Object = { };
 	public var _extraBuffers:Object = { };
 }
