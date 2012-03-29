@@ -35,6 +35,7 @@ package away3d.loaders.parsers
 		private var _stringLength:uint;
 		private var _currentObject:ObjectGroup;
 		private var _currentGroup:Group;
+		private var _groupName:String;
 		private var _currentMaterialGroup:MaterialGroup;
 		private var _objects:Vector.<ObjectGroup>;
 		private var _materialIDs:Vector.<String>;
@@ -274,6 +275,8 @@ package away3d.loaders.parsers
 					materialGroups = groups[g].materialGroups;
 					numMaterialGroups = materialGroups.length;
 					
+					_groupName = groups[g].name;
+					
 					for (m = 0; m < numMaterialGroups; ++m)
 						translateMaterialGroup(materialGroups[m], geometry);
 						
@@ -304,7 +307,7 @@ package away3d.loaders.parsers
 							mesh.subMeshes[sm].material = bmMaterial;
 					}
 					
-					finalizeAsset(mesh);
+					finalizeAsset(mesh, mesh.name);
 				}
 			}
 		}
@@ -369,6 +372,12 @@ package away3d.loaders.parsers
 					
 				} else {
 					
+					throw new Error("Too many verts (" + vlength + ") on geometry " + _groupName + ". The vert limit for the engine is " + LIMIT);
+					
+					/**
+					 * This doesn't work right now, so we have to limit our vert
+					 * sizes for each mesh
+					 */
 					var nvertices:Vector.<Number> = new Vector.<Number>();
 					var nuvs:Vector.<Number> = new Vector.<Number>();
 					var nnormals:Vector.<Number> = new Vector.<Number>();
@@ -567,13 +576,24 @@ package away3d.loaders.parsers
 			for (var i:uint = 1; i < len; ++i) {
 				if (trunk[i] == "") continue;
 				indices = trunk[i].split("/");
-				face.vertexIndices.push(parseInt(indices[0]));
-				if (indices[1] && String(indices[1]).length > 0) face.uvIndices.push(parseInt(indices[1]));
-				if (indices[2] && String(indices[2]).length > 0) face.normalIndices.push(parseInt(indices[2]));
+				face.vertexIndices.push(parseIndex(parseInt(indices[0]),_vertices.length));
+				if (indices[1] && String(indices[1]).length > 0) face.uvIndices.push(parseIndex(parseInt(indices[1]), _uvs.length));
+				if (indices[2] && String(indices[2]).length > 0) face.normalIndices.push(parseIndex(parseInt(indices[2]), _vertexNormals.length));
 				face.indexIds.push(trunk[i]);
 			}
 			
 			_currentMaterialGroup.faces.push(face);
+		}
+		
+		/**
+		* This is a hack around negative face coords
+		*/
+		private function parseIndex(index:int, length:uint):int
+		{
+			if(index < 0)
+				return index + length + 1;
+			else
+				return index;
 		}
 		
 		private function parseMtl(data:String):void
@@ -670,6 +690,7 @@ package away3d.loaders.parsers
 						basicSpecularMethod.specular = specular;
 						
 						var specularData:SpecularData = new SpecularData();
+						specularData.alpha = alpha;
 						specularData.basicSpecularMethod = basicSpecularMethod;
 						specularData.materialID = _lastMtlID;
 						
@@ -783,6 +804,8 @@ package away3d.loaders.parsers
 						mat = TextureMaterial(mesh.material);
 						mat.texture = lm.texture;
 						mat.ambientColor = lm.ambientColor;
+						mat.alpha = lm.alpha;
+						mat.alphaThreshold = 0.5;
 						
 						if(lm.specularMethod){
 							mat.specularMethod = lm.specularMethod;
@@ -792,14 +815,16 @@ package away3d.loaders.parsers
 								if(specularData.materialID == lm.materialID){
 									mat.specularMethod = specularData.basicSpecularMethod;
 									mat.ambientColor = specularData.ambientColor;
-									_materialSpecularData.splice(j,1);
+									mat.alpha = specularData.alpha;
+									mat.repeat = true;
+									//_materialSpecularData.splice(j,1);
 									break;
 								}
 							}
 						}
 					}
 					
-					mesh.material.name = decomposeID[1];
+					mesh.material.name = decomposeID[1] ? decomposeID[1] : decomposeID[0];
 					_meshes.splice(i, 1);
 					--i;
 				}
@@ -844,6 +869,7 @@ class SpecularData
 	public var materialID:String;
 	public var basicSpecularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
+	public var alpha:Number = 1;
 }
 
 class LoadedMaterial
@@ -855,6 +881,7 @@ class LoadedMaterial
 	public var cm:ColorMaterial;
 	public var specularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
+	public var alpha:Number = 1;
 }
 
 class FaceData
