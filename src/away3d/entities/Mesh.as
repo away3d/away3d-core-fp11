@@ -46,11 +46,6 @@
 			this.material = material;
 		}
 		
-		/**
-		 * Name of the mesh
-		 */
-		public var meshName:String;
-
 		public function bakeTransformations():void
 		{
 			geometry.applyTransformation(transform);
