@@ -304,7 +304,7 @@ package away3d.loaders.parsers
 							mesh.subMeshes[sm].material = bmMaterial;
 					}
 					
-					finalizeAsset(mesh, mesh.name);
+					finalizeAsset(mesh);
 				}
 			}
 		}
