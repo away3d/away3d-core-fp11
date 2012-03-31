@@ -31,7 +31,7 @@ package away3d.primitives {
 		 */
 		public function ConeGeometry(radius : Number = 50, height : Number = 100, segmentsW : uint = 16, segmentsH : uint = 1, closed:Boolean = true, yUp : Boolean = true)
 		{
-			super(0, radius, height, segmentsW, segmentsH, false, closed, yUp);
+			super(0.00001, radius, height, segmentsW, segmentsH, false, closed, yUp);
 		}
 	}
 }
