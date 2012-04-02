@@ -283,10 +283,13 @@ package away3d.loaders.parsers
 					mesh = new Mesh(geometry, bmMaterial);
 					
 					if (_objects[objIndex].name) {
+						// this is a full independent object ('o' tag in OBJ file)
 						mesh.name = _objects[objIndex].name;
 					} else if(groups[g].name) {
+						// this is a group so the sub groups contain the actual mesh object names ('g' tag in OBJ file)
 						mesh.name = groups[g].name;
 					} else {
+						// no name and thats unfortunate, lets make one up
 						mesh.name = "obj" + meshid;
 						meshid++;
 					}

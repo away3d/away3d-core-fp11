@@ -25,9 +25,9 @@ package away3d.core.managers
 		 * @param stage The Stage object that contains the Stage3D objects to be managed.
 		 * @private
 		 */
-		public function Stage3DManager(stage : Stage, singletonEnforcer : SingletonEnforcer)
+		public function Stage3DManager(stage : Stage, Stage3DManagerSingletonEnforcer : Stage3DManagerSingletonEnforcer)
 		{
-			if (!singletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
+			if (!Stage3DManagerSingletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
 			_stage = stage;
 			_stageProxies = new Vector.<Stage3DProxy>(_stage.stage3Ds.length, true);
 		}
@@ -39,7 +39,7 @@ package away3d.core.managers
 		 */
 		public static function getInstance(stage : Stage) : Stage3DManager
 		{
-			return (_instances ||= new Dictionary())[stage] ||= new Stage3DManager(stage, new SingletonEnforcer());
+			return (_instances ||= new Dictionary())[stage] ||= new Stage3DManager(stage, new Stage3DManagerSingletonEnforcer());
 		}
 
 		/**
@@ -78,4 +78,4 @@ package away3d.core.managers
 	}
 }
 
-class SingletonEnforcer {}
+class Stage3DManagerSingletonEnforcer {}
