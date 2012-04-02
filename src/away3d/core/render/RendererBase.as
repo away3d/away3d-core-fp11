@@ -44,6 +44,7 @@ package away3d.core.render
 		private var _renderableSorter : EntitySorterBase;
 		private var _backgroundImageRenderer : BackgroundImageRenderer;
 		private var _background : Texture2DBase;
+		
 		protected var _renderToTexture : Boolean;
 		protected var _antiAlias : uint;
 		protected var _textureRatioX : Number = 1;
