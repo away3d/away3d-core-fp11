@@ -63,9 +63,13 @@ package away3d.loaders
 			SingleFileLoader.enableParsers(parserClasses);
 		}
 		
-		
 		/**
 		 * Loads a file and (optionally) all of its dependencies.
+		 * 
+		 * @param req The URLRequest object containing the URL of the file to be loaded.
+		 * @param context An optional context object providing additional parameters for loading
+		 * @param ns An optional namespace string under which the file is to be loaded, allowing the differentiation of two resources with identical assets
+		 * @param parser An optional parser object for translating the loaded data into a usable resource. If not provided, AssetLoader will attempt to auto-detect the file type.
 		 */
 		public function load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
@@ -83,6 +87,11 @@ package away3d.loaders
 		
 		/**
 		 * Loads a resource from already loaded data.
+		 * 
+		 * @param data The data object containing all resource information.
+		 * @param context An optional context object providing additional parameters for loading
+		 * @param ns An optional namespace string under which the file is to be loaded, allowing the differentiation of two resources with identical assets
+		 * @param parser An optional parser object for translating the loaded data into a usable resource. If not provided, AssetLoader will attempt to auto-detect the file type.
 		 */
 		public function loadData(data : *, id : String, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
