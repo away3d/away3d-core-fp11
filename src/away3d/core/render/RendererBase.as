@@ -10,7 +10,9 @@ package away3d.core.render
 	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;
 
-	import flash.display3D.Context3D;
+import flash.display.BitmapData;
+
+import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
@@ -48,6 +50,9 @@ package away3d.core.render
 		protected var _antiAlias : uint;
 		protected var _textureRatioX : Number = 1;
 		protected var _textureRatioY : Number = 1;
+
+        private var _snapshotBitmapData:BitmapData;
+        private var _snapshotRequired:Boolean;
 
 		/**
 		 * Creates a new RendererBase object.
@@ -253,9 +258,22 @@ package away3d.core.render
 
 			draw(entityCollector, target);
 
+            if( _snapshotRequired && _snapshotBitmapData ) {
+                _context.drawToBitmapData( _snapshotBitmapData );
+                _snapshotRequired = false;
+            }
+
 			if (_swapBackBuffer && !target) _context.present();
 			_stage3DProxy.scissorRect = null;
 		}
+
+        /*
+        * Will draw the renderer's output on next render to the provided bitmap data.
+        * */
+        public function queueSnapshot( bmd:BitmapData ):void {
+            _snapshotRequired = true;
+            _snapshotBitmapData = bmd;
+        }
 
 		protected function executeRenderToTexturePass(entityCollector : EntityCollector) : void
 		{
