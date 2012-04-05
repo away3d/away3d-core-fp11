@@ -27,7 +27,7 @@ package away3d.materials.methods
 		/**
 		 * Creates a new WrapDiffuseMethod object.
 		 * @param wrap A factor to indicate the amount by which the light is allowed to wrap
-		 * @param scatterTexture A texture that contains the light colour based on the angle. This can be used to change the light colour due to subsurface scattering when dot < 0
+		 * @param scatterTexture A texture that contains the light colour based on the angle. This can be used to change the light colour due to subsurface scattering when dot &lt; 0
 		 */
 		public function WrapDiffuseMethod(wrapFactor : Number = .5, scatterTexture : Texture2DBase = null)
 		{
