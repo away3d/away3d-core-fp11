@@ -2,3 +2,5 @@
 /target
 /.project
 /.actionScriptProperties
+*.iml
+out
