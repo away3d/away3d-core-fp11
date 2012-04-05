@@ -283,10 +283,13 @@ package away3d.loaders.parsers
 					mesh = new Mesh(geometry, bmMaterial);
 					
 					if (_objects[objIndex].name) {
+						// this is a full independent object ('o' tag in OBJ file)
 						mesh.name = _objects[objIndex].name;
 					} else if(groups[g].name) {
+						// this is a group so the sub groups contain the actual mesh object names ('g' tag in OBJ file)
 						mesh.name = groups[g].name;
 					} else {
+						// no name and thats unfortunate, lets make one up
 						mesh.name = "obj" + meshid;
 						meshid++;
 					}
@@ -567,13 +570,24 @@ package away3d.loaders.parsers
 			for (var i:uint = 1; i < len; ++i) {
 				if (trunk[i] == "") continue;
 				indices = trunk[i].split("/");
-				face.vertexIndices.push(parseInt(indices[0]));
-				if (indices[1] && String(indices[1]).length > 0) face.uvIndices.push(parseInt(indices[1]));
-				if (indices[2] && String(indices[2]).length > 0) face.normalIndices.push(parseInt(indices[2]));
+				face.vertexIndices.push(parseIndex(parseInt(indices[0]),_vertices.length));
+				if (indices[1] && String(indices[1]).length > 0) face.uvIndices.push(parseIndex(parseInt(indices[1]), _uvs.length));
+				if (indices[2] && String(indices[2]).length > 0) face.normalIndices.push(parseIndex(parseInt(indices[2]), _vertexNormals.length));
 				face.indexIds.push(trunk[i]);
 			}
 			
 			_currentMaterialGroup.faces.push(face);
+		}
+		
+		/**
+		* This is a hack around negative face coords
+		*/
+		private function parseIndex(index:int, length:uint):int
+		{
+			if(index < 0)
+				return index + length + 1;
+			else
+				return index;
 		}
 		
 		private function parseMtl(data:String):void
@@ -670,6 +684,7 @@ package away3d.loaders.parsers
 						basicSpecularMethod.specular = specular;
 						
 						var specularData:SpecularData = new SpecularData();
+						specularData.alpha = alpha;
 						specularData.basicSpecularMethod = basicSpecularMethod;
 						specularData.materialID = _lastMtlID;
 						
@@ -783,6 +798,7 @@ package away3d.loaders.parsers
 						mat = TextureMaterial(mesh.material);
 						mat.texture = lm.texture;
 						mat.ambientColor = lm.ambientColor;
+						mat.alpha = lm.alpha;
 						
 						if(lm.specularMethod){
 							mat.specularMethod = lm.specularMethod;
@@ -792,6 +808,7 @@ package away3d.loaders.parsers
 								if(specularData.materialID == lm.materialID){
 									mat.specularMethod = specularData.basicSpecularMethod;
 									mat.ambientColor = specularData.ambientColor;
+									mat.alpha = specularData.alpha;
 									_materialSpecularData.splice(j,1);
 									break;
 								}
@@ -799,7 +816,7 @@ package away3d.loaders.parsers
 						}
 					}
 					
-					mesh.material.name = decomposeID[1];
+					mesh.material.name = decomposeID[1] ? decomposeID[1] : decomposeID[0];
 					_meshes.splice(i, 1);
 					--i;
 				}
@@ -844,6 +861,7 @@ class SpecularData
 	public var materialID:String;
 	public var basicSpecularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
+	public var alpha:Number = 1;
 }
 
 class LoadedMaterial
@@ -855,6 +873,7 @@ class LoadedMaterial
 	public var cm:ColorMaterial;
 	public var specularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
+	public var alpha:Number = 1;
 }
 
 class FaceData
