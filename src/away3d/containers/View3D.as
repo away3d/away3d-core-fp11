@@ -53,6 +53,8 @@
 		protected var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
 		private var _addedToStage:Boolean;
+		
+		private var _forceSoftware : Boolean;
 
 		protected var _filter3DRenderer : Filter3DRenderer;
 		protected var _requireDepthRender : Boolean;
@@ -118,7 +120,7 @@
 		}
 		
 		
-		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null)
+		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null, forceSoftware:Boolean = false)
 		{
 			super();
 
@@ -127,6 +129,7 @@
 			_renderer = renderer || new DefaultRenderer();
 			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
+			_forceSoftware = forceSoftware;
 
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
@@ -627,7 +630,7 @@
 			_addedToStage = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
-			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
+			_stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
 			_stage3DProxy.x = _globalPos.x;
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 			_stage3DProxy.y = _globalPos.y;

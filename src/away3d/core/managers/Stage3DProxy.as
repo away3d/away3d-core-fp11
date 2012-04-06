@@ -3,9 +3,10 @@ package away3d.core.managers
 	import away3d.arcane;
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
-
+	
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DRenderMode;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.TextureBase;
@@ -50,8 +51,9 @@ package away3d.core.managers
 		 * @param stage3DIndex The index of the Stage3D to be proxied.
 		 * @param stage3D The Stage3D to be proxied.
 		 * @param stage3DManager
+		 * @param forceSoftware Whether to force software mode even if hardware acceleration is available.
 		 */
-		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager)
+		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager, forceSoftware : Boolean = false)
 		{
 			_stage3DIndex = stage3DIndex;
 			_stage3D = stage3D;
@@ -60,7 +62,7 @@ package away3d.core.managers
 			_stage3DManager = stage3DManager;
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
-			requestContext();
+			requestContext(forceSoftware);
 		}
 
 		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int) : void
@@ -234,9 +236,9 @@ package away3d.core.managers
 		/**
 		 * Requests a Context3D object to attach to the managed Stage3D.
 		 */
-		private function requestContext() : void
+		private function requestContext(forceSoftware : Boolean = false) : void
 		{
-			_stage3D.requestContext3D();
+			_stage3D.requestContext3D(forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO);
 			_contextRequested = true;
 		}
 	}
