@@ -551,6 +551,12 @@
 		 */
 		public function render() : void
 		{
+			//if context3D has Disposed by the OS,don't render at this frame
+			if (!stage3DProxy.recoverFromDisposal()) {
+				_backBufferInvalid = true;
+				return;
+			}
+			
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();

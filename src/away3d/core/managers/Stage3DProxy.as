@@ -490,5 +490,16 @@ package away3d.core.managers
 			//notify the exitframe listeners
 			notifyExitFrame();
 		}
+
+		public function recoverFromDisposal() : Boolean
+		{
+			if (!_context3D) return false;
+			if (_context3D.driverInfo == "Disposed") {
+				_context3D = null;
+				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_DISPOSED));
+				return false;
+			}
+			return true;
+		}
 	}
 }

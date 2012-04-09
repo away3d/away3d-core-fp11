@@ -24,7 +24,7 @@ package away3d.core.managers
 		private var _usages : Array;
 		private var _keys : Array;
 
-		private var _currentId : int;
+		private static var _currentId : int;
 
 
 		public function AGALProgram3DCache(stage3DProxy : Stage3DProxy, AGALProgram3DCacheSingletonEnforcer : AGALProgram3DCacheSingletonEnforcer)
@@ -46,7 +46,8 @@ package away3d.core.managers
 
 			if (!_instances[index]) {
 				_instances[index] = new AGALProgram3DCache(stage3DProxy, new AGALProgram3DCacheSingletonEnforcer());
-				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
+				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed, false, 0, true);
+				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContext3DDisposed,false,0,true);
 			}
 
 			return _instances[index];
@@ -65,15 +66,13 @@ package away3d.core.managers
 			_instances[index].dispose();
 			_instances[index] = null;
 			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
+			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContext3DDisposed);
 		}
 
 		public function dispose() : void
 		{
-			for (var key : String in _program3Ds) {
-				_program3Ds[key].dispose();
-				delete _program3Ds[key];
-				_ids[key] = -1;
-			}
+			for (var key : String in _program3Ds)
+				destroyProgram(key);
 
 			_keys = null;
 			_program3Ds = null;

@@ -15,7 +15,7 @@ package away3d.textures
 	public class TextureProxyBase extends NamedAssetBase implements IAsset
 	{
 		protected var _textures : Vector.<TextureBase>;
-		protected var _dirty : Vector.<Boolean>;
+		protected var _dirty : Vector.<Context3D>;
 
 		protected var _width : int;
 		protected var _height : int;
@@ -23,7 +23,7 @@ package away3d.textures
 		public function TextureProxyBase()
 		{
 			_textures = new Vector.<TextureBase>(8);
-			_dirty = new Vector.<Boolean>(8);
+			_dirty = new Vector.<Context3D>(8);
 		}
 		
 		
@@ -46,10 +46,11 @@ package away3d.textures
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var tex : TextureBase = _textures[contextIndex];
+			var context : Context3D = stage3DProxy._context3D;
 
-			if (!tex || _dirty[contextIndex]) {
-				if (!tex) _textures[contextIndex] = tex = createTexture(stage3DProxy._context3D);
-				_dirty[contextIndex] = false;
+			if (!tex || _dirty[contextIndex] != context) {
+				_textures[contextIndex] = tex = createTexture(context);
+				_dirty[contextIndex] = context;
 				uploadContent(tex);
 			}
 
@@ -73,7 +74,7 @@ package away3d.textures
 		public function invalidateContent() : void
 		{
 			for (var i : int = 0; i < 8; ++i) {
-				_dirty[i] = true;
+				_dirty[i] = null;
 			}
 		}
 
@@ -85,7 +86,7 @@ package away3d.textures
 				if (tex) {
 					tex.dispose();
 					_textures[i] = null;
-					_dirty[i] = false;
+					_dirty[i] = null;
 				}
 			}
 		}

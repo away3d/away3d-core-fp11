@@ -3,6 +3,7 @@
 	import away3d.animators.data.AnimationBase;
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import flash.display3D.Context3D;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -58,13 +59,13 @@
 		protected var _vertexTangentsDirty : Boolean = true;
 
 		// buffer dirty flags, per context:
-		protected var _vertexBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
-		protected var _uvBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
-		protected var _secondaryUvBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
-		protected var _indexBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
-		protected var _vertexNormalBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
-		protected var _vertexTangentBufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
-		protected var _customBufferDirty : Vector.<Boolean>;
+		protected var _vertexBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _uvBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _secondaryUvBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _indexBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _vertexNormalBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _vertexTangentBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _customBufferContext : Vector.<Context3D>;
 
 		protected var _numVertices : uint;
 		protected var _numIndices : uint;
@@ -175,7 +176,7 @@
 			_numVertices = numVertices;
 			_customElementsPerVertex = elementsPerVertex;
 			_customBuffer = new Vector.<VertexBuffer3D>(8);
-			_customBufferDirty = new Vector.<Boolean>(8);
+			_customBufferContext = new Vector.<Context3D>(8);
 		}
 
 		/**
@@ -186,11 +187,12 @@
 		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-
-			if (_customBufferDirty[contextIndex] || !_customBuffer[contextIndex]) {
-				VertexBuffer3D(_customBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, _customElementsPerVertex)).uploadFromVector(_customData, 0, _numVertices);
-				_customBufferDirty[contextIndex] = false;
-			}
+			var context : Context3D = stage3DProxy._context3D;
+			if (_customBufferContext[contextIndex] != context || !_customBuffer[contextIndex]) {
+				_customBuffer[contextIndex] = context.createVertexBuffer(_numVertices, _customElementsPerVertex);
+				_customBuffer[contextIndex].uploadFromVector(_customData, 0, _numVertices);
+				_customBufferContext[contextIndex] = context;
+ 			}
 
 			return _customBuffer[contextIndex];
 		}
@@ -203,11 +205,12 @@
 		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-
-			if (_vertexBufferDirty[contextIndex] || !_vertexBuffer[contextIndex]) {
-				VertexBuffer3D(_vertexBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertices, 0, _numVertices);
-				_vertexBufferDirty[contextIndex] = false;
-			}
+			var context : Context3D = stage3DProxy._context3D;
+			if (_vertexBufferContext[contextIndex] != context || !_vertexBuffer[contextIndex]) {
+				_vertexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
+				_vertexBuffer[contextIndex].uploadFromVector(_vertices, 0, _numVertices);
+				_vertexBufferContext[contextIndex] = context;
+ 			}
 
 			return _vertexBuffer[contextIndex];
 		}
@@ -220,14 +223,16 @@
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
-			
+			var context : Context3D = stage3DProxy._context3D;
+
 			if (_autoGenerateUVs && _uvsDirty)
 				updateDummyUVs();
 
-			if (_uvBufferDirty[contextIndex] || !_uvBuffer[contextIndex]) {
-				(_uvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_uvs, 0, _numVertices);
-				_uvBufferDirty[contextIndex] = false;
-			}
+			if (_uvBufferContext[contextIndex] != context || !_uvBuffer[contextIndex]) {
+				_uvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
+				_uvBuffer[contextIndex].uploadFromVector(_uvs, 0, _numVertices);
+				_uvBufferContext[contextIndex] = context;
+ 			}
 
 			return _uvBuffer[contextIndex];
 		}
@@ -285,11 +290,13 @@
 		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
 
-			if (_secondaryUvBufferDirty[contextIndex] || !_secondaryUvBuffer[contextIndex]) {
-				(_secondaryUvBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 2)).uploadFromVector(_secondaryUvs, 0, _numVertices);
-				_secondaryUvBufferDirty[contextIndex] = false;
-			}
+			if (_secondaryUvBufferContext[contextIndex] != context || !_secondaryUvBuffer[contextIndex]) {
+				_secondaryUvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
+				_secondaryUvBuffer[contextIndex].uploadFromVector(_secondaryUvs, 0, _numVertices);
+				_secondaryUvBufferContext[contextIndex] = context;
+ 			}
 
 			return _secondaryUvBuffer[contextIndex];
 		}
@@ -302,14 +309,16 @@
 		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
 
 			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
 				updateVertexNormals();
 
-			if (_vertexNormalBufferDirty[contextIndex] || !_vertexNormalBuffer[contextIndex]) {
-				(_vertexNormalBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertexNormals, 0, _numVertices);
-				_vertexNormalBufferDirty[contextIndex] = false;
-			}
+			if (_vertexNormalBufferContext[contextIndex] != context || !_vertexNormalBuffer[contextIndex]) {
+				_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
+				_vertexNormalBuffer[contextIndex].uploadFromVector(_vertexNormals, 0, _numVertices);
+				_vertexNormalBufferContext[contextIndex] = context;
+ 			}
 
 			return _vertexNormalBuffer[contextIndex];
 		}
@@ -322,14 +331,16 @@
 		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
 
 			if (_vertexTangentsDirty)
 				updateVertexTangents();
 
-			if (_vertexTangentBufferDirty[contextIndex] || !_vertexTangentBuffer[contextIndex]) {
-				(_vertexTangentBuffer[contextIndex] ||= stage3DProxy._context3D.createVertexBuffer(_numVertices, 3)).uploadFromVector(_vertexTangents, 0, _numVertices);
-				_vertexTangentBufferDirty[contextIndex] = false;
-			}
+			if (_vertexTangentBufferContext[contextIndex] != context || !_vertexTangentBuffer[contextIndex]) {
+				_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
+				_vertexTangentBuffer[contextIndex].uploadFromVector(_vertexTangents, 0, _numVertices);
+				_vertexTangentBufferContext[contextIndex] = context;
+ 			}
 			return _vertexTangentBuffer[contextIndex];
 		}
 
@@ -341,11 +352,13 @@
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
 
-			if (_indexBufferDirty[contextIndex] || !_indexBuffer[contextIndex]) {
-				(_indexBuffer[contextIndex] ||= stage3DProxy._context3D.createIndexBuffer(_numIndices)).uploadFromVector(_indices, 0, _numIndices);
-				_indexBufferDirty[contextIndex] = false;
-			}
+			if (_indexBufferContext[contextIndex] != context || !_indexBuffer[contextIndex]) {
+				_indexBuffer[contextIndex] = context.createIndexBuffer(_numIndices);
+				_indexBuffer[contextIndex].uploadFromVector(_indices, 0, _numIndices);
+				_indexBufferContext[contextIndex] = context;
+ 			}
 
 			return _indexBuffer[contextIndex];
 		}
@@ -375,7 +388,7 @@
 			var len : uint = _vertices.length;
 			for (var i : uint = 0; i < len; ++i)
 				_vertices[i] *= scale;
-			invalidateBuffers(_vertexBufferDirty);
+			invalidateBuffers(_vertexBufferContext);
 		}
 
 		/**
@@ -409,7 +422,7 @@
 			_scaleU = scaleU;
 			_scaleV = scaleV;
 			 
-			invalidateBuffers(_uvBufferDirty);
+			invalidateBuffers(_uvBufferContext);
 		}
 
 		/**
@@ -436,13 +449,13 @@
 			_faceWeights = null;
 			_faceTangents = null;
 			_customData = null;
-			_vertexBufferDirty = null;
-			_uvBufferDirty = null;
-			_secondaryUvBufferDirty = null;
-			_indexBufferDirty = null;
-			_vertexNormalBufferDirty = null;
-			_vertexTangentBufferDirty = null;
-			_customBufferDirty = null;
+			_vertexBufferContext = null;
+			_uvBufferContext = null;
+			_secondaryUvBufferContext = null;
+			_indexBufferContext = null;
+			_vertexNormalBufferContext = null;
+			_vertexTangentBufferContext = null;
+			_customBufferContext = null;
 		}
 
 		protected function disposeAllVertexBuffers() : void
@@ -465,7 +478,7 @@
 
 		public function updateCustomData(data : Vector.<Number>) : void
 		{
-			invalidateBuffers(_customBufferDirty);
+			invalidateBuffers(_customBufferContext);
 		}
 
 		/**
@@ -483,7 +496,7 @@
 			var numVertices : int = vertices.length / 3;
 			if (numVertices != _numVertices) disposeAllVertexBuffers();
 			_numVertices = numVertices;
-            invalidateBuffers(_vertexBufferDirty);
+            invalidateBuffers(_vertexBufferContext);
 
 			invalidateBounds();
 		}
@@ -516,13 +529,13 @@
 			if (_autoDeriveVertexTangents) _vertexTangentsDirty = true;
 			_faceTangentsDirty = true;
 			_uvs = uvs;
-			invalidateBuffers(_uvBufferDirty);
+			invalidateBuffers(_uvBufferContext);
 		}
 
 		public function updateSecondaryUVData(uvs : Vector.<Number>) : void
 		{
 			_secondaryUvs = uvs;
-			invalidateBuffers(_secondaryUvBufferDirty);
+			invalidateBuffers(_secondaryUvBufferContext);
 		}
 
 		/**
@@ -544,7 +557,7 @@
 			_vertexNormalsDirty = false;
 			_autoDeriveVertexNormals = (vertexNormals == null);
 			_vertexNormals = vertexNormals;
-			invalidateBuffers(_vertexNormalBufferDirty);
+			invalidateBuffers(_vertexNormalBufferContext);
 		}
 
 		/**
@@ -568,7 +581,7 @@
 			_vertexTangentsDirty = false;
 			_autoDeriveVertexTangents = (vertexTangents == null);
 			_vertexTangents = vertexTangents;
-			invalidateBuffers(_vertexTangentBufferDirty);
+			invalidateBuffers(_vertexTangentBufferContext);
 		}
 
 		/**
@@ -594,7 +607,7 @@
 			if (_numTriangles != numTriangles)
 				disposeIndexBuffers(_indexBuffer);
 			_numTriangles = numTriangles;
-			invalidateBuffers(_indexBufferDirty);
+			invalidateBuffers(_indexBufferContext);
 			_faceNormalsDirty = true;
 
 			if (_autoDeriveVertexNormals) _vertexNormalsDirty = true;
@@ -631,10 +644,10 @@
 		 * Invalidates all buffers in a vector, causing them the update when they are first requested.
 		 * @param buffers The vector of buffers to invalidate.
 		 */
-		protected function invalidateBuffers(buffers : Vector.<Boolean>) : void
+		protected function invalidateBuffers(buffers : Vector.<Context3D>) : void
 		{
 			for (var i : int = 0; i < 8; ++i)
-				buffers[i] = true;
+				buffers[i] = null;
 		}
 
 		/**
@@ -720,7 +733,7 @@
 			}
 
 			_vertexNormalsDirty = false;
-			invalidateBuffers(_vertexNormalBufferDirty);
+			invalidateBuffers(_vertexNormalBufferContext);
 		}
 		
 		
@@ -758,7 +771,7 @@
 			_uvs.fixed = true;
 			
 			_uvsDirty = false;
-			invalidateBuffers(_uvBufferDirty);
+			invalidateBuffers(_uvBufferContext);
 		}
 
 		/**
@@ -817,7 +830,7 @@
 			}
 
 			_vertexTangentsDirty = false;
-			invalidateBuffers(_vertexTangentBufferDirty);
+			invalidateBuffers(_vertexTangentBufferContext);
 		}
 
 		/**
