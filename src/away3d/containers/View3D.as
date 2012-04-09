@@ -485,6 +485,9 @@
 		 */
 		public function render() : void
 		{
+			//if context3D has Disposed by the OS,don't render at this frame
+			if (stage3DProxy.context3D.driverInfo == "Disposed") return;
+			
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();

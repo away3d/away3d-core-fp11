@@ -33,7 +33,8 @@ package away3d.materials.passes
 
 		arcane var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
 		arcane var _program3Dids : Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
-		private var _programInvalids : Vector.<Boolean> = new Vector.<Boolean>(8);
+		//private var _programInvalids : Vector.<Boolean> = new Vector.<Boolean>(8);
+		private var _context3Ds:Vector.<Context3D> = new Vector.<Context3D>(8);
 
 		// agal props. these NEED to be set by subclasses!
 		// todo: can we perhaps figure these out manually by checking read operations in the bytecode, so other sources can be safely updated?
@@ -229,7 +230,8 @@ package away3d.materials.passes
 			 
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
-			if (_programInvalids[contextIndex] || !_program3Ds[contextIndex]) {
+			if (_context3Ds[contextIndex] != stage3DProxy.context3D || !_program3Ds[contextIndex]) {
+				_context3Ds[contextIndex] = stage3DProxy.context3D;
 				updateProgram(stage3DProxy);
 				dispatchEvent(new Event(Event.CHANGE));
 			}
@@ -294,7 +296,7 @@ package away3d.materials.passes
 		arcane function invalidateShaderProgram(updateMaterial : Boolean = true) : void
 		{
 			for (var i : uint = 0; i < 8; ++i)
-				_programInvalids[i] = true;
+				_program3Ds[i] = null;
 
 			if (_material && updateMaterial)
 				_material.invalidatePasses(this);
@@ -316,7 +318,7 @@ package away3d.materials.passes
 				trace (fragmentCode);
 			}
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);
-			_programInvalids[stage3DProxy.stage3DIndex] = false;
+			//_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 
 		arcane function get numPointLights() : uint

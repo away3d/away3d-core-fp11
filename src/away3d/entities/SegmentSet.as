@@ -16,6 +16,7 @@
 	import away3d.primitives.LineSegment;
 	import away3d.primitives.data.Segment;
 	import away3d.core.raycast.MouseHitMethod;
+	import flash.display3D.Context3D;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -38,6 +39,10 @@
 		private var _numIndices:uint;
 		private var _vertexBufferDirty:Boolean;
 		private var _indexBufferDirty:Boolean;
+		
+		private var _vertexContext3D:Context3D;
+		private var _indexContext3D:Context3D;
+		
 		private var _vertexBuffer:VertexBuffer3D;
 		private var _indexBuffer:IndexBuffer3D;
 		private var _lineCount:uint;
@@ -180,10 +185,11 @@
 		}
 
 		public function getIndexBuffer( stage3DProxy:Stage3DProxy ):IndexBuffer3D {
-			if( _indexBufferDirty ) {
+			if ( _indexContext3D != stage3DProxy.context3D || _indexBufferDirty ) {
 				_indexBuffer = stage3DProxy._context3D.createIndexBuffer( _numIndices );
 				_indexBuffer.uploadFromVector( _indices, 0, _numIndices );
 				_indexBufferDirty = false;
+				_indexContext3D = stage3DProxy.context3D;
 			}
 			return _indexBuffer;
 		}
@@ -193,10 +199,11 @@
 				addSegment( new LineSegment( new Vector3D(), new Vector3D() ) ); // buffers cannot be empty
 			}
 
-			if( _vertexBufferDirty ) {
+			if ( _vertexContext3D != stage3DProxy.context3D || _vertexBufferDirty ) {
 				_vertexBuffer = stage3DProxy._context3D.createVertexBuffer( _numVertices, 11 );
 				_vertexBuffer.uploadFromVector( _vertices, 0, _numVertices );
 				_vertexBufferDirty = false;
+				_vertexContext3D = stage3DProxy.context3D;
 			}
 			return _vertexBuffer;
 		}
