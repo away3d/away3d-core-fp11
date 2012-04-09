@@ -138,7 +138,7 @@ package away3d.core.base
 		protected var _rot:Vector3D = new Vector3D();
 		protected var _sca:Vector3D = new Vector3D();
 		protected var trans:Matrix3D = new Matrix3D();
-
+		private var _transformVector:Vector.<Vector3D>;
 		/**
 		 * An object that can contain any extra data.
 		 */
@@ -487,6 +487,10 @@ package away3d.core.base
 			_transform.identity();
 			
 			_flipY.appendScale(1, -1, 1);
+			_transformVector = new Vector.<Vector3D>(3, true);
+			_transformVector[0] = _pos;
+            _transformVector[1] = _rot;
+            _transformVector[2] = _sca;
 		}
 		
 		/**
@@ -796,7 +800,7 @@ package away3d.core.base
 			_sca.y = _scaleY;
 			_sca.z = _scaleZ;
 			
-			_transform.recompose(Vector.<Vector3D>([_pos, _rot, _sca]));
+			_transform.recompose(_transformVector);
 			
 			if (!_pivotZero)
 				_transform.appendTranslation(_x + _pivotPoint.x, _y + _pivotPoint.y, _z + _pivotPoint.z);
