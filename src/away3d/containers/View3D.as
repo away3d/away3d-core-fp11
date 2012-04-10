@@ -593,14 +593,14 @@
 			_entityCollector = null;
 		}
 
-		public function project(point3d : Vector3D) : Point
+		public function project(point3d : Vector3D) : Vector3D
 		{
-			var p : Point = _camera.project(point3d);
+			var v : Vector3D = _camera.project(point3d);
 
-			p.x = (p.x + 1.0)*_width/2.0;
-			p.y = (p.y + 1.0)*_height/2.0;
+			v.x = (v.x + 1.0)*_width/2.0;
+			v.y = (v.y + 1.0)*_height/2.0;
 
-			return p;
+			return v;
 		}
 
 		public function unproject(mX : Number, mY : Number, useTranslation:Boolean = false) : Vector3D
