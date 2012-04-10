@@ -288,8 +288,8 @@ package away3d.core.math
 		}
 
 		/**
-		 * Converts the quaternion to a Vector.<Number> matrix representation of a rotation equivalent to this quaternion.
-		 * @param target The Vector.<Number> to contain the raw matrix data.
+		 * Converts the quaternion to a Vector.&lt;Number&gt; matrix representation of a rotation equivalent to this quaternion.
+		 * @param target The Vector.&lt;Number&gt; to contain the raw matrix data.
 		 * @param exclude4thRow If true, the last row will be omitted, and a 4x3 matrix will be generated instead of a 4x4.
 		 */
 		public function toRawData(target : Vector.<Number>, exclude4thRow : Boolean = false) : void

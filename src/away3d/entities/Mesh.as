@@ -45,7 +45,7 @@
 			this.geometry = geometry || new Geometry();
 			this.material = material;
 		}
-
+		
 		public function bakeTransformations():void
 		{
 			geometry.applyTransformation(transform);

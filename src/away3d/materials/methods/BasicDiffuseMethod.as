@@ -43,6 +43,14 @@ package away3d.materials.methods
 			_diffuseData = Vector.<Number>([1, 1, 1, 1]);
 			_cutOffData = new Vector.<Number>(4, true);
 		}
+		
+		public function generateMip(stage3DProxy : Stage3DProxy):void
+		{
+			if (_useTexture)
+			{
+				_texture.getTextureForStage3D(stage3DProxy);
+			}
+		}
 
 		/**
 		 * The alpha component of the diffuse reflection.

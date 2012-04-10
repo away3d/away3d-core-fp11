@@ -45,6 +45,11 @@ package away3d.cameras.lenses
 			return _frustumCorners;
 		}
 
+		public function set frustumCorners(frustumCorners : Vector.<Number>) : void
+		{
+			_frustumCorners = frustumCorners;
+		}
+		
 		/**
 		 * The projection matrix that transforms 3D geometry to normalized homogeneous coordinates.
 		 */
@@ -55,6 +60,13 @@ package away3d.cameras.lenses
 				_matrixInvalid = false;
 			}
 			return _matrix;
+		}
+		
+				
+		public function set matrix(value : Matrix3D) : void
+		{
+			_matrix = value;
+			invalidateMatrix();
 		}
 
 		/**

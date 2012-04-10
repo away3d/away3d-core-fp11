@@ -248,7 +248,7 @@ package away3d.debug
 		 */
 		public static function get instance() : AwayStats
 		{
-			return _INSTANCE;
+			return _INSTANCE ? _INSTANCE : _INSTANCE = new AwayStats();
 		}
 		
 		
