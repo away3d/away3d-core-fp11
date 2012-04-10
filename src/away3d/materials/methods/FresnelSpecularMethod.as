@@ -106,14 +106,10 @@ package away3d.materials.methods
             // use normal or half vector? :s
             code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + (_incidentLight? target+".xyz\n" : _normalFragmentReg+".xyz\n") +   // dot(V, H)
             		"sub " + _viewDirFragmentReg+".w, " + _dataReg+".z, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
-
-            		"mul " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 2)
-					"mul " + _normalFragmentReg+".w, " + _normalFragmentReg+".w, " + _normalFragmentReg+".w\n" +             // exp = pow(base, 4)
-					"mul " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 5)
-
-					"sub " + _normalFragmentReg+".w, " + _dataReg+".z, " + _viewDirFragmentReg+".w\n" +             // 1 - exp
-					"mul " + _normalFragmentReg+".w, " + _dataReg+".x, " + _normalFragmentReg+".w\n" +             // f0*(1 - exp)
-					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
+            		"pow " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _dataReg+".y\n" +             // exp = pow(base, 5)
+					"sub " + _viewDirFragmentReg+".w, " + _dataReg+".z, " + _normalFragmentReg+".w\n" +             // 1 - exp
+					"mul " + _viewDirFragmentReg+".w, " + _dataReg+".x, " + _viewDirFragmentReg+".w\n" +             // f0*(1 - exp)
+					"add " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +          // exp + f0*(1 - exp)
 					"mul " + target+".w, " + target+".w, " + _viewDirFragmentReg+".w\n";
 //            code += AGAL.sat(target+".w", target+".w");
 
