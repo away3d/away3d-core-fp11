@@ -54,7 +54,20 @@ package away3d.materials.methods
 		{
 			_baseSpecularMethod.specular = value;
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function get shadingModel() : String
+		{
+			return _baseSpecularMethod.shadingModel;
+		}
+		
+		override public function set shadingModel(value : String) : void
+		{
+			_baseSpecularMethod.shadingModel = value;
+		}
+		
 		/**
 		 * @inheritDoc
 		 */
