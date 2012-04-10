@@ -36,7 +36,11 @@ package away3d.core.render
 			_backgroundG = 1;
 			_backgroundB = 1;
 		}
-
+		
+		arcane function get distanceBased():Boolean
+		{
+			return _distanceBased;
+		}
 
 		arcane override function set backgroundR(value : Number) : void
 		{

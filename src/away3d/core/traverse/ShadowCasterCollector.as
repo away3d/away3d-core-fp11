@@ -18,6 +18,8 @@ package away3d.core.traverse
 	 */
 	public class ShadowCasterCollector extends EntityCollector
 	{
+		arcane var distanceBased:Boolean;
+		
 		/**
 		 * Creates a new EntityCollector object.
 		 */
@@ -46,7 +48,11 @@ package away3d.core.traverse
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
 				item.zIndex = renderable.zIndex;
-				item.renderOrderId = renderable.material._uniqueId;
+				if (distanceBased)
+					item.renderOrderId = renderable.material.distancePassId;
+				else
+					item.renderOrderId = renderable.material.depthPassId;
+				item.materialId = renderable.material._uniqueId;
 				_opaqueRenderableHead = item;
 			}
 		}

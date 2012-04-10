@@ -46,6 +46,8 @@ package away3d.materials
 		private static var _currentId:int = 0;
 		
 		arcane var _renderOrderId : int;
+		arcane var _distancePassId : int;
+		arcane var _depthPassId : int;
 		arcane var _name : String = "material";
 
 		private var _bothSides : Boolean;
@@ -248,14 +250,6 @@ package away3d.materials
 			return _requiresBlending;
 		}
 
-		/**
-		 * The unique id assigned to the material by the MaterialLibrary.
-		 */
-		public function get uniqueId() : int
-		{
-			return _uniqueId;
-		}
-
 		public override function get name() : String
 		{
 			return _name;
@@ -395,16 +389,6 @@ package away3d.materials
 		}
 
 		/**
-		 * Assignes a unique id to the material.
-		 * @param id
-		 * @private
-		 */
-		arcane function setUniqueId(id : int) : void
-		{
-			_uniqueId = id;
-		}
-
-		/**
 		 * Updates the material
 		 *
 		 * @private
@@ -474,12 +458,7 @@ package away3d.materials
 			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights : 0;
 			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
-			calculateRenderId();
 			invalidatePasses(null);
-		}
-
-		private function calculateRenderId() : void
-		{
 		}
 
 		private function onPassChange(event : Event) : void
@@ -487,13 +466,15 @@ package away3d.materials
 			var mult : Number = 1;
 			var ids : Vector.<int>;
 			var len : int;
-
+			var i:int;
+			var j:int;
+			
 			_renderOrderId = 0;
 
-			for (var i : int = 0; i < _numPasses; ++i) {
+			for (i = 0; i < _numPasses; ++i) {
 				ids = _passes[i]._program3Dids;
 				len = ids.length;
-				for (var j : int = 0; j < len; ++j) {
+				for (j = 0; j < len; ++j) {
 					if (ids[j] != -1) {
 						_renderOrderId += mult*ids[j];
 						j = len;
@@ -501,6 +482,37 @@ package away3d.materials
 				}
 				mult *= 1000;
 			}
+			
+			_distancePassId = 0;
+			ids = _distancePass._program3Dids;
+			len = ids.length;
+			for (j = 0; j < len; ++j) {
+			if (ids[j] != -1) {
+				_distancePassId += ids[j];
+					j = len;
+				}
+			}
+			
+			_depthPassId = 0;
+			ids = _depthPass._program3Dids;
+			len = ids.length;
+			for (j = 0; j < len; ++j) {
+			if (ids[j] != -1) {
+				_depthPassId += ids[j];
+					j = len;
+				}
+			}
 		}
+		
+		arcane function get distancePassId():int
+		{
+			return _distancePassId;
+		}
+		
+		arcane function get depthPassId():int
+ 		{
+			return _depthPassId;
+		}
+		
 	}
 }

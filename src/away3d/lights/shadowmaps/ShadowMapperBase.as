@@ -100,6 +100,7 @@ package away3d.lights.shadowmaps
 		{
 			updateDepthProjection(entityCollector.camera);
 			_depthMap ||= createDepthTexture();
+			_casterCollector.distanceBased = renderer.distanceBased;
 			drawDepthMap(_depthMap.getTextureForStage3D(stage3DProxy), entityCollector.scene, renderer);
 		}
 
