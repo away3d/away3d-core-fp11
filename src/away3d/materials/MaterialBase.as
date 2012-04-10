@@ -43,7 +43,8 @@ package away3d.materials
 
 		// this value is usually derived from other settings
 		arcane var _uniqueId : int;
-
+		private static var _currentId:int = 0;
+		
 		arcane var _renderOrderId : int;
 		arcane var _name : String = "material";
 
@@ -80,7 +81,8 @@ package away3d.materials
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
 			_distancePass = new DistanceMapPass();
-
+			_uniqueId = _currentId++;
+			
 //			invalidatePasses(null);
 		}
 
