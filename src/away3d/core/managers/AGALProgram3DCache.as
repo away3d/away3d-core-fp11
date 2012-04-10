@@ -4,6 +4,7 @@ package away3d.core.managers
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
 	import away3d.materials.passes.MaterialPassBase;
+	import flash.utils.Dictionary;
 
 	import com.adobe.utils.AGALMiniAssembler;
 
@@ -19,10 +20,8 @@ package away3d.core.managers
 
 		private var _stage3DProxy : Stage3DProxy;
 
-		private var _program3Ds : Array;
-		private var _ids : Array;
-		private var _usages : Array;
-		private var _keys : Array;
+		private var _program3Ds : Dictionary;
+		private var _ids : Dictionary;
 
 		private var _currentId : int;
 
@@ -32,10 +31,8 @@ package away3d.core.managers
 			if (!AGALProgram3DCacheSingletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
 			_stage3DProxy = stage3DProxy;
 
-			_program3Ds = [];
-			_ids = [];
-			_usages = [];
-			_keys = [];
+			_program3Ds = new Dictionary(true);
+			_ids = new Dictionary();
 		}
 
 		public static function getInstance(stage3DProxy : Stage3DProxy) : AGALProgram3DCache
@@ -47,7 +44,7 @@ package away3d.core.managers
 			if (!_instances[index]) {
 				_instances[index] = new AGALProgram3DCache(stage3DProxy, new AGALProgram3DCacheSingletonEnforcer());
 				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed, false, 0, true);
-				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContext3DDisposed,false,0,true);
+				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContext3DDisposed, false, 0, true);
 			}
 
 			return _instances[index];
@@ -70,15 +67,9 @@ package away3d.core.managers
 
 		public function dispose() : void
 		{
-			for (var key : String in _program3Ds) {
-				_program3Ds[key].dispose();
-				delete _program3Ds[key];
-				_ids[key] = -1;
+			for (var key : Object in _program3Ds) {
+				(_program3Ds[key] as Program3D).dispose();
 			}
-
-			_keys = null;
-			_program3Ds = null;
-			_usages = null;
 		}
 
 		public function setProgram3D(pass : MaterialPassBase, vertexCode : String, fragmentCode : String) : void
@@ -86,46 +77,32 @@ package away3d.core.managers
 			var stageIndex : int = _stage3DProxy._stage3DIndex;
 			var program : Program3D;
 			var key : String = getKey(vertexCode, fragmentCode);
-
-			if (_program3Ds[key] == null) {
-				_keys[_currentId] = key;
-				_usages[_currentId] = 0;
+			
+			
+			for (var cachedProgram3D:Object in _program3Ds)
+			{
+				if (_program3Ds[cachedProgram3D] == key)
+				{
+					program = cachedProgram3D as Program3D;
+					break;
+				}
+			}
+			
+			if (!program) 
+			{
+				program = _stage3DProxy._context3D.createProgram();
+ 
+ 				var vertexByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode);
+ 				var fragmentByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, fragmentCode);
+				
+				program.upload(vertexByteCode, fragmentByteCode);
+				_program3Ds[program] = key;
 				_ids[key] = _currentId;
 				++_currentId;
-				program = _stage3DProxy._context3D.createProgram();
-
-				var vertexByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode);
-				var fragmentByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, fragmentCode);
-
-				program.upload(vertexByteCode, fragmentByteCode);
-
-				_program3Ds[key] = program;
 			}
-
-			var oldId : int = pass._program3Dids[stageIndex];
-			var newId : int = _ids[key];
-
-			if (oldId != newId) {
-				if (oldId >= 0) freeProgram3D(oldId);
-				_usages[newId]++;
-			}
-
-			pass._program3Dids[stageIndex] = newId;
-			pass._program3Ds[stageIndex] = _program3Ds[key];
-		}
-
-		public function freeProgram3D(programId : int) : void
-		{
-			_usages[programId]--;
-			if (_usages[programId] == 0) destroyProgram(_keys[programId]);
-		}
-
-		private function destroyProgram(key : String) : void
-		{
-			_program3Ds[key].dispose();
-			_program3Ds[key] = null;
-			delete _program3Ds[key];
-			_ids[key] = -1;
+			
+			pass._program3Dids[stageIndex] = _ids[key];
+			pass._program3Ds[stageIndex] = program;
 		}
 
 		private function getKey(vertexCode : String, fragmentCode : String) : String

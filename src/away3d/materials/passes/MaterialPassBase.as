@@ -167,9 +167,7 @@ package away3d.materials.passes
 		 */
 		public function dispose() : void
 		{
-			for (var i : uint = 0; i < 8; ++i) {
-				if (_program3Ds[i]) AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
-			}
+			//let VM to manage the disposing of objects.
 		}
 
 // AGAL RELATED STUFF

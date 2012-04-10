@@ -126,10 +126,10 @@
 
 			_geometry = value;
 			if (_geometry) {
-				_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
-				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
-				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-				_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+				_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid, false, 0, true);
+				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded, false, 0, true);
+				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved, false, 0, true);
+				_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged, false, 0, true);
 				initGeometry();
 			}
 

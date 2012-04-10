@@ -15,6 +15,7 @@ package away3d.materials
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.DistanceMapPass;
 	import away3d.materials.passes.MaterialPassBase;
+	import flash.utils.Dictionary;
 
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
@@ -49,7 +50,7 @@ package away3d.materials
 		private var _bothSides : Boolean;
 		private var _animation : AnimationBase;
 
-		private var _owners : Vector.<IMaterialOwner>;
+		private var _owners : Dictionary;
 
 		private var _requiresBlending : Boolean;
 
@@ -75,7 +76,7 @@ package away3d.materials
 		 */
 		public function MaterialBase()
 		{
-			_owners = new Vector.<IMaterialOwner>();
+			_owners = new Dictionary(true);
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
 			_distancePass = new DistanceMapPass();
@@ -370,7 +371,7 @@ package away3d.materials
 				invalidatePasses(null);
 			}
 
-			_owners.push(owner);
+			_owners[owner] = true;
 		}
 
 		/**
@@ -380,8 +381,15 @@ package away3d.materials
 		 */
 		arcane function removeOwner(owner : IMaterialOwner) : void
 		{
-			_owners.splice(_owners.indexOf(owner), 1);
-			if (_owners.length == 0) _animation = null;
+			delete _owners[owner];
+			var empty:Boolean = true;
+			for (var i:Object in _owners)
+			{
+				empty = false;
+				break;
+			}
+			if(empty)
+				_animation = null;
 		}
 
 		/**
@@ -392,15 +400,6 @@ package away3d.materials
 		arcane function setUniqueId(id : int) : void
 		{
 			_uniqueId = id;
-		}
-
-		/**
-		 * A list of the IMaterialOwners that use this material
-		 * @private
-		 */
-		arcane function get owners() : Vector.<IMaterialOwner>
-		{
-			return _owners;
 		}
 
 		/**
