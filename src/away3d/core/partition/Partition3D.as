@@ -5,6 +5,7 @@ package away3d.core.partition
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.core.traverse.ShadowCasterCollector;
 	import away3d.entities.Entity;
+	import flash.utils.Dictionary;
 
 	use namespace arcane;
 
@@ -18,7 +19,8 @@ package away3d.core.partition
 		private var _rootNode : NodeBase;
 		private var _updatesMade : Boolean;
 		private var _updateQueue : EntityNode;
-
+		private var _updateDict:Dictionary = new Dictionary;
+		private var _deleteVector:Vector.<Object> = new Vector.<Object>;
 		/**
 		 * Creates a new Partition3D object.
 		 * @param rootNode The root node of the space partition system. This will indicate which type of data structure will be used.
@@ -60,20 +62,8 @@ package away3d.core.partition
 		arcane function markForUpdate(entity : Entity) : void
 		{
 			var node : EntityNode = entity.getEntityPartitionNode();
-			// already marked to be updated
-			var t : EntityNode = _updateQueue;
-
-			// if already marked for update
-			while (t) {
-				if (node == t)
-					return;
-				
-				t = t._updateQueueNext;
-			}
-			
-			node._updateQueueNext = _updateQueue;
-			
-			_updateQueue = node;
+		
+			_updateDict[node] = true;
 			_updatesMade = true;
 		}
 
@@ -87,23 +77,7 @@ package away3d.core.partition
 			var t : EntityNode;
 			
 			node.removeFromParent();
-			
-			// remove from update list if it's in
-			if (node == _updateQueue)
-				_updateQueue = node._updateQueueNext;
-			else {
-				t = _updateQueue;
-				while (t && t._updateQueueNext != node)
-					t = t._updateQueueNext;
-				if (t)
-					t._updateQueueNext = node._updateQueueNext;
-			}
-			
-			node._updateQueueNext = null;
-			
-			// any updates have been made undone
-			if (!_updateQueue)
-				_updatesMade = false;
+			delete _updateDict[node];
 		}
 		
 		/**
@@ -111,33 +85,27 @@ package away3d.core.partition
 		 */
 		private function updateEntities() : void
 		{
-			var node : EntityNode = _updateQueue;
+			var node : EntityNode;
 			var targetNode : NodeBase;
-			var t : EntityNode;
 			
-			//clear updateQueue early to allow for newly marked entity updates
-			_updateQueue = null;
-			
-			_updatesMade = false;
-
-			do {
+			for (var i:Object in _updateDict)
+			{
+				node = i as EntityNode;
 				targetNode = _rootNode.findPartitionForEntity(node.entity);
-
-				// if changed, find and attach the mesh node to the best suited partition node
 				if (node.parent != targetNode) {
-					if (node)
-						node.removeFromParent();
-					
+					node.removeFromParent();					
 					targetNode.addNode(node);
 				}
-				
-				t = node._updateQueueNext;
-				node._updateQueueNext = null;
-				
 				//call an internal update on the entity to fire any attached logic
 				node.entity.internalUpdate();
-				
-			} while (node = t);
+				_deleteVector.push(i);
+			}
+			for (var k:uint = 0; k < _deleteVector.length; k++)
+			{
+				delete _updateDict[_deleteVector[k]];
+			}
+			_deleteVector.length = 0;
+			_updatesMade = false;
 		}
 	}
 }
