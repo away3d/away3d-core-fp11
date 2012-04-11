@@ -286,8 +286,8 @@ package away3d.materials.methods
 					_cutOffIndex = cutOffReg.index;
 					code += "sub " + temp + ".w, " + temp + ".w, " + cutOffReg + ".x\n" +
 							"kil " + temp + ".w\n" +
-							"add " + temp + ".w, " + temp + ".w, " + cutOffReg + ".x\n" +
-							"div " + temp + ", " + temp + ", " + temp + ".w\n";
+							"add " + temp + ".w, " + temp + ".w, " + cutOffReg + ".x\n";// +
+							//"div " + temp + ", " + temp + ", " + temp + ".w\n";
 				}
 			}
 			else {
