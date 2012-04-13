@@ -35,35 +35,35 @@ package away3d.containers
 	 * 
 	 * @eventType away3d.events.MouseEvent3D
 	 */
-	[Event(name="mouseMove",type="away3d.events.MouseEvent3D")]
+	[Event(name="mouseMove3d",type="away3d.events.MouseEvent3D")]
 	
 	/**
 	 * Dispatched when a user presses the left hand mouse button while the cursor is over the 3d object.
 	 * 
 	 * @eventType away3d.events.MouseEvent3D
 	 */
-	[Event(name="mouseDown",type="away3d.events.MouseEvent3D")]
+	[Event(name="mouseDown3d",type="away3d.events.MouseEvent3D")]
 	
 	/**
 	 * Dispatched when a user releases the left hand mouse button while the cursor is over the 3d object.
 	 * 
 	 * @eventType away3d.events.MouseEvent3D
 	 */
-	[Event(name="mouseUp",type="away3d.events.MouseEvent3D")]
+	[Event(name="mouseUp3d",type="away3d.events.MouseEvent3D")]
 	
 	/**
 	 * Dispatched when a user moves the cursor over the 3d object.
 	 * 
 	 * @eventType away3d.events.MouseEvent3D
 	 */
-	[Event(name="mouseOver",type="away3d.events.MouseEvent3D")]
+	[Event(name="mouseOver3d",type="away3d.events.MouseEvent3D")]
 	
 	/**
 	 * Dispatched when a user moves the cursor away from the 3d object.
 	 * 
 	 * @eventType away3d.events.MouseEvent3D
 	 */
-	[Event(name="mouseOut",type="away3d.events.MouseEvent3D")]
+	[Event(name="mouseOut3d",type="away3d.events.MouseEvent3D")]
 	
 	/**
 	 * ObjectContainer3D is the most basic scene graph node. It can contain other ObjectContainer3Ds.
