@@ -20,7 +20,6 @@ package away3d.core.partition
 		private var _updatesMade : Boolean;
 		private var _updateQueue : EntityNode;
 		private var _updateDict:Dictionary = new Dictionary;
-		private var _deleteVector:Vector.<Object> = new Vector.<Object>;
 		/**
 		 * Creates a new Partition3D object.
 		 * @param rootNode The root node of the space partition system. This will indicate which type of data structure will be used.
@@ -88,6 +87,8 @@ package away3d.core.partition
 			var node : EntityNode;
 			var targetNode : NodeBase;
 			
+			_updatesMade = false;
+			
 			for (var i:Object in _updateDict)
 			{
 				node = i as EntityNode;
@@ -96,16 +97,12 @@ package away3d.core.partition
 					node.removeFromParent();					
 					targetNode.addNode(node);
 				}
+				
+				delete _updateDict[i];
+				
 				//call an internal update on the entity to fire any attached logic
 				node.entity.internalUpdate();
-				_deleteVector.push(i);
 			}
-			for (var k:uint = 0; k < _deleteVector.length; k++)
-			{
-				delete _updateDict[_deleteVector[k]];
-			}
-			_deleteVector.length = 0;
-			_updatesMade = false;
 		}
 	}
 }
