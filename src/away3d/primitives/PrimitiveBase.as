@@ -51,6 +51,26 @@ package away3d.primitives
 
 			return super.clone();
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function scale(scale:Number):void
+		{
+			if (_geomDirty) updateGeometry();
+
+			super.scale(scale);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function scaleUV(scaleU:Number=1, scaleV:Number=1):void
+		{
+			if (_uvDirty) updateUVs();
+			
+			super.scaleUV(scaleU, scaleV);
+		}
 
 		/**
 		 * Builds the primitive's geometry when invalid. This method should not be called directly. The calling should
