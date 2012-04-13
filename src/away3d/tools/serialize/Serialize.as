@@ -116,7 +116,7 @@ package away3d.tools.serialize
 			serializer.writeBoolean("bothSides", material.bothSides);
 			serializer.writeString("blendMode", material.blendMode);
 			serializer.writeBoolean("requiresBlending", material.requiresBlending);
-			serializer.writeUint("uniqueId", material.uniqueId);
+			//serializer.writeUint("uniqueId", material.uniqueId);
 			serializer.writeUint("numPasses", material.numPasses);
 			serializer.endObject();
 		}
