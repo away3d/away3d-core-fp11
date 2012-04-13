@@ -619,7 +619,7 @@ package away3d.debug
 			var dia_y : int;
 			
 			// Redraw counters
-			_fps_tf.text = _fps.toString().concat('/', stage.frameRate);
+			_fps_tf.text = _fps.toString().concat('/', int(stage.frameRate));
 			_afps_tf.text = Math.round(_avg_fps).toString();
 			_ram_tf.text = _getRamString(_ram).concat(' / ', _getRamString(_max_ram));
 			
