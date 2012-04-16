@@ -45,15 +45,10 @@ package away3d.loaders.parsers
 		private var _compression : uint;
 		private var _streaming : Boolean;
 		
-		private var _optimized_for_accuracy : Boolean;
-		
 		private var _texture_users : Object = {};
 		
 		private var _parsed_header : Boolean;
 		private var _body : ByteArray;
-		
-		private var read_float : Function;
-		private var read_uint : Function;
 		
 		public static const UNCOMPRESSED : uint = 0;
 		public static const DEFLATE : uint = 1;
@@ -203,14 +198,6 @@ package away3d.loaders.parsers
 						break;
 				}
 				
-				// Define which methods to use when reading floating
-				// point and integer numbers respectively. This way, 
-				// the optimization test and ByteArray dot-lookup
-				// won't have to be made every iteration in the loop.
-				read_float = _optimized_for_accuracy? _body.readDouble : _body.readFloat;
-				read_uint = _optimized_for_accuracy? _body.readUnsignedInt : _body.readUnsignedShort;
-			
-				
 				_parsed_header = true;
 			}
 			
@@ -237,9 +224,7 @@ package away3d.loaders.parsers
 			
 			// Parse bit flags and compression
 			flags = _byteData.readUnsignedShort();
-			_streaming 					= (flags & 0x1) == 0x1;
-			_optimized_for_accuracy 	= (flags & 0x2) == 0x2;
-			
+			_streaming 	= (flags & 0x1) == 0x1;
 			
 			_compression = _byteData.readUnsignedByte();
 			
@@ -253,12 +238,19 @@ package away3d.loaders.parsers
 		private function parseNextBlock() : void
 		{
 			var assetData : IAsset;
-			var ns : uint, type : uint, len : uint;
+			var ns : uint, type : uint, flags : uint, len : uint;
 			
 			_cur_block_id = _body.readUnsignedInt();
 			ns = _body.readUnsignedByte();
 			type = _body.readUnsignedByte();
+			flags = _body.readUnsignedByte();
 			len = _body.readUnsignedInt();
+			
+			// TODO: Remove this
+			if (_body.bytesAvailable < len) {
+				_body.position = _body.length;
+				return;
+			}
 			
 			switch (type) {
 				case 1:
@@ -267,7 +259,7 @@ package away3d.loaders.parsers
 				case 22:
 					assetData = parseContainer(len);
 					break;
-				case 24:
+				case 23:
 					assetData = parseMeshInstance(len);
 					break;
 				case 81:
@@ -757,9 +749,12 @@ package away3d.loaders.parsers
 				// Loop through data streams
 				while (_body.position < sm_end) {
 					var idx : uint = 0;
+					var str_ftype : uint;
 					var str_type : uint, str_len : uint, str_end : uint;
 					
+					// Type, field type, length
 					str_type = _body.readUnsignedByte();
+					str_ftype = _body.readUnsignedByte();
 					str_len = _body.readUnsignedInt();
 					str_end = _body.position + str_len;
 					
@@ -768,9 +763,10 @@ package away3d.loaders.parsers
 					if (str_type == 1) {
 						var verts : Vector.<Number> = new Vector.<Number>;
 						while (_body.position < str_end) {
-							x = read_float();
-							y = read_float();
-							z = read_float();
+							// TODO: Respect stream field type
+							x = _body.readFloat();
+							y = _body.readFloat();
+							z = _body.readFloat();
 							
 							verts[idx++] = x;
 							verts[idx++] = y;
@@ -781,34 +777,39 @@ package away3d.loaders.parsers
 					else if (str_type == 2) {
 						var indices : Vector.<uint> = new Vector.<uint>;
 						while (_body.position < str_end) {
-							indices[idx++] = read_uint();
+							// TODO: Respect stream field type
+							indices[idx++] = _body.readUnsignedShort();
 						}
 						sub_geom.updateIndexData(indices);
 					}
 					else if (str_type == 3) {
 						var uvs : Vector.<Number> = new Vector.<Number>;
 						while (_body.position < str_end) {
-							uvs[idx++] = read_float();
+							// TODO: Respect stream field type
+							uvs[idx++] = _body.readFloat();
 						}
 						sub_geom.updateUVData(uvs);
 					}
 					else if (str_type == 4) {
 						var normals : Vector.<Number> = new Vector.<Number>;
 						while (_body.position < str_end) {
-							normals[idx++] = read_float();
+							// TODO: Respect stream field type
+							normals[idx++] = _body.readFloat();
 						}
 						sub_geom.updateVertexNormalData(normals);
 					}
 					else if (str_type == 6) {
 						w_indices = new Vector.<Number>;
 						while (_body.position < str_end) {
-							w_indices[idx++] = read_uint()*3;
+							// TODO: Respect stream field type
+							w_indices[idx++] = _body.readUnsignedShort()*3;
 						}
 					}
 					else if (str_type == 7) {
 						weights = new Vector.<Number>;
 						while (_body.position < str_end) {
-							weights[idx++] = read_float();
+							// TODO: Respect stream field type
+							weights[idx++] = _body.readFloat();
 						}
 					}
 					else {
@@ -1020,12 +1021,12 @@ package away3d.loaders.parsers
 			return mtx;
 		}
 		
-		private function parseMatrixRawData(len : uint = 16) : Vector.<Number>
+		private function parseMatrixRawData(len : uint = 12) : Vector.<Number>
 		{
 			var i : uint;
 			var mtx_raw : Vector.<Number> = new Vector.<Number>;
 			for (i=0; i<len; i++) {
-				mtx_raw[i] = read_float();
+				mtx_raw[i] = _body.readFloat();
 			}
 			
 			return mtx_raw;
