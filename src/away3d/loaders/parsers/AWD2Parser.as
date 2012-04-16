@@ -1017,7 +1017,30 @@ package away3d.loaders.parsers
 		
 		private function parseMatrix3D() : Matrix3D
 		{
-			var mtx : Matrix3D = new Matrix3D(parseMatrixRawData());
+			var raw3 : Vector.<Number>;
+			var raw4 : Vector.<Number>;
+			var mtx : Matrix3D;
+			
+			raw3 = parseMatrixRawData(12);
+			raw4 = new Vector.<Number>(16, true);
+			raw4[0] = raw3[0];
+			raw4[1] = raw3[1];
+			raw4[2] = raw3[2];
+			raw4[3] = 0;
+			raw4[4] = raw3[3];
+			raw4[5] = raw3[4];
+			raw4[6] = raw3[5];
+			raw4[7] = 0;
+			raw4[8] = raw3[6];
+			raw4[9] = raw3[7];
+			raw4[10] = raw3[8];
+			raw4[11] = 0;
+			raw4[12] = raw3[9];
+			raw4[13] = raw3[10];
+			raw4[14] = raw3[11];
+			raw4[15] = 1;
+			
+			mtx = new Matrix3D(raw4);
 			return mtx;
 		}
 		
