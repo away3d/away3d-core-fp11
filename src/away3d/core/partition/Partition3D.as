@@ -89,6 +89,7 @@ package away3d.core.partition
 			
 			_updatesMade = false;
 			
+			//in debug mode,the iteration will be broken if you set BreakPoint in the loop!
 			for (var i:Object in _updateDict)
 			{
 				node = i as EntityNode;
