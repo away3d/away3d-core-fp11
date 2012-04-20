@@ -20,6 +20,7 @@ package away3d.core.partition
 		private var _updatesMade : Boolean;
 		private var _updateQueue : EntityNode;
 		private var _updateDict:Dictionary = new Dictionary;
+		private var _updateDictTemp:Dictionary = new Dictionary;
 		/**
 		 * Creates a new Partition3D object.
 		 * @param rootNode The root node of the space partition system. This will indicate which type of data structure will be used.
@@ -89,8 +90,16 @@ package away3d.core.partition
 			
 			_updatesMade = false;
 			
-			//in debug mode,the iteration will be broken if you set BreakPoint in the loop!
-			for (var i:Object in _updateDict)
+			//swap _updateDict for _updateDictTemp
+			var temp:Dictionary = _updateDict;
+			_updateDict = _updateDictTemp;
+			_updateDictTemp = temp;
+			
+			var i:Object;
+			
+			//in the iteration,the node.entity.internalUpdate may change the Dictionary,
+			//so use an extra Dictionary.
+			for (i in _updateDictTemp)
 			{
 				node = i as EntityNode;
 				targetNode = _rootNode.findPartitionForEntity(node.entity);
@@ -99,10 +108,14 @@ package away3d.core.partition
 					targetNode.addNode(node);
 				}
 				
-				delete _updateDict[i];
-				
 				//call an internal update on the entity to fire any attached logic
 				node.entity.internalUpdate();
+			}
+			
+			//in debug mode,the iteration will be broken if you set BreakPoint in the loop!
+			for (i in _updateDictTemp)
+			{
+				delete _updateDictTemp[i];
 			}
 		}
 	}
