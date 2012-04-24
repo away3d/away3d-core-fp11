@@ -494,10 +494,10 @@ package away3d.loaders.parsers
 				var ibp : Matrix3D;
 				
 				// Ignore joint id
-				_body.readUnsignedInt();
+				_body.readUnsignedShort();
 				
 				joint = new SkeletonJoint();
-				joint.parentIndex = _body.readUnsignedInt() -1; // 0=null in AWD
+				joint.parentIndex = _body.readUnsignedShort() -1; // 0=null in AWD
 				joint.name = parseVarStr();
 				
 				ibp = parseMatrix3D();
@@ -547,7 +547,7 @@ package away3d.loaders.parsers
 				if (has_transform == 1) {
 					// TODO: not used
 					// var mtx0 : Matrix3D;
-					var mtx_data : Vector.<Number> = parseMatrixRawData();
+					var mtx_data : Vector.<Number> = parseMatrix43RawData();
 					
 					var mtx : Matrix3D = new Matrix3D(mtx_data);
 					joint_pose.orientation.fromMatrix(mtx);
@@ -1009,7 +1009,7 @@ package away3d.loaders.parsers
 		private function parseMatrix2D() : Matrix
 		{
 			var mtx : Matrix;
-			var mtx_raw : Vector.<Number> = parseMatrixRawData(6);
+			var mtx_raw : Vector.<Number> = parseMatrix32RawData();
 			
 			mtx = new Matrix(mtx_raw[0], mtx_raw[1], mtx_raw[2], mtx_raw[3], mtx_raw[4], mtx_raw[5]);
 			return mtx;
@@ -1017,40 +1017,41 @@ package away3d.loaders.parsers
 		
 		private function parseMatrix3D() : Matrix3D
 		{
-			var raw3 : Vector.<Number>;
-			var raw4 : Vector.<Number>;
-			var mtx : Matrix3D;
-			
-			raw3 = parseMatrixRawData(12);
-			raw4 = new Vector.<Number>(16, true);
-			raw4[0] = raw3[0];
-			raw4[1] = raw3[1];
-			raw4[2] = raw3[2];
-			raw4[3] = 0;
-			raw4[4] = raw3[3];
-			raw4[5] = raw3[4];
-			raw4[6] = raw3[5];
-			raw4[7] = 0;
-			raw4[8] = raw3[6];
-			raw4[9] = raw3[7];
-			raw4[10] = raw3[8];
-			raw4[11] = 0;
-			raw4[12] = raw3[9];
-			raw4[13] = raw3[10];
-			raw4[14] = raw3[11];
-			raw4[15] = 1;
-			
-			mtx = new Matrix3D(raw4);
-			return mtx;
+			return new Matrix3D(parseMatrix43RawData());
 		}
 		
-		private function parseMatrixRawData(len : uint = 12) : Vector.<Number>
+		
+		private function parseMatrix32RawData() : Vector.<Number>
 		{
 			var i : uint;
-			var mtx_raw : Vector.<Number> = new Vector.<Number>;
-			for (i=0; i<len; i++) {
+			var mtx_raw : Vector.<Number> = new Vector.<Number>(6, true);
+			for (i=0; i<6; i++)
 				mtx_raw[i] = _body.readFloat();
-			}
+			
+			return mtx_raw;
+		}
+		
+		private function parseMatrix43RawData() : Vector.<Number>
+		{
+			var i : uint;
+			var mtx_raw : Vector.<Number> = new Vector.<Number>(16, true);
+			
+			mtx_raw[0] = _body.readFloat();
+			mtx_raw[1] = _body.readFloat();
+			mtx_raw[2] = _body.readFloat();
+			mtx_raw[3] = 0.0;
+			mtx_raw[4] = _body.readFloat();
+			mtx_raw[5] = _body.readFloat();
+			mtx_raw[6] = _body.readFloat();
+			mtx_raw[7] = 0.0;
+			mtx_raw[8] = _body.readFloat();
+			mtx_raw[9] = _body.readFloat();
+			mtx_raw[10] = _body.readFloat();
+			mtx_raw[11] = 0.0;
+			mtx_raw[12] = _body.readFloat();
+			mtx_raw[13] = _body.readFloat();
+			mtx_raw[14] = _body.readFloat();
+			mtx_raw[15] = 1.0;
 			
 			return mtx_raw;
 		}
