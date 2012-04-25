@@ -68,7 +68,7 @@ package away3d.core.managers
 		public function dispose() : void
 		{
 			for (var key : Object in _program3Ds) {
-				(_program3Ds[key] as Program3D).dispose();
+				(key as Program3D).dispose();
 			}
 		}
 
