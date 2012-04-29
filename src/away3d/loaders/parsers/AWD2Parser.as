@@ -177,7 +177,7 @@ package away3d.loaders.parsers
 			}
 			
 			if (!_parsed_header) {
-				_byteData.endian = Endian.BIG_ENDIAN;
+				_byteData.endian = Endian.LITTLE_ENDIAN;
 				
 				//TODO: Create general-purpose parseBlockRef(requiredType) (return _blocks[addr] or throw error)
 				
