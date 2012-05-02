@@ -219,7 +219,7 @@ package away3d.materials.methods
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
-			_globalPosReg
+			
 			if (lightIndex > 0) {
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);

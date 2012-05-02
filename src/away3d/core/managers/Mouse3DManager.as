@@ -13,9 +13,7 @@ package away3d.core.managers
 	import away3d.core.raycast.MouseHitMethod;
 
 	import flash.events.MouseEvent;
-	import flash.geom.Point;
 	import flash.geom.Vector3D;
-	import flash.utils.getTimer;
 
 	use namespace arcane;
 

@@ -126,7 +126,7 @@ package away3d.primitives
 		public function set height(value:Number):void
 		{
 			if (height <= 0)
-				throw new Error('Height must be a value greater than zero.')
+				throw new Error('Height must be a value greater than zero.');
 			_height = value;
 			invalidateGeometry();
 		}

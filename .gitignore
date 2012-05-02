@@ -1,6 +1,7 @@
 /.flexLibProperties
 /target
 /.project
+/.settings
 /.actionScriptProperties
 *.iml
 out

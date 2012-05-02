@@ -5,7 +5,6 @@ package away3d.animators.data
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
-	import away3d.materials.passes.MaterialPassBase;
 
 	/**
 	 * AnimationStateBase provides an abstract base class for all animation states. This defines the actual state of the

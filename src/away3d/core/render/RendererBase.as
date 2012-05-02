@@ -5,7 +5,6 @@ package away3d.core.render
 	import away3d.core.sort.EntitySorterBase;
 	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;
-	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;

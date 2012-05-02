@@ -310,9 +310,9 @@ package away3d.materials.passes
 			var fragmentCode : String = getFragmentCode();
 			if (Debug.active) {
 				trace ("Compiling AGAL Code:");
-				trace ("--------------------")
+				trace ("--------------------");
 				trace (vertexCode);
-				trace ("--------------------")
+				trace ("--------------------");
 				trace (fragmentCode);
 			}
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);

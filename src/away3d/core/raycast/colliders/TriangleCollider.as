@@ -1,7 +1,5 @@
 package away3d.core.raycast.colliders
 {
-
-	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubMesh;
 
 	import flash.display.Shader;

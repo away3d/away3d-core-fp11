@@ -2,7 +2,6 @@ package away3d.primitives
 {
 
 	import away3d.core.base.SubGeometry;
-	import away3d.materials.MaterialBase;
 
 	/**
 	 * A UV Capsule primitive mesh.

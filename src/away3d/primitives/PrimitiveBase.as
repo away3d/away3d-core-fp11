@@ -1,14 +1,8 @@
 package away3d.primitives
 {
-	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.Object3D;
 	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
-	import away3d.debug.Debug;
-	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
-	import away3d.materials.MaterialBase;
 
 	/**
 	 * PrimitiveBase is an abstract base class for mesh primitives, which are prebuilt simple meshes.

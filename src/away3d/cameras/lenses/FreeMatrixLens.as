@@ -2,8 +2,6 @@ package away3d.cameras.lenses
 {
 	import away3d.arcane;
 
-	import flash.geom.Matrix3D;
-
 	use namespace arcane;
 
 	/**

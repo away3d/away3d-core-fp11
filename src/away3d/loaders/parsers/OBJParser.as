@@ -16,7 +16,6 @@ package away3d.loaders.parsers
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
-	import flash.display.BitmapData;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 

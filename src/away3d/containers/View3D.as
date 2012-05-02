@@ -12,9 +12,6 @@
 	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.display.Sprite;

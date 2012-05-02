@@ -2,7 +2,6 @@ package away3d.utils
 {
 	
     import away3d.errors.CastError;
-    import away3d.materials.*;
     import away3d.textures.BitmapTexture;
     
     import flash.display.*;

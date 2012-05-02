@@ -7,7 +7,6 @@ package away3d.cameras.lenses
 	import flash.events.EventDispatcher;
 
 	import flash.geom.Matrix3D;
-	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
