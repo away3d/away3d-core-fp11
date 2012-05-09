@@ -198,6 +198,7 @@ package away3d.loaders.parsers
 						break;
 				}
 				
+				_body.endian = Endian.LITTLE_ENDIAN;
 				_parsed_header = true;
 			}
 			
