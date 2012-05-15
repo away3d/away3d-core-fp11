@@ -54,7 +54,10 @@ package away3d.animators
 			if (_activeClipIndex != -1) {
 				_fadeOutClips.push(_activeClipIndex);
 				// diminish per second
-				_fadeOutSpeeds.push(_mainWeight / crossFadeTime / 1000);
+				if (crossFadeTime == 0)
+					_fadeOutSpeeds.push(Number.MAX_VALUE)
+				else
+					_fadeOutSpeeds.push(_mainWeight / crossFadeTime / 1000);
 			}
 
 			clip = _clips[sequenceName];
