@@ -35,6 +35,9 @@ package a3dparticle.animators
 		private var _offest:Boolean;
 		private var _rotation:Boolean;
 		
+		private var _bufferDict:Dictionary=new Dictionary();
+		private var _context3DDict:Dictionary = new Dictionary();
+		
 		public function TransformFollowState(offest:Boolean, rotation:Boolean, animation : ParticleAnimation, isClone:Boolean = false)
 		{
 			super(animation);
@@ -111,7 +114,7 @@ package a3dparticle.animators
 					}
 				}
 			}
-			var buffer:VertexBuffer3D = stage3DProxy._context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 3, 3);
+			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 3);
 			stage3DProxy.setSimpleVertexBuffer(_followAction.offestAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
@@ -143,7 +146,7 @@ package a3dparticle.animators
 					}
 				}
 			}
-			var buffer:VertexBuffer3D = stage3DProxy._context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 3, 3);
+			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 3);
 			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
@@ -180,7 +183,7 @@ package a3dparticle.animators
 					}
 				}
 			}
-			var buffer:VertexBuffer3D = stage3DProxy._context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 6, 6);
+			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 6);
 			var context : Context3D = stage3DProxy._context3D;
 			context.setVertexBufferAt(_followAction.offestAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
@@ -193,6 +196,23 @@ package a3dparticle.animators
 			clone._followAction = _followAction;
 			clone.time = time;
 			return clone;
+		}
+		
+		private function getBuffer(stage3DProxy:Stage3DProxy, subContainer:SubContainer):VertexBuffer3D
+		{
+			if (!_bufferDict[subContainer.shareAtt] || stage3DProxy.context3D != _context3DDict[subContainer.shareAtt])
+			{
+				if (_offest && _rotation)
+				{
+					_bufferDict[subContainer.shareAtt]=stage3DProxy.context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 6, 6);
+				}
+				else
+				{
+					_bufferDict[subContainer.shareAtt]=stage3DProxy.context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 3, 3);
+				}
+				_context3DDict[subContainer.shareAtt] = stage3DProxy.context3D;
+			}
+			return _bufferDict[subContainer.shareAtt];
 		}
 		
 	}
