@@ -46,10 +46,14 @@
 		private var _vertexBuffer:VertexBuffer3D;
 		private var _indexBuffer:IndexBuffer3D;
 		private var _lineCount:uint;
+		
+		private static var currentId:int;
+		private var _geometryId : int;
 
 		public function SegmentSet() {
 			super();
-
+			_geometryId = currentId++;
+			
 			_nullAnimation ||= new NullAnimation();
 			_vertices = new Vector.<Number>();
 			_segments = new Vector.<Segment>();
@@ -327,6 +331,11 @@
 		public function get secondaryUVBufferOffset() : int
 		{
 			return 0;
+		}
+		
+		public function get geometryId():int
+		{
+			return _geometryId;
 		}
 	}
 }

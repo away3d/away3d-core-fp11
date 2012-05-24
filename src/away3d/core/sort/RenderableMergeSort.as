@@ -70,6 +70,7 @@ package away3d.core.sort
 				if (useMaterial) {
 					// first sort per render order id (reduces program3D switches),
 					// then on material id (reduces setting props),
+					// then on geometry id (reduces setting VertexBuffer),
 					// then on zIndex (reduces overdraw)
 					var aid : uint = head.renderOrderId;
 					var bid : uint = headB.renderOrderId;
@@ -79,7 +80,13 @@ package away3d.core.sort
 						var mb : uint = headB.materialId;
 
 						if (ma == mb) {
-							if (head.zIndex < headB.zIndex) cmp = 1;
+							var ga:int = head.renderable.geometryId;
+							var gb:int = headB.renderable.geometryId;
+							if (ga == gb) {
+								if (head.zIndex < headB.zIndex) cmp = 1;
+								else cmp = -1;
+							}
+							else if (ga > gb) cmp = 1;
 							else cmp = -1;
 						}
 						else if (ma > mb) cmp = 1;

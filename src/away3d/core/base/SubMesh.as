@@ -329,5 +329,10 @@ package away3d.core.base
 		public function get UVData():Vector.<Number> {
 			return _subGeometry.UVData;
 		}
+		
+		public function get geometryId():int
+		{
+			return _subGeometry.geometryId;
+		}
 	}
 }

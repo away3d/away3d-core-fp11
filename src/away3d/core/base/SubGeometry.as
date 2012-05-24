@@ -70,13 +70,16 @@
 		protected var _numTriangles : uint;
 		private var _uvScaleV : Number = 1;
 		private var _customElementsPerVertex : int;
-
+		
+		private static var currentId:int;
+		private var _geometryId:int;
 
 		/**
 		 * Creates a new SubGeometry object.
 		 */
 		public function SubGeometry()
 		{
+			_geometryId = currentId++;
 		}
 
 		/**
@@ -933,6 +936,11 @@
 		public function get secondaryUVBufferOffset() : int
 		{
 			return 0;
+		}
+		
+		public function get geometryId():int
+		{
+			return _geometryId;
 		}
 	}
 }

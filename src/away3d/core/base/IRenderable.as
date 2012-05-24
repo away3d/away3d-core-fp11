@@ -131,5 +131,6 @@ package away3d.core.base
 		function get tangentBufferOffset() : int;
 		function get UVBufferOffset() : int;
 		function get secondaryUVBufferOffset() : int;
+		function get geometryId():int;
 	}
 }
