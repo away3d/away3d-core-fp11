@@ -48,6 +48,7 @@ package away3d.core.traverse
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
 				item.zIndex = renderable.zIndex;
+				item.geometrId = renderable.geometryId;
 				if (distanceBased)
 					item.renderOrderId = renderable.material.distancePassId;
 				else

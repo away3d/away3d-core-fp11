@@ -211,6 +211,7 @@ package away3d.core.traverse
 				item.materialId = material._uniqueId;
 				item.renderOrderId = material._renderOrderId;
 				item.zIndex = renderable.zIndex;
+				item.geometrId = renderable.geometryId;
 				if (material.requiresBlending) {
 					item.next = _blendedRenderableHead;
 					_blendedRenderableHead = item;

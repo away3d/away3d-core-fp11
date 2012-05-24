@@ -80,8 +80,8 @@ package away3d.core.sort
 						var mb : uint = headB.materialId;
 
 						if (ma == mb) {
-							var ga:int = head.renderable.geometryId;
-							var gb:int = headB.renderable.geometryId;
+							var ga:int = head.geometrId;
+							var gb:int = headB.geometrId;
 							if (ga == gb) {
 								if (head.zIndex < headB.zIndex) cmp = 1;
 								else cmp = -1;
