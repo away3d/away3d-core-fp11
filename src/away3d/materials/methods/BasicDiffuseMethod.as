@@ -16,6 +16,8 @@ package away3d.materials.methods
 	 */
 	public class BasicDiffuseMethod extends LightingMethodBase
 	{
+		arcane var _useDiffuseTexture : Boolean;
+		
 		protected var _useTexture : Boolean;
 		internal var _totalLightColorReg : ShaderRegisterElement;
 
@@ -262,48 +264,63 @@ package away3d.materials.methods
 		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
-			var temp : ShaderRegisterElement;
+			var t : ShaderRegisterElement;
 			var cutOffReg : ShaderRegisterElement;
 
 			// incorporate input from ambient
 			if (_numLights > 0) {
+				t = regCache.getFreeFragmentVectorTemp();
+				regCache.addFragmentTempUsages(t, 1);
+				
 				if (_shadowRegister)
 					code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
-				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz\n" +
-						"sat " + targetReg + ".xyz, " + targetReg + ".xyz\n";
-				regCache.removeFragmentTempUsage(_totalLightColorReg);
+			} else {
+				t = targetReg;
 			}
 
-			temp = _numLights > 0 ? regCache.getFreeFragmentVectorTemp() : targetReg;
 
 			if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
-				code += getTexSampleCode(temp, _diffuseInputRegister) +
+				code += getTexSampleCode(t, _diffuseInputRegister) +
 					// apparently, still needs to un-premultiply :s
-						"div " + temp + ".xyz, " + temp + ".xyz, " + temp + ".w\n";
+						"div " + t + ".xyz, " + t + ".xyz, " + t + ".w\n";
 				if (_alphaThreshold > 0) {
 					cutOffReg = regCache.getFreeFragmentConstant();
 					_cutOffIndex = cutOffReg.index;
-					code += "sub " + temp + ".w, " + temp + ".w, " + cutOffReg + ".x\n" +
-							"kil " + temp + ".w\n" +
-							"add " + temp + ".w, " + temp + ".w, " + cutOffReg + ".x\n";// +
-							//"div " + temp + ", " + temp + ", " + temp + ".w\n";
+
+					code += "sub " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n" +
+							"kil " + t + ".w\n" +
+							"add " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n";// +
+							//"div " + t + ", " + t + ", " + t + ".w\n";
 				}
 			}
 			else {
 				_diffuseInputRegister = regCache.getFreeFragmentConstant();
-				code += "mov " + temp + ", " + _diffuseInputRegister + "\n";
+				code += "mov " + t + ", " + _diffuseInputRegister + "\n";
 			}
 
 			_diffuseInputIndex = _diffuseInputRegister.index;
 
 			if (_numLights == 0)
 				return code;
+			
+			
+			if (_useDiffuseTexture) {
+				code += "sat " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
+					"mul " + t + ".xyz, " + t + ".xyz, " + _totalLightColorReg + ".xyz\n" +
+					"mul " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
+					"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
+					"add " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n";
+			} else {
+				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz\n" +
+					"sat " + targetReg + ".xyz, " + targetReg + ".xyz\n" +
+					"mul " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n" +
+					"mov " + targetReg + ".w, " + t + ".w\n"; 
+			}
 
-
-			code += "mul " + targetReg + ".xyz, " + temp + ".xyz, " + targetReg + ".xyz\n" +
-					"mov " + targetReg + ".w, " + temp + ".w\n";
-
+			regCache.removeFragmentTempUsage(_totalLightColorReg);
+			regCache.removeFragmentTempUsage(t);
+			
 			return code;
 		}
 

@@ -70,7 +70,21 @@
 		{
 			_screenPass.diffuseMethod.texture = value;
 		}
-
+		
+		/**
+		 * The texture object to use for the ambient colour.
+		 */
+		public function get ambientTexture() : Texture2DBase
+		{
+			return _screenPass.ambientMethod.texture;
+		}
+		
+		public function set ambientTexture(value : Texture2DBase) : void
+		{
+			_screenPass.diffuseMethod._useDiffuseTexture = true;
+			_screenPass.ambientMethod.texture = value;
+		}
+		
 		override public function get requiresBlending() : Boolean
 		{
 			return super.requiresBlending || _alphaBlending;

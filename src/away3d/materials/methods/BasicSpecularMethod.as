@@ -5,7 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-
+	
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
@@ -31,7 +31,9 @@ package away3d.materials.methods
 		private var _specularColor : uint = 0xffffff;
 		arcane var _specularR : Number = 1, _specularG : Number = 1, _specularB : Number = 1;
 		private var _shadowRegister : ShaderRegisterElement;
-
+		private var _shadingModel:String;
+		
+		
 		/**
 		 * Creates a new BasicSpecularMethod object.
 		 */
@@ -39,6 +41,8 @@ package away3d.materials.methods
 		{
 			super(true, true, false);
 			_specularData = Vector.<Number>([1, 1, 1, 50]);
+			
+			_shadingModel = SpecularShadingModel.BLINN_PHONG;
 		}
 
 		/**
@@ -69,7 +73,26 @@ package away3d.materials.methods
 			_specular = value;
 			updateSpecular();
 		}
-
+		
+		/**
+		 * The model used by the specular shader
+		 * 
+		 * @see away3d.materials.methods.SpecularShadingModel
+		 */
+		public function get shadingModel() : String
+		{
+			return _shadingModel;
+		}
+		
+		public function set shadingModel(value : String) : void
+		{
+			if (value == _shadingModel) return;
+			
+			_shadingModel = value;
+			
+			invalidateShaderProgram();
+		}
+		
 		/**
 		 * The colour of the specular reflection of the surface.
 		 */
@@ -196,19 +219,47 @@ package away3d.materials.methods
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
-
+			
 			if (lightIndex > 0) {
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);
 			}
 			else t = _totalLightColorReg;
-
-			// half vector
-			code += "add " + t + ".xyz, " + lightDirReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n" +
-					"nrm " + t + ".xyz, " + t + ".xyz\n" +
-					"dp3 " + t + ".w, " + _normalFragmentReg + ".xyz, " + t + ".xyz\n" +
-					"sat " + t + ".w, " + t + ".w\n";
-
+			
+			switch (_shadingModel) {
+				case SpecularShadingModel.BLINN_PHONG:
+					
+					// half vector
+					code += "add " + t + ".xyz, " + lightDirReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n" +
+							"nrm " + t + ".xyz, " + t + ".xyz\n" +
+							"dp3 " + t + ".w, " + _normalFragmentReg + ".xyz, " + t + ".xyz\n" +
+							"sat " + t + ".w, " + t + ".w\n";
+					
+					break;
+				case SpecularShadingModel.PHONG:
+					
+					// phong model
+					code += "dp3 " + t + ".w, " + lightDirReg + ".xyz, " + _normalFragmentReg + ".xyz\n" + // sca1 = light.normal
+					
+							//find the reflected light vector R
+							"add " + t + ".w, " + t + ".w, " + t + ".w\n" + // sca1 = sca1*2
+							"mul " + t + ".xyz, " + _normalFragmentReg + ".xyz, " + t + ".w\n" + // vec1 = normal*sca1
+							"sub " + t + ".xyz, " + t + ".xyz, " + lightDirReg + ".xyz\n" + // vec1 = vec1 - light (light vector is negative)
+							
+							//smooth the edge as incidence angle approaches 90
+							"add" + t + ".w, " + t + ".w, " + _normalFragmentReg + ".w\n" + // sca1 = sca1 + smoothtep;
+							//"div" + t + ".w, " + t + ".w, " + _specularDataRegister2 + ".z\n" + // sca1 = sca1/smoothtep;
+							"sat " + t + ".w, " + t + ".w\n" + // sca1 range 0 - 1
+							"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" + // vec1 = vec1*sca1
+							
+							//find the dot product between R and V
+							"dp3 " + t + ".w, " + t + ".xyz, " + _viewDirFragmentReg + ".xyz\n" + // sca1 = vec1.view
+							"sat " + t + ".w, " + t + ".w\n";
+					
+					break;
+				default:
+			}
+			
 			if (_useTexture) {
 				// apply gloss modulation from texture
 				code += "mul " + _specularTexData + ".w, " + _specularTexData + ".y, " + _specularDataRegister + ".w\n" +
@@ -216,14 +267,14 @@ package away3d.materials.methods
 			}
 			else
 				code += "pow " + t + ".w, " + t + ".w, " + _specularDataRegister + ".w\n";
-
+			
 			// attenuate
 			code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 
 			code += "mul " + t + ".xyz, " + lightColReg + ".xyz, " + t + ".w\n";
-
+				
 			if (lightIndex > 0) {
 				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
 				regCache.removeFragmentTempUsage(t);

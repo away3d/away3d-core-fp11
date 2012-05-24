@@ -104,7 +104,7 @@ package away3d.lights
 		public function set diffuse(value : Number) : void
 		{
 			if (value < 0) value = 0;
-			else if (value > 1) value = 1;
+			//else if (value > 1) value = 1;
 			_diffuse = value;
 			updateDiffuse();
 		}

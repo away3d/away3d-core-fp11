@@ -37,7 +37,6 @@ package away3d.animators.data
         private var _globalInput : Boolean;
 		private var _buffersValid : Dictionary = new Dictionary();
 		private var _globalMatricesInvalid : Boolean;
-		private var _useCondensedIndices : Boolean;
 		private var _condensedMatrices : Vector.<Number>;
 
 

@@ -2,8 +2,7 @@
 {
 	import away3d.arcane;
 	import away3d.core.base.SubGeometry;
-	import away3d.materials.MaterialBase;
-
+	
 	use namespace arcane;
 
 	/**

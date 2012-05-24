@@ -8,11 +8,7 @@ package away3d.lights
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.PointLightNode;
 	import away3d.lights.shadowmaps.CubeMapShadowMapper;
-	import away3d.lights.shadowmaps.CubeMapShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;

@@ -7,7 +7,6 @@ package away3d.cameras.lenses
 	import flash.events.EventDispatcher;
 
 	import flash.geom.Matrix3D;
-	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -99,13 +98,12 @@ package away3d.cameras.lenses
 			invalidateMatrix();
 		}
 
-		public function project(point3d : Vector3D) : Point
+		public function project(point3d : Vector3D) : Vector3D
 		{
-			var p : Point = new Point();
 			var v : Vector3D = matrix.transformVector(point3d);
-			p.x = v.x/v.w;
-			p.y = -v.y/v.w;
-			return p;
+			v.x = v.x/v.w;
+			v.y = -v.y/v.w;
+			return v;
 		}
 
 		public function get unprojectionMatrix() : Matrix3D

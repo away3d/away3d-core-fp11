@@ -158,7 +158,6 @@
 			var nameid:String;
 			var refscount:int;
 			var tUrl:String = "";
-			var m:Mesh;
 			var cont:ObjectContainer3D;
 			
 			while(charIndex<stringLength && hasTime()){
@@ -421,7 +420,8 @@
 			
 			return null;
 		}
-		 
+		
+		/*
 		private function getVersionFromHex(char:String):int
 		{
 			switch (char) 
@@ -448,5 +448,6 @@
 					return new Number(char);
 			}    
 		}
+		 */
 	}
 }

@@ -13,9 +13,7 @@ package away3d.core.managers
 	import away3d.core.raycast.MouseHitMethod;
 
 	import flash.events.MouseEvent;
-	import flash.geom.Point;
 	import flash.geom.Vector3D;
-	import flash.utils.getTimer;
 
 	use namespace arcane;
 
@@ -38,6 +36,7 @@ package away3d.core.managers
 		private var _blendedCollider:MouseRaycast;
 		private var _activeCollider:MouseRaycast;
 		private var _view:View3D;
+        private var _mouseIsOverView:Boolean;
 
 		private static var _mouseClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.CLICK );
 		private static var _mouseDoubleClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.DOUBLE_CLICK );
@@ -72,6 +71,8 @@ package away3d.core.managers
 			_view.addEventListener( MouseEvent.MOUSE_MOVE, onMouseMove );	// mark moves as most important
 			_view.addEventListener( MouseEvent.MOUSE_UP, onMouseUp );
 			_view.addEventListener( MouseEvent.MOUSE_WHEEL, onMouseWheel );
+			_view.addEventListener( MouseEvent.MOUSE_OVER, onMouseOver );
+			_view.addEventListener( MouseEvent.MOUSE_OUT, onMouseOut );
 		}
 
 		public function get forceMouseMove():Boolean {
@@ -97,13 +98,30 @@ package away3d.core.managers
 			_view.removeEventListener( MouseEvent.MOUSE_MOVE, onMouseMove );
 			_view.removeEventListener( MouseEvent.MOUSE_UP, onMouseUp );
 			_view.removeEventListener( MouseEvent.MOUSE_WHEEL, onMouseWheel );
+            _view.removeEventListener( MouseEvent.MOUSE_OVER, onMouseOver );
+            _view.removeEventListener( MouseEvent.MOUSE_OUT, onMouseOut );
 		}
 
 		private function mouseInView():Boolean {
 			var mx:Number = _view.mouseX;
 			var my:Number = _view.mouseY;
-			return mx >= 0 && my >= 0 && mx < _view.width && my < _view.height;
+			return mx >= 0 && my >= 0 && mx < _view.width && my < _view.height && _mouseIsOverView;
 		}
+
+        private function onMouseOut( event:MouseEvent ):void {
+            _mouseIsOverView = false;
+            if( _activeRenderable ) {
+                queueDispatch( _mouseOut, event, _activeRenderable );
+            }
+        }
+
+        private function onMouseOver( event:MouseEvent ):void {
+            _mouseIsOverView = true;
+            updateHitData();
+            if( _activeRenderable ) {
+                queueDispatch( _mouseOver, event, _activeRenderable );
+            }
+        }
 
 		/**
 		 * Called when the mouse clicks on the stage.
@@ -116,8 +134,9 @@ package away3d.core.managers
 		public function updateHitData():void {
 			if( mouseInView() )
 				getObjectHitData();
-			else
-				_activeRenderable = null;
+			else if( _mouseIsOverView ) {
+                _activeRenderable = null;
+            }
 		}
 
 		/**
@@ -152,17 +171,12 @@ package away3d.core.managers
 				queueDispatch( _mouseWheel, event );
 		}
 
-		// TODO: remove
-		public var testTime:uint;
-
 		/**
 		 * Get the object hit information at the mouse position.
 		 */
 		private function getObjectHitData():void {
 			if( !_forceMouseMove && _queuedEvents.length == 0 )
 				return;
-
-			testTime = getTimer();
 
 			_previousActiveObject = _activeObject;
 			_previousActiveRenderable = _activeRenderable;
@@ -192,8 +206,6 @@ package away3d.core.managers
 				_activeObject = null;
 				_activeRenderable = null;
 			}
-
-			testTime = getTimer() - testTime;
 		}
 
 		/**
@@ -274,28 +286,28 @@ package away3d.core.managers
 				if( _activeRenderable ) queueDispatch( _mouseOver, _mouseMoveEvent, _activeRenderable );
 			}
 
-			if( _forceMouseMove && _activeRenderable ) {
-				var localX:Number;
-				var localY:Number;
-				var localZ:Number;
-				
-				if( _activeRenderable ) {
-					var local:Vector3D = _activeCollider.collisionPoint;
-					localX = local.x;
-					localY = local.y;
-					localZ = local.z;
-				}
-				else {
-					localX = localY = localZ = -1;
-				}
+            if( _forceMouseMove && _activeRenderable ) {
+                var localX:Number;
+                var localY:Number;
+                var localZ:Number;
 
-				if( (localX != _oldLocalX) || (localY != _oldLocalY) || (localZ != _oldLocalZ) ) {
-					queueDispatch( _mouseMove, _mouseMoveEvent, _activeRenderable );
-					_oldLocalX = localX;
-					_oldLocalY = localY;
-					_oldLocalZ = localZ;
-				}
-			}
+                if( _activeRenderable ) {
+                    var local:Vector3D = _activeCollider.collisionPoint;
+                    localX = local.x;
+                    localY = local.y;
+                    localZ = local.z;
+                }
+                else {
+                    localX = localY = localZ = -1;
+                }
+
+                if( (localX != _oldLocalX) || (localY != _oldLocalY) || (localZ != _oldLocalZ) ) {
+                    queueDispatch( _mouseMove, _mouseMoveEvent, _activeRenderable );
+                    _oldLocalX = localX;
+                    _oldLocalY = localY;
+                    _oldLocalZ = localZ;
+                }
+            }
 
 			var len:uint = _queuedEvents.length;
 

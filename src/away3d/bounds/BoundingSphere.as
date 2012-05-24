@@ -260,7 +260,7 @@ package away3d.bounds
 			var c:Number = px * px + py * py + pz * pz - _radius * _radius;
 			var det:Number = b * b - 4 * a * c;
 			if( det >= 0 ) { // ray goes through sphere
-				var sqrtDet:Number = Math.sqrt( det )
+				var sqrtDet:Number = Math.sqrt( det );
 				t = ( -b - sqrtDet ) / ( 2 * a );
 				_rayFarT = ( -b + sqrtDet ) / ( 2 * a );
 				if( t > 0 ) {
