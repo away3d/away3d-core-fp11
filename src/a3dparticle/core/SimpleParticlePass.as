@@ -68,7 +68,7 @@ package a3dparticle.core
 		{
 			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0]);
 			var code:String =  animation.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters) + projectionVertexCode;
-			trace(code);
+			
 			return code;
 		}
 		
@@ -95,7 +95,7 @@ package a3dparticle.core
 			code += _particleAnimation.getAGALFragmentCode(this);
 			
 			code += "mov oc," + _particleAnimation.colorTarget.toString() + "\n";
-			trace("----\n", code);
+			
 			return code;
 		}
 		

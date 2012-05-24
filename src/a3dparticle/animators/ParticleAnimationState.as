@@ -64,16 +64,6 @@ package a3dparticle.animators
 			return clone;
 		}
 		
-		override arcane function addOwner(mesh : Mesh) : void
-		{
-			return;
-		}
-
-		override arcane function removeOwner(mesh : Mesh) : void
-		{
-			return;
-		}
-		
 	}
 
 }
