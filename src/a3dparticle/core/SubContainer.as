@@ -238,6 +238,10 @@ package a3dparticle.core
 		{
 			return 0;
 		}
+		public function get geometryId():int
+		{
+			return _shareAtt.geometryId;
+		}
 		
 	}
 }
@@ -259,4 +263,15 @@ class cloneShareAtt
 	public var _uvContex3D:Context3D;
 	public var _extraDatas:Object = { };
 	public var _extraBuffers:Object = { };
+	
+	private static var currentId:int;
+	private var _geometryId : int;
+	public function cloneShareAtt()
+	{
+		_geometryId = currentId++;
+	}
+	public function get geometryId():int
+	{
+		return _geometryId;
+	}
 }
