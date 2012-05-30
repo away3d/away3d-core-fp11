@@ -17,7 +17,7 @@ package away3d.core.managers
 	{
 		private static var _instances : Dictionary;
 
-		private var _stageProxies : Vector.<Stage3DProxy>;
+		private var _stageProxies : Dictionary;
 		private var _stage : Stage;
 
 		/**
@@ -29,7 +29,7 @@ package away3d.core.managers
 		{
 			if (!Stage3DManagerSingletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
 			_stage = stage;
-			_stageProxies = new Vector.<Stage3DProxy>(_stage.stage3Ds.length, true);
+			_stageProxies = new Dictionary(true);
 		}
 
 		/**
@@ -39,7 +39,7 @@ package away3d.core.managers
 		 */
 		public static function getInstance(stage : Stage) : Stage3DManager
 		{
-			return (_instances ||= new Dictionary())[stage] ||= new Stage3DManager(stage, new Stage3DManagerSingletonEnforcer());
+			return (_instances ||= new Dictionary(true))[stage] ||= new Stage3DManager(stage, new Stage3DManagerSingletonEnforcer());
 		}
 
 		/**
@@ -49,7 +49,9 @@ package away3d.core.managers
 		 */
 		public function getStage3DProxy(index : uint) : Stage3DProxy
 		{
-			return _stageProxies[index] ||= new Stage3DProxy(index, _stage.stage3Ds[index], this);
+			var stage3DProxy:Stage3DProxy = new Stage3DProxy(index, _stage.stage3Ds[index], this);
+			_stageProxies[stage3DProxy] = true;
+			return stage3DProxy;
 		}
 
 		/**
@@ -59,16 +61,20 @@ package away3d.core.managers
 		 */
 		arcane function removeStage3DProxy(stage3DProxy : Stage3DProxy) : void
 		{
-			_stageProxies[stage3DProxy.stage3DIndex] = null;
+			delete _stageProxies[stage3DProxy];
 		}
 
 		public function getFreeStage3DProxy() : Stage3DProxy
 		{
 			var i : uint;
-			var len : uint = _stageProxies.length;
-
+			var len : uint = _stage.stage3Ds.length;
+			var markArray:Vector.<Boolean> = new Vector.<Boolean>(len, true);
+			for (var proxy:Object in _stageProxies)
+			{
+				markArray[Stage3DProxy(proxy)._stage3DIndex] = true;
+			}
 			while (i < len) {
-				if (!_stageProxies[i]) return getStage3DProxy(i);
+				if (!markArray[i]) return getStage3DProxy(i);
 				++i;
 			}
 

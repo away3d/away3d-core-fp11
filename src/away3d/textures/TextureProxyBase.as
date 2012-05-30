@@ -3,9 +3,11 @@ package away3d.textures
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
+	import away3d.events.Stage3DEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
+	import flash.utils.Dictionary;
 	
 	import flash.display3D.Context3D;
 	import flash.display3D.textures.TextureBase;
@@ -14,16 +16,14 @@ package away3d.textures
 
 	public class TextureProxyBase extends NamedAssetBase implements IAsset
 	{
-		protected var _textures : Vector.<TextureBase>;
-		protected var _dirty : Vector.<Context3D>;
+		protected var _textures : Dictionary;
 
 		protected var _width : int;
 		protected var _height : int;
 
 		public function TextureProxyBase()
 		{
-			_textures = new Vector.<TextureBase>(8);
-			_dirty = new Vector.<Context3D>(8);
+			_textures = new Dictionary(true);
 		}
 		
 		
@@ -44,13 +44,12 @@ package away3d.textures
 
 		public function getTextureForStage3D(stage3DProxy : Stage3DProxy) : TextureBase
 		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var tex : TextureBase = _textures[contextIndex];
+			var tex : TextureBase = _textures[stage3DProxy];
 
-			if (!tex || _dirty[contextIndex] != stage3DProxy.context3D) {
-				_textures[contextIndex] = tex = createTexture(stage3DProxy._context3D);
+			if (!tex) {
+				_textures[stage3DProxy] = tex = createTexture(stage3DProxy._context3D);
 				uploadContent(tex);
-				_dirty[contextIndex] = stage3DProxy.context3D;
+				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
 			}
 
 			return tex;
@@ -72,25 +71,13 @@ package away3d.textures
 
 		public function invalidateContent() : void
 		{
-			for (var i : int = 0; i < 8; ++i) {
-				_dirty[i] = null;
-			}
+			_textures = new Dictionary(true);
 		}
 
 		protected function invalidateSize() : void
 		{
-			var tex : TextureBase;
-			for (var i : int = 0; i < 8; ++i) {
-				tex = _textures[i];
-				if (tex) {
-					tex.dispose();
-					_textures[i] = null;
-					_dirty[i] = null;
-				}
-			}
+			_textures = new Dictionary(true);
 		}
-
-
 
 		protected function createTexture(context : Context3D) : TextureBase
 		{
@@ -99,8 +86,15 @@ package away3d.textures
 
 		public function dispose() : void
 		{
-			for (var i : int = 0; i < 8; ++i)
-				if (_textures[i]) _textures[i].dispose();
+			for (var i : Object in _textures)
+				_textures[i].dispose();
+				delete _textures[i];
+		}
+		
+		private function onRecreated(e:Stage3DEvent):void
+		{
+			var stage3Dproxy:Stage3DProxy = e.target as Stage3DProxy;
+			delete _textures[stage3Dproxy];
 		}
 	}
 }

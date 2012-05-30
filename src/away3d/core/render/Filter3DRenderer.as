@@ -5,6 +5,7 @@ package away3d.core.render
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.events.Stage3DEvent;
 	import away3d.filters.Filter3DBase;
 	import away3d.filters.tasks.Filter3DTaskBase;
 
@@ -28,11 +29,30 @@ package away3d.core.render
 		private var _stage3DProxy : Stage3DProxy;
 		private var _filterSizesInvalid : Boolean = true;
 
-		public function Filter3DRenderer(stage3DProxy : Stage3DProxy)
+		public function Filter3DRenderer()
 		{
-			_stage3DProxy = stage3DProxy;
-			_rttManager = RTTBufferManager.getInstance(stage3DProxy);
-			_rttManager.addEventListener(Event.RESIZE, onRTTResize);
+		}
+		
+		public function set stage3DProxy(value:Stage3DProxy):void
+		{
+			_stage3DProxy = value;
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
+		}
+		
+		public function get stage3DProxy():Stage3DProxy
+		{
+			return _stage3DProxy;
+		}
+		
+		public function set rttManager(value:RTTBufferManager):void
+		{
+			_rttManager = value;
+			_rttManager.addEventListener(Event.RESIZE, onRTTResize, false, 0, true);
+		}
+		
+		public function get rttManager():RTTBufferManager
+		{
+			return _rttManager;
 		}
 
 		private function onRTTResize(event : Event) : void
@@ -156,9 +176,16 @@ package away3d.core.render
 
 		public function dispose() : void
 		{
-			_rttManager.removeEventListener(Event.RESIZE, onRTTResize);
+			if (_rttManager)_rttManager.removeEventListener(Event.RESIZE, onRTTResize);
+			if (_stage3DProxy)_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated);
 			_rttManager = null;
 			_stage3DProxy = null;
+		}
+		
+		private function onRecreated(e:Stage3DEvent):void
+		{
+			_filterSizesInvalid = true;
+			_filterTasksInvalid = true;
 		}
 	}
 }

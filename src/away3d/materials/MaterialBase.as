@@ -463,20 +463,18 @@ package away3d.materials
 		private function onPassChange(event : Event) : void
 		{
 			var mult : Number = 1;
-			var ids : Vector.<int>;
-			var len : int;
+			var ids : Dictionary;
 			var i:int;
-			var j:int;
+			var j:Object;
 			
 			_renderOrderId = 0;
 
 			for (i = 0; i < _numPasses; ++i) {
 				ids = _passes[i]._program3Dids;
-				len = ids.length;
-				for (j = 0; j < len; ++j) {
+				for (j in ids) {
 					if (ids[j] != -1) {
 						_renderOrderId += mult*ids[j];
-						j = len;
+						break;
 					}
 				}
 				mult *= 1000;
@@ -484,21 +482,19 @@ package away3d.materials
 			
 			_distancePassId = 0;
 			ids = _distancePass._program3Dids;
-			len = ids.length;
-			for (j = 0; j < len; ++j) {
+			for (j in ids) {
 			if (ids[j] != -1) {
 				_distancePassId += ids[j];
-					j = len;
+					break;
 				}
 			}
 			
 			_depthPassId = 0;
 			ids = _depthPass._program3Dids;
-			len = ids.length;
-			for (j = 0; j < len; ++j) {
+			for (j in ids) {
 			if (ids[j] != -1) {
 				_depthPassId += ids[j];
-					j = len;
+					break;
 				}
 			}
 		}

@@ -12,6 +12,7 @@
 	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.display.Sprite;
@@ -225,8 +226,13 @@
 				_filter3DRenderer.dispose();
 				_filter3DRenderer = null;
 			} else if (!_filter3DRenderer && value) {
-				_filter3DRenderer = new Filter3DRenderer(stage3DProxy);
+				_filter3DRenderer = new Filter3DRenderer();
 				_filter3DRenderer.filters = value;
+				if (_stage3DProxy)
+				{
+					_filter3DRenderer.rttManager = _rttBufferManager;
+					_filter3DRenderer.stage3DProxy = _stage3DProxy;
+				}
 			}
 
 			if (_filter3DRenderer) {
@@ -483,7 +489,7 @@
 		public function render() : void
 		{
 			//if context3D has Disposed by the OS,don't render at this frame
-			if (stage3DProxy.context3D.driverInfo == "Disposed") return;
+			if (!_stage3DProxy || !_stage3DProxy.context3D || stage3DProxy.context3D.driverInfo == "Disposed") return;
 			
 			// reset or update render settings
 			if (_backBufferInvalid)
@@ -583,7 +589,9 @@
 			_mouse3DManager.dispose();
 			if (_depthRender) _depthRender.dispose();
 			if (_rttBufferManager) _rttBufferManager.dispose();
-
+			
+			_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated);
+			
 			_rttBufferManager = null;
 			_depthRender = null;
 			_mouse3DManager = null;
@@ -591,6 +599,7 @@
 			_stage3DProxy = null;
 			_renderer = null;
 			_entityCollector = null;
+			
 		}
 
 		public function project(point3d : Vector3D) : Vector3D
@@ -632,15 +641,23 @@
 			_stage3DManager = Stage3DManager.getInstance(stage);
 			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
 			_stage3DProxy.x = _globalPos.x;
-			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
+			_rttBufferManager = new RTTBufferManager(_stage3DProxy);
 			_stage3DProxy.y = _globalPos.y;
-
+			
 			if (_width == 0) width = stage.stageWidth;
 			else _rttBufferManager.viewWidth = _width;
 			if (_height == 0) height = stage.stageHeight;
 			else _rttBufferManager.viewHeight = _height;
 
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+			
+			if (_filter3DRenderer)
+			{
+				_filter3DRenderer.rttManager = _rttBufferManager;
+				_filter3DRenderer.stage3DProxy = _stage3DProxy;
+			}
+			
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
 		}
 
 		private function onAdded(event : Event) : void
@@ -651,6 +668,11 @@
 				_stage3DProxy.x = _globalPos.x;
 				_stage3DProxy.y = _globalPos.y;
 			}
+		}
+		
+		private function onRecreated(e:Stage3DEvent):void
+		{
+			_depthTextureInvalid = true;
 		}
 
 		// dead ends:

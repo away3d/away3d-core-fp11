@@ -1,5 +1,6 @@
 package away3d.core.managers
 {
+	import away3d.events.Stage3DEvent;
 	import away3d.tools.utils.TextureUtils;
 
 	import flash.display3D.Context3D;
@@ -15,8 +16,6 @@ package away3d.core.managers
 
 	public class RTTBufferManager extends EventDispatcher
 	{
-		private static var _instances : Dictionary;
-
 		private var _renderToTextureVertexBuffer : VertexBuffer3D;
 		private var _renderToScreenVertexBuffer : VertexBuffer3D;
 
@@ -32,20 +31,11 @@ package away3d.core.managers
 		private var _textureRatioX : Number;
 		private var _textureRatioY : Number;
 
-		public function RTTBufferManager(se : SingletonEnforcer, stage3DProxy : Stage3DProxy)
+		public function RTTBufferManager(stage3DProxy : Stage3DProxy)
 		{
-			if (!se) throw new Error("No cheating the multiton!");
-
 			_renderToTextureRect = new Rectangle();
-
 			_stage3DProxy = stage3DProxy;
-		}
-
-		public static function getInstance(stage3DProxy : Stage3DProxy) : RTTBufferManager
-		{
-			if (!stage3DProxy) throw new Error("stage3DProxy key cannot be null!");
-			_instances ||= new Dictionary();
-			return _instances[stage3DProxy] ||= new RTTBufferManager(new SingletonEnforcer(), stage3DProxy);
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
 		}
 
 
@@ -146,7 +136,6 @@ package away3d.core.managers
 
 		public function dispose() : void
 		{
-			delete _instances[_stage3DProxy];
 			if (_indexBuffer) {
 				_indexBuffer.dispose();
 				_renderToScreenVertexBuffer.dispose();
@@ -155,6 +144,7 @@ package away3d.core.managers
 				_renderToTextureVertexBuffer = null;
 				_indexBuffer = null;
 			}
+			_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated);
 		}
 
 		// todo: place all this in a separate model, since it's used all over the place
@@ -210,7 +200,13 @@ package away3d.core.managers
 
 			_buffersInvalid = false;
 		}
+		
+		private function onRecreated(e:Event):void
+		{
+			_buffersInvalid = true;
+			_renderToTextureVertexBuffer = null;
+			_renderToScreenVertexBuffer = null;
+			_indexBuffer = null;
+		}
 	}
 }
-
-class SingletonEnforcer {}

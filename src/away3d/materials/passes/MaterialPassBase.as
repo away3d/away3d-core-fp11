@@ -8,8 +8,10 @@ package away3d.materials.passes
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
 	import away3d.errors.AbstractMethodError;
+	import away3d.events.Stage3DEvent;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.LightPickerBase;
+	import flash.utils.Dictionary;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -31,10 +33,8 @@ package away3d.materials.passes
 		protected var _material : MaterialBase;
 		private var _animation : AnimationBase;
 
-		arcane var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
-		arcane var _program3Dids : Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
-		//private var _programInvalids : Vector.<Boolean> = new Vector.<Boolean>(8);
-		private var _context3Ds:Vector.<Context3D> = new Vector.<Context3D>(8);
+		arcane var _program3Ds : Dictionary = new Dictionary(true);
+		arcane var _program3Dids : Dictionary = new Dictionary(true);
 
 		// agal props. these NEED to be set by subclasses!
 		// todo: can we perhaps figure these out manually by checking read operations in the bytecode, so other sources can be safely updated?
@@ -53,8 +53,8 @@ package away3d.materials.passes
 		protected var _numLightProbes : uint;
 
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
-		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
-		private static var _previousUsedTexs : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
+		private static var _previousUsedStreams : Dictionary = new Dictionary(true);
+		private static var _previousUsedTexs : Dictionary = new Dictionary(true);
 		protected var _defaultCulling : String = Context3DTriangleFace.BACK;
 
 		private var _renderToTexture : Boolean;
@@ -167,6 +167,8 @@ package away3d.materials.passes
 		 */
 		public function dispose() : void
 		{
+			_program3Ds = null;
+			_program3Dids = null;
 			//let VM to manage the disposing of objects.
 		}
 
@@ -226,28 +228,25 @@ package away3d.materials.passes
 			// TODO: not used
 			camera = camera;
 			 
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-
-			if (_context3Ds[contextIndex] != stage3DProxy.context3D || !_program3Ds[contextIndex]) {
-				_context3Ds[contextIndex] = stage3DProxy.context3D;
+			if (!_program3Ds[stage3DProxy]) {
 				updateProgram(stage3DProxy);
 				dispatchEvent(new Event(Event.CHANGE));
 			}
 
-			var prevUsed : int = _previousUsedStreams[contextIndex];
+			var prevUsed : int = _previousUsedStreams[stage3DProxy];
 			var i : uint;
 			for (i = _numUsedStreams; i < prevUsed; ++i) {
 				stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
 			}
 
-			prevUsed = _previousUsedTexs[contextIndex];
+			prevUsed = _previousUsedTexs[stage3DProxy];
 
 			for (i = _numUsedTextures; i < prevUsed; ++i) {
 				stage3DProxy.setTextureAt(i, null);
 			}
 
 			_animation.activate(stage3DProxy, this);
-			stage3DProxy.setProgram(_program3Ds[contextIndex]);
+			stage3DProxy.setProgram(_program3Ds[stage3DProxy]);
 
 			stage3DProxy._context3D.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
 
@@ -273,9 +272,8 @@ package away3d.materials.passes
 		 */
 		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			var index : uint = stage3DProxy._stage3DIndex;
-			_previousUsedStreams[index] = _numUsedStreams;
-			_previousUsedTexs[index] = _numUsedTextures;
+			_previousUsedStreams[stage3DProxy] = _numUsedStreams;
+			_previousUsedTexs[stage3DProxy] = _numUsedTextures;
 
 			if (_animation) _animation.deactivate(stage3DProxy, this);
 
@@ -293,8 +291,8 @@ package away3d.materials.passes
 		 */
 		arcane function invalidateShaderProgram(updateMaterial : Boolean = true) : void
 		{
-			for (var i : uint = 0; i < 8; ++i)
-				_program3Ds[i] = null;
+			_program3Ds = new Dictionary(true);
+			_program3Dids = new Dictionary(true);
 
 			if (_material && updateMaterial)
 				_material.invalidatePasses(this);
@@ -315,8 +313,15 @@ package away3d.materials.passes
 				trace ("--------------------");
 				trace (fragmentCode);
 			}
-			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);
+			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode, stage3DProxy);
+			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
 			//_programInvalids[stage3DProxy.stage3DIndex] = false;
+		}
+		
+		private function onRecreated(e:Stage3DEvent):void
+		{
+			delete _program3Ds[e.target];
+			delete _program3Dids[e.target];
 		}
 
 		arcane function get numPointLights() : uint

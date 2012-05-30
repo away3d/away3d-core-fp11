@@ -9,9 +9,9 @@ package away3d.core.render
 	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;
 
-import flash.display.BitmapData;
+	import flash.display.BitmapData;
 
-import flash.display3D.Context3D;
+	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
@@ -181,7 +181,6 @@ import flash.display3D.Context3D;
 				_stage3DProxy = null;
 				_context = null;
 
-//				_contextIndex = -1;
 				return;
 			}
 			else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
@@ -192,7 +191,10 @@ import flash.display3D.Context3D;
 			if (value.context3D)
 				_context = value.context3D;
 			else
-				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
+			{
+				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate, false, 0, true);
+				value.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContextUpdate, false, 0, true);
+			}
 		}
 
 
@@ -296,7 +298,6 @@ import flash.display3D.Context3D;
 		{
 			_context = _stage3DProxy.context3D;
 
-//			_contextIndex = _stage3DProxy.stage3DIndex;
 		}
 
 		arcane function get backgroundAlpha() : Number

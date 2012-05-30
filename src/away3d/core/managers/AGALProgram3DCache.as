@@ -16,9 +16,7 @@ package away3d.core.managers
 
 	public class AGALProgram3DCache
 	{
-		private static var _instances : Vector.<AGALProgram3DCache>;
-
-		private var _stage3DProxy : Stage3DProxy;
+		private static var _instances : Dictionary = new Dictionary(true);
 
 		private var _program3Ds : Dictionary;
 		private var _ids : Dictionary;
@@ -26,10 +24,9 @@ package away3d.core.managers
 		private var _currentId : int;
 
 
-		public function AGALProgram3DCache(stage3DProxy : Stage3DProxy, AGALProgram3DCacheSingletonEnforcer : AGALProgram3DCacheSingletonEnforcer)
+		public function AGALProgram3DCache(AGALProgram3DCacheSingletonEnforcer : AGALProgram3DCacheSingletonEnforcer)
 		{
 			if (!AGALProgram3DCacheSingletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
-			_stage3DProxy = stage3DProxy;
 
 			_program3Ds = new Dictionary(true);
 			_ids = new Dictionary();
@@ -37,34 +34,26 @@ package away3d.core.managers
 
 		public static function getInstance(stage3DProxy : Stage3DProxy) : AGALProgram3DCache
 		{
-			var index : int = stage3DProxy._stage3DIndex;
-
-			_instances ||= new Vector.<AGALProgram3DCache>(8, true);
-
-			if (!_instances[index]) {
-				_instances[index] = new AGALProgram3DCache(stage3DProxy, new AGALProgram3DCacheSingletonEnforcer());
+			var t : AGALProgram3DCache = _instances[stage3DProxy];
+			if (!t) {
+				t = _instances[stage3DProxy] = new AGALProgram3DCache(new AGALProgram3DCacheSingletonEnforcer());
 				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed, false, 0, true);
-				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContext3DDisposed, false, 0, true);
+				stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DDisposed, false, 0, true);
 			}
 
-			return _instances[index];
+			return t;
 		}
 
-		public static function getInstanceFromIndex(index : int) : AGALProgram3DCache
-		{
-			if (!_instances[index]) throw new Error("Instance not created yet!");
-			return _instances[index];
-		}
 
 		private static function onContext3DDisposed(event : Stage3DEvent) : void
 		{
 			var stage3DProxy : Stage3DProxy = Stage3DProxy(event.target);
-			var index : int = stage3DProxy._stage3DIndex;
-			_instances[index].dispose();
-			_instances[index] = null;
+			_instances[stage3DProxy].dispose();
+			delete _instances[stage3DProxy];
 			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_DISPOSED, onContext3DDisposed);
+			stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DDisposed);
 		}
-
+		
 		public function dispose() : void
 		{
 			for (var key : Object in _program3Ds) {
@@ -72,9 +61,8 @@ package away3d.core.managers
 			}
 		}
 
-		public function setProgram3D(pass : MaterialPassBase, vertexCode : String, fragmentCode : String) : void
+		public function setProgram3D(pass : MaterialPassBase, vertexCode : String, fragmentCode : String, stage3DProxy:Stage3DProxy) : void
 		{
-			var stageIndex : int = _stage3DProxy._stage3DIndex;
 			var program : Program3D;
 			var key : String = getKey(vertexCode, fragmentCode);
 			
@@ -90,7 +78,7 @@ package away3d.core.managers
 			
 			if (!program) 
 			{
-				program = _stage3DProxy._context3D.createProgram();
+				program = stage3DProxy._context3D.createProgram();
  
  				var vertexByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode);
  				var fragmentByteCode : ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, fragmentCode);
@@ -101,8 +89,8 @@ package away3d.core.managers
 				++_currentId;
 			}
 			
-			pass._program3Dids[stageIndex] = _ids[key];
-			pass._program3Ds[stageIndex] = program;
+			pass._program3Dids[stage3DProxy] = _ids[key];
+			pass._program3Ds[stage3DProxy] = program;
 		}
 
 		private function getKey(vertexCode : String, fragmentCode : String) : String

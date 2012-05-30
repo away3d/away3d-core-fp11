@@ -59,7 +59,7 @@ package away3d.core.managers
 			_stage3D.y = 0;
 			_stage3DManager = stage3DManager;
 			// whatever happens, be sure this has highest priority
-			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
+			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, true);
 			requestContext();
 		}
 
@@ -221,10 +221,19 @@ package away3d.core.managers
 		private function onContext3DUpdate(event : Event) : void
 		{
 			if (_stage3D.context3D) {
-				_context3D = _stage3D.context3D;
-				_context3D.enableErrorChecking = Debug.active;
-				_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
-				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
+				if (!_context3D)
+				{
+					_context3D = _stage3D.context3D;
+					_context3D.enableErrorChecking = Debug.active;
+					dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
+				}
+				else
+				{
+					_context3D = _stage3D.context3D;
+					_context3D.enableErrorChecking = Debug.active;
+					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+					dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_RECREATED));
+				}
 			}
 			else {
 				throw new Error("Rendering context lost!");

@@ -6,6 +6,7 @@ package away3d.filters.tasks
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
 	import away3d.errors.AbstractMethodError;
+	import away3d.events.Stage3DEvent;
 
 	import com.adobe.utils.AGALMiniAssembler;
 
@@ -111,6 +112,7 @@ package away3d.filters.tasks
 			_program3D.upload(	new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, getVertexCode(), Debug.active),
 								new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, getFragmentCode(), Debug.active));
 			_program3DInvalid = false;
+			stage.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
 		}
 
 		protected function getVertexCode() : String
@@ -151,6 +153,12 @@ package away3d.filters.tasks
 		public function get requireDepthRender() : Boolean
 		{
 			return _requireDepthRender;
+		}
+		
+		private function onRecreated(e:Stage3DEvent):void
+		{
+			invalidateProgram3D();
+			_textureDimensionsInvalid = true;
 		}
 	}
 }

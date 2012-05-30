@@ -2,6 +2,7 @@ package away3d.core.render
 {
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.debug.Debug;
+	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;
 
 	import com.adobe.utils.AGALMiniAssembler;
@@ -24,6 +25,7 @@ package away3d.core.render
 		public function BackgroundImageRenderer(stage3DProxy : Stage3DProxy)
 		{
 			this.stage3DProxy = stage3DProxy;
+			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
 		}
 
 		public function get stage3DProxy() : Stage3DProxy
@@ -34,6 +36,7 @@ package away3d.core.render
 		public function set stage3DProxy(value : Stage3DProxy) : void
 		{
 			if (value == _stage3DProxy) return;
+			if (_stage3DProxy)_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated);
 			_stage3DProxy = value;
 
 			if (_vertexBuffer) {
@@ -107,6 +110,14 @@ package away3d.core.render
 		public function set texture(value : Texture2DBase) : void
 		{
 			_texture = value;
+		}
+		
+		protected function onRecreated(e:Stage3DEvent):void
+		{
+			_program3d = null;
+			_indexBuffer = null;
+			_vertexBuffer = null;
+			_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated);
 		}
 	}
 }
