@@ -496,7 +496,6 @@ package away3d.tools.helpers
 			var nSubGeom:SubGeometry;
 			var nm:Mesh;
 			
-			var meshMat:MaterialBase = mesh.material;
 			var nMeshMat:MaterialBase;
 			var j : uint = 0;
 			
