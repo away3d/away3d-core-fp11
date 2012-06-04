@@ -3,7 +3,7 @@ package away3d.textures
 	import away3d.materials.utils.IVideoPlayer;
 	import away3d.materials.utils.SimpleVideoPlayer;
 	import away3d.tools.utils.TextureUtils;
-
+	
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
@@ -41,7 +41,7 @@ package away3d.textures
 			_autoPlay = autoPlay;
 
 			// Sets up the bitmap material
-			super(new BitmapData(_materialWidth, _materialHeight, false, 0x00ffffff));
+			super(new BitmapData(_materialWidth, _materialHeight, true, 0));
 
 			// if autoplay start video
 			if (autoPlay)
@@ -61,6 +61,7 @@ package away3d.textures
 			if (_player.playing && !_player.paused) {
 
 				bitmapData.lock();
+				bitmapData.fillRect(_clippingRect, 0);
 				bitmapData.draw(_player.container, null, null, null, _clippingRect);
 				bitmapData.unlock();
 				invalidateContent();
