@@ -734,7 +734,6 @@ package away3d.loaders.parsers
 				var i : uint;
 				var sm_len : uint, sm_end : uint;
 				var sub_geoms : Vector.<SubGeometry>;
-				var skinned_sub_geom : SkinnedSubGeometry;
 				var w_indices : Vector.<Number>;
 				var weights : Vector.<Number>;
 				
@@ -878,7 +877,7 @@ package away3d.loaders.parsers
 				
 				var mappings : Vector.<int> = new Vector.<int>(verts.length/3, true);
 				i = mappings.length;
-				while (i-->0) 
+				while (i-- > 0) 
 					mappings[i] = -1;
 				
 				// Loop over all triangles
@@ -898,7 +897,7 @@ package away3d.loaders.parsers
 						splitJointIndices = (jointIndices != null)? new Vector.<Number>() : null;
 						
 						j = mappings.length;
-						while (j-->0)
+						while (j-- > 0)
 							mappings[j] = -1;
 						
 						outIndex = 0;
@@ -1174,7 +1173,6 @@ package away3d.loaders.parsers
 		
 		private function parseMatrix43RawData() : Vector.<Number>
 		{
-			var i : uint;
 			var mtx_raw : Vector.<Number> = new Vector.<Number>(16, true);
 			
 			mtx_raw[0] = _body.readFloat();
