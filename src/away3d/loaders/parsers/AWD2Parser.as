@@ -719,13 +719,6 @@ package away3d.loaders.parsers
 			// Read optional properties
 			props = parseProperties({ 1:AWD_FIELD_MTX4x4 }); 
 			
-			// TODO: not used
-			// var mtx : Matrix3D;
-			var bsm_data : Array = props.get(1, null);
-			if (bsm_data) {
-				bsm = new Matrix3D(Vector.<Number>(bsm_data));
-			}
-			
 			geom = new Geometry();
 			
 			// Loop through sub meshes
