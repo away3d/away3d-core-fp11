@@ -170,6 +170,11 @@
 		 */
 		public function get subMeshes() : Vector.<SubMesh>
 		{
+			// Since this getter is invoked every iteration of the render loop, and
+			// the geometry construct could affect the sub-meshes, the geometry is
+			// validated here to give it a chance to rebuild.
+			_geometry.validate();
+			
 			return _subMeshes;
 		}
 
@@ -254,6 +259,11 @@
 			var subGeom : SubGeometry = event.subGeometry;
 			var len : int = _subMeshes.length;
 			var i : uint;
+			
+			// Important! This has to be done here, and not delayed until the
+			// next render loop, since this may be caused by the geometry being
+			// rebuilt IN THE RENDER LOOP. Invalidating and waiting will delay
+			// it until the NEXT RENDER FRAME which is probably not desirable.
 
 			for (i = 0; i < len; ++i) {
 				subMesh = _subMeshes[i];

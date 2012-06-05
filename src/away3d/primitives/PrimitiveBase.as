@@ -1,8 +1,11 @@
 package away3d.primitives
 {
+	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.errors.AbstractMethodError;
+	
+	use namespace arcane;
 
 	/**
 	 * PrimitiveBase is an abstract base class for mesh primitives, which are prebuilt simple meshes.
@@ -116,6 +119,13 @@ package away3d.primitives
 		{
 			buildUVs(_subGeometry);
 			_uvDirty = false;
+		}
+		
+		
+		override arcane function validate() : void
+		{
+			if (_geomDirty) updateGeometry();
+			if (_uvDirty) updateUVs();
 		}
 	}
 }
