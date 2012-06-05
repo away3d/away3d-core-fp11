@@ -11,6 +11,29 @@ package away3d.core.base
 	
 	use namespace arcane;
 	
+	
+	/**
+	 * Dispatched when the position of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 */
+	[Event(name="positionChanged",type="away3d.events.Object3DEvent")]
+	
+	/**
+	 * Dispatched when the scale of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 */
+	[Event(name="scaleChanged",type="away3d.events.Object3DEvent")]
+	
+	/**
+	 * Dispatched when the rotation of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 */
+	[Event(name="rotationChanged",type="away3d.events.Object3DEvent")]
+	
+	
 	/**
 	 * Object3D provides a base class for any 3D object that has a (local) transformation.
 	 *
