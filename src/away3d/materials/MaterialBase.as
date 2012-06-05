@@ -14,7 +14,7 @@ package away3d.materials
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.DistanceMapPass;
 	import away3d.materials.passes.MaterialPassBase;
-
+	
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
@@ -50,6 +50,7 @@ package away3d.materials
 
 		private var _owners : Vector.<IMaterialOwner>;
 
+		private var _premultiplied : Boolean;
 		private var _requiresBlending : Boolean;
 
 		private var _blendMode : String = BlendMode.NORMAL;
@@ -78,6 +79,9 @@ package away3d.materials
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
 			_distancePass = new DistanceMapPass();
+			
+			// Default to considering pre-multiplied textures while blending
+			alphaPremultiplied = true;
 
 //			invalidatePasses(null);
 		}
@@ -235,6 +239,23 @@ package away3d.materials
 			}
 
 		}
+		
+		
+		/**
+		 * Indicates whether visible textures (or other pixels) used by this material have
+		 * already been premultiplied. Toggle this if you are seeing black halos around your
+		 * blended alpha edges.
+		*/
+		public function get alphaPremultiplied() : Boolean
+		{
+			return _premultiplied;
+		}
+		public function set alphaPremultiplied(value : Boolean) : void
+		{
+			_premultiplied = value;
+			_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+		}
+		
 
 		/**
 		 * Indicates whether or not the material requires alpha blending during rendering.
