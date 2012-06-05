@@ -214,30 +214,7 @@ package away3d.materials
 		{
 			_blendMode = value;
 
-			_requiresBlending = true;
-			switch (value) {
-				case BlendMode.NORMAL:
-				case BlendMode.LAYER:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
-					_requiresBlending = false; // only requires blending if a subtype needs it
-					break;
-				case BlendMode.MULTIPLY:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
-					break;
-				case BlendMode.ADD:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE;
-					break;
-				case BlendMode.ALPHA:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					break;
-				default:
-					throw new ArgumentError("Unsupported blend mode!");
-			}
-
+			updateBlendFactors();
 		}
 		
 		
@@ -253,7 +230,7 @@ package away3d.materials
 		public function set alphaPremultiplied(value : Boolean) : void
 		{
 			_premultiplied = value;
-			_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+			updateBlendFactors();
 		}
 		
 
@@ -496,7 +473,36 @@ package away3d.materials
 			calculateRenderId();
 			invalidatePasses(null);
 		}
-
+		
+		private function updateBlendFactors() : void
+		{
+			switch (_blendMode) {
+				case BlendMode.NORMAL:
+				case BlendMode.LAYER:
+					_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+					_requiresBlending = false; // only requires blending if a subtype needs it
+					break;
+				case BlendMode.MULTIPLY:
+					_srcBlend = Context3DBlendFactor.ZERO;
+					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
+					_requiresBlending = true;
+					break;
+				case BlendMode.ADD:
+					_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+					_destBlend = Context3DBlendFactor.ONE;
+					_requiresBlending = true;
+					break;
+				case BlendMode.ALPHA:
+					_srcBlend = Context3DBlendFactor.ZERO;
+					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
+					_requiresBlending = true;
+					break;
+				default:
+					throw new ArgumentError("Unsupported blend mode!");
+			}
+		}
+		
 		private function calculateRenderId() : void
 		{
 		}
