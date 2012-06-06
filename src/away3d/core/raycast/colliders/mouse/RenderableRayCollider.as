@@ -1,103 +1,92 @@
 package away3d.core.raycast.colliders.mouse {
 
+	import away3d.core.base.IRenderable;
+	import away3d.core.data.LinkedListUtil;
+	import away3d.core.data.ListItem;
 	import away3d.core.raycast.*;
 
 	import away3d.core.base.SubMesh;
 	import away3d.core.data.RenderableListItem;
 import away3d.core.raycast.colliders.*;
-	import away3d.core.raycast.colliders.triangle.PBTriangleCollider;
+	import away3d.core.raycast.colliders.bounds.RenderableBoundsRayCollider;
+	import away3d.core.raycast.colliders.bounds.vo.BoundsCollisionVO;
+	import away3d.core.raycast.colliders.triangle.PBTriangleRayCollider;
 	import away3d.entities.Entity;
 
 import flash.geom.Point;
 import flash.geom.Vector3D;
 import flash.utils.Dictionary;
 
-public class MouseRayCollider extends RayColliderBase {
+public class RenderableRayCollider extends RayColliderBase {
 
-	private var _triangleCollider:PBTriangleCollider;
-    private var _nearestCollisionVO:MouseCollisionVO;
+	private var _boundsCollider:RenderableBoundsRayCollider;
+	private var _triangleCollider:PBTriangleRayCollider;
 
-    public function MouseRayCollider() {
+    public function RenderableRayCollider() {
         super();
-        _triangleCollider = new PBTriangleCollider();
+		_boundsCollider = new RenderableBoundsRayCollider();
+        _triangleCollider = new PBTriangleRayCollider();
     }
 
-    override public function evaluate():Boolean {
+	override public function updateRay( position:Vector3D, direction:Vector3D ):void {
+		super.updateRay( position, direction );
+		_boundsCollider.updateRay( position, direction );
+	}
 
-		var item:RenderableListItem = _currentListItem as RenderableListItem;
+	override public function updateCurrentListItem( currentListItem:ListItem ):void {
+		super.updateCurrentListItem( currentListItem );
+		_boundsCollider.updateCurrentListItem( currentListItem );
+	}
 
-        if( !item ) return _collisionExists = false;
+    override public function evaluate():void {
 
-//        trace( "picking test ------------------------------------------------------------" );
+		_collisionExists = false;
+		_numberOfCollisions = 0;
+		_lastCollidingListItem = null;
 
-        // init
-        var t:Number;
-        var entity:Entity;
-        var i:uint, j:uint;
-        var rp:Vector3D, rd:Vector3D;
-        var collisionVO:MouseCollisionVO;
-        var cameraIsInEntityBounds:Boolean;
-        var entityHasBeenChecked:Dictionary = new Dictionary();
-        var entityToCollisionVoDictionary:Dictionary = new Dictionary();
-        var collisionVOs:Vector.<MouseCollisionVO> = new Vector.<MouseCollisionVO>();
+		// ---------------------------------------------------------------------
+		// Filter out renderables whose bounds don't collide with ray.
+		// ---------------------------------------------------------------------
 
-//        var time:uint = getTimer();
+		var boundsCollisionVO:BoundsCollisionVO;
+		var renderableListItem:RenderableListItem;
 
-        // sweep renderables and collect entities whose bounds are hit by ray
-        while( item ) {
-            entity = item.renderable.sourceEntity;
-            if( entity.visible && entity.mouseEnabled ) {
-                if( !entityHasBeenChecked[ entity ] ) {
-                    // convert ray to object space
-                    rp = entity.inverseSceneTransform.transformVector( _rayPosition );
-                    rd = entity.inverseSceneTransform.deltaTransformVector( _rayDirection );
-                    // check for ray-bounds collision
-                    t = entity.bounds.intersectsRay( rp, rd );
-                    cameraIsInEntityBounds = false;
-                    if( t == -1 ) { // if there is no collision, check if the ray starts inside the bounding volume
-                        cameraIsInEntityBounds = entity.bounds.containsPoint( rp );
-                        if( cameraIsInEntityBounds ) t = 0;
-                    }
-                    if( t >= 0 ) { // collision exists for this renderable's entity bounds
-                        // store collision VO
-                        collisionVO = new MouseCollisionVO();
-                        collisionVO.boundsCollisionT = t;
-                        collisionVO.boundsCollisionFarT = entity.bounds.rayFarT;
-                        collisionVO.entity = entity;
-                        collisionVO.localRayPosition = rp;
-                        collisionVO.localRayDirection = rd;
-                        collisionVO.renderableItems.push( item );
-                        collisionVO.cameraIsInEntityBounds = cameraIsInEntityBounds;
-                        collisionVO.collidingRenderable = item.renderable;
-                        entityToCollisionVoDictionary[ entity ] = collisionVO;
-                        collisionVOs.push( collisionVO );
-                    }
-                    entityHasBeenChecked[ entity ] = true; // do not check entities twice
-                }
-                else {
-                    // if entity has been checked and a collision was found for it, collect all its renderables
-                    collisionVO = entityToCollisionVoDictionary[ entity ];
-                    if( collisionVO ) collisionVO.renderableItems.push( item );
-                }
-            }
-            item = item.next;
-        }
+		renderableListItem = RenderableListItem( _currentListItem );
+		_boundsCollider.evaluate();
+		if( !_boundsCollider.aCollisionExists ) {
+			_collisionExists = false;
+			return;
+		}
+		else {
+			_currentListItem = _boundsCollider.collidingListItemHead;
+		}
 
-//        time = getTimer() - time;
-//        trace( "phase 1 test time: " + time + ", with " + collisionVOs.length + " bounds colliders." );
-//        time = getTimer();
-//        var triTests:uint;
+		// ---------------------------------------------------------------------
+		// Evaluate triangle collisions when needed.
+		// ---------------------------------------------------------------------
 
-        // no bound hits?
-        var numBoundHits:uint = collisionVOs.length;
-        if( numBoundHits == 0 ) return _collisionExists = false;
+		var renderable:IRenderable;
 
-        // sort collision vos, closest to furthest
-        collisionVOs = collisionVOs.sort( onSmallestT );
+		renderableListItem = RenderableListItem( _currentListItem );
+		while( renderableListItem ) {
+
+			renderable = renderableListItem.renderable;
+
+			// TODO: Remove linked list util for function call overheads?
+
+			if( renderable. ) {
+
+			}
+
+			boundsCollisionVO = _boundsCollider.collisionData[ renderableListItem ];
+
+
+
+		}
 
         // find nearest collision and perform triangle collision tests where necessary
         var numItems:uint;
-        _nearestCollisionVO = new MouseCollisionVO();
+        var _nearestCollisionVO:BoundsCollisionVO = new BoundsCollisionVO();
         _nearestCollisionVO.finalCollisionT = Number.MAX_VALUE;
         _nearestCollisionVO.boundsCollisionT = Number.MAX_VALUE;
         _nearestCollisionVO.boundsCollisionFarT = Number.MAX_VALUE;

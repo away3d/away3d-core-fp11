@@ -10,7 +10,7 @@ package away3d.core.raycast.colliders.triangle
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
 
-	public class PBTriangleCollider extends RayColliderBase
+	public class PBTriangleRayCollider extends RayColliderBase
 	{
 		[Embed("/../pb/RayTriangleKernel.pbj", mimeType="application/octet-stream")]
 		private var RayTriangleKernelClass:Class;
@@ -25,7 +25,7 @@ package away3d.core.raycast.colliders.triangle
 		private var _breakOnFirstTriangleHit:Boolean = false;
 		private var _shaderJob:ShaderJob;
 
-		public function PBTriangleCollider() {
+		public function PBTriangleRayCollider() {
 			super();
 			_kernelOutputBuffer = new Vector.<Number>();
 			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );
