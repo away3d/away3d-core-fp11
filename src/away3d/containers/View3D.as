@@ -74,6 +74,7 @@
 		private var _menu0:ContextMenuItem;
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
+		private var _deferContextCalls:Boolean = false;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -156,6 +157,12 @@
 		public function get stage3DProxy() : Stage3DProxy
 		{
 			return _stage3DProxy;
+		}
+
+		public function set stage3DProxy(stage3DProxy:Stage3DProxy) : void
+		{
+			_stage3DProxy = stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
 		}
 
 		/**
@@ -450,12 +457,26 @@
 		}
 
 		/**
+		 * Used to defer Context3D calls to an external process, to enable multiple Stage3D framewords
+		 * to utilise the same Stage3D instance.
+		 */
+		public function get deferContextCalls() : Boolean
+		{
+			return _deferContextCalls;
+		}
+
+		public function set deferContextCalls(value : Boolean) : void
+		{
+			_deferContextCalls = value;
+		}
+
+		/**
 		 * Updates the backbuffer dimensions.
 		 */
 		protected function updateBackBuffer() : void
 		{
 			if( _width && _height ){
-				_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
+				if (!_deferContextCalls) _stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
 				_backBufferInvalid = false;
 			} else {
 				width = stage.stageWidth;
@@ -510,8 +531,9 @@
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
-				_stage3DProxy._context3D.present();
+				if (!_deferContextCalls) _stage3DProxy._context3D.present();
 			} else {
+				_renderer.viewDeferContextCalls = _deferContextCalls;
 				_renderer.render(_entityCollector);
 			}
 
@@ -627,7 +649,8 @@
 			_addedToStage = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
-			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
+			if (!_stage3DProxy) _stage3DProxy = _stage3DManager.getFreeStage3DProxy();
+
 			_stage3DProxy.x = _globalPos.x;
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 			_stage3DProxy.y = _globalPos.y;

@@ -9,9 +9,9 @@ package away3d.core.render
 	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;
 
-import flash.display.BitmapData;
-
-import flash.display3D.Context3D;
+	import flash.display.BitmapData;
+	
+	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
@@ -32,6 +32,7 @@ import flash.display3D.Context3D;
 		protected var _backgroundG : Number = 0;
 		protected var _backgroundB : Number = 0;
 		protected var _backgroundAlpha : Number = 1;
+		protected var _viewDeferContextCalls : Boolean = false;
 
 		protected var _swapBackBuffer : Boolean = true;
 
@@ -184,7 +185,7 @@ import flash.display3D.Context3D;
 //				_contextIndex = -1;
 				return;
 			}
-			else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
+			//else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
 
 			_stage3DProxy = value;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.stage3DProxy = value;
@@ -195,6 +196,21 @@ import flash.display3D.Context3D;
 				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 		}
 
+		/**
+		 * Defer the Context3D calls to an externally managed process to enable sharing of the
+		 * current Stage3D instance across multiple frameworks.
+		 *
+		 * @private
+		 */
+		arcane function get viewDeferContextCalls() : Boolean
+		{
+			return _viewDeferContextCalls;
+		}
+
+		arcane function set viewDeferContextCalls(value : Boolean) : void
+		{
+			_viewDeferContextCalls = value;
+		}
 
 		/**
 		 * Disposes the resources used by the RendererBase.
@@ -250,20 +266,24 @@ import flash.display3D.Context3D;
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			if (additionalClearMask != 0)
-				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+			if (!_viewDeferContextCalls) {
+				if (additionalClearMask != 0)
+					_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+			}
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			_stage3DProxy.scissorRect = scissorRect;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
 			draw(entityCollector, target);
 
-            if( _snapshotRequired && _snapshotBitmapData ) {
-                _context.drawToBitmapData( _snapshotBitmapData );
-                _snapshotRequired = false;
-            }
-
-			if (_swapBackBuffer && !target) _context.present();
+			if ( !_viewDeferContextCalls ) {
+				if( _snapshotRequired && _snapshotBitmapData ) {
+					_context.drawToBitmapData( _snapshotBitmapData );
+					_snapshotRequired = false;
+				}
+	
+				if (_swapBackBuffer && !target) _context.present();
+			}
 			_stage3DProxy.scissorRect = null;
 		}
 
