@@ -1,6 +1,7 @@
 package away3d.core.base
 {
 
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 
@@ -28,6 +29,16 @@ package away3d.core.base
 		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
 		 */
 		function get modelViewProjection():Matrix3D;
+
+		/**
+		 *
+		 */
+		function get bounds():BoundingVolumeBase
+
+		/**
+		 *
+		 */
+		function get visible():Boolean
 
 		/**
 		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.

@@ -1,4 +1,4 @@
-package away3d.core.raycast
+package away3d.core.raycast.colliders.mouse
 {
 
 	public class MouseHitMethod

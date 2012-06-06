@@ -1,26 +1,30 @@
-package away3d.core.raycast {
+package away3d.core.raycast.colliders.mouse {
+
+	import away3d.core.raycast.*;
 
 	import away3d.core.base.SubMesh;
 	import away3d.core.data.RenderableListItem;
 import away3d.core.raycast.colliders.*;
-import away3d.entities.Entity;
+	import away3d.core.raycast.colliders.triangle.PBTriangleCollider;
+	import away3d.entities.Entity;
 
 import flash.geom.Point;
 import flash.geom.Vector3D;
 import flash.utils.Dictionary;
 
-public class MouseRaycast extends ColliderBase {
-    private var _triangleCollider:TriangleCollider;
+public class MouseRayCollider extends RayColliderBase {
+
+	private var _triangleCollider:PBTriangleCollider;
     private var _nearestCollisionVO:MouseCollisionVO;
 
-    public function MouseRaycast() {
+    public function MouseRayCollider() {
         super();
-        _triangleCollider = new TriangleCollider();
+        _triangleCollider = new PBTriangleCollider();
     }
 
     override public function evaluate():Boolean {
 
-		var item:RenderableListItem = _target as RenderableListItem;
+		var item:RenderableListItem = _currentListItem as RenderableListItem;
 
         if( !item ) return _collisionExists = false;
 
@@ -115,7 +119,7 @@ public class MouseRaycast extends ColliderBase {
                             || item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT ) {
 //                        triTests++;
                         _triangleCollider.breakOnFirstTriangleHit = item.renderable.mouseHitMethod == MouseHitMethod.MESH_ANY_HIT;
-						_triangleCollider.updateTarget( item.renderable as SubMesh );
+						_triangleCollider.updateCurrentListItem( item.renderable as SubMesh );
 						if( _triangleCollider.evaluate() ) { // triangle collision exists?
                             collisionVO.finalCollisionT = _triangleCollider.collisionT;
                             collisionVO.collidingRenderable = item.renderable;
@@ -139,7 +143,7 @@ public class MouseRaycast extends ColliderBase {
 
         // use nearest collision found
         _t = _nearestCollisionVO.finalCollisionT;
-        _collidingRenderable = _nearestCollisionVO.collidingRenderable;
+        _collidingRenderables = _nearestCollisionVO.collidingRenderable;
         return _collisionExists = _nearestCollisionVO.finalCollisionT != Number.MAX_VALUE;
     }
 
@@ -171,29 +175,4 @@ public class MouseRaycast extends ColliderBase {
         return _nearestCollisionVO.collisionUV;
     }
 }
-}
-
-import away3d.core.base.IRenderable;
-import away3d.core.data.RenderableListItem;
-import away3d.entities.Entity;
-
-import flash.geom.Point;
-import flash.geom.Vector3D;
-
-class MouseCollisionVO {
-    public var boundsCollisionT:Number;
-    public var boundsCollisionFarT:Number;
-    public var finalCollisionT:Number;
-    public var entity:Entity;
-    public var collisionUV:Point;
-    public var isTriangleHit:Boolean;
-    public var localRayPosition:Vector3D;
-    public var localRayDirection:Vector3D;
-    public var cameraIsInEntityBounds:Boolean;
-    public var collidingRenderable:IRenderable;
-    public var renderableItems:Vector.<RenderableListItem>;
-
-    public function MouseCollisionVO() {
-        renderableItems = new Vector.<RenderableListItem>();
-    }
 }

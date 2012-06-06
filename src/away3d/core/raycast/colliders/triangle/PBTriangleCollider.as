@@ -1,5 +1,7 @@
-package away3d.core.raycast.colliders
+package away3d.core.raycast.colliders.triangle
 {
+
+	import away3d.core.raycast.colliders.*;
 	import away3d.core.base.SubMesh;
 
 	import flash.display.Shader;
@@ -8,7 +10,7 @@ package away3d.core.raycast.colliders
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
 
-	public class TriangleCollider extends ColliderBase
+	public class PBTriangleCollider extends RayColliderBase
 	{
 		[Embed("/../pb/RayTriangleKernel.pbj", mimeType="application/octet-stream")]
 		private var RayTriangleKernelClass:Class;
@@ -23,7 +25,7 @@ package away3d.core.raycast.colliders
 		private var _breakOnFirstTriangleHit:Boolean = false;
 		private var _shaderJob:ShaderJob;
 
-		public function TriangleCollider() {
+		public function PBTriangleCollider() {
 			super();
 			_kernelOutputBuffer = new Vector.<Number>();
 			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );
@@ -33,10 +35,10 @@ package away3d.core.raycast.colliders
 
 		override public function evaluate():Boolean {
 			_collisionExists = false;
-			var subMesh:SubMesh = _target as SubMesh;
+			var subMesh:SubMesh = _currentListItem as SubMesh;
 			uploadRenderableData( subMesh );
 			executeKernel();
-			if( _collisionExists ) _collidingRenderable = subMesh;
+			if( _collisionExists ) _collidingRenderables = subMesh;
 			return _collisionExists;
 		}
 
@@ -120,16 +122,16 @@ package away3d.core.raycast.colliders
 		override public function get collisionPoint():Vector3D {
 			if( !_collisionExists ) return null;
 			_t = _kernelOutputBuffer[ _collisionTriangleIndex ];
-			_collisionPoint.x = _rayPosition.x + _t * _rayDirection.x;
-			_collisionPoint.y = _rayPosition.y + _t * _rayDirection.y;
-			_collisionPoint.z = _rayPosition.z + _t * _rayDirection.z;
-			return _collisionPoint;
+			_collisionPoints.x = _rayPosition.x + _t * _rayDirection.x;
+			_collisionPoints.y = _rayPosition.y + _t * _rayDirection.y;
+			_collisionPoints.z = _rayPosition.z + _t * _rayDirection.z;
+			return _collisionPoints;
 		}
 
 		public function get collisionNormal():Vector3D {
 			if( !_collisionExists ) return null;
-			var indices:Vector.<uint> = _collidingRenderable.indexData;
-			var vertices:Vector.<Number> = _collidingRenderable.vertexData;
+			var indices:Vector.<uint> = _collidingRenderables.indexData;
+			var vertices:Vector.<Number> = _collidingRenderables.vertexData;
 			var index:uint = _collisionTriangleIndex;
 			var i0:uint = indices[ index ] * 3;
 			var i1:uint = indices[ index + 1 ] * 3;
@@ -146,8 +148,8 @@ package away3d.core.raycast.colliders
 
 		public function get collisionUV():Point {
 			if( !_collisionExists ) return null;
-			var indices:Vector.<uint> = _collidingRenderable.indexData;
-			var uvs:Vector.<Number> = _collidingRenderable.UVData;
+			var indices:Vector.<uint> = _collidingRenderables.indexData;
+			var uvs:Vector.<Number> = _collidingRenderables.UVData;
 			var index:uint = _collisionTriangleIndex;
 			var v:Number = _kernelOutputBuffer[ index + 1 ]; // barycentric coord 1
 			var w:Number = _kernelOutputBuffer[ index + 2 ]; // barycentric coord 2

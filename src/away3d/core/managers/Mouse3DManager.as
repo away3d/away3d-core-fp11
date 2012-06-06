@@ -9,8 +9,8 @@ package away3d.core.managers
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
-	import away3d.core.raycast.MouseRaycast;
-	import away3d.core.raycast.MouseHitMethod;
+	import away3d.core.raycast.colliders.mouse.MouseRayCollider;
+	import away3d.core.raycast.colliders.mouse.MouseHitMethod;
 
 	import flash.events.MouseEvent;
 	import flash.geom.Vector3D;
@@ -32,9 +32,9 @@ package away3d.core.managers
 		private var _oldLocalY:Number;
 		private var _oldLocalZ:Number;
 
-		private var _opaqueCollider:MouseRaycast;
-		private var _blendedCollider:MouseRaycast;
-		private var _activeCollider:MouseRaycast;
+		private var _opaqueCollider:MouseRayCollider;
+		private var _blendedCollider:MouseRayCollider;
+		private var _activeCollider:MouseRayCollider;
 		private var _view:View3D;
         private var _mouseIsOverView:Boolean;
 
@@ -62,8 +62,8 @@ package away3d.core.managers
 		 */
 		public function Mouse3DManager( view:View3D ) {
 			_view = view;
-			_opaqueCollider = new MouseRaycast();
-			_blendedCollider = new MouseRaycast();
+			_opaqueCollider = new MouseRayCollider();
+			_blendedCollider = new MouseRayCollider();
 			// TODO: add invisible container?
 			_view.addEventListener( MouseEvent.CLICK, onClick );
 			_view.addEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
@@ -188,9 +188,9 @@ package away3d.core.managers
 				var rayDirection:Vector3D = _view.unproject( _view.mouseX, _view.mouseY );
 				_opaqueCollider.updateRay( rayPosition, rayDirection );
 				_blendedCollider.updateRay( rayPosition, rayDirection );
-				_opaqueCollider.updateTarget( collector.opaqueRenderableHead );
+				_opaqueCollider.updateCurrentListItem( collector.opaqueRenderableHead );
 				var opaqueCollides:Boolean = _opaqueCollider.evaluate();
-				_blendedCollider.updateTarget( collector.blendedRenderableHead );
+				_blendedCollider.updateCurrentListItem( collector.blendedRenderableHead );
 				var blendedCollides:Boolean = _blendedCollider.evaluate();
 				if( opaqueCollides && blendedCollides ) {
 					_activeCollider = _opaqueCollider.collisionT < _blendedCollider.collisionT ? _opaqueCollider : _blendedCollider;
@@ -198,7 +198,7 @@ package away3d.core.managers
 				else if( opaqueCollides ) _activeCollider = _opaqueCollider;
 				else if( blendedCollides ) _activeCollider = _blendedCollider;
 				else _activeCollider = null;
-				_activeRenderable = _activeCollider ? _activeCollider.collidingRenderable : null;
+				_activeRenderable = _activeCollider ? _activeCollider.collidingRenderables : null;
 				_activeObject = ( _activeRenderable && _activeRenderable.mouseEnabled ) ? _activeRenderable.sourceEntity : null;
 			}
 			else {
