@@ -152,8 +152,6 @@ package away3d.bounds
 					}
 				}
 	
-				if( minX == Number.POSITIVE_INFINITY )
-					minX = minY = minZ = maxX = maxY = maxZ = 0;
 				fromExtremes( minX, minY, minZ, maxX, maxY, maxZ );
 			}
 			else {
