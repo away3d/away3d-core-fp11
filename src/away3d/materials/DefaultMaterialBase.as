@@ -52,13 +52,13 @@
 
 		arcane override function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false) : void
 		{
-			super.activateForDepth(stage3DProxy, camera, distanceBased);
 			if (distanceBased) {
 				_distancePass.alphaMask = _screenPass.diffuseMethod.texture;
 			}
 			else {
 				_depthPass.alphaMask = _screenPass.diffuseMethod.texture;
 			}
+			super.activateForDepth(stage3DProxy, camera, distanceBased);
 		}
 
 		public function get specularLightSources() : uint
