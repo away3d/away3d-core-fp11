@@ -28,9 +28,10 @@ package away3d.core.managers
 	 */
 	public class Stage3DProxy extends EventDispatcher
 	{
-		private var _stage3D : Stage3D;
 		arcane var _context3D : Context3D;
 		arcane var _stage3DIndex : int = -1;
+
+		private var _stage3D : Stage3D;
 		private var _activeProgram3D : Program3D;
 		private var _stage3DManager : Stage3DManager;
 		private var _backBufferWidth : int;
@@ -65,7 +66,7 @@ package away3d.core.managers
 			requestContext(forceSoftware);
 		}
 
-		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int) : void
+		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int = 0) : void
 		{
 			// force setting null
 			if (buffer && _activeVertexBuffers[index] == buffer) return;
@@ -160,8 +161,6 @@ package away3d.core.managers
 			_context3D.setScissorRectangle(_scissorRect);
 		}
 
-
-
 		/**
 		 * The index of the Stage3D which is managed by this instance of Stage3DProxy.
 		 */
@@ -216,19 +215,28 @@ package away3d.core.managers
 			_context3D = null;
 		}
 
-		/**
+		/*
 		 * Called whenever the Context3D is retrieved or lost.
 		 * @param event The event dispatched.
-		 */
+		*/
 		private function onContext3DUpdate(event : Event) : void
 		{
 			if (_stage3D.context3D) {
-				_context3D = _stage3D.context3D;
-				_context3D.enableErrorChecking = Debug.active;
-				_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
-				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
-			}
-			else {
+
+				if(_context3D){
+					_context3D = _stage3D.context3D;
+					_context3D.enableErrorChecking = Debug.active;
+					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+					dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_RECREATED));
+
+				} else {
+					_context3D = _stage3D.context3D;
+					_context3D.enableErrorChecking = Debug.active;
+					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+					dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
+				}
+
+			} else {
 				throw new Error("Rendering context lost!");
 			}
 		}
