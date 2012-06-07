@@ -5,6 +5,8 @@ package away3d.primitives
 	import away3d.core.base.SubGeometry;
 	import away3d.errors.AbstractMethodError;
 	
+	import flash.geom.Matrix3D;
+	
 	use namespace arcane;
 
 	/**
@@ -67,6 +69,15 @@ package away3d.primitives
 			if (_uvDirty) updateUVs();
 			
 			super.scaleUV(scaleU, scaleV);
+		}
+		
+		/**
+		 * @inheritDoc
+		*/
+		override public function applyTransformation(transform:Matrix3D):void
+		{
+			if (_geomDirty) updateGeometry();
+			super.applyTransformation(transform);
 		}
 
 		/**
