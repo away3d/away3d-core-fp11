@@ -126,45 +126,27 @@ package a3dparticle.core
 		
 		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._vertexBuffer || _shareAtt._vertexContex3D != stage3DProxy.context3D) 
-			{
-				_shareAtt._vertexBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._vertices.length/3, 3);
-				_shareAtt._vertexBuffer.uploadFromVector(_shareAtt._vertices, 0, _shareAtt._vertices.length / 3);
-				_shareAtt._vertexContex3D = stage3DProxy.context3D;
-			}
-			return _shareAtt._vertexBuffer;
+			return _shareAtt.getVertexBuffer(stage3DProxy);
 		}
 		
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
-			if (!_shareAtt._indexBuffer || _shareAtt._indexContex3D != stage3DProxy.context3D) 
-			{
-				_shareAtt._indexBuffer = stage3DProxy._context3D.createIndexBuffer(_shareAtt._indices.length);
-				_shareAtt._indexBuffer.uploadFromVector(_shareAtt._indices, 0, _shareAtt._indices.length);
-				_shareAtt._indexContex3D = stage3DProxy.context3D;
-			}
-			return _shareAtt._indexBuffer;
+			return _shareAtt.getIndexBuffer(stage3DProxy);
 		}
 		
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._uvBuffer || _shareAtt._uvContex3D != stage3DProxy.context3D) 
-			{
-				_shareAtt._uvBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._uvData.length/2, 2);
-				_shareAtt._uvBuffer.uploadFromVector(_shareAtt._uvData, 0, _shareAtt._uvData.length / 2);
-				_shareAtt._uvContex3D = stage3DProxy.context3D;
-			}
-			return _shareAtt._uvBuffer;
+			return _shareAtt.getUVBuffer(stage3DProxy);
 		}
 		
-		public function get extraBuffers() : Object
+		public function getExtraBuffer(stage3DProxy:Stage3DProxy, bufferName:String, dataLenght:uint) : VertexBuffer3D
 		{
-			return _shareAtt._extraBuffers;
+			return _shareAtt.getExtraBuffer(stage3DProxy, bufferName, dataLenght);
 		}
 		
-		public function get extraDatas():Object
+		public function getExtraData(bufferName:String):Vector.<Number>
 		{
-			return _shareAtt._extraDatas;
+			return _shareAtt.getExtraData(bufferName);
 		}
 		
 		public function get indexData():Vector.<uint>
@@ -179,7 +161,6 @@ package a3dparticle.core
 		{
 			return _shareAtt._vertices;
 		}
-		
 		
 		public function get zIndex() : Number
 		{
@@ -246,23 +227,26 @@ package a3dparticle.core
 	}
 }
 
+import away3d.core.managers.Stage3DProxy;
+import away3d.events.Stage3DEvent;
 import flash.display3D.Context3D;
 import flash.display3D.IndexBuffer3D;
 import flash.display3D.VertexBuffer3D;
+import flash.utils.Dictionary;
+
+import away3d.arcane;
+use namespace arcane;
 
 class cloneShareAtt
 {
-	public var _vertexBuffer : VertexBuffer3D;
-	public var _indexBuffer : IndexBuffer3D;
-	public var _uvBuffer : VertexBuffer3D;
-	public var _vertices : Vector.<Number>=new Vector.<Number>();
+	protected var _vertexBuffer : Dictionary = new Dictionary(true);
+	protected var _indexBuffer : Dictionary = new Dictionary(true);
+	protected var _uvBuffer : Dictionary = new Dictionary(true);
+	public var _vertices : Vector.<Number> = new Vector.<Number>();
 	public var _indices : Vector.<uint> = new Vector.<uint>;
 	public var _uvData:Vector.<Number> = new Vector.<Number>();
-	public var _vertexContex3D:Context3D;
-	public var _indexContex3D:Context3D;
-	public var _uvContex3D:Context3D;
 	public var _extraDatas:Object = { };
-	public var _extraBuffers:Object = { };
+	protected var _extraBuffers:Object = { };
 	
 	private static var currentId:int;
 	private var _geometryId : int;
@@ -273,5 +257,83 @@ class cloneShareAtt
 	public function get geometryId():int
 	{
 		return _geometryId;
+	}
+	
+	public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+	{
+		var t : VertexBuffer3D = _vertexBuffer[stage3DProxy];
+		if (!t) 
+		{
+			t = _vertexBuffer[stage3DProxy] = stage3DProxy._context3D.createVertexBuffer(_vertices.length / 3, 3);
+			t.uploadFromVector(_vertices, 0, _vertices.length / 3);
+			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
+		}
+
+		return t;
+	}
+	
+	public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
+	{
+		var t : IndexBuffer3D = _indexBuffer[stage3DProxy];
+		if (!t) 
+		{
+			t = _indexBuffer[stage3DProxy] = stage3DProxy._context3D.createIndexBuffer(_indices.length);
+			t.uploadFromVector(_indices, 0, _indices.length);
+			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
+		}
+
+		return t;
+	}
+	
+	public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+	{
+		var t : VertexBuffer3D = _uvBuffer[stage3DProxy];
+		if (!t) 
+		{
+			t = _uvBuffer[stage3DProxy] = stage3DProxy._context3D.createVertexBuffer(_uvData.length / 2, 2);
+			t.uploadFromVector(_uvData, 0, _uvData.length / 2);
+			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
+		}
+		return t;
+	}
+	
+	public function getExtraBuffer(stage3DProxy:Stage3DProxy, bufferName:String, dataLenght:uint) : VertexBuffer3D
+	{
+		var buffer:Dictionary = _extraBuffers[bufferName];
+		if (!buffer)
+		{
+			buffer = _extraBuffers[bufferName] = new Dictionary(true);
+		}
+		var t : VertexBuffer3D = buffer[stage3DProxy];
+		if (!t) 
+		{
+			var data:Vector.<Number> = getExtraData(bufferName);
+			t = buffer[stage3DProxy] = stage3DProxy._context3D.createVertexBuffer(data.length / dataLenght, dataLenght);
+			t.uploadFromVector(data, 0, data.length / dataLenght);
+			stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onRecreated, false, 0, true);
+		}
+		return t;
+	}
+	
+	public function getExtraData(bufferName:String):Vector.<Number>
+	{
+		var t : Vector.<Number> = _extraDatas[bufferName];
+		if (!t) 
+		{
+			t = _extraDatas[bufferName] = new Vector.<Number>();
+		}
+		return t;
+	}
+
+	private function onRecreated(e:Stage3DEvent):void
+	{
+		var stage3Dproxy:Stage3DProxy = e.target as Stage3DProxy;
+		delete _vertexBuffer[stage3Dproxy];
+		delete _uvBuffer[stage3Dproxy];
+		delete _indexBuffer[stage3Dproxy];
+		for each(var i:Dictionary in _extraBuffers)
+		{
+			delete i[stage3Dproxy];
+		}
 	}
 }
