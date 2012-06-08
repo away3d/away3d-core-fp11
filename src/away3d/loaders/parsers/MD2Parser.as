@@ -184,18 +184,18 @@ package away3d.loaders.parsers
 								sub.updateUVData(_firstSubGeom.UVData);
 								sub.updateIndexData(_indices);
 								
-								return true;
+								// Force name to be chosen by finalizeAsset()
+								_mesh.name = "";
+								finalizeAsset(_mesh);
+								
+								return PARSING_DONE;
 							}
 						}
 					}
 				}
 			}
 			
-			// TODO: Can this be done a nicer fashion for this file format? Or does
-			// it always just return a single mesh, in which case this should be fine
-			finalizeAsset(_mesh);
-			
-			return false;
+			return MORE_TO_PARSE;
 		}
 		
 		/**
