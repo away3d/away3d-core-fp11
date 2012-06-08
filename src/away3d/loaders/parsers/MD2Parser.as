@@ -10,6 +10,7 @@ package away3d.loaders.parsers
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.loaders.misc.ResourceDependency;
+	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
@@ -98,10 +99,7 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			// TODO: not used
-			data = data;
-			// todo: implement
-			return false;
+			return (ParserUtil.toString(data, 4) == 'IDP2');
 		}
 		
 		/**
@@ -138,6 +136,10 @@ package away3d.loaders.parsers
 			if(!_startedParsing) {
 				_byteData = getByteData();
 				_startedParsing = true;
+				
+				// Reset bytearray read position (which may have been 
+				// moved forward by the supportsData() function.)
+				_byteData.position = 0;
 			}
 			
 			while (hasTime()) {
