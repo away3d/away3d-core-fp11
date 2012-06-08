@@ -149,20 +149,7 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			var bytes : ByteArray = ParserUtil.toByteArray(data);
-			
-			if (bytes) {
-				var magic : String;
-				
-				bytes.position = 0;
-				magic = data.readUTFBytes(3);
-				bytes.position = 0;
-				
-				if (magic == 'AWD')
-					return true;
-			}
-			
-			return false;
+			return (ParserUtil.toString(data, 3)=='AWD');
 		}
 		
 		
