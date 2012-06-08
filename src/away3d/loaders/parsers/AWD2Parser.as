@@ -20,6 +20,7 @@ package away3d.loaders.parsers
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.display.Sprite;
@@ -136,11 +137,22 @@ package away3d.loaders.parsers
 		/**
 		 * @inheritDoc
 		 */
-		/*override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
+		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			// apply system default
-			//BitmapMaterial(mesh.material).bitmapData = defaultBitmapData;
-		}*/
+			if (_texture_users.hasOwnProperty(resourceDependency.id)) {
+				var mat : TextureMaterial;
+				var users : Array;
+				
+				// TODO: Reuse default bitmap texture
+				var texture : BitmapTexture = new BitmapTexture(defaultBitmapData);
+				
+				users = _texture_users[resourceDependency.id];
+				for each (mat in users) {
+					mat.texture = texture;
+					finalizeAsset(mat);
+				}
+			}
+		}
 		
 		/**
 		 * Tests whether a data block can be parsed by the parser.
