@@ -824,6 +824,8 @@ package away3d.loaders.parsers
 					--i;
 				}
 			}
+			
+			finalizeAsset(lm.cm || mat);
 		}
 		
 		private function applyMaterials():void
