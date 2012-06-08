@@ -14,17 +14,19 @@ package away3d.loaders.parsers.utils
 			else return null;
 		}
 		
-		public static function toString(data : *) : String
+		public static function toString(data : *, length : uint = 0) : String
 		{
 			var ba : ByteArray;
 			
+			length ||= uint.MAX_VALUE;
+			
 			if (data is String)
-				return data;
+				return String(data).substr(0, length);
 			
 			ba = toByteArray(data);
 			if (ba) {
 				ba.position = 0;
-				return ba.readUTFBytes(ba.bytesAvailable);
+				return ba.readUTFBytes(Math.min(ba.bytesAvailable, length));
 			}
 			
 			return null;
