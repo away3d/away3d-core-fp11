@@ -15,7 +15,7 @@
 	import away3d.materials.SegmentMaterial;
 	import away3d.primitives.LineSegment;
 	import away3d.primitives.data.Segment;
-	import away3d.core.raycast.colliders.mouse.MouseHitMethod;
+	import away3d.core.raycast.data.MouseHitMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;

@@ -4,6 +4,7 @@ package away3d.core.base
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 	import away3d.entities.Mesh;
@@ -328,6 +329,14 @@ package away3d.core.base
 
 		public function get UVData():Vector.<Number> {
 			return _subGeometry.UVData;
+		}
+
+		public function get bounds():BoundingVolumeBase {
+			return _parentMesh.bounds; // TODO: return smaller, sub mesh bounds instead
+		}
+
+		public function get visible():Boolean {
+			return _parentMesh.visible;
 		}
 	}
 }

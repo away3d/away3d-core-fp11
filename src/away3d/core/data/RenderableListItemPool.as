@@ -2,19 +2,19 @@ package away3d.core.data
 {
 	public class RenderableListItemPool
 	{
-		private var _pool : Vector.<RenderableListItem>;
+		private var _pool : Vector.<LinkedListItem>;
 		private var _index : int;
 		private var _poolSize : int;
 
 		public function RenderableListItemPool()
 		{
-			_pool = new Vector.<RenderableListItem>();
+			_pool = new Vector.<LinkedListItem>();
 		}
 
-		public function getItem() : RenderableListItem
+		public function getItem() : LinkedListItem
 		{
 			if (_index == _poolSize) {
-				var item : RenderableListItem = new RenderableListItem();
+				var item : LinkedListItem = new LinkedListItem();
 				_pool[_index++] = item;
 				++_poolSize;
 				return item;

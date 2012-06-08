@@ -6,11 +6,14 @@ package away3d.core.managers
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
+	import away3d.core.data.LinkedListItem;
+	import away3d.core.data.LinkedListItem;
+	import away3d.core.raycast.data.RayCollisionVO;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
-	import away3d.core.raycast.colliders.mouse.RenderableRayCollider;
-	import away3d.core.raycast.colliders.mouse.MouseHitMethod;
+	import away3d.core.raycast.colliders.MouseRayCollider;
+	import away3d.core.raycast.data.MouseHitMethod;
 
 	import flash.events.MouseEvent;
 	import flash.geom.Vector3D;
@@ -32,9 +35,7 @@ package away3d.core.managers
 		private var _oldLocalY:Number;
 		private var _oldLocalZ:Number;
 
-		private var _opaqueCollider:RenderableRayCollider;
-		private var _blendedCollider:RenderableRayCollider;
-		private var _activeCollider:RenderableRayCollider;
+		private var _opaqueCollider:MouseRayCollider;
 		private var _view:View3D;
         private var _mouseIsOverView:Boolean;
 
@@ -62,8 +63,7 @@ package away3d.core.managers
 		 */
 		public function Mouse3DManager( view:View3D ) {
 			_view = view;
-			_opaqueCollider = new RenderableRayCollider();
-			_blendedCollider = new RenderableRayCollider();
+			_opaqueCollider = new MouseRayCollider( view );
 			// TODO: add invisible container?
 			_view.addEventListener( MouseEvent.CLICK, onClick );
 			_view.addEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
@@ -184,25 +184,13 @@ package away3d.core.managers
 			var collector:EntityCollector = _view.entityCollector;
 
 			if( collector.numMouseEnableds > 0 ) {
-				var rayPosition:Vector3D = _view.camera.position;
-				var rayDirection:Vector3D = _view.unproject( _view.mouseX, _view.mouseY );
-				_opaqueCollider.updateRay( rayPosition, rayDirection );
-				_blendedCollider.updateRay( rayPosition, rayDirection );
-				_opaqueCollider.updateCurrentListItem( collector.opaqueRenderableHead );
-				var opaqueCollides:Boolean = _opaqueCollider.evaluate();
-				_blendedCollider.updateCurrentListItem( collector.blendedRenderableHead );
-				var blendedCollides:Boolean = _blendedCollider.evaluate();
-				if( opaqueCollides && blendedCollides ) {
-					_activeCollider = _opaqueCollider.collisionT < _blendedCollider.collisionT ? _opaqueCollider : _blendedCollider;
-				}
-				else if( opaqueCollides ) _activeCollider = _opaqueCollider;
-				else if( blendedCollides ) _activeCollider = _blendedCollider;
-				else _activeCollider = null;
-				_activeRenderable = _activeCollider ? _activeCollider.collidingRenderables : null;
+				// TODO: consider the blended renderable head as well...
+				_opaqueCollider.updateMouseRay();
+				_opaqueCollider.updateLinkedListHead( collector.opaqueRenderableHead.clone() );
+				_opaqueCollider.evaluate();
 				_activeObject = ( _activeRenderable && _activeRenderable.mouseEnabled ) ? _activeRenderable.sourceEntity : null;
 			}
 			else {
-				_activeCollider = null;
 				_activeObject = null;
 				_activeRenderable = null;
 			}
@@ -225,19 +213,19 @@ package away3d.core.managers
 			event3D.material = renderable.material;
 			event3D.object = renderable.sourceEntity;
 
-			if( _activeCollider && renderable.mouseHitMethod == MouseHitMethod.MESH_CLOSEST_HIT ) {
-				event3D.uv = _activeCollider.collisionUV;
+			if( _opaqueCollider.aCollisionExists && renderable.mouseHitMethod != MouseHitMethod.BOUNDS_ONLY ) {
+				event3D.uv = _opaqueCollider.getCollisionDataForFirstItem().collisionUV;
 			}
 			else {
 				event3D.uv = null;
 			}
 
-			if( _activeCollider ) {
-				local = _activeCollider.collisionPoint;
+			if( _opaqueCollider.aCollisionExists ) {
+				local = _opaqueCollider.getCollisionDataForFirstItem().collisionPoint;
 				event3D.localX = local.x;
 				event3D.localY = local.y;
 				event3D.localZ = local.z;
-				scene = _activeCollider.entity.transform.transformVector(local);
+				scene = _opaqueCollider.linkedListHeadItem.renderable.sourceEntity.transform.transformVector(local);
 				event3D.sceneX = scene.x;
 				event3D.sceneY = scene.y;
 				event3D.sceneZ = scene.z;
@@ -292,7 +280,7 @@ package away3d.core.managers
                 var localZ:Number;
 
                 if( _activeRenderable ) {
-                    var local:Vector3D = _activeCollider.collisionPoint;
+                    var local:Vector3D = _opaqueCollider.getCollisionDataForFirstItem().collisionPoint;
                     localX = local.x;
                     localY = local.y;
                     localZ = local.z;

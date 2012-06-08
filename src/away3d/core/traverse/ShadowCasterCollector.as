@@ -2,7 +2,7 @@ package away3d.core.traverse
 {
 	import away3d.arcane;
 	import away3d.core.base.IRenderable;
-	import away3d.core.data.RenderableListItem;
+	import away3d.core.data.LinkedListItem;
 	import away3d.entities.Entity;
 	import away3d.lights.LightBase;
 
@@ -42,7 +42,7 @@ package away3d.core.traverse
 			// the test for material is temporary, you SHOULD be hammered with errors if you try to render anything without a material
 			if (renderable.castsShadows && renderable.material) {
 				_numOpaques++;
-				var item : RenderableListItem = _renderableListItemPool.getItem();
+				var item : LinkedListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
 				item.zIndex = renderable.zIndex;

@@ -3,7 +3,7 @@ package away3d.core.traverse
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
-	import away3d.core.data.RenderableListItem;
+	import away3d.core.data.LinkedListItem;
 	import away3d.core.data.RenderableListItemPool;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
@@ -26,8 +26,8 @@ package away3d.core.traverse
 	{
 		protected var _skyBox : IRenderable;
 		protected var _entities : Vector.<Entity>;
-		protected var _opaqueRenderableHead : RenderableListItem;
-		protected var _blendedRenderableHead : RenderableListItem;
+		protected var _opaqueRenderableHead : LinkedListItem;
+		protected var _blendedRenderableHead : LinkedListItem;
 		protected var _renderableListItemPool : RenderableListItemPool;
 		protected var _lights : Vector.<LightBase>;
 		private var _directionalLights : Vector.<DirectionalLight>;
@@ -108,12 +108,12 @@ package away3d.core.traverse
 		 * The list of opaque IRenderable objects that are considered potentially visible.
 		 * @param value
 		 */
-		public function get opaqueRenderableHead() : RenderableListItem
+		public function get opaqueRenderableHead() : LinkedListItem
 		{
 			return _opaqueRenderableHead;
 		}
 
-		public function set opaqueRenderableHead(value : RenderableListItem) : void
+		public function set opaqueRenderableHead(value : LinkedListItem) : void
 		{
 			_opaqueRenderableHead = value;
 		}
@@ -122,12 +122,12 @@ package away3d.core.traverse
 		 * The list of IRenderable objects that require blending and are considered potentially visible.
 		 * @param value
 		 */
-		public function get blendedRenderableHead() : RenderableListItem
+		public function get blendedRenderableHead() : LinkedListItem
 		{
 			return _blendedRenderableHead;
 		}
 
-		public function set blendedRenderableHead(value : RenderableListItem) : void
+		public function set blendedRenderableHead(value : LinkedListItem) : void
 		{
 			_blendedRenderableHead = value;
 		}
@@ -206,7 +206,7 @@ package away3d.core.traverse
 
 			material = renderable.material;
 			if (material) {
-				var item : RenderableListItem = _renderableListItemPool.getItem();
+				var item : LinkedListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;
 				item.materialId = material._uniqueId;
 				item.renderOrderId = material._renderOrderId;

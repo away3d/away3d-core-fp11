@@ -1,4 +1,4 @@
-package away3d.core.raycast.colliders.triangle
+package away3d.core.raycast.colliders
 {
 
 	public class AS3TriangleRayCollider

@@ -1,7 +1,7 @@
 package away3d.core.sort
 {
 	import away3d.arcane;
-	import away3d.core.data.RenderableListItem;
+	import away3d.core.data.LinkedListItem;
 	import away3d.core.traverse.EntityCollector;
 
 	use namespace arcane;
@@ -30,10 +30,10 @@ package away3d.core.sort
 			collector.blendedRenderableHead = mergeSort(collector.blendedRenderableHead, false);
 		}
 
-		private function mergeSort(head : RenderableListItem, useMaterial : Boolean) : RenderableListItem
+		private function mergeSort(head : LinkedListItem, useMaterial : Boolean) : LinkedListItem
 		{
-			var headB : RenderableListItem;
-			var fast : RenderableListItem, slow : RenderableListItem;
+			var headB : LinkedListItem;
+			var fast : LinkedListItem, slow : LinkedListItem;
 
 			if (!head || !head.next) return head;
 
@@ -57,9 +57,9 @@ package away3d.core.sort
 			headB = mergeSort(headB, useMaterial);
 
 			// merge sublists while respecting order
-			var result : RenderableListItem;
-			var curr : RenderableListItem;
-			var l : RenderableListItem;
+			var result : LinkedListItem;
+			var curr : LinkedListItem;
+			var l : LinkedListItem;
 			var cmp : int;
 
 			if (!head) return headB;

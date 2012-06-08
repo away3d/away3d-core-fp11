@@ -2,7 +2,8 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.core.data.RenderableListItem;
+	import away3d.core.data.LinkedListItem;
+	import away3d.core.data.LinkedListItem;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.materials.MaterialBase;
 
@@ -81,10 +82,10 @@ package away3d.core.render
 		 * @param renderables The renderables to draw.
 		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function drawRenderables(item : RenderableListItem, entityCollector : EntityCollector) : void
+		private function drawRenderables(item : LinkedListItem, entityCollector : EntityCollector) : void
 		{
 			var camera : Camera3D = entityCollector.camera;
-			var item2 : RenderableListItem;
+			var item2 : LinkedListItem;
 
 			while (item) {
 				_activeMaterial = item.renderable.material;
