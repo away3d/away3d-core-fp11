@@ -372,6 +372,7 @@ package away3d.loaders.parsers
 			var tvertices : Vector.<Number>;
 			var i : uint, j : int, k : uint, ch : uint;
 			var name : String = "";
+			var prevSeq : VertexAnimationSequence = null;
 			
 			_byteData.position = _offsetFrames;
 			
@@ -427,12 +428,26 @@ package away3d.loaders.parsers
 				if (!seq) {
 					seq = new VertexAnimationSequence(name);
 					_animator.addSequence(seq);
+					
+					// If another sequence was parsed before this one, starting
+					// a new sequence measn the previuos one is complete and can
+					// hence be finalized.
+					if (prevSeq)
+						finalizeAsset(prevSeq);
+					
+					prevSeq = seq;
 				}
 				seq.addFrame(geometry, 1000 / FPS);
 			}
 			
+			// Finalize the last sequence
+			if (prevSeq)
+				finalizeAsset(prevSeq);
 			
+			// Force finalizeAsset() to decide name
+			_animator.name = "";
 			finalizeAsset(_animator);
+			
 			_parsedFrames = true;
 		}
 		
