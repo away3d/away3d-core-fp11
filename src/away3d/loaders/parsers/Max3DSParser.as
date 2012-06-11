@@ -13,6 +13,7 @@ package away3d.loaders.parsers
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.geom.Matrix3D;
@@ -529,7 +530,8 @@ package away3d.loaders.parsers
 			var mat : DefaultMaterialBase;
 			
 			if (_cur_mat.colorMap) {
-				mat = new TextureMaterial(_cur_mat.colorMap.texture);
+				// TODO: Consider way to optimize by reusing default texture
+				mat = new TextureMaterial(_cur_mat.colorMap.texture || new BitmapTexture(defaultBitmapData));
 			}
 			else {
 				mat = new ColorMaterial(_cur_mat.diffuseColor);
