@@ -330,7 +330,7 @@ package away3d.library
 				rehashAssetDict();
 			
 			if (_assetDictionary.hasOwnProperty(asset.assetNamespace)) {
-				if (_assetDictionary.hasOwnProperty(asset.name))
+				if (_assetDictionary[asset.assetNamespace].hasOwnProperty(asset.name))
 					delete _assetDictionary[asset.assetNamespace][asset.name];
 				
 			}
