@@ -79,7 +79,7 @@ package away3d.core.managers
 			}
 			else {
 				_renderToTextureRect.x = 0;
-				_renderToTextureRect.height = _textureHeight;
+				_renderToTextureRect.width = _textureWidth;
 			}
 
 			dispatchEvent(new Event(Event.RESIZE));
