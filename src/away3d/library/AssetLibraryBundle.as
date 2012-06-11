@@ -316,12 +316,21 @@ package away3d.library
 				if (asset.assetNamespace == ns) {
 					if (dispose) 
 						asset.disposeAsset();
-					removeAssetFromDict(asset);
+					
+					// Remove asset from dictionary, but don't try to auto-remove
+					// the namespace, which will trigger an unnecessarily expensive
+					// test that is not needed since we know that the namespace
+					// will be empty when loop finishes.
+					removeAssetFromDict(asset, false);
 				}
 				else {
 					_assets[idx++] = asset;
 				}
 			}
+			
+			// Remove empty namespace
+			if (_assetDictionary.hasOwnProperty(ns))
+				delete _assetDictionary[ns];
 		}
 		
 		private function removeAssetFromDict(asset : IAsset, autoRemoveEmptyNamespace : Boolean = true) : void
