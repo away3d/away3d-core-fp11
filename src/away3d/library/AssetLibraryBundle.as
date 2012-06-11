@@ -310,7 +310,7 @@ package away3d.library
 			_assets.length = 0;
 			
 			ns ||= NamedAssetBase.DEFAULT_NAMESPACE;
-			for each (asset in _assets) {
+			for each (asset in old_assets) {
 				// Remove from dict if in the supplied namespace. If not,
 				// transfer over to the new vector.
 				if (asset.assetNamespace == ns) {
