@@ -324,7 +324,7 @@ package away3d.library
 			}
 		}
 		
-		private function removeAssetFromDict(asset : IAsset) : void
+		private function removeAssetFromDict(asset : IAsset, autoRemoveEmptyNamespace : Boolean = true) : void
 		{
 			if (_assetDictDirty)
 				rehashAssetDict();
@@ -333,6 +333,18 @@ package away3d.library
 				if (_assetDictionary[asset.assetNamespace].hasOwnProperty(asset.name))
 					delete _assetDictionary[asset.assetNamespace][asset.name];
 				
+				if (autoRemoveEmptyNamespace) {
+					var key : String;
+					var empty : Boolean = true;
+					
+					for (key in _assetDictionary[asset.assetNamespace]) {
+						empty = false;
+						break;
+					}
+					
+					if (empty)
+						delete _assetDictionary[asset.assetNamespace];
+				}
 			}
 		}
 		
