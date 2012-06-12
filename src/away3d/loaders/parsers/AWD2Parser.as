@@ -1006,7 +1006,7 @@ package away3d.loaders.parsers
 					var type : uint;
 					
 					key = _body.readUnsignedShort();
-					len = _body.readUnsignedShort();
+					len = _body.readUnsignedInt();
 					if (expected.hasOwnProperty(key)) {
 						type = expected[key];
 						props.set(key, parseAttrValue(type, len));
@@ -1044,7 +1044,7 @@ package away3d.loaders.parsers
 					ns_id = _body.readUnsignedByte();
 					attr_key = parseVarStr();
 					attr_type = _body.readUnsignedByte();
-					attr_len = _body.readUnsignedShort();
+					attr_len = _body.readUnsignedInt();
 					
 					switch (attr_type) {
 						case AWD_FIELD_STRING:
