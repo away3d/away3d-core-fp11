@@ -70,7 +70,6 @@ package away3d.core.raycast.colliders {
 			// The bounds collider has filtered and populated its data, use it here from now on.
 			_entities = _boundsCollider.entities;
 			_collisionData = _boundsCollider.collisionData;
-			_aCollisionExists = true; // TODO: evaluate these when tri collisions come in.
 			_numberOfCollisions = _boundsCollider.numberOfCollisions;
 		}
 		else return;
@@ -92,6 +91,7 @@ package away3d.core.raycast.colliders {
 				// If a collision exists, update the collision data and stop all checks.
 				if( triangleCollider.aCollisionExists ) {
 					setCollisionDataForItem( entity, triangleCollider.getCollisionDataForFirstItem() );
+					_aCollisionExists = true;
 					return;
 				}
 				else { // A failed triangle collision check discards the collision.
@@ -103,7 +103,10 @@ package away3d.core.raycast.colliders {
 					i--;
 				}
 			}
-			else return; // A bounds collision with no triangle collider stops all checks.
+			else { // A bounds collision with no triangle collider stops all checks.
+				_aCollisionExists = true;
+				return;
+			}
 		}
     }
 }

@@ -5,7 +5,6 @@ package away3d.core.raycast.colliders
 	import away3d.core.base.Object3D;
 	import away3d.core.base.SubMesh;
 	import away3d.core.raycast.data.RayCollisionVO;
-	import away3d.entities.Entity;
 	import away3d.entities.Mesh;
 
 	import flash.geom.Vector3D;
@@ -155,5 +154,7 @@ package away3d.core.raycast.colliders
 			}
 			return false;
 		}
+
+		// TODO: provide additional collision data such as UV, etc...
 	}
 }
