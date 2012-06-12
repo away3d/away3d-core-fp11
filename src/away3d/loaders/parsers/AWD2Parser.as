@@ -359,9 +359,10 @@ package away3d.loaders.parsers
 			num_methods = _body.readUnsignedByte();
 			
 			// Read material numerical properties
-			// (1=color, 2=bitmap url, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
+			// (1=color, 2=bitmap url, 10=alpha, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
 			props = parseProperties({ 1:AWD_FIELD_INT32, 2:AWD_FIELD_BADDR, 
-				11:AWD_FIELD_BOOL, 12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
+				10:AWD_FIELD_FLOAT32, 11:AWD_FIELD_BOOL, 
+				12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
 			
 			methods_parsed = 0;
 			while (methods_parsed < num_methods) {
@@ -378,7 +379,7 @@ package away3d.loaders.parsers
 				var color : uint;
 				
 				color = props.get(1, 0xcccccc);
-				mat = new ColorMaterial(color);
+				mat = new ColorMaterial(color, props.get(10, 1.0));
 			}
 			else if (type == 2) { // Bitmap material
 				//TODO: not used
