@@ -310,29 +310,50 @@ package away3d.library
 			_assets.length = 0;
 			
 			ns ||= NamedAssetBase.DEFAULT_NAMESPACE;
-			for each (asset in _assets) {
+			for each (asset in old_assets) {
 				// Remove from dict if in the supplied namespace. If not,
 				// transfer over to the new vector.
 				if (asset.assetNamespace == ns) {
 					if (dispose) 
 						asset.disposeAsset();
-					removeAssetFromDict(asset);
+					
+					// Remove asset from dictionary, but don't try to auto-remove
+					// the namespace, which will trigger an unnecessarily expensive
+					// test that is not needed since we know that the namespace
+					// will be empty when loop finishes.
+					removeAssetFromDict(asset, false);
 				}
 				else {
 					_assets[idx++] = asset;
 				}
 			}
+			
+			// Remove empty namespace
+			if (_assetDictionary.hasOwnProperty(ns))
+				delete _assetDictionary[ns];
 		}
 		
-		private function removeAssetFromDict(asset : IAsset) : void
+		private function removeAssetFromDict(asset : IAsset, autoRemoveEmptyNamespace : Boolean = true) : void
 		{
 			if (_assetDictDirty)
 				rehashAssetDict();
 			
 			if (_assetDictionary.hasOwnProperty(asset.assetNamespace)) {
-				if (_assetDictionary.hasOwnProperty(asset.name))
+				if (_assetDictionary[asset.assetNamespace].hasOwnProperty(asset.name))
 					delete _assetDictionary[asset.assetNamespace][asset.name];
 				
+				if (autoRemoveEmptyNamespace) {
+					var key : String;
+					var empty : Boolean = true;
+					
+					for (key in _assetDictionary[asset.assetNamespace]) {
+						empty = false;
+						break;
+					}
+					
+					if (empty)
+						delete _assetDictionary[asset.assetNamespace];
+				}
 			}
 		}
 		

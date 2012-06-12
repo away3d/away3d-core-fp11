@@ -278,6 +278,10 @@ package away3d.loaders.parsers
 						
 					if(geometry.subGeometries.length == 0) continue;
 					
+					// Finalize and force type-based name
+					finalizeAsset(geometry, "");
+					
+					// TODO: Re-use default material
 					bmMaterial = new TextureMaterial( new BitmapTexture(defaultBitmapData));
 					mesh = new Mesh(geometry, bmMaterial);
 					
@@ -820,6 +824,8 @@ package away3d.loaders.parsers
 					--i;
 				}
 			}
+			
+			finalizeAsset(lm.cm || mat);
 		}
 		
 		private function applyMaterials():void

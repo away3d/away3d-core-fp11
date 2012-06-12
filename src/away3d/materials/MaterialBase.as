@@ -14,7 +14,7 @@ package away3d.materials
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.DistanceMapPass;
 	import away3d.materials.passes.MaterialPassBase;
-
+	
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
@@ -50,6 +50,7 @@ package away3d.materials
 
 		private var _owners : Vector.<IMaterialOwner>;
 
+		private var _premultiplied : Boolean;
 		private var _requiresBlending : Boolean;
 
 		private var _blendMode : String = BlendMode.NORMAL;
@@ -78,6 +79,9 @@ package away3d.materials
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
 			_distancePass = new DistanceMapPass();
+			
+			// Default to considering pre-multiplied textures while blending
+			alphaPremultiplied = true;
 
 //			invalidatePasses(null);
 		}
@@ -210,31 +214,25 @@ package away3d.materials
 		{
 			_blendMode = value;
 
-			_requiresBlending = true;
-			switch (value) {
-				case BlendMode.NORMAL:
-				case BlendMode.LAYER:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
-					_requiresBlending = false; // only requires blending if a subtype needs it
-					break;
-				case BlendMode.MULTIPLY:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
-					break;
-				case BlendMode.ADD:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE;
-					break;
-				case BlendMode.ALPHA:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					break;
-				default:
-					throw new ArgumentError("Unsupported blend mode!");
-			}
-
+			updateBlendFactors();
 		}
+		
+		
+		/**
+		 * Indicates whether visible textures (or other pixels) used by this material have
+		 * already been premultiplied. Toggle this if you are seeing black halos around your
+		 * blended alpha edges.
+		*/
+		public function get alphaPremultiplied() : Boolean
+		{
+			return _premultiplied;
+		}
+		public function set alphaPremultiplied(value : Boolean) : void
+		{
+			_premultiplied = value;
+			updateBlendFactors();
+		}
+		
 
 		/**
 		 * Indicates whether or not the material requires alpha blending during rendering.
@@ -475,7 +473,36 @@ package away3d.materials
 			calculateRenderId();
 			invalidatePasses(null);
 		}
-
+		
+		private function updateBlendFactors() : void
+		{
+			switch (_blendMode) {
+				case BlendMode.NORMAL:
+				case BlendMode.LAYER:
+					_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+					_requiresBlending = false; // only requires blending if a subtype needs it
+					break;
+				case BlendMode.MULTIPLY:
+					_srcBlend = Context3DBlendFactor.ZERO;
+					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
+					_requiresBlending = true;
+					break;
+				case BlendMode.ADD:
+					_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+					_destBlend = Context3DBlendFactor.ONE;
+					_requiresBlending = true;
+					break;
+				case BlendMode.ALPHA:
+					_srcBlend = Context3DBlendFactor.ZERO;
+					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
+					_requiresBlending = true;
+					break;
+				default:
+					throw new ArgumentError("Unsupported blend mode!");
+			}
+		}
+		
 		private function calculateRenderId() : void
 		{
 		}

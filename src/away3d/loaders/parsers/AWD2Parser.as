@@ -20,6 +20,7 @@ package away3d.loaders.parsers
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.display.Sprite;
@@ -136,11 +137,22 @@ package away3d.loaders.parsers
 		/**
 		 * @inheritDoc
 		 */
-		/*override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
+		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			// apply system default
-			//BitmapMaterial(mesh.material).bitmapData = defaultBitmapData;
-		}*/
+			if (_texture_users.hasOwnProperty(resourceDependency.id)) {
+				var mat : TextureMaterial;
+				var users : Array;
+				
+				// TODO: Reuse default bitmap texture
+				var texture : BitmapTexture = new BitmapTexture(defaultBitmapData);
+				
+				users = _texture_users[resourceDependency.id];
+				for each (mat in users) {
+					mat.texture = texture;
+					finalizeAsset(mat);
+				}
+			}
+		}
 		
 		/**
 		 * Tests whether a data block can be parsed by the parser.
@@ -149,20 +161,7 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			var bytes : ByteArray = ParserUtil.toByteArray(data);
-			
-			if (bytes) {
-				var magic : String;
-				
-				bytes.position = 0;
-				magic = data.readUTFBytes(3);
-				bytes.position = 0;
-				
-				if (magic == 'AWD')
-					return true;
-			}
-			
-			return false;
+			return (ParserUtil.toString(data, 3)=='AWD');
 		}
 		
 		
@@ -719,13 +718,6 @@ package away3d.loaders.parsers
 			// Read optional properties
 			props = parseProperties({ 1:AWD_FIELD_MTX4x4 }); 
 			
-			// TODO: not used
-			// var mtx : Matrix3D;
-			var bsm_data : Array = props.get(1, null);
-			if (bsm_data) {
-				bsm = new Matrix3D(Vector.<Number>(bsm_data));
-			}
-			
 			geom = new Geometry();
 			
 			// Loop through sub meshes
@@ -1014,7 +1006,7 @@ package away3d.loaders.parsers
 					var type : uint;
 					
 					key = _body.readUnsignedShort();
-					len = _body.readUnsignedShort();
+					len = _body.readUnsignedInt();
 					if (expected.hasOwnProperty(key)) {
 						type = expected[key];
 						props.set(key, parseAttrValue(type, len));
@@ -1052,7 +1044,7 @@ package away3d.loaders.parsers
 					ns_id = _body.readUnsignedByte();
 					attr_key = parseVarStr();
 					attr_type = _body.readUnsignedByte();
-					attr_len = _body.readUnsignedShort();
+					attr_len = _body.readUnsignedInt();
 					
 					switch (attr_type) {
 						case AWD_FIELD_STRING:

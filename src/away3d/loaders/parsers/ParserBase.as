@@ -198,7 +198,7 @@ package away3d.loaders.parsers
 			var type_event : String;
 			var type_name : String;
 			
-			if (name)
+			if (name != null)
 				asset.name = name;
 			
 			switch (asset.assetType) {

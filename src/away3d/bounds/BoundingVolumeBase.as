@@ -120,38 +120,43 @@ package away3d.bounds
 		 */
 		public function fromGeometry( geometry:Geometry ):void {
 			var subs:Vector.<SubGeometry> = geometry.subGeometries;
-			var j:uint;
 			var lenS:uint = subs.length;
-			var lenV:uint;
-			var vertices:Vector.<Number>;
-			var i:uint;
-			var v:Number;
-			var minX:Number, minY:Number, minZ:Number;
-			var maxX:Number, maxY:Number, maxZ:Number;
-
-			minX = minY = minZ = Number.POSITIVE_INFINITY;
-			maxX = maxY = maxZ = Number.NEGATIVE_INFINITY;
-
-			while( j < lenS ) {
-				vertices = subs[j++].vertexData;
-				lenV = vertices.length;
-				i = 0;
-				while( i < lenV ) {
-					v = vertices[i++];
-					if( v < minX ) minX = v;
-					else if( v > maxX ) maxX = v;
-					v = vertices[i++];
-					if( v < minY ) minY = v;
-					else if( v > maxY ) maxY = v;
-					v = vertices[i++];
-					if( v < minZ ) minZ = v;
-					else if( v > maxZ ) maxZ = v;
+			
+			if (lenS > 0 && subs[0].vertexData.length >= 3) {
+				var j:uint;
+				var lenV:uint;
+				var vertices:Vector.<Number>;
+				var i:uint;
+				var v:Number;
+				var minX:Number, minY:Number, minZ:Number;
+				var maxX:Number, maxY:Number, maxZ:Number;
+	
+				minX = maxX = subs[0].vertexData[0];
+				minY = maxY = subs[0].vertexData[1];
+				minZ = maxZ = subs[0].vertexData[2];
+	
+				while( j < lenS ) {
+					vertices = subs[j++].vertexData;
+					lenV = vertices.length;
+					i = 0;
+					while( i < lenV ) {
+						v = vertices[i++];
+						if( v < minX ) minX = v;
+						else if( v > maxX ) maxX = v;
+						v = vertices[i++];
+						if( v < minY ) minY = v;
+						else if( v > maxY ) maxY = v;
+						v = vertices[i++];
+						if( v < minZ ) minZ = v;
+						else if( v > maxZ ) maxZ = v;
+					}
 				}
+	
+				fromExtremes( minX, minY, minZ, maxX, maxY, maxZ );
 			}
-
-			if( minX == Number.POSITIVE_INFINITY )
-				minX = minY = minZ = maxX = maxY = maxZ = 0;
-			fromExtremes( minX, minY, minZ, maxX, maxY, maxZ );
+			else {
+				fromExtremes(0,0,0, 0,0,0);
+			}
 		}
 
 		/**

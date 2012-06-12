@@ -10,6 +10,7 @@ package away3d.loaders.parsers
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.loaders.misc.ResourceDependency;
+	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
@@ -98,10 +99,7 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			// TODO: not used
-			data = data;
-			// todo: implement
-			return false;
+			return (ParserUtil.toString(data, 4) == 'IDP2');
 		}
 		
 		/**
@@ -138,6 +136,10 @@ package away3d.loaders.parsers
 			if(!_startedParsing) {
 				_byteData = getByteData();
 				_startedParsing = true;
+				
+				// Reset bytearray read position (which may have been 
+				// moved forward by the supportsData() function.)
+				_byteData.position = 0;
 			}
 			
 			while (hasTime()) {
@@ -182,18 +184,18 @@ package away3d.loaders.parsers
 								sub.updateUVData(_firstSubGeom.UVData);
 								sub.updateIndexData(_indices);
 								
-								return true;
+								// Force name to be chosen by finalizeAsset()
+								_mesh.name = "";
+								finalizeAsset(_mesh);
+								
+								return PARSING_DONE;
 							}
 						}
 					}
 				}
 			}
 			
-			// TODO: Can this be done a nicer fashion for this file format? Or does
-			// it always just return a single mesh, in which case this should be fine
-			finalizeAsset(_mesh);
-			
-			return false;
+			return MORE_TO_PARSE;
 		}
 		
 		/**
@@ -370,6 +372,7 @@ package away3d.loaders.parsers
 			var tvertices : Vector.<Number>;
 			var i : uint, j : int, k : uint, ch : uint;
 			var name : String = "";
+			var prevSeq : VertexAnimationSequence = null;
 			
 			_byteData.position = _offsetFrames;
 			
@@ -425,12 +428,26 @@ package away3d.loaders.parsers
 				if (!seq) {
 					seq = new VertexAnimationSequence(name);
 					_animator.addSequence(seq);
+					
+					// If another sequence was parsed before this one, starting
+					// a new sequence measn the previuos one is complete and can
+					// hence be finalized.
+					if (prevSeq)
+						finalizeAsset(prevSeq);
+					
+					prevSeq = seq;
 				}
 				seq.addFrame(geometry, 1000 / FPS);
 			}
 			
+			// Finalize the last sequence
+			if (prevSeq)
+				finalizeAsset(prevSeq);
 			
+			// Force finalizeAsset() to decide name
+			_animator.name = "";
 			finalizeAsset(_animator);
+			
 			_parsedFrames = true;
 		}
 		
