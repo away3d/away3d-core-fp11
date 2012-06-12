@@ -394,6 +394,7 @@ package away3d.loaders.parsers
 				if (texture) {
 					mat = new TextureMaterial(texture);
 					TextureMaterial(mat).alphaBlending = props.get(11, false);
+					TextureMaterial(mat).alpha = props.get(10, 1.0);
 					finalize = true;
 				}
 				else {
