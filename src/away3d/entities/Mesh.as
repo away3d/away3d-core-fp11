@@ -11,6 +11,7 @@
 	import away3d.core.base.SubMesh;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.MeshNode;
+	import away3d.core.raycast.colliders.BoundsRayCollider;
 	import away3d.events.GeometryEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
@@ -30,7 +31,6 @@
 		private var _material : MaterialBase;
 		arcane var _animationState : AnimationStateBase;
 		private var _castsShadows : Boolean = true;
-		private var _mouseHitMethod:uint;
 
 		/**
 		 * Create a new Mesh object.
@@ -44,6 +44,8 @@
 
 			this.geometry = geometry || new Geometry();
 			this.material = material;
+
+			_boundsRayCollider = new BoundsRayCollider();
 		}
 		
 		public function bakeTransformations():void
@@ -61,17 +63,6 @@
 		private function onGeometryBoundsInvalid(event : GeometryEvent) : void
 		{
 			invalidateBounds();
-		}
-
-		/**
-		 * Indicates what picking method to use on this mesh. See MouseHitMethod for available options.
-		 */
-		public function get mouseHitMethod():uint {
-			return _mouseHitMethod;
-		}
-
-		public function set mouseHitMethod( value:uint ):void {
-			_mouseHitMethod = value;
 		}
 
 		/**

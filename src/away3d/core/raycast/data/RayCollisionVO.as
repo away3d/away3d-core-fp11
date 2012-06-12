@@ -12,13 +12,6 @@ package away3d.core.raycast.data
 		public var collisionFarT:Number;
 		public var collisionUV:Point;
 		public var rayOriginIsInsideBounds:Boolean;
-
-		public function get collisionPoint():Vector3D {
-			var point:Vector3D = new Vector3D();
-			point.x = localRayPosition.x + collisionNearT * localRayDirection.x;
-			point.y = localRayPosition.y + collisionNearT * localRayDirection.y;
-			point.z = localRayPosition.z + collisionNearT * localRayDirection.z;
-			return point;
-		}
+		public var collisionPoint:Vector3D;
 	}
 }

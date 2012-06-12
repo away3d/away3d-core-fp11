@@ -4,18 +4,14 @@ package away3d.core.managers
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
-	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
-	import away3d.core.data.LinkedListItem;
-	import away3d.core.data.LinkedListItem;
-	import away3d.core.raycast.data.RayCollisionVO;
+	import away3d.core.raycast.colliders.MouseRayCollider;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
-	import away3d.core.raycast.colliders.MouseRayCollider;
-	import away3d.core.raycast.data.MouseHitMethod;
 
 	import flash.events.MouseEvent;
+	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -27,282 +23,253 @@ package away3d.core.managers
 	 */
 	public class Mouse3DManager
 	{
-		private var _previousActiveObject:Object3D;
-		private var _previousActiveRenderable:IRenderable;
-		private var _activeObject:Entity;
-		private var _activeRenderable:IRenderable;
+		private var _previousCollidingObject:Entity;
+		private var _collidingObject:Entity;
 		private var _oldLocalX:Number;
 		private var _oldLocalY:Number;
 		private var _oldLocalZ:Number;
 
-		private var _opaqueCollider:MouseRayCollider;
+		private var _mouseIsOccludedByAnotherView:Boolean;
+		private var _mouseIsWithinTheView:Boolean;
+
 		private var _view:View3D;
-        private var _mouseIsOverView:Boolean;
+		private var _rayCollider:MouseRayCollider;
 
-		private static var _mouseClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.CLICK );
-		private static var _mouseDoubleClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.DOUBLE_CLICK );
-		private static var _mouseMove:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_MOVE );
-		private static var _mouseOver:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_OVER );
-		private static var _mouseOut:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_OUT );
-		private static var _mouseUp:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_UP );
-		private static var _mouseDown:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_DOWN );
-		private static var _mouseWheel:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_WHEEL );
-
+//		private var _forceMouseMove:Boolean;
 		private var _queuedEvents:Vector.<MouseEvent3D> = new Vector.<MouseEvent3D>();
-		private var _forceMouseMove:Boolean;
 		private var _mouseMoveEvent:MouseEvent = new MouseEvent( MouseEvent.MOUSE_MOVE );
 
+		private static var _mouseUp:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_UP );
+		private static var _mouseClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.CLICK );
+		private static var _mouseOut:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_OUT );
+		private static var _mouseDown:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_DOWN );
+		private static var _mouseMove:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_MOVE );
+		private static var _mouseOver:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_OVER );
+		private static var _mouseWheel:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_WHEEL );
+		private static var _mouseDoubleClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.DOUBLE_CLICK );
 
-//		private static var _rollOver : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OVER);
-//		private static var _rollOut : MouseEvent3D = new MouseEvent3D(MouseEvent3D.ROLL_OUT);
-
-		/**
-		 * Creates a Mouse3DManager object.
-		 * @param view The View3D object for which the mouse will be detected.
-		 * @param hitTestRenderer The hitTestRenderer that will perform hit-test rendering.
-		 */
 		public function Mouse3DManager( view:View3D ) {
 			_view = view;
-			_opaqueCollider = new MouseRayCollider( view );
-			// TODO: add invisible container?
+			_rayCollider = new MouseRayCollider( view );
+			enableListeners();
+		}
+
+		// ---------------------------------------------------------------------
+		// Interface.
+		// ---------------------------------------------------------------------
+
+		public function update():void {
+			if( _mouseIsWithinTheView && !_mouseIsOccludedByAnotherView ) { // Only update when the mouse is in the view.
+
+				// Store previous colliding object.
+				_previousCollidingObject = _collidingObject;
+
+				// Evaluate new colliding object.
+				var collector:EntityCollector = _view.entityCollector;
+				if( collector.numMouseEnableds > 0 ) {
+					_rayCollider.updateMouseRay();
+					_rayCollider.updateEntities( collector.entities );
+					_rayCollider.evaluate();
+					_collidingObject = _rayCollider.aCollisionExists ? _rayCollider.firstEntity : null;
+				}
+				else {
+					_collidingObject = null;
+				}
+			}
+		}
+
+		public function fireMouseEvents():void {
+
+			trace( "Mouse3DManager - fireMouseEvents() -----------------------------------" );
+			trace( "_collidingObject: " + _collidingObject + ", _previousCollidingObject: " + _previousCollidingObject );
+
+			var i:uint;
+			var len:uint;
+			var event:MouseEvent3D;
+			var dispatcher:Object3D;
+
+			// If colliding object has changed, queue over/out events.
+			if( _collidingObject != _previousCollidingObject ) {
+				if( _previousCollidingObject ) queueDispatch( _mouseOut, _mouseMoveEvent, _previousCollidingObject );
+				if( _collidingObject ) queueDispatch( _mouseOver, _mouseMoveEvent, _collidingObject );
+			}
+
+			/*if( _forceMouseMove && _collidingObject ) {
+
+			 var localX:Number;
+			 var localY:Number;
+			 var localZ:Number;
+
+			 if( _collidingObject ) {
+			 var local:Vector3D = _rayCollider.getCollisionDataForFirstItem().collisionPoint;
+			 localX = local.x;
+			 localY = local.y;
+			 localZ = local.z;
+			 }
+			 else {
+			 localX = localY = localZ = -1;
+			 }
+
+			 if( ( localX != _oldLocalX ) || ( localY != _oldLocalY ) || ( localZ != _oldLocalZ ) ) {
+			 queueDispatch( _mouseMove, _mouseMoveEvent, _collidingObject );
+			 _oldLocalX = localX;
+			 _oldLocalY = localY;
+			 _oldLocalZ = localZ;
+			 }
+			 }*/
+
+			// Dispatch all queued events.
+			len = _queuedEvents.length;
+			for( i = 0; i < len; ++i ) {
+				// Only dispatch from first implicitly enabled object ( one that is not a child of a mouseChildren = false hierarchy ).
+				event = _queuedEvents[ i ];
+				dispatcher = event.object;
+				while( dispatcher && dispatcher is ObjectContainer3D && !ObjectContainer3D( dispatcher )._implicitMouseEnabled ) dispatcher = ObjectContainer3D( dispatcher ).parent;
+				if( dispatcher ) {
+					dispatcher.dispatchEvent( event );
+				}
+			}
+			_queuedEvents.length = 0;
+		}
+
+		// ---------------------------------------------------------------------
+		// Private.
+		// ---------------------------------------------------------------------
+
+		private function queueDispatch( event:MouseEvent3D, sourceEvent:MouseEvent, object:Entity = null ):void {
+
+			var local:Vector3D;
+			var scene:Vector3D;
+
+			// 2D properties.
+			event.ctrlKey = sourceEvent.ctrlKey;
+			event.altKey = sourceEvent.altKey;
+			event.shiftKey = sourceEvent.shiftKey;
+			event.delta = sourceEvent.delta;
+			event.screenX = _view.stage.mouseX;
+			event.screenY = _view.stage.mouseY;
+
+			// 3D properties.
+			// TODO set all 3d event properties
+			event.object = object ? object : _collidingObject;
+			if( _rayCollider.aCollisionExists ) {
+				// UV.
+				var collisionUV:Point = _rayCollider.getCollisionDataForFirstItem().collisionUV;
+				if( collisionUV ) {
+					event.uv = collisionUV;
+				}
+				// Position.
+				local = _rayCollider.getCollisionDataForFirstItem().collisionPoint;
+				event.localX = local.x;
+				event.localY = local.y;
+				event.localZ = local.z;
+				scene = _rayCollider.firstEntity.transform.transformVector( local );
+				event.sceneX = scene.x;
+				event.sceneY = scene.y;
+				event.sceneZ = scene.z;
+			}
+			else {
+				event.uv = null;
+				event.localX = -1;
+				event.localY = -1;
+				event.localZ = -1;
+				event.sceneX = -1;
+				event.sceneY = -1;
+				event.sceneZ = -1;
+			}
+
+			// Store event to be dispatched later.
+			_queuedEvents.push( event );
+		}
+
+		public function dispose():void {
+			disableListeners();
+		}
+
+		// ---------------------------------------------------------------------
+		// Listeners.
+		// ---------------------------------------------------------------------
+
+		private function onMouseMove( event:MouseEvent ):void {
+			trace( "Mouse3DManager - onMouseMove" );
+			evaluateIfMouseIsWithinTheView();
+//			if( !_mouseIsWithinTheView ) return; // Ignore mouse moves outside the view.
+//			if( _forceMouseMove ) return; // If on force mouse move, move events are managed on every update, not here.
+			if( _collidingObject ) queueDispatch( _mouseMove, _mouseMoveEvent = event );
+		}
+
+		private function onMouseOut( event:MouseEvent ):void {
+			_mouseIsOccludedByAnotherView = true;
+			if( _collidingObject ) queueDispatch( _mouseOut, event, _collidingObject );
+		}
+
+		private function onMouseOver( event:MouseEvent ):void {
+			_mouseIsOccludedByAnotherView = false;
+			if( _collidingObject ) queueDispatch( _mouseOver, event, _collidingObject );
+		}
+
+		private function onClick( event:MouseEvent ):void {
+//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseClick, event );
+		}
+
+		private function onDoubleClick( event:MouseEvent ):void {
+//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseDoubleClick, event );
+		}
+
+		private function onMouseDown( event:MouseEvent ):void {
+//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseDown, event );
+		}
+
+		private function onMouseUp( event:MouseEvent ):void {
+//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseUp, event );
+		}
+
+		private function onMouseWheel( event:MouseEvent ):void {
+//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseWheel, event );
+		}
+
+		private function enableListeners():void {
 			_view.addEventListener( MouseEvent.CLICK, onClick );
 			_view.addEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
 			_view.addEventListener( MouseEvent.MOUSE_DOWN, onMouseDown );
-			_view.addEventListener( MouseEvent.MOUSE_MOVE, onMouseMove );	// mark moves as most important
+			_view.addEventListener( MouseEvent.MOUSE_MOVE, onMouseMove );
 			_view.addEventListener( MouseEvent.MOUSE_UP, onMouseUp );
 			_view.addEventListener( MouseEvent.MOUSE_WHEEL, onMouseWheel );
 			_view.addEventListener( MouseEvent.MOUSE_OVER, onMouseOver );
 			_view.addEventListener( MouseEvent.MOUSE_OUT, onMouseOut );
 		}
 
-		public function get forceMouseMove():Boolean {
-			return _forceMouseMove;
-		}
-
-		public function set forceMouseMove( value:Boolean ):void {
-			_forceMouseMove = value;
-		}
-
-		private function onMouseMove( event:MouseEvent ):void {
-			if( !_forceMouseMove )
-				queueDispatch( _mouseMove, event );
-		}
-
-		/**
-		 * Clear all resources and listeners used by this Mouse3DManager.
-		 */
-		public function dispose():void {
+		private function disableListeners():void {
 			_view.removeEventListener( MouseEvent.CLICK, onClick );
 			_view.removeEventListener( MouseEvent.DOUBLE_CLICK, onDoubleClick );
 			_view.removeEventListener( MouseEvent.MOUSE_DOWN, onMouseDown );
 			_view.removeEventListener( MouseEvent.MOUSE_MOVE, onMouseMove );
 			_view.removeEventListener( MouseEvent.MOUSE_UP, onMouseUp );
 			_view.removeEventListener( MouseEvent.MOUSE_WHEEL, onMouseWheel );
-            _view.removeEventListener( MouseEvent.MOUSE_OVER, onMouseOver );
-            _view.removeEventListener( MouseEvent.MOUSE_OUT, onMouseOut );
+			_view.removeEventListener( MouseEvent.MOUSE_OVER, onMouseOver );
+			_view.removeEventListener( MouseEvent.MOUSE_OUT, onMouseOut );
 		}
 
-		private function mouseInView():Boolean {
+		// ---------------------------------------------------------------------
+		// Getters & setters.
+		// ---------------------------------------------------------------------
+
+		/*public function get forceMouseMove():Boolean {
+		 return _forceMouseMove;
+		 }
+
+		 public function set forceMouseMove( value:Boolean ):void {
+		 _forceMouseMove = value;
+		 }*/
+
+		// ---------------------------------------------------------------------
+		// Utils.
+		// ---------------------------------------------------------------------
+
+		private function evaluateIfMouseIsWithinTheView():void {
 			var mx:Number = _view.mouseX;
 			var my:Number = _view.mouseY;
-			return mx >= 0 && my >= 0 && mx < _view.width && my < _view.height && _mouseIsOverView;
-		}
-
-        private function onMouseOut( event:MouseEvent ):void {
-            _mouseIsOverView = false;
-            if( _activeRenderable ) {
-                queueDispatch( _mouseOut, event, _activeRenderable );
-            }
-        }
-
-        private function onMouseOver( event:MouseEvent ):void {
-            _mouseIsOverView = true;
-            updateHitData();
-            if( _activeRenderable ) {
-                queueDispatch( _mouseOver, event, _activeRenderable );
-            }
-        }
-
-		/**
-		 * Called when the mouse clicks on the stage.
-		 */
-		private function onClick( event:MouseEvent ):void {
-			if( mouseInView() )
-				queueDispatch( _mouseClick, event );
-		}
-
-		public function updateHitData():void {
-			if( mouseInView() )
-				getObjectHitData();
-			else if( _mouseIsOverView ) {
-                _activeRenderable = null;
-            }
-		}
-
-		/**
-		 * Called when the mouse double-clicks on the stage.
-		 */
-		private function onDoubleClick( event:MouseEvent ):void {
-			if( mouseInView() )
-				queueDispatch( _mouseDoubleClick, event );
-		}
-
-		/**
-		 * Called when a mouseDown event occurs on the stage
-		 */
-		private function onMouseDown( event:MouseEvent ):void {
-			if( mouseInView() )
-				queueDispatch( _mouseDown, event );
-		}
-
-		/**
-		 * Called when a mouseUp event occurs on the stage
-		 */
-		private function onMouseUp( event:MouseEvent ):void {
-			if( mouseInView() )
-				queueDispatch( _mouseUp, event );
-		}
-
-		/**
-		 * Called when a mouseWheel event occurs on the stage
-		 */
-		private function onMouseWheel( event:MouseEvent ):void {
-			if( mouseInView() )
-				queueDispatch( _mouseWheel, event );
-		}
-
-		/**
-		 * Get the object hit information at the mouse position.
-		 */
-		private function getObjectHitData():void {
-			if( !_forceMouseMove && _queuedEvents.length == 0 )
-				return;
-
-			_previousActiveObject = _activeObject;
-			_previousActiveRenderable = _activeRenderable;
-
-			var collector:EntityCollector = _view.entityCollector;
-
-			if( collector.numMouseEnableds > 0 ) {
-				// TODO: consider the blended renderable head as well...
-				_opaqueCollider.updateMouseRay();
-				_opaqueCollider.updateLinkedListHead( collector.opaqueRenderableHead.clone() );
-				_opaqueCollider.evaluate();
-				_activeObject = ( _activeRenderable && _activeRenderable.mouseEnabled ) ? _activeRenderable.sourceEntity : null;
-			}
-			else {
-				_activeObject = null;
-				_activeRenderable = null;
-			}
-		}
-
-		/**
-		 * Sends out a MouseEvent3D based on the MouseEvent that triggered it on the Stage.
-		 * @param event3D The MouseEvent3D that will be dispatched.
-		 * @param sourceEvent The MouseEvent that triggered the dispatch.
-		 * @param renderable The IRenderable object that is the subject of the MouseEvent3D.
-		 */
-		private function dispatch( event3D:MouseEvent3D ):void {
-			var renderable:IRenderable;
-			// assign default renderable if it wasn't provide on queue time
-			if( !(renderable = (event3D.renderable ||= _activeRenderable)) ) return;
-
-			var local:Vector3D;
-			var scene:Vector3D;
-			
-			event3D.material = renderable.material;
-			event3D.object = renderable.sourceEntity;
-
-			if( _opaqueCollider.aCollisionExists && renderable.mouseHitMethod != MouseHitMethod.BOUNDS_ONLY ) {
-				event3D.uv = _opaqueCollider.getCollisionDataForFirstItem().collisionUV;
-			}
-			else {
-				event3D.uv = null;
-			}
-
-			if( _opaqueCollider.aCollisionExists ) {
-				local = _opaqueCollider.getCollisionDataForFirstItem().collisionPoint;
-				event3D.localX = local.x;
-				event3D.localY = local.y;
-				event3D.localZ = local.z;
-				scene = _opaqueCollider.linkedListHeadItem.renderable.sourceEntity.transform.transformVector(local);
-				event3D.sceneX = scene.x;
-				event3D.sceneY = scene.y;
-				event3D.sceneZ = scene.z;
-			}
-			else {
-				event3D.localX = -1;
-				event3D.localY = -1;
-				event3D.localZ = -1;
-				event3D.sceneX = -1;
-				event3D.sceneY = -1;
-				event3D.sceneZ = -1;
-			}
-
-			// only dispatch from first implicitly enabled object (one that is not a child of a mouseChildren=false hierarchy)
-			var dispatcher:ObjectContainer3D = renderable.sourceEntity;
-
-			while(dispatcher && !dispatcher._implicitMouseEnabled) dispatcher = dispatcher.parent;
-			dispatcher.dispatchEvent( event3D );
-		}
-
-		private var _proxy:Stage3DProxy;
-
-		public function get stage3DProxy():Stage3DProxy {
-			return _proxy;
-		}
-
-		public function set stage3DProxy( value:Stage3DProxy ):void {
-			_proxy = value;
-		}
-
-		private function queueDispatch( event:MouseEvent3D, sourceEvent:MouseEvent, renderable:IRenderable = null ):void {
-			event.ctrlKey = sourceEvent.ctrlKey;
-			event.altKey = sourceEvent.altKey;
-			event.shiftKey = sourceEvent.shiftKey;
-			event.renderable = renderable;
-			event.delta = sourceEvent.delta;
-			event.screenX = _view.stage.mouseX;
-			event.screenY = _view.stage.mouseY;
-			_queuedEvents.push( event );
-		}
-
-		public function fireMouseEvents():void {
-
-			if( _activeObject != _previousActiveObject ) {
-				if( _previousActiveRenderable ) queueDispatch( _mouseOut, _mouseMoveEvent, _previousActiveRenderable );
-				if( _activeRenderable ) queueDispatch( _mouseOver, _mouseMoveEvent, _activeRenderable );
-			}
-
-            if( _forceMouseMove && _activeRenderable ) {
-                var localX:Number;
-                var localY:Number;
-                var localZ:Number;
-
-                if( _activeRenderable ) {
-                    var local:Vector3D = _opaqueCollider.getCollisionDataForFirstItem().collisionPoint;
-                    localX = local.x;
-                    localY = local.y;
-                    localZ = local.z;
-                }
-                else {
-                    localX = localY = localZ = -1;
-                }
-
-                if( (localX != _oldLocalX) || (localY != _oldLocalY) || (localZ != _oldLocalZ) ) {
-                    queueDispatch( _mouseMove, _mouseMoveEvent, _activeRenderable );
-                    _oldLocalX = localX;
-                    _oldLocalY = localY;
-                    _oldLocalZ = localZ;
-                }
-            }
-
-			var len:uint = _queuedEvents.length;
-
-			for( var i:uint = 0; i < len; ++i )
-				dispatch( _queuedEvents[i] );
-
-			_queuedEvents.length = 0;
+			_mouseIsWithinTheView = mx >= 0 && my >= 0 && mx < _view.width && my < _view.height;
 		}
 	}
 }

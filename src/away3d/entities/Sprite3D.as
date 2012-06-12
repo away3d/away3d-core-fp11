@@ -85,14 +85,6 @@ package away3d.entities
 		 _transform.appendScale(_width, _height, 1);
 		 }*/
 
-		public function get mouseHitMethod():uint {
-			return _mouseHitMethod;
-		}
-
-		public function set mouseHitMethod( value:uint ):void {
-			_mouseHitMethod = value;
-		}
-
 		public function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {
 			return _geometry.getVertexBuffer( stage3DProxy );
 		}

@@ -37,9 +37,9 @@ package away3d.core.raycast.colliders
 
 			reset();
 
-			var subMesh:SubMesh = _linkedListHeadItem as SubMesh;
-			uploadRenderableData( subMesh );
-			executeKernel();
+//			var subMesh:SubMesh = _listHeadItem as SubMesh;
+//			uploadRenderableData( subMesh );
+//			executeKernel();
 
 //			if( _collisionExists ) _collidingRenderables = subMesh;
 		}
@@ -115,7 +115,7 @@ package away3d.core.raycast.colliders
 			}
 //			_t = smallestNonNegativeT;
 			_collisionTriangleIndex = collisionTriangleIndex;
-			_collisionExists = collisionTriangleIndex >= 0;
+			_aCollisionExists = collisionTriangleIndex >= 0;
 
 //        time = getTimer() - time;
 //        trace( "tri-test - resolve time: " + time );

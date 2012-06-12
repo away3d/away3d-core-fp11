@@ -8,6 +8,7 @@ package away3d.entities
 	import away3d.containers.Scene3D;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.Partition3D;
+	import away3d.core.raycast.colliders.RayColliderBase;
 	import away3d.errors.AbstractMethodError;
 	import away3d.library.assets.AssetType;
 
@@ -42,6 +43,9 @@ package away3d.entities
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
+
+		protected var _boundsRayCollider:RayColliderBase;
+		protected var _triangleRayCollider:RayColliderBase;
 
 		/**
 		 * 
@@ -350,6 +354,22 @@ package away3d.entities
 		override public function get assetType() : String
 		{
 			return AssetType.ENTITY;
+		}
+
+		public function get boundsRayCollider():RayColliderBase {
+			return _boundsRayCollider;
+		}
+
+		public function set boundsRayCollider( value:RayColliderBase ):void {
+			_boundsRayCollider = value;
+		}
+
+		public function get triangleRayCollider():RayColliderBase {
+			return _triangleRayCollider;
+		}
+
+		public function set triangleRayCollider( value:RayColliderBase ):void {
+			_triangleRayCollider = value;
 		}
 	}
 }

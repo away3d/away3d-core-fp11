@@ -1,23 +1,25 @@
 package away3d.core.raycast.colliders
 {
 
-	import away3d.core.data.LinkedListItem;
 	import away3d.core.raycast.data.RayCollisionVO;
+	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
+
+	// TODO: Use linked lists instead of vectors.
 
 	public class RayColliderBase
 	{
 		protected var _rayPosition:Vector3D;
 		protected var _rayDirection:Vector3D;
 
-		protected var _collisionExists:Boolean;
+		protected var _aCollisionExists:Boolean;
 		protected var _numberOfCollisions:uint;
 
 		protected var _collisionData:Dictionary;
-		protected var _linkedListHeadItem:LinkedListItem;
+		protected var _entities:Vector.<Entity>;
 
 		public function RayColliderBase() {
 		}
@@ -27,8 +29,8 @@ package away3d.core.raycast.colliders
 			_rayDirection = direction;
 		}
 
-		public function updateLinkedListHead( currentListItem:LinkedListItem ):void {
-			_linkedListHeadItem = currentListItem;
+		public function updateEntities( entities:Vector.<Entity> ):void {
+			_entities = entities;
 		}
 
 		public function evaluate():void {
@@ -36,15 +38,22 @@ package away3d.core.raycast.colliders
 		}
 
 		public function get aCollisionExists():Boolean {
-			return _collisionExists;
+			return _aCollisionExists;
 		}
 
 		public function getCollisionDataForFirstItem():RayCollisionVO {
-			return _collisionData[ _linkedListHeadItem ];
+			return _collisionData[ _entities[ 0 ] ];
 		}
 
-		public function getCollisionDataForItem( item:LinkedListItem ):RayCollisionVO {
-			return _collisionData[ item ];
+		public function getCollisionDataForItem( entity:Entity ):RayCollisionVO {
+			return _collisionData[ entity ];
+		}
+
+		public function setCollisionDataForItem( entity:Entity, data:RayCollisionVO ):void {
+			if( !_collisionData ) {
+				_collisionData = new Dictionary();
+			}
+			_collisionData[ entity ] = data;
 		}
 
 		public function get numberOfCollisions():uint {
@@ -52,16 +61,28 @@ package away3d.core.raycast.colliders
 		}
 
 		protected function reset():void {
-			_collisionExists = false;
+			_aCollisionExists = false;
 			_numberOfCollisions = 0;
+			_collisionData = null;
 		}
 
-		public function get linkedListHeadItem():LinkedListItem {
-			return _linkedListHeadItem;
+		public function get firstEntity():Entity {
+			return _entities[ 0 ];
 		}
 
 		public function get collisionData():Dictionary {
 			return _collisionData;
+		}
+
+		public function get entities():Vector.<Entity> {
+			return _entities;
+		}
+
+		public function setEntityAt( index:uint, entity:Entity ):void {
+			if( !_entities ) {
+				_entities = new Vector.<Entity>();
+			}
+			_entities[ index ] = entity;
 		}
 	}
 }

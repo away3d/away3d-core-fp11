@@ -1,24 +1,21 @@
 package away3d.core.raycast.colliders {
 
 	import away3d.containers.View3D;
-	import away3d.core.base.IRenderable;
-	import away3d.core.data.LinkedListItem;
-	import away3d.core.data.LinkedListItem;
-	import away3d.core.raycast.data.MouseHitMethod;
 	import away3d.core.raycast.data.RayCollisionVO;
+	import away3d.entities.Entity;
 
 	import flash.geom.Vector3D;
 
 	public class MouseRayCollider extends RayColliderBase {
 
 	private var _view:View3D;
-	private var _boundsCollider:RenderableBoundsRayCollider;
+	private var _boundsCollider:MultipleBoundsRayCollider;
 	private var _triangleCollider:PBTriangleRayCollider;
 
     public function MouseRayCollider( view:View3D ) {
         super();
 		_view = view;
-		_boundsCollider = new RenderableBoundsRayCollider();
+		_boundsCollider = new MultipleBoundsRayCollider();
         _triangleCollider = new PBTriangleRayCollider();
     }
 
@@ -33,12 +30,33 @@ package away3d.core.raycast.colliders {
 		_boundsCollider.updateRay( position, direction );
 	}
 
-	override public function updateLinkedListHead( currentListItem:LinkedListItem ):void {
-		super.updateLinkedListHead( currentListItem );
-		_boundsCollider.updateLinkedListHead( currentListItem );
+	override public function updateEntities( entities:Vector.<Entity> ):void {
+
+		var entity:Entity;
+		var i:uint, len:uint;
+		var filteredEntities:Vector.<Entity>;
+
+		// Filter out non visibles and non mouse enableds.
+		len = entities.length;
+		filteredEntities = new Vector.<Entity>();
+		for( i = 0; i < len; i++ ) {
+			entity = entities[ i ];
+			if( entity.visible && entity.mouseEnabled ) {
+				filteredEntities.push( entity );
+			}
+		}
+
+		// Set the filtered items onto the bounds collider.
+		_boundsCollider.updateEntities( filteredEntities );
 	}
 
     override public function evaluate():void {
+
+		trace( "MouseRayCollider - evaluate()" );
+
+		var i:uint;
+		var entity:Entity;
+		var triangleCollider:RayColliderBase;
 
 		reset();
 
@@ -46,12 +64,18 @@ package away3d.core.raycast.colliders {
 		// Filter out renderables whose bounds don't collide with ray.
 		// ---------------------------------------------------------------------
 
+		// Perform ray-bounds collision checks.
 		_boundsCollider.evaluate();
-		if( !_boundsCollider.aCollisionExists ) return;
-		else {
-			_linkedListHeadItem = _boundsCollider.linkedListHeadItem;
+
+		// If a collision exists, extract the data from the bounds collider...
+		if( _boundsCollider.aCollisionExists ) {
+			// The bounds collider has filtered and populated its data, use it here from now on.
+			_entities = _boundsCollider.entities;
 			_collisionData = _boundsCollider.collisionData;
+			_aCollisionExists = true; // TODO: evaluate these when tri collisions come in.
+			_numberOfCollisions = _boundsCollider.numberOfCollisions;
 		}
+		else return;
 
 		// ---------------------------------------------------------------------
 		// Evaluate triangle collisions when needed.
@@ -59,31 +83,19 @@ package away3d.core.raycast.colliders {
 		// with more precise data.
 		// ---------------------------------------------------------------------
 
-		var renderable:IRenderable;
-		var boundsCollisionVO:RayCollisionVO;
-		var renderableListItem:LinkedListItem;
+		for( i = 0; i < _numberOfCollisions; ++i ) {
+			entity = _entities[ i ];
+			triangleCollider = entity.triangleRayCollider;
+			if( triangleCollider ) {
+				// Update triangle collider.
+				triangleCollider.setEntityAt( 0, entity );
+				triangleCollider.updateRay( _rayPosition, _rayDirection );
+				triangleCollider.evaluate();
+				// If a collision exists, update the collision data.
+				if( triangleCollider.aCollisionExists ) {
 
-		renderableListItem = _linkedListHeadItem;
-		while( renderableListItem ) {
-
-			renderable = renderableListItem.renderable;
-
-			switch( renderable.mouseHitMethod ) {
-				case MouseHitMethod.BOUNDS_ONLY:
-					// Do nothing.
-					break;
-				case MouseHitMethod.TRIANGLE_AS3:
-					// todo
-					break;
-				case MouseHitMethod.TRIANGLE_PIXEL_BENDER:
-					// todo
-					break;
-				case MouseHitMethod.TRIANGLE_AUTO:
-					// todo
-					break;
+				}
 			}
-
-			renderableListItem = renderableListItem.next;
 		}
     }
 }

@@ -1,8 +1,8 @@
 package away3d.core.render
 {
 	import away3d.core.base.IRenderable;
-	import away3d.core.data.LinkedListItem;
-	import away3d.core.data.LinkedListItem;
+	import away3d.core.data.RenderableListItem;
+	import away3d.core.data.RenderableListItem;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.debug.Debug;
 
@@ -45,7 +45,7 @@ package away3d.core.render
 			// TODO: not used
 			target = target; 
 			
-			var item : LinkedListItem;
+			var item : RenderableListItem;
 			var renderable : IRenderable;
 
 			_context.setDepthTest(true, Context3DCompareMode.LESS);

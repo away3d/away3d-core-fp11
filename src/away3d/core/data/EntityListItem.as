@@ -6,5 +6,6 @@ package away3d.core.data
 	public class EntityListItem
 	{
 		public var entity:Entity;
+		public var next:EntityListItem;
 	}
 }

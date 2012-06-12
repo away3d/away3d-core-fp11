@@ -242,13 +242,6 @@ package away3d.core.base
 			return _parentMesh.mouseEnabled;
 		}
 
-		/**
-		 * Indicates whether the SubMesh needs to provide mouse event details, such as position and uv coordinates.
-		 */
-		public function get mouseHitMethod():uint {
-			return _parentMesh.mouseHitMethod;
-		}
-
 		public function get castsShadows():Boolean {
 			return _parentMesh.castsShadows;
 		}
