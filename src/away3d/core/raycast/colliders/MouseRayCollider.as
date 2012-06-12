@@ -52,8 +52,6 @@ package away3d.core.raycast.colliders {
 
     override public function evaluate():void {
 
-		trace( "MouseRayCollider - evaluate()" );
-
 		var i:uint;
 		var entity:Entity;
 		var triangleCollider:RayColliderBase;
@@ -91,11 +89,21 @@ package away3d.core.raycast.colliders {
 				triangleCollider.setEntityAt( 0, entity );
 				triangleCollider.updateRay( _rayPosition, _rayDirection );
 				triangleCollider.evaluate();
-				// If a collision exists, update the collision data.
+				// If a collision exists, update the collision data and stop all checks.
 				if( triangleCollider.aCollisionExists ) {
-
+					setCollisionDataForItem( entity, triangleCollider.getCollisionDataForFirstItem() );
+					return;
+				}
+				else { // A failed triangle collision check discards the collision.
+					_entities.splice( i, 1 );
+					_numberOfCollisions--;
+					if( _numberOfCollisions == 0 ) {
+						_aCollisionExists = false;
+					}
+					i--;
 				}
 			}
+			else return; // A bounds collision with no triangle collider stops all checks.
 		}
     }
 }

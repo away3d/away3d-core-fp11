@@ -148,7 +148,7 @@ package away3d.core.raycast.colliders
 						collisionVO.localRayPosition = _localRayPosition;
 						collisionVO.localRayDirection = _localRayDirection;
 						collisionVO.collisionPoint = new Vector3D( _cx, _cy, _cz );
-						setCollisionDataForItem( _targetMesh ); // TODO: I'm here...........^%$@^!%#$@^&%#$^&@!%#$^&@!%#$^&@!%$#
+						setCollisionDataForItem( _targetMesh, collisionVO );
 						return true; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
 					}
 				}

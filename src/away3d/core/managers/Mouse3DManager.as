@@ -80,9 +80,6 @@ package away3d.core.managers
 
 		public function fireMouseEvents():void {
 
-			trace( "Mouse3DManager - fireMouseEvents() -----------------------------------" );
-			trace( "_collidingObject: " + _collidingObject + ", _previousCollidingObject: " + _previousCollidingObject );
-
 			var i:uint;
 			var len:uint;
 			var event:MouseEvent3D;
@@ -191,7 +188,6 @@ package away3d.core.managers
 		// ---------------------------------------------------------------------
 
 		private function onMouseMove( event:MouseEvent ):void {
-			trace( "Mouse3DManager - onMouseMove" );
 			evaluateIfMouseIsWithinTheView();
 //			if( !_mouseIsWithinTheView ) return; // Ignore mouse moves outside the view.
 //			if( _forceMouseMove ) return; // If on force mouse move, move events are managed on every update, not here.
