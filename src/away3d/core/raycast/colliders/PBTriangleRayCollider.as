@@ -46,7 +46,10 @@ package away3d.core.raycast.colliders
 			_rayTriangleKernel.data.rayDirection.value = [ localRayDirection.x, localRayDirection.y, localRayDirection.z ];
 		}
 
-		override protected function evaluateSubMesh( subMesh:SubMesh ):Boolean {
+		override public function evaluateSubMesh( subMesh:SubMesh ):Boolean {
+
+			trace( "PB triangle evaluation..." );
+
 			uploadSubMeshData( subMesh );
 			return executeKernel();
 		}
@@ -116,7 +119,7 @@ package away3d.core.raycast.colliders
 				);
 				collisionVO.normal = getCollisionNormal( collisionTriangleIndex );
 				collisionVO.uv = getCollisionUV( collisionTriangleIndex );
-				setCollisionDataForItem( _targetMesh, collisionVO );
+				setCollisionDataForItem( targetMesh, collisionVO );
 			}
 
 			return collides;

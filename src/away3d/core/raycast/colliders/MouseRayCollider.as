@@ -9,14 +9,12 @@ package away3d.core.raycast.colliders {
 	public class MouseRayCollider extends RayColliderBase {
 
 	private var _view:View3D;
-	private var _boundsCollider:MultipleBoundsRayCollider;
-	private var _triangleCollider:PBTriangleRayColliderOLD;
+	private var _multipleBoundsCollider:MultipleBoundsRayCollider;
 
     public function MouseRayCollider( view:View3D ) {
         super();
 		_view = view;
-		_boundsCollider = new MultipleBoundsRayCollider();
-        _triangleCollider = new PBTriangleRayColliderOLD();
+		_multipleBoundsCollider = new MultipleBoundsRayCollider();
     }
 
 	public function updateMouseRay():void {
@@ -27,7 +25,7 @@ package away3d.core.raycast.colliders {
 
 	override public function updateRay( position:Vector3D, direction:Vector3D ):void {
 		super.updateRay( position, direction );
-		_boundsCollider.updateRay( position, direction );
+		_multipleBoundsCollider.updateRay( position, direction );
 	}
 
 	override public function updateEntities( entities:Vector.<Entity> ):void {
@@ -47,7 +45,7 @@ package away3d.core.raycast.colliders {
 		}
 
 		// Set the filtered items onto the bounds collider.
-		_boundsCollider.updateEntities( filteredEntities );
+		_multipleBoundsCollider.updateEntities( filteredEntities );
 	}
 
     override public function evaluate():void {
@@ -63,14 +61,14 @@ package away3d.core.raycast.colliders {
 		// ---------------------------------------------------------------------
 
 		// Perform ray-bounds collision checks.
-		_boundsCollider.evaluate();
+		_multipleBoundsCollider.evaluate();
 
 		// If a collision exists, extract the data from the bounds collider...
-		if( _boundsCollider.aCollisionExists ) {
+		if( _multipleBoundsCollider.aCollisionExists ) {
 			// The bounds collider has filtered and populated its data, use it here from now on.
-			_entities = _boundsCollider.entities;
-			_collisionData = _boundsCollider.collisionData;
-			_numberOfCollisions = _boundsCollider.numberOfCollisions;
+			_entities = _multipleBoundsCollider.entities;
+			_collisionData = _multipleBoundsCollider.collisionData;
+			_numberOfCollisions = _multipleBoundsCollider.numberOfCollisions;
 		}
 		else return;
 

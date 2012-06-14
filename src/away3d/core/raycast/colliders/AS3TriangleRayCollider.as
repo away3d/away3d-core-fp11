@@ -18,7 +18,9 @@ package away3d.core.raycast.colliders
 			super();
 		}
 
-		override protected function evaluateSubMesh( subMesh:SubMesh ):Boolean {
+		override public function evaluateSubMesh( subMesh:SubMesh ):Boolean {
+
+			trace( "AS3 triangle evaluation..." );
 
 			var i:uint;
 			var t:Number;
@@ -110,7 +112,7 @@ package away3d.core.raycast.colliders
 						collisionVO.position = new Vector3D( cx, cy, cz );
 						collisionVO.normal = new Vector3D( nx, ny, nz );
 						collisionVO.uv = getCollisionUV( index, v, w, u );
-						setCollisionDataForItem( _targetMesh, collisionVO );
+						setCollisionDataForItem( targetMesh, collisionVO );
 						return true; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
 					}
 				}

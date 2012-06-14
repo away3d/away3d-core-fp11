@@ -11,8 +11,7 @@ package away3d.core.raycast.colliders
 
 	public class TriangleRayCollider extends RayColliderBase
 	{
-		protected var _targetMesh:Mesh;
-
+		private var _targetMesh:Mesh;
 		private var _localRayPosition:Vector3D;
 		private var _localRayDirection:Vector3D;
 
@@ -59,7 +58,7 @@ package away3d.core.raycast.colliders
 			}
 		}
 
-		protected function evaluateSubMesh( subMesh:SubMesh ):Boolean {
+		public function evaluateSubMesh( subMesh:SubMesh ):Boolean {
 			throw new AbstractMethodError();
 		}
 
@@ -77,6 +76,14 @@ package away3d.core.raycast.colliders
 
 		public function set localRayDirection( value:Vector3D ):void {
 			_localRayDirection = value;
+		}
+
+		public function get targetMesh():Mesh {
+			return _targetMesh;
+		}
+
+		public function set targetMesh( value:Mesh ):void {
+			_targetMesh = value;
 		}
 	}
 }

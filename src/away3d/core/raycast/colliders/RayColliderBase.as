@@ -84,5 +84,13 @@ package away3d.core.raycast.colliders
 			}
 			_entities[ index ] = entity;
 		}
+
+		public function get rayPosition():Vector3D {
+			return _rayPosition;
+		}
+
+		public function get rayDirection():Vector3D {
+			return _rayDirection;
+		}
 	}
 }
