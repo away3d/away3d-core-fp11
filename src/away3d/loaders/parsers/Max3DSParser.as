@@ -456,8 +456,9 @@ package away3d.loaders.parsers
 		private function constructObject(obj : ObjectVO, pivot : Vector3D = null) : ObjectContainer3D
 		{
 			if (obj.type == AssetType.MESH) {
+				var i : uint;
+				var subs : Vector.<SubGeometry>;
 				var geom : Geometry;
-				var sub : SubGeometry;
 				var mat : MaterialBase;
 				var mesh : Mesh;
 				var mtx : Matrix3D;
@@ -465,15 +466,14 @@ package away3d.loaders.parsers
 				if (obj.materials.length > 1)
 					trace('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
 				
-				sub = new SubGeometry();
-				sub.autoDeriveVertexNormals = true;
-				sub.autoDeriveVertexTangents = true;
-				if(obj.verts) sub.updateVertexData(obj.verts);
-				if(obj.indices) sub.updateIndexData(obj.indices);
-				if(obj.uvs) sub.updateUVData(obj.uvs);
-				
 				geom = new Geometry();
-				geom.subGeometries.push(sub);
+				
+				// Construct sub-geometries (potentially splitting buffers)
+				// and add them to geometry.
+				subs = constructSubGeometries(obj.verts, obj.indices, obj.uvs, null, null, null, null);
+				for (i=0; i<subs.length; i++) {
+					geom.subGeometries.push(subs[i]);
+				}
 				
 				if (obj.materials.length>0) {
 					var mname : String;
