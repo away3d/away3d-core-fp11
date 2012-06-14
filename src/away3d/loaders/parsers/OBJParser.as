@@ -367,6 +367,8 @@ package away3d.loaders.parsers
 
 			var vlength:uint = vertices.length;
 			 
+			// TODO: Investigate using ParserBase.constructSubGeometries() instead
+			// of this bespoke solution for splitting buffers.
 			if(vlength > 0){
 				
 				if(vlength <= LIMIT){
