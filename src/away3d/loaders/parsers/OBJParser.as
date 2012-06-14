@@ -26,7 +26,6 @@ package away3d.loaders.parsers
 	 */
 	public class OBJParser extends ParserBase
 	{
-		private const LIMIT:uint = 196605;
 		private var _textData:String;
 		private var _startedParsing:Boolean;
 		private var _charIndex:uint;
