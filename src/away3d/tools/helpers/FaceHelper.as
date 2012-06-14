@@ -14,8 +14,7 @@ package away3d.tools.helpers
 	 
 	public class FaceHelper {
 		
-		private static const LIMIT:uint = 65535;
-		private static const VERTLIMIT:uint = 196605;
+		private static const LIMIT:uint = 196605;
 		private static const SPLIT:uint = 2;
 		private static const TRI:uint = 3;
 		private static const QUARTER:uint = 4;
@@ -39,7 +38,7 @@ package away3d.tools.helpers
 
 			var lengthVertices:uint = vertices.length;
 
-			if(lengthVertices+9>VERTLIMIT){
+			if(lengthVertices+9 > LIMIT){
 				indices = Vector.<uint>([0,1,2]);
 				vertices = Vector.<Number>([v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z]);
 				uvs = Vector.<Number>([uv0.u, uv0.v, uv1.u, uv1.v, uv2.u, uv2.v]);
@@ -221,7 +220,7 @@ package away3d.tools.helpers
 			 
 			var vertices:Vector.<Number> = subGeom.vertexData.concat();
 			
-			if(indices.length + 3 > LIMIT || vertices.length + 9 > VERTLIMIT){
+			if(indices.length + 3 > LIMIT || vertices.length + 9 > LIMIT){
 				trace("splitFace cannot take place, not enough room in target subGeometry");
 				return;
 			}
@@ -308,7 +307,7 @@ package away3d.tools.helpers
 			
 			var vertices:Vector.<Number> = subGeom.vertexData.concat();
 			
-			if(indices.length + 6 > LIMIT || vertices.length + 18 > VERTLIMIT){
+			if(indices.length + 6 > LIMIT || vertices.length + 18 > LIMIT){
 				trace("triFace cannot take place, not enough room in target subGeometry");
 				return;
 			}
@@ -375,7 +374,7 @@ package away3d.tools.helpers
 			
 			var vertices:Vector.<Number> = subGeom.vertexData.concat();
 			
-			if(indices.length + 9 > LIMIT || vertices.length + 27 > VERTLIMIT){
+			if(indices.length + 9 > LIMIT || vertices.length + 27 > LIMIT){
 				trace("quarterFace cannot take place, not enough room in target subGeometry");
 				return;
 			}
