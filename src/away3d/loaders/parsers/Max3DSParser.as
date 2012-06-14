@@ -185,7 +185,7 @@ package away3d.loaders.parsers
 							parseObjectAnimation(end);
 							break;
                                                 
-                                                case 0x4150: // Smoothing groups
+						case 0x4150: // Smoothing groups
 							parseSmoothingGroups();
 							break;	
 						
@@ -476,15 +476,18 @@ package away3d.loaders.parsers
 				var mat : MaterialBase;
 				var mesh : Mesh;
 				var mtx : Matrix3D;
+				var vertices:Vector.<VertexVO>;
+				var faces:Vector.<FaceVO>;
 				
 				if (obj.materials.length > 1)
 					trace('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
-	 
-                var vertices:Vector.<VertexVO> = new Vector.<VertexVO>(obj.verts.length / 3);
-				var faces:Array = new Array(obj.indices.length / 3);
+				
+				vertices = new Vector.<VertexVO>(obj.verts.length / 3, false);
+				faces = new Vector.<FaceVO>(obj.indices.length / 3, true);
+				
 				prepareData(vertices, faces, obj);
 				applySmoothGroups(vertices, faces);
-				var i:uint;
+				
 				obj.verts = new Vector.<Number>(vertices.length * 3, true);
 				for (i = 0; i < vertices.length; i++) {
 					obj.verts[i * 3] = vertices[i].x;
@@ -561,7 +564,7 @@ package away3d.loaders.parsers
 			return null;
 		}
 
-		private function prepareData(vertices:Vector.<VertexVO>, faces:Array, obj:ObjectVO):void {
+		private function prepareData(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>, obj:ObjectVO):void {
 			// convert raw ObjectVO's data to structured VertexVO and FaceVO
 			var i:int;
 			var j:int;
@@ -587,7 +590,7 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		private function applySmoothGroups(vertices:Vector.<VertexVO>, faces:Array):void {
+		private function applySmoothGroups(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>):void {
 			// clone vertices according to following rule:
 			// clone if vertex's in faces from groups 1+2 and 3
 			// don't clone if vertex's in faces from groups 1+2, 3 and 1+3
