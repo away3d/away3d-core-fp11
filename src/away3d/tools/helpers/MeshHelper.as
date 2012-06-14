@@ -25,7 +25,7 @@ package away3d.tools.helpers
 	 
 	public class MeshHelper {
 		
-		private static const LIMIT:uint = 65535;
+		private static const LIMIT:uint = 196605;
 		/**
 		* Returns the boundingRadius of an Entity of a Mesh.
 		* @param mesh		Mesh. The mesh to get the boundingRadius from.
