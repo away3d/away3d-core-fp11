@@ -23,7 +23,7 @@
 		public static const Y_AXIS:String = "y";
 		public static const Z_AXIS:String = "z";
 		
-		private const LIMIT:uint = 64998;
+		private const LIMIT:uint = 196605;
 		private const EPS:Number = .0001;
 		
 		private var _varr:Vector.<Vertex>;
