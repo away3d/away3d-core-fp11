@@ -218,11 +218,14 @@ package away3d.tools.helpers
 			if(pointer >  indices.length -3)
 				throw new Error("ERROR >> face index out of range! Use the location in indice vector /3. For example, pass 1 if you want edit face 1, not 3!");
 			
-			//Split cannot take place, not enough room in target subGeometry;
-			if(indices.length+3> LIMIT)
-				return;
-			
+			 
 			var vertices:Vector.<Number> = subGeom.vertexData.concat();
+			
+			if(indices.length + 3 > LIMIT || vertices.length + 9 > VERTLIMIT){
+				trace("splitFace cannot take place, not enough room in target subGeometry");
+				return;
+			}
+			
 			var uvs:Vector.<Number> = subGeom.UVData.concat();
 			var normals:Vector.<Number> = subGeom.vertexNormalData.concat();
 			var tangents:Vector.<Number> = subGeom.vertexTangentData.concat();
@@ -303,11 +306,13 @@ package away3d.tools.helpers
 			if(pointer >  indices.length -3)
 				throw new Error("ERROR >> face index out of range! Use the location in indice vector /3. For example, pass 1 if you want edit face 1, not 3!");
 			
-			//triFace cannot take place, not enough room in target subGeometry;
-			if(indices.length+6 > LIMIT)
-				return;
-				
 			var vertices:Vector.<Number> = subGeom.vertexData.concat();
+			
+			if(indices.length + 6 > LIMIT || vertices.length + 18 > VERTLIMIT){
+				trace("triFace cannot take place, not enough room in target subGeometry");
+				return;
+			}
+			
 			var uvs:Vector.<Number> = subGeom.UVData.concat();
 			var normals:Vector.<Number> = subGeom.vertexNormalData.concat();
 			var tangents:Vector.<Number> = subGeom.vertexTangentData.concat();
@@ -368,11 +373,13 @@ package away3d.tools.helpers
 			if(pointer >  indices.length -3)
 				throw new Error("ERROR >> face index out of range! Use the location in indice vector /3. For example, pass 1 if you want edit face 1, not 3!");
 			
-			//quaterFace cannot take place, not enough room in target subGeometry;
-			if(indices.length+9> LIMIT)
-				return;
-			
 			var vertices:Vector.<Number> = subGeom.vertexData.concat();
+			
+			if(indices.length + 9 > LIMIT || vertices.length + 27 > VERTLIMIT){
+				trace("quarterFace cannot take place, not enough room in target subGeometry");
+				return;
+			}
+			
 			var uvs:Vector.<Number> = subGeom.UVData.concat();
 			var normals:Vector.<Number> = subGeom.vertexNormalData.concat();
 			var tangents:Vector.<Number> = subGeom.vertexTangentData.concat();
