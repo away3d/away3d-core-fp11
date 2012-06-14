@@ -10,13 +10,13 @@ package away3d.core.raycast.colliders {
 
 	private var _view:View3D;
 	private var _boundsCollider:MultipleBoundsRayCollider;
-	private var _triangleCollider:PBTriangleRayCollider;
+	private var _triangleCollider:PBTriangleRayColliderOLD;
 
     public function MouseRayCollider( view:View3D ) {
         super();
 		_view = view;
 		_boundsCollider = new MultipleBoundsRayCollider();
-        _triangleCollider = new PBTriangleRayCollider();
+        _triangleCollider = new PBTriangleRayColliderOLD();
     }
 
 	public function updateMouseRay():void {

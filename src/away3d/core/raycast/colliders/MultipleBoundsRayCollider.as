@@ -63,7 +63,7 @@ package away3d.core.raycast.colliders
 		private function sortOnNearT( entity1:Entity, entity2:Entity ):Number {
 			var collisionVO1:RayCollisionVO = _collisionData[ entity1 ];
 			var collisionVO2:RayCollisionVO = _collisionData[ entity2 ];
-			return collisionVO1.collisionNearT > collisionVO2.collisionNearT ? 1 : -1;
+			return collisionVO1.nearT > collisionVO2.nearT ? 1 : -1;
 		}
 	}
 }

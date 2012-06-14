@@ -6,6 +6,7 @@ package away3d.core.managers
 	import away3d.containers.View3D;
 	import away3d.core.base.Object3D;
 	import away3d.core.raycast.colliders.MouseRayCollider;
+	import away3d.core.raycast.data.RayCollisionVO;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.events.MouseEvent3D;
@@ -137,6 +138,9 @@ package away3d.core.managers
 
 			var local:Vector3D;
 			var scene:Vector3D;
+			var normal:Vector3D;
+			var sceneNormal:Vector3D;
+			var collisionData:RayCollisionVO;
 
 			// 2D properties.
 			event.ctrlKey = sourceEvent.ctrlKey;
@@ -150,20 +154,32 @@ package away3d.core.managers
 			// TODO set all 3d event properties
 			event.object = object ? object : _collidingObject;
 			if( _rayCollider.aCollisionExists ) {
+				collisionData = _rayCollider.getCollisionDataForFirstItem();
 				// UV.
-				var collisionUV:Point = _rayCollider.getCollisionDataForFirstItem().collisionUV;
+				var collisionUV:Point = collisionData.uv;
 				if( collisionUV ) {
 					event.uv = collisionUV;
 				}
 				// Position.
-				local = _rayCollider.getCollisionDataForFirstItem().collisionPoint;
+				local = collisionData.position;
 				event.localX = local.x;
 				event.localY = local.y;
 				event.localZ = local.z;
-				scene = _rayCollider.firstEntity.transform.transformVector( local );
+				scene = event.object.transform.transformVector( local );
 				event.sceneX = scene.x;
 				event.sceneY = scene.y;
 				event.sceneZ = scene.z;
+				// Normal.
+				normal = collisionData.normal;
+				if( normal ) {
+					event.localNormalX = normal.x;
+					event.localNormalY = normal.y;
+					event.localNormalZ = normal.z;
+					sceneNormal = event.object.transform.deltaTransformVector( normal );
+					event.sceneNormalX = sceneNormal.x;
+					event.sceneNormalY = sceneNormal.y;
+					event.sceneNormalZ = sceneNormal.z;
+				}
 			}
 			else {
 				event.uv = null;
@@ -173,6 +189,9 @@ package away3d.core.managers
 				event.sceneX = -1;
 				event.sceneY = -1;
 				event.sceneZ = -1;
+				event.localNormalX = -1;
+				event.localNormalY = -1;
+				event.localNormalZ = -1;
 			}
 
 			// Store event to be dispatched later.

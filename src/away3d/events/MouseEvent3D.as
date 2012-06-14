@@ -149,6 +149,14 @@ package away3d.events
 		 */
 		public var delta : int;
 
+		public var localNormalX:Number;
+		public var localNormalY:Number;
+		public var localNormalZ:Number;
+
+		public var sceneNormalX:Number;
+		public var sceneNormalY:Number;
+		public var sceneNormalZ:Number;
+
 		/**
 		 * Create a new MouseEvent3D object.
 		 * @param type The type of the MouseEvent3D.
@@ -182,7 +190,13 @@ package away3d.events
 			result.sceneX = sceneX;
 			result.sceneY = sceneY;
 			result.sceneZ = sceneZ;
-			
+			result.localNormalX = localNormalX;
+			result.localNormalY = localNormalY;
+			result.localNormalZ = localNormalZ;
+			result.sceneNormalX = sceneNormalX;
+			result.sceneNormalY = sceneNormalY;
+			result.sceneNormalZ = sceneNormalZ;
+
 			result.ctrlKey = ctrlKey;
 			result.shiftKey = shiftKey;
 
