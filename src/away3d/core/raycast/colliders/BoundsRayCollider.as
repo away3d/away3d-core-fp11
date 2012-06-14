@@ -54,10 +54,6 @@ package away3d.core.raycast.colliders
 				boundsCollisionVO.localRayPosition = localRayPosition;
 				boundsCollisionVO.localRayDirection = localRayDirection;
 				boundsCollisionVO.rayOriginIsInsideBounds = cameraIsInEntityBounds;
-//				var collisionPoint:Vector3D = new Vector3D(); // TODO: can extract from bounds object?
-//				collisionPoint.x = localRayPosition.x + collisionT * localRayDirection.x;
-//				collisionPoint.y = localRayPosition.y + collisionT * localRayDirection.y;
-//				collisionPoint.z = localRayPosition.z + collisionT * localRayDirection.z;
 				boundsCollisionVO.position = entity.bounds.rayIntersectionPoint;
 				boundsCollisionVO.normal = entity.bounds.rayIntersectionNormal;
 				setCollisionDataForItem( _entities[ 0 ], boundsCollisionVO );

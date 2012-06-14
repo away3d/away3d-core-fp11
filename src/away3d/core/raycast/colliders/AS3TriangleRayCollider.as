@@ -10,6 +10,10 @@ package away3d.core.raycast.colliders
 
 	public class AS3TriangleRayCollider extends TriangleRayCollider
 	{
+		private var _uvData:Vector.<Number>;
+		private var _indexData:Vector.<uint>;
+		private var _vertexData:Vector.<Number>;
+
 		public function AS3TriangleRayCollider() {
 			super();
 		}
@@ -19,8 +23,6 @@ package away3d.core.raycast.colliders
 			var i:uint;
 			var t:Number;
 			var numTriangles:uint;
-			var indices:Vector.<uint>;
-			var vertices:Vector.<Number>;
 			var i0:uint, i1:uint, i2:uint;
 			var rx:Number, ry:Number, rz:Number;
 			var nx:Number, ny:Number, nz:Number;
@@ -34,8 +36,9 @@ package away3d.core.raycast.colliders
 			var nl:Number, nDotV:Number, D:Number, disToPlane:Number;
 			var Q1Q2:Number, Q1Q1:Number, Q2Q2:Number, RQ1:Number, RQ2:Number;
 
-			indices = subMesh.indexData;
-			vertices = subMesh.vertexData;
+			_indexData = subMesh.indexData;
+			_vertexData = subMesh.vertexData;
+			_uvData = subMesh.UVData;
 			numTriangles = subMesh.numTriangles;
 
 			for( i = 0; i < numTriangles; ++i ) { // sweep all triangles
@@ -43,20 +46,20 @@ package away3d.core.raycast.colliders
 				var index:uint = i * 3;
 
 				// evaluate triangle indices
-				i0 = indices[ index ] * 3;
-				i1 = indices[ index + 1 ] * 3;
-				i2 = indices[ index + 2 ] * 3;
+				i0 = _indexData[ index ] * 3;
+				i1 = _indexData[ index + 1 ] * 3;
+				i2 = _indexData[ index + 2 ] * 3;
 
 				// evaluate triangle vertices
-				p0x = vertices[ i0 ];
-				p0y = vertices[ i0 + 1 ];
-				p0z = vertices[ i0 + 2 ];
-				p1x = vertices[ i1 ];
-				p1y = vertices[ i1 + 1 ];
-				p1z = vertices[ i1 + 2 ];
-				p2x = vertices[ i2 ];
-				p2y = vertices[ i2 + 1 ];
-				p2z = vertices[ i2 + 2 ];
+				p0x = _vertexData[ i0 ];
+				p0y = _vertexData[ i0 + 1 ];
+				p0z = _vertexData[ i0 + 2 ];
+				p1x = _vertexData[ i1 ];
+				p1y = _vertexData[ i1 + 1 ];
+				p1z = _vertexData[ i1 + 2 ];
+				p2x = _vertexData[ i2 ];
+				p2y = _vertexData[ i2 + 1 ];
+				p2z = _vertexData[ i2 + 2 ];
 
 				// evaluate sides and triangle normal
 				s0x = p1x - p0x; // s0 = p1 - p0
@@ -98,12 +101,15 @@ package away3d.core.raycast.colliders
 					w = coeff * ( -Q1Q2 * RQ1 + Q1Q1 * RQ2 );
 					if( v < 0 ) continue;
 					if( w < 0 ) continue;
-					if( !( 1 - v - w < 0 ) ) { // all tests passed
+					var u:Number = 1 - v - w;
+					if( !( u < 0 ) ) { // all tests passed
 						var collisionVO:RayCollisionVO = new RayCollisionVO();
 						collisionVO.nearT = t;
 						collisionVO.localRayPosition = localRayPosition;
 						collisionVO.localRayDirection = localRayDirection;
 						collisionVO.position = new Vector3D( cx, cy, cz );
+						collisionVO.normal = new Vector3D( nx, ny, nz );
+						collisionVO.uv = getCollisionUV( index, v, w, u );
 						setCollisionDataForItem( _targetMesh, collisionVO );
 						return true; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
 					}
@@ -112,14 +118,19 @@ package away3d.core.raycast.colliders
 			return false;
 		}
 
-		override protected function get collisionNormal():Vector3D {
-			return new Vector3D(); // TODO
+		private function getCollisionUV( triangleIndex:uint, v:Number, w:Number, u:Number ):Point {
+			var uv:Point = new Point();
+			var uvIndex:Number = _indexData[ triangleIndex ] * 2;
+			var uv0:Vector3D = new Vector3D( _uvData[ uvIndex ], _uvData[ uvIndex + 1 ] );
+			triangleIndex++;
+			uvIndex = _indexData[ triangleIndex ] * 2;
+			var uv1:Vector3D = new Vector3D( _uvData[ uvIndex ], _uvData[ uvIndex + 1 ] );
+			triangleIndex++;
+			uvIndex = _indexData[ triangleIndex ] * 2;
+			var uv2:Vector3D = new Vector3D( _uvData[ uvIndex ], _uvData[ uvIndex + 1 ] );
+			uv.x = u * uv0.x + v * uv1.x + w * uv2.x;
+			uv.y = u * uv0.y + v * uv1.y + w * uv2.y;
+			return uv;
 		}
-
-		override protected function get collisionUV():Point {
-			return new Point(); // TODO
-		}
-
-		// TODO: provide additional collision data such as UV, etc...
 	}
 }

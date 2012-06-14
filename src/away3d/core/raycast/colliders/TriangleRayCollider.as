@@ -7,8 +7,6 @@ package away3d.core.raycast.colliders
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
 
-	import flash.geom.Point;
-
 	import flash.geom.Vector3D;
 
 	public class TriangleRayCollider extends RayColliderBase
@@ -62,14 +60,6 @@ package away3d.core.raycast.colliders
 		}
 
 		protected function evaluateSubMesh( subMesh:SubMesh ):Boolean {
-			throw new AbstractMethodError();
-		}
-
-		protected function get collisionNormal():Vector3D {
-			throw new AbstractMethodError();
-		}
-
-		protected function get collisionUV():Point {
 			throw new AbstractMethodError();
 		}
 

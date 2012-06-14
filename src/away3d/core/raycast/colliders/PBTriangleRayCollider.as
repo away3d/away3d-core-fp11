@@ -19,15 +19,12 @@ package away3d.core.raycast.colliders
 		[Embed("/../pb/RayTriangleKernel.pbj", mimeType="application/octet-stream")]
 		private var RayTriangleKernelClass:Class;
 
-		private var _collisionUV:Point;
 		private var _shaderJob:ShaderJob;
 		private var _indexBufferDims:Point;
 		private var _uvData:Vector.<Number>;
 		private var _rayTriangleKernel:Shader;
-		private var _collisionNormal:Vector3D;
 		private var _indexData:Vector.<Number>;
 		private var _vertexData:Vector.<Number>;
-		private var _collisionTriangleIndex:uint;
 		private var _lastRenderableUploaded:SubMesh;
 		private var _kernelOutputBuffer:Vector.<Number>;
 
@@ -35,8 +32,6 @@ package away3d.core.raycast.colliders
 
 			_kernelOutputBuffer = new Vector.<Number>();
 			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );
-			_collisionUV = new Point();
-			_collisionNormal = new Vector3D();
 
 			super();
 		}
@@ -106,7 +101,6 @@ package away3d.core.raycast.colliders
 					break; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
 				}
 			}
-			_collisionTriangleIndex = collisionTriangleIndex;
 			var collides:Boolean = collisionTriangleIndex >= 0;
 
 			// Construct and set collision data.
@@ -120,45 +114,45 @@ package away3d.core.raycast.colliders
 						localRayPosition.y + t * localRayDirection.y,
 						localRayPosition.z + t * localRayDirection.z
 				);
-				collisionVO.normal = collisionNormal;
-				collisionVO.uv = collisionUV;
+				collisionVO.normal = getCollisionNormal( collisionTriangleIndex );
+				collisionVO.uv = getCollisionUV( collisionTriangleIndex );
 				setCollisionDataForItem( _targetMesh, collisionVO );
 			}
 
 			return collides;
 		}
 
-		override protected function get collisionNormal():Vector3D {
-			var index:uint = _collisionTriangleIndex;
-			var i0:Number = _indexData[ index ] * 3;
-			var i1:Number = _indexData[ index + 1 ] * 3;
-			var i2:Number = _indexData[ index + 2 ] * 3;
+		private function getCollisionNormal( triangleIndex:uint ):Vector3D {
+			var normal:Vector3D = new Vector3D();
+			var i0:Number = _indexData[ triangleIndex ] * 3;
+			var i1:Number = _indexData[ triangleIndex + 1 ] * 3;
+			var i2:Number = _indexData[ triangleIndex + 2 ] * 3;
 			var p0:Vector3D = new Vector3D( _vertexData[ i0 ], _vertexData[ i0 + 1 ], _vertexData[ i0 + 2 ] );
 			var p1:Vector3D = new Vector3D( _vertexData[ i1 ], _vertexData[ i1 + 1 ], _vertexData[ i1 + 2 ] );
 			var p2:Vector3D = new Vector3D( _vertexData[ i2 ], _vertexData[ i2 + 1 ], _vertexData[ i2 + 2 ] );
 			var side0:Vector3D = p1.subtract( p0 );
 			var side1:Vector3D = p2.subtract( p0 );
-			_collisionNormal = side0.crossProduct( side1 );
-			_collisionNormal.normalize();
-			return _collisionNormal;
+			normal = side0.crossProduct( side1 );
+			normal.normalize();
+			return normal;
 		}
 
-		override protected function get collisionUV():Point {
-			var index:uint = _collisionTriangleIndex;
-			var v:Number = _kernelOutputBuffer[ index + 1 ]; // barycentric coord 1
-			var w:Number = _kernelOutputBuffer[ index + 2 ]; // barycentric coord 2
+		private function getCollisionUV( triangleIndex:uint ):Point {
+			var uv:Point = new Point();
+			var v:Number = _kernelOutputBuffer[ triangleIndex + 1 ]; // barycentric coord 1
+			var w:Number = _kernelOutputBuffer[ triangleIndex + 2 ]; // barycentric coord 2
 			var u:Number = 1.0 - v - w;
-			var uvIndex:Number = _indexData[ index ] * 2;
+			var uvIndex:Number = _indexData[ triangleIndex ] * 2;
 			var uv0:Vector3D = new Vector3D( _uvData[ uvIndex ], _uvData[ uvIndex + 1 ] );
-			index++;
-			uvIndex = _indexData[ index ] * 2;
+			triangleIndex++;
+			uvIndex = _indexData[ triangleIndex ] * 2;
 			var uv1:Vector3D = new Vector3D( _uvData[ uvIndex ], _uvData[ uvIndex + 1 ] );
-			index++;
-			uvIndex = _indexData[ index ] * 2;
+			triangleIndex++;
+			uvIndex = _indexData[ triangleIndex ] * 2;
 			var uv2:Vector3D = new Vector3D( _uvData[ uvIndex ], _uvData[ uvIndex + 1 ] );
-			_collisionUV.x = u * uv0.x + v * uv1.x + w * uv2.x;
-			_collisionUV.y = u * uv0.y + v * uv1.y + w * uv2.y;
-			return _collisionUV;
+			uv.x = u * uv0.x + v * uv1.x + w * uv2.x;
+			uv.y = u * uv0.y + v * uv1.y + w * uv2.y;
+			return uv;
 		}
 
 		// TODO: this is not necessarily the most efficient way to pass data to pb ( try different grid dimensions? )

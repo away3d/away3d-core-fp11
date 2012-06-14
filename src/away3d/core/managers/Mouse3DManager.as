@@ -232,11 +232,11 @@ package away3d.core.managers
 		}
 
 		private function onMouseDown( event:MouseEvent ):void {
-//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseDown, event );
+			queueDispatch( _mouseDown, event );
 		}
 
 		private function onMouseUp( event:MouseEvent ):void {
-//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseUp, event );
+			queueDispatch( _mouseUp, event );
 		}
 
 		private function onMouseWheel( event:MouseEvent ):void {
