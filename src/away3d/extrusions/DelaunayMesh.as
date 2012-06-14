@@ -21,7 +21,7 @@ package away3d.extrusions
 		public static const PLANE_XY:String = "xy";
 		public static const PLANE_ZY:String = "zy";
 		
-		private const LIMIT:uint = 64998;
+		private const LIMIT:uint = 196605;
 		private const EPS:Number = .0001;
 		private const MAXRAD:Number = 1.2;
 		
