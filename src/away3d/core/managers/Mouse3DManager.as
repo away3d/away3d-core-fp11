@@ -5,7 +5,7 @@ package away3d.core.managers
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.Object3D;
-	import away3d.core.raycast.colliders.MouseRayCollider;
+	import away3d.core.raycast.colliders.picking.MouseRayCollider;
 	import away3d.core.raycast.data.RayCollisionVO;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;

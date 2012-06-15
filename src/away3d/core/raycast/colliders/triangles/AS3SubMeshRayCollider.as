@@ -1,26 +1,20 @@
-package away3d.core.raycast.colliders
+package away3d.core.raycast.colliders.triangles
 {
 
-	import away3d.core.base.SubMesh;
 	import away3d.core.raycast.data.RayCollisionVO;
 
 	import flash.geom.Point;
-
 	import flash.geom.Vector3D;
 
-	public class AS3TriangleRayCollider extends TriangleRayCollider
+	public class AS3SubMeshRayCollider extends SubMeshRayColliderBase
 	{
-		private var _uvData:Vector.<Number>;
-		private var _indexData:Vector.<uint>;
-		private var _vertexData:Vector.<Number>;
-
-		public function AS3TriangleRayCollider() {
+		public function AS3SubMeshRayCollider() {
 			super();
 		}
 
-		override public function evaluateSubMesh( subMesh:SubMesh ):Boolean {
+		override public function evaluate():void {
 
-			trace( "AS3 triangle evaluation..." );
+			reset();
 
 			var i:uint;
 			var t:Number;
@@ -38,10 +32,10 @@ package away3d.core.raycast.colliders
 			var nl:Number, nDotV:Number, D:Number, disToPlane:Number;
 			var Q1Q2:Number, Q1Q1:Number, Q2Q2:Number, RQ1:Number, RQ2:Number;
 
-			_indexData = subMesh.indexData;
-			_vertexData = subMesh.vertexData;
-			_uvData = subMesh.UVData;
-			numTriangles = subMesh.numTriangles;
+			_indexData = _subMesh.indexData;
+			_vertexData = _subMesh.vertexData;
+			_uvData = _subMesh.UVData;
+			numTriangles = _subMesh.numTriangles;
 
 			for( i = 0; i < numTriangles; ++i ) { // sweep all triangles
 
@@ -79,16 +73,16 @@ package away3d.core.raycast.colliders
 				nz /= nl;
 
 				// -- plane intersection test --
-				nDotV = nx * localRayDirection.x + ny * + localRayDirection.y + nz * localRayDirection.z; // rayDirection . normal
+				nDotV = nx * _rayDirection.x + ny * + _rayDirection.y + nz * _rayDirection.z; // rayDirection . normal
 				if( nDotV < 0 ) { // an intersection must exist
 					// find collision t
 					D = -( nx * p0x + ny * p0y + nz * p0z );
-					disToPlane = -( nx * localRayPosition.x + ny * localRayPosition.y + nz * localRayPosition.z + D );
+					disToPlane = -( nx * _rayPosition.x + ny * _rayPosition.y + nz * _rayPosition.z + D );
 					t = disToPlane / nDotV;
 					// find collision point
-					cx = localRayPosition.x + t * localRayDirection.x;
-					cy = localRayPosition.y + t * localRayDirection.y;
-					cz = localRayPosition.z + t * localRayDirection.z;
+					cx = _rayPosition.x + t * _rayDirection.x;
+					cy = _rayPosition.y + t * _rayDirection.y;
+					cz = _rayPosition.z + t * _rayDirection.z;
 					// collision point inside triangle? ( using barycentric coordinates )
 					Q1Q2 = s0x * s1x + s0y * s1y + s0z * s1z;
 					Q1Q1 = s0x * s0x + s0y * s0y + s0z * s0z;
@@ -107,17 +101,16 @@ package away3d.core.raycast.colliders
 					if( !( u < 0 ) ) { // all tests passed
 						var collisionVO:RayCollisionVO = new RayCollisionVO();
 						collisionVO.nearT = t;
-						collisionVO.localRayPosition = localRayPosition;
-						collisionVO.localRayDirection = localRayDirection;
+						collisionVO.localRayPosition = _rayPosition;
+						collisionVO.localRayDirection = _rayDirection;
 						collisionVO.position = new Vector3D( cx, cy, cz );
 						collisionVO.normal = new Vector3D( nx, ny, nz );
 						collisionVO.uv = getCollisionUV( index, v, w, u );
-						setCollisionDataForItem( targetMesh, collisionVO );
-						return true; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
+						setCollisionDataForItem( _entity, collisionVO );
+						_aCollisionExists = true; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
 					}
 				}
 			}
-			return false;
 		}
 
 		private function getCollisionUV( triangleIndex:uint, v:Number, w:Number, u:Number ):Point {

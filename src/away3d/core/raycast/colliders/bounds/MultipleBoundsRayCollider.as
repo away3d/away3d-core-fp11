@@ -1,5 +1,7 @@
-package away3d.core.raycast.colliders
+package away3d.core.raycast.colliders.bounds
 {
+
+	import away3d.core.raycast.colliders.*;
 
 	import away3d.core.raycast.data.RayCollisionVO;
 	import away3d.entities.Entity;

@@ -11,7 +11,7 @@
 	import away3d.core.base.SubMesh;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.MeshNode;
-	import away3d.core.raycast.colliders.BoundsRayCollider;
+	import away3d.core.raycast.colliders.bounds.BoundsRayCollider;
 	import away3d.events.GeometryEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;

@@ -1,6 +1,9 @@
-package away3d.core.raycast.colliders {
+package away3d.core.raycast.colliders.picking {
+
+	import away3d.core.raycast.colliders.*;
 
 	import away3d.containers.View3D;
+	import away3d.core.raycast.colliders.bounds.MultipleBoundsRayCollider;
 	import away3d.core.raycast.data.RayCollisionVO;
 	import away3d.entities.Entity;
 
