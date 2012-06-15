@@ -30,6 +30,8 @@ package away3d.core.managers
 		private var _oldLocalY:Number;
 		private var _oldLocalZ:Number;
 
+		private var _nullVector:Vector3D;
+
 		private var _mouseIsOccludedByAnotherView:Boolean;
 		private var _mouseIsWithinTheView:Boolean;
 
@@ -52,6 +54,7 @@ package away3d.core.managers
 		public function Mouse3DManager( view:View3D ) {
 			_view = view;
 			_rayCollider = new MouseRayCollider( view );
+			_nullVector = new Vector3D();
 			enableListeners();
 		}
 
@@ -136,8 +139,8 @@ package away3d.core.managers
 
 		private function queueDispatch( event:MouseEvent3D, sourceEvent:MouseEvent, object:Entity = null ):void {
 
-			var local:Vector3D;
-			var scene:Vector3D;
+			var localPosition:Vector3D;
+			var scenePosition:Vector3D;
 			var normal:Vector3D;
 			var sceneNormal:Vector3D;
 			var collisionData:RayCollisionVO;
@@ -161,37 +164,23 @@ package away3d.core.managers
 					event.uv = collisionUV;
 				}
 				// Position.
-				local = collisionData.position;
-				event.localX = local.x;
-				event.localY = local.y;
-				event.localZ = local.z;
-				scene = event.object.transform.transformVector( local );
-				event.sceneX = scene.x;
-				event.sceneY = scene.y;
-				event.sceneZ = scene.z;
+				localPosition = collisionData.position;
+				event.localPosition = localPosition;
+				scenePosition = event.object.transform.transformVector( localPosition );
+				event.scenePosition = scenePosition;
 				// Normal.
 				normal = collisionData.normal;
 				if( normal ) {
-					event.localNormalX = normal.x;
-					event.localNormalY = normal.y;
-					event.localNormalZ = normal.z;
+					event.localNormal = normal;
 					sceneNormal = event.object.transform.deltaTransformVector( normal );
-					event.sceneNormalX = sceneNormal.x;
-					event.sceneNormalY = sceneNormal.y;
-					event.sceneNormalZ = sceneNormal.z;
+					event.sceneNormal = sceneNormal;
 				}
 			}
 			else {
 				event.uv = null;
-				event.localX = -1;
-				event.localY = -1;
-				event.localZ = -1;
-				event.sceneX = -1;
-				event.sceneY = -1;
-				event.sceneZ = -1;
-				event.localNormalX = -1;
-				event.localNormalY = -1;
-				event.localNormalZ = -1;
+				event.localPosition = _nullVector;
+				event.scenePosition = _nullVector;
+				event.localNormal = _nullVector;
 			}
 
 			// Store event to be dispatched later.

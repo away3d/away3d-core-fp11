@@ -7,6 +7,7 @@ package away3d.events
 
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Vector3D;
 
 	/**
 	 * A MouseEvent3D is dispatched when a mouse event occurs over a mouseEnabled object in View3D.
@@ -102,32 +103,12 @@ package away3d.events
 		/**
 		 * The x-coordinate in object space where the event took place
 		 */
-		public var localX : Number;
+		public var localPosition : Vector3D;
 
-		/**
-		 * The y-coordinate in object space where the event took place
-		 */
-		public var localY : Number;
-
-		/**
-		 * The z-coordinate in object space where the event took place
-		 */
-		public var localZ : Number;
-		
 		/**
 		 * The x-coordinate in scene space where the event took place
 		 */
-		public var sceneX : Number;
-		
-		/**
-		 * The y-coordinate in scene space where the event took place
-		 */
-		public var sceneY : Number;
-		
-		/**
-		 * The z-coordinate in scene space where the event took place
-		 */
-		public var sceneZ : Number;
+		public var scenePosition : Vector3D;
 		
 		/**
 		 * Indicates whether the Control key is active (true) or inactive (false).
@@ -149,13 +130,9 @@ package away3d.events
 		 */
 		public var delta : int;
 
-		public var localNormalX:Number;
-		public var localNormalY:Number;
-		public var localNormalZ:Number;
+		public var localNormal:Vector3D;
 
-		public var sceneNormalX:Number;
-		public var sceneNormalY:Number;
-		public var sceneNormalZ:Number;
+		public var sceneNormal:Vector3D;
 
 		/**
 		 * Create a new MouseEvent3D object.
@@ -184,18 +161,10 @@ package away3d.events
 			result.renderable = renderable;
 			result.material = material;
 			result.uv = uv;
-			result.localX = localX;
-			result.localY = localY;
-			result.localZ = localZ;
-			result.sceneX = sceneX;
-			result.sceneY = sceneY;
-			result.sceneZ = sceneZ;
-			result.localNormalX = localNormalX;
-			result.localNormalY = localNormalY;
-			result.localNormalZ = localNormalZ;
-			result.sceneNormalX = sceneNormalX;
-			result.sceneNormalY = sceneNormalY;
-			result.sceneNormalZ = sceneNormalZ;
+			result.localPosition = localPosition;
+			result.scenePosition = scenePosition;
+			result.localNormal = localNormal;
+			result.sceneNormal = sceneNormal;
 
 			result.ctrlKey = ctrlKey;
 			result.shiftKey = shiftKey;

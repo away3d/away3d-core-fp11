@@ -20,7 +20,7 @@ package away3d.core.raycast.colliders.triangles
 		private var _indexBufferDims:Point;
 		private var _rayTriangleKernel:Shader;
 		private var _numericIndexData:Vector.<Number>;
-		private var _lastRenderableUploaded:SubMesh;
+		private var _lastSubMeshUploaded:SubMesh;
 		private var _kernelOutputBuffer:Vector.<Number>;
 
 		public function PBSubMeshRayCollider() {
@@ -52,7 +52,7 @@ package away3d.core.raycast.colliders.triangles
 			// if working on a clone, no need to resend data to pb
 			// TODO: next line avoids re-upload if its the same renderable, but not if its 2 renderables referring to the same geometry or source
 			// TODO: perhaps implement a geom id?
-			if( _lastRenderableUploaded && _lastRenderableUploaded === _subMesh ) return;
+			if( _lastSubMeshUploaded && _lastSubMeshUploaded === _subMesh ) return;
 
 			// send vertices to pb
 			_vertexData = _subMesh.vertexData.concat(); // TODO: need concat? if not could affect rendering by introducing null triangles, or uncontrolled index buffer growth
@@ -69,7 +69,7 @@ package away3d.core.raycast.colliders.triangles
 			_rayTriangleKernel.data.indexBuffer.width = _indexBufferDims.x;
 			_rayTriangleKernel.data.indexBuffer.height = _indexBufferDims.y;
 			_rayTriangleKernel.data.indexBuffer.input = _numericIndexData;
-			_lastRenderableUploaded = _subMesh;
+			_lastSubMeshUploaded = _subMesh;
 
 			_uvData = _subMesh.UVData;
 		}
