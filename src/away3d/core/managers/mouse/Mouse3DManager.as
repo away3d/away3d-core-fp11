@@ -1,14 +1,12 @@
-package away3d.core.managers
+package away3d.core.managers.mouse
 {
 
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.Object3D;
-	import away3d.core.raycast.colliders.picking.MouseRayCollider;
-	import away3d.core.raycast.data.RayCollisionVO;
-	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
+	import away3d.errors.AbstractMethodError;
 	import away3d.events.MouseEvent3D;
 
 	import flash.events.MouseEvent;
@@ -19,26 +17,26 @@ package away3d.core.managers
 
 	/**
 	 * Mouse3DManager provides a manager class for detecting 3D mouse hits and sending out mouse events.
-	 *
-	 * todo: first check if within view bounds
 	 */
 	public class Mouse3DManager
 	{
 		private var _previousCollidingObject:Entity;
-		private var _collidingObject:Entity;
-		private var _oldLocalX:Number;
-		private var _oldLocalY:Number;
-		private var _oldLocalZ:Number;
+
+		private var _updateDirty:Boolean;
 
 		private var _nullVector:Vector3D;
 
 		private var _mouseIsOccludedByAnotherView:Boolean;
 		private var _mouseIsWithinTheView:Boolean;
 
-		private var _view:View3D;
-		private var _rayCollider:MouseRayCollider;
+		protected var _view:View3D;
 
-//		private var _forceMouseMove:Boolean;
+		protected var _collidingObject:Entity;
+		protected var _collisionPosition:Vector3D;
+		protected var _collisionNormal:Vector3D;
+		protected var _collisionUV:Point;
+
+		private var _forceMouseMove:Boolean;
 		private var _queuedEvents:Vector.<MouseEvent3D> = new Vector.<MouseEvent3D>();
 		private var _mouseMoveEvent:MouseEvent = new MouseEvent( MouseEvent.MOUSE_MOVE );
 
@@ -51,11 +49,7 @@ package away3d.core.managers
 		private static var _mouseWheel:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_WHEEL );
 		private static var _mouseDoubleClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.DOUBLE_CLICK );
 
-		public function Mouse3DManager( view:View3D ) {
-			_view = view;
-			_rayCollider = new MouseRayCollider( view );
-			_nullVector = new Vector3D();
-			enableListeners();
+		public function Mouse3DManager() {
 		}
 
 		// ---------------------------------------------------------------------
@@ -63,23 +57,25 @@ package away3d.core.managers
 		// ---------------------------------------------------------------------
 
 		public function update():void {
-			if( _mouseIsWithinTheView && !_mouseIsOccludedByAnotherView ) { // Only update when the mouse is in the view.
 
-				// Store previous colliding object.
-				_previousCollidingObject = _collidingObject;
+			// Only update when the mouse is in the view.
+			if( !( _mouseIsWithinTheView && !_mouseIsOccludedByAnotherView ) )
+				return;
 
-				// Evaluate new colliding object.
-				var collector:EntityCollector = _view.entityCollector;
-				if( collector.numMouseEnableds > 0 ) {
-					_rayCollider.updateMouseRay();
-					_rayCollider.updateEntities( collector.entities );
-					_rayCollider.evaluate();
-					_collidingObject = _rayCollider.aCollisionExists ? _rayCollider.firstEntity : null;
-				}
-				else {
-					_collidingObject = null;
-				}
-			}
+			// If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
+			if( !_forceMouseMove && !_updateDirty )
+				return;
+
+			// Store previous colliding object.
+			_previousCollidingObject = _collidingObject;
+
+			updatePicker();
+
+			_updateDirty = false;
+		}
+
+		protected function updatePicker():void {
+			throw new AbstractMethodError();
 		}
 
 		public function fireMouseEvents():void {
@@ -95,29 +91,10 @@ package away3d.core.managers
 				if( _collidingObject ) queueDispatch( _mouseOver, _mouseMoveEvent, _collidingObject );
 			}
 
-			/*if( _forceMouseMove && _collidingObject ) {
-
-			 var localX:Number;
-			 var localY:Number;
-			 var localZ:Number;
-
-			 if( _collidingObject ) {
-			 var local:Vector3D = _rayCollider.getCollisionDataForFirstItem().collisionPoint;
-			 localX = local.x;
-			 localY = local.y;
-			 localZ = local.z;
-			 }
-			 else {
-			 localX = localY = localZ = -1;
-			 }
-
-			 if( ( localX != _oldLocalX ) || ( localY != _oldLocalY ) || ( localZ != _oldLocalZ ) ) {
-			 queueDispatch( _mouseMove, _mouseMoveEvent, _collidingObject );
-			 _oldLocalX = localX;
-			 _oldLocalY = localY;
-			 _oldLocalZ = localZ;
-			 }
-			 }*/
+			// Fire mouse move events here if forceMouseMove is on.
+			if( _forceMouseMove && _collidingObject ) {
+				queueDispatch( _mouseMove, _mouseMoveEvent, _collidingObject );
+			}
 
 			// Dispatch all queued events.
 			len = _queuedEvents.length;
@@ -139,11 +116,8 @@ package away3d.core.managers
 
 		private function queueDispatch( event:MouseEvent3D, sourceEvent:MouseEvent, object:Entity = null ):void {
 
-			var localPosition:Vector3D;
 			var scenePosition:Vector3D;
-			var normal:Vector3D;
 			var sceneNormal:Vector3D;
-			var collisionData:RayCollisionVO;
 
 			// 2D properties.
 			event.ctrlKey = sourceEvent.ctrlKey;
@@ -156,23 +130,19 @@ package away3d.core.managers
 			// 3D properties.
 			// TODO set all 3d event properties
 			event.object = object ? object : _collidingObject;
-			if( _rayCollider.aCollisionExists ) {
-				collisionData = _rayCollider.getCollisionDataForFirstItem();
+			if( _collidingObject ) {
 				// UV.
-				var collisionUV:Point = collisionData.uv;
-				if( collisionUV ) {
-					event.uv = collisionUV;
+				if( _collisionUV ) {
+					event.uv = _collisionUV;
 				}
 				// Position.
-				localPosition = collisionData.position;
-				event.localPosition = localPosition;
-				scenePosition = event.object.transform.transformVector( localPosition );
+				event.localPosition = _collisionPosition;
+				scenePosition = event.object.transform.transformVector( _collisionPosition );
 				event.scenePosition = scenePosition;
 				// Normal.
-				normal = collisionData.normal;
-				if( normal ) {
-					event.localNormal = normal;
-					sceneNormal = event.object.transform.deltaTransformVector( normal );
+				if( _collisionNormal ) {
+					event.localNormal = _collisionNormal;
+					sceneNormal = event.object.transform.deltaTransformVector( _collisionNormal );
 					event.sceneNormal = sceneNormal;
 				}
 			}
@@ -198,38 +168,46 @@ package away3d.core.managers
 		private function onMouseMove( event:MouseEvent ):void {
 			evaluateIfMouseIsWithinTheView();
 //			if( !_mouseIsWithinTheView ) return; // Ignore mouse moves outside the view.
-//			if( _forceMouseMove ) return; // If on force mouse move, move events are managed on every update, not here.
+			if( _forceMouseMove ) return; // If on force mouse move, move events are managed on every update, not here.
 			if( _collidingObject ) queueDispatch( _mouseMove, _mouseMoveEvent = event );
+			_updateDirty = true;
 		}
 
 		private function onMouseOut( event:MouseEvent ):void {
 			_mouseIsOccludedByAnotherView = true;
 			if( _collidingObject ) queueDispatch( _mouseOut, event, _collidingObject );
+			_updateDirty = true;
 		}
 
 		private function onMouseOver( event:MouseEvent ):void {
 			_mouseIsOccludedByAnotherView = false;
 			if( _collidingObject ) queueDispatch( _mouseOver, event, _collidingObject );
+			_updateDirty = true;
 		}
 
 		private function onClick( event:MouseEvent ):void {
-//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseClick, event );
+			if( _collidingObject ) queueDispatch( _mouseClick, event );
+			_updateDirty = true;
 		}
 
 		private function onDoubleClick( event:MouseEvent ):void {
-//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseDoubleClick, event );
+			if( _collidingObject ) queueDispatch( _mouseDoubleClick, event );
+			_updateDirty = true;
 		}
 
 		private function onMouseDown( event:MouseEvent ):void {
-			queueDispatch( _mouseDown, event );
+			if( _collidingObject ) queueDispatch( _mouseDown, event );
+			_updateDirty = true;
 		}
 
 		private function onMouseUp( event:MouseEvent ):void {
-			queueDispatch( _mouseUp, event );
+			if( _collidingObject ) queueDispatch( _mouseUp, event );
+			_updateDirty = true;
 		}
 
 		private function onMouseWheel( event:MouseEvent ):void {
-//			if( evaluateIfMouseIsWithinTheView() ) queueDispatch( _mouseWheel, event );
+			if( _collidingObject ) queueDispatch( _mouseWheel, event );
+			_updateDirty = true;
 		}
 
 		private function enableListeners():void {
@@ -258,13 +236,19 @@ package away3d.core.managers
 		// Getters & setters.
 		// ---------------------------------------------------------------------
 
-		/*public function get forceMouseMove():Boolean {
-		 return _forceMouseMove;
-		 }
+		public function get forceMouseMove():Boolean {
+			return _forceMouseMove;
+		}
 
-		 public function set forceMouseMove( value:Boolean ):void {
-		 _forceMouseMove = value;
-		 }*/
+		public function set forceMouseMove( value:Boolean ):void {
+			_forceMouseMove = value;
+		}
+
+		public function set view( value:View3D ):void {
+			_view = value;
+			_nullVector = new Vector3D();
+			enableListeners();
+		}
 
 		// ---------------------------------------------------------------------
 		// Utils.

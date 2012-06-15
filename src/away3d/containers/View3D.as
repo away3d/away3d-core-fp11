@@ -3,10 +3,11 @@
 	import away3d.Away3D;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Mouse3DManager;
+	import away3d.core.managers.mouse.Mouse3DManager;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.managers.mouse.RayMouse3DManager;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.DepthRenderer;
 	import away3d.core.render.Filter3DRenderer;
@@ -125,7 +126,7 @@
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
-			_mouse3DManager = new Mouse3DManager(this);
+			pickingMethod = new RayMouse3DManager(); // TODO: evaluate default global picking method
 			_depthRenderer = new DepthRenderer();
 
 			// todo: entity collector should be defined by renderer
@@ -162,7 +163,7 @@
 		 * Forces mouse-move related events even when the mouse hasn't moved. This allows mouseOver and mouseOut events
 		 * etc to be triggered due to changes in the scene graph.
 		 */
-		/*public function get forceMouseMove() : Boolean
+		public function get forceMouseMove() : Boolean
 		{
 			return _mouse3DManager.forceMouseMove;
 		}
@@ -170,7 +171,7 @@
 		public function set forceMouseMove(value : Boolean) : void
 		{
 			_mouse3DManager.forceMouseMove = value;
-		}*/
+		}
 
 		public function get background() : Texture2DBase
 		{
@@ -660,9 +661,9 @@
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
 
-		// TODO: remove
-		public function get mouse3DManager():Mouse3DManager {
-			return _mouse3DManager;
+		public function set pickingMethod( value:Mouse3DManager ):void {
+			_mouse3DManager = value;
+			_mouse3DManager.view = this;
 		}
 	}
 }

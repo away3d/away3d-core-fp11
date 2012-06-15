@@ -37,8 +37,18 @@ package away3d.core.raycast.colliders
 			throw new AbstractMethodError();
 		}
 
+		protected function reset():void {
+			_aCollisionExists = false;
+			_numberOfCollisions = 0;
+			_collisionData = null;
+		}
+
 		public function get aCollisionExists():Boolean {
 			return _aCollisionExists;
+		}
+
+		public function get numberOfCollisions():uint {
+			return _numberOfCollisions;
 		}
 
 		public function getCollisionDataForFirstItem():RayCollisionVO {
@@ -54,16 +64,6 @@ package away3d.core.raycast.colliders
 				_collisionData = new Dictionary();
 			}
 			_collisionData[ entity ] = data;
-		}
-
-		public function get numberOfCollisions():uint {
-			return _numberOfCollisions;
-		}
-
-		protected function reset():void {
-			_aCollisionExists = false;
-			_numberOfCollisions = 0;
-			_collisionData = null;
 		}
 
 		public function get firstEntity():Entity {
