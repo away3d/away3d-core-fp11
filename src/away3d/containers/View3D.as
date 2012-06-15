@@ -55,6 +55,8 @@
 		private var _depthRenderer : DepthRenderer;
 		private var _addedToStage:Boolean;
 
+		private var _forceMouseMove:Boolean;
+
 		protected var _filter3DRenderer : Filter3DRenderer;
 		protected var _requireDepthRender : Boolean;
 		protected var _depthRender : Texture;
@@ -171,6 +173,7 @@
 		public function set forceMouseMove(value : Boolean) : void
 		{
 			_mouse3DManager.forceMouseMove = value;
+			_forceMouseMove = value;
 		}
 
 		public function get background() : Texture2DBase
@@ -664,6 +667,7 @@
 		public function set pickingMethod( value:Mouse3DManager ):void {
 			_mouse3DManager = value;
 			_mouse3DManager.view = this;
+			_mouse3DManager.forceMouseMove = _forceMouseMove;
 		}
 	}
 }

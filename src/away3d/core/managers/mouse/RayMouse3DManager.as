@@ -30,12 +30,15 @@ package away3d.core.managers.mouse
 				_rayCollider.updateMouseRay();
 				_rayCollider.updateEntities( collector.entities );
 				_rayCollider.evaluate();
-				_collidingObject = _rayCollider.aCollisionExists ? _rayCollider.firstEntity : null;
-				if( _collidingObject ) {
+				if( _rayCollider.aCollisionExists ) {
+					_collidingObject = _rayCollider.firstEntity;
 					var collisionData:RayCollisionVO = _rayCollider.getCollisionDataForFirstItem();
 					_collisionPosition = collisionData.position;
 					_collisionNormal = collisionData.normal;
 					_collisionUV = collisionData.uv;
+				}
+				else {
+					_collidingObject = null;
 				}
 			}
 			else {

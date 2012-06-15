@@ -47,7 +47,7 @@ package away3d.entities
 		protected var _boundsRayCollider:RayColliderBase;
 		protected var _triangleRayCollider:RayColliderBase;
 
-		public function set pickingMethod( method:RayColliderBase ):void {
+		public function set rayPickingMethod( method:RayColliderBase ):void {
 			_triangleRayCollider = method;
 		}
 

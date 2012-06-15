@@ -7,5 +7,7 @@ package away3d.core.managers.mouse
 		public function ShaderMouse3DManager() {
 			super();
 		}
+
+		// TODO: implement
 	}
 }

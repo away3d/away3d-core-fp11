@@ -20,25 +20,20 @@ package away3d.core.managers.mouse
 	 */
 	public class Mouse3DManager
 	{
-		private var _previousCollidingObject:Entity;
-
 		private var _updateDirty:Boolean;
-
 		private var _nullVector:Vector3D;
-
-		private var _mouseIsOccludedByAnotherView:Boolean;
-		private var _mouseIsWithinTheView:Boolean;
-
-		protected var _view:View3D;
-
-		protected var _collidingObject:Entity;
-		protected var _collisionPosition:Vector3D;
-		protected var _collisionNormal:Vector3D;
-		protected var _collisionUV:Point;
-
 		private var _forceMouseMove:Boolean;
+		private var _mouseIsWithinTheView:Boolean;
+		private var _previousCollidingObject:Entity;
+		private var _mouseIsOccludedByAnotherView:Boolean;
 		private var _queuedEvents:Vector.<MouseEvent3D> = new Vector.<MouseEvent3D>();
 		private var _mouseMoveEvent:MouseEvent = new MouseEvent( MouseEvent.MOUSE_MOVE );
+
+		protected var _view:View3D;
+		protected var _collisionUV:Point;
+		protected var _collidingObject:Entity;
+		protected var _collisionNormal:Vector3D;
+		protected var _collisionPosition:Vector3D;
 
 		private static var _mouseUp:MouseEvent3D = new MouseEvent3D( MouseEvent3D.MOUSE_UP );
 		private static var _mouseClick:MouseEvent3D = new MouseEvent3D( MouseEvent3D.CLICK );
@@ -58,18 +53,16 @@ package away3d.core.managers.mouse
 
 		public function update():void {
 
-			// Only update when the mouse is in the view.
-			if( !( _mouseIsWithinTheView && !_mouseIsOccludedByAnotherView ) )
-				return;
-
-			// If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
-			if( !_forceMouseMove && !_updateDirty )
-				return;
-
 			// Store previous colliding object.
 			_previousCollidingObject = _collidingObject;
 
-			updatePicker();
+			// Update picker.
+			if( _mouseIsWithinTheView && !_mouseIsOccludedByAnotherView ) { // Only update when the mouse is in the view.
+				if( _forceMouseMove || _updateDirty ) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
+					// Update.
+					updatePicker();
+				}
+			}
 
 			// Set null to all collision props if there is no collision.
 			if( !_collidingObject ) {
@@ -174,8 +167,6 @@ package away3d.core.managers.mouse
 
 		private function onMouseMove( event:MouseEvent ):void {
 			evaluateIfMouseIsWithinTheView();
-//			if( !_mouseIsWithinTheView ) return; // Ignore mouse moves outside the view.
-			if( _forceMouseMove ) return; // If on force mouse move, move events are managed on every update, not here.
 			if( _collidingObject ) queueDispatch( _mouseMove, _mouseMoveEvent = event );
 			_updateDirty = true;
 		}
