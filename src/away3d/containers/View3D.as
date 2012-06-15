@@ -166,6 +166,16 @@
 		{
 			_stage3DProxy = stage3DProxy;
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+
+			super.x = _stage3DProxy.x;
+			
+			_localPos.x = _stage3DProxy.x;
+			_globalPos.x = parent? parent.localToGlobal(_localPos).x : _stage3DProxy.x;
+
+			super.y = _stage3DProxy.y;
+			
+			_localPos.y = _stage3DProxy.y;
+			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
 		}
 
 		/**
@@ -478,12 +488,14 @@
 		 */
 		protected function updateBackBuffer() : void
 		{
-			if( _width && _height ){
-				if (!_deferContextCalls) _stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
-				_backBufferInvalid = false;
-			} else {
-				width = stage.stageWidth;
-				height = stage.stageHeight;
+			if (!_deferContextCalls) {
+				if( _width && _height) {
+					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
+					_backBufferInvalid = false;
+				} else {
+					width = stage.stageWidth;
+					height = stage.stageHeight;
+				}
 			}
 		}
 		
@@ -509,6 +521,11 @@
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();
+				
+			if (_deferContextCalls) {
+				width = _stage3DProxy.width;
+				height = _stage3DProxy.height;
+			}
 
 			if (!_parentIsStage)
 				updateGlobalPos();

@@ -4,6 +4,7 @@ package away3d.core.managers
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
 	
+	import flash.display.Stage;
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DRenderMode;
@@ -44,6 +45,11 @@ package away3d.core.managers
 		private var _renderTarget : TextureBase;
 		private var _renderSurfaceSelector : int;
 		private var _scissorRect : Rectangle;
+		private var _color : uint;
+		private var _backBufferDirty : Boolean;
+		private var _viewPort : Rectangle;
+		private var _layerRenderFunctions : Vector.<Function>;
+		private var _stage : Stage;
 
 
 		/**
@@ -61,6 +67,10 @@ package away3d.core.managers
 			_stage3D.x = 0;
 			_stage3D.y = 0;
 			_stage3DManager = stage3DManager;
+			_viewPort = new Rectangle();
+			_enableDepthAndStencil = true;
+			_layerRenderFunctions = new Vector.<Function>();
+			
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
 			requestContext(forceSoftware);
@@ -127,6 +137,12 @@ package away3d.core.managers
 			return _enableDepthAndStencil;
 		}
 
+		public function set enableDepthAndStencil(enableDepthAndStencil : Boolean) : void
+		{ 
+			_enableDepthAndStencil = enableDepthAndStencil; 
+			_backBufferDirty = true;
+		}
+		
 		public function get renderTarget() : TextureBase
 		{
 			return _renderTarget;
@@ -149,6 +165,66 @@ package away3d.core.managers
 			else
 				_context3D.setRenderToBackBuffer();
 		}
+		
+		public function initialiseRender() : void {
+			if (!_context3D) return;
+			
+			if (_backBufferDirty) {
+				configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+				_backBufferDirty = false;
+			}
+				
+			_context3D.clear(
+				((_color >> 16) & 0xff) / 255.0, 
+                ((_color >> 8) & 0xff) / 255.0, 
+                (_color & 0xff) / 255.0,
+                ((_color >> 24) & 0xff) / 255.0 );
+		}
+
+
+		public function completeRender() : void {
+			if (!_context3D) return;
+
+			_context3D.present();
+		}
+		
+		/**
+		 * Add the supplied framework rendering function to the list of layer functions to be rendered
+		 * The order in which they are added determines the render order - bottom (first) to top (last)
+		 * @param fn The rendering function of the framework
+		 */
+		public function addLayerScene(fn : Function) : void 
+		{
+			_layerRenderFunctions.push(fn);
+		}
+
+		/**
+		 * Remove the supplied function from the list of layer functions to be rendered
+		 * @param fn The rendering function of the framework
+		 */
+		public function removeLayerScene(fn : Function) : void 
+		{
+			_layerRenderFunctions.splice(_layerRenderFunctions.indexOf(fn), 1);
+		}
+		
+		/**
+		 * Start the automatic rendering of the added scenes using the provided stage
+		 * object so Enter_Frame events can be attahed
+		 * @param stage The stage instance to be used to attach Enter_Frame events too.
+		 */
+		public function renderLayeredScenes(stage : Stage = null) : void {			
+			// Remove any previous Enter_Frame listeners
+			if (_stage) {
+				_stage.removeEventListener(Event.ENTER_FRAME, onRenderLayerEnterFrame);
+			}
+
+			// If the stage param is null exit - can be used to cancel rendering
+			if (!stage) return;
+			
+			// Setup the new Enter_Frame listener for rendering the layers
+			_stage = stage;
+			stage.addEventListener(Event.ENTER_FRAME, onRenderLayerEnterFrame);
+		}
 
 		public function get scissorRect() : Rectangle
 		{
@@ -170,6 +246,14 @@ package away3d.core.managers
 		}
 
 		/**
+		 * The base Stage3D object associated with this proxy.
+		 */
+		public function get stage3D() : Stage3D
+		{
+			return _stage3D;
+		}
+
+		/**
 		 * The Context3D object associated with the given Stage3D object.
 		 */
 		public function get context3D() : Context3D
@@ -187,7 +271,7 @@ package away3d.core.managers
 
 		public function set x(value : Number) : void
 		{
-			_stage3D.x = value;
+			_stage3D.x = _viewPort.x = value;
 		}
 
 		/**
@@ -200,7 +284,71 @@ package away3d.core.managers
 
 		public function set y(value : Number) : void
 		{
-			_stage3D.y = value;
+			_stage3D.y = _viewPort.y = value;
+		}
+
+
+		/**
+		 * The width of the Stage3D.
+		 */
+		public function get width() : int
+		{ 
+			return _backBufferWidth;
+		}
+
+		public function set width(width : int) : void
+		{ 
+			_backBufferWidth = _viewPort.width = width; 
+			_backBufferDirty = true;
+		}
+
+		/**
+		 * The height of the Stage3D.
+		 */
+		public function get height() : int
+		{ 
+			return _backBufferHeight;
+		}
+		
+		public function set height(height : int) : void
+		{ 
+			_backBufferHeight = _viewPort.height = height; 
+			_backBufferDirty = true;
+		}
+
+		/**
+		 * The antiAliasing of the Stage3D.
+		 */
+		public function get antiAlias() : int
+		{ 
+			return _antiAlias;
+		}
+		
+		public function set antiAlias(antiAlias : int) : void
+		{ 
+			_antiAlias = antiAlias; 
+			_backBufferDirty = true;
+		}
+
+		/**
+		 * A viewPort rectangle equivalent of the Stage3D size and position.
+		 */
+		public function get viewPort() : Rectangle
+		{ 
+			return _viewPort;
+		}
+
+		/**
+		 * The background color of the Stage3D.
+		 */
+		public function get color() : uint
+		{ 
+			return _color;
+		}
+		
+		public function set color(color : uint) : void
+		{ 
+			_color = color;
 		}
 
 		/**
@@ -248,6 +396,25 @@ package away3d.core.managers
 		{
 			_stage3D.requestContext3D(forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO);
 			_contextRequested = true;
+		}
+		
+		/**
+		 * The Enter_Frame handler for rendering framework layers on the Stage3D instance
+		 */
+		private function onRenderLayerEnterFrame(event : Event) : void
+		{
+			if (!_context3D) return; 
+			
+			// Clear the stage3D instance
+			initialiseRender();
+			
+			// Render each layer using the remdering functions added
+			for each (var renderFunction:Function in _layerRenderFunctions) {
+				renderFunction();
+			}
+			
+			// Call the present() to render the frame
+			completeRender();
 		}
 	}
 }
