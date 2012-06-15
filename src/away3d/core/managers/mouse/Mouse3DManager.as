@@ -71,6 +71,13 @@ package away3d.core.managers.mouse
 
 			updatePicker();
 
+			// Set null to all collision props if there is no collision.
+			if( !_collidingObject ) {
+				_collisionPosition = null;
+				_collisionNormal = null;
+				_collisionUV = null;
+			}
+
 			_updateDirty = false;
 		}
 

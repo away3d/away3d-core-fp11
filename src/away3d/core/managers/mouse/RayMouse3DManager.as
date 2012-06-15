@@ -41,13 +41,6 @@ package away3d.core.managers.mouse
 			else {
 				_collidingObject = null;
 			}
-
-			// Set null to all collision props if there is no collision.
-			if( !_collidingObject ) {
-				_collisionPosition = null;
-				_collisionNormal = null;
-				_collisionUV = null;
-			}
 		}
 	}
 }
