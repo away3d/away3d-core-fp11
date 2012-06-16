@@ -73,6 +73,14 @@ package away3d.animators.data
 		}
 
 		/**
+		 * The target skeleton.
+		 */
+		public function get skeleton() : Skeleton
+		{
+			return _skeleton;
+		}
+
+		/**
 		 * The amount of joints in the target skeleton.
 		 */
 		public function get numJoints() : uint

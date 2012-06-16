@@ -359,9 +359,10 @@ package away3d.loaders.parsers
 			num_methods = _body.readUnsignedByte();
 			
 			// Read material numerical properties
-			// (1=color, 2=bitmap url, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
+			// (1=color, 2=bitmap url, 10=alpha, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
 			props = parseProperties({ 1:AWD_FIELD_INT32, 2:AWD_FIELD_BADDR, 
-				11:AWD_FIELD_BOOL, 12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
+				10:AWD_FIELD_FLOAT32, 11:AWD_FIELD_BOOL, 
+				12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
 			
 			methods_parsed = 0;
 			while (methods_parsed < num_methods) {
@@ -378,7 +379,7 @@ package away3d.loaders.parsers
 				var color : uint;
 				
 				color = props.get(1, 0xcccccc);
-				mat = new ColorMaterial(color);
+				mat = new ColorMaterial(color, props.get(10, 1.0));
 			}
 			else if (type == 2) { // Bitmap material
 				//TODO: not used
@@ -393,6 +394,7 @@ package away3d.loaders.parsers
 				if (texture) {
 					mat = new TextureMaterial(texture);
 					TextureMaterial(mat).alphaBlending = props.get(11, false);
+					TextureMaterial(mat).alpha = props.get(10, 1.0);
 					finalize = true;
 				}
 				else {
@@ -805,7 +807,7 @@ package away3d.loaders.parsers
 				// Ignore sub-mesh attributes for now
 				parseUserAttributes();
 				
-				sub_geoms = buildSubGeometries(verts, indices, uvs, normals, null, weights, w_indices);
+				sub_geoms = constructSubGeometries(verts, indices, uvs, normals, null, weights, w_indices);
 				for (i=0; i<sub_geoms.length; i++) {
 					geom.addSubGeometry(sub_geoms[i]);
 					// TODO: Somehow map in-sub to out-sub indices to enable look-up
@@ -820,161 +822,6 @@ package away3d.loaders.parsers
 			finalizeAsset(geom, name);
 			
 			return geom;
-		}
-		
-		
-		private function buildSubGeometry(verts : Vector.<Number>, indices : Vector.<uint>, uvs : Vector.<Number>, 
-										  normals : Vector.<Number>, tangents : Vector.<Number>, 
-										  weights : Vector.<Number>, jointIndices : Vector.<Number>) : SubGeometry
-		{
-			var sub : SubGeometry;
-			
-			if (weights && jointIndices) {
-				// If there were weights and joint indices defined, this
-				// is a skinned mesh and needs to be built from skinned
-				// sub-geometries.
-				sub = new SkinnedSubGeometry(weights.length / (verts.length/3));
-				SkinnedSubGeometry(sub).updateJointWeightsData(weights);
-				SkinnedSubGeometry(sub).updateJointIndexData(jointIndices);
-			}
-			else {
-				sub = new SubGeometry();
-			}
-			
-			sub.updateVertexData(verts);
-			sub.updateIndexData(indices);
-			if (uvs) sub.updateUVData(uvs);
-			if (normals) sub.updateVertexNormalData(normals);
-			if (tangents) sub.updateVertexTangentData(tangents);
-			
-			return sub;
-		}
-		
-		private function buildSubGeometries(verts : Vector.<Number>, indices : Vector.<uint>, uvs : Vector.<Number>, 
-											normals : Vector.<Number>, tangents : Vector.<Number>, 
-											weights : Vector.<Number>, jointIndices : Vector.<Number>) : Vector.<SubGeometry>
-		{
-			const LIMIT : uint = 3*0xffff;
-			var subs : Vector.<SubGeometry> = new Vector.<SubGeometry>();
-			
-			if (verts.length >= LIMIT || indices.length >= LIMIT) {
-				var i : uint, len : uint, outIndex : uint;
-				var splitVerts : Vector.<Number> = new Vector.<Number>();
-				var splitIndices : Vector.<uint> = new Vector.<uint>();
-				var splitUvs : Vector.<Number> = (uvs != null)? new Vector.<Number>() : null;
-				var splitNormals : Vector.<Number> = (normals != null)? new Vector.<Number>() : null;
-				var splitTangents : Vector.<Number> = (tangents != null)? new Vector.<Number>() : null;
-				var splitWeights : Vector.<Number> = (weights != null)? new Vector.<Number>() : null;
-				var splitJointIndices: Vector.<Number> = (jointIndices != null)? new Vector.<Number>() : null;
-				
-				var mappings : Vector.<int> = new Vector.<int>(verts.length/3, true);
-				i = mappings.length;
-				while (i-- > 0) 
-					mappings[i] = -1;
-				
-				// Loop over all triangles
-				outIndex = 0;
-				len = indices.length;
-				for (i=0; i<len; i+=3) {
-					var j : uint;
-					
-					if (outIndex >= LIMIT) {
-						subs.push(buildSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices));
-						splitVerts = new Vector.<Number>();
-						splitIndices = new Vector.<uint>();
-						splitUvs = (uvs != null)? new Vector.<Number>() : null;
-						splitNormals = (normals != null)? new Vector.<Number>() : null;
-						splitTangents = (tangents != null)? new Vector.<Number>() : null;
-						splitWeights = (weights != null)? new Vector.<Number>() : null;
-						splitJointIndices = (jointIndices != null)? new Vector.<Number>() : null;
-						
-						j = mappings.length;
-						while (j-- > 0)
-							mappings[j] = -1;
-						
-						outIndex = 0;
-					}
-					
-					// Loop over all vertices in triangle
-					for (j=0; j<3; j++) {
-						var originalIndex : uint;
-						var splitIndex : uint;
-						
-						originalIndex = indices[i+j];
-						
-						if (mappings[originalIndex] >= 0) {
-							splitIndex = mappings[originalIndex];
-						}
-						else {
-							var o0 : uint, o1 : uint, o2 : uint,
-							s0 : uint, s1 : uint, s2 : uint;
-							
-							o0 = originalIndex*3 + 0;
-							o1 = originalIndex*3 + 1;
-							o2 = originalIndex*3 + 2;
-							
-							// This vertex does not yet exist in the split list and
-							// needs to be copied from the long list.
-							splitIndex = splitVerts.length / 3;
-							s0 = splitIndex*3+0;
-							s1 = splitIndex*3+1;
-							s2 = splitIndex*3+2;
-							
-							splitVerts[s0] = verts[o0];
-							splitVerts[s1] = verts[o1];
-							splitVerts[s2] = verts[o2];
-							
-							if (uvs) {
-								splitUvs[s0] = uvs[o0];
-								splitUvs[s1] = uvs[o1];
-								splitUvs[s2] = uvs[o2];
-							}
-							
-							if (normals) {
-								splitNormals[s0] = normals[o0];
-								splitNormals[s1] = normals[o1];
-								splitNormals[s2] = normals[o2];
-							}
-							
-							if (tangents) {
-								splitTangents[s0] = tangents[o0];
-								splitTangents[s1] = tangents[o1];
-								splitTangents[s2] = tangents[o2];
-							}
-							
-							if (weights) {
-								splitWeights[s0] = weights[o0];
-								splitWeights[s1] = weights[o1];
-								splitWeights[s2] = weights[o2];
-							}
-							
-							if (jointIndices) {
-								splitJointIndices[s0] = jointIndices[o0];
-								splitJointIndices[s1] = jointIndices[o1];
-								splitJointIndices[s2] = jointIndices[o2];
-							}
-							
-							mappings[originalIndex] = splitIndex;
-						}
-						
-						// Store new index, which may have come from the mapping look-up,
-						// or from copying a new set of vertex data from the original vector
-						splitIndices[outIndex+j] = splitIndex;
-					}
-					
-					outIndex += 3;
-				}
-				
-				if (splitVerts.length > 0) {
-					// More was added in the last iteration of the loop.
-					subs.push(buildSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices));
-				}
-			}
-			else {
-				subs.push(buildSubGeometry(verts, indices, uvs, normals, tangents, weights, jointIndices));
-			}
-			
-			return subs;
 		}
 		
 		

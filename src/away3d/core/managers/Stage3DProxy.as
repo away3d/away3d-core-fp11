@@ -67,6 +67,7 @@ package away3d.core.managers
 			_stage3D.x = 0;
 			_stage3D.y = 0;
 			_stage3DManager = stage3DManager;
+
 			_viewPort = new Rectangle();
 			_enableDepthAndStencil = true;
 			_layerRenderFunctions = new Vector.<Function>();
@@ -370,19 +371,20 @@ package away3d.core.managers
 		private function onContext3DUpdate(event : Event) : void
 		{
 			if (_stage3D.context3D) {
+				var hadContext : Boolean = (_context3D != null);
 
-				if(_context3D){
-					_context3D = _stage3D.context3D;
-					_context3D.enableErrorChecking = Debug.active;
+				_context3D = _stage3D.context3D;
+				_context3D.enableErrorChecking = Debug.active;
+				
+				// Only configure back buffer if width and height have been set,
+				// which they may not have been if View3D.render() has yet to be
+				// invoked for the first time.
+				if (_backBufferWidth && _backBufferHeight)
 					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
-					dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_RECREATED));
-
-				} else {
-					_context3D = _stage3D.context3D;
-					_context3D.enableErrorChecking = Debug.active;
-					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
-					dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
-				}
+				
+				// Dispatch the appropriate event depending on whether context was
+				// created for the first time or recreated after a device loss.
+				dispatchEvent(new Stage3DEvent(hadContext? Stage3DEvent.CONTEXT3D_RECREATED : Stage3DEvent.CONTEXT3D_CREATED));
 
 			} else {
 				throw new Error("Rendering context lost!");

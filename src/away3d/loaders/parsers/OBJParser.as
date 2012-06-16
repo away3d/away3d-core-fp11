@@ -26,7 +26,6 @@ package away3d.loaders.parsers
 	 */
 	public class OBJParser extends ParserBase
 	{
-		private const LIMIT:uint = 196605;
 		private var _textData:String;
 		private var _startedParsing:Boolean;
 		private var _charIndex:uint;
@@ -315,24 +314,6 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		/* If no uv's are found (often seen case with obj format) parser generates a new set of default uv's */
-		private function addDefaultUVs(vertices:Vector.<Number>, uvs: Vector.<Number>) :Vector.<Number>
-		{
-			var j:uint = 0;
-			for (var i :uint = 0; i<vertices.length; i+=3){
-				if(j == 0){
-					uvs.push(0, 1);
-				} else if(j == 1){
-					uvs.push(.5, 0);
-				} else{
-					uvs.push(1, 1);
-				}
-				
-				j = (j+1>2)? 0:j++;
-			}
-			
-			return uvs;
-		}
 		
 		/**
 		 * Translates an obj's material group to a subgeometry.
@@ -345,6 +326,7 @@ package away3d.loaders.parsers
 			var face:FaceData;
 			var numFaces:uint = faces.length;
 			var numVerts:uint;
+			var subs : Vector.<SubGeometry>;
 			
 			var vertices:Vector.<Number> = new Vector.<Number>();
 			var uvs:Vector.<Number> = new Vector.<Number>();
@@ -364,83 +346,13 @@ package away3d.loaders.parsers
 					translateVertexData(face, j+1, vertices, uvs, indices, normals);
 				}
 			}
-
-			var vlength:uint = vertices.length;
-			 
-			if(vlength > 0){
-				
-				if(vlength <= LIMIT){
-					 
-					buildSubGeometry(geometry, vertices, uvs, indices, normals);
-					
-				} else {
-					
-					var nvertices:Vector.<Number> = new Vector.<Number>();
-					var nuvs:Vector.<Number> = new Vector.<Number>();
-					var nnormals:Vector.<Number> = new Vector.<Number>();
-					var nindices:Vector.<uint> = new Vector.<uint>();
-					
-					var ind:uint;
-					var vind:uint;
-					var uvind:uint;
-					 
-					vlength = 0;
-					
-					for (i = 0; i < indices.length; ++i) {
-						
-						if(vlength+3 > LIMIT){
-							vlength = 0;
-							buildSubGeometry(geometry, nvertices, nuvs, nindices, nnormals);
-							nvertices = new Vector.<Number>();
-							nuvs = new Vector.<Number>();
-							nnormals = new Vector.<Number>();
-							nindices = new Vector.<uint>();
-						}
-						
-						ind = indices[i];
-						vind = ind*3;
-						uvind = ind*2;
-						nindices.push(nvertices.length/3);
-						nvertices.push(vertices[vind], vertices[vind+1], vertices[vind+2]);
-						
-						if (uvs.length > 0)
-							nuvs.push(uvs[uvind], uvs[uvind+1]);
-						
-						if(normals.length > 0 && normals[vind]) nnormals.push(normals[vind], normals[vind+1], normals[vind+2]);
-						 
-						vlength+=3;
-					}
-					
-					buildSubGeometry(geometry, nvertices, nuvs, nindices, nnormals);
-					
-				}
+			
+			subs = constructSubGeometries(vertices, indices, uvs, normals, null, null, null);
+			for (i=0; i<subs.length; i++) {
+				geometry.addSubGeometry(subs[i]);
 			}
 		}
 		
-		private function buildSubGeometry(geometry:Geometry, vertices:Vector.<Number>, uvs:Vector.<Number>, indices:Vector.<uint>, normals:Vector.<Number>):void
-		{
-			if(vertices.length == 0) return;
-			
-			var subGeom:SubGeometry = new SubGeometry();
-			subGeom.autoDeriveVertexTangents = true;
-			 
-			if(uvs.length == 0 && vertices.length > 0)
-				uvs = addDefaultUVs(vertices, uvs);
-			
-			subGeom.updateVertexData(vertices);
-			subGeom.updateIndexData(indices);
-			if (uvs) subGeom.updateUVData(uvs);
-			
-			var needDerive:Boolean = Boolean(normals.length != vertices.length);
-			if(needDerive){
-				subGeom.autoDeriveVertexNormals = needDerive;
-			} else{
-				subGeom.updateVertexNormalData(normals);
-			}
-			
-			geometry.addSubGeometry(subGeom);
-		}
-
 		private function translateVertexData(face:FaceData, vertexIndex:int, vertices:Vector.<Number>, uvs:Vector.<Number>, indices:Vector.<uint>, normals:Vector.<Number>):void
 		{
 			var index:uint;
