@@ -166,7 +166,7 @@ package away3d.core.managers
 				_context3D.setRenderToBackBuffer();
 		}
 		
-		public function initialiseRender() : void {
+		public function clear() : void {
 			if (!_context3D) return;
 			
 			if (_backBufferDirty) {
@@ -182,7 +182,7 @@ package away3d.core.managers
 		}
 
 
-		public function completeRender() : void {
+		public function present() : void {
 			if (!_context3D) return;
 
 			_context3D.present();
@@ -193,7 +193,7 @@ package away3d.core.managers
 		 * The order in which they are added determines the render order - bottom (first) to top (last)
 		 * @param fn The rendering function of the framework
 		 */
-		public function addLayerScene(fn : Function) : void 
+		public function addLayer(fn : Function) : void 
 		{
 			_layerRenderFunctions.push(fn);
 		}
@@ -208,11 +208,11 @@ package away3d.core.managers
 		}
 		
 		/**
-		 * Start the automatic rendering of the added scenes using the provided stage
+		 * Start the automatic rendering of the added layers using the provided stage
 		 * object so Enter_Frame events can be attahed
 		 * @param stage The stage instance to be used to attach Enter_Frame events too.
 		 */
-		public function renderLayeredScenes(stage : Stage = null) : void {			
+		public function renderLayers(stage : Stage = null) : void {			
 			// Remove any previous Enter_Frame listeners
 			if (_stage) {
 				_stage.removeEventListener(Event.ENTER_FRAME, onRenderLayerEnterFrame);
@@ -406,7 +406,7 @@ package away3d.core.managers
 			if (!_context3D) return; 
 			
 			// Clear the stage3D instance
-			initialiseRender();
+			clear();
 			
 			// Render each layer using the remdering functions added
 			for each (var renderFunction:Function in _layerRenderFunctions) {
@@ -414,7 +414,7 @@ package away3d.core.managers
 			}
 			
 			// Call the present() to render the frame
-			completeRender();
+			present();
 		}
 	}
 }
