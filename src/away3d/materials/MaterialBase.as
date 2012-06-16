@@ -98,13 +98,17 @@ package away3d.materials
 
 		public function set lightPicker(value : LightPickerBase) : void
 		{
-			if (_lightPicker)
-				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
-
-			_lightPicker = value;
-
-			if (_lightPicker)
-				_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
+			if (value != _lightPicker) {
+				if (_lightPicker)
+					_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+				
+				_lightPicker = value;
+	
+				if (_lightPicker)
+					_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
+				
+				invalidatePasses(null);
+			}
 		}
 
 		private function onLightsChange(event : Event) : void

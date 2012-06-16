@@ -22,7 +22,7 @@ package away3d.extrusions
 	public class LatheExtrude extends Mesh
 	{
 		private const EPS:Number = .0001;
-		private const LIMIT:uint = 64998;
+		private const LIMIT:uint = 196605;
 		private const MAXRAD:Number = 1.2;
 		
 		private var _profile:Vector.<Vector3D>;

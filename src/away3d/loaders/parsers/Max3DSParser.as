@@ -184,6 +184,10 @@ package away3d.loaders.parsers
 						case 0xB002: // Object animation (including pivot)
 							parseObjectAnimation(end);
 							break;
+                                                
+						case 0x4150: // Smoothing groups
+							parseSmoothingGroups();
+							break;	
 						
 						default:
 							// Skip this (unknown) chunk
@@ -360,9 +364,19 @@ package away3d.loaders.parsers
 				// Skip "face info", irrelevant in Away3D
 				_byteData.position += 2;
 			}
+                        
+                        _cur_obj.smoothingGroups = new Vector.<uint>(count, true);
 		}
 		
-		
+		private function parseSmoothingGroups():void {
+			var len:uint = _cur_obj.indices.length / 3;
+			var i:uint = 0;
+			while (i < len) {
+				_cur_obj.smoothingGroups[i] = _byteData.readUnsignedInt();
+				i++;
+			}
+		}		
+
 		private function parseUVList() : void
 		{
 			var i : uint;
@@ -456,24 +470,50 @@ package away3d.loaders.parsers
 		private function constructObject(obj : ObjectVO, pivot : Vector3D = null) : ObjectContainer3D
 		{
 			if (obj.type == AssetType.MESH) {
+				var i : uint;
+				var subs : Vector.<SubGeometry>;
 				var geom : Geometry;
-				var sub : SubGeometry;
 				var mat : MaterialBase;
 				var mesh : Mesh;
 				var mtx : Matrix3D;
+				var vertices:Vector.<VertexVO>;
+				var faces:Vector.<FaceVO>;
 				
 				if (obj.materials.length > 1)
 					trace('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
 				
-				sub = new SubGeometry();
-				sub.autoDeriveVertexNormals = true;
-				sub.autoDeriveVertexTangents = true;
-				if(obj.verts) sub.updateVertexData(obj.verts);
-				if(obj.indices) sub.updateIndexData(obj.indices);
-				if(obj.uvs) sub.updateUVData(obj.uvs);
+				vertices = new Vector.<VertexVO>(obj.verts.length / 3, false);
+				faces = new Vector.<FaceVO>(obj.indices.length / 3, true);
 				
+				prepareData(vertices, faces, obj);
+				applySmoothGroups(vertices, faces);
+				
+				obj.verts = new Vector.<Number>(vertices.length * 3, true);
+				for (i = 0; i < vertices.length; i++) {
+					obj.verts[i * 3] = vertices[i].x;
+					obj.verts[i * 3 + 1] = vertices[i].y;
+					obj.verts[i * 3 + 2] = vertices[i].z;
+				}
+				obj.indices = new Vector.<uint>(faces.length * 3, true);
+				for (i = 0; i < faces.length; i++) {
+					obj.indices[i * 3] = faces[i].a;
+					obj.indices[i * 3 + 1] = faces[i].b;
+					obj.indices[i * 3 + 2] = faces[i].c;
+				}
+				obj.uvs = new Vector.<Number>(vertices.length * 2, true);
+				for (i = 0; i < vertices.length; i++) {
+					obj.uvs[i * 2] = vertices[i].u;
+					obj.uvs[i * 2 + 1] = vertices[i].v;
+				}
+		
 				geom = new Geometry();
-				geom.subGeometries.push(sub);
+				
+				// Construct sub-geometries (potentially splitting buffers)
+				// and add them to geometry.
+				subs = constructSubGeometries(obj.verts, obj.indices, obj.uvs, null, null, null, null);
+				for (i=0; i<subs.length; i++) {
+					geom.subGeometries.push(subs[i]);
+				}
 				
 				if (obj.materials.length>0) {
 					var mname : String;
@@ -522,6 +562,113 @@ package away3d.loaders.parsers
 			
 			// If reached, unknown
 			return null;
+		}
+
+		private function prepareData(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>, obj:ObjectVO):void {
+			// convert raw ObjectVO's data to structured VertexVO and FaceVO
+			var i:int;
+			var j:int;
+			var k:int;
+			var len:int = obj.verts.length;
+			for (i = 0, j = 0, k = 0; i < len;) {
+				var v:VertexVO = new VertexVO;
+				v.x = obj.verts[i++];
+				v.y = obj.verts[i++];
+				v.z = obj.verts[i++];
+				v.u = obj.uvs[j++];
+				v.v = obj.uvs[j++];
+				vertices[k++] = v;
+			}
+			len = obj.indices.length;
+			for (i = 0, k = 0; i < len;) {
+				var f:FaceVO = new FaceVO();
+				f.a = obj.indices[i++];
+				f.b = obj.indices[i++];
+				f.c = obj.indices[i++];
+				f.smoothGroup = obj.smoothingGroups[k];
+				faces[k++] = f;
+			}
+		}
+		
+		private function applySmoothGroups(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>):void {
+			// clone vertices according to following rule:
+			// clone if vertex's in faces from groups 1+2 and 3
+			// don't clone if vertex's in faces from groups 1+2, 3 and 1+3
+
+			var i:int;
+			var j:int;
+			var k:int;
+			var l:int;
+			var len:int;
+			var numVerts:uint = vertices.length;
+			var numFaces:uint = faces.length;
+			
+			// extract groups data for vertices
+			var vGroups:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>(numVerts, true);
+			for (i = 0; i < numVerts; i++) {
+				vGroups[i] = new Vector.<uint>;
+			}
+			for (i = 0; i < numFaces; i++) {
+				var face:FaceVO = FaceVO(faces[i]);
+				for (j = 0; j < 3; j++) {
+					var groups:Vector.<uint> = vGroups[(j == 0) ? face.a : ((j == 1) ? face.b : face.c)];
+					var group:uint = face.smoothGroup;
+					for (k = groups.length - 1; k >= 0; k--) {
+						if ((group & groups[k]) > 0) {
+							group |= groups[k];
+							groups.splice(k, 1);
+							k = groups.length - 1;
+						}
+					}
+					groups.push(group);
+				}
+			}
+			// clone vertices
+			var vClones:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>(numVerts, true);
+			for (i = 0; i < numVerts; i++) {
+				if ((len = vGroups[i].length) < 1) continue;
+				var clones:Vector.<uint> = new Vector.<uint>(len, true);
+				vClones[i] = clones;
+				clones[0] = i;
+				var v0:VertexVO = vertices[i];
+				for (j = 1; j < len; j++) {
+					var v1:VertexVO = new VertexVO;
+					v1.x = v0.x;
+					v1.y = v0.y;
+					v1.z = v0.z;
+					v1.u = v0.u;
+					v1.v = v0.v;
+					clones[j] = vertices.length;
+					vertices.push(v1);
+				}
+			}
+			numVerts = vertices.length;
+
+			for (i = 0; i < numFaces; i++) {
+				face = FaceVO(faces[i]);
+				group = face.smoothGroup;
+				for (j = 0; j < 3; j++) {
+					k = (j == 0) ? face.a : ((j == 1) ? face.b : face.c);
+					groups = vGroups[k];
+					len = groups.length;
+					clones = vClones[k];
+					for (l = 0; l < len; l++) {
+						if (((group == 0) && (groups[l] == 0)) ||
+								((group & groups[l]) > 0)) {
+							var index:uint = clones[l];
+							if (group == 0) {
+								// vertex is unique if no smoothGroup found
+								groups.splice(l, 1);
+								clones.splice(l, 1);
+							}
+							if (j == 0) face.a = index; else
+							if (j == 1) face.b = index; else
+								face.c = index;
+							l = len;
+						}
+					}
+				}
+			}
 		}
 		
 		
@@ -627,7 +774,7 @@ package away3d.loaders.parsers
 	}
 }
 
-
+import flash.geom.Vector3D;
 import away3d.materials.MaterialBase;
 import away3d.textures.Texture2DBase;
 
@@ -662,5 +809,22 @@ internal class ObjectVO
 	public var uvs : Vector.<Number>;
 	public var materialFaces : Object;
 	public var materials : Vector.<String>;
+	public var smoothingGroups:Vector.<uint>;
 }
 
+internal class VertexVO {
+	public var x:Number;
+	public var y:Number;
+	public var z:Number;
+	public var u:Number;
+	public var v:Number;
+	public var normal:Vector3D;
+	public var tangent:Vector3D;
+}
+
+internal class FaceVO {
+	public var a:uint;
+	public var b:uint;
+	public var c:uint;
+	public var smoothGroup:uint;
+}

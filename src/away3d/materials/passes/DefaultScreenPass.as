@@ -855,7 +855,7 @@ package away3d.materials.passes
 			_registerCache.getFreeVertexConstant();
 			_sceneMatrixIndex = _positionMatrixRegs[0].index;
 
-			_vertexCode += 	"m34 " + _globalPositionVertexReg + ".xyz, " + _localPositionRegister.toString() + ", " + _positionMatrixRegs[0].toString() + "\n" +
+			_vertexCode += 	"m44 " + _globalPositionVertexReg + ".xyz, " + _localPositionRegister.toString() + ", " + _positionMatrixRegs[0].toString() + "\n" +
 							"mov " + _globalPositionVertexReg + ".w, " + _localPositionRegister + ".w     \n";
 //			_registerCache.removeVertexTempUsage(_localPositionRegister);
 

@@ -161,6 +161,7 @@ package away3d.core.base
 		protected var _rot:Vector3D = new Vector3D();
 		protected var _sca:Vector3D = new Vector3D();
 		protected var trans:Matrix3D = new Matrix3D();
+		protected var _transformComponents : Vector.<Vector3D>;
 
 		/**
 		 * An object that can contain any extra data.
@@ -507,6 +508,13 @@ package away3d.core.base
 		 */
 		public function Object3D()
 		{
+			// Cached vector of transformation components used when
+			// recomposing the transform matrix in updateTransform()
+			_transformComponents = new Vector.<Vector3D>(3, true);
+			_transformComponents[0] = _pos;
+			_transformComponents[1] = _rot;
+			_transformComponents[2] = _sca;
+			
 			_transform.identity();
 			
 			_flipY.appendScale(1, -1, 1);
@@ -819,7 +827,7 @@ package away3d.core.base
 			_sca.y = _scaleY;
 			_sca.z = _scaleZ;
 			
-			_transform.recompose(Vector.<Vector3D>([_pos, _rot, _sca]));
+			_transform.recompose(_transformComponents);
 			
 			if (!_pivotZero)
 				_transform.appendTranslation(_x + _pivotPoint.x, _y + _pivotPoint.y, _z + _pivotPoint.z);
