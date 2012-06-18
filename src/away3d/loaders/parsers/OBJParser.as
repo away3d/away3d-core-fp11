@@ -261,7 +261,6 @@ package away3d.loaders.parsers
 				var numMaterialGroups:uint;
 				var geometry:Geometry;
 				var mesh:Mesh;
-				var meshid:uint = 0;
 				
 				var m:uint;
 				var sm:uint;
@@ -291,9 +290,9 @@ package away3d.loaders.parsers
 						// this is a group so the sub groups contain the actual mesh object names ('g' tag in OBJ file)
 						mesh.name = groups[g].name;
 					} else {
-						// no name and thats unfortunate, lets make one up
-						mesh.name = "obj" + meshid;
-						meshid++;
+						// No name stored. Use empty string which will force it
+						// to be overridden by finalizeAsset() to type default.
+						mesh.name = "";
 					}
 						
 					_meshes.push(mesh);
