@@ -99,6 +99,14 @@ package away3d.materials.utils
 			}
 		}
 
+		public function dispose() : void
+		{
+			_vectorRegisters = null;
+			_registerComponents = null;
+			_usedSingleCount = null;
+			_usedVectorCount = null;
+		}
+
 		/**
 		 * Indicates whether or not any registers are in use.
 		 */

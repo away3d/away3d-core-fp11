@@ -54,6 +54,23 @@ package away3d.materials.utils
 			for (i = 0; i < _vertexConstantOffset; ++i) getFreeVertexConstant();
 		}
 
+		public function dispose() : void
+		{
+			_fragmentTempCache.dispose();
+			_vertexTempCache.dispose();
+			_varyingCache.dispose();
+			_fragmentConstantsCache.dispose();
+			_vertexAttributesCache.dispose();
+
+			_fragmentTempCache = null;
+			_vertexTempCache = null;
+			_varyingCache = null;
+			_fragmentConstantsCache = null;
+			_vertexAttributesCache = null;
+			_fragmentOutputRegister = null;
+			_vertexOutputRegister = null;
+		}
+
 		/**
 		 * Marks a fragment temporary register as used, so it cannot be retrieved.
 		 * @param register The register to mark as used.
