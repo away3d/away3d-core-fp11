@@ -183,6 +183,7 @@
 		 */
 		override public function dispose() : void
 		{
+			super.dispose();
 			material = null;
 			geometry = null;
 		}
