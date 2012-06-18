@@ -1,6 +1,3 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.animators.skeleton
 {
 
@@ -39,7 +36,7 @@ package away3d.animators.skeleton
 		public function set blendWeight(value : Number) : void
 		{
 			_blendWeight = value;
-			_duration = inputA.duration + _blendWeight*(inputB.duration - inputB.duration);
+			_duration = inputA.duration + _blendWeight*(inputB.duration - inputA.duration);
 		}
 
 // todo: return whether or not update was performed
