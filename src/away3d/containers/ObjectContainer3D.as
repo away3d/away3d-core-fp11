@@ -616,6 +616,11 @@ package away3d.containers
 			if (parent) parent.removeChild(this);
 		}
 
+		/**
+		 * Clones this ObjectContainer3D instance along with all it's children, and
+		 * returns the result (which will be a copy of this container, containing copies
+		 * of all it's children.)
+		*/
 		override public function clone() : Object3D
 		{
 			var clone : ObjectContainer3D = new ObjectContainer3D();
