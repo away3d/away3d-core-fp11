@@ -16,7 +16,7 @@ package away3d.lights.shadowmaps
 
 	public class DirectionalShadowMapper extends ShadowMapperBase
 	{
-		private var _depthCamera : Camera3D;
+		protected var _depthCamera : Camera3D;
 		private var _localFrustum : Vector.<Number>;
 
 		private var _lightOffset : Number = 10000;
