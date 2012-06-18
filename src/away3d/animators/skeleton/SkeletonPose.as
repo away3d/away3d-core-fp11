@@ -100,6 +100,14 @@ package away3d.animators.skeleton
 			}
 			return clone;
 		}
+		
+		/** 
+		 * @inheritDoc
+		 */
+		public function dispose() : void
+		{
+			jointPoses.length = 0;
+		}
 
 		/**
 		 * Converts a local hierarchical skeleton pose to a global pose

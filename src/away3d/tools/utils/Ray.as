@@ -4,14 +4,13 @@ package away3d.tools.utils
 	
 	public class Ray{
 		
-		private var _orig:Vector3D = new Vector3D();
-		private var _dir:Vector3D = new Vector3D();
-		private var _intersect:Vector3D = new Vector3D();
-		private var _tu:Vector3D = new Vector3D();
-		private var _tv:Vector3D = new Vector3D();
-		private var _w:Vector3D = new Vector3D();
-		private var _pn:Vector3D = new Vector3D();
-		private var _npn:Vector3D = new Vector3D();
+		private var _orig:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private var _dir:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private var _tu:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private var _tv:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private var _w:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private var _pn:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private var _npn:Vector3D = new Vector3D(0.0,0.0,0.0);
 		private var _a:Number;
 		private var _b:Number;
 		private var _c:Number;
@@ -100,7 +99,7 @@ package away3d.tools.utils
 			if sintersect == null no hit, else sintersect = intersection vector3d or the normal of the intersection
 		*/
 		
-		public function getRayToSphereIntersection(pOrig:Vector3D, dir:Vector3D, sPos:Vector3D, radius:Number, bNearest:Boolean = true, bNormal:Boolean = false):Vector3D
+		public function getRayToSphereIntersection(pOrig:Vector3D, dir:Vector3D, sPos:Vector3D, radius:Number, bNearest:Boolean = true, bNormal:Boolean = false, outVector3D:Vector3D = null):Vector3D
 		{
 			_d = hasSphereIntersection(pOrig, dir, sPos, radius);
 			
@@ -113,32 +112,34 @@ package away3d.tools.utils
 				
 			if (t == 0.0) return null;
 			
-			_intersect.x = pOrig.x + (_pn.x* t);
-			_intersect.y = pOrig.y + (_pn.y* t);
-			_intersect.z = pOrig.z + (_pn.z* t);
+			var result:Vector3D = outVector3D || new Vector3D(0.0,0.0,0.0);
+			result.x = pOrig.x + (_pn.x* t);
+			result.y = pOrig.y + (_pn.y* t);
+			result.z = pOrig.z + (_pn.z* t);
 			
 			//todo, add dist return. var dist:Number = Math.sqrt(a)*t;
 			
 			if(bNormal){
-				_pn.x = (_intersect.x - sPos.x) / radius;
-				_pn.y = (_intersect.y - sPos.y) / radius;
-				_pn.z = (_intersect.z - sPos.z) / radius;
+				_pn.x = (result.x - sPos.x) / radius;
+				_pn.y = (result.y - sPos.y) / radius;
+				_pn.z = (result.z - sPos.z) / radius;
 				
 				return _pn;
 			}
-			 
-			return _intersect;
+			
+			return result;
 		}
 	
 		/**
 		* Returns a Vector3D where the ray intersects a plane inside a triangle
 		* Returns null if no hit is found.
 		*
-		*@param		p0		Vector3D. 		The origin of the ray.
-		*@param		p1		Vector3D. 		The end of the ray.
-		*@param		v0		Vector3D. 		The first scenespace vertex of the face.
-		*@param		v1		Vector3D.		The second scenespace vertex of the face.
-		*@param		v2		Vector3D.		The third scenespace vertex of the face.
+		*@param		p0			Vector3D. 		The origin of the ray.
+		*@param		p1			Vector3D. 		The end of the ray.
+		*@param		v0			Vector3D. 		The first scenespace vertex of the face.
+		*@param		v1			Vector3D.		The second scenespace vertex of the face.
+		*@param		v2			Vector3D.		The third scenespace vertex of the face.
+		*@param		outVector3D	Vector3D.		Optional user defined Vector3D returned with result values
 		*
 		* example: fire a ray from camera position to 0,0,0 and test if it hits the triangle.
 		
@@ -158,7 +159,7 @@ package away3d.tools.utils
 		*
 		* @return	Vector3D	The intersection point
 		*/
-		public function getRayToTriangleIntersection(p0:Vector3D, p1:Vector3D, v0:Vector3D, v1:Vector3D, v2:Vector3D):Vector3D
+		public function getRayToTriangleIntersection(p0:Vector3D, p1:Vector3D, v0:Vector3D, v1:Vector3D, v2:Vector3D, outVector3D:Vector3D = null):Vector3D
 		{
 			_tu.x = v1.x - v0.x;
 			_tu.y = v1.y - v0.y;
@@ -196,17 +197,18 @@ package away3d.tools.utils
 			if (r < 0 || r > 1)
 				return null;
 			
-			_intersect.x = p0.x+(_dir.x*r);
-			_intersect.y = p0.y+(_dir.y*r);
-			_intersect.z = p0.z+(_dir.z*r);
+			var result:Vector3D = outVector3D || new Vector3D(0.0,0.0,0.0);
+			result.x = p0.x+(_dir.x*r);
+			result.y = p0.y+(_dir.y*r);
+			result.z = p0.z+(_dir.z*r);
  
 			var uu:Number = _tu.x * _tu.x + _tu.y * _tu.y + _tu.z * _tu.z;
 			var uv:Number = _tu.x * _tv.x + _tu.y * _tv.y + _tu.z * _tv.z;
 			var vv:Number = _tv.x * _tv.x + _tv.y * _tv.y + _tv.z * _tv.z;
 
-			_w.x = _intersect.x - v0.x;
-			_w.y = _intersect.y - v0.y;
-			_w.z = _intersect.z - v0.z;
+			_w.x = result.x - v0.x;
+			_w.y = result.y - v0.y;
+			_w.z = result.z - v0.z;
 			
 			var wu:Number = _w.x * _tu.x + _w.y * _tu.y + _w.z * _tu.z;
 			var wv:Number = _w.x * _tv.x + _w.y * _tv.y + _w.z * _tv.z;
@@ -220,7 +222,7 @@ package away3d.tools.utils
 			if (t < 0 || (v + t) > 1.0)
 				return null;
 			
-			return _intersect;
+			return result;
 		}
 		
 		private function hasSphereIntersection(pOrig:Vector3D, dir:Vector3D, sPos:Vector3D, radius:Number):Number

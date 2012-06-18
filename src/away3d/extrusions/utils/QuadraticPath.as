@@ -1,5 +1,7 @@
-﻿package away3d.extrusions.utils
+package away3d.extrusions.utils
 {
+	import away3d.extrusions.utils.QuadraticPathSegment;
+
 	import flash.geom.Vector3D;
 
 	//import away3d.containers.Scene3D;
@@ -9,7 +11,7 @@
 	 * Holds information about a single Path definition.
 	 * DEBUG OPTION OUT AT THIS TIME OF DEV
 	 */
-    public class Path
+    public class QuadraticPath implements IPath
     {
 		/**
 		 * Creates a new <code>Path</code> object.
@@ -17,28 +19,22 @@
 		 * @param	 aVectors		[optional] An array of a series of Vector3D's organized in the following fashion. [a,b,c,a,b,c etc...] a = pEnd, b=pControl (control point), c = v2
 		 */
 		 
-        public function Path(aVectors:Vector.<Vector3D> = null)
+        public function QuadraticPath(aVectors:Vector.<Vector3D> = null)
         {
-			if(aVectors!= null && aVectors.length < 3)
-				throw new Error("Path Vector.<Vector3D> must contain at least 3 Vector3D's");
+			_segments = new Vector.<IPathSegment>();
 			
-            _segments = new Vector.<PathSegment>();
-			
-			if(aVectors != null)
-				for(var i:int = 0; i<aVectors.length; i+=3)
-					_segments.push( new PathSegment(aVectors[i], aVectors[i+1], aVectors[i+2]));
-			 
+			if(aVectors)
+				pointData = aVectors;
         }
-		
 		 
 		//private var _pathDebug:PathDebug;
 		 
-        private var _segments:Vector.<PathSegment>;
+        private var _segments:Vector.<IPathSegment>;
 		
 		/**
     	 * The worldAxis of reference
     	 */
-		public var worldAxis:Vector3D = new Vector3D(0,1,0);
+		private var _worldAxis:Vector3D = new Vector3D(0,1,0);
     	
 		
         private var _smoothed:Boolean;
@@ -103,11 +99,11 @@
 		 
 		/**
 		 * adds a PathSegment to the path
-		 * @see PathSegment:
+		 * @see QuadraticPathSegment:
 		 */
-		public function add(ps:PathSegment):void
+		public function add(segment:IPathSegment):void
         {
-			_segments.push(ps);
+			_segments.push(segment);
         }
 		
 		/**
@@ -115,7 +111,7 @@
 		 * 
 		 * @return	an integer: the length of the Path elements array
 		 */
-		public function get length():int
+		public function get length():uint
         {
 			return _segments.length;
         }
@@ -125,7 +121,7 @@
 		 * 
 		 * @return	a Vector.&lt;PathSegment&gt;: holding the elements (PathSegment) of the path
 		 */
-		public function get segments():Vector.<PathSegment>
+		public function get segments():Vector.<IPathSegment>
         {
 			return _segments;
         }
@@ -136,7 +132,7 @@
 		 * @param	 indice uint. the indice of a given PathSegment		
 		 * @return	given PathSegment from the path
 		 */
-		public function getSegmentAt(indice:uint):PathSegment
+		public function getSegmentAt(indice:uint):IPathSegment
         {
 			return _segments[indice];
         }
@@ -153,9 +149,9 @@
 				return;
 			
 			if(join && index < _segments.length-1 && index>0){
-				var seg:PathSegment = _segments[index];
-				var prevSeg:PathSegment = _segments[index-1];
-				var nextSeg:PathSegment = _segments[index+1];
+				var seg:QuadraticPathSegment = _segments[index] as QuadraticPathSegment;
+				var prevSeg:QuadraticPathSegment = _segments[index-1] as QuadraticPathSegment;
+				var nextSeg:QuadraticPathSegment = _segments[index+1] as QuadraticPathSegment;
 				prevSeg.pControl.x = (prevSeg.pControl.x+seg.pControl.x)*.5;
 				prevSeg.pControl.y = (prevSeg.pControl.y+seg.pControl.y)*.5;
 				prevSeg.pControl.z = (prevSeg.pControl.z+seg.pControl.z)*.5;
@@ -177,7 +173,7 @@
 			if(_segments.length > 1){
 				_segments.splice(index, 1);
 			} else{
-				_segments = new Vector.<PathSegment>();
+				_segments = new Vector.<IPathSegment>();
 			}
         }
 		
@@ -200,37 +196,42 @@
 			var seg1:Vector3D;
 			var tmp:Vector.<Vector3D> = new Vector.<Vector3D>();
 			var i:uint;
-			
-			var startseg:Vector3D = new Vector3D(_segments[0].pStart.x, _segments[0].pStart.y, _segments[0].pStart.z);
-			var endseg:Vector3D = new Vector3D(_segments[_segments.length-1].pEnd.x, 
-																		_segments[_segments.length-1].pEnd.y,
-																		_segments[_segments.length-1].pEnd.z);
+
+			var seg:QuadraticPathSegment = _segments[0] as QuadraticPathSegment;
+			var segnext:QuadraticPathSegment = _segments[_segments.length-1] as QuadraticPathSegment;
+
+			var startseg:Vector3D = new Vector3D(seg.pStart.x, seg.pStart.y, seg.pStart.z);
+			var endseg:Vector3D = new Vector3D(segnext.pEnd.x, segnext.pEnd.y, segnext.pEnd.z);
+
 			for(i = 0; i< length-1; ++i)
 			{
-				if(_segments[i].pControl == null)
-					_segments[i].pControl = _segments[i].pEnd;
+				seg = _segments[i] as QuadraticPathSegment;
+				segnext = _segments[i + 1] as QuadraticPathSegment;
+
+				if(seg.pControl == null)
+					seg.pControl = seg.pEnd;
 				
-				if(_segments[i+1].pControl == null)
-					_segments[i+1].pControl = _segments[i+1].pEnd;
+				if(segnext.pControl == null)
+					segnext.pControl = segnext.pEnd;
 				
-				seg0 = _segments[i].pControl;
-				seg1 = _segments[i+1].pControl;
+				seg0 = seg.pControl;
+				seg1 = segnext.pControl;
 				x = (seg0.x + seg1.x) * .5;
 				y = (seg0.y + seg1.y) * .5;
 				z = (seg0.z + seg1.z) * .5;
 				
 				tmp.push( startseg,  new Vector3D(seg0.x, seg0.y, seg0.z), new Vector3D(x, y, z));
 				startseg = new Vector3D(x, y, z);
-				_segments[i] = null;
+				seg = null;
 			}
 			
-			seg0 = _segments[_segments.length-1].pControl;
+			seg0 = QuadraticPathSegment(_segments[_segments.length-1]).pControl;
 			tmp.push( startseg,  new Vector3D((seg0.x+seg1.x)*.5, (seg0.y+seg1.y)*.5, (seg0.z+seg1.z)*.5), endseg);
 			
-			_segments = new Vector.<PathSegment>();
+			_segments = new Vector.<IPathSegment>();
 			
 			for(i = 0; i<tmp.length; i+=3)
-				_segments.push( new PathSegment(tmp[i], tmp[i+1], tmp[i+2]) );
+				_segments.push( new QuadraticPathSegment(tmp[i], tmp[i+1], tmp[i+2]) );
 			 
 			tmp = null;
 		}
@@ -243,11 +244,14 @@
         {
 			_averaged = true;
 			_smoothed = false;
-			
+
+			var seg:QuadraticPathSegment;
+
 			for(var i:uint = 0; i<_segments.length; ++i){
-				_segments[i].pControl.x = (_segments[i].pStart.x+_segments[i].pEnd.x)*.5;
-				_segments[i].pControl.y = (_segments[i].pStart.y+_segments[i].pEnd.y)*.5;
-				_segments[i].pControl.z = (_segments[i].pStart.z+_segments[i].pEnd.z)*.5;
+				seg = _segments[i] as QuadraticPathSegment;
+				seg.pControl.x = (seg.pStart.x+seg.pEnd.x)*.5;
+				seg.pControl.y = (seg.pStart.y+seg.pEnd.y)*.5;
+				seg.pControl.z = (seg.pStart.z+seg.pEnd.z)*.5;
 			}
         }
         
@@ -293,11 +297,50 @@
   				aVectors.push(aVectors[0]);
 	  		}
 	  		
-            _segments = new Vector.<PathSegment>();
+            _segments = new Vector.<IPathSegment>();
 			
 			for(i = 0; i< aVectors.length; i+=3)
-				_segments.push( new PathSegment(aVectors[i], aVectors[i+1], aVectors[i+2]));
+				_segments.push( new QuadraticPathSegment(aVectors[i], aVectors[i+1], aVectors[i+2]));
   		}
-		
-    }
+
+
+		public function set pointData(aVectors:Vector.<Vector3D>):void
+		{
+			if(aVectors.length < 3)
+				throw new Error("Path Vector.<Vector3D> must contain at least 3 Vector3D's");
+			
+			if(aVectors.length%3 != 0)
+				throw new Error("Path Vector.<Vector3D> must contain series of 3 Vector3D's per segment");
+				
+			for(var i:uint = 0; i<aVectors.length; i+=3)
+				_segments.push( new QuadraticPathSegment(aVectors[i], aVectors[i+1], aVectors[i+2]));
+		}
+
+
+		public function get worldAxis():Vector3D
+		{
+			return _worldAxis;
+		}
+		public function set worldAxis(value:Vector3D):void
+		{
+			_worldAxis = value;
+		}
+
+		//to do, remove removeSegment method
+		public function remove(index:uint, join:Boolean = false):void
+		{
+			removeSegment(index, join);
+		}
+
+		public function dispose():void
+		{
+			var i:uint = 0;
+			while(_segments.length !=0 ){
+				QuadraticPathSegment(_segments[i]).dispose();
+				_segments[i] = null;
+				_segments.splice(0, 1);
+			}
+			
+		}
+	}
 }

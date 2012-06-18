@@ -97,6 +97,9 @@ package away3d.textures
 			throw new AbstractMethodError();
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		public function dispose() : void
 		{
 			for (var i : int = 0; i < 8; ++i)

@@ -7,15 +7,15 @@ package away3d.extrusions{
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
-	import away3d.extrusions.utils.Path;
-	import away3d.extrusions.utils.PathSegment;
+	import away3d.extrusions.utils.IPath;
+	import away3d.extrusions.utils.IPathSegment;
 	import away3d.extrusions.utils.PathUtils;
 	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
 	import away3d.tools.helpers.MeshHelper;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
@@ -31,7 +31,7 @@ package away3d.extrusions{
 		
 		private const LIMIT:uint = 196605;
 		private const MAXRAD:Number = 1.2;
-		private var _path:Path;
+		private var _path:IPath;
 		private var _profile:Vector.<Vector3D>;
 		private var _centerMesh:Boolean;
 		private var _scales:Vector.<Vector3D>;
@@ -66,7 +66,6 @@ package away3d.extrusions{
 		private var _normal0: Vector3D;
 		private var _normal1: Vector3D;
 		private var _normal2: Vector3D;
-		
 		private var _keepExtremes:Boolean;
 		private var _distribute:Boolean;
 		private var _distributeU:Boolean;
@@ -97,7 +96,7 @@ package away3d.extrusions{
 		* @param	distributeU			[optional]	Boolean. If the mesh uv' u value is procentually spreaded over the entire mesh surface. Prevents the source map to be stretched. Default is true.
 		* @param	keepExtremes		[optional]	Boolean. If the the first and last profile coordinates must be kept accessible, in order to feed classes such as DelaunayMesh. Default is false;
 		*/
-		function PathExtrude(	material:MaterialBase = null, path:Path = null, profile:Vector.<Vector3D> = null, subdivision:uint = 2, coverAll:Boolean = true, coverSegment:Boolean = false, alignToPath:Boolean = true, centerMesh:Boolean = false, mapFit:Boolean = false,
+		function PathExtrude(	material:MaterialBase = null, path:IPath = null, profile:Vector.<Vector3D> = null, subdivision:uint = 2, coverAll:Boolean = true, coverSegment:Boolean = false, alignToPath:Boolean = true, centerMesh:Boolean = false, mapFit:Boolean = false,
 							 			flip:Boolean = false, closePath:Boolean = false, materials:Vector.<MaterialBase> = null, scales:Vector.<Vector3D> = null, smoothScale:Boolean = true, rotations:Vector.<Vector3D> = null, smoothSurface:Boolean = true, distribute:Boolean = false, distributeU:Boolean = true, keepExtremes:Boolean = false)
 		{
 			var geom : Geometry = new Geometry();
@@ -123,6 +122,7 @@ package away3d.extrusions{
 			_distributeU = distributeU;
 			_keepExtremes = keepExtremes;
 		}
+		
 		
 		/**
 		 * @inheritDoc
@@ -172,7 +172,7 @@ package away3d.extrusions{
 			
 			if (_centerMesh && this.geometry.subGeometries.length > 0){
 				MeshHelper.recenter( this);
-			}else{
+			} else {
 				invalidateGeometry();
 			}
     	}
@@ -210,12 +210,12 @@ package away3d.extrusions{
 		 /**
     	 * Defines the <code>Path</code> object representing path to extrude along. Required.
     	 */ 
-		public function get path():Path
+		public function get path():IPath
     	{
     		return _path;
     	}
 		
-		public function set path(val:Path):void
+		public function set path(val:IPath):void
     	{
     		_path = val;
     		_geomDirty = true;
@@ -503,8 +503,7 @@ package away3d.extrusions{
             _zAxis = target.subtract(position);
             _zAxis.normalize();
     
-            if (_zAxis.length > 0.1)
-            {
+            if (_zAxis.length > 0.1){
                 _xAxis = _worldAxis.crossProduct(_zAxis);
                 _xAxis.normalize();
     
@@ -708,7 +707,7 @@ package away3d.extrusions{
 				
 				_matIndex = _materials.length;
 				
-			} else{
+			} else {
 				_uvs = new Vector.<Number>();
 				_vertices = new Vector.<Number>();
 				_indices = new Vector.<uint>();
@@ -773,7 +772,6 @@ package away3d.extrusions{
 			var normals:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var sglist:SubGeometryList;
-			
 			var startMat:Boolean;
 			 
 			if(_activeMaterial != mat && _materials && _materials.length > 0){
@@ -812,6 +810,7 @@ package away3d.extrusions{
 					subGeom.autoDeriveVertexNormals = true;
 					
 				if(_MaterialsSubGeometries && _MaterialsSubGeometries.length > 1){
+					
 					sglist = getSubGeometryListFromMaterial(mat);
 					sglist.subGeometry = _subGeometry = subGeom;
 					sglist.uvs = _uvs = uvs = new Vector.<Number>();
@@ -951,16 +950,16 @@ package away3d.extrusions{
 			indices.push(ind0, ind1, ind2);
 		}
 		
-		private function calcPosition( t:Number, ps:PathSegment, out:Vector3D):Vector3D
-        {
-			var dt:Number = 2 * (1 - t);
-			var v:Vector3D = out || new Vector3D();
-            v.x = ps.pStart.x + t * (dt * (ps.pControl.x - ps.pStart.x) + t * (ps.pEnd.x - ps.pStart.x));
-            v.y = ps.pStart.y + t * (dt * (ps.pControl.y - ps.pStart.y) + t * (ps.pEnd.y - ps.pStart.y));
-            v.z = ps.pStart.z + t * (dt * (ps.pControl.z - ps.pStart.z) + t * (ps.pEnd.z - ps.pStart.z));
-			
-			return v;
-        }
+//		private function calcPosition( t:Number, ps:QuadraticPathSegment, out:Vector3D):Vector3D
+//        {
+//			var dt:Number = 2 * (1 - t);
+//			var v:Vector3D = out || new Vector3D();
+//            v.x = ps.pStart.x + t * (dt * (ps.pControl.x - ps.pStart.x) + t * (ps.pEnd.x - ps.pStart.x));
+//            v.y = ps.pStart.y + t * (dt * (ps.pControl.y - ps.pStart.y) + t * (ps.pEnd.y - ps.pStart.y));
+//            v.z = ps.pStart.z + t * (dt * (ps.pControl.z - ps.pStart.z) + t * (ps.pEnd.z - ps.pStart.z));
+//
+//			return v;
+//        }
 		
 		private function distributeVectors():Vector.<Vector.<Vector3D>>
 		{
@@ -987,7 +986,7 @@ package away3d.extrusions{
 			var step:Number = estLength/vCount;
 			var tPrecision:Number = 0.001;
 			var t:Number = 0;
-			var ps:PathSegment;
+			var ps:IPathSegment;
 			 
 			var tmpVDist:Number = 0;
 			var diff:Number = 0;
@@ -1015,7 +1014,7 @@ package away3d.extrusions{
 							ignore = true;
 							break;
 						} else {
-							tmpV = calcPosition(t, ps, tmpV);
+							tmpV = PathUtils.calcPosition(t, ps, tmpV);
 							tmpVDist = Vector3D.distance(prevV, tmpV);
 						}
 					}
@@ -1056,21 +1055,21 @@ package away3d.extrusions{
 		
     	private function buildExtrude():void
     	{
-    		 
+ 
 			if(_path == null || _path.length == 0 || _profile == null || _profile.length < 2)
 				throw new Error("PathExtrude error: invalid Path or profile with unsufficient data");
-				
+				 
 				_geomDirty = false;
 				initHolders();
 				 
 				_worldAxis = _path.worldAxis;
-				
 				_maxIndProfile = _profile.length*9;
 				
 				var vSegPts:Vector.<Vector.<Vector3D>>;
+				
 				if(_distribute){
 					vSegPts = distributeVectors();
-				} else{
+				} else {
 					vSegPts = PathUtils.getPointsOnCurve(_path, _subdivision);
 				}
 
@@ -1269,6 +1268,7 @@ package away3d.extrusions{
 							sg.updateVertexData(sglist.vertices);
 							sg.updateIndexData(sglist.indices);
 							sg.updateUVData(sglist.uvs);
+							
 							if(_smoothSurface)
 								sg.updateVertexNormalData(sglist.normals);
 						}
@@ -1279,6 +1279,7 @@ package away3d.extrusions{
 					_subGeometry.updateVertexData(_vertices);
 					_subGeometry.updateIndexData(_indices);
 					_subGeometry.updateUVData(_uvs);
+					
 					if(_smoothSurface)
 						_subGeometry.updateVertexNormalData(_normals);
 						
@@ -1286,7 +1287,7 @@ package away3d.extrusions{
 				}
 				 
 				if (_centerMesh)
-					MeshHelper.recenter( this);
+					MeshHelper.recenter(this);
 		}
 	}
 }

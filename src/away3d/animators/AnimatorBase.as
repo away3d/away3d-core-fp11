@@ -55,6 +55,14 @@ package away3d.animators
 		{
 			notifyStop();
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function dispose() : void
+		{
+			// To be overridden by sub-classes that have something to dispose
+		}
 
 		private function notifyStart() : void
 		{
