@@ -230,6 +230,8 @@ package away3d.tools.utils{
 		*/
 		public function updateDrag():void
 		{
+			var localIntersect : Vector3D;
+			
 			if(_object3d == null)
 				throw new Error ("Drag3D error: no ObjectContainer3D or world planes specified");
 			
@@ -237,14 +239,17 @@ package away3d.tools.utils{
 				
 			intersect();
 			
+			// TODO: Optimize this? Matrix3D.transformVector() creates a new vector - unnuecessary.
+			localIntersect = _object3d.parent.inverseSceneTransform.transformVector(_intersect);
+			
 			if(_offsetCenter == null){
-				_object3d.x = _intersect.x;
-				_object3d.y = _intersect.y;
-				_object3d.z = _intersect.z;
+				_object3d.x = localIntersect.x;
+				_object3d.y = localIntersect.y;
+				_object3d.z = localIntersect.z;
 			} else{
-				_object3d.x = _intersect.x + _offsetCenter.x;
-				_object3d.y = _intersect.y + _offsetCenter.y;
-				_object3d.z = _intersect.z + _offsetCenter.z;
+				_object3d.x = localIntersect.x + _offsetCenter.x;
+				_object3d.y = localIntersect.y + _offsetCenter.y;
+				_object3d.z = localIntersect.z + _offsetCenter.z;
 			}
 		}
 		 
