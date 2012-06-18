@@ -249,7 +249,7 @@ package away3d.library
 				_assets.splice(idx, 1);
 			
 			if (dispose)
-				asset.disposeAsset();
+				asset.dispose();
 		}
 		
 		/**
@@ -281,7 +281,7 @@ package away3d.library
 			if (dispose) {
 				var asset : IAsset;
 				for each (asset in _assets)
-					asset.disposeAsset();
+					asset.dispose();
 			}
 			
 			_assets.length = 0;
@@ -315,7 +315,7 @@ package away3d.library
 				// transfer over to the new vector.
 				if (asset.assetNamespace == ns) {
 					if (dispose) 
-						asset.disposeAsset();
+						asset.dispose();
 					
 					// Remove asset from dictionary, but don't try to auto-remove
 					// the namespace, which will trigger an unnecessarily expensive

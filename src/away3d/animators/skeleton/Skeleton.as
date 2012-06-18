@@ -70,6 +70,14 @@ package away3d.animators.skeleton
 
 			return -1;
 		}
+		
+		/**
+		 * @inheritDoc
+		*/
+		public function dispose() : void
+		{
+			joints.length = 0;
+		}
 
 		/**
 		 * The amount of joints in the Skeleton

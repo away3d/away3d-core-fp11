@@ -799,6 +799,15 @@ package away3d.core.base
 		public function dispose() : void
 		{
 		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function disposeAsset() : void
+		{
+			dispose();
+		}
 
 		/**
 		 * Invalidates the transformation matrix, causing it to be updated upon the next request
