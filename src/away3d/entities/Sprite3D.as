@@ -79,12 +79,6 @@ package away3d.entities
 			invalidateTransform();
 		}
 
-		/*override public function lookAt(target : Vector3D, upAxis : Vector3D = null) : void
-		 {
-		 super.lookAt(target, upAxis);
-		 _transform.appendScale(_width, _height, 1);
-		 }*/
-
 		public function get mouseHitMethod():uint {
 			return _mouseHitMethod;
 		}

@@ -101,7 +101,7 @@ package away3d.materials.methods
 			_depthMapCoordReg = null;
 		}
 
-		arcane final override function getVertexCode(regCache : ShaderRegisterCache) : String
+		arcane override function getVertexCode(regCache : ShaderRegisterCache) : String
 		{
 			return _usePoint? getPointVertexCode(regCache) : getPlanarVertexCode(regCache);
 		}
@@ -136,7 +136,7 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane final override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			return _usePoint? getPointFragmentCode(regCache, targetReg) : getPlanarFragmentCode(regCache, targetReg);
 		}
