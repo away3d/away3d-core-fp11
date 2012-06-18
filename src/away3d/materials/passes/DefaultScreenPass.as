@@ -694,6 +694,7 @@ package away3d.materials.passes
 			_animatedTangentReg = null;
 			_commonsReg = null;
 
+			_registerCache.dispose();
 			_registerCache = null;
 
 			if (_normalMethod) _normalMethod.cleanCompilationData();
