@@ -160,6 +160,7 @@
 					removeSegmentByIndex( segment.index );
 					segment = null;
 					_lineCount--;
+					
 				} else {
 					_segments[i].index = index;
 					index += 6;
