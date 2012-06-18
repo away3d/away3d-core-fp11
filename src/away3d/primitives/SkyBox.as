@@ -156,7 +156,7 @@ package away3d.primitives
 		 */
 		override public function pushModelViewProjection(camera : Camera3D) : void
 		{
-			var size : Number = camera.lens.far / Math.sqrt(3);
+			var size : Number = camera.lens.far / Math.sqrt(2) * .5;
 			if (++_mvpIndex == _stackLen) {
 				_mvpTransformStack[_mvpIndex] = new Matrix3D();
 				++_stackLen;
