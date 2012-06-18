@@ -60,6 +60,7 @@ package away3d.core.managers
 			_stage3D = stage3D;
 			_stage3D.x = 0;
 			_stage3D.y = 0;
+			_stage3D.visible = true;
 			_stage3DManager = stage3DManager;
 			_enableDepthAndStencil = true;
 			
@@ -204,6 +205,21 @@ package away3d.core.managers
 		{
 			_stage3D.y = value;
 		}
+		
+		
+		/**
+		 * The visibility of the Stage3D.
+		 */
+		public function get visible() : Boolean
+		{
+			return _stage3D.visible;
+		}
+		
+		public function set visible(value : Boolean) : void
+		{
+			_stage3D.visible = value;
+		}
+		
 
 		/**
 		 * Frees the Context3D associated with this Stage3DProxy.

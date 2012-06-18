@@ -427,6 +427,14 @@
 			if (_stage3DProxy)
 				_stage3DProxy.y = _globalPos.y;
 		}
+		
+		override public function set visible(value : Boolean) : void
+		{
+			super.visible = value;
+			
+			if (_stage3DProxy)
+				_stage3DProxy.visible = value;
+		}
 
 		/**
 		 * The amount of anti-aliasing to be used.
