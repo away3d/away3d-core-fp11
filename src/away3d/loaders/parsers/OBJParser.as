@@ -621,6 +621,7 @@ package away3d.loaders.parsers
 					var cm:ColorMaterial = new ColorMaterial(diffuseColor);
 					cm.alpha = alpha;
 					cm.ambientColor = ambientColor;
+					cm.repeat = true;
 					
 					if(useSpecular){
 						cm.specularColor = specularColor;
@@ -713,6 +714,7 @@ package away3d.loaders.parsers
 						mat.texture = lm.texture;
 						mat.ambientColor = lm.ambientColor;
 						mat.alpha = lm.alpha;
+						mat.repeat = true;
 						
 						if(lm.specularMethod){
 							mat.specularMethod = lm.specularMethod;
