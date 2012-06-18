@@ -11,7 +11,6 @@ package away3d.extrusions.utils
 		 */
 		function set pointData(data:Vector.<Vector3D>):void;
 
-
 		/**
 		 * The number of <code>CubicPathSegment</code> instances in the path.
 		 */

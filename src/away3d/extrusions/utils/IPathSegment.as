@@ -7,4 +7,5 @@ package away3d.extrusions.utils
 		 */
 		function dispose():void;
 	}
+	
 }

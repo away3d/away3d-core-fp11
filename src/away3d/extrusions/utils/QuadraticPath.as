@@ -26,7 +26,6 @@ package away3d.extrusions.utils
 			if(aVectors)
 				pointData = aVectors;
         }
-		
 		 
 		//private var _pathDebug:PathDebug;
 		 

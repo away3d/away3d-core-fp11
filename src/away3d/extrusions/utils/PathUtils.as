@@ -34,7 +34,7 @@ package away3d.extrusions.utils
 			
 			return vTween;
 		}
-		 
+		
 		public static function rotatePoint(aPoint:Vector3D, rotation:Vector3D):Vector3D
 		{
 			if(rotation.x != 0 || rotation.y != 0 || rotation.z != 0){

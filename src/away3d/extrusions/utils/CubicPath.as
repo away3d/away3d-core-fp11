@@ -41,7 +41,6 @@ package away3d.extrusions.utils
 			}
 		}
 
-
 		public function get length():uint
 		{
 			return _segments.length;

@@ -43,6 +43,5 @@ package away3d.extrusions.utils
 		{
 			pStart = pControl = pEnd = null;
 		}
-		
 	}
 }

@@ -43,7 +43,6 @@ package away3d.extrusions.utils
 			this.end = end;
 		}
 
-
 		public function toString():String
 		{
 			return start + ", " + control1 + ", " + control2 + ", " + end;
