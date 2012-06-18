@@ -128,8 +128,8 @@
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
-			pickingMethod = new RayMouse3DManager(); // TODO: evaluate default global picking method
 			_depthRenderer = new DepthRenderer();
+			pickingMethod = new RayMouse3DManager();
 
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
