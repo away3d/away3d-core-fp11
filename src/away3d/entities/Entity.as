@@ -37,6 +37,8 @@ package away3d.entities
 		private var _partitionNode : EntityNode;
 		private var _mouseEnabled : Boolean;
 
+		private var _mouseDetails:Boolean;
+
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
 		protected var _zIndices : Vector.<Number> = new Vector.<Number>();
 		protected var _mvpIndex : int = -1;
@@ -374,6 +376,14 @@ package away3d.entities
 
 		public function set triangleRayCollider( value:RayColliderBase ):void {
 			_triangleRayCollider = value;
+		}
+
+		public function get mouseDetails():Boolean {
+			return _mouseDetails;
+		}
+
+		public function set mouseDetails( value:Boolean ):void {
+			_mouseDetails = value;
 		}
 	}
 }

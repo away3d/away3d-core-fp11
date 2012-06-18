@@ -17,9 +17,9 @@ package away3d.core.managers.mouse
 			super();
 		}
 
-		override public function set view( value:View3D ):void {
-			super.view = value;
-			_rayCollider = new MouseRayCollider( value );
+		override public function set view( view:View3D ):void {
+			super.view = view;
+			_rayCollider = new MouseRayCollider( view );
 		}
 
 		override protected function updatePicker():void {

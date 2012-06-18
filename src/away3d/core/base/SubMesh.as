@@ -49,6 +49,10 @@ package away3d.core.base
 			this.material = material;
 		}
 
+		public function get mouseDetails():Boolean {
+			return sourceEntity.mouseDetails;
+		}
+
 		public function get offsetU():Number {
 			return _offsetU;
 		}

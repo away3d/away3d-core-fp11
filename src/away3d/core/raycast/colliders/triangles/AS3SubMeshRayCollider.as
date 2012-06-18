@@ -67,10 +67,10 @@ package away3d.core.raycast.colliders.triangles
 				nx = s0y * s1z - s0z * s1y; // n = s0 x s1
 				ny = s0z * s1x - s0x * s1z;
 				nz = s0x * s1y - s0y * s1x;
-				nl = Math.sqrt( nx * nx + ny * ny + nz * nz ); // normalize n
-				nx /= nl;
-				ny /= nl;
-				nz /= nl;
+				nl = 1 / Math.sqrt( nx * nx + ny * ny + nz * nz ); // normalize n
+				nx *= nl;
+				ny *= nl;
+				nz *= nl;
 
 				// -- plane intersection test --
 				nDotV = nx * _rayDirection.x + ny * + _rayDirection.y + nz * _rayDirection.z; // rayDirection . normal
