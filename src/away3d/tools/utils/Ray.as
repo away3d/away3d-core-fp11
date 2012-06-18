@@ -6,7 +6,6 @@ package away3d.tools.utils
 		
 		private var _orig:Vector3D = new Vector3D(0.0,0.0,0.0);
 		private var _dir:Vector3D = new Vector3D(0.0,0.0,0.0);
-		private var _intersect:Vector3D = new Vector3D(0.0,0.0,0.0);
 		private var _tu:Vector3D = new Vector3D(0.0,0.0,0.0);
 		private var _tv:Vector3D = new Vector3D(0.0,0.0,0.0);
 		private var _w:Vector3D = new Vector3D(0.0,0.0,0.0);
@@ -113,7 +112,7 @@ package away3d.tools.utils
 				
 			if (t == 0.0) return null;
 			
-			var result:Vector3D = outVector3D || _intersect;
+			var result:Vector3D = outVector3D || new Vector3D(0.0,0.0,0.0);
 			result.x = pOrig.x + (_pn.x* t);
 			result.y = pOrig.y + (_pn.y* t);
 			result.z = pOrig.z + (_pn.z* t);
@@ -198,7 +197,7 @@ package away3d.tools.utils
 			if (r < 0 || r > 1)
 				return null;
 			
-			var result:Vector3D = outVector3D || _intersect;
+			var result:Vector3D = outVector3D || new Vector3D(0.0,0.0,0.0);
 			result.x = p0.x+(_dir.x*r);
 			result.y = p0.y+(_dir.y*r);
 			result.z = p0.z+(_dir.z*r);
