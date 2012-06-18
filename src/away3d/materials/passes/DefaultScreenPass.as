@@ -233,6 +233,8 @@ package away3d.materials.passes
 		 */
 		public function addMethod(method : ShadingMethodBase) : void
 		{
+			verifyShadingMethod(method);
+			
 			_methods.push(method);
 			method.parentPass = this;
 			invalidateShaderProgram();
@@ -250,6 +252,8 @@ package away3d.materials.passes
 		 */
 		public function addMethodAt(method : ShadingMethodBase, index : int) : void
 		{
+			verifyShadingMethod(method);
+			
 			_methods.splice(index, 0, method);
 			method.parentPass = this;
 			invalidateShaderProgram();
@@ -301,6 +305,8 @@ package away3d.materials.passes
 
 		public function set normalMethod(value : BasicNormalMethod) : void
 		{
+			verifyShadingMethod(value);
+			
 			_normalMethod.parentPass = null;
 			value.copyFrom(_normalMethod);
 			value.parentPass = this;
@@ -315,6 +321,8 @@ package away3d.materials.passes
 
 		public function set ambientMethod(value : BasicAmbientMethod) : void
 		{
+			verifyShadingMethod(value);
+			
 			_ambientMethod.parentPass = null;
 			value.copyFrom(_ambientMethod);
 			value.parentPass = this;
@@ -329,6 +337,8 @@ package away3d.materials.passes
 
 		public function set shadowMethod(value : ShadingMethodBase) : void
 		{
+			verifyShadingMethod(value);
+			
 			if (_shadowMethod) _shadowMethod.parentPass = null;
 			if (value) value.parentPass = this;
 			_shadowMethod = value;
@@ -345,6 +355,8 @@ package away3d.materials.passes
 
 		public function set diffuseMethod(value : BasicDiffuseMethod) : void
 		{
+			verifyShadingMethod(value);
+			
 			_diffuseMethod.parentPass = null;
 			value.copyFrom(_diffuseMethod);
 			_diffuseMethod = value;
@@ -362,6 +374,8 @@ package away3d.materials.passes
 
 		public function set specularMethod(value : BasicSpecularMethod) : void
 		{
+			verifyShadingMethod(value);
+			
 			if (_specularMethod) {
 				_specularMethod.parentPass = null;
 				if (value) value.copyFrom(_specularMethod);
@@ -403,6 +417,8 @@ package away3d.materials.passes
 
 		arcane function set colorTransformMethod(value : ColorTransformMethod) : void
 		{
+			verifyShadingMethod(value);
+			
 			if (_colorTransformMethod == value) return;
 
 			if (_colorTransformMethod) _colorTransformMethod.parentPass = null;
@@ -1387,6 +1403,17 @@ package away3d.materials.passes
 			}
 
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _probeWeightsIndex, weights, _numProbeRegisters);
+		}
+		
+		/**
+		 * @private
+		 * Verifies that a method is not being used by more than one render pass,
+		 * which can generate undefined behavior.
+		 */
+		private function verifyShadingMethod(method : ShadingMethodBase) : void
+		{
+			if (method && method.parentPass && method.parentPass!=this)
+				throw new ArgumentError('Shading method instances can not be shared between materials.');
 		}
 	}
 }
