@@ -425,7 +425,7 @@ package away3d.loaders.parsers
 				for (i=0; i<len; i+=3) {
 					var j : uint;
 					
-					if (outIndex >= LIMIT) {
+					if (outIndex*3 >= LIMIT) {
 						subs.push(constructSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices));
 						splitVerts = new Vector.<Number>();
 						splitIndices = new Vector.<uint>();
@@ -472,9 +472,14 @@ package away3d.loaders.parsers
 							splitVerts[s2] = verts[o2];
 							
 							if (uvs) {
-								splitUvs[s0] = uvs[o0];
-								splitUvs[s1] = uvs[o1];
-								splitUvs[s2] = uvs[o2];
+								var su : uint, ou : uint, sv : uint, ov : uint;
+								su = splitIndex*2+0;
+								sv = splitIndex*2+1;
+								ou = originalIndex*2+0;
+								ov = originalIndex*2+1;
+								
+								splitUvs[su] = uvs[ou];
+								splitUvs[sv] = uvs[ov];
 							}
 							
 							if (normals) {
