@@ -1,4 +1,4 @@
-﻿package away3d.tools.utils
+package away3d.tools.utils
 {
 	import flash.display.BitmapData;
 	import flash.events.Event;
