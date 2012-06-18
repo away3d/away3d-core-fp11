@@ -226,7 +226,7 @@ package away3d.core.render
 		private function updateRay(camera : Camera3D) : void
 		{
 			var p1 : Vector3D = camera.scenePosition;
-			var p2 : Vector3D = camera.unproject(_projX, _projY);
+			var p2 : Vector3D = camera.unproject(_projX, _projY, true);
 
 			_rayPos.x = p1.x;
 			_rayPos.y = p1.y;
@@ -397,7 +397,7 @@ package away3d.core.render
 					if (s >= 0 && t >= 0 && (s + t) <= 1) {
 
 						// this is def the triangle, now calculate precise coords
-						getPrecisePosition(camera, _hitRenderable.inverseSceneTransform, normals[i], normals[i+1], normals[i+2], x1, y1, z1);
+						getPrecisePosition(_hitRenderable.inverseSceneTransform, normals[i], normals[i+1], normals[i+2], x1, y1, z1);
 
 						v2x = _localHitPosition.x - x1;
 						v2y = _localHitPosition.y - y1;
@@ -456,7 +456,7 @@ package away3d.core.render
 		 * @param py The y-coordinate of a point on the face's plane (ie a face vertex)
 		 * @param pz The z-coordinate of a point on the face's plane (ie a face vertex)
 		 */
-		private function getPrecisePosition(camera : Camera3D, invSceneTransform : Matrix3D, nx : Number, ny : Number, nz : Number, px : Number, py : Number, pz : Number) : void
+		private function getPrecisePosition(invSceneTransform : Matrix3D, nx : Number, ny : Number, nz : Number, px : Number, py : Number, pz : Number) : void
 		{
 			// calculate screen ray and find exact intersection position with triangle
 			var rx : Number, ry : Number, rz : Number;
@@ -465,7 +465,7 @@ package away3d.core.render
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var cx : Number = _rayPos.x, cy : Number = _rayPos.y, cz : Number = _rayPos.z;
 
-			// unproject projection point, gives ray dir in cam space
+			// unprojected projection point, gives ray dir in cam space
 			ox = _rayDir.x;
 			oy = _rayDir.y;
 			oz = _rayDir.z;
