@@ -1,5 +1,6 @@
 package away3d.core.managers
 {
+	import flash.display.Shape;
 	import away3d.arcane;
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
@@ -17,6 +18,9 @@ package away3d.core.managers
 
 	use namespace arcane;
 
+	[Event(name="enterFrame", type="flash.events.Event")]
+	[Event(name="exitFrame", type="flash.events.Event")]
+	
 	/**
 	 * Stage3DProxy provides a proxy class to manage a single Stage3D instance as well as handling the creation and
 	 * attachment of the Context3D (and in turn the back buffer) is uses. Stage3DProxy should never be created directly,
@@ -29,6 +33,8 @@ package away3d.core.managers
 	 */
 	public class Stage3DProxy extends EventDispatcher
 	{
+		private static var _frameEventDriver : Shape = new Shape();
+		
 		arcane var _context3D : Context3D;
 		arcane var _stage3DIndex : int = -1;
 
@@ -50,7 +56,8 @@ package away3d.core.managers
 		private var _viewPort : Rectangle;
 		private var _layerRenderFunctions : Vector.<Function>;
 		private var _stage : Stage;
-
+		private var _enterFrameListenerFunctions : Vector.<Function>;
+		private var _exitFrameListenerFunctions : Vector.<Function>;
 
 		/**
 		 * Creates a Stage3DProxy object. This method should not be called directly. Creation of Stage3DProxy objects should
@@ -67,10 +74,11 @@ package away3d.core.managers
 			_stage3D.x = 0;
 			_stage3D.y = 0;
 			_stage3DManager = stage3DManager;
-
 			_viewPort = new Rectangle();
 			_enableDepthAndStencil = true;
 			_layerRenderFunctions = new Vector.<Function>();
+			_enterFrameListenerFunctions = new Vector.<Function>();
+			_exitFrameListenerFunctions = new Vector.<Function>();
 			
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
@@ -225,6 +233,50 @@ package away3d.core.managers
 			// Setup the new Enter_Frame listener for rendering the layers
 			_stage = stage;
 			stage.addEventListener(Event.ENTER_FRAME, onRenderLayerEnterFrame);
+		}
+		
+		public override function addEventListener(type : String, listener :Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void {
+			// Only override Enter_Frame events
+			if (type != Event.ENTER_FRAME && type != Event.EXIT_FRAME) {
+				super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+				return;
+			}
+			
+			// Only add if the listener method is not already included
+			if (_enterFrameListenerFunctions.indexOf(listener) != -1 || _exitFrameListenerFunctions.indexOf(listener) != -1) return; 
+			if (type == Event.ENTER_FRAME) {
+				_enterFrameListenerFunctions.push(listener);
+			} else {
+				_exitFrameListenerFunctions.push(listener);
+			}
+			_frameEventDriver.addEventListener(Event.ENTER_FRAME, onLayerRenderEnterFrame, useCapture, priority, useWeakReference);
+		}
+
+		public override function removeEventListener(type : String, listener :Function, useCapture : Boolean = false) : void {
+			// Only override Enter_Frame events
+			if (type != Event.ENTER_FRAME && type != Event.EXIT_FRAME) {
+				super.addEventListener(type, listener, useCapture); 
+				return;
+			}
+			
+			var listenerIndex:int;
+			if (type == Event.ENTER_FRAME) {
+				listenerIndex = _enterFrameListenerFunctions.indexOf(listener);
+				if (listenerIndex == -1) return;
+				
+				// Remove the listener function from the list of enterFrame functions to execute
+				_enterFrameListenerFunctions.splice(listenerIndex, 1);
+			} else {
+				listenerIndex = _exitFrameListenerFunctions.indexOf(listener);
+				if (listenerIndex == -1) return;
+				
+				// Remove the listener function from the list of exitFrame functions to execute
+				_exitFrameListenerFunctions.splice(listenerIndex, 1);
+			}
+			
+			// Remove the main rendering listener if no EnterFrame listeners remain
+			if (_enterFrameListenerFunctions.length == 0 && _exitFrameListenerFunctions.length == 0)
+				_frameEventDriver.removeEventListener(Event.ENTER_FRAME, onLayerRenderEnterFrame, useCapture);
 		}
 
 		public function get scissorRect() : Rectangle
@@ -417,6 +469,31 @@ package away3d.core.managers
 			
 			// Call the present() to render the frame
 			present();
+		}
+		
+		/**
+		 * The Enter_Frame handler for processing the proxy.ENTER_FRAME and proxy.EXIT_FRAME event handlers.
+		 * Typically the proxy.ENTER_FRAME listener would render the layers for this Stage3D instance.
+		 */
+		private function onLayerRenderEnterFrame(event : Event) : void {
+			if (!_context3D) return; 
+			
+			// Clear the stage3D instance
+			clear();
+			
+			var listenerFunction:Function;
+			// Render each layer using the rendering listener functions added
+			for each (listenerFunction in _enterFrameListenerFunctions) {
+				listenerFunction(event);
+			}
+			
+			// Call the present() to render the frame
+			present();
+			
+			// Call each exit function using the exitFrame listener functions added
+			for each (listenerFunction in _exitFrameListenerFunctions) {
+				listenerFunction(event);
+			}
 		}
 	}
 }
