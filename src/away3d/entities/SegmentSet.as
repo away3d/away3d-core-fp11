@@ -42,7 +42,8 @@
 		private var _indexBuffer:IndexBuffer3D;
 		private var _lineCount:uint;
 
-		public function SegmentSet() {
+		public function SegmentSet()
+		{
 			super();
 
 			_nullAnimation ||= new NullAnimation();
@@ -54,7 +55,8 @@
 			material = new SegmentMaterial();
 		}
 
-		public function addSegment( segment:Segment ):void {
+		public function addSegment( segment:Segment ):void
+		{
 			segment.index = _vertices.length;
 			segment.segmentsBase = this;
 			_segments.push( segment );
@@ -72,7 +74,8 @@
 			_lineCount++;
 		}
 
-		arcane function updateSegment( segment:Segment ):void {
+		arcane function updateSegment( segment:Segment ):void
+		{
 			//to do add support for curve segment
 			var start:Vector3D = segment._start;
 			var end:Vector3D = segment._end;
@@ -135,8 +138,8 @@
 			_vertexBufferDirty = true;
 		}
 
-
-		private function removeSegmentByIndex( index:uint ):void {
+		private function removeSegmentByIndex( index:uint ):void
+		{
 			var indVert:uint = _indices[index] * 11;
 			_indices.splice( index, 6 );
 			_vertices.splice( indVert, 44 );
@@ -147,13 +150,15 @@
 			_indexBufferDirty = true;
 		}
 
-		public function removeSegment( segment:Segment ):void {
+		public function removeSegment( segment:Segment ):void
+		{
 			//to do, add support curve indices/offset
 			var index:uint;
 			for( var i:uint = 0; i < _segments.length; ++i ) {
 				if( _segments[i] == segment ) {
 					_segments.splice( i, 1 );
 					removeSegmentByIndex( segment.index );
+					segment = null;
 					_lineCount--;
 				} else {
 					_segments[i].index = index;
@@ -168,7 +173,8 @@
 			return _segments[index];
 		}
 
-		public function removeAllSegments():void {
+		public function removeAllSegments():void
+		{
 			_vertices.length = 0;
 			_indices.length = 0;
 			_segments.length = 0;
@@ -179,7 +185,8 @@
 			_indexBufferDirty = true;
 		}
 
-		public function getIndexBuffer( stage3DProxy:Stage3DProxy ):IndexBuffer3D {
+		public function getIndexBuffer( stage3DProxy:Stage3DProxy ):IndexBuffer3D
+		{
 			if( _indexBufferDirty ) {
 				_indexBuffer = stage3DProxy._context3D.createIndexBuffer( _numIndices );
 				_indexBuffer.uploadFromVector( _indices, 0, _numIndices );
@@ -188,10 +195,10 @@
 			return _indexBuffer;
 		}
 
-		public function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {
-			if( _numVertices == 0 ) {
-				addSegment( new LineSegment( new Vector3D(), new Vector3D() ) ); // buffers cannot be empty
-			}
+		public function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D
+		{
+			if( _numVertices == 0 )
+				addSegment( new LineSegment( new Vector3D(0.0,0.0,0.0), new Vector3D(0.0,0.0,0.0) ) ); // buffers cannot be empty
 
 			if( _vertexBufferDirty ) {
 				_vertexBuffer = stage3DProxy._context3D.createVertexBuffer( _numVertices, 11 );
