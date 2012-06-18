@@ -458,7 +458,7 @@ package away3d.loaders.parsers
 			// If name is "$$$DUMMY" this is an empty object (e.g. a container)
 			// and will be ignored in this version of the parser
 			// TODO: Implement containers in 3DS parser.
-			if (name != '$$$DUMMY') {
+			if (name != '$$$DUMMY' && _unfinalized_objects.hasOwnProperty(name)) {
 				vo = _unfinalized_objects[name];
 				obj = constructObject(vo, pivot);
 				
