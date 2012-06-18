@@ -220,7 +220,9 @@ package away3d.loaders.parsers
 				for (name in _unfinalized_objects) {
 					var obj : ObjectContainer3D;
 					obj = constructObject(_unfinalized_objects[name]);
-					finalizeAsset(obj, name);
+					if (obj) {
+						finalizeAsset(obj, name);
+					}
 				}
 				
 				return PARSING_DONE;
@@ -460,7 +462,9 @@ package away3d.loaders.parsers
 				vo = _unfinalized_objects[name];
 				obj = constructObject(vo, pivot);
 				
-				finalizeAsset(obj, vo.name);
+				if (obj) {
+					finalizeAsset(obj, vo.name);
+				}
 				
 				delete _unfinalized_objects[name];
 			}
@@ -481,6 +485,10 @@ package away3d.loaders.parsers
 				
 				if (obj.materials.length > 1)
 					trace('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
+				
+				// Ignore empty objects
+				if (!obj.indices || obj.indices.length==0)
+					return null;
 				
 				vertices = new Vector.<VertexVO>(obj.verts.length / 3, false);
 				faces = new Vector.<FaceVO>(obj.indices.length / 3, true);
