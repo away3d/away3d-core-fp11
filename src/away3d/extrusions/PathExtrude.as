@@ -123,6 +123,7 @@ package away3d.extrusions{
 			_keepExtremes = keepExtremes;
 		}
 		
+		
 		/**
 		 * @inheritDoc
 		 */

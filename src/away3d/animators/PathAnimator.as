@@ -74,6 +74,7 @@ package away3d.animators
 			_offset.z = z;
 		}
 
+
 		/**
 		 * Calculates the new position and set the object on the path accordingly
 		 *

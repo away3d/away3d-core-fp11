@@ -54,6 +54,7 @@ package away3d.extrusions {
 			_container = container;
 		}
 		
+		
 		/**
     	 * If a container is provided, the meshes are addChilded to it instead of directly into the scene. The container is NOT addChilded to the scene.
     	 */ 
