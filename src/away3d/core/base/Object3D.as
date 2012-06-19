@@ -359,10 +359,6 @@ package away3d.core.base
 			if (_transformDirty)
 				updateTransform();
 			
-			_positionDirty = false;
-			_rotationDirty = false;
-			_scaleDirty = false;
-			
 			return _transform;
 		}
 		
@@ -842,6 +838,9 @@ package away3d.core.base
 				_transform.appendTranslation(_x + _pivotPoint.x, _y + _pivotPoint.y, _z + _pivotPoint.z);
 
 			_transformDirty = false;
+			_positionDirty = false;
+			_rotationDirty = false;
+			_scaleDirty = false;
 		}
 	}
 }
