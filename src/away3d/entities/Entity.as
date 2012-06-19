@@ -62,8 +62,6 @@ package away3d.entities
 
 		override protected function updateMouseChildren() : void {
 
-			trace( "updating mouse children on '" + name + "', mouseEnabled: " + _mouseEnabled );
-
 			// Use its parent's triangle collider.
 			if( _parent && !_triangleRayCollider ) {
 				if( _parent is Entity ) {

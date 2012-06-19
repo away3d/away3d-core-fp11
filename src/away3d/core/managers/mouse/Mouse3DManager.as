@@ -80,20 +80,12 @@ package away3d.core.managers.mouse
 
 		public function fireMouseEvents():void {
 
-			trace( "Mouse3DManager - fireMouseEvents()." );
-
 			var i:uint;
 			var len:uint;
 			var event:MouseEvent3D;
 			var dispatcher:Object3D;
 
 			// If colliding object has changed, queue over/out events.
-			if( _collidingObject ) {
-				trace( "_collidingObject: " + _collidingObject.name );
-			}
-			if( _previousCollidingObject ) {
-				trace( "_previousCollidingObject: " + _previousCollidingObject.name );
-			}
 			if( _collidingObject != _previousCollidingObject ) {
 				if( _previousCollidingObject ) queueDispatch( _mouseOut, _mouseMoveEvent, _previousCollidingObject );
 				if( _collidingObject ) queueDispatch( _mouseOver, _mouseMoveEvent, _collidingObject );

@@ -201,11 +201,7 @@ package away3d.containers
 				// Set implicit mouse enabled if parent is enabled and allows its children to be so.
 				if( _parent.mouseChildren && _parent._implicitlyMouseEnabled ) {
 					_implicitlyMouseEnabled = true;
-					trace( "_implicitlyMouseEnabled set to true" );
 				}
-
-				trace( "_implicitlyMouseEnabled: " + _implicitlyMouseEnabled );
-				trace( "parent: " + _parent + ", " + _parent.name );
 
 				// Sweep children.
 				var len:uint = _children.length;

@@ -43,7 +43,6 @@ package away3d.core.raycast.colliders.picking {
 		filteredEntities = new Vector.<Entity>();
 		for( i = 0; i < len; i++ ) {
 			entity = entities[ i ];
-//			trace( "MouseRayManager - received entity of name: " + entity.name + "." );
 			if( entity.visible && entity._implicitlyMouseEnabled ) {
 				filteredEntities.push( entity );
 			}
@@ -85,7 +84,6 @@ package away3d.core.raycast.colliders.picking {
 
 		for( i = 0; i < _numberOfCollisions; ++i ) {
 			entity = _entities[ i ];
-			trace( "entity '" + entity.name + "' passed bounds collision test." );
 			triangleCollider = entity.triangleRayCollider;
 			if( triangleCollider ) {
 				// Update triangle collider.
@@ -93,7 +91,6 @@ package away3d.core.raycast.colliders.picking {
 				triangleCollider.updateRay( _rayPosition, _rayDirection );
 				triangleCollider.evaluate();
 				// If a collision exists, update the collision data and stop all checks.
-				trace( "tested triangle collision on entity '" + entity.name + "', " + triangleCollider.aCollisionExists );
 				if( triangleCollider.aCollisionExists ) {
 					setCollisionDataForItem( entity, triangleCollider.getCollisionDataForFirstItem() );
 					_aCollisionExists = true;

@@ -23,42 +23,30 @@ package away3d.core.raycast.colliders.triangles
 		private function evaluateObject3D( object3d:Object3D ):void {
 
 			var i:uint, len:uint;
-			var container:ObjectContainer3D;
 
-			// Sweep children and sub-meshes.
-			if( object3d is ObjectContainer3D ) {
-
-				// Evaluate mesh sub-meshes.
-				if( object3d is Mesh ) {
-					var mesh:Mesh = object3d as Mesh;
-					_subMeshCollider.entity = mesh;
-					// Transform ray to mesh's object space.
-					_subMeshCollider.updateRay(
-						mesh.inverseSceneTransform.transformVector( _rayPosition ),
-						mesh.inverseSceneTransform.deltaTransformVector( _rayDirection )
-					);
-					len = mesh.subMeshes.length;
-					for( i = 0; i < len; i++ ) {
-						trace( "picking on sub-mesh " + i + " of mesh " + mesh.name + ", which has " + len + " sub-meshes." );
-						_subMeshCollider.subMesh = mesh.subMeshes[ i ];
-						_subMeshCollider.evaluate();
-						if( _subMeshCollider.aCollisionExists ) {
-							_aCollisionExists = true;
-							_collisionData = _subMeshCollider.collisionData;
-							return;
-						}
+			// Evaluate mesh's sub-mesh objects.
+			if( object3d is Mesh ) {
+				var mesh:Mesh = object3d as Mesh;
+				_subMeshCollider.entity = mesh;
+				// Transform ray to mesh's object space.
+				_subMeshCollider.updateRay(
+					mesh.inverseSceneTransform.transformVector( _rayPosition ),
+					mesh.inverseSceneTransform.deltaTransformVector( _rayDirection )
+				);
+				len = mesh.subMeshes.length;
+				for( i = 0; i < len; i++ ) {
+					_subMeshCollider.subMesh = mesh.subMeshes[ i ];
+					_subMeshCollider.evaluate();
+					if( _subMeshCollider.aCollisionExists ) {
+						_aCollisionExists = true;
+						_collisionData = _subMeshCollider.collisionData;
+						return;
 					}
 				}
-
-				// Evaluate container children.
-				/*container = object3d as ObjectContainer3D;
-				len = container.numChildren;
-				for( i = 0; i < len; i++ ) {
-					if( !_aCollisionExists ) {
-						evaluateObject3D( container.getChildAt( i ) );
-					}
-				}*/
 			}
+
+			// Note, potential children are not swept by the collider, it ignores them completely.
+			// However, when used for picking, EntityCollector provides a flattened list of entities with children at the same level of their parents,
 		}
 	}
 }
