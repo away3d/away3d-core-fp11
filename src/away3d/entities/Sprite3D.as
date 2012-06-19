@@ -24,9 +24,10 @@ package away3d.entities
 	use namespace arcane;
 
 	/**
-	 * Sprite3D is a 3D billboard, a renderable rectangular area that always faces the camera.
+	 * Sprite3D is a 3D billboard, a renderable rectangular area that is always aligned with the projection plane.
+	 * As a result, no perspective transformation occurs on a Sprite3D object.
 	 *
-	 * todo: mvp generation can probably be optimized
+	 * todo: mvp generation or vertex shader code can be optimized
 	 */
 	public class Sprite3D extends Entity implements IRenderable
 	{

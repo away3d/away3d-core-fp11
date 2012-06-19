@@ -1,4 +1,4 @@
-package away3d.controllers
+﻿package away3d.controllers
 {
 	import away3d.containers.*;
 	import away3d.entities.*;
@@ -16,12 +16,20 @@ package away3d.controllers
         private var _lookAtObject:ObjectContainer3D;
         private var _lookAtPosition:Vector3D;
 		protected var _origin:Vector3D = new Vector3D(0.0,0.0,0.0);
-		
-		private function onLookAtObjectChanged(event:Object3DEvent):void
+
+		/**
+		 * Creates a new <code>LookAtController</code> object.
+		 */
+		public function LookAtController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null)
 		{
-			notifyUpdate();
+			super(targetObject);
+
+			if (lookAtObject)
+				this.lookAtObject = lookAtObject;
+			else
+				this.lookAtPosition = new Vector3D();
 		}
-		
+
 		/**
         * The Vector3D object that the target looks at.
         */
@@ -68,19 +76,6 @@ package away3d.controllers
 			
 			notifyUpdate();
 		}
-		
-	    /**
-	    * Creates a new <code>LookAtController</code> object.
-		 */
-        public function LookAtController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null)
-        {
-            super(targetObject);
-			
-			if (lookAtObject)
-				this.lookAtObject = lookAtObject;
-			else
-				this.lookAtPosition = new Vector3D();
-        }
         
 		/**
 		 * @inheritDoc
@@ -95,6 +90,11 @@ package away3d.controllers
 					_targetObject.lookAt(_lookAtObject.scene ? _lookAtObject.scenePosition : _lookAtObject.position);
 				}
 			}
+		}
+
+		private function onLookAtObjectChanged(event:Object3DEvent):void
+		{
+			notifyUpdate();
 		}
     }
 }   
