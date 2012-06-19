@@ -3,7 +3,7 @@ package
 	import a3dparticle.animators.actions.color.FlickerGlobal;
 	import a3dparticle.animators.actions.color.RandomColorLocal;
 	import a3dparticle.animators.actions.fog.FogByDistanceGlobal;
-	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.position.OffsetPositionLocal;
 	import a3dparticle.animators.actions.scale.RandomScaleLocal;
 	import a3dparticle.generater.MutiWeightGenerater;
 	import a3dparticle.particle.ParticleColorMaterial;
@@ -101,7 +101,7 @@ package
 			particle = new ParticlesContainer();
 			particle.loop = false;
 			
-			var action1:OffestPositionLocal = new OffestPositionLocal();
+			var action1:OffsetPositionLocal = new OffsetPositionLocal();
 			particle.addAction(action1);
 			
 			var action2:RandomScaleLocal = new RandomScaleLocal();
@@ -131,7 +131,7 @@ package
 			var degree1:Number = Math.random() * Math.PI * 2;
 			var degree2:Number = Math.random() * Math.PI / 2;
 			var r:Number = 2000 + Math.random() * 1000;
-			param["OffestPositionLocal"] = new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.sin(degree2), r * Math.cos(degree1) * Math.cos(degree2) );
+			param["OffsetPositionLocal"] = new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.sin(degree2), r * Math.cos(degree1) * Math.cos(degree2) );
 			var scale:Number = 0.3 + Math.random() * 0.7;
 			param["RandomScaleLocal"] = new Vector3D(scale, scale, scale);
 			param["RandomColorLocal"] = new ColorTransform(Math.random(),Math.random(),Math.random());

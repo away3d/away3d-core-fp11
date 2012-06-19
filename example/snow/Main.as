@@ -2,7 +2,7 @@ package
 {
 	import a3dparticle.animators.actions.drift.DriftLocal;
 	import a3dparticle.animators.actions.fog.FogByDistanceGlobal;
-	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.position.OffsetPositionLocal;
 	import a3dparticle.animators.actions.rotation.RandomRotateLocal;
 	import a3dparticle.animators.actions.scale.RandomScaleLocal;
 	import a3dparticle.animators.actions.velocity.VelocityGlobal;
@@ -124,7 +124,7 @@ package
 			var action2:DriftLocal = new DriftLocal();
 			particle.addAction(action2);
 			
-			var action3:OffestPositionLocal = new OffestPositionLocal();
+			var action3:OffsetPositionLocal = new OffsetPositionLocal();
 			particle.addAction(action3);
 			
 			var action4:RandomRotateLocal = new RandomRotateLocal();
@@ -151,7 +151,7 @@ package
 			param.startTime = Math.random()*20;
 			param.duringTime = 20;
 			param["DriftLocal"] = new Vector3D(Math.random() * 100 - 50, 0, Math.random() * 100 - 50, Math.random() * 2 + 3);
-			param["OffestPositionLocal"] = new Vector3D(Math.random() * 10000 - 5000, 1200, Math.random() * 10000 - 5000);
+			param["OffsetPositionLocal"] = new Vector3D(Math.random() * 10000 - 5000, 1200, Math.random() * 10000 - 5000);
 			param["RandomRotateLocal"] = new Vector3D(Math.random(), Math.random(), Math.random(), Math.random() * 2 + 2);
 			var scale:Number = 2 + Math.random() * 2;
 			param["RandomScaleLocal"] = new Vector3D(scale, scale, scale);
