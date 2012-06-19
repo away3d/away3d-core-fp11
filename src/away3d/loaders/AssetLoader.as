@@ -287,6 +287,7 @@ package away3d.loaders
 		 */
 		private function onRetrievalFailed(event : LoaderEvent) : void
 		{
+			var eventName : String;
 			var loader : SingleFileLoader = SingleFileLoader(event.target);
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
@@ -303,17 +304,23 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
-			// TODO: Investigate this. Why is this done?
-			var ext:String = loader.url.substring(loader.url.length-4, loader.url.length).toLowerCase();
-			if(ext ==".jpg" || ext ==".png"){
-				_loadingDependency.resolveFailure();
-				prepareNextRetrieve(loader, event, false);
+			var isDependency : Boolean = (_currentDependencyIndex > 1);
+			eventName = isDependency? LoaderEvent.DEPENDENCY_ERROR : LoaderEvent.LOAD_ERROR;
+			if (hasEventListener(eventName)) {
+				event = new LoaderEvent(eventName, _uri, event.message);
+				dispatchEvent(event);
+				if (isDependency && !event.isDefaultPrevented()) {
+					_loadingDependency.resolveFailure();
+					prepareNextRetrieve(loader, event, false);
+				}
+				else {
+					// Bail out
+					// TODO: Clean up?
+					return;
+				}
 			}
-
-			if(hasEventListener(LoaderEvent.LOAD_ERROR)){
-				dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, loader.url, event.message));
-			} else{
-				trace("Unable to load "+loader.url);
+			else {
+				throw new Error(event.message);
 			}
 		}
 		
