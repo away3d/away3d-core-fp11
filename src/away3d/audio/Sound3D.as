@@ -2,6 +2,7 @@ package away3d.audio
 {
 	import away3d.audio.drivers.*;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.events.Object3DEvent;
 	
 	import flash.events.Event;
 	import flash.geom.*;
@@ -61,9 +62,9 @@ package away3d.audio
 			_refv = new Vector3D;
 			_inv_ref_mtx = new Matrix3D;
 			
-			
-			//this.addEventListener(Object3DEvent.SCENE_CHANGED, _onSceneChanged);
-			//this.addEventListener(Object3DEvent.SCENETRANSFORM_CHANGED, _onSceneTransformChanged);
+			addEventListener(Object3DEvent.SCENE_CHANGED, onSceneChanged);
+			addEventListener(Object3DEvent.SCENETRANSFORM_CHANGED, onSceneTransformChanged);
+			_reference.addEventListener(Object3DEvent.SCENETRANSFORM_CHANGED, onSceneTransformChanged);
 		}
 		
 		
@@ -183,17 +184,19 @@ package away3d.audio
 		 * @internal
 		 * When scene changes, mute if object was removed from scene. 
 		*/
-		/*
-		private function _onSceneChanged(ev : Object3DEvent) : void
+		private function onSceneChanged(ev : Object3DEvent) : void
 		{
+			trace('scene changed');
 			// mute driver if there is no scene available, i.e. when the
 			// sound3d object has been removed from the scene
-			_driver.mute = (this.arcane::_scene == null);
+			_driver.mute = (_scene == null);
 			
 			// Re-update reference vector to force changes to take effect
 			_driver.updateReferenceVector(_refv);
+			
+			// Force update
+			update();
 		}
-		*/
 		
 		/**
 		 * @internal
@@ -201,9 +204,7 @@ package away3d.audio
 		 * and the position of this sound source, and update the driver to use
 		 * this as the reference vector.
 		 */
-		
-		// WORK AROUND WHILE EVENTS ARE ADDED
-		public function update():void
+		private function update():void
 		{
 			_inv_ref_mtx.rawData = _reference.sceneTransform.rawData;
 			_inv_ref_mtx.invert();
@@ -212,16 +213,10 @@ package away3d.audio
 			_driver.updateReferenceVector(_refv);
 		}
 		
-		/*
-		private function _onSceneTransformChanged(ev : Object3DEvent) : void
+		private function onSceneTransformChanged(ev : Object3DEvent) : void
 		{
-			_inv_ref_mtx.rawData = _reference.sceneTransform.rawData;
-			_inv_ref_mtx.invert();
-			_refv = _inv_ref_mtx.deltaTransformVector(_reference.position);
-			_refv = this.scenePosition.subtract(_refv);
-			_driver.updateReferenceVector(_refv);
+			update();
 		}
-		*/
 		
 		
 		private function onSoundComplete(ev : Event) : void
