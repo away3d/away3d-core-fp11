@@ -29,7 +29,6 @@ package away3d.audio
 	public class Sound3D extends ObjectContainer3D
 	{
 		private var _refv : Vector3D;
-		private var _inv_ref_mtx : Matrix3D;
 		private var _driver : ISound3DDriver;
 		private var _reference : ObjectContainer3D;
 		private var _sound : Sound;
@@ -58,9 +57,6 @@ package away3d.audio
 			_driver.volume = volume;
 			_driver.scale = scale;
 			_driver.addEventListener(Event.SOUND_COMPLETE, onSoundComplete);
-			
-			_refv = new Vector3D;
-			_inv_ref_mtx = new Matrix3D;
 			
 			addEventListener(Object3DEvent.SCENE_CHANGED, onSceneChanged);
 			addEventListener(Object3DEvent.SCENETRANSFORM_CHANGED, onSceneTransformChanged);
@@ -191,11 +187,11 @@ package away3d.audio
 			// sound3d object has been removed from the scene
 			_driver.mute = (_scene == null);
 			
-			// Re-update reference vector to force changes to take effect
-			_driver.updateReferenceVector(_refv);
-			
 			// Force update
 			update();
+			
+			// Re-update reference vector to force changes to take effect
+			_driver.updateReferenceVector(_refv);
 		}
 		
 		/**
@@ -206,10 +202,8 @@ package away3d.audio
 		 */
 		private function update():void
 		{
-			_inv_ref_mtx.rawData = _reference.sceneTransform.rawData;
-			_inv_ref_mtx.invert();
-			_refv = _inv_ref_mtx.deltaTransformVector(_reference.position);
-			_refv = this.scenePosition.subtract(_refv);
+			// Transform sound position into local space of the reference object ("listener").
+			_refv = _reference.inverseSceneTransform.transformVector(sceneTransform.position);
 			_driver.updateReferenceVector(_refv);
 		}
 		
