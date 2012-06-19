@@ -2,15 +2,14 @@ package away3d.core.raycast.colliders.triangles
 {
 
 	import away3d.core.base.SubMesh;
-	import away3d.core.raycast.colliders.*;
 	import away3d.core.raycast.data.RayCollisionVO;
-	import away3d.entities.Entity;
 
 	import flash.display.Shader;
 	import flash.display.ShaderJob;
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 	import flash.utils.ByteArray;
+	import flash.utils.getTimer;
 
 	public class PBSubMeshRayCollider extends SubMeshRayColliderBase
 	{
@@ -54,6 +53,8 @@ package away3d.core.raycast.colliders.triangles
 			// TODO: perhaps implement a geom id?
 			if( _lastSubMeshUploaded && _lastSubMeshUploaded === _subMesh ) return;
 
+			var time:uint = getTimer(); // TODO: remove
+
 			// send vertices to pb
 			_vertexData = _subMesh.vertexData.concat(); // TODO: need concat? if not could affect rendering by introducing null triangles, or uncontrolled index buffer growth
 			var vertexBufferDims:Point = evaluateArrayAsGrid( _vertexData );
@@ -72,9 +73,14 @@ package away3d.core.raycast.colliders.triangles
 			_lastSubMeshUploaded = _subMesh;
 
 			_uvData = _subMesh.UVData;
+
+			time = getTimer() - time; // TODO: remove
+			trace( "PB upload time: " + time ); // TODO: remove
 		}
 
 		private function executeKernel():void {
+
+			var time:uint = getTimer(); // TODO: remove
 
 			// run kernel.
 			var shaderJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, _indexBufferDims.x, _indexBufferDims.y );
@@ -111,6 +117,9 @@ package away3d.core.raycast.colliders.triangles
 				collisionVO.uv = getCollisionUV( collisionTriangleIndex );
 				setCollisionDataForItem( _entity, collisionVO );
 			}
+
+			time = getTimer() - time; // TODO: remove
+			trace( "PB calc time: " + time ); // TODO: remove
 		}
 
 		private function getCollisionNormal( triangleIndex:uint ):Vector3D {

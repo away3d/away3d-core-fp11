@@ -53,6 +53,8 @@ package away3d.core.managers.mouse
 
 		public function update():void {
 
+			trace( "Mouse3DManager - update() --------------------" );
+
 			// Store previous colliding object.
 			_previousCollidingObject = _collidingObject;
 

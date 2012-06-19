@@ -3,6 +3,7 @@ package away3d.core.raycast.colliders.triangles
 
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Object3D;
+	import away3d.core.base.SubMesh;
 	import away3d.core.raycast.colliders.*;
 	import away3d.entities.Mesh;
 
@@ -35,7 +36,9 @@ package away3d.core.raycast.colliders.triangles
 				);
 				len = mesh.subMeshes.length;
 				for( i = 0; i < len; i++ ) {
-					_subMeshCollider.subMesh = mesh.subMeshes[ i ];
+					var subMesh:SubMesh = mesh.subMeshes[ i ];
+					trace( "tri testing on subMesh of " + subMesh.numTriangles + " triangles." );
+					_subMeshCollider.subMesh = subMesh;
 					_subMeshCollider.evaluate();
 					if( _subMeshCollider.aCollisionExists ) {
 						_aCollisionExists = true;
