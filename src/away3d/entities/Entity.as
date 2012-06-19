@@ -35,8 +35,10 @@ package away3d.entities
 		
 		private var _showBounds : Boolean;
 		private var _partitionNode : EntityNode;
-		private var _mouseEnabled : Boolean;
+		protected var _boundsRayCollider:RayColliderBase;
+		protected var _triangleRayCollider:RayColliderBase;
 
+		private var _mouseEnabled : Boolean;
 		private var _mouseDetails:Boolean;
 
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
@@ -45,9 +47,6 @@ package away3d.entities
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
-
-		protected var _boundsRayCollider:RayColliderBase;
-		protected var _triangleRayCollider:RayColliderBase;
 
 		public function set rayPickingMethod( method:RayColliderBase ):void {
 			_triangleRayCollider = method;
@@ -59,6 +58,23 @@ package away3d.entities
 		public function get showBounds() : Boolean
 		{
 			return _showBounds;
+		}
+
+		override protected function updateMouseChildren() : void {
+
+			trace( "updating mouse children on '" + name + "', mouseEnabled: " + _mouseEnabled );
+
+			// Use its parent's triangle collider.
+			if( _parent && !_triangleRayCollider ) {
+				if( _parent is Entity ) {
+					var collider:RayColliderBase = Entity( _parent ).triangleRayCollider;
+					if( collider ) {
+						triangleRayCollider = collider;
+					}
+				}
+			}
+
+			super.updateMouseChildren();
 		}
 
 		public function set showBounds(value : Boolean) : void
@@ -87,6 +103,7 @@ package away3d.entities
 		public function set mouseEnabled(value : Boolean) : void
 		{
 			_mouseEnabled = value;
+			_implicitlyMouseEnabled = value;
 		}
 		
 		/**

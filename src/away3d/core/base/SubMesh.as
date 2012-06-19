@@ -243,7 +243,7 @@ package away3d.core.base
 		 * Indicates whether the SubMesh should trigger mouse events, and hence should be rendered for hit testing.
 		 */
 		public function get mouseEnabled():Boolean {
-			return _parentMesh.mouseEnabled;
+			return _parentMesh.mouseEnabled || _parentMesh._implicitlyMouseEnabled;
 		}
 
 		public function get castsShadows():Boolean {

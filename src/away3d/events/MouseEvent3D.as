@@ -1,5 +1,7 @@
 package away3d.events
 {
+
+	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
@@ -106,11 +108,6 @@ package away3d.events
 		public var localPosition : Vector3D;
 
 		/**
-		 * The x-coordinate in scene space where the event took place
-		 */
-		public var scenePosition : Vector3D;
-		
-		/**
 		 * Indicates whether the Control key is active (true) or inactive (false).
 		 */
 		public var ctrlKey : Boolean;
@@ -131,8 +128,6 @@ package away3d.events
 		public var delta : int;
 
 		public var localNormal:Vector3D;
-
-		public var sceneNormal:Vector3D;
 
 		/**
 		 * Create a new MouseEvent3D object.
@@ -162,14 +157,32 @@ package away3d.events
 			result.material = material;
 			result.uv = uv;
 			result.localPosition = localPosition;
-			result.scenePosition = scenePosition;
 			result.localNormal = localNormal;
-			result.sceneNormal = sceneNormal;
 
 			result.ctrlKey = ctrlKey;
 			result.shiftKey = shiftKey;
 
 			return result;
+		}
+
+		public function get scenePosition():Vector3D {
+			if( object is ObjectContainer3D ) {
+				return ObjectContainer3D( object ).sceneTransform.transformVector( localPosition );
+			}
+			else {
+				return localPosition;
+			}
+		}
+
+		public function get sceneNormal():Vector3D {
+			if( object is ObjectContainer3D ) {
+				var sceneNormal:Vector3D = ObjectContainer3D( object ).sceneTransform.deltaTransformVector( localNormal );
+				sceneNormal.normalize();
+				return sceneNormal;
+			}
+			else {
+				return localNormal;
+			}
 		}
 	}
 }

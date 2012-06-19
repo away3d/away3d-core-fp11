@@ -74,7 +74,7 @@ package away3d.containers
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		/** @private */
-		arcane var _implicitMouseEnabled : Boolean = true;
+		arcane var _implicitlyMouseEnabled : Boolean;
 
 		protected var _scene : Scene3D;
 		protected var _parent : ObjectContainer3D;
@@ -84,7 +84,7 @@ package away3d.containers
 		protected var _explicitPartition : Partition3D; // what the user explicitly set as the partition
 		protected var _implicitPartition : Partition3D; // what is inherited from the parents if it doesn't have its own explicitPartition
 
-		private var _scenetransformchanged:Object3DEvent;
+		private var _sceneTransformChanged:Object3DEvent;
 		// TODO: not used
 		// private var _scenechanged:Object3DEvent;
 		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
@@ -164,10 +164,10 @@ package away3d.containers
 			if (!hasEventListener(Object3DEvent.SCENETRANSFORM_CHANGED))
 				return;
 			
-			if (!_scenetransformchanged)
-				_scenetransformchanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
+			if (!_sceneTransformChanged)
+				_sceneTransformChanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
 			
-			dispatchEvent(_scenetransformchanged);
+			dispatchEvent(_sceneTransformChanged);
 		}
 		
 		/*
@@ -193,16 +193,25 @@ package away3d.containers
 			dispatchEvent(_scenechanged);
 		}
 		*/
-				
-		protected function updateMouseChildren() : void
-		{
-			if (_parent) {
-				_implicitMouseEnabled = _parent._implicitMouseEnabled && _parent._mouseChildren;
-				var len : uint = _children.length;
-				for (var i : uint = 0; i < len; ++i)
+
+		protected function updateMouseChildren():void {
+
+			if( _parent ) {
+
+				// Set implicit mouse enabled if parent is enabled and allows its children to be so.
+				if( _parent.mouseChildren && _parent._implicitlyMouseEnabled ) {
+					_implicitlyMouseEnabled = true;
+					trace( "_implicitlyMouseEnabled set to true" );
+				}
+
+				trace( "_implicitlyMouseEnabled: " + _implicitlyMouseEnabled );
+				trace( "parent: " + _parent + ", " + _parent.name );
+
+				// Sweep children.
+				var len:uint = _children.length;
+				for( var i:uint = 0; i < len; ++i ) {
 					_children[i].updateMouseChildren();
-			} else {
-				_implicitMouseEnabled = true;
+				}
 			}
 		}
 		

@@ -39,6 +39,7 @@ package away3d.core.raycast.colliders.triangles
 					);
 					len = mesh.subMeshes.length;
 					for( i = 0; i < len; i++ ) {
+						trace( "picking on sub-mesh " + i + " of mesh " + mesh.name + ", which has " + len + " sub-meshes." );
 						_subMeshCollider.subMesh = mesh.subMeshes[ i ];
 						_subMeshCollider.evaluate();
 						if( _subMeshCollider.aCollisionExists ) {
@@ -50,13 +51,13 @@ package away3d.core.raycast.colliders.triangles
 				}
 
 				// Evaluate container children.
-				container = object3d as ObjectContainer3D;
+				/*container = object3d as ObjectContainer3D;
 				len = container.numChildren;
 				for( i = 0; i < len; i++ ) {
 					if( !_aCollisionExists ) {
 						evaluateObject3D( container.getChildAt( i ) );
 					}
-				}
+				}*/
 			}
 		}
 	}

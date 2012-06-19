@@ -40,6 +40,7 @@ package away3d.core.raycast.colliders.bounds
 					thisEntityBoundsCollider.updateRay( _rayPosition, _rayDirection );
 					thisEntityBoundsCollider.evaluate();
 					// Store collision if it exists.
+					trace( "tested bounds collision on entity '" + thisEntity.name + "', " + thisEntityBoundsCollider.aCollisionExists );
 					if( thisEntityBoundsCollider.aCollisionExists ) {
 						// Tag collision.
 						_numberOfCollisions++;

@@ -80,12 +80,20 @@ package away3d.core.managers.mouse
 
 		public function fireMouseEvents():void {
 
+			trace( "Mouse3DManager - fireMouseEvents()." );
+
 			var i:uint;
 			var len:uint;
 			var event:MouseEvent3D;
 			var dispatcher:Object3D;
 
 			// If colliding object has changed, queue over/out events.
+			if( _collidingObject ) {
+				trace( "_collidingObject: " + _collidingObject.name );
+			}
+			if( _previousCollidingObject ) {
+				trace( "_previousCollidingObject: " + _previousCollidingObject.name );
+			}
 			if( _collidingObject != _previousCollidingObject ) {
 				if( _previousCollidingObject ) queueDispatch( _mouseOut, _mouseMoveEvent, _previousCollidingObject );
 				if( _collidingObject ) queueDispatch( _mouseOver, _mouseMoveEvent, _collidingObject );
@@ -102,7 +110,7 @@ package away3d.core.managers.mouse
 				// Only dispatch from first implicitly enabled object ( one that is not a child of a mouseChildren = false hierarchy ).
 				event = _queuedEvents[ i ];
 				dispatcher = event.object;
-				while( dispatcher && dispatcher is ObjectContainer3D && !ObjectContainer3D( dispatcher )._implicitMouseEnabled ) dispatcher = ObjectContainer3D( dispatcher ).parent;
+				while( dispatcher && dispatcher is ObjectContainer3D && !ObjectContainer3D( dispatcher )._implicitlyMouseEnabled ) dispatcher = ObjectContainer3D( dispatcher ).parent;
 				if( dispatcher ) {
 					dispatcher.dispatchEvent( event );
 				}
@@ -115,9 +123,6 @@ package away3d.core.managers.mouse
 		// ---------------------------------------------------------------------
 
 		private function queueDispatch( event:MouseEvent3D, sourceEvent:MouseEvent, object:Entity = null ):void {
-
-			var scenePosition:Vector3D;
-			var sceneNormal:Vector3D;
 
 			// 2D properties.
 			event.ctrlKey = sourceEvent.ctrlKey;
@@ -137,19 +142,14 @@ package away3d.core.managers.mouse
 				}
 				// Position.
 				event.localPosition = _collisionPosition;
-				scenePosition = event.object.transform.transformVector( _collisionPosition );
-				event.scenePosition = scenePosition;
 				// Normal.
 				if( _collisionNormal ) {
 					event.localNormal = _collisionNormal;
-					sceneNormal = event.object.transform.deltaTransformVector( _collisionNormal );
-					event.sceneNormal = sceneNormal;
 				}
 			}
 			else {
 				event.uv = null;
 				event.localPosition = _nullVector;
-				event.scenePosition = _nullVector;
 				event.localNormal = _nullVector;
 			}
 

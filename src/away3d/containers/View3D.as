@@ -503,7 +503,7 @@
 			_scene.traversePartitions(_entityCollector);
 
 			// update picking
-			if( _entityCollector.numMouseEnableds > 0 ) _mouse3DManager.update();
+			_mouse3DManager.update();
 
 //			updateLights(_entityCollector);
 
