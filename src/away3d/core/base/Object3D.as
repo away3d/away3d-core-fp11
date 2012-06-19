@@ -99,9 +99,9 @@ package away3d.core.base
 			if (_positionDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_positionDirty = true;
+			
+			invalidateTransform();
 			
 			if (!hasEventListener(Object3DEvent.POSITION_CHANGED))
 				return;
@@ -117,9 +117,9 @@ package away3d.core.base
 			if (_rotationDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_rotationDirty = true;
+			
+			invalidateTransform();
 			
 			if (!hasEventListener(Object3DEvent.ROTATION_CHANGED))
 				return;
@@ -135,9 +135,9 @@ package away3d.core.base
 			if (_scaleDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_scaleDirty = true;
+			
+			invalidateTransform();
 			
 			if (!hasEventListener(Object3DEvent.SCALE_CHANGED))
 				return;
