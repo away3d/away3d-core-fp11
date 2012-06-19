@@ -225,15 +225,8 @@ package away3d.core.render
 
 		private function updateRay(camera : Camera3D) : void
 		{
-			var p1 : Vector3D = camera.scenePosition;
-			var p2 : Vector3D = camera.unproject(_projX, _projY, true);
-
-			_rayPos.x = p1.x;
-			_rayPos.y = p1.y;
-			_rayPos.z = p1.z;
-			_rayDir.x = p2.x - p1.x;
-			_rayDir.y = p2.y - p1.y;
-			_rayDir.z = p2.z - p1.z;
+			_rayPos = camera.scenePosition;
+			_rayDir = camera.getRay(_projX, _projY);
 			_rayDir.normalize();
 		}
 

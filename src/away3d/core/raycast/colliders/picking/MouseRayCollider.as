@@ -21,8 +21,8 @@ package away3d.core.raycast.colliders.picking {
     }
 
 	public function updateMouseRay():void {
-		var rayPosition:Vector3D = _view.camera.position;
-		var rayDirection:Vector3D = _view.unproject( _view.mouseX, _view.mouseY );
+		var rayPosition:Vector3D = _view.camera.scenePosition;
+		var rayDirection:Vector3D = _view.getRay(_view.mouseX, _view.mouseY);
 		updateRay( rayPosition, rayDirection );
 	}
 
