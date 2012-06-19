@@ -28,10 +28,10 @@ package away3d.materials.methods
 		protected var _depthMapIndex : int;
 		protected var _depthMapCoordReg : ShaderRegisterElement;
 		private var _depthProjIndex : int;
-		private var _offsetData : Vector.<Number> = Vector.<Number>([.5, -.5, 1.0, 1.0]);
-		private var _toTexIndex : int = -1;
-		protected var _data : Vector.<Number>;
-		protected var _decIndex : int;
+		private var _vertexData : Vector.<Number> = Vector.<Number>([.5, -.5, 1.0, 1.0]);
+		private var _vertexDataIndex : int = -1;
+		protected var _fragmentData : Vector.<Number>;
+		protected var _fragmentDataIndex : int;
 		private var _projMatrix : Matrix3D = new Matrix3D();
 		private var _shadowMapper : ShadowMapperBase;
 
@@ -46,7 +46,17 @@ package away3d.materials.methods
 			castingLight.castsShadows = true;
 			_shadowMapper = castingLight.shadowMapper;
 			var eps : Number = _usePoint? -.01 : -.002;
-			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, eps, 0, 0, 1, 0, 0, 0, 1]);
+			_fragmentData = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, eps, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]);
+		}
+
+		public function get alpha() : Number
+		{
+			return 1-_fragmentData[5];
+		}
+
+		public function set alpha(value : Number) : void
+		{
+			_fragmentData[5] = 1-value;
 		}
 
 		/**
@@ -69,12 +79,12 @@ package away3d.materials.methods
 
 		public function get epsilon() : Number
 		{
-			return -_data[4];
+			return -_fragmentData[4];
 		}
 
 		public function set epsilon(value : Number) : void
 		{
-			_data[4] = -value;
+			_fragmentData[4] = -value;
 		}
 
 
@@ -83,8 +93,8 @@ package away3d.materials.methods
 			super.reset();
 			_depthMapIndex = -1;
 			_depthProjIndex = -1;
-			_toTexIndex = -1;
-			_decIndex = -1;
+			_vertexDataIndex = -1;
+			_fragmentDataIndex = -1;
 		}
 
 
@@ -123,7 +133,7 @@ package away3d.materials.methods
 			regCache.getFreeVertexConstant();
 			_depthProjIndex = depthMapProj.index;
 			_depthMapCoordReg = regCache.getFreeVarying();
-			_toTexIndex = toTexReg.index;
+			_vertexDataIndex = toTexReg.index;
 
 			code += "m44 " + temp + ", vt0, " + depthMapProj + "\n" +
 					"rcp " + temp + ".w, " + temp + ".w\n" +
@@ -138,7 +148,10 @@ package away3d.materials.methods
 
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			return _usePoint? getPointFragmentCode(regCache, targetReg) : getPlanarFragmentCode(regCache, targetReg);
+			var code : String = _usePoint? getPointFragmentCode(regCache, targetReg) : getPlanarFragmentCode(regCache, targetReg);
+			code += "add " + targetReg + ".w, " + targetReg + ".w, fc" + (_fragmentDataIndex+1) + ".y\n" +
+					"sat " + targetReg + ".w, " + targetReg + ".w\n";
+			return code;
 		}
 
 		protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
@@ -170,21 +183,21 @@ package away3d.materials.methods
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			// when wrapped (fe: cascade), it's possible this is not set
-			if (_toTexIndex != -1)
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
+			if (_vertexDataIndex != -1)
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexDataIndex, _vertexData, 1);
 
 			if (_usePoint) {
 				var pos : Vector3D = _castingLight.scenePosition;
-				_data[8] = pos.x;
-				_data[9] = pos.y;
-				_data[10] = pos.z;
+				_fragmentData[12] = pos.x;
+				_fragmentData[13] = pos.y;
+				_fragmentData[14] = pos.z;
 				// used to decompress distance
 				var f : Number = PointLight(_castingLight)._fallOff;
-				_data[11] = 1/(2*f*f);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _data, 3);
+				_fragmentData[15] = 1/(2*f*f);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _fragmentDataIndex, _fragmentData, 4);
 			}
 			else {
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _data, 2);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _fragmentDataIndex, _fragmentData, 3);
 			}
 			stage3DProxy.setTextureAt(_depthMapIndex, _castingLight.shadowMapper.depthMap.getTextureForStage3D(stage3DProxy));
 		}

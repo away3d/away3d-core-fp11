@@ -29,11 +29,11 @@ package away3d.materials.methods
 			// todo: implement for point lights
 			super(castingLight);
 
-			_data[5] = highRes? 1/8 : 1/4;
+			_fragmentData[8] = highRes? 1/8 : 1/4;
 			// area to sample in texture space
 			_depthMapSize = castingLight.shadowMapper.depthMapSize;
-			_data[6] = _range/_depthMapSize;
-			_data[7] = .5;
+			_fragmentData[9] = _range/_depthMapSize;
+			_fragmentData[10] = .5;
 
 			_highRes = highRes;
 
@@ -52,7 +52,7 @@ package away3d.materials.methods
 		public function set range(value : Number) : void
 		{
 			_range = value;
-			_data[6] = _range/_depthMapSize;
+			_fragmentData[9] = _range/_depthMapSize;
 		}
 
 		private function initGrainTexture() : void
@@ -103,22 +103,23 @@ package away3d.materials.methods
 			var grainRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var customDataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
 
-            _decIndex = decReg.index;
+            _fragmentDataIndex = decReg.index;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 
 			uvReg = regCache.getFreeFragmentVectorTemp();
 
 			code += // keep grain in uvReg.xy
-					"div " + uvReg + ", " + _depthMapCoordReg + ", " + dataReg + ".z\n" +
+					"div " + uvReg + ", " + _depthMapCoordReg + ", " + customDataReg + ".y\n" +
 					"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
-					"sub " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".ww\n" + 	// uv-.5
+					"sub " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".zz\n" + 	// uv-.5
 					"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +      // 2*(uv-.5)
-					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".z\n" +
+					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".y\n" +
 
 //					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 //					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
@@ -158,11 +159,11 @@ package away3d.materials.methods
 
 			if (_highRes) {
 					// reseed
-				code +=	"div " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + dataReg + ".z\n" +
+				code +=	"div " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + customDataReg + ".y\n" +
 						"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
-						"sub " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".ww\n" +
+						"sub " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".zz\n" +
 						"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +
-						"mul " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".z\n" +
+						"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".y\n" +
 						"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
 
 						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
@@ -200,7 +201,7 @@ package away3d.materials.methods
 
 			regCache.removeFragmentTempUsage(depthCol);
 
-			code += "mul " + targetReg+".w, " + targetReg+".w, " + dataReg+".y\n";  // average
+			code += "mul " + targetReg+".w, " + targetReg+".w, " + customDataReg+".x\n";  // average
 
 			_depthMapIndex = depthMapRegister.index;
 			_grainMapIndex = grainRegister.index;

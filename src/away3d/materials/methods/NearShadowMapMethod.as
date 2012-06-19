@@ -30,13 +30,23 @@ package away3d.materials.methods
 			_baseMethod = baseMethod;
 			_needsProjection = true;
 			_fadeRatio = fadeRatio;
-			_data = new Vector.<Number>(4, true);
-			_data[2] = 0;
-			_data[3] = 1;
+			_fragmentData = new Vector.<Number>(4, true);
+			_fragmentData[2] = 0;
+			_fragmentData[3] = 1;
 			_light = baseMethod.castingLight;
 			_shadowMapper = _light.shadowMapper as NearDirectionalShadowMapper;
 			if (!_shadowMapper)
 				throw new Error("NearShadowMapMethod requires a light that has a NearDirectionalShadowMapper instance assigned to shadowMapper.");
+		}
+
+		override public function get alpha() : Number
+		{
+			return _baseMethod.alpha;
+		}
+
+		override public function set alpha(value : Number) : void
+		{
+			_baseMethod.alpha = value;
 		}
 
 		override public function get epsilon() : Number
@@ -111,9 +121,9 @@ package away3d.materials.methods
 			maxDistance = near + maxDistance*d;
 			minDistance = near + minDistance*d;
 
-			_data[0] = minDistance;
-			_data[1] = 1/(maxDistance-minDistance);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data,  1);
+			_fragmentData[0] = minDistance;
+			_fragmentData[1] = 1/(maxDistance-minDistance);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _fragmentData,  1);
 			_baseMethod.setRenderState(renderable, stage3DProxy, camera);
 		}
 
