@@ -92,8 +92,8 @@ package away3d.loaders.parsers
 		{
 			super(ParserDataFormat.BINARY);
 			
-			_blocks = new Vector.<AWDBlock>;
-			_blocks[0] = new AWDBlock;
+			_blocks = new Vector.<AWDBlock>();
+			_blocks[0] = new AWDBlock();
 			_blocks[0].data = null; // Zero address means null in AWD
 			
 			_version = [];
@@ -184,7 +184,7 @@ package away3d.loaders.parsers
 				parseHeader();
 				switch (_compression) {
 					case DEFLATE:
-						_body = new ByteArray;
+						_body = new ByteArray();
 						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
 						_body.uncompress();
 						break;
@@ -313,7 +313,7 @@ package away3d.loaders.parsers
 			seq = new UVAnimationSequence(name);
 			
 			frames_parsed = 0;
-			dummy = new Sprite;
+			dummy = new Sprite();
 			while (frames_parsed < num_frames) {
 				var mtx : Matrix;
 				var frame_dur : uint;
@@ -659,7 +659,7 @@ package away3d.loaders.parsers
 			data_id = _body.readUnsignedInt();
 			geom = _blocks[data_id].data as Geometry;
 			
-			materials = new Vector.<MaterialBase>;
+			materials = new Vector.<MaterialBase>();
 			num_materials = _body.readUnsignedShort();
 			materials_parsed = 0;
 			while (materials_parsed < num_materials) {
@@ -752,7 +752,7 @@ package away3d.loaders.parsers
 					var x:Number, y:Number, z:Number;
 					
 					if (str_type == 1) {
-						var verts : Vector.<Number> = new Vector.<Number>;
+						var verts : Vector.<Number> = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							x = _body.readFloat();
@@ -765,35 +765,35 @@ package away3d.loaders.parsers
 						}
 					}
 					else if (str_type == 2) {
-						var indices : Vector.<uint> = new Vector.<uint>;
+						var indices : Vector.<uint> = new Vector.<uint>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							indices[idx++] = _body.readUnsignedShort();
 						}
 					}
 					else if (str_type == 3) {
-						var uvs : Vector.<Number> = new Vector.<Number>;
+						var uvs : Vector.<Number> = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							uvs[idx++] = _body.readFloat();
 						}
 					}
 					else if (str_type == 4) {
-						var normals : Vector.<Number> = new Vector.<Number>;
+						var normals : Vector.<Number> = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							normals[idx++] = _body.readFloat();
 						}
 					}
 					else if (str_type == 6) {
-						w_indices = new Vector.<Number>;
+						w_indices = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							w_indices[idx++] = _body.readUnsignedShort()*3;
 						}
 					}
 					else if (str_type == 7) {
-						weights = new Vector.<Number>;
+						weights = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							weights[idx++] = _body.readFloat();
