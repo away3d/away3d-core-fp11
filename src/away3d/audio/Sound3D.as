@@ -2,9 +2,15 @@ package away3d.audio
 {
 	import away3d.audio.drivers.*;
 	import away3d.containers.ObjectContainer3D;
-
+	
+	import flash.events.Event;
 	import flash.geom.*;
 	import flash.media.*;
+	
+	/**
+	 * Dispatched when end of sound stream is reached (bubbled from the internal sound object).
+	 */
+	[Event(name="soundComplete", type="flash.events.Event")]
 
 	/**
 	 * <p>A sound source/emitter object that can be positioned in 3D space, and from which all audio
@@ -50,6 +56,7 @@ package away3d.audio
 			_driver.sourceSound = _sound;
 			_driver.volume = volume;
 			_driver.scale = scale;
+			_driver.addEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 			
 			_refv = new Vector3D;
 			_inv_ref_mtx = new Matrix3D;
@@ -215,5 +222,11 @@ package away3d.audio
 			_driver.updateReferenceVector(_refv);
 		}
 		*/
+		
+		
+		private function onSoundComplete(ev : Event) : void
+		{
+			dispatchEvent(ev.clone());
+		}
 	}
 }

@@ -1,9 +1,10 @@
 package away3d.audio.drivers
 {
+	import flash.events.IEventDispatcher;
 	import flash.geom.*;
 	import flash.media.*;
 
-	public interface ISound3DDriver
+	public interface ISound3DDriver extends IEventDispatcher
 	{
 		/**
 		 * The sound object (flash.media.Sound) to play at the point of the sound
