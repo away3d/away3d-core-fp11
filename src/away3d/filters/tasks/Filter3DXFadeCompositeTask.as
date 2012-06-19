@@ -16,6 +16,8 @@ package away3d.filters.tasks
 		public function Filter3DXFadeCompositeTask(amount : Number)
 		{
 			super();
+			if (amount < 0) amount = 0;
+			else if (amount > 1) amount = 1;
 			_data = Vector.<Number>([ amount, 0, 0, 0 ]);
 		}
 
