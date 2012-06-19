@@ -137,7 +137,7 @@ package a3dparticle.animators.actions.rotation
 			
 			code += "m44 " + temp2.toString() +"," + _animation.positionAttribute.toString() + "," + matrix1.toString() + "\n";
 			code += "sub " + temp2.toString() +"," + temp2.toString() + "," + _animation.positionAttribute.toString() + "\n";
-			code += "add " + _animation.offestTarget.toString() +".xyz," + temp2.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
+			code += "add " + _animation.offsetTarget.toString() +".xyz," + temp2.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";
 			*/
 			
 			var nrmVel:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();

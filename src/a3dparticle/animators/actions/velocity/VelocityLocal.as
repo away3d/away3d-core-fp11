@@ -59,7 +59,7 @@ package a3dparticle.animators.actions.velocity
 			velocityAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
 			code += "mul " + distance.toString() + "," + _animation.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
-			code += "add " + _animation.offestTarget.toString() +"," + distance.toString() + "," + _animation.offestTarget.toString() + "\n";
+			code += "add " + _animation.offsetTarget.toString() +"," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
 			if (_animation.needVelocity)
 			{
 				code += "add " + _animation.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";

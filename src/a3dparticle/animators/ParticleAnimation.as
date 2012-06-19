@@ -58,7 +58,7 @@ package a3dparticle.animators
 		public var timeConst:ShaderRegisterElement;
 		public var positionAttribute:ShaderRegisterElement;
 		public var uvAttribute:ShaderRegisterElement;
-		public var offestTarget:ShaderRegisterElement;
+		public var offsetTarget:ShaderRegisterElement;
 		public var scaleAndRotateTarget:ShaderRegisterElement
 		public var velocityTarget:ShaderRegisterElement;
 		public var vertexTime:ShaderRegisterElement;
@@ -229,9 +229,9 @@ package a3dparticle.animators
 			}
 			//allot temp register
 			var tempTime:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-			offestTarget = new ShaderRegisterElement(tempTime.regName, tempTime.index, "xyz");
-			//uv action is processed after normal actions,so use offestTarget as uvTarget
-			uvTarget = new ShaderRegisterElement(offestTarget.regName, offestTarget.index, "xy");
+			offsetTarget = new ShaderRegisterElement(tempTime.regName, tempTime.index, "xyz");
+			//uv action is processed after normal actions,so use offsetTarget as uvTarget
+			uvTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xy");
 			
 			shaderRegisterCache.addVertexTempUsages(tempTime, 1);
 			vertexTime = new ShaderRegisterElement(tempTime.regName, tempTime.index, "w");
@@ -272,7 +272,7 @@ package a3dparticle.animators
 			}
 			
 			_AGALVertexCode += "mov " + varyTime.toString() + ".zw," + zeroConst.toString() + "\n";
-			_AGALVertexCode += "mov " + offestTarget.toString() + "," + zeroConst.toString() + "\n";
+			_AGALVertexCode += "mov " + offsetTarget.toString() + "," + zeroConst.toString() + "\n";
 			_AGALVertexCode += "mov " + scaleAndRotateTarget.toString() + "," + positionAttribute.toString() + "\n";
 			var action:ActionBase;
 			for each(action in _particleActions)
@@ -287,8 +287,8 @@ package a3dparticle.animators
 				_AGALVertexCode += "dp3 " + velocityTarget.toString() + ".x," + velocityTarget.toString() + "," + velocityTarget.toString() + "\n";
 				_AGALVertexCode += "sqt " + fragmentVelocity.toString() + "," + velocityTarget.toString() + ".x\n";
 			}
-			_AGALVertexCode += "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offestTarget.toString() + "\n";
-			//in post_priority stage,the offestTarget temp register if free for use,we use is as uv temp register
+			_AGALVertexCode += "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offsetTarget.toString() + "\n";
+			//in post_priority stage,the offsetTarget temp register if free for use,we use is as uv temp register
 			
 			if (needUV)
 			{

@@ -32,7 +32,7 @@ package a3dparticle.animators.actions.velocity
 			var distance:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var code:String = "";
 			code += "mul " + distance.toString() + "," + _animation.vertexTime.toString() + "," + velocityConst.toString() + "\n";
-			code += "add " + _animation.offestTarget.toString() +"," + distance.toString() + "," + _animation.offestTarget.toString() + "\n";
+			code += "add " + _animation.offsetTarget.toString() +"," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
 			if (_animation.needVelocity)
 			{
 				code += "add " + _animation.velocityTarget.toString() + ".xyz," + velocityConst.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";
