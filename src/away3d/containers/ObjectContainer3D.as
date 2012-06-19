@@ -85,8 +85,7 @@ package away3d.containers
 		protected var _implicitPartition : Partition3D; // what is inherited from the parents if it doesn't have its own explicitPartition
 
 		private var _scenetransformchanged:Object3DEvent;
-		// TODO: not used
-		// private var _scenechanged:Object3DEvent;
+		private var _scenechanged:Object3DEvent;
 		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
 		private var _mouseChildren : Boolean = true;
 		private var _oldScene : Scene3D;
@@ -143,6 +142,7 @@ package away3d.containers
 			}
 			
 			notifySceneTransformChange();
+			notifySceneChange();
 		}
 		
 		private function notifySceneTransformChange():void
@@ -170,8 +170,6 @@ package away3d.containers
 			dispatchEvent(_scenetransformchanged);
 		}
 		
-		/*
-		// TODO: not used
 		private function notifySceneChange():void
 		{
 			notifySceneTransformChange();
@@ -192,8 +190,7 @@ package away3d.containers
 			
 			dispatchEvent(_scenechanged);
 		}
-		*/
-				
+			
 		protected function updateMouseChildren() : void
 		{
 			if (_parent) {
@@ -526,7 +523,7 @@ package away3d.containers
 			if (!child._explicitPartition)
 				child.implicitPartition = _implicitPartition;
 			
-			child._parent = this;
+			child.setParent(this);
 			child.scene = _scene;
 			child.notifySceneTransformChange();
 			child.updateMouseChildren();
@@ -616,6 +613,11 @@ package away3d.containers
 			if (parent) parent.removeChild(this);
 		}
 
+		/**
+		 * Clones this ObjectContainer3D instance along with all it's children, and
+		 * returns the result (which will be a copy of this container, containing copies
+		 * of all it's children.)
+		*/
 		override public function clone() : Object3D
 		{
 			var clone : ObjectContainer3D = new ObjectContainer3D();

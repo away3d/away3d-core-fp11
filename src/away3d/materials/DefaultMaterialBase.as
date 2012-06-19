@@ -103,7 +103,8 @@
 		}
 
 		/**
-		 * The method to perform diffuse shading.
+		 * The method to perform ambient shading. Note that shading methods cannot
+		 * be reused across materials.
 		 */
 		public function get ambientMethod() : BasicAmbientMethod
 		{
@@ -116,7 +117,8 @@
 		}
 
 		/**
-		 * The method to perform diffuse shading.
+		 * The method to render shadows cast on this surface. Note that shading methods can not
+		 * be reused across materials.
 		 */
 		public function get shadowMethod() : ShadingMethodBase
 		{
@@ -129,7 +131,8 @@
 		}
 
 		/**
-		 * The method to perform diffuse shading.
+		 * The method to perform diffuse shading. Note that shading methods can not
+		 * be reused across materials.
 		 */
 		public function get diffuseMethod() : BasicDiffuseMethod
 		{
@@ -142,7 +145,8 @@
 		}
 
 		/**
-		 * The method to generate the (tangent-space) normal
+		 * The method to generate the (tangent-space) normal. Note that shading methods can not
+		 * be reused across materials.
 		 */
 		public function get normalMethod() : BasicNormalMethod
 		{
@@ -155,7 +159,8 @@
 		}
 
 		/**
-		 * The method to perform specular shading.
+		 * The method to perform specular shading. Note that shading methods can not
+		 * be reused across materials.
 		 */
 		public function get specularMethod() : BasicSpecularMethod
 		{
@@ -166,7 +171,11 @@
 		{
 			_screenPass.specularMethod = value;
 		}
-
+		
+ 		/**
+		 * Adds a shading method to the end of the shader. Note that shading methods can
+		 * not be reused across materials.
+		*/
 		public function addMethod(method : ShadingMethodBase) : void
 		{
 			_screenPass.addMethod(method);
@@ -187,6 +196,11 @@
 			return _screenPass.getMethodAt(index);
 		}
 
+		/**
+		 * Adds a shading method to the end of a shader, at the specified index amongst
+		 * the methods in that section of the shader. Note that shading methods can not
+		 * be reused across materials.
+		*/
 		public function addMethodAt(method : ShadingMethodBase, index : int) : void
 		{
 			_screenPass.addMethodAt(method, index);

@@ -99,9 +99,9 @@ package away3d.core.base
 			if (_positionDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_positionDirty = true;
+			
+			invalidateTransform();
 			
 			if (!hasEventListener(Object3DEvent.POSITION_CHANGED))
 				return;
@@ -117,9 +117,9 @@ package away3d.core.base
 			if (_rotationDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_rotationDirty = true;
+			
+			invalidateTransform();
 			
 			if (!hasEventListener(Object3DEvent.ROTATION_CHANGED))
 				return;
@@ -135,9 +135,9 @@ package away3d.core.base
 			if (_scaleDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_scaleDirty = true;
+			
+			invalidateTransform();
 			
 			if (!hasEventListener(Object3DEvent.SCALE_CHANGED))
 				return;
@@ -358,10 +358,6 @@ package away3d.core.base
 		{
 			if (_transformDirty)
 				updateTransform();
-			
-			_positionDirty = false;
-			_rotationDirty = false;
-			_scaleDirty = false;
 			
 			return _transform;
 		}
@@ -842,6 +838,9 @@ package away3d.core.base
 				_transform.appendTranslation(_x + _pivotPoint.x, _y + _pivotPoint.y, _z + _pivotPoint.z);
 
 			_transformDirty = false;
+			_positionDirty = false;
+			_rotationDirty = false;
+			_scaleDirty = false;
 		}
 	}
 }

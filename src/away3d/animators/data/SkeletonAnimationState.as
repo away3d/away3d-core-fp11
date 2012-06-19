@@ -295,7 +295,7 @@ package away3d.animators.data
 		}
 
 		/**
-		 * If the animation can't be performed on cpu, transform vertices manually
+		 * If the animation can't be performed on GPU, transform vertices manually
 		 * @param subGeom The subgeometry containing the weights and joint index data per vertex.
 		 * @param pass The material pass for which we need to transform the vertices
 		 *

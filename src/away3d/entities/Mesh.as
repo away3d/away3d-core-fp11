@@ -189,8 +189,21 @@
 		}
 
 		/**
-		 * @inheritDoc
-		 */
+		 * Clones this Mesh instance along with all it's children, while re-using the same
+		 * material and geometry instance. The returned result will be a copy of this mesh,
+		 * containing copies of all of it's children.
+		 * 
+		 * Properties that are re-used (i.e. not cloned) by the new copy include name, 
+		 * geometry, and material. Properties that are cloned or created anew for the copy
+		 * include subMeshes, animation and animationState and the children of the mesh.
+		 * 
+		 * If you want to copy just the mesh, reusing it's geometry and material while not
+		 * cloning it's children, the simplest way is to create a new mesh manually:
+		 * 
+		 * <code>
+		 * var clone : Mesh = new Mesh(original.geometry, original.material);
+		 * </code>
+		*/
 		override public function clone() : Object3D
 		{
 			var clone : Mesh = new Mesh(geometry, _material);
