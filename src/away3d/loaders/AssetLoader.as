@@ -9,7 +9,7 @@ package away3d.loaders
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
-
+	
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
 
@@ -30,6 +30,7 @@ package away3d.loaders
 	public class AssetLoader extends EventDispatcher
 	{
 		private var _context : AssetLoaderContext;
+		private var _token : AssetLoaderToken;
 		private var _uri : String;
 		
 		private var _loaderStack : Vector.<SingleFileLoader>;
@@ -73,16 +74,21 @@ package away3d.loaders
 		 */
 		public function load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
-			var token : AssetLoaderToken = new AssetLoaderToken(this);
+			if (!_token) {
+				_token = new AssetLoaderToken(this);
+				
+				_uri = req.url = req.url.replace(/\\/g, "/");
+				_context = context;
+				_namespace = ns;
+				_currentDependencies = new Vector.<ResourceDependency>();
+				_currentDependencies.push(new ResourceDependency('', req, null, null));
+				retrieveNext(parser);
+				
+				return _token;
+			}
 			
-			_uri = req.url = req.url.replace(/\\/g, "/");
-			_context = context;
-			_namespace = ns;
-			_currentDependencies = new Vector.<ResourceDependency>();
-			_currentDependencies.push(new ResourceDependency('', req, null, null));
-			retrieveNext(parser);
-			
-			return token;
+			// TODO: Throw error (already loading)
+			return null;
 		}
 		
 		/**
@@ -95,16 +101,21 @@ package away3d.loaders
 		 */
 		public function loadData(data : *, id : String, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
-			var token : AssetLoaderToken = new AssetLoaderToken(this);
+			if (!_token) {
+				_token = new AssetLoaderToken(this);
+				
+				_uri = id;
+				_context = context;
+				_namespace = ns;
+				_currentDependencies = new Vector.<ResourceDependency>();
+				_currentDependencies.push(new ResourceDependency(id, null, data, null));
+				retrieveNext(parser);
+				
+				return _token;
+			}
 			
-			_uri = id;
-			_context = context;
-			_namespace = ns;
-			_currentDependencies = new Vector.<ResourceDependency>();
-			_currentDependencies.push(new ResourceDependency(id, null, data, null));
-			retrieveNext(parser);
-			
-			return token;
+			// TODO: Throw error (already loading)
+			return null;
 		}
 		
 		
