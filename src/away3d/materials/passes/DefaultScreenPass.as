@@ -204,7 +204,8 @@ package away3d.materials.passes
 				_colorTransformMethod.parentPass = this;
 			}
 			else if (!value) {
-				_colorTransformMethod.parentPass = null;
+				if (_colorTransformMethod)
+					_colorTransformMethod.parentPass = null;
 				colorTransformMethod = _colorTransformMethod = null;
 			}
 		}
