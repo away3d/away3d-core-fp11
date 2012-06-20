@@ -31,6 +31,7 @@
 		private var _url : String;
 		private var _message : String;
 		private var _isDependency : Boolean;
+		private var _isDefaultPrevented : Boolean;
 		
 		/**
 		 * Create a new LoaderEvent object.
@@ -71,6 +72,24 @@
 		public function get isDependency() : Boolean
 		{
 			return _isDependency;
+		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function preventDefault():void
+		{
+			_isDefaultPrevented = true;
+		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function isDefaultPrevented():Boolean
+		{
+			return _isDefaultPrevented;
 		}
 		
 		
