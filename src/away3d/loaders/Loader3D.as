@@ -188,9 +188,17 @@ package away3d.loaders
 				var clone : Event = ev.clone();
 				
 				dispatchEvent(clone);
-				if (clone.isDefaultPrevented()) {
-					ev.preventDefault();
+				
+				// If this was the base file, or if default behavior was prevented,
+				// the load will not continue past this point, and hence the event
+				// listeners should be cleaned up here.
+				if (!ev.isDependency || clone.isDefaultPrevented()) {
 					removeListeners(EventDispatcher(ev.currentTarget));
+					
+					// If default behavior was prevented on the cloned event,
+					// propagate it back to the original dispatcher.
+					if (clone.isDefaultPrevented())
+						ev.preventDefault();
 				}
 			}
 			else {
