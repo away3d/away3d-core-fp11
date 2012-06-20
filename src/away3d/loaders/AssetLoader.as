@@ -320,8 +320,10 @@ package away3d.loaders
 					prepareNextRetrieve(loader, event, false);
 				}
 				else {
-					// Bail out
-					// TODO: Clean up?
+					// Either this was the base file (last left in the stack) or
+					// default behavior was prevented by the handlers, and hence
+					// there is nothing more to do than clean up and bail.
+					dispose();
 					return;
 				}
 			}
@@ -431,6 +433,23 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+		}
+		
+		
+		private function dispose() : void
+		{
+			_currentDependencies = null;
+			_loadingDependency = null;
+			
+			_errorHandlers = null;
+			_loaderStack = null;
+			_context = null;
+			_token = null;
+			
+			if (_currentLoader) {
+				removeEventListeners(_currentLoader);
+				_currentLoader = null;
+			}
 		}
 		
 		
