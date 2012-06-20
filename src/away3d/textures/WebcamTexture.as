@@ -40,19 +40,19 @@ package away3d.textures
 			
 			// if autoplay start video
 			if (autoStart)
-				play();
+				start();
 			
 			// set smoothing
 			_smoothing = smoothing;
 		}
 		
-		private function play():void
+		public function start():void
 		{
 			_video.attachCamera( _camera );
 			_broadcaster.addEventListener(Event.ENTER_FRAME, autoUpdateHandler, false, 0, true);
 		}
 		
-		private function stop():void
+		public function stop():void
 		{
 			// you know Adobe, you could add a video.detachCamera()... Just Saying.
 			_video.attachCamera( null );
