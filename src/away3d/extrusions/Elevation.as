@@ -152,7 +152,7 @@
 		 */
 		public function getHeightAt(x : Number, z : Number) : Number
 		{
-			var col : uint = _activeMap.getPixel((x/_width+.5)*_activeMap.width, (-z/_depth+.5)*_activeMap.height) & 0xff;
+			var col : uint = _activeMap.getPixel((x/_width+.5)*(_activeMap.width-1), (-z/_depth+.5)*(_activeMap.height-1)) & 0xff;
 			return (col >_maxElevation)? (_maxElevation / 0xff) * _height : ((col <_minElevation)?(_minElevation / 0xff) * _height :  (col / 0xff) * _height);
 		}
 		
