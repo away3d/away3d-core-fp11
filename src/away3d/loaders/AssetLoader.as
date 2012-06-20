@@ -314,7 +314,7 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
-			var isDependency : Boolean = (_currentDependencyIndex > 1);
+			var isDependency : Boolean = (_dependencyStack.length > 0);
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
 				event = new LoaderEvent(LoaderEvent.LOAD_ERROR, _uri, isDependency, event.message);
 				dispatchEvent(event);
