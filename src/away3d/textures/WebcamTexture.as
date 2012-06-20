@@ -1,22 +1,17 @@
 package away3d.textures
 {
-	import away3d.materials.utils.IVideoPlayer;
-	import away3d.materials.utils.SimpleVideoPlayer;
 	import away3d.tools.utils.TextureUtils;
 	
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Matrix;
-	import flash.geom.Rectangle;
 	import flash.media.Camera;
 	import flash.media.Video;
 	
 	public class WebcamTexture extends BitmapTexture
 	{
 		private var _broadcaster : Sprite;
-		private var _autoPlay : Boolean;
-		private var _autoUpdate : Boolean;
 		private var _materialSize : uint;
 		private var _video : Video;
 		private var _camera : Camera;
@@ -41,14 +36,11 @@ package away3d.textures
 			_video = new Video( cameraWidth, cameraHeight );
 			
 			// Sets up the bitmap material
-			super(new BitmapData(_materialSize, _materialSize, false, 0xFF9900));
+			super(new BitmapData(_materialSize, _materialSize, false, 0));
 			
 			// if autoplay start video
 			if (autoStart)
 				play();
-			
-			// auto update is true by default
-			autoUpdate = true;
 			
 			// set smoothing
 			_smoothing = smoothing;
@@ -57,12 +49,14 @@ package away3d.textures
 		private function play():void
 		{
 			_video.attachCamera( _camera );
+			_broadcaster.addEventListener(Event.ENTER_FRAME, autoUpdateHandler, false, 0, true);
 		}
 		
 		private function stop():void
 		{
 			// you know Adobe, you could add a video.detachCamera()... Just Saying.
 			_video.attachCamera( null );
+			_broadcaster.removeEventListener(Event.ENTER_FRAME, autoUpdateHandler);
 		}
 		
 		/**
@@ -71,7 +65,6 @@ package away3d.textures
 		 */
 		public function update() : void
 		{
-		
 			// draw
 			bitmapData.lock();
 			bitmapData.fillRect(bitmapData.rect, 0);
@@ -84,7 +77,7 @@ package away3d.textures
 		override public function dispose() : void
 		{
 			super.dispose();
-			autoUpdate = false;
+			stop();
 			bitmapData.dispose();
 			_video.attachCamera( null );
 			_camera = null;
@@ -92,6 +85,41 @@ package away3d.textures
 			_broadcaster = null;
 			_matrix = null;
 		}
+		
+		/**
+		 * Flips the image from the webcam horizontally
+		 */
+		public function flipHorizontal():void
+		{
+			_matrix.a=-1*_matrix.a;
+			_matrix.a > 0 ? _matrix.tx = _video.x - _video.width * Math.abs( _matrix.a ) : _matrix.tx = _video.width * Math.abs( _matrix.a ) +  _video.x;
+		}
+		
+		/**
+		 * Flips the image from the webcam vertically
+		 */
+		public function flipVertical():void
+		{
+			_matrix.d=-1*_matrix.d;
+			_matrix.d > 0 ? _matrix.ty = _video.y - _video.height * Math.abs( _matrix.d ) : _matrix.ty = _video.height * Math.abs( _matrix.d ) +  _video.y;
+		}
+		
+		
+		public function get camera():Camera
+		{
+			return _camera;
+		}
+		
+		public function get smoothing():Boolean
+		{
+			return _smoothing;
+		}
+		
+		public function set smoothing(value:Boolean):void
+		{
+			_smoothing = value;
+		}
+		
 		
 		private function autoUpdateHandler(event : Event) : void
 		{
@@ -110,40 +138,6 @@ package away3d.textures
 			return size;
 		}
 		
-		/**
-		 * Indicates whether the material will redraw onEnterFrame
-		 */
-		public function get autoUpdate():Boolean
-		{
-			return _autoUpdate;
-		}
 		
-		public function set autoUpdate(value:Boolean):void
-		{
-			if (value == _autoUpdate) return;
-			
-			_autoUpdate = value;
-			
-			if(value)
-				_broadcaster.addEventListener(Event.ENTER_FRAME, autoUpdateHandler, false, 0, true);
-			else
-				_broadcaster.removeEventListener(Event.ENTER_FRAME, autoUpdateHandler);
-		}
-		
-		public function get camera():Camera
-		{
-			return _camera;
-		}
-
-		public function get smoothing():Boolean
-		{
-			return _smoothing;
-		}
-
-		public function set smoothing(value:Boolean):void
-		{
-			_smoothing = value;
-		}
-
 	}
 }
