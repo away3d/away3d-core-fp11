@@ -201,10 +201,10 @@ package away3d.loaders.parsers
 				if(_mtlLib  && !_mtlLibLoaded)
 					return MORE_TO_PARSE;
 				 
-					translate();
-					applyMaterials();
-					
-					return PARSING_DONE;
+				translate();
+				applyMaterials();
+				
+				return PARSING_DONE;
 			}
 			
 			return MORE_TO_PARSE;
