@@ -184,10 +184,14 @@ package away3d.loaders
 		
 		private function onLoadError(ev : LoaderEvent) : void
 		{
-			removeListeners(EventDispatcher(ev.currentTarget));
-			
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
-				dispatchEvent(ev.clone());
+				var clone : Event = ev.clone();
+				
+				dispatchEvent(clone);
+				if (clone.isDefaultPrevented()) {
+					ev.preventDefault();
+					removeListeners(EventDispatcher(ev.currentTarget));
+				}
 			}
 			else {
 				throw new Error(ev.message);
