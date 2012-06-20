@@ -272,7 +272,7 @@
 
 		override protected function updateBounds():void {
 			// todo: fix bounds
-			_bounds.fromExtremes( -100, -100, 0, 100, 100, 0 );
+			_bounds.fromExtremes( -10000, -10000, 0, 10000, 10000, 0 );
 			_boundsInvalid = false;
 		}
 
