@@ -471,7 +471,6 @@ package away3d.library
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
 			loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
-			loader.removeEventListener(LoaderEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);

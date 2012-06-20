@@ -188,7 +188,7 @@ package away3d.loaders
 				if (_loadingDependency.retrieveAsRawData) {
 					// No need to parse. The parent parser is expecting this
 					// to be raw data so it can be passed directly.
-					dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, _loadingDependency.request.url));
+					dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, _loadingDependency.request.url, true));
 					_loadingDependency.setData(data);
 					_loadingDependency.resolve();
 					
@@ -287,7 +287,6 @@ package away3d.loaders
 		 */
 		private function onRetrievalFailed(event : LoaderEvent) : void
 		{
-			var eventName : String;
 			var loader : SingleFileLoader = SingleFileLoader(event.target);
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
@@ -305,9 +304,8 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
 			var isDependency : Boolean = (_currentDependencyIndex > 1);
-			eventName = isDependency? LoaderEvent.DEPENDENCY_ERROR : LoaderEvent.LOAD_ERROR;
-			if (hasEventListener(eventName)) {
-				event = new LoaderEvent(eventName, _uri, event.message);
+			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
+				event = new LoaderEvent(LoaderEvent.LOAD_ERROR, _uri, isDependency, event.message);
 				dispatchEvent(event);
 				if (isDependency && !event.isDefaultPrevented()) {
 					_loadingDependency.resolveFailure();
