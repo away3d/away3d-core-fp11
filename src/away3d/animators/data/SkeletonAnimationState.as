@@ -35,10 +35,9 @@ package away3d.animators.data
         private var _blendTree : SkeletonTreeNode;
         private var _globalPose : SkeletonPose;
         private var _globalInput : Boolean;
-		private var _buffersValid : Dictionary = new Dictionary();
+		private var _animationStates : Dictionary = new Dictionary();
 		private var _globalMatricesInvalid : Boolean;
 		private var _condensedMatrices : Vector.<Number>;
-
 
 		/**
 		 * Creates a SkeletonAnimationState object.
@@ -138,8 +137,8 @@ package away3d.animators.data
 		{
 			super.invalidateState();
 
-			for(var key : Object in _buffersValid) {
-			    delete _buffersValid[key];
+			for(var key : Object in _animationStates) {
+			    SubGeomAnimationState(_animationStates[key]).valid = false;
 			}
 		}
 
@@ -172,10 +171,15 @@ package away3d.animators.data
 			}
 			else {
 				if (_animation.usesCPU) {
-					if (!_buffersValid[skinnedGeom]) {
-						morphGeometry(skinnedGeom);
-						_buffersValid[skinnedGeom] = skinnedGeom;
+					var subGeomAnimState : SubGeomAnimationState = _animationStates[skinnedGeom] ||= new SubGeomAnimationState(skinnedGeom);
+
+					if (!subGeomAnimState.valid) {
+						morphGeometry(subGeomAnimState, skinnedGeom);
+						subGeomAnimState.valid = true;
 					}
+					skinnedGeom.animatedVertexData = subGeomAnimState.animatedVertexData;
+					skinnedGeom.animatedNormalData = subGeomAnimState.animatedNormalData;
+					skinnedGeom.animatedTangentData = subGeomAnimState.animatedTangentData;
 					return;
 				}
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
@@ -301,14 +305,14 @@ package away3d.animators.data
 		 *
 		 * todo: we may be able to transform tangents more easily, similar to how it happens on gpu
 		 */
-		private function morphGeometry(subGeom : SkinnedSubGeometry) : void
+		private function morphGeometry(state : SubGeomAnimationState, subGeom : SkinnedSubGeometry) : void
 		{
 			var verts : Vector.<Number> = subGeom.vertexData;
 			var normals : Vector.<Number> = subGeom.vertexNormalData;
 			var tangents : Vector.<Number> = subGeom.vertexTangentData;
-			var targetVerts : Vector.<Number> = subGeom.animatedVertexData;
-			var targetNormals : Vector.<Number> = subGeom.animatedNormalData;
-			var targetTangents : Vector.<Number> = subGeom.animatedTangentData;
+			var targetVerts : Vector.<Number> = state.animatedVertexData;
+			var targetNormals : Vector.<Number> = state.animatedNormalData;
+			var targetTangents : Vector.<Number> = state.animatedTangentData;
 			var jointIndices : Vector.<Number> = subGeom.jointIndexData;
 			var jointWeights : Vector.<Number> = subGeom.jointWeightsData;
 			var i1 : uint, i2 : uint = 1, i3 : uint = 2;
@@ -369,9 +373,6 @@ package away3d.animators.data
 
 				i1 += 3; i2 += 3; i3 += 3;
 			}
-			subGeom.animatedVertexData = targetVerts;
-			subGeom.animatedNormalData = targetNormals;
-			subGeom.animatedTangentData = targetTangents;
 		}
 
 		public function applyRootDelta() : void
@@ -385,5 +386,22 @@ package away3d.animators.data
 					_owners[i].translateLocal(delta, dist);
 			}
 		}
+	}
+}
+
+import away3d.core.base.SubGeometry;
+
+class SubGeomAnimationState
+{
+	public var animatedVertexData : Vector.<Number>;
+	public var animatedNormalData : Vector.<Number>;
+	public var animatedTangentData : Vector.<Number>;
+	public var valid : Boolean = false;
+
+	public function SubGeomAnimationState(subGeom : SubGeometry)
+	{
+		animatedVertexData = subGeom.vertexData.concat();
+		animatedNormalData = subGeom.vertexNormalData.concat();
+		animatedTangentData = subGeom.vertexTangentData.concat();
 	}
 }
