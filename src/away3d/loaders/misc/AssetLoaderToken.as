@@ -1,11 +1,14 @@
 package away3d.loaders.misc
 {
+	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.loaders.AssetLoader;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
+	use namespace arcane;
 
 	/**
 	 * Instances of this class are returned as tokens by loading operations
@@ -22,7 +25,7 @@ package away3d.loaders.misc
 	*/
 	public class AssetLoaderToken extends EventDispatcher
 	{
-		private var _loader : AssetLoader;
+		arcane var _loader : AssetLoader;
 		
 		public function AssetLoaderToken(loader : AssetLoader)
 		{

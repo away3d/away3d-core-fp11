@@ -33,6 +33,8 @@ package away3d.loaders
 		private var _token : AssetLoaderToken;
 		private var _uri : String;
 		
+		private var _errorHandlers : Vector.<Function>;
+		
 		private var _loaderStack : Vector.<SingleFileLoader>;
 		private var _dependencyStack : Vector.<Vector.<ResourceDependency>>;
 		private var _dependencyIndexStack : Vector.<uint>;
@@ -50,6 +52,8 @@ package away3d.loaders
 			_loaderStack = new Vector.<SingleFileLoader>();
 			_dependencyStack = new Vector.<Vector.<ResourceDependency>>();
 			_dependencyIndexStack = new Vector.<uint>();
+			
+			_errorHandlers = new Vector.<Function>();
 		}
 		
 		
@@ -288,14 +292,29 @@ package away3d.loaders
 		 */
 		private function onRetrievalFailed(event : LoaderEvent) : void
 		{
+			var handled : Boolean;
+			var isDependency : Boolean = (_dependencyStack.length > 0);
 			var loader : SingleFileLoader = SingleFileLoader(event.target);
 			
 			removeEventListeners(loader);
-	
-			var isDependency : Boolean = (_dependencyStack.length > 0);
+			
+			event = new LoaderEvent(LoaderEvent.LOAD_ERROR, _uri, isDependency, event.message);
+			
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
-				event = new LoaderEvent(LoaderEvent.LOAD_ERROR, _uri, isDependency, event.message);
 				dispatchEvent(event);
+				handled = true;
+			}
+			else {
+				// TODO: Consider not doing this even when AssetLoader does
+				// have it's own LOAD_ERROR listener
+				var i : uint, len : uint = _errorHandlers.length;
+				for (i=0; i<len; i++) {
+					var handlerFunction : Function = _errorHandlers[i];
+					handled ||= handlerFunction(event);
+				}
+			}
+			
+			if (handled) {
 				if (isDependency && !event.isDefaultPrevented()) {
 					_loadingDependency.resolveFailure();
 					prepareNextRetrieve(loader, event, false);
@@ -410,6 +429,14 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+		}
+		
+		
+		arcane function addErrorHandler(handler : Function) : void
+		{
+			if (_errorHandlers.indexOf(handler)<0) {
+				_errorHandlers.push(handler);
+			}
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package away3d.loaders
 {
+	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.entities.Mesh;
 	import away3d.events.AssetEvent;
@@ -14,6 +15,8 @@ package away3d.loaders
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
+	
+	use namespace arcane;
 
 	/**
 	 * Loader3D can load any file format that Away3D supports (or for which a third-party parser
@@ -67,7 +70,6 @@ package away3d.loaders
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
-			token.addEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
@@ -79,6 +81,9 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			token._loader.addErrorHandler(onLoadError);
 			
 			return token;
 		}
@@ -106,7 +111,6 @@ package away3d.loaders
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
-			token.addEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
@@ -118,6 +122,9 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			token._loader.addErrorHandler(onLoadError);
 			
 			return token;
 		}
@@ -182,27 +189,14 @@ package away3d.loaders
 		}
 		
 		
-		private function onLoadError(ev : LoaderEvent) : void
+		private function onLoadError(ev : LoaderEvent) : Boolean
 		{
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
-				var clone : Event = ev.clone();
-				
-				dispatchEvent(clone);
-				
-				// If this was the base file, or if default behavior was prevented,
-				// the load will not continue past this point, and hence the event
-				// listeners should be cleaned up here.
-				if (!ev.isDependency || clone.isDefaultPrevented()) {
-					removeListeners(EventDispatcher(ev.currentTarget));
-					
-					// If default behavior was prevented on the cloned event,
-					// propagate it back to the original dispatcher.
-					if (clone.isDefaultPrevented())
-						ev.preventDefault();
-				}
+				dispatchEvent(ev);
+				return true;
 			}
 			else {
-				throw new Error(ev.message);
+				return false;
 			}
 		}
 

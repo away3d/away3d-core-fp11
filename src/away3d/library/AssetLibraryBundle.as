@@ -366,7 +366,6 @@ package away3d.library
 			_loadingSessions.push(loader);
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
-			loader.addEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
@@ -378,6 +377,10 @@ package away3d.library
 			loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			loader.addErrorHandler(onDependencyRetrievingError);
+			
 			return loader.load(req, context, ns, parser);
 		}
 		
@@ -406,6 +409,10 @@ package away3d.library
 			loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			loader.addErrorHandler(onDependencyRetrievingError);
+			
 			return loader.loadData(data, '', context, ns, parser);
 		}
 		
@@ -439,16 +446,15 @@ package away3d.library
 		/**
 		 * Called when a an error occurs during dependency retrieving.
 		 */
-		private function onDependencyRetrievingError(event : LoaderEvent) : void
+		private function onDependencyRetrievingError(event : LoaderEvent) : Boolean
 		{
-			// TODO: not used
-			//var ext:String = 
-			event.url.substring(event.url.length-4, event.url.length).toLowerCase();
-			if (hasEventListener(LoaderEvent.LOAD_ERROR)){
+			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
 				dispatchEvent(event);
+				return true;
 			}
-			
-			else throw new Error(event.message);
+			else {
+				return false;
+			}
 		}
 		
 		private function onAssetComplete(event : AssetEvent) : void
