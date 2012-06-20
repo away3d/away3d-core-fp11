@@ -326,6 +326,8 @@ package away3d.loaders
 				}
 			}
 			else {
+				// Error event was not handled by listeners directly on AssetLoader or
+				// on any of the subscribed loaders (in the list of error handlers.)
 				throw new Error(event.message);
 			}
 		}
@@ -432,6 +434,17 @@ package away3d.loaders
 		}
 		
 		
+		/**
+		 * @private
+		 * This method is used by other loader classes (e.g. Loader3D and AssetLibraryBundle) to
+		 * add error event listeners to the AssetLoader instance. This system is used instead of
+		 * the regular EventDispatcher system so that the AssetLibrary error handler can be sure
+		 * that if hasEventListener() returns true, it's client code that's listening for the
+		 * event. Secondly, functions added as error handler through this custom method are 
+		 * expected to return a boolean value indicating whether the event was handled (i.e.
+		 * whether they in turn had any client code listening for the event.) If no handlers
+		 * return true, the AssetLoader knows that the event wasn't handled and will throw an RTE.
+		*/
 		arcane function addErrorHandler(handler : Function) : void
 		{
 			if (_errorHandlers.indexOf(handler)<0) {
