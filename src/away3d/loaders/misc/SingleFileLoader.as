@@ -298,7 +298,7 @@ package away3d.loaders.misc
 			} else{
 				var msg:String = "No parser defined. To enable all parsers for auto-detection, use Parsers.enableAllBundled()";
 				if(hasEventListener(LoaderEvent.LOAD_ERROR)){
-					this.dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, "", msg) );
+					this.dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, "", true, msg) );
 				} else{
 					throw new Error(msg);
 				}
