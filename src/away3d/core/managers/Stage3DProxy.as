@@ -63,7 +63,7 @@ package away3d.core.managers
 				return;
 			
 			if (!_enterFrame)
-				_enterFrame = new Event(Event.ENTER_FRAME, this);
+				_enterFrame = new Event(Event.ENTER_FRAME);
 			
 			dispatchEvent(_enterFrame);
 		}
@@ -74,7 +74,7 @@ package away3d.core.managers
 				return;
 			
 			if (!_exitFrame)
-				_exitFrame = new Event(Event.EXIT_FRAME, this);
+				_exitFrame = new Event(Event.EXIT_FRAME);
 			
 			dispatchEvent(_exitFrame);
 		}
