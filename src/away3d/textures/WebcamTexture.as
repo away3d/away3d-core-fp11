@@ -3,9 +3,7 @@ package away3d.textures
 	import away3d.tools.utils.TextureUtils;
 	
 	import flash.display.BitmapData;
-	import flash.display.Sprite;
 	import flash.display3D.textures.TextureBase;
-	import flash.events.Event;
 	import flash.geom.Matrix;
 	import flash.media.Camera;
 	import flash.media.Video;
@@ -22,29 +20,22 @@ package away3d.textures
 		
 		public function WebcamTexture( cameraWidth : uint = 320, cameraHeight : uint = 240, materialSize : uint = 256, autoStart : Boolean = true, camera : Camera = null, smoothing : Boolean = true )
 		{
-			// validates the size of the material
 			_materialSize  = validateMaterialSize( materialSize );
 			
-			// martrix transform to fit the camera video inside the Pow2 texure.
+			super(new BitmapData(_materialSize, _materialSize, false, 0));
+			
+			// Use default camera if none supplied
+			_camera = camera || Camera.getCamera();
+			_video = new Video( cameraWidth, cameraHeight );
+			
 			_matrix = new Matrix();
 			_matrix.scale(  _materialSize / cameraWidth, _materialSize / cameraHeight );
 			
-			// assigns the provided camera or creates one if null.
-			_camera = camera || Camera.getCamera();
-			
-			// creates the video object
-			_video = new Video( cameraWidth, cameraHeight );
-			
-			// Sets up the bitmap material
-			super(new BitmapData(_materialSize, _materialSize, false, 0));
-			
-			// if autoplay start video
 			if (autoStart) {
 				_autoUpdate = true;
 				start();
 			}
 			
-			// set smoothing
 			_smoothing = smoothing;
 		}
 		
@@ -71,7 +62,6 @@ package away3d.textures
 		
 		public function stop():void
 		{
-			// you know Adobe, you could add a video.detachCamera()... Just Saying.
 			_playing = false;
 			_video.attachCamera( null );
 		}
@@ -131,11 +121,19 @@ package away3d.textures
 		}
 		
 		
+		/**
+		 * The Camera instance (webcam) used by this texture.
+		*/
 		public function get camera():Camera
 		{
 			return _camera;
 		}
 		
+		
+		/**
+		 * Toggles smoothing on the texture as it's drawn (and potentially scaled)
+		 * from the video stream to a BitmapData object.
+		 */
 		public function get smoothing():Boolean
 		{
 			return _smoothing;
