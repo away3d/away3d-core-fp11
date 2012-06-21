@@ -31,7 +31,7 @@ package away3d.core.managers
 		arcane var _context3D : Context3D;
 		arcane var _stage3DIndex : int = -1;
 
-		private var _software : Boolean;
+		private var _usesSoftwareRendering : Boolean;
 		private var _stage3D : Stage3D;
 		private var _activeProgram3D : Program3D;
 		private var _stage3DManager : Stage3DManager;
@@ -195,9 +195,9 @@ package away3d.core.managers
 		 * Remember to wait for the CONTEXT3D_CREATED event before checking this property,
 		 * as only then will it be guaranteed to be accurate.
 		*/
-		public function get software() : Boolean
+		public function get usesSoftwareRendering() : Boolean
 		{
-			return _software;
+			return _usesSoftwareRendering;
 		}
 		
 
@@ -266,7 +266,7 @@ package away3d.core.managers
 				_context3D = _stage3D.context3D;
 				_context3D.enableErrorChecking = Debug.active;
 				
-				_software = (_context3D.driverInfo.indexOf('Software')==0);
+				_usesSoftwareRendering = (_context3D.driverInfo.indexOf('Software')==0);
 				
 				// Only configure back buffer if width and height have been set,
 				// which they may not have been if View3D.render() has yet to be
@@ -292,7 +292,7 @@ package away3d.core.managers
 			// returned Context3D will be running software mode.
 			// If not, we can't be sure and should stick to the
 			// old value (will likely be same if re-requesting.)
-			_software ||= forceSoftware;
+			_usesSoftwareRendering ||= forceSoftware;
 			
 			_stage3D.requestContext3D(forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO);
 			_contextRequested = true;
