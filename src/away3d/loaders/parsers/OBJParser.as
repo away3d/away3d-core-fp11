@@ -717,11 +717,17 @@ package away3d.loaders.parsers
 						mat.repeat = true;
 						
 						if(lm.specularMethod){
+							// By setting the specularMethod property to null before assigning
+							// the actual method instance, we avoid having the properties of
+							// the new method being overridden with the settings from the old
+							// one, which is default behavior of the setter.
+							mat.specularMethod = null;
 							mat.specularMethod = lm.specularMethod;
 						} else if(_materialSpecularData){
 							for(j = 0;j<_materialSpecularData.length;++j){
 								specularData = _materialSpecularData[j];
 								if(specularData.materialID == lm.materialID){
+									mat.specularMethod = null; // Prevent property overwrite (see above)
 									mat.specularMethod = specularData.basicSpecularMethod;
 									mat.ambientColor = specularData.ambientColor;
 									mat.alpha = specularData.alpha;
