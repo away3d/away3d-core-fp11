@@ -4,6 +4,7 @@ package away3d.textures
 	
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
+	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.geom.Matrix;
 	import flash.media.Camera;
@@ -11,17 +12,15 @@ package away3d.textures
 	
 	public class WebcamTexture extends BitmapTexture
 	{
-		private var _broadcaster : Sprite;
 		private var _materialSize : uint;
 		private var _video : Video;
 		private var _camera : Camera;
 		private var _matrix:Matrix;
-		private var _smoothing:Boolean;
+		private var _smoothing : Boolean;
+		private var _playing : Boolean;
 		
 		public function WebcamTexture( cameraWidth : uint = 320, cameraHeight : uint = 240, materialSize : uint = 256, autoStart : Boolean = true, camera : Camera = null, smoothing : Boolean = true )
 		{
-			_broadcaster = new Sprite();
-			
 			// validates the size of the material
 			_materialSize  = validateMaterialSize( materialSize );
 			
@@ -49,14 +48,15 @@ package away3d.textures
 		public function start():void
 		{
 			_video.attachCamera( _camera );
-			_broadcaster.addEventListener(Event.ENTER_FRAME, autoUpdateHandler, false, 0, true);
+			_playing = true;
+			invalidateContent();
 		}
 		
 		public function stop():void
 		{
 			// you know Adobe, you could add a video.detachCamera()... Just Saying.
+			_playing = false;
 			_video.attachCamera( null );
-			_broadcaster.removeEventListener(Event.ENTER_FRAME, autoUpdateHandler);
 		}
 		
 		/**
@@ -71,7 +71,17 @@ package away3d.textures
 			bitmapData.draw(_video, _matrix, null, null, bitmapData.rect, _smoothing);
 			bitmapData.unlock();
 			invalidateContent();
+		}
+		
+		override protected function uploadContent(texture:TextureBase):void
+		{
+			super.uploadContent(texture);
 			
+			if (_playing) {
+				// Keep content invalid so that it will
+				// be updated again next render cycle
+				update();
+			}
 		}
 		
 		override public function dispose() : void
@@ -82,7 +92,6 @@ package away3d.textures
 			_video.attachCamera( null );
 			_camera = null;
 			_video = null;
-			_broadcaster = null;
 			_matrix = null;
 		}
 		
@@ -121,12 +130,6 @@ package away3d.textures
 		}
 		
 		
-		private function autoUpdateHandler(event : Event) : void
-		{
-			update();
-		}
-		
-		
 		private function validateMaterialSize( size:uint ):int
 		{
 			if (!TextureUtils.isDimensionValid(size)) {
@@ -137,7 +140,5 @@ package away3d.textures
 			
 			return size;
 		}
-		
-		
 	}
 }
