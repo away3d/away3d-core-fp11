@@ -8,8 +8,7 @@ package away3d.core.raycast.data
 	{
 		public var localRayPosition:Vector3D;
 		public var localRayDirection:Vector3D;
-		public var nearT:Number;
-		public var farT:Number;
+		public var t:Number;
 		public var uv:Point;
 		public var normal:Vector3D;
 		public var rayOriginIsInsideBounds:Boolean;

@@ -90,7 +90,7 @@ package away3d.core.raycast.colliders.picking
 
 			if( _numberOfCollisions > 0 ) {
 
-				// TODO: must consider bounds intersections.
+				// TODO: would be more accurate if bound intersections were considered.
 
 				var i:uint;
 				var triangleCollider:RayColliderBase;
@@ -109,6 +109,7 @@ package away3d.core.raycast.colliders.picking
 						// If a collision exists, update the collision data and stop all checks.
 						if( triangleCollider.collides ) {
 							_collisionData = triangleCollider.collisionData;
+
 							_collides = true;
 							time = getTimer() - time; // TODO: remove
 							trace( "checked triangle collisions in " + time + "ms." ); // TODO: remove

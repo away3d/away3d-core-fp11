@@ -39,8 +39,7 @@ package away3d.core.raycast.colliders.bounds
 
 				// Store collision data.
 				_collisionData = new RayCollisionVO();
-				_collisionData.nearT = collisionT;
-				_collisionData.farT = _entity.bounds.rayFarT;
+				_collisionData.t = collisionT;
 				_collisionData.localRayPosition = _rayPosition;
 				_collisionData.localRayDirection = _rayDirection;
 				_collisionData.rayOriginIsInsideBounds = cameraIsInEntityBounds;

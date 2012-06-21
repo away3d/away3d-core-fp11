@@ -177,7 +177,6 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
 						normal = new Vector3D( 1, 0, 0 );
 						intersects = true;
 					}
@@ -191,7 +190,6 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
 						normal = new Vector3D( -1, 0, 0 );
 						intersects = true;
 					}
@@ -205,7 +203,6 @@ package away3d.bounds
 					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
 						normal = new Vector3D( 0, 1, 0 );
 						intersects = true;
 					}
@@ -219,7 +216,6 @@ package away3d.bounds
 					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
 						normal = new Vector3D( 0, -1, 0 );
 						intersects = true;
 					}
@@ -233,7 +229,6 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
 						normal = new Vector3D( 0, 0, 1);
 						intersects = true;
 					}
@@ -247,7 +242,6 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
 						normal = new Vector3D( 0, 0, -1 );
 						intersects = true;
 					}

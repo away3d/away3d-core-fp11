@@ -24,7 +24,6 @@ package away3d.bounds
 		protected var _aabbPoints:Vector.<Number> = new Vector.<Number>();
 		protected var _aabbPointsDirty:Boolean = true;
 		protected var _boundingRenderable:WireframePrimitiveBase;
-		protected var _rayFarT:Number;
 
 		/**
 		 * Creates a new BoundingVolumeBase object
@@ -247,10 +246,6 @@ package away3d.bounds
 			_aabbPoints[22] = maxY;
 			_aabbPoints[23] = maxZ;
 			_aabbPointsDirty = false;
-		}
-
-		public function get rayFarT():Number {
-			return _rayFarT;
 		}
 
 		public function get rayIntersectionPoint():Vector3D {

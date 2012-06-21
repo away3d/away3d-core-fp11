@@ -105,7 +105,7 @@ package away3d.core.raycast.colliders.triangles
 			// Construct and set collision data.
 			if( _collides ) {
 				_collisionData = new RayCollisionVO();
-				_collisionData.nearT = t;
+				_collisionData.t = t;
 				_collisionData.localRayPosition = _rayPosition;
 				_collisionData.localRayDirection = _rayDirection;
 				_collisionData.position = new Vector3D(

@@ -100,13 +100,14 @@ package away3d.core.raycast.colliders.triangles
 					var u:Number = 1 - v - w;
 					if( !( u < 0 ) ) { // all tests passed
 						_collisionData = new RayCollisionVO();
-						_collisionData.nearT = t;
+						_collisionData.t = t;
 						_collisionData.localRayPosition = _rayPosition;
 						_collisionData.localRayDirection = _rayDirection;
 						_collisionData.position = new Vector3D( cx, cy, cz );
 						_collisionData.normal = new Vector3D( nx, ny, nz );
 						_collisionData.uv = getCollisionUV( index, v, w, u );
 						_collides = true; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
+						return;
 					}
 				}
 			}
