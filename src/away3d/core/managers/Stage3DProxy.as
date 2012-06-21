@@ -54,11 +54,31 @@ package away3d.core.managers
 		private var _color : uint;
 		private var _backBufferDirty : Boolean;
 		private var _viewPort : Rectangle;
-		private var _layerRenderFunctions : Vector.<Function>;
-		private var _stage : Stage;
-		private var _enterFrameListenerFunctions : Vector.<Function>;
-		private var _exitFrameListenerFunctions : Vector.<Function>;
-
+		private var _enterFrame : Event;
+		private var _exitFrame : Event;
+		
+		private function notifyEnterFrame():void
+		{
+			if (!hasEventListener(Event.ENTER_FRAME))
+				return;
+			
+			if (!_enterFrame)
+				_enterFrame = new Event(Event.ENTER_FRAME, this);
+			
+			dispatchEvent(_enterFrame);
+		}
+		
+		private function notifyExitFrame():void
+		{
+			if (!hasEventListener(Event.EXIT_FRAME))
+				return;
+			
+			if (!_exitFrame)
+				_exitFrame = new Event(Event.EXIT_FRAME, this);
+			
+			dispatchEvent(_exitFrame);
+		}
+		
 		/**
 		 * Creates a Stage3DProxy object. This method should not be called directly. Creation of Stage3DProxy objects should
 		 * be handled by Stage3DManager.
@@ -76,9 +96,6 @@ package away3d.core.managers
 			_stage3DManager = stage3DManager;
 			_viewPort = new Rectangle();
 			_enableDepthAndStencil = true;
-			_layerRenderFunctions = new Vector.<Function>();
-			_enterFrameListenerFunctions = new Vector.<Function>();
-			_exitFrameListenerFunctions = new Vector.<Function>();
 			
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
@@ -175,7 +192,8 @@ package away3d.core.managers
 				_context3D.setRenderToBackBuffer();
 		}
 		
-		public function clear() : void {
+		public function clear() : void
+		{
 			if (!_context3D) return;
 			
 			if (_backBufferDirty) {
@@ -191,54 +209,46 @@ package away3d.core.managers
 		}
 
 
-		public function present() : void {
+		public function present() : void
+		{
 			if (!_context3D) return;
 
 			_context3D.present();
 		}
 		
-		public override function addEventListener(type : String, listener :Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void {
-			// Only override Enter_Frame events
-			if (type != Event.ENTER_FRAME && type != Event.EXIT_FRAME) {
-				super.addEventListener(type, listener, useCapture, priority, useWeakReference);
-				return;
-			}
+		/**
+		 * Registers an event listener object with an EventDispatcher object so that the listener receives notification of an event. Special case for enterframe and exitframe events - will switch Stage3DProxy into automatic render mode.
+		 * You can register event listeners on all nodes in the display list for a specific type of event, phase, and priority.
+		 * 
+		 * @param type The type of event.
+		 * @param listener The listener function that processes the event.
+		 * @param useCapture Determines whether the listener works in the capture phase or the target and bubbling phases. If useCapture is set to true, the listener processes the event only during the capture phase and not in the target or bubbling phase. If useCapture is false, the listener processes the event only during the target or bubbling phase. To listen for the event in all three phases, call addEventListener twice, once with useCapture set to true, then again with useCapture set to false.
+		 * @param priority The priority level of the event listener. The priority is designated by a signed 32-bit integer. The higher the number, the higher the priority. All listeners with priority n are processed before listeners of priority n-1. If two or more listeners share the same priority, they are processed in the order in which they were added. The default priority is 0.
+		 * @param useWeakReference Determines whether the reference to the listener is strong or weak. A strong reference (the default) prevents your listener from being garbage-collected. A weak reference does not.
+		 */
+		public override function addEventListener(type : String, listener :Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		{
+			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
 			
-			// Only add if the listener method is not already included
-			if (_enterFrameListenerFunctions.indexOf(listener) != -1 || _exitFrameListenerFunctions.indexOf(listener) != -1) return; 
-			if (type == Event.ENTER_FRAME) {
-				_enterFrameListenerFunctions.push(listener);
-			} else {
-				_exitFrameListenerFunctions.push(listener);
-			}
-			_frameEventDriver.addEventListener(Event.ENTER_FRAME, onLayerRenderEnterFrame, useCapture, priority, useWeakReference);
+			if ((type == Event.ENTER_FRAME || type == Event.EXIT_FRAME) && !_frameEventDriver.hasEventListener(Event.ENTER_FRAME))
+				_frameEventDriver.addEventListener(Event.ENTER_FRAME, onEnterFrame, useCapture, priority, useWeakReference);
 		}
-
-		public override function removeEventListener(type : String, listener :Function, useCapture : Boolean = false) : void {
-			// Only override Enter_Frame events
-			if (type != Event.ENTER_FRAME && type != Event.EXIT_FRAME) {
-				super.addEventListener(type, listener, useCapture); 
-				return;
-			}
-			
-			var listenerIndex:int;
-			if (type == Event.ENTER_FRAME) {
-				listenerIndex = _enterFrameListenerFunctions.indexOf(listener);
-				if (listenerIndex == -1) return;
-				
-				// Remove the listener function from the list of enterFrame functions to execute
-				_enterFrameListenerFunctions.splice(listenerIndex, 1);
-			} else {
-				listenerIndex = _exitFrameListenerFunctions.indexOf(listener);
-				if (listenerIndex == -1) return;
-				
-				// Remove the listener function from the list of exitFrame functions to execute
-				_exitFrameListenerFunctions.splice(listenerIndex, 1);
-			}
+		
+		/**
+		 * Removes a listener from the EventDispatcher object. Special case for enterframe and exitframe events - will switch Stage3DProxy out of automatic render mode.
+		 * If there is no matching listener registered with the EventDispatcher object, a call to this method has no effect.
+		 * 
+		 * @param type The type of event.
+		 * @param listener The listener object to remove.
+		 * @param useCapture Specifies whether the listener was registered for the capture phase or the target and bubbling phases. If the listener was registered for both the capture phase and the target and bubbling phases, two calls to removeEventListener() are required to remove both, one call with useCapture() set to true, and another call with useCapture() set to false.
+		 */
+		public override function removeEventListener(type : String, listener :Function, useCapture : Boolean = false) : void
+		{
+			super.removeEventListener(type, listener, useCapture);
 			
 			// Remove the main rendering listener if no EnterFrame listeners remain
-			if (_enterFrameListenerFunctions.length == 0 && _exitFrameListenerFunctions.length == 0)
-				_frameEventDriver.removeEventListener(Event.ENTER_FRAME, onLayerRenderEnterFrame, useCapture);
+			if (!hasEventListener(Event.ENTER_FRAME) && !hasEventListener(Event.EXIT_FRAME) && _frameEventDriver.hasEventListener(Event.ENTER_FRAME))
+				_frameEventDriver.removeEventListener(Event.ENTER_FRAME, onEnterFrame, useCapture);
 		}
 
 		public function get scissorRect() : Rectangle
@@ -415,47 +425,25 @@ package away3d.core.managers
 		}
 		
 		/**
-		 * The Enter_Frame handler for rendering framework layers on the Stage3D instance
-		 */
-		private function onRenderLayerEnterFrame(event : Event) : void
-		{
-			if (!_context3D) return; 
-			
-			// Clear the stage3D instance
-			clear();
-			
-			// Render each layer using the remdering functions added
-			for each (var renderFunction:Function in _layerRenderFunctions) {
-				renderFunction();
-			}
-			
-			// Call the present() to render the frame
-			present();
-		}
-		
-		/**
 		 * The Enter_Frame handler for processing the proxy.ENTER_FRAME and proxy.EXIT_FRAME event handlers.
 		 * Typically the proxy.ENTER_FRAME listener would render the layers for this Stage3D instance.
 		 */
-		private function onLayerRenderEnterFrame(event : Event) : void {
-			if (!_context3D) return; 
+		private function onEnterFrame(event : Event) : void
+		{
+			if (!_context3D)
+				return; 
 			
 			// Clear the stage3D instance
 			clear();
 			
-			var listenerFunction:Function;
-			// Render each layer using the rendering listener functions added
-			for each (listenerFunction in _enterFrameListenerFunctions) {
-				listenerFunction(event);
-			}
+			//notify the enterframe listeners
+			notifyEnterFrame();
 			
 			// Call the present() to render the frame
 			present();
 			
-			// Call each exit function using the exitFrame listener functions added
-			for each (listenerFunction in _exitFrameListenerFunctions) {
-				listenerFunction(event);
-			}
+			//notify the exitframe listeners
+			notifyExitFrame();
 		}
 	}
 }
