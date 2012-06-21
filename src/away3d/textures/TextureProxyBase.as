@@ -49,8 +49,8 @@ package away3d.textures
 
 			if (!tex || _dirty[contextIndex]) {
 				if (!tex) _textures[contextIndex] = tex = createTexture(stage3DProxy._context3D);
-				uploadContent(tex);
 				_dirty[contextIndex] = false;
+				uploadContent(tex);
 			}
 
 			return tex;
