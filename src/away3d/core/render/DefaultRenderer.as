@@ -80,11 +80,6 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
-			// TODO: not used
-			target = target;
-
-			_context.setDepthTest(false, Context3DCompareMode.LESS);
-
 			if (entityCollector.skyBox) {
 				if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 				_activeMaterial = null;

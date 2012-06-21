@@ -5,6 +5,8 @@ package away3d.materials.passes
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.textures.CubeTextureBase;
 
+	import flash.display3D.Context3DCompareMode;
+
 	use namespace arcane;
 
 	/**
@@ -63,6 +65,7 @@ package away3d.materials.passes
 		{
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
+			stage3DProxy._context3D.setDepthTest(false, Context3DCompareMode.LESS);
 			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 	}
