@@ -40,6 +40,10 @@ package away3d.textures
 		}
 		
 		
+		/**
+		 * Defines whether the texture should automatically update while camera stream is
+		 * playing. If false, the update() method must be invoked for the texture to redraw.
+		*/
 		public function get autoUpdate() : Boolean
 		{
 			return _autoUpdate;
@@ -50,74 +54,6 @@ package away3d.textures
 			
 			if (_autoUpdate && _playing)
 				invalidateContent();
-		}
-		
-		
-		public function start():void
-		{
-			_video.attachCamera( _camera );
-			_playing = true;
-			invalidateContent();
-		}
-		
-		public function stop():void
-		{
-			_playing = false;
-			_video.attachCamera( null );
-		}
-		
-		/**
-		 * Draws the video and updates the bitmap texture
-		 * If autoUpdate is false and this function is not called the bitmap texture will not update!
-		 */
-		public function update() : void
-		{
-			// draw
-			bitmapData.lock();
-			bitmapData.fillRect(bitmapData.rect, 0);
-			bitmapData.draw(_video, _matrix, null, null, bitmapData.rect, _smoothing);
-			bitmapData.unlock();
-			invalidateContent();
-		}
-		
-		override protected function uploadContent(texture:TextureBase):void
-		{
-			super.uploadContent(texture);
-			
-			if (_playing && _autoUpdate) {
-				// Keep content invalid so that it will
-				// be updated again next render cycle
-				update();
-			}
-		}
-		
-		override public function dispose() : void
-		{
-			super.dispose();
-			stop();
-			bitmapData.dispose();
-			_video.attachCamera( null );
-			_camera = null;
-			_video = null;
-			_matrix = null;
-		}
-		
-		/**
-		 * Flips the image from the webcam horizontally
-		 */
-		public function flipHorizontal():void
-		{
-			_matrix.a=-1*_matrix.a;
-			_matrix.a > 0 ? _matrix.tx = _video.x - _video.width * Math.abs( _matrix.a ) : _matrix.tx = _video.width * Math.abs( _matrix.a ) +  _video.x;
-		}
-		
-		/**
-		 * Flips the image from the webcam vertically
-		 */
-		public function flipVertical():void
-		{
-			_matrix.d=-1*_matrix.d;
-			_matrix.d > 0 ? _matrix.ty = _video.y - _video.height * Math.abs( _matrix.d ) : _matrix.ty = _video.height * Math.abs( _matrix.d ) +  _video.y;
 		}
 		
 		
@@ -142,6 +78,90 @@ package away3d.textures
 		public function set smoothing(value:Boolean):void
 		{
 			_smoothing = value;
+		}
+		
+		
+		/**
+		 * Start subscribing to camera stream. For the texture to update the update()
+		 * method must be repeatedly invoked, or autoUpdate set to true.
+		*/
+		public function start():void
+		{
+			_video.attachCamera( _camera );
+			_playing = true;
+			invalidateContent();
+		}
+		
+		
+		/**
+		 * Detaches from the camera stream.
+		*/
+		public function stop():void
+		{
+			_playing = false;
+			_video.attachCamera( null );
+		}
+		
+		
+		/**
+		 * Draws the video and updates the bitmap texture
+		 * If autoUpdate is false and this function is not called the bitmap texture will not update!
+		 */
+		public function update() : void
+		{
+			// draw
+			bitmapData.lock();
+			bitmapData.fillRect(bitmapData.rect, 0);
+			bitmapData.draw(_video, _matrix, null, null, bitmapData.rect, _smoothing);
+			bitmapData.unlock();
+			invalidateContent();
+		}
+		
+		
+		/**
+		 * Flips the image from the webcam horizontally
+		 */
+		public function flipHorizontal():void
+		{
+			_matrix.a=-1*_matrix.a;
+			_matrix.a > 0 ? _matrix.tx = _video.x - _video.width * Math.abs( _matrix.a ) : _matrix.tx = _video.width * Math.abs( _matrix.a ) +  _video.x;
+		}
+		
+		/**
+		 * Flips the image from the webcam vertically
+		 */
+		public function flipVertical():void
+		{
+			_matrix.d=-1*_matrix.d;
+			_matrix.d > 0 ? _matrix.ty = _video.y - _video.height * Math.abs( _matrix.d ) : _matrix.ty = _video.height * Math.abs( _matrix.d ) +  _video.y;
+		}
+		
+		
+		/**
+		 * Clean up used resources.
+		*/
+		override public function dispose() : void
+		{
+			super.dispose();
+			stop();
+			bitmapData.dispose();
+			_video.attachCamera( null );
+			_camera = null;
+			_video = null;
+			_matrix = null;
+		}
+		
+		
+		
+		override protected function uploadContent(texture:TextureBase):void
+		{
+			super.uploadContent(texture);
+			
+			if (_playing && _autoUpdate) {
+				// Keep content invalid so that it will
+				// be updated again next render cycle
+				update();
+			}
 		}
 		
 		
