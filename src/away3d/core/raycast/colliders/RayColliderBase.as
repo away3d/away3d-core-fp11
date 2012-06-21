@@ -6,22 +6,20 @@ package away3d.core.raycast.colliders
 	import away3d.errors.AbstractMethodError;
 
 	import flash.geom.Vector3D;
-	import flash.utils.Dictionary;
-
-	// TODO: Use linked lists instead of vectors.
 
 	public class RayColliderBase
 	{
+		protected var _entity:Entity;
+		protected var _collides:Boolean;
 		protected var _rayPosition:Vector3D;
 		protected var _rayDirection:Vector3D;
-
-		protected var _aCollisionExists:Boolean;
-		protected var _numberOfCollisions:uint;
-
-		protected var _collisionData:Dictionary;
-		protected var _entities:Vector.<Entity>;
+		protected var _collisionData:RayCollisionVO;
 
 		public function RayColliderBase() {
+		}
+
+		public function evaluate():void {
+			throw new AbstractMethodError();
 		}
 
 		public function updateRay( position:Vector3D, direction:Vector3D ):void {
@@ -29,60 +27,29 @@ package away3d.core.raycast.colliders
 			_rayDirection = direction;
 		}
 
-		public function updateEntities( entities:Vector.<Entity> ):void {
-			_entities = entities;
+		public function set entity( entity:Entity ):void {
+			_entity = entity;
 		}
 
-		public function evaluate():void {
-			throw new AbstractMethodError();
+		public function get entity():Entity {
+			return _entity;
 		}
 
 		protected function reset():void {
-			_aCollisionExists = false;
-			_numberOfCollisions = 0;
+			_collides = false;
 			_collisionData = null;
 		}
 
-		public function get aCollisionExists():Boolean {
-			return _aCollisionExists;
+		public function get collides():Boolean {
+			return _collides;
 		}
 
-		public function get numberOfCollisions():uint {
-			return _numberOfCollisions;
-		}
-
-		public function getCollisionDataForFirstItem():RayCollisionVO {
-			return _collisionData[ _entities[ 0 ] ];
-		}
-
-		public function getCollisionDataForItem( entity:Entity ):RayCollisionVO {
-			return _collisionData[ entity ];
-		}
-
-		public function setCollisionDataForItem( entity:Entity, data:RayCollisionVO ):void {
-			if( !_collisionData ) {
-				_collisionData = new Dictionary();
-			}
-			_collisionData[ entity ] = data;
-		}
-
-		public function get firstEntity():Entity {
-			return _entities[ 0 ];
-		}
-
-		public function get collisionData():Dictionary {
+		public function get collisionData():RayCollisionVO {
 			return _collisionData;
 		}
 
-		public function get entities():Vector.<Entity> {
-			return _entities;
-		}
-
-		public function setEntityAt( index:uint, entity:Entity ):void {
-			if( !_entities ) {
-				_entities = new Vector.<Entity>();
-			}
-			_entities[ index ] = entity;
+		public function set collisionData( data:RayCollisionVO ):void {
+			_collisionData = data;
 		}
 
 		public function get rayPosition():Vector3D {

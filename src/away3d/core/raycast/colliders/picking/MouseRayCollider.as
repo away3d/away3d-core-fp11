@@ -12,9 +12,8 @@ package away3d.core.raycast.colliders.picking
 
 	use namespace arcane;
 
-	public class MouseRayCollider extends RayColliderBase
+	public class MouseRayCollider extends MultipleRayColliderBase
 	{
-
 		private var _view:View3D;
 		private var _multipleBoundsCollider:MultipleBoundsRayCollider;
 
@@ -35,9 +34,9 @@ package away3d.core.raycast.colliders.picking
 			_multipleBoundsCollider.updateRay( position, direction );
 		}
 
-		override public function updateEntities( entities:Vector.<Entity> ):void {
+		override public function set entities( entities:Vector.<Entity> ):void {
 
-			var entity:Entity;
+			var thisEntity:Entity;
 			var i:uint, len:uint;
 			var filteredEntities:Vector.<Entity>;
 
@@ -45,14 +44,14 @@ package away3d.core.raycast.colliders.picking
 			len = entities.length;
 			filteredEntities = new Vector.<Entity>();
 			for( i = 0; i < len; i++ ) {
-				entity = entities[ i ];
-				if( entity.visible && entity._implicitlyMouseEnabled ) {
-					filteredEntities.push( entity );
+				thisEntity = entities[ i ];
+				if( thisEntity.visible && thisEntity._implicitlyMouseEnabled ) {
+					filteredEntities.push( thisEntity );
 				}
 			}
 
 			// Set the filtered items onto the bounds collider.
-			_multipleBoundsCollider.updateEntities( filteredEntities );
+			_multipleBoundsCollider.entities = filteredEntities;
 		}
 
 		override public function evaluate():void {
@@ -70,40 +69,47 @@ package away3d.core.raycast.colliders.picking
 			trace( "checked bound collisions in " + time + "ms." ); // TODO: remove
 
 			// If a collision exists, extract the data from the bounds collider...
-			if( _multipleBoundsCollider.aCollisionExists ) {
+			if( _multipleBoundsCollider.collides ) {
 				// The bounds collider has filtered and populated its data, use it here from now on.
 				_entities = _multipleBoundsCollider.entities;
-				_collisionData = _multipleBoundsCollider.collisionData;
+				_collisionDatas = _multipleBoundsCollider.collisionDatas;
 				_numberOfCollisions = _multipleBoundsCollider.numberOfCollisions;
+				_collides = true;
+				_entity = _entities[ 0 ];
+				_collisionData = _collisionDatas[ _entity ];
 			}
-			else return;
+			else {
+				// Break if no bounds are hit.
+				return;
+			}
 
 			// ---------------------------------------------------------------------
 			// Evaluate triangle collisions when needed.
-			// Replaces collision data provided by bounds collider
-			// with more precise data.
+			// Replaces collision data provided by bounds collider with more precise data.
 			// ---------------------------------------------------------------------
 
 			if( _numberOfCollisions > 0 ) {
 
+				// TODO: must consider bounds intersections.
+
 				var i:uint;
-				var entity:Entity;
 				var triangleCollider:RayColliderBase;
 
 				for( i = 0; i < _numberOfCollisions; ++i ) {
-					entity = _entities[ i ];
-					triangleCollider = entity.triangleRayCollider;
+					_entity = _entities[ i ];
+					_collisionData = _collisionDatas[ _entity ];
+					triangleCollider = _entity.triangleRayCollider;
 					if( triangleCollider ) {
-						trace( "initiating entity triangle collision check..." );
+						trace( "initiating thisEntity triangle collision check..." );
 						time = getTimer(); // TODO: remove
 						// Update triangle collider.
-						triangleCollider.setEntityAt( 0, entity );
+						triangleCollider.entity = _entity;
 						triangleCollider.updateRay( _rayPosition, _rayDirection );
 						triangleCollider.evaluate();
 						// If a collision exists, update the collision data and stop all checks.
-						if( triangleCollider.aCollisionExists ) {
-							setCollisionDataForItem( entity, triangleCollider.getCollisionDataForFirstItem() );
-							_aCollisionExists = true;
+						if( triangleCollider.collides ) {
+							_collisionData = triangleCollider.collisionData;
+							_collides = true;
 							time = getTimer() - time; // TODO: remove
 							trace( "checked triangle collisions in " + time + "ms." ); // TODO: remove
 							return;
@@ -112,13 +118,13 @@ package away3d.core.raycast.colliders.picking
 							_entities.splice( i, 1 );
 							_numberOfCollisions--;
 							if( _numberOfCollisions == 0 ) {
-								_aCollisionExists = false;
+								_collides = false;
 							}
 							i--;
 						}
 					}
 					else { // A bounds collision with no triangle collider stops all checks.
-						_aCollisionExists = true;
+						_collides = true;
 						time = getTimer() - time; // TODO: remove
 						trace( "checked triangle collisions in " + time + "ms." ); // TODO: remove
 						return;

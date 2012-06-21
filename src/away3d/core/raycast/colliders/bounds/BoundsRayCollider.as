@@ -2,11 +2,7 @@ package away3d.core.raycast.colliders.bounds
 {
 
 	import away3d.core.raycast.colliders.*;
-
 	import away3d.core.raycast.data.RayCollisionVO;
-	import away3d.entities.Entity;
-
-	import flash.geom.Vector3D;
 
 	public class BoundsRayCollider extends RayColliderBase
 	{
@@ -18,27 +14,20 @@ package away3d.core.raycast.colliders.bounds
 
 			reset();
 
-			var entity:Entity;
 			var collisionT:Number;
 			var cameraIsInEntityBounds:Boolean;
-			var localRayPosition:Vector3D;
-			var localRayDirection:Vector3D;
-			var boundsCollisionVO:RayCollisionVO;
-
-			// Identify entity
-			entity = _entities[ 0 ];
 
 			// convert ray to object space
-			localRayPosition = entity.inverseSceneTransform.transformVector( _rayPosition );
-			localRayDirection = entity.inverseSceneTransform.deltaTransformVector( _rayDirection );
+			_rayPosition = _entity.inverseSceneTransform.transformVector( _rayPosition );
+			_rayDirection = _entity.inverseSceneTransform.deltaTransformVector( _rayDirection );
 
 			// check for ray-bounds collision
-			collisionT = entity.bounds.intersectsRay( localRayPosition, localRayDirection );
+			collisionT = _entity.bounds.intersectsRay( _rayPosition, _rayDirection );
 
 			// accept cases on which the ray starts inside the bounds
 			cameraIsInEntityBounds = false;
 			if( collisionT == -1 ) {
-				cameraIsInEntityBounds = entity.bounds.containsPoint( localRayPosition );
+				cameraIsInEntityBounds = _entity.bounds.containsPoint( _rayPosition );
 				if( cameraIsInEntityBounds ) {
 					collisionT = 0;
 				}
@@ -46,19 +35,17 @@ package away3d.core.raycast.colliders.bounds
 
 			if( collisionT >= 0 ) {
 
-				_aCollisionExists = true;
-				_numberOfCollisions++;
+				_collides = true;
 
 				// Store collision data.
-				boundsCollisionVO = new RayCollisionVO();
-				boundsCollisionVO.nearT = collisionT;
-				boundsCollisionVO.farT = entity.bounds.rayFarT;
-				boundsCollisionVO.localRayPosition = localRayPosition;
-				boundsCollisionVO.localRayDirection = localRayDirection;
-				boundsCollisionVO.rayOriginIsInsideBounds = cameraIsInEntityBounds;
-				boundsCollisionVO.position = entity.bounds.rayIntersectionPoint;
-				boundsCollisionVO.normal = entity.bounds.rayIntersectionNormal;
-				setCollisionDataForItem( _entities[ 0 ], boundsCollisionVO );
+				_collisionData = new RayCollisionVO();
+				_collisionData.nearT = collisionT;
+				_collisionData.farT = _entity.bounds.rayFarT;
+				_collisionData.localRayPosition = _rayPosition;
+				_collisionData.localRayDirection = _rayDirection;
+				_collisionData.rayOriginIsInsideBounds = cameraIsInEntityBounds;
+				_collisionData.position = _entity.bounds.rayIntersectionPoint;
+				_collisionData.normal = _entity.bounds.rayIntersectionNormal;
 			}
 		}
 	}

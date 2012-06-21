@@ -100,22 +100,21 @@ package away3d.core.raycast.colliders.triangles
 					break; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
 				}
 			}
-			_aCollisionExists = collisionTriangleIndex >= 0;
+			_collides = collisionTriangleIndex >= 0;
 
 			// Construct and set collision data.
-			if( _aCollisionExists ) {
-				var collisionVO:RayCollisionVO = new RayCollisionVO();
-				collisionVO.nearT = t;
-				collisionVO.localRayPosition = _rayPosition;
-				collisionVO.localRayDirection = _rayDirection;
-				collisionVO.position = new Vector3D(
+			if( _collides ) {
+				_collisionData = new RayCollisionVO();
+				_collisionData.nearT = t;
+				_collisionData.localRayPosition = _rayPosition;
+				_collisionData.localRayDirection = _rayDirection;
+				_collisionData.position = new Vector3D(
 						_rayPosition.x + t * _rayDirection.x,
 						_rayPosition.y + t * _rayDirection.y,
 						_rayPosition.z + t * _rayDirection.z
 				);
-				collisionVO.normal = getCollisionNormal( collisionTriangleIndex );
-				collisionVO.uv = getCollisionUV( collisionTriangleIndex );
-				setCollisionDataForItem( _entity, collisionVO );
+				_collisionData.normal = getCollisionNormal( collisionTriangleIndex );
+				_collisionData.uv = getCollisionUV( collisionTriangleIndex );
 			}
 
 			time = getTimer() - time; // TODO: remove

@@ -6,7 +6,7 @@ package away3d.core.raycast.colliders.bounds
 	import away3d.core.raycast.data.RayCollisionVO;
 	import away3d.entities.Entity;
 
-	public class MultipleBoundsRayCollider extends RayColliderBase
+	public class MultipleBoundsRayCollider extends MultipleRayColliderBase
 	{
 		public function MultipleBoundsRayCollider() {
 			super();
@@ -21,7 +21,6 @@ package away3d.core.raycast.colliders.bounds
 			// and calculate collision data.
 			// ---------------------------------------------------------------------
 
-			var thisEntity:Entity;
 			var i:uint, len:uint;
 			var filteredEntities:Vector.<Entity>;
 			var thisEntityBoundsCollider:RayColliderBase;
@@ -30,24 +29,24 @@ package away3d.core.raycast.colliders.bounds
 			len = _entities.length;
 			filteredEntities = new Vector.<Entity>();
 			for( i = 0; i < len; i++ ) {
-				// Id entity.
-				thisEntity = _entities[ i ];
+				// Id thisEntity.
+				_entity = _entities[ i ];
 				// Check for bound-ray collision.
-				thisEntityBoundsCollider = thisEntity.boundsRayCollider;
+				thisEntityBoundsCollider = _entity.boundsRayCollider;
 				if( thisEntityBoundsCollider ) { // Some entities may not have a bounds collider.
 					// Update bounds collider.
-					thisEntityBoundsCollider.setEntityAt( 0, thisEntity );
+					thisEntityBoundsCollider.entity = _entity;
 					thisEntityBoundsCollider.updateRay( _rayPosition, _rayDirection );
 					thisEntityBoundsCollider.evaluate();
 					// Store collision if it exists.
-					if( thisEntityBoundsCollider.aCollisionExists ) {
+					if( thisEntityBoundsCollider.collides ) {
 						// Tag collision.
 						_numberOfCollisions++;
-						_aCollisionExists = true;
+						_collides = true;
 						// Store collision data.
-						setCollisionDataForItem( thisEntity, thisEntityBoundsCollider.getCollisionDataForFirstItem() );
+						addCollisionDataForEntity( _entity, thisEntityBoundsCollider.collisionData );
 						// Store in new data set.
-						filteredEntities.push( thisEntity );
+						filteredEntities.push( _entity );
 					}
 				}
 			}
@@ -63,8 +62,8 @@ package away3d.core.raycast.colliders.bounds
 		}
 
 		private function sortOnNearT( entity1:Entity, entity2:Entity ):Number {
-			var collisionVO1:RayCollisionVO = _collisionData[ entity1 ];
-			var collisionVO2:RayCollisionVO = _collisionData[ entity2 ];
+			var collisionVO1:RayCollisionVO = _collisionDatas[ entity1 ];
+			var collisionVO2:RayCollisionVO = _collisionDatas[ entity2 ];
 			return collisionVO1.nearT > collisionVO2.nearT ? 1 : -1;
 		}
 	}

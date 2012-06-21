@@ -1,7 +1,6 @@
 package away3d.core.raycast.colliders.triangles
 {
 
-	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Object3D;
 	import away3d.core.base.SubMesh;
 	import away3d.core.raycast.colliders.*;
@@ -18,7 +17,7 @@ package away3d.core.raycast.colliders.triangles
 
 		override public function evaluate():void {
 			reset();
-			evaluateObject3D( _entities[ 0 ] );
+			evaluateObject3D( _entity );
 		}
 
 		private function evaluateObject3D( object3d:Object3D ):void {
@@ -40,8 +39,8 @@ package away3d.core.raycast.colliders.triangles
 					trace( "tri testing on subMesh of " + subMesh.numTriangles + " triangles." );
 					_subMeshCollider.subMesh = subMesh;
 					_subMeshCollider.evaluate();
-					if( _subMeshCollider.aCollisionExists ) {
-						_aCollisionExists = true;
+					if( _subMeshCollider.collides ) {
+						_collides = true;
 						_collisionData = _subMeshCollider.collisionData;
 						return;
 					}

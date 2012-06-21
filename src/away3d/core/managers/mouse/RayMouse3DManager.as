@@ -11,7 +11,7 @@ package away3d.core.managers.mouse
 
 	public class RayMouse3DManager extends Mouse3DManager
 	{
-		private var _rayCollider:MouseRayCollider;
+		private var _mouseRayCollider:MouseRayCollider;
 
 		public function RayMouse3DManager() {
 			super();
@@ -19,7 +19,7 @@ package away3d.core.managers.mouse
 
 		override public function set view( view:View3D ):void {
 			super.view = view;
-			_rayCollider = new MouseRayCollider( view );
+			_mouseRayCollider = new MouseRayCollider( view );
 		}
 
 		override protected function updatePicker():void {
@@ -27,15 +27,14 @@ package away3d.core.managers.mouse
 			// Evaluate new colliding object.
 			var collector:EntityCollector = _view.entityCollector;
 			if( collector.numMouseEnableds > 0 ) {
-				_rayCollider.updateMouseRay();
-				_rayCollider.updateEntities( collector.entities );
-				_rayCollider.evaluate();
-				if( _rayCollider.aCollisionExists ) {
-					_collidingObject = _rayCollider.firstEntity;
-					var collisionData:RayCollisionVO = _rayCollider.getCollisionDataForFirstItem();
-					_collisionPosition = collisionData.position;
-					_collisionNormal = collisionData.normal;
-					_collisionUV = collisionData.uv;
+				_mouseRayCollider.updateMouseRay();
+				_mouseRayCollider.entities = collector.entities;
+				_mouseRayCollider.evaluate();
+				if( _mouseRayCollider.collides ) {
+					_collidingObject = _mouseRayCollider.entity;
+					_collisionPosition = _mouseRayCollider.collisionData.position;
+					_collisionNormal = _mouseRayCollider.collisionData.normal;
+					_collisionUV = _mouseRayCollider.collisionData.uv;
 				}
 				else {
 					_collidingObject = null;

@@ -28,8 +28,8 @@ package away3d.core.raycast.colliders.triangles
 				_triangleCountLimitDirty = false;
 			}
 			_activeSubMeshRayCollider.evaluate();
-			_aCollisionExists = _activeSubMeshRayCollider.aCollisionExists;
-			if( _aCollisionExists ) {
+			_collides = _activeSubMeshRayCollider.collides;
+			if( _collides ) {
 				_collisionData = _activeSubMeshRayCollider.collisionData;
 			}
 		}
