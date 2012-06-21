@@ -18,6 +18,7 @@ package away3d.textures
 		private var _matrix:Matrix;
 		private var _smoothing : Boolean;
 		private var _playing : Boolean;
+		private var _autoUpdate : Boolean;
 		
 		public function WebcamTexture( cameraWidth : uint = 320, cameraHeight : uint = 240, materialSize : uint = 256, autoStart : Boolean = true, camera : Camera = null, smoothing : Boolean = true )
 		{
@@ -38,12 +39,28 @@ package away3d.textures
 			super(new BitmapData(_materialSize, _materialSize, false, 0));
 			
 			// if autoplay start video
-			if (autoStart)
+			if (autoStart) {
+				_autoUpdate = true;
 				start();
+			}
 			
 			// set smoothing
 			_smoothing = smoothing;
 		}
+		
+		
+		public function get autoUpdate() : Boolean
+		{
+			return _autoUpdate;
+		}
+		public function set autoUpdate(val : Boolean) : void
+		{
+			_autoUpdate = val;
+			
+			if (_autoUpdate && _playing)
+				invalidateContent();
+		}
+		
 		
 		public function start():void
 		{
@@ -77,7 +94,7 @@ package away3d.textures
 		{
 			super.uploadContent(texture);
 			
-			if (_playing) {
+			if (_playing && _autoUpdate) {
 				// Keep content invalid so that it will
 				// be updated again next render cycle
 				update();
