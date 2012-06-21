@@ -15,6 +15,7 @@ package away3d.primitives
 		private var _yUp : Boolean;
 		private var _width : Number;
 		private var _height : Number;
+		private var _doubleSided : Boolean;
 
 		/**
 		 * Creates a new Plane object.
@@ -24,8 +25,9 @@ package away3d.primitives
 		 * @param segmentsW The number of segments that make up the plane along the X-axis. Defaults to 1.
 		 * @param segmentsH The number of segments that make up the plane along the Y or Z-axis. Defaults to 1.
 		 * @param yUp Defines whether the normal vector of the plane should point along the Y-axis (true) or Z-axis (false). Defaults to true.
+		 * @param doubleSided Defines whether the plane will be visible from both sides, with correct vertex normals.
 		 */
-		public function PlaneGeometry(width : Number = 100, height : Number = 100, segmentsW : uint = 1, segmentsH : uint = 1, yUp : Boolean = true)
+		public function PlaneGeometry(width : Number = 100, height : Number = 100, segmentsW : uint = 1, segmentsH : uint = 1, yUp : Boolean = true, doubleSided : Boolean = false)
 		{
 			super();
 			
@@ -34,6 +36,7 @@ package away3d.primitives
 			_yUp = yUp;
 			_width = width;
 			_height = height;
+			_doubleSided = doubleSided;
 		}
 
 		/**
@@ -82,6 +85,20 @@ package away3d.primitives
 		}
 
 		/**
+		 * Defines whether the plane will be visible from both sides, with correct vertex normals (as opposed to bothSides on Material). Defaults to false.
+		 */
+		public function get doubleSided() : Boolean
+		{
+			return _doubleSided;
+		}
+
+		public function set doubleSided(value : Boolean) : void
+		{
+			_doubleSided = value;
+			invalidateGeometry();
+		}
+
+		/**
 		 * The width of the plane.
 		 */
 		public function get width() : Number
@@ -119,61 +136,86 @@ package away3d.primitives
 			var tangents : Vector.<Number>;
 			var indices : Vector.<uint>;
 			var x : Number, y : Number;
-			var numInds : uint;
+			var numIndices : uint = 0;
 			var base : uint;
 			var tw : uint = _segmentsW+1;
-			var numVerts : uint = (_segmentsH + 1) * tw;
+			var numVertices : uint = (_segmentsH + 1) * tw;
+			if (_doubleSided) numVertices *= 2;
 
-			if (numVerts == target.numVertices) {
+			if (numVertices == target.numVertices) {
 				vertices = target.vertexData;
 				normals = target.vertexNormalData;
 				tangents = target.vertexTangentData;
 				indices = target.indexData;
 			}
 			else {
-				vertices = new Vector.<Number>(numVerts * 3, true);
-				normals = new Vector.<Number>(numVerts * 3, true);
-				tangents = new Vector.<Number>(numVerts * 3, true);
-				indices = new Vector.<uint>(_segmentsH * _segmentsW * 6, true);
+				vertices = new Vector.<Number>(numVertices * 3, true);
+				normals = new Vector.<Number>(numVertices * 3, true);
+				tangents = new Vector.<Number>(numVertices * 3, true);
+				numIndices = _segmentsH * _segmentsW * 6;
+				if (_doubleSided) numIndices <<= 1;
+				indices = new Vector.<uint>(numIndices, true);
 			}
 
-			numVerts = 0;
+			numIndices = 0;
+			numVertices = 0;
 			for (var yi : uint = 0; yi <= _segmentsH; ++yi) {
 				for (var xi : uint = 0; xi <= _segmentsW; ++xi) {
 					x = (xi/_segmentsW-.5)*_width;
 					y = (yi/_segmentsH-.5)*_height;
 
-					vertices[numVerts] = x;
-					normals[numVerts] = 0;
-					tangents[numVerts++] = 1;
+					vertices[numVertices] = x;
+					normals[numVertices] = 0;
+					tangents[numVertices++] = 1;
 
 					if (_yUp) {
-						vertices[numVerts] = 0;
-						normals[numVerts] = 1;
-						tangents[numVerts++] = 0;
+						vertices[numVertices] = 0;
+						normals[numVertices] = 1;
+						tangents[numVertices++] = 0;
 
-						vertices[numVerts] = y;
-						normals[numVerts] = 0;
-						tangents[numVerts++] = 0;
+						vertices[numVertices] = y;
+						normals[numVertices] = 0;
+						tangents[numVertices++] = 0;
 					}
 					else {
-						vertices[numVerts] = y;
-						normals[numVerts] = 0;
-						tangents[numVerts++] = 0;
+						vertices[numVertices] = y;
+						normals[numVertices] = 0;
+						tangents[numVertices++] = 0;
 
-						vertices[numVerts] = 0;
-						normals[numVerts] = -1;
-						tangents[numVerts++] = 0;
+						vertices[numVertices] = 0;
+						normals[numVertices] = -1;
+						tangents[numVertices++] = 0;
+					}
+
+					// add vertex with same position, but with inverted normal & tangent
+					if (_doubleSided) {
+						for (var i : int = 0; i < 3; ++i) {
+							vertices[numVertices] = vertices[numVertices-3];
+							normals[numVertices] = -normals[numVertices-3];
+							tangents[numVertices] = -tangents[numVertices-3];
+							++numVertices;
+						}
 					}
 
 					if (xi != _segmentsW && yi != _segmentsH) {
 						base = xi + yi*tw;
-						indices[numInds++] = base;
-						indices[numInds++] = base + tw;
-						indices[numInds++] = base + tw + 1;
-						indices[numInds++] = base;
-						indices[numInds++] = base + tw + 1;
-						indices[numInds++] = base + 1;
+						var mult : int = _doubleSided? 2 : 1;
+
+						indices[numIndices++] = base*mult;
+						indices[numIndices++] = (base + tw)*mult;
+						indices[numIndices++] = (base + tw + 1)*mult;
+						indices[numIndices++] = base*mult;
+						indices[numIndices++] = (base + tw + 1)*mult;
+						indices[numIndices++] = (base + 1)*mult;
+
+						if(_doubleSided) {
+							indices[numIndices++] = (base + tw + 1)*mult + 1;
+							indices[numIndices++] = (base + tw)*mult + 1;
+							indices[numIndices++] = base*mult + 1;
+							indices[numIndices++] = (base + 1)*mult + 1;
+							indices[numIndices++] = (base + tw + 1)*mult + 1;
+							indices[numIndices++] = base*mult + 1;
+						}
 					}
 				}
 			}
