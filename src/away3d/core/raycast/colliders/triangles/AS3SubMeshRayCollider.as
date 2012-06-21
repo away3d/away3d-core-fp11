@@ -106,7 +106,7 @@ package away3d.core.raycast.colliders.triangles
 						_collisionData.position = new Vector3D( cx, cy, cz );
 						_collisionData.normal = new Vector3D( nx, ny, nz );
 						_collisionData.uv = getCollisionUV( index, v, w, u );
-						_collides = true; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
+						_collides = true; // does not search for closest collision, first found will do... // TODO: add option of finding best triangle hit?
 						return;
 					}
 				}

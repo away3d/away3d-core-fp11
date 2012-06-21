@@ -36,13 +36,13 @@ package away3d.core.raycast.colliders.triangles
 				len = mesh.subMeshes.length;
 				for( i = 0; i < len; i++ ) {
 					var subMesh:SubMesh = mesh.subMeshes[ i ];
-					trace( "tri testing on subMesh of " + subMesh.numTriangles + " triangles." );
+//					trace( "tri testing on subMesh of " + subMesh.numTriangles + " triangles." );
 					_subMeshCollider.subMesh = subMesh;
 					_subMeshCollider.evaluate();
 					if( _subMeshCollider.collides ) {
 						_collides = true;
 						_collisionData = _subMeshCollider.collisionData;
-						return;
+						return; // does not search for closest collision, first found will do... // TODO: add option of finding best sub-mesh hit?
 					}
 				}
 			}

@@ -62,6 +62,8 @@ package away3d.core.raycast.colliders.picking
 			// Filter out renderables whose bounds don't collide with ray.
 			// ---------------------------------------------------------------------
 
+			trace( "MouseRayCollider - evaluating collisions on " + _multipleBoundsCollider.entities.length + " objects ----------------------------" );
+
 			// Perform ray-bounds collision checks.
 			var time:uint = getTimer(); // TODO: remove
 			_multipleBoundsCollider.evaluate();
@@ -90,7 +92,10 @@ package away3d.core.raycast.colliders.picking
 
 			if( _numberOfCollisions > 0 ) {
 
-				// TODO: would be more accurate if bound intersections were considered.
+				// does not search for closest collision, first found will do... // TODO: add option of finding best hit?
+				// Example: Bound B is inside bound A. Bound A's collision t is closer than bound B. Both have tri colliders. Bound A surface hit
+				// is further than bound B surface hit. Atm, this algorithm would fail in detecting that B's surface hit is actually closer.
+				// Suggestions: calculate ray bounds near and far t's and evaluate bound intersections within ray trajectory.
 
 				var i:uint;
 				var triangleCollider:RayColliderBase;
@@ -99,9 +104,8 @@ package away3d.core.raycast.colliders.picking
 					_entity = _entities[ i ];
 					_collisionData = _collisionDatas[ _entity ];
 					triangleCollider = _entity.triangleRayCollider;
+					time = getTimer(); // TODO: remove
 					if( triangleCollider ) {
-						trace( "initiating thisEntity triangle collision check..." );
-						time = getTimer(); // TODO: remove
 						// Update triangle collider.
 						triangleCollider.entity = _entity;
 						triangleCollider.updateRay( _rayPosition, _rayDirection );

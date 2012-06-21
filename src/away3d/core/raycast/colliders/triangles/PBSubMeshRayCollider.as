@@ -97,7 +97,7 @@ package away3d.core.raycast.colliders.triangles
 				if( t > 0 && t < smallestNonNegativeT ) {
 					smallestNonNegativeT = t;
 					collisionTriangleIndex = i;
-					break; // does not search for closest collision, first found will do... // TODO: add option of finding best tri hit? on a different collider?
+					break; // does not search for closest collision, first found will do... // TODO: add option of finding best triangle hit?
 				}
 			}
 			_collides = collisionTriangleIndex >= 0;

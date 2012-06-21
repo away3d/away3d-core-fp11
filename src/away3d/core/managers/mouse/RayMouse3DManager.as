@@ -4,7 +4,6 @@ package away3d.core.managers.mouse
 	import away3d.arcane;
 	import away3d.containers.View3D;
 	import away3d.core.raycast.colliders.picking.MouseRayCollider;
-	import away3d.core.raycast.data.RayCollisionVO;
 	import away3d.core.traverse.EntityCollector;
 
 	use namespace arcane;
