@@ -354,7 +354,8 @@
 		}
 
 		/**
-		 * The width of the viewport
+		 * The width of the viewport. When software rendering is used, this is limited by the
+		 * platform to 2048 pixels.
 		 */
 		override public function get width() : Number
 		{
@@ -384,7 +385,8 @@
 		}
 
 		/**
-		 * The height of the viewport
+		 * The height of the viewport. When software rendering is used, this is limited by the
+		 * platform to 2048 pixels.
 		 */
 		override public function get height() : Number
 		{
