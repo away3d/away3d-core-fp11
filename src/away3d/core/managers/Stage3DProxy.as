@@ -197,44 +197,6 @@ package away3d.core.managers
 			_context3D.present();
 		}
 		
-		/**
-		 * Add the supplied framework rendering function to the list of layer functions to be rendered
-		 * The order in which they are added determines the render order - bottom (first) to top (last)
-		 * @param fn The rendering function of the framework
-		 */
-		public function addLayer(fn : Function) : void 
-		{
-			_layerRenderFunctions.push(fn);
-		}
-
-		/**
-		 * Remove the supplied function from the list of layer functions to be rendered
-		 * @param fn The rendering function of the framework
-		 */
-		public function removeLayerScene(fn : Function) : void 
-		{
-			_layerRenderFunctions.splice(_layerRenderFunctions.indexOf(fn), 1);
-		}
-		
-		/**
-		 * Start the automatic rendering of the added layers using the provided stage
-		 * object so Enter_Frame events can be attahed
-		 * @param stage The stage instance to be used to attach Enter_Frame events too.
-		 */
-		public function renderLayers(stage : Stage = null) : void {			
-			// Remove any previous Enter_Frame listeners
-			if (_stage) {
-				_stage.removeEventListener(Event.ENTER_FRAME, onRenderLayerEnterFrame);
-			}
-
-			// If the stage param is null exit - can be used to cancel rendering
-			if (!stage) return;
-			
-			// Setup the new Enter_Frame listener for rendering the layers
-			_stage = stage;
-			stage.addEventListener(Event.ENTER_FRAME, onRenderLayerEnterFrame);
-		}
-		
 		public override function addEventListener(type : String, listener :Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void {
 			// Only override Enter_Frame events
 			if (type != Event.ENTER_FRAME && type != Event.EXIT_FRAME) {
