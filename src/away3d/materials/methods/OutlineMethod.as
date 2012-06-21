@@ -9,7 +9,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class OutlineMethod extends ShadingMethodBase
+	public class OutlineMethod extends EffectMethodBase
 	{
 		private var _outlinePass : OutlinePass;
 
@@ -60,7 +60,7 @@ package away3d.materials.methods
 		{
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			// TODO: not used
 			regCache = regCache;

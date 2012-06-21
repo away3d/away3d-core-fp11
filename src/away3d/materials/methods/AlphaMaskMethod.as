@@ -12,7 +12,7 @@ package away3d.materials.methods
 	 * Allows the use of an additional texture to specify the alpha value of the material. When used with the secondary uv
 	 * set, it allows for a tiled main texture with independently varying alpha (useful for water etc).
 	 */
-	public class AlphaMaskMethod extends ShadingMethodBase
+	public class AlphaMaskMethod extends EffectMethodBase
 	{
 		private var _textureMapIndex : int;
 		private var _texture : Texture2DBase;
@@ -70,7 +70,7 @@ package away3d.materials.methods
 			stage3DProxy.setTextureAt(_textureMapIndex, _texture.getTextureForStage3D(stage3DProxy));
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var textureReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();

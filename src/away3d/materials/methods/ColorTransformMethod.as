@@ -14,7 +14,7 @@ package away3d.materials.methods
 	 * ColorTransformMethod provides a shading method that changes the colour of a material according to a ColorTransform
 	 * object.
 	 */
-	public class ColorTransformMethod extends ShadingMethodBase
+	public class ColorTransformMethod extends EffectMethodBase
 	{
 		private var _colorTransformIndex : int;
 		private var _colorTransform : ColorTransform;
@@ -54,7 +54,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var colorMultReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();

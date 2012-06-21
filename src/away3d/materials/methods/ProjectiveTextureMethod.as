@@ -13,7 +13,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class ProjectiveTextureMethod extends ShadingMethodBase
+	public class ProjectiveTextureMethod extends EffectMethodBase
 	{
 		public static const MULTIPLY : String = "multiply";
 		public static const ADD : String = "add";
@@ -81,8 +81,6 @@ package away3d.materials.methods
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
-			// TODO: not used
-			// var temp : ShaderRegisterElement =
 			regCache.getFreeVertexVectorTemp();
 			_projectionIndex = projReg.index;
 			_uvVarying = regCache.getFreeVarying();
@@ -93,7 +91,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var mapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();

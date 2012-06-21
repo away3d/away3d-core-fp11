@@ -9,7 +9,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class FogMethod extends ShadingMethodBase
+	public class FogMethod extends EffectMethodBase
 	{
 		private var _minDistance : Number = 0;
 		private var _maxDistance : Number = 1000;
@@ -74,7 +74,7 @@ package away3d.materials.methods
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _fogDataIndex, _fogData, 2);
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var fogColor : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var fogData : ShaderRegisterElement = regCache.getFreeFragmentConstant();

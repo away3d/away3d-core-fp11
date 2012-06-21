@@ -69,5 +69,18 @@ package away3d.materials.methods
 			// lightIndex will just continue on from code per light
 			return "";
 		}
+
+		/**
+		 * Get the fragment shader code that should be added after all per-light code. Usually composits everything to the target register.
+		 * @param regCache The register cache used during the compilation.
+		 * @private
+		 */
+		arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		{
+			// TODO: not used
+			regCache = regCache;
+			targetReg = targetReg;
+			return "";
+		}
 	}
 }

@@ -1,6 +1,3 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.materials.methods
 {
 	import away3d.arcane;
@@ -13,7 +10,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class FresnelEnvMapMethod extends ShadingMethodBase
+	public class FresnelEnvMapMethod extends EffectMethodBase
 	{
 		private var _cubeTexture : CubeTextureBase;
 		private var _cubeMapIndex : int;
@@ -102,7 +99,7 @@ package away3d.materials.methods
 //			stage3DProxy.setTextureAt(_cubeMapIndex, null);
 //		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var dataRegister : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();

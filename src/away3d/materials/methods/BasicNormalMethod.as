@@ -76,7 +76,7 @@ package away3d.materials.methods
 			if (_normalMapIndex >= 0) stage3DProxy.setTextureAt(_normalMapIndex, _texture.getTextureForStage3D(stage3DProxy));
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			_normalTextureRegister = regCache.getFreeTextureReg();
 			_normalMapIndex = _normalTextureRegister.index;

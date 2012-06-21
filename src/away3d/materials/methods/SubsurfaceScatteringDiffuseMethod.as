@@ -21,7 +21,7 @@ package away3d.materials.methods
 	 * light inside translucent surfaces. It allows light to shine through an object and to soften the diffuse shading.
 	 * It can be used for candle wax, ice, skin, ...
 	 */
-	public class SubsurfaceScatteringDiffuseMethod extends CompositeDiffuseMethod
+	public class SubsurfaceScatteringDiffuseMethod extends CompositeDiffuseMethod implements IDiffuseMethod
 	{
 		private var _depthPass : SingleObjectDepthPass;
 		private var _depthMapRegs : Vector.<uint>;

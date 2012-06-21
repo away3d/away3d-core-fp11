@@ -8,7 +8,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class LightMapMethod extends ShadingMethodBase
+	public class LightMapMethod extends EffectMethodBase
 	{
 		public static const MULTIPLY : String = "multiply";
 		public static const ADD : String = "add";
@@ -63,7 +63,7 @@ package away3d.materials.methods
 			super.activate(stage3DProxy);
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String;
 			var lightMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();

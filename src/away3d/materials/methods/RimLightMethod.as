@@ -12,7 +12,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class RimLightMethod extends ShadingMethodBase
+	public class RimLightMethod extends EffectMethodBase
 	{
 		public static const ADD : String = "add";
 		public static const MULTIPLY : String = "multiply";
@@ -78,7 +78,7 @@ package away3d.materials.methods
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 2);
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var dataRegister : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataRegister2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();

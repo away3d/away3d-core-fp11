@@ -15,7 +15,7 @@ package away3d.materials.methods
 	 * ColorMatrixMethod provides a shading method that changes the colour of a material according to a ColorMatrixFilter
 	 * object.
 	 */
-	public class ColorMatrixMethod extends ShadingMethodBase
+	public class ColorMatrixMethod extends EffectMethodBase
 	{
 		private var _colors:Vector.<Number>; 
 		private var _offset:Vector.<Number>;
@@ -59,7 +59,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var colorMultReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();

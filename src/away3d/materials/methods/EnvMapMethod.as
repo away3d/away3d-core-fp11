@@ -13,7 +13,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class EnvMapMethod extends ShadingMethodBase
+	public class EnvMapMethod extends EffectMethodBase
 	{
 		private var _cubeTexture : CubeTextureBase;
 		private var _cubeMapIndex : int;
@@ -77,7 +77,7 @@ package away3d.materials.methods
 //			stage3DProxy.setTextureAt(_cubeMapIndex, null);
 //		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var dataRegister : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();

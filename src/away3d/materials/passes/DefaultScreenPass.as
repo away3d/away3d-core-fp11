@@ -15,7 +15,9 @@ package away3d.materials.passes
 	import away3d.materials.methods.BasicNormalMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.ColorTransformMethod;
+	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadingMethodBase;
+	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
@@ -51,10 +53,10 @@ package away3d.materials.passes
 		private var _colorTransformMethod : ColorTransformMethod;
 		private var _normalMethod : BasicNormalMethod;
 		private var _ambientMethod : BasicAmbientMethod;
-		private var _shadowMethod : ShadingMethodBase;
+		private var _shadowMethod : ShadowMapMethodBase;
 		private var _diffuseMethod : BasicDiffuseMethod;
 		private var _specularMethod : BasicSpecularMethod;
-		private var _methods : Vector.<ShadingMethodBase>;
+		private var _methods : Vector.<EffectMethodBase>;
 		private var _registerCache : ShaderRegisterCache;
 		private var _vertexCode : String;
 		private var _fragmentCode : String;
@@ -139,7 +141,7 @@ package away3d.materials.passes
 			super();
 			_material = material;
 
-			_methods = new Vector.<ShadingMethodBase>();
+			_methods = new Vector.<EffectMethodBase>();
 			_normalMethod = new BasicNormalMethod();
 			_ambientMethod = new BasicAmbientMethod();
 			_diffuseMethod = new BasicDiffuseMethod();
@@ -232,7 +234,7 @@ package away3d.materials.passes
 		 * Adds a method to change the material after all lighting is performed.
 		 * @param method The method to be added.
 		 */
-		public function addMethod(method : ShadingMethodBase) : void
+		public function addMethod(method : EffectMethodBase) : void
 		{
 			verifyShadingMethod(method);
 			
@@ -241,7 +243,7 @@ package away3d.materials.passes
 			invalidateShaderProgram();
 		}
 
-		public function hasMethod(method : ShadingMethodBase) : Boolean
+		public function hasMethod(method : EffectMethodBase) : Boolean
 		{
 			return _methods.indexOf(method) >= 0;
 		}
@@ -251,7 +253,7 @@ package away3d.materials.passes
 		 * @param method The method to be added.
 		 * @param index The index of the method's occurrence
 		 */
-		public function addMethodAt(method : ShadingMethodBase, index : int) : void
+		public function addMethodAt(method : EffectMethodBase, index : int) : void
 		{
 			verifyShadingMethod(method);
 			
@@ -260,7 +262,7 @@ package away3d.materials.passes
 			invalidateShaderProgram();
 		}
 
-		public function getMethodAt(index : int) : ShadingMethodBase
+		public function getMethodAt(index : int) : EffectMethodBase
 		{
 			return _methods[index];
 		}
@@ -274,7 +276,7 @@ package away3d.materials.passes
 		 * Removes a method from the pass.
 		 * @param method The method to be removed.
 		 */
-		public function removeMethod(method : ShadingMethodBase) : void
+		public function removeMethod(method : EffectMethodBase) : void
 		{
 			var index : int = _methods.indexOf(method);
 			_methods[index].parentPass = null;
@@ -331,12 +333,12 @@ package away3d.materials.passes
 			invalidateShaderProgram();
 		}
 
-		public function get shadowMethod() : ShadingMethodBase
+		public function get shadowMethod() : ShadowMapMethodBase
 		{
 			return _shadowMethod;
 		}
 
-		public function set shadowMethod(value : ShadingMethodBase) : void
+		public function set shadowMethod(value : ShadowMapMethodBase) : void
 		{
 			verifyShadingMethod(value);
 			
@@ -927,7 +929,7 @@ package away3d.materials.passes
 
 			if (_normalMethod.hasOutput && !_normalMethod.tangentSpace) {
 				_vertexCode += _normalMethod.getVertexCode(_registerCache);
-				_fragmentCode += _normalMethod.getFragmentPostLightingCode(_registerCache, _normalFragmentReg);
+				_fragmentCode += _normalMethod.getFragmentCode(_registerCache, _normalFragmentReg);
 				return;
 			}
 
@@ -1048,7 +1050,7 @@ package away3d.materials.passes
 
 			var temp : ShaderRegisterElement = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(temp, 1);
-			_fragmentCode += _normalMethod.getFragmentPostLightingCode(_registerCache, temp) +
+			_fragmentCode += _normalMethod.getFragmentCode(_registerCache, temp) +
 							"sub " + temp + ".xyz, " + temp + ".xyz, " + _commonsReg + ".xxx	\n" +
 							"nrm " + temp + ".xyz, " + temp + ".xyz							\n" +
 							"m33 " + _normalFragmentReg + ".xyz, " + temp + ".xyz, " + t + "	\n" +
@@ -1110,7 +1112,7 @@ package away3d.materials.passes
 				compileLightProbeCode();
 
 			_vertexCode += _ambientMethod.getVertexCode(_registerCache);
-			_fragmentCode += _ambientMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
+			_fragmentCode += _ambientMethod.getFragmentCode(_registerCache, _shadedTargetReg);
 			if (_ambientMethod.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
 			if (_ambientMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 
@@ -1128,7 +1130,7 @@ package away3d.materials.passes
 					shadowReg = _normalFragmentReg;
 
 				_diffuseMethod.shadowRegister = shadowReg;
-				_fragmentCode += _shadowMethod.getFragmentPostLightingCode(_registerCache, shadowReg);
+				_fragmentCode += _shadowMethod.getFragmentCode(_registerCache, shadowReg);
 			}
 			_fragmentCode += _diffuseMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
 
@@ -1289,14 +1291,14 @@ package away3d.materials.passes
 				_vertexCode += _methods[i].getVertexCode(_registerCache);
 				if (_methods[i].needsGlobalPos) _registerCache.removeVertexTempUsage(_globalPositionVertexReg);
 
-				_fragmentCode += _methods[i].getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
+				_fragmentCode += _methods[i].getFragmentCode(_registerCache, _shadedTargetReg);
 				if (_methods[i].needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
 				if (_methods[i].needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 			}
 
 			if (_colorTransformMethod) {
 				_vertexCode += _colorTransformMethod.getVertexCode(_registerCache);
-				_fragmentCode += _colorTransformMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
+				_fragmentCode += _colorTransformMethod.getFragmentCode(_registerCache, _shadedTargetReg);
 			}
 		}
 

@@ -7,7 +7,9 @@
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadingMethodBase;
+	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.passes.DefaultScreenPass;
 	import away3d.textures.Texture2DBase;
 
@@ -120,12 +122,12 @@
 		 * The method to render shadows cast on this surface. Note that shading methods can not
 		 * be reused across materials.
 		 */
-		public function get shadowMethod() : ShadingMethodBase
+		public function get shadowMethod() : ShadowMapMethodBase
 		{
 			return _screenPass.shadowMethod;
 		}
 
-		public function set shadowMethod(value : ShadingMethodBase) : void
+		public function set shadowMethod(value : ShadowMapMethodBase) : void
 		{
 			_screenPass.shadowMethod = value;
 		}
@@ -176,7 +178,7 @@
 		 * Adds a shading method to the end of the shader. Note that shading methods can
 		 * not be reused across materials.
 		*/
-		public function addMethod(method : ShadingMethodBase) : void
+		public function addMethod(method : EffectMethodBase) : void
 		{
 			_screenPass.addMethod(method);
 		}
@@ -186,12 +188,12 @@
 			return _screenPass.numMethods;
 		}
 
-		public function hasMethod(method : ShadingMethodBase) : Boolean
+		public function hasMethod(method : EffectMethodBase) : Boolean
 		{
 			return _screenPass.hasMethod(method);
 		}
 
-		public function getMethodAt(index : int) : ShadingMethodBase
+		public function getMethodAt(index : int) : EffectMethodBase
 		{
 			return _screenPass.getMethodAt(index);
 		}
@@ -201,12 +203,12 @@
 		 * the methods in that section of the shader. Note that shading methods can not
 		 * be reused across materials.
 		*/
-		public function addMethodAt(method : ShadingMethodBase, index : int) : void
+		public function addMethodAt(method : EffectMethodBase, index : int) : void
 		{
 			_screenPass.addMethodAt(method, index);
 		}
 
-		public function removeMethod(method : ShadingMethodBase) : void
+		public function removeMethod(method : EffectMethodBase) : void
 		{
 			_screenPass.removeMethod(method);
 		}
