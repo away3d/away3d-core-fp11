@@ -316,6 +316,11 @@ package away3d.materials
 			}
 		}
 
+		arcane function passRendersToTexture(index : uint) : Boolean
+		{
+			return _passes[index].renderToTexture;
+		}
+
 		/**
 		 * Sets the render state for a pass that is independent of the rendered object.
 		 * @param index The index of the pass to activate.

@@ -320,8 +320,6 @@
 		 */
 		arcane override function updateMaterial(context : Context3D) : void
 		{
-			// TODO: not used
-			context = context; 
 			if (_screenPass._passesDirty) {
 				clearPasses();
 				if (_screenPass._passes) {

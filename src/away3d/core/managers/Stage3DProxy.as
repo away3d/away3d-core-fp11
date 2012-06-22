@@ -13,6 +13,7 @@ package away3d.core.managers
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
+	import flash.system.System;
 
 	use namespace arcane;
 

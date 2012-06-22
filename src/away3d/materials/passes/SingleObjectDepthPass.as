@@ -194,7 +194,6 @@ package away3d.materials.passes
 
 				stage3DProxy.setRenderTarget(_textures[contextIndex][renderable][i], true);
 				context.clear(1.0, 1.0, 1.0);
-
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
 				stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);

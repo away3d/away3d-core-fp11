@@ -173,6 +173,14 @@ package away3d.materials.passes
 		}
 
 		/**
+		 * Specifies whether this pass renders to texture
+		 */
+		public function get renderToTexture() : Boolean
+		{
+			return _renderToTexture;
+		}
+
+		/**
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */

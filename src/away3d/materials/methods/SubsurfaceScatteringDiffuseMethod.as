@@ -215,7 +215,7 @@ package away3d.materials.methods
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			context.setRenderToBackBuffer();
+
 			super.activate(stage3DProxy);
 
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _commonProps, 1);

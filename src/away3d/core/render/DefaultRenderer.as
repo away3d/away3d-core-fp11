@@ -24,6 +24,9 @@ package away3d.core.render
 	 */
 	public class DefaultRenderer extends RendererBase
 	{
+		private static var RTT_PASSES : int = 1;
+		private static var SCREEN_PASSES : int = 2;
+		private static var ALL_PASSES : int = 3;
 		private var _activeMaterial : MaterialBase;
 		private var _distanceRenderer : DepthRenderer;
 		private var _depthRenderer : DepthRenderer;
@@ -49,7 +52,13 @@ package away3d.core.render
 		protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
 			updateLights(entityCollector);
-			
+
+			// otherwise RTT will interfere with other RTTs
+			if (target) {
+				drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, RTT_PASSES);
+				drawRenderables(entityCollector.blendedRenderableHead, entityCollector, RTT_PASSES);
+			}
+
 			super.executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
 		}
 
@@ -87,11 +96,11 @@ package away3d.core.render
 			}
 
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
-
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector);
 
-			drawRenderables(entityCollector.blendedRenderableHead, entityCollector);
+			var which : int = target? SCREEN_PASSES : ALL_PASSES;
+			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, which);
+			drawRenderables(entityCollector.blendedRenderableHead, entityCollector, which);
 
 			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 
@@ -118,7 +127,7 @@ package away3d.core.render
 		 * @param renderables The renderables to draw.
 		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function drawRenderables(item : RenderableListItem, entityCollector : EntityCollector) : void
+		private function drawRenderables(item : RenderableListItem, entityCollector : EntityCollector, which : int) : void
 		{
 			var numPasses : uint;
 			var j : uint;
@@ -135,12 +144,19 @@ package away3d.core.render
 				do {
 					item2 = item;
 
-					_activeMaterial.activatePass(j, _stage3DProxy, camera, _textureRatioX, _textureRatioY);
-					do {
-						_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector);
+					var rttMask : int = _activeMaterial.passRendersToTexture(j)? 1 : 2;
+
+					if ((rttMask & which) != 0) {
+						_activeMaterial.activatePass(j, _stage3DProxy, camera, _textureRatioX, _textureRatioY);
+						do {
+							_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector);
+							item2 = item2.next;
+						} while (item2 && item2.renderable.material == _activeMaterial);
+						_activeMaterial.deactivatePass(j, _stage3DProxy);
+					}
+					else do {
 						item2 = item2.next;
 					} while (item2 && item2.renderable.material == _activeMaterial);
-					_activeMaterial.deactivatePass(j, _stage3DProxy);
 
 				} while (++j < numPasses);
 

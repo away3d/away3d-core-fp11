@@ -250,8 +250,9 @@ import flash.display3D.Context3D;
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			if (additionalClearMask != 0)
+			if (additionalClearMask != 0) {
 				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+			}
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			_stage3DProxy.scissorRect = scissorRect;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
