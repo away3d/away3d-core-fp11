@@ -6,7 +6,7 @@ package away3d.core.raycast.colliders.picking
 	import away3d.core.raycast.colliders.triangles.MeshRayCollider;
 	import away3d.core.raycast.colliders.triangles.PBSubMeshRayCollider;
 
-	public class EntityPickingMethod
+	public class CpuPickingMethod
 	{
 		public static const BOUNDS_ONLY:RayColliderBase = null;
 		public static const AS3_TRIANGLE_HIT:RayColliderBase = new MeshRayCollider( new AS3SubMeshRayCollider() );
