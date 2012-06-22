@@ -12,7 +12,10 @@ package away3d.core.raycast.colliders.triangles
 		protected var _indexData:Vector.<uint>;
 		protected var _vertexData:Vector.<Number>;
 
-		public function SubMeshRayColliderBase() {
+		protected var _findBestHit:Boolean;
+
+		public function SubMeshRayColliderBase( findBestHit:Boolean ) {
+			_findBestHit = findBestHit;
 			super();
 		}
 

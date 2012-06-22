@@ -9,6 +9,7 @@ package away3d.entities
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.Partition3D;
 	import away3d.core.raycast.colliders.RayColliderBase;
+	import away3d.core.raycast.colliders.bounds.BoundsRayCollider;
 	import away3d.errors.AbstractMethodError;
 	import away3d.library.assets.AssetType;
 
@@ -378,6 +379,9 @@ package away3d.entities
 		}
 
 		public function get boundsRayCollider():RayColliderBase {
+			if( !_boundsRayCollider ) {
+				_boundsRayCollider = new BoundsRayCollider();
+			}
 			return _boundsRayCollider;
 		}
 

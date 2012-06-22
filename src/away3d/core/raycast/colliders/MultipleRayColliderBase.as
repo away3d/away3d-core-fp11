@@ -6,6 +6,8 @@ package away3d.core.raycast.colliders
 
 	import flash.utils.Dictionary;
 
+	// TODO: use linked lists instead of vectors? line up collision test shows that vectors aren't too bad
+
 	public class MultipleRayColliderBase extends RayColliderBase
 	{
 		protected var _entities:Vector.<Entity>;

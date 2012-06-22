@@ -8,8 +8,10 @@ package away3d.core.raycast.colliders.triangles
 
 	public class AS3SubMeshRayCollider extends SubMeshRayColliderBase
 	{
-		public function AS3SubMeshRayCollider() {
-			super();
+		// TODO: implement find best hit
+
+		public function AS3SubMeshRayCollider( findBestHit:Boolean ) {
+			super( findBestHit );
 		}
 
 		override public function evaluate():void {

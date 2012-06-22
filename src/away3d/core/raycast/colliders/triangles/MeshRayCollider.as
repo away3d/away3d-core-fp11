@@ -2,15 +2,17 @@ package away3d.core.raycast.colliders.triangles
 {
 
 	import away3d.core.base.Object3D;
-	import away3d.core.base.SubMesh;
 	import away3d.core.raycast.colliders.*;
 	import away3d.entities.Mesh;
 
 	public class MeshRayCollider extends RayColliderBase
 	{
 		private var _subMeshCollider:SubMeshRayColliderBase;
+		private var _findBestHit:Boolean;
 
-		public function MeshRayCollider( subMeshCollider:SubMeshRayColliderBase ) {
+		// TODO: implement find best hit
+
+		public function MeshRayCollider( subMeshCollider:SubMeshRayColliderBase, findBestHit:Boolean ) {
 			super();
 			_subMeshCollider = subMeshCollider;
 		}

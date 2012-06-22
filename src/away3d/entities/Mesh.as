@@ -44,8 +44,6 @@
 
 			this.geometry = geometry || new Geometry();
 			this.material = material;
-
-			_boundsRayCollider = new BoundsRayCollider();
 		}
 		
 		public function bakeTransformations():void

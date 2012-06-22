@@ -53,6 +53,8 @@ package away3d.core.raycast.colliders.bounds
 
 			// Sort filtered entities from closest to furthest.
 			// TODO: Instead of sorting the array, create it one item at a time in a sorted manner.
+			// Note: EntityCollector does provide the entities with some sorting, its not random, make use of that.
+			// However, line up collision test shows that the current implementation isn't too bad.
 			if( _numberOfCollisions > 1 ) {
 				filteredEntities = filteredEntities.sort( sortOnNearT );
 			}

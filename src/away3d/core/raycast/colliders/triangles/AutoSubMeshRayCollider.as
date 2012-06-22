@@ -15,10 +15,12 @@ package away3d.core.raycast.colliders.triangles
 		private var _as3SubMeshRayCollider:AS3SubMeshRayCollider;
 		private var _activeSubMeshRayCollider:SubMeshRayColliderBase;
 
-		public function AutoSubMeshRayCollider() {
-			super();
-			_as3SubMeshRayCollider = new AS3SubMeshRayCollider();
-			_pbSubMeshRayCollider = new PBSubMeshRayCollider();
+		// TODO: implement find best hit
+
+		public function AutoSubMeshRayCollider( findBestHit:Boolean ) {
+			super( findBestHit );
+			_as3SubMeshRayCollider = new AS3SubMeshRayCollider( findBestHit );
+			_pbSubMeshRayCollider = new PBSubMeshRayCollider( findBestHit );
 		}
 
 		override public function evaluate():void {

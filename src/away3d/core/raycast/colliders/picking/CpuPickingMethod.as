@@ -9,8 +9,17 @@ package away3d.core.raycast.colliders.picking
 	public class CpuPickingMethod
 	{
 		public static const BOUNDS_ONLY:RayColliderBase = null;
-		public static const AS3_TRIANGLE_HIT:RayColliderBase = new MeshRayCollider( new AS3SubMeshRayCollider() );
-		public static const PB_TRIANGLE_HIT:RayColliderBase = new MeshRayCollider( new PBSubMeshRayCollider() );
-		public static const AUTO_TRIANGLE_HIT:RayColliderBase = new MeshRayCollider( new AutoSubMeshRayCollider() );
+		public static const LOW_POLY_MESH:RayColliderBase = new MeshRayCollider( new AS3SubMeshRayCollider( false ), false );
+		public static const LOW_POLY_MESH_1:RayColliderBase = new MeshRayCollider( new AS3SubMeshRayCollider( false ), true );
+		public static const LOW_POLY_MESH_2:RayColliderBase = new MeshRayCollider( new AS3SubMeshRayCollider( true ), true );
+		public static const LOW_POLY_MESH_3:RayColliderBase = new MeshRayCollider( new AS3SubMeshRayCollider( true ), false );
+		public static const HIGH_POLY_MESH:RayColliderBase = new MeshRayCollider( new PBSubMeshRayCollider( false ), false );
+		public static const HIGH_POLY_MESH_1:RayColliderBase = new MeshRayCollider( new PBSubMeshRayCollider( false ), true );
+		public static const HIGH_POLY_MESH_2:RayColliderBase = new MeshRayCollider( new PBSubMeshRayCollider( false ), true );
+		public static const HIGH_POLY_MESH_3:RayColliderBase = new MeshRayCollider( new PBSubMeshRayCollider( false ), true );
+		public static const AUTO_MESH:RayColliderBase = new MeshRayCollider( new AutoSubMeshRayCollider( false ), false );
+		public static const AUTO_MESH_1:RayColliderBase = new MeshRayCollider( new AutoSubMeshRayCollider( false ), true );
+		public static const AUTO_MESH_2:RayColliderBase = new MeshRayCollider( new AutoSubMeshRayCollider( true ), true );
+		public static const AUTO_MESH_3:RayColliderBase = new MeshRayCollider( new AutoSubMeshRayCollider( true ), false );
 	}
 }
