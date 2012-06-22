@@ -8,7 +8,6 @@ package away3d.core.raycast.colliders.picking
 	import away3d.entities.Entity;
 
 	import flash.geom.Vector3D;
-	import flash.utils.getTimer;
 
 	use namespace arcane;
 
@@ -62,13 +61,8 @@ package away3d.core.raycast.colliders.picking
 			// Filter out renderables whose bounds don't collide with ray.
 			// ---------------------------------------------------------------------
 
-			trace( "MouseRayCollider - evaluating collisions on " + _multipleBoundsCollider.entities.length + " objects ----------------------------" );
-
 			// Perform ray-bounds collision checks.
-			var time:uint = getTimer(); // TODO: remove
 			_multipleBoundsCollider.evaluate();
-			time = getTimer() - time; // TODO: remove
-			trace( "checked bound collisions in " + time + "ms." ); // TODO: remove
 
 			// If a collision exists, extract the data from the bounds collider...
 			if( _multipleBoundsCollider.collides ) {
@@ -104,7 +98,6 @@ package away3d.core.raycast.colliders.picking
 					_entity = _entities[ i ];
 					_collisionData = _collisionDatas[ _entity ];
 					triangleCollider = _entity.triangleRayCollider;
-					time = getTimer(); // TODO: remove
 					if( triangleCollider ) {
 						// Update triangle collider.
 						triangleCollider.entity = _entity;
@@ -113,10 +106,7 @@ package away3d.core.raycast.colliders.picking
 						// If a collision exists, update the collision data and stop all checks.
 						if( triangleCollider.collides ) {
 							_collisionData = triangleCollider.collisionData;
-
 							_collides = true;
-							time = getTimer() - time; // TODO: remove
-							trace( "checked triangle collisions in " + time + "ms." ); // TODO: remove
 							return;
 						}
 						else { // A failed triangle collision check discards the collision.
@@ -130,13 +120,9 @@ package away3d.core.raycast.colliders.picking
 					}
 					else { // A bounds collision with no triangle collider stops all checks.
 						_collides = true;
-						time = getTimer() - time; // TODO: remove
-						trace( "checked triangle collisions in " + time + "ms." ); // TODO: remove
 						return;
 					}
 				}
-				time = getTimer() - time; // TODO: remove
-				trace( "checked triangle collisions in " + time + "ms." ); // TODO: remove
 			}
 		}
 	}
