@@ -107,9 +107,8 @@ package away3d.loaders.parsers
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.id == 'mtl') {
-				
-				var ba:ByteArray = resourceDependency.data;
-				parseMtl(ba.readUTFBytes(ba.bytesAvailable));
+				var str : String = ParserUtil.toString(resourceDependency.data);
+				parseMtl(str);
 				
 			} else {
 				
