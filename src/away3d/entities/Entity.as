@@ -42,6 +42,7 @@ package away3d.entities
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
+		private var _boundsIsShown : Boolean = false;
 
 		/**
 		 * 
@@ -58,12 +59,10 @@ package away3d.entities
 			
 			_showBounds = value;
 			
-			if (value) {
-				addChild(_bounds.boundingRenderable);
-			} else {
-				removeChild(_bounds.boundingRenderable);
-				_bounds.disposeRenderable();
-			}
+			if (_showBounds) 
+				addBounds();
+			else 
+				removeBounds();
 		}
 		
 		/**
@@ -158,9 +157,35 @@ package away3d.entities
 		
 		public function set bounds(value : BoundingVolumeBase) : void
 		{
+			removeBounds();
 			_bounds = value;
 			_boundsInvalid = true;
+			if (_showBounds)
+				addBounds();
 		}
+		
+		
+		// adds bounds if needed.
+		private function addBounds():void
+		{
+			if (!_boundsIsShown) 
+			{
+				_boundsIsShown = true;
+				addChild(_bounds.boundingRenderable);
+			}
+		}
+		
+		// removes bounds if it is shown
+		private function removeBounds():void
+		{
+			if (_boundsIsShown) 
+			{
+				_boundsIsShown = false;
+				removeChild(_bounds.boundingRenderable);
+				_bounds.disposeRenderable();
+			}
+		}
+		
 		
 		/**
 		 * @inheritDoc
