@@ -174,9 +174,9 @@ package away3d.tools.helpers
 		* The geomIndices vector will then contain only zeros.
 		* IMPORTANT: the code considers the indices as location in the mesh subgemeometry indices vector, not the value at the pointer location.
 		* 
-		* @param mesh								Mesh. The mesh to remove a face from
-		* @param indices							Vector.<uint>. A vector with a series of uints indices: the indices of the faces to be removed. 
-		* @param subGeomIndices						Vector.<uint>. A vector with a series of uints indices representing the subgeometries of the faces to be removed.
+		* @param mesh				Mesh. The mesh to remove a face from
+		* @param indices			A vector with a series of uints indices: the indices of the faces to be removed. 
+		* @param subGeomIndices		A vector with a series of uints indices representing the subgeometries of the faces to be removed.
 		*/
 		public static function removeFaces(mesh:Mesh, indices:Vector.<uint>, subGeomIndices:Vector.<uint>):void
 		{
@@ -186,13 +186,13 @@ package away3d.tools.helpers
 		
 		/**
 		* Adds a series of faces from a mesh. All vectors must have the same length.
-		* @param mesh						Mesh. The mesh to remove a face from
-		* @param v0s						Vector.<Vertex>. A vector with a series of Vertex Objects representing the v0 of a face. 
-		* @param v1s						Vector.<Vertex>. A vector with a series of Vertex Objects representing the v1 of a face. 
-		* @param v2s						Vector.<Vertex>. A vector with a series of Vertex Objects representing the v2 of a face. 
-		* @param uv0s						Vector.<UV>. A vector with a series of UV Objects representing the uv0 of a face.
-		* @param uv1s						Vector.<UV>. A vector with a series of UV Objects representing the uv1 of a face. 
-		* @param uv2s						Vector.<UV>. A vector with a series of UV Objects representing the uv2 of a face. 
+		* @param mesh	Mesh. The mesh to remove a face from
+		* @param v0s	A vector with a series of Vertex Objects representing the v0 of a face. 
+		* @param v1s	A vector with a series of Vertex Objects representing the v1 of a face. 
+		* @param v2s	A vector with a series of Vertex Objects representing the v2 of a face. 
+		* @param uv0s	A vector with a series of UV Objects representing the uv0 of a face.
+		* @param uv1s	A vector with a series of UV Objects representing the uv1 of a face. 
+		* @param uv2s	A vector with a series of UV Objects representing the uv2 of a face. 
 		*/
 		public static function addFaces(mesh:Mesh, v0s:Vector.<Vertex>, v1s:Vector.<Vertex>, v2s:Vector.<Vertex>, uv0s:Vector.<UV>, uv1s:Vector.<UV>, uv2s:Vector.<UV>, subGeomIndices:Vector.<uint>):void
 		{
