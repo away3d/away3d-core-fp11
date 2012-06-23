@@ -193,6 +193,12 @@ package away3d.loaders.parsers
 				trunk = line.replace("  "," ").split(" ");
 				_oldIndex = _charIndex+1;
 				parseLine(trunk);
+				
+				// If whatever was parsed on this line resulted in the
+				// parsing being paused to retrieve dependencies, break
+				// here and do not continue parsing until un-paused.
+				if (parsingPaused)
+					return MORE_TO_PARSE;
 			}
 			
 			if(_charIndex >= _stringLength){
