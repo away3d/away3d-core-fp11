@@ -9,6 +9,8 @@ package away3d.loaders.parsers
 	import away3d.materials.BitmapMaterial;
 	import away3d.materials.ColorMaterial;
 	
+	import flash.display.BitmapData;
+	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
 	
@@ -19,6 +21,10 @@ package away3d.loaders.parsers
 	 */
 	public class DAEParser extends ParserBase
 	{	
+		public static const FLAG_FLIP_FACES:int = 1;
+		public static const FLAG_FLIP_IMAGES:int = 2;
+		public static const FLAG_DEFAULT:int = 3;
+		
 		private var _doc : XML;
 		private var _ns : Namespace;
 		private var _parseState : uint = 0;
@@ -26,6 +32,7 @@ package away3d.loaders.parsers
 		private var _imageCount : uint;
 		private var _currentImage : uint;
 		private var _dependencyCount : uint = 0;
+		private var _flags : int;
 		
 		private var _libImages : Object;
 		private var _libMaterials : Object;
@@ -35,13 +42,15 @@ package away3d.loaders.parsers
 		private var _scene : DAEScene;
 		private var _root : DAEVisualScene;
 		
-		private var _defaultBitmapMatrial:BitmapMaterial = new BitmapMaterial(defaultBitmapData, true, true);
+		private var _defaultBitmapMaterial:BitmapMaterial = new BitmapMaterial(defaultBitmapData, true, true);
 		private var _defaultColorMaterial:ColorMaterial = new ColorMaterial(0xff0000);
 		
 		private static var _numInstances:uint = 0;
 		
 		public function DAEParser()
 		{
+			_flags = FLAG_DEFAULT;
+			
 			super(ParserDataFormat.PLAIN_TEXT);
 		}
 		
@@ -82,6 +91,16 @@ package away3d.loaders.parsers
 			if (resource && resource.bitmapData)
 			{
 				var image:DAEImage = _libImages[ resourceDependency.id ] as DAEImage;
+				
+				if (_flags & FLAG_FLIP_IMAGES)
+				{
+					var clone:BitmapData = resource.bitmapData.clone();
+					var matrix:Matrix = new Matrix(1, 0, 0, -1, 0, clone.height);
+					
+					resource.bitmapData.draw(clone, matrix);
+					
+					clone.dispose();
+				}
 				
 				if (image)
 				{
@@ -165,7 +184,7 @@ package away3d.loaders.parsers
 							
 							finalize(_root, o);
 							
-							finalizeAsset(o, "COLLADA_" + (_numInstances++));
+							finalizeAsset(o, "COLLADA_ROOT_" + (_numInstances++));
 							
 							o.scaleX = -o.scaleX;
 						}
@@ -187,30 +206,63 @@ package away3d.loaders.parsers
 		{
 			var o : ObjectContainer3D = node.instance_geometries.length ? new Mesh(new BitmapMaterial(defaultBitmapData)) : new ObjectContainer3D();
 			var mesh:Mesh = o as Mesh;
-			var i:int, j:int;
+			var effects:Vector.<DAEEffect> = new Vector.<DAEEffect>();
+			var i:int, j:int, k:int;
 			
 			if (parent)
 				parent.addChild(o);
 			
 			for (i = 0; i < node.instance_geometries.length; i++)
 			{
-				var instance:DAEInstanceGeometry = node.instance_geometries[i];
+				var instance:DAEInstanceGeometry = node.instance_geometries[j];
 				var geom:DAEGeometry = _libGeometries[instance.url];
 				var geometry:Geometry = null;
 				
 				if (geom.mesh) 
 				{
-					geom.mesh.createGeometry(mesh.geometry);
+					for (j = 0; j < geom.mesh.primitives.length; j++)
+					{
+						var primitive:DAEPrimitive = geom.mesh.primitives[j];
+						for (k = 0; k < instance.bind_material.instance_material.length; k++)
+						{
+							var imat:DAEInstanceMaterial = instance.bind_material.instance_material[k];
+							
+							if (imat.symbol == primitive.material)
+							{
+								var mat:DAEMaterial = _libMaterials[ imat.target ];
+								var eff:DAEEffect = _libEffects[mat.instance_effect.url];
+								effects.push(eff);
+								break;
+							}
+						}
+					}
+					geom.mesh.createGeometry(mesh.geometry, Boolean(_flags & FLAG_FLIP_FACES != 0));
 				}
 			}
 			
 			if (mesh)
 			{
 				for(j = 0; j < mesh.subMeshes.length; j++)
-				{
-					if(mesh.subMeshes[j].subGeometry.UVData.length)
+				{	
+					var effect : DAEEffect = effects[j];
+					
+					var cot:DAEColorOrTexture = effect.shader.props["diffuse"];
+					
+					if(cot && cot.texture && effect.surface)
 					{
-						mesh.subMeshes[j].material = _defaultBitmapMatrial; //new BitmapMaterial(defaultBitmapData);
+						var image:DAEImage = _libImages[effect.surface.init_from];
+						if (isBitmapDataValid(image.resource.bitmapData))
+						{
+							mesh.subMeshes[j].material = new BitmapMaterial(image.resource.bitmapData);
+						}
+						else
+						{
+							mesh.subMeshes[j].material = _defaultColorMaterial;
+						}
+					}
+					else if (cot && cot.color)
+					{
+						mesh.subMeshes[j].material = effect.colorMaterial;
 					}
 					else
 					{
@@ -313,6 +365,7 @@ import away3d.core.base.SubGeometry;
 import away3d.core.base.data.Vertex;
 import away3d.library.assets.BitmapDataAsset;
 import away3d.loaders.parsers.DAEParser;
+import away3d.materials.ColorMaterial;
 
 import flash.geom.Matrix3D;
 import flash.geom.Vector3D;
@@ -941,11 +994,14 @@ class DAEMesh extends DAEElement
 		}
 	}
 	
-	public function createGeometry(geometry : Geometry) : void
+	public function createGeometry(geometry : Geometry, flipFaces : Boolean = true) : void
 	{
-		for (var i:int = 0; i < this.primitives.length; i++)
+		var i:int, j:int, k:int;
+		
+		for (i = 0; i < this.primitives.length; i++)
 		{
-			var faces:Vector.<DAEFace> = this.primitives[i].create(this);
+			var primitive:DAEPrimitive = this.primitives[i];
+			var faces:Vector.<DAEFace> = primitive.create(this);
 			
 			if (faces)
 			{
@@ -955,11 +1011,11 @@ class DAEMesh extends DAEElement
 				var uvData:Vector.<Number> = new Vector.<Number>();
 				var uvData2:Vector.<Number> = new Vector.<Number>();
 				
-				for (var j:int = 0; j < faces.length; j++)
+				for (j = 0; j < faces.length; j++)
 				{
 					var face:DAEFace = faces[j];					
 
-					for (var k:int = 0; k < face.vertices.length; k++)
+					for (k = 0; k < face.vertices.length; k++)
 					{
 						var v:DAEVertex = face.vertices[k];
 						
@@ -983,13 +1039,12 @@ class DAEMesh extends DAEElement
 					sub.updateUVData(uvData);
 					if (uvData.length == uvData2.length)
 						sub.updateSecondaryUVData(uvData2);
-					
-					indexData.reverse();
-					sub.updateIndexData(indexData);
-					
-					geometry.addSubGeometry(sub);
 				}
+				if (flipFaces)
+					indexData.reverse();
+				sub.updateIndexData(indexData);
 				
+				geometry.addSubGeometry(sub);
 			}
 		}
 	}
@@ -1162,6 +1217,17 @@ class DAEColor
 	public var g : Number;
 	public var b : Number;
 	public var a : Number;
+	
+	public function get color() : uint
+	{
+		var c:uint = 0;
+		
+		c |= int(r * 255.0) << 16;
+		c |= int(g * 255.0) << 8;
+		c |= int(b * 255.0);
+		
+		return c;
+	}
 }
 
 class DAETexture
@@ -1297,11 +1363,13 @@ class DAEShader extends DAEElement
 				case "specular":
 				case "emission":
 				case "transparent":
+				case "reflective":
 					this.props[name] = new DAEColorOrTexture(child);
 					break;
 				case "shininess":
 				case "reflectivity":
 				case "transparency":
+				case "index_of_refraction":
 					this.props[name] = parseFloat(readText(child.ns::float[0]));
 					break;
 				default:
@@ -1317,6 +1385,8 @@ class DAEEffect extends DAEElement
 	public var shader : DAEShader;
 	public var surface : DAESurface;
 	public var sampler : DAESampler2D;
+	
+	private var _colorMaterial:ColorMaterial;
 	
 	public function DAEEffect(element : XML = null)
 	{
@@ -1395,9 +1465,11 @@ class DAEEffect extends DAEElement
 			{
 				case "surface":
 					this.surface = new DAESurface(child);
+					this.surface.sid = element.@sid.toString();
 					break;
 				case "sampler2D":
 					this.sampler = new DAESampler2D(child);
+					this.sampler.sid = element.@sid.toString();
 					break;
 				default:
 					trace("[WARNING] unhandled newparam: " + name);
@@ -1425,11 +1497,25 @@ class DAEEffect extends DAEElement
 				case "blinn":
 				case "phong":
 					this.shader = new DAEShader(child);
+					var cot:DAEColorOrTexture = this.shader.props["diffuse"];
+					if (cot && cot.color)
+					{
+						_colorMaterial = new ColorMaterial(cot.color.color);
+					}
+					else
+					{
+						_colorMaterial = new ColorMaterial(0xff00ff);
+					}
 					break;
 				default:
 					break;
 			}
 		}
+	}
+	
+	public function get colorMaterial() : ColorMaterial
+	{
+		return _colorMaterial;
 	}
 }
 
@@ -1567,6 +1653,8 @@ class DAENode extends DAEElement
 					break;
 				case "instance_geometry":
 					this.instance_geometries.push(new DAEInstanceGeometry(child));
+					break;
+				case "instance_light":
 					break;
 				case "instance_node":
 					instance = new DAEInstanceNode(child);
