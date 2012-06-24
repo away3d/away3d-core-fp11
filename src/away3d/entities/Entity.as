@@ -165,7 +165,6 @@ package away3d.entities
 		}
 		
 		
-		// adds bounds if needed.
 		private function addBounds():void
 		{
 			if (!_boundsIsShown) 
@@ -175,7 +174,6 @@ package away3d.entities
 			}
 		}
 		
-		// removes bounds if it is shown
 		private function removeBounds():void
 		{
 			if (_boundsIsShown) 
