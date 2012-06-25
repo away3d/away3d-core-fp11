@@ -9,9 +9,9 @@ package away3d.core.render
 	import away3d.events.Stage3DEvent;
 	import away3d.textures.Texture2DBase;
 
-import flash.display.BitmapData;
-
-import flash.display3D.Context3D;
+	import flash.display.BitmapData;
+	
+	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
@@ -32,6 +32,7 @@ import flash.display3D.Context3D;
 		protected var _backgroundG : Number = 0;
 		protected var _backgroundB : Number = 0;
 		protected var _backgroundAlpha : Number = 1;
+		protected var _shareContext : Boolean = false;
 
 		protected var _swapBackBuffer : Boolean = true;
 
@@ -184,7 +185,7 @@ import flash.display3D.Context3D;
 //				_contextIndex = -1;
 				return;
 			}
-			else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
+			//else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
 
 			_stage3DProxy = value;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.stage3DProxy = value;
@@ -195,6 +196,21 @@ import flash.display3D.Context3D;
 				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 		}
 
+		/**
+		 * Defers control of Context3D clear() and present() calls to Stage3DProxy, enabling multiple Stage3D frameworks
+		 * to share the same Context3D object.
+		 * 
+		 * @private
+		 */
+		arcane function get shareContext() : Boolean
+		{
+			return _shareContext;
+		}
+
+		arcane function set shareContext(value : Boolean) : void
+		{
+			_shareContext = value;
+		}
 
 		/**
 		 * Disposes the resources used by the RendererBase.
@@ -250,8 +266,9 @@ import flash.display3D.Context3D;
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			if (additionalClearMask != 0) {
-				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+			if (!_shareContext) {
+				if (additionalClearMask != 0)
+					_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 			}
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			_stage3DProxy.scissorRect = scissorRect;
@@ -259,12 +276,14 @@ import flash.display3D.Context3D;
 
 			draw(entityCollector, target);
 
-            if( _snapshotRequired && _snapshotBitmapData ) {
-                _context.drawToBitmapData( _snapshotBitmapData );
-                _snapshotRequired = false;
-            }
-
-			if (_swapBackBuffer && !target) _context.present();
+			if ( !_shareContext ) {
+				if( _snapshotRequired && _snapshotBitmapData ) {
+					_context.drawToBitmapData( _snapshotBitmapData );
+					_snapshotRequired = false;
+				}
+	
+				if (_swapBackBuffer && !target) _context.present();
+			}
 			_stage3DProxy.scissorRect = null;
 		}
 

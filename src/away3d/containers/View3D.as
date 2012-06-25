@@ -76,6 +76,7 @@
 		private var _menu0:ContextMenuItem;
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
+		private var _shareContext:Boolean = false;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -159,6 +160,22 @@
 		public function get stage3DProxy() : Stage3DProxy
 		{
 			return _stage3DProxy;
+		}
+
+		public function set stage3DProxy(stage3DProxy:Stage3DProxy) : void
+		{
+			_stage3DProxy = stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+
+			super.x = _stage3DProxy.x;
+			
+			_localPos.x = _stage3DProxy.x;
+			_globalPos.x = parent? parent.localToGlobal(_localPos).x : _stage3DProxy.x;
+
+			super.y = _stage3DProxy.y;
+			
+			_localPos.y = _stage3DProxy.y;
+			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
 		}
 
 		/**
@@ -471,6 +488,20 @@
 		}
 
 		/**
+		 * Defers control of Context3D clear() and present() calls to Stage3DProxy, enabling multiple Stage3D frameworks
+		 * to share the same Context3D object.
+		 */
+		public function get shareContext() : Boolean
+		{
+			return _shareContext;
+		}
+
+		public function set shareContext(value : Boolean) : void
+		{
+			_shareContext = value;
+		}
+
+		/**
 		 * Updates the backbuffer dimensions.
 		 */
 		protected function updateBackBuffer() : void
@@ -478,7 +509,7 @@
 			// No reason trying to configure back buffer if there is no context available.
 			// Doing this anyway (and relying on _stage3DProxy to cache width/height for 
 			// context does get available) means usesSoftwareRendering won't be reliable.
-			if (_stage3DProxy.context3D) {
+			if (_stage3DProxy.context3D && !_shareContext) {
 				if( _width && _height ){
 					// Backbuffers are limited to 2048x2048 in software mode and
 					// trying to configure the backbuffer to be bigger than that
@@ -526,6 +557,11 @@
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();
+				
+			if (_shareContext) {
+				width = _stage3DProxy.width;
+				height = _stage3DProxy.height;
+			}
 
 			if (!_parentIsStage)
 				updateGlobalPos();
@@ -551,8 +587,9 @@
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
-				_stage3DProxy._context3D.present();
+				if (!_shareContext) _stage3DProxy._context3D.present();
 			} else {
+				_renderer.shareContext = _shareContext;
 				_renderer.render(_entityCollector);
 			}
 
@@ -668,7 +705,8 @@
 			_addedToStage = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
-			_stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
+			if (!_stage3DProxy) _stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
+
 			_stage3DProxy.x = _globalPos.x;
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 			_stage3DProxy.y = _globalPos.y;

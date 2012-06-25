@@ -29,7 +29,7 @@ package away3d.core.managers
 		{
 			if (!Stage3DManagerSingletonEnforcer) throw new Error("This class is a multiton and cannot be instantiated manually. Use Stage3DManager.getInstance instead.");
 			_stage = stage;
-			
+						
 			if (!_stageProxies) 
 				_stageProxies = new Vector.<Stage3DProxy>(_stage.stage3Ds.length, true);
 		}
@@ -71,7 +71,12 @@ package away3d.core.managers
 			var len : uint = _stageProxies.length;
 
 			while (i < len) {
-				if (!_stageProxies[i]) return getStage3DProxy(i, forceSoftware);
+				if (!_stageProxies[i]) {
+					getStage3DProxy(i, forceSoftware);
+					_stageProxies[i].width = _stage.stageWidth;
+					_stageProxies[i].height = _stage.stageHeight;
+					return _stageProxies[i];
+				}
 				++i;
 			}
 
