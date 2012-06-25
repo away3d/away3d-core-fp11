@@ -1,5 +1,7 @@
+//original author Tim Knip
 package away3d.loaders.parsers
 {
+	import away3d.arcane;
 	import away3d.animators.AnimatorBase;
 	import away3d.animators.SmoothSkeletonAnimator;
 	import away3d.animators.data.AnimationSequenceBase;
@@ -10,21 +12,16 @@ package away3d.loaders.parsers
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.animators.skeleton.SkeletonPose;
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.LensBase;
-	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.BitmapDataAsset;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.materials.BitmapMaterial;
+	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
 	import away3d.materials.ColorMaterial;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.methods.BasicAmbientMethod;
@@ -41,26 +38,18 @@ package away3d.loaders.parsers
 	use namespace arcane;
 	
 	/**
-	 * Provides a parser for the Collada (DAE) data type.
+	 * DAEParser provides a parser for the DAE data type.
 	 */
 	public class DAEParser extends ParserBase
 	{	
-		/** Whether to use GPU skinning. */
-		public static const CONFIG_USE_GPU 		: uint = 1;
-		/** Whether to fix images with invalid size */
-		public static const CONFIG_FIX_IMAGES	: uint = 2;
-		/** Default configuration is CONFIG_USE_GPU */
-		public static const CONFIG_DEFAULT		: uint = CONFIG_USE_GPU;
+		public static const CONFIG_USE_GPU 				: uint = 1;
+		public static const CONFIG_DEFAULT				: uint = CONFIG_USE_GPU;
+		public static const PARSE_GEOMETRIES 			: uint = 1;
+		public static const PARSE_IMAGES				: uint = 2;
+		public static const PARSE_MATERIALS 			: uint = 4;
+		public static const PARSE_VISUAL_SCENES 		: uint = 8;
+		public static const PARSE_DEFAULT				: uint = PARSE_GEOMETRIES | PARSE_IMAGES | PARSE_MATERIALS | PARSE_VISUAL_SCENES;
 		
-		public static const PARSE_GEOMETRIES 	: uint = 1;
-		public static const PARSE_IMAGES		: uint = 2;
-		public static const PARSE_CAMERAS 		: uint = 4;
-		public static const PARSE_LIGHTS 		: uint = 8;
-		public static const PARSE_MATERIALS 	: uint = 16;
-		public static const PARSE_VISUAL_SCENES : uint = 32;
-		public static const PARSE_DEFAULT		: uint = PARSE_GEOMETRIES | PARSE_IMAGES |
-														 PARSE_CAMERAS | PARSE_LIGHTS |
-														 PARSE_MATERIALS | PARSE_VISUAL_SCENES;
 		private var _doc : XML;
 		private var _ns : Namespace;
 		private var _parseState : uint = 0;
@@ -68,37 +57,26 @@ package away3d.loaders.parsers
 		private var _imageCount : uint;
 		private var _currentImage : uint;
 		private var _dependencyCount : uint = 0;
-		
 		private var _configFlags : uint;
 		private var _parseFlags : uint;
-		
 		private var _libImages : Object;
 		private var _libMaterials : Object;
 		private var _libEffects : Object;
 		private var _libGeometries : Object;
 		private var _libControllers : Object;
 		private var _libAnimations : Object;
-		private var _libCameras : Object;
-		private var _libLights : Object;
-		
 		private var _scene : DAEScene;
 		private var _root : DAEVisualScene;
 		private var _rootContainer : ObjectContainer3D;
-		
 		private var _geometries : Vector.<Geometry>;
-		
 		private var _animationInfo : DAEAnimationInfo;
 		private var _animators : Vector.<AnimatorBase>;
 		private var _sequences : Vector.<AnimationSequenceBase>;
-		
-		private var _defaultBitmapMaterial:BitmapMaterial = new BitmapMaterial(defaultBitmapData, true, true);
+		private var _defaultBitmapMaterial:TextureMaterial;
 		private var _defaultColorMaterial:ColorMaterial = new ColorMaterial(0xff0000);
-		
 		private static var _numInstances:uint = 0;
 		
 		/**
-		 * Constructor
-		 * 
 		 * @param	configFlags	Bitfield to configure the parser. @see DAEParser.CONFIG_USE_GPU etc.
 		 */ 
 		public function DAEParser(configFlags : uint = 0)
@@ -108,15 +86,7 @@ package away3d.loaders.parsers
 			
  			super(ParserDataFormat.PLAIN_TEXT);
 		}
-		
-		/**
-		 * Gets a Geometry by name.
-		 * 
-		 * @param	name
-		 * @param	clone
-		 * 
-		 * @return the found Geometry or null on failure.
-		 */ 
+		 
 		public function getGeometryByName(name : String, clone : Boolean = false) : Geometry
 		{
 			if (!_geometries)
@@ -148,50 +118,28 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean 
 		{
-			// TODO
-			return true;
+			if(String(data).indexOf("COLLADA")!= -1 || String(data).indexOf("collada") != -1)
+				return true;
+			
+			return false;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void 
 		{
-			if (resourceDependency.assets.length != 1)
-				return;
-			
-			var resource:BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
-			
+			if (resourceDependency.assets.length != 1) return;
+			var resource : Texture2DBase = resourceDependency.assets[0] as Texture2DBase; 
 			_dependencyCount--;
 			
-			if (resource && resource.bitmapData) {
+			if (resource && BitmapTexture(resource).bitmapData) {
 				var image:DAEImage = _libImages[ resourceDependency.id ] as DAEImage;
 				
-				if (image) {
-					image.resource = resource;
-					if (!isBitmapDataValid(resource.bitmapData) && (_configFlags & CONFIG_FIX_IMAGES)) {
-						// TODO: let Away3D take care of this elsewhere 
-						var w : int = TextureUtils.getBestPowerOf2(resource.bitmapData.width);
-						var h : int = TextureUtils.getBestPowerOf2(resource.bitmapData.height);
-
-						var m : Matrix = new Matrix(w / resource.bitmapData.width, 0, 0, h / resource.bitmapData.height);
-						var original : BitmapData = resource.bitmapData.clone();
-						
-						resource.bitmapData = new BitmapData(w, h, original.transparent);
-						resource.bitmapData.draw(original, m);
-						
-						original.dispose();
-					}
-				}
+				if (image) image.resource = BitmapTexture(resource);
 			}
 			
 			if (_dependencyCount == 0)
 				_parseState = DAEParserState.PARSE_MATERIALS;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{			
 			if (resourceDependency.assets.length != 1)
@@ -205,29 +153,29 @@ package away3d.loaders.parsers
 				_parseState = DAEParserState.PARSE_MATERIALS;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
 		protected override function proceedParsing() : Boolean
 		{
-			switch (_parseState)
-			{
+			if(!_defaultBitmapMaterial) _defaultBitmapMaterial = buildDefaultMaterial();
+			
+			switch (_parseState) {
 				case DAEParserState.LOAD_XML:
-					_doc = new XML(getTextData());
-					_ns = _doc.namespace();
-					
-					_imageList = _doc._ns::library_images._ns::image;
-					_imageCount = _dependencyCount = _imageList.length();
-					_currentImage = 0;
-					
-					_parseState = _imageCount > 0 ? DAEParserState.PARSE_IMAGES : DAEParserState.PARSE_MATERIALS;
+					try{
+						_doc = new XML(getTextData());
+						_ns = _doc.namespace();
+						_imageList = _doc._ns::library_images._ns::image;
+						_imageCount = _dependencyCount = _imageList.length();
+						_currentImage = 0;
+						_parseState = _imageCount > 0 ? DAEParserState.PARSE_IMAGES : DAEParserState.PARSE_MATERIALS;
+						
+					} catch (e:Error){
+						return PARSING_DONE;
+					}
 					break;
 				
 				case DAEParserState.PARSE_IMAGES:
 					_libImages = parseLibrary(_doc._ns::library_images._ns::image, DAEImage);
 					for (var imageId:String in _libImages) {
 						var image:DAEImage = _libImages[imageId] as DAEImage;
-						
 						addDependency(image.id, new URLRequest(image.init_from));
 					}
 					pauseAndRetrieveDependencies();
@@ -236,9 +184,7 @@ package away3d.loaders.parsers
 				case DAEParserState.PARSE_MATERIALS:
 					_libMaterials = parseLibrary(_doc._ns::library_materials._ns::material, DAEMaterial);
 					_libEffects = parseLibrary(_doc._ns::library_effects._ns::effect, DAEEffect);
-					
 					setupMaterials();
-					
 					_parseState = DAEParserState.PARSE_GEOMETRIES;
 					break;
 				
@@ -250,23 +196,12 @@ package away3d.loaders.parsers
 				
 				case DAEParserState.PARSE_CONTROLLERS:
 					_libControllers = parseLibrary(_doc._ns::library_controllers._ns::controller, DAEController);
-					_parseState = DAEParserState.PARSE_CAMERAS;
-					break;
-				
-				case DAEParserState.PARSE_CAMERAS:
-					_libCameras = parseLibrary(_doc._ns::library_cameras._ns::camera, DAECamera);
-					_parseState = DAEParserState.PARSE_LIGHTS;
-					break;
-				
-				case DAEParserState.PARSE_LIGHTS:
-					_libLights = parseLibrary(_doc._ns::library_lights._ns::light, DAELight);
 					_parseState = DAEParserState.PARSE_VISUAL_SCENE;
 					break;
-				
+					 
 				case DAEParserState.PARSE_VISUAL_SCENE:
 					_scene = null;
 					_root = null;
-					
 					_libAnimations = parseLibrary(_doc._ns::library_animations._ns::animation, DAEAnimation);
 					_animators = new Vector.<AnimatorBase>();
 					_sequences = new Vector.<AnimationSequenceBase>();
@@ -280,9 +215,7 @@ package away3d.loaders.parsers
 							_rootContainer = new ObjectContainer3D();
 							_root = new DAEVisualScene(this, list[0]);
 							_root.updateTransforms(_root);
-							
 							_animationInfo = parseAnimationInfo();
-							
 							parseSceneGraph(_root, _rootContainer);
 						}
 					}
@@ -294,30 +227,26 @@ package away3d.loaders.parsers
 					break;
 				
 				case DAEParserState.PARSE_COMPLETE:
-					for each (var sequence:AnimationSequenceBase in _sequences) {
-						for each (var animator:AnimatorBase in _animators) {
-							if (animator is SmoothSkeletonAnimator) {
-								if (SmoothSkeletonAnimator(animator).hasSequence(sequence.name)) {
-									SmoothSkeletonAnimator(animator).play(sequence.name);
-									break;
-								}
-							}
-						}
-					}
 					finalizeAsset(_rootContainer, "COLLADA_ROOT_" + (_numInstances++));
 					return PARSING_DONE;
-					break;
-				
-				default:
-					break;
 			}
+			
 			return MORE_TO_PARSE;
+		}
+		
+		
+		private function buildDefaultMaterial(map:BitmapData = null):TextureMaterial
+		{
+			var bmt:BitmapTexture = new BitmapTexture(map || defaultBitmapData);
+			_defaultBitmapMaterial = new TextureMaterial(bmt);
+			
+			return _defaultBitmapMaterial;
 		}
 		
 		private function applySkinBindShape(geometry : Geometry, skin : DAESkin) : void
 		{
 			var vec : Vector3D = new Vector3D();
-			var i : int;
+			var i : uint;
 			for each (var sub : SubGeometry in geometry.subGeometries) {
 				var vertexData : Vector.<Number> = sub.vertexData;
 				for (i = 0; i < vertexData.length; i += 3) {
@@ -340,12 +269,11 @@ package away3d.loaders.parsers
 			var primitive : DAEPrimitive;
 			var jointIndices:Vector.<Number>;
 			var jointWeights:Vector.<Number>
-			var i : int, j : int, k : int, l : int;
+			var i : uint, j : uint, k : uint, l : int;
 			
 			for (i = 0; i < geometry.subGeometries.length; i++) {
 				sub = geometry.subGeometries[i];
 				primitive = mesh.primitives[i];
-				
 				jointIndices = new Vector.<Number>(skin.maxBones * primitive.vertices.length, true);
 				jointWeights = new Vector.<Number>(skin.maxBones * primitive.vertices.length, true);
 				l = 0;
@@ -355,7 +283,6 @@ package away3d.loaders.parsers
 					
 					for (k = 0; k < weights.length; k++) {
 						var influence:DAEVertexWeight = weights[k];
-						
 						// indices need to be multiplied by 3 (amount of matrix registers)
 						jointIndices[l] = influence.joint * 3;
 						jointWeights[l++] = influence.weight;
@@ -381,7 +308,6 @@ package away3d.loaders.parsers
 		private function parseAnimationInfo() : DAEAnimationInfo
 		{
 			var info : DAEAnimationInfo = new DAEAnimationInfo();
-			
 			info.minTime = Number.MAX_VALUE;
 			info.maxTime = -info.minTime;
 			info.numFrames = 0;
@@ -401,17 +327,10 @@ package away3d.loaders.parsers
 			return info;
 		}
 		
-		/**
-		 * Parses a COLLADA library element.
-		 * 
-		 * @param	list
-		 * @param 	clas
-		 */ 
 		private function parseLibrary(list : XMLList, clas : Class) : Object
 		{
-			var library:Object = new Object();
-			
-			for (var i:int = 0; i < list.length(); i++) {
+			var library:Object = {};
+			for (var i:uint = 0; i < list.length(); i++) {
 				var obj : * = new clas(list[i]);
 				library[ obj.id ] = obj;
 			}
@@ -419,81 +338,57 @@ package away3d.loaders.parsers
 			return library;
 		}
 		
-		/**
-		 * 
-		 */ 
 		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D = null):void
 		{
 			var container : ObjectContainer3D;
-			var i : int;
-			
+			 
 			if (node.type != "JOINT") {
-				
 				container = new ObjectContainer3D();
 				container.name = node.id;
 				container.transform.rawData = node.matrix.rawData;	
-				
 				processGeometries(node, container);
-				processCameras(node, container);
-				processLights(node, container);
 				processControllers(node, container);
 				
-				if (parent) {
-					parent.addChild(container);
-				}
+				if (parent) parent.addChild(container);
 			}
 			
-			for (i = 0; i < node.nodes.length; i++) {
+			for (var i : uint = 0; i < node.nodes.length; i++)
 				parseSceneGraph(node.nodes[i], container);
-			}
 		}
 		
-		/**
-		 * 
-		 */ 
 		private function processController(controller : DAEController, instance : DAEInstanceController) : Geometry
 		{
 			var geometry : Geometry;
-			
-			if (!controller)
-				return null;
+			if (!controller) return null;
 			
 			if (controller.morph) {
 				geometry = processControllerMorph(controller, instance);
-			}
-			else if (controller.skin) {
+			} else if (controller.skin) {
 				geometry = processControllerSkin(controller, instance);
 			}
 			
 			return geometry;
 		}
 		
-		/**
-		 * 
-		 */ 
 		private function processControllerMorph(controller : DAEController, instance : DAEInstanceController) : Geometry
 		{
 			var morph : DAEMorph = controller.morph;
+
+			if (!base) base = processController(_libControllers[morph.source], instance);
+			if  (!base) return null;
+			
 			var targets : Vector.<Geometry> = new Vector.<Geometry>();
 			var base : Geometry = getGeometryByName(morph.source);
 			var vertexData : Vector.<Number>;
 			var sub : SubGeometry;
 			var startWeight : Number = 1.0;
-			var i : int, j : int, k : int;
+			var i : uint, j : uint, k : uint;
+			var geometry : Geometry;
 			
-			if (!base) {
-				base = processController(_libControllers[morph.source], instance); 	
-			}
-			
-			if  (!base) {
-				return null;
-			}
-		
 			for (i = 0; i < morph.targets.length; i++) {
-				var geometry : Geometry = getGeometryByName(morph.targets[i]);
-				if (!geometry) {
-					return null;
-				}
+				geometry = getGeometryByName(morph.targets[i]);
+				if (!geometry) return null;
+
 				targets.push(geometry);
 				startWeight -= morph.weights[i];
 			}
@@ -513,25 +408,17 @@ package away3d.loaders.parsers
 			return base;
 		}
 		
-		/**
-		 * 
-		 */ 
 		private function processControllerSkin(controller : DAEController, instance : DAEInstanceController) : Geometry
 		{
 			var geometry : Geometry = getGeometryByName(controller.skin.source);
-			var skeleton : Skeleton;
-			var daeGeometry : DAEGeometry;
 			
-			if (!geometry) {
+			if (!geometry)
 				geometry = processController(_libControllers[controller.skin.source], instance);
-			}
 			
-			if (!geometry) {
-				return null;
-			}
+			if (!geometry) return null;
 			
-			daeGeometry = _libGeometries[geometry.name];
-			skeleton = parseSkeleton(instance);
+			var skeleton : Skeleton = parseSkeleton(instance);
+			var daeGeometry : DAEGeometry = _libGeometries[geometry.name];
 			applySkinBindShape(geometry, controller.skin);
 			applySkinController(geometry, daeGeometry.mesh, controller.skin, skeleton);
 			controller.skin.userData = skeleton;
@@ -539,9 +426,6 @@ package away3d.loaders.parsers
 			return geometry;
 		}
 		
-		/**
-		 * 
-		 */ 
 		private function processControllers(node : DAENode, container : ObjectContainer3D) : void
 		{
 			var instance : DAEInstanceController;
@@ -553,30 +437,29 @@ package away3d.loaders.parsers
 			var skeleton : Skeleton;
 			var sequence : AnimationSequenceBase;
 			var animator : AnimatorBase;
-			var i : int, j : int;
+			var i : uint, j : uint;
 			
-			if (!node.instance_controllers || node.instance_controllers.length == 0) {
-				return;
-			}
-			
+			if (!node.instance_controllers || node.instance_controllers.length == 0)   return;
+			 
 			for (i = 0; i < node.instance_controllers.length; i++) {
 				instance = node.instance_controllers[i];
 				controller = _libControllers[instance.url] as DAEController;
 				
 				geometry = processController(controller, instance);
-				
-				if (!geometry) {
-					continue;
-				}
-				
+				if (!geometry) continue;
+ 
 				daeGeometry = _libGeometries[geometry.name] as DAEGeometry;
 				effects = getMeshEffects(instance.bind_material, daeGeometry.mesh);
-				mesh = new Mesh(null, geometry);
-				for (j = 0; j < mesh.subMeshes.length; j++) {
+				
+				mesh = new Mesh(geometry, null);
+				
+				if(daeGeometry.meshName && daeGeometry.meshName != "")
+					mesh.name = daeGeometry.meshName;
+				
+				for (j = 0; j < mesh.subMeshes.length; j++)
 					mesh.subMeshes[j].material = effects[j].material;
-				}
+				
 				container.addChild(mesh);
-				finalizeAsset(mesh);
 				
 				if (controller.skin && controller.skin.userData is Skeleton) {
 					skeleton = controller.skin.userData as Skeleton;
@@ -584,9 +467,14 @@ package away3d.loaders.parsers
 					sequence = processSkinAnimation(controller.skin, mesh, skeleton);
 					animator = new SmoothSkeletonAnimator(SkeletonAnimationState(mesh.animationState));
 					sequence.looping = true;
-					
 					SmoothSkeletonAnimator(animator).addSequence(SkeletonAnimationSequence(sequence));
+					 
+					var weights:uint = SkinnedSubGeometry(mesh.geometry.subGeometries[0]).jointIndexData.length;
+					var jpv:uint = weights / (mesh.geometry.subGeometries[0].vertexData.length/3);
 					
+					var anim:SkeletonAnimation = new SkeletonAnimation(skeleton, jpv);
+					mesh.geometry.animation = anim;
+
 					_animators.push(animator);
 					_sequences.push(sequence);
 					
@@ -594,131 +482,29 @@ package away3d.loaders.parsers
 					finalizeAsset(sequence);
 				}
 				
+				finalizeAsset(mesh);
+				
 				break;
 			}
 		}
-		
-		/**
-		 * 
-		 */
-		private function processCamera(node : DAENode, instance_camera : DAEInstanceCamera) : Camera3D {
-			var cam : DAECamera;
-			var perspective : DAEPerspective;
-			var orthographic : DAEOrthographic;
-			var camera : Camera3D;
-			var lens : LensBase;
-			
-			if (!_libCameras.hasOwnProperty(instance_camera.url))
-				return null;
-			
-			cam = _libCameras[instance_camera.url] as DAECamera;
-			if (cam.optics.orthographic) {
-				trace ("orthographic cameras not supported yet");
-				return null;
-			} else if (cam.optics.perspective) {
-				perspective = cam.optics.perspective;
-				if (!isNaN(perspective.yfov)) {
-					lens = new PerspectiveLens(cam.optics.perspective.yfov);
-				} else {
-					trace ("unhandled camera instance");
-					return null;
-				}
-			} else {
-				return null;
-			}
-			
-			camera = new Camera3D(lens);
-			camera.name = "daeCamera_" + node.id;
-			return camera;
-		}
-		
-		private function processCameras(node : DAENode, container : ObjectContainer3D) : void
-		{
-			if (!node.instance_cameras || node.instance_cameras.length == 0)
-				return;
-			
-			for (var i:int = 0; i < node.instance_cameras.length; i++) {
-				var camera : Camera3D = processCamera(node, node.instance_cameras[i]);
-				if (camera) {
-					container.addChild(camera);
-					finalizeAsset(camera);
-				}
-			}
-		}
-		
-		/**
-		 * 
-		 */ 
-		private function processLight(node : DAENode, instance : DAEInstanceLight) : LightBase
-		{
-			if (!_libLights.hasOwnProperty(instance.url))
-				return null;
-			
-			var daeLight : DAELight = _libLights[instance.url] as DAELight;
-			var light : LightBase;
-			var directional : DirectionalLight;
-			var point : PointLight;
-			
-			if (daeLight.light is DAEAmbient) {
-				trace ("[WARNING] DAEParser: ambient lights not supported");
-			} else if (daeLight.light is DAEDirectional) {
-				light = directional = new DirectionalLight();
-				
-			} else if (daeLight.light is DAEPoint) {
-				light = point = new PointLight();
-				
-				
-			} else if (daeLight.light is DAESpot) {
-				trace ("[WARNING] DAEParser: spot lights not supported");
-			}
-			
-			if (light is LightBase) {
-				light.name = "daeLight_" + node.id;
-				light.transform.rawData = node.matrix.rawData;
-			}
-			
-			return light;
-		}
-		
-		/**
-		 * 
-		 */ 
-		private function processLights(node : DAENode, container : ObjectContainer3D) : void
-		{
-			if (!node.instance_lights || node.instance_lights.length == 0)
-				return;
-			
-			for (var i:int = 0; i < node.instance_lights.length; i++) {
-				var light : LightBase = processLight(node, node.instance_lights[i]);
-				if (light) {
-					container.addChild(light);
-					finalizeAsset(light);
-				}
-			}
-		}
-		
-		/**
-		 * 
-		 */ 
+		 
 		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonAnimationSequence
 		{
 			var useGPU : Boolean = _configFlags & CONFIG_USE_GPU ? true : false;
 			var animation : SkeletonAnimation = new SkeletonAnimation(skeleton, skin.maxBones, useGPU);
 			var animated : Boolean = isAnimatedSkeleton(skeleton);
-			var duration : Number = _animationInfo.numFrames == 0 ?
-				1.0 : 
-				_animationInfo.maxTime - _animationInfo.minTime;
+			var duration : Number = _animationInfo.numFrames == 0 ? 1.0 :  _animationInfo.maxTime - _animationInfo.minTime;
 			var numFrames : int = Math.max(_animationInfo.numFrames, (animated ? 50 : 2));
 			var frameDuration : Number = duration / numFrames;
-			var sequence : SkeletonAnimationSequence;
+			 
 			var t : Number = 0;
-			var i : int, j : int;
-			
-			sequence = new SkeletonAnimationSequence("sequence_" + _sequences.length);
+			var i : uint, j : uint;
+			var sequence : SkeletonAnimationSequence = new SkeletonAnimationSequence("seq_" + _sequences.length);
 			mesh.geometry.animation = animation;
+			var skeletonPose : SkeletonPose;
 			
 			for (i = 0; i < numFrames; i++) {
-				var skeletonPose : SkeletonPose = new SkeletonPose();
+				skeletonPose = new SkeletonPose();
 				
 				for (j = 0; j < skin.joints.length; j++) {
 					var node : DAENode = _root.findNodeById(skin.joints[j]) || _root.findNodeBySid(skin.joints[j]);
@@ -726,42 +512,39 @@ package away3d.loaders.parsers
 					var matrix : Matrix3D;
 					
 					matrix = node.getAnimatedMatrix(t) || node.matrix;
-					
 					pose.name = skin.joints[j];
 					pose.orientation.fromMatrix(matrix);
 					pose.translation.copyFrom(matrix.position);
 					
-					if (isNaN(pose.orientation.x)) {
-						pose.orientation.fromMatrix(new Matrix3D());
-					}
-					
+					if (isNaN(pose.orientation.x)) pose.orientation.fromMatrix(new Matrix3D());
+					 
 					skeletonPose.jointPoses.push(pose);
 				}
 				t += frameDuration;
+				
 				sequence.addFrame(skeletonPose, frameDuration * 1000);
 			}
+			
 			return sequence;
 		}
 		
 		private function isAnimatedSkeleton(skeleton : Skeleton) : Boolean
 		{
-			var animation : DAEAnimation;
 			var node : DAENode;
-			var i : int;
-			
-			for (i = 0; i < skeleton.joints.length; i++) {
-				node = _root.findNodeById(skeleton.joints[i].name) || _root.findNodeBySid(skeleton.joints[i].name);
-				if (node && node.channels.length) {
-					return true;
+			 
+			for (var i : uint = 0; i < skeleton.joints.length; i++) {
+				try{
+					node = _root.findNodeById(skeleton.joints[i].name) || _root.findNodeBySid(skeleton.joints[i].name);
+				} catch(e:Error){
+					trace("Errors found in skeleton data");
+					return false;
 				}
+				if (node && node.channels.length) return true;
 			}
 			
 			return false;
 		}
 		
-		/**
-		 * 
-		 */ 
 		private function processGeometries(node : DAENode, container : ObjectContainer3D) : void
 		{
 			var instance : DAEInstanceGeometry;
@@ -769,7 +552,7 @@ package away3d.loaders.parsers
 			var effects : Vector.<DAEEffect>;
 			var mesh : Mesh;
 			var geometry : Geometry;
-			var i : int, j : int;
+			var i : uint, j : uint;
 			
 			for (i = 0; i < node.instance_geometries.length; i++) {
 				instance = node.instance_geometries[i];
@@ -778,11 +561,17 @@ package away3d.loaders.parsers
 				if (daeGeometry && daeGeometry.mesh) {
 					geometry = getGeometryByName(instance.url);
 					effects = getMeshEffects(instance.bind_material, daeGeometry.mesh);
-					
-					if (geometry && effects.length == geometry.subGeometries.length) {
-						mesh = new Mesh(null, geometry);
-						for (j = 0; j < mesh.subMeshes.length; j++) {
-							mesh.subMeshes[j].material = effects[j].material;
+					 
+					if (geometry) {
+						mesh = new Mesh(geometry, (effects.length == 0)? _defaultBitmapMaterial : null);
+						
+						if(daeGeometry.meshName && daeGeometry.meshName != "")
+							mesh.name = daeGeometry.meshName;
+ 						
+						if(effects.length == geometry.subGeometries.length) {
+							for (j = 0; j < mesh.subMeshes.length; j++) {
+								mesh.subMeshes[j].material = effects[j].material;
+							}
 						}
 						container.addChild(mesh);
 						finalizeAsset(mesh);
@@ -794,12 +583,15 @@ package away3d.loaders.parsers
 		private function getMeshEffects(bindMaterial : DAEBindMaterial, mesh : DAEMesh) : Vector.<DAEEffect>
 		{
 			var effects:Vector.<DAEEffect> = new Vector.<DAEEffect>();
+			if(!bindMaterial) return effects;
+			
 			var material : DAEMaterial;
 			var effect : DAEEffect;
 			var instance : DAEInstanceMaterial;
-			var i : int, j : int;
+			var i : uint, j : uint;
 			
 			for (i = 0; i < mesh.primitives.length; i++) {
+				if(!bindMaterial.instance_material) continue;
 				for (j = 0; j < bindMaterial.instance_material.length; j++) {
 					instance = bindMaterial.instance_material[j];
 					if (mesh.primitives[i].material == instance.symbol) {
@@ -816,110 +608,93 @@ package away3d.loaders.parsers
 
 		private function parseSkeleton(instance_controller : DAEInstanceController) : Skeleton
 		{
-			if (!instance_controller.skeleton.length)
-				return null;
+			if (!instance_controller.skeleton.length) return null;
 			
 			var controller:DAEController = _libControllers[instance_controller.url] as DAEController;
 			var skeletonId:String = instance_controller.skeleton[0];
 			var skeletonRoot:DAENode = _root.findNodeById(skeletonId) || _root.findNodeBySid(skeletonId);
 			
-			if (!skeletonRoot)
-				return null;
+			if (!skeletonRoot) return null;
 			
 			var skeleton:Skeleton = new Skeleton();
-			
 			skeleton.joints = new Vector.<SkeletonJoint>(controller.skin.joints.length, true);
-			
 			parseSkeletonHierarchy(skeletonRoot, controller.skin, skeleton);
 
 			return skeleton;
 		}
 		
-		private function parseSkeletonHierarchy(node : DAENode, skin : DAESkin, skeleton : Skeleton, 
-									   parent : int = -1) : void
+		private function parseSkeletonHierarchy(node : DAENode, skin : DAESkin, skeleton : Skeleton, parent : int = -1) : void
 		{
+			var jointIndex :uint = skin.jointSourceType == "IDREF_array" ?  skin.getJointIndex(node.id) : skin.getJointIndex(node.sid);
+			if (jointIndex < 0) return;
+			
 			var joint : SkeletonJoint = new SkeletonJoint();
-			var ibm:Matrix3D;
-			
-			var jointIndex :int = skin.jointSourceType == "IDREF_array" ? 
-				skin.getJointIndex(node.id) :
-				skin.getJointIndex(node.sid);
-			if (jointIndex < 0)
-				throw new Error("could not find joint");
-			
 			joint.parentIndex = parent;
-			joint.name = skin.joints[jointIndex];
+			if(skin.joints[jointIndex]) joint.name = skin.joints[jointIndex];
 			
-			ibm = skin.inv_bind_matrix[jointIndex];
+			var ibm:Matrix3D = skin.inv_bind_matrix[jointIndex];
 			
 			joint.inverseBindPose = ibm.rawData;
 			
 			skeleton.joints[jointIndex] = joint;
 
-			for (var i:int = 0; i < node.nodes.length; i++) {
-				parseSkeletonHierarchy(node.nodes[i], skin, skeleton, jointIndex);
+			for (var i:uint = 0; i < node.nodes.length; i++){
+				try{
+					parseSkeletonHierarchy(node.nodes[i], skin, skeleton, jointIndex);
+				} catch(e:Error){
+					trace(e.message);
+				}
 			}
 		}
 		
-		/**
-		 * 
-		 */ 
-		private function setupMaterial(material : DAEMaterial, effect : DAEEffect) : MaterialBase {
-			if (!effect || !material)
-				return null;
+		private function setupMaterial(material : DAEMaterial, effect : DAEEffect) : MaterialBase
+		{
+			if (!effect || !material) return null;
+			
 			var mat:MaterialBase = _defaultColorMaterial;
-			var bitmapMaterial : BitmapMaterial;
+			var textureMaterial : TextureMaterial;
 			var ambient:DAEColorOrTexture = effect.shader.props["ambient"];
 			var diffuse:DAEColorOrTexture = effect.shader.props["diffuse"];
 			var specular:DAEColorOrTexture = effect.shader.props["specular"];
-			var shininess:Number = effect.shader.props.hasOwnProperty("shininess") ? 
-				effect.shader.props["shininess"] as Number :
-				10;
-			var transparency:Number = effect.shader.props.hasOwnProperty("transparency") ? 
-				effect.shader.props["transparency"] as Number :
-				1;
+			var shininess:Number = effect.shader.props.hasOwnProperty("shininess") ? Number(effect.shader.props["shininess"]) :10;
+			var transparency:Number = effect.shader.props.hasOwnProperty("transparency") ? Number(effect.shader.props["transparency"]) : 1;
 			
 			if(diffuse && diffuse.texture && effect.surface) {
 				var image:DAEImage = _libImages[effect.surface.init_from];
-				if (isBitmapDataValid(image.resource.bitmapData)) {
-					mat = bitmapMaterial = new BitmapMaterial(image.resource.bitmapData, true, true);
-				}
-			} 
-			else if (diffuse && diffuse.color) {
-				mat = bitmapMaterial = new BitmapMaterial();
-				bitmapMaterial.bitmapData = new BitmapData(256, 256, true, 0xff << 24 | diffuse.color.rgb);
+				
+				if (isBitmapDataValid(image.resource.bitmapData))
+					mat = textureMaterial = buildDefaultMaterial(image.resource.bitmapData);
+				
+			} else if (diffuse && diffuse.color) {
+				var bmd:BitmapData = new BitmapData(256, 256, true, 0xff << 24 | diffuse.color.rgb);
+				mat = textureMaterial = buildDefaultMaterial(bmd);
 			}
 			
-			if (bitmapMaterial) {
-				bitmapMaterial.ambientMethod = new BasicAmbientMethod();
-				bitmapMaterial.diffuseMethod = new BasicDiffuseMethod();
-				bitmapMaterial.specularMethod = new BasicSpecularMethod();
+			if (textureMaterial) {
+				textureMaterial.ambientMethod = new BasicAmbientMethod();
+				textureMaterial.diffuseMethod = new BasicDiffuseMethod();
+				textureMaterial.specularMethod = new BasicSpecularMethod();
+				textureMaterial.ambientColor = (ambient && ambient.color) ? ambient.color.rgb : 0x303030;
+				textureMaterial.specularColor = (specular && specular.color) ? specular.color.rgb : 0x202020;
 				
-				bitmapMaterial.ambientColor = (ambient && ambient.color) ? ambient.color.rgb :  0x303030;
-				bitmapMaterial.specularColor = (specular && specular.color) ? specular.color.rgb : 0x202020;
-				if (transparency < 1)
-					bitmapMaterial.alpha = transparency;
-				bitmapMaterial.gloss = shininess;
-				bitmapMaterial.ambient = 1;
-				bitmapMaterial.specular = 1;
+				if (transparency < 1) textureMaterial.alpha = (transparency == 0)? 0.1 : transparency;
+				
+				textureMaterial.gloss = shininess;
+				textureMaterial.ambient = 1;
+				textureMaterial.specular = 1;
 			}
 			
 			mat.name = material.id;
-			
 			finalizeAsset(mat);
 			
 			return mat;
 		}
 		
-		/**
-		 * 
-		 */ 
 		private function setupMaterials() : void
 		{
 			for each (var material:DAEMaterial in _libMaterials) {
 				if (_libEffects.hasOwnProperty(material.instance_effect.url)) {
 					var effect:DAEEffect = _libEffects[material.instance_effect.url] as DAEEffect;
-					
 					effect.material = setupMaterial(material, effect);
 				}
 			}
@@ -936,7 +711,7 @@ package away3d.loaders.parsers
 				if (daeGeometry.mesh) {
 					geometry = translateGeometry(daeGeometry.mesh);	
 					if (geometry.subGeometries.length) {
-						geometry.name = id;
+						if(id && isNaN(Number(id))) geometry.name = id;
 						geometries.push(geometry);
 						
 						finalizeAsset(geometry);
@@ -950,30 +725,15 @@ package away3d.loaders.parsers
 		private function translateGeometry(mesh : DAEMesh) : Geometry
 		{
 			var geometry : Geometry = new Geometry();
-			for (var i:int = 0; i < mesh.primitives.length; i++) {
+			for (var i:uint = 0; i < mesh.primitives.length; i++) {
 				var sub : SubGeometry = translatePrimitive(mesh, mesh.primitives[i]);
-				if (sub) {
-					geometry.addSubGeometry(sub);
-				}
+				if (sub) geometry.addSubGeometry(sub);
 			}
+			
 			return geometry;
 		}
-		
-		/**
-		 * Translates a DAEPrimitive to a SubGeometry.
-		 * 
-		 * @param	mesh
-		 * @param	primitive
-		 * @param	reverseTriangles
-		 * @param	autoDeriveVertexNormals
-		 * @param	autoDeriveVertexTangents
-		 * 
-		 * @return The created SubGeometry
-		 */ 
-		private function translatePrimitive(mesh : DAEMesh, primitive : DAEPrimitive, 
-											reverseTriangles:Boolean = true,
-											autoDeriveVertexNormals : Boolean = true,
-											autoDeriveVertexTangents : Boolean = true) : SubGeometry
+		 
+		private function translatePrimitive(mesh : DAEMesh, primitive : DAEPrimitive,  reverseTriangles:Boolean = true, autoDeriveVertexNormals : Boolean = true, autoDeriveVertexTangents : Boolean = true) : SubGeometry
 		{
 			var sub : SubGeometry = new SubGeometry();
 			var indexData:Vector.<uint> = new Vector.<uint>();
@@ -983,7 +743,7 @@ package away3d.loaders.parsers
 			var uvData2:Vector.<Number> = new Vector.<Number>();
 			var faces:Vector.<DAEFace> = primitive.create(mesh);
 			var v : DAEVertex, f : DAEFace;
-			var i : int, j : int;
+			var i : uint, j : uint;
 			
 			// vertices, normals and uvs
 			for (i = 0; i < primitive.vertices.length; i++) {
@@ -1008,15 +768,13 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			if (reverseTriangles)
-				indexData.reverse();
+			if (reverseTriangles) indexData.reverse();
 			
 			sub.autoDeriveVertexNormals = autoDeriveVertexNormals;
 			sub.autoDeriveVertexTangents = autoDeriveVertexTangents;
-			
 			sub.updateVertexData(vertexData);
-			if (autoDeriveVertexNormals == false)
-				sub.updateVertexNormalData(normalData);
+			
+			if (autoDeriveVertexNormals == false) sub.updateVertexNormalData(normalData);
 			
 			if (vertexData.length == uvData.length*(3/2)) {
 				sub.updateUVData(uvData);
@@ -1034,35 +792,20 @@ package away3d.loaders.parsers
 			return sub;
 		}
 		
-		public function get geometries() : Vector.<Geometry>
-		{
-			return _geometries;
-		}
+		public function get geometries() : Vector.<Geometry> { return _geometries; }
 		
-		public function get effects() : Object
-		{
-			return _libEffects;
-		}
+		public function get effects() : Object {return _libEffects; }
 		
-		public function get images() : Object
-		{
-			return _libImages;
-		}
+		public function get images() : Object { return _libImages; }
 		
-		public function get materials() : Object
-		{
-			return _libMaterials;
-		}
+		public function get materials() : Object{ return _libMaterials; }
 		
-		public function get isAnimated() : Boolean
-		{
-			return (_doc._ns::library_animations._ns::animation.length() > 0);
-		}
+		public function get isAnimated() : Boolean { return (_doc._ns::library_animations._ns::animation.length() > 0);}
+		
 	}
 }
-
+ 
 import away3d.loaders.parsers.DAEParser;
-
 import flash.geom.Matrix3D;
 import flash.geom.Vector3D;
 
@@ -1076,18 +819,15 @@ class DAEAnimationInfo
 class DAEElement
 {
 	public static var USE_LEFT_HANDED : Boolean = true;
-	
 	public var id : String;
 	public var name : String;
 	public var sid : String;
 	public var userData : *;
-	
 	protected var ns : Namespace;
 	
 	public function DAEElement(element : XML = null)
 	{
-		if (element)
-			deserialize(element);
+		if (element) deserialize(element);
 	}
 	
 	public function deserialize(element : XML) : void
@@ -1098,45 +838,34 @@ class DAEElement
 		sid = element.@sid.toString();
 	}
 	
-	public function dispose() : void
-	{
-		
-	}
+	public function dispose() : void {}
 	
-	protected function traverseChildHandler(child : XML, nodeName : String) : void 
-	{
-		
-	}
+	protected function traverseChildHandler(child : XML, nodeName : String) : void {}
 	
 	protected function traverseChildren(element : XML, name : String = null) : void
 	{
 		var children : XMLList = name ? element.ns::[name] : element.children();
 		var count : int = children.length();
-		var i : int;
-		
-		for (i = 0; i < count; i++) {
+		 
+		for (var i : uint = 0; i < count; i++)
 			traverseChildHandler(children[i], children[i].name().localName);
-		}
 	}
 	
 	protected function convertMatrix(matrix : Matrix3D) : void
 	{
 		var indices : Vector.<int> = Vector.<int>([2, 6, 8, 9, 11, 14]);
 		var raw : Vector.<Number> = matrix.rawData;
-		var i : int;
-		for (i = 0; i < indices.length; i++) {
+		for (var i : uint = 0; i < indices.length; i++)
 			raw[indices[i]] *= -1.0;
-		}
+		
 		matrix.rawData = raw;
 	}
 	
 	protected function getRootElement(element : XML) : XML
 	{
 		var tmp : XML = element;
-		
-		while (tmp.name().localName != "COLLADA") {
+		while (tmp.name().localName != "COLLADA")
 			tmp = tmp.parent();		
-		}
 		
 		return (tmp.name().localName == "COLLADA" ? tmp : null);
 	}
@@ -1146,11 +875,9 @@ class DAEElement
 		var raw : String = readText(element);
 		var parts : Array = raw.split(/\s+/);
 		var floats : Vector.<Number> = new Vector.<Number>();
-		var i : int;
-		
-		for (i = 0; i < parts.length; i++) {
+		 
+		for (var i : uint = 0; i < parts.length; i++)
 			floats.push(parseFloat(parts[i]));
-		}
 		
 		return floats;
 	}
@@ -1160,11 +887,9 @@ class DAEElement
 		var raw : String = readText(element);
 		var parts : Array = raw.split(/\s+/);
 		var ints : Vector.<int> = new Vector.<int>();
-		var i : int;
 		
-		for (i = 0; i < parts.length; i++) {
+		for (var i : uint = 0; i < parts.length; i++)
 			ints.push(parseInt(parts[i], 10));
-		}
 		
 		return ints;
 	}
@@ -1174,11 +899,9 @@ class DAEElement
 		var raw : String = readText(element);
 		var parts : Array = raw.split(/\s+/);
 		var strings : Vector.<String> = new Vector.<String>();
-		var i : int;
 		
-		for (i = 0; i < parts.length; i++) {
+		for (var i : uint = 0; i < parts.length; i++)
 			strings.push(parts[i]);
-		}
 		
 		return strings;
 	}
@@ -1206,18 +929,11 @@ class DAEImage extends DAEElement
 	public var init_from : String;
 	public var resource : *;
 	
-	public function DAEImage(element : XML = null)
-	{
-		super(element);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
+	public function DAEImage(element : XML = null) : void{super(element);}
+	 
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		init_from = readText(element.ns::init_from[0]);
 		resource = null;
 	}
@@ -1227,14 +943,8 @@ class DAEParam extends DAEElement
 {
 	public var type : String;
 	
-	public function DAEParam(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEParam(element : XML = null) : void{super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
@@ -1249,31 +959,21 @@ class DAEAccessor extends DAEElement
 	public var stride : int;
 	public var count : int;
 	
-	public function DAEAccessor(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEAccessor(element : XML = null) : void{super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.params = new Vector.<DAEParam>();
 		this.source = element.@source.toString().replace(/^#/, "");
 		this.stride = readIntAttr(element, "stride", 1);
 		this.count = readIntAttr(element, "count", 0);
-		
 		traverseChildren(element, "param");
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		if (nodeName == "param") {
-			this.params.push(new DAEParam(child));
-		}
+		if (nodeName == "param") this.params.push(new DAEParam(child));
 	}
 }
 
@@ -1286,18 +986,14 @@ class DAESource extends DAEElement
 	public var bools : Vector.<Boolean>;
 	public var strings : Vector.<String>;
 	
-	public function DAESource(element : XML = null)
+	public function DAESource(element : XML = null) : void
 	{
 		super(element);
 	}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		traverseChildren(element);
 	}
 	
@@ -1322,9 +1018,6 @@ class DAESource extends DAEElement
 				break;
 			case "technique_common":
 				this.accessor = new DAEAccessor(child.ns::accessor[0]);
-				break;
-			default:
-				break;
 		}
 	}
 }
@@ -1340,10 +1033,6 @@ class DAEInput extends DAEElement
 	{
 		super(element);
 	}
-	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
@@ -1401,8 +1090,7 @@ class DAEVertex
 class DAEFace
 {
 	public var vertices:Vector.<DAEVertex>;
-	
-	public function DAEFace()
+	public function DAEFace() : void
 	{
 		this.vertices = new Vector.<DAEVertex>();	
 	}
@@ -1414,24 +1102,16 @@ class DAEPrimitive extends DAEElement
 	public var material : String;
 	public var count : int;
 	public var vertices : Vector.<DAEVertex>;
-	
 	private var _inputs : Vector.<DAEInput>;
 	private var _p : Vector.<int>;
 	private var _vcount : Vector.<int>;
 	private var _texcoordSets : Vector.<int>;
 	
-	public function DAEPrimitive(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEPrimitive(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.type = element.name().localName;
 		this.material = element.@material.toString();
 		this.count = readIntAttr(element, "count", 0);
@@ -1441,9 +1121,8 @@ class DAEPrimitive extends DAEElement
 		_vcount = null;
 		
 		var list:XMLList = element.ns::input;
-		var i:int;
 		
-		for (i = 0; i < list.length(); i++) {
+		for (var i:uint = 0; i < list.length(); i++){
 			_inputs.push(new DAEInput(list[i]));
 		}
 		
@@ -1454,37 +1133,28 @@ class DAEPrimitive extends DAEElement
 			_vcount = readIntArray(element.ns::vcount[0]);
 	}
 	
-	/**
-	 * Creates the primitive. Typically called after deserialization.
-	 * 
-	 * @param	mesh
-	 * 
-	 * @return Array of DAEFace or null on failure.
-	 */ 
 	public function create(mesh : DAEMesh) : Vector.<DAEFace>
 	{
-		if (!prepareInputs(mesh))
-			return null;
+		if (!prepareInputs(mesh)) return null;
 		
 		var faces:Vector.<DAEFace> = new Vector.<DAEFace>();
 		var input:DAEInput;
 		var source:DAESource;
 		var numInputs:uint = _inputs.length;
-		var idx:int = 0, index:int;
-		var i:int, j:int;
+		var idx:uint = 0, index:uint;
+		var i:uint, j:uint;
 		var x:Number, y:Number, z:Number;
 		var vertexIndex:uint = 0;
-		var vertexDict:Object = new Object();
-		var idx32:int;
-		
+		var vertexDict:Object = {};
+		var idx32:uint;
 		this.vertices = new Vector.<DAEVertex>();
 		
 		while (idx < _p.length) {
-			var vcount:int = _vcount != null ? _vcount.shift() : 3;
+			var vcount:uint = _vcount != null ? _vcount.shift() : 3;
 			var face:DAEFace = new DAEFace();
 
 			for (i = 0; i < vcount; i++) {
-				var t:int = i * numInputs;
+				var t:uint = i * numInputs;
 				var vertex:DAEVertex = new DAEVertex(_texcoordSets.length);
 				
 				for (j = 0; j < _inputs.length; j++) {
@@ -1531,8 +1201,7 @@ class DAEPrimitive extends DAEElement
 
 				if (vertexDict[hash]) {
 					face.vertices.push(vertexDict[hash]);
-				}
-				else {
+				} else {
 					vertex.index = this.vertices.length;
 					vertexDict[hash] = vertex;
 					face.vertices.push(vertex);
@@ -1543,16 +1212,15 @@ class DAEPrimitive extends DAEElement
 			if (face.vertices.length > 3) {
 				// triangulate
 				var v0:DAEVertex = face.vertices[0];
-
-				for (var k:int = 1; k < face.vertices.length - 1; k++) {
+				for (var k:uint = 1; k < face.vertices.length - 1; k++) {
 					var f:DAEFace = new DAEFace();
 					f.vertices.push(v0);
 					f.vertices.push(face.vertices[k]);
 					f.vertices.push(face.vertices[k+1]);
 					faces.push(f);
 				}
-			}
-			else if (face.vertices.length == 3) {
+				
+			} else if (face.vertices.length == 3) {
 				faces.push(face);
 			}
 			idx += (vcount * numInputs);
@@ -1563,17 +1231,14 @@ class DAEPrimitive extends DAEElement
 	private function prepareInputs(mesh : DAEMesh) : Boolean
 	{
 		var input:DAEInput;
-		var i:int, j:int;
+		var i:uint, j:uint;
 		var result : Boolean = true;
-		
 		_texcoordSets = new Vector.<int>();
 		
 		for (i = 0; i < _inputs.length; i++) {
 			input = _inputs[i];
 			
-			if (input.semantic == "TEXCOORD") {
-				_texcoordSets.push(input.set);
-			}
+			if (input.semantic == "TEXCOORD") _texcoordSets.push(input.set);
 			
 			if (!mesh.sources[input.source]) {
 				result = false;
@@ -1604,15 +1269,10 @@ class DAEVertices extends DAEElement
 		super(element);
 	}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.inputs = new Vector.<DAEInput>();
-		
 		traverseChildren(element, "input");
 	}
 	
@@ -1625,37 +1285,20 @@ class DAEVertices extends DAEElement
 class DAEGeometry extends DAEElement
 {	
 	public var mesh : DAEMesh;
+	public var meshName : String = "";
+	public function DAEGeometry(element : XML = null){super(element);}
 	
-	public function DAEGeometry(element : XML = null)
-	{
-		super(element);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
-		this.mesh = null;
-		
 		traverseChildren(element);
+		meshName = element.attribute("name");
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		switch (nodeName) {
-			case "mesh":
-				this.mesh = new DAEMesh(this, child);
-				break;
-			case "convex_mesh":
-				break;
-			case "spline":
-				break;
-			default:
-				break;
-		}
+		if(nodeName == "mesh")
+			this.mesh = new DAEMesh(this, child);//case "spline"//case "convex_mesh":
 	}
 }
 
@@ -1665,25 +1308,18 @@ class DAEMesh extends DAEElement
 	public var sources : Object;
 	public var vertices : DAEVertices;
 	public var primitives : Vector.<DAEPrimitive>;
-	
 	public function DAEMesh(geometry : DAEGeometry, element : XML = null)
 	{
 		this.geometry = geometry;
-		
 		super(element);
 	}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
-		this.sources = new Object();
+		this.sources = {};
 		this.vertices = null;
 		this.primitives = new Vector.<DAEPrimitive>();
-		
 		traverseChildren(element);
 	}
 	
@@ -1701,9 +1337,6 @@ class DAEMesh extends DAEElement
 			case "polylist":
 			case "polygon":
 				this.primitives.push(new DAEPrimitive(child));
-				break;
-			default:
-				break;
 		}
 	}
 }
@@ -1711,34 +1344,20 @@ class DAEMesh extends DAEElement
 class DAEBindMaterial extends DAEElement
 {	
 	public var instance_material : Vector.<DAEInstanceMaterial>;
+	public function DAEBindMaterial(element : XML = null){super(element);}
 	
-	public function DAEBindMaterial(element : XML = null)
-	{
-		super(element);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.instance_material = new Vector.<DAEInstanceMaterial>();
-		
 		traverseChildren(element);
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		switch (nodeName) {
-			case "technique_common":
-				for (var j:int = 0; j < child.children().length(); j++) {
-					this.instance_material.push(new DAEInstanceMaterial(child.children()[j]));
-				}
-				break;
-			default:
-				break;
+		if(nodeName == "technique_common"){
+			for (var i:uint = 0; i < child.children().length(); i++)
+				this.instance_material.push(new DAEInstanceMaterial(child.children()[i]));
 		}
 	}
 }
@@ -1749,18 +1368,11 @@ class DAEBindVertexInput extends DAEElement
 	public var input_semantic : String;
 	public var input_set : int;
 	
-	public function DAEBindVertexInput(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEBindVertexInput(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.semantic = element.@semantic.toString();
 		this.input_semantic = element.@input_semantic.toString();
 		this.input_set = readIntAttr(element, "input_set");
@@ -1770,28 +1382,12 @@ class DAEBindVertexInput extends DAEElement
 class DAEInstance extends DAEElement
 {	
 	public var url : String;
+	public function DAEInstance(element : XML = null){super(element);}
 	
-	public function DAEInstance(element : XML = null)
-	{
-		super(element);
-	}
-	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.url = element.@url.toString().replace(/^#/, "");
-	}
-}
-
-class DAEInstanceCamera extends DAEInstance
-{	
-	public function DAEInstanceCamera(element : XML = null)
-	{
-		super(element);
 	}
 }
 
@@ -1800,18 +1396,13 @@ class DAEInstanceController extends DAEInstance
 	public var bind_material : DAEBindMaterial;
 	public var skeleton : Vector.<String>;
 	
-	public function DAEInstanceController(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEInstanceController(element : XML = null){super(element);}
 	
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.bind_material = null;
 		this.skeleton = new Vector.<String>();
-		
 		traverseChildren(element);
 	}
 	
@@ -1823,51 +1414,31 @@ class DAEInstanceController extends DAEInstance
 				break;
 			case "bind_material":
 				this.bind_material = new DAEBindMaterial(child);
-				break;
-			default:
-				break;
 		}
 	}
 }
 
 class DAEInstanceEffect extends DAEInstance
 {	
-	public function DAEInstanceEffect(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEInstanceEffect(element : XML = null){super(element);}
 }
 
 class DAEInstanceGeometry extends DAEInstance
 {	
 	public var bind_material : DAEBindMaterial;
 	
-	public function DAEInstanceGeometry(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEInstanceGeometry(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.bind_material = null;
-		
 		traverseChildren(element);
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		switch (nodeName) {
-			case "bind_material":
-				this.bind_material = new DAEBindMaterial(child);
-				break;
-			default:
-				break;
-		}
+		if(nodeName == "bind_material") this.bind_material = new DAEBindMaterial(child);
 	}
 }
 
@@ -1877,67 +1448,31 @@ class DAEInstanceMaterial extends DAEInstance
 	public var symbol : String;
 	public var bind_vertex_input : Vector.<DAEBindVertexInput>;
 	
-	public function DAEInstanceMaterial(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEInstanceMaterial(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.target = element.@target.toString().replace(/^#/, "");
 		this.symbol = element.@symbol.toString();
 		this.bind_vertex_input = new Vector.<DAEBindVertexInput>();
-		
 		traverseChildren(element);
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		switch (nodeName) {
-			case "bind_vertex_input":
-				this.bind_vertex_input.push(new DAEBindVertexInput(child));
-				break;
-			default:
-				break;
-		}
+		if(nodeName == "bind_vertex_input") this.bind_vertex_input.push(new DAEBindVertexInput(child));
 	}
 }
-
-class DAEInstanceLight extends DAEInstance
-{	
-	public function DAEInstanceLight(element : XML = null)
-	{
-		super(element);
-	}
-}
-
+ 
 class DAEInstanceNode extends DAEInstance
 {	
-	public function DAEInstanceNode(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEInstanceNode(element : XML = null) { super(element);}
 }
-
-class DAEInstancePhysicsScene extends DAEInstance
-{	
-	public function DAEInstancePhysicsScene(element : XML = null)
-	{
-		super(element);
-	}
-}
-
+ 
 class DAEInstanceVisualScene extends DAEInstance
 {	
-	public function DAEInstanceVisualScene(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEInstanceVisualScene(element : XML = null) { super(element);}
 }
 
 class DAEColor
@@ -1950,7 +1485,6 @@ class DAEColor
 	public function get rgb() : uint
 	{
 		var c:uint = 0;
-		
 		c |= int(r * 255.0) << 16;
 		c |= int(g * 255.0) << 8;
 		c |= int(b * 255.0);
@@ -1975,21 +1509,13 @@ class DAEColorOrTexture extends DAEElement
 	public var color : DAEColor;
 	public var texture : DAETexture;
 	
-	public function DAEColorOrTexture(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEColorOrTexture(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.color = null;
 		this.texture = null;
-		
 		traverseChildren(element);
 	}
 	
@@ -2004,11 +1530,13 @@ class DAEColorOrTexture extends DAEElement
 				this.color.b = values[2];
 				this.color.a = values.length > 3 ? values[3] : 1.0;
 				break;
+				
 			case "texture":
 				this.texture = new DAETexture();
 				this.texture.texcoord = child.@texcoord.toString();
 				this.texture.texture = child.@texture.toString();
 				break;
+				
 			default:
 				break;
 		}
@@ -2020,18 +1548,11 @@ class DAESurface extends DAEElement
 	public var type : String;
 	public var init_from : String;
 	
-	public function DAESurface(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAESurface(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.type = element.@type.toString();
 		this.init_from = readText(element.ns::init_from[0]);
 	}
@@ -2041,18 +1562,11 @@ class DAESampler2D extends DAEElement
 {	
 	public var source : String;
 
-	public function DAESampler2D(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAESampler2D(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.source = readText(element.ns::source[0]);
 	}
 }
@@ -2062,21 +1576,13 @@ class DAEShader extends DAEElement
 	public var type : String;
 	public var props : Object;
 	
-	public function DAEShader(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEShader(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.type = element.name().localName;
-		this.props = new Object();
-		
+		this.props = {};
 		traverseChildren(element);
 	}
 	
@@ -2099,7 +1605,6 @@ class DAEShader extends DAEElement
 				break;
 			default:
 				trace("[WARNING] unhandled DAEShader property: " + nodeName);
-				break;
 		}
 	}
 }
@@ -2111,44 +1616,28 @@ class DAEEffect extends DAEElement
 	public var sampler : DAESampler2D;
 	public var material : *;
 
-	public function DAEEffect(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEEffect(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.shader = null;
 		this.surface = null;
 		this.sampler = null;
-		
 		traverseChildren(element);
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		switch (nodeName) {
-			case "profile_COMMON":
+		if(nodeName == "profile_COMMON")
 				deserializeProfile(child);
-				break;
-			case "extra":
-				break;
-			default:
-				break;
-		}
 	}
 	
 	private function deserializeProfile(element : XML) : void
 	{
 		var children:XMLList = element.children();
-		var i:int;
-		
-		for (i = 0; i < children.length(); i++) {
+		 
+		for (var i:uint = 0; i < children.length(); i++) {
 			var child:XML = children[i];
 			var name:String = child.name().localName;
 			
@@ -2158,11 +1647,6 @@ class DAEEffect extends DAEElement
 					break;
 				case "newparam":
 					deserializeNewParam(child);
-					break;
-				case "extra":
-					break;
-				default:
-					break;
 			}
 		}
 	}
@@ -2170,9 +1654,8 @@ class DAEEffect extends DAEElement
 	private function deserializeNewParam(element : XML) : void
 	{
 		var children:XMLList = element.children();
-		var i:int;
-		
-		for (i = 0; i < children.length(); i++) {
+		 
+		for (var i:uint = 0; i < children.length(); i++) {
 			var child:XML = children[i];
 			var name:String = child.name().localName;
 			
@@ -2187,7 +1670,6 @@ class DAEEffect extends DAEElement
 					break;
 				default:
 					trace("[WARNING] unhandled newparam: " + name);
-					break;
 			}
 		}
 	}
@@ -2195,11 +1677,9 @@ class DAEEffect extends DAEElement
 	private function deserializeShader(technique : XML) : void
 	{
 		var children:XMLList = technique.children();
-		var i:int;
-		
 		this.shader = null;
 		
-		for (i = 0; i < children.length(); i++) {
+		for (var i:uint = 0; i < children.length(); i++) {
 			var child:XML = children[i];
 			var name:String = child.name().localName;
 			
@@ -2209,9 +1689,6 @@ class DAEEffect extends DAEElement
 				case "blinn":
 				case "phong":
 					this.shader = new DAEShader(child);
-					break;
-				default:
-					break;
 			}
 		}
 	}
@@ -2221,32 +1698,18 @@ class DAEMaterial extends DAEElement
 {	
 	public var instance_effect : DAEInstanceEffect;
 	
-	public function DAEMaterial(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEMaterial(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.instance_effect = null;
-		
 		traverseChildren(element);
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		switch (nodeName) {
-			case "instance_effect":
-				this.instance_effect = new DAEInstanceEffect(child);
-				break;
-			default:
-				break;
-		}
+		if(nodeName == "instance_effect") this.instance_effect = new DAEInstanceEffect(child);
 	}
 }
 
@@ -2255,18 +1718,11 @@ class DAETransform extends DAEElement
 	public var type : String;
 	public var data : Vector.<Number>;
 	
-	public function DAETransform(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAETransform(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.type = element.name().localName;
 		this.data = readFloatArray(element);
 	}
@@ -2274,7 +1730,6 @@ class DAETransform extends DAEElement
 	public function get matrix() : Matrix3D
 	{
 		var matrix : Matrix3D = new Matrix3D();
-		//trace(this.type);
 		
 		switch (this.type) {
 			case "matrix":
@@ -2290,9 +1745,6 @@ class DAETransform extends DAEElement
 			case "rotate":
 				var axis:Vector3D = new Vector3D(this.data[0], this.data[1], this.data[2]);
 				matrix.appendRotation(this.data[3], axis);
-				break;
-			default:
-				break;
 		}
 		
 		return matrix;
@@ -2306,13 +1758,10 @@ class DAENode extends DAEElement
 	public var parser : DAEParser;
 	public var nodes : Vector.<DAENode>;
 	public var transforms : Vector.<DAETransform>;
-	public var instance_cameras : Vector.<DAEInstanceCamera>;
 	public var instance_controllers : Vector.<DAEInstanceController>;
 	public var instance_geometries : Vector.<DAEInstanceGeometry>;
-	public var instance_lights : Vector.<DAEInstanceLight>;
 	public var world : Matrix3D;
 	public var channels : Vector.<DAEChannel>;
-	
 	private var _root : XML;
 	
 	public function DAENode(parser : DAEParser, element : XML = null, parent : DAENode = null)
@@ -2324,9 +1773,6 @@ class DAENode extends DAEElement
 		super(element);
 	}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
@@ -2336,11 +1782,8 @@ class DAENode extends DAEElement
 		this.type = element.@type.toString().length ? element.@type.toString() : "NODE";
 		this.nodes = new Vector.<DAENode>();
 		this.transforms = new Vector.<DAETransform>();
-		this.instance_cameras = new Vector.<DAEInstanceCamera>();
 		this.instance_controllers = new Vector.<DAEInstanceController>();
 		this.instance_geometries = new Vector.<DAEInstanceGeometry>();
-		this.instance_lights = new Vector.<DAEInstanceLight>();
-		
 		traverseChildren(element);
 	}
 	
@@ -2353,38 +1796,28 @@ class DAENode extends DAEElement
 			case "node":
 				this.nodes.push(new DAENode(this.parser, child, this));
 				break;
-			case "instance_camera":
-				this.instance_cameras.push(new DAEInstanceCamera(child));
-				break;
+
 			case "instance_controller":
 				instance = new DAEInstanceController(child);
 				this.instance_controllers.push(instance);
 				break;
+				
 			case "instance_geometry":
 				this.instance_geometries.push(new DAEInstanceGeometry(child));
 				break;
-			case "instance_light":
-				this.instance_lights.push(new DAEInstanceLight(child));
-				break;
+			
 			case "instance_node":
 				instance = new DAEInstanceNode(child);
 				instances = _root.ns::library_nodes.ns::node.(@id == instance.url);
 				if (instances.length())
 					this.nodes.push(new DAENode(this.parser, instances[0], this));
 				break;
+				
 			case "matrix":
 			case "translate":
 			case "scale":
 			case "rotate":
 				this.transforms.push(new DAETransform(child));
-				break;
-			case "lookat":
-			case "skew":
-				break;
-			case "extra":
-				break;
-			default:
-				trace(nodeName);
 				break;
 		}
 	}
@@ -2392,19 +1825,16 @@ class DAENode extends DAEElement
 	public function getMatrixBySID(sid : String) : Matrix3D
 	{
 		var transform : DAETransform = getTransformBySID(sid);
-		
-		if (transform)
-			return transform.matrix;
+		if (transform) return transform.matrix;
 		
 		return null;
 	}
 	
 	public function getTransformBySID(sid : String) : DAETransform
 	{
-		for each (var transform : DAETransform in this.transforms) {
-			if (transform.sid == sid)
-				return transform;
-		}
+		for each (var transform : DAETransform in this.transforms)
+			if (transform.sid == sid) return transform;
+		
 		return null;	
 	}
 	
@@ -2413,12 +1843,12 @@ class DAENode extends DAEElement
 		var matrix : Matrix3D = new Matrix3D();
 		var tdata : Vector.<Number>;
 		var odata : Vector.<Number>;
-		var channelsBySID : Object = new Object();
+		var channelsBySID : Object = {};
 		var transform : DAETransform;
 		var channel : DAEChannel;
 		var minTime : Number = Number.MAX_VALUE;
 		var maxTime : Number = -minTime;
-		var i : int, j : int, frame : int;
+		var i : uint, j : uint, frame : int;
 	
 		for (i = 0; i < this.channels.length; i++) {
 			channel = this.channels[i];
@@ -2434,7 +1864,6 @@ class DAENode extends DAEElement
 				var m : Matrix3D = new Matrix3D();
 				var found : Boolean = false;
 				var frameData : DAEFrameData = null;
-				
 				channel = channelsBySID[transform.sid] as DAEChannel;
 				frameData = channel.sampler.getFrameData(time);
 
@@ -2451,39 +1880,43 @@ class DAENode extends DAEElement
 								//	trace(channel.arrayIndices[0] * 4 + channel.arrayIndices[1])
 								}
 								
-							} 
-							else if (channel.dotAccess) {
+							} else if (channel.dotAccess) {
 								trace ("unhandled matrix array access");
-							}
-							else if (odata.length == 16) {
+								
+							} else if (odata.length == 16) {
 								m.rawData = odata;
 								m.transpose();
+								
 							} else {
 								trace("unhandled matrix " + transform.sid + " " + odata);
-							}
+							}							
 							break;
+							
 						case "rotate":
 							if (channel.arrayAccess) {
 								trace ("unhandled rotate array access");
-							} 
-							else if (channel.dotAccess) {
+								
+							}else if (channel.dotAccess) {
+								
 								switch (channel.dotAccessor) {
 									case "ANGLE":
 										m.appendRotation(odata[0], new Vector3D(tdata[0], tdata[1], tdata[2]));
 										break;
 									default:
 										trace ("unhandled rotate dot access " + channel.dotAccessor);
-										break;
 								}
+								
 							} else {
 								trace ("unhandled rotate");
 							}
 							break;
+							
 						case "scale":
 							if (channel.arrayAccess) {
 								trace ("unhandled scale array access");
-							} 
-							else if (channel.dotAccess) {
+								
+							} else if (channel.dotAccess) {
+								
 								switch (channel.dotAccessor) {
 									case "X":
 										m.appendScale(odata[0], tdata[1], tdata[2]);
@@ -2496,17 +1929,19 @@ class DAENode extends DAEElement
 										break;
 									default:
 										trace ("unhandled scale dot access " + channel.dotAccessor);
-										break;
 								}
+								
 							} else {
 								trace("unhandled scale: " + odata.length);
 							}
 							break;
+							
 						case "translate":
 							if (channel.arrayAccess) {
 								trace ("unhandled translate array access");
-							} 
-							else if (channel.dotAccess) {
+								
+							}else if (channel.dotAccess) {
+								
 								switch (channel.dotAccessor) {
 									case "X":
 										m.appendTranslation(odata[0], tdata[1], tdata[2]);
@@ -2519,28 +1954,30 @@ class DAENode extends DAEElement
 										break;
 									default:
 										trace ("unhandled translate dot access " + channel.dotAccessor);
-										break;
-								}	
+								}
+								
 							} else {
 								m.appendTranslation(odata[0], odata[1], odata[2]);
 							}
 							break;
+							
 						default:
 							trace ("unhandled transform type " + transform.type);
 							continue;
 					}
 					matrix.prepend(m);
+					
 				} else {
 					matrix.prepend(transform.matrix);
 				}
+				
 			} else {
 				matrix.prepend(transform.matrix);
 			}
 		}
 		
-		if (DAEElement.USE_LEFT_HANDED) {
+		if (DAEElement.USE_LEFT_HANDED)
 			convertMatrix(matrix);
-		}
 		
 		return matrix;
 	}
@@ -2548,14 +1985,10 @@ class DAENode extends DAEElement
 	public function get matrix() : Matrix3D
 	{
 		var matrix : Matrix3D = new Matrix3D();
-		
-		for (var i:int = 0; i < this.transforms.length; i++) {
+		for (var i:uint = 0; i < this.transforms.length; i++)
 			matrix.prepend(this.transforms[i].matrix);
-		}
 		
-		if (DAEElement.USE_LEFT_HANDED) {
-			convertMatrix(matrix);
-		}
+		if (DAEElement.USE_LEFT_HANDED)  convertMatrix(matrix);
 		
 		return matrix;
 	}
@@ -2563,62 +1996,31 @@ class DAENode extends DAEElement
 
 class DAEVisualScene extends DAENode
 {
-	public function DAEVisualScene(parser : DAEParser, element : XML = null)
-	{
-		super(parser, element);
-	}
+	public function DAEVisualScene(parser : DAEParser, element : XML = null) { super(parser, element);}
 	
-	/**
-	 * @inheritDoc
-	 */
-	public override function deserialize(element : XML) : void
-	{	
-		super.deserialize(element);
-	}
+	public override function deserialize(element : XML) : void {super.deserialize(element);}
 	
-	/**
-	 * Finds a node by its ID.
-	 * 
-	 * @param id
-	 * @param node
-	 * 
-	 * @return The found node or null on failure.
-	 */ 
 	public function findNodeById(id : String, node : DAENode = null) : DAENode
 	{
 		node = node || this;
+		if (node.id == id) return node;
 		
-		if (node.id == id)
-			return node;
-		
-		for (var i:int = 0; i < node.nodes.length; i++) {
+		for (var i:uint = 0; i < node.nodes.length; i++) {
 			var result:DAENode = findNodeById(id, node.nodes[i]);
-			if (result)
-				return result;
+			if (result) return result;
 		}
 		
 		return null;
 	}
 	
-	/**
-	 * Finds a node by its ID.
-	 * 
-	 * @param sid
-	 * @param node
-	 * 
-	 * @return The found node or null on failure.
-	 */ 
 	public function findNodeBySid(sid : String, node : DAENode = null) : DAENode
 	{
 		node = node || this;
+		if (node.sid == sid) return node;
 		
-		if (node.sid == sid)
-			return node;
-		
-		for (var i:int = 0; i < node.nodes.length; i++) {
+		for (var i:uint = 0; i < node.nodes.length; i++) {
 			var result:DAENode = findNodeBySid(sid, node.nodes[i]);
-			if (result)
-				return result;
+			if (result) return result;
 		}
 		
 		return null;
@@ -2629,47 +2031,28 @@ class DAEVisualScene extends DAENode
 		node.world = node.matrix.clone();
 		if (parent && parent.world)
 			node.world.append(parent.world);
-		for (var i:int = 0; i < node.nodes.length; i++) {
+			
+		for (var i:uint = 0; i < node.nodes.length; i++)
 			updateTransforms(node.nodes[i], node);
-		}
 	}
 }
 
 class DAEScene extends DAEElement
 {
 	public var instance_visual_scene : DAEInstanceVisualScene;
-	public var instance_physics_scene : DAEInstancePhysicsScene;
 	
-	public function DAEScene(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEScene(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element : XML) : void
 	{
 		super.deserialize(element);
-		
 		this.instance_visual_scene = null;
-		this.instance_physics_scene = null;
-		
 		traverseChildren(element);
 	}
 	
 	protected override function traverseChildHandler(child:XML, nodeName:String):void
 	{
-		switch (nodeName) {
-			case "instance_visual_scene":
-				this.instance_visual_scene = new DAEInstanceVisualScene(child);
-				break;
-			case "instance_physics_scene":
-				this.instance_physics_scene = new DAEInstancePhysicsScene(child);
-				break;
-			default:
-				break;
-		}
+		if (nodeName == "instance_visual_scene") this.instance_visual_scene = new DAEInstanceVisualScene(child);
 	}
 }
 
@@ -2680,32 +2063,24 @@ class DAEMorph extends DAEEffect
 	public var targets : Vector.<String>;
 	public var weights : Vector.<Number>;
 	
-	public function DAEMorph(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEMorph(element : XML = null) { super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element:XML):void
 	{
 		super.deserialize(element);
-		
 		this.source = element.@source.toString().replace(/^#/, "");
 		this.method = element.@method.toString();
 		this.method = this.method.length ? this.method : "NORMALIZED";
 		this.targets = new Vector.<String>();
 		this.weights = new Vector.<Number>();
 		
-		var sources : Object = new Object();
+		var sources : Object = {};
 		var source : DAESource;
 		var input : DAEInput;
 		var list : XMLList = element.ns::source;
-		var i : int;
-		
+		 
 		if (element.ns::targets && element.ns::targets.length() > 0) {
-			for (i = 0; i < list.length(); i++) {
+			for (var i : uint = 0; i < list.length(); i++) {
 				source = new DAESource(list[i]);
 				sources[source.id] = source;
 			}
@@ -2719,9 +2094,6 @@ class DAEMorph extends DAEEffect
 						break;
 					case "MORPH_WEIGHT":
 						this.weights = source.floats;
-						break;
-					default:
-						break;
 				}
 			}
 		}
@@ -2745,14 +2117,8 @@ class DAESkin extends DAEElement
 	public var jointSourceType:String;
 	public var maxBones:uint;
 	
-	public function DAESkin(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAESkin(element : XML = null){super(element);}
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element:XML):void
 	{
 		super.deserialize(element);
@@ -2764,8 +2130,8 @@ class DAESkin extends DAEElement
 		this.weights = new Vector.<Vector.<DAEVertexWeight>>();
 		
 		var children:XMLList = element.children();
-		var i:int;
-		var sources : Object = new Object();
+		var i:uint;
+		var sources : Object = {};
 		
 		for (i = 0; i < element.ns::source.length(); i++) {
 			var source : DAESource = new DAESource(element.ns::source[i]);
@@ -2776,8 +2142,7 @@ class DAESkin extends DAEElement
 			var child:XML = children[i];
 			var name:String = child.name().localName;
 			
-			switch (name)
-			{
+			switch (name) {
 				case "bind_shape_matrix":
 					parseBindShapeMatrix(child);
 					break;
@@ -2797,7 +2162,7 @@ class DAESkin extends DAEElement
 	
 	public function getJointIndex(joint : String) : int
 	{
-		for (var i:int = 0; i < this.joints.length; i++) {
+		for (var i:uint = 0; i < this.joints.length; i++) {
 			if (this.joints[i] == joint)
 				return i;
 		}
@@ -2807,12 +2172,10 @@ class DAESkin extends DAEElement
 	private function parseBindShapeMatrix(element : XML) : void
 	{
 		var values : Vector.<Number> = readFloatArray(element);
-		
 		this.bind_shape_matrix = new Matrix3D(values);
 		this.bind_shape_matrix.transpose();
-		if (DAEElement.USE_LEFT_HANDED) {
+		if (DAEElement.USE_LEFT_HANDED)
 			convertMatrix(this.bind_shape_matrix);
-		}
 	}
 	
 	private function parseJoints(element : XML, sources : Object) : void
@@ -2820,7 +2183,7 @@ class DAESkin extends DAEElement
 		var list:XMLList = element.ns::input;
 		var input:DAEInput;
 		var source:DAESource;
-		var i:int, j:int;
+		var i:uint, j:uint;
 		
 		for (i = 0; i < list.length(); i++) {
 			input = new DAEInput(list[i]);	
@@ -2840,9 +2203,6 @@ class DAESkin extends DAEElement
 						}
 						inv_bind_matrix.push(matrix);
 					}
-					break;
-				default:
-					break;
 			}
 		}
 	}
@@ -2853,22 +2213,20 @@ class DAESkin extends DAEElement
 		var input:DAEInput;
 		var inputs:Vector.<DAEInput> = new Vector.<DAEInput>();
 		var source:DAESource;
-		var i:int, j:int, k:int;
+		var i:uint, j:uint, k:uint;
 		
 		if (!element.ns::vcount.length() || !element.ns::v.length())
 			throw new Error("Can't parse vertex weights");
 		
 		var vcount:Vector.<int> = readIntArray(element.ns::vcount[0]);
 		var v:Vector.<int> = readIntArray(element.ns::v[0]);
-		var numWeights:int = parseInt(element.@count.toString(), 10);
+		var numWeights:uint = parseInt(element.@count.toString(), 10);
 		var index:uint = 0;
-		
 		this.maxBones = 0;
 		
-		for (i = 0; i < list.length(); i++) {
+		for (i = 0; i < list.length(); i++)
 			inputs.push(new DAEInput(list[i]));
-		}
-		
+		 
 		for (i = 0; i < vcount.length; i++) {
 			var numBones:uint = vcount[i];
 			var vertex_weights:Vector.<DAEVertexWeight> = new Vector.<DAEVertexWeight>();
@@ -2897,6 +2255,7 @@ class DAESkin extends DAEElement
 				vertex_weights.push(influence);
 				index += inputs.length;
 			}
+			
 			this.weights.push(vertex_weights);
 		}
 	}
@@ -2907,28 +2266,19 @@ class DAEController extends DAEElement
 	public var skin : DAESkin;
 	public var morph : DAEMorph;
 	
-	public function DAEController(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEController(element : XML = null) { super(element); }
 	
-	/**
-	 * @inheritDoc
-	 */
 	public override function deserialize(element:XML):void
 	{
 		super.deserialize(element);
-		
 		this.skin = null;
 		this.morph = null;
 		
 		if (element.ns::skin && element.ns::skin.length()) {
 			this.skin = new DAESkin(element.ns::skin[0]);
-		}
-		else if (element.ns::morph && element.ns::morph.length()) {
+		} else if (element.ns::morph && element.ns::morph.length()) {
 			this.morph = new DAEMorph(element.ns::morph[0]);
-		}
-		else {
+		} else {
 			throw new Error("DAEController: could not find a <skin> or <morph> element");
 		}
 	}
@@ -2942,35 +2292,26 @@ class DAESampler extends DAEElement
 	public var interpolation:Vector.<String>;
 	public var minTime:Number;
 	public var maxTime:Number;
-	
 	private var _inputs:Vector.<DAEInput>;
 	
-	public function DAESampler(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAESampler(element : XML = null){ super(element);}
 	
 	public override function deserialize(element:XML):void
 	{
 		super.deserialize(element);
-		
 		var list:XMLList = element.ns::input;
-		var i:int;
-		
+		var i:uint;
 		_inputs = new Vector.<DAEInput>();
 		
-		for (i = 0; i < list.length(); i++) {
+		for (i = 0; i < list.length(); i++)
 			_inputs.push(new DAEInput(list[i]));
-		}
 	}
-	
 	
 	public function create(sources:Object):void
 	{
 		var input:DAEInput;
 		var source:DAESource;
-		var i:int, j:int;
-		
+		var i:uint, j:uint;
 		this.input = new Vector.<Number>();
 		this.output = new Vector.<Vector.<Number>>();
 		this.interpolation = new Vector.<String>();
@@ -2995,30 +2336,18 @@ class DAESampler extends DAEElement
 					break;
 				case "INTEROLATION":
 					this.interpolation = source.strings;
-					break;
-				default:
-					break;
 			}
 		}
 	}
 	
-	/**
-	 * Gets frameData by time.
-	 * 
-	 * @param	time
-	 * 
-	 * @return frame
-	 */ 
 	public function getFrameData(time : Number) : DAEFrameData
 	{
 		var frameData : DAEFrameData = new DAEFrameData(0, time);
+		
+		if (!this.input || this.input.length == 0)  return null;
+		
 		var a:Number, b:Number;
-		var i:int;
-		
-		if (!this.input || this.input.length == 0) {
-			return null;
-		}
-		
+		var i:uint;
 		frameData.valid = true;
 		frameData.time = time;
 			
@@ -3026,13 +2355,14 @@ class DAESampler extends DAEElement
 			frameData.frame = 0;
 			frameData.dt = 0;
 			frameData.data = this.output[0];
-		}
-		else if (time >= this.input[this.input.length - 1]) {
+			
+		} else if (time >= this.input[this.input.length - 1]) {
 			frameData.frame = this.input.length - 1;
 			frameData.dt = 0;
 			frameData.data = this.output[frameData.frame];
-		}
-		else {
+			
+		} else {
+			
 			for (i = 0; i < this.input.length - 1; i++) {
 				if (time >= this.input[i] && time < this.input[i + 1] ) {
 					frameData.frame = i;
@@ -3081,10 +2411,7 @@ class DAEChannel extends DAEElement
 	public var dotAccessor:String;
 	public var arrayIndices:Array;
 	
-	public function DAEChannel(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEChannel(element : XML = null){ super(element);}
 	
 	public override function deserialize(element:XML):void
 	{
@@ -3093,12 +2420,9 @@ class DAEChannel extends DAEElement
 		this.source = element.@source.toString().replace(/^#/, "");
 		this.target = element.@target.toString();
 		this.sampler = null;
-		
 		var parts:Array = this.target.split("/");
-		
 		this.targetId = parts.shift();
 		this.arrayAccess = this.dotAccess = false;
-		
 		var tmp:String = parts.shift();
 		
 		if (tmp.indexOf("(") >= 0) {
@@ -3106,18 +2430,16 @@ class DAEChannel extends DAEElement
 			this.arrayAccess = true;
 			this.arrayIndices = new Array();
 			this.targetSid = parts.shift();
-			for (var i:int = 0; i < parts.length; i++)
-			{
+			for (var i:uint = 0; i < parts.length; i++) 
 				this.arrayIndices.push(parseInt(parts[i].replace(")", ""), 10));
-			}
-		}
-		else if (tmp.indexOf(".") >= 0) {
+				
+		} else if (tmp.indexOf(".") >= 0) {
 			parts = tmp.split(".");
 			this.dotAccess = true;
 			this.targetSid = parts[0];
 			this.dotAccessor = parts[1];
-		}
-		else {
+			
+		} else {
 			this.targetSid = tmp;
 		}
 	}
@@ -3129,21 +2451,15 @@ class DAEAnimation extends DAEElement
 	public var channels:Vector.<DAEChannel>;
 	public var sources : Object;
 	
-	public function DAEAnimation(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAEAnimation(element : XML = null){super(element);}
 	
 	public override function deserialize(element:XML):void
 	{
 		super.deserialize(element);
-		
 		this.samplers = new Vector.<DAESampler>();
 		this.channels = new Vector.<DAEChannel>();
-		this.sources = new Object();
-		
+		this.sources = {};
 		traverseChildren(element);
-
 		setupChannels(this.sources);
 	}
 	
@@ -3159,9 +2475,6 @@ class DAEAnimation extends DAEElement
 				break;
 			case "channel":
 				this.channels.push(new DAEChannel(child));
-				break;
-			default:
-				break;
 		}
 	}
 	
@@ -3183,10 +2496,7 @@ class DAELightType extends DAEElement
 {
 	public var color : DAEColor;
 	
-	public function DAELightType(element : XML = null)
-	{
-		super(element);
-	}
+	public function DAELightType(element : XML = null){super(element);}
 	
 	public override function deserialize(element:XML):void
 	{
@@ -3198,9 +2508,7 @@ class DAELightType extends DAEElement
 	{
 		if (nodeName == "color") {
 			var f:Vector.<Number> = readFloatArray(child);
-			
 			this.color = new DAEColor();
-		
 			color.r = f[0];
 			color.g = f[1];
 			color.b = f[2];
@@ -3208,240 +2516,7 @@ class DAELightType extends DAEElement
 		}
 	}
 }
-
-class DAEAmbient extends DAELightType
-{
-	public function DAEAmbient(element : XML = null)
-	{
-		super(element);
-	}
-}
-
-class DAEDirectional extends DAELightType
-{
-	public function DAEDirectional(element : XML = null)
-	{
-		super(element);
-	}
-}
-
-class DAEPoint extends DAELightType
-{
-	public function DAEPoint(element : XML = null)
-	{
-		super(element);
-	}
-}
-
-class DAESpot extends DAELightType
-{
-	public function DAESpot(element : XML = null)
-	{
-		super(element);
-	}
-}
-
-class DAELight extends DAEElement
-{
-	public var light : DAELightType;
-	
-	public function DAELight(element : XML = null)
-	{
-		super(element);
-	}
-	
-	public override function deserialize(element:XML):void
-	{
-		super.deserialize(element);
-		this.light = null;
-		traverseChildren(element.ns::technique_common[0]);
-	}
-	
-	protected override function traverseChildHandler(child:XML, nodeName:String):void
-	{
-		switch (nodeName) {
-			case "ambient":
-				this.light = new DAEAmbient(child);
-				break;
-			case "directional":
-				this.light = new DAEDirectional(child);
-				break;
-			case "point":
-				this.light = new DAEPoint(child);
-				break;
-			case "spot":
-				this.light = new DAESpot(child);
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-class DAEOrthographic extends DAEElement
-{
-	public var xmag : Number;
-	public var ymag : Number;
-	public var aspect_ratio : Number;
-	public var znear : Number;
-	public var zfar : Number;
-	public var sids : Object;
-	
-	public function DAEOrthographic(element : XML = null)
-	{
-		super(element);
-	}
-	
-	public override function deserialize(element:XML):void
-	{
-		super.deserialize(element);
-		this.xmag = this.ymag = NaN;
-		this.sids = new Object();
-		traverseChildren(element);
-	}
-	
-	protected override function traverseChildHandler(child:XML, nodeName:String):void
-	{
-		var sid : String = child.@sid.toString();
-		
-		if (sid.length) {
-			this.sids[nodeName] = sid;
-		}
-		
-		switch (nodeName) {
-			case "xmag":
-				this.xmag = parseFloat(readText(child));
-				break;
-			case "ymag":
-				this.ymag = parseFloat(readText(child));
-				break;
-			case "aspect_ratio":
-				this.aspect_ratio = parseFloat(readText(child));
-				break;
-			case "zfar":
-				this.zfar = parseFloat(readText(child));
-				break;
-			case "znear":
-				this.znear = parseFloat(readText(child));
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-class DAEPerspective extends DAEElement
-{
-	public var xfov : Number;
-	public var yfov : Number;
-	public var aspect_ratio : Number;
-	public var znear : Number;
-	public var zfar : Number;
-	public var sids : Object;
-	
-	public function DAEPerspective(element : XML = null)
-	{
-		super(element);
-	}
-	
-	public override function deserialize(element:XML):void
-	{
-		super.deserialize(element);
-		this.xfov = this.yfov = NaN;
-		this.sids = new Object();
-		traverseChildren(element);
-	}
-	
-	protected override function traverseChildHandler(child:XML, nodeName:String):void
-	{
-		var sid : String = child.@sid.toString();
-		
-		if (sid.length) {
-			this.sids[nodeName] = sid;
-		}
-		
-		switch (nodeName) {
-			case "xfov":
-				this.xfov = parseFloat(readText(child));
-				break;
-			case "yfov":
-				this.yfov = parseFloat(readText(child));
-				break;
-			case "aspect_ratio":
-				this.aspect_ratio = parseFloat(readText(child));
-				break;
-			case "zfar":
-				this.zfar = parseFloat(readText(child));
-				break;
-			case "znear":
-				this.znear = parseFloat(readText(child));
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-class DAEOptics extends DAEElement
-{
-	public var orthographic : DAEOrthographic;
-	public var perspective : DAEPerspective;
-	
-	public function DAEOptics(element : XML = null)
-	{
-		super(element);
-	}
-	
-	public override function deserialize(element:XML):void
-	{
-		super.deserialize(element);
-		
-		traverseChildren(element.ns::technique_common[0]);
-	}
-	
-	protected override function traverseChildHandler(child:XML, nodeName:String):void
-	{
-		switch (nodeName) {
-			case "orthographic":
-				this.orthographic = new DAEOrthographic(child);
-				break;
-			case "perspective":
-				this.perspective = new DAEPerspective(child);
-				break;
-			default:
-				break;
-		}
-	}
-}
-
-class DAECamera extends DAEElement
-{
-	public var optics : DAEOptics;
-	
-	public function DAECamera(element : XML = null)
-	{
-		super(element);
-	}
-	
-	public override function deserialize(element:XML):void
-	{
-		super.deserialize(element);
-		
-		traverseChildren(element);
-	}
-	
-	protected override function traverseChildHandler(child:XML, nodeName:String):void
-	{
-		switch (nodeName) {
-			case "optics":
-				this.optics = new DAEOptics(child);
-				break;
-			default:
-				break;
-		}
-	}
-}
-
+ 
 class DAEParserState
 {
 	public static const LOAD_XML 			: uint = 0;
@@ -3449,10 +2524,7 @@ class DAEParserState
 	public static const PARSE_MATERIALS 	: uint = 2;
 	public static const PARSE_GEOMETRIES 	: uint = 3;
 	public static const PARSE_CONTROLLERS 	: uint = 4;
-	public static const PARSE_CAMERAS 		: uint = 5;
-	public static const PARSE_LIGHTS 		: uint = 6;
-	public static const PARSE_VISUAL_SCENE 	: uint = 7;
-	public static const PARSE_ANIMATIONS 	: uint = 8;
-	public static const PARSE_COMPLETE 		: uint = 9;
+	public static const PARSE_VISUAL_SCENE 	: uint = 5;
+	public static const PARSE_ANIMATIONS 	: uint = 6;
+	public static const PARSE_COMPLETE 		: uint = 7;
 }
-
