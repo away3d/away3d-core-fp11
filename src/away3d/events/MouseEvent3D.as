@@ -14,6 +14,8 @@ package away3d.events
 	 */
 	public class MouseEvent3D extends Event
 	{
+		private var _propagataionStopped : Boolean;
+		
 		/**
 		 * Defines the value of the type property of a mouseOver3d event object.
 		 */
@@ -157,6 +159,36 @@ package away3d.events
 		{
 			super(type, true, true);
 		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function get bubbles() : Boolean
+		{
+			// Don't bubble i propagation has been stopped.
+			return (super.bubbles && !_propagataionStopped);
+		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function stopPropagation() : void
+		{
+			super.stopPropagation();
+			_propagataionStopped = true;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function stopImmediatePropagation() : void
+		{
+			super.stopImmediatePropagation();
+			_propagataionStopped = true;
+		}
+		
 
 		/**
 		 * Creates a copy of the MouseEvent3D object and sets the value of each property to match that of the original.
