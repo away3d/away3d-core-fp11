@@ -5,7 +5,6 @@ package away3d.core.managers
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
 	
-	import flash.display.Stage;
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DRenderMode;
