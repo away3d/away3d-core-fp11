@@ -12,13 +12,18 @@ package away3d.core.managers.mouse
 	{
 		private var _mouseRayCollider:MouseRayCollider;
 
-		public function RayMouse3DManager() {
+		// TODO: add option of finding best hit?
+
+		private var _findBestHit:Boolean;
+
+		public function RayMouse3DManager( findBestHit:Boolean ) {
 			super();
+			_findBestHit = findBestHit;
 		}
 
 		override public function set view( view:View3D ):void {
 			super.view = view;
-			_mouseRayCollider = new MouseRayCollider( view );
+			_mouseRayCollider = new MouseRayCollider( view, _findBestHit );
 		}
 
 		override protected function updatePicker():void {

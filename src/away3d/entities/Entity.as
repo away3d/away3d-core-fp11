@@ -36,6 +36,7 @@ package away3d.entities
 		
 		private var _showBounds : Boolean;
 		private var _partitionNode : EntityNode;
+
 		protected var _boundsRayCollider:RayColliderBase;
 		protected var _triangleRayCollider:RayColliderBase;
 

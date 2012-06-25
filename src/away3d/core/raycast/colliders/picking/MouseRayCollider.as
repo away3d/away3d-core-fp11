@@ -16,10 +16,15 @@ package away3d.core.raycast.colliders.picking
 		private var _view:View3D;
 		private var _multipleBoundsCollider:MultipleBoundsRayCollider;
 
-		public function MouseRayCollider( view:View3D ) {
+		private var _findBestHit:Boolean;
+
+		// TODO: implement _findBestHit
+
+		public function MouseRayCollider( view:View3D, findBestHit:Boolean ) {
 			super();
 			_view = view;
 			_multipleBoundsCollider = new MultipleBoundsRayCollider();
+			_findBestHit = findBestHit;
 		}
 
 		public function updateMouseRay():void {
@@ -86,7 +91,7 @@ package away3d.core.raycast.colliders.picking
 
 			if( _numberOfCollisions > 0 ) {
 
-				// does not search for closest collision, first found will do... // TODO: add option of finding best hit?
+				// does not search for closest collision, first found will do... // TODO: implement _findBestHit
 				// Example: Bound B is inside bound A. Bound A's collision t is closer than bound B. Both have tri colliders. Bound A surface hit
 				// is further than bound B surface hit. Atm, this algorithm would fail in detecting that B's surface hit is actually closer.
 				// Suggestions: calculate ray bounds near and far t's and evaluate bound intersections within ray trajectory.
