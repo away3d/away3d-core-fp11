@@ -32,7 +32,7 @@ package away3d.core.render
 		protected var _backgroundG : Number = 0;
 		protected var _backgroundB : Number = 0;
 		protected var _backgroundAlpha : Number = 1;
-		protected var _viewDeferContextCalls : Boolean = false;
+		protected var _shareContext : Boolean = false;
 
 		protected var _swapBackBuffer : Boolean = true;
 
@@ -197,19 +197,19 @@ package away3d.core.render
 		}
 
 		/**
-		 * Defer the Context3D calls to an externally managed process to enable sharing of the
-		 * current Stage3D instance across multiple frameworks.
-		 *
+		 * Defers control of Context3D clear() and present() calls to Stage3DProxy, enabling multiple Stage3D frameworks
+		 * to share the same Context3D object.
+		 * 
 		 * @private
 		 */
-		arcane function get viewDeferContextCalls() : Boolean
+		arcane function get shareContext() : Boolean
 		{
-			return _viewDeferContextCalls;
+			return _shareContext;
 		}
 
-		arcane function set viewDeferContextCalls(value : Boolean) : void
+		arcane function set shareContext(value : Boolean) : void
 		{
-			_viewDeferContextCalls = value;
+			_shareContext = value;
 		}
 
 		/**
@@ -266,7 +266,7 @@ package away3d.core.render
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			if (!_viewDeferContextCalls) {
+			if (!_shareContext) {
 				if (additionalClearMask != 0)
 					_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 			}
@@ -276,7 +276,7 @@ package away3d.core.render
 
 			draw(entityCollector, target);
 
-			if ( !_viewDeferContextCalls ) {
+			if ( !_shareContext ) {
 				if( _snapshotRequired && _snapshotBitmapData ) {
 					_context.drawToBitmapData( _snapshotBitmapData );
 					_snapshotRequired = false;

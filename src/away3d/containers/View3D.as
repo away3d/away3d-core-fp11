@@ -76,7 +76,7 @@
 		private var _menu0:ContextMenuItem;
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
-		private var _deferContextCalls:Boolean = false;
+		private var _shareContext:Boolean = false;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -470,17 +470,17 @@
 		}
 
 		/**
-		 * Used to defer Context3D calls to an external process, to enable multiple Stage3D framewords
-		 * to utilise the same Stage3D instance.
+		 * Defers control of Context3D clear() and present() calls to Stage3DProxy, enabling multiple Stage3D frameworks
+		 * to share the same Context3D object.
 		 */
-		public function get deferContextCalls() : Boolean
+		public function get shareContext() : Boolean
 		{
-			return _deferContextCalls;
+			return _shareContext;
 		}
 
-		public function set deferContextCalls(value : Boolean) : void
+		public function set shareContext(value : Boolean) : void
 		{
-			_deferContextCalls = value;
+			_shareContext = value;
 		}
 
 		/**
@@ -488,7 +488,7 @@
 		 */
 		protected function updateBackBuffer() : void
 		{
-			if (!_deferContextCalls) {
+			if (!_shareContext) {
 				if( _width && _height) {
 					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
 					_backBufferInvalid = false;
@@ -522,7 +522,7 @@
 			if (_backBufferInvalid)
 				updateBackBuffer();
 				
-			if (_deferContextCalls) {
+			if (_shareContext) {
 				width = _stage3DProxy.width;
 				height = _stage3DProxy.height;
 			}
@@ -551,9 +551,9 @@
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
-				if (!_deferContextCalls) _stage3DProxy._context3D.present();
+				if (!_shareContext) _stage3DProxy._context3D.present();
 			} else {
-				_renderer.viewDeferContextCalls = _deferContextCalls;
+				_renderer.shareContext = _shareContext;
 				_renderer.render(_entityCollector);
 			}
 
