@@ -3,6 +3,7 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.BitmapTexture;
@@ -16,7 +17,6 @@ package away3d.materials.methods
 		private static var _grainTexture : BitmapTexture;
 		private static var _grainUsages : int;
 		private static var _grainBitmapData : BitmapData;
-		private var _grainMapIndex : int;
 		private var _highRes : Boolean;
 		private var _depthMapSize : int;
 		private var _range : Number = 1;
@@ -88,16 +88,16 @@ package away3d.materials.methods
 			}
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-            stage3DProxy.setTextureAt(_grainMapIndex, _grainTexture.getTextureForStage3D(stage3DProxy));
+			super.activate(vo,  stage3DProxy);
+            stage3DProxy.setTextureAt(vo.texturesIndex+1, _grainTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var grainRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
@@ -108,7 +108,7 @@ package away3d.materials.methods
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
 
-            _fragmentDataIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 
@@ -203,8 +203,7 @@ package away3d.materials.methods
 
 			code += "mul " + targetReg+".w, " + targetReg+".w, " + customDataReg+".x\n";  // average
 
-			_depthMapIndex = depthMapRegister.index;
-			_grainMapIndex = grainRegister.index;
+			vo.texturesIndex = depthMapRegister.index;
 
 			return code;
 		}

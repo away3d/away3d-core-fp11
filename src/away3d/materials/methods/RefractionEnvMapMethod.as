@@ -12,9 +12,7 @@ package away3d.materials.methods
 
 	public class RefractionEnvMapMethod extends EffectMethodBase
 	{
-		private var _cubeMapIndex : int;
 		private var _data : Vector.<Number>;
-		private var _dataIndex : int;
 		private var _envMap : CubeTextureBase;
 
 		private var _dispersionR : Number = 0;
@@ -25,7 +23,7 @@ package away3d.materials.methods
 		// example values for dispersion: dispersionR : Number = -0.03, dispersionG : Number = -0.01, dispersionB : Number = .0015
 		public function RefractionEnvMapMethod(envMap : CubeTextureBase, refractionIndex : Number = .9, dispersionR : Number = 0, dispersionG : Number = 0, dispersionB : Number = 0)
 		{
-			super(true, true, false);
+			super();
 			_envMap = envMap;
 			_data = new Vector.<Number>(8, true);
 			_dispersionR = dispersionR;
@@ -37,6 +35,12 @@ package away3d.materials.methods
 			_data[5] = 0;
 			_data[6] = 1;
 			_data[7] = 1;
+		}
+
+		override arcane function initData(vo : MethodVO) : void
+		{
+			vo.needsNormals = true;
+			vo.needsView = true;
 		}
 
 		public function get refractionIndex() : Number
@@ -103,13 +107,6 @@ package away3d.materials.methods
 			}
 		}
 
-		arcane override function reset() : void
-		{
-			super.reset();
-			_dataIndex = -1;
-			_cubeMapIndex = -1;
-		}
-
 		public function get alpha() : Number
 		{
 			return _data[6];
@@ -120,13 +117,13 @@ package away3d.materials.methods
 			_data[6] = value;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 2);
-			stage3DProxy.setTextureAt(_cubeMapIndex, _envMap.getTextureForStage3D(stage3DProxy));
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 2);
+			stage3DProxy.setTextureAt(vo.texturesIndex, _envMap.getTextureForStage3D(stage3DProxy));
 		}
 
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var data : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var data2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -136,8 +133,8 @@ package away3d.materials.methods
 			var refractionColor : ShaderRegisterElement;
 			var temp : ShaderRegisterElement;
 
-			_cubeMapIndex = cubeMapReg.index;
-			_dataIndex = data.index;
+			vo.texturesIndex = cubeMapReg.index;
+			vo.fragmentConstantsIndex = data.index;
 
 			refractionDir = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(refractionDir, 1);
@@ -164,7 +161,7 @@ package away3d.materials.methods
 					"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 					"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
-			code +=	"tex " + refractionColor + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n";
+			code +=	"tex " + refractionColor + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n";
 
 			if (_dispersionR != _dispersionG || _dispersionR == _dispersionB) {
 				// GREEN
@@ -185,7 +182,7 @@ package away3d.materials.methods
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 	//
-				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n" +
+				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 						"mov " + refractionColor + ".y, " + temp + ".y\n";
 
 
@@ -208,7 +205,7 @@ package away3d.materials.methods
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
-				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n" +
+				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 						"mov " + refractionColor + ".z, " + temp + ".z\n";
 			}
 

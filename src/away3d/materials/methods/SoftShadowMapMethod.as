@@ -23,7 +23,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -32,7 +32,7 @@ package away3d.materials.methods
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
-            _fragmentDataIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 
@@ -97,7 +97,7 @@ package away3d.materials.methods
 			regCache.removeFragmentTempUsage(depthCol);
 			code += "mul " + targetReg+".w, " + targetReg+".w, " + customDataReg+".x\n";  // average
 
-			_depthMapIndex = depthMapRegister.index;
+			vo.texturesIndex = depthMapRegister.index;
 
 			return code;
 		}

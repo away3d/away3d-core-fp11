@@ -1,6 +1,3 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.materials.methods
 {
 	import away3d.arcane;
@@ -16,16 +13,20 @@ package away3d.materials.methods
 	public class EnvMapMethod extends EffectMethodBase
 	{
 		private var _cubeTexture : CubeTextureBase;
-		private var _cubeMapIndex : int;
 		private var _data : Vector.<Number>;
-		private var _dataIndex : int;
 
 		public function EnvMapMethod(envMap : CubeTextureBase, alpha : Number = 1)
 		{
-			super(true, true, false);
+			super();
 			_cubeTexture = envMap;
 			_data = new Vector.<Number>(4, true);
 			_data[0] = alpha;
+		}
+
+		override arcane function initData(vo : MethodVO) : void
+		{
+			vo.needsNormals = true;
+			vo.needsView = true;
 		}
 
 		/**
@@ -39,14 +40,6 @@ package away3d.materials.methods
 		public function set envMap(value : CubeTextureBase) : void
 		{
 			_cubeTexture = value;
-		}
-
-
-		arcane override function reset() : void
-		{
-			super.reset();
-			_dataIndex = -1;
-			_cubeMapIndex = -1;
 		}
 
 		/**
@@ -66,25 +59,20 @@ package away3d.materials.methods
 			_data[0] = value;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
-			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 1);
+			stage3DProxy.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			stage3DProxy.setTextureAt(_cubeMapIndex, null);
-//		}
-
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var dataRegister : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-			_cubeMapIndex = cubeMapReg.index;
-			_dataIndex = dataRegister.index;
+			vo.texturesIndex = cubeMapReg.index;
+			vo.fragmentConstantsIndex = dataRegister.index;
 
 			// r = I - 2(I.N)*N
 			code += "dp3 " + temp + ".w, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz		\n" +
@@ -93,7 +81,7 @@ package away3d.materials.methods
 					"sub " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz, " + temp + ".xyz					\n" +
 			// 	(I = -V, so invert vector)
 					"neg " + temp + ".xyz, " + temp + ".xyz														\n" +
-					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (_smooth? "linear" : "nearest") + ",miplinear,clamp>\n" +
+					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n" +
 					"mul " + temp + ", " + temp + ", " + dataRegister + ".x										\n" +
 					"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz							\n";

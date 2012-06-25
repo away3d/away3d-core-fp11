@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -16,7 +17,6 @@ package away3d.materials.methods
 	{
 		private var _levels : uint;
 		private var _dataReg : ShaderRegisterElement;
-		private var _dataIndex : int;
 		private var _data : Vector.<Number>;
 
 		/**
@@ -57,14 +57,6 @@ package away3d.materials.methods
 			_data[3] = value;
 		}
 
-
-		arcane override function reset() : void
-		{
-			super.reset();
-
-			_dataIndex = -1;
-		}
-
 		/**
 		 * @inheritDoc
 		 */
@@ -77,20 +69,20 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_dataReg = regCache.getFreeFragmentConstant();
-			_dataIndex = _dataReg.index;
-			return super.getFragmentAGALPreLightingCode(regCache);
+			vo.secondaryFragmentConstantsIndex = _dataReg.index;
+			return super.getFragmentAGALPreLightingCode(vo, regCache);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
+			super.activate(vo, stage3DProxy);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.secondaryFragmentConstantsIndex, _data, 1);
 		}
 
 		/**
@@ -99,11 +91,8 @@ package away3d.materials.methods
 		 * @param regCache The register cache used for the shader compilation.
 		 * @return The AGAL fragment code for the method.
 		 */
-		private function clampDiffuse(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function clampDiffuse(vo : MethodVO, t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			regCache = regCache;
-			
 			return 	"mul " + t+".w, " + t+".w, " + _dataReg+".x\n" +
 					"frc " + t+".z, " + t+".w\n" +
 					"sub " + t+".y, " +  t+".w, " + t+".z\n" +

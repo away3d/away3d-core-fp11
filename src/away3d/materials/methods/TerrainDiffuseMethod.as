@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
@@ -16,11 +17,7 @@ package away3d.materials.methods
 		private var _splats : Vector.<Texture2DBase>;
 		private var _data : Vector.<Number>;
 		private var _numSplattingLayers : uint;
-		private var _tileRegisterIndex : int;
-		private var _splatTextureIndex : int;
-		private var _blendingTextureIndex : int;
 		private var _detailTexture : Texture2DBase;
-		private var _detailTextureIndex : int;
 
 		/**
 		 *
@@ -55,7 +52,7 @@ package away3d.materials.methods
 			}
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var albedo : ShaderRegisterElement;
@@ -65,7 +62,7 @@ package away3d.materials.methods
 			var detailTexRegister : ShaderRegisterElement;
 
 			// incorporate input from ambient
-			if (_numLights > 0) {
+			if (vo.numLights > 0) {
 				if (_shadowRegister)
 					code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
 				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz\n" +
@@ -80,6 +77,8 @@ package away3d.materials.methods
 
 			if (!_useTexture) throw new Error("TerrainDiffuseMethod requires a diffuse texture!");
 			_diffuseInputRegister = regCache.getFreeTextureReg();
+			vo.texturesIndex = _diffuseInputRegister.index;
+			var blendTexReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 
 			scaleRegister = regCache.getFreeFragmentConstant();
 
@@ -87,18 +86,17 @@ package away3d.materials.methods
 				detailScaleRegister = regCache.getFreeFragmentConstant();
 				detailBlendFactorRegister = regCache.getFreeFragmentConstant();
 				detailTexRegister = regCache.getFreeTextureReg();
-				_detailTextureIndex = detailTexRegister.index;
 			}
 
 			var uv : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uv, 1);
 
 			code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + ".x\n" +
-					getSplatSampleCode(albedo, _diffuseInputRegister, uv);
+					getSplatSampleCode(vo, albedo, _diffuseInputRegister, uv);
 
 			if (_detailTexture) {
 				code += "mul " + uv + ", " + _uvFragmentReg + ", " + detailScaleRegister + ".x\n" +
-						getSplatSampleCode(uv, detailTexRegister, uv) +
+						getSplatSampleCode(vo, uv, detailTexRegister, uv) +
 						"mul " + uv + ", " + uv + ", " + detailBlendFactorRegister + ".x\n" +
 						"mul " + albedo + ", " + albedo + ", " + uv + ".x\n";
 			}
@@ -106,23 +104,21 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(temp, 1);
 			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			var blendTexReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-			_blendingTextureIndex = blendTexReg.index;
+
 			code += "tex "+temp+", "+_uvFragmentReg +", "+blendTexReg+" <2d,linear,miplinear,clamp>\n";
 			var splatTexReg : ShaderRegisterElement;
 
-			_tileRegisterIndex = scaleRegister.index;
+			vo.fragmentConstantsIndex = scaleRegister.index;
 			var comps : Array = [ ".x",".y",".z",".w" ];
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
 				splatTexReg = regCache.getFreeTextureReg();
-				if (i == 0) _splatTextureIndex = splatTexReg.index;
 				code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + comps[i+1] + "\n" +
-						getSplatSampleCode(uv, splatTexReg, uv);
+						getSplatSampleCode(vo, uv, splatTexReg, uv);
 
 				if (_detailTexture) {
 					code += "mul " + temp2 + ", " + _uvFragmentReg + ", " + detailScaleRegister + comps[i+1] + "\n" +
-							getSplatSampleCode(temp2, detailTexRegister, temp2) +
+							getSplatSampleCode(vo, temp2, detailTexRegister, temp2) +
 							"mul " + temp2 + ", " + temp2 + ", " + detailBlendFactorRegister + comps[i+1] + "\n" +
 							"mul " + uv + ", " + temp2 + comps[i+1] + ", " + uv + "\n";
 				}
@@ -134,9 +130,7 @@ package away3d.materials.methods
 			regCache.removeFragmentTempUsage(uv);
 			regCache.removeFragmentTempUsage(temp);
 
-			_diffuseInputIndex = _diffuseInputRegister.index;
-
-			if (_numLights == 0)
+			if (vo.numLights == 0)
 				return code;
 
 			code += "mul " + targetReg + ".xyz, " + albedo + ".xyz, " + targetReg + ".xyz\n" +
@@ -146,21 +140,24 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-			stage3DProxy.setTextureAt(_blendingTextureIndex, _blendingTexture.getTextureForStage3D(stage3DProxy));
-
-			for (var i : int = 0; i < _numSplattingLayers; ++i)
-				stage3DProxy.setTextureAt(i + _splatTextureIndex, _splats[i].getTextureForStage3D(stage3DProxy));
+			var texIndex : int = vo.texturesIndex;
+			super.activate(vo, stage3DProxy);
+			stage3DProxy.setTextureAt(texIndex+1, _blendingTexture.getTextureForStage3D(stage3DProxy));
 
 			if (_detailTexture) {
-				stage3DProxy.setTextureAt(_detailTextureIndex, _detailTexture.getTextureForStage3D(stage3DProxy));
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _tileRegisterIndex, _data, 3);
+				stage3DProxy.setTextureAt(texIndex + 2, _detailTexture.getTextureForStage3D(stage3DProxy));
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 3);
+				++texIndex;
 			}
 			else {
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _tileRegisterIndex, _data, 1);
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 1);
 			}
+
+			texIndex += 2;
+			for (var i : int = 0; i < _numSplattingLayers; ++i)
+				stage3DProxy.setTextureAt(i + texIndex, _splats[i].getTextureForStage3D(stage3DProxy));
 		}
 
 		override public function set alphaThreshold(value : Number) : void
@@ -169,14 +166,14 @@ package away3d.materials.methods
 				throw new Error("Alpha threshold not supported for TerrainDiffuseMethod");
 		}
 
-		protected function getSplatSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
+		protected function getSplatSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
 		{
 			// TODO: not used
 			// var wrap : String = "wrap";
 			var filter : String;
 
-			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
-			else filter = _mipmap ? "nearest,mipnearest" : "nearest";
+			if (vo.useSmoothTextures) filter = vo.useMipmapping ? "linear,miplinear" : "linear";
+			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
 
 			uvReg ||= _uvFragmentReg;
 			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + ",wrap>\n";

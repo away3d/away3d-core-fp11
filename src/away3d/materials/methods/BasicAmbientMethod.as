@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
@@ -22,8 +23,7 @@ package away3d.materials.methods
 		private var _texture : Texture2DBase;
 		
 		protected var _ambientInputRegister : ShaderRegisterElement;
-		protected var _ambientInputIndex : int;
-		
+
 		private var _ambientColor : uint = 0xffffff;
 		private var _ambientData : Vector.<Number>;
 		private var _ambientR : Number = 0, _ambientG : Number = 0, _ambientB : Number = 0;
@@ -38,8 +38,13 @@ package away3d.materials.methods
 		 */
 		public function BasicAmbientMethod()
 		{
-			super(false, false, false);
+			super();
 			_ambientData = Vector.<Number>([0, 0, 0, 1]);
+		}
+
+		override arcane function initData(vo : MethodVO) : void
+		{
+			vo.needsUV = _useTexture;
 		}
 
 		/**
@@ -91,34 +96,8 @@ package away3d.materials.methods
 			var diff : BasicAmbientMethod = BasicAmbientMethod(method);
 			ambient = diff.ambient;
 			ambientColor = diff.ambientColor;
-			smooth = diff.smooth;
-			repeat = diff.repeat;
-			mipmap = diff.mipmap;
-			numLights = diff.numLights;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set numLights(value : int) : void
-		{
-			super.numLights = value;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsUV() : Boolean
-		{
-			return _useTexture;
-		}
-		
-		arcane override function reset() : void
-		{
-			super.reset();
-			_ambientInputIndex = -1;
-		}
-		
 		arcane override function cleanCompilationData() : void
 		{
 			super.cleanCompilationData();
@@ -128,38 +107,38 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			
 			if (_useTexture) {
 				_ambientInputRegister = regCache.getFreeTextureReg();
-				code += getTexSampleCode(targetReg, _ambientInputRegister) +
+				vo.texturesIndex = _ambientInputRegister.index;
+				code += getTexSampleCode(vo, targetReg, _ambientInputRegister) +
 					// apparently, still needs to un-premultiply :s
 					"div " + targetReg + ".xyz, " + targetReg + ".xyz, " + targetReg + ".w\n";
 			}
 			else {
 				_ambientInputRegister = regCache.getFreeFragmentConstant();
+				vo.fragmentConstantsIndex = _ambientInputRegister.index;
 				code += "mov " + targetReg + ", " + _ambientInputRegister + "\n";
 			}
-			
-			_ambientInputIndex = _ambientInputRegister.index;
-			
+
 			return code;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			updateAmbient();
 			
 			var context : Context3D = stage3DProxy._context3D;
-			if (_useTexture) {
-				stage3DProxy.setTextureAt(_ambientInputIndex, _texture.getTextureForStage3D(stage3DProxy));
-			}
-			else context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _ambientInputIndex, _ambientData, 1);
+			if (_useTexture)
+				stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+			else
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _ambientData, 1);
 		}
 
 		/**
@@ -171,7 +150,5 @@ package away3d.materials.methods
 			_ambientData[uint(1)] = _ambientG = ((_ambientColor >> 8) & 0xff) / 0xff * _ambient * _lightAmbientG;
 			_ambientData[uint(2)] = _ambientB = (_ambientColor & 0xff) / 0xff * _ambient * _lightAmbientB;
 		}
-
-
 	}
 }

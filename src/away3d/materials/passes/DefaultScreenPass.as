@@ -4,6 +4,7 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.events.ShadingMethodEvent;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
@@ -16,6 +17,8 @@ package away3d.materials.passes
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.ColorTransformMethod;
 	import away3d.materials.methods.EffectMethodBase;
+	import away3d.materials.methods.MethodVO;
+	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.utils.ShaderRegisterCache;
@@ -51,12 +54,18 @@ package away3d.materials.passes
 		private var _combinedLightSources : uint;
 
 		private var _colorTransformMethod : ColorTransformMethod;
+		private var _colorTransformMethodVO : MethodVO;
 		private var _normalMethod : BasicNormalMethod;
+		private var _normalMethodVO : MethodVO;
 		private var _ambientMethod : BasicAmbientMethod;
+		private var _ambientMethodVO : MethodVO;
 		private var _shadowMethod : ShadowMapMethodBase;
+		private var _shadowMethodVO : MethodVO;
 		private var _diffuseMethod : BasicDiffuseMethod;
+		private var _diffuseMethodVO : MethodVO;
 		private var _specularMethod : BasicSpecularMethod;
-		private var _methods : Vector.<EffectMethodBase>;
+		private var _specularMethodVO : MethodVO;
+		private var _methods : Vector.<MethodSet>;
 		private var _registerCache : ShaderRegisterCache;
 		private var _vertexCode : String;
 		private var _fragmentCode : String;
@@ -141,12 +150,24 @@ package away3d.materials.passes
 			super();
 			_material = material;
 
-			_methods = new Vector.<EffectMethodBase>();
+			init();
+		}
+
+		private function init() : void
+		{
+			_methods = new Vector.<MethodSet>();
 			_normalMethod = new BasicNormalMethod();
 			_ambientMethod = new BasicAmbientMethod();
 			_diffuseMethod = new BasicDiffuseMethod();
 			_specularMethod = new BasicSpecularMethod();
-			_normalMethod.parentPass = _diffuseMethod.parentPass = _specularMethod.parentPass = _ambientMethod.parentPass = this;
+			_normalMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_diffuseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_specularMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_ambientMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_normalMethodVO = _normalMethod.createMethodVO();
+			_ambientMethodVO = _ambientMethod.createMethodVO();
+			_diffuseMethodVO = _diffuseMethod.createMethodVO();
+			_specularMethodVO = _specularMethod.createMethodVO();
 		}
 
 		public function get animateUVs() : Boolean
@@ -203,11 +224,10 @@ package away3d.materials.passes
 			if (value) {
 				colorTransformMethod ||= new ColorTransformMethod();
 				_colorTransformMethod.colorTransform = value;
-				_colorTransformMethod.parentPass = this;
 			}
 			else if (!value) {
 				if (_colorTransformMethod)
-					_colorTransformMethod.parentPass = null;
+					colorTransformMethod = null;
 				colorTransformMethod = _colorTransformMethod = null;
 			}
 		}
@@ -219,15 +239,30 @@ package away3d.materials.passes
 		{
 			super.dispose();
 
-//			if (_normalMapTexture) _normalMapTexture.dispose();
+			_normalMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_normalMethod.dispose();
+			_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_diffuseMethod.dispose();
-			if (_shadowMethod) _shadowMethod.dispose();
+			if (_shadowMethod) {
+				_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_shadowMethod.dispose();
+			}
+			_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_ambientMethod.dispose();
-			if (_specularMethod) _specularMethod.dispose();
-			if (_colorTransformMethod) _colorTransformMethod.dispose();
-			for (var i : int = 0; i < _methods.length; ++i)
-				_methods[i].dispose();
+			if (_specularMethod) {
+				_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_specularMethod.dispose();
+			}
+			if (_colorTransformMethod) {
+				_colorTransformMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_colorTransformMethod.dispose();
+			}
+			for (var i : int = 0; i < _methods.length; ++i) {
+				_methods[i].method.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_methods[i].method.dispose();
+			}
+
+			_methods = null;
 		}
 
 		/**
@@ -236,16 +271,14 @@ package away3d.materials.passes
 		 */
 		public function addMethod(method : EffectMethodBase) : void
 		{
-			verifyShadingMethod(method);
-			
-			_methods.push(method);
-			method.parentPass = this;
+			_methods.push(new MethodSet(method));
+			method.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			invalidateShaderProgram();
 		}
 
 		public function hasMethod(method : EffectMethodBase) : Boolean
 		{
-			return _methods.indexOf(method) >= 0;
+			return getMethodSetForMethod(method) != null;
 		}
 
 		/**
@@ -255,16 +288,14 @@ package away3d.materials.passes
 		 */
 		public function addMethodAt(method : EffectMethodBase, index : int) : void
 		{
-			verifyShadingMethod(method);
-			
-			_methods.splice(index, 0, method);
-			method.parentPass = this;
+			_methods.splice(index, 0, new MethodSet(method));
+			method.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			invalidateShaderProgram();
 		}
 
 		public function getMethodAt(index : int) : EffectMethodBase
 		{
-			return _methods[index];
+			return EffectMethodBase(_methods[index].method);
 		}
 
 		public function get numMethods() : int
@@ -278,10 +309,13 @@ package away3d.materials.passes
 		 */
 		public function removeMethod(method : EffectMethodBase) : void
 		{
-			var index : int = _methods.indexOf(method);
-			_methods[index].parentPass = null;
-			_methods.splice(index, 1);
-			invalidateShaderProgram();
+			var methodSet : MethodSet = getMethodSetForMethod(method);
+			if (methodSet != null) {
+				var index : int = _methods.indexOf(methodSet);
+				_methods.splice(index, 1);
+				method.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				invalidateShaderProgram();
+			}
 		}
 
 		/**
@@ -308,12 +342,11 @@ package away3d.materials.passes
 
 		public function set normalMethod(value : BasicNormalMethod) : void
 		{
-			verifyShadingMethod(value);
-			
-			_normalMethod.parentPass = null;
+			_normalMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			value.copyFrom(_normalMethod);
-			value.parentPass = this;
 			_normalMethod = value;
+			_normalMethodVO = _normalMethod.createMethodVO();
+			_normalMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			invalidateShaderProgram();
 		}
 
@@ -324,12 +357,11 @@ package away3d.materials.passes
 
 		public function set ambientMethod(value : BasicAmbientMethod) : void
 		{
-			verifyShadingMethod(value);
-			
-			_ambientMethod.parentPass = null;
+			_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			value.copyFrom(_ambientMethod);
-			value.parentPass = this;
+			_ambientMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_ambientMethod = value;
+			_ambientMethodVO = _ambientMethod.createMethodVO();
 			invalidateShaderProgram();
 		}
 
@@ -340,11 +372,14 @@ package away3d.materials.passes
 
 		public function set shadowMethod(value : ShadowMapMethodBase) : void
 		{
-			verifyShadingMethod(value);
-			
-			if (_shadowMethod) _shadowMethod.parentPass = null;
-			if (value) value.parentPass = this;
+			if (_shadowMethod) _shadowMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_shadowMethod = value;
+			if (_shadowMethod) {
+				_shadowMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_shadowMethodVO = _shadowMethod.createMethodVO();
+			}
+			else
+				_shadowMethodVO = null;
 			invalidateShaderProgram();
 		}
 
@@ -358,12 +393,11 @@ package away3d.materials.passes
 
 		public function set diffuseMethod(value : BasicDiffuseMethod) : void
 		{
-			verifyShadingMethod(value);
-			
-			_diffuseMethod.parentPass = null;
+			_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			value.copyFrom(_diffuseMethod);
 			_diffuseMethod = value;
-			_diffuseMethod.parentPass = this;
+			_diffuseMethodVO = _diffuseMethod.createMethodVO();
+			_diffuseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			invalidateShaderProgram();
 		}
 
@@ -377,18 +411,41 @@ package away3d.materials.passes
 
 		public function set specularMethod(value : BasicSpecularMethod) : void
 		{
-			verifyShadingMethod(value);
-			
 			if (_specularMethod) {
-				_specularMethod.parentPass = null;
+				_specularMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 				if (value) value.copyFrom(_specularMethod);
 			}
 
-			if (value) value.parentPass = this;
-
 			_specularMethod = value;
+			if (_specularMethod) {
+				_specularMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_specularMethodVO = _specularMethod.createMethodVO();
+			}
+			else _specularMethodVO = null;
 
 			invalidateShaderProgram();
+		}
+
+		/**
+		 * @private
+		 */
+		arcane function get colorTransformMethod() : ColorTransformMethod
+		{
+			return _colorTransformMethod;
+		}
+
+		arcane function set colorTransformMethod(value : ColorTransformMethod) : void
+		{
+			if (_colorTransformMethod == value) return;
+			if (_colorTransformMethod) _colorTransformMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			if (!_colorTransformMethod || !value) invalidateShaderProgram();
+
+			_colorTransformMethod = value;
+			if (_colorTransformMethod) {
+				_colorTransformMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_colorTransformMethodVO = _colorTransformMethod.createMethodVO();
+			}
+			else _colorTransformMethodVO = null;
 		}
 
 		arcane override function set numPointLights(value : uint) : void
@@ -407,29 +464,6 @@ package away3d.materials.passes
 		{
 			super.numLightProbes = value;
 			invalidateShaderProgram();
-		}
-
-		/**
-		 * A method for reserved actions such as ColorTransformations.
-		 * @private
-		 */
-		arcane function get colorTransformMethod() : ColorTransformMethod
-		{
-			return _colorTransformMethod;
-		}
-
-		arcane function set colorTransformMethod(value : ColorTransformMethod) : void
-		{
-			verifyShadingMethod(value);
-			
-			if (_colorTransformMethod == value) return;
-
-			if (_colorTransformMethod) _colorTransformMethod.parentPass = null;
-
-			if (!_colorTransformMethod || !value) invalidateShaderProgram();
-
-			_colorTransformMethod = value;
-			if (value) value.parentPass = this;
 		}
 
 		/**
@@ -482,15 +516,17 @@ package away3d.materials.passes
 
 			if (_commonsRegIndex >= 0) context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _commonsRegIndex, _commonsData, 1);
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.activate(stage3DProxy);
-			_ambientMethod.activate(stage3DProxy);
-			if (_shadowMethod) _shadowMethod.activate(stage3DProxy);
-			_diffuseMethod.activate(stage3DProxy);
-			if (_usingSpecularMethod) _specularMethod.activate(stage3DProxy);
-			if (_colorTransformMethod) _colorTransformMethod.activate(stage3DProxy);
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.activate(_normalMethodVO, stage3DProxy);
+			_ambientMethod.activate(_ambientMethodVO, stage3DProxy);
+			if (_shadowMethod) _shadowMethod.activate(_shadowMethodVO, stage3DProxy);
+			_diffuseMethod.activate(_diffuseMethodVO, stage3DProxy);
+			if (_usingSpecularMethod) _specularMethod.activate(_specularMethodVO, stage3DProxy);
+			if (_colorTransformMethod) _colorTransformMethod.activate(_colorTransformMethodVO, stage3DProxy);
 
-			for (var i : int = 0; i < len; ++i)
-				_methods[i].activate(stage3DProxy);
+			for (var i : int = 0; i < len; ++i) {
+				var set : MethodSet = _methods[i];
+				set.method.activate(set.data, stage3DProxy);
+			}
 
 			if (_cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;
@@ -509,17 +545,18 @@ package away3d.materials.passes
 			super.deactivate(stage3DProxy);
 			var len : uint = _methods.length;
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.deactivate(stage3DProxy);
-			_ambientMethod.deactivate(stage3DProxy);
-			if (_shadowMethod) _shadowMethod.deactivate(stage3DProxy);
-			_diffuseMethod.deactivate(stage3DProxy);
-			if (_usingSpecularMethod) _specularMethod.deactivate(stage3DProxy);
-			if (_colorTransformMethod) _colorTransformMethod.deactivate(stage3DProxy);
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.deactivate(_normalMethodVO, stage3DProxy);
+			_ambientMethod.deactivate(_ambientMethodVO, stage3DProxy);
+			if (_shadowMethod) _shadowMethod.deactivate(_shadowMethodVO, stage3DProxy);
+			_diffuseMethod.deactivate(_diffuseMethodVO, stage3DProxy);
+			if (_usingSpecularMethod) _specularMethod.deactivate(_specularMethodVO, stage3DProxy);
+			if (_colorTransformMethod) _colorTransformMethod.deactivate(_colorTransformMethodVO, stage3DProxy);
 
-			for (var i : uint = 0; i < len; ++i)
-				if (_methods[i]) _methods[i].deactivate(stage3DProxy);
-
-//			if (_normalMapIndex >= 0) stage3DProxy.setTextureAt(_normalMapIndex, null);
+			var set : MethodSet;
+			for (var i : uint = 0; i < len; ++i) {
+				set = _methods[i];
+				set.method.deactivate(set.data, stage3DProxy);
+			}
 		}
 
 		/**
@@ -566,19 +603,21 @@ package away3d.materials.passes
 				updateProbes(lightPicker.lightProbes, lightPicker.lightProbeWeights, stage3DProxy);
 			}
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.setRenderState(renderable, stage3DProxy, camera);
-			_ambientMethod.setRenderState(renderable, stage3DProxy, camera);
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.setRenderState(_normalMethodVO, renderable, stage3DProxy, camera);
+			_ambientMethod.setRenderState(_ambientMethodVO, renderable, stage3DProxy, camera);
 			_ambientMethod._lightAmbientR = _ambientLightR;
 			_ambientMethod._lightAmbientG = _ambientLightG;
 			_ambientMethod._lightAmbientB = _ambientLightB;
-			if (_shadowMethod) _shadowMethod.setRenderState(renderable, stage3DProxy, camera);
-			_diffuseMethod.setRenderState(renderable, stage3DProxy, camera);
-			if (_usingSpecularMethod) _specularMethod.setRenderState(renderable, stage3DProxy, camera);
-			if (_colorTransformMethod) _colorTransformMethod.setRenderState(renderable, stage3DProxy, camera);
+			if (_shadowMethod) _shadowMethod.setRenderState(_shadowMethodVO, renderable, stage3DProxy, camera);
+			_diffuseMethod.setRenderState(_diffuseMethodVO, renderable, stage3DProxy, camera);
+			if (_usingSpecularMethod) _specularMethod.setRenderState(_specularMethodVO, renderable, stage3DProxy, camera);
+			if (_colorTransformMethod) _colorTransformMethod.setRenderState(_colorTransformMethodVO, renderable, stage3DProxy, camera);
 
 			var len : uint = _methods.length;
-			for (var i : uint = 0; i < len; ++i)
-				_methods[i].setRenderState(renderable, stage3DProxy, camera);
+			for (var i : uint = 0; i < len; ++i) {
+				var set : MethodSet = _methods[i];
+				set.method.setRenderState(set.data, renderable, stage3DProxy, camera);
+			}
 
 			super.render(renderable, stage3DProxy, camera, lightPicker);
 		}
@@ -599,8 +638,9 @@ package away3d.materials.passes
 			addPasses(_diffuseMethod.passes);
 			if (_specularMethod) addPasses(_specularMethod.passes);
 			if (_colorTransformMethod) addPasses(_colorTransformMethod.passes);
+
 			for (var i : uint = 0; i < _methods.length; ++i) {
-				addPasses(_methods[i].passes);
+				addPasses(_methods[i].method.passes);
 			}
 		}
 
@@ -655,15 +695,6 @@ package away3d.materials.passes
 
 			_lightInputIndices = new Vector.<uint>(_numLights, true);
 
-			setMethodProps(_normalMethod);
-			setMethodProps(_diffuseMethod);
-			if (_shadowMethod) setMethodProps(_shadowMethod);
-			setMethodProps(_ambientMethod);
-			if (_usingSpecularMethod) setMethodProps(_specularMethod);
-			if (_colorTransformMethod) setMethodProps(_colorTransformMethod);
-			for (var i : int = 0; i < _methods.length; ++i)
-				setMethodProps(_methods[i]);
-
 			_commonsReg = null;
 			_numUsedVertexConstants = 0;
 			_numUsedStreams = 1;
@@ -678,7 +709,6 @@ package away3d.materials.passes
 			_registerCache.addVertexTempUsages(_localPositionRegister, 1);
 
 			compile();
-//			_fragmentCode += "mov oc, " + _globalPositionVaryingReg;
 
 			_numUsedVertexConstants = _registerCache.numUsedVertexConstants;
 			_numUsedStreams = _registerCache.numUsedStreams;
@@ -688,6 +718,12 @@ package away3d.materials.passes
 		}
 
 		private function cleanUp() : void
+		{
+			nullifyCompilationData();
+			cleanUpMethods();
+		}
+
+		private function nullifyCompilationData() : void
 		{
 			_pointLightRegisters = null;
 			_dirLightRegisters = null;
@@ -715,7 +751,10 @@ package away3d.materials.passes
 
 			_registerCache.dispose();
 			_registerCache = null;
+		}
 
+		private function cleanUpMethods() : void
+		{
 			if (_normalMethod) _normalMethod.cleanCompilationData();
 			if (_diffuseMethod) _diffuseMethod.cleanCompilationData();
 			if (_ambientMethod) _ambientMethod.cleanCompilationData();
@@ -725,17 +764,8 @@ package away3d.materials.passes
 
 			var len : uint = _methods.length;
 			for (var i : uint = 0; i < len; ++i) {
-				_methods[i].cleanCompilationData();
+				_methods[i].method.cleanCompilationData();
 			}
-		}
-
-		private function setMethodProps(method : ShadingMethodBase) : void
-		{
-			method.smooth = _smooth;
-			method.repeat = _repeat;
-			method.mipmap = _mipmap;
-			method.numLights = _numLights + _numLightProbes;
-			method.reset();
 		}
 
 		/**
@@ -743,14 +773,14 @@ package away3d.materials.passes
 		 */
 		private function compile() : void
 		{
-			calcDependencies();
+			calculateDependencies();
 
 			if (_projectionDependencies > 0) compileProjCode();
 			if (_uvDependencies > 0) compileUVCode();
 			if (_secondaryUVDependencies > 0) compileSecondaryUVCode();
 			if (_globalPosDependencies > 0) compileGlobalPositionCode();
 
-			setMethodRegs(_normalMethod);
+			updateMethodRegisters(_normalMethod);
 			if (_normalDependencies > 0) {
 				// needs to be created before view
 				_animatedNormalReg = _registerCache.getFreeVertexVectorTemp();
@@ -760,14 +790,14 @@ package away3d.materials.passes
 			if (_viewDirDependencies > 0) compileViewDirCode();
 
 
-			setMethodRegs(_diffuseMethod);
-			if (_shadowMethod) setMethodRegs(_shadowMethod);
-			setMethodRegs(_ambientMethod);
-			if (_specularMethod) setMethodRegs(_specularMethod);
-			if (_colorTransformMethod) setMethodRegs(_colorTransformMethod);
+			updateMethodRegisters(_diffuseMethod);
+			if (_shadowMethod) updateMethodRegisters(_shadowMethod);
+			updateMethodRegisters(_ambientMethod);
+			if (_specularMethod) updateMethodRegisters(_specularMethod);
+			if (_colorTransformMethod) updateMethodRegisters(_colorTransformMethod);
 
 			for (var i : uint = 0; i < _methods.length; ++i)
-				setMethodRegs(_methods[i]);
+				updateMethodRegisters(_methods[i].method);
 
 			_shadedTargetReg = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_shadedTargetReg, 1);
@@ -788,7 +818,7 @@ package away3d.materials.passes
 			_vertexCode += "mov " + _projectionFragmentReg + ", " + _projectedTargetRegister + "\n";
 		}
 
-		private function setMethodRegs(method : ShadingMethodBase) : void
+		private function updateMethodRegisters(method : ShadingMethodBase) : void
 		{
 			method.globalPosReg = _globalPositionVaryingReg;
 			method.normalFragmentReg = _normalFragmentReg;
@@ -818,7 +848,7 @@ package away3d.materials.passes
 		/**
 		 * Calculates register dependencies for commonly used data.
 		 */
-		private function calcDependencies() : void
+		private function calculateDependencies() : void
 		{
 			var len : uint;
 
@@ -828,17 +858,17 @@ package away3d.materials.passes
 			_secondaryUVDependencies = 0;
 			_globalPosDependencies = 0;
 
-			countMethodDependencies(_diffuseMethod);
-			if (_shadowMethod) countMethodDependencies(_shadowMethod);
-			countMethodDependencies(_ambientMethod);
-			if (_usingSpecularMethod) countMethodDependencies(_specularMethod);
-			if (_colorTransformMethod) countMethodDependencies(_colorTransformMethod);
+			setupAndCountMethodDependencies(_diffuseMethod, _diffuseMethodVO);
+			if (_shadowMethod) setupAndCountMethodDependencies(_shadowMethod, _shadowMethodVO);
+			setupAndCountMethodDependencies(_ambientMethod, _ambientMethodVO);
+			if (_usingSpecularMethod) setupAndCountMethodDependencies(_specularMethod, _specularMethodVO);
+			if (_colorTransformMethod) setupAndCountMethodDependencies(_colorTransformMethod, _colorTransformMethodVO);
 
 			len = _methods.length;
 			for (var i : uint = 0; i < len; ++i)
-				countMethodDependencies(_methods[i]);
+				setupAndCountMethodDependencies(_methods[i].method, _methods[i].data);
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput) countMethodDependencies(_normalMethod);
+			if (_normalDependencies > 0 && _normalMethod.hasOutput) setupAndCountMethodDependencies(_normalMethod, _normalMethodVO);
 			if (_viewDirDependencies > 0) ++_globalPosDependencies;
 
 			// todo: add spotlight check
@@ -848,19 +878,35 @@ package away3d.materials.passes
 			}
 		}
 
-
-		private function countMethodDependencies(method : ShadingMethodBase) : void
+		private function setupAndCountMethodDependencies(method : ShadingMethodBase, methodVO : MethodVO) : void
 		{
-			if (method.needsProjection) ++_projectionDependencies;
-			if (method.needsGlobalPos) {
+			setupMethod(method, methodVO);
+			countDependencies(methodVO);
+		}
+
+		private function countDependencies(methodVO : MethodVO) : void
+		{
+			if (methodVO.needsProjection) ++_projectionDependencies;
+			if (methodVO.needsGlobalPos) {
 				++_globalPosDependencies;
 				_usesGlobalPosFragment = true;
 			}
-			if (method.needsNormals) ++_normalDependencies;
-			if (method.needsTangents) ++_tangentDependencies;
-			if (method.needsView) ++_viewDirDependencies;
-			if (method.needsUV) ++_uvDependencies;
-			if (method.needsSecondaryUV) ++_secondaryUVDependencies;
+			if (methodVO.needsNormals) ++_normalDependencies;
+			if (methodVO.needsTangents) ++_tangentDependencies;
+			if (methodVO.needsView) ++_viewDirDependencies;
+			if (methodVO.needsUV) ++_uvDependencies;
+			if (methodVO.needsSecondaryUV) ++_secondaryUVDependencies;
+		}
+
+		private function setupMethod(method : ShadingMethodBase, methodVO : MethodVO) : void
+		{
+			method.reset();
+			methodVO.reset();
+			methodVO.useSmoothTextures = _smooth;
+			methodVO.repeatTextures = _repeat;
+			methodVO.useMipmapping = _mipmap;
+			methodVO.numLights = _numLights + _numLightProbes;
+			method.initData(methodVO);
 		}
 
 		private function compileGlobalPositionCode() : void
@@ -928,8 +974,8 @@ package away3d.materials.passes
 			_registerCache.addFragmentTempUsages(_normalFragmentReg, _normalDependencies);
 
 			if (_normalMethod.hasOutput && !_normalMethod.tangentSpace) {
-				_vertexCode += _normalMethod.getVertexCode(_registerCache);
-				_fragmentCode += _normalMethod.getFragmentCode(_registerCache, _normalFragmentReg);
+				_vertexCode += _normalMethod.getVertexCode(_normalMethodVO, _registerCache);
+				_fragmentCode += _normalMethod.getFragmentCode(_normalMethodVO, _registerCache, _normalFragmentReg);
 				return;
 			}
 
@@ -1050,7 +1096,7 @@ package away3d.materials.passes
 
 			var temp : ShaderRegisterElement = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(temp, 1);
-			_fragmentCode += _normalMethod.getFragmentCode(_registerCache, temp) +
+			_fragmentCode += _normalMethod.getFragmentCode(_normalMethodVO, _registerCache, temp) +
 							"sub " + temp + ".xyz, " + temp + ".xyz, " + _commonsReg + ".xxx	\n" +
 							"nrm " + temp + ".xyz, " + temp + ".xyz							\n" +
 							"m33 " + _normalFragmentReg + ".xyz, " + temp + ".xyz, " + t + "	\n" +
@@ -1058,8 +1104,8 @@ package away3d.materials.passes
 
 			_registerCache.removeFragmentTempUsage(temp);
 
-			if (_normalMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
-			if (_normalMethod.needsGlobalPos) _registerCache.removeVertexTempUsage(_globalPositionVertexReg);
+			if (_normalMethodVO.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
+			if (_normalMethodVO.needsGlobalPos) _registerCache.removeVertexTempUsage(_globalPositionVertexReg);
 			_registerCache.removeFragmentTempUsage(b);
 			_registerCache.removeFragmentTempUsage(t);
 			_registerCache.removeFragmentTempUsage(n);
@@ -1093,12 +1139,12 @@ package away3d.materials.passes
 
 			initLightRegisters();
 
-			_vertexCode += _diffuseMethod.getVertexCode(_registerCache);
-			_fragmentCode += _diffuseMethod.getFragmentAGALPreLightingCode(_registerCache);
+			_vertexCode += _diffuseMethod.getVertexCode(_diffuseMethodVO, _registerCache);
+			_fragmentCode += _diffuseMethod.getFragmentAGALPreLightingCode(_diffuseMethodVO, _registerCache);
 
 			if (_usingSpecularMethod) {
-				_vertexCode += _specularMethod.getVertexCode(_registerCache);
-				_fragmentCode += _specularMethod.getFragmentAGALPreLightingCode(_registerCache);
+				_vertexCode += _specularMethod.getVertexCode(_specularMethodVO, _registerCache);
+				_fragmentCode += _specularMethod.getFragmentAGALPreLightingCode(_specularMethodVO, _registerCache);
 			}
 
 			_diffuseLightIndex = 0;
@@ -1111,15 +1157,14 @@ package away3d.materials.passes
 			if (_numLightProbes > 0  && (_combinedLightSources & LightSources.PROBES))
 				compileLightProbeCode();
 
-			_vertexCode += _ambientMethod.getVertexCode(_registerCache);
-			_fragmentCode += _ambientMethod.getFragmentCode(_registerCache, _shadedTargetReg);
-			if (_ambientMethod.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
-			if (_ambientMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
+			_vertexCode += _ambientMethod.getVertexCode(_ambientMethodVO, _registerCache);
+			_fragmentCode += _ambientMethod.getFragmentCode(_ambientMethodVO, _registerCache, _shadedTargetReg);
+			if (_ambientMethodVO.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
+			if (_ambientMethodVO.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 
 
 			if (_shadowMethod) {
-				_vertexCode += _shadowMethod.getVertexCode(_registerCache);
-//				shadowReg = _registerCache.getFreeFragmentSingleTemp();
+				_vertexCode += _shadowMethod.getVertexCode(_shadowMethodVO, _registerCache);
 				// using normal to contain shadow data if available is perhaps risky :s
 				// todo: improve compilation with lifetime analysis so this isn't necessary?
 				if (_normalDependencies == 0) {
@@ -1130,22 +1175,20 @@ package away3d.materials.passes
 					shadowReg = _normalFragmentReg;
 
 				_diffuseMethod.shadowRegister = shadowReg;
-				_fragmentCode += _shadowMethod.getFragmentCode(_registerCache, shadowReg);
+				_fragmentCode += _shadowMethod.getFragmentCode(_shadowMethodVO, _registerCache, shadowReg);
 			}
-			_fragmentCode += _diffuseMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
+			_fragmentCode += _diffuseMethod.getFragmentPostLightingCode(_diffuseMethodVO, _registerCache, _shadedTargetReg);
 
 			// resolve other dependencies as well?
-			if (_diffuseMethod.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
-			if (_diffuseMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
+			if (_diffuseMethodVO.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
+			if (_diffuseMethodVO.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 
 			if (_usingSpecularMethod) {
 				_specularMethod.shadowRegister = shadowReg;
-				_fragmentCode += _specularMethod.getFragmentPostLightingCode(_registerCache, _shadedTargetReg);
-				if (_specularMethod.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
-				if (_specularMethod.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
+				_fragmentCode += _specularMethod.getFragmentPostLightingCode(_specularMethodVO, _registerCache, _shadedTargetReg);
+				if (_specularMethodVO.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
+				if (_specularMethodVO.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 			}
-
-//			if (shadowReg && _normalDependencies > 0) _registerCache.removeFragmentTempUsage(shadowReg);
 		}
 
 		private function initLightRegisters() : void
@@ -1182,11 +1225,11 @@ package away3d.materials.passes
 				diffuseColorReg = _dirLightRegisters[regIndex++];
 				specularColorReg = _dirLightRegisters[regIndex++];
 				if (addDiff) {
-					_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_diffuseLightIndex, lightDirReg, diffuseColorReg, _registerCache);
+					_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_diffuseMethodVO, _diffuseLightIndex, lightDirReg, diffuseColorReg, _registerCache);
 					++_diffuseLightIndex;
 				}
 				if (addSpec) {
-					_fragmentCode += _specularMethod.getFragmentCodePerLight(_specularLightIndex, lightDirReg, specularColorReg, _registerCache);
+					_fragmentCode += _specularMethod.getFragmentCodePerLight(_specularMethodVO, _specularLightIndex, lightDirReg, specularColorReg, _registerCache);
 					++_specularLightIndex;
 				}
 
@@ -1230,11 +1273,12 @@ package away3d.materials.passes
 
 				if (_lightDataIndex == -1) _lightDataIndex = lightPosReg.index;
 				if (addDiff) {
-					_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_diffuseLightIndex, lightDirReg, diffuseColorReg, _registerCache);
+					// TODO: vo can contain register data
+					_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_diffuseMethodVO, _diffuseLightIndex, lightDirReg, diffuseColorReg, _registerCache);
 					++_diffuseLightIndex;
 				}
 				if (addSpec) {
-					_fragmentCode += _specularMethod.getFragmentCodePerLight(_specularLightIndex, lightDirReg, specularColorReg, _registerCache);
+					_fragmentCode += _specularMethod.getFragmentCodePerLight(_specularMethodVO, _specularLightIndex, lightDirReg, specularColorReg, _registerCache);
 					++_specularLightIndex;
 				}
 
@@ -1270,14 +1314,14 @@ package away3d.materials.passes
 				if (addDiff) {
 					texReg = _registerCache.getFreeTextureReg();
 					_lightProbeDiffuseIndices[i] = texReg.index;
-					_fragmentCode += _diffuseMethod.getFragmentCodePerProbe(_diffuseLightIndex, texReg, weightReg, _registerCache);
+					_fragmentCode += _diffuseMethod.getFragmentCodePerProbe(_diffuseMethodVO, _diffuseLightIndex, texReg, weightReg, _registerCache);
 					++_diffuseLightIndex;
 				}
 
 				if (addSpec) {
 					texReg = _registerCache.getFreeTextureReg();
 					_lightProbeSpecularIndices[i] = texReg.index;
-					_fragmentCode += _specularMethod.getFragmentCodePerProbe(_specularLightIndex, texReg, weightReg, _registerCache);
+					_fragmentCode += _specularMethod.getFragmentCodePerProbe(_specularMethodVO, _specularLightIndex, texReg, weightReg, _registerCache);
 					++_specularLightIndex;
 				}
 			}
@@ -1286,19 +1330,23 @@ package away3d.materials.passes
 		private function compileMethods() : void
 		{
 			var numMethods : uint = _methods.length;
+			var method : EffectMethodBase;
+			var data : MethodVO;
 
 			for (var i : uint = 0; i < numMethods; ++i) {
-				_vertexCode += _methods[i].getVertexCode(_registerCache);
-				if (_methods[i].needsGlobalPos) _registerCache.removeVertexTempUsage(_globalPositionVertexReg);
+				method = _methods[i].method;
+				data = _methods[i].data;
+				_vertexCode += method.getVertexCode(data, _registerCache);
+				if (data.needsGlobalPos) _registerCache.removeVertexTempUsage(_globalPositionVertexReg);
 
-				_fragmentCode += _methods[i].getFragmentCode(_registerCache, _shadedTargetReg);
-				if (_methods[i].needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
-				if (_methods[i].needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
+				_fragmentCode += method.getFragmentCode(data, _registerCache, _shadedTargetReg);
+				if (data.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
+				if (data.needsView) _registerCache.removeFragmentTempUsage(_viewDirFragmentReg);
 			}
 
 			if (_colorTransformMethod) {
-				_vertexCode += _colorTransformMethod.getVertexCode(_registerCache);
-				_fragmentCode += _colorTransformMethod.getFragmentCode(_registerCache, _shadedTargetReg);
+				_vertexCode += _colorTransformMethod.getVertexCode(data, _registerCache);
+				_fragmentCode += _colorTransformMethod.getFragmentCode(data, _registerCache, _shadedTargetReg);
 			}
 		}
 
@@ -1407,16 +1455,37 @@ package away3d.materials.passes
 
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _probeWeightsIndex, weights, _numProbeRegisters);
 		}
-		
-		/**
-		 * @private
-		 * Verifies that a method is not being used by more than one render pass,
-		 * which can generate undefined behavior.
-		 */
-		private function verifyShadingMethod(method : ShadingMethodBase) : void
+
+		private function getMethodSetForMethod(method : EffectMethodBase) : MethodSet
 		{
-			if (method && method.parentPass && method.parentPass!=this)
-				throw new ArgumentError('Shading method instances can not be shared between materials.');
+			var len : int = _methods.length;
+			for (var i : int = 0; i < len; ++i)
+				if (_methods[i].method == method) return _methods[i];
+
+			return null;
 		}
+
+		private function onShaderInvalidated(event : ShadingMethodEvent) : void
+		{
+			invalidateShaderProgram();
+		}
+	}
+}
+
+import away3d.arcane;
+import away3d.materials.methods.EffectMethodBase;
+import away3d.materials.methods.MethodVO;
+
+class MethodSet
+{
+	use namespace  arcane;
+
+	public var method : EffectMethodBase;
+	public var data : MethodVO;
+
+	public function MethodSet(method : EffectMethodBase)
+	{
+		this.method = method;
+		data = method.createMethodVO();
 	}
 }

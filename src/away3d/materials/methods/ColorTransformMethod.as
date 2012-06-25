@@ -16,7 +16,6 @@ package away3d.materials.methods
 	 */
 	public class ColorTransformMethod extends EffectMethodBase
 	{
-		private var _colorTransformIndex : int;
 		private var _colorTransform : ColorTransform;
 		private var _colorTransformData : Vector.<Number>;
 
@@ -25,7 +24,7 @@ package away3d.materials.methods
 		 */
 		public function ColorTransformMethod()
 		{
-			super(false, false, false);
+			super();
 			_colorTransformData = new Vector.<Number>(8, true);
 		}
 
@@ -45,21 +44,12 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function reset() : void
-		{
-			super.reset();
-			_colorTransformIndex = -1;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var colorMultReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var colorOffsReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			_colorTransformIndex = colorMultReg.index;
+			vo.fragmentConstantsIndex = colorMultReg.index;
 			code += "mul " + targetReg + ", " + targetReg.toString() + ", " + colorMultReg + "\n" +
 					"add " + targetReg + ", " + targetReg.toString() + ", " + colorOffsReg + "\n";
 			return code;
@@ -68,7 +58,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			var inv : Number = 1/0xff;
 			_colorTransformData[0] = _colorTransform.redMultiplier;
@@ -79,7 +69,7 @@ package away3d.materials.methods
 			_colorTransformData[5] = _colorTransform.greenOffset*inv;
 			_colorTransformData[6] = _colorTransform.blueOffset*inv;
 			_colorTransformData[7] = _colorTransform.alphaOffset*inv;
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _colorTransformIndex, _colorTransformData, 2);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _colorTransformData, 2);
 		}
 	}
 }

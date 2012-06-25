@@ -9,6 +9,10 @@ package away3d.materials.methods
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
+	import away3d.materials.methods.MethodVO;
+	import away3d.materials.methods.MethodVO;
+	import away3d.materials.methods.MethodVO;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -25,13 +29,9 @@ package away3d.materials.methods
 	public class ShadowMapMethodBase extends ShadingMethodBase
 	{
 		private var _castingLight : LightBase;
-		protected var _depthMapIndex : int;
 		protected var _depthMapCoordReg : ShaderRegisterElement;
-		private var _depthProjIndex : int;
 		private var _vertexData : Vector.<Number> = Vector.<Number>([.5, -.5, 1.0, 1.0]);
-		private var _vertexDataIndex : int = -1;
 		protected var _fragmentData : Vector.<Number>;
-		protected var _fragmentDataIndex : int;
 		private var _projMatrix : Matrix3D = new Matrix3D();
 		private var _shadowMapper : ShadowMapperBase;
 
@@ -41,12 +41,19 @@ package away3d.materials.methods
 		public function ShadowMapMethodBase(castingLight : LightBase)
 		{
 			_usePoint = castingLight is PointLight;
-			super(false, true, _usePoint);
+			super();
 			_castingLight = castingLight;
 			castingLight.castsShadows = true;
 			_shadowMapper = castingLight.shadowMapper;
 			var eps : Number = _usePoint? -.01 : -.002;
 			_fragmentData = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, eps, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]);
+		}
+
+		override arcane function initData(vo : MethodVO) : void
+		{
+			vo.needsView = true;
+			vo.needsGlobalPos = _usePoint;
+			vo.needsNormals = vo.numLights > 0;
 		}
 
 		public function get alpha() : Number
@@ -87,23 +94,6 @@ package away3d.materials.methods
 			_fragmentData[4] = -value;
 		}
 
-
-		arcane override function reset() : void
-		{
-			super.reset();
-			_depthMapIndex = -1;
-			_depthProjIndex = -1;
-			_vertexDataIndex = -1;
-			_fragmentDataIndex = -1;
-		}
-
-
-		arcane override function set numLights(value : int) : void
-		{
-			super.numLights = value;
-			_needsNormals = value > 0;
-		}
-
 		arcane override function cleanCompilationData() : void
 		{
 			super.cleanCompilationData();
@@ -111,18 +101,17 @@ package away3d.materials.methods
 			_depthMapCoordReg = null;
 		}
 
-		arcane override function getVertexCode(regCache : ShaderRegisterCache) : String
+		arcane override function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _usePoint? getPointVertexCode(regCache) : getPlanarVertexCode(regCache);
+			return _usePoint? getPointVertexCode(vo, regCache) : getPlanarVertexCode(vo, regCache);
 		}
 
-		protected function getPointVertexCode(regCache : ShaderRegisterCache) : String
+		protected function getPointVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			// nothing extra needed, we'll just get global pos
 			return "";
 		}
 
-		protected function getPlanarVertexCode(regCache : ShaderRegisterCache) : String
+		protected function getPlanarVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 			var toTexReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
@@ -131,9 +120,8 @@ package away3d.materials.methods
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
-			_depthProjIndex = depthMapProj.index;
 			_depthMapCoordReg = regCache.getFreeVarying();
-			_vertexDataIndex = toTexReg.index;
+			vo.vertexConstantsIndex = toTexReg.index;
 
 			code += "m44 " + temp + ", vt0, " + depthMapProj + "\n" +
 					"rcp " + temp + ".w, " + temp + ".w\n" +
@@ -146,32 +134,32 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			var code : String = _usePoint? getPointFragmentCode(regCache, targetReg) : getPlanarFragmentCode(regCache, targetReg);
-			code += "add " + targetReg + ".w, " + targetReg + ".w, fc" + (_fragmentDataIndex+1) + ".y\n" +
+			var code : String = _usePoint? getPointFragmentCode(vo, regCache, targetReg) : getPlanarFragmentCode(vo, regCache, targetReg);
+			code += "add " + targetReg + ".w, " + targetReg + ".w, fc" + (vo.fragmentConstantsIndex+1) + ".y\n" +
 					"sat " + targetReg + ".w, " + targetReg + ".w\n";
 			return code;
 		}
 
-		protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();
 			return "";
 		}
 
-		protected function getPointFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		protected function getPointFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();
 			return "";
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (!_usePoint) {
 				_projMatrix.copyFrom(DirectionalShadowMapper(_shadowMapper).depthProjection);
 				_projMatrix.prepend(renderable.sceneTransform);
-				stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _depthProjIndex, _projMatrix, true);
+				stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, vo.vertexConstantsIndex + 1, _projMatrix, true);
 			}
 
 		}
@@ -179,12 +167,11 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			// when wrapped (fe: cascade), it's possible this is not set
-			if (_vertexDataIndex != -1)
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexDataIndex, _vertexData, 1);
+			if (vo.vertexConstantsIndex != -1)
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vo.vertexConstantsIndex, _vertexData, 1);
 
 			if (_usePoint) {
 				var pos : Vector3D = _castingLight.scenePosition;
@@ -194,12 +181,12 @@ package away3d.materials.methods
 				// used to decompress distance
 				var f : Number = PointLight(_castingLight)._fallOff;
 				_fragmentData[15] = 1/(2*f*f);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _fragmentDataIndex, _fragmentData, 4);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _fragmentData, 4);
 			}
 			else {
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _fragmentDataIndex, _fragmentData, 3);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _fragmentData, 3);
 			}
-			stage3DProxy.setTextureAt(_depthMapIndex, _castingLight.shadowMapper.depthMap.getTextureForStage3D(stage3DProxy));
+			stage3DProxy.setTextureAt(vo.texturesIndex, _castingLight.shadowMapper.depthMap.getTextureForStage3D(stage3DProxy));
 		}
 	}
 }

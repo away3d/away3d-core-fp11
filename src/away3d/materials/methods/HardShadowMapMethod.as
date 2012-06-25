@@ -20,7 +20,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -28,7 +28,7 @@ package away3d.materials.methods
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 
-			_fragmentDataIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index;
 
 			code += "tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
@@ -37,12 +37,12 @@ package away3d.materials.methods
 					"slt " + targetReg + ".w, " + targetReg + ".w, " + depthCol+".z\n";   // 0 if in shadow
 
 
-			_depthMapIndex = depthMapRegister.index;
+			vo.texturesIndex = depthMapRegister.index;
 
 			return code;
 		}
 
-		override protected function getPointFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPointFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -54,8 +54,8 @@ package away3d.materials.methods
 			var lightDir : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 
-			_fragmentDataIndex = decReg.index;
-			_depthMapIndex = depthMapRegister.index;
+			vo.fragmentConstantsIndex = decReg.index;
+			vo.texturesIndex = depthMapRegister.index;
 
 			code += "sub " + lightDir + ", " + _globalPosReg + ", " + posReg + "\n" +
 					"dp3 " + lightDir + ".w, " + lightDir + ".xyz, " + lightDir + ".xyz\n" +

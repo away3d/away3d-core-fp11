@@ -15,7 +15,6 @@ package away3d.materials.methods
 	public class FresnelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
-		private var _dataIndex : int;
 		private var _data : Vector.<Number>;
         private var _incidentLight : Boolean;
 
@@ -35,6 +34,11 @@ package away3d.materials.methods
             _incidentLight = !basedOnSurface;
 		}
 
+		override arcane function initData(vo : MethodVO) : void
+		{
+			super.initData(vo);
+		}
+
 		public function get fresnelPower() : Number
 		{
 			return _data[1];
@@ -43,12 +47,6 @@ package away3d.materials.methods
 		public function set fresnelPower(value : Number) : void
 		{
 			_data[1] = value;
-		}
-
-		arcane override function reset() : void
-		{
-			super.reset();
-			_dataIndex = -1;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -73,20 +71,20 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
+			super.activate(vo, stage3DProxy);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.secondaryFragmentConstantsIndex, _data, 1);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_dataReg = regCache.getFreeFragmentConstant();
-			_dataIndex = _dataReg.index;
-			return super.getFragmentAGALPreLightingCode(regCache);
+			vo.secondaryFragmentConstantsIndex = _dataReg.index;
+			return super.getFragmentAGALPreLightingCode(vo, regCache);
 		}
 
 		/**
@@ -96,10 +94,8 @@ package away3d.materials.methods
 		 * @param regCache The register cache used for the shader compilation.
 		 * @return The AGAL fragment code for the method.
 		 */
-		private function modulateSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function modulateSpecular(vo : MethodVO, target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			regCache = regCache;			
 			var code : String = "";
 
 			// use view dir and normal fragment .w as temp
@@ -111,7 +107,6 @@ package away3d.materials.methods
 					"mul " + _viewDirFragmentReg+".w, " + _dataReg+".x, " + _viewDirFragmentReg+".w\n" +             // f0*(1 - exp)
 					"add " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +          // exp + f0*(1 - exp)
 					"mul " + target+".w, " + target+".w, " + _viewDirFragmentReg+".w\n";
-//            code += AGAL.sat(target+".w", target+".w");
 
 			return code;
 		}

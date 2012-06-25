@@ -17,10 +17,7 @@ package away3d.materials.methods
 	 */
 	public class ColorMatrixMethod extends EffectMethodBase
 	{
-		private var _colors:Vector.<Number>; 
-		private var _offset:Vector.<Number>;
-		private var _colorIndex:int;
-		private var _offsetIndex:int;
+		private var _data:Vector.<Number>;
 		private var _filter:ColorMatrixFilter;
 
 		/**
@@ -28,10 +25,9 @@ package away3d.materials.methods
 		 */
 		public function ColorMatrixMethod()
 		{
-			super(false, false, false);
+			super();
 			
-			_colors = new Vector.<Number>(16, true);	
-			_offset = new Vector.<Number>(4, true);
+			_data = new Vector.<Number>(20, true);
 		}
 		
 		/**
@@ -50,16 +46,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function reset() : void
-		{
-			super.reset();
-			_offsetIndex = _colorIndex = -1;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var colorMultReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -68,8 +55,7 @@ package away3d.materials.methods
 			regCache.getFreeFragmentConstant();
 			var colorOffsetReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			
-			_colorIndex = colorMultReg.index;
-			_offsetIndex = colorOffsetReg.index;
+			vo.fragmentConstantsIndex = colorMultReg.index;
 
 			code += "m44 " + targetReg + ", " + targetReg + ", " + colorMultReg + "\n" +
 					"add " + targetReg + ", " + targetReg + ", " + colorOffsetReg + "\n";
@@ -80,37 +66,41 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			var matrix:Array = _filter.matrix;
 			// r
-			_colors[0] = matrix[0];
-			_colors[1] = matrix[1];
-			_colors[2] = matrix[2];
-			_colors[3] = matrix[3];
-			_offset[0] = matrix[4];
+			_data[0] = matrix[0];
+			_data[1] = matrix[1];
+			_data[2] = matrix[2];
+			_data[3] = matrix[3];
+
 			// g
-			_colors[4] = matrix[5];
-			_colors[5] = matrix[6];
-			_colors[6] = matrix[7];
-			_colors[7] = matrix[8];
-			_offset[1] = matrix[9];
+			_data[4] = matrix[5];
+			_data[5] = matrix[6];
+			_data[6] = matrix[7];
+			_data[7] = matrix[8];
+
 			// b
-			_colors[8] = matrix[10];
-			_colors[9] = matrix[11];
-			_colors[10] = matrix[12];
-			_colors[11] = matrix[13];
-			_offset[2] = matrix[14];
+			_data[8] = matrix[10];
+			_data[9] = matrix[11];
+			_data[10] = matrix[12];
+			_data[11] = matrix[13];
+
 			// a
-			_colors[12] = matrix[15];
-			_colors[13] = matrix[16];
-			_colors[14] = matrix[17];
-			_colors[15] = matrix[18];
-			_offset[3] = matrix[19];
+			_data[12] = matrix[15];
+			_data[13] = matrix[16];
+			_data[14] = matrix[17];
+			_data[15] = matrix[18];
+
+			// rgba offset
+			_data[16] = matrix[4];
+			_data[17] = matrix[9];
+			_data[18] = matrix[14];
+			_data[19] = matrix[19];
 			
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _offsetIndex, _offset, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _colorIndex, _colors, 4);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 5);
 		}
 	}
 }

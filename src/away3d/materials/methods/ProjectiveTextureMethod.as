@@ -21,11 +21,8 @@ package away3d.materials.methods
 
 		private var _offsetData : Vector.<Number> = Vector.<Number>([.5, -.5, 1.0, 1.0]);
 		private var _projector : TextureProjector;
-		private var _projectionIndex : int;
 		private var _uvVarying : ShaderRegisterElement;
-		private var _toTexIndex : int;
 		private var _projMatrix : Matrix3D = new Matrix3D();
-		private var _mapIndex : int;
 		private var _mode : String;
 
 		/**
@@ -33,18 +30,9 @@ package away3d.materials.methods
 		 */
 		public function ProjectiveTextureMethod(projector : TextureProjector, mode : String = "multiply")
 		{
-			super(false, false, false);
+			super();
 			_projector = projector;
 			_mode = mode;
-		}
-
-
-		arcane override function reset() : void
-		{
-			super.reset();
-			_projectionIndex = -1;
-			_toTexIndex = -1;
-			_mapIndex = -1;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -75,14 +63,14 @@ package away3d.materials.methods
 			_projector = value;
 		}
 
-		arcane override function getVertexCode(regCache : ShaderRegisterCache) : String
+		arcane override function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var projReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexVectorTemp();
-			_projectionIndex = projReg.index;
+			vo.vertexConstantsIndex = projReg.index;
 			_uvVarying = regCache.getFreeVarying();
 
 			return "m44 " + _uvVarying + ", vt0, " + projReg + "\n";
@@ -91,15 +79,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var mapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var col : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var toTexReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			_toTexIndex = toTexReg.index;
-
-			_mapIndex = mapRegister.index;
+			vo.fragmentConstantsIndex = toTexReg.index;
+			vo.texturesIndex = mapRegister.index;
 
 			code += "div " + col + ", " + _uvVarying + ", " + _uvVarying + ".w						\n" +
 					"mul " + col + ".xy, " + col + ".xy, " + toTexReg+".xy	\n" +
@@ -122,27 +109,20 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			// TODO: not used
-			camera = null; 
 			_projMatrix.copyFrom(_projector.viewProjection);
 			_projMatrix.prepend(renderable.sceneTransform);
-			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _projectionIndex, _projMatrix, true);
+			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, vo.vertexConstantsIndex, _projMatrix, true);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _toTexIndex, _offsetData, 1);
-			stage3DProxy.setTextureAt(_mapIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _offsetData, 1);
+			stage3DProxy.setTextureAt(vo.texturesIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
 		}
-
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			stage3DProxy.setTextureAt(_mapIndex, null);
-//		}
 	}
 }

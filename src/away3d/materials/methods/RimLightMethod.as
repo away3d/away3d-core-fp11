@@ -20,12 +20,11 @@ package away3d.materials.methods
 
 		private var _color : uint;
 		private var _data : Vector.<Number>;
-		private var _dataIndex : int;
 		private var _blend : String;
 
 		public function RimLightMethod(color : uint = 0xffffff, strength : Number = .4, power : Number = 2, blend : String = "mix")
 		{
-			super(true, true, false);
+			super();
 			_blend = blend;
 			_data = new Vector.<Number>(8, true);
 			_data[3] = 1;
@@ -34,10 +33,10 @@ package away3d.materials.methods
 			this.color = color;
 		}
 
-		arcane override function reset() : void
+		override arcane function initData(vo : MethodVO) : void
 		{
-			super.reset();
-			_dataIndex = -1;
+			vo.needsNormals = true;
+			vo.needsView = true;
 		}
 
 		public function get color() : uint
@@ -73,18 +72,18 @@ package away3d.materials.methods
 			_data[5] = value;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 2);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 2);
 		}
 
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var dataRegister : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataRegister2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
-			_dataIndex = dataRegister.index;
+			vo.fragmentConstantsIndex = dataRegister.index;
 
 			code += "dp3 " + temp + ".x, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz	\n" +
 					"sat " + temp + ".x, " + temp + ".x														\n" +

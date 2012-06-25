@@ -12,7 +12,6 @@ package away3d.materials.methods
 
 	public class HeightMapNormalMethod extends BasicNormalMethod
 	{
-		private var _dataRegIndex : int;
 		private var _data : Vector.<Number>;
 
 		public function HeightMapNormalMethod(heightMap : Texture2DBase, worldWidth : Number, worldHeight : Number, worldDepth : Number)
@@ -34,33 +33,33 @@ package away3d.materials.methods
 			return false;
 		}
 
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data, 2);
+			super.activate(vo, stage3DProxy);
+			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 2);
 		}
 
 		override public function copyFrom(method : ShadingMethodBase) : void
 		{
 		}
 
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataReg2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			_normalTextureRegister = regCache.getFreeTextureReg();
-			_normalMapIndex = _normalTextureRegister.index;
+			vo.texturesIndex = _normalTextureRegister.index;
+			vo.fragmentConstantsIndex = dataReg.index;
 
-			_dataRegIndex = dataReg.index;
-			return	getTexSampleCode(targetReg, _normalTextureRegister, _uvFragmentReg, "clamp") +
+			return	getTexSampleCode(vo, targetReg, _normalTextureRegister, _uvFragmentReg, "clamp") +
 
 					"add " + temp + ", " + _uvFragmentReg + ", " + dataReg + ".xzzz\n" +
-					getTexSampleCode(temp, _normalTextureRegister, temp, "clamp") +
+					getTexSampleCode(vo, temp, _normalTextureRegister, temp, "clamp") +
 					"sub " + targetReg + ".x, " + targetReg + ".x, " + temp + ".x\n" +
 
 					"add " + temp + ", " + _uvFragmentReg + ", " + dataReg + ".zyzz\n" +
-					getTexSampleCode(temp, _normalTextureRegister, temp, "clamp") +
+					getTexSampleCode(vo, temp, _normalTextureRegister, temp, "clamp") +
 					"sub " + targetReg + ".z, " + targetReg + ".z, " + temp + ".x\n" +
 
 					"mov " + targetReg + ".y, " + dataReg + ".w\n" +
