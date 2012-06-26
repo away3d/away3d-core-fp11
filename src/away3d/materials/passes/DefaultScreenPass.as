@@ -1345,8 +1345,8 @@ package away3d.materials.passes
 			}
 
 			if (_colorTransformMethod) {
-				_vertexCode += _colorTransformMethod.getVertexCode(data, _registerCache);
-				_fragmentCode += _colorTransformMethod.getFragmentCode(data, _registerCache, _shadedTargetReg);
+				_vertexCode += _colorTransformMethod.getVertexCode(_colorTransformMethodVO, _registerCache);
+				_fragmentCode += _colorTransformMethod.getFragmentCode(_colorTransformMethodVO, _registerCache, _shadedTargetReg);
 			}
 		}
 

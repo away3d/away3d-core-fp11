@@ -322,9 +322,9 @@ package away3d.materials.methods
 			_diffuseData[uint(2)] = _diffuseB = (_diffuseColor & 0xff) / 0xff;
 		}
 
-		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		arcane function set shadowRegister(value : ShaderRegisterElement) : void
 		{
-			_shadowRegister = shadowReg;
+			_shadowRegister = value;
 		}
 	}
 }

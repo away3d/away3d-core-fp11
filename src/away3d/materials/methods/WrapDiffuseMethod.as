@@ -48,7 +48,7 @@ package away3d.materials.methods
 
 		arcane override function cleanCompilationData() : void
 		{
-			super.arcane::cleanCompilationData();
+			super.cleanCompilationData();
 			_wrapDataRegister = null;
 			_scatterTextureRegister = null;
 		}
@@ -68,6 +68,7 @@ package away3d.materials.methods
 		{
 			var code : String = super.getFragmentAGALPreLightingCode(vo, regCache);
 			_wrapDataRegister = regCache.getFreeFragmentConstant();
+			vo.fragmentConstantsIndex = _wrapDataRegister.index;
 
 			if (_scatterTexture) {
 				_scatterTextureRegister = regCache.getFreeTextureReg();

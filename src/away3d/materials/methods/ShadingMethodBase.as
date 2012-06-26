@@ -249,15 +249,15 @@ package away3d.materials.methods
 		{
 		}
 
-		public function get tangentVaryingReg() : ShaderRegisterElement
+		arcane function get tangentVaryingReg() : ShaderRegisterElement
 		{
 			return _tangentVaryingReg;
 		}
 
 
-		public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
 		{
-			_tangentVaryingReg = tangentVaryingReg;
+			_tangentVaryingReg = value;
 		}
 	}
 }

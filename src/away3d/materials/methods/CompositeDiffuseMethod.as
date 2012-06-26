@@ -239,18 +239,18 @@ package away3d.materials.methods
 			_baseDiffuseMethod.normalFragmentReg = _normalFragmentReg = value;
 		}
 
-		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
 		{
 
-			super.shadowRegister = shadowReg;
-			_baseDiffuseMethod.shadowRegister = shadowReg;
+			super.shadowRegister = value;
+			_baseDiffuseMethod.shadowRegister = value;
 		}
 
 
-		override public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		override arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
 		{
-			super.tangentVaryingReg = tangentVaryingReg;
-			_baseDiffuseMethod.shadowRegister = tangentVaryingReg;
+			super.tangentVaryingReg = value;
+			_baseDiffuseMethod.tangentVaryingReg = value;
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

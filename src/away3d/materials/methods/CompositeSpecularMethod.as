@@ -232,16 +232,16 @@ package away3d.materials.methods
 			_baseSpecularMethod.cleanCompilationData();
 		}
 
-		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
 		{
-			super.shadowRegister = shadowReg;
-			_baseSpecularMethod.shadowRegister = shadowReg;
+			super.shadowRegister = value;
+			_baseSpecularMethod.shadowRegister = value;
 		}
 
-		override public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		override arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
 		{
-			super.tangentVaryingReg = tangentVaryingReg;
-			_baseSpecularMethod.shadowRegister = tangentVaryingReg;
+			super.tangentVaryingReg = value;
+			_baseSpecularMethod.tangentVaryingReg = value;
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

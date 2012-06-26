@@ -338,7 +338,7 @@ package away3d.materials.methods
 			_specularData[2] = _specularB = (_specularColor & 0xff) / 0xff * _specular;
 		}
 
-		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		arcane function set shadowRegister(shadowReg : ShaderRegisterElement) : void
 		{
 			_shadowRegister = shadowReg;
 		}
