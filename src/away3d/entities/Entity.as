@@ -8,6 +8,8 @@ package away3d.entities
 	import away3d.containers.Scene3D;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.Partition3D;
+	import away3d.core.raycast.colliders.RayColliderBase;
+	import away3d.core.raycast.colliders.bounds.BoundsRayCollider;
 	import away3d.errors.AbstractMethodError;
 	import away3d.library.assets.AssetType;
 
@@ -34,7 +36,12 @@ package away3d.entities
 		
 		private var _showBounds : Boolean;
 		private var _partitionNode : EntityNode;
+
+		protected var _boundsRayCollider:RayColliderBase;
+		protected var _triangleRayCollider:RayColliderBase;
+
 		private var _mouseEnabled : Boolean;
+		private var _mouseDetails:Boolean;
 
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
 		protected var _zIndices : Vector.<Number> = new Vector.<Number>();
@@ -44,12 +51,31 @@ package away3d.entities
 		protected var _boundsInvalid : Boolean = true;
 		private var _boundsIsShown : Boolean = false;
 
+		public function set rayPickingMethod( method:RayColliderBase ):void {
+			_triangleRayCollider = method;
+		}
+
 		/**
 		 * 
 		 */
 		public function get showBounds() : Boolean
 		{
 			return _showBounds;
+		}
+
+		override protected function updateMouseChildren() : void {
+
+			// Use its parent's triangle collider.
+			if( _parent && !_triangleRayCollider ) {
+				if( _parent is Entity ) {
+					var collider:RayColliderBase = Entity( _parent ).triangleRayCollider;
+					if( collider ) {
+						triangleRayCollider = collider;
+					}
+				}
+			}
+
+			super.updateMouseChildren();
 		}
 
 		public function set showBounds(value : Boolean) : void
@@ -76,6 +102,7 @@ package away3d.entities
 		public function set mouseEnabled(value : Boolean) : void
 		{
 			_mouseEnabled = value;
+			_implicitMouseEnabled = value;
 		}
 		
 		/**
@@ -373,6 +400,33 @@ package away3d.entities
 		override public function get assetType() : String
 		{
 			return AssetType.ENTITY;
+		}
+
+		public function get boundsRayCollider():RayColliderBase {
+			if( !_boundsRayCollider ) {
+				_boundsRayCollider = new BoundsRayCollider();
+			}
+			return _boundsRayCollider;
+		}
+
+		public function set boundsRayCollider( value:RayColliderBase ):void {
+			_boundsRayCollider = value;
+		}
+
+		public function get triangleRayCollider():RayColliderBase {
+			return _triangleRayCollider;
+		}
+
+		public function set triangleRayCollider( value:RayColliderBase ):void {
+			_triangleRayCollider = value;
+		}
+
+		public function get mouseDetails():Boolean {
+			return _mouseDetails;
+		}
+
+		public function set mouseDetails( value:Boolean ):void {
+			_mouseDetails = value;
 		}
 	}
 }

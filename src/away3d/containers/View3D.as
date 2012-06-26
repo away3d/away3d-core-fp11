@@ -3,10 +3,11 @@
 	import away3d.Away3D;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Mouse3DManager;
+	import away3d.core.managers.mouse.Mouse3DManager;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.managers.mouse.RayMouse3DManager;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.DepthRenderer;
 	import away3d.core.render.Filter3DRenderer;
@@ -55,6 +56,8 @@
 		private var _addedToStage:Boolean;
 		
 		private var _forceSoftware : Boolean;
+
+		private var _forceMouseMove:Boolean;
 
 		protected var _filter3DRenderer : Filter3DRenderer;
 		protected var _requireDepthRender : Boolean;
@@ -128,10 +131,10 @@
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
-			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
 			_forceSoftware = forceSoftware;
-
+			pickingMethod = new RayMouse3DManager(true);
+			
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
@@ -165,7 +168,7 @@
 		public function set stage3DProxy(stage3DProxy:Stage3DProxy) : void
 		{
 			_stage3DProxy = stage3DProxy;
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 
 			super.x = _stage3DProxy.x;
 			
@@ -190,6 +193,7 @@
 		public function set forceMouseMove(value : Boolean) : void
 		{
 			_mouse3DManager.forceMouseMove = value;
+			_forceMouseMove = value;
 		}
 
 		public function get background() : Texture2DBase
@@ -575,9 +579,8 @@
 			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
 
-			// render things
-			if (_entityCollector.numMouseEnableds > 0)
-				_mouse3DManager.updateHitData();
+			// update picking
+			_mouse3DManager.update();
 
 //			updateLights(_entityCollector);
 
@@ -678,9 +681,26 @@
 			return v;
 		}
 
-		public function unproject(mX : Number, mY : Number, useTranslation:Boolean = false) : Vector3D
+		/**
+		 * Calculates the scene position of the given screen coordinates.
+		 * @param mX The x coordinate relative to the View3D.
+		 * @param mY The y coordinate relative to the View3D..
+		 * @return The scene position of the given screen coordinates. The returned point corresponds to a point on the projection plane.
+		 */
+		public function unproject(mX : Number, mY : Number) : Vector3D
 		{
-			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, useTranslation);
+			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height);
+		}
+
+		/**
+		 * Returns the ray in scene space from the camera to the point on the screen.
+		 * @param mX The x coordinate relative to the View3D.
+		 * @param mY The y coordinate relative to the View3D..
+		 * @return The ray from the camera to the scene space position of a point on the projection plane.
+		 */
+		public function getRay(mX : Number, mY : Number) : Vector3D
+		{
+			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height);
 		}
 
 		/**
@@ -716,7 +736,7 @@
 			if (_height == 0) height = stage.stageHeight;
 			else _rttBufferManager.viewHeight = _height;
 
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void
@@ -740,9 +760,10 @@
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
 
-		// TODO: remove
-		public function get mouse3DManager():Mouse3DManager {
-			return _mouse3DManager;
+		public function set pickingMethod( value:Mouse3DManager ):void {
+			_mouse3DManager = value;
+			_mouse3DManager.view = this;
+			_mouse3DManager.forceMouseMove = _forceMouseMove;
 		}
 	}
 }

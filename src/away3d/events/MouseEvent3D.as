@@ -1,5 +1,7 @@
 package away3d.events
 {
+
+	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
@@ -7,6 +9,7 @@ package away3d.events
 
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Vector3D;
 
 	/**
 	 * A MouseEvent3D is dispatched when a mouse event occurs over a mouseEnabled object in View3D.
@@ -104,33 +107,8 @@ package away3d.events
 		/**
 		 * The x-coordinate in object space where the event took place
 		 */
-		public var localX : Number;
+		public var localPosition : Vector3D;
 
-		/**
-		 * The y-coordinate in object space where the event took place
-		 */
-		public var localY : Number;
-
-		/**
-		 * The z-coordinate in object space where the event took place
-		 */
-		public var localZ : Number;
-		
-		/**
-		 * The x-coordinate in scene space where the event took place
-		 */
-		public var sceneX : Number;
-		
-		/**
-		 * The y-coordinate in scene space where the event took place
-		 */
-		public var sceneY : Number;
-		
-		/**
-		 * The z-coordinate in scene space where the event took place
-		 */
-		public var sceneZ : Number;
-		
 		/**
 		 * Indicates whether the Control key is active (true) or inactive (false).
 		 */
@@ -150,6 +128,8 @@ package away3d.events
 		 * Indicates how many lines should be scrolled for each unit the user rotates the mouse wheel.
 		 */
 		public var delta : int;
+
+		public var localNormal:Vector3D;
 
 		/**
 		 * Create a new MouseEvent3D object.
@@ -208,17 +188,33 @@ package away3d.events
 			result.renderable = renderable;
 			result.material = material;
 			result.uv = uv;
-			result.localX = localX;
-			result.localY = localY;
-			result.localZ = localZ;
-			result.sceneX = sceneX;
-			result.sceneY = sceneY;
-			result.sceneZ = sceneZ;
-			
+			result.localPosition = localPosition;
+			result.localNormal = localNormal;
+
 			result.ctrlKey = ctrlKey;
 			result.shiftKey = shiftKey;
 
 			return result;
+		}
+
+		public function get scenePosition():Vector3D {
+			if( object is ObjectContainer3D ) {
+				return ObjectContainer3D( object ).sceneTransform.transformVector( localPosition );
+			}
+			else {
+				return localPosition;
+			}
+		}
+
+		public function get sceneNormal():Vector3D {
+			if( object is ObjectContainer3D ) {
+				var sceneNormal:Vector3D = ObjectContainer3D( object ).sceneTransform.deltaTransformVector( localNormal );
+				sceneNormal.normalize();
+				return sceneNormal;
+			}
+			else {
+				return localNormal;
+			}
 		}
 	}
 }

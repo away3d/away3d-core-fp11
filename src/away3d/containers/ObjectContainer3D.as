@@ -84,7 +84,7 @@ package away3d.containers
 		protected var _explicitPartition : Partition3D; // what the user explicitly set as the partition
 		protected var _implicitPartition : Partition3D; // what is inherited from the parents if it doesn't have its own explicitPartition
 
-		private var _scenetransformchanged:Object3DEvent;
+		private var _sceneTransformChanged:Object3DEvent;
 		private var _scenechanged:Object3DEvent;
 		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
 		private var _mouseChildren : Boolean = true;
@@ -164,10 +164,10 @@ package away3d.containers
 			if (!hasEventListener(Object3DEvent.SCENETRANSFORM_CHANGED))
 				return;
 			
-			if (!_scenetransformchanged)
-				_scenetransformchanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
+			if (!_sceneTransformChanged)
+				_sceneTransformChanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
 			
-			dispatchEvent(_scenetransformchanged);
+			dispatchEvent(_sceneTransformChanged);
 		}
 		
 		private function notifySceneChange():void
@@ -194,7 +194,10 @@ package away3d.containers
 		protected function updateMouseChildren() : void
 		{
 			if (_parent) {
+				// Set implicit mouse enabled if parent is enabled and allows its children to be so.
 				_implicitMouseEnabled = _parent._implicitMouseEnabled && _parent._mouseChildren;
+				
+				// Sweep children.
 				var len : uint = _children.length;
 				for (var i : uint = 0; i < len; ++i)
 					_children[i].updateMouseChildren();
