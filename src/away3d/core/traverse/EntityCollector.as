@@ -158,8 +158,6 @@ package away3d.core.traverse
 
 		/**
 		 * Clears all objects in the entity collector.
-		 * @param time The time taken by the last render
-		 * @param camera The camera that provides the frustum.
 		 */
 		public function clear() : void
 		{
