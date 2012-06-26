@@ -216,11 +216,11 @@ package away3d.bounds
 		}
 
 		public function intersectsRay( p:Vector3D, dir:Vector3D ):Number {
-			throw new AbstractMethodError();
+			return -1;
 		}
 
 		public function containsPoint( p:Vector3D ):Boolean {
-			throw new AbstractMethodError();
+			return false;
 		}
 
 		protected function updateAABBPoints():void {
