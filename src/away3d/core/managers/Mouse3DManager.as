@@ -1,4 +1,4 @@
-package away3d.core.managers.mouse
+package away3d.core.managers
 {
 
 	import away3d.arcane;

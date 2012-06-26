@@ -4,6 +4,7 @@ package away3d.core.managers.mouse
 	import away3d.arcane;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Mouse3DManager;
 	import away3d.core.render.HitTestRenderer;
 	import away3d.core.traverse.EntityCollector;
 

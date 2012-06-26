@@ -1,5 +1,6 @@
 package away3d.core.managers.mouse
 {
+	import away3d.core.managers.Mouse3DManager;
 	public class GlobalPickingMethod
 	{
 		public static const GPU:Mouse3DManager = new ShaderMouse3DManager();
