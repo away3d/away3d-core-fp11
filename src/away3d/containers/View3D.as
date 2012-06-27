@@ -1,6 +1,6 @@
 ﻿package away3d.containers
 {
-	import away3d.core.pick.PickingMode;
+	import away3d.core.pick.PickingType;
 	import away3d.core.pick.IPicker;
 	import away3d.Away3D;
 	import away3d.arcane;
@@ -756,6 +756,6 @@
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
 		
-		public var mousePicker:IPicker = PickingMode.RAYCAST_PICKER;
+		public var mousePicker:IPicker = PickingType.RAYCAST_FIRST_ENCOUNTERED;
 	}
 }

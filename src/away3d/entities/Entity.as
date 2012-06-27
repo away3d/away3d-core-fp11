@@ -6,8 +6,6 @@ package away3d.entities
 	import away3d.containers.*;
 	import away3d.core.partition.*;
 	import away3d.core.pick.*;
-	import away3d.core.raycast.colliders.*;
-	import away3d.core.raycast.colliders.bounds.*;
 	import away3d.errors.*;
 	import away3d.library.assets.*;
 
@@ -34,9 +32,7 @@ package away3d.entities
 		
 		private var _showBounds : Boolean;
 		private var _partitionNode : EntityNode;
-
-		protected var _boundsRayCollider:RayColliderBase;
-		protected var _triangleRayCollider:RayColliderBase;
+		
 		protected var _pickingCollision:PickingCollisionVO;
 		
 		private var _mouseEnabled : Boolean;
@@ -57,10 +53,6 @@ package away3d.entities
 			
 			return _pickingCollision;
 		}
-		
-		public function set rayPickingMethod( method:RayColliderBase ):void {
-			_triangleRayCollider = method;
-		}
 
 		/**
 		 * 
@@ -73,11 +65,11 @@ package away3d.entities
 		override protected function updateMouseChildren() : void {
 
 			// Use its parent's triangle collider.
-			if( _parent && !_triangleRayCollider ) {
+			if( _parent && !pickingCollider ) {
 				if( _parent is Entity ) {
-					var collider:RayColliderBase = Entity( _parent ).triangleRayCollider;
+					var collider:IPickingCollider = Entity( _parent ).pickingCollider;
 					if( collider ) {
-						triangleRayCollider = collider;
+						pickingCollider = collider;
 					}
 				}
 			}
@@ -409,24 +401,7 @@ package away3d.entities
 			return AssetType.ENTITY;
 		}
 
-		public function get boundsRayCollider():RayColliderBase {
-			if( !_boundsRayCollider ) {
-				_boundsRayCollider = new BoundsRayCollider();
-			}
-			return _boundsRayCollider;
-		}
-
-		public function set boundsRayCollider( value:RayColliderBase ):void {
-			_boundsRayCollider = value;
-		}
-
-		public function get triangleRayCollider():RayColliderBase {
-			return _triangleRayCollider;
-		}
-
-		public function set triangleRayCollider( value:RayColliderBase ):void {
-			_triangleRayCollider = value;
-		}
+		public var pickingCollider:IPickingCollider;
 
 		public function get mouseDetails():Boolean {
 			return _mouseDetails;
