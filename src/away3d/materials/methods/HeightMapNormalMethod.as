@@ -12,31 +12,32 @@ package away3d.materials.methods
 
 	public class HeightMapNormalMethod extends BasicNormalMethod
 	{
-		private var _data : Vector.<Number>;
+		private var _worldXYRatio : Number;
+		private var _worldXZRatio : Number;
 
 		public function HeightMapNormalMethod(heightMap : Texture2DBase, worldWidth : Number, worldHeight : Number, worldDepth : Number)
 		{
 			super();
 			normalMap = heightMap;
-			_data = new Vector.<Number>(8, true);
-			_data[0] = 1/heightMap.width;
-			_data[1] = 1/heightMap.height;
-			_data[2] = 0;
-			_data[3] = 1;
-			_data[4] = worldWidth/worldHeight;
-			_data[5] = worldDepth/worldHeight;
+			_worldXYRatio = worldWidth/worldHeight;
+			_worldXZRatio = worldDepth/worldHeight;
 		}
 
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var index : int = vo.fragmentConstantsIndex;
+			var data : Vector.<Number> = vo.fragmentData;
+			data[index] = 1/normalMap.width;
+			data[index+1] = 1/normalMap.height;
+			data[index+2] = 0;
+			data[index+3] = 1;
+			data[index+4] = _worldXYRatio;
+			data[index+5] = _worldXZRatio;
+		}
 
 		override arcane function get tangentSpace() : Boolean
 		{
 			return false;
-		}
-
-		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
-		{
-			super.activate(vo, stage3DProxy);
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 2);
 		}
 
 		override public function copyFrom(method : ShadingMethodBase) : void
@@ -50,7 +51,7 @@ package away3d.materials.methods
 			var dataReg2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			_normalTextureRegister = regCache.getFreeTextureReg();
 			vo.texturesIndex = _normalTextureRegister.index;
-			vo.fragmentConstantsIndex = dataReg.index;
+			vo.fragmentConstantsIndex = dataReg.index*4;
 
 			return	getTexSampleCode(vo, targetReg, _normalTextureRegister, _uvFragmentReg, "clamp") +
 

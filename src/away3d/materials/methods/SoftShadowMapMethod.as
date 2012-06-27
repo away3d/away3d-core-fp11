@@ -15,9 +15,17 @@ package away3d.materials.methods
 		public function SoftShadowMapMethod(castingLight : DirectionalLight)
 		{
 			super(castingLight);
-			_fragmentData[8] = 1/9;
-			_fragmentData[9] = 1/castingLight.shadowMapper.depthMapSize;
-			_fragmentData[10] = 0;
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			super.initConstants(vo);
+
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+			fragmentData[index+8] = 1/9;
+			fragmentData[index+9] = 1/castingLight.shadowMapper.depthMapSize;
+			fragmentData[index+10] = 0;
 		}
 
 		/**
@@ -32,7 +40,7 @@ package away3d.materials.methods
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
-			vo.fragmentConstantsIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index*4;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 

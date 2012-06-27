@@ -26,7 +26,7 @@ package away3d.materials.methods
 			this.blendMode = blendMode;
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsUV = !_useSecondaryUV;
 			vo.needsSecondaryUV = _useSecondaryUV;

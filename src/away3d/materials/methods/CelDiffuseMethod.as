@@ -17,7 +17,7 @@ package away3d.materials.methods
 	{
 		private var _levels : uint;
 		private var _dataReg : ShaderRegisterElement;
-		private var _data : Vector.<Number>;
+		private var _smoothness : Number = .1;
 
 		/**
 		 * Creates a new CelDiffuseMethod object.
@@ -29,9 +29,16 @@ package away3d.materials.methods
 			super(clampDiffuse, baseDiffuseMethod);
 
 			_levels = levels;
-			_data = Vector.<Number>([levels, 1, 0, .1]);
 		}
 
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var data : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			super.initConstants(vo);
+			data[index+1] = 1;
+			data[index+2] = 0;
+		}
 
 		public function get levels() : uint
 		{
@@ -41,7 +48,6 @@ package away3d.materials.methods
 		public function set levels(value : uint) : void
 		{
 			_levels = value;
-			_data[0] = value;
 		}
 
 		/**
@@ -49,12 +55,12 @@ package away3d.materials.methods
 		 */
 		public function get smoothness() : Number
 		{
-			return _data[3];
+			return _smoothness;
 		}
 
 		public function set smoothness(value : Number) : void
 		{
-			_data[3] = value;
+			_smoothness = value;
 		}
 
 		/**
@@ -72,7 +78,7 @@ package away3d.materials.methods
 		override arcane function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_dataReg = regCache.getFreeFragmentConstant();
-			vo.secondaryFragmentConstantsIndex = _dataReg.index;
+			vo.secondaryFragmentConstantsIndex = _dataReg.index*4;
 			return super.getFragmentAGALPreLightingCode(vo, regCache);
 		}
 
@@ -82,7 +88,10 @@ package away3d.materials.methods
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(vo, stage3DProxy);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.secondaryFragmentConstantsIndex, _data, 1);
+			var data : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			data[index] =_levels;
+			data[index+3] = _smoothness;
 		}
 
 		/**

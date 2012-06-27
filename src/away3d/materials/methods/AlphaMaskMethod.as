@@ -24,7 +24,7 @@ package away3d.materials.methods
 			_useSecondaryUV = useSecondaryUV;
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsSecondaryUV = _useSecondaryUV;
 			vo.needsUV = !_useSecondaryUV;

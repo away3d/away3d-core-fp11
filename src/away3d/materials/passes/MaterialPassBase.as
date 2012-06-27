@@ -6,6 +6,7 @@ package away3d.materials.passes
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.AGALProgram3DCache;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.debug.Debug;
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.MaterialBase;
@@ -41,6 +42,7 @@ package away3d.materials.passes
 		protected var _numUsedStreams : uint;
 		protected var _numUsedTextures : uint;
 		protected var _numUsedVertexConstants : uint;
+		protected var _numUsedFragmentConstants : uint;
 
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
@@ -210,16 +212,12 @@ package away3d.materials.passes
 		}
 
 		/**
-		 * Renders an object to the current render target.
+		 * Renders an object to the current render target5.
 		 *
 		 * @private
 		 */
 		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
-			// TODO: not used
-			camera = camera;
-			lightPicker = lightPicker; 
-			
 			var context : Context3D = stage3DProxy._context3D;
 
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
@@ -244,9 +242,6 @@ package away3d.materials.passes
 
 		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			// TODO: not used
-			camera = camera;
-			 
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 
 			if (_programInvalids[contextIndex] || !_program3Ds[contextIndex]) {

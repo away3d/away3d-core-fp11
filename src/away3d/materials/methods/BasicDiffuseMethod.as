@@ -26,10 +26,6 @@ package away3d.materials.methods
 
 		private var _texture : Texture2DBase;
 		private var _diffuseColor : uint = 0xffffff;
-
-		protected var _diffuseData : Vector.<Number>;
-		private var _cutOffData : Vector.<Number>;
-
 		private var _diffuseR : Number = 1, _diffuseG : Number = 1, _diffuseB : Number = 1, _diffuseA : Number = 1;
 		protected var _shadowRegister : ShaderRegisterElement;
 
@@ -41,11 +37,9 @@ package away3d.materials.methods
 		public function BasicDiffuseMethod()
 		{
 			super();
-			_diffuseData = Vector.<Number>([1, 1, 1, 1]);
-			_cutOffData = new Vector.<Number>(4, true);
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsUV = _useTexture;
 			vo.needsNormals = vo.numLights > 0;
@@ -69,7 +63,7 @@ package away3d.materials.methods
 
 		public function set diffuseAlpha(value : Number) : void
 		{
-			_diffuseData[3] = _diffuseA = value;
+			_diffuseA = value;
 		}
 
 		/**
@@ -121,7 +115,6 @@ package away3d.materials.methods
 				invalidateShaderProgram();
 
 			_alphaThreshold = value;
-			_cutOffData[0] = _alphaThreshold;
 		}
 
 		/**
@@ -261,7 +254,7 @@ package away3d.materials.methods
 				code += getTexSampleCode(vo, t, _diffuseInputRegister);
 				if (_alphaThreshold > 0) {
 					cutOffReg = regCache.getFreeFragmentConstant();
-					vo.fragmentConstantsIndex = cutOffReg.index;
+					vo.fragmentConstantsIndex = cutOffReg.index*4;
 					code += "sub " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n" +
 							"kil " + t + ".w\n" +
 							"add " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n" +
@@ -270,7 +263,7 @@ package away3d.materials.methods
 			}
 			else {
 				_diffuseInputRegister = regCache.getFreeFragmentConstant();
-				vo.fragmentConstantsIndex = _diffuseInputRegister.index;
+				vo.fragmentConstantsIndex = _diffuseInputRegister.index*4;
 				code += "mov " + t + ", " + _diffuseInputRegister + "\n";
 			}
 
@@ -303,12 +296,21 @@ package away3d.materials.methods
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
+
+
 			if (_useTexture) {
 				stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 				if (_alphaThreshold > 0)
-					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _cutOffData, 1);
+					vo.fragmentData[vo.fragmentConstantsIndex] = _alphaThreshold;
 			}
-			else context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _diffuseData, 1);
+			else {
+				var index : int = vo.fragmentConstantsIndex;
+				var data : Vector.<Number> = vo.fragmentData;
+				data[index] = _diffuseR;
+				data[index+1] = _diffuseG;
+				data[index+2] = _diffuseB;
+				data[index+3] = _diffuseA;
+			}
 		}
 
 
@@ -317,9 +319,9 @@ package away3d.materials.methods
 		 */
 		private function updateDiffuse() : void
 		{
-			_diffuseData[uint(0)] = _diffuseR = ((_diffuseColor >> 16) & 0xff) / 0xff;
-			_diffuseData[uint(1)] = _diffuseG = ((_diffuseColor >> 8) & 0xff) / 0xff;
-			_diffuseData[uint(2)] = _diffuseB = (_diffuseColor & 0xff) / 0xff;
+			_diffuseR = ((_diffuseColor >> 16) & 0xff) / 0xff;
+			_diffuseG = ((_diffuseColor >> 8) & 0xff) / 0xff;
+			_diffuseB = (_diffuseColor & 0xff) / 0xff;
 		}
 
 		arcane function set shadowRegister(value : ShaderRegisterElement) : void

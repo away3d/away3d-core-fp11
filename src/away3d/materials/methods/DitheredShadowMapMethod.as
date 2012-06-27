@@ -29,11 +29,8 @@ package away3d.materials.methods
 			// todo: implement for point lights
 			super(castingLight);
 
-			_fragmentData[8] = highRes? 1/8 : 1/4;
 			// area to sample in texture space
 			_depthMapSize = castingLight.shadowMapper.depthMapSize;
-			_fragmentData[9] = _range/_depthMapSize;
-			_fragmentData[10] = .5;
 
 			_highRes = highRes;
 
@@ -44,6 +41,17 @@ package away3d.materials.methods
 			}
 		}
 
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			super.initConstants(vo);
+
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+			fragmentData[index + 8] = _highRes? 1/8 : 1/4;
+			fragmentData[index + 9] = _range/_depthMapSize;
+			fragmentData[index + 10] = .5;
+		}
+
 		public function get range() : Number
 		{
 			return _range;
@@ -52,7 +60,6 @@ package away3d.materials.methods
 		public function set range(value : Number) : void
 		{
 			_range = value;
-			_fragmentData[9] = _range/_depthMapSize;
 		}
 
 		private function initGrainTexture() : void
@@ -91,6 +98,7 @@ package away3d.materials.methods
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(vo,  stage3DProxy);
+			vo.fragmentData[vo.fragmentConstantsIndex+9] = _range/_depthMapSize;
             stage3DProxy.setTextureAt(vo.texturesIndex+1, _grainTexture.getTextureForStage3D(stage3DProxy));
 		}
 
@@ -108,7 +116,7 @@ package away3d.materials.methods
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
 
-			vo.fragmentConstantsIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index*4;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 

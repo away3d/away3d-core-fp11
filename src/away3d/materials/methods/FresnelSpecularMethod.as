@@ -15,8 +15,9 @@ package away3d.materials.methods
 	public class FresnelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
-		private var _data : Vector.<Number>;
         private var _incidentLight : Boolean;
+        private var _fresnelPower : Number = 5;
+		private var _normalReflectance : Number = .028;	// default value for skin
 
 		/**
 		 * Creates a new FresnelSpecularMethod object.
@@ -27,26 +28,24 @@ package away3d.materials.methods
 		{
             // may want to offer diff speculars
 			super(modulateSpecular, baseSpecularMethod);
-			_data = new Vector.<Number>(4, true);
-            _data[0] = .028; // skin
-            _data[1] = 5; // exponent
-            _data[2] = 1;
             _incidentLight = !basedOnSurface;
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initConstants(vo : MethodVO) : void
 		{
-			super.initData(vo);
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			vo.fragmentData[index+2] = 1;
+			vo.fragmentData[index+3] = 0;
 		}
 
 		public function get fresnelPower() : Number
 		{
-			return _data[1];
+			return _fresnelPower;
 		}
 
 		public function set fresnelPower(value : Number) : void
 		{
-			_data[1] = value;
+			_fresnelPower = value;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -60,12 +59,12 @@ package away3d.materials.methods
 		 */
 		public function get normalReflectance() : Number
 		{
-			return _data[0];
+			return _normalReflectance;
 		}
 
 		public function set normalReflectance(value : Number) : void
 		{
-			_data[0] = value;
+			_normalReflectance = value;
 		}
 
 		/**
@@ -74,7 +73,10 @@ package away3d.materials.methods
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(vo, stage3DProxy);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.secondaryFragmentConstantsIndex, _data, 1);
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			fragmentData[index] = _normalReflectance;
+			fragmentData[index+1] = _fresnelPower;
 		}
 
 		/**
@@ -83,7 +85,7 @@ package away3d.materials.methods
 		override arcane function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_dataReg = regCache.getFreeFragmentConstant();
-			vo.secondaryFragmentConstantsIndex = _dataReg.index;
+			vo.secondaryFragmentConstantsIndex = _dataReg.index*4;
 			return super.getFragmentAGALPreLightingCode(vo, regCache);
 		}
 

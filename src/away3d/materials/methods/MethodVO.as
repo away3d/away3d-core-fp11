@@ -2,6 +2,10 @@ package away3d.materials.methods
 {
 	public class MethodVO
 	{
+		public var vertexConstantsOffset : int;
+		public var vertexData : Vector.<Number>;
+		public var fragmentData : Vector.<Number>;
+
 		// public register indices
 		public var texturesIndex : int;
 		public var secondaryTexturesIndex : int;	// sometimes needed for composites
@@ -27,6 +31,7 @@ package away3d.materials.methods
 
 		public function reset() : void
 		{
+			vertexConstantsOffset = 0;
 			texturesIndex = -1;
 			vertexConstantsIndex = -1;
 			fragmentConstantsIndex = -1;

@@ -27,9 +27,9 @@ package away3d.materials.methods
 			_cubeTexture = envMap;
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
-			super.initData(vo);
+			super.initVO(vo);
 			vo.needsNormals = true;
 		}
 

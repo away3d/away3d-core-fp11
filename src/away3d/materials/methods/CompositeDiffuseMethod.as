@@ -30,9 +30,14 @@ package away3d.materials.methods
 			_baseDiffuseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
-			_baseDiffuseMethod.initData(vo);
+			_baseDiffuseMethod.initVO(vo);
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			_baseDiffuseMethod.initConstants(vo);
 		}
 
 		/**

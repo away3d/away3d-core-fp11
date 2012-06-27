@@ -13,17 +13,16 @@ package away3d.materials.methods
 	public class EnvMapMethod extends EffectMethodBase
 	{
 		private var _cubeTexture : CubeTextureBase;
-		private var _data : Vector.<Number>;
+		private var _alpha : Number;
 
 		public function EnvMapMethod(envMap : CubeTextureBase, alpha : Number = 1)
 		{
 			super();
 			_cubeTexture = envMap;
-			_data = new Vector.<Number>(4, true);
-			_data[0] = alpha;
+			_alpha = alpha;
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsNormals = true;
 			vo.needsView = true;
@@ -51,17 +50,17 @@ package away3d.materials.methods
 
 		public function get alpha() : Number
 		{
-			return _data[0];
+			return _alpha;
 		}
 
 		public function set alpha(value : Number) : void
 		{
-			_data[0] = value;
+			_alpha = value;
 		}
 
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 1);
+			vo.fragmentData[vo.fragmentConstantsIndex] = _alpha;
 			stage3DProxy.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
@@ -72,7 +71,7 @@ package away3d.materials.methods
 			var code : String = "";
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			vo.texturesIndex = cubeMapReg.index;
-			vo.fragmentConstantsIndex = dataRegister.index;
+			vo.fragmentConstantsIndex = dataRegister.index*4;
 
 			// r = I - 2(I.N)*N
 			code += "dp3 " + temp + ".w, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz		\n" +

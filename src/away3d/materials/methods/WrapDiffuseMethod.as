@@ -16,10 +16,10 @@ package away3d.materials.methods
 	 */
 	public class WrapDiffuseMethod extends BasicDiffuseMethod
 	{
-		private var _wrapData : Vector.<Number>;
 		private var _wrapDataRegister : ShaderRegisterElement;
 		private var _scatterTextureRegister : ShaderRegisterElement;
 		private var _scatterTexture : Texture2DBase;
+		private var _wrapFactor : Number;
 
 		/**
 		 * Creates a new WrapDiffuseMethod object.
@@ -29,10 +29,15 @@ package away3d.materials.methods
 		public function WrapDiffuseMethod(wrapFactor : Number = .5, scatterTexture : Texture2DBase = null)
 		{
 			super();
-			_wrapData = new Vector.<Number>(4, true);
-			_wrapData[2] = .5;
 			this.wrapFactor = wrapFactor;
 			this.scatterTexture = scatterTexture;
+		}
+
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			super.initConstants(vo);
+			vo.fragmentData[vo.secondaryFragmentConstantsIndex+2] = .5;
 		}
 
 		public function get scatterTexture() : Texture2DBase
@@ -55,20 +60,20 @@ package away3d.materials.methods
 
 		public function get wrapFactor() : Number
 		{
-			return _wrapData[0];
+			return _wrapFactor
 		}
 
 		public function set wrapFactor(value : Number) : void
 		{
-			_wrapData[0] = value;
-			_wrapData[1] = 1/(value+1);
+			_wrapFactor = value;
+			_wrapFactor = 1/(value+1);
 		}
 
 		arcane override function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = super.getFragmentAGALPreLightingCode(vo, regCache);
 			_wrapDataRegister = regCache.getFreeFragmentConstant();
-			vo.fragmentConstantsIndex = _wrapDataRegister.index;
+			vo.secondaryFragmentConstantsIndex = _wrapDataRegister.index*4;
 
 			if (_scatterTexture) {
 				_scatterTextureRegister = regCache.getFreeTextureReg();
@@ -125,8 +130,10 @@ package away3d.materials.methods
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(vo, stage3DProxy);
-			var index : int = !_useTexture || (_useTexture && _alphaThreshold > 0) ? vo.fragmentConstantsIndex + 1 : vo.fragmentConstantsIndex;
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, index, _wrapData, 1);
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			var data : Vector.<Number> = vo.fragmentData;
+			data[index] = _wrapFactor;
+			data[index+1] = 1/(_wrapFactor+1);
 
 			if (_scatterTexture) {
 				index = _useTexture? vo.texturesIndex+1 : vo.texturesIndex;

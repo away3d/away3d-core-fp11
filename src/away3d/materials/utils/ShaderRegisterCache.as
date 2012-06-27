@@ -15,13 +15,10 @@ package away3d.materials.utils
 		private var _vertexConstantOffset : uint;
 		private var _vertexAttributesOffset : uint;
 
-		private var _fragmentConstantsCount : uint;
-		private var _vertexConstantsCount : uint;
-		private var _vertexAttributeCount : uint;
-
 		private var _fragmentOutputRegister : ShaderRegisterElement;
 		private var _vertexOutputRegister : ShaderRegisterElement;
 		private var _numUsedVertexConstants : uint;
+		private var _numUsedFragmentConstants : uint;
 		private var _numUsedStreams : uint;
 		private var _numUsedTextures : uint;
 
@@ -138,6 +135,7 @@ package away3d.materials.utils
 		 */
 		public function getFreeFragmentConstant() : ShaderRegisterElement
 		{
+			++_numUsedFragmentConstants;
 			return _fragmentConstantsCache.requestFreeVectorReg();
 		}
 
@@ -211,30 +209,6 @@ package away3d.materials.utils
 		}
 
 		/**
-		 * The amount of used fragment constant registers.
-		 */
-		public function get fragmentsConstantCount() : uint
-		{
-			return _fragmentConstantsCount;
-		}
-
-		/**
-		 * The amount of used vertex constant registers.
-		 */
-		public function get vertexConstantCount() : uint
-		{
-			return _vertexConstantsCount;
-		}
-
-		/**
-		 * The amount of used vertex attribute registers.
-		 */
-		public function get vertexAttributeCount() : uint
-		{
-			return _vertexAttributeCount;
-		}
-
-		/**
 		 * The fragment output register.
 		 */
 		public function get fragmentOutputRegister() : ShaderRegisterElement
@@ -248,6 +222,14 @@ package away3d.materials.utils
 		public function get numUsedVertexConstants() : uint
 		{
 			return _numUsedVertexConstants;
+		}
+
+		/**
+		 * The amount of used fragment constant registers.
+		 */
+		public function get numUsedFragmentConstants() : uint
+		{
+			return _numUsedFragmentConstants;
 		}
 
 		/**

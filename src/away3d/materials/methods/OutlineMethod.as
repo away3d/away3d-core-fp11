@@ -21,7 +21,7 @@ package away3d.materials.methods
 			_passes.push(_outlinePass);
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsNormals = true;
 		}

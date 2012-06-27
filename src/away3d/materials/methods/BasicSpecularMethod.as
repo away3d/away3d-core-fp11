@@ -25,13 +25,13 @@ package away3d.materials.methods
 
 		private var _texture : Texture2DBase;
 
-		protected var _specularData : Vector.<Number>;
+		private var _gloss : int = 50;
 		private var _specular : Number = 1;
 		private var _specularColor : uint = 0xffffff;
 		arcane var _specularR : Number = 1, _specularG : Number = 1, _specularB : Number = 1;
 		private var _shadowRegister : ShaderRegisterElement;
 		private var _shadingModel:String;
-		
+
 		
 		/**
 		 * Creates a new BasicSpecularMethod object.
@@ -39,11 +39,10 @@ package away3d.materials.methods
 		public function BasicSpecularMethod()
 		{
 			super();
-			_specularData = Vector.<Number>([1, 1, 1, 50]);
 			_shadingModel = SpecularShadingModel.BLINN_PHONG;
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsUV = _useTexture;
 			vo.needsNormals = vo.numLights > 0;
@@ -55,12 +54,12 @@ package away3d.materials.methods
 		 */
 		public function get gloss() : Number
 		{
-			return _specularData[uint(3)];
+			return _gloss;
 		}
 
 		public function set gloss(value : Number) : void
 		{
-			_specularData[uint(3)] = value;
+			_gloss = value;
 		}
 
 		/**
@@ -167,7 +166,7 @@ package away3d.materials.methods
 
 			if (vo.numLights > 0) {
 				_specularDataRegister = regCache.getFreeFragmentConstant();
-				vo.fragmentConstantsIndex = _specularDataRegister.index;
+				vo.fragmentConstantsIndex = _specularDataRegister.index*4;
 
 				if (_useTexture) {
 					_specularTexData = regCache.getFreeFragmentVectorTemp();
@@ -325,7 +324,12 @@ package away3d.materials.methods
 			if (vo.numLights == 0) return;
 
 			if (_useTexture) stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _specularData, 1);
+			var index : int = vo.fragmentConstantsIndex;
+			var data : Vector.<Number> = vo.fragmentData;
+			data[index] = _specularR;
+			data[index+1] = _specularG;
+			data[index+2] = _specularB;
+			data[index+3] = _gloss;
 		}
 
 		/**
@@ -333,9 +337,9 @@ package away3d.materials.methods
 		 */
 		private function updateSpecular() : void
 		{
-			_specularData[0] = _specularR = ((_specularColor >> 16) & 0xff) / 0xff * _specular;
-			_specularData[1] = _specularG = ((_specularColor >> 8) & 0xff) / 0xff * _specular;
-			_specularData[2] = _specularB = (_specularColor & 0xff) / 0xff * _specular;
+			_specularR = ((_specularColor >> 16) & 0xff) / 0xff * _specular;
+			_specularG = ((_specularColor >> 8) & 0xff) / 0xff * _specular;
+			_specularB = (_specularColor & 0xff) / 0xff * _specular;
 		}
 
 		arcane function set shadowRegister(shadowReg : ShaderRegisterElement) : void

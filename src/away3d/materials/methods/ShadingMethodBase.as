@@ -39,7 +39,12 @@ package away3d.materials.methods
 		{
 		}
 
-		arcane function initData(vo : MethodVO) : void
+		arcane function initVO(vo : MethodVO) : void
+		{
+
+		}
+
+		arcane function initConstants(vo : MethodVO) : void
 		{
 
 		}

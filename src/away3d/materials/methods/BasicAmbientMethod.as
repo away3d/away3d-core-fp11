@@ -25,7 +25,6 @@ package away3d.materials.methods
 		protected var _ambientInputRegister : ShaderRegisterElement;
 
 		private var _ambientColor : uint = 0xffffff;
-		private var _ambientData : Vector.<Number>;
 		private var _ambientR : Number = 0, _ambientG : Number = 0, _ambientB : Number = 0;
 		private var _ambient : Number = 1;
 		arcane var _lightAmbientR : Number = 0;
@@ -39,12 +38,16 @@ package away3d.materials.methods
 		public function BasicAmbientMethod()
 		{
 			super();
-			_ambientData = Vector.<Number>([0, 0, 0, 1]);
 		}
 
-		override arcane function initData(vo : MethodVO) : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsUV = _useTexture;
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			vo.fragmentData[vo.fragmentConstantsIndex+3] = 1;
 		}
 
 		/**
@@ -120,7 +123,7 @@ package away3d.materials.methods
 			}
 			else {
 				_ambientInputRegister = regCache.getFreeFragmentConstant();
-				vo.fragmentConstantsIndex = _ambientInputRegister.index;
+				vo.fragmentConstantsIndex = _ambientInputRegister.index*4;
 				code += "mov " + targetReg + ", " + _ambientInputRegister + "\n";
 			}
 
@@ -134,11 +137,15 @@ package away3d.materials.methods
 		{
 			updateAmbient();
 			
-			var context : Context3D = stage3DProxy._context3D;
 			if (_useTexture)
 				stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
-			else
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _ambientData, 1);
+			else {
+				var index : int = vo.fragmentConstantsIndex;
+				var data : Vector.<Number> = vo.fragmentData;
+				data[index] = _ambientR;
+				data[index+1] = _ambientG;
+				data[index+2] = _ambientB;
+			}
 		}
 
 		/**
@@ -146,9 +153,9 @@ package away3d.materials.methods
 		 */
 		private function updateAmbient() : void
 		{
-			_ambientData[uint(0)] = _ambientR = ((_ambientColor >> 16) & 0xff) / 0xff * _ambient * _lightAmbientR;
-			_ambientData[uint(1)] = _ambientG = ((_ambientColor >> 8) & 0xff) / 0xff * _ambient * _lightAmbientG;
-			_ambientData[uint(2)] = _ambientB = (_ambientColor & 0xff) / 0xff * _ambient * _lightAmbientB;
+			_ambientR = ((_ambientColor >> 16) & 0xff) / 0xff * _ambient * _lightAmbientR;
+			_ambientG = ((_ambientColor >> 8) & 0xff) / 0xff * _ambient * _lightAmbientG;
+			_ambientB = (_ambientColor & 0xff) / 0xff * _ambient * _lightAmbientB;
 		}
 	}
 }

@@ -15,9 +15,10 @@ package away3d.materials.methods
 	{
 		private var _blendingTexture : Texture2DBase;
 		private var _splats : Vector.<Texture2DBase>;
-		private var _data : Vector.<Number>;
 		private var _numSplattingLayers : uint;
 		private var _detailTexture : Texture2DBase;
+		private var _tileData : Array;
+		private var _blendFactors : Array;
 
 		/**
 		 *
@@ -29,27 +30,27 @@ package away3d.materials.methods
 		{
 			super();
 			_splats = Vector.<Texture2DBase>(splatTextures);
-
-			_data = new Vector.<Number>(12, true);
-			_data[0] = tileData ? tileData[0] : 1;
-			for (var i : int = 1; i < 4; ++i) {
-				_data[i] = tileData ? tileData[i] : 50;
-			}
+			_tileData = tileData;
 			_blendingTexture = blendingTexture;
 			_numSplattingLayers = _splats.length;
 			if (_numSplattingLayers > 3) throw new Error("More than 3 splatting layers is not supported!");
 		}
 
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var data : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+			data[index] = _tileData ? _tileData[0] : 1;
+			for (var i : int = 1; i < 4; ++i) {
+				data[index+i] = _tileData ? _tileData[i] : 50;
+			}
+		}
+
 		public function setDetailTexture(detail : Texture2DBase = null, tileData  : Array = null, blendFactors : Array = null) : void
 		{
 			if (Boolean(detail) != Boolean(_detailTexture)) invalidateShaderProgram();
-			
+			_blendFactors = blendFactors;
 			_detailTexture = detail;
-
-			for (var i : int = 0; i < 4; ++i) {
-				_data[i+4] = tileData ? tileData[i] : 50;
-				_data[i+8] = blendFactors? blendFactors[i] : 1;
-			}
 		}
 
 		arcane override function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
@@ -108,7 +109,7 @@ package away3d.materials.methods
 			code += "tex "+temp+", "+_uvFragmentReg +", "+blendTexReg+" <2d,linear,miplinear,clamp>\n";
 			var splatTexReg : ShaderRegisterElement;
 
-			vo.fragmentConstantsIndex = scaleRegister.index;
+			vo.fragmentConstantsIndex = scaleRegister.index*4;
 			var comps : Array = [ ".x",".y",".z",".w" ];
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
@@ -142,21 +143,24 @@ package away3d.materials.methods
 
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
+			var i : int;
 			var texIndex : int = vo.texturesIndex;
 			super.activate(vo, stage3DProxy);
 			stage3DProxy.setTextureAt(texIndex+1, _blendingTexture.getTextureForStage3D(stage3DProxy));
 
 			if (_detailTexture) {
+				var data : Vector.<Number> = vo.fragmentData;
+				var index : int = vo.fragmentConstantsIndex+4;
+				for (i = 0; i < 4; ++i) {
+					data[index+i] = _tileData ? _tileData[i] : 50;
+					data[index+i] = _blendFactors? _blendFactors[i] : 1;
+				}
 				stage3DProxy.setTextureAt(texIndex + 2, _detailTexture.getTextureForStage3D(stage3DProxy));
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 3);
 				++texIndex;
-			}
-			else {
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _data, 1);
 			}
 
 			texIndex += 2;
-			for (var i : int = 0; i < _numSplattingLayers; ++i)
+			for (i = 0; i < _numSplattingLayers; ++i)
 				stage3DProxy.setTextureAt(i + texIndex, _splats[i].getTextureForStage3D(stage3DProxy));
 		}
 

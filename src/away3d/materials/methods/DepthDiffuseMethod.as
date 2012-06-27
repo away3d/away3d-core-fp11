@@ -14,15 +14,23 @@ package away3d.materials.methods
 	 */
 	public class DepthDiffuseMethod extends BasicDiffuseMethod
 	{
-		private var _depthData : Vector.<Number>;
-
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
 		public function DepthDiffuseMethod()
 		{
 			super();
-			_depthData = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0]);
+		}
+
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var data : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+			data[index] = 1.0;
+			data[index+1] = 1/255.0;
+			data[index+2] = 1/65025.0;
+			data[index+3] = 1/16581375.0;
 		}
 
 		/**
@@ -33,6 +41,8 @@ package away3d.materials.methods
 			var code : String = "";
 			var temp : ShaderRegisterElement;
 			var decReg : ShaderRegisterElement;
+
+			if (!_useTexture) throw new Error("DepthDiffuseMethod requires texture!");
 
 			// incorporate input from ambient
 			if (vo.numLights > 0) {
@@ -45,20 +55,13 @@ package away3d.materials.methods
 
 			temp = vo.numLights > 0 ? regCache.getFreeFragmentVectorTemp() : targetReg;
 
-			if (_useTexture) {
-				_diffuseInputRegister = regCache.getFreeTextureReg();
-				vo.texturesIndex = _diffuseInputRegister.index;
-				decReg = regCache.getFreeFragmentConstant();
-				vo.fragmentConstantsIndex = decReg.index;
-				code += getTexSampleCode(vo, temp, _diffuseInputRegister) +
-						"dp4 " + temp + ".x, " + temp + ", "+ decReg + "\n" +
-						"mov " + temp + ".yzw, " + temp + ".xxx			\n";
-			}
-			else {
-				_diffuseInputRegister = regCache.getFreeFragmentConstant();
-				code += "mov " + temp + ", " + _diffuseInputRegister + "\n";
-				vo.fragmentConstantsIndex = _diffuseInputRegister.index;
-			}
+			_diffuseInputRegister = regCache.getFreeTextureReg();
+			vo.texturesIndex = _diffuseInputRegister.index;
+			decReg = regCache.getFreeFragmentConstant();
+			vo.fragmentConstantsIndex = decReg.index*4;
+			code += getTexSampleCode(vo, temp, _diffuseInputRegister) +
+					"dp4 " + temp + ".x, " + temp + ", "+ decReg + "\n" +
+					"mov " + temp + ".yzw, " + temp + ".xxx			\n";
 
 			if (vo.numLights == 0)
 				return code;
@@ -67,16 +70,6 @@ package away3d.materials.methods
 					"mov " + targetReg + ".w, " + temp + ".w\n";
 
 			return code;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
-		{
-			super.activate(vo, stage3DProxy);
-			if (_useTexture)
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, vo.fragmentConstantsIndex, _depthData, 1);
 		}
 	}
 }
