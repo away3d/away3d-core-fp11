@@ -88,17 +88,20 @@ package away3d.core.pick
 				if( t > 0 && t < smallestNonNegativeT ) {
 					smallestNonNegativeT = t;
 					collisionTriangleIndex = i;
-					break; // does not search for closest collision, first found will do... // TODO: add option of finding best triangle hit?
+					
+					//break loop unless best hit is required
+					if (!_findBestHit)
+						break;
 				}
 			}
 			
 			// Detect collision
 			if( collisionTriangleIndex >= 0 ) {
 				
-				pickingCollisionVO.collisionT = t;
-				cx = rayPosition.x + t * rayDirection.x;
-				cy = rayPosition.y + t * rayDirection.y;
-				cz = rayPosition.z + t * rayDirection.z;
+				pickingCollisionVO.collisionT = smallestNonNegativeT;
+				cx = rayPosition.x + smallestNonNegativeT * rayDirection.x;
+				cy = rayPosition.y + smallestNonNegativeT * rayDirection.y;
+				cz = rayPosition.z + smallestNonNegativeT * rayDirection.z;
 				pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
 				pickingCollisionVO.localNormal = getCollisionNormal( indexData, vertexData, collisionTriangleIndex );
 				v = _kernelOutputBuffer[ collisionTriangleIndex + 1 ]; // barycentric coord 1

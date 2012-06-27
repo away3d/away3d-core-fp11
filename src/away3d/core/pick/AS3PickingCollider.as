@@ -37,6 +37,8 @@ package away3d.core.pick
 			var indexData:Vector.<uint> = subMesh.indexData;
 			var vertexData:Vector.<Number> = subMesh.vertexData;
 			var uvData:Vector.<Number> = subMesh.UVData;
+			var collisionTriangleIndex:int = -1;
+			var smallestNonNegativeT:Number = Number.MAX_VALUE;
 			numTriangles = subMesh.numTriangles;
 			
 			for( i = 0; i < numTriangles; ++i ) { // sweep all triangles
@@ -100,17 +102,23 @@ package away3d.core.pick
 					if( v < 0 ) continue;
 					if( w < 0 ) continue;
 					u = 1 - v - w;
-					if( !( u < 0 ) ) { // all tests passed
+					if( !( u < 0 ) && t > 0 && t < smallestNonNegativeT) { // all tests passed
+						smallestNonNegativeT = t;
+						collisionTriangleIndex = i;
 						pickingCollisionVO.collisionT = t;
 						pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
 						pickingCollisionVO.localNormal = new Vector3D( nx, ny, nz );
 						pickingCollisionVO.uv = getCollisionUV( indexData, uvData, index, v, w, u );
 						
-						// does not search for closest collision, first found will do... // TODO: add option of finding best triangle hit?
-						return true;
+						// if not looking for best hit, first found will do...
+						if (!_findBestHit)
+							return true;
 					}
 				}
 			}
+			
+			if( collisionTriangleIndex >= 0 )
+				return true;
 			
 			return false;
 		}
