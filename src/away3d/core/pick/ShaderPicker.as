@@ -1,175 +1,134 @@
-package away3d.core.render
+package away3d.core.pick
 {
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.containers.View3D;
-	import away3d.core.base.IRenderable;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
-	import away3d.core.data.RenderableListItem;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.render.RendererBase;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.entities.Entity;
 
-	import com.adobe.utils.AGALMiniAssembler;
-
-	import flash.display.BitmapData;
-	import flash.display3D.Context3DBlendFactor;
-	import flash.display3D.Context3DClearMask;
-	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DTriangleFace;
-	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
-	import flash.geom.Matrix3D;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.geom.Vector3D;
+	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3DBlendFactor;
+	import away3d.core.data.RenderableListItem;
+	import flash.display3D.Context3DTriangleFace;
+	import com.adobe.utils.AGALMiniAssembler;
+	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DClearMask;
+	import away3d.entities.Entity;
+	import away3d.cameras.Camera3D;
+	import flash.display3D.Context3D;
+	import away3d.core.managers.Stage3DProxy;
+	import flash.display.BitmapData;
+	import flash.display3D.Program3D;
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.arcane;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.core.traverse.*;
 
+	import flash.geom.*;
+	
 	use namespace arcane;
 
-	/**
-	 * HitTestRenderer provides a renderer that can identify objects under a given screen position and can optionally
-	 * calculate further geometrical information about the object at that point.
-	 *
-	 * @see away3d.core.managers.Mouse3DManager
-	 */
-	public class HitTestRenderer extends RendererBase
+	public class ShaderPicker implements IPicker
 	{
-		private var _objectProgram3D : Program3D;
-		private var _triangleProgram3D : Program3D;
-		public var _bitmapData : BitmapData;
-		private var _viewportData : Vector.<Number>;
-		private var _boundOffsetScale : Vector.<Number>;
-		private var _id : Vector.<Number>;
-
-		private var _interactives : Vector.<IRenderable>;
-		private var _interactiveId : uint;
-		private var _hitColor : uint;
-		private var _inverse : Matrix3D;
-		private var _projX : Number;
-		private var _projY : Number;
-
-		private var _hitRenderable : IRenderable;
-		private var _localHitPosition : Vector3D;
-		private var _hitUV : Point;
-
-		private var _localHitNormal:Vector3D;
-
-		private var _rayPos : Vector3D = new Vector3D();
-		private var _rayDir : Vector3D = new Vector3D();
-//		private var _localRayPos : Vector3D = new Vector3D();
-//		private var _localRayDir : Vector3D = new Vector3D();
-		private var _potentialFound : Boolean;
-		private var _view : View3D;
-		private static const MOUSE_SCISSOR_RECT : Rectangle = new Rectangle(0, 0, 1, 1);
-
-		/**
-		 * Creates a new HitTestRenderer object.
-		 * @param renderMode The render mode to use.
-		 */
-		public function HitTestRenderer(view : View3D)
-		{
-			super();
-			_view = view;
-			swapBackBuffer = false;
-
-			// DO NOT SORT
-			renderableSorter = null;
-
-			init();
-		}
-
-		/**
-		 * Initializes data.
-		 */
-		private function init() : void
+		private var _stage3DProxy:Stage3DProxy;
+		private var _context:Context3D;
+		
+		public function ShaderPicker()
 		{
 			_id = new Vector.<Number>(4, true);
 			_viewportData = new Vector.<Number>(4, true);	// first 2 contain scale, last 2 translation
 			_boundOffsetScale = new Vector.<Number>(8, true);	// first 2 contain scale, last 2 translation
 			_boundOffsetScale[3] = 0;
 			_boundOffsetScale[7] = 1;
-			_localHitPosition = new Vector3D();
-			_localHitNormal = new Vector3D();
-			_interactives = new Vector.<IRenderable>();
-			_bitmapData = new BitmapData(1, 1, false, 0);
-			_inverse = new Matrix3D();
 		}
-
-		/**
-		 * Updates the object information at the given position for the given visible objects.
-		 * @param ratioX A ratio between 0 and 1 of the horizontal hit-test position relative to the viewport width.
-		 * @param ratioY A ratio between 0 and 1 of the vertical hit-test position relative to the viewport height.
-		 * @param entityCollector The EntityCollector object containing all potentially visible objects.
-		 */
-		public function update(ratioX : Number, ratioY : Number, entityCollector : EntityCollector) : void
+		
+		
+		public function getViewCollision(x:Number, y:Number, view:View3D):PickingCollisionVO
 		{
-			if (!_stage3DProxy) return;
-
-			_viewportData[0] = _view.width;
-			_viewportData[1] = _view.height;
-			_viewportData[2] = -(_projX = ratioX*2 - 1);
-			_viewportData[3] = _projY = ratioY*2 - 1;
-
+			var collector:EntityCollector = view.entityCollector;
+			
+			_stage3DProxy = view.stage3DProxy;
+			
+			if (!_stage3DProxy)
+				return null;
+			
+			_context = _stage3DProxy._context3D;
+			
+			_viewportData[0] = view.width;
+			_viewportData[1] = view.height;
+			_viewportData[2] = -(_projX = 2*x/view.width - 1);
+			_viewportData[3] = _projY = 2*y/view.height - 1;
+			
 			// _potentialFound will be set to true if any object is actually rendered
-			_hitRenderable = null;
-			_hitUV = null;
 			_potentialFound = false;
 
-			draw( entityCollector, null );
+			draw( collector, null );
 
 			// clear buffers
 			_stage3DProxy.setSimpleVertexBuffer( 0, null, null, 0 );
 
-			if (!_context || !_potentialFound) return;
+			if (!_context || !_potentialFound)
+				return null;
+			
 			_context.drawToBitmapData(_bitmapData);
 			_hitColor = _bitmapData.getPixel(0, 0);
 
-			if (_hitColor != 0) {
-				_hitRenderable = _interactives[_hitColor-1];
-
-				if (_hitRenderable.mouseDetails)
-					getHitDetails(entityCollector.camera);
-				else {
-					_hitUV = null;
-//					_localHitPosition = null;
-				}
+			if (!_hitColor) {
+				_context.present();
+				return null;
 			}
-//			_context.clear(0, 0, 0, 0, 1, 0);
+			
+			_hitRenderable = _interactives[_hitColor-1];
+
+			var _collisionVO:PickingCollisionVO = _hitRenderable.sourceEntity.pickingCollisionVO;
+			
+			if (_hitRenderable.mouseDetails) {
+				getHitDetails(view.camera);
+				_collisionVO.localPosition = _localHitPosition;
+				_collisionVO.localNormal = _localHitNormal;
+				_collisionVO.uv = _hitUV;
+			} else {
+				_collisionVO.localPosition = null;
+				_collisionVO.localNormal = null;
+				_collisionVO.uv = null;
+			}
+			
 			_context.present();
+			
+			return _collisionVO;
 		}
-
-		/**
-		 * The IRenderable object directly under the hit-test position after a call to update.
-		 */
-		public function get hitRenderable() : IRenderable
+		
+		public function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO
 		{
-			return _hitRenderable;
+			return null;
 		}
+		
+		private var _objectProgram3D : Program3D;
+		private var _triangleProgram3D : Program3D;
+		private var _bitmapData : BitmapData = new BitmapData(1, 1, false, 0);
+		private var _viewportData : Vector.<Number>;
+		private var _boundOffsetScale : Vector.<Number>;
+		private var _id : Vector.<Number>;
 
-		/**
-		 * The UV coordinate at the hit position.
-		 */
-		public function get hitUV() : Point
-		{
-			return _hitUV;
-		}
+		private var _interactives : Vector.<IRenderable> = new Vector.<IRenderable>();
+		private var _interactiveId : uint;
+		private var _hitColor : uint;
+		private var _projX : Number;
+		private var _projY : Number;
 
-		/**
-		 * The coordinate in object space of the hit position.
-		 */
-		public function get localHitPosition() : Vector3D
-		{
-			return _localHitPosition;
-		}
+		private var _hitRenderable : IRenderable;
+		private var _localHitPosition : Vector3D = new Vector3D();
+		private var _hitUV : Point = new Point();
+
+		private var _localHitNormal:Vector3D = new Vector3D();
+
+		private var _rayPos : Vector3D = new Vector3D();
+		private var _rayDir : Vector3D = new Vector3D();
+		private var _potentialFound : Boolean;
+		private static const MOUSE_SCISSOR_RECT : Rectangle = new Rectangle(0, 0, 1, 1);
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
+		protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
 			var camera : Camera3D = entityCollector.camera;
 
@@ -355,7 +314,6 @@ package away3d.core.render
 
 			updateRay(camera);
 
-			_hitUV = new Point();
 
 			while (i < len) {
 				t1 = indices[i]*3;
@@ -478,10 +436,6 @@ package away3d.core.render
 			_localHitPosition.x = ox + rx*t;
 			_localHitPosition.y = oy + ry*t;
 			_localHitPosition.z = oz + rz*t;
-		}
-
-		public function get localHitNormal():Vector3D {
-			return _localHitNormal;
 		}
 	}
 }

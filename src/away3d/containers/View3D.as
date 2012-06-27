@@ -1,5 +1,7 @@
 ﻿package away3d.containers
 {
+	import away3d.core.pick.PickingMode;
+	import away3d.core.pick.IPicker;
 	import away3d.Away3D;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -7,14 +9,13 @@
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.mouse.RayMouse3DManager;
+	import away3d.core.pick.RaycastPicker;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.DepthRenderer;
 	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.textures.Texture2DBase;
-	
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -29,6 +30,7 @@
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 	import flash.utils.getTimer;
+	
 
 	use namespace arcane;
 
@@ -56,8 +58,6 @@
 		private var _addedToStage:Boolean;
 		
 		private var _forceSoftware : Boolean;
-
-		private var _forceMouseMove:Boolean;
 
 		protected var _filter3DRenderer : Filter3DRenderer;
 		protected var _requireDepthRender : Boolean;
@@ -133,12 +133,14 @@
 			_renderer = renderer || new DefaultRenderer();
 			_depthRenderer = new DepthRenderer();
 			_forceSoftware = forceSoftware;
-			pickingMethod = new RayMouse3DManager(true);
 			
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
 			initHitField();
+			
+			_mouse3DManager = Mouse3DManager.getInstance();
+			_mouse3DManager.enableMouseListeners(this);
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
@@ -183,18 +185,9 @@
 
 		/**
 		 * Forces mouse-move related events even when the mouse hasn't moved. This allows mouseOver and mouseOut events
-		 * etc to be triggered due to changes in the scene graph.
+		 * etc to be triggered due to changes in the scene graph. Defaults to false.
 		 */
-		public function get forceMouseMove() : Boolean
-		{
-			return _mouse3DManager.forceMouseMove;
-		}
-
-		public function set forceMouseMove(value : Boolean) : void
-		{
-			_mouse3DManager.forceMouseMove = value;
-			_forceMouseMove = value;
-		}
+		public var forceMouseMove : Boolean;
 
 		public function get background() : Texture2DBase
 		{
@@ -580,7 +573,7 @@
 			_scene.traversePartitions(_entityCollector);
 
 			// update picking
-			_mouse3DManager.update();
+			_mouse3DManager.updateCollider(this);
 
 //			updateLights(_entityCollector);
 
@@ -600,7 +593,7 @@
 			_entityCollector.cleanUp();
 
 			// fire collected mouse events
-			_mouse3DManager.fireMouseEvents();
+			_mouse3DManager.fireMouseEvents(this);
 		}
 
 		protected function updateGlobalPos() : void
@@ -656,12 +649,15 @@
 		{
 			_stage3DProxy.dispose();
 			_renderer.dispose();
-			_mouse3DManager.dispose();
-			_depthRenderer.dispose();
-			_mouse3DManager.dispose();
-			if (_depthRender) _depthRender.dispose();
-			if (_rttBufferManager) _rttBufferManager.dispose();
-
+			
+			if (_depthRender)
+				_depthRender.dispose();
+			
+			if (_rttBufferManager)
+				_rttBufferManager.dispose();
+			
+			_mouse3DManager.disableMouseListeners(this);
+			
 			_rttBufferManager = null;
 			_depthRender = null;
 			_mouse3DManager = null;
@@ -759,11 +755,7 @@
 		override public function set transform(value : Transform) : void {}
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
-
-		public function set pickingMethod( value:Mouse3DManager ):void {
-			_mouse3DManager = value;
-			_mouse3DManager.view = this;
-			_mouse3DManager.forceMouseMove = _forceMouseMove;
-		}
+		
+		public var mousePicker:IPicker = PickingMode.RAYCAST_PICKER;
 	}
 }

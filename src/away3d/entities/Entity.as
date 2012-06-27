@@ -1,19 +1,17 @@
 package away3d.entities
 {
 	import away3d.arcane;
-	import away3d.bounds.AxisAlignedBoundingBox;
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.cameras.Camera3D;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.containers.Scene3D;
-	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.Partition3D;
-	import away3d.core.raycast.colliders.RayColliderBase;
-	import away3d.core.raycast.colliders.bounds.BoundsRayCollider;
-	import away3d.errors.AbstractMethodError;
-	import away3d.library.assets.AssetType;
+	import away3d.bounds.*;
+	import away3d.cameras.*;
+	import away3d.containers.*;
+	import away3d.core.partition.*;
+	import away3d.core.pick.*;
+	import away3d.core.raycast.colliders.*;
+	import away3d.core.raycast.colliders.bounds.*;
+	import away3d.errors.*;
+	import away3d.library.assets.*;
 
-	import flash.geom.Matrix3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -39,7 +37,8 @@ package away3d.entities
 
 		protected var _boundsRayCollider:RayColliderBase;
 		protected var _triangleRayCollider:RayColliderBase;
-
+		protected var _pickingCollision:PickingCollisionVO;
+		
 		private var _mouseEnabled : Boolean;
 		private var _mouseDetails:Boolean;
 
@@ -50,7 +49,15 @@ package away3d.entities
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
 		private var _boundsIsShown : Boolean = false;
-
+		
+		public function get pickingCollisionVO():PickingCollisionVO
+		{
+			if (!_pickingCollision)
+				_pickingCollision = new PickingCollisionVO(this);
+			
+			return _pickingCollision;
+		}
+		
 		public function set rayPickingMethod( method:RayColliderBase ):void {
 			_triangleRayCollider = method;
 		}

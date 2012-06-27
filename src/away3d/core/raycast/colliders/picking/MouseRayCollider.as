@@ -13,23 +13,21 @@ package away3d.core.raycast.colliders.picking
 
 	public class MouseRayCollider extends MultipleRayColliderBase
 	{
-		private var _view:View3D;
 		private var _multipleBoundsCollider:MultipleBoundsRayCollider;
 
 		private var _findBestHit:Boolean;
 
 		// TODO: implement _findBestHit
 
-		public function MouseRayCollider( view:View3D, findBestHit:Boolean ) {
+		public function MouseRayCollider(findBestHit:Boolean ) {
 			super();
-			_view = view;
 			_multipleBoundsCollider = new MultipleBoundsRayCollider();
 			_findBestHit = findBestHit;
 		}
 
-		public function updateMouseRay():void {
-			var rayPosition:Vector3D = _view.camera.scenePosition;
-			var rayDirection:Vector3D = _view.getRay( _view.mouseX, _view.mouseY );
+		public function updateMouseRay(view:View3D):void {
+			var rayPosition:Vector3D = view.camera.scenePosition;
+			var rayDirection:Vector3D = view.getRay( view.mouseX, view.mouseY );
 			updateRay( rayPosition, rayDirection );
 		}
 
