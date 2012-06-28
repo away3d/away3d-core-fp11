@@ -19,15 +19,23 @@ package away3d.materials.methods
 		{
 			super(castingLight);
 			if (castingLight is PointLight) throw new Error("FilteredShadowMapMethod not supported for Point Lights");
-			_fragmentData[8] = 1/3;
-			_fragmentData[9] = castingLight.shadowMapper.depthMapSize;
-			_fragmentData[10] = 1/castingLight.shadowMapper.depthMapSize;
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			super.initConstants(vo);
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+
+			fragmentData[index+8] = 1/3;
+			fragmentData[index+9] = castingLight.shadowMapper.depthMapSize;
+			fragmentData[index+10] = 1/castingLight.shadowMapper.depthMapSize;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -36,7 +44,7 @@ package away3d.materials.methods
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement;
 			var code : String;
-            _fragmentDataIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index*4;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 
@@ -189,7 +197,7 @@ package away3d.materials.methods
 			regCache.removeFragmentTempUsage(depthCol);
 			regCache.removeFragmentTempUsage(uvReg);
 
-			_depthMapIndex = depthMapRegister.index;
+			vo.texturesIndex = depthMapRegister.index;
 
 			return code;
 		}

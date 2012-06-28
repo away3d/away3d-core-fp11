@@ -14,16 +14,20 @@ package away3d.materials.methods
 	 */
 	public class AlphaMaskMethod extends EffectMethodBase
 	{
-		private var _textureMapIndex : int;
 		private var _texture : Texture2DBase;
 		private var _useSecondaryUV : Boolean;
 
 		public function AlphaMaskMethod(texture : Texture2DBase, useSecondaryUV : Boolean = false)
 		{
-			super(true, true, false);
+			super();
 			_texture = texture;
 			_useSecondaryUV = useSecondaryUV;
-			_needsUV = !useSecondaryUV;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsSecondaryUV = _useSecondaryUV;
+			vo.needsUV = !_useSecondaryUV;
 		}
 
 		public function get useSecondaryUV() : Boolean
@@ -35,7 +39,6 @@ package away3d.materials.methods
 		{
 			if (_useSecondaryUV == value) return;
 			_useSecondaryUV = value;
-			_needsUV = !value;
 			invalidateShaderProgram();
 		}
 
@@ -49,35 +52,19 @@ package away3d.materials.methods
 			_texture = value;
 		}
 
-		arcane override function get needsSecondaryUV() : Boolean
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			return _useSecondaryUV;
+			stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 		}
 
-		arcane override function get needsUV() : Boolean
-		{
-			return !_useSecondaryUV;
-		}
-
-		arcane override function reset() : void
-		{
-			super.reset();
-			_textureMapIndex = -1;
-		}
-
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
-		{
-			stage3DProxy.setTextureAt(_textureMapIndex, _texture.getTextureForStage3D(stage3DProxy));
-		}
-
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var textureReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement = _useSecondaryUV? _secondaryUVFragmentReg : _uvFragmentReg;
-			_textureMapIndex = textureReg.index;
+			vo.texturesIndex = textureReg.index;
 
-			return 	getTexSampleCode(temp, textureReg, uvReg) +
+			return 	getTexSampleCode(vo, temp, textureReg, uvReg) +
 					"mul " + targetReg + ", " + targetReg + ", " + temp + ".x\n";
 		}
 	}
