@@ -139,15 +139,13 @@ package away3d.bounds
 		}
 
 		override public function intersectsRay( p:Vector3D, v:Vector3D ):Number {
-			return rayIntersectionTest( p, v );
-		}
 
-		private function rayIntersectionTest( p:Vector3D, v:Vector3D, flip:Boolean = false ):Number {
 			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
 			var vx:Number = v.x, vy:Number = v.y, vz:Number = v.z;
 			var ix:Number, iy:Number, iz:Number;
 			var containedInAxis1:Boolean, containedInAxis2:Boolean;
 			var t:Number;
+			var normal:Vector3D;
 
 			// possible tests
 			var testPosX:Boolean = true, testNegX:Boolean = true, testPosY:Boolean = true;
@@ -159,14 +157,15 @@ package away3d.bounds
 			if( vz == 0 ) testPosZ = testNegZ = false;
 
 			// discard tests 2: ray hits sides from the back?
-			if( vx < 0 ) testNegX = flip;
-			else if( vx > 0 ) testPosX = flip;
-			if( vy < 0 ) testNegY = flip;
-			else if( vy > 0 ) testPosY = flip;
-			if( vz < 0 ) testNegZ = flip;
-			else if( vz > 0 ) testPosZ = flip;
+			if( vx < 0 ) testNegX = false;
+			else if( vx > 0 ) testPosX = false;
+			if( vy < 0 ) testNegY = false;
+			else if( vy > 0 ) testPosY = false;
+			if( vz < 0 ) testNegZ = false;
+			else if( vz > 0 ) testPosZ = false;
 
 			// ray-plane tests
+			var intersects:Boolean;
 			if( testPosX ) {
 				t = ( _halfExtentsX - px ) / vx;
 				if( t > 0 ) {
@@ -175,12 +174,12 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+						normal = new Vector3D( 1, 0, 0 );
+						intersects = true;
 					}
 				}
 			}
-			if( testNegX ) {
+			if( !intersects && testNegX ) {
 				t = ( -_halfExtentsX - px ) / vx;
 				if( t > 0 ) {
 					iy = py + t * vy;
@@ -188,12 +187,12 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+						normal = new Vector3D( -1, 0, 0 );
+						intersects = true;
 					}
 				}
 			}
-			if( testPosY ) {
+			if( !intersects && testPosY ) {
 				t = ( _halfExtentsY - py ) / vy;
 				if( t > 0 ) {
 					ix = px + t * vx;
@@ -201,12 +200,12 @@ package away3d.bounds
 					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+						normal = new Vector3D( 0, 1, 0 );
+						intersects = true;
 					}
 				}
 			}
-			if( testNegY ) {
+			if( !intersects && testNegY ) {
 				t = ( -_halfExtentsY - py ) / vy;
 				if( t > 0 ) {
 					ix = px + t * vx;
@@ -214,12 +213,12 @@ package away3d.bounds
 					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+						normal = new Vector3D( 0, -1, 0 );
+						intersects = true;
 					}
 				}
 			}
-			if( testPosZ ) {
+			if( !intersects && testPosZ ) {
 				t = ( _halfExtentsZ - pz ) / vz;
 				if( t > 0 ) {
 					ix = px + t * vx;
@@ -227,12 +226,12 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+						normal = new Vector3D( 0, 0, 1);
+						intersects = true;
 					}
 				}
 			}
-			if( testNegZ ) {
+			if( !intersects && testNegZ ) {
 				t = ( -_halfExtentsZ - pz ) / vz;
 				if( t > 0 ) {
 					ix = px + t * vx;
@@ -240,13 +239,22 @@ package away3d.bounds
 					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
 					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
 					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+						normal = new Vector3D( 0, 0, -1 );
+						intersects = true;
 					}
 				}
 			}
 
-			return -1;
+			if( intersects ) {
+				if( !_rayIntersectionPoint ) _rayIntersectionPoint = new Vector3D();
+				_rayIntersectionPoint.x = p.x + t * v.x;
+				_rayIntersectionPoint.y = p.y + t * v.y;
+				_rayIntersectionPoint.z = p.z + t * v.z;
+				if( !_rayIntersectionNormal ) _rayIntersectionNormal = new Vector3D();
+				_rayIntersectionNormal = normal;
+			}
+
+			return intersects ? t : -1;
 		}
 
 		override public function containsPoint( p:Vector3D ):Boolean {

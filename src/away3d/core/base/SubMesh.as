@@ -4,6 +4,7 @@ package away3d.core.base
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 	import away3d.entities.Mesh;
@@ -46,6 +47,10 @@ package away3d.core.base
 			_parentMesh = parentMesh;
 			_subGeometry = subGeometry;
 			this.material = material;
+		}
+
+		public function get mouseDetails():Boolean {
+			return sourceEntity.mouseDetails;
 		}
 
 		public function get offsetU():Number {
@@ -238,14 +243,7 @@ package away3d.core.base
 		 * Indicates whether the SubMesh should trigger mouse events, and hence should be rendered for hit testing.
 		 */
 		public function get mouseEnabled():Boolean {
-			return _parentMesh.mouseEnabled;
-		}
-
-		/**
-		 * Indicates whether the SubMesh needs to provide mouse event details, such as position and uv coordinates.
-		 */
-		public function get mouseHitMethod():uint {
-			return _parentMesh.mouseHitMethod;
+			return _parentMesh.mouseEnabled || _parentMesh._implicitMouseEnabled;
 		}
 
 		public function get castsShadows():Boolean {
@@ -328,6 +326,14 @@ package away3d.core.base
 
 		public function get UVData():Vector.<Number> {
 			return _subGeometry.UVData;
+		}
+
+		public function get bounds():BoundingVolumeBase {
+			return _parentMesh.bounds; // TODO: return smaller, sub mesh bounds instead
+		}
+
+		public function get visible():Boolean {
+			return _parentMesh.visible;
 		}
 	}
 }

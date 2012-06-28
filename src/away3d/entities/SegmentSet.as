@@ -15,7 +15,6 @@
 	import away3d.materials.SegmentMaterial;
 	import away3d.primitives.LineSegment;
 	import away3d.primitives.data.Segment;
-	import away3d.core.raycast.MouseHitMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -229,10 +228,6 @@
 
 		override public function get mouseEnabled():Boolean {
 			return false;
-		}
-
-		public function get mouseHitMethod():uint {
-			return MouseHitMethod.BOUNDS_ONLY;
 		}
 
 		public function get numTriangles():uint {

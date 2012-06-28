@@ -19,10 +19,11 @@ package away3d.bounds
 	{
 		protected var _min:Vector3D;
 		protected var _max:Vector3D;
+		protected var _rayIntersectionPoint:Vector3D;
+		protected var _rayIntersectionNormal:Vector3D;
 		protected var _aabbPoints:Vector.<Number> = new Vector.<Number>();
 		protected var _aabbPointsDirty:Boolean = true;
 		protected var _boundingRenderable:WireframePrimitiveBase;
-		protected var _rayFarT:Number;
 
 		/**
 		 * Creates a new BoundingVolumeBase object
@@ -215,11 +216,11 @@ package away3d.bounds
 		}
 
 		public function intersectsRay( p:Vector3D, dir:Vector3D ):Number {
-			throw new AbstractMethodError();
+			return -1;
 		}
 
 		public function containsPoint( p:Vector3D ):Boolean {
-			throw new AbstractMethodError();
+			return false;
 		}
 
 		protected function updateAABBPoints():void {
@@ -252,8 +253,12 @@ package away3d.bounds
 			_aabbPointsDirty = false;
 		}
 
-		public function get rayFarT():Number {
-			return _rayFarT;
+		public function get rayIntersectionPoint():Vector3D {
+			return _rayIntersectionPoint;
+		}
+
+		public function get rayIntersectionNormal():Vector3D {
+			return _rayIntersectionNormal;
 		}
 	}
 }

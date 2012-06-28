@@ -1,5 +1,6 @@
 package away3d.primitives
 {
+
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.NullAnimation;
@@ -16,7 +17,6 @@ package away3d.primitives
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
 	import away3d.textures.CubeTextureBase;
-	import away3d.core.raycast.MouseHitMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -50,13 +50,6 @@ package away3d.primitives
 			_geometry = new SubGeometry();
 			_bounds = new NullBounds();
 			buildGeometry(_geometry);
-		}
-
-		/**
-		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
-		 */
-		public function get mouseHitMethod():uint {
-			return MouseHitMethod.BOUNDS_ONLY;
 		}
 
 		/**

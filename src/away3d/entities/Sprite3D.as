@@ -80,14 +80,6 @@ package away3d.entities
 			invalidateTransform();
 		}
 
-		public function get mouseHitMethod():uint {
-			return _mouseHitMethod;
-		}
-
-		public function set mouseHitMethod( value:uint ):void {
-			_mouseHitMethod = value;
-		}
-
 		public function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {
 			return _geometry.getVertexBuffer( stage3DProxy );
 		}

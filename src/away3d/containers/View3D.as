@@ -1,5 +1,7 @@
 ﻿package away3d.containers
 {
+	import away3d.core.pick.PickingType;
+	import away3d.core.pick.IPicker;
 	import away3d.Away3D;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -7,13 +9,13 @@
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.pick.RaycastPicker;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.DepthRenderer;
 	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.textures.Texture2DBase;
-	
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -28,6 +30,7 @@
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 	import flash.utils.getTimer;
+	
 
 	use namespace arcane;
 
@@ -128,14 +131,16 @@
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
-			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
 			_forceSoftware = forceSoftware;
-
+			
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
 			initHitField();
+			
+			_mouse3DManager = Mouse3DManager.getInstance();
+			_mouse3DManager.enableMouseListeners(this);
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
@@ -165,7 +170,7 @@
 		public function set stage3DProxy(stage3DProxy:Stage3DProxy) : void
 		{
 			_stage3DProxy = stage3DProxy;
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 
 			super.x = _stage3DProxy.x;
 			
@@ -180,17 +185,9 @@
 
 		/**
 		 * Forces mouse-move related events even when the mouse hasn't moved. This allows mouseOver and mouseOut events
-		 * etc to be triggered due to changes in the scene graph.
+		 * etc to be triggered due to changes in the scene graph. Defaults to false.
 		 */
-		public function get forceMouseMove() : Boolean
-		{
-			return _mouse3DManager.forceMouseMove;
-		}
-
-		public function set forceMouseMove(value : Boolean) : void
-		{
-			_mouse3DManager.forceMouseMove = value;
-		}
+		public var forceMouseMove : Boolean;
 
 		public function get background() : Texture2DBase
 		{
@@ -575,9 +572,8 @@
 			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
 
-			// render things
-			if (_entityCollector.numMouseEnableds > 0)
-				_mouse3DManager.updateHitData();
+			// update picking
+			_mouse3DManager.updateCollider(this);
 
 //			updateLights(_entityCollector);
 
@@ -597,7 +593,7 @@
 			_entityCollector.cleanUp();
 
 			// fire collected mouse events
-			_mouse3DManager.fireMouseEvents();
+			_mouse3DManager.fireMouseEvents(this);
 		}
 
 		protected function updateGlobalPos() : void
@@ -653,12 +649,15 @@
 		{
 			_stage3DProxy.dispose();
 			_renderer.dispose();
-			_mouse3DManager.dispose();
-			_depthRenderer.dispose();
-			_mouse3DManager.dispose();
-			if (_depthRender) _depthRender.dispose();
-			if (_rttBufferManager) _rttBufferManager.dispose();
-
+			
+			if (_depthRender)
+				_depthRender.dispose();
+			
+			if (_rttBufferManager)
+				_rttBufferManager.dispose();
+			
+			_mouse3DManager.disableMouseListeners(this);
+			
 			_rttBufferManager = null;
 			_depthRender = null;
 			_mouse3DManager = null;
@@ -678,9 +677,26 @@
 			return v;
 		}
 
-		public function unproject(mX : Number, mY : Number, useTranslation:Boolean = false) : Vector3D
+		/**
+		 * Calculates the scene position of the given screen coordinates.
+		 * @param mX The x coordinate relative to the View3D.
+		 * @param mY The y coordinate relative to the View3D..
+		 * @return The scene position of the given screen coordinates. The returned point corresponds to a point on the projection plane.
+		 */
+		public function unproject(mX : Number, mY : Number) : Vector3D
 		{
-			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, useTranslation);
+			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height);
+		}
+
+		/**
+		 * Returns the ray in scene space from the camera to the point on the screen.
+		 * @param mX The x coordinate relative to the View3D.
+		 * @param mY The y coordinate relative to the View3D..
+		 * @return The ray from the camera to the scene space position of a point on the projection plane.
+		 */
+		public function getRay(mX : Number, mY : Number) : Vector3D
+		{
+			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height);
 		}
 
 		/**
@@ -716,7 +732,7 @@
 			if (_height == 0) height = stage.stageHeight;
 			else _rttBufferManager.viewHeight = _height;
 
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void
@@ -739,10 +755,7 @@
 		override public function set transform(value : Transform) : void {}
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
-
-		// TODO: remove
-		public function get mouse3DManager():Mouse3DManager {
-			return _mouse3DManager;
-		}
+		
+		public var mousePicker:IPicker = PickingType.RAYCAST_FIRST_ENCOUNTERED;
 	}
 }

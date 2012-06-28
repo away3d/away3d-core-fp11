@@ -270,8 +270,16 @@ package away3d.bounds
 			if (det >= 0) { // ray goes through sphere
 				var sqrtDet : Number = Math.sqrt(det);
 				t = ( -b - sqrtDet ) / ( 2 * a );
-				_rayFarT = ( -b + sqrtDet ) / ( 2 * a );
 				if (t > 0) {
+
+					if( !_rayIntersectionPoint ) _rayIntersectionPoint = new Vector3D();
+					_rayIntersectionPoint.x = px + t * vx;
+					_rayIntersectionPoint.y = py + t * vy;
+					_rayIntersectionPoint.z = pz + t * vz;
+					if( !_rayIntersectionNormal ) _rayIntersectionNormal = new Vector3D();
+					_rayIntersectionNormal = _rayIntersectionPoint.clone();
+					_rayIntersectionNormal.normalize();
+
 					return t;
 				}
 			}

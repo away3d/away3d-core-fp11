@@ -1,20 +1,13 @@
 ﻿package away3d.entities
 {
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.data.*;
 	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.IMaterialOwner;
-	import away3d.core.base.Object3D;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
-	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.MeshNode;
-	import away3d.events.GeometryEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.materials.MaterialBase;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.core.partition.*;
+	import away3d.events.*;
+	import away3d.library.assets.*;
+	import away3d.materials.*;
 
 	use namespace arcane;
 
@@ -30,7 +23,6 @@
 		private var _material : MaterialBase;
 		arcane var _animationState : AnimationStateBase;
 		private var _castsShadows : Boolean = true;
-		private var _mouseHitMethod:uint;
 
 		/**
 		 * Create a new Mesh object.
@@ -61,17 +53,6 @@
 		private function onGeometryBoundsInvalid(event : GeometryEvent) : void
 		{
 			invalidateBounds();
-		}
-
-		/**
-		 * Indicates what picking method to use on this mesh. See MouseHitMethod for available options.
-		 */
-		public function get mouseHitMethod():uint {
-			return _mouseHitMethod;
-		}
-
-		public function set mouseHitMethod( value:uint ):void {
-			_mouseHitMethod = value;
 		}
 
 		/**
