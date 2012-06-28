@@ -438,6 +438,7 @@ package away3d.loaders.parsers
 			var sequence : AnimationSequenceBase;
 			var animator : AnimatorBase;
 			var i : uint, j : uint;
+			var hasMaterial:Boolean;
 			
 			if (!node.instance_controllers || node.instance_controllers.length == 0)   return;
 			 
@@ -452,13 +453,21 @@ package away3d.loaders.parsers
 				effects = getMeshEffects(instance.bind_material, daeGeometry.mesh);
 				
 				mesh = new Mesh(geometry, null);
+				hasMaterial = false;
 				
 				if(daeGeometry.meshName && daeGeometry.meshName != "")
 					mesh.name = daeGeometry.meshName;
 				
-				for (j = 0; j < mesh.subMeshes.length; j++)
-					mesh.subMeshes[j].material = effects[j].material;
+				if(effects.length>0){
+					for (j = 0; j < mesh.subMeshes.length; j++){
+						if(effects[j].material){
+							mesh.subMeshes[j].material = effects[j].material;
+							hasMaterial = true;
+						}
+					}
+				}
 				
+				if(!hasMaterial) mesh.material = _defaultBitmapMaterial;
 				container.addChild(mesh);
 				
 				if (controller.skin && controller.skin.userData is Skeleton) {
@@ -597,7 +606,7 @@ package away3d.loaders.parsers
 					if (mesh.primitives[i].material == instance.symbol) {
 						material = _libMaterials[instance.target] as DAEMaterial;
 						effect = _libEffects[material.instance_effect.url];
-						effects.push(effect);
+						if(effect) effects.push(effect);
 						break;
 					}
 				}
