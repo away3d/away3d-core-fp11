@@ -40,7 +40,9 @@ package away3d.core.pick
 			_boundOffsetScale[7] = 1;
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		public function getViewCollision(x:Number, y:Number, view:View3D):PickingCollisionVO
 		{
 			var collector:EntityCollector = view.entityCollector;
@@ -96,6 +98,9 @@ package away3d.core.pick
 			return _collisionVO;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO
 		{
 			return null;

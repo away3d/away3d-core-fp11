@@ -1,20 +1,23 @@
 package away3d.core.pick
 {
-
 	import away3d.core.base.*;
 	
 	import flash.display.*;
 	import flash.geom.*;
 	import flash.utils.*;
-
-
+	
+	/**
+	 * PixelBender-based picking collider for entity objects. Used with the <code>RaycastPicker</code> picking object.
+	 * 
+	 * @see away3d.entities.Entity#pickingCollider
+	 * @see away3d.core.pick.RaycastPicker
+	 */
 	public class PBPickingCollider extends PickingColliderBase implements IPickingCollider
 	{
 		[Embed("/../pb/RayTriangleKernel.pbj", mimeType="application/octet-stream")]
 		private var RayTriangleKernelClass:Class;
 		
-		// TODO: implement find best hit
-		private var _findBestHit:Boolean;
+		private var _findClosestCollision:Boolean;
 		
 		private var _rayTriangleKernel:Shader;
 		private var _lastSubMeshUploaded:SubMesh;
@@ -23,6 +26,9 @@ package away3d.core.pick
 		private var cx:Number, cy:Number, cz:Number;
 		private var u:Number, v:Number, w:Number;
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function setLocalRay(localPosition:Vector3D, localDirection:Vector3D):void
 		{
 			super.setLocalRay(localPosition, localDirection);
@@ -32,16 +38,23 @@ package away3d.core.pick
 			_rayTriangleKernel.data.rayDirection.value = [ rayDirection.x, rayDirection.y, rayDirection.z ];
 		}
 		
-		// TODO: implement find best hit
-		public function PBPickingCollider( findBestHit:Boolean = false )
+		/**
+		 * Creates a new <code>PBPickingCollider</code> object.
+		 * 
+		 * @param findClosestCollision Determines whether the picking collider searches for the closesst collision along the ray. Defaults to false.
+		 */
+		public function PBPickingCollider( findClosestCollision:Boolean = false )
 		{
-			_findBestHit = findBestHit;
+			_findClosestCollision = findClosestCollision;
 			
 			_kernelOutputBuffer = new Vector.<Number>();
 			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );
 		}
 		
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO):Boolean
+		/**
+		 * @inheritDoc
+		 */
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			// TODO: It seems that the kernel takes almost the same time to calculate on a mesh with 2 triangles than on a
 			// mesh with thousands of triangles. It might be worth exploring the possibility of accumulating buffers until a certain
@@ -82,15 +95,14 @@ package away3d.core.pick
 			var t:Number;
 			var collisionTriangleIndex:int = -1;
 			var len:uint = _kernelOutputBuffer.length;
-			var smallestNonNegativeT:Number = Number.MAX_VALUE;
 			for( i = 0; i < len; i += 3 ) {
 				t = _kernelOutputBuffer[ i ];
-				if( t > 0 && t < smallestNonNegativeT ) {
-					smallestNonNegativeT = t;
+				if( t > 0 && t < shortestCollisionDistance ) {
+					shortestCollisionDistance = t;
 					collisionTriangleIndex = i;
 					
 					//break loop unless best hit is required
-					if (!_findBestHit)
+					if (!_findClosestCollision)
 						break;
 				}
 			}
@@ -98,10 +110,10 @@ package away3d.core.pick
 			// Detect collision
 			if( collisionTriangleIndex >= 0 ) {
 				
-				pickingCollisionVO.collisionT = smallestNonNegativeT;
-				cx = rayPosition.x + smallestNonNegativeT * rayDirection.x;
-				cy = rayPosition.y + smallestNonNegativeT * rayDirection.y;
-				cz = rayPosition.z + smallestNonNegativeT * rayDirection.z;
+				pickingCollisionVO.collisionT = shortestCollisionDistance;
+				cx = rayPosition.x + shortestCollisionDistance * rayDirection.x;
+				cy = rayPosition.y + shortestCollisionDistance * rayDirection.y;
+				cz = rayPosition.z + shortestCollisionDistance * rayDirection.z;
 				pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
 				pickingCollisionVO.localNormal = getCollisionNormal( indexData, vertexData, collisionTriangleIndex );
 				v = _kernelOutputBuffer[ collisionTriangleIndex + 1 ]; // barycentric coord 1

@@ -17,18 +17,21 @@ package away3d.core.pick
 		
 		// TODO: add option of finding best hit?
 
-		private var _findBestHit:Boolean;
+		private var _findClosestCollision:Boolean;
 		
 		protected var _entities:Vector.<Entity>;
 		protected var _numberOfCollisions:uint;
 		protected var _collides:Boolean;
 		protected var _pickingCollisionVO:PickingCollisionVO;
 		
-		public function RaycastPicker( findBestHit:Boolean ) {
+		public function RaycastPicker( findClosestCollision:Boolean ) {
 			
-			_findBestHit = findBestHit;
+			_findClosestCollision = findClosestCollision;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function getViewCollision(x:Number, y:Number, view:View3D):PickingCollisionVO
 		{
 			//cast ray through the collection of entities on the view
@@ -126,21 +129,25 @@ package away3d.core.pick
 			// Replaces collision data provided by bounds collider with more precise data.
 			// ---------------------------------------------------------------------
 			
-			// does not search for closest collision, first found will do... // TODO: implement _findBestHit
+			// does not search for closest collision, first found will do... // TODO: implement _findClosestCollision
 			// Example: Bound B is inside bound A. Bound A's collision t is closer than bound B. Both have tri colliders. Bound A surface hit
 			// is further than bound B surface hit. Atm, this algorithm would fail in detecting that B's surface hit is actually closer.
 			// Suggestions: calculate ray bounds near and far t's and evaluate bound intersections within ray trajectory.
 			
 			var pickingCollider:IPickingCollider;
-
+			var shortestCollisionDistance:Number = Number.MAX_VALUE;
+			
 			for( i = 0; i < _numberOfCollisions; ++i ) {
 				_entity = _entities[ i ];
 				_pickingCollisionVO = _entity.pickingCollisionVO;
 				pickingCollider = _entity.pickingCollider;
 				if( pickingCollider) {
 					// If a collision exists, update the collision data and stop all checks.
-					if( testCollision( pickingCollider, _pickingCollisionVO ) )
-						return _pickingCollisionVO;
+					if( testCollision( pickingCollider, _pickingCollisionVO, shortestCollisionDistance ) ) {
+						//TODO: break loop unless best hit is required
+						//if (!_findClosestCollision)
+							return _pickingCollisionVO;
+					}
 				} else { // A bounds collision with no triangle collider stops all checks.
 					return _pickingCollisionVO;
 				}
@@ -149,6 +156,9 @@ package away3d.core.pick
 			return null;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO
 		{
 			//cast ray through the scene
@@ -162,7 +172,7 @@ package away3d.core.pick
 			return entity1.pickingCollisionVO.collisionT > entity2.pickingCollisionVO.collisionT ? 1 : -1;
 		}
 		
-		private function testCollision(pickingCollider:IPickingCollider, pickingCollisionVO:PickingCollisionVO):Boolean
+		private function testCollision(pickingCollider:IPickingCollider, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			pickingCollider.setLocalRay(pickingCollisionVO.localRayPosition, pickingCollisionVO.localRayDirection);
 			
@@ -170,7 +180,7 @@ package away3d.core.pick
 				var mesh:Mesh = pickingCollisionVO.entity as Mesh;
 				var subMesh:SubMesh;
 				for each (subMesh in mesh.subMeshes)
-					if (pickingCollider.testSubMeshCollision(subMesh, pickingCollisionVO))
+					if (pickingCollider.testSubMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance))
 						return true;
 			} else {
 				//if not a mesh, rely on entity bounds

@@ -38,6 +38,9 @@ package away3d.core.pick
 			return uv;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function setLocalRay(localPosition:Vector3D, localDirection:Vector3D):void
 		{
 			rayPosition = localPosition;

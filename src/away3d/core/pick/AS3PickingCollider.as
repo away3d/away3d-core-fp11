@@ -3,13 +3,17 @@ package away3d.core.pick
 	import away3d.core.base.*;
 	
 	import flash.geom.*;
-
-
+	
+	/**
+	 * Pure AS3 picking collider for entity objects. Used with the <code>RaycastPicker</code> picking object.
+	 * 
+	 * @see away3d.entities.Entity#pickingCollider
+	 * @see away3d.core.pick.RaycastPicker
+	 */
 	public class AS3PickingCollider extends PickingColliderBase implements IPickingCollider
 	{
-		// TODO: implement find best hit
-		private var _findBestHit:Boolean;
-
+		private var _findClosestCollision:Boolean;
+		
 		private var i:uint;
 		private var t:Number;
 		private var numTriangles:uint;
@@ -26,19 +30,26 @@ package away3d.core.pick
 		private var nl:Number, nDotV:Number, D:Number, disToPlane:Number;
 		private var Q1Q2:Number, Q1Q1:Number, Q2Q2:Number, RQ1:Number, RQ2:Number;
 		
-		public function AS3PickingCollider( findBestHit:Boolean = false )
+		/**
+		 * Creates a new <code>AS3PickingCollider</code> object.
+		 * 
+		 * @param findClosestCollision Determines whether the picking collider searches for the closesst collision along the ray. Defaults to false.
+		 */
+		public function AS3PickingCollider( findClosestCollision:Boolean = false )
 		{
-			_findBestHit = findBestHit;
+			_findClosestCollision = findClosestCollision;
 		}
 		
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO):Boolean
+		/**
+		 * @inheritDoc
+		 */
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			
 			var indexData:Vector.<uint> = subMesh.indexData;
 			var vertexData:Vector.<Number> = subMesh.vertexData;
 			var uvData:Vector.<Number> = subMesh.UVData;
 			var collisionTriangleIndex:int = -1;
-			var smallestNonNegativeT:Number = Number.MAX_VALUE;
 			numTriangles = subMesh.numTriangles;
 			
 			for( i = 0; i < numTriangles; ++i ) { // sweep all triangles
@@ -102,8 +113,8 @@ package away3d.core.pick
 					if( v < 0 ) continue;
 					if( w < 0 ) continue;
 					u = 1 - v - w;
-					if( !( u < 0 ) && t > 0 && t < smallestNonNegativeT) { // all tests passed
-						smallestNonNegativeT = t;
+					if( !( u < 0 ) && t > 0 && t < shortestCollisionDistance) { // all tests passed
+						shortestCollisionDistance = t;
 						collisionTriangleIndex = i;
 						pickingCollisionVO.collisionT = t;
 						pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
@@ -111,7 +122,7 @@ package away3d.core.pick
 						pickingCollisionVO.uv = getCollisionUV( indexData, uvData, index, v, w, u );
 						
 						// if not looking for best hit, first found will do...
-						if (!_findBestHit)
+						if (!_findClosestCollision)
 							return true;
 					}
 				}
