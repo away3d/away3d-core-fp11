@@ -6,11 +6,16 @@ package away3d.core.pick
 	import away3d.core.base.*;
 	import away3d.core.traverse.*;
 	import away3d.entities.*;
-
+	
 	import flash.geom.*;
 	
 	use namespace arcane;
-
+	
+	/**
+	 * Picks a 3d object from a view or scene by 3D raycast calculations.
+	 * Performs an initial coarse boundary calculation to return a subset of entities whose bounding volumes intersect with the specified ray,
+	 * then triggers an optional picking collider on individual entity objects to further determine the precise values of the picking ray collision.
+	 */
 	public class RaycastPicker implements IPicker
 	{
 		private var _entity:Entity;
@@ -24,6 +29,12 @@ package away3d.core.pick
 		protected var _collides:Boolean;
 		protected var _pickingCollisionVO:PickingCollisionVO;
 		
+		/**
+		 * Creates a new <code>RaycastPicker</code> object.
+		 * 
+		 * @param findClosestCollision Determines whether the picker searches for the closest bounds collision along the ray,
+		 * or simply returns the first collision encountered Defaults to false.
+		 */
 		public function RaycastPicker( findClosestCollision:Boolean ) {
 			
 			_findClosestCollision = findClosestCollision;
@@ -138,6 +149,18 @@ package away3d.core.pick
 
 			return bestCollisionVO;
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO
+		{
+			//cast ray through the scene
+			//TODO: implement scene-based picking
+			
+			// Evaluate new colliding object.
+			return null;
+		}
 
 		private function testCollision(pickingCollider:IPickingCollider, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
@@ -162,17 +185,6 @@ package away3d.core.pick
 			else { // if not a mesh, rely on entity bounds
 				return true;
 			}
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO
-		{
-			//cast ray through the scene
-			
-			// Evaluate new colliding object.
-			return null;
 		}
 		
 		private function sortOnNearT( entity1:Entity, entity2:Entity ):Number
