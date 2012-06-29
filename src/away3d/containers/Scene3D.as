@@ -31,6 +31,7 @@ package away3d.containers
 			_partitions = new Vector.<Partition3D>();
 			_sceneGraphRoot = new ObjectContainer3D();
 			_sceneGraphRoot.scene = this;
+			_sceneGraphRoot._isRoot = true;
 			_sceneGraphRoot.partition = new Partition3D(new NodeBase());
 		}
 

@@ -35,7 +35,6 @@ package away3d.entities
 		
 		protected var _pickingCollision:PickingCollisionVO;
 		
-		private var _mouseEnabled : Boolean;
 		private var _mouseDetails:Boolean;
 
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
@@ -64,7 +63,7 @@ package away3d.entities
 
 		override protected function updateMouseChildren() : void {
 
-			// Use its parent's triangle collider.
+			// If there is a parent and this child does not have a triangle collider, use its parent's triangle collider.
 			if( _parent && !pickingCollider ) {
 				if( _parent is Entity ) {
 					var collider:IPickingCollider = Entity( _parent ).pickingCollider;
@@ -88,20 +87,6 @@ package away3d.entities
 				addBounds();
 			else 
 				removeBounds();
-		}
-		
-		/**
-		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
-		 */
-		public function get mouseEnabled() : Boolean
-		{
-			return _mouseEnabled;
-		}
-		
-		public function set mouseEnabled(value : Boolean) : void
-		{
-			_mouseEnabled = value;
-			_implicitMouseEnabled = value;
 		}
 		
 		/**
