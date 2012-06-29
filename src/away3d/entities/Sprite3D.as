@@ -34,7 +34,6 @@ package away3d.entities
 		private static var _geometry:SubGeometry;
 
 		private static var _nullAnimation:NullAnimation;
-		private var _mouseHitMethod:uint;
 		private var _material:MaterialBase;
 		private var _animationState:AnimationStateBase;
 		private var _spriteMatrix:Matrix3D;

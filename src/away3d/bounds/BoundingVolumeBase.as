@@ -2,13 +2,12 @@ package away3d.bounds
 {
 
 	import away3d.arcane;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.errors.AbstractMethodError;
-	import away3d.primitives.WireframePrimitiveBase;
+	import away3d.core.base.*;
+	import away3d.core.pick.*;
+	import away3d.errors.*;
+	import away3d.primitives.*;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -22,10 +21,7 @@ package away3d.bounds
 		protected var _aabbPoints:Vector.<Number> = new Vector.<Number>();
 		protected var _aabbPointsDirty:Boolean = true;
 		protected var _boundingRenderable:WireframePrimitiveBase;
-		protected var _rayIntersectionPoint:Vector3D;
-		protected var _rayIntersectionNormal:Vector3D;
-		protected var _rayCollisionFarT:Number;
-
+		
 		/**
 		 * Creates a new BoundingVolumeBase object
 		 */
@@ -216,8 +212,9 @@ package away3d.bounds
 			return _aabbPoints;
 		}
 
-		public function intersectsRay( p:Vector3D, dir:Vector3D ):Number {
-			return -1;
+		public function intersectsRay( p:Vector3D, dir:Vector3D, pickingCollisionVO:PickingCollisionVO ):Boolean
+		{
+			return false;
 		}
 
 		public function containsPoint( p:Vector3D ):Boolean {
@@ -252,18 +249,6 @@ package away3d.bounds
 			_aabbPoints[22] = maxY;
 			_aabbPoints[23] = maxZ;
 			_aabbPointsDirty = false;
-		}
-
-		public function get rayIntersectionPoint():Vector3D {
-			return _rayIntersectionPoint;
-		}
-
-		public function get rayIntersectionNormal():Vector3D {
-			return _rayIntersectionNormal;
-		}
-
-		public function get rayCollisionFarT():Number {
-			return _rayCollisionFarT;
 		}
 	}
 }

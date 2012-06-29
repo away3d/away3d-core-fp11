@@ -43,7 +43,7 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Number
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			
 			var indexData:Vector.<uint> = subMesh.indexData;
@@ -117,22 +117,22 @@ package away3d.core.pick
 					if( !( u < 0 ) && t > 0 && t < shortestCollisionDistance) { // all tests passed
 						shortestCollisionDistance = t;
 						collisionTriangleIndex = i;
-						pickingCollisionVO.collisionT = t;
+						pickingCollisionVO.rayEntryDistance = t;
 						pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
 						pickingCollisionVO.localNormal = new Vector3D( nx, ny, nz );
 						pickingCollisionVO.uv = getCollisionUV( indexData, uvData, index, v, w, u );
 						
 						// if not looking for best hit, first found will do...
 						if (!_findClosestCollision)
-							return t;
+							return true;
 					}
 				}
 			}
 			
 			if( collisionTriangleIndex >= 0 )
-				return shortestCollisionDistance;
+				return true;
 			
-			return -1;
+			return false;
 		}
 	}
 }

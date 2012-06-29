@@ -2,12 +2,11 @@ package away3d.bounds
 {
 
 	import away3d.arcane;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.primitives.WireframePrimitiveBase;
-	import away3d.primitives.WireframeSphere;
+	import away3d.core.math.*;
+	import away3d.core.pick.*;
+	import away3d.primitives.*;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -256,32 +255,35 @@ package away3d.bounds
 			return clone;
 		}
 
-		override public function intersectsRay(p : Vector3D, v : Vector3D) : Number
+		override public function intersectsRay(p : Vector3D, v : Vector3D, pickingCollisionVO:PickingCollisionVO) : Boolean
 		{
 
 			var px : Number = p.x - _centerX, py : Number = p.y - _centerY, pz : Number = p.z - _centerZ;
 			var vx : Number = v.x, vy : Number = v.y, vz : Number = v.z;
-			var t:Number;
-
+			var rayEntryDistance:Number;
+			var rayOriginIsInsideBounds:Boolean;
+			
 			var a : Number = vx * vx + vy * vy + vz * vz;
 			var b : Number = 2 * ( px * vx + py * vy + pz * vz );
 			var c : Number = px * px + py * py + pz * pz - _radius * _radius;
 			var det : Number = b * b - 4 * a * c;
+			
 			if (det >= 0) { // ray goes through sphere
 				var sqrtDet : Number = Math.sqrt(det);
-				t = ( -b - sqrtDet ) / ( 2 * a );
-				_rayCollisionFarT = ( -b + sqrtDet ) / ( 2 * a );
-				if (t > 0) {
-
-					if( !_rayIntersectionPoint ) _rayIntersectionPoint = new Vector3D();
-					_rayIntersectionPoint.x = px + t * vx;
-					_rayIntersectionPoint.y = py + t * vy;
-					_rayIntersectionPoint.z = pz + t * vz;
-					if( !_rayIntersectionNormal ) _rayIntersectionNormal = new Vector3D();
-					_rayIntersectionNormal = _rayIntersectionPoint.clone();
-					_rayIntersectionNormal.normalize();
-
-					return t;
+				rayEntryDistance = ( -b - sqrtDet ) / ( 2 * a );
+				
+				// accept cases on which the ray starts inside the bounds
+				if( rayEntryDistance < 0 && (rayOriginIsInsideBounds = containsPoint(p)) )
+					rayEntryDistance = 0;
+				
+				if (rayEntryDistance >= 0) {
+					pickingCollisionVO.localPosition = new Vector3D(px + rayEntryDistance * vx, py + rayEntryDistance * vy, pz + rayEntryDistance * vz);
+					pickingCollisionVO.localNormal = pickingCollisionVO.localPosition.clone();
+					pickingCollisionVO.localNormal.normalize();
+					pickingCollisionVO.rayEntryDistance = rayEntryDistance;
+					pickingCollisionVO.rayOriginIsInsideBounds = rayOriginIsInsideBounds;
+					
+					return true;
 				}
 			}
 			/*else if( det == 0 ) { // ray touches the sphere at a tangent ( very rare )
@@ -292,7 +294,7 @@ package away3d.bounds
 			 }*/
 
 			// ray misses sphere
-			return -1;
+			return false;
 		}
 
 		override public function containsPoint(p : Vector3D) : Boolean

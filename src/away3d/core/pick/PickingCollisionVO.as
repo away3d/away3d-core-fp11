@@ -47,19 +47,9 @@ package away3d.core.pick
 		public var rayOriginIsInsideBounds:Boolean;
 		
 		/**
-		 * The distance along the ray from the starting position to the calculated intersection best point with the entity.
-		 */
-		public var collisionT:Number;
-
-		/**
 		 * The distance along the ray from the starting position to the calculated intersection entry point with the entity.
 		 */
-		public var collisionNearT:Number;
-
-		/**
-		 * The distance along the ray from the starting position to the calculated intersection exit point with the entity.
-		 */
-		public var collisionFarT:Number;
+		public var rayEntryDistance:Number;
 		
 		/**
 		 * The entity to which this collision object belongs.
