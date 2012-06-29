@@ -130,7 +130,7 @@ package away3d.core.pick
 			}
 			
 			if( collisionTriangleIndex >= 0 )
-				return t;
+				return shortestCollisionDistance;
 			
 			return -1;
 		}
