@@ -6,6 +6,8 @@ package away3d.core.pick
 	
 	/**
 	 * Auto-selecting picking collider for entity objects. Used with the <code>RaycastPicker</code> picking object.
+	 * Chooses between pure AS3 picking and PixelBender picking based on a threshold property representing
+	 * the number of triangles encountered in a <code>SubMesh</code> object over which PixelBender is used.
 	 * 
 	 * @see away3d.entities.Entity#pickingCollider
 	 * @see away3d.core.pick.RaycastPicker
@@ -16,12 +18,15 @@ package away3d.core.pick
 		private var _as3PickingCollider:AS3PickingCollider;
 		private var _activePickingCollider:IPickingCollider;
 		
+		/**
+		 * Represents the number of triangles encountered in a <code>SubMesh</code> object over which PixelBender is used.
+		 */
 		public var triangleThreshold:uint = 256;
 		
 		/**
 		 * Creates a new <code>AutoPickingCollider</code> object.
 		 * 
-		 * @param findClosestCollision Determines whether the picking collider searches for the closesst collision along the ray. Defaults to false.
+		 * @param findClosestCollision Determines whether the picking collider searches for the closest collision along the ray. Defaults to false.
 		 */
 		public function AutoPickingCollider( findClosestCollision:Boolean = false )
 		{

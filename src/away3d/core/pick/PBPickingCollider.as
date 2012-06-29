@@ -27,6 +27,19 @@ package away3d.core.pick
 		private var u:Number, v:Number, w:Number;
 		
 		/**
+		 * Creates a new <code>PBPickingCollider</code> object.
+		 * 
+		 * @param findClosestCollision Determines whether the picking collider searches for the closest collision along the ray. Defaults to false.
+		 */
+		public function PBPickingCollider( findClosestCollision:Boolean = false )
+		{
+			_findClosestCollision = findClosestCollision;
+			
+			_kernelOutputBuffer = new Vector.<Number>();
+			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );
+		}
+		
+		/**
 		 * @inheritDoc
 		 */
 		override public function setLocalRay(localPosition:Vector3D, localDirection:Vector3D):void
@@ -36,19 +49,6 @@ package away3d.core.pick
 			//update ray
 			_rayTriangleKernel.data.rayStartPoint.value = [ rayPosition.x, rayPosition.y, rayPosition.z ];
 			_rayTriangleKernel.data.rayDirection.value = [ rayDirection.x, rayDirection.y, rayDirection.z ];
-		}
-		
-		/**
-		 * Creates a new <code>PBPickingCollider</code> object.
-		 * 
-		 * @param findClosestCollision Determines whether the picking collider searches for the closesst collision along the ray. Defaults to false.
-		 */
-		public function PBPickingCollider( findClosestCollision:Boolean = false )
-		{
-			_findClosestCollision = findClosestCollision;
-			
-			_kernelOutputBuffer = new Vector.<Number>();
-			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );
 		}
 		
 		/**

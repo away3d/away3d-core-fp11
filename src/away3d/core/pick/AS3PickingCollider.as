@@ -33,7 +33,7 @@ package away3d.core.pick
 		/**
 		 * Creates a new <code>AS3PickingCollider</code> object.
 		 * 
-		 * @param findClosestCollision Determines whether the picking collider searches for the closesst collision along the ray. Defaults to false.
+		 * @param findClosestCollision Determines whether the picking collider searches for the closest collision along the ray. Defaults to false.
 		 */
 		public function AS3PickingCollider( findClosestCollision:Boolean = false )
 		{
