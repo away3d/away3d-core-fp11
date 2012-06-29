@@ -261,7 +261,7 @@ package away3d.bounds
 
 			var px : Number = p.x - _centerX, py : Number = p.y - _centerY, pz : Number = p.z - _centerZ;
 			var vx : Number = v.x, vy : Number = v.y, vz : Number = v.z;
-			var t : Number;
+			var t:Number;
 
 			var a : Number = vx * vx + vy * vy + vz * vz;
 			var b : Number = 2 * ( px * vx + py * vy + pz * vz );
@@ -270,6 +270,7 @@ package away3d.bounds
 			if (det >= 0) { // ray goes through sphere
 				var sqrtDet : Number = Math.sqrt(det);
 				t = ( -b - sqrtDet ) / ( 2 * a );
+				_rayCollisionFarT = ( -b + sqrtDet ) / ( 2 * a );
 				if (t > 0) {
 
 					if( !_rayIntersectionPoint ) _rayIntersectionPoint = new Vector3D();

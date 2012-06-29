@@ -101,7 +101,8 @@ package away3d.core.pick
 					
 					// Store collision data.
 					_pickingCollisionVO = _entity.pickingCollisionVO;
-					_pickingCollisionVO.collisionT = collisionT;
+					_pickingCollisionVO.collisionNearT = _pickingCollisionVO.collisionT = collisionT;
+					_pickingCollisionVO.collisionFarT = _entity.bounds.rayCollisionFarT;
 					_pickingCollisionVO.localRayPosition = localRayPosition;
 					_pickingCollisionVO.localRayDirection = localRayDirection;
 					_pickingCollisionVO.rayOriginIsInsideBounds = rayOriginIsInsideBounds;
@@ -133,27 +134,85 @@ package away3d.core.pick
 			// Example: Bound B is inside bound A. Bound A's collision t is closer than bound B. Both have tri colliders. Bound A surface hit
 			// is further than bound B surface hit. Atm, this algorithm would fail in detecting that B's surface hit is actually closer.
 			// Suggestions: calculate ray bounds near and far t's and evaluate bound intersections within ray trajectory.
-			
+
+			return _findClosestCollision ? determineBestCollision() : determineFirstCollision();
+		}
+
+		private function determineFirstCollision():PickingCollisionVO {
+
+			var i:uint;
 			var pickingCollider:IPickingCollider;
 			var shortestCollisionDistance:Number = Number.MAX_VALUE;
-			
+
 			for( i = 0; i < _numberOfCollisions; ++i ) {
 				_entity = _entities[ i ];
 				_pickingCollisionVO = _entity.pickingCollisionVO;
 				pickingCollider = _entity.pickingCollider;
 				if( pickingCollider) {
-					// If a collision exists, update the collision data and stop all checks.
-					if( testCollision( pickingCollider, _pickingCollisionVO, shortestCollisionDistance ) ) {
-						//TODO: break loop unless best hit is required
-						//if (!_findClosestCollision)
-							return _pickingCollisionVO;
+					if( testCollision( pickingCollider, _pickingCollisionVO, shortestCollisionDistance ) ) { // First found triangle collision will do.
+						return _pickingCollisionVO;
 					}
-				} else { // A bounds collision with no triangle collider stops all checks.
+				} else { // First found bounds collision with no triangle collider will do.
 					return _pickingCollisionVO;
 				}
 			}
-			
+
 			return null;
+		}
+
+		private function determineBestCollision():PickingCollisionVO {
+
+			var i:uint;
+			var pickingCollider:IPickingCollider;
+			var shortestCollisionDistance:Number = Number.MAX_VALUE;
+			var bestCollisionVO:PickingCollisionVO;
+
+			for( i = 0; i < _numberOfCollisions; ++i ) {
+				_entity = _entities[ i ];
+				_pickingCollisionVO = _entity.pickingCollisionVO;
+				pickingCollider = _entity.pickingCollider;
+				if( pickingCollider) {
+					// If no triangle collision has been found, do the triangle test and remember it, if successful.
+					if( bestCollisionVO == null ) {
+						if( testCollision( pickingCollider, _pickingCollisionVO, shortestCollisionDistance ) ) {
+							shortestCollisionDistance = _pickingCollisionVO.collisionT;
+							bestCollisionVO = _pickingCollisionVO;
+						}
+					}
+					else { // If there is a previous collision, only consider a new candidate if bounds intersect.
+						if( _pickingCollisionVO.collisionT > bestCollisionVO.collisionNearT && _pickingCollisionVO.collisionT < bestCollisionVO.collisionFarT ) { // t is in between previous t's
+							if( testCollision( pickingCollider, _pickingCollisionVO, shortestCollisionDistance ) ) {
+								shortestCollisionDistance = _pickingCollisionVO.collisionT;
+								bestCollisionVO = _pickingCollisionVO;
+							}
+						}
+					}
+				}
+				else { // First found bounds collision with no triangle collider will do.
+					return _pickingCollisionVO;
+				}
+			}
+
+			return bestCollisionVO;
+		}
+
+		private function testCollision(pickingCollider:IPickingCollider, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		{
+			pickingCollider.setLocalRay(pickingCollisionVO.localRayPosition, pickingCollisionVO.localRayDirection);
+
+			if (pickingCollisionVO.entity is Mesh) {
+				var mesh:Mesh = pickingCollisionVO.entity as Mesh;
+				var subMesh:SubMesh;
+				// TODO: implement best hit between sub-meshes ( already done with rob's shortestCollisionDistance? )
+				for each (subMesh in mesh.subMeshes)
+					if (pickingCollider.testSubMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance))
+						return true;
+			} else {
+				//if not a mesh, rely on entity bounds
+				return true;
+			}
+
+			return false;
 		}
 		
 		/**
@@ -170,24 +229,6 @@ package away3d.core.pick
 		private function sortOnNearT( entity1:Entity, entity2:Entity ):Number
 		{
 			return entity1.pickingCollisionVO.collisionT > entity2.pickingCollisionVO.collisionT ? 1 : -1;
-		}
-		
-		private function testCollision(pickingCollider:IPickingCollider, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
-		{
-			pickingCollider.setLocalRay(pickingCollisionVO.localRayPosition, pickingCollisionVO.localRayDirection);
-			
-			if (pickingCollisionVO.entity is Mesh) {
-				var mesh:Mesh = pickingCollisionVO.entity as Mesh;
-				var subMesh:SubMesh;
-				for each (subMesh in mesh.subMeshes)
-					if (pickingCollider.testSubMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance))
-						return true;
-			} else {
-				//if not a mesh, rely on entity bounds
-				return true;
-			}
-			
-			return false;
 		}
 	}
 }

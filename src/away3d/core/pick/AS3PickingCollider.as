@@ -94,6 +94,7 @@ package away3d.core.pick
 					D = -( nx * p0x + ny * p0y + nz * p0z );
 					disToPlane = -( nx * rayPosition.x + ny * rayPosition.y + nz * rayPosition.z + D );
 					t = disToPlane / nDotV;
+					// TODO: can put t < shortestCollisionDistance here?
 					// find collision point
 					cx = rayPosition.x + t * rayDirection.x;
 					cy = rayPosition.y + t * rayDirection.y;

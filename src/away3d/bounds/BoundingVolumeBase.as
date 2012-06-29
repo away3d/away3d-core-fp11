@@ -19,11 +19,12 @@ package away3d.bounds
 	{
 		protected var _min:Vector3D;
 		protected var _max:Vector3D;
-		protected var _rayIntersectionPoint:Vector3D;
-		protected var _rayIntersectionNormal:Vector3D;
 		protected var _aabbPoints:Vector.<Number> = new Vector.<Number>();
 		protected var _aabbPointsDirty:Boolean = true;
 		protected var _boundingRenderable:WireframePrimitiveBase;
+		protected var _rayIntersectionPoint:Vector3D;
+		protected var _rayIntersectionNormal:Vector3D;
+		protected var _rayCollisionFarT:Number;
 
 		/**
 		 * Creates a new BoundingVolumeBase object
@@ -259,6 +260,10 @@ package away3d.bounds
 
 		public function get rayIntersectionNormal():Vector3D {
 			return _rayIntersectionNormal;
+		}
+
+		public function get rayCollisionFarT():Number {
+			return _rayCollisionFarT;
 		}
 	}
 }
