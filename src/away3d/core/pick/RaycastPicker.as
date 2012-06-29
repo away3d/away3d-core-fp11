@@ -150,6 +150,7 @@ package away3d.core.pick
 				
 				for each (subMesh in mesh.subMeshes) {
 					if( pickingCollider.testSubMeshCollision( subMesh, pickingCollisionVO, shortestCollisionDistance ) ) {
+						shortestCollisionDistance = _pickingCollisionVO.rayEntryDistance;
 						collides = true;
 						if( !_findClosestCollision )
 							return true;
