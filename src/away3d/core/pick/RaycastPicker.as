@@ -203,16 +203,25 @@ package away3d.core.pick
 			if (pickingCollisionVO.entity is Mesh) {
 				var mesh:Mesh = pickingCollisionVO.entity as Mesh;
 				var subMesh:SubMesh;
-				// TODO: implement best hit between sub-meshes ( already done with rob's shortestCollisionDistance? )
-				for each (subMesh in mesh.subMeshes)
-					if (pickingCollider.testSubMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance))
-						return true;
-			} else {
-				//if not a mesh, rely on entity bounds
+				var shortestT:Number = shortestCollisionDistance;
+				var collisionT:Number;
+				var collides:Boolean;
+				for each (subMesh in mesh.subMeshes) {
+					collisionT = pickingCollider.testSubMeshCollision( subMesh, pickingCollisionVO, shortestT );
+					if( collisionT > 0 && collisionT < shortestT ) {
+						shortestT = collisionT;
+						collides = true;
+						if( !_findClosestCollision ) {
+							return true;
+						}
+					}
+				}
+				pickingCollisionVO.collisionT = shortestT;
+				return collides;
+			}
+			else { // if not a mesh, rely on entity bounds
 				return true;
 			}
-
-			return false;
 		}
 		
 		/**

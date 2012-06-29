@@ -54,7 +54,7 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Number
 		{
 			// TODO: It seems that the kernel takes almost the same time to calculate on a mesh with 2 triangles than on a
 			// mesh with thousands of triangles. It might be worth exploring the possibility of accumulating buffers until a certain
@@ -121,11 +121,10 @@ package away3d.core.pick
 				u = 1.0 - v - w;
 				pickingCollisionVO.uv = getCollisionUV( indexData, uvData, collisionTriangleIndex, v, w, u );
 				
-				// does not search for closest collision, first found will do... // TODO: add option of finding best triangle hit?
-				return true;
+				return t;
 			}
 			
-			return false;
+			return -1;
 		}
 		
 		// TODO: this is not necessarily the most efficient way to pass data to pb ( try different grid dimensions? )

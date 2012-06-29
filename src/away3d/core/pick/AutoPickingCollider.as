@@ -21,7 +21,7 @@ package away3d.core.pick
 		/**
 		 * Represents the number of triangles encountered in a <code>SubMesh</code> object over which PixelBender is used.
 		 */
-		public var triangleThreshold:uint = 256;
+		public var triangleThreshold:uint = 1024;
 		
 		/**
 		 * Creates a new <code>AutoPickingCollider</code> object.
@@ -46,10 +46,9 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Number
 		{
 			_activePickingCollider = (subMesh.numTriangles > triangleThreshold)? _pbPickingCollider : _as3PickingCollider;
-			
 			return _activePickingCollider.testSubMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance);
 		}
 	}
