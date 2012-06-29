@@ -75,9 +75,10 @@ package away3d.core.pick
 			len = filteredEntities.length;
 			_entities = new Vector.<Entity>();
 			for( i = 0; i < len; i++ ) {
+
 				// Id thisEntity.
 				_entity = filteredEntities[ i ];
-				
+
 				// convert ray to entity space
 				localRayPosition = _entity.inverseSceneTransform.transformVector( rayPosition );
 				localRayDirection = _entity.inverseSceneTransform.deltaTransformVector( rayDirection );
@@ -129,11 +130,6 @@ package away3d.core.pick
 			// Evaluate triangle collisions when needed.
 			// Replaces collision data provided by bounds collider with more precise data.
 			// ---------------------------------------------------------------------
-			
-			// does not search for closest collision, first found will do... // TODO: implement _findClosestCollision
-			// Example: Bound B is inside bound A. Bound A's collision t is closer than bound B. Both have tri colliders. Bound A surface hit
-			// is further than bound B surface hit. Atm, this algorithm would fail in detecting that B's surface hit is actually closer.
-			// Suggestions: calculate ray bounds near and far t's and evaluate bound intersections within ray trajectory.
 
 			return _findClosestCollision ? determineBestCollision() : determineFirstCollision();
 		}
@@ -207,7 +203,7 @@ package away3d.core.pick
 				var collisionT:Number;
 				var collides:Boolean;
 				for each (subMesh in mesh.subMeshes) {
-					collisionT = pickingCollider.testSubMeshCollision( subMesh, pickingCollisionVO, shortestT );
+					collisionT = pickingCollider.testSubMeshCollision( subMesh, pickingCollisionVO, shortestCollisionDistance );
 					if( collisionT > 0 && collisionT < shortestT ) {
 						shortestT = collisionT;
 						collides = true;

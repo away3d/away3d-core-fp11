@@ -88,7 +88,7 @@ package away3d.core.pick
 			
 			// run kernel.
 			var shaderJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, indexBufferDims.x, indexBufferDims.y );
-			shaderJob.start( true ); // TODO: use false and listen for completion
+			shaderJob.start( true ); // TODO: performance test, use false and listen for completion? affects the whole picking system
 
 			// find a proper collision from pb's output
 			var i:uint;
