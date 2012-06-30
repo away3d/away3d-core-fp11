@@ -110,23 +110,11 @@ package away3d.loaders.parsers
 				_parser.parseAsync(_data);
 			}
 			
-			// Because finishParsing() is overriden, we can stop
-			// this parser without any events being dispatched.
-			return PARSING_DONE;
+			// Return MORE_TO_PARSE while delegate parser is working. Once the delegate
+			// finishes parsing, this dummy parser instance will be stopped as well as
+			// a result of the delegate's PARSE_COMPLETE event (onParseComplete).
+			return MORE_TO_PARSE;
 		}
-		
-		
-		/**
-		 * @private
-		 * Overridden to prevent default behavior of dispatching event,
-		 * so that this wrapper can stop "parsing" straight away but not
-		 * dispatch events until wrapped concrete parser is actually done.
-		*/
-		protected override function finishParsing() : void
-		{
-			// Do nothing.
-		}
-		
 		
 		
 		
@@ -169,7 +157,7 @@ package away3d.loaders.parsers
 			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
-			dispatchEvent(ev.clone());
+			finishParsing();
 		}
 	}
 }
