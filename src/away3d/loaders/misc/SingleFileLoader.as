@@ -313,16 +313,6 @@ package away3d.loaders.misc
 			
 			if(hasEventListener(LoaderEvent.LOAD_ERROR))
 				dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, _req.url, true, event.text));
-			
-			// if flash.net.URLLoader failed to load requested asset, then attempt to parse whatever data we got back anyway.
-			// do not do this for jpg or png files
-			/*var urlFile:String = _url.toLowerCase();
-			if(urlFile.indexOf("jpg") == -1 && urlFile.indexOf("png") == -1){
-			if (!_parser)
-			_parser = getParserFromData(urlLoader.data, _fileName);
-			
-			parse(urlLoader.data);
-			}    */
 		}
 		
 		/**
