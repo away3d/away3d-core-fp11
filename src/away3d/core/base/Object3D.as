@@ -35,35 +35,46 @@ package away3d.core.base
 	
 	
 	/**
-	 * Object3D provides a base class for any 3D object that has a (local) transformation.
+	 * Object3D provides a base class for any 3D object that has a (local) transformation.<br/><br/>
 	 *
 	 * Standard Transform:
-	 * - The standard order for transformation is [parent transform] * (Translate+Pivot) * (Rotate) * (-Pivot) * (Scale) * [child transform]
-	 *   - This is the order of matrix multiplications, left-to-right.
-	 *   - The order of transformation is right-to-left, however!
-	 *       (Scale) happens before (-Pivot) happens before (Rotate) happens before (Translate+Pivot)
-	 *   - with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform]
-	 *       (Scale) happens before (Rotate) happens before (Translate)
-	 *   - This is based on code in updateTransform and ObjectContainer3D.updateSceneTransform().
-	 *   - Matrix3D prepend = operator on rhs - e.g. transform' = transform * rhs;
-	 *   - Matrix3D append =  operator on lhr - e.g. transform' = lhs * transform;
-	 *
+	 * <ul>
+	 *     <li> The standard order for transformation is [parent transform] * (Translate+Pivot) * (Rotate) * (-Pivot) * (Scale) * [child transform] </li>
+	 *     <li> This is the order of matrix multiplications, left-to-right. </li>
+	 *     <li> The order of transformation is right-to-left, however! 
+	 *          (Scale) happens before (-Pivot) happens before (Rotate) happens before (Translate+Pivot) 
+	 *          with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform]
+	 *          (Scale) happens before (Rotate) happens before (Translate) </li>
+	 *     <li> This is based on code in updateTransform and ObjectContainer3D.updateSceneTransform(). </li>
+	 *     <li> Matrix3D prepend = operator on rhs - e.g. transform' = transform * rhs; </li>
+	 *     <li> Matrix3D append =  operator on lhr - e.g. transform' = lhs * transform; </li>
+	 * </ul>
+	 * 
 	 * To affect Scale:
-	 * - set scaleX/Y/Z directly, or call scale(delta)
-	 *
+	 * <ul>
+	 *     <li> set scaleX/Y/Z directly, or call scale(delta) </li>
+	 * </ul>
+	 * 
 	 * To affect Pivot:
-	 * - set pivotPoint directly, or call movePivot()
+	 * <ul>
+	 *     <li> set pivotPoint directly, or call movePivot() </li>
+	 * </ul>
 	 *
 	 * To affect Rotate:
-	 * - set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()
-	 * - call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.
-	 *     rotationX/Y/Z will be reset based on these operations.
-	 *
+	 * <ul>
+	 *    <li> set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()</li>
+	 *    <li> call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.
+	 *         rotationX/Y/Z will be reset based on these operations. </li>
+	 * </ul>
+	 * 
 	 * To affect Translate (post-rotate translate):
-	 * - set x/y/z/position or call moveTo().
-	 * - call translate(), which modifies x/y/z based on a delta vector.
-	 * - call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to add an
-	 *     additional translate *before* the current transform. x/y/z will be reset based on these operations.
+	 * 
+	 * <ul>
+	 *    <li> set x/y/z/position or call moveTo(). </li>
+	 *    <li> call translate(), which modifies x/y/z based on a delta vector. </li>
+	 *    <li> call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to add an
+	 *         additional translate *before* the current transform. x/y/z will be reset based on these operations. </li>
+	 * </ul>
 	 */
 	
 	public class Object3D extends NamedAssetBase
