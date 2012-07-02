@@ -73,7 +73,7 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -114,7 +114,7 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -150,7 +150,7 @@ package away3d.loaders
 			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			dispatcher.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);

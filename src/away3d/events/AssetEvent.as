@@ -14,7 +14,7 @@ package away3d.events
 		public static const SKELETON_POSE_COMPLETE : String = 'skeletonPoseComplete';
 		public static const CONTAINER_COMPLETE : String = 'containerComplete';
 		public static const ANIMATION_COMPLETE : String = 'animationComplete';
-		public static const BITMAP_COMPLETE : String = 'bitmapComplete';
+		public static const TEXTURE_COMPLETE : String = 'textureComplete';
 		public static const MATERIAL_COMPLETE : String = 'materialComplete';
 		public static const ANIMATOR_COMPLETE : String = 'animatorComplete';
 

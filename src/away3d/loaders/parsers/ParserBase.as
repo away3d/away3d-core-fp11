@@ -214,7 +214,7 @@ package away3d.loaders.parsers
 					break;
 				case AssetType.TEXTURE:
 					type_name = 'texture';
-					type_event = AssetEvent.BITMAP_COMPLETE;
+					type_event = AssetEvent.TEXTURE_COMPLETE;
 					break;
 				case AssetType.CONTAINER:
 					type_name = 'container';
