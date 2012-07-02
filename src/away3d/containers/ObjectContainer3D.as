@@ -74,7 +74,7 @@ package away3d.containers
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		/** @private */
-		arcane var _implicitMouseEnabled : Boolean;
+		arcane var _ancestorsAllowMouseEnabled : Boolean;
 		arcane var _isRoot:Boolean;
 
 		protected var _scene : Scene3D;
@@ -195,14 +195,12 @@ package away3d.containers
 		protected function updateMouseChildren() : void
 		{
 			if( _parent && !_parent._isRoot ) {
-				// Set implicit mouse enabled if parent is enabled and allows its children to be so.
-				_implicitMouseEnabled = _parent.mouseChildren && _parent._implicitMouseEnabled;
+				// Set implicit mouse enabled if parent its children to be so.
+				_ancestorsAllowMouseEnabled = parent._ancestorsAllowMouseEnabled && _parent.mouseChildren;
 			}
 			else {
-				_implicitMouseEnabled = _mouseEnabled;
+				_ancestorsAllowMouseEnabled = mouseChildren;
 			}
-
-			var pName:String = _parent ? _parent.name : "null";
 
 			// Sweep children.
 			var len : uint = _children.length;
@@ -270,10 +268,7 @@ package away3d.containers
 		public function set mouseChildren(value : Boolean) : void
 		{
 			_mouseChildren = value;
-
-			var len : uint = _children.length;
-			for (var i : uint = 0; i < len; ++i)
-				_children[i].updateMouseChildren();
+			updateMouseChildren();
 		}
 		/**
 		 * 

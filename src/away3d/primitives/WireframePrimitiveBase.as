@@ -109,7 +109,7 @@ package away3d.primitives
 		}
 
 		override protected function updateMouseChildren():void {
-			_implicitMouseEnabled = false;
+			_ancestorsAllowMouseEnabled = false;
 		}
 	}
 }

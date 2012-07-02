@@ -18,6 +18,85 @@ package away3d.loaders.misc
 	use namespace arcane;
 	
 	/**
+	 * Dispatched when the dependency that this single-file loader was loading complets.
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="dependencyComplete", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when an error occurs during loading. 
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="loadError", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when any asset finishes parsing. Also see specific events for each
+	 * individual asset type (meshes, materials et c.)
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a geometry asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="geometryComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton pose asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonPoseComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a container asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a animation asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a texture asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a material asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a animator asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
 	 * The SingleFileLoader is used to load a single file, as part of a resource.
 	 *
 	 * While SingleFileLoader can be used directly, e.g. to create a third-party asset 
@@ -234,16 +313,6 @@ package away3d.loaders.misc
 			
 			if(hasEventListener(LoaderEvent.LOAD_ERROR))
 				dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, _req.url, true, event.text));
-			
-			// if flash.net.URLLoader failed to load requested asset, then attempt to parse whatever data we got back anyway.
-			// do not do this for jpg or png files
-			/*var urlFile:String = _url.toLowerCase();
-			if(urlFile.indexOf("jpg") == -1 && urlFile.indexOf("png") == -1){
-			if (!_parser)
-			_parser = getParserFromData(urlLoader.data, _fileName);
-			
-			parse(urlLoader.data);
-			}    */
 		}
 		
 		/**
@@ -258,7 +327,7 @@ package away3d.loaders.misc
 			
 			if (_loadAsRawData) {
 				// No need to parse this data, which should be returned as is
-				dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED));
+				dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE));
 			}
 			else {
 				parse(_data);
@@ -282,7 +351,7 @@ package away3d.loaders.misc
 				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-				_parser.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -321,14 +390,14 @@ package away3d.loaders.misc
 		 */
 		private function onParseComplete(event : ParserEvent) : void
 		{
-			this.dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED, this.url));//dispatch in front of removing listeners to allow any remaining asset events to propagate
+			this.dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, this.url));//dispatch in front of removing listeners to allow any remaining asset events to propagate
 			
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			_parser.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);

@@ -8,11 +8,6 @@
 	public class LoaderEvent extends Event
 	{
 		/**
-		 * Dispatched when loading of an asset completed.
-		 */
-		public static const DATA_LOADED : String = "dataLoaded";
-		
-		/**
 		 * Dispatched when loading of a asset failed.
 		 * Such as wrong parser type, unsupported extensions, parsing errors, malformated or unsupported 3d file etc..
 		 */
