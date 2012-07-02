@@ -487,7 +487,7 @@ package away3d.loaders
 		
 		private function addEventListeners(loader : SingleFileLoader) : void
 		{
-			loader.addEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
+			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onRetrievalComplete);
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
@@ -507,7 +507,7 @@ package away3d.loaders
 		private function removeEventListeners(loader : SingleFileLoader) : void
 		{
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
-			loader.removeEventListener(LoaderEvent.DATA_LOADED, onRetrievalComplete);
+			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onRetrievalComplete);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);

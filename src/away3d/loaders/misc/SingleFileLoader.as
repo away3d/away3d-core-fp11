@@ -258,7 +258,7 @@ package away3d.loaders.misc
 			
 			if (_loadAsRawData) {
 				// No need to parse this data, which should be returned as is
-				dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED));
+				dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE));
 			}
 			else {
 				parse(_data);
@@ -321,7 +321,7 @@ package away3d.loaders.misc
 		 */
 		private function onParseComplete(event : ParserEvent) : void
 		{
-			this.dispatchEvent(new LoaderEvent(LoaderEvent.DATA_LOADED, this.url));//dispatch in front of removing listeners to allow any remaining asset events to propagate
+			this.dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, this.url));//dispatch in front of removing listeners to allow any remaining asset events to propagate
 			
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
