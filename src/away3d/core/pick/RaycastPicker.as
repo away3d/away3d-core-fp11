@@ -66,11 +66,13 @@ package away3d.core.pick
 			len = collector.entities.length;
 			for( i = 0; i < len; i++ ) {
 				_entity = collector.entities[ i ];
-				if( _entity.visible && _entity._implicitMouseEnabled ) {
+				if( _entity.visible && _entity._ancestorsAllowMouseEnabled && _entity.mouseEnabled ) {
 					filteredEntities.push( _entity );
 				}
 			}
-			
+
+//			trace( "picking on " + filteredEntities.length + " entities." );
+
 			//reset
 			_collides = false;
 			_numberOfCollisions = 0;
