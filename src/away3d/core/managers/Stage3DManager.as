@@ -16,8 +16,9 @@ package away3d.core.managers
 	public class Stage3DManager
 	{
 		private static var _instances : Dictionary;
-
 		private static var _stageProxies : Vector.<Stage3DProxy>;
+		private static var _numStageProxies : uint = 0;
+
 		private var _stage : Stage;
 
 		/**
@@ -52,7 +53,12 @@ package away3d.core.managers
 		 */
 		public function getStage3DProxy(index : uint, forceSoftware : Boolean = false) : Stage3DProxy
 		{
-			return _stageProxies[index] ||= new Stage3DProxy(index, _stage.stage3Ds[index], this, forceSoftware);
+			if(!_stageProxies[index]){
+				_numStageProxies++;
+				_stageProxies[index] = new Stage3DProxy(index, _stage.stage3Ds[index], this, forceSoftware);
+			}
+
+			return _stageProxies[index];
 		}
 
 		/**
@@ -62,6 +68,7 @@ package away3d.core.managers
 		 */
 		arcane function removeStage3DProxy(stage3DProxy : Stage3DProxy) : void
 		{
+			_numStageProxies--;
 			_stageProxies[stage3DProxy.stage3DIndex] = null;
 		}
 
@@ -82,6 +89,39 @@ package away3d.core.managers
 
 			throw new Error("Too many Stage3D instances used!");
 			return null;
+		}
+
+		/**
+		 * Checks if a new stage3DProxy can be created and managed by the class.
+		 * @return true if there is one slot free for a new stage3DProxy
+		 */
+		public function get hasFreeStage3DProxy() : Boolean
+		{
+			return _numStageProxies < _stageProxies.length? true : false;
+		}
+		/**
+		 * Returns the amount of stage3DProxy objects that can be created and managed by the class
+		 * @return the amount of free slots 
+		 */
+		public function get numProxySlotsFree() : uint
+		{
+			return _stageProxies.length-_numStageProxies;
+		}
+		/**
+		 * Returns the amount of Stage3DProxy objects currently managed by the class.
+		 * @return the amount of slots used 
+		 */
+		public function get numProxySlotsUsed() : uint
+		{
+			return _numStageProxies;
+		}
+		/**
+		 * Returns the maximum amount of Stage3DProxy objects that can be managed by the class
+		 * @return the maximum amount of Stage3DProxy objects that can be managed by the class
+		 */
+		public function get numProxySlotsTotal() : uint
+		{
+			return _stageProxies.length;
 		}
 	}
 }

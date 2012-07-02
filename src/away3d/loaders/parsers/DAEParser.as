@@ -428,6 +428,8 @@ package away3d.loaders.parsers
 		
 		private function processControllers(node : DAENode, container : ObjectContainer3D) : void
 		{
+			if (!node.instance_controllers || node.instance_controllers.length == 0) return;
+			
 			var instance : DAEInstanceController;
 			var daeGeometry : DAEGeometry;
 			var controller : DAEController;
@@ -436,12 +438,13 @@ package away3d.loaders.parsers
 			var mesh : Mesh;
 			var skeleton : Skeleton;
 			var sequence : AnimationSequenceBase;
+			var anim:SkeletonAnimation;
 			var animator : AnimatorBase;
 			var i : uint, j : uint;
 			var hasMaterial:Boolean;
+			var weights:uint;
+			var jpv:uint;
 			
-			if (!node.instance_controllers || node.instance_controllers.length == 0)   return;
-			 
 			for (i = 0; i < node.instance_controllers.length; i++) {
 				instance = node.instance_controllers[i];
 				controller = _libControllers[instance.url] as DAEController;
@@ -474,21 +477,20 @@ package away3d.loaders.parsers
 					skeleton = controller.skin.userData as Skeleton;
 					
 					sequence = processSkinAnimation(controller.skin, mesh, skeleton);
-					animator = new SmoothSkeletonAnimator(SkeletonAnimationState(mesh.animationState));
 					sequence.looping = true;
-					SmoothSkeletonAnimator(animator).addSequence(SkeletonAnimationSequence(sequence));
-					 
-					var weights:uint = SkinnedSubGeometry(mesh.geometry.subGeometries[0]).jointIndexData.length;
-					var jpv:uint = weights / (mesh.geometry.subGeometries[0].vertexData.length/3);
 					
-					var anim:SkeletonAnimation = new SkeletonAnimation(skeleton, jpv);
-					mesh.geometry.animation = anim;
-
+					weights = SkinnedSubGeometry(mesh.geometry.subGeometries[0]).jointIndexData.length;
+					jpv = weights / (mesh.geometry.subGeometries[0].vertexData.length/3);
+					anim = new SkeletonAnimation(skeleton, jpv);
+					
+					var state:SkeletonAnimationState = SkeletonAnimationState(mesh.animationState);
+					animator = new SmoothSkeletonAnimator(state);
+					SmoothSkeletonAnimator(animator).addSequence(SkeletonAnimationSequence(sequence));
+					
 					_animators.push(animator);
 					_sequences.push(sequence);
-					
-					finalizeAsset(animator);
-					finalizeAsset(sequence);
+
+					finalizeAsset(animator, sequence.name);
 				}
 				
 				finalizeAsset(mesh);
@@ -496,7 +498,7 @@ package away3d.loaders.parsers
 				break;
 			}
 		}
-		 
+		
 		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonAnimationSequence
 		{
 			var useGPU : Boolean = _configFlags & CONFIG_USE_GPU ? true : false;
@@ -511,26 +513,31 @@ package away3d.loaders.parsers
 			var sequence : SkeletonAnimationSequence = new SkeletonAnimationSequence("seq_" + _sequences.length);
 			mesh.geometry.animation = animation;
 			var skeletonPose : SkeletonPose;
+			var identity:Matrix3D;
+			var matrix : Matrix3D;
+			var node : DAENode;
+			var pose : JointPose;
 			
 			for (i = 0; i < numFrames; i++) {
 				skeletonPose = new SkeletonPose();
 				
 				for (j = 0; j < skin.joints.length; j++) {
-					var node : DAENode = _root.findNodeById(skin.joints[j]) || _root.findNodeBySid(skin.joints[j]);
-					var pose : JointPose = new JointPose();
-					var matrix : Matrix3D;
-					
+					node = _root.findNodeById(skin.joints[j]) || _root.findNodeBySid(skin.joints[j]);
+					pose = new JointPose();
 					matrix = node.getAnimatedMatrix(t) || node.matrix;
 					pose.name = skin.joints[j];
 					pose.orientation.fromMatrix(matrix);
 					pose.translation.copyFrom(matrix.position);
 					
-					if (isNaN(pose.orientation.x)) pose.orientation.fromMatrix(new Matrix3D());
+					if (isNaN(pose.orientation.x)){
+						if(!identity) identity = new Matrix3D();
+						pose.orientation.fromMatrix(identity);
+					}
 					 
 					skeletonPose.jointPoses.push(pose);
 				}
-				t += frameDuration;
 				
+				t += frameDuration;
 				sequence.addFrame(skeletonPose, frameDuration * 1000);
 			}
 			
@@ -545,7 +552,7 @@ package away3d.loaders.parsers
 				try{
 					node = _root.findNodeById(skeleton.joints[i].name) || _root.findNodeBySid(skeleton.joints[i].name);
 				} catch(e:Error){
-					trace("Errors found in skeleton data");
+					trace("Errors found in skeleton joints data");
 					return false;
 				}
 				if (node && node.channels.length) return true;

@@ -74,7 +74,8 @@ package away3d.containers
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		/** @private */
-		arcane var _implicitMouseEnabled : Boolean = true;
+		arcane var _implicitMouseEnabled : Boolean;
+		arcane var _isRoot:Boolean;
 
 		protected var _scene : Scene3D;
 		protected var _parent : ObjectContainer3D;
@@ -83,8 +84,8 @@ package away3d.containers
 		// these vars allow not having to traverse the scene graph to figure out what partition is set
 		protected var _explicitPartition : Partition3D; // what the user explicitly set as the partition
 		protected var _implicitPartition : Partition3D; // what is inherited from the parents if it doesn't have its own explicitPartition
-
-		private var _scenetransformchanged:Object3DEvent;
+		protected var _mouseEnabled : Boolean;
+		private var _sceneTransformChanged:Object3DEvent;
 		private var _scenechanged:Object3DEvent;
 		private var _children : Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
 		private var _mouseChildren : Boolean = true;
@@ -164,10 +165,10 @@ package away3d.containers
 			if (!hasEventListener(Object3DEvent.SCENETRANSFORM_CHANGED))
 				return;
 			
-			if (!_scenetransformchanged)
-				_scenetransformchanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
+			if (!_sceneTransformChanged)
+				_sceneTransformChanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
 			
-			dispatchEvent(_scenetransformchanged);
+			dispatchEvent(_sceneTransformChanged);
 		}
 		
 		private function notifySceneChange():void
@@ -193,14 +194,34 @@ package away3d.containers
 			
 		protected function updateMouseChildren() : void
 		{
-			if (_parent) {
-				_implicitMouseEnabled = _parent._implicitMouseEnabled && _parent._mouseChildren;
-				var len : uint = _children.length;
-				for (var i : uint = 0; i < len; ++i)
-					_children[i].updateMouseChildren();
-			} else {
-				_implicitMouseEnabled = true;
+			if( _parent && !_parent._isRoot ) {
+				// Set implicit mouse enabled if parent is enabled and allows its children to be so.
+				_implicitMouseEnabled = _parent.mouseChildren && _parent._implicitMouseEnabled;
 			}
+			else {
+				_implicitMouseEnabled = _mouseEnabled;
+			}
+
+			var pName:String = _parent ? _parent.name : "null";
+
+			// Sweep children.
+			var len : uint = _children.length;
+			for (var i : uint = 0; i < len; ++i)
+				_children[i].updateMouseChildren();
+		}
+
+		/**
+		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
+		 */
+		public function get mouseEnabled() : Boolean
+		{
+			return _mouseEnabled;
+		}
+
+		public function set mouseEnabled(value : Boolean) : void
+		{
+			_mouseEnabled = value;
+			updateMouseChildren();
 		}
 		
 		/**

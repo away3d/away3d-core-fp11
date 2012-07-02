@@ -82,14 +82,5 @@
 			_screenPass.diffuseMethod._useDiffuseTexture = true;
 			_screenPass.ambientMethod.texture = value;
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose() : void
-		{
-			_screenPass.dispose();
-			super.dispose();
-		}
 	}
 }

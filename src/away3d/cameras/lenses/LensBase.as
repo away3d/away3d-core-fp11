@@ -118,6 +118,13 @@ package away3d.cameras.lenses
 			return _unprojection;
 		}
 
+		/**
+		 * Calculates the position of the given normalized coordinates relative to the camera.
+		 * @param mX The x coordinate relative to the View3D. -1 corresponds to the utter left side of the viewport, 1 to the right.
+		 * @param mY The y coordinate relative to the View3D. -1 corresponds to the top side of the viewport, 1 to the bottom.
+		 * @param mZ The distance from the projection plane.
+		 * @return The scene position of the given screen coordinates.
+		 */
 		public function unproject(mX:Number, mY:Number, mZ : Number):Vector3D
 		{
 			var v : Vector3D = new Vector3D(mX, -mY, mZ, 1.0);

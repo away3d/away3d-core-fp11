@@ -2,12 +2,11 @@ package away3d.bounds
 {
 
 	import away3d.arcane;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.primitives.WireframeCube;
-	import away3d.primitives.WireframePrimitiveBase;
+	import away3d.core.math.*;
+	import away3d.core.pick.*;
+	import away3d.primitives.*;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -25,22 +24,10 @@ package away3d.bounds
 		private var _halfExtentsZ:Number = 0;
 
 		/**
-		 * Creates a new AxisAlignedBoundingBox object.
+		 * Creates a new <code>AxisAlignedBoundingBox</code> object.
 		 */
-		public function AxisAlignedBoundingBox() {
-		}
-
-		override protected function updateBoundingRenderable():void {
-			_boundingRenderable.scaleX = Math.max( _halfExtentsX * 2, 0.001 );
-			_boundingRenderable.scaleY = Math.max( _halfExtentsY * 2, 0.001 );
-			_boundingRenderable.scaleZ = Math.max( _halfExtentsZ * 2, 0.001 );
-			_boundingRenderable.x = _centerX;
-			_boundingRenderable.y = _centerY;
-			_boundingRenderable.z = _centerZ;
-		}
-
-		override protected function createBoundingRenderable():WireframePrimitiveBase {
-			return new WireframeCube( 1, 1, 1 );
+		public function AxisAlignedBoundingBox()
+		{
 		}
 
 		/**
@@ -137,18 +124,19 @@ package away3d.bounds
 
 			return true;
 		}
-
-		override public function intersectsRay( p:Vector3D, v:Vector3D ):Number {
-			return rayIntersectionTest( p, v );
-		}
-
-		private function rayIntersectionTest( p:Vector3D, v:Vector3D, flip:Boolean = false ):Number {
-			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
-			var vx:Number = v.x, vy:Number = v.y, vz:Number = v.z;
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function intersectsRay( position:Vector3D, direction:Vector3D, pickingCollisionVO:PickingCollisionVO ):Boolean
+		{
+			var px:Number = position.x - _centerX, py:Number = position.y - _centerY, pz:Number = position.z - _centerZ;
+			var vx:Number = direction.x, vy:Number = direction.y, vz:Number = direction.z;
 			var ix:Number, iy:Number, iz:Number;
-			var containedInAxis1:Boolean, containedInAxis2:Boolean;
-			var t:Number;
-
+			var rayEntryDistance:Number;
+			var localNormal:Vector3D;
+			var rayOriginIsInsideBounds:Boolean;
+			
 			// possible tests
 			var testPosX:Boolean = true, testNegX:Boolean = true, testPosY:Boolean = true;
 			var testNegY:Boolean = true, testPosZ:Boolean = true, testNegZ:Boolean = true;
@@ -159,104 +147,118 @@ package away3d.bounds
 			if( vz == 0 ) testPosZ = testNegZ = false;
 
 			// discard tests 2: ray hits sides from the back?
-			if( vx < 0 ) testNegX = flip;
-			else if( vx > 0 ) testPosX = flip;
-			if( vy < 0 ) testNegY = flip;
-			else if( vy > 0 ) testPosY = flip;
-			if( vz < 0 ) testNegZ = flip;
-			else if( vz > 0 ) testPosZ = flip;
+			if( vx < 0 ) testNegX = false;
+			else if( vx > 0 ) testPosX = false;
+			if( vy < 0 ) testNegY = false;
+			else if( vy > 0 ) testPosY = false;
+			if( vz < 0 ) testNegZ = false;
+			else if( vz > 0 ) testPosZ = false;
 
 			// ray-plane tests
+			var intersects:Boolean;
+
+			// X
 			if( testPosX ) {
-				t = ( _halfExtentsX - px ) / vx;
-				if( t > 0 ) {
-					iy = py + t * vy;
-					iz = pz + t * vz;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+				rayEntryDistance = ( _halfExtentsX - px ) / vx;
+				if( rayEntryDistance > 0 ) {
+					iy = py + rayEntryDistance * vy;
+					iz = pz + rayEntryDistance * vz;
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
+						localNormal = new Vector3D( 1, 0, 0 );
+						intersects = true;
 					}
 				}
 			}
-			if( testNegX ) {
-				t = ( -_halfExtentsX - px ) / vx;
-				if( t > 0 ) {
-					iy = py + t * vy;
-					iz = pz + t * vz;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
-					}
-				}
-			}
-			if( testPosY ) {
-				t = ( _halfExtentsY - py ) / vy;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iz = pz + t * vz;
-					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
-					}
-				}
-			}
-			if( testNegY ) {
-				t = ( -_halfExtentsY - py ) / vy;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iz = pz + t * vz;
-					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
-					}
-				}
-			}
-			if( testPosZ ) {
-				t = ( _halfExtentsZ - pz ) / vz;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iy = py + t * vy;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
-					}
-				}
-			}
-			if( testNegZ ) {
-				t = ( -_halfExtentsZ - pz ) / vz;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iy = py + t * vy;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					if( containedInAxis1 && containedInAxis2 ) {
-						if( !flip ) _rayFarT = rayIntersectionTest( p, v, true );
-						return t;
+			if( !intersects && testNegX ) {
+				rayEntryDistance = ( -_halfExtentsX - px ) / vx;
+				if( rayEntryDistance > 0 ) {
+					iy = py + rayEntryDistance * vy;
+					iz = pz + rayEntryDistance * vz;
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
+						localNormal = new Vector3D( -1, 0, 0 );
+						intersects = true;
 					}
 				}
 			}
 
-			return -1;
+			// Y
+			if( !intersects && testPosY ) {
+				rayEntryDistance = ( _halfExtentsY - py ) / vy;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iz = pz + rayEntryDistance * vz;
+					if( ix > -_halfExtentsX && ix < _halfExtentsX && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
+						localNormal = new Vector3D( 0, 1, 0 );
+						intersects = true;
+					}
+				}
+			}
+			if( !intersects && testNegY ) {
+				rayEntryDistance = ( -_halfExtentsY - py ) / vy;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iz = pz + rayEntryDistance * vz;
+					if( ix > -_halfExtentsX && ix < _halfExtentsX && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
+						localNormal = new Vector3D( 0, -1, 0 );
+						intersects = true;
+					}
+				}
+			}
+
+			// Z
+			if( !intersects && testPosZ ) {
+				rayEntryDistance = ( _halfExtentsZ - pz ) / vz;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iy = py + rayEntryDistance * vy;
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && ix > -_halfExtentsX && ix < _halfExtentsX ) {
+						localNormal = new Vector3D( 0, 0, 1);
+						intersects = true;
+					}
+				}
+			}
+			if( !intersects && testNegZ ) {
+				rayEntryDistance = ( -_halfExtentsZ - pz ) / vz;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iy = py + rayEntryDistance * vy;
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && ix > -_halfExtentsX && ix < _halfExtentsX ) {
+						localNormal = new Vector3D( 0, 0, -1 );
+						intersects = true;
+					}
+				}
+			}
+			
+			// accept cases on which the ray starts inside the bounds
+			if( rayEntryDistance < 0 && (rayOriginIsInsideBounds = containsPoint(position)) ) {
+				rayEntryDistance = 0;
+				intersects = true;
+			}
+			
+			if (intersects) {
+				pickingCollisionVO.localNormal = localNormal;
+				pickingCollisionVO.localPosition = new Vector3D(position.x + rayEntryDistance*direction.x, position.y + rayEntryDistance*direction.y, position.z + rayEntryDistance*direction.z);
+				pickingCollisionVO.rayEntryDistance = rayEntryDistance;
+				pickingCollisionVO.rayOriginIsInsideBounds = rayOriginIsInsideBounds;
+				
+				return true;
+			}
+			
+			
+			return false;
 		}
-
-		override public function containsPoint( p:Vector3D ):Boolean {
-			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function containsPoint( position:Vector3D ):Boolean {
+			var px:Number = position.x - _centerX, py:Number = position.y - _centerY, pz:Number = position.z - _centerZ;
 			if( px > _halfExtentsX || px < -_halfExtentsX ) return false;
 			if( py > _halfExtentsY || py < -_halfExtentsY ) return false;
 			if( pz > _halfExtentsZ || pz < -_halfExtentsZ ) return false;
 			return true;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -269,28 +271,32 @@ package away3d.bounds
 			_halfExtentsZ = (maxZ - minZ) * .5;
 			super.fromExtremes( minX, minY, minZ, maxX, maxY, maxZ );
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override public function clone():BoundingVolumeBase {
+		override public function clone():BoundingVolumeBase
+		{
 			var clone:AxisAlignedBoundingBox = new AxisAlignedBoundingBox();
 			clone.fromExtremes( _min.x, _min.y, _min.z, _max.x, _max.y, _max.z );
 			return clone;
 		}
-
-		public function get halfExtentsX():Number {
+		
+		public function get halfExtentsX():Number
+		{
 			return _halfExtentsX;
 		}
-
-		public function get halfExtentsY():Number {
+		
+		public function get halfExtentsY():Number
+		{
 			return _halfExtentsY;
 		}
-
-		public function get halfExtentsZ():Number {
+		
+		public function get halfExtentsZ():Number
+		{
 			return _halfExtentsZ;
 		}
-
+		
 		public function closestPointToPoint(point : Vector3D, target : Vector3D = null) : Vector3D
 		{
 			var p : Number;
@@ -312,6 +318,19 @@ package away3d.bounds
 			target.z = p;
 
 			return target;
+		}
+		
+		override protected function updateBoundingRenderable():void {
+			_boundingRenderable.scaleX = Math.max( _halfExtentsX * 2, 0.001 );
+			_boundingRenderable.scaleY = Math.max( _halfExtentsY * 2, 0.001 );
+			_boundingRenderable.scaleZ = Math.max( _halfExtentsZ * 2, 0.001 );
+			_boundingRenderable.x = _centerX;
+			_boundingRenderable.y = _centerY;
+			_boundingRenderable.z = _centerZ;
+		}
+		
+		override protected function createBoundingRenderable():WireframePrimitiveBase {
+			return new WireframeCube( 1, 1, 1 );
 		}
 	}
 }

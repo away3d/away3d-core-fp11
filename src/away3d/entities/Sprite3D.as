@@ -34,7 +34,6 @@ package away3d.entities
 		private static var _geometry:SubGeometry;
 
 		private static var _nullAnimation:NullAnimation;
-		private var _mouseHitMethod:uint;
 		private var _material:MaterialBase;
 		private var _animationState:AnimationStateBase;
 		private var _spriteMatrix:Matrix3D;
@@ -78,14 +77,6 @@ package away3d.entities
 			if( _height == value ) return;
 			_height = value;
 			invalidateTransform();
-		}
-
-		public function get mouseHitMethod():uint {
-			return _mouseHitMethod;
-		}
-
-		public function set mouseHitMethod( value:uint ):void {
-			_mouseHitMethod = value;
 		}
 
 		public function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {

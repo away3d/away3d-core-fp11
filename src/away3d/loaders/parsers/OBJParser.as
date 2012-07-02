@@ -736,7 +736,6 @@ package away3d.loaders.parsers
 									mat.specularMethod = specularData.basicSpecularMethod;
 									mat.ambientColor = specularData.ambientColor;
 									mat.alpha = specularData.alpha;
-									_materialSpecularData.splice(j,1);
 									break;
 								}
 							}

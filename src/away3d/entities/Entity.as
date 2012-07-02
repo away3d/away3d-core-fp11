@@ -1,17 +1,15 @@
 package away3d.entities
 {
 	import away3d.arcane;
-	import away3d.bounds.AxisAlignedBoundingBox;
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.cameras.Camera3D;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.containers.Scene3D;
-	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.Partition3D;
-	import away3d.errors.AbstractMethodError;
-	import away3d.library.assets.AssetType;
+	import away3d.bounds.*;
+	import away3d.cameras.*;
+	import away3d.containers.*;
+	import away3d.core.partition.*;
+	import away3d.core.pick.*;
+	import away3d.errors.*;
+	import away3d.library.assets.*;
 
-	import flash.geom.Matrix3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -26,32 +24,66 @@ package away3d.entities
 	 */
 	public class Entity extends ObjectContainer3D
 	{
-		arcane function internalUpdate():void
-		{
-			if (_controller)
-				_controller.update();
-		}
-		
 		private var _showBounds : Boolean;
 		private var _partitionNode : EntityNode;
-		private var _mouseEnabled : Boolean;
-
+		private var _boundsIsShown : Boolean = false;
+		private var _shaderPickingDetails:Boolean;
+		
+		protected var _pickingCollision:PickingCollisionVO;
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
 		protected var _zIndices : Vector.<Number> = new Vector.<Number>();
 		protected var _mvpIndex : int = -1;
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
-		private var _boundsIsShown : Boolean = false;
+		
+		/**
+		 * Used by the raycast-based picking system to determine how the geometric contents of an entity are processed
+		 * in order to offer more details for the picking collision object, including local position, normal vector and uv value.
+		 * Defaults to null.
+		 * 
+		 * @see away3d.core.pick.RaycastPicker
+		 */
+		public var pickingCollider:IPickingCollider;
+		
+		/**
+		 * Used by the shader-based picking system to determine whether a separate render pass is made in order
+		 * to offer more details for the picking collision object, including local position, normal vector and uv value.
+		 * Defaults to false.
+		 * 
+		 * @see away3d.core.pick.ShaderPicker
+		 */
+		public function get shaderPickingDetails() : Boolean
+		{
+			return _shaderPickingDetails;
+		}
+		
+		public function set shaderPickingDetails(value : Boolean) : void
+		{
+			_shaderPickingDetails = value;
+		}
+		
+		/**
+		 * Returns a unique picking collision value object for the entity.
+		 */
+		public function get pickingCollisionVO():PickingCollisionVO
+		{
+			if (!_pickingCollision)
+				_pickingCollision = new PickingCollisionVO(this);
+			
+			return _pickingCollision;
+		}
 
 		/**
+		 * Determines if the bounds object is visible in the view.
 		 * 
+		 * @see away3d.bounds
 		 */
 		public function get showBounds() : Boolean
 		{
 			return _showBounds;
 		}
-
+		
 		public function set showBounds(value : Boolean) : void
 		{
 			if (value == _showBounds)
@@ -63,19 +95,6 @@ package away3d.entities
 				addBounds();
 			else 
 				removeBounds();
-		}
-		
-		/**
-		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
-		 */
-		public function get mouseEnabled() : Boolean
-		{
-			return _mouseEnabled;
-		}
-		
-		public function set mouseEnabled(value : Boolean) : void
-		{
-			_mouseEnabled = value;
 		}
 		
 		/**
@@ -164,27 +183,6 @@ package away3d.entities
 				addBounds();
 		}
 		
-		
-		private function addBounds():void
-		{
-			if (!_boundsIsShown) 
-			{
-				_boundsIsShown = true;
-				addChild(_bounds.boundingRenderable);
-			}
-		}
-		
-		private function removeBounds():void
-		{
-			if (_boundsIsShown) 
-			{
-				_boundsIsShown = false;
-				removeChild(_bounds.boundingRenderable);
-				_bounds.disposeRenderable();
-			}
-		}
-		
-		
 		/**
 		 * @inheritDoc
 		 */
@@ -217,6 +215,11 @@ package away3d.entities
 				value.registerEntity(this);
 
 			super.scene = value;
+		}
+		
+		override public function get assetType() : String
+		{
+			return AssetType.ENTITY;
 		}
 		
 		/**
@@ -284,7 +287,7 @@ package away3d.entities
 		{
 			--_mvpIndex;
 		}
-
+		
 		/**
 		 * Gets a concrete EntityPartition3DNode subclass that is associated with this Entity instance
 		 */
@@ -292,7 +295,7 @@ package away3d.entities
 		{
 			return _partitionNode ||= createEntityPartitionNode();
 		}
-
+		
 		/**
 		 * Factory method that returns the current partition node. Needs to be overridden by concrete subclasses
 		 * such as Mesh to return the correct concrete subtype of EntityPartition3DNode (for Mesh = MeshPartition3DNode,
@@ -302,7 +305,7 @@ package away3d.entities
 		{
 			throw new AbstractMethodError();
 		}
-
+		
 		/**
 		 * Creates the default bounding box to be used by this type of Entity.
 		 * @return
@@ -313,7 +316,7 @@ package away3d.entities
 			// directional lights should be using null bounds
 			return new AxisAlignedBoundingBox();
 		}
-
+		
 		/**
 		 * Updates the bounding volume for the object. Overriding methods need to set invalid flag to false!
 		 */
@@ -321,7 +324,7 @@ package away3d.entities
 		{
 			throw new AbstractMethodError();
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -331,7 +334,7 @@ package away3d.entities
 			
 			notifySceneBoundsInvalid();
 		}
-
+		
 		/**
 		 * Invalidates the bounding volume, causing to be updated when requested.
 		 */
@@ -341,7 +344,21 @@ package away3d.entities
 			
 			notifySceneBoundsInvalid();
 		}
+				override protected function updateMouseChildren() : void {
 
+			// If there is a parent and this child does not have a triangle collider, use its parent's triangle collider.
+			if( _parent && !pickingCollider ) {
+				if( _parent is Entity ) {
+					var collider:IPickingCollider = Entity( _parent ).pickingCollider;
+					if( collider ) {
+						pickingCollider = collider;
+					}
+				}
+			}
+
+			super.updateMouseChildren();
+		}
+		
 		/**
 		 * Notify the scene that the global scene bounds have changed, so it can be repartitioned.
 		 */
@@ -350,7 +367,7 @@ package away3d.entities
 			if (_scene)
 				_scene.invalidateEntityBounds(this);
 		}
-
+		
 		/**
 		 * Notify the scene that a new partition was assigned.
 		 */
@@ -359,7 +376,7 @@ package away3d.entities
 			if (_scene)
 				_scene.registerPartition(this);//_onAssignPartitionCallback(this);
 		}
-
+		
 		/**
 		 * Notify the scene that a partition was unassigned.
 		 */
@@ -368,11 +385,30 @@ package away3d.entities
 			if (_scene)
 				_scene.unregisterPartition(this);
 		}
-
-
-		override public function get assetType() : String
+		
+		private function addBounds():void
 		{
-			return AssetType.ENTITY;
+			if (!_boundsIsShown) 
+			{
+				_boundsIsShown = true;
+				addChild(_bounds.boundingRenderable);
+			}
+		}
+		
+		private function removeBounds():void
+		{
+			if (_boundsIsShown) 
+			{
+				_boundsIsShown = false;
+				removeChild(_bounds.boundingRenderable);
+				_bounds.disposeRenderable();
+			}
+		}
+		
+		arcane function internalUpdate():void
+		{
+			if (_controller)
+				_controller.update();
 		}
 	}
 }
