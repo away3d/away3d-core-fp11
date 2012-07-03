@@ -9,7 +9,7 @@ package away3d.textures
 
 	public class SplatBlendBitmapTexture extends BitmapTexture
 	{
-		[Embed(source="../pbks/NormalizeSplats.pbj", mimeType="application/octet-stream")]
+		[Embed(source="/../pb/NormalizeSplats.pbj", mimeType="application/octet-stream")]
 		private var NormalizeKernel : Class;
 
 		private var _numSplattingLayers : int;
