@@ -686,23 +686,25 @@
 		/**
 		 * Calculates the scene position of the given screen coordinates.
 		 * @param mX The x coordinate relative to the View3D.
-		 * @param mY The y coordinate relative to the View3D..
+		 * @param mY The y coordinate relative to the View3D.
+		 * @param mZ The z coordinate relative to the View3D.
 		 * @return The scene position of the given screen coordinates. The returned point corresponds to a point on the projection plane.
 		 */
-		public function unproject(mX : Number, mY : Number) : Vector3D
+		public function unproject(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
 		{
-			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height);
+			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
 		}
 
 		/**
 		 * Returns the ray in scene space from the camera to the point on the screen.
 		 * @param mX The x coordinate relative to the View3D.
-		 * @param mY The y coordinate relative to the View3D..
+		 * @param mY The y coordinate relative to the View3D.
+		 * @param mZ The z coordinate relative to the View3D.
 		 * @return The ray from the camera to the scene space position of a point on the projection plane.
 		 */
-		public function getRay(mX : Number, mY : Number) : Vector3D
+		public function getRay(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
 		{
-			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height);
+			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
 		}
 
 		/**

@@ -1,5 +1,7 @@
 package away3d.core.pick
 {
+
+	import away3d.core.base.IRenderable;
 	import away3d.entities.*;
 	
 	import flash.geom.*;
@@ -50,7 +52,12 @@ package away3d.core.pick
 		 * The distance along the ray from the starting position to the calculated intersection entry point with the entity.
 		 */
 		public var rayEntryDistance:Number;
-		
+
+		/**
+		 * The IRenderable associated with a collision.
+		 */
+		public var renderable:IRenderable;
+
 		/**
 		 * The entity to which this collision object belongs.
 		 */
