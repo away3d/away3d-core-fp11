@@ -6,13 +6,14 @@ package away3d.animators
 	import away3d.animators.data.SkeletonAnimationState;
 	import away3d.animators.skeleton.SkeletonNaryLERPNode;
 	import away3d.animators.skeleton.SkeletonTimelineClipNode;
+	import away3d.animators.skeleton.SkeletonTimelineClipNode;
 	import away3d.animators.skeleton.SkeletonTreeNode;
 	import away3d.arcane;
 
 	use namespace arcane;
 
 	/**
-	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
+	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md5, md5anim).
 	 */
 	public class SmoothSkeletonAnimator extends SkeletonAnimatorBase
 	{
@@ -47,31 +48,68 @@ package away3d.animators
 		 */
 		public function play(sequenceName : String, crossFadeTime : Number = 0) : void
 		{
-			var clip : SkeletonTimelineClipNode;
-
 			_crossFadeTime = crossFadeTime;
 
-			if (_activeClipIndex != -1) {
-				_fadeOutClips.push(_activeClipIndex);
-				// diminish per second
-				_fadeOutSpeeds.push(_mainWeight / crossFadeTime / 1000);
-			}
+			var clip : SkeletonTimelineClipNode = _clips[sequenceName];
 
-			clip = _clips[sequenceName];
-			clip.reset();
-			if (clip && clip.duration > 0) {
-				_activeClipIndex = _lerpNode.getInputIndex(clip);
-				var i : int = _fadeOutClips.indexOf(_activeClipIndex);
-				if (i != -1) {
-					_fadeOutClips.splice(i, 1);
-					_fadeOutSpeeds.splice(i, 1);
-				}
-			}
-
-			if (_activeClipIndex == -1)
+			if (!clip)
 				throw new Error("Clip not found!");
+			if (clip.duration == 0)
+				throw new Error("Invalid clip: duration is 0!");
+
+			if (crossFadeTime == 0)
+				setActiveClipDirect(clip);
+			else
+				setActiveClipWithFadeOut(clip);
 
 			start();
+		}
+
+		private function setActiveClipDirect(clip : SkeletonTimelineClipNode) : void
+		{
+			clearFadeOuts();
+			clip.reset();
+			_activeClipIndex = _lerpNode.getInputIndex(clip);
+		}
+
+		private function clearFadeOuts() : void
+		{
+			var len : uint = _fadeOutClips.length;
+			var weights : Vector.<Number> = _lerpNode.blendWeights;
+
+			for (var i : uint = 0; i < len; ++i)
+				weights[_fadeOutClips[i]] = 0;
+
+			if (_activeClipIndex != -1)
+				weights[_activeClipIndex] = 0;
+
+			_fadeOutClips.length = 0;
+			_fadeOutSpeeds.length = 0;
+		}
+
+		private function setActiveClipWithFadeOut(clip : SkeletonTimelineClipNode) : void
+		{
+			addActiveClipToFadeOuts();
+			clip.reset();
+			_activeClipIndex = _lerpNode.getInputIndex(clip);
+			removeActiveClipFromFadeOuts();
+		}
+
+		private function addActiveClipToFadeOuts() : void
+		{
+			if (_activeClipIndex != -1) {
+				_fadeOutClips.push(_activeClipIndex);
+				_fadeOutSpeeds.push(_mainWeight / (_crossFadeTime * 1000));
+			}
+		}
+
+		private function removeActiveClipFromFadeOuts() : void
+		{
+			var i : int = _fadeOutClips.indexOf(_activeClipIndex);
+			if (i != -1) {
+				_fadeOutClips.splice(i, 1);
+				_fadeOutSpeeds.splice(i, 1);
+			}
 		}
 
 		public function hasSequence(sequenceName:String):Boolean
@@ -97,16 +135,9 @@ package away3d.animators
 		 */
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			var blendTree : SkeletonTreeNode;
-
 			updateWeights(realDT);
-
-			blendTree = _target.blendTree;
-
 			_lerpNode.time += scaledDT / _lerpNode.duration;
-
 			super.updateAnimation(realDT, scaledDT);
-
 		}
 
 		private function updateWeights(dt : Number) : void
