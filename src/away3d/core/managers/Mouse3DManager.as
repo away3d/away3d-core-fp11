@@ -128,24 +128,21 @@ package away3d.core.managers
 			collider = collider || _collidingObject;
 			
 			// 3D properties.
-			// TODO set all 3d event properties
-			if (collider)
+			if( collider ) {
+				// Object.
 				event.object = collider.entity;
-			else
-				event.object = null;
-			
-			if( _collidingObject ) {
+				event.renderable = collider.renderable;
 				// UV.
-				event.uv = _collidingObject.uv;
-				
+				event.uv = collider.uv;
 				// Position.
-				event.localPosition = _collidingObject.localPosition;
-				
+				event.localPosition = collider.localPosition;
 				// Normal.
-				event.localNormal = _collidingObject.localNormal;
+				event.localNormal = collider.localNormal;
 			}
 			else {
+				// Set all to null.
 				event.uv = null;
+				event.object = null;
 				event.localPosition = _nullVector;
 				event.localNormal = _nullVector;
 			}

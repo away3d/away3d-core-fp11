@@ -171,9 +171,9 @@ package away3d.core.pick
 				var mesh:Mesh = pickingCollisionVO.entity as Mesh;
 				var subMesh:SubMesh;
 				var collides:Boolean;
-				
 				for each (subMesh in mesh.subMeshes) {
 					if( pickingCollider.testSubMeshCollision( subMesh, pickingCollisionVO, shortestCollisionDistance ) ) {
+						pickingCollisionVO.renderable = subMesh;
 						shortestCollisionDistance = _pickingCollisionVO.rayEntryDistance;
 						collides = true;
 						if( !_findClosestCollision )
