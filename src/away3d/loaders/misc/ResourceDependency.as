@@ -25,6 +25,7 @@
 		private var _dependencies : Vector.<ResourceDependency>;
 		
 		arcane var loader : SingleFileLoader;
+		arcane var success : Boolean;
 		
 		
 		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false, suppressAssetEvents : Boolean = false)

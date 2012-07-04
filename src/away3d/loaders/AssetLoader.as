@@ -220,7 +220,13 @@ package away3d.loaders
 				_loadingDependency.loader.parser.resumeParsingAfterDependencies();
 			}
 			else if (_stack.length) {
+				var prev : ResourceDependency = _loadingDependency;
+				
 				_loadingDependency = _stack.pop();
+				
+				if (prev.success)
+					prev.resolve();
+				
 				retrieveNext(parser);
 			}
 			else {
@@ -440,7 +446,7 @@ package away3d.loaders
 			
 			// Resolve this dependency
 			_loadingDependency.setData(loader.data);
-			_loadingDependency.resolve();
+			_loadingDependency.success = true;
 			
 			dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, event.url));
 			removeEventListeners(loader);
