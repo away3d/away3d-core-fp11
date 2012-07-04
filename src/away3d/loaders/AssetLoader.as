@@ -413,7 +413,8 @@ package away3d.loaders
 				event.asset.resetAssetPath(event.asset.name, _namespace);
 			}
 			
-			dispatchEvent(event.clone());
+			if (!_loadingDependency.suppresAssetEvents)
+				dispatchEvent(event.clone());
 		}
 		
 		

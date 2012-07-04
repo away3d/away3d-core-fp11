@@ -21,18 +21,20 @@
 		private var _parentParser : ParserBase;
 		private var _data : *;
 		private var _retrieveAsRawData : Boolean;
+		private var _suppressAssetEvents : Boolean;
 		private var _dependencies : Vector.<ResourceDependency>;
 		
 		arcane var loader : SingleFileLoader;
 		
 		
-		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false)
+		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false, suppressAssetEvents : Boolean = false)
 		{
 			_id = id;
 			_req = req;
 			_parentParser = parentParser;
 			_data = data;
 			_retrieveAsRawData = retrieveAsRawData;
+			_suppressAssetEvents = suppressAssetEvents;
 			
 			_assets = new Vector.<IAsset>();
 			_dependencies = new Vector.<ResourceDependency>();
@@ -66,6 +68,12 @@
 		public function get retrieveAsRawData() : Boolean
 		{
 			return _retrieveAsRawData;
+		}
+		
+		
+		public function get suppresAssetEvents() : Boolean
+		{
+			return _suppressAssetEvents;
 		}
 		
 		
