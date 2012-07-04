@@ -121,9 +121,18 @@ package away3d.loaders.parsers
 				if (asset) {
 					var mat : TextureMaterial;
 					var users : Array;
+					var block : AWDBlock = _blocks[parseInt(resourceDependency.id)];
 					
 					// Store finished asset
-					_blocks[parseInt(resourceDependency.id)].data = asset;
+					block.data = asset;
+					
+					// Reset name of texture to the one defined in the AWD file,
+					// as opposed to whatever the image parser came up with.
+					asset.resetAssetPath(block.name, null, true);
+					
+					// Finalize texture asset to dispatch texture event, which was
+					// previously suppressed while the dependency was loaded.
+					finalizeAsset(asset);
 					
 					users = _texture_users[resourceDependency.id];
 					for each (mat in users) {
@@ -237,6 +246,7 @@ package away3d.loaders.parsers
 		
 		private function parseNextBlock() : void
 		{
+			var block : AWDBlock;
 			var assetData : IAsset;
 			var ns : uint, type : uint, flags : uint, len : uint;
 			
@@ -245,6 +255,8 @@ package away3d.loaders.parsers
 			type = _body.readUnsignedByte();
 			flags = _body.readUnsignedByte();
 			len = _body.readUnsignedInt();
+			
+			block = new AWDBlock();
 			
 			switch (type) {
 				case 1:
@@ -260,7 +272,7 @@ package away3d.loaders.parsers
 					assetData = parseMaterial(len);
 					break;
 				case 82:
-					assetData = parseTexture(len);
+					assetData = parseTexture(len, block);
 					break;
 				case 101:
 					assetData = parseSkeleton(len);
@@ -281,7 +293,7 @@ package away3d.loaders.parsers
 			}
 			
 			// Store block reference for later use
-			_blocks[_cur_block_id] = new AWDBlock();
+			_blocks[_cur_block_id] = block;
 			_blocks[_cur_block_id].data = assetData;
 			_blocks[_cur_block_id].id = _cur_block_id;
 		}
@@ -414,16 +426,15 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function parseTexture(blockLength : uint) : Texture2DBase
+		private function parseTexture(blockLength : uint, block : AWDBlock) : Texture2DBase
 		{
 			// TODO: not used
 			blockLength = blockLength; 
-			var name : String;
 			var type : uint;
 			var data_len : uint;
 			var asset : Texture2DBase;
 			
-			name = parseVarStr();
+			block.name = parseVarStr();
 			type = _body.readUnsignedByte();
 			data_len = _body.readUnsignedInt();
 			
@@ -435,7 +446,7 @@ package away3d.loaders.parsers
 				
 				url = _body.readUTFBytes(data_len);
 				
-				addDependency(_cur_block_id.toString(), new URLRequest(url));
+				addDependency(_cur_block_id.toString(), new URLRequest(url), false, null, true);
 			}
 			else {
 				var data : ByteArray;
@@ -445,7 +456,7 @@ package away3d.loaders.parsers
 				data = new ByteArray();
 				_body.readBytes(data, 0, data_len);
 				
-				addDependency(_cur_block_id.toString(), null, false, data);
+				addDependency(_cur_block_id.toString(), null, false, data, true);
 			}
 			
 			// Ignore for now
@@ -1034,6 +1045,7 @@ package away3d.loaders.parsers
 internal class AWDBlock
 {
 	public var id : uint;
+	public var name : String;
 	public var data : *;
 }
 
