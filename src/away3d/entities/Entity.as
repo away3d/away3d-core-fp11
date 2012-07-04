@@ -344,8 +344,8 @@ package away3d.entities
 			
 			notifySceneBoundsInvalid();
 		}
-				override protected function updateMouseChildren() : void {
 
+		override protected function updateMouseChildren() : void {
 			// If there is a parent and this child does not have a triangle collider, use its parent's triangle collider.
 			if( _parent && !pickingCollider ) {
 				if( _parent is Entity ) {

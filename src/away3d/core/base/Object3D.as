@@ -104,8 +104,11 @@ package away3d.core.base
 		private var _eulers : Vector3D = new Vector3D();
 
 		private var _flipY : Matrix3D = new Matrix3D();
+		private var _listenToPositionChanged : Boolean;
+		private var _listenToRotationChanged : Boolean;
+		private var _listenToScaleChanged : Boolean;
 		
-		private function notifyPositionChange():void
+		private function invalidatePosition():void
 		{
 			if (_positionDirty)
 				return;
@@ -114,16 +117,55 @@ package away3d.core.base
 			
 			invalidateTransform();
 			
-			if (!hasEventListener(Object3DEvent.POSITION_CHANGED))
-				return;
-			
+			if (_listenToPositionChanged)
+				notifyPositionChanged();
+		}
+
+		private function notifyPositionChanged() : void
+		{
 			if (!_positionChanged)
 				_positionChanged = new Object3DEvent(Object3DEvent.POSITION_CHANGED, this);
-			
+
 			dispatchEvent(_positionChanged);
 		}
-		
-		private function notifyRotationChange():void
+
+		override public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		{
+			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+			switch (type) {
+				case Object3DEvent.POSITION_CHANGED:
+					_listenToPositionChanged = true;
+					break;
+				case Object3DEvent.ROTATION_CHANGED:
+					_listenToRotationChanged = true;
+					break;
+				case Object3DEvent.SCALE_CHANGED:
+					_listenToRotationChanged = true;
+					break;
+			}
+		}
+
+
+		override public function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void
+		{
+			super.removeEventListener(type, listener, useCapture);
+
+			if (hasEventListener(type)) return;
+
+			switch (type) {
+				case Object3DEvent.POSITION_CHANGED:
+					_listenToPositionChanged = false;
+					break;
+				case Object3DEvent.ROTATION_CHANGED:
+					_listenToRotationChanged = false;
+					break;
+				case Object3DEvent.SCALE_CHANGED:
+					_listenToScaleChanged = false;
+					break;
+			}
+		}
+
+		private function invalidateRotation():void
 		{
 			if (_rotationDirty)
 				return;
@@ -132,16 +174,19 @@ package away3d.core.base
 			
 			invalidateTransform();
 			
-			if (!hasEventListener(Object3DEvent.ROTATION_CHANGED))
-				return;
-			
+			if (_listenToRotationChanged)
+				notifyRotationChanged();
+		}
+
+		private function notifyRotationChanged() : void
+		{
 			if (!_rotationChanged)
 				_rotationChanged = new Object3DEvent(Object3DEvent.ROTATION_CHANGED, this);
-			
+
 			dispatchEvent(_rotationChanged);
 		}
 		
-		private function notifyScaleChange():void
+		private function invalidateScale():void
 		{
 			if (_scaleDirty)
 				return;
@@ -150,12 +195,15 @@ package away3d.core.base
 			
 			invalidateTransform();
 			
-			if (!hasEventListener(Object3DEvent.SCALE_CHANGED))
-				return;
-			
+			if (_listenToScaleChanged)
+				notifyScaleChanged();
+		}
+
+		private function notifyScaleChanged() : void
+		{
 			if (!_scaleChanged)
 				_scaleChanged = new Object3DEvent(Object3DEvent.SCALE_CHANGED, this);
-			
+
 			dispatchEvent(_scaleChanged);
 		}
 		
@@ -171,7 +219,6 @@ package away3d.core.base
 		protected var _pos:Vector3D = new Vector3D();
 		protected var _rot:Vector3D = new Vector3D();
 		protected var _sca:Vector3D = new Vector3D();
-		protected var trans:Matrix3D = new Matrix3D();
 		protected var _transformComponents : Vector.<Vector3D>;
 
 		/**
@@ -194,7 +241,7 @@ package away3d.core.base
 			
 			_x = val;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -212,7 +259,7 @@ package away3d.core.base
 			
 			_y = val;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -230,7 +277,7 @@ package away3d.core.base
 			
 			_z = val;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -248,7 +295,7 @@ package away3d.core.base
 			
 			_rotationX = val * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -266,7 +313,7 @@ package away3d.core.base
 			
 			_rotationY = val * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -284,7 +331,7 @@ package away3d.core.base
 			
 			_rotationZ = val * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -302,7 +349,7 @@ package away3d.core.base
 			
 			_scaleX = val;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 		
 		/**
@@ -320,7 +367,7 @@ package away3d.core.base
 			
 			_scaleY = val;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 		
 		/**
@@ -338,7 +385,7 @@ package away3d.core.base
 			
 			_scaleZ = val;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 		
 		/**
@@ -359,7 +406,7 @@ package away3d.core.base
 			_rotationY = value.y * MathConsts.DEGREES_TO_RADIANS;
 			_rotationZ = value.z * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -393,7 +440,7 @@ package away3d.core.base
 				_y = vec.y;
 				_z = vec.z;
 				
-				notifyPositionChange();
+				invalidatePosition();
 			}
 			
 			vec = elements[1];
@@ -403,7 +450,7 @@ package away3d.core.base
 				_rotationY = vec.y;
 				_rotationZ = vec.z;
 				
-				notifyRotationChange();
+				invalidateRotation();
 			}
 			
 			vec = elements[2];
@@ -413,7 +460,7 @@ package away3d.core.base
 				_scaleY = vec.y;
 				_scaleZ = vec.z;
 				
-				notifyScaleChange();
+				invalidateScale();
 			}
 		}
 
@@ -431,7 +478,7 @@ package away3d.core.base
 
 			_pivotZero = (_pivotPoint.x == 0) && (_pivotPoint.y == 0) && (_pivotPoint.z == 0);
 			
-			 notifyPositionChange();
+			 invalidatePosition();
 		}
 
 		/**
@@ -450,7 +497,7 @@ package away3d.core.base
 			_y = value.y;
 			_z = value.z;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -537,7 +584,7 @@ package away3d.core.base
 			_scaleY *= value;
 			_scaleZ *= value;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 
 		/**
@@ -614,7 +661,7 @@ package away3d.core.base
 			_y = dy;
 			_z = dz;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 
 		/**
@@ -630,7 +677,7 @@ package away3d.core.base
 			_pivotPoint.y = dy;
 			_pivotPoint.z = dz;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 
 		/**
@@ -648,7 +695,7 @@ package away3d.core.base
 			_y += y * len;
 			_z += z * len;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 
 		/**
@@ -670,7 +717,7 @@ package away3d.core.base
 			_y = _pos.y;
 			_z = _pos.z;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 
 		/**
@@ -726,7 +773,7 @@ package away3d.core.base
 			_rotationY = ay * MathConsts.DEGREES_TO_RADIANS;
 			_rotationZ = az * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 
 		/**

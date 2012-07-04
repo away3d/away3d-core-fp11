@@ -95,7 +95,10 @@ package away3d.containers
 		private var _scenePosition : Vector3D = new Vector3D();
 		private var _scenePositionDirty : Boolean = true;
 		private var _explicitVisibility : Boolean = true;
-		private var _implicitVisibility : Boolean = true; // visibility passed on from parents
+		private var _implicitVisibility : Boolean = true;
+		private var _listenToSceneTransformChanged : Boolean;
+		private var _listenToSceneChanged : Boolean;
+		// visibility passed on from parents
 		
 		/**
 		 * @private
@@ -162,13 +165,11 @@ package away3d.containers
 				_children[i++].notifySceneTransformChange();
 			
 			//trigger event if listener exists
-			if (!hasEventListener(Object3DEvent.SCENETRANSFORM_CHANGED))
-				return;
-			
-			if (!_sceneTransformChanged)
-				_sceneTransformChanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
-			
-			dispatchEvent(_sceneTransformChanged);
+			if (_listenToSceneTransformChanged) {
+				if (!_sceneTransformChanged)
+					_sceneTransformChanged = new Object3DEvent(Object3DEvent.SCENETRANSFORM_CHANGED, this);
+				dispatchEvent(_sceneTransformChanged);
+			}
 		}
 		
 		private function notifySceneChange():void
@@ -183,13 +184,12 @@ package away3d.containers
 			while (i < len)
 				_children[i++].notifySceneChange();
 			
-			if (!hasEventListener(Object3DEvent.SCENE_CHANGED))
-				return;
-			
-			if (!_scenechanged)
-				_scenechanged = new Object3DEvent(Object3DEvent.SCENE_CHANGED, this);
-			
-			dispatchEvent(_scenechanged);
+			if (_listenToSceneChanged) {
+				if (!_scenechanged)
+					_scenechanged = new Object3DEvent(Object3DEvent.SCENE_CHANGED, this);
+
+				dispatchEvent(_scenechanged);
+			}
 		}
 			
 		protected function updateMouseChildren() : void
@@ -247,7 +247,7 @@ package away3d.containers
 		 */
 		protected function updateSceneTransform():void
 		{
-			if (_parent) {
+			if (_parent && !_parent._isRoot) {
 				_sceneTransform.copyFrom(_parent.sceneTransform);
 				_sceneTransform.prepend(transform);
 			} else {
@@ -686,6 +686,36 @@ package away3d.containers
 
 			for (var i : uint = 0; i < len; ++i)
 				_children[i].updateImplicitVisibility();
+		}
+
+		override public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		{
+			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+			switch (type) {
+				case Object3DEvent.SCENETRANSFORM_CHANGED:
+					_listenToSceneTransformChanged = true;
+					break;
+				case Object3DEvent.SCENE_CHANGED:
+					_listenToSceneChanged = true;
+					break;
+			}
+		}
+
+
+		override public function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void
+		{
+			super.removeEventListener(type, listener, useCapture);
+
+			if (hasEventListener(type)) return;
+
+			switch (type) {
+				case Object3DEvent.SCENETRANSFORM_CHANGED:
+					_listenToSceneTransformChanged = false;
+					break;
+				case Object3DEvent.SCENE_CHANGED:
+					_listenToSceneChanged = false;
+					break;
+			}
 		}
 	}
 }
