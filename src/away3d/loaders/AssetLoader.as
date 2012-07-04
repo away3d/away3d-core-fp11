@@ -424,7 +424,7 @@ package away3d.loaders
 			if (handled) {
 				if (isDependency && !event.isDefaultPrevented()) {
 					_loadingDependency.resolveFailure();
-					prepareNextRetrieve(loader, event, false);
+					retrieveNext();
 				}
 				else {
 					// Either this was the base file (last left in the stack) or
@@ -480,30 +480,16 @@ package away3d.loaders
 		private function onRetrievalComplete(event : LoaderEvent) : void
 		{
 			var loader : SingleFileLoader = SingleFileLoader(event.target);
-			prepareNextRetrieve(loader, event); //prepare next in front of removing listeners to allow any remaining asset events to propagate
+			
+			// Resolve this dependency
+			_loadingDependency.setData(loader.data);
+			_loadingDependency.resolve();
 			
 			dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, event.url));
 			removeEventListeners(loader);
-		}
-		
-		/**
-		 * Pushes further dependencies onto the stack.
-		 * @param event
-		 */
-		private function prepareNextRetrieve(loader:SingleFileLoader, event : LoaderEvent, resolve:Boolean = true) : void
-		{
-			_loadingDependency.setData(loader.data);
-			if(resolve) _loadingDependency.resolve();
 			
+			// Move on
 			retrieveNext();
-			
-			/*
-			if (_context && !_context.includeDependencies){
-				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
-			} else{
-				retrieveLoaderDependencies(loader);
-			}
-			*/
 		}
 		
 		
