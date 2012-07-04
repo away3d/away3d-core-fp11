@@ -3,7 +3,7 @@
 	import away3d.arcane;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.parsers.ParserBase;
-
+	
 	import flash.net.URLRequest;
 
 	use namespace arcane;
@@ -20,9 +20,12 @@
 		private var _assets : Vector.<IAsset>;
 		private var _parentParser : ParserBase;
 		private var _data : *;
-		// TODO: not used
-		// private var _base : Boolean;
 		private var _retrieveAsRawData : Boolean;
+		private var _dependencies : Vector.<ResourceDependency>;
+		
+		// TODO: Should not be public
+		public var loader : SingleFileLoader;
+		
 		
 		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false)
 		{
@@ -32,7 +35,8 @@
 			_data = data;
 			_retrieveAsRawData = retrieveAsRawData;
 			
-			_assets = new Vector.<IAsset>;
+			_assets = new Vector.<IAsset>();
+			_dependencies = new Vector.<ResourceDependency>();
 		}
 		
 		
@@ -45,6 +49,12 @@
 		public function get assets() : Vector.<IAsset>
 		{
 			return _assets;
+		}
+		
+		
+		public function get dependencies() : Vector.<ResourceDependency>
+		{
+			return _dependencies;
 		}
 		
 		
