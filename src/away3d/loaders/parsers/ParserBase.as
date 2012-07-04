@@ -278,7 +278,6 @@ package away3d.loaders.parsers
 		
 		arcane function resumeParsingAfterDependencies() : void
 		{
-			_dependencies.length = 0;
 			_parsingPaused = false;
 			_timer.start();
 		}

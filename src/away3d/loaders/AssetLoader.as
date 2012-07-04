@@ -380,6 +380,10 @@ package away3d.loaders
 				_loadingDependency.dependencies[i] = loader.dependencies[i];
 			}
 			
+			// Since more dependencies might be added eventually, empty this
+			// list so that the same dependency isn't retrieved more than once.
+			loader.dependencies.length = 0;
+			
 			_stack.push(_loadingDependency);
 			
 			retrieveNext();
