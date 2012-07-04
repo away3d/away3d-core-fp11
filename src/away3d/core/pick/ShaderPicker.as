@@ -92,9 +92,7 @@ package away3d.core.pick
 				_collisionVO.localNormal = null;
 				_collisionVO.uv = null;
 			}
-			
-			_context.present();
-			
+
 			return _collisionVO;
 		}
 		
