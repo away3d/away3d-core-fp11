@@ -246,12 +246,6 @@ package away3d.loaders.parsers
 			flags = _body.readUnsignedByte();
 			len = _body.readUnsignedInt();
 			
-			// TODO: Remove this
-			if (_body.bytesAvailable < len) {
-				_body.position = _body.length;
-				return;
-			}
-			
 			switch (type) {
 				case 1:
 					assetData = parseMeshData(len);
