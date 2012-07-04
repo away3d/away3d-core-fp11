@@ -492,8 +492,14 @@ package away3d.loaders
 			dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, event.url));
 			removeEventListeners(loader);
 			
-			// Move on
-			retrieveNext();
+			// Retrieve any last dependencies remaining on this loader, or
+			// if none exists, just move on.
+			if (loader.dependencies.length) {
+				retrieveLoaderDependencies(loader);
+			}
+			else {
+				retrieveNext();
+			}
 		}
 		
 		
