@@ -213,6 +213,7 @@ package away3d.loaders
 			if (_loadingDependency.dependencies.length) {
 				var dep : ResourceDependency = _loadingDependency.dependencies.pop();
 				
+				_stack.push(_loadingDependency);
 				retrieveDependency(dep);
 			}
 			else if (_loadingDependency.loader.parser && _loadingDependency.loader.parser.parsingPaused) {
