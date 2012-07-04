@@ -23,8 +23,7 @@
 		private var _retrieveAsRawData : Boolean;
 		private var _dependencies : Vector.<ResourceDependency>;
 		
-		// TODO: Should not be public
-		public var loader : SingleFileLoader;
+		arcane var loader : SingleFileLoader;
 		
 		
 		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false)
