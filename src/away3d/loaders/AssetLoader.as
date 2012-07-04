@@ -226,47 +226,6 @@ package away3d.loaders
 			else {
 				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
 			}
-			
-			/*
-			// move back up the stack while we're at the end
-			while (_currentDependencies && _currentDependencyIndex == _currentDependencies.length) {
-				if (_dependencyStack.length > 0) {
-					_currentLoader = _loaderStack.pop();
-					_currentDependencies = _dependencyStack.pop();
-					_currentDependencyIndex = _dependencyIndexStack.pop();
-					
-					// If this load operation is one that needs to be parsed, and the parsing has
-					// not completed yet, resume parsing after having loaded it's dependency queue
-					if (_currentLoader.parser && _currentLoader.parser.parsingPaused) {
-						// Back to loading the one we thought was complete
-						_loadingDependency = _currentDependencies[_currentDependencyIndex-1];
-						_currentLoader.parser.resumeParsingAfterDependencies();
-						break;
-					}
-				}
-				else _currentDependencies = null;
-			}
-			
-			
-			if (_currentDependencies && _currentDependencyIndex<_currentDependencies.length) {
-				// Order is extremely important here. If retrieveDependency() finishes synchronously,
-				// and currentDependencyIndex hasn't been incremented by that time, we hit infinitely
-				// deep recursion (loading the same over and over again.) Hence the temp variable.
-				var idx : uint = _currentDependencyIndex;
-				_currentDependencyIndex++;
-				retrieveDependency(_currentDependencies[idx], parser);
-			} 
-			else if (_loaderStack.length==0) {
-				if (_currentLoader.parser.parsingComplete) {
-					// This was the first (base) loader in the stack. Since it has been completed the
-					// entire resource must be done.
-					dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
-				}
-				else {
-					_currentLoader.parser.resumeParsingAfterDependencies();
-				}
-			}
-			*/
 		}
 		
 		/**
@@ -388,14 +347,6 @@ package away3d.loaders
 			_stack.push(_loadingDependency);
 			
 			retrieveNext();
-			/*
-			_loaderStack.push(loader);
-			_dependencyStack.push(_currentDependencies);
-			_dependencyIndexStack.push(_currentDependencyIndex);
-			_currentDependencyIndex = 0;
-			_currentDependencies = loader.dependencies;
-			retrieveNext();
-			*/
 		}
 		
 		/**
@@ -544,13 +495,11 @@ package away3d.loaders
 		
 		private function dispose() : void
 		{
-			//_currentDependencies = null;
 			_loadingDependency = null;
-			
 			_errorHandlers = null;
-			//_loaderStack = null;
 			_context = null;
 			_token = null;
+			_stack = null;
 			
 			if (_loadingDependency && _loadingDependency.loader) {
 				removeEventListeners(_loadingDependency.loader);
