@@ -53,6 +53,15 @@ package away3d.loaders.parsers
 		
 		
 		/**
+		 * @inheritDoc
+		*/
+		public override function get parsingPaused():Boolean
+		{
+			return _parser? _parser.parsingPaused : false;
+		}
+		
+		
+		/**
 		 * @private
 		 * Delegate to the concrete parser.
 		*/

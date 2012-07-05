@@ -278,7 +278,6 @@ package away3d.loaders.parsers
 		
 		arcane function resumeParsingAfterDependencies() : void
 		{
-			_dependencies.length = 0;
 			_parsingPaused = false;
 			_timer.start();
 		}
@@ -368,9 +367,9 @@ package away3d.loaders.parsers
 		}
 		
 		
-		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false, data : * = null) : void
+		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false, data : * = null, suppressErrorEvents : Boolean = false) : void
 		{
-			_dependencies.push(new ResourceDependency(id, req, data, this, retrieveAsRawData));
+			_dependencies.push(new ResourceDependency(id, req, data, this, retrieveAsRawData, suppressErrorEvents));
 		}
 		
 		

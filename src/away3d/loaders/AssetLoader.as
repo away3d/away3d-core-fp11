@@ -122,12 +122,8 @@ package away3d.loaders
 		
 		private var _errorHandlers : Vector.<Function>;
 		
-		private var _loaderStack : Vector.<SingleFileLoader>;
-		private var _dependencyStack : Vector.<Vector.<ResourceDependency>>;
-		private var _dependencyIndexStack : Vector.<uint>;
-		private var _currentLoader : SingleFileLoader;
-		private var _currentDependencyIndex : uint;
-		private var _currentDependencies : Vector.<ResourceDependency>;
+		private var _stack : Vector.<ResourceDependency>;
+		private var _baseDependency : ResourceDependency;
 		private var _loadingDependency : ResourceDependency;
 		private var _namespace : String;
 		
@@ -136,10 +132,7 @@ package away3d.loaders
 		 */
 		public function AssetLoader()
 		{
-			_loaderStack = new Vector.<SingleFileLoader>();
-			_dependencyStack = new Vector.<Vector.<ResourceDependency>>();
-			_dependencyIndexStack = new Vector.<uint>();
-			
+			_stack = new Vector.<ResourceDependency>();
 			_errorHandlers = new Vector.<Function>();
 		}
 		
@@ -171,9 +164,9 @@ package away3d.loaders
 				_uri = req.url = req.url.replace(/\\/g, "/");
 				_context = context;
 				_namespace = ns;
-				_currentDependencies = new Vector.<ResourceDependency>();
-				_currentDependencies.push(new ResourceDependency('', req, null, null));
-				retrieveNext(parser);
+				
+				_baseDependency = new ResourceDependency('', req, null, null);
+				retrieveDependency(_baseDependency, parser);
 				
 				return _token;
 			}
@@ -198,9 +191,9 @@ package away3d.loaders
 				_uri = id;
 				_context = context;
 				_namespace = ns;
-				_currentDependencies = new Vector.<ResourceDependency>();
-				_currentDependencies.push(new ResourceDependency(id, null, data, null));
-				retrieveNext(parser);
+				
+				_baseDependency = new ResourceDependency(id, null, data, null);
+				retrieveDependency(_baseDependency, parser);
 				
 				return _token;
 			}
@@ -217,43 +210,27 @@ package away3d.loaders
 		 */
 		private function retrieveNext(parser : ParserBase = null) : void
 		{
-			// move back up the stack while we're at the end
-			while (_currentDependencies && _currentDependencyIndex == _currentDependencies.length) {
-				if (_dependencyStack.length > 0) {
-					_currentLoader = _loaderStack.pop();
-					_currentDependencies = _dependencyStack.pop();
-					_currentDependencyIndex = _dependencyIndexStack.pop();
-					
-					// If this load operation is one that needs to be parsed, and the parsing has
-					// not completed yet, resume parsing after having loaded it's dependency queue
-					if (_currentLoader.parser && _currentLoader.parser.parsingPaused) {
-						// Back to loading the one we thought was complete
-						_loadingDependency = _currentDependencies[_currentDependencyIndex-1];
-						_currentLoader.parser.resumeParsingAfterDependencies();
-						break;
-					}
-				}
-				else _currentDependencies = null;
+			if (_loadingDependency.dependencies.length) {
+				var dep : ResourceDependency = _loadingDependency.dependencies.pop();
+				
+				_stack.push(_loadingDependency);
+				retrieveDependency(dep);
 			}
-			
-			
-			if (_currentDependencies && _currentDependencyIndex<_currentDependencies.length) {
-				// Order is extremely important here. If retrieveDependency() finishes synchronously,
-				// and currentDependencyIndex hasn't been incremented by that time, we hit infinitely
-				// deep recursion (loading the same over and over again.) Hence the temp variable.
-				var idx : uint = _currentDependencyIndex;
-				_currentDependencyIndex++;
-				retrieveDependency(_currentDependencies[idx], parser);
-			} 
-			else if (_loaderStack.length==0) {
-				if (_currentLoader.parser.parsingComplete) {
-					// This was the first (base) loader in the stack. Since it has been completed the
-					// entire resource must be done.
-					dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
-				}
-				else {
-					_currentLoader.parser.resumeParsingAfterDependencies();
-				}
+			else if (_loadingDependency.loader.parser && _loadingDependency.loader.parser.parsingPaused) {
+				_loadingDependency.loader.parser.resumeParsingAfterDependencies();
+			}
+			else if (_stack.length) {
+				var prev : ResourceDependency = _loadingDependency;
+				
+				_loadingDependency = _stack.pop();
+				
+				if (prev.success)
+					prev.resolve();
+				
+				retrieveNext(parser);
+			}
+			else {
+				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
 			}
 		}
 		
@@ -264,12 +241,10 @@ package away3d.loaders
 		private function retrieveDependency(dependency : ResourceDependency, parser : ParserBase = null) : void
 		{
 			var data : *;
-			var loader : SingleFileLoader;
-			
-			loader = new SingleFileLoader();
-			addEventListeners(loader);
 			
 			_loadingDependency = dependency;
+			_loadingDependency.loader = new SingleFileLoader();
+			addEventListeners(_loadingDependency.loader);
 			
 			// Get already loaded (or mapped) data if available
 			data = _loadingDependency.data;
@@ -288,13 +263,13 @@ package away3d.loaders
 					retrieveNext();
 				}
 				else {
-					loader.parseData(data, parser, _loadingDependency.request);
+					_loadingDependency.loader.parseData(data, parser, _loadingDependency.request);
 				}
 			}
 			else {
 				// Resolve URL and start loading
 				dependency.request.url = resolveDependencyUrl(dependency);
-				loader.load(dependency.request, parser, _loadingDependency.retrieveAsRawData);
+				_loadingDependency.loader.load(dependency.request, parser, _loadingDependency.retrieveAsRawData);
 			}
 		}
 		
@@ -365,11 +340,18 @@ package away3d.loaders
 		
 		private function retrieveLoaderDependencies(loader : SingleFileLoader) : void
 		{
-			_loaderStack.push(loader);
-			_dependencyStack.push(_currentDependencies);
-			_dependencyIndexStack.push(_currentDependencyIndex);
-			_currentDependencyIndex = 0;
-			_currentDependencies = loader.dependencies;
+			var i : int, len : int = loader.dependencies.length;
+			
+			for (i=0; i<len; i++) {
+				_loadingDependency.dependencies[i] = loader.dependencies[i];
+			}
+			
+			// Since more dependencies might be added eventually, empty this
+			// list so that the same dependency isn't retrieved more than once.
+			loader.dependencies.length = 0;
+			
+			_stack.push(_loadingDependency);
+			
 			retrieveNext();
 		}
 		
@@ -380,7 +362,7 @@ package away3d.loaders
 		private function onRetrievalFailed(event : LoaderEvent) : void
 		{
 			var handled : Boolean;
-			var isDependency : Boolean = (_dependencyStack.length > 0);
+			var isDependency : Boolean = (_loadingDependency != _baseDependency);
 			var loader : SingleFileLoader = SingleFileLoader(event.target);
 			
 			removeEventListeners(loader);
@@ -404,7 +386,7 @@ package away3d.loaders
 			if (handled) {
 				if (isDependency && !event.isDefaultPrevented()) {
 					_loadingDependency.resolveFailure();
-					prepareNextRetrieve(loader, event, false);
+					retrieveNext();
 				}
 				else {
 					// Either this was the base file (last left in the stack) or
@@ -437,7 +419,8 @@ package away3d.loaders
 				event.asset.resetAssetPath(event.asset.name, _namespace);
 			}
 			
-			dispatchEvent(event.clone());
+			if (!_loadingDependency.suppresAssetEvents)
+				dispatchEvent(event.clone());
 		}
 		
 		
@@ -460,27 +443,21 @@ package away3d.loaders
 		private function onRetrievalComplete(event : LoaderEvent) : void
 		{
 			var loader : SingleFileLoader = SingleFileLoader(event.target);
-			prepareNextRetrieve(loader, event); //prepare next in front of removing listeners to allow any remaining asset events to propagate
 			
-			removeEventListeners(loader);
-		}
-		
-		/**
-		 * Pushes further dependencies onto the stack.
-		 * @param event
-		 */
-		private function prepareNextRetrieve(loader:SingleFileLoader, event : LoaderEvent, resolve:Boolean = true) : void
-		{
-			// TODO: Don't dispatch this on failure
-			dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, event.url));
-			
+			// Resolve this dependency
 			_loadingDependency.setData(loader.data);
-			if(resolve) _loadingDependency.resolve();
+			_loadingDependency.success = true;
 			
-			if (_context && !_context.includeDependencies){
-				dispatchEvent(new LoaderEvent(LoaderEvent.RESOURCE_COMPLETE, _uri));
-			} else{
+			dispatchEvent(new LoaderEvent(LoaderEvent.DEPENDENCY_COMPLETE, event.url));
+			removeEventListeners(loader);
+			
+			// Retrieve any last dependencies remaining on this loader, or
+			// if none exists, just move on.
+			if (loader.dependencies.length) {
 				retrieveLoaderDependencies(loader);
+			}
+			else {
+				retrieveNext();
 			}
 		}
 		
@@ -525,17 +502,14 @@ package away3d.loaders
 		
 		private function dispose() : void
 		{
-			_currentDependencies = null;
 			_loadingDependency = null;
-			
 			_errorHandlers = null;
-			_loaderStack = null;
 			_context = null;
 			_token = null;
+			_stack = null;
 			
-			if (_currentLoader) {
-				removeEventListeners(_currentLoader);
-				_currentLoader = null;
+			if (_loadingDependency && _loadingDependency.loader) {
+				removeEventListeners(_loadingDependency.loader);
 			}
 		}
 		
