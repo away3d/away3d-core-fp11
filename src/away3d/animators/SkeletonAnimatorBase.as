@@ -1,10 +1,10 @@
 package away3d.animators
 {
 	import away3d.animators.data.SkeletonAnimationState;
-	import away3d.animators.skeleton.SkeletonTreeNode;
+	import away3d.animators.nodes.SkeletonTreeNode;
 	import away3d.errors.AbstractMethodError;
-
 	import flash.geom.Vector3D;
+
 
 	public class SkeletonAnimatorBase extends AnimatorBase
 	{

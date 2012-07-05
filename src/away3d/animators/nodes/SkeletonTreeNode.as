@@ -1,11 +1,13 @@
 /**
  * Author: David Lenaerts
  */
-package away3d.animators.skeleton
+package away3d.animators.nodes
 {
+	import away3d.animators.skeleton.Skeleton;
+	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.errors.AbstractMethodError;
-
 	import flash.geom.Vector3D;
+
 
 	/**
 	 * SkeletonTreeNode provides an abstract base class for nodes in a skeleton blend tree.

@@ -1,7 +1,7 @@
 /**
  * Author: David Lenaerts
  */
-package away3d.animators.skeleton
+package away3d.animators.nodes
 {
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.arcane;

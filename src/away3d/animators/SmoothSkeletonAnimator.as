@@ -4,10 +4,9 @@ package away3d.animators
 	import away3d.animators.data.AnimationSequenceBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.data.SkeletonAnimationState;
-	import away3d.animators.skeleton.SkeletonNaryLERPNode;
-	import away3d.animators.skeleton.SkeletonTimelineClipNode;
-	import away3d.animators.skeleton.SkeletonTimelineClipNode;
-	import away3d.animators.skeleton.SkeletonTreeNode;
+	import away3d.animators.nodes.SkeletonNaryLERPNode;
+	import away3d.animators.nodes.SkeletonTimelineClipNode;
+	import away3d.animators.nodes.SkeletonTreeNode;
 	import away3d.arcane;
 
 	use namespace arcane;

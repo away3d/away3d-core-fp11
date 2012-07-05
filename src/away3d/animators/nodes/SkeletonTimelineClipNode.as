@@ -1,11 +1,14 @@
 /**
  * Author: David Lenaerts
  */
-package away3d.animators.skeleton
+package away3d.animators.nodes
 {
+	import away3d.animators.skeleton.JointPose;
+	import away3d.animators.skeleton.Skeleton;
+	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.arcane;
-
 	import flash.geom.Vector3D;
+
 
 	use namespace arcane;
 

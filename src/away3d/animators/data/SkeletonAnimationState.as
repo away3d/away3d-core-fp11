@@ -1,20 +1,20 @@
 package away3d.animators.data
 {
+	import away3d.animators.nodes.SkeletonTreeNode;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.animators.skeleton.SkeletonPose;
-	import away3d.animators.skeleton.SkeletonTreeNode;
 	import away3d.arcane;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Quaternion;
-
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
+
 
 	use namespace arcane;
 

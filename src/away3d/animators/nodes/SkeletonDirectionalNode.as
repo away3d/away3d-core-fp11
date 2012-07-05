@@ -1,9 +1,11 @@
 /**
  * Author: David Lenaerts
  */
-package away3d.animators.skeleton
+package away3d.animators.nodes
 {
 
+	import away3d.animators.skeleton.JointPose;
+	import away3d.animators.skeleton.Skeleton;
 	import flash.geom.Vector3D;
 
 	public class SkeletonDirectionalNode extends SkeletonTreeNode
