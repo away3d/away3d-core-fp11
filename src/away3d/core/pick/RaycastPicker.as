@@ -1,32 +1,37 @@
 package away3d.core.pick
 {
 
+	import away3d.bounds.BoundingVolumeBase;
+	import away3d.containers.Scene3D;
+	import away3d.containers.View3D;
 	import away3d.core.base.SubMesh;
 	import away3d.arcane;
-	import away3d.containers.*;
-	import away3d.core.traverse.*;
-	import away3d.entities.*;
+	import away3d.core.data.EntityListItem;
+	import away3d.core.traverse.EntityCollector;
+	import away3d.entities.Entity;
+	import away3d.entities.Mesh;
 
-	import flash.geom.*;
-	
+	import flash.geom.Matrix3D;
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 
 	public class RaycastPicker implements IPicker
 	{
-		private var _entity:Entity;
-		
 		// TODO: add option of finding best hit?
 
 		private var _findClosestCollision:Boolean;
-		
+
 		protected var _entities:Vector.<Entity>;
-		protected var _numberOfCollisions:uint;
+		protected var _numEntities:uint;
 		protected var _collides:Boolean;
 		protected var _pickingCollisionVO:PickingCollisionVO;
 		
 		public function RaycastPicker( findClosestCollision:Boolean ) {
 			
 			_findClosestCollision = findClosestCollision;
+			_entities = new Vector.<Entity>();
 		}
 		
 		/**
@@ -34,36 +39,21 @@ package away3d.core.pick
 		 */
 		public function getViewCollision(x:Number, y:Number, view:View3D):PickingCollisionVO
 		{
+			var entity : Entity;
 			//cast ray through the collection of entities on the view
 			var collector:EntityCollector = view.entityCollector;
+			var i:uint;
 			
-			//global vars
-			var i:uint, len:uint;
-			
-			// Evaluate new colliding object.
 			if( collector.numMouseEnableds == 0 )
 				return null;
 			
 			//update ray
 			var rayPosition:Vector3D = view.camera.scenePosition;
 			var rayDirection:Vector3D = view.getRay( x, y );
-			
-			//set entities
-			var filteredEntities:Vector.<Entity> = new Vector.<Entity>();
 
-			// Filter out non visibles and non mouse enableds.
-			len = collector.entities.length;
-			for( i = 0; i < len; i++ ) {
-				_entity = collector.entities[ i ];
-				if( _entity.visible && _entity._implicitMouseEnabled ) {
-					filteredEntities.push( _entity );
-				}
-			}
-			
 			//reset
 			_collides = false;
-			_numberOfCollisions = 0;
-			
+
 			//evaluate
 			// Perform ray-bounds collision checks.
 			var localRayPosition:Vector3D;
@@ -72,55 +62,60 @@ package away3d.core.pick
 			var rayOriginIsInsideBounds:Boolean;
 			
 			// Sweep all filtered entities.
-			len = filteredEntities.length;
-			_entities = new Vector.<Entity>();
-			for( i = 0; i < len; i++ ) {
-				// Id thisEntity.
-				_entity = filteredEntities[ i ];
-				
-				// convert ray to entity space
-				localRayPosition = _entity.inverseSceneTransform.transformVector( rayPosition );
-				localRayDirection = _entity.inverseSceneTransform.deltaTransformVector( rayDirection );
-	
-				// check for ray-bounds collision
-				collisionT = _entity.bounds.intersectsRay( localRayPosition, localRayDirection );
-	
-				// accept cases on which the ray starts inside the bounds
-				rayOriginIsInsideBounds = false;
-				if( collisionT == -1 ) {
-					rayOriginIsInsideBounds = _entity.bounds.containsPoint( localRayPosition );
-					if( rayOriginIsInsideBounds ) {
-						collisionT = 0;
+
+			_numEntities = 0;
+			var node : EntityListItem = collector.entityHead;
+			while (node) {
+				entity = node.entity;
+
+				if( entity.visible && entity._implicitMouseEnabled ) {
+					// convert ray to entity space
+					var invSceneTransform : Matrix3D = entity.inverseSceneTransform;
+					var bounds:BoundingVolumeBase = entity.bounds;
+					localRayPosition = invSceneTransform.transformVector( rayPosition );
+					localRayDirection = invSceneTransform.deltaTransformVector( rayDirection );
+
+					// check for ray-bounds collision
+					collisionT = bounds.intersectsRay( localRayPosition, localRayDirection );
+
+					// accept cases on which the ray starts inside the bounds
+					rayOriginIsInsideBounds = false;
+					if( collisionT == -1 ) {
+						rayOriginIsInsideBounds = bounds.containsPoint( localRayPosition );
+						if( rayOriginIsInsideBounds ) {
+							collisionT = 0;
+						}
+					}
+
+					if( collisionT >= 0 ) {
+
+						_collides = true;
+
+						// Store collision data.
+						_pickingCollisionVO = entity.pickingCollisionVO;
+						_pickingCollisionVO.collisionT = collisionT;
+						_pickingCollisionVO.localRayPosition = localRayPosition;
+						_pickingCollisionVO.localRayDirection = localRayDirection;
+						_pickingCollisionVO.rayOriginIsInsideBounds = rayOriginIsInsideBounds;
+						_pickingCollisionVO.localPosition = entity.bounds.rayIntersectionPoint;
+						_pickingCollisionVO.localNormal = entity.bounds.rayIntersectionNormal;
+
+						// Store in new data set.
+						_entities[_numEntities++] = entity;
 					}
 				}
-	
-				if( collisionT >= 0 ) {
-	
-					_collides = true;
-					_numberOfCollisions++;
-					
-					// Store collision data.
-					_pickingCollisionVO = _entity.pickingCollisionVO;
-					_pickingCollisionVO.collisionT = collisionT;
-					_pickingCollisionVO.localRayPosition = localRayPosition;
-					_pickingCollisionVO.localRayDirection = localRayDirection;
-					_pickingCollisionVO.rayOriginIsInsideBounds = rayOriginIsInsideBounds;
-					_pickingCollisionVO.localPosition = _entity.bounds.rayIntersectionPoint;
-					_pickingCollisionVO.localNormal = _entity.bounds.rayIntersectionNormal;
-					
-					// Store in new data set.
-					_entities.push( _entity );
-				}
+				node = node.next;
 			}
+
+			// trim before sorting
+			_entities.length = _numEntities;
 
 			// Sort entities from closest to furthest.
 			// TODO: Instead of sorting the array, create it one item at a time in a sorted manner.
 			// Note: EntityCollector does provide the entities with some sorting, its not random, make use of that.
 			// However, line up collision test shows that the current implementation isn't too bad.
-			if( _numberOfCollisions > 1 ) {
-				_entities = _entities.sort( sortOnNearT );
-			}
-			
+			_entities = _entities.sort( sortOnNearT );
+
 			if( !_collides )
 				return null;
 			
@@ -137,10 +132,10 @@ package away3d.core.pick
 			var pickingCollider:IPickingCollider;
 			var shortestCollisionDistance:Number = Number.MAX_VALUE;
 			
-			for( i = 0; i < _numberOfCollisions; ++i ) {
-				_entity = _entities[ i ];
-				_pickingCollisionVO = _entity.pickingCollisionVO;
-				pickingCollider = _entity.pickingCollider;
+			for( i = 0; i < _numEntities; ++i ) {
+				entity = _entities[ i ];
+				_pickingCollisionVO = entity.pickingCollisionVO;
+				pickingCollider = entity.pickingCollider;
 				if( pickingCollider) {
 					// If a collision exists, update the collision data and stop all checks.
 					if( testCollision( pickingCollider, _pickingCollisionVO, shortestCollisionDistance ) ) {

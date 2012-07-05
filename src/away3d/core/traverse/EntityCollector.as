@@ -27,7 +27,6 @@ package away3d.core.traverse
 	public class EntityCollector extends PartitionTraverser
 	{
 		protected var _skyBox : IRenderable;
-		protected var _entities : Vector.<Entity>;
 		protected var _opaqueRenderableHead : RenderableListItem;
 		protected var _blendedRenderableHead : RenderableListItem;
 		private var _entityHead:EntityListItem;
@@ -64,7 +63,6 @@ package away3d.core.traverse
 			_directionalLights = new Vector.<DirectionalLight>();
 			_pointLights = new Vector.<PointLight>();
 			_lightProbes = new Vector.<LightProbe>();
-			_entities = new Vector.<Entity>();
 			_renderableListItemPool = new RenderableListItemPool();
 			_entityListItemPool = new EntityListItemPool();
 		}
@@ -240,7 +238,7 @@ package away3d.core.traverse
 		 */
 		override public function applyEntity(entity : Entity) : void
 		{
-			_entities[_numEntities++] = entity;
+			++_numEntities;
 
 			var item:EntityListItem = _entityListItemPool.getItem();
 			item.entity = entity;
@@ -291,15 +289,11 @@ package away3d.core.traverse
 		 */
 		public function cleanUp() : void
 		{
-			if (_numEntities > 0) {
-				for (var i : uint = 0; i < _numEntities; ++i)
-					_entities[i].popModelViewProjection();
-				_entities.length = _numEntities = 0;
+			var node : EntityListItem = _entityHead;
+			while (node) {
+				node.entity.popModelViewProjection();
+				node = node.next;
 			}
-		}
-
-		public function get entities():Vector.<Entity> {
-			return _entities;
 		}
 	}
 }
