@@ -14,22 +14,6 @@ package away3d.core.pick
 	{
 		private var _findClosestCollision:Boolean;
 		
-		private var i:uint;
-		private var t:Number;
-		private var numTriangles:uint;
-		private var i0:uint, i1:uint, i2:uint;
-		private var rx:Number, ry:Number, rz:Number;
-		private var nx:Number, ny:Number, nz:Number;
-		private var cx:Number, cy:Number, cz:Number;
-		private var coeff:Number, u:Number, v:Number, w:Number;
-		private var p0x:Number, p0y:Number, p0z:Number;
-		private var p1x:Number, p1y:Number, p1z:Number;
-		private var p2x:Number, p2y:Number, p2z:Number;
-		private var s0x:Number, s0y:Number, s0z:Number;
-		private var s1x:Number, s1y:Number, s1z:Number;
-		private var nl:Number, nDotV:Number, D:Number, disToPlane:Number;
-		private var Q1Q2:Number, Q1Q1:Number, Q2Q2:Number, RQ1:Number, RQ2:Number;
-		
 		/**
 		 * Creates a new <code>AS3PickingCollider</code> object.
 		 * 
@@ -45,7 +29,21 @@ package away3d.core.pick
 		 */
 		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
-			
+			var i:uint;
+			var t:Number;
+			var numTriangles:uint;
+			var i0:uint, i1:uint, i2:uint;
+			var rx:Number, ry:Number, rz:Number;
+			var nx:Number, ny:Number, nz:Number;
+			var cx:Number, cy:Number, cz:Number;
+			var coeff:Number, u:Number, v:Number, w:Number;
+			var p0x:Number, p0y:Number, p0z:Number;
+			var p1x:Number, p1y:Number, p1z:Number;
+			var p2x:Number, p2y:Number, p2z:Number;
+			var s0x:Number, s0y:Number, s0z:Number;
+			var s1x:Number, s1y:Number, s1z:Number;
+			var nl:Number, nDotV:Number, D:Number, disToPlane:Number;
+			var Q1Q2:Number, Q1Q1:Number, Q2Q2:Number, RQ1:Number, RQ2:Number;
 			var indexData:Vector.<uint> = subMesh.indexData;
 			var vertexData:Vector.<Number> = subMesh.vertexData;
 			var uvData:Vector.<Number> = subMesh.UVData;

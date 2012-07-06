@@ -7,7 +7,7 @@ package away3d.core.pick
 	{
 		protected var rayPosition:Vector3D;
 		protected var rayDirection:Vector3D;
-		
+
 		protected function getCollisionNormal( indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint ):Vector3D {
 			var normal:Vector3D = new Vector3D();
 			var i0:uint = indexData[ triangleIndex ] * 3;
@@ -37,7 +37,7 @@ package away3d.core.pick
 			uv.y = u * uv0.y + v * uv1.y + w * uv2.y;
 			return uv;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */

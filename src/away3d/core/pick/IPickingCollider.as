@@ -14,12 +14,12 @@ package away3d.core.pick
 	{
 		/**
 		 * Sets the position and direction of a picking ray in local coordinates to the entity.
-		 * 
+		 *
 		 * @param localDirection The position vector in local coordinates
-		 * @param localPosition The direction vector in local coordinates 
+		 * @param localPosition The direction vector in local coordinates
 		 */
 		function setLocalRay(localPosition:Vector3D, localDirection:Vector3D):void
-		
+
 		/**
 		 * Tests a <code>SubMesh</code> object for a collision with the picking ray.
 		 * 

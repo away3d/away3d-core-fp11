@@ -12,7 +12,7 @@ package away3d.core.pick
 	 */
 	public class PickingCollisionVO
 	{
-		private var _entity:Entity;
+		public var entity:Entity;
 		
 		/**
 		 * The local position of the collision on the entity's surface.
@@ -50,15 +50,7 @@ package away3d.core.pick
 		 * The distance along the ray from the starting position to the calculated intersection with the entity.
 		 */
 		public var collisionT:Number;
-		
-		/**
-		 * The entity to which this collision object belongs.
-		 */
-		public function get entity():Entity
-		{
-			return _entity;
-		}
-		
+
 		/**
 		 * Creates a new <code>PickingCollisionVO</code> object.
 		 * 
@@ -66,7 +58,7 @@ package away3d.core.pick
 		 */
 		function PickingCollisionVO(entity:Entity)
 		{
-			_entity = entity;
+			this.entity = entity;
 		}
 	}
 }

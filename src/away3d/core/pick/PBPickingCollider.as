@@ -23,9 +23,6 @@ package away3d.core.pick
 		private var _lastSubMeshUploaded:SubMesh;
 		private var _kernelOutputBuffer:Vector.<Number>;
 		
-		private var cx:Number, cy:Number, cz:Number;
-		private var u:Number, v:Number, w:Number;
-		
 		/**
 		 * @inheritDoc
 		 */
@@ -59,7 +56,9 @@ package away3d.core.pick
 			// TODO: It seems that the kernel takes almost the same time to calculate on a mesh with 2 triangles than on a
 			// mesh with thousands of triangles. It might be worth exploring the possibility of accumulating buffers until a certain
 			// threshold is met, and then running the kernel on a group of meshes.
-			
+
+			var cx:Number, cy:Number, cz:Number;
+			var u:Number, v:Number, w:Number;
 			var indexData:Vector.<uint> = subMesh.indexData;
 			var vertexData:Vector.<Number> = subMesh.vertexData;
 			var uvData:Vector.<Number> = subMesh.UVData;

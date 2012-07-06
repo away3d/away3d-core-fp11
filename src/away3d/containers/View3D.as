@@ -139,7 +139,7 @@
 
 			initHitField();
 			
-			_mouse3DManager = Mouse3DManager.getInstance();
+			_mouse3DManager = new Mouse3DManager();
 			_mouse3DManager.enableMouseListeners(this);
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
@@ -187,7 +187,15 @@
 		 * Forces mouse-move related events even when the mouse hasn't moved. This allows mouseOver and mouseOut events
 		 * etc to be triggered due to changes in the scene graph. Defaults to false.
 		 */
-		public var forceMouseMove : Boolean;
+		public function get forceMouseMove() : Boolean
+		{
+			return _mouse3DManager.forceMouseMove;
+		}
+
+		public function set forceMouseMove(value : Boolean) : void
+		{
+			_mouse3DManager.forceMouseMove = value;
+		}
 
 		public function get background() : Texture2DBase
 		{
@@ -593,7 +601,7 @@
 			_entityCollector.cleanUp();
 
 			// fire collected mouse events
-			_mouse3DManager.fireMouseEvents(this);
+			_mouse3DManager.fireMouseEvents();
 		}
 
 		protected function updateGlobalPos() : void
@@ -699,6 +707,17 @@
 			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height);
 		}
 
+
+		public function get mousePicker() : IPicker
+		{
+			return _mouse3DManager.mousePicker;
+		}
+
+		public function set mousePicker(value : IPicker) : void
+		{
+			_mouse3DManager.mousePicker = value;
+		}
+
 		/**
 		 * The EntityCollector object that will collect all potentially visible entities in the partition tree.
 		 *
@@ -745,7 +764,8 @@
 			}
 		}
 
-		// dead ends:
+
+// dead ends:
 		override public function set z(value : Number) : void {}
 		override public function set scaleZ(value : Number) : void {}
 		override public function set rotation(value : Number) : void {}
@@ -755,7 +775,5 @@
 		override public function set transform(value : Transform) : void {}
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
-		
-		public var mousePicker:IPicker = PickingType.RAYCAST_FIRST_ENCOUNTERED;
 	}
 }

@@ -33,8 +33,9 @@ package away3d.entities
 		private var _showBounds : Boolean;
 		private var _partitionNode : EntityNode;
 		
-		protected var _pickingCollision:PickingCollisionVO;
-		
+		arcane var _pickingCollisionVO:PickingCollisionVO;
+		arcane var _pickingCollider:IPickingCollider;
+
 		private var _mouseEnabled : Boolean;
 		private var _mouseDetails:Boolean;
 
@@ -48,11 +49,33 @@ package away3d.entities
 		
 		public function get pickingCollisionVO():PickingCollisionVO
 		{
-			if (!_pickingCollision)
-				_pickingCollision = new PickingCollisionVO(this);
-			
-			return _pickingCollision;
+			if (!_pickingCollisionVO)
+				_pickingCollisionVO = new PickingCollisionVO(this);
+
+			return _pickingCollisionVO;
 		}
+
+		/**
+		 * Tests if a collision occurs before shortestCollisionDistance, using the data stored in PickingCollisionVO.
+		 * @param shortestCollisionDistance
+		 * @return
+		 */
+		arcane function collidesBefore(shortestCollisionDistance : Number) : Boolean
+		{
+			return true;
+		}
+
+		override protected function updateMouseChildren() : void {
+
+			var parent : Entity = _parent as Entity;
+
+			// Use its parent's triangle collider.
+			if(parent)
+				_pickingCollider ||= parent._pickingCollider;
+
+			super.updateMouseChildren();
+		}
+
 
 		/**
 		 * 
@@ -60,21 +83,6 @@ package away3d.entities
 		public function get showBounds() : Boolean
 		{
 			return _showBounds;
-		}
-
-		override protected function updateMouseChildren() : void {
-
-			// Use its parent's triangle collider.
-			if( _parent && !pickingCollider ) {
-				if( _parent is Entity ) {
-					var collider:IPickingCollider = Entity( _parent ).pickingCollider;
-					if( collider ) {
-						pickingCollider = collider;
-					}
-				}
-			}
-
-			super.updateMouseChildren();
 		}
 
 		public function set showBounds(value : Boolean) : void
@@ -401,14 +409,22 @@ package away3d.entities
 			return AssetType.ENTITY;
 		}
 
-		public var pickingCollider:IPickingCollider;
-
 		public function get mouseDetails():Boolean {
 			return _mouseDetails;
 		}
 
 		public function set mouseDetails( value:Boolean ):void {
 			_mouseDetails = value;
+		}
+
+		public function get pickingCollider() : IPickingCollider
+		{
+			return _pickingCollider;
+		}
+
+		public function set pickingCollider(value : IPickingCollider) : void
+		{
+			_pickingCollider = value;
 		}
 	}
 }

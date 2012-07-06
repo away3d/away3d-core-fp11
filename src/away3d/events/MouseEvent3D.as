@@ -2,6 +2,7 @@ package away3d.events
 {
 
 	import away3d.containers.ObjectContainer3D;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
@@ -87,7 +88,7 @@ package away3d.events
 		/**
 		 * The 3d object inside which the event took place.
 		 */
-		public var object : Object3D;
+		public var object : ObjectContainer3D;
 
 		/**
 		 * The renderable inside which the event took place.
