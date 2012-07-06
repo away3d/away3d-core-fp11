@@ -175,5 +175,29 @@ package away3d.animators
 		{
 			return _clips[sequenceName].clip;
 		}
+		
+		/**
+		 * Returns all sequences as SkeletonAnimationSequence(AnimationSequenceBase)
+		 */
+		public function get sequences() : Array
+		{
+			var sequences:Array = [];
+			for(var key:String in _clips)
+				sequences.push(getSequence(key));
+			 
+			return sequences;
+		 }
+		/**
+		* Retrieves all sequences names
+		* @private
+		*/
+		arcane function get sequencesNames() : Array
+		{
+			var seqsNames:Array = [];
+			for(var key:String in _clips)
+				seqsNames.push(key);
+			 
+			return seqsNames;
+		}
 	}
 }
