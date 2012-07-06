@@ -4,9 +4,9 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.events.ShadingMethodEvent;
 	import away3d.lights.LightBase;
 	import away3d.lights.shadowmaps.NearDirectionalShadowMapper;
-	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -19,7 +19,6 @@ package away3d.materials.methods
 	{
 		private var _baseMethod : ShadowMapMethodBase;
 
-		private var _dataIndex : int;
 		private var _fadeRatio : Number;
 		private var _shadowMapper : NearDirectionalShadowMapper;
 		private var _light : LightBase;
@@ -28,15 +27,34 @@ package away3d.materials.methods
 		{
 			super(baseMethod.castingLight);
 			_baseMethod = baseMethod;
-			_needsProjection = true;
 			_fadeRatio = fadeRatio;
-			_fragmentData = new Vector.<Number>(4, true);
-			_fragmentData[2] = 0;
-			_fragmentData[3] = 1;
 			_light = baseMethod.castingLight;
 			_shadowMapper = _light.shadowMapper as NearDirectionalShadowMapper;
 			if (!_shadowMapper)
 				throw new Error("NearShadowMapMethod requires a light that has a NearDirectionalShadowMapper instance assigned to shadowMapper.");
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			super.initConstants(vo);
+			_baseMethod.initConstants(vo);
+
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			fragmentData[index+2] = 0;
+			fragmentData[index+3] = 1;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			_baseMethod.initVO(vo);
+			vo.needsProjection = true;
+		}
+
+		override public function dispose() : void
+		{
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
 
 		override public function get alpha() : Number
@@ -69,22 +87,12 @@ package away3d.materials.methods
 			_fadeRatio = value;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set parentPass(value : MaterialPassBase) : void
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			super.parentPass = value;
-			_baseMethod.parentPass = value;
-		}
-
-
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
-		{
-			var code : String = _baseMethod.getFragmentCode(regCache, targetReg);
+			var code : String = _baseMethod.getFragmentCode(vo, regCache, targetReg);
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentSingleTemp();
-			_dataIndex = dataReg.index;
+			vo.secondaryFragmentConstantsIndex = dataReg.index*4;
 
 			code +=	"abs " + temp + ", " + _projectionReg + ".w\n" +
 					"sub " + temp + ", " + temp + ", " + dataReg + ".x\n" +
@@ -101,18 +109,19 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			_baseMethod.activate(stage3DProxy);
+			_baseMethod.activate(vo, stage3DProxy);
 		}
 
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
+		arcane override function deactivate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			_baseMethod.deactivate(stage3DProxy);
+			_baseMethod.deactivate(vo, stage3DProxy);
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// todo: move this to activate (needs camera)
 			var near : Number = camera.lens.near;
 			var d : Number = camera.lens.far - near;
 			var maxDistance : Number = _shadowMapper.coverageRatio;
@@ -121,26 +130,19 @@ package away3d.materials.methods
 			maxDistance = near + maxDistance*d;
 			minDistance = near + minDistance*d;
 
-			_fragmentData[0] = minDistance;
-			_fragmentData[1] = 1/(maxDistance-minDistance);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _fragmentData,  1);
-			_baseMethod.setRenderState(renderable, stage3DProxy, camera);
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			fragmentData[index] = minDistance;
+			fragmentData[index+1] = 1/(maxDistance-minDistance);
+			_baseMethod.setRenderState(vo, renderable, stage3DProxy, camera);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get needsUV() : Boolean
+		override arcane function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _baseMethod.needsUV;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getVertexCode(regCache : ShaderRegisterCache) : String
-		{
-			return _baseMethod.getVertexCode(regCache);
+			return _baseMethod.getVertexCode(vo, regCache);
 		}
 
 
@@ -157,99 +159,6 @@ package away3d.materials.methods
 		{
 			super.cleanCompilationData();
 			_baseMethod.cleanCompilationData();
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get mipmap() : Boolean
-		{
-			return _mipmap;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set mipmap(value : Boolean) : void
-		{
-			_baseMethod.mipmap = _mipmap = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get smooth() : Boolean
-		{
-			return _smooth;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set smooth(value : Boolean) : void
-		{
-			_baseMethod.smooth = _smooth = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get repeat() : Boolean
-		{
-			return _repeat;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set repeat(value : Boolean) : void
-		{
-			_baseMethod.repeat = _repeat = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get numLights() : int
-		{
-			return _numLights;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set numLights(value : int) : void
-		{
-			_numLights = _baseMethod.numLights = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsGlobalPos() : Boolean
-		{
-			return _needsGlobalPos || _baseMethod.needsGlobalPos;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsView() : Boolean
-		{
-			return _needsView || _baseMethod.needsView;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsNormals() : Boolean
-		{
-			return _needsNormals || _baseMethod.needsNormals;
-		}
-
-		arcane override function get needsProjection() : Boolean
-		{
-			return _needsProjection || _baseMethod.needsProjection;
 		}
 
 		/**
@@ -298,6 +207,11 @@ package away3d.materials.methods
 		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
 		{
 			_baseMethod.normalFragmentReg = _normalFragmentReg = value;
+		}
+
+		private function onShaderInvalidated(event : ShadingMethodEvent) : void
+		{
+			invalidateShaderProgram();
 		}
 	}
 }

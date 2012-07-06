@@ -49,7 +49,7 @@ package away3d.core.render
 			_distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
 		}
 
-		protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		protected override function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0) : void
 		{
 			updateLights(entityCollector);
 
@@ -59,7 +59,7 @@ package away3d.core.render
 				drawRenderables(entityCollector.blendedRenderableHead, entityCollector, RTT_PASSES);
 			}
 
-			super.executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
+			super.executeRender(entityCollector, target, scissorRect, surfaceSelector);
 		}
 
 		private function updateLights(entityCollector : EntityCollector) : void
@@ -94,16 +94,18 @@ package away3d.core.render
 				_activeMaterial = null;
 				drawSkyBox(entityCollector);
 			}
-
+			
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-
+			
 			var which : int = target? SCREEN_PASSES : ALL_PASSES;
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, which);
 			drawRenderables(entityCollector.blendedRenderableHead, entityCollector, which);
-
+			
 			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
-
+			
+			_context.setDepthTest(false, Context3DCompareMode.LESS);
+			
 			_activeMaterial = null;
 		}
 

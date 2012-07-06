@@ -1,36 +1,65 @@
 package away3d.core.pick
 {
-
-	import flash.display3D.textures.TextureBase;
-	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.Context3DBlendFactor;
-	import away3d.core.data.RenderableListItem;
-	import flash.display3D.Context3DTriangleFace;
-	import com.adobe.utils.AGALMiniAssembler;
-	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DClearMask;
-	import away3d.entities.Entity;
-	import away3d.cameras.Camera3D;
-	import flash.display3D.Context3D;
-	import away3d.core.managers.Stage3DProxy;
-	import flash.display.BitmapData;
-	import flash.display3D.Program3D;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.arcane;
+	import away3d.cameras.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
+	import away3d.core.data.*;
+	import away3d.core.managers.*;
+	import away3d.core.math.*;
 	import away3d.core.traverse.*;
+	import away3d.entities.*;
 
+	import flash.display.*;
+	import flash.display3D.*;
+	import flash.display3D.textures.*;
 	import flash.geom.*;
 	
+	import com.adobe.utils.*;
+	
 	use namespace arcane;
-
+	
+	/**
+	 * Picks a 3d object from a view or scene by performing a separate render pass on the scene around the area being picked using key color values,
+	 * then reading back the color value of the pixel in the render representing the picking ray. Requires multiple passes and readbacks for retriving details
+	 * on an entity that has its shaderPickingDetails property set to true.
+	 * 
+	 * A read-back operation from any GPU is not a very efficient process, and the amount of processing used can vary significantly between different hardware.
+	 * 
+	 * @see away3d.entities.Entity#shaderPickingDetails
+	 */
 	public class ShaderPicker implements IPicker
 	{
 		private var _stage3DProxy:Stage3DProxy;
 		private var _context:Context3D;
 		
+		private var _objectProgram3D : Program3D;
+		private var _triangleProgram3D : Program3D;
+		private var _bitmapData : BitmapData = new BitmapData(1, 1, false, 0);
+		private var _viewportData : Vector.<Number>;
+		private var _boundOffsetScale : Vector.<Number>;
+		private var _id : Vector.<Number>;
+		
+		private var _interactives : Vector.<IRenderable> = new Vector.<IRenderable>();
+		private var _interactiveId : uint;
+		private var _hitColor : uint;
+		private var _projX : Number;
+		private var _projY : Number;
+		
+		private var _hitRenderable : IRenderable;
+		private var _localHitPosition : Vector3D = new Vector3D();
+		private var _hitUV : Point = new Point();
+		
+		private var _localHitNormal:Vector3D = new Vector3D();
+		
+		private var _rayPos : Vector3D = new Vector3D();
+		private var _rayDir : Vector3D = new Vector3D();
+		private var _potentialFound : Boolean;
+		private static const MOUSE_SCISSOR_RECT : Rectangle = new Rectangle(0, 0, 1, 1);
+		
+		/**
+		 * Creates a new <code>ShaderPicker</code> object.
+		 */
 		public function ShaderPicker()
 		{
 			_id = new Vector.<Number>(4, true);
@@ -82,7 +111,7 @@ package away3d.core.pick
 
 			var _collisionVO:PickingCollisionVO = _hitRenderable.sourceEntity.pickingCollisionVO;
 			
-			if (_hitRenderable.mouseDetails) {
+			if (_hitRenderable.shaderPickingDetails) {
 				getHitDetails(view.camera);
 				_collisionVO.localPosition = _localHitPosition;
 				_collisionVO.localNormal = _localHitNormal;
@@ -104,30 +133,6 @@ package away3d.core.pick
 			return null;
 		}
 		
-		private var _objectProgram3D : Program3D;
-		private var _triangleProgram3D : Program3D;
-		private var _bitmapData : BitmapData = new BitmapData(1, 1, false, 0);
-		private var _viewportData : Vector.<Number>;
-		private var _boundOffsetScale : Vector.<Number>;
-		private var _id : Vector.<Number>;
-
-		private var _interactives : Vector.<IRenderable> = new Vector.<IRenderable>();
-		private var _interactiveId : uint;
-		private var _hitColor : uint;
-		private var _projX : Number;
-		private var _projY : Number;
-
-		private var _hitRenderable : IRenderable;
-		private var _localHitPosition : Vector3D = new Vector3D();
-		private var _hitUV : Point = new Point();
-
-		private var _localHitNormal:Vector3D = new Vector3D();
-
-		private var _rayPos : Vector3D = new Vector3D();
-		private var _rayDir : Vector3D = new Vector3D();
-		private var _potentialFound : Boolean;
-		private static const MOUSE_SCISSOR_RECT : Rectangle = new Rectangle(0, 0, 1, 1);
-
 		/**
 		 * @inheritDoc
 		 */

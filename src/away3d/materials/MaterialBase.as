@@ -31,6 +31,7 @@ package away3d.materials
 	 */
 	public class MaterialBase extends NamedAssetBase implements IAsset
 	{
+		private static var MATERIAL_ID_COUNT : uint = 0;
 		/**
 		 * An object to contain any extra data
 		 */
@@ -41,7 +42,7 @@ package away3d.materials
 		arcane var _classification : String;
 
 		// this value is usually derived from other settings
-		arcane var _uniqueId : int;
+		arcane var _uniqueId : uint;
 
 		arcane var _renderOrderId : int;
 		arcane var _name : String = "material";
@@ -85,7 +86,7 @@ package away3d.materials
 			// Default to considering pre-multiplied textures while blending
 			alphaPremultiplied = true;
 
-//			invalidatePasses(null);
+			_uniqueId = MATERIAL_ID_COUNT++;
 		}
 
 		public function get assetType() : String
@@ -262,7 +263,7 @@ package away3d.materials
 		/**
 		 * The unique id assigned to the material by the MaterialLibrary.
 		 */
-		public function get uniqueId() : int
+		public function get uniqueId() : uint
 		{
 			return _uniqueId;
 		}
@@ -401,16 +402,6 @@ package away3d.materials
 		{
 			_owners.splice(_owners.indexOf(owner), 1);
 			if (_owners.length == 0) _animation = null;
-		}
-
-		/**
-		 * Assignes a unique id to the material.
-		 * @param id
-		 * @private
-		 */
-		arcane function setUniqueId(id : int) : void
-		{
-			_uniqueId = id;
 		}
 
 		/**

@@ -15,6 +15,7 @@ package away3d.tools.helpers
 	 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
+	import flash.utils.Dictionary;
 
 	use namespace arcane;
 	
@@ -372,9 +373,6 @@ package away3d.tools.helpers
 		*/
 		public static function build(vertices:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number> = null, name:String = "", material:MaterialBase = null, shareVertices:Boolean = true, useDefaultMap:Boolean = true):Mesh
 		{
-			if(uvs && (vertices.length/3)*2 < uvs.length)
-				throw new Error("MeshHelper error: The vector uvs provided do not hold enough entries");
-			
 			var subGeom:SubGeometry = new SubGeometry();
 			subGeom.autoDeriveVertexNormals = true;
 			subGeom.autoDeriveVertexTangents = true;
@@ -389,76 +387,72 @@ package away3d.tools.helpers
 			var nvertices:Vector.<Number> = new Vector.<Number>();
 			var nuvs:Vector.<Number> = new Vector.<Number>();
 			var nindices:Vector.<uint> = new Vector.<uint>();
-			
-			var noUV:Boolean;
-			
-			if(!uvs){
-				noUV = true;
-				var defaultUVS:Vector.<Number> = Vector.<Number>([0, 1, .5, 0, 1, 1, .5, 0]);
-				var uvid:uint;
-			}
+			 
+			var defaultUVS:Vector.<Number> = Vector.<Number>([0, 1, .5, 0, 1, 1, .5, 0]);
+			var uvid:uint = 0;
+			 
+			if(shareVertices) var dShared:Dictionary = new Dictionary();
 			
 			var uvind:uint;
 			var vind:uint;
 			var ind:uint;
-			var dub:Boolean;
 			var i:uint;
 			var j:uint;
-			var lenv:uint;
-			var tmpVind:uint;
-			
 			var vertex:Vertex = new Vertex();
+			
 			for (i = 0;i<indices.length;++i){
 				ind = indices[i]*3;
 				vertex.x = vertices[ind];
 				vertex.y = vertices[ind+1];
 				vertex.z = vertices[ind+2];
-				lenv = nvertices.length;
 				
-				if(lenv == LIMIT ){
+				if(nvertices.length == LIMIT ){
 					subGeom.updateVertexData(nvertices);
 					subGeom.updateIndexData(nindices);
 					subGeom.updateUVData(nuvs);
+					
+					if(shareVertices){
+						dShared = null;
+						dShared = new Dictionary();
+					}
 				
 					subGeom = new SubGeometry();
 					subGeom.autoDeriveVertexNormals = true;
 					subGeom.autoDeriveVertexTangents = true;
 					geometry.addSubGeometry(subGeom);
+
+					uvind = uvid = 0;
 					
-					vind =  uvind = lenv = 0;
-					if(noUV) uvid = 0;
 					nvertices = new Vector.<Number>();
 					nindices = new Vector.<uint>();
 					nuvs = new Vector.<Number>();
 				}
 				
-				if(lenv>0 && shareVertices){
-					dub = false;
-					for(j = 0;j<nindices.length-3;++j){
-						tmpVind = j*3;
-						if(nvertices[tmpVind] == vertex.x && vertex.y == nvertices[tmpVind+1] && vertex.z == nvertices[tmpVind+2]){
-							ind = j/3;
-							nindices[nindices.length] = j;
-							dub = true;
-							break;
-						}
-					}
-				}
-				 
-				if(dub) continue;
-				 
-				nvertices.push(vertex.x, vertex.y, vertex.z); 
-				nindices[nindices.length] = i;
+				vind = nvertices.length/3;
+				uvind = vind*2;
 				
-				if(noUV){
+				if(shareVertices){
+					if(dShared[vertex.toString()]){
+						nindices[nindices.length] = dShared[vertex.toString()];
+						continue;
+					}
+					dShared[vertex.toString()] = vind;
+				}
+				
+				nindices[nindices.length] = vind;
+				nvertices.push(vertex.x, vertex.y, vertex.z);
+				
+				if( !uvs || uvind>uvs.length-2 ){
 					nuvs.push(defaultUVS[uvid], defaultUVS[uvid+1]);
 					uvid = (uvid+2>3)? 0 : uvid+=2;
-					 
-				} else{
-					uvind = indices[i]*2;
+					
+				} else {
+					
 					nuvs.push(uvs[uvind], uvs[uvind+1]); 
 				}
 			}
+			
+			if(shareVertices) dShared = null;
 			 
 			subGeom.updateVertexData(nvertices);
 			subGeom.updateIndexData(nindices);

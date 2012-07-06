@@ -131,6 +131,6 @@ package away3d.core.base
 		function get UVBufferOffset() : int;
 		function get secondaryUVBufferOffset() : int;
 
-		function get mouseDetails():Boolean;
+		function get shaderPickingDetails():Boolean;
 	}
 }

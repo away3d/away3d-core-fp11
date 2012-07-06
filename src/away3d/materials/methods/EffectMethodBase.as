@@ -13,9 +13,9 @@ package away3d.materials.methods
 	 */
 	public class EffectMethodBase extends ShadingMethodBase
 	{
-		public function EffectMethodBase(needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean)
+		public function EffectMethodBase()
 		{
-			super(needsNormals, needsView, needsGlobalPos);
+			super();
 		}
 
 		/**
@@ -23,7 +23,7 @@ package away3d.materials.methods
 		 * @param regCache The register cache used during the compilation.
 		 * @private
 		 */
-		arcane function getFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();
 			return "";

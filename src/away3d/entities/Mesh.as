@@ -325,15 +325,23 @@
 			return _subMeshes[_geometry.subGeometries.indexOf(subGeometry)];
 		}
 
-		override arcane function collidesBefore(shortestCollisionDistance : Number) : Boolean
+		override arcane function collidesBefore(shortestCollisionDistance : Number, findClosest : Boolean) : Boolean
 		{
-			_pickingCollider.setLocalRay(_pickingCollisionVO.localRayPosition, _pickingCollisionVO.localRayDirection);
+			_pickingCollider.setLocalRay(_pickingCollision.localRayPosition, _pickingCollision.localRayDirection);
+			_pickingCollision.renderable = null;
 			var len : int = _subMeshes.length;
-			for (var i : int = 0; i < len; ++i)
-				if (_pickingCollider.testSubMeshCollision(_subMeshes[i], _pickingCollisionVO, shortestCollisionDistance))
-					return true;
+			for (var i : int = 0; i < len; ++i) {
+				var subMesh : SubMesh = _subMeshes[i];
 
-			return false;
+				if (_pickingCollider.testSubMeshCollision(subMesh, _pickingCollision, shortestCollisionDistance)) {
+					shortestCollisionDistance = _pickingCollision.rayEntryDistance;
+					_pickingCollision.renderable = subMesh;
+					if (findClosest)
+						return true;
+				}
+			}
+
+			return pickingCollisionVO.renderable != null;
 		}
 	}
 }

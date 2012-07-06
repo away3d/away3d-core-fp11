@@ -49,8 +49,8 @@ package away3d.core.base
 			this.material = material;
 		}
 
-		public function get mouseDetails():Boolean {
-			return sourceEntity.mouseDetails;
+		public function get shaderPickingDetails():Boolean {
+			return sourceEntity.shaderPickingDetails;
 		}
 
 		public function get offsetU():Number {
@@ -243,7 +243,7 @@ package away3d.core.base
 		 * Indicates whether the SubMesh should trigger mouse events, and hence should be rendered for hit testing.
 		 */
 		public function get mouseEnabled():Boolean {
-			return _parentMesh.mouseEnabled || _parentMesh._implicitMouseEnabled;
+			return _parentMesh.mouseEnabled || _parentMesh._ancestorsAllowMouseEnabled;
 		}
 
 		public function get castsShadows():Boolean {

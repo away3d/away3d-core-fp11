@@ -34,7 +34,6 @@ package away3d.entities
 		private static var _geometry:SubGeometry;
 
 		private static var _nullAnimation:NullAnimation;
-		private var _mouseHitMethod:uint;
 		private var _material:MaterialBase;
 		private var _animationState:AnimationStateBase;
 		private var _spriteMatrix:Matrix3D;
@@ -157,7 +156,7 @@ package away3d.entities
 		}
 
 		override protected function updateBounds():void {
-			_bounds.fromExtremes( -.5, -.5, 0, .5, .5, 0 );
+			_bounds.fromExtremes(-.5 * _scaleX, -.5 * _scaleY, 0, .5 * _scaleX, .5 * _scaleY, 0);
 			_boundsInvalid = false;
 		}
 

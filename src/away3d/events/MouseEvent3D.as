@@ -106,9 +106,14 @@ package away3d.events
 		public var uv : Point;
 
 		/**
-		 * The x-coordinate in object space where the event took place
+		 * The position in object space where the event took place
 		 */
 		public var localPosition : Vector3D;
+
+		/**
+		 * The normal in object space where the event took place
+		 */
+		public var localNormal:Vector3D;
 
 		/**
 		 * Indicates whether the Control key is active (true) or inactive (false).
@@ -129,8 +134,6 @@ package away3d.events
 		 * Indicates how many lines should be scrolled for each unit the user rotates the mouse wheel.
 		 */
 		public var delta : int;
-
-		public var localNormal:Vector3D;
 
 		/**
 		 * Create a new MouseEvent3D object.
@@ -198,6 +201,9 @@ package away3d.events
 			return result;
 		}
 
+		/**
+		 * The position in scene space where the event took place
+		 */
 		public function get scenePosition():Vector3D {
 			if( object is ObjectContainer3D ) {
 				return ObjectContainer3D( object ).sceneTransform.transformVector( localPosition );
@@ -207,6 +213,9 @@ package away3d.events
 			}
 		}
 
+		/**
+		 * The normal in scene space where the event took place
+		 */
 		public function get sceneNormal():Vector3D {
 			if( object is ObjectContainer3D ) {
 				var sceneNormal:Vector3D = ObjectContainer3D( object ).sceneTransform.deltaTransformVector( localNormal );

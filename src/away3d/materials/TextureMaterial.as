@@ -12,8 +12,6 @@
 	 */
 	public class TextureMaterial extends DefaultMaterialBase
 	{
-		private var _alphaBlending : Boolean;
-
 		/**
 		 * Creates a new TextureMaterial.
 		 */
@@ -83,34 +81,6 @@
 		{
 			_screenPass.diffuseMethod._useDiffuseTexture = true;
 			_screenPass.ambientMethod.texture = value;
-		}
-		
-		override public function get requiresBlending() : Boolean
-		{
-			return super.requiresBlending || _alphaBlending;
-		}
-
-		/**
-		 * Indicate whether or not the BitmapData contains semi-transparency. If binary transparency is sufficient, for
-		 * example when using textures of foliage, consider using alphaThreshold instead.
-		 */
-		public function get alphaBlending() : Boolean
-		{
-			return _alphaBlending;
-		}
-
-		public function set alphaBlending(value : Boolean) : void
-		{
-			_alphaBlending = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose() : void
-		{
-			_screenPass.dispose();
-			super.dispose();
 		}
 	}
 }

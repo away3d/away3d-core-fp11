@@ -25,6 +25,7 @@
 	public class DefaultMaterialBase extends MaterialBase
 	{
 		protected var _screenPass : DefaultScreenPass;
+		private var _alphaBlending : Boolean;
 
 		/**
 		 * Creates a new DefaultMaterialBase object.
@@ -101,7 +102,7 @@
 		 */
 		override public function get requiresBlending() : Boolean
 		{
-			return super.requiresBlending || (_screenPass.colorTransform && _screenPass.colorTransform.alphaMultiplier < 1);
+			return super.requiresBlending || _alphaBlending || (_screenPass.colorTransform && _screenPass.colorTransform.alphaMultiplier < 1);
 		}
 
 		/**
@@ -313,6 +314,20 @@
 		public function set specularColor(value : uint) : void
 		{
 			_screenPass.specularMethod.specularColor = value;
+		}
+
+		/**
+		 * Indicate whether or not the material has transparency. If binary transparency is sufficient, for
+		 * example when using textures of foliage, consider using alphaThreshold instead.
+		 */
+		public function get alphaBlending() : Boolean
+		{
+			return _alphaBlending;
+		}
+
+		public function set alphaBlending(value : Boolean) : void
+		{
+			_alphaBlending = value;
 		}
 
 		/**

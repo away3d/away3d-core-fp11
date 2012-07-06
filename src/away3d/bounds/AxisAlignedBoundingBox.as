@@ -2,12 +2,11 @@ package away3d.bounds
 {
 
 	import away3d.arcane;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.primitives.WireframeCube;
-	import away3d.primitives.WireframePrimitiveBase;
+	import away3d.core.math.*;
+	import away3d.core.pick.*;
+	import away3d.primitives.*;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -25,22 +24,10 @@ package away3d.bounds
 		private var _halfExtentsZ:Number = 0;
 
 		/**
-		 * Creates a new AxisAlignedBoundingBox object.
+		 * Creates a new <code>AxisAlignedBoundingBox</code> object.
 		 */
-		public function AxisAlignedBoundingBox() {
-		}
-
-		override protected function updateBoundingRenderable():void {
-			_boundingRenderable.scaleX = Math.max( _halfExtentsX * 2, 0.001 );
-			_boundingRenderable.scaleY = Math.max( _halfExtentsY * 2, 0.001 );
-			_boundingRenderable.scaleZ = Math.max( _halfExtentsZ * 2, 0.001 );
-			_boundingRenderable.x = _centerX;
-			_boundingRenderable.y = _centerY;
-			_boundingRenderable.z = _centerZ;
-		}
-
-		override protected function createBoundingRenderable():WireframePrimitiveBase {
-			return new WireframeCube( 1, 1, 1 );
+		public function AxisAlignedBoundingBox()
+		{
 		}
 
 		/**
@@ -138,105 +125,110 @@ package away3d.bounds
 			return true;
 		}
 
-		override public function rayIntersection( p:Vector3D, v:Vector3D ):Number {
+		override public function rayIntersection(position:Vector3D, direction:Vector3D, targetNormal:Vector3D):Number {
+			if (containsPoint(position)) return 0;
 
-			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
-			var vx:Number = v.x, vy:Number = v.y, vz:Number = v.z;
+			var px:Number = position.x - _centerX, py:Number = position.y - _centerY, pz:Number = position.z - _centerZ;
+			var vx:Number = direction.x, vy:Number = direction.y, vz:Number = direction.z;
 			var ix:Number, iy:Number, iz:Number;
-			var t:Number;
+			var rayEntryDistance:Number;
 
 			// ray-plane tests
 			var intersects:Boolean;
 			if( vx < 0 ) {
-				t = ( _halfExtentsX - px ) / vx;
-				if( t > 0 ) {
-					iy = py + t * vy;
-					iz = pz + t * vz;
+				rayEntryDistance = ( _halfExtentsX - px ) / vx;
+				if( rayEntryDistance > 0 ) {
+					iy = py + rayEntryDistance * vy;
+					iz = pz + rayEntryDistance * vz;
 					if( iy > -_halfExtentsY && iy < _halfExtentsY && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
-						_rayIntersectionNormal.x = 1;
-						_rayIntersectionNormal.y = 0;
-						_rayIntersectionNormal.z = 0;
+						targetNormal.x = 1;
+						targetNormal.y = 0;
+						targetNormal.z = 0;
+
 						intersects = true;
 					}
 				}
 			}
 			if( !intersects && vx > 0 ) {
-				t = ( -_halfExtentsX - px ) / vx;
-				if( t > 0 ) {
-					iy = py + t * vy;
-					iz = pz + t * vz;
+				rayEntryDistance = ( -_halfExtentsX - px ) / vx;
+				if( rayEntryDistance > 0 ) {
+					iy = py + rayEntryDistance * vy;
+					iz = pz + rayEntryDistance * vz;
 					if( iy > -_halfExtentsY && iy < _halfExtentsY && iz > -_halfExtentsZ && iz < _halfExtentsZ) {
-						_rayIntersectionNormal.x = -1;
-						_rayIntersectionNormal.y = 0;
-						_rayIntersectionNormal.z = 0;
+						targetNormal.x = -1;
+						targetNormal.y = 0;
+						targetNormal.z = 0;
 						intersects = true;
 					}
 				}
 			}
 			if( !intersects && vy < 0 ) {
-				t = ( _halfExtentsY - py ) / vy;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iz = pz + t * vz;
+				rayEntryDistance = ( _halfExtentsY - py ) / vy;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iz = pz + rayEntryDistance * vz;
 					if( ix > -_halfExtentsX && ix < _halfExtentsX && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
-						_rayIntersectionNormal.x = 0;
-						_rayIntersectionNormal.y = 1;
-						_rayIntersectionNormal.z = 0;
+						targetNormal.x = 0;
+						targetNormal.y = 1;
+						targetNormal.z = 0;
 						intersects = true;
 					}
 				}
 			}
 			if( !intersects && vy > 0 ) {
-				t = ( -_halfExtentsY - py ) / vy;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iz = pz + t * vz;
+				rayEntryDistance = ( -_halfExtentsY - py ) / vy;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iz = pz + rayEntryDistance * vz;
 					if( ix > -_halfExtentsX && ix < _halfExtentsX && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
-						_rayIntersectionNormal.x = 0;
-						_rayIntersectionNormal.y = -1;
-						_rayIntersectionNormal.z = 0;
+						targetNormal.x = 0;
+						targetNormal.y = -1;
+						targetNormal.z = 0;
 						intersects = true;
 					}
 				}
 			}
 			if( !intersects && vz < 0 ) {
-				t = ( _halfExtentsZ - pz ) / vz;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iy = py + t * vy;
+				rayEntryDistance = ( _halfExtentsZ - pz ) / vz;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iy = py + rayEntryDistance * vy;
 					if( iy > -_halfExtentsY && iy < _halfExtentsY && ix > -_halfExtentsX && ix < _halfExtentsX) {
-						_rayIntersectionNormal.x = 0;
-						_rayIntersectionNormal.y = 0;
-						_rayIntersectionNormal.z = 1;
+						targetNormal.x = 0;
+						targetNormal.y = 0;
+						targetNormal.z = 1;
 						intersects = true;
 					}
 				}
 			}
 			if( !intersects && vz > 0 ) {
-				t = ( -_halfExtentsZ - pz ) / vz;
-				if( t > 0 ) {
-					ix = px + t * vx;
-					iy = py + t * vy;
+				rayEntryDistance = ( -_halfExtentsZ - pz ) / vz;
+				if( rayEntryDistance > 0 ) {
+					ix = px + rayEntryDistance * vx;
+					iy = py + rayEntryDistance * vy;
 					if( iy > -_halfExtentsY && iy < _halfExtentsY && ix > -_halfExtentsX && ix < _halfExtentsX ) {
-						_rayIntersectionNormal.x = 0;
-						_rayIntersectionNormal.y = 0;
-						_rayIntersectionNormal.z = -1;
+						targetNormal.x = 0;
+						targetNormal.y = 0;
+						targetNormal.z = -1;
 						intersects = true;
 					}
 				}
 			}
 
-			return intersects ? t : -1;
+			return intersects ? rayEntryDistance : -1;
 		}
-
-		override public function containsPoint( p:Vector3D ):Boolean {
-			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function containsPoint( position:Vector3D ):Boolean {
+			var px:Number = position.x - _centerX, py:Number = position.y - _centerY, pz:Number = position.z - _centerZ;
 			if( px > _halfExtentsX || px < -_halfExtentsX ) return false;
 			if( py > _halfExtentsY || py < -_halfExtentsY ) return false;
 			if( pz > _halfExtentsZ || pz < -_halfExtentsZ ) return false;
 			return true;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -249,28 +241,32 @@ package away3d.bounds
 			_halfExtentsZ = (maxZ - minZ) * .5;
 			super.fromExtremes( minX, minY, minZ, maxX, maxY, maxZ );
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override public function clone():BoundingVolumeBase {
+		override public function clone():BoundingVolumeBase
+		{
 			var clone:AxisAlignedBoundingBox = new AxisAlignedBoundingBox();
 			clone.fromExtremes( _min.x, _min.y, _min.z, _max.x, _max.y, _max.z );
 			return clone;
 		}
-
-		public function get halfExtentsX():Number {
+		
+		public function get halfExtentsX():Number
+		{
 			return _halfExtentsX;
 		}
-
-		public function get halfExtentsY():Number {
+		
+		public function get halfExtentsY():Number
+		{
 			return _halfExtentsY;
 		}
-
-		public function get halfExtentsZ():Number {
+		
+		public function get halfExtentsZ():Number
+		{
 			return _halfExtentsZ;
 		}
-
+		
 		public function closestPointToPoint(point : Vector3D, target : Vector3D = null) : Vector3D
 		{
 			var p : Number;
@@ -292,6 +288,19 @@ package away3d.bounds
 			target.z = p;
 
 			return target;
+		}
+		
+		override protected function updateBoundingRenderable():void {
+			_boundingRenderable.scaleX = Math.max( _halfExtentsX * 2, 0.001 );
+			_boundingRenderable.scaleY = Math.max( _halfExtentsY * 2, 0.001 );
+			_boundingRenderable.scaleZ = Math.max( _halfExtentsZ * 2, 0.001 );
+			_boundingRenderable.x = _centerX;
+			_boundingRenderable.y = _centerY;
+			_boundingRenderable.z = _centerZ;
+		}
+		
+		override protected function createBoundingRenderable():WireframePrimitiveBase {
+			return new WireframeCube( 1, 1, 1 );
 		}
 	}
 }

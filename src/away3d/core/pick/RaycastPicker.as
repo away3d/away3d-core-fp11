@@ -14,7 +14,12 @@ package away3d.core.pick
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
-
+	
+	/**
+	 * Picks a 3d object from a view or scene by 3D raycast calculations.
+	 * Performs an initial coarse boundary calculation to return a subset of entities whose bounding volumes intersect with the specified ray,
+	 * then triggers an optional picking collider on individual entity objects to further determine the precise values of the picking ray collision.
+	 */
 	public class RaycastPicker implements IPicker
 	{
 		// TODO: add option of finding best hit?
@@ -25,6 +30,12 @@ package away3d.core.pick
 		protected var _numEntities:uint;
 		protected var _hasCollisions:Boolean;
 
+		/**
+		 * Creates a new <code>RaycastPicker</code> object.
+		 * 
+		 * @param findClosestCollision Determines whether the picker searches for the closest bounds collision along the ray,
+		 * or simply returns the first collision encountered Defaults to false.
+		 */
 		public function RaycastPicker( findClosestCollision:Boolean ) {
 
 			_findClosestCollision = findClosestCollision;
@@ -45,18 +56,18 @@ package away3d.core.pick
 				return null;
 
 			//update ray
-			var rayPosition:Vector3D = view.camera.scenePosition;
-			var rayDirection:Vector3D = view.getRay( x, y );
+			var rayPosition:Vector3D = view.unproject( x, y, 0 );
+			var rayDirection:Vector3D = view.unproject( x, y, 1 );
+			rayDirection = rayDirection.subtract( rayPosition );
 
 			//reset
 			_hasCollisions = false;
 
-			//evaluate
 			// Perform ray-bounds collision checks.
 			var localRayPosition:Vector3D;
 			var localRayDirection:Vector3D;
-			var collisionT:Number;
-			var rayOriginIsInsideBounds:Boolean;
+
+			var rayEntryDistance:Number;
 			var pickingCollisionVO:PickingCollisionVO;
 
 			// Sweep all filtered entities.
@@ -66,7 +77,8 @@ package away3d.core.pick
 			while (node) {
 				entity = node.entity;
 
-				if( entity.visible && entity._implicitMouseEnabled ) {
+				if( entity.visible && entity._ancestorsAllowMouseEnabled && entity.mouseEnabled ) {
+					pickingCollisionVO = entity.pickingCollisionVO;
 					// convert ray to entity space
 					var invSceneTransform : Matrix3D = entity.inverseSceneTransform;
 					var bounds:BoundingVolumeBase = entity.bounds;
@@ -74,27 +86,16 @@ package away3d.core.pick
 					localRayDirection = invSceneTransform.deltaTransformVector( rayDirection );
 
 					// check for ray-bounds collision
-					collisionT = bounds.rayIntersection( localRayPosition, localRayDirection );
+					rayEntryDistance = bounds.rayIntersection( localRayPosition, localRayDirection, pickingCollisionVO.localNormal ||= new Vector3D());
 
-					// accept cases on which the ray starts inside the bounds
-					rayOriginIsInsideBounds = false;
-					if( collisionT == -1 ) {
-						rayOriginIsInsideBounds = bounds.containsPoint( localRayPosition );
-						if( rayOriginIsInsideBounds ) {
-							collisionT = 0;
-						}
-					}
-
-					if( collisionT >= 0 ) {
+					if( rayEntryDistance >= 0 ) {
 						_hasCollisions = true;
 
 						// Store collision data.
-						pickingCollisionVO = entity.pickingCollisionVO;
-						pickingCollisionVO.collisionT = collisionT;
+						pickingCollisionVO.rayEntryDistance = rayEntryDistance;
 						pickingCollisionVO.localRayPosition = localRayPosition;
 						pickingCollisionVO.localRayDirection = localRayDirection;
-						pickingCollisionVO.rayOriginIsInsideBounds = rayOriginIsInsideBounds;
-						pickingCollisionVO.localNormal = bounds._rayIntersectionNormal;
+						pickingCollisionVO.rayOriginIsInsideBounds = rayEntryDistance == 0;
 
 						// Store in new data set.
 						_entities[_numEntities++] = entity;
@@ -120,32 +121,31 @@ package away3d.core.pick
 			// Replaces collision data provided by bounds collider with more precise data.
 			// ---------------------------------------------------------------------
 
-			// does not search for closest collision, first found will do... // TODO: implement _findClosestCollision
-			// Example: Bound B is inside bound A. Bound A's collision t is closer than bound B. Both have tri colliders. Bound A surface hit
-			// is further than bound B surface hit. Atm, this algorithm would fail in detecting that B's surface hit is actually closer.
-			// Suggestions: calculate ray bounds near and far t's and evaluate bound intersections within ray trajectory.
-
 			var shortestCollisionDistance:Number = Number.MAX_VALUE;
+			var bestCollisionVO:PickingCollisionVO;
 
 			for( i = 0; i < _numEntities; ++i ) {
 				entity = _entities[i];
-				pickingCollisionVO = entity._pickingCollisionVO;
-				if( entity._pickingCollider) {
+				pickingCollisionVO = entity._pickingCollision;
+				if(entity.pickingCollider) {
 					// If a collision exists, update the collision data and stop all checks.
-					if( entity.collidesBefore(shortestCollisionDistance) ) {
+					if( (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) && entity.collidesBefore(shortestCollisionDistance, _findClosestCollision) ) {
+						shortestCollisionDistance = pickingCollisionVO.rayEntryDistance;
+						bestCollisionVO = pickingCollisionVO;
 						//TODO: break loop unless best hit is required
-						//if (!_findClosestCollision)
+						if (!_findClosestCollision) {
 							updateLocalPosition(pickingCollisionVO);
 							return pickingCollisionVO;
+						}
 					}
 				}
-				else { // A bounds collision with no triangle collider stops all checks.
+				else if (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) { // A bounds collision with no triangle collider stops all checks.
 					updateLocalPosition(pickingCollisionVO);
 					return pickingCollisionVO;
 				}
 			}
 
-			return null;
+			return bestCollisionVO;
 		}
 
 		private function updateLocalPosition(pickingCollisionVO : PickingCollisionVO) : void
@@ -153,7 +153,7 @@ package away3d.core.pick
 			var collisionPos : Vector3D = pickingCollisionVO.localPosition ||= new Vector3D();
 			var rayDir : Vector3D = pickingCollisionVO.localRayDirection;
 			var rayPos : Vector3D = pickingCollisionVO.localRayPosition;
-			var t : Number = pickingCollisionVO.collisionT;
+			var t : Number = pickingCollisionVO.rayEntryDistance;
 			collisionPos.x = rayPos.x + t*rayDir.x;
 			collisionPos.y = rayPos.y + t*rayDir.y;
 			collisionPos.z = rayPos.z + t*rayDir.z;
@@ -165,14 +165,13 @@ package away3d.core.pick
 		public function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO
 		{
 			//cast ray through the scene
-
 			// Evaluate new colliding object.
 			return null;
 		}
 
 		private function sortOnNearT( entity1:Entity, entity2:Entity ):Number
 		{
-			return entity1.pickingCollisionVO.collisionT > entity2.pickingCollisionVO.collisionT ? 1 : -1;
+			return entity1.pickingCollisionVO.rayEntryDistance > entity2.pickingCollisionVO.rayEntryDistance ? 1 : -1;
 		}
 	}
 }

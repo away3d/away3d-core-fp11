@@ -87,7 +87,7 @@ package away3d.core.managers
 				event = _queuedEvents[i];
 				dispatcher = event.object;
 
-				while (dispatcher && !dispatcher._implicitMouseEnabled)
+				while (dispatcher && !dispatcher._ancestorsAllowMouseEnabled)
 					dispatcher = dispatcher.parent;
 
 				if (dispatcher)
@@ -110,22 +110,24 @@ package away3d.core.managers
 			event.screenX = sourceEvent.localX;
 			event.screenY = sourceEvent.localY;
 
-			collider = collider || _collidingObject;
+			collider ||= _collidingObject;
 
 			// 3D properties.
-			// TODO set all 3d event properties
-			if (collider)
+			if( collider ) {
+				// Object.
 				event.object = collider.entity;
-			else
-				event.object = null;
-
-			if (_collidingObject) {
-				event.uv = _collidingObject.uv;
-				event.localPosition = _collidingObject.localPosition;
-				event.localNormal = _collidingObject.localNormal;
+				event.renderable = collider.renderable;
+				// UV.
+				event.uv = collider.uv;
+				// Position.
+				event.localPosition = collider.localPosition;
+				// Normal.
+				event.localNormal = collider.localNormal;
 			}
 			else {
+				// Set all to null.
 				event.uv = null;
+				event.object = null;
 				event.localPosition = _nullVector;
 				event.localNormal = _nullVector;
 			}

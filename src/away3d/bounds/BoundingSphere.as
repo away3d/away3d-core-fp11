@@ -2,17 +2,16 @@ package away3d.bounds
 {
 
 	import away3d.arcane;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.primitives.WireframePrimitiveBase;
-	import away3d.primitives.WireframeSphere;
+	import away3d.core.math.*;
+	import away3d.core.pick.*;
+	import away3d.primitives.*;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
 	/**
-	 * BoundingSphere represents a spherical bounding volume defined by a center point and a radius?
+	 * BoundingSphere represents a spherical bounding volume defined by a center point and a radius.
 	 * This bounding volume is useful for point lights.
 	 */
 	public class BoundingSphere extends BoundingVolumeBase
@@ -23,27 +22,18 @@ package away3d.bounds
 		private var _centerZ : Number = 0;
 
 		/**
-		 * Creates a new BoundingSphere object
+		 * The radius of the bounding sphere, calculated from the contents of the entity.
+		 */
+		public function get radius() : Number
+		{
+			return _radius;
+		}
+
+		/**
+		 * Creates a new <code>BoundingSphere</code> object
 		 */
 		public function BoundingSphere()
 		{
-		}
-
-		override protected function updateBoundingRenderable() : void
-		{
-			var sc : Number = _radius;
-			if (sc == 0) sc = 0.001;
-			_boundingRenderable.scaleX = sc;
-			_boundingRenderable.scaleY = sc;
-			_boundingRenderable.scaleZ = sc;
-			_boundingRenderable.x = _centerX;
-			_boundingRenderable.y = _centerY;
-			_boundingRenderable.z = _centerZ;
-		}
-
-		override protected function createBoundingRenderable() : WireframePrimitiveBase
-		{
-			return new WireframeSphere(1);
 		}
 
 		/**
@@ -71,7 +61,7 @@ package away3d.bounds
 			var a : Number, b : Number, c : Number, d : Number;
 			var dd : Number, rr : Number = _radius;
 
-			// todo: this can be (much) faster: http://www.racer.nl/reference/vfc_markmorley.htm
+			// TODO: this can be (much) faster: http://www.racer.nl/reference/vfc_markmorley.htm
 
 			// left plane
 			a = c41 + c11;
@@ -143,68 +133,6 @@ package away3d.bounds
 			return true;
 		}
 
-
-		/*override public function isInFrustum( mvpMatrix:Matrix3D ):Boolean {
-		 var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-		 mvpMatrix.copyRawDataTo( raw );
-		 var c11:Number = raw[uint( 0 )], c12:Number = raw[uint( 4 )], c13:Number = raw[uint( 8 )], c14:Number = raw[uint( 12 )];
-		 var c21:Number = raw[uint( 1 )], c22:Number = raw[uint( 5 )], c23:Number = raw[uint( 9 )], c24:Number = raw[uint( 13 )];
-		 var c31:Number = raw[uint( 2 )], c32:Number = raw[uint( 6 )], c33:Number = raw[uint( 10 )], c34:Number = raw[uint( 14 )];
-		 var c41:Number = raw[uint( 3 )], c42:Number = raw[uint( 7 )], c43:Number = raw[uint( 11 )], c44:Number = raw[uint( 15 )];
-		 var a:Number, b:Number, c:Number, d:Number;
-		 var negRad:Number = -_radius;
-
-		 // left plane
-		 a = c41 + c11;
-		 b = c42 + c12;
-		 c = c43 + c13;
-		 d = c44 + c14;
-		 if( a * _centerX + b * _centerY + c * _centerZ + d <= negRad )
-		 return false;
-
-		 // right plane
-		 a = c41 - c11;
-		 b = c42 - c12;
-		 c = c43 - c13;
-		 d = c44 - c14;
-		 if( a * _centerX + b * _centerY + c * _centerZ + d <= negRad )
-		 return false;
-
-		 // bottom plane
-		 a = c41 + c21;
-		 b = c42 + c22;
-		 c = c43 + c23;
-		 d = c44 + c24;
-		 if( a * _centerX + b * _centerY + c * _centerZ + d <= negRad )
-		 return false;
-
-		 // top plane
-		 a = c41 - c21;
-		 b = c42 - c22;
-		 c = c43 - c23;
-		 d = c44 - c24;
-		 if( a * _centerX + b * _centerY + c * _centerZ + d <= negRad )
-		 return false;
-
-		 // near plane
-		 a = c31;
-		 b = c32;
-		 c = c33;
-		 d = c34;
-		 if( a * _centerX + b * _centerY + c * _centerZ + d <= negRad )
-		 return false;
-
-		 // far plane
-		 a = c41 - c31;
-		 b = c42 - c32;
-		 c = c43 - c33;
-		 d = c44 - c34;
-		 if( a * _centerX + b * _centerY + c * _centerZ + d <= negRad )
-		 return false;
-
-		 return true;
-		 }    */
-
 		/**
 		 * @inheritDoc
 		 */
@@ -224,7 +152,7 @@ package away3d.bounds
 			if (_boundingRenderable) updateBoundingRenderable();
 		}
 
-		// todo: fromGeometry can probably be updated a lot
+		// TODO: fromGeometry can probably be updated a lot
 		// find center from extremes, but radius from actual furthest distance from center
 
 		/**
@@ -256,50 +184,60 @@ package away3d.bounds
 			return clone;
 		}
 
-		override public function rayIntersection(p : Vector3D, v : Vector3D) : Number
-		{
+		override public function rayIntersection(position:Vector3D, direction:Vector3D, targetNormal:Vector3D):Number {
+			if (containsPoint(position)) return 0;
 
-			var px : Number = p.x - _centerX, py : Number = p.y - _centerY, pz : Number = p.z - _centerZ;
-			var vx : Number = v.x, vy : Number = v.y, vz : Number = v.z;
-			var t : Number;
+			var px : Number = position.x - _centerX, py : Number = position.y - _centerY, pz : Number = position.z - _centerZ;
+			var vx : Number = direction.x, vy : Number = direction.y, vz : Number = direction.z;
+			var rayEntryDistance:Number;
 
 			var a : Number = vx * vx + vy * vy + vz * vz;
 			var b : Number = 2 * ( px * vx + py * vy + pz * vz );
 			var c : Number = px * px + py * py + pz * pz - _radius * _radius;
 			var det : Number = b * b - 4 * a * c;
+
 			if (det >= 0) { // ray goes through sphere
 				var sqrtDet : Number = Math.sqrt(det);
-				t = ( -b - sqrtDet ) / ( 2 * a );
-				if (t > 0) {
-					_rayIntersectionNormal.x = px + t * vx;
-					_rayIntersectionNormal.y = py + t * vy;
-					_rayIntersectionNormal.z = pz + t * vz;
-					_rayIntersectionNormal.normalize();
+				rayEntryDistance = ( -b - sqrtDet ) / ( 2 * a );
+				if (rayEntryDistance >= 0) {
+					targetNormal.x = px + rayEntryDistance * vx;
+					targetNormal.y = py + rayEntryDistance * vy;
+					targetNormal.z = pz + rayEntryDistance * vz;
+					targetNormal.normalize();
 
-					return t;
+					return rayEntryDistance;
 				}
 			}
-			/*else if( det == 0 ) { // ray touches the sphere at a tangent ( very rare )
-			 t = -b / ( 2 * a );
-			 if( t > 0 ) {
-			 return t;
-			 }
-			 }*/
 
 			// ray misses sphere
 			return -1;
 		}
 
-		override public function containsPoint(p : Vector3D) : Boolean
+		/**
+		 * @inheritDoc
+		 */
+		override public function containsPoint(position : Vector3D) : Boolean
 		{
-			var px : Number = p.x - _centerX, py : Number = p.y - _centerY, pz : Number = p.z - _centerZ;
+			var px : Number = position.x - _centerX, py : Number = position.y - _centerY, pz : Number = position.z - _centerZ;
 			var distance : Number = Math.sqrt(px * px + py * py + pz * pz);
 			return distance <= _radius;
 		}
 
-		public function get radius() : Number
+		override protected function updateBoundingRenderable() : void
 		{
-			return _radius;
+			var sc : Number = _radius;
+			if (sc == 0) sc = 0.001;
+			_boundingRenderable.scaleX = sc;
+			_boundingRenderable.scaleY = sc;
+			_boundingRenderable.scaleZ = sc;
+			_boundingRenderable.x = _centerX;
+			_boundingRenderable.y = _centerY;
+			_boundingRenderable.z = _centerZ;
+		}
+
+		override protected function createBoundingRenderable() : WireframePrimitiveBase
+		{
+			return new WireframeSphere(1);
 		}
 	}
 }

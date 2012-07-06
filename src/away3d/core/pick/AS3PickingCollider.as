@@ -17,7 +17,7 @@ package away3d.core.pick
 		/**
 		 * Creates a new <code>AS3PickingCollider</code> object.
 		 * 
-		 * @param findClosestCollision Determines whether the picking collider searches for the closesst collision along the ray. Defaults to false.
+		 * @param findClosestCollision Determines whether the picking collider searches for the closest collision along the ray. Defaults to false.
 		 */
 		public function AS3PickingCollider( findClosestCollision:Boolean = false )
 		{
@@ -92,6 +92,7 @@ package away3d.core.pick
 					D = -( nx * p0x + ny * p0y + nz * p0z );
 					disToPlane = -( nx * rayPosition.x + ny * rayPosition.y + nz * rayPosition.z + D );
 					t = disToPlane / nDotV;
+					// TODO: can put t < shortestCollisionDistance here?
 					// find collision point
 					cx = rayPosition.x + t * rayDirection.x;
 					cy = rayPosition.y + t * rayDirection.y;
@@ -114,7 +115,7 @@ package away3d.core.pick
 					if( !( u < 0 ) && t > 0 && t < shortestCollisionDistance) { // all tests passed
 						shortestCollisionDistance = t;
 						collisionTriangleIndex = i;
-						pickingCollisionVO.collisionT = t;
+						pickingCollisionVO.rayEntryDistance = t;
 						pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
 						pickingCollisionVO.localNormal = new Vector3D( nx, ny, nz );
 						pickingCollisionVO.uv = getCollisionUV( indexData, uvData, index, v, w, u );

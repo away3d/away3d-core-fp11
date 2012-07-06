@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
@@ -20,29 +21,32 @@ package away3d.materials.methods
 		protected var _totalLightColorReg : ShaderRegisterElement;
 		protected var _specularTextureRegister : ShaderRegisterElement;
 		protected var _specularTexData : ShaderRegisterElement;
-		protected var _specularTexIndex : int;
 		protected var _specularDataRegister : ShaderRegisterElement;
-		protected var _specularDataIndex : int;
 
 		private var _texture : Texture2DBase;
 
-		protected var _specularData : Vector.<Number>;
+		private var _gloss : int = 50;
 		private var _specular : Number = 1;
 		private var _specularColor : uint = 0xffffff;
 		arcane var _specularR : Number = 1, _specularG : Number = 1, _specularB : Number = 1;
 		private var _shadowRegister : ShaderRegisterElement;
 		private var _shadingModel:String;
-		
+
 		
 		/**
 		 * Creates a new BasicSpecularMethod object.
 		 */
 		public function BasicSpecularMethod()
 		{
-			super(true, true, false);
-			_specularData = Vector.<Number>([1, 1, 1, 50]);
-			
+			super();
 			_shadingModel = SpecularShadingModel.BLINN_PHONG;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsUV = _useTexture;
+			vo.needsNormals = vo.numLights > 0;
+			vo.needsView = vo.numLights > 0;
 		}
 
 		/**
@@ -50,12 +54,12 @@ package away3d.materials.methods
 		 */
 		public function get gloss() : Number
 		{
-			return _specularData[uint(3)];
+			return _gloss;
 		}
 
 		public function set gloss(value : Number) : void
 		{
-			_specularData[uint(3)] = value;
+			_gloss = value;
 		}
 
 		/**
@@ -134,41 +138,10 @@ package away3d.materials.methods
 		override public function copyFrom(method : ShadingMethodBase) : void
 		{
 			var spec : BasicSpecularMethod = BasicSpecularMethod(method);
-			smooth = spec.smooth;
-			repeat = spec.repeat;
-			mipmap = spec.mipmap;
-			numLights = spec.numLights;
 			texture = spec.texture;
 			specular = spec.specular;
 			specularColor = spec.specularColor;
 			gloss = spec.gloss;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set numLights(value : int) : void
-		{
-			_needsNormals = value > 0;
-			_needsView = value > 0;
-			super.numLights = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsUV() : Boolean
-		{
-			return _useTexture;
-		}
-
-
-		arcane override function reset() : void
-		{
-			super.reset();
-
-			_specularTexIndex = -1;
-			_specularDataIndex = -1;
 		}
 
 		/**
@@ -187,20 +160,20 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 
-			if (_numLights > 0) {
+			if (vo.numLights > 0) {
 				_specularDataRegister = regCache.getFreeFragmentConstant();
-				_specularDataIndex = _specularDataRegister.index;
+				vo.fragmentConstantsIndex = _specularDataRegister.index*4;
 
 				if (_useTexture) {
 					_specularTexData = regCache.getFreeFragmentVectorTemp();
 					regCache.addFragmentTempUsages(_specularTexData, 1);
 					_specularTextureRegister = regCache.getFreeTextureReg();
-					_specularTexIndex = _specularTextureRegister.index;
-					code = getTexSampleCode(_specularTexData, _specularTextureRegister);
+					vo.texturesIndex = _specularTextureRegister.index;
+					code = getTexSampleCode(vo, _specularTexData, _specularTextureRegister);
 				}
 				else
 					_specularTextureRegister = null;
@@ -215,7 +188,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
@@ -271,7 +244,7 @@ package away3d.materials.methods
 			// attenuate
 			code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
-			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
+			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache);
 
 			code += "mul " + t + ".xyz, " + lightColReg + ".xyz, " + t + ".w\n";
 				
@@ -286,7 +259,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
@@ -305,11 +278,6 @@ package away3d.materials.methods
 			code += "tex " + t + ", " + _viewDirFragmentReg + ", " + cubeMapReg + " <cube,linear,miplinear>\n" +
 					"mul " + t + ", " + t + ", " + weightRegister + "\n";
 
-//			if (_modulateMethod != null) {
-// 				code += _modulateMethod(t, regCache);
-//			}
-//			code += "mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n";
-
 			if (lightIndex > 0) {
 				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
 				regCache.removeFragmentTempUsage(t);
@@ -322,11 +290,11 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 
-			if (_numLights == 0)
+			if (vo.numLights == 0)
 				return code;
 
 			if (_shadowRegister)
@@ -349,32 +317,32 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 
-			if (_numLights == 0) return;
+			if (vo.numLights == 0) return;
 
-			if (_useTexture) stage3DProxy.setTextureAt(_specularTexIndex, _texture.getTextureForStage3D(stage3DProxy));
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _specularDataIndex, _specularData, 1);
+			if (_useTexture) stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+			var index : int = vo.fragmentConstantsIndex;
+			var data : Vector.<Number> = vo.fragmentData;
+			data[index] = _specularR;
+			data[index+1] = _specularG;
+			data[index+2] = _specularB;
+			data[index+3] = _gloss;
 		}
-
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			if (_useTexture) stage3DProxy.setTextureAt(_specularTexIndex, null);
-//		}
 
 		/**
 		 * Updates the specular color data used by the render state.
 		 */
 		private function updateSpecular() : void
 		{
-			_specularData[0] = _specularR = ((_specularColor >> 16) & 0xff) / 0xff * _specular;
-			_specularData[1] = _specularG = ((_specularColor >> 8) & 0xff) / 0xff * _specular;
-			_specularData[2] = _specularB = (_specularColor & 0xff) / 0xff * _specular;
+			_specularR = ((_specularColor >> 16) & 0xff) / 0xff * _specular;
+			_specularG = ((_specularColor >> 8) & 0xff) / 0xff * _specular;
+			_specularB = (_specularColor & 0xff) / 0xff * _specular;
 		}
 
-		public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		arcane function set shadowRegister(shadowReg : ShaderRegisterElement) : void
 		{
 			_shadowRegister = shadowReg;
 		}

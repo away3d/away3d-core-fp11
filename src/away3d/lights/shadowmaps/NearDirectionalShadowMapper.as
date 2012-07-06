@@ -29,6 +29,8 @@ package away3d.lights.shadowmaps
 			_localFrustum = new Vector.<Number>(24);
 		}
 
+
+
 		/**
 		 * A value between 0 and 1 to indicate the ratio of the view frustum that needs to be covered by the shadow map.
 		 */

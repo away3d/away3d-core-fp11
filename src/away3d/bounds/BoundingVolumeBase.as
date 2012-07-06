@@ -2,13 +2,12 @@ package away3d.bounds
 {
 
 	import away3d.arcane;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.errors.AbstractMethodError;
-	import away3d.primitives.WireframePrimitiveBase;
+	import away3d.core.base.*;
+	import away3d.core.pick.*;
+	import away3d.errors.*;
+	import away3d.primitives.*;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -22,48 +21,6 @@ package away3d.bounds
 		protected var _aabbPoints:Vector.<Number> = new Vector.<Number>();
 		protected var _aabbPointsDirty:Boolean = true;
 		protected var _boundingRenderable:WireframePrimitiveBase;
-
-		arcane var _rayIntersectionNormal:Vector3D = new Vector3D();
-
-		/**
-		 * Creates a new BoundingVolumeBase object
-		 */
-		public function BoundingVolumeBase() {
-			_min = new Vector3D();
-			_max = new Vector3D();
-		}
-
-		public function get boundingRenderable():WireframePrimitiveBase {
-			if( !_boundingRenderable ) {
-				_boundingRenderable = createBoundingRenderable();
-				updateBoundingRenderable();
-			}
-
-			return _boundingRenderable;
-		}
-
-		protected function updateBoundingRenderable():void {
-			throw new AbstractMethodError();
-		}
-
-		protected function createBoundingRenderable():WireframePrimitiveBase {
-			throw new AbstractMethodError();
-		}
-
-		/**
-		 * Sets the bounds to zero size.
-		 */
-		public function nullify():void {
-			_min.x = _min.y = _min.z = 0;
-			_max.x = _max.y = _max.z = 0;
-			_aabbPointsDirty = true;
-			if( _boundingRenderable ) updateBoundingRenderable();
-		}
-
-		public function disposeRenderable():void {
-			if( _boundingRenderable ) _boundingRenderable.dispose();
-			_boundingRenderable = null;
-		}
 
 		/**
 		 * The maximum extreme of the bounds
@@ -80,7 +37,60 @@ package away3d.bounds
 		}
 
 		/**
+		 * Returns a vector of values representing the concatenated cartesian triplet of the 8 axial extremities of the bounding volume.
+		 */
+		public function get aabbPoints():Vector.<Number>
+		{
+			if( _aabbPointsDirty )
+				updateAABBPoints();
+
+			return _aabbPoints;
+		}
+
+		/**
+		 * Returns the bounding renderable object for the bounding volume, in cases where the showBounds
+		 * property of the entity is set to true.
+		 *
+		 * @see away3d.entities.Entity#showBounds
+		 */
+		public function get boundingRenderable():WireframePrimitiveBase {
+			if( !_boundingRenderable ) {
+				_boundingRenderable = createBoundingRenderable();
+				updateBoundingRenderable();
+			}
+
+			return _boundingRenderable;
+		}
+
+		/**
+		 * Creates a new <code>BoundingVolumeBase</code> object
+		 */
+		public function BoundingVolumeBase() {
+			_min = new Vector3D();
+			_max = new Vector3D();
+		}
+
+		/**
+		 * Sets the bounds to zero size.
+		 */
+		public function nullify():void {
+			_min.x = _min.y = _min.z = 0;
+			_max.x = _max.y = _max.z = 0;
+			_aabbPointsDirty = true;
+			if( _boundingRenderable ) updateBoundingRenderable();
+		}
+
+		/**
+		 * Disposes of the bounds renderable object. Used to clear memory after a bounds rendeable is no longer required.
+		 */
+		public function disposeRenderable():void {
+			if( _boundingRenderable ) _boundingRenderable.dispose();
+			_boundingRenderable = null;
+		}
+
+		/**
 		 * Updates the bounds to fit a list of vertices
+		 *
 		 * @param vertices A Vector.&lt;Number&gt; of vertex data to be bounded.
 		 */
 		public function fromVertices( vertices:Vector.<Number> ):void {
@@ -117,12 +127,13 @@ package away3d.bounds
 
 		/**
 		 * Updates the bounds to fit a Geometry object.
+		 *
 		 * @param geometry The Geometry object to be bounded.
 		 */
 		public function fromGeometry( geometry:Geometry ):void {
 			var subs:Vector.<SubGeometry> = geometry.subGeometries;
 			var lenS:uint = subs.length;
-			
+
 			if (lenS > 0 && subs[0].vertexData.length >= 3) {
 				var j:uint;
 				var lenV:uint;
@@ -131,11 +142,11 @@ package away3d.bounds
 				var v:Number;
 				var minX:Number, minY:Number, minZ:Number;
 				var maxX:Number, maxY:Number, maxZ:Number;
-	
+
 				minX = maxX = subs[0].vertexData[0];
 				minY = maxY = subs[0].vertexData[1];
 				minZ = maxZ = subs[0].vertexData[2];
-	
+
 				while( j < lenS ) {
 					vertices = subs[j++].vertexData;
 					lenV = vertices.length;
@@ -152,7 +163,7 @@ package away3d.bounds
 						else if( v > maxZ ) maxZ = v;
 					}
 				}
-	
+
 				fromExtremes( minX, minY, minZ, maxX, maxY, maxZ );
 			}
 			else {
@@ -162,6 +173,7 @@ package away3d.bounds
 
 		/**
 		 * Sets the bound to fit a given sphere.
+		 *
 		 * @param center The center of the sphere to be bounded
 		 * @param radius The radius of the sphere to be bounded
 		 */
@@ -173,6 +185,13 @@ package away3d.bounds
 
 		/**
 		 * Sets the bounds to the given extrema.
+		 *
+		 * @param minX The minimum x value of the bounds
+		 * @param minY The minimum y value of the bounds
+		 * @param minZ The minimum z value of the bounds
+		 * @param maxX The maximum x value of the bounds
+		 * @param maxY The maximum y value of the bounds
+		 * @param maxZ The maximum z value of the bounds
 		 */
 		public function fromExtremes( minX:Number, minY:Number, minZ:Number, maxX:Number, maxY:Number, maxZ:Number ):void {
 			_min.x = minX;
@@ -187,10 +206,12 @@ package away3d.bounds
 
 		/**
 		 * Tests if the bounds are in the camera frustum.
+		 *
 		 * @param mvpMatrix The model view projection matrix for the object to which this bounding box belongs.
 		 * @return True if the bounding box is at least partially inside the frustum
 		 */
-		public function isInFrustum( mvpMatrix:Matrix3D ):Boolean {
+		public function isInFrustum( mvpMatrix:Matrix3D ):Boolean
+		{
 			throw new AbstractMethodError();
 		}
 
@@ -204,22 +225,30 @@ package away3d.bounds
 		 * Clones the current BoundingVolume object
 		 * @return An exact duplicate of this object
 		 */
-		public function clone():BoundingVolumeBase {
+		public function clone():BoundingVolumeBase
+		{
 			throw new AbstractMethodError();
 		}
 
-		public function get aabbPoints():Vector.<Number> {
-			if( _aabbPointsDirty )
-				updateAABBPoints();
-
-			return _aabbPoints;
-		}
-
-		public function rayIntersection( p:Vector3D, dir:Vector3D ):Number {
+		/**
+		 * Method for calculating whether an intersection of the given ray occurs with the bounding volume.
+		 *
+		 * @param position The starting position of the casting ray in local coordinates.
+		 * @param direction A unit vector representing the direction of the casting ray in local coordinates.
+		 * @param targetNormal The vector to store the bounds' normal at the point of collision
+		 * @return A Boolean value representing the detection of an intersection.
+		 */
+		public function rayIntersection(position:Vector3D, direction:Vector3D, targetNormal:Vector3D):Number {
 			return -1;
 		}
 
-		public function containsPoint( p:Vector3D ):Boolean {
+		/**
+		 * Method for calculating whether the given position is contained within the bounding volume.
+		 *
+		 * @param position The position in local coordinates to be checked.
+		 * @return A Boolean value representing the detection of a contained position.
+		 */
+		public function containsPoint( position:Vector3D ):Boolean {
 			return false;
 		}
 
@@ -253,8 +282,14 @@ package away3d.bounds
 			_aabbPointsDirty = false;
 		}
 
-		public function get rayIntersectionNormal():Vector3D {
-			return _rayIntersectionNormal;
+		protected function updateBoundingRenderable():void {
+			throw new AbstractMethodError();
 		}
+
+		protected function createBoundingRenderable():WireframePrimitiveBase {
+			throw new AbstractMethodError();
+		}
+
+		
 	}
 }

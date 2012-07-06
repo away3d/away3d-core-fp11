@@ -233,11 +233,11 @@ package away3d.core.render
 		 * @param surfaceSelector The index of a CubeTexture's face to render to.
 		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
 		 */
-		arcane function render(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		arcane function render(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0) : void
 		{
 			if (!_stage3DProxy || !_context) return;
 
-			executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
+			executeRender(entityCollector, target, scissorRect, surfaceSelector);
 
 			// clear buffers
 			for (var i : uint = 0; i < 8; ++i) {
@@ -253,7 +253,7 @@ package away3d.core.render
 		 * @param surfaceSelector The index of a CubeTexture's face to render to.
 		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
 		 */
-		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
+		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0) : void
 		{
 			_renderTarget = target;
 			_renderTargetSurface = surfaceSelector;
@@ -267,8 +267,7 @@ package away3d.core.render
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
 			if (!_shareContext) {
-				if (additionalClearMask != 0)
-					_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0);
 			}
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			_stage3DProxy.scissorRect = scissorRect;

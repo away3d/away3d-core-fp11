@@ -148,7 +148,7 @@ package away3d.loaders.parsers
 					
 					// TODO: Create a mesh only when encountered (if it makes sense
 					// for this file format) and return it using finalizeAsset()
-					_mesh = new Mesh;
+					_mesh = new Mesh();
 					_mesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
 					
 					_geometry = _mesh.geometry;
@@ -240,8 +240,10 @@ package away3d.loaders.parsers
 			_materialNames = new Vector.<String>();
 			_byteData.position = _offsetSkins;
 			
+			var regExp:RegExp = new RegExp("[^a-zA-Z0-9\\_\\.]", "g");
 			for (var i : uint = 0; i < _numSkins; ++i) {
 				name = _byteData.readUTFBytes(64);
+				name = name.replace(regExp, "");
 				extIndex = name.lastIndexOf(".");
 				if (_ignoreTexturePath) {
 					slashIndex = name.lastIndexOf("/");

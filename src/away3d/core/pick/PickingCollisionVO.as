@@ -1,5 +1,7 @@
 package away3d.core.pick
 {
+
+	import away3d.core.base.IRenderable;
 	import away3d.entities.*;
 	
 	import flash.geom.*;
@@ -12,6 +14,9 @@ package away3d.core.pick
 	 */
 	public class PickingCollisionVO
 	{
+		/**
+		 * The entity to which this collision object belongs.
+		 */
 		public var entity:Entity;
 		
 		/**
@@ -47,9 +52,14 @@ package away3d.core.pick
 		public var rayOriginIsInsideBounds:Boolean;
 		
 		/**
-		 * The distance along the ray from the starting position to the calculated intersection with the entity.
+		 * The distance along the ray from the starting position to the calculated intersection entry point with the entity.
 		 */
-		public var collisionT:Number;
+		public var rayEntryDistance:Number;
+
+		/**
+		 * The IRenderable associated with a collision.
+		 */
+		public var renderable:IRenderable;
 
 		/**
 		 * Creates a new <code>PickingCollisionVO</code> object.
