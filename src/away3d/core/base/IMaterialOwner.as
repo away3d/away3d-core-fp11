@@ -1,7 +1,6 @@
 package away3d.core.base
 {
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.IAnimator;
 	import away3d.materials.MaterialBase;
 
 	/**
@@ -18,7 +17,6 @@ package away3d.core.base
 		/**
 		 * The animation used by the material to assemble the vertex code.
 		 */
-		function get animation() : AnimationBase;	// in most cases, this will in fact be NullAnimation
-		function get animationState() : AnimationStateBase;
+		function get animator() : IAnimator;	// in most cases, this will in fact be null
 	}
 }

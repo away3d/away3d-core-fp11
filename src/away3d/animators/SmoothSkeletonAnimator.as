@@ -1,9 +1,9 @@
 package away3d.animators
 {
 
+	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.data.AnimationSequenceBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
-	import away3d.animators.data.SkeletonAnimationState;
 	import away3d.animators.nodes.SkeletonNaryLERPNode;
 	import away3d.animators.nodes.SkeletonTimelineClipNode;
 	import away3d.animators.nodes.SkeletonTreeNode;
@@ -14,7 +14,7 @@ package away3d.animators
 	/**
 	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md5, md5anim).
 	 */
-	public class SmoothSkeletonAnimator extends SkeletonAnimatorBase
+	public class SmoothSkeletonAnimator extends SkeletonAnimator
 	{
 		private var _clips : Array;
 		private var _activeClipIndex : int = -1;
@@ -27,9 +27,9 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function SmoothSkeletonAnimator(target : SkeletonAnimationState)
+		public function SmoothSkeletonAnimator(skeleton : Skeleton, jointsPerVertex : uint = 4, forceCPU : Boolean = false)
 		{
-			super(target);
+			super(skeleton, jointsPerVertex, forceCPU);
 			_clips = [];
 			_fadeOutClips = new Vector.<int>();
 			_fadeOutSpeeds = new Vector.<Number>();

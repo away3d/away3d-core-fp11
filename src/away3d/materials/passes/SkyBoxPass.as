@@ -1,5 +1,6 @@
 package away3d.materials.passes
 {
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
@@ -41,7 +42,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode() : String
+		arcane override function getVertexCode(code:String) : String
 		{
 			return  "m44 vt7, va0, vc0		\n" +
 					// fit within texture range

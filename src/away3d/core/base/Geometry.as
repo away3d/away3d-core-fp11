@@ -1,7 +1,5 @@
 package away3d.core.base
 {
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.NullAnimation;
 	import away3d.arcane;
 	import away3d.events.GeometryEvent;
 	import away3d.library.assets.AssetType;
@@ -26,7 +24,6 @@ package away3d.core.base
 	public class Geometry extends NamedAssetBase implements IAsset
 	{
 		private var _subGeometries : Vector.<SubGeometry>;
-		arcane var _animation : AnimationBase;
 		
 		/**
 		 * Creates a new Geometry object.
@@ -34,7 +31,6 @@ package away3d.core.base
 		public function Geometry()
 		{
 			_subGeometries = new Vector.<SubGeometry>();
-			_animation = new NullAnimation();
 		}
 
 		public function applyTransformation(transform:Matrix3D):void
@@ -49,21 +45,6 @@ package away3d.core.base
 		public function get assetType() : String
 		{
 			return AssetType.GEOMETRY;
-		}
-		
-		/**
-		 * The AnimationBase object used to animate the geometry.
-		 */
-		public function get animation() : AnimationBase
-		{
-			return _animation;
-		}
-		
-		public function set animation(value : AnimationBase) : void
-		{
-			_animation = value;
-			if (hasEventListener(GeometryEvent.ANIMATION_CHANGED))
-				dispatchEvent(new GeometryEvent(GeometryEvent.ANIMATION_CHANGED));
 		}
 		
 		/**
@@ -110,7 +91,6 @@ package away3d.core.base
 		public function clone() : Geometry
 		{
 			var clone : Geometry = new Geometry();
-			clone._animation = _animation;
 			var len : uint = _subGeometries.length;
 			for (var i : int = 0; i < len; ++i) {
 				clone.addSubGeometry(_subGeometries[i].clone());

@@ -1,10 +1,8 @@
 package away3d.loaders.parsers
 {
+	import flash.utils.Dictionary;
 	import away3d.animators.VertexAnimator;
-	import away3d.animators.data.VertexAnimation;
-	import away3d.animators.data.VertexAnimationMode;
 	import away3d.animators.data.VertexAnimationSequence;
-	import away3d.animators.data.VertexAnimationState;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
@@ -28,6 +26,7 @@ package away3d.loaders.parsers
 	{
 		public static var FPS : int = 6;
 		
+		private var _sequences:Dictionary = new Dictionary(true);
 		private var _byteData : ByteArray;
 		private var _startedParsing : Boolean;
 		private var _parsedHeader : Boolean;
@@ -152,8 +151,8 @@ package away3d.loaders.parsers
 					_mesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
 					
 					_geometry = _mesh.geometry;
-					_geometry.animation = new VertexAnimation(2, VertexAnimationMode.ABSOLUTE);
-					_animator = new VertexAnimator(VertexAnimationState(_mesh.animationState));
+					//_geometry.animation = new VertexAnimation(2, VertexAnimationMode.ABSOLUTE);
+					//_animator = new VertexAnimator(VertexAnimationState(_mesh.animationState));
 					
 					
 					// Parse header and decompress body
@@ -400,7 +399,7 @@ package away3d.loaders.parsers
 				for (j = 0; j < 16; j++) {
 					ch = _byteData.readUnsignedByte();
 					
-					if (uint(ch) >= 0x39 && uint(ch) <= 0x7A && k == 0) {
+					if (uint(ch) > 0x39 && uint(ch) <= 0x7A && k == 0) {
 						name += String.fromCharCode(ch);
 					}
 					
@@ -426,11 +425,11 @@ package away3d.loaders.parsers
 				subGeom.updateUVData(_finalUV);
 				subGeom.updateIndexData(_indices);
 				
-				var seq : VertexAnimationSequence = VertexAnimationSequence(_animator.getSequence(name));
+				var seq : VertexAnimationSequence = _sequences[name];
 				if (!seq) {
 					seq = new VertexAnimationSequence(name);
-					_animator.addSequence(seq);
-					
+					//_animator.addSequence(seq);
+					_sequences[name] = seq;
 					// If another sequence was parsed before this one, starting
 					// a new sequence measn the previuos one is complete and can
 					// hence be finalized.
@@ -447,8 +446,8 @@ package away3d.loaders.parsers
 				finalizeAsset(prevSeq);
 			
 			// Force finalizeAsset() to decide name
-			_animator.name = "";
-			finalizeAsset(_animator);
+			//_animator.name = "";
+			//finalizeAsset(_animator);
 			
 			_parsedFrames = true;
 		}

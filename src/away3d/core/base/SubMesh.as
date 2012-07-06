@@ -1,8 +1,7 @@
 package away3d.core.base
 {
 
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.managers.Stage3DProxy;
@@ -137,13 +136,6 @@ package away3d.core.base
 		}
 
 		/**
-		 * The animation object which is used to transform the geometry.
-		 */
-		public function get animation():AnimationBase {
-			return _subGeometry.animation;
-		}
-
-		/**
 		 * The distance of the SubMesh object to the view, used to sort per object.
 		 */
 		public function get zIndex():Number {
@@ -233,10 +225,10 @@ package away3d.core.base
 		}
 
 		/**
-		 * The AnimationStateBase object that provides the state for the SubMesh's animation.
+		 * The animator object that provides the state for the SubMesh's animation.
 		 */
-		public function get animationState():AnimationStateBase {
-			return _parentMesh._animationState;
+		public function get animator():IAnimator {
+			return _parentMesh.animator;
 		}
 
 		/**

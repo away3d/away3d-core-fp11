@@ -1,6 +1,5 @@
 ﻿package away3d.core.base
 {
-	import away3d.animators.data.AnimationBase;
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.Context3D;
@@ -79,14 +78,6 @@
 		 */
 		public function SubGeometry()
 		{
-		}
-
-		/**
-		 * The animation that affects the geometry.
-		 */
-		public function get animation() : AnimationBase
-		{
-			return _parentGeometry._animation;
 		}
 
 		/**

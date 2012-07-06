@@ -1,6 +1,5 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.data.SkeletonAnimation;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.arcane;
@@ -58,7 +57,7 @@ package away3d.loaders.parsers
 		private var _geometry : Geometry;
 
 		private var _skeleton : Skeleton;
-		private var _animation : SkeletonAnimation;
+		//private var _animation : SkeletonAnimation;
 
 		private var _rotationQuat : Quaternion;
 
@@ -110,14 +109,6 @@ package away3d.loaders.parsers
 			return false;
 		}
 
-		/**
-		 *
-		 */
-		public function get animation() : SkeletonAnimation
-		{
-			return SkeletonAnimation(_geometry.animation);
-		}
-
 
 		/**
 		 * @inheritDoc
@@ -164,7 +155,7 @@ package away3d.loaders.parsers
 
 				if (_reachedEOF) {
 					calculateMaxJointCount();
-					_animation = new SkeletonAnimation(_skeleton, _maxJointCount);
+					//_animation = new SkeletonAnimation(_skeleton, _maxJointCount);
 
 					_mesh = new Mesh();
 					_geometry = _mesh.geometry;
@@ -173,7 +164,7 @@ package away3d.loaders.parsers
 						_geometry.addSubGeometry(translateGeom(_meshData[i].vertexData, _meshData[i].weightData, _meshData[i].indices));
 					}
 
-					_geometry.animation = _animation;
+					//_geometry.animation = _animation;
 //					_mesh.animationController = _animationController;
 
 					finalizeAsset(_mesh);

@@ -1,5 +1,6 @@
 ﻿package away3d.materials.passes
 {
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -66,11 +67,8 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode() : String
+		arcane override function getVertexCode(code:String) : String
 		{
-			// todo: only use gpu code if main pass also runs on gpu, determine on assignment
-			var code : String = animation.getAGALVertexCode(this, ["va0"], ["vt0"]);
-
 			code += "m44 vt7, vt0, vc0		\n" +
 					"mul op, vt7, vc4		\n" +
 					"m44 vt1, vt0, vc5		\n" +

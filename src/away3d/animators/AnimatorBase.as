@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.entities.Mesh;
 	import away3d.arcane;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.AnimatorEvent;
@@ -26,24 +27,49 @@ package away3d.animators
 		private var _startEvent : AnimatorEvent;
 		private var _stopEvent : AnimatorEvent;
 		private var _time : int;
-		private var _timeScale : Number = 1;
-
+		private var _playbackSpeed : Number = 1;
+		
+		protected var _usesCPU : Boolean;
+		protected var _stateInvalid:Boolean;
+		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
+		
 		public function AnimatorBase()
 		{
 //			start();
 		}
+		
+		
+		public function resetGPUCompatibility() : void
+        {
+            _usesCPU = false;
+        }
+		
+		public function get usesCPU() : Boolean
+		{
+			return _usesCPU;
+		}
+		
+		public function addOwner(mesh : Mesh) : void
+		{
+			_owners.push(mesh);
+		}
 
+		public function removeOwner(mesh : Mesh) : void
+		{
+			_owners.splice(_owners.indexOf(mesh), 1);
+		}
+		
 		/**
 		 * The amount by which passed time should be scaled. Used to slow down or speed up animations.
 		 */
-		public function get timeScale() : Number
+		public function get playbackSpeed() : Number
 		{
-			return _timeScale;
+			return _playbackSpeed;
 		}
 
-		public function set timeScale(value : Number) : void
+		public function set playbackSpeed(value : Number) : void
 		{
-			_timeScale = value;
+			_playbackSpeed = value;
 		}
 		
 		public function get assetType() : String
@@ -107,8 +133,15 @@ package away3d.animators
 		{
 			throw new AbstractMethodError();
 		}
-
-
+		
+		/**
+		 * Invalidates the state, so it needs to be updated next time it is requested.
+		 */
+		public function invalidateState() : void
+		{
+			_stateInvalid = true;
+		}
+		
 		protected function start() : void
 		{
 			_time = getTimer();
@@ -123,8 +156,29 @@ package away3d.animators
 		{
 			var time : int = getTimer();
 			var dt : Number = time-_time;
-			updateAnimation(dt, dt*_timeScale);
+			updateAnimation(dt, dt*_playbackSpeed);
 			_time = time;
+		}
+		
+		/**
+		 * Retrieves a temporary register that's still free.
+		 * @param exclude An array of non-free temporary registers
+		 * @param excludeAnother An additional register that's not free
+		 * @return A temporary register that can be used
+		 */
+		protected function findTempReg(exclude : Array, excludeAnother : String = null) : String
+		{
+			var i : uint;
+			var reg : String;
+
+			while (true) {
+				reg = "vt" + i;
+				if (exclude.indexOf(reg) == -1 && excludeAnother != reg) return reg;
+				++i;
+			}
+
+			// can't be reached
+			return null;
 		}
 	}
 }

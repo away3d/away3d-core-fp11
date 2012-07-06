@@ -1,6 +1,6 @@
 package away3d.materials
 {
-	import away3d.animators.data.AnimationBase;
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
@@ -48,7 +48,7 @@ package away3d.materials
 		arcane var _name : String = "material";
 
 		private var _bothSides : Boolean;
-		private var _animation : AnimationBase;
+		private var _animator : IAnimator;
 
 		private var _owners : Vector.<IMaterialOwner>;
 
@@ -378,15 +378,15 @@ package away3d.materials
 		 */
 		arcane function addOwner(owner : IMaterialOwner) : void
 		{
-			if (_animation && !owner.animation.equals(_animation)) {
-				throw new Error("A Material instance cannot be shared across renderables with different animation instances");
+			if (_animator && (owner.animator != _animator)) {
+				throw new Error("A Material instance cannot be shared across renderables with different animator instances");
 			}
 			else {
-				_animation = owner.animation;
+				_animator = owner.animator;
 				for (var i : int = 0; i < _numPasses; ++i)
-					_passes[i].animation = _animation;
-				_depthPass.animation = _animation;
-				_distancePass.animation = _animation;
+					_passes[i].animator = _animator;
+				_depthPass.animator = _animator;
+				_distancePass.animator = _animator;
 				invalidatePasses(null);
 			}
 
@@ -401,7 +401,14 @@ package away3d.materials
 		arcane function removeOwner(owner : IMaterialOwner) : void
 		{
 			_owners.splice(_owners.indexOf(owner), 1);
-			if (_owners.length == 0) _animation = null;
+			if (_owners.length == 0) {
+				_animator = null;
+				for (var i : int = 0; i < _numPasses; ++i)
+					_passes[i].animator = _animator;
+				_depthPass.animator = _animator;
+				_distancePass.animator = _animator;
+				invalidatePasses(null);
+			}
 		}
 
 		/**
@@ -441,17 +448,17 @@ package away3d.materials
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
 
-			if (_animation) {
-				_animation.resetGPUCompatibility();
-				_animation.testGPUCompatibility(_depthPass);
-				_animation.testGPUCompatibility(_distancePass);
+			if (_animator) {
+				_animator.resetGPUCompatibility();
+				_animator.testGPUCompatibility(_depthPass);
+				_animator.testGPUCompatibility(_distancePass);
 			}
 
 			for (var i : int = 0; i < _numPasses; ++i) {
 				if (_passes[i] != triggerPass) _passes[i].invalidateShaderProgram(false);
 				// test if animation will be able to run on gpu BEFORE compiling materials
-				if (_animation)
-					_animation.testGPUCompatibility(_passes[i]);
+				if (_animator)
+					_animator.testGPUCompatibility(_passes[i]);
 			}
 		}
 
@@ -475,7 +482,7 @@ package away3d.materials
 		protected function addPass(pass : MaterialPassBase) : void
 		{
 			_passes[_numPasses++] = pass;
-			pass.animation = _animation;
+			pass.animator = _animator;
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;

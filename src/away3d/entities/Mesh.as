@@ -1,5 +1,6 @@
 ﻿package away3d.entities
 {
+	import away3d.animators.IAnimator;
 	import away3d.animators.data.*;
 	import away3d.arcane;
 	import away3d.containers.*;
@@ -21,7 +22,7 @@
 		private var _subMeshes : Vector.<SubMesh>;
 		protected var _geometry : Geometry;
 		private var _material : MaterialBase;
-		arcane var _animationState : AnimationStateBase;
+		private var _animator : IAnimator;
 		private var _castsShadows : Boolean = true;
 
 		/**
@@ -69,18 +70,40 @@
 		}
 
 		/**
-		 * The animation state of the mesh, defining how the animation should influence the mesh's geometry.
+		 * Defines the animator of the mesh. Act on the mesh's geometry. Defaults to null
 		 */
-		public function get animationState() : AnimationStateBase
+		public function get animator() : IAnimator
 		{
-			return _animationState;
+			return _animator;
 		}
 
-		public function set animationState(value : AnimationStateBase) : void
+		public function set animator(value : IAnimator) : void
 		{
-			if (_animationState) _animationState.removeOwner(this);
-			_animationState = value;
-			if (_animationState) _animationState.addOwner(this);
+			if (_animator)
+				_animator.removeOwner(this);
+			
+			_animator = value;
+			
+			// cause material to be unregistered and registered again to work with the new animation type (if possible)
+			var oldMaterial : MaterialBase = material;
+			material = null;
+			material = oldMaterial;
+
+			var len : uint = _subMeshes.length;
+			var subMesh : SubMesh;
+
+			// reassign for each SubMesh
+			for (var i : int = 0; i < len; ++i) {
+				subMesh = _subMeshes[i];
+				oldMaterial = subMesh._material;
+				if (oldMaterial) {
+					subMesh.material = null;
+					subMesh.material = oldMaterial;
+				}
+			}
+			
+			if (_animator)
+				_animator.addOwner(this);
 		}
 
 		/**
@@ -93,13 +116,14 @@
 
 		public function set geometry(value : Geometry) : void
 		{
+			var i:uint;
+			
 			if (_geometry) {
 				_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
 				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
 				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-				_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
 
-				for (var i : uint = 0; i < _subMeshes.length; ++i) {
+				for (i = 0; i < _subMeshes.length; ++i) {
 					_subMeshes[i].dispose();
 				}
 				_subMeshes.length = 0;
@@ -110,8 +134,11 @@
 				_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
 				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
 				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-				_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
-				initGeometry();
+				
+				var subGeoms : Vector.<SubGeometry> = _geometry.subGeometries;
+
+				for (i = 0; i < subGeoms.length; ++i)
+					addSubMesh(subGeoms[i]);
 			}
 
 			if (_material) {
@@ -135,14 +162,6 @@
 			if (_material) _material.removeOwner(this);
 			_material = value;
 			if (_material) _material.addOwner(this);
-		}
-
-		/**
-		 * The type of animation used to influence the geometry.
-		 */
-		public function get animation() : AnimationBase
-		{
-			return _geometry.animation;
 		}
 
 		/**
@@ -225,19 +244,6 @@
 		}
 
 		/**
-		 * Initialises the SubMesh objects to map unto the Geometry's SubGeometry objects.
-		 */
-		protected function initGeometry() : void
-		{
-			var subGeoms : Vector.<SubGeometry> = _geometry.subGeometries;
-
-			for (var i : uint = 0; i < subGeoms.length; ++i)
-				addSubMesh(subGeoms[i]);
-
-			if (_geometry.animation) animationState = _geometry.animation.createAnimationState();
-		}
-
-		/**
 		 * Called when a SubGeometry was added to the Geometry.
 		 */
 		private function onSubGeometryAdded(event : GeometryEvent) : void
@@ -285,32 +291,6 @@
 			subMesh._index = len;
 			_subMeshes[len] = subMesh;
 			invalidateBounds();
-		}
-
-		/**
-		 * Called when the Geometry's animation type was changed.
-		 */
-		private function onAnimationChanged(event : GeometryEvent) : void
-		{
-			animationState = _geometry.animation.createAnimationState();
-
-			// cause material to be unregistered and registered again to work with the new animation type (if possible)
-			var oldMaterial : MaterialBase = material;
-			material = null;
-			material = oldMaterial;
-
-			var len : uint = _subMeshes.length;
-			var subMesh : SubMesh;
-
-			// reassign for each SubMesh
-			for (var i : int = 0; i < len; ++i) {
-				subMesh = _subMeshes[i];
-				oldMaterial = subMesh._material;
-				if (oldMaterial) {
-					subMesh.material = null;
-					subMesh.material = oldMaterial;
-				}
-			}
 		}
 
 		public function getSubMeshForSubGeometry(subGeometry : SubGeometry) : SubMesh

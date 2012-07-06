@@ -1,8 +1,8 @@
 package away3d.animators
 {
+	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.data.AnimationSequenceBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
-	import away3d.animators.data.SkeletonAnimationState;
 	import away3d.animators.nodes.SkeletonAdditiveNode;
 	import away3d.animators.nodes.SkeletonClipNodeBase;
 	import away3d.animators.nodes.SkeletonNaryLERPNode;
@@ -15,7 +15,7 @@ package away3d.animators
 	/**
 	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
 	 */
-	public class BlendingSkeletonAnimator extends SkeletonAnimatorBase
+	public class BlendingSkeletonAnimator extends SkeletonAnimator
 	{
 		private var _clips : Array;
 		private var _lerpNode : SkeletonNaryLERPNode;
@@ -28,9 +28,9 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function BlendingSkeletonAnimator(target : SkeletonAnimationState)
+		public function BlendingSkeletonAnimator(skeleton : Skeleton, jointsPerVertex : uint = 4, forceCPU : Boolean = false)
 		{
-			super(target);
+			super(skeleton, jointsPerVertex, forceCPU);
 			_clips = [];
 			_activeAbsClips = new Vector.<int>();
 			_blendWeights = new Vector.<Number>();
@@ -128,7 +128,6 @@ package away3d.animators
 			additive.differenceInput = node;
 			additive.baseInput = _mainNode;
 			_mainNode = additive;
-			_target.blendTree = _mainNode;
 		}
 
 		private function addAbsoluteSequence(sequence : SkeletonAnimationSequence) : void

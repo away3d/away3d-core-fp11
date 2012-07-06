@@ -1,9 +1,7 @@
 package away3d.primitives
 {
 
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
-	import away3d.animators.data.NullAnimation;
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.bounds.NullBounds;
 	import away3d.cameras.Camera3D;
@@ -35,9 +33,14 @@ package away3d.primitives
 		// todo: remove SubGeometry, use a simple single buffer with offsets
 		private var _geometry : SubGeometry;
 		private var _material : SkyBoxMaterial;
-		private var _nullAnimation : AnimationBase = new NullAnimation();
 		private var _uvTransform : Matrix = new Matrix();
-
+		private var _animator : IAnimator;
+		
+		public function get animator():IAnimator
+		{
+			return _animator;
+		}
+		
 		/**
 		 * Create a new SkyBox object.
 		 * @param cubeMap The CubeMap to use for the sky box's texture.
@@ -129,19 +132,6 @@ package away3d.primitives
 		public function set material(value : MaterialBase) : void
 		{
 			throw new AbstractMethodError("Unsupported method!");
-		}
-
-		/**
-		 * The animation used by the material to assemble the vertex code.
-		 */
-		public function get animation() : AnimationBase
-		{
-			return _nullAnimation;
-		}
-
-		public function get animationState() : AnimationStateBase
-		{
-			return null;
 		}
 
 		/**

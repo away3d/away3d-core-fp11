@@ -1,8 +1,7 @@
 package away3d.tools.serialize
 {
+	import away3d.animators.IAnimator;
 	import away3d.materials.lightpickers.StaticLightPicker;
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
@@ -54,9 +53,9 @@ package away3d.tools.serialize
 			serializeObjectContainerInternal(mesh as ObjectContainer3D, serializer, false /* serializeChildrenAndEnd */);
 			serializer.writeBoolean("castsShadows", mesh.castsShadows);
 			
-			if (mesh.animationState)
+			if (mesh.animator)
 			{
-				serializeAnimationState(mesh.animationState, serializer);
+				serializeAnimationState(mesh.animator, serializer);
 			}
 			
 			if (mesh.material)
@@ -75,16 +74,16 @@ package away3d.tools.serialize
 			serializer.endObject();
 		}
 		
-		public static function serializeAnimationState(animationState:AnimationStateBase, serializer:SerializerBase):void
+		public static function serializeAnimationState(animator:IAnimator, serializer:SerializerBase):void
 		{
-			serializer.beginObject(classNameFromInstance(animationState), null);
-			serializeAnimation(animationState.animation, serializer);
+			serializer.beginObject(classNameFromInstance(animator), null);
+			serializeAnimator(animator, serializer);
 			serializer.endObject();
 		}
 		
-		public static function serializeAnimation(animation:AnimationBase, serializer:SerializerBase):void
+		public static function serializeAnimator(animator:IAnimator, serializer:SerializerBase):void
 		{
-			serializer.beginObject(classNameFromInstance(animation), null);
+			serializer.beginObject(classNameFromInstance(animator), null);
 			serializer.endObject();
 		}
 		

@@ -1,7 +1,15 @@
 package away3d.animators
 {
+	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubMesh;
+	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DVertexBufferFormat;
+	import away3d.animators.data.VertexAnimationMode;
+	import flash.display3D.Context3D;
+	import away3d.materials.passes.MaterialPassBase;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.data.VertexAnimationSequence;
-	import away3d.animators.data.VertexAnimationState;
 	import away3d.animators.utils.TimelineUtil;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
@@ -11,22 +19,34 @@ package away3d.animators
 	/**
 	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
 	 */
-	public class VertexAnimator extends AnimatorBase
+	public class VertexAnimator extends AnimatorBase implements IAnimator
 	{
 		private var _sequences : Array;
 		private var _activeSequence : VertexAnimationSequence;
 		private var _absoluteTime : Number;
-		private var _target : VertexAnimationState;
 		private var _tlUtil : TimelineUtil;
-
+		
+		private var _streamIndex : uint;
+		private var _useNormals : Boolean;
+		private var _useTangents : Boolean;
+		private var _numPoses : uint;
+		private var _blendMode : String;
+		
+		private var _poses : Vector.<Geometry>;
+		private var _weights : Vector.<Number>;
+		
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function VertexAnimator(target : VertexAnimationState)
+		public function VertexAnimator(numPoses : uint = 2, blendMode : String = "absolute" )
 		{
 			super();
+			_numPoses = numPoses;
+			_blendMode = blendMode;
+			_weights = Vector.<Number>([1, 0, 0, 0]);
+			_poses = new Vector.<Geometry>();
+			
 			_sequences = [];
-			_target = target;
 			_tlUtil = new TimelineUtil();
 		}
 
@@ -62,8 +82,8 @@ package away3d.animators
 		 */
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			var poses : Vector.<Geometry> = _target.poses;
-			var weights : Vector.<Number> = _target.weights;
+			var poses : Vector.<Geometry> = _poses;
+			var weights : Vector.<Number> = _weights;
 
 			_absoluteTime += scaledDT;
 			_tlUtil.updateFrames(_absoluteTime, _activeSequence);
@@ -71,10 +91,181 @@ package away3d.animators
 			poses[uint(0)] = _activeSequence._frames[_tlUtil.frame0];
 			poses[uint(1)] = _activeSequence._frames[_tlUtil.frame1];
 			weights[uint(0)] = 1 - (weights[uint(1)] = _tlUtil.blendWeight);
+		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+		{
+			// todo: add code for when running on cpu
+			var i : uint;
+			var len : uint = _numPoses;
+			var index : uint = _streamIndex;
+			var context : Context3D = stage3DProxy._context3D;
 
-			_target.invalidateState();
+			// if no poses defined, set temp data
+			if (!_poses.length) {
+				if (_blendMode == VertexAnimationMode.ABSOLUTE) {
+					for (i = 1; i < len; ++i) {
+						stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
+						context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
+
+						if (_useNormals)
+							stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
+					}
+				}
+					// todo: set temp data for additive?
+				return;
+			}
+
+			// this type of animation can only be SubMesh
+			var subMesh : SubMesh = SubMesh(renderable);
+			var subGeom : SubGeometry;
+			var j : uint;
+
+			if (_blendMode == VertexAnimationMode.ABSOLUTE) {
+				i = 1;
+				subGeom = _poses[uint(0)].subGeometries[subMesh._index];
+				if (subGeom) subMesh.subGeometry = subGeom;
+			}
+			else i = 0;
+			// set the base sub-geometry so the material can simply pick up on this data
+
+
+
+			for (; i < len; ++i) {
+				subGeom = _poses[i].subGeometries[subMesh._index] || subMesh.subGeometry;
+				stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.vertexBufferOffset);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
+
+				if (_useNormals)
+					stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.normalBufferOffset);
+
+			}
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+		{
+			if (_blendMode == VertexAnimationMode.ABSOLUTE)
+				return getAbsoluteAGALCode(pass, sourceRegisters, targetRegisters);
+			else
+				return getAdditiveAGALCode(pass, sourceRegisters, targetRegisters);
+		}
+		
+		/**
+		 * Generates the vertex AGAL code for absolute blending.
+		 */
+		private function getAbsoluteAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+		{
+			var code : String = "";
+			var temp1 : String = findTempReg(targetRegisters);
+			var temp2 : String = findTempReg(targetRegisters, temp1);
+			var regs : Array = ["x", "y", "z", "w"];
+			var len : uint = sourceRegisters.length;
+			_useNormals = len > 1;
+			_useTangents = len > 2;
+			if (len > 2) len = 2;
+			_streamIndex = pass.numUsedStreams;
+
+			var k : uint;
+			for (var i : uint = 0; i < len; ++i) {
+				for (var j : uint = 0; j < _numPoses; ++j) {
+					if (j == 0) {
+						code += "mul " + temp1 + ", " + sourceRegisters[i] + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
+					}
+					else {
+						code += "mul " + temp2 + ", va" + (_streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
+						if (j < _numPoses - 1) code += "add " + temp1 + ", " + temp1 + ", " + temp2 + "\n";
+						else code += "add " + targetRegisters[i] + ", " + temp1 + ", " + temp2 + "\n";
+						++k;
+					}
+				}
+			}
+
+			if (_useTangents) {
+				code += "dp3 " + temp1 + ".x, " + sourceRegisters[uint(2)] + ", " + targetRegisters[uint(1)] + "\n" +
+						"mul " + temp1 + ", " + targetRegisters[uint(1)] + ", " + temp1 + ".x			 \n" +
+						"sub " + targetRegisters[uint(2)] + ", " + sourceRegisters[uint(2)] + ", " + temp1 + "\n";
+			}
+			return code;
 		}
 
+		private function getAdditiveAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+		{
+			var code : String = "";
+			var len : uint = sourceRegisters.length;
+			var regs : Array = ["x", "y", "z", "w"];
+			var temp1 : String = findTempReg(targetRegisters);
+			var k : uint;
+
+			_useNormals = len > 1;
+			_useTangents = len > 2;
+
+			if (len > 2) len = 2;
+
+			code += "mov  " + targetRegisters[0] + ", " + sourceRegisters[0] + "\n";
+			if (_useNormals) code += "mov " + targetRegisters[1] + ", " + sourceRegisters[1] + "\n";
+
+			for (var i : uint = 0; i < len; ++i) {
+				for (var j : uint = 0; j < _numPoses; ++j) {
+					code += "mul " + temp1 + ", va" + (_streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n" +
+							"add " + targetRegisters[i] + ", " + targetRegisters[i] + ", " + temp1 + "\n";
+					k++;
+				}
+			}
+
+			if (_useTangents) {
+				code += "dp3 " + temp1 + ".x, " + sourceRegisters[uint(2)] + ", " + targetRegisters[uint(1)] + "\n" +
+						"mul " + temp1 + ", " + targetRegisters[uint(1)] + ", " + temp1 + ".x			 \n" +
+						"sub " + targetRegisters[uint(2)] + ", " + sourceRegisters[uint(2)] + ", " + temp1 + "\n";
+			}
+
+			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
+		{
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
+		{
+			// TODO: not used
+			pass = pass;
+			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null, 0);
+			if (_useNormals)
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null, 0);
+			if (_useTangents)
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null, 0);
+		}
+				
+        /**
+         * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
+		 * Needs to be called if gpu code is potentially required.
+         */
+        public function testGPUCompatibility(pass : MaterialPassBase) : void
+        {
+        }
+		
+		/**
+		 * Clears the GPU render state that has been set by the current animation.
+		 * @param context The context which is currently performing the rendering.
+		 * @param pass The material pass which is currently used to render the geometry.
+		 *
+		 * @private
+		 */
+		arcane function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void {}
+		
 		/**
 		 * Retrieves a sequence with a given name.
 		 * @private
