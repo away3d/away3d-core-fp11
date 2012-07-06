@@ -1,18 +1,13 @@
 package away3d.animators
 {
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
-	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DVertexBufferFormat;
-	import away3d.animators.data.VertexAnimationMode;
-	import flash.display3D.Context3D;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.core.base.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.animators.data.VertexAnimationSequence;
-	import away3d.animators.utils.TimelineUtil;
 	import away3d.arcane;
-	import away3d.core.base.Geometry;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.core.base.*;
+	import away3d.core.managers.*;
+	import away3d.materials.passes.*;
+	
+	import flash.display3D.*;
 
 	use namespace arcane;
 
@@ -21,14 +16,12 @@ package away3d.animators
 	 */
 	public class VertexAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _sequences : Array;
-		private var _activeSequence : VertexAnimationSequence;
+		private var _activeNode : VertexClipNode;
 		private var _absoluteTime : Number;
-		private var _tlUtil : TimelineUtil;
 		
 		private var _vertexAnimationLibrary:VertexAnimationLibrary;
-		private var _poses : Vector.<Geometry>;
-		private var _weights : Vector.<Number>;
+		private var _poses : Vector.<Geometry> = new Vector.<Geometry>();
+		private var _weights : Vector.<Number> = Vector.<Number>([1, 0, 0, 0]);
 		private var _numPoses : uint;
 		private var _blendMode : String;
 		
@@ -41,23 +34,19 @@ package away3d.animators
 			super(vertexAnimationLibrary);
 			
 			_vertexAnimationLibrary = vertexAnimationLibrary;
-			_poses = new Vector.<Geometry>();
-			_weights = Vector.<Number>([1, 0, 0, 0]);
 			_numPoses = vertexAnimationLibrary.numPoses;
 			_blendMode = vertexAnimationLibrary.blendMode;
-			
-			_sequences = [];
-			_tlUtil = new TimelineUtil();
 		}
 
 		/**
 		 * Plays a sequence with a given name. If the sequence is not found, it may not be loaded yet, and it will retry every frame.
 		 * @param sequenceName The name of the clip to be played.
 		 */
-		public function play(sequenceName : String) : void
+		public function play(stateName : String) : void
 		{
-			_activeSequence = _sequences[sequenceName];
-			if (!_activeSequence)
+			_activeNode = (_vertexAnimationLibrary.getState(stateName) as VertexAnimationState).rootNode as VertexClipNode;
+			
+			if (!_activeNode)
 				throw new Error("Clip not found!");
 
 			reset();
@@ -70,27 +59,17 @@ package away3d.animators
 		}
 
 		/**
-		 * Adds a sequence to the controller.
-		 */
-		public function addSequence(sequence : VertexAnimationSequence) : void
-		{
-			_sequences[sequence.name] = sequence;
-		}
-
-		/**
 		 * @inheritDoc
 		 */
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			var poses : Vector.<Geometry> = _poses;
-			var weights : Vector.<Number> = _weights;
-
 			_absoluteTime += scaledDT;
-			_tlUtil.updateFrames(_absoluteTime, _activeSequence);
-
-			poses[uint(0)] = _activeSequence._frames[_tlUtil.frame0];
-			poses[uint(1)] = _activeSequence._frames[_tlUtil.frame1];
-			weights[uint(0)] = 1 - (weights[uint(1)] = _tlUtil.blendWeight);
+			
+			_activeNode.update(_absoluteTime);
+			
+			_poses[uint(0)] = _activeNode.currentFrame;
+			_poses[uint(1)] = _activeNode.nextFrame;
+			_weights[uint(0)] = 1 - (_weights[uint(1)] = _activeNode.blendWeight);
 		}
 		
 		
@@ -154,39 +133,5 @@ package away3d.animators
         public function testGPUCompatibility(pass : MaterialPassBase) : void
         {
         }
-		
-		/**
-		 * Retrieves a sequence with a given name.
-		 * @private
-		 */
-		arcane function getSequence(sequenceName : String) : VertexAnimationSequence
-		{
-			return _sequences[sequenceName];
-		}
-		/**
-		* Retrieves all sequences names.
-		* @private
-		*/
-		arcane function get sequencesNames() : Array
-		{
-			var seqsNames:Array = [];
-			for(var key:String in _sequences)
-				seqsNames.push(key);
-			 
-			return seqsNames;
-		}
-		
-		/**
-		 * Retrieves all the sequences
-		 * @private
-		 */
-		arcane function get sequences() : Array
-		{
-			var seqs:Array = [];
-			for(var key:String in _sequences)
-				seqs.push(_sequences[key]);
-			
-			return seqs;
-		}
 	}
 }

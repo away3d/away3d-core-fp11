@@ -16,7 +16,9 @@ package away3d.events
 		public static const ANIMATION_COMPLETE : String = "animationComplete";
 		public static const TEXTURE_COMPLETE : String = "textureComplete";
 		public static const MATERIAL_COMPLETE : String = "materialComplete";
-		public static const ANIMATOR_COMPLETE : String = "animatorComplete";
+		public static const ANIMATION_LIBRARY_COMPLETE : String = "animationLibraryComplete";
+		public static const ANIMATION_STATE_COMPLETE : String = "animationStateComplete";
+		public static const ANIMATION_NODE_COMPLETE : String = "animationNodeComplete";
 
 		
 		public static const ASSET_RENAME : String = 'assetRename';

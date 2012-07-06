@@ -1,10 +1,9 @@
 package away3d.animators
 {
-	import away3d.animators.data.VertexAnimationMode;
-	import away3d.core.base.Geometry;
-	import away3d.animators.IAnimationLibrary;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.core.managers.*;
+	import away3d.materials.passes.*;
 
 	/**
 	 * @author robbateman
@@ -143,13 +142,18 @@ package away3d.animators
 		 */
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			// TODO: not used
-			pass = pass;
 			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null, 0);
 			if (_useNormals)
 				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null, 0);
 			if (_useTangents)
 				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null, 0);
+		}
+		
+		public override function addState(stateName:String, animationState:IAnimationState):void
+		{
+			super.addState(stateName, animationState);
+			
+			animationState.addOwner(this, stateName);
 		}
 	}
 }

@@ -1,10 +1,8 @@
 package away3d.animators
 {
-	import away3d.library.assets.IAsset;
-	import away3d.animators.AnimationLibraryBase;
-	import away3d.animators.IAnimationLibrary;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.animators.*;
+	import away3d.core.managers.*;
+	import away3d.materials.passes.*;
 
 	/**
 	 * @author robbateman
@@ -23,7 +21,6 @@ package away3d.animators
 		{
 			_jointsPerVertex = jointsPerVertex;
 		}
-
 		
 		/**
 		 * @inheritDoc

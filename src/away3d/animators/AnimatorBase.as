@@ -1,17 +1,13 @@
 package away3d.animators
 {
-	import flash.events.EventDispatcher;
-	import away3d.entities.Mesh;
 	import away3d.arcane;
-	import away3d.errors.AbstractMethodError;
-	import away3d.events.AnimatorEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
+	import away3d.entities.*;
+	import away3d.errors.*;
+	import away3d.events.*;
 
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.utils.getTimer;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.utils.*;
 
 	use namespace arcane;
 

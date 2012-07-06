@@ -1,5 +1,7 @@
 package away3d.animators
 {
+	import away3d.errors.AnimationLibraryError;
+	import flash.utils.Dictionary;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.library.assets.IAsset;
@@ -13,6 +15,8 @@ package away3d.animators
 	public class AnimationLibraryBase extends NamedAssetBase implements IAsset
 	{
 		arcane var _usesCPU:Boolean;
+		private var _states:Vector.<IAnimationState> = new Vector.<IAnimationState>();
+		private var _stateDictionary:Dictionary = new Dictionary(true);
 		
 		/**
 		 * Retrieves a temporary register that's still free.
@@ -34,7 +38,7 @@ package away3d.animators
 			// can't be reached
 			return null;
 		}
-				
+		
 		public function get usesCPU() : Boolean
 		{
 			return _usesCPU;
@@ -48,6 +52,27 @@ package away3d.animators
 		public function get assetType() : String
 		{
 			return AssetType.ANIMATION_LIBRARY;
+		}
+		
+		
+		public function get states():Vector.<IAnimationState>
+		{
+			return _states;
+		}
+		
+		public function getState(name:String):IAnimationState
+		{
+			return _stateDictionary[name];
+		}
+		
+		public function addState(stateName:String, animationState:IAnimationState):void
+		{
+			if (_stateDictionary[stateName])
+				throw new AnimationLibraryError("Animation state name already exists");
+			
+			_stateDictionary[stateName] = animationState;
+			
+			_states.push(animationState);
 		}
 		
 		/**

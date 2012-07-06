@@ -1,9 +1,9 @@
 package away3d.loaders.parsers
 {
+	import away3d.animators.nodes.VertexClipNode;
+	import away3d.animators.VertexAnimationState;
 	import away3d.animators.VertexAnimationLibrary;
 	import flash.utils.Dictionary;
-	import away3d.animators.VertexAnimator;
-	import away3d.animators.data.VertexAnimationSequence;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
@@ -27,7 +27,7 @@ package away3d.loaders.parsers
 	{
 		public static var FPS : int = 6;
 		
-		private var _sequences:Dictionary = new Dictionary(true);
+		private var _clipNodes:Dictionary = new Dictionary(true);
 		private var _byteData : ByteArray;
 		private var _startedParsing : Boolean;
 		private var _parsedHeader : Boolean;
@@ -58,7 +58,7 @@ package away3d.loaders.parsers
 		private var _vertIndices : Vector.<Number>;
 		
 		// the current subgeom being built
-		private var _animationLibrary : VertexAnimationLibrary;
+		private var _animationLibrary : VertexAnimationLibrary = new VertexAnimationLibrary();
 		private var _firstSubGeom : SubGeometry;
 		private var _uvs : Vector.<Number>;
 		private var _finalUV : Vector.<Number>;
@@ -374,7 +374,7 @@ package away3d.loaders.parsers
 			var tvertices : Vector.<Number>;
 			var i : uint, j : int, k : uint, ch : uint;
 			var name : String = "";
-			var prevSeq : VertexAnimationSequence = null;
+			var prevClip : VertexClipNode = null;
 			
 			_byteData.position = _offsetFrames;
 			
@@ -426,29 +426,31 @@ package away3d.loaders.parsers
 				subGeom.updateUVData(_finalUV);
 				subGeom.updateIndexData(_indices);
 				
-				var seq : VertexAnimationSequence = _sequences[name];
-				if (!seq) {
-					seq = new VertexAnimationSequence(name);
-					//_animator.addSequence(seq);
-					_sequences[name] = seq;
+				var clip : VertexClipNode = _clipNodes[name];
+				if (!clip) {
+					clip = new VertexClipNode();
+					var state : VertexAnimationState = new VertexAnimationState(clip);
+					
+					_animationLibrary.addState(name, state);
+					_clipNodes[name] = clip;
 					// If another sequence was parsed before this one, starting
 					// a new sequence measn the previuos one is complete and can
 					// hence be finalized.
-					if (prevSeq)
-						finalizeAsset(prevSeq);
+					if (prevClip)
+						finalizeAsset(prevClip);
 					
-					prevSeq = seq;
+					prevClip = clip;
 				}
-				seq.addFrame(geometry, 1000 / FPS);
+				clip.addFrame(geometry, 1000 / FPS);
 			}
 			
 			// Finalize the last sequence
-			if (prevSeq)
-				finalizeAsset(prevSeq);
+			if (prevClip)
+				finalizeAsset(prevClip);
 			
 			// Force finalizeAsset() to decide name
 			//_animator.name = "";
-			//finalizeAsset(_animator);
+			finalizeAsset(_animationLibrary);
 			
 			_parsedFrames = true;
 		}

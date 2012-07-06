@@ -9,6 +9,12 @@ package away3d.animators
 	 */
 	public interface IAnimationLibrary
 	{
+		function get states():Vector.<IAnimationState>;
+		
+		function getState(stateName:String):IAnimationState;
+		
+		function addState(stateName:String, animationState:IAnimationState):void;
+		
 		function get usesCPU() : Boolean;
 		
 		/**
