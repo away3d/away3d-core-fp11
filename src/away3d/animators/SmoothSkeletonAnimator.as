@@ -27,9 +27,9 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function SmoothSkeletonAnimator(skeletonAnimatorLibrary:SkeletonAnimatorLibrary, skeleton : Skeleton, forceCPU : Boolean = false)
+		public function SmoothSkeletonAnimator(skeletonAnimationLibrary:SkeletonAnimationLibrary, skeleton : Skeleton, forceCPU : Boolean = false)
 		{
-			super(skeletonAnimatorLibrary, skeleton, forceCPU);
+			super(skeletonAnimationLibrary, skeleton, forceCPU);
 			_clips = [];
 			_fadeOutClips = new Vector.<int>();
 			_fadeOutSpeeds = new Vector.<Number>();

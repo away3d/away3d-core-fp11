@@ -26,7 +26,7 @@ package away3d.animators
 		private var _absoluteTime : Number;
 		private var _tlUtil : TimelineUtil;
 		
-		private var _vertexAnimatorLibrary:VertexAnimatorLibrary;
+		private var _vertexAnimationLibrary:VertexAnimationLibrary;
 		private var _poses : Vector.<Geometry>;
 		private var _weights : Vector.<Number>;
 		private var _numPoses : uint;
@@ -36,15 +36,15 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function VertexAnimator(vertexAnimatorLibrary:VertexAnimatorLibrary )
+		public function VertexAnimator(vertexAnimationLibrary:VertexAnimationLibrary )
 		{
-			super(vertexAnimatorLibrary);
+			super(vertexAnimationLibrary);
 			
-			_vertexAnimatorLibrary = vertexAnimatorLibrary;
+			_vertexAnimationLibrary = vertexAnimationLibrary;
 			_poses = new Vector.<Geometry>();
 			_weights = Vector.<Number>([1, 0, 0, 0]);
-			_numPoses = vertexAnimatorLibrary.numPoses;
-			_blendMode = vertexAnimatorLibrary.blendMode;
+			_numPoses = vertexAnimationLibrary.numPoses;
+			_blendMode = vertexAnimationLibrary.blendMode;
 			
 			_sequences = [];
 			_tlUtil = new TimelineUtil();
@@ -102,7 +102,7 @@ package away3d.animators
 			// todo: add code for when running on cpu
 			var i : uint;
 			var len : uint = _numPoses;
-			var index : uint = _vertexAnimatorLibrary.streamIndex;
+			var index : uint = _vertexAnimationLibrary.streamIndex;
 			var context : Context3D = stage3DProxy._context3D;
 
 			// if no poses defined, set temp data
@@ -112,7 +112,7 @@ package away3d.animators
 						stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
 						context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 
-						if (_vertexAnimatorLibrary.useNormals)
+						if (_vertexAnimationLibrary.useNormals)
 							stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
 					}
 				}
@@ -140,7 +140,7 @@ package away3d.animators
 				stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.vertexBufferOffset);
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 
-				if (_vertexAnimatorLibrary.useNormals)
+				if (_vertexAnimationLibrary.useNormals)
 					stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.normalBufferOffset);
 
 			}

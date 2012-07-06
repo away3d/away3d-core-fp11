@@ -37,7 +37,7 @@ package away3d.animators
 		private var _animationStates : Dictionary = new Dictionary();
 		private var _condensedMatrices : Vector.<Number>;
 		
-		private var _skeletonAnimatorLibrary:SkeletonAnimatorLibrary;
+		private var _skeletonAnimationLibrary:SkeletonAnimationLibrary;
         private var _skeleton : Skeleton;
 		private var _forceCPU : Boolean;
 		private var _useCondensedIndices : Boolean;
@@ -48,14 +48,14 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function SkeletonAnimator(skeletonAnimatorLibrary:SkeletonAnimatorLibrary, skeleton : Skeleton, forceCPU : Boolean = false)
+		public function SkeletonAnimator(skeletonAnimationLibrary:SkeletonAnimationLibrary, skeleton : Skeleton, forceCPU : Boolean = false)
 		{
-			super(skeletonAnimatorLibrary);
+			super(skeletonAnimationLibrary);
 			
-			_skeletonAnimatorLibrary = skeletonAnimatorLibrary;
+			_skeletonAnimationLibrary = skeletonAnimationLibrary;
 			_skeleton = skeleton;
 			_forceCPU = forceCPU;
-			_jointsPerVertex = _skeletonAnimatorLibrary.jointsPerVertex;
+			_jointsPerVertex = _skeletonAnimationLibrary.jointsPerVertex;
 			
 			_numJoints = _skeleton.numJoints;
 			_globalMatrices = new Vector.<Number>(_numJoints*12, true);
@@ -125,7 +125,7 @@ package away3d.animators
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _condensedMatrices, numCondensedJoints*3);
 			}
 			else {
-				if (_skeletonAnimatorLibrary.usesCPU) {
+				if (_skeletonAnimationLibrary.usesCPU) {
 					var subGeomAnimState : SubGeomAnimationState = _animationStates[skinnedGeom] ||= new SubGeomAnimationState(skinnedGeom);
 
 					if (!subGeomAnimState.valid) {
@@ -343,7 +343,7 @@ package away3d.animators
         public function testGPUCompatibility(pass : MaterialPassBase) : void
         {
 			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _numJoints * 3 > 128)) {
-				_skeletonAnimatorLibrary._usesCPU = true;
+				_skeletonAnimationLibrary._usesCPU = true;
 			}
         }
 	}

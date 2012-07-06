@@ -1,15 +1,15 @@
 package away3d.animators
 {
 	import away3d.library.assets.IAsset;
-	import away3d.animators.AnimatorLibraryBase;
-	import away3d.animators.IAnimatorLibrary;
+	import away3d.animators.AnimationLibraryBase;
+	import away3d.animators.IAnimationLibrary;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.core.managers.Stage3DProxy;
 
 	/**
 	 * @author robbateman
 	 */
-	public class SkeletonAnimatorLibrary extends AnimatorLibraryBase implements IAnimatorLibrary
+	public class SkeletonAnimationLibrary extends AnimationLibraryBase implements IAnimationLibrary
 	{
 		private var _jointsPerVertex : uint;
 		
@@ -19,7 +19,7 @@ package away3d.animators
 			return _jointsPerVertex;
 		}
 		
-		public function SkeletonAnimatorLibrary(jointsPerVertex : uint = 4)
+		public function SkeletonAnimationLibrary(jointsPerVertex : uint = 4)
 		{
 			_jointsPerVertex = jointsPerVertex;
 		}

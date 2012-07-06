@@ -10,7 +10,7 @@ package away3d.animators
 	/**
 	 * @author robbateman
 	 */
-	public class AnimatorLibraryBase extends NamedAssetBase implements IAsset
+	public class AnimationLibraryBase extends NamedAssetBase implements IAsset
 	{
 		arcane var _usesCPU:Boolean;
 		

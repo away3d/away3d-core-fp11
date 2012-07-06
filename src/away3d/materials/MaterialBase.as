@@ -1,6 +1,6 @@
 package away3d.materials
 {
-	import away3d.animators.IAnimatorLibrary;
+	import away3d.animators.IAnimationLibrary;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -49,7 +49,7 @@ package away3d.materials
 		arcane var _name : String = "material";
 
 		private var _bothSides : Boolean;
-		private var _animatorLibrary : IAnimatorLibrary;
+		private var _animationLibrary : IAnimationLibrary;
 
 		private var _owners : Vector.<IMaterialOwner>;
 
@@ -382,15 +382,15 @@ package away3d.materials
 			_owners.push(owner);
 			
 			if (owner.animator) {
-				if (_animatorLibrary && owner.animator.animatorLibrary != _animatorLibrary) {
+				if (_animationLibrary && owner.animator.animationLibrary != _animationLibrary) {
 					throw new Error("A Material instance cannot be shared across renderables with different animator libraries");
 				}
 				else {
-					_animatorLibrary = owner.animator.animatorLibrary;
+					_animationLibrary = owner.animator.animationLibrary;
 					for (var i : int = 0; i < _numPasses; ++i)
-						_passes[i].animatorLibrary = _animatorLibrary;
-					_depthPass.animatorLibrary = _animatorLibrary;
-					_distancePass.animatorLibrary = _animatorLibrary;
+						_passes[i].animationLibrary = _animationLibrary;
+					_depthPass.animationLibrary = _animationLibrary;
+					_distancePass.animationLibrary = _animationLibrary;
 					invalidatePasses(null);
 				}
 			}
@@ -405,11 +405,11 @@ package away3d.materials
 		{
 			_owners.splice(_owners.indexOf(owner), 1);
 			if (_owners.length == 0) {
-				_animatorLibrary = null;
+				_animationLibrary = null;
 				for (var i : int = 0; i < _numPasses; ++i)
-					_passes[i].animatorLibrary = _animatorLibrary;
-				_depthPass.animatorLibrary = _animatorLibrary;
-				_distancePass.animatorLibrary = _animatorLibrary;
+					_passes[i].animationLibrary = _animationLibrary;
+				_depthPass.animationLibrary = _animationLibrary;
+				_distancePass.animationLibrary = _animationLibrary;
 				invalidatePasses(null);
 			}
 		}
@@ -453,8 +453,8 @@ package away3d.materials
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
 			
-			if (_animatorLibrary) {
-				_animatorLibrary.resetGPUCompatibility();
+			if (_animationLibrary) {
+				_animationLibrary.resetGPUCompatibility();
 				for each (owner in _owners) {
 					if (owner.animator) {
 						owner.animator.testGPUCompatibility(_depthPass);
@@ -466,7 +466,7 @@ package away3d.materials
 			for (var i : int = 0; i < _numPasses; ++i) {
 				if (_passes[i] != triggerPass) _passes[i].invalidateShaderProgram(false);
 				// test if animation will be able to run on gpu BEFORE compiling materials
-				if (_animatorLibrary)
+				if (_animationLibrary)
 					for each (owner in _owners)
 						if (owner.animator)
 							owner.animator.testGPUCompatibility(_passes[i]);
@@ -493,7 +493,7 @@ package away3d.materials
 		protected function addPass(pass : MaterialPassBase) : void
 		{
 			_passes[_numPasses++] = pass;
-			pass.animatorLibrary = _animatorLibrary;
+			pass.animationLibrary = _animationLibrary;
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;

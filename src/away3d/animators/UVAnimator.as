@@ -21,13 +21,11 @@ package away3d.animators
 		private var _tlUtil : TimelineUtil;
 		private var _absoluteTime : Number;
 		private var _deltaFrame : UVAnimationFrame;
-		private var _uvAnimatorLibrary:UVAnimatorLibrary;
 		
-		public function UVAnimator(uvAnimatorLibrary:UVAnimatorLibrary, target : SubMesh)
+		public function UVAnimator(target : SubMesh)
 		{
-			super(uvAnimatorLibrary);
+			super(null);
 			
-			_uvAnimatorLibrary = uvAnimatorLibrary;
 			_target = target;
             // disable transform warning
             _target.uvRotation = 1;

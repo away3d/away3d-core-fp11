@@ -28,9 +28,9 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function BlendingSkeletonAnimator(skeletonAnimatorLibrary:SkeletonAnimatorLibrary, skeleton : Skeleton, forceCPU : Boolean = false)
+		public function BlendingSkeletonAnimator(skeletonAnimationLibrary:SkeletonAnimationLibrary, skeleton : Skeleton, forceCPU : Boolean = false)
 		{
-			super(skeletonAnimatorLibrary, skeleton, forceCPU);
+			super(skeletonAnimationLibrary, skeleton, forceCPU);
 			_clips = [];
 			_activeAbsClips = new Vector.<int>();
 			_blendWeights = new Vector.<Number>();

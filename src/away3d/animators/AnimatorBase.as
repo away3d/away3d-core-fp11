@@ -24,7 +24,7 @@ package away3d.animators
 	public class AnimatorBase extends EventDispatcher
 	{
 		private var _broadcaster : Sprite = new Sprite();
-		private var _animatorLibrary : IAnimatorLibrary;
+		private var _animationLibrary : IAnimationLibrary;
 		private var _isPlaying : Boolean;
 		private var _startEvent : AnimatorEvent;
 		private var _stopEvent : AnimatorEvent;
@@ -34,14 +34,14 @@ package away3d.animators
 		protected var _stateInvalid:Boolean;
 		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
 		
-		public function get animatorLibrary() : IAnimatorLibrary
+		public function get animationLibrary() : IAnimationLibrary
 		{
-			return _animatorLibrary;
+			return _animationLibrary;
 		}
 		
-		public function AnimatorBase(animatorLibrary:IAnimatorLibrary)
+		public function AnimatorBase(animationLibrary:IAnimationLibrary)
 		{
-			_animatorLibrary = animatorLibrary;
+			_animationLibrary = animationLibrary;
 //			start();
 		}
 		

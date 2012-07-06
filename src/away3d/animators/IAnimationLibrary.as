@@ -7,7 +7,7 @@ package away3d.animators
 	/**
 	 * @author robbateman
 	 */
-	public interface IAnimatorLibrary
+	public interface IAnimationLibrary
 	{
 		function get usesCPU() : Boolean;
 		

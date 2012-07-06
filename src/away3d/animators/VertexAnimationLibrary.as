@@ -2,14 +2,14 @@ package away3d.animators
 {
 	import away3d.animators.data.VertexAnimationMode;
 	import away3d.core.base.Geometry;
-	import away3d.animators.IAnimatorLibrary;
+	import away3d.animators.IAnimationLibrary;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.core.managers.Stage3DProxy;
 
 	/**
 	 * @author robbateman
 	 */
-	public class VertexAnimatorLibrary extends AnimatorLibraryBase implements IAnimatorLibrary
+	public class VertexAnimationLibrary extends AnimationLibraryBase implements IAnimationLibrary
 	{
 				
 		private var _numPoses : uint;
@@ -41,7 +41,7 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function VertexAnimatorLibrary(numPoses : uint = 2, blendMode : String = "absolute" )
+		public function VertexAnimationLibrary(numPoses : uint = 2, blendMode : String = "absolute" )
 		{
 			super();
 			_numPoses = numPoses;
