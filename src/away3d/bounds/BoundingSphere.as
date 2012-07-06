@@ -256,7 +256,7 @@ package away3d.bounds
 			return clone;
 		}
 
-		override public function intersectsRay(p : Vector3D, v : Vector3D) : Number
+		override public function rayIntersection(p : Vector3D, v : Vector3D) : Number
 		{
 
 			var px : Number = p.x - _centerX, py : Number = p.y - _centerY, pz : Number = p.z - _centerZ;
@@ -271,13 +271,9 @@ package away3d.bounds
 				var sqrtDet : Number = Math.sqrt(det);
 				t = ( -b - sqrtDet ) / ( 2 * a );
 				if (t > 0) {
-
-					if( !_rayIntersectionPoint ) _rayIntersectionPoint = new Vector3D();
-					_rayIntersectionPoint.x = px + t * vx;
-					_rayIntersectionPoint.y = py + t * vy;
-					_rayIntersectionPoint.z = pz + t * vz;
-					if( !_rayIntersectionNormal ) _rayIntersectionNormal = new Vector3D();
-					_rayIntersectionNormal = _rayIntersectionPoint.clone();
+					_rayIntersectionNormal.x = px + t * vx;
+					_rayIntersectionNormal.y = py + t * vy;
+					_rayIntersectionNormal.z = pz + t * vz;
 					_rayIntersectionNormal.normalize();
 
 					return t;

@@ -74,7 +74,7 @@ package away3d.core.pick
 					localRayDirection = invSceneTransform.deltaTransformVector( rayDirection );
 
 					// check for ray-bounds collision
-					collisionT = bounds.intersectsRay( localRayPosition, localRayDirection );
+					collisionT = bounds.rayIntersection( localRayPosition, localRayDirection );
 
 					// accept cases on which the ray starts inside the bounds
 					rayOriginIsInsideBounds = false;
@@ -94,7 +94,6 @@ package away3d.core.pick
 						pickingCollisionVO.localRayPosition = localRayPosition;
 						pickingCollisionVO.localRayDirection = localRayDirection;
 						pickingCollisionVO.rayOriginIsInsideBounds = rayOriginIsInsideBounds;
-						pickingCollisionVO.localPosition = bounds._rayIntersectionPoint;
 						pickingCollisionVO.localNormal = bounds._rayIntersectionNormal;
 
 						// Store in new data set.
@@ -136,15 +135,28 @@ package away3d.core.pick
 					if( entity.collidesBefore(shortestCollisionDistance) ) {
 						//TODO: break loop unless best hit is required
 						//if (!_findClosestCollision)
+							updateLocalPosition(pickingCollisionVO);
 							return pickingCollisionVO;
 					}
 				}
 				else { // A bounds collision with no triangle collider stops all checks.
+					updateLocalPosition(pickingCollisionVO);
 					return pickingCollisionVO;
 				}
 			}
 
 			return null;
+		}
+
+		private function updateLocalPosition(pickingCollisionVO : PickingCollisionVO) : void
+		{
+			var collisionPos : Vector3D = pickingCollisionVO.localPosition ||= new Vector3D();
+			var rayDir : Vector3D = pickingCollisionVO.localRayDirection;
+			var rayPos : Vector3D = pickingCollisionVO.localRayPosition;
+			var t : Number = pickingCollisionVO.collisionT;
+			collisionPos.x = rayPos.x + t*rayDir.x;
+			collisionPos.y = rayPos.y + t*rayDir.y;
+			collisionPos.z = rayPos.z + t*rayDir.z;
 		}
 
 		/**

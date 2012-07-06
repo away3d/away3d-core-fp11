@@ -138,120 +138,92 @@ package away3d.bounds
 			return true;
 		}
 
-		override public function intersectsRay( p:Vector3D, v:Vector3D ):Number {
+		override public function rayIntersection( p:Vector3D, v:Vector3D ):Number {
 
 			var px:Number = p.x - _centerX, py:Number = p.y - _centerY, pz:Number = p.z - _centerZ;
 			var vx:Number = v.x, vy:Number = v.y, vz:Number = v.z;
 			var ix:Number, iy:Number, iz:Number;
-			var containedInAxis1:Boolean, containedInAxis2:Boolean;
 			var t:Number;
-			var normal:Vector3D;
-
-			// possible tests
-			var testPosX:Boolean = true, testNegX:Boolean = true, testPosY:Boolean = true;
-			var testNegY:Boolean = true, testPosZ:Boolean = true, testNegZ:Boolean = true;
-
-			// discard tests 1: ray is parallel to some sides?
-			if( vx == 0 ) testNegX = testPosX = false;
-			if( vy == 0 ) testPosY = testNegY = false;
-			if( vz == 0 ) testPosZ = testNegZ = false;
-
-			// discard tests 2: ray hits sides from the back?
-			if( vx < 0 ) testNegX = false;
-			else if( vx > 0 ) testPosX = false;
-			if( vy < 0 ) testNegY = false;
-			else if( vy > 0 ) testPosY = false;
-			if( vz < 0 ) testNegZ = false;
-			else if( vz > 0 ) testPosZ = false;
 
 			// ray-plane tests
 			var intersects:Boolean;
-			if( testPosX ) {
+			if( vx < 0 ) {
 				t = ( _halfExtentsX - px ) / vx;
 				if( t > 0 ) {
 					iy = py + t * vy;
 					iz = pz + t * vz;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						normal = new Vector3D( 1, 0, 0 );
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
+						_rayIntersectionNormal.x = 1;
+						_rayIntersectionNormal.y = 0;
+						_rayIntersectionNormal.z = 0;
 						intersects = true;
 					}
 				}
 			}
-			if( !intersects && testNegX ) {
+			if( !intersects && vx > 0 ) {
 				t = ( -_halfExtentsX - px ) / vx;
 				if( t > 0 ) {
 					iy = py + t * vy;
 					iz = pz + t * vz;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						normal = new Vector3D( -1, 0, 0 );
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && iz > -_halfExtentsZ && iz < _halfExtentsZ) {
+						_rayIntersectionNormal.x = -1;
+						_rayIntersectionNormal.y = 0;
+						_rayIntersectionNormal.z = 0;
 						intersects = true;
 					}
 				}
 			}
-			if( !intersects && testPosY ) {
+			if( !intersects && vy < 0 ) {
 				t = ( _halfExtentsY - py ) / vy;
 				if( t > 0 ) {
 					ix = px + t * vx;
 					iz = pz + t * vz;
-					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						normal = new Vector3D( 0, 1, 0 );
+					if( ix > -_halfExtentsX && ix < _halfExtentsX && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
+						_rayIntersectionNormal.x = 0;
+						_rayIntersectionNormal.y = 1;
+						_rayIntersectionNormal.z = 0;
 						intersects = true;
 					}
 				}
 			}
-			if( !intersects && testNegY ) {
+			if( !intersects && vy > 0 ) {
 				t = ( -_halfExtentsY - py ) / vy;
 				if( t > 0 ) {
 					ix = px + t * vx;
 					iz = pz + t * vz;
-					containedInAxis1 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					containedInAxis2 = iz > -_halfExtentsZ && iz < _halfExtentsZ;
-					if( containedInAxis1 && containedInAxis2 ) {
-						normal = new Vector3D( 0, -1, 0 );
+					if( ix > -_halfExtentsX && ix < _halfExtentsX && iz > -_halfExtentsZ && iz < _halfExtentsZ ) {
+						_rayIntersectionNormal.x = 0;
+						_rayIntersectionNormal.y = -1;
+						_rayIntersectionNormal.z = 0;
 						intersects = true;
 					}
 				}
 			}
-			if( !intersects && testPosZ ) {
+			if( !intersects && vz < 0 ) {
 				t = ( _halfExtentsZ - pz ) / vz;
 				if( t > 0 ) {
 					ix = px + t * vx;
 					iy = py + t * vy;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					if( containedInAxis1 && containedInAxis2 ) {
-						normal = new Vector3D( 0, 0, 1);
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && ix > -_halfExtentsX && ix < _halfExtentsX) {
+						_rayIntersectionNormal.x = 0;
+						_rayIntersectionNormal.y = 0;
+						_rayIntersectionNormal.z = 1;
 						intersects = true;
 					}
 				}
 			}
-			if( !intersects && testNegZ ) {
+			if( !intersects && vz > 0 ) {
 				t = ( -_halfExtentsZ - pz ) / vz;
 				if( t > 0 ) {
 					ix = px + t * vx;
 					iy = py + t * vy;
-					containedInAxis1 = iy > -_halfExtentsY && iy < _halfExtentsY;
-					containedInAxis2 = ix > -_halfExtentsX && ix < _halfExtentsX;
-					if( containedInAxis1 && containedInAxis2 ) {
-						normal = new Vector3D( 0, 0, -1 );
+					if( iy > -_halfExtentsY && iy < _halfExtentsY && ix > -_halfExtentsX && ix < _halfExtentsX ) {
+						_rayIntersectionNormal.x = 0;
+						_rayIntersectionNormal.y = 0;
+						_rayIntersectionNormal.z = -1;
 						intersects = true;
 					}
 				}
-			}
-
-			if( intersects ) {
-				if( !_rayIntersectionPoint ) _rayIntersectionPoint = new Vector3D();
-				_rayIntersectionPoint.x = p.x + t * v.x;
-				_rayIntersectionPoint.y = p.y + t * v.y;
-				_rayIntersectionPoint.z = p.z + t * v.z;
-				if( !_rayIntersectionNormal ) _rayIntersectionNormal = new Vector3D();
-				_rayIntersectionNormal = normal;
 			}
 
 			return intersects ? t : -1;

@@ -23,8 +23,7 @@ package away3d.bounds
 		protected var _aabbPointsDirty:Boolean = true;
 		protected var _boundingRenderable:WireframePrimitiveBase;
 
-		arcane var _rayIntersectionPoint:Vector3D;
-		arcane var _rayIntersectionNormal:Vector3D;
+		arcane var _rayIntersectionNormal:Vector3D = new Vector3D();
 
 		/**
 		 * Creates a new BoundingVolumeBase object
@@ -216,7 +215,7 @@ package away3d.bounds
 			return _aabbPoints;
 		}
 
-		public function intersectsRay( p:Vector3D, dir:Vector3D ):Number {
+		public function rayIntersection( p:Vector3D, dir:Vector3D ):Number {
 			return -1;
 		}
 
@@ -252,10 +251,6 @@ package away3d.bounds
 			_aabbPoints[22] = maxY;
 			_aabbPoints[23] = maxZ;
 			_aabbPointsDirty = false;
-		}
-
-		public function get rayIntersectionPoint():Vector3D {
-			return _rayIntersectionPoint;
 		}
 
 		public function get rayIntersectionNormal():Vector3D {
