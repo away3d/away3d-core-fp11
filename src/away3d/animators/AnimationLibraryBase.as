@@ -47,7 +47,7 @@ package away3d.animators
 		
 		public function get assetType() : String
 		{
-			return AssetType.ANIMATOR_LIBRARY;
+			return AssetType.ANIMATION_LIBRARY;
 		}
 		
 		/**
