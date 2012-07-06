@@ -31,33 +31,35 @@ package away3d.animators
 		private var _clipNode : SkeletonTimelineClipNode;
 		private var _globalMatrices : Vector.<Number>;
 		private var _numJoints : uint;
-		private var _jointsPerVertex : uint;
 		private var _bufferFormat : String;
-        private var _skeleton : Skeleton;
         private var _blendTree : SkeletonTreeNode;
         private var _globalPose : SkeletonPose;
 		private var _animationStates : Dictionary = new Dictionary();
 		private var _condensedMatrices : Vector.<Number>;
 		
+		private var _skeletonAnimatorLibrary:SkeletonAnimatorLibrary;
+        private var _skeleton : Skeleton;
 		private var _forceCPU : Boolean;
 		private var _useCondensedIndices : Boolean;
+		private var _jointsPerVertex : uint;
 		
 		public var updateRootPosition:Boolean = true;
 		
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function SkeletonAnimator(skeleton : Skeleton, jointsPerVertex : uint = 4, forceCPU : Boolean = false)
+		public function SkeletonAnimator(skeletonAnimatorLibrary:SkeletonAnimatorLibrary, skeleton : Skeleton, forceCPU : Boolean = false)
 		{
-			super();
+			super(skeletonAnimatorLibrary);
 			
-			_forceCPU = _usesCPU = forceCPU;
+			_skeletonAnimatorLibrary = skeletonAnimatorLibrary;
 			_skeleton = skeleton;
-			_jointsPerVertex = jointsPerVertex;
+			_forceCPU = forceCPU;
+			_jointsPerVertex = _skeletonAnimatorLibrary.jointsPerVertex;
 			
 			_numJoints = _skeleton.numJoints;
 			_globalMatrices = new Vector.<Number>(_numJoints*12, true);
-			_bufferFormat = "float"+_jointsPerVertex;
+			_bufferFormat = "float" + _jointsPerVertex;
             _globalPose = new SkeletonPose();
 
 			var j : int;
@@ -123,7 +125,7 @@ package away3d.animators
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _condensedMatrices, numCondensedJoints*3);
 			}
 			else {
-				if (_usesCPU) {
+				if (_skeletonAnimatorLibrary.usesCPU) {
 					var subGeomAnimState : SubGeomAnimationState = _animationStates[skinnedGeom] ||= new SubGeomAnimationState(skinnedGeom);
 
 					if (!subGeomAnimState.valid) {
@@ -302,48 +304,6 @@ package away3d.animators
 					_owners[i].translateLocal(delta, dist);
 			}
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
-		{
-			var len : uint = sourceRegisters.length;
-
-			var indexOffset0 : uint = pass.numUsedVertexConstants;
-			var indexOffset1 : uint = indexOffset0 + 1;
-			var indexOffset2 : uint = indexOffset0 + 2;
-			var indexStream : String = "va" + pass.numUsedStreams;
-			var weightStream : String = "va" + (pass.numUsedStreams + 1);
-			var indices : Array = [ indexStream + ".x", indexStream + ".y", indexStream + ".z", indexStream + ".w" ];
-			var weights : Array = [ weightStream + ".x", weightStream + ".y", weightStream + ".z", weightStream + ".w" ];
-			var temp1 : String = findTempReg(targetRegisters);
-			var temp2 : String = findTempReg(targetRegisters, temp1);
-			var dot : String = "dp4";
-			var code : String = "";
-
-			for (var i : uint = 0; i < len; ++i) {
-
-				var src : String = sourceRegisters[i];
-
-				for (var j : uint = 0; j < _jointsPerVertex; ++j) {
-					code +=	dot + " " + temp1 + ".x, " + src + ", vc[" + indices[j] + "+" + indexOffset0 + "]		\n" +
-							dot + " " + temp1 + ".y, " + src + ", vc[" + indices[j] + "+" + indexOffset1 + "]    	\n" +
-							dot + " " + temp1 + ".z, " + src + ", vc[" + indices[j] + "+" + indexOffset2 + "]		\n" +
-							"mov " + temp1 + ".w, " + src + ".w		\n" +
-							"mul " + temp1 + ", " + temp1 + ", " + weights[j] + "\n";	// apply weight
-
-					// add or mov to target. Need to write to a temp reg first, because an output can be a target
-					if (j == 0) code += "mov " + temp2 + ", " + temp1 + "\n";
-					else code += "add " + temp2 + ", " + temp2 + ", " + temp1 + "\n";
-				}
-				// switch to dp3 once positions have been transformed, from now on, it should only be vectors instead of points
-				dot = "dp3";
-				code += "mov " + targetRegisters[i] + ", " + temp2 + "\n";
-			}
-
-			return code;
-		}
 		
 
 		/**
@@ -382,29 +342,10 @@ package away3d.animators
          */
         public function testGPUCompatibility(pass : MaterialPassBase) : void
         {
-			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _skeleton.numJoints * 3 > 128)) {
-				_usesCPU = true;
+			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _numJoints * 3 > 128)) {
+				_skeletonAnimatorLibrary._usesCPU = true;
 			}
         }
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
-		{
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
-		{
-			if (_usesCPU) return;
-			var streamOffset : uint = pass.numUsedStreams;
-
-			stage3DProxy.setSimpleVertexBuffer(streamOffset, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(streamOffset + 1, null, null, 0);
-		}
 	}
 }
 

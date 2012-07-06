@@ -1,5 +1,8 @@
 package away3d.animators
 {
+	import away3d.materials.passes.MaterialPassBase;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.data.UVAnimationFrame;
 	import away3d.animators.data.UVAnimationSequence;
 	import away3d.animators.utils.TimelineUtil;
@@ -9,7 +12,7 @@ package away3d.animators
 
 	use namespace arcane;
 	
-	public class UVAnimator extends AnimatorBase
+	public class UVAnimator extends AnimatorBase implements IAnimator
 	{
 		private var _target : SubMesh;
 		private var _sequences : Object;
@@ -18,12 +21,13 @@ package away3d.animators
 		private var _tlUtil : TimelineUtil;
 		private var _absoluteTime : Number;
 		private var _deltaFrame : UVAnimationFrame;
+		private var _uvAnimatorLibrary:UVAnimatorLibrary;
 		
-		
-		public function UVAnimator(target : SubMesh)
+		public function UVAnimator(uvAnimatorLibrary:UVAnimatorLibrary, target : SubMesh)
 		{
-			super();
+			super(uvAnimatorLibrary);
 			
+			_uvAnimatorLibrary = uvAnimatorLibrary;
 			_target = target;
             // disable transform warning
             _target.uvRotation = 1;
@@ -31,6 +35,11 @@ package away3d.animators
 			_sequences = {};
 			_deltaFrame = new UVAnimationFrame();
 			_tlUtil = new TimelineUtil();
+		}
+		
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+		{
+			
 		}
 		
 		
@@ -89,7 +98,14 @@ package away3d.animators
 			_target.scaleV = frame0.scaleV + (w * _deltaFrame.scaleV);
 			_target.uvRotation = frame0.rotation + (w * _deltaFrame.rotation);
 		}
-		
+						
+        /**
+         * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
+		 * Needs to be called if gpu code is potentially required.
+         */
+        public function testGPUCompatibility(pass : MaterialPassBase) : void
+        {
+        }
 		
 		private function reset() : void
 		{

@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.animators.VertexAnimatorLibrary;
 	import flash.utils.Dictionary;
 	import away3d.animators.VertexAnimator;
 	import away3d.animators.data.VertexAnimationSequence;
@@ -57,7 +58,7 @@ package away3d.loaders.parsers
 		private var _vertIndices : Vector.<Number>;
 		
 		// the current subgeom being built
-		private var _animator : VertexAnimator;
+		private var _animatorLibrary : VertexAnimatorLibrary;
 		private var _firstSubGeom : SubGeometry;
 		private var _uvs : Vector.<Number>;
 		private var _finalUV : Vector.<Number>;

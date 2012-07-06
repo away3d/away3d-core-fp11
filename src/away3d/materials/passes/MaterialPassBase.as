@@ -1,5 +1,6 @@
 package away3d.materials.passes
 {
+	import away3d.animators.IAnimatorLibrary;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -30,8 +31,8 @@ package away3d.materials.passes
 	public class MaterialPassBase extends EventDispatcher
 	{
 		protected var _material : MaterialBase;
-		protected var _animator : IAnimator;
-
+		protected var _animatorLibrary : IAnimatorLibrary;
+		
 		arcane var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
 		arcane var _program3Dids : Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
 		private var _context3Ds:Vector.<Context3D> = new Vector.<Context3D>(8);
@@ -163,17 +164,17 @@ package away3d.materials.passes
 		/**
 		 * The animation used to add vertex code to the shader code.
 		 */
-		public function get animator() : IAnimator
+		public function get animatorLibrary() : IAnimatorLibrary
 		{
-			return _animator;
+			return _animatorLibrary;
 		}
 
-		public function set animator(value : IAnimator) : void
+		public function set animatorLibrary(value : IAnimatorLibrary) : void
 		{
-			if (_animator == value)
+			if (_animatorLibrary == value)
 				return;
 			
-			_animator = value;
+			_animatorLibrary = value;
 			
 			invalidateShaderProgram();
 		}
@@ -226,8 +227,8 @@ package away3d.materials.passes
 
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
 
-			if (_animator)
-				_animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
+			if (renderable.animator)
+				renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
 
 			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
 
@@ -267,8 +268,8 @@ package away3d.materials.passes
 				stage3DProxy.setTextureAt(i, null);
 			}
 			
-			if (_animator)
-				_animator.activate(stage3DProxy, this);
+			if (_animatorLibrary && !_animatorLibrary.usesCPU)
+				_animatorLibrary.activate(stage3DProxy, this);
 			
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
 
@@ -302,8 +303,8 @@ package away3d.materials.passes
 			_previousUsedStreams[index] = _numUsedStreams;
 			_previousUsedTexs[index] = _numUsedTextures;
 
-			if (_animator)
-				_animator.deactivate(stage3DProxy, this);
+			if (_animatorLibrary && !_animatorLibrary.usesCPU)
+				_animatorLibrary.deactivate(stage3DProxy, this);
 
 			if (_renderToTexture) {
 				// kindly restore state
@@ -336,8 +337,8 @@ package away3d.materials.passes
 		{
 			var animatorCode : String = "";
 			
-			if (_animator && !_animator.usesCPU) {
-				animatorCode = _animator.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
+			if (_animatorLibrary && !_animatorLibrary.usesCPU) {
+				animatorCode = _animatorLibrary.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
 			} else {
 				var len : uint = _animatableAttributes.length;
 	

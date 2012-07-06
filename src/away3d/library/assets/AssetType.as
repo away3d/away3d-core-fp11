@@ -11,6 +11,6 @@ package away3d.library.assets
 		public static const ANIMATION : String = 'animation';
 		public static const TEXTURE : String = 'texture';
 		public static const MATERIAL : String = 'material';
-		public static const ANIMATOR : String = 'animator';
+		public static const ANIMATOR_LIBRARY : String = 'animatorLibrary';
 	}
 }

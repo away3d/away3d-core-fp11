@@ -1,5 +1,7 @@
 package away3d.loaders.parsers
 {
+	import away3d.animators.SkeletonAnimator;
+	import away3d.animators.SkeletonAnimatorLibrary;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;
 	import away3d.arcane;
@@ -57,7 +59,7 @@ package away3d.loaders.parsers
 		private var _geometry : Geometry;
 
 		private var _skeleton : Skeleton;
-		//private var _animation : SkeletonAnimation;
+		private var _animatorLibrary : SkeletonAnimatorLibrary;
 
 		private var _rotationQuat : Quaternion;
 
@@ -155,7 +157,7 @@ package away3d.loaders.parsers
 
 				if (_reachedEOF) {
 					calculateMaxJointCount();
-					//_animation = new SkeletonAnimation(_skeleton, _maxJointCount);
+					_animatorLibrary = new SkeletonAnimatorLibrary(_maxJointCount);
 
 					_mesh = new Mesh();
 					_geometry = _mesh.geometry;
@@ -169,7 +171,7 @@ package away3d.loaders.parsers
 
 					finalizeAsset(_mesh);
 					finalizeAsset(_skeleton);
-
+					finalizeAsset(_animatorLibrary);
 					return ParserBase.PARSING_DONE;
 				}
 			}

@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import flash.events.EventDispatcher;
 	import away3d.entities.Mesh;
 	import away3d.arcane;
 	import away3d.errors.AbstractMethodError;
@@ -20,33 +21,28 @@ package away3d.animators
 	 * @see away3d.core.animation.AnimationStateBase
 	 *
 	 */
-	public class AnimatorBase extends NamedAssetBase implements IAsset
+	public class AnimatorBase extends EventDispatcher
 	{
 		private var _broadcaster : Sprite = new Sprite();
+		private var _animatorLibrary : IAnimatorLibrary;
 		private var _isPlaying : Boolean;
 		private var _startEvent : AnimatorEvent;
 		private var _stopEvent : AnimatorEvent;
 		private var _time : int;
 		private var _playbackSpeed : Number = 1;
 		
-		protected var _usesCPU : Boolean;
 		protected var _stateInvalid:Boolean;
 		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
 		
-		public function AnimatorBase()
+		public function get animatorLibrary() : IAnimatorLibrary
 		{
-//			start();
+			return _animatorLibrary;
 		}
 		
-		
-		public function resetGPUCompatibility() : void
-        {
-            _usesCPU = false;
-        }
-		
-		public function get usesCPU() : Boolean
+		public function AnimatorBase(animatorLibrary:IAnimatorLibrary)
 		{
-			return _usesCPU;
+			_animatorLibrary = animatorLibrary;
+//			start();
 		}
 		
 		public function addOwner(mesh : Mesh) : void
@@ -71,23 +67,10 @@ package away3d.animators
 		{
 			_playbackSpeed = value;
 		}
-		
-		public function get assetType() : String
-		{
-			return AssetType.ANIMATOR;
-		}
 
 		public function stop() : void
 		{
 			notifyStop();
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function dispose() : void
-		{
-			// To be overridden by sub-classes that have something to dispose
 		}
 
 		private function notifyStart() : void
@@ -158,27 +141,6 @@ package away3d.animators
 			var dt : Number = time-_time;
 			updateAnimation(dt, dt*_playbackSpeed);
 			_time = time;
-		}
-		
-		/**
-		 * Retrieves a temporary register that's still free.
-		 * @param exclude An array of non-free temporary registers
-		 * @param excludeAnother An additional register that's not free
-		 * @return A temporary register that can be used
-		 */
-		protected function findTempReg(exclude : Array, excludeAnother : String = null) : String
-		{
-			var i : uint;
-			var reg : String;
-
-			while (true) {
-				reg = "vt" + i;
-				if (exclude.indexOf(reg) == -1 && excludeAnother != reg) return reg;
-				++i;
-			}
-
-			// can't be reached
-			return null;
 		}
 	}
 }
