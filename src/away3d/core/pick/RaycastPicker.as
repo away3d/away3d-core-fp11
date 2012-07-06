@@ -108,9 +108,6 @@ package away3d.core.pick
 			_entities.length = _numEntities;
 
 			// Sort entities from closest to furthest.
-			// TODO: Instead of sorting the array, create it one item at a time in a sorted manner.
-			// Note: EntityCollector does provide the entities with some sorting, its not random, make use of that.
-			// However, line up collision test shows that the current implementation isn't too bad.
 			_entities = _entities.sort( sortOnNearT );
 
 			if( !_hasCollisions )
