@@ -1,6 +1,6 @@
 package away3d.materials.passes
 {
-	import away3d.animators.IAnimationLibrary;
+	import away3d.animators.IAnimationSet;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -31,7 +31,7 @@ package away3d.materials.passes
 	public class MaterialPassBase extends EventDispatcher
 	{
 		protected var _material : MaterialBase;
-		protected var _animationLibrary : IAnimationLibrary;
+		protected var _animationSet : IAnimationSet;
 		
 		arcane var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
 		arcane var _program3Dids : Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
@@ -164,17 +164,17 @@ package away3d.materials.passes
 		/**
 		 * The animation used to add vertex code to the shader code.
 		 */
-		public function get animationLibrary() : IAnimationLibrary
+		public function get animationSet() : IAnimationSet
 		{
-			return _animationLibrary;
+			return _animationSet;
 		}
 
-		public function set animationLibrary(value : IAnimationLibrary) : void
+		public function set animationSet(value : IAnimationSet) : void
 		{
-			if (_animationLibrary == value)
+			if (_animationSet == value)
 				return;
 			
-			_animationLibrary = value;
+			_animationSet = value;
 			
 			invalidateShaderProgram();
 		}
@@ -268,8 +268,8 @@ package away3d.materials.passes
 				stage3DProxy.setTextureAt(i, null);
 			}
 			
-			if (_animationLibrary && !_animationLibrary.usesCPU)
-				_animationLibrary.activate(stage3DProxy, this);
+			if (_animationSet && !_animationSet.usesCPU)
+				_animationSet.activate(stage3DProxy, this);
 			
 			stage3DProxy.setProgram(_program3Ds[contextIndex]);
 
@@ -303,8 +303,8 @@ package away3d.materials.passes
 			_previousUsedStreams[index] = _numUsedStreams;
 			_previousUsedTexs[index] = _numUsedTextures;
 
-			if (_animationLibrary && !_animationLibrary.usesCPU)
-				_animationLibrary.deactivate(stage3DProxy, this);
+			if (_animationSet && !_animationSet.usesCPU)
+				_animationSet.deactivate(stage3DProxy, this);
 
 			if (_renderToTexture) {
 				// kindly restore state
@@ -337,8 +337,8 @@ package away3d.materials.passes
 		{
 			var animatorCode : String = "";
 			
-			if (_animationLibrary && !_animationLibrary.usesCPU) {
-				animatorCode = _animationLibrary.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
+			if (_animationSet && !_animationSet.usesCPU) {
+				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
 			} else {
 				var len : uint = _animatableAttributes.length;
 	

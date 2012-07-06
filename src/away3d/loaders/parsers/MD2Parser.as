@@ -2,7 +2,7 @@ package away3d.loaders.parsers
 {
 	import away3d.animators.nodes.VertexClipNode;
 	import away3d.animators.VertexAnimationState;
-	import away3d.animators.VertexAnimationLibrary;
+	import away3d.animators.VertexAnimationSet;
 	import flash.utils.Dictionary;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
@@ -58,7 +58,7 @@ package away3d.loaders.parsers
 		private var _vertIndices : Vector.<Number>;
 		
 		// the current subgeom being built
-		private var _animationLibrary : VertexAnimationLibrary = new VertexAnimationLibrary();
+		private var _animationSet : VertexAnimationSet = new VertexAnimationSet();
 		private var _firstSubGeom : SubGeometry;
 		private var _uvs : Vector.<Number>;
 		private var _finalUV : Vector.<Number>;
@@ -431,7 +431,7 @@ package away3d.loaders.parsers
 					clip = new VertexClipNode();
 					var state : VertexAnimationState = new VertexAnimationState(clip);
 					
-					_animationLibrary.addState(name, state);
+					_animationSet.addState(name, state);
 					_clipNodes[name] = clip;
 					// If another sequence was parsed before this one, starting
 					// a new sequence measn the previuos one is complete and can
@@ -450,7 +450,7 @@ package away3d.loaders.parsers
 			
 			// Force finalizeAsset() to decide name
 			//_animator.name = "";
-			finalizeAsset(_animationLibrary);
+			finalizeAsset(_animationSet);
 			
 			_parsedFrames = true;
 		}

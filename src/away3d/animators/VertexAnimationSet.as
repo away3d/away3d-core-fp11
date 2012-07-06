@@ -8,7 +8,7 @@ package away3d.animators
 	/**
 	 * @author robbateman
 	 */
-	public class VertexAnimationLibrary extends AnimationLibraryBase implements IAnimationLibrary
+	public class VertexAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
 				
 		private var _numPoses : uint;
@@ -40,7 +40,7 @@ package away3d.animators
 		/**
 		 * Creates a new AnimationSequenceController object.
 		 */
-		public function VertexAnimationLibrary(numPoses : uint = 2, blendMode : String = "absolute" )
+		public function VertexAnimationSet(numPoses : uint = 2, blendMode : String = "absolute" )
 		{
 			super();
 			_numPoses = numPoses;

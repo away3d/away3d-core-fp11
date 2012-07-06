@@ -11,7 +11,7 @@ package away3d.animators
 	public class AnimationStateBase extends NamedAssetBase implements IAsset
 	{
 		private var _rootNode:IAnimationNode;
-		private var _owner:IAnimationLibrary;
+		private var _owner:IAnimationSet;
 		private var _stateName:String;
 		
 		public function get rootNode():IAnimationNode
@@ -38,7 +38,7 @@ package away3d.animators
 			return AssetType.ANIMATION_STATE;
 		}
 		
-		public function addOwner(owner:IAnimationLibrary, stateName:String):void
+		public function addOwner(owner:IAnimationSet, stateName:String):void
 		{
 			_owner = owner;
 			_stateName = stateName;

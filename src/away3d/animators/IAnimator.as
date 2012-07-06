@@ -9,7 +9,7 @@ package away3d.animators
 	 */
 	public interface IAnimator
 	{
-		function get animationLibrary() : IAnimationLibrary
+		function get animationSet() : IAnimationSet
 		
 		/**
 		 * Sets the GPU render state required by the animation that is dependent of the rendered object.

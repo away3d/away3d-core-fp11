@@ -10,6 +10,6 @@ package away3d.animators
 		
 		function get stateName():String;
 		
-		function addOwner(owner:IAnimationLibrary, stateName:String):void;
+		function addOwner(owner:IAnimationSet, stateName:String):void;
 	}
 }

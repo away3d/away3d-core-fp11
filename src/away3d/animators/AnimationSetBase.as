@@ -1,6 +1,6 @@
 package away3d.animators
 {
-	import away3d.errors.AnimationLibraryError;
+	import away3d.errors.AnimationSetError;
 	import flash.utils.Dictionary;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.NamedAssetBase;
@@ -12,7 +12,7 @@ package away3d.animators
 	/**
 	 * @author robbateman
 	 */
-	public class AnimationLibraryBase extends NamedAssetBase implements IAsset
+	public class AnimationSetBase extends NamedAssetBase implements IAsset
 	{
 		arcane var _usesCPU:Boolean;
 		private var _states:Vector.<IAnimationState> = new Vector.<IAnimationState>();
@@ -68,7 +68,7 @@ package away3d.animators
 		public function addState(stateName:String, animationState:IAnimationState):void
 		{
 			if (_stateDictionary[stateName])
-				throw new AnimationLibraryError("Animation state name already exists");
+				throw new AnimationSetError("Animation state name already exists");
 			
 			_stateDictionary[stateName] = animationState;
 			

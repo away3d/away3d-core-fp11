@@ -7,7 +7,7 @@ package away3d.animators
 	/**
 	 * @author robbateman
 	 */
-	public interface IAnimationLibrary
+	public interface IAnimationSet
 	{
 		function get states():Vector.<IAnimationState>;
 		

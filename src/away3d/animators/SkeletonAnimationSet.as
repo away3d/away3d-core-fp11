@@ -7,7 +7,7 @@ package away3d.animators
 	/**
 	 * @author robbateman
 	 */
-	public class SkeletonAnimationLibrary extends AnimationLibraryBase implements IAnimationLibrary
+	public class SkeletonAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
 		private var _jointsPerVertex : uint;
 		
@@ -17,7 +17,7 @@ package away3d.animators
 			return _jointsPerVertex;
 		}
 		
-		public function SkeletonAnimationLibrary(jointsPerVertex : uint = 4)
+		public function SkeletonAnimationSet(jointsPerVertex : uint = 4)
 		{
 			_jointsPerVertex = jointsPerVertex;
 		}
