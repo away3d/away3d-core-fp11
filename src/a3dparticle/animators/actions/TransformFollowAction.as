@@ -17,18 +17,18 @@ package a3dparticle.animators.actions
 	 */
 	public class TransformFollowAction extends PerParticleAction
 	{
-		public var offestAttribute:ShaderRegisterElement;
+		public var offsetAttribute:ShaderRegisterElement;
 		public var rotationAttribute:ShaderRegisterElement;
 		
-		private var _offest:Boolean;
+		private var _offset:Boolean;
 		private var _rotation:Boolean;
 		private var temp:Vector3D;
 		
 		public var particlesData:Dictionary = new Dictionary();
 		
-		public function TransformFollowAction(offest:Boolean, rotation:Boolean)
+		public function TransformFollowAction(offset:Boolean, rotation:Boolean)
 		{
-			this._offest = offest;
+			this._offset = offset;
 			this._rotation = rotation;
 			priority = 9;
 		}
@@ -70,16 +70,16 @@ package a3dparticle.animators.actions
 		{
 			var code:String = "";
 			if (_rotation) code += getRotationCode();
-			if (_offest) code += getOffestCode();
+			if (_offset) code += getOffsetCode();
 			
 			return code;
 		}
 		
-		private function getOffestCode():String
+		private function getOffsetCode():String
 		{
-			offestAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			offsetAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
-			code += "add " + _animation.scaleAndRotateTarget.toString() +"," + offestAttribute.toString() + ".xyz," + _animation.scaleAndRotateTarget.toString() + "\n";
+			code += "add " + _animation.scaleAndRotateTarget.toString() +"," + offsetAttribute.toString() + ".xyz," + _animation.scaleAndRotateTarget.toString() + "\n";
 			return code;
 		}
 		

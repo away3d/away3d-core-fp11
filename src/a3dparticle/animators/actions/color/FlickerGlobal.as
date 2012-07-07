@@ -28,14 +28,14 @@ package a3dparticle.animators.actions.color
 		
 		private var startMultiplierConst:ShaderRegisterElement;
 		private var deltaMultiplierConst:ShaderRegisterElement;
-		private var startOffestConst:ShaderRegisterElement;
-		private var deltaOffestConst:ShaderRegisterElement;
+		private var startOffsetConst:ShaderRegisterElement;
+		private var deltaOffsetConst:ShaderRegisterElement;
 		private var cycleConst:ShaderRegisterElement;
 		
 		private var startMultiplier:Vector.<Number>;
 		private var deltaMultiplier:Vector.<Number>;
-		private var startOffest:Vector.<Number>;
-		private var deltaOffest:Vector.<Number>;
+		private var startOffset:Vector.<Number>;
+		private var deltaOffset:Vector.<Number>;
 		
 		private var cycleData:Vector.<Number>;
 		
@@ -53,8 +53,8 @@ package a3dparticle.animators.actions.color
 				
 			startMultiplier = Vector.<Number>([(_minColor.redMultiplier + _maxColor.redMultiplier) / 2 , (_minColor.greenMultiplier + _maxColor.greenMultiplier) / 2 , (_minColor.blueMultiplier + _maxColor.blueMultiplier) / 2 , (_minColor.alphaMultiplier + _maxColor.alphaMultiplier) / 2 ]);
 			deltaMultiplier = Vector.<Number>([(_maxColor.redMultiplier - _minColor.redMultiplier) / 2 , (_maxColor.greenMultiplier - _minColor.greenMultiplier) / 2 , (_maxColor.blueMultiplier - _minColor.blueMultiplier) / 2 , (_maxColor.alphaMultiplier - _minColor.alphaMultiplier) / 2]);
-			startOffest = Vector.<Number>([(_minColor.redOffset + _maxColor.redOffset) / (256 * 2), (_minColor.greenOffset + _maxColor.greenOffset) / (256 * 2), (_minColor.blueOffset + _maxColor.blueOffset) / (256 * 2), (_minColor.alphaOffset + _maxColor.alphaOffset) / (256 * 2)]);
-			deltaOffest = Vector.<Number>([(_maxColor.redOffset - _minColor.redOffset) / (256 * 2), (_maxColor.greenOffset - _minColor.greenOffset) / (256 * 2), (_maxColor.blueOffset - _minColor.blueOffset) / (256 * 2), (_maxColor.alphaOffset - _minColor.alphaOffset) / (256 * 2)]);
+			startOffset = Vector.<Number>([(_minColor.redOffset + _maxColor.redOffset) / (256 * 2), (_minColor.greenOffset + _maxColor.greenOffset) / (256 * 2), (_minColor.blueOffset + _maxColor.blueOffset) / (256 * 2), (_minColor.alphaOffset + _maxColor.alphaOffset) / (256 * 2)]);
+			deltaOffset = Vector.<Number>([(_maxColor.redOffset - _minColor.redOffset) / (256 * 2), (_maxColor.greenOffset - _minColor.greenOffset) / (256 * 2), (_maxColor.blueOffset - _minColor.blueOffset) / (256 * 2), (_maxColor.alphaOffset - _minColor.alphaOffset) / (256 * 2)]);
 			
 			if (phaseAngle != 0) _hasPhaseAngle = true;
 			cycleData = Vector.<Number>([Math.PI * 2 / cycle, phaseAngle * Math.PI / 180, 0, 0]);
@@ -69,8 +69,8 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				startOffestConst = shaderRegisterCache.getFreeFragmentConstant();
-				deltaOffestConst = shaderRegisterCache.getFreeFragmentConstant();
+				startOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
+				deltaOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
 			}
 			cycleConst = shaderRegisterCache.getFreeFragmentConstant();
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentVectorTemp();
@@ -95,8 +95,8 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				code += "mul " + temp.toString() + "," + deltaOffestConst.toString() +"," + sin.toString() + "\n";
-				code += "add " + temp.toString() + "," + temp.toString() +"," + startOffestConst.toString() + "\n";
+				code += "mul " + temp.toString() + "," + deltaOffsetConst.toString() +"," + sin.toString() + "\n";
+				code += "add " + temp.toString() + "," + temp.toString() +"," + startOffsetConst.toString() + "\n";
 				code += "add " + _animation.colorTarget.toString() +"," +temp.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
 			return code;
@@ -114,8 +114,8 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, startOffestConst.index, startOffest);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffestConst.index, deltaOffest);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, startOffsetConst.index, startOffset);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffsetConst.index, deltaOffset);
 			}
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, cycleConst.index, cycleData);
 		}

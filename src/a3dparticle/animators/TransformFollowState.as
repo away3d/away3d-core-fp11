@@ -32,20 +32,20 @@ package a3dparticle.animators
 		
 		private var _lastTime:Number = 0;
 		
-		private var _offest:Boolean;
+		private var _offset:Boolean;
 		private var _rotation:Boolean;
 		
 		private var _bufferDict:Dictionary=new Dictionary();
 		private var _context3DDict:Dictionary = new Dictionary();
 		
-		public function TransformFollowState(offest:Boolean, rotation:Boolean, animation : ParticleAnimation, isClone:Boolean = false)
+		public function TransformFollowState(offset:Boolean, rotation:Boolean, animation : ParticleAnimation, isClone:Boolean = false)
 		{
 			super(animation);
-			this._offest = offest;
+			this._offset = offset;
 			this._rotation = rotation;
 			if (!isClone)
 			{
-				animation.addAction(_followAction = new TransformFollowAction(offest,rotation));
+				animation.addAction(_followAction = new TransformFollowAction(offset,rotation));
 			}
 		}
 		
@@ -73,13 +73,13 @@ package a3dparticle.animators
 			var subContainer:SubContainer = renderable as SubContainer;
 			if (_followAction.particlesData[subContainer.shareAtt])
 			{
-				if (_offest && _rotation)
+				if (_offset && _rotation)
 				{
-					processOffestAndRotation(stage3DProxy,subContainer);
+					processOffsetAndRotation(stage3DProxy,subContainer);
 				}
-				else if(_offest)
+				else if(_offset)
 				{
-					processOffest(stage3DProxy,subContainer);
+					processOffset(stage3DProxy,subContainer);
 				}
 				else if(_rotation)
 				{
@@ -89,7 +89,7 @@ package a3dparticle.animators
 			super.setRenderState(stage3DProxy, renderable, vertexConstantOffset, vertexStreamOffset);
 		}
 		
-		private function processOffest(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
+		private function processOffset(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
 		{
 			var position : Vector3D = new Vector3D();
 			if (_followTarget) position = _followTarget.position.clone();
@@ -116,7 +116,7 @@ package a3dparticle.animators
 			}
 			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 3);
-			stage3DProxy.setSimpleVertexBuffer(_followAction.offestAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.setSimpleVertexBuffer(_followAction.offsetAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
 		
 		private function precessRotation(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
@@ -151,7 +151,7 @@ package a3dparticle.animators
 			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
 		
-		private function processOffestAndRotation(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
+		private function processOffsetAndRotation(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
 		{
 			var position : Vector3D = new Vector3D();
 			if (_followTarget) position = _followTarget.position.clone();
@@ -186,13 +186,13 @@ package a3dparticle.animators
 			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 6);
 			var context : Context3D = stage3DProxy._context3D;
-			context.setVertexBufferAt(_followAction.offestAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(_followAction.offsetAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 			context.setVertexBufferAt(_followAction.rotationAttribute.index, buffer, 3, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 		override public function clone() : AnimationStateBase
 		{
-			var clone : TransformFollowState = new TransformFollowState(_offest, _rotation, ParticleAnimation(_animation), true);
+			var clone : TransformFollowState = new TransformFollowState(_offset, _rotation, ParticleAnimation(_animation), true);
 			clone._followAction = _followAction;
 			clone.time = time;
 			return clone;
@@ -202,7 +202,7 @@ package a3dparticle.animators
 		{
 			if (!_bufferDict[subContainer.shareAtt] || stage3DProxy.context3D != _context3DDict[subContainer.shareAtt])
 			{
-				if (_offest && _rotation)
+				if (_offset && _rotation)
 				{
 					_bufferDict[subContainer.shareAtt]=stage3DProxy.context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 6, 6);
 				}

@@ -44,7 +44,7 @@ package a3dparticle.animators.actions.fog
 			_fogConst = shaderRegisterCache.getFreeFragmentConstant();
 			
 			var code:String = "";
-			code += "sub " + _camerVary.toString() + "," + _animation.offestTarget.toString() + "," + _animation.cameraPosConst.toString() + "\n";
+			code += "sub " + _camerVary.toString() + "," + _animation.offsetTarget.toString() + "," + _animation.cameraPosConst.toString() + "\n";
 			return code;
 		}
 		

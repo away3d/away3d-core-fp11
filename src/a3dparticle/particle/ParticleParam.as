@@ -31,9 +31,9 @@ package a3dparticle.particle
 		 * 
 		 * RandomRotateLocal Vector3D. (x,y,z) is the rotation axis of the particle, w is the cycle time of rotation.The w must be greater than 0.
 		 * 
-		 * OffestPositionLocal Vector3D. (x,y,z) is the offest position of the particle.
+		 * OffsetPositionLocal Vector3D. (x,y,z) is the offset position of the particle.
 		 * 
-		 * DriftLocal Vector3D. (x,y,z) is the max drift position,w is the cycle time of drift.It use the sin to cacluate output.So the max offest is (x,y,z),min offest
+		 * DriftLocal Vector3D. (x,y,z) is the max drift position,w is the cycle time of drift.It use the sin to cacluate output.So the max offset is (x,y,z),min offset
 		 * 						is (-x,-y,-z).
 		 * 
 		 * RandomColorLocal ColorTransform.This will effect the original color of the particle.

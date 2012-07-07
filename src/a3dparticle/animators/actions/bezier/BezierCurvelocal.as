@@ -88,9 +88,9 @@ package a3dparticle.animators.actions.bezier
 			code += "mul " + time_temp.toString() + "," + _animation.vertexLife.toString() +"," + rev_time.toString() + "\n";
 			code += "mul " + time_temp.toString() + "," + time_temp.toString() +"," + _animation.TwoConst.toString() + "\n";
 			code += "mul " + distance.toString() + "," + time_temp.toString() +"," + p1Attribute.toString() + "\n";
-			code += "add " + _animation.offestTarget.toString() +".xyz," + distance.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
+			code += "add " + _animation.offsetTarget.toString() +".xyz," + distance.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";
 			code += "mul " + distance.toString() + "," + time_2.toString() +"," + p2Attribute.toString() + "\n";
-			code += "add " + _animation.offestTarget.toString() +".xyz," + distance.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";
+			code += "add " + _animation.offsetTarget.toString() +".xyz," + distance.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";
 			
 			if (_animation.needVelocity)
 			{	

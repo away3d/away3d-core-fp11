@@ -22,16 +22,16 @@ package a3dparticle.animators.actions.color
 		
 		private var startMultiplierConst:ShaderRegisterElement;
 		private var deltaMultiplierConst:ShaderRegisterElement;
-		private var startOffestConst:ShaderRegisterElement;
-		private var deltaOffestConst:ShaderRegisterElement;
+		private var startOffsetConst:ShaderRegisterElement;
+		private var deltaOffsetConst:ShaderRegisterElement;
 		
 		private var _hasMult:Boolean;
 		private var _hasOffset:Boolean;
 		
 		private var startMultiplier:Vector.<Number>;
 		private var deltaMultiplier:Vector.<Number>;
-		private var startOffest:Vector.<Number>;
-		private var deltaOffest:Vector.<Number>;
+		private var startOffset:Vector.<Number>;
+		private var deltaOffset:Vector.<Number>;
 		
 		public function ChangeColorByLifeGlobal(startColor:ColorTransform,endColor:ColorTransform) 
 		{
@@ -46,8 +46,8 @@ package a3dparticle.animators.actions.color
 			
 			startMultiplier = Vector.<Number>([_startColor.redMultiplier , _startColor.greenMultiplier , _startColor.blueMultiplier , _startColor.alphaMultiplier ]);
 			deltaMultiplier = Vector.<Number>([(_endColor.redMultiplier - _startColor.redMultiplier) , (_endColor.greenMultiplier - _startColor.greenMultiplier) , (_endColor.blueMultiplier - _startColor.blueMultiplier) , (_endColor.alphaMultiplier - _startColor.alphaMultiplier)]);
-			startOffest = Vector.<Number>([_startColor.redOffset / 256, _startColor.greenOffset / 256, _startColor.blueOffset / 256, _startColor.alphaOffset / 256]);
-			deltaOffest = Vector.<Number>([(_endColor.greenOffset - _startColor.redOffset) / 256, (_endColor.greenOffset - _startColor.greenOffset) / 256, (_endColor.blueOffset - _startColor.blueOffset ) / 256, (_endColor.alphaOffset - _startColor.alphaOffset) / 256]);
+			startOffset = Vector.<Number>([_startColor.redOffset / 256, _startColor.greenOffset / 256, _startColor.blueOffset / 256, _startColor.alphaOffset / 256]);
+			deltaOffset = Vector.<Number>([(_endColor.greenOffset - _startColor.redOffset) / 256, (_endColor.greenOffset - _startColor.greenOffset) / 256, (_endColor.blueOffset - _startColor.blueOffset ) / 256, (_endColor.alphaOffset - _startColor.alphaOffset) / 256]);
 			
 		}
 		
@@ -60,8 +60,8 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				startOffestConst = shaderRegisterCache.getFreeFragmentConstant();
-				deltaOffestConst = shaderRegisterCache.getFreeFragmentConstant();
+				startOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
+				deltaOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
 			}
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentVectorTemp();
@@ -76,8 +76,8 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				code += "mul " + temp.toString() + "," + _animation.fragmentLife.toString() +"," + deltaOffestConst.toString() + "\n";
-				code += "add " + temp.toString() + "," + temp.toString() +"," + startOffestConst.toString() + "\n";
+				code += "mul " + temp.toString() + "," + _animation.fragmentLife.toString() +"," + deltaOffsetConst.toString() + "\n";
+				code += "add " + temp.toString() + "," + temp.toString() +"," + startOffsetConst.toString() + "\n";
 				code += "add " + _animation.colorTarget.toString() +"," +temp.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
 			return code;
@@ -94,8 +94,8 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, startOffestConst.index, startOffest);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffestConst.index, deltaOffest);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, startOffsetConst.index, startOffset);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffsetConst.index, deltaOffset);
 			}
 			
 		}

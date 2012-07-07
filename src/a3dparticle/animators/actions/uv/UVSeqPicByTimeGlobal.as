@@ -69,7 +69,7 @@ package a3dparticle.animators.actions.uv
 				
 				var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 				var time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
-				var vOffest:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
+				var vOffset:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
 				temp = new ShaderRegisterElement(temp.regName, temp.index, "z");
 				var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "w");
 				
@@ -107,9 +107,9 @@ package a3dparticle.animators.actions.uv
 				if (_needV)
 				{
 					code += "frc " + temp2.toString() + "," + temp.toString() + "\n";
-					code += "sub " + vOffest.toString() + "," + temp.toString() + "," + temp2.toString() + "\n";
-					code += "mul " + vOffest.toString() + "," + vOffest.toString() + "," + vStep.toString() + "\n";
-					code += "add " + v.toString() + "," + v.toString() + "," + vOffest.toString() + "\n";
+					code += "sub " + vOffset.toString() + "," + temp.toString() + "," + temp2.toString() + "\n";
+					code += "mul " + vOffset.toString() + "," + vOffset.toString() + "," + vStep.toString() + "\n";
+					code += "add " + v.toString() + "," + v.toString() + "," + vOffset.toString() + "\n";
 				}
 				code += stepDiv(temp, temp, uStep, temp2);
 				code += "add " + u.toString() + "," + u.toString() + "," + temp.toString() + "\n";

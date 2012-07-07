@@ -69,7 +69,7 @@ package a3dparticle.animators.actions.drift
 			code += "mul " + dgree.toString() + "," + _animation.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
 			code += "sin " + sin.toString() + "," + dgree.toString() + "\n";
 			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
-			code += "add " + _animation.offestTarget.toString() +"," + distance.toString() + "," + _animation.offestTarget.toString() + "\n";
+			code += "add " + _animation.offsetTarget.toString() +"," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
 			
 			if (_animation.needVelocity)
 			{	code += "cos " + cos.toString() + "," + dgree.toString() + "\n";
