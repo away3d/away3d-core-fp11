@@ -24,7 +24,7 @@ package a3dparticle.animators.actions.color
 		private var _tempColor:ColorTransform;
 		
 		private var _hasMult:Boolean;
-		private var _hasOffest:Boolean;
+		private var _hasOffset:Boolean;
 		
 		private var multiplierAtt:ShaderRegisterElement;
 		private var multiplierVary:ShaderRegisterElement;
@@ -32,16 +32,16 @@ package a3dparticle.animators.actions.color
 		private var offsetVary:ShaderRegisterElement;
 		
 		
-		public function RandomColorLocal(fun:Function=null,hasMult:Boolean=true,hasOffest:Boolean=true) 
+		public function RandomColorLocal(fun:Function=null,hasMult:Boolean=true,hasOffset:Boolean=true) 
 		{
 			_colorFun = fun;
 			_hasMult = hasMult;
-			_hasOffest = hasOffest;
+			_hasOffset = hasOffset;
 			_name = "RandomColorLocal";
-			if (_hasMult && _hasOffest) dataLenght = 8;
-			if (_hasMult && !_hasOffest) dataLenght = 4;
-			if (!_hasMult && _hasOffest) dataLenght = 4;
-			if (!_hasMult && !_hasOffest) throw(new Error("no change!"));
+			if (_hasMult && _hasOffset) dataLenght = 8;
+			if (_hasMult && !_hasOffset) dataLenght = 4;
+			if (!_hasMult && _hasOffset) dataLenght = 4;
+			if (!_hasMult && !_hasOffset) throw(new Error("no change!"));
 		}
 		
 		override public function genOne(param:ParticleParam):void
@@ -66,7 +66,7 @@ package a3dparticle.animators.actions.color
 				getExtraData(subContainer).push(_tempColor.blueMultiplier);
 				getExtraData(subContainer).push(_tempColor.alphaMultiplier);
 			}
-			if (_hasOffest)
+			if (_hasOffset)
 			{
 				getExtraData(subContainer).push(_tempColor.redOffset);
 				getExtraData(subContainer).push(_tempColor.greenOffset);
@@ -85,7 +85,7 @@ package a3dparticle.animators.actions.color
 				multiplierVary = shaderRegisterCache.getFreeVarying();
 				code += "mov " + multiplierVary.toString() + "," + multiplierAtt.toString() + "\n";
 			}
-			if (_hasOffest)
+			if (_hasOffset)
 			{
 				offsetAtt = shaderRegisterCache.getFreeVertexAttribute();
 				offsetVary = shaderRegisterCache.getFreeVarying();
@@ -103,7 +103,7 @@ package a3dparticle.animators.actions.color
 			{
 				code += "mul " + _animation.colorTarget.toString() +"," + multiplierVary.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
-			if (_hasOffest)
+			if (_hasOffset)
 			{
 				code += "add " + _animation.colorTarget.toString() +"," +offsetVary.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
@@ -116,7 +116,7 @@ package a3dparticle.animators.actions.color
 			if (_hasMult)
 			{
 				context.setVertexBufferAt(multiplierAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
-				if (_hasOffest)
+				if (_hasOffset)
 					context.setVertexBufferAt(offsetAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 4, Context3DVertexBufferFormat.FLOAT_4);
 			}
 			else

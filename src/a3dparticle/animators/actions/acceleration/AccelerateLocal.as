@@ -71,7 +71,7 @@ package a3dparticle.animators.actions.acceleration
 			shaderRegisterCache.removeVertexTempUsage(temp);
 			
 			code += "mul " + temp.toString() +"," + temp.toString() + "," + _animation.vertexTime.toString() + "\n";
-			code += "add " + _animation.offestTarget.toString() +".xyz," + temp.toString() + "," + _animation.offestTarget.toString() + ".xyz\n";		
+			code += "add " + _animation.offsetTarget.toString() +".xyz," + temp.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";		
 			return code;
 		}
 		

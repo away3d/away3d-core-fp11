@@ -2,7 +2,7 @@ package
 {
 	import a3dparticle.animators.actions.acceleration.AccelerateGlobal;
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
-	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.position.OffsetPositionLocal;
 	import a3dparticle.animators.actions.velocity.VelocityLocal;
 	import a3dparticle.generater.SingleGenerater;
 	import a3dparticle.particle.ParticleColorMaterial;
@@ -78,7 +78,7 @@ package
 			var action2:AccelerateGlobal = new AccelerateGlobal(new Vector3D(0, -500, 0));
 			particle.addAction(action2);
 			
-			var action3:OffestPositionLocal = new OffestPositionLocal();
+			var action3:OffsetPositionLocal = new OffsetPositionLocal();
 			particle.addAction(action3);
 			
 			var action4:ChangeColorByLifeGlobal = new ChangeColorByLifeGlobal(new ColorTransform(0.7,0.9,1,0.5),new ColorTransform(0.9,1,1,0.3) );
@@ -112,7 +112,7 @@ package
 			var degree2:Number = Math.PI *80/ 180 + Math.random() * Math.PI* 5/ 180;
 			
 			param["VelocityLocal"] = new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.sin(degree2), r * Math.cos(degree1) * Math.cos(degree2));
-			param["OffestPositionLocal"] = new Vector3D(r2 * cos, 0, r2 * sin);
+			param["OffsetPositionLocal"] = new Vector3D(r2 * cos, 0, r2 * sin);
 		}
 
 		

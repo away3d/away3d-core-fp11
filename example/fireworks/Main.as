@@ -1,7 +1,7 @@
 package 
 {
 	import a3dparticle.animators.actions.brokenline.BrokenLineLocal;
-	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.position.OffsetPositionLocal;
 	import a3dparticle.animators.actions.texture.ColorTextureByLifeGlobal;
 	import a3dparticle.animators.actions.texture.TextureHelper;
 	import a3dparticle.generater.SingleGenerater;
@@ -76,7 +76,7 @@ package
 			particle.hasDuringTime = true;
 			particle.hasSleepTime = true;
 			
-			var action1:OffestPositionLocal = new OffestPositionLocal();
+			var action1:OffsetPositionLocal = new OffsetPositionLocal();
 			particle.addAction(action1);
 			var action2:BrokenLineLocal = new BrokenLineLocal(2);
 			particle.addAction(action2);
@@ -110,7 +110,7 @@ package
 			var degree1:Number = int(Math.random()*12)/12 * Math.PI * 2;
 			var degree2:Number = int(Math.random()*12)/12 * Math.PI * 2;
 			var r:Number = Math.random() * maxR;
-			param["OffestPositionLocal"] = new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.cos(degree1) * Math.cos(degree2), r * Math.sin(degree2));
+			param["OffsetPositionLocal"] = new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.cos(degree1) * Math.cos(degree2), r * Math.sin(degree2));
 			r = Math.random() * 200 ;
 			param["BrokenLineLocal"] = [new Vector3D(0, 400, 0, 1), new Vector3D(r * Math.sin(degree1) * Math.cos(degree2), r * Math.cos(degree1) * Math.cos(degree2), r * Math.sin(degree2),3)];
 			

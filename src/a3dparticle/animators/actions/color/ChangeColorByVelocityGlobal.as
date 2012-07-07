@@ -22,13 +22,13 @@ package a3dparticle.animators.actions.color
 		
 		private var velFactor:ShaderRegisterElement;
 		private var deltaMultiplierConst:ShaderRegisterElement;
-		private var deltaOffestConst:ShaderRegisterElement;
+		private var deltaOffsetConst:ShaderRegisterElement;
 		
 		private var _hasMult:Boolean;
 		private var _hasOffset:Boolean;
 		
 		private var deltaMultiplier:Vector.<Number>;
-		private var deltaOffest:Vector.<Number>;
+		private var deltaOffset:Vector.<Number>;
 		
 		private var _multFactor:Number;
 		private var _offsetFactor:Number;
@@ -45,7 +45,7 @@ package a3dparticle.animators.actions.color
 				if (offsetFactor != 0)_hasOffset = true;
 			
 			deltaMultiplier = Vector.<Number>([_deltaColor.redMultiplier , _deltaColor.greenMultiplier , _deltaColor.blueMultiplier , _deltaColor.alphaMultiplier]);
-			deltaOffest = Vector.<Number>([_deltaColor.redOffset / 256, _deltaColor.greenOffset / 256, _deltaColor.blueOffset / 256, _deltaColor.alphaOffset / 256]);
+			deltaOffset = Vector.<Number>([_deltaColor.redOffset / 256, _deltaColor.greenOffset / 256, _deltaColor.blueOffset / 256, _deltaColor.alphaOffset / 256]);
 		}
 		
 		override public function set animation(value:ParticleAnimation):void
@@ -67,7 +67,7 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				deltaOffestConst = shaderRegisterCache.getFreeFragmentConstant();
+				deltaOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
 			}
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentVectorTemp();
@@ -83,7 +83,7 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				code += "mul " + temp.toString() + "," + deltaOffestConst.toString() +"," + _animation.fragmentVelocity.toString() + "\n";
+				code += "mul " + temp.toString() + "," + deltaOffsetConst.toString() +"," + _animation.fragmentVelocity.toString() + "\n";
 				code += "mul " + temp.toString() + "," + temp.toString() +"," + offsetFactor.toString() + "\n";
 				code += "add " + _animation.colorTarget.toString() +"," +temp.toString() + "," + _animation.colorTarget.toString() + "\n";
 			}
@@ -100,7 +100,7 @@ package a3dparticle.animators.actions.color
 			}
 			if (_hasOffset)
 			{
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffestConst.index, deltaOffest);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffsetConst.index, deltaOffset);
 			}
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, velFactor.index,  Vector.<Number>([_multFactor, _offsetFactor, 0, 0]));
 		}

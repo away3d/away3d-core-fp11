@@ -17,19 +17,19 @@ package a3dparticle
 		private var defaultSleepTime:Number;
 		/**
 		 * 
-		 * @param	offest Boolean.If following target offest
+		 * @param	offset Boolean.If following target offset
 		 * @param	rotation Boolean.If following target rotation.This is conflict with BillboardGlobal.
 		 * @param	sleepTime Number.The particles must has a sleepTime,otherwise it will looks strange.
 		 * @param	isClone Boolean.
 		 */
-		public function TransformFollowContainer(offest:Boolean = true, rotation:Boolean = false, sleepTime:Number = 0.1, isClone:Boolean = false) 
+		public function TransformFollowContainer(offset:Boolean = true, rotation:Boolean = false, sleepTime:Number = 0.1, isClone:Boolean = false) 
 		{
 			super(true);
 			if (!isClone)
 			{
 				_particleAnimation = new ParticleAnimation();
 				
-				_animationState = new TransformFollowState(offest, rotation, _particleAnimation);
+				_animationState = new TransformFollowState(offset, rotation, _particleAnimation);
 				
 				__controller = new ParticleAnimationtor(_animationState);
 				_subContainers = new Vector.<SubContainer>();

@@ -16,56 +16,56 @@ package a3dparticle.animators.actions.position
 	 * ...
 	 * @author ...
 	 */
-	public class OffestPositionLocal extends PerParticleAction
+	public class OffsetPositionLocal extends PerParticleAction
 	{
-		private var _offestFun:Function;
+		private var _offsetFun:Function;
 		
-		private var _tempOffest:Vector3D;
+		private var _tempOffset:Vector3D;
 		
-		private var _offectAttribute:ShaderRegisterElement;
+		private var _offsetAttribute:ShaderRegisterElement;
 		
 		/**
 		 * 
-		 * @param	offest Function.It return a Vector3D that the (x,y,z) is the position.
+		 * @param	offset Function.It return a Vector3D that the (x,y,z) is the position.
 		 */
-		public function OffestPositionLocal(offest:Function=null) 
+		public function OffsetPositionLocal(offset:Function=null) 
 		{
 			dataLenght = 3;
-			_name = "OffestPositionLocal";
-			_offestFun = offest;
+			_name = "OffsetPositionLocal";
+			_offsetFun = offset;
 		}
 		
 		override public function genOne(param:ParticleParam):void
 		{
-			if (_offestFun != null)
+			if (_offsetFun != null)
 			{
-				_tempOffest = _offestFun(param);
+				_tempOffset = _offsetFun(param);
 			}
 			else
 			{
 				if (!param[_name]) throw(new Error("there is no " + _name + " in param!"));
-				_tempOffest = param[_name];
+				_tempOffset = param[_name];
 			}
 		}
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_tempOffest.x);
-			getExtraData(subContainer).push(_tempOffest.y);
-			getExtraData(subContainer).push(_tempOffest.z);
+			getExtraData(subContainer).push(_tempOffset.x);
+			getExtraData(subContainer).push(_tempOffset.y);
+			getExtraData(subContainer).push(_tempOffset.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			_offectAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			_offsetAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
-			code += "add " + _animation.offestTarget.toString() +"," + _offectAttribute.toString() + ".xyz," + _animation.offestTarget.toString() + "\n";
+			code += "add " + _animation.offsetTarget.toString() +"," + _offsetAttribute.toString() + ".xyz," + _animation.offsetTarget.toString() + "\n";
 			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(_offectAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.setSimpleVertexBuffer(_offsetAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
 		
 	}

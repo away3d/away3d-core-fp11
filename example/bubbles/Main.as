@@ -2,7 +2,7 @@ package
 {
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
 	import a3dparticle.animators.actions.drift.DriftLocal;
-	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.position.OffsetPositionLocal;
 	import a3dparticle.animators.actions.rotation.BillboardGlobal;
 	import a3dparticle.animators.actions.scale.ScaleByLifeGlobal;
 	import a3dparticle.animators.actions.velocity.VelocityLocal;
@@ -86,7 +86,7 @@ package
 			var action:VelocityLocal = new VelocityLocal();
 			particle.addAction(action);
 			
-			var action2:OffestPositionLocal = new OffestPositionLocal();
+			var action2:OffsetPositionLocal = new OffsetPositionLocal();
 			particle.addAction(action2);
 			
 			var action3:BillboardGlobal = new BillboardGlobal();
@@ -113,7 +113,7 @@ package
 			param.startTime = Math.random()*8;
 			param.duringTime = 8;
 			param["VelocityLocal"] = new Vector3D(0, Math.random() * 50 + 50, 0);
-			param["OffestPositionLocal"] = new Vector3D(Math.random() * 1000 - 500, 0, Math.random() * 1000 - 500);
+			param["OffsetPositionLocal"] = new Vector3D(Math.random() * 1000 - 500, 0, Math.random() * 1000 - 500);
 			param["DriftLocal"] = new Vector3D(Math.random() * 50, 0, Math.random() * 50, Math.random() * 5 + 2);
 			param["RandomRotateLocal"] = new Vector3D(0,0,1,5);
 		}

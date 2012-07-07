@@ -2,7 +2,7 @@ package
 {
 	import a3dparticle.animators.actions.acceleration.AccelerateGlobal;
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
-	import a3dparticle.animators.actions.position.OffestPositionLocal;
+	import a3dparticle.animators.actions.position.OffsetPositionLocal;
 	import a3dparticle.animators.actions.velocity.VelocityLocal;
 	import a3dparticle.generater.MutiWeightGenerater;
 	import a3dparticle.particle.ParticleColorMaterial;
@@ -49,7 +49,7 @@ package
 			var action1:VelocityLocal = new VelocityLocal();
 			particle.addAction(action1);
 			
-			var action2:OffestPositionLocal = new OffestPositionLocal();
+			var action2:OffsetPositionLocal = new OffsetPositionLocal();
 			particle.addAction(action2);
 			
 			var action3:ChangeColorByLifeGlobal = new ChangeColorByLifeGlobal(new ColorTransform(0.8, 0.7, 0, 0.8), new ColorTransform(0.8, 0, 0, 0) );
@@ -78,7 +78,7 @@ package
 			var r1:Number = Math.random() * 20;
 			var r2:Number = Math.random()*10;
 			param["VelocityLocal"] = new Vector3D(r1 * cos, Math.random() * 50 + 80, r1 * sin);
-			param["OffestPositionLocal"] = new Vector3D(r2 * cos, 0, r2 * sin);
+			param["OffsetPositionLocal"] = new Vector3D(r2 * cos, 0, r2 * sin);
 			if (param.sample == sample2) Vector3D(param["VelocityLocal"]).scaleBy(1.4);
 		}
 		

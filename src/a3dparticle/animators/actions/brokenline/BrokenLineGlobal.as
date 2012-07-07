@@ -67,7 +67,7 @@ package a3dparticle.animators.actions.brokenline
 				code += "min " + max.toString() + "," + time.toString() + "," + _brokenRegisters[i].toString() + ".w\n";
 				code += "max " + max.toString() + "," + max.toString() + "," + _animation.zeroConst.toString() + "\n";
 				code += "mul " + distance.toString() + "," + _brokenRegisters[i].toString() + ".xyz," + max.toString() + "\n";
-				code += "add " + _animation.offestTarget.toString() + "," + distance.toString() + "," + _animation.offestTarget.toString() + "\n";
+				code += "add " + _animation.offsetTarget.toString() + "," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
 				if (_animation.needVelocity)
 				{
 					code += "slt " + slt.toString() + "," + _animation.zeroConst.toString() + "," + time.toString() + "\n";

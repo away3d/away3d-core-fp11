@@ -53,7 +53,7 @@ package a3dparticle.animators.actions.rotation
 			
 			var code:String = "";
 			
-			code += "sub " + nrmVel.toString() + ".xyz," + _animation.cameraPosConst.toString() + ".xyz," + _animation.offestTarget.toString() + "\n";
+			code += "sub " + nrmVel.toString() + ".xyz," + _animation.cameraPosConst.toString() + ".xyz," + _animation.offsetTarget.toString() + "\n";
 			code += "nrm " + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";			
 						
 			
