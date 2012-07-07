@@ -160,8 +160,13 @@ package away3d.loaders.parsers
 			var creturn:String = String.fromCharCode(10);
 			var trunk:Array;
 			
-			if(!_startedParsing)
+			if(!_startedParsing) {
 				_textData = getTextData();
+				
+				// Merge linebreaks that are immediately preceeded by
+				// the "escape" backward slash into single lines.
+				_textData = _textData.replace(/\\[\r\n]+\s*/gm, ' ');
+			}
 			
 			if(_textData.indexOf(creturn) == -1)
 				creturn = String.fromCharCode(13);
