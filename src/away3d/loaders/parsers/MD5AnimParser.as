@@ -1,5 +1,7 @@
 package away3d.loaders.parsers
 {
+	import away3d.animators.nodes.SkeletonClipNode;
+	import away3d.animators.SkeletonAnimationState;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.SkeletonPose;
@@ -51,7 +53,8 @@ package away3d.loaders.parsers
 		private var _baseFrameData : Vector.<BaseFrameData>;
 		
 		private var _rotationQuat : Quaternion;
-		private var _sequence : SkeletonAnimationSequence;
+		private var _clip : SkeletonClipNode;
+		private var _state : SkeletonAnimationState;
 		
 		/**
 		 * Creates a new MD5AnimParser object.
@@ -165,9 +168,11 @@ package away3d.loaders.parsers
 				}
 				
 				if (_reachedEOF) {
-					_sequence = new SkeletonAnimationSequence('md5sequence');
-					translateSequence();
-					finalizeAsset(_sequence);
+					_clip = new SkeletonClipNode();
+					_state = new SkeletonAnimationState(_clip);
+					translateClip();
+					finalizeAsset(_clip);
+					finalizeAsset(_state);
 					return ParserBase.PARSING_DONE;
 				}
 			}
@@ -177,10 +182,10 @@ package away3d.loaders.parsers
 		/**
 		 * Converts all key frame data to an SkinnedAnimationSequence.
 		 */
-		private function translateSequence() : void
+		private function translateClip() : void
 		{
 			for (var i : int = 0; i < _numFrames; ++i)
-				_sequence.addFrame(translatePose(_frameData[i]), 1000 / _frameRate);
+				_clip.addFrame(translatePose(_frameData[i]), 1000 / _frameRate);
 		}
 		
 		/**

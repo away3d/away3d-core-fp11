@@ -17,13 +17,14 @@ package away3d.animators
 	public class VertexAnimator extends AnimatorBase implements IAnimator
 	{
 		private var _activeNode : VertexClipNode;
+		private var _activeState:VertexAnimationState;
 		private var _absoluteTime : Number;
 		
 		private var _vertexAnimationSet:VertexAnimationSet;
 		private var _poses : Vector.<Geometry> = new Vector.<Geometry>();
 		private var _weights : Vector.<Number> = Vector.<Number>([1, 0, 0, 0]);
 		private var _numPoses : uint;
-		private var _blendMode : String;
+		private var _blendMode:String;
 		
 		
 		/**
@@ -44,18 +45,16 @@ package away3d.animators
 		 */
 		public function play(stateName : String) : void
 		{
-			_activeNode = (_vertexAnimationSet.getState(stateName) as VertexAnimationState).rootNode as VertexClipNode;
+			_activeState = _vertexAnimationSet.getState(stateName) as VertexAnimationState;
 			
-			if (!_activeNode)
-				throw new Error("Clip not found!");
-
-			reset();
-			start();
-		}
-
-		private function reset() : void
-		{
+			if (!_activeState)
+				throw new Error("Animation state " + stateName + " not found!");
+			
+			_activeNode = _activeState.rootNode as VertexClipNode;
+			
 			_absoluteTime = 0;
+			
+			start();
 		}
 
 		/**
@@ -67,8 +66,8 @@ package away3d.animators
 			
 			_activeNode.update(_absoluteTime);
 			
-			_poses[uint(0)] = _activeNode.currentFrame;
-			_poses[uint(1)] = _activeNode.nextFrame;
+			_poses[uint(0)] = _activeNode.currentGeometry;
+			_poses[uint(1)] = _activeNode.nextGeometry;
 			_weights[uint(0)] = 1 - (_weights[uint(1)] = _activeNode.blendWeight);
 		}
 		

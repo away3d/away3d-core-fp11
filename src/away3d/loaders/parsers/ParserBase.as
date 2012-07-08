@@ -297,7 +297,7 @@ package away3d.loaders.parsers
 					type_name = 'animation';
 					type_event = AssetEvent.ANIMATION_COMPLETE;
 					break;
-				case AssetType.ANIMATION_LIBRARY:
+				case AssetType.ANIMATION_SET:
 					type_name = 'animationSet';
 					type_event = AssetEvent.ANIMATION_LIBRARY_COMPLETE;
 					break;

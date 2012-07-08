@@ -1,37 +1,45 @@
 package away3d.animators.nodes
 {
-	import away3d.core.base.Geometry;
-	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.core.base.*;
+	import away3d.library.assets.*;
 
 	/**
 	 * @author robbateman
 	 */
-	public class VertexClipNode extends AnimationNodeBase implements IAnimationNode
+	public class VertexClipNode extends AnimationNodeBase
 	{
 		private var _totalDuration : uint = 0;
+		private var _framesDirty : Boolean;
 		private var _frames : Vector.<Geometry> = new Vector.<Geometry>();		
 		private var _durations : Vector.<uint> = new Vector.<uint>();
 		private var _fixedFrameRate:Boolean;
-		private var _currentFrame : Geometry;
-		private var _nextFrame : Geometry;
+		private var _currentGeometry : Geometry;
+		private var _nextGeometry : Geometry;
 		private var _blendWeight : Number;
 		
-		public var looping : Boolean = true;
-		
-		public function get currentFrame() : Geometry
+		public function get currentGeometry() : Geometry
 		{
-			return _currentFrame;
+			if (_framesDirty)
+				updateFrames();
+			
+			return _currentGeometry;
 		}
 		
 		
-		public function get nextFrame() : Geometry
+		public function get nextGeometry() : Geometry
 		{
-			return _nextFrame;
+			if (_framesDirty)
+				updateFrames();
+			
+			return _nextGeometry;
 		}
 		
 		
 		public function get blendWeight() : Number
 		{
+			if (_framesDirty)
+				updateFrames();
+			
 			return _blendWeight;
 		}
 		
@@ -46,47 +54,54 @@ package away3d.animators.nodes
 			_durations.push(duration);
 		}
 		
-		public function update(time:Number):void
+		override protected function updateTime(time:Number):void
 		{
-			var dur : uint, frameTime : uint, current : uint, next : uint;
+			super.updateTime(time);
+			
+			_framesDirty = true;
+		}
+
+		private function updateFrames() : void
+		{
+			var dur : uint, frameTime : uint, currentFrame : uint, nextFrame : uint;
 			var numFrames : int = _durations.length;
 			
-			if ((time > _totalDuration || time < 0) && looping) {
-				time %= _totalDuration;
-				if (time < 0) time += _totalDuration;
+			if ((_time > _totalDuration || _time < 0) && looping) {
+				_time %= _totalDuration;
+				if (_time < 0) _time += _totalDuration;
 			}
 			
 			var lastFrame : uint = numFrames - 1;
 			
-			if (!looping && time > _totalDuration - _durations[lastFrame]) {
+			if (!looping && _time > _totalDuration - _durations[lastFrame]) {
 				//_activeSequence.notifyPlaybackComplete();
-				current = lastFrame;
-				next = lastFrame;
+				currentFrame = lastFrame;
+				nextFrame = lastFrame;
 				_blendWeight = 0;
 			}
 			else if (_fixedFrameRate) {
-				var t : Number = time/_totalDuration * numFrames;
-				current = t;
-				next = current + 1;
-				_blendWeight = t - current;
-				if (current == numFrames) current = 0;
-				if (next >= numFrames) next -= numFrames;
+				var t : Number = _time/_totalDuration * numFrames;
+				currentFrame = t;
+				nextFrame = currentFrame + 1;
+				_blendWeight = t - currentFrame;
+				if (currentFrame == numFrames) currentFrame = 0;
+				if (nextFrame >= numFrames) nextFrame -= numFrames;
 			}
 			else {
 				do {
 					frameTime = dur;
-					dur += _durations[current];
-					current = next;
-					if (++next == numFrames) {
-						next = 0;
+					dur += _durations[currentFrame];
+					currentFrame = nextFrame;
+					if (++nextFrame == numFrames) {
+						nextFrame = 0;
 					}
-				} while (time > dur);
+				} while (_time > dur);
 				
-				_blendWeight = (time - frameTime) / _durations[current];
-				
-				_currentFrame = _frames[current];
-				_nextFrame = _frames[next];
+				_blendWeight = (_time - frameTime) / _durations[currentFrame];
 			}
+			
+			_currentGeometry = _frames[currentFrame];
+			_nextGeometry = _frames[nextFrame];
 		}
 	}
 }

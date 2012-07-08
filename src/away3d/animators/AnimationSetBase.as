@@ -51,7 +51,7 @@ package away3d.animators
 		
 		public function get assetType() : String
 		{
-			return AssetType.ANIMATION_LIBRARY;
+			return AssetType.ANIMATION_SET;
 		}
 		
 		
@@ -68,7 +68,7 @@ package away3d.animators
 		public function addState(stateName:String, animationState:IAnimationState):void
 		{
 			if (_stateDictionary[stateName])
-				throw new AnimationSetError("Animation state name already exists");
+				throw new AnimationSetError("Animation state name already exists in the set");
 			
 			_stateDictionary[stateName] = animationState;
 			

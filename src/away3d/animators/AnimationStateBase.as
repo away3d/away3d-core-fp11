@@ -1,20 +1,34 @@
 package away3d.animators
 {
-	import away3d.animators.nodes.IAnimationNode;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.NamedAssetBase;
-	import away3d.library.assets.IAsset;
+	import away3d.animators.nodes.*;
+	import away3d.library.assets.*;
 
 	/**
 	 * @author robbateman
 	 */
 	public class AnimationStateBase extends NamedAssetBase implements IAsset
 	{
-		private var _rootNode:IAnimationNode;
+		private var _looping:Boolean;
+		private var _rootNode:AnimationNodeBase;
 		private var _owner:IAnimationSet;
 		private var _stateName:String;
 		
-		public function get rootNode():IAnimationNode
+		public function get looping():Boolean
+		{	
+			return _looping;
+		}
+		
+		public function set looping(value:Boolean):void
+		{	
+			if (_looping == value)
+				return;
+			
+			_looping = value;
+			
+			_rootNode.looping = value;
+		}
+		
+		public function get rootNode():AnimationNodeBase
 		{	
 			return _rootNode;
 		}
@@ -24,7 +38,7 @@ package away3d.animators
 			return _stateName;
 		}
 		
-		public function AnimationStateBase(rootNode:IAnimationNode)
+		public function AnimationStateBase(rootNode:AnimationNodeBase)
 		{
 			_rootNode = rootNode;
 		}

@@ -1,12 +1,17 @@
 package away3d.animators
 {
-	import away3d.animators.nodes.IAnimationNode;
+	import away3d.animators.nodes.*;
+	
 	/**
 	 * @author robbateman
 	 */
 	public interface IAnimationState
 	{
-		function get rootNode():IAnimationNode;
+		function get looping():Boolean;
+		
+		function set looping(value:Boolean):void;
+		
+		function get rootNode():AnimationNodeBase;
 		
 		function get stateName():String;
 		

@@ -1,5 +1,8 @@
 package away3d.animators
 {
+	import away3d.animators.nodes.SkeletonNaryLERPNode;
+	import away3d.animators.nodes.SkeletonNodeBase;
+	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.errors.AbstractMethodError;
 	import away3d.entities.Mesh;
 	import away3d.materials.passes.MaterialPassBase;
@@ -27,13 +30,16 @@ package away3d.animators
 	 */
 	public class SkeletonAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _sequences : Array;
-		private var _clipNode : SkeletonTimelineClipNode;
+		private var _activeNode : SkeletonNodeBase;
+		private var _activeState:SkeletonAnimationState;
+		private var _absoluteTime : Number;
+		
 		private var _globalMatrices : Vector.<Number>;
+        private var _globalPose : SkeletonPose = new SkeletonPose();
+		private var _globalPropertiesDirty : Boolean;
 		private var _numJoints : uint;
 		private var _bufferFormat : String;
         private var _blendTree : SkeletonTreeNode;
-        private var _globalPose : SkeletonPose;
 		private var _animationStates : Dictionary = new Dictionary();
 		private var _condensedMatrices : Vector.<Number>;
 		
@@ -44,6 +50,22 @@ package away3d.animators
 		private var _jointsPerVertex : uint;
 		
 		public var updateRootPosition:Boolean = true;
+		
+		public function get globalMatrices():Vector.<Number>
+		{
+			if (_globalPropertiesDirty)
+				updateGlobalProperties();
+			
+			return _globalMatrices;
+		}
+		
+		public function get globalPose():SkeletonPose
+		{
+			if (_globalPropertiesDirty)
+				updateGlobalProperties();
+			
+			return _globalPose;
+		}
 		
 		/**
 		 * Creates a new AnimationSequenceController object.
@@ -60,7 +82,6 @@ package away3d.animators
 			_numJoints = _skeleton.numJoints;
 			_globalMatrices = new Vector.<Number>(_numJoints*12, true);
 			_bufferFormat = "float" + _jointsPerVertex;
-            _globalPose = new SkeletonPose();
 
 			var j : int;
 			for (var i : uint = 0; i < _numJoints; ++i) {
@@ -69,34 +90,55 @@ package away3d.animators
 				_globalMatrices[j++] = 0; _globalMatrices[j++] = 0; _globalMatrices[j++] = 1; _globalMatrices[j++] = 0;
 			}
 			
-			_sequences = [];
-			
-			_blendTree = createBlendTree();
-		}
-		
-		protected function createBlendTree() : SkeletonTreeNode
-		{
-			throw new AbstractMethodError();
+			_blendTree = new SkeletonNaryLERPNode();
 		}
 		
 		/**
-		 * @inheritDoc
+		 * Plays a state with a given name. If the sequence is not found, it may not be loaded yet, and it will retry every frame.
+		 * @param sequenceName The name of the clip to be played.
 		 */
-		override public function invalidateState() : void
+		public function play(stateName : String, crossFadeTime : Number = 0) : void
 		{
-			super.invalidateState();
+			_activeState = _skeletonAnimationSet.getState(stateName) as SkeletonAnimationState;
+			
+			if (!_activeState)
+				throw new Error("Animation state " + stateName + " not found!");
+			
+			_activeNode = _activeState.rootNode as SkeletonNodeBase;
+			
+			//_crossFadeTime = crossFadeTime;
+			/*
+			var clip : SkeletonTimelineClipNode = _clips[sequenceName];
 
-			for(var key : Object in _animationStates) {
-			    SubGeomAnimationState(_animationStates[key]).valid = false;
-			}
+			if (!clip)
+				throw new Error("Clip not found!");
+			if (clip.duration == 0)
+				throw new Error("Invalid clip: duration is 0!");
+
+			if (crossFadeTime == 0)
+				setActiveClipDirect(clip);
+			else
+				setActiveClipWithFadeOut(clip);
+			*/
+			_absoluteTime = 0;
+			
+			_activeNode.update(_absoluteTime);
+			
+			start();
 		}
 		
 		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
-			invalidateState();
-
-			_blendTree.updatePositionData();
-
+			_absoluteTime += scaledDT;
+			
+			//invalidate pose matrices
+			_globalPropertiesDirty = true;
+			
+			for(var key : Object in _animationStates)
+			    SubGeomAnimationState(_animationStates[key]).dirty = true;
+			
+			_activeNode.update(_absoluteTime);
+			
 			if (updateRootPosition)
 				applyRootDelta();
 		}
@@ -106,13 +148,9 @@ package away3d.animators
 		 */
         public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
-			// do on request of globalPose
-			if (_stateInvalid) {
-				_stateInvalid = false;
-				_blendTree.updatePose(_skeleton);
-				_blendTree.skeletonPose.toGlobalPose(_globalPose, _skeleton);
-				convertToMatrices();
-			}
+			// do on request of globalProperties
+			if (_globalPropertiesDirty)
+				updateGlobalProperties();
 
 			var skinnedGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
 
@@ -128,9 +166,9 @@ package away3d.animators
 				if (_skeletonAnimationSet.usesCPU) {
 					var subGeomAnimState : SubGeomAnimationState = _animationStates[skinnedGeom] ||= new SubGeomAnimationState(skinnedGeom);
 
-					if (!subGeomAnimState.valid) {
+					if (subGeomAnimState.dirty) {
 						morphGeometry(subGeomAnimState, skinnedGeom);
-						subGeomAnimState.valid = true;
+						subGeomAnimState.dirty = false;
 					}
 					skinnedGeom.animatedVertexData = subGeomAnimState.animatedVertexData;
 					skinnedGeom.animatedNormalData = subGeomAnimState.animatedNormalData;
@@ -161,8 +199,13 @@ package away3d.animators
 			} while (++i < numJoints);
 		}
 		
-		private function convertToMatrices() : void
+		private function updateGlobalProperties() : void
 		{
+			_globalPropertiesDirty = false;
+			
+			//get global pose
+			localToGlobalPose(_activeNode.getSkeletonPose(_skeleton), _globalPose, _skeleton);
+			
 			// convert pose to matrix
 		    var mtxOffset : uint;
 			var globalPoses : Vector.<JointPose> = _globalPose.jointPoses;
@@ -292,10 +335,104 @@ package away3d.animators
 				i1 += 3; i2 += 3; i3 += 3;
 			}
 		}
+		
+		
+		/**
+		 * Converts a local hierarchical skeleton pose to a global pose
+		 * @param targetPose The SkeletonPose object that will contain the global pose.
+		 * @param skeleton The skeleton containing the joints, and as such, the hierarchical data to transform to global poses.
+		 */
+		public function localToGlobalPose(sourcePose : SkeletonPose, targetPose : SkeletonPose, skeleton : Skeleton) : void
+		{
+			var globalPoses : Vector.<JointPose> = targetPose.jointPoses;
+			var globalJointPose : JointPose;
+			var joints : Vector.<SkeletonJoint> = skeleton.joints;
+			var len : uint = sourcePose.numJointPoses;
+			var jointPoses : Vector.<JointPose> = sourcePose.jointPoses;
+			var parentIndex : int;
+			var joint : SkeletonJoint;
+			var parentPose : JointPose;
+			var pose : JointPose;
+			var or : Quaternion;
+			var tr : Vector3D;
+			var t : Vector3D;
+			var q : Quaternion;
 
+			var x1 : Number, y1 : Number, z1 : Number, w1 : Number;
+			var x2 : Number, y2 : Number, z2 : Number, w2 : Number;
+			var x3 : Number, y3 : Number, z3 : Number;
+
+			// :s
+			if (globalPoses.length != len) globalPoses.length = len;
+
+			for (var i : uint = 0; i < len; ++i) {
+				globalJointPose = globalPoses[i] ||= new JointPose();
+				joint = joints[i];
+				parentIndex = joint.parentIndex;
+				pose = jointPoses[i];
+
+				q = globalJointPose.orientation;
+				t = globalJointPose.translation;
+
+				if (parentIndex < 0) {
+					tr = pose.translation;
+					or = pose.orientation;
+					q.x = or.x;
+					q.y = or.y;
+					q.z = or.z;
+					q.w = or.w;
+					t.x = tr.x;
+					t.y = tr.y;
+					t.z = tr.z;
+				}
+				else {
+					// append parent pose
+					parentPose = globalPoses[parentIndex];
+
+					// rotate point
+					or = parentPose.orientation;
+					tr = pose.translation;
+					x2 = or.x;
+					y2 = or.y;
+					z2 = or.z;
+					w2 = or.w;
+					x3 = tr.x;
+					y3 = tr.y;
+					z3 = tr.z;
+
+					w1 = -x2 * x3 - y2 * y3 - z2 * z3;
+					x1 = w2 * x3 + y2 * z3 - z2 * y3;
+					y1 = w2 * y3 - x2 * z3 + z2 * x3;
+					z1 = w2 * z3 + x2 * y3 - y2 * x3;
+
+					// append parent translation
+					tr = parentPose.translation;
+					t.x = -w1 * x2 + x1 * w2 - y1 * z2 + z1 * y2 + tr.x;
+					t.y = -w1 * y2 + x1 * z2 + y1 * w2 - z1 * x2 + tr.y;
+					t.z = -w1 * z2 - x1 * y2 + y1 * x2 + z1 * w2 + tr.z;
+
+					// append parent orientation
+					x1 = or.x;
+					y1 = or.y;
+					z1 = or.z;
+					w1 = or.w;
+					or = pose.orientation;
+					x2 = or.x;
+					y2 = or.y;
+					z2 = or.z;
+					w2 = or.w;
+
+					q.w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;
+					q.x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;
+					q.y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2;
+					q.z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2;
+				}
+			}
+		}
+		
 		public function applyRootDelta() : void
 		{
-			var delta : Vector3D = _blendTree.rootDelta;
+			var delta : Vector3D = _activeNode.rootDelta;
 			var dist : Number = delta.length;
 			var len : uint;
 			if (dist > 0) {
@@ -303,37 +440,6 @@ package away3d.animators
 				for (var i : uint = 0; i < len; ++i)
 					_owners[i].translateLocal(delta, dist);
 			}
-		}
-		
-
-		/**
-		 * Retrieves a sequence with a given name.
-		 * @private
-		 */
-		/*arcane function getSequence(sequenceName : String) : AnimationSequenceBase
-		{
-			return _sequences[sequenceName];
-		 } */
-		 
-		/**
-		 * Retrieving the sequences
-		 */
-		arcane function get sequences() : Array
-		{
-			return _sequences;
-		}
-		 
-		/**
-		* Retrieves all sequences names.
-		* @private
-		*/
-		arcane function get sequencesNames() : Array
-		{
-			var seqsNames:Array = [];
-			for(var key:String in _sequences)
-				seqsNames.push(key);
-			
-			return seqsNames;
 		}
 		
         /**
@@ -356,7 +462,7 @@ class SubGeomAnimationState
 	public var animatedVertexData : Vector.<Number>;
 	public var animatedNormalData : Vector.<Number>;
 	public var animatedTangentData : Vector.<Number>;
-	public var valid : Boolean = false;
+	public var dirty : Boolean = true;
 
 	public function SubGeomAnimationState(subGeom : SubGeometry)
 	{

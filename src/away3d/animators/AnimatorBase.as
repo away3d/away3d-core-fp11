@@ -27,7 +27,6 @@ package away3d.animators
 		private var _time : int;
 		private var _playbackSpeed : Number = 1;
 		
-		protected var _stateInvalid:Boolean;
 		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
 		
 		public function get animationSet() : IAnimationSet
@@ -111,14 +110,6 @@ package away3d.animators
 		protected function updateAnimation(realDT : Number, scaledDT : Number) : void
 		{
 			throw new AbstractMethodError();
-		}
-		
-		/**
-		 * Invalidates the state, so it needs to be updated next time it is requested.
-		 */
-		public function invalidateState() : void
-		{
-			_stateInvalid = true;
 		}
 		
 		protected function start() : void

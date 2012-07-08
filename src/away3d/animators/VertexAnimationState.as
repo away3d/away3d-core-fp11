@@ -1,7 +1,7 @@
 package away3d.animators
 {
-	import away3d.animators.nodes.VertexClipNode;
 	import away3d.arcane;
+	import away3d.animators.nodes.*;
 	
 	use namespace arcane;
 	
