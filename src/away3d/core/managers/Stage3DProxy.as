@@ -216,6 +216,8 @@ package away3d.core.managers
 			if (!_context3D) return;
 
 			_context3D.present();
+						
+			_activeProgram3D = null;
 		}
 		
 		/**
