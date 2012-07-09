@@ -648,7 +648,7 @@ package away3d.loaders.parsers
 			joint.parentIndex = parent;
 
 			if(!isNaN(jointIndex) && jointIndex<skin.joints.length){
-				if(skin.joints[jointIndex]) joint.name = gskin.joints[jointIndex];
+				if(skin.joints[jointIndex]) joint.name = skin.joints[jointIndex];
 			} else {
 				trace("Error: skin.joints index out of range");
 				return;
