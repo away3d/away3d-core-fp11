@@ -646,8 +646,14 @@ package away3d.loaders.parsers
 			
 			var joint : SkeletonJoint = new SkeletonJoint();
 			joint.parentIndex = parent;
-			if(skin.joints[jointIndex]) joint.name = skin.joints[jointIndex];
-			
+
+			if(!isNaN(jointIndex) && jointIndex<skin.joints.length){
+				if(skin.joints[jointIndex]) joint.name = gskin.joints[jointIndex];
+			} else {
+				trace("Error: skin.joints index out of range");
+				return;
+			}
+
 			var ibm:Matrix3D = skin.inv_bind_matrix[jointIndex];
 			
 			joint.inverseBindPose = ibm.rawData;
