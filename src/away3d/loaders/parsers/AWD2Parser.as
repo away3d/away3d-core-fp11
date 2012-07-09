@@ -1,5 +1,7 @@
 package away3d.loaders.parsers
 {
+	import away3d.animators.SkeletonAnimationState;
+	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.data.UVAnimationFrame;
 	import away3d.animators.data.UVAnimationSequence;
@@ -569,7 +571,7 @@ package away3d.loaders.parsers
 			return pose;
 		}
 		
-		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationSequence
+		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationState
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -579,10 +581,10 @@ package away3d.loaders.parsers
 			// TODO: not used
 			//var frame_rate : uint;
 			var frame_dur : Number;
-			var animation : SkeletonAnimationSequence;
 			
 			name = parseVarStr();
-			animation = new SkeletonAnimationSequence(name);
+			var clip : SkeletonClipNode = new SkeletonClipNode();
+			var state : SkeletonAnimationState = new SkeletonAnimationState(clip);
 			
 			num_frames = _body.readUnsignedShort();
 			
@@ -596,7 +598,7 @@ package away3d.loaders.parsers
 				//TODO: Check for null?
 				pose_addr = _body.readUnsignedInt();
 				frame_dur = _body.readUnsignedShort();
-				animation.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
+				clip.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
 				
 				frames_parsed++;
 			}
@@ -604,9 +606,9 @@ package away3d.loaders.parsers
 			// Ignore attributes for now
 			parseUserAttributes();
 			
-			finalizeAsset(animation, name);
+			finalizeAsset(state, name);
 			
-			return animation;
+			return state;
 		}
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D

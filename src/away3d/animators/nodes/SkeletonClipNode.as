@@ -14,7 +14,6 @@ package away3d.animators.nodes
 		private var _timeDir:Number;
 		private var _totalDuration : uint = 0;
 		private var _totalDelta : Vector3D = new Vector3D();
-		private var _delta : Vector3D = new Vector3D();
 		private var _frames : Vector.<SkeletonPose> = new Vector.<SkeletonPose>();
 		private var _framesDirty : Boolean;
 		private var _numFrames : uint = 0;
@@ -27,12 +26,31 @@ package away3d.animators.nodes
 		private var _currentPose : SkeletonPose;
 		private var _nextPose : SkeletonPose;
 		private var _blendWeight : Number;
+		private var _stitchFinalFrame:Boolean = false;
+		private var _stitchDirty:Boolean = true;
 		
 		/**
 		 * 
 		 */
 		public var highQuality:Boolean = false;
-		private var _old:uint;
+		
+		public function get stitchFinalFrame() : Boolean
+		{
+			return _stitchFinalFrame;
+		}
+		
+		public function set stitchFinalFrame(value:Boolean):void
+		{
+			if (_stitchFinalFrame == value)
+				return;
+			
+			_stitchFinalFrame = value;
+			
+			_stitchDirty = true;
+			_framesDirty = true;
+		}
+		
+		private var _oldFrame:uint;
 		
 		/**
 		 * 
@@ -71,23 +89,12 @@ package away3d.animators.nodes
 		
 		public function addFrame(skeletonPose : SkeletonPose, duration : uint) : void
 		{
-			if (_numFrames) {
-				_totalDuration += _durations[_lastFrame];
-				var p1 : Vector3D = _frames[_lastFrame].jointPoses[0].translation;
-				var p2 : Vector3D = skeletonPose.jointPoses[0].translation;
-				_delta.x = p2.x - p1.x;
-				_delta.y = p2.y - p1.y;
-				_delta.z = p2.z - p1.z;
-				_totalDelta.x += _delta.x;
-				_totalDelta.y += _delta.y;
-				_totalDelta.z += _delta.z;
-			}
 			_frames.push(skeletonPose);
 			_durations.push(duration);
 			
 			_numFrames = _durations.length;
-			_lastFrame = _numFrames - 1;
 			
+			_stitchDirty = true;
 		}
 		
 		override protected function updateTime(time:Number):void
@@ -107,12 +114,12 @@ package away3d.animators.nodes
 		{
 			_skeletonPoseDirty = false;
 			
-			if (!_totalDuration)
-				return;
-			
 			if (_framesDirty)
 				updateFrames();
 
+			if (!_totalDuration)
+				return;
+			
 			var currentPose : Vector.<JointPose> = _currentPose.jointPoses;
 			var nextPose : Vector.<JointPose> = _nextPose.jointPoses;
 			var numJoints : uint = skeleton.numJoints;
@@ -155,34 +162,48 @@ package away3d.animators.nodes
 		{
 			if (_framesDirty)
 				updateFrames();
-
-			var p1 : Vector3D = _frames[_currentFrame].jointPoses[0].translation,
-				p2 : Vector3D = _nextPose.jointPoses[0].translation;
-				
-			if ((_timeDir > 0 && _nextFrame > _old) || (_timeDir < 0 && _currentFrame < _old)) {
-			}
+			
+			var p1 : Vector3D, p2 : Vector3D, p3 : Vector3D;
+			
 			// jumping back, need to reset position
-			else {
+			if (_nextFrame < _oldFrame) {
 				_rootPos.x -= _totalDelta.x;
 				_rootPos.y -= _totalDelta.y;
 				_rootPos.z -= _totalDelta.z;
 			}
-			trace(_rootPos)
+			
 			var dx : Number = _rootPos.x;
 			var dy : Number = _rootPos.y;
 			var dz : Number = _rootPos.z;
-			_rootPos.x = p1.x + _blendWeight*(p2.x - p1.x);
-			_rootPos.y = p1.y + _blendWeight*(p2.y - p1.y);
-			_rootPos.z = p1.z + _blendWeight*(p2.z - p1.z);
+			
+			if (_stitchFinalFrame && _nextFrame == _lastFrame) {
+				p1 = _frames[0].jointPoses[0].translation;
+				p2 = _frames[1].jointPoses[0].translation;
+				p3 = _currentPose.jointPoses[0].translation;
+				
+				_rootPos.x = p3.x + p1.x + _blendWeight*(p2.x - p1.x);
+				_rootPos.y = p3.y + p1.y + _blendWeight*(p2.y - p1.y);
+				_rootPos.z = p3.z + p1.z + _blendWeight*(p2.z - p1.z);
+			} else {
+				p1 = _currentPose.jointPoses[0].translation;
+				p2 = _frames[_nextFrame].jointPoses[0].translation;
+				
+				_rootPos.x = p1.x + _blendWeight*(p2.x - p1.x);
+				_rootPos.y = p1.y + _blendWeight*(p2.y - p1.y);
+				_rootPos.z = p1.z + _blendWeight*(p2.z - p1.z);
+			}
 			_rootDelta.x = _rootPos.x - dx;
 			_rootDelta.y = _rootPos.y - dy;
 			_rootDelta.z = _rootPos.z - dz;
-			_old = _timeDir > 0? _currentFrame : _nextFrame;
+			_oldFrame = _nextFrame;
 		}
 
 		private function updateFrames() : void
 		{
 			_framesDirty = false;
+			
+			if (_stitchDirty)
+				updateStitch();
 			
 			var dur : uint = 0, frameTime : uint;
 			var time : Number = _time;
@@ -213,7 +234,7 @@ package away3d.animators.nodes
 					_currentFrame = _nextFrame++;
 				} while (time > dur);
 				
-				if (_currentFrame >= _lastFrame) {
+				if (_currentFrame == _lastFrame) {
 					_currentFrame = 0;
 					_nextFrame = 1;
 				}
@@ -221,8 +242,46 @@ package away3d.animators.nodes
 				_blendWeight = (time - frameTime) / _durations[_currentFrame];
 			}
 			
-			_currentPose = _frames[_currentFrame || _lastFrame];
-			_nextPose = _frames[_nextFrame];
+			_currentPose = _frames[_currentFrame];
+			
+			if (_looping && _nextFrame >= _lastFrame)
+				_nextPose = _frames[0];
+			else
+				_nextPose = _frames[_nextFrame];
+		}
+		
+		private function updateStitch():void
+		{
+			_stitchDirty = false;
+			
+			_lastFrame = _stitchFinalFrame? _numFrames : _numFrames - 1;
+			
+			_totalDuration = 0;
+			_totalDelta.x = 0;
+			_totalDelta.y = 0;
+			_totalDelta.z = 0;
+			
+			var i:uint = _numFrames - 1;
+			var p1 : Vector3D, p2 : Vector3D, delta : Vector3D;
+			while (i--) {
+				_totalDuration += _durations[i];
+				p1 = _frames[i].jointPoses[0].translation;
+				p2 = _frames[i+1].jointPoses[0].translation;
+				delta = p2.subtract(p1);
+				_totalDelta.x += delta.x;
+				_totalDelta.y += delta.y;
+				_totalDelta.z += delta.z;
+			}
+			
+			if (_stitchFinalFrame) {
+				_totalDuration += _durations[_numFrames - 1];
+				p1 = _frames[0].jointPoses[0].translation;
+				p2 = _frames[1].jointPoses[0].translation;
+				delta = p2.subtract(p1);
+				_totalDelta.x += delta.x;
+				_totalDelta.y += delta.y;
+				_totalDelta.z += delta.z;
+			}
 		}
 	}
 }
