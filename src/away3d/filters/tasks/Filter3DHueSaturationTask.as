@@ -7,7 +7,7 @@ package away3d.filters.tasks
 	
 	import flash.display3D.textures.Texture;
 	
-	public class Filter3DHSLTask extends Filter3DTaskBase
+	public class Filter3DHueSaturationTask extends Filter3DTaskBase
 	{
 		private var _rgbData:Vector.<Number>;
 		private var _saturation:Number = 0.6;
@@ -15,7 +15,7 @@ package away3d.filters.tasks
 		private var _b:Number = 1;
 		private var _g:Number = 1;
 		
-		public function Filter3DHSLTask()
+		public function Filter3DHueSaturationTask()
 		{
 			super();
 			updateConstants();

@@ -1,16 +1,16 @@
 package away3d.filters
 {
-	import away3d.filters.tasks.Filter3DHSLTask;
+	import away3d.filters.tasks.Filter3DHueSaturationTask;
 	
-	public class HSLFilter3D extends Filter3DBase
+	public class HueSaturationFilter3D extends Filter3DBase
 	{
-		private var _hslTask:Filter3DHSLTask;
+		private var _hslTask:Filter3DHueSaturationTask;
 		
-		public function HSLFilter3D(saturation:Number = 1,r:Number = 1,g:Number = 1,b:Number = 1)
+		public function HueSaturationFilter3D(saturation:Number = 1,r:Number = 1,g:Number = 1,b:Number = 1)
 		{
 			super();
 			
-			_hslTask = new Filter3DHSLTask();
+			_hslTask = new Filter3DHueSaturationTask();
 			this.saturation = saturation;
 			this.r = r;
 			this.g = g;
