@@ -107,7 +107,14 @@ package away3d.core.base
 		private var _listenToPositionChanged : Boolean;
 		private var _listenToRotationChanged : Boolean;
 		private var _listenToScaleChanged : Boolean;
-		
+
+		private function invalidatePivot():void
+		{
+			_pivotZero = (_pivotPoint.x == 0) && (_pivotPoint.y == 0) && (_pivotPoint.z == 0);
+
+			invalidateTransform();
+		}
+
 		private function invalidatePosition():void
 		{
 			if (_positionDirty)
@@ -476,9 +483,7 @@ package away3d.core.base
 		{
 			_pivotPoint = pivot.clone();
 
-			_pivotZero = (_pivotPoint.x == 0) && (_pivotPoint.y == 0) && (_pivotPoint.z == 0);
-			
-			 invalidatePosition();
+			 invalidatePivot();
 		}
 
 		/**
@@ -673,11 +678,12 @@ package away3d.core.base
 		 */
 		public function movePivot(dx : Number, dy : Number, dz : Number) : void
 		{
-			_pivotPoint.x = dx;
-			_pivotPoint.y = dy;
-			_pivotPoint.z = dz;
-			
-			invalidatePosition();
+			_pivotPoint ||= new Vector3D();
+			_pivotPoint.x += dx;
+			_pivotPoint.y += dy;
+			_pivotPoint.z += dz;
+
+			invalidatePivot();
 		}
 
 		/**
@@ -873,15 +879,10 @@ package away3d.core.base
 
 		protected function updateTransform() : void
 		{
-			if (_pivotZero) {
-				_pos.x = _x;
-				_pos.y = _y;
-				_pos.z = _z;
-			} else {
-				_pos.x = -_pivotPoint.x;
-				_pos.y = -_pivotPoint.y;
-				_pos.z = -_pivotPoint.z;
-			}
+			_pos.x = _x;
+			_pos.y = _y;
+			_pos.z = _z;
+
 			_rot.x = _rotationX;
 			_rot.y = _rotationY;
 			_rot.z = _rotationZ;
@@ -892,8 +893,10 @@ package away3d.core.base
 			
 			_transform.recompose(_transformComponents);
 			
-			if (!_pivotZero)
-				_transform.appendTranslation(_x + _pivotPoint.x, _y + _pivotPoint.y, _z + _pivotPoint.z);
+			if (!_pivotZero) {
+				_transform.prependTranslation(-_pivotPoint.x, -_pivotPoint.y, -_pivotPoint.z);
+				_transform.appendTranslation(_pivotPoint.x, _pivotPoint.y, _pivotPoint.z);
+			}
 
 			_transformDirty = false;
 			_positionDirty = false;
