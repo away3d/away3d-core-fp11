@@ -2,9 +2,7 @@ package away3d.loaders.parsers
 {
 	import away3d.animators.SkeletonAnimationState;
 	import away3d.animators.nodes.SkeletonClipNode;
-	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.data.UVAnimationFrame;
-	import away3d.animators.data.UVAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;
@@ -279,9 +277,9 @@ package away3d.loaders.parsers
 				case 103:
 					assetData = parseSkeletonAnimation(len);
 					break;
-				case 121:
-					assetData = parseUVAnimation(len);
-					break;
+				//case 121:
+				//	assetData = parseUVAnimation(len);
+				//	break;
 				default:
 					//trace('Ignoring block!');
 					_body.position += len;
@@ -295,7 +293,7 @@ package away3d.loaders.parsers
 		}
 		
 		
-		
+		/*
 		private function parseUVAnimation(blockLength : uint) : UVAnimationSequence
 		{
 			// TODO: not used
@@ -341,7 +339,7 @@ package away3d.loaders.parsers
 			
 			return seq;
 		}
-		
+		*/
 		
 		private function parseMaterial(blockLength : uint) : MaterialBase
 		{

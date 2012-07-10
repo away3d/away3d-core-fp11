@@ -11,7 +11,10 @@ package away3d.animators.nodes
 	 */
 	public class AnimationNodeBase extends NamedAssetBase implements IAsset
 	{
+		private var _startTime:Number = 0;
+		
 		protected var _time:Number;
+		protected var _totalDuration : uint = 0;
 		protected var _rootDelta : Vector3D = new Vector3D();
 		protected var _rootDeltaDirty : Boolean;
 		protected var _looping:Boolean = true;
@@ -24,13 +27,12 @@ package away3d.animators.nodes
 		}
 		
 		public function set looping(value:Boolean):void
-		{	
+		{
 			if (_looping == value)
 				return;
 			
 			_looping = value;
-			
-			updateTime(_time);
+			updateLooping();
 		}
 				
 		public function get rootDelta() : Vector3D
@@ -45,12 +47,23 @@ package away3d.animators.nodes
 		{
 		}
 		
+		public function reset(time:Number):void
+		{
+			if (!_looping)
+				_startTime = time;
+			
+			update(time);
+		}
+		
 		public function update(time:Number):void
 		{
-			if (_time == time)
+			if (!_looping && time > _startTime + _totalDuration)
+				time = _startTime + _totalDuration;
+				
+			if (_time == time - _startTime)
 				return;
 			
-			updateTime(time);
+			updateTime(time - _startTime);
 		}
 		
 		public function dispose():void
@@ -78,6 +91,11 @@ package away3d.animators.nodes
 			_time = time;
 			
 			_rootDeltaDirty = true;
+		}
+		
+		protected function updateLooping():void
+		{
+			updateTime(_time - _startTime);
 		}
 	}
 }

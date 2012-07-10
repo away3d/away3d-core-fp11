@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.events.AnimationStateEvent;
 	import away3d.animators.nodes.*;
 	import away3d.library.assets.*;
 
@@ -8,7 +9,7 @@ package away3d.animators
 	 */
 	public class AnimationStateBase extends NamedAssetBase implements IAsset
 	{
-		private var _looping:Boolean;
+		private var _looping:Boolean = true;
 		private var _rootNode:AnimationNodeBase;
 		private var _owner:IAnimationSet;
 		private var _stateName:String;
@@ -41,6 +42,12 @@ package away3d.animators
 		public function AnimationStateBase(rootNode:AnimationNodeBase)
 		{
 			_rootNode = rootNode;
+			_rootNode.addEventListener(AnimationStateEvent.PLAYBACK_COMPLETE, onAnimationStateEvent);
+		}
+		
+		public function reset(time:Number):void
+		{
+			_rootNode.reset(time);
 		}
 		
 		public function dispose():void
@@ -56,6 +63,11 @@ package away3d.animators
 		{
 			_owner = owner;
 			_stateName = stateName;
+		}
+		
+		private function onAnimationStateEvent(event:AnimationStateEvent):void
+		{
+			dispatchEvent(event);
 		}
 	}
 }

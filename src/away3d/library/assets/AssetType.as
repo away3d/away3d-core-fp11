@@ -14,5 +14,6 @@ package away3d.library.assets
 		public static const ANIMATION_SET : String = 'animationSet';
 		public static const ANIMATION_STATE : String = 'animationState';
 		public static const ANIMATION_NODE : String = 'animationNode';
+		public static const STATE_TRANSITION : String = 'stateTransition';
 	}
 }

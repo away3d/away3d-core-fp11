@@ -1,27 +1,18 @@
 package away3d.animators
 {
-	import away3d.animators.nodes.SkeletonNaryLERPNode;
-	import away3d.animators.nodes.SkeletonNodeBase;
-	import away3d.animators.nodes.SkeletonClipNode;
-	import away3d.errors.AbstractMethodError;
-	import away3d.entities.Mesh;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.core.base.SubMesh;
-	import flash.geom.Vector3D;
-	import away3d.core.math.Quaternion;
-	import away3d.animators.skeleton.SkeletonJoint;
-	import away3d.animators.skeleton.JointPose;
-	import flash.display3D.Context3DProgramType;
-	import away3d.core.base.SkinnedSubGeometry;
-	import flash.utils.Dictionary;
-	import away3d.animators.skeleton.SkeletonPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.core.base.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.animators.data.SkeletonAnimationSequence;
-	import away3d.animators.nodes.SkeletonTimelineClipNode;
-	import away3d.animators.nodes.SkeletonTreeNode;
 	import away3d.arcane;
+	import away3d.animators.nodes.*;
+	import away3d.animators.skeleton.*;
+	import away3d.animators.transitions.*;
+	import away3d.core.base.*;
+	import away3d.core.managers.*;
+	import away3d.core.math.*;
+	import away3d.events.*;
+	import away3d.materials.passes.*;
+	
+	import flash.display3D.*;
+	import flash.geom.*;
+	import flash.utils.*;
 
 	use namespace arcane;
 
@@ -32,7 +23,7 @@ package away3d.animators
 	{
 		private var _activeNode : SkeletonNodeBase;
 		private var _activeState:SkeletonAnimationState;
-		private var _absoluteTime : Number;
+		private var _absoluteTime : Number = 0;
 		
 		private var _globalMatrices : Vector.<Number>;
         private var _globalPose : SkeletonPose = new SkeletonPose();
@@ -48,6 +39,7 @@ package away3d.animators
 		private var _forceCPU : Boolean;
 		private var _useCondensedIndices : Boolean;
 		private var _jointsPerVertex : uint;
+		private var _stateTransition:StateTransitionBase;
 		
 		public var updateRootPosition:Boolean = true;
 		
@@ -97,32 +89,28 @@ package away3d.animators
 		 * Plays a state with a given name. If the sequence is not found, it may not be loaded yet, and it will retry every frame.
 		 * @param sequenceName The name of the clip to be played.
 		 */
-		public function play(stateName : String, crossFadeTime : Number = 0) : void
+		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
 		{
 			_activeState = _skeletonAnimationSet.getState(stateName) as SkeletonAnimationState;
 			
 			if (!_activeState)
 				throw new Error("Animation state " + stateName + " not found!");
 			
-			_activeNode = _activeState.rootNode as SkeletonNodeBase;
+			if (stateTransition && _activeNode) {
+				//setup the transition
+				_stateTransition = stateTransition.clone();
+				_stateTransition.blendWeight = 0;
+				_stateTransition.startNode = _activeNode;
+				_stateTransition.endNode = _activeState.rootNode as SkeletonNodeBase;
+				_stateTransition.startTime = _absoluteTime;
+				_stateTransition.addEventListener(StateTransitionEvent.TRANSITION_COMPLETE, onStateTransitionComplete);
+				_activeNode = _stateTransition.rootNode;
+			} else {
+				_activeNode = _activeState.rootNode as SkeletonNodeBase;
+			}
 			
-			//_crossFadeTime = crossFadeTime;
-			/*
-			var clip : SkeletonTimelineClipNode = _clips[sequenceName];
-
-			if (!clip)
-				throw new Error("Clip not found!");
-			if (clip.duration == 0)
-				throw new Error("Invalid clip: duration is 0!");
-
-			if (crossFadeTime == 0)
-				setActiveClipDirect(clip);
-			else
-				setActiveClipWithFadeOut(clip);
-			*/
-			_absoluteTime = 0;
-			
-			_activeNode.update(_absoluteTime);
+			//apply new time to new state and reset
+			_activeState.reset(_absoluteTime);
 			
 			start();
 		}
@@ -131,13 +119,17 @@ package away3d.animators
 		{
 			_absoluteTime += scaledDT;
 			
+			
 			//invalidate pose matrices
 			_globalPropertiesDirty = true;
 			
 			for(var key : Object in _animationStates)
 			    SubGeomAnimationState(_animationStates[key]).dirty = true;
 			
-			_activeNode.update(_absoluteTime);
+			if (_stateTransition)
+				_stateTransition.update(_absoluteTime);
+			else
+				_activeNode.update(_absoluteTime);
 			
 			if (updateRootPosition)
 				applyRootDelta();
@@ -452,6 +444,19 @@ package away3d.animators
 				_skeletonAnimationSet._usesCPU = true;
 			}
         }
+		
+		private function onStateTransitionComplete(event:StateTransitionEvent):void
+		{
+			if (event.type == StateTransitionEvent.TRANSITION_COMPLETE) {
+				var stateTransition:StateTransitionBase = event.target as StateTransitionBase;
+				stateTransition.removeEventListener(StateTransitionEvent.TRANSITION_COMPLETE, onStateTransitionComplete);
+				//if this is the current active statetransition, revert control to the active state
+				if (_stateTransition == stateTransition) {
+					_activeNode = _activeState.rootNode as SkeletonNodeBase;
+					_stateTransition = null;
+				}
+			}
+		}
 	}
 }
 

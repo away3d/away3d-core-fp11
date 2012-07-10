@@ -2,7 +2,6 @@ package away3d.loaders.parsers
 {
 	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.animators.SkeletonAnimationState;
-	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.arcane;

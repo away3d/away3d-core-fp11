@@ -18,7 +18,6 @@ package away3d.animators
 			super(rootNode);
 		}
 		
-		
 		override public function addOwner(owner:IAnimationSet, stateName:String):void
 		{
 			if (!(owner is SkeletonAnimationSet))

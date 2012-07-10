@@ -1,26 +1,28 @@
 /**
  * Author: David Lenaerts
  */
-package away3d.animators.skeleton
+package away3d.animators.utils
 {
-	import away3d.animators.data.SkeletonAnimationSequence;
+	import away3d.animators.nodes.SkeletonClipNode;
+	import away3d.animators.skeleton.JointPose;
+	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.arcane;
-
 	import flash.geom.Matrix3D;
 	import flash.geom.Orientation3D;
 	import flash.geom.Vector3D;
+
 
 	use namespace arcane;
 
 	public class SkeletonUtils
 	{
-		public static function generateDifferenceClip(source : SkeletonAnimationSequence, referencePose : SkeletonPose) : SkeletonAnimationSequence
+		public static function generateDifferenceClip(source : SkeletonClipNode, referencePose : SkeletonPose) : SkeletonClipNode
 		{
-			var diff : SkeletonAnimationSequence = new SkeletonAnimationSequence(source.name, true);
-			var numFrames : uint = source._frames.length;
+			var diff : SkeletonClipNode = new SkeletonClipNode();
+			var numFrames : uint = source.frames.length;
 
 			for (var i : uint = 0; i < numFrames; ++i)
-				diff.addFrame(generateDifferencePose(source._frames[i], referencePose), source._durations[i]);
+				diff.addFrame(generateDifferencePose(source.frames[i], referencePose), source.durations[i]);
 
 			return diff;
 		}
