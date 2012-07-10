@@ -3,8 +3,9 @@ package away3d.extrusions {
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
 	import away3d.entities.Mesh;
-	import away3d.extrusions.utils.IPath;
-	import away3d.extrusions.utils.PathUtils;
+	import away3d.paths.IPath;
+	import away3d.paths.SegmentedPathBase;
+	import away3d.paths.utils.PathUtils;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -35,7 +36,7 @@ package away3d.extrusions {
 		* @param	path				[optional]	A Path object. The _path definition. either Cubic or Quadratic path
 		* @param	meshes				[optional]	Vector.&lt;Mesh&gt;. One or more meshes to repeat along the path.
 		* @param	scene				[optional]	Scene3D. The scene where to addchild the meshes if no ObjectContainer3D is provided.
-		* @param	repeat				[optional]	uint. Howmany times a mesh is cloned per PathSegment. Default is 1.
+		* @param	repeat				[optional]	uint. How many times a mesh is cloned per PathSegment. Default is 1.
 		* @param	alignToPath			[optional]	Boolean. If the alignment of the clones must follow the path. Default is true.
 		* @param	segmentSpread		[optional]	Boolean. If more than one Mesh is passed, it defines if the clones alternate themselves per PathSegment or each repeat. Default is false.
 		* @param container				[optional]	ObjectContainer3D. If an ObjectContainer3D is provided, the meshes are addChilded to it instead of directly into the scene. The container is NOT addChilded to the scene by default.
@@ -182,7 +183,7 @@ package away3d.extrusions {
 			_count = 0;
 			_clones = new Vector.<Mesh>();
 			
-			var segments:Vector.<Vector.<Vector3D>> = PathUtils.getPointsOnCurve(_path, _repeat);
+			var segments:Vector.<Vector.<Vector3D>> = _path.getPointsOnCurve(_repeat);
 			var tmppt:Vector3D = new Vector3D();
 			 
 			var i:uint;

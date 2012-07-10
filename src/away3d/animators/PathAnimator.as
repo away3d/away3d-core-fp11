@@ -2,9 +2,9 @@ package away3d.animators
 {
 	import away3d.core.base.Object3D;
 	import away3d.events.PathEvent;
-	import away3d.extrusions.utils.IPath;
-	import away3d.extrusions.utils.IPathSegment;
-	import away3d.extrusions.utils.PathUtils;
+	import away3d.paths.IPath;
+	import away3d.paths.IPathSegment;
+	import away3d.paths.utils.PathUtils;
 
 	import flash.events.EventDispatcher;
 	import flash.geom.Vector3D;
@@ -90,18 +90,18 @@ package away3d.animators
 
 			} else if (t >= 1){
 				t = 1;
-				_lastSegment = _path.length - 1;
+				_lastSegment = _path.numSegments - 1;
 			}
 
-			if (_bCycle && t <= 0.1 && _lastSegment == _path.length - 1)
+			if (_bCycle && t <= 0.1 && _lastSegment == _path.numSegments - 1)
 				dispatchEvent(new PathEvent(PathEvent.CYCLE));
 
 			_lastTime = t;
 
-			var multi:Number = _path.length*t;
+			var multi:Number = _path.numSegments*t;
 			_index = multi;
 
-			if (_index == _path.length) index--;
+			if (_index == _path.numSegments) index--;
 
 			if (_offset != null)
 				_target.position = _basePosition;
@@ -177,11 +177,11 @@ package away3d.animators
 			if (!_path)  throw new Error("No Path object set for this class");
 
 			t = (t < 0) ? 0 : (t > 1) ? 1 : t;
-			var m:Number = _path.length*t;
+			var m:Number = _path.numSegments*t;
 			var i:uint = m;
 			var ps:IPathSegment = _path.segments[i];
 
-			return PathUtils.calcPosition(m - i, ps, out);
+			return ps.getPointOnSegment(m - i, out);
 		}
 
 		/**
@@ -203,11 +203,11 @@ package away3d.animators
 
 			var t:Number = Math.abs(ms)/duration;
 			t = (t < 0) ? 0 : (t > 1) ? 1 : t;
-			var m:Number = _path.length*t;
+			var m:Number = _path.numSegments*t;
 			var i:uint = m;
 			var ps:IPathSegment = _path.segments[i];
 
-			return PathUtils.calcPosition(m - i, ps, out);
+			return ps.getPointOnSegment(m - i, out);
 		}
 
 		/**
@@ -269,7 +269,7 @@ package away3d.animators
 		public function getTimeSegment(t:Number = NaN):Number
 		{
 			t = (isNaN(t)) ? _time : t;
-			return Math.floor(path.length*t);
+			return Math.floor(path.numSegments*t);
 		}
 
 		/**
@@ -326,7 +326,7 @@ package away3d.animators
 		 */
 		public function set index(val:uint):void
 		{
-			_index = (val > _path.length - 1) ? _path.length - 1 : (val > 0) ? val : 0;
+			_index = (val > _path.numSegments - 1) ? _path.numSegments - 1 : (val > 0) ? val : 0;
 		}
 
 
@@ -411,7 +411,7 @@ package away3d.animators
 
 		private function updatePosition(t:Number, ps:IPathSegment):void
 		{
-			_basePosition = PathUtils.calcPosition(t, ps, _basePosition);
+			_basePosition = ps.getPointOnSegment(t, _basePosition);
 
 			_position.x = _basePosition.x;
 			_position.y = _basePosition.y;

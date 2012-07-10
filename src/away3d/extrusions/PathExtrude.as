@@ -7,9 +7,9 @@ package away3d.extrusions{
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
-	import away3d.extrusions.utils.IPath;
-	import away3d.extrusions.utils.IPathSegment;
-	import away3d.extrusions.utils.PathUtils;
+	import away3d.paths.IPath;
+	import away3d.paths.IPathSegment;
+	import away3d.paths.utils.PathUtils;
 	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
@@ -963,7 +963,7 @@ package away3d.extrusions{
 		
 		private function distributeVectors():Vector.<Vector.<Vector3D>>
 		{
-			var segs:Vector.<Vector.<Vector3D>>= PathUtils.getPointsOnCurve(_path, _subdivision);
+			var segs:Vector.<Vector.<Vector3D>>= _path.getPointsOnCurve(_subdivision);
 			var nSegs:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
 			
 			var seg:Vector.<Vector3D>;
@@ -1014,7 +1014,7 @@ package away3d.extrusions{
 							ignore = true;
 							break;
 						} else {
-							tmpV = PathUtils.calcPosition(t, ps, tmpV);
+							tmpV = ps.getPointOnSegment(t, tmpV);
 							tmpVDist = Vector3D.distance(prevV, tmpV);
 						}
 					}
@@ -1056,7 +1056,7 @@ package away3d.extrusions{
     	private function buildExtrude():void
     	{
  
-			if(_path == null || _path.length == 0 || _profile == null || _profile.length < 2)
+			if(_path == null || _path.numSegments == 0 || _profile == null || _profile.length < 2)
 				throw new Error("PathExtrude error: invalid Path or profile with unsufficient data");
 				 
 				_geomDirty = false;
@@ -1070,7 +1070,7 @@ package away3d.extrusions{
 				if(_distribute){
 					vSegPts = distributeVectors();
 				} else {
-					vSegPts = PathUtils.getPointsOnCurve(_path, _subdivision);
+					vSegPts = _path.getPointsOnCurve(_subdivision);
 				}
 
 				if(_distributeU) generateUlist();
@@ -1104,9 +1104,9 @@ package away3d.extrusions{
 				if(_smoothScale && rescale){
 					var nextscale:Vector3D = new Vector3D(1, 1, 1);
 					var vScales:Vector.<Vector3D> = Vector.<Vector3D>([lastscale]);
-					if(_scales.length!=_path.length+2){
+					if(_scales.length!=_path.numSegments+2){
 						var lastScl:Vector3D = _scales[_scales.length-1];
-						while (_scales.length!=_path.length+2){
+						while (_scales.length!=_path.numSegments+2){
 							_scales.push(lastScl);
 						}
 					}

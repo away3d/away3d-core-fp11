@@ -1,4 +1,4 @@
-package away3d.utils
+package away3d.tools.utils
 {
 	
     import away3d.errors.CastError;
