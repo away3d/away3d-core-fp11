@@ -3,19 +3,16 @@ package away3d.extrusions {
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
 	import away3d.entities.Mesh;
-	import away3d.extrusions.utils.IPath;
-	import away3d.extrusions.utils.PathUtils;
+	import away3d.paths.IPath;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
-	public class PathDuplicator{
-		 
-		private var _xAxis:Vector3D = new Vector3D();
-    	private var _yAxis:Vector3D = new Vector3D();
-    	private var _zAxis:Vector3D = new Vector3D();
+	[Deprecated]
+	public class PathDuplicator
+	{
 		private var _transform:Matrix3D;
-		private var _worldAxis:Vector3D;
+		private var _upAxis:Vector3D = new Vector3D(0, 1, 0);
 		private var _path:IPath;
 		private var _scene:Scene3D;
 		private var _meshes:Vector.<Mesh>;
@@ -35,7 +32,7 @@ package away3d.extrusions {
 		* @param	path				[optional]	A Path object. The _path definition. either Cubic or Quadratic path
 		* @param	meshes				[optional]	Vector.&lt;Mesh&gt;. One or more meshes to repeat along the path.
 		* @param	scene				[optional]	Scene3D. The scene where to addchild the meshes if no ObjectContainer3D is provided.
-		* @param	repeat				[optional]	uint. Howmany times a mesh is cloned per PathSegment. Default is 1.
+		* @param	repeat				[optional]	uint. How many times a mesh is cloned per PathSegment. Default is 1.
 		* @param	alignToPath			[optional]	Boolean. If the alignment of the clones must follow the path. Default is true.
 		* @param	segmentSpread		[optional]	Boolean. If more than one Mesh is passed, it defines if the clones alternate themselves per PathSegment or each repeat. Default is false.
 		* @param container				[optional]	ObjectContainer3D. If an ObjectContainer3D is provided, the meshes are addChilded to it instead of directly into the scene. The container is NOT addChilded to the scene by default.
@@ -53,8 +50,20 @@ package away3d.extrusions {
 			_randomRotationY = randomRotationY;
 			_container = container;
 		}
-		
-		
+
+		/**
+		 * The up axis to which duplicated objects' Y axis will be oriented.
+		 */
+		public function get upAxis() : Vector3D
+		{
+			return _upAxis;
+		}
+
+		public function set upAxis(value : Vector3D) : void
+		{
+			_upAxis = value;
+		}
+
 		/**
     	 * If a container is provided, the meshes are addChilded to it instead of directly into the scene. The container is NOT addChilded to the scene.
     	 */ 
@@ -178,11 +187,10 @@ package away3d.extrusions {
 			if(!_scene && !_container) throw new Error("PathDuplicator error: Missing Scene3D or ObjectContainer3D.");
 			
 			_mIndex = _meshes.length-1;
-			_worldAxis = _path.worldAxis;
 			_count = 0;
 			_clones = new Vector.<Mesh>();
 			
-			var segments:Vector.<Vector.<Vector3D>> = PathUtils.getPointsOnCurve(_path, _repeat);
+			var segments:Vector.<Vector.<Vector3D>> = _path.getPointsOnCurvePerSegment(_repeat);
 			var tmppt:Vector3D = new Vector3D();
 			 
 			var i:uint;
@@ -191,13 +199,13 @@ package away3d.extrusions {
 			var m:Mesh;
 			var tPosi:Vector3D;
 			 
-			for (i = 0; i <segments.length; ++i) {
+			for (i = 0; i < segments.length; ++i) {
 				
-				if(!segmentSpread) _mIndex = (_mIndex+1 != _meshes.length)? _mIndex+1 : 0;
+				if(!_segmentSpread) _mIndex = (_mIndex+1 != _meshes.length)? _mIndex+1 : 0;
 				 
-				for(j = 0; j<segments[i].length;++j){
+				for(j = 0; j < segments[i].length; ++j){
 					
-					if(segmentSpread) _mIndex = (_mIndex+1 != _meshes.length)? _mIndex+1 : 0;
+					if(_segmentSpread) _mIndex = (_mIndex+1 != _meshes.length)? _mIndex+1 : 0;
 					
 					m = _meshes[_mIndex];
 					tPosi = m.position;
@@ -214,8 +222,7 @@ package away3d.extrusions {
 						}
 					}
 					
-					if(_alignToPath){
-						 
+					if(_alignToPath) {
 						tmppt.x = tPosi.x * _transform.rawData[0] + tPosi.y * _transform.rawData[4] + tPosi.z * _transform.rawData[8] + _transform.rawData[12];
 						tmppt.y = tPosi.x * _transform.rawData[1] + tPosi.y * _transform.rawData[5] + tPosi.z * _transform.rawData[9] + _transform.rawData[13];
 						tmppt.z = tPosi.x * _transform.rawData[2] + tPosi.y * _transform.rawData[6] + tPosi.z * _transform.rawData[10] + _transform.rawData[14];
@@ -223,7 +230,6 @@ package away3d.extrusions {
 						tmppt.x +=  segments[i][j].x;
 						tmppt.y +=  segments[i][j].y;
 						tmppt.z +=  segments[i][j].z;
-						 
 					} else {
 						
 						tmppt = new Vector3D(tPosi.x+segments[i][j].x, tPosi.y+segments[i][j].y, tPosi.z+segments[i][j].z);
@@ -238,29 +244,31 @@ package away3d.extrusions {
 		 
 		private function orientateAt(target:Vector3D, position:Vector3D):void
         {
-            _zAxis = target.subtract(position);
-            _zAxis.normalize();
+			var xAxis : Vector3D;
+			var yAxis : Vector3D;
+            var zAxis : Vector3D = target.subtract(position);
+            zAxis.normalize();
     
-            if (_zAxis.length > 0.1){
-                _xAxis = _worldAxis.crossProduct(_zAxis);
-                _xAxis.normalize();
+            if (zAxis.length > 0.1){
+                xAxis = _upAxis.crossProduct(zAxis);
+                xAxis.normalize();
     
-                _yAxis = _xAxis.crossProduct(_zAxis);
-                _yAxis.normalize();
+                yAxis = xAxis.crossProduct(zAxis);
+                yAxis.normalize();
     			
     			var rawData:Vector.<Number> = _transform.rawData;
     			
-                rawData[0] = _xAxis.x;
-                rawData[1] = _xAxis.y;
-                rawData[2] = _xAxis.z;
+                rawData[0] = xAxis.x;
+                rawData[1] = xAxis.y;
+                rawData[2] = xAxis.z;
     
-                rawData[4] = -_yAxis.x;
-                rawData[5] = -_yAxis.y;
-                rawData[6] = -_yAxis.z;
+                rawData[4] = -yAxis.x;
+                rawData[5] = -yAxis.y;
+                rawData[6] = -yAxis.z;
     
-                rawData[8] = _zAxis.x;
-                rawData[9] = _zAxis.y;
-                rawData[10] = _zAxis.z;
+                rawData[8] = zAxis.x;
+                rawData[9] = zAxis.y;
+                rawData[10] = zAxis.z;
 				
 				_transform.rawData = rawData;
             }
@@ -268,25 +276,25 @@ package away3d.extrusions {
 		
 		private function generate(m:Mesh, position:Vector3D):void
         {
-			var newClone:Mesh;
-			newClone = m.clone() as Mesh;
-			
-			if(_alignToPath)
-				newClone.transform = _transform.clone();
-				
-			newClone.position = position;
-			newClone.name = (m.name != null)? m.name+"_"+_count : "clone_"+_count;
+			var clone:Mesh = m.clone() as Mesh;
+
+			if (_alignToPath)
+				clone.transform = _transform;
+			else
+				clone.position = position;
+
+			clone.name = (m.name != null)? m.name+"_"+_count : "clone_"+_count;
 			_count++;
 			
 			if(_randomRotationY)
-				newClone.rotationY = Math.random()*360;
-			 
-			if(_container){
-				_container.addChild(newClone);
-			} else {
-				_scene.addChild(newClone);
-			}
-			_clones.push(newClone);
+				clone.rotationY = Math.random()*360;
+
+			if(_container)
+				_container.addChild(clone);
+			else
+				_scene.addChild(clone);
+
+			_clones.push(clone);
 		}
 		
 	}

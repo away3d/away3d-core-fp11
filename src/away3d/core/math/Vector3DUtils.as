@@ -157,6 +157,74 @@ package away3d.core.math
             
 			return result;
         }
-        
+
+		public static function rotatePoint(aPoint : Vector3D, rotation : Vector3D) : Vector3D
+		{
+			if (rotation.x != 0 || rotation.y != 0 || rotation.z != 0) {
+
+				var x1 : Number;
+				var y1 : Number;
+
+				var rad : Number = MathConsts.DEGREES_TO_RADIANS;
+				var rotx : Number = rotation.x * rad;
+				var roty : Number = rotation.y * rad;
+				var rotz : Number = rotation.z * rad;
+
+				var sinx : Number = Math.sin(rotx);
+				var cosx : Number = Math.cos(rotx);
+				var siny : Number = Math.sin(roty);
+				var cosy : Number = Math.cos(roty);
+				var sinz : Number = Math.sin(rotz);
+				var cosz : Number = Math.cos(rotz);
+
+				var x : Number = aPoint.x;
+				var y : Number = aPoint.y;
+				var z : Number = aPoint.z;
+
+				y1 = y;
+				y = y1 * cosx + z * -sinx;
+				z = y1 * sinx + z * cosx;
+
+				x1 = x;
+				x = x1 * cosy + z * siny;
+				z = x1 * -siny + z * cosy;
+
+				x1 = x;
+				x = x1 * cosz + y * -sinz;
+				y = x1 * sinz + y * cosz;
+
+				aPoint.x = x;
+				aPoint.y = y;
+				aPoint.z = z;
+			}
+
+			return aPoint;
+		}
+
+		public static function subdivide(startVal : Vector3D, endVal : Vector3D, numSegments : int) : Vector.<Vector3D>
+		{
+			var points : Vector.<Vector3D> = new Vector.<Vector3D>();
+			var numPoints : int = 0;
+			var stepx : Number = (endVal.x - startVal.x) / numSegments;
+			var stepy : Number = (endVal.y - startVal.y) / numSegments;
+			var stepz : Number = (endVal.z - startVal.z) / numSegments;
+
+			var step : int = 1;
+			var scalestep : Vector3D;
+
+			while (step < numSegments) {
+				scalestep = new Vector3D();
+				scalestep.x = startVal.x + (stepx * step);
+				scalestep.y = startVal.y + (stepy * step);
+				scalestep.z = startVal.z + (stepz * step);
+				points[numPoints++] = scalestep;
+
+				step++;
+			}
+
+			points[numPoints] = endVal;
+
+			return points;
+		}
 	}
 }
