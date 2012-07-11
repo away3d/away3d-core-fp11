@@ -455,8 +455,10 @@ package away3d.library
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
@@ -487,8 +489,10 @@ package away3d.library
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
@@ -566,8 +570,10 @@ package away3d.library
 			loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.removeEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);

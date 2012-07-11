@@ -159,8 +159,10 @@ package away3d.loaders
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
@@ -200,8 +202,10 @@ package away3d.loaders
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
@@ -236,8 +240,10 @@ package away3d.loaders
 			dispatcher.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
 			dispatcher.removeEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			dispatcher.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			dispatcher.removeEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);

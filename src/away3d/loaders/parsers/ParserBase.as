@@ -293,13 +293,9 @@ package away3d.loaders.parsers
 				asset.name = name;
 			
 			switch (asset.assetType) {
-				case AssetType.ANIMATION:
-					type_name = 'animation';
-					type_event = AssetEvent.ANIMATION_COMPLETE;
-					break;
 				case AssetType.ANIMATION_SET:
 					type_name = 'animationSet';
-					type_event = AssetEvent.ANIMATION_LIBRARY_COMPLETE;
+					type_event = AssetEvent.ANIMATION_SET_COMPLETE;
 					break;
 				case AssetType.ANIMATION_STATE:
 					type_name = 'animationState';
@@ -308,6 +304,10 @@ package away3d.loaders.parsers
 				case AssetType.ANIMATION_NODE:
 					type_name = 'animationNode';
 					type_event = AssetEvent.ANIMATION_NODE_COMPLETE;
+					break;
+				case AssetType.STATE_TRANSITION:
+					type_name = 'stateTransition';
+					type_event = AssetEvent.STATE_TRANSITION_COMPLETE;
 					break;
 				case AssetType.TEXTURE:
 					type_name = 'texture';

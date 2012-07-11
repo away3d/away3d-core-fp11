@@ -105,8 +105,10 @@ package away3d.loaders.parsers
 				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-				_parser.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-				_parser.addEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
@@ -155,8 +157,10 @@ package away3d.loaders.parsers
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			_parser.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			_parser.removeEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);

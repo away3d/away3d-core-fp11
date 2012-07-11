@@ -13,13 +13,12 @@ package away3d.events
 		public static const SKELETON_COMPLETE : String = "skeletonComplete";
 		public static const SKELETON_POSE_COMPLETE : String = "skeletonPoseComplete";
 		public static const CONTAINER_COMPLETE : String = "containerComplete";
-		public static const ANIMATION_COMPLETE : String = "animationComplete";
 		public static const TEXTURE_COMPLETE : String = "textureComplete";
 		public static const MATERIAL_COMPLETE : String = "materialComplete";
-		public static const ANIMATION_LIBRARY_COMPLETE : String = "animationSetComplete";
+		public static const ANIMATION_SET_COMPLETE : String = "animationSetComplete";
 		public static const ANIMATION_STATE_COMPLETE : String = "animationStateComplete";
 		public static const ANIMATION_NODE_COMPLETE : String = "animationNodeComplete";
-
+		public static const STATE_TRANSITION_COMPLETE : String = "stateTransitionComplete";
 		
 		public static const ASSET_RENAME : String = 'assetRename';
 		public static const ASSET_CONFLICT_RESOLVED : String = 'assetConflictResolved';
