@@ -4,19 +4,17 @@ package away3d.paths
 
 	public interface IPath
 	{
-		// TODO: pointOnPath(phase : Number)	--> samplePoint
-		// TODO: getSegmentAt vs get segments
-
-
 		/**
 		 * The number of <code>CubicPathSegment</code> instances in the path.
 		 */
+		[Deprecated]
 		function get numSegments():uint;
 
 
 		/**
 		 * The <code>IPathSegment</code> instances which make up this path.
 		 */
+		[Deprecated]
 		function get segments():Vector.<IPathSegment>;
 
 		/**
@@ -24,6 +22,7 @@ package away3d.paths
 		 * @param index The index of the segment
 		 * @return A <code>CubicPathSegment</code> instance
 		 */
+		[Deprecated]
 		function getSegmentAt(index:uint):IPathSegment;
 
 
@@ -31,6 +30,7 @@ package away3d.paths
 		 * Adds a <code>CubicPathSegment</code> to the end of the path
 		 * @param segment
 		 */
+		[Deprecated]
 		function addSegment(segment:IPathSegment):void;
 
 
@@ -39,6 +39,7 @@ package away3d.paths
 		 * @param index The index of the <code>CubicPathSegment</code> to be removed
 		 * @param join Determines if the segments on either side of the removed segment should be adjusted so there is no gap.
 		 */
+		[Deprecated]
 		function removeSegment(index:uint, join:Boolean = false):void;
 
 
@@ -52,8 +53,9 @@ package away3d.paths
 		 *
 		 * @param numSegments The amount of segments to split the sampling in. The amount of points returned is numSegments + 1
 		 *
-		 * TODO: is this really even necessary? We should be able to simply call samplePoint(t) instead
+		 * TODO: is this really even necessary? We should be able to simply call getPointOnCurve(t) instead
 		 */
+		[Deprecated]
 		function getPointsOnCurvePerSegment(numSegments : uint) : Vector.<Vector.<Vector3D>>;
 	}
 }

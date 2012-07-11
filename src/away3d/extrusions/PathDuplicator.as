@@ -4,12 +4,11 @@ package away3d.extrusions {
 	import away3d.containers.Scene3D;
 	import away3d.entities.Mesh;
 	import away3d.paths.IPath;
-	import away3d.paths.SegmentedPathBase;
-	import away3d.paths.utils.PathUtils;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
+	[Deprecated]
 	public class PathDuplicator
 	{
 		private var _transform:Matrix3D;

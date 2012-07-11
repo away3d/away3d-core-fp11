@@ -1,14 +1,15 @@
 package away3d.animators
 {
 	import away3d.core.base.Object3D;
+	import away3d.core.math.Vector3DUtils;
 	import away3d.events.PathEvent;
 	import away3d.paths.IPath;
 	import away3d.paths.IPathSegment;
-	import away3d.paths.utils.PathUtils;
 
 	import flash.events.EventDispatcher;
 	import flash.geom.Vector3D;
 
+	[Deprecated]
 	public class PathAnimator extends EventDispatcher
 	{
 		private var _path:IPath;
@@ -148,7 +149,7 @@ package away3d.animators
 					_upAxis.x = 0;
 					_upAxis.y = 1;
 					_upAxis.z = 0;
-					_upAxis = PathUtils.rotatePoint(_upAxis, _rot);
+					_upAxis = Vector3DUtils.rotatePoint(_upAxis, _rot);
 
 					_target.lookAt(_basePosition, _upAxis);
 
@@ -433,7 +434,7 @@ package away3d.animators
 				_tmpOffset.x = _offset.x;
 				_tmpOffset.y = _offset.y;
 				_tmpOffset.z = _offset.z;
-				_tmpOffset = PathUtils.rotatePoint(_tmpOffset, _rot);
+				_tmpOffset = Vector3DUtils.rotatePoint(_tmpOffset, _rot);
 
 				_position.x += _tmpOffset.x;
 				_position.y += _tmpOffset.y;

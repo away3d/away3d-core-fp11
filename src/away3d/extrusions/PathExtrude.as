@@ -7,19 +7,20 @@ package away3d.extrusions
 	import away3d.core.base.SubMesh;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
+	import away3d.core.math.Vector3DUtils;
 	import away3d.entities.Mesh;
 	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.paths.IPath;
 	import away3d.paths.IPathSegment;
-	import away3d.paths.utils.PathUtils;
 	import away3d.textures.BitmapTexture;
 	import away3d.tools.helpers.MeshHelper;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
+	[Deprecated]
 	public class PathExtrude extends Mesh
 	{
 		private var _varr : Vector.<Vertex>;
@@ -1114,14 +1115,14 @@ package away3d.extrusions
 					lastrotate = (_rotations[i] == null) ? lastrotate : _rotations[i];
 					nextrotate = (_rotations[i + 1] == null) ? lastrotate : _rotations[i + 1];
 					rotation = Vector.<Vector3D>([lastrotate]);
-					rotation = rotation.concat(PathUtils.step(lastrotate, nextrotate, _subdivision));
+					rotation = rotation.concat(Vector3DUtils.subdivide(lastrotate, nextrotate, _subdivision));
 				}
 
 				if (rescale)  lastscale = (!_scales[i]) ? lastscale : _scales[i];
 
 				if (_smoothScale && rescale) {
 					nextscale = (!_scales[i + 1]) ? (!_scales[i]) ? lastscale : _scales[i] : _scales[i + 1];
-					vScales = vScales.concat(PathUtils.step(lastscale, nextscale, _subdivision));
+					vScales = vScales.concat(Vector3DUtils.subdivide(lastscale, nextscale, _subdivision));
 				}
 
 				for (j = 0; j < vSegPts[i].length; ++j) {
@@ -1167,7 +1168,7 @@ package away3d.extrusions
 							tmppt.z = atmp[k].x * _trans.rawData[2] + atmp[k].y * _trans.rawData[6] + atmp[k].z * _trans.rawData[10] + _trans.rawData[14];
 
 							if (rotate)
-								tmppt = PathUtils.rotatePoint(tmppt, tweenrot);
+								tmppt = Vector3DUtils.rotatePoint(tmppt, tweenrot);
 
 							tmppt.x += vSegPts[i][j].x;
 							tmppt.y += vSegPts[i][j].y;
