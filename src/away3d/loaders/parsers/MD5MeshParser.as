@@ -69,20 +69,13 @@ package away3d.loaders.parsers
 		{
 			super(ParserDataFormat.PLAIN_TEXT);
 			_rotationQuat = new Quaternion();
-			var t1 : Quaternion = new Quaternion();
-			var t2 : Quaternion = new Quaternion();
 
-			t1.fromAxisAngle(Vector3D.X_AXIS, -Math.PI * .5);
-			t2.fromAxisAngle(Vector3D.Y_AXIS, Math.PI * .5);
+			_rotationQuat.fromAxisAngle(Vector3D.X_AXIS, -Math.PI * .5);
 
 			if (additionalRotationAxis) {
-				var t3 : Quaternion = new Quaternion();
-				t3.multiply(t2, t1);
-				t1.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
-				_rotationQuat.multiply(t1, t3);
-			}
-			else {
-				_rotationQuat.multiply(t2, t1);
+				var quat : Quaternion = new Quaternion();
+				quat.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
+				_rotationQuat.multiply(_rotationQuat, quat);
 			}
 		}
 
@@ -243,9 +236,11 @@ package away3d.loaders.parsers
 				pos = parseVector3D();
 				pos = _rotationQuat.rotatePoint(pos);
 				quat = parseQuaternion();
+
 				// todo: check if this is correct, or maybe we want to actually store it as quats?
 				_bindPoses[i] = quat.toMatrix3D();
 				_bindPoses[i].appendTranslation(pos.x, pos.y, pos.z);
+
 				var inv : Matrix3D = _bindPoses[i].clone();
 				inv.invert();
 				joint.inverseBindPose = inv.rawData;

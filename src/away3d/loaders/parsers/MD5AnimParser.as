@@ -66,16 +66,14 @@ package away3d.loaders.parsers
 			var t2 : Quaternion = new Quaternion();
 			
 			t1.fromAxisAngle(Vector3D.X_AXIS, -Math.PI*.5);
-			t2.fromAxisAngle(Vector3D.Y_AXIS, Math.PI*.5);
-			
+			t2.fromAxisAngle(Vector3D.Y_AXIS, -Math.PI*.5);
+
+			_rotationQuat.multiply(t2, t1);
+
 			if (additionalRotationAxis) {
-				var t3 : Quaternion = new Quaternion();
-				t3.multiply(t2, t1);
-				t1.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
-				_rotationQuat.multiply(t1, t3);
-			}
-			else {
 				_rotationQuat.multiply(t2, t1);
+				t1.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
+				_rotationQuat.multiply(t1, _rotationQuat);
 			}
 		}
 		
@@ -97,9 +95,6 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			// TODO: not used
-			data = data;
-			// todo: implement
 			return false;
 		}
 		
@@ -495,7 +490,7 @@ package away3d.loaders.parsers
 			vec.z = getNextNumber();
 			
 			if (getNextToken() != ")") sendParseError(")");
-			
+
 			return vec;
 		}
 		
