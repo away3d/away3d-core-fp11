@@ -1,11 +1,11 @@
 package away3d.tools.serialize
 {
+	import away3d.animators.SkeletonAnimationState;
 	import away3d.animators.IAnimator;
-	import away3d.materials.lightpickers.StaticLightPicker;
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.SkeletonJoint;
-	import away3d.animators.skeleton.SkeletonPose;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
+	import away3d.animators.data.SkeletonPose;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
@@ -14,8 +14,9 @@ package away3d.tools.serialize
 	import away3d.core.base.SubMesh;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
-
+	import away3d.materials.lightpickers.StaticLightPicker;
 	import flash.utils.getQualifiedClassName;
+
 
 	use namespace arcane;
 	
@@ -183,16 +184,10 @@ package away3d.tools.serialize
 			serializer.endObject();
 		}
 		
-		public static function serializeSkeletonAnimationSequence(skeletonAnimationSequence:SkeletonAnimationSequence, serializer:SerializerBase):void
+		public static function serializeSkeletonAnimationState(skeletonAnimationState:SkeletonAnimationState, serializer:SerializerBase):void
 		{
-			serializer.beginObject(classNameFromInstance(skeletonAnimationSequence), skeletonAnimationSequence.name);
-			serializer.writeUint("duration", skeletonAnimationSequence.duration);
-			serializer.writeBoolean("fixedFrameRate", skeletonAnimationSequence.fixedFrameRate);
-			serializer.writeBoolean("looping", skeletonAnimationSequence.looping);
-			for each (var skeletonPose:SkeletonPose in skeletonAnimationSequence._frames)
-			{
-				serializeSkeletonPose(skeletonPose, serializer);
-			}
+			serializer.beginObject(classNameFromInstance(skeletonAnimationState), skeletonAnimationState.name);
+			//TODO: add animation nodes to serialiser
 			serializer.endObject();
 		}
 		

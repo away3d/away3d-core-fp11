@@ -4,30 +4,29 @@
 package away3d.animators.nodes
 {
 
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.core.math.Quaternion;
-	import flash.geom.Vector3D;
+	import away3d.animators.data.*;
+	import away3d.core.math.*;
+	
+	import flash.geom.*;
+	
 
 
-	public class SkeletonAdditiveNode extends SkeletonTreeNode
+	public class SkeletonAdditiveNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
-		public var baseInput : SkeletonTreeNode;
-		public var differenceInput : SkeletonTreeNode;
+		public var baseInput : ISkeletonAnimationNode;
+		public var differenceInput : ISkeletonAnimationNode;
+		
 		private var _blendWeight : Number = 0;
-
+		private var _skeletonPose : SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty : Boolean;
+		
 		private static var _tempQuat : Quaternion = new Quaternion();
 
 		public function SkeletonAdditiveNode()
 		{
 			super();
 		}
-
-		override public function get duration() : Number
-		{
-			return baseInput.duration;
-		}
-
+		
 		public function get blendWeight() : Number
 		{
 			return _blendWeight;
@@ -36,34 +35,46 @@ package away3d.animators.nodes
 		public function set blendWeight(value : Number) : void
 		{
 			_blendWeight = value;
-			_duration = baseInput.duration;
+			
+			_rootDeltaDirty = true;
+			_skeletonPoseDirty = true;
 		}
-
-		override public function set time(value : Number) : void
+		
+		override public function reset(time:Number):void
 		{
-			baseInput.time = value;
-			differenceInput.time = value;
-			super.time = value;
+			super.reset(time);
+			
+			baseInput.reset(time);
+			differenceInput.reset(time);
 		}
-
-		override public function set direction(value : Number) : void
+		
+		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
 		{
-			baseInput.direction = value;
-			differenceInput.direction = value;
-			super.direction = value;
+			if (_skeletonPoseDirty)
+				updateSkeletonPose(skeleton);
+			
+			return _skeletonPose;
+		}
+		
+		override protected function updateTime(time : Number) : void
+		{
+			super.updateTime(time);
+			
+			baseInput.update(time);
+			differenceInput.update(time);
+			
+			_skeletonPoseDirty = true;
 		}
 
 		// todo: return whether or not update was performed
-		override public function updatePose(skeleton : Skeleton) : void
+		public function updateSkeletonPose(skeleton : Skeleton) : void
 		{
-			// todo: should only update if blendWeight dirty, or if either child returns false
-			baseInput.updatePose(skeleton);
-			differenceInput.updatePose(skeleton);
-
+			_skeletonPoseDirty = false;
+			
 			var endPose : JointPose;
-			var endPoses : Vector.<JointPose> = skeletonPose.jointPoses;
-			var basePoses : Vector.<JointPose> = baseInput.skeletonPose.jointPoses;
-			var diffPoses : Vector.<JointPose> = differenceInput.skeletonPose.jointPoses;
+			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
+			var basePoses : Vector.<JointPose> = baseInput.getSkeletonPose(skeleton).jointPoses;
+			var diffPoses : Vector.<JointPose> = differenceInput.getSkeletonPose(skeleton).jointPoses;
 			var base : JointPose, diff : JointPose;
 			var basePos : Vector3D, diffPos : Vector3D;
 			var tr : Vector3D;
@@ -89,7 +100,7 @@ package away3d.animators.nodes
 			}
 		}
 
-		override public function updatePositionData() : void
+		override protected function updateRootDelta() : void
 		{
 			var deltA : Vector3D = baseInput.rootDelta;
 			var deltB : Vector3D = differenceInput.rootDelta;

@@ -16,7 +16,7 @@ package away3d.animators
 	 */
 	public class VertexAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _activeNode : VertexClipNode;
+		private var _activeNode : IVertexAnimationNode;
 		private var _activeState:VertexAnimationState;
 		private var _absoluteTime : Number;
 		
@@ -50,7 +50,7 @@ package away3d.animators
 			if (!_activeState)
 				throw new Error("Animation state " + stateName + " not found!");
 			
-			_activeNode = _activeState.rootNode as VertexClipNode;
+			_activeNode = _activeState.rootNode as IVertexAnimationNode;
 			
 			_absoluteTime = 0;
 			

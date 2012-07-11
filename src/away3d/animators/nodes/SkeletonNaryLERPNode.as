@@ -3,49 +3,75 @@
  */
 package away3d.animators.nodes
 {
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.core.math.Quaternion;
-	import flash.geom.Vector3D;
+	import away3d.animators.data.*;
+	import away3d.core.math.*;
+	
+	import flash.geom.*;
+	
 
 
-	public class SkeletonNaryLERPNode extends SkeletonTreeNode
+	public class SkeletonNaryLERPNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
 		/**
 		 * The weights for each joint. The total needs to equal 1.
 		 */
 		private var _blendWeights : Vector.<Number>;
-		private var _inputs : Vector.<SkeletonTreeNode>;
+		private var _inputs : Vector.<ISkeletonAnimationNode>;
 		private var _numInputs : uint;
-
+		private var _skeletonPose : SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty : Boolean;
+		
 		public function SkeletonNaryLERPNode()
 		{
 			super();
-			_inputs = new Vector.<SkeletonTreeNode>();
+			_inputs = new Vector.<ISkeletonAnimationNode>();
 			_blendWeights = new Vector.<Number>();
 		}
 
-		public function getInputIndex(input : SkeletonTreeNode) : int
+		public function getInputIndex(input : ISkeletonAnimationNode) : int
 		{
 			return _inputs.indexOf(input);
 		}
 
-		public function getInputAt(index : uint) : SkeletonTreeNode
+		public function getInputAt(index : uint) : ISkeletonAnimationNode
 		{
 			return _inputs[index];
 		}
+		
+		public function getBlendWeightAt(index : uint) : Number
+		{
+			return _blendWeights[index];
+		}
+		
+		public function setBlendWeightAt(index : uint, blendWeight:Number) : void
+		{
+			_blendWeights[index] = blendWeight;
+			
+			_rootDeltaDirty = true;
+			_skeletonPoseDirty = true;
+		}
 
-		public function addInput(input : SkeletonTreeNode) : void
+		public function addInput(input : ISkeletonAnimationNode) : void
 		{
 			_inputs[_numInputs] = input;
 			_blendWeights[_numInputs++] = 0;
 		}
-
-		override public function updatePose(skeleton : Skeleton) : void
+		
+		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
 		{
-			var input : SkeletonTreeNode;
+			if (_skeletonPoseDirty)
+				updateSkeletonPose(skeleton);
+			
+			return _skeletonPose;
+		}
+		
+		
+		public function updateSkeletonPose(skeleton : Skeleton) : void
+		{
+			_skeletonPoseDirty = false;
+			
 			var weight : Number;
-			var endPoses : Vector.<JointPose> = skeletonPose.jointPoses;
+			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
 			var poses : Vector.<JointPose>;
 			var endPose : JointPose, pose : JointPose;
 			var endTr : Vector3D, tr : Vector3D;
@@ -61,13 +87,11 @@ package away3d.animators.nodes
 
 			for (var j : uint = 0; j < _numInputs; ++j) {
 				weight = _blendWeights[j];
-				if (weight == 0) continue;
-				input = _inputs[j];
-				input.time = _time;
-				input.direction = _direction;
-				input.updatePose(skeleton);
+				
+				if (!weight)
+					continue;
 
-				poses = input.skeletonPose.jointPoses;
+				poses = _inputs[j].getSkeletonPose(skeleton).jointPoses;
 
 				if (!firstPose) {
 					firstPose = poses;
@@ -127,43 +151,46 @@ package away3d.animators.nodes
 				endPoses[i].orientation.normalize();
 			}
 		}
-
-		override public function updatePositionData() : void
+		
+		override protected function updateTime(time : Number) : void
 		{
+			super.updateTime(time);
+			
+			var weight : Number;
+			
+			for (var j : uint = 0; j < _numInputs; ++j) {
+				weight = _blendWeights[j];
+				
+				if (!weight)
+					continue;
+				
+				_inputs.update(time);
+			}
+			
+			_skeletonPoseDirty = true;
+		}
+		
+		override protected function updateRootDelta() : void
+		{
+			_rootDeltaDirty = false;
+			
 			var delta : Vector3D;
 			var weight : Number;
 
-			rootDelta.x = 0;
-			rootDelta.y = 0;
-			rootDelta.z = 0;
+			_rootDelta.x = 0;
+			_rootDelta.y = 0;
+			_rootDelta.z = 0;
 
 			for (var j : uint = 0; j < _numInputs; ++j) {
 				weight = _blendWeights[j];
-				if (weight == 0) continue;
-				_inputs[j].time = _time;
-				_inputs[j].updatePositionData();
+				
+				if (!weight)
+					continue;
+				
 				delta = _inputs[j].rootDelta;
-				rootDelta.x += weight*delta.x;
-				rootDelta.y += weight*delta.y;
-				rootDelta.z += weight*delta.z;
-			}
-		}
-
-		public function get blendWeights() : Vector.<Number>
-		{
-			return _blendWeights;
-		}
-
-		public function updateWeights(weights : Vector.<Number>) : void
-		{
-			var weight : Number;
-
-			_duration = 0;
-			_blendWeights = weights;
-			for (var j : uint = 0; j < _numInputs; ++j) {
-				weight = _blendWeights[j];
-				if (weight == 0) continue;
-				_duration += weight*_inputs[j].duration;
+				_rootDelta.x += weight*delta.x;
+				_rootDelta.y += weight*delta.y;
+				_rootDelta.z += weight*delta.z;
 			}
 		}
 	}

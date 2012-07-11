@@ -4,60 +4,80 @@
 package away3d.animators.nodes
 {
 
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import flash.geom.Vector3D;
+	import away3d.animators.data.*;
+	
+	import flash.geom.*;
 
-	public class SkeletonDirectionalNode extends SkeletonTreeNode
+	public class SkeletonDirectionalNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
 		/**
 		 * The weights for each joint. The total needs to equal 1.
 		 */
-		public var forward : SkeletonTreeNode;
-		public var backward : SkeletonTreeNode;
-		public var left : SkeletonTreeNode;
-		public var right : SkeletonTreeNode;
-		private var _inputA : SkeletonTreeNode;
-		private var _inputB : SkeletonTreeNode;
-		private var _blendWeight : Number;
-		private var _blendDirty : Boolean;
-
+		public var forward : ISkeletonAnimationNode;
+		public var backward : ISkeletonAnimationNode;
+		public var left : ISkeletonAnimationNode;
+		public var right : ISkeletonAnimationNode;
+		
+		private var _inputA : ISkeletonAnimationNode;
+		private var _inputB : ISkeletonAnimationNode;
+		private var _blendWeight : Number = 0;
+		private var _direction:Number = 0;
+		private var _blendDirty:Boolean;
+		private var _skeletonPose : SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty : Boolean;
+		
 		public function SkeletonDirectionalNode()
 		{
 			super();
 		}
-
-		override public function set time(value : Number) : void
+		
+		override public function reset(time:Number):void
 		{
-			forward.time = value;
-			backward.time = value;
-			left.time = value;
-			right.time = value;
-			super.time = value;
+			super.reset(time);
+			
+			forward.reset(time);
+			backward.reset(time);
+			left.reset(time);
+			right.reset(time);
+		}
+		
+		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
+		{
+			if (_skeletonPoseDirty)
+				updateSkeletonPose(skeleton);
+			
+			return _skeletonPose;
 		}
 
 		// between 0 - 360
-		override public function set direction(value : Number) : void
+		public function set direction(value : Number) : void
 		{
-			forward.direction = value;
-			backward.direction = value;
-			left.direction = value;
-			right.direction = value;
+			if (_direction == value)
+				return;
+			
+			_direction = value;
+			
 			_blendDirty = true;
-			super.direction = value;
+			_skeletonPoseDirty = true;
+			_rootDeltaDirty = true;
+		}
+		
+		public function get direction():Number
+		{
+			return _direction;
 		}
 
-		override public function updatePose(skeleton : Skeleton) : void
+		public function updateSkeletonPose(skeleton : Skeleton) : void
 		{
-			if (_blendDirty) updateBlend();
-			_inputA.updatePose(skeleton);
-			_inputB.updatePose(skeleton);
-
-			var durA : Number = _inputA.duration;
+			_skeletonPoseDirty = false;
+			
+			if (_blendDirty)
+				updateBlend();
+			
 			var endPose : JointPose;
-			var endPoses : Vector.<JointPose> = skeletonPose.jointPoses;
-			var poses1 : Vector.<JointPose> = _inputA.skeletonPose.jointPoses;
-			var poses2 : Vector.<JointPose> = _inputB.skeletonPose.jointPoses;
+			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
+			var poses1 : Vector.<JointPose> = _inputA.getSkeletonPose(skeleton).jointPoses;
+			var poses2 : Vector.<JointPose> = _inputB.getSkeletonPose(skeleton).jointPoses;
 			var pose1 : JointPose, pose2 : JointPose;
 			var p1 : Vector3D, p2 : Vector3D;
 			var tr : Vector3D;
@@ -65,9 +85,7 @@ package away3d.animators.nodes
 
 			// :s
 			if (endPoses.length != numJoints) endPoses.length = numJoints;
-
-			_duration = durA + _blendWeight*(_inputB.duration - durA);
-
+			
 			for (var i : uint = 0; i < numJoints; ++i) {
 				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
@@ -87,8 +105,10 @@ package away3d.animators.nodes
 		{
 			_blendDirty = false;
 
-			while (_direction < 0) _direction += 360;
-			while (_direction >= 360) _direction -= 360;
+			if (_direction < 0 || _direction > 360) {
+				 _direction %= 360;
+				 if (_direction < 0) _direction += 360;
+			}
 
 			if (_direction < 90) {
 				_inputA = forward;
@@ -111,15 +131,31 @@ package away3d.animators.nodes
 				_blendWeight = (_direction-270)/90;
 			}
 		}
-
-		override public function updatePositionData() : void
+		
+		
+		override protected function updateTime(time : Number) : void
 		{
-			if (_blendDirty) updateBlend();
+			super.updateTime(time);
+			
+			_inputA.update(time);
+			_inputB.update(time);
+			
+			_skeletonPoseDirty = true;
+		}
+		
+		override protected function updateRootDelta() : void
+		{
+			_rootDeltaDirty = false;
+			
+			if (_blendDirty)
+				updateBlend();
+			
 			var deltA : Vector3D = _inputA.rootDelta;
 			var deltB : Vector3D = _inputB.rootDelta;
-			rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
-			rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
-			rootDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
+			
+			_rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
+			_rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
+			_rootDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
 		}
 	}
 }

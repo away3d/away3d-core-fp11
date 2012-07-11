@@ -1,17 +1,17 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.SkeletonAnimator;
 	import away3d.animators.SkeletonAnimationSet;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.SkeletonJoint;
+	import away3d.animators.SkeletonAnimator;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.math.Quaternion;
 	import away3d.entities.Mesh;
-
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
+
 
 	use namespace arcane;
 

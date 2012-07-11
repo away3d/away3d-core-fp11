@@ -1,8 +1,8 @@
 package away3d.animators
 {
 	import away3d.arcane;
+	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
-	import away3d.animators.skeleton.*;
 	import away3d.animators.transitions.*;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;

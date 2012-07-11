@@ -20,7 +20,7 @@ package away3d.animators
 		override public function addOwner(owner:IAnimationSet, stateName:String):void
 		{
 			if (!(owner is VertexAnimationSet))
-				throw new Error("A skeleton animation state can only be added to a skeleton animation set");
+				throw new Error("A vertex animation state can only be added to a vertex animation set");
 			
 			super.addOwner(owner, stateName);
 						

@@ -1,4 +1,4 @@
-package away3d.animators.skeleton
+package away3d.animators.data
 {
 	/**
 	 * Joint represents a joint in a Skeleton.

@@ -1,6 +1,6 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.skeleton.*;
+	import away3d.animators.data.*;
 	
 	/**
 	 * @author robbateman

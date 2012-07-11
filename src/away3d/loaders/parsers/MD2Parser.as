@@ -375,6 +375,7 @@ package away3d.loaders.parsers
 			var i : uint, j : int, k : uint, ch : uint;
 			var name : String = "";
 			var prevClip : VertexClipNode = null;
+			var state : VertexAnimationState;
 			
 			_byteData.position = _offsetFrames;
 			
@@ -427,27 +428,33 @@ package away3d.loaders.parsers
 				subGeom.updateIndexData(_indices);
 				
 				var clip : VertexClipNode = _clipNodes[name];
+				
 				if (!clip) {
+					// If another sequence was parsed before this one, starting
+					// a new state means the previous one is complete and can
+					// hence be finalized.
+					if (prevClip) {
+						finalizeAsset(prevClip);
+						finalizeAsset(state);
+					}
+						
 					clip = new VertexClipNode();
 					clip.stitchFinalFrame = true;
-					var state : VertexAnimationState = new VertexAnimationState(clip);
+					state = new VertexAnimationState(clip);
 					
 					_animationSet.addState(name, state);
 					_clipNodes[name] = clip;
-					// If another sequence was parsed before this one, starting
-					// a new sequence measn the previuos one is complete and can
-					// hence be finalized.
-					if (prevClip)
-						finalizeAsset(prevClip);
 					
 					prevClip = clip;
 				}
 				clip.addFrame(geometry, 1000 / FPS);
 			}
 			
-			// Finalize the last sequence
-			if (prevClip)
+			// Finalize the last state
+			if (prevClip) {
 				finalizeAsset(prevClip);
+				finalizeAsset(state);
+			}
 			
 			// Force finalizeAsset() to decide name
 			//_animator.name = "";

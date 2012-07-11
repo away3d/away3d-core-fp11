@@ -1,17 +1,16 @@
 package away3d.animators.nodes
 {
 
-	import away3d.animators.skeleton.SkeletonPose;
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import flash.geom.Vector3D;
+	import away3d.animators.data.*;
+	
+	import flash.geom.*;
 
 	public class SkeletonBinaryLERPNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
 		public var inputA : ISkeletonAnimationNode;
 		public var inputB : ISkeletonAnimationNode;
 		
-		private var _blendWeight : Number;
+		private var _blendWeight : Number = 0;
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
 		private var _skeletonPoseDirty : Boolean;
 		
@@ -22,7 +21,8 @@ package away3d.animators.nodes
 		
 		override public function reset(time:Number):void
 		{
-			update(time);
+			super.reset(time);
+			
 			inputA.reset(time);
 			inputB.reset(time);
 		}
@@ -34,28 +34,6 @@ package away3d.animators.nodes
 			
 			return _skeletonPose;
 		}
-		
-		override protected function updateTime(time : Number) : void
-		{
-			super.updateTime(time);
-			inputA.update(time);
-			inputB.update(time);
-			
-			_skeletonPoseDirty = true;
-		}
-		
-		override protected function updateRootDelta() : void
-		{
-			_rootDeltaDirty = false;
-			
-			var deltA : Vector3D = inputA.rootDelta;
-			var deltB : Vector3D = inputB.rootDelta;
-			
-			_rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
-			_rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
-			_rootDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
-		}
-		
 
 		public function get blendWeight() : Number
 		{
@@ -100,5 +78,28 @@ package away3d.animators.nodes
 				tr.z = p1.z + _blendWeight*(p2.z - p1.z);
 			}
 		}
+		
+		override protected function updateTime(time : Number) : void
+		{
+			super.updateTime(time);
+			
+			inputA.update(time);
+			inputB.update(time);
+			
+			_skeletonPoseDirty = true;
+		}
+		
+		override protected function updateRootDelta() : void
+		{
+			_rootDeltaDirty = false;
+			
+			var deltA : Vector3D = inputA.rootDelta;
+			var deltB : Vector3D = inputB.rootDelta;
+			
+			_rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
+			_rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
+			_rootDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
+		}
+		
 	}
 }

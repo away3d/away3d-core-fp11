@@ -1,9 +1,8 @@
-package away3d.animators.skeleton
+package away3d.animators.data
 {
-	import away3d.core.math.Quaternion;
+	import away3d.core.math.*;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	/**
 	 * JointPose contains transformation data for a skeleton joint, used for skeleton animation.

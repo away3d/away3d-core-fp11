@@ -2,13 +2,13 @@
 package away3d.loaders.parsers
 {
 	import away3d.animators.SkeletonAnimationSet;
-	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.animators.SkeletonAnimationState;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.arcane;
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.SkeletonJoint;
-	import away3d.animators.skeleton.SkeletonPose;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SkinnedSubGeometry;
@@ -16,21 +16,21 @@ package away3d.loaders.parsers
 	import away3d.entities.Mesh;
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.materials.TextureMaterial;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DBase;
 	import away3d.materials.ColorMaterial;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.TextureUtils;
-	
 	import flash.display.BitmapData;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
+	
 	
 	use namespace arcane;
 	
