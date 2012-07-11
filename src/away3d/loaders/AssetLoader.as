@@ -468,7 +468,7 @@ package away3d.loaders
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
@@ -488,7 +488,7 @@ package away3d.loaders
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_LIBRARY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);

@@ -1,16 +1,18 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.data.SkeletonAnimationSequence;
+	import away3d.animators.nodes.UVClipNode;
+	import flash.display.Sprite;
+	import away3d.animators.UVAnimationState;
 	import away3d.animators.data.UVAnimationFrame;
-	import away3d.animators.data.UVAnimationSequence;
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.SkeletonJoint;
-	import away3d.animators.skeleton.SkeletonPose;
+	import away3d.animators.SkeletonAnimationState;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.IAsset;
@@ -22,13 +24,12 @@ package away3d.loaders.parsers
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
-	
-	import flash.display.Sprite;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
+	
 	
 	use namespace arcane;
 	
@@ -298,9 +299,7 @@ package away3d.loaders.parsers
 			_blocks[_cur_block_id].id = _cur_block_id;
 		}
 		
-		
-		
-		private function parseUVAnimation(blockLength : uint) : UVAnimationSequence
+		private function parseUVAnimation(blockLength : uint) : UVAnimationState
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -309,14 +308,16 @@ package away3d.loaders.parsers
 			var frames_parsed : uint;
 			var props : AWDProperties;
 			var dummy : Sprite;
-			var seq : UVAnimationSequence;
+			var state : UVAnimationState;
+			var clip : UVClipNode;
 			
 			name = parseVarStr();
 			num_frames = _body.readUnsignedShort();
 			
 			props = parseProperties(null);
 			
-			seq = new UVAnimationSequence(name);
+			clip = new UVClipNode();
+			state = new UVAnimationState(clip);
 			
 			frames_parsed = 0;
 			dummy = new Sprite();
@@ -333,7 +334,7 @@ package away3d.loaders.parsers
 				frame_dur = _body.readUnsignedShort();
 				
 				frame = new UVAnimationFrame(dummy.x*0.01, dummy.y*0.01, dummy.scaleX/100, dummy.scaleY/100, dummy.rotation);
-				seq.addFrame(frame, frame_dur);
+				clip.addFrame(frame, frame_dur);
 				
 				frames_parsed++;
 			}
@@ -341,11 +342,11 @@ package away3d.loaders.parsers
 			// Ignore for now
 			parseUserAttributes();
 			
-			finalizeAsset(seq, name);
+			finalizeAsset(clip, name);
+			finalizeAsset(state, name);
 			
-			return seq;
+			return state;
 		}
-		
 		
 		private function parseMaterial(blockLength : uint) : MaterialBase
 		{
@@ -574,7 +575,7 @@ package away3d.loaders.parsers
 			return pose;
 		}
 		
-		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationSequence
+		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationState
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -584,10 +585,10 @@ package away3d.loaders.parsers
 			// TODO: not used
 			//var frame_rate : uint;
 			var frame_dur : Number;
-			var animation : SkeletonAnimationSequence;
 			
 			name = parseVarStr();
-			animation = new SkeletonAnimationSequence(name);
+			var clip : SkeletonClipNode = new SkeletonClipNode();
+			var state : SkeletonAnimationState = new SkeletonAnimationState(clip);
 			
 			num_frames = _body.readUnsignedShort();
 			
@@ -601,7 +602,7 @@ package away3d.loaders.parsers
 				//TODO: Check for null?
 				pose_addr = _body.readUnsignedInt();
 				frame_dur = _body.readUnsignedShort();
-				animation.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
+				clip.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
 				
 				frames_parsed++;
 			}
@@ -609,9 +610,9 @@ package away3d.loaders.parsers
 			// Ignore attributes for now
 			parseUserAttributes();
 			
-			finalizeAsset(animation, name);
+			finalizeAsset(state, name);
 			
-			return animation;
+			return state;
 		}
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D

@@ -1,5 +1,6 @@
 ﻿package away3d.materials.passes
 {
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -38,9 +39,9 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode() : String
+		arcane override function getVertexCode(code:String) : String
 		{
-			var code : String =
+			code =
 					"m44 vt0, va0, vc8				\n" + // transform Q0 to eye space
 							"m44 vt1, va1, vc8				\n" + // transform Q1 to eye space
 

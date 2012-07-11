@@ -1,15 +1,13 @@
 package away3d.animators
 {
 	import away3d.arcane;
-	import away3d.errors.AbstractMethodError;
-	import away3d.events.AnimatorEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
+	import away3d.entities.*;
+	import away3d.errors.*;
+	import away3d.events.*;
 
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.utils.getTimer;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.utils.*;
 
 	use namespace arcane;
 
@@ -19,49 +17,55 @@ package away3d.animators
 	 * @see away3d.core.animation.AnimationStateBase
 	 *
 	 */
-	public class AnimatorBase extends NamedAssetBase implements IAsset
+	public class AnimatorBase extends EventDispatcher
 	{
 		private var _broadcaster : Sprite = new Sprite();
+		private var _animationSet : IAnimationSet;
 		private var _isPlaying : Boolean;
 		private var _startEvent : AnimatorEvent;
 		private var _stopEvent : AnimatorEvent;
 		private var _time : int;
-		private var _timeScale : Number = 1;
-
-		public function AnimatorBase()
+		private var _playbackSpeed : Number = 1;
+		
+		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
+		
+		public function get animationSet() : IAnimationSet
 		{
+			return _animationSet;
+		}
+		
+		public function AnimatorBase(animationSet:IAnimationSet)
+		{
+			_animationSet = animationSet;
 //			start();
 		}
+		
+		public function addOwner(mesh : Mesh) : void
+		{
+			_owners.push(mesh);
+		}
 
+		public function removeOwner(mesh : Mesh) : void
+		{
+			_owners.splice(_owners.indexOf(mesh), 1);
+		}
+		
 		/**
 		 * The amount by which passed time should be scaled. Used to slow down or speed up animations.
 		 */
-		public function get timeScale() : Number
+		public function get playbackSpeed() : Number
 		{
-			return _timeScale;
+			return _playbackSpeed;
 		}
 
-		public function set timeScale(value : Number) : void
+		public function set playbackSpeed(value : Number) : void
 		{
-			_timeScale = value;
-		}
-		
-		public function get assetType() : String
-		{
-			return AssetType.ANIMATOR;
+			_playbackSpeed = value;
 		}
 
 		public function stop() : void
 		{
 			notifyStop();
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function dispose() : void
-		{
-			// To be overridden by sub-classes that have something to dispose
 		}
 
 		private function notifyStart() : void
@@ -107,8 +111,7 @@ package away3d.animators
 		{
 			throw new AbstractMethodError();
 		}
-
-
+		
 		protected function start() : void
 		{
 			_time = getTimer();
@@ -123,7 +126,7 @@ package away3d.animators
 		{
 			var time : int = getTimer();
 			var dt : Number = time-_time;
-			updateAnimation(dt, dt*_timeScale);
+			updateAnimation(dt, dt*_playbackSpeed);
 			_time = time;
 		}
 	}

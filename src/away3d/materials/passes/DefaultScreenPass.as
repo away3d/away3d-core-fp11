@@ -139,9 +139,7 @@ package away3d.materials.passes
 		private var _ambientLightR : Number;
 		private var _ambientLightG : Number;
 		private var _ambientLightB : Number;
-
-		private var _animatableAttributes : Array = ["va0"];
-		private var _animationTargetRegisters : Array = ["vt0"];
+		
 		private var _projectedTargetRegister : String;
 
 
@@ -472,11 +470,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode() : String
+		arcane override function getVertexCode(code : String) : String
 		{
 			var normal : String = _animationTargetRegisters.length > 1? _animationTargetRegisters[1] : null;
 			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0], _projectedTargetRegister, normal);
-			_vertexCode = animation.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters) + projectionVertexCode + _vertexCode;
+			_vertexCode = code + projectionVertexCode + _vertexCode;
 			return _vertexCode;
 		}
 

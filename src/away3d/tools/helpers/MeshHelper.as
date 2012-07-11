@@ -179,7 +179,7 @@ package away3d.tools.helpers
 		{
 			if(scaleX == 1 && scaleY == 1 && scaleZ == 1) return;
 
-			if(mesh.animationState){
+			if(mesh.animator){
 				mesh.scaleX = scaleX;
 				mesh.scaleY = scaleY;
 				mesh.scaleZ = scaleZ;

@@ -21,11 +21,6 @@ package away3d.events
 		 */
 		public static const SUB_GEOMETRY_REMOVED : String = "SubGeometryRemoved";
 
-		/**
-		 * Dispatched when the Animation property of the dispatching Geometry was changed.
-		 */
-		public static const ANIMATION_CHANGED : String = "AnimationChanged";
-
 		public static const BOUNDS_INVALID : String = "BoundsInvalid";
 
 		private var _subGeometry : SubGeometry;
