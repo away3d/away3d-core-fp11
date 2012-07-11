@@ -45,12 +45,6 @@
 			this.material = material;
 		}
 		
-		public function bakeTransformations():void
-		{
-			geometry.applyTransformation(transform);
-			transform.identity();
-		}
-		
 		public override function get assetType() : String
 		{
 			return AssetType.MESH;
