@@ -1,42 +1,54 @@
 package away3d.animators.data
 {
-	import away3d.core.math.*;
 	import away3d.library.assets.*;
-
-	import flash.geom.Vector3D;
-
+	
 	/**
-	 * A SkeletonPose is a collection of JointPose objects, determining the pose for an entire skeleton.
-	 * A SkeletonPose and JointPose combination corresponds to a Skeleton and Joint combination. However, there is no
-	 * reference to a Skeleton instance, since several skeletons could be influenced by the same pose (fe: animation
-	 * sequences that can apply to any target with a valid skeleton)
+	 * A collection of pose objects, determining the pose for an entire skeleton.
+	 * The <code>jointPoses</code> vector object corresponds to a skeleton's <code>joints<ccode> vector object, however, there is no
+	 * reference to a skeleton's instance, since several skeletons can be influenced by the same pose (eg: animation
+	 * clips are added to any animator with a valid skeleton)
+	 * 
+	 * @see away3d.animators.data.Skeleton
+	 * @see away3d.animators.data.JointPose
 	 */
 	public class SkeletonPose extends NamedAssetBase implements IAsset
 	{
 		/**
-		 * The joint poses for the skeleton. The JointPoses indices correspond to the target skeleton's joints.
+		 * A flat list of pose objects that comprise the skeleton pose. The pose indices correspond to the target skeleton's joint indices.
+		 * 
+		 * @see away3d.animators.data.Skeleton#joints
 		 */
 		public var jointPoses : Vector.<JointPose>;
-
+		
 		/**
-		 * Creates a new SkeletonPose object.
-		 * @param numJoints The number of joints in the target skeleton.
+		 * The total number of joint poses in the skeleton pose.
+		 */
+		public function get numJointPoses() : uint
+		{
+			return jointPoses.length;
+		}
+		
+		/**
+		 * Creates a new <code>SkeletonPose</code> object.
 		 */
 		public function SkeletonPose()
 		{
 			jointPoses = new Vector.<JointPose>();
 		}
-
-
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function get assetType() : String
 		{
 			return AssetType.SKELETON_POSE;
 		}
-
+		
 		/**
-		 * Returns the JointPose, given the joint name.
-		 * @param jointName is the name of the JointPose to be found.
-		 * @return JointPose
+		 * Returns the joint pose object with the given joint name, otherwise returns a null object.
+		 * 
+		 * @param jointName The name of the joint object whose pose is to be found.
+		 * @return The pose object with the given joint name.
 		 */
 		public function jointPoseFromName(jointName : String) : JointPose
 		{
@@ -48,11 +60,14 @@ package away3d.animators.data
 				return null;
 			}
 		}
-
+		
 		/**
-		 * Returns the joint index, given the joint name. -1 is returned if joint name not found.
-		 * @param jointName is the name of the JointPose to be found.
-		 * @return jointIndex
+		 * Returns the pose index, given the joint name. -1 is returned if the joint name is not found in the pose.
+		 * 
+		 * @param The name of the joint object whose pose is to be found.
+		 * @return The index of the pose object in the jointPoses vector. 
+		 * 
+		 * @see #jointPoses
 		 */
 		public function jointPoseIndexFromName(jointName : String) : int
 		{
@@ -72,17 +87,10 @@ package away3d.animators.data
 
 			return -1;
 		}
-
+		
 		/**
-		 * The amount of joints in the Skeleton
-		 */
-		public function get numJointPoses() : uint
-		{
-			return jointPoses.length;
-		}
-
-		/**
-		 * Clones this SkeletonPose, with all of its component jointPoses.
+		 * Creates a copy of the <code>SkeletonPose</code> object, with a dulpicate of its component joint poses.
+		 * 
 		 * @return SkeletonPose
 		 */
 		public function clone() : SkeletonPose

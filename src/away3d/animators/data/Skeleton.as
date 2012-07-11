@@ -3,21 +3,29 @@ package away3d.animators.data
 	import away3d.library.assets.*;
 
 	/**
-	 * A Skeleton object is a hierarchical grouping of Joint objects that can be used for skeletal animation.
+	 * A Skeleton object is a hierarchical grouping of joint objects that can be used for skeletal animation.
 	 *
-	 * @see away3d.core.animation.skeleton.Joint
+	 * @see away3d.animators.data.SkeletonJoint
 	 */
 	public class Skeleton extends NamedAssetBase implements IAsset
 	{
 		/**
-		 * A flat list of Joint objects that comprise the skeleton. Every joint except for the root has a parentIndex
+		 * A flat list of joint objects that comprise the skeleton. Every joint except for the root has a parentIndex
 		 * property that is an index into this list.
-		 * A child Joint should always have a higher index than its parent.
+		 * A child joint should always have a higher index than its parent.
 		 */
 		public var joints : Vector.<SkeletonJoint>;
 
 		/**
-		 * Creates a new Skeleton object
+		 * The total number of joints in the skeleton.
+		 */
+		public function get numJoints() : uint
+		{
+			return joints.length;
+		}
+
+		/**
+		 * Creates a new <code>Skeleton</code> object
 		 */
 		public function Skeleton()
 		{
@@ -26,9 +34,12 @@ package away3d.animators.data
 		}
 
 		/**
-		 * Returns the SkeletonJoint, given the joint name.
-		 * @param jointName is the name of the SkeletonJoint to be found.
-		 * @return SkeletonJoint 
+		 * Returns the joint object in the skeleton with the given name, otherwise returns a null object.
+		 * 
+		 * @param jointName The name of the joint object to be found.
+		 * @return The joint object with the given name.
+		 * 
+		 * @see #joints
 		 */
 		public function jointFromName(jointName:String):SkeletonJoint
 		{
@@ -44,9 +55,12 @@ package away3d.animators.data
 		}
 
 		/**
-		 * Returns the joint index, given the joint name. -1 is returned if joint name not found.
-		 * @param jointName is the name of the SkeletonJoint to be found.
-		 * @return jointIndex 
+		 * Returns the joint index, given the joint name. -1 is returned if the joint name is not found.
+		 * 
+		 * @param jointName The name of the joint object to be found.
+		 * @return The index of the joint object in the joints vector. 
+		 * 
+		 * @see #joints
 		 */
 		public function jointIndexFromName(jointName:String):int
 		{
@@ -76,16 +90,10 @@ package away3d.animators.data
 		{
 			joints.length = 0;
 		}
-
+		
 		/**
-		 * The amount of joints in the Skeleton
-		 */
-		public function get numJoints() : uint
-		{
-			return joints.length;
-		}
-		
-		
+		 * @inheritDoc
+		*/
 		public function get assetType() : String
 		{
 			return AssetType.SKELETON;
