@@ -21,7 +21,7 @@ package away3d.animators
 	 */
 	public class SkeletonAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _activeNode : SkeletonNodeBase;
+		private var _activeNode : ISkeletonAnimationNode;
 		private var _activeState:SkeletonAnimationState;
 		private var _absoluteTime : Number = 0;
 		
@@ -30,7 +30,6 @@ package away3d.animators
 		private var _globalPropertiesDirty : Boolean;
 		private var _numJoints : uint;
 		private var _bufferFormat : String;
-        private var _blendTree : SkeletonTreeNode;
 		private var _animationStates : Dictionary = new Dictionary();
 		private var _condensedMatrices : Vector.<Number>;
 		
@@ -81,8 +80,6 @@ package away3d.animators
 				_globalMatrices[j++] = 0; _globalMatrices[j++] = 1; _globalMatrices[j++] = 0; _globalMatrices[j++] = 0;
 				_globalMatrices[j++] = 0; _globalMatrices[j++] = 0; _globalMatrices[j++] = 1; _globalMatrices[j++] = 0;
 			}
-			
-			_blendTree = new SkeletonNaryLERPNode();
 		}
 		
 		/**
@@ -101,12 +98,12 @@ package away3d.animators
 				_stateTransition = stateTransition.clone();
 				_stateTransition.blendWeight = 0;
 				_stateTransition.startNode = _activeNode;
-				_stateTransition.endNode = _activeState.rootNode as SkeletonNodeBase;
+				_stateTransition.endNode = _activeState.rootNode as ISkeletonAnimationNode;
 				_stateTransition.startTime = _absoluteTime;
 				_stateTransition.addEventListener(StateTransitionEvent.TRANSITION_COMPLETE, onStateTransitionComplete);
-				_activeNode = _stateTransition.rootNode;
+				_activeNode = _stateTransition.rootNode as ISkeletonAnimationNode;
 			} else {
-				_activeNode = _activeState.rootNode as SkeletonNodeBase;
+				_activeNode = _activeState.rootNode as ISkeletonAnimationNode;
 			}
 			
 			//apply new time to new state and reset
@@ -452,7 +449,7 @@ package away3d.animators
 				stateTransition.removeEventListener(StateTransitionEvent.TRANSITION_COMPLETE, onStateTransitionComplete);
 				//if this is the current active statetransition, revert control to the active state
 				if (_stateTransition == stateTransition) {
-					_activeNode = _activeState.rootNode as SkeletonNodeBase;
+					_activeNode = _activeState.rootNode as ISkeletonAnimationNode;
 					_stateTransition = null;
 				}
 			}

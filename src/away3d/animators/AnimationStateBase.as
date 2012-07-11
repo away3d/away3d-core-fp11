@@ -10,7 +10,7 @@ package away3d.animators
 	public class AnimationStateBase extends NamedAssetBase implements IAsset
 	{
 		private var _looping:Boolean = true;
-		private var _rootNode:AnimationNodeBase;
+		private var _rootNode:IAnimationNode;
 		private var _owner:IAnimationSet;
 		private var _stateName:String;
 		
@@ -29,7 +29,7 @@ package away3d.animators
 			_rootNode.looping = value;
 		}
 		
-		public function get rootNode():AnimationNodeBase
+		public function get rootNode():IAnimationNode
 		{	
 			return _rootNode;
 		}
@@ -39,7 +39,7 @@ package away3d.animators
 			return _stateName;
 		}
 		
-		public function AnimationStateBase(rootNode:AnimationNodeBase)
+		public function AnimationStateBase(rootNode:IAnimationNode)
 		{
 			_rootNode = rootNode;
 			_rootNode.addEventListener(AnimationStateEvent.PLAYBACK_COMPLETE, onAnimationStateEvent);

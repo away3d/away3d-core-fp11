@@ -11,7 +11,7 @@ package away3d.animators
 		
 		function set looping(value:Boolean):void;
 		
-		function get rootNode():AnimationNodeBase;
+		function get rootNode():IAnimationNode;
 		
 		function get stateName():String;
 		

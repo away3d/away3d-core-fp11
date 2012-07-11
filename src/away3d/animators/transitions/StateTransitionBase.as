@@ -39,12 +39,12 @@ package away3d.animators.transitions
 			_rootNode.blendWeight = value;
 		}
 		
-		public function get startNode():SkeletonNodeBase
+		public function get startNode():ISkeletonAnimationNode
 		{
 			return _rootNode.inputA;
 		}
 		
-		public function set startNode(value:SkeletonNodeBase):void
+		public function set startNode(value:ISkeletonAnimationNode):void
 		{
 			if (_rootNode.inputA == value)
 				return;
@@ -53,12 +53,12 @@ package away3d.animators.transitions
 		}
 		
 		
-		public function get endNode():SkeletonNodeBase
+		public function get endNode():ISkeletonAnimationNode
 		{
 			return _rootNode.inputB;
 		}
 		
-		public function set endNode(value:SkeletonNodeBase):void
+		public function set endNode(value:ISkeletonAnimationNode):void
 		{
 			if (_rootNode.inputB == value)
 				return;

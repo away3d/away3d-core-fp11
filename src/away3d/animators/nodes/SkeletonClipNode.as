@@ -1,65 +1,31 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.AnimationStateBase;
-	import away3d.events.AnimationStateEvent;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.JointPose;
-	import flash.geom.Vector3D;
-	import away3d.animators.skeleton.SkeletonPose;
-	import away3d.animators.nodes.SkeletonNodeBase;
+	import away3d.animators.skeleton.*;
+	
+	import flash.geom.*;
 
 	/**
 	 * @author robbateman
 	 */
-	public class SkeletonClipNode extends SkeletonNodeBase
+	public class SkeletonClipNode extends AnimationClipNodeBase implements ISkeletonAnimationNode
 	{
-		private var _timeDir:Number;
-		private var _totalDelta : Vector3D = new Vector3D();
 		private var _frames : Vector.<SkeletonPose> = new Vector.<SkeletonPose>();
-		private var _framesDirty : Boolean;
-		private var _numFrames : uint = 0;
-		private var _lastFrame : uint;
-		private var _currentFrame : uint;
-		private var _nextFrame : uint;
 		private var _rootPos : Vector3D = new Vector3D();
-		private var _durations : Vector.<uint> = new Vector.<uint>();
-		private var _fixedFrameRate:Boolean = true;
 		private var _currentPose : SkeletonPose;
 		private var _nextPose : SkeletonPose;
-		private var _blendWeight : Number;
-		private var _stitchFinalFrame:Boolean = false;
-		private var _stitchDirty:Boolean = true;
-		private var _animationStatePlaybackComplete:AnimationStateEvent;
+		
+		private var _skeletonPose : SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty : Boolean;
 		
 		/**
 		 * 
 		 */
 		public var highQuality:Boolean = false;
 		
-		public function get stitchFinalFrame() : Boolean
-		{
-			return _stitchFinalFrame;
-		}
-		
-		public function set stitchFinalFrame(value:Boolean):void
-		{
-			if (_stitchFinalFrame == value)
-				return;
-			
-			_stitchFinalFrame = value;
-			
-			_stitchDirty = true;
-			_framesDirty = true;
-		}
 		
 		public function get frames():Vector.<SkeletonPose>
 		{
 			return _frames;
-		}
-		
-		public function get durations():Vector.<uint>
-		{
-			return _durations;
 		}
 		
 		private var _oldFrame:uint;
@@ -87,26 +53,20 @@ package away3d.animators.nodes
 		}
 		
 		
-		public function get blendWeight() : Number
-		{
-			if (_framesDirty)
-				updateFrames();
-			
-			return _blendWeight;
-		}
 		
 		public function SkeletonClipNode()
 		{
 		}
 		
-		override public function reset(time:Number):void
+		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
 		{
-			super.reset(time);
+			if (_skeletonPoseDirty)
+				updateSkeletonPose(skeleton);
 			
-			updateRootDelta();	
+			return _skeletonPose;
 		}
 		
-		public function addFrame(skeletonPose : SkeletonPose, duration : uint) : void
+		public function addFrame(skeletonPose : SkeletonPose, duration : Number) : void
 		{
 			_frames.push(skeletonPose);
 			_durations.push(duration);
@@ -118,18 +78,17 @@ package away3d.animators.nodes
 		
 		override protected function updateTime(time:Number):void
 		{
-			_timeDir = time - _time;
-			
 			super.updateTime(time);
 			
 			_framesDirty = true;
+			_skeletonPoseDirty = true;
 		}
 		
 		
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateSkeletonPose(skeleton:Skeleton) : void
+		protected function updateSkeletonPose(skeleton:Skeleton) : void
 		{
 			_skeletonPoseDirty = false;
 			
@@ -218,56 +177,9 @@ package away3d.animators.nodes
 			_oldFrame = _nextFrame;
 		}
 		
-		override protected function updateLooping():void
+		override protected function updateFrames() : void
 		{
-			super.updateLooping();
-			
-			_stitchDirty = true;
-		}
-		
-		private function updateFrames() : void
-		{
-			_framesDirty = false;
-			
-			if (_stitchDirty)
-				updateStitch();
-			
-			var dur : uint = 0, frameTime : uint;
-			var time : Number = _time;
-			
-			if ((time > _totalDuration || time < 0) && _looping) {
-				time %= _totalDuration;
-				if (time < 0) time += _totalDuration;
-			}
-			
-			if (!_looping && time >= _totalDuration) {
-				notifyPlaybackComplete();
-				_currentFrame = _lastFrame;
-				_nextFrame = _lastFrame;
-				_blendWeight = 0;
-			}
-			else if (_fixedFrameRate) {
-				var t : Number = time/_totalDuration * _lastFrame;
-				_currentFrame = t;
-				_blendWeight = t - _currentFrame;
-				_nextFrame = _currentFrame + 1;
-			}
-			else {
-				_currentFrame = 0;
-				_nextFrame = 0;
-				do {
-					frameTime = dur;
-					dur += _durations[_nextFrame];
-					_currentFrame = _nextFrame++;
-				} while (time > dur);
-				
-				if (_currentFrame == _lastFrame) {
-					_currentFrame = 0;
-					_nextFrame = 1;
-				}
-				
-				_blendWeight = (time - frameTime) / _durations[_currentFrame];
-			}
+			super.updateFrames();
 			
 			_currentPose = _frames[_currentFrame];
 			
@@ -277,16 +189,9 @@ package away3d.animators.nodes
 				_nextPose = _frames[_nextFrame];
 		}
 		
-		private function updateStitch():void
+		override protected function updateStitch():void
 		{
-			_stitchDirty = false;
-			
-			_lastFrame = (_stitchFinalFrame)? _numFrames : _numFrames - 1;
-			
-			_totalDuration = 0;
-			_totalDelta.x = 0;
-			_totalDelta.y = 0;
-			_totalDelta.z = 0;
+			super.updateStitch();
 			
 			var i:uint = _numFrames - 1;
 			var p1 : Vector3D, p2 : Vector3D, delta : Vector3D;
@@ -309,11 +214,6 @@ package away3d.animators.nodes
 				_totalDelta.y += delta.y;
 				_totalDelta.z += delta.z;
 			}
-		}
-		
-		private function notifyPlaybackComplete():void
-		{
-			dispatchEvent(_animationStatePlaybackComplete || (_animationStatePlaybackComplete = new AnimationStateEvent(AnimationStateEvent.PLAYBACK_COMPLETE, null, this)));
 		}
 	}
 }

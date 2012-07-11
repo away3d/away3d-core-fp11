@@ -2,7 +2,6 @@ package away3d.tools.serialize
 {
 	import away3d.animators.IAnimator;
 	import away3d.materials.lightpickers.StaticLightPicker;
-	import away3d.animators.data.SkeletonAnimationSequence;
 	import away3d.animators.skeleton.JointPose;
 	import away3d.animators.skeleton.Skeleton;
 	import away3d.animators.skeleton.SkeletonJoint;

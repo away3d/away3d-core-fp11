@@ -429,6 +429,7 @@ package away3d.loaders.parsers
 				var clip : VertexClipNode = _clipNodes[name];
 				if (!clip) {
 					clip = new VertexClipNode();
+					clip.stitchFinalFrame = true;
 					var state : VertexAnimationState = new VertexAnimationState(clip);
 					
 					_animationSet.addState(name, state);

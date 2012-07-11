@@ -6,11 +6,14 @@ package away3d.animators.nodes
 	import away3d.animators.skeleton.Skeleton;
 	import flash.geom.Vector3D;
 
-	public class SkeletonBinaryLERPNode extends SkeletonNodeBase
+	public class SkeletonBinaryLERPNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
-		public var inputA : SkeletonNodeBase;
-		public var inputB : SkeletonNodeBase;
+		public var inputA : ISkeletonAnimationNode;
+		public var inputB : ISkeletonAnimationNode;
+		
 		private var _blendWeight : Number;
+		private var _skeletonPose : SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty : Boolean;
 		
 		public function SkeletonBinaryLERPNode()
 		{
@@ -24,11 +27,21 @@ package away3d.animators.nodes
 			inputB.reset(time);
 		}
 		
+		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
+		{
+			if (_skeletonPoseDirty)
+				updateSkeletonPose(skeleton);
+			
+			return _skeletonPose;
+		}
+		
 		override protected function updateTime(time : Number) : void
 		{
 			super.updateTime(time);
 			inputA.update(time);
 			inputB.update(time);
+			
+			_skeletonPoseDirty = true;
 		}
 		
 		override protected function updateRootDelta() : void
@@ -57,7 +70,7 @@ package away3d.animators.nodes
 			_skeletonPoseDirty = true;
 		}
 		
-		override protected function updateSkeletonPose(skeleton : Skeleton) : void
+		protected function updateSkeletonPose(skeleton : Skeleton) : void
 		{
 			_skeletonPoseDirty = false;
 

@@ -19,8 +19,6 @@ package away3d.animators.nodes
 		protected var _rootDeltaDirty : Boolean;
 		protected var _looping:Boolean = true;
 		
-
-		
 		public function get looping():Boolean
 		{	
 			return _looping;
@@ -53,6 +51,8 @@ package away3d.animators.nodes
 				_startTime = time;
 			
 			update(time);
+			
+			updateRootDelta();
 		}
 		
 		public function update(time:Number):void
@@ -95,7 +95,7 @@ package away3d.animators.nodes
 		
 		protected function updateLooping():void
 		{
-			updateTime(_time - _startTime);
+			updateTime(_time);
 		}
 	}
 }

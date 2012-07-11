@@ -1,21 +1,18 @@
 package away3d.animators.nodes
 {
+	import flash.geom.Vector3D;
 	import away3d.core.base.*;
 	import away3d.library.assets.*;
 
 	/**
 	 * @author robbateman
 	 */
-	public class VertexClipNode extends AnimationNodeBase
+	public class VertexClipNode extends AnimationClipNodeBase implements IVertexAnimationNode
 	{
-		private var _totalDuration : uint = 0;
-		private var _framesDirty : Boolean;
-		private var _frames : Vector.<Geometry> = new Vector.<Geometry>();		
-		private var _durations : Vector.<uint> = new Vector.<uint>();
-		private var _fixedFrameRate:Boolean;
+		private var _frames : Vector.<Geometry> = new Vector.<Geometry>();
+		private var _translations : Vector.<Vector3D> = new Vector.<Vector3D>();
 		private var _currentGeometry : Geometry;
 		private var _nextGeometry : Geometry;
-		private var _blendWeight : Number;
 		
 		public function get currentGeometry() : Geometry
 		{
@@ -34,24 +31,19 @@ package away3d.animators.nodes
 			return _nextGeometry;
 		}
 		
-		
-		public function get blendWeight() : Number
-		{
-			if (_framesDirty)
-				updateFrames();
-			
-			return _blendWeight;
-		}
-		
 		public function VertexClipNode()
 		{
 		}
 		
-		public function addFrame(geometry : Geometry, duration : uint) : void
+		public function addFrame(geometry : Geometry, duration : Number, translation:Vector3D = null) : void
 		{
-			_totalDuration += duration;
 			_frames.push(geometry);
 			_durations.push(duration);
+			_translations.push(translation || new Vector3D());
+			
+			_numFrames = _durations.length;
+			
+			_stitchDirty = true;
 		}
 		
 		override protected function updateTime(time:Number):void
@@ -61,47 +53,43 @@ package away3d.animators.nodes
 			_framesDirty = true;
 		}
 
-		private function updateFrames() : void
+		override protected function updateFrames() : void
 		{
-			var dur : uint, frameTime : uint, currentFrame : uint, nextFrame : uint;
-			var numFrames : int = _durations.length;
+			super.updateFrames();
 			
-			if ((_time > _totalDuration || _time < 0) && looping) {
-				_time %= _totalDuration;
-				if (_time < 0) _time += _totalDuration;
+			_currentGeometry = _frames[_currentFrame];
+			
+			if (_looping && _nextFrame >= _lastFrame)
+				_nextGeometry = _frames[0];
+			else
+				_nextGeometry = _frames[_nextFrame];
+		}
+		
+		override protected function updateStitch():void
+		{
+			super.updateStitch();
+			
+			var i:uint = _numFrames - 1;
+			var p1 : Vector3D, p2 : Vector3D, delta : Vector3D;
+			while (i--) {
+				_totalDuration += _durations[i];
+				p1 = _translations[i];
+				p2 = _translations[i+1];
+				delta = p2.subtract(p1);
+				_totalDelta.x += delta.x;
+				_totalDelta.y += delta.y;
+				_totalDelta.z += delta.z;
 			}
 			
-			var lastFrame : uint = numFrames - 1;
-			
-			if (!looping && _time > _totalDuration - _durations[lastFrame]) {
-				//_activeSequence.notifyPlaybackComplete();
-				currentFrame = lastFrame;
-				nextFrame = lastFrame;
-				_blendWeight = 0;
+			if (_stitchFinalFrame || !_looping) {
+				_totalDuration += _durations[_numFrames - 1];
+				p1 = _translations[0];
+				p2 = _translations[1];
+				delta = p2.subtract(p1);
+				_totalDelta.x += delta.x;
+				_totalDelta.y += delta.y;
+				_totalDelta.z += delta.z;
 			}
-			else if (_fixedFrameRate) {
-				var t : Number = _time/_totalDuration * numFrames;
-				currentFrame = t;
-				nextFrame = currentFrame + 1;
-				_blendWeight = t - currentFrame;
-				if (currentFrame == numFrames) currentFrame = 0;
-				if (nextFrame >= numFrames) nextFrame -= numFrames;
-			}
-			else {
-				do {
-					frameTime = dur;
-					dur += _durations[currentFrame];
-					currentFrame = nextFrame;
-					if (++nextFrame == numFrames) {
-						nextFrame = 0;
-					}
-				} while (_time > dur);
-				
-				_blendWeight = (_time - frameTime) / _durations[currentFrame];
-			}
-			
-			_currentGeometry = _frames[currentFrame];
-			_nextGeometry = _frames[nextFrame];
 		}
 	}
 }

@@ -13,7 +13,7 @@ package away3d.animators
 	{
 		private var _skeletonAnimationSet:SkeletonAnimationSet;
 		
-		public function SkeletonAnimationState(rootNode:SkeletonNodeBase)
+		public function SkeletonAnimationState(rootNode:ISkeletonAnimationNode)
 		{
 			super(rootNode);
 		}
