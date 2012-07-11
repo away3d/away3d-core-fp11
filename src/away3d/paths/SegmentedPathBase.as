@@ -104,6 +104,22 @@ package away3d.paths
 			_segments = null;
 		}
 
+		public function getPointOnCurve(t : Number, target : Vector3D = null) : Vector3D
+		{
+			var numSegments : int = _segments.length;
+			t *= numSegments;
+			var segment : int = int(t);
+
+			if (segment == numSegments) {
+				segment = numSegments-1;
+				t = 1;
+			}
+			else
+				t -= segment;
+
+			return _segments[segment].getPointOnSegment(t, target);
+		}
+
 		public function getPointsOnCurvePerSegment(subdivision:uint):Vector.<Vector.<Vector3D>>
 		{
 			var points:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();

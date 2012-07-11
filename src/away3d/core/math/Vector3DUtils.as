@@ -204,7 +204,7 @@ package away3d.core.math
 		public static function subdivide(startVal : Vector3D, endVal : Vector3D, numSegments : int) : Vector.<Vector3D>
 		{
 			var points : Vector.<Vector3D> = new Vector.<Vector3D>();
-			var numPoints : int;
+			var numPoints : int = 0;
 			var stepx : Number = (endVal.x - startVal.x) / numSegments;
 			var stepy : Number = (endVal.y - startVal.y) / numSegments;
 			var stepz : Number = (endVal.z - startVal.z) / numSegments;

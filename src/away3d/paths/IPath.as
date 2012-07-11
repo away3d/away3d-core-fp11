@@ -53,9 +53,17 @@ package away3d.paths
 		 *
 		 * @param numSegments The amount of segments to split the sampling in. The amount of points returned is numSegments + 1
 		 *
-		 * TODO: is this really even necessary? We should be able to simply call getPointOnCurve(t) instead
+		 * TODO: is this really even necessary? We should be able to simply call getPointOnCurve(t) instead, oblivious of segments
 		 */
 		[Deprecated]
 		function getPointsOnCurvePerSegment(numSegments : uint) : Vector.<Vector.<Vector3D>>;
+
+		/**
+		 * Gets a point on the curve
+		 * @param t The phase for which to get the point. A number between 0 and 1.
+		 * @param target An optional parameter to store the calculation, to avoid creating a new Vector3D object
+		 * @return The point on the curve for the given phase
+		 */
+		function getPointOnCurve(t : Number, target : Vector3D = null) : Vector3D;
 	}
 }
