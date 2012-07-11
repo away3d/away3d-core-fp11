@@ -9,11 +9,6 @@ package away3d.paths
 		private var _pointsPerSegment:uint;
 		protected var _segments:Vector.<IPathSegment>;
 
-		/**
-		 * The worldAxis of reference
-		 */
-		protected var _worldAxis:Vector3D = new Vector3D(0,1,0);
-
 		public function SegmentedPathBase(pointsPerSegment:uint, data:Vector.<Vector3D> = null)
 		{
 			_pointsPerSegment = pointsPerSegment;
@@ -55,15 +50,6 @@ package away3d.paths
 		public function get segments():Vector.<IPathSegment>
 		{
 			return _segments;
-		}
-
-		public function get worldAxis():Vector3D
-		{
-			return _worldAxis;
-		}
-		public function set worldAxis(value:Vector3D):void
-		{
-			_worldAxis = value;
 		}
 
 		/**
@@ -116,10 +102,9 @@ package away3d.paths
 				_segments[i].dispose();
 
 			_segments = null;
-			_worldAxis = null;
 		}
 
-		public function getPointsOnCurve(subdivision:uint):Vector.<Vector.<Vector3D>>
+		public function getPointsOnCurvePerSegment(subdivision:uint):Vector.<Vector.<Vector3D>>
 		{
 			var points:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
 

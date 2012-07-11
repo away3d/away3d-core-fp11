@@ -29,7 +29,7 @@ package away3d.animators
 		private var _bCycle:Boolean;
 		private var _lastSegment:uint = 0;
 		private var _rot:Vector3D;
-		private var _worldAxis:Vector3D;
+		private var _upAxis:Vector3D = new Vector3D(0, 1, 0);
 		private var _basePosition:Vector3D = new Vector3D(0, 0, 0);
 
 		/**
@@ -48,7 +48,6 @@ package away3d.animators
 			_time = _lastTime = 0;
 
 			_path = path;
-			if (_path) _worldAxis = _path.worldAxis;
 
 			_target = target;
 			_alignToPath = alignToPath;
@@ -59,7 +58,16 @@ package away3d.animators
 			this.rotations = rotations;
 
 			if (_lookAtTarget && _alignToPath) _alignToPath = false;
+		}
 
+		public function get upAxis() : Vector3D
+		{
+			return _upAxis;
+		}
+
+		public function set upAxis(value : Vector3D) : void
+		{
+			_upAxis = value;
 		}
 
 		/**
@@ -67,7 +75,7 @@ package away3d.animators
 		 */
 		public function setOffset(x:Number = 0, y:Number = 0, z:Number = 0):void
 		{
-			if (!_offset) _offset = new Vector3D();
+			_offset ||= new Vector3D();
 
 			_offset.x = x;
 			_offset.y = y;
@@ -137,12 +145,12 @@ package away3d.animators
 
 					}
 
-					_worldAxis.x = 0;
-					_worldAxis.y = 1;
-					_worldAxis.z = 0;
-					_worldAxis = PathUtils.rotatePoint(_worldAxis, _rot);
+					_upAxis.x = 0;
+					_upAxis.y = 1;
+					_upAxis.z = 0;
+					_upAxis = PathUtils.rotatePoint(_upAxis, _rot);
 
-					_target.lookAt(_basePosition, _worldAxis);
+					_target.lookAt(_basePosition, _upAxis);
 
 					rotate = true;
 
@@ -235,10 +243,9 @@ package away3d.animators
 		 * defines the path to follow
 		 * @see Path
 		 */
-		public function set path(p:IPath):void
+		public function set path(value:IPath):void
 		{
-			_path = p;
-			_worldAxis = _path.worldAxis;
+			_path = value;
 		}
 
 		public function get path():IPath
@@ -269,7 +276,7 @@ package away3d.animators
 		public function getTimeSegment(t:Number = NaN):Number
 		{
 			t = (isNaN(t)) ? _time : t;
-			return Math.floor(path.numSegments*t);
+			return Math.floor(_path.numSegments*t);
 		}
 
 		/**
@@ -311,9 +318,9 @@ package away3d.animators
 		/**
 		 * sets an optional Vector.&lt;Vector3D&gt; of rotations. if the object3d is animated along a PathExtrude object, use the very same vector to follow the "curves".
 		 */
-		public function set rotations(vRot:Vector.<Vector3D>):void
+		public function set rotations(value:Vector.<Vector3D>):void
 		{
-			_rotations = vRot;
+			_rotations = value;
 
 			if (_rotations && !_rot){
 				_rot = new Vector3D();

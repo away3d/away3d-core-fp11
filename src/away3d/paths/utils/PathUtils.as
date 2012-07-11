@@ -1,5 +1,7 @@
 package away3d.paths.utils
 {
+	import away3d.core.math.MathConsts;
+
 	import flash.geom.Vector3D;
 
 	/**
@@ -41,7 +43,7 @@ package away3d.paths.utils
 				var x1 : Number;
 				var y1 : Number;
 
-				var rad : Number = Math.PI / 180;
+				var rad : Number = MathConsts.DEGREES_TO_RADIANS;
 				var rotx : Number = rotation.x * rad;
 				var roty : Number = rotation.y * rad;
 				var rotz : Number = rotation.z * rad;
