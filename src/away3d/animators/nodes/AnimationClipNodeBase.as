@@ -11,7 +11,6 @@ package away3d.animators.nodes
 	public class AnimationClipNodeBase extends AnimationNodeBase implements IAnimationNode
 	{
 		private var _animationStatePlaybackComplete:AnimationStateEvent;
-		private var _fixedFrameRate:Boolean = true;
 		
 		protected var _stitchDirty:Boolean = true;
 		protected var _stitchFinalFrame:Boolean = false;
@@ -23,6 +22,8 @@ package away3d.animators.nodes
 		protected var _nextFrame : uint;
 		protected var _durations : Vector.<uint> = new Vector.<uint>();
 		protected var _totalDelta : Vector3D = new Vector3D();
+		
+		public var fixedFrameRate:Boolean = true;
 		
 		public function get stitchFinalFrame() : Boolean
 		{
@@ -86,7 +87,7 @@ package away3d.animators.nodes
 				_nextFrame = _lastFrame;
 				_blendWeight = 0;
 			}
-			else if (_fixedFrameRate) {
+			else if (fixedFrameRate) {
 				var t : Number = time/_totalDuration * _lastFrame;
 				_currentFrame = t;
 				_blendWeight = t - _currentFrame;
