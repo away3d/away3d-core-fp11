@@ -31,6 +31,11 @@ package away3d.animators.nodes
 			return _nextGeometry;
 		}
 		
+		public function get frames():Vector.<Geometry>
+		{
+			return _frames;
+		}
+		
 		public function VertexClipNode()
 		{
 		}

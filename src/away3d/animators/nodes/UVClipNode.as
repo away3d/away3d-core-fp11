@@ -28,6 +28,11 @@ package away3d.animators.nodes
 			return _nextUVFrame;
 		}
 		
+		public function get frames():Vector.<UVAnimationFrame>
+		{
+			return _frames;
+		}
+		
 		public function UVClipNode()
 		{
 		}
