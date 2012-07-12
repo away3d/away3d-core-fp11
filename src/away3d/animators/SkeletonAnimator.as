@@ -74,6 +74,21 @@ package away3d.animators
 		}
 		
 		/**
+		 * Offers the option of enabling GPU accelerated animation on skeletons larger than 32 joints
+		 * by condensing the number of joint index values required per mesh. Only applicable to
+		 * skeleton animations that utilise more than one mesh object. Defaults to false.
+		 */
+		public function get useCondensedIndices() : Boolean
+		{
+			return _useCondensedIndices;
+		}
+
+		public function set useCondensedIndices(value : Boolean) : void
+		{
+			_useCondensedIndices = value;
+		}
+		
+		/**
 		 * Creates a new <code>SkeletonAnimator</code> object.
 		 * 
 		 * @param skeletonAnimationSet The animation data set containing the skeleton animation states used by the animator.
