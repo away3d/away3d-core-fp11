@@ -16,6 +16,13 @@ package away3d.animators
 		function get states():Vector.<IAnimationState>;
 		
 		/**
+		 * Check to determine whether a state is registered in the animation set under the given name.
+		 * 
+		 * @param stateName The name of the animation state object to be checked.
+		 */
+		function hasState(stateName:String):Boolean;
+		
+		/**
 		 * Retrieves the animation state object registered in the animation data set under the given name.
 		 * 
 		 * @param stateName The name of the animation state object to be retrieved.

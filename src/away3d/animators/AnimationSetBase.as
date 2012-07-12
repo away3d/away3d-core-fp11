@@ -80,6 +80,16 @@ package away3d.animators
 		}
 		
 		/**
+		 * Check to determine whether a state is registered in the animation set under the given name.
+		 * 
+		 * @param stateName The name of the animation state object to be checked.
+		 */
+		public function hasState(stateName:String):Boolean
+		{
+			return _stateDictionary[stateName] != null;
+		}
+		
+		/**
 		 * Retrieves the animation state object registered in the animation data set under the given name.
 		 * 
 		 * @param stateName The name of the animation state object to be retrieved.
@@ -88,6 +98,7 @@ package away3d.animators
 		{
 			return _stateDictionary[stateName];
 		}
+		
 		
 		/**
 		 * Adds an animation state object to the aniamtion data set under the given name.

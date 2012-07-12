@@ -13,8 +13,8 @@
     */
     public class LookAtController extends ControllerBase
     {
-        private var _lookAtObject:ObjectContainer3D;
-        private var _lookAtPosition:Vector3D;
+        protected var _lookAtPosition:Vector3D;
+        protected var _lookAtObject:ObjectContainer3D;
 		protected var _origin:Vector3D = new Vector3D(0.0,0.0,0.0);
 
 		/**
