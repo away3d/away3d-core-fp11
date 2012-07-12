@@ -1,5 +1,6 @@
 ﻿package away3d.entities
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.containers.*;
@@ -29,13 +30,13 @@
 		 * @param material The material with which to render the Mesh.
 		 * @param geometry The geometry used by the mesh that provides it with its shape.
 		 */
-		public function Mesh(geometry : Geometry, material : MaterialBase)
+		public function Mesh(geometry : Geometry, material : MaterialBase = null)
 		{
 			super();
 			_subMeshes = new Vector.<SubMesh>();
 
-			this.geometry = geometry || new Geometry();
-			this.material = material;
+			this.geometry = geometry;
+			this.material = material || DefaultMaterialManager.getDefaultMaterial(this);
 		}
 		
 		public function bakeTransformations():void
