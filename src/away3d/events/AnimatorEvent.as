@@ -5,7 +5,7 @@ package away3d.events
 	import flash.events.*;
 
 	/**
-	 * AnimationEvent is an Event dispatched to notify changes in an animation's state.
+	 * Dispatched to notify changes in an animator's state.
 	 */
 	public class AnimatorEvent extends Event
 	{
@@ -22,9 +22,10 @@ package away3d.events
 		private var _animator : AnimatorBase;
 
 		/**
-		 * Create a new GeometryEvent
+		 * Create a new <code>AnimatorEvent</code> object.
+		 * 
 		 * @param type The event type.
-		 * @param subGeometry An optional SubGeometry object that is the subject of this event.
+		 * @param animator The animator object that is the subject of this event.
 		 */
 		public function AnimatorEvent(type : String, animator : AnimatorBase) : void
 		{
@@ -39,7 +40,8 @@ package away3d.events
 
 		/**
 		 * Clones the event.
-		 * @return An exact duplicate of the current object.
+		 * 
+		 * @return An exact duplicate of the current event object.
 		 */
 		override public function clone() : Event
 		{

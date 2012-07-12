@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.animators.transitions.StateTransitionBase;
 	import away3d.arcane;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
@@ -10,15 +11,23 @@ package away3d.animators
 
 	use namespace arcane;
 	
+	/**
+	 * Provides an interface for assigning uv-based animation data sets to mesh-based entity objects
+	 * and controlling the various available states of animation through an interative playhead that can be
+	 * automatically updated or manually triggered.
+	 */
 	public class UVAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _activeNode : IUVAnimationNode;
-		private var _activeState:VertexAnimationState;
-		private var _absoluteTime : Number;
+		private var _activeNode:IUVAnimationNode;
 		
 		private var _uvAnimationSet:UVAnimationSet;
 		private var _deltaFrame : UVAnimationFrame = new UVAnimationFrame();
 		
+		/**
+		 * Creates a new <code>UVAnimator</code> object.
+		 * 
+		 * @param uvAnimationSet The animation data set containing the uv animation states used by the animator.
+		 */
 		public function UVAnimator(uvAnimationSet:UVAnimationSet)
 		{
 			super(uvAnimationSet);
@@ -26,6 +35,9 @@ package away3d.animators
 			_uvAnimationSet = uvAnimationSet;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			var material:TextureMaterial = renderable.material as TextureMaterial;
@@ -44,7 +56,10 @@ package away3d.animators
 			subMesh.uvRotation = _deltaFrame.rotation;
 		}
 		
-		public function play(stateName : String) : void
+		/**
+		 * @inheritDoc
+		 */
+		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
 		{
 			_activeState = _uvAnimationSet.getState(stateName) as VertexAnimationState;
 			
@@ -58,9 +73,12 @@ package away3d.animators
 			start();
 		}
 		
-		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
+		/**
+		 * Applies the calculated time delta to the active animation state node.
+		 */
+		override protected function updateDeltaTime(dt : Number) : void
 		{
-			_absoluteTime += scaledDT;
+			_absoluteTime += dt;
 			
 			_activeNode.update(_absoluteTime);
 			

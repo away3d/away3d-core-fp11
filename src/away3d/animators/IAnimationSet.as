@@ -1,21 +1,49 @@
 package away3d.animators
 {
-	import away3d.entities.Mesh;
-	import away3d.core.base.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.passes.MaterialPassBase;
+	import away3d.core.managers.*;
+	import away3d.materials.passes.*;
+	
 	/**
-	 * @author robbateman
+	 * Provides an interface for data set classes that hold animation data for use in animator classes.
+	 *
+	 * @see away3d.animators.IAnimator
 	 */
 	public interface IAnimationSet
 	{
+		/**
+		 * Returns a vector of animation state objects that make up the contents of the animation data set.
+		 */
 		function get states():Vector.<IAnimationState>;
 		
+		/**
+		 * Retrieves the animation state object registered in the animation data set under the given name.
+		 * 
+		 * @param stateName The name of the animation state object to be retrieved.
+		 */
 		function getState(stateName:String):IAnimationState;
 		
+		/**
+		 * Adds an animation state object to the aniamtion data set under the given name.
+		 * 
+		 * @param stateName The name under which the animation state object will be stored.
+		 * @param animationState The animation state object to be staored in the set.
+		 */
 		function addState(stateName:String, animationState:IAnimationState):void;
 		
+		/**
+		 * Indicates whether the properties of the animation data contained within the set combined with
+		 * the vertex registers aslready in use on shading materials allows the animation data to utilise
+		 * GPU calls.
+		 */
 		function get usesCPU() : Boolean;
+		
+		/**
+		 * Called by the material to reset the GPU indicator before testing whether register space in the shader
+		 * is available for running GPU-based animation code.
+		 * 
+		 * @private
+		 */
+		function resetGPUCompatibility() : void;
 		
 		/**
 		 * Generates the AGAL Vertex code for the animation, tailored to the material pass's requirements.
@@ -43,7 +71,5 @@ package away3d.animators
 		 * @private
 		 */
 		function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
-		
-		function resetGPUCompatibility() : void;
 	}
 }

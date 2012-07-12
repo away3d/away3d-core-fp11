@@ -6,7 +6,10 @@ package away3d.animators
 	import away3d.materials.passes.*;
 
 	/**
-	 * @author robbateman
+	 * The animation data set used by vertex-based animators, containing vertex animation state data.
+	 * 
+	 * @see away3d.animators.VertexAnimator
+	 * @see away3d.animators.VertexAnimationState
 	 */
 	public class VertexAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
@@ -17,28 +20,45 @@ package away3d.animators
 		private var _useNormals : Boolean;
 		private var _useTangents : Boolean;
 		
+		/**
+		 * Returns the number of poses made available at once to the GPU animation code.
+		 */
 		public function get numPoses() : uint
 		{
 			return _numPoses;
 		}
 		
+		/**
+		 * Returns the active blend mode of the vertex animator object.
+		 */
 		public function get blendMode() : String
 		{
 			return _blendMode;
 		}
 		
+		/**
+		 * Returns the set stream index for the animation component of the GPU vertex shader.
+		 */
 		public function get streamIndex() : uint
 		{
 			return _streamIndex;
 		}
 		
+		/**
+		 * Returns whether or not normal data is used in last set GPU pass of the vertex shader. 
+		 */
 		public function get useNormals() : Boolean
 		{
 			return _useNormals;
 		}
 		
 		/**
-		 * Creates a new AnimationSequenceController object.
+		 * Creates a new <code>VertexAnimationSet</code> object.
+		 * 
+		 * @param numPoses The number of poses made available at once to the GPU animation code.
+		 * @param blendMode Optional value for setting the animation mode of the vertex animator object.
+		 * 
+		 * @see away3d.animators.data.VertexAnimationMode
 		 */
 		public function VertexAnimationSet(numPoses : uint = 2, blendMode : String = "absolute" )
 		{
@@ -57,6 +77,36 @@ package away3d.animators
 				return getAbsoluteAGALCode(pass, sourceRegisters, targetRegisters);
 			else
 				return getAdditiveAGALCode(pass, sourceRegisters, targetRegisters);
+		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
+		{
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
+		{
+			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null, 0);
+			if (_useNormals)
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null, 0);
+			if (_useTangents)
+				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null, 0);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function addState(stateName:String, animationState:IAnimationState):void
+		{
+			super.addState(stateName, animationState);
+			
+			animationState.addOwner(this, stateName);
 		}
 		
 		/**
@@ -96,7 +146,10 @@ package away3d.animators
 			}
 			return code;
 		}
-
+		
+		/**
+		 * Generates the vertex AGAL code for additive blending.
+		 */
 		private function getAdditiveAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
 			var code : String = "";
@@ -128,32 +181,6 @@ package away3d.animators
 			}
 
 			return code;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
-		{
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
-		{
-			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null, 0);
-			if (_useNormals)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null, 0);
-			if (_useTangents)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null, 0);
-		}
-		
-		public override function addState(stateName:String, animationState:IAnimationState):void
-		{
-			super.addState(stateName, animationState);
-			
-			animationState.addOwner(this, stateName);
 		}
 	}
 }

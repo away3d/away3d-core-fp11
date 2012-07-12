@@ -6,37 +6,52 @@ package away3d.events
 	import flash.events.Event;
 
 	/**
-	 * Dispatched to notify changes in an animation's state.
+	 * Dispatched to notify changes in an animation state's state.
 	 */
 	public class AnimationStateEvent extends Event
 	{
 		/**
-    	 * Fires when a non-looping clip node reaches the end of its timeline.
+    	 * Dispatched when a non-looping clip node inside an animation state reaches the end of its timeline.
     	 */
     	public static const PLAYBACK_COMPLETE:String = "playbackComplete";
 		
 		private var _animationState:IAnimationState;
-		private var _animationNode:AnimationNodeBase;
+		private var _animationNode:IAnimationNode;
 		
 		/**
-		 * Create a new AnimatonStateEvent
+		 * Create a new <code>AnimatonStateEvent</code>
+		 * 
 		 * @param type The event type.
-		 * @param animator An optional SubGeometry object that is the subject of this event.
+		 * @param animator The animation state object that is the subject of this event.
+		 * @param animationNode The animation node inside the animation state from which the event originated.
 		 */
-		public function AnimationStateEvent(type : String, animationState : IAnimationState, animationNode:AnimationNodeBase) : void
+		public function AnimationStateEvent(type : String, animationState : IAnimationState, animationNode:IAnimationNode) : void
 		{
 			super(type, false, false);
+			
 			_animationState = animationState;
 			_animationNode = animationNode;
 		}
-
+		
+		/**
+		 * The animation state object that is the subject of this event.
+		 */
 		public function get animationState() : IAnimationState
 		{
 			return _animationState;
 		}
-
+				
+		/**
+		 * The animation node inside the animation state from which the event originated.
+		 */
+		public function get animationNode() : IAnimationNode
+		{
+			return _animationNode;
+		}
+		
 		/**
 		 * Clones the event.
+		 * 
 		 * @return An exact duplicate of the current object.
 		 */
 		override public function clone() : Event

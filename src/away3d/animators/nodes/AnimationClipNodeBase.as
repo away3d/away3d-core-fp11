@@ -1,25 +1,27 @@
 package away3d.animators.nodes
 {
-	import flash.geom.Vector3D;
 	import away3d.animators.nodes.*;
 	import away3d.events.*;
+	
+	import flash.geom.*;
 
 	/**
 	 * @author robbateman
 	 */
-	public class AnimationClipNodeBase extends AnimationNodeBase
+	public class AnimationClipNodeBase extends AnimationNodeBase implements IAnimationNode
 	{
+		private var _animationStatePlaybackComplete:AnimationStateEvent;
+		private var _fixedFrameRate:Boolean = true;
+		
 		protected var _stitchDirty:Boolean = true;
 		protected var _stitchFinalFrame:Boolean = false;
 		protected var _blendWeight : Number;
 		protected var _framesDirty : Boolean;
-		private var _animationStatePlaybackComplete:AnimationStateEvent;
 		protected var _numFrames : uint = 0;
 		protected var _lastFrame : uint;
 		protected var _currentFrame : uint;
 		protected var _nextFrame : uint;
 		protected var _durations : Vector.<Number> = new Vector.<Number>();
-		private var _fixedFrameRate:Boolean = true;
 		protected var _totalDelta : Vector3D = new Vector3D();
 		
 		public function get stitchFinalFrame() : Boolean

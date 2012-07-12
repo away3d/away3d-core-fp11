@@ -5,18 +5,29 @@ package away3d.animators
 	import away3d.materials.passes.*;
 
 	/**
-	 * @author robbateman
+	 * The animation data set used by skeleton-based animators, containing skeleton animation state data.
+	 * 
+	 * @see away3d.animators.SkeletonAnimator
+	 * @see away3d.animators.SkeletonAnimationState
 	 */
 	public class SkeletonAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
 		private var _jointsPerVertex : uint;
 		
-		
+		/**
+		 * Returns the amount of skeleton joints that can be linked to a single vertex via skinned weight values. For GPU-base animation, the 
+		 * maximum allowed value is 4.
+		 */
 		public function get jointsPerVertex() : uint
 		{
 			return _jointsPerVertex;
 		}
 		
+		/**
+		 * Creates a new <code>SkeletonAnimationSet</code> object.
+		 * 
+		 * @param jointsPerVertex Sets the amount of skeleton joints that can be linked to a single vertex via skinned weight values. For GPU-base animation, the maximum allowed value is 4. Defaults to 4.
+		 */
 		public function SkeletonAnimationSet(jointsPerVertex : uint = 4)
 		{
 			_jointsPerVertex = jointsPerVertex;
@@ -82,6 +93,9 @@ package away3d.animators
 			stage3DProxy.setSimpleVertexBuffer(streamOffset + 1, null, null, 0);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public override function addState(stateName:String, animationState:IAnimationState):void
 		{
 			super.addState(stateName, animationState);

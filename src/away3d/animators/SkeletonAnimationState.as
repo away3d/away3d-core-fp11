@@ -7,17 +7,28 @@ package away3d.animators
 	use namespace arcane;
 	
 	/**
-	 * @author robbateman
+	 * The animation state class used by skeleton-based animation data sets to store animation node data.
+	 * 
+	 * @see away3d.animators.SkeletonAnimator
+	 * @see away3d.animators.SkeletonAnimationSet
 	 */
 	public class SkeletonAnimationState extends AnimationStateBase implements IAnimationState
 	{
 		private var _skeletonAnimationSet:SkeletonAnimationSet;
 		
+		/**
+		 * Creates a new <code>SkeletonAnimationState</code> object.
+		 * 
+		 * @param rootNode Sets the root animation node used by the state for determining the output pose of the animation node data.
+		 */
 		public function SkeletonAnimationState(rootNode:ISkeletonAnimationNode)
 		{
 			super(rootNode);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function addOwner(owner:IAnimationSet, stateName:String):void
 		{
 			if (!(owner is SkeletonAnimationSet))

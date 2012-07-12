@@ -6,17 +6,28 @@ package away3d.animators
 	use namespace arcane;
 	
 	/**
-	 * @author robbateman
+	 * The animation state class used by uv-based animation data sets to store uv animation node data.
+	 * 
+	 * @see away3d.animators.UVAnimator
+	 * @see away3d.animators.UVAnimationSet
 	 */
 	public class UVAnimationState extends AnimationStateBase implements IAnimationState
 	{
 		private var _vertexAnimationSet:UVAnimationSet;
 		
+		/**
+		 * Creates a new <code>UVAnimationState</code> object.
+		 * 
+		 * @param rootNode Sets the root animation node used by the state for determining the output pose of the uv animation node data.
+		 */
 		public function UVAnimationState(rootNode:UVClipNode)
 		{
 			super(rootNode);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function addOwner(owner:IAnimationSet, stateName:String):void
 		{
 			if (!(owner is UVAnimationSet))

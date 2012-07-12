@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.animators.transitions.StateTransitionBase;
 	import away3d.arcane;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
@@ -12,20 +13,19 @@ package away3d.animators
 	use namespace arcane;
 
 	/**
-	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
+	 * Provides an interface for assigning vertex-based animation data sets to mesh-based entity objects
+	 * and controlling the various available states of animation through an interative playhead that can be
+	 * automatically updated or manually triggered.
 	 */
 	public class VertexAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _activeNode : IVertexAnimationNode;
-		private var _activeState:VertexAnimationState;
-		private var _absoluteTime : Number;
+		private var _activeNode:IVertexAnimationNode;
 		
 		private var _vertexAnimationSet:VertexAnimationSet;
 		private var _poses : Vector.<Geometry> = new Vector.<Geometry>();
 		private var _weights : Vector.<Number> = Vector.<Number>([1, 0, 0, 0]);
 		private var _numPoses : uint;
 		private var _blendMode:String;
-		
 		
 		/**
 		 * Creates a new AnimationSequenceController object.
@@ -43,7 +43,7 @@ package away3d.animators
 		 * Plays a sequence with a given name. If the sequence is not found, it may not be loaded yet, and it will retry every frame.
 		 * @param sequenceName The name of the clip to be played.
 		 */
-		public function play(stateName : String) : void
+		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
 		{
 			_activeState = _vertexAnimationSet.getState(stateName) as VertexAnimationState;
 			
@@ -60,9 +60,9 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
+		override protected function updateDeltaTime(dt : Number) : void
 		{
-			_absoluteTime += scaledDT;
+			_absoluteTime += dt;
 			
 			_activeNode.update(_absoluteTime);
 			

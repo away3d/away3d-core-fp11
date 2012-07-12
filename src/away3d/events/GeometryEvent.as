@@ -5,7 +5,7 @@ package away3d.events
 	import flash.events.Event;
 
 	/**
-	 * GeometryEvent is an Event dispatched to notify changes on a Geometry object.
+	 * Dispatched to notify changes in a geometry object's state.
 	 *
 	 * @see away3d.core.base.Geometry
 	 */

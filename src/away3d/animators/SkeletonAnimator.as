@@ -17,13 +17,13 @@ package away3d.animators
 	use namespace arcane;
 
 	/**
-	 * AnimationSequenceController provides a controller for single clip-based animation sequences (fe: md2, md5anim).
+	 * Provides and interface for assigning skeleton-based animation data sets to mesh-based entity objects
+	 * and controlling the various available states of animation through an interative playhead that can be
+	 * automatically updated or manually triggered
 	 */
 	public class SkeletonAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _activeNode : ISkeletonAnimationNode;
-		private var _activeState:SkeletonAnimationState;
-		private var _absoluteTime : Number = 0;
+		private var _activeNode:ISkeletonAnimationNode;
 		
 		private var _globalMatrices : Vector.<Number>;
         private var _globalPose : SkeletonPose = new SkeletonPose();
@@ -40,8 +40,18 @@ package away3d.animators
 		private var _jointsPerVertex : uint;
 		private var _stateTransition:StateTransitionBase;
 		
+		/**
+		 * Enables translation of the animated mesh from data returned per frame via the rootDelta property of the active animation node. Defaults to true.
+		 * 
+		 * @see away3d.animators.nodes.AnimationNodeBase#rootDelta
+		 */
 		public var updateRootPosition:Boolean = true;
 		
+		/**
+		 * returns the calculated global matrices of the current skeleton pose.
+		 * 
+		 * @see #globalPose
+		 */
 		public function get globalMatrices():Vector.<Number>
 		{
 			if (_globalPropertiesDirty)
@@ -50,6 +60,11 @@ package away3d.animators
 			return _globalMatrices;
 		}
 		
+		/**
+		 * returns the current skeleton pose output from the animator.
+		 * 
+		 * @see away3d.animators.data.SkeletonPose
+		 */
 		public function get globalPose():SkeletonPose
 		{
 			if (_globalPropertiesDirty)
@@ -59,7 +74,11 @@ package away3d.animators
 		}
 		
 		/**
-		 * Creates a new AnimationSequenceController object.
+		 * Creates a new <code>SkeletonAnimator</code> object.
+		 * 
+		 * @param skeletonAnimationSet The animation data set containing the skeleton animation states used by the animator.
+		 * @param skeleton The skeleton object used for calculating the resulting global matrices for transforming skinned mesh data.
+		 * @param forceCPU Optional value that only allows the animator to perform calculation on the CPU. Defaults to false.
 		 */
 		public function SkeletonAnimator(skeletonAnimationSet:SkeletonAnimationSet, skeleton : Skeleton, forceCPU : Boolean = false)
 		{
@@ -83,12 +102,14 @@ package away3d.animators
 		}
 		
 		/**
-		 * Plays a state with a given name. If the sequence is not found, it may not be loaded yet, and it will retry every frame.
-		 * @param sequenceName The name of the clip to be played.
+		 * Plays an animation state registered with the given name in the animation data set.
+		 * 
+		 * @param stateName The data set name of the animation state to be played.
+		 * @param stateTransition An optional transition object that determines how the animator will transition from the currently active animation state.
 		 */
 		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
 		{
-			_activeState = _skeletonAnimationSet.getState(stateName) as SkeletonAnimationState;
+			_activeState = _skeletonAnimationSet.getState(stateName);
 			
 			if (!_activeState)
 				throw new Error("Animation state " + stateName + " not found!");
@@ -110,26 +131,6 @@ package away3d.animators
 			_activeState.reset(_absoluteTime);
 			
 			start();
-		}
-		
-		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
-		{
-			_absoluteTime += scaledDT;
-			
-			
-			//invalidate pose matrices
-			_globalPropertiesDirty = true;
-			
-			for(var key : Object in _animationStates)
-			    SubGeomAnimationState(_animationStates[key]).dirty = true;
-			
-			if (_stateTransition)
-				_stateTransition.update(_absoluteTime);
-			else
-				_activeNode.update(_absoluteTime);
-			
-			if (updateRootPosition)
-				applyRootDelta();
 		}
 		
 		/**
@@ -169,6 +170,39 @@ package away3d.animators
 
 			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), _bufferFormat, 0);
 			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), _bufferFormat, 0);
+		}
+				
+        /**
+         * @inheritDoc
+         */
+        public function testGPUCompatibility(pass : MaterialPassBase) : void
+        {
+			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _numJoints * 3 > 128)) {
+				_skeletonAnimationSet._usesCPU = true;
+			}
+        }
+		
+		/**
+		 * Applies the calculated time delta to the active animation state node or state transition object.
+		 */
+		override protected function updateDeltaTime(dt : Number) : void
+		{
+			_absoluteTime += dt;
+			
+			
+			//invalidate pose matrices
+			_globalPropertiesDirty = true;
+			
+			for(var key : Object in _animationStates)
+			    SubGeomAnimationState(_animationStates[key]).dirty = true;
+			
+			if (_stateTransition)
+				_stateTransition.update(_absoluteTime);
+			else
+				_activeNode.update(_absoluteTime);
+			
+			if (updateRootPosition)
+				applyRootDelta();
 		}
 		
 		private function updateCondensedMatrices(condensedIndexLookUp : Vector.<uint>, numJoints : uint) : void
@@ -331,7 +365,7 @@ package away3d.animators
 		 * @param targetPose The SkeletonPose object that will contain the global pose.
 		 * @param skeleton The skeleton containing the joints, and as such, the hierarchical data to transform to global poses.
 		 */
-		public function localToGlobalPose(sourcePose : SkeletonPose, targetPose : SkeletonPose, skeleton : Skeleton) : void
+		private function localToGlobalPose(sourcePose : SkeletonPose, targetPose : SkeletonPose, skeleton : Skeleton) : void
 		{
 			var globalPoses : Vector.<JointPose> = targetPose.jointPoses;
 			var globalJointPose : JointPose;
@@ -419,7 +453,7 @@ package away3d.animators
 			}
 		}
 		
-		public function applyRootDelta() : void
+		private function applyRootDelta() : void
 		{
 			var delta : Vector3D = _activeNode.rootDelta;
 			var dist : Number = delta.length;
@@ -430,18 +464,7 @@ package away3d.animators
 					_owners[i].translateLocal(delta, dist);
 			}
 		}
-		
-        /**
-         * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
-		 * Needs to be called if gpu code is potentially required.
-         */
-        public function testGPUCompatibility(pass : MaterialPassBase) : void
-        {
-			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _numJoints * 3 > 128)) {
-				_skeletonAnimationSet._usesCPU = true;
-			}
-        }
-		
+				
 		private function onStateTransitionComplete(event:StateTransitionEvent):void
 		{
 			if (event.type == StateTransitionEvent.TRANSITION_COMPLETE) {
