@@ -63,6 +63,7 @@ package away3d.primitives
 		{
 			var i:uint, j:uint;
 			var x:Number, y:Number, z:Number, radius:Number, revolutionAngle:Number;
+			var dr : Number, latNormElev : Number, latNormBase : Number;
 
 			// reset utility variables
 			_numVertices = 0;
@@ -104,7 +105,7 @@ package away3d.primitives
 			var revolutionAngleDelta:Number = 2 * Math.PI / _segmentsW;
 
 			// top
-			if (_topClosed) {
+			if (_topClosed && _topRadius > 0) {
 
 				z = -0.5 * _height;
 
@@ -132,7 +133,7 @@ package away3d.primitives
 			}
 
 			// bottom
-			if (_bottomClosed) {
+			if (_bottomClosed && _bottomRadius > 0) {
 
 				z = 0.5 * _height;
 
@@ -159,11 +160,21 @@ package away3d.primitives
 
 				_vertexIndexOffset = _nextVertexIndex;
 			}
+			
+			// The normals on the lateral surface all have the same incline, i.e.
+			// the "elevation" component (Y or Z depending on yUp) is constant.
+			// Same principle goes for the "base" of these vectors, which will be
+			// calculated such that a vector [base,elev] will be a unit vector.
+			dr = (_bottomRadius - _topRadius);
+			latNormElev = dr / _height;
+			latNormBase = (latNormElev==0)? 1 : _height / dr;
+			
 
 			// lateral surface
 			if(_surfaceClosed)
 			{
 				var a:uint, b:uint, c:uint, d:uint;
+				var na0 : Number, na1 : Number;
 
 				for(j = 0; j <= _segmentsH; ++j)
 				{
@@ -176,15 +187,17 @@ package away3d.primitives
 						revolutionAngle = i * revolutionAngleDelta;
 						x = radius * Math.cos(revolutionAngle);
 						y = radius * Math.sin(revolutionAngle);
-						var tanLen:Number = Math.sqrt(y * y + x * x);
+						na0 = latNormBase * Math.cos(revolutionAngle);
+						na1 = latNormBase * Math.sin(revolutionAngle);
+						
 						if(_yUp)
 							addVertex(x, -z, y,
-									  x / tanLen, 0, y / tanLen,
-									  tanLen > .007 ? -y / tanLen : 1, 0, tanLen > .007 ? x / tanLen : 0);
+									  na0, latNormElev, na1,
+									  na1, 0, -na0);
 						else
 							addVertex(x, y, z,
-									  x / tanLen, y / tanLen, 0,
-									  tanLen > .007 ? -y / tanLen : 1, tanLen > .007 ? x / tanLen : 0, 0);
+									  na0, na1, latNormElev,
+									  na1, -na0, 0);
 
 						// close triangle
 						if(i > 0 && j > 0)
