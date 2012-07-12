@@ -94,10 +94,10 @@ package away3d.filters.tasks
 		private function updateBlurData() : void
 		{
 			// todo: must be normalized using view size ratio instead of texture
-			var invW : Number = 1/_textureWidth;
+			var invH : Number = 1/_textureHeight;
 
-			_data[0] = _amount*.5*invW;
-			_data[1] = _realStepSize*invW;
+			_data[0] = _amount*.5*invH;
+			_data[1] = _realStepSize*invH;
 		}
 
 		private function calculateStepSize() : void

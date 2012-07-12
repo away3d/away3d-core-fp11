@@ -644,6 +644,8 @@
 		protected function renderSceneDepth(entityCollector : EntityCollector) : void
 		{
 			if (_depthTextureInvalid || !_depthRender) initDepthTexture(_stage3DProxy._context3D);
+			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+			_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
 			_depthRenderer.render(entityCollector, _depthRender);
 		}
 

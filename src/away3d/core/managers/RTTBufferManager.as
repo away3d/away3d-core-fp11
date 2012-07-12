@@ -51,11 +51,13 @@ package away3d.core.managers
 
 		public function get textureRatioX() : Number
 		{
+			if (_buffersInvalid) updateRTTBuffers();
 			return _textureRatioX;
 		}
 
 		public function get textureRatioY() : Number
 		{
+			if (_buffersInvalid) updateRTTBuffers();
 			return _textureRatioY;
 		}
 

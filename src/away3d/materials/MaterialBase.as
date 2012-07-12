@@ -289,14 +289,14 @@ package away3d.materials
 			return _numPasses;
 		}
 
-		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false) : void
+		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void
 		{
 			_distanceBasedDepthRender = distanceBased;
 
 			if (distanceBased)
-				_distancePass.activate(stage3DProxy, camera, 1, 1);
+				_distancePass.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 			else
-				_depthPass.activate(stage3DProxy, camera, 1, 1);
+				_depthPass.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 		}
 
 		arcane function deactivateForDepth(stage3DProxy : Stage3DProxy) : void

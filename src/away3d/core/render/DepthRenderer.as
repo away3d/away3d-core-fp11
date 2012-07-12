@@ -63,7 +63,9 @@ package away3d.core.render
 			if (_renderBlended)
 				drawRenderables(entityCollector.blendedRenderableHead, entityCollector);
 
-			if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
+			if (_activeMaterial)
+				_activeMaterial.deactivateForDepth(_stage3DProxy);
+
 			_activeMaterial = null;
 		}
 
@@ -80,7 +82,7 @@ package away3d.core.render
 			while (item) {
 				_activeMaterial = item.renderable.material;
 
-				_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased);
+				_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased, _textureRatioX, _textureRatioY);
 				item2 = item;
 				do {
 					_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);

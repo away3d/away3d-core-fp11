@@ -15,8 +15,8 @@ package away3d.filters.tasks
 		private var _realStepSize : Number;
 
 		/**
-		 *
-		 * @param amount
+		 * Creates a new Filter3DHDepthOfFFieldTask
+		 * @param amount The maximum amount of blur to apply in pixels at the most out-of-focus areas
 		 * @param stepSize The distance between samples. Set to -1 to autodetect with acceptable quality.
 		 */
 		public function Filter3DHBlurTask(amount : uint, stepSize : int = -1)
@@ -39,6 +39,7 @@ package away3d.filters.tasks
 
 			invalidateProgram3D();
 			updateBlurData();
+			calculateStepSize();
 		}
 
 		public function get stepSize() : int
@@ -66,8 +67,8 @@ package away3d.filters.tasks
 			code += "tex ft1, ft0, fs0 <2d,nearest,clamp>\n";
 
 			for (var x : Number = _realStepSize; x <= _amount; x += _realStepSize) {
-				code += "add ft0.x, ft0.x, fc0.y	\n";
-				code += "tex ft2, ft0, fs0 <2d,nearest,clamp>\n" +
+				code += "add ft0.x, ft0.x, fc0.y	\n" +
+						"tex ft2, ft0, fs0 <2d,nearest,clamp>\n" +
 						"add ft1, ft1, ft2 \n";
 				++numSamples;
 			}
@@ -102,9 +103,9 @@ package away3d.filters.tasks
 
 		private function calculateStepSize() : void
 		{
-				_realStepSize = _stepSize > 0? 				_stepSize :
-								_amount > MAX_AUTO_SAMPLES? _amount/MAX_AUTO_SAMPLES :
-															1;
+			_realStepSize = _stepSize > 0? 				_stepSize :
+							_amount > MAX_AUTO_SAMPLES? _amount/MAX_AUTO_SAMPLES :
+														1;
 		}
 	}
 }

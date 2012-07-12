@@ -53,7 +53,7 @@
 			_distancePass.alphaThreshold = value;
 		}
 
-		arcane override function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false) : void
+		arcane override function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void
 		{
 			if (distanceBased) {
 				_distancePass.alphaMask = _screenPass.diffuseMethod.texture;
@@ -61,7 +61,7 @@
 			else {
 				_depthPass.alphaMask = _screenPass.diffuseMethod.texture;
 			}
-			super.activateForDepth(stage3DProxy, camera, distanceBased);
+			super.activateForDepth(stage3DProxy, camera, distanceBased, textureRatioX, textureRatioY);
 		}
 
 		public function get specularLightSources() : uint
