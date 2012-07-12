@@ -15,7 +15,6 @@ package away3d.animators
 	 */
 	public class VertexAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
-				
 		private var _numPoses : uint;
 		private var _blendMode : String;
 		private var _streamIndices : Dictionary = new Dictionary(true);
@@ -102,9 +101,9 @@ package away3d.animators
 		{
 			stage3DProxy.setSimpleVertexBuffer(_uploadIndex, null, null, 0);
 			if (_uploadNormals)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndices + 1, null, null, 0);
+				stage3DProxy.setSimpleVertexBuffer(_uploadIndex + 1, null, null, 0);
 			if (_uploadTangents)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndices + 2, null, null, 0);
+				stage3DProxy.setSimpleVertexBuffer(_uploadIndex + 2, null, null, 0);
 		}
 		
 		/**

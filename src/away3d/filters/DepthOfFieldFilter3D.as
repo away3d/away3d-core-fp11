@@ -4,6 +4,7 @@ package away3d.filters
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.filters.tasks.Filter3DHDepthOfFFieldTask;
+	import away3d.filters.tasks.Filter3DVDepthOfFFieldTask;
 
 	import flash.display3D.textures.Texture;
 
@@ -13,13 +14,13 @@ package away3d.filters
 	{
 		private var _focusTarget : ObjectContainer3D;
 		private var _hDofTask : Filter3DHDepthOfFFieldTask;
-		private var _vDofTask : Filter3DHDepthOfFFieldTask;
+		private var _vDofTask : Filter3DVDepthOfFFieldTask;
 
 		public function DepthOfFieldFilter3D(maxBlurX : uint = 3, maxBlurY : uint = 3, stepSize:int = -1)
 		{
 			super();
 			_hDofTask = new Filter3DHDepthOfFFieldTask(maxBlurX, stepSize);
-			_vDofTask = new Filter3DHDepthOfFFieldTask(maxBlurY, stepSize);
+			_vDofTask = new Filter3DVDepthOfFFieldTask(maxBlurY, stepSize);
 			addTask(_hDofTask);
 			addTask(_vDofTask);
 		}
