@@ -12,10 +12,14 @@ package away3d.materials.utils
 	{
 		private static var _defaultTextureBitmapData:BitmapData;
 		private static var _defaultMaterial:TextureMaterial;
+		private static var _defaultTexture:BitmapTexture;
 		//private static var _defaultMaterialRenderables:Vector.<IMaterialOwner> = new Vector.<IMaterialOwner>();
 		
-		public static function getDefaultMaterial(renderable:IMaterialOwner):TextureMaterial
+		public static function getDefaultMaterial(renderable:IMaterialOwner = null):TextureMaterial
 		{
+			if (!_defaultTexture)
+				createDefaultTexture();
+			
 			if (!_defaultMaterial)
 				createDefaultMaterial();
 			
@@ -24,7 +28,17 @@ package away3d.materials.utils
 			return _defaultMaterial;
 		}
 		
-		private static function createDefaultMaterial():void
+		public static function getDefaultTexture(renderable:IMaterialOwner = null):BitmapTexture
+		{
+			if (!_defaultTexture)
+				createDefaultTexture();
+			
+			//_defaultMaterialRenderables.push(renderable);
+			
+			return _defaultTexture;
+		}
+		
+		private static function createDefaultTexture():void
 		{
 			_defaultTextureBitmapData = new BitmapData(8, 8, false, 0x0);
 			
@@ -37,7 +51,12 @@ package away3d.materials.utils
 				}
 			}
 			
-			_defaultMaterial = new TextureMaterial(new BitmapTexture(_defaultTextureBitmapData));
+			_defaultTexture = new BitmapTexture(_defaultTextureBitmapData);
+		}
+		
+		private static function createDefaultMaterial():void
+		{
+			_defaultMaterial = new TextureMaterial(_defaultTexture);
 			_defaultMaterial.mipmap = false;
 			_defaultMaterial.smooth = false;
 		}

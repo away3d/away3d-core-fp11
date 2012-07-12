@@ -1,6 +1,7 @@
 //original author Tim Knip
 package away3d.loaders.parsers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.SkeletonAnimationSet;
 	import away3d.animators.SkeletonAnimationState;
 	import away3d.animators.data.JointPose;
@@ -69,7 +70,7 @@ package away3d.loaders.parsers
 		private var _animationInfo : DAEAnimationInfo;
 		//private var _animators : Vector.<AnimatorBase>;
 		private var _states : Vector.<SkeletonAnimationState>;
-		private var _defaultBitmapMaterial:TextureMaterial;
+		private var _defaultBitmapMaterial:TextureMaterial = DefaultMaterialManager.getDefaultMaterial();
 		private var _defaultColorMaterial:ColorMaterial = new ColorMaterial(0xff0000);
 		private static var _numInstances:uint = 0;
 		
@@ -234,8 +235,11 @@ package away3d.loaders.parsers
 		
 		private function buildDefaultMaterial(map:BitmapData = null):TextureMaterial
 		{
-			var bmt:BitmapTexture = new BitmapTexture(map || defaultBitmapData);
-			_defaultBitmapMaterial = new TextureMaterial(bmt);
+			//TODO:fix this duplication mess
+			if (map)
+				_defaultBitmapMaterial = new TextureMaterial(new BitmapTexture(map));
+			else
+				_defaultBitmapMaterial = DefaultMaterialManager.getDefaultMaterial();
 			
 			return _defaultBitmapMaterial;
 		}
@@ -587,7 +591,7 @@ package away3d.loaders.parsers
 					effects = getMeshEffects(instance.bind_material, daeGeometry.mesh);
 					 
 					if (geometry) {
-						mesh = new Mesh(geometry, (effects.length == 0)? _defaultBitmapMaterial : null);
+						mesh = new Mesh(geometry);
 						
 						if(daeGeometry.meshName && daeGeometry.meshName != "")
 							mesh.name = daeGeometry.meshName;
@@ -696,8 +700,7 @@ package away3d.loaders.parsers
 					mat = textureMaterial = buildDefaultMaterial(image.resource.bitmapData);
 				
 			} else if (diffuse && diffuse.color) {
-				var bmd:BitmapData = new BitmapData(256, 256, true, 0xff << 24 | diffuse.color.rgb);
-				mat = textureMaterial = buildDefaultMaterial(bmd);
+				mat = textureMaterial = buildDefaultMaterial();
 			}
 			
 			if (textureMaterial) {

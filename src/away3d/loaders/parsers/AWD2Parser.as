@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.nodes.UVClipNode;
 	import flash.display.Sprite;
 	import away3d.animators.UVAnimationState;
@@ -153,8 +154,7 @@ package away3d.loaders.parsers
 				var mat : TextureMaterial;
 				var users : Array;
 				
-				// TODO: Reuse default bitmap texture
-				var texture : BitmapTexture = new BitmapTexture(defaultBitmapData);
+				var texture : BitmapTexture = DefaultMaterialManager.getDefaultTexture();
 				
 				users = _texture_users[resourceDependency.id];
 				for each (mat in users) {

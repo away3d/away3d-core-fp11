@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -693,8 +694,7 @@ package away3d.loaders.parsers
 			var mat : DefaultMaterialBase;
 			
 			if (_cur_mat.colorMap) {
-				// TODO: Consider way to optimize by reusing default texture
-				mat = new TextureMaterial(_cur_mat.colorMap.texture || new BitmapTexture(defaultBitmapData));
+				mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
 			}
 			else {
 				mat = new ColorMaterial(_cur_mat.diffuseColor);

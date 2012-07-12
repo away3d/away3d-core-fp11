@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -281,8 +282,7 @@ package away3d.loaders.parsers
 							_aC[ref.container].addChild(mesh);
 						
 						mesh.transform = ref.transform;
-						mesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
-						mesh.material.name = ref.name;
+						mesh.material = DefaultMaterialManager.getDefaultMaterial();
 					
 						if(ref.material && ref.material != "")
 							addDependency(ref.name, new URLRequest(ref.material));
