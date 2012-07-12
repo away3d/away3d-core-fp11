@@ -156,15 +156,9 @@ package away3d.animators.nodes
 		{
 			super.updateTime(time);
 			
-			var weight : Number;
-			
 			for (var j : uint = 0; j < _numInputs; ++j) {
-				weight = _blendWeights[j];
-				
-				if (!weight)
-					continue;
-				
-				_inputs.update(time);
+				if (_blendWeights[j])
+					_inputs[j].update(time);
 			}
 			
 			_skeletonPoseDirty = true;
@@ -184,13 +178,12 @@ package away3d.animators.nodes
 			for (var j : uint = 0; j < _numInputs; ++j) {
 				weight = _blendWeights[j];
 				
-				if (!weight)
-					continue;
-				
-				delta = _inputs[j].rootDelta;
-				_rootDelta.x += weight*delta.x;
-				_rootDelta.y += weight*delta.y;
-				_rootDelta.z += weight*delta.z;
+				if (weight) {
+					delta = _inputs[j].rootDelta;
+					_rootDelta.x += weight*delta.x;
+					_rootDelta.y += weight*delta.y;
+					_rootDelta.z += weight*delta.z;
+				}
 			}
 		}
 	}
