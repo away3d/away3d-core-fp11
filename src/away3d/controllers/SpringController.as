@@ -5,6 +5,12 @@ package away3d.controllers
 	
 	import flash.geom.Vector3D;
 	
+	
+	/**
+	 * Uses spring physics to animate the target object towards a position that is
+	 * defined as the lookAtTarget object's position plus the vector defined by the
+	 * positionOffset property.
+	 */
 	public class SpringController extends LookAtController
 	{
 		private var _velocity:Vector3D;
@@ -34,7 +40,8 @@ package away3d.controllers
 		/**
 		 * Offset of spring center from target in target object space, ie: Where the camera should ideally be in the target object space.
 		 */
-		public var positionOffset:Vector3D = new Vector3D(0,5,-50);
+		public var positionOffset:Vector3D = new Vector3D(0,500,-1000);
+		
 		
 		public function SpringController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null, stiffness : Number = 1, mass : Number = 40, damping : Number = 4)
 		{
