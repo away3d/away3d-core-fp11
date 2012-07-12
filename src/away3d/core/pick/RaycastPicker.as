@@ -123,7 +123,7 @@ package away3d.core.pick
 
 			for( i = 0; i < _numEntities; ++i ) {
 				entity = _entities[i];
-				pickingCollisionVO = entity._pickingCollision;
+				pickingCollisionVO = entity._pickingCollisionVO;
 				if(entity.pickingCollider) {
 					// If a collision exists, update the collision data and stop all checks.
 					if( (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) && entity.collidesBefore(shortestCollisionDistance, _findClosestCollision) ) {

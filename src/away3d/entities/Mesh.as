@@ -301,21 +301,21 @@
 
 		override arcane function collidesBefore(shortestCollisionDistance : Number, findClosest : Boolean) : Boolean
 		{
-			_pickingCollider.setLocalRay(_pickingCollision.localRayPosition, _pickingCollision.localRayDirection);
-			_pickingCollision.renderable = null;
+			_pickingCollider.setLocalRay(_pickingCollisionVO.localRayPosition, _pickingCollisionVO.localRayDirection);
+			_pickingCollisionVO.renderable = null;
 			var len : int = _subMeshes.length;
 			for (var i : int = 0; i < len; ++i) {
 				var subMesh : SubMesh = _subMeshes[i];
 
-				if (_pickingCollider.testSubMeshCollision(subMesh, _pickingCollision, shortestCollisionDistance)) {
-					shortestCollisionDistance = _pickingCollision.rayEntryDistance;
-					_pickingCollision.renderable = subMesh;
-					if (findClosest)
+				if (_pickingCollider.testSubMeshCollision(subMesh, _pickingCollisionVO, shortestCollisionDistance)) {
+					shortestCollisionDistance = _pickingCollisionVO.rayEntryDistance;
+					_pickingCollisionVO.renderable = subMesh;
+					if (!findClosest)
 						return true;
 				}
 			}
 
-			return pickingCollisionVO.renderable != null;
+			return _pickingCollisionVO.renderable != null;
 		}
 	}
 }
