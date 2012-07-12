@@ -37,7 +37,7 @@ package away3d.animators.nodes
 		{
 		}
 		
-		public function addFrame(uvFrame : UVAnimationFrame, duration : Number) : void
+		public function addFrame(uvFrame : UVAnimationFrame, duration : uint) : void
 		{
 			_frames.push(uvFrame);
 			_durations.push(duration);
@@ -47,7 +47,7 @@ package away3d.animators.nodes
 			_stitchDirty = true;
 		}
 		
-		override protected function updateTime(time:Number):void
+		override protected function updateTime(time:uint):void
 		{
 			super.updateTime(time);
 			

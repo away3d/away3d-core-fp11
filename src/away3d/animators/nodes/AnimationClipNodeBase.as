@@ -21,7 +21,7 @@ package away3d.animators.nodes
 		protected var _lastFrame : uint;
 		protected var _currentFrame : uint;
 		protected var _nextFrame : uint;
-		protected var _durations : Vector.<Number> = new Vector.<Number>();
+		protected var _durations : Vector.<uint> = new Vector.<uint>();
 		protected var _totalDelta : Vector3D = new Vector3D();
 		
 		public function get stitchFinalFrame() : Boolean
@@ -48,7 +48,7 @@ package away3d.animators.nodes
 			return _blendWeight;
 		}
 		
-		public function get durations():Vector.<Number>
+		public function get durations():Vector.<uint>
 		{
 			return _durations;
 		}
@@ -73,9 +73,9 @@ package away3d.animators.nodes
 				updateStitch();
 			
 			var dur : uint = 0, frameTime : uint;
-			var time : Number = _time;
+			var time : int = _time;
 			
-			if ((time > _totalDuration || time < 0) && _looping) {
+			if ((time >= _totalDuration || time < 0) && _looping) {
 				time %= _totalDuration;
 				if (time < 0) time += _totalDuration;
 			}

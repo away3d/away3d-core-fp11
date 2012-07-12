@@ -66,7 +66,7 @@ package away3d.animators.nodes
 			return _skeletonPose;
 		}
 		
-		public function addFrame(skeletonPose : SkeletonPose, duration : Number) : void
+		public function addFrame(skeletonPose : SkeletonPose, duration : uint) : void
 		{
 			_frames.push(skeletonPose);
 			_durations.push(duration);
@@ -76,7 +76,7 @@ package away3d.animators.nodes
 			_stitchDirty = true;
 		}
 		
-		override protected function updateTime(time:Number):void
+		override protected function updateTime(time:int):void
 		{
 			super.updateTime(time);
 			
