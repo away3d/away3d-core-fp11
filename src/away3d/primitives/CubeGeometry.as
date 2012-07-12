@@ -355,14 +355,14 @@ package away3d.primitives
 		 */
 		override protected function buildUVs(target : SubGeometry) : void
 		{
+			var i : uint, j : uint, uidx : uint = 0;
 			var uvData : Vector.<Number>;
-			var i : uint, j : uint, uidx  :  uint; // indices
-			var hw : Number, hh : Number, hd : Number; // halves
-			var dw : Number, dh : Number, dd : Number; // deltas
 
 			var u_tile_dim : Number, v_tile_dim : Number;
 			var u_tile_step : Number, v_tile_step : Number;
-			var outer_uv : Number;
+			var tl0u : Number, tl0v : Number;
+			var tl1u : Number, tl1v : Number;
+			var du : Number, dv : Number;
 
 			var numUvs : uint = ((_segmentsW + 1) * (_segmentsH + 1) +
 								(_segmentsW + 1) * (_segmentsD + 1) +
@@ -373,17 +373,6 @@ package away3d.primitives
 			else
 				uvData = new Vector.<Number>(numUvs, true);
 
-
-			// half cube dimensions
-			hw = _width/2;
-			hh = _height/2;
-			hd = _height/2;
-
-			// Segment dimensions
-			dw = _width/_segmentsW;
-			dh = _height/_segmentsH;
-			dd = _depth/_segmentsD;
-
 			if (_tile6) {
 				u_tile_dim = u_tile_step = 1/3;
 				v_tile_dim = v_tile_step = 1/2;
@@ -392,37 +381,64 @@ package away3d.primitives
 				u_tile_dim = v_tile_dim = 1;
 				u_tile_step = v_tile_step = 0;
 			}
-
-			for (i = 0; i <= _segmentsW; i++) {
-				outer_uv = u_tile_dim * (i/_segmentsW);
-
-				for (j = 0; j <= _segmentsH; j++) {
-					uvData[uidx++] = outer_uv;
-					uvData[uidx++] = 1-v_tile_dim * (j/_segmentsH);
-					uvData[uidx++] = 1-outer_uv;
-					uvData[uidx++] = 1-(v_tile_step + v_tile_dim * (j/_segmentsH));
+			
+			// Create planes two and two, the same way that they were
+			// constructed in the buildGeometry() function. First calculate
+			// the top-left UV coordinate for both planes, and then loop
+			// over the points, calculating the UVs from these numbers.
+			
+			// When tile6 is true, the layout is as follows:
+			//       .-----.-----.-----. (1,1)
+			//       | Bot |  T  | Bak |
+			//       |-----+-----+-----|
+			//       |  L  |  F  |  R  |
+			// (0,0)'-----'-----'-----'
+			
+			// FRONT / BACK
+			tl0u = 1 * u_tile_step;
+			tl0v = 1 * v_tile_step;
+			tl1u = 2 * u_tile_step;
+			tl1v = 0 * v_tile_step;
+			du = u_tile_dim / _segmentsW;
+			dv = v_tile_dim / _segmentsH;
+			for (i=0; i<=_segmentsW; i++) {
+				for (j=0; j<=_segmentsH; j++) {
+					uvData[uidx++] = tl0u + i * du;
+					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
+					uvData[uidx++] = tl1u + (u_tile_dim - i * du);
+					uvData[uidx++] = tl1v + (v_tile_dim - j * dv);
 				}
 			}
-
-			for (i = 0; i <= _segmentsW; i++) {
-				outer_uv = u_tile_step + u_tile_dim * (i/_segmentsW);
-
-				for (j = 0; j <= _segmentsD; j++) {
-					uvData[uidx++] = outer_uv;
-					uvData[uidx++] = 1-v_tile_dim * (j/_segmentsD);
-					uvData[uidx++] = outer_uv;
-					uvData[uidx++] = v_tile_step + v_tile_dim * (j/_segmentsD);
+			
+			// TOP / BOTTOM
+			tl0u = 1 * u_tile_step;
+			tl0v = 0 * v_tile_step;
+			tl1u = 0 * u_tile_step;
+			tl1v = 0 * v_tile_step;
+			du = u_tile_dim / _segmentsW;
+			dv = v_tile_dim / _segmentsH;
+			for (i=0; i<=_segmentsW; i++) {
+				for (j=0; j<=_segmentsH; j++) {
+					uvData[uidx++] = tl0u + i * du;
+					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
+					uvData[uidx++] = tl1u + i * du;
+					uvData[uidx++] = tl1v + j * dv;
 				}
 			}
-
-			for (i = 0; i <= _segmentsH; i++) {
-				outer_uv = 2*u_tile_step + u_tile_dim * (i/_segmentsH);
-
-				for (j = 0; j <= _segmentsD; j++) {
-					uvData[uidx++] = 1-v_tile_dim * (j/_segmentsD);
-					uvData[uidx++] = 1-outer_uv;
-					uvData[uidx++] = v_tile_step + v_tile_dim * (j/_segmentsD);
-					uvData[uidx++] = 1-outer_uv;
+			
+			// LEFT / RIGHT
+			tl0u = 0 * u_tile_step;
+			tl0v = 1 * v_tile_step;
+			tl1u = 2 * u_tile_step;
+			tl1v = 1 * v_tile_step;
+			du = u_tile_dim / _segmentsW;
+			dv = v_tile_dim / _segmentsH;
+			for (i=0; i<=_segmentsW; i++) {
+				for (j=0; j<=_segmentsH; j++) {
+					uvData[uidx++] = tl0u + i * du;
+					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
+					uvData[uidx++] = tl1u + (u_tile_dim - i * du);
+					uvData[uidx++] = tl1v + (v_tile_dim - j * dv);
 				}
 			}
 
