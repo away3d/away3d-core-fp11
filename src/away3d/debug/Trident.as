@@ -1,5 +1,6 @@
 ﻿package away3d.debug
 {
+	import away3d.core.base.Geometry;
 	import away3d.debug.data.TridentLines;
 	import away3d.entities.Mesh;
 	import away3d.extrusions.LatheExtrude;
@@ -19,7 +20,7 @@
 	{
 		public function Trident(length:Number = 1000, showLetters:Boolean = true):void
 		{
-			super(null, null);
+			super(new Geometry(), null);
 			buildTrident(Math.abs((length == 0)? 10 : length), showLetters);
 		}
 		

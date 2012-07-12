@@ -2,6 +2,7 @@ package away3d.materials.passes
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
+	import away3d.core.base.Geometry;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
@@ -194,7 +195,7 @@ package away3d.materials.passes
 		// creates a new mesh in which all vertices are unique
 		private function createDedicatedMesh(source : SubGeometry) : Mesh
 		{
-			var mesh : Mesh = new Mesh(null, null);
+			var mesh : Mesh = new Mesh(new Geometry(), null);
 			var dest : SubGeometry = new SubGeometry();
 			var indexLookUp : Array = [];
 			var srcIndices : Vector.<uint> = source.indexData;
