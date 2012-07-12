@@ -228,14 +228,13 @@ package away3d.loaders.parsers
 			_materialNames = new Vector.<String>();
 			_byteData.position = _offsetSkins;
 			
-			var regExp:RegExp = new RegExp("[^a-zA-Z0-9\\_\\.]", "g");
+			var regExp:RegExp = new RegExp("[^a-zA-Z0-9\\_\/.]", "g");
 			for (var i : uint = 0; i < _numSkins; ++i) {
 				name = _byteData.readUTFBytes(64);
 				name = name.replace(regExp, "");
 				extIndex = name.lastIndexOf(".");
 				if (_ignoreTexturePath) {
 					slashIndex = name.lastIndexOf("/");
-					if (slashIndex < 0) slashIndex = 0;
 				}
                 if(name.toLowerCase().indexOf(".jpg") == -1 && name.toLowerCase().indexOf(".png") == -1){
                     name = name.substring(slashIndex+1, extIndex);
@@ -245,7 +244,7 @@ package away3d.loaders.parsers
                 }
 
 				_materialNames[i] = name;
-				// only support 1 skin
+				// only support 1 skin TODO: really?
 				if (dependencies.length == 0)
 					addDependency(name, new URLRequest(url));
 			}
