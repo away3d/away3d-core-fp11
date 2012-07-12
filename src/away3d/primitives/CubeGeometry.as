@@ -87,8 +87,12 @@ package away3d.primitives
 		}
 
 		/**
-		 * The type of uv mapping to use. When true, a texture will be subdivided in a 2x3 grid, each used for a single
-		 * face. When false, the entire image is mapped on each face.
+		 * The type of uv mapping to use. When false, the entire image is mapped on each face. 
+		 * When true, a texture will be subdivided in a 3x2 grid, each used for a single face.
+		 * Reading the tiles from left to right, top to bottom they represent the faces of the
+		 * cube in the following order: bottom, top, back, left, front, right. This creates
+		 * several shared edges (between the top, front, left and right faces) which simplifies
+		 * texture painting.
 		 */
 		public function get tile6() : Boolean
 		{
