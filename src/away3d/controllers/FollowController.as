@@ -13,9 +13,9 @@ package away3d.controllers
 	 * 
 	 * @see	away3d.containers.View3D
 	 */
-	public class CharacterFollowController extends HoverController
+	public class FollowController extends HoverController
 	{
-		public function CharacterFollowController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null, tiltAngle : Number = 45, distance : Number = 700 ) 
+		public function FollowController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null, tiltAngle : Number = 45, distance : Number = 700 ) 
 		{
 			super(targetObject, lookAtObject, 0, tiltAngle, distance);
 		}
