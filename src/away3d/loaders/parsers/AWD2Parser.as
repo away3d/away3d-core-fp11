@@ -710,8 +710,6 @@ package away3d.loaders.parsers
 		
 		private function parseMeshData(blockLength : uint) : Geometry
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var geom : Geometry;
 			var num_subs : uint;

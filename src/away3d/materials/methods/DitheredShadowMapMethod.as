@@ -128,11 +128,7 @@ package away3d.materials.methods
 					"sub " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".zz\n" + 	// uv-.5
 					"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +      // 2*(uv-.5)
 					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".y\n" +
-
-//					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-//					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
-//					"slt " + targetReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 
 					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +

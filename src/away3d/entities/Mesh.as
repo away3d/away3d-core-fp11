@@ -1,7 +1,6 @@
 ﻿package away3d.entities
 {
 	import away3d.animators.IAnimator;
-	import away3d.animators.data.*;
 	import away3d.arcane;
 	import away3d.containers.*;
 	import away3d.core.base.*;
@@ -212,6 +211,7 @@
 			clone.partition = partition;
 			clone.bounds = _bounds.clone();
 			clone.name = name;
+			clone.castsShadows = castsShadows;
 
 			var len : int = _subMeshes.length;
 			for (var i : int = 0; i < len; ++i) {

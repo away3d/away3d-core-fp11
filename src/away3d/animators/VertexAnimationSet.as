@@ -5,6 +5,8 @@ package away3d.animators
 	import away3d.core.managers.*;
 	import away3d.materials.passes.*;
 
+	import flash.utils.Dictionary;
+
 	/**
 	 * The animation data set used by vertex-based animators, containing vertex animation state data.
 	 * 
@@ -16,10 +18,13 @@ package away3d.animators
 				
 		private var _numPoses : uint;
 		private var _blendMode : String;
-		private var _streamIndex : uint;
-		private var _useNormals : Boolean;
-		private var _useTangents : Boolean;
-		
+		private var _streamIndices : Dictionary = new Dictionary(true);
+		private var _useNormals : Dictionary = new Dictionary(true);
+		private var _useTangents : Dictionary = new Dictionary(true);
+		private var _uploadNormals : Boolean;
+		private var _uploadTangents : Boolean;
+		private var _uploadIndex : uint;
+
 		/**
 		 * Returns the number of poses made available at once to the GPU animation code.
 		 */
@@ -41,7 +46,7 @@ package away3d.animators
 		 */
 		public function get streamIndex() : uint
 		{
-			return _streamIndex;
+			return _uploadIndex;
 		}
 		
 		/**
@@ -49,7 +54,7 @@ package away3d.animators
 		 */
 		public function get useNormals() : Boolean
 		{
-			return _useNormals;
+			return _uploadNormals;
 		}
 		
 		/**
@@ -85,6 +90,9 @@ package away3d.animators
 		 */
 		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
+			_uploadNormals = _useNormals[pass];
+			_uploadTangents = _useTangents[pass];
+			_uploadIndex = _streamIndices[pass];
 		}
 		
 		/**
@@ -92,11 +100,11 @@ package away3d.animators
 		 */
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(_streamIndex, null, null, 0);
-			if (_useNormals)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 1, null, null, 0);
-			if (_useTangents)
-				stage3DProxy.setSimpleVertexBuffer(_streamIndex + 2, null, null, 0);
+			stage3DProxy.setSimpleVertexBuffer(_uploadIndex, null, null, 0);
+			if (_uploadNormals)
+				stage3DProxy.setSimpleVertexBuffer(_streamIndices + 1, null, null, 0);
+			if (_uploadTangents)
+				stage3DProxy.setSimpleVertexBuffer(_streamIndices + 2, null, null, 0);
 		}
 		
 		/**
@@ -119,10 +127,11 @@ package away3d.animators
 			var temp2 : String = findTempReg(targetRegisters, temp1);
 			var regs : Array = ["x", "y", "z", "w"];
 			var len : uint = sourceRegisters.length;
-			_useNormals = len > 1;
-			_useTangents = len > 2;
+			var useTangents : Boolean = _useTangents[pass] = len > 2;
+			_useNormals[pass] = len > 1;
+
 			if (len > 2) len = 2;
-			_streamIndex = pass.numUsedStreams;
+			var streamIndex : uint = _streamIndices[pass] = pass.numUsedStreams;
 
 			var k : uint;
 			for (var i : uint = 0; i < len; ++i) {
@@ -131,7 +140,7 @@ package away3d.animators
 						code += "mul " + temp1 + ", " + sourceRegisters[i] + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
 					}
 					else {
-						code += "mul " + temp2 + ", va" + (_streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
+						code += "mul " + temp2 + ", va" + (streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
 						if (j < _numPoses - 1) code += "add " + temp1 + ", " + temp1 + ", " + temp2 + "\n";
 						else code += "add " + targetRegisters[i] + ", " + temp1 + ", " + temp2 + "\n";
 						++k;
@@ -139,7 +148,7 @@ package away3d.animators
 				}
 			}
 
-			if (_useTangents) {
+			if (useTangents) {
 				code += "dp3 " + temp1 + ".x, " + sourceRegisters[uint(2)] + ", " + targetRegisters[uint(1)] + "\n" +
 						"mul " + temp1 + ", " + targetRegisters[uint(1)] + ", " + temp1 + ".x			 \n" +
 						"sub " + targetRegisters[uint(2)] + ", " + sourceRegisters[uint(2)] + ", " + temp1 + "\n";
@@ -157,24 +166,24 @@ package away3d.animators
 			var regs : Array = ["x", "y", "z", "w"];
 			var temp1 : String = findTempReg(targetRegisters);
 			var k : uint;
-
-			_useNormals = len > 1;
-			_useTangents = len > 2;
+			var useTangents : Boolean = _useTangents[pass] = len > 2;
+			var useNormals : Boolean = _useNormals[pass] = len > 1;
+			var streamIndex : uint = _streamIndices[pass] = pass.numUsedStreams;
 
 			if (len > 2) len = 2;
 
 			code += "mov  " + targetRegisters[0] + ", " + sourceRegisters[0] + "\n";
-			if (_useNormals) code += "mov " + targetRegisters[1] + ", " + sourceRegisters[1] + "\n";
+			if (useNormals) code += "mov " + targetRegisters[1] + ", " + sourceRegisters[1] + "\n";
 
 			for (var i : uint = 0; i < len; ++i) {
 				for (var j : uint = 0; j < _numPoses; ++j) {
-					code += "mul " + temp1 + ", va" + (_streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n" +
+					code += "mul " + temp1 + ", va" + (streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n" +
 							"add " + targetRegisters[i] + ", " + targetRegisters[i] + ", " + temp1 + "\n";
 					k++;
 				}
 			}
 
-			if (_useTangents) {
+			if (useTangents) {
 				code += "dp3 " + temp1 + ".x, " + sourceRegisters[uint(2)] + ", " + targetRegisters[uint(1)] + "\n" +
 						"mul " + temp1 + ", " + targetRegisters[uint(1)] + ", " + temp1 + ".x			 \n" +
 						"sub " + targetRegisters[uint(2)] + ", " + sourceRegisters[uint(2)] + ", " + temp1 + "\n";

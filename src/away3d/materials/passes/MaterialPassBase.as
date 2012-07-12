@@ -47,6 +47,7 @@ package away3d.materials.passes
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = true;
+		protected var _depthCompareMode:String = Context3DCompareMode.LESS;
 
 		private var _bothSides : Boolean;
 
@@ -150,6 +151,16 @@ package away3d.materials.passes
 			_bothSides = value;
 		}
 		
+		public function get depthCompareMode() : String
+		{
+			return _depthCompareMode;
+		}
+
+		public function set depthCompareMode(value : String) : void
+		{
+			_depthCompareMode = value;
+		}
+
 		/**
 		 * The animation used to add vertex code to the shader code.
 		 */
@@ -277,6 +288,8 @@ package away3d.materials.passes
 				_rttData[1] = textureRatioY;
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _rttData, 1);
 			}
+
+			context.setDepthTest( true, _depthCompareMode );
 		}
 
 		/**

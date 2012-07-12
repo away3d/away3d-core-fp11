@@ -56,16 +56,7 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
-			// TODO: not used
-			target = target; 
-			
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-
-//			_context.setDepthTest(false, Context3DCompareMode.LESS);
-
-//			if (entityCollector.skyBox)
-//				drawSkyBox(entityCollector);
-
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector);
 

@@ -1,6 +1,5 @@
 ﻿package away3d.materials.passes
 {
-	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;

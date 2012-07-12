@@ -5,7 +5,8 @@ package away3d.animators
 	import away3d.core.managers.*;
 	import away3d.entities.*;
 	import away3d.materials.passes.*;
-	
+	import away3d.materials.passes.MaterialPassBase;
+
 	/**
 	 * Provides an interface for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
 	 * 
@@ -74,8 +75,7 @@ package away3d.animators
 		/**
 		 * Sets the GPU render state required by the animation that is dependent of the rendered object.
 		 * 
-		 * @param context The context which is currently performing the rendering.
-		 * @param pass The material pass which is currently used to render the geometry.
+		 * @param stage3DProxy The Stage3DProxy object which is currently being used for rendering.
 		 * @param renderable The object currently being rendered.
 		 * @param vertexConstantOffset The first available vertex register to write data to if running on the gpu.
 		 * @param vertexStreamOffset The first available vertex stream to write vertex data to if running on the gpu.
