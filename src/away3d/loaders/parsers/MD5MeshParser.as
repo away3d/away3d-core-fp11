@@ -152,7 +152,7 @@ package away3d.loaders.parsers
 					calculateMaxJointCount();
 					_animationSet = new SkeletonAnimationSet(_maxJointCount);
 
-					_mesh = new Mesh();
+					_mesh = new Mesh(null, null);
 					_geometry = _mesh.geometry;
 
 					for (var i : int = 0; i < _meshData.length; ++i) {

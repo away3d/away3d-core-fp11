@@ -89,7 +89,7 @@ package away3d.tools.commands
 		public function applyToContainer(object:ObjectContainer3D, name:String = ""):Mesh
 		{
 			initHolders();
-			_baseReceiver = new Mesh(new Geometry());
+			_baseReceiver = new Mesh(new Geometry(), null);
 			_baseReceiver.position = object.position;
 			
 			parseContainer(object);

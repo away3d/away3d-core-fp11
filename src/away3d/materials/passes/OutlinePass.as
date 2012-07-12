@@ -194,7 +194,7 @@ package away3d.materials.passes
 		// creates a new mesh in which all vertices are unique
 		private function createDedicatedMesh(source : SubGeometry) : Mesh
 		{
-			var mesh : Mesh = new Mesh();
+			var mesh : Mesh = new Mesh(null, null);
 			var dest : SubGeometry = new SubGeometry();
 			var indexLookUp : Array = [];
 			var srcIndices : Vector.<uint> = source.indexData;

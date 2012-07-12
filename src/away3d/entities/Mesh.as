@@ -30,7 +30,7 @@
 		 * @param material The material with which to render the Mesh.
 		 * @param geometry The geometry used by the mesh that provides it with its shape.
 		 */
-		public function Mesh(geometry : Geometry = null, material : MaterialBase = null)
+		public function Mesh(geometry : Geometry, material : MaterialBase)
 		{
 			super();
 			_subMeshes = new Vector.<SubMesh>();

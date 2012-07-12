@@ -273,7 +273,7 @@ package away3d.loaders.parsers
 				for(i = 0;i<_objs.length;++i){
 					ref = _objs[i];
 					if(ref && ref.geo){
-						mesh = new Mesh();
+						mesh = new Mesh(null, null);
 						mesh.name = ref.name;
 						_meshList.push(mesh);
 						

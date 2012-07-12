@@ -148,7 +148,7 @@ package away3d.loaders.parsers
 					
 					// TODO: Create a mesh only when encountered (if it makes sense
 					// for this file format) and return it using finalizeAsset()
-					_mesh = new Mesh();
+					_mesh = new Mesh(null, null);
 					_mesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
 					
 					_geometry = _mesh.geometry;
