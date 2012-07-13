@@ -72,6 +72,11 @@ package away3d.core.managers
 			_stageProxies[stage3DProxy.stage3DIndex] = null;
 		}
 
+		/**
+		 * Get the next available stage3DProxy. An error is thrown if there are no Stage3DProxies available 
+		 * @param forceSoftware Whether to force software mode even if hardware acceleration is available.
+		 * @return The allocated stage3DProxy
+		 */
 		public function getFreeStage3DProxy(forceSoftware:Boolean = false) : Stage3DProxy
 		{
 			var i : uint;

@@ -3,22 +3,22 @@
 	import flash.geom.Vector3D;
 
 	/**
-	* Class WireFrameGrid generates a grid of lines on a given plane<code>WireFrameGrid</code>
-	* @param	subDivision		[optional] uint . Default is 10;
-	* @param	gridSize				[optional] uint . Default is 100;
-	* @param	color					[optional] uint . Default is 0xFFFFFF;
-	* @param	thickness			[optional] Number . Default is 1;
-	* @param	plane					[optional] String . Default is PLANE_XZ;
-	* @param	worldPlanes		[optional] Boolean . Default is false.
-	* If true, class displays the 3 world planes, at 0,0,0. with subDivision, thickness and and gridSize. Overrides color and plane settings.
-	*/
-		
+	 * A WireframeSphere primitive mesh
+	 */
 	public class WireframeSphere extends WireframePrimitiveBase
 	{
 		private var _segmentsW : uint;
 		private var _segmentsH : uint;
 		private var _radius : Number;
 
+		/**
+		 * Creates a new WireframeSphere object.
+		 * @param radius The radius of the sphere.
+		 * @param segmentsW Defines the number of horizontal segments that make up the sphere.
+		 * @param segmentsH Defines the number of vertical segments that make up the sphere.
+		 * @param color The colour of the wireframe lines
+		 * @param thickness The thickness of the wireframe lines
+		 */	
 		public function WireframeSphere(radius : Number = 50, segmentsW : uint = 16, segmentsH : uint = 12, color:uint = 0xFFFFFF, thickness:Number = 1) {
 			super(color, thickness);
 
@@ -27,6 +27,9 @@
 			_segmentsH = segmentsH;
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		override protected function buildGeometry() : void
 		{
 			var vertices : Vector.<Number> = new Vector.<Number>();
@@ -96,6 +99,5 @@
 				}
 			}
 		}
-
 	}
 }

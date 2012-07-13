@@ -1,6 +1,5 @@
 ﻿package away3d.containers
 {
-	import away3d.core.pick.PickingType;
 	import away3d.core.pick.IPicker;
 	import away3d.Away3D;
 	import away3d.arcane;
@@ -9,7 +8,6 @@
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.pick.RaycastPicker;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.DepthRenderer;
 	import away3d.core.render.Filter3DRenderer;
@@ -23,6 +21,7 @@
 	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
@@ -80,6 +79,7 @@
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
 		private var _shareContext:Boolean = false;
+		private var _viewScissoRect:Rectangle;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -137,6 +137,8 @@
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
+			_viewScissoRect = new Rectangle();
+
 			initHitField();
 			
 			_mouse3DManager = new Mouse3DManager();
@@ -181,6 +183,8 @@
 			
 			_localPos.y = _stage3DProxy.y;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
+			
+			_viewScissoRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
 		}
 
 		/**
@@ -402,6 +406,8 @@
 			_depthTextureInvalid = true;
 
 			_renderer.viewWidth = value;
+			
+			_viewScissoRect.width = value;
 
 			invalidateBackBuffer();
 		}
@@ -433,6 +439,8 @@
 			_depthTextureInvalid = true;
 
 			_renderer.viewHeight = value;
+
+			_viewScissoRect.height = value;
 			
 			invalidateBackBuffer();
 		}
@@ -444,8 +452,9 @@
 			
 			_localPos.x = value;
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
+			_viewScissoRect.x = value;
 			
-			if (_stage3DProxy)
+			if (_stage3DProxy && !_shareContext)
 				_stage3DProxy.x = _globalPos.x;
 		}
 
@@ -455,8 +464,9 @@
 			
 			_localPos.y = value;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
+			_viewScissoRect.y = value;
 			
-			if (_stage3DProxy)
+			if (_stage3DProxy && !_shareContext)
 				_stage3DProxy.y = _globalPos.y;
 		}
 		
@@ -464,7 +474,7 @@
 		{
 			super.visible = value;
 			
-			if (_stage3DProxy)
+			if (_stage3DProxy && !_shareContext)
 				_stage3DProxy.visible = value;
 		}
 
@@ -569,11 +579,6 @@
 			if (_backBufferInvalid)
 				updateBackBuffer();
 				
-			if (_shareContext) {
-				width = _stage3DProxy.width;
-				height = _stage3DProxy.height;
-			}
-
 			if (!_parentIsStage)
 				updateGlobalPos();
 
@@ -600,7 +605,12 @@
 				if (!_shareContext) _stage3DProxy._context3D.present();
 			} else {
 				_renderer.shareContext = _shareContext;
-				_renderer.render(_entityCollector);
+				if (_shareContext) {
+					_renderer.render(_entityCollector, null, _viewScissoRect);
+				} else {
+					_renderer.render(_entityCollector);
+				}
+				
 			}
 
 			// clean up data for this render

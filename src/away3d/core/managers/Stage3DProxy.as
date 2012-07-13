@@ -104,6 +104,13 @@ package away3d.core.managers
 			requestContext(forceSoftware);
 		}
 
+		/**
+		 * Assign the vertex buffer in the Context3D ready for use in the shader.
+		 * @param index The index for the vertex buffer setting
+		 * @param buffer The Vertex Buffer 
+		 * @param format The format of the buffer. See Context3DVertexBufferFormat
+		 * @param offset An offset from the start of the data
+		 */
 		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int = 0) : void
 		{
 			// force setting null
@@ -113,6 +120,11 @@ package away3d.core.managers
 			_activeVertexBuffers[index] = buffer;
 		}
 
+		/**
+		 * Assign the texture in the Context3D ready for use in the shader.
+		 * @param index The index where the texture is set
+		 * @param texture The texture to set
+		 */
 		public function setTextureAt(index : int, texture : TextureBase) : void
 		{
 			if (texture != null && _activeTextures[index] == texture) return;
@@ -122,6 +134,10 @@ package away3d.core.managers
 			_activeTextures[index] = texture;
 		}
 
+		/**
+		 * Set the shader program for the subsequent rendering calls.
+		 * @param program3D The program to be used in the shader
+		 */
 		public function setProgram(program3D : Program3D) : void
 		{
 			if (_activeProgram3D == program3D) return;
@@ -160,6 +176,9 @@ package away3d.core.managers
 				_context3D.configureBackBuffer(backBufferWidth, backBufferHeight, antiAlias, enableDepthAndStencil);
 		}
 
+		/*
+		 * Indicates whether the depth and stencil buffer is used
+		 */
 		public function get enableDepthAndStencil() : Boolean
 		{
 			return _enableDepthAndStencil;
@@ -194,6 +213,9 @@ package away3d.core.managers
 				_context3D.setRenderToBackBuffer();
 		}
 		
+		/* 
+		 * Clear and reset the back buffer when using a shared context
+		 */
 		public function clear() : void
 		{
 			if (!_context3D) return;
@@ -211,6 +233,9 @@ package away3d.core.managers
 		}
 
 
+		/* 
+		 * Display the back rendering buffer
+		 */
 		public function present() : void
 		{
 			if (!_context3D) return;
