@@ -47,7 +47,7 @@ package away3d.animators.nodes
 			_stitchDirty = true;
 		}
 		
-		override protected function updateTime(time:uint):void
+		override protected function updateTime(time:int):void
 		{
 			super.updateTime(time);
 			

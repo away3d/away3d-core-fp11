@@ -152,7 +152,7 @@ package away3d.animators.nodes
 			}
 		}
 		
-		override protected function updateTime(time : Number) : void
+		override protected function updateTime(time : int) : void
 		{
 			super.updateTime(time);
 			

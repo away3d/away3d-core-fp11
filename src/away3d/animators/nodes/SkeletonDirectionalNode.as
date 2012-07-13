@@ -31,7 +31,7 @@ package away3d.animators.nodes
 			super();
 		}
 		
-		override public function reset(time:Number):void
+		override public function reset(time:int):void
 		{
 			super.reset(time);
 			
@@ -133,7 +133,7 @@ package away3d.animators.nodes
 		}
 		
 		
-		override protected function updateTime(time : Number) : void
+		override protected function updateTime(time : int) : void
 		{
 			super.updateTime(time);
 			
