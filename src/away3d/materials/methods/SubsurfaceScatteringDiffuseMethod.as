@@ -173,7 +173,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_totalScatterColorReg = regCache.getFreeFragmentVectorTemp();
 			_colorReg = regCache.getFreeFragmentConstant();
@@ -182,7 +182,7 @@ package away3d.materials.methods
 			vo.secondaryFragmentConstantsIndex = _colorReg.index*4;
 
 			regCache.addFragmentTempUsages(_totalScatterColorReg, 1);
-			return super.getFragmentAGALPreLightingCode(vo, regCache);
+			return super.getFragmentPreLightingCode(vo, regCache);
 		}
 
 		/**

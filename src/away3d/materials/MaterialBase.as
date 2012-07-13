@@ -53,7 +53,7 @@ package away3d.materials
 
 		private var _owners : Vector.<IMaterialOwner>;
 
-		private var _premultiplied : Boolean;
+		private var _alphaPremultiplied : Boolean;
 		private var _requiresBlending : Boolean;
 
 		private var _blendMode : String = BlendMode.NORMAL;
@@ -243,12 +243,14 @@ package away3d.materials
 		*/
 		public function get alphaPremultiplied() : Boolean
 		{
-			return _premultiplied;
+			return _alphaPremultiplied;
 		}
 		public function set alphaPremultiplied(value : Boolean) : void
 		{
-			_premultiplied = value;
-			updateBlendFactors();
+			_alphaPremultiplied = value;
+
+			for (var i : int = 0; i < _numPasses; ++i)
+				_passes[i].alphaPremultiplied = value;
 		}
 		
 
@@ -507,6 +509,7 @@ package away3d.materials
 		{
 			_passes[_numPasses++] = pass;
 			pass.animationSet = _animationSet;
+			pass.alphaPremultiplied = _alphaPremultiplied;
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
@@ -523,7 +526,7 @@ package away3d.materials
 			switch (_blendMode) {
 				case BlendMode.NORMAL:
 				case BlendMode.LAYER:
-					_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
 					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
 					_requiresBlending = false; // only requires blending if a subtype needs it
 					break;
@@ -533,7 +536,7 @@ package away3d.materials
 					_requiresBlending = true;
 					break;
 				case BlendMode.ADD:
-					_srcBlend = _premultiplied? Context3DBlendFactor.ONE : Context3DBlendFactor.SOURCE_ALPHA;
+					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
 					_destBlend = Context3DBlendFactor.ONE;
 					_requiresBlending = true;
 					break;

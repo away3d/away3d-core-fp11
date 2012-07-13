@@ -69,6 +69,8 @@ package away3d.materials.passes
 		private var _oldRect : Rectangle;
 		private static var _rttData : Vector.<Number>;
 
+		protected var _alphaPremultiplied : Boolean;
+
 		/**
 		 * Creates a new MaterialPassBase object.
 		 */
@@ -388,6 +390,16 @@ package away3d.materials.passes
 		arcane function set numLightProbes(value : uint) : void
 		{
 			_numLightProbes = value;
+		}
+
+		public function get alphaPremultiplied() : Boolean
+		{
+			return _alphaPremultiplied;
+		}
+
+		public function set alphaPremultiplied(value : Boolean) : void
+		{
+			_alphaPremultiplied = value;
 		}
 	}
 }

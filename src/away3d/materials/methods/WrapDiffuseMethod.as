@@ -69,9 +69,9 @@ package away3d.materials.methods
 			_wrapFactor = 1/(value+1);
 		}
 
-		arcane override function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = super.getFragmentAGALPreLightingCode(vo, regCache);
+			var code : String = super.getFragmentPreLightingCode(vo, regCache);
 			_wrapDataRegister = regCache.getFreeFragmentConstant();
 			vo.secondaryFragmentConstantsIndex = _wrapDataRegister.index*4;
 

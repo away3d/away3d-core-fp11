@@ -148,7 +148,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 
@@ -257,8 +257,7 @@ package away3d.materials.methods
 					vo.fragmentConstantsIndex = cutOffReg.index*4;
 					code += "sub " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n" +
 							"kil " + t + ".w\n" +
-							"add " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n" +
-							"div " + t + ", " + t + ", " + t + ".w\n";
+							"add " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n";
 				}
 			}
 			else {
