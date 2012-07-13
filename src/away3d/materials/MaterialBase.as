@@ -310,9 +310,13 @@ package away3d.materials
 		arcane function renderDepth(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (_distanceBasedDepthRender) {
+				if (renderable.animator)
+					_distancePass.updateAnimationState(renderable, stage3DProxy);
 				_distancePass.render(renderable, stage3DProxy, camera, _lightPicker);
 			}
 			else {
+				if (renderable.animator)
+					_depthPass.updateAnimationState(renderable, stage3DProxy);
 				_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
 			}
 		}
