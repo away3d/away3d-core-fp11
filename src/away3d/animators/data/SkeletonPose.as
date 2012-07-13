@@ -4,7 +4,7 @@ package away3d.animators.data
 	
 	/**
 	 * A collection of pose objects, determining the pose for an entire skeleton.
-	 * The <code>jointPoses</code> vector object corresponds to a skeleton's <code>joints<ccode> vector object, however, there is no
+	 * The <code>jointPoses</code> vector object corresponds to a skeleton's <code>joints</code> vector object, however, there is no
 	 * reference to a skeleton's instance, since several skeletons can be influenced by the same pose (eg: animation
 	 * clips are added to any animator with a valid skeleton)
 	 * 
