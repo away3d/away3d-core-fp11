@@ -83,57 +83,12 @@
 			var endX:Number = end.x, endY:Number = end.y, endZ:Number = end.z;
 			var startR:Number = segment._startR, startG:Number = segment._startG, startB:Number = segment._startB;
 			var endR:Number = segment._endR, endG:Number = segment._endG, endB:Number = segment._endB;
-			var index:uint = segment.index;
 			var t:Number = segment.thickness;
 
-
-			_vertices[index++] = startX;
-			_vertices[index++] = startY;
-			_vertices[index++] = startZ;
-			_vertices[index++] = endX;
-			_vertices[index++] = endY;
-			_vertices[index++] = endZ;
-			_vertices[index++] = t;
-			_vertices[index++] = startR;
-			_vertices[index++] = startG;
-			_vertices[index++] = startB;
-			_vertices[index++] = 1;
-
-			_vertices[index++] = endX;
-			_vertices[index++] = endY;
-			_vertices[index++] = endZ;
-			_vertices[index++] = startX;
-			_vertices[index++] = startY;
-			_vertices[index++] = startZ;
-			_vertices[index++] = -t;
-			_vertices[index++] = endR;
-			_vertices[index++] = endG;
-			_vertices[index++] = endB;
-			_vertices[index++] = 1;
-
-			_vertices[index++] = startX;
-			_vertices[index++] = startY;
-			_vertices[index++] = startZ;
-			_vertices[index++] = endX;
-			_vertices[index++] = endY;
-			_vertices[index++] = endZ;
-			_vertices[index++] = -t;
-			_vertices[index++] = startR;
-			_vertices[index++] = startG;
-			_vertices[index++] = startB;
-			_vertices[index++] = 1;
-
-			_vertices[index++] = endX;
-			_vertices[index++] = endY;
-			_vertices[index++] = endZ;
-			_vertices[index++] = startX;
-			_vertices[index++] = startY;
-			_vertices[index++] = startZ;
-			_vertices[index++] = t;
-			_vertices[index++] = endR;
-			_vertices[index++] = endG;
-			_vertices[index++] = endB;
-			_vertices[index++] = 1;
+			_vertices.push(startX, startY, startZ, endX, endY, endZ, t, startR, startG, startB, 1);
+			_vertices.push(endX, endY, endZ, startX, startY, startZ, -t, endR, endG, endB, 1);
+			_vertices.push(startX, startY, startZ, endX, endY, endZ, -t, startR, startG, startB, 1);
+			_vertices.push(endX, endY, endZ, startX, startY, startZ, t, endR, endG, endB, 1);
 
 			_vertexBufferDirty = true;
 		}

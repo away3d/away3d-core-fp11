@@ -22,6 +22,7 @@
 
 		private var _constants : Vector.<Number> = new Vector.<Number>(4, true);
 		private var _calcMatrix : Matrix3D;
+		private var _thickness : Number;
 
 		/**
 		 * Creates a new WireframePass object.
@@ -30,8 +31,8 @@
 		{
 			_calcMatrix = new Matrix3D();
 
-			_constants[0] = thickness/1000;
-			_constants[1] = 0.0039215686274509803921568627451;	// 1/255 ;)
+			_thickness = thickness;
+			_constants[1] = 1/255;
 
 			super();
 		}
@@ -43,9 +44,9 @@
 		{
 			code =
 					"m44 vt0, va0, vc8				\n" + // transform Q0 to eye space
-							"m44 vt1, va1, vc8				\n" + // transform Q1 to eye space
+					"m44 vt1, va1, vc8				\n" + // transform Q1 to eye space
 
-							"sub vt2, vt1, vt0 				\n" + // L = Q1 - Q0
+					"sub vt2, vt1, vt0 				\n" + // L = Q1 - Q0
 
 						// test if behind camera near plane
 						// if 0 - Q0.z < Camera.near then the point needs to be clipped
@@ -115,8 +116,6 @@
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
-			// TODO: not used
-			lightPicker = lightPicker;
 			var context : Context3D = stage3DProxy._context3D;
 			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);
 			context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
@@ -139,6 +138,7 @@
 			var context : Context3D = stage3DProxy._context3D;
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
+			_constants[0] = _thickness/Math.min(stage3DProxy.width, stage3DProxy.height);
 			// value to convert distance from camera to model length per pixel width
 			_constants[2] = camera.lens.near;
 
