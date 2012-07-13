@@ -74,6 +74,24 @@ package away3d.animators
 		}
 		
 		/**
+		 * Returns the skeleton object in use by the animator - this defines the number and heirarchy of joints used by the
+		 * skinned geoemtry to which skeleon animator is applied.
+		 */
+		public function get skeleton():Skeleton
+		{
+			return _skeleton;
+		}
+		
+		/**
+		 * Indicates whether the skeleton animator is disabled by default for GPU rendering, something that allows the animator to perform calculation on the GPU.
+		 * Defaults to false.
+		 */
+		public function get forceCPU():Boolean
+		{
+			return _forceCPU;
+		}
+		
+		/**
 		 * Offers the option of enabling GPU accelerated animation on skeletons larger than 32 joints
 		 * by condensing the number of joint index values required per mesh. Only applicable to
 		 * skeleton animations that utilise more than one mesh object. Defaults to false.
