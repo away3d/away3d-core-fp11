@@ -300,7 +300,7 @@ package away3d.primitives
 			inc += 2*(_segmentsW + 1)*(_segmentsD + 1);
 			
 			for (i = 0; i <= _segmentsD; i++) {
-				outer_pos = hh - i*dh;
+				outer_pos = hd - i*dd;
 
 				for (j = 0; j <= _segmentsH; j++) {
 					// left
@@ -309,7 +309,7 @@ package away3d.primitives
 					vertices[vidx++] = -hw;
 					vertexNormals[vidx] = 0;
 					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hd + j*dd;
+					vertices[vidx++] = -hh + j*dh;
 					vertexNormals[vidx] = 0;
 					vertexTangents[vidx] = -1;
 					vertices[vidx++] = outer_pos;
@@ -320,7 +320,7 @@ package away3d.primitives
 					vertices[vidx++] = hw;
 					vertexNormals[vidx] = 0;
 					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hd + j*dd;
+					vertices[vidx++] = -hh + j*dh;
 					vertexNormals[vidx] = 0;
 					vertexTangents[vidx] = 1;
 					vertices[vidx++] = outer_pos;
