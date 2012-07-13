@@ -365,7 +365,12 @@ package away3d.materials
 			if (_lightPicker)
 				_lightPicker.collectLights(renderable, entityCollector);
 
-			_passes[index].render(renderable, stage3DProxy, entityCollector.camera, _lightPicker);
+			var pass : MaterialPassBase = _passes[index];
+
+			if (renderable.animator)
+				pass.updateAnimationState(renderable, stage3DProxy);
+
+			pass.render(renderable, stage3DProxy, entityCollector.camera, _lightPicker);
 		}
 
 

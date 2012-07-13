@@ -78,50 +78,55 @@ package away3d.animators
 		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			// todo: add code for when running on cpu
-			var i : uint;
-			var len : uint = _numPoses;
-			var index : uint = _vertexAnimationSet.streamIndex;
-			var context : Context3D = stage3DProxy._context3D;
 
 			// if no poses defined, set temp data
 			if (!_poses.length) {
-				if (_blendMode == VertexAnimationMode.ABSOLUTE) {
-					for (i = 1; i < len; ++i) {
-						stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
-						context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
-
-						if (_vertexAnimationSet.useNormals)
-							stage3DProxy.setSimpleVertexBuffer(index + (j++), renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
-					}
-				}
-					// todo: set temp data for additive?
+				setNullPose(stage3DProxy, renderable, vertexConstantOffset, vertexStreamOffset);
 				return;
 			}
 
 			// this type of animation can only be SubMesh
 			var subMesh : SubMesh = SubMesh(renderable);
 			var subGeom : SubGeometry;
-			var j : uint;
+			var i : uint;
+			var len : uint = _numPoses;
+
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 
 			if (_blendMode == VertexAnimationMode.ABSOLUTE) {
 				i = 1;
 				subGeom = _poses[uint(0)].subGeometries[subMesh._index];
-				if (subGeom) subMesh.subGeometry = subGeom;
+				// set the base sub-geometry so the material can simply pick up on this data
+				if (subGeom)
+					subMesh.subGeometry = subGeom;
 			}
 			else i = 0;
-			// set the base sub-geometry so the material can simply pick up on this data
-
-
 
 			for (; i < len; ++i) {
 				subGeom = _poses[i].subGeometries[subMesh._index] || subMesh.subGeometry;
-				stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.vertexBufferOffset);
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
+
+				stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.vertexBufferOffset);
 
 				if (_vertexAnimationSet.useNormals)
-					stage3DProxy.setSimpleVertexBuffer(index + (j++), subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.normalBufferOffset);
+					stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.normalBufferOffset);
 
 			}
+		}
+
+		private function setNullPose(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+		{
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
+
+			if (_blendMode == VertexAnimationMode.ABSOLUTE) {
+				var len : uint = _numPoses;
+				for (var i : uint = 1; i < len; ++i) {
+					stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
+
+					if (_vertexAnimationSet.useNormals)
+						stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
+				}
+			}
+			// todo: set temp data for additive?
 		}
 
 				

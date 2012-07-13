@@ -145,7 +145,7 @@ package away3d.animators
 			if (!hasEventListener(AnimatorEvent.START))
 				return;
 			
-			dispatchEvent(_startEvent || (_startEvent = new AnimatorEvent(AnimatorEvent.START, this)));
+			dispatchEvent(_startEvent ||= new AnimatorEvent(AnimatorEvent.START, this));
 		}
 		
 		/**

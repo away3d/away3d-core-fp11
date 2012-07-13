@@ -22,7 +22,6 @@ package away3d.animators
 		private var _useTangents : Dictionary = new Dictionary(true);
 		private var _uploadNormals : Boolean;
 		private var _uploadTangents : Boolean;
-		private var _uploadIndex : uint;
 
 		/**
 		 * Returns the number of poses made available at once to the GPU animation code.
@@ -38,14 +37,6 @@ package away3d.animators
 		public function get blendMode() : String
 		{
 			return _blendMode;
-		}
-		
-		/**
-		 * Returns the set stream index for the animation component of the GPU vertex shader.
-		 */
-		public function get streamIndex() : uint
-		{
-			return _uploadIndex;
 		}
 		
 		/**
@@ -91,7 +82,6 @@ package away3d.animators
 		{
 			_uploadNormals = _useNormals[pass];
 			_uploadTangents = _useTangents[pass];
-			_uploadIndex = _streamIndices[pass];
 		}
 		
 		/**
@@ -99,11 +89,12 @@ package away3d.animators
 		 */
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(_uploadIndex, null, null, 0);
+			var index : int = _streamIndices[pass];
+			stage3DProxy.setSimpleVertexBuffer(index, null, null);
 			if (_uploadNormals)
-				stage3DProxy.setSimpleVertexBuffer(_uploadIndex + 1, null, null, 0);
+				stage3DProxy.setSimpleVertexBuffer(index + 1, null, null);
 			if (_uploadTangents)
-				stage3DProxy.setSimpleVertexBuffer(_uploadIndex + 2, null, null, 0);
+				stage3DProxy.setSimpleVertexBuffer(index + 2, null, null);
 		}
 		
 		/**
@@ -126,27 +117,29 @@ package away3d.animators
 			var temp2 : String = findTempReg(targetRegisters, temp1);
 			var regs : Array = ["x", "y", "z", "w"];
 			var len : uint = sourceRegisters.length;
+			var constantReg : String = "vc" + pass.numUsedVertexConstants;
 			var useTangents : Boolean = _useTangents[pass] = len > 2;
 			_useNormals[pass] = len > 1;
 
 			if (len > 2) len = 2;
 			var streamIndex : uint = _streamIndices[pass] = pass.numUsedStreams;
 
-			var k : uint;
 			for (var i : uint = 0; i < len; ++i) {
-				for (var j : uint = 0; j < _numPoses; ++j) {
-					if (j == 0) {
-						code += "mul " + temp1 + ", " + sourceRegisters[i] + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
-					}
-					else {
-						code += "mul " + temp2 + ", va" + (streamIndex + k) + ", vc" + pass.numUsedVertexConstants + "." + regs[j] + "\n";
-						if (j < _numPoses - 1) code += "add " + temp1 + ", " + temp1 + ", " + temp2 + "\n";
-						else code += "add " + targetRegisters[i] + ", " + temp1 + ", " + temp2 + "\n";
-						++k;
-					}
+				code += "mul " + temp1 + ", " + sourceRegisters[i] + ", " + constantReg + "." + regs[0] + "\n";
+
+				for (var j : uint = 1; j < _numPoses; ++j) {
+					code += "mul " + temp2 + ", va" + streamIndex + ", " + constantReg + "." + regs[j] + "\n";
+
+					if (j < _numPoses - 1)
+						code += "add " + temp1 + ", " + temp1 + ", " + temp2 + "\n";
+
+					++streamIndex;
 				}
+
+				code += "add " + targetRegisters[i] + ", " + temp1 + ", " + temp2 + "\n";
 			}
 
+			// add code for bitangents if tangents are used
 			if (useTangents) {
 				code += "dp3 " + temp1 + ".x, " + sourceRegisters[uint(2)] + ", " + targetRegisters[uint(1)] + "\n" +
 						"mul " + temp1 + ", " + targetRegisters[uint(1)] + ", " + temp1 + ".x			 \n" +

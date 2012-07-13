@@ -149,9 +149,10 @@ package away3d.core.render
 					var rttMask : int = _activeMaterial.passRendersToTexture(j)? 1 : 2;
 
 					if ((rttMask & which) != 0) {
+						_context.setDepthTest(true, Context3DCompareMode.LESS);
 						_activeMaterial.activatePass(j, _stage3DProxy, camera, _textureRatioX, _textureRatioY);
 						do {
-					 		_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector);
+							_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector);
 							item2 = item2.next;
 						} while (item2 && item2.renderable.material == _activeMaterial);
 						_activeMaterial.deactivatePass(j, _stage3DProxy);

@@ -217,6 +217,16 @@ package away3d.materials.passes
 		}
 
 		/**
+		 * Sets up the animation state. This needs to be called before render()
+		 *
+		 * @private
+		 */
+		arcane function updateAnimationState(renderable : IRenderable, stage3DProxy : Stage3DProxy)
+		{
+			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
+		}
+
+		/**
 		 * Renders an object to the current render target5.
 		 *
 		 * @private
@@ -224,14 +234,8 @@ package away3d.materials.passes
 		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
-
-			if (renderable.animator)
-				renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
-
 			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
-
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
