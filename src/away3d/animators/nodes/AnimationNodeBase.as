@@ -15,7 +15,7 @@ package away3d.animators.nodes
 		protected var _time:int;
 		protected var _totalDuration : uint = 0;
 		protected var _rootDelta : Vector3D = new Vector3D();
-		protected var _rootDeltaDirty : Boolean;
+		protected var _rootDeltaDirty : Boolean = true;
 		protected var _looping:Boolean = true;
 		
 		/**

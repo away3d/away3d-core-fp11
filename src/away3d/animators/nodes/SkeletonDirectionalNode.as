@@ -22,9 +22,9 @@ package away3d.animators.nodes
 		private var _inputB : ISkeletonAnimationNode;
 		private var _blendWeight : Number = 0;
 		private var _direction:Number = 0;
-		private var _blendDirty:Boolean;
+		private var _blendDirty:Boolean = true;
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean;
+		private var _skeletonPoseDirty : Boolean = true;
 		
 		public function SkeletonDirectionalNode()
 		{

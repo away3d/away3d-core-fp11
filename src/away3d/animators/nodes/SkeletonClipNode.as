@@ -15,7 +15,7 @@ package away3d.animators.nodes
 		private var _nextPose : SkeletonPose;
 		
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean;
+		private var _skeletonPoseDirty : Boolean = true;
 		
 		/**
 		 * 

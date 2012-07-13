@@ -15,7 +15,7 @@ package away3d.animators.nodes
 		protected var _stitchDirty:Boolean = true;
 		protected var _stitchFinalFrame:Boolean = false;
 		protected var _blendWeight : Number;
-		protected var _framesDirty : Boolean;
+		protected var _framesDirty : Boolean = true;
 		protected var _numFrames : uint = 0;
 		protected var _lastFrame : uint;
 		protected var _currentFrame : uint;

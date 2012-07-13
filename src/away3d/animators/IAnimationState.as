@@ -32,7 +32,7 @@ package away3d.animators
 		 * 
 		 * @param time The absolute time (in milliseconds) of the animator's playhead.
 		 */
-		function reset(time:Number):void
+		function reset(time:int):void
 		
 		/**
 		 * Used by the animation set on adding a state, defines the internal owner and state name
