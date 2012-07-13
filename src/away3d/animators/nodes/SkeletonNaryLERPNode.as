@@ -1,6 +1,3 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.animators.nodes
 {
 	import away3d.animators.data.*;
@@ -8,41 +5,63 @@ package away3d.animators.nodes
 	
 	import flash.geom.*;
 	
-
-
+	/**
+	 * A skeleton animation node that uses an n-dimensional array of animation node inputs to blend a lineraly interpolated output of a skeleton pose.
+	 */
 	public class SkeletonNaryLERPNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
-		/**
-		 * The weights for each joint. The total needs to equal 1.
-		 */
 		private var _blendWeights : Vector.<Number>;
 		private var _inputs : Vector.<ISkeletonAnimationNode>;
 		private var _numInputs : uint;
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
 		private var _skeletonPoseDirty : Boolean =true;
 		
+		/**
+		 * Creates a new <code>SkeletonNaryLERPNode</code> object.
+		 */
 		public function SkeletonNaryLERPNode()
 		{
 			super();
 			_inputs = new Vector.<ISkeletonAnimationNode>();
 			_blendWeights = new Vector.<Number>();
 		}
-
+		
+		/**
+		 * Returns an integer representing the input index of the given skeleton animation node.
+		 * 
+		 * @param input The skeleton animation node for with the input index is requested.
+		 */
 		public function getInputIndex(input : ISkeletonAnimationNode) : int
 		{
 			return _inputs.indexOf(input);
 		}
-
+		
+		/**
+		 * Returns the skeleton animation node object that resides at the given input index.
+		 * 
+		 * @param index The input index for which the skeleton animation node is requested.
+		 */
 		public function getInputAt(index : uint) : ISkeletonAnimationNode
 		{
 			return _inputs[index];
 		}
 		
+		/**
+		 * Returns the blend weight of the skeleton aniamtion node that resides at the given input index.
+		 * 
+		 * @param index The input index for which the skeleton animation node blend weight is requested.
+		 */
 		public function getBlendWeightAt(index : uint) : Number
 		{
 			return _blendWeights[index];
 		}
 		
+		/**
+		 * Sets the blend weight of the skeleton aniamtion node that resides at the given input index.
+		 * 
+		 * @param index The input index on which the skeleton animation node blend weight is to be set.
+		 * @param blendWeight The blend weight value to use for the given skeleton animation node index.
+		 */
 		public function setBlendWeightAt(index : uint, blendWeight:Number) : void
 		{
 			_blendWeights[index] = blendWeight;
@@ -50,13 +69,21 @@ package away3d.animators.nodes
 			_rootDeltaDirty = true;
 			_skeletonPoseDirty = true;
 		}
-
+		
+		/**
+		 * Adds a new skeleton animation node input to the animation node.
+		 */
 		public function addInput(input : ISkeletonAnimationNode) : void
 		{
 			_inputs[_numInputs] = input;
 			_blendWeights[_numInputs++] = 0;
 		}
 		
+		/**
+		 * Returns the current skeleton pose of the animation node based on the blend weight values given to the input nodes.
+		 * 
+		 * @see #setBlendWeightAt
+		 */
 		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
 		{
 			if (_skeletonPoseDirty)
@@ -65,7 +92,11 @@ package away3d.animators.nodes
 			return _skeletonPose;
 		}
 		
-		
+		/**
+		 * Updates the output skeleton pose of the node based on the blend weight values given to the input nodes.
+		 * 
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 */
 		public function updateSkeletonPose(skeleton : Skeleton) : void
 		{
 			_skeletonPoseDirty = false;
@@ -152,6 +183,9 @@ package away3d.animators.nodes
 			}
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateTime(time : int) : void
 		{
 			super.updateTime(time);
@@ -164,6 +198,9 @@ package away3d.animators.nodes
 			_skeletonPoseDirty = true;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateRootDelta() : void
 		{
 			_rootDeltaDirty = false;

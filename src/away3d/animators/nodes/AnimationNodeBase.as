@@ -36,7 +36,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Returns a 3d vector representing the translation delta of the animating entity for the current frame of animation
+		 * Returns a 3d vector representing the translation delta of the animating entity for the current timestep of animation
 		 */		
 		public function get rootDelta() : Vector3D
 		{
@@ -56,7 +56,7 @@ package away3d.animators.nodes
 		/**
 		 * Resets the configuration of the node to its default state.
 		 * 
-		 * @param time The absolute time (in milliseconds) of the animator's playhead.
+		 * @param time The absolute time (in milliseconds) of the animator's playhead position.
 		 */
 		public function reset(time:int):void
 		{
@@ -71,7 +71,7 @@ package away3d.animators.nodes
 		/**
 		 * Updates the configuration of the node to its current state.
 		 * 
-		 * @param time The absolute time (in milliseconds) of the animator's play head.
+		 * @param time The absolute time (in milliseconds) of the animator's play head position.
 		 * 
 		 * @see away3d.animators.AnimatorBase#update()
 		 */		
@@ -103,6 +103,8 @@ package away3d.animators.nodes
 
 		/**
 		 * Updates the node's root delta position
+		 * 
+		 * @see #rootDelta
 		 */
 		protected function updateRootDelta() : void
 		{
@@ -111,6 +113,8 @@ package away3d.animators.nodes
 		
 		/**
 		 * Updates the node's internal playhead position.
+		 * 
+		 * @param time The local time (in milliseconds) of the node's playhead position.
 		 */
 		protected function updateTime(time:int) : void
 		{
@@ -121,6 +125,8 @@ package away3d.animators.nodes
 		
 		/**
 		 * Updates the node's looping state
+		 * 
+		 * @see #looping
 		 */
 		protected function updateLooping():void
 		{

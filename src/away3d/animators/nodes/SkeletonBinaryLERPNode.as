@@ -4,21 +4,37 @@ package away3d.animators.nodes
 	import away3d.animators.data.*;
 	
 	import flash.geom.*;
-
+	
+	/**
+	 * A skeleton animation node that uses two animation node inputs to blend a lineraly interpolated output of a skeleton pose.
+	 */
 	public class SkeletonBinaryLERPNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
-		public var inputA : ISkeletonAnimationNode;
-		public var inputB : ISkeletonAnimationNode;
-		
 		private var _blendWeight : Number = 0;
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
 		private var _skeletonPoseDirty : Boolean = true;
 		
+		/**
+		 * Defines input node A to use for the blended output.
+		 */
+		public var inputA : ISkeletonAnimationNode;
+		
+		/**
+		 * Defines input node B to use for the blended output.
+		 */
+		public var inputB : ISkeletonAnimationNode;
+		
+		/**
+		 * Creates a new <code>SkeletonBinaryLERPNode</code> object.
+		 */
 		public function SkeletonBinaryLERPNode()
 		{
 			super();
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function reset(time:int):void
 		{
 			super.reset(time);
@@ -27,6 +43,13 @@ package away3d.animators.nodes
 			inputB.reset(time);
 		}
 		
+		/**
+		 * Returns the current skeleton pose of the animation node based on the blendWeight value between input nodes.
+		 * 
+		 * @see #inputA
+		 * @see #inputB
+		 * @see #blendWeight
+		 */
 		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
 		{
 			if (_skeletonPoseDirty)
@@ -34,7 +57,14 @@ package away3d.animators.nodes
 			
 			return _skeletonPose;
 		}
-
+		
+		/**
+		 * Defines a fractional value between 0 and 1 representing the blending ratio between inputA (0) and inputB (1),
+		 * used to produce the skeleton pose output.
+		 * 
+		 * @see inputA
+		 * @see inputB
+		 */
 		public function get blendWeight() : Number
 		{
 			return _blendWeight;
@@ -48,6 +78,11 @@ package away3d.animators.nodes
 			_skeletonPoseDirty = true;
 		}
 		
+		/**
+		 * Updates the output skeleton pose of the node based on the blendWeight value between input nodes.
+		 * 
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 */
 		protected function updateSkeletonPose(skeleton : Skeleton) : void
 		{
 			_skeletonPoseDirty = false;

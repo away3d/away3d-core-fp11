@@ -1,32 +1,45 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.animators.nodes
 {
-
 	import away3d.animators.data.*;
 	import away3d.core.math.*;
 	
 	import flash.geom.*;
 	
-
-
-	public class SkeletonAdditiveNode extends AnimationNodeBase implements ISkeletonAnimationNode
+	/**
+	 * A skeleton animation node that uses a difference input pose with a base input pose to blend a linearly interpolated output of a skeleton pose.
+	 */
+	public class SkeletonDifferenceNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
-		public var baseInput : ISkeletonAnimationNode;
-		public var differenceInput : ISkeletonAnimationNode;
-		
 		private var _blendWeight : Number = 0;
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
 		private var _skeletonPoseDirty : Boolean = true;
-		
 		private static var _tempQuat : Quaternion = new Quaternion();
 
-		public function SkeletonAdditiveNode()
+		/**
+		 * Defines a base input node to use for the blended output.
+		 */
+		public var baseInput : ISkeletonAnimationNode;
+		
+		/**
+		 * Defines a difference input node to use for the blended output.
+		 */
+		public var differenceInput : ISkeletonAnimationNode;
+		
+		/**
+		 * Creates a new <core>SkeletonAdditiveNode</code> object.
+		 */
+		public function SkeletonDifferenceNode()
 		{
 			super();
 		}
 		
+		/**
+		 * Defines a fractional value between 0 and 1 representing the blending ratio between the base input (0) and difference input (1),
+		 * used to produce the skeleton pose output.
+		 * 
+		 * @see #baseInput
+		 * @see #differenceInput
+		 */
 		public function get blendWeight() : Number
 		{
 			return _blendWeight;
@@ -40,6 +53,9 @@ package away3d.animators.nodes
 			_skeletonPoseDirty = true;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function reset(time:int):void
 		{
 			super.reset(time);
@@ -48,6 +64,13 @@ package away3d.animators.nodes
 			differenceInput.reset(time);
 		}
 		
+		/**
+		 * Returns the current skeleton pose of the animation node based on the blendWeight value between base input and difference input nodes.
+		 * 
+		 * @see #baseInput
+		 * @see #differenceInput
+		 * @see #blendWeight
+		 */
 		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
 		{
 			if (_skeletonPoseDirty)
@@ -56,6 +79,9 @@ package away3d.animators.nodes
 			return _skeletonPose;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateTime(time : int) : void
 		{
 			super.updateTime(time);
@@ -66,7 +92,11 @@ package away3d.animators.nodes
 			_skeletonPoseDirty = true;
 		}
 
-		// todo: return whether or not update was performed
+		/**
+		 * Updates the output skeleton pose of the node based on the blendWeight value between base input and difference input nodes.
+		 * 
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 */
 		public function updateSkeletonPose(skeleton : Skeleton) : void
 		{
 			_skeletonPoseDirty = false;
@@ -99,7 +129,10 @@ package away3d.animators.nodes
 				tr.z = basePos.z + _blendWeight*diffPos.z;
 			}
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateRootDelta() : void
 		{
 			var deltA : Vector3D = baseInput.rootDelta;

@@ -6,7 +6,7 @@ package away3d.animators.nodes
 	import flash.geom.*;
 
 	/**
-	 * @author robbateman
+	 * Provides an abstract base class for nodes with time-based animation data in an animation blend tree.
 	 */
 	public class AnimationClipNodeBase extends AnimationNodeBase implements IAnimationNode
 	{
@@ -25,6 +25,10 @@ package away3d.animators.nodes
 		
 		public var fixedFrameRate:Boolean = true;
 		
+		/**
+		 * Defines if looping content blends the final frame of animation data with the first (true) or works on the
+		 * assumption that both first and last frames are identical (false). Defaults to false.
+		 */
 		public function get stitchFinalFrame() : Boolean
 		{
 			return _stitchFinalFrame;
@@ -41,6 +45,13 @@ package away3d.animators.nodes
 			_framesDirty = true;
 		}
 		
+		/**
+		 * Returns a fractional value between 0 and 1 representing the blending ratio of the current playhead position
+		 * between the current frame (0) and next frame (1) of the animation.
+		 * 
+		 * @see #currentFrame
+		 * @see #nextFrame
+		 */
 		public function get blendWeight() : Number
 		{
 			if (_framesDirty)
@@ -49,16 +60,46 @@ package away3d.animators.nodes
 			return _blendWeight;
 		}
 		
+		/**
+		 * Returns a vector of time values representing the duration (in milliseconds) of each animation frame in the clip.
+		 */
 		public function get durations():Vector.<uint>
 		{
 			return _durations;
 		}
 		
+		/**
+		 * Returns the current frame of animation in the clip based on the internal playhead position.
+		 */
+		public function get currentFrame() : uint
+		{
+			if (_framesDirty)
+				updateFrames();
+			
+			return _currentFrame;
+		}
+		
+		/**
+		 * Returns the next frame of animation in the clip based on the internal playhead position.
+		 */
+		public function get nextFrame() : uint
+		{
+			if (_framesDirty)
+				updateFrames();
+			
+			return _nextFrame;
+		}
+		/**
+		 * Creates a new <code>AnimationClipNodeBase</code> object.
+		 */
 		public function AnimationClipNodeBase()
 		{
 			super();
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateLooping():void
 		{
 			super.updateLooping();
@@ -66,6 +107,13 @@ package away3d.animators.nodes
 			_stitchDirty = true;
 		}
 		
+		/**
+		 * Updates the nodes internal playhead to determine the current and next animation frame, and the blendWeight between the two.
+		 * 
+		 * @see #currentFrame
+		 * @see #nextFrame
+		 * @see #blendWeight
+		 */
 		protected function updateFrames() : void
 		{
 			_framesDirty = false;
@@ -111,6 +159,11 @@ package away3d.animators.nodes
 			}
 		}
 		
+		/**
+		 * Updates the node's final frame stitch state.
+		 * 
+		 * @see #stitchFinalFrame
+		 */
 		protected function updateStitch():void
 		{
 			_stitchDirty = false;

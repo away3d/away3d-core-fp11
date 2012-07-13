@@ -1,11 +1,12 @@
 package away3d.animators.nodes
 {
-	import flash.geom.Vector3D;
 	import away3d.core.base.*;
-	import away3d.library.assets.*;
+
+	import flash.geom.*;
+	
 
 	/**
-	 * @author robbateman
+	 * A vertex animation node containing time-based animation data as individual geometry obejcts.
 	 */
 	public class VertexClipNode extends AnimationClipNodeBase implements IVertexAnimationNode
 	{
@@ -14,6 +15,9 @@ package away3d.animators.nodes
 		private var _currentGeometry : Geometry;
 		private var _nextGeometry : Geometry;
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function get currentGeometry() : Geometry
 		{
 			if (_framesDirty)
@@ -22,7 +26,9 @@ package away3d.animators.nodes
 			return _currentGeometry;
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		public function get nextGeometry() : Geometry
 		{
 			if (_framesDirty)
@@ -31,15 +37,28 @@ package away3d.animators.nodes
 			return _nextGeometry;
 		}
 		
+		/**
+		 * Returns a vector of geometry frames representing the vertex values of each animation frame in the clip.
+		 */
 		public function get frames():Vector.<Geometry>
 		{
 			return _frames;
 		}
 		
+		/**
+		 * Creates a new <code>VertexClipNode</code> object.
+		 */
 		public function VertexClipNode()
 		{
 		}
 		
+		/**
+		 * Adds a geometry object to the internal timeline of the animation node.
+		 * 
+		 * @param geometry The geometry object to add to the timeline of the node.
+		 * @param duration The specified duration of the frame in milliseconds.
+		 * @param translation The absolute translation of the frame, used in root delta calculations for mesh movement.
+		 */
 		public function addFrame(geometry : Geometry, duration : uint, translation:Vector3D = null) : void
 		{
 			_frames.push(geometry);
@@ -51,13 +70,19 @@ package away3d.animators.nodes
 			_stitchDirty = true;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateTime(time:int):void
 		{
 			super.updateTime(time);
 			
 			_framesDirty = true;
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateFrames() : void
 		{
 			super.updateFrames();
@@ -70,6 +95,9 @@ package away3d.animators.nodes
 				_nextGeometry = _frames[_nextFrame];
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateStitch():void
 		{
 			super.updateStitch();

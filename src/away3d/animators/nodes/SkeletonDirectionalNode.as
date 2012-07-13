@@ -7,17 +7,12 @@ package away3d.animators.nodes
 	import away3d.animators.data.*;
 	
 	import flash.geom.*;
-
+	
+	/**
+	 * A skeleton animation node that uses four directional input poses with an input direction to blend a linearly interpolated output of a skeleton pose.
+	 */
 	public class SkeletonDirectionalNode extends AnimationNodeBase implements ISkeletonAnimationNode
 	{
-		/**
-		 * The weights for each joint. The total needs to equal 1.
-		 */
-		public var forward : ISkeletonAnimationNode;
-		public var backward : ISkeletonAnimationNode;
-		public var left : ISkeletonAnimationNode;
-		public var right : ISkeletonAnimationNode;
-		
 		private var _inputA : ISkeletonAnimationNode;
 		private var _inputB : ISkeletonAnimationNode;
 		private var _blendWeight : Number = 0;
@@ -26,30 +21,25 @@ package away3d.animators.nodes
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
 		private var _skeletonPoseDirty : Boolean = true;
 		
-		public function SkeletonDirectionalNode()
-		{
-			super();
-		}
+		/**
+		 * Defines the forward configured input node to use for the blended output.
+		 */
+		public var forward : ISkeletonAnimationNode;
 		
-		override public function reset(time:int):void
-		{
-			super.reset(time);
-			
-			forward.reset(time);
-			backward.reset(time);
-			left.reset(time);
-			right.reset(time);
-		}
+		/**
+		 * Defines the backwards configured input node to use for the blended output.
+		 */
+		public var backward : ISkeletonAnimationNode;
 		
-		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
-		{
-			if (_skeletonPoseDirty)
-				updateSkeletonPose(skeleton);
-			
-			return _skeletonPose;
-		}
-
-		// between 0 - 360
+		/**
+		 * Defines the left configured input node to use for the blended output.
+		 */
+		public var left : ISkeletonAnimationNode;
+		
+		/**
+		 * Defines the direction in degrees of the aniamtion between the forwards (0), right(90) backwards (180) and left(270) input nodes, 
+		 * used to produce the skeleton pose output.
+		 */
 		public function set direction(value : Number) : void
 		{
 			if (_direction == value)
@@ -66,7 +56,52 @@ package away3d.animators.nodes
 		{
 			return _direction;
 		}
+		
+		/**
+		 * Defines the right configured input node to use for the blended output.
+		 */
+		public var right : ISkeletonAnimationNode;
+		
+		public function SkeletonDirectionalNode()
+		{
+			super();
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function reset(time:int):void
+		{
+			super.reset(time);
+			
+			forward.reset(time);
+			backward.reset(time);
+			left.reset(time);
+			right.reset(time);
+		}
+		
+		/**
+		 * Returns the current skeleton pose of the animation node based on the direction value between forward, backwards, left and right input nodes.
+		 * 
+		 * @see #forward
+		 * @see #backwards
+		 * @see #left
+		 * @see #right
+		 * @see #direction
+		 */
+		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
+		{
+			if (_skeletonPoseDirty)
+				updateSkeletonPose(skeleton);
+			
+			return _skeletonPose;
+		}
 
+		/**
+		 * Updates the output skeleton pose of the node based on the direction value between forward, backwards, left and right input nodes.
+		 * 
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 */
 		public function updateSkeletonPose(skeleton : Skeleton) : void
 		{
 			_skeletonPoseDirty = false;
@@ -100,7 +135,43 @@ package away3d.animators.nodes
 				tr.z = p1.z + _blendWeight*(p2.z - p1.z);
 			}
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateTime(time : int) : void
+		{
+			super.updateTime(time);
+			
+			_inputA.update(time);
+			_inputB.update(time);
+			
+			_skeletonPoseDirty = true;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateRootDelta() : void
+		{
+			_rootDeltaDirty = false;
+			
+			if (_blendDirty)
+				updateBlend();
+			
+			var deltA : Vector3D = _inputA.rootDelta;
+			var deltB : Vector3D = _inputB.rootDelta;
+			
+			_rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
+			_rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
+			_rootDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
+		}
+		
+		/**
+		 * Updates the blend value for the animation output based on the direction value between forward, backwards, left and right input nodes.
+		 * 
+		 * @private
+		 */
 		private function updateBlend() : void
 		{
 			_blendDirty = false;
@@ -130,32 +201,6 @@ package away3d.animators.nodes
 				_inputB = forward;
 				_blendWeight = (_direction-270)/90;
 			}
-		}
-		
-		
-		override protected function updateTime(time : int) : void
-		{
-			super.updateTime(time);
-			
-			_inputA.update(time);
-			_inputB.update(time);
-			
-			_skeletonPoseDirty = true;
-		}
-		
-		override protected function updateRootDelta() : void
-		{
-			_rootDeltaDirty = false;
-			
-			if (_blendDirty)
-				updateBlend();
-			
-			var deltA : Vector3D = _inputA.rootDelta;
-			var deltB : Vector3D = _inputB.rootDelta;
-			
-			_rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
-			_rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
-			_rootDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
 		}
 	}
 }

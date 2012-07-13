@@ -5,7 +5,7 @@ package away3d.animators.nodes
 	import flash.geom.*;
 
 	/**
-	 * @author robbateman
+	 * A skeleton animation node containing time-based animation data as individual skeleton poses.
 	 */
 	public class SkeletonClipNode extends AnimationClipNodeBase implements ISkeletonAnimationNode
 	{
@@ -13,25 +13,27 @@ package away3d.animators.nodes
 		private var _rootPos : Vector3D = new Vector3D();
 		private var _currentPose : SkeletonPose;
 		private var _nextPose : SkeletonPose;
+		private var _oldFrame:uint;
 		
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
 		private var _skeletonPoseDirty : Boolean = true;
 		
 		/**
-		 * 
+		 * Determines whether to use SLERP equations (true) or LERP equations (false) in the calculation
+		 * of the output skeleton pose. Defaults to false.
 		 */
 		public var highQuality:Boolean = false;
 		
-		
+		/**
+		 * Returns a vector of skeleton poses representing the pose of each animation frame in the clip.
+		 */
 		public function get frames():Vector.<SkeletonPose>
 		{
 			return _frames;
 		}
 		
-		private var _oldFrame:uint;
-		
 		/**
-		 * 
+		 * Returns the current skeleton pose frame of animation in the clip based on the internal playhead position.
 		 */
 		public function get currentPose() : SkeletonPose
 		{
@@ -42,7 +44,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * 
+		 * Returns the next skeleton pose frame of animation in the clip based on the internal playhead position.
 		 */
 		public function get nextPose() : SkeletonPose
 		{
@@ -52,12 +54,16 @@ package away3d.animators.nodes
 			return _nextPose;
 		}
 		
-		
-		
+		/**
+		 * Creates a new <code>SkeletonClipNode</code> object.
+		 */
 		public function SkeletonClipNode()
 		{
 		}
 		
+		/**
+		 * Returns the current skeleton pose of the animation in the clip based on the internal playhead position.
+		 */
 		public function getSkeletonPose(skeleton:Skeleton):SkeletonPose
 		{
 			if (_skeletonPoseDirty)
@@ -66,6 +72,12 @@ package away3d.animators.nodes
 			return _skeletonPose;
 		}
 		
+		/**
+		 * Adds a skeleton pose frame to the internal timeline of the animation node.
+		 * 
+		 * @param skeletonPose The skeleton pose object to add to the timeline of the node.
+		 * @param duration The specified duration of the frame in milliseconds.
+		 */
 		public function addFrame(skeletonPose : SkeletonPose, duration : uint) : void
 		{
 			_frames.push(skeletonPose);
@@ -76,6 +88,9 @@ package away3d.animators.nodes
 			_stitchDirty = true;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateTime(time:int):void
 		{
 			super.updateTime(time);
@@ -86,7 +101,9 @@ package away3d.animators.nodes
 		
 		
 		/**
-		 * @inheritDoc
+		 * Updates the output skeleton pose of the node based on the internal playhead position.
+		 * 
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
 		 */
 		protected function updateSkeletonPose(skeleton:Skeleton) : void
 		{
@@ -177,6 +194,9 @@ package away3d.animators.nodes
 			_oldFrame = _nextFrame;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateFrames() : void
 		{
 			super.updateFrames();
@@ -189,6 +209,9 @@ package away3d.animators.nodes
 				_nextPose = _frames[_nextFrame];
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateStitch():void
 		{
 			super.updateStitch();
