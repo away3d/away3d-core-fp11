@@ -21,13 +21,12 @@ package away3d.primitives
 
 		/**
 		 * Creates a new Cube object.
-		 * @param material The material with which to render the object.
 		 * @param width The size of the cube along its X-axis.
 		 * @param height The size of the cube along its Y-axis.
 		 * @param depth The size of the cube along its Z-axis.
-		 * @param segmentsW The number of segments that make up the cube along the X-axis. Defaults to 1.
-		 * @param segmentsH The number of segments that make up the cube along the Y-axis. Defaults to 1.
-		 * @param segmentsD The number of segments that make up the cube along the Z-axis. Defaults to 1.
+		 * @param segmentsW The number of segments that make up the cube along the X-axis.
+		 * @param segmentsH The number of segments that make up the cube along the Y-axis.
+		 * @param segmentsD The number of segments that make up the cube along the Z-axis.
 		 * @param tile6 The type of uv mapping to use. When true, a texture will be subdivided in a 2x3 grid, each used for a single face. When false, the entire image is mapped on each face.
 		 */
 		public function CubeGeometry(width : Number = 100, height : Number = 100, depth : Number = 100,

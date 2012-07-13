@@ -22,7 +22,6 @@ package away3d.primitives
 
 		/**
 		 * Creates a new Cone object.
-		 * @param material The material with which to render the cone.
 		 * @param radius The radius of the bottom end of the cone
 		 * @param height The height of the cone
 		 * @param segmentsW Defines the number of horizontal segments that make up the cone. Defaults to 16.

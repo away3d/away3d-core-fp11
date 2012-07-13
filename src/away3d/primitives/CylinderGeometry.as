@@ -407,7 +407,6 @@ package away3d.primitives
 		
 		/**
 		 * Creates a new Cylinder object.
-		 * @param material The material with which to render the cylinder.
 		 * @param topRadius The radius of the top end of the cylinder.
 		 * @param bottomRadius The radius of the bottom end of the cylinder
 		 * @param height The radius of the bottom end of the cylinder

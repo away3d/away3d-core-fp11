@@ -16,7 +16,6 @@ package away3d.primitives
 
 		/**
 		 * Creates a new Capsule object.
-		 * @param material The material with which to render the capsule.
 		 * @param radius The radius of the capsule.
 		 * @param height The height of the capsule.
 		 * @param segmentsW Defines the number of horizontal segments that make up the capsule. Defaults to 16.

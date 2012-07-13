@@ -249,8 +249,8 @@ package away3d.primitives
 		 * Creates a new <code>Torus</code> object.
 		 * @param radius The radius of the torus.
 		 * @param tuebRadius The radius of the inner tube of the torus.
-		 * @param segmentsR Defines the number of horizontal segments that make up the torus. Defaults to 16.
-		 * @param segmentsT Defines the number of vertical segments that make up the torus. Defaults to 8.
+		 * @param segmentsR Defines the number of horizontal segments that make up the torus.
+		 * @param segmentsT Defines the number of vertical segments that make up the torus.
 		 * @param yUp Defines whether the torus poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
 		public function TorusGeometry(radius : Number = 50, tubeRadius : Number = 50, segmentsR : uint = 16, segmentsT : uint = 8, yUp : Boolean = true)
