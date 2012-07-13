@@ -29,7 +29,7 @@ package away3d.entities
 		private var _boundsIsShown : Boolean = false;
 		private var _shaderPickingDetails:Boolean;
 		
-		arcane var _pickingCollision:PickingCollisionVO;
+		arcane var _pickingCollisionVO:PickingCollisionVO;
 		arcane var _pickingCollider:IPickingCollider;
 
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
@@ -61,10 +61,10 @@ package away3d.entities
 		 */
 		public function get pickingCollisionVO():PickingCollisionVO
 		{
-			if (!_pickingCollision)
-				_pickingCollision = new PickingCollisionVO(this);
+			if (!_pickingCollisionVO)
+				_pickingCollisionVO = new PickingCollisionVO(this);
 
-			return _pickingCollision;
+			return _pickingCollisionVO;
 		}
 
 		/**

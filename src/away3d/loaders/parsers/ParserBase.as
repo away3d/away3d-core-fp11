@@ -9,7 +9,6 @@ package away3d.loaders.parsers
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.tools.utils.TextureUtils;
 	
@@ -199,14 +198,6 @@ package away3d.loaders.parsers
 		{
 			_dataFormat = format;
 			_dependencies = new Vector.<ResourceDependency>();
-		}
-		
-		/**
-		 * The url or id of the data or file to be parsed.
-		 */
-		public function get defaultBitmapData() : BitmapData
-		{
-			return DefaultBitmapData.bitmapData;
 		}
 		
 		/**

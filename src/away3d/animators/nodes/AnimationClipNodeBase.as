@@ -11,18 +11,19 @@ package away3d.animators.nodes
 	public class AnimationClipNodeBase extends AnimationNodeBase implements IAnimationNode
 	{
 		private var _animationStatePlaybackComplete:AnimationStateEvent;
-		private var _fixedFrameRate:Boolean = true;
 		
 		protected var _stitchDirty:Boolean = true;
 		protected var _stitchFinalFrame:Boolean = false;
 		protected var _blendWeight : Number;
-		protected var _framesDirty : Boolean;
+		protected var _framesDirty : Boolean = true;
 		protected var _numFrames : uint = 0;
 		protected var _lastFrame : uint;
 		protected var _currentFrame : uint;
 		protected var _nextFrame : uint;
-		protected var _durations : Vector.<Number> = new Vector.<Number>();
+		protected var _durations : Vector.<uint> = new Vector.<uint>();
 		protected var _totalDelta : Vector3D = new Vector3D();
+		
+		public var fixedFrameRate:Boolean = true;
 		
 		public function get stitchFinalFrame() : Boolean
 		{
@@ -48,7 +49,7 @@ package away3d.animators.nodes
 			return _blendWeight;
 		}
 		
-		public function get durations():Vector.<Number>
+		public function get durations():Vector.<uint>
 		{
 			return _durations;
 		}
@@ -73,9 +74,9 @@ package away3d.animators.nodes
 				updateStitch();
 			
 			var dur : uint = 0, frameTime : uint;
-			var time : Number = _time;
+			var time : int = _time;
 			
-			if ((time > _totalDuration || time < 0) && _looping) {
+			if ((time >= _totalDuration || time < 0) && _looping) {
 				time %= _totalDuration;
 				if (time < 0) time += _totalDuration;
 			}
@@ -86,7 +87,7 @@ package away3d.animators.nodes
 				_nextFrame = _lastFrame;
 				_blendWeight = 0;
 			}
-			else if (_fixedFrameRate) {
+			else if (fixedFrameRate) {
 				var t : Number = time/_totalDuration * _lastFrame;
 				_currentFrame = t;
 				_blendWeight = t - _currentFrame;

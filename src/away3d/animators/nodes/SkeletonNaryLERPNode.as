@@ -19,7 +19,7 @@ package away3d.animators.nodes
 		private var _inputs : Vector.<ISkeletonAnimationNode>;
 		private var _numInputs : uint;
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean;
+		private var _skeletonPoseDirty : Boolean =true;
 		
 		public function SkeletonNaryLERPNode()
 		{
@@ -152,7 +152,7 @@ package away3d.animators.nodes
 			}
 		}
 		
-		override protected function updateTime(time : Number) : void
+		override protected function updateTime(time : int) : void
 		{
 			super.updateTime(time);
 			

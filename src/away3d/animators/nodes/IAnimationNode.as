@@ -15,8 +15,8 @@ package away3d.animators.nodes
 		function get rootDelta() : Vector3D;
 		
 		
-		function update(time:Number):void;
+		function update(time:int):void;
 		
-		function reset(time:Number):void;
+		function reset(time:int):void;
 	}
 }

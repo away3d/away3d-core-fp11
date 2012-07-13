@@ -1,5 +1,6 @@
 package away3d.tools.helpers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -7,7 +8,6 @@ package away3d.tools.helpers
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
-	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
@@ -379,7 +379,7 @@ package away3d.tools.helpers
 			var geometry:Geometry = new Geometry();
 			geometry.addSubGeometry(subGeom);
 			
-			material = (!material && useDefaultMap)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData )) : material;
+			material = (!material && useDefaultMap)? DefaultMaterialManager.getDefaultMaterial() : material;
 			var m:Mesh = new Mesh(geometry, material);
 			
 			if(name != "") m.name = name;

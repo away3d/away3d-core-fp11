@@ -75,7 +75,7 @@ package away3d.animators
 		 * 
 		 * @param time The absolute time (in milliseconds) of the animator's playhead.
 		 */
-		public function reset(time:Number):void
+		public function reset(time:int):void
 		{
 			_rootNode.reset(time);
 		}

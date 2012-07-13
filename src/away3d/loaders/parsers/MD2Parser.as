@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.nodes.VertexClipNode;
 	import away3d.animators.VertexAnimationState;
 	import away3d.animators.VertexAnimationSet;
@@ -124,7 +125,7 @@ package away3d.loaders.parsers
 			// TODO: not used
 			resourceDependency = resourceDependency; 			
 			// apply system default
-			TextureMaterial(_mesh.material).texture = new BitmapTexture(defaultBitmapData);
+			_mesh.material = DefaultMaterialManager.getDefaultMaterial();
 		} 
 		
 		
@@ -150,7 +151,7 @@ package away3d.loaders.parsers
 					// for this file format) and return it using finalizeAsset()
 					_geometry = new Geometry();
 					_mesh = new Mesh(_geometry, null);
-					_mesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
+					_mesh.material = DefaultMaterialManager.getDefaultMaterial();
 					
 					//_geometry.animation = new VertexAnimation(2, VertexAnimationMode.ABSOLUTE);
 					//_animator = new VertexAnimator(VertexAnimationState(_mesh.animationState));
@@ -227,14 +228,13 @@ package away3d.loaders.parsers
 			_materialNames = new Vector.<String>();
 			_byteData.position = _offsetSkins;
 			
-			var regExp:RegExp = new RegExp("[^a-zA-Z0-9\\_\\.]", "g");
+			var regExp:RegExp = new RegExp("[^a-zA-Z0-9\\_\/.]", "g");
 			for (var i : uint = 0; i < _numSkins; ++i) {
 				name = _byteData.readUTFBytes(64);
 				name = name.replace(regExp, "");
 				extIndex = name.lastIndexOf(".");
 				if (_ignoreTexturePath) {
 					slashIndex = name.lastIndexOf("/");
-					if (slashIndex < 0) slashIndex = 0;
 				}
                 if(name.toLowerCase().indexOf(".jpg") == -1 && name.toLowerCase().indexOf(".png") == -1){
                     name = name.substring(slashIndex+1, extIndex);
@@ -244,7 +244,7 @@ package away3d.loaders.parsers
                 }
 
 				_materialNames[i] = name;
-				// only support 1 skin
+				// only support 1 skin TODO: really?
 				if (dependencies.length == 0)
 					addDependency(name, new URLRequest(url));
 			}

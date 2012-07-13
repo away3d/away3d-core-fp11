@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -264,8 +265,7 @@ package away3d.loaders.parsers
 						break;
 					
 					case "texture":
-						_activeMesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
-						_activeMesh.material.name = "m_"+_activeMesh.name;
+						_activeMesh.material = DefaultMaterialManager.getDefaultMaterial();
 						addDependency(String(_meshList.length-1), new URLRequest(tUrl));
 						break;
 					

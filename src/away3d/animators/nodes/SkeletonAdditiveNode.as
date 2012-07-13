@@ -18,7 +18,7 @@ package away3d.animators.nodes
 		
 		private var _blendWeight : Number = 0;
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean;
+		private var _skeletonPoseDirty : Boolean = true;
 		
 		private static var _tempQuat : Quaternion = new Quaternion();
 
@@ -40,7 +40,7 @@ package away3d.animators.nodes
 			_skeletonPoseDirty = true;
 		}
 		
-		override public function reset(time:Number):void
+		override public function reset(time:int):void
 		{
 			super.reset(time);
 			
@@ -56,7 +56,7 @@ package away3d.animators.nodes
 			return _skeletonPose;
 		}
 		
-		override protected function updateTime(time : Number) : void
+		override protected function updateTime(time : int) : void
 		{
 			super.updateTime(time);
 			
