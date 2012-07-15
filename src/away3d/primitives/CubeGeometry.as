@@ -326,8 +326,8 @@ package away3d.primitives
 					vertices[vidx++] = outer_pos;
 
 					if (i && j) {
-						tl = inc + 2 * ((i-1) * (_segmentsD + 1) + (j-1));
-						tr = inc + 2 * (i * (_segmentsD + 1) + (j-1));
+						tl = inc + 2 * ((i-1) * (_segmentsH + 1) + (j-1));
+						tr = inc + 2 * (i * (_segmentsH + 1) + (j-1));
 						bl = tl + 2;
 						br = tr + 2;
 						
