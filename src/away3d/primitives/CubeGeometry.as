@@ -419,9 +419,9 @@ package away3d.primitives
 			tl1u = 0 * u_tile_step;
 			tl1v = 0 * v_tile_step;
 			du = u_tile_dim / _segmentsW;
-			dv = v_tile_dim / _segmentsH;
+			dv = v_tile_dim / _segmentsD;
 			for (i=0; i<=_segmentsW; i++) {
-				for (j=0; j<=_segmentsH; j++) {
+				for (j=0; j<=_segmentsD; j++) {
 					uvData[uidx++] = tl0u + i * du;
 					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
 					uvData[uidx++] = tl1u + i * du;
@@ -434,9 +434,9 @@ package away3d.primitives
 			tl0v = 1 * v_tile_step;
 			tl1u = 2 * u_tile_step;
 			tl1v = 1 * v_tile_step;
-			du = u_tile_dim / _segmentsW;
+			du = u_tile_dim / _segmentsD;
 			dv = v_tile_dim / _segmentsH;
-			for (i=0; i<=_segmentsW; i++) {
+			for (i=0; i<=_segmentsD; i++) {
 				for (j=0; j<=_segmentsH; j++) {
 					uvData[uidx++] = tl0u + i * du;
 					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
