@@ -26,7 +26,7 @@ package away3d.animators.nodes
 		public var differenceInput : ISkeletonAnimationNode;
 		
 		/**
-		 * Creates a new <core>SkeletonAdditiveNode</code> object.
+		 * Creates a new <code>SkeletonAdditiveNode</code> object.
 		 */
 		public function SkeletonDifferenceNode()
 		{
