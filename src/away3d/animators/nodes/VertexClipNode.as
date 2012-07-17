@@ -53,6 +53,14 @@ package away3d.animators.nodes
 		}
 		
 		/**
+		 * @inheritDoc
+		 */
+		override protected function updateRootDelta() : void
+		{
+			//TODO:implement rootdelta functionality for vertex animations
+		}
+		
+		/**
 		 * Adds a geometry object to the internal timeline of the animation node.
 		 * 
 		 * @param geometry The geometry object to add to the timeline of the node.

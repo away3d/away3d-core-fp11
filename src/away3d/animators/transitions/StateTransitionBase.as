@@ -78,7 +78,7 @@ package away3d.animators.transitions
 		
 		public function update(time:Number):void
 		{
-			_blendWeight = _rootNode.blendWeight = (time - startTime)/(1000*blendSpeed);
+			_blendWeight = _rootNode.blendWeight = Math.abs(time - startTime)/(1000*blendSpeed);
 			
 			_rootNode.update(time);
 			

@@ -14,6 +14,7 @@ package away3d.animators.nodes
 		private var _currentPose : SkeletonPose;
 		private var _nextPose : SkeletonPose;
 		private var _oldFrame:uint;
+		private var _timeDir:int;
 		
 		private var _skeletonPose : SkeletonPose = new SkeletonPose();
 		private var _skeletonPoseDirty : Boolean = true;
@@ -93,6 +94,8 @@ package away3d.animators.nodes
 		 */
 		override protected function updateTime(time:int):void
 		{
+			_timeDir = (time - _time > 0)? 1 : -1;
+			
 			super.updateTime(time);
 			
 			_framesDirty = true;
@@ -161,10 +164,10 @@ package away3d.animators.nodes
 			var p1 : Vector3D, p2 : Vector3D, p3 : Vector3D;
 			
 			// jumping back, need to reset position
-			if (_nextFrame < _oldFrame) {
-				_rootPos.x -= _totalDelta.x;
-				_rootPos.y -= _totalDelta.y;
-				_rootPos.z -= _totalDelta.z;
+			if ((_timeDir > 0 && _nextFrame < _oldFrame) || (_timeDir < 0 && _nextFrame > _oldFrame)) {
+				_rootPos.x -= _totalDelta.x*_timeDir;
+				_rootPos.y -= _totalDelta.y*_timeDir;
+				_rootPos.z -= _totalDelta.z*_timeDir;
 			}
 			
 			var dx : Number = _rootPos.x;
