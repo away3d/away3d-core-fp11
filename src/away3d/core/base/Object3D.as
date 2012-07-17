@@ -11,36 +11,70 @@ package away3d.core.base
 	
 	use namespace arcane;
 	
+	
 	/**
-	 * Object3D provides a base class for any 3D object that has a (local) transformation.
+	 * Dispatched when the position of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 */
+	[Event(name="positionChanged",type="away3d.events.Object3DEvent")]
+	
+	/**
+	 * Dispatched when the scale of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 */
+	[Event(name="scaleChanged",type="away3d.events.Object3DEvent")]
+	
+	/**
+	 * Dispatched when the rotation of the 3d object changes.
+	 * 
+	 * @eventType away3d.events.Object3DEvent
+	 */
+	[Event(name="rotationChanged",type="away3d.events.Object3DEvent")]
+	
+	
+	/**
+	 * Object3D provides a base class for any 3D object that has a (local) transformation.<br/><br/>
 	 *
 	 * Standard Transform:
-	 * - The standard order for transformation is [parent transform] * (Translate+Pivot) * (Rotate) * (-Pivot) * (Scale) * [child transform]
-	 *   - This is the order of matrix multiplications, left-to-right.
-	 *   - The order of transformation is right-to-left, however!
-	 *       (Scale) happens before (-Pivot) happens before (Rotate) happens before (Translate+Pivot)
-	 *   - with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform]
-	 *       (Scale) happens before (Rotate) happens before (Translate)
-	 *   - This is based on code in updateTransform and ObjectContainer3D.updateSceneTransform().
-	 *   - Matrix3D prepend = operator on rhs - e.g. transform' = transform * rhs;
-	 *   - Matrix3D append =  operator on lhr - e.g. transform' = lhs * transform;
-	 *
+	 * <ul>
+	 *     <li> The standard order for transformation is [parent transform] * (Translate+Pivot) * (Rotate) * (-Pivot) * (Scale) * [child transform] </li>
+	 *     <li> This is the order of matrix multiplications, left-to-right. </li>
+	 *     <li> The order of transformation is right-to-left, however! 
+	 *          (Scale) happens before (-Pivot) happens before (Rotate) happens before (Translate+Pivot) 
+	 *          with no pivot, the above transform works out to [parent transform] * Translate * Rotate * Scale * [child transform]
+	 *          (Scale) happens before (Rotate) happens before (Translate) </li>
+	 *     <li> This is based on code in updateTransform and ObjectContainer3D.updateSceneTransform(). </li>
+	 *     <li> Matrix3D prepend = operator on rhs - e.g. transform' = transform * rhs; </li>
+	 *     <li> Matrix3D append =  operator on lhr - e.g. transform' = lhs * transform; </li>
+	 * </ul>
+	 * 
 	 * To affect Scale:
-	 * - set scaleX/Y/Z directly, or call scale(delta)
-	 *
+	 * <ul>
+	 *     <li> set scaleX/Y/Z directly, or call scale(delta) </li>
+	 * </ul>
+	 * 
 	 * To affect Pivot:
-	 * - set pivotPoint directly, or call movePivot()
+	 * <ul>
+	 *     <li> set pivotPoint directly, or call movePivot() </li>
+	 * </ul>
 	 *
 	 * To affect Rotate:
-	 * - set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()
-	 * - call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.
-	 *     rotationX/Y/Z will be reset based on these operations.
-	 *
+	 * <ul>
+	 *    <li> set rotationX/Y/Z individually (using degrees), set eulers [all 3 angles] (using radians), or call rotateTo()</li>
+	 *    <li> call pitch()/yaw()/roll()/rotate() to add an additional rotation *before* the current transform.
+	 *         rotationX/Y/Z will be reset based on these operations. </li>
+	 * </ul>
+	 * 
 	 * To affect Translate (post-rotate translate):
-	 * - set x/y/z/position or call moveTo().
-	 * - call translate(), which modifies x/y/z based on a delta vector.
-	 * - call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to add an
-	 *     additional translate *before* the current transform. x/y/z will be reset based on these operations.
+	 * 
+	 * <ul>
+	 *    <li> set x/y/z/position or call moveTo(). </li>
+	 *    <li> call translate(), which modifies x/y/z based on a delta vector. </li>
+	 *    <li> call moveForward()/moveBackward()/moveLeft()/moveRight()/moveUp()/moveDown()/translateLocal() to add an
+	 *         additional translate *before* the current transform. x/y/z will be reset based on these operations. </li>
+	 * </ul>
 	 */
 	
 	public class Object3D extends NamedAssetBase
@@ -70,58 +104,113 @@ package away3d.core.base
 		private var _eulers : Vector3D = new Vector3D();
 
 		private var _flipY : Matrix3D = new Matrix3D();
-		
-		private function notifyPositionChange():void
+		private var _listenToPositionChanged : Boolean;
+		private var _listenToRotationChanged : Boolean;
+		private var _listenToScaleChanged : Boolean;
+
+		private function invalidatePivot():void
+		{
+			_pivotZero = (_pivotPoint.x == 0) && (_pivotPoint.y == 0) && (_pivotPoint.z == 0);
+
+			invalidateTransform();
+		}
+
+		private function invalidatePosition():void
 		{
 			if (_positionDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_positionDirty = true;
 			
-			if (!hasEventListener(Object3DEvent.POSITION_CHANGED))
-				return;
+			invalidateTransform();
 			
+			if (_listenToPositionChanged)
+				notifyPositionChanged();
+		}
+
+		private function notifyPositionChanged() : void
+		{
 			if (!_positionChanged)
 				_positionChanged = new Object3DEvent(Object3DEvent.POSITION_CHANGED, this);
-			
+
 			dispatchEvent(_positionChanged);
 		}
-		
-		private function notifyRotationChange():void
+
+		override public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		{
+			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+			switch (type) {
+				case Object3DEvent.POSITION_CHANGED:
+					_listenToPositionChanged = true;
+					break;
+				case Object3DEvent.ROTATION_CHANGED:
+					_listenToRotationChanged = true;
+					break;
+				case Object3DEvent.SCALE_CHANGED:
+					_listenToRotationChanged = true;
+					break;
+			}
+		}
+
+
+		override public function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void
+		{
+			super.removeEventListener(type, listener, useCapture);
+
+			if (hasEventListener(type)) return;
+
+			switch (type) {
+				case Object3DEvent.POSITION_CHANGED:
+					_listenToPositionChanged = false;
+					break;
+				case Object3DEvent.ROTATION_CHANGED:
+					_listenToRotationChanged = false;
+					break;
+				case Object3DEvent.SCALE_CHANGED:
+					_listenToScaleChanged = false;
+					break;
+			}
+		}
+
+		private function invalidateRotation():void
 		{
 			if (_rotationDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_rotationDirty = true;
 			
-			if (!hasEventListener(Object3DEvent.ROTATION_CHANGED))
-				return;
+			invalidateTransform();
 			
+			if (_listenToRotationChanged)
+				notifyRotationChanged();
+		}
+
+		private function notifyRotationChanged() : void
+		{
 			if (!_rotationChanged)
 				_rotationChanged = new Object3DEvent(Object3DEvent.ROTATION_CHANGED, this);
-			
+
 			dispatchEvent(_rotationChanged);
 		}
 		
-		private function notifyScaleChange():void
+		private function invalidateScale():void
 		{
 			if (_scaleDirty)
 				return;
 			
-			invalidateTransform();
-			
 			_scaleDirty = true;
 			
-			if (!hasEventListener(Object3DEvent.SCALE_CHANGED))
-				return;
+			invalidateTransform();
 			
+			if (_listenToScaleChanged)
+				notifyScaleChanged();
+		}
+
+		private function notifyScaleChanged() : void
+		{
 			if (!_scaleChanged)
 				_scaleChanged = new Object3DEvent(Object3DEvent.SCALE_CHANGED, this);
-			
+
 			dispatchEvent(_scaleChanged);
 		}
 		
@@ -137,7 +226,7 @@ package away3d.core.base
 		protected var _pos:Vector3D = new Vector3D();
 		protected var _rot:Vector3D = new Vector3D();
 		protected var _sca:Vector3D = new Vector3D();
-		protected var trans:Matrix3D = new Matrix3D();
+		protected var _transformComponents : Vector.<Vector3D>;
 
 		/**
 		 * An object that can contain any extra data.
@@ -159,7 +248,7 @@ package away3d.core.base
 			
 			_x = val;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -177,7 +266,7 @@ package away3d.core.base
 			
 			_y = val;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -195,7 +284,7 @@ package away3d.core.base
 			
 			_z = val;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -213,7 +302,7 @@ package away3d.core.base
 			
 			_rotationX = val * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -231,7 +320,7 @@ package away3d.core.base
 			
 			_rotationY = val * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -249,7 +338,7 @@ package away3d.core.base
 			
 			_rotationZ = val * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -267,7 +356,7 @@ package away3d.core.base
 			
 			_scaleX = val;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 		
 		/**
@@ -285,7 +374,7 @@ package away3d.core.base
 			
 			_scaleY = val;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 		
 		/**
@@ -303,7 +392,7 @@ package away3d.core.base
 			
 			_scaleZ = val;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 		
 		/**
@@ -324,7 +413,7 @@ package away3d.core.base
 			_rotationY = value.y * MathConsts.DEGREES_TO_RADIANS;
 			_rotationZ = value.z * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 		
 		/**
@@ -334,10 +423,6 @@ package away3d.core.base
 		{
 			if (_transformDirty)
 				updateTransform();
-			
-			_positionDirty = false;
-			_rotationDirty = false;
-			_scaleDirty = false;
 			
 			return _transform;
 		}
@@ -362,7 +447,7 @@ package away3d.core.base
 				_y = vec.y;
 				_z = vec.z;
 				
-				notifyPositionChange();
+				invalidatePosition();
 			}
 			
 			vec = elements[1];
@@ -372,7 +457,7 @@ package away3d.core.base
 				_rotationY = vec.y;
 				_rotationZ = vec.z;
 				
-				notifyRotationChange();
+				invalidateRotation();
 			}
 			
 			vec = elements[2];
@@ -382,7 +467,7 @@ package away3d.core.base
 				_scaleY = vec.y;
 				_scaleZ = vec.z;
 				
-				notifyScaleChange();
+				invalidateScale();
 			}
 		}
 
@@ -398,9 +483,7 @@ package away3d.core.base
 		{
 			_pivotPoint = pivot.clone();
 
-			_pivotZero = (_pivotPoint.x == 0) && (_pivotPoint.y == 0) && (_pivotPoint.z == 0);
-			
-			 notifyPositionChange();
+			 invalidatePivot();
 		}
 
 		/**
@@ -419,7 +502,7 @@ package away3d.core.base
 			_y = value.y;
 			_z = value.z;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 		
 		/**
@@ -484,6 +567,13 @@ package away3d.core.base
 		 */
 		public function Object3D()
 		{
+			// Cached vector of transformation components used when
+			// recomposing the transform matrix in updateTransform()
+			_transformComponents = new Vector.<Vector3D>(3, true);
+			_transformComponents[0] = _pos;
+			_transformComponents[1] = _rot;
+			_transformComponents[2] = _sca;
+			
 			_transform.identity();
 			
 			_flipY.appendScale(1, -1, 1);
@@ -499,7 +589,7 @@ package away3d.core.base
 			_scaleY *= value;
 			_scaleZ *= value;
 			
-			notifyScaleChange();
+			invalidateScale();
 		}
 
 		/**
@@ -576,7 +666,7 @@ package away3d.core.base
 			_y = dy;
 			_z = dz;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 
 		/**
@@ -588,11 +678,12 @@ package away3d.core.base
 		 */
 		public function movePivot(dx : Number, dy : Number, dz : Number) : void
 		{
-			_pivotPoint.x = dx;
-			_pivotPoint.y = dy;
-			_pivotPoint.z = dz;
-			
-			notifyPositionChange();
+			_pivotPoint ||= new Vector3D();
+			_pivotPoint.x += dx;
+			_pivotPoint.y += dy;
+			_pivotPoint.z += dz;
+
+			invalidatePivot();
 		}
 
 		/**
@@ -610,7 +701,7 @@ package away3d.core.base
 			_y += y * len;
 			_z += z * len;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 
 		/**
@@ -632,7 +723,7 @@ package away3d.core.base
 			_y = _pos.y;
 			_z = _pos.z;
 			
-			notifyPositionChange();
+			invalidatePosition();
 		}
 
 		/**
@@ -688,7 +779,7 @@ package away3d.core.base
 			_rotationY = ay * MathConsts.DEGREES_TO_RADIANS;
 			_rotationZ = az * MathConsts.DEGREES_TO_RADIANS;
 			
-			notifyRotationChange();
+			invalidateRotation();
 		}
 
 		/**
@@ -768,6 +859,15 @@ package away3d.core.base
 		public function dispose() : void
 		{
 		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function disposeAsset() : void
+		{
+			dispose();
+		}
 
 		/**
 		 * Invalidates the transformation matrix, causing it to be updated upon the next request
@@ -779,15 +879,10 @@ package away3d.core.base
 
 		protected function updateTransform() : void
 		{
-			if (_pivotZero) {
-				_pos.x = _x;
-				_pos.y = _y;
-				_pos.z = _z;
-			} else {
-				_pos.x = -_pivotPoint.x;
-				_pos.y = -_pivotPoint.y;
-				_pos.z = -_pivotPoint.z;
-			}
+			_pos.x = _x;
+			_pos.y = _y;
+			_pos.z = _z;
+
 			_rot.x = _rotationX;
 			_rot.y = _rotationY;
 			_rot.z = _rotationZ;
@@ -796,12 +891,17 @@ package away3d.core.base
 			_sca.y = _scaleY;
 			_sca.z = _scaleZ;
 			
-			_transform.recompose(Vector.<Vector3D>([_pos, _rot, _sca]));
+			_transform.recompose(_transformComponents);
 			
-			if (!_pivotZero)
-				_transform.appendTranslation(_x + _pivotPoint.x, _y + _pivotPoint.y, _z + _pivotPoint.z);
+			if (!_pivotZero) {
+				_transform.prependTranslation(-_pivotPoint.x, -_pivotPoint.y, -_pivotPoint.z);
+				_transform.appendTranslation(_pivotPoint.x, _pivotPoint.y, _pivotPoint.z);
+			}
 
 			_transformDirty = false;
+			_positionDirty = false;
+			_rotationDirty = false;
+			_scaleDirty = false;
 		}
 	}
 }

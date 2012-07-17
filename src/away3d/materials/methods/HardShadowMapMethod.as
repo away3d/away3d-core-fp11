@@ -1,9 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -22,7 +20,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -30,21 +28,18 @@ package away3d.materials.methods
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 
-			_decIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index*4;
+			vo.texturesIndex = depthMapRegister.index;
 
 			code += "tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"add " + targetReg + ".w, " + _depthMapCoordReg+".z, " + epsReg+".x\n" +    // offset by epsilon
-
 					"slt " + targetReg + ".w, " + targetReg + ".w, " + depthCol+".z\n";   // 0 if in shadow
-
-
-			_depthMapIndex = depthMapRegister.index;
 
 			return code;
 		}
 
-		override protected function getPointFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPointFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
@@ -55,8 +50,8 @@ package away3d.materials.methods
 			var lightDir : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 
-			_decIndex = decReg.index;
-			_depthMapIndex = depthMapRegister.index;
+			vo.fragmentConstantsIndex = decReg.index*4;
+			vo.texturesIndex = depthMapRegister.index;
 
 			code += "sub " + lightDir + ", " + _globalPosReg + ", " + posReg + "\n" +
 					"dp3 " + lightDir + ".w, " + lightDir + ".xyz, " + lightDir + ".xyz\n" +

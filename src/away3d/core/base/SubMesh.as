@@ -1,9 +1,9 @@
 package away3d.core.base
 {
 
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 	import away3d.entities.Mesh;
@@ -46,6 +46,10 @@ package away3d.core.base
 			_parentMesh = parentMesh;
 			_subGeometry = subGeometry;
 			this.material = material;
+		}
+
+		public function get shaderPickingDetails():Boolean {
+			return sourceEntity.shaderPickingDetails;
 		}
 
 		public function get offsetU():Number {
@@ -129,13 +133,6 @@ package away3d.core.base
 			_material = value;
 
 			if( _material ) _material.addOwner( this );
-		}
-
-		/**
-		 * The animation object which is used to transform the geometry.
-		 */
-		public function get animation():AnimationBase {
-			return _subGeometry.animation;
 		}
 
 		/**
@@ -228,24 +225,17 @@ package away3d.core.base
 		}
 
 		/**
-		 * The AnimationStateBase object that provides the state for the SubMesh's animation.
+		 * The animator object that provides the state for the SubMesh's animation.
 		 */
-		public function get animationState():AnimationStateBase {
-			return _parentMesh._animationState;
+		public function get animator():IAnimator {
+			return _parentMesh.animator;
 		}
 
 		/**
 		 * Indicates whether the SubMesh should trigger mouse events, and hence should be rendered for hit testing.
 		 */
 		public function get mouseEnabled():Boolean {
-			return _parentMesh.mouseEnabled;
-		}
-
-		/**
-		 * Indicates whether the SubMesh needs to provide mouse event details, such as position and uv coordinates.
-		 */
-		public function get mouseHitMethod():uint {
-			return _parentMesh.mouseHitMethod;
+			return _parentMesh.mouseEnabled || _parentMesh._ancestorsAllowMouseEnabled;
 		}
 
 		public function get castsShadows():Boolean {
@@ -328,6 +318,14 @@ package away3d.core.base
 
 		public function get UVData():Vector.<Number> {
 			return _subGeometry.UVData;
+		}
+
+		public function get bounds():BoundingVolumeBase {
+			return _parentMesh.bounds; // TODO: return smaller, sub mesh bounds instead
+		}
+
+		public function get visible():Boolean {
+			return _parentMesh.visible;
 		}
 	}
 }

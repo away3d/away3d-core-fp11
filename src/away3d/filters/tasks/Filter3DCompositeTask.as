@@ -48,7 +48,7 @@ package away3d.filters.tasks
 			var op : String;
 			code = 	"tex ft0, v0, fs0 <2d,linear,clamp>	\n" +
 					"tex ft1, v0, fs1 <2d,linear,clamp>	\n" +
-					"mul ft1, ft1, fc0.x				\n";
+					"mul ft0, ft0, fc0.x				\n";
 			switch (_blendMode) {
 				case "multiply":
 					op = "mul";
@@ -75,10 +75,6 @@ package away3d.filters.tasks
 
 		override public function activate(stage3DProxy : Stage3DProxy, camera3D : Camera3D, depthTexture : Texture) : void
 		{
-			// TODO: not used
-			camera3D = camera3D;
-			depthTexture =  depthTexture;
-			 
 			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 1);
 			stage3DProxy.setTextureAt(1, _overlayTexture);
 		}

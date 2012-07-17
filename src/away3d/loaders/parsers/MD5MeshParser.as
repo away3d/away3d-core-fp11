@@ -1,16 +1,17 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.data.SkeletonAnimation;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.SkeletonJoint;
+	import away3d.animators.SkeletonAnimationSet;
+	import away3d.animators.SkeletonAnimator;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.math.Quaternion;
 	import away3d.entities.Mesh;
-
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
+
 
 	use namespace arcane;
 
@@ -58,7 +59,7 @@ package away3d.loaders.parsers
 		private var _geometry : Geometry;
 
 		private var _skeleton : Skeleton;
-		private var _animation : SkeletonAnimation;
+		private var _animationSet : SkeletonAnimationSet;
 
 		private var _rotationQuat : Quaternion;
 
@@ -69,20 +70,13 @@ package away3d.loaders.parsers
 		{
 			super(ParserDataFormat.PLAIN_TEXT);
 			_rotationQuat = new Quaternion();
-			var t1 : Quaternion = new Quaternion();
-			var t2 : Quaternion = new Quaternion();
 
-			t1.fromAxisAngle(Vector3D.X_AXIS, -Math.PI * .5);
-			t2.fromAxisAngle(Vector3D.Y_AXIS, Math.PI * .5);
+			_rotationQuat.fromAxisAngle(Vector3D.X_AXIS, -Math.PI * .5);
 
 			if (additionalRotationAxis) {
-				var t3 : Quaternion = new Quaternion();
-				t3.multiply(t2, t1);
-				t1.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
-				_rotationQuat.multiply(t1, t3);
-			}
-			else {
-				_rotationQuat.multiply(t2, t1);
+				var quat : Quaternion = new Quaternion();
+				quat.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
+				_rotationQuat.multiply(_rotationQuat, quat);
 			}
 		}
 
@@ -110,14 +104,6 @@ package away3d.loaders.parsers
 			return false;
 		}
 
-		/**
-		 *
-		 */
-		public function get animation() : SkeletonAnimation
-		{
-			return SkeletonAnimation(_geometry.animation);
-		}
-
 
 		/**
 		 * @inheritDoc
@@ -125,12 +111,12 @@ package away3d.loaders.parsers
 		protected override function proceedParsing() : Boolean
 		{
 			var token : String;
-			
+
 			if(!_startedParsing) {
 				_textData = getTextData();
 				_startedParsing = true;
 			}
-			
+
 			while (hasTime()) {
 				token = getNextToken();
 				switch (token) {
@@ -163,25 +149,60 @@ package away3d.loaders.parsers
 				}
 
 				if (_reachedEOF) {
-					_animation = new SkeletonAnimation(_skeleton, _maxJointCount);
-					
-					_mesh = new Mesh();
+					calculateMaxJointCount();
+					_animationSet = new SkeletonAnimationSet(_maxJointCount);
+
+					_mesh = new Mesh(new Geometry(), null);
 					_geometry = _mesh.geometry;
 
 					for (var i : int = 0; i < _meshData.length; ++i) {
 						_geometry.addSubGeometry(translateGeom(_meshData[i].vertexData, _meshData[i].weightData, _meshData[i].indices));
 					}
 
-					_geometry.animation = _animation;
+					//_geometry.animation = _animation;
 //					_mesh.animationController = _animationController;
-					
+
 					finalizeAsset(_mesh);
 					finalizeAsset(_skeleton);
-
+					finalizeAsset(_animationSet);
 					return ParserBase.PARSING_DONE;
 				}
 			}
 			return ParserBase.MORE_TO_PARSE;
+		}
+
+		private function calculateMaxJointCount() : void
+		{
+			_maxJointCount = 0;
+
+			var numMeshData : int = _meshData.length;
+			for (var i : int = 0; i < numMeshData; ++i) {
+				var meshData : MeshData = _meshData[i];
+				var vertexData : Vector.<VertexData> = meshData.vertexData;
+				var numVerts : int = vertexData.length;
+
+				for (var j : int = 0; j < numVerts; ++j) {
+					var zeroWeights : int = countZeroWeightJoints(vertexData[j], meshData.weightData);
+					var totalJoints : int = vertexData[j].countWeight - zeroWeights;
+					if (totalJoints > _maxJointCount)
+						_maxJointCount = totalJoints;
+				}
+			}
+		}
+
+		private function countZeroWeightJoints(vertex : VertexData, weights : Vector.<JointData>) : int
+		{
+			var start : int = vertex.startWeight;
+			var end : int = vertex.startWeight + vertex.countWeight;
+			var count : int = 0;
+			var weight : Number;
+
+			for (var i : int = start; i < end; ++i) {
+				weight = weights[i].bias;
+				if (weight == 0) ++count;
+			}
+
+			return count;
 		}
 
 		/**
@@ -197,9 +218,9 @@ package away3d.loaders.parsers
 			var token : String = getNextToken();
 
 			if (token != "{") sendUnknownKeywordError();
-			
+
 			_skeleton = new Skeleton();
-			
+
 			do {
 				if (_reachedEOF) sendEOFError();
 				joint = new SkeletonJoint();
@@ -208,9 +229,11 @@ package away3d.loaders.parsers
 				pos = parseVector3D();
 				pos = _rotationQuat.rotatePoint(pos);
 				quat = parseQuaternion();
+
 				// todo: check if this is correct, or maybe we want to actually store it as quats?
 				_bindPoses[i] = quat.toMatrix3D();
 				_bindPoses[i].appendTranslation(pos.x, pos.y, pos.z);
+
 				var inv : Matrix3D = _bindPoses[i].clone();
 				inv.invert();
 				joint.inverseBindPose = inv.rawData;
@@ -314,6 +337,7 @@ package away3d.loaders.parsers
 			var jointIndices : Vector.<Number> = new Vector.<Number>(len * _maxJointCount, true);
 			var jointWeights : Vector.<Number> = new Vector.<Number>(len * _maxJointCount, true);
 			var l : int;
+			var nonZeroWeights : int;
 
 			for (var i : int = 0; i < len; ++i) {
 				vertex = vertexData[i];
@@ -322,20 +346,24 @@ package away3d.loaders.parsers
 				v3 = v1 + 2;
 				vertices[v1] = vertices[v2] = vertices[v3] = 0;
 
+				nonZeroWeights = 0;
 				for (var j : int = 0; j < vertex.countWeight; ++j) {
 					weight = weights[vertex.startWeight + j];
-					bindPose = _bindPoses[weight.joint];
-					pos = bindPose.transformVector(weight.pos);
-					vertices[v1] += pos.x * weight.bias;
-					vertices[v2] += pos.y * weight.bias;
-					vertices[v3] += pos.z * weight.bias;
+					if (weight.bias > 0) {
+						bindPose = _bindPoses[weight.joint];
+						pos = bindPose.transformVector(weight.pos);
+						vertices[v1] += pos.x * weight.bias;
+						vertices[v2] += pos.y * weight.bias;
+						vertices[v3] += pos.z * weight.bias;
 
-					// indices need to be multiplied by 3 (amount of matrix registers)
-					jointIndices[l] = weight.joint * 3;
-					jointWeights[l++] = weight.bias;
+						// indices need to be multiplied by 3 (amount of matrix registers)
+						jointIndices[l] = weight.joint * 3;
+						jointWeights[l++] = weight.bias;
+						++nonZeroWeights;
+					}
 				}
 
-				for (j = vertex.countWeight; j < _maxJointCount; ++j) {
+				for (j = nonZeroWeights; j < _maxJointCount; ++j) {
 					jointIndices[l] = 0;
 					jointWeights[l++] = 0;
 				}
@@ -391,7 +419,7 @@ package away3d.loaders.parsers
 			parseUV(vertex);
 			vertex.startWeight = getNextInt();
 			vertex.countWeight = getNextInt();
-			if (vertex.countWeight > _maxJointCount) _maxJointCount = vertex.countWeight;
+//			if (vertex.countWeight > _maxJointCount) _maxJointCount = vertex.countWeight;
 			vertexData[vertex.index] = vertex;
 		}
 

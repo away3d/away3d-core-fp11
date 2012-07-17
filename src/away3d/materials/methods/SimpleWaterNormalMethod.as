@@ -14,56 +14,73 @@ package away3d.materials.methods
 	{
 		private var _texture2 : Texture2DBase;
 		private var _normalTextureRegister2 : ShaderRegisterElement;
-		private var _normalMapIndex2 : int;
-		private var _data : Vector.<Number>;
-		private var _dataRegIndex : int;
+		private var _useSecondNormalMap : Boolean;
+		private var _water1OffsetX : Number = 0;
+		private var _water1OffsetY : Number = 0;
+		private var _water2OffsetX : Number = 0;
+		private var _water2OffsetY : Number = 0;
 
 		public function SimpleWaterNormalMethod(waveMap1 : Texture2DBase, waveMap2 : Texture2DBase)
 		{
 			super();
 			normalMap = waveMap1;
 			secondaryNormalMap = waveMap2;
-			_data = Vector.<Number>([.5, 0, 0, 1, 0, 0, 0, 0]);
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var index : int = vo.fragmentConstantsIndex;
+			vo.fragmentData[index] = .5;
+			vo.fragmentData[index+1] = 0;
+			vo.fragmentData[index+2] = 0;
+			vo.fragmentData[index+3] = 1;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			super.initVO(vo);
+			if (normalMap == secondaryNormalMap)
+				_useSecondNormalMap = false;
 		}
 
 		public function get water1OffsetX() : Number
 		{
-			return _data[4];
+			return _water1OffsetX;
 		}
 
 		public function set water1OffsetX(value : Number) : void
 		{
-			_data[4] = value;
+			_water1OffsetX = value;
 		}
 
 		public function get water1OffsetY() : Number
 		{
-			return _data[5];
+			return _water1OffsetY;
 		}
 
 		public function set water1OffsetY(value : Number) : void
 		{
-			_data[5] = value;
+			_water1OffsetY = value;
 		}
 
 		public function get water2OffsetX() : Number
 		{
-			return _data[6];
+			return _water2OffsetX;
 		}
 
 		public function set water2OffsetX(value : Number) : void
 		{
-			_data[6] = value;
+			_water2OffsetX = value;
 		}
 
 		public function get water2OffsetY() : Number
 		{
-			return _data[7];
+			return _water2OffsetY;
 		}
 
 		public function set water2OffsetY(value : Number) : void
 		{
-			_data[7] = value;
+			_water2OffsetY = value;
 		}
 
 		override public function set normalMap(value : Texture2DBase) : void
@@ -88,43 +105,43 @@ package away3d.materials.methods
 			_normalTextureRegister2 = null;
 		}
 
-		arcane override function reset() : void
-		{
-			super.reset();
-			_normalMapIndex2 = -1;
-		}
-
 		override public function dispose() : void
 		{
 			super.dispose();
 			_texture2 = null;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
+			super.activate(vo, stage3DProxy);
 
-			if (_normalMapIndex2 >= 0) {
-				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data, 2);
-				stage3DProxy.setTextureAt(_normalMapIndex2, _texture2.getTextureForStage3D(stage3DProxy));
+			var data : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+
+			data[index+4] = _water1OffsetX;
+			data[index+5] = _water1OffsetY;
+			data[index+6] = _water2OffsetX;
+			data[index+7] = _water2OffsetY;
+
+			if (_useSecondNormalMap >= 0) {
+				stage3DProxy.setTextureAt(vo.texturesIndex+1, _texture2.getTextureForStage3D(stage3DProxy));
 			}
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataReg2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			_normalTextureRegister = regCache.getFreeTextureReg();
-			_normalTextureRegister2 = regCache.getFreeTextureReg();
-			_normalMapIndex = _normalTextureRegister.index;
-			_normalMapIndex2 = _normalTextureRegister2.index;
+			_normalTextureRegister2 = _useSecondNormalMap? regCache.getFreeTextureReg() : _normalTextureRegister;
+			vo.texturesIndex = _normalTextureRegister.index;
 
-			_dataRegIndex = dataReg.index;
+			vo.fragmentConstantsIndex = dataReg.index*4;
 			return	 "add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".xyxy\n" +
-					getTexSampleCode(targetReg, _normalTextureRegister, temp) +
+					getTexSampleCode(vo, targetReg, _normalTextureRegister, temp) +
 					"add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".zwzw\n" +
-					getTexSampleCode(temp, _normalTextureRegister2, temp) +
+					getTexSampleCode(vo, temp, _normalTextureRegister2, temp) +
 					"add " + targetReg + ", " + targetReg + ", " + temp + "		\n" +
 					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n";
 		}

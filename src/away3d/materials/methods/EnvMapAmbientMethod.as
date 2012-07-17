@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
@@ -15,7 +16,6 @@ package away3d.materials.methods
 	public class EnvMapAmbientMethod extends BasicAmbientMethod
 	{
 		private var _cubeTexture : CubeTextureBase;
-		private var _cubeMapIndex : int;
 
 		/**
 		 * Creates a new EnvMapDiffuseMethod object.
@@ -25,14 +25,12 @@ package away3d.materials.methods
 		{
 			super();
 			_cubeTexture = envMap;
-			_needsNormals = true;
 		}
 
-
-		arcane override function reset() : void
+		override arcane function initVO(vo : MethodVO) : void
 		{
-			super.reset();
-			_cubeMapIndex = -1;
+			super.initVO(vo);
+			vo.needsNormals = true;
 		}
 
 		/**
@@ -58,42 +56,26 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function set numLights(value : int) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.numLights = value;
-			_needsNormals = true;
+			super.activate(vo, stage3DProxy);
+
+			stage3DProxy.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
-		{
-			super.activate(stage3DProxy);
-
-			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
-		}
-
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			super.deactivate(stage3DProxy);
-//
-//			stage3DProxy.setTextureAt(_cubeMapIndex, null);
-//		}
-
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-			_cubeMapIndex = cubeMapReg.index;
+			vo.texturesIndex = cubeMapReg.index;
 
 			code += "tex " + targetReg + ", " + _normalFragmentReg + ", " + cubeMapReg + " <cube,linear,miplinear,clamp>\n";
 
 			_ambientInputRegister = regCache.getFreeFragmentConstant();
-			_ambientInputIndex = _ambientInputRegister.index;
+			vo.fragmentConstantsIndex = _ambientInputRegister.index;
 
 			code += "add " + targetReg+".xyz, " + targetReg+".xyz, " + _ambientInputRegister+".xyz\n";
 

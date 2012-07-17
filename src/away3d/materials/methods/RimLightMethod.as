@@ -12,32 +12,39 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class RimLightMethod extends ShadingMethodBase
+	public class RimLightMethod extends EffectMethodBase
 	{
 		public static const ADD : String = "add";
 		public static const MULTIPLY : String = "multiply";
 		public static const MIX : String = "mix";
 
 		private var _color : uint;
-		private var _data : Vector.<Number>;
-		private var _dataIndex : int;
 		private var _blend : String;
+		private var _colorR : Number;
+		private var _colorG : Number;
+		private var _colorB : Number;
+		private var _strength : Number;
+		private var _power : Number;
 
 		public function RimLightMethod(color : uint = 0xffffff, strength : Number = .4, power : Number = 2, blend : String = "mix")
 		{
-			super(true, true, false);
+			super();
 			_blend = blend;
-			_data = new Vector.<Number>(8, true);
-			_data[3] = 1;
-			_data[4] = strength;
-			_data[5] = power;
+			_strength = strength;
+			_power = power;
 			this.color = color;
 		}
 
-		arcane override function reset() : void
+
+		override arcane function initConstants(vo : MethodVO) : void
 		{
-			super.reset();
-			_dataIndex = -1;
+			vo.fragmentData[vo.fragmentConstantsIndex+3] = 1;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsNormals = true;
+			vo.needsView = true;
 		}
 
 		public function get color() : uint
@@ -48,43 +55,49 @@ package away3d.materials.methods
 		public function set color(value : uint) : void
 		{
 			_color = value;
-			_data[0] = ((value >> 16) & 0xff)/0xff;
-			_data[1] = ((value >> 8) & 0xff)/0xff;
-			_data[2] = (value & 0xff)/0xff;
+			_colorR = ((value >> 16) & 0xff)/0xff;
+			_colorG = ((value >> 8) & 0xff)/0xff;
+			_colorB = (value & 0xff)/0xff;
 		}
 
 		public function get strength() : Number
 		{
-			return _data[4];
+			return _strength;
 		}
 
 		public function set strength(value : Number) : void
 		{
-			_data[4] = value;
+			_strength = value;
 		}
 
 		public function get power() : Number
 		{
-			return _data[5];
+			return _power;
 		}
 
 		public function set power(value : Number) : void
 		{
-			_data[5] = value;
+			_power = value;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 2);
+			var index : int = vo.fragmentConstantsIndex;
+			var data : Vector.<Number> = vo.fragmentData;
+			data[index] = _colorR;
+			data[index+1] = _colorG;
+			data[index+2] = _colorB;
+			data[index+4] = _strength;
+			data[index+5] = _power;
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var dataRegister : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataRegister2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
-			_dataIndex = dataRegister.index;
+			vo.fragmentConstantsIndex = dataRegister.index*4;
 
 			code += "dp3 " + temp + ".x, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz	\n" +
 					"sat " + temp + ".x, " + temp + ".x														\n" +

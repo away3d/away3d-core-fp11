@@ -12,12 +12,17 @@ package away3d.materials.methods
 	{
 		private var _texture : Texture2DBase;
 		private var _useTexture : Boolean;
-		protected var _normalMapIndex : int = -1;
 		protected var _normalTextureRegister : ShaderRegisterElement;
 
 		public function BasicNormalMethod()
 		{
-			super(false, false, false);
+			super();
+		}
+
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsUV = Boolean(_texture);
 		}
 
 		arcane function get tangentSpace() : Boolean
@@ -38,11 +43,6 @@ package away3d.materials.methods
 			normalMap = BasicNormalMethod(method).normalMap;
 		}
 
-		arcane override function get needsUV() : Boolean
-		{
-			return Boolean(_texture);
-		}
-
 		public function get normalMap() : Texture2DBase
 		{
 			return _texture;
@@ -61,26 +61,21 @@ package away3d.materials.methods
 			_normalTextureRegister = null;
 		}
 
-		arcane override function reset() : void
-		{
-			_normalMapIndex = -1;
-		}
-
 		override public function dispose() : void
 		{
 			if (_texture) _texture = null;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			if (_normalMapIndex >= 0) stage3DProxy.setTextureAt(_normalMapIndex, _texture.getTextureForStage3D(stage3DProxy));
+			if (vo.texturesIndex >= 0) stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			_normalTextureRegister = regCache.getFreeTextureReg();
-			_normalMapIndex = _normalTextureRegister.index;
-			return getTexSampleCode(targetReg, _normalTextureRegister);
+			vo.texturesIndex = _normalTextureRegister.index;
+			return getTexSampleCode(vo,  targetReg, _normalTextureRegister);
 		}
 	}
 }

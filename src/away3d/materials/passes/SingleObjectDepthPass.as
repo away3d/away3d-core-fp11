@@ -47,6 +47,9 @@ package away3d.materials.passes
 			_enc = Vector.<Number>([	1.0, 255.0, 65025.0, 16581375.0,
 										1.0 / 255.0,1.0 / 255.0,1.0 / 255.0,0.0
 									]);
+			
+			_animatableAttributes = ["va0", "va1"];
+			_animationTargetRegisters = ["vt0", "vt1"];
 		}
 
 		/**
@@ -99,10 +102,8 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode() : String
+		arcane override function getVertexCode(code:String) : String
 		{
-			var code : String = animation.getAGALVertexCode(this, ["va0", "va1"], ["vt0", "vt1"]);
-//			code += getProjectionCode("vt0", "vt2", "vc7.x", "vt1");
 
 			// offset
 			code += "mul vt7, vt1, vc4.x	\n" +
@@ -194,7 +195,6 @@ package away3d.materials.passes
 
 				stage3DProxy.setRenderTarget(_textures[contextIndex][renderable][i], true);
 				context.clear(1.0, 1.0, 1.0);
-
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
 				stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);

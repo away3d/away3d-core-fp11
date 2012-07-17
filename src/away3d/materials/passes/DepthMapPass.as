@@ -62,10 +62,8 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode() : String
+		arcane override function getVertexCode(code:String) : String
 		{
-			var code : String = animation.getAGALVertexCode(this, ["va0"], ["vt0"]);
-
 			// project
 			code += "m44 vt1, vt0, vc0		\n" +
 					"mul op, vt1, vc4\n";

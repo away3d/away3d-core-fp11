@@ -53,6 +53,15 @@ package away3d.loaders.parsers
 		
 		
 		/**
+		 * @inheritDoc
+		*/
+		public override function get parsingPaused():Boolean
+		{
+			return _parser? _parser.parsingPaused : false;
+		}
+		
+		
+		/**
 		 * @private
 		 * Delegate to the concrete parser.
 		*/
@@ -96,9 +105,11 @@ package away3d.loaders.parsers
 				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-				_parser.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-				_parser.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-				_parser.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -110,23 +121,11 @@ package away3d.loaders.parsers
 				_parser.parseAsync(_data);
 			}
 			
-			// Because finishParsing() is overriden, we can stop
-			// this parser without any events being dispatched.
-			return PARSING_DONE;
+			// Return MORE_TO_PARSE while delegate parser is working. Once the delegate
+			// finishes parsing, this dummy parser instance will be stopped as well as
+			// a result of the delegate's PARSE_COMPLETE event (onParseComplete).
+			return MORE_TO_PARSE;
 		}
-		
-		
-		/**
-		 * @private
-		 * Overridden to prevent default behavior of dispatching event,
-		 * so that this wrapper can stop "parsing" straight away but not
-		 * dispatch events until wrapped concrete parser is actually done.
-		*/
-		protected override function finishParsing() : void
-		{
-			// Do nothing.
-		}
-		
 		
 		
 		
@@ -158,9 +157,11 @@ package away3d.loaders.parsers
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			_parser.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			_parser.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			_parser.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -169,7 +170,7 @@ package away3d.loaders.parsers
 			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
-			dispatchEvent(ev.clone());
+			finishParsing();
 		}
 	}
 }

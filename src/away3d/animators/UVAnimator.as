@@ -1,99 +1,104 @@
 package away3d.animators
 {
-	import away3d.animators.data.UVAnimationFrame;
-	import away3d.animators.data.UVAnimationSequence;
-	import away3d.animators.utils.TimelineUtil;
+	import away3d.animators.transitions.StateTransitionBase;
 	import away3d.arcane;
-	import away3d.core.base.SubMesh;
-	import away3d.materials.TextureMaterial;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.core.base.*;
+	import away3d.core.managers.*;
+	import away3d.materials.*;
+	import away3d.materials.passes.*;
 
 	use namespace arcane;
 	
-	public class UVAnimator extends AnimatorBase
+	/**
+	 * Provides an interface for assigning uv-based animation data sets to mesh-based entity objects
+	 * and controlling the various available states of animation through an interative playhead that can be
+	 * automatically updated or manually triggered.
+	 */
+	public class UVAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _target : SubMesh;
-		private var _sequences : Object;
-		private var _activeSequence : UVAnimationSequence;
+		private var _activeNode:IUVAnimationNode;
 		
-		private var _tlUtil : TimelineUtil;
-		private var _absoluteTime : Number;
-		private var _deltaFrame : UVAnimationFrame;
+		private var _uvAnimationSet:UVAnimationSet;
+		private var _deltaFrame : UVAnimationFrame = new UVAnimationFrame();
 		
-		
-		public function UVAnimator(target : SubMesh)
+		/**
+		 * Creates a new <code>UVAnimator</code> object.
+		 * 
+		 * @param uvAnimationSet The animation data set containing the uv animation states used by the animator.
+		 */
+		public function UVAnimator(uvAnimationSet:UVAnimationSet)
 		{
-			super();
+			super(uvAnimationSet);
 			
-			_target = target;
-            // disable transform warning
-            _target.uvRotation = 1;
-            _target.uvRotation = 0;
-			_sequences = {};
-			_deltaFrame = new UVAnimationFrame();
-			_tlUtil = new TimelineUtil();
+			_uvAnimationSet = uvAnimationSet;
 		}
 		
-		
-		public function addSequence(sequence : UVAnimationSequence) : void
+		/**
+		 * @inheritDoc
+		 */
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
-			_sequences[sequence.name] = sequence;
-		}
-		
-		
-		public function play(sequenceName : String) : void
-		{
-			var material : TextureMaterial = _target.material as TextureMaterial;
-
-			_activeSequence = _sequences[sequenceName];
-
-			if (material)
+			var material:TextureMaterial = renderable.material as TextureMaterial;
+			var subMesh:SubMesh = renderable as SubMesh;
+			
+			if (!material || !subMesh)
+				return;
+			
+			if (!material.animateUVs)
 				material.animateUVs = true;
-
-			reset();
+			
+			subMesh.offsetU = _deltaFrame.offsetU;
+			subMesh.offsetV = _deltaFrame.offsetV;
+			subMesh.scaleU = _deltaFrame.scaleU;
+			subMesh.scaleV = _deltaFrame.scaleV;
+			subMesh.uvRotation = _deltaFrame.rotation;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
+		{
+			_activeState = _uvAnimationSet.getState(stateName) as VertexAnimationState;
+			
+			if (!_activeState)
+				throw new Error("Animation state " + stateName + " not found!");
+			
+			_activeNode = _activeState.rootNode as IUVAnimationNode;
+			
+			_absoluteTime = 0;
+			
 			start();
 		}
 		
-		override protected function updateAnimation(realDT:Number, scaledDT:Number):void
+		/**
+		 * Applies the calculated time delta to the active animation state node.
+		 */
+		override protected function updateDeltaTime(dt : Number) : void
 		{
-			// TODO: not used
-			realDT = realDT;
+			_absoluteTime += dt;
 			
-			var w : Number;
-			var frame0 : UVAnimationFrame, frame1 : UVAnimationFrame;
+			_activeNode.update(_absoluteTime);
 			
-			_absoluteTime += scaledDT;
-			if (_absoluteTime >= _activeSequence._totalDuration)
-				_absoluteTime %= _activeSequence._totalDuration;
+			var currentUVFrame : UVAnimationFrame = _activeNode.currentUVFrame;
+			var nextUVFrame : UVAnimationFrame = _activeNode.currentUVFrame;
+			var blendWeight : Number = _activeNode.blendWeight;
 			
-			// TODO: not used
-			//var frame : UVAnimationFrame;
-			//var idx : uint;
-			
-			_tlUtil.updateFrames(_absoluteTime, _activeSequence);
-			frame0 = _activeSequence._frames[_tlUtil.frame0];
-			frame1 = _activeSequence._frames[_tlUtil.frame1];
-			w = _tlUtil.blendWeight;
-			
-			_deltaFrame.offsetU = frame1.offsetU - frame0.offsetU;
-			_deltaFrame.offsetV = frame1.offsetV - frame0.offsetV;
-			_deltaFrame.scaleU = frame1.scaleU - frame0.scaleU;
-			_deltaFrame.scaleV = frame1.scaleV - frame0.scaleV;
-			_deltaFrame.rotation = frame1.rotation - frame0.rotation;
-			
-			// TODO: Find closest direction for rotation
-			// TODO: Fix snap-back issue when looping
-			
-			_target.offsetU = frame0.offsetU + (w * _deltaFrame.offsetU);
-			_target.offsetV = frame0.offsetV + (w * _deltaFrame.offsetV);
-			_target.scaleU = frame0.scaleU + (w * _deltaFrame.scaleU);
-			_target.scaleV = frame0.scaleV + (w * _deltaFrame.scaleV);
-			_target.uvRotation = frame0.rotation + (w * _deltaFrame.rotation);
+			_deltaFrame.offsetU = currentUVFrame.offsetU + blendWeight * (nextUVFrame.offsetU - currentUVFrame.offsetU);
+			_deltaFrame.offsetV = currentUVFrame.offsetV + blendWeight * (nextUVFrame.offsetV - currentUVFrame.offsetV);
+			_deltaFrame.scaleU = currentUVFrame.scaleU + blendWeight * (nextUVFrame.scaleU - currentUVFrame.scaleU);
+			_deltaFrame.scaleV = currentUVFrame.scaleV + blendWeight * (nextUVFrame.scaleV - currentUVFrame.scaleV);
+			_deltaFrame.rotation = currentUVFrame.rotation + blendWeight * (nextUVFrame.rotation - currentUVFrame.rotation);
 		}
-		
-		
-		private function reset() : void
-		{
-			_absoluteTime = 0;
-		}
+						
+        /**
+         * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
+		 * Needs to be called if gpu code is potentially required.
+         */
+        public function testGPUCompatibility(pass : MaterialPassBase) : void
+        {
+        }
 	}
 }

@@ -32,8 +32,6 @@ package away3d.filters
 
 		override public function update(stage : Stage3DProxy, camera : Camera3D) : void
 		{
-			// TODO: not used
-			camera = camera; 
 			_compositeTask.overlayTexture = _copyTask.getMainInputTexture(stage);
 			_compositeTask.target = _copyTask.secondaryInputTexture;
 		}

@@ -1,5 +1,7 @@
 package away3d.primitives
 {
+
+	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.cameras.Camera3D;
 	import away3d.entities.SegmentSet;
@@ -7,6 +9,8 @@ package away3d.primitives
 	import away3d.primitives.data.Segment;
 
 	import flash.geom.Vector3D;
+
+	use namespace arcane;
 
 	public class WireframePrimitiveBase extends SegmentSet
 	{
@@ -19,6 +23,7 @@ package away3d.primitives
 			if(thickness <= 0) thickness = 1;
 			_color = color;
 			_thickness = thickness;
+			mouseEnabled = mouseChildren = false;
 		}
 
 		public function get color() : uint
@@ -101,6 +106,10 @@ package away3d.primitives
 			else {
 				addSegment( new LineSegment(v0.clone(), v1.clone(), _color, _color, _thickness));
 			}
+		}
+
+		override protected function updateMouseChildren():void {
+			_ancestorsAllowMouseEnabled = false;
 		}
 	}
 }

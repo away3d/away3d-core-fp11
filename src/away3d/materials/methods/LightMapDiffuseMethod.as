@@ -5,9 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-
-	import flash.display.BitmapData;
-
+	
 	use namespace arcane;
 
 	public class LightMapDiffuseMethod extends CompositeDiffuseMethod
@@ -16,17 +14,21 @@ package away3d.materials.methods
 		public static const ADD : String = "add";
 
 		private var _texture : Texture2DBase;
-		private var _lightMapIndex : int;
 		private var _blendMode : String;
+		private var _useSecondaryUV : Boolean;
 
 		public function LightMapDiffuseMethod(lightMap : Texture2DBase, blendMode : String = "multiply", useSecondaryUV : Boolean = false, baseMethod : BasicDiffuseMethod = null)
 		{
 			super(null, baseMethod);
-			_needsSecondaryUV = useSecondaryUV;
-			_needsUV = !useSecondaryUV;
-
-			this.blendMode = blendMode;
+			_useSecondaryUV = useSecondaryUV;
 			_texture = lightMap;
+			this.blendMode = blendMode;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsSecondaryUV = _useSecondaryUV;
+			vo.needsUV = !_useSecondaryUV;
 		}
 
 		public function get blendMode() : String
@@ -42,12 +44,6 @@ package away3d.materials.methods
 			invalidateShaderProgram();
 		}
 
-		arcane override function reset() : void
-		{
-			super.reset();
-			_lightMapIndex = -1;
-		}
-
 		public function get lightMapTexture() : Texture2DBase
 		{
 			return _texture;
@@ -58,20 +54,20 @@ package away3d.materials.methods
 			_texture = value;
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy.setTextureAt(_lightMapIndex, _texture.getTextureForStage3D(stage3DProxy));
-			super.activate(stage3DProxy);
+			stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+			super.activate(vo, stage3DProxy);
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String;
 			var lightMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			_lightMapIndex = lightMapReg.index;
+			vo.secondaryTexturesIndex = lightMapReg.index;
 
-			code = getTexSampleCode(temp, lightMapReg, _secondaryUVFragmentReg);
+			code = getTexSampleCode(vo, temp, lightMapReg, _secondaryUVFragmentReg);
 
 			switch (_blendMode) {
 				case MULTIPLY:
@@ -82,7 +78,7 @@ package away3d.materials.methods
 					break;
 			}
 
-			code += super.getFragmentPostLightingCode(regCache, targetReg);
+			code += super.getFragmentPostLightingCode(vo, regCache, targetReg);
 
 			return code;
 		}

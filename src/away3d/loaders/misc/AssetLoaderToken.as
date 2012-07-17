@@ -1,12 +1,123 @@
 package away3d.loaders.misc
 {
+	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
 	import away3d.loaders.AssetLoader;
 	
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	
+	use namespace arcane;
 
+	/**
+	 * Dispatched when a full resource (including dependencies) finishes loading.
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="resourceComplete", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when a single dependency (which may be the main file of a resource)
+	 * finishes loading.
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="dependencyComplete", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when an error occurs during loading. 
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="loadError", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when any asset finishes parsing. Also see specific events for each
+	 * individual asset type (meshes, materials et c.)
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a geometry asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="geometryComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton pose asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonPoseComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a container asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
+		
+	/**
+	 * Dispatched when an animation set has been constructed from a group of animation state resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation node has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a texture asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a material asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a animator asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
+	
+	
 	/**
 	 * Instances of this class are returned as tokens by loading operations
 	 * to provide an object on which events can be listened for in cases where
@@ -22,91 +133,37 @@ package away3d.loaders.misc
 	*/
 	public class AssetLoaderToken extends EventDispatcher
 	{
-		private var _loader : AssetLoader;
-		
-		private var _eventBuffer : Object;
+		arcane var _loader : AssetLoader;
 		
 		public function AssetLoaderToken(loader : AssetLoader)
 		{
 			super();
 			
-			_eventBuffer = {};
-			
 			_loader = loader;
-			_loader.addEventListener(LoaderEvent.LOAD_ERROR, onLoaderEvent);
-			_loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(LoaderEvent.DEPENDENCY_ERROR, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.ASSET_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.MESH_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onLoaderEvent);
-			_loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onLoaderEvent);
 		}
 		
 		
 		public override function addEventListener(type:String, listener:Function, useCapture:Boolean=false, priority:int=0, useWeakReference:Boolean=false):void
 		{
-			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
-			
-			flushBuffer(type);
+			_loader.addEventListener(type, listener, useCapture, priority, useWeakReference);
 		}
 		
 		
-		private function flushBuffer(type : String) : void
+		public override function removeEventListener(type:String, listener:Function, useCapture:Boolean=false):void
 		{
-			if (_eventBuffer.hasOwnProperty(type)) {
-				var ev : Event;
-				var events : Array = _eventBuffer[type];
-				for each (ev in events) {
-					dispatchEvent(ev.clone());
-				}
-			}
+			_loader.removeEventListener(type, listener, useCapture);
 		}
 		
 		
-		private function onLoaderEvent(ev : Event) : void
+		public override function hasEventListener(type:String):Boolean
 		{
-			// If someone is listening for this event, bubble it. Otherwise,
-			// buffer it so that it can be dispatched when a listener is added.
-			if (hasEventListener(ev.type)) {
-				dispatchEvent(ev.clone());
-			}
-			else if (ev.type == LoaderEvent.DEPENDENCY_ERROR || ev.type == LoaderEvent.LOAD_ERROR) {
-				throw new Error(LoaderEvent(ev).message);
-			}
-			else {
-				// If no buffer exists for this type, create it.
-				if (!_eventBuffer.hasOwnProperty(ev.type))
-					_eventBuffer[ev.type] = [];
-				
-				// Add event to buffer.
-				_eventBuffer[ev.type].push(ev);
-			}
-			
-			if (ev.type == LoaderEvent.RESOURCE_COMPLETE) {
-				_loader.removeEventListener(LoaderEvent.LOAD_ERROR, onLoaderEvent);
-				_loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(LoaderEvent.DEPENDENCY_ERROR, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.MESH_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onLoaderEvent);
-				_loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onLoaderEvent);
-			}
+			return _loader.hasEventListener(type);
+		}
+		
+		
+		public override function willTrigger(type:String):Boolean
+		{
+			return _loader.willTrigger(type);
 		}
 	}
 }

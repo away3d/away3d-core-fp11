@@ -5,7 +5,7 @@ package away3d.events
 	import flash.events.Event;
 
 	/**
-	 * GeometryEvent is an Event dispatched to notify changes on a Geometry object.
+	 * Dispatched to notify changes in a geometry object's state.
 	 *
 	 * @see away3d.core.base.Geometry
 	 */
@@ -20,11 +20,6 @@ package away3d.events
 		 * Dispatched when a SubGeometry was removed from the dispatching Geometry.
 		 */
 		public static const SUB_GEOMETRY_REMOVED : String = "SubGeometryRemoved";
-
-		/**
-		 * Dispatched when the Animation property of the dispatching Geometry was changed.
-		 */
-		public static const ANIMATION_CHANGED : String = "AnimationChanged";
 
 		public static const BOUNDS_INVALID : String = "BoundsInvalid";
 

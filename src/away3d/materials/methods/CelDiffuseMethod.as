@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -16,8 +17,7 @@ package away3d.materials.methods
 	{
 		private var _levels : uint;
 		private var _dataReg : ShaderRegisterElement;
-		private var _dataIndex : int;
-		private var _data : Vector.<Number>;
+		private var _smoothness : Number = .1;
 
 		/**
 		 * Creates a new CelDiffuseMethod object.
@@ -29,9 +29,16 @@ package away3d.materials.methods
 			super(clampDiffuse, baseDiffuseMethod);
 
 			_levels = levels;
-			_data = Vector.<Number>([levels, 1, 0, .1]);
 		}
 
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var data : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			super.initConstants(vo);
+			data[index+1] = 1;
+			data[index+2] = 0;
+		}
 
 		public function get levels() : uint
 		{
@@ -41,7 +48,6 @@ package away3d.materials.methods
 		public function set levels(value : uint) : void
 		{
 			_levels = value;
-			_data[0] = value;
 		}
 
 		/**
@@ -49,20 +55,12 @@ package away3d.materials.methods
 		 */
 		public function get smoothness() : Number
 		{
-			return _data[3];
+			return _smoothness;
 		}
 
 		public function set smoothness(value : Number) : void
 		{
-			_data[3] = value;
-		}
-
-
-		arcane override function reset() : void
-		{
-			super.reset();
-
-			_dataIndex = -1;
+			_smoothness = value;
 		}
 
 		/**
@@ -77,20 +75,23 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_dataReg = regCache.getFreeFragmentConstant();
-			_dataIndex = _dataReg.index;
-			return super.getFragmentAGALPreLightingCode(regCache);
+			vo.secondaryFragmentConstantsIndex = _dataReg.index*4;
+			return super.getFragmentPreLightingCode(vo, regCache);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
+			super.activate(vo, stage3DProxy);
+			var data : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			data[index] =_levels;
+			data[index+3] = _smoothness;
 		}
 
 		/**
@@ -99,11 +100,8 @@ package away3d.materials.methods
 		 * @param regCache The register cache used for the shader compilation.
 		 * @return The AGAL fragment code for the method.
 		 */
-		private function clampDiffuse(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function clampDiffuse(vo : MethodVO, t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			regCache = regCache;
-			
 			return 	"mul " + t+".w, " + t+".w, " + _dataReg+".x\n" +
 					"frc " + t+".z, " + t+".w\n" +
 					"sub " + t+".y, " +  t+".w, " + t+".z\n" +

@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
@@ -15,8 +16,8 @@ package away3d.materials.methods
 	public class CelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
-		private var _dataIndex : int;
-		private var _data : Vector.<Number>;
+		private var _smoothness : Number = .1;
+		private var _specularCutOff : Number = .1;
 
 		/**
 		 * Creates a new CelSpecularMethod object.
@@ -26,9 +27,7 @@ package away3d.materials.methods
 		public function CelSpecularMethod(specularCutOff : Number = .5, baseSpecularMethod : BasicSpecularMethod = null)
 		{
 			super(clampSpecular, baseSpecularMethod);
-			_data = new Vector.<Number>(4, true);
-			_data[0] = .1;
-			_data[1] = specularCutOff;
+			_specularCutOff = specularCutOff;
 		}
 
 		/**
@@ -36,12 +35,12 @@ package away3d.materials.methods
 		 */
 		public function get smoothness() : Number
 		{
-			return _data[0];
+			return _smoothness;
 		}
 
 		public function set smoothness(value : Number) : void
 		{
-			_data[0] = value;
+			_smoothness = value;
 		}
 
 		/**
@@ -49,21 +48,24 @@ package away3d.materials.methods
 		 */
 		public function get specularCutOff() : Number
 		{
-			return _data[1];
+			return _specularCutOff;
 		}
 
 		public function set specularCutOff(value : Number) : void
 		{
-			_data[1] = value;
+			_specularCutOff = value;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
+			super.activate(vo, stage3DProxy);
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			var data : Vector.<Number> = vo.fragmentData;
+			data[index] = _smoothness;
+			data[index+1] = _specularCutOff;
 		}
 
 		/**
@@ -81,10 +83,8 @@ package away3d.materials.methods
 		 * @param regCache The register cache used for the shader compilation.
 		 * @return The AGAL fragment code for the method.
 		 */
-		private function clampSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function clampSpecular(methodVO : MethodVO, target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			regCache = regCache;			
 			return 	"sub " + target+".y, " + target+".w, " + _dataReg+".y\n" + // x - cutoff
 					"div " + target+".y, " + target+".y, " + _dataReg+".x\n" + // (x - cutoff)/epsilon
 					"sat " + target+".y, " + target+".y\n" +
@@ -95,11 +95,11 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_dataReg = regCache.getFreeFragmentConstant();
-			_dataIndex = _dataReg.index;
-			return super.getFragmentAGALPreLightingCode(regCache);
+			vo.secondaryFragmentConstantsIndex = _dataReg.index*4;
+			return super.getFragmentPreLightingCode(vo, regCache);
 		}
 	}
 }

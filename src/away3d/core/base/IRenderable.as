@@ -1,6 +1,7 @@
 package away3d.core.base
 {
 
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 
@@ -46,8 +47,6 @@ package away3d.core.base
 		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
 		 */
 		function get mouseEnabled():Boolean;
-
-		function get mouseHitMethod():uint;
 
 		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex positions.
@@ -131,5 +130,7 @@ package away3d.core.base
 		function get tangentBufferOffset() : int;
 		function get UVBufferOffset() : int;
 		function get secondaryUVBufferOffset() : int;
+
+		function get shaderPickingDetails():Boolean;
 	}
 }

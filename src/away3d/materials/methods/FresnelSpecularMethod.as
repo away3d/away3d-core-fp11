@@ -15,9 +15,9 @@ package away3d.materials.methods
 	public class FresnelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
-		private var _dataIndex : int;
-		private var _data : Vector.<Number>;
         private var _incidentLight : Boolean;
+        private var _fresnelPower : Number = 5;
+		private var _normalReflectance : Number = .028;	// default value for skin
 
 		/**
 		 * Creates a new FresnelSpecularMethod object.
@@ -28,27 +28,24 @@ package away3d.materials.methods
 		{
             // may want to offer diff speculars
 			super(modulateSpecular, baseSpecularMethod);
-			_data = new Vector.<Number>(4, true);
-            _data[0] = .028; // skin
-            _data[1] = 5; // exponent
-            _data[2] = 1;
             _incidentLight = !basedOnSurface;
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			vo.fragmentData[index+2] = 1;
+			vo.fragmentData[index+3] = 0;
 		}
 
 		public function get fresnelPower() : Number
 		{
-			return _data[1];
+			return _fresnelPower;
 		}
 
 		public function set fresnelPower(value : Number) : void
 		{
-			_data[1] = value;
-		}
-
-		arcane override function reset() : void
-		{
-			super.reset();
-			_dataIndex = -1;
+			_fresnelPower = value;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -62,31 +59,34 @@ package away3d.materials.methods
 		 */
 		public function get normalReflectance() : Number
 		{
-			return _data[0];
+			return _normalReflectance;
 		}
 
 		public function set normalReflectance(value : Number) : void
 		{
-			_data[0] = value;
+			_normalReflectance = value;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
+			super.activate(vo, stage3DProxy);
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.secondaryFragmentConstantsIndex;
+			fragmentData[index] = _normalReflectance;
+			fragmentData[index+1] = _fresnelPower;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_dataReg = regCache.getFreeFragmentConstant();
-			_dataIndex = _dataReg.index;
-			return super.getFragmentAGALPreLightingCode(regCache);
+			vo.secondaryFragmentConstantsIndex = _dataReg.index*4;
+			return super.getFragmentPreLightingCode(vo, regCache);
 		}
 
 		/**
@@ -96,26 +96,19 @@ package away3d.materials.methods
 		 * @param regCache The register cache used for the shader compilation.
 		 * @return The AGAL fragment code for the method.
 		 */
-		private function modulateSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function modulateSpecular(vo : MethodVO, target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			regCache = regCache;			
 			var code : String = "";
 
 			// use view dir and normal fragment .w as temp
             // use normal or half vector? :s
             code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + (_incidentLight? target+".xyz\n" : _normalFragmentReg+".xyz\n") +   // dot(V, H)
             		"sub " + _viewDirFragmentReg+".w, " + _dataReg+".z, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
-
-            		"mul " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 2)
-					"mul " + _normalFragmentReg+".w, " + _normalFragmentReg+".w, " + _normalFragmentReg+".w\n" +             // exp = pow(base, 4)
-					"mul " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +             // exp = pow(base, 5)
-
-					"sub " + _normalFragmentReg+".w, " + _dataReg+".z, " + _viewDirFragmentReg+".w\n" +             // 1 - exp
-					"mul " + _normalFragmentReg+".w, " + _dataReg+".x, " + _normalFragmentReg+".w\n" +             // f0*(1 - exp)
-					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
+            		"pow " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _dataReg+".y\n" +             // exp = pow(base, 5)
+					"sub " + _viewDirFragmentReg+".w, " + _dataReg+".z, " + _normalFragmentReg+".w\n" +             // 1 - exp
+					"mul " + _viewDirFragmentReg+".w, " + _dataReg+".x, " + _viewDirFragmentReg+".w\n" +             // f0*(1 - exp)
+					"add " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +          // exp + f0*(1 - exp)
 					"mul " + target+".w, " + target+".w, " + _viewDirFragmentReg+".w\n";
-//            code += AGAL.sat(target+".w", target+".w");
 
 			return code;
 		}

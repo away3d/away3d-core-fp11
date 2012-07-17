@@ -1,8 +1,7 @@
 package away3d.primitives
 {
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
-	import away3d.animators.data.NullAnimation;
+
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.bounds.NullBounds;
 	import away3d.cameras.Camera3D;
@@ -16,7 +15,6 @@ package away3d.primitives
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
 	import away3d.textures.CubeTextureBase;
-	import away3d.core.raycast.MouseHitMethod;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -35,9 +33,14 @@ package away3d.primitives
 		// todo: remove SubGeometry, use a simple single buffer with offsets
 		private var _geometry : SubGeometry;
 		private var _material : SkyBoxMaterial;
-		private var _nullAnimation : AnimationBase = new NullAnimation();
 		private var _uvTransform : Matrix = new Matrix();
-
+		private var _animator : IAnimator;
+		
+		public function get animator():IAnimator
+		{
+			return _animator;
+		}
+		
 		/**
 		 * Create a new SkyBox object.
 		 * @param cubeMap The CubeMap to use for the sky box's texture.
@@ -50,13 +53,6 @@ package away3d.primitives
 			_geometry = new SubGeometry();
 			_bounds = new NullBounds();
 			buildGeometry(_geometry);
-		}
-
-		/**
-		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
-		 */
-		public function get mouseHitMethod():uint {
-			return MouseHitMethod.BOUNDS_ONLY;
 		}
 
 		/**
@@ -139,24 +135,11 @@ package away3d.primitives
 		}
 
 		/**
-		 * The animation used by the material to assemble the vertex code.
-		 */
-		public function get animation() : AnimationBase
-		{
-			return _nullAnimation;
-		}
-
-		public function get animationState() : AnimationStateBase
-		{
-			return null;
-		}
-
-		/**
 		 * @inheritDoc
 		 */
 		override public function pushModelViewProjection(camera : Camera3D) : void
 		{
-			var size : Number = camera.lens.far / Math.sqrt(3);
+			var size : Number = camera.lens.far / Math.sqrt(2) * .5;
 			if (++_mvpIndex == _stackLen) {
 				_mvpTransformStack[_mvpIndex] = new Matrix3D();
 				++_stackLen;

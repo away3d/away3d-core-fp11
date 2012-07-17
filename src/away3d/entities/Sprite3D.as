@@ -1,9 +1,7 @@
 package away3d.entities
 {
 
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
-	import away3d.animators.data.NullAnimation;
+	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
@@ -24,27 +22,25 @@ package away3d.entities
 	use namespace arcane;
 
 	/**
-	 * Sprite3D is a 3D billboard, a renderable rectangular area that always faces the camera.
+	 * Sprite3D is a 3D billboard, a renderable rectangular area that is always aligned with the projection plane.
+	 * As a result, no perspective transformation occurs on a Sprite3D object.
 	 *
-	 * todo: mvp generation can probably be optimized
+	 * todo: mvp generation or vertex shader code can be optimized
 	 */
 	public class Sprite3D extends Entity implements IRenderable
 	{
 		private static var _geometry:SubGeometry;
 
-		private static var _nullAnimation:NullAnimation;
-		private var _mouseHitMethod:uint;
 		private var _material:MaterialBase;
-		private var _animationState:AnimationStateBase;
 		private var _spriteMatrix:Matrix3D;
-
+		private var _animator : IAnimator;
+		
 		private var _width:Number;
 		private var _height:Number;
 		private var _shadowCaster:Boolean = false;
 
 		public function Sprite3D( material:MaterialBase, width:Number, height:Number ) {
 			super();
-			_nullAnimation ||= new NullAnimation();
 			this.material = material;
 			_width = width;
 			_height = height;
@@ -77,20 +73,6 @@ package away3d.entities
 			if( _height == value ) return;
 			_height = value;
 			invalidateTransform();
-		}
-
-		/*override public function lookAt(target : Vector3D, upAxis : Vector3D = null) : void
-		 {
-		 super.lookAt(target, upAxis);
-		 _transform.appendScale(_width, _height, 1);
-		 }*/
-
-		public function get mouseHitMethod():uint {
-			return _mouseHitMethod;
-		}
-
-		public function set mouseHitMethod( value:uint ):void {
-			_mouseHitMethod = value;
 		}
 
 		public function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {
@@ -153,12 +135,13 @@ package away3d.entities
 			if( _material ) _material.addOwner( this );
 		}
 
-		public function get animation():AnimationBase {
-			return _nullAnimation;
-		}
-
-		public function get animationState():AnimationStateBase {
-			return _animationState;
+		
+		/**
+		 * Defines the animator of the mesh. Act on the mesh's geometry. Defaults to null
+		 */
+		public function get animator() : IAnimator
+		{
+			return _animator;
 		}
 
 		public function get castsShadows():Boolean {
@@ -170,7 +153,7 @@ package away3d.entities
 		}
 
 		override protected function updateBounds():void {
-			_bounds.fromExtremes( -.5, -.5, 0, .5, .5, 0 );
+			_bounds.fromExtremes(-.5 * _scaleX, -.5 * _scaleY, 0, .5 * _scaleX, .5 * _scaleY, 0);
 			_boundsInvalid = false;
 		}
 

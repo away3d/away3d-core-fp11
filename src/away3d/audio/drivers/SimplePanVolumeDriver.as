@@ -1,7 +1,8 @@
 package away3d.audio.drivers
 {
 	import away3d.audio.SoundTransform3D;
-
+	
+	import flash.events.Event;
 	import flash.geom.*;
 	import flash.media.*;
 
@@ -43,6 +44,7 @@ package away3d.audio.drivers
 			// start from beginning of file.
 			pos = _paused? _pause_position : 0;
 			_sound_chan = _src.play(pos, 0, _st3D.soundTransform);
+			_sound_chan.addEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 		}
 		
 		
@@ -51,12 +53,14 @@ package away3d.audio.drivers
 			_paused = true;
 			_pause_position = _sound_chan.position;
 			_sound_chan.stop();
+			_sound_chan.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 		}
 		
 		
 		public function stop() : void
 		{
 			_sound_chan.stop();
+			_sound_chan.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 		}
 		
 		
@@ -98,5 +102,10 @@ package away3d.audio.drivers
 				_sound_chan.soundTransform = _st3D.soundTransform;
 		}
 		
+		
+		private function onSoundComplete(ev : Event) : void
+		{
+			this.dispatchEvent(ev.clone());
+		}
 	}
 }

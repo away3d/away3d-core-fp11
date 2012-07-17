@@ -56,23 +56,16 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
-			// TODO: not used
-			target = target; 
-			
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-
-//			_context.setDepthTest(false, Context3DCompareMode.LESS);
-
-//			if (entityCollector.skyBox)
-//				drawSkyBox(entityCollector);
-
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector);
 
 			if (_renderBlended)
 				drawRenderables(entityCollector.blendedRenderableHead, entityCollector);
 
-			if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
+			if (_activeMaterial)
+				_activeMaterial.deactivateForDepth(_stage3DProxy);
+
 			_activeMaterial = null;
 		}
 
@@ -89,7 +82,7 @@ package away3d.core.render
 			while (item) {
 				_activeMaterial = item.renderable.material;
 
-				_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased);
+				_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased, _textureRatioX, _textureRatioY);
 				item2 = item;
 				do {
 					_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);

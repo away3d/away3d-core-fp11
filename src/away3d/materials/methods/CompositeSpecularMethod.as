@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.events.ShadingMethodEvent;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -27,6 +28,17 @@ package away3d.materials.methods
 			super();
 			_baseSpecularMethod = baseSpecularMethod || new BasicSpecularMethod();
 			_baseSpecularMethod._modulateMethod = modulateMethod;
+			_baseSpecularMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			_baseSpecularMethod.initVO(vo);
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			_baseSpecularMethod.initConstants(vo);
 		}
 
 		/**
@@ -54,7 +66,20 @@ package away3d.materials.methods
 		{
 			_baseSpecularMethod.specular = value;
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function get shadingModel() : String
+		{
+			return _baseSpecularMethod.shadingModel;
+		}
+		
+		override public function set shadingModel(value : String) : void
+		{
+			_baseSpecularMethod.shadingModel = value;
+		}
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -68,6 +93,7 @@ package away3d.materials.methods
 		 */
 		override public function dispose() : void
 		{
+			_baseSpecularMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_baseSpecularMethod.dispose();
 		}
 
@@ -87,52 +113,14 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set parentPass(value : MaterialPassBase) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.parentPass = value;
-			_baseSpecularMethod.parentPass = value;
+			_baseSpecularMethod.activate(vo, stage3DProxy);
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function deactivate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			_baseSpecularMethod.activate(stage3DProxy);
-		}
-
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			_baseSpecularMethod.deactivate(stage3DProxy);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsView() : Boolean
-		{
-			return _baseSpecularMethod.needsView;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsUV() : Boolean
-		{
-			return _baseSpecularMethod.needsUV;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsNormals() : Boolean
-		{
-			return _baseSpecularMethod.needsNormals;
-		}
-
-		arcane override function get needsProjection() : Boolean
-		{
-			return _baseSpecularMethod.needsProjection || _needsProjection;
+			_baseSpecularMethod.deactivate(vo, stage3DProxy);
 		}
 
 		/**
@@ -151,77 +139,6 @@ package away3d.materials.methods
 			_normalFragmentReg = _baseSpecularMethod.normalFragmentReg = value;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get mipmap() : Boolean
-		{
-			return _baseSpecularMethod.mipmap;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set mipmap(value : Boolean) : void
-		{
-			_baseSpecularMethod.mipmap = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get smooth() : Boolean
-		{
-			return _baseSpecularMethod.smooth;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set smooth(value : Boolean) : void
-		{
-			_baseSpecularMethod.smooth = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get repeat() : Boolean
-		{
-			return _baseSpecularMethod.repeat;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set repeat(value : Boolean) : void
-		{
-			_baseSpecularMethod.repeat = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get numLights() : int
-		{
-			return _baseSpecularMethod.numLights;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set numLights(value : int) : void
-		{
-			_baseSpecularMethod.numLights = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsGlobalPos() : Boolean
-		{
-			return _baseSpecularMethod.needsGlobalPos || _needsGlobalPos;
-		}
 
 		/**
 		 * @inheritDoc
@@ -268,42 +185,42 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getVertexCode(regCache : ShaderRegisterCache) : String
+		override arcane function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getVertexCode(regCache);
+			return _baseSpecularMethod.getVertexCode(vo, regCache);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentAGALPreLightingCode(regCache);
+			return _baseSpecularMethod.getFragmentPreLightingCode(vo, regCache);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentCodePerLight(lightIndex, lightDirReg, lightColReg, regCache);
+			return _baseSpecularMethod.getFragmentCodePerLight(vo, lightIndex, lightDirReg, lightColReg, regCache);
 		}
 
 		/**
 		 * @inheritDoc
 		 * @return
 		 */
-		arcane override function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentCodePerProbe(lightIndex, cubeMapReg, weightRegister, regCache);
+			return _baseSpecularMethod.getFragmentCodePerProbe(vo, lightIndex, cubeMapReg, weightRegister, regCache);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			return _baseSpecularMethod.getFragmentPostLightingCode(regCache, targetReg);
+			return _baseSpecularMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
 		}
 
 		/**
@@ -320,26 +237,21 @@ package away3d.materials.methods
 			_baseSpecularMethod.cleanCompilationData();
 		}
 
-		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
+		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
 		{
-			super.shadowRegister = shadowReg;
-			_baseSpecularMethod.shadowRegister = shadowReg;
+			super.shadowRegister = value;
+			_baseSpecularMethod.shadowRegister = value;
 		}
 
-		override public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		override arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
 		{
-			super.tangentVaryingReg = tangentVaryingReg;
-			_baseSpecularMethod.shadowRegister = tangentVaryingReg;
+			super.tangentVaryingReg = value;
+			_baseSpecularMethod.tangentVaryingReg = value;
 		}
 
-		arcane override function get needsSecondaryUV() : Boolean
+		private function onShaderInvalidated(event : ShadingMethodEvent) : void
 		{
-			return _needsSecondaryUV || _baseSpecularMethod.needsSecondaryUV;
-		}
-
-		arcane override function get needsTangents() : Boolean
-		{
-			return _needsTangents || _baseSpecularMethod.needsTangents;
+			invalidateShaderProgram();
 		}
 	}
 }

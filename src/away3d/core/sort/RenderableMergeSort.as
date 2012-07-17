@@ -26,11 +26,11 @@ package away3d.core.sort
 		 */
 		override public function sort(collector : EntityCollector) : void
 		{
-			collector.opaqueRenderableHead = mergeSort(collector.opaqueRenderableHead, true);
-			collector.blendedRenderableHead = mergeSort(collector.blendedRenderableHead, false);
+			collector.opaqueRenderableHead = mergeSortByMaterial(collector.opaqueRenderableHead);
+			collector.blendedRenderableHead = mergeSortByDepth(collector.blendedRenderableHead);
 		}
 
-		private function mergeSort(head : RenderableListItem, useMaterial : Boolean) : RenderableListItem
+		private function mergeSortByDepth(head : RenderableListItem) : RenderableListItem
 		{
 			var headB : RenderableListItem;
 			var fast : RenderableListItem, slow : RenderableListItem;
@@ -53,8 +53,66 @@ package away3d.core.sort
 			slow.next = null;
 
 			// recurse
-			head = mergeSort(head, useMaterial);
-			headB = mergeSort(headB, useMaterial);
+			head = mergeSortByDepth(head);
+			headB = mergeSortByDepth(headB);
+
+			// merge sublists while respecting order
+			var result : RenderableListItem;
+			var curr : RenderableListItem;
+			var l : RenderableListItem;
+
+			if (!head) return headB;
+			if (!headB) return head;
+
+			while (head && headB) {
+				if (head.zIndex < headB.zIndex) {
+					l = head;
+					head = head.next;
+				}
+				else {
+					l = headB;
+					headB = headB.next;
+				}
+
+				if (!result)
+					result = l;
+				else
+					curr.next = l;
+
+				curr = l;
+			}
+
+			if (head) curr.next = head;
+			else if (headB) curr.next = headB;
+
+			return result;
+		}
+
+		private function mergeSortByMaterial(head : RenderableListItem) : RenderableListItem
+		{
+			var headB : RenderableListItem;
+			var fast : RenderableListItem, slow : RenderableListItem;
+
+			if (!head || !head.next) return head;
+
+			// split in two sublists
+			slow = head;
+			fast = head.next;
+
+			while (fast) {
+				fast = fast.next;
+				if (fast) {
+					slow = slow.next;
+					fast = fast.next;
+				}
+			}
+
+			headB = slow.next;
+			slow.next = null;
+
+			// recurse
+			head = mergeSortByMaterial(head);
+			headB = mergeSortByMaterial(headB);
 
 			// merge sublists while respecting order
 			var result : RenderableListItem;
@@ -67,31 +125,25 @@ package away3d.core.sort
 
 			while (head && headB) {
 
-				if (useMaterial) {
-					// first sort per render order id (reduces program3D switches),
-					// then on material id (reduces setting props),
-					// then on zIndex (reduces overdraw)
-					var aid : uint = head.renderOrderId;
-					var bid : uint = headB.renderOrderId;
+				// first sort per render order id (reduces program3D switches),
+				// then on material id (reduces setting props),
+				// then on zIndex (reduces overdraw)
+				var aid : uint = head.renderOrderId;
+				var bid : uint = headB.renderOrderId;
 
-					if (aid == bid) {
-						var ma : uint = head.materialId;
-						var mb : uint = headB.materialId;
+				if (aid == bid) {
+					var ma : uint = head.materialId;
+					var mb : uint = headB.materialId;
 
-						if (ma == mb) {
-							if (head.zIndex < headB.zIndex) cmp = 1;
-							else cmp = -1;
-						}
-						else if (ma > mb) cmp = 1;
+					if (ma == mb) {
+						if (head.zIndex < headB.zIndex) cmp = 1;
 						else cmp = -1;
 					}
-					else if (aid > bid) cmp = 1;
+					else if (ma > mb) cmp = 1;
 					else cmp = -1;
 				}
-				else {
-					if (head.zIndex < headB.zIndex) cmp = -1;
-					else cmp = 1;
-				}
+				else if (aid > bid) cmp = 1;
+				else cmp = -1;
 
 				if (cmp < 0) {
 					l = head;
@@ -117,41 +169,5 @@ package away3d.core.sort
 
 			return result;
 		}
-
-
-		/**
-		 * Sorts per material, then per zIndex, front to back, for opaques
-		 *
-		 * is inlined
-		 */
-		/*private function opaqueSortFunction(a : IRenderable, b : IRenderable) : int
-		{
-			var aid : uint = a.material.uniqueId;
-			var bid : uint = b.material.uniqueId;
-
-			if (aid == bid) {
-				var za : Number = a.zIndex;
-				var zb : Number = b.zIndex;
-				if (za == zb) return 0;
-				else if (za < zb) return 1;
-				else return -1;
-			}
-			else if (aid > bid) return 1;
-			else return -1;
-		}*/
-
-		/**
-		 * Sorts per material, but back to front, for materials that require blending
-		 *
-		 * is inlined
-		 */
-		/*private function blendedSortFunction(a : IRenderable, b : IRenderable) : int
-		{
-			var za : Number = a.zIndex;
-			var zb : Number = b.zIndex;
-			if (za == zb) return 0;
-			else if (za < zb) return -1;
-			else return 1;
-		}*/
 	}
 }

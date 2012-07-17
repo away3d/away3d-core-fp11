@@ -3,6 +3,8 @@ package away3d.core.traverse
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.data.EntityListItem;
+	import away3d.core.data.EntityListItemPool;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.data.RenderableListItemPool;
 	import away3d.core.partition.NodeBase;
@@ -25,10 +27,11 @@ package away3d.core.traverse
 	public class EntityCollector extends PartitionTraverser
 	{
 		protected var _skyBox : IRenderable;
-		protected var _entities : Vector.<Entity>;
 		protected var _opaqueRenderableHead : RenderableListItem;
 		protected var _blendedRenderableHead : RenderableListItem;
+		private var _entityHead:EntityListItem;
 		protected var _renderableListItemPool : RenderableListItemPool;
+		protected var _entityListItemPool : EntityListItemPool;
 		protected var _lights : Vector.<LightBase>;
 		private var _directionalLights : Vector.<DirectionalLight>;
 		private var _pointLights : Vector.<PointLight>;
@@ -60,8 +63,8 @@ package away3d.core.traverse
 			_directionalLights = new Vector.<DirectionalLight>();
 			_pointLights = new Vector.<PointLight>();
 			_lightProbes = new Vector.<LightProbe>();
-			_entities = new Vector.<Entity>();
 			_renderableListItemPool = new RenderableListItemPool();
+			_entityListItemPool = new EntityListItemPool();
 		}
 
 		public function get numOpaques() : uint
@@ -132,6 +135,10 @@ package away3d.core.traverse
 			_blendedRenderableHead = value;
 		}
 
+		public function get entityHead():EntityListItem {
+			return _entityHead;
+		}
+
 		/**
 		 * The lights of which the affecting area intersects the camera's frustum.
 		 */
@@ -164,7 +171,9 @@ package away3d.core.traverse
 			_numTriangles = _numMouseEnableds = 0;
 			_blendedRenderableHead = null;
 			_opaqueRenderableHead = null;
+			_entityHead = null;
 			_renderableListItemPool.freeAll();
+			_entityListItemPool.freeAll();
 			_skyBox = null;
 			if (_numLights > 0) _lights.length = _numLights = 0;
 			if (_numDirectionalLights > 0) _directionalLights.length = _numDirectionalLights = 0;
@@ -199,7 +208,7 @@ package away3d.core.traverse
 		{
 			var material : MaterialBase;
 
-			if (renderable.mouseEnabled) ++_numMouseEnableds;
+			if( renderable.mouseEnabled ) ++_numMouseEnableds;
 			_numTriangles += renderable.numTriangles;
 
 			material = renderable.material;
@@ -220,6 +229,20 @@ package away3d.core.traverse
 					++_numOpaques;
 				}
 			}
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override public function applyEntity(entity : Entity) : void
+		{
+			++_numEntities;
+
+			var item:EntityListItem = _entityListItemPool.getItem();
+			item.entity = entity;
+
+			item.next = _entityHead;
+			_entityHead = item;
 		}
 
 		/**
@@ -260,22 +283,14 @@ package away3d.core.traverse
 		}
 
 		/**
-		 * @inheritDoc
-		 */
-		override public function applyEntity(entity : Entity) : void
-		{
-			_entities[_numEntities++] = entity;
-		}
-
-		/**
 		 * Cleans up any data at the end of a frame.
 		 */
 		public function cleanUp() : void
 		{
-			if (_numEntities > 0) {
-				for (var i : uint = 0; i < _numEntities; ++i)
-					_entities[i].popModelViewProjection();
-				_entities.length = _numEntities = 0;
+			var node : EntityListItem = _entityHead;
+			while (node) {
+				node.entity.popModelViewProjection();
+				node = node.next;
 			}
 		}
 	}

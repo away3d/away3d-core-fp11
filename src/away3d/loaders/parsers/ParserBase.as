@@ -1,13 +1,14 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
+	import away3d.core.base.SkinnedSubGeometry;
+	import away3d.core.base.SubGeometry;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.AssetEvent;
 	import away3d.events.ParserEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.tools.utils.TextureUtils;
 	
@@ -20,6 +21,117 @@ package away3d.loaders.parsers
 	import flash.utils.getTimer;
 
 	use namespace arcane;
+	
+	
+	/**
+	 * Dispatched when the parsing finishes.
+	 * 
+	 * @eventType away3d.events.ParserEvent
+	 */
+	[Event(name="parseComplete", type="away3d.events.ParserEvent")]
+	
+	/**
+	 * Dispatched when parser pauses to wait for dependencies, used internally to trigger
+	 * loading of dependencies which are then returned to the parser through it's interface
+	 * in the arcane namespace.
+	 * 
+	 * @eventType away3d.events.ParserEvent
+	 */
+	[Event(name="readyForDependencies", type="away3d.events.ParserEvent")]
+	
+	/**
+	 * Dispatched if an error was caught during parsing.
+	 * 
+	 * @eventType away3d.events.ParserEvent
+	 */
+	[Event(name="parseError", type="away3d.events.ParserEvent")]
+	
+	/**
+	 * Dispatched when any asset finishes parsing. Also see specific events for each
+	 * individual asset type (meshes, materials et c.)
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a geometry asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="geometryComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton pose asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonPoseComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a container asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
+		
+	/**
+	 * Dispatched when an animation set has been constructed from a group of animation state resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation node has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a texture asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a material asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a animator asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
+	
+	
 	
 	/**
 	 * <code>ParserBase</code> provides an abstract base class for objects that convert blocks of data to data structures
@@ -86,14 +198,6 @@ package away3d.loaders.parsers
 		{
 			_dataFormat = format;
 			_dependencies = new Vector.<ResourceDependency>();
-		}
-		
-		/**
-		 * The url or id of the data or file to be parsed.
-		 */
-		public function get defaultBitmapData() : BitmapData
-		{
-			return DefaultBitmapData.bitmapData;
 		}
 		
 		/**
@@ -186,7 +290,6 @@ package away3d.loaders.parsers
 		
 		arcane function resumeParsingAfterDependencies() : void
 		{
-			_dependencies.length = 0;
 			_parsingPaused = false;
 			_timer.start();
 		}
@@ -198,21 +301,29 @@ package away3d.loaders.parsers
 			var type_event : String;
 			var type_name : String;
 			
-			if (name)
+			if (name != null)
 				asset.name = name;
 			
 			switch (asset.assetType) {
-				case AssetType.ANIMATION:
-					type_name = 'animation';
-					type_event = AssetEvent.ANIMATION_COMPLETE;
+				case AssetType.ANIMATION_SET:
+					type_name = 'animationSet';
+					type_event = AssetEvent.ANIMATION_SET_COMPLETE;
 					break;
-				case AssetType.ANIMATOR:
-					type_name = 'animator';
-					type_event = AssetEvent.ANIMATOR_COMPLETE;
+				case AssetType.ANIMATION_STATE:
+					type_name = 'animationState';
+					type_event = AssetEvent.ANIMATION_STATE_COMPLETE;
+					break;
+				case AssetType.ANIMATION_NODE:
+					type_name = 'animationNode';
+					type_event = AssetEvent.ANIMATION_NODE_COMPLETE;
+					break;
+				case AssetType.STATE_TRANSITION:
+					type_name = 'stateTransition';
+					type_event = AssetEvent.STATE_TRANSITION_COMPLETE;
 					break;
 				case AssetType.TEXTURE:
 					type_name = 'texture';
-					type_event = AssetEvent.BITMAP_COMPLETE;
+					type_event = AssetEvent.TEXTURE_COMPLETE;
 					break;
 				case AssetType.CONTAINER:
 					type_name = 'container';
@@ -276,9 +387,9 @@ package away3d.loaders.parsers
 		}
 		
 		
-		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false, data : * = null) : void
+		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false, data : * = null, suppressErrorEvents : Boolean = false) : void
 		{
-			_dependencies.push(new ResourceDependency(id, req, data, this, retrieveAsRawData));
+			_dependencies.push(new ResourceDependency(id, req, data, this, retrieveAsRawData, suppressErrorEvents));
 		}
 		
 		
@@ -333,6 +444,198 @@ package away3d.loaders.parsers
 			_timer = null;
 			_parsingComplete = true;
 			dispatchEvent(new ParserEvent(ParserEvent.PARSE_COMPLETE));
+		}
+		
+		
+		/**
+		 * Build a sub-geometry from data vectors.
+		*/
+		protected function constructSubGeometry(verts : Vector.<Number>, indices : Vector.<uint>, uvs : Vector.<Number>, 
+										  normals : Vector.<Number>, tangents : Vector.<Number>, 
+										  weights : Vector.<Number>, jointIndices : Vector.<Number>) : SubGeometry
+		{
+			var sub : SubGeometry;
+			
+			if (weights && jointIndices) {
+				// If there were weights and joint indices defined, this
+				// is a skinned mesh and needs to be built from skinned
+				// sub-geometries.
+				sub = new SkinnedSubGeometry(weights.length / (verts.length/3));
+				SkinnedSubGeometry(sub).updateJointWeightsData(weights);
+				SkinnedSubGeometry(sub).updateJointIndexData(jointIndices);
+			}
+			else {
+				sub = new SubGeometry();
+			}
+			
+			sub.updateVertexData(verts);
+			sub.updateIndexData(indices);
+			
+			// Use explciti UVs or configure auto-generation
+			if (uvs && uvs.length) {
+				sub.updateUVData(uvs);
+				sub.autoGenerateDummyUVs = false;
+			}
+			else {
+				sub.autoGenerateDummyUVs = true;
+			}
+			
+			// Use explicit normals or configure auto-generation
+			if (normals && normals.length){
+				sub.updateVertexNormalData(normals);
+				sub.autoDeriveVertexNormals = false;
+			}
+			else {
+				sub.autoDeriveVertexNormals = true;
+			}
+			
+			// Use explicit tangents or configure auto-generation
+			if (tangents && tangents.length) {
+				sub.updateVertexTangentData(tangents);
+				sub.autoDeriveVertexTangents = false;
+			}
+			else {
+				sub.autoDeriveVertexTangents = true;
+			}
+			
+			return sub;
+		}
+		
+		
+		/**
+		 * Build a list of sub-geometries from raw data vectors, splitting them up in 
+		 * such a way that they won't exceed buffer length limits.
+		*/
+		protected function constructSubGeometries(verts : Vector.<Number>, indices : Vector.<uint>, uvs : Vector.<Number>, 
+											normals : Vector.<Number>, tangents : Vector.<Number>, 
+											weights : Vector.<Number>, jointIndices : Vector.<Number>) : Vector.<SubGeometry>
+		{
+			const LIMIT : uint = 3*0xffff;
+			var subs : Vector.<SubGeometry> = new Vector.<SubGeometry>();
+			
+			if (verts.length >= LIMIT || indices.length >= LIMIT) {
+				var i : uint, len : uint, outIndex : uint;
+				var splitVerts : Vector.<Number> = new Vector.<Number>();
+				var splitIndices : Vector.<uint> = new Vector.<uint>();
+				var splitUvs : Vector.<Number> = (uvs != null)? new Vector.<Number>() : null;
+				var splitNormals : Vector.<Number> = (normals != null)? new Vector.<Number>() : null;
+				var splitTangents : Vector.<Number> = (tangents != null)? new Vector.<Number>() : null;
+				var splitWeights : Vector.<Number> = (weights != null)? new Vector.<Number>() : null;
+				var splitJointIndices: Vector.<Number> = (jointIndices != null)? new Vector.<Number>() : null;
+				
+				var mappings : Vector.<int> = new Vector.<int>(verts.length/3, true);
+				i = mappings.length;
+				while (i-- > 0) 
+					mappings[i] = -1;
+				
+				// Loop over all triangles
+				outIndex = 0;
+				len = indices.length;
+				for (i=0; i<len; i+=3) {
+					var j : uint;
+					
+					if (outIndex*3 >= LIMIT) {
+						subs.push(constructSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices));
+						splitVerts = new Vector.<Number>();
+						splitIndices = new Vector.<uint>();
+						splitUvs = (uvs != null)? new Vector.<Number>() : null;
+						splitNormals = (normals != null)? new Vector.<Number>() : null;
+						splitTangents = (tangents != null)? new Vector.<Number>() : null;
+						splitWeights = (weights != null)? new Vector.<Number>() : null;
+						splitJointIndices = (jointIndices != null)? new Vector.<Number>() : null;
+						
+						j = mappings.length;
+						while (j-- > 0)
+							mappings[j] = -1;
+						
+						outIndex = 0;
+					}
+					
+					// Loop over all vertices in triangle
+					for (j=0; j<3; j++) {
+						var originalIndex : uint;
+						var splitIndex : uint;
+						
+						originalIndex = indices[i+j];
+						
+						if (mappings[originalIndex] >= 0) {
+							splitIndex = mappings[originalIndex];
+						}
+						else {
+							var o0 : uint, o1 : uint, o2 : uint,
+							s0 : uint, s1 : uint, s2 : uint;
+							
+							o0 = originalIndex*3 + 0;
+							o1 = originalIndex*3 + 1;
+							o2 = originalIndex*3 + 2;
+							
+							// This vertex does not yet exist in the split list and
+							// needs to be copied from the long list.
+							splitIndex = splitVerts.length / 3;
+							s0 = splitIndex*3+0;
+							s1 = splitIndex*3+1;
+							s2 = splitIndex*3+2;
+							
+							splitVerts[s0] = verts[o0];
+							splitVerts[s1] = verts[o1];
+							splitVerts[s2] = verts[o2];
+							
+							if (uvs) {
+								var su : uint, ou : uint, sv : uint, ov : uint;
+								su = splitIndex*2+0;
+								sv = splitIndex*2+1;
+								ou = originalIndex*2+0;
+								ov = originalIndex*2+1;
+								
+								splitUvs[su] = uvs[ou];
+								splitUvs[sv] = uvs[ov];
+							}
+							
+							if (normals) {
+								splitNormals[s0] = normals[o0];
+								splitNormals[s1] = normals[o1];
+								splitNormals[s2] = normals[o2];
+							}
+							
+							if (tangents) {
+								splitTangents[s0] = tangents[o0];
+								splitTangents[s1] = tangents[o1];
+								splitTangents[s2] = tangents[o2];
+							}
+							
+							if (weights) {
+								splitWeights[s0] = weights[o0];
+								splitWeights[s1] = weights[o1];
+								splitWeights[s2] = weights[o2];
+							}
+							
+							if (jointIndices) {
+								splitJointIndices[s0] = jointIndices[o0];
+								splitJointIndices[s1] = jointIndices[o1];
+								splitJointIndices[s2] = jointIndices[o2];
+							}
+							
+							mappings[originalIndex] = splitIndex;
+						}
+						
+						// Store new index, which may have come from the mapping look-up,
+						// or from copying a new set of vertex data from the original vector
+						splitIndices[outIndex+j] = splitIndex;
+					}
+					
+					outIndex += 3;
+				}
+				
+				if (splitVerts.length > 0) {
+					// More was added in the last iteration of the loop.
+					subs.push(constructSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices));
+				}
+			}
+			else {
+				subs.push(constructSubGeometry(verts, indices, uvs, normals, tangents, weights, jointIndices));
+			}
+			
+			return subs;
 		}
 	}
 }

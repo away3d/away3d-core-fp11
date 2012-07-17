@@ -51,11 +51,13 @@ package away3d.core.managers
 
 		public function get textureRatioX() : Number
 		{
+			if (_buffersInvalid) updateRTTBuffers();
 			return _textureRatioX;
 		}
 
 		public function get textureRatioY() : Number
 		{
+			if (_buffersInvalid) updateRTTBuffers();
 			return _textureRatioY;
 		}
 
@@ -79,7 +81,7 @@ package away3d.core.managers
 			}
 			else {
 				_renderToTextureRect.x = 0;
-				_renderToTextureRect.height = _textureHeight;
+				_renderToTextureRect.width = _textureWidth;
 			}
 
 			dispatchEvent(new Event(Event.RESIZE));

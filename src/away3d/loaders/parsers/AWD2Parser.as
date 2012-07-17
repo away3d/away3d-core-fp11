@@ -1,16 +1,19 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.data.SkeletonAnimationSequence;
+	import away3d.materials.utils.DefaultMaterialManager;
+	import away3d.animators.nodes.UVClipNode;
+	import flash.display.Sprite;
+	import away3d.animators.UVAnimationState;
 	import away3d.animators.data.UVAnimationFrame;
-	import away3d.animators.data.UVAnimationSequence;
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.Skeleton;
-	import away3d.animators.skeleton.SkeletonJoint;
-	import away3d.animators.skeleton.SkeletonPose;
+	import away3d.animators.SkeletonAnimationState;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.IAsset;
@@ -20,14 +23,14 @@ package away3d.loaders.parsers
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
-	
-	import flash.display.Sprite;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
+	
 	
 	use namespace arcane;
 	
@@ -91,8 +94,8 @@ package away3d.loaders.parsers
 		{
 			super(ParserDataFormat.BINARY);
 			
-			_blocks = new Vector.<AWDBlock>;
-			_blocks[0] = new AWDBlock;
+			_blocks = new Vector.<AWDBlock>();
+			_blocks[0] = new AWDBlock();
 			_blocks[0].data = null; // Zero address means null in AWD
 			
 			_version = [];
@@ -120,9 +123,18 @@ package away3d.loaders.parsers
 				if (asset) {
 					var mat : TextureMaterial;
 					var users : Array;
+					var block : AWDBlock = _blocks[parseInt(resourceDependency.id)];
 					
 					// Store finished asset
-					_blocks[parseInt(resourceDependency.id)].data = asset;
+					block.data = asset;
+					
+					// Reset name of texture to the one defined in the AWD file,
+					// as opposed to whatever the image parser came up with.
+					asset.resetAssetPath(block.name, null, true);
+					
+					// Finalize texture asset to dispatch texture event, which was
+					// previously suppressed while the dependency was loaded.
+					finalizeAsset(asset);
 					
 					users = _texture_users[resourceDependency.id];
 					for each (mat in users) {
@@ -136,11 +148,21 @@ package away3d.loaders.parsers
 		/**
 		 * @inheritDoc
 		 */
-		/*override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
+		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			// apply system default
-			//BitmapMaterial(mesh.material).bitmapData = defaultBitmapData;
-		}*/
+			if (_texture_users.hasOwnProperty(resourceDependency.id)) {
+				var mat : TextureMaterial;
+				var users : Array;
+				
+				var texture : BitmapTexture = DefaultMaterialManager.getDefaultTexture();
+				
+				users = _texture_users[resourceDependency.id];
+				for each (mat in users) {
+					mat.texture = texture;
+					finalizeAsset(mat);
+				}
+			}
+		}
 		
 		/**
 		 * Tests whether a data block can be parsed by the parser.
@@ -149,20 +171,7 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			var bytes : ByteArray = ParserUtil.toByteArray(data);
-			
-			if (bytes) {
-				var magic : String;
-				
-				bytes.position = 0;
-				magic = data.readUTFBytes(3);
-				bytes.position = 0;
-				
-				if (magic == 'AWD')
-					return true;
-			}
-			
-			return false;
+			return (ParserUtil.toString(data, 3)=='AWD');
 		}
 		
 		
@@ -185,7 +194,7 @@ package away3d.loaders.parsers
 				parseHeader();
 				switch (_compression) {
 					case DEFLATE:
-						_body = new ByteArray;
+						_body = new ByteArray();
 						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
 						_body.uncompress();
 						break;
@@ -238,6 +247,7 @@ package away3d.loaders.parsers
 		
 		private function parseNextBlock() : void
 		{
+			var block : AWDBlock;
 			var assetData : IAsset;
 			var ns : uint, type : uint, flags : uint, len : uint;
 			
@@ -247,11 +257,7 @@ package away3d.loaders.parsers
 			flags = _body.readUnsignedByte();
 			len = _body.readUnsignedInt();
 			
-			// TODO: Remove this
-			if (_body.bytesAvailable < len) {
-				_body.position = _body.length;
-				return;
-			}
+			block = new AWDBlock();
 			
 			switch (type) {
 				case 1:
@@ -267,7 +273,7 @@ package away3d.loaders.parsers
 					assetData = parseMaterial(len);
 					break;
 				case 82:
-					assetData = parseTexture(len);
+					assetData = parseTexture(len, block);
 					break;
 				case 101:
 					assetData = parseSkeleton(len);
@@ -288,14 +294,12 @@ package away3d.loaders.parsers
 			}
 			
 			// Store block reference for later use
-			_blocks[_cur_block_id] = new AWDBlock();
+			_blocks[_cur_block_id] = block;
 			_blocks[_cur_block_id].data = assetData;
 			_blocks[_cur_block_id].id = _cur_block_id;
 		}
 		
-		
-		
-		private function parseUVAnimation(blockLength : uint) : UVAnimationSequence
+		private function parseUVAnimation(blockLength : uint) : UVAnimationState
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -304,17 +308,19 @@ package away3d.loaders.parsers
 			var frames_parsed : uint;
 			var props : AWDProperties;
 			var dummy : Sprite;
-			var seq : UVAnimationSequence;
+			var state : UVAnimationState;
+			var clip : UVClipNode;
 			
 			name = parseVarStr();
 			num_frames = _body.readUnsignedShort();
 			
 			props = parseProperties(null);
 			
-			seq = new UVAnimationSequence(name);
+			clip = new UVClipNode();
+			state = new UVAnimationState(clip);
 			
 			frames_parsed = 0;
-			dummy = new Sprite;
+			dummy = new Sprite();
 			while (frames_parsed < num_frames) {
 				var mtx : Matrix;
 				var frame_dur : uint;
@@ -328,7 +334,7 @@ package away3d.loaders.parsers
 				frame_dur = _body.readUnsignedShort();
 				
 				frame = new UVAnimationFrame(dummy.x*0.01, dummy.y*0.01, dummy.scaleX/100, dummy.scaleY/100, dummy.rotation);
-				seq.addFrame(frame, frame_dur);
+				clip.addFrame(frame, frame_dur);
 				
 				frames_parsed++;
 			}
@@ -336,11 +342,11 @@ package away3d.loaders.parsers
 			// Ignore for now
 			parseUserAttributes();
 			
-			finalizeAsset(seq, name);
+			finalizeAsset(clip, name);
+			finalizeAsset(state, name);
 			
-			return seq;
+			return state;
 		}
-		
 		
 		private function parseMaterial(blockLength : uint) : MaterialBase
 		{
@@ -360,9 +366,10 @@ package away3d.loaders.parsers
 			num_methods = _body.readUnsignedByte();
 			
 			// Read material numerical properties
-			// (1=color, 2=bitmap url, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
+			// (1=color, 2=bitmap url, 10=alpha, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
 			props = parseProperties({ 1:AWD_FIELD_INT32, 2:AWD_FIELD_BADDR, 
-				11:AWD_FIELD_BOOL, 12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
+				10:AWD_FIELD_FLOAT32, 11:AWD_FIELD_BOOL, 
+				12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
 			
 			methods_parsed = 0;
 			while (methods_parsed < num_methods) {
@@ -379,7 +386,7 @@ package away3d.loaders.parsers
 				var color : uint;
 				
 				color = props.get(1, 0xcccccc);
-				mat = new ColorMaterial(color);
+				mat = new ColorMaterial(color, props.get(10, 1.0));
 			}
 			else if (type == 2) { // Bitmap material
 				//TODO: not used
@@ -394,6 +401,7 @@ package away3d.loaders.parsers
 				if (texture) {
 					mat = new TextureMaterial(texture);
 					TextureMaterial(mat).alphaBlending = props.get(11, false);
+					TextureMaterial(mat).alpha = props.get(10, 1.0);
 					finalize = true;
 				}
 				else {
@@ -419,16 +427,15 @@ package away3d.loaders.parsers
 		}
 		
 		
-		private function parseTexture(blockLength : uint) : Texture2DBase
+		private function parseTexture(blockLength : uint, block : AWDBlock) : Texture2DBase
 		{
 			// TODO: not used
 			blockLength = blockLength; 
-			var name : String;
 			var type : uint;
 			var data_len : uint;
 			var asset : Texture2DBase;
 			
-			name = parseVarStr();
+			block.name = parseVarStr();
 			type = _body.readUnsignedByte();
 			data_len = _body.readUnsignedInt();
 			
@@ -440,7 +447,7 @@ package away3d.loaders.parsers
 				
 				url = _body.readUTFBytes(data_len);
 				
-				addDependency(_cur_block_id.toString(), new URLRequest(url));
+				addDependency(_cur_block_id.toString(), new URLRequest(url), false, null, true);
 			}
 			else {
 				var data : ByteArray;
@@ -450,7 +457,7 @@ package away3d.loaders.parsers
 				data = new ByteArray();
 				_body.readBytes(data, 0, data_len);
 				
-				addDependency(_cur_block_id.toString(), null, false, data);
+				addDependency(_cur_block_id.toString(), null, false, data, true);
 			}
 			
 			// Ignore for now
@@ -568,7 +575,7 @@ package away3d.loaders.parsers
 			return pose;
 		}
 		
-		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationSequence
+		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationState
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -578,10 +585,10 @@ package away3d.loaders.parsers
 			// TODO: not used
 			//var frame_rate : uint;
 			var frame_dur : Number;
-			var animation : SkeletonAnimationSequence;
 			
 			name = parseVarStr();
-			animation = new SkeletonAnimationSequence(name);
+			var clip : SkeletonClipNode = new SkeletonClipNode();
+			var state : SkeletonAnimationState = new SkeletonAnimationState(clip);
 			
 			num_frames = _body.readUnsignedShort();
 			
@@ -595,7 +602,7 @@ package away3d.loaders.parsers
 				//TODO: Check for null?
 				pose_addr = _body.readUnsignedInt();
 				frame_dur = _body.readUnsignedShort();
-				animation.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
+				clip.addFrame(_blocks[pose_addr].data as SkeletonPose, frame_dur);
 				
 				frames_parsed++;
 			}
@@ -603,9 +610,9 @@ package away3d.loaders.parsers
 			// Ignore attributes for now
 			parseUserAttributes();
 			
-			finalizeAsset(animation, name);
+			finalizeAsset(state, name);
 			
-			return animation;
+			return state;
 		}
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D
@@ -658,7 +665,7 @@ package away3d.loaders.parsers
 			data_id = _body.readUnsignedInt();
 			geom = _blocks[data_id].data as Geometry;
 			
-			materials = new Vector.<MaterialBase>;
+			materials = new Vector.<MaterialBase>();
 			num_materials = _body.readUnsignedShort();
 			materials_parsed = 0;
 			while (materials_parsed < num_materials) {
@@ -670,7 +677,7 @@ package away3d.loaders.parsers
 				materials_parsed++;
 			}
 			
-			mesh = new Mesh(geom);
+			mesh = new Mesh(geom, null);
 			mesh.transform = mtx;
 			
 			// Add to parent if one exists
@@ -703,8 +710,6 @@ package away3d.loaders.parsers
 		
 		private function parseMeshData(blockLength : uint) : Geometry
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var geom : Geometry;
 			var num_subs : uint;
@@ -719,13 +724,6 @@ package away3d.loaders.parsers
 			// Read optional properties
 			props = parseProperties({ 1:AWD_FIELD_MTX4x4 }); 
 			
-			// TODO: not used
-			// var mtx : Matrix3D;
-			var bsm_data : Array = props.get(1, null);
-			if (bsm_data) {
-				bsm = new Matrix3D(Vector.<Number>(bsm_data));
-			}
-			
 			geom = new Geometry();
 			
 			// Loop through sub meshes
@@ -734,7 +732,6 @@ package away3d.loaders.parsers
 				var i : uint;
 				var sm_len : uint, sm_end : uint;
 				var sub_geoms : Vector.<SubGeometry>;
-				var skinned_sub_geom : SkinnedSubGeometry;
 				var w_indices : Vector.<Number>;
 				var weights : Vector.<Number>;
 				
@@ -759,7 +756,7 @@ package away3d.loaders.parsers
 					var x:Number, y:Number, z:Number;
 					
 					if (str_type == 1) {
-						var verts : Vector.<Number> = new Vector.<Number>;
+						var verts : Vector.<Number> = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							x = _body.readFloat();
@@ -772,35 +769,35 @@ package away3d.loaders.parsers
 						}
 					}
 					else if (str_type == 2) {
-						var indices : Vector.<uint> = new Vector.<uint>;
+						var indices : Vector.<uint> = new Vector.<uint>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							indices[idx++] = _body.readUnsignedShort();
 						}
 					}
 					else if (str_type == 3) {
-						var uvs : Vector.<Number> = new Vector.<Number>;
+						var uvs : Vector.<Number> = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							uvs[idx++] = _body.readFloat();
 						}
 					}
 					else if (str_type == 4) {
-						var normals : Vector.<Number> = new Vector.<Number>;
+						var normals : Vector.<Number> = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							normals[idx++] = _body.readFloat();
 						}
 					}
 					else if (str_type == 6) {
-						w_indices = new Vector.<Number>;
+						w_indices = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							w_indices[idx++] = _body.readUnsignedShort()*3;
 						}
 					}
 					else if (str_type == 7) {
-						weights = new Vector.<Number>;
+						weights = new Vector.<Number>();
 						while (_body.position < str_end) {
 							// TODO: Respect stream field type
 							weights[idx++] = _body.readFloat();
@@ -814,7 +811,7 @@ package away3d.loaders.parsers
 				// Ignore sub-mesh attributes for now
 				parseUserAttributes();
 				
-				sub_geoms = buildSubGeometries(verts, indices, uvs, normals, null, weights, w_indices);
+				sub_geoms = constructSubGeometries(verts, indices, uvs, normals, null, weights, w_indices);
 				for (i=0; i<sub_geoms.length; i++) {
 					geom.addSubGeometry(sub_geoms[i]);
 					// TODO: Somehow map in-sub to out-sub indices to enable look-up
@@ -829,161 +826,6 @@ package away3d.loaders.parsers
 			finalizeAsset(geom, name);
 			
 			return geom;
-		}
-		
-		
-		private function buildSubGeometry(verts : Vector.<Number>, indices : Vector.<uint>, uvs : Vector.<Number>, 
-										  normals : Vector.<Number>, tangents : Vector.<Number>, 
-										  weights : Vector.<Number>, jointIndices : Vector.<Number>) : SubGeometry
-		{
-			var sub : SubGeometry;
-			
-			if (weights && jointIndices) {
-				// If there were weights and joint indices defined, this
-				// is a skinned mesh and needs to be built from skinned
-				// sub-geometries.
-				sub = new SkinnedSubGeometry(weights.length / (verts.length/3));
-				SkinnedSubGeometry(sub).updateJointWeightsData(weights);
-				SkinnedSubGeometry(sub).updateJointIndexData(jointIndices);
-			}
-			else {
-				sub = new SubGeometry();
-			}
-			
-			sub.updateVertexData(verts);
-			sub.updateIndexData(indices);
-			if (uvs) sub.updateUVData(uvs);
-			if (normals) sub.updateVertexNormalData(normals);
-			if (tangents) sub.updateVertexTangentData(tangents);
-			
-			return sub;
-		}
-		
-		private function buildSubGeometries(verts : Vector.<Number>, indices : Vector.<uint>, uvs : Vector.<Number>, 
-											normals : Vector.<Number>, tangents : Vector.<Number>, 
-											weights : Vector.<Number>, jointIndices : Vector.<Number>) : Vector.<SubGeometry>
-		{
-			const LIMIT : uint = 3*0xffff;
-			var subs : Vector.<SubGeometry> = new Vector.<SubGeometry>();
-			
-			if (verts.length >= LIMIT || indices.length >= LIMIT) {
-				var i : uint, len : uint, outIndex : uint;
-				var splitVerts : Vector.<Number> = new Vector.<Number>();
-				var splitIndices : Vector.<uint> = new Vector.<uint>();
-				var splitUvs : Vector.<Number> = (uvs != null)? new Vector.<Number>() : null;
-				var splitNormals : Vector.<Number> = (normals != null)? new Vector.<Number>() : null;
-				var splitTangents : Vector.<Number> = (tangents != null)? new Vector.<Number>() : null;
-				var splitWeights : Vector.<Number> = (weights != null)? new Vector.<Number>() : null;
-				var splitJointIndices: Vector.<Number> = (jointIndices != null)? new Vector.<Number>() : null;
-				
-				var mappings : Vector.<int> = new Vector.<int>(verts.length/3, true);
-				i = mappings.length;
-				while (i-->0) 
-					mappings[i] = -1;
-				
-				// Loop over all triangles
-				outIndex = 0;
-				len = indices.length;
-				for (i=0; i<len; i+=3) {
-					var j : uint;
-					
-					if (outIndex >= LIMIT) {
-						subs.push(buildSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices));
-						splitVerts = new Vector.<Number>();
-						splitIndices = new Vector.<uint>();
-						splitUvs = (uvs != null)? new Vector.<Number>() : null;
-						splitNormals = (normals != null)? new Vector.<Number>() : null;
-						splitTangents = (tangents != null)? new Vector.<Number>() : null;
-						splitWeights = (weights != null)? new Vector.<Number>() : null;
-						splitJointIndices = (jointIndices != null)? new Vector.<Number>() : null;
-						
-						j = mappings.length;
-						while (j-->0)
-							mappings[j] = -1;
-						
-						outIndex = 0;
-					}
-					
-					// Loop over all vertices in triangle
-					for (j=0; j<3; j++) {
-						var originalIndex : uint;
-						var splitIndex : uint;
-						
-						originalIndex = indices[i+j];
-						
-						if (mappings[originalIndex] >= 0) {
-							splitIndex = mappings[originalIndex];
-						}
-						else {
-							var o0 : uint, o1 : uint, o2 : uint,
-							s0 : uint, s1 : uint, s2 : uint;
-							
-							o0 = originalIndex*3 + 0;
-							o1 = originalIndex*3 + 1;
-							o2 = originalIndex*3 + 2;
-							
-							// This vertex does not yet exist in the split list and
-							// needs to be copied from the long list.
-							splitIndex = splitVerts.length / 3;
-							s0 = splitIndex*3+0;
-							s1 = splitIndex*3+1;
-							s2 = splitIndex*3+2;
-							
-							splitVerts[s0] = verts[o0];
-							splitVerts[s1] = verts[o1];
-							splitVerts[s2] = verts[o2];
-							
-							if (uvs) {
-								splitUvs[s0] = uvs[o0];
-								splitUvs[s1] = uvs[o1];
-								splitUvs[s2] = uvs[o2];
-							}
-							
-							if (normals) {
-								splitNormals[s0] = normals[o0];
-								splitNormals[s1] = normals[o1];
-								splitNormals[s2] = normals[o2];
-							}
-							
-							if (tangents) {
-								splitTangents[s0] = tangents[o0];
-								splitTangents[s1] = tangents[o1];
-								splitTangents[s2] = tangents[o2];
-							}
-							
-							if (weights) {
-								splitWeights[s0] = weights[o0];
-								splitWeights[s1] = weights[o1];
-								splitWeights[s2] = weights[o2];
-							}
-							
-							if (jointIndices) {
-								splitJointIndices[s0] = jointIndices[o0];
-								splitJointIndices[s1] = jointIndices[o1];
-								splitJointIndices[s2] = jointIndices[o2];
-							}
-							
-							mappings[originalIndex] = splitIndex;
-						}
-						
-						// Store new index, which may have come from the mapping look-up,
-						// or from copying a new set of vertex data from the original vector
-						splitIndices[outIndex+j] = splitIndex;
-					}
-					
-					outIndex += 3;
-				}
-				
-				if (splitVerts.length > 0) {
-					// More was added in the last iteration of the loop.
-					subs.push(buildSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices));
-				}
-			}
-			else {
-				subs.push(buildSubGeometry(verts, indices, uvs, normals, tangents, weights, jointIndices));
-			}
-			
-			return subs;
 		}
 		
 		
@@ -1015,7 +857,7 @@ package away3d.loaders.parsers
 					var type : uint;
 					
 					key = _body.readUnsignedShort();
-					len = _body.readUnsignedShort();
+					len = _body.readUnsignedInt();
 					if (expected.hasOwnProperty(key)) {
 						type = expected[key];
 						props.set(key, parseAttrValue(type, len));
@@ -1053,7 +895,7 @@ package away3d.loaders.parsers
 					ns_id = _body.readUnsignedByte();
 					attr_key = parseVarStr();
 					attr_type = _body.readUnsignedByte();
-					attr_len = _body.readUnsignedShort();
+					attr_len = _body.readUnsignedInt();
 					
 					switch (attr_type) {
 						case AWD_FIELD_STRING:
@@ -1174,7 +1016,6 @@ package away3d.loaders.parsers
 		
 		private function parseMatrix43RawData() : Vector.<Number>
 		{
-			var i : uint;
 			var mtx_raw : Vector.<Number> = new Vector.<Number>(16, true);
 			
 			mtx_raw[0] = _body.readFloat();
@@ -1203,6 +1044,7 @@ package away3d.loaders.parsers
 internal class AWDBlock
 {
 	public var id : uint;
+	public var name : String;
 	public var data : *;
 }
 

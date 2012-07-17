@@ -1,5 +1,6 @@
 package away3d.loaders
 {
+	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.entities.Mesh;
 	import away3d.events.AssetEvent;
@@ -14,7 +15,118 @@ package away3d.loaders
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.net.URLRequest;
+	
+	use namespace arcane;
 
+	/**
+	 * Dispatched when a full resource (including dependencies) finishes loading.
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="resourceComplete", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when a single dependency (which may be the main file of a resource)
+	 * finishes loading.
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="dependencyComplete", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when an error occurs during loading. 
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="loadError", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when any asset finishes parsing. Also see specific events for each
+	 * individual asset type (meshes, materials et c.)
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a geometry asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="geometryComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton pose asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonPoseComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a container asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
+		
+	/**
+	 * Dispatched when an animation set has been constructed from a group of animation state resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation node has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a texture asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a material asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a animator asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
+	
+	
+	
 	/**
 	 * Loader3D can load any file format that Away3D supports (or for which a third-party parser
 	 * has been plugged in) and be added directly to the scene. As assets are encountered
@@ -67,11 +179,12 @@ package away3d.loaders
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
-			token.addEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -79,6 +192,9 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			token._loader.addErrorHandler(onLoadError);
 			
 			return token;
 		}
@@ -106,11 +222,12 @@ package away3d.loaders
 			}
 			
 			token.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
-			token.addEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			token.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			token.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+			token.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -118,6 +235,9 @@ package away3d.loaders
 			token.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			token.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			token._loader.addErrorHandler(onLoadError);
 			
 			return token;
 		}
@@ -141,9 +261,11 @@ package away3d.loaders
 			dispatcher.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceComplete);
 			dispatcher.removeEventListener(LoaderEvent.LOAD_ERROR, onLoadError);
 			dispatcher.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			dispatcher.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			dispatcher.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			dispatcher.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+			dispatcher.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			dispatcher.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -182,15 +304,14 @@ package away3d.loaders
 		}
 		
 		
-		private function onLoadError(ev : LoaderEvent) : void
+		private function onLoadError(ev : LoaderEvent) : Boolean
 		{
-			removeListeners(EventDispatcher(ev.currentTarget));
-			
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
-				dispatchEvent(ev.clone());
+				dispatchEvent(ev);
+				return true;
 			}
 			else {
-				throw new Error(ev.message);
+				return false;
 			}
 		}
 

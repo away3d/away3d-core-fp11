@@ -4,9 +4,12 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.events.ShadingMethodEvent;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+
+	import flash.events.EventDispatcher;
 
 	use namespace arcane;
 
@@ -14,16 +17,8 @@ package away3d.materials.methods
 	 * ShadingMethodBase provides an abstract base method for shading methods, used by DefaultScreenPass to compile
 	 * the final shading program.
 	 */
-	public class ShadingMethodBase
+	public class ShadingMethodBase extends EventDispatcher
 	{
-		protected var _needsProjection : Boolean;
-		protected var _needsView : Boolean;
-		protected var _needsNormals : Boolean;
-		protected var _needsTangents : Boolean;
-		protected var _needsUV : Boolean;
-		protected var _needsSecondaryUV : Boolean;
-		protected var _needsGlobalPos : Boolean;
-
 		protected var _viewDirVaryingReg : ShaderRegisterElement;
 		protected var _viewDirFragmentReg : ShaderRegisterElement;
 		protected var _normalFragmentReg : ShaderRegisterElement;
@@ -33,27 +28,25 @@ package away3d.materials.methods
 		protected var _globalPosReg : ShaderRegisterElement;
 		protected var _projectionReg : ShaderRegisterElement;
 
-		protected var _mipmap : Boolean = true;
-		protected var _smooth : Boolean = true;
-
-		protected var _repeat : Boolean;
 		protected var _passes : Vector.<MaterialPassBase>;
-
-		private var _parentPass : MaterialPassBase;
-		protected var _numLights : int;
-
-
 
 		/**
 		 * Create a new ShadingMethodBase object.
 		 * @param needsNormals Defines whether or not the method requires normals.
 		 * @param needsView Defines whether or not the method requires the view direction.
 		 */
-		public function ShadingMethodBase(needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean)
+		public function ShadingMethodBase()  // needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean
 		{
-			_needsNormals = needsNormals;
-			_needsView = needsView;
-			_needsGlobalPos = needsGlobalPos;
+		}
+
+		arcane function initVO(vo : MethodVO) : void
+		{
+
+		}
+
+		arcane function initConstants(vo : MethodVO) : void
+		{
+
 		}
 
 		/**
@@ -74,32 +67,11 @@ package away3d.materials.methods
 		}
 
 		/**
-		 * The amount of lights the method needs to support.
-		 * @private
+		 * Creates a data container that contains material-dependent data. Provided as a factory method so a custom subtype can be overridden when needed.
 		 */
-		arcane function get numLights() : int
+		arcane function createMethodVO() : MethodVO
 		{
-			return _numLights;
-		}
-
-		arcane function set numLights(value : int) : void
-		{
-			_numLights = value;
-		}
-
-
-		/**
-		 * The pass for which this method is used.
-		 * @private
-		 */
-		arcane function get parentPass() : MaterialPassBase
-		{
-			return _parentPass;
-		}
-
-		arcane function set parentPass(value : MaterialPassBase) : void
-		{
-			_parentPass = value;
+			return new MethodVO();
 		}
 
 		arcane function reset() : void
@@ -119,99 +91,6 @@ package away3d.materials.methods
 			_uvFragmentReg = null;
 			_globalPosReg = null;
 			_projectionReg = null;
-		}
-
-		/**
-		 * Defines whether any used textures should use mipmapping.
-		 * @private
-		 */
-		arcane function get mipmap() : Boolean
-		{
-			return _mipmap;
-		}
-
-		arcane function set mipmap(value : Boolean) : void
-		{
-			_mipmap = value;
-		}
-
-		/**
-		 * Defines whether smoothing should be applied to any used textures.
-		 * @private
-		 */
-		arcane function get smooth() : Boolean
-		{
-			return _smooth;
-		}
-
-		arcane function set smooth(value : Boolean) : void
-		{
-			_smooth = value;
-		}
-
-		/**
-		 * Defines whether textures should be tiled.
-		 * @private
-		 */
-		arcane function get repeat() : Boolean
-		{
-			return _repeat;
-		}
-
-		arcane function set repeat(value : Boolean) : void
-		{
-			_repeat = value;
-		}
-
-		/**
-		 * Indicates whether the material requires uv coordinates.
-		 * @private
-		 */
-		arcane function get needsUV() : Boolean
-		{
-			return _needsUV;
-		}
-
-		/**
-		 * Indicates whether the material requires uv coordinates.
-		 * @private
-		 */
-		arcane function get needsSecondaryUV() : Boolean
-		{
-			return _needsSecondaryUV;
-		}
-
-		/**
-		 * Indicates whether the material requires the view direction.
-		 * @private
-		 */
-		arcane function get needsView() : Boolean
-		{
-			return _needsView;
-		}
-
-		/**
-		 * Indicates whether the material requires normals.
-		 * @private
-		 */
-		arcane function get needsNormals() : Boolean
-		{
-			return _needsNormals;
-		}
-
-		arcane function get needsTangents() : Boolean
-		{
-			return _needsTangents;
-		}
-
-		arcane function get needsGlobalPos() : Boolean
-		{
-			return _needsGlobalPos;
-		}
-
-		arcane function get needsProjection() : Boolean
-		{
-			return _needsProjection;
 		}
 
 		/**
@@ -309,23 +188,8 @@ package away3d.materials.methods
 		 * @param regCache The register cache used during the compilation.
 		 * @private
 		 */
-		arcane function getVertexCode(regCache : ShaderRegisterCache) : String
+		arcane function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			regCache = regCache;			
-			return "";
-		}
-
-		/**
-		 * Get the fragment shader code that should be added after all per-light code. Usually composits everything to the target register.
-		 * @param regCache The register cache used during the compilation.
-		 * @private
-		 */
-		arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
-		{
-			// TODO: not used
-			regCache = regCache;
-			targetReg = targetReg;			
 			return "";
 		}
 
@@ -334,7 +198,7 @@ package away3d.materials.methods
 		 * @param context The Context3D currently used for rendering.
 		 * @private
 		 */
-		arcane function activate(stage3DProxy : Stage3DProxy) : void
+		arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 
 		}
@@ -342,7 +206,7 @@ package away3d.materials.methods
 		/**
 		 * Sets the render state for a single renderable.
 		 */
-		arcane function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 
 		}
@@ -352,7 +216,7 @@ package away3d.materials.methods
 		 * @param context The Context3D currently used for rendering.
 		 * @private
 		 */
-		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
+		arcane function deactivate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 
 		}
@@ -363,13 +227,13 @@ package away3d.materials.methods
 		 * @param inputReg The texture stream register.
 		 * @return The fragment code that performs the sampling.
 		 */
-		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null, forceWrap : String = null) : String
+		protected function getTexSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null, forceWrap : String = null) : String
 		{
-			var wrap : String = forceWrap || (_repeat ? "wrap" : "clamp");
+			var wrap : String = forceWrap || (vo.repeatTextures ? "wrap" : "clamp");
 			var filter : String;
 
-			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
-			else filter = _mipmap ? "nearest,mipnearest" : "nearest";
+			if (vo.useSmoothTextures) filter = vo.useMipmapping? "linear,miplinear" : "linear";
+			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
 
             uvReg ||= _uvFragmentReg;
             return "tex "+targetReg.toString()+", "+uvReg.toString()+", "+inputReg.toString()+" <2d,"+filter+","+wrap+">\n";
@@ -380,8 +244,7 @@ package away3d.materials.methods
 		 */
 		protected function invalidateShaderProgram() : void
 		{
-			if (_parentPass)
-				_parentPass.invalidateShaderProgram();
+			dispatchEvent(new ShadingMethodEvent(ShadingMethodEvent.SHADER_INVALIDATED));
 		}
 
 		/**
@@ -391,15 +254,15 @@ package away3d.materials.methods
 		{
 		}
 
-		public function get tangentVaryingReg() : ShaderRegisterElement
+		arcane function get tangentVaryingReg() : ShaderRegisterElement
 		{
 			return _tangentVaryingReg;
 		}
 
 
-		public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
 		{
-			_tangentVaryingReg = tangentVaryingReg;
+			_tangentVaryingReg = value;
 		}
 	}
 }

@@ -1,5 +1,6 @@
-﻿package away3d.loaders.parsers
+package away3d.loaders.parsers
 {
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -10,6 +11,7 @@
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
+	import away3d.materials.ColorMaterial;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
@@ -26,29 +28,30 @@
 	 */
 	public class AC3DParser extends ParserBase
 	{
+		private const LIMIT:uint = 196605;
+		
 		private var _textData:String;
 		private var _startedParsing : Boolean;
 		private var _container:ObjectContainer3D;
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
 		private var _inited:Boolean;
-		private const LIMIT:uint = 64998;
-		private var trunk:Array;
-		private var materialIndexList:Array = [];
-		private var containersList:Array = [];
-		private var tmpos:Vector3D = new Vector3D(0.0,0.0,0.0);
-		private var kidsCount:int = 0;
-		private var activeMesh:Mesh;
-		private var vertexes:Array;
-		private var uvs:Array;
-		private var parsesV:Boolean;
-		private var isQuad:Boolean;
-		private var quadCount:int;
-		private var invalidPoly:Boolean;
-		private var lastType:String = "";
-		private var charIndex:uint;
-		private var oldIndex:uint;
-		private var stringLength:uint;
+		private var _trunk:Array;
+		private var _containersList:Array = [];
+		private var _tmpos:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private var _kidsCount:int = 0;
+		private var _activeMesh:Mesh;
+		private var _vertices:Vector.<Vertex>;
+		private var _indices:Vector.<uint>;
+		private var _uvs:Array;
+		private var _parsesV:Boolean;
+		private var _isQuad:Boolean;
+		private var _quadCount:int;
+		private var _lastType:String = "";
+		private var _charIndex:uint;
+		private var _oldIndex:uint;
+		private var _stringLen:uint;
+		private var _materialList:Array;
 		
 		/**
 		 * Creates a new AC3DParser object.
@@ -91,8 +94,8 @@
 				str = (data is String)? String(data).substr(0, 4) : null;
 			}
 			
-			if (str == 'AC3D')
-				return true;
+			if (str == 'AC3D') return true;
+			
 			return false;
 		}
 		
@@ -115,11 +118,9 @@
 		
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			//resourceDependency.id
+			//handled with default material
 		}
-		
-		
-		
+		 
 		/**
 		 * @inheritDoc
 		 */
@@ -131,26 +132,26 @@
 			// TODO: Remove root container (if it makes sense for this format) and
 			// instead return each asset individually using finalizeAsset()
 			if (!_container)
-				_container = new ObjectContainer3D;
+				_container = new ObjectContainer3D();
 			
 			if(!_startedParsing) {
 				_textData = getTextData();
 				var re:RegExp = new RegExp(String.fromCharCode(13),"g");
 				_textData = _textData.replace(re, "");
+				_materialList = [];
 				_startedParsing = true;
 			}
 			
 			if(!_inited){
 				_inited = true;
 				_meshList = new Vector.<Mesh>();
-				stringLength = _textData.length;
-				
-				//version ac3d --> AC3D[b] --> hex value for file format
-				//to do add to ParserBase a version getter for supported versions per filetype
-				charIndex = _textData.indexOf(creturn, 0);
-				oldIndex = charIndex;
+				_stringLen = _textData.length;
+				_charIndex = _textData.indexOf(creturn, 0);
+				_oldIndex = _charIndex;
 				//skip the version header line
-				//line = _textData.substring(0, charIndex-1);
+				//version ac3d --> AC3D[b] --> hex value for file format
+				//If we once need to check version in future
+				//line = _textData.substring(0, _charIndex-1);
 				//var version:String = line.substring(line.length-1, line.length);
 				//ac3d version = getVersionFromHex(version);
 			}
@@ -161,25 +162,25 @@
 			var m:Mesh;
 			var cont:ObjectContainer3D;
 			
-			while(charIndex<stringLength && hasTime()){
+			while(_charIndex<_stringLen && hasTime()){
 				
-				charIndex = _textData.indexOf(creturn, oldIndex);
+				_charIndex = _textData.indexOf(creturn, _oldIndex);
 				
-				if(charIndex == -1)
-					charIndex = stringLength;
+				if(_charIndex == -1)
+					_charIndex = _stringLen;
 				
-				line = _textData.substring(oldIndex, charIndex);
-				trunk = line.replace("  "," ").replace("  "," ").replace("  "," ").split(" ");
+				line = _textData.substring(_oldIndex, _charIndex);
+				if(line.indexOf("texture ") != -1) tUrl = line.substring(line.indexOf('"')+1, line.length-1);
+				_trunk = line.replace("  "," ").replace("  "," ").replace("  "," ").split(" ");
 				
-				if(charIndex != stringLength)
-					oldIndex = charIndex+1;
+				if(_charIndex != _stringLen)
+					_oldIndex = _charIndex+1;
 				
-				switch (trunk[0])
+				switch (_trunk[0])
 				{
-					//unused tags
-					case "MATERIAL"://MATERIAL "ac3dmat1" rgb 1 1 1  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.2 0.2 0.2  shi 128  trans 0
-						//materialList.push(line);//pushing the whole line for now
-						//break;
+					case "MATERIAL":
+						generateMaterial(line);
+						break;
 					case "numsurf"://integer
 					case "crease"://45.000000. 
 					case "texrep":// %f %f tiling
@@ -187,93 +188,85 @@
 					case "url":
 					case "data":
 					case "numvert lines of":
+					case "SURF"://0x30
 						break;
 					
 					case "kids"://howmany children in the upcomming object. Probably need it later on, to couple with container/group generation
-						kidsCount = parseInt(trunk[1]);
+						_kidsCount = parseInt(_trunk[1]);
 						break;
 					
 					case "OBJECT":
-						
-						if(activeMesh != null){
-							buildMeshGeometry(activeMesh, vertexes, uvs , tmpos);
-							tmpos.x = tmpos.y = tmpos.z = 0;
-							activeMesh = null;
+					
+						if(_activeMesh != null){
+							buildMeshGeometry(_activeMesh);
+							_tmpos.x = _tmpos.y = _tmpos.z = 0;
+							_activeMesh = null;
 						}
 						
-						if(trunk[1] == "world"){
-							lastType = "world";
+						if(_trunk[1] == "world"){
+							_lastType = "world";
 							_activeContainer = _container;
 						}
 						
-						if(trunk[1] == "poly"){
+						if(_trunk[1] == "poly"){
 							var geometry:Geometry = new Geometry();
-							activeMesh = new Mesh(geometry, null);
-							activeMesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
-							vertexes = [];
-							uvs = [];
-							activeMesh.name = "m_"+_meshList.length;
-							_meshList[_meshList.length] = activeMesh;
+							_activeMesh = new Mesh(geometry, null );
+							if(_vertices) cleanUpBuffers();
+							_vertices = new Vector.<Vertex>();
+							_indices = new Vector.<uint>();
+							_uvs = [];
+							_activeMesh.name = "m_"+_meshList.length;
+							_meshList[_meshList.length] = _activeMesh;
 							//in case of groups, numvert might not be there
-							parsesV = true;
-							lastType = "poly";
+							_parsesV = true;
+							_lastType = "poly";
 						}
 						
-						if(trunk[1] == "group"){
+						if(_trunk[1] == "group"){
 							cont = new ObjectContainer3D();
 							_activeContainer.addChild(cont);
-							cont.name = "c_"+containersList.length;
-							containersList.push(cont);
+							cont.name = "c_"+_containersList.length;
+							_containersList.push(cont);
 							_activeContainer = cont;
-							lastType = "group";
+							_lastType = "group";
 						}
-						
 						break;
 					
 					case "name":
 						nameid = line.substring(6, line.length-1);
-						if(lastType == "poly"){
-							activeMesh.name = nameid;
-							activeMesh.material.name = nameid;
+						if(_lastType == "poly"){
+							_activeMesh.name = nameid;
 						} else{
 							_activeContainer.name = nameid;
 						}
 						break;
 					
 					case "numvert":
-						parsesV = true;
-						break;
-					
-					case "SURF"://0x30
-						if(invalidPoly)
-							invalidPoly = false;
+						_parsesV = true;
 						break;
 					
 					case "refs":
-						refscount = parseInt(trunk[1]);
+						refscount = parseInt(_trunk[1]);
 						if(refscount == 4){
-							isQuad = true;
-							quadCount = 0;
+							_isQuad = true;
+							_quadCount = 0;
 						} else if( refscount<3 || refscount > 4){
 							trace("AC3D Parser: Unsupported polygon type with "+refscount+" sides found. Triangulate in AC3D!");
-							//invalidPoly = true;
 							continue;
 						} else{
-							isQuad = false;
+							_isQuad = false;
 						}
-						parsesV = false;
+						_parsesV = false;
 						break;
 					
 					case "mat":
-						materialIndexList.push(trunk[1]);
+						if(!_activeMesh.material)
+							_activeMesh.material = _materialList[ parseInt(_trunk[1]) ];
 						break;
 					
 					case "texture":
-						
-						tUrl = trunk[1].substring(1,trunk[1].length-1);
-						activeMesh.material.name = activeMesh.name;
-						addDependency(activeMesh.name, new URLRequest(tUrl));
-						
+						_activeMesh.material = DefaultMaterialManager.getDefaultMaterial();
+						addDependency(String(_meshList.length-1), new URLRequest(tUrl));
 						break;
 					
 					case "loc"://%f %f %f
@@ -282,63 +275,67 @@
 						relative to the parent - i.e. not a global position.  If this is not found then
 						the default centre of the object will be 0, 0, 0.
 						*/
-						tmpos.x = parseFloat(trunk[1]);
-						tmpos.y = parseFloat(trunk[2]);
-						tmpos.z = parseFloat(trunk[3]);
-						
+						_tmpos.x = parseFloat(_trunk[1]);
+						_tmpos.y = parseFloat(_trunk[2]);
+						_tmpos.z = parseFloat(_trunk[3]);
+					
 					case "rot"://%f %f %f  %f %f %f  %f %f %f
 						/*The 3x3 rotation matrix for this objects vertices.  Note that the rotation is relative
 						to the object's parent i.e. it is not a global rotation matrix.  If this token
 						is not specified then the default rotation matrix is 1 0 0, 0 1 0, 0 0 1 */
-						//Not required as ac 3d applys rotation to vertexes during export
+						//Not required as ac 3d applys rotation to _vertices during export
 						//Might be required for containers later on
 						//matrix = new Matrix3D();
 						
-						/*matrix.rawData = Vector.<Number>([parseFloat(trunk[1]),parseFloat(trunk[2]),parseFloat(trunk[3]),0,
-						parseFloat(trunk[4]),parseFloat(trunk[5]),parseFloat(trunk[6]),0,
-						parseFloat(trunk[7]),parseFloat(trunk[8]),parseFloat(trunk[9]),0,
+						/*matrix.rawData = Vector.<Number>([parseFloat(_trunk[1]),parseFloat(_trunk[2]),parseFloat(_trunk[3]),0,
+						parseFloat(_trunk[4]),parseFloat(_trunk[5]),parseFloat(_trunk[6]),0,
+						parseFloat(_trunk[7]),parseFloat(_trunk[8]),parseFloat(_trunk[9]),0,
 						0,0,0,1]);*/
 						
-						//activeMesh.transform = matrix;
-						
+						//_activeMesh.transform = matrix;
 						break;
 					
 					default:
-						if(trunk[0] == "" || invalidPoly)
+						if(_trunk[0] == "")
 							break;
 						
-						if(parsesV){
-							vertexes.push(new Vertex( parseFloat(trunk[0]), parseFloat(trunk[1]), parseFloat(trunk[2])));
+						if(_parsesV){
+							_vertices.push(new Vertex( -(parseFloat(_trunk[0])), parseFloat(_trunk[1]), parseFloat(_trunk[2])));
 							
-						} else{
+						} else {
 							
-							if(isQuad){
-								quadCount++;
-								if(quadCount == 4){
-									uvs.push(uvs[uvs.length-2], uvs[uvs.length-1]);
-									uvs.push(parseInt(trunk[0]), new UV(parseFloat(trunk[1]), 1-parseFloat(trunk[2])));
-									uvs.push(uvs[uvs.length-10], uvs[uvs.length-9]);
+							if(_isQuad){
+								_quadCount++;
+								if(_quadCount == 4){
+									_indices.push(_indices[_indices.length-1]);
+									_uvs.push(_uvs[_uvs.length-2], _uvs[_uvs.length-1]);
+									_indices.push(parseInt(_trunk[0]));
+									_uvs.push(parseInt(_trunk[0]), new UV(parseFloat(_trunk[1]), 1-parseFloat(_trunk[2])));
+									_indices.push(_indices[_indices.length-5]);
+									_uvs.push(_uvs[_uvs.length-10], _uvs[_uvs.length-9]);
 									
-								} else{
-									uvs.push(parseInt(trunk[0]), new UV(parseFloat(trunk[1]), 1-parseFloat(trunk[2])));
+								} else {
+									_indices.push(parseInt(_trunk[0]));
+									_uvs.push(parseInt(_trunk[0]), new UV(parseFloat(_trunk[1]), 1-parseFloat(_trunk[2])));
 								}
 								
 							} else {
-								
-								uvs.push(parseInt(trunk[0]), new UV(parseFloat(trunk[1]), 1-parseFloat(trunk[2])));
-								
+								_indices.push(parseInt(_trunk[0]));
+								_uvs.push(parseInt(_trunk[0]), new UV(parseFloat(_trunk[1]), 1-parseFloat(_trunk[2])));
 							}
 						}
 				}
 				
 			}
 			
-			if(charIndex >= stringLength){
+			if(_charIndex >= _stringLen){
 				
-				if(activeMesh != null)
-					buildMeshGeometry(activeMesh, vertexes, uvs, tmpos);
+				if(_activeMesh != null)
+					buildMeshGeometry(_activeMesh);
 				
 				finalizeAsset(_container);
+				
+				cleanUP();
 				
 				return PARSING_DONE;
 			} 
@@ -346,7 +343,7 @@
 			return MORE_TO_PARSE;
 		}
 		
-		private function buildMeshGeometry(mesh:Mesh, vertexes:Array, uvs:Array, tmpos:Vector3D = null):void
+		private function buildMeshGeometry(mesh:Mesh):void
 		{
 			var v0:Vertex;
 			var v1:Vertex;
@@ -365,7 +362,8 @@
 			var subGeomsData:Array = [vertices,indices,vuv];
 			
 			var j:uint;
-			for (var i:uint = 0;i<uvs.length;i+=6){
+			
+			for (var i:uint = 0;i<_uvs.length;i+=6){
 				
 				if(vertLength+9 > LIMIT ){
 					index = 0;
@@ -376,20 +374,22 @@
 					subGeomsData.push(vertices,indices,vuv);
 				}
 				
-				uv0 = uvs[i+1];
-				uv1 = uvs[i+3];
-				uv2 = uvs[i+5];
+				uv0 = _uvs[i+1];
+				uv1 = _uvs[i+3];
+				uv2 = _uvs[i+5];
 				
-				v0 = vertexes[uvs[i]];
-				v1 = vertexes[uvs[i+2]];
-				v2 = vertexes[uvs[i+4]];
+				v0 = _vertices[_uvs[i]];
+				v1 = _vertices[_uvs[i+2]];
+				v2 = _vertices[_uvs[i+4]];
 				
-				vertices.push(v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+				vertices.push(v1.x, v1.y, v1.z, v0.x, v0.y, v0.z, v2.x, v2.y, v2.z);
+				
 				for(j=0; j<3;++j){
 					indices[index] = index;
 					index++;
 				}
-				vuv.push(uv0.u, uv0.v, uv1.u, uv1.v, uv2.u, uv2.v);
+				
+				vuv.push(uv1.u, uv1.v, uv0.u, uv0.v, uv2.u, uv2.v);
 				vertLength+=9;
 			}
 			
@@ -406,18 +406,16 @@
 			
 			_activeContainer.addChild(mesh);
 			
-			mesh.x = -tmpos.x;
-			mesh.y = tmpos.y;
-			mesh.z = tmpos.z;
+			mesh.x = -_tmpos.x;
+			mesh.y = _tmpos.y;
+			mesh.z = _tmpos.z;
 			
 			finalizeAsset(mesh);
 		}
 		
 		private function retrieveMeshFromID(id:String):Mesh
 		{
-			for(var i:int = 0;i<_meshList.length;++i)
-				if(Mesh(_meshList[i]).name == id)
-					return Mesh(_meshList[i]);
+			if(_meshList[parseInt(id)]) return _meshList[parseInt(id)];
 			
 			return null;
 		}
@@ -448,5 +446,76 @@
 					return new Number(char);
 			}    
 		}
+
+		private function generateMaterial(materialString:String):void
+		{	
+			_materialList.push(parseMaterialLine(materialString));
+		}
+		
+		private function parseMaterialLine(materialString:String):ColorMaterial
+		{
+			var trunk:Array = materialString.split(" ");
+			var colorMaterial:ColorMaterial = new ColorMaterial(0xFFFFFF);
+
+			for(var i:uint = 0;i<trunk.length;++i){
+				
+				if(trunk[i] == "") continue;
+				
+				if(trunk[i].indexOf("\"") != -1 || trunk[i].indexOf("\'") != -1){
+					colorMaterial.name = trunk[i].substring(1, trunk[i].length-1);
+					continue;
+				}
+				
+				switch(trunk[i]){
+					case "rgb":
+						var r:uint = (parseFloat(trunk[i+1])*255);
+						var g:uint = (parseFloat(trunk[i+2])*255);
+						var b:uint = (parseFloat(trunk[i+3])*255);
+						i+=3;
+						colorMaterial.color = r << 16| g << 8 | b;
+					break;
+					
+					case "amb":
+						colorMaterial.ambient = parseFloat(trunk[i+1]);
+						i+=2;
+					break;
+					
+					case "spec":
+						colorMaterial.specular = parseFloat(trunk[i+1]);
+						i+=2;
+					break;
+					
+					case "shi":
+						colorMaterial.gloss = parseFloat(trunk[i+1])/255;
+						i+=2;
+					break;
+					
+					case "trans":
+						colorMaterial.alpha = (1-parseFloat(trunk[i+1]));
+					break;
+				}
+			}
+			
+			return colorMaterial;
+		}
+		
+		private function cleanUP():void
+		{
+			_materialList = null;
+			cleanUpBuffers();
+		}
+		
+		private function cleanUpBuffers():void
+		{
+			for(var i:uint = 0;i<_vertices.length;++i)
+				_vertices[i] = null;
+			
+			for(i = 0;i<_uvs.length;++i)
+				_uvs[i] = null;
+			
+			_vertices = null;
+			_uvs = null;
+		}
+						
 	}
 }

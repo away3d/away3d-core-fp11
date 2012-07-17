@@ -1,6 +1,5 @@
-package away3d.primitives {
-	import away3d.materials.MaterialBase;
-
+package away3d.primitives
+{
 	/**
 	 * A UV RegularPolygon primitive mesh.
 	 */
@@ -49,9 +48,8 @@ package away3d.primitives {
 		
 		/**
 		 * Creates a new RegularPolygon disc object.
-		 * @param material The material with which to render the regular polygon.
 		 * @param radius The radius of the regular polygon
-		 * @param sides Defines the number of sides of the regular polygon. Defaults to 16.
+		 * @param sides Defines the number of sides of the regular polygon.
 		 * @param yUp Defines whether the regular polygon should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
 		public function RegularPolygonGeometry(radius : Number = 100, sides : uint = 16, yUp : Boolean = true) {

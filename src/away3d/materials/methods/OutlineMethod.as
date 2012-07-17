@@ -9,16 +9,21 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class OutlineMethod extends ShadingMethodBase
+	public class OutlineMethod extends EffectMethodBase
 	{
 		private var _outlinePass : OutlinePass;
 
 		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 1, showInnerLines : Boolean = true, dedicatedMeshes : Boolean = false)
 		{
-			super(true, false, false);
+			super();
 			_passes = new Vector.<MaterialPassBase>();
 			_outlinePass = new OutlinePass(outlineColor, outlineSize, showInnerLines, dedicatedMeshes);
 			_passes.push(_outlinePass);
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsNormals = true;
 		}
 
 		public function get showInnerLines() : Boolean
@@ -56,15 +61,12 @@ package away3d.materials.methods
 			super.reset();
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 		}
 
-		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			// TODO: not used
-			regCache = regCache;
-			targetReg = targetReg;			
 			return "";
 		}
 	}

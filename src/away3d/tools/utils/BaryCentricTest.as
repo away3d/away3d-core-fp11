@@ -1,4 +1,4 @@
-﻿package away3d.tools.utils
+package away3d.tools.utils
 {
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;

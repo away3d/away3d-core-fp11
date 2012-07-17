@@ -1,14 +1,13 @@
 package away3d.primitives
 {
-	import away3d.bounds.BoundingVolumeBase;
+	import away3d.arcane;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.Object3D;
 	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
-	import away3d.debug.Debug;
-	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
-	import away3d.materials.MaterialBase;
+	
+	import flash.geom.Matrix3D;
+	
+	use namespace arcane;
 
 	/**
 	 * PrimitiveBase is an abstract base class for mesh primitives, which are prebuilt simple meshes.
@@ -71,6 +70,15 @@ package away3d.primitives
 			
 			super.scaleUV(scaleU, scaleV);
 		}
+		
+		/**
+		 * @inheritDoc
+		*/
+		override public function applyTransformation(transform:Matrix3D):void
+		{
+			if (_geomDirty) updateGeometry();
+			super.applyTransformation(transform);
+		}
 
 		/**
 		 * Builds the primitive's geometry when invalid. This method should not be called directly. The calling should
@@ -122,6 +130,13 @@ package away3d.primitives
 		{
 			buildUVs(_subGeometry);
 			_uvDirty = false;
+		}
+		
+		
+		override arcane function validate() : void
+		{
+			if (_geomDirty) updateGeometry();
+			if (_uvDirty) updateUVs();
 		}
 	}
 }

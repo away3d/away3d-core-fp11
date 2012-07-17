@@ -1,4 +1,4 @@
-﻿package away3d.core.base.data
+package away3d.core.base.data
 {
 	
     /**

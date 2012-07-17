@@ -1,5 +1,6 @@
 ﻿package away3d.containers
 {
+	import away3d.core.pick.IPicker;
 	import away3d.Away3D;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -12,11 +13,7 @@
 	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
 	import away3d.textures.Texture2DBase;
-	
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -24,6 +21,7 @@
 	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Rectangle;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
@@ -31,6 +29,7 @@
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 	import flash.utils.getTimer;
+	
 
 	use namespace arcane;
 
@@ -56,6 +55,8 @@
 		protected var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
 		private var _addedToStage:Boolean;
+		
+		private var _forceSoftware : Boolean;
 
 		protected var _filter3DRenderer : Filter3DRenderer;
 		protected var _requireDepthRender : Boolean;
@@ -77,6 +78,8 @@
 		private var _menu0:ContextMenuItem;
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
+		private var _shareContext:Boolean = false;
+		private var _viewScissoRect:Rectangle;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -121,20 +124,25 @@
 		}
 		
 		
-		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null)
+		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null, forceSoftware:Boolean = false)
 		{
 			super();
 
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
-			_mouse3DManager = new Mouse3DManager(this);
 			_depthRenderer = new DepthRenderer();
-
+			_forceSoftware = forceSoftware;
+			
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
+			_viewScissoRect = new Rectangle();
+
 			initHitField();
+			
+			_mouse3DManager = new Mouse3DManager();
+			_mouse3DManager.enableMouseListeners(this);
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
@@ -161,9 +169,27 @@
 			return _stage3DProxy;
 		}
 
+		public function set stage3DProxy(stage3DProxy:Stage3DProxy) : void
+		{
+			_stage3DProxy = stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
+
+			super.x = _stage3DProxy.x;
+			
+			_localPos.x = _stage3DProxy.x;
+			_globalPos.x = parent? parent.localToGlobal(_localPos).x : _stage3DProxy.x;
+
+			super.y = _stage3DProxy.y;
+			
+			_localPos.y = _stage3DProxy.y;
+			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
+			
+			_viewScissoRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
+		}
+
 		/**
 		 * Forces mouse-move related events even when the mouse hasn't moved. This allows mouseOver and mouseOut events
-		 * etc to be triggered due to changes in the scene graph.
+		 * etc to be triggered due to changes in the scene graph. Defaults to false.
 		 */
 		public function get forceMouseMove() : Boolean
 		{
@@ -354,7 +380,8 @@
 		}
 
 		/**
-		 * The width of the viewport
+		 * The width of the viewport. When software rendering is used, this is limited by the
+		 * platform to 2048 pixels.
 		 */
 		override public function get width() : Number
 		{
@@ -363,6 +390,10 @@
 
 		override public function set width(value : Number) : void
 		{
+			// Backbuffer limitation in software mode. See comment in updateBackBuffer()
+			if (_stage3DProxy && _stage3DProxy.usesSoftwareRendering && value > 2048)
+				value = 2048;
+				
 			if (_width == value)
 				return;
 
@@ -375,12 +406,15 @@
 			_depthTextureInvalid = true;
 
 			_renderer.viewWidth = value;
+			
+			_viewScissoRect.width = value;
 
 			invalidateBackBuffer();
 		}
 
 		/**
-		 * The height of the viewport
+		 * The height of the viewport. When software rendering is used, this is limited by the
+		 * platform to 2048 pixels.
 		 */
 		override public function get height() : Number
 		{
@@ -389,6 +423,10 @@
 
 		override public function set height(value : Number) : void
 		{
+			// Backbuffer limitation in software mode. See comment in updateBackBuffer()
+			if (_stage3DProxy && _stage3DProxy.usesSoftwareRendering && value > 2048)
+				value = 2048;
+				
 			if (_height == value)
 				return;
 
@@ -401,6 +439,8 @@
 			_depthTextureInvalid = true;
 
 			_renderer.viewHeight = value;
+
+			_viewScissoRect.height = value;
 			
 			invalidateBackBuffer();
 		}
@@ -412,8 +452,9 @@
 			
 			_localPos.x = value;
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
+			_viewScissoRect.x = value;
 			
-			if (_stage3DProxy)
+			if (_stage3DProxy && !_shareContext)
 				_stage3DProxy.x = _globalPos.x;
 		}
 
@@ -423,9 +464,18 @@
 			
 			_localPos.y = value;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
+			_viewScissoRect.y = value;
 			
-			if (_stage3DProxy)
+			if (_stage3DProxy && !_shareContext)
 				_stage3DProxy.y = _globalPos.y;
+		}
+		
+		override public function set visible(value : Boolean) : void
+		{
+			super.visible = value;
+			
+			if (_stage3DProxy && !_shareContext)
+				_stage3DProxy.visible = value;
 		}
 
 		/**
@@ -453,16 +503,50 @@
 		}
 
 		/**
+		 * Defers control of Context3D clear() and present() calls to Stage3DProxy, enabling multiple Stage3D frameworks
+		 * to share the same Context3D object.
+		 */
+		public function get shareContext() : Boolean
+		{
+			return _shareContext;
+		}
+
+		public function set shareContext(value : Boolean) : void
+		{
+			_shareContext = value;
+		}
+
+		/**
 		 * Updates the backbuffer dimensions.
 		 */
 		protected function updateBackBuffer() : void
 		{
-			if( _width && _height ){
-				_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
-				_backBufferInvalid = false;
-			} else {
-				width = stage.stageWidth;
-				height = stage.stageHeight;
+			// No reason trying to configure back buffer if there is no context available.
+			// Doing this anyway (and relying on _stage3DProxy to cache width/height for 
+			// context does get available) means usesSoftwareRendering won't be reliable.
+			if (_stage3DProxy.context3D && !_shareContext) {
+				if( _width && _height ){
+					// Backbuffers are limited to 2048x2048 in software mode and
+					// trying to configure the backbuffer to be bigger than that
+					// will throw an error. Capping the value is a graceful way of
+					// avoiding runtime exceptions for developers who are unable
+					// to test their Away3D implementation on screens that are 
+					// large enough for this error to ever occur.
+					if (_stage3DProxy.usesSoftwareRendering) {
+						// Even though these checks where already made in the width
+						// and height setters, at that point we couldn't be sure that
+						// the context had even been retrieved and the software flag
+						// thus be reliable. Make checks again.
+						if (_width > 2048) _width = 2048;
+						if (_height > 2048) _height = 2048;
+					}
+					
+					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
+					_backBufferInvalid = false;
+				} else {
+					width = stage.stageWidth;
+					height = stage.stageHeight;
+				}
 			}
 		}
 		
@@ -485,10 +569,16 @@
 		 */
 		public function render() : void
 		{
+			//if context3D has Disposed by the OS,don't render at this frame
+			if (!stage3DProxy.recoverFromDisposal()) {
+				_backBufferInvalid = true;
+				return;
+			}
+			
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();
-
+				
 			if (!_parentIsStage)
 				updateGlobalPos();
 
@@ -501,9 +591,8 @@
 			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
 
-			// render things
-			if (_entityCollector.numMouseEnableds > 0)
-				_mouse3DManager.updateHitData();
+			// update picking
+			_mouse3DManager.updateCollider(this);
 
 //			updateLights(_entityCollector);
 
@@ -513,9 +602,15 @@
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
-				_stage3DProxy._context3D.present();
+				if (!_shareContext) _stage3DProxy._context3D.present();
 			} else {
-				_renderer.render(_entityCollector);
+				_renderer.shareContext = _shareContext;
+				if (_shareContext) {
+					_renderer.render(_entityCollector, null, _viewScissoRect);
+				} else {
+					_renderer.render(_entityCollector);
+				}
+				
 			}
 
 			// clean up data for this render
@@ -559,6 +654,8 @@
 		protected function renderSceneDepth(entityCollector : EntityCollector) : void
 		{
 			if (_depthTextureInvalid || !_depthRender) initDepthTexture(_stage3DProxy._context3D);
+			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+			_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
 			_depthRenderer.render(entityCollector, _depthRender);
 		}
 
@@ -578,12 +675,15 @@
 		{
 			_stage3DProxy.dispose();
 			_renderer.dispose();
-			_mouse3DManager.dispose();
-			_depthRenderer.dispose();
-			_mouse3DManager.dispose();
-			if (_depthRender) _depthRender.dispose();
-			if (_rttBufferManager) _rttBufferManager.dispose();
-
+			
+			if (_depthRender)
+				_depthRender.dispose();
+			
+			if (_rttBufferManager)
+				_rttBufferManager.dispose();
+			
+			_mouse3DManager.disableMouseListeners(this);
+			
 			_rttBufferManager = null;
 			_depthRender = null;
 			_mouse3DManager = null;
@@ -593,19 +693,49 @@
 			_entityCollector = null;
 		}
 
-		public function project(point3d : Vector3D) : Point
+		public function project(point3d : Vector3D) : Vector3D
 		{
-			var p : Point = _camera.project(point3d);
+			var v : Vector3D = _camera.project(point3d);
 
-			p.x = (p.x + 1.0)*_width/2.0;
-			p.y = (p.y + 1.0)*_height/2.0;
+			v.x = (v.x + 1.0)*_width/2.0;
+			v.y = (v.y + 1.0)*_height/2.0;
 
-			return p;
+			return v;
 		}
 
-		public function unproject(mX : Number, mY : Number, useTranslation:Boolean = false) : Vector3D
+		/**
+		 * Calculates the scene position of the given screen coordinates.
+		 * @param mX The x coordinate relative to the View3D.
+		 * @param mY The y coordinate relative to the View3D.
+		 * @param mZ The z coordinate relative to the View3D.
+		 * @return The scene position of the given screen coordinates. The returned point corresponds to a point on the projection plane.
+		 */
+		public function unproject(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
 		{
-			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, useTranslation);
+			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
+		}
+
+		/**
+		 * Returns the ray in scene space from the camera to the point on the screen.
+		 * @param mX The x coordinate relative to the View3D.
+		 * @param mY The y coordinate relative to the View3D.
+		 * @param mZ The z coordinate relative to the View3D.
+		 * @return The ray from the camera to the scene space position of a point on the projection plane.
+		 */
+		public function getRay(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
+		{
+			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
+		}
+
+
+		public function get mousePicker() : IPicker
+		{
+			return _mouse3DManager.mousePicker;
+		}
+
+		public function set mousePicker(value : IPicker) : void
+		{
+			_mouse3DManager.mousePicker = value;
 		}
 
 		/**
@@ -630,7 +760,8 @@
 			_addedToStage = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
-			_stage3DProxy = _stage3DManager.getFreeStage3DProxy();
+			if (!_stage3DProxy) _stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
+
 			_stage3DProxy.x = _globalPos.x;
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 			_stage3DProxy.y = _globalPos.y;
@@ -640,7 +771,7 @@
 			if (_height == 0) height = stage.stageHeight;
 			else _rttBufferManager.viewHeight = _height;
 
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _mouse3DManager.stage3DProxy = _stage3DProxy;
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void
@@ -653,7 +784,8 @@
 			}
 		}
 
-		// dead ends:
+
+// dead ends:
 		override public function set z(value : Number) : void {}
 		override public function set scaleZ(value : Number) : void {}
 		override public function set rotation(value : Number) : void {}
@@ -663,10 +795,5 @@
 		override public function set transform(value : Transform) : void {}
 		override public function set scaleX(value : Number) : void {}
 		override public function set scaleY(value : Number) : void {}
-
-		// TODO: remove
-		public function get mouse3DManager():Mouse3DManager {
-			return _mouse3DManager;
-		}
 	}
 }

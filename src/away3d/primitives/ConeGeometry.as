@@ -1,5 +1,5 @@
-package away3d.primitives {
-	import away3d.materials.MaterialBase;
+package away3d.primitives
+{
 
 	/**
 	 * A UV Cone primitive mesh.
@@ -22,7 +22,6 @@ package away3d.primitives {
 
 		/**
 		 * Creates a new Cone object.
-		 * @param material The material with which to render the cone.
 		 * @param radius The radius of the bottom end of the cone
 		 * @param height The height of the cone
 		 * @param segmentsW Defines the number of horizontal segments that make up the cone. Defaults to 16.
@@ -31,7 +30,7 @@ package away3d.primitives {
 		 */
 		public function ConeGeometry(radius : Number = 50, height : Number = 100, segmentsW : uint = 16, segmentsH : uint = 1, closed:Boolean = true, yUp : Boolean = true)
 		{
-			super(0.00001, radius, height, segmentsW, segmentsH, false, closed, yUp);
+			super(0, radius, height, segmentsW, segmentsH, false, closed, true, yUp);
 		}
 	}
 }

@@ -3,7 +3,7 @@
 	import away3d.arcane;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.parsers.ParserBase;
-
+	
 	import flash.net.URLRequest;
 
 	use namespace arcane;
@@ -20,19 +20,25 @@
 		private var _assets : Vector.<IAsset>;
 		private var _parentParser : ParserBase;
 		private var _data : *;
-		// TODO: not used
-		// private var _base : Boolean;
 		private var _retrieveAsRawData : Boolean;
+		private var _suppressAssetEvents : Boolean;
+		private var _dependencies : Vector.<ResourceDependency>;
 		
-		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false)
+		arcane var loader : SingleFileLoader;
+		arcane var success : Boolean;
+		
+		
+		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false, suppressAssetEvents : Boolean = false)
 		{
 			_id = id;
 			_req = req;
 			_parentParser = parentParser;
 			_data = data;
 			_retrieveAsRawData = retrieveAsRawData;
+			_suppressAssetEvents = suppressAssetEvents;
 			
-			_assets = new Vector.<IAsset>;
+			_assets = new Vector.<IAsset>();
+			_dependencies = new Vector.<ResourceDependency>();
 		}
 		
 		
@@ -48,6 +54,12 @@
 		}
 		
 		
+		public function get dependencies() : Vector.<ResourceDependency>
+		{
+			return _dependencies;
+		}
+		
+		
 		public function get request() : URLRequest
 		{
 			return _req;
@@ -57,6 +69,12 @@
 		public function get retrieveAsRawData() : Boolean
 		{
 			return _retrieveAsRawData;
+		}
+		
+		
+		public function get suppresAssetEvents() : Boolean
+		{
+			return _suppressAssetEvents;
 		}
 		
 		

@@ -23,27 +23,33 @@
 		arcane var _endG : Number;
 		arcane var _endB : Number;
 
-		public function Segment(start:Vector3D, end:Vector3D, anchor:Vector3D, color0:uint = 0x333333, color1:uint = 0x333333, thickness:Number = 1):void
+		public function Segment(start:Vector3D, end:Vector3D, anchor:Vector3D, colorStart:uint = 0x333333, colorEnd:uint = 0x333333, thickness:Number = 1):void
 		{
-			// TODO: not used
+			// TODO: not yet used: for CurveSegment support
 			anchor=null;
+
 			_thickness = thickness *.5;
 			// TODO: add support for curve using anchor v1
 			// Prefer removing v1 from this, and make Curve a separate class extending Segment? (- David)
 			_start = start;
 			_end = end;
-			startColor 	= color0;
-			endColor 	= color1;
+			startColor 	= colorStart;
+			endColor 	= colorEnd;
 		}
 
-		public function updateSegment(start:Vector3D, end:Vector3D, anchor:Vector3D, startColor:uint = 0x333333, endColor:uint = 0x333333, thickness:Number = 1) : void
+		public function updateSegment(start:Vector3D, end:Vector3D, anchor:Vector3D, colorStart:uint = 0x333333, colorEnd:uint = 0x333333, thickness:Number = 1) : void
 		{
-			// TODO: not used
+			// TODO: not yet used: for CurveSegment support
 			anchor = null;
 			_start = start;
 			_end = end;
-			_startColor = startColor;
-			_endColor = endColor;
+
+			if(_startColor != colorStart)
+				startColor = colorStart;
+
+			if(_endColor != colorEnd)
+				endColor = colorEnd;
+			 
 			_thickness = thickness;
 			update();
 		}
@@ -106,6 +112,8 @@
 			_startG =  ( ( color >> 8 ) & 0xff ) / 255;
 			_startB =  ( color & 0xff ) / 255;
 
+			_startColor = color;
+
 			update();
         }
 		
@@ -122,6 +130,8 @@
          	_endR =  ( ( color >> 16 ) & 0xff ) / 255;
 			_endG =  ( ( color >> 8 ) & 0xff ) / 255;
 			_endB =  ( color & 0xff ) / 255;
+
+			_endColor = color;
 
 			update();
         }

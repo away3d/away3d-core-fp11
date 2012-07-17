@@ -1,5 +1,8 @@
 package away3d.events
 {
+
+	import away3d.containers.ObjectContainer3D;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
@@ -7,6 +10,7 @@ package away3d.events
 
 	import flash.events.Event;
 	import flash.geom.Point;
+	import flash.geom.Vector3D;
 
 	/**
 	 * A MouseEvent3D is dispatched when a mouse event occurs over a mouseEnabled object in View3D.
@@ -14,6 +18,8 @@ package away3d.events
 	 */
 	public class MouseEvent3D extends Event
 	{
+		private var _propagataionStopped : Boolean;
+		
 		/**
 		 * Defines the value of the type property of a mouseOver3d event object.
 		 */
@@ -82,7 +88,7 @@ package away3d.events
 		/**
 		 * The 3d object inside which the event took place.
 		 */
-		public var object : Object3D;
+		public var object : ObjectContainer3D;
 
 		/**
 		 * The renderable inside which the event took place.
@@ -100,35 +106,15 @@ package away3d.events
 		public var uv : Point;
 
 		/**
-		 * The x-coordinate in object space where the event took place
+		 * The position in object space where the event took place
 		 */
-		public var localX : Number;
+		public var localPosition : Vector3D;
 
 		/**
-		 * The y-coordinate in object space where the event took place
+		 * The normal in object space where the event took place
 		 */
-		public var localY : Number;
+		public var localNormal:Vector3D;
 
-		/**
-		 * The z-coordinate in object space where the event took place
-		 */
-		public var localZ : Number;
-		
-		/**
-		 * The x-coordinate in scene space where the event took place
-		 */
-		public var sceneX : Number;
-		
-		/**
-		 * The y-coordinate in scene space where the event took place
-		 */
-		public var sceneY : Number;
-		
-		/**
-		 * The z-coordinate in scene space where the event took place
-		 */
-		public var sceneZ : Number;
-		
 		/**
 		 * Indicates whether the Control key is active (true) or inactive (false).
 		 */
@@ -157,6 +143,36 @@ package away3d.events
 		{
 			super(type, true, true);
 		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function get bubbles() : Boolean
+		{
+			// Don't bubble i propagation has been stopped.
+			return (super.bubbles && !_propagataionStopped);
+		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function stopPropagation() : void
+		{
+			super.stopPropagation();
+			_propagataionStopped = true;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public override function stopImmediatePropagation() : void
+		{
+			super.stopImmediatePropagation();
+			_propagataionStopped = true;
+		}
+		
 
 		/**
 		 * Creates a copy of the MouseEvent3D object and sets the value of each property to match that of the original.
@@ -176,17 +192,39 @@ package away3d.events
 			result.renderable = renderable;
 			result.material = material;
 			result.uv = uv;
-			result.localX = localX;
-			result.localY = localY;
-			result.localZ = localZ;
-			result.sceneX = sceneX;
-			result.sceneY = sceneY;
-			result.sceneZ = sceneZ;
-			
+			result.localPosition = localPosition;
+			result.localNormal = localNormal;
+
 			result.ctrlKey = ctrlKey;
 			result.shiftKey = shiftKey;
 
 			return result;
+		}
+
+		/**
+		 * The position in scene space where the event took place
+		 */
+		public function get scenePosition():Vector3D {
+			if( object is ObjectContainer3D ) {
+				return ObjectContainer3D( object ).sceneTransform.transformVector( localPosition );
+			}
+			else {
+				return localPosition;
+			}
+		}
+
+		/**
+		 * The normal in scene space where the event took place
+		 */
+		public function get sceneNormal():Vector3D {
+			if( object is ObjectContainer3D ) {
+				var sceneNormal:Vector3D = ObjectContainer3D( object ).sceneTransform.deltaTransformVector( localNormal );
+				sceneNormal.normalize();
+				return sceneNormal;
+			}
+			else {
+				return localNormal;
+			}
 		}
 	}
 }

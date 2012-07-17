@@ -6,17 +6,11 @@ package away3d.materials.methods
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
-	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
-	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-
-	import flash.display3D.Context3D;
-
-	import flash.display3D.Context3DProgramType;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -27,28 +21,69 @@ package away3d.materials.methods
 	public class ShadowMapMethodBase extends ShadingMethodBase
 	{
 		private var _castingLight : LightBase;
-		protected var _depthMapIndex : int;
 		protected var _depthMapCoordReg : ShaderRegisterElement;
-		private var _depthProjIndex : int;
-		private var _offsetData : Vector.<Number> = Vector.<Number>([.5, -.5, 1.0, 1.0]);
-		private var _toTexIndex : int = -1;
-		protected var _data : Vector.<Number>;
-		protected var _decIndex : int;
 		private var _projMatrix : Matrix3D = new Matrix3D();
 		private var _shadowMapper : ShadowMapperBase;
 
 		protected var _usePoint : Boolean;
+		private var _epsilon : Number;
+		private var _alpha : Number = 1;
 
 
 		public function ShadowMapMethodBase(castingLight : LightBase)
 		{
 			_usePoint = castingLight is PointLight;
-			super(false, true, _usePoint);
+			super();
 			_castingLight = castingLight;
 			castingLight.castsShadows = true;
 			_shadowMapper = castingLight.shadowMapper;
-			var eps : Number = _usePoint? -.01 : -.002;
-			_data = Vector.<Number>([1.0, 1/255.0, 1/65025.0, 1/16581375.0, eps, 0, 0, 1, 0, 0, 0, 1]);
+			_epsilon = _usePoint? .01 : .002;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsView = true;
+			vo.needsGlobalPos = _usePoint;
+			vo.needsNormals = vo.numLights > 0;
+		}
+
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var vertexData : Vector.<Number> = vo.vertexData;
+			var index : int = vo.fragmentConstantsIndex;
+			fragmentData[index] = 1.0;
+			fragmentData[index+1] = 1/255.0;
+			fragmentData[index+2] = 1/65025.0;
+			fragmentData[index+3] = 1/16581375.0;
+
+			fragmentData[index+6] = 0;
+			fragmentData[index+7] = 1;
+
+			if (_usePoint) {
+				fragmentData[index+8] = 0;
+				fragmentData[index+9] = 0;
+				fragmentData[index+10] = 0;
+				fragmentData[index+11] = 1;
+			}
+
+			index = vo.vertexConstantsIndex;
+			if (index != -1) {
+				vertexData[index] = .5;
+				vertexData[index + 1] = -.5;
+				vertexData[index + 2] = 1.0;
+				vertexData[index + 3] = 1.0;
+			}
+		}
+
+		public function get alpha() : Number
+		{
+			return _alpha;
+		}
+
+		public function set alpha(value : Number) : void
+		{
+			_alpha = value;
 		}
 
 		/**
@@ -76,29 +111,12 @@ package away3d.materials.methods
 
 		public function get epsilon() : Number
 		{
-			return -_data[4];
+			return _epsilon;
 		}
 
 		public function set epsilon(value : Number) : void
 		{
-			_data[4] = -value;
-		}
-
-
-		arcane override function reset() : void
-		{
-			super.reset();
-			_depthMapIndex = -1;
-			_depthProjIndex = -1;
-			_toTexIndex = -1;
-			_decIndex = -1;
-		}
-
-
-		arcane override function set numLights(value : int) : void
-		{
-			super.numLights = value;
-			_needsNormals = value > 0;
+			_epsilon = value;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -108,29 +126,28 @@ package away3d.materials.methods
 			_depthMapCoordReg = null;
 		}
 
-		arcane final override function getVertexCode(regCache : ShaderRegisterCache) : String
+		arcane override function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _usePoint? getPointVertexCode(regCache) : getPlanarVertexCode(regCache);
+			return _usePoint? getPointVertexCode(vo, regCache) : getPlanarVertexCode(vo, regCache);
 		}
 
-		protected function getPointVertexCode(regCache : ShaderRegisterCache) : String
+		protected function getPointVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			// nothing extra needed, we'll just get global pos
+			vo.vertexConstantsIndex = -1;
 			return "";
 		}
 
-		protected function getPlanarVertexCode(regCache : ShaderRegisterCache) : String
+		protected function getPlanarVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
-			var toTexReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeVertexVectorTemp();
+			var toTexReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
 			var depthMapProj : ShaderRegisterElement = regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
-			_depthProjIndex = depthMapProj.index;
 			_depthMapCoordReg = regCache.getFreeVarying();
-			_toTexIndex = toTexReg.index;
+			vo.vertexConstantsIndex = (toTexReg.index-vo.vertexConstantsOffset)*4;
 
 			code += "m44 " + temp + ", vt0, " + depthMapProj + "\n" +
 					"rcp " + temp + ".w, " + temp + ".w\n" +
@@ -143,57 +160,54 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane final override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			return _usePoint? getPointFragmentCode(regCache, targetReg) : getPlanarFragmentCode(regCache, targetReg);
+			var code : String = _usePoint? getPointFragmentCode(vo, regCache, targetReg) : getPlanarFragmentCode(vo, regCache, targetReg);
+			code += "add " + targetReg + ".w, " + targetReg + ".w, fc" + (vo.fragmentConstantsIndex/4+1) + ".y\n" +
+					"sat " + targetReg + ".w, " + targetReg + ".w\n";
+			return code;
 		}
 
-		protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
-		{
-			throw new AbstractMethodError();
-			return "";
-		}
-
-		protected function getPointFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();
 			return "";
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		protected function getPointFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		{
+			throw new AbstractMethodError();
+			return "";
+		}
+
+		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (!_usePoint) {
 				_projMatrix.copyFrom(DirectionalShadowMapper(_shadowMapper).depthProjection);
 				_projMatrix.prepend(renderable.sceneTransform);
-				stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _depthProjIndex, _projMatrix, true);
+				_projMatrix.copyRawDataTo(vo.vertexData, vo.vertexConstantsIndex + 4, true);
 			}
-
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
-			// when wrapped (fe: cascade), it's possible this is not set
-			if (_toTexIndex != -1)
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _toTexIndex, _offsetData, 1);
-
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+			fragmentData[index+4] = -_epsilon;
+			fragmentData[index+5] = 1-_alpha;
 			if (_usePoint) {
 				var pos : Vector3D = _castingLight.scenePosition;
-				_data[8] = pos.x;
-				_data[9] = pos.y;
-				_data[10] = pos.z;
+				fragmentData[index+8] = pos.x;
+				fragmentData[index+9] = pos.y;
+				fragmentData[index+10] = pos.z;
 				// used to decompress distance
 				var f : Number = PointLight(_castingLight)._fallOff;
-				_data[11] = 1/(2*f*f);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _data, 3);
+				fragmentData[index+11] = 1/(2*f*f);
 			}
-			else {
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _data, 2);
-			}
-			stage3DProxy.setTextureAt(_depthMapIndex, _castingLight.shadowMapper.depthMap.getTextureForStage3D(stage3DProxy));
+			stage3DProxy.setTextureAt(vo.texturesIndex, _castingLight.shadowMapper.depthMap.getTextureForStage3D(stage3DProxy));
 		}
 	}
 }

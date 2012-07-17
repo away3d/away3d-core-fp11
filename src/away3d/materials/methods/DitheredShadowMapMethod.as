@@ -3,7 +3,7 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
-	import away3d.lights.PointLight;
+	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.BitmapTexture;
@@ -17,7 +17,6 @@ package away3d.materials.methods
 		private static var _grainTexture : BitmapTexture;
 		private static var _grainUsages : int;
 		private static var _grainBitmapData : BitmapData;
-		private var _grainMapIndex : int;
 		private var _highRes : Boolean;
 		private var _depthMapSize : int;
 		private var _range : Number = 1;
@@ -30,11 +29,8 @@ package away3d.materials.methods
 			// todo: implement for point lights
 			super(castingLight);
 
-			_data[5] = highRes? 1/8 : 1/4;
 			// area to sample in texture space
 			_depthMapSize = castingLight.shadowMapper.depthMapSize;
-			_data[6] = _range/_depthMapSize;
-			_data[7] = .5;
 
 			_highRes = highRes;
 
@@ -45,6 +41,17 @@ package away3d.materials.methods
 			}
 		}
 
+		override arcane function initConstants(vo : MethodVO) : void
+		{
+			super.initConstants(vo);
+
+			var fragmentData : Vector.<Number> = vo.fragmentData;
+			var index : int = vo.fragmentConstantsIndex;
+			fragmentData[index + 8] = _highRes? 1/8 : 1/4;
+			fragmentData[index + 9] = _range/_depthMapSize;
+			fragmentData[index + 10] = .5;
+		}
+
 		public function get range() : Number
 		{
 			return _range;
@@ -53,7 +60,6 @@ package away3d.materials.methods
 		public function set range(value : Number) : void
 		{
 			_range = value;
-			_data[6] = _range/_depthMapSize;
 		}
 
 		private function initGrainTexture() : void
@@ -89,42 +95,40 @@ package away3d.materials.methods
 			}
 		}
 
-		arcane override function activate(stage3DProxy : Stage3DProxy) : void
+		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy);
-            stage3DProxy.setTextureAt(_grainMapIndex, _grainTexture.getTextureForStage3D(stage3DProxy));
+			super.activate(vo,  stage3DProxy);
+			vo.fragmentData[vo.fragmentConstantsIndex+9] = _range/_depthMapSize;
+            stage3DProxy.setTextureAt(vo.texturesIndex+1, _grainTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var grainRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var customDataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
 
-            _decIndex = decReg.index;
+			vo.fragmentConstantsIndex = decReg.index*4;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
 
 			uvReg = regCache.getFreeFragmentVectorTemp();
 
 			code += // keep grain in uvReg.xy
-					"div " + uvReg + ", " + _depthMapCoordReg + ", " + dataReg + ".z\n" +
+					"div " + uvReg + ", " + _depthMapCoordReg + ", " + customDataReg + ".y\n" +
 					"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
-					"sub " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".ww\n" + 	// uv-.5
+					"sub " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".zz\n" + 	// uv-.5
 					"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +      // 2*(uv-.5)
-					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".z\n" +
-
-//					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-//					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".y\n" +
 					"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
-//					"slt " + targetReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
 
 					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
@@ -159,11 +163,11 @@ package away3d.materials.methods
 
 			if (_highRes) {
 					// reseed
-				code +=	"div " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + dataReg + ".z\n" +
+				code +=	"div " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + customDataReg + ".y\n" +
 						"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
-						"sub " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".ww\n" +
+						"sub " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".zz\n" +
 						"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +
-						"mul " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".z\n" +
+						"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".y\n" +
 						"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
 
 						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
@@ -201,10 +205,9 @@ package away3d.materials.methods
 
 			regCache.removeFragmentTempUsage(depthCol);
 
-			code += "mul " + targetReg+".w, " + targetReg+".w, " + dataReg+".y\n";  // average
+			code += "mul " + targetReg+".w, " + targetReg+".w, " + customDataReg+".x\n";  // average
 
-			_depthMapIndex = depthMapRegister.index;
-			_grainMapIndex = grainRegister.index;
+			vo.texturesIndex = depthMapRegister.index;
 
 			return code;
 		}

@@ -21,6 +21,115 @@ package away3d.library
 	use namespace arcane;
 	
 	/**
+	 * Dispatched when a full resource (including dependencies) finishes loading.
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="resourceComplete", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when a single dependency (which may be the main file of a resource)
+	 * finishes loading.
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="dependencyComplete", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when an error occurs during loading. 
+	 * 
+	 * @eventType away3d.events.LoaderEvent
+	 */
+	[Event(name="loadError", type="away3d.events.LoaderEvent")]
+	
+	/**
+	 * Dispatched when any asset finishes parsing. Also see specific events for each
+	 * individual asset type (meshes, materials et c.)
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a geometry asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="geometryComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a skeleton pose asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="skeletonPoseComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a container asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation set has been constructed from a group of animation state resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation node has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a texture asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a material asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a animator asset has been constructed from a resource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
+	
+	
+	
+	/**
 	 * AssetLibraryBundle enforces a multiton pattern and is not intended to be instanced directly.
 	 * Its purpose is to create a container for 3D data management, both before and after parsing.
 	 * If you are interested in creating multiple library bundles, please use the <code>getInstance()</code> method.
@@ -249,7 +358,7 @@ package away3d.library
 				_assets.splice(idx, 1);
 			
 			if (dispose)
-				asset.disposeAsset();
+				asset.dispose();
 		}
 		
 		/**
@@ -281,7 +390,7 @@ package away3d.library
 			if (dispose) {
 				var asset : IAsset;
 				for each (asset in _assets)
-					asset.disposeAsset();
+					asset.dispose();
 			}
 			
 			_assets.length = 0;
@@ -310,29 +419,50 @@ package away3d.library
 			_assets.length = 0;
 			
 			ns ||= NamedAssetBase.DEFAULT_NAMESPACE;
-			for each (asset in _assets) {
+			for each (asset in old_assets) {
 				// Remove from dict if in the supplied namespace. If not,
 				// transfer over to the new vector.
 				if (asset.assetNamespace == ns) {
 					if (dispose) 
-						asset.disposeAsset();
-					removeAssetFromDict(asset);
+						asset.dispose();
+					
+					// Remove asset from dictionary, but don't try to auto-remove
+					// the namespace, which will trigger an unnecessarily expensive
+					// test that is not needed since we know that the namespace
+					// will be empty when loop finishes.
+					removeAssetFromDict(asset, false);
 				}
 				else {
 					_assets[idx++] = asset;
 				}
 			}
+			
+			// Remove empty namespace
+			if (_assetDictionary.hasOwnProperty(ns))
+				delete _assetDictionary[ns];
 		}
 		
-		private function removeAssetFromDict(asset : IAsset) : void
+		private function removeAssetFromDict(asset : IAsset, autoRemoveEmptyNamespace : Boolean = true) : void
 		{
 			if (_assetDictDirty)
 				rehashAssetDict();
 			
 			if (_assetDictionary.hasOwnProperty(asset.assetNamespace)) {
-				if (_assetDictionary.hasOwnProperty(asset.name))
+				if (_assetDictionary[asset.assetNamespace].hasOwnProperty(asset.name))
 					delete _assetDictionary[asset.assetNamespace][asset.name];
 				
+				if (autoRemoveEmptyNamespace) {
+					var key : String;
+					var empty : Boolean = true;
+					
+					for (key in _assetDictionary[asset.assetNamespace]) {
+						empty = false;
+						break;
+					}
+					
+					if (empty)
+						delete _assetDictionary[asset.assetNamespace];
+				}
 			}
 		}
 		
@@ -345,11 +475,12 @@ package away3d.library
 			_loadingSessions.push(loader);
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
-			loader.addEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -357,6 +488,10 @@ package away3d.library
 			loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			loader.addErrorHandler(onDependencyRetrievingError);
+			
 			return loader.load(req, context, ns, parser);
 		}
 		
@@ -375,9 +510,11 @@ package away3d.library
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			loader.addEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
@@ -385,6 +522,10 @@ package away3d.library
 			loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			
+			// Error are handled separately (see documentation for addErrorHandler)
+			loader.addErrorHandler(onDependencyRetrievingError);
+			
 			return loader.loadData(data, '', context, ns, parser);
 		}
 		
@@ -418,16 +559,15 @@ package away3d.library
 		/**
 		 * Called when a an error occurs during dependency retrieving.
 		 */
-		private function onDependencyRetrievingError(event : LoaderEvent) : void
+		private function onDependencyRetrievingError(event : LoaderEvent) : Boolean
 		{
-			// TODO: not used
-			//var ext:String = 
-			event.url.substring(event.url.length-4, event.url.length).toLowerCase();
-			if (hasEventListener(LoaderEvent.LOAD_ERROR)){
+			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
 				dispatchEvent(event);
+				return true;
 			}
-			
-			else throw new Error(event.message);
+			else {
+				return false;
+			}
 		}
 		
 		private function onAssetComplete(event : AssetEvent) : void
@@ -450,11 +590,12 @@ package away3d.library
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
 			loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
-			loader.removeEventListener(LoaderEvent.DEPENDENCY_ERROR, onDependencyRetrievingError);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
-			loader.removeEventListener(AssetEvent.ANIMATION_COMPLETE, onAssetComplete);
-			loader.removeEventListener(AssetEvent.ANIMATOR_COMPLETE, onAssetComplete);
-			loader.removeEventListener(AssetEvent.BITMAP_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ANIMATION_NODE_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.STATE_TRANSITION_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.TEXTURE_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.CONTAINER_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);

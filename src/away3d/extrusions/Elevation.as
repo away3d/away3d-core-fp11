@@ -57,7 +57,7 @@
 			buildUVs();
 			buildGeometry();
 			
-			if(smoothMap) smoothHeightMap();
+			if(smoothMap) generateSmoothedHeightMap();
         }
 		 
 		/**
@@ -152,7 +152,7 @@
 		 */
 		public function getHeightAt(x : Number, z : Number) : Number
 		{
-			var col : uint = _activeMap.getPixel((x/_width+.5)*_activeMap.width, (-z/_depth+.5)*_activeMap.height) & 0xff;
+			var col : uint = _activeMap.getPixel((x/_width+.5)*(_activeMap.width-1), (-z/_depth+.5)*(_activeMap.height-1)) & 0xff;
 			return (col >_maxElevation)? (_maxElevation / 0xff) * _height : ((col <_minElevation)?(_minElevation / 0xff) * _height :  (col / 0xff) * _height);
 		}
 		
@@ -162,7 +162,7 @@
 		*
 		* @see away3d.extrusions.Elevation.getHeightAt
 		*/
-		public function smoothHeightMap():void
+		public function generateSmoothedHeightMap():BitmapData
 		{
 			if(_smoothedHeightMap) _smoothedHeightMap.dispose();
 			_smoothedHeightMap = new BitmapData(_heightMap.width, _heightMap.height, false, 0);
@@ -248,11 +248,13 @@
 			_smoothedHeightMap.unlock();
 			
 			_activeMap = _smoothedHeightMap;
+
+			return _smoothedHeightMap;
 		}
 		
 		
 		/*
-		* Returns the smoothed heightmap if smoothHeightMap() has been called. 
+		* Returns the smoothed heightmap
 		*/
 		public function get smoothedHeightMap() : BitmapData
 		{

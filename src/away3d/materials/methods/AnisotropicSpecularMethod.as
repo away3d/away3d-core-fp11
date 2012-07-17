@@ -14,11 +14,15 @@ package away3d.materials.methods
 		public function AnisotropicSpecularMethod()
 		{
 			super();
-			_needsTangents = true;
-			_needsView = true;
 		}
 
-		arcane override function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsTangents = true;
+			vo.needsView = true;
+		}
+
+		arcane override function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
@@ -60,7 +64,7 @@ package away3d.materials.methods
 			// attenuate
 			code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
-			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
+			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache);
 
 			code += "mul " + t + ".xyz, " + lightColReg + ".xyz, " + t + ".w\n";
 

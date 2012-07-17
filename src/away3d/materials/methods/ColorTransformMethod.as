@@ -14,19 +14,16 @@ package away3d.materials.methods
 	 * ColorTransformMethod provides a shading method that changes the colour of a material according to a ColorTransform
 	 * object.
 	 */
-	public class ColorTransformMethod extends ShadingMethodBase
+	public class ColorTransformMethod extends EffectMethodBase
 	{
-		private var _colorTransformIndex : int;
 		private var _colorTransform : ColorTransform;
-		private var _colorTransformData : Vector.<Number>;
 
 		/**
 		 * Creates a new ColorTransformMethod.
 		 */
 		public function ColorTransformMethod()
 		{
-			super(false, false, false);
-			_colorTransformData = new Vector.<Number>(8, true);
+			super();
 		}
 
 		/**
@@ -45,21 +42,12 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function reset() : void
-		{
-			super.reset();
-			_colorTransformIndex = -1;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var colorMultReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var colorOffsReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			_colorTransformIndex = colorMultReg.index;
+			vo.fragmentConstantsIndex = colorMultReg.index*4;
 			code += "mul " + targetReg + ", " + targetReg.toString() + ", " + colorMultReg + "\n" +
 					"add " + targetReg + ", " + targetReg.toString() + ", " + colorOffsReg + "\n";
 			return code;
@@ -68,18 +56,19 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			var inv : Number = 1/0xff;
-			_colorTransformData[0] = _colorTransform.redMultiplier;
-			_colorTransformData[1] = _colorTransform.greenMultiplier;
-			_colorTransformData[2] = _colorTransform.blueMultiplier;
-			_colorTransformData[3] = _colorTransform.alphaMultiplier;
-			_colorTransformData[4] = _colorTransform.redOffset*inv;
-			_colorTransformData[5] = _colorTransform.greenOffset*inv;
-			_colorTransformData[6] = _colorTransform.blueOffset*inv;
-			_colorTransformData[7] = _colorTransform.alphaOffset*inv;
-			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _colorTransformIndex, _colorTransformData, 2);
+			var index : int = vo.fragmentConstantsIndex;
+			var data : Vector.<Number> = vo.fragmentData;
+			data[index] = _colorTransform.redMultiplier;
+			data[index+1] = _colorTransform.greenMultiplier;
+			data[index+2] = _colorTransform.blueMultiplier;
+			data[index+3] = _colorTransform.alphaMultiplier;
+			data[index+4] = _colorTransform.redOffset*inv;
+			data[index+5] = _colorTransform.greenOffset*inv;
+			data[index+6] = _colorTransform.blueOffset*inv;
+			data[index+7] = _colorTransform.alphaOffset*inv;
 		}
 	}
 }

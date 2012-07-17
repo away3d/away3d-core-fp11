@@ -1,20 +1,26 @@
 package away3d.core.managers
 {
+	import flash.display.Shape;
 	import away3d.arcane;
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
-
+	
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DRenderMode;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
+	import flash.system.System;
 
 	use namespace arcane;
 
+	[Event(name="enterFrame", type="flash.events.Event")]
+	[Event(name="exitFrame", type="flash.events.Event")]
+	
 	/**
 	 * Stage3DProxy provides a proxy class to manage a single Stage3D instance as well as handling the creation and
 	 * attachment of the Context3D (and in turn the back buffer) is uses. Stage3DProxy should never be created directly,
@@ -27,9 +33,13 @@ package away3d.core.managers
 	 */
 	public class Stage3DProxy extends EventDispatcher
 	{
-		private var _stage3D : Stage3D;
+		private static var _frameEventDriver : Shape = new Shape();
+		
 		arcane var _context3D : Context3D;
 		arcane var _stage3DIndex : int = -1;
+
+		private var _usesSoftwareRendering : Boolean;
+		private var _stage3D : Stage3D;
 		private var _activeProgram3D : Program3D;
 		private var _stage3DManager : Stage3DManager;
 		private var _backBufferWidth : int;
@@ -42,28 +52,66 @@ package away3d.core.managers
 		private var _renderTarget : TextureBase;
 		private var _renderSurfaceSelector : int;
 		private var _scissorRect : Rectangle;
-
-
+		private var _color : uint;
+		private var _backBufferDirty : Boolean;
+		private var _viewPort : Rectangle;
+		private var _enterFrame : Event;
+		private var _exitFrame : Event;
+		
+		private function notifyEnterFrame():void
+		{
+			if (!hasEventListener(Event.ENTER_FRAME))
+				return;
+			
+			if (!_enterFrame)
+				_enterFrame = new Event(Event.ENTER_FRAME);
+			
+			dispatchEvent(_enterFrame);
+		}
+		
+		private function notifyExitFrame():void
+		{
+			if (!hasEventListener(Event.EXIT_FRAME))
+				return;
+			
+			if (!_exitFrame)
+				_exitFrame = new Event(Event.EXIT_FRAME);
+			
+			dispatchEvent(_exitFrame);
+		}
+		
 		/**
 		 * Creates a Stage3DProxy object. This method should not be called directly. Creation of Stage3DProxy objects should
 		 * be handled by Stage3DManager.
 		 * @param stage3DIndex The index of the Stage3D to be proxied.
 		 * @param stage3D The Stage3D to be proxied.
 		 * @param stage3DManager
+		 * @param forceSoftware Whether to force software mode even if hardware acceleration is available.
 		 */
-		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager)
+		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager, forceSoftware : Boolean = false)
 		{
 			_stage3DIndex = stage3DIndex;
 			_stage3D = stage3D;
 			_stage3D.x = 0;
 			_stage3D.y = 0;
+			_stage3D.visible = true;
 			_stage3DManager = stage3DManager;
+			_viewPort = new Rectangle();
+			_enableDepthAndStencil = true;
+			
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
-			requestContext();
+			requestContext(forceSoftware);
 		}
 
-		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int) : void
+		/**
+		 * Assign the vertex buffer in the Context3D ready for use in the shader.
+		 * @param index The index for the vertex buffer setting
+		 * @param buffer The Vertex Buffer 
+		 * @param format The format of the buffer. See Context3DVertexBufferFormat
+		 * @param offset An offset from the start of the data
+		 */
+		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int = 0) : void
 		{
 			// force setting null
 			if (buffer && _activeVertexBuffers[index] == buffer) return;
@@ -72,6 +120,11 @@ package away3d.core.managers
 			_activeVertexBuffers[index] = buffer;
 		}
 
+		/**
+		 * Assign the texture in the Context3D ready for use in the shader.
+		 * @param index The index where the texture is set
+		 * @param texture The texture to set
+		 */
 		public function setTextureAt(index : int, texture : TextureBase) : void
 		{
 			if (texture != null && _activeTextures[index] == texture) return;
@@ -81,6 +134,10 @@ package away3d.core.managers
 			_activeTextures[index] = texture;
 		}
 
+		/**
+		 * Set the shader program for the subsequent rendering calls.
+		 * @param program3D The program to be used in the shader
+		 */
 		public function setProgram(program3D : Program3D) : void
 		{
 			if (_activeProgram3D == program3D) return;
@@ -119,11 +176,20 @@ package away3d.core.managers
 				_context3D.configureBackBuffer(backBufferWidth, backBufferHeight, antiAlias, enableDepthAndStencil);
 		}
 
+		/*
+		 * Indicates whether the depth and stencil buffer is used
+		 */
 		public function get enableDepthAndStencil() : Boolean
 		{
 			return _enableDepthAndStencil;
 		}
 
+		public function set enableDepthAndStencil(enableDepthAndStencil : Boolean) : void
+		{ 
+			_enableDepthAndStencil = enableDepthAndStencil; 
+			_backBufferDirty = true;
+		}
+		
 		public function get renderTarget() : TextureBase
 		{
 			return _renderTarget;
@@ -146,6 +212,73 @@ package away3d.core.managers
 			else
 				_context3D.setRenderToBackBuffer();
 		}
+		
+		/* 
+		 * Clear and reset the back buffer when using a shared context
+		 */
+		public function clear() : void
+		{
+			if (!_context3D) return;
+			
+			if (_backBufferDirty) {
+				configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+				_backBufferDirty = false;
+			}
+				
+			_context3D.clear(
+				((_color >> 16) & 0xff) / 255.0, 
+                ((_color >> 8) & 0xff) / 255.0, 
+                (_color & 0xff) / 255.0,
+                ((_color >> 24) & 0xff) / 255.0 );
+		}
+
+
+		/* 
+		 * Display the back rendering buffer
+		 */
+		public function present() : void
+		{
+			if (!_context3D) return;
+
+			_context3D.present();
+						
+			_activeProgram3D = null;
+		}
+		
+		/**
+		 * Registers an event listener object with an EventDispatcher object so that the listener receives notification of an event. Special case for enterframe and exitframe events - will switch Stage3DProxy into automatic render mode.
+		 * You can register event listeners on all nodes in the display list for a specific type of event, phase, and priority.
+		 * 
+		 * @param type The type of event.
+		 * @param listener The listener function that processes the event.
+		 * @param useCapture Determines whether the listener works in the capture phase or the target and bubbling phases. If useCapture is set to true, the listener processes the event only during the capture phase and not in the target or bubbling phase. If useCapture is false, the listener processes the event only during the target or bubbling phase. To listen for the event in all three phases, call addEventListener twice, once with useCapture set to true, then again with useCapture set to false.
+		 * @param priority The priority level of the event listener. The priority is designated by a signed 32-bit integer. The higher the number, the higher the priority. All listeners with priority n are processed before listeners of priority n-1. If two or more listeners share the same priority, they are processed in the order in which they were added. The default priority is 0.
+		 * @param useWeakReference Determines whether the reference to the listener is strong or weak. A strong reference (the default) prevents your listener from being garbage-collected. A weak reference does not.
+		 */
+		public override function addEventListener(type : String, listener :Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		{
+			super.addEventListener(type, listener, useCapture, priority, useWeakReference);
+			
+			if ((type == Event.ENTER_FRAME || type == Event.EXIT_FRAME) && !_frameEventDriver.hasEventListener(Event.ENTER_FRAME))
+				_frameEventDriver.addEventListener(Event.ENTER_FRAME, onEnterFrame, useCapture, priority, useWeakReference);
+		}
+		
+		/**
+		 * Removes a listener from the EventDispatcher object. Special case for enterframe and exitframe events - will switch Stage3DProxy out of automatic render mode.
+		 * If there is no matching listener registered with the EventDispatcher object, a call to this method has no effect.
+		 * 
+		 * @param type The type of event.
+		 * @param listener The listener object to remove.
+		 * @param useCapture Specifies whether the listener was registered for the capture phase or the target and bubbling phases. If the listener was registered for both the capture phase and the target and bubbling phases, two calls to removeEventListener() are required to remove both, one call with useCapture() set to true, and another call with useCapture() set to false.
+		 */
+		public override function removeEventListener(type : String, listener :Function, useCapture : Boolean = false) : void
+		{
+			super.removeEventListener(type, listener, useCapture);
+			
+			// Remove the main rendering listener if no EnterFrame listeners remain
+			if (!hasEventListener(Event.ENTER_FRAME) && !hasEventListener(Event.EXIT_FRAME) && _frameEventDriver.hasEventListener(Event.ENTER_FRAME))
+				_frameEventDriver.removeEventListener(Event.ENTER_FRAME, onEnterFrame, useCapture);
+		}
 
 		public function get scissorRect() : Rectangle
 		{
@@ -158,8 +291,6 @@ package away3d.core.managers
 			_context3D.setScissorRectangle(_scissorRect);
 		}
 
-
-
 		/**
 		 * The index of the Stage3D which is managed by this instance of Stage3DProxy.
 		 */
@@ -169,12 +300,40 @@ package away3d.core.managers
 		}
 
 		/**
+		 * The base Stage3D object associated with this proxy.
+		 */
+		public function get stage3D() : Stage3D
+		{
+			return _stage3D;
+		}
+
+		/**
 		 * The Context3D object associated with the given Stage3D object.
 		 */
 		public function get context3D() : Context3D
 		{
 			return _context3D;
 		}
+		
+		/**
+		 * The driver information as reported by the Context3D object (if any)
+		*/
+		public function get driverInfo() : String
+		{
+			return _context3D? _context3D.driverInfo : null;
+		}
+		
+		
+		/**
+		 * Indicates whether the Stage3D managed by this proxy is running in software mode.
+		 * Remember to wait for the CONTEXT3D_CREATED event before checking this property,
+		 * as only then will it be guaranteed to be accurate.
+		*/
+		public function get usesSoftwareRendering() : Boolean
+		{
+			return _usesSoftwareRendering;
+		}
+		
 
 		/**
 		 * The x position of the Stage3D.
@@ -186,7 +345,7 @@ package away3d.core.managers
 
 		public function set x(value : Number) : void
 		{
-			_stage3D.x = value;
+			_stage3D.x = _viewPort.x = value;
 		}
 
 		/**
@@ -199,8 +358,87 @@ package away3d.core.managers
 
 		public function set y(value : Number) : void
 		{
-			_stage3D.y = value;
+			_stage3D.y = _viewPort.y = value;
 		}
+
+
+		/**
+		 * The width of the Stage3D.
+		 */
+		public function get width() : int
+		{ 
+			return _backBufferWidth;
+		}
+
+		public function set width(width : int) : void
+		{ 
+			_backBufferWidth = _viewPort.width = width; 
+			_backBufferDirty = true;
+		}
+
+		/**
+		 * The height of the Stage3D.
+		 */
+		public function get height() : int
+		{ 
+			return _backBufferHeight;
+		}
+		
+		public function set height(height : int) : void
+		{ 
+			_backBufferHeight = _viewPort.height = height; 
+			_backBufferDirty = true;
+		}
+
+		/**
+		 * The antiAliasing of the Stage3D.
+		 */
+		public function get antiAlias() : int
+		{ 
+			return _antiAlias;
+		}
+		
+		public function set antiAlias(antiAlias : int) : void
+		{ 
+			_antiAlias = antiAlias; 
+			_backBufferDirty = true;
+		}
+
+		/**
+		 * A viewPort rectangle equivalent of the Stage3D size and position.
+		 */
+		public function get viewPort() : Rectangle
+		{ 
+			return _viewPort;
+		}
+
+		/**
+		 * The background color of the Stage3D.
+		 */
+		public function get color() : uint
+		{ 
+			return _color;
+		}
+		
+		public function set color(color : uint) : void
+		{ 
+			_color = color;
+		}
+		
+		
+		/**
+		 * The visibility of the Stage3D.
+		 */
+		public function get visible() : Boolean
+		{
+			return _stage3D.visible;
+		}
+		
+		public function set visible(value : Boolean) : void
+		{
+			_stage3D.visible = value;
+		}
+		
 
 		/**
 		 * Frees the Context3D associated with this Stage3DProxy.
@@ -214,19 +452,31 @@ package away3d.core.managers
 			_context3D = null;
 		}
 
-		/**
+		/*
 		 * Called whenever the Context3D is retrieved or lost.
 		 * @param event The event dispatched.
-		 */
+		*/
 		private function onContext3DUpdate(event : Event) : void
 		{
 			if (_stage3D.context3D) {
+				var hadContext : Boolean = (_context3D != null);
+
 				_context3D = _stage3D.context3D;
 				_context3D.enableErrorChecking = Debug.active;
-				_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
-				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
-			}
-			else {
+				
+				_usesSoftwareRendering = (_context3D.driverInfo.indexOf('Software')==0);
+				
+				// Only configure back buffer if width and height have been set,
+				// which they may not have been if View3D.render() has yet to be
+				// invoked for the first time.
+				if (_backBufferWidth && _backBufferHeight)
+					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+				
+				// Dispatch the appropriate event depending on whether context was
+				// created for the first time or recreated after a device loss.
+				dispatchEvent(new Stage3DEvent(hadContext? Stage3DEvent.CONTEXT3D_RECREATED : Stage3DEvent.CONTEXT3D_CREATED));
+
+			} else {
 				throw new Error("Rendering context lost!");
 			}
 		}
@@ -234,10 +484,49 @@ package away3d.core.managers
 		/**
 		 * Requests a Context3D object to attach to the managed Stage3D.
 		 */
-		private function requestContext() : void
+		private function requestContext(forceSoftware : Boolean = false) : void
 		{
-			_stage3D.requestContext3D();
+			// If forcing software, we can be certain that the
+			// returned Context3D will be running software mode.
+			// If not, we can't be sure and should stick to the
+			// old value (will likely be same if re-requesting.)
+			_usesSoftwareRendering ||= forceSoftware;
+			
+			_stage3D.requestContext3D(forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO);
 			_contextRequested = true;
+		}
+		
+		/**
+		 * The Enter_Frame handler for processing the proxy.ENTER_FRAME and proxy.EXIT_FRAME event handlers.
+		 * Typically the proxy.ENTER_FRAME listener would render the layers for this Stage3D instance.
+		 */
+		private function onEnterFrame(event : Event) : void
+		{
+			if (!_context3D)
+				return; 
+			
+			// Clear the stage3D instance
+			clear();
+			
+			//notify the enterframe listeners
+			notifyEnterFrame();
+			
+			// Call the present() to render the frame
+			present();
+			
+			//notify the exitframe listeners
+			notifyExitFrame();
+		}
+
+		public function recoverFromDisposal() : Boolean
+		{
+			if (!_context3D) return false;
+			if (_context3D.driverInfo == "Disposed") {
+				_context3D = null;
+				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_DISPOSED));
+				return false;
+			}
+			return true;
 		}
 	}
 }

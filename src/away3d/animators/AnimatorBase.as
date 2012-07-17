@@ -1,78 +1,161 @@
 package away3d.animators
 {
 	import away3d.arcane;
-	import away3d.errors.AbstractMethodError;
-	import away3d.events.AnimatorEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
+	import away3d.entities.*;
+	import away3d.errors.*;
+	import away3d.events.*;
 
-	import flash.display.Sprite;
-	import flash.events.Event;
-	import flash.utils.getTimer;
+	import flash.display.*;
+	import flash.events.*;
+	import flash.utils.*;
 
 	use namespace arcane;
-
+	
+		
 	/**
-	 * AnimationControllerBase provides an abstract base class for classes that control a subtype of AnimationStateBase.
-	 *
-	 * @see away3d.core.animation.AnimationStateBase
-	 *
+	 * Dispatched when playback of an animation inside the animator object starts.
+	 * 
+	 * @eventType away3d.events.AnimatorEvent
 	 */
-	public class AnimatorBase extends NamedAssetBase implements IAsset
+	[Event(name="start",type="away3d.events.AnimatorEvent")]
+			
+	/**
+	 * Dispatched when playback of an animation inside the animator object stops.
+	 * 
+	 * @eventType away3d.events.AnimatorEvent
+	 */
+	[Event(name="stop",type="away3d.events.AnimatorEvent")]
+	
+	/**
+	 * Provides an abstract base class for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
+	 * 
+	 * @see away3d.animators.AnimationSetBase
+	 */
+	public class AnimatorBase extends EventDispatcher
 	{
 		private var _broadcaster : Sprite = new Sprite();
+		private var _animationSet : IAnimationSet;
 		private var _isPlaying : Boolean;
+		private var _autoUpdate : Boolean = true;
 		private var _startEvent : AnimatorEvent;
 		private var _stopEvent : AnimatorEvent;
 		private var _time : int;
-		private var _timeScale : Number = 1;
-
-		public function AnimatorBase()
-		{
-//			start();
-		}
-
+		private var _playbackSpeed : Number = 1;
+		
+		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
+		protected var _activeState:IAnimationState;
+		protected var _absoluteTime : Number = 0;
+		
 		/**
-		 * The amount by which passed time should be scaled. Used to slow down or speed up animations.
+		 * Returns the animation data set in use by the animator.
 		 */
-		public function get timeScale() : Number
+		public function get animationSet() : IAnimationSet
 		{
-			return _timeScale;
-		}
-
-		public function set timeScale(value : Number) : void
-		{
-			_timeScale = value;
+			return _animationSet;
 		}
 		
-		public function get assetType() : String
+		/**
+		 * Returns the current active animation state.
+		 */
+		public function get activeState():IAnimationState
 		{
-			return AssetType.ANIMATOR;
+			return _activeState;
 		}
-
-		public function stop() : void
+		
+		/**
+		 * Determines whether the animators internal update mechanisms are active. Used in cases
+		 * where manual updates are required either via the <code>time</code> property or <code>update()</code> method.
+		 * Defaults to true.
+		 * 
+		 * @see #time
+		 * @see #update()
+		 */
+		public function get autoUpdate():Boolean
 		{
-			notifyStop();
+			return _autoUpdate;
 		}
-
-		private function notifyStart() : void
+		
+		public function set autoUpdate(value:Boolean):void
 		{
-			if (_isPlaying)
+			if (_autoUpdate == value)
 				return;
+			
+			_autoUpdate = value;
+			
+			if (_autoUpdate)
+				start();
+			else
+				stop();
+		}
+		
+		/**
+		 * Gets and sets the internal time clock of the animator.
+		 */
+		public function get time():int
+		{
+			return _time;
+		}
+		
+		public function set time(value:int):void
+		{
+			if (_time == value)
+				return;
+			
+			update(_time);
+		}
+		
+		/**
+		 * Creates a new <code>AnimatorBase</code> object.
+		 * 
+		 * @param animationSet The animation data set to be used by the animator object.
+		 */
+		public function AnimatorBase(animationSet:IAnimationSet)
+		{
+			_animationSet = animationSet;
+		}
+		
+		/**
+		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
+		 */
+		public function get playbackSpeed() : Number
+		{
+			return _playbackSpeed;
+		}
 
+		public function set playbackSpeed(value : Number) : void
+		{
+			_playbackSpeed = value;
+		}
+		
+		/**
+		 * Resumes the automatic playback clock controling the active state of the animator.
+		 */
+		public function start() : void
+		{
+			_time = getTimer();
+			
+			if (_isPlaying || !_autoUpdate)
+				return;
+			
 			_isPlaying = true;
-
+			
+			if (!_broadcaster.hasEventListener(Event.ENTER_FRAME))
+				_broadcaster.addEventListener(Event.ENTER_FRAME, onEnterFrame);
+			
 			if (!hasEventListener(AnimatorEvent.START))
 				return;
-
-			if (!_startEvent)
-				_startEvent = new AnimatorEvent(AnimatorEvent.START, this);
-
-			dispatchEvent(_startEvent);
+			
+			dispatchEvent(_startEvent ||= new AnimatorEvent(AnimatorEvent.START, this));
 		}
-
-		private function notifyStop() : void
+		
+		/**
+		 * Pauses the automatic playback clock of the animator, in case manual updates are required via the
+		 * <code>time</code> property or <code>update()</code> method.
+		 * 
+		 * @see #time
+		 * @see #update()
+		 */
+		public function stop() : void
 		{
 			if (!_isPlaying)
 				return;
@@ -84,39 +167,62 @@ package away3d.animators
 
 			if (!hasEventListener(AnimatorEvent.STOP))
 				return;
-
-			if (!_stopEvent)
-				_stopEvent = new AnimatorEvent(AnimatorEvent.STOP, this);
-
-			dispatchEvent(_stopEvent);
+			
+			dispatchEvent(_stopEvent || (_stopEvent = new AnimatorEvent(AnimatorEvent.STOP, this)));
 		}
-
+		
 		/**
-		 * Updates the animation state.
+		 * Provides a way to manually update the active state of the animator when automatic
+		 * updates are disabled.
+		 * 
+		 * @see #stop()
+		 * @see #autoUpdate
+		 */
+		public function update(time : int) : void
+		{
+			var dt : Number = (time-_time)*playbackSpeed;
+			
+			updateDeltaTime(dt);
+			
+			_time = time;
+		}
+		
+		/**
+		 * Used by the mesh object to which the animator is applied, registers the owner for internal use.
+		 * 
 		 * @private
 		 */
-		protected function updateAnimation(realDT : Number, scaledDT : Number) : void
+		public function addOwner(mesh : Mesh) : void
+		{
+			_owners.push(mesh);
+		}
+		
+		/**
+		 * Used by the mesh object from which the animator is removed, unregisters the owner for internal use.
+		 * 
+		 * @private
+		 */
+		public function removeOwner(mesh : Mesh) : void
+		{
+			_owners.splice(_owners.indexOf(mesh), 1);
+		}
+		
+		/**
+		 * Internal abstract method called when the time delta property of the animator's contents requires updating.
+		 * 
+		 * @private
+		 */
+		protected function updateDeltaTime(dt:Number):void
 		{
 			throw new AbstractMethodError();
 		}
-
-
-		protected function start() : void
-		{
-			_time = getTimer();
-
-			if (!_broadcaster.hasEventListener(Event.ENTER_FRAME))
-				_broadcaster.addEventListener(Event.ENTER_FRAME, onEnterFrame);
-
-			notifyStart();
-		}
-
+		
+		/**
+		 * Enter frame event handler for automatically updating the active state of the animator.
+		 */
 		private function onEnterFrame(event : Event = null) : void
 		{
-			var time : int = getTimer();
-			var dt : Number = time-_time;
-			updateAnimation(dt, dt*_timeScale);
-			_time = time;
+			update(getTimer());
 		}
 	}
 }

@@ -7,8 +7,6 @@
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.textures.CubeTexture;
-	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;

@@ -6,7 +6,6 @@ package away3d.extrusions
 	import away3d.core.base.SubMesh;
 	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
-	import away3d.loaders.parsers.data.DefaultBitmapData;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.utils.MultipleMaterials;
@@ -22,7 +21,7 @@ package away3d.extrusions
 	public class LatheExtrude extends Mesh
 	{
 		private const EPS:Number = .0001;
-		private const LIMIT:uint = 64998;
+		private const LIMIT:uint = 196605;
 		private const MAXRAD:Number = 1.2;
 		
 		private var _profile:Vector.<Vector3D>;
@@ -98,7 +97,7 @@ package away3d.extrusions
 			_subGeometry = new SubGeometry();
 			
 			if(!material && materials && materials.front) material = materials.front;
-			super(geom, (!material)? new TextureMaterial( new BitmapTexture(DefaultBitmapData.bitmapData)) : material);
+			super(geom, material);
 			 
 			_profile = profile;
 			_axis = axis;

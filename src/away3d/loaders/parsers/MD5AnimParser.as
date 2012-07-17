@@ -1,12 +1,13 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.data.SkeletonAnimationSequence;
-	import away3d.animators.skeleton.JointPose;
-	import away3d.animators.skeleton.SkeletonPose;
+	import away3d.animators.SkeletonAnimationState;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.arcane;
 	import away3d.core.math.Quaternion;
-
 	import flash.geom.Vector3D;
+
 
 	use namespace arcane;
 	
@@ -51,7 +52,8 @@ package away3d.loaders.parsers
 		private var _baseFrameData : Vector.<BaseFrameData>;
 		
 		private var _rotationQuat : Quaternion;
-		private var _sequence : SkeletonAnimationSequence;
+		private var _clip : SkeletonClipNode;
+		private var _state : SkeletonAnimationState;
 		
 		/**
 		 * Creates a new MD5AnimParser object.
@@ -66,16 +68,14 @@ package away3d.loaders.parsers
 			var t2 : Quaternion = new Quaternion();
 			
 			t1.fromAxisAngle(Vector3D.X_AXIS, -Math.PI*.5);
-			t2.fromAxisAngle(Vector3D.Y_AXIS, Math.PI*.5);
-			
+			t2.fromAxisAngle(Vector3D.Y_AXIS, -Math.PI*.5);
+
+			_rotationQuat.multiply(t2, t1);
+
 			if (additionalRotationAxis) {
-				var t3 : Quaternion = new Quaternion();
-				t3.multiply(t2, t1);
-				t1.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
-				_rotationQuat.multiply(t1, t3);
-			}
-			else {
 				_rotationQuat.multiply(t2, t1);
+				t1.fromAxisAngle(additionalRotationAxis, additionalRotationRadians);
+				_rotationQuat.multiply(t1, _rotationQuat);
 			}
 		}
 		
@@ -97,9 +97,6 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			// TODO: not used
-			data = data;
-			// todo: implement
 			return false;
 		}
 		
@@ -165,9 +162,11 @@ package away3d.loaders.parsers
 				}
 				
 				if (_reachedEOF) {
-					_sequence = new SkeletonAnimationSequence('md5sequence');
-					translateSequence();
-					finalizeAsset(_sequence);
+					_clip = new SkeletonClipNode();
+					_state = new SkeletonAnimationState(_clip);
+					translateClip();
+					finalizeAsset(_clip);
+					finalizeAsset(_state);
 					return ParserBase.PARSING_DONE;
 				}
 			}
@@ -177,10 +176,10 @@ package away3d.loaders.parsers
 		/**
 		 * Converts all key frame data to an SkinnedAnimationSequence.
 		 */
-		private function translateSequence() : void
+		private function translateClip() : void
 		{
 			for (var i : int = 0; i < _numFrames; ++i)
-				_sequence.addFrame(translatePose(_frameData[i]), 1000 / _frameRate);
+				_clip.addFrame(translatePose(_frameData[i]), 1000 / _frameRate);
 		}
 		
 		/**
@@ -495,7 +494,7 @@ package away3d.loaders.parsers
 			vec.z = getNextNumber();
 			
 			if (getNextToken() != ")") sendParseError(")");
-			
+
 			return vec;
 		}
 		

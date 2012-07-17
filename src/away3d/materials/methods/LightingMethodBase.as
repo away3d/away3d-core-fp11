@@ -17,14 +17,9 @@ package away3d.materials.methods
 		 */
 		arcane var _modulateMethod : Function;
 
-		/**
-		 * Create a new ShadingMethodBase ob	ject.
-		 * @param needsNormals Defines whether or not the method requires normals.
-		 * @param needsView Defines whether or not the method requires the view direction.
-		 */
-		public function LightingMethodBase(needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean)
+		public function LightingMethodBase()
 		{
-			super(needsNormals, needsView, needsGlobalPos);
+			super();
 		}
 
 		/**
@@ -32,23 +27,16 @@ package away3d.materials.methods
 		 * @param regCache The register cache used during the compilation.
 		 * @private
 		 */
-		arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
+		arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			regCache = regCache;
 			return "";
 		}
 
 		/**
 		 * Get the fragment shader code that will generate the code relevant to a single light.
 		 */
-		arcane function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			lightIndex = lightIndex;
-			lightDirReg = lightDirReg; 
-			lightColReg = lightColReg;
-			regCache = regCache;  			
 			return "";
 		}
 
@@ -59,14 +47,19 @@ package away3d.materials.methods
 		 * @param weightRegister A string representation of the register + component containing the current weight
 		 * @param regCache The register cache providing any necessary registers to the shader
 		 */
-		arcane function getFragmentCodePerProbe(lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
-			// TODO: not used
-			cubeMapReg = cubeMapReg;
-			lightIndex = lightIndex;
-			weightRegister = weightRegister;
-			regCache = regCache;
 			// lightIndex will just continue on from code per light
+			return "";
+		}
+
+		/**
+		 * Get the fragment shader code that should be added after all per-light code. Usually composits everything to the target register.
+		 * @param regCache The register cache used during the compilation.
+		 * @private
+		 */
+		arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		{
 			return "";
 		}
 	}

@@ -2,8 +2,7 @@
 {
 	import away3d.arcane;
 	import away3d.core.base.SubGeometry;
-	import away3d.materials.MaterialBase;
-
+	
 	use namespace arcane;
 
 	/**
@@ -18,10 +17,9 @@
 
 		/**
 		 * Creates a new Sphere object.
-		 * @param material The material with which to render the sphere.
 		 * @param radius The radius of the sphere.
-		 * @param segmentsW Defines the number of horizontal segments that make up the sphere. Defaults to 16.
-		 * @param segmentsH Defines the number of vertical segments that make up the sphere. Defaults to 12.
+		 * @param segmentsW Defines the number of horizontal segments that make up the sphere.
+		 * @param segmentsH Defines the number of vertical segments that make up the sphere.
 		 * @param yUp Defines whether the sphere poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
 		public function SphereGeometry(radius : Number = 50, segmentsW : uint = 16, segmentsH : uint = 12, yUp : Boolean = true)

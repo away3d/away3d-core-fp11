@@ -1,5 +1,6 @@
 ﻿package away3d.debug
 {
+	import away3d.core.base.Geometry;
 	import away3d.debug.data.TridentLines;
 	import away3d.entities.Mesh;
 	import away3d.extrusions.LatheExtrude;
@@ -19,7 +20,7 @@
 	{
 		public function Trident(length:Number = 1000, showLetters:Boolean = true):void
 		{
-			super();
+			super(new Geometry(), null);
 			buildTrident(Math.abs((length == 0)? 10 : length), showLetters);
 		}
 		
@@ -73,8 +74,6 @@
 				
 				var scaleH:Number = length/10;
 				var scaleW:Number = length/20;
-				offset = length-scaleW;
-				
 				var scl1:Number = scaleW*1.5;
 				var scl2:Number = scaleH*3;
 				var scl3:Number = scaleH*2;
@@ -106,8 +105,6 @@
 			}
 			
 			this.addChild(new TridentLines(vectors, colors));
-			
-			arrowX = arrowY = arrowZ = origin = null;
 		}
 		 
 	}

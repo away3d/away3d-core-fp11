@@ -3,23 +3,23 @@
 	import flash.geom.Vector3D;
 
 	/**
-	* Class WireFrameGrid generates a grid of lines on a given plane<code>WireFrameGrid</code>
-	* @param	subDivision		[optional] uint . Default is 10;
-	* @param	gridSize				[optional] uint . Default is 100;
-	* @param	color					[optional] uint . Default is 0xFFFFFF;
-	* @param	thickness			[optional] Number . Default is 1;
-	* @param	plane					[optional] String . Default is PLANE_XZ;
-	* @param	worldPlanes		[optional] Boolean . Default is false.
-	* If true, class displays the 3 world planes, at 0,0,0. with subDivision, thickness and and gridSize. Overrides color and plane settings.
-	*/
-		
+	 * A WirefameCube primitive mesh.
+	 */
 	public class WireframeCube extends WireframePrimitiveBase
 	{
 		private var _width : Number;
 		private var _height : Number;
 		private var _depth : Number;
 
-		public function WireframeCube(width : Number, height : Number, depth : Number, color:uint = 0xFFFFFF, thickness:Number = 1) {
+		/**
+		 * Creates a new WireframeCube object.
+		 * @param width The size of the cube along its X-axis.
+		 * @param height The size of the cube along its Y-axis.
+		 * @param depth The size of the cube along its Z-axis.
+		 * @param color The colour of the wireframe lines
+		 * @param thickness The thickness of the wireframe lines
+		 */
+		public function WireframeCube(width : Number = 100, height : Number = 100, depth : Number = 100, color:uint = 0xFFFFFF, thickness:Number = 1) {
 			super(color, thickness);
 
 			_width = width;
@@ -27,6 +27,9 @@
 			_depth = depth;
 		}
 
+		/**
+		 * The size of the cube along its X-axis.
+		 */
 		public function get width() : Number
 		{
 			return _width;
@@ -38,6 +41,9 @@
 			invalidateGeometry();
 		}
 
+		/**
+		 * The size of the cube along its Y-axis.
+		 */
 		public function get height() : Number
 		{
 			return _height;
@@ -50,6 +56,9 @@
 			invalidateGeometry();
 		}
 
+		/**
+		 * The size of the cube along its Z-axis.
+		 */
 		public function get depth() : Number
 		{
 			return _depth;
@@ -61,6 +70,9 @@
 			invalidateGeometry();
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		override protected function buildGeometry() : void
 		{
 			var v0 : Vector3D = new Vector3D();
@@ -108,8 +120,6 @@
 			v0.y = -hh;
 			v1.y = -hh;
 			updateOrAddSegment(11, v0, v1);
-
 		}
-
 	}
 }
