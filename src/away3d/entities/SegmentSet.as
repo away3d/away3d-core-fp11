@@ -156,6 +156,7 @@
 			var index:uint;
 			for( var i:uint = 0; i < _segments.length; ++i ) {
 				if( _segments[i] == segment ) {
+					segment.segmentsBase = null;
 					_segments.splice( i, 1 );
 					removeSegmentByIndex( segment.index );
 					segment = null;
