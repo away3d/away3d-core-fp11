@@ -104,11 +104,6 @@ package away3d.materials.methods
 			return _castingLight;
 		}
 
-		public function get castingLight() : LightBase
-		{
-			return _castingLight;
-		}
-
 		public function get epsilon() : Number
 		{
 			return _epsilon;
