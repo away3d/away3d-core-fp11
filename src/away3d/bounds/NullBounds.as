@@ -36,11 +36,6 @@ package away3d.bounds
 			return _alwaysIn;
 		}
 
-		override public function intersectsLine(p : Vector3D, dir : Vector3D) : Boolean
-		{
-			return _alwaysIn;
-		}
-
 		/**
 		 * @inheritDoc
 		 */

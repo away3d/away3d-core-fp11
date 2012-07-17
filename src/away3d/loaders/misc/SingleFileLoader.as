@@ -14,8 +14,7 @@ package away3d.loaders.misc
 	import flash.net.URLLoader;
 	import flash.net.URLLoaderDataFormat;
 	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -43,7 +42,7 @@ package away3d.loaders.misc
 		
 		
 		/**
-		 * Creates a new AssetLoader object.
+		 * Creates a new SingleFileLoader object.
 		 */
 		public function SingleFileLoader()
 		{
@@ -86,6 +85,7 @@ package away3d.loaders.misc
 		
 		/**
 		 * Load a resource from a file.
+		 * 
 		 * @param urlRequest The URLRequest object containing the URL of the object to be loaded.
 		 * @param parser An optional parser object that will translate the loaded data into a usable resource. If not provided, AssetLoader will attempt to auto-detect the file type.
 		 */
@@ -287,6 +287,7 @@ package away3d.loaders.misc
 				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				
@@ -332,6 +333,7 @@ package away3d.loaders.misc
 			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 		}

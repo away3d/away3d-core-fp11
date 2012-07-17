@@ -2,10 +2,12 @@ package away3d.materials.passes
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.core.managers.CubeTexture3DProxy;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
@@ -14,7 +16,7 @@ package away3d.materials.passes
 	 */
 	public class SkyBoxPass extends MaterialPassBase
 	{
-		private var _cubeTexture : CubeTexture3DProxy;
+		private var _cubeTexture : CubeTextureBase;
 
 		/**
 		 * Creates a new SkyBoxPass object.
@@ -28,12 +30,12 @@ package away3d.materials.passes
 		/**
 		 * The cube texture to use as the skybox.
 		 */
-		public function get cubeTexture() : CubeTexture3DProxy
+		public function get cubeTexture() : CubeTextureBase
 		{
 			return _cubeTexture;
 		}
 
-		public function set cubeTexture(value : CubeTexture3DProxy) : void
+		public function set cubeTexture(value : CubeTextureBase) : void
 		{
 			_cubeTexture = value;
 		}
@@ -43,7 +45,10 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			return "mov v0, vt0\n";
+			return  "m44 vt7, va0, vc0		\n" +
+					// fit within texture range
+					"mul op, vt7, vc4\n" +
+					"mov v0, va0\n";
 		}
 
 		/**
@@ -58,17 +63,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			super.activate(stage3DProxy, camera);
-			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForContext(stage3DProxy));
+			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+
+			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
-
-
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			stage3DProxy.setTextureAt(0, null);
-//		}
 	}
-
 }

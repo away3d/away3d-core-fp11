@@ -6,12 +6,15 @@ package away3d.loaders.parsers
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.BitmapDataAsset;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.BitmapMaterial;
+	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
-	import away3d.tools.utils.TextureUtils;
+	import away3d.materials.ColorMaterial;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.display.BitmapData;
 	import flash.net.URLRequest;
@@ -24,36 +27,31 @@ package away3d.loaders.parsers
 	 */
 	public class OBJParser extends ParserBase
 	{
+		private const LIMIT:uint = 196605;
 		private var _textData:String;
-		private var _startedParsing : Boolean;
+		private var _startedParsing:Boolean;
 		private var _charIndex:uint;
 		private var _oldIndex:uint;
 		private var _stringLength:uint;
-		private const LIMIT:uint = 64998;
-		
-		private var _currentObject : ObjectGroup;
-		private var _currentGroup : Group;
-		private var _currentMaterialGroup : MaterialGroup;
-		private var _objects : Vector.<ObjectGroup>;
-		private var _materialIDs : Vector.<String>;
-		private var _materialLoaded : Vector.<LoadedMaterial>;
-		private var _materialSpecularData : Vector.<SpecularData>;
-		private var _meshes : Vector.<Mesh>;
+		private var _currentObject:ObjectGroup;
+		private var _currentGroup:Group;
+		private var _currentMaterialGroup:MaterialGroup;
+		private var _objects:Vector.<ObjectGroup>;
+		private var _materialIDs:Vector.<String>;
+		private var _materialLoaded:Vector.<LoadedMaterial>;
+		private var _materialSpecularData:Vector.<SpecularData>;
+		private var _meshes:Vector.<Mesh>;
 		private var _lastMtlID:String;
-		private var _objectIndex : uint;
-		private var _realIndices : Array;
-		private var _vertexIndex : uint;
-
-		private var _mtlLib : Boolean;
-		private var _mtlLibLoaded : Boolean = true;
-		private var _idCount : uint;
+		private var _objectIndex:uint;
+		private var _realIndices:Array;
+		private var _vertexIndex:uint;
+		private var _vertices:Vector.<Vertex>;
+		private var _vertexNormals:Vector.<Vertex>;
+		private var _uvs:Vector.<UV>;
+		private var _scale:Number;
+		private var _mtlLib:Boolean;
+		private var _mtlLibLoaded:Boolean = true;
 		private var _activeMaterialID:String = "";
-		
-		private var _vertices : Vector.<Vertex>;
-		private var _vertexNormals : Vector.<Vertex>;
-		private var _uvs : Vector.<UV>;
-		
-		private var _scale : Number;
 		
 		/**
 		 * Creates a new OBJParser object.
@@ -80,7 +78,7 @@ package away3d.loaders.parsers
 		 * @param extension The file extension of a potential file to be parsed.
 		 * @return Whether or not the given file type is supported.
 		 */
-		public static function supportsType(extension : String) : Boolean
+		public static function supportsType(extension:String):Boolean
 		{
 			extension = extension.toLowerCase();
 			return extension == "obj";
@@ -91,11 +89,11 @@ package away3d.loaders.parsers
 		 * @param data The data block to potentially be parsed.
 		 * @return Whether or not the given data is supported.
 		 */
-		public static function supportsData(data : *) : Boolean
+		public static function supportsData(data:*):Boolean
 		{
-			var content : String = ParserUtil.toString(data);
-			var hasV : Boolean
-			var hasF : Boolean
+			var content:String = ParserUtil.toString(data);
+			var hasV:Boolean;
+			var hasF:Boolean;
 			
 			if (content) {
 				hasV = content.indexOf("\nv ") != -1;
@@ -105,27 +103,29 @@ package away3d.loaders.parsers
 			return hasV && hasF;
 		}
 		
-		
 		/**
 		 * @inheritDoc
 		 */
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.id == 'mtl') {
-				var ba : ByteArray = resourceDependency.data;
 				
+				var ba:ByteArray = resourceDependency.data;
 				parseMtl(ba.readUTFBytes(ba.bytesAvailable));
-			}
-			else {
+				
+			} else {
+				
+				var asset:IAsset;
+				
 				if (resourceDependency.assets.length != 1)
 					return;
 				
-				var asset:BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
+				asset = resourceDependency.assets[0];
 				
-				if (asset){
+				if (asset.assetType == AssetType.TEXTURE){
 					var lm:LoadedMaterial = new LoadedMaterial();
 					lm.materialID = resourceDependency.id;
-					lm.bitmapData = isBitmapDataValid(asset.bitmapData)? asset.bitmapData : defaultBitmapData ;
+					lm.texture = asset as Texture2DBase;
 					
 					_materialLoaded.push(lm);
 					
@@ -140,12 +140,16 @@ package away3d.loaders.parsers
 		*/
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			var lm:LoadedMaterial = new LoadedMaterial();
-			lm.materialID = resourceDependency.id;
-			lm.bitmapData = defaultBitmapData;
-			
-			_materialLoaded.push(lm);
-			
+			if(resourceDependency.id == "mtl"){
+				_mtlLib = false;
+				_mtlLibLoaded = false;
+			} else {
+				var lm:LoadedMaterial = new LoadedMaterial();
+				lm.materialID = resourceDependency.id;
+				lm.texture = new BitmapTexture(defaultBitmapData);
+				_materialLoaded.push(lm);
+			}
+		
 			if(_meshes.length>0)
 				applyMaterial(lm);
 		}
@@ -153,7 +157,7 @@ package away3d.loaders.parsers
 		/**
 		* @inheritDoc
 		*/
-		override protected function proceedParsing() : Boolean
+		override protected function proceedParsing():Boolean
 		{
 			var line:String;
 			var creturn:String = String.fromCharCode(10);
@@ -198,22 +202,11 @@ package away3d.loaders.parsers
 				
 				if(_mtlLib  && !_mtlLibLoaded)
 					return MORE_TO_PARSE;
-				
-				//try {
+				 
 					translate();
 					applyMaterials();
 					
 					return PARSING_DONE;
-					
-					/*
-				} catch(e:Error){
-					parsingFailure = true;
-					trace("parsing failure: " + e.message);
-					
-					//TODO: DEAL WITH THIS ERROR!
-					return PARSING_DONE;
-				}
-					*/
 			}
 			
 			return MORE_TO_PARSE;
@@ -222,7 +215,7 @@ package away3d.loaders.parsers
 		/**
 		* Parses a single line in the OBJ file.
 		*/
-		private function parseLine(trunk : Array) : void
+		private function parseLine(trunk:Array):void
 		{
 			switch (trunk[0]) {
 				case "mtllib":
@@ -262,48 +255,65 @@ package away3d.loaders.parsers
 		*/
 		private function translate() :void
 		{
-			var groups : Vector.<Group> = _objects[_objectIndex].groups;
-			var numGroups : uint = groups.length;
-			var materialGroups : Vector.<MaterialGroup>;
-			var numMaterialGroups : uint;
-			var geometry : Geometry;
-			var mesh : Mesh;
-			var meshid:uint;
-			
-			var m : uint;
-			var sm : uint;
-			var bmMaterial:BitmapMaterial;
+			for (var objIndex:int = 0; objIndex < _objects.length; ++objIndex)
+			{
+				var groups:Vector.<Group> = _objects[objIndex].groups;
+				var numGroups:uint = groups.length;
+				var materialGroups:Vector.<MaterialGroup>;
+				var numMaterialGroups:uint;
+				var geometry:Geometry;
+				var mesh:Mesh;
+				var meshid:uint = 0;
+				
+				var m:uint;
+				var sm:uint;
+				var bmMaterial:TextureMaterial;
 
-			for (var g : uint = 0; g < numGroups; ++g) {
-				geometry = new Geometry();
-				materialGroups = groups[g].materialGroups;
-				numMaterialGroups = materialGroups.length;
-				for (m = 0; m < numMaterialGroups; ++m) {
-					translateMaterialGroup(materialGroups[m], geometry);
+				for (var g:uint = 0; g < numGroups; ++g) {
+					geometry = new Geometry();
+					materialGroups = groups[g].materialGroups;
+					numMaterialGroups = materialGroups.length;
+					
+					for (m = 0; m < numMaterialGroups; ++m)
+						translateMaterialGroup(materialGroups[m], geometry);
+						
+					if(geometry.subGeometries.length == 0) continue;
+					
+					bmMaterial = new TextureMaterial( new BitmapTexture(defaultBitmapData));
+					mesh = new Mesh(geometry, bmMaterial);
+					
+					if (_objects[objIndex].name) {
+						// this is a full independent object ('o' tag in OBJ file)
+						mesh.name = _objects[objIndex].name;
+					} else if(groups[g].name) {
+						// this is a group so the sub groups contain the actual mesh object names ('g' tag in OBJ file)
+						mesh.name = groups[g].name;
+					} else {
+						// no name and thats unfortunate, lets make one up
+						mesh.name = "obj" + meshid;
+						meshid++;
+					}
+						
+					_meshes.push(mesh);
+					
+					if(groups[g].materialID != ""){
+						bmMaterial.name = groups[g].materialID+"~"+mesh.name;
+					} else {
+						bmMaterial.name = _lastMtlID+"~"+mesh.name;
+					}
+					
+					if(mesh.subMeshes.length >1){
+						for (sm = 1; sm<mesh.subMeshes.length; ++sm)
+							mesh.subMeshes[sm].material = bmMaterial;
+					}
+					
+					finalizeAsset(mesh);
 				}
-				bmMaterial = new BitmapMaterial(defaultBitmapData);
-				mesh = new Mesh(bmMaterial, geometry);
-				meshid = _meshes.length;
-				mesh.name = "obj"+meshid;
-				_meshes[meshid] = mesh;
-				
-				if(groups[g].materialID != ""){
-					bmMaterial.name = groups[g].materialID+"~"+mesh.name;
-				} else {
-					bmMaterial.name = _lastMtlID+"~"+mesh.name;
-				}
-				
-				if(mesh.subMeshes.length >1){
-					for (sm = 1; sm<mesh.subMeshes.length; ++sm)
-						mesh.subMeshes[sm].material = bmMaterial;
-				}
-				
-				finalizeAsset(mesh);
 			}
 		}
 		
 		/* If no uv's are found (often seen case with obj format) parser generates a new set of default uv's */
-		private function addDefaultUVs(vertices : Vector.<Number>, uvs: Vector.<Number>) :Vector.<Number>
+		private function addDefaultUVs(vertices:Vector.<Number>, uvs: Vector.<Number>) :Vector.<Number>
 		{
 			var j:uint = 0;
 			for (var i :uint = 0; i<vertices.length; i+=3){
@@ -315,7 +325,7 @@ package away3d.loaders.parsers
 					uvs.push(1, 1);
 				}
 				
-				j = (j+1>2)? 0 : j++;
+				j = (j+1>2)? 0:j++;
 			}
 			
 			return uvs;
@@ -326,12 +336,12 @@ package away3d.loaders.parsers
 		 * @param materialGroup The material group data to convert.
 		 * @param geometry The Geometry to contain the converted SubGeometry.
 		 */
-		private function translateMaterialGroup(materialGroup : MaterialGroup, geometry : Geometry) : void
+		private function translateMaterialGroup(materialGroup:MaterialGroup, geometry:Geometry):void
 		{
-			var faces : Vector.<FaceData> = materialGroup.faces;
-			var face : FaceData;
-			var numFaces : uint = faces.length;
-			var numVerts : uint;
+			var faces:Vector.<FaceData> = materialGroup.faces;
+			var face:FaceData;
+			var numFaces:uint = faces.length;
+			var numVerts:uint;
 			
 			var vertices:Vector.<Number> = new Vector.<Number>();
 			var uvs:Vector.<Number> = new Vector.<Number>();
@@ -342,7 +352,7 @@ package away3d.loaders.parsers
 			_vertexIndex = 0;
 
 			var j:uint;
-			for (var i : uint = 0; i < numFaces; ++i) {
+			for (var i:uint = 0; i < numFaces; ++i) {
 				face = faces[i];
 				numVerts = face.indexIds.length - 1;
 				for (j = 1; j < numVerts; ++j) {
@@ -389,9 +399,11 @@ package away3d.loaders.parsers
 						uvind = ind*2;
 						nindices.push(nvertices.length/3);
 						nvertices.push(vertices[vind], vertices[vind+1], vertices[vind+2]);
-						nuvs.push(uvs[uvind], uvs[uvind+1]);
 						
-						if(normals[vind]) nnormals.push(normals[vind], normals[vind+1], normals[vind+2]);
+						if (uvs.length > 0)
+							nuvs.push(uvs[uvind], uvs[uvind+1]);
+						
+						if(normals.length > 0 && normals[vind]) nnormals.push(normals[vind], normals[vind+1], normals[vind+2]);
 						 
 						vlength+=3;
 					}
@@ -406,7 +418,7 @@ package away3d.loaders.parsers
 		{
 			if(vertices.length == 0) return;
 			
-			var subGeom : SubGeometry = new SubGeometry();
+			var subGeom:SubGeometry = new SubGeometry();
 			subGeom.autoDeriveVertexTangents = true;
 			 
 			if(uvs.length == 0 && vertices.length > 0)
@@ -414,28 +426,31 @@ package away3d.loaders.parsers
 			
 			subGeom.updateVertexData(vertices);
 			subGeom.updateIndexData(indices);
-			subGeom.updateUVData(uvs);
+			if (uvs) subGeom.updateUVData(uvs);
 			
-			var deriveVN:Boolean = normals.length>0? true :false;
-			subGeom.autoDeriveVertexNormals = deriveVN;
-			
-			if(deriveVN) subGeom.updateVertexNormalData(normals);
+			var needDerive:Boolean = Boolean(normals.length != vertices.length);
+			if(needDerive){
+				subGeom.autoDeriveVertexNormals = needDerive;
+			} else{
+				subGeom.updateVertexNormalData(normals);
+			}
 			
 			geometry.addSubGeometry(subGeom);
 		}
 
-		private function translateVertexData(face : FaceData, vertexIndex : int, vertices:Vector.<Number>, uvs:Vector.<Number>, indices:Vector.<uint>, normals:Vector.<Number>) : void
+		private function translateVertexData(face:FaceData, vertexIndex:int, vertices:Vector.<Number>, uvs:Vector.<Number>, indices:Vector.<uint>, normals:Vector.<Number>):void
 		{
-			var index : uint;
-			var vertex : Vertex;
-			var vertexNormal : Vertex;
-			var uv : UV;
+			var index:uint;
+			var vertex:Vertex;
+			var vertexNormal:Vertex;
+			var uv:UV;
 
 			if (!_realIndices[face.indexIds[vertexIndex]]) {
 				index = _vertexIndex;
 				_realIndices[face.indexIds[vertexIndex]] = ++_vertexIndex;
 				vertex = _vertices[face.vertexIndices[vertexIndex]-1];
 				vertices.push(vertex.x * _scale, vertex.y * _scale, vertex.z * _scale);
+				
 				if (face.normalIndices.length > 0) {
 					vertexNormal = _vertexNormals[face.normalIndices[vertexIndex]-1];
 					normals.push(vertexNormal.x, vertexNormal.y, vertexNormal.z);
@@ -464,8 +479,10 @@ package away3d.loaders.parsers
 				}
 
 			} else {
+				
 				index = _realIndices[face.indexIds[vertexIndex]] - 1;
 			}
+			
 			indices.push(index);
 		}
 		
@@ -474,11 +491,12 @@ package away3d.loaders.parsers
 		 * Creates a new object group.
 		 * @param trunk The data block containing the object tag and its parameters
 		 */
-		private function createObject(trunk : Array) : void
+		private function createObject(trunk:Array):void
 		{
 			_currentGroup = null;
 			_currentMaterialGroup = null;
 			_objects.push(_currentObject = new ObjectGroup());
+			
 			if (trunk) _currentObject.name = trunk[1];
 		}
 		
@@ -486,7 +504,7 @@ package away3d.loaders.parsers
 		 * Creates a new group.
 		 * @param trunk The data block containing the group tag and its parameters
 		 */
-		private function createGroup(trunk : Array) : void
+		private function createGroup(trunk:Array):void
 		{
 			if (!_currentObject) createObject(null);
 			_currentGroup = new Group();
@@ -503,7 +521,7 @@ package away3d.loaders.parsers
 		 * Creates a new material group.
 		 * @param trunk The data block containing the material tag and its parameters
 		 */
-		private function createMaterialGroup(trunk : Array) : void
+		private function createMaterialGroup(trunk:Array):void
 		{
 			_currentMaterialGroup = new MaterialGroup();
 			if (trunk) _currentMaterialGroup.url = trunk[1];
@@ -514,7 +532,7 @@ package away3d.loaders.parsers
 		 * Reads the next vertex coordinates.
 		 * @param trunk The data block containing the vertex tag and its parameters
 		 */
-		private function parseVertex(trunk : Array) : void
+		private function parseVertex(trunk:Array):void
 		{
 			_vertices.push(new Vertex(parseFloat(trunk[1]), parseFloat(trunk[2]), -parseFloat(trunk[3])));
 		}
@@ -523,7 +541,7 @@ package away3d.loaders.parsers
 		 * Reads the next uv coordinates.
 		 * @param trunk The data block containing the uv tag and its parameters
 		 */
-		private function parseUV(trunk : Array) : void
+		private function parseUV(trunk:Array):void
 		{
 			_uvs.push(new UV(parseFloat(trunk[1]), 1-parseFloat(trunk[2])));
 		}
@@ -532,7 +550,7 @@ package away3d.loaders.parsers
 		 * Reads the next vertex normal coordinates.
 		 * @param trunk The data block containing the vertex normal tag and its parameters
 		 */
-		private function parseVertexNormal(trunk : Array) : void
+		private function parseVertexNormal(trunk:Array):void
 		{
 			_vertexNormals.push(new Vertex(parseFloat(trunk[1]), parseFloat(trunk[2]), -parseFloat(trunk[3])));
 		}
@@ -541,27 +559,38 @@ package away3d.loaders.parsers
 		 * Reads the next face's indices.
 		 * @param trunk The data block containing the face tag and its parameters
 		 */
-		private function parseFace(trunk : Array) : void
+		private function parseFace(trunk:Array):void
 		{
-			var len : uint = trunk.length;
-			var face : FaceData = new FaceData();
+			var len:uint = trunk.length;
+			var face:FaceData = new FaceData();
 			
 			if (!_currentGroup) createGroup(null);
 			
-			var indices : Array;
-			for (var i : uint = 1; i < len; ++i) {
+			var indices:Array;
+			for (var i:uint = 1; i < len; ++i) {
 				if (trunk[i] == "") continue;
 				indices = trunk[i].split("/");
-				face.vertexIndices.push(parseInt(indices[0]));
-				if (indices[1] && String(indices[1]).length > 0) face.uvIndices.push(parseInt(indices[1]));
-				if (indices[2] && String(indices[2]).length > 0) face.normalIndices.push(parseInt(indices[2]));
+				face.vertexIndices.push(parseIndex(parseInt(indices[0]),_vertices.length));
+				if (indices[1] && String(indices[1]).length > 0) face.uvIndices.push(parseIndex(parseInt(indices[1]), _uvs.length));
+				if (indices[2] && String(indices[2]).length > 0) face.normalIndices.push(parseIndex(parseInt(indices[2]), _vertexNormals.length));
 				face.indexIds.push(trunk[i]);
 			}
 			
 			_currentMaterialGroup.faces.push(face);
 		}
 		
-		private function parseMtl(data : String):void
+		/**
+		* This is a hack around negative face coords
+		*/
+		private function parseIndex(index:int, length:uint):int
+		{
+			if(index < 0)
+				return index + length + 1;
+			else
+				return index;
+		}
+		
+		private function parseMtl(data:String):void
 		{
 			var materialDefinitions:Array = data.split('newmtl');
 			var lines:Array;
@@ -655,6 +684,7 @@ package away3d.loaders.parsers
 						basicSpecularMethod.specular = specular;
 						
 						var specularData:SpecularData = new SpecularData();
+						specularData.alpha = alpha;
 						specularData.basicSpecularMethod = basicSpecularMethod;
 						specularData.materialID = _lastMtlID;
 						
@@ -672,19 +702,18 @@ package away3d.loaders.parsers
 					var lm:LoadedMaterial = new LoadedMaterial();
 					lm.materialID = _lastMtlID;
 					
-					if(alpha == 0)
-						trace("Warning: an alpha value of 0 was found in mtl color tag (Tr or d) ref:"+_lastMtlID+", mesh(es) using it will be invisible!");
+					if(alpha == 0) trace("Warning: an alpha value of 0 was found in mtl color tag (Tr or d) ref:"+_lastMtlID+", mesh(es) using it will be invisible!");
 					
-					lm.bitmapData = new BitmapData(256, 256, (alpha == 1)? false : true, diffuseColor); 
-					lm.ambientColor = ambientColor;
+					var cm:ColorMaterial = new ColorMaterial(diffuseColor);
+					cm.alpha = alpha;
+					cm.ambientColor = ambientColor;
 					
 					if(useSpecular){
-						basicSpecularMethod = new BasicSpecularMethod();
-						basicSpecularMethod.specularColor = specularColor;
-						basicSpecularMethod.specular = specular;
-						lm.specularMethod = basicSpecularMethod;
+						cm.specularColor = specularColor;
+						cm.specular = specular;
 					}
 					
+					lm.cm = cm;
 					_materialLoaded.push(lm);
 					
 					if(_meshes.length>0)
@@ -748,12 +777,11 @@ package away3d.loaders.parsers
 			pauseAndRetrieveDependencies();
 		}
 		
-		private function applyMaterial(lm:LoadedMaterial) : void
+		private function applyMaterial(lm:LoadedMaterial):void
 		{
-			var meshID:String;
 			var decomposeID:Array;
 			var mesh:Mesh;
-			var mat:BitmapMaterial;
+			var mat:TextureMaterial;
 			var j:uint;
 			var specularData:SpecularData;
 			
@@ -762,32 +790,40 @@ package away3d.loaders.parsers
 				decomposeID = mesh.material.name.split("~");
 				
 				if(decomposeID[0] == lm.materialID){
-					mesh.material.name = decomposeID[1];
-					mat = BitmapMaterial(mesh.material);
-					mat.bitmapData = lm.bitmapData;
-					mat.ambientColor = lm.ambientColor;
 					
-					if(lm.specularMethod){
-						mat.specularMethod = lm.specularMethod;
-					} else if(_materialSpecularData){
-						for(j = 0;j<_materialSpecularData.length;++j){
-							specularData = _materialSpecularData[j];
-							if(specularData.materialID == lm.materialID){
-								mat.specularMethod = specularData.basicSpecularMethod;
-								mat.ambientColor = specularData.ambientColor;
-								_materialSpecularData.splice(j,1);
-								break;
+					if(lm.cm){
+						if(mesh.material) mesh.material = null;
+						mesh.material = lm.cm;
+					} else {
+						mat = TextureMaterial(mesh.material);
+						mat.texture = lm.texture;
+						mat.ambientColor = lm.ambientColor;
+						mat.alpha = lm.alpha;
+						
+						if(lm.specularMethod){
+							mat.specularMethod = lm.specularMethod;
+						} else if(_materialSpecularData){
+							for(j = 0;j<_materialSpecularData.length;++j){
+								specularData = _materialSpecularData[j];
+								if(specularData.materialID == lm.materialID){
+									mat.specularMethod = specularData.basicSpecularMethod;
+									mat.ambientColor = specularData.ambientColor;
+									mat.alpha = specularData.alpha;
+									_materialSpecularData.splice(j,1);
+									break;
+								}
 							}
 						}
 					}
 					
+					mesh.material.name = decomposeID[1] ? decomposeID[1] : decomposeID[0];
 					_meshes.splice(i, 1);
 					--i;
 				}
 			}
 		}
 		
-		private function applyMaterials() : void
+		private function applyMaterials():void
 		{
 			if(_materialLoaded.length == 0)
 				return;
@@ -795,55 +831,55 @@ package away3d.loaders.parsers
 			for(var i:uint = 0; i <_materialLoaded.length;++i)
 				applyMaterial(_materialLoaded[i]);
 		}
-		
 	}
 }
 
 import away3d.materials.methods.BasicSpecularMethod;
+import away3d.textures.Texture2DBase;
 
-import flash.display.BitmapData;
-
-// value objects:
 class ObjectGroup
 {
-	public var name : String;
-	public var groups : Vector.<Group> = new Vector.<Group>();
+	public var name:String;
+	public var groups:Vector.<Group> = new Vector.<Group>();
 }
 
 class Group
 {
-	public var name : String;
-	public var materialID : String;
-	public var materialGroups : Vector.<MaterialGroup> = new Vector.<MaterialGroup>();
+	public var name:String;
+	public var materialID:String;
+	public var materialGroups:Vector.<MaterialGroup> = new Vector.<MaterialGroup>();
 }
 
 class MaterialGroup
 {
-	public var url : String;
-	public var faces : Vector.<FaceData> = new Vector.<FaceData>();
+	public var url:String;
+	public var faces:Vector.<FaceData> = new Vector.<FaceData>();
 }
 
 class SpecularData
 {
-	public var materialID : String;
-	public var basicSpecularMethod : BasicSpecularMethod;
+	public var materialID:String;
+	public var basicSpecularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
+	public var alpha:Number = 1;
 }
 
 class LoadedMaterial
 {
-	public var materialID:String;
-	public var bitmapData:BitmapData;
+	import away3d.materials.ColorMaterial;
 	
+	public var materialID:String;
+	public var texture:Texture2DBase;
+	public var cm:ColorMaterial;
 	public var specularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
+	public var alpha:Number = 1;
 }
 
 class FaceData
 {
-	public var vertexIndices : Vector.<uint> = new Vector.<uint>();
-	public var uvIndices : Vector.<uint> = new Vector.<uint>();
-	public var normalIndices : Vector.<uint> = new Vector.<uint>();
-	public var indexIds : Vector.<String> = new Vector.<String>();	// used for real index lookups
+	public var vertexIndices:Vector.<uint> = new Vector.<uint>();
+	public var uvIndices:Vector.<uint> = new Vector.<uint>();
+	public var normalIndices:Vector.<uint> = new Vector.<uint>();
+	public var indexIds:Vector.<String> = new Vector.<String>();	// used for real index lookups
 }
-

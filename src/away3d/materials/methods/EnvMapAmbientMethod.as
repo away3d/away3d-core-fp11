@@ -1,13 +1,10 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.CubeTexture3DProxy;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-
-	import flash.display3D.Context3D;
+	import away3d.textures.CubeTextureBase;
 
 	use namespace arcane;
 
@@ -17,18 +14,17 @@ package away3d.materials.methods
 	 */
 	public class EnvMapAmbientMethod extends BasicAmbientMethod
 	{
-		private var _cubeTexture : CubeTexture3DProxy;
+		private var _cubeTexture : CubeTextureBase;
 		private var _cubeMapIndex : int;
 
 		/**
 		 * Creates a new EnvMapDiffuseMethod object.
 		 * @param envMap The cube environment map to use for the diffuse lighting.
 		 */
-		public function EnvMapAmbientMethod(envMap : CubeMap)
+		public function EnvMapAmbientMethod(envMap : CubeTextureBase)
 		{
 			super();
-			_cubeTexture = new CubeTexture3DProxy();
-			_cubeTexture.cubeMap = envMap;
+			_cubeTexture = envMap;
 			_needsNormals = true;
 		}
 
@@ -42,22 +38,21 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			_cubeTexture.dispose(deep);
 		}
 
 		/**
 		 * The cube environment map to use for the diffuse lighting.
 		 */
-		public function get envMap() : CubeMap
+		public function get envMap() : CubeTextureBase
 		{
-			return _cubeTexture.cubeMap;
+			return _cubeTexture;
 		}
 
-		public function set envMap(value : CubeMap) : void
+		public function set envMap(value : CubeTextureBase) : void
 		{
-			_cubeTexture.cubeMap = value;
+			_cubeTexture = value;
 		}
 
 		/**
@@ -76,7 +71,7 @@ package away3d.materials.methods
 		{
 			super.activate(stage3DProxy);
 
-			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
+			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 //		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void

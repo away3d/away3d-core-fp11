@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
@@ -20,7 +19,10 @@ package away3d.materials.methods
 		private var _ambientColor : uint = 0xffffff;
 		private var _ambientData : Vector.<Number>;
 		private var _ambientR : Number = 0, _ambientG : Number = 0, _ambientB : Number = 0;
-		private var _ambient : Number = 0;
+		private var _ambient : Number = 1;
+		arcane var _lightAmbientR : Number = 0;
+		arcane var _lightAmbientG : Number = 0;
+		arcane var _lightAmbientB : Number = 0;
 
 		protected var _ambientInputRegister : ShaderRegisterElement;
 		protected var _ambientInputIndex : int;
@@ -46,7 +48,6 @@ package away3d.materials.methods
 		public function set ambient(value : Number) : void
 		{
 			_ambient = value;
-			updateAmbient();
 		}
 
 		/**
@@ -60,7 +61,6 @@ package away3d.materials.methods
 		public function set ambientColor(value : uint) : void
 		{
 			_ambientColor = value;
-			updateAmbient();
 		}
 
 		/**
@@ -113,6 +113,7 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy) : void
 		{
+			updateAmbient();
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _ambientInputIndex, _ambientData, 1);
 		}
 
@@ -121,9 +122,9 @@ package away3d.materials.methods
 		 */
 		private function updateAmbient() : void
 		{
-			_ambientData[uint(0)] = _ambientR = ((_ambientColor >> 16) & 0xff) / 0xff * _ambient;
-			_ambientData[uint(1)] = _ambientG = ((_ambientColor >> 8) & 0xff) / 0xff * _ambient;
-			_ambientData[uint(2)] = _ambientB = (_ambientColor & 0xff) / 0xff * _ambient;
+			_ambientData[uint(0)] = _ambientR = ((_ambientColor >> 16) & 0xff) / 0xff * _ambient * _lightAmbientR;
+			_ambientData[uint(1)] = _ambientG = ((_ambientColor >> 8) & 0xff) / 0xff * _ambient * _lightAmbientG;
+			_ambientData[uint(2)] = _ambientB = (_ambientColor & 0xff) / 0xff * _ambient * _lightAmbientB;
 		}
 
 

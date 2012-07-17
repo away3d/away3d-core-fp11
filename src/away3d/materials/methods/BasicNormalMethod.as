@@ -1,19 +1,16 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.BitmapDataTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-
-	import flash.display.BitmapData;
+	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
 	public class BasicNormalMethod extends ShadingMethodBase
 	{
-		private var _texture : Texture3DProxy;
+		private var _texture : Texture2DBase;
 		private var _useTexture : Boolean;
 		protected var _normalMapIndex : int = -1;
 		protected var _normalTextureRegister : ShaderRegisterElement;
@@ -21,6 +18,11 @@ package away3d.materials.methods
 		public function BasicNormalMethod()
 		{
 			super(false, false, false);
+		}
+
+		arcane function get tangentSpace() : Boolean
+		{
+			return true;
 		}
 
 		/**
@@ -41,27 +43,16 @@ package away3d.materials.methods
 			return Boolean(_texture);
 		}
 
-		public function get normalMap() : BitmapData
+		public function get normalMap() : Texture2DBase
 		{
-			return _texture? _texture.bitmapData : null;
+			return _texture;
 		}
 
-		public function set normalMap(value : BitmapData) : void
+		public function set normalMap(value : Texture2DBase) : void
 		{
-			if (value == normalMap) return;
-
-			if (!value || !_useTexture)
-				invalidateShaderProgram();
-
-			if (_useTexture) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
-
+			if (!value || !_useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
-
-			if (_useTexture)
-				_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+			_texture = value;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -75,12 +66,9 @@ package away3d.materials.methods
 			_normalMapIndex = -1;
 		}
 
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			if (_texture) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture);
-				_texture = null;
-			}
+			if (_texture) _texture = null;
 		}
 
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void

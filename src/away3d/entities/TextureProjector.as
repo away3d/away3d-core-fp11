@@ -3,11 +3,9 @@ package away3d.entities
 	import away3d.arcane;
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.managers.BitmapDataTextureCache;
-	import away3d.core.managers.Texture3DProxy;
 	import away3d.events.LensEvent;
+	import away3d.textures.Texture2DBase;
 
-	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -18,17 +16,14 @@ package away3d.entities
 		private var _lens : PerspectiveLens;
 		private var _viewProjectionInvalid : Boolean = true;
 		private var _viewProjection : Matrix3D = new Matrix3D();
-		private var _texture : Texture3DProxy;
+		private var _texture : Texture2DBase;
 
-		public function TextureProjector(bitmapData : BitmapData)
+		public function TextureProjector(texture : Texture2DBase)
 		{
 			_lens = new PerspectiveLens();
 			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onInvalidateLensMatrix, false, 0, true);
-//			_texture = new Texture3DProxy();
-//			_texture.bitmapData = bitmapData;
-			_texture = BitmapDataTextureCache.getInstance().getTexture(bitmapData);
-			_lens.aspectRatio = bitmapData.width/bitmapData.height;
-//			lookAt(new Vector3D(0, -1000, 0));
+			_texture = texture;
+			_lens.aspectRatio = texture.width/texture.height;
 			rotationX = -90;
 		}
 
@@ -52,16 +47,15 @@ package away3d.entities
 			_lens.fieldOfView = value;
 		}
 
-		public function get bitmapData() : BitmapData
+		public function get texture() : Texture2DBase
 		{
-			return _texture.bitmapData;
+			return _texture;
 		}
 
-		public function set bitmapData(value : BitmapData) : void
+		public function set bitmapData(value : Texture2DBase) : void
 		{
-			if (value == _texture.bitmapData) return;
-			BitmapDataTextureCache.getInstance().freeTexture(_texture);
-			_texture = BitmapDataTextureCache.getInstance().getTexture(value);
+			if (value == _texture) return;
+			_texture = value;
 		}
 
 		public function get viewProjection() : Matrix3D
@@ -72,12 +66,6 @@ package away3d.entities
 				_viewProjectionInvalid = false;
 			}
 			return _viewProjection;
-		}
-
-		override public function dispose(deep : Boolean) : void
-		{
-			super.dispose(deep);
-			BitmapDataTextureCache.getInstance().freeTexture(_texture);
 		}
 
 		/**
@@ -92,11 +80,6 @@ package away3d.entities
 		private function onInvalidateLensMatrix(event : LensEvent) : void
 		{
 			_viewProjectionInvalid = true;
-		}
-
-		arcane function get texture() : Texture3DProxy
-		{
-			return _texture;
 		}
 	}
 }

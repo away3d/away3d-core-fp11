@@ -5,8 +5,6 @@ package away3d.loaders.parsers
 	import away3d.events.ParserEvent;
 	import away3d.loaders.misc.ResourceDependency;
 	
-	import flash.utils.ByteArray;
-
 	use namespace arcane;
 
 	/**
@@ -105,6 +103,7 @@ package away3d.loaders.parsers
 				_parser.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+				_parser.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 				
@@ -166,6 +165,7 @@ package away3d.loaders.parsers
 			_parser.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			_parser.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			

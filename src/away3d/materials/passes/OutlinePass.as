@@ -7,6 +7,7 @@ package away3d.materials.passes
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
+	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
@@ -43,10 +44,8 @@ package away3d.materials.passes
 			this.outlineColor = outlineColor;
 			this.outlineSize = outlineSize;
 			_defaultCulling = Context3DTriangleFace.FRONT;
-			_animatableAttributes = ["va0", "va1"];
-			_targetRegisters = ["vt0", "vt1"];
 			_numUsedStreams = 2;
-			_numUsedVertexConstants = 5;
+			_numUsedVertexConstants = 6;
 			_showInnerLines = showInnerLines;
 			_dedicatedMeshes = dedicatedMeshes;
 			if (dedicatedMeshes)
@@ -54,26 +53,34 @@ package away3d.materials.passes
 		}
 
 		/**
-		 * Clears mesh, will also cause invalidation
+		 * Clears mesh.
+		 * TODO: have Object3D broadcast dispose event, so this can be handled automatically?
 		 */
 		public function clearDedicatedMesh(mesh : Mesh) : void
 		{
 			if (_dedicatedMeshes) {
 				for (var i : int = 0; i < mesh.subMeshes.length; ++i) {
-					var key : SubMesh = mesh.subMeshes[i];
-					Mesh(_dedicatedMeshes[key]).dispose(true);
-					delete _dedicatedMeshes[key];
+					disposeDedicated(mesh.subMeshes[i]);
 				}
 			}
 		}
 
-		override public function dispose(deep : Boolean) : void
+		private function disposeDedicated(keySubMesh : Object) : void
 		{
-			super.dispose(deep);
+			var mesh : Mesh;
+			mesh = Mesh(_dedicatedMeshes[keySubMesh]);
+			mesh.geometry.dispose();
+			mesh.dispose();
+			delete _dedicatedMeshes[keySubMesh];
+		}
+
+		override public function dispose() : void
+		{
+			super.dispose();
+
 			if (_dedicatedMeshes) {
 				for (var key : Object in _outlineMeshes) {
-					Mesh(_dedicatedMeshes[key]).dispose(true);
-					delete _dedicatedMeshes[key];
+					disposeDedicated(key);
 				}
 			}
 		}
@@ -116,7 +123,17 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			return "";
+			var code : String = animation.getAGALVertexCode(this, ["va0", "va1"], ["vt0", "vt1"]);
+
+			// offset
+			code += "mul vt7, vt1, vc5.x\n" +
+					"add vt7, vt7, vt0\n" +
+					"mov vt7.w, vt0.w\n" +
+			// project and scale to viewport
+					"m44 vt7, vt7, vc0		\n" +
+					"mul op, vt7, vc4\n";
+
+			return code;
 		}
 
 		/**
@@ -130,17 +147,17 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera);
+			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
 			// do not write depth if not drawing inner lines (will cause the overdraw to hide inner lines)
 			if (!_showInnerLines)
 				context.setDepthTest(false, Context3DCompareMode.LESS);
 
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _colorData, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _offsetData, 1);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _offsetData, 1);
 		}
 
 
@@ -152,7 +169,7 @@ package away3d.materials.passes
 		}
 
 
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
 		{
 			var mesh : Mesh, dedicatedRenderable : IRenderable;
 			if (_dedicatedMeshes) {
@@ -161,14 +178,14 @@ package away3d.materials.passes
 
 				var context : Context3D = stage3DProxy._context3D;
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
-				stage3DProxy.setSimpleVertexBuffer(0, dedicatedRenderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-				stage3DProxy.setSimpleVertexBuffer(1, dedicatedRenderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(0, dedicatedRenderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, dedicatedRenderable.vertexBufferOffset);
+				stage3DProxy.setSimpleVertexBuffer(1, dedicatedRenderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, dedicatedRenderable.normalBufferOffset);
 				context.drawTriangles(dedicatedRenderable.getIndexBuffer(stage3DProxy), 0, dedicatedRenderable.numTriangles);
 			}
 			else {
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
+				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
 
-				super.render(renderable, stage3DProxy, camera);
+				super.render(renderable, stage3DProxy, camera, lightPicker);
 			}
 		}
 
@@ -218,14 +235,5 @@ package away3d.materials.passes
 			mesh.geometry.addSubGeometry(dest);
 			return mesh;
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function updateProgram(stage3DProxy : Stage3DProxy, polyOffsetReg : String = null) : void
-		{
-			super.updateProgram(stage3DProxy, "vc4.x");
-		}
 	}
-
 }

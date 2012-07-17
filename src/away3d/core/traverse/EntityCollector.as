@@ -7,7 +7,10 @@ package away3d.core.traverse
 	import away3d.core.data.RenderableListItemPool;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.LightProbe;
+	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
 
 	use namespace arcane;
@@ -27,6 +30,9 @@ package away3d.core.traverse
 		protected var _blendedRenderableHead : RenderableListItem;
 		protected var _renderableListItemPool : RenderableListItemPool;
 		protected var _lights : Vector.<LightBase>;
+		private var _directionalLights : Vector.<DirectionalLight>;
+		private var _pointLights : Vector.<PointLight>;
+		private var _lightProbes : Vector.<LightProbe>;
 		protected var _numEntities : uint;
 		protected var _numOpaques : uint;
 		protected var _numBlended : uint;
@@ -34,6 +40,9 @@ package away3d.core.traverse
 		protected var _numTriangles : uint;
 		protected var _numMouseEnableds : uint;
 		protected var _camera : Camera3D;
+		private var _numDirectionalLights : uint;
+		private var _numPointLights : uint;
+		private var _numLightProbes : uint;
 
 		/**
 		 * Creates a new EntityCollector object.
@@ -48,6 +57,9 @@ package away3d.core.traverse
 //			_opaqueRenderables = new Vector.<IRenderable>();
 //			_blendedRenderables = new Vector.<IRenderable>();
 			_lights = new Vector.<LightBase>();
+			_directionalLights = new Vector.<DirectionalLight>();
+			_pointLights = new Vector.<PointLight>();
+			_lightProbes = new Vector.<LightProbe>();
 			_entities = new Vector.<Entity>();
 			_renderableListItemPool = new RenderableListItemPool();
 		}
@@ -125,13 +137,27 @@ package away3d.core.traverse
 		 */
 		public function get lights() : Vector.<LightBase>
 		{
+			// todo: provide separate containers per default light type, otherwise store here
 			return _lights;
+		}
+
+		public function get directionalLights() : Vector.<DirectionalLight>
+		{
+			return _directionalLights;
+		}
+
+		public function get pointLights() : Vector.<PointLight>
+		{
+			return _pointLights;
+		}
+
+		public function get lightProbes() : Vector.<LightProbe>
+		{
+			return _lightProbes;
 		}
 
 		/**
 		 * Clears all objects in the entity collector.
-		 * @param time The time taken by the last render
-		 * @param camera The camera that provides the frustum.
 		 */
 		public function clear() : void
 		{
@@ -141,6 +167,9 @@ package away3d.core.traverse
 			_renderableListItemPool.freeAll();
 			_skyBox = null;
 			if (_numLights > 0) _lights.length = _numLights = 0;
+			if (_numDirectionalLights > 0) _directionalLights.length = _numDirectionalLights = 0;
+			if (_numPointLights > 0) _pointLights.length = _numPointLights = 0;
+			if (_numLightProbes > 0) _lightProbes.length = _numLightProbes = 0;
 		}
 
 		/**
@@ -197,10 +226,30 @@ package away3d.core.traverse
 		 * Adds a light to the potentially visible objects.
 		 * @param light The light to add.
 		 */
-		override public function applyLight(light : LightBase) : void
+		override public function applyUnknownLight(light : LightBase) : void
 		{
 			_lights[_numLights++] = light;
 		}
+
+		override public function applyDirectionalLight(light : DirectionalLight) : void
+		{
+			_lights[_numLights++] = light;
+			_directionalLights[_numDirectionalLights++] = light;
+		}
+
+		override public function applyPointLight(light : PointLight) : void
+		{
+			_lights[_numLights++] = light;
+			_pointLights[_numPointLights++] = light;
+		}
+
+		override public function applyLightProbe(light : LightProbe) : void
+		{
+			_lights[_numLights++] = light;
+			_lightProbes[_numLightProbes++] = light;
+		}
+
+
 
 		/**
 		 * The total number of triangles collected, and which will be pushed to the render engine.

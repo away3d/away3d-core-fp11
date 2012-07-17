@@ -1,28 +1,24 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.BitmapDataTextureCache;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
-	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DBase;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
 	public class SimpleWaterNormalMethod extends BasicNormalMethod
 	{
-		private var _texture2 : Texture3DProxy;
+		private var _texture2 : Texture2DBase;
 		private var _normalTextureRegister2 : ShaderRegisterElement;
 		private var _normalMapIndex2 : int;
 		private var _data : Vector.<Number>;
 		private var _dataRegIndex : int;
 
-		public function SimpleWaterNormalMethod(waveMap1 : BitmapData, waveMap2 : BitmapData)
+		public function SimpleWaterNormalMethod(waveMap1 : Texture2DBase, waveMap2 : Texture2DBase)
 		{
 			super();
 			normalMap = waveMap1;
@@ -70,31 +66,20 @@ package away3d.materials.methods
 			_data[7] = value;
 		}
 
-
-		override public function copyFrom(method : ShadingMethodBase) : void
-		{
-			normalMap = BasicNormalMethod(method).normalMap;
-		}
-
-		override public function set normalMap(value : BitmapData) : void
+		override public function set normalMap(value : Texture2DBase) : void
 		{
 			if (!value) return;
 			super.normalMap = value;
 		}
 
-		public function get secondaryNormalMap() : BitmapData
+		public function get secondaryNormalMap() : Texture2DBase
 		{
-			return _texture2? _texture2.bitmapData : null;
+			return _texture2;
 		}
 
-		public function set secondaryNormalMap(value : BitmapData) : void
+		public function set secondaryNormalMap(value : Texture2DBase) : void
 		{
-			if (value == normalMap) return;
-
-			if (_texture2)
-				BitmapDataTextureCache.getInstance().freeTexture(_texture2);
-
-			_texture2 = BitmapDataTextureCache.getInstance().getTexture(value);
+			_texture2 = value;
 		}
 
 		arcane override function cleanCompilationData() : void
@@ -109,21 +94,18 @@ package away3d.materials.methods
 			_normalMapIndex2 = -1;
 		}
 
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			super.dispose(deep);
-			if (_texture2) {
-				BitmapDataTextureCache.getInstance().freeTexture(_texture2);
-				_texture2 = null;
-			}
+			super.dispose();
+			_texture2 = null;
 		}
 
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			super.activate(stage3DProxy)
+			super.activate(stage3DProxy);
 
 			if (_normalMapIndex2 >= 0) {
-				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data,  2);
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataRegIndex, _data, 2);
 				stage3DProxy.setTextureAt(_normalMapIndex2, _texture2.getTextureForStage3D(stage3DProxy));
 			}
 		}
@@ -139,12 +121,12 @@ package away3d.materials.methods
 			_normalMapIndex2 = _normalTextureRegister2.index;
 
 			_dataRegIndex = dataReg.index;
-			return 	"add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".xyxy\n" +
+			return	 "add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".xyxy\n" +
 					getTexSampleCode(targetReg, _normalTextureRegister, temp) +
 					"add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".zwzw\n" +
 					getTexSampleCode(temp, _normalTextureRegister2, temp) +
-					"add "+targetReg+", "+targetReg+", "+temp +"		\n" +
-					"mul "+targetReg+", "+targetReg+", "+dataReg+".x	\n";
+					"add " + targetReg + ", " + targetReg + ", " + temp + "		\n" +
+					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n";
 		}
 	}
 }

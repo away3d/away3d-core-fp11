@@ -4,7 +4,7 @@ package away3d.core.partition
 	import away3d.lights.LightBase;
 
 	/**
-	 * LightNode is a space partitioning leaf node that contains a LightBase object.
+	 * LightNode is a space partitioning leaf node that contains a LightBase object. Used for lights that are not of default supported type.
 	 */
 	public class LightNode extends EntityNode
 	{
@@ -35,7 +35,7 @@ package away3d.core.partition
 		{
 			if (traverser.enterNode(this)) {
 				super.acceptTraverser(traverser);
-				traverser.applyLight(_light);
+				traverser.applyUnknownLight(_light);
 			}
 			traverser.leaveNode(this);
 		}

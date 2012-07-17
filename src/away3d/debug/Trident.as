@@ -4,7 +4,7 @@
 	import away3d.entities.Mesh;
 	import away3d.extrusions.LatheExtrude;
 	import away3d.materials.ColorMaterial;
-	import away3d.tools.Merge;
+	import away3d.tools.commands.Merge;
 
 	import flash.geom.Vector3D;
 
@@ -27,7 +27,6 @@
 		{
 			var base:Number = length*.9;
 			var rad:Number = 2.4;
-			var dRad:Number = rad*3;
 			var offset:Number = length*.025;
 			var vectors:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
 			var colors:Vector.<uint> = Vector.<uint>([0xFF0000, 0x00FF00, 0x0000FF]);
@@ -61,11 +60,11 @@
 			var arrowZ:LatheExtrude = new LatheExtrude(matZ, profileZ, LatheExtrude.Z_AXIS, 1, 10);
 			
 			var profileO:Vector.<Vector3D> = new Vector.<Vector3D>();
-			profileO[0] = new Vector3D( 0 , dRad, 0);
-			profileO[1] = new Vector3D( -(dRad*.7) , dRad*.7, 0);
-			profileO[2] = new Vector3D( -dRad, 0, 0);
-			profileO[3] = new Vector3D( -(dRad*.7), -(dRad*.7), 0);
-			profileO[4] = new Vector3D( 0, -dRad, 0);
+			profileO[0] = new Vector3D( 0 , rad, 0);
+			profileO[1] = new Vector3D( -(rad*.7) , rad*.7, 0);
+			profileO[2] = new Vector3D( -rad, 0, 0);
+			profileO[3] = new Vector3D( -(rad*.7), -(rad*.7), 0);
+			profileO[4] = new Vector3D( 0, -rad, 0);
 			var origin:LatheExtrude = new LatheExtrude(matOrigin, profileO, LatheExtrude.Y_AXIS, 1, 10);
 			
 			merge.applyToMeshes(this, Vector.<Mesh>([arrowX, arrowY, arrowZ, origin]));

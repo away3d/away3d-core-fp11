@@ -6,7 +6,10 @@ package away3d.core.traverse
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.LightProbe;
+	import away3d.lights.PointLight;
 
 	import flash.geom.Vector3D;
 
@@ -31,7 +34,11 @@ package away3d.core.traverse
 		 * @param node The currently entered node.
 		 * @return true if further recursion down children is necessary, false if not.
 		 */
-		public function enterNode(node : NodeBase) : Boolean { return true; }
+		public function enterNode(node : NodeBase) : Boolean { 
+			// TODO: not used;
+		 	node=node; 
+		 	return true; 
+		}
 
 		/**
 		 * Called when the traverser leaves a node. This method is still called when enterNode returned false.
@@ -58,7 +65,22 @@ package away3d.core.traverse
 		/**
 		 * Passes a light to be processed by the traverser.
 		 */
-		public function applyLight(light : LightBase) : void
+		public function applyUnknownLight(light : LightBase) : void
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function applyDirectionalLight(light : DirectionalLight) : void
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function applyPointLight(light : PointLight) : void
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function applyLightProbe(light : LightProbe) : void
 		{
 			throw new AbstractMethodError();
 		}
@@ -74,6 +96,7 @@ package away3d.core.traverse
 		/**
 		 * The entry point for scene graph traversal, ie the point that will be used for traversing the graph
 		 * position-dependently. For example: BSP visibility determination or collision detection.
+		 * For the EntityCollector, this is the camera's scene position for example.
 		 */
 		public function get entryPoint() : Vector3D
 		{

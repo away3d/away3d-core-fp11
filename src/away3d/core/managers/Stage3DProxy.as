@@ -1,6 +1,7 @@
 package away3d.core.managers
 {
 	import away3d.arcane;
+	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
 
 	import flash.display.Stage3D;
@@ -62,18 +63,18 @@ package away3d.core.managers
 			requestContext();
 		}
 
-		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String = null) : void
+		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int) : void
 		{
 			// force setting null
 			if (buffer && _activeVertexBuffers[index] == buffer) return;
 
-			_context3D.setVertexBufferAt(index, buffer, 0, format);
+			_context3D.setVertexBufferAt(index, buffer, offset, format);
 			_activeVertexBuffers[index] = buffer;
 		}
 
 		public function setTextureAt(index : int, texture : TextureBase) : void
 		{
-			if (_activeTextures[index] == texture) return;
+			if (texture != null && _activeTextures[index] == texture) return;
 
 			_context3D.setTextureAt(index,  texture);
 
@@ -135,7 +136,7 @@ package away3d.core.managers
 
 		public function setRenderTarget(target : TextureBase, enableDepthAndStencil : Boolean = false, surfaceSelector : int = 0) : void
 		{
-			if (_renderTarget == target && surfaceSelector == _renderSurfaceSelector) return;
+			if (_renderTarget == target && surfaceSelector == _renderSurfaceSelector && _enableDepthAndStencil == enableDepthAndStencil) return;
 			_renderTarget = target;
 			_renderSurfaceSelector = surfaceSelector;
 			_enableDepthAndStencil = enableDepthAndStencil;
@@ -221,7 +222,7 @@ package away3d.core.managers
 		{
 			if (_stage3D.context3D) {
 				_context3D = _stage3D.context3D;
-				_context3D.enableErrorChecking = true;
+				_context3D.enableErrorChecking = Debug.active;
 				_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
 				dispatchEvent(new Stage3DEvent(Stage3DEvent.CONTEXT3D_CREATED));
 			}

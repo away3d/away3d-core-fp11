@@ -2,20 +2,16 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Texture3DProxy;
 	import away3d.core.sort.EntitySorterBase;
 	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.Stage3DEvent;
-
-	import flash.display.BitmapData;
-
-	import flash.display.BitmapData;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.geom.Rectangle;
@@ -41,16 +37,56 @@ package away3d.core.render
 		protected var _renderTarget : TextureBase;
 		protected var _renderTargetSurface : int;
 
+		// only used by renderers that need to render geometry to textures
+		protected var _viewWidth : Number;
+		protected var _viewHeight : Number;
+
 		private var _renderableSorter : EntitySorterBase;
 		private var _backgroundImageRenderer : BackgroundImageRenderer;
-		private var _backgroundImage : BitmapData;
+		private var _background : Texture2DBase;
+		
+		protected var _renderToTexture : Boolean;
+		protected var _antiAlias : uint;
+		protected var _textureRatioX : Number = 1;
+		protected var _textureRatioY : Number = 1;
 
 		/**
 		 * Creates a new RendererBase object.
 		 */
-		public function RendererBase()
+		public function RendererBase(renderToTexture : Boolean = false)
 		{
 			_renderableSorter = new RenderableMergeSort();
+			_renderToTexture = renderToTexture;
+		}
+
+		arcane function createEntityCollector() : EntityCollector
+		{
+			return new EntityCollector();
+		}
+
+		arcane function get viewWidth() : Number
+		{
+			return _viewWidth;
+		}
+
+		arcane function set viewWidth(value : Number) : void
+		{
+			_viewWidth = value;
+		}
+
+		arcane function get viewHeight() : Number
+		{
+			return _viewHeight;
+		}
+
+		arcane function set viewHeight(value : Number) : void
+		{
+			_viewHeight = value;
+		}
+
+		arcane function get renderToTexture() : Boolean
+		{
+			return _renderToTexture;
 		}
 
 		public function get renderableSorter() : EntitySorterBase
@@ -155,38 +191,6 @@ package away3d.core.render
 				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 		}
 
-		/**
-		 * The width of the back buffer.
-		 *
-		 * @private
-		 */
-		/*arcane function get backBufferWidth() : int
-		{
-			return _backBufferWidth;
-		}
-
-		arcane function set backBufferWidth(value : int) : void
-		{
-			_backBufferWidth = value;
-			_backBufferInvalid = true;
-		}    */
-
-		/**
-		 * The height of the back buffer.
-		 *
-		 * @private
-		 */
-		/*arcane function get backBufferHeight() : int
-		{
-			return _backBufferHeight;
-		}
-
-		arcane function set backBufferHeight(value : int) : void
-		{
-			_backBufferHeight = value;
-			_backBufferInvalid = true;
-		}  */
-
 
 		/**
 		 * Disposes the resources used by the RendererBase.
@@ -213,13 +217,11 @@ package away3d.core.render
 		{
 			if (!_stage3DProxy || !_context) return;
 
-			_renderTarget = target;
-			_renderTargetSurface = surfaceSelector;
 			executeRender(entityCollector, target, scissorRect, surfaceSelector, additionalClearMask);
 
 			// clear buffers
 			for (var i : uint = 0; i < 8; ++i) {
-				_stage3DProxy.setSimpleVertexBuffer(i, null);
+				_stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
 				_stage3DProxy.setTextureAt(i, null);
 			}
 		}
@@ -233,38 +235,42 @@ package away3d.core.render
 		 */
 		protected function executeRender(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0, additionalClearMask : int = 7) : void
 		{
-			if (_renderableSorter) _renderableSorter.sort(entityCollector);
+			_renderTarget = target;
+			_renderTargetSurface = surfaceSelector;
+			
+			if (_renderableSorter)
+				_renderableSorter.sort(entityCollector);
+
+			if (_renderToTexture)
+				executeRenderToTexturePass(entityCollector);
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
+			if (additionalClearMask != 0)
+				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0, additionalClearMask);
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			_stage3DProxy.scissorRect = scissorRect;
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
-			draw(entityCollector);
+			draw(entityCollector, target);
 
 			if (_swapBackBuffer && !target) _context.present();
+			_stage3DProxy.scissorRect = null;
+		}
+
+		protected function executeRenderToTexturePass(entityCollector : EntityCollector) : void
+		{
+			throw new AbstractMethodError();
 		}
 
 		/**
 		 * Performs the actual drawing of geometry to the target.
 		 * @param entityCollector The EntityCollector object containing the potentially visible geometry.
 		 */
-		protected function draw(entityCollector : EntityCollector) : void
+		protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
 			throw new AbstractMethodError();
 		}
-
-		/**
-		 * Updates the viewport dimensions;
-		 */
-		/*protected function updateViewPort() : void
-		{
-			_stage3DProxy.x = _viewPortX;
-			_stage3DProxy.y = _viewPortY;
-			_viewPortInvalid = false;
-		}   */
 
 		/**
 		 * Assign the context once retrieved
@@ -286,12 +292,12 @@ package away3d.core.render
 			_backgroundAlpha = value;
 		}
 
-		arcane function get backgroundImage() : BitmapData
+		arcane function get background() : Texture2DBase
 		{
-			return _backgroundImage;
+			return _background;
 		}
 
-		arcane function set backgroundImage(value : BitmapData) : void
+		arcane function set background(value : Texture2DBase) : void
 		{
 			if (_backgroundImageRenderer && !value) {
 				_backgroundImageRenderer.dispose();
@@ -301,13 +307,44 @@ package away3d.core.render
 			if (!_backgroundImageRenderer && value)
 				_backgroundImageRenderer = new BackgroundImageRenderer(_stage3DProxy);
 
-			_backgroundImage = value;
-			if (_backgroundImageRenderer) _backgroundImageRenderer.bitmapData = value;
+			_background = value;
+
+			if (_backgroundImageRenderer) _backgroundImageRenderer.texture = value;
 		}
 
 		public function get backgroundImageRenderer():BackgroundImageRenderer
 		{
 			return _backgroundImageRenderer;
+		}
+
+		public function get antiAlias() : uint
+		{
+			return _antiAlias;
+		}
+
+		public function set antiAlias(antiAlias : uint) : void
+		{
+			_antiAlias = antiAlias;
+		}
+
+		arcane function get textureRatioX() : Number
+		{
+			return _textureRatioX;
+		}
+
+		arcane function set textureRatioX(value : Number) : void
+		{
+			_textureRatioX = value;
+		}
+
+		arcane function get textureRatioY() : Number
+		{
+			return _textureRatioY;
+		}
+
+		arcane function set textureRatioY(value : Number) : void
+		{
+			_textureRatioY = value;
 		}
 	}
 }

@@ -13,7 +13,7 @@ package away3d.primitives
 	/**
 	 * PrimitiveBase is an abstract base class for mesh primitives, which are prebuilt simple meshes.
 	 */
-	public class PrimitiveBase extends Mesh
+	public class PrimitiveBase extends Geometry
 	{
 		protected var _geomDirty : Boolean = true;
 		protected var _uvDirty : Boolean = true;
@@ -24,57 +24,52 @@ package away3d.primitives
 		 * Creates a new PrimitiveBase object.
 		 * @param material The material with which to render the object
 		 */
-		public function PrimitiveBase(material:MaterialBase)
+		public function PrimitiveBase()
 		{
-			var geom : Geometry = new Geometry();
 			_subGeometry = new SubGeometry();
-			geom.addSubGeometry(_subGeometry);
-			super(material, geom);
+			addSubGeometry(_subGeometry);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function get bounds() : BoundingVolumeBase
-		{
-			if (_geomDirty) updateGeometry();
-			return super.bounds;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function get geometry() : Geometry
+		override public function get subGeometries():Vector.<SubGeometry>
 		{
 			if (_geomDirty) updateGeometry();
 			if (_uvDirty) updateUVs();
 
-			return super.geometry;
+			return super.subGeometries;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function get subMeshes():Vector.<SubMesh>
+		override public function clone() : Geometry
 		{
 			if (_geomDirty) updateGeometry();
 			if (_uvDirty) updateUVs();
-
-			return super.subMeshes;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function clone() : Object3D
-		{
-			if (_geomDirty) updateGeometry();
-			if (_uvDirty) updateUVs();
-
-			if (Debug.active)
-				Debug.warning("clone method of AbstractPrimitive subtype wasn't overridden. Cloned object will be typed as Mesh.");
 
 			return super.clone();
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function scale(scale:Number):void
+		{
+			if (_geomDirty) updateGeometry();
+
+			super.scale(scale);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function scaleUV(scaleU:Number=1, scaleV:Number=1):void
+		{
+			if (_uvDirty) updateUVs();
+			
+			super.scaleUV(scaleU, scaleV);
 		}
 
 		/**
@@ -101,7 +96,6 @@ package away3d.primitives
 		protected function invalidateGeometry() : void
 		{
 			_geomDirty = true;
-			invalidateBounds();
 		}
 
 		/**

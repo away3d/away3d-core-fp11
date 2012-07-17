@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
@@ -13,7 +12,7 @@ package away3d.materials.methods
 	/**
 	 * FresnelSpecularMethod provides a specular shading method that is stronger on shallow view angles.
 	 */
-	public class FresnelSpecularMethod extends WrapSpecularMethod
+	public class FresnelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
 		private var _dataIndex : int;
@@ -34,6 +33,16 @@ package away3d.materials.methods
             _data[1] = 5; // exponent
             _data[2] = 1;
             _incidentLight = !basedOnSurface;
+		}
+
+		public function get fresnelPower() : Number
+		{
+			return _data[1];
+		}
+
+		public function set fresnelPower(value : Number) : void
+		{
+			_data[1] = value;
 		}
 
 		arcane override function reset() : void
@@ -89,6 +98,8 @@ package away3d.materials.methods
 		 */
 		private function modulateSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			regCache = regCache;			
 			var code : String = "";
 
 			// use view dir and normal fragment .w as temp

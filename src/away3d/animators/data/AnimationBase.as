@@ -5,8 +5,6 @@ package away3d.animators.data
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.passes.MaterialPassBase;
 
-	import flash.display3D.Context3D;
-
 	use namespace arcane;
 
 	/**
@@ -20,6 +18,30 @@ package away3d.animators.data
 	 */
 	public class AnimationBase
 	{
+        protected var _usesCPU : Boolean;
+
+		/**
+		 * Indicates whether or not this animation runs on CPU or GPU.
+		 */
+		public function get usesCPU() : Boolean
+		{
+			return _usesCPU;
+		}
+
+		arcane function resetGPUCompatibility() : void
+        {
+            _usesCPU = false;
+        }
+
+        /**
+         * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
+		 * Needs to be called if gpu code is potentially required.
+         */
+        arcane function testGPUCompatibility(pass : MaterialPassBase) : void
+        {
+			// by default, let it run on gpu
+        }
+
 		/**
 		 * Factory method which creates an animation state specific to this animation type.
 		 * @return A concrete subtype of AnimationStateBase that is specific to the concrete subtype of AnimationStateBase
@@ -38,8 +60,10 @@ package away3d.animators.data
 		 *
 		 * @private
 		 */
-		arcane function getAGALVertexCode(pass : MaterialPassBase) : String
+		arcane function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
+			// TODO: not used
+			pass = pass;
 			throw new AbstractMethodError();
 			return null;
 		}

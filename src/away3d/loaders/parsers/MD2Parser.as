@@ -9,9 +9,10 @@ package away3d.loaders.parsers
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
-	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
-	import away3d.materials.BitmapMaterial;
+	import away3d.materials.TextureMaterial;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -37,18 +38,18 @@ package away3d.loaders.parsers
 		private var _version : uint;
 		private var _skinWidth : uint;
 		private var _skinHeight : uint;
-		private var _frameSize : uint;
+		//private var _frameSize : uint;
 		private var _numSkins : uint;
 		private var _numVertices : uint;
 		private var _numST : uint;
 		private var _numTris : uint;
-		private var _numGlCmds : uint;
+		//private var _numGlCmds : uint;
 		private var _numFrames : uint;
 		private var _offsetSkins : uint;
 		private var _offsetST : uint;
 		private var _offsetTris : uint;
 		private var _offsetFrames : uint;
-		private var _offsetGlCmds : uint;
+		//private var _offsetGlCmds : uint;
 		private var _offsetEnd : uint;
 		
 		private var _uvIndices : Vector.<Number>;
@@ -97,6 +98,8 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
+			// TODO: not used
+			data = data;
 			// todo: implement
 			return false;
 		}
@@ -109,10 +112,10 @@ package away3d.loaders.parsers
 			if (resourceDependency.assets.length != 1)
 				return;
 			
-			var asset : BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
+			var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
 			
-			if (asset && asset.bitmapData && isBitmapDataValid(asset.bitmapData))
-				BitmapMaterial(_mesh.material).bitmapData = asset.bitmapData;
+			if (asset)
+				TextureMaterial(_mesh.material).texture = asset;
 			
 		}
 		/**
@@ -120,8 +123,10 @@ package away3d.loaders.parsers
 		 */
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
+			// TODO: not used
+			resourceDependency = resourceDependency; 			
 			// apply system default
-			BitmapMaterial(_mesh.material).bitmapData = defaultBitmapData;
+			TextureMaterial(_mesh.material).texture = new BitmapTexture(defaultBitmapData);
 		} 
 		
 		
@@ -142,7 +147,7 @@ package away3d.loaders.parsers
 					// TODO: Create a mesh only when encountered (if it makes sense
 					// for this file format) and return it using finalizeAsset()
 					_mesh = new Mesh;
-					_mesh.material = new BitmapMaterial(defaultBitmapData);
+					_mesh.material = new TextureMaterial( new BitmapTexture(defaultBitmapData) );
 					
 					_geometry = _mesh.geometry;
 					_geometry.animation = new VertexAnimation(2, VertexAnimationMode.ABSOLUTE);
@@ -201,19 +206,22 @@ package away3d.loaders.parsers
 			_version = _byteData.readInt();
 			_skinWidth = _byteData.readInt();
 			_skinHeight = _byteData.readInt();
-			_frameSize = _byteData.readInt();
-			_numSkins = _byteData.readInt();
-			_numVertices = _byteData.readInt();
-			_numST = _byteData.readInt();
-			_numTris = _byteData.readInt();
-			_numGlCmds = _byteData.readInt();
-			_numFrames = _byteData.readInt();
-			_offsetSkins = _byteData.readInt();
-			_offsetST = _byteData.readInt();
-			_offsetTris = _byteData.readInt();
-			_offsetFrames = _byteData.readInt();
-			_offsetGlCmds = _byteData.readInt();
-			_offsetEnd = _byteData.readInt();
+            //skip _frameSize
+            _byteData.readInt();
+            _numSkins = _byteData.readInt();
+            _numVertices = _byteData.readInt();
+            _numST = _byteData.readInt();
+            _numTris = _byteData.readInt();
+            //skip _numGlCmds
+            _byteData.readInt();
+            _numFrames = _byteData.readInt();
+            _offsetSkins = _byteData.readInt();
+            _offsetST = _byteData.readInt();
+            _offsetTris = _byteData.readInt();
+            _offsetFrames = _byteData.readInt();
+            //skip _offsetGlCmds
+            _byteData.readInt();
+            _offsetEnd = _byteData.readInt();
 			
 			_parsedHeader = true;
 		}
@@ -237,10 +245,13 @@ package away3d.loaders.parsers
 					slashIndex = name.lastIndexOf("/");
 					if (slashIndex < 0) slashIndex = 0;
 				}
-				
-				name = name.substring(slashIndex+1, extIndex);
-				url = name+"."+_textureType;
-				
+                if(name.toLowerCase().indexOf(".jpg") == -1 && name.toLowerCase().indexOf(".png") == -1){
+                    name = name.substring(slashIndex+1, extIndex);
+                    url = name+"."+_textureType;
+                } else{
+                    url = name;
+                }
+
 				_materialNames[i] = name;
 				// only support 1 skin
 				if (dependencies.length == 0)

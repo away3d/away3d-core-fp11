@@ -4,29 +4,26 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.core.managers.CubeTexture3DProxy;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.CubeMap;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.CubeTextureBase;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
 	public class FresnelEnvMapMethod extends ShadingMethodBase
 	{
-		private var _cubeTexture : CubeTexture3DProxy;
+		private var _cubeTexture : CubeTextureBase;
 		private var _cubeMapIndex : int;
 		private var _data : Vector.<Number>;
 		private var _dataIndex : int;
 
-		public function FresnelEnvMapMethod(envMap : CubeMap, alpha : Number = 1)
+		public function FresnelEnvMapMethod(envMap : CubeTextureBase, alpha : Number = 1)
 		{
 			super(true, true, false);
-			_cubeTexture = new CubeTexture3DProxy();
-			_cubeTexture.cubeMap = envMap;
+			_cubeTexture = envMap;
 			_data = new Vector.<Number>(4, true);
 			_data[0] = alpha;
 			_data[1] = 0;
@@ -52,11 +49,23 @@ package away3d.materials.methods
 		}
 
 		/**
+		 * The cube environment map to use for the diffuse lighting.
+		 */
+		public function get envMap() : CubeTextureBase
+		{
+			return _cubeTexture;
+		}
+
+		public function set envMap(value : CubeTextureBase) : void
+		{
+			_cubeTexture = value;
+		}
+
+		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			_cubeTexture.dispose(deep);
 		}
 
 		public function get alpha() : Number
@@ -85,7 +94,7 @@ package away3d.materials.methods
 		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _dataIndex, _data, 1);
-			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForContext(stage3DProxy));
+			stage3DProxy.setTextureAt(_cubeMapIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 //		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void

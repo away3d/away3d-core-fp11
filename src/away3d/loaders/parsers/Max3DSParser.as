@@ -6,14 +6,14 @@ package away3d.loaders.parsers
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.AssetType;
-	import away3d.library.assets.BitmapDataAsset;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.BitmapMaterial;
 	import away3d.materials.ColorMaterial;
 	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.TextureMaterial;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -73,11 +73,11 @@ package away3d.loaders.parsers
 				var asset : IAsset;
 				
 				asset = resourceDependency.assets[0];
-				if (asset.assetType == AssetType.BITMAP) {
+				if (asset.assetType == AssetType.TEXTURE) {
 					var tex : TextureVO;
 					
 					tex = _textures[resourceDependency.id];
-					tex.bitmap = asset as BitmapDataAsset;
+					tex.texture = asset as Texture2DBase;
 				}
 			}
 		}
@@ -467,9 +467,9 @@ package away3d.loaders.parsers
 				sub = new SubGeometry();
 				sub.autoDeriveVertexNormals = true;
 				sub.autoDeriveVertexTangents = true;
-				sub.updateVertexData(obj.verts);
-				sub.updateIndexData(obj.indices);
-				sub.updateUVData(obj.uvs);
+				if(obj.verts) sub.updateVertexData(obj.verts);
+				if(obj.indices) sub.updateIndexData(obj.indices);
+				if(obj.uvs) sub.updateUVData(obj.uvs);
 				
 				geom = new Geometry();
 				geom.subGeometries.push(sub);
@@ -514,7 +514,7 @@ package away3d.loaders.parsers
 				finalizeAsset(geom, obj.name.concat('_geom'));
 				
 				// Build mesh and return it
-				mesh = new Mesh(mat, geom);
+				mesh = new Mesh(geom, mat);
 				mesh.transform = new Matrix3D(obj.transform);
 				return mesh;
 			}
@@ -529,7 +529,7 @@ package away3d.loaders.parsers
 			var mat : DefaultMaterialBase;
 			
 			if (_cur_mat.colorMap) {
-				mat = new BitmapMaterial(_cur_mat.colorMap.bitmap.bitmapData);
+				mat = new TextureMaterial(_cur_mat.colorMap.texture);
 			}
 			else {
 				mat = new ColorMaterial(_cur_mat.diffuseColor);
@@ -626,13 +626,13 @@ package away3d.loaders.parsers
 }
 
 
-import away3d.library.assets.BitmapDataAsset;
 import away3d.materials.MaterialBase;
+import away3d.textures.Texture2DBase;
 
 internal class TextureVO
 {
 	public var url : String;
-	public var bitmap : BitmapDataAsset;
+	public var texture : Texture2DBase;
 }
 
 internal class MaterialVO

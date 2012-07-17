@@ -4,7 +4,6 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.LightBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.SingleObjectDepthPass;
 	import away3d.materials.utils.ShaderRegisterCache;
@@ -22,7 +21,7 @@ package away3d.materials.methods
 	 * light inside translucent surfaces. It allows light to shine through an object and to soften the diffuse shading.
 	 * It can be used for candle wax, ice, skin, ...
 	 */
-	public class SubsurfaceScatteringDiffuseMethod extends WrapDiffuseMethod
+	public class SubsurfaceScatteringDiffuseMethod extends CompositeDiffuseMethod
 	{
 		private var _depthPass : SingleObjectDepthPass;
 		private var _depthMapRegs : Vector.<uint>;
@@ -147,7 +146,7 @@ package away3d.materials.methods
 		arcane override function getVertexCode(regCache : ShaderRegisterCache) : String
 		{
 			var code : String = super.getVertexCode(regCache);
-			var lightProjection : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>(4, true);
+			var lightProjection : ShaderRegisterElement;
 			var temp : ShaderRegisterElement = regCache.getFreeVertexVectorTemp();
 			_lightProjVaryings = new Vector.<ShaderRegisterElement>(_numLights, true);
 
@@ -157,13 +156,13 @@ package away3d.materials.methods
 
 			for (var i : int = 0; i < _numLights; ++i) {
 				_lightProjVaryings[i] = regCache.getFreeVarying();
-				lightProjection[0] = regCache.getFreeVertexConstant();
-				lightProjection[1] = regCache.getFreeVertexConstant();
-				lightProjection[2] = regCache.getFreeVertexConstant();
-				lightProjection[3] = regCache.getFreeVertexConstant();
-				if (_lightMatrixsConstsIndex < 0) _lightMatrixsConstsIndex = lightProjection[0].index;
+				lightProjection = regCache.getFreeVertexConstant();
+				regCache.getFreeVertexConstant();
+				regCache.getFreeVertexConstant();
+				regCache.getFreeVertexConstant();
+				if (_lightMatrixsConstsIndex < 0) _lightMatrixsConstsIndex = lightProjection.index;
 
-				code += "m44 " + temp+ ", vt0, " + lightProjection[0] + "\n" +
+				code += "m44 " + temp+ ", vt0, " + lightProjection + "\n" +
 						"rcp " + temp+".w, " + temp+".w\n" +
 						"mul " + temp+".xyz, " + temp+".xyz, " + temp+".w\n" +
 						"mul " + temp+".xy, " + temp+".xy, " + _toTexRegister+".xy\n" +
@@ -195,6 +194,7 @@ package away3d.materials.methods
 		arcane override function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			_lightColorReg = lightColReg;
+			_lightIndex = lightIndex;
 			return super.getFragmentCodePerLight(lightIndex, lightDirReg, lightColReg, regCache);
 		}
 
@@ -205,7 +205,6 @@ package away3d.materials.methods
 		{
 			var code : String = super.getFragmentPostLightingCode(regCache, targetReg);
 			code += "add " + targetReg+".xyz, " + targetReg+".xyz, " + _totalScatterColorReg+".xyz\n";
-//			code += AGAL.mov(targetReg+".xyz", _totalScatterColorReg+".xyz");
 			regCache.removeFragmentTempUsage(_totalScatterColorReg);
 			return code;
 		}
@@ -225,8 +224,10 @@ package away3d.materials.methods
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _decIndex, _dec, 1);
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			camera = null; 
 			var context : Context3D = stage3DProxy._context3D;
 			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, stage3DProxy);
 			var projections : Vector.<Matrix3D> = _depthPass.getProjections(renderable);
@@ -236,18 +237,6 @@ package away3d.materials.methods
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _lightMatrixsConstsIndex+i*4, projections[i], true);
 			}
 		}
-
-
-		/**
-		 * @inheritDoc
-		 */
-//		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-//		{
-//			super.deactivate(stage3DProxy);
-//
-//			for (var i : int = 0; i < 1; ++i)
-//				stage3DProxy.setTextureAt(_depthMapRegs[i], null);
-//		}
 
 		/**
 		 * Generates the code for this method
@@ -269,12 +258,12 @@ package away3d.materials.methods
 			}
 
 //			temp = regCache.getFreeFragmentVectorTemp();
-			code += "tex " + _totalScatterColorReg + ", " + projReg + ", " + depthReg +  " <2d,linear,clamp>\n" +
+			code += "tex " + _totalScatterColorReg + ", " + projReg + ", " + depthReg +  " <2d,nearest,clamp>\n" +
 			// reencode RGBA
 					"dp4 " + _totalScatterColorReg+".z, " + _totalScatterColorReg + ", " + _decReg + "\n" +
 			// currentDistanceToLight - closestDistanceToLight
 					"sub " + _totalScatterColorReg+".w, " + projReg+".z, " + _totalScatterColorReg+".z\n" +
-//			code += AGAL.sat(temp+".w", temp+".w");
+
 					"sub " + _totalScatterColorReg+".w, " + _invRegister+".x, " + _totalScatterColorReg+".w\n" +
 					"mul " + _totalScatterColorReg+".w, " + _invRegister+".y, " + _totalScatterColorReg+".w\n" +
 					"sat " + _totalScatterColorReg+".w, " + _totalScatterColorReg+".w\n" +
@@ -292,8 +281,6 @@ package away3d.materials.methods
 
 					"mul " + _totalScatterColorReg+".xyz, " + _lightColorReg+".xyz, " + _totalScatterColorReg+".w\n" +
 					"mul " + _totalScatterColorReg+".xyz, " + _totalScatterColorReg+".xyz, " + _colorReg+".xyz\n";
-
-			++_lightIndex;
 
 			return code;
 		}

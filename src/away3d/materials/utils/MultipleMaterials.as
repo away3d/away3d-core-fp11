@@ -22,7 +22,7 @@
 		* @param	top:MaterialBase	 		[optional] The top material.
 		* @param	down:MaterialBase	 	[optional] The down material.
 		*/
-        public function MultipleMaterials(front:MaterialBase = null, back:MaterialBase = null, left:MaterialBase = null, right:MaterialBase = null, top:MaterialBase = null, down:MaterialBase = null)
+        public function MultipleMaterials(front:MaterialBase = null, back:MaterialBase = null, left:MaterialBase = null, right:MaterialBase = null, top:MaterialBase = null)
         {
         	_left = left;
         	_right = right;

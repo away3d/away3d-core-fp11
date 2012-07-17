@@ -102,7 +102,7 @@ package away3d.loaders.parsers
 		public function isBitmapDataValid(bitmapData: BitmapData) : Boolean
 		{
 			var isValid:Boolean = TextureUtils.isBitmapDataValid(bitmapData);
-			if(!isValid) trace(">> bitmap loaded is not having power of 2 dimensions or is higher than 4096");
+			if(!isValid) trace(">> Bitmap loaded is not having power of 2 dimensions or is higher than 2048");
 			
 			return isValid;
 		}
@@ -210,8 +210,8 @@ package away3d.loaders.parsers
 					type_name = 'animator';
 					type_event = AssetEvent.ANIMATOR_COMPLETE;
 					break;
-				case AssetType.BITMAP:
-					type_name = 'bitmap';
+				case AssetType.TEXTURE:
+					type_name = 'texture';
 					type_event = AssetEvent.BITMAP_COMPLETE;
 					break;
 				case AssetType.CONTAINER:
@@ -237,6 +237,10 @@ package away3d.loaders.parsers
 				case AssetType.SKELETON_POSE:
 					type_name = 'skelpose';
 					type_event = AssetEvent.SKELETON_POSE_COMPLETE;
+					break;
+				case AssetType.ENTITY:
+					type_name = 'entity';
+					type_event = AssetEvent.ENTITY_COMPLETE;
 					break;
 				default:
 					throw new Error('Unhandled asset type '+asset.assetType+'. Report as bug!');

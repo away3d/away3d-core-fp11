@@ -11,9 +11,9 @@ package away3d.core.render
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DRenderMode;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
+	import flash.display3D.textures.TextureBase;
 
 	/**
 	 * The PositionRenderer renders normalized position coordinates.
@@ -39,8 +39,11 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector : EntityCollector) : void
+		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
+			// TODO: not used
+			target = target; 
+			
 			var item : RenderableListItem;
 			var renderable : IRenderable;
 
@@ -53,8 +56,8 @@ package away3d.core.render
 			item = entityCollector.opaqueRenderableHead;
 			while (item) {
 				renderable = item.renderable;
-				_stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
+				_stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
+				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
 				item = item.next;
 			}
@@ -64,8 +67,8 @@ package away3d.core.render
 			item = entityCollector.blendedRenderableHead;
 			while (item) {
 				renderable = item.renderable;
-				_stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
+				_stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
+				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
 				item = item.next;
 			}

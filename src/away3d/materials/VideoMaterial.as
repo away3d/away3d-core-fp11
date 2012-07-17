@@ -2,6 +2,7 @@ package away3d.materials
 {
 
 
+	import away3d.errors.DeprecationError;
 	import away3d.materials.utils.IVideoPlayer;
 	import away3d.materials.utils.SimpleVideoPlayer;
 
@@ -10,6 +11,7 @@ package away3d.materials
 	import flash.events.Event;
 	import flash.geom.Rectangle;
 
+	[Deprecated(message="Use texture composition instead of inheritance", replacement="TextureMaterial", since="4.0a")]
 	public class VideoMaterial extends BitmapMaterial
 	{
 		
@@ -23,7 +25,6 @@ package away3d.materials
 		
 		public function VideoMaterial(source:String, materialSize:int = 256, loop:Boolean = true, autoPlay:Boolean = false, player:IVideoPlayer = null)
 		{
-			
 			// used to capture the onEnterFrame event
 			_broadcaster = new Sprite();
 			
@@ -51,6 +52,8 @@ package away3d.materials
 			
 			// auto update is true by default 
 			autoUpdate = true;
+
+			throw new DeprecationError("VideoMaterial", "4.0a", "Please use new TextureMaterial(new VideoTexture(source)) instead.");
 		}
 		
 		
@@ -67,15 +70,14 @@ package away3d.materials
 				
 				bitmapData.lock();
 				bitmapData.draw( _player.container, null, null, null, _clippingRect);
-				updateTexture();
+				updateBitmapData();
 				bitmapData.unlock();
-				
 			}
 			
 		}
 		
 		
-		override public function dispose(deep:Boolean):void
+		override public function dispose():void
 		{
 			
 			autoUpdate = false;
@@ -84,7 +86,7 @@ package away3d.materials
 			_broadcaster = null;
 			_clippingRect = null;
 			
-			super.dispose(deep);
+			super.dispose();
 		}
 		
 		private function autoUpdateHandler( e:Event ):void

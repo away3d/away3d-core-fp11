@@ -1,4 +1,4 @@
-﻿package away3d.animators
+package away3d.animators
 {
 	import away3d.core.base.Object3D;
 	import away3d.events.PathEvent;
@@ -15,7 +15,8 @@
 		private var _time:Number;
 		private var _index:uint = 0;
 		private var _rotations:Vector.<Vector3D>;
-		private var _lookAt:Boolean;
+		// TODO:not used
+		// private var _lookAt:Boolean;
 		private var _alignToPath:Boolean;
 		private var _target:Object3D;
 		private var _lookAtTarget:Object3D;
@@ -38,9 +39,9 @@
 		* 
 		* @param	 			[optional] path					The path to animate onto.
 		* @param	 			[optional] target					An Object3D, the object to animate along the path. It can be Mesh, Camera, ObjectContainer3D...
+		* @param	 			[optional] offset					A Vector3D to define the target offset to its location on the path.
 		* @param	 			[optional] alignToPath			Defines if the object animated along the path is orientated to the path. Default is true.
 		* @param	 			[optional] lookAtTarget		An Object3D that the target will constantly look at during animation.
-		* @param	 			[optional] offset					A Vector3D to define the target offset to its location on the path.
 		* @param	 			[optional] rotations				A Vector.&lt;Vector3D&gt; to define rotations per pathsegments. If PathExtrude is used to simulate the "road", use the very same rotations vector.
 		*/
 		function PathAnimator(path:Path = null, target:Object3D = null, offset:Vector3D = null, alignToPath:Boolean = true, lookAtTarget:Object3D = null, rotations:Vector.<Vector3D> = null)
@@ -279,6 +280,8 @@
     	*/
 		public function set target(object3d:Object3D):void
 		{
+			// TODO: not used
+			object3d = object3d;
 			_target = target;
 		}
 		public function get target():Object3D

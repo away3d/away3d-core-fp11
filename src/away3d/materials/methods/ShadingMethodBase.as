@@ -4,7 +4,6 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.lights.LightBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
@@ -20,6 +19,7 @@ package away3d.materials.methods
 		protected var _needsProjection : Boolean;
 		protected var _needsView : Boolean;
 		protected var _needsNormals : Boolean;
+		protected var _needsTangents : Boolean;
 		protected var _needsUV : Boolean;
 		protected var _needsSecondaryUV : Boolean;
 		protected var _needsGlobalPos : Boolean;
@@ -29,7 +29,8 @@ package away3d.materials.methods
 		protected var _normalFragmentReg : ShaderRegisterElement;
 		protected var _uvFragmentReg : ShaderRegisterElement;
 		protected var _secondaryUVFragmentReg : ShaderRegisterElement;
-		protected var _globalPosVertexReg : ShaderRegisterElement;
+		protected var _tangentVaryingReg : ShaderRegisterElement;
+		protected var _globalPosReg : ShaderRegisterElement;
 		protected var _projectionReg : ShaderRegisterElement;
 
 		protected var _mipmap : Boolean = true;
@@ -67,7 +68,7 @@ package away3d.materials.methods
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose(deep : Boolean) : void
+		public function dispose() : void
 		{
 
 		}
@@ -116,7 +117,7 @@ package away3d.materials.methods
 			_viewDirFragmentReg = null;
 			_normalFragmentReg = null;
 			_uvFragmentReg = null;
-			_globalPosVertexReg = null;
+			_globalPosReg = null;
 			_projectionReg = null;
 		}
 
@@ -198,6 +199,11 @@ package away3d.materials.methods
 			return _needsNormals;
 		}
 
+		arcane function get needsTangents() : Boolean
+		{
+			return _needsTangents;
+		}
+
 		arcane function get needsGlobalPos() : Boolean
 		{
 			return _needsGlobalPos;
@@ -212,14 +218,14 @@ package away3d.materials.methods
 		 * The fragment register in which the uv coordinates are stored.
 		 * @private
 		 */
-		arcane function get globalPosVertexReg() : ShaderRegisterElement
+		arcane function get globalPosReg() : ShaderRegisterElement
 		{
-			return _globalPosVertexReg;
+			return _globalPosReg;
 		}
 
-		arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
+		arcane function set globalPosReg(value : ShaderRegisterElement) : void
 		{
-			_globalPosVertexReg = value;
+			_globalPosReg = value;
 		}
 
 		arcane function get projectionReg() : ShaderRegisterElement
@@ -305,6 +311,8 @@ package away3d.materials.methods
 		 */
 		arcane function getVertexCode(regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			regCache = regCache;			
 			return "";
 		}
 
@@ -315,6 +323,9 @@ package away3d.materials.methods
 		 */
 		arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
+			// TODO: not used
+			regCache = regCache;
+			targetReg = targetReg;			
 			return "";
 		}
 
@@ -331,7 +342,7 @@ package away3d.materials.methods
 		/**
 		 * Sets the render state for a single renderable.
 		 */
-		arcane function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 
 		}
@@ -352,9 +363,9 @@ package away3d.materials.methods
 		 * @param inputReg The texture stream register.
 		 * @return The fragment code that performs the sampling.
 		 */
-		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
+		protected function getTexSampleCode(targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null, forceWrap : String = null) : String
 		{
-			var wrap : String = _repeat ? "wrap" : "clamp";
+			var wrap : String = forceWrap || (_repeat ? "wrap" : "clamp");
 			var filter : String;
 
 			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
@@ -378,6 +389,17 @@ package away3d.materials.methods
 		 */
 		public function copyFrom(method : ShadingMethodBase) : void
 		{
+		}
+
+		public function get tangentVaryingReg() : ShaderRegisterElement
+		{
+			return _tangentVaryingReg;
+		}
+
+
+		public function set tangentVaryingReg(tangentVaryingReg : ShaderRegisterElement) : void
+		{
+			_tangentVaryingReg = tangentVaryingReg;
 		}
 	}
 }

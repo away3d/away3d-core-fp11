@@ -5,11 +5,9 @@ package away3d.materials.methods
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.TextureProjector;
-	import away3d.lights.LightBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Matrix3D;
 
@@ -83,7 +81,9 @@ package away3d.materials.methods
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
-			var temp : ShaderRegisterElement = regCache.getFreeVertexVectorTemp();
+			// TODO: not used
+			// var temp : ShaderRegisterElement =
+			regCache.getFreeVertexVectorTemp();
 			_projectionIndex = projReg.index;
 			_uvVarying = regCache.getFreeVarying();
 
@@ -124,8 +124,10 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lights : Vector.<LightBase>) : void
+		arcane override function setRenderState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			camera = null; 
 			_projMatrix.copyFrom(_projector.viewProjection);
 			_projMatrix.prepend(renderable.sceneTransform);
 			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _projectionIndex, _projMatrix, true);

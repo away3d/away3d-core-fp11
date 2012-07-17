@@ -113,7 +113,22 @@ package away3d.events
 		 * The z-coordinate in object space where the event took place
 		 */
 		public var localZ : Number;
-
+		
+		/**
+		 * The x-coordinate in scene space where the event took place
+		 */
+		public var sceneX : Number;
+		
+		/**
+		 * The y-coordinate in scene space where the event took place
+		 */
+		public var sceneY : Number;
+		
+		/**
+		 * The z-coordinate in scene space where the event took place
+		 */
+		public var sceneZ : Number;
+		
 		/**
 		 * Indicates whether the Control key is active (true) or inactive (false).
 		 */
@@ -164,7 +179,10 @@ package away3d.events
 			result.localX = localX;
 			result.localY = localY;
 			result.localZ = localZ;
-
+			result.sceneX = sceneX;
+			result.sceneY = sceneY;
+			result.sceneZ = sceneZ;
+			
 			result.ctrlKey = ctrlKey;
 			result.shiftKey = shiftKey;
 

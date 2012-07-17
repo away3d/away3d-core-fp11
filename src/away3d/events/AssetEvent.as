@@ -7,6 +7,7 @@ package away3d.events
 	public class AssetEvent extends Event
 	{
 		public static const ASSET_COMPLETE : String = 'assetComplete';
+		public static const ENTITY_COMPLETE : String = 'entityComplete';
 		public static const MESH_COMPLETE : String = 'meshComplete';
 		public static const GEOMETRY_COMPLETE : String = 'geometryComplete';
 		public static const SKELETON_COMPLETE : String = 'skeletonComplete';

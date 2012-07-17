@@ -29,27 +29,23 @@
 		protected var _geometry : Geometry;
 		private var _material : MaterialBase;
 		arcane var _animationState : AnimationStateBase;
-		private var _mouseDetails : Boolean;
 		private var _castsShadows : Boolean = true;
+		private var _mouseHitMethod:uint;
 
 		/**
 		 * Create a new Mesh object.
 		 * @param material The material with which to render the Mesh.
 		 * @param geometry The geometry used by the mesh that provides it with its shape.
 		 */
-		public function Mesh(material : MaterialBase = null, geometry : Geometry = null)
+		public function Mesh(geometry : Geometry = null, material : MaterialBase = null)
 		{
 			super();
-			_geometry = geometry || new Geometry();
-			_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
-			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
-			_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-			_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
 			_subMeshes = new Vector.<SubMesh>();
-			this.material = material;
-			if (geometry) initGeometry();
-		}
 
+			this.geometry = geometry || new Geometry();
+			this.material = material;
+		}
+		
 		public function bakeTransformations():void
 		{
 			geometry.applyTransformation(transform);
@@ -68,16 +64,14 @@
 		}
 
 		/**
-		 * Indicates whether or not mouse events contain UV and position coordinates. Setting this to true can affect performance. Defaults to false.
+		 * Indicates what picking method to use on this mesh. See MouseHitMethod for available options.
 		 */
-		public function get mouseDetails() : Boolean
-		{
-			return _mouseDetails;
+		public function get mouseHitMethod():uint {
+			return _mouseHitMethod;
 		}
 
-		public function set mouseDetails(value : Boolean) : void
-		{
-			_mouseDetails = value;
+		public function set mouseHitMethod( value:uint ):void {
+			_mouseHitMethod = value;
 		}
 
 		/**
@@ -116,6 +110,36 @@
 			return _geometry;
 		}
 
+		public function set geometry(value : Geometry) : void
+		{
+			if (_geometry) {
+				_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
+				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
+				_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
+				_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+
+				for (var i : uint = 0; i < _subMeshes.length; ++i) {
+					_subMeshes[i].dispose();
+				}
+				_subMeshes.length = 0;
+			}
+
+			_geometry = value;
+			if (_geometry) {
+				_geometry.addEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
+				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
+				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
+				_geometry.addEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
+				initGeometry();
+			}
+
+			if (_material) {
+				// reregister material in case geometry has a different animation
+				_material.removeOwner(this);
+				_material.addOwner(this);
+			}
+		}
+
 		/**
 		 * The material with which to render the Mesh.
 		 */
@@ -152,21 +176,10 @@
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose(deep : Boolean) : void
+		override public function dispose() : void
 		{
-			_geometry.removeEventListener(GeometryEvent.BOUNDS_INVALID, onGeometryBoundsInvalid);
-			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
-			_geometry.removeEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
-			_geometry.removeEventListener(GeometryEvent.ANIMATION_CHANGED, onAnimationChanged);
-
-			if (deep) {
-				_geometry.dispose();
-
-				if (_material) {
-					_material.dispose(true);
-					material = null;
-				}
-			}
+			material = null;
+			geometry = null;
 		}
 
 		/**
@@ -174,7 +187,7 @@
 		 */
 		override public function clone() : Object3D
 		{
-			var clone : Mesh = new Mesh(_material, geometry);
+			var clone : Mesh = new Mesh(geometry, _material);
 			clone.transform = transform;
 			clone.pivotPoint = pivotPoint;
 			clone.partition = partition;
@@ -245,6 +258,7 @@
 			for (i = 0; i < len; ++i) {
 				subMesh = _subMeshes[i];
 				if (subMesh.subGeometry == subGeom) {
+					subMesh.dispose();
 					_subMeshes.splice(i, 1);
 					break;
 				}
@@ -274,6 +288,24 @@
 		private function onAnimationChanged(event : GeometryEvent) : void
 		{
 			animationState = _geometry.animation.createAnimationState();
+
+			// cause material to be unregistered and registered again to work with the new animation type (if possible)
+			var oldMaterial : MaterialBase = material;
+			material = null;
+			material = oldMaterial;
+
+			var len : uint = _subMeshes.length;
+			var subMesh : SubMesh;
+
+			// reassign for each SubMesh
+			for (var i : int = 0; i < len; ++i) {
+				subMesh = _subMeshes[i];
+				oldMaterial = subMesh._material;
+				if (oldMaterial) {
+					subMesh.material = null;
+					subMesh.material = oldMaterial;
+				}
+			}
 		}
 
 		public function getSubMeshForSubGeometry(subGeometry : SubGeometry) : SubMesh

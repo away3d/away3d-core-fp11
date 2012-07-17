@@ -2,349 +2,136 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.textures.Texture2DBase;
 
-	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
 	/**
-	 * WrapDiffuseMethod provides a base class for diffuse methods that wrap a diffuse method to alter the strength
-	 * of its calculated strength.
+	 * WrapDiffuseMethod is an alternative to BasicDiffuseMethod in which the light is allowed to be "wrapped around" the normally dark area, to some extent.
+	 * It can be used as a crude approximation to Oren-Nayar or subsurface scattering.
 	 */
 	public class WrapDiffuseMethod extends BasicDiffuseMethod
 	{
-		private var _baseDiffuseMethod : BasicDiffuseMethod;
+		private var _wrapData : Vector.<Number>;
+		private var _wrapDataRegister : ShaderRegisterElement;
+		private var _scatterTextureRegister : ShaderRegisterElement;
+		private var _wrapIndex : int;
+		private var _scatterTexture : Texture2DBase;
+		private var _scatterTextureIndex : int;
 
 		/**
 		 * Creates a new WrapDiffuseMethod object.
-		 * @param modulateMethod The method which will add the code to alter the base method's strength. It needs to have the signature clampDiffuse(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String, in which t.w will contain the diffuse strength.
-		 * @param baseDiffuseMethod The base diffuse method on which this method's shading is based.
+		 * @param wrap A factor to indicate the amount by which the light is allowed to wrap
+		 * @param scatterTexture A texture that contains the light colour based on the angle. This can be used to change the light colour due to subsurface scattering when dot &lt; 0
 		 */
-		public function WrapDiffuseMethod(modulateMethod : Function = null, baseDiffuseMethod : BasicDiffuseMethod = null)
+		public function WrapDiffuseMethod(wrapFactor : Number = .5, scatterTexture : Texture2DBase = null)
 		{
-			_baseDiffuseMethod = baseDiffuseMethod || new BasicDiffuseMethod();
-			_baseDiffuseMethod._modulateMethod = modulateMethod;
+			super();
+			_wrapData = new Vector.<Number>(4, true);
+			_wrapData[2] = .5;
+			this.wrapFactor = wrapFactor;
+			this.scatterTexture = scatterTexture;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose(deep : Boolean) : void
+		public function get scatterTexture() : Texture2DBase
 		{
-			_baseDiffuseMethod.dispose(deep);
+			return _scatterTexture;
 		}
 
-        override public function get alphaThreshold() : Number
-        {
-            return _baseDiffuseMethod.alphaThreshold;
-        }
-
-        override public function set alphaThreshold(value : Number) : void
-        {
-            _baseDiffuseMethod.alphaThreshold = value;
-        }
-
-        /**
-		 * @inheritDoc
-		 */
-		override public function invalidateBitmapData() : void
+		public function set scatterTexture(value : Texture2DBase) : void
 		{
-			_baseDiffuseMethod.invalidateBitmapData();
+			if (Boolean(_scatterTexture) != Boolean(value)) invalidateShaderProgram();
+			_scatterTexture = value;
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function get bitmapData() : BitmapData
-		{
-			return _baseDiffuseMethod.bitmapData;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function set bitmapData(value : BitmapData) : void
-		{
-			_baseDiffuseMethod.bitmapData = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function get diffuseAlpha() : Number
-		{
-			return _baseDiffuseMethod.diffuseAlpha;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function get diffuseColor() : uint
-		{
-			return _baseDiffuseMethod.diffuseColor;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function set diffuseColor(diffuseColor : uint) : void
-		{
-			_baseDiffuseMethod.diffuseColor = diffuseColor;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function set diffuseAlpha(value : Number) : void
-		{
-			_baseDiffuseMethod.diffuseAlpha = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set parentPass(value : MaterialPassBase) : void
-		{
-			super.parentPass = value;
-			_baseDiffuseMethod.parentPass = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
-		{
-			return _baseDiffuseMethod.getFragmentAGALPreLightingCode(regCache);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
-		{
-			var code : String = _baseDiffuseMethod.getFragmentCodePerLight(lightIndex, lightDirReg, lightColReg, regCache);
-			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
-			return code;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy) : void
-		{
-			_baseDiffuseMethod.activate(stage3DProxy);
-		}
-
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			_baseDiffuseMethod.deactivate(stage3DProxy);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsUV() : Boolean
-		{
-			return _baseDiffuseMethod.needsUV;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getVertexCode(regCache : ShaderRegisterCache) : String
-		{
-			return _baseDiffuseMethod.getVertexCode(regCache);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
-		{
-			return _baseDiffuseMethod.getFragmentPostLightingCode(regCache, targetReg);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function reset() : void
-		{
-			_baseDiffuseMethod.reset();
-		}
-
 
 		arcane override function cleanCompilationData() : void
 		{
-			super.cleanCompilationData();
-			_baseDiffuseMethod.cleanCompilationData();
+			super.arcane::cleanCompilationData();
+			_wrapDataRegister = null;
+			_scatterTextureRegister = null;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get mipmap() : Boolean
+		public function get wrapFactor() : Number
 		{
-			return _mipmap;
+			return _wrapData[0];
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set mipmap(value : Boolean) : void
+		public function set wrapFactor(value : Number) : void
 		{
-			_baseDiffuseMethod.mipmap = _mipmap = value;
+			_wrapData[0] = value;
+			_wrapData[1] = 1/(value+1);
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get smooth() : Boolean
+		arcane override function getFragmentAGALPreLightingCode(regCache : ShaderRegisterCache) : String
 		{
-			return _smooth;
+			_wrapDataRegister = regCache.getFreeFragmentConstant();
+			_wrapIndex = _wrapDataRegister.index;
+
+			if (_scatterTexture) {
+				_scatterTextureRegister = regCache.getFreeTextureReg();
+				_scatterTextureIndex = _scatterTextureRegister.index;
+			}
+
+			return super.arcane::getFragmentAGALPreLightingCode(regCache);
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set smooth(value : Boolean) : void
+		arcane override function getFragmentCodePerLight(lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			_baseDiffuseMethod.smooth = _smooth = value;
-		}
+			var code : String = "";
+			var t : ShaderRegisterElement;
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get repeat() : Boolean
-		{
-			return _repeat;
-		}
+			// write in temporary if not first light, so we can add to total diffuse colour
+			if (lightIndex > 0) {
+				t = regCache.getFreeFragmentVectorTemp();
+				regCache.addFragmentTempUsages(t, 1);
+			}
+			else {
+				t = _totalLightColorReg;
+			}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set repeat(value : Boolean) : void
-		{
-			_baseDiffuseMethod.repeat = _repeat = value;
-		}
+			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
+					"add " + t + ".y, " + t + ".x, " + _wrapDataRegister + ".x\n" +
+					"mul " + t + ".y, " + t + ".y, " + _wrapDataRegister + ".y\n" +
+					"sat " + t + ".w, " + t + ".y\n" +
+					"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get numLights() : int
-		{
-			return _numLights;
-		}
+			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set numLights(value : int) : void
-		{
-			_numLights = _baseDiffuseMethod.numLights = value;
-		}
+			if (_scatterTexture) {
+				code += "mul " + t + ".x, " + t + ".x, " + _wrapDataRegister + ".z\n" +
+						"add " + t + ".x, " + t + ".x, " + t + ".x\n" +
+						"tex " + t + ".xyz, " + t + ".xxx, " + _scatterTextureRegister + " <2d, nearest, clamp>\n" +
+						"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" +
+						"mul " + t + ".xyz, " + t + ".xyz, " + lightColReg + ".xyz\n";
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsGlobalPos() : Boolean
-		{
-			return _baseDiffuseMethod.needsGlobalPos || _needsGlobalPos;
-		}
+			}
+			else {
+				code += "mul " + t + ", " + t + ".w, " + lightColReg + "\n";
+			}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsView() : Boolean
-		{
-			return _baseDiffuseMethod.needsView || _needsView;
-		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get needsNormals() : Boolean
-		{
-			return _baseDiffuseMethod.needsNormals || _needsNormals;
-		}
+			if (lightIndex > 0) {
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
+				regCache.removeFragmentTempUsage(t);
+			}
 
-		arcane override function get needsProjection() : Boolean
-		{
-			return _baseDiffuseMethod.needsProjection || _needsProjection;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set globalPosVertexReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.globalPosVertexReg = _globalPosVertexReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.UVFragmentReg = _uvFragmentReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.secondaryUVFragmentReg = _secondaryUVFragmentReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get viewDirFragmentReg() : ShaderRegisterElement
-		{
-			return _viewDirFragmentReg;
-		}
-
-		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.viewDirFragmentReg = _viewDirFragmentReg = value;
-		}
-
-		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_viewDirVaryingReg = _baseDiffuseMethod.viewDirVaryingReg = value;
+			return code;
 		}
 
 
-		arcane override function set projectionReg(value : ShaderRegisterElement) : void
+		arcane override function activate(stage3DProxy : Stage3DProxy) : void
 		{
-			_projectionReg = _baseDiffuseMethod.projectionReg = value;
-		}
+			super.arcane::activate(stage3DProxy);
+			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _wrapIndex, _wrapData, 1);
 
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get normalFragmentReg() : ShaderRegisterElement
-		{
-			return _normalFragmentReg;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.normalFragmentReg = _normalFragmentReg = value;
-		}
-
-		override public function set shadowRegister(shadowReg : ShaderRegisterElement) : void
-		{
-
-			super.shadowRegister = shadowReg;
-			_baseDiffuseMethod.shadowRegister = shadowReg;
+			if (_scatterTexture) {
+				stage3DProxy.setTextureAt(_scatterTextureIndex, _scatterTexture.getTextureForStage3D(stage3DProxy));
+			}
 		}
 	}
 }

@@ -5,15 +5,17 @@ package away3d.lights
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.partition.EntityNode;
+	import away3d.core.partition.PointLightNode;
+	import away3d.lights.shadowmaps.CubeMapShadowMapper;
+	import away3d.lights.shadowmaps.CubeMapShadowMapper;
+	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
-	import flash.utils.Dictionary;
 
 	use namespace arcane;
 
@@ -23,14 +25,9 @@ package away3d.lights
 	public class PointLight extends LightBase
 	{
 		//private static var _pos : Vector3D = new Vector3D();
-		protected var _radius : Number = Number.MAX_VALUE;
-		protected var _fallOff : Number = Number.MAX_VALUE;
-		private var _positionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
-		private var _attenuationData : Vector.<Number>;
-		private var _vertexPosReg : ShaderRegisterElement;
-		private var _varyingReg : ShaderRegisterElement;
-		private var _attenuationIndices : Dictionary;
-		private var _attenuationRegister : ShaderRegisterElement;
+		arcane var _radius : Number = Number.MAX_VALUE;
+		arcane var _fallOff : Number = Number.MAX_VALUE;
+		arcane var _fallOffFactor : Number;
 
 		/**
 		 * Creates a new PointLight object.
@@ -38,21 +35,22 @@ package away3d.lights
 		public function PointLight()
 		{
 			super();
-			_attenuationData = Vector.<Number>([_radius, 1 / (_fallOff - _radius), 0, 1]);
-			_attenuationIndices = new Dictionary(true);
+			_fallOffFactor = 1 / (_fallOff - _radius);
+		}
+
+		override protected function createShadowMapper() : ShadowMapperBase
+		{
+			return new CubeMapShadowMapper();
 		}
 
 
-		arcane override function cleanCompilationData() : void
+		override protected function createEntityPartitionNode() : EntityNode
 		{
-			super.cleanCompilationData();
-			_attenuationRegister = null;
-			_vertexPosReg = null;
-			_varyingReg = null;
+			return new PointLightNode(this);
 		}
 
 		/**
-		 * The maximum distance of the light's reach.
+		 * The minimum distance of the light's reach.
 		 */
 		public function get radius() : Number
 		{
@@ -68,12 +66,16 @@ package away3d.lights
 				invalidateBounds();
 			}
 
-			_attenuationData[0] = _radius;
-			_attenuationData[1] = 1 / (_fallOff - _radius);
+			_fallOffFactor = 1 / (_fallOff - _radius);
+		}
+
+		arcane function fallOffFactor() : Number
+		{
+			return _fallOffFactor;
 		}
 
 		/**
-		 * The fallOff component of the light.
+		 * The maximum distance of the light's reach
 		 */
 		public function get fallOff() : Number
 		{
@@ -85,9 +87,8 @@ package away3d.lights
 			_fallOff = value;
 			if (_fallOff < 0) _fallOff = 0;
 			if (_fallOff < _radius) _radius = _fallOff;
+			_fallOffFactor = 1 / (_fallOff - _radius);
 			invalidateBounds();
-			_attenuationData[0] = _radius;
-			_attenuationData[1] = 1 / (_fallOff - _radius);
 		}
 
 		/**
@@ -96,19 +97,9 @@ package away3d.lights
 		override protected function updateBounds() : void
 		{
 //			super.updateBounds();
-			_bounds.fromExtremes(-_fallOff, -_fallOff, -_fallOff, _fallOff, _fallOff, _fallOff);
+//			_bounds.fromExtremes(-_fallOff, -_fallOff, -_fallOff, _fallOff, _fallOff, _fallOff);
+			_bounds.fromSphere(new Vector3D(), _fallOff);
 			_boundsInvalid = false;
-		}
-
-
-		override protected function updateSceneTransform() : void
-		{
-			super.updateSceneTransform();
-			var pos : Vector3D = scenePosition;
-
-			_positionData[0] = pos.x;
-			_positionData[1] = pos.y;
-			_positionData[2] = pos.z;
 		}
 
 		/**
@@ -128,10 +119,9 @@ package away3d.lights
 			var bounds : BoundingVolumeBase = renderable.sourceEntity.bounds;
 			var m : Matrix3D = new Matrix3D();
 
+			// todo: do not use lookAt on Light
 			m.copyFrom(renderable.sceneTransform);
 			m.append(_parent.inverseSceneTransform);
-// todo: why doesn't this work?
-//			m.copyRowTo(3, _pos);
 			lookAt(m.position);
 
 			m.copyFrom(renderable.sceneTransform);
@@ -153,8 +143,8 @@ package away3d.lights
 			raw[uint(10)] = zMax / (zMax - zMin);
 			raw[uint(11)] = 1;
 			raw[uint(1)] = raw[uint(2)] = raw[uint(3)] = raw[uint(4)] =
-					raw[uint(6)] = raw[uint(7)] = raw[uint(8)] = raw[uint(9)] =
-							raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
+			raw[uint(6)] = raw[uint(7)] = raw[uint(8)] = raw[uint(9)] =
+			raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
 			raw[uint(14)] = -zMin * raw[uint(10)];
 
 			target ||= new Matrix3D();
@@ -162,51 +152,6 @@ package away3d.lights
 			target.prepend(m);
 
 			return target;
-		}
-
-		override arcane function get positionBased() : Boolean
-		{
-			return true;
-		}
-
-
-		arcane override function getVertexCode(regCache : ShaderRegisterCache, globalPositionRegister : ShaderRegisterElement, pass : MaterialPassBase) : String
-		{
-			_vertexPosReg = regCache.getFreeVertexConstant();
-			_varyingReg = regCache.getFreeVarying();
-			_shaderConstantIndex = _vertexPosReg.index;
-
-			return "sub " + _varyingReg.toString() + ", " + _vertexPosReg.toString() + ", " + globalPositionRegister.toString() + "\n";
-		}
-
-		arcane override function getFragmentCode(regCache : ShaderRegisterCache, pass : MaterialPassBase) : String
-		{
-			_attenuationRegister = regCache.getFreeFragmentConstant();
-			// setting this causes the material bug
-			_attenuationIndices[pass] = _attenuationRegister.index;
-			_fragmentDirReg = _varyingReg;
-			return	 "";
-		}
-
-
-		arcane override function getAttenuationCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement, pass : MaterialPassBase) : String
-		{
-			// w = sqrt(dir . dir) = len(dir)
-			return	"dp3 " + targetReg + ".w, " + _varyingReg + ".xyz, " + _varyingReg + ".xyz\n" +
-					"sqt " + targetReg + ".w, " + targetReg + ".w\n" +
-				// w = d - min
-					"sub " + targetReg + ".w, " + targetReg + ".w, " + _attenuationRegister + ".x\n" +
-				// w = (d - min)/(max-min)
-					"mul " + targetReg + ".w, " + targetReg + ".w, " + _attenuationRegister + ".y\n" +
-				// w = clamp(w, 0, 1)
-					"sat " + targetReg + ".w, " + targetReg + ".w\n" +
-					"sub " + targetReg + ".w, " + _attenuationRegister + ".w, " + targetReg + ".w\n";
-		}
-
-		arcane override function setRenderState(context : Context3D, inputIndex : int, pass : MaterialPassBase) : void
-		{
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, inputIndex, _positionData, 1);
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _attenuationIndices[pass], _attenuationData, 1);
 		}
 	}
 }

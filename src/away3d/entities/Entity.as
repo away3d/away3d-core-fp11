@@ -9,6 +9,7 @@ package away3d.entities
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.Partition3D;
 	import away3d.errors.AbstractMethodError;
+	import away3d.library.assets.AssetType;
 
 	import flash.geom.Matrix3D;
 
@@ -41,7 +42,7 @@ package away3d.entities
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
-		
+
 		/**
 		 * 
 		 */
@@ -239,7 +240,7 @@ package away3d.entities
 
 			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
 			mvp.copyFrom(sceneTransform);
-			mvp.append(camera.renderToTextureProjection);
+			mvp.append(camera.viewProjection);
 			mvp.copyColumnTo(3, _pos);
 			_zIndices[_mvpIndex] = -_pos.z;
 		}
@@ -343,6 +344,12 @@ package away3d.entities
 		{
 			if (_scene)
 				_scene.unregisterPartition(this);
+		}
+
+
+		override public function get assetType() : String
+		{
+			return AssetType.ENTITY;
 		}
 	}
 }

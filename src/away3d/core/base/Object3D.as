@@ -55,9 +55,10 @@ package away3d.core.base
 		private var _rotationDirty:Boolean;
 		private var _scaleDirty:Boolean;
 		
-		private var _positionValuesDirty:Boolean;
-		private var _rotationValuesDirty:Boolean;
-		private var _scaleValuesDirty:Boolean;
+		// TODO: not used
+		// private var _positionValuesDirty:Boolean;
+		// private var _rotationValuesDirty:Boolean;
+		// private var _scaleValuesDirty:Boolean;
 		
 		private var _positionChanged:Object3DEvent;
 		private var _rotationChanged:Object3DEvent;
@@ -346,7 +347,7 @@ package away3d.core.base
 			//ridiculous matrix error
 			if (!val.rawData[uint(0)]) {
 				var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-				val.copyRawDataTo(raw)
+				val.copyRawDataTo(raw);
 				raw[uint(0)] = _smallestNumber;
 				val.copyRawDataFrom(raw);
 			}
@@ -763,9 +764,8 @@ package away3d.core.base
 		
 		/**
 		 * Cleans up any resources used by the current object.
-		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose(deep : Boolean) : void
+		public function dispose() : void
 		{
 		}
 

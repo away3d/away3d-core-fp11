@@ -7,8 +7,6 @@ package away3d.animators.data
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.passes.MaterialPassBase;
 
-	import flash.display3D.Context3D;
-
 	/**
 	 * AnimationStateBase provides an abstract base class for all animation states. This defines the actual state of the
 	 * animation data (such as the matrices to be used for skinning) for an entire Mesh. The AnimationController is the
@@ -52,8 +50,10 @@ package away3d.animators.data
 		 * @param context The context which is currently performing the rendering.
 		 * @param pass The material pass which is currently used to render the geometry.
 		 * @param renderable The object currently being rendered.
+		 * @param vertexConstantOffset The first available vertex register to write data to if running on the gpu.
+		 * @param vertexStreamOffset The first available vertex stream to write vertex data to if running on the gpu.
 		 */
-		public function setRenderState(stage3DProxy : Stage3DProxy, pass : MaterialPassBase, renderable : IRenderable) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			throw new AbstractMethodError();
 		}

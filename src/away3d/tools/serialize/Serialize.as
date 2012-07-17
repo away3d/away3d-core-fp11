@@ -1,5 +1,6 @@
 package away3d.tools.serialize
 {
+	import away3d.materials.lightpickers.StaticLightPicker;
 	import away3d.animators.data.AnimationBase;
 	import away3d.animators.data.AnimationStateBase;
 	import away3d.animators.data.SkeletonAnimationSequence;
@@ -51,7 +52,7 @@ package away3d.tools.serialize
 		public static function serializeMesh(mesh:Mesh, serializer:SerializerBase):void
 		{
 			serializeObjectContainerInternal(mesh as ObjectContainer3D, serializer, false /* serializeChildrenAndEnd */);
-			serializer.writeBoolean("mouseDetails", mesh.mouseDetails);
+			serializer.writeUint("mouseHitMethod", mesh.mouseHitMethod);
 			serializer.writeBoolean("castsShadows", mesh.castsShadows);
 			
 			if (mesh.animationState)
@@ -105,7 +106,10 @@ package away3d.tools.serialize
 		public static function serializeMaterial(material:MaterialBase, serializer:SerializerBase):void
 		{
 			serializer.beginObject(classNameFromInstance(material), material.name);
-			serializer.writeString("lights", String(material.lights));
+
+			if (material.lightPicker is StaticLightPicker) {
+				serializer.writeString("lights", String(StaticLightPicker(material.lightPicker).lights));
+			}
 			serializer.writeBoolean("mipmap", material.mipmap);
 			serializer.writeBoolean("smooth", material.smooth);
 			serializer.writeBoolean("repeat", material.repeat);
@@ -135,11 +139,11 @@ package away3d.tools.serialize
 			{
 				if (skinnedSubGeometry.jointWeightsData)
 				{
-					serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length)
+					serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length);
 				}
 				if (skinnedSubGeometry.jointIndexData)
 				{
-					serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length)
+					serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length);
 				}
 			}
 			serializer.endObject();
@@ -207,7 +211,7 @@ package away3d.tools.serialize
 		
 		private static function classNameFromInstance(instance:*):String
 		{
-			return getQualifiedClassName(instance).split("::").pop()
+			return getQualifiedClassName(instance).split("::").pop();
 		}
 		
 		private static function serializeObjectContainerInternal(objectContainer:ObjectContainer3D, serializer:SerializerBase, serializeChildrenAndEnd:Boolean):void

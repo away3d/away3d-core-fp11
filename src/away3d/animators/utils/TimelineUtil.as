@@ -36,13 +36,13 @@ package away3d.animators.utils
 		/**
 		 * Calculates the frames between which to interpolate.
 		 */
-		public function updateFrames(time : Number, _activeSequence : AnimationSequenceBase) : void
+		public function updateFrames(time : Number, activeSequence : AnimationSequenceBase) : void
 		{
 			var lastFrame : uint, frame : uint, nextFrame : uint;
 			var dur : uint, frameTime : uint;
-			var durations : Vector.<uint> = _activeSequence._durations;
-			var totalDuration : uint = _activeSequence._totalDuration;
-			var looping : Boolean = _activeSequence.looping;
+			var durations : Vector.<uint> = activeSequence._durations;
+			var totalDuration : uint = activeSequence._totalDuration;
+			var looping : Boolean = activeSequence.looping;
 			var numFrames : int = durations.length;
 			var w : Number;
 			
@@ -54,12 +54,12 @@ package away3d.animators.utils
 			lastFrame = numFrames - 1;
 			
 			if (!looping && time > totalDuration - durations[lastFrame]) {
-				_activeSequence.notifyPlaybackComplete();
+				activeSequence.notifyPlaybackComplete();
 				frame = lastFrame;
 				nextFrame = lastFrame;
 				w = 0;
 			}
-			else if (_activeSequence._fixedFrameRate) {
+			else if (activeSequence._fixedFrameRate) {
 				var t : Number = time/totalDuration * numFrames;
 				frame = t;
 				nextFrame = frame + 1;

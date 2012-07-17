@@ -23,10 +23,10 @@ package away3d.cameras.lenses
 		protected var _far : Number = 3000;
 		protected var _aspectRatio : Number = 1;
 
-		private var _matrixInvalid : Boolean = true;
+		protected var _matrixInvalid : Boolean = true;
 		protected var _frustumCorners : Vector.<Number> = new Vector.<Number>(8*3, true);
 
-		private var _unprojection : Matrix3D = new Matrix3D();
+		private var _unprojection : Matrix3D;
 		private var _unprojectionInvalid : Boolean = true;
 
 		/**
@@ -45,6 +45,11 @@ package away3d.cameras.lenses
 			return _frustumCorners;
 		}
 
+		public function set frustumCorners(frustumCorners : Vector.<Number>) : void
+		{
+			_frustumCorners = frustumCorners;
+		}
+		
 		/**
 		 * The projection matrix that transforms 3D geometry to normalized homogeneous coordinates.
 		 */
@@ -55,6 +60,13 @@ package away3d.cameras.lenses
 				_matrixInvalid = false;
 			}
 			return _matrix;
+		}
+		
+				
+		public function set matrix(value : Matrix3D) : void
+		{
+			_matrix = value;
+			invalidateMatrix();
 		}
 
 		/**
@@ -96,17 +108,23 @@ package away3d.cameras.lenses
 			return p;
 		}
 
-		public function unproject(mX:Number, mY:Number, mZ : Number):Vector3D
+		public function get unprojectionMatrix() : Matrix3D
 		{
 			if (_unprojectionInvalid) {
+				_unprojection ||= new Matrix3D();
 				_unprojection.copyFrom(matrix);
 				_unprojection.invert();
 				_unprojectionInvalid = false;
 			}
 
+			return _unprojection;
+		}
+
+		public function unproject(mX:Number, mY:Number, mZ : Number):Vector3D
+		{
 			var v : Vector3D = new Vector3D(mX, -mY, mZ, 1.0);
 
-			v = _unprojection.transformVector(v);
+			v = unprojectionMatrix.transformVector(v);
 
 			var inv : Number = 1/v.w;
 
@@ -154,13 +172,5 @@ package away3d.cameras.lenses
 		{
 			throw new AbstractMethodError();
 		}
-
-		/**
-		 * Calculates a projectionmatrix for an (potientally off-centre) subfrustum
-		 */
-//		public function getSubFrustumMatrix(ratioLeft : Number, ratioRight : Number, ratioTop : Number, ratioBottom : Number, matrix : Matrix3D, corners : Vector.<Number>) : void
-//		{
-//			throw new AbstractMethodError();
-//		}
 	}
 }

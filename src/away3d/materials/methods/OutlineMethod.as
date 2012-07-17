@@ -7,17 +7,13 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
-	import flash.utils.Dictionary;
-
 	use namespace arcane;
 
 	public class OutlineMethod extends ShadingMethodBase
 	{
 		private var _outlinePass : OutlinePass;
 
-		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 20, showInnerLines : Boolean = true, dedicatedMeshes : Boolean = false)
+		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 1, showInnerLines : Boolean = true, dedicatedMeshes : Boolean = false)
 		{
 			super(true, false, false);
 			_passes = new Vector.<MaterialPassBase>();
@@ -66,6 +62,9 @@ package away3d.materials.methods
 
 		arcane override function getFragmentPostLightingCode(regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
+			// TODO: not used
+			regCache = regCache;
+			targetReg = targetReg;			
 			return "";
 		}
 	}

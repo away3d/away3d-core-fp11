@@ -54,7 +54,7 @@ package away3d.core.traverse
 		/**
 		 * @inheritDoc
 		 */
-		override public function applyLight(light : LightBase) : void
+		override public function applyUnknownLight(light : LightBase) : void
 		{
 		}
 	}

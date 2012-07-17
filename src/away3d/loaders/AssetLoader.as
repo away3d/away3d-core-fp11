@@ -63,9 +63,13 @@ package away3d.loaders
 			SingleFileLoader.enableParsers(parserClasses);
 		}
 		
-		
 		/**
 		 * Loads a file and (optionally) all of its dependencies.
+		 * 
+		 * @param req The URLRequest object containing the URL of the file to be loaded.
+		 * @param context An optional context object providing additional parameters for loading
+		 * @param ns An optional namespace string under which the file is to be loaded, allowing the differentiation of two resources with identical assets
+		 * @param parser An optional parser object for translating the loaded data into a usable resource. If not provided, AssetLoader will attempt to auto-detect the file type.
 		 */
 		public function load(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
@@ -83,6 +87,11 @@ package away3d.loaders
 		
 		/**
 		 * Loads a resource from already loaded data.
+		 * 
+		 * @param data The data object containing all resource information.
+		 * @param context An optional context object providing additional parameters for loading
+		 * @param ns An optional namespace string under which the file is to be loaded, allowing the differentiation of two resources with identical assets
+		 * @param parser An optional parser object for translating the loaded data into a usable resource. If not provided, AssetLoader will attempt to auto-detect the file type.
 		 */
 		public function loadData(data : *, id : String, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
@@ -164,6 +173,7 @@ package away3d.loaders
 			loader.addEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.addEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			loader.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
@@ -289,20 +299,21 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			
+			// TODO: Investigate this. Why is this done?
+			var ext:String = loader.url.substring(loader.url.length-4, loader.url.length).toLowerCase();
+			if(ext ==".jpg" || ext ==".png"){
+				_loadingDependency.resolveFailure();
+				prepareNextRetrieve(loader, event, false);
+			}
+
 			if(hasEventListener(LoaderEvent.LOAD_ERROR)){
 				dispatchEvent(new LoaderEvent(LoaderEvent.LOAD_ERROR, loader.url, event.message));
 			} else{
 				trace("Unable to load "+loader.url);
-			}
-			
-			// TODO: Investigate this. Why is this done?
-			var ext:String = loader.url.substring(loader.url.length-4, loader.url.length).toLowerCase();
-			if(ext == ".mtl" || ext ==".jpg" || ext ==".png"){
-				_loadingDependency.resolveFailure();
-				prepareNextRetrieve(loader, event, false);
 			}
 		}
 		
@@ -358,6 +369,7 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.GEOMETRY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.MATERIAL_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.MESH_COMPLETE, onAssetComplete);
+			loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 		}

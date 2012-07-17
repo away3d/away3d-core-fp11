@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
@@ -13,7 +12,7 @@ package away3d.materials.methods
 	/**
 	 * CelSpecularMethod provides a shading method to add diffuse cel (cartoon) shading.
 	 */
-	public class CelSpecularMethod extends WrapSpecularMethod
+	public class CelSpecularMethod extends CompositeSpecularMethod
 	{
 		private var _dataReg : ShaderRegisterElement;
 		private var _dataIndex : int;
@@ -84,6 +83,8 @@ package away3d.materials.methods
 		 */
 		private function clampSpecular(target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			// TODO: not used
+			regCache = regCache;			
 			return 	"sub " + target+".y, " + target+".w, " + _dataReg+".y\n" + // x - cutoff
 					"div " + target+".y, " + target+".y, " + _dataReg+".x\n" + // (x - cutoff)/epsilon
 					"sat " + target+".y, " + target+".y\n" +

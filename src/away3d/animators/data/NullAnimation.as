@@ -13,17 +13,15 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getAGALVertexCode(pass : MaterialPassBase) : String
+		override arcane function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
-			var attributes : Array = pass.getAnimationSourceRegisters();
-			var targets : Array = pass.getAnimationTargetRegisters();
-			var len : uint = attributes.length;
+			var len : uint = sourceRegisters.length;
 			var code : String = "";
 
 			// simply write attributes to targets, do not animate them
 			// projection will pick up on targets[0] to do the projection
 			for (var i : uint = 0; i < len; ++i)
-				code += "mov " + targets[i] + ", " + attributes[i] + "\n";
+				code += "mov " + targetRegisters[i] + ", " + sourceRegisters[i] + "\n";
 
 			return code;
 		}
