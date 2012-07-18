@@ -762,7 +762,7 @@ package away3d.materials.passes
 		{
 			_fragmentConstantData[_commonsDataIndex] = .5;
 			_fragmentConstantData[_commonsDataIndex + 1] = 0;
-			_fragmentConstantData[_commonsDataIndex + 2] = .00001;
+			_fragmentConstantData[_commonsDataIndex + 2] = 1/255;
 			_fragmentConstantData[_commonsDataIndex + 3] = 1;
 		}
 
@@ -1232,7 +1232,9 @@ package away3d.materials.passes
 
 			if (_alphaPremultiplied) {
 				_fragmentCode += "add " + _shadedTargetReg + ".w, " + _shadedTargetReg + ".w, " + _commonsReg + ".z\n" +
-								 "div " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".w\n";
+								 "div " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".w\n" +
+								 "sub " + _shadedTargetReg + ".w, " + _shadedTargetReg + ".w, " + _commonsReg + ".z\n"
+								 "sat " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".xyz\n";
 			}
 
 			// resolve other dependencies as well?
