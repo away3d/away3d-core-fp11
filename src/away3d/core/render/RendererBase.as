@@ -55,6 +55,8 @@ package away3d.core.render
         private var _snapshotBitmapData:BitmapData;
         private var _snapshotRequired:Boolean;
 
+		private var _clearOnRender : Boolean = true;
+
 		/**
 		 * Creates a new RendererBase object.
 		 */
@@ -102,6 +104,16 @@ package away3d.core.render
 		public function set renderableSorter(value : EntitySorterBase) : void
 		{
 			_renderableSorter = value;
+		}
+
+		arcane function get clearOnRender() : Boolean
+		{
+			return _clearOnRender;
+		}
+
+		arcane function set clearOnRender(value : Boolean) : void
+		{
+			_clearOnRender = value;
 		}
 
 		/**
@@ -266,7 +278,7 @@ package away3d.core.render
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			if (!_shareContext) {
+			if (!_shareContext && _clearOnRender) {
 				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0);
 			}
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);

@@ -470,11 +470,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code : String) : String
+		arcane override function getVertexCode(animatorCode : String) : String
 		{
 			var normal : String = _animationTargetRegisters.length > 1? _animationTargetRegisters[1] : null;
 			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0], _projectedTargetRegister, normal);
-			_vertexCode = code + projectionVertexCode + _vertexCode;
+			_vertexCode = animatorCode + projectionVertexCode + _vertexCode;
 			return _vertexCode;
 		}
 
