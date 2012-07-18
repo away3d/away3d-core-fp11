@@ -10,7 +10,15 @@ package away3d.entities
 
 	use namespace arcane;
 
-	// tho this is technically not an entity, to the user it functions similarly, so it's in the same package
+	/**
+	 * TextureProjector is an object in the scene that can be used to project textures onto geometry. To do so,
+	 * the object's material must have a ProjectiveTextureMethod method added to it with a TextureProjector object
+	 * passed in the constructor.
+	 * This can be used for various effects apart from acting like a normal projector, such as projecting fake shadows
+	 * unto a surface, the impact of light coming through a stained glass window, ...
+	 *
+	 * @see away3d.materials.methods.ProjectiveTextureMethod
+	 */
 	public class TextureProjector extends ObjectContainer3D
 	{
 		private var _lens : PerspectiveLens;
@@ -18,6 +26,11 @@ package away3d.entities
 		private var _viewProjection : Matrix3D = new Matrix3D();
 		private var _texture : Texture2DBase;
 
+		/**
+		 * Creates a new TextureProjector object.
+		 * @param texture The texture to be projected on the geometry. Since any point that is projected out of the range
+		 * of the projector's cone is clamped to the texture's edges, the edges should be entirely transparent.
+		 */
 		public function TextureProjector(texture : Texture2DBase)
 		{
 			_lens = new PerspectiveLens();
@@ -27,6 +40,9 @@ package away3d.entities
 			rotationX = -90;
 		}
 
+		/**
+		 * The aspect ratio of the texture or projection. By default this is the same aspect ratio of the texture (width/height)
+		 */
 		public function get aspectRatio() : Number
 		{
 			return _lens.aspectRatio;
@@ -37,6 +53,9 @@ package away3d.entities
 			_lens.aspectRatio = value;
 		}
 
+		/**
+		 * The vertical field of view of the projection, or the angle of the cone.
+		 */
 		public function get fieldOfView() : Number
 		{
 			return _lens.fieldOfView;
@@ -47,17 +66,24 @@ package away3d.entities
 			_lens.fieldOfView = value;
 		}
 
+		/**
+		 * The texture to be projected on the geometry.
+		 * IMPORTANT: Since any point that is projected out of the range of the projector's cone is clamped to the texture's edges, the edges should be entirely transparent.
+		 */
 		public function get texture() : Texture2DBase
 		{
 			return _texture;
 		}
 
-		public function set bitmapData(value : Texture2DBase) : void
+		public function set texture(value : Texture2DBase) : void
 		{
 			if (value == _texture) return;
 			_texture = value;
 		}
 
+		/**
+		 * The matrix that projects a point in scene space into the texture coordinates.
+		 */
 		public function get viewProjection() : Matrix3D
 		{
 			if (_viewProjectionInvalid) {

@@ -13,6 +13,11 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
+	/**
+	 * ProjectiveTextureMethod is a material method used to project a texture unto the surface of an object.
+	 * This can be used for various effects apart from acting like a normal projector, such as projecting fake shadows
+	 * unto a surface, the impact of light coming through a stained glass window, ...
+	 */
 	public class ProjectiveTextureMethod extends EffectMethodBase
 	{
 		public static const MULTIPLY : String = "multiply";
@@ -25,7 +30,12 @@ package away3d.materials.methods
 		private var _mode : String;
 
 		/**
-		 * Creates a new BasicDiffuseMethod object.
+		 * Creates a new ProjectiveTextureMethod object.
+		 *
+		 * @param projector The TextureProjector object that defines the projection properties as well as the texture.
+		 * @param mode The blend mode with which the texture is blended unto the surface.
+		 *
+		 * @see away3d.entities.TextureProjector
 		 */
 		public function ProjectiveTextureMethod(projector : TextureProjector, mode : String = "multiply")
 		{
@@ -50,6 +60,12 @@ package away3d.materials.methods
 			_uvVarying = null;
 		}
 
+		/**
+		 * The blend mode with which the texture is blended unto the object.
+		 * ProjectiveTextureMethod.MULTIPLY can be used to project shadows
+		 * ProjectiveTextureMethod.ADD can be used to project light, such as a slide projector or light coming through stained glass
+		 * ProjectiveTextureMethod.MIX provides normal alpha blending
+		 */
 		public function get mode() : String
 		{
 			return _mode;
@@ -62,6 +78,11 @@ package away3d.materials.methods
 			invalidateShaderProgram();
 		}
 
+		/**
+		 * The TextureProjector object that defines the projection properties as well as the texture.
+		 *
+		 * @see away3d.entities.TextureProjector
+		 */
 		public function get projector() : TextureProjector
 		{
 			return _projector;
@@ -72,6 +93,9 @@ package away3d.materials.methods
 			_projector = value;
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var projReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
