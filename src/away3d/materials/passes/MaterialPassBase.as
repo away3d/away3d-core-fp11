@@ -270,10 +270,9 @@ package away3d.materials.passes
 
 			prevUsed = _previousUsedTexs[contextIndex];
 
-			for (i = _numUsedTextures; i < prevUsed; ++i) {
+			for (i = _numUsedTextures; i < prevUsed; ++i)
 				stage3DProxy.setTextureAt(i, null);
-			}
-			
+
 			if (_animationSet && !_animationSet.usesCPU)
 				_animationSet.activate(stage3DProxy, this);
 			

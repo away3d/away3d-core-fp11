@@ -40,7 +40,12 @@ package away3d.lights.shadowmaps
 			if (_depthMap == depthMap) return;
 			if (_depthMap && !_explicitDepthMap) _depthMap.dispose();
 			_depthMap = depthMap;
-			_explicitDepthMap = depthMap? true : false;
+			if (_depthMap) {
+				_explicitDepthMap = true;
+				_depthMapSize = _depthMap.width;
+			}
+			else
+				_explicitDepthMap = false;
 		}
 
 		public function get light() : LightBase
