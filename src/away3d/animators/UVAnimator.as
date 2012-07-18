@@ -61,7 +61,7 @@ package away3d.animators
 		 */
 		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
 		{
-			_activeState = _uvAnimationSet.getState(stateName) as VertexAnimationState;
+			_activeState = _uvAnimationSet.getState(stateName) as UVAnimationState;
 			
 			if (!_activeState)
 				throw new Error("Animation state " + stateName + " not found!");
