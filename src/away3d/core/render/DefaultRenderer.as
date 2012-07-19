@@ -101,11 +101,10 @@ package away3d.core.render
 			var which : int = target? SCREEN_PASSES : ALL_PASSES;
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, which);
 			drawRenderables(entityCollector.blendedRenderableHead, entityCollector, which);
-			
-			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
-			
+
 			_context.setDepthTest(false, Context3DCompareMode.LESS);
-			
+
+			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 			_activeMaterial = null;
 		}
 
@@ -149,7 +148,6 @@ package away3d.core.render
 					var rttMask : int = _activeMaterial.passRendersToTexture(j)? 1 : 2;
 
 					if ((rttMask & which) != 0) {
-						_context.setDepthTest(true, Context3DCompareMode.LESS);
 						_activeMaterial.activatePass(j, _stage3DProxy, camera, _textureRatioX, _textureRatioY);
 						do {
 							_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector);
