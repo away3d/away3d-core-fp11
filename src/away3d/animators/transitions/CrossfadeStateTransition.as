@@ -3,9 +3,6 @@ package away3d.animators.transitions
 	import away3d.animators.nodes.SkeletonBinaryLERPNode;
 	import away3d.animators.transitions.StateTransitionBase;
 
-	/**
-	 * @author robbateman
-	 */
 	public class CrossfadeStateTransition extends StateTransitionBase
 	{	
 		public function CrossfadeStateTransition(blendSpeed:Number)
