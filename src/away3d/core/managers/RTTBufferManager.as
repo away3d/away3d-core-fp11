@@ -167,7 +167,7 @@ package away3d.core.managers
 			var context : Context3D = _stage3DProxy.context3D;
 			var textureVerts : Vector.<Number>;
 			var screenVerts : Vector.<Number>;
-			var x : Number,  y : Number,  u : Number,  v : Number;
+			var x : Number,  y : Number;
 
 			_renderToTextureVertexBuffer ||= context.createVertexBuffer(4, 5);
 			_renderToScreenVertexBuffer ||= context.createVertexBuffer(4, 5);
@@ -177,35 +177,24 @@ package away3d.core.managers
 				_indexBuffer.uploadFromVector(new <uint>[2, 1, 0, 3, 2, 0], 0, 6);
 			}
 
-			if (_viewWidth > _textureWidth) {
-				x = 1;
-				u = 0;
-			}
-			else {
-				x = _viewWidth/_textureWidth;
-				u = _renderToTextureRect.x/_textureWidth;
-			}
-			if (_viewHeight > _textureHeight) {
-				y = 1;
-				v = 0;
-			}
-			else {
-				y = _viewHeight/_textureHeight;
-				v = _renderToTextureRect.y/_textureHeight;
-			}
+			_textureRatioX = x = Math.min(_viewWidth/_textureWidth, 1);
+			_textureRatioY = y = Math.min(_viewHeight/_textureHeight, 1);
 
-			_textureRatioX = x;
-			_textureRatioY = y;
+			var u1 : Number = (1 - x)*.5;
+			var u2 : Number = (x + 1)*.5;
+			var v1 : Number = (y + 1)*.5;
+			var v2 : Number = (1 - y)*.5;
 
 			// last element contains indices for data per vertex that can be passed to the vertex shader if necessary (ie: frustum corners for deferred rendering)
-			textureVerts = new <Number>[	-x, -y, u,   1-v, 0,
-											 x, -y, 1-u, 1-v, 1,
-											 x,  y, 1-u, v,   2,
-											-x,  y, u,   v,   3 ];
-			screenVerts = new <Number>[		-1, -1,   u, 1-v, 0,
-											 1, -1, 1-u, 1-v, 1,
-											 1,  1, 1-u,   v, 2,
-											-1,  1,   u,   v, 3 ];
+			textureVerts = new <Number>[	-x, -y, u1, v1, 0,
+											 x, -y, u2, v1, 1,
+											 x,  y, u2, v2, 2,
+											-x,  y, u1, v2, 3 ];
+
+			screenVerts = new <Number>[		-1, -1, u1, v1, 0,
+											 1, -1, u2, v1, 1,
+											 1,  1, u2, v2, 2,
+											-1,  1, u1, v2, 3 ];
 
 			_renderToTextureVertexBuffer.uploadFromVector(textureVerts, 0, 4);
 			_renderToScreenVertexBuffer.uploadFromVector(screenVerts, 0, 4);
