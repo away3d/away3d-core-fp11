@@ -3,9 +3,6 @@ package away3d.events {
 
 	import flash.events.Event;
 
-	/**
-	 * @author Paul Tondeur
-	 */
 	public class Scene3DEvent extends Event {
 		public static const ADDED_TO_SCENE : String = "addedToScene";
 		public static const REMOVED_FROM_SCENE : String = "removedFromScene";

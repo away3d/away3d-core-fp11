@@ -1,4 +1,3 @@
-//original author Tim Knip
 package away3d.loaders.parsers
 {
 	import away3d.materials.utils.DefaultMaterialManager;

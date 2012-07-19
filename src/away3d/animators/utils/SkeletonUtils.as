@@ -1,6 +1,3 @@
-/**
- * Author: David Lenaerts
- */
 package away3d.animators.utils
 {
 	import away3d.arcane;

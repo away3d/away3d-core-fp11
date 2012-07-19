@@ -8,7 +8,6 @@ package away3d.tools.utils
 	/**
 	* Classe returns the uv's from a Vector3D on a triangle plane defined with Vertex objects. Null if outside the triangle definition
 	*/
-	//credits: http://www.blackpawn.com
 	
 	public class BaryCentricTest
 	{
