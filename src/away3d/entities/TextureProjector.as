@@ -29,7 +29,7 @@ package away3d.entities
 		/**
 		 * Creates a new TextureProjector object.
 		 * @param texture The texture to be projected on the geometry. Since any point that is projected out of the range
-		 * of the projector's cone is clamped to the texture's edges, the edges should be entirely transparent.
+		 * of the projector's cone is clamped to the texture's edges, the edges should be entirely neutral.
 		 */
 		public function TextureProjector(texture : Texture2DBase)
 		{
@@ -68,7 +68,11 @@ package away3d.entities
 
 		/**
 		 * The texture to be projected on the geometry.
-		 * IMPORTANT: Since any point that is projected out of the range of the projector's cone is clamped to the texture's edges, the edges should be entirely transparent.
+		 * IMPORTANT: Since any point that is projected out of the range of the projector's cone is clamped to the texture's edges,
+		 * the edges should be entirely neutral. Depending on the blend mode, the neutral color is:
+		 * White for MULTIPLY,
+		 * Black for ADD,
+		 * Transparent for MIX
 		 */
 		public function get texture() : Texture2DBase
 		{

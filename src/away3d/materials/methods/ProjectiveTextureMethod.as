@@ -62,9 +62,9 @@ package away3d.materials.methods
 
 		/**
 		 * The blend mode with which the texture is blended unto the object.
-		 * ProjectiveTextureMethod.MULTIPLY can be used to project shadows
-		 * ProjectiveTextureMethod.ADD can be used to project light, such as a slide projector or light coming through stained glass
-		 * ProjectiveTextureMethod.MIX provides normal alpha blending
+		 * ProjectiveTextureMethod.MULTIPLY can be used to project shadows. To prevent clamping, the texture's alpha should be white!
+		 * ProjectiveTextureMethod.ADD can be used to project light, such as a slide projector or light coming through stained glass. To prevent clamping, the texture's alpha should be black!
+		 * ProjectiveTextureMethod.MIX provides normal alpha blending. To prevent clamping, the texture's alpha should be transparent!
 		 */
 		public function get mode() : String
 		{
