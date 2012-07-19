@@ -5,9 +5,7 @@ package away3d.materials.utils
 	import away3d.textures.*;
 	
 	import flash.display.*;
-	/**
-	 * @author robbateman
-	 */
+	
 	public class DefaultMaterialManager
 	{
 		private static var _defaultTextureBitmapData:BitmapData;

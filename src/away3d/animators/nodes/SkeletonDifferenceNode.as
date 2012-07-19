@@ -138,9 +138,9 @@ package away3d.animators.nodes
 			var deltA : Vector3D = baseInput.rootDelta;
 			var deltB : Vector3D = differenceInput.rootDelta;
 
-			rootDelta.x = deltA.x + _blendWeight*deltB.x;
-			rootDelta.y = deltA.y + _blendWeight*deltB.y;
-			rootDelta.z = deltA.z + _blendWeight*deltB.z;
+			_rootDelta.x = deltA.x + _blendWeight*deltB.x;
+			_rootDelta.y = deltA.y + _blendWeight*deltB.y;
+			_rootDelta.z = deltA.z + _blendWeight*deltB.z;
 		}
 	}
 }

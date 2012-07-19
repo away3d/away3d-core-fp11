@@ -5,9 +5,6 @@ package away3d.animators.transitions
 	import away3d.library.assets.*;
 	
 	
-	/**
-	 * @author robbateman
-	 */
 	public class StateTransitionBase extends NamedAssetBase implements IAsset
 	{
 		private var _stateTransitionComplete:StateTransitionEvent;
