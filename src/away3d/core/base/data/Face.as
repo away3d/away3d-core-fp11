@@ -1,11 +1,15 @@
-package away3d.core.base.data
+﻿package away3d.core.base.data
 {
-	
-    /**
+	import flash.geom.Point;
+	import flash.geom.Vector3D;
+
+	/**
     * Face value object.
     */
     public class Face
     {
+		private static var _calcPoint : Point;
+
 		private var _vertices:Vector.<Number>;
 		private var _uvs:Vector.<Number>;
 		private var _faceIndex:uint;
@@ -64,8 +68,6 @@ package away3d.core.base.data
 		 */
 		public function set uv0Index(ind:uint):void
   		{
-			// TODO: not used
-			ind = ind;			
 			_uv0Index;
 		}
 		/**
@@ -107,8 +109,6 @@ package away3d.core.base.data
 		 */
 		public function set uv1Index(ind:uint):void
   		{
-			// TODO: not used			
-			ind = ind;
 			_uv1Index;
 		}
 		/**
@@ -150,8 +150,6 @@ package away3d.core.base.data
 		 */
 		public function set uv2Index(ind:uint):void
   		{
-			// TODO: not used
-			ind = ind;
 			_uv2Index;
 		}
 		/**
@@ -209,8 +207,6 @@ package away3d.core.base.data
 		 */
 		public function set v0Index(ind:uint):void
   		{
-			// TODO: not used
-			ind = ind;
 			_v0Index;
 		}
 		/**
@@ -256,8 +252,6 @@ package away3d.core.base.data
 		 */
 		public function set v1Index(ind:uint):void
   		{
-			// TODO: not used
-			ind = ind;
 			_v1Index;
 		}
 		/**
@@ -303,8 +297,6 @@ package away3d.core.base.data
 		 */
 		public function set v2Index(ind:uint):void
   		{
-			// TODO: not used
-			ind = ind;
 			_v2Index;
 		}
 		/**
@@ -348,15 +340,89 @@ package away3d.core.base.data
 		public function clone():Face
   		{
 			var nVertices:Vector.<Number> = Vector.<Number>([	_vertices[0],_vertices[1],_vertices[2],
-																								_vertices[3],_vertices[4],_vertices[5],
-																								_vertices[6],_vertices[7],_vertices[8]]);
+																_vertices[3],_vertices[4],_vertices[5],
+																_vertices[6],_vertices[7],_vertices[8]]);
 			
 			var nUvs:Vector.<Number> = Vector.<Number>([_uvs[0],_uvs[1],
-																						_uvs[2],_uvs[3],
-																						_uvs[4],_uvs[5]]);
+														_uvs[2],_uvs[3],
+														_uvs[4],_uvs[5]]);
 
 			return new Face(nVertices, nUvs);
 		}
-  		
+
+		/**
+		 * Returns the first two barycentric coordinates for a point on (or outside) the triangle. The third coordinate is 1 - x - y
+		 * @param point The point for which to calculate the new target
+		 * @param target An optional Point object to store the calculation in order to prevent creation of a new object
+		 */
+		public function getBarycentricCoords(point : Vector3D, target : Point = null) : Point
+		{
+			var v0x : Number = _vertices[0];
+			var v0y : Number = _vertices[1];
+			var v0z : Number = _vertices[2];
+			var dx0 : Number = point.x - v0x;
+			var dy0 : Number = point.y - v0y;
+			var dz0 : Number = point.z - v0z;
+			var dx1 : Number = _vertices[3] - v0x;
+			var dy1 : Number = _vertices[4] - v0y;
+			var dz1 : Number = _vertices[5] - v0z;
+			var dx2 : Number = _vertices[6] - v0x;
+			var dy2 : Number = _vertices[7] - v0y;
+			var dz2 : Number = _vertices[8] - v0z;
+
+			var dot01 : Number = dx1 * dx0 + dy1 * dy0 + dz1 * dz0;
+			var dot02 : Number = dx2 * dx0 + dy2 * dy0 + dz2 * dz0;
+			var dot11 : Number = dx1 * dx1 + dy1 * dy1 + dz1 * dz1;
+			var dot22 : Number = dx2 * dx2 + dy2 * dy2 + dz2 * dz2;
+			var dot12 : Number = dx2 * dx1 + dy2 * dy1 + dz2 * dz1;
+
+			var invDenom : Number = 1 / (dot22 * dot11 - dot12 * dot12);
+			target ||= new Point();
+			target.x = (dot22 * dot01 - dot12 * dot02) * invDenom;
+			target.y = (dot11 * dot02 - dot12 * dot01) * invDenom;
+			return target;
+		}
+
+		/**
+		 * Tests whether a given point is inside the triangle
+		 * @param point The point to test against
+		 */
+		public function containsPoint(point : Vector3D) : Boolean
+		{
+			getBarycentricCoords(point, _calcPoint ||= new Point());
+			var s : Number = _calcPoint.x;
+			var t : Number = _calcPoint.y;
+			return s >= 0.0 && t >= 0.0 && (s + t) <= 1.0;
+		}
+
+		/**
+		 * Returns the target coordinates for a point on a triangle
+		 * @param v0 The triangle's first vertex
+		 * @param v1 The triangle's second vertex
+		 * @param v2 The triangle's third vertex
+		 * @param uv0 The UV coord associated with the triangle's first vertex
+		 * @param uv1 The UV coord associated with the triangle's second vertex
+		 * @param uv2 The UV coord associated with the triangle's third vertex
+		 * @param point The point for which to calculate the new target
+		 * @param target An optional UV object to store the calculation in order to prevent creation of a new object
+		 */
+		public function getUVAtPoint(point : Vector3D, target : UV = null) : UV
+		{
+			getBarycentricCoords(point, _calcPoint ||= new Point());
+
+			var s : Number = _calcPoint.x;
+			var t : Number = _calcPoint.y;
+
+			if (s >= 0.0 && t >= 0.0 && (s + t) <= 1.0) {
+				var u0 : Number = _uvs[0];
+				var v0 : Number = _uvs[1];
+				target ||= new UV();
+				target.u = u0 + t * (_uvs[4] - u0) + s * (_uvs[2] - u0);
+				target.v = v0 + t * (_uvs[5] - v0) + s * (_uvs[3] - v0);
+				return target;
+			}
+			else
+				return null;
+		}
     }
 }

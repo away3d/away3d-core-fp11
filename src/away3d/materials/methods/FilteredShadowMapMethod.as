@@ -2,9 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.lights.DirectionalLight;
-	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.materials.utils.ShaderRegisterElement;
 
 	use namespace arcane;
@@ -61,10 +59,10 @@ package away3d.materials.methods
 					"add " + uvReg+".x, " + _depthMapCoordReg+".x, " + customDataReg+".z\n" + 	// (1, 0)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg+".x\n" +	// offset by epsilon
+					"sub " + depthCol+".z, " + depthCol + ".z, " + dataReg+".x\n" +	// offset by epsilon
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
-					"div " + depthCol+".x, " + _depthMapCoordReg+".x, " + customDataReg+".z\n" +
+					"mul " + depthCol+".x, " + _depthMapCoordReg+".x, " + customDataReg+".y\n" +
 					"frc " + depthCol+".x, " + depthCol+".x\n" +
 					"sub " + uvReg+".w, " + uvReg+".w, " + uvReg+".z\n" +
 					"mul " + uvReg+".w, " + uvReg+".w, " + depthCol+".x\n" +
