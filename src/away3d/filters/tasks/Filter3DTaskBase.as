@@ -36,6 +36,9 @@ package away3d.filters.tasks
 			_requireDepthRender = requireDepthRender;
 		}
 
+		/**
+		 * The texture scale for the input of this texture. This will define the output of the previous entry in the chain
+		 */
 		public function get textureScale() : int
 		{
 			return _textureScale;
@@ -116,7 +119,7 @@ package away3d.filters.tasks
 		protected function getVertexCode() : String
 		{
 			return 	"mov op, va0\n"+
-					"mov v0, va1";
+					"mov v0, va1\n";
 		}
 
 		protected function getFragmentCode() : String

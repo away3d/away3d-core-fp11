@@ -30,6 +30,8 @@ package away3d.filters
 
 			_hBlurTask.textureScale = (4 - quality);
 			_vBlurTask.textureScale = (4 - quality);
+			// composite's main input texture is from vBlur, so needs to be scaled down
+			_compositeTask.textureScale = (4 - quality);
 
 			addTask(_brightPassTask);
 			addTask(_hBlurTask);
