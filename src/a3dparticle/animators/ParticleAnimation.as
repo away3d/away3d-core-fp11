@@ -80,6 +80,7 @@ package a3dparticle.animators
 		public var uvVar:ShaderRegisterElement;
 		public var fragmentZeroConst:ShaderRegisterElement;
 		public var fragmentOneConst:ShaderRegisterElement;
+		public var fadeFactorConst:ShaderRegisterElement;
 		
 		
 		public function ParticleAnimation()

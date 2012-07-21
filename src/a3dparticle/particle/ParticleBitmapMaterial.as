@@ -1,4 +1,4 @@
-package a3dparticle.particle 
+package a3dparticle.particle
 {
 	import a3dparticle.animators.ParticleAnimation;
 	import away3d.cameras.Camera3D;
@@ -71,7 +71,7 @@ package a3dparticle.particle
 				else tex = "<2d," + wrap + "," + "nearest,nomip>";
 			}
 			code += "tex " + _particleAnimation.colorTarget.toString() + "," + _particleAnimation.uvVar.toString() + "," + _particleAnimation.textSample.toString() + tex + "\n";
-			if (_alphaThreshold > 0) 
+			if (_alphaThreshold > 0)
 			{
 				cutOffReg = _particleAnimation.shaderRegisterCache.getFreeFragmentConstant();
 				var temp:ShaderRegisterElement = _particleAnimation.shaderRegisterCache.getFreeFragmentSingleTemp();
@@ -83,11 +83,11 @@ package a3dparticle.particle
 		
 		override public function render(_particleAnimation:ParticleAnimation, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
+			super.render(_particleAnimation, renderable, stage3DProxy, camera);
 			stage3DProxy.setTextureAt(_particleAnimation.textSample.index, _texture.getTextureForStage3D(stage3DProxy));
 			if (_alphaThreshold > 0)
 			{
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, cutOffReg.index, _cutOffData);
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, cutOffReg.index, _cutOffData);
 			}
 		}
 		

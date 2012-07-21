@@ -1,10 +1,14 @@
 package a3dparticle.core
 {
+	import a3dparticle.animators.ParticleAnimationtor;
 	import a3dparticle.particle.ParticleMaterialBase;
 	import away3d.animators.AnimationSetBase;
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.traverse.EntityCollector;
 	import away3d.materials.MaterialBase;
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
@@ -19,6 +23,8 @@ package a3dparticle.core
 	{
 		public var _screenPass : SimpleParticlePass;
 		private var _particleMaterial:ParticleMaterialBase;
+		
+		private var renderTimes:int;
 		
 		public function SimpleParticleMaterial(particleMaterial:ParticleMaterialBase)
 		{
@@ -69,7 +75,27 @@ package a3dparticle.core
 		override arcane function updateMaterial(context : Context3D) : void
 		{
 			cpoyParam();
+			if (renderTimes != _particleMaterial.renderTimes)
+			{
+				invalidatePasses(null);
+				renderTimes = _particleMaterial.renderTimes;
+			}
 			super.updateMaterial(context);
+		}
+		
+		
+		override arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, entityCollector : EntityCollector) : void
+		{
+			if (renderable is SubContainer)
+			{
+				for (var i:int = 0; i < renderTimes; i++)
+				{
+					ParticleAnimationtor(SubContainer(renderable).animator).passCount = i;
+					ParticleAnimationtor(SubContainer(renderable).animator).offestTime = -i * _particleMaterial.timeInterval;
+					super.renderPass(index, renderable, stage3DProxy, entityCollector);
+				}
+			}
+			
 		}
 		
 	}

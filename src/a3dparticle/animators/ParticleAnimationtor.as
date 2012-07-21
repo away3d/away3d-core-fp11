@@ -15,6 +15,11 @@ package a3dparticle.animators
 	{
 		private var _particleAnimation:ParticleAnimation;
 		
+		//for multiple-pass-rendering
+		public var offestTime:Number = 0;
+		public var passCount:int = 0;
+		
+		
 		public function ParticleAnimationtor(animationSet : ParticleAnimation)
 		{
 			super(animationSet);
@@ -41,8 +46,13 @@ package a3dparticle.animators
 			if (_particleAnimation.hasGen)
 			{
 				var actionTime:Number = _absoluteTime / 1000;
+				if (passCount != 0)
+					actionTime += offestTime;
 				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.timeConst.index, Vector.<Number>([ actionTime, actionTime, actionTime, 0 ]));
-				_particleAnimation.setRenderState(stage3DProxy, renderable);
+				if (passCount == 0)
+				{
+					_particleAnimation.setRenderState(stage3DProxy, renderable);
+				}
 			}
 		}
 		

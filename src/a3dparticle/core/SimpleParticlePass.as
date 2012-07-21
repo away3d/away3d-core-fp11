@@ -90,7 +90,7 @@ package a3dparticle.core
 			code += _particleMaterial.getFragmentCode(_particleAnimation);
 			//change the colorTarget
 			code += _particleAnimation.getAGALFragmentCode(this);
-			
+			code += _particleMaterial.getPostFragmentCode(_particleAnimation);
 			code += "mov oc," + _particleAnimation.colorTarget.toString() + "\n";
 			
 			return code;

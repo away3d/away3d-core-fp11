@@ -1,14 +1,11 @@
-package a3dparticle.particle 
+package a3dparticle.particle
 {
 	import a3dparticle.animators.ParticleAnimation;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	
-	import away3d.arcane;
-	use namespace arcane;
 	/**
 	 * ...
 	 * @author liaocheng
@@ -18,7 +15,7 @@ package a3dparticle.particle
 		private var _color:uint;
 		private var _colorData:Vector.<Number>=new Vector.<Number>();
 		
-		public function ParticleColorMaterial(color:uint=0xFFFFFFFF) 
+		public function ParticleColorMaterial(color:uint=0xFFFFFFFF)
 		{
 			this.color = color;
 		}
@@ -41,8 +38,8 @@ package a3dparticle.particle
 		
 		override public function render(_particleAnimation:ParticleAnimation, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.colorDefalut.index, _colorData, 1);
+			super.render(_particleAnimation, renderable, stage3DProxy, camera);
+			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.colorDefalut.index, _colorData, 1);
 		}
 		
 	}
