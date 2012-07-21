@@ -1,21 +1,20 @@
-package a3dparticle.core 
+package a3dparticle.core
 {
 	import a3dparticle.animators.ParticleAnimation;
 	import a3dparticle.particle.ParticleMaterialBase;
-	import away3d.animators.data.AnimationBase;
+	import away3d.animators.IAnimationSet;
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Utils3D;
 	import flash.geom.Vector3D;
 	
-	import away3d.arcane;
 	use namespace arcane;
 	/**
 	 * ...
@@ -24,32 +23,30 @@ package a3dparticle.core
 	public class SimpleParticlePass extends MaterialPassBase
 	{
 		private var _particleMaterial:ParticleMaterialBase;
-		private var _animatableAttributes : Array = ["va0"];
-		private var _animationTargetRegisters : Array = ["vt0"];
 		
-		public function SimpleParticlePass(particleMaterial:ParticleMaterialBase) 
+		public function SimpleParticlePass(particleMaterial:ParticleMaterialBase)
 		{
 			super();
 			this._particleMaterial = particleMaterial;
 		}
 		
-		override public function set animation(value : AnimationBase) : void
+		override public function set animationSet(value : IAnimationSet) : void
 		{
-			if (animation == value) return;
+			if (animationSet == value) return;
 			if (value is ParticleAnimation)
 			{
 				_particleMaterial.initAnimation(value as ParticleAnimation);
-				super.animation = value;
+				super.animationSet = value;
 			}
 			else
 			{
-				throw(new Error("animation not match!"));
+				throw(new Error("animationSet not match!"));
 			}
 		}
 		
 		private function get _particleAnimation():ParticleAnimation
 		{
-			return  animation as ParticleAnimation;
+			return  animationSet as ParticleAnimation;
 		}
 		
 		/**
@@ -60,15 +57,20 @@ package a3dparticle.core
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
 				super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
-				_numUsedTextures = _particleAnimation.shaderRegisterCache.numUsedTextures;
 			}
 		}
 		
-		arcane override function getVertexCode() : String
+		override arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
-			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0]);
-			var code:String =  animation.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters) + projectionVertexCode;
+			super.updateProgram(stage3DProxy);
+			_numUsedTextures = _particleAnimation.shaderRegisterCache.numUsedTextures;
+			_numUsedStreams = _particleAnimation.shaderRegisterCache.numUsedStreams;
 			
+		}
+		
+		arcane override function getVertexCode(code:String) : String
+		{
+			code += getProjectionCode(_animationTargetRegisters[0]);
 			return code;
 		}
 		
@@ -83,11 +85,6 @@ package a3dparticle.core
 		arcane override function getFragmentCode() : String
 		{
 			var code:String = "";
-			//if time=0,discard the fragment
-			var temp:ShaderRegisterElement = _particleAnimation.shaderRegisterCache.getFreeFragmentSingleTemp();
-			//code += "sge " + temp.toString() + "," + _particleAnimation.fragmentZeroConst.toString() + "," + _particleAnimation.fragmentTime + "\n";
-			//code += "neg " + temp.toString() + "," + temp.toString() + "\n";
-			//code += "kil " + temp.toString() + "\n";
 			
 			//set the init color
 			code += _particleMaterial.getFragmentCode(_particleAnimation);

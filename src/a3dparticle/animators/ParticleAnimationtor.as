@@ -1,39 +1,61 @@
-package a3dparticle.animators 
+package a3dparticle.animators
 {
 	import away3d.animators.AnimatorBase;
+	import away3d.animators.IAnimator;
+	import away3d.animators.transitions.StateTransitionBase;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.passes.MaterialPassBase;
+	import flash.display3D.Context3DProgramType;
 	/**
 	 * ...
 	 * @author ...
 	 */
-	public class ParticleAnimationtor extends AnimatorBase
+	public class ParticleAnimationtor extends AnimatorBase implements IAnimator
 	{
-		private var _target:ParticleAnimationState;
+		private var _particleAnimation:ParticleAnimation;
 		
-		public function ParticleAnimationtor(target : ParticleAnimationState) 
+		public function ParticleAnimationtor(animationSet : ParticleAnimation)
 		{
-			super();
-			_target = target;
+			super(animationSet);
+			_particleAnimation = animationSet;
 		}
 		
-		public function get time():Number
+		public function set absoluteTime(value:Number):void
 		{
-			return _target.time;
+			_absoluteTime = value;
 		}
 		
-		public function set time(value:Number):void
+		public function get absoluteTime():Number
 		{
-			_target.time = value;
+			return _absoluteTime;
+		}
+
+		public function play(stateName : String, stateTransition:StateTransitionBase = null) :void
+		{
+			throw(new Error("use start instead"));
 		}
 		
-		override protected function updateAnimation(realDT : Number, scaledDT : Number) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
-			_target.time += scaledDT / 1000;
+			if (_particleAnimation.hasGen)
+			{
+				var actionTime:Number = _absoluteTime / 1000;
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.timeConst.index, Vector.<Number>([ actionTime, actionTime, actionTime, 0 ]));
+				_particleAnimation.setRenderState(stage3DProxy, renderable);
+			}
 		}
 		
-		public function play():void
+		override protected function updateDeltaTime(dt : Number) : void
 		{
-			start();
+			absoluteTime += dt;
 		}
+		
+		public function testGPUCompatibility(pass : MaterialPassBase) : void
+		{
+			
+		}
+		
 	}
 
 }

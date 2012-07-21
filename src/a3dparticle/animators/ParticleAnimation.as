@@ -1,4 +1,4 @@
-package a3dparticle.animators 
+package a3dparticle.animators
 {
 	import a3dparticle.animators.actions.ActionBase;
 	import a3dparticle.animators.actions.PerParticleAction;
@@ -6,8 +6,8 @@ package a3dparticle.animators
 	import a3dparticle.core.SimpleParticlePass;
 	import a3dparticle.core.SubContainer;
 	import a3dparticle.particle.ParticleParam;
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.IAnimationSet;
+	import away3d.animators.IAnimationState;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -22,7 +22,7 @@ package a3dparticle.animators
 	 * ...
 	 * @author ...
 	 */
-	public class ParticleAnimation extends AnimationBase
+	public class ParticleAnimation implements IAnimationSet
 	{
 		public static const POST_PRIORITY:int = 9;
 		
@@ -176,8 +176,7 @@ package a3dparticle.animators
 			}
 		}
 		
-		
-		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
+		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
 			//set some const
 			var context : Context3D = stage3DProxy._context3D;
@@ -186,17 +185,15 @@ package a3dparticle.animators
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, zeroConst.index, VERTEX_CONST, 3);
 			//set fragmentZeroConst,fragmentOneConst
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentZeroConst.index, FRAGMENT_CONST, 2);
-			
+		}
+		
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
+		{
 			var action:ActionBase;
 			for each(action in _particleActions)
 			{
 				action.setRenderState(stage3DProxy,renderable);
 			}
-		}
-		
-		public function render():void
-		{
-			
 		}
 		
 		
@@ -257,10 +254,9 @@ package a3dparticle.animators
 			//allot fs register
 			
 		}
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+
+		
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
 			var simpleParticlePass:SimpleParticlePass = SimpleParticlePass(pass);
 			reset(simpleParticlePass);
@@ -324,11 +320,11 @@ package a3dparticle.animators
 			_AGALVertexCode += "slt " + temp.toString() + "," + temp.toString() + "," + zeroConst.toString() + "\n";
 			_AGALVertexCode += "mul " + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + "," + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + "," + temp.toString() + "\n";
 			return _AGALVertexCode;
-		}		
+		}
 		
-		arcane function getAGALFragmentCode(pass : MaterialPassBase) : String
+		public function getAGALFragmentCode(pass : MaterialPassBase) : String
 		{
-			_AGALFragmentCode = ""; 
+			_AGALFragmentCode = "";
 			var action:ActionBase;
 			for each(action in _particleActions)
 			{
@@ -337,34 +333,37 @@ package a3dparticle.animators
 			return _AGALFragmentCode;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
+
+		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			//
-			var i:int;0
-			for (i = pass.numUsedStreams; i < shaderRegisterCache.numUsedStreams; i++)
-			{
-				stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
-			}
-			super.deactivate(stage3DProxy , pass );
+			
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function createAnimationState() : AnimationStateBase
+		
+		public function get states():Vector.<IAnimationState>
 		{
 			return null;
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function equals(animation : AnimationBase) : Boolean
+		
+		public function hasState(stateName:String):Boolean
 		{
-			return animation == this;
+			return false;
+		}
+		public function getState(stateName:String):IAnimationState
+		{
+			return null;
+		}
+		public function addState(stateName:String, animationState:IAnimationState):void
+		{
+			return ;
+		}
+		public function get usesCPU() : Boolean
+		{
+			return false;
+		}
+		public function resetGPUCompatibility() : void
+		{
+			
 		}
 		
 	}

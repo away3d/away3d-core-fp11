@@ -1,9 +1,8 @@
-package a3dparticle.core 
+package a3dparticle.core
 {
 	import a3dparticle.particle.ParticleMaterialBase;
 	import a3dparticle.ParticlesContainer;
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.IAnimator;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
@@ -28,7 +27,7 @@ package a3dparticle.core
 		private var _numTriangles:uint;
 		private var _parent:ParticlesContainer;
 		
-		public function SubContainer(parent:ParticlesContainer, particleMaterial:ParticleMaterialBase, clone:Boolean = false ) 
+		public function SubContainer(parent:ParticlesContainer, particleMaterial:ParticleMaterialBase, clone:Boolean = false )
 		{
 			this._parent = parent;
 			this._particleMaterial = particleMaterial;
@@ -36,7 +35,7 @@ package a3dparticle.core
 			{
 				this._shareAtt = new cloneShareAtt;
 				this._material = new SimpleParticleMaterial(particleMaterial);
-				this._material.animation = animation;
+				this._material.animation = parent.animation;
 			}
 		}
 		
@@ -71,17 +70,17 @@ package a3dparticle.core
 		}
 		
 		
-		public function get animation() : AnimationBase
+		/*public function get animation() : AnimationBase
 		{
 			return ParticlesContainer(_parent).animation;
-		}
+		}*/
 		
-		public function get animationState() : AnimationStateBase
+		public function get animator() : IAnimator
 		{
-			return ParticlesContainer(_parent).animationState;
+			return ParticlesContainer(_parent).animator;
 		}
 		
-		public function get mouseDetails() : Boolean
+		public function get shaderPickingDetails() : Boolean
 		{
 			return false;
 		}
@@ -126,7 +125,7 @@ package a3dparticle.core
 		
 		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._vertexBuffer || _shareAtt._vertexContex3D != stage3DProxy.context3D) 
+			if (!_shareAtt._vertexBuffer || _shareAtt._vertexContex3D != stage3DProxy.context3D)
 			{
 				_shareAtt._vertexBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._vertices.length/3, 3);
 				_shareAtt._vertexBuffer.uploadFromVector(_shareAtt._vertices, 0, _shareAtt._vertices.length / 3);
@@ -137,7 +136,7 @@ package a3dparticle.core
 		
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
-			if (!_shareAtt._indexBuffer || _shareAtt._indexContex3D != stage3DProxy.context3D) 
+			if (!_shareAtt._indexBuffer || _shareAtt._indexContex3D != stage3DProxy.context3D)
 			{
 				_shareAtt._indexBuffer = stage3DProxy._context3D.createIndexBuffer(_shareAtt._indices.length);
 				_shareAtt._indexBuffer.uploadFromVector(_shareAtt._indices, 0, _shareAtt._indices.length);
@@ -148,7 +147,7 @@ package a3dparticle.core
 		
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._uvBuffer || _shareAtt._uvContex3D != stage3DProxy.context3D) 
+			if (!_shareAtt._uvBuffer || _shareAtt._uvContex3D != stage3DProxy.context3D)
 			{
 				_shareAtt._uvBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._uvData.length/2, 2);
 				_shareAtt._uvBuffer.uploadFromVector(_shareAtt._uvData, 0, _shareAtt._uvData.length / 2);

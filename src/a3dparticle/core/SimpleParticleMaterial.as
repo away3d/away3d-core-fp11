@@ -1,11 +1,12 @@
-package a3dparticle.core 
+package a3dparticle.core
 {
-	import a3dparticle.animators.ParticleAnimation;
 	import a3dparticle.particle.ParticleMaterialBase;
-	import away3d.animators.data.AnimationBase;
+	import away3d.animators.AnimationSetBase;
+	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.materials.MaterialBase;
+	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	
 	
@@ -19,7 +20,7 @@ package a3dparticle.core
 		public var _screenPass : SimpleParticlePass;
 		private var _particleMaterial:ParticleMaterialBase;
 		
-		public function SimpleParticleMaterial(particleMaterial:ParticleMaterialBase) 
+		public function SimpleParticleMaterial(particleMaterial:ParticleMaterialBase)
 		{
 			super();
 			this._particleMaterial = particleMaterial;
@@ -40,10 +41,6 @@ package a3dparticle.core
 			return _particleMaterial.bothSides;
 		}
 
-		/*override public function set bothSides(value : Boolean) : void
-		{
-			throw(new Error("don't set it directly"));
-		}*/
 		
 		/**
 		 * @inheritDoc
@@ -58,10 +55,10 @@ package a3dparticle.core
 			throw(new Error("this is along with only one owner"));
 		}
 		
-		public function set animation(value:AnimationBase):void
+		public function set animation(value:IAnimationSet):void
 		{
 			for (var i : int = 0; i < _numPasses; ++i)
-				_passes[i].animation = value;
+				_passes[i].animationSet = value;
 		}
 		
 		override arcane function removeOwner(owner : IMaterialOwner) : void

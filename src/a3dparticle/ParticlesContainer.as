@@ -1,16 +1,14 @@
-package a3dparticle 
+package a3dparticle
 {
 	import a3dparticle.animators.actions.ActionBase;
 	import a3dparticle.animators.ParticleAnimation;
-	import a3dparticle.animators.ParticleAnimationState;
 	import a3dparticle.animators.ParticleAnimationtor;
 	import a3dparticle.core.ParticlesNode;
 	import a3dparticle.core.SubContainer;
 	import a3dparticle.generater.GeneraterBase;
 	import a3dparticle.particle.ParticleParam;
 	import a3dparticle.particle.ParticleSample;
-	import away3d.animators.data.AnimationBase;
-	import away3d.animators.data.AnimationStateBase;
+	import away3d.animators.IAnimationSet;
 	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.ObjectContainer3D;
@@ -18,8 +16,7 @@ package a3dparticle
 	import away3d.core.partition.EntityNode;
 	import away3d.entities.Entity;
 	
-	import away3d.arcane;
-	use namespace arcane;
+
 	/**
 	 * A container of particles
 	 * @author liaocheng.Email:liaocheng210@126.com.
@@ -28,8 +25,7 @@ package a3dparticle
 	{
 		public var initParticleFun:Function;
 		
-		protected var __controller:ParticleAnimationtor;
-		protected var _animationState:ParticleAnimationState;
+		protected var _animator:ParticleAnimationtor;
 		protected var _particleAnimation : ParticleAnimation;
 		
 		protected var _isStart:Boolean;
@@ -40,16 +36,14 @@ package a3dparticle
 		
 		public var _subContainers : Vector.<SubContainer>;
 		
-		public function ParticlesContainer(isClone:Boolean=false) 
+		public function ParticlesContainer(isClone:Boolean=false)
 		{
 			super();
 			if (!isClone)
 			{
 				_particleAnimation = new ParticleAnimation();
 				
-				_animationState = new ParticleAnimationState(_particleAnimation);
-				
-				__controller = new ParticleAnimationtor(_animationState);
+				_animator = new ParticleAnimationtor(_particleAnimation);
 				_subContainers = new Vector.<SubContainer>();
 			}
 		}
@@ -65,21 +59,21 @@ package a3dparticle
 		}
 		
 		
-		public function set timeScale(value:Number):void
+		public function set playbackSpeed(value:Number):void
 		{
-			__controller.timeScale = value;
+			_animator.playbackSpeed = value;
 		}
-		public function get timeScale():Number
+		public function get playbackSpeed():Number
 		{
-			return __controller.timeScale;
+			return _animator.playbackSpeed;
 		}
 		public function set time(value:Number):void
 		{
-			__controller.time = value;
+			_animator.absoluteTime = value * 1000;
 		}
 		public function get time():Number
 		{
-			return __controller.time;
+			return _animator.absoluteTime /1000;
 		}
 		
 		public function addAction(action:ActionBase):void
@@ -175,19 +169,19 @@ package a3dparticle
 		
 		protected function initParticleParam():ParticleParam
 		{
-			return new ParticleParam; 
+			return new ParticleParam;
 		}
 		
 		public function start():void
 		{
 			_isStart = true;
-			__controller.play();
+			_animator.start();
 		}
 		
 		public function stop():void
 		{
 			_isStart = false;
-			__controller.stop();
+			_animator.stop();
 		}
 				
 		override protected function createEntityPartitionNode() : EntityNode
@@ -200,22 +194,22 @@ package a3dparticle
 			return new AxisAlignedBoundingBox();
 		}
 
-		override protected function updateBounds():void 
+		override protected function updateBounds():void
 		{
 			_bounds.fromExtremes( -100, -100, -100, 100, 100, 100 );
 			_boundsInvalid = false;
 		}
 		
-		public function get animation() : AnimationBase
+		public function get animation() : IAnimationSet
 		{
 			return _particleAnimation;
 		}
 		
-		public function get animationState() : AnimationStateBase
+		public function get animator() : ParticleAnimationtor
 		{
-			return _animationState;
+			return _animator;
 		}
-		
+				
 		
 		override public function get mouseEnabled() : Boolean
 		{
@@ -230,12 +224,12 @@ package a3dparticle
 		/**
 		 * Indicates what picking method to use on this mesh. See MouseHitMethod for available options.
 		 */
-		public function get mouseHitMethod():uint 
+		public function get mouseHitMethod():uint
 		{
 			return _mouseHitMethod;
 		}
 
-		public function set mouseHitMethod( value:uint ):void 
+		public function set mouseHitMethod( value:uint ):void
 		{
 			_mouseHitMethod = value;
 		}
@@ -249,8 +243,7 @@ package a3dparticle
 			var clone : ParticlesContainer = new ParticlesContainer(true);
 			clone._hasGen = _hasGen;
 			clone._particleAnimation = _particleAnimation;
-			clone._animationState = _animationState.clone() as ParticleAnimationState;
-			clone.__controller = new ParticleAnimationtor(clone._animationState);
+			clone._animator = new ParticleAnimationtor(_particleAnimation);
 			clone._subContainers = new Vector.<SubContainer>();
 			clone._isStart = _isStart;
 			clone.alwaysInFrustum = alwaysInFrustum;

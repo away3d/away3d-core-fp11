@@ -1,29 +1,22 @@
-package a3dparticle.animators 
+package a3dparticle.animators
 {
 	import a3dparticle.animators.actions.TransformFollowAction;
 	import a3dparticle.animators.ParticleAnimation;
-	import a3dparticle.animators.ParticleAnimationState;
 	import a3dparticle.core.SubContainer;
-	import away3d.animators.data.AnimationStateBase;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.MathConsts;
-	import away3d.materials.passes.MaterialPassBase;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
-	
-	import away3d.arcane;
-	use namespace arcane;
-	
 	/**
 	 * ...
-	 * @author liaocheng
+	 * @author Cheng Liao
 	 */
-	public class TransformFollowState extends ParticleAnimationState
+	public class TransformFollowAnimator extends ParticleAnimationtor
 	{
 		private var _followTarget:Object3D;
 		private var _followAction:TransformFollowAction;
@@ -38,7 +31,7 @@ package a3dparticle.animators
 		private var _bufferDict:Dictionary=new Dictionary();
 		private var _context3DDict:Dictionary = new Dictionary();
 		
-		public function TransformFollowState(offset:Boolean, rotation:Boolean, animation : ParticleAnimation, isClone:Boolean = false)
+		public function TransformFollowAnimator(offset:Boolean, rotation:Boolean, animation : ParticleAnimation, isClone:Boolean = false)
 		{
 			super(animation);
 			this._offset = offset;
@@ -49,11 +42,21 @@ package a3dparticle.animators
 			}
 		}
 		
-		override public function set time(value:Number):void
+		public function get offset():Boolean
 		{
-			_lastTime = time;
-			super.time = value;
+			return offset;
 		}
+		public function get rotation():Boolean
+		{
+			return rotation;
+		}
+		
+		override public function set absoluteTime(value:Number):void
+		{
+			_lastTime = absoluteTime;
+			super.absoluteTime = value;
+		}
+		
 		
 		public function set followTarget(value:Object3D):void
 		{
@@ -65,9 +68,7 @@ package a3dparticle.animators
 			return _followTarget;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
+
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{
 			var subContainer:SubContainer = renderable as SubContainer;
@@ -102,9 +103,9 @@ package a3dparticle.animators
 			}
 			for (var i:uint = 0; i < data.length; i++)
 			{
-				var k:Number = (time-data[i].startTime) / data[i].lifeTime;
+				var k:Number = (_absoluteTime / 1000 - data[i].startTime) / data[i].lifeTime;
 				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
-				if ( _followTarget && t - (time-_lastTime) <= 0)
+				if ( _followTarget && t - (_absoluteTime-_lastTime)/1000 <= 0)
 				{
 					for (var j:uint = 0; j < data[i].num; j++)
 					{
@@ -134,9 +135,9 @@ package a3dparticle.animators
 			
 			for (var i:uint = 0; i < data.length; i++)
 			{
-				var k:Number = (time-data[i].startTime) / data[i].lifeTime;
+				var k:Number = (_absoluteTime/1000-data[i].startTime) / data[i].lifeTime;
 				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
-				if ( _followTarget && t - (time-_lastTime) <= 0)
+				if ( _followTarget && t - (_absoluteTime-_lastTime)/1000 <= 0)
 				{
 					for (var j:uint = 0; j < data[i].num; j++)
 					{
@@ -168,9 +169,9 @@ package a3dparticle.animators
 			
 			for (var i:uint = 0; i < data.length; i++)
 			{
-				var k:Number = (time-data[i].startTime) / data[i].lifeTime;
+				var k:Number = (_absoluteTime-data[i].startTime) / data[i].lifeTime;
 				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
-				if ( _followTarget && t - (time-_lastTime) <= 0)
+				if ( _followTarget && t - (_absoluteTime-_lastTime)/1000 <= 0)
 				{
 					for (var j:uint = 0; j < data[i].num; j++)
 					{
@@ -185,17 +186,9 @@ package a3dparticle.animators
 			}
 			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 6);
-			var context : Context3D = stage3DProxy._context3D;
+			var context : Context3D = stage3DProxy.context3D;
 			context.setVertexBufferAt(_followAction.offsetAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 			context.setVertexBufferAt(_followAction.rotationAttribute.index, buffer, 3, Context3DVertexBufferFormat.FLOAT_3);
-		}
-		
-		override public function clone() : AnimationStateBase
-		{
-			var clone : TransformFollowState = new TransformFollowState(_offset, _rotation, ParticleAnimation(_animation), true);
-			clone._followAction = _followAction;
-			clone.time = time;
-			return clone;
 		}
 		
 		private function getBuffer(stage3DProxy:Stage3DProxy, subContainer:SubContainer):VertexBuffer3D
