@@ -14,21 +14,21 @@ package away3d.animators
 		
 	/**
 	 * Dispatched when playback of an animation inside the animator object starts.
-	 * 
+	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
 	[Event(name="start",type="away3d.events.AnimatorEvent")]
 			
 	/**
 	 * Dispatched when playback of an animation inside the animator object stops.
-	 * 
+	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
 	[Event(name="stop",type="away3d.events.AnimatorEvent")]
 	
 	/**
 	 * Provides an abstract base class for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
-	 * 
+	 *
 	 * @see away3d.animators.AnimationSetBase
 	 */
 	public class AnimatorBase extends EventDispatcher
@@ -66,7 +66,7 @@ package away3d.animators
 		 * Determines whether the animators internal update mechanisms are active. Used in cases
 		 * where manual updates are required either via the <code>time</code> property or <code>update()</code> method.
 		 * Defaults to true.
-		 * 
+		 *
 		 * @see #time
 		 * @see #update()
 		 */
@@ -101,12 +101,12 @@ package away3d.animators
 			if (_time == value)
 				return;
 			
-			update(_time);
+			update(value);
 		}
 		
 		/**
 		 * Creates a new <code>AnimatorBase</code> object.
-		 * 
+		 *
 		 * @param animationSet The animation data set to be used by the animator object.
 		 */
 		public function AnimatorBase(animationSet:IAnimationSet)
@@ -151,7 +151,7 @@ package away3d.animators
 		/**
 		 * Pauses the automatic playback clock of the animator, in case manual updates are required via the
 		 * <code>time</code> property or <code>update()</code> method.
-		 * 
+		 *
 		 * @see #time
 		 * @see #update()
 		 */
@@ -174,7 +174,7 @@ package away3d.animators
 		/**
 		 * Provides a way to manually update the active state of the animator when automatic
 		 * updates are disabled.
-		 * 
+		 *
 		 * @see #stop()
 		 * @see #autoUpdate
 		 */
@@ -189,7 +189,7 @@ package away3d.animators
 		
 		/**
 		 * Used by the mesh object to which the animator is applied, registers the owner for internal use.
-		 * 
+		 *
 		 * @private
 		 */
 		public function addOwner(mesh : Mesh) : void
@@ -199,7 +199,7 @@ package away3d.animators
 		
 		/**
 		 * Used by the mesh object from which the animator is removed, unregisters the owner for internal use.
-		 * 
+		 *
 		 * @private
 		 */
 		public function removeOwner(mesh : Mesh) : void
@@ -209,7 +209,7 @@ package away3d.animators
 		
 		/**
 		 * Internal abstract method called when the time delta property of the animator's contents requires updating.
-		 * 
+		 *
 		 * @private
 		 */
 		protected function updateDeltaTime(dt:Number):void
