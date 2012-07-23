@@ -105,6 +105,7 @@ package away3d.core.render
 			_context.setDepthTest(false, Context3DCompareMode.LESS);
 
 			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
+
 			_activeMaterial = null;
 		}
 

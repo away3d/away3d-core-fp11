@@ -287,6 +287,8 @@ package away3d.core.render
 
 			draw(entityCollector, target);
 
+			_context.setDepthTest(false, Context3DCompareMode.LESS);
+
 			if ( !_shareContext ) {
 				if( _snapshotRequired && _snapshotBitmapData ) {
 					_context.drawToBitmapData( _snapshotBitmapData );
