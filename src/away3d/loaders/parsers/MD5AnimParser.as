@@ -222,7 +222,7 @@ package away3d.loaders.parsers
 				
 				var w : Number = 1 - orientation.x * orientation.x - orientation.y * orientation.y - orientation.z * orientation.z;
 				orientation.w = w < 0 ? 0 : -Math.sqrt(w);
-				
+
 				if (hierarchy.parentIndex < 0) {
 					pose.orientation.multiply(_rotationQuat, orientation);
 					pose.translation = _rotationQuat.rotatePoint(translate);
@@ -233,6 +233,9 @@ package away3d.loaders.parsers
 					pose.translation.y = translate.y;
 					pose.translation.z = translate.z;
 				}
+				pose.orientation.y = -pose.orientation.y;
+				pose.orientation.z = -pose.orientation.z;
+				pose.translation.x = -pose.translation.x;
 				
 				jointPoses[i] = pose;
 			}

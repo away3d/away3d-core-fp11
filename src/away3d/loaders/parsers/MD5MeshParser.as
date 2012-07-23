@@ -98,9 +98,6 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			// TODO: not used			
-			data = null;
-			// todo: implement
 			return false;
 		}
 
@@ -233,10 +230,10 @@ package away3d.loaders.parsers
 				// todo: check if this is correct, or maybe we want to actually store it as quats?
 				_bindPoses[i] = quat.toMatrix3D();
 				_bindPoses[i].appendTranslation(pos.x, pos.y, pos.z);
-
 				var inv : Matrix3D = _bindPoses[i].clone();
 				inv.invert();
 				joint.inverseBindPose = inv.rawData;
+
 				_skeleton.joints[i++] = joint;
 
 				ch = getNextChar();
@@ -390,8 +387,8 @@ package away3d.loaders.parsers
 		{
 			var index : int = getNextInt() * 3;
 			indices[index] = getNextInt();
-			indices[index + 2] = getNextInt();
 			indices[index + 1] = getNextInt();
+			indices[index + 2] = getNextInt();
 		}
 
 		/**
@@ -534,7 +531,7 @@ package away3d.loaders.parsers
 			var ch : String = getNextToken();
 
 			if (ch != "(") sendParseError("(");
-			vec.x = getNextNumber();
+			vec.x = -getNextNumber();
 			vec.y = getNextNumber();
 			vec.z = getNextNumber();
 
@@ -553,8 +550,8 @@ package away3d.loaders.parsers
 
 			if (ch != "(") sendParseError("(");
 			quat.x = getNextNumber();
-			quat.y = getNextNumber();
-			quat.z = getNextNumber();
+			quat.y = -getNextNumber();
+			quat.z = -getNextNumber();
 
 			// quat supposed to be unit length
 			var t : Number = 1 - quat.x * quat.x - quat.y * quat.y - quat.z * quat.z;
@@ -564,7 +561,6 @@ package away3d.loaders.parsers
 
 			var rotQuat : Quaternion = new Quaternion();
 			rotQuat.multiply(_rotationQuat, quat);
-
 			return rotQuat;
 		}
 
