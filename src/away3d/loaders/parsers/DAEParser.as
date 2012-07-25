@@ -17,6 +17,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.ColorMaterial;
+	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicAmbientMethod;
@@ -684,7 +685,7 @@ package away3d.loaders.parsers
 		{
 			if (!effect || !material) return null;
 			
-			var mat:MaterialBase = _defaultColorMaterial;
+			var mat:DefaultMaterialBase = _defaultColorMaterial;
 			var textureMaterial : TextureMaterial;
 			var ambient:DAEColorOrTexture = effect.shader.props["ambient"];
 			var diffuse:DAEColorOrTexture = effect.shader.props["diffuse"];
@@ -695,25 +696,25 @@ package away3d.loaders.parsers
 			if(diffuse && diffuse.texture && effect.surface) {
 				var image:DAEImage = _libImages[effect.surface.init_from];
 				
-				if (isBitmapDataValid(image.resource.bitmapData))
+				if (isBitmapDataValid(image.resource.bitmapData)) {
 					mat = textureMaterial = buildDefaultMaterial(image.resource.bitmapData);
+					textureMaterial.alpha = transparency;
+				}
 				
 			} else if (diffuse && diffuse.color) {
-				mat = textureMaterial = buildDefaultMaterial();
+				mat = new ColorMaterial(diffuse.color.rgb, transparency);
 			}
 			
-			if (textureMaterial) {
-				textureMaterial.ambientMethod = new BasicAmbientMethod();
-				textureMaterial.diffuseMethod = new BasicDiffuseMethod();
-				textureMaterial.specularMethod = new BasicSpecularMethod();
-				textureMaterial.ambientColor = (ambient && ambient.color) ? ambient.color.rgb : 0x303030;
-				textureMaterial.specularColor = (specular && specular.color) ? specular.color.rgb : 0x202020;
+			if (mat) {
+				mat.ambientMethod = new BasicAmbientMethod();
+				mat.diffuseMethod = new BasicDiffuseMethod();
+				mat.specularMethod = new BasicSpecularMethod();
+				mat.ambientColor = (ambient && ambient.color) ? ambient.color.rgb : 0x303030;
+				mat.specularColor = (specular && specular.color) ? specular.color.rgb : 0x202020;
 				
-				if (transparency < 1) textureMaterial.alpha = (transparency == 0)? 0.1 : transparency;
-				
-				textureMaterial.gloss = shininess;
-				textureMaterial.ambient = 1;
-				textureMaterial.specular = 1;
+				mat.gloss = shininess;
+				mat.ambient = 1;
+				mat.specular = 1;
 			}
 			
 			mat.name = material.id;
