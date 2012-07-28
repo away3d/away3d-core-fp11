@@ -30,5 +30,45 @@ package away3d.primitives {
 
       _orientation = orientation;
     }
+    /**
+     * The orientation in which the plane lies
+     */
+     public function get orientation():String {
+       return _orientation;
+     }
+     public function set orientation(value:String):void {
+       _orientation = value;
+       invalidateGeometry();
+     }
+
+        /**
+     * The size of the tetrahedron bottom.
+     */
+    public function get width() : Number
+    {
+      return _width;
+    }
+
+    public function set width(value : Number) : void
+    {
+      if (value <= 0) throw new Error("Value needs to be greater than 0");
+      _width = value;
+      invalidateGeometry();
+    }
+
+    /**
+     * The size of the tetrahedron height.
+     */
+    public function get height() : Number
+    {
+      return _height;
+    }
+
+    public function set height(value : Number) : void
+    {
+      if (value <= 0) throw new Error("Value needs to be greater than 0");
+      _height = value;
+      invalidateGeometry();
+    }
   }
 }
