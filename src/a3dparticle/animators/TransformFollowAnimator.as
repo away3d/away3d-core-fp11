@@ -31,7 +31,7 @@ package a3dparticle.animators
 		private var _bufferDict:Dictionary=new Dictionary();
 		private var _context3DDict:Dictionary = new Dictionary();
 		
-		public function TransformFollowAnimator(offset:Boolean, rotation:Boolean, animation : ParticleAnimation, isClone:Boolean = false)
+		public function TransformFollowAnimator(offset:Boolean, rotation:Boolean, animation : ParticleAnimation, isClone:Boolean = false, followAction:TransformFollowAction = null)
 		{
 			super(animation);
 			this._offset = offset;
@@ -40,15 +40,24 @@ package a3dparticle.animators
 			{
 				animation.addAction(_followAction = new TransformFollowAction(offset,rotation));
 			}
+			else
+			{
+				_followAction = followAction;
+			}
+		}
+		
+		public function get followAction():TransformFollowAction
+		{
+			return _followAction;
 		}
 		
 		public function get offset():Boolean
 		{
-			return offset;
+			return _offset;
 		}
 		public function get rotation():Boolean
 		{
-			return rotation;
+			return _rotation;
 		}
 		
 		override public function set absoluteTime(value:Number):void

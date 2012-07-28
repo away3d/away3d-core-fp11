@@ -57,7 +57,7 @@ package a3dparticle
 			clone._hasGen = _hasGen;
 			clone._particleAnimation = _particleAnimation;
 
-			clone._animator = new TransformFollowAnimator(TransformFollowAnimator(_animator).offset, TransformFollowAnimator(_animator).rotation, _particleAnimation);
+			clone._animator = new TransformFollowAnimator(TransformFollowAnimator(_animator).offset, TransformFollowAnimator(_animator).rotation, _particleAnimation, true, TransformFollowAnimator(_animator).followAction);
 			clone._subContainers = new Vector.<SubContainer>();
 			clone._isStart = _isStart;
 			clone.alwaysInFrustum = alwaysInFrustum;
