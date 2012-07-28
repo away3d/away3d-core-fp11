@@ -42,7 +42,7 @@ package away3d.primitives {
        invalidateGeometry();
      }
 
-        /**
+    /**
      * The size of the tetrahedron bottom.
      */
     public function get width() : Number
@@ -107,16 +107,16 @@ package away3d.primitives {
           top = new Vector3D(_height, 0, 0);
           break;
       }
-
+      //bottom
       updateOrAddSegment(0, bv0, bv1);
       updateOrAddSegment(1, bv1, bv2);
       updateOrAddSegment(2, bv2, bv3);
       updateOrAddSegment(3, bv3, bv0);
-
-      updateOrAddSegment(5, bv0, top);
-      updateOrAddSegment(6, bv1, top);
-      updateOrAddSegment(7, bv2, top);
-      updateOrAddSegment(8, bv3, top);
+      //bottom to top
+      updateOrAddSegment(4, bv0, top);
+      updateOrAddSegment(5, bv1, top);
+      updateOrAddSegment(6, bv2, top);
+      updateOrAddSegment(7, bv3, top);
     }
   }
 }
