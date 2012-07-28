@@ -1,4 +1,5 @@
 package away3d.primitives {
+  import flash.geom.Vector3D;
   import away3d.primitives.WireframePrimitiveBase;
 
 
@@ -69,6 +70,53 @@ package away3d.primitives {
       if (value <= 0) throw new Error("Value needs to be greater than 0");
       _height = value;
       invalidateGeometry();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    override protected function buildGeometry():void {
+
+      var bv0:Vector3D;
+      var bv1:Vector3D;
+      var bv2:Vector3D;
+      var bv3:Vector3D;
+      var top:Vector3D;
+      const hw:Number = _width * 0.5;
+
+      switch (_orientation) {
+        case ORIENTATION_XY:
+          bv0 = new Vector3D(-hw, hw, 0);
+          bv1 = new Vector3D(hw, hw, 0);
+          bv2 = new Vector3D(hw, -hw, 0);
+          bv3 = new Vector3D(-hw, -hw, 0);
+          top = new Vector3D(0, 0, _height);
+          break;
+        case ORIENTATION_XZ:
+          bv0 = new Vector3D(-hw, 0, hw);
+          bv1 = new Vector3D(hw, 0, hw);
+          bv2 = new Vector3D(hw, 0, -hw);
+          bv3 = new Vector3D(-hw, 0, -hw);
+          top = new Vector3D(0, _height, 0);
+          break;
+        case ORIENTATION_YZ:
+          bv0 = new Vector3D(0, -hw, hw);
+          bv1 = new Vector3D(0, hw, hw);
+          bv2 = new Vector3D(0, hw, -hw);
+          bv3 = new Vector3D(0, -hw, -hw);
+          top = new Vector3D(_height, 0, 0);
+          break;
+      }
+
+      updateOrAddSegment(0, bv0, bv1);
+      updateOrAddSegment(1, bv1, bv2);
+      updateOrAddSegment(2, bv2, bv3);
+      updateOrAddSegment(3, bv3, bv0);
+
+      updateOrAddSegment(5, bv0, top);
+      updateOrAddSegment(6, bv1, top);
+      updateOrAddSegment(7, bv2, top);
+      updateOrAddSegment(8, bv3, top);
     }
   }
 }
