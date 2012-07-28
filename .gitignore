@@ -5,3 +5,4 @@
 /.actionScriptProperties
 *.iml
 out
+/src/org
