@@ -32,7 +32,6 @@ package a3dparticle
 		protected var _hasGen:Boolean;
 		protected var _alwaysInFrustum:Boolean;
 		
-		private var _mouseHitMethod:uint;
 		
 		public var _subContainers : Vector.<SubContainer>;
 		
@@ -209,30 +208,7 @@ package a3dparticle
 		{
 			return _animator;
 		}
-				
 		
-		override public function get mouseEnabled() : Boolean
-		{
-			return false;
-		}
-		
-		override public function set mouseEnabled(value : Boolean) : void
-		{
-			throw(new Error("the particlesContainer is not interactive!"));
-		}
-		
-		/**
-		 * Indicates what picking method to use on this mesh. See MouseHitMethod for available options.
-		 */
-		public function get mouseHitMethod():uint
-		{
-			return _mouseHitMethod;
-		}
-
-		public function set mouseHitMethod( value:uint ):void
-		{
-			_mouseHitMethod = value;
-		}
 		
 		/**
 		 * @inheritDoc

@@ -206,10 +206,6 @@ package a3dparticle.core
 		{
 			return _parent.mouseEnabled;
 		}
-		public function get mouseHitMethod():uint
-		{
-			return _parent.mouseHitMethod;
-		}
 		
 		
 		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
