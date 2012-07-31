@@ -34,8 +34,6 @@ package away3d.core.render
 		protected var _backgroundAlpha : Number = 1;
 		protected var _shareContext : Boolean = false;
 
-		protected var _swapBackBuffer : Boolean = true;
-
 		protected var _renderTarget : TextureBase;
 		protected var _renderTargetSurface : int;
 
@@ -114,19 +112,6 @@ package away3d.core.render
 		arcane function set clearOnRender(value : Boolean) : void
 		{
 			_clearOnRender = value;
-		}
-
-		/**
-		 * Indicates whether or not the back buffer should be swapped when rendering is complete.
-		 */
-		public function get swapBackBuffer() : Boolean
-		{
-			return _swapBackBuffer;
-		}
-
-		public function set swapBackBuffer(value : Boolean) : void
-		{
-			_swapBackBuffer = value;
 		}
 
 		/**
@@ -287,15 +272,11 @@ package away3d.core.render
 
 			draw(entityCollector, target);
 
-			_context.setDepthTest(false, Context3DCompareMode.LESS);
-
 			if ( !_shareContext ) {
 				if( _snapshotRequired && _snapshotBitmapData ) {
-					_context.drawToBitmapData( _snapshotBitmapData );
+					_context.drawToBitmapData(_snapshotBitmapData);
 					_snapshotRequired = false;
 				}
-	
-				if (_swapBackBuffer && !target) _context.present();
 			}
 			_stage3DProxy.scissorRect = null;
 		}

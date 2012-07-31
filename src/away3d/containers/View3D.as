@@ -79,7 +79,7 @@
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
 		private var _shareContext:Boolean = false;
-		private var _viewScissoRect:Rectangle;
+		private var _viewScissorRect:Rectangle;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -137,7 +137,7 @@
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
-			_viewScissoRect = new Rectangle();
+			_viewScissorRect = new Rectangle();
 
 			initHitField();
 			
@@ -184,7 +184,7 @@
 			_localPos.y = _stage3DProxy.y;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
 			
-			_viewScissoRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
+			_viewScissorRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
 		}
 
 		/**
@@ -407,7 +407,7 @@
 
 			_renderer.viewWidth = value;
 			
-			_viewScissoRect.width = value;
+			_viewScissorRect.width = value;
 
 			invalidateBackBuffer();
 		}
@@ -440,7 +440,7 @@
 
 			_renderer.viewHeight = value;
 
-			_viewScissoRect.height = value;
+			_viewScissorRect.height = value;
 			
 			invalidateBackBuffer();
 		}
@@ -452,7 +452,7 @@
 			
 			_localPos.x = value;
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
-			_viewScissoRect.x = value;
+			_viewScissorRect.x = value;
 			
 			if (_stage3DProxy && !_shareContext)
 				_stage3DProxy.x = _globalPos.x;
@@ -464,7 +464,7 @@
 			
 			_localPos.y = value;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
-			_viewScissoRect.y = value;
+			_viewScissorRect.y = value;
 			
 			if (_stage3DProxy && !_shareContext)
 				_stage3DProxy.y = _globalPos.y;
@@ -594,24 +594,21 @@
 			// update picking
 			_mouse3DManager.updateCollider(this);
 
-//			updateLights(_entityCollector);
-
 			if (_requireDepthRender)
 				renderSceneDepth(_entityCollector);
 
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
-				if (!_shareContext) _stage3DProxy._context3D.present();
 			} else {
 				_renderer.shareContext = _shareContext;
-				if (_shareContext) {
-					_renderer.render(_entityCollector, null, _viewScissoRect);
-				} else {
+				if (_shareContext)
+					_renderer.render(_entityCollector, null, _viewScissorRect);
+				else
 					_renderer.render(_entityCollector);
-				}
-				
+
 			}
+			if (!_shareContext) stage3DProxy.present();
 
 			// clean up data for this render
 			_entityCollector.cleanUp();

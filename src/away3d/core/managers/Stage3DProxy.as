@@ -113,8 +113,7 @@ package away3d.core.managers
 		 */
 		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int = 0) : void
 		{
-			// force setting null
-			if (buffer && _activeVertexBuffers[index] == buffer) return;
+			if (_activeVertexBuffers[index] == buffer) return;
 
 			_context3D.setVertexBufferAt(index, buffer, offset, format);
 			_activeVertexBuffers[index] = buffer;
@@ -127,7 +126,7 @@ package away3d.core.managers
 		 */
 		public function setTextureAt(index : int, texture : TextureBase) : void
 		{
-			if (texture != null && _activeTextures[index] == texture) return;
+			if (_activeTextures[index] == texture) return;
 
 			_context3D.setTextureAt(index,  texture);
 
@@ -185,8 +184,8 @@ package away3d.core.managers
 		}
 
 		public function set enableDepthAndStencil(enableDepthAndStencil : Boolean) : void
-		{ 
-			_enableDepthAndStencil = enableDepthAndStencil; 
+		{
+			_enableDepthAndStencil = enableDepthAndStencil;
 			_backBufferDirty = true;
 		}
 		
@@ -463,7 +462,7 @@ package away3d.core.managers
 
 				_context3D = _stage3D.context3D;
 				_context3D.enableErrorChecking = Debug.active;
-				
+
 				_usesSoftwareRendering = (_context3D.driverInfo.indexOf('Software')==0);
 				
 				// Only configure back buffer if width and height have been set,

@@ -118,15 +118,14 @@
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);
-			context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
-			context.setVertexBufferAt(1, vertexBuffer, 3, Context3DVertexBufferFormat.FLOAT_3);
-			context.setVertexBufferAt(2, vertexBuffer, 6, Context3DVertexBufferFormat.FLOAT_1);
-			context.setVertexBufferAt(3, vertexBuffer, 7, Context3DVertexBufferFormat.FLOAT_4);
+			stage3DProxy.setSimpleVertexBuffer(0, vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.setSimpleVertexBuffer(1, vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 3);
+			stage3DProxy.setSimpleVertexBuffer(2, vertexBuffer, Context3DVertexBufferFormat.FLOAT_1, 6);
+			stage3DProxy.setSimpleVertexBuffer(3, vertexBuffer, Context3DVertexBufferFormat.FLOAT_4, 7);
 
 			_calcMatrix.copyFrom(renderable.sourceEntity.sceneTransform);
 			_calcMatrix.append(camera.inverseSceneTransform);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 8, _calcMatrix, true);
-
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
