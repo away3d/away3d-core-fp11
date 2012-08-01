@@ -16,7 +16,6 @@ package away3d.lights.shadowmaps
 
 	use namespace arcane;
 
-	// todo: deferred renderers can support a shared depth map for several lights. Allow an external depth map to be set.
 	public class ShadowMapperBase
 	{
 		protected var _casterCollector : ShadowCasterCollector;

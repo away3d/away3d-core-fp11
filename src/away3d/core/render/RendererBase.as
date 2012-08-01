@@ -178,8 +178,6 @@ package away3d.core.render
 				if (_stage3DProxy) _stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 				_stage3DProxy = null;
 				_context = null;
-
-//				_contextIndex = -1;
 				return;
 			}
 			//else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
@@ -309,8 +307,6 @@ package away3d.core.render
 		private function onContextUpdate(event : Event) : void
 		{
 			_context = _stage3DProxy.context3D;
-
-//			_contextIndex = _stage3DProxy.stage3DIndex;
 		}
 
 		arcane function get backgroundAlpha() : Number

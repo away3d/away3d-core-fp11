@@ -1,5 +1,8 @@
 ﻿package away3d.core.base.data
 {
+	import away3d.core.math.Plane3D;
+	import away3d.core.math.Plane3D;
+
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
@@ -68,7 +71,7 @@
 		 */
 		public function set uv0Index(ind:uint):void
   		{
-			_uv0Index;
+			_uv0Index = ind;
 		}
 		/**
 		* @return return the index set for uv0 in this Face value object
@@ -109,7 +112,7 @@
 		 */
 		public function set uv1Index(ind:uint):void
   		{
-			_uv1Index;
+			_uv1Index = ind;
 		}
 		/**
 		* @return Returns the index set for uv1 in this Face value object
@@ -150,7 +153,7 @@
 		 */
 		public function set uv2Index(ind:uint):void
   		{
-			_uv2Index;
+			_uv2Index = ind;
 		}
 		/**
 		* @return return the index set for uv2 in this Face value object
@@ -386,13 +389,40 @@
 		/**
 		 * Tests whether a given point is inside the triangle
 		 * @param point The point to test against
+		 * @param maxDistanceToPlane The minimum distance to the plane for the point to be considered on the triangle. This is usually used to allow for rounding error, but can also be used to perform a volumetric test.
 		 */
-		public function containsPoint(point : Vector3D) : Boolean
+		public function containsPoint(point : Vector3D, maxDistanceToPlane : Number = .007) : Boolean
 		{
+			if (!planeContains(point, maxDistanceToPlane))
+				return false;
+
 			getBarycentricCoords(point, _calcPoint ||= new Point());
 			var s : Number = _calcPoint.x;
 			var t : Number = _calcPoint.y;
 			return s >= 0.0 && t >= 0.0 && (s + t) <= 1.0;
+		}
+
+		private function planeContains(point : Vector3D, epsilon : Number = .007) : Boolean
+		{
+			var v0x : Number = _vertices[0];
+			var v0y : Number = _vertices[1];
+			var v0z : Number = _vertices[2];
+			var d1x : Number = _vertices[3] - v0x;
+			var d1y : Number = _vertices[4] - v0y;
+			var d1z : Number = _vertices[5] - v0z;
+			var d2x : Number = _vertices[6] - v0x;
+			var d2y : Number = _vertices[7] - v0y;
+			var d2z : Number = _vertices[8] - v0z;
+			var a : Number = d1y * d2z - d1z * d2y;
+			var b : Number = d1z * d2x - d1x * d2z;
+			var c : Number = d1x * d2y - d1y * d2x;
+			var len : Number = 1/Math.sqrt(a*a+b*b+c*c);
+			a *= len;
+			b *= len;
+			c *= len;
+			var dist : Number = a*(point.x - v0x) + b*(point.y - v0y) + c*(point.z - v0z);
+			trace (dist);
+			return dist > -epsilon && dist < epsilon;
 		}
 
 		/**
