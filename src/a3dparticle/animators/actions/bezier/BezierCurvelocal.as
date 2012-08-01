@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.bezier 
+package a3dparticle.animators.actions.bezier
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -31,10 +31,10 @@ package a3dparticle.animators.actions.bezier
 		private var _vertices2:Vector.<Number> = new Vector.<Number>();
 		private var _vertexBuffer2:VertexBuffer3D;
 		/**
-		 * 
+		 *
 		 * @param	fun Function.The function return a [p1:Vector3D,p2:Vector3D].
 		 */
-		public function BezierCurvelocal(fun:Function=null) 
+		public function BezierCurvelocal(fun:Function=null)
 		{
 			dataLenght = 6;
 			_name = "BezierCurvelocal";
@@ -59,12 +59,7 @@ package a3dparticle.animators.actions.bezier
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_p1.x);
-			getExtraData(subContainer).push(_p1.y);
-			getExtraData(subContainer).push(_p1.z);
-			getExtraData(subContainer).push(_p2.x);
-			getExtraData(subContainer).push(_p2.y);
-			getExtraData(subContainer).push(_p2.z);
+			getExtraData(subContainer).push(_p1.x, _p1.y, _p1.z, _p2.x, _p2.y, _p2.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -93,7 +88,7 @@ package a3dparticle.animators.actions.bezier
 			code += "add " + _animation.offsetTarget.toString() +".xyz," + distance.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";
 			
 			if (_animation.needVelocity)
-			{	
+			{
 				code += "mul " + time_2.toString() + "," + _animation.vertexLife.toString() + "," + _animation.TwoConst.toString() + "\n";
 				code += "sub " + time_temp.toString() + "," + _animation.OneConst.toString() + "," + time_2.toString() + "\n";
 				code += "mul " + time_temp.toString() + "," + _animation.TwoConst.toString() + "," + time_temp.toString() + "\n";

@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.uv 
+package a3dparticle.animators.actions.uv
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.animators.ParticleAnimation;
@@ -73,9 +73,7 @@ package a3dparticle.animators.actions.uv
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(temp.x);
-			getExtraData(subContainer).push(temp.y);
-			getExtraData(subContainer).push(temp.x - temp.x / _total / 2);
+			getExtraData(subContainer).push(temp.x, temp.y, temp.x - temp.x / _total / 2);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

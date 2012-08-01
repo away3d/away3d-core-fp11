@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.drift 
+package a3dparticle.animators.actions.drift
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -25,7 +25,7 @@ package a3dparticle.animators.actions.drift
 		
 		private var _driftData:Vector3D;
 		
-		public function DriftLocal(fun:Function=null) 
+		public function DriftLocal(fun:Function=null)
 		{
 			dataLenght = 4;
 			_name = "DriftLocal";
@@ -47,10 +47,7 @@ package a3dparticle.animators.actions.drift
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_driftData.x);
-			getExtraData(subContainer).push(_driftData.y);
-			getExtraData(subContainer).push(_driftData.z);
-			getExtraData(subContainer).push( Math.PI * 2 / _driftData.w);
+			getExtraData(subContainer).push(_driftData.x, _driftData.y, _driftData.z, _driftData.x, Math.PI * 2 / _driftData.w);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

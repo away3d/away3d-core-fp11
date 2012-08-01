@@ -125,6 +125,9 @@ package a3dparticle
 			var j:uint;
 			var length:uint;
 			var param:ParticleParam;
+			var tempIndex:uint;
+			var tempLength:uint;
+			var nowVertexLen:int;
 			
 			for (var i:uint = 0; i < _vec.length; i++)
 			{
@@ -141,9 +144,16 @@ package a3dparticle
 				vertexData = _vec[i].subGem.vertexData;
 				uvData = _vec[i].subGem.UVData;
 				
-				_subContainers[j].numTriangles+= _vec[i].subGem.numTriangles;
-				indexData.forEach(function(index:uint, ...rest):void { _subContainers[j].indexData.push(index + _subContainers[j].vertexData.length / 3); } );
-				uvData.forEach(function(uv:Number, ...rest):void { _subContainers[j].UVData.push(uv); } );
+				_subContainers[j].numTriangles += _vec[i].subGem.numTriangles;
+				nowVertexLen = _subContainers[j].vertexData.length / 3;
+				for (tempIndex = 0; tempIndex < indexData.length; tempIndex += 3)
+				{
+					_subContainers[j].indexData.push(indexData[tempIndex] + nowVertexLen, indexData[tempIndex + 1] + nowVertexLen, indexData[tempIndex + 2] + nowVertexLen);
+				}
+				for (tempIndex = 0; tempIndex < uvData.length; tempIndex += 2)
+				{
+					_subContainers[j].UVData.push(uvData[tempIndex], uvData[tempIndex + 1]);
+				}
 				
 				param = initParticleParam();
 				param.total = _vec.length;
@@ -153,13 +163,12 @@ package a3dparticle
 				if (initParticleFun != null) initParticleFun(param);
 				
 				_particleAnimation.genOne(param);
-				for (var k:uint = 0; k < length; k += 3)
+				for (tempIndex = 0; tempIndex < length; tempIndex += 3)
 				{
-					_subContainers[j].vertexData.push(vertexData[k]);
-					_subContainers[j].vertexData.push(vertexData[k + 1]);
-					_subContainers[j].vertexData.push(vertexData[k + 2]);
-					_particleAnimation.distributeOne(i, k, _subContainers[j]);
+					_subContainers[j].vertexData.push(vertexData[tempIndex], vertexData[tempIndex + 1], vertexData[tempIndex + 2]);
+					_particleAnimation.distributeOne(i, tempIndex, _subContainers[j]);
 				}
+				
 			}
 			_particleAnimation.finishGen();
 			_hasGen = true;

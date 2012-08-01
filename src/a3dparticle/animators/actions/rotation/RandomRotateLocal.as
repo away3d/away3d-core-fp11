@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.rotation 
+package a3dparticle.animators.actions.rotation
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -25,10 +25,10 @@ package a3dparticle.animators.actions.rotation
 		private var roatateAttribute:ShaderRegisterElement;
 		
 		/**
-		 * 
+		 *
 		 * @param	fun Function.the function return a Vector3D. (Vector3d.x,Vector3d.y,Vector3d.z) is roatate axis,Vector3d.w is cycle time
 		 */
-		public function RandomRotateLocal(fun:Function=null) 
+		public function RandomRotateLocal(fun:Function=null)
 		{
 			dataLenght = 4;
 			_name = "RandomRotateLocal";
@@ -54,10 +54,7 @@ package a3dparticle.animators.actions.rotation
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_tempRotateAxis.x);
-			getExtraData(subContainer).push(_tempRotateAxis.y);
-			getExtraData(subContainer).push(_tempRotateAxis.z);
-			getExtraData(subContainer).push(_tempRotateRate);
+			getExtraData(subContainer).push(_tempRotateAxis.x, _tempRotateAxis.y, _tempRotateAxis.z, _tempRotateRate);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

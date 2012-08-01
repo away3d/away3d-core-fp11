@@ -38,7 +38,7 @@ package a3dparticle.animators
 		
 		private var _particleActions:Vector.<ActionBase> = new Vector.<ActionBase>();
 		
-		private var _pushOrderActions:Vector.<ActionBase> = new Vector.<ActionBase>();
+		private var _perActions:Vector.<PerParticleAction> = new Vector.<PerParticleAction>();
 		
 		//dependent and global action
 		private var timeAction:TimeAction;
@@ -142,7 +142,9 @@ package a3dparticle.animators
 		public function addAction(action:ActionBase):void
 		{
 			var i:int;
-			_pushOrderActions.push(action);
+			
+			if (action is PerParticleAction)
+				_perActions.push(action);
 			
 			for (i = _particleActions.length - 1; i >= 0; i--)
 			{
@@ -157,23 +159,19 @@ package a3dparticle.animators
 		
 		public function genOne(param:ParticleParam):void
 		{
-			for each (var action:ActionBase in _pushOrderActions)
+			var len:int = _perActions.length;
+			for (var i:int = 0; i < len; i++)
 			{
-				if (action is PerParticleAction)
-				{
-					PerParticleAction(action).genOne(param);
-				}
+				_perActions[i].genOne(param);
 			}
 		}
 		
 		public function distributeOne(index:uint, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			for each (var action:ActionBase in _pushOrderActions)
+			var len:int = _perActions.length;
+			for (var i:int = 0; i < len; i++)
 			{
-				if (action is PerParticleAction)
-				{
-					PerParticleAction(action).distributeOne(index, verticeIndex, subContainer);
-				}
+				_perActions[i].distributeOne(index, verticeIndex, subContainer);
 			}
 		}
 		

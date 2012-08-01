@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.brokenline 
+package a3dparticle.animators.actions.brokenline
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -31,11 +31,11 @@ package a3dparticle.animators.actions.brokenline
 		private var vertices_buffer:Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>();
 		
 		/**
-		 * 
+		 *
 		 * @param	brokenCount uint.Becasue the number of attribute registers is only 8,the broken should be less 4.
 		 * @param	fun Function.It should return a [Vector3D],(Vector3D.x,Vector3D.y,Vector3D.z) is the velocity,Vector3D.w is the during time.
 		 */
-		public function BrokenLineLocal(brokenCount:uint,fun:Function=null) 
+		public function BrokenLineLocal(brokenCount:uint,fun:Function=null)
 		{
 			_brokenCount = brokenCount;
 			_genFun = fun;
@@ -65,10 +65,7 @@ package a3dparticle.animators.actions.brokenline
 		{
 			for(var i:int = 0; i < _brokenCount; i++)
 			{
-				getExtraDataByIndex(subContainer,i).push(_brokenData[i].x)
-				getExtraDataByIndex(subContainer,i).push(_brokenData[i].y)
-				getExtraDataByIndex(subContainer,i).push(_brokenData[i].z)
-				getExtraDataByIndex(subContainer,i).push(_brokenData[i].w)
+				getExtraDataByIndex(subContainer, i).push(_brokenData[i].x, _brokenData[i].y, _brokenData[i].z, _brokenData[i].w);
 			}
 		}
 		

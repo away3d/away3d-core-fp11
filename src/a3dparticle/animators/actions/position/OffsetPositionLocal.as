@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.position 
+package a3dparticle.animators.actions.position
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -25,10 +25,10 @@ package a3dparticle.animators.actions.position
 		private var _offsetAttribute:ShaderRegisterElement;
 		
 		/**
-		 * 
+		 *
 		 * @param	offset Function.It return a Vector3D that the (x,y,z) is the position.
 		 */
-		public function OffsetPositionLocal(offset:Function=null) 
+		public function OffsetPositionLocal(offset:Function=null)
 		{
 			dataLenght = 3;
 			_name = "OffsetPositionLocal";
@@ -50,9 +50,7 @@ package a3dparticle.animators.actions.position
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_tempOffset.x);
-			getExtraData(subContainer).push(_tempOffset.y);
-			getExtraData(subContainer).push(_tempOffset.z);
+			getExtraData(subContainer).push(_tempOffset.x, _tempOffset.y, _tempOffset.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

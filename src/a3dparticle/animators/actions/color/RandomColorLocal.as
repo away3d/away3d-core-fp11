@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.color 
+package a3dparticle.animators.actions.color
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -32,7 +32,7 @@ package a3dparticle.animators.actions.color
 		private var offsetVary:ShaderRegisterElement;
 		
 		
-		public function RandomColorLocal(fun:Function=null,hasMult:Boolean=true,hasOffset:Boolean=true) 
+		public function RandomColorLocal(fun:Function=null,hasMult:Boolean=true,hasOffset:Boolean=true)
 		{
 			_colorFun = fun;
 			_hasMult = hasMult;
@@ -61,17 +61,11 @@ package a3dparticle.animators.actions.color
 		{
 			if (_hasMult)
 			{
-				getExtraData(subContainer).push(_tempColor.redMultiplier);
-				getExtraData(subContainer).push(_tempColor.greenMultiplier);
-				getExtraData(subContainer).push(_tempColor.blueMultiplier);
-				getExtraData(subContainer).push(_tempColor.alphaMultiplier);
+				getExtraData(subContainer).push(_tempColor.redMultiplier,_tempColor.greenMultiplier,_tempColor.blueMultiplier,_tempColor.alphaMultiplier);
 			}
 			if (_hasOffset)
 			{
-				getExtraData(subContainer).push(_tempColor.redOffset);
-				getExtraData(subContainer).push(_tempColor.greenOffset);
-				getExtraData(subContainer).push(_tempColor.blueOffset);
-				getExtraData(subContainer).push(_tempColor.alphaOffset);
+				getExtraData(subContainer).push(_tempColor.redOffset,_tempColor.greenOffset,_tempColor.blueOffset,_tempColor.alphaOffset);
 			}
 		}
 		

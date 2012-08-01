@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.scale 
+package a3dparticle.animators.actions.scale
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -21,7 +21,7 @@ package a3dparticle.animators.actions.scale
 		
 		private var scaleAttribute:ShaderRegisterElement;
 		/**
-		 * 
+		 *
 		 * @param	fun Function.The fun return a Vector3D which (x,y,z) is a (scaleX,scaleY,scaleZ)
 		 */
 		public function RandomScaleLocal(fun:Function = null)
@@ -47,9 +47,7 @@ package a3dparticle.animators.actions.scale
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_tempScale.x);
-			getExtraData(subContainer).push(_tempScale.y);
-			getExtraData(subContainer).push(_tempScale.z);
+			getExtraData(subContainer).push(_tempScale.x, _tempScale.y, _tempScale.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

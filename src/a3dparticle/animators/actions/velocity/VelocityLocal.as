@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.velocity 
+package a3dparticle.animators.actions.velocity
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -21,10 +21,10 @@ package a3dparticle.animators.actions.velocity
 		
 		private var velocityAttribute:ShaderRegisterElement;
 		/**
-		 * 
+		 *
 		 * @param	fun Function.The fun should return a Vector3D whick (x,y,z) is the velocity.
 		 */
-		public function VelocityLocal(fun:Function=null) 
+		public function VelocityLocal(fun:Function=null)
 		{
 			dataLenght = 3;
 			_velFun = fun;
@@ -46,9 +46,7 @@ package a3dparticle.animators.actions.velocity
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_tempVelocity.x);
-			getExtraData(subContainer).push(_tempVelocity.y);
-			getExtraData(subContainer).push(_tempVelocity.z);
+			getExtraData(subContainer).push(_tempVelocity.x,_tempVelocity.y,_tempVelocity.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

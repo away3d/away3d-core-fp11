@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions
 {
 	import a3dparticle.core.SubContainer;
 	import a3dparticle.particle.ParticleParam;
@@ -33,7 +33,7 @@ package a3dparticle.animators.actions
 		
 		private var _loop:Boolean;
 		
-		public function TimeAction() 
+		public function TimeAction()
 		{
 			priority = 0;
 			dataLenght = 4;
@@ -112,10 +112,7 @@ package a3dparticle.animators.actions
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_tempStartTime);
-			getExtraData(subContainer).push(_tempEndTime);
-			getExtraData(subContainer).push(_tempSleepTime + _tempEndTime);
-			getExtraData(subContainer).push(1 / _tempEndTime);
+			getExtraData(subContainer).push(_tempStartTime, _tempEndTime, _tempSleepTime + _tempEndTime, 1 / _tempEndTime);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

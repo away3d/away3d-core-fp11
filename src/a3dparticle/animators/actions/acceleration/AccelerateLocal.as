@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.acceleration 
+package a3dparticle.animators.actions.acceleration
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -22,10 +22,10 @@ package a3dparticle.animators.actions.acceleration
 		private var accAttribute:ShaderRegisterElement;
 		
 		/**
-		 * 
+		 *
 		 * @param	fun Function.The fun return a Vector3D that (x,y,z) is a acceleration.
 		 */
-		public function AccelerateLocal(fun:Function=null) 
+		public function AccelerateLocal(fun:Function=null)
 		{
 			dataLenght = 3;
 			_name = "AccelerateLocal";
@@ -47,9 +47,7 @@ package a3dparticle.animators.actions.acceleration
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_tempAcc.x);
-			getExtraData(subContainer).push(_tempAcc.y);
-			getExtraData(subContainer).push(_tempAcc.z);
+			getExtraData(subContainer).push(_tempAcc.x, _tempAcc.y, _tempAcc.z);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -71,7 +69,7 @@ package a3dparticle.animators.actions.acceleration
 			shaderRegisterCache.removeVertexTempUsage(temp);
 			
 			code += "mul " + temp.toString() +"," + temp.toString() + "," + _animation.vertexTime.toString() + "\n";
-			code += "add " + _animation.offsetTarget.toString() +".xyz," + temp.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";		
+			code += "add " + _animation.offsetTarget.toString() +".xyz," + temp.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";
 			return code;
 		}
 		

@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.circle 
+package a3dparticle.animators.actions.circle
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -33,11 +33,11 @@ package a3dparticle.animators.actions.circle
 		private var circleAttribute:ShaderRegisterElement;
 		private var eulersMatrixRegister:ShaderRegisterElement;
 		/**
-		 * 
+		 *
 		 * @param	fun Function.The fun return a a Vector3D. Vector3D.x is radius,Vector3D.y is cycle
 		 * @param	eulers Vector3D.The eulers of the rotate.
 		 */
-		public function CircleLocal(fun:Function=null,eulers:Vector3D=null) 
+		public function CircleLocal(fun:Function=null,eulers:Vector3D=null)
 		{
 			_name = "CircleLocal";
 			_dataFun = fun;
@@ -67,8 +67,7 @@ package a3dparticle.animators.actions.circle
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_radius);
-			getExtraData(subContainer).push(Math.PI * 2 / _cycle);
+			getExtraData(subContainer).push(_radius, Math.PI * 2 / _cycle);
 			if (_animation.needVelocity) getExtraData(subContainer).push(_radius * Math.PI * 2);
 		}
 		
