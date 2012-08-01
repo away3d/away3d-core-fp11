@@ -27,7 +27,7 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, ignoreFacesLookingAway:Boolean ):Boolean
 		{
 			var i:uint;
 			var t:Number;
@@ -87,7 +87,7 @@ package away3d.core.pick
 
 				// -- plane intersection test --
 				nDotV = nx * rayDirection.x + ny * + rayDirection.y + nz * rayDirection.z; // rayDirection . normal
-				if( nDotV < 0 ) { // an intersection must exist
+				if( ( ignoreFacesLookingAway && nDotV < 0.0 ) || ( !ignoreFacesLookingAway && nDotV != 0.0 ) ) {
 					// find collision t
 					D = -( nx * p0x + ny * p0y + nz * p0z );
 					disToPlane = -( nx * rayPosition.x + ny * rayPosition.y + nz * rayPosition.z + D );

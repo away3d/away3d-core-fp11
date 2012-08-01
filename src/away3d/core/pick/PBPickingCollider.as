@@ -51,7 +51,7 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, ignoreFacesLookingAway:Boolean):Boolean
 		{
 			// TODO: It seems that the kernel takes almost the same time to calculate on a mesh with 2 triangles than on a
 			// mesh with thousands of triangles. It might be worth exploring the possibility of accumulating buffers until a certain
@@ -76,6 +76,7 @@ package away3d.core.pick
 				_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
 				_rayTriangleKernel.data.vertexBufferWidth.value = [ vertexBufferDims.x ];
 				_rayTriangleKernel.data.vertexBuffer.input = duplicateVertexData;
+				_rayTriangleKernel.data.ignoreFacesLookingAway.value = [ ignoreFacesLookingAway ? 1.0 : 0.0 ];
 	
 				// send indices to pb
 				_rayTriangleKernel.data.indexBuffer.width = indexBufferDims.x;
