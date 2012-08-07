@@ -17,10 +17,10 @@ package away3d.lights.shadowmaps
 	public class DirectionalShadowMapper extends ShadowMapperBase
 	{
 		protected var _depthCamera : Camera3D;
-		private var _localFrustum : Vector.<Number>;
+		protected var _localFrustum : Vector.<Number>;
 
 		private var _lightOffset : Number = 10000;
-		private var _matrix : Matrix3D;
+		protected var _matrix : Matrix3D;
 		private var _depthLens : FreeMatrixLens;
 
 		public function DirectionalShadowMapper()
@@ -61,23 +61,27 @@ package away3d.lights.shadowmaps
 
 		override protected function updateDepthProjection(viewCamera : Camera3D) : void
 		{
+			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners);
+			_depthLens.matrix = _matrix;
+		}
+
+		protected function updateProjectionFromFrustumCorners(viewCamera : Camera3D, corners : Vector.<Number>) : void
+		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var dir : Vector3D;
-			var d : Number;
-			var corners : Vector.<Number> = viewCamera.lens.frustumCorners;
 			var x : Number, y : Number, z : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number = Number.POSITIVE_INFINITY;
 			var maxX : Number = Number.NEGATIVE_INFINITY, maxY : Number = Number.NEGATIVE_INFINITY, maxZ : Number = Number.NEGATIVE_INFINITY;
 			var scaleX : Number, scaleY : Number;
 			var offsX : Number, offsY : Number;
-			var halfSize : Number = _depthMapSize*.5;
+			var halfSize : Number = _depthMapSize * .5;
 			var i : uint;
 
 			_depthCamera.transform = _light.sceneTransform;
 			dir = DirectionalLight(_light).sceneDirection;
-			_depthCamera.x = viewCamera.x - dir.x * _lightOffset;
-			_depthCamera.y = viewCamera.y - dir.y * _lightOffset;
-			_depthCamera.z = viewCamera.z - dir.z * _lightOffset;
+			_depthCamera.x = -dir.x * _lightOffset;
+			_depthCamera.y = -dir.y * _lightOffset;
+			_depthCamera.z = -dir.z * _lightOffset;
 
 			_matrix.copyFrom(_depthCamera.inverseSceneTransform);
 			_matrix.prepend(viewCamera.sceneTransform);
@@ -92,29 +96,31 @@ package away3d.lights.shadowmaps
 				if (x > maxX) maxX = x;
 				if (y < minY) minY = y;
 				if (y > maxY) maxY = y;
-//				if (z < minZ) minZ = z;
 				if (z > maxZ) maxZ = z;
 			}
+			minZ = 10;
 
-			// counter shadow map swimming
-			scaleX = 64 / Math.ceil((maxX - minX)*32);
-			scaleY = 64 / Math.ceil((maxY - minY)*32);
+			var quantizeFactor : Number = 128;
+			var invQuantizeFactor : Number = 1/quantizeFactor;
+
+			scaleX = 2*invQuantizeFactor/Math.ceil((maxX - minX)*invQuantizeFactor);
+			scaleY = 2*invQuantizeFactor/Math.ceil((maxY - minY)*invQuantizeFactor);
 
 			offsX = Math.ceil(-.5*(maxX + minX)*scaleX*halfSize) / halfSize;
 			offsY = Math.ceil(-.5*(maxY + minY)*scaleY*halfSize) / halfSize;
 
-			minZ = 10;
+			var d : Number = 1/(maxZ - minZ);
 
-			d = 1 / (maxZ - minZ);
-			raw[0] = raw[5] = raw[15] = 1;
+			raw[0] = scaleX;
+			raw[5] = scaleY;
 			raw[10] = d;
+			raw[12] = offsX;
+			raw[13] = offsY;
 			raw[14] = -minZ * d;
-			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = raw[12] = raw[13] = 0;
+			raw[15] = 1;
+			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;
 
 			_matrix.copyRawDataFrom(raw);
-			_matrix.prependTranslation(offsX, offsY, 0);
-			_matrix.prependScale(scaleX, scaleY, 1);
-
 			_depthLens.matrix = _matrix;
 		}
 	}
