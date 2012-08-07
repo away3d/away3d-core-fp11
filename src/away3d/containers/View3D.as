@@ -49,7 +49,7 @@
 		private var _backgroundColor : uint = 0x000000;
 		private var _backgroundAlpha : Number = 1;
 
-		private var _mouse3DManager : Mouse3DManager;
+		protected var _mouse3DManager : Mouse3DManager;
 		private var _stage3DManager : Stage3DManager;
 
 		protected var _renderer : RendererBase;
@@ -78,8 +78,8 @@
 		private var _menu0:ContextMenuItem;
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
-		private var _shareContext:Boolean = false;
-		private var _viewScissorRect:Rectangle;
+		protected var _shareContext:Boolean = false;
+		protected var _viewScissorRect:Rectangle;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -633,7 +633,7 @@
 			_time = time;
 		}
 
-		private function updateViewSizeData() : void
+		protected function updateViewSizeData() : void
 		{
 			_camera.lens.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
