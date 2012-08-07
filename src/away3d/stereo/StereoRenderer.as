@@ -99,8 +99,8 @@ package away3d.stereo
 			
 			_method.activate(stage3DProxy);
 			
-			context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
-			context.setVertexBufferAt(1, vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
+			stage3DProxy.setSimpleVertexBuffer(0, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 0);
+			stage3DProxy.setSimpleVertexBuffer(1, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 2);
 			
 			stage3DProxy.setTextureAt(0, _leftTexture);
 			stage3DProxy.setTextureAt(1, _rightTexture);
