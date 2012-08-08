@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.animators.nodes.*;
 	import away3d.core.managers.*;
 	import away3d.materials.passes.*;
 	
@@ -11,31 +12,18 @@ package away3d.animators
 	public interface IAnimationSet
 	{
 		/**
-		 * Returns a vector of animation state objects that make up the contents of the animation data set.
-		 */
-		function get states():Vector.<IAnimationState>;
-		
-		/**
 		 * Check to determine whether a state is registered in the animation set under the given name.
 		 * 
 		 * @param stateName The name of the animation state object to be checked.
 		 */
-		function hasState(stateName:String):Boolean;
+		function hasAnimation(name:String):Boolean;
 		
 		/**
 		 * Retrieves the animation state object registered in the animation data set under the given name.
 		 * 
 		 * @param stateName The name of the animation state object to be retrieved.
 		 */
-		function getState(stateName:String):IAnimationState;
-		
-		/**
-		 * Adds an animation state object to the aniamtion data set under the given name.
-		 * 
-		 * @param stateName The name under which the animation state object will be stored.
-		 * @param animationState The animation state object to be staored in the set.
-		 */
-		function addState(stateName:String, animationState:IAnimationState):void;
+		function getAnimation(name:String):AnimationNodeBase;
 		
 		/**
 		 * Indicates whether the properties of the animation data contained within the set combined with
@@ -51,6 +39,8 @@ package away3d.animators
 		 * @private
 		 */
 		function resetGPUCompatibility() : void;
+		
+		function cancelGPUCompatibility() : void;
 		
 		/**
 		 * Generates the AGAL Vertex code for the animation, tailored to the material pass's requirements.

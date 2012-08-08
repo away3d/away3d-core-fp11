@@ -1,8 +1,8 @@
 package away3d.loaders.parsers
 {
+	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.SkeletonAnimationSet;
-	import away3d.animators.SkeletonAnimationState;
 	import away3d.animators.data.JointPose;
 	import away3d.animators.data.Skeleton;
 	import away3d.animators.data.SkeletonJoint;
@@ -68,8 +68,8 @@ package away3d.loaders.parsers
 		private var _rootContainer : ObjectContainer3D;
 		private var _geometries : Vector.<Geometry>;
 		private var _animationInfo : DAEAnimationInfo;
-		//private var _animators : Vector.<AnimatorBase>;
-		private var _states : Vector.<SkeletonAnimationState>;
+		//private var _animators : Vector.<IAnimator>;
+		private var _rootNodes : Vector.<AnimationNodeBase>;
 		private var _defaultBitmapMaterial:TextureMaterial = DefaultMaterialManager.getDefaultMaterial();
 		private var _defaultColorMaterial:ColorMaterial = new ColorMaterial(0xff0000);
 		private static var _numInstances:uint = 0;
@@ -196,8 +196,8 @@ package away3d.loaders.parsers
 					_scene = null;
 					_root = null;
 					_libAnimations = parseLibrary(_doc._ns::library_animations._ns::animation, DAEAnimation);
-					//_animators = new Vector.<AnimatorBase>();
-					_states = new Vector.<SkeletonAnimationState>();
+					//_animators = new Vector.<IAnimator>();
+					_rootNodes = new Vector.<AnimationNodeBase>();
 					
 					if (_doc.._ns::scene && _doc.._ns::scene.length()) {
 						_scene = new DAEScene(_doc.._ns::scene[0]);
@@ -433,7 +433,7 @@ package away3d.loaders.parsers
 			var geometry : Geometry;
 			var mesh : Mesh;
 			var skeleton : Skeleton;
-			var state : SkeletonAnimationState;
+			var clip : SkeletonClipNode;
 			//var anim:SkeletonAnimation;
 			var animationSet : SkeletonAnimationSet;
 			var i : uint, j : uint;
@@ -476,8 +476,8 @@ package away3d.loaders.parsers
 					
 					skeleton = controller.skin.userData as Skeleton;
 					
-					state = processSkinAnimation(controller.skin, mesh, skeleton);
-					state.looping = true;
+					clip = processSkinAnimation(controller.skin, mesh, skeleton);
+					clip.looping = true;
 					
 					weights = SkinnedSubGeometry(mesh.geometry.subGeometries[0]).jointIndexData.length;
 					jpv = weights / (mesh.geometry.subGeometries[0].vertexData.length/3);
@@ -486,11 +486,10 @@ package away3d.loaders.parsers
 					//var state:SkeletonAnimationState = SkeletonAnimationState(mesh.animationState);
 					//animator = new SmoothSkeletonAnimator(state);
 					//SmoothSkeletonAnimator(animator).addSequence(SkeletonAnimationSequence(sequence));
-					animationSet.addState("state_" + _states.length, state);
+					animationSet.addAnimation("node_" + _rootNodes.length, clip);
 					
 					//_animators.push(animator);
-					_states.push(state);
-					finalizeAsset(state, state.name);
+					_rootNodes.push(clip);
 				}
 				
 				finalizeAsset(mesh);
@@ -503,7 +502,7 @@ package away3d.loaders.parsers
 				finalizeAsset(animationSet);
 		}
 		
-		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonAnimationState
+		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonClipNode
 		{
 			//var useGPU : Boolean = _configFlags & CONFIG_USE_GPU ? true : false;
 			//var animation : SkeletonAnimation = new SkeletonAnimation(skeleton, skin.maxBones, useGPU);
@@ -515,7 +514,6 @@ package away3d.loaders.parsers
 			var t : Number = 0;
 			var i : uint, j : uint;
 			var clip : SkeletonClipNode = new SkeletonClipNode();
-			var state : SkeletonAnimationState = new SkeletonAnimationState(clip);
 			//mesh.geometry.animation = animation;
 			var skeletonPose : SkeletonPose;
 			var identity:Matrix3D;
@@ -548,7 +546,7 @@ package away3d.loaders.parsers
 			
 			finalizeAsset(clip);
 			
-			return state;
+			return clip;
 		}
 		
 		private function isAnimatedSkeleton(skeleton : Skeleton) : Boolean

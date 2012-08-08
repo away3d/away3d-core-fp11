@@ -1,6 +1,7 @@
 package away3d.events
 {
 	import away3d.animators.*;
+	import away3d.animators.states.*;
 	import away3d.animators.nodes.*;
 
 	import flash.events.Event;
@@ -15,8 +16,11 @@ package away3d.events
     	 */
     	public static const PLAYBACK_COMPLETE:String = "playbackComplete";
 		
+		public static const TRANSITION_COMPLETE:String = "transitionComplete";
+		
+		private var _animator:IAnimator;
 		private var _animationState:IAnimationState;
-		private var _animationNode:IAnimationNode;
+		private var _animationNode:AnimationNodeBase;
 		
 		/**
 		 * Create a new <code>AnimatonStateEvent</code>
@@ -25,12 +29,21 @@ package away3d.events
 		 * @param animator The animation state object that is the subject of this event.
 		 * @param animationNode The animation node inside the animation state from which the event originated.
 		 */
-		public function AnimationStateEvent(type : String, animationState : IAnimationState, animationNode:IAnimationNode) : void
+		public function AnimationStateEvent(type : String, animator:IAnimator, animationState : IAnimationState, animationNode:AnimationNodeBase) : void
 		{
 			super(type, false, false);
 			
+			_animator = animator;
 			_animationState = animationState;
 			_animationNode = animationNode;
+		}
+		
+		/**
+		 * The animator object that is the subject of this event.
+		 */
+		public function get animator() : IAnimator
+		{
+			return _animator;
 		}
 		
 		/**
@@ -40,11 +53,11 @@ package away3d.events
 		{
 			return _animationState;
 		}
-				
+		
 		/**
 		 * The animation node inside the animation state from which the event originated.
 		 */
-		public function get animationNode() : IAnimationNode
+		public function get animationNode() : AnimationNodeBase
 		{
 			return _animationNode;
 		}
@@ -56,7 +69,7 @@ package away3d.events
 		 */
 		override public function clone() : Event
 		{
-			return new AnimationStateEvent(type, _animationState, _animationNode);
+			return new AnimationStateEvent(type, _animator, _animationState, _animationNode);
 		}
 	}
 }

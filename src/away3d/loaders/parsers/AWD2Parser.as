@@ -1,11 +1,10 @@
 package away3d.loaders.parsers
 {
+	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.nodes.UVClipNode;
 	import flash.display.Sprite;
-	import away3d.animators.UVAnimationState;
 	import away3d.animators.data.UVAnimationFrame;
-	import away3d.animators.SkeletonAnimationState;
 	import away3d.animators.data.JointPose;
 	import away3d.animators.data.Skeleton;
 	import away3d.animators.data.SkeletonJoint;
@@ -299,7 +298,7 @@ package away3d.loaders.parsers
 			_blocks[_cur_block_id].id = _cur_block_id;
 		}
 		
-		private function parseUVAnimation(blockLength : uint) : UVAnimationState
+		private function parseUVAnimation(blockLength : uint) : UVClipNode
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -308,7 +307,6 @@ package away3d.loaders.parsers
 			var frames_parsed : uint;
 			var props : AWDProperties;
 			var dummy : Sprite;
-			var state : UVAnimationState;
 			var clip : UVClipNode;
 			
 			name = parseVarStr();
@@ -317,7 +315,6 @@ package away3d.loaders.parsers
 			props = parseProperties(null);
 			
 			clip = new UVClipNode();
-			state = new UVAnimationState(clip);
 			
 			frames_parsed = 0;
 			dummy = new Sprite();
@@ -343,9 +340,8 @@ package away3d.loaders.parsers
 			parseUserAttributes();
 			
 			finalizeAsset(clip, name);
-			finalizeAsset(state, name);
 			
-			return state;
+			return clip;
 		}
 		
 		private function parseMaterial(blockLength : uint) : MaterialBase
@@ -575,7 +571,7 @@ package away3d.loaders.parsers
 			return pose;
 		}
 		
-		private function parseSkeletonAnimation(blockLength : uint) : SkeletonAnimationState
+		private function parseSkeletonAnimation(blockLength : uint) : SkeletonClipNode
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -588,7 +584,6 @@ package away3d.loaders.parsers
 			
 			name = parseVarStr();
 			var clip : SkeletonClipNode = new SkeletonClipNode();
-			var state : SkeletonAnimationState = new SkeletonAnimationState(clip);
 			
 			num_frames = _body.readUnsignedShort();
 			
@@ -610,9 +605,9 @@ package away3d.loaders.parsers
 			// Ignore attributes for now
 			parseUserAttributes();
 			
-			finalizeAsset(state, name);
+			finalizeAsset(clip, name);
 			
-			return state;
+			return clip;
 		}
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D

@@ -2,7 +2,6 @@ package away3d.loaders.parsers
 {
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.nodes.VertexClipNode;
-	import away3d.animators.VertexAnimationState;
 	import away3d.animators.VertexAnimationSet;
 	import flash.utils.Dictionary;
 	import away3d.arcane;
@@ -12,7 +11,6 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
-	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.net.URLRequest;
@@ -362,7 +360,6 @@ package away3d.loaders.parsers
 			var i : uint, j : int, k : uint, ch : uint;
 			var name : String = "";
 			var prevClip : VertexClipNode = null;
-			var state : VertexAnimationState;
 			
 			_byteData.position = _offsetFrames;
 			
@@ -407,16 +404,13 @@ package away3d.loaders.parsers
 					// If another sequence was parsed before this one, starting
 					// a new state means the previous one is complete and can
 					// hence be finalized.
-					if (prevClip) {
+					if (prevClip)
 						finalizeAsset(prevClip);
-						finalizeAsset(state);
-					}
 						
 					clip = new VertexClipNode();
 					clip.stitchFinalFrame = true;
-					state = new VertexAnimationState(clip);
 					
-					_animationSet.addState(name, state);
+					_animationSet.addAnimation(name, clip);
 					_clipNodes[name] = clip;
 					
 					prevClip = clip;
@@ -425,10 +419,8 @@ package away3d.loaders.parsers
 			}
 			
 			// Finalize the last state
-			if (prevClip) {
+			if (prevClip)
 				finalizeAsset(prevClip);
-				finalizeAsset(state);
-			}
 			
 			// Force finalizeAsset() to decide name
 			//_animator.name = "";

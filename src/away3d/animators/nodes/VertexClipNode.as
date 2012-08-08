@@ -1,5 +1,6 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.states.*;
 	import away3d.core.base.*;
 
 	import flash.geom.*;
@@ -8,34 +9,11 @@ package away3d.animators.nodes
 	/**
 	 * A vertex animation node containing time-based animation data as individual geometry obejcts.
 	 */
-	public class VertexClipNode extends AnimationClipNodeBase implements IVertexAnimationNode
+	public class VertexClipNode extends AnimationClipNodeBase
 	{
 		private var _frames : Vector.<Geometry> = new Vector.<Geometry>();
 		private var _translations : Vector.<Vector3D> = new Vector.<Vector3D>();
-		private var _currentGeometry : Geometry;
-		private var _nextGeometry : Geometry;
 		
-		/**
-		 * @inheritDoc
-		 */
-		public function get currentGeometry() : Geometry
-		{
-			if (_framesDirty)
-				updateFrames();
-			
-			return _currentGeometry;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function get nextGeometry() : Geometry
-		{
-			if (_framesDirty)
-				updateFrames();
-			
-			return _nextGeometry;
-		}
 		
 		/**
 		 * Returns a vector of geometry frames representing the vertex values of each animation frame in the clip.
@@ -50,15 +28,9 @@ package away3d.animators.nodes
 		 */
 		public function VertexClipNode()
 		{
+			_stateClass = VertexClipState;
 		}
 		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateRootDelta() : void
-		{
-			//TODO:implement rootdelta functionality for vertex animations
-		}
 		
 		/**
 		 * Adds a geometry object to the internal timeline of the animation node.
@@ -76,31 +48,6 @@ package away3d.animators.nodes
 			_numFrames = _durations.length;
 			
 			_stitchDirty = true;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateTime(time:int):void
-		{
-			super.updateTime(time);
-			
-			_framesDirty = true;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateFrames() : void
-		{
-			super.updateFrames();
-			
-			_currentGeometry = _frames[_currentFrame];
-			
-			if (_looping && _nextFrame >= _lastFrame)
-				_nextGeometry = _frames[0];
-			else
-				_nextGeometry = _frames[_nextFrame];
 		}
 		
 		/**

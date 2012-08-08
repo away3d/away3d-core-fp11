@@ -1,6 +1,5 @@
 package away3d.tools.serialize
 {
-	import away3d.animators.SkeletonAnimationState;
 	import away3d.animators.IAnimator;
 	import away3d.animators.data.JointPose;
 	import away3d.animators.data.Skeleton;
@@ -181,13 +180,6 @@ package away3d.tools.serialize
 			{
 				serializeJointPose(jointPose, serializer);
 			}
-			serializer.endObject();
-		}
-		
-		public static function serializeSkeletonAnimationState(skeletonAnimationState:SkeletonAnimationState, serializer:SerializerBase):void
-		{
-			serializer.beginObject(classNameFromInstance(skeletonAnimationState), skeletonAnimationState.name);
-			//TODO: add animation nodes to serialiser
 			serializer.endObject();
 		}
 		

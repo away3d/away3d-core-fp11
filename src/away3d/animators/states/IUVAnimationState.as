@@ -1,4 +1,4 @@
-package away3d.animators.nodes
+package away3d.animators.states
 {
 	import away3d.animators.data.*;
 	
@@ -7,7 +7,7 @@ package away3d.animators.nodes
 	 * 
 	 * @see away3d.animators.UVAnimator
 	 */
-	public interface IUVAnimationNode extends IAnimationNode
+	public interface IUVAnimationState extends IAnimationState
 	{
 		/**
 		 * Returns the current UV frame of animation in the clip based on the internal playhead position.
@@ -24,5 +24,4 @@ package away3d.animators.nodes
 		 * between the current uv frame (0) and next uv frame (1) of the animation.
 		 */
 		function get blendWeight() : Number;
-	}
-}
+	}}

@@ -1,13 +1,10 @@
 package away3d.animators
 {
-	import away3d.errors.AnimationSetError;
-	import flash.utils.Dictionary;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.NamedAssetBase;
-	import away3d.library.assets.IAsset;
-	import away3d.arcane;
+	import away3d.animators.nodes.*;
+	import away3d.errors.*;
+	import away3d.library.assets.*;
 	
-	use namespace arcane;
+	import flash.utils.*;
 	
 	/**
 	 * Provides an abstract base class for data set classes that hold animation data for use in animator classes.
@@ -16,9 +13,10 @@ package away3d.animators
 	 */
 	public class AnimationSetBase extends NamedAssetBase implements IAsset
 	{
-		arcane var _usesCPU:Boolean;
-		private var _states:Vector.<IAnimationState> = new Vector.<IAnimationState>();
-		private var _stateDictionary:Dictionary = new Dictionary(true);
+		private var _usesCPU:Boolean;
+		private var _animations:Vector.<AnimationNodeBase> = new Vector.<AnimationNodeBase>();
+		private var _animationNames:Vector.<String> = new Vector.<String>();
+		private var _animationDictionary:Dictionary = new Dictionary(true);
 		
 		/**
 		 * Retrieves a temporary GPU register that's still free.
@@ -63,6 +61,11 @@ package away3d.animators
             _usesCPU = false;
         }
 		
+		public function cancelGPUCompatibility() : void
+        {
+            _usesCPU = true;
+        }
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -74,9 +77,17 @@ package away3d.animators
 		/**
 		 * Returns a vector of animation state objects that make up the contents of the animation data set.
 		 */
-		public function get states():Vector.<IAnimationState>
+		public function get animations():Vector.<AnimationNodeBase>
 		{
-			return _states;
+			return _animations;
+		}
+		
+		/**
+		 * Returns a vector of animation state objects that make up the contents of the animation data set.
+		 */
+		public function get animationNames():Vector.<String>
+		{
+			return _animationNames;
 		}
 		
 		/**
@@ -84,9 +95,9 @@ package away3d.animators
 		 * 
 		 * @param stateName The name of the animation state object to be checked.
 		 */
-		public function hasState(stateName:String):Boolean
+		public function hasAnimation(name:String):Boolean
 		{
-			return _stateDictionary[stateName] != null;
+			return _animationDictionary[name] != null;
 		}
 		
 		/**
@@ -94,9 +105,9 @@ package away3d.animators
 		 * 
 		 * @param stateName The name of the animation state object to be retrieved.
 		 */
-		public function getState(stateName:String):IAnimationState
+		public function getAnimation(name:String):AnimationNodeBase
 		{
-			return _stateDictionary[stateName];
+			return _animationDictionary[name];
 		}
 		
 		
@@ -106,14 +117,16 @@ package away3d.animators
 		 * @param stateName The name under which the animation state object will be stored.
 		 * @param animationState The animation state object to be staored in the set.
 		 */
-		public function addState(stateName:String, animationState:IAnimationState):void
+		public function addAnimation(name:String, node:AnimationNodeBase):void
 		{
-			if (_stateDictionary[stateName])
-				throw new AnimationSetError("Animation state name already exists in the set");
+			if (_animationDictionary[name])
+				throw new AnimationSetError("root node name already exists in the set");
 			
-			_stateDictionary[stateName] = animationState;
+			_animationDictionary[name] = node;
 			
-			_states.push(animationState);
+			_animations.push(node);
+			
+			_animationNames.push(name);
 		}
 		
 		/**

@@ -2,7 +2,7 @@ package away3d.animators
 {
 	import away3d.arcane;
 	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
+	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
@@ -13,9 +13,8 @@ package away3d.animators
 	import flash.display3D.*;
 	import flash.geom.*;
 	import flash.utils.*;
-
+	
 	use namespace arcane;
-
 	/**
 	 * Provides and interface for assigning skeleton-based animation data sets to mesh-based entity objects
 	 * and controlling the various available states of animation through an interative playhead that can be
@@ -23,8 +22,6 @@ package away3d.animators
 	 */
 	public class SkeletonAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _activeNode:ISkeletonAnimationNode;
-		
 		private var _globalMatrices : Vector.<Number>;
         private var _globalPose : SkeletonPose = new SkeletonPose();
 		private var _globalPropertiesDirty : Boolean;
@@ -33,12 +30,11 @@ package away3d.animators
 		private var _animationStates : Dictionary = new Dictionary();
 		private var _condensedMatrices : Vector.<Number>;
 		
-		private var _skeletonAnimationSet:SkeletonAnimationSet;
         private var _skeleton : Skeleton;
 		private var _forceCPU : Boolean;
 		private var _useCondensedIndices : Boolean;
 		private var _jointsPerVertex : uint;
-		private var _stateTransition:StateTransitionBase;
+		private var _activeSkeletonState:ISkeletonAnimationState;
 		
 		/**
 		 * Enables translation of the animated mesh from data returned per frame via the rootDelta property of the active animation node. Defaults to true.
@@ -100,7 +96,7 @@ package away3d.animators
 		{
 			return _useCondensedIndices;
 		}
-
+		
 		public function set useCondensedIndices(value : Boolean) : void
 		{
 			_useCondensedIndices = value;
@@ -113,19 +109,18 @@ package away3d.animators
 		 * @param skeleton The skeleton object used for calculating the resulting global matrices for transforming skinned mesh data.
 		 * @param forceCPU Optional value that only allows the animator to perform calculation on the CPU. Defaults to false.
 		 */
-		public function SkeletonAnimator(skeletonAnimationSet:SkeletonAnimationSet, skeleton : Skeleton, forceCPU : Boolean = false)
+		public function SkeletonAnimator(animationSet:SkeletonAnimationSet, skeleton : Skeleton, forceCPU : Boolean = false)
 		{
-			super(skeletonAnimationSet);
+			super(animationSet);
 			
-			_skeletonAnimationSet = skeletonAnimationSet;
 			_skeleton = skeleton;
 			_forceCPU = forceCPU;
-			_jointsPerVertex = _skeletonAnimationSet.jointsPerVertex;
+			_jointsPerVertex = animationSet.jointsPerVertex;
 			
 			_numJoints = _skeleton.numJoints;
 			_globalMatrices = new Vector.<Number>(_numJoints*12, true);
 			_bufferFormat = "float" + _jointsPerVertex;
-
+			
 			var j : int;
 			for (var i : uint = 0; i < _numJoints; ++i) {
 				_globalMatrices[j++] = 1; _globalMatrices[j++] = 0; _globalMatrices[j++] = 0; _globalMatrices[j++] = 0;
@@ -140,30 +135,38 @@ package away3d.animators
 		 * @param stateName The data set name of the animation state to be played.
 		 * @param stateTransition An optional transition object that determines how the animator will transition from the currently active animation state.
 		 */
-		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
+		public function play(name : String, transition : IAnimationTransition = null, offset : Number = NaN) : void
 		{
-			_activeState = _skeletonAnimationSet.getState(stateName);
+			if (_name == name)
+				return;
 			
-			if (!_activeState)
-				throw new Error("Animation state " + stateName + " not found!");
+			_name = name;
 			
-			if (stateTransition && _activeNode) {
+			if (!_animationSet.hasAnimation(name))
+				throw new Error("Animation root node " + name + " not found!");
+			
+			if (transition && _activeNode) {
 				//setup the transition
-				_stateTransition = stateTransition.clone();
-				_stateTransition.blendWeight = 0;
-				_stateTransition.startNode = _activeNode;
-				_stateTransition.endNode = _activeState.rootNode as ISkeletonAnimationNode;
-				_stateTransition.startTime = _absoluteTime;
-				_stateTransition.addEventListener(StateTransitionEvent.TRANSITION_COMPLETE, onStateTransitionComplete);
-				_activeNode = _stateTransition.rootNode as ISkeletonAnimationNode;
+				_activeNode = transition.getAnimationNode(this, _activeNode, _animationSet.getAnimation(name), _absoluteTime);
+				_activeNode.addEventListener(AnimationStateEvent.TRANSITION_COMPLETE, onTransitionComplete);
 			} else {
-				_activeNode = _activeState.rootNode as ISkeletonAnimationNode;
+				_activeNode = _animationSet.getAnimation(name);
 			}
 			
-			//apply new time to new state and reset
-			_activeState.reset(_absoluteTime);
+			_activeState = getAnimationState(_activeNode);
+			
+			_activeSkeletonState = _activeState as ISkeletonAnimationState;
 			
 			start();
+			
+			//apply a time offset if specified
+			if (!isNaN(offset))
+				reset(name, offset);
+		}
+		
+		public function reset(name : String, offset : Number = 0) : void
+		{
+			getAnimationState(_animationSet.getAnimation(name)).offset(offset + _absoluteTime);
 		}
 		
 		/**
@@ -174,9 +177,9 @@ package away3d.animators
 			// do on request of globalProperties
 			if (_globalPropertiesDirty)
 				updateGlobalProperties();
-
+			
 			var skinnedGeom : SkinnedSubGeometry = SkinnedSubGeometry(SubMesh(renderable).subGeometry);
-
+			
 			// using condensed data
 			var numCondensedJoints : uint = skinnedGeom.numCondensedJoints;
 			if (_useCondensedIndices) {
@@ -186,9 +189,9 @@ package away3d.animators
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _condensedMatrices, numCondensedJoints*3);
 			}
 			else {
-				if (_skeletonAnimationSet.usesCPU) {
+				if (_animationSet.usesCPU) {
 					var subGeomAnimState : SubGeomAnimationState = _animationStates[skinnedGeom] ||= new SubGeomAnimationState(skinnedGeom);
-
+					
 					if (subGeomAnimState.dirty) {
 						morphGeometry(subGeomAnimState, skinnedGeom);
 						subGeomAnimState.dirty = false;
@@ -211,7 +214,7 @@ package away3d.animators
         public function testGPUCompatibility(pass : MaterialPassBase) : void
         {
 			if (!_useCondensedIndices && (_forceCPU || _jointsPerVertex > 4 || pass.numUsedVertexConstants + _numJoints * 3 > 128)) {
-				_skeletonAnimationSet._usesCPU = true;
+				_animationSet.cancelGPUCompatibility();
 			}
         }
 		
@@ -229,10 +232,7 @@ package away3d.animators
 			for(var key : Object in _animationStates)
 			    SubGeomAnimationState(_animationStates[key]).dirty = true;
 			
-			if (_stateTransition)
-				_stateTransition.update(_absoluteTime);
-			else
-				_activeNode.update(_absoluteTime);
+			_activeState.update(_absoluteTime);
 			
 			if (updateRootPosition)
 				applyRootDelta();
@@ -243,9 +243,9 @@ package away3d.animators
 			var i : uint = 0, j : uint = 0;
 			var len : uint;
 			var srcIndex : uint;
-
+			
 			_condensedMatrices = new Vector.<Number>();
-
+			
 			do {
 				srcIndex = condensedIndexLookUp[i*3]*4;
 				len = srcIndex+12;
@@ -260,7 +260,7 @@ package away3d.animators
 			_globalPropertiesDirty = false;
 			
 			//get global pose
-			localToGlobalPose(_activeNode.getSkeletonPose(_skeleton), _globalPose, _skeleton);
+			localToGlobalPose(_activeSkeletonState.getSkeletonPose(_skeleton), _globalPose, _skeleton);
 			
 			// convert pose to matrix
 		    var mtxOffset : uint;
@@ -280,7 +280,7 @@ package away3d.animators
 			var pose : JointPose;
 			var quat : Quaternion;
 			var vec : Vector3D;
-
+			
 			for (var i : uint = 0; i < _numJoints; ++i) {
 				pose = globalPoses[i];
 				quat = pose.orientation;
@@ -289,17 +289,17 @@ package away3d.animators
 				xy2 = 2.0 * ox * oy; 	xz2 = 2.0 * ox * oz; 	xw2 = 2.0 * ox * ow;
 				yz2 = 2.0 * oy * oz; 	yw2 = 2.0 * oy * ow; 	zw2 = 2.0 * oz * ow;
 				xx = ox * ox;			yy = oy * oy;			zz = oz * oz; 			ww = ow * ow;
-
+				
 				n11 = xx - yy - zz + ww;	n12 = xy2 - zw2;			n13 = xz2 + yw2;			n14 = vec.x;
 				n21 = xy2 + zw2;			n22 = -xx + yy - zz + ww;	n23 = yz2 - xw2;			n24 = vec.y;
 				n31 = xz2 - yw2;			n32 = yz2 + xw2;			n33 = -xx - yy + zz + ww;	n34 = vec.z;
-
+				
 				// prepend inverse bind pose
 				raw = joints[i].inverseBindPose;
 				m11 = raw[0];	m12 = raw[4];	m13 = raw[8];	m14 = raw[12];
 				m21 = raw[1];	m22 = raw[5];   m23 = raw[9];	m24 = raw[13];
 				m31 = raw[2];   m32 = raw[6];   m33 = raw[10];  m34 = raw[14];
-
+				
 				_globalMatrices[mtxOffset++] = n11 * m11 + n12 * m21 + n13 * m31;
 				_globalMatrices[mtxOffset++] = n11 * m12 + n12 * m22 + n13 * m32;
 				_globalMatrices[mtxOffset++] = n11 * m13 + n12 * m23 + n13 * m33;
@@ -346,7 +346,7 @@ package away3d.animators
 			var m11 : Number, m12 : Number, m13 : Number;
 			var m21 : Number, m22 : Number, m23 : Number;
 			var m31 : Number, m32 : Number, m33 : Number;
-
+			
 			while (i1 < len) {
 				vertX = verts[i1]; vertY = verts[i2]; vertZ = verts[i3];
 				vx = 0; vy = 0; vz = 0;
@@ -354,9 +354,9 @@ package away3d.animators
 				nx = 0; ny = 0; nz = 0;
 				tangX = tangents[i1]; tangY = tangents[i2]; tangZ = tangents[i3];
 				tx = 0; ty = 0; tz = 0;
-
+				
 				// todo: can we use actual matrices when using cpu + using matrix.transformVectors, then adding them in loop?
-
+				
 				k = 0;
 				while (k < _jointsPerVertex) {
 					weight = jointWeights[j];
@@ -373,7 +373,7 @@ package away3d.animators
 						vx += weight*(m11*vertX + m12*vertY + m13*vertZ + _globalMatrices[mtxOffset+3]);
 						vy += weight*(m21*vertX + m22*vertY + m23*vertZ + _globalMatrices[mtxOffset+7]);
 						vz += weight*(m31*vertX + m32*vertY + m33*vertZ + _globalMatrices[mtxOffset+11]);
-
+						
 						nx += weight*(m11*normX + m12*normY + m13*normZ);
 						ny += weight*(m21*normX + m22*normY + m23*normZ);
 						nz += weight*(m31*normX + m32*normY + m33*normZ);
@@ -383,11 +383,11 @@ package away3d.animators
 						k++;
 					}
 				}
-
+				
 				targetVerts[i1] = vx; targetVerts[i2] = vy; targetVerts[i3] = vz;
 				targetNormals[i1] = nx; targetNormals[i2] = ny; targetNormals[i3] = nz;
 				targetTangents[i1] = tx; targetTangents[i2] = ty; targetTangents[i3] = tz;
-
+				
 				i1 += 3; i2 += 3; i3 += 3;
 			}
 		}
@@ -413,23 +413,23 @@ package away3d.animators
 			var tr : Vector3D;
 			var t : Vector3D;
 			var q : Quaternion;
-
+			
 			var x1 : Number, y1 : Number, z1 : Number, w1 : Number;
 			var x2 : Number, y2 : Number, z2 : Number, w2 : Number;
 			var x3 : Number, y3 : Number, z3 : Number;
-
+			
 			// :s
 			if (globalPoses.length != len) globalPoses.length = len;
-
+			
 			for (var i : uint = 0; i < len; ++i) {
 				globalJointPose = globalPoses[i] ||= new JointPose();
 				joint = joints[i];
 				parentIndex = joint.parentIndex;
 				pose = jointPoses[i];
-
+				
 				q = globalJointPose.orientation;
 				t = globalJointPose.translation;
-
+				
 				if (parentIndex < 0) {
 					tr = pose.translation;
 					or = pose.orientation;
@@ -444,7 +444,7 @@ package away3d.animators
 				else {
 					// append parent pose
 					parentPose = globalPoses[parentIndex];
-
+					
 					// rotate point
 					or = parentPose.orientation;
 					tr = pose.translation;
@@ -455,18 +455,18 @@ package away3d.animators
 					x3 = tr.x;
 					y3 = tr.y;
 					z3 = tr.z;
-
+					
 					w1 = -x2 * x3 - y2 * y3 - z2 * z3;
 					x1 = w2 * x3 + y2 * z3 - z2 * y3;
 					y1 = w2 * y3 - x2 * z3 + z2 * x3;
 					z1 = w2 * z3 + x2 * y3 - y2 * x3;
-
+					
 					// append parent translation
 					tr = parentPose.translation;
 					t.x = -w1 * x2 + x1 * w2 - y1 * z2 + z1 * y2 + tr.x;
 					t.y = -w1 * y2 + x1 * z2 + y1 * w2 - z1 * x2 + tr.y;
 					t.z = -w1 * z2 - x1 * y2 + y1 * x2 + z1 * w2 + tr.z;
-
+					
 					// append parent orientation
 					x1 = or.x;
 					y1 = or.y;
@@ -477,7 +477,7 @@ package away3d.animators
 					y2 = or.y;
 					z2 = or.z;
 					w2 = or.w;
-
+					
 					q.w = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2;
 					q.x = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2;
 					q.y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2;
@@ -488,7 +488,7 @@ package away3d.animators
 		
 		private function applyRootDelta() : void
 		{
-			var delta : Vector3D = _activeNode.rootDelta;
+			var delta : Vector3D = _activeState.rootDelta;
 			var dist : Number = delta.length;
 			var len : uint;
 			if (dist > 0) {
@@ -498,15 +498,15 @@ package away3d.animators
 			}
 		}
 				
-		private function onStateTransitionComplete(event:StateTransitionEvent):void
+		private function onTransitionComplete(event:AnimationStateEvent):void
 		{
-			if (event.type == StateTransitionEvent.TRANSITION_COMPLETE) {
-				var stateTransition:StateTransitionBase = event.target as StateTransitionBase;
-				stateTransition.removeEventListener(StateTransitionEvent.TRANSITION_COMPLETE, onStateTransitionComplete);
-				//if this is the current active statetransition, revert control to the active state
-				if (_stateTransition == stateTransition) {
-					_activeNode = _activeState.rootNode as ISkeletonAnimationNode;
-					_stateTransition = null;
+			if (event.type == AnimationStateEvent.TRANSITION_COMPLETE) {
+				event.animationNode.removeEventListener(AnimationStateEvent.TRANSITION_COMPLETE, onTransitionComplete);
+				//if this is the current active state transition, revert control to the active node
+				if (_activeState == event.animationState) {
+					_activeNode = _animationSet.getAnimation(_name);
+					_activeState = getAnimationState(_activeNode);
+					_activeSkeletonState = _activeState as ISkeletonAnimationState;
 				}
 			}
 		}
@@ -521,7 +521,7 @@ class SubGeomAnimationState
 	public var animatedNormalData : Vector.<Number>;
 	public var animatedTangentData : Vector.<Number>;
 	public var dirty : Boolean = true;
-
+	
 	public function SubGeomAnimationState(subGeom : SubGeometry)
 	{
 		animatedVertexData = subGeom.vertexData.concat();

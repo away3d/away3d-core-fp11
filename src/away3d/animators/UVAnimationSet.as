@@ -34,15 +34,5 @@ package away3d.animators
 		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public override function addState(stateName:String, animationState:IAnimationState):void
-		{
-			super.addState(stateName, animationState);
-			
-			animationState.addOwner(this, stateName);
-		}
 	}
 }
