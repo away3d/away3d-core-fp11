@@ -76,9 +76,7 @@ package a3dparticle.core
 		
 		private function getProjectionCode(positionRegister : String) : String
 		{
-			var code : String = "";
-			var pos : String = positionRegister;
-			code += "m44 op, vt0, vc0\n";
+			var code : String = "m44 vt7, vt0, vc0\nmul op, vt7, vc4\n";
 			return code;
 		}
 		

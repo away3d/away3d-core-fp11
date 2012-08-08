@@ -199,7 +199,7 @@ package a3dparticle.animators
 		private function reset(simpleParticlePass:SimpleParticlePass):void
 		{
 			shaderRegisterCache = new ShaderRegisterCache();
-			shaderRegisterCache.vertexConstantOffset = 4;
+			shaderRegisterCache.vertexConstantOffset = 5;
 			shaderRegisterCache.vertexAttributesOffset = 1;
 			shaderRegisterCache.reset();
 			
