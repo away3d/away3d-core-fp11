@@ -7,6 +7,7 @@ package away3d.tools.helpers
 	import away3d.core.base.Object3D;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.Vertex;
+	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
@@ -391,7 +392,11 @@ package away3d.tools.helpers
 			var defaultUVS:Vector.<Number> = Vector.<Number>([0, 1, .5, 0, 1, 1, .5, 0]);
 			var uvid:uint = 0;
 			 
-			if(shareVertices) var dShared:Dictionary = new Dictionary();
+			if(shareVertices){
+				var dShared:Dictionary = new Dictionary();
+				var uv:UV = new UV();
+				var ref:String;
+			}
 			
 			var uvind:uint;
 			var vind:uint;
@@ -421,7 +426,7 @@ package away3d.tools.helpers
 					subGeom.autoDeriveVertexTangents = true;
 					geometry.addSubGeometry(subGeom);
 
-					uvind = uvid = 0;
+					uvid = 0;
 					
 					nvertices = new Vector.<Number>();
 					nindices = new Vector.<uint>();
@@ -429,14 +434,17 @@ package away3d.tools.helpers
 				}
 				
 				vind = nvertices.length/3;
-				uvind = vind*2;
+				uvind = indices[i]*2;
 				
 				if(shareVertices){
-					if(dShared[vertex.toString()]){
-						nindices[nindices.length] = dShared[vertex.toString()];
+					uv.u = uvs[uvind];
+					uv.v = uvs[uvind+1];
+					ref = vertex.toString()+uv.toString();
+					if(dShared[ref]){
+						nindices[nindices.length] = dShared[ref];
 						continue;
 					}
-					dShared[vertex.toString()] = vind;
+					dShared[ref] = vind;
 				}
 				
 				nindices[nindices.length] = vind;
@@ -447,7 +455,6 @@ package away3d.tools.helpers
 					uvid = (uvid+2>3)? 0 : uvid+=2;
 					
 				} else {
-					
 					nuvs.push(uvs[uvind], uvs[uvind+1]); 
 				}
 			}
