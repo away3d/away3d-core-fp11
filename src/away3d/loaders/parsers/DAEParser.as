@@ -648,6 +648,8 @@ package away3d.loaders.parsers
 			skeleton.joints = new Vector.<SkeletonJoint>(controller.skin.joints.length, true);
 			parseSkeletonHierarchy(skeletonRoot, controller.skin, skeleton);
 
+			finalizeAsset(skeleton);
+
 			return skeleton;
 		}
 		
