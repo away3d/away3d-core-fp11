@@ -140,11 +140,6 @@ package away3d.loaders.parsers
 		
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{			
-			if (resourceDependency.assets.length != 1)
-				return;
-			
-			var resource:BitmapDataAsset = resourceDependency.assets[0] as BitmapDataAsset;
-			
 			_dependencyCount--;
 			
 			if (_dependencyCount == 0)
