@@ -43,6 +43,8 @@ package away3d.animators.states
 		public function offset(startTime:int):void
 		{
 			_startTime = startTime;
+			
+			_positionDeltaDirty = true;
 		}
 		
 		/**

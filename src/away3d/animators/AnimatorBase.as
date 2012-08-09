@@ -1,15 +1,14 @@
 package away3d.animators
 {
-	import flash.geom.Vector3D;
 	import away3d.animators.nodes.*;
 	import away3d.animators.states.*;
 	import away3d.arcane;
 	import away3d.entities.*;
-	import away3d.errors.*;
 	import away3d.events.*;
 	
 	import flash.display.*;
 	import flash.events.*;
+	import flash.geom.*;
 	import flash.utils.*;
 	
 	use namespace arcane;

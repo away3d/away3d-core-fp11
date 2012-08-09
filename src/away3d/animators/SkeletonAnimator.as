@@ -148,6 +148,12 @@ package away3d.animators
 			
 			_activeState = getAnimationState(_activeNode);
 			
+			if (updatePosition) {
+				//update straight away to reset position deltas
+				_activeState.update(_absoluteTime);
+				_activeState.positionDelta;
+			}
+			
 			_activeSkeletonState = _activeState as ISkeletonAnimationState;
 			
 			start();
