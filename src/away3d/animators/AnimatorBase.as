@@ -1,17 +1,19 @@
 package away3d.animators
 {
+	import away3d.animators.nodes.*;
+	import away3d.animators.states.*;
 	import away3d.arcane;
 	import away3d.entities.*;
-	import away3d.errors.*;
 	import away3d.events.*;
-
+	
 	import flash.display.*;
 	import flash.events.*;
+	import flash.geom.*;
 	import flash.utils.*;
-
+	
 	use namespace arcane;
 	
-		
+	
 	/**
 	 * Dispatched when playback of an animation inside the animator object starts.
 	 *
@@ -34,7 +36,6 @@ package away3d.animators
 	public class AnimatorBase extends EventDispatcher
 	{
 		private var _broadcaster : Sprite = new Sprite();
-		private var _animationSet : IAnimationSet;
 		private var _isPlaying : Boolean;
 		private var _autoUpdate : Boolean = true;
 		private var _startEvent : AnimatorEvent;
@@ -42,9 +43,38 @@ package away3d.animators
 		private var _time : int;
 		private var _playbackSpeed : Number = 1;
 		
+		protected var _animationSet : IAnimationSet;
 		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
+		protected var _activeNode:AnimationNodeBase;
 		protected var _activeState:IAnimationState;
+		protected var _name:String;
 		protected var _absoluteTime : Number = 0;
+		private var _animationStates:Dictionary = new Dictionary(true);
+		
+		/**
+		 * Enables translation of the animated mesh from data returned per frame via the positionDelta property of the active animation node. Defaults to true.
+		 * 
+		 * @see away3d.animators.states.IAnimationState#positionDelta
+		 */
+		public var updatePosition:Boolean = true;
+		
+		public function getAnimationState(node:AnimationNodeBase):AnimationStateBase
+		{
+			var className:Class = node.stateClass;
+			
+			return _animationStates[node] ||= new className(this, node);
+		}
+		
+		/**
+		 * Returns the internal absolute time of the animator, calculated by the current time and the playback speed.
+		 * 
+		 * @see #time
+		 * @see #playbackSpeed
+		 */
+		public function get absoluteTime():Number
+		{
+			return _absoluteTime;
+		}
 		
 		/**
 		 * Returns the animation data set in use by the animator.
@@ -60,6 +90,22 @@ package away3d.animators
 		public function get activeState():IAnimationState
 		{
 			return _activeState;
+		}
+		
+		/**
+		 * Returns the current active animation node.
+		 */
+		public function get activeAnimation():AnimationNodeBase
+		{
+			return _animationSet.getAnimation(_name);
+		}
+		
+		/**
+		 * Returns the current active animation node.
+		 */
+		public function get activeAnimationName():String
+		{
+			return _name;
 		}
 		
 		/**
@@ -105,6 +151,16 @@ package away3d.animators
 		}
 		
 		/**
+		 * Sets the animation phase of the current active state's animation clip(s).
+		 * 
+		 * @param value The phase value to use. 0 represents the beginning of an animation clip, 1 represents the end.
+		 */
+		public function phase(value:Number):void
+		{
+			_activeState.phase(value);
+		}
+		
+		/**
 		 * Creates a new <code>AnimatorBase</code> object.
 		 *
 		 * @param animationSet The animation data set to be used by the animator object.
@@ -132,10 +188,10 @@ package away3d.animators
 		 */
 		public function start() : void
 		{
-			_time = getTimer();
-			
 			if (_isPlaying || !_autoUpdate)
 				return;
+			
+			_time = _absoluteTime = getTimer();
 			
 			_isPlaying = true;
 			
@@ -187,6 +243,11 @@ package away3d.animators
 			_time = time;
 		}
 		
+		public function reset(name : String, offset : Number = 0) : void
+		{
+			getAnimationState(_animationSet.getAnimation(name)).offset(offset + _absoluteTime);
+		}
+		
 		/**
 		 * Used by the mesh object to which the animator is applied, registers the owner for internal use.
 		 *
@@ -214,7 +275,12 @@ package away3d.animators
 		 */
 		protected function updateDeltaTime(dt:Number):void
 		{
-			throw new AbstractMethodError();
+			_absoluteTime += dt;
+			
+			_activeState.update(_absoluteTime);
+			
+			if (updatePosition)
+				applyPositionDelta();
 		}
 		
 		/**
@@ -223,6 +289,18 @@ package away3d.animators
 		private function onEnterFrame(event : Event = null) : void
 		{
 			update(getTimer());
+		}
+		
+		private function applyPositionDelta() : void
+		{
+			var delta : Vector3D = _activeState.positionDelta;
+			var dist : Number = delta.length;
+			var len : uint;
+			if (dist > 0) {
+				len = _owners.length;
+				for (var i : uint = 0; i < len; ++i)
+					_owners[i].translateLocal(delta, dist);
+			}
 		}
 	}
 }

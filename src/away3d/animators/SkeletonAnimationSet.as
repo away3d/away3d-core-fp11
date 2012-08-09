@@ -92,15 +92,5 @@ package away3d.animators
 			stage3DProxy.setSimpleVertexBuffer(streamOffset, null, null, 0);
 			stage3DProxy.setSimpleVertexBuffer(streamOffset + 1, null, null, 0);
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public override function addState(stateName:String, animationState:IAnimationState):void
-		{
-			super.addState(stateName, animationState);
-			
-			animationState.addOwner(this, stateName);
-		}
 	}
 }

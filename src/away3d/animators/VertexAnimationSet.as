@@ -98,16 +98,6 @@ package away3d.animators
 		}
 		
 		/**
-		 * @inheritDoc
-		 */
-		public override function addState(stateName:String, animationState:IAnimationState):void
-		{
-			super.addState(stateName, animationState);
-			
-			animationState.addOwner(this, stateName);
-		}
-		
-		/**
 		 * Generates the vertex AGAL code for absolute blending.
 		 */
 		private function getAbsoluteAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String

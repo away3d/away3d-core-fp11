@@ -1,9 +1,9 @@
 package away3d.animators
 {
-	import away3d.animators.transitions.StateTransitionBase;
 	import away3d.arcane;
+	import away3d.animators.states.*;
+	import away3d.animators.transitions.*;
 	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.materials.passes.*;
@@ -19,13 +19,12 @@ package away3d.animators
 	 */
 	public class VertexAnimator extends AnimatorBase implements IAnimator
 	{
-		private var _activeNode:IVertexAnimationNode;
-		
 		private var _vertexAnimationSet:VertexAnimationSet;
 		private var _poses : Vector.<Geometry> = new Vector.<Geometry>();
 		private var _weights : Vector.<Number> = Vector.<Number>([1, 0, 0, 0]);
 		private var _numPoses : uint;
 		private var _blendMode:String;
+		private var _activeVertexState:IVertexAnimationState;
 		
 		/**
 		 * Creates a new AnimationSequenceController object.
@@ -43,18 +42,35 @@ package away3d.animators
 		 * Plays a sequence with a given name. If the sequence is not found, it may not be loaded yet, and it will retry every frame.
 		 * @param sequenceName The name of the clip to be played.
 		 */
-		public function play(stateName : String, stateTransition:StateTransitionBase = null) : void
+		public function play(name : String, transition : IAnimationTransition = null, offset : Number = NaN) : void
 		{
-			_activeState = _vertexAnimationSet.getState(stateName) as VertexAnimationState;
+			if (_name == name)
+				return;
 			
-			if (!_activeState)
-				throw new Error("Animation state " + stateName + " not found!");
+			_name = name;
 			
-			_activeNode = _activeState.rootNode as IVertexAnimationNode;
+			//TODO: implement transitions in vertex animator
 			
-			_absoluteTime = 0;
+			if (!_animationSet.hasAnimation(name))
+				throw new Error("Animation root node " + name + " not found!");
+			
+			_activeNode = _animationSet.getAnimation(name);
+			
+			_activeState = getAnimationState(_activeNode);
+			
+			if (updatePosition) {
+				//update straight away to reset position deltas
+				_activeState.update(_absoluteTime);
+				_activeState.positionDelta;
+			}
+			
+			_activeVertexState = _activeState as IVertexAnimationState;
 			
 			start();
+			
+			//apply a time offset if specified
+			if (!isNaN(offset))
+				reset(name, offset);
 		}
 
 		/**
@@ -62,13 +78,11 @@ package away3d.animators
 		 */
 		override protected function updateDeltaTime(dt : Number) : void
 		{
-			_absoluteTime += dt;
+			super.updateDeltaTime(dt);
 			
-			_activeNode.update(_absoluteTime);
-			
-			_poses[uint(0)] = _activeNode.currentGeometry;
-			_poses[uint(1)] = _activeNode.nextGeometry;
-			_weights[uint(0)] = 1 - (_weights[uint(1)] = _activeNode.blendWeight);
+			_poses[uint(0)] = _activeVertexState.currentGeometry;
+			_poses[uint(1)] = _activeVertexState.nextGeometry;
+			_weights[uint(0)] = 1 - (_weights[uint(1)] = _activeVertexState.blendWeight);
 		}
 		
 		

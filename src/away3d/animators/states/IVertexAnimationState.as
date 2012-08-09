@@ -1,4 +1,4 @@
-package away3d.animators.nodes
+package away3d.animators.states
 {
 	import away3d.core.base.*;
 	
@@ -7,7 +7,7 @@ package away3d.animators.nodes
 	 * 
 	 * @see away3d.animators.VertexAnimator
 	 */
-	public interface IVertexAnimationNode extends IAnimationNode
+	public interface IVertexAnimationState extends IAnimationState
 	{
 		/**
 		 * Returns the current geometry frame of animation in the clip based on the internal playhead position.

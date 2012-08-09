@@ -1,37 +1,14 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.states.*;
 	import away3d.animators.data.*;
 
 	/**
 	 * A uv animation node containing time-based animation data as individual uv animation frames.
 	 */
-	public class UVClipNode extends AnimationClipNodeBase implements IUVAnimationNode
+	public class UVClipNode extends AnimationClipNodeBase
 	{
 		private var _frames : Vector.<UVAnimationFrame> = new Vector.<UVAnimationFrame>();
-		private var _currentUVFrame : UVAnimationFrame;
-		private var _nextUVFrame : UVAnimationFrame;
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function get currentUVFrame() : UVAnimationFrame
-		{
-			if (_framesDirty)
-				updateFrames();
-			
-			return _currentUVFrame;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function get nextUVFrame() : UVAnimationFrame
-		{
-			if (_framesDirty)
-				updateFrames();
-			
-			return _nextUVFrame;
-		}
 		
 		/**
 		 * Returns a vector of UV frames representing the uv values of each animation frame in the clip.
@@ -46,6 +23,7 @@ package away3d.animators.nodes
 		 */
 		public function UVClipNode()
 		{
+			_stateClass = UVClipState;
 		}
 		
 		/**
@@ -62,31 +40,6 @@ package away3d.animators.nodes
 			_numFrames = _durations.length;
 			
 			_stitchDirty = true;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateTime(time:int):void
-		{
-			super.updateTime(time);
-			
-			_framesDirty = true;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateFrames() : void
-		{
-			super.updateFrames();
-			
-			_currentUVFrame = _frames[_currentFrame];
-			
-			if (_looping && _nextFrame >= _lastFrame)
-				_nextUVFrame = _frames[0];
-			else
-				_nextUVFrame = _frames[_nextFrame];
 		}
 		
 		/**

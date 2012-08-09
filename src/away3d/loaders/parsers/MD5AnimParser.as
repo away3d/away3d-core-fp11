@@ -1,12 +1,11 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.SkeletonAnimationState;
-	import away3d.animators.data.JointPose;
-	import away3d.animators.data.SkeletonPose;
-	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.arcane;
-	import away3d.core.math.Quaternion;
-	import flash.geom.Vector3D;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.core.math.*;
+	
+	import flash.geom.*;
 
 
 	use namespace arcane;
@@ -53,7 +52,6 @@ package away3d.loaders.parsers
 		
 		private var _rotationQuat : Quaternion;
 		private var _clip : SkeletonClipNode;
-		private var _state : SkeletonAnimationState;
 		
 		/**
 		 * Creates a new MD5AnimParser object.
@@ -163,10 +161,8 @@ package away3d.loaders.parsers
 				
 				if (_reachedEOF) {
 					_clip = new SkeletonClipNode();
-					_state = new SkeletonAnimationState(_clip);
 					translateClip();
 					finalizeAsset(_clip);
-					finalizeAsset(_state);
 					return ParserBase.PARSING_DONE;
 				}
 			}
