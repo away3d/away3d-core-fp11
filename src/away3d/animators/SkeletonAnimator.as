@@ -163,11 +163,6 @@ package away3d.animators
 				reset(name, offset);
 		}
 		
-		public function reset(name : String, offset : Number = 0) : void
-		{
-			getAnimationState(_animationSet.getAnimation(name)).offset(offset + _absoluteTime);
-		}
-		
 		/**
 		 * @inheritDoc
 		 */

@@ -243,6 +243,11 @@ package away3d.animators
 			_time = time;
 		}
 		
+		public function reset(name : String, offset : Number = 0) : void
+		{
+			getAnimationState(_animationSet.getAnimation(name)).offset(offset + _absoluteTime);
+		}
+		
 		/**
 		 * Used by the mesh object to which the animator is applied, registers the owner for internal use.
 		 *
