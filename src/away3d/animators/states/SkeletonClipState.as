@@ -138,9 +138,9 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateRootDelta() : void
+		override protected function updatePositionDelta() : void
 		{
-			_rootDeltaDirty = false;
+			_positionDeltaDirty = false;
 			
 			if (_framesDirty)
 				updateFrames();

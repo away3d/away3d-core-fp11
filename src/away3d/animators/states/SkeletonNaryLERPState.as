@@ -40,7 +40,7 @@ package away3d.animators.states
 		{
 			_skeletonPoseDirty = true;
 			
-			_rootDeltaDirty = true;
+			_positionDeltaDirty = true;
 			
 			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j)
 				if (_blendWeights[j])
@@ -90,32 +90,32 @@ package away3d.animators.states
 		{
 			_blendWeights[index] = blendWeight;
 			
-			_rootDeltaDirty = true;
+			_positionDeltaDirty = true;
 			_skeletonPoseDirty = true;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateRootDelta() : void
+		override protected function updatePositionDelta() : void
 		{
-			_rootDeltaDirty = false;
+			_positionDeltaDirty = false;
 			
 			var delta : Vector3D;
 			var weight : Number;
 
-			rootDelta.x = 0;
-			rootDelta.y = 0;
-			rootDelta.z = 0;
+			positionDelta.x = 0;
+			positionDelta.y = 0;
+			positionDelta.z = 0;
 
 			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j) {
 				weight = _blendWeights[j];
 				
 				if (weight) {
-					delta = _inputs[j].rootDelta;
-					rootDelta.x += weight*delta.x;
-					rootDelta.y += weight*delta.y;
-					rootDelta.z += weight*delta.z;
+					delta = _inputs[j].positionDelta;
+					positionDelta.x += weight*delta.x;
+					positionDelta.y += weight*delta.y;
+					positionDelta.z += weight*delta.z;
 				}
 			}
 		}

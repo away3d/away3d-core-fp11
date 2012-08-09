@@ -4,7 +4,7 @@ package away3d.animators.states
 	
 	public interface IAnimationState
 	{
-		function get rootDelta() : Vector3D;
+		function get positionDelta() : Vector3D;
 		
 		function offset(startTime:int):void;
 		

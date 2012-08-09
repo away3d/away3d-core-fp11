@@ -62,9 +62,9 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateRootDelta() : void
+		override protected function updatePositionDelta() : void
 		{
-			//TODO:implement rootdelta functionality for vertex animations
+			//TODO:implement positiondelta functionality for vertex animations
 		}
 	}
 }

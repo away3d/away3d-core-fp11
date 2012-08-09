@@ -37,13 +37,6 @@ package away3d.animators
 		private var _activeSkeletonState:ISkeletonAnimationState;
 		
 		/**
-		 * Enables translation of the animated mesh from data returned per frame via the rootDelta property of the active animation node. Defaults to true.
-		 * 
-		 * @see away3d.animators.nodes.AnimationNodeBase#rootDelta
-		 */
-		public var updateRootPosition:Boolean = true;
-		
-		/**
 		 * returns the calculated global matrices of the current skeleton pose.
 		 * 
 		 * @see #globalPose
@@ -230,9 +223,6 @@ package away3d.animators
 			
 			for(var key : Object in _animationStates)
 			    SubGeomAnimationState(_animationStates[key]).dirty = true;
-			
-			if (updateRootPosition)
-				applyRootDelta();
 		}
 		
 		private function updateCondensedMatrices(condensedIndexLookUp : Vector.<uint>, numJoints : uint) : void
@@ -480,18 +470,6 @@ package away3d.animators
 					q.y = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2;
 					q.z = w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2;
 				}
-			}
-		}
-		
-		private function applyRootDelta() : void
-		{
-			var delta : Vector3D = _activeState.rootDelta;
-			var dist : Number = delta.length;
-			var len : uint;
-			if (dist > 0) {
-				len = _owners.length;
-				for (var i : uint = 0; i < len; ++i)
-					_owners[i].translateLocal(delta, dist);
 			}
 		}
 				

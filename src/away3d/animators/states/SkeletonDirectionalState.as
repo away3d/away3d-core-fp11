@@ -38,7 +38,7 @@ package away3d.animators.states
 			_blendDirty = true;
 			
 			_skeletonPoseDirty = true;
-			_rootDeltaDirty = true;
+			_positionDeltaDirty = true;
 		}
 		
 		public function get direction():Number
@@ -68,7 +68,7 @@ package away3d.animators.states
 			
 			_skeletonPoseDirty = true;
 			
-			_rootDeltaDirty = true;
+			_positionDeltaDirty = true;
 			
 			_inputA.phase(value);
 			_inputB.phase(value);
@@ -104,19 +104,19 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateRootDelta() : void
+		override protected function updatePositionDelta() : void
 		{
-			_rootDeltaDirty = false;
+			_positionDeltaDirty = false;
 			
 			if (_blendDirty)
 				updateBlend();
 			
-			var deltA : Vector3D = _inputA.rootDelta;
-			var deltB : Vector3D = _inputB.rootDelta;
+			var deltA : Vector3D = _inputA.positionDelta;
+			var deltB : Vector3D = _inputB.positionDelta;
 			
-			rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
-			rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
-			rootDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
+			positionDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
+			positionDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
+			positionDelta.z = deltA.z + _blendWeight*(deltB.z - deltA.z);
 		}
 		
 		/**

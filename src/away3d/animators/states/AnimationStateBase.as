@@ -12,7 +12,7 @@ package away3d.animators.states
 	{
 		private var _animationNode:AnimationNodeBase;
 		protected var _rootDelta : Vector3D = new Vector3D();
-		protected var _rootDeltaDirty : Boolean = true;
+		protected var _positionDeltaDirty : Boolean = true;
 		
 		protected var _time:int;
 		protected var _startTime:int;
@@ -21,10 +21,10 @@ package away3d.animators.states
 		/**
 		 * Returns a 3d vector representing the translation delta of the animating entity for the current timestep of animation
 		 */		
-		public function get rootDelta() : Vector3D
+		public function get positionDelta() : Vector3D
 		{
-			if (_rootDeltaDirty)
-				updateRootDelta();
+			if (_positionDeltaDirty)
+				updatePositionDelta();
 			
 			return _rootDelta;
 		}
@@ -78,13 +78,13 @@ package away3d.animators.states
 		{
 			_time = time - _startTime;
 			
-			_rootDeltaDirty = true;
+			_positionDeltaDirty = true;
 		}
 			
 		/**
 		 * Updates the node's root delta position
 		 */
-		protected function updateRootDelta() : void
+		protected function updatePositionDelta() : void
 		{
 		}
 	}
