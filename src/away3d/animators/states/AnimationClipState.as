@@ -84,7 +84,20 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override public function updateTime(time : int) : void
+		override public function phase(value:Number):void
+		{
+			var time:int = value*_animationClipNode.totalDuration + _startTime;
+			
+			if (_time == time - _startTime)
+				return;
+			
+			updateTime(time);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateTime(time : int) : void
 		{
 			_framesDirty = true;
 			
@@ -92,7 +105,7 @@ package away3d.animators.states
 			
 			super.updateTime(time);
 		}
-				
+		
 		/**
 		 * Updates the nodes internal playhead to determine the current and next animation frame, and the blendWeight between the two.
 		 * 

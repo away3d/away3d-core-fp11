@@ -144,17 +144,14 @@ package away3d.animators
 		}
 		
 		/**
-		 * Gets and sets the animation phase of the current active state's animation clip. 0 represents the beginning of an animation clip, 1 represents the end.
+		 * Sets the animation phase of the current active state's animation clip(s).
+		 * 
+		 * @param value The phase value to use. 0 represents the beginning of an animation clip, 1 represents the end.
 		 */
-//		public function get phase():Number
-//		{
-//			return _activeState.phase;
-//		}
-//		
-//		public function set phase(value:Number):void
-//		{
-//			_activeState.phase;
-//		}
+		public function phase(value:Number):void
+		{
+			_activeState.phase(value);
+		}
 		
 		/**
 		 * Creates a new <code>AnimatorBase</code> object.
@@ -266,7 +263,9 @@ package away3d.animators
 		 */
 		protected function updateDeltaTime(dt:Number):void
 		{
-			throw new AbstractMethodError();
+			_absoluteTime += dt;
+			
+			_activeState.update(_absoluteTime);
 		}
 		
 		/**

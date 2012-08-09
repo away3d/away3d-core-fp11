@@ -61,17 +61,26 @@ package away3d.animators.states
 		}
 		
 		/**
+		 * Sets the animation phase of the node.
+		 * 
+		 * @param value The phase value to use. 0 represents the beginning of an animation clip, 1 represents the end.
+		 */
+		public function phase(value:Number):void
+		{
+		}
+		
+		/**
 		 * Updates the node's internal playhead position.
 		 * 
 		 * @param time The local time (in milliseconds) of the node's playhead position.
 		 */
-		public function updateTime(time:int):void
+		protected function updateTime(time:int):void
 		{
 			_time = time - _startTime;
 			
 			_rootDeltaDirty = true;
 		}
-				
+			
 		/**
 		 * Updates the node's root delta position
 		 */

@@ -36,7 +36,21 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override public function updateTime(time : int) : void
+		override public function phase(value:Number):void
+		{
+			_skeletonPoseDirty = true;
+			
+			_rootDeltaDirty = true;
+			
+			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j)
+				if (_blendWeights[j])
+					_inputs[j].update(value);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateTime(time : int) : void
 		{
 			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j)
 				if (_blendWeights[j])
@@ -85,6 +99,8 @@ package away3d.animators.states
 		 */
 		override protected function updateRootDelta() : void
 		{
+			_rootDeltaDirty = false;
+			
 			var delta : Vector3D;
 			var weight : Number;
 
@@ -111,6 +127,8 @@ package away3d.animators.states
 		 */
 		private function updateSkeletonPose(skeleton : Skeleton) : void
 		{
+			_skeletonPoseDirty = false;
+			
 			var weight : Number;
 			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
 			var poses : Vector.<JointPose>;

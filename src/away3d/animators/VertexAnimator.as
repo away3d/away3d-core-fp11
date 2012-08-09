@@ -68,9 +68,7 @@ package away3d.animators
 		 */
 		override protected function updateDeltaTime(dt : Number) : void
 		{
-			_absoluteTime += dt;
-			
-			_activeState.update(_absoluteTime);
+			super.updateDeltaTime(dt);
 			
 			_poses[uint(0)] = _activeVertexState.currentGeometry;
 			_poses[uint(1)] = _activeVertexState.nextGeometry;

@@ -63,7 +63,7 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override public function updateTime(time:int):void
+		override protected function updateTime(time:int):void
 		{
 			_skeletonPoseDirty = true;
 			
@@ -140,6 +140,8 @@ package away3d.animators.states
 		 */
 		override protected function updateRootDelta() : void
 		{
+			_rootDeltaDirty = false;
+			
 			if (_framesDirty)
 				updateFrames();
 			

@@ -223,16 +223,13 @@ package away3d.animators
 		 */
 		override protected function updateDeltaTime(dt : Number) : void
 		{
-			_absoluteTime += dt;
-			
+			super.updateDeltaTime(dt);
 			
 			//invalidate pose matrices
 			_globalPropertiesDirty = true;
 			
 			for(var key : Object in _animationStates)
 			    SubGeomAnimationState(_animationStates[key]).dirty = true;
-			
-			_activeState.update(_absoluteTime);
 			
 			if (updateRootPosition)
 				applyRootDelta();

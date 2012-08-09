@@ -61,17 +61,35 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override public function updateTime(time : int) : void
+		override public function phase(value:Number):void
 		{
 			if (_blendDirty)
 				updateBlend();
+			
+			_skeletonPoseDirty = true;
+			
+			_rootDeltaDirty = true;
+			
+			_inputA.phase(value);
+			_inputB.phase(value);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override protected function updateTime(time : int) : void
+		{
+			if (_blendDirty)
+				updateBlend();
+			
+			_skeletonPoseDirty = true;
 			
 			_inputA.update(time);
 			_inputB.update(time);
 			
 			super.updateTime(time);
 		}
-
+		
 		/**
 		 * Returns the current skeleton pose of the animation in the clip based on the internal playhead position.
 		 */
