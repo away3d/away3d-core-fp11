@@ -144,7 +144,6 @@ package away3d.loaders.parsers
 			} else {
 				var lm:LoadedMaterial = new LoadedMaterial();
 				lm.materialID = resourceDependency.id;
-				lm.texture = DefaultMaterialManager.getDefaultTexture();
 				_materialLoaded.push(lm);
 			}
 		
@@ -290,7 +289,7 @@ package away3d.loaders.parsers
 					// Finalize and force type-based name
 					finalizeAsset(geometry, "");
 					
-					bmMaterial = DefaultMaterialManager.getDefaultMaterial();
+					bmMaterial = new TextureMaterial(DefaultMaterialManager.getDefaultTexture());
 					mesh = new Mesh(geometry, bmMaterial);
 					
 					if (_objects[objIndex].name) {
@@ -719,7 +718,8 @@ package away3d.loaders.parsers
 					if(lm.cm){
 						if(mesh.material) mesh.material = null;
 						mesh.material = lm.cm;
-					} else {
+
+					} else if(lm.texture){
 						mat = TextureMaterial(mesh.material);
 						mat.texture = lm.texture;
 						mat.ambientColor = lm.ambientColor;
