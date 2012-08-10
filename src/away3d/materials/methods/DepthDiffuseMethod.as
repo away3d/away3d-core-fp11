@@ -22,7 +22,6 @@ package away3d.materials.methods
 			super();
 		}
 
-
 		override arcane function initConstants(vo : MethodVO) : void
 		{
 			var data : Vector.<Number> = vo.fragmentData;
@@ -61,7 +60,9 @@ package away3d.materials.methods
 			vo.fragmentConstantsIndex = decReg.index*4;
 			code += getTexSampleCode(vo, temp, _diffuseInputRegister) +
 					"dp4 " + temp + ".x, " + temp + ", "+ decReg + "\n" +
-					"mov " + temp + ".yzw, " + temp + ".xxx			\n";
+					"mov " + temp + ".yz, " + temp + ".xx			\n" +
+					"mov " + temp + ".w, " + decReg + ".x\n" +
+					"sub " + temp + ".xyz, " + decReg + ".xxx, " + temp + ".xyz\n";
 
 			if (vo.numLights == 0)
 				return code;

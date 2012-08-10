@@ -55,6 +55,12 @@ package away3d.materials.methods
 			invalidateShaderProgram();
 		}
 
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			super.initVO(vo);
+			vo.needsProjection = true;
+		}
+
 		override arcane function initConstants(vo : MethodVO) : void
 		{
 			super.initConstants(vo);
@@ -62,18 +68,17 @@ package away3d.materials.methods
 			var fragmentData : Vector.<Number> = vo.fragmentData;
 			var index : int = vo.fragmentConstantsIndex;
 			fragmentData[index + 8] = 1/_numSamples;
-			fragmentData[index + 10] = .5;
 
 		}
 
 		public function get range() : Number
 		{
-			return _range;
+			return _range*2;
 		}
 
 		public function set range(value : Number) : void
 		{
-			_range = value;
+			_range = value/2;
 		}
 
 		private function initGrainTexture() : void
@@ -82,18 +87,20 @@ package away3d.materials.methods
 			var vec : Vector.<uint> = new Vector.<uint>();
 			var len : uint = 4096;
 			var step : Number = 1/(_depthMapSize*_range);
-			var inv : Number = 1-step;
 			var r : Number,  g : Number;
 
 			for (var i : uint = 0; i < len; ++i) {
-				r = 2*(Math.random() - .5)*inv;
-				g = 2*(Math.random() - .5)*inv;
+				r = 2*(Math.random() - .5);
+				g = 2*(Math.random() - .5);
 				if (r < 0) r -= step;
 				else r += step;
 				if (g < 0) g -= step;
 				else g += step;
-
-				vec[i] = (((r*.5 + .5)*0xff) << 16) | (((g*.5 + .5)*0xff) << 8);
+				if (r > 1) r = 1;
+				else if (r < -1) r = -1;
+				if (g > 1) g = 1;
+				else if (g < -1) g = -1;
+				vec[i] = (int((r*.5 + .5)*0xff) << 16) | (int((g*.5 + .5)*0xff) << 8);
 			}
 
 			_grainBitmapData.setVector(_grainBitmapData.rect, vec);
@@ -112,8 +119,9 @@ package away3d.materials.methods
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(vo,  stage3DProxy);
-			vo.fragmentData[vo.fragmentConstantsIndex+9] = _depthMapSize/_range;
-			vo.fragmentData[vo.fragmentConstantsIndex+11] = 2*_range/_depthMapSize;
+			vo.fragmentData[vo.fragmentConstantsIndex + 9] = (stage3DProxy.width-1)/63;
+			vo.fragmentData[vo.fragmentConstantsIndex + 10] = (stage3DProxy.height-1)/63;
+			vo.fragmentData[vo.fragmentConstantsIndex + 11] = 2*_range/_depthMapSize;
 			stage3DProxy.setTextureAt(vo.texturesIndex+1, _grainTexture.getTextureForStage3D(stage3DProxy));
 		}
 
@@ -137,14 +145,17 @@ package away3d.materials.methods
 
 			uvReg = regCache.getFreeFragmentVectorTemp();
 
-			code += // keep grain in uvReg.xy
-					"mul " + uvReg + ", " + _depthMapCoordReg + ", " + customDataReg + ".y\n" +
+			code += "div " + uvReg + ", " + _projectionReg + ", " + _projectionReg + ".w\n" +
+					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".yz\n" +
 					"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
 					"add " + _viewDirFragmentReg+".w, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
 
-					"sub " + uvReg + ".zw, " + uvReg + ".xy, " + customDataReg + ".zz\n" + 	// uv-.5
+				// keep grain in uvReg.zw
+					"sub " + uvReg + ".zw, " + uvReg + ".xy, fc0.xx\n" + 	// uv-.5
 					"mul " + uvReg + ".zw, " + uvReg + ".zw, " + customDataReg + ".w\n" +	// (tex unpack scale and tex scale in one)
 
+
+			// first sample
 					"add " + uvReg+".xy, " + uvReg+".zw, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
