@@ -216,11 +216,9 @@ package away3d.materials.methods
 			}
 
 			code += "tex " + t + ", " + _normalFragmentReg + ", " + cubeMapReg + " <cube,linear,miplinear>\n" +
-					"mul " + t + ", " + t + ", " + weightRegister + "\n";
+					"mul " + t + ".xyz, " + t + ".xyz, " + weightRegister + "\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
-
-//			code += "mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n";
 
 			if (!_isFirstLight) {
 				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";

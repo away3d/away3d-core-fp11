@@ -281,9 +281,9 @@ package away3d.materials.methods
 			code += "dp3 " + t + ".w, " + _normalFragmentReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n" +
 					"add " + t + ".w, " + t + ".w, " + t + ".w\n" +
 					"mul " + t + ", " + t + ".w, " + _normalFragmentReg + "\n" +
-					"sub " + t + ", " + _viewDirFragmentReg + ", " + t + "\n" +
+					"sub " + t + ", " + t + ", " + _viewDirFragmentReg + "\n" +
 					"tex " + t + ", " + t + ", " + cubeMapReg + " <cube,linear,miplinear>\n" +
-					"mul " + t + ", " + t + ", " + weightRegister + "\n";
+					"mul " + t + ".xyz, " + t + ".xyz, " + weightRegister + "\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache);
 

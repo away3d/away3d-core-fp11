@@ -131,8 +131,7 @@ package away3d.materials.methods
 			code += "dp3 " + temp + ".w, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz		\n" +
 					"add " + temp + ".w, " + temp + ".w, " + temp + ".w											\n" +
 					"mul " + temp + ".xyz, " + _normalFragmentReg + ".xyz, " + temp + ".w						\n" +
-					"sub " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz, " + temp + ".xyz					\n" +
-					"neg " + temp + ".xyz, " + temp + ".xyz														\n" +
+					"sub " + temp + ".xyz, " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz					\n" +
 					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n";
 

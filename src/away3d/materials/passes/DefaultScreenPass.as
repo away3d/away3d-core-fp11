@@ -126,8 +126,6 @@ package away3d.materials.passes
 
 		private var _pointLightRegisters : Vector.<ShaderRegisterElement>;
 		private var _dirLightRegisters : Vector.<ShaderRegisterElement>;
-		private var _diffuseLightIndex : int;
-		private var _specularLightIndex : int;
 		private var _probeWeightsIndex : int;
 		private var _numProbeRegisters : uint;
 		private var _usingSpecularMethod : Boolean;
@@ -589,6 +587,8 @@ package away3d.materials.passes
 					_vertexConstantData[_uvTransformIndex+7] = 0;
 				}
 			}
+
+			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
 			if (_numLights > 0 && (_combinedLightSources & LightSources.LIGHTS))
 				updateLights(lightPicker.directionalLights, lightPicker.pointLights, stage3DProxy);
@@ -1188,8 +1188,6 @@ package away3d.materials.passes
 		{
 			var shadowReg : ShaderRegisterElement;
 
-			initLightRegisters();
-
 			_vertexCode += _diffuseMethod.getVertexCode(_diffuseMethodVO, _registerCache);
 			_fragmentCode += _diffuseMethod.getFragmentPreLightingCode(_diffuseMethodVO, _registerCache);
 
@@ -1198,16 +1196,15 @@ package away3d.materials.passes
 				_fragmentCode += _specularMethod.getFragmentPreLightingCode(_specularMethodVO, _registerCache);
 			}
 
-			_diffuseLightIndex = 0;
-			_specularLightIndex = 0;
-
 			if (_numLights > 0 && (_combinedLightSources & LightSources.LIGHTS)) {
+				initLightRegisters();
 				compileDirectionalLightCode();
 				compilePointLightCode();
 			}
 			if (_numLightProbes > 0  && (_combinedLightSources & LightSources.PROBES))
 				compileLightProbeCode();
 
+			// only need to create and reserve _shadedTargetReg here, no earlier?
 			_vertexCode += _ambientMethod.getVertexCode(_ambientMethodVO, _registerCache);
 			_fragmentCode += _ambientMethod.getFragmentCode(_ambientMethodVO, _registerCache, _shadedTargetReg);
 			if (_ambientMethodVO.needsNormals) _registerCache.removeFragmentTempUsage(_normalFragmentReg);
@@ -1233,7 +1230,7 @@ package away3d.materials.passes
 			if (_alphaPremultiplied) {
 				_fragmentCode += "add " + _shadedTargetReg + ".w, " + _shadedTargetReg + ".w, " + _commonsReg + ".z\n" +
 								 "div " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".w\n" +
-								 "sub " + _shadedTargetReg + ".w, " + _shadedTargetReg + ".w, " + _commonsReg + ".z\n"
+								 "sub " + _shadedTargetReg + ".w, " + _shadedTargetReg + ".w, " + _commonsReg + ".z\n" +
 								 "sat " + _shadedTargetReg + ".xyz, " + _shadedTargetReg + ".xyz\n";
 			}
 
@@ -1282,15 +1279,10 @@ package away3d.materials.passes
 				lightDirReg = _dirLightRegisters[regIndex++];
 				diffuseColorReg = _dirLightRegisters[regIndex++];
 				specularColorReg = _dirLightRegisters[regIndex++];
-				if (addDiff) {
+				if (addDiff)
 					_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_diffuseMethodVO, lightDirReg, diffuseColorReg, _registerCache);
-					++_diffuseLightIndex;
-				}
-				if (addSpec) {
+				if (addSpec)
 					_fragmentCode += _specularMethod.getFragmentCodePerLight(_specularMethodVO, lightDirReg, specularColorReg, _registerCache);
-					++_specularLightIndex;
-				}
-
 			}
 		}
 
@@ -1330,15 +1322,12 @@ package away3d.materials.passes
 								"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
 
 				if (_lightDataIndex == -1) _lightDataIndex = lightPosReg.index*4;
-				if (addDiff) {
-					// TODO: vo can contain register data
+
+				if (addDiff)
 					_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_diffuseMethodVO, lightDirReg, diffuseColorReg, _registerCache);
-					++_diffuseLightIndex;
-				}
-				if (addSpec) {
+
+				if (addSpec)
 					_fragmentCode += _specularMethod.getFragmentCodePerLight(_specularMethodVO, lightDirReg, specularColorReg, _registerCache);
-					++_specularLightIndex;
-				}
 
 				_registerCache.removeFragmentTempUsage(lightDirReg);
 			}
@@ -1373,14 +1362,12 @@ package away3d.materials.passes
 					texReg = _registerCache.getFreeTextureReg();
 					_lightProbeDiffuseIndices[i] = texReg.index;
 					_fragmentCode += _diffuseMethod.getFragmentCodePerProbe(_diffuseMethodVO, texReg, weightReg, _registerCache);
-					++_diffuseLightIndex;
 				}
 
 				if (addSpec) {
 					texReg = _registerCache.getFreeTextureReg();
 					_lightProbeSpecularIndices[i] = texReg.index;
 					_fragmentCode += _specularMethod.getFragmentCodePerProbe(_specularMethodVO, texReg, weightReg, _registerCache);
-					++_specularLightIndex;
 				}
 			}
 		}
@@ -1422,8 +1409,6 @@ package away3d.materials.passes
 			var i : uint, k : uint;
 			var len : int;
 			var dirPos : Vector3D;
-
-			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
 			len = directionalLights.length;
 			k = _lightDataIndex;
