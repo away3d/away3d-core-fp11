@@ -1,7 +1,7 @@
 package away3d.loaders.parsers
 {
-	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
@@ -96,17 +96,14 @@ package away3d.loaders.parsers
 		 */
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
-			var asset : Texture2DBase;
-			var m:Mesh; 
-			
 			if (resourceDependency.assets.length != 1)
 				return;
 			
-			asset = resourceDependency.assets[0] as Texture2DBase;
-			m = retrieveMeshFromID(resourceDependency.id);
+			var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
+			var m:Mesh = retrieveMeshFromID(resourceDependency.id);
 			
 			if(m && asset)
-				BitmapTexture(TextureMaterial(m.material).texture).bitmapData = BitmapTexture(asset).bitmapData;
+				TextureMaterial(m.material).texture = asset;
 		}
 		
 		/**
@@ -147,17 +144,14 @@ package away3d.loaders.parsers
 				_oList =[];
 				_dline = [];
 				_aC = [];
-				
-				// TODO: Don't return a full container (unless it makes sense for this
-				// file format) but rather return all assets one by one.
-				_container = new ObjectContainer3D;
+				 
+				_container = new ObjectContainer3D();
 			}
 			
 			var cont:ObjectContainer3D;
 			var i:uint;
 			var oData:Object;
 			var m:Matrix3D;
-			//var version:String = "";
 			
 			while(_charIndex<_stringLength && hasTime()){
 				
@@ -176,10 +170,7 @@ package away3d.loaders.parsers
 					_id = 0;
 					_buffer = 0;
 					//unused in f11
-					if(_state == "#v")
-						// TODO: not used
-						// var version:String = 
-						line.substring(3,line.length-1);
+					if(_state == "#v") line.substring(3,line.length-1);
 					
 					if(_state == "#f")
 						_isMaterial = (parseInt(line.substring(3,4)) == 2) as Boolean;
@@ -202,23 +193,20 @@ package away3d.loaders.parsers
 						
 						++_buffer;
 					} else {
-						
-						/*if(customPath != "")
-						var standardURL:Array = _dline[12].split("/");*/
-						
+						 
 						//legacy properties left here in case of debug needs
 						oData = {name:(_dline[0] == "")? "m_"+_id: _dline[0] ,
 							transform:m,
 							//pivotPoint:new Vector3D(parseFloat(_dline[1]), parseFloat(_dline[2]), parseFloat(_dline[3])),
 							container:parseInt(_dline[4]),
-							//bothsides:(_dline[5] == "true")? true : false,
+							bothSides:(_dline[5] == "true")? true : false,
 							//ownCanvas:(_dline[6] == "true")? true : false,
 							//pushfront:(_dline[7] == "true")? true : false,
 							//pushback:(_dline[8] == "true")? true : false,
 							x:parseFloat(_dline[9]),
 							y:parseFloat(_dline[10]),
 							z:parseFloat(_dline[11]),
-							//material:(_isMaterial && _dline[12] != null && _dline[12] != "")? resolvedP+((customPath != "")? standardURL[standardURL.length-1] : _dline[12]) : null};
+							
 							material:(_isMaterial && _dline[12] != null && _dline[12] != "")? _dline[12] : null};
 						_objs.push(oData);
 						_buffer = 0;
@@ -282,7 +270,14 @@ package away3d.loaders.parsers
 							_aC[ref.container].addChild(mesh);
 						
 						mesh.transform = ref.transform;
-						mesh.material = DefaultMaterialManager.getDefaultMaterial();
+						mesh.material = new TextureMaterial( DefaultMaterialManager.getDefaultTexture());
+						
+						mesh.material.bothSides = ref.bothSides;
+						 
+						if(ref.material && ref.material != "")
+							addDependency(ref.name, new URLRequest(ref.material));
+							
+						mesh.material.name = ref.name;
 					
 						if(ref.material && ref.material != "")
 							addDependency(ref.name, new URLRequest(ref.material));
