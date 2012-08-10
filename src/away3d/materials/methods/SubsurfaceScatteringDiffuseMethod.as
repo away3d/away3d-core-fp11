@@ -29,7 +29,6 @@ package away3d.materials.methods
 		private var _propReg : ShaderRegisterElement;
 		private var _scattering : Number;
 		private var _translucency : Number = 1;
-		private var _lightIndex : int;
 		private var _totalScatterColorReg : ShaderRegisterElement;
 		private var _lightColorReg : ShaderRegisterElement;
 		private var _scatterColor : uint = 0xffffff;
@@ -133,16 +132,6 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function reset() : void
-		{
-			_lightIndex = 0;
-			super.reset();
-		}
-
-
-		/**
-		 * @inheritDoc
-		 */
 		arcane override function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = super.getVertexCode(vo, regCache);
@@ -188,11 +177,10 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			_lightColorReg = lightColReg;
-			_lightIndex = lightIndex;
-			return super.getFragmentCodePerLight(vo, lightIndex, lightDirReg, lightColReg, regCache);
+			return super.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
 		}
 
 		/**
@@ -241,7 +229,7 @@ package away3d.materials.methods
 			var projReg : ShaderRegisterElement = _lightProjVarying;
 
 			// only scatter first light
-			if (_lightIndex > 0) return "";
+			if (!_isFirstLight) return "";
 
 			vo.secondaryTexturesIndex = depthReg.index;
 

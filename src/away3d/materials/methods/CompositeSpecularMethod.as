@@ -201,18 +201,18 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentCodePerLight(vo, lightIndex, lightDirReg, lightColReg, regCache);
+			return _baseSpecularMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
 		}
 
 		/**
 		 * @inheritDoc
 		 * @return
 		 */
-		arcane override function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerProbe(vo : MethodVO, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentCodePerProbe(vo, lightIndex, cubeMapReg, weightRegister, regCache);
+			return _baseSpecularMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
 		}
 
 		/**

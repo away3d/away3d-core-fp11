@@ -117,9 +117,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = _baseDiffuseMethod.getFragmentCodePerLight(vo, lightIndex, lightDirReg, lightColReg, regCache);
+			var code : String = _baseDiffuseMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
 			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
 			return code;
 		}
@@ -128,9 +128,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerProbe(vo : MethodVO, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = _baseDiffuseMethod.getFragmentCodePerProbe(vo, lightIndex, cubeMapReg, weightRegister, regCache);
+			var code : String = _baseDiffuseMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
 			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
 			return code;
 		}

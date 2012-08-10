@@ -30,6 +30,7 @@ package away3d.materials.methods
 		protected var _shadowRegister : ShaderRegisterElement;
 
 		protected var _alphaThreshold : Number = 0;
+		protected var _isFirstLight : Boolean;
 
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -152,6 +153,8 @@ package away3d.materials.methods
 		{
 			var code : String = "";
 
+			_isFirstLight = true;
+
 			if (vo.numLights > 0) {
 				_totalLightColorReg = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(_totalLightColorReg, 1);
@@ -163,18 +166,17 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		override arcane function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
 
 			// write in temporary if not first light, so we can add to total diffuse colour
-			if (lightIndex > 0) {
+			if (_isFirstLight)
+				t = _totalLightColorReg;
+			else {
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);
-			}
-			else {
-				t = _totalLightColorReg;
 			}
 
 			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
@@ -187,10 +189,12 @@ package away3d.materials.methods
 			code += "mul " + t + ", " + t + ".w, " + lightColReg + "\n";
 
 
-			if (lightIndex > 0) {
+			if (!_isFirstLight) {
 				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
 				regCache.removeFragmentTempUsage(t);
 			}
+
+			_isFirstLight = false;
 
 			return code;
 		}
@@ -198,31 +202,32 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerProbe(vo : MethodVO, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
 
 			// write in temporary if not first light, so we can add to total diffuse colour
-			if (lightIndex > 0) {
+			if (_isFirstLight)
+				t = _totalLightColorReg;
+			else {
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);
-			}
-			else {
-				t = _totalLightColorReg;
 			}
 
 			code += "tex " + t + ", " + _normalFragmentReg + ", " + cubeMapReg + " <cube,linear,miplinear>\n" +
 					"mul " + t + ", " + t + ", " + weightRegister + "\n";
 
-//			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
+			if (_modulateMethod != null) code += _modulateMethod(t, regCache);
 
 //			code += "mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n";
 
-			if (lightIndex > 0) {
+			if (!_isFirstLight) {
 				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
 				regCache.removeFragmentTempUsage(t);
 			}
+
+			_isFirstLight = false;
 
 			return code;
 		}
@@ -294,9 +299,6 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
-
-
 			if (_useTexture) {
 				stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 				if (_alphaThreshold > 0)

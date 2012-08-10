@@ -5,6 +5,7 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3DProgramType;
 
@@ -16,6 +17,7 @@ package away3d.materials.methods
 		private var _fresnelPower : Number = 5;
 		private var _normalReflectance : Number = 0;
 		private var _alpha : Number;
+		private var _mask : Texture2DBase;
 
 		public function FresnelEnvMapMethod(envMap : CubeTextureBase, alpha : Number = 1)
 		{
@@ -28,11 +30,24 @@ package away3d.materials.methods
 		{
 			vo.needsNormals = true;
 			vo.needsView = true;
+			vo.needsUV = _mask != null;
 		}
 
 		override arcane function initConstants(vo : MethodVO) : void
 		{
 			vo.fragmentData[vo.fragmentConstantsIndex+3] = 1;
+		}
+
+		public function get mask() : Texture2DBase
+		{
+			return _mask;
+		}
+
+		public function set mask(value : Texture2DBase) : void
+		{
+			if (Boolean(value) != Boolean(_mask))
+				invalidateShaderProgram();
+			_mask = value;
 		}
 
 		public function get fresnelPower() : Number
@@ -96,6 +111,8 @@ package away3d.materials.methods
 			data[index+1] = _normalReflectance;
 			data[index+2] = _fresnelPower;
 			stage3DProxy.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
+			if (_mask)
+				stage3DProxy.setTextureAt(vo.texturesIndex+1, _mask.getTextureForStage3D(stage3DProxy));
 		}
 
 		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
@@ -104,8 +121,11 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
+
 			vo.texturesIndex = cubeMapReg.index;
 			vo.fragmentConstantsIndex = dataRegister.index*4;
+
+			regCache.addFragmentTempUsages(temp,  1);
 
 			// r = V - 2(V.N)*N
 			code += "dp3 " + temp + ".w, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz		\n" +
@@ -127,12 +147,20 @@ package away3d.materials.methods
 					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
 
 					// total alpha
-					"mul " + _viewDirFragmentReg+".w, " + dataRegister+".x, " + _viewDirFragmentReg+".w\n" +
+					"mul " + _viewDirFragmentReg+".w, " + dataRegister+".x, " + _viewDirFragmentReg+".w\n";
+
+			if (_mask) {
+				var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+				var maskReg : ShaderRegisterElement = regCache.getFreeTextureReg();
+				code += getTexSampleCode(vo, temp2, maskReg, _uvFragmentReg) +
+						"mul " + _viewDirFragmentReg + ".w, " + temp2 + ".x, " + _viewDirFragmentReg + ".w\n";
+			}
 
 					// blend
-					"mul " + temp + ", " + temp + ", " + _viewDirFragmentReg + ".w						\n" +
+			code +=	"mul " + temp + ", " + temp + ", " + _viewDirFragmentReg + ".w						\n" +
 					"add " + targetReg + ".xyzw, " + targetReg+".xyzw, " + temp + ".xyzw						\n";
 
+			regCache.removeFragmentTempUsage(temp);
 
 			return code;
 		}

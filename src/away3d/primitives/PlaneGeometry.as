@@ -230,19 +230,24 @@ package away3d.primitives
 		 */
 		override protected function buildUVs(target : SubGeometry) : void
 		{
-			var uvs : Vector.<Number> = new Vector.<Number>();
+			var uvs : Vector.<Number>;
 			var numUvs : uint = (_segmentsH + 1) * (_segmentsW + 1) * 2;
 
 			if (target.UVData && numUvs == target.UVData.length)
 				uvs = target.UVData;
 			else
-				uvs = new Vector.<Number>(numUvs, true);
+				uvs = new Vector.<Number>(numUvs*(int(_doubleSided)+1), true);
 
 			numUvs = 0;
 			for (var yi : uint = 0; yi <= _segmentsH; ++yi) {
 				for (var xi : uint = 0; xi <= _segmentsW; ++xi) {
 					uvs[numUvs++] = xi/_segmentsW;
 					uvs[numUvs++] = 1 - yi/_segmentsH;
+
+					if (_doubleSided) {
+						uvs[numUvs++] = xi/_segmentsW;
+						uvs[numUvs++] = 1 - yi/_segmentsH;
+					}
 				}
 			}
 

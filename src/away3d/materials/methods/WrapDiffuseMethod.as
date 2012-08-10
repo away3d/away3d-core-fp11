@@ -72,6 +72,7 @@ package away3d.materials.methods
 		arcane override function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = super.getFragmentPreLightingCode(vo, regCache);
+			_isFirstLight = true;
 			_wrapDataRegister = regCache.getFreeFragmentConstant();
 			vo.secondaryFragmentConstantsIndex = _wrapDataRegister.index*4;
 
@@ -83,18 +84,17 @@ package away3d.materials.methods
 			return code;
 		}
 
-		arcane override function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
 
 			// write in temporary if not first light, so we can add to total diffuse colour
-			if (lightIndex > 0) {
+			if (_isFirstLight)
+				t = _totalLightColorReg;
+			else {
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);
-			}
-			else {
-				t = _totalLightColorReg;
 			}
 
 			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
@@ -118,10 +118,12 @@ package away3d.materials.methods
 			}
 
 
-			if (lightIndex > 0) {
+			if (!_isFirstLight) {
 				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
 				regCache.removeFragmentTempUsage(t);
 			}
+
+			_isFirstLight = false;
 
 			return code;
 		}
