@@ -34,9 +34,7 @@ package away3d.materials.methods
 			// area to sample in texture space
 			_depthMapSize = castingLight.shadowMapper.depthMapSize;
 
-			_numSamples = numSamples;
-			if (_numSamples < 1) _numSamples = 1;
-			else if (_numSamples > 8) _numSamples = 8;
+			this.numSamples = numSamples;
 
 			++_grainUsages;
 
@@ -52,6 +50,8 @@ package away3d.materials.methods
 		public function set numSamples(value : int) : void
 		{
 			_numSamples = value;
+			if (_numSamples < 1) _numSamples = 1;
+			else if (_numSamples > 8) _numSamples = 8;
 			invalidateShaderProgram();
 		}
 
@@ -161,9 +161,22 @@ package away3d.materials.methods
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + targetReg+".w, " + _viewDirFragmentReg+".w, " + depthCol+".z\n";    // 0 if in shadow
 
+			if (_numSamples > 4)
+				code += "add " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".zw\n" +
+						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
 			if (_numSamples > 1)
 				code +=	"sub " + uvReg+".xy, " + _depthMapCoordReg +".xy, " + uvReg+".zw\n" +
+						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
+
+			if (_numSamples > 5)
+				code += "sub " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".zw\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
@@ -179,6 +192,13 @@ package away3d.materials.methods
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 			}
 
+			if (_numSamples > 6)
+				code += "add " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".wz\n" +
+						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
+						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
+
 			if (_numSamples > 3)
 				code +=	"sub " + uvReg+".xy, " + _depthMapCoordReg +".xy, " + uvReg+".wz\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
@@ -186,33 +206,8 @@ package away3d.materials.methods
 						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
-			if (_numSamples > 4) {
-				code += "add " + uvReg+".xy, " + uvReg+".zw, " + _depthMapCoordReg+".xy\n" +
-						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
-						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
-			}
-
-			if (_numSamples > 5)
-				code +=	"sub " + uvReg+".xy, " + _depthMapCoordReg +".xy, " + uvReg+".zw\n" +
-						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
-						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
-
-			if (_numSamples > 6) {
-				code += "neg " + uvReg + ".w, " + uvReg + ".w\n";	// back to normal when accessed as zw
-
-				code +=	"add " + uvReg+".xy, " + uvReg+".wz, " + _depthMapCoordReg+".xy\n" +
-						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
-						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
-			}
-
 			if (_numSamples > 7)
-				code +=	"sub " + uvReg+".xy, " + _depthMapCoordReg +".xy, " + uvReg+".wz\n" +
+				code += "sub " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".wz\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
