@@ -1,6 +1,10 @@
 package away3d.cameras.lenses
 {
 	import away3d.arcane;
+	import away3d.core.math.Matrix3DUtils;
+
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -10,7 +14,6 @@ package away3d.cameras.lenses
 	 */
 	public class FreeMatrixLens extends LensBase
 	{
-
 		/**
 		 * Creates a new FreeMatrixLens object.
 		 */
@@ -19,12 +22,6 @@ package away3d.cameras.lenses
 			super();
 			_matrix.copyFrom(new PerspectiveLens().matrix);
 		}
-		
-		override protected function updateMatrix() : void
-		{
-			_matrixInvalid = false;
-		}
-
 
 		override public function set near(value : Number) : void
 		{
@@ -41,5 +38,20 @@ package away3d.cameras.lenses
 			_aspectRatio = value;
 		}
 
+		override public function clone() : LensBase
+		{
+			var clone : FreeMatrixLens = new FreeMatrixLens();
+			clone._matrix.copyFrom(_matrix);
+			clone._near = _near;
+			clone._far = _far;
+			clone._aspectRatio = _aspectRatio;
+			clone.invalidateMatrix();
+			return clone;
+		}
+
+		override protected function updateMatrix() : void
+		{
+			_matrixInvalid = false;
+		}
 	}
 }

@@ -142,6 +142,14 @@ package away3d.cameras.lenses
 		}
 
 		/**
+		 * Creates an exact duplicate of the lens
+		 */
+		public function clone() : LensBase
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
 		 * The aspect ratio (width/height) of the view. Set by the renderer.
 		 * @private
 		 */

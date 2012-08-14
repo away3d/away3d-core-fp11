@@ -12,6 +12,7 @@ package away3d.textures
 	public class BitmapCubeTexture extends CubeTextureBase
 	{
 		private var _bitmapDatas : Vector.<BitmapData>;
+		private var _useAlpha : Boolean;
 
 		public function BitmapCubeTexture(posX : BitmapData, negX : BitmapData, posY : BitmapData, negY : BitmapData, posZ : BitmapData, negZ : BitmapData)
 		{
@@ -134,7 +135,7 @@ package away3d.textures
 		override protected function uploadContent(texture : TextureBase) : void
 		{
 			for (var i : int = 0; i < 6; ++i)
-				MipmapGenerator.generateMipMaps(_bitmapDatas[i], texture, null, false, i);
+				MipmapGenerator.generateMipMaps(_bitmapDatas[i], texture, null, _bitmapDatas[i].transparent, i);
 		}
 	}
 }

@@ -71,6 +71,15 @@ package away3d.cameras.lenses
 			invalidateMatrix();
 		}
 
+		override public function clone() : LensBase
+		{
+			var clone : OrthographicOffCenterLens = new OrthographicOffCenterLens(_minX, _maxX, _minY, _maxY);
+			clone._near = _near;
+			clone._far = _far;
+			clone._aspectRatio = _aspectRatio;
+			return clone;
+		}
+
 		/**
 		 * @inheritDoc
 		 */

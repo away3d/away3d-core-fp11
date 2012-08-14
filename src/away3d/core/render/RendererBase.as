@@ -261,7 +261,7 @@ package away3d.core.render
 
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 
-			if (!_shareContext && _clearOnRender) {
+			if ((target || !_shareContext) && _clearOnRender) {
 				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0);
 			}
 			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);

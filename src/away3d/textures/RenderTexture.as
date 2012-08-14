@@ -44,7 +44,7 @@
 		override protected function uploadContent(texture : TextureBase) : void
 		{
 			// fake data, to complete texture for sampling
-			var bmp : BitmapData = new BitmapData(width, height, false);
+			var bmp : BitmapData = new BitmapData(width, height, false, 0xff0000);
 			MipmapGenerator.generateMipMaps(bmp, texture);
 			bmp.dispose();
 		}

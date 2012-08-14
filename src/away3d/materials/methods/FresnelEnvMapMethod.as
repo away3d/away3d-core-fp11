@@ -133,6 +133,9 @@ package away3d.materials.methods
 					"mul " + temp + ".xyz, " + _normalFragmentReg + ".xyz, " + temp + ".w						\n" +
 					"sub " + temp + ".xyz, " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz					\n" +
 					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+					"sub " + temp + ".w, " + temp + ".w, fc0.x									\n" +               	// -.5
+					"kil " + temp + ".w\n" +	// used for real time reflection mapping - if alpha is not 1 (mock texture) kil output
+					"add " + temp + ".w, " + temp + ".w, fc0.x									\n" +
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n";
 
 			// calculate fresnel term

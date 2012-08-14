@@ -36,6 +36,16 @@ package away3d.cameras.lenses
 			invalidateMatrix();
 		}
 
+		override public function clone() : LensBase
+		{
+			var clone : OrthographicLens = new OrthographicLens();
+			clone._near = _near;
+			clone._far = _far;
+			clone._aspectRatio = _aspectRatio;
+			clone.projectionHeight = _projectionHeight;
+			return clone;
+		}
+
 		/**
 		 * @inheritDoc
 		 */

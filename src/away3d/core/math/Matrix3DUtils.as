@@ -148,5 +148,23 @@ package away3d.core.math
 
 			matrix.copyRawDataFrom(raw);
 		}
+
+		public static function reflection(plane : Plane3D, target : Matrix3D = null) : Matrix3D
+		{
+			target ||= new Matrix3D();
+			var a : Number = plane.a, b : Number = plane.b, c : Number = plane.c, d = plane.d;
+			var rawData : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			var ab2 : Number = -2*a*b;
+			var ac2 : Number = -2*a*c;
+			var bc2 : Number = -2*b*c;
+			// reflection matrix
+			rawData[0] = 1-2*a*a;	rawData[4] = ab2;		rawData[8] = ac2;		rawData[12] = -2*a*d;
+			rawData[1] = ab2;		rawData[5] = 1-2*b*b;	rawData[9] = bc2;		rawData[13] = -2*b*d;
+			rawData[2] = ac2;		rawData[6] = bc2;		rawData[10] = 1-2*c*c;	rawData[14] = -2*c*d;
+			rawData[3] = 0;			rawData[7] = 0;			rawData[11] = 0;		rawData[15] = 1;
+			target.copyRawDataFrom(rawData);
+
+			return target
+		}
 	}
 }
