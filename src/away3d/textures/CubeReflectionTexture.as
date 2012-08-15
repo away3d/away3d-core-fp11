@@ -19,7 +19,7 @@ package away3d.textures
 	use namespace arcane;
 
 	// possibly wrappable in an Entity at some point
-	public class CubeTextureView extends RenderCubeTexture
+	public class CubeReflectionTexture extends RenderCubeTexture
 	{
 		private var _mockTexture : BitmapCubeTexture;
 		private var _mockBitmapData : BitmapData;
@@ -32,7 +32,7 @@ package away3d.textures
 		private var _position : Vector3D;
 		private var _isRendering : Boolean;
 
-		public function CubeTextureView(size : Number)
+		public function CubeReflectionTexture(size : Number)
 		{
 			super(size);
 			_renderer = new DefaultRenderer();

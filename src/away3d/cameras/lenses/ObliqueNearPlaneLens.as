@@ -4,18 +4,21 @@ package away3d.cameras.lenses
 	import away3d.core.math.Plane3D;
 	import away3d.events.LensEvent;
 
+	import flash.geom.Matrix3D;
+
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
-	public class OrientedNearPlaneLens extends LensBase
+	public class ObliqueNearPlaneLens extends LensBase
 	{
 		private var _baseLens : LensBase;
 		private var _plane : Plane3D;
 
-		public function OrientedNearPlaneLens(baseLens : LensBase, plane : Plane3D)
+		public function ObliqueNearPlaneLens(baseLens : LensBase, plane : Plane3D)
 		{
 			this.baseLens = baseLens;
+			this.plane = plane;
 		}
 
 
@@ -85,18 +88,21 @@ package away3d.cameras.lenses
 
 		override protected function updateMatrix() : void
 		{
-			_matrix.identity();
 			_matrix.copyFrom(_baseLens.matrix);
-			var vec : Vector3D = new Vector3D();
-			// z component must contain the distance to near plane, with far maximum
-			vec.x = _plane.a;
-			vec.y = _plane.b;
-			vec.z = _plane.c;
-			vec.w = -_plane.d;
 
-			// problem is, z is placed on w, doesn't match z range after projection
-
-			_matrix.copyRowFrom(2, vec);
+			var cx : Number = _plane.a;
+			var cy : Number = _plane.b;
+			var cz : Number = _plane.c;
+			var cw : Number = -_plane.d;
+			var signX : Number = cx >= 0 ? 1 : -1;
+			var signY : Number = cy >= 0 ? 1 : -1;
+			var p : Vector3D = new Vector3D(signX, signY, 1, 1);
+			var inverse : Matrix3D = _matrix.clone();
+			inverse.invert();
+			var q : Vector3D = inverse.transformVector(p);
+			_matrix.copyRowTo(3, p);
+			var a : Number = (q.x*p.x + q.y*p.y + q.z*p.z + q.w*p.w)/(cx*q.x + cy*q.y+ cz*q.z + cw*q.w);
+			_matrix.copyRowFrom(2, new Vector3D(cx*a, cy*a, cz*a, cw*a));
 		}
 	}
 }

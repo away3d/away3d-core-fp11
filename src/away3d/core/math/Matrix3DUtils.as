@@ -152,7 +152,7 @@ package away3d.core.math
 		public static function reflection(plane : Plane3D, target : Matrix3D = null) : Matrix3D
 		{
 			target ||= new Matrix3D();
-			var a : Number = plane.a, b : Number = plane.b, c : Number = plane.c, d = plane.d;
+			var a : Number = plane.a, b : Number = plane.b, c : Number = plane.c, d : Number = plane.d;
 			var rawData : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var ab2 : Number = -2*a*b;
 			var ac2 : Number = -2*a*c;

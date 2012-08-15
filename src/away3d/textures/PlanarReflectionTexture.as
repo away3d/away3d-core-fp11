@@ -2,7 +2,7 @@ package away3d.textures
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.OrientedNearPlaneLens;
+	import away3d.cameras.lenses.ObliqueNearPlaneLens;
 	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
@@ -33,7 +33,7 @@ package away3d.textures
 		private var _matrix : Matrix3D;
 		private var _vector : Vector3D;
 		private var _scissorRect : Rectangle;
-		private var _lens : OrientedNearPlaneLens;
+		private var _lens : ObliqueNearPlaneLens;
 		private var _viewWidth : Number;
 		private var _viewHeight : Number;
 
@@ -41,7 +41,7 @@ package away3d.textures
 		{
 			super(2, 2);
 			_camera = new Camera3D();
-			_lens = new OrientedNearPlaneLens(null, null);
+			_lens = new ObliqueNearPlaneLens(null, null);
 			_camera.lens = _lens;
 			_matrix = new Matrix3D();
 			_vector = new Vector3D();
@@ -49,7 +49,6 @@ package away3d.textures
 			_scissorRect = new Rectangle();
 			_renderer = new DefaultRenderer();
 			_entityCollector = _renderer.createEntityCollector();
-			_entityCollector.camera = _camera;
 			initMockTexture();
 		}
 
@@ -106,14 +105,14 @@ package away3d.textures
 						value;
 		}
 
-		public function render(view : View3D)
+		public function render(view : View3D) : void
 		{
 			_isRendering = true;
 			updateSize(view.width, view.height);
 			updateCamera(view.camera);
 
 			_entityCollector.clear();
-//			_entityCollector.camera = view.camera;
+			_entityCollector.camera = _camera;
 			view.scene.traversePartitions(_entityCollector);
 			_renderer.stage3DProxy = view.stage3DProxy;
 			_renderer.render(_entityCollector, super.getTextureForStage3D(view.stage3DProxy), _scissorRect);
@@ -134,7 +133,6 @@ package away3d.textures
 
 		private function updateCamera(camera : Camera3D) : void
 		{
-			// project cam position on plane
 			Matrix3DUtils.reflection(_plane, _matrix);
 			_matrix.prepend(camera.sceneTransform);
 			_matrix.prependScale(1, -1, 1);
@@ -142,13 +140,6 @@ package away3d.textures
 			_lens.baseLens = camera.lens;
 			_lens.aspectRatio = _viewWidth/_viewHeight;
 			_lens.plane = transformPlane(_plane, _matrix);
-
-			// todo: _near/_xMax
-			// still using symmetric perspective matrix
-			// xMax = _near/_xMax
-			// yMax = _near/_yMax
-			// should recalculate the correct points (and near distance) for left and right
-			// could use rawData[uint(11)]*newValue + (1-rawData[uint(11)])*oldValue - to be sure that orthographic/perspective projection remains correct without typechecking
 		}
 
 		private function transformPlane(plane : Plane3D, matrix : Matrix3D) : Plane3D
