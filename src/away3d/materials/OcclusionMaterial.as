@@ -1,7 +1,7 @@
 package away3d.materials {
 	import away3d.arcane;
-
-	import flash.display3D.Context3D;
+	import away3d.cameras.Camera3D;
+	import away3d.core.managers.Stage3DProxy;
 
 	use namespace arcane;
 
@@ -40,21 +40,21 @@ package away3d.materials {
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function updateMaterial(context : Context3D) : void
+		override arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			super.updateMaterial(context);
 			if(occlude) {
-				context.setColorMask(false, false, false, false);
+				stage3DProxy._context3D.setColorMask(false, false, false, false);
 			}
+			super.activatePass(index, stage3DProxy, camera, textureRatioX, textureRatioY);
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function cleanMaterial(context : Context3D) : void
+		override arcane function deactivatePass(index : uint, stage3DProxy : Stage3DProxy) : void
 		{
-			super.cleanMaterial(context);
-			context.setColorMask(true, true, true, true);
+			super.deactivatePass(index, stage3DProxy);
+			stage3DProxy._context3D.setColorMask(true, true, true, true);
 		}
 	}
 }
