@@ -156,12 +156,12 @@ package away3d.materials
 		
 		public function get depthCompareMode() : String
 		{
-			return _passes[_numPasses-1].depthCompareMode;
+			return _depthCompareMode;
 		}
 		
 		public function set depthCompareMode(value : String) : void
 		{
-			_passes[_numPasses-1].depthCompareMode = value;
+			_depthCompareMode = value;
 		}
 
 		/**
@@ -337,19 +337,17 @@ package away3d.materials
 		 */
 		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			var pass : MaterialPassBase = _passes[index];
-			var enableDepthWrite : Boolean = true;
-			var context : Context3D = stage3DProxy._context3D;
-
 			if (index == _numPasses-1) {
+				var context : Context3D = stage3DProxy._context3D;
 				if (requiresBlending) {
-					enableDepthWrite = false;
 					context.setBlendFactors(_srcBlend, _destBlend);
+					context.setDepthTest(false, _depthCompareMode);
 				}
+				else
+					context.setDepthTest(true, _depthCompareMode);
 			}
 
-			context.setDepthTest(enableDepthWrite, pass.depthCompareMode);
-			pass.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			_passes[index].activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 		}
 
 		/**
@@ -446,6 +444,16 @@ package away3d.materials
 		 * @private
 		 */
 		arcane function updateMaterial(context : Context3D) : void
+		{
+
+		}
+		
+		/**
+		 * Clean up the material
+		 *
+		 * @private
+		 */
+		arcane function cleanMaterial(context : Context3D) : void
 		{
 
 		}
