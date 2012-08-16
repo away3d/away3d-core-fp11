@@ -22,7 +22,7 @@ package away3d.materials.methods
 		protected var _viewDirVaryingReg : ShaderRegisterElement;
 		protected var _viewDirFragmentReg : ShaderRegisterElement;
 		protected var _normalFragmentReg : ShaderRegisterElement;
-		protected var _uvFragmentReg : ShaderRegisterElement;
+		protected var _uvVaryingReg : ShaderRegisterElement;
 		protected var _secondaryUVFragmentReg : ShaderRegisterElement;
 		protected var _tangentVaryingReg : ShaderRegisterElement;
 		protected var _globalPosReg : ShaderRegisterElement;
@@ -88,7 +88,7 @@ package away3d.materials.methods
 			_viewDirVaryingReg = null;
 			_viewDirFragmentReg = null;
 			_normalFragmentReg = null;
-			_uvFragmentReg = null;
+			_uvVaryingReg = null;
 			_globalPosReg = null;
 			_projectionReg = null;
 		}
@@ -121,14 +121,14 @@ package away3d.materials.methods
 		 * The fragment register in which the uv coordinates are stored.
 		 * @private
 		 */
-		arcane function get UVFragmentReg() : ShaderRegisterElement
+		arcane function get UVVaryingReg() : ShaderRegisterElement
 		{
-			return _uvFragmentReg;
+			return _uvVaryingReg;
 		}
 
-		arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
+		arcane function set UVVaryingReg(value : ShaderRegisterElement) : void
 		{
-			_uvFragmentReg = value;
+			_uvVaryingReg = value;
 		}
 
 		/**
@@ -235,7 +235,7 @@ package away3d.materials.methods
 			if (vo.useSmoothTextures) filter = vo.useMipmapping? "linear,miplinear" : "linear";
 			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
 
-            uvReg ||= _uvFragmentReg;
+            uvReg ||= _uvVaryingReg;
             return "tex "+targetReg.toString()+", "+uvReg.toString()+", "+inputReg.toString()+" <2d,"+filter+","+wrap+">\n";
 		}
 

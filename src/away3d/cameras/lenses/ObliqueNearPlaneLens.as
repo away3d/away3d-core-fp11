@@ -21,7 +21,6 @@ package away3d.cameras.lenses
 			this.plane = plane;
 		}
 
-
 		override public function get frustumCorners() : Vector.<Number>
 		{
 			return _baseLens.frustumCorners;

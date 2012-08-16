@@ -151,9 +151,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
+		override arcane function set UVVaryingReg(value : ShaderRegisterElement) : void
 		{
-			_baseSpecularMethod.UVFragmentReg = value;
+			_baseSpecularMethod.UVVaryingReg = value;
 		}
 
 		/**

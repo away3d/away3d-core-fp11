@@ -78,8 +78,7 @@ package away3d.materials.methods
 
 			if (_scatterTexture) {
 				_scatterTextureRegister = regCache.getFreeTextureReg();
-				if (!_useTexture)
-					vo.texturesIndex = _scatterTextureRegister.index;
+				vo.secondaryTexturesIndex = _scatterTextureRegister.index;
 			}
 			return code;
 		}
@@ -106,9 +105,9 @@ package away3d.materials.methods
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache);
 
 			if (_scatterTexture) {
-				code += "mul " + t + ".x, " + t + ".x, " + _wrapDataRegister + ".z\n" +
+				code += "mul " + t + ".x, " + t + ".w, " + _wrapDataRegister + ".z\n" +
 						"add " + t + ".x, " + t + ".x, " + t + ".x\n" +
-						"tex " + t + ".xyz, " + t + ".xxx, " + _scatterTextureRegister + " <2d, nearest, clamp>\n" +
+						"tex " + t + ".xyz, " + t + ".xxx, " + _scatterTextureRegister + " <2d, linear, clamp>\n" +
 						"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" +
 						"mul " + t + ".xyz, " + t + ".xyz, " + lightColReg + ".xyz\n";
 
@@ -137,10 +136,8 @@ package away3d.materials.methods
 			data[index] = _wrapFactor;
 			data[index+1] = 1/(_wrapFactor+1);
 
-			if (_scatterTexture) {
-				index = _useTexture? vo.texturesIndex+1 : vo.texturesIndex;
-				stage3DProxy.setTextureAt(index, _scatterTexture.getTextureForStage3D(stage3DProxy));
-			}
+			if (_scatterTexture)
+				stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, _scatterTexture.getTextureForStage3D(stage3DProxy));
 		}
 	}
 }

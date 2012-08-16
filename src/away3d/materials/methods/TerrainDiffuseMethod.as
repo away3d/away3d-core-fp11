@@ -92,11 +92,11 @@ package away3d.materials.methods
 			var uv : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uv, 1);
 
-			code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + ".x\n" +
+			code += "mul " + uv + ", " + _uvVaryingReg + ", " + scaleRegister + ".x\n" +
 					getSplatSampleCode(vo, albedo, _diffuseInputRegister, uv);
 
 			if (_detailTexture) {
-				code += "mul " + uv + ", " + _uvFragmentReg + ", " + detailScaleRegister + ".x\n" +
+				code += "mul " + uv + ", " + _uvVaryingReg + ", " + detailScaleRegister + ".x\n" +
 						getSplatSampleCode(vo, uv, detailTexRegister, uv) +
 						"mul " + uv + ", " + uv + ", " + detailBlendFactorRegister + ".x\n" +
 						"mul " + albedo + ", " + albedo + ", " + uv + ".x\n";
@@ -106,7 +106,7 @@ package away3d.materials.methods
 			regCache.addFragmentTempUsages(temp, 1);
 			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
-			code += "tex "+temp+", "+_uvFragmentReg +", "+blendTexReg+" <2d,linear,miplinear,clamp>\n";
+			code += "tex "+temp+", "+_uvVaryingReg +", "+blendTexReg+" <2d,linear,miplinear,clamp>\n";
 			var splatTexReg : ShaderRegisterElement;
 
 			vo.fragmentConstantsIndex = scaleRegister.index*4;
@@ -114,11 +114,11 @@ package away3d.materials.methods
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
 				splatTexReg = regCache.getFreeTextureReg();
-				code += "mul " + uv + ", " + _uvFragmentReg + ", " + scaleRegister + comps[i+1] + "\n" +
+				code += "mul " + uv + ", " + _uvVaryingReg + ", " + scaleRegister + comps[i+1] + "\n" +
 						getSplatSampleCode(vo, uv, splatTexReg, uv);
 
 				if (_detailTexture) {
-					code += "mul " + temp2 + ", " + _uvFragmentReg + ", " + detailScaleRegister + comps[i+1] + "\n" +
+					code += "mul " + temp2 + ", " + _uvVaryingReg + ", " + detailScaleRegister + comps[i+1] + "\n" +
 							getSplatSampleCode(vo, temp2, detailTexRegister, temp2) +
 							"mul " + temp2 + ", " + temp2 + ", " + detailBlendFactorRegister + comps[i+1] + "\n" +
 							"mul " + uv + ", " + temp2 + comps[i+1] + ", " + uv + "\n";
@@ -179,7 +179,7 @@ package away3d.materials.methods
 			if (vo.useSmoothTextures) filter = vo.useMipmapping ? "linear,miplinear" : "linear";
 			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
 
-			uvReg ||= _uvFragmentReg;
+			uvReg ||= _uvVaryingReg;
 			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + ",wrap>\n";
 		}
 	}

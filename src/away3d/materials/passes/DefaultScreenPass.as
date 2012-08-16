@@ -873,7 +873,7 @@ package away3d.materials.passes
 			method.globalPosReg = _globalPositionVaryingReg;
 			method.normalFragmentReg = _normalFragmentReg;
 			method.projectionReg = _projectionFragmentReg;
-			method.UVFragmentReg = _uvVaryingReg;
+			method.UVVaryingReg = _uvVaryingReg;
 			method.tangentVaryingReg = _tangentVarying;
 			method.secondaryUVFragmentReg = _secondaryUVVaryingReg;
 			method.viewDirFragmentReg = _viewDirFragmentReg;

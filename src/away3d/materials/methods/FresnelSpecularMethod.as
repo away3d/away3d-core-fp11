@@ -98,17 +98,15 @@ package away3d.materials.methods
 		 */
 		private function modulateSpecular(vo : MethodVO, target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = "";
+			var code : String;
 
-			// use view dir and normal fragment .w as temp
-            // use normal or half vector? :s
-            code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + (_incidentLight? target+".xyz\n" : _normalFragmentReg+".xyz\n") +   // dot(V, H)
-            		"sub " + _viewDirFragmentReg+".w, " + _dataReg+".z, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
-            		"pow " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _dataReg+".y\n" +             // exp = pow(base, 5)
-					"sub " + _viewDirFragmentReg+".w, " + _dataReg+".z, " + _normalFragmentReg+".w\n" +             // 1 - exp
-					"mul " + _viewDirFragmentReg+".w, " + _dataReg+".x, " + _viewDirFragmentReg+".w\n" +             // f0*(1 - exp)
-					"add " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w, " + _viewDirFragmentReg+".w\n" +          // exp + f0*(1 - exp)
-					"mul " + target+".w, " + target+".w, " + _viewDirFragmentReg+".w\n";
+            code = 	"dp3 " + target+".y, " + _viewDirFragmentReg+".xyz, " + (_incidentLight? target+".xyz\n" : _normalFragmentReg+".xyz\n") +   // dot(V, H)
+            		"sub " + target+".y, " + _dataReg+".z, " + target+".y\n" +             // base = 1-dot(V, H)
+            		"pow " + target+".x, " + target+".y, " + _dataReg+".y\n" +             // exp = pow(base, 5)
+					"sub " + target+".y, " + _dataReg+".z, " + target+".y\n" +             // 1 - exp
+					"mul " + target+".y, " + _dataReg+".x, " + target+".y\n" +             // f0*(1 - exp)
+					"add " + target+".y, " + target+".x, " + target+".y\n" +          // exp + f0*(1 - exp)
+					"mul " + target+".w, " + target+".w, " + target+".y\n";
 
 			return code;
 		}

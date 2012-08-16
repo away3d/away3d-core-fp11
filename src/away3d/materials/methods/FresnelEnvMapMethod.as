@@ -154,7 +154,7 @@ package away3d.materials.methods
 			if (_mask) {
 				var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 				var maskReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-				code += getTexSampleCode(vo, temp2, maskReg, _uvFragmentReg) +
+				code += getTexSampleCode(vo, temp2, maskReg, _uvVaryingReg) +
 						"mul " + _viewDirFragmentReg + ".w, " + temp2 + ".x, " + _viewDirFragmentReg + ".w\n";
 			}
 

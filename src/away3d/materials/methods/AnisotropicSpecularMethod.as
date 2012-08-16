@@ -26,8 +26,7 @@ package away3d.materials.methods
 		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
 			_isFirstLight = true;
-			return getFragmentPreLightingCode(vo, regCache);
-
+			return super.getFragmentPreLightingCode(vo, regCache);
 		}
 
 		arcane override function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String

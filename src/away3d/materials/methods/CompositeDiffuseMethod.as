@@ -15,7 +15,7 @@ package away3d.materials.methods
 	 */
 	public class CompositeDiffuseMethod extends BasicDiffuseMethod
 	{
-		private var _baseDiffuseMethod : BasicDiffuseMethod;
+		protected var _baseDiffuseMethod : BasicDiffuseMethod;
 
 		/**
 		 * Creates a new WrapDiffuseMethod object.
@@ -190,9 +190,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
+		override arcane function set UVVaryingReg(value : ShaderRegisterElement) : void
 		{
-			_baseDiffuseMethod.UVFragmentReg = _uvFragmentReg = value;
+			_baseDiffuseMethod.UVVaryingReg = _uvVaryingReg = value;
 		}
 
 		/**
