@@ -86,7 +86,7 @@ package away3d.materials.methods
 		
 		public function set texture(value : Texture2DBase) : void
 		{
-			if (!value || !_useTexture) invalidateShaderProgram();
+			if (Boolean(value) != _useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
 			_texture = value;
 		}

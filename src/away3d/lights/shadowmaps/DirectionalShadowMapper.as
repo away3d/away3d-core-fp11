@@ -19,9 +19,9 @@ package away3d.lights.shadowmaps
 		protected var _depthCamera : Camera3D;
 		protected var _localFrustum : Vector.<Number>;
 
-		private var _lightOffset : Number = 10000;
+		protected var _lightOffset : Number = 10000;
 		protected var _matrix : Matrix3D;
-		private var _depthLens : FreeMatrixLens;
+		protected var _depthLens : FreeMatrixLens;
 
 		public function DirectionalShadowMapper()
 		{
@@ -61,11 +61,11 @@ package away3d.lights.shadowmaps
 
 		override protected function updateDepthProjection(viewCamera : Camera3D) : void
 		{
-			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners);
+			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners, _matrix);
 			_depthLens.matrix = _matrix;
 		}
 
-		protected function updateProjectionFromFrustumCorners(viewCamera : Camera3D, corners : Vector.<Number>) : void
+		protected function updateProjectionFromFrustumCorners(viewCamera : Camera3D, corners : Vector.<Number>, matrix : Matrix3D) : void
 		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var dir : Vector3D;
@@ -77,8 +77,8 @@ package away3d.lights.shadowmaps
 			var halfSize : Number = _depthMapSize * .5;
 			var i : uint;
 
-			_depthCamera.transform = _light.sceneTransform;
 			dir = DirectionalLight(_light).sceneDirection;
+			_depthCamera.transform = _light.sceneTransform;
 			_depthCamera.x = -dir.x * _lightOffset;
 			_depthCamera.y = -dir.y * _lightOffset;
 			_depthCamera.z = -dir.z * _lightOffset;
@@ -89,9 +89,9 @@ package away3d.lights.shadowmaps
 
 			i = 0;
 			while (i < 24) {
-				x = _localFrustum[i++];
-				y = _localFrustum[i++];
-				z = _localFrustum[i++];
+				x = _localFrustum[uint(i++)];
+				y = _localFrustum[uint(i++)];
+				z = _localFrustum[uint(i++)];
 				if (x < minX) minX = x;
 				if (x > maxX) maxX = x;
 				if (y < minY) minY = y;
@@ -120,8 +120,7 @@ package away3d.lights.shadowmaps
 			raw[15] = 1;
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;
 
-			_matrix.copyRawDataFrom(raw);
-			_depthLens.matrix = _matrix;
+			matrix.copyRawDataFrom(raw);
 		}
 	}
 }

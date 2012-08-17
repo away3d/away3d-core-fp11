@@ -49,9 +49,7 @@ package away3d.materials.methods
 		public function generateMip(stage3DProxy : Stage3DProxy):void
 		{
 			if (_useTexture)
-			{
 				_texture.getTextureForStage3D(stage3DProxy);
-			}
 		}
 
 		/**
@@ -91,9 +89,9 @@ package away3d.materials.methods
 
 		public function set texture(value : Texture2DBase) : void
 		{
+			if (Boolean(value) != _useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
 			_texture = value;
-			if (!value || !_useTexture) invalidateShaderProgram();
 		}
 
 		/**

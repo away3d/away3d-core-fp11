@@ -241,7 +241,7 @@ package away3d.loaders.parsers
 					if(_mtlLib){
 						_materialIDs.push(trunk[1]);
 						_activeMaterialID = trunk[1];
-						if(_currentGroup) _currentGroup.materialID= _activeMaterialID;
+						if(_currentGroup) _currentGroup.materialID = _activeMaterialID;
 					}
 					break;
 				case "v":
