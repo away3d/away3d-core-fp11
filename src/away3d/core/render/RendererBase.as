@@ -269,7 +269,10 @@ package away3d.core.render
 			if (_backgroundImageRenderer) _backgroundImageRenderer.render();
 
 			draw(entityCollector, target);
-
+			
+			//line required for correct rendering when using away3d with starling. DO NOT REMOVE UNLESS STARLING INTEGRATION IS RETESTED!
+			_context.setDepthTest(false, Context3DCompareMode.LESS);
+			
 			if ( !_shareContext ) {
 				if( _snapshotRequired && _snapshotBitmapData ) {
 					_context.drawToBitmapData(_snapshotBitmapData);
