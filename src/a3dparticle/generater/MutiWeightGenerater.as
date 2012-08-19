@@ -15,20 +15,20 @@ package a3dparticle.generater
 			var i:uint;
 			var j:uint;
 			var current:Number;
-			var _wieghts:Array = [];
+			var _weights:Array = [];
 			_vec = new  Vector.<ParticleSample>();
 			
 			for (i = 0; i < samples.length; i++)
 			{
 				total += weights[i];
-				_wieghts.push(total);
+				_weights.push(total);
 			}
 			for (j = 0; j < count; j++)
 			{
 				current = Math.random() * total;
 				for (i = 0; i < samples.length; i++)
 				{
-					if (current < _wieghts[i]) break;
+					if (current < _weights[i]) break;
 				}
 				_vec.push(samples[i]);
 			}

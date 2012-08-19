@@ -42,7 +42,7 @@ package a3dparticle.animators.actions.texture
 					result[3] = startColor[3] + delta * deltaColor[3];
 					return (result[0] << 24) + (result[1] << 16) + (result[2] << 8) + result[3];
 				}
-			}
+			};
 			return genPixels(precision, genFun);
 		}
 		
@@ -80,7 +80,7 @@ package a3dparticle.animators.actions.texture
 					result[3] = startColor[3] + delta * deltaColor[3];
 					return (result[0] << 24) + (result[1] << 16) + (result[2] << 8) + result[3];
 				}
-			}
+			};
 			return genPixels(precision, genFun);
 		}
 		

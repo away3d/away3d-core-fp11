@@ -31,10 +31,10 @@ package a3dparticle.animators.actions.brokenline
 			for (var i:int; i < brokenData.length; i++)
 			{
 				vertices_vec.push(new Vector.<Number>());
-				vertices_vec[i].push(brokenData[i].x)
-				vertices_vec[i].push(brokenData[i].y)
-				vertices_vec[i].push(brokenData[i].z)
-				vertices_vec[i].push(brokenData[i].w)
+				vertices_vec[i].push(brokenData[i].x);
+				vertices_vec[i].push(brokenData[i].y);
+				vertices_vec[i].push(brokenData[i].z);
+				vertices_vec[i].push(brokenData[i].w);
 			}
 		}
 		

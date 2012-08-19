@@ -73,7 +73,7 @@ package a3dparticle.animators.actions.circle
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			if (_animation.needVelocity) dataLenght = 3
+			if (_animation.needVelocity) dataLenght = 3;
 			else dataLenght = 2;
 			
 			
