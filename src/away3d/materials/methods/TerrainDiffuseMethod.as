@@ -33,7 +33,7 @@ package away3d.materials.methods
 			_tileData = tileData;
 			_blendingTexture = blendingTexture;
 			_numSplattingLayers = _splats.length;
-			if (_numSplattingLayers > 3) throw new Error("More than 3 splatting layers is not supported!");
+			if (_numSplattingLayers > 4) throw new Error("More than 4 splatting layers is not supported!");
 		}
 
 		override arcane function initConstants(vo : MethodVO) : void
@@ -44,6 +44,9 @@ package away3d.materials.methods
 			for (var i : int = 1; i < 4; ++i) {
 				data[index+i] = _tileData ? _tileData[i] : 50;
 			}
+
+			if (_numSplattingLayers == 4)
+				data[index+4] = _tileData ? _tileData[4] : 50;
 		}
 
 		public function setDetailTexture(detail : Texture2DBase = null, tileData  : Array = null, blendFactors : Array = null) : void
@@ -61,6 +64,7 @@ package away3d.materials.methods
 			var detailScaleRegister : ShaderRegisterElement;
 			var detailBlendFactorRegister : ShaderRegisterElement;
 			var detailTexRegister : ShaderRegisterElement;
+			var scaleRegister2 : ShaderRegisterElement;
 
 			// incorporate input from ambient
 			if (vo.numLights > 0) {
@@ -82,6 +86,7 @@ package away3d.materials.methods
 			var blendTexReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 
 			scaleRegister = regCache.getFreeFragmentConstant();
+			if (_numSplattingLayers == 4) scaleRegister2 = regCache.getFreeFragmentConstant();
 
 			if (_detailTexture) {
 				detailScaleRegister = regCache.getFreeFragmentConstant();
@@ -113,8 +118,9 @@ package away3d.materials.methods
 			var comps : Array = [ ".x",".y",".z",".w" ];
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
+				var scaleRegName : String = i < 3? scaleRegister + comps[i+1] : scaleRegister2 + ".x";
 				splatTexReg = regCache.getFreeTextureReg();
-				code += "mul " + uv + ", " + _uvVaryingReg + ", " + scaleRegister + comps[i+1] + "\n" +
+				code += "mul " + uv + ", " + _uvVaryingReg + ", " + scaleRegName + "\n" +
 						getSplatSampleCode(vo, uv, splatTexReg, uv);
 
 				if (_detailTexture) {
@@ -172,8 +178,6 @@ package away3d.materials.methods
 
 		protected function getSplatSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
 		{
-			// TODO: not used
-			// var wrap : String = "wrap";
 			var filter : String;
 
 			if (vo.useSmoothTextures) filter = vo.useMipmapping ? "linear,miplinear" : "linear";

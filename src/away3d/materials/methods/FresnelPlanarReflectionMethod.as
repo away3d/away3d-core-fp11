@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.PlanarReflectionTexture;
-	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
@@ -13,23 +12,19 @@ package away3d.materials.methods
 	 * Allows the use of an additional texture to specify the alpha value of the material. When used with the secondary uv
 	 * set, it allows for a tiled main texture with independently varying alpha (useful for water etc).
 	 */
-	public class PlanarReflectionMethod extends EffectMethodBase
+	public class FresnelPlanarReflectionMethod extends EffectMethodBase
 	{
 		private var _texture : PlanarReflectionTexture;
 		private var _alpha : Number = 1;
 		private var _normalDisplacement : Number = 0;
+		private var _normalReflectance : Number = 0;
+		private var _fresnelPower : Number = 5;
 
-		public function PlanarReflectionMethod(texture : PlanarReflectionTexture, alpha : Number = 1)
+		public function FresnelPlanarReflectionMethod(texture : PlanarReflectionTexture, alpha : Number = 1)
 		{
 			super();
 			_texture = texture;
 			_alpha = alpha;
-		}
-
-		override arcane function initVO(vo : MethodVO) : void
-		{
-			vo.needsProjection = true;
-			vo.needsNormals = _normalDisplacement > 0;
 		}
 
 		public function get alpha() : Number
@@ -40,6 +35,36 @@ package away3d.materials.methods
 		public function set alpha(value : Number) : void
 		{
 			_alpha = value;
+		}
+
+		public function get fresnelPower() : Number
+		{
+			return _fresnelPower;
+		}
+
+		public function set fresnelPower(value : Number) : void
+		{
+			_fresnelPower = value;
+		}
+
+		/**
+		 * The minimum amount of reflectance, ie the reflectance when the view direction is normal to the surface or light direction.
+		 */
+		public function get normalReflectance() : Number
+		{
+			return _normalReflectance;
+		}
+
+		public function set normalReflectance(value : Number) : void
+		{
+			_normalReflectance = value;
+		}
+
+		override arcane function initVO(vo : MethodVO) : void
+		{
+			vo.needsProjection = true;
+			vo.needsNormals = true;
+			vo.needsView = true;
 		}
 
 		public function get texture() : PlanarReflectionTexture
@@ -70,12 +95,12 @@ package away3d.materials.methods
 			vo.fragmentData[vo.fragmentConstantsIndex] = _texture.textureRatioX*.5;
 			vo.fragmentData[vo.fragmentConstantsIndex+1] = _texture.textureRatioY*.5;
 			vo.fragmentData[vo.fragmentConstantsIndex+3] = _alpha;
+			vo.fragmentData[vo.fragmentConstantsIndex+4] = _normalReflectance;
+			vo.fragmentData[vo.fragmentConstantsIndex+5] = _fresnelPower;
 			if(_normalDisplacement > 0) {
 				vo.fragmentData[vo.fragmentConstantsIndex+2] = _normalDisplacement;
-				vo.fragmentData[vo.fragmentConstantsIndex+4] = .5+_texture.textureRatioX*.5 - 1/_texture.width;
-				vo.fragmentData[vo.fragmentConstantsIndex+5] = .5+_texture.textureRatioY*.5 - 1/_texture.height;
-				vo.fragmentData[vo.fragmentConstantsIndex+6] = .5-_texture.textureRatioX*.5 + 1/_texture.width;
-				vo.fragmentData[vo.fragmentConstantsIndex+7] = .5-_texture.textureRatioY*.5 + 1/_texture.height;
+				vo.fragmentData[vo.fragmentConstantsIndex+6] = .5+_texture.textureRatioX*.5 - 1/_texture.width;
+				vo.fragmentData[vo.fragmentConstantsIndex+7] = .5-_texture.textureRatioX*.5 + 1/_texture.width;
 			}
 		}
 
@@ -84,6 +109,7 @@ package away3d.materials.methods
 			var textureReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var dataReg2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 
 			var filter : String = vo.useSmoothTextures? "linear" : "nearest";
 			var code : String;
@@ -96,22 +122,37 @@ package away3d.materials.methods
 					"add " + temp + ".xy, " + temp + ".xy, fc0.xx\n";
 
 			if (_normalDisplacement > 0) {
-				var dataReg2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 				code += "add " + temp + ".w, " + _projectionReg + ".w, " + "fc0.w\n" +
 						"sub " + temp + ".z, fc0.w, " + _normalFragmentReg + ".y\n" +
 						"div " + temp + ".z, " + temp + ".z, " + temp + ".w\n" +
 						"mul " + temp + ".z, " + dataReg + ".z, " + temp + ".z\n" +
 						"add " + temp + ".x, " + temp + ".x, " + temp + ".z\n" +
-						"min " + temp + ".x, " + temp + ".x, " + dataReg2 + ".x\n" +
-						"max " + temp + ".x, " + temp + ".x, " + dataReg2 + ".z\n";
+						"min " + temp + ".x, " + temp + ".x, " + dataReg2 + ".z\n" +
+						"max " + temp + ".x, " + temp + ".x, " + dataReg2 + ".w\n";
 			}
 
 			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d,"+filter+">\n" +
 					"sub " + temp + ".w, " + temp + ".w,  fc0.x\n" +
 					"kil " + temp + ".w\n" +
-					"add " + temp + ".w, " + temp + ".w, fc0.x\n" +
+					"add " + temp + ".w, " + temp + ".w, fc0.x\n";
+
+
+			// calculate fresnel term
+			code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + _normalFragmentReg+".xyz\n" +   // dot(V, H)
+					"sub " + _viewDirFragmentReg+".w, fc0.w, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
+
+					"pow " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + dataReg2+".y\n" +             // exp = pow(base, 5)
+
+					"sub " + _normalFragmentReg+".w, fc0.w, " + _viewDirFragmentReg+".w\n" +             // 1 - exp
+					"mul " + _normalFragmentReg+".w, " + dataReg2+".x, " + _normalFragmentReg+".w\n" +             // f0*(1 - exp)
+					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
+
+				// total alpha
+					"mul " + _viewDirFragmentReg+".w, " + dataReg+".w, " + _viewDirFragmentReg+".w\n" +
+
 					"sub " + temp + ", " + temp + ", " + targetReg + "\n" +
-					"mul " + temp + ", " + temp + ", " + dataReg + ".w\n" +
+					"mul " + temp + ", " + temp + ", " + _viewDirFragmentReg + ".w\n" +
+
 					"add " + targetReg + ", " + targetReg + ", " + temp + "\n";
 
 			return code;
