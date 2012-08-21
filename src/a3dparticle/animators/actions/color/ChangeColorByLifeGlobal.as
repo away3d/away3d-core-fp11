@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.color 
+package a3dparticle.animators.actions.color
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
@@ -33,7 +33,7 @@ package a3dparticle.animators.actions.color
 		private var startOffset:Vector.<Number>;
 		private var deltaOffset:Vector.<Number>;
 		
-		public function ChangeColorByLifeGlobal(startColor:ColorTransform,endColor:ColorTransform) 
+		public function ChangeColorByLifeGlobal(startColor:ColorTransform,endColor:ColorTransform)
 		{
 			_startColor = startColor;
 			_endColor = endColor;
@@ -47,7 +47,7 @@ package a3dparticle.animators.actions.color
 			startMultiplier = Vector.<Number>([_startColor.redMultiplier , _startColor.greenMultiplier , _startColor.blueMultiplier , _startColor.alphaMultiplier ]);
 			deltaMultiplier = Vector.<Number>([(_endColor.redMultiplier - _startColor.redMultiplier) , (_endColor.greenMultiplier - _startColor.greenMultiplier) , (_endColor.blueMultiplier - _startColor.blueMultiplier) , (_endColor.alphaMultiplier - _startColor.alphaMultiplier)]);
 			startOffset = Vector.<Number>([_startColor.redOffset / 256, _startColor.greenOffset / 256, _startColor.blueOffset / 256, _startColor.alphaOffset / 256]);
-			deltaOffset = Vector.<Number>([(_endColor.greenOffset - _startColor.redOffset) / 256, (_endColor.greenOffset - _startColor.greenOffset) / 256, (_endColor.blueOffset - _startColor.blueOffset ) / 256, (_endColor.alphaOffset - _startColor.alphaOffset) / 256]);
+			deltaOffset = Vector.<Number>([(_endColor.redOffset - _startColor.redOffset) / 256, (_endColor.greenOffset - _startColor.greenOffset) / 256, (_endColor.blueOffset - _startColor.blueOffset ) / 256, (_endColor.alphaOffset - _startColor.alphaOffset) / 256]);
 			
 		}
 		
