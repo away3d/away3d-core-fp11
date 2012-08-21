@@ -47,7 +47,7 @@ package a3dparticle.animators.actions.drift
 		
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
-			getExtraData(subContainer).push(_driftData.x, _driftData.y, _driftData.z, _driftData.x, Math.PI * 2 / _driftData.w);
+			getExtraData(subContainer).push(_driftData.x, _driftData.y, _driftData.z, Math.PI * 2 / _driftData.w);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
