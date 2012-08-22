@@ -1,11 +1,11 @@
-package a3dparticle.animators.actions.texture 
+package a3dparticle.animators.actions.texture
 {
 	import flash.display.BitmapData;
 	/**
 	 * ...
 	 * @author liaocheng
 	 */
-	public class TextureHelper 
+	public class TextureHelper
 	{
 		
 		public static function hori2tilt(_startColor:uint, _endColor:uint, turnPoint:Number, precision:uint = 512):BitmapData
@@ -17,7 +17,7 @@ package a3dparticle.animators.actions.texture
 			startColor[3] = _startColor & 0xff;
 			var endColor:Array = [];
 			endColor[0] = (_endColor >> 24) & 0xff;
-			endColor[1] = _endColor & 0xff;
+			endColor[1] = (_endColor >> 16) & 0xff;
 			endColor[2] = (_endColor >> 8) & 0xff;
 			endColor[3] = _endColor & 0xff;
 			var deltaColor:Array = [];
@@ -26,7 +26,7 @@ package a3dparticle.animators.actions.texture
 			deltaColor[2] = endColor[2] - startColor[2];
 			deltaColor[3] = endColor[3] - startColor[3];
 			
-			var genFun:Function = function(u:Number):uint 
+			var genFun:Function = function(u:Number):uint
 			{
 				if (u <= turnPoint)
 				{
@@ -64,7 +64,7 @@ package a3dparticle.animators.actions.texture
 			deltaColor[2] = endColor[2] - startColor[2];
 			deltaColor[3] = endColor[3] - startColor[3];
 			
-			var genFun:Function = function(u:Number):uint 
+			var genFun:Function = function(u:Number):uint
 			{
 				if (u <= turnPoint)
 				{
