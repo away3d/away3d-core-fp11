@@ -107,9 +107,11 @@ package away3d.textures
 
 		public function render(view : View3D) : void
 		{
+			var camera : Camera3D = view.camera;
+			if (isCameraBehindPlane(camera)) return;
 			_isRendering = true;
 			updateSize(view.width, view.height);
-			updateCamera(view.camera);
+			updateCamera(camera);
 
 			_entityCollector.clear();
 			_entityCollector.camera = _camera;
@@ -119,6 +121,11 @@ package away3d.textures
 
 			_entityCollector.cleanUp();
 			_isRendering = false;
+		}
+
+		private function isCameraBehindPlane(camera : Camera3D) : Boolean
+		{
+			return camera.x*_plane.a + camera.y*_plane.b + camera.z*_plane.c + _plane.d < 0;
 		}
 
 		arcane function get textureRatioX() : Number
