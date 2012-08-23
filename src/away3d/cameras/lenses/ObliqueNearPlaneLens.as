@@ -92,7 +92,7 @@ package away3d.cameras.lenses
 			var cx : Number = _plane.a;
 			var cy : Number = _plane.b;
 			var cz : Number = _plane.c;
-			var cw : Number = -_plane.d;
+			var cw : Number = -_plane.d+.05;
 			var signX : Number = cx >= 0 ? 1 : -1;
 			var signY : Number = cy >= 0 ? 1 : -1;
 			var p : Vector3D = new Vector3D(signX, signY, 1, 1);

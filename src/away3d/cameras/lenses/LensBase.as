@@ -60,8 +60,7 @@ package away3d.cameras.lenses
 			}
 			return _matrix;
 		}
-		
-				
+
 		public function set matrix(value : Matrix3D) : void
 		{
 			_matrix = value;
