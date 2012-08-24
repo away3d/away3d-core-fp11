@@ -1,4 +1,4 @@
-package 
+package bubbles
 {
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
 	import a3dparticle.animators.actions.drift.DriftLocal;

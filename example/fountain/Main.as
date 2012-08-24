@@ -1,4 +1,4 @@
-package 
+package fountain
 {
 	import a3dparticle.animators.actions.acceleration.AccelerateGlobal;
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;

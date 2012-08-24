@@ -1,4 +1,4 @@
-package 
+package star
 {
 	import a3dparticle.animators.actions.color.FlickerGlobal;
 	import a3dparticle.animators.actions.color.RandomColorLocal;
@@ -20,7 +20,7 @@ package
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.parsers.Max3DSParser;
 	import away3d.debug.WireframeAxesGrid;
-	import away3d.tools.helpers.MeshHelper
+	import away3d.tools.helpers.MeshHelper;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -33,7 +33,7 @@ package
 	 * @author liaocheng
 	 */
 	[SWF(width="1024", height="768", frameRate="60")]
-	public class Main extends Sprite 
+	public class Main extends Sprite
 	{
 		
 		[Embed(source = "model/star.3ds", mimeType = "application/octet-stream")]
@@ -47,13 +47,13 @@ package
 		
 		private var mesh:Mesh;
 		
-		public function Main():void 
+		public function Main():void
 		{
 			if (stage) setTimeout(init, 0);
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		
-		private function init(e:Event = null):void 
+		private function init(e:Event = null):void
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			

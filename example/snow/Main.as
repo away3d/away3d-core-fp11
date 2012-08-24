@@ -1,4 +1,4 @@
-package 
+package snow
 {
 	import a3dparticle.animators.actions.drift.DriftLocal;
 	import a3dparticle.animators.actions.fog.FogByDistanceGlobal;

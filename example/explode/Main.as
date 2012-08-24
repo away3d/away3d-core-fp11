@@ -1,4 +1,4 @@
-package 
+package explode
 {
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
 	import a3dparticle.animators.actions.rotation.AutoRotateGlobal;
@@ -15,7 +15,7 @@ package
 	import away3d.primitives.CylinderGeometry;
 	import away3d.primitives.SphereGeometry;
 	import away3d.debug.WireframeAxesGrid;
-	import away3d.tools.MeshHelper;
+	import away3d.tools.helpers.MeshHelper;
 	import flash.display.BlendMode;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
@@ -30,7 +30,7 @@ package
 	 * @author liaocheng
 	 */
 	[SWF(width="1024", height="768", frameRate="60")]
-	public class Main extends Sprite 
+	public class Main extends Sprite
 	{
 		protected var _view:View3D;
 		
@@ -38,13 +38,13 @@ package
 		private var sample1:ParticleSample;
 		private var sample2:ParticleSample;
 		
-		public function Main():void 
+		public function Main():void
 		{
 			if (stage) setTimeout(init, 0);
 			else addEventListener(Event.ADDED_TO_STAGE, init);
 		}
 		
-		private function init(e:Event = null):void 
+		private function init(e:Event = null):void
 		{
 			removeEventListener(Event.ADDED_TO_STAGE, init);
 			

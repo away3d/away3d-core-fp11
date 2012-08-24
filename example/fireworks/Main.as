@@ -1,4 +1,4 @@
-package 
+package fireworks
 {
 	import a3dparticle.animators.actions.brokenline.BrokenLineLocal;
 	import a3dparticle.animators.actions.position.OffsetPositionLocal;
