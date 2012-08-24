@@ -14,7 +14,7 @@ package explode
 	import away3d.entities.Mesh;
 	import away3d.primitives.CylinderGeometry;
 	import away3d.primitives.SphereGeometry;
-	import away3d.debug.WireframeAxesGrid
+	import away3d.debug.WireframeAxesGrid;
 	import away3d.tools.helpers.MeshHelper;
 	import flash.display.BlendMode;
 	import flash.display.Sprite;
