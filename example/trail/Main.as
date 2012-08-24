@@ -1,4 +1,4 @@
-package 
+package trail
 {
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.ObjectContainer3D;
