@@ -1,4 +1,4 @@
-package
+package fire
 {
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
@@ -18,7 +18,7 @@ package
 	public class Main extends Sprite 
 	{
 		protected var _view:View3D;
-		
+
 		private var particle:ParticlesContainer;
 		
 		public function Main():void 
@@ -51,8 +51,8 @@ package
 		
 		private function initScene():void
 		{
-			var fire:Fire = new Fire();
-			_view.scene.addChild(fire);
+			var fire_:Fire = new Fire();
+			_view.scene.addChild(fire_);
 			var smoke:Smoke = new Smoke();
 			_view.scene.addChild(smoke);
 		}

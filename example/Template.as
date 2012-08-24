@@ -10,8 +10,8 @@ package
 	import a3dparticle.ParticlesContainer;
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
-	import away3d.primitives.Sphere;
-	import away3d.primitives.WireframeAxesGrid;
+	import away3d.primitives.SphereGeometry;
+	import away3d.debug.WireframeAxesGrid
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -65,10 +65,10 @@ package
 			//the geometry can be got from the primitives of away3d or models which is createed by tools like max or maya .
 			//the material can be ParticleColorMaterial which set color directly or ParticleBitmapMaterial which set color using texture.
 			var material:ParticleColorMaterial = new ParticleColorMaterial();
-			var sphereLarge:Sphere = new Sphere(null, 10, 6, 6);
-			var sphereSmall:Sphere = new Sphere(null, 5, 4, 4);
-			var sample1:ParticleSample = new ParticleSample(sphereLarge.geometry.subGeometries[0], material);
-			var sample2:ParticleSample = new ParticleSample(sphereSmall.geometry.subGeometries[0], material);
+			var sphereLarge:SphereGeometry = new SphereGeometry(10, 6, 6);
+			var sphereSmall:SphereGeometry = new SphereGeometry(5, 4, 4);
+			var sample1:ParticleSample = new ParticleSample(sphereLarge.subGeometries[0], material);
+			var sample2:ParticleSample = new ParticleSample(sphereSmall.subGeometries[0], material);
 			
 			//step 2: we create a generater which group the samples.
 			//The generater will provide a samples list for container.

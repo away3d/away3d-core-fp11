@@ -1,4 +1,4 @@
-package 
+package snow
 {
 	import a3dparticle.animators.actions.drift.DriftLocal;
 	import a3dparticle.animators.actions.fog.FogByDistanceGlobal;
@@ -21,7 +21,7 @@ package
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.parsers.Max3DSParser;
 	import away3d.primitives.SkyBox;
-	import away3d.primitives.WireframeAxesGrid;
+	import away3d.debug.WireframeAxesGrid
 	import away3d.textures.BitmapCubeTexture;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;

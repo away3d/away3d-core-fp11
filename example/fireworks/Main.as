@@ -1,4 +1,4 @@
-package 
+package fireworks
 {
 	import a3dparticle.animators.actions.brokenline.BrokenLineLocal;
 	import a3dparticle.animators.actions.position.OffsetPositionLocal;
@@ -12,7 +12,7 @@ package
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
 	import away3d.primitives.SphereGeometry;
-	import away3d.primitives.WireframeAxesGrid;
+	import away3d.debug.WireframeAxesGrid
 	import flash.display.BlendMode;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;

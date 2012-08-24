@@ -1,4 +1,4 @@
-package 
+package bubbles
 {
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
 	import a3dparticle.animators.actions.drift.DriftLocal;
@@ -14,7 +14,7 @@ package
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
 	import away3d.primitives.PlaneGeometry;
-	import away3d.primitives.WireframeAxesGrid;
+	import away3d.debug.WireframeAxesGrid
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;

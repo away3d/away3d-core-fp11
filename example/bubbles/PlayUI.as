@@ -1,4 +1,4 @@
-package  
+package bubbles
 {
 	import a3dparticle.ParticlesContainer;
 	import flash.display.Sprite;
@@ -41,11 +41,11 @@ package
 		{
 			if (check.selected)
 			{
-				target.timeScale = -1;
+				target.playbackSpeed = -1;
 			}
 			else
 			{
-				target.timeScale = 1;
+				target.playbackSpeed = 1;
 			}
 		}
 		

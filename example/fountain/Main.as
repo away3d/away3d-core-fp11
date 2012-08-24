@@ -1,4 +1,4 @@
-package 
+package fountain
 {
 	import a3dparticle.animators.actions.acceleration.AccelerateGlobal;
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
@@ -12,7 +12,7 @@ package
 	import away3d.containers.View3D;
 	import away3d.debug.AwayStats;
 	import away3d.primitives.SphereGeometry;
-	import away3d.primitives.WireframeAxesGrid;
+	import away3d.debug.WireframeAxesGrid
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;

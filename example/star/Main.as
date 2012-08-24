@@ -1,4 +1,4 @@
-package 
+package star
 {
 	import a3dparticle.animators.actions.color.FlickerGlobal;
 	import a3dparticle.animators.actions.color.RandomColorLocal;
@@ -19,7 +19,7 @@ package
 	import away3d.library.assets.AssetType;
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.parsers.Max3DSParser;
-	import away3d.primitives.WireframeAxesGrid;
+	import away3d.debug.WireframeAxesGrid
 	import away3d.tools.helpers.MeshHelper
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
