@@ -1,6 +1,5 @@
 package a3dparticle.animators.actions 
 {
-	import a3dparticle.animators.ParticleAnimation;
 	/**
 	 * ...
 	 * @author ...
