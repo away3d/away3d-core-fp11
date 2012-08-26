@@ -404,13 +404,15 @@ package away3d.loaders.parsers
 					// If another sequence was parsed before this one, starting
 					// a new state means the previous one is complete and can
 					// hence be finalized.
-					if (prevClip)
+					if (prevClip) {
 						finalizeAsset(prevClip);
+						_animationSet.addAnimation(prevClip.name, prevClip);
+					}
 						
 					clip = new VertexClipNode();
+					clip.name = name;
 					clip.stitchFinalFrame = true;
 					
-					_animationSet.addAnimation(name, clip);
 					_clipNodes[name] = clip;
 					
 					prevClip = clip;
@@ -419,11 +421,12 @@ package away3d.loaders.parsers
 			}
 			
 			// Finalize the last state
-			if (prevClip)
+			if (prevClip) {
 				finalizeAsset(prevClip);
+				_animationSet.addAnimation(prevClip.name, prevClip);
+			}
 			
 			// Force finalizeAsset() to decide name
-			//_animator.name = "";
 			finalizeAsset(_animationSet);
 			
 			_parsedFrames = true;
