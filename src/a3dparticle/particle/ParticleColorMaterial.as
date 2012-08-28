@@ -32,14 +32,14 @@ package a3dparticle.particle
 		override public function getFragmentCode(_particleAnimation:ParticleAnimation):String
 		{
 			var code:String = "";
-			code += "mov " + _particleAnimation.colorTarget.toString() + "," +_particleAnimation.colorDefalut.toString() + "\n";
+			code += "mov " + _particleAnimation.colorTarget.toString() + "," +_particleAnimation.colorDefault.toString() + "\n";
 			return code;
 		}
 		
 		override public function render(_particleAnimation:ParticleAnimation, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			super.render(_particleAnimation, renderable, stage3DProxy, camera);
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.colorDefalut.index, _colorData, 1);
+			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _particleAnimation.colorDefault.index, _colorData, 1);
 		}
 		
 	}
