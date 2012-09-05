@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.rotation 
+package a3dparticle.animators.actions.rotation
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
@@ -6,9 +6,9 @@ package a3dparticle.animators.actions.rotation
 	import away3d.core.math.MathConsts;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.utils.ShaderRegisterElement;
-	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Matrix3D;
+	import flash.geom.Orientation3D;
 	import flash.geom.Vector3D;
 	
 	import away3d.arcane;
@@ -20,8 +20,9 @@ package a3dparticle.animators.actions.rotation
 	public class BillboardGlobal extends AllParticleAction
 	{
 		private var rotationMatrixRegister:ShaderRegisterElement;
+		private var matrix:Matrix3D = new Matrix3D;
 		
-		public function BillboardGlobal() 
+		public function BillboardGlobal()
 		{
 			priority = 2;
 		}
@@ -42,16 +43,12 @@ package a3dparticle.animators.actions.rotation
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			var mvp :Matrix3D = renderable.getModelViewProjectionUnsafe();
-			var comps : Vector.<Vector3D>;
-			comps = mvp.decompose();
-			var rotation :Matrix3D = new Matrix3D();
-			rotation.appendRotation(-comps[1].z * MathConsts.RADIANS_TO_DEGREES, new Vector3D(0, 0, 1));
-			rotation.appendRotation(-comps[1].y * MathConsts.RADIANS_TO_DEGREES, new Vector3D(0, 1, 0));
-			rotation.appendRotation(-comps[1].x * MathConsts.RADIANS_TO_DEGREES, new Vector3D(1, 0, 0));
-			
-			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, rotationMatrixRegister.index, rotation, true);
+			matrix.copyFrom(renderable.sceneTransform);
+			matrix.append(_animation.camera.inverseSceneTransform);
+			var comps : Vector.<Vector3D> = matrix.decompose(Orientation3D.AXIS_ANGLE);
+			matrix.identity();
+			matrix.appendRotation( -comps[1].w * MathConsts.RADIANS_TO_DEGREES, comps[1]);
+			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, rotationMatrixRegister.index, matrix, true);
 		}
 		
 	}

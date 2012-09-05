@@ -8,6 +8,7 @@ package a3dparticle.animators
 	import a3dparticle.particle.ParticleParam;
 	import away3d.animators.IAnimationSet;
 	import away3d.animators.IAnimationState;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -67,7 +68,7 @@ package a3dparticle.animators
 		public var OneConst:ShaderRegisterElement;
 		public var TwoConst:ShaderRegisterElement;
 		public var cameraPosConst:ShaderRegisterElement;
-		public var uvTarget:ShaderRegisterElement
+		public var uvTarget:ShaderRegisterElement;
 		//vary
 		private var varyTime:ShaderRegisterElement;
 		public var fragmentTime:ShaderRegisterElement;
@@ -82,6 +83,9 @@ package a3dparticle.animators
 		public var fragmentOneConst:ShaderRegisterElement;
 		public var fadeFactorConst:ShaderRegisterElement;
 		
+		
+		//rendering camera
+		public var camera:Camera3D;
 		
 		public function ParticleAnimation()
 		{

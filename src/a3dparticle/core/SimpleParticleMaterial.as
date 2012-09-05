@@ -1,5 +1,6 @@
 package a3dparticle.core
 {
+	import a3dparticle.animators.ParticleAnimation;
 	import a3dparticle.animators.ParticleAnimationtor;
 	import a3dparticle.particle.ParticleMaterialBase;
 	import away3d.animators.AnimationSetBase;
@@ -86,12 +87,15 @@ package a3dparticle.core
 		
 		override arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, entityCollector : EntityCollector) : void
 		{
-			if (renderable is SubContainer)
+			var subContainer:SubContainer;
+			if ((subContainer = renderable as SubContainer))
 			{
+				//sometimes action need to read the camera, set it temporary
+				(subContainer.animator.animationSet as ParticleAnimation).camera = entityCollector.camera;
 				for (var i:int = 0; i < renderTimes; i++)
 				{
-					ParticleAnimationtor(SubContainer(renderable).animator).passCount = i;
-					ParticleAnimationtor(SubContainer(renderable).animator).offestTime = -i * _particleMaterial.timeInterval;
+					ParticleAnimationtor(subContainer.animator).passCount = i;
+					ParticleAnimationtor(subContainer.animator).offestTime = -i * _particleMaterial.timeInterval;
 					super.renderPass(index, renderable, stage3DProxy, entityCollector);
 				}
 			}
