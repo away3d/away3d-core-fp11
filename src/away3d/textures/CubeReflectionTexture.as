@@ -6,13 +6,11 @@ package away3d.textures
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.EntityCollector;
 
 	import flash.display.BitmapData;
-	import flash.display3D.textures.CubeTexture;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Vector3D;
 
