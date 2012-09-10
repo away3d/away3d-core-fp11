@@ -62,6 +62,9 @@ package away3d.materials.methods
 		{
 		}
 
+		/**
+		 * The reflectiveness of the surface
+		 */
 		public function get alpha() : Number
 		{
 			return _alpha;

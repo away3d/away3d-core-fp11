@@ -20,6 +20,11 @@ package away3d.textures
 
 	use namespace arcane;
 
+	/**
+	 * PlanarReflectionTexture is a Texture that can be used for material-based planar reflections, as provided by PlanarReflectionMethod, FresnelPlanarReflectionMethod.
+	 *
+	 * @see away3d.materials.methods.PlanarReflectionMethod
+	 */
 	public class PlanarReflectionTexture extends RenderTexture
 	{
 		private var _mockTexture : BitmapTexture;
@@ -37,6 +42,9 @@ package away3d.textures
 		private var _viewWidth : Number;
 		private var _viewHeight : Number;
 
+		/**
+		 * Creates a new PlanarReflectionTexture object.
+		 */
 		public function PlanarReflectionTexture()
 		{
 			super(2, 2);
@@ -52,6 +60,9 @@ package away3d.textures
 			initMockTexture();
 		}
 
+		/**
+		 * The plane to reflect with.
+		 */
 		public function get plane() : Plane3D
 		{
 			return _plane;
@@ -62,6 +73,10 @@ package away3d.textures
 			_plane = value;
 		}
 
+		/**
+		 * Sets the plane to match a given matrix. This is used to easily match a Mesh using a PlaneGeometry and yUp = false.
+		 * @param matrix The transformation matrix to rotate the plane with.
+		 */
 		public function applyTransform(matrix : Matrix3D) : void
 		{
 			var rawData : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
@@ -76,11 +91,17 @@ package away3d.textures
 			_plane.d = -_vector.w;
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		override public function getTextureForStage3D(stage3DProxy : Stage3DProxy) : TextureBase
 		{
 			return _isRendering? _mockTexture.getTextureForStage3D(stage3DProxy) : super.getTextureForStage3D(stage3DProxy);
 		}
 
+		/**
+		 * The renderer to use.
+		 */
 		public function get renderer() : RendererBase
 		{
 			return _renderer;
@@ -93,6 +114,9 @@ package away3d.textures
 			_entityCollector = _renderer.createEntityCollector();
 		}
 
+		/**
+		 * A scale factor to reduce the quality of the reflection. Default value is 1 (same quality as the View)
+		 */
 		public function get scale() : Number
 		{
 			return _scale;
@@ -105,6 +129,10 @@ package away3d.textures
 						value;
 		}
 
+		/**
+		 * Renders the scene in the given view for reflections.
+		 * @param view The view containing the Scene to render.
+		 */
 		public function render(view : View3D) : void
 		{
 			var camera : Camera3D = view.camera;
@@ -123,9 +151,12 @@ package away3d.textures
 			_isRendering = false;
 		}
 
-		private function isCameraBehindPlane(camera : Camera3D) : Boolean
+		override public function dispose() : void
 		{
-			return camera.x*_plane.a + camera.y*_plane.b + camera.z*_plane.c + _plane.d < 0;
+			super.dispose();
+			_mockTexture.dispose();
+			_camera.dispose();
+			_mockBitmapData.dispose();
 		}
 
 		arcane function get textureRatioX() : Number
@@ -138,6 +169,11 @@ package away3d.textures
 			return _renderer.textureRatioY;
 		}
 
+		/**
+		 * @inheritDoc
+		 */
+		override protected function uploadContent(texture : TextureBase) : void { /* disallow */ }
+
 		private function updateCamera(camera : Camera3D) : void
 		{
 			Matrix3DUtils.reflection(_plane, _matrix);
@@ -147,6 +183,11 @@ package away3d.textures
 			_lens.baseLens = camera.lens;
 			_lens.aspectRatio = _viewWidth/_viewHeight;
 			_lens.plane = transformPlane(_plane, _matrix);
+		}
+
+		private function isCameraBehindPlane(camera : Camera3D) : Boolean
+		{
+			return camera.x*_plane.a + camera.y*_plane.b + camera.z*_plane.c + _plane.d < 0;
 		}
 
 		private function transformPlane(plane : Plane3D, matrix : Matrix3D) : Plane3D
@@ -190,18 +231,6 @@ package away3d.textures
 			// use a completely transparent map to prevent anything from using this texture when updating map
 			_mockBitmapData = new BitmapData(2, 2, true, 0x00000000);
 			_mockTexture = new BitmapTexture(_mockBitmapData);
-		}
-
-		override public function dispose() : void
-		{
-			super.dispose();
-			_mockTexture.dispose();
-			_camera.dispose();
-			_mockBitmapData.dispose();
-		}
-
-		override protected function uploadContent(texture : TextureBase) : void
-		{
 		}
 	}
 }

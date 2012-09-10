@@ -10,8 +10,9 @@ package away3d.materials.methods
 	use namespace arcane;
 
 	/**
-	 * Allows the use of an additional texture to specify the alpha value of the material. When used with the secondary uv
-	 * set, it allows for a tiled main texture with independently varying alpha (useful for water etc).
+	 * PlanarReflectionMethod is a material method that adds reflections from a PlanarReflectionTexture object.
+	 *
+	 * @see away3d.textures.PlanarReflectionTexture
 	 */
 	public class PlanarReflectionMethod extends EffectMethodBase
 	{
@@ -19,6 +20,11 @@ package away3d.materials.methods
 		private var _alpha : Number = 1;
 		private var _normalDisplacement : Number = 0;
 
+		/**
+		 * Creates a new PlanarReflectionMethod
+		 * @param texture The PlanarReflectionTexture used to render the reflected view.
+		 * @param alpha The reflectiveness of the surface.
+		 */
 		public function PlanarReflectionMethod(texture : PlanarReflectionTexture, alpha : Number = 1)
 		{
 			super();
@@ -26,12 +32,18 @@ package away3d.materials.methods
 			_alpha = alpha;
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo : MethodVO) : void
 		{
 			vo.needsProjection = true;
 			vo.needsNormals = _normalDisplacement > 0;
 		}
 
+		/**
+		 * The reflectiveness of the surface.
+		 */
 		public function get alpha() : Number
 		{
 			return _alpha;
@@ -42,6 +54,9 @@ package away3d.materials.methods
 			_alpha = value;
 		}
 
+		/**
+		 * The PlanarReflectionTexture used to render the reflected view.
+		 */
 		public function get texture() : PlanarReflectionTexture
 		{
 			return _texture;
@@ -52,6 +67,9 @@ package away3d.materials.methods
 			_texture = value;
 		}
 
+		/**
+		 * The amount of displacement on the surface, for use with water waves.
+		 */
 		public function get normalDisplacement() : Number
 		{
 			return _normalDisplacement;

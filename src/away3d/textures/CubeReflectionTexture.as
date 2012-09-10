@@ -16,7 +16,12 @@ package away3d.textures
 
 	use namespace arcane;
 
-	// possibly wrappable in an Entity at some point
+	/**
+	 * CubeReflectionTexture provides a cube map texture for real-time reflections, used for any method that uses environment maps,
+	 * such as EnvMapMethod.
+	 *
+	 * @see away3d.materials.methods.EnvMapMethod
+	 */
 	public class CubeReflectionTexture extends RenderCubeTexture
 	{
 		private var _mockTexture : BitmapCubeTexture;
@@ -30,7 +35,11 @@ package away3d.textures
 		private var _position : Vector3D;
 		private var _isRendering : Boolean;
 
-		public function CubeReflectionTexture(size : Number)
+		/**
+		 * Creates a new CubeReflectionTexture object
+		 * @param size The size of the cube texture
+		 */
+		public function CubeReflectionTexture(size : int)
 		{
 			super(size);
 			_renderer = new DefaultRenderer();
@@ -40,11 +49,17 @@ package away3d.textures
 			initCameras();
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		override public function getTextureForStage3D(stage3DProxy : Stage3DProxy) : TextureBase
 		{
 			return _isRendering? _mockTexture.getTextureForStage3D(stage3DProxy) : super.getTextureForStage3D(stage3DProxy);
 		}
 
+		/**
+		 * The origin where the environment map will be rendered. This is usually in the centre of the reflective object.
+		 */
 		public function get position() : Vector3D
 		{
 			return _position;
@@ -55,6 +70,9 @@ package away3d.textures
 			_position = value;
 		}
 
+		/**
+		 * The near plane used by the camera lens.
+		 */
 		public function get nearPlaneDistance() : Number
 		{
 			return _nearPlaneDistance;
@@ -65,6 +83,9 @@ package away3d.textures
 			_nearPlaneDistance = value;
 		}
 
+		/**
+		 * The far plane of the camera lens. Can be used to cut off objects that are too far to be of interest in reflections
+		 */
 		public function get farPlaneDistance() : Number
 		{
 			return _farPlaneDistance;
@@ -75,6 +96,10 @@ package away3d.textures
 			_farPlaneDistance = value;
 		}
 
+		/**
+		 * Renders the scene in the given view for reflections.
+		 * @param view The view containing the scene to render.
+		 */
 		public function render(view : View3D) : void
 		{
 			var stage3DProxy : Stage3DProxy = view.stage3DProxy;
@@ -88,6 +113,34 @@ package away3d.textures
 				renderSurface(i, scene, targetTexture);
 
 			_isRendering = false;
+		}
+
+		/**
+		 * The renderer to use.
+		 */
+		public function get renderer() : RendererBase
+		{
+			return _renderer;
+		}
+
+		public function set renderer(value : RendererBase) : void
+		{
+			_renderer.dispose();
+			_renderer = value;
+			_entityCollector = _renderer.createEntityCollector();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override public function dispose() : void
+		{
+			super.dispose();
+			_mockTexture.dispose();
+			for (var i : int = 0; i < 6; ++i)
+				_cameras[i].dispose();
+
+			_mockBitmapData.dispose();
 		}
 
 		private function renderSurface(surfaceIndex : uint, scene : Scene3D, targetTexture : TextureBase) : void
@@ -105,28 +158,6 @@ package away3d.textures
 			_renderer.render(_entityCollector, targetTexture, null, surfaceIndex);
 
 			_entityCollector.cleanUp();
-		}
-
-		public function get renderer() : RendererBase
-		{
-			return _renderer;
-		}
-
-		public function set renderer(value : RendererBase) : void
-		{
-			_renderer.dispose();
-			_renderer = value;
-			_entityCollector = _renderer.createEntityCollector();
-		}
-
-		override public function dispose() : void
-		{
-			super.dispose();
-			_mockTexture.dispose();
-			for (var i : int = 0; i < 6; ++i)
-				_cameras[i].dispose();
-
-			_mockBitmapData.dispose();
 		}
 
 
