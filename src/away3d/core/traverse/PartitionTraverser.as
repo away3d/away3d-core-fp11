@@ -35,9 +35,7 @@ package away3d.core.traverse
 		 * @return true if further recursion down children is necessary, false if not.
 		 */
 		public function enterNode(node : NodeBase) : Boolean { 
-			// TODO: not used;
-		 	node=node; 
-		 	return true; 
+		 	return true;
 		}
 
 		/**

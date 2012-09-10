@@ -128,7 +128,7 @@ package away3d.materials.methods
 
 		public function set texture(value : Texture2DBase) : void
 		{
-			if (!value || !_useTexture) invalidateShaderProgram();
+			if (Boolean(value) != _useTexture) invalidateShaderProgram();
 			_useTexture = Boolean(value);
 			_texture = value;
 		}
@@ -224,7 +224,7 @@ package away3d.materials.methods
 							"sub " + t + ".xyz, " + t + ".xyz, " + lightDirReg + ".xyz\n" + // vec1 = vec1 - light (light vector is negative)
 
 						//smooth the edge as incidence angle approaches 90
-							"add" + t + ".w, " + t + ".w, " + _normalFragmentReg + ".w\n" + // sca1 = sca1 + smoothtep;
+							"add" + t + ".w, " + t + ".w, " + _viewDirVaryingReg + ".w\n" + // sca1 = sca1 + smoothtep;
 						//"div" + t + ".w, " + t + ".w, " + _specularDataRegister2 + ".z\n" + // sca1 = sca1/smoothtep;
 							"sat " + t + ".w, " + t + ".w\n" + // sca1 range 0 - 1
 							"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" + // vec1 = vec1*sca1

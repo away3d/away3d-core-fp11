@@ -60,8 +60,7 @@ package away3d.cameras.lenses
 			}
 			return _matrix;
 		}
-		
-				
+
 		public function set matrix(value : Matrix3D) : void
 		{
 			_matrix = value;
@@ -139,6 +138,14 @@ package away3d.cameras.lenses
 			v.w = 1.0;
 
 			return v;
+		}
+
+		/**
+		 * Creates an exact duplicate of the lens
+		 */
+		public function clone() : LensBase
+		{
+			throw new AbstractMethodError();
 		}
 
 		/**

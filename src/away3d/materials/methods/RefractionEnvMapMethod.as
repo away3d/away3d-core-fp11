@@ -22,7 +22,7 @@ package away3d.materials.methods
 		private var _alpha : Number = 1;
 
 		// example values for dispersion: dispersionR : Number = -0.03, dispersionG : Number = -0.01, dispersionB : Number = .0015
-		public function RefractionEnvMapMethod(envMap : CubeTextureBase, refractionIndex : Number = .9, dispersionR : Number = 0, dispersionG : Number = 0, dispersionB : Number = 0)
+		public function RefractionEnvMapMethod(envMap : CubeTextureBase, refractionIndex : Number = .1, dispersionR : Number = 0, dispersionG : Number = 0, dispersionB : Number = 0)
 		{
 			super();
 			_envMap = envMap;
@@ -168,7 +168,9 @@ package away3d.materials.methods
 					"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 					"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
-			code +=	"tex " + refractionColor + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n";
+			code +=	"tex " + refractionColor + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+					"sub " + refractionColor + ".w, " + refractionColor + ".w, fc0.x	\n" +
+					"kil " + refractionColor + ".w\n";
 
 			if (_useDispersion) {
 				// GREEN

@@ -138,9 +138,9 @@ package away3d.materials.methods
 			vo.texturesIndex = _normalTextureRegister.index;
 
 			vo.fragmentConstantsIndex = dataReg.index*4;
-			return	 "add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".xyxy\n" +
+			return	 "add " + temp + ", " + _uvVaryingReg + ", " + dataReg2 + ".xyxy\n" +
 					getTexSampleCode(vo, targetReg, _normalTextureRegister, temp) +
-					"add " + temp + ", " + _uvFragmentReg + ", " + dataReg2 + ".zwzw\n" +
+					"add " + temp + ", " + _uvVaryingReg + ", " + dataReg2 + ".zwzw\n" +
 					getTexSampleCode(vo, temp, _normalTextureRegister2, temp) +
 					"add " + targetReg + ", " + targetReg + ", " + temp + "		\n" +
 					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n";

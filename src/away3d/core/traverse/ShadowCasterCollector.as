@@ -4,7 +4,10 @@ package away3d.core.traverse
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.entities.Entity;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
+	import away3d.lights.LightProbe;
+	import away3d.lights.PointLight;
 
 	use namespace arcane;
 
@@ -23,13 +26,7 @@ package away3d.core.traverse
 		 */
 		public function ShadowCasterCollector()
 		{
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function applySkyBox(renderable : IRenderable) : void
-		{
+			super();
 		}
 
 		/**
@@ -49,11 +46,10 @@ package away3d.core.traverse
 			}
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function applyUnknownLight(light : LightBase) : void
-		{
-		}
+		override public function applyUnknownLight(light : LightBase) : void {}
+		override public function applyDirectionalLight(light : DirectionalLight) : void {}
+		override public function applyPointLight(light : PointLight) : void {}
+		override public function applyLightProbe(light : LightProbe) : void {}
+		override public function applySkyBox(renderable : IRenderable) : void {}
 	}
 }

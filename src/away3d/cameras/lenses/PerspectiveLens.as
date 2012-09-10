@@ -39,6 +39,15 @@ package away3d.cameras.lenses
 			invalidateMatrix();
 		}
 
+		override public function clone() : LensBase
+		{
+			var clone : PerspectiveLens = new PerspectiveLens(_fieldOfView);
+			clone._near = _near;
+			clone._far = _far;
+			clone._aspectRatio = _aspectRatio;
+			return clone;
+		}
+
 		/**
 		 * @inheritDoc
 		 */

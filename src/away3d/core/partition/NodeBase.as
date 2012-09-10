@@ -118,8 +118,6 @@ package away3d.core.partition
 		 */
 		public function isInFrustum(camera : Camera3D) : Boolean
 		{
-			// TODO: not used
-			camera = null; 
 			return true;
 		}
 

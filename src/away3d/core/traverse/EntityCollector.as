@@ -55,8 +55,6 @@ package away3d.core.traverse
 
 		private function init() : void
 		{
-//			_opaqueRenderables = new Vector.<IRenderable>();
-//			_blendedRenderables = new Vector.<IRenderable>();
 			_lights = new Vector.<LightBase>();
 			_directionalLights = new Vector.<DirectionalLight>();
 			_pointLights = new Vector.<PointLight>();
@@ -132,7 +130,6 @@ package away3d.core.traverse
 		 */
 		public function get lights() : Vector.<LightBase>
 		{
-			// todo: provide separate containers per default light type, otherwise store here
 			return _lights;
 		}
 
