@@ -213,17 +213,22 @@
 			clone.bounds = _bounds.clone();
 			clone.name = name;
 			clone.castsShadows = castsShadows;
-
+			clone.mouseEnabled=this.mouseEnabled;
+			clone.mouseChildren=this.mouseChildren;
+			//this is of course no proper cloning
+			//maybe use this instead?: http://blog.another-d-mention.ro/programming/how-to-clone-duplicate-an-object-in-actionscript-3/
+			clone.extra=this.extra;
+			
 			var len : int = _subMeshes.length;
 			for (var i : int = 0; i < len; ++i) {
 				clone._subMeshes[i]._material = _subMeshes[i]._material;
 			}
-
+			
 			len = numChildren;
 			for (i = 0; i < len; ++i) {
 				clone.addChild(ObjectContainer3D(getChildAt(i).clone()));
 			}
-
+			
 			return clone;
 		}
 
