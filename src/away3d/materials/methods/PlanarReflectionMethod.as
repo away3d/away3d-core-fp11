@@ -109,14 +109,16 @@ package away3d.materials.methods
 			vo.fragmentConstantsIndex = dataReg.index*4;
 			// fc0.x = .5
 
-			code = 	"div " + temp + ", " + _projectionReg + ", " + _projectionReg + ".w\n" +
+			var projectionReg : ShaderRegisterElement = _sharedRegisters.projectionFragment;
+
+			code = 	"div " + temp + ", " + projectionReg + ", " + projectionReg + ".w\n" +
 					"mul " + temp + ", " + temp + ", " + dataReg + ".xyww\n" +
 					"add " + temp + ".xy, " + temp + ".xy, fc0.xx\n";
 
 			if (_normalDisplacement > 0) {
 				var dataReg2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-				code += "add " + temp + ".w, " + _projectionReg + ".w, " + "fc0.w\n" +
-						"sub " + temp + ".z, fc0.w, " + _normalFragmentReg + ".y\n" +
+				code += "add " + temp + ".w, " + projectionReg + ".w, " + "fc0.w\n" +
+						"sub " + temp + ".z, fc0.w, " + _sharedRegisters.normalFragment + ".y\n" +
 						"div " + temp + ".z, " + temp + ".z, " + temp + ".w\n" +
 						"mul " + temp + ".z, " + dataReg + ".z, " + temp + ".z\n" +
 						"add " + temp + ".x, " + temp + ".x, " + temp + ".z\n" +

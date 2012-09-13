@@ -119,6 +119,8 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
+			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
 
 			vo.texturesIndex = cubeMapReg.index;
 			vo.fragmentConstantsIndex = dataRegister.index*4;
@@ -126,10 +128,10 @@ package away3d.materials.methods
 			regCache.addFragmentTempUsages(temp,  1);
 
 			// r = V - 2(V.N)*N
-			code += "dp3 " + temp + ".w, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz		\n" +
+			code += "dp3 " + temp + ".w, " + viewDirReg + ".xyz, " + normalReg + ".xyz		\n" +
 					"add " + temp + ".w, " + temp + ".w, " + temp + ".w											\n" +
-					"mul " + temp + ".xyz, " + _normalFragmentReg + ".xyz, " + temp + ".w						\n" +
-					"sub " + temp + ".xyz, " + temp + ".xyz, " + _viewDirFragmentReg + ".xyz					\n" +
+					"mul " + temp + ".xyz, " + normalReg + ".xyz, " + temp + ".w						\n" +
+					"sub " + temp + ".xyz, " + temp + ".xyz, " + viewDirReg + ".xyz					\n" +
 					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 					"sub " + temp + ".w, " + temp + ".w, fc0.x									\n" +               	// -.5
 					"kil " + temp + ".w\n" +	// used for real time reflection mapping - if alpha is not 1 (mock texture) kil output
@@ -137,27 +139,27 @@ package away3d.materials.methods
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n";
 
 			// calculate fresnel term
-			code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + _normalFragmentReg+".xyz\n" +   // dot(V, H)
-            		"sub " + _viewDirFragmentReg+".w, " + dataRegister+".w, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
+			code += "dp3 " + viewDirReg+".w, " + viewDirReg+".xyz, " + normalReg+".xyz\n" +   // dot(V, H)
+            		"sub " + viewDirReg+".w, " + dataRegister+".w, " + viewDirReg+".w\n" +             // base = 1-dot(V, H)
 
-					"pow " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + dataRegister+".z\n" +             // exp = pow(base, 5)
+					"pow " + viewDirReg+".w, " + viewDirReg+".w, " + dataRegister+".z\n" +             // exp = pow(base, 5)
 
-					"sub " + _normalFragmentReg+".w, " + dataRegister+".w, " + _viewDirFragmentReg+".w\n" +             // 1 - exp
-					"mul " + _normalFragmentReg+".w, " + dataRegister+".y, " + _normalFragmentReg+".w\n" +             // f0*(1 - exp)
-					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
+					"sub " + normalReg+".w, " + dataRegister+".w, " + viewDirReg+".w\n" +             // 1 - exp
+					"mul " + normalReg+".w, " + dataRegister+".y, " + normalReg+".w\n" +             // f0*(1 - exp)
+					"add " + viewDirReg+".w, " + viewDirReg+".w, " + normalReg+".w\n" +          // exp + f0*(1 - exp)
 
 					// total alpha
-					"mul " + _viewDirFragmentReg+".w, " + dataRegister+".x, " + _viewDirFragmentReg+".w\n";
+					"mul " + viewDirReg+".w, " + dataRegister+".x, " + viewDirReg+".w\n";
 
 			if (_mask) {
 				var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 				var maskReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-				code += getTexSampleCode(vo, temp2, maskReg, _uvVaryingReg) +
-						"mul " + _viewDirFragmentReg + ".w, " + temp2 + ".x, " + _viewDirFragmentReg + ".w\n";
+				code += getTexSampleCode(vo, temp2, maskReg, _sharedRegisters.uvVarying) +
+						"mul " + viewDirReg + ".w, " + temp2 + ".x, " + viewDirReg + ".w\n";
 			}
 
 					// blend
-			code +=	"mul " + temp + ", " + temp + ", " + _viewDirFragmentReg + ".w						\n" +
+			code +=	"mul " + temp + ", " + temp + ", " + viewDirReg + ".w						\n" +
 					"add " + targetReg + ".xyzw, " + targetReg+".xyzw, " + temp + ".xyzw						\n";
 
 			regCache.removeFragmentTempUsage(temp);

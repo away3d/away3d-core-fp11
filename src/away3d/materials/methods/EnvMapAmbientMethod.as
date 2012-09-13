@@ -72,7 +72,7 @@ package away3d.materials.methods
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			vo.texturesIndex = cubeMapReg.index;
 
-			code += "tex " + targetReg + ", " + _normalFragmentReg + ", " + cubeMapReg + " <cube,linear,miplinear,clamp>\n";
+			code += "tex " + targetReg + ", " + _sharedRegisters.normalFragment + ", " + cubeMapReg + " <cube,linear,miplinear,clamp>\n";
 
 			_ambientInputRegister = regCache.getFreeFragmentConstant();
 			vo.fragmentConstantsIndex = _ambientInputRegister.index;

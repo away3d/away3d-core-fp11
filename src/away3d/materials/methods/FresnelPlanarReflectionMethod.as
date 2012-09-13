@@ -117,13 +117,17 @@ package away3d.materials.methods
 			vo.fragmentConstantsIndex = dataReg.index*4;
 			// fc0.x = .5
 
-			code = 	"div " + temp + ", " + _projectionReg + ", " + _projectionReg + ".w\n" +
+			var projectionReg : ShaderRegisterElement = _sharedRegisters.projectionFragment;
+			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
+			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+
+			code = 	"div " + temp + ", " + projectionReg + ", " + projectionReg + ".w\n" +
 					"mul " + temp + ", " + temp + ", " + dataReg + ".xyww\n" +
 					"add " + temp + ".xy, " + temp + ".xy, fc0.xx\n";
 
 			if (_normalDisplacement > 0) {
-				code += "add " + temp + ".w, " + _projectionReg + ".w, " + "fc0.w\n" +
-						"sub " + temp + ".z, fc0.w, " + _normalFragmentReg + ".y\n" +
+				code += "add " + temp + ".w, " + projectionReg + ".w, " + "fc0.w\n" +
+						"sub " + temp + ".z, fc0.w, " + normalReg + ".y\n" +
 						"div " + temp + ".z, " + temp + ".z, " + temp + ".w\n" +
 						"mul " + temp + ".z, " + dataReg + ".z, " + temp + ".z\n" +
 						"add " + temp + ".x, " + temp + ".x, " + temp + ".z\n" +
@@ -138,20 +142,20 @@ package away3d.materials.methods
 
 
 			// calculate fresnel term
-			code += "dp3 " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".xyz, " + _normalFragmentReg+".xyz\n" +   // dot(V, H)
-					"sub " + _viewDirFragmentReg+".w, fc0.w, " + _viewDirFragmentReg+".w\n" +             // base = 1-dot(V, H)
+			code += "dp3 " + viewDirReg+".w, " + viewDirReg+".xyz, " + normalReg+".xyz\n" +   // dot(V, H)
+					"sub " + viewDirReg+".w, fc0.w, " + viewDirReg+".w\n" +             // base = 1-dot(V, H)
 
-					"pow " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + dataReg2+".y\n" +             // exp = pow(base, 5)
+					"pow " + viewDirReg+".w, " + viewDirReg+".w, " + dataReg2+".y\n" +             // exp = pow(base, 5)
 
-					"sub " + _normalFragmentReg+".w, fc0.w, " + _viewDirFragmentReg+".w\n" +             // 1 - exp
-					"mul " + _normalFragmentReg+".w, " + dataReg2+".x, " + _normalFragmentReg+".w\n" +             // f0*(1 - exp)
-					"add " + _viewDirFragmentReg+".w, " + _viewDirFragmentReg+".w, " + _normalFragmentReg+".w\n" +          // exp + f0*(1 - exp)
+					"sub " + normalReg+".w, fc0.w, " + viewDirReg+".w\n" +             // 1 - exp
+					"mul " + normalReg+".w, " + dataReg2+".x, " + normalReg+".w\n" +             // f0*(1 - exp)
+					"add " + viewDirReg+".w, " + viewDirReg+".w, " + normalReg+".w\n" +          // exp + f0*(1 - exp)
 
 				// total alpha
-					"mul " + _viewDirFragmentReg+".w, " + dataReg+".w, " + _viewDirFragmentReg+".w\n" +
+					"mul " + viewDirReg+".w, " + dataReg+".w, " + viewDirReg+".w\n" +
 
 					"sub " + temp + ", " + temp + ", " + targetReg + "\n" +
-					"mul " + temp + ", " + temp + ", " + _viewDirFragmentReg + ".w\n" +
+					"mul " + temp + ", " + temp + ", " + viewDirReg + ".w\n" +
 
 					"add " + targetReg + ", " + targetReg + ", " + temp + "\n";
 

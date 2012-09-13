@@ -61,7 +61,7 @@ package away3d.materials.methods
 		{
 			var textureReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			var uvReg : ShaderRegisterElement = _useSecondaryUV? _secondaryUVFragmentReg : _uvVaryingReg;
+			var uvReg : ShaderRegisterElement = _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying;
 			vo.texturesIndex = textureReg.index;
 
 			return 	getTexSampleCode(vo, temp, textureReg, uvReg) +

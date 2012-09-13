@@ -92,7 +92,7 @@ package away3d.materials.methods
 			var code : String = "";
 			vo.fragmentConstantsIndex = fogColor.index*4;
 
-			code += "dp3 " + temp + ".w, " + _viewDirVaryingReg+".xyz	, " + _viewDirVaryingReg+".xyz\n" + 	// dist²
+			code += "dp3 " + temp + ".w, " + _sharedRegisters.viewDirVarying+".xyz	, " + _sharedRegisters.viewDirVarying+".xyz\n" + 	// dist²
 					"sqt " + temp + ".w, " + temp + ".w										\n" + 	// dist
 					"sub " + temp + ".w, " + temp + ".w, " + fogData + ".x					\n" +
 					"mul " + temp + ".w, " + temp + ".w, " + fogData + ".y					\n" +

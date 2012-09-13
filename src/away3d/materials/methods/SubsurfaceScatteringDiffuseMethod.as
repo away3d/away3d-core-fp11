@@ -191,7 +191,7 @@ package away3d.materials.methods
 					"mul " + temp+".xyz, " + temp+".xyz, " + _colorReg+".xyz\n" +
 					"add " + targetReg+".xyz, " + targetReg+".xyz, " + temp+".xyz\n";
 
-			if(_targetReg != _viewDirFragmentReg)
+			if(_targetReg != _sharedRegisters.viewDirFragment)
 				regCache.removeFragmentTempUsage(targetReg);
 
 			return code;
@@ -235,8 +235,8 @@ package away3d.materials.methods
 			var depthReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 
 
-			if (_viewDirFragmentReg) {
-				_targetReg = _viewDirFragmentReg;
+			if (_sharedRegisters.viewDirFragment) {
+				_targetReg = _sharedRegisters.viewDirFragment;
 			}
 			else {
 				_targetReg = regCache.getFreeFragmentVectorTemp();

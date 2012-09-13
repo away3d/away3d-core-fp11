@@ -100,7 +100,7 @@ package away3d.materials.methods
 		{
 			var code : String;
 
-            code = 	"dp3 " + target+".y, " + _viewDirFragmentReg+".xyz, " + (_incidentLight? target+".xyz\n" : _normalFragmentReg+".xyz\n") +   // dot(V, H)
+            code = 	"dp3 " + target+".y, " + _sharedRegisters.viewDirFragment+".xyz, " + (_incidentLight? target+".xyz\n" : _sharedRegisters.normalFragment+".xyz\n") +   // dot(V, H)
             		"sub " + target+".y, " + _dataReg+".z, " + target+".y\n" +             // base = 1-dot(V, H)
             		"pow " + target+".x, " + target+".y, " + _dataReg+".y\n" +             // exp = pow(base, 5)
 					"sub " + target+".y, " + _dataReg+".z, " + target+".y\n" +             // 1 - exp

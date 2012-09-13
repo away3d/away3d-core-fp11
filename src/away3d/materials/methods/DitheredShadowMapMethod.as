@@ -145,10 +145,13 @@ package away3d.materials.methods
 
 			uvReg = regCache.getFreeFragmentVectorTemp();
 
-			code += "div " + uvReg + ", " + _projectionReg + ", " + _projectionReg + ".w\n" +
+			var projectionReg : ShaderRegisterElement = _sharedRegisters.projectionFragment;
+			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+
+			code += "div " + uvReg + ", " + projectionReg + ", " + projectionReg + ".w\n" +
 					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".yz\n" +
 					"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
-					"add " + _viewDirFragmentReg+".w, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
+					"add " + viewDirReg+".w, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
 
 				// keep grain in uvReg.zw
 					"sub " + uvReg + ".zw, " + uvReg + ".xy, fc0.xx\n" + 	// uv-.5
@@ -159,27 +162,27 @@ package away3d.materials.methods
 					"add " + uvReg+".xy, " + uvReg+".zw, " + _depthMapCoordReg+".xy\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"slt " + targetReg+".w, " + _viewDirFragmentReg+".w, " + depthCol+".z\n";    // 0 if in shadow
+					"slt " + targetReg+".w, " + viewDirReg+".w, " + depthCol+".z\n";    // 0 if in shadow
 
 			if (_numSamples > 4)
 				code += "add " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".zw\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"slt " + depthCol+".z, " + viewDirReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
 			if (_numSamples > 1)
 				code +=	"sub " + uvReg+".xy, " + _depthMapCoordReg +".xy, " + uvReg+".zw\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"slt " + depthCol+".z, " + viewDirReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
 			if (_numSamples > 5)
 				code += "sub " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".zw\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"slt " + depthCol+".z, " + viewDirReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
 			if (_numSamples > 2) {
@@ -188,7 +191,7 @@ package away3d.materials.methods
 				code +=	"add " + uvReg+".xy, " + uvReg+".wz, " + _depthMapCoordReg+".xy\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"slt " + depthCol+".z, " + viewDirReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 			}
 
@@ -196,21 +199,21 @@ package away3d.materials.methods
 				code += "add " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".wz\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"slt " + depthCol+".z, " + viewDirReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
 			if (_numSamples > 3)
 				code +=	"sub " + uvReg+".xy, " + _depthMapCoordReg +".xy, " + uvReg+".wz\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"slt " + depthCol+".z, " + viewDirReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
 			if (_numSamples > 7)
 				code += "sub " + uvReg+".xy, " + uvReg+".xy, " + uvReg+".wz\n" +
 						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
 						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + depthCol+".z, " + _viewDirFragmentReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
+						"slt " + depthCol+".z, " + viewDirReg+".w, " + depthCol+".z\n" +    // 0 if in shadow
 						"add " + targetReg+".w, " + targetReg+".w, " + depthCol+".z\n";
 
 			regCache.removeFragmentTempUsage(depthCol);

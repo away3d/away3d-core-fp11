@@ -53,7 +53,7 @@ package away3d.materials.methods
 			vo.fragmentConstantsIndex = decReg.index*4;
 			vo.texturesIndex = depthMapRegister.index;
 
-			code += "sub " + lightDir + ", " + _globalPosReg + ", " + posReg + "\n" +
+			code += "sub " + lightDir + ", " + _sharedRegisters.globalPositionVarying + ", " + posReg + "\n" +
 					"dp3 " + lightDir + ".w, " + lightDir + ".xyz, " + lightDir + ".xyz\n" +
 					"mul " + lightDir + ".w, " + lightDir + ".w, " + posReg + ".w\n" +
 					"nrm " + lightDir + ".xyz, " + lightDir + ".xyz\n" +

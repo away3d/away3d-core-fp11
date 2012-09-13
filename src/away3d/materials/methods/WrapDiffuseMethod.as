@@ -96,7 +96,7 @@ package away3d.materials.methods
 				regCache.addFragmentTempUsages(t, 1);
 			}
 
-			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
+			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _sharedRegisters.normalFragment + ".xyz\n" +
 					"add " + t + ".y, " + t + ".x, " + _wrapDataRegister + ".x\n" +
 					"mul " + t + ".y, " + t + ".y, " + _wrapDataRegister + ".y\n" +
 					"sat " + t + ".w, " + t + ".y\n" +

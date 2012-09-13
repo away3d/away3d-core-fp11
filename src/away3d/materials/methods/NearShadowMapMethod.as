@@ -8,6 +8,7 @@ package away3d.materials.methods
 	import away3d.lights.LightBase;
 	import away3d.lights.shadowmaps.NearDirectionalShadowMapper;
 	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
 
 	import flash.display3D.Context3DProgramType;
@@ -94,7 +95,7 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentSingleTemp();
 			vo.secondaryFragmentConstantsIndex = dataReg.index*4;
 
-			code +=	"abs " + temp + ", " + _projectionReg + ".w\n" +
+			code +=	"abs " + temp + ", " + _sharedRegisters.projectionFragment + ".w\n" +
 					"sub " + temp + ", " + temp + ", " + dataReg + ".x\n" +
 					"mul " + temp + ", " + temp + ", " + dataReg + ".y\n" +
 					"sat " + temp + ", " + temp + "\n" +
@@ -164,49 +165,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
+		override arcane function set sharedRegisters(value : ShaderRegisterData) : void
 		{
-			_baseMethod.globalPosReg = _globalPosReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set UVVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.UVVaryingReg = _uvVaryingReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.secondaryUVFragmentReg = _secondaryUVFragmentReg = value;
-		}
-
-		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.viewDirFragmentReg = _viewDirFragmentReg = value;
-		}
-
-		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_viewDirVaryingReg = _baseMethod.viewDirVaryingReg = value;
-		}
-
-
-		arcane override function set projectionReg(value : ShaderRegisterElement) : void
-		{
-			_projectionReg = _baseMethod.projectionReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.normalFragmentReg = _normalFragmentReg = value;
+			super.sharedRegisters = _baseMethod.sharedRegisters = value;
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void
