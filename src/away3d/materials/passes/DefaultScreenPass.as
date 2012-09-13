@@ -576,10 +576,10 @@ package away3d.materials.passes
 
 			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
-			if (_numLights > 0 && (_combinedLightSources & LightSources.LIGHTS))
+			if (_numLights > 0 && usesLightsForAny())
 				updateLights(lightPicker.directionalLights, lightPicker.pointLights, stage3DProxy);
 
-			if (_numLightProbes > 0 && (_combinedLightSources & LightSources.PROBES))
+			if (_numLightProbes > 0 && usesProbesForAny())
 				updateProbes(lightPicker.lightProbes, lightPicker.lightProbeWeights, stage3DProxy);
 
 			if (_sceneMatrixIndex >= 0)
@@ -650,40 +650,9 @@ package away3d.materials.passes
 		 */
 		private function reset() : void
 		{
-			_numLights = _numPointLights + _numDirectionalLights;
-			_numProbeRegisters = Math.ceil(_numLightProbes/4);
-
-			if (_specularMethod)
-				_combinedLightSources = _specularLightSources | _diffuseLightSources;
-			else
-				_combinedLightSources = _diffuseLightSources;
-
-			_usingSpecularMethod = 	_specularMethod && (
-									(_numLights > 0 && (_specularLightSources & LightSources.LIGHTS)) ||
-									(_numLightProbes > 0 && (_specularLightSources & LightSources.PROBES)));
-
-			_uvTransformIndex = -1;
-			_cameraPositionIndex = -1;
-			_commonsDataIndex = -1;
-			_uvBufferIndex = -1;
-			_secondaryUVBufferIndex = -1;
-			_normalBufferIndex = -1;
-			_tangentBufferIndex = -1;
-			_lightDataIndex = -1;
-			_sceneMatrixIndex = -1;
-			_sceneNormalMatrixIndex = -1;
-			_probeWeightsIndex = -1;
-
-			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights*3, true);
-			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights*3, true);
-			_lightDataLength = _numLights*3;
-
-			_registerCache = new ShaderRegisterCache();
-			_vertexConstantIndex = _registerCache.vertexConstantOffset = 5;
-			_registerCache.vertexAttributesOffset = 1;
-			_registerCache.reset();
-
-			_lightInputIndices = new Vector.<uint>(_numLights, true);
+			resetRegisterIndices();
+			resetLightData();
+			resetRegisterCache();
 
 			_commonsReg = null;
 			_numUsedVertexConstants = 0;
@@ -699,13 +668,81 @@ package away3d.materials.passes
 			_registerCache.addVertexTempUsages(_localPositionRegister, 1);
 
 			compile();
+			updateUsedOffsets();
+			initConstantData();
+			cleanUp();
+		}
 
+		private function resetRegisterCache() : void
+		{
+			_registerCache = new ShaderRegisterCache();
+			_vertexConstantIndex = _registerCache.vertexConstantOffset = 5;
+			_registerCache.vertexAttributesOffset = 1;
+			_registerCache.reset();
+		}
+
+		private function resetLightData() : void
+		{
+			_numLights = _numPointLights + _numDirectionalLights;
+			_numProbeRegisters = Math.ceil(_numLightProbes/4);
+
+			if (_specularMethod)
+				_combinedLightSources = _specularLightSources | _diffuseLightSources;
+			else
+				_combinedLightSources = _diffuseLightSources;
+
+			_usingSpecularMethod = 	_specularMethod && (
+					(_numLights > 0 && usesLightsForSpecular()) ||
+					(_numLightProbes > 0 && usesProbesForSpecular()));
+
+			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights * 3, true);
+			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights * 3, true);
+			_lightDataLength = _numLights * 3;
+			_lightInputIndices = new Vector.<uint>(_numLights, true);
+		}
+
+		private function usesProbesForSpecular() : Boolean
+		{
+			return (_specularLightSources & LightSources.PROBES) != 0;
+		}
+
+		private function usesProbesForDiffuse() : Boolean
+		{
+			return (_diffuseLightSources & LightSources.PROBES) != 0;
+		}
+
+		private function usesProbesForAny() : Boolean
+		{
+			return (_combinedLightSources & LightSources.PROBES) != 0;
+		}
+
+		private function usesLightsForSpecular() : Boolean
+		{
+			return (_specularLightSources & LightSources.LIGHTS) != 0;
+		}
+
+		private function usesLightsForDiffuse() : Boolean
+		{
+			return (_diffuseLightSources & LightSources.LIGHTS) != 0;
+		}
+
+		private function usesLightsForAny() : Boolean
+		{
+			return (_combinedLightSources & LightSources.LIGHTS) != 0;
+		}
+
+		private function updateUsedOffsets() : void
+		{
 			_numUsedVertexConstants = _registerCache.numUsedVertexConstants;
 			_numUsedFragmentConstants = _registerCache.numUsedFragmentConstants;
 			_numUsedStreams = _registerCache.numUsedStreams;
 			_numUsedTextures = _registerCache.numUsedTextures;
-			_vertexConstantData.length = (_numUsedVertexConstants-_vertexConstantIndex)*4;
-			_fragmentConstantData.length = _numUsedFragmentConstants*4;
+		}
+
+		private function initConstantData() : void
+		{
+			_vertexConstantData.length = (_numUsedVertexConstants - _vertexConstantIndex) * 4;
+			_fragmentConstantData.length = _numUsedFragmentConstants * 4;
 
 			initCommonsData();
 			if (_uvTransformIndex >= 0)
@@ -714,7 +751,21 @@ package away3d.materials.passes
 				_vertexConstantData[_cameraPositionIndex + 3] = 1;
 
 			updateMethodConstants();
-			cleanUp();
+		}
+
+		private function resetRegisterIndices() : void
+		{
+			_uvTransformIndex = -1;
+			_cameraPositionIndex = -1;
+			_commonsDataIndex = -1;
+			_uvBufferIndex = -1;
+			_secondaryUVBufferIndex = -1;
+			_normalBufferIndex = -1;
+			_tangentBufferIndex = -1;
+			_lightDataIndex = -1;
+			_sceneMatrixIndex = -1;
+			_sceneNormalMatrixIndex = -1;
+			_probeWeightsIndex = -1;
 		}
 
 		private function updateMethodConstants() : void
@@ -1161,12 +1212,13 @@ package away3d.materials.passes
 				_fragmentCode += _specularMethod.getFragmentPreLightingCode(_specularMethodVO, _registerCache);
 			}
 
-			if (_numLights > 0 && (_combinedLightSources & LightSources.LIGHTS)) {
+			if (_numLights > 0 && usesLightsForAny()) {
 				initLightRegisters();
 				compileDirectionalLightCode();
 				compilePointLightCode();
 			}
-			if (_numLightProbes > 0  && (_combinedLightSources & LightSources.PROBES))
+
+			if (_numLightProbes > 0 && usesProbesForAny())
 				compileLightProbeCode();
 
 			// only need to create and reserve _shadedTargetReg here, no earlier?
@@ -1235,8 +1287,8 @@ package away3d.materials.passes
 			var specularColorReg : ShaderRegisterElement;
 			var lightDirReg : ShaderRegisterElement;
 			var regIndex : int;
-			var addSpec : Boolean = _usingSpecularMethod && ((_specularLightSources & LightSources.LIGHTS) != 0);
-			var addDiff : Boolean = (_diffuseLightSources & LightSources.LIGHTS) != 0;
+			var addSpec : Boolean = _usingSpecularMethod && usesLightsForSpecular();
+			var addDiff : Boolean = usesLightsForDiffuse();
 
 			if (!(addSpec || addDiff)) return;
 
@@ -1258,8 +1310,8 @@ package away3d.materials.passes
 			var lightPosReg : ShaderRegisterElement;
 			var lightDirReg : ShaderRegisterElement;
 			var regIndex : int;
-			var addSpec : Boolean = _usingSpecularMethod && ((_specularLightSources & LightSources.LIGHTS) != 0);
-			var addDiff : Boolean = (_diffuseLightSources & LightSources.LIGHTS) != 0;
+			var addSpec : Boolean = _usingSpecularMethod && usesLightsForSpecular();
+			var addDiff : Boolean = usesLightsForDiffuse();
 
 			if (!(addSpec || addDiff)) return;
 
@@ -1305,8 +1357,8 @@ package away3d.materials.passes
 			var weightRegisters : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>();
 			var i : uint;
 			var texReg : ShaderRegisterElement;
-			var addSpec : Boolean = _usingSpecularMethod && ((_specularLightSources & LightSources.PROBES) != 0);
-			var addDiff : Boolean = (_diffuseLightSources & LightSources.PROBES) != 0;
+			var addSpec : Boolean = _usingSpecularMethod && usesProbesForSpecular();
+			var addDiff : Boolean = usesProbesForDiffuse();
 
 			if (!(addSpec || addDiff)) return;
 
@@ -1445,8 +1497,8 @@ package away3d.materials.passes
 		{
 			var probe : LightProbe;
 			var len : int = lightProbes.length;
-			var addDiff : Boolean = _diffuseMethod && ((_diffuseLightSources & LightSources.PROBES) != 0);
-			var addSpec : Boolean = _specularMethod && ((_specularLightSources & LightSources.PROBES) != 0);
+			var addDiff : Boolean = _diffuseMethod && usesProbesForDiffuse();
+			var addSpec : Boolean = _specularMethod && usesProbesForSpecular();
 
 			if (!(addDiff || addSpec)) return;
 
