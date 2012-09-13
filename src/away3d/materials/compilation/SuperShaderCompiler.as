@@ -19,6 +19,10 @@ package away3d.materials.compilation
 		public var _commonsDataIndex : int = -1;
 		public var _probeWeightsIndex : int = -1;
 
+		public var _vertexCode : String;
+		public var _fragmentCode : String;
+
+
 		public function SuperShaderCompiler()
 		{
 			_sharedRegisters = new ShaderRegisterData();
@@ -126,6 +130,16 @@ package away3d.materials.compilation
 		public function get probeWeightsIndex() : int
 		{
 			return _probeWeightsIndex;
+		}
+
+		public function get vertexCode() : String
+		{
+			return _vertexCode;
+		}
+
+		public function get fragmentCode() : String
+		{
+			return _fragmentCode;
 		}
 	}
 }
