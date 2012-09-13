@@ -1,11 +1,15 @@
 package away3d.materials.compilation
 {
+	import away3d.arcane;
+	import away3d.materials.LightSources;
+	import away3d.materials.methods.ShaderMethodSetup;
+
 	public class SuperShaderCompiler
 	{
 		private var _sharedRegisters : ShaderRegisterData;
 		private var _registerCache : ShaderRegisterCache;
+		private var _methodSetup : ShaderMethodSetup;
 		private var _vertexConstantsOffset : uint;
-
 
 		// TODO: CHANGE BACK TO PRIVATE!
 		public var _uvBufferIndex : int = -1;
@@ -29,7 +33,14 @@ package away3d.materials.compilation
 		private var _numPointLights : uint;
 		private var _numDirectionalLights : uint;
 		public var _numProbeRegisters : Number;
+		private var _specularLightSources : uint;
+		private var _diffuseLightSources : uint;
+		public var _combinedLightSources : uint;
+		public var _usingSpecularMethod : Boolean;
+		public var _pointLightRegisters : Vector.<ShaderRegisterElement>;
+		public var _dirLightRegisters : Vector.<ShaderRegisterElement>;
 
+		use namespace arcane;
 
 		public function SuperShaderCompiler()
 		{
@@ -45,7 +56,17 @@ package away3d.materials.compilation
 			_registerCache.reset();
 		}
 
-		// TODO: REMOVE
+		public function get methodSetup() : ShaderMethodSetup
+		{
+			return _methodSetup;
+		}
+
+		public function set methodSetup(value : ShaderMethodSetup) : void
+		{
+			_methodSetup = value;
+		}
+
+// TODO: REMOVE
 		public function get sharedRegisters() : ShaderRegisterData
 		{
 			return _sharedRegisters;
@@ -90,6 +111,18 @@ package away3d.materials.compilation
 		{
 			_numLights = _numPointLights + _numDirectionalLights;
 			_numProbeRegisters = Math.ceil(_numLightProbes/4);
+
+			if (_methodSetup._specularMethod)
+				_combinedLightSources = _specularLightSources | _diffuseLightSources;
+			else
+				_combinedLightSources = _diffuseLightSources;
+
+			_usingSpecularMethod = 	_methodSetup._specularMethod && (
+									usesLightsForSpecular() ||
+									usesProbesForSpecular());
+
+			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights * 3, true);
+			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights * 3, true);
 		}
 
 		public function get uvBufferIndex() : int
@@ -190,9 +223,59 @@ package away3d.materials.compilation
 			_numLightProbes = value;
 		}
 
-		/*private function usesLights() : Boolean
+		public function get specularLightSources() : uint
 		{
-			return (_numLights > 0) && (_combinedLightSources & LightSources.LIGHTS) != 0;
-		} */
+			return _specularLightSources;
+		}
+
+		public function set specularLightSources(value : uint) : void
+		{
+			_specularLightSources = value;
+		}
+
+		public function get diffuseLightSources() : uint
+		{
+			return _diffuseLightSources;
+		}
+
+		public function set diffuseLightSources(value : uint) : void
+		{
+			_diffuseLightSources = value;
+		}
+
+		public function get usingSpecularMethod() : Boolean
+		{
+			return _usingSpecularMethod;
+		}
+
+		private function usesLights() : Boolean
+		{
+			return _numLights > 0 && (_combinedLightSources & LightSources.LIGHTS) != 0;
+		}
+
+		private function usesProbesForSpecular() : Boolean
+		{
+			return _numLightProbes > 0 && (_specularLightSources & LightSources.PROBES) != 0;
+		}
+
+		private function usesProbesForDiffuse() : Boolean
+		{
+			return _numLightProbes > 0 && (_diffuseLightSources & LightSources.PROBES) != 0;
+		}
+
+		private function usesProbes() : Boolean
+		{
+			return _numLightProbes > 0 && ((_diffuseLightSources | _specularLightSources) & LightSources.PROBES) != 0;
+		}
+
+		private function usesLightsForSpecular() : Boolean
+		{
+			return _numLights > 0 && (_specularLightSources & LightSources.LIGHTS) != 0;
+		}
+
+		private function usesLightsForDiffuse() : Boolean
+		{
+			return _numLights > 0 && (_diffuseLightSources & LightSources.LIGHTS) != 0;
+		}
 	}
 }
