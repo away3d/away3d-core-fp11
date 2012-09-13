@@ -85,6 +85,7 @@ package away3d.materials.passes
 		private var _lightProbeDiffuseIndices : Vector.<uint>;
 		private var _lightProbeSpecularIndices : Vector.<uint>;
 
+		// TODO: Commons data should be compiler only
 		private var _commonsDataIndex : int;
 
 		private var _vertexConstantsOffset : uint;
@@ -633,8 +634,8 @@ package away3d.materials.passes
 		private function reset() : void
 		{
 			_compiler = new SuperShaderCompiler();
+			_compiler.compile();
 
-			resetRegisterIndices();
 			resetLightData();
 
 			_numUsedVertexConstants = 0;
@@ -649,11 +650,26 @@ package away3d.materials.passes
 			_compiler.registerCache.addVertexTempUsages(_compiler.sharedRegisters.localPosition, 1);
 
 			compile();
-
-			_vertexConstantsOffset = _compiler.vertexConstantsOffset;
+			updateRegisterIndices();
 			updateUsedOffsets();
 			initConstantData();
 			cleanUp();
+		}
+
+		private function updateRegisterIndices() : void
+		{
+			_vertexConstantsOffset = _compiler.vertexConstantsOffset;
+			_uvBufferIndex = _compiler.uvBufferIndex;
+			_uvTransformIndex = _compiler.uvTransformIndex;
+			_secondaryUVBufferIndex = _compiler.secondaryUVBufferIndex;
+			_normalBufferIndex = _compiler.normalBufferIndex;
+			_tangentBufferIndex = _compiler.tangentBufferIndex;
+			_lightDataIndex = _compiler.lightDataIndex;
+			_cameraPositionIndex = _compiler.cameraPositionIndex;
+			_commonsDataIndex = _compiler.commonsDataIndex;
+			_sceneMatrixIndex = _compiler.sceneMatrixIndex;
+			_sceneNormalMatrixIndex = _compiler.sceneNormalMatrixIndex;
+			_probeWeightsIndex = _compiler.probeWeightsIndex;
 		}
 
 		private function resetLightData() : void
@@ -728,21 +744,6 @@ package away3d.materials.passes
 			updateMethodConstants();
 		}
 
-		private function resetRegisterIndices() : void
-		{
-			_uvTransformIndex = -1;
-			_cameraPositionIndex = -1;
-			_commonsDataIndex = -1;
-			_uvBufferIndex = -1;
-			_secondaryUVBufferIndex = -1;
-			_normalBufferIndex = -1;
-			_tangentBufferIndex = -1;
-			_lightDataIndex = -1;
-			_sceneMatrixIndex = -1;
-			_sceneNormalMatrixIndex = -1;
-			_probeWeightsIndex = -1;
-		}
-
 		private function updateMethodConstants() : void
 		{
 			if (_normalMethod) _normalMethod.initConstants(_normalMethodVO);
@@ -770,6 +771,7 @@ package away3d.materials.passes
 			_vertexConstantData[_uvTransformIndex+7] = 0;
 		}
 
+		// TODO: Probably should let the compiler init this, since only it knows what it's for
 		private function initCommonsData() : void
 		{
 			_fragmentConstantData[_commonsDataIndex] = .5;
@@ -936,16 +938,14 @@ package away3d.materials.passes
 			_compiler.registerCache.getFreeVertexConstant();
 			_compiler.registerCache.getFreeVertexConstant();
 			_compiler.registerCache.getFreeVertexConstant();
-			_sceneMatrixIndex = (positionMatrixReg.index - _compiler.vertexConstantsOffset)*4;
+			_compiler._sceneMatrixIndex = (positionMatrixReg.index - _compiler.vertexConstantsOffset)*4;
 
 			_vertexCode += 	"m44 " + _compiler.sharedRegisters.globalPositionVertex + ".xyz, " + _compiler.sharedRegisters.localPosition.toString() + ", " + positionMatrixReg + "\n" +
 							"mov " + _compiler.sharedRegisters.globalPositionVertex + ".w, " + _compiler.sharedRegisters.localPosition + ".w     \n";
-//			_compiler.registerCache.removeVertexTempUsage(_localPositionRegister);
 
 			if (_dependencyCounter.usesGlobalPosFragment) {
 				_compiler.sharedRegisters.globalPositionVarying = _compiler.registerCache.getFreeVarying();
 				_vertexCode += "mov " + _compiler.sharedRegisters.globalPositionVarying + ", " + _compiler.sharedRegisters.globalPositionVertex + "\n";
-//				_compiler.registerCache.removeVertexTempUsage(_globalPositionVertexReg);
 			}
 		}
 
@@ -955,8 +955,8 @@ package away3d.materials.passes
 			uvCompiler.animateUVs = _animateUVs;
 			uvCompiler.vertexConstantsOffset = _compiler.vertexConstantsOffset;
 			_vertexCode += uvCompiler.getVertexCode();
-			_uvBufferIndex = uvCompiler.uvBufferIndex;
-			_uvTransformIndex = uvCompiler.uvTransformIndex;
+			_compiler._uvBufferIndex = uvCompiler.uvBufferIndex;
+			_compiler._uvTransformIndex = uvCompiler.uvTransformIndex;
 		}
 
 		private function compileSecondaryUVCode() : void
@@ -964,7 +964,7 @@ package away3d.materials.passes
 			var uvCompiler : UVCodeCompiler = new UVCodeCompiler(_compiler.registerCache, _compiler.sharedRegisters);
 			uvCompiler.secondaryUVs = true;
 			_vertexCode += uvCompiler.getVertexCode();
-			_secondaryUVBufferIndex = uvCompiler.uvBufferIndex;
+			_compiler._secondaryUVBufferIndex = uvCompiler.uvBufferIndex;
 		}
 
 		private function compileNormalCode() : void
@@ -981,7 +981,7 @@ package away3d.materials.passes
 			}
 
 			_compiler.sharedRegisters.normalInput = _compiler.registerCache.getFreeVertexAttribute();
-			_normalBufferIndex = _compiler.sharedRegisters.normalInput.index;
+			_compiler._normalBufferIndex = _compiler.sharedRegisters.normalInput.index;
 
 			_compiler.sharedRegisters.normalVarying = _compiler.registerCache.getFreeVarying();
 
@@ -992,7 +992,7 @@ package away3d.materials.passes
 			normalMatrix[1] = _compiler.registerCache.getFreeVertexConstant();
 			normalMatrix[2] = _compiler.registerCache.getFreeVertexConstant();
 			_compiler.registerCache.getFreeVertexConstant();
-			_sceneNormalMatrixIndex = (normalMatrix[0].index-_compiler.vertexConstantsOffset)*4;
+			_compiler._sceneNormalMatrixIndex = (normalMatrix[0].index-_compiler.vertexConstantsOffset)*4;
 
 			if (_normalMethod.hasOutput) {
 				// tangent stream required
@@ -1009,7 +1009,7 @@ package away3d.materials.passes
 
 				if (_dependencyCounter.tangentDependencies > 0) {
 					_compiler.sharedRegisters.tangentInput = _compiler.registerCache.getFreeVertexAttribute();
-					_tangentBufferIndex = _compiler.sharedRegisters.tangentInput.index;
+					_compiler._tangentBufferIndex = _compiler.sharedRegisters.tangentInput.index;
 					_compiler.sharedRegisters.tangentVarying = _compiler.registerCache.getFreeVarying();
 					_vertexCode += "mov " + _compiler.sharedRegisters.tangentVarying + ", " + _compiler.sharedRegisters.tangentInput + "\n";
 				}
@@ -1029,7 +1029,7 @@ package away3d.materials.passes
 			_compiler.sharedRegisters.bitangentVarying = _compiler.registerCache.getFreeVarying();
 
 			_compiler.sharedRegisters.tangentInput = _compiler.registerCache.getFreeVertexAttribute();
-			_tangentBufferIndex = _compiler.sharedRegisters.tangentInput.index;
+			_compiler._tangentBufferIndex = _compiler.sharedRegisters.tangentInput.index;
 
 			_compiler.sharedRegisters.animatedTangent = _compiler.registerCache.getFreeVertexVectorTemp();
 			_compiler.registerCache.addVertexTempUsages(_compiler.sharedRegisters.animatedTangent, 1);
@@ -1113,7 +1113,7 @@ package away3d.materials.passes
 		private function createCommons() : void
 		{
 			_compiler.sharedRegisters.commons = _compiler.registerCache.getFreeFragmentConstant();
-			_commonsDataIndex = _compiler.sharedRegisters.commons.index*4;
+			_compiler._commonsDataIndex = _compiler.sharedRegisters.commons.index*4;
 		}
 
 		private function compileViewDirCode() : void
@@ -1123,7 +1123,7 @@ package away3d.materials.passes
 			_compiler.sharedRegisters.viewDirFragment = _compiler.registerCache.getFreeFragmentVectorTemp();
 			_compiler.registerCache.addFragmentTempUsages(_compiler.sharedRegisters.viewDirFragment, _dependencyCounter.viewDirDependencies);
 
-			_cameraPositionIndex = (cameraPositionReg.index-_compiler.vertexConstantsOffset)*4;
+			_compiler._cameraPositionIndex = (cameraPositionReg.index-_compiler.vertexConstantsOffset)*4;
 
 			_vertexCode += "sub " + _compiler.sharedRegisters.viewDirVarying + ", " + cameraPositionReg + ", " + _compiler.sharedRegisters.globalPositionVertex + "\n";
 			_fragmentCode += 	"nrm " + _compiler.sharedRegisters.viewDirFragment + ".xyz, " + _compiler.sharedRegisters.viewDirVarying + ".xyz		\n" +
@@ -1203,13 +1203,13 @@ package away3d.materials.passes
 			len = _dirLightRegisters.length;
 			for (i = 0; i < len; ++i) {
 				_dirLightRegisters[i] = _compiler.registerCache.getFreeFragmentConstant();
-				if (_lightDataIndex == -1) _lightDataIndex = _dirLightRegisters[i].index*4;
+				if (_compiler._lightDataIndex == -1) _compiler._lightDataIndex = _dirLightRegisters[i].index*4;
 			}
 
 			len = _pointLightRegisters.length;
 			for (i = 0; i < len; ++i) {
 				_pointLightRegisters[i] = _compiler.registerCache.getFreeFragmentConstant();
-				if (_lightDataIndex == -1) _lightDataIndex = _pointLightRegisters[i].index*4;
+				if (_compiler._lightDataIndex == -1) _compiler._lightDataIndex = _pointLightRegisters[i].index*4;
 			}
 		}
 
@@ -1270,7 +1270,7 @@ package away3d.materials.passes
 					// normalize
 						"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
 
-				if (_lightDataIndex == -1) _lightDataIndex = lightPosReg.index*4;
+				if (_compiler._lightDataIndex == -1) _compiler._lightDataIndex = lightPosReg.index*4;
 
 				if (addDiff)
 					_fragmentCode += _diffuseMethod.getFragmentCodePerLight(_diffuseMethodVO, lightDirReg, diffuseColorReg, _compiler.registerCache);
@@ -1301,7 +1301,7 @@ package away3d.materials.passes
 
 			for (i = 0; i < _numProbeRegisters; ++i) {
 				weightRegisters[i] = _compiler.registerCache.getFreeFragmentConstant();
-				if (i == 0) _probeWeightsIndex = weightRegisters[i].index*4;
+				if (i == 0) _compiler._probeWeightsIndex = weightRegisters[i].index*4;
 			}
 
 			for (i = 0; i < _numLightProbes; ++i) {

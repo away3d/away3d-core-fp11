@@ -7,17 +7,17 @@ package away3d.materials.compilation
 		private var _vertexConstantsOffset : uint;
 
 		// TODO: CHANGE BACK TO PRIVATE!
-//		public var _uvBufferIndex : int = -1;
-//		public var _secondaryUVBufferIndex : int = -1;
-//		public var _normalBufferIndex : int = -1;
-//		public var _tangentBufferIndex : int = -1;
-//		public var _sceneMatrixIndex : int = -1;
-//		public var _sceneNormalMatrixIndex : int = -1;
-//		public var _lightDataIndex : int = -1;
-//		public var _cameraPositionIndex : int = -1;
-//		public var _uvTransformIndex : int = -1;
-//		public var _commonsDataIndex : int = -1;
-//		public var _probeWeightsIndex : int = -1;
+		public var _uvBufferIndex : int = -1;
+		public var _uvTransformIndex : int = -1;
+		public var _secondaryUVBufferIndex : int = -1;
+		public var _normalBufferIndex : int = -1;
+		public var _tangentBufferIndex : int = -1;
+		public var _lightDataIndex : int = -1;
+		public var _sceneMatrixIndex : int = -1;
+		public var _sceneNormalMatrixIndex : int = -1;
+		public var _cameraPositionIndex : int = -1;
+		public var _commonsDataIndex : int = -1;
+		public var _probeWeightsIndex : int = -1;
 
 		public function SuperShaderCompiler()
 		{
@@ -54,16 +54,16 @@ package away3d.materials.compilation
 
 		public function compile() : void
 		{
-//			resetRegisterIndices();
+			resetRegisterIndices();
 		}
 
 
-		/*private function resetRegisterIndices() : void
+		private function resetRegisterIndices() : void
 		{
-			_uvTransformIndex = -1;
 			_cameraPositionIndex = -1;
 			_commonsDataIndex = -1;
 			_uvBufferIndex = -1;
+			_uvTransformIndex = -1;
 			_secondaryUVBufferIndex = -1;
 			_normalBufferIndex = -1;
 			_tangentBufferIndex = -1;
@@ -76,6 +76,11 @@ package away3d.materials.compilation
 		public function get uvBufferIndex() : int
 		{
 			return _uvBufferIndex;
+		}
+
+		public function get uvTransformIndex() : int
+		{
+			return _uvTransformIndex;
 		}
 
 		public function get secondaryUVBufferIndex() : int
@@ -93,16 +98,6 @@ package away3d.materials.compilation
 			return _tangentBufferIndex;
 		}
 
-		public function get sceneMatrixIndex() : int
-		{
-			return _sceneMatrixIndex;
-		}
-
-		public function get sceneNormalMatrixIndex() : int
-		{
-			return _sceneNormalMatrixIndex;
-		}
-
 		public function get lightDataIndex() : int
 		{
 			return _lightDataIndex;
@@ -113,26 +108,24 @@ package away3d.materials.compilation
 			return _cameraPositionIndex;
 		}
 
-		public function get uvTransformIndex() : int
-		{
-			return _uvTransformIndex;
-		}
-
 		public function get commonsDataIndex() : int
 		{
 			return _commonsDataIndex;
 		}
 
+		public function get sceneMatrixIndex() : int
+		{
+			return _sceneMatrixIndex;
+		}
+
+		public function get sceneNormalMatrixIndex() : int
+		{
+			return _sceneNormalMatrixIndex;
+		}
+
 		public function get probeWeightsIndex() : int
 		{
 			return _probeWeightsIndex;
-		}                  */
-
-
-
-
-
-
-
+		}
 	}
 }
