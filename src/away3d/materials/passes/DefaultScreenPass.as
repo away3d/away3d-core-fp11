@@ -10,6 +10,7 @@ package away3d.materials.passes
 	import away3d.lights.PointLight;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.compilation.MethodDependencyCounter;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
@@ -20,8 +21,8 @@ package away3d.materials.passes
 	import away3d.materials.methods.MethodVO;
 	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
@@ -42,10 +43,6 @@ package away3d.materials.passes
 	// TODO: Remove compilation from this class, gets messy. Only perform rendering here.
 	public class DefaultScreenPass extends MaterialPassBase
 	{
-//		private var _cameraPositionData : Vector.<Number> = Vector.<Number>([0, 0, 0, 1]);
-//		private var _lightData : Vector.<Number>;
-//		private var _uvTransformData : Vector.<Number>;
-
 		// todo: create something similar for diffuse: useOnlyProbesDiffuse - ignoring normal lights?
 		// or: for both, provide mode: LightSourceMode.LIGHTS = 0x01, LightSourceMode.PROBES = 0x02, LightSourceMode.ALL = 0x03
 		private var _specularLightSources : uint = 0x01;
@@ -68,12 +65,8 @@ package away3d.materials.passes
 		private var _registerCache : ShaderRegisterCache;
 		private var _vertexCode : String;
 		private var _fragmentCode : String;
-		private var _projectionDependencies : uint;
-		private var _normalDependencies : uint;
-		private var _viewDirDependencies : uint;
-		private var _uvDependencies : uint;
-		private var _secondaryUVDependencies : uint;
-		private var _globalPosDependencies : uint;
+
+		private var _dependencyCounter : MethodDependencyCounter;
 
 		// registers
 		protected var _uvBufferIndex : int;
@@ -129,8 +122,6 @@ package away3d.materials.passes
 		private var _probeWeightsIndex : int;
 		private var _numProbeRegisters : uint;
 		private var _usingSpecularMethod : Boolean;
-		private var _usesGlobalPosFragment : Boolean = true;
-		private var _tangentDependencies : int;
 
 		private var _ambientLightR : Number;
 		private var _ambientLightG : Number;
@@ -154,6 +145,7 @@ package away3d.materials.passes
 		private function init() : void
 		{
 			_methods = new Vector.<MethodSet>();
+			_dependencyCounter = new MethodDependencyCounter();
 			_normalMethod = new BasicNormalMethod();
 			_ambientMethod = new BasicAmbientMethod();
 			_diffuseMethod = new BasicDiffuseMethod();
@@ -236,30 +228,24 @@ package away3d.materials.passes
 		{
 			super.dispose();
 
-			_normalMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_normalMethod.dispose();
-			_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_diffuseMethod.dispose();
-			if (_shadowMethod) {
-				_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-				_shadowMethod.dispose();
-			}
-			_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_ambientMethod.dispose();
-			if (_specularMethod) {
-				_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-				_specularMethod.dispose();
-			}
-			if (_colorTransformMethod) {
-				_colorTransformMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-				_colorTransformMethod.dispose();
-			}
-			for (var i : int = 0; i < _methods.length; ++i) {
-				_methods[i].method.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-				_methods[i].method.dispose();
-			}
+			disposeMethod(_normalMethod);
+			disposeMethod(_diffuseMethod);
+			disposeMethod(_shadowMethod);
+			disposeMethod(_ambientMethod);
+			disposeMethod(_specularMethod);
+
+			for (var i : int = 0; i < _methods.length; ++i)
+				disposeMethod(_methods[i].method);
 
 			_methods = null;
+		}
+
+		private function disposeMethod(method : ShadingMethodBase)
+		{
+			if (method) {
+				method.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				method.dispose();
+			}
 		}
 
 		/**
@@ -512,7 +498,7 @@ package away3d.materials.passes
 
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.activate(_normalMethodVO, stage3DProxy);
+			if (_dependencyCounter.normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.activate(_normalMethodVO, stage3DProxy);
 			_ambientMethod.activate(_ambientMethodVO, stage3DProxy);
 			if (_shadowMethod) _shadowMethod.activate(_shadowMethodVO, stage3DProxy);
 			_diffuseMethod.activate(_diffuseMethodVO, stage3DProxy);
@@ -540,7 +526,7 @@ package away3d.materials.passes
 			super.deactivate(stage3DProxy);
 			var len : uint = _methods.length;
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.deactivate(_normalMethodVO, stage3DProxy);
+			if (_dependencyCounter.normalDependencies > 0 && _normalMethod.hasOutput) _normalMethod.deactivate(_normalMethodVO, stage3DProxy);
 			_ambientMethod.deactivate(_ambientMethodVO, stage3DProxy);
 			if (_shadowMethod) _shadowMethod.deactivate(_shadowMethodVO, stage3DProxy);
 			_diffuseMethod.deactivate(_diffuseMethodVO, stage3DProxy);
@@ -602,7 +588,7 @@ package away3d.materials.passes
 			if (_sceneNormalMatrixIndex >= 0)
 				renderable.inverseSceneTransform.copyRawDataTo(_vertexConstantData, _sceneNormalMatrixIndex, false);
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput)
+			if (_dependencyCounter.normalDependencies > 0 && _normalMethod.hasOutput)
 				_normalMethod.setRenderState(_normalMethodVO, renderable, stage3DProxy, camera);
 
 			_ambientMethod.setRenderState(_ambientMethodVO, renderable, stage3DProxy, camera);
@@ -825,19 +811,19 @@ package away3d.materials.passes
 			createCommons();
 			calculateDependencies();
 
-			if (_projectionDependencies > 0) compileProjCode();
-			if (_uvDependencies > 0) compileUVCode();
-			if (_secondaryUVDependencies > 0) compileSecondaryUVCode();
-			if (_globalPosDependencies > 0) compileGlobalPositionCode();
+			if (_dependencyCounter.projectionDependencies > 0) compileProjCode();
+			if (_dependencyCounter.uvDependencies > 0) compileUVCode();
+			if (_dependencyCounter.secondaryUVDependencies > 0) compileSecondaryUVCode();
+			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
 
 			updateMethodRegisters(_normalMethod);
-			if (_normalDependencies > 0) {
+			if (_dependencyCounter.normalDependencies > 0) {
 				// needs to be created before view
 				_animatedNormalReg = _registerCache.getFreeVertexVectorTemp();
 				_registerCache.addVertexTempUsages(_animatedNormalReg, 1);
-				if (_normalDependencies > 0) compileNormalCode();
+				if (_dependencyCounter.normalDependencies > 0) compileNormalCode();
 			}
-			if (_viewDirDependencies > 0) compileViewDirCode();
+			if (_dependencyCounter.viewDirDependencies > 0) compileViewDirCode();
 
 
 			updateMethodRegisters(_diffuseMethod);
@@ -902,11 +888,7 @@ package away3d.materials.passes
 		{
 			var len : uint;
 
-			_normalDependencies = 0;
-			_viewDirDependencies = 0;
-			_uvDependencies = 0;
-			_secondaryUVDependencies = 0;
-			_globalPosDependencies = 0;
+			_dependencyCounter.reset();
 
 			setupAndCountMethodDependencies(_diffuseMethod, _diffuseMethodVO);
 			if (_shadowMethod) setupAndCountMethodDependencies(_shadowMethod, _shadowMethodVO);
@@ -918,34 +900,17 @@ package away3d.materials.passes
 			for (var i : uint = 0; i < len; ++i)
 				setupAndCountMethodDependencies(_methods[i].method, _methods[i].data);
 
-			if (_normalDependencies > 0 && _normalMethod.hasOutput) setupAndCountMethodDependencies(_normalMethod, _normalMethodVO);
-			if (_viewDirDependencies > 0) ++_globalPosDependencies;
+			if (_dependencyCounter.normalDependencies > 0 && _normalMethod.hasOutput)
+				setupAndCountMethodDependencies(_normalMethod, _normalMethodVO);
 
-			// todo: add spotlight check
-			if (_numPointLights > 0 && (_combinedLightSources & LightSources.LIGHTS)) {
-				++_globalPosDependencies;
-				_usesGlobalPosFragment = true;
-			}
+			// todo: add spotlights to count check
+			_dependencyCounter.setPositionedLights(_numPointLights, _combinedLightSources);
 		}
 
 		private function setupAndCountMethodDependencies(method : ShadingMethodBase, methodVO : MethodVO) : void
 		{
 			setupMethod(method, methodVO);
-			countDependencies(methodVO);
-		}
-
-		private function countDependencies(methodVO : MethodVO) : void
-		{
-			if (methodVO.needsProjection) ++_projectionDependencies;
-			if (methodVO.needsGlobalPos) {
-				++_globalPosDependencies;
-				_usesGlobalPosFragment = true;
-			}
-			if (methodVO.needsNormals) ++_normalDependencies;
-			if (methodVO.needsTangents) ++_tangentDependencies;
-			if (methodVO.needsView) ++_viewDirDependencies;
-			if (methodVO.needsUV) ++_uvDependencies;
-			if (methodVO.needsSecondaryUV) ++_secondaryUVDependencies;
+			_dependencyCounter.includeMethodVO(methodVO);
 		}
 
 		private function setupMethod(method : ShadingMethodBase, methodVO : MethodVO) : void
@@ -965,7 +930,7 @@ package away3d.materials.passes
 		private function compileGlobalPositionCode() : void
 		{
 			_globalPositionVertexReg = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(_globalPositionVertexReg, _globalPosDependencies);
+			_registerCache.addVertexTempUsages(_globalPositionVertexReg, _dependencyCounter.globalPosDependencies);
 
 			_positionMatrixRegs = new Vector.<ShaderRegisterElement>();
 			_positionMatrixRegs[0] = _registerCache.getFreeVertexConstant();
@@ -979,7 +944,7 @@ package away3d.materials.passes
 //			_registerCache.removeVertexTempUsage(_localPositionRegister);
 
 			// todo: add spotlight check as well
-			if (_usesGlobalPosFragment) {
+			if (_dependencyCounter.usesGlobalPosFragment) {
 				_globalPositionVaryingReg = _registerCache.getFreeVarying();
 				_vertexCode += "mov " + _globalPositionVaryingReg + ", " + _globalPositionVertexReg + "\n";
 //				_registerCache.removeVertexTempUsage(_globalPositionVertexReg);
@@ -1024,7 +989,7 @@ package away3d.materials.passes
 			var normalMatrix : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>(3, true);
 
 			_normalFragmentReg = _registerCache.getFreeFragmentVectorTemp();
-			_registerCache.addFragmentTempUsages(_normalFragmentReg, _normalDependencies);
+			_registerCache.addFragmentTempUsages(_normalFragmentReg, _dependencyCounter.normalDependencies);
 
 			if (_normalMethod.hasOutput && !_normalMethod.tangentSpace) {
 				_vertexCode += _normalMethod.getVertexCode(_normalMethodVO, _registerCache);
@@ -1059,7 +1024,7 @@ package away3d.materials.passes
 								"mov " + _normalFragmentReg + ".w, " + _normalVarying + ".w		\n";
 
 
-				if (_tangentDependencies > 0) {
+				if (_dependencyCounter.tangentDependencies > 0) {
 					_tangentInput = _registerCache.getFreeVertexAttribute();
 					_tangentBufferIndex = _tangentInput.index;
 					_tangentVarying = _registerCache.getFreeVarying();
@@ -1173,7 +1138,7 @@ package away3d.materials.passes
 			var cameraPositionReg : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
 			_viewDirVaryingReg = _registerCache.getFreeVarying();
 			_viewDirFragmentReg = _registerCache.getFreeFragmentVectorTemp();
-			_registerCache.addFragmentTempUsages(_viewDirFragmentReg, _viewDirDependencies);
+			_registerCache.addFragmentTempUsages(_viewDirFragmentReg, _dependencyCounter.viewDirDependencies);
 
 			_cameraPositionIndex = (cameraPositionReg.index-_vertexConstantIndex)*4;
 
@@ -1215,7 +1180,7 @@ package away3d.materials.passes
 				_vertexCode += _shadowMethod.getVertexCode(_shadowMethodVO, _registerCache);
 				// using normal to contain shadow data if available is perhaps risky :s
 				// todo: improve compilation with lifetime analysis so this isn't necessary?
-				if (_normalDependencies == 0) {
+				if (_dependencyCounter.normalDependencies == 0) {
 					shadowReg = _registerCache.getFreeFragmentVectorTemp();
 					_registerCache.addFragmentTempUsages(shadowReg, 1);
 				}

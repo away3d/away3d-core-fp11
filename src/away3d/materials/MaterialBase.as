@@ -26,9 +26,6 @@ package away3d.materials
 
 	/**
 	 * MaterialBase forms an abstract base class for any material.
-	 *
-	 * Vertex stream index 0 is reserved for vertex positions.
-	 * Vertex shader constants index 0-3 are reserved for projections, constant 4 for viewport positioning
 	 */
 	public class MaterialBase extends NamedAssetBase implements IAsset
 	{
@@ -66,7 +63,6 @@ package away3d.materials
 		protected var _mipmap : Boolean = true;
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean;
-		protected var _depthCompareMode:String = Context3DCompareMode.LESS;
 
 		protected var _depthPass : DepthMapPass;
 		protected var _distancePass : DistanceMapPass;

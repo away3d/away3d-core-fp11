@@ -9,8 +9,8 @@ package away3d.materials.methods
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;

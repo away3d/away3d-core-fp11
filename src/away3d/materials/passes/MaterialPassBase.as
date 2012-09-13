@@ -27,6 +27,10 @@ package away3d.materials.passes
 
 	/**
 	 * MaterialPassBase provides an abstract base class for material shader passes.
+	 *
+	 * Vertex stream index 0 is reserved for vertex positions.
+	 * Vertex shader constants index 0-3 are reserved for projections, constant 4 for viewport positioning
+	 * Vertex shader constant index 4 is reserved for render-to-texture scaling
 	 */
 	public class MaterialPassBase extends EventDispatcher
 	{
@@ -63,16 +67,21 @@ package away3d.materials.passes
 		protected var _defaultCulling : String = Context3DTriangleFace.BACK;
 
 		private var _renderToTexture : Boolean;
+
+		// render state mementos for render-to-texture passes
 		private var _oldTarget : TextureBase;
 		private var _oldSurface : int;
 		private var _oldDepthStencil : Boolean;
 		private var _oldRect : Rectangle;
+
 		private static var _rttData : Vector.<Number>;
 
 		protected var _alphaPremultiplied : Boolean;
 
 		/**
 		 * Creates a new MaterialPassBase object.
+		 *
+		 * @param renderToTexture
 		 */
 		public function MaterialPassBase(renderToTexture : Boolean = false)
 		{
@@ -196,11 +205,12 @@ package away3d.materials.passes
 		public function dispose() : void
 		{
 			for (var i : uint = 0; i < 8; ++i) {
-				if (_program3Ds[i]) AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
+				if (_program3Ds[i]) {
+					AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
+					_program3Ds[i] = null;
+				}
 			}
 		}
-
-// AGAL RELATED STUFF
 
 		/**
 		 * The amount of used vertex streams in the vertex code. Used by the animation code generation to know from which index on streams are available.
@@ -361,7 +371,6 @@ package away3d.materials.passes
 				trace (fragmentCode);
 			}
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);
-			//_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 
 		arcane function get numPointLights() : uint

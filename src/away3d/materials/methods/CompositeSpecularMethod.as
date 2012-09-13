@@ -4,8 +4,8 @@ package away3d.materials.methods
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.events.ShadingMethodEvent;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
