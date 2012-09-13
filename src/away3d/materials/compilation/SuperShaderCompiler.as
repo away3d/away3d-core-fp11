@@ -39,6 +39,8 @@ package away3d.materials.compilation
 		public var _usingSpecularMethod : Boolean;
 		public var _pointLightRegisters : Vector.<ShaderRegisterElement>;
 		public var _dirLightRegisters : Vector.<ShaderRegisterElement>;
+		private var _animatableAttributes : Array;
+		private var _animationTargetRegisters : Array;
 
 		use namespace arcane;
 
@@ -66,7 +68,7 @@ package away3d.materials.compilation
 			_methodSetup = value;
 		}
 
-// TODO: REMOVE
+		// TODO: REMOVE
 		public function get sharedRegisters() : ShaderRegisterData
 		{
 			return _sharedRegisters;
@@ -79,16 +81,20 @@ package away3d.materials.compilation
 		}
 
 
-		public function get vertexConstantsOffset() : uint
-		{
-			return _vertexConstantsOffset;
-		}
-
-
 		public function compile() : void
 		{
 			initRegisterIndices();
 			initLightData();
+
+			_animatableAttributes = ["va0"];
+			_animationTargetRegisters = ["vt0"];
+			_vertexCode = "";
+			_fragmentCode = "";
+
+			_sharedRegisters.localPosition = _registerCache.getFreeVertexVectorTemp();
+			_registerCache.addVertexTempUsages(_sharedRegisters.localPosition, 1);
+
+			createCommons();
 		}
 
 
@@ -123,6 +129,18 @@ package away3d.materials.compilation
 
 			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights * 3, true);
 			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights * 3, true);
+		}
+
+		private function createCommons() : void
+		{
+			_sharedRegisters.commons = _registerCache.getFreeFragmentConstant();
+			_commonsDataIndex = _sharedRegisters.commons.index*4;
+		}
+
+
+		public function get vertexConstantsOffset() : uint
+		{
+			return _vertexConstantsOffset;
 		}
 
 		public function get uvBufferIndex() : int
@@ -246,6 +264,16 @@ package away3d.materials.compilation
 		public function get usingSpecularMethod() : Boolean
 		{
 			return _usingSpecularMethod;
+		}
+
+		public function get animatableAttributes() : Array
+		{
+			return _animatableAttributes;
+		}
+
+		public function get animationTargetRegisters() : Array
+		{
+			return _animationTargetRegisters;
 		}
 
 		private function usesLights() : Boolean

@@ -526,22 +526,16 @@ package away3d.materials.passes
 			_compiler.diffuseLightSources = _diffuseLightSources;
 			_compiler.specularLightSources = _specularLightSources;
 			_compiler.compile();
-
-			_numUsedVertexConstants = 0;
-			_numUsedStreams = 1;
-
-			_animatableAttributes = ["va0"];
-			_animationTargetRegisters = ["vt0"];
-			_compiler._vertexCode = "";
-			_compiler._fragmentCode = "";
-
-			_compiler.sharedRegisters.localPosition = _compiler.registerCache.getFreeVertexVectorTemp();
-			_compiler.registerCache.addVertexTempUsages(_compiler.sharedRegisters.localPosition, 1);
+			// keep this straight after compile();
+			_animatableAttributes = _compiler.animatableAttributes;
+			_animationTargetRegisters = _compiler.animationTargetRegisters;
 
 			compile();
+
 			_vertexCode = _compiler.vertexCode;
 			_fragmentCode = _compiler.fragmentCode;
 			_usingSpecularMethod = _compiler.usingSpecularMethod;
+
 			updateRegisterIndices();
 			updateUsedOffsets();
 			initConstantData();
@@ -688,7 +682,6 @@ package away3d.materials.passes
 		 */
 		private function compile() : void
 		{
-			createCommons();
 			calculateDependencies();
 
 			if (_dependencyCounter.projectionDependencies > 0) compileProjCode();
@@ -813,7 +806,7 @@ package away3d.materials.passes
 			_compiler.registerCache.getFreeVertexConstant();
 			_compiler._sceneMatrixIndex = (positionMatrixReg.index - _compiler.vertexConstantsOffset)*4;
 
-			_compiler._vertexCode += 	"m44 " + _compiler.sharedRegisters.globalPositionVertex + ".xyz, " + _compiler.sharedRegisters.localPosition.toString() + ", " + positionMatrixReg + "\n" +
+			_compiler._vertexCode += 	"m44 " + _compiler.sharedRegisters.globalPositionVertex + ".xyz, " + _compiler.sharedRegisters.localPosition + ", " + positionMatrixReg + "\n" +
 							"mov " + _compiler.sharedRegisters.globalPositionVertex + ".w, " + _compiler.sharedRegisters.localPosition + ".w     \n";
 
 			if (_dependencyCounter.usesGlobalPosFragment) {
@@ -981,12 +974,6 @@ package away3d.materials.passes
 			_compiler.registerCache.removeFragmentTempUsage(b);
 			_compiler.registerCache.removeFragmentTempUsage(t);
 			_compiler.registerCache.removeFragmentTempUsage(n);
-		}
-
-		private function createCommons() : void
-		{
-			_compiler.sharedRegisters.commons = _compiler.registerCache.getFreeFragmentConstant();
-			_compiler._commonsDataIndex = _compiler.sharedRegisters.commons.index*4;
 		}
 
 		private function compileViewDirCode() : void
