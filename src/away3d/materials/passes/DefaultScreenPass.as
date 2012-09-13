@@ -576,10 +576,10 @@ package away3d.materials.passes
 
 			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
-			if (_numLights > 0 && usesLightsForAny())
+			if (usesLights())
 				updateLights(lightPicker.directionalLights, lightPicker.pointLights, stage3DProxy);
 
-			if (_numLightProbes > 0 && usesProbesForAny())
+			if (usesProbes())
 				updateProbes(lightPicker.lightProbes, lightPicker.lightProbeWeights, stage3DProxy);
 
 			if (_sceneMatrixIndex >= 0)
@@ -692,8 +692,8 @@ package away3d.materials.passes
 				_combinedLightSources = _diffuseLightSources;
 
 			_usingSpecularMethod = 	_specularMethod && (
-					(_numLights > 0 && usesLightsForSpecular()) ||
-					(_numLightProbes > 0 && usesProbesForSpecular()));
+									usesLightsForSpecular() ||
+									usesProbesForSpecular());
 
 			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights * 3, true);
 			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights * 3, true);
@@ -703,32 +703,32 @@ package away3d.materials.passes
 
 		private function usesProbesForSpecular() : Boolean
 		{
-			return (_specularLightSources & LightSources.PROBES) != 0;
+			return _numLightProbes > 0 && (_specularLightSources & LightSources.PROBES) != 0;
 		}
 
 		private function usesProbesForDiffuse() : Boolean
 		{
-			return (_diffuseLightSources & LightSources.PROBES) != 0;
+			return _numLightProbes > 0 && (_diffuseLightSources & LightSources.PROBES) != 0;
 		}
 
-		private function usesProbesForAny() : Boolean
+		private function usesProbes() : Boolean
 		{
-			return (_combinedLightSources & LightSources.PROBES) != 0;
+			return _numLightProbes > 0 && (_combinedLightSources & LightSources.PROBES) != 0;
 		}
 
 		private function usesLightsForSpecular() : Boolean
 		{
-			return (_specularLightSources & LightSources.LIGHTS) != 0;
+			return _numLights > 0 && (_specularLightSources & LightSources.LIGHTS) != 0;
 		}
 
 		private function usesLightsForDiffuse() : Boolean
 		{
-			return (_diffuseLightSources & LightSources.LIGHTS) != 0;
+			return _numLights > 0 && (_diffuseLightSources & LightSources.LIGHTS) != 0;
 		}
 
-		private function usesLightsForAny() : Boolean
+		private function usesLights() : Boolean
 		{
-			return (_combinedLightSources & LightSources.LIGHTS) != 0;
+			return _numLights > 0 && (_combinedLightSources & LightSources.LIGHTS) != 0;
 		}
 
 		private function updateUsedOffsets() : void
@@ -1212,13 +1212,13 @@ package away3d.materials.passes
 				_fragmentCode += _specularMethod.getFragmentPreLightingCode(_specularMethodVO, _registerCache);
 			}
 
-			if (_numLights > 0 && usesLightsForAny()) {
+			if (usesLights()) {
 				initLightRegisters();
 				compileDirectionalLightCode();
 				compilePointLightCode();
 			}
 
-			if (_numLightProbes > 0 && usesProbesForAny())
+			if (usesProbes())
 				compileLightProbeCode();
 
 			// only need to create and reserve _shadedTargetReg here, no earlier?
