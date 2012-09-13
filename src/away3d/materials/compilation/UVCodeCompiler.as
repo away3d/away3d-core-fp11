@@ -19,7 +19,7 @@ package away3d.materials.compilation
 			this.sharedRegisters = sharedRegisters;
 		}
 
-		public function appendVertexCode(code : String) : String
+		public function getVertexCode() : String
 		{
 			var uvAttributeReg : ShaderRegisterElement = registerCache.getFreeVertexAttribute();
 			uvBufferIndex = uvAttributeReg.index;
@@ -38,16 +38,14 @@ package away3d.materials.compilation
 				var uvTransform2 : ShaderRegisterElement = registerCache.getFreeVertexConstant();
 				uvTransformIndex = (uvTransform1.index - vertexConstantsOffset)*4;
 
-				code += 	"dp4 " + varying + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
-							"dp4 " + varying + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
-							"mov " + varying + ".zw, " + uvAttributeReg + ".zw \n";
+				return	"dp4 " + varying + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
+						"dp4 " + varying + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
+						"mov " + varying + ".zw, " + uvAttributeReg + ".zw \n";
 			}
 			else {
-				code += "mov " + varying + ", " + uvAttributeReg + "\n";
 				uvTransformIndex = -1;
+				return "mov " + varying + ", " + uvAttributeReg + "\n";
 			}
-
-			return code;
 		}
 	}
 }

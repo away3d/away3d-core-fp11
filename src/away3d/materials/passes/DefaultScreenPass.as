@@ -961,7 +961,7 @@ package away3d.materials.passes
 			var uvCompiler : UVCodeCompiler = new UVCodeCompiler(_registerCache, _sharedRegisters);
 			uvCompiler.animateUVs = _animateUVs;
 			uvCompiler.vertexConstantsOffset = _vertexConstantsOffset;
-			_vertexCode = uvCompiler.appendVertexCode(_vertexCode);
+			_vertexCode += uvCompiler.getVertexCode();
 			_uvBufferIndex = uvCompiler.uvBufferIndex;
 			_uvTransformIndex = uvCompiler.uvTransformIndex;
 		}
@@ -970,7 +970,7 @@ package away3d.materials.passes
 		{
 			var uvCompiler : UVCodeCompiler = new UVCodeCompiler(_registerCache, _sharedRegisters);
 			uvCompiler.secondaryUVs = true;
-			_vertexCode = uvCompiler.appendVertexCode(_vertexCode);
+			_vertexCode += uvCompiler.getVertexCode();
 			_secondaryUVBufferIndex = uvCompiler.uvBufferIndex;
 		}
 
