@@ -6,6 +6,7 @@ package away3d.materials.compilation
 		private var _registerCache : ShaderRegisterCache;
 		private var _vertexConstantsOffset : uint;
 
+
 		// TODO: CHANGE BACK TO PRIVATE!
 		public var _uvBufferIndex : int = -1;
 		public var _uvTransformIndex : int = -1;
@@ -21,6 +22,13 @@ package away3d.materials.compilation
 
 		public var _vertexCode : String;
 		public var _fragmentCode : String;
+
+		public var _numLights : int;
+
+		private var _numLightProbes : uint;
+		private var _numPointLights : uint;
+		private var _numDirectionalLights : uint;
+		public var _numProbeRegisters : Number;
 
 
 		public function SuperShaderCompiler()
@@ -58,11 +66,12 @@ package away3d.materials.compilation
 
 		public function compile() : void
 		{
-			resetRegisterIndices();
+			initRegisterIndices();
+			initLightData();
 		}
 
 
-		private function resetRegisterIndices() : void
+		private function initRegisterIndices() : void
 		{
 			_cameraPositionIndex = -1;
 			_commonsDataIndex = -1;
@@ -75,6 +84,12 @@ package away3d.materials.compilation
 			_sceneMatrixIndex = -1;
 			_sceneNormalMatrixIndex = -1;
 			_probeWeightsIndex = -1;
+		}
+
+		private function initLightData() : void
+		{
+			_numLights = _numPointLights + _numDirectionalLights;
+			_numProbeRegisters = Math.ceil(_numLightProbes/4);
 		}
 
 		public function get uvBufferIndex() : int
@@ -141,5 +156,43 @@ package away3d.materials.compilation
 		{
 			return _fragmentCode;
 		}
+
+
+		public function get numPointLights() : uint
+		{
+			return _numPointLights;
+		}
+
+		public function set numPointLights(numPointLights : uint) : void
+		{
+			_numPointLights = numPointLights;
+		}
+
+
+		public function get numDirectionalLights() : uint
+		{
+			return _numDirectionalLights;
+		}
+
+		public function set numDirectionalLights(value : uint) : void
+		{
+			_numDirectionalLights = value;
+		}
+
+
+		public function get numLightProbes() : uint
+		{
+			return _numLightProbes;
+		}
+
+		public function set numLightProbes(value : uint) : void
+		{
+			_numLightProbes = value;
+		}
+
+		/*private function usesLights() : Boolean
+		{
+			return (_numLights > 0) && (_combinedLightSources & LightSources.LIGHTS) != 0;
+		} */
 	}
 }
