@@ -73,12 +73,18 @@ package away3d.materials.methods
 
 		public function set ambientMethod(value : BasicAmbientMethod) : void
 		{
-			_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			value.copyFrom(_ambientMethod);
-			_ambientMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			if (_ambientMethod)
+				_ambientMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			if (value) {
+				if (_ambientMethod) value.copyFrom(_ambientMethod);
+				value.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_ambientMethodVO = _ambientMethod.createMethodVO();
+				invalidateShaderProgram();
+			}
+			else {
+				_ambientMethodVO = null;
+			}
 			_ambientMethod = value;
-			_ambientMethodVO = _ambientMethod.createMethodVO();
-			invalidateShaderProgram();
 		}
 
 		public function get shadowMethod() : ShadowMapMethodBase
@@ -109,12 +115,20 @@ package away3d.materials.methods
 
 		public function set diffuseMethod(value : BasicDiffuseMethod) : void
 		{
-			_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			value.copyFrom(_diffuseMethod);
+			if (_diffuseMethod)
+				_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			if (value) {
+				if (_diffuseMethod) value.copyFrom(_diffuseMethod);
+				value.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+				_diffuseMethodVO = value.createMethodVO();
+				invalidateShaderProgram();
+			}
+			else {
+				_diffuseMethodVO = null;
+				// should not invalidate, null should only be temporary state to prevent copying
+			}
+
 			_diffuseMethod = value;
-			_diffuseMethodVO = _diffuseMethod.createMethodVO();
-			_diffuseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			invalidateShaderProgram();
 		}
 
 		/**
@@ -168,24 +182,22 @@ package away3d.materials.methods
 
 		public function dispose() : void
 		{
-			disposeMethod(_normalMethod);
-			disposeMethod(_diffuseMethod);
-			disposeMethod(_shadowMethod);
-			disposeMethod(_ambientMethod);
-			disposeMethod(_specularMethod);
+			clearListeners(_normalMethod);
+			clearListeners(_diffuseMethod);
+			clearListeners(_shadowMethod);
+			clearListeners(_ambientMethod);
+			clearListeners(_specularMethod);
 
 			for (var i : int = 0; i < _methods.length; ++i)
-				disposeMethod(_methods[i].method);
+				clearListeners(_methods[i].method);
 
 			_methods = null;
 		}
 
-		private function disposeMethod(method : ShadingMethodBase)
+		private function clearListeners(method : ShadingMethodBase)
 		{
-			if (method) {
+			if (method)
 				method.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-				method.dispose();
-			}
 		}
 
 		/**

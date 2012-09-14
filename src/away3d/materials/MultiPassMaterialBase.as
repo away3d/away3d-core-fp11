@@ -3,6 +3,7 @@
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
@@ -13,7 +14,7 @@
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
-	import flash.geom.ColorTransform;
+	import flash.events.Event;
 
 	use namespace arcane;
 
@@ -21,18 +22,28 @@
 	 * DefaultMaterialBase forms an abstract base class for the default materials provided by Away3D and use methods
 	 * to define their appearance.
 	 */
-	public class DefaultMaterialBase extends MaterialBase
+	public class MultiPassMaterialBase extends MaterialBase
 	{
-		protected var _screenPass : SuperShaderPass;
-		private var _alphaBlending : Boolean;
+		protected var _effectsPass : SuperShaderPass;
+
+		private var _alphaThreshold : Number = 0;
+		private var _specularLightSources : uint;
+		private var _diffuseLightSources : uint;
+
+		private var _ambientMethod : BasicAmbientMethod = new BasicAmbientMethod();
+		private var _shadowMethod : ShadowMapMethodBase;
+		private var _diffuseMethod : BasicDiffuseMethod = new BasicDiffuseMethod();
+		private var _normalMethod : BasicNormalMethod = new BasicNormalMethod();
+		private var _specularMethod : BasicSpecularMethod = new BasicSpecularMethod();
+
+		private var _screenPassesInvalid : Boolean = true;
 
 		/**
 		 * Creates a new DefaultMaterialBase object.
 		 */
-		public function DefaultMaterialBase()
+		public function MultiPassMaterialBase()
 		{
 			super();
-			addPass(_screenPass = new SuperShaderPass(this));
 		}
 
 		/**
@@ -42,58 +53,51 @@
 		 */
 		public function get alphaThreshold() : Number
 		{
-			return _screenPass.diffuseMethod.alphaThreshold;
+			return _alphaThreshold;
 		}
 
 		public function set alphaThreshold(value : Number) : void
 		{
-			_screenPass.diffuseMethod.alphaThreshold = value;
+			_alphaThreshold = value;
+			if (_effectsPass) _effectsPass.diffuseMethod.alphaThreshold = value;
 			_depthPass.alphaThreshold = value;
 			_distancePass.alphaThreshold = value;
 		}
 
 		arcane override function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void
 		{
-			if (distanceBased) {
-				_distancePass.alphaMask = _screenPass.diffuseMethod.texture;
-			}
-			else {
-				_depthPass.alphaMask = _screenPass.diffuseMethod.texture;
-			}
+			if (distanceBased)
+				_distancePass.alphaMask = _diffuseMethod.texture;
+			else
+				_depthPass.alphaMask = _diffuseMethod.texture;
+
 			super.activateForDepth(stage3DProxy, camera, distanceBased, textureRatioX, textureRatioY);
 		}
 
 		public function get specularLightSources() : uint
 		{
-			return _screenPass.specularLightSources;
+			return _specularLightSources;
 		}
 
 		public function set specularLightSources(value : uint) : void
 		{
-			_screenPass.specularLightSources = value;
+			_specularLightSources = value;
 		}
 
 		public function get diffuseLightSources() : uint
 		{
-			return _screenPass.diffuseLightSources;
+			return _diffuseLightSources;
 		}
 
 		public function set diffuseLightSources(value : uint) : void
 		{
-			_screenPass.diffuseLightSources = value;
+			_diffuseLightSources = value;
 		}
 
-		/**
-		 * The ColorTransform object to transform the colour of the material with.
-		 */
-		public function get colorTransform() : ColorTransform
+		override public function set lightPicker(value : LightPickerBase) : void
 		{
-			return _screenPass.colorTransform;
-		}
-
-		public function set colorTransform(value : ColorTransform) : void
-		{
-			_screenPass.colorTransform = value;
+			super.lightPicker = value;
+			invalidateScreenPasses();
 		}
 
 		/**
@@ -101,7 +105,7 @@
 		 */
 		override public function get requiresBlending() : Boolean
 		{
-			return super.requiresBlending || _alphaBlending || (_screenPass.colorTransform && _screenPass.colorTransform.alphaMultiplier < 1);
+			return false;
 		}
 
 		/**
@@ -110,12 +114,13 @@
 		 */
 		public function get ambientMethod() : BasicAmbientMethod
 		{
-			return _screenPass.ambientMethod;
+			return _ambientMethod;
 		}
 
 		public function set ambientMethod(value : BasicAmbientMethod) : void
 		{
-			_screenPass.ambientMethod = value;
+			_ambientMethod = value;
+			invalidateScreenPasses();
 		}
 
 		/**
@@ -124,12 +129,13 @@
 		 */
 		public function get shadowMethod() : ShadowMapMethodBase
 		{
-			return _screenPass.shadowMethod;
+			return _shadowMethod;
 		}
 
 		public function set shadowMethod(value : ShadowMapMethodBase) : void
 		{
-			_screenPass.shadowMethod = value;
+			_shadowMethod = value;
+			invalidateScreenPasses();
 		}
 
 		/**
@@ -138,12 +144,13 @@
 		 */
 		public function get diffuseMethod() : BasicDiffuseMethod
 		{
-			return _screenPass.diffuseMethod;
+			return _diffuseMethod;
 		}
 
 		public function set diffuseMethod(value : BasicDiffuseMethod) : void
 		{
-			_screenPass.diffuseMethod = value;
+			_diffuseMethod = value;
+			invalidateScreenPasses();
 		}
 
 		/**
@@ -152,12 +159,13 @@
 		 */
 		public function get normalMethod() : BasicNormalMethod
 		{
-			return _screenPass.normalMethod;
+			return _normalMethod;
 		}
 
 		public function set normalMethod(value : BasicNormalMethod) : void
 		{
-			_screenPass.normalMethod = value;
+			_normalMethod = value;
+			invalidateScreenPasses();
 		}
 
 		/**
@@ -166,12 +174,13 @@
 		 */
 		public function get specularMethod() : BasicSpecularMethod
 		{
-			return _screenPass.specularMethod;
+			return _specularMethod;
 		}
 
 		public function set specularMethod(value : BasicSpecularMethod) : void
 		{
-			_screenPass.specularMethod = value;
+			_specularMethod = value;
+			invalidateScreenPasses();
 		}
 		
  		/**
@@ -180,22 +189,24 @@
 		*/
 		public function addMethod(method : EffectMethodBase) : void
 		{
-			_screenPass.addMethod(method);
+			_effectsPass ||= new SuperShaderPass(this);
+			_effectsPass.addMethod(method);
+			invalidateScreenPasses();
 		}
 
 		public function get numMethods() : int
 		{
-			return _screenPass.numMethods;
+			return _effectsPass? _effectsPass.numMethods : 0;
 		}
 
 		public function hasMethod(method : EffectMethodBase) : Boolean
 		{
-			return _screenPass.hasMethod(method);
+			return _effectsPass? _effectsPass.hasMethod(method) : false;
 		}
 
 		public function getMethodAt(index : int) : EffectMethodBase
 		{
-			return _screenPass.getMethodAt(index);
+			return _effectsPass.getMethodAt(index);
 		}
 
 		/**
@@ -205,12 +216,19 @@
 		*/
 		public function addMethodAt(method : EffectMethodBase, index : int) : void
 		{
-			_screenPass.addMethodAt(method, index);
+			_effectsPass ||= new SuperShaderPass(this);
+			_effectsPass.addMethodAt(method, index);
+			invalidateScreenPasses();
 		}
 
 		public function removeMethod(method : EffectMethodBase) : void
 		{
-			_screenPass.removeMethod(method);
+			if (_effectsPass) return;
+			_effectsPass.removeMethod(method);
+
+			// reconsider
+			if (_effectsPass.numMethods == 0)
+				invalidateScreenPasses();
 		}
 
 		/**
@@ -227,12 +245,12 @@
 		 */
 		public function get normalMap() : Texture2DBase
 		{
-			return _screenPass.normalMap;
+			return _normalMethod.normalMap;
 		}
 
 		public function set normalMap(value : Texture2DBase) : void
 		{
-			_screenPass.normalMap = value;
+			_normalMethod.normalMap = value;
 		}
 
 		/**
@@ -241,12 +259,12 @@
 		 */
 		public function get specularMap() : Texture2DBase
 		{
-			return _screenPass.specularMethod.texture;
+			return _specularMethod.texture;
 		}
 
 		public function set specularMap(value : Texture2DBase) : void
 		{
-			if (_screenPass.specularMethod) _screenPass.specularMethod.texture = value;
+			if (_specularMethod) _specularMethod.texture = value;
 			else throw new Error("No specular method was set to assign the specularGlossMap to");
 		}
 
@@ -255,12 +273,12 @@
 		 */
 		public function get gloss() : Number
 		{
-			return _screenPass.specularMethod? _screenPass.specularMethod.gloss : 0;
+			return _specularMethod? _specularMethod.gloss : 0;
 		}
 
 		public function set gloss(value : Number) : void
 		{
-			if (_screenPass.specularMethod) _screenPass.specularMethod.gloss = value;
+			if (_specularMethod) _specularMethod.gloss = value;
 		}
 
 		/**
@@ -268,12 +286,12 @@
 		 */
 		public function get ambient() : Number
 		{
-			return _screenPass.ambientMethod.ambient;
+			return _ambientMethod.ambient;
 		}
 
 		public function set ambient(value : Number) : void
 		{
-			_screenPass.ambientMethod.ambient = value;
+			_ambientMethod.ambient = value;
 		}
 
 		/**
@@ -281,12 +299,12 @@
 		 */
 		public function get specular() : Number
 		{
-			return _screenPass.specularMethod? _screenPass.specularMethod.specular : 0;
+			return _specularMethod? _specularMethod.specular : 0;
 		}
 
 		public function set specular(value : Number) : void
 		{
-			if (_screenPass.specularMethod) _screenPass.specularMethod.specular = value;
+			if (_specularMethod) _specularMethod.specular = value;
 		}
 
 		/**
@@ -294,12 +312,12 @@
 		 */
 		public function get ambientColor() : uint
 		{
-			return _screenPass.ambientMethod.ambientColor;
+			return _ambientMethod.ambientColor;
 		}
 
 		public function set ambientColor(value : uint) : void
 		{
-			_screenPass.ambientMethod.ambientColor = value;
+			_ambientMethod.ambientColor = value;
 		}
 
 		/**
@@ -307,26 +325,12 @@
 		 */
 		public function get specularColor() : uint
 		{
-			return _screenPass.specularMethod.specularColor;
+			return _specularMethod.specularColor;
 		}
 
 		public function set specularColor(value : uint) : void
 		{
-			_screenPass.specularMethod.specularColor = value;
-		}
-
-		/**
-		 * Indicate whether or not the material has transparency. If binary transparency is sufficient, for
-		 * example when using textures of foliage, consider using alphaThreshold instead.
-		 */
-		public function get alphaBlending() : Boolean
-		{
-			return _alphaBlending;
-		}
-
-		public function set alphaBlending(value : Boolean) : void
-		{
-			_alphaBlending = value;
+			_specularMethod.specularColor = value;
 		}
 
 		/**
@@ -334,17 +338,81 @@
 		 */
 		arcane override function updateMaterial(context : Context3D) : void
 		{
-			if (_screenPass._passesDirty) {
+			var passesInvalid : Boolean;
+			if (_screenPassesInvalid) {
+				updateScreenPasses();
+				passesInvalid = true;
+			}
+
+			// TODO: other passes
+			if (passesInvalid || (_effectsPass && _effectsPass._passesDirty)) {
 				clearPasses();
-				if (_screenPass._passes) {
-					var len : uint = _screenPass._passes.length;
+				if (_effectsPass._passes) {
+					var len : uint = _effectsPass._passes.length;
 					for (var i : uint = 0; i < len; ++i)
-						addPass(_screenPass._passes[i]);
+						addPass(_effectsPass._passes[i]);
 				}
 
-				addPass(_screenPass);
-				_screenPass._passesDirty = false;
+				addPass(_effectsPass);
+				_effectsPass.numDirectionalLights = 0;
+				_effectsPass.numPointLights = 0;
+				_effectsPass.numLightProbes = 0;
+				_effectsPass._passesDirty = false;
 			}
+		}
+
+		override protected function onLightsChange(event : Event) : void
+		{
+			invalidateScreenPasses();
+		}
+
+		protected function updateScreenPasses() : void
+		{
+			// effects pass will be used to render unshaded diffuse
+			if (numLights == 0 || numMethods > 0)
+				initEffectsPass();
+			else if (_effectsPass && numMethods == 0)
+				removeEffectsPass();
+
+			_screenPassesInvalid = false;
+		}
+
+		private function removeEffectsPass() : void
+		{
+			if (_effectsPass.diffuseMethod != _diffuseMethod)
+				_effectsPass.diffuseMethod.dispose();
+			_effectsPass.dispose();
+			_effectsPass = null;
+		}
+
+		private function initEffectsPass() : SuperShaderPass
+		{
+			_effectsPass ||= new SuperShaderPass(this);
+			if (numLights == 0) {
+				_effectsPass.diffuseMethod = null;
+				_effectsPass.diffuseMethod = _diffuseMethod;
+//				_effectsPass.diffuseMethod = new BasicDiffuseMethod();
+//				_effectsPass.diffuseMethod.texture = _diffuseMethod.texture;
+			}
+			else {
+				_effectsPass.diffuseMethod = null;
+				_effectsPass.diffuseMethod = new BasicDiffuseMethod();
+				_effectsPass.diffuseMethod.diffuseColor = 0x00000000;
+			}
+			_effectsPass.diffuseMethod.alphaThreshold = _alphaThreshold;
+			_effectsPass.normalMethod = _normalMethod;
+
+			return _effectsPass;
+		}
+
+		private function get numLights() : int
+		{
+			return _lightPicker ? _lightPicker.numLightProbes + _lightPicker.numDirectionalLights + _lightPicker.numPointLights : 0;
+		}
+
+		protected function invalidateScreenPasses() : void
+		{
+			_screenPassesInvalid = true;
 		}
 	}
 }

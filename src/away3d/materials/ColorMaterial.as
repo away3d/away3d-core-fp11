@@ -7,7 +7,7 @@ package away3d.materials
 	/**
 	 * ColorMaterial is a material that uses a flat colour as the surfaces diffuse.
 	 */
-	public class ColorMaterial extends DefaultMaterialBase
+	public class ColorMaterial extends SinglePassMaterialBase
 	{
 		private var _diffuseAlpha : Number = 1;
 

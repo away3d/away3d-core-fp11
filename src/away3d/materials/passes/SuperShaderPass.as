@@ -462,9 +462,9 @@ package away3d.materials.passes
 			_passesDirty = true;
 			_passes = new Vector.<MaterialPassBase>();
 			if (_methodSetup._normalMethod.hasOutput) addPasses(_methodSetup._normalMethod.passes);
-			addPasses(_methodSetup._ambientMethod.passes);
+			if (_methodSetup._ambientMethod) (_methodSetup._ambientMethod.passes);
 			if (_methodSetup._shadowMethod) addPasses(_methodSetup._shadowMethod.passes);
-			addPasses(_methodSetup._diffuseMethod.passes);
+			if (_methodSetup._diffuseMethod) addPasses(_methodSetup._diffuseMethod.passes);
 			if (_methodSetup._specularMethod) addPasses(_methodSetup._specularMethod.passes);
 			if (_methodSetup._colorTransformMethod) addPasses(_methodSetup._colorTransformMethod.passes);
 

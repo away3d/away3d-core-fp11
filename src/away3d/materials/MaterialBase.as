@@ -67,7 +67,7 @@ package away3d.materials
 		protected var _depthPass : DepthMapPass;
 		protected var _distancePass : DistanceMapPass;
 
-		private var _lightPicker : LightPickerBase;
+		protected var _lightPicker : LightPickerBase;
 		private var _distanceBasedDepthRender : Boolean;
 
 		/**
@@ -111,7 +111,7 @@ package away3d.materials
 			}
 		}
 
-		private function onLightsChange(event : Event) : void
+		protected function onLightsChange(event : Event) : void
 		{
 			var pass : MaterialPassBase;
 			for (var i : uint = 0; i < _numPasses; ++i) {
