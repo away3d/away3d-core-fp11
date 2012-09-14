@@ -273,20 +273,36 @@ package away3d.materials.compilation
 
 		private function compileUVCode() : void
 		{
-			var uvCompiler : UVCodeCompiler = new UVCodeCompiler(_registerCache, _sharedRegisters);
-			uvCompiler.animateUVs = _animateUVs;
-			uvCompiler.vertexConstantsOffset = _vertexConstantsOffset;
-			_vertexCode += uvCompiler.getVertexCode();
-			_uvBufferIndex = uvCompiler.uvBufferIndex;
-			_uvTransformIndex = uvCompiler.uvTransformIndex;
+			var uvAttributeReg : ShaderRegisterElement = _registerCache.getFreeVertexAttribute();
+			_uvBufferIndex = uvAttributeReg.index;
+
+			var varying : ShaderRegisterElement = _registerCache.getFreeVarying();
+
+			_sharedRegisters.uvVarying = varying;
+
+			if (animateUVs) {
+				// a, b, 0, tx
+				// c, d, 0, ty
+				var uvTransform1 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
+				var uvTransform2 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
+				_uvTransformIndex = (uvTransform1.index - vertexConstantsOffset)*4;
+
+				_vertexCode +=	"dp4 " + varying + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
+						"dp4 " + varying + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
+						"mov " + varying + ".zw, " + uvAttributeReg + ".zw \n";
+			}
+			else {
+				_uvTransformIndex = -1;
+				_vertexCode += "mov " + varying + ", " + uvAttributeReg + "\n";
+			}
 		}
 
 		private function compileSecondaryUVCode() : void
 		{
-			var uvCompiler : UVCodeCompiler = new UVCodeCompiler(_registerCache, _sharedRegisters);
-			uvCompiler.secondaryUVs = true;
-			_vertexCode += uvCompiler.getVertexCode();
-			_secondaryUVBufferIndex = uvCompiler.uvBufferIndex;
+			var uvAttributeReg : ShaderRegisterElement = _registerCache.getFreeVertexAttribute();
+			_secondaryUVBufferIndex = uvAttributeReg.index;
+			_sharedRegisters.secondaryUVVarying = _registerCache.getFreeVarying();
+			_vertexCode += "mov " + _sharedRegisters.secondaryUVVarying + ", " + uvAttributeReg + "\n";
 		}
 
 		private function compileGlobalPositionCode() : void
