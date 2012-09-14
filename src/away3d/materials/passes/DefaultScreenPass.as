@@ -10,9 +10,7 @@ package away3d.materials.passes
 	import away3d.lights.PointLight;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.compilation.MethodDependencyCounter;
 	import away3d.materials.compilation.SuperShaderCompiler;
-	import away3d.materials.compilation.UVCodeCompiler;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
@@ -43,7 +41,6 @@ package away3d.materials.passes
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
 
-		// TODO: Remove compilation from this class, gets messy. Only perform rendering here.
 	public class DefaultScreenPass extends MaterialPassBase
 	{
 		// todo: create something similar for diffuse: useOnlyProbesDiffuse - ignoring normal lights?
@@ -53,8 +50,6 @@ package away3d.materials.passes
 
 		private var _vertexCode : String;
 		private var _fragmentCode : String;
-
-		private var _dependencyCounter : MethodDependencyCounter;
 
 		// registers
 		protected var _uvBufferIndex : int;
@@ -90,6 +85,8 @@ package away3d.materials.passes
 
 		private var _compiler : SuperShaderCompiler;
 		private var _methodSetup : ShaderMethodSetup;
+		private var _usesNormals : Boolean;
+		private var _projectedTargetRegister : String;
 
 
 
@@ -106,7 +103,6 @@ package away3d.materials.passes
 
 		private function init() : void
 		{
-			_dependencyCounter = new MethodDependencyCounter();
 			_methodSetup = new ShaderMethodSetup();
 			_methodSetup.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
@@ -318,11 +314,9 @@ package away3d.materials.passes
 		arcane override function getVertexCode(animatorCode : String) : String
 		{
 			var normal : String = _animationTargetRegisters.length > 1? _animationTargetRegisters[1] : null;
-			var projectedTarget : String = _compiler.sharedRegisters.projectedTarget? _compiler.sharedRegisters.projectedTarget.toString() : null;
+			var projectedTarget : String = _projectedTargetRegister;
 			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0], projectedTarget, normal);
 			_vertexCode = animatorCode + projectionVertexCode + _vertexCode;
-			// finally okay to get rid of compiler
-			_compiler = null;
 			return _vertexCode;
 		}
 
@@ -362,7 +356,7 @@ package away3d.materials.passes
 
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
-			if (_dependencyCounter.normalDependencies > 0 && _methodSetup._normalMethod.hasOutput) _methodSetup._normalMethod.activate(_methodSetup._normalMethodVO, stage3DProxy);
+			if (_usesNormals) _methodSetup._normalMethod.activate(_methodSetup._normalMethodVO, stage3DProxy);
 			_methodSetup._ambientMethod.activate(_methodSetup._ambientMethodVO, stage3DProxy);
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.activate(_methodSetup._shadowMethodVO, stage3DProxy);
 			_methodSetup._diffuseMethod.activate(_methodSetup._diffuseMethodVO, stage3DProxy);
@@ -391,7 +385,7 @@ package away3d.materials.passes
 			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
 			var len : uint = methods.length;
 
-			if (_dependencyCounter.normalDependencies > 0 && _methodSetup._normalMethod.hasOutput) _methodSetup._normalMethod.deactivate(_methodSetup._normalMethodVO, stage3DProxy);
+			if (_usesNormals) _methodSetup._normalMethod.deactivate(_methodSetup._normalMethodVO, stage3DProxy);
 			_methodSetup._ambientMethod.deactivate(_methodSetup._ambientMethodVO, stage3DProxy);
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.deactivate(_methodSetup._shadowMethodVO, stage3DProxy);
 			_methodSetup._diffuseMethod.deactivate(_methodSetup._diffuseMethodVO, stage3DProxy);
@@ -453,7 +447,7 @@ package away3d.materials.passes
 			if (_sceneNormalMatrixIndex >= 0)
 				renderable.inverseSceneTransform.copyRawDataTo(_vertexConstantData, _sceneNormalMatrixIndex, false);
 
-			if (_dependencyCounter.normalDependencies > 0 && _methodSetup._normalMethod.hasOutput)
+			if (_usesNormals)
 				_methodSetup._normalMethod.setRenderState(_methodSetup._normalMethodVO, renderable, stage3DProxy, camera);
 
 			var ambientMethod : BasicAmbientMethod = _methodSetup._ambientMethod;
@@ -525,21 +519,29 @@ package away3d.materials.passes
 			_compiler.methodSetup = _methodSetup;
 			_compiler.diffuseLightSources = _diffuseLightSources;
 			_compiler.specularLightSources = _specularLightSources;
+			_compiler.setTextureSampling(_smooth, _repeat, _mipmap);
+			_compiler.setConstantDataBuffers(_vertexConstantData, _fragmentConstantData);
+			_compiler.animateUVs = _animateUVs;
+			_compiler.alphaPremultiplied = _alphaPremultiplied;
 			_compiler.compile();
-			// keep this straight after compile();
+
+			updateShaderProperties();
+			initConstantData();
+			cleanUp();
+		}
+
+		private function updateShaderProperties() : void
+		{
 			_animatableAttributes = _compiler.animatableAttributes;
 			_animationTargetRegisters = _compiler.animationTargetRegisters;
-
-			compile();
-
 			_vertexCode = _compiler.vertexCode;
 			_fragmentCode = _compiler.fragmentCode;
 			_usingSpecularMethod = _compiler.usingSpecularMethod;
+			_usesNormals = _compiler.usesNormals;
+			_projectedTargetRegister = _compiler.projectedTargetRegister;
 
 			updateRegisterIndices();
 			updateUsedOffsets();
-			initConstantData();
-			cleanUp();
 		}
 
 		private function updateRegisterIndices() : void
@@ -556,6 +558,8 @@ package away3d.materials.passes
 			_sceneMatrixIndex = _compiler.sceneMatrixIndex;
 			_sceneNormalMatrixIndex = _compiler.sceneNormalMatrixIndex;
 			_probeWeightsIndex = _compiler.probeWeightsIndex;
+			_lightProbeDiffuseIndices = _compiler.lightProbeDiffuseIndices;
+			_lightProbeSpecularIndices = _compiler.lightProbeSpecularIndices;
 		}
 
 		private function usesProbesForSpecular() : Boolean
@@ -590,10 +594,10 @@ package away3d.materials.passes
 
 		private function updateUsedOffsets() : void
 		{
-			_numUsedVertexConstants = _compiler.registerCache.numUsedVertexConstants;
-			_numUsedFragmentConstants = _compiler.registerCache.numUsedFragmentConstants;
-			_numUsedStreams = _compiler.registerCache.numUsedStreams;
-			_numUsedTextures = _compiler.registerCache.numUsedTextures;
+			_numUsedVertexConstants = _compiler.numUsedVertexConstants;
+			_numUsedFragmentConstants = _compiler.numUsedFragmentConstants;
+			_numUsedStreams = _compiler.numUsedStreams;
+			_numUsedTextures = _compiler.numUsedTextures;
 		}
 
 		private function initConstantData() : void
@@ -649,87 +653,8 @@ package away3d.materials.passes
 
 		private function cleanUp() : void
 		{
-			nullifyCompilationData();
-			cleanUpMethods();
-		}
-
-		private function nullifyCompilationData() : void
-		{
-			_compiler.sharedRegisters.normalInput = null;
-			_compiler.sharedRegisters.tangentInput = null;
-
-			_compiler.registerCache.dispose();
-		}
-
-		private function cleanUpMethods() : void
-		{
-			if (_methodSetup._normalMethod) _methodSetup._normalMethod.cleanCompilationData();
-			if (_methodSetup._diffuseMethod) _methodSetup._diffuseMethod.cleanCompilationData();
-			if (_methodSetup._ambientMethod) _methodSetup._ambientMethod.cleanCompilationData();
-			if (_methodSetup._specularMethod) _methodSetup._specularMethod.cleanCompilationData();
-			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.cleanCompilationData();
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.cleanCompilationData();
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-			for (var i : uint = 0; i < len; ++i) {
-				methods[i].method.cleanCompilationData();
-			}
-		}
-
-		/**
-		 * Compiles the actual shader code.
-		 */
-		private function compile() : void
-		{
-			calculateDependencies();
-
-			if (_dependencyCounter.projectionDependencies > 0) compileProjCode();
-			if (_dependencyCounter.uvDependencies > 0) compileUVCode();
-			if (_dependencyCounter.secondaryUVDependencies > 0) compileSecondaryUVCode();
-			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
-
-			updateMethodRegisters();
-
-			if (_dependencyCounter.normalDependencies > 0) {
-				// needs to be created before view
-				_compiler.sharedRegisters.animatedNormal = _compiler.registerCache.getFreeVertexVectorTemp();
-				_compiler.registerCache.addVertexTempUsages(_compiler.sharedRegisters.animatedNormal, 1);
-				if (_dependencyCounter.normalDependencies > 0) compileNormalCode();
-			}
-			if (_dependencyCounter.viewDirDependencies > 0) compileViewDirCode();
-
-			_compiler.sharedRegisters.shadedTarget = _compiler.registerCache.getFreeFragmentVectorTemp();
-			_compiler.registerCache.addFragmentTempUsages(_compiler.sharedRegisters.shadedTarget, 1);
-
-			compileLightingCode();
-			compileMethods();
-
-			_compiler._fragmentCode += "mov " + _compiler.registerCache.fragmentOutputRegister + ", " + _compiler.sharedRegisters.shadedTarget + "\n";
-
-			_compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.shadedTarget);
-		}
-
-		private function updateMethodRegisters() : void
-		{
-			_methodSetup._normalMethod.sharedRegisters = _compiler.sharedRegisters;
-			_methodSetup._diffuseMethod.sharedRegisters = _compiler.sharedRegisters;
-			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.sharedRegisters = _compiler.sharedRegisters;
-			_methodSetup._ambientMethod.sharedRegisters = _compiler.sharedRegisters;
-			if (_methodSetup._specularMethod) _methodSetup._specularMethod.sharedRegisters = _compiler.sharedRegisters;
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.sharedRegisters = _compiler.sharedRegisters;
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			for (var i : uint = 0; i < methods.length; ++i)
-				methods[i].method.sharedRegisters = _compiler.sharedRegisters;
-		}
-
-		private function compileProjCode() : void
-		{
-			_compiler.sharedRegisters.projectionFragment = _compiler.registerCache.getFreeVarying();
-			_compiler.sharedRegisters.projectedTarget = _compiler.registerCache.getFreeVertexVectorTemp();
-
-			_compiler._vertexCode += "mov " + _compiler.sharedRegisters.projectionFragment + ", " + _compiler.sharedRegisters.projectedTarget + "\n";
+			_compiler.dispose();
+			_compiler = null;
 		}
 
 		/**
@@ -744,464 +669,6 @@ package away3d.materials.passes
 			for (var i : uint = 0; i < len; ++i) {
 				passes[i].material = material;
 				_passes.push(passes[i]);
-			}
-		}
-
-		/**
-		 * Calculates register dependencies for commonly used data.
-		 */
-		private function calculateDependencies() : void
-		{
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint;
-
-			_dependencyCounter.reset();
-
-			setupAndCountMethodDependencies(_methodSetup._diffuseMethod, _methodSetup._diffuseMethodVO);
-			if (_methodSetup._shadowMethod) setupAndCountMethodDependencies(_methodSetup._shadowMethod, _methodSetup._shadowMethodVO);
-			setupAndCountMethodDependencies(_methodSetup._ambientMethod, _methodSetup._ambientMethodVO);
-			if (_compiler._usingSpecularMethod) setupAndCountMethodDependencies(_methodSetup._specularMethod, _methodSetup._specularMethodVO);
-			if (_methodSetup._colorTransformMethod) setupAndCountMethodDependencies(_methodSetup._colorTransformMethod, _methodSetup._colorTransformMethodVO);
-
-			len = methods.length;
-			for (var i : uint = 0; i < len; ++i)
-				setupAndCountMethodDependencies(methods[i].method, methods[i].data);
-
-			if (_dependencyCounter.normalDependencies > 0 && _methodSetup._normalMethod.hasOutput)
-				setupAndCountMethodDependencies(_methodSetup._normalMethod, _methodSetup._normalMethodVO);
-
-			// todo: add spotlights to count check
-			_dependencyCounter.setPositionedLights(_numPointLights, _compiler._combinedLightSources);
-		}
-
-		private function setupAndCountMethodDependencies(method : ShadingMethodBase, methodVO : MethodVO) : void
-		{
-			setupMethod(method, methodVO);
-			_dependencyCounter.includeMethodVO(methodVO);
-		}
-
-		private function setupMethod(method : ShadingMethodBase, methodVO : MethodVO) : void
-		{
-			method.reset();
-			methodVO.reset();
-			methodVO.vertexData = _vertexConstantData;
-			methodVO.fragmentData = _fragmentConstantData;
-			methodVO.vertexConstantsOffset = _compiler.vertexConstantsOffset;
-			methodVO.useSmoothTextures = _smooth;
-			methodVO.repeatTextures = _repeat;
-			methodVO.useMipmapping = _mipmap;
-			methodVO.numLights = _compiler._numLights + _numLightProbes;
-			method.initVO(methodVO);
-		}
-
-		private function compileGlobalPositionCode() : void
-		{
-			var positionMatrixReg : ShaderRegisterElement;
-			_compiler.sharedRegisters.globalPositionVertex = _compiler.registerCache.getFreeVertexVectorTemp();
-			_compiler.registerCache.addVertexTempUsages(_compiler.sharedRegisters.globalPositionVertex, _dependencyCounter.globalPosDependencies);
-
-			positionMatrixReg = _compiler.registerCache.getFreeVertexConstant();
-			_compiler.registerCache.getFreeVertexConstant();
-			_compiler.registerCache.getFreeVertexConstant();
-			_compiler.registerCache.getFreeVertexConstant();
-			_compiler._sceneMatrixIndex = (positionMatrixReg.index - _compiler.vertexConstantsOffset)*4;
-
-			_compiler._vertexCode += 	"m44 " + _compiler.sharedRegisters.globalPositionVertex + ".xyz, " + _compiler.sharedRegisters.localPosition + ", " + positionMatrixReg + "\n" +
-							"mov " + _compiler.sharedRegisters.globalPositionVertex + ".w, " + _compiler.sharedRegisters.localPosition + ".w     \n";
-
-			if (_dependencyCounter.usesGlobalPosFragment) {
-				_compiler.sharedRegisters.globalPositionVarying = _compiler.registerCache.getFreeVarying();
-				_compiler._vertexCode += "mov " + _compiler.sharedRegisters.globalPositionVarying + ", " + _compiler.sharedRegisters.globalPositionVertex + "\n";
-			}
-		}
-
-		private function compileUVCode() : void
-		{
-			var uvCompiler : UVCodeCompiler = new UVCodeCompiler(_compiler.registerCache, _compiler.sharedRegisters);
-			uvCompiler.animateUVs = _animateUVs;
-			uvCompiler.vertexConstantsOffset = _compiler.vertexConstantsOffset;
-			_compiler._vertexCode += uvCompiler.getVertexCode();
-			_compiler._uvBufferIndex = uvCompiler.uvBufferIndex;
-			_compiler._uvTransformIndex = uvCompiler.uvTransformIndex;
-		}
-
-		private function compileSecondaryUVCode() : void
-		{
-			var uvCompiler : UVCodeCompiler = new UVCodeCompiler(_compiler.registerCache, _compiler.sharedRegisters);
-			uvCompiler.secondaryUVs = true;
-			_compiler._vertexCode += uvCompiler.getVertexCode();
-			_compiler._secondaryUVBufferIndex = uvCompiler.uvBufferIndex;
-		}
-
-		private function compileNormalCode() : void
-		{
-			var normalMatrix : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>(3, true);
-
-			_compiler.sharedRegisters.normalFragment = _compiler.registerCache.getFreeFragmentVectorTemp();
-			_compiler.registerCache.addFragmentTempUsages(_compiler.sharedRegisters.normalFragment, _dependencyCounter.normalDependencies);
-
-			if (_methodSetup._normalMethod.hasOutput && !_methodSetup._normalMethod.tangentSpace) {
-				_compiler._vertexCode += _methodSetup._normalMethod.getVertexCode(_methodSetup._normalMethodVO, _compiler.registerCache);
-				_compiler._fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _compiler.registerCache, _compiler.sharedRegisters.normalFragment);
-				return;
-			}
-
-			_compiler.sharedRegisters.normalInput = _compiler.registerCache.getFreeVertexAttribute();
-			_compiler._normalBufferIndex = _compiler.sharedRegisters.normalInput.index;
-
-			_compiler.sharedRegisters.normalVarying = _compiler.registerCache.getFreeVarying();
-
-			_animatableAttributes.push(_compiler.sharedRegisters.normalInput.toString());
-			_animationTargetRegisters.push(_compiler.sharedRegisters.animatedNormal.toString());
-
-			normalMatrix[0] = _compiler.registerCache.getFreeVertexConstant();
-			normalMatrix[1] = _compiler.registerCache.getFreeVertexConstant();
-			normalMatrix[2] = _compiler.registerCache.getFreeVertexConstant();
-			_compiler.registerCache.getFreeVertexConstant();
-			_compiler._sceneNormalMatrixIndex = (normalMatrix[0].index-_compiler.vertexConstantsOffset)*4;
-
-			if (_methodSetup._normalMethod.hasOutput) {
-				// tangent stream required
-				compileTangentVertexCode(normalMatrix);
-				compileTangentNormalMapFragmentCode();
-			}
-			else {
-				_compiler._vertexCode += "m33 " + _compiler.sharedRegisters.normalVarying + ".xyz, " + _compiler.sharedRegisters.animatedNormal + ".xyz, " + normalMatrix[0] + "\n" +
-						"mov " + _compiler.sharedRegisters.normalVarying + ".w, " + _compiler.sharedRegisters.animatedNormal + ".w	\n";
-
-				_compiler._fragmentCode += "nrm " + _compiler.sharedRegisters.normalFragment + ".xyz, " + _compiler.sharedRegisters.normalVarying + ".xyz	\n" +
-						"mov " + _compiler.sharedRegisters.normalFragment + ".w, " + _compiler.sharedRegisters.normalVarying + ".w		\n";
-
-
-				if (_dependencyCounter.tangentDependencies > 0) {
-					_compiler.sharedRegisters.tangentInput = _compiler.registerCache.getFreeVertexAttribute();
-					_compiler._tangentBufferIndex = _compiler.sharedRegisters.tangentInput.index;
-					_compiler.sharedRegisters.tangentVarying = _compiler.registerCache.getFreeVarying();
-					_compiler._vertexCode += "mov " + _compiler.sharedRegisters.tangentVarying + ", " + _compiler.sharedRegisters.tangentInput + "\n";
-				}
-			}
-
-			_compiler.registerCache.removeVertexTempUsage(_compiler.sharedRegisters.animatedNormal);
-		}
-
-		private function compileTangentVertexCode(matrix : Vector.<ShaderRegisterElement>) : void
-		{
-			var normalTemp : ShaderRegisterElement;
-			var tanTemp : ShaderRegisterElement;
-			var bitanTemp1 : ShaderRegisterElement;
-			var bitanTemp2 : ShaderRegisterElement;
-
-			_compiler.sharedRegisters.tangentVarying = _compiler.registerCache.getFreeVarying();
-			_compiler.sharedRegisters.bitangentVarying = _compiler.registerCache.getFreeVarying();
-
-			_compiler.sharedRegisters.tangentInput = _compiler.registerCache.getFreeVertexAttribute();
-			_compiler._tangentBufferIndex = _compiler.sharedRegisters.tangentInput.index;
-
-			_compiler.sharedRegisters.animatedTangent = _compiler.registerCache.getFreeVertexVectorTemp();
-			_compiler.registerCache.addVertexTempUsages(_compiler.sharedRegisters.animatedTangent, 1);
-			_animatableAttributes.push(_compiler.sharedRegisters.tangentInput.toString());
-			_animationTargetRegisters.push(_compiler.sharedRegisters.animatedTangent.toString());
-
-			normalTemp = _compiler.registerCache.getFreeVertexVectorTemp();
-			_compiler.registerCache.addVertexTempUsages(normalTemp, 1);
-
-			_compiler._vertexCode += 	"m33 " + normalTemp + ".xyz, " + _compiler.sharedRegisters.animatedNormal + ".xyz, " + matrix[0].toString() + "\n" +
-					"nrm " + normalTemp + ".xyz, " + normalTemp + ".xyz	\n";
-
-			tanTemp = _compiler.registerCache.getFreeVertexVectorTemp();
-			_compiler.registerCache.addVertexTempUsages(tanTemp, 1);
-
-			_compiler._vertexCode += 	"m33 " + tanTemp + ".xyz, " + _compiler.sharedRegisters.animatedTangent + ".xyz, " + matrix[0].toString() + "\n" +
-					"nrm " + tanTemp + ".xyz, " + tanTemp + ".xyz	\n";
-
-			bitanTemp1 = _compiler.registerCache.getFreeVertexVectorTemp();
-			_compiler.registerCache.addVertexTempUsages(bitanTemp1, 1);
-			bitanTemp2 = _compiler.registerCache.getFreeVertexVectorTemp();
-
-			_compiler._vertexCode += "mul " + bitanTemp1 + ".xyz, " + normalTemp + ".yzx, " + tanTemp + ".zxy	\n" +
-					"mul " + bitanTemp2 + ".xyz, " + normalTemp + ".zxy, " + tanTemp + ".yzx	\n" +
-					"sub " + bitanTemp2 + ".xyz, " + bitanTemp1 + ".xyz, " + bitanTemp2 + ".xyz	\n" +
-
-					"mov " + _compiler.sharedRegisters.tangentVarying + ".x, " + tanTemp + ".x	\n" +
-					"mov " + _compiler.sharedRegisters.tangentVarying + ".y, " + bitanTemp2 + ".x	\n" +
-					"mov " + _compiler.sharedRegisters.tangentVarying + ".z, " + normalTemp + ".x	\n" +
-					"mov " + _compiler.sharedRegisters.tangentVarying + ".w, " + _compiler.sharedRegisters.normalInput + ".w	\n" +
-					"mov " + _compiler.sharedRegisters.bitangentVarying + ".x, " + tanTemp + ".y	\n" +
-					"mov " + _compiler.sharedRegisters.bitangentVarying + ".y, " + bitanTemp2 + ".y	\n" +
-					"mov " + _compiler.sharedRegisters.bitangentVarying + ".z, " + normalTemp + ".y	\n" +
-					"mov " + _compiler.sharedRegisters.bitangentVarying + ".w, " + _compiler.sharedRegisters.normalInput + ".w	\n" +
-					"mov " + _compiler.sharedRegisters.normalVarying + ".x, " + tanTemp + ".z	\n" +
-					"mov " + _compiler.sharedRegisters.normalVarying + ".y, " + bitanTemp2 + ".z	\n" +
-					"mov " + _compiler.sharedRegisters.normalVarying + ".z, " + normalTemp + ".z	\n" +
-					"mov " + _compiler.sharedRegisters.normalVarying + ".w, " + _compiler.sharedRegisters.normalInput + ".w	\n";
-
-			_compiler.registerCache.removeVertexTempUsage(normalTemp);
-			_compiler.registerCache.removeVertexTempUsage(tanTemp);
-			_compiler.registerCache.removeVertexTempUsage(bitanTemp1);
-			_compiler.registerCache.removeVertexTempUsage(_compiler.sharedRegisters.animatedTangent);
-		}
-
-		private function compileTangentNormalMapFragmentCode() : void
-		{
-			var t : ShaderRegisterElement;
-			var b : ShaderRegisterElement;
-			var n : ShaderRegisterElement;
-
-			t = _compiler.registerCache.getFreeFragmentVectorTemp();
-			_compiler.registerCache.addFragmentTempUsages(t, 1);
-			b = _compiler.registerCache.getFreeFragmentVectorTemp();
-			_compiler.registerCache.addFragmentTempUsages(b, 1);
-			n = _compiler.registerCache.getFreeFragmentVectorTemp();
-			_compiler.registerCache.addFragmentTempUsages(n, 1);
-
-			_compiler._fragmentCode += 	"nrm " + t + ".xyz, " + _compiler.sharedRegisters.tangentVarying + ".xyz	\n" +
-					"mov " + t + ".w, " + _compiler.sharedRegisters.tangentVarying + ".w	\n" +
-					"nrm " + b + ".xyz, " + _compiler.sharedRegisters.bitangentVarying + ".xyz	\n" +
-					"nrm " + n + ".xyz, " + _compiler.sharedRegisters.normalVarying + ".xyz	\n";
-
-			var temp : ShaderRegisterElement = _compiler.registerCache.getFreeFragmentVectorTemp();
-			_compiler.registerCache.addFragmentTempUsages(temp, 1);
-			_compiler._fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _compiler.registerCache, temp) +
-					"sub " + temp + ".xyz, " + temp + ".xyz, " + _compiler.sharedRegisters.commons + ".xxx	\n" +
-					"nrm " + temp + ".xyz, " + temp + ".xyz							\n" +
-					"m33 " + _compiler.sharedRegisters.normalFragment + ".xyz, " + temp + ".xyz, " + t + "	\n" +
-					"mov " + _compiler.sharedRegisters.normalFragment + ".w,   " + _compiler.sharedRegisters.normalVarying + ".w			\n";
-
-			_compiler.registerCache.removeFragmentTempUsage(temp);
-
-			if (_methodSetup._normalMethodVO.needsView) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.viewDirFragment);
-			if (_methodSetup._normalMethodVO.needsGlobalPos) _compiler.registerCache.removeVertexTempUsage(_compiler.sharedRegisters.globalPositionVertex);
-			_compiler.registerCache.removeFragmentTempUsage(b);
-			_compiler.registerCache.removeFragmentTempUsage(t);
-			_compiler.registerCache.removeFragmentTempUsage(n);
-		}
-
-		private function compileViewDirCode() : void
-		{
-			var cameraPositionReg : ShaderRegisterElement = _compiler.registerCache.getFreeVertexConstant();
-			_compiler.sharedRegisters.viewDirVarying = _compiler.registerCache.getFreeVarying();
-			_compiler.sharedRegisters.viewDirFragment = _compiler.registerCache.getFreeFragmentVectorTemp();
-			_compiler.registerCache.addFragmentTempUsages(_compiler.sharedRegisters.viewDirFragment, _dependencyCounter.viewDirDependencies);
-
-			_compiler._cameraPositionIndex = (cameraPositionReg.index-_compiler.vertexConstantsOffset)*4;
-
-			_compiler._vertexCode += "sub " + _compiler.sharedRegisters.viewDirVarying + ", " + cameraPositionReg + ", " + _compiler.sharedRegisters.globalPositionVertex + "\n";
-			_compiler._fragmentCode += 	"nrm " + _compiler.sharedRegisters.viewDirFragment + ".xyz, " + _compiler.sharedRegisters.viewDirVarying + ".xyz		\n" +
-					"mov " + _compiler.sharedRegisters.viewDirFragment + ".w,   " + _compiler.sharedRegisters.viewDirVarying + ".w 		\n";
-
-			_compiler.registerCache.removeVertexTempUsage(_compiler.sharedRegisters.globalPositionVertex);
-		}
-
-		private function compileLightingCode() : void
-		{
-			var shadowReg : ShaderRegisterElement;
-
-			_compiler._vertexCode += _methodSetup._diffuseMethod.getVertexCode(_methodSetup._diffuseMethodVO, _compiler.registerCache);
-			_compiler._fragmentCode += _methodSetup._diffuseMethod.getFragmentPreLightingCode(_methodSetup._diffuseMethodVO, _compiler.registerCache);
-
-			if (_compiler._usingSpecularMethod) {
-				_compiler._vertexCode += _methodSetup._specularMethod.getVertexCode(_methodSetup._specularMethodVO, _compiler.registerCache);
-				_compiler._fragmentCode += _methodSetup._specularMethod.getFragmentPreLightingCode(_methodSetup._specularMethodVO, _compiler.registerCache);
-			}
-
-			if (usesLights()) {
-				initLightRegisters();
-				compileDirectionalLightCode();
-				compilePointLightCode();
-			}
-
-			if (usesProbes())
-				compileLightProbeCode();
-
-			// only need to create and reserve _shadedTargetReg here, no earlier?
-			_compiler._vertexCode += _methodSetup._ambientMethod.getVertexCode(_methodSetup._ambientMethodVO, _compiler.registerCache);
-			_compiler._fragmentCode += _methodSetup._ambientMethod.getFragmentCode(_methodSetup._ambientMethodVO, _compiler.registerCache, _compiler.sharedRegisters.shadedTarget);
-			if (_methodSetup._ambientMethodVO.needsNormals) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.normalFragment);
-			if (_methodSetup._ambientMethodVO.needsView) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.viewDirFragment);
-
-
-			if (_methodSetup._shadowMethod) {
-				_compiler._vertexCode += _methodSetup._shadowMethod.getVertexCode(_methodSetup._shadowMethodVO, _compiler.registerCache);
-				// using normal to contain shadow data if available is perhaps risky :s
-				// todo: improve compilation with lifetime analysis so this isn't necessary?
-				if (_dependencyCounter.normalDependencies == 0) {
-					shadowReg = _compiler.registerCache.getFreeFragmentVectorTemp();
-					_compiler.registerCache.addFragmentTempUsages(shadowReg, 1);
-				}
-				else
-					shadowReg = _compiler.sharedRegisters.normalFragment;
-
-				_methodSetup._diffuseMethod.shadowRegister = shadowReg;
-				_compiler._fragmentCode += _methodSetup._shadowMethod.getFragmentCode(_methodSetup._shadowMethodVO, _compiler.registerCache, shadowReg);
-			}
-			_compiler._fragmentCode += _methodSetup._diffuseMethod.getFragmentPostLightingCode(_methodSetup._diffuseMethodVO, _compiler.registerCache, _compiler.sharedRegisters.shadedTarget);
-
-			if (_alphaPremultiplied) {
-				_compiler._fragmentCode += "add " + _compiler.sharedRegisters.shadedTarget + ".w, " + _compiler.sharedRegisters.shadedTarget + ".w, " + _compiler.sharedRegisters.commons + ".z\n" +
-						"div " + _compiler.sharedRegisters.shadedTarget + ".xyz, " + _compiler.sharedRegisters.shadedTarget + ".xyz, " + _compiler.sharedRegisters.shadedTarget + ".w\n" +
-						"sub " + _compiler.sharedRegisters.shadedTarget + ".w, " + _compiler.sharedRegisters.shadedTarget + ".w, " + _compiler.sharedRegisters.commons + ".z\n" +
-						"sat " + _compiler.sharedRegisters.shadedTarget + ".xyz, " + _compiler.sharedRegisters.shadedTarget + ".xyz\n";
-			}
-
-			// resolve other dependencies as well?
-			if (_methodSetup._diffuseMethodVO.needsNormals) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.normalFragment);
-			if (_methodSetup._diffuseMethodVO.needsView) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.viewDirFragment);
-
-			if (_compiler._usingSpecularMethod) {
-				_methodSetup._specularMethod.shadowRegister = shadowReg;
-				_compiler._fragmentCode += _methodSetup._specularMethod.getFragmentPostLightingCode(_methodSetup._specularMethodVO, _compiler.registerCache, _compiler.sharedRegisters.shadedTarget);
-				if (_methodSetup._specularMethodVO.needsNormals) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.normalFragment);
-				if (_methodSetup._specularMethodVO.needsView) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.viewDirFragment);
-			}
-		}
-
-		private function initLightRegisters() : void
-		{
-			// init these first so we're sure they're in sequence
-			var i : uint, len : uint;
-
-			len = _compiler._dirLightRegisters.length;
-			for (i = 0; i < len; ++i) {
-				_compiler._dirLightRegisters[i] = _compiler.registerCache.getFreeFragmentConstant();
-				if (_compiler._lightDataIndex == -1) _compiler._lightDataIndex = _compiler._dirLightRegisters[i].index*4;
-			}
-
-			len = _compiler._pointLightRegisters.length;
-			for (i = 0; i < len; ++i) {
-				_compiler._pointLightRegisters[i] = _compiler.registerCache.getFreeFragmentConstant();
-				if (_compiler._lightDataIndex == -1) _compiler._lightDataIndex = _compiler._pointLightRegisters[i].index*4;
-			}
-		}
-
-		private function compileDirectionalLightCode() : void
-		{
-			var diffuseColorReg : ShaderRegisterElement;
-			var specularColorReg : ShaderRegisterElement;
-			var lightDirReg : ShaderRegisterElement;
-			var regIndex : int;
-			var addSpec : Boolean = _compiler._usingSpecularMethod && usesLightsForSpecular();
-			var addDiff : Boolean = usesLightsForDiffuse();
-
-			if (!(addSpec || addDiff)) return;
-
-			for (var i : uint = 0; i < _numDirectionalLights; ++i) {
-				lightDirReg = _compiler._dirLightRegisters[regIndex++];
-				diffuseColorReg = _compiler._dirLightRegisters[regIndex++];
-				specularColorReg = _compiler._dirLightRegisters[regIndex++];
-				if (addDiff)
-					_compiler._fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerLight(_methodSetup._diffuseMethodVO, lightDirReg, diffuseColorReg, _compiler.registerCache);
-				if (addSpec)
-					_compiler._fragmentCode += _methodSetup._specularMethod.getFragmentCodePerLight(_methodSetup._specularMethodVO, lightDirReg, specularColorReg, _compiler.registerCache);
-			}
-		}
-
-		private function compilePointLightCode() : void
-		{
-			var diffuseColorReg : ShaderRegisterElement;
-			var specularColorReg : ShaderRegisterElement;
-			var lightPosReg : ShaderRegisterElement;
-			var lightDirReg : ShaderRegisterElement;
-			var regIndex : int;
-			var addSpec : Boolean = _compiler._usingSpecularMethod && usesLightsForSpecular();
-			var addDiff : Boolean = usesLightsForDiffuse();
-
-			if (!(addSpec || addDiff)) return;
-
-			for (var i : uint = 0; i < _numPointLights; ++i) {
-				lightPosReg = _compiler._pointLightRegisters[regIndex++];
-				diffuseColorReg = _compiler._pointLightRegisters[regIndex++];
-				specularColorReg = _compiler._pointLightRegisters[regIndex++];
-				lightDirReg = _compiler.registerCache.getFreeFragmentVectorTemp();
-				_compiler.registerCache.addFragmentTempUsages(lightDirReg, 1);
-
-				// calculate direction
-				_compiler._fragmentCode += "sub " + lightDirReg + ", " + lightPosReg + ", " + _compiler.sharedRegisters.globalPositionVarying + "\n" +
-					// attenuate
-						"dp3 " + lightDirReg + ".w, " + lightDirReg + ".xyz, " + lightDirReg + ".xyz\n" +
-						"sqt " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
-					// w = d - radis
-						"sub " + lightDirReg + ".w, " + lightDirReg + ".w, " + diffuseColorReg + ".w\n" +
-					// w = (d - radius)/(max-min)
-						"mul " + lightDirReg + ".w, " + lightDirReg + ".w, " + specularColorReg + ".w\n" +
-					// w = clamp(w, 0, 1)
-						"sat " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
-					// w = 1-w
-						"sub " + lightDirReg + ".w, " + lightPosReg + ".w, " + lightDirReg + ".w\n" +
-					// normalize
-						"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
-
-				if (_compiler._lightDataIndex == -1) _compiler._lightDataIndex = lightPosReg.index*4;
-
-				if (addDiff)
-					_compiler._fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerLight(_methodSetup._diffuseMethodVO, lightDirReg, diffuseColorReg, _compiler.registerCache);
-
-				if (addSpec)
-					_compiler._fragmentCode += _methodSetup._specularMethod.getFragmentCodePerLight(_methodSetup._specularMethodVO, lightDirReg, specularColorReg, _compiler.registerCache);
-
-				_compiler.registerCache.removeFragmentTempUsage(lightDirReg);
-			}
-		}
-
-		private function compileLightProbeCode() : void
-		{
-			var weightReg : String;
-			var weightComponents : Array = [ ".x", ".y", ".z", ".w" ];
-			var weightRegisters : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>();
-			var i : uint;
-			var texReg : ShaderRegisterElement;
-			var addSpec : Boolean = _compiler._usingSpecularMethod && usesProbesForSpecular();
-			var addDiff : Boolean = usesProbesForDiffuse();
-
-			if (!(addSpec || addDiff)) return;
-
-			if (addDiff)
-				_lightProbeDiffuseIndices = new Vector.<uint>();
-			if (addSpec)
-				_lightProbeSpecularIndices = new Vector.<uint>();
-
-			for (i = 0; i < _compiler._numProbeRegisters; ++i) {
-				weightRegisters[i] = _compiler.registerCache.getFreeFragmentConstant();
-				if (i == 0) _compiler._probeWeightsIndex = weightRegisters[i].index*4;
-			}
-
-			for (i = 0; i < _numLightProbes; ++i) {
-				weightReg = weightRegisters[Math.floor(i/4)].toString() + weightComponents[i % 4];
-
-				if (addDiff) {
-					texReg = _compiler.registerCache.getFreeTextureReg();
-					_lightProbeDiffuseIndices[i] = texReg.index;
-					_compiler._fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerProbe(_methodSetup._diffuseMethodVO, texReg, weightReg, _compiler.registerCache);
-				}
-
-				if (addSpec) {
-					texReg = _compiler.registerCache.getFreeTextureReg();
-					_lightProbeSpecularIndices[i] = texReg.index;
-					_compiler._fragmentCode += _methodSetup._specularMethod.getFragmentCodePerProbe(_methodSetup._specularMethodVO, texReg, weightReg, _compiler.registerCache);
-				}
-			}
-		}
-
-		private function compileMethods() : void
-		{
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var numMethods : uint = methods.length;
-			var method : EffectMethodBase;
-			var data : MethodVO;
-
-			for (var i : uint = 0; i < numMethods; ++i) {
-				method = methods[i].method;
-				data = methods[i].data;
-				_compiler._vertexCode += method.getVertexCode(data, _compiler.registerCache);
-				if (data.needsGlobalPos) _compiler.registerCache.removeVertexTempUsage(_compiler.sharedRegisters.globalPositionVertex);
-
-				_compiler._fragmentCode += method.getFragmentCode(data, _compiler.registerCache, _compiler.sharedRegisters.shadedTarget);
-				if (data.needsNormals) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.normalFragment);
-				if (data.needsView) _compiler.registerCache.removeFragmentTempUsage(_compiler.sharedRegisters.viewDirFragment);
-			}
-
-			if (_methodSetup._colorTransformMethod) {
-				_compiler._vertexCode += _methodSetup._colorTransformMethod.getVertexCode(_methodSetup._colorTransformMethodVO, _compiler.registerCache);
-				_compiler._fragmentCode += _methodSetup._colorTransformMethod.getFragmentCode(_methodSetup._colorTransformMethodVO, _compiler.registerCache, _compiler.sharedRegisters.shadedTarget);
 			}
 		}
 
