@@ -9,7 +9,7 @@
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.passes.DefaultScreenPass;
+	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
@@ -23,7 +23,7 @@
 	 */
 	public class DefaultMaterialBase extends MaterialBase
 	{
-		protected var _screenPass : DefaultScreenPass;
+		protected var _screenPass : SuperShaderPass;
 		private var _alphaBlending : Boolean;
 
 		/**
@@ -32,7 +32,7 @@
 		public function DefaultMaterialBase()
 		{
 			super();
-			addPass(_screenPass = new DefaultScreenPass(this));
+			addPass(_screenPass = new SuperShaderPass(this));
 		}
 
 		/**

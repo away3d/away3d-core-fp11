@@ -18,12 +18,9 @@ package away3d.materials.passes
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.ColorTransformMethod;
 	import away3d.materials.methods.EffectMethodBase;
-	import away3d.materials.methods.MethodVO;
 	import away3d.materials.methods.MethodVOSet;
 	import away3d.materials.methods.ShaderMethodSetup;
-	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
@@ -41,7 +38,7 @@ package away3d.materials.passes
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
 
-	public class DefaultScreenPass extends MaterialPassBase
+	public class SuperShaderPass extends MaterialPassBase
 	{
 		// todo: create something similar for diffuse: useOnlyProbesDiffuse - ignoring normal lights?
 		// or: for both, provide mode: LightSourceMode.LIGHTS = 0x01, LightSourceMode.PROBES = 0x02, LightSourceMode.ALL = 0x03
@@ -86,14 +83,12 @@ package away3d.materials.passes
 		private var _compiler : SuperShaderCompiler;
 		private var _methodSetup : ShaderMethodSetup;
 		private var _usesNormals : Boolean;
-		private var _projectedTargetRegister : String;
-
 
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
 		 */
-		public function DefaultScreenPass(material : MaterialBase)
+		public function SuperShaderPass(material : MaterialBase)
 		{
 			super();
 			_material = material;
@@ -313,29 +308,7 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode(animatorCode : String) : String
 		{
-			var normal : String = _animationTargetRegisters.length > 1? _animationTargetRegisters[1] : null;
-			var projectedTarget : String = _projectedTargetRegister;
-			var projectionVertexCode : String = getProjectionCode(_animationTargetRegisters[0], projectedTarget, normal);
-			_vertexCode = animatorCode + projectionVertexCode + _vertexCode;
-			return _vertexCode;
-		}
-
-		private function getProjectionCode(positionRegister : String, projectionRegister : String, normalRegister : String) : String
-		{
-			var code : String = "";
-			var pos : String = positionRegister;
-
-			// if we need projection somewhere
-			if (projectionRegister) {
-				code += "m44 "+projectionRegister+", " + pos + ", vc0		\n" +
-						"mov vt7, " + projectionRegister + "\n" +
-						"mul op, vt7, vc4\n";
-			}
-			else {
-				code += "m44 vt7, "+pos+", vc0		\n" +
-						"mul op, vt7, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
-			}
-			return code;
+			return animatorCode + _vertexCode;
 		}
 
 		/**
@@ -416,20 +389,20 @@ package away3d.materials.passes
 				uvTransform = renderable.uvTransform;
 				if (uvTransform) {
 					_vertexConstantData[_uvTransformIndex] = uvTransform.a;
-					_vertexConstantData[_uvTransformIndex+1] = uvTransform.b;
-					_vertexConstantData[_uvTransformIndex+3] = uvTransform.tx;
-					_vertexConstantData[_uvTransformIndex+4] = uvTransform.c;
-					_vertexConstantData[_uvTransformIndex+5] = uvTransform.d;
-					_vertexConstantData[_uvTransformIndex+7] = uvTransform.ty;
+					_vertexConstantData[_uvTransformIndex + 1] = uvTransform.b;
+					_vertexConstantData[_uvTransformIndex + 3] = uvTransform.tx;
+					_vertexConstantData[_uvTransformIndex + 4] = uvTransform.c;
+					_vertexConstantData[_uvTransformIndex + 5] = uvTransform.d;
+					_vertexConstantData[_uvTransformIndex + 7] = uvTransform.ty;
 				}
 				else {
 					trace("Warning: animateUVs is set to true with an IRenderable without a uvTransform. Identity matrix assumed.");
 					_vertexConstantData[_uvTransformIndex] = 1;
-					_vertexConstantData[_uvTransformIndex+1] = 0;
-					_vertexConstantData[_uvTransformIndex+3] = 0;
-					_vertexConstantData[_uvTransformIndex+4] = 0;
-					_vertexConstantData[_uvTransformIndex+5] = 1;
-					_vertexConstantData[_uvTransformIndex+7] = 0;
+					_vertexConstantData[_uvTransformIndex + 1] = 0;
+					_vertexConstantData[_uvTransformIndex + 3] = 0;
+					_vertexConstantData[_uvTransformIndex + 4] = 0;
+					_vertexConstantData[_uvTransformIndex + 5] = 1;
+					_vertexConstantData[_uvTransformIndex + 7] = 0;
 				}
 			}
 
@@ -468,7 +441,7 @@ package away3d.materials.passes
 				set.method.setRenderState(set.data, renderable, stage3DProxy, camera);
 			}
 
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexConstantsOffset, _vertexConstantData, _numUsedVertexConstants-_vertexConstantsOffset);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexConstantsOffset, _vertexConstantData, _numUsedVertexConstants - _vertexConstantsOffset);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentConstantData, _numUsedFragmentConstants);
 
 			super.render(renderable, stage3DProxy, camera, lightPicker);
@@ -481,8 +454,12 @@ package away3d.materials.passes
 		arcane override function invalidateShaderProgram(updateMaterial : Boolean = true) : void
 		{
 			super.invalidateShaderProgram(updateMaterial);
-			_passesDirty = true;
+			addPassesFromMethods();
+		}
 
+		private function addPassesFromMethods() : void
+		{
+			_passesDirty = true;
 			_passes = new Vector.<MaterialPassBase>();
 			if (_methodSetup._normalMethod.hasOutput) addPasses(_methodSetup._normalMethod.passes);
 			addPasses(_methodSetup._ambientMethod.passes);
@@ -492,9 +469,8 @@ package away3d.materials.passes
 			if (_methodSetup._colorTransformMethod) addPasses(_methodSetup._colorTransformMethod.passes);
 
 			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			for (var i : uint = 0; i < methods.length; ++i) {
+			for (var i : uint = 0; i < methods.length; ++i)
 				addPasses(methods[i].method.passes);
-			}
 		}
 
 		/**
@@ -538,7 +514,6 @@ package away3d.materials.passes
 			_fragmentCode = _compiler.fragmentCode;
 			_usingSpecularMethod = _compiler.usingSpecularMethod;
 			_usesNormals = _compiler.usesNormals;
-			_projectedTargetRegister = _compiler.projectedTargetRegister;
 
 			updateRegisterIndices();
 			updateUsedOffsets();
@@ -575,16 +550,6 @@ package away3d.materials.passes
 		private function usesProbes() : Boolean
 		{
 			return _numLightProbes > 0 && ((_diffuseLightSources | _specularLightSources) & LightSources.PROBES) != 0;
-		}
-
-		private function usesLightsForSpecular() : Boolean
-		{
-			return _compiler._numLights > 0 && (_specularLightSources & LightSources.LIGHTS) != 0;
-		}
-
-		private function usesLightsForDiffuse() : Boolean
-		{
-			return _compiler._numLights > 0 && (_diffuseLightSources & LightSources.LIGHTS) != 0;
 		}
 
 		private function usesLights() : Boolean
@@ -633,13 +598,13 @@ package away3d.materials.passes
 		private function initUVTransformData() : void
 		{
 			_vertexConstantData[_uvTransformIndex] = 1;
-			_vertexConstantData[_uvTransformIndex+1] = 0;
-			_vertexConstantData[_uvTransformIndex+2] = 0;
-			_vertexConstantData[_uvTransformIndex+3] = 0;
-			_vertexConstantData[_uvTransformIndex+4] = 0;
-			_vertexConstantData[_uvTransformIndex+5] = 1;
-			_vertexConstantData[_uvTransformIndex+6] = 0;
-			_vertexConstantData[_uvTransformIndex+7] = 0;
+			_vertexConstantData[_uvTransformIndex + 1] = 0;
+			_vertexConstantData[_uvTransformIndex + 2] = 0;
+			_vertexConstantData[_uvTransformIndex + 3] = 0;
+			_vertexConstantData[_uvTransformIndex + 4] = 0;
+			_vertexConstantData[_uvTransformIndex + 5] = 1;
+			_vertexConstantData[_uvTransformIndex + 6] = 0;
+			_vertexConstantData[_uvTransformIndex + 7] = 0;
 		}
 
 		// TODO: Probably should let the compiler init this, since only it knows what it's for
@@ -647,7 +612,7 @@ package away3d.materials.passes
 		{
 			_fragmentConstantData[_commonsDataIndex] = .5;
 			_fragmentConstantData[_commonsDataIndex + 1] = 0;
-			_fragmentConstantData[_commonsDataIndex + 2] = 1/255;
+			_fragmentConstantData[_commonsDataIndex + 2] = 1 / 255;
 			_fragmentConstantData[_commonsDataIndex + 3] = 1;
 		}
 

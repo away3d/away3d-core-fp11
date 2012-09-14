@@ -30,10 +30,10 @@ package away3d.materials.compilation
 		private var _lightProbeDiffuseIndices : Vector.<uint>;
 		private var _lightProbeSpecularIndices : Vector.<uint>;
 
-		public var _vertexCode : String;
-		public var _fragmentCode : String;
+		private var _vertexCode : String;
+		private var _fragmentCode : String;
 
-		public var _numLights : int;
+		private var _numLights : int;
 
 		private var _numLightProbes : uint;
 		private var _numPointLights : uint;
@@ -134,9 +134,34 @@ package away3d.materials.compilation
 			updateMethodRegisters();
 
 			compileMethodsCode();
+			compileProjectionCode();
+			compileFragmentOutput();
+		}
 
+		private function compileFragmentOutput() : void
+		{
 			_fragmentCode += "mov " + _registerCache.fragmentOutputRegister + ", " + _sharedRegisters.shadedTarget + "\n";
 			_registerCache.removeFragmentTempUsage(_sharedRegisters.shadedTarget);
+		}
+
+		private function compileProjectionCode() : void
+		{
+			var pos : String = _animationTargetRegisters[0];
+			var projectedTarget : ShaderRegisterElement =  _sharedRegisters.projectedTarget;
+			var code : String;
+
+			// if we need projection somewhere
+			if (projectedTarget) {
+				code =	"m44 " + projectedTarget + ", " + pos + ", vc0		\n" +
+						"mov vt7, " + projectedTarget + "\n" +
+						"mul op, vt7, vc4\n";
+			}
+			else {
+				code = 	"m44 vt7, " + pos + ", vc0		\n" +
+						"mul op, vt7, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
+			}
+
+			_vertexCode = code + _vertexCode;
 		}
 
 		private function compileMethodsCode() : void
@@ -858,11 +883,6 @@ package away3d.materials.compilation
 		public function get lightProbeSpecularIndices() : Vector.<uint>
 		{
 			return _lightProbeSpecularIndices;
-		}
-
-		public function get projectedTargetRegister() : String
-		{
-			return _sharedRegisters.projectedTarget ? _sharedRegisters.projectedTarget.toString() : null;
 		}
 
 		public function get numUsedVertexConstants() : uint
