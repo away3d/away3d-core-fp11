@@ -2,7 +2,6 @@ package a3dparticle.animators
 {
 	import away3d.animators.AnimatorBase;
 	import away3d.animators.IAnimator;
-	import away3d.animators.transitions.StateTransitionBase;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -31,15 +30,6 @@ package a3dparticle.animators
 			_absoluteTime = value;
 		}
 		
-		public function get absoluteTime():Number
-		{
-			return _absoluteTime;
-		}
-
-		public function play(stateName : String, stateTransition:StateTransitionBase = null) :void
-		{
-			throw(new Error("use start instead"));
-		}
 		
 		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
 		{

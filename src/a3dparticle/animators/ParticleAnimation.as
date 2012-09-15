@@ -7,7 +7,7 @@ package a3dparticle.animators
 	import a3dparticle.core.SubContainer;
 	import a3dparticle.particle.ParticleParam;
 	import away3d.animators.IAnimationSet;
-	import away3d.animators.IAnimationState;
+	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -343,23 +343,6 @@ package a3dparticle.animators
 		}
 		
 		
-		public function get states():Vector.<IAnimationState>
-		{
-			return null;
-		}
-		
-		public function hasState(stateName:String):Boolean
-		{
-			return false;
-		}
-		public function getState(stateName:String):IAnimationState
-		{
-			return null;
-		}
-		public function addState(stateName:String, animationState:IAnimationState):void
-		{
-			return ;
-		}
 		public function get usesCPU() : Boolean
 		{
 			return false;
@@ -367,6 +350,19 @@ package a3dparticle.animators
 		public function resetGPUCompatibility() : void
 		{
 			
+		}
+		public function cancelGPUCompatibility() : void
+		{
+			
+		}
+		public function hasAnimation(name:String):Boolean
+		{
+			return false;
+		}
+		
+		public function getAnimation(name:String):AnimationNodeBase
+		{
+			return null;
 		}
 		
 	}
