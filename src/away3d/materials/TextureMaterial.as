@@ -3,6 +3,8 @@
 	import away3d.arcane;
 	import away3d.textures.Texture2DBase;
 
+	import flash.display.BlendMode;
+
 	import flash.geom.ColorTransform;
 
 	use namespace arcane;
@@ -49,6 +51,7 @@
 
 			colorTransform ||= new ColorTransform();
 			colorTransform.alphaMultiplier = value;
+			_screenPass.preserveAlpha = requiresBlending;
 		}
 
 		/**

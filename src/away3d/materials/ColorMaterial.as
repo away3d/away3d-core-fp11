@@ -36,6 +36,7 @@ package away3d.materials
 			if (value > 1) value = 1;
 			else if (value < 0) value = 0;
 			_screenPass.diffuseMethod.diffuseAlpha = _diffuseAlpha = value;
+			_screenPass.preserveAlpha = requiresBlending;
 		}
 
 		/**

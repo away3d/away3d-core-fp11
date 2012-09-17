@@ -54,8 +54,6 @@ package away3d.materials
 		private var _requiresBlending : Boolean;
 
 		private var _blendMode : String = BlendMode.NORMAL;
-		private var _srcBlend : String = Context3DBlendFactor.SOURCE_ALPHA;
-		private var _destBlend : String = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
 
 		protected var _numPasses : uint;
 		protected var _passes : Vector.<MaterialPassBase>;
@@ -69,6 +67,7 @@ package away3d.materials
 
 		protected var _lightPicker : LightPickerBase;
 		private var _distanceBasedDepthRender : Boolean;
+		private var _depthCompareMode : String = Context3DCompareMode.LESS;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -152,12 +151,12 @@ package away3d.materials
 		
 		public function get depthCompareMode() : String
 		{
-			return _passes[_numPasses-1].depthCompareMode;
+			return _depthCompareMode;
 		}
 		
 		public function set depthCompareMode(value : String) : void
 		{
-			_passes[_numPasses-1].depthCompareMode = value;
+			_depthCompareMode = value;
 		}
 
 		/**
@@ -227,8 +226,6 @@ package away3d.materials
 		public function set blendMode(value : String) : void
 		{
 			_blendMode = value;
-
-			updateBlendFactors();
 		}
 		
 		
@@ -333,19 +330,7 @@ package away3d.materials
 		 */
 		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			var pass : MaterialPassBase = _passes[index];
-			var enableDepthWrite : Boolean = true;
-			var context : Context3D = stage3DProxy._context3D;
-
-			if (index == _numPasses-1) {
-				if (requiresBlending) {
-					enableDepthWrite = false;
-					context.setBlendFactors(_srcBlend, _destBlend);
-				}
-			}
-
-			context.setDepthTest(enableDepthWrite, pass.depthCompareMode);
-			pass.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			_passes[index].activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 		}
 
 		/**
@@ -496,7 +481,6 @@ package away3d.materials
 			}
 			_passes.length = 0;
 			_numPasses = 0;
-
 		}
 
 		/**
@@ -515,41 +499,7 @@ package away3d.materials
 			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights : 0;
 			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
-			calculateRenderId();
 			invalidatePasses(null);
-		}
-		
-		private function updateBlendFactors() : void
-		{
-			switch (_blendMode) {
-				case BlendMode.NORMAL:
-				case BlendMode.LAYER:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
-					_requiresBlending = false; // only requires blending if a subtype needs it
-					break;
-				case BlendMode.MULTIPLY:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
-					_requiresBlending = true;
-					break;
-				case BlendMode.ADD:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE;
-					_requiresBlending = true;
-					break;
-				case BlendMode.ALPHA:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_requiresBlending = true;
-					break;
-				default:
-					throw new ArgumentError("Unsupported blend mode!");
-			}
-		}
-		
-		private function calculateRenderId() : void
-		{
 		}
 
 		private function onPassChange(event : Event) : void

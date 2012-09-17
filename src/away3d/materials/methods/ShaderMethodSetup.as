@@ -58,12 +58,18 @@ package away3d.materials.methods
 
 		public function set normalMethod(value : BasicNormalMethod) : void
 		{
-			_normalMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			value.copyFrom(_normalMethod);
+			if (_normalMethod)
+				_normalMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+
+			if (value) {
+				if (_normalMethod) value.copyFrom(_normalMethod);
+				_normalMethodVO = value.createMethodVO();
+				value.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			}
+
 			_normalMethod = value;
-			_normalMethodVO = _normalMethod.createMethodVO();
-			_normalMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			invalidateShaderProgram();
+
+			if (value) invalidateShaderProgram();
 		}
 
 		public function get ambientMethod() : BasicAmbientMethod
@@ -78,13 +84,11 @@ package away3d.materials.methods
 			if (value) {
 				if (_ambientMethod) value.copyFrom(_ambientMethod);
 				value.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-				_ambientMethodVO = _ambientMethod.createMethodVO();
-				invalidateShaderProgram();
-			}
-			else {
-				_ambientMethodVO = null;
+				_ambientMethodVO = value.createMethodVO();
 			}
 			_ambientMethod = value;
+
+			if (value) invalidateShaderProgram();
 		}
 
 		public function get shadowMethod() : ShadowMapMethodBase
@@ -117,18 +121,16 @@ package away3d.materials.methods
 		{
 			if (_diffuseMethod)
 				_diffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+
 			if (value) {
 				if (_diffuseMethod) value.copyFrom(_diffuseMethod);
 				value.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 				_diffuseMethodVO = value.createMethodVO();
-				invalidateShaderProgram();
-			}
-			else {
-				_diffuseMethodVO = null;
-				// should not invalidate, null should only be temporary state to prevent copying
 			}
 
 			_diffuseMethod = value;
+
+			if (value) invalidateShaderProgram();
 		}
 
 		/**

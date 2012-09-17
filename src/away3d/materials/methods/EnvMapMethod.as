@@ -93,6 +93,7 @@ package away3d.materials.methods
 			vo.fragmentConstantsIndex = dataRegister.index*4;
 
 			regCache.addFragmentTempUsages(temp, 1);
+			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
 			// r = I - 2(I.N)*N
 			code += "dp3 " + temp + ".w, " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.normalFragment + ".xyz		\n" +
@@ -100,18 +101,17 @@ package away3d.materials.methods
 					"mul " + temp + ".xyz, " + _sharedRegisters.normalFragment + ".xyz, " + temp + ".w						\n" +
 					"sub " + temp + ".xyz, " + temp + ".xyz, " + _sharedRegisters.viewDirFragment + ".xyz					\n" +
 					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
-					"sub " + temp + ".w, " + temp + ".w, fc0.x									\n" +               	// -.5
-					"kil " + temp + ".w\n" +	// used for real time reflection mapping - if alpha is not 1 (mock texture) kil output
+					"sub " + temp2 + ".w, " + temp + ".w, fc0.x									\n" +               	// -.5
+					"kil " + temp2 + ".w\n" +	// used for real time reflection mapping - if alpha is not 1 (mock texture) kil output
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n";
 
 			if (_mask) {
-				var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 				var maskReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 				code += getTexSampleCode(vo, temp2, maskReg, _sharedRegisters.uvVarying) +
 						"mul " + temp + ", " + temp2 + ", " + dataRegister + ".x\n";
 			}
 			code +=	"mul " + temp + ", " + temp + ", " + dataRegister + ".x										\n" +
-					"add " + targetReg + ".xyz, " + targetReg+".xyz, " + temp + ".xyz							\n";
+					"add " + targetReg + ", " + targetReg+", " + temp + "										\n";
 
 			regCache.removeFragmentTempUsage(temp);
 

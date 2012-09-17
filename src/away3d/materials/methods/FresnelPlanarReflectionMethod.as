@@ -136,10 +136,8 @@ package away3d.materials.methods
 			}
 
 			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d,"+filter+">\n" +
-					"sub " + temp + ".w, " + temp + ".w,  fc0.x\n" +
-					"kil " + temp + ".w\n" +
-					"add " + temp + ".w, " + temp + ".w, fc0.x\n";
-
+					"sub " + viewDirReg + ".w, " + temp + ".w,  fc0.x\n" +
+					"kil " + viewDirReg + ".w\n";
 
 			// calculate fresnel term
 			code += "dp3 " + viewDirReg+".w, " + viewDirReg+".xyz, " + normalReg+".xyz\n" +   // dot(V, H)

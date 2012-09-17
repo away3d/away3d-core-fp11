@@ -40,8 +40,6 @@ package away3d.materials.passes
 
 	public class SuperShaderPass extends MaterialPassBase
 	{
-		// todo: create something similar for diffuse: useOnlyProbesDiffuse - ignoring normal lights?
-		// or: for both, provide mode: LightSourceMode.LIGHTS = 0x01, LightSourceMode.PROBES = 0x02, LightSourceMode.ALL = 0x03
 		private var _specularLightSources : uint = 0x01;
 		private var _diffuseLightSources : uint = 0x03;
 
@@ -62,7 +60,6 @@ package away3d.materials.passes
 		private var _lightProbeDiffuseIndices : Vector.<uint>;
 		private var _lightProbeSpecularIndices : Vector.<uint>;
 
-		// TODO: Commons data should be compiler only
 		private var _commonsDataIndex : int;
 
 		private var _vertexConstantsOffset : uint;
@@ -83,6 +80,7 @@ package away3d.materials.passes
 		private var _compiler : SuperShaderCompiler;
 		private var _methodSetup : ShaderMethodSetup;
 		private var _usesNormals : Boolean;
+		private var _preserveAlpha : Boolean = true;
 
 
 		/**
@@ -100,6 +98,18 @@ package away3d.materials.passes
 		{
 			_methodSetup = new ShaderMethodSetup();
 			_methodSetup.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+		}
+
+		public function get preserveAlpha() : Boolean
+		{
+			return _preserveAlpha;
+		}
+
+		public function set preserveAlpha(value : Boolean) : void
+		{
+			if (_preserveAlpha == value) return;
+			_preserveAlpha = value;
+			invalidateShaderProgram();
 		}
 
 		public function get animateUVs() : Boolean
@@ -169,6 +179,7 @@ package away3d.materials.passes
 		override public function dispose() : void
 		{
 			super.dispose();
+			_methodSetup.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_methodSetup.dispose();
 			_methodSetup = null;
 		}
@@ -461,8 +472,8 @@ package away3d.materials.passes
 		{
 			_passesDirty = true;
 			_passes = new Vector.<MaterialPassBase>();
-			if (_methodSetup._normalMethod.hasOutput) addPasses(_methodSetup._normalMethod.passes);
-			if (_methodSetup._ambientMethod) (_methodSetup._ambientMethod.passes);
+			if (_methodSetup._normalMethod && _methodSetup._normalMethod.hasOutput) addPasses(_methodSetup._normalMethod.passes);
+			if (_methodSetup._ambientMethod) addPasses(_methodSetup._ambientMethod.passes);
 			if (_methodSetup._shadowMethod) addPasses(_methodSetup._shadowMethod.passes);
 			if (_methodSetup._diffuseMethod) addPasses(_methodSetup._diffuseMethod.passes);
 			if (_methodSetup._specularMethod) addPasses(_methodSetup._specularMethod.passes);
@@ -499,6 +510,7 @@ package away3d.materials.passes
 			_compiler.setConstantDataBuffers(_vertexConstantData, _fragmentConstantData);
 			_compiler.animateUVs = _animateUVs;
 			_compiler.alphaPremultiplied = _alphaPremultiplied;
+			_compiler.preserveAlpha = _preserveAlpha;
 			_compiler.compile();
 
 			updateShaderProperties();

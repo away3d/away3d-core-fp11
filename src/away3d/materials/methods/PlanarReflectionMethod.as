@@ -111,6 +111,8 @@ package away3d.materials.methods
 
 			var projectionReg : ShaderRegisterElement = _sharedRegisters.projectionFragment;
 
+			regCache.addFragmentTempUsages(temp, 1);
+
 			code = 	"div " + temp + ", " + projectionReg + ", " + projectionReg + ".w\n" +
 					"mul " + temp + ", " + temp + ", " + dataReg + ".xyww\n" +
 					"add " + temp + ".xy, " + temp + ".xy, fc0.xx\n";
@@ -126,13 +128,15 @@ package away3d.materials.methods
 						"max " + temp + ".x, " + temp + ".x, " + dataReg2 + ".z\n";
 			}
 
+			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentSingleTemp();
 			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d,"+filter+">\n" +
-					"sub " + temp + ".w, " + temp + ".w,  fc0.x\n" +
-					"kil " + temp + ".w\n" +
-					"add " + temp + ".w, " + temp + ".w, fc0.x\n" +
+					"sub " + temp2 + ", " + temp + ".w,  fc0.x\n" +
+					"kil " + temp2 + "\n" +
 					"sub " + temp + ", " + temp + ", " + targetReg + "\n" +
 					"mul " + temp + ", " + temp + ", " + dataReg + ".w\n" +
 					"add " + targetReg + ", " + targetReg + ", " + temp + "\n";
+
+			regCache.removeFragmentTempUsage(temp);
 
 			return code;
 		}

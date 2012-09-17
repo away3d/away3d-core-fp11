@@ -11,8 +11,11 @@ package away3d.materials.passes
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.LightPickerBase;
-	
+
+	import flash.display.BlendMode;
+
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
@@ -51,7 +54,11 @@ package away3d.materials.passes
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = true;
-		protected var _depthCompareMode:String = Context3DCompareMode.LESS;
+		protected var _depthCompareMode : String = Context3DCompareMode.LESS;
+
+		private var _srcBlend : String = Context3DBlendFactor.ONE;
+		private var _destBlend : String = Context3DBlendFactor.ZERO;
+		private var _enableBlending : Boolean;
 
 		private var _bothSides : Boolean;
 
@@ -261,10 +268,48 @@ package away3d.materials.passes
 			throw new AbstractMethodError();
 		}
 
+		public function setBlendMode(value : String, force : Boolean = false) : void
+		{
+			switch (value) {
+				case BlendMode.NORMAL:
+				case BlendMode.LAYER:
+					if (force) {
+						_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
+						_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+					}
+					else {
+						_srcBlend = Context3DBlendFactor.ONE;
+						_destBlend = Context3DBlendFactor.ZERO;
+					}
+					_enableBlending = force; // only requires blending if a subtype needs it
+					break;
+				case BlendMode.MULTIPLY:
+					_srcBlend = Context3DBlendFactor.ZERO;
+					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
+					_enableBlending = true;
+					break;
+				case BlendMode.ADD:
+					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
+					_destBlend = Context3DBlendFactor.ONE;
+					_enableBlending = true;
+					break;
+				case BlendMode.ALPHA:
+					_srcBlend = Context3DBlendFactor.ZERO;
+					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
+					_enableBlending = true;
+					break;
+				default:
+					throw new ArgumentError("Unsupported blend mode!");
+			}
+		}
+
 		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
+
+			context.setDepthTest(!_enableBlending, _depthCompareMode);
+			if (_enableBlending) context.setBlendFactors(_srcBlend, _destBlend);
 
 			if (_context3Ds[contextIndex] != context || !_program3Ds[contextIndex]) {
 				_context3Ds[contextIndex] = context;

@@ -52,14 +52,25 @@
 			_distancePass.alphaThreshold = value;
 		}
 
+
+		override public function set blendMode(value : String) : void
+		{
+			super.blendMode = value;
+			_screenPass.setBlendMode(value, requiresBlending);
+		}
+
+		override public function set depthCompareMode(value : String) : void
+		{
+			super.depthCompareMode = value;
+			_screenPass.depthCompareMode = value;
+		}
+
 		arcane override function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void
 		{
-			if (distanceBased) {
+			if (distanceBased)
 				_distancePass.alphaMask = _screenPass.diffuseMethod.texture;
-			}
-			else {
+			else
 				_depthPass.alphaMask = _screenPass.diffuseMethod.texture;
-			}
 			super.activateForDepth(stage3DProxy, camera, distanceBased, textureRatioX, textureRatioY);
 		}
 
@@ -327,6 +338,7 @@
 		public function set alphaBlending(value : Boolean) : void
 		{
 			_alphaBlending = value;
+			_screenPass.preserveAlpha = requiresBlending;
 		}
 
 		/**
@@ -344,6 +356,8 @@
 
 				addPass(_screenPass);
 				_screenPass._passesDirty = false;
+
+				trace ("_passes: " + _passes);
 			}
 		}
 	}

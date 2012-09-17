@@ -50,11 +50,11 @@ package away3d.materials.compilation
 		private var _smooth : Boolean;
 		private var _repeat : Boolean;
 		private var _mipmap : Boolean;
+		private var _preserveAlpha : Boolean = true;
 		private var _animateUVs : Boolean;
 		private var _alphaPremultiplied : Boolean;
 		private var _vertexConstantData : Vector.<Number>;
 		private var _fragmentConstantData : Vector.<Number>;
-
 
 		use namespace arcane;
 
@@ -91,6 +91,16 @@ package away3d.materials.compilation
 		public function set alphaPremultiplied(value : Boolean) : void
 		{
 			_alphaPremultiplied = value;
+		}
+
+		public function get preserveAlpha() : Boolean
+		{
+			return _preserveAlpha;
+		}
+
+		public function set preserveAlpha(value : Boolean) : void
+		{
+			_preserveAlpha = value;
 		}
 
 		public function setTextureSampling(smooth : Boolean, repeat : Boolean, mipmap : Boolean) : void
@@ -700,6 +710,13 @@ package away3d.materials.compilation
 			var numMethods : uint = methods.length;
 			var method : EffectMethodBase;
 			var data : MethodVO;
+			var alphaReg : ShaderRegisterElement;
+
+			if (_preserveAlpha) {
+				alphaReg = _registerCache.getFreeFragmentSingleTemp();
+				_registerCache.addFragmentTempUsages(alphaReg, 1);
+				_fragmentCode += "mov " + alphaReg + ", " + _sharedRegisters.shadedTarget + ".w\n";
+			}
 
 			for (var i : uint = 0; i < numMethods; ++i) {
 				method = methods[i].method;
@@ -710,6 +727,11 @@ package away3d.materials.compilation
 				_fragmentCode += method.getFragmentCode(data, _registerCache, _sharedRegisters.shadedTarget);
 				if (data.needsNormals) _registerCache.removeFragmentTempUsage(_sharedRegisters.normalFragment);
 				if (data.needsView) _registerCache.removeFragmentTempUsage(_sharedRegisters.viewDirFragment);
+			}
+
+			if (_preserveAlpha) {
+				_fragmentCode += "mov " + _sharedRegisters.shadedTarget + ".w, " + alphaReg + "\n";
+				_registerCache.removeFragmentTempUsage(alphaReg);
 			}
 
 			if (_methodSetup._colorTransformMethod) {
