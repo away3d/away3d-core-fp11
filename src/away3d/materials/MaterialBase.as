@@ -252,7 +252,7 @@ package away3d.materials
 		 */
 		public function get requiresBlending() : Boolean
 		{
-			return _requiresBlending;
+			return _blendMode != BlendMode.NORMAL;
 		}
 
 		/**
