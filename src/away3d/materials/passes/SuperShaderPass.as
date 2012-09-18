@@ -81,6 +81,7 @@ package away3d.materials.passes
 		private var _methodSetup : ShaderMethodSetup;
 		private var _usesNormals : Boolean;
 		private var _preserveAlpha : Boolean = true;
+		private var _includeCasters : Boolean = true;
 
 
 		/**
@@ -98,6 +99,18 @@ package away3d.materials.passes
 		{
 			_methodSetup = new ShaderMethodSetup();
 			_methodSetup.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+		}
+
+		public function get includeCasters() : Boolean
+		{
+			return _includeCasters;
+		}
+
+		public function set includeCasters(value : Boolean) : void
+		{
+			if (_includeCasters == value) return;
+			_includeCasters = value;
+			invalidateShaderProgram();
 		}
 
 		public function get preserveAlpha() : Boolean
@@ -420,7 +433,7 @@ package away3d.materials.passes
 			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
 			if (usesLights())
-				updateLights(lightPicker.directionalLights, lightPicker.pointLights);
+				updateLights(lightPicker);
 
 			if (usesProbes())
 				updateProbes(lightPicker.lightProbes, lightPicker.lightProbeWeights, stage3DProxy);
@@ -655,7 +668,7 @@ package away3d.materials.passes
 		 * @param numLights The amount of lights available.
 		 * @param maxLights The maximum amount of lights supported.
 		 */
-		private function updateLights(directionalLights : Vector.<DirectionalLight>, pointLights : Vector.<PointLight>) : void
+		private function updateLights(lightPicker : LightPickerBase) : void
 		{
 			// first dirs, then points
 			var dirLight : DirectionalLight;
@@ -663,68 +676,80 @@ package away3d.materials.passes
 			var i : uint, k : uint;
 			var len : int;
 			var dirPos : Vector3D;
+			var total : uint = 0;
+			var numLightTypes : uint = _includeCasters? 2 : 1;
 
-			len = directionalLights.length;
 			k = _lightDataIndex;
-			for (i = 0; i < len; ++i) {
-				dirLight = directionalLights[i];
-				dirPos = dirLight.sceneDirection;
 
-				_ambientLightR += dirLight._ambientR;
-				_ambientLightG += dirLight._ambientG;
-				_ambientLightB += dirLight._ambientB;
+			for (var cast : int = 0; cast < numLightTypes; ++cast) {
+				var dirLights : Vector.<DirectionalLight> = cast? lightPicker.castingDirectionalLights : lightPicker.directionalLights;
+				len = dirLights.length;
+				total += len;
 
-				_fragmentConstantData[k++] = -dirPos.x;
-				_fragmentConstantData[k++] = -dirPos.y;
-				_fragmentConstantData[k++] = -dirPos.z;
-				_fragmentConstantData[k++] = 1;
+				for (i = 0; i < len; ++i) {
+					dirLight = dirLights[i];
+					dirPos = dirLight.sceneDirection;
 
-				_fragmentConstantData[k++] = dirLight._diffuseR;
-				_fragmentConstantData[k++] = dirLight._diffuseG;
-				_fragmentConstantData[k++] = dirLight._diffuseB;
-				_fragmentConstantData[k++] = 1;
+					_ambientLightR += dirLight._ambientR;
+					_ambientLightG += dirLight._ambientG;
+					_ambientLightB += dirLight._ambientB;
 
-				_fragmentConstantData[k++] = dirLight._specularR;
-				_fragmentConstantData[k++] = dirLight._specularG;
-				_fragmentConstantData[k++] = dirLight._specularB;
-				_fragmentConstantData[k++] = 1;
+					_fragmentConstantData[k++] = -dirPos.x;
+					_fragmentConstantData[k++] = -dirPos.y;
+					_fragmentConstantData[k++] = -dirPos.z;
+					_fragmentConstantData[k++] = 1;
+
+					_fragmentConstantData[k++] = dirLight._diffuseR;
+					_fragmentConstantData[k++] = dirLight._diffuseG;
+					_fragmentConstantData[k++] = dirLight._diffuseB;
+					_fragmentConstantData[k++] = 1;
+
+					_fragmentConstantData[k++] = dirLight._specularR;
+					_fragmentConstantData[k++] = dirLight._specularG;
+					_fragmentConstantData[k++] = dirLight._specularB;
+					_fragmentConstantData[k++] = 1;
+				}
 			}
 
 			// more directional supported than currently picked, need to clamp all to 0
-			if (_numDirectionalLights > len) {
-				i = k + (_numDirectionalLights - len) * 12;
+			if (_numDirectionalLights > total) {
+				i = k + (_numDirectionalLights - total) * 12;
 				while (k < i)
 					_fragmentConstantData[k++] = 0;
 			}
 
-			len = pointLights.length;
-			for (i = 0; i < len; ++i) {
-				pointLight = pointLights[i];
-				dirPos = pointLight.scenePosition;
+			total = 0;
+			for (var cast : int = 0; cast < numLightTypes; ++cast) {
+				var pointLights : Vector.<PointLight> = cast? lightPicker.castingPointLights : lightPicker.pointLights;
+				len = pointLights.length;
+				for (i = 0; i < len; ++i) {
+					pointLight = pointLights[i];
+					dirPos = pointLight.scenePosition;
 
-				_ambientLightR += pointLight._ambientR;
-				_ambientLightG += pointLight._ambientG;
-				_ambientLightB += pointLight._ambientB;
+					_ambientLightR += pointLight._ambientR;
+					_ambientLightG += pointLight._ambientG;
+					_ambientLightB += pointLight._ambientB;
 
-				_fragmentConstantData[k++] = dirPos.x;
-				_fragmentConstantData[k++] = dirPos.y;
-				_fragmentConstantData[k++] = dirPos.z;
-				_fragmentConstantData[k++] = 1;
+					_fragmentConstantData[k++] = dirPos.x;
+					_fragmentConstantData[k++] = dirPos.y;
+					_fragmentConstantData[k++] = dirPos.z;
+					_fragmentConstantData[k++] = 1;
 
-				_fragmentConstantData[k++] = pointLight._diffuseR;
-				_fragmentConstantData[k++] = pointLight._diffuseG;
-				_fragmentConstantData[k++] = pointLight._diffuseB;
-				_fragmentConstantData[k++] = pointLight._radius;
+					_fragmentConstantData[k++] = pointLight._diffuseR;
+					_fragmentConstantData[k++] = pointLight._diffuseG;
+					_fragmentConstantData[k++] = pointLight._diffuseB;
+					_fragmentConstantData[k++] = pointLight._radius;
 
-				_fragmentConstantData[k++] = pointLight._specularR;
-				_fragmentConstantData[k++] = pointLight._specularG;
-				_fragmentConstantData[k++] = pointLight._specularB;
-				_fragmentConstantData[k++] = pointLight._fallOffFactor;
+					_fragmentConstantData[k++] = pointLight._specularR;
+					_fragmentConstantData[k++] = pointLight._specularG;
+					_fragmentConstantData[k++] = pointLight._specularB;
+					_fragmentConstantData[k++] = pointLight._fallOffFactor;
+				}
 			}
 
 			// more directional supported than currently picked, need to clamp all to 0
-			if (_numPointLights > len) {
-				i = k + (len - _numPointLights) * 12;
+			if (_numPointLights > total) {
+				i = k + (total - _numPointLights) * 12;
 				for (; k < i; ++k)
 					_fragmentConstantData[k] = 0;
 			}

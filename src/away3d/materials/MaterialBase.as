@@ -115,8 +115,8 @@ package away3d.materials
 			var pass : MaterialPassBase;
 			for (var i : uint = 0; i < _numPasses; ++i) {
 				pass = _passes[i];
-				pass.numPointLights = _lightPicker.numPointLights;
-				pass.numDirectionalLights = _lightPicker.numDirectionalLights;
+				pass.numPointLights = _lightPicker.numPointLights + _lightPicker.numCastingPointLights;
+				pass.numDirectionalLights = _lightPicker.numDirectionalLights + _lightPicker.numCastingDirectionalLights;
 				pass.numLightProbes = _lightPicker.numLightProbes;
 			}
 		}
@@ -495,8 +495,8 @@ package away3d.materials
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
-			pass.numPointLights = _lightPicker? _lightPicker.numPointLights : 0;
-			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights : 0;
+			pass.numPointLights = _lightPicker? _lightPicker.numPointLights + _lightPicker.numCastingPointLights : 0;
+			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights + _lightPicker.numCastingDirectionalLights : 0;
 			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			invalidatePasses(null);

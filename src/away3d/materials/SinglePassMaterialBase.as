@@ -338,6 +338,7 @@
 		public function set alphaBlending(value : Boolean) : void
 		{
 			_alphaBlending = value;
+			_screenPass.setBlendMode(blendMode, requiresBlending);
 			_screenPass.preserveAlpha = requiresBlending;
 		}
 
@@ -355,9 +356,7 @@
 				}
 
 				addPass(_screenPass);
-				_screenPass._passesDirty = false;
-
-				trace ("_passes: " + _passes);
+				_screenPass._passesDirty = false
 			}
 		}
 	}

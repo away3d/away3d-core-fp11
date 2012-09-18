@@ -6,6 +6,7 @@ package away3d.lights
 	import away3d.core.partition.LightNode;
 	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
+	import away3d.events.LightEvent;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 
 	import flash.geom.Matrix3D;
@@ -70,6 +71,8 @@ package away3d.lights
 				_shadowMapper.dispose();
 				_shadowMapper = null;
 			}
+
+			dispatchEvent(new LightEvent(LightEvent.CASTS_SHADOW_CHANGE));
 		}
 
 		protected function createShadowMapper() : ShadowMapperBase

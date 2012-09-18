@@ -366,21 +366,12 @@
 				passesInvalid = true;
 			}
 
-			// TODO: other passes
 			if (	passesInvalid ||
 					(_nonCasterLightPass && _nonCasterLightPass._passesDirty) ||
 					(_effectsPass && _effectsPass._passesDirty)
 				)
 			{
 				clearPasses();
-				if (_nonCasterLightPass)
-					_nonCasterLightPass._passesDirty = false;
-				if (_effectsPass) {
-					_effectsPass.numDirectionalLights = 0;
-					_effectsPass.numPointLights = 0;
-					_effectsPass.numLightProbes = 0;
-					_effectsPass._passesDirty = false;
-				}
 
 				addChildPassesFor(_nonCasterLightPass);
 				addChildPassesFor(_effectsPass);
@@ -388,6 +379,21 @@
 				// ensure screenpasses are last
 				if (_nonCasterLightPass) addPass(_nonCasterLightPass);
 				if (_effectsPass) addPass(_effectsPass);
+
+				if (_nonCasterLightPass) {
+					_nonCasterLightPass._passesDirty = false;
+					if (!_shadowMethod) {
+						_nonCasterLightPass.numDirectionalLights = _lightPicker.numDirectionalLights;
+						_nonCasterLightPass.numPointLights = _lightPicker.numPointLights;
+						_nonCasterLightPass.numLightProbes = _lightPicker.numLightProbes;
+					}
+				}
+				if (_effectsPass) {
+					_effectsPass.numDirectionalLights = 0;
+					_effectsPass.numPointLights = 0;
+					_effectsPass.numLightProbes = 0;
+					_effectsPass._passesDirty = false;
+				}
 			}
 		}
 
@@ -453,6 +459,7 @@
 		private function initNonCasterLightPass() : void
 		{
 			_nonCasterLightPass ||= new SuperShaderPass(this);
+			_nonCasterLightPass.includeCasters = _shadowMethod != null;
 			_nonCasterLightPass.diffuseMethod = null;
 			_nonCasterLightPass.ambientMethod = null;
 			_nonCasterLightPass.normalMethod = null;
@@ -502,7 +509,8 @@
 
 		private function get numLights() : int
 		{
-			return _lightPicker ? _lightPicker.numLightProbes + _lightPicker.numDirectionalLights + _lightPicker.numPointLights : 0;
+			return _lightPicker ? 	_lightPicker.numLightProbes + _lightPicker.numDirectionalLights + _lightPicker.numPointLights +
+									_lightPicker.numCastingDirectionalLights + _lightPicker.numCastingPointLights : 0;
 		}
 
 		private function get numNonCasters() : int
@@ -514,5 +522,7 @@
 		{
 			_screenPassesInvalid = true;
 		}
+
+
 	}
 }
