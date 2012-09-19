@@ -215,11 +215,11 @@ package away3d.materials.methods
 
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, stage3DProxy);
-			var projections : Vector.<Matrix3D> = _depthPass.getProjections(renderable);
+			var depthMap : Texture = _depthPass.getDepthMap(renderable, stage3DProxy);
+			var projection : Matrix3D = _depthPass.getProjection(renderable);
 
-			stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, depthMaps[0]);
-			projections[0].copyRawDataTo(vo.vertexData, vo.secondaryVertexConstantsIndex+4, true);
+			stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, depthMap);
+			projection.copyRawDataTo(vo.vertexData, vo.secondaryVertexConstantsIndex+4, true);
 		}
 
 		/**

@@ -69,19 +69,6 @@ package away3d.materials.passes
 			}
 		}
 
-
-		arcane override function set numPointLights(value : uint) : void
-		{
-			super.numPointLights = value;
-			_projectionTexturesInvalid = true;
-		}
-
-		arcane override function set numDirectionalLights(value : uint) : void
-		{
-			super.numDirectionalLights = value;
-			_projectionTexturesInvalid = true;
-		}
-
 		private function updateProjectionTextures() : void
 		{
 			if (_textures) {
@@ -141,7 +128,7 @@ package away3d.materials.passes
 		 * @param renderable The renderable for which to retrieve the depth maps
 		 * @return A list of depth map textures for all supported lights.
 		 */
-		arcane function getDepthMaps(renderable : IRenderable, stage3DProxy : Stage3DProxy) : Vector.<Texture>
+		arcane function getDepthMap(renderable : IRenderable, stage3DProxy : Stage3DProxy) : Texture
 		{
 			return _textures[stage3DProxy._stage3DIndex][renderable];
 		}
@@ -151,7 +138,7 @@ package away3d.materials.passes
 		 * @param renderable The renderable for which to retrieve the projection maps.
 		 * @return A list of projection maps for all supported lights.
 		 */
-		arcane function getProjections(renderable : IRenderable) : Vector.<Matrix3D>
+		arcane function getProjection(renderable : IRenderable) : Matrix3D
 		{
 			return _projections[renderable];
 		}
@@ -166,41 +153,31 @@ package away3d.materials.passes
 			var matrix : Matrix3D;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
-			var j : uint, i : uint, len : uint;
+			var len : uint;
 			var light : LightBase;
-			var vec : Vector.<Matrix3D>;
 			var lights : Vector.<LightBase> = lightPicker.allPickedLights;
 
 			_textures[contextIndex] ||= new Dictionary();
-			_textures[contextIndex][renderable] ||= new Vector.<Texture>(_numPointLights+_numDirectionalLights);
 
-			if (!_projections[renderable]) {
-				vec = _projections[renderable] = new Vector.<Matrix3D>();
-				for (i = 0; i < _numDirectionalLights; ++i)
-					vec[j++] = new Matrix3D();
-				for (i = 0; i < _numPointLights; ++i)
-					vec[j++] = new Matrix3D();
-			}
+			if (!_projections[renderable])
+				_projections[renderable] = new Matrix3D();
 
 			len = lights.length;
-			for (i = 0; i < len; ++i) {
-				// local position = enough
-				light = lights[i];
+			// local position = enough
+			light = lights[0];
 
-				matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable][i]);
+			matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable]);
 
-				// todo: use texture proxy?
-				_textures[contextIndex][renderable][i] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);
-				j = 0;
+			// todo: use texture proxy?
+			var target : Texture = _textures[contextIndex][renderable] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);
 
-				stage3DProxy.setRenderTarget(_textures[contextIndex][renderable][i], true);
-				context.clear(1.0, 1.0, 1.0);
-				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
-				stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
-				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
-			}
+			stage3DProxy.setRenderTarget(target, true);
+			context.clear(1.0, 1.0, 1.0);
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
+			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
+			stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		/**

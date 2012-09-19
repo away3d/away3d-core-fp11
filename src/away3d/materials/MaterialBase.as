@@ -476,9 +476,9 @@ package away3d.materials
 		 */
 		protected function clearPasses() : void
 		{
-			for (var i : int = 0; i < _numPasses; ++i) {
+			for (var i : int = 0; i < _numPasses; ++i)
 				_passes[i].removeEventListener(Event.CHANGE, onPassChange);
-			}
+
 			_passes.length = 0;
 			_numPasses = 0;
 		}
