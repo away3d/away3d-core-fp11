@@ -310,6 +310,7 @@ package away3d.materials.passes
 
 			for (var i : uint = 0; i < len; ++i) {
 				passes[i].material = material;
+				passes[i].lightPicker = _lightPicker;
 				_passes.push(passes[i]);
 			}
 		}
@@ -494,6 +495,12 @@ package away3d.materials.passes
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.deactivate(_methodSetup._shadowMethodVO, stage3DProxy);
 			_methodSetup._diffuseMethod.deactivate(_methodSetup._diffuseMethodVO, stage3DProxy);
 			if (_usingSpecularMethod) _methodSetup._specularMethod.deactivate(_methodSetup._specularMethodVO, stage3DProxy);
+		}
+
+		override protected function updateLights() : void
+		{
+			for (var i : int = 0; i < _passes.length; ++i)
+				_passes[i].lightPicker = _lightPicker;
 		}
 	}
 }

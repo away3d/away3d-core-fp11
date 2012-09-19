@@ -139,6 +139,7 @@ package away3d.materials.passes
 
 		override protected function updateLights() : void
 		{
+			super.updateLights();
 			_numPointLights = _lightPicker.numPointLights;
 			_numDirectionalLights = _lightPicker.numDirectionalLights;
 			_numLightProbes = _lightPicker.numLightProbes;
@@ -147,9 +148,6 @@ package away3d.materials.passes
 				_numPointLights += _lightPicker.numCastingPointLights;
 				_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
 			}
-
-			for (var i : int = 0; i < _passes.length; ++i)
-				_passes[i].lightPicker = _lightPicker;
 
 			invalidateShaderProgram();
 		}
