@@ -49,16 +49,7 @@ package away3d.materials.passes
 		 */
 		public function SuperShaderPass(material : MaterialBase)
 		{
-			super();
-			_material = material;
-
-			init();
-		}
-
-		private function init() : void
-		{
-			_methodSetup = new ShaderMethodSetup();
-			_methodSetup.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			super(material);
 		}
 
 		public function get includeCasters() : Boolean
@@ -71,38 +62,6 @@ package away3d.materials.passes
 			if (_includeCasters == value) return;
 			_includeCasters = value;
 			invalidateShaderProgram();
-		}
-
-		public function get preserveAlpha() : Boolean
-		{
-			return _preserveAlpha;
-		}
-
-		public function set preserveAlpha(value : Boolean) : void
-		{
-			if (_preserveAlpha == value) return;
-			_preserveAlpha = value;
-			invalidateShaderProgram();
-		}
-
-		public function get animateUVs() : Boolean
-		{
-			return _animateUVs;
-		}
-
-		public function set animateUVs(value : Boolean) : void
-		{
-			_animateUVs = value;
-			if ((value && !_animateUVs) || (!value && _animateUVs)) invalidateShaderProgram();
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function set mipmap(value : Boolean) : void
-		{
-			if (_mipmap == value) return;
-			super.mipmap = value;
 		}
 
 		public function get specularLightSources() : uint
@@ -144,80 +103,6 @@ package away3d.materials.passes
 					colorTransformMethod = null;
 				colorTransformMethod = _methodSetup._colorTransformMethod = null;
 			}
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function dispose() : void
-		{
-			super.dispose();
-			_methodSetup.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_methodSetup.dispose();
-			_methodSetup = null;
-		}
-
-		/**
-		 * The tangent space normal map to influence the direction of the surface for each texel.
-		 */
-		public function get normalMap() : Texture2DBase
-		{
-			return _methodSetup._normalMethod.normalMap;
-		}
-
-		public function set normalMap(value : Texture2DBase) : void
-		{
-			_methodSetup._normalMethod.normalMap = value;
-		}
-
-		public function get normalMethod() : BasicNormalMethod
-		{
-			return _methodSetup.normalMethod;
-		}
-
-		public function set normalMethod(value : BasicNormalMethod) : void
-		{
-			_methodSetup.normalMethod = value;
-		}
-
-		public function get ambientMethod() : BasicAmbientMethod
-		{
-			return _methodSetup.ambientMethod;
-		}
-
-		public function set ambientMethod(value : BasicAmbientMethod) : void
-		{
-			_methodSetup.ambientMethod = value;
-		}
-
-		public function get shadowMethod() : ShadowMapMethodBase
-		{
-			return _methodSetup.shadowMethod;
-		}
-
-		public function set shadowMethod(value : ShadowMapMethodBase) : void
-		{
-			_methodSetup.shadowMethod = value;
-		}
-
-		public function get diffuseMethod() : BasicDiffuseMethod
-		{
-			return _methodSetup.diffuseMethod;
-		}
-
-		public function set diffuseMethod(value : BasicDiffuseMethod) : void
-		{
-			_methodSetup.diffuseMethod = value;
-		}
-
-		public function get specularMethod() : BasicSpecularMethod
-		{
-			return _methodSetup.specularMethod;
-		}
-
-		public function set specularMethod(value : BasicSpecularMethod) : void
-		{
-			_methodSetup.specularMethod = value;
 		}
 
 		public function get colorTransformMethod() : ColorTransformMethod
@@ -289,36 +174,14 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(animatorCode : String) : String
-		{
-			return animatorCode + _vertexCode;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function getFragmentCode() : String
-		{
-			return _fragmentCode;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
-			if (_usesNormals) _methodSetup._normalMethod.activate(_methodSetup._normalMethodVO, stage3DProxy);
-			_methodSetup._ambientMethod.activate(_methodSetup._ambientMethodVO, stage3DProxy);
-			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.activate(_methodSetup._shadowMethodVO, stage3DProxy);
-			_methodSetup._diffuseMethod.activate(_methodSetup._diffuseMethodVO, stage3DProxy);
-			if (_usingSpecularMethod) _methodSetup._specularMethod.activate(_methodSetup._specularMethodVO, stage3DProxy);
 			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.activate(_methodSetup._colorTransformMethodVO, stage3DProxy);
 
+			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
+			var len : uint = methods.length;
 			for (var i : int = 0; i < len; ++i) {
 				var set : MethodVOSet = methods[i];
 				set.method.activate(set.data, stage3DProxy);
@@ -338,17 +201,12 @@ package away3d.materials.passes
 		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
 			super.deactivate(stage3DProxy);
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
 
-			if (_usesNormals) _methodSetup._normalMethod.deactivate(_methodSetup._normalMethodVO, stage3DProxy);
-			_methodSetup._ambientMethod.deactivate(_methodSetup._ambientMethodVO, stage3DProxy);
-			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.deactivate(_methodSetup._shadowMethodVO, stage3DProxy);
-			_methodSetup._diffuseMethod.deactivate(_methodSetup._diffuseMethodVO, stage3DProxy);
-			if (_usingSpecularMethod) _methodSetup._specularMethod.deactivate(_methodSetup._specularMethodVO, stage3DProxy);
 			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.deactivate(_methodSetup._colorTransformMethodVO, stage3DProxy);
 
 			var set : MethodVOSet;
+			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
+			var len : uint = methods.length;
 			for (var i : uint = 0; i < len; ++i) {
 				set = methods[i];
 				set.method.deactivate(set.data, stage3DProxy);
@@ -434,6 +292,7 @@ package away3d.materials.passes
 		override protected function addPassesFromMethods() : void
 		{
 			super.addPassesFromMethods();
+			if (_methodSetup._colorTransformMethod) addPasses(_methodSetup._colorTransformMethod.passes);
 
 			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
 			for (var i : uint = 0; i < methods.length; ++i)
@@ -547,13 +406,9 @@ package away3d.materials.passes
 			updateMethodConstants();
 		}
 
-		private function updateMethodConstants() : void
+		override protected function updateMethodConstants() : void
 		{
-			if (_methodSetup._normalMethod) _methodSetup._normalMethod.initConstants(_methodSetup._normalMethodVO);
-			if (_methodSetup._diffuseMethod) _methodSetup._diffuseMethod.initConstants(_methodSetup._diffuseMethodVO);
-			if (_methodSetup._ambientMethod) _methodSetup._ambientMethod.initConstants(_methodSetup._ambientMethodVO);
-			if (_usingSpecularMethod) _methodSetup._specularMethod.initConstants(_methodSetup._specularMethodVO);
-			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.initConstants(_methodSetup._shadowMethodVO);
+			super.updateMethodConstants();
 			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.initConstants(_methodSetup._colorTransformMethodVO);
 
 			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
@@ -563,40 +418,13 @@ package away3d.materials.passes
 			}
 		}
 
-		private function initUVTransformData() : void
-		{
-			_vertexConstantData[_uvTransformIndex] = 1;
-			_vertexConstantData[_uvTransformIndex + 1] = 0;
-			_vertexConstantData[_uvTransformIndex + 2] = 0;
-			_vertexConstantData[_uvTransformIndex + 3] = 0;
-			_vertexConstantData[_uvTransformIndex + 4] = 0;
-			_vertexConstantData[_uvTransformIndex + 5] = 1;
-			_vertexConstantData[_uvTransformIndex + 6] = 0;
-			_vertexConstantData[_uvTransformIndex + 7] = 0;
-		}
-
-		// TODO: Probably should let the compiler init this, since only it knows what it's for
-		private function initCommonsData() : void
-		{
-			_fragmentConstantData[_commonsDataIndex] = .5;
-			_fragmentConstantData[_commonsDataIndex + 1] = 0;
-			_fragmentConstantData[_commonsDataIndex + 2] = 1 / 255;
-			_fragmentConstantData[_commonsDataIndex + 3] = 1;
-		}
-
-		private function cleanUp() : void
-		{
-			_compiler.dispose();
-			_compiler = null;
-		}
-
 		/**
 		 * Updates the lights data for the render state.
 		 * @param lights The lights selected to shade the current object.
 		 * @param numLights The amount of lights available.
 		 * @param maxLights The maximum amount of lights supported.
 		 */
-		private function updateLightConstants() : void
+		override protected function updateLightConstants() : void
 		{
 			// first dirs, then points
 			var dirLight : DirectionalLight;
@@ -683,7 +511,7 @@ package away3d.materials.passes
 			}
 		}
 
-		private function updateProbes(stage3DProxy : Stage3DProxy) : void
+		override protected function updateProbes(stage3DProxy : Stage3DProxy) : void
 		{
 			var probe : LightProbe;
 			var lightProbes : Vector.<LightProbe> = _lightPicker.lightProbes;
@@ -707,11 +535,6 @@ package away3d.materials.passes
 			_fragmentConstantData[_probeWeightsIndex + 1] = weights[1];
 			_fragmentConstantData[_probeWeightsIndex + 2] = weights[2];
 			_fragmentConstantData[_probeWeightsIndex + 3] = weights[3];
-		}
-
-		private function onShaderInvalidated(event : ShadingMethodEvent) : void
-		{
-			invalidateShaderProgram();
 		}
 	}
 }
