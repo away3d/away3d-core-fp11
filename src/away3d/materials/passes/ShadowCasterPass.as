@@ -6,7 +6,6 @@ package away3d.materials.passes
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.events.ShadingMethodEvent;
 	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
@@ -15,9 +14,6 @@ package away3d.materials.passes
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
-	import away3d.materials.methods.ColorTransformMethod;
-	import away3d.materials.methods.EffectMethodBase;
-	import away3d.materials.methods.MethodVOSet;
 	import away3d.materials.methods.ShaderMethodSetup;
 	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.textures.Texture2DBase;
@@ -25,7 +21,6 @@ package away3d.materials.passes
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Vector3D;
 
@@ -37,17 +32,13 @@ package away3d.materials.passes
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
 
-	public class SuperShaderPass extends CompiledPass
+	public class ShadowCasterPass extends CompiledPass
 	{
-		private var _specularLightSources : uint = 0x01;
-		private var _diffuseLightSources : uint = 0x03;
-
-		private var _includeCasters : Boolean = true;
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
 		 */
-		public function SuperShaderPass(material : MaterialBase)
+		public function ShadowCasterPass(material : MaterialBase)
 		{
 			super();
 			_material = material;
@@ -59,18 +50,6 @@ package away3d.materials.passes
 		{
 			_methodSetup = new ShaderMethodSetup();
 			_methodSetup.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-		}
-
-		public function get includeCasters() : Boolean
-		{
-			return _includeCasters;
-		}
-
-		public function set includeCasters(value : Boolean) : void
-		{
-			if (_includeCasters == value) return;
-			_includeCasters = value;
-			invalidateShaderProgram();
 		}
 
 		public function get preserveAlpha() : Boolean
@@ -103,47 +82,6 @@ package away3d.materials.passes
 		{
 			if (_mipmap == value) return;
 			super.mipmap = value;
-		}
-
-		public function get specularLightSources() : uint
-		{
-			return _specularLightSources;
-		}
-
-		public function set specularLightSources(value : uint) : void
-		{
-			_specularLightSources = value;
-		}
-
-		public function get diffuseLightSources() : uint
-		{
-			return _diffuseLightSources;
-		}
-
-		public function set diffuseLightSources(value : uint) : void
-		{
-			_diffuseLightSources = value;
-		}
-
-		/**
-		 * The ColorTransform object to transform the colour of the material with.
-		 */
-		public function get colorTransform() : ColorTransform
-		{
-			return _methodSetup.colorTransformMethod ? _methodSetup._colorTransformMethod.colorTransform : null;
-		}
-
-		public function set colorTransform(value : ColorTransform) : void
-		{
-			if (value) {
-				colorTransformMethod ||= new ColorTransformMethod();
-				_methodSetup._colorTransformMethod.colorTransform = value;
-			}
-			else if (!value) {
-				if (_methodSetup._colorTransformMethod)
-					colorTransformMethod = null;
-				colorTransformMethod = _methodSetup._colorTransformMethod = null;
-			}
 		}
 
 		/**
@@ -220,68 +158,12 @@ package away3d.materials.passes
 			_methodSetup.specularMethod = value;
 		}
 
-		public function get colorTransformMethod() : ColorTransformMethod
-		{
-			return _methodSetup.colorTransformMethod;
-		}
-
-		public function set colorTransformMethod(value : ColorTransformMethod) : void
-		{
-			_methodSetup.colorTransformMethod = value;
-		}
-
-		/**
-		 * Adds a shading method to the end of the shader. Note that shading methods can
-		 * not be reused across materials.
-		 */
-		public function addMethod(method : EffectMethodBase) : void
-		{
-			_methodSetup.addMethod(method);
-		}
-
-		public function get numMethods() : int
-		{
-			return _methodSetup.numMethods;
-		}
-
-		public function hasMethod(method : EffectMethodBase) : Boolean
-		{
-			return _methodSetup.hasMethod(method);
-		}
-
-		public function getMethodAt(index : int) : EffectMethodBase
-		{
-			return _methodSetup.getMethodAt(index);
-		}
-
-		/**
-		 * Adds a shading method to the end of a shader, at the specified index amongst
-		 * the methods in that section of the shader. Note that shading methods can not
-		 * be reused across materials.
-		 */
-		public function addMethodAt(method : EffectMethodBase, index : int) : void
-		{
-			_methodSetup.addMethodAt(method, index);
-		}
-
-		public function removeMethod(method : EffectMethodBase) : void
-		{
-			_methodSetup.removeMethod(method);
-		}
-
 		override protected function updateLights() : void
 		{
-			_numPointLights = _lightPicker.numPointLights;
-			_numDirectionalLights = _lightPicker.numDirectionalLights;
-			_numLightProbes = _lightPicker.numLightProbes;
-
-			if (_includeCasters) {
-				_numPointLights += _lightPicker.numCastingPointLights;
-				_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
-			}
-
-			for (var i : int = 0; i < _passes.length; ++i)
-				_passes[i].lightPicker = _lightPicker;
+			_numPointLights = _lightPicker.numCastingPointLights > 0? 1 : 0;
+			_numDirectionalLights = _lightPicker.numCastingDirectionalLights > 0? 1 : 0;
+			_numLightProbes = 0;
+			if (_numPointLights == _numDirectionalLights) throw new Error("Must have exactly one light!");
 
 			invalidateShaderProgram();
 		}
@@ -307,9 +189,6 @@ package away3d.materials.passes
 		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
 			if (_usesNormals) _methodSetup._normalMethod.activate(_methodSetup._normalMethodVO, stage3DProxy);
@@ -317,12 +196,6 @@ package away3d.materials.passes
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.activate(_methodSetup._shadowMethodVO, stage3DProxy);
 			_methodSetup._diffuseMethod.activate(_methodSetup._diffuseMethodVO, stage3DProxy);
 			if (_usingSpecularMethod) _methodSetup._specularMethod.activate(_methodSetup._specularMethodVO, stage3DProxy);
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.activate(_methodSetup._colorTransformMethodVO, stage3DProxy);
-
-			for (var i : int = 0; i < len; ++i) {
-				var set : MethodVOSet = methods[i];
-				set.method.activate(set.data, stage3DProxy);
-			}
 
 			if (_cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;
@@ -338,21 +211,12 @@ package away3d.materials.passes
 		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
 			super.deactivate(stage3DProxy);
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
 
 			if (_usesNormals) _methodSetup._normalMethod.deactivate(_methodSetup._normalMethodVO, stage3DProxy);
 			_methodSetup._ambientMethod.deactivate(_methodSetup._ambientMethodVO, stage3DProxy);
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.deactivate(_methodSetup._shadowMethodVO, stage3DProxy);
 			_methodSetup._diffuseMethod.deactivate(_methodSetup._diffuseMethodVO, stage3DProxy);
 			if (_usingSpecularMethod) _methodSetup._specularMethod.deactivate(_methodSetup._specularMethodVO, stage3DProxy);
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.deactivate(_methodSetup._colorTransformMethodVO, stage3DProxy);
-
-			var set : MethodVOSet;
-			for (var i : uint = 0; i < len; ++i) {
-				set = methods[i];
-				set.method.deactivate(set.data, stage3DProxy);
-			}
 		}
 
 		/**
@@ -391,11 +255,7 @@ package away3d.materials.passes
 
 			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
-			if (usesLights())
-				updateLightConstants();
-
-			if (usesProbes())
-				updateProbes(stage3DProxy);
+			updateLightConstants();
 
 			if (_sceneMatrixIndex >= 0)
 				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
@@ -415,14 +275,6 @@ package away3d.materials.passes
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.setRenderState(_methodSetup._shadowMethodVO, renderable, stage3DProxy, camera);
 			_methodSetup._diffuseMethod.setRenderState(_methodSetup._diffuseMethodVO, renderable, stage3DProxy, camera);
 			if (_usingSpecularMethod) _methodSetup._specularMethod.setRenderState(_methodSetup._specularMethodVO, renderable, stage3DProxy, camera);
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.setRenderState(_methodSetup._colorTransformMethodVO, renderable, stage3DProxy, camera);
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-			for (i = 0; i < len; ++i) {
-				var set : MethodVOSet = methods[i];
-				set.method.setRenderState(set.data, renderable, stage3DProxy, camera);
-			}
 
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexConstantsOffset, _vertexConstantData, _numUsedVertexConstants - _vertexConstantsOffset);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentConstantData, _numUsedFragmentConstants);
@@ -431,13 +283,13 @@ package away3d.materials.passes
 		}
 
 
-		override protected function addPassesFromMethods() : void
+		/**
+		 * Marks the shader program as invalid, so it will be recompiled before the next render.
+		 */
+		arcane override function invalidateShaderProgram(updateMaterial : Boolean = true) : void
 		{
-			super.addPassesFromMethods();
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			for (var i : uint = 0; i < methods.length; ++i)
-				addPasses(methods[i].method.passes);
+			super.invalidateShaderProgram(updateMaterial);
+			addPassesFromMethods();
 		}
 
 		/**
@@ -456,22 +308,26 @@ package away3d.materials.passes
 		private function reset() : void
 		{
 			_compiler = new SuperShaderCompiler();
+			initCompiler();
+			updateShaderProperties();
+			initConstantData();
+			cleanUp();
+		}
+
+		private function initCompiler() : void
+		{
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
 			_compiler.numLightProbes = _numLightProbes;
 			_compiler.methodSetup = _methodSetup;
-			_compiler.diffuseLightSources = _diffuseLightSources;
-			_compiler.specularLightSources = _specularLightSources;
+			_compiler.diffuseLightSources = LightSources.LIGHTS;
+			_compiler.specularLightSources = LightSources.LIGHTS;
 			_compiler.setTextureSampling(_smooth, _repeat, _mipmap);
 			_compiler.setConstantDataBuffers(_vertexConstantData, _fragmentConstantData);
 			_compiler.animateUVs = _animateUVs;
 			_compiler.alphaPremultiplied = _alphaPremultiplied;
 			_compiler.preserveAlpha = _preserveAlpha;
 			_compiler.compile();
-
-			updateShaderProperties();
-			initConstantData();
-			cleanUp();
 		}
 
 		private function updateShaderProperties() : void
@@ -505,26 +361,6 @@ package away3d.materials.passes
 			_lightProbeSpecularIndices = _compiler.lightProbeSpecularIndices;
 		}
 
-		private function usesProbesForSpecular() : Boolean
-		{
-			return _numLightProbes > 0 && (_specularLightSources & LightSources.PROBES) != 0;
-		}
-
-		private function usesProbesForDiffuse() : Boolean
-		{
-			return _numLightProbes > 0 && (_diffuseLightSources & LightSources.PROBES) != 0;
-		}
-
-		private function usesProbes() : Boolean
-		{
-			return _numLightProbes > 0 && ((_diffuseLightSources | _specularLightSources) & LightSources.PROBES) != 0;
-		}
-
-		private function usesLights() : Boolean
-		{
-			return (_numPointLights > 0 || _numDirectionalLights > 0) && ((_diffuseLightSources | _specularLightSources) & LightSources.LIGHTS) != 0;
-		}
-
 		private function updateUsedOffsets() : void
 		{
 			_numUsedVertexConstants = _compiler.numUsedVertexConstants;
@@ -554,13 +390,6 @@ package away3d.materials.passes
 			if (_methodSetup._ambientMethod) _methodSetup._ambientMethod.initConstants(_methodSetup._ambientMethodVO);
 			if (_usingSpecularMethod) _methodSetup._specularMethod.initConstants(_methodSetup._specularMethodVO);
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.initConstants(_methodSetup._shadowMethodVO);
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.initConstants(_methodSetup._colorTransformMethodVO);
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-			for (var i : uint = 0; i < len; ++i) {
-				methods[i].method.initConstants(methods[i].data);
-			}
 		}
 
 		private function initUVTransformData() : void
@@ -590,6 +419,7 @@ package away3d.materials.passes
 			_compiler = null;
 		}
 
+
 		/**
 		 * Updates the lights data for the render state.
 		 * @param lights The lights selected to shade the current object.
@@ -602,111 +432,63 @@ package away3d.materials.passes
 			var dirLight : DirectionalLight;
 			var pointLight : PointLight;
 			var i : uint, k : uint;
-			var len : int;
 			var dirPos : Vector3D;
-			var total : uint = 0;
-			var numLightTypes : uint = _includeCasters? 2 : 1;
 
 			k = _lightDataIndex;
 
-			for (var cast : int = 0; cast < numLightTypes; ++cast) {
-				var dirLights : Vector.<DirectionalLight> = cast? _lightPicker.castingDirectionalLights : _lightPicker.directionalLights;
-				len = dirLights.length;
-				total += len;
+			if (_numDirectionalLights > 0) {
+				dirLight = _lightPicker.castingDirectionalLights[0];
+				dirPos = dirLight.sceneDirection;
 
-				for (i = 0; i < len; ++i) {
-					dirLight = dirLights[i];
-					dirPos = dirLight.sceneDirection;
+				_ambientLightR += dirLight._ambientR;
+				_ambientLightG += dirLight._ambientG;
+				_ambientLightB += dirLight._ambientB;
 
-					_ambientLightR += dirLight._ambientR;
-					_ambientLightG += dirLight._ambientG;
-					_ambientLightB += dirLight._ambientB;
+				_fragmentConstantData[k++] = -dirPos.x;
+				_fragmentConstantData[k++] = -dirPos.y;
+				_fragmentConstantData[k++] = -dirPos.z;
+				_fragmentConstantData[k++] = 1;
 
-					_fragmentConstantData[k++] = -dirPos.x;
-					_fragmentConstantData[k++] = -dirPos.y;
-					_fragmentConstantData[k++] = -dirPos.z;
-					_fragmentConstantData[k++] = 1;
+				_fragmentConstantData[k++] = dirLight._diffuseR;
+				_fragmentConstantData[k++] = dirLight._diffuseG;
+				_fragmentConstantData[k++] = dirLight._diffuseB;
+				_fragmentConstantData[k++] = 1;
 
-					_fragmentConstantData[k++] = dirLight._diffuseR;
-					_fragmentConstantData[k++] = dirLight._diffuseG;
-					_fragmentConstantData[k++] = dirLight._diffuseB;
-					_fragmentConstantData[k++] = 1;
-
-					_fragmentConstantData[k++] = dirLight._specularR;
-					_fragmentConstantData[k++] = dirLight._specularG;
-					_fragmentConstantData[k++] = dirLight._specularB;
-					_fragmentConstantData[k++] = 1;
-				}
+				_fragmentConstantData[k++] = dirLight._specularR;
+				_fragmentConstantData[k++] = dirLight._specularG;
+				_fragmentConstantData[k++] = dirLight._specularB;
+				_fragmentConstantData[k++] = 1;
+				return;
 			}
 
-			// more directional supported than currently picked, need to clamp all to 0
-			if (_numDirectionalLights > total) {
-				i = k + (_numDirectionalLights - total) * 12;
-				while (k < i)
-					_fragmentConstantData[k++] = 0;
-			}
+			if (_numPointLights > 0) {
+				pointLight = _lightPicker.castingPointLights[i];
+				dirPos = pointLight.scenePosition;
 
-			total = 0;
-			for (var cast : int = 0; cast < numLightTypes; ++cast) {
-				var pointLights : Vector.<PointLight> = cast? _lightPicker.castingPointLights : _lightPicker.pointLights;
-				len = pointLights.length;
-				for (i = 0; i < len; ++i) {
-					pointLight = pointLights[i];
-					dirPos = pointLight.scenePosition;
+				_ambientLightR += pointLight._ambientR;
+				_ambientLightG += pointLight._ambientG;
+				_ambientLightB += pointLight._ambientB;
 
-					_ambientLightR += pointLight._ambientR;
-					_ambientLightG += pointLight._ambientG;
-					_ambientLightB += pointLight._ambientB;
+				_fragmentConstantData[k++] = dirPos.x;
+				_fragmentConstantData[k++] = dirPos.y;
+				_fragmentConstantData[k++] = dirPos.z;
+				_fragmentConstantData[k++] = 1;
 
-					_fragmentConstantData[k++] = dirPos.x;
-					_fragmentConstantData[k++] = dirPos.y;
-					_fragmentConstantData[k++] = dirPos.z;
-					_fragmentConstantData[k++] = 1;
+				_fragmentConstantData[k++] = pointLight._diffuseR;
+				_fragmentConstantData[k++] = pointLight._diffuseG;
+				_fragmentConstantData[k++] = pointLight._diffuseB;
+				_fragmentConstantData[k++] = pointLight._radius;
 
-					_fragmentConstantData[k++] = pointLight._diffuseR;
-					_fragmentConstantData[k++] = pointLight._diffuseG;
-					_fragmentConstantData[k++] = pointLight._diffuseB;
-					_fragmentConstantData[k++] = pointLight._radius;
-
-					_fragmentConstantData[k++] = pointLight._specularR;
-					_fragmentConstantData[k++] = pointLight._specularG;
-					_fragmentConstantData[k++] = pointLight._specularB;
-					_fragmentConstantData[k++] = pointLight._fallOffFactor;
-				}
-			}
-
-			// more directional supported than currently picked, need to clamp all to 0
-			if (_numPointLights > total) {
-				i = k + (total - _numPointLights) * 12;
-				for (; k < i; ++k)
-					_fragmentConstantData[k] = 0;
+				_fragmentConstantData[k++] = pointLight._specularR;
+				_fragmentConstantData[k++] = pointLight._specularG;
+				_fragmentConstantData[k++] = pointLight._specularB;
+				_fragmentConstantData[k++] = pointLight._fallOffFactor;
 			}
 		}
 
 		private function updateProbes(stage3DProxy : Stage3DProxy) : void
 		{
-			var probe : LightProbe;
-			var lightProbes : Vector.<LightProbe> = _lightPicker.lightProbes;
-			var weights : Vector.<Number> = _lightPicker.lightProbeWeights;
-			var len : int = lightProbes.length;
-			var addDiff : Boolean = usesProbesForDiffuse();
-			var addSpec : Boolean = _methodSetup._specularMethod && usesProbesForSpecular();
 
-			if (!(addDiff || addSpec)) return;
-
-			for (var i : uint = 0; i < len; ++i) {
-				probe = lightProbes[i];
-
-				if (addDiff)
-					stage3DProxy.setTextureAt(_lightProbeDiffuseIndices[i], probe.diffuseMap.getTextureForStage3D(stage3DProxy));
-				if (addSpec)
-					stage3DProxy.setTextureAt(_lightProbeSpecularIndices[i], probe.specularMap.getTextureForStage3D(stage3DProxy));
-			}
-
-			_fragmentConstantData[_probeWeightsIndex] = weights[0];
-			_fragmentConstantData[_probeWeightsIndex + 1] = weights[1];
-			_fragmentConstantData[_probeWeightsIndex + 2] = weights[2];
-			_fragmentConstantData[_probeWeightsIndex + 3] = weights[3];
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

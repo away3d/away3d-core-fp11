@@ -11,8 +11,8 @@
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.passes.SuperShaderPass;
+	import away3d.materials.passes.CompiledPass;
+	import away3d.materials.passes.ShadowCasterPass;
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 
@@ -30,7 +30,7 @@
 	 */
 	public class MultiPassMaterialBase extends MaterialBase
 	{
-		protected var _casterLightPass : SuperShaderPass;
+		protected var _casterLightPass : ShadowCasterPass;
 		protected var _nonCasterLightPass : SuperShaderPass;
 		protected var _effectsPass : SuperShaderPass;
 
@@ -383,7 +383,7 @@
 			}
 		}
 
-		private function addScreenPass(pass : SuperShaderPass) : void
+		private function addScreenPass(pass : CompiledPass) : void
 		{
 			if (pass) {
 				addPass(pass);
@@ -398,7 +398,7 @@
 					(_effectsPass && _effectsPass._passesDirty);
 		}
 
-		private function addChildPassesFor(pass : SuperShaderPass) : void
+		private function addChildPassesFor(pass : CompiledPass) : void
 		{
 			if (!pass) return;
 
@@ -478,8 +478,7 @@
 
 		private function initCasterLightPass() : void
 		{
-			_casterLightPass ||= new SuperShaderPass(this);
-			_casterLightPass.includeCasters = true;
+			_casterLightPass ||= new ShadowCasterPass(this);
 			_casterLightPass.diffuseMethod = null;
 			_casterLightPass.ambientMethod = null;
 			_casterLightPass.normalMethod = null;
