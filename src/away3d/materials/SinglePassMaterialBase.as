@@ -3,6 +3,7 @@
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
@@ -358,6 +359,12 @@
 				addPass(_screenPass);
 				_screenPass._passesDirty = false
 			}
+		}
+
+		override public function set lightPicker(value : LightPickerBase) : void
+		{
+			super.lightPicker = value;
+			_screenPass.lightPicker = value;
 		}
 	}
 }

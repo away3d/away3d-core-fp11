@@ -62,9 +62,7 @@ package away3d.materials.passes
 
 		private var _bothSides : Boolean;
 
-		protected var _numPointLights : uint;
-		protected var _numDirectionalLights : uint;
-		protected var _numLightProbes : uint;
+		protected var _lightPicker : LightPickerBase;
 		protected var _animatableAttributes : Array = ["va0"];
 		protected var _animationTargetRegisters : Array = ["vt0"];
 		
@@ -211,6 +209,8 @@ package away3d.materials.passes
 		 */
 		public function dispose() : void
 		{
+			if (_lightPicker) _lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+
 			for (var i : uint = 0; i < 8; ++i) {
 				if (_program3Ds[i]) {
 					AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
@@ -418,29 +418,28 @@ package away3d.materials.passes
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);
 		}
 
-		arcane function get numPointLights() : uint
+		arcane function get lightPicker() : LightPickerBase
 		{
-			return _numPointLights;
+			return _lightPicker;
 		}
 
-		arcane function set numPointLights(value : uint) : void
+		arcane function set lightPicker(value : LightPickerBase) : void
 		{
-			_numPointLights = value;
+			if (_lightPicker) _lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+			_lightPicker = value;
+			if (_lightPicker) _lightPicker.addEventListener(Event.CHANGE, onLightsChange);
+			updateLights();
 		}
 
-		arcane function get numDirectionalLights() : uint
+		private function onLightsChange(event : Event) : void
 		{
-			return _numDirectionalLights;
+			updateLights();
 		}
 
-		arcane function set numDirectionalLights(value : uint) : void
+		// need to implement if pass is light-dependent
+		protected function updateLights() : void
 		{
-			_numDirectionalLights = value;
-		}
 
-		arcane function set numLightProbes(value : uint) : void
-		{
-			_numLightProbes = value;
 		}
 
 		public function get alphaPremultiplied() : Boolean

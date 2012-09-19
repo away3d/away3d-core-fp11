@@ -26,6 +26,7 @@ package away3d.materials.passes
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.events.Event;
 	import flash.geom.ColorTransform;
 	import flash.geom.Matrix;
 	import flash.geom.Vector3D;
@@ -82,6 +83,10 @@ package away3d.materials.passes
 		private var _usesNormals : Boolean;
 		private var _preserveAlpha : Boolean = true;
 		private var _includeCasters : Boolean = true;
+
+		private var _numPointLights : uint;
+		private var _numDirectionalLights : uint;
+		private var _numLightProbes : uint;
 
 
 		/**
@@ -309,21 +314,20 @@ package away3d.materials.passes
 			_methodSetup.removeMethod(method);
 		}
 
-		arcane override function set numPointLights(value : uint) : void
+		override protected function updateLights() : void
 		{
-			super.numPointLights = value;
-			invalidateShaderProgram();
-		}
+			_numPointLights = _lightPicker.numPointLights;
+			_numDirectionalLights = _lightPicker.numDirectionalLights;
+			_numLightProbes = _lightPicker.numLightProbes;
 
-		arcane override function set numDirectionalLights(value : uint) : void
-		{
-			super.numDirectionalLights = value;
-			invalidateShaderProgram();
-		}
+			if (_includeCasters) {
+				_numPointLights += _lightPicker.numCastingPointLights;
+				_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
+			}
 
-		arcane override function set numLightProbes(value : uint) : void
-		{
-			super.numLightProbes = value;
+			for (var i : int = 0; i < _passes.length; ++i)
+				_passes[i].lightPicker = _lightPicker;
+
 			invalidateShaderProgram();
 		}
 
@@ -433,7 +437,7 @@ package away3d.materials.passes
 			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
 			if (usesLights())
-				updateLights(lightPicker);
+				updateLightConstants(lightPicker);
 
 			if (usesProbes())
 				updateProbes(lightPicker.lightProbes, lightPicker.lightProbeWeights, stage3DProxy);
@@ -609,7 +613,7 @@ package away3d.materials.passes
 			if (_methodSetup._normalMethod) _methodSetup._normalMethod.initConstants(_methodSetup._normalMethodVO);
 			if (_methodSetup._diffuseMethod) _methodSetup._diffuseMethod.initConstants(_methodSetup._diffuseMethodVO);
 			if (_methodSetup._ambientMethod) _methodSetup._ambientMethod.initConstants(_methodSetup._ambientMethodVO);
-			if (_methodSetup._specularMethod) _methodSetup._specularMethod.initConstants(_methodSetup._specularMethodVO);
+			if (_usingSpecularMethod) _methodSetup._specularMethod.initConstants(_methodSetup._specularMethodVO);
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.initConstants(_methodSetup._shadowMethodVO);
 			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.initConstants(_methodSetup._colorTransformMethodVO);
 
@@ -668,7 +672,7 @@ package away3d.materials.passes
 		 * @param numLights The amount of lights available.
 		 * @param maxLights The maximum amount of lights supported.
 		 */
-		private function updateLights(lightPicker : LightPickerBase) : void
+		private function updateLightConstants(lightPicker : LightPickerBase) : void
 		{
 			// first dirs, then points
 			var dirLight : DirectionalLight;

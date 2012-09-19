@@ -18,7 +18,6 @@ package away3d.materials
 	
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
-	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.events.Event;
 
@@ -97,28 +96,8 @@ package away3d.materials
 
 		public function set lightPicker(value : LightPickerBase) : void
 		{
-			if (value != _lightPicker) {
-				if (_lightPicker)
-					_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
-				
+			if (value != _lightPicker)
 				_lightPicker = value;
-	
-				if (_lightPicker)
-					_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
-				
-				invalidatePasses(null);
-			}
-		}
-
-		protected function onLightsChange(event : Event) : void
-		{
-			var pass : MaterialPassBase;
-			for (var i : uint = 0; i < _numPasses; ++i) {
-				pass = _passes[i];
-				pass.numPointLights = _lightPicker.numPointLights + _lightPicker.numCastingPointLights;
-				pass.numDirectionalLights = _lightPicker.numDirectionalLights + _lightPicker.numCastingDirectionalLights;
-				pass.numLightProbes = _lightPicker.numLightProbes;
-			}
 		}
 
 		/**
@@ -185,9 +164,6 @@ package away3d.materials
 
 			_depthPass.dispose();
 			_distancePass.dispose();
-
-			if (_lightPicker)
-				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
 		}
 
 		/**
@@ -495,9 +471,6 @@ package away3d.materials
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
-			pass.numPointLights = _lightPicker? _lightPicker.numPointLights + _lightPicker.numCastingPointLights : 0;
-			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights + _lightPicker.numCastingDirectionalLights : 0;
-			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			invalidatePasses(null);
 		}

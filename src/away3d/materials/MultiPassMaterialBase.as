@@ -382,16 +382,8 @@
 
 				if (_nonCasterLightPass) {
 					_nonCasterLightPass._passesDirty = false;
-					if (!_shadowMethod) {
-						_nonCasterLightPass.numDirectionalLights = _lightPicker.numDirectionalLights;
-						_nonCasterLightPass.numPointLights = _lightPicker.numPointLights;
-						_nonCasterLightPass.numLightProbes = _lightPicker.numLightProbes;
-					}
 				}
 				if (_effectsPass) {
-					_effectsPass.numDirectionalLights = 0;
-					_effectsPass.numPointLights = 0;
-					_effectsPass.numLightProbes = 0;
 					_effectsPass._passesDirty = false;
 				}
 			}
@@ -420,11 +412,6 @@
 		{
 			super.deactivate(stage3DProxy);
 			stage3DProxy._context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-		}
-
-		override protected function onLightsChange(event : Event) : void
-		{
-			invalidateScreenPasses();
 		}
 
 		protected function updateScreenPasses() : void
