@@ -156,7 +156,7 @@ package away3d.materials.passes
 			updateUsedOffsets();
 		}
 
-		private function updateRegisterIndices() : void
+		protected function updateRegisterIndices() : void
 		{
 			_vertexConstantsOffset = _compiler.vertexConstantsOffset;
 			_uvBufferIndex = _compiler.uvBufferIndex;
@@ -164,7 +164,7 @@ package away3d.materials.passes
 			_secondaryUVBufferIndex = _compiler.secondaryUVBufferIndex;
 			_normalBufferIndex = _compiler.normalBufferIndex;
 			_tangentBufferIndex = _compiler.tangentBufferIndex;
-			_lightFragmentConstantIndex = _compiler.lightFragmentDataIndex;
+			_lightFragmentConstantIndex = _compiler.lightFragmentConstantIndex;
 			_cameraPositionIndex = _compiler.cameraPositionIndex;
 			_commonsDataIndex = _compiler.commonsDataIndex;
 			_sceneMatrixIndex = _compiler.sceneMatrixIndex;

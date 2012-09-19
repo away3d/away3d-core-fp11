@@ -40,7 +40,7 @@ package away3d.materials.compilation
 		protected var _secondaryUVBufferIndex : int = -1;
 		protected var _normalBufferIndex : int = -1;
 		protected var _tangentBufferIndex : int = -1;
-		protected var _lightFragmentDataIndex : int = -1;
+		protected var _lightFragmentConstantIndex : int = -1;
 		protected var _sceneMatrixIndex : int = -1;
 		protected var _sceneNormalMatrixIndex : int = -1;
 		protected var _cameraPositionIndex : int = -1;
@@ -276,7 +276,7 @@ package away3d.materials.compilation
 			_secondaryUVBufferIndex = -1;
 			_normalBufferIndex = -1;
 			_tangentBufferIndex = -1;
-			_lightFragmentDataIndex = -1;
+			_lightFragmentConstantIndex = -1;
 			_sceneMatrixIndex = -1;
 			_sceneNormalMatrixIndex = -1;
 			_probeWeightsIndex = -1;
@@ -487,9 +487,9 @@ package away3d.materials.compilation
 			return _tangentBufferIndex;
 		}
 
-		public function get lightFragmentDataIndex() : int
+		public function get lightFragmentConstantIndex() : int
 		{
-			return _lightFragmentDataIndex;
+			return _lightFragmentConstantIndex;
 		}
 
 		public function get cameraPositionIndex() : int

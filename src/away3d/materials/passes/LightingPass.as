@@ -10,9 +10,6 @@ package away3d.materials.passes
 	import away3d.materials.MaterialBase;
 	import away3d.materials.compilation.LightingShaderCompiler;
 	import away3d.materials.compilation.ShaderCompiler;
-	import away3d.materials.compilation.SuperShaderCompiler;
-	import away3d.materials.methods.ColorTransformMethod;
-	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.MethodVOSet;
 
 	import flash.geom.ColorTransform;
@@ -29,6 +26,7 @@ package away3d.materials.passes
 	public class LightingPass extends CompiledPass
 	{
 		private var _includeCasters : Boolean = true;
+		private var _lightVertexConstantIndex : int;
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
@@ -68,6 +66,12 @@ package away3d.materials.passes
 			}
 
 			invalidateShaderProgram();
+		}
+
+		override protected function updateRegisterIndices() : void
+		{
+			super.updateRegisterIndices();
+			_lightVertexConstantIndex = LightingShaderCompiler(_compiler).lightVertexConstantIndex;
 		}
 
 		/**
@@ -123,7 +127,9 @@ package away3d.materials.passes
 			var dirPos : Vector3D;
 			var total : uint = 0;
 			var numLightTypes : uint = _includeCasters ? 2 : 1;
+			var l : int;
 
+			l = _lightVertexConstantIndex;
 			k = _lightFragmentConstantIndex;
 
 			for (var cast : int = 0; cast < numLightTypes; ++cast) {
@@ -139,10 +145,10 @@ package away3d.materials.passes
 					_ambientLightG += dirLight._ambientG;
 					_ambientLightB += dirLight._ambientB;
 
-					_fragmentConstantData[k++] = -dirPos.x;
-					_fragmentConstantData[k++] = -dirPos.y;
-					_fragmentConstantData[k++] = -dirPos.z;
-					_fragmentConstantData[k++] = 1;
+					_vertexConstantData[l++] = -dirPos.x;
+					_vertexConstantData[l++] = -dirPos.y;
+					_vertexConstantData[l++] = -dirPos.z;
+					_vertexConstantData[l++] = 1;
 
 					_fragmentConstantData[k++] = dirLight._diffuseR;
 					_fragmentConstantData[k++] = dirLight._diffuseG;

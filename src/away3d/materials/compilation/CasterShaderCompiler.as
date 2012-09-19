@@ -268,13 +268,13 @@ package away3d.materials.compilation
 			len = _dirLightRegisters.length;
 			for (i = 0; i < len; ++i) {
 				_dirLightRegisters[i] = _registerCache.getFreeFragmentConstant();
-				if (_lightFragmentDataIndex == -1) _lightFragmentDataIndex = _dirLightRegisters[i].index*4;
+				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = _dirLightRegisters[i].index*4;
 			}
 
 			len = _pointLightRegisters.length;
 			for (i = 0; i < len; ++i) {
 				_pointLightRegisters[i] = _registerCache.getFreeFragmentConstant();
-				if (_lightFragmentDataIndex == -1) _lightFragmentDataIndex = _pointLightRegisters[i].index*4;
+				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = _pointLightRegisters[i].index*4;
 			}
 		}
 
@@ -335,7 +335,7 @@ package away3d.materials.compilation
 					// normalize
 						"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
 
-				if (_lightFragmentDataIndex == -1) _lightFragmentDataIndex = lightPosReg.index*4;
+				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = lightPosReg.index*4;
 
 				if (addDiff)
 					_fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerLight(_methodSetup._diffuseMethodVO, lightDirReg, diffuseColorReg, _registerCache);

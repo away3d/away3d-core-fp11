@@ -4,8 +4,11 @@ package away3d.materials.compilation
 
 	public class LightingShaderCompiler extends ShaderCompiler
 	{
-		public var _pointLightRegisters : Vector.<ShaderRegisterElement>;
-		public var _dirLightRegisters : Vector.<ShaderRegisterElement>;
+		public var _pointLightFragmentConstants : Vector.<ShaderRegisterElement>;
+		public var _pointLightVertexConstants : Vector.<ShaderRegisterElement>;
+		public var _dirLightFragmentConstants : Vector.<ShaderRegisterElement>;
+		public var _dirLightVertexConstants : Vector.<ShaderRegisterElement>;
+		private var _lightVertexConstantIndex : int;
 
 		use namespace arcane;
 
@@ -14,12 +17,25 @@ package away3d.materials.compilation
 			super();
 		}
 
+		public function get lightVertexConstantIndex() : int
+		{
+			return _lightVertexConstantIndex;
+		}
+
+		override protected function initRegisterIndices() : void
+		{
+			super.initRegisterIndices();
+			_lightVertexConstantIndex = -1;
+		}
+
 		override protected function initLightData() : void
 		{
 			super.initLightData();
 
-			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights * 3, true);
-			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights * 3, true);
+			_dirLightVertexConstants = new Vector.<ShaderRegisterElement>(_numDirectionalLights, true);
+			_pointLightVertexConstants = new Vector.<ShaderRegisterElement>(_numPointLights * 0, true);
+			_dirLightFragmentConstants = new Vector.<ShaderRegisterElement>(_numDirectionalLights * 2, true);
+			_pointLightFragmentConstants = new Vector.<ShaderRegisterElement>(_numPointLights * 3, true);
 		}
 
 		/**
@@ -221,21 +237,6 @@ package away3d.materials.compilation
 			if (_methodSetup._ambientMethodVO.needsNormals) _registerCache.removeFragmentTempUsage(_sharedRegisters.normalFragment);
 			if (_methodSetup._ambientMethodVO.needsView) _registerCache.removeFragmentTempUsage(_sharedRegisters.viewDirFragment);
 
-
-			if (_methodSetup._shadowMethod) {
-				_vertexCode += _methodSetup._shadowMethod.getVertexCode(_methodSetup._shadowMethodVO, _registerCache);
-				// using normal to contain shadow data if available is perhaps risky :s
-				// todo: improve compilation with lifetime analysis so this isn't necessary?
-				if (_dependencyCounter.normalDependencies == 0) {
-					shadowReg = _registerCache.getFreeFragmentVectorTemp();
-					_registerCache.addFragmentTempUsages(shadowReg, 1);
-				}
-				else
-					shadowReg = _sharedRegisters.normalFragment;
-
-				_methodSetup._diffuseMethod.shadowRegister = shadowReg;
-				_fragmentCode += _methodSetup._shadowMethod.getFragmentCode(_methodSetup._shadowMethodVO, _registerCache, shadowReg);
-			}
 			_fragmentCode += _methodSetup._diffuseMethod.getFragmentPostLightingCode(_methodSetup._diffuseMethodVO, _registerCache, _sharedRegisters.shadedTarget);
 
 			if (_alphaPremultiplied) {
@@ -263,16 +264,28 @@ package away3d.materials.compilation
 			// init these first so we're sure they're in sequence
 			var i : uint, len : uint;
 
-			len = _dirLightRegisters.length;
+			len = _dirLightVertexConstants.length;
 			for (i = 0; i < len; ++i) {
-				_dirLightRegisters[i] = _registerCache.getFreeFragmentConstant();
-				if (_lightFragmentDataIndex == -1) _lightFragmentDataIndex = _dirLightRegisters[i].index*4;
+				_dirLightVertexConstants[i] = _registerCache.getFreeVertexConstant();
+				if (_lightVertexConstantIndex == -1) _lightVertexConstantIndex = (_dirLightVertexConstants[i].index - _vertexConstantsOffset)*4;
 			}
 
-			len = _pointLightRegisters.length;
+			len = _pointLightVertexConstants.length;
 			for (i = 0; i < len; ++i) {
-				_pointLightRegisters[i] = _registerCache.getFreeFragmentConstant();
-				if (_lightFragmentDataIndex == -1) _lightFragmentDataIndex = _pointLightRegisters[i].index*4;
+				_pointLightVertexConstants[i] = _registerCache.getFreeVertexConstant();
+				if (_lightVertexConstantIndex == -1) _lightVertexConstantIndex = (_pointLightVertexConstants[i].index - _vertexConstantsOffset)*4;
+			}
+
+			len = _dirLightFragmentConstants.length;
+			for (i = 0; i < len; ++i) {
+				_dirLightFragmentConstants[i] = _registerCache.getFreeFragmentConstant();
+				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = _dirLightFragmentConstants[i].index*4;
+			}
+
+			len = _pointLightFragmentConstants.length;
+			for (i = 0; i < len; ++i) {
+				_pointLightFragmentConstants[i] = _registerCache.getFreeFragmentConstant();
+				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = _pointLightFragmentConstants[i].index*4;
 			}
 		}
 
@@ -281,20 +294,30 @@ package away3d.materials.compilation
 			var diffuseColorReg : ShaderRegisterElement;
 			var specularColorReg : ShaderRegisterElement;
 			var lightDirReg : ShaderRegisterElement;
-			var regIndex : int;
+			var vertexRegIndex : int;
+			var fragmentRegIndex : int;
 			var addSpec : Boolean = _usingSpecularMethod && usesLightsForSpecular();
 			var addDiff : Boolean = usesLightsForDiffuse();
 
 			if (!(addSpec || addDiff)) return;
 
 			for (var i : uint = 0; i < _numDirectionalLights; ++i) {
-				lightDirReg = _dirLightRegisters[regIndex++];
-				diffuseColorReg = _dirLightRegisters[regIndex++];
-				specularColorReg = _dirLightRegisters[regIndex++];
+				lightDirReg = _dirLightVertexConstants[vertexRegIndex++];
+
+				var lightVarying : ShaderRegisterElement = _registerCache.getFreeVarying();
+				_vertexCode += "mov " + lightVarying + ", " + lightDirReg + "\n";
+
+				lightDirReg = _registerCache.getFreeFragmentVectorTemp();
+				_registerCache.addFragmentTempUsages(lightDirReg, 1);
+				_fragmentCode += "nrm " + lightDirReg + ".xyz, " + lightVarying + ".xyz\n";
+				_fragmentCode += "mov " + lightDirReg + ".w, " + lightVarying + ".w\n";
+				diffuseColorReg = _dirLightFragmentConstants[fragmentRegIndex++];
+				specularColorReg = _dirLightFragmentConstants[fragmentRegIndex++];
 				if (addDiff)
 					_fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerLight(_methodSetup._diffuseMethodVO, lightDirReg, diffuseColorReg, _registerCache);
 				if (addSpec)
 					_fragmentCode += _methodSetup._specularMethod.getFragmentCodePerLight(_methodSetup._specularMethodVO, lightDirReg, specularColorReg, _registerCache);
+				_registerCache.removeFragmentTempUsage(lightDirReg);
 			}
 		}
 
@@ -311,9 +334,9 @@ package away3d.materials.compilation
 			if (!(addSpec || addDiff)) return;
 
 			for (var i : uint = 0; i < _numPointLights; ++i) {
-				lightPosReg = _pointLightRegisters[regIndex++];
-				diffuseColorReg = _pointLightRegisters[regIndex++];
-				specularColorReg = _pointLightRegisters[regIndex++];
+				lightPosReg = _pointLightFragmentConstants[regIndex++];
+				diffuseColorReg = _pointLightFragmentConstants[regIndex++];
+				specularColorReg = _pointLightFragmentConstants[regIndex++];
 				lightDirReg = _registerCache.getFreeFragmentVectorTemp();
 				_registerCache.addFragmentTempUsages(lightDirReg, 1);
 
@@ -333,7 +356,7 @@ package away3d.materials.compilation
 					// normalize
 						"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
 
-				if (_lightFragmentDataIndex == -1) _lightFragmentDataIndex = lightPosReg.index*4;
+				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = lightPosReg.index*4;
 
 				if (addDiff)
 					_fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerLight(_methodSetup._diffuseMethodVO, lightDirReg, diffuseColorReg, _registerCache);
@@ -383,5 +406,7 @@ package away3d.materials.compilation
 				}
 			}
 		}
+
+
 	}
 }
