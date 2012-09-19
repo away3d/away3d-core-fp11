@@ -11,7 +11,6 @@ package away3d.materials.passes
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.compilation.SuperShaderCompiler;
-	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
@@ -403,7 +402,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var i : uint;
 			var context : Context3D = stage3DProxy._context3D;
@@ -437,10 +436,10 @@ package away3d.materials.passes
 			_ambientLightR = _ambientLightG = _ambientLightB = 0;
 
 			if (usesLights())
-				updateLightConstants(lightPicker);
+				updateLightConstants();
 
 			if (usesProbes())
-				updateProbes(lightPicker.lightProbes, lightPicker.lightProbeWeights, stage3DProxy);
+				updateProbes(stage3DProxy);
 
 			if (_sceneMatrixIndex >= 0)
 				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
@@ -472,7 +471,7 @@ package away3d.materials.passes
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexConstantsOffset, _vertexConstantData, _numUsedVertexConstants - _vertexConstantsOffset);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentConstantData, _numUsedFragmentConstants);
 
-			super.render(renderable, stage3DProxy, camera, lightPicker);
+			super.render(renderable, stage3DProxy, camera);
 		}
 
 
@@ -672,7 +671,7 @@ package away3d.materials.passes
 		 * @param numLights The amount of lights available.
 		 * @param maxLights The maximum amount of lights supported.
 		 */
-		private function updateLightConstants(lightPicker : LightPickerBase) : void
+		private function updateLightConstants() : void
 		{
 			// first dirs, then points
 			var dirLight : DirectionalLight;
@@ -686,7 +685,7 @@ package away3d.materials.passes
 			k = _lightDataIndex;
 
 			for (var cast : int = 0; cast < numLightTypes; ++cast) {
-				var dirLights : Vector.<DirectionalLight> = cast? lightPicker.castingDirectionalLights : lightPicker.directionalLights;
+				var dirLights : Vector.<DirectionalLight> = cast? _lightPicker.castingDirectionalLights : _lightPicker.directionalLights;
 				len = dirLights.length;
 				total += len;
 
@@ -724,7 +723,7 @@ package away3d.materials.passes
 
 			total = 0;
 			for (var cast : int = 0; cast < numLightTypes; ++cast) {
-				var pointLights : Vector.<PointLight> = cast? lightPicker.castingPointLights : lightPicker.pointLights;
+				var pointLights : Vector.<PointLight> = cast? _lightPicker.castingPointLights : _lightPicker.pointLights;
 				len = pointLights.length;
 				for (i = 0; i < len; ++i) {
 					pointLight = pointLights[i];
@@ -759,9 +758,11 @@ package away3d.materials.passes
 			}
 		}
 
-		private function updateProbes(lightProbes : Vector.<LightProbe>, weights : Vector.<Number>, stage3DProxy : Stage3DProxy) : void
+		private function updateProbes(stage3DProxy : Stage3DProxy) : void
 		{
 			var probe : LightProbe;
+			var lightProbes : Vector.<LightProbe> = _lightPicker.lightProbes;
+			var weights : Vector.<Number> = _lightPicker.lightProbeWeights;
 			var len : int = lightProbes.length;
 			var addDiff : Boolean = usesProbesForDiffuse();
 			var addSpec : Boolean = _methodSetup._specularMethod && usesProbesForSpecular();

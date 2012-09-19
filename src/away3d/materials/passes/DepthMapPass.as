@@ -115,12 +115,12 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (_alphaThreshold > 0)
 				stage3DProxy.setSimpleVertexBuffer(1, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.UVBufferOffset);
 
-			super.render(renderable, stage3DProxy, camera, lightPicker);
+			super.render(renderable, stage3DProxy, camera);
 		}
 
 		/**

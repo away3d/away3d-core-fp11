@@ -4,12 +4,15 @@
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.lightpickers.LightPickerBase;
+	import away3d.materials.lightpickers.StaticLightPicker;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
+	import away3d.materials.passes.MaterialPassBase;
+	import away3d.materials.passes.SuperShaderPass;
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 
@@ -18,7 +21,6 @@
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
-	import flash.events.Event;
 
 	use namespace arcane;
 
@@ -28,8 +30,9 @@
 	 */
 	public class MultiPassMaterialBase extends MaterialBase
 	{
-		protected var _effectsPass : SuperShaderPass;
+		protected var _casterLightPass : SuperShaderPass;
 		protected var _nonCasterLightPass : SuperShaderPass;
+		protected var _effectsPass : SuperShaderPass;
 
 		private var _alphaThreshold : Number = 0;
 		private var _specularLightSources : uint = 0x01;
@@ -361,32 +364,38 @@
 		arcane override function updateMaterial(context : Context3D) : void
 		{
 			var passesInvalid : Boolean;
+
 			if (_screenPassesInvalid) {
 				updateScreenPasses();
 				passesInvalid = true;
 			}
 
-			if (	passesInvalid ||
-					(_nonCasterLightPass && _nonCasterLightPass._passesDirty) ||
-					(_effectsPass && _effectsPass._passesDirty)
-				)
-			{
+			if (passesInvalid || isAnyScreenPassInvalid()) {
 				clearPasses();
 
+				addChildPassesFor(_casterLightPass);
 				addChildPassesFor(_nonCasterLightPass);
 				addChildPassesFor(_effectsPass);
 
-				// ensure screenpasses are last
-				if (_nonCasterLightPass) addPass(_nonCasterLightPass);
-				if (_effectsPass) addPass(_effectsPass);
-
-				if (_nonCasterLightPass) {
-					_nonCasterLightPass._passesDirty = false;
-				}
-				if (_effectsPass) {
-					_effectsPass._passesDirty = false;
-				}
+				addScreenPass(_casterLightPass);
+				addScreenPass(_nonCasterLightPass);
+				addScreenPass(_effectsPass);
 			}
+		}
+
+		private function addScreenPass(pass : SuperShaderPass) : void
+		{
+			if (pass) {
+				addPass(pass);
+				pass._passesDirty = false;
+			}
+		}
+
+		private function isAnyScreenPassInvalid() : Boolean
+		{
+			return 	(_casterLightPass && _casterLightPass._passesDirty) ||
+					(_nonCasterLightPass && _nonCasterLightPass._passesDirty) ||
+					(_effectsPass && _effectsPass._passesDirty);
 		}
 
 		private function addChildPassesFor(pass : SuperShaderPass) : void
@@ -399,7 +408,6 @@
 					addPass(pass._passes[i]);
 			}
 		}
-
 
 		override arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
@@ -416,20 +424,47 @@
 
 		protected function updateScreenPasses() : void
 		{
-			// effects pass will be used to render unshaded diffuse
+			initPasses();
+			setBlendAndCompareModes();
+
+			_screenPassesInvalid = false;
+		}
+
+		private function initPasses() : void
+		{
+// effects pass will be used to render unshaded diffuse
 			if (numLights == 0 || numMethods > 0)
 				initEffectsPass();
 			else if (_effectsPass && numMethods == 0)
 				removeEffectsPass();
 
-			if (numNonCasters > 0)
-			    initNonCasterLightPass();
+			if (_shadowMethod)
+				initCasterLightPass();
 			else
-			    removeNonCasterLightPass();
+				removeCasterLightPass();
+
+			if (numNonCasters > 0)
+				initNonCasterLightPass();
+			else
+				removeNonCasterLightPass();
+		}
+
+		private function setBlendAndCompareModes() : void
+		{
+			if (_casterLightPass) {
+				_casterLightPass.setBlendMode(BlendMode.NORMAL, false);
+				_casterLightPass.depthCompareMode = depthCompareMode;
+			}
 
 			if (_nonCasterLightPass) {
-				_nonCasterLightPass.setBlendMode(BlendMode.NORMAL, false);
-				_nonCasterLightPass.depthCompareMode = depthCompareMode;
+				if (_casterLightPass) {
+					_nonCasterLightPass.setBlendMode(BlendMode.ADD, false);
+					_nonCasterLightPass.depthCompareMode = Context3DCompareMode.EQUAL;
+				}
+				else {
+					_nonCasterLightPass.setBlendMode(BlendMode.NORMAL, false);
+					_nonCasterLightPass.depthCompareMode = depthCompareMode;
+				}
 				if (_effectsPass) {
 					_effectsPass.depthCompareMode = Context3DCompareMode.EQUAL;
 					_effectsPass.setBlendMode(BlendMode.NORMAL, true);
@@ -439,18 +474,41 @@
 				_effectsPass.depthCompareMode = depthCompareMode;
 				_effectsPass.setBlendMode(BlendMode.NORMAL, false);
 			}
+		}
 
-			_screenPassesInvalid = false;
+		private function initCasterLightPass() : void
+		{
+			_casterLightPass ||= new SuperShaderPass(this);
+			_casterLightPass.includeCasters = true;
+			_casterLightPass.diffuseMethod = null;
+			_casterLightPass.ambientMethod = null;
+			_casterLightPass.normalMethod = null;
+			_casterLightPass.specularMethod = null;
+			_casterLightPass.shadowMethod = null;
+			_casterLightPass.lightPicker = new StaticLightPicker([_shadowMethod.castingLight]);
+			_casterLightPass.shadowMethod = _shadowMethod;
+			_casterLightPass.diffuseMethod = _diffuseMethod;
+			_casterLightPass.ambientMethod = _ambientMethod;
+			_casterLightPass.normalMethod = _normalMethod;
+			_casterLightPass.specularMethod = _specularMethod;
+		}
+
+		private function removeCasterLightPass() : void
+		{
+			if (!_casterLightPass) return;
+			_casterLightPass.dispose();
+			_casterLightPass = null;
 		}
 
 		private function initNonCasterLightPass() : void
 		{
 			_nonCasterLightPass ||= new SuperShaderPass(this);
-			_nonCasterLightPass.includeCasters = _shadowMethod != null;
+			_nonCasterLightPass.includeCasters = _shadowMethod == null;
 			_nonCasterLightPass.diffuseMethod = null;
 			_nonCasterLightPass.ambientMethod = null;
 			_nonCasterLightPass.normalMethod = null;
 			_nonCasterLightPass.specularMethod = null;
+			_nonCasterLightPass.lightPicker = _lightPicker;
 			_nonCasterLightPass.diffuseMethod = _diffuseMethod;
 			_nonCasterLightPass.ambientMethod = _ambientMethod;
 			_nonCasterLightPass.normalMethod = _normalMethod;
@@ -509,7 +567,5 @@
 		{
 			_screenPassesInvalid = true;
 		}
-
-
 	}
 }

@@ -146,16 +146,14 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			// TODO: not used
-			camera = null; 
 			var matrix : Matrix3D;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
 			var len : uint;
 			var light : LightBase;
-			var lights : Vector.<LightBase> = lightPicker.allPickedLights;
+			var lights : Vector.<LightBase> = _lightPicker.allPickedLights;
 
 			_textures[contextIndex] ||= new Dictionary();
 

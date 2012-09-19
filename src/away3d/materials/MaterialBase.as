@@ -50,7 +50,6 @@ package away3d.materials
 		private var _owners : Vector.<IMaterialOwner>;
 
 		private var _alphaPremultiplied : Boolean;
-		private var _requiresBlending : Boolean;
 
 		private var _blendMode : String = BlendMode.NORMAL;
 
@@ -283,12 +282,12 @@ package away3d.materials
 			if (_distanceBasedDepthRender) {
 				if (renderable.animator)
 					_distancePass.updateAnimationState(renderable, stage3DProxy);
-				_distancePass.render(renderable, stage3DProxy, camera, _lightPicker);
+				_distancePass.render(renderable, stage3DProxy, camera);
 			}
 			else {
 				if (renderable.animator)
 					_depthPass.updateAnimationState(renderable, stage3DProxy);
-				_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
+				_depthPass.render(renderable, stage3DProxy, camera);
 			}
 		}
 
@@ -335,7 +334,7 @@ package away3d.materials
 			if (renderable.animator)
 				pass.updateAnimationState(renderable, stage3DProxy);
 
-			pass.render(renderable, stage3DProxy, entityCollector.camera, _lightPicker);
+			pass.render(renderable, stage3DProxy, entityCollector.camera);
 		}
 
 
@@ -417,7 +416,7 @@ package away3d.materials
 		}
 
 		/**
-		 * Marks the depth shader program as invalid, so it will be recompiled before the next render.
+		 * Marks the depth shader programs as invalid, so it will be recompiled before the next render.
 		 * @param triggerPass The pass triggering the invalidation, if any, so no infinite loop will occur.
 		 */
 		arcane function invalidatePasses(triggerPass : MaterialPassBase) : void
