@@ -2,14 +2,14 @@ package away3d.materials.compilation
 {
 	import away3d.arcane;
 
-	public class SuperShaderCompiler extends ShaderCompiler
+	public class CasterShaderCompiler extends ShaderCompiler
 	{
 		public var _pointLightRegisters : Vector.<ShaderRegisterElement>;
 		public var _dirLightRegisters : Vector.<ShaderRegisterElement>;
 
 		use namespace arcane;
 
-		public function SuperShaderCompiler()
+		public function CasterShaderCompiler()
 		{
 			super();
 		}
@@ -28,7 +28,14 @@ package away3d.materials.compilation
 		override protected function calculateDependencies() : void
 		{
 			super.calculateDependencies();
-			_dependencyCounter.addWorldSpaceDependencies();
+			if (usesWorldSpaceShading())
+				_dependencyCounter.addWorldSpaceDependencies();
+		}
+
+		private function usesWorldSpaceShading() : Boolean
+		{
+			// !(_normalMethod.hasOutput && _normalMethod.tangentSpace)
+			return true;
 		}
 
 		override protected function compileNormalCode() : void
@@ -186,7 +193,7 @@ package away3d.materials.compilation
 
 			_vertexCode += "sub " + _sharedRegisters.viewDirVarying + ", " + cameraPositionReg + ", " + _sharedRegisters.globalPositionVertex + "\n";
 			_fragmentCode += 	"nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + ".xyz		\n" +
-								"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
+					"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
 
 			_registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 		}
@@ -194,6 +201,10 @@ package away3d.materials.compilation
 		override protected function compileLightingCode() : void
 		{
 			var shadowReg : ShaderRegisterElement;
+
+			initLightRegisters();
+			compileDirectionalLightCode();
+			compilePointLightCode();
 
 			_sharedRegisters.shadedTarget = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_sharedRegisters.shadedTarget, 1);
@@ -205,15 +216,6 @@ package away3d.materials.compilation
 				_vertexCode += _methodSetup._specularMethod.getVertexCode(_methodSetup._specularMethodVO, _registerCache);
 				_fragmentCode += _methodSetup._specularMethod.getFragmentPreLightingCode(_methodSetup._specularMethodVO, _registerCache);
 			}
-
-			if (usesLights()) {
-				initLightRegisters();
-				compileDirectionalLightCode();
-				compilePointLightCode();
-			}
-
-			if (usesProbes())
-				compileLightProbeCode();
 
 			// only need to create and reserve _shadedTargetReg here, no earlier?
 			_vertexCode += _methodSetup._ambientMethod.getVertexCode(_methodSetup._ambientMethodVO, _registerCache);
@@ -342,45 +344,6 @@ package away3d.materials.compilation
 					_fragmentCode += _methodSetup._specularMethod.getFragmentCodePerLight(_methodSetup._specularMethodVO, lightDirReg, specularColorReg, _registerCache);
 
 				_registerCache.removeFragmentTempUsage(lightDirReg);
-			}
-		}
-
-		private function compileLightProbeCode() : void
-		{
-			var weightReg : String;
-			var weightComponents : Array = [ ".x", ".y", ".z", ".w" ];
-			var weightRegisters : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>();
-			var i : uint;
-			var texReg : ShaderRegisterElement;
-			var addSpec : Boolean = _usingSpecularMethod && usesProbesForSpecular();
-			var addDiff : Boolean = usesProbesForDiffuse();
-
-			if (!(addSpec || addDiff)) return;
-
-			if (addDiff)
-				_lightProbeDiffuseIndices = new Vector.<uint>();
-			if (addSpec)
-				_lightProbeSpecularIndices = new Vector.<uint>();
-
-			for (i = 0; i < _numProbeRegisters; ++i) {
-				weightRegisters[i] = _registerCache.getFreeFragmentConstant();
-				if (i == 0) _probeWeightsIndex = weightRegisters[i].index*4;
-			}
-
-			for (i = 0; i < _numLightProbes; ++i) {
-				weightReg = weightRegisters[Math.floor(i/4)].toString() + weightComponents[i % 4];
-
-				if (addDiff) {
-					texReg = _registerCache.getFreeTextureReg();
-					_lightProbeDiffuseIndices[i] = texReg.index;
-					_fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerProbe(_methodSetup._diffuseMethodVO, texReg, weightReg, _registerCache);
-				}
-
-				if (addSpec) {
-					texReg = _registerCache.getFreeTextureReg();
-					_lightProbeSpecularIndices[i] = texReg.index;
-					_fragmentCode += _methodSetup._specularMethod.getFragmentCodePerProbe(_methodSetup._specularMethodVO, texReg, weightReg, _registerCache);
-				}
 			}
 		}
 	}

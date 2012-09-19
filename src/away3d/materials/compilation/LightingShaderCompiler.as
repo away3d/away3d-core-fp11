@@ -2,14 +2,14 @@ package away3d.materials.compilation
 {
 	import away3d.arcane;
 
-	public class SuperShaderCompiler extends ShaderCompiler
+	public class LightingShaderCompiler extends ShaderCompiler
 	{
 		public var _pointLightRegisters : Vector.<ShaderRegisterElement>;
 		public var _dirLightRegisters : Vector.<ShaderRegisterElement>;
 
 		use namespace arcane;
 
-		public function SuperShaderCompiler()
+		public function LightingShaderCompiler()
 		{
 			super();
 		}
@@ -186,7 +186,7 @@ package away3d.materials.compilation
 
 			_vertexCode += "sub " + _sharedRegisters.viewDirVarying + ", " + cameraPositionReg + ", " + _sharedRegisters.globalPositionVertex + "\n";
 			_fragmentCode += 	"nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + ".xyz		\n" +
-								"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
+					"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
 
 			_registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 		}

@@ -4,9 +4,11 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.errors.AbstractMethodError;
 	import away3d.events.ShadingMethodEvent;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.compilation.ShaderCompiler;
 	import away3d.materials.compilation.SuperShaderCompiler;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
@@ -46,7 +48,7 @@ package away3d.materials.passes
 		protected var _tangentBufferIndex : int;
 		protected var _sceneMatrixIndex : int;
 		protected var _sceneNormalMatrixIndex : int;
-		protected var _lightDataIndex : int;
+		protected var _lightFragmentConstantIndex : int;
 		protected var _cameraPositionIndex : int;
 		protected var _uvTransformIndex : int;
 		protected var _lightProbeDiffuseIndices : Vector.<uint>;
@@ -56,7 +58,7 @@ package away3d.materials.passes
 		protected var _ambientLightG : Number;
 		protected var _ambientLightB : Number;
 
-		protected var _compiler : SuperShaderCompiler;
+		protected var _compiler : ShaderCompiler;
 
 		protected var _methodSetup : ShaderMethodSetup;
 
@@ -121,7 +123,7 @@ package away3d.materials.passes
 
 		protected function initCompiler() : void
 		{
-			_compiler = new SuperShaderCompiler();
+			_compiler = createCompiler();
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
 			_compiler.numLightProbes = _numLightProbes;
@@ -134,6 +136,11 @@ package away3d.materials.passes
 			_compiler.alphaPremultiplied = _alphaPremultiplied;
 			_compiler.preserveAlpha = _preserveAlpha;
 			_compiler.compile();
+		}
+
+		protected function createCompiler() : ShaderCompiler
+		{
+			throw new AbstractMethodError();
 		}
 
 		private function updateShaderProperties() : void
@@ -157,7 +164,7 @@ package away3d.materials.passes
 			_secondaryUVBufferIndex = _compiler.secondaryUVBufferIndex;
 			_normalBufferIndex = _compiler.normalBufferIndex;
 			_tangentBufferIndex = _compiler.tangentBufferIndex;
-			_lightDataIndex = _compiler.lightDataIndex;
+			_lightFragmentConstantIndex = _compiler.lightFragmentDataIndex;
 			_cameraPositionIndex = _compiler.cameraPositionIndex;
 			_commonsDataIndex = _compiler.commonsDataIndex;
 			_sceneMatrixIndex = _compiler.sceneMatrixIndex;
@@ -501,6 +508,26 @@ package away3d.materials.passes
 		{
 			for (var i : int = 0; i < _passes.length; ++i)
 				_passes[i].lightPicker = _lightPicker;
+		}
+
+		public function get specularLightSources() : uint
+		{
+			return _specularLightSources;
+		}
+
+		public function set specularLightSources(value : uint) : void
+		{
+			_specularLightSources = value;
+		}
+
+		public function get diffuseLightSources() : uint
+		{
+			return _diffuseLightSources;
+		}
+
+		public function set diffuseLightSources(value : uint) : void
+		{
+			_diffuseLightSources = value;
 		}
 	}
 }

@@ -3,11 +3,11 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.events.ShadingMethodEvent;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.PointLight;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.compilation.ShaderCompiler;
 	import away3d.materials.compilation.SuperShaderCompiler;
 
 	import flash.geom.Vector3D;
@@ -31,6 +31,11 @@ package away3d.materials.passes
 			super(material);
 			_diffuseLightSources = LightSources.LIGHTS;
 			_specularLightSources = LightSources.LIGHTS;
+		}
+
+		override protected function createCompiler() : ShaderCompiler
+		{
+			return new SuperShaderCompiler();
 		}
 
 		override protected function updateLights() : void
@@ -75,7 +80,7 @@ package away3d.materials.passes
 			var i : uint, k : uint;
 			var dirPos : Vector3D;
 
-			k = _lightDataIndex;
+			k = _lightFragmentConstantIndex;
 
 			if (_numDirectionalLights > 0) {
 				dirLight = _lightPicker.castingDirectionalLights[0];

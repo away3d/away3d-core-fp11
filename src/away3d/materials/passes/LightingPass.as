@@ -8,6 +8,7 @@ package away3d.materials.passes
 	import away3d.lights.PointLight;
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.compilation.LightingShaderCompiler;
 	import away3d.materials.compilation.ShaderCompiler;
 	import away3d.materials.compilation.SuperShaderCompiler;
 	import away3d.materials.methods.ColorTransformMethod;
@@ -25,21 +26,21 @@ package away3d.materials.passes
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
 
-	public class SuperShaderPass extends CompiledPass
+	public class LightingPass extends CompiledPass
 	{
 		private var _includeCasters : Boolean = true;
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
 		 */
-		public function SuperShaderPass(material : MaterialBase)
+		public function LightingPass(material : MaterialBase)
 		{
 			super(material);
 		}
 
 		override protected function createCompiler() : ShaderCompiler
 		{
-			return new SuperShaderCompiler();
+			return new LightingShaderCompiler();
 		}
 
 		public function get includeCasters() : Boolean
@@ -52,76 +53,6 @@ package away3d.materials.passes
 			if (_includeCasters == value) return;
 			_includeCasters = value;
 			invalidateShaderProgram();
-		}
-
-		/**
-		 * The ColorTransform object to transform the colour of the material with.
-		 */
-		public function get colorTransform() : ColorTransform
-		{
-			return _methodSetup.colorTransformMethod ? _methodSetup._colorTransformMethod.colorTransform : null;
-		}
-
-		public function set colorTransform(value : ColorTransform) : void
-		{
-			if (value) {
-				colorTransformMethod ||= new ColorTransformMethod();
-				_methodSetup._colorTransformMethod.colorTransform = value;
-			}
-			else if (!value) {
-				if (_methodSetup._colorTransformMethod)
-					colorTransformMethod = null;
-				colorTransformMethod = _methodSetup._colorTransformMethod = null;
-			}
-		}
-
-		public function get colorTransformMethod() : ColorTransformMethod
-		{
-			return _methodSetup.colorTransformMethod;
-		}
-
-		public function set colorTransformMethod(value : ColorTransformMethod) : void
-		{
-			_methodSetup.colorTransformMethod = value;
-		}
-
-		/**
-		 * Adds a shading method to the end of the shader. Note that shading methods can
-		 * not be reused across materials.
-		 */
-		public function addMethod(method : EffectMethodBase) : void
-		{
-			_methodSetup.addMethod(method);
-		}
-
-		public function get numMethods() : int
-		{
-			return _methodSetup.numMethods;
-		}
-
-		public function hasMethod(method : EffectMethodBase) : Boolean
-		{
-			return _methodSetup.hasMethod(method);
-		}
-
-		public function getMethodAt(index : int) : EffectMethodBase
-		{
-			return _methodSetup.getMethodAt(index);
-		}
-
-		/**
-		 * Adds a shading method to the end of a shader, at the specified index amongst
-		 * the methods in that section of the shader. Note that shading methods can not
-		 * be reused across materials.
-		 */
-		public function addMethodAt(method : EffectMethodBase, index : int) : void
-		{
-			_methodSetup.addMethodAt(method, index);
-		}
-
-		public function removeMethod(method : EffectMethodBase) : void
-		{
-			_methodSetup.removeMethod(method);
 		}
 
 		override protected function updateLights() : void
@@ -146,49 +77,12 @@ package away3d.materials.passes
 		{
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.activate(_methodSetup._colorTransformMethodVO, stage3DProxy);
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-			for (var i : int = 0; i < len; ++i) {
-				var set : MethodVOSet = methods[i];
-				set.method.activate(set.data, stage3DProxy);
-			}
-
 			if (_cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;
 				_vertexConstantData[_cameraPositionIndex] = pos.x;
 				_vertexConstantData[_cameraPositionIndex + 1] = pos.y;
 				_vertexConstantData[_cameraPositionIndex + 2] = pos.z;
 			}
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
-		{
-			super.deactivate(stage3DProxy);
-
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.deactivate(_methodSetup._colorTransformMethodVO, stage3DProxy);
-
-			var set : MethodVOSet;
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-			for (var i : uint = 0; i < len; ++i) {
-				set = methods[i];
-				set.method.deactivate(set.data, stage3DProxy);
-			}
-		}
-
-		override protected function addPassesFromMethods() : void
-		{
-			super.addPassesFromMethods();
-			if (_methodSetup._colorTransformMethod) addPasses(_methodSetup._colorTransformMethod.passes);
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			for (var i : uint = 0; i < methods.length; ++i)
-				addPasses(methods[i].method.passes);
 		}
 
 		private function usesProbesForSpecular() : Boolean

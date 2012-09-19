@@ -12,7 +12,10 @@ package away3d.materials.compilation
 		private var _secondaryUVDependencies : uint;
 		private var _globalPosDependencies : uint;
 		private var _tangentDependencies : uint;
-		private var _usesGlobalPosFragment : Boolean = true;	// why always true?
+		private var _usesGlobalPosFragment : Boolean = true;
+		private var _numPointLights : uint;
+		private var _lightSourceMask : uint;
+		// why always true?
 
 		public function MethodDependencyCounter()
 		{
@@ -32,10 +35,8 @@ package away3d.materials.compilation
 
 		public function setPositionedLights(numPointLights : uint, lightSourceMask : uint) : void
 		{
-			if (numPointLights > 0 && (lightSourceMask & LightSources.LIGHTS)) {
-				++_globalPosDependencies;
-				_usesGlobalPosFragment = true;
-			}
+			_numPointLights = numPointLights;
+			_lightSourceMask = lightSourceMask;
 		}
 
 		public function includeMethodVO(methodVO : MethodVO) : void
@@ -47,11 +48,7 @@ package away3d.materials.compilation
 			}
 			if (methodVO.needsNormals) ++_normalDependencies;
 			if (methodVO.needsTangents) ++_tangentDependencies;
-			if (methodVO.needsView) {
-				if (_viewDirDependencies == 0)
-					++_globalPosDependencies;
-				++_viewDirDependencies;
-			}
+			if (methodVO.needsView) ++_viewDirDependencies;
 			if (methodVO.needsUV) ++_uvDependencies;
 			if (methodVO.needsSecondaryUV) ++_secondaryUVDependencies;
 		}
@@ -94,6 +91,16 @@ package away3d.materials.compilation
 		public function get globalPosDependencies() : uint
 		{
 			return _globalPosDependencies;
+		}
+
+		public function addWorldSpaceDependencies() : void
+		{
+			if (_viewDirDependencies > 0) ++_globalPosDependencies;
+
+			if (_numPointLights > 0 && (_lightSourceMask & LightSources.LIGHTS)) {
+				++_globalPosDependencies;
+				_usesGlobalPosFragment = true;
+			}
 		}
 	}
 }

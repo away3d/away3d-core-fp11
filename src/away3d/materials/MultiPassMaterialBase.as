@@ -12,6 +12,7 @@
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.passes.CompiledPass;
+	import away3d.materials.passes.LightingPass;
 	import away3d.materials.passes.ShadowCasterPass;
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
@@ -31,7 +32,7 @@
 	public class MultiPassMaterialBase extends MaterialBase
 	{
 		protected var _casterLightPass : ShadowCasterPass;
-		protected var _nonCasterLightPass : SuperShaderPass;
+		protected var _nonCasterLightPass : LightingPass;
 		protected var _effectsPass : SuperShaderPass;
 
 		private var _alphaThreshold : Number = 0;
@@ -490,6 +491,8 @@
 			_casterLightPass.ambientMethod = _ambientMethod;
 			_casterLightPass.normalMethod = _normalMethod;
 			_casterLightPass.specularMethod = _specularMethod;
+			_casterLightPass.diffuseLightSources = _diffuseLightSources;
+			_casterLightPass.specularLightSources = _specularLightSources;
 		}
 
 		private function removeCasterLightPass() : void
@@ -501,7 +504,7 @@
 
 		private function initNonCasterLightPass() : void
 		{
-			_nonCasterLightPass ||= new SuperShaderPass(this);
+			_nonCasterLightPass ||= new LightingPass(this);
 			_nonCasterLightPass.includeCasters = _shadowMethod == null;
 			_nonCasterLightPass.diffuseMethod = null;
 			_nonCasterLightPass.ambientMethod = null;
