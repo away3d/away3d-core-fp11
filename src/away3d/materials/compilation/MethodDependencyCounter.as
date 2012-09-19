@@ -93,13 +93,13 @@ package away3d.materials.compilation
 			return _globalPosDependencies;
 		}
 
-		public function addWorldSpaceDependencies() : void
+		public function addWorldSpaceDependencies(fragmentLights : Boolean) : void
 		{
 			if (_viewDirDependencies > 0) ++_globalPosDependencies;
 
 			if (_numPointLights > 0 && (_lightSourceMask & LightSources.LIGHTS)) {
 				++_globalPosDependencies;
-				_usesGlobalPosFragment = true;
+				if (fragmentLights) _usesGlobalPosFragment = true;
 			}
 		}
 	}

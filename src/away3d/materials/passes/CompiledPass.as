@@ -9,7 +9,6 @@ package away3d.materials.passes
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.compilation.ShaderCompiler;
-	import away3d.materials.compilation.SuperShaderCompiler;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
@@ -143,7 +142,7 @@ package away3d.materials.passes
 			throw new AbstractMethodError();
 		}
 
-		private function updateShaderProperties() : void
+		protected function updateShaderProperties() : void
 		{
 			_animatableAttributes = _compiler.animatableAttributes;
 			_animationTargetRegisters = _compiler.animationTargetRegisters;
@@ -371,7 +370,6 @@ package away3d.materials.passes
 		{
 			invalidateShaderProgram();
 		}
-
 
 
 		/**

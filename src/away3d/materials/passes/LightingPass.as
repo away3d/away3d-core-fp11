@@ -2,6 +2,7 @@ package away3d.materials.passes
 {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
+	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightProbe;
@@ -9,10 +10,10 @@ package away3d.materials.passes
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.compilation.LightingShaderCompiler;
+	import away3d.materials.compilation.LightingShaderCompiler;
 	import away3d.materials.compilation.ShaderCompiler;
 	import away3d.materials.methods.MethodVOSet;
 
-	import flash.geom.ColorTransform;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -26,7 +27,9 @@ package away3d.materials.passes
 	public class LightingPass extends CompiledPass
 	{
 		private var _includeCasters : Boolean = true;
+		private var _tangentSpace : Boolean;
 		private var _lightVertexConstantIndex : int;
+		private var _inverseSceneMatrix : Vector.<Number> = new Vector.<Number>();
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
@@ -68,10 +71,33 @@ package away3d.materials.passes
 			invalidateShaderProgram();
 		}
 
+		override protected function updateShaderProperties() : void
+		{
+			super.updateShaderProperties();
+			_tangentSpace = LightingShaderCompiler(_compiler).tangentSpace;
+		}
+
 		override protected function updateRegisterIndices() : void
 		{
 			super.updateRegisterIndices();
 			_lightVertexConstantIndex = LightingShaderCompiler(_compiler).lightVertexConstantIndex;
+		}
+
+
+		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		{
+			renderable.inverseSceneTransform.copyRawDataTo(_inverseSceneMatrix);
+
+			if (_tangentSpace && _cameraPositionIndex >= 0) {
+				var pos : Vector3D = camera.scenePosition;
+				var x : Number = pos.x;
+				var y : Number = pos.y;
+				var z : Number = pos.z;
+				_vertexConstantData[_cameraPositionIndex] = _inverseSceneMatrix[0]*x + _inverseSceneMatrix[4]*y + _inverseSceneMatrix[8]*z + _inverseSceneMatrix[12];
+				_vertexConstantData[_cameraPositionIndex + 1] = _inverseSceneMatrix[1]*x + _inverseSceneMatrix[5]*y + _inverseSceneMatrix[9]*z + _inverseSceneMatrix[13];
+				_vertexConstantData[_cameraPositionIndex + 2] = _inverseSceneMatrix[2]*x + _inverseSceneMatrix[6]*y + _inverseSceneMatrix[10]*z + _inverseSceneMatrix[14];
+			}
+			super.render(renderable, stage3DProxy, camera);
 		}
 
 		/**
@@ -81,7 +107,7 @@ package away3d.materials.passes
 		{
 			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 
-			if (_cameraPositionIndex >= 0) {
+			if (!_tangentSpace && _cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;
 				_vertexConstantData[_cameraPositionIndex] = pos.x;
 				_vertexConstantData[_cameraPositionIndex + 1] = pos.y;
@@ -145,10 +171,21 @@ package away3d.materials.passes
 					_ambientLightG += dirLight._ambientG;
 					_ambientLightB += dirLight._ambientB;
 
-					_vertexConstantData[l++] = -dirPos.x;
-					_vertexConstantData[l++] = -dirPos.y;
-					_vertexConstantData[l++] = -dirPos.z;
-					_vertexConstantData[l++] = 1;
+					if (_tangentSpace) {
+						var x : Number = -dirPos.x;
+						var y : Number = -dirPos.y;
+						var z : Number = -dirPos.z;
+						_vertexConstantData[l++] = _inverseSceneMatrix[0]*x + _inverseSceneMatrix[4]*y + _inverseSceneMatrix[8]*z;
+						_vertexConstantData[l++] = _inverseSceneMatrix[1]*x + _inverseSceneMatrix[5]*y + _inverseSceneMatrix[9]*z;
+						_vertexConstantData[l++] = _inverseSceneMatrix[2]*x + _inverseSceneMatrix[6]*y + _inverseSceneMatrix[10]*z;
+						_vertexConstantData[l++] = 1;
+					}
+					else {
+						_fragmentConstantData[k++] = -dirPos.x;
+						_fragmentConstantData[k++] = -dirPos.y;
+						_fragmentConstantData[k++] = -dirPos.z;
+						_fragmentConstantData[k++] = 1;
+					}
 
 					_fragmentConstantData[k++] = dirLight._diffuseR;
 					_fragmentConstantData[k++] = dirLight._diffuseG;
@@ -181,10 +218,20 @@ package away3d.materials.passes
 					_ambientLightG += pointLight._ambientG;
 					_ambientLightB += pointLight._ambientB;
 
-					_fragmentConstantData[k++] = dirPos.x;
-					_fragmentConstantData[k++] = dirPos.y;
-					_fragmentConstantData[k++] = dirPos.z;
-					_fragmentConstantData[k++] = 1;
+					if (_tangentSpace) {
+						x = dirPos.x;
+						y = dirPos.y;
+						z = dirPos.z;
+						_vertexConstantData[l++] = _inverseSceneMatrix[0]*x + _inverseSceneMatrix[4]*y + _inverseSceneMatrix[8]*z + _inverseSceneMatrix[12];
+						_vertexConstantData[l++] = _inverseSceneMatrix[1]*x + _inverseSceneMatrix[5]*y + _inverseSceneMatrix[9]*z + _inverseSceneMatrix[13];
+						_vertexConstantData[l++] = _inverseSceneMatrix[2]*x + _inverseSceneMatrix[6]*y + _inverseSceneMatrix[10]*z + _inverseSceneMatrix[14];
+					}
+					else {
+						_vertexConstantData[l++] = dirPos.x;
+						_vertexConstantData[l++] = dirPos.y;
+						_vertexConstantData[l++] = dirPos.z;
+					}
+					_vertexConstantData[l++] = 1;
 
 					_fragmentConstantData[k++] = pointLight._diffuseR;
 					_fragmentConstantData[k++] = pointLight._diffuseG;

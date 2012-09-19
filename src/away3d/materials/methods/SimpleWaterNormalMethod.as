@@ -143,7 +143,10 @@ package away3d.materials.methods
 					"add " + temp + ", " + _sharedRegisters.uvVarying + ", " + dataReg2 + ".zwzw\n" +
 					getTexSampleCode(vo, temp, _normalTextureRegister2, temp) +
 					"add " + targetReg + ", " + targetReg + ", " + temp + "		\n" +
-					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n";
+					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n" +
+					"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _sharedRegisters.commons + ".xxx	\n" +
+					"nrm " + targetReg + ".xyz, " + targetReg + ".xyz							\n";
+
 		}
 	}
 }

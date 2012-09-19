@@ -29,7 +29,7 @@ package away3d.materials.compilation
 		{
 			super.calculateDependencies();
 			if (usesWorldSpaceShading())
-				_dependencyCounter.addWorldSpaceDependencies();
+				_dependencyCounter.addWorldSpaceDependencies(true);	// will need to be FALSE
 		}
 
 		private function usesWorldSpaceShading() : Boolean

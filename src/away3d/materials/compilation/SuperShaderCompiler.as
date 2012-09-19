@@ -28,7 +28,7 @@ package away3d.materials.compilation
 		override protected function calculateDependencies() : void
 		{
 			super.calculateDependencies();
-			_dependencyCounter.addWorldSpaceDependencies();
+			_dependencyCounter.addWorldSpaceDependencies(true);
 		}
 
 		override protected function compileNormalCode() : void
@@ -161,8 +161,6 @@ package away3d.materials.compilation
 			var temp : ShaderRegisterElement = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(temp, 1);
 			_fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _registerCache, temp) +
-					"sub " + temp + ".xyz, " + temp + ".xyz, " + _sharedRegisters.commons + ".xxx	\n" +
-					"nrm " + temp + ".xyz, " + temp + ".xyz							\n" +
 					"m33 " + _sharedRegisters.normalFragment + ".xyz, " + temp + ".xyz, " + t + "	\n" +
 					"mov " + _sharedRegisters.normalFragment + ".w,   " + _sharedRegisters.normalVarying + ".w			\n";
 

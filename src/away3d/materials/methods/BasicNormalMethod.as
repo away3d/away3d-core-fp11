@@ -75,7 +75,9 @@ package away3d.materials.methods
 		{
 			_normalTextureRegister = regCache.getFreeTextureReg();
 			vo.texturesIndex = _normalTextureRegister.index;
-			return getTexSampleCode(vo,  targetReg, _normalTextureRegister);
+			return 	getTexSampleCode(vo,  targetReg, _normalTextureRegister) +
+					"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _sharedRegisters.commons + ".xxx	\n" +
+					"nrm " + targetReg + ".xyz, " + targetReg + ".xyz							\n";
 		}
 	}
 }
