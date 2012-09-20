@@ -422,7 +422,7 @@ package away3d.materials
 		arcane function invalidatePasses(triggerPass : MaterialPassBase) : void
 		{
 			var owner : IMaterialOwner;
-			
+
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
 			

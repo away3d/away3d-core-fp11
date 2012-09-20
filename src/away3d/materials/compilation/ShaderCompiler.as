@@ -232,8 +232,7 @@ package away3d.materials.compilation
 			_registerCache.getFreeVertexConstant();
 			_sceneMatrixIndex = (positionMatrixReg.index - _vertexConstantsOffset)*4;
 
-			_vertexCode += 	"m44 " + _sharedRegisters.globalPositionVertex + ".xyz, " + _sharedRegisters.localPosition + ", " + positionMatrixReg + "\n" +
-							"mov " + _sharedRegisters.globalPositionVertex + ".w, " + _sharedRegisters.localPosition + ".w     \n";
+			_vertexCode += 	"m44 " + _sharedRegisters.globalPositionVertex + ", " + _sharedRegisters.localPosition + ", " + positionMatrixReg + "\n";
 
 			if (_dependencyCounter.usesGlobalPosFragment) {
 				_sharedRegisters.globalPositionVarying = _registerCache.getFreeVarying();

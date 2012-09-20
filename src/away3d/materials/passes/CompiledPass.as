@@ -296,13 +296,25 @@ package away3d.materials.passes
 
 		protected function addPassesFromMethods() : void
 		{
-			_passesDirty = true;
+			var oldPasses : Vector.<MaterialPassBase> = _passes;
 			_passes = new Vector.<MaterialPassBase>();
 			if (_methodSetup._normalMethod && _methodSetup._normalMethod.hasOutput) addPasses(_methodSetup._normalMethod.passes);
 			if (_methodSetup._ambientMethod) addPasses(_methodSetup._ambientMethod.passes);
 			if (_methodSetup._shadowMethod) addPasses(_methodSetup._shadowMethod.passes);
 			if (_methodSetup._diffuseMethod) addPasses(_methodSetup._diffuseMethod.passes);
 			if (_methodSetup._specularMethod) addPasses(_methodSetup._specularMethod.passes);
+
+			if (!oldPasses || _passes.length != oldPasses.length) {
+				_passesDirty = true;
+				return;
+			}
+
+			for (var i : int = 0; i < _passes.length; ++i) {
+				if (_passes[i] != oldPasses[i]) {
+					_passesDirty = true;
+					return;
+				}
+			}
 		}
 
 		/**

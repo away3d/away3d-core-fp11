@@ -312,6 +312,7 @@ package away3d.animators
 		 */
 		private function morphGeometry(state : SubGeomAnimationState, subGeom : SkinnedSubGeometry) : void
 		{
+			// todo: improve performance, should be able to use cache coherency better once buffers are merged
 			var verts : Vector.<Number> = subGeom.vertexData;
 			var normals : Vector.<Number> = subGeom.vertexNormalData;
 			var tangents : Vector.<Number> = subGeom.vertexTangentData;
@@ -320,63 +321,59 @@ package away3d.animators
 			var targetTangents : Vector.<Number> = state.animatedTangentData;
 			var jointIndices : Vector.<Number> = subGeom.jointIndexData;
 			var jointWeights : Vector.<Number> = subGeom.jointWeightsData;
-			var i1 : uint, i2 : uint = 1, i3 : uint = 2;
+			var i1 : uint, i2 : uint, i3 : uint;
 			var j : uint, k : uint;
 			var vx : Number, vy : Number, vz : Number;
 			var nx : Number, ny : Number, nz : Number;
 			var tx : Number, ty : Number, tz : Number;
 			var len : int = verts.length;
 			var weight : Number;
-			var mtxOffset : uint;
 			var vertX : Number, vertY : Number, vertZ : Number;
 			var normX : Number, normY : Number, normZ : Number;
 			var tangX : Number, tangY : Number, tangZ : Number;
-			var m11 : Number, m12 : Number, m13 : Number;
-			var m21 : Number, m22 : Number, m23 : Number;
-			var m31 : Number, m32 : Number, m33 : Number;
-			
+			var m11 : Number, m12 : Number, m13 : Number, m14 : Number;
+			var m21 : Number, m22 : Number, m23 : Number, m24 : Number;
+			var m31 : Number, m32 : Number, m33 : Number, m34 : Number;
+
 			while (i1 < len) {
+				i2 = uint(i1 + 1);
+				i3 = uint(i1 + 2);
 				vertX = verts[i1]; vertY = verts[i2]; vertZ = verts[i3];
-				vx = 0; vy = 0; vz = 0;
 				normX = normals[i1]; normY = normals[i2]; normZ = normals[i3];
-				nx = 0; ny = 0; nz = 0;
 				tangX = tangents[i1]; tangY = tangents[i2]; tangZ = tangents[i3];
+				vx = 0; vy = 0; vz = 0;
+				nx = 0; ny = 0; nz = 0;
 				tx = 0; ty = 0; tz = 0;
-				
-				// todo: can we use actual matrices when using cpu + using matrix.transformVectors, then adding them in loop?
-				
 				k = 0;
 				while (k < _jointsPerVertex) {
 					weight = jointWeights[j];
 					if (weight == 0) {
 						j += _jointsPerVertex - k;
 						k = _jointsPerVertex;
+						continue;
 					}
-					else {
-						// implicit /3*12 (/3 because indices are multiplied by 3 for gpu matrix access, *12 because it's the matrix size)
-						mtxOffset = jointIndices[uint(j++)]*4;
-						m11 = _globalMatrices[mtxOffset]; m12 = _globalMatrices[mtxOffset+1]; m13 = _globalMatrices[mtxOffset+2];
-						m21 = _globalMatrices[mtxOffset+4]; m22 = _globalMatrices[mtxOffset+5]; m23 = _globalMatrices[mtxOffset+6];
-						m31 = _globalMatrices[mtxOffset+8]; m32 = _globalMatrices[mtxOffset+9]; m33 = _globalMatrices[mtxOffset+10];
-						vx += weight*(m11*vertX + m12*vertY + m13*vertZ + _globalMatrices[mtxOffset+3]);
-						vy += weight*(m21*vertX + m22*vertY + m23*vertZ + _globalMatrices[mtxOffset+7]);
-						vz += weight*(m31*vertX + m32*vertY + m33*vertZ + _globalMatrices[mtxOffset+11]);
-						
-						nx += weight*(m11*normX + m12*normY + m13*normZ);
-						ny += weight*(m21*normX + m22*normY + m23*normZ);
-						nz += weight*(m31*normX + m32*normY + m33*normZ);
-						tx += weight*(m11*tangX + m12*tangY + m13*tangZ);
-						ty += weight*(m21*tangX + m22*tangY + m23*tangZ);
-						tz += weight*(m31*tangX + m32*tangY + m33*tangZ);
-						k++;
-					}
+					// implicit /3*12 (/3 because indices are multiplied by 3 for gpu matrix access, *12 because it's the matrix size)
+					var mtxOffset : uint = uint(jointIndices[uint(j++)]) << 2;
+					m11 = _globalMatrices[mtxOffset]; m12 = _globalMatrices[uint(mtxOffset+1)]; m13 = _globalMatrices[uint(mtxOffset+2)]; m14 = _globalMatrices[uint(mtxOffset+3)];
+					m21 = _globalMatrices[uint(mtxOffset+4)]; m22 = _globalMatrices[uint(mtxOffset+5)]; m23 = _globalMatrices[uint(mtxOffset+6)]; m24 = _globalMatrices[uint(mtxOffset+7)];
+					m31 = _globalMatrices[uint(mtxOffset+8)]; m32 = _globalMatrices[uint(mtxOffset+9)]; m33 = _globalMatrices[uint(mtxOffset+10)];  m34 = _globalMatrices[uint(mtxOffset+11)];
+					vx += weight*(m11*vertX + m12*vertY + m13*vertZ + m14);
+					vy += weight*(m21*vertX + m22*vertY + m23*vertZ + m24);
+					vz += weight*(m31*vertX + m32*vertY + m33*vertZ + m34);
+					nx += weight*(m11*normX + m12*normY + m13*normZ);
+					ny += weight*(m21*normX + m22*normY + m23*normZ);
+					nz += weight*(m31*normX + m32*normY + m33*normZ);
+					tx += weight*(m11*tangX + m12*tangY + m13*tangZ);
+					ty += weight*(m21*tangX + m22*tangY + m23*tangZ);
+					tz += weight*(m31*tangX + m32*tangY + m33*tangZ);
+					k++;
 				}
-				
+
 				targetVerts[i1] = vx; targetVerts[i2] = vy; targetVerts[i3] = vz;
 				targetNormals[i1] = nx; targetNormals[i2] = ny; targetNormals[i3] = nz;
 				targetTangents[i1] = tx; targetTangents[i2] = ty; targetTangents[i3] = tz;
 				
-				i1 += 3; i2 += 3; i3 += 3;
+				i1 += 3;
 			}
 		}
 		
