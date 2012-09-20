@@ -10,9 +10,7 @@ package away3d.materials.passes
 	import away3d.materials.LightSources;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.compilation.LightingShaderCompiler;
-	import away3d.materials.compilation.LightingShaderCompiler;
 	import away3d.materials.compilation.ShaderCompiler;
-	import away3d.materials.methods.MethodVOSet;
 
 	import flash.geom.Vector3D;
 
@@ -203,7 +201,7 @@ package away3d.materials.passes
 			}
 
 			total = 0;
-			for (var cast : int = 0; cast < numLightTypes; ++cast) {
+			for (cast = 0; cast < numLightTypes; ++cast) {
 				var pointLights : Vector.<PointLight> = cast ? _lightPicker.castingPointLights : _lightPicker.pointLights;
 				len = pointLights.length;
 				for (i = 0; i < len; ++i) {

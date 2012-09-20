@@ -12,7 +12,7 @@ package away3d.materials.compilation
 		private var _secondaryUVDependencies : uint;
 		private var _globalPosDependencies : uint;
 		private var _tangentDependencies : uint;
-		private var _usesGlobalPosFragment : Boolean = true;
+		private var _usesGlobalPosFragment : Boolean = false;
 		private var _numPointLights : uint;
 		private var _lightSourceMask : uint;
 		// why always true?
@@ -30,7 +30,7 @@ package away3d.materials.compilation
 			_secondaryUVDependencies = 0;
 			_globalPosDependencies = 0;
 			_tangentDependencies = 0;
-			_usesGlobalPosFragment = true;
+			_usesGlobalPosFragment = false;
 		}
 
 		public function setPositionedLights(numPointLights : uint, lightSourceMask : uint) : void
@@ -42,7 +42,11 @@ package away3d.materials.compilation
 		public function includeMethodVO(methodVO : MethodVO) : void
 		{
 			if (methodVO.needsProjection) ++_projectionDependencies;
-			if (methodVO.needsGlobalPos) {
+			if (methodVO.needsGlobalVertexPos) {
+				++_globalPosDependencies;
+				if (methodVO.needsGlobalFragmentPos) _usesGlobalPosFragment = true;
+			}
+			else if (methodVO.needsGlobalFragmentPos) {
 				++_globalPosDependencies;
 				_usesGlobalPosFragment = true;
 			}

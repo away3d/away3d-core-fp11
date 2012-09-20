@@ -167,7 +167,7 @@ package away3d.materials.compilation
 			_registerCache.removeFragmentTempUsage(temp);
 
 			if (_methodSetup._normalMethodVO.needsView) _registerCache.removeFragmentTempUsage(_sharedRegisters.viewDirFragment);
-			if (_methodSetup._normalMethodVO.needsGlobalPos) _registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
+			if (_methodSetup._normalMethodVO.needsGlobalVertexPos || _methodSetup._normalMethodVO.needsGlobalFragmentPos) _registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 			_registerCache.removeFragmentTempUsage(b);
 			_registerCache.removeFragmentTempUsage(t);
 			_registerCache.removeFragmentTempUsage(n);

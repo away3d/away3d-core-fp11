@@ -270,7 +270,7 @@ package away3d.materials.passes
 			}
 
 			total = 0;
-			for (var cast : int = 0; cast < numLightTypes; ++cast) {
+			for (cast = 0; cast < numLightTypes; ++cast) {
 				var pointLights : Vector.<PointLight> = cast ? _lightPicker.castingPointLights : _lightPicker.pointLights;
 				len = pointLights.length;
 				for (i = 0; i < len; ++i) {

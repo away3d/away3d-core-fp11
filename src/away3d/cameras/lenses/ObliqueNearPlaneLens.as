@@ -67,7 +67,7 @@ package away3d.cameras.lenses
 			invalidateMatrix();
 		}
 
-		public function set baseLens(value : LensBase)
+		public function set baseLens(value : LensBase) : void
 		{
 			if (_baseLens)
 				_baseLens.removeEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);

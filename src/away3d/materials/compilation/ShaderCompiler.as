@@ -598,7 +598,7 @@ package away3d.materials.compilation
 				method = methods[i].method;
 				data = methods[i].data;
 				_vertexCode += method.getVertexCode(data, _registerCache);
-				if (data.needsGlobalPos) _registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
+				if (data.needsGlobalVertexPos || data.needsGlobalFragmentPos) _registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 
 				_fragmentCode += method.getFragmentCode(data, _registerCache, _sharedRegisters.shadedTarget);
 				if (data.needsNormals) _registerCache.removeFragmentTempUsage(_sharedRegisters.normalFragment);

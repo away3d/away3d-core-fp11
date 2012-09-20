@@ -196,7 +196,7 @@ package away3d.materials.methods
 			_methods = null;
 		}
 
-		private function clearListeners(method : ShadingMethodBase)
+		private function clearListeners(method : ShadingMethodBase) : void
 		{
 			if (method)
 				method.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);

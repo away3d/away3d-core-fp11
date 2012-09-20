@@ -143,7 +143,7 @@ package away3d.materials.methods
 			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
 
             uvReg ||= _sharedRegisters.uvVarying;
-            return "tex "+targetReg.toString()+", "+uvReg.toString()+", "+inputReg.toString()+" <2d,"+filter+","+wrap+">\n";
+            return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d,"+filter+","+wrap+">\n";
 		}
 
 		/**

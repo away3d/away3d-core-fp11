@@ -8,7 +8,7 @@ package away3d.materials.methods
 
 	use namespace arcane;
 
-	public class TripleFilteredShadowMapMethod extends ShadowMapMethodBase
+	public class TripleFilteredShadowMapMethod extends SimpleShadowMapMethodBase
 	{
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -56,13 +56,11 @@ package away3d.materials.methods
 			code = 	"mov " + uvReg + ", " + _depthMapCoordReg + "\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg + ".x		\n" +	// offset by epsilon
 					"slt " + uvReg+".z, " + _depthMapCoordReg+".z, " + depthCol + ".z	\n" +    // 0 if in shadow
 
 					"add " + uvReg+".x, " + uvReg+".x, " + customDataReg+".z		\n" + // (1, 0)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg+".x		\n" + 	// offset by epsilon
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z		\n" +    // 0 if in shadow
 
 					"div " + depthCol+".x, " + _depthMapCoordReg+".x, " + customDataReg+".z		\n" +
@@ -75,13 +73,11 @@ package away3d.materials.methods
 					"add " + uvReg+".y, " + _depthMapCoordReg+".y, " + customDataReg+".z	\n" +	// (0, 1)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol + ".z, " + depthCol+".z, " + dataReg+".x		\n" + 	// offset by epsilon
 					"slt " + uvReg + ".z, " + _depthMapCoordReg+".z, " + depthCol+".z		\n" +   // 0 if in shadow
 
 					"add " + uvReg + ".x, " + uvReg+".x, " + customDataReg+".z						\n" +	// (1, 1)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol + ".z, " + depthCol+".z, " + dataReg+".x				\n" +	// offset by epsilon
 					"slt " + uvReg + ".w, " + _depthMapCoordReg+".z, " + depthCol+".z			\n" +   // 0 if in shadow
 
 					// recalculate fraction, since we ran out of registers :(
@@ -98,18 +94,14 @@ package away3d.materials.methods
 					"add " + targetReg + ".w, " + viewDirReg+".w, " + uvReg+".w	\n" +
 
 
-
-//					"mov " + uvReg + ".x, " + _depthMapVar+".x						\n" +
 					"sub " + uvReg + ".xy, " + _depthMapCoordReg+".xy, " + customDataReg+".zz		\n" +
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol + ".z, " + depthCol + ".z, " + dataReg+".x	\n" +	// offset by epsilon
 					"slt " + uvReg + ".z, " + _depthMapCoordReg + ".z, " + depthCol+".z	\n" +   // 0 if in shadow
 
 					"add " + uvReg + ".x, " + uvReg+".x, " + customDataReg+".z			\n" +	// (1, 0)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol + ".z, " + depthCol + ".z, " + dataReg + ".x				\n" +	// offset by epsilon
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z					\n" +   // 0 if in shadow
 
 					"div " + depthCol+".x, " + _depthMapCoordReg+".x, " + customDataReg+".z		\n" +
@@ -128,7 +120,6 @@ package away3d.materials.methods
 					"add " + uvReg+".x, " + uvReg+".x, " + customDataReg + ".z				\n" +	// (1, 1)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg + ".x			\n" +	// offset by epsilon
 					"slt " + uvReg+".w, " + _depthMapCoordReg + ".z, " + depthCol + ".z		\n" +   // 0 if in shadow
 
 					// recalculate fraction, since we ran out of registers :(
@@ -150,13 +141,11 @@ package away3d.materials.methods
 //					"mov " + uvReg + ".y, " + _depthMapVar + ".y										\n" +	// (1, 0)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + 		"\n" +
-					"sub " + depthCol + ".z, " + depthCol + ".z, " + dataReg + ".x						\n" +	// offset by epsilon
 					"slt " + uvReg + ".z, " + _depthMapCoordReg + ".z, " + depthCol + ".z					\n" +   // 0 if in shadow
 
 					"add " + uvReg + ".x, " + uvReg + ".x, " + customDataReg + ".z							\n" +	// (2, 0)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg +		"\n" +
-					"sub " + depthCol + ".z, " + depthCol + ".z, " + dataReg + ".x						\n" +	// offset by epsilon
 					"slt " + uvReg + ".w, " + _depthMapCoordReg + ".z, " + depthCol + ".z					\n" +   // 0 if in shadow
 
 					"div " + depthCol + ".x, " + _depthMapCoordReg + ".x, " + customDataReg + ".z					\n" +
@@ -168,13 +157,11 @@ package away3d.materials.methods
 					"add " + uvReg+".xy, " + _depthMapCoordReg+".xy, " + customDataReg+".zz				\n" +	// (0, 1)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg +		"\n" +
-					"sub " + depthCol + ".z, " + depthCol+".z, " + dataReg + ".x						\n" +	// offset by epsilon
 					"slt " + uvReg + ".z, " + _depthMapCoordReg+".z, " + depthCol + ".z					\n" +   // 0 if in shadow
 
 					"add " + uvReg+".x, " + uvReg+".x, " + customDataReg+".z							\n" +	// (1, 1)
 					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + 		"\n" +
-					"sub " + depthCol+".z, " + depthCol+".z, " + dataReg+".x							\n" +	// offset by epsilon
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z						\n" +   // 0 if in shadow
 
 					// recalculate fraction, since we ran out of registers :(

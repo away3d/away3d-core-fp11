@@ -142,7 +142,7 @@ package away3d.materials.compilation
 			_fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _registerCache, _sharedRegisters.normalFragment);
 
 			if (_methodSetup._normalMethodVO.needsView) _registerCache.removeFragmentTempUsage(_sharedRegisters.viewDirFragment);
-			if (_methodSetup._normalMethodVO.needsGlobalPos) _registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
+			if (_methodSetup._normalMethodVO.needsGlobalFragmentPos || _methodSetup._normalMethodVO.needsGlobalVertexPos) _registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 		}
 
 		override protected function compileViewDirCode() : void
