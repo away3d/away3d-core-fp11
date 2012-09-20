@@ -194,7 +194,7 @@ package away3d.materials.compilation
 			}
 
 			if (usesProbes())
-				throw new Error("Light probes not supported for LightingShaderCompiler!");
+				compileLightProbeCode();
 
 			// only need to create and reserve _shadedTargetReg here, no earlier?
 			_vertexCode += _methodSetup._ambientMethod.getVertexCode(_methodSetup._ambientMethodVO, _registerCache);
@@ -369,6 +369,46 @@ package away3d.materials.compilation
 					_fragmentCode += _methodSetup._specularMethod.getFragmentCodePerLight(_methodSetup._specularMethodVO, lightDirReg, specularColorReg, _registerCache);
 
 				_registerCache.removeFragmentTempUsage(lightDirReg);
+			}
+		}
+
+
+		private function compileLightProbeCode() : void
+		{
+			var weightReg : String;
+			var weightComponents : Array = [ ".x", ".y", ".z", ".w" ];
+			var weightRegisters : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>();
+			var i : uint;
+			var texReg : ShaderRegisterElement;
+			var addSpec : Boolean = _usingSpecularMethod && usesProbesForSpecular();
+			var addDiff : Boolean = usesProbesForDiffuse();
+
+			if (!(addSpec || addDiff)) return;
+
+			if (addDiff)
+				_lightProbeDiffuseIndices = new Vector.<uint>();
+			if (addSpec)
+				_lightProbeSpecularIndices = new Vector.<uint>();
+
+			for (i = 0; i < _numProbeRegisters; ++i) {
+				weightRegisters[i] = _registerCache.getFreeFragmentConstant();
+				if (i == 0) _probeWeightsIndex = weightRegisters[i].index*4;
+			}
+
+			for (i = 0; i < _numLightProbes; ++i) {
+				weightReg = weightRegisters[Math.floor(i/4)].toString() + weightComponents[i % 4];
+
+				if (addDiff) {
+					texReg = _registerCache.getFreeTextureReg();
+					_lightProbeDiffuseIndices[i] = texReg.index;
+					_fragmentCode += _methodSetup._diffuseMethod.getFragmentCodePerProbe(_methodSetup._diffuseMethodVO, texReg, weightReg, _registerCache);
+				}
+
+				if (addSpec) {
+					texReg = _registerCache.getFreeTextureReg();
+					_lightProbeSpecularIndices[i] = texReg.index;
+					_fragmentCode += _methodSetup._specularMethod.getFragmentCodePerProbe(_methodSetup._specularMethodVO, texReg, weightReg, _registerCache);
+				}
 			}
 		}
 

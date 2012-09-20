@@ -68,8 +68,8 @@ package away3d.materials.lightpickers
 
 			_numDirectionalLights = numDirectionalLights;
 			_numCastingDirectionalLights = numCastingDirectionalLights;
-			_numCastingPointLights = numCastingPointLights;
 			_numPointLights = numPointLights;
+			_numCastingPointLights = numCastingPointLights;
 			_numLightProbes = numLightProbes;
 
 			// MUST HAVE MULTIPLE OF 4 ELEMENTS!
