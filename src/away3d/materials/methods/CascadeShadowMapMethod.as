@@ -155,7 +155,9 @@ package away3d.materials.methods
 			code += "mul " + uvCoord + ".xy, " + uvCoord + ".xy, " + dataReg + ".zw\n" +
 					"add " + uvCoord + ".xy, " + uvCoord + ".xy, " + dataReg + ".zz\n";
 
-			code += _baseMethod.getCascadeFragmentCode(vo, regCache, decReg, depthMapRegister, uvCoord, targetReg);
+			code += _baseMethod.getCascadeFragmentCode(vo, regCache, decReg, depthMapRegister, uvCoord, targetReg) +
+					"add " + targetReg + ".w, " + targetReg + ".w, " + dataReg + ".y\n";
+
 
 			regCache.removeFragmentTempUsage(uvCoord);
 
