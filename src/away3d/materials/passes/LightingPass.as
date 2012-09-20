@@ -59,16 +59,25 @@ package away3d.materials.passes
 		override protected function updateLights() : void
 		{
 			super.updateLights();
-			_numPointLights = _lightPicker.numPointLights;
-			_numDirectionalLights = _lightPicker.numDirectionalLights;
-			_numLightProbes = _lightPicker.numLightProbes;
+			var numPointLights : int = _lightPicker.numPointLights;
+			var numDirectionalLights : int = _lightPicker.numDirectionalLights;
+			var numLightProbes : int = _lightPicker.numLightProbes;
 
 			if (_includeCasters) {
-				_numPointLights += _lightPicker.numCastingPointLights;
-				_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
+				numPointLights += _lightPicker.numCastingPointLights;
+				numDirectionalLights += _lightPicker.numCastingDirectionalLights;
 			}
 
-			invalidateShaderProgram();
+			if (numPointLights != _numPointLights ||
+				numDirectionalLights != _numDirectionalLights ||
+				numLightProbes != _numLightProbes)
+			{
+				_numPointLights = numPointLights;
+				_numDirectionalLights = numDirectionalLights;
+				_numLightProbes = numLightProbes;
+				invalidateShaderProgram();
+			}
+
 		}
 
 		override protected function updateShaderProperties() : void
@@ -125,19 +134,7 @@ package away3d.materials.passes
 			return _numLightProbes > 0 && (_diffuseLightSources & LightSources.PROBES) != 0;
 		}
 
-		override protected function updateMethodConstants() : void
-		{
-			super.updateMethodConstants();
-			if (_methodSetup._colorTransformMethod) _methodSetup._colorTransformMethod.initConstants(_methodSetup._colorTransformMethodVO);
-
-			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
-			var len : uint = methods.length;
-			for (var i : uint = 0; i < len; ++i) {
-				methods[i].method.initConstants(methods[i].data);
-			}
-		}
-
-		/**
+		/*
 		 * Updates the lights data for the render state.
 		 * @param lights The lights selected to shade the current object.
 		 * @param numLights The amount of lights available.
@@ -145,7 +142,6 @@ package away3d.materials.passes
 		 */
 		override protected function updateLightConstants() : void
 		{
-			// first dirs, then points
 			var dirLight : DirectionalLight;
 			var pointLight : PointLight;
 			var i : uint, k : uint;

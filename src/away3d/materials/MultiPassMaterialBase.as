@@ -32,7 +32,7 @@
 	public class MultiPassMaterialBase extends MaterialBase
 	{
 		protected var _casterLightPass : ShadowCasterPass;
-		protected var _nonCasterLightPass : *;	// TODO: Abstract out common functionality
+		protected var _nonCasterLightPass : LightingPass;
 		protected var _effectsPass : SuperShaderPass;
 
 		private var _alphaThreshold : Number = 0;
@@ -504,10 +504,7 @@
 
 		private function initNonCasterLightPass() : void
 		{
-			if (_lightPicker.numLightProbes == 0)
-				_nonCasterLightPass ||= new LightingPass(this);
-			else
-				_nonCasterLightPass ||= new SuperShaderPass(this);
+			_nonCasterLightPass ||= new LightingPass(this);
 			_nonCasterLightPass.includeCasters = _shadowMethod == null;
 			_nonCasterLightPass.diffuseMethod = null;
 			_nonCasterLightPass.ambientMethod = null;

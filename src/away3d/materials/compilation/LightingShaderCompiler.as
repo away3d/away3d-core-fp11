@@ -9,6 +9,7 @@ package away3d.materials.compilation
 		public var _dirLightFragmentConstants : Vector.<ShaderRegisterElement>;
 		public var _dirLightVertexConstants : Vector.<ShaderRegisterElement>;
 		private var _lightVertexConstantIndex : int;
+		private var _shadowRegister : ShaderRegisterElement;
 
 		use namespace arcane;
 
@@ -62,7 +63,7 @@ package away3d.materials.compilation
 
 		public function get tangentSpace() : Boolean
 		{
-			return _methodSetup._normalMethod.hasOutput && _methodSetup._normalMethod.tangentSpace;
+			return _numLightProbes == 0 && methodSetup._normalMethod.hasOutput && _methodSetup._normalMethod.tangentSpace;
 		}
 
 		override protected function initLightData() : void
@@ -170,7 +171,10 @@ package away3d.materials.compilation
 
 		override protected function compileLightingCode() : void
 		{
-			var shadowReg : ShaderRegisterElement;
+			if (_methodSetup._shadowMethod)
+				compileShadowCode();
+
+			_methodSetup._diffuseMethod.shadowRegister = _shadowRegister;
 
 			_sharedRegisters.shadedTarget = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_sharedRegisters.shadedTarget, 1);
@@ -212,11 +216,27 @@ package away3d.materials.compilation
 			if (_methodSetup._diffuseMethodVO.needsView) _registerCache.removeFragmentTempUsage(_sharedRegisters.viewDirFragment);
 
 			if (_usingSpecularMethod) {
-				_methodSetup._specularMethod.shadowRegister = shadowReg;
+				_methodSetup._specularMethod.shadowRegister = _shadowRegister;
 				_fragmentCode += _methodSetup._specularMethod.getFragmentPostLightingCode(_methodSetup._specularMethodVO, _registerCache, _sharedRegisters.shadedTarget);
 				if (_methodSetup._specularMethodVO.needsNormals) _registerCache.removeFragmentTempUsage(_sharedRegisters.normalFragment);
 				if (_methodSetup._specularMethodVO.needsView) _registerCache.removeFragmentTempUsage(_sharedRegisters.viewDirFragment);
 			}
+
+			if (_methodSetup._shadowMethod)
+				_registerCache.removeFragmentTempUsage(_shadowRegister);
+		}
+
+		private function compileShadowCode() : void
+		{
+			if (_sharedRegisters.normalFragment) {
+				_shadowRegister = _sharedRegisters.normalFragment;
+			}
+			else
+				_shadowRegister = _registerCache.getFreeFragmentVectorTemp();
+			_registerCache.addFragmentTempUsages(_shadowRegister, 1);
+
+			_vertexCode += _methodSetup._shadowMethod.getVertexCode(_methodSetup._shadowMethodVO, _registerCache);
+			_fragmentCode += _methodSetup._shadowMethod.getFragmentCode(_methodSetup._shadowMethodVO, _registerCache, _shadowRegister);
 		}
 
 
