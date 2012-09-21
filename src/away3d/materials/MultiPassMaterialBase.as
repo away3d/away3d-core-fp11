@@ -562,7 +562,7 @@
 
 		private function get numNonCasters() : int
 		{
-			return _lightPicker.numLightProbes + _lightPicker.numDirectionalLights + _lightPicker.numPointLights;
+			return _lightPicker? _lightPicker.numLightProbes + _lightPicker.numDirectionalLights + _lightPicker.numPointLights : 0;
 		}
 
 		protected function invalidateScreenPasses() : void
