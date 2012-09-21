@@ -32,7 +32,7 @@
 	public class MultiPassMaterialBase extends MaterialBase
 	{
 		protected var _casterLightPass : ShadowCasterPass;
-		protected var _nonCasterLightPass : LightingPass;
+		protected var _nonCasterLightPasses : Vector.<LightingPass>;
 		protected var _effectsPass : SuperShaderPass;
 
 		private var _alphaThreshold : Number = 0;
@@ -375,11 +375,15 @@
 				clearPasses();
 
 				addChildPassesFor(_casterLightPass);
-				addChildPassesFor(_nonCasterLightPass);
+				if (_nonCasterLightPasses)
+					for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
+						addChildPassesFor(_nonCasterLightPasses[i]);
 				addChildPassesFor(_effectsPass);
 
 				addScreenPass(_casterLightPass);
-				addScreenPass(_nonCasterLightPass);
+				if (_nonCasterLightPasses)
+					for (i = 0; i < _nonCasterLightPasses.length; ++i)
+						addScreenPass(_nonCasterLightPasses[i]);
 				addScreenPass(_effectsPass);
 			}
 		}
@@ -394,9 +398,15 @@
 
 		private function isAnyScreenPassInvalid() : Boolean
 		{
-			return 	(_casterLightPass && _casterLightPass._passesDirty) ||
-					(_nonCasterLightPass && _nonCasterLightPass._passesDirty) ||
-					(_effectsPass && _effectsPass._passesDirty);
+			if	((_casterLightPass && _casterLightPass._passesDirty) ||
+				(_effectsPass && _effectsPass._passesDirty))
+				return true;
+
+			if (_nonCasterLightPasses)
+				for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
+					if (_nonCasterLightPasses[i]._passesDirty) return true;
+
+			return false;
 		}
 
 		private function addChildPassesFor(pass : CompiledPass) : void
@@ -445,9 +455,9 @@
 				removeCasterLightPass();
 
 			if (numNonCasters > 0)
-				initNonCasterLightPass();
+				initNonCasterLightPasses();
 			else
-				removeNonCasterLightPass();
+				removeNonCasterLightPasses();
 		}
 
 		private function setBlendAndCompareModes() : void
@@ -457,14 +467,16 @@
 				_casterLightPass.depthCompareMode = depthCompareMode;
 			}
 
-			if (_nonCasterLightPass) {
-				if (_casterLightPass) {
-					_nonCasterLightPass.setBlendMode(BlendMode.ADD, false);
-					_nonCasterLightPass.depthCompareMode = Context3DCompareMode.EQUAL;
+			if (_nonCasterLightPasses) {
+				var firstAdditiveIndex : int = 0;
+				if (!_casterLightPass) {
+					_nonCasterLightPasses[0].setBlendMode(BlendMode.NORMAL, false);
+					_nonCasterLightPasses[0].depthCompareMode = depthCompareMode;
+					firstAdditiveIndex = 1;
 				}
-				else {
-					_nonCasterLightPass.setBlendMode(BlendMode.NORMAL, false);
-					_nonCasterLightPass.depthCompareMode = depthCompareMode;
+				for (var i : int = firstAdditiveIndex; i < _nonCasterLightPasses.length; ++i) {
+					_nonCasterLightPasses[i].setBlendMode(BlendMode.ADD, false);
+					_nonCasterLightPasses[i].depthCompareMode = Context3DCompareMode.EQUAL;
 				}
 				if (_effectsPass) {
 					_effectsPass.depthCompareMode = Context3DCompareMode.EQUAL;
@@ -502,28 +514,54 @@
 			_casterLightPass = null;
 		}
 
-		private function initNonCasterLightPass() : void
+		private function initNonCasterLightPasses() : void
 		{
-			_nonCasterLightPass ||= new LightingPass(this);
-			_nonCasterLightPass.includeCasters = _shadowMethod == null;
-			_nonCasterLightPass.diffuseMethod = null;
-			_nonCasterLightPass.ambientMethod = null;
-			_nonCasterLightPass.normalMethod = null;
-			_nonCasterLightPass.specularMethod = null;
-			_nonCasterLightPass.lightPicker = _lightPicker;
-			_nonCasterLightPass.diffuseMethod = _diffuseMethod;
-			_nonCasterLightPass.ambientMethod = _ambientMethod;
-			_nonCasterLightPass.normalMethod = _normalMethod;
-			_nonCasterLightPass.specularMethod = _specularMethod;
-			_nonCasterLightPass.diffuseLightSources = _diffuseLightSources;
-			_nonCasterLightPass.specularLightSources = _specularLightSources;
+			removeNonCasterLightPasses();
+			var pass : LightingPass;
+			var numDirLights : int = _lightPicker.numDirectionalLights;
+			var numPointLights : int = _lightPicker.numPointLights;
+			var numLightProbes : int = _lightPicker.numLightProbes;
+			var dirLightOffset : int = 0;
+			var pointLightOffset : int = 0;
+			var probeOffset : int = 0;
+
+			if (!_casterLightPass) {
+				numDirLights += _lightPicker.numCastingDirectionalLights;
+				numPointLights += _lightPicker.numCastingPointLights;
+			}
+
+			_nonCasterLightPasses = new Vector.<LightingPass>();
+			while (dirLightOffset < numDirLights || pointLightOffset < numPointLights || probeOffset < numLightProbes) {
+				pass = new LightingPass(this);
+				pass.includeCasters = _shadowMethod == null;
+				pass.directionalLightsOffset = dirLightOffset;
+				pass.pointLightsOffset = pointLightOffset;
+				pass.lightProbesOffset = probeOffset;
+				pass.diffuseMethod = null;
+				pass.ambientMethod = null;
+				pass.normalMethod = null;
+				pass.specularMethod = null;
+				pass.lightPicker = _lightPicker;
+				pass.diffuseMethod = _diffuseMethod;
+				pass.ambientMethod = _ambientMethod;
+				pass.normalMethod = _normalMethod;
+				pass.specularMethod = _specularMethod;
+				pass.diffuseLightSources = _diffuseLightSources;
+				pass.specularLightSources = _specularLightSources;
+				_nonCasterLightPasses.push(pass);
+
+				dirLightOffset += pass.numDirectionalLights;
+				pointLightOffset += pass.numPointLights;
+				probeOffset += pass.numLightProbes;
+			}
 		}
 
-		private function removeNonCasterLightPass() : void
+		private function removeNonCasterLightPasses() : void
 		{
-			if (!_nonCasterLightPass) return;
-			_nonCasterLightPass.dispose();
-			_nonCasterLightPass = null;
+			if (!_nonCasterLightPasses) return;
+			for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
+				_nonCasterLightPasses[i].dispose();
+			_nonCasterLightPasses = null;
 		}
 
 		private function removeEffectsPass() : void

@@ -77,6 +77,22 @@ package away3d.materials.passes
 			init();
 		}
 
+
+		arcane function get numPointLights() : uint
+		{
+			return _numPointLights;
+		}
+
+		arcane function get numDirectionalLights() : uint
+		{
+			return _numDirectionalLights;
+		}
+
+		arcane function get numLightProbes() : uint
+		{
+			return _numLightProbes;
+		}
+
 		/**
 		 * @inheritDoc
 		 */

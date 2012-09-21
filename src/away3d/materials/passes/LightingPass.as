@@ -29,12 +29,47 @@ package away3d.materials.passes
 		private var _lightVertexConstantIndex : int;
 		private var _inverseSceneMatrix : Vector.<Number> = new Vector.<Number>();
 
+		private var _directionalLightsOffset : uint;
+		private var _pointLightsOffset : uint;
+		private var _lightProbesOffset : uint;
+
 		/**
 		 * Creates a new DefaultScreenPass objects.
 		 */
 		public function LightingPass(material : MaterialBase)
 		{
 			super(material);
+		}
+
+		// these need to be set before the light picker is assigned
+		public function get directionalLightsOffset() : uint
+		{
+			return _directionalLightsOffset;
+		}
+
+		public function set directionalLightsOffset(value : uint) : void
+		{
+			_directionalLightsOffset = value;
+		}
+
+		public function get pointLightsOffset() : uint
+		{
+			return _pointLightsOffset;
+		}
+
+		public function set pointLightsOffset(value : uint) : void
+		{
+			_pointLightsOffset = value;
+		}
+
+		public function get lightProbesOffset() : uint
+		{
+			return _lightProbesOffset;
+		}
+
+		public function set lightProbesOffset(value : uint) : void
+		{
+			_lightProbesOffset = value;
 		}
 
 		override protected function createCompiler() : ShaderCompiler
@@ -57,9 +92,9 @@ package away3d.materials.passes
 		override protected function updateLights() : void
 		{
 			super.updateLights();
-			var numPointLights : int = _lightPicker.numPointLights;
-			var numDirectionalLights : int = _lightPicker.numDirectionalLights;
-			var numLightProbes : int = _lightPicker.numLightProbes;
+			var numDirectionalLights : int = calculateNumDirectionalLights(_lightPicker.numDirectionalLights);
+			var numPointLights : int = calculateNumPointLights(_lightPicker.numPointLights);
+			var numLightProbes : int = calculateNumProbes(_lightPicker.numLightProbes);
 
 			if (_includeCasters) {
 				numPointLights += _lightPicker.numCastingPointLights;
@@ -76,6 +111,29 @@ package away3d.materials.passes
 				invalidateShaderProgram();
 			}
 
+		}
+
+		private function calculateNumDirectionalLights(numDirectionalLights : uint) : int
+		{
+			// allow 3 varyings per light
+			return Math.min(numDirectionalLights - _directionalLightsOffset, 3);
+		}
+
+		private function calculateNumPointLights(numPointLights : uint) : int
+		{
+			// allow 3 varyings, but only those that aren't used by directional lights
+			var numFree : int = 3 - _numDirectionalLights;
+			return Math.min(numPointLights - _pointLightsOffset, numFree);
+		}
+
+		private function calculateNumProbes(numLightProbes : uint) : int
+		{
+			var numChannels : int;
+			if ((_specularLightSources & LightSources.PROBES) != 0) ++numChannels;
+			if ((_diffuseLightSources & LightSources.PROBES) != 0) ++numChannels;
+
+			// 4 channels available
+			return Math.min(numLightProbes - _lightProbesOffset, int(4 / numChannels));
 		}
 
 		override protected function updateShaderProperties() : void
@@ -148,17 +206,26 @@ package away3d.materials.passes
 			var total : uint = 0;
 			var numLightTypes : uint = _includeCasters ? 2 : 1;
 			var l : int;
+			var offset : int;
 
 			l = _lightVertexConstantIndex;
 			k = _lightFragmentConstantIndex;
 
-			for (var cast : int = 0; cast < numLightTypes; ++cast) {
-				var dirLights : Vector.<DirectionalLight> = cast ? _lightPicker.castingDirectionalLights : _lightPicker.directionalLights;
-				len = dirLights.length;
-				total += len;
+			var cast : int = 0;
+			var dirLights : Vector.<DirectionalLight> = _lightPicker.directionalLights;
+			offset = _directionalLightsOffset;
+			len = _lightPicker.directionalLights.length;
+			if (offset > len) {
+				cast = 1;
+				offset -= len;
+			}
 
+			for (; cast < numLightTypes; ++cast) {
+				if (cast) dirLights = _lightPicker.castingDirectionalLights;
+				len = dirLights.length;
+				if (len > _numDirectionalLights) len = _numDirectionalLights;
 				for (i = 0; i < len; ++i) {
-					dirLight = dirLights[i];
+					dirLight = dirLights[offset + i];
 					dirPos = dirLight.sceneDirection;
 
 					_ambientLightR += dirLight._ambientR;
@@ -190,6 +257,12 @@ package away3d.materials.passes
 					_fragmentConstantData[k++] = dirLight._specularG;
 					_fragmentConstantData[k++] = dirLight._specularB;
 					_fragmentConstantData[k++] = 1;
+
+					if (++total == _numDirectionalLights) {
+						// break loop
+						i = len;
+						cast = numLightTypes;
+					}
 				}
 			}
 
@@ -201,11 +274,21 @@ package away3d.materials.passes
 			}
 
 			total = 0;
-			for (cast = 0; cast < numLightTypes; ++cast) {
-				var pointLights : Vector.<PointLight> = cast ? _lightPicker.castingPointLights : _lightPicker.pointLights;
+
+			var pointLights : Vector.<PointLight> = _lightPicker.pointLights;
+			offset = _pointLightsOffset;
+			len = _lightPicker.pointLights.length;
+			if (offset > len) {
+				cast = 1;
+				offset -= len;
+			}
+			else
+				cast = 0;
+			for (; cast < numLightTypes; ++cast) {
+				if (cast) pointLights = _lightPicker.castingPointLights;
 				len = pointLights.length;
 				for (i = 0; i < len; ++i) {
-					pointLight = pointLights[i];
+					pointLight = pointLights[offset + i];
 					dirPos = pointLight.scenePosition;
 
 					_ambientLightR += pointLight._ambientR;
@@ -236,6 +319,12 @@ package away3d.materials.passes
 					_fragmentConstantData[k++] = pointLight._specularG;
 					_fragmentConstantData[k++] = pointLight._specularB;
 					_fragmentConstantData[k++] = pointLight._fallOffFactor;
+
+					if (++total == _numPointLights) {
+						// break loop
+						i = len;
+						cast = numLightTypes;
+					}
 				}
 			}
 
@@ -252,14 +341,16 @@ package away3d.materials.passes
 			var probe : LightProbe;
 			var lightProbes : Vector.<LightProbe> = _lightPicker.lightProbes;
 			var weights : Vector.<Number> = _lightPicker.lightProbeWeights;
-			var len : int = lightProbes.length;
+			var len : int = lightProbes.length - _lightProbesOffset;
 			var addDiff : Boolean = usesProbesForDiffuse();
 			var addSpec : Boolean = _methodSetup._specularMethod && usesProbesForSpecular();
 
 			if (!(addDiff || addSpec)) return;
 
+			if (len > _numLightProbes) len = _numLightProbes;
+
 			for (var i : uint = 0; i < len; ++i) {
-				probe = lightProbes[i];
+				probe = lightProbes[_lightProbesOffset + i];
 
 				if (addDiff)
 					stage3DProxy.setTextureAt(_lightProbeDiffuseIndices[i], probe.diffuseMap.getTextureForStage3D(stage3DProxy));
@@ -267,10 +358,8 @@ package away3d.materials.passes
 					stage3DProxy.setTextureAt(_lightProbeSpecularIndices[i], probe.specularMap.getTextureForStage3D(stage3DProxy));
 			}
 
-			_fragmentConstantData[_probeWeightsIndex] = weights[0];
-			_fragmentConstantData[_probeWeightsIndex + 1] = weights[1];
-			_fragmentConstantData[_probeWeightsIndex + 2] = weights[2];
-			_fragmentConstantData[_probeWeightsIndex + 3] = weights[3];
+			for (i = 0; i < len; ++i)
+				_fragmentConstantData[_probeWeightsIndex + i] = weights[_lightProbesOffset + i];
 		}
 	}
 }
