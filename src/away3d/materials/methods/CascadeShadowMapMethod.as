@@ -8,6 +8,7 @@ package away3d.materials.methods
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.shadowmaps.CascadeShadowMapper;
 	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
 
 	use namespace arcane;
@@ -37,7 +38,16 @@ package away3d.materials.methods
 
 		override arcane function initVO(vo : MethodVO) : void
 		{
+			var tempVO : MethodVO = new MethodVO();
+			_baseMethod.initVO(tempVO);
 			vo.needsGlobalVertexPos = true;
+			vo.needsProjection = tempVO.needsProjection;
+		}
+
+		override arcane function set sharedRegisters(value : ShaderRegisterData) : void
+		{
+			super.sharedRegisters = value;
+			_baseMethod.sharedRegisters = value;
 		}
 
 		override arcane function initConstants(vo : MethodVO) : void
