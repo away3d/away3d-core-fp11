@@ -36,6 +36,14 @@
 		protected var _faceWeights : Vector.<Number>;
 		protected var _faceTangents : Vector.<Number>;
 
+		protected var _customDataInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+		protected var _verticesInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+		protected var _uvsInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+		protected var _secondaryUvsInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+		protected var _normalsInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+		protected var _tangentsInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+		protected var _indicesInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+
 		// buffers:
 		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _uvBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
@@ -181,10 +189,13 @@
 			var context : Context3D = stage3DProxy._context3D;
 			if (_customBufferContext[contextIndex] != context || !_customBuffer[contextIndex]) {
 				_customBuffer[contextIndex] = context.createVertexBuffer(_numVertices, _customElementsPerVertex);
-				_customBuffer[contextIndex].uploadFromVector(_customData, 0, _numVertices);
 				_customBufferContext[contextIndex] = context;
+				_customDataInvalid[contextIndex] = true;
  			}
-
+			if(_customDataInvalid[contextIndex]) {
+				_customBuffer[contextIndex].uploadFromVector(_customData, 0, _numVertices);
+				_customDataInvalid[contextIndex] = false;
+			}
 			return _customBuffer[contextIndex];
 		}
 
@@ -199,9 +210,13 @@
 			var context : Context3D = stage3DProxy._context3D;
 			if (_vertexBufferContext[contextIndex] != context || !_vertexBuffer[contextIndex]) {
 				_vertexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
-				_vertexBuffer[contextIndex].uploadFromVector(_vertices, 0, _numVertices);
 				_vertexBufferContext[contextIndex] = context;
+				_verticesInvalid[contextIndex] = true;
  			}
+			if (_verticesInvalid[contextIndex]) {
+				_vertexBuffer[contextIndex].uploadFromVector(_vertices, 0, _numVertices);
+				_verticesInvalid[contextIndex] = false;
+			}
 
 			return _vertexBuffer[contextIndex];
 		}
@@ -221,9 +236,13 @@
 
 			if (_uvBufferContext[contextIndex] != context || !_uvBuffer[contextIndex]) {
 				_uvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
-				_uvBuffer[contextIndex].uploadFromVector(_uvs, 0, _numVertices);
 				_uvBufferContext[contextIndex] = context;
+				_uvsInvalid[contextIndex] = true;
  			}
+			if (_uvsInvalid[contextIndex]) {
+				_uvBuffer[contextIndex].uploadFromVector(_uvs, 0, _numVertices);
+				_uvsInvalid[contextIndex] = false;
+			}
 
 			return _uvBuffer[contextIndex];
 		}
@@ -285,9 +304,13 @@
 
 			if (_secondaryUvBufferContext[contextIndex] != context || !_secondaryUvBuffer[contextIndex]) {
 				_secondaryUvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
-				_secondaryUvBuffer[contextIndex].uploadFromVector(_secondaryUvs, 0, _numVertices);
 				_secondaryUvBufferContext[contextIndex] = context;
+				_secondaryUvsInvalid[contextIndex] = true;
  			}
+			if (_secondaryUvsInvalid[contextIndex]) {
+				_secondaryUvBuffer[contextIndex].uploadFromVector(_secondaryUvs, 0, _numVertices);
+				_secondaryUvsInvalid[contextIndex] = false;
+			}
 
 			return _secondaryUvBuffer[contextIndex];
 		}
@@ -307,9 +330,13 @@
 
 			if (_vertexNormalBufferContext[contextIndex] != context || !_vertexNormalBuffer[contextIndex]) {
 				_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
-				_vertexNormalBuffer[contextIndex].uploadFromVector(_vertexNormals, 0, _numVertices);
 				_vertexNormalBufferContext[contextIndex] = context;
+				_normalsInvalid[contextIndex] = true;
  			}
+			if (_normalsInvalid[contextIndex]) {
+				_vertexNormalBuffer[contextIndex].uploadFromVector(_vertexNormals, 0, _numVertices);
+				_normalsInvalid[contextIndex] = false;
+			}
 
 			return _vertexNormalBuffer[contextIndex];
 		}
@@ -329,9 +356,13 @@
 
 			if (_vertexTangentBufferContext[contextIndex] != context || !_vertexTangentBuffer[contextIndex]) {
 				_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
-				_vertexTangentBuffer[contextIndex].uploadFromVector(_vertexTangents, 0, _numVertices);
 				_vertexTangentBufferContext[contextIndex] = context;
+				_tangentsInvalid[contextIndex] = true;
  			}
+			if (_tangentsInvalid[contextIndex]) {
+				_vertexTangentBuffer[contextIndex].uploadFromVector(_vertexTangents, 0, _numVertices);
+				_tangentsInvalid[contextIndex] = false;
+			}
 			return _vertexTangentBuffer[contextIndex];
 		}
 
@@ -347,9 +378,13 @@
 
 			if (_indexBufferContext[contextIndex] != context || !_indexBuffer[contextIndex]) {
 				_indexBuffer[contextIndex] = context.createIndexBuffer(_numIndices);
-				_indexBuffer[contextIndex].uploadFromVector(_indices, 0, _numIndices);
 				_indexBufferContext[contextIndex] = context;
+				_indicesInvalid[contextIndex] = true;
  			}
+			if (_indicesInvalid[contextIndex]) {
+				_indexBuffer[contextIndex].uploadFromVector(_indices, 0, _numIndices);
+				_indicesInvalid[contextIndex] = false;
+			}
 
 			return _indexBuffer[contextIndex];
 		}
@@ -379,7 +414,7 @@
 			var len : uint = _vertices.length;
 			for (var i : uint = 0; i < len; ++i)
 				_vertices[i] *= scale;
-			invalidateBuffers(_vertexBufferContext);
+			invalidateBuffers(_verticesInvalid);
 		}
 
 		/**
@@ -389,7 +424,7 @@
 		 */
 		private var _scaleU : Number = 1;
 		private var _scaleV : Number = 1;
-		
+
 		public function get scaleU():Number
 		{
 			return _scaleU;
@@ -413,7 +448,7 @@
 			_scaleU = scaleU;
 			_scaleV = scaleV;
 			 
-			invalidateBuffers(_uvBufferContext);
+			invalidateBuffers(_uvsInvalid);
 		}
 
 		/**
@@ -469,7 +504,7 @@
 
 		public function updateCustomData(data : Vector.<Number>) : void
 		{
-			invalidateBuffers(_customBufferContext);
+			invalidateBuffers(_customDataInvalid);
 		}
 
 		/**
@@ -487,7 +522,8 @@
 			var numVertices : int = vertices.length / 3;
 			if (numVertices != _numVertices) disposeAllVertexBuffers();
 			_numVertices = numVertices;
-            invalidateBuffers(_vertexBufferContext);
+
+            invalidateBuffers(_verticesInvalid);
 
 			invalidateBounds();
 		}
@@ -520,13 +556,13 @@
 			if (_autoDeriveVertexTangents) _vertexTangentsDirty = true;
 			_faceTangentsDirty = true;
 			_uvs = uvs;
-			invalidateBuffers(_uvBufferContext);
+			invalidateBuffers(_uvsInvalid);
 		}
 
 		public function updateSecondaryUVData(uvs : Vector.<Number>) : void
 		{
 			_secondaryUvs = uvs;
-			invalidateBuffers(_secondaryUvBufferContext);
+			invalidateBuffers(_secondaryUvsInvalid);
 		}
 
 		/**
@@ -548,7 +584,7 @@
 			_vertexNormalsDirty = false;
 			_autoDeriveVertexNormals = (vertexNormals == null);
 			_vertexNormals = vertexNormals;
-			invalidateBuffers(_vertexNormalBufferContext);
+			invalidateBuffers(_normalsInvalid);
 		}
 
 		/**
@@ -572,7 +608,7 @@
 			_vertexTangentsDirty = false;
 			_autoDeriveVertexTangents = (vertexTangents == null);
 			_vertexTangents = vertexTangents;
-			invalidateBuffers(_vertexTangentBufferContext);
+			invalidateBuffers(_tangentsInvalid);
 		}
 
 		/**
@@ -598,7 +634,7 @@
 			if (_numTriangles != numTriangles)
 				disposeIndexBuffers(_indexBuffer);
 			_numTriangles = numTriangles;
-			invalidateBuffers(_indexBufferContext);
+			invalidateBuffers(_indicesInvalid);
 			_faceNormalsDirty = true;
 
 			if (_autoDeriveVertexNormals) _vertexNormalsDirty = true;
@@ -635,10 +671,10 @@
 		 * Invalidates all buffers in a vector, causing them the update when they are first requested.
 		 * @param buffers The vector of buffers to invalidate.
 		 */
-		protected function invalidateBuffers(buffers : Vector.<Context3D>) : void
+		protected function invalidateBuffers(invalid : Vector.<Boolean>) : void
 		{
 			for (var i : int = 0; i < 8; ++i)
-				buffers[i] = null;
+				invalid[i] = true;
 		}
 
 		/**
@@ -724,7 +760,7 @@
 			}
 
 			_vertexNormalsDirty = false;
-			invalidateBuffers(_vertexNormalBufferContext);
+			invalidateBuffers(_normalsInvalid);
 		}
 		
 		
@@ -762,7 +798,7 @@
 			_uvs.fixed = true;
 			
 			_uvsDirty = false;
-			invalidateBuffers(_uvBufferContext);
+			invalidateBuffers(_uvsInvalid);
 		}
 
 		/**
@@ -821,7 +857,7 @@
 			}
 
 			_vertexTangentsDirty = false;
-			invalidateBuffers(_vertexTangentBufferContext);
+			invalidateBuffers(_tangentsInvalid);
 		}
 
 		/**
