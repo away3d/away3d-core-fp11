@@ -95,14 +95,14 @@ package away3d.core.render
 				drawSkyBox(entityCollector);
 			}
 
-			_context.setDepthTest(true, Context3DCompareMode.LESS);
+			_context.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			
 			var which : int = target? SCREEN_PASSES : ALL_PASSES;
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, which);
 			drawRenderables(entityCollector.blendedRenderableHead, entityCollector, which);
 
-			_context.setDepthTest(false, Context3DCompareMode.LESS);
+			_context.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
 
 			if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 

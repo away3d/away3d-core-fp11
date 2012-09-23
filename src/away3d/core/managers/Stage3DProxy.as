@@ -459,7 +459,6 @@ package away3d.core.managers
 		{
 			if (_stage3D.context3D) {
 				var hadContext : Boolean = (_context3D != null);
-
 				_context3D = _stage3D.context3D;
 				_context3D.enableErrorChecking = Debug.active;
 

@@ -65,7 +65,7 @@ package away3d.materials
 
 		protected var _lightPicker : LightPickerBase;
 		private var _distanceBasedDepthRender : Boolean;
-		private var _depthCompareMode : String = Context3DCompareMode.LESS;
+		private var _depthCompareMode : String = Context3DCompareMode.LESS_EQUAL;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -257,6 +257,11 @@ package away3d.materials
 		arcane function get numPasses() : uint
 		{
 			return _numPasses;
+		}
+
+		arcane function hasDepthAlphaThreshold() : Boolean
+		{
+			return _depthPass.alphaThreshold > 0;
 		}
 
 		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void

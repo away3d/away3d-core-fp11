@@ -80,6 +80,8 @@
 		private var _ViewContextMenu:ContextMenu;
 		private var _shareContext:Boolean = false;
 		private var _viewScissorRect:Rectangle;
+
+		private var _depthPrepass:Boolean;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -90,8 +92,18 @@
 				
 			}
 		}
-		
-		private function visitWebsite(e:ContextMenuEvent):void 
+
+		public function get depthPrepass() : Boolean
+		{
+			return _depthPrepass;
+		}
+
+		public function set depthPrepass(value : Boolean) : void
+		{
+			_depthPrepass = value;
+		}
+
+		private function visitWebsite(e:ContextMenuEvent):void
 		{
 			var url:String = Away3D.WEBSITE_URL;
 			var request:URLRequest = new URLRequest(url);
@@ -595,7 +607,12 @@
 			_mouse3DManager.updateCollider(this);
 
 			if (_requireDepthRender)
-				renderSceneDepth(_entityCollector);
+				renderSceneDepthToTexture(_entityCollector);
+
+			if (_depthPrepass)
+				renderDepthPrepass(_entityCollector);
+
+			_renderer.clearOnRender = !_depthPrepass;
 
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
@@ -647,8 +664,24 @@
 				_renderer.textureRatioY = 1;
 			}
 		}
-		
-		protected function renderSceneDepth(entityCollector : EntityCollector) : void
+
+		private function renderDepthPrepass(entityCollector : EntityCollector) : void
+		{
+			_depthRenderer.disableColor = true;
+			if (_filter3DRenderer || _renderer.renderToTexture) {
+				_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+				_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+				_depthRenderer.render(entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+			}
+			else {
+				_depthRenderer.textureRatioX = 1;
+				_depthRenderer.textureRatioY = 1;
+				_depthRenderer.render(entityCollector);
+			}
+			_depthRenderer.disableColor = false;
+		}
+
+		protected function renderSceneDepthToTexture(entityCollector : EntityCollector) : void
 		{
 			if (_depthTextureInvalid || !_depthRender) initDepthTexture(_stage3DProxy._context3D);
 			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;

@@ -115,6 +115,7 @@ package away3d.lights.shadowmaps
 			if (_scissorRectsInvalid) updateScissorRects();
 
 			for (var i : int = 0; i < _numCascades; ++i) {
+				// todo: collect only once for a theoretical light encompassing the frustum?
 				_casterCollector.clear();
 				_casterCollector.camera = _depthCameras[i];
 				scene.traversePartitions(_casterCollector);

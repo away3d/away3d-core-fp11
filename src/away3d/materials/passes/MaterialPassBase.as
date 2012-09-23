@@ -54,7 +54,7 @@ package away3d.materials.passes
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = true;
-		protected var _depthCompareMode : String = Context3DCompareMode.LESS;
+		protected var _depthCompareMode : String = Context3DCompareMode.LESS_EQUAL;
 
 		private var _srcBlend : String = Context3DBlendFactor.ONE;
 		private var _destBlend : String = Context3DBlendFactor.ZERO;
@@ -370,7 +370,7 @@ package away3d.materials.passes
 				stage3DProxy.scissorRect = _oldRect;
 			}
 			
-			stage3DProxy._context3D.setDepthTest( true, Context3DCompareMode.LESS );
+			stage3DProxy._context3D.setDepthTest( true, Context3DCompareMode.LESS_EQUAL );
 		}
 
 		/**

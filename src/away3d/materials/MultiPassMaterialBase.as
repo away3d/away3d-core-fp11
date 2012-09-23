@@ -478,6 +478,9 @@
 					_nonCasterLightPasses[i].setBlendMode(BlendMode.ADD, false);
 					_nonCasterLightPasses[i].depthCompareMode = Context3DCompareMode.EQUAL;
 				}
+			}
+
+			if (_casterLightPass || _nonCasterLightPasses) {
 				if (_effectsPass) {
 					_effectsPass.depthCompareMode = Context3DCompareMode.EQUAL;
 					_effectsPass.setBlendMode(BlendMode.NORMAL, true);
