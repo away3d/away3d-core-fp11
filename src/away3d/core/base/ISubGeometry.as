@@ -18,10 +18,15 @@ package away3d.core.base
 		function get numTriangles() : uint;
 
 		/**
-		 * The number of data elements in the buffers per vertex.
+		 * The distance between two consecutive vertex, normal or tangent elements
 		 * This always applies to vertices, normals and tangents.
 		 */
 		function get vertexStride() : uint;
+
+		/**
+		 * The distance between two consecutive UV or secondary UV elements
+		 */
+		function get UVStride() : uint;
 
 		/**
 		 * Assigns the attribute stream for vertex positions.
