@@ -131,7 +131,7 @@
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 9, _vertexData, 1);
 
 			if (_alphaThreshold > 0)
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.UVBufferOffset);
+				renderable.activateUVBuffer(1, stage3DProxy);
 
 			super.render(renderable, stage3DProxy, camera);
 		}

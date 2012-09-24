@@ -3,6 +3,7 @@ package away3d.core.base
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DVertexBufferFormat;
 
 	import flash.display3D.VertexBuffer3D;
 	import flash.utils.Dictionary;
@@ -149,7 +150,7 @@ package away3d.core.base
 		/**
 		 * @inheritDoc
 		 */
-		override public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		override public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			if (_animatedVertexData) {
 				var contextIndex : int = stage3DProxy._stage3DIndex;
@@ -163,16 +164,16 @@ package away3d.core.base
 					_vertexBuffer[contextIndex].uploadFromVector(_animatedVertexData, 0, _animatedVertexData.length / 3);
 					_verticesInvalid[contextIndex] = false;
 				}
-			    return _vertexBuffer[contextIndex];
+				stage3DProxy.setSimpleVertexBuffer(index, _vertexBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else
-				return super.getVertexBuffer(stage3DProxy);
+				super.activateVertexBuffer(index, stage3DProxy);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		override public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			if (_animatedNormalData) {
 				var contextIndex : int = stage3DProxy._stage3DIndex;
@@ -186,16 +187,16 @@ package away3d.core.base
 					_vertexNormalBuffer[contextIndex].uploadFromVector(_animatedNormalData, 0, _numVertices);
 					_normalsInvalid[contextIndex] = false;
 				}
-			    return _vertexNormalBuffer[contextIndex];
+				stage3DProxy.setSimpleVertexBuffer(index, _vertexNormalBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else
-				return super.getVertexNormalBuffer(stage3DProxy);
+				super.activateVertexNormalBuffer(index, stage3DProxy);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		override public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			if (_animatedTangentData) {
 				var contextIndex : int = stage3DProxy._stage3DIndex;
@@ -209,10 +210,10 @@ package away3d.core.base
 					_vertexTangentBuffer[contextIndex].uploadFromVector(_animatedTangentData, 0, _numVertices);
 					_tangentsInvalid[contextIndex] = false;
 				}
-			    return _vertexTangentBuffer[contextIndex];
+				stage3DProxy.setSimpleVertexBuffer(index, _vertexTangentBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else
-				return super.getVertexTangentBuffer(stage3DProxy);
+				super.activateVertexTangentBuffer(index, stage3DProxy);
 		}
 		/**
 		 * Clones the current object.

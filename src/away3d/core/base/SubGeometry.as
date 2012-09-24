@@ -3,6 +3,7 @@
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DVertexBufferFormat;
 
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
@@ -179,36 +180,15 @@
 		}
 
 		/**
-		 * A buffer allowing you any sort of data. Needs to be initialized by calling initCustomBuffer
-		 * @param stage3DProxy
-		 * @return
-		 */
-		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
-		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
-			if (_customBufferContext[contextIndex] != context || !_customBuffer[contextIndex]) {
-				_customBuffer[contextIndex] = context.createVertexBuffer(_numVertices, _customElementsPerVertex);
-				_customBufferContext[contextIndex] = context;
-				_customDataInvalid[contextIndex] = true;
- 			}
-			if(_customDataInvalid[contextIndex]) {
-				_customBuffer[contextIndex].uploadFromVector(_customData, 0, _numVertices);
-				_customDataInvalid[contextIndex] = false;
-			}
-			return _customBuffer[contextIndex];
-		}
-
-		/**
 		 * Retrieves the VertexBuffer3D object that contains vertex positions.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains vertex positions.
 		 */
-		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
-			if (_vertexBufferContext[contextIndex] != context || !_vertexBuffer[contextIndex]) {
+			if (_vertexBufferContext[contextIndex] != context) {
 				_vertexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
 				_vertexBufferContext[contextIndex] = context;
 				_verticesInvalid[contextIndex] = true;
@@ -218,7 +198,7 @@
 				_verticesInvalid[contextIndex] = false;
 			}
 
-			return _vertexBuffer[contextIndex];
+			stage3DProxy.setSimpleVertexBuffer(index, _vertexBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
 		}
 
 		/**
@@ -226,7 +206,7 @@
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains texture coordinates.
 		 */
-		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
@@ -244,7 +224,99 @@
 				_uvsInvalid[contextIndex] = false;
 			}
 
-			return _uvBuffer[contextIndex];
+			stage3DProxy.setSimpleVertexBuffer(index, _uvBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_2);
+		}
+
+		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (_secondaryUvBufferContext[contextIndex] != context) {
+				_secondaryUvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
+				_secondaryUvBufferContext[contextIndex] = context;
+				_secondaryUvsInvalid[contextIndex] = true;
+ 			}
+			if (_secondaryUvsInvalid[contextIndex]) {
+				_secondaryUvBuffer[contextIndex].uploadFromVector(_secondaryUvs, 0, _numVertices);
+				_secondaryUvsInvalid[contextIndex] = false;
+			}
+
+			stage3DProxy.setSimpleVertexBuffer(index, _secondaryUvBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_2);
+		}
+
+		/**
+		 * Retrieves the VertexBuffer3D object that contains vertex normals.
+		 * @param context The Context3D for which we request the buffer
+		 * @return The VertexBuffer3D object that contains vertex normals.
+		 */
+		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
+				updateVertexNormals();
+
+			if (_vertexNormalBufferContext[contextIndex] != context) {
+				_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
+				_vertexNormalBufferContext[contextIndex] = context;
+				_normalsInvalid[contextIndex] = true;
+ 			}
+			if (_normalsInvalid[contextIndex]) {
+				_vertexNormalBuffer[contextIndex].uploadFromVector(_vertexNormals, 0, _numVertices);
+				_normalsInvalid[contextIndex] = false;
+			}
+
+			stage3DProxy.setSimpleVertexBuffer(index, _vertexNormalBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
+		}
+
+		/**
+		 * Retrieves the VertexBuffer3D object that contains vertex tangents.
+		 * @param context The Context3D for which we request the buffer
+		 * @return The VertexBuffer3D object that contains vertex tangents.
+		 */
+		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (_vertexTangentsDirty)
+				updateVertexTangents();
+
+			if (_vertexTangentBufferContext[contextIndex] != context) {
+				_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
+				_vertexTangentBufferContext[contextIndex] = context;
+				_tangentsInvalid[contextIndex] = true;
+ 			}
+			if (_tangentsInvalid[contextIndex]) {
+				_vertexTangentBuffer[contextIndex].uploadFromVector(_vertexTangents, 0, _numVertices);
+				_tangentsInvalid[contextIndex] = false;
+			}
+			stage3DProxy.setSimpleVertexBuffer(index, _vertexTangentBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
+		}
+
+		/**
+		 * Retrieves the VertexBuffer3D object that contains triangle indices.
+		 * @param context The Context3D for which we request the buffer
+		 * @return The VertexBuffer3D object that contains triangle indices.
+		 */
+		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (_indexBufferContext[contextIndex] != context) {
+				_indexBuffer[contextIndex] = context.createIndexBuffer(_numIndices);
+				_indexBufferContext[contextIndex] = context;
+				_indicesInvalid[contextIndex] = true;
+ 			}
+			if (_indicesInvalid[contextIndex]) {
+				_indexBuffer[contextIndex].uploadFromVector(_indices, 0, _numIndices);
+				_indicesInvalid[contextIndex] = false;
+			}
+
+			return _indexBuffer[contextIndex];
 		}
 
 		public function applyTransformation(transform:Matrix3D):void
@@ -295,98 +367,6 @@
 					_vertexTangents[i2] = v3.z;
 				}
 			}
-		}
-
-		public function getSecondaryUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
-		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
-
-			if (_secondaryUvBufferContext[contextIndex] != context || !_secondaryUvBuffer[contextIndex]) {
-				_secondaryUvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
-				_secondaryUvBufferContext[contextIndex] = context;
-				_secondaryUvsInvalid[contextIndex] = true;
- 			}
-			if (_secondaryUvsInvalid[contextIndex]) {
-				_secondaryUvBuffer[contextIndex].uploadFromVector(_secondaryUvs, 0, _numVertices);
-				_secondaryUvsInvalid[contextIndex] = false;
-			}
-
-			return _secondaryUvBuffer[contextIndex];
-		}
-
-		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex normals.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex normals.
-		 */
-		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
-		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
-
-			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
-				updateVertexNormals();
-
-			if (_vertexNormalBufferContext[contextIndex] != context || !_vertexNormalBuffer[contextIndex]) {
-				_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
-				_vertexNormalBufferContext[contextIndex] = context;
-				_normalsInvalid[contextIndex] = true;
- 			}
-			if (_normalsInvalid[contextIndex]) {
-				_vertexNormalBuffer[contextIndex].uploadFromVector(_vertexNormals, 0, _numVertices);
-				_normalsInvalid[contextIndex] = false;
-			}
-
-			return _vertexNormalBuffer[contextIndex];
-		}
-
-		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex tangents.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex tangents.
-		 */
-		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
-		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
-
-			if (_vertexTangentsDirty)
-				updateVertexTangents();
-
-			if (_vertexTangentBufferContext[contextIndex] != context || !_vertexTangentBuffer[contextIndex]) {
-				_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
-				_vertexTangentBufferContext[contextIndex] = context;
-				_tangentsInvalid[contextIndex] = true;
- 			}
-			if (_tangentsInvalid[contextIndex]) {
-				_vertexTangentBuffer[contextIndex].uploadFromVector(_vertexTangents, 0, _numVertices);
-				_tangentsInvalid[contextIndex] = false;
-			}
-			return _vertexTangentBuffer[contextIndex];
-		}
-
-		/**
-		 * Retrieves the VertexBuffer3D object that contains triangle indices.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains triangle indices.
-		 */
-		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
-		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
-
-			if (_indexBufferContext[contextIndex] != context || !_indexBuffer[contextIndex]) {
-				_indexBuffer[contextIndex] = context.createIndexBuffer(_numIndices);
-				_indexBufferContext[contextIndex] = context;
-				_indicesInvalid[contextIndex] = true;
- 			}
-			if (_indicesInvalid[contextIndex]) {
-				_indexBuffer[contextIndex].uploadFromVector(_indices, 0, _numIndices);
-				_indicesInvalid[contextIndex] = false;
-			}
-
-			return _indexBuffer[contextIndex];
 		}
 
 		/**
@@ -1001,31 +981,6 @@
 				_indexBuffer[index].dispose();
 				_indexBuffer[index] = null;
 			}
-		}
-
-		public function get vertexBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get normalBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get tangentBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get UVBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get secondaryUVBufferOffset() : int
-		{
-			return 0;
 		}
 	}
 }

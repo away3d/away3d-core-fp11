@@ -116,11 +116,7 @@
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);
-			stage3DProxy.setSimpleVertexBuffer(0, vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 0);
-			stage3DProxy.setSimpleVertexBuffer(1, vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 3);
-			stage3DProxy.setSimpleVertexBuffer(2, vertexBuffer, Context3DVertexBufferFormat.FLOAT_1, 6);
-			stage3DProxy.setSimpleVertexBuffer(3, vertexBuffer, Context3DVertexBufferFormat.FLOAT_4, 7);
+			renderable.activateVertexBuffer(0, stage3DProxy);
 
 			_calcMatrix.copyFrom(renderable.sourceEntity.sceneTransform);
 			_calcMatrix.append(camera.inverseSceneTransform);

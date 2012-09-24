@@ -1,12 +1,10 @@
 package away3d.core.base
 {
 
-	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 
 	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 
@@ -18,17 +16,17 @@ package away3d.core.base
 		/**
 		 * The transformation matrix that transforms from model to world space.
 		 */
-		function get sceneTransform():Matrix3D;
+		function get sceneTransform() : Matrix3D;
 
 		/**
 		 * The inverse scene transform object that transforms from world to model space.
 		 */
-		function get inverseSceneTransform():Matrix3D;
+		function get inverseSceneTransform() : Matrix3D;
 
 		/**
 		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
 		 */
-		function get modelViewProjection():Matrix3D;
+		function get modelViewProjection() : Matrix3D;
 
 		/**
 		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
@@ -36,101 +34,93 @@ package away3d.core.base
 		 *
 		 * @private
 		 */
-		function getModelViewProjectionUnsafe():Matrix3D;
+		function getModelViewProjectionUnsafe() : Matrix3D;
 
 		/**
 		 * The distance of the IRenderable object to the view, used to sort per object.
 		 */
-		function get zIndex():Number;
+		function get zIndex() : Number;
 
 		/**
 		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
 		 */
-		function get mouseEnabled():Boolean;
+		function get mouseEnabled() : Boolean;
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex positions.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex positions.
+		 * Assigns the attribute stream for vertex positions.
+		 * @param index The attribute stream index for the vertex shader
+		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */
-		function getVertexBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
+		function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void;
+
 
 		/**
-		 * Retrieves a custom buffer that can contain any per-vertex data
-		 * @param stage3DProxy
-		 * @return The VertexBuffer3D object containing the data?
+		 * Assigns the attribute stream for coordinates
+		 * @param index The attribute stream index for the vertex shader
+		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */
-		function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D;
+		function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void;
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains texture coordinates.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains texture coordinates.
+		 * Assigns the attribute stream for a secondary set of UV coordinates
+		 * @param index The attribute stream index for the vertex shader
+		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */
-		function getUVBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
-
-
-		function getSecondaryUVBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
+		function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void;
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex normals.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex normals.
+		 * Assigns the attribute stream for vertex normals
+		 * @param index The attribute stream index for the vertex shader
+		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */
-		function getVertexNormalBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
+		function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void;
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex tangents.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex tangents.
+		 * Assigns the attribute stream for vertex tangents
+		 * @param index The attribute stream index for the vertex shader
+		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */
-		function getVertexTangentBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D;
+		function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void;
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains triangle indices.
+		 * Retrieves the IndexBuffer3D object that contains triangle indices.
 		 * @param context The Context3D for which we request the buffer
 		 * @return The VertexBuffer3D object that contains triangle indices.
 		 */
-		function getIndexBuffer( stage3DProxy:Stage3DProxy ):IndexBuffer3D;
+		function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D;
 
 		/**
 		 * The amount of triangles that comprise the IRenderable geometry.
 		 */
-		function get numTriangles():uint;
+		function get numTriangles() : uint;
 
 		/**
 		 * The entity that that initially provided the IRenderable to the render pipeline.
 		 */
-		function get sourceEntity():Entity;
+		function get sourceEntity() : Entity;
 
 		/**
 		 * Indicates whether the renderable can cast shadows
 		 */
-		function get castsShadows():Boolean;
+		function get castsShadows() : Boolean;
 
 		/**
 		 * Retrieves the object's vertices as a Number array.
 		 */
-		function get vertexData():Vector.<Number>;
+		function get vertexData() : Vector.<Number>;
 
 		/**
 		 * Retrieves the object's indices as a uint array.
 		 */
-		function get indexData():Vector.<uint>;
+		function get indexData() : Vector.<uint>;
 
 		/**
 		 * Retrieves the object's uvs as a Number array.
 		 */
-		function get UVData():Vector.<Number>;
+		function get UVData() : Vector.<Number>;
 
-		function get uvTransform():Matrix;
+		function get uvTransform() : Matrix;
 
-		function get vertexBufferOffset() : int;
-		function get normalBufferOffset() : int;
-		function get tangentBufferOffset() : int;
-		function get UVBufferOffset() : int;
-		function get secondaryUVBufferOffset() : int;
-
-		function get shaderPickingDetails():Boolean;
+		function get shaderPickingDetails() : Boolean;
 	}
 }
