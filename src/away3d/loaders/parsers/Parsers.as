@@ -31,13 +31,14 @@ package away3d.loaders.parsers
 		 * <li>Doom 3 MD5 animation clips (.md5anim)</li>
 		 * <li>Wavefront OBJ (.obj)</li>
 		 * <li>3DMax (.3ds)</li>
+		 * <li>DXF (.dxf)</li>
 		 * <li>Images (.jpg, .png)</li>
 		 * </ul>
 		 * 
 		 * @see away3d.loading.AssetLibrary.enableParser
 		*/
 		public static const ALL_BUNDLED : Vector.<Class> = Vector.<Class>([
-			AC3DParser, AWDParser, Max3DSParser,
+			AC3DParser, AWDParser, Max3DSParser, DXFParser,
 			MD2Parser, MD5AnimParser, MD5MeshParser, OBJParser,
 			DAEParser
 		]);
