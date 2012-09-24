@@ -244,5 +244,40 @@ package away3d.primitives
 		{
 			return _geometry.UVData;
 		}
+
+		public function get numVertices() : uint
+		{
+			return _geometry.numVertices;
+		}
+
+		public function get vertexStride() : uint
+		{
+			return _geometry.vertexStride;
+		}
+
+		public function get vertexNormalData() : Vector.<Number>
+		{
+			return _geometry.vertexNormalData;
+		}
+
+		public function get vertexTangentData() : Vector.<Number>
+		{
+			return _geometry.vertexTangentData;
+		}
+
+		public function get vertexOffset() : int
+		{
+			return _geometry.vertexOffset;
+		}
+
+		public function get vertexNormalOffset() : int
+		{
+			return _geometry.vertexNormalOffset;
+		}
+
+		public function get vertexTangentOffset() : int
+		{
+			return _geometry.vertexTangentOffset;
+		}
 	}
 }

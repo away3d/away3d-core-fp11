@@ -14,7 +14,6 @@ package away3d.entities
 	import away3d.materials.MaterialBase;
 
 	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -210,6 +209,41 @@ package away3d.entities
 		public function get UVData() : Vector.<Number>
 		{
 			return _geometry.UVData;
+		}
+
+		public function get numVertices() : uint
+		{
+			return _geometry.numVertices;
+		}
+
+		public function get vertexStride() : uint
+		{
+			return _geometry.vertexStride;
+		}
+
+		public function get vertexNormalData() : Vector.<Number>
+		{
+			return _geometry.vertexNormalData;
+		}
+
+		public function get vertexTangentData() : Vector.<Number>
+		{
+			return _geometry.vertexTangentData;
+		}
+
+		public function get vertexOffset() : int
+		{
+			return _geometry.vertexOffset;
+		}
+
+		public function get vertexNormalOffset() : int
+		{
+			return _geometry.vertexNormalOffset;
+		}
+
+		public function get vertexTangentOffset() : int
+		{
+			return _geometry.vertexTangentOffset;
 		}
 	}
 }

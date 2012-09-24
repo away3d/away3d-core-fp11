@@ -21,12 +21,11 @@
 	 * @see away3d.core.base.Geometry
 	 * @see away3d.core.base.SubMesh
 	 */
-	public class SubGeometry
+	public class SubGeometry implements ISubGeometry
 	{
 		private var _parentGeometry : Geometry;
 
 		// raw data:
-		protected var _customData : Vector.<Number>;
 		protected var _vertices : Vector.<Number>;
 		protected var _uvs : Vector.<Number>;
 		protected var _secondaryUvs : Vector.<Number>;
@@ -37,7 +36,6 @@
 		protected var _faceWeights : Vector.<Number>;
 		protected var _faceTangents : Vector.<Number>;
 
-		protected var _customDataInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
 		protected var _verticesInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
 		protected var _uvsInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
 		protected var _secondaryUvsInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
@@ -51,7 +49,6 @@
 		protected var _secondaryUvBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _vertexNormalBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _vertexTangentBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
-		protected var _customBuffer : Vector.<VertexBuffer3D>;
 		protected var _indexBuffer : Vector.<IndexBuffer3D> = new Vector.<IndexBuffer3D>(8);
 
 		private var _autoGenerateUVs : Boolean = false;
@@ -73,13 +70,11 @@
 		protected var _indexBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
 		protected var _vertexNormalBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
 		protected var _vertexTangentBufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
-		protected var _customBufferContext : Vector.<Context3D>;
 
 		protected var _numVertices : uint;
 		protected var _numIndices : uint;
 		protected var _numTriangles : uint;
 		private var _uvScaleV : Number = 1;
-		private var _customElementsPerVertex : int;
 
 
 		/**
@@ -171,24 +166,14 @@
 			_vertexTangentsDirty = value;
 		}
 
-		public function initCustomBuffer(numVertices : int, elementsPerVertex : int) : void
-		{
-			_numVertices = numVertices;
-			_customElementsPerVertex = elementsPerVertex;
-			_customBuffer = new Vector.<VertexBuffer3D>(8);
-			_customBufferContext = new Vector.<Context3D>(8);
-		}
-
 		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex positions.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex positions.
+		 * @inheritDoc
 		 */
 		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
-			if (_vertexBufferContext[contextIndex] != context) {
+			if (!_vertexBuffer[contextIndex] || _vertexBufferContext[contextIndex] != context) {
 				_vertexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
 				_vertexBufferContext[contextIndex] = context;
 				_verticesInvalid[contextIndex] = true;
@@ -202,9 +187,7 @@
 		}
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains texture coordinates.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains texture coordinates.
+		 * @inheritDoc
 		 */
 		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
@@ -214,7 +197,7 @@
 			if (_autoGenerateUVs && _uvsDirty)
 				updateDummyUVs();
 
-			if (_uvBufferContext[contextIndex] != context || !_uvBuffer[contextIndex]) {
+			if (!_uvBuffer[contextIndex] || _uvBufferContext[contextIndex] != context) {
 				_uvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
 				_uvBufferContext[contextIndex] = context;
 				_uvsInvalid[contextIndex] = true;
@@ -227,12 +210,15 @@
 			stage3DProxy.setSimpleVertexBuffer(index, _uvBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_2);
 		}
 
+		/**
+		 * @inheritDoc
+		 */
 		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
 
-			if (_secondaryUvBufferContext[contextIndex] != context) {
+			if (!_secondaryUvBuffer[contextIndex] || _secondaryUvBufferContext[contextIndex] != context) {
 				_secondaryUvBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 2);
 				_secondaryUvBufferContext[contextIndex] = context;
 				_secondaryUvsInvalid[contextIndex] = true;
@@ -258,7 +244,7 @@
 			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
 				updateVertexNormals();
 
-			if (_vertexNormalBufferContext[contextIndex] != context) {
+			if (!_vertexNormalBuffer[contextIndex] || _vertexNormalBufferContext[contextIndex] != context) {
 				_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
 				_vertexNormalBufferContext[contextIndex] = context;
 				_normalsInvalid[contextIndex] = true;
@@ -284,7 +270,7 @@
 			if (_vertexTangentsDirty)
 				updateVertexTangents();
 
-			if (_vertexTangentBufferContext[contextIndex] != context) {
+			if (!_vertexTangentBuffer[contextIndex] || _vertexTangentBufferContext[contextIndex] != context) {
 				_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
 				_vertexTangentBufferContext[contextIndex] = context;
 				_tangentsInvalid[contextIndex] = true;
@@ -306,7 +292,7 @@
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
 
-			if (_indexBufferContext[contextIndex] != context) {
+			if (!_indexBuffer[contextIndex] || _indexBufferContext[contextIndex] != context) {
 				_indexBuffer[contextIndex] = context.createIndexBuffer(_numIndices);
 				_indexBufferContext[contextIndex] = context;
 				_indicesInvalid[contextIndex] = true;
@@ -438,7 +424,6 @@
 		{
 			disposeAllVertexBuffers();
 			disposeIndexBuffers(_indexBuffer);
-			_customBuffer = null;
 			_vertexBuffer = null;
 			_vertexNormalBuffer = null;
 			_uvBuffer = null;
@@ -454,14 +439,12 @@
 			_faceNormalsData = null;
 			_faceWeights = null;
 			_faceTangents = null;
-			_customData = null;
 			_vertexBufferContext = null;
 			_uvBufferContext = null;
 			_secondaryUvBufferContext = null;
 			_indexBufferContext = null;
 			_vertexNormalBufferContext = null;
 			_vertexTangentBufferContext = null;
-			_customBufferContext = null;
 		}
 
 		protected function disposeAllVertexBuffers() : void
@@ -471,7 +454,6 @@
 			disposeVertexBuffers(_uvBuffer);
 			disposeVertexBuffers(_secondaryUvBuffer);
 			disposeVertexBuffers(_vertexTangentBuffer);
-			if (_customBuffer) disposeVertexBuffers(_customBuffer);
 		}
 
 		/**
@@ -480,11 +462,6 @@
 		public function get vertexData() : Vector.<Number>
 		{
 			return _vertices;
-		}
-
-		public function updateCustomData(data : Vector.<Number>) : void
-		{
-			invalidateBuffers(_customDataInvalid);
 		}
 
 		/**
@@ -981,6 +958,26 @@
 				_indexBuffer[index].dispose();
 				_indexBuffer[index] = null;
 			}
+		}
+
+		public function get vertexStride() : uint
+		{
+			return 3;
+		}
+
+		public function get vertexOffset() : int
+		{
+			return 0;
+		}
+
+		public function get vertexNormalOffset() : int
+		{
+			return 0;
+		}
+
+		public function get vertexTangentOffset() : int
+		{
+			return 0;
 		}
 	}
 }

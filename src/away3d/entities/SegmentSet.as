@@ -304,5 +304,40 @@
 		{
 			return null;
 		}
+
+		public function get numVertices() : uint
+		{
+			return _numVertices;
+		}
+
+		public function get vertexStride() : uint
+		{
+			return 11;
+		}
+
+		public function get vertexNormalData() : Vector.<Number>
+		{
+			return null;
+		}
+
+		public function get vertexTangentData() : Vector.<Number>
+		{
+			return null;
+		}
+
+		public function get vertexOffset() : int
+		{
+			return 0;
+		}
+
+		public function get vertexNormalOffset() : int
+		{
+			return 0;
+		}
+
+		public function get vertexTangentOffset() : int
+		{
+			return 0;
+		}
 	}
 }

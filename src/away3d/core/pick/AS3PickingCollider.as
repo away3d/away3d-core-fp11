@@ -48,12 +48,11 @@ package away3d.core.pick
 			var vertexData:Vector.<Number> = subMesh.vertexData;
 			var uvData:Vector.<Number> = subMesh.UVData;
 			var collisionTriangleIndex:int = -1;
+			var stride:int = subMesh.vertexStride;
 			numTriangles = subMesh.numTriangles;
+			var index:uint = subMesh.vertexOffset;
 			
 			for( i = 0; i < numTriangles; ++i ) { // sweep all triangles
-
-				var index:uint = i * 3;
-
 				// evaluate triangle indices
 				i0 = indexData[ index ] * 3;
 				i1 = indexData[ index + 1 ] * 3;
@@ -125,6 +124,7 @@ package away3d.core.pick
 							return true;
 					}
 				}
+				index += stride;
 			}
 			
 			if( collisionTriangleIndex >= 0 )

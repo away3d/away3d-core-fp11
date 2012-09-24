@@ -331,5 +331,40 @@ package away3d.core.base
 		{
 			return _parentMesh.visible;
 		}
+
+		public function get numVertices() : uint
+		{
+			return _subGeometry.numVertices;
+		}
+
+		public function get vertexStride() : uint
+		{
+			return _subGeometry.vertexStride;
+		}
+
+		public function get vertexNormalData() : Vector.<Number>
+		{
+			return _subGeometry.vertexNormalData;
+		}
+
+		public function get vertexTangentData() : Vector.<Number>
+		{
+			return _subGeometry.vertexTangentData;
+		}
+
+		public function get vertexOffset() : int
+		{
+			return _subGeometry.vertexOffset;
+		}
+
+		public function get vertexNormalOffset() : int
+		{
+			return _subGeometry.vertexNormalOffset;
+		}
+
+		public function get vertexTangentOffset() : int
+		{
+			return _subGeometry.vertexTangentOffset;
+		}
 	}
 }
