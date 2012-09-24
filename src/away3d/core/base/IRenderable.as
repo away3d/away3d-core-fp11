@@ -55,7 +55,7 @@ package away3d.core.base
 
 
 		/**
-		 * Assigns the attribute stream for coordinates
+		 * Assigns the attribute stream for UV coordinates
 		 * @param index The attribute stream index for the vertex shader
 		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */

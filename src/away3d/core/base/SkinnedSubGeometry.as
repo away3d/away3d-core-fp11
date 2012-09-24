@@ -17,6 +17,7 @@ package away3d.core.base
 	 */
 	public class SkinnedSubGeometry extends SubGeometry
 	{
+		private var _bufferFormat : String;
 		private var _jointWeightsData : Vector.<Number>;
 		private var _jointIndexData : Vector.<Number>;
 		private var _animatedVertexData : Vector.<Number>;	// used for cpu fallback
@@ -43,6 +44,7 @@ package away3d.core.base
 		{
 			super();
 			_jointsPerVertex = jointsPerVertex;
+			_bufferFormat = "float" + _jointsPerVertex;
 		}
 
 		/**
@@ -104,11 +106,11 @@ package away3d.core.base
 		}
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains joint weights.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains joint weights.
+		 * Assigns the attribute stream for joint weights
+		 * @param index The attribute stream index for the vertex shader
+		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */
-		public function getJointWeightsBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateJointWeightsBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
@@ -121,15 +123,15 @@ package away3d.core.base
 				_jointWeightsBuffer[contextIndex].uploadFromVector(_jointWeightsData, 0, _jointWeightsData.length / _jointsPerVertex);
 				_jointWeightsInvalid[contextIndex] = false;
 			}
-			return _jointWeightsBuffer[contextIndex];
+			stage3DProxy.setSimpleVertexBuffer(index, _jointWeightsBuffer[contextIndex], _bufferFormat);
 		}
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains joint indices.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains joint indices.
+		 * Assigns the attribute stream for joint indices
+		 * @param index The attribute stream index for the vertex shader
+		 * @param stage3DProxy The Stage3DProxy to assign the stream to
 		 */
-		public function getJointIndexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateJointIndexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
@@ -144,7 +146,7 @@ package away3d.core.base
 				_jointIndexBuffer[contextIndex].uploadFromVector(_jointWeightsData, 0, _jointWeightsData.length / _jointsPerVertex);
 				_jointIndicesInvalid[contextIndex] = false;
 			}
-			return _jointIndexBuffer[contextIndex];
+			stage3DProxy.setSimpleVertexBuffer(index, _jointIndexBuffer[contextIndex], _bufferFormat);
 		}
 
 		/**

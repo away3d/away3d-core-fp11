@@ -26,7 +26,6 @@ package away3d.animators
         private var _globalPose : SkeletonPose = new SkeletonPose();
 		private var _globalPropertiesDirty : Boolean;
 		private var _numJoints : uint;
-		private var _bufferFormat : String;
 		private var _animationStates : Dictionary = new Dictionary();
 		private var _condensedMatrices : Vector.<Number>;
 		
@@ -112,8 +111,7 @@ package away3d.animators
 			
 			_numJoints = _skeleton.numJoints;
 			_globalMatrices = new Vector.<Number>(_numJoints*12, true);
-			_bufferFormat = "float" + _jointsPerVertex;
-			
+
 			var j : int;
 			for (var i : uint = 0; i < _numJoints; ++i) {
 				_globalMatrices[j++] = 1; _globalMatrices[j++] = 0; _globalMatrices[j++] = 0; _globalMatrices[j++] = 0;
@@ -198,8 +196,8 @@ package away3d.animators
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), _bufferFormat, 0);
-			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), _bufferFormat, 0);
+			skinnedGeom.activateJointIndexBuffer(vertexStreamOffset, stage3DProxy);
+			skinnedGeom.activateJointWeightsBuffer(vertexStreamOffset + 1, stage3DProxy);
 		}
 				
         /**
