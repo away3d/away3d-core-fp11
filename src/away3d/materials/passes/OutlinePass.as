@@ -4,6 +4,7 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.IRenderable;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
@@ -193,7 +194,7 @@ package away3d.materials.passes
 		}
 
 		// creates a new mesh in which all vertices are unique
-		private function createDedicatedMesh(source : SubGeometry) : Mesh
+		private function createDedicatedMesh(source : ISubGeometry) : Mesh
 		{
 			var mesh : Mesh = new Mesh(new Geometry(), null);
 			var dest : SubGeometry = new SubGeometry();
@@ -209,9 +210,11 @@ package away3d.materials.passes
 			var vertexCount : int;
 			var len : int = srcIndices.length;
 			var maxIndex : int;
+			var stride : int = source.vertexStride;
+			var offset : int = source.vertexOffset;
 
 			for (var i : int = 0; i < len; ++i) {
-				index = srcIndices[i]*3;
+				index = offset + srcIndices[i]*stride;
 				x = srcVertices[index];
 				y = srcVertices[index+1];
 				z = srcVertices[index+2];

@@ -297,7 +297,7 @@ package away3d.core.pick
 		 */
 		private function getPreciseDetails(camera : Camera3D) : void {
 
-			var subGeom : SubGeometry = SubMesh(_hitRenderable).subGeometry;
+			var subGeom : ISubGeometry = SubMesh(_hitRenderable).subGeometry;
 			var indices : Vector.<uint> = subGeom.indexData;
 			var vertices : Vector.<Number> = subGeom.vertexData;
 			var len : int = indices.length;
@@ -319,14 +319,16 @@ package away3d.core.pick
 			var s0x:Number, s0y:Number, s0z:Number;
 			var s1x:Number, s1y:Number, s1z:Number;
 			var nl:Number;
+			var stride:int = subGeom.vertexStride;
+			var vertexOffset:int = subGeom.vertexOffset;
 
 			updateRay(camera);
 
 
 			while (i < len) {
-				t1 = indices[i]*3;
-				t2 = indices[j]*3;
-				t3 = indices[k]*3;
+				t1 = vertexOffset + indices[i]*stride;
+				t2 = vertexOffset + indices[j]*stride;
+				t3 = vertexOffset + indices[k]*stride;
 				x1 = vertices[t1];	y1 = vertices[t1+1];	z1 = vertices[t1+2];
 				x2 = vertices[t2];	y2 = vertices[t2+1];	z2 = vertices[t2+2];
 				x3 = vertices[t3];	y3 = vertices[t3+1];	z3 = vertices[t3+2];

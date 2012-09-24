@@ -3,6 +3,7 @@ package away3d.core.base
 	import away3d.core.managers.Stage3DProxy;
 
 	import flash.display3D.IndexBuffer3D;
+	import flash.geom.Matrix3D;
 
 	public interface ISubGeometry
 	{
@@ -96,6 +97,11 @@ package away3d.core.base
 		function get vertexTangentOffset() : int;
 
 		/**
+		 * The offset into UVData vector where the UVs are placed
+		 */
+		function get UVOffset() : int;
+
+		/**
 		 * Retrieves the object's indices as a uint array.
 		 */
 		function get indexData() : Vector.<uint>;
@@ -104,5 +110,19 @@ package away3d.core.base
 		 * Retrieves the object's uvs as a Number array.
 		 */
 		function get UVData() : Vector.<Number>;
+
+		function applyTransformation(transform:Matrix3D):void;
+		function scale(scale : Number):void;
+
+		function dispose() : void;
+		function clone() : SubGeometry;
+		function get scaleU():Number;
+		function get scaleV():Number;
+		function scaleUV(scaleU : Number = 1, scaleV : Number = 1):void;
+
+		function get parentGeometry() : Geometry;
+		function set parentGeometry(value : Geometry) : void;
+
+		function get faceNormalsData() : Vector.<Number>;
 	}
 }

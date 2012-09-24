@@ -2,6 +2,7 @@ package away3d.tools.utils
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 
@@ -198,20 +199,22 @@ package away3d.tools.utils
  
 			} catch(e:Error){
 				
-				var geometries:Vector.<SubGeometry> = m.geometry.subGeometries;
+				var geometries:Vector.<ISubGeometry> = m.geometry.subGeometries;
 				var numSubGeoms:int = geometries.length;
 				
-				var subGeom:SubGeometry;
+				var subGeom:ISubGeometry;
 				var vertices:Vector.<Number>;
 	
 				var j : uint;
 				var vecLength : uint;
+				var stride : uint;
 				
 				for (var i : uint = 0; i < numSubGeoms; ++i){
 					subGeom = geometries[i];
 					vertices = subGeom.vertexData;
 					vecLength = vertices.length;
-					for (j = 0; j < vecLength; j+=3){
+					stride = subGeom.vertexStride;
+					for (j = subGeom.vertexOffset; j < vecLength; j+=stride){
 						//not using Math.min or max to go faster
 						x = (vertices[j]*m.scaleX)+offsetPosition.x;
 						y = (vertices[j+1]*m.scaleY)+offsetPosition.y;

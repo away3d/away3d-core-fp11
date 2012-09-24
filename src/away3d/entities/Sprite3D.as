@@ -28,6 +28,7 @@ package away3d.entities
 	 */
 	public class Sprite3D extends Entity implements IRenderable
 	{
+		// TODO: Replace with CompactSubGeometry
 		private static var _geometry : SubGeometry;
 
 		private var _material : MaterialBase;

@@ -603,7 +603,7 @@
 		 *
 		 * @private
 		 */
-		arcane function get faceNormalsData() : Vector.<Number>
+		public function get faceNormalsData() : Vector.<Number>
 		{
 			if (_faceNormalsDirty) updateFaceNormals();
 			return _faceNormalsData;
@@ -614,12 +614,12 @@
 		 *
 		 * @private
 		 */
-		arcane function get parentGeometry() : Geometry
+		public function get parentGeometry() : Geometry
 		{
 			return _parentGeometry;
 		}
 
-		arcane function set parentGeometry(value : Geometry) : void
+		public function set parentGeometry(value : Geometry) : void
 		{
 			_parentGeometry = value;
 		}
@@ -976,6 +976,11 @@
 		}
 
 		public function get vertexTangentOffset() : int
+		{
+			return 0;
+		}
+
+		public function get UVOffset() : int
 		{
 			return 0;
 		}

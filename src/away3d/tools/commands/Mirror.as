@@ -3,6 +3,8 @@ package away3d.tools.commands
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
@@ -143,7 +145,7 @@ package away3d.tools.commands
 				}
 			 
 				var geometry:Geometry = mesh.geometry;
-				var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+				var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 				var numSubGeoms:uint = geometries.length;
 				
 				if(duplicate){
@@ -179,7 +181,7 @@ package away3d.tools.commands
 				 
 				 for (i = 0; i<numSubGeoms; ++i){					 
 					 
-					sub_geom = geometries[i];
+					sub_geom = SubGeometry(geometries[i]);
 					sourceVerts = sub_geom.vertexData;
 					sourceIndices = sub_geom.indexData;
 					sourceUVs = sub_geom.UVData;

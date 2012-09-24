@@ -1,6 +1,8 @@
 package away3d.loaders.parsers
 {
 	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubGeometry;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.SkeletonAnimationSet;
 	import away3d.animators.data.JointPose;
@@ -268,7 +270,7 @@ package away3d.loaders.parsers
 			var i : uint, j : uint, k : uint, l : int;
 			
 			for (i = 0; i < geometry.subGeometries.length; i++) {
-				sub = geometry.subGeometries[i];
+				sub = SubGeometry(geometry.subGeometries[i]);
 				primitive = mesh.primitives[i];
 				jointIndices = new Vector.<Number>(skin.maxBones * primitive.vertices.length, true);
 				jointWeights = new Vector.<Number>(skin.maxBones * primitive.vertices.length, true);
@@ -390,7 +392,7 @@ package away3d.loaders.parsers
 			}
 			
 			for (i = 0; i < base.subGeometries.length; i++) {
-				sub = base.subGeometries[i];
+				sub = SubGeometry(base.subGeometries[i]);
 				vertexData = new Vector.<Number>(sub.vertexData.length);
 				for (j = 0; j < vertexData.length; j++) {
 					vertexData[j] = morph.method == "NORMALIZED" ? startWeight * sub.vertexData[j] : sub.vertexData[j];

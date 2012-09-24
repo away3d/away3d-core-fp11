@@ -101,7 +101,7 @@ package away3d.animators
 
 			// this type of animation can only be SubMesh
 			var subMesh : SubMesh = SubMesh(renderable);
-			var subGeom : SubGeometry;
+			var subGeom : ISubGeometry;
 			var i : uint;
 			var len : uint = _numPoses;
 

@@ -2,6 +2,7 @@ package away3d.tools.commands
 {
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
@@ -166,7 +167,7 @@ package away3d.tools.commands
 			var ds:DataSubGeometry;
 			
 			var geometry:Geometry = destMesh.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
 			var vertices:Vector.<Number>;
@@ -407,7 +408,7 @@ package away3d.tools.commands
 				geometry.removeSubGeometry(geometry.subGeometries[0]);
 		}
 		
-		private function isSubGeomAdded(subGeometries:Vector.<SubGeometry>, subGeom:SubGeometry):Boolean
+		private function isSubGeomAdded(subGeometries:Vector.<ISubGeometry>, subGeom:SubGeometry):Boolean
 		{
 			for (var i:uint = 0; i<subGeometries.length; ++i)
 				if(subGeometries[i] == subGeom) return true;
@@ -419,7 +420,7 @@ package away3d.tools.commands
 		{
 			var ds:DataSubGeometry;
 			var geom:Geometry = m.geometry;
-			var geoms:Vector.<SubGeometry> = geom.subGeometries;
+			var geoms:Vector.<ISubGeometry> = geom.subGeometries;
 			
 			if(geoms.length == 0) return;
 			 

@@ -2,6 +2,7 @@ package away3d.primitives
 {
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.errors.AbstractMethodError;
 	
@@ -32,7 +33,7 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		override public function get subGeometries():Vector.<SubGeometry>
+		override public function get subGeometries():Vector.<ISubGeometry>
 		{
 			if (_geomDirty) updateGeometry();
 			if (_uvDirty) updateUVs();

@@ -26,7 +26,7 @@ package away3d.core.base
 	{
 		arcane var _material : MaterialBase;
 		private var _parentMesh : Mesh;
-		private var _subGeometry : SubGeometry;
+		private var _subGeometry : ISubGeometry;
 		arcane var _index : uint;
 		private var _uvTransform : Matrix;
 		private var _uvTransformDirty : Boolean;
@@ -42,7 +42,7 @@ package away3d.core.base
 		 * @param parentMesh The Mesh object to which this SubMesh belongs.
 		 * @param material An optional material used to render this SubMesh.
 		 */
-		public function SubMesh(subGeometry : SubGeometry, parentMesh : Mesh, material : MaterialBase = null)
+		public function SubMesh(subGeometry : ISubGeometry, parentMesh : Mesh, material : MaterialBase = null)
 		{
 			_parentMesh = parentMesh;
 			_subGeometry = subGeometry;
@@ -125,12 +125,12 @@ package away3d.core.base
 		/**
 		 * The SubGeometry object which provides the geometry data for this SubMesh.
 		 */
-		public function get subGeometry() : SubGeometry
+		public function get subGeometry() : ISubGeometry
 		{
 			return _subGeometry;
 		}
 
-		public function set subGeometry(value : SubGeometry) : void
+		public function set subGeometry(value : ISubGeometry) : void
 		{
 			_subGeometry = value;
 		}

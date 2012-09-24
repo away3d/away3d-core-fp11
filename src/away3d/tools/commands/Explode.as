@@ -3,6 +3,7 @@ package away3d.tools.commands
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
@@ -85,7 +86,7 @@ package away3d.tools.commands
 		private static function explode(m:Mesh):void
 		{
 			var geometry:Geometry = m.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:int = geometries.length;
 			
 			var vertices:Vector.<Number>;
