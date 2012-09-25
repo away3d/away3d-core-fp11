@@ -312,7 +312,7 @@ package away3d.core.pick
 			var dot00 : Number, dot01 : Number, dot02 : Number, dot11 : Number, dot12 : Number;
 			var s : Number, t : Number, invDenom : Number;
 			var uvs : Vector.<Number> = subGeom.UVData;
-			var normals : Vector.<Number> = subGeom.faceNormalsData;
+			var normals : Vector.<Number> = subGeom.faceNormals;
 			var x : Number = _localHitPosition.x, y : Number = _localHitPosition.y, z : Number = _localHitPosition.z;
 			var u : Number, v : Number;
 			var ui1 : uint, ui2 : uint, ui3 : uint;

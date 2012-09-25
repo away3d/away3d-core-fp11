@@ -151,6 +151,6 @@ package away3d.core.base
 		function get parentGeometry() : Geometry;
 		function set parentGeometry(value : Geometry) : void;
 
-		function get faceNormalsData() : Vector.<Number>;
+		function get faceNormals() : Vector.<Number>;
 	}
 }

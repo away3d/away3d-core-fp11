@@ -370,9 +370,14 @@ package away3d.loaders.parsers
 				uvs[v1] = vertex.t;
 			}
 
-			subGeom.updateVertexData(vertices);
-			subGeom.updateUVData(uvs);
 			subGeom.updateIndexData(indices);
+			constructVertexData(subGeom, vertices, uvs, null, null);
+			// cause explicit updates
+			subGeom.vertexNormalData;
+			subGeom.vertexTangentData;
+			// turn auto updates off because they may be animated and set explicitly
+			subGeom.autoDeriveVertexTangents = false;
+			subGeom.autoDeriveVertexNormals = false;
 			subGeom.updateJointIndexData(jointIndices);
 			subGeom.updateJointWeightsData(jointWeights);
 

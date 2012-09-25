@@ -15,14 +15,12 @@ package away3d.core.base
 	 * it provides joint indices and weights.
 	 * Important! Joint indices need to be pre-multiplied by 3, since they index the matrix array (and each matrix has 3 float4 elements)
 	 */
-	public class SkinnedSubGeometry extends SubGeometry
+	public class SkinnedSubGeometry extends CompactSubGeometry
 	{
 		private var _bufferFormat : String;
 		private var _jointWeightsData : Vector.<Number>;
 		private var _jointIndexData : Vector.<Number>;
-		private var _animatedVertexData : Vector.<Number>;	// used for cpu fallback
-		private var _animatedNormalData : Vector.<Number>;	// used for cpu fallback
-		private var _animatedTangentData : Vector.<Number>;	// used for cpu fallback
+		private var _animatedData : Vector.<Number>;	// used for cpu fallback
 		private var _jointWeightsBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		private var _jointIndexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		private var _jointWeightsInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
@@ -64,45 +62,17 @@ package away3d.core.base
 		}
 
 		/**
-		 * The animated vertex normals when set explicitly if the skinning transformations couldn't be performed on GPU.
-		 */
-		public function get animatedNormalData() : Vector.<Number>
-		{
-			return _animatedNormalData ||= new Vector.<Number>(_vertices.length, true);
-		}
-
-		public function set animatedNormalData(value : Vector.<Number>) : void
-		{
-			_animatedNormalData = value;
-			invalidateBuffers(_normalsInvalid);
-		}
-
-		/**
-		 * The animated vertex tangents when set explicitly if the skinning transformations couldn't be performed on GPU.
-		 */
-		public function get animatedTangentData() : Vector.<Number>
-		{
-			return _animatedTangentData ||= new Vector.<Number>(_vertices.length, true);
-		}
-
-		public function set animatedTangentData(value : Vector.<Number>) : void
-		{
-			_animatedTangentData = value;
-			invalidateBuffers(_tangentsInvalid);
-		}
-
-		/**
 		 * The animated vertex positions when set explicitly if the skinning transformations couldn't be performed on GPU.
 		 */
-		public function get animatedVertexData() : Vector.<Number>
+		public function get animatedData() : Vector.<Number>
 		{
-			return _animatedVertexData ||= new Vector.<Number>(_vertices.length, true);
+			return _animatedData || _vertexData.concat();
 		}
 
-		public function set animatedVertexData(value : Vector.<Number>) : void
+		public function updateAnimatedData(value : Vector.<Number>) : void
 		{
-			_animatedVertexData = value;
-			invalidateBuffers(_verticesInvalid);
+			_animatedData = value;
+			invalidateBuffers(_vertexDataInvalid);
 		}
 
 		/**
@@ -149,74 +119,16 @@ package away3d.core.base
 			stage3DProxy.setSimpleVertexBuffer(index, _jointIndexBuffer[contextIndex], _bufferFormat);
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		override protected function uploadData(contextIndex : int) : void
 		{
-			if (_animatedVertexData) {
-				var contextIndex : int = stage3DProxy._stage3DIndex;
-				var context : Context3D = stage3DProxy._context3D;
-				if (_vertexBufferContext[contextIndex] != context || !_vertexBuffer[contextIndex]) {
-					_vertexBuffer[contextIndex] = context.createVertexBuffer(_animatedVertexData.length / 3, 3);
-					_vertexBufferContext[contextIndex] = context;
-					_verticesInvalid[contextIndex] = true;
-				}
-				if (_verticesInvalid[contextIndex]) {
-					_vertexBuffer[contextIndex].uploadFromVector(_animatedVertexData, 0, _animatedVertexData.length / 3);
-					_verticesInvalid[contextIndex] = false;
-				}
-				stage3DProxy.setSimpleVertexBuffer(index, _vertexBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
+			if (_animatedData) {
+				_activeBuffer.uploadFromVector(_animatedData, 0, _numVertices);
+				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
 			}
 			else
-				super.activateVertexBuffer(index, stage3DProxy);
+				super.uploadData(contextIndex);
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
-		{
-			if (_animatedNormalData) {
-				var contextIndex : int = stage3DProxy._stage3DIndex;
-				var context : Context3D = stage3DProxy._context3D;
-				if (_vertexNormalBufferContext[contextIndex] != context || !_vertexNormalBuffer[contextIndex]) {
-					_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
-					_vertexNormalBufferContext[contextIndex] = context;
-					_normalsInvalid[contextIndex] = true;
-				}
-				if (_normalsInvalid[contextIndex]) {
-					_vertexNormalBuffer[contextIndex].uploadFromVector(_animatedNormalData, 0, _numVertices);
-					_normalsInvalid[contextIndex] = false;
-				}
-				stage3DProxy.setSimpleVertexBuffer(index, _vertexNormalBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
-			}
-			else
-				super.activateVertexNormalBuffer(index, stage3DProxy);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void
-		{
-			if (_animatedTangentData) {
-				var contextIndex : int = stage3DProxy._stage3DIndex;
-				var context : Context3D = stage3DProxy._context3D;
-				if (_vertexTangentBufferContext[contextIndex] != context || !_vertexTangentBuffer[contextIndex]) {
-					_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
-					_vertexTangentBufferContext[contextIndex] = context;
-					_tangentsInvalid[contextIndex] = true;
-				}
-				if (_tangentsInvalid[contextIndex]) {
-					_vertexTangentBuffer[contextIndex].uploadFromVector(_animatedTangentData, 0, _numVertices);
-					_tangentsInvalid[contextIndex] = false;
-				}
-				stage3DProxy.setSimpleVertexBuffer(index, _vertexTangentBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
-			}
-			else
-				super.activateVertexTangentBuffer(index, stage3DProxy);
-		}
 		/**
 		 * Clones the current object.
 		 * @return An exact duplicate of the current object.
@@ -224,13 +136,12 @@ package away3d.core.base
 		override public function clone() : ISubGeometry
 		{
 			var clone : SkinnedSubGeometry = new SkinnedSubGeometry(_jointsPerVertex);
-			clone.updateVertexData(_vertices.concat());
-			clone.updateUVData(_uvs.concat());
+			clone.updateData(_vertexData.concat());
 			clone.updateIndexData(_indices.concat());
 			clone.updateJointIndexData(_jointIndexData.concat());
 			clone.updateJointWeightsData(_jointWeightsData.concat());
-			if (!autoDeriveVertexNormals) clone.updateVertexNormalData(_vertexNormals.concat());
-			if (!autoDeriveVertexTangents) clone.updateVertexTangentData(_vertexTangents.concat());
+			clone._autoDeriveVertexNormals = _autoDeriveVertexNormals;
+			clone._autoDeriveVertexTangents = _autoDeriveVertexTangents;
 			clone._numCondensedJoints = _numCondensedJoints;
 			clone._condensedIndexLookUp = _condensedIndexLookUp;
 			clone._condensedJointIndexData = _condensedJointIndexData;
@@ -308,22 +219,6 @@ package away3d.core.base
 		{
 			_jointIndexData = value;
 			invalidateBuffers(_jointIndicesInvalid);
-		}
-
-
-		override protected function disposeForStage3D(stage3DProxy : Stage3DProxy) : void
-		{
-			super.disposeForStage3D(stage3DProxy);
-
-			var index : int = stage3DProxy._stage3DIndex;
-			if (_jointWeightsBuffer[index]) {
-				_jointWeightsBuffer[index].dispose();
-				_jointWeightsBuffer[index] = null;
-			}
-			if (_jointIndexBuffer[index]) {
-				_jointIndexBuffer[index].dispose();
-				_jointIndexBuffer[index] = null;
-			}
 		}
 	}
 }

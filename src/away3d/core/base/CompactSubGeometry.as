@@ -15,15 +15,16 @@ package away3d.core.base
 		protected var _vertexDataInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
 		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
-		protected var _vertexData : Vector.<Number>;
-		private var _numVertices : uint;
-		private var _contextIndex : int;
-		private var _activeBuffer : VertexBuffer3D;
-		private var _activeContext : Context3D;
-		private var _activeDataInvalid : Boolean;
+		protected var _numVertices : uint;
+		protected var _contextIndex : int;
+		protected var _activeBuffer : VertexBuffer3D;
+		protected var _activeContext : Context3D;
+		protected var _activeDataInvalid : Boolean;
 
 		public function CompactSubGeometry()
 		{
+			_autoDeriveVertexNormals = false;
+			_autoDeriveVertexTangents = false;
 		}
 
 		public function get numVertices() : uint
@@ -45,6 +46,7 @@ package away3d.core.base
 			if (_autoDeriveVertexTangents) _vertexTangentsDirty = true;
 
 			_faceNormalsDirty = true;
+			_faceTangentsDirty = true;
 
 			_vertexData = data;
 			var numVertices : int = _vertexData.length / 13;
@@ -65,10 +67,8 @@ package away3d.core.base
 
 			if (!_activeBuffer || _activeContext != context)
 				createBuffer(contextIndex, context);
-			if (_activeDataInvalid) {
-				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
-				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
-			}
+			if (_activeDataInvalid)
+				uploadData(contextIndex);
 
 			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
@@ -78,14 +78,17 @@ package away3d.core.base
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
 
+			if (_uvsDirty && _autoGenerateUVs) {
+				_vertexData = updateDummyUVs(_vertexData);
+				invalidateBuffers(_vertexDataInvalid);
+			}
+
 			if (contextIndex != _contextIndex) updateActiveBuffer(contextIndex);
 
 			if (!_activeBuffer || _activeContext != context)
 				createBuffer(contextIndex, context);
-			if (_activeDataInvalid) {
-				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
-				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
-			}
+			if (_activeDataInvalid)
+				uploadData(contextIndex);
 
 			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_2, 9);
 		}
@@ -99,12 +102,16 @@ package away3d.core.base
 
 			if (!_activeBuffer || _activeContext != context)
 				createBuffer(contextIndex, context);
-			if (_activeDataInvalid) {
-				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
-				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
-			}
+			if (_activeDataInvalid)
+				uploadData(contextIndex);
 
 			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_2, 11);
+		}
+
+		protected function uploadData(contextIndex : int) : void
+		{
+			_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
+			_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
 		}
 
 		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
@@ -116,10 +123,8 @@ package away3d.core.base
 
 			if (!_activeBuffer || _activeContext != context)
 				createBuffer(contextIndex, context);
-			if (_activeDataInvalid) {
-				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
-				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
-			}
+			if (_activeDataInvalid)
+				uploadData(contextIndex);
 
 			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 3);
 		}
@@ -133,22 +138,20 @@ package away3d.core.base
 
 			if (!_activeBuffer || _activeContext != context)
 				createBuffer(contextIndex, context);
-			if (_activeDataInvalid) {
-				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
-				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
-			}
+			if (_activeDataInvalid)
+				uploadData(contextIndex);
 
 			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 6);
 		}
 
-		private function createBuffer(contextIndex : int, context : Context3D) : void
+		protected function createBuffer(contextIndex : int, context : Context3D) : void
 		{
 			_vertexBuffer[contextIndex] = _activeBuffer = context.createVertexBuffer(_numVertices, 13);
 			_bufferContext[contextIndex] = _activeContext = context;
 			_vertexDataInvalid[contextIndex] = _activeDataInvalid = true;
 		}
 
-		private function updateActiveBuffer(contextIndex : int) : void
+		protected function updateActiveBuffer(contextIndex : int) : void
 		{
 			_contextIndex = contextIndex;
 			_activeDataInvalid = _vertexDataInvalid[contextIndex];
@@ -158,23 +161,50 @@ package away3d.core.base
 
 		override public function get vertexData() : Vector.<Number>
 		{
+			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
+				_vertexData = updateVertexNormals(_vertexData);
+			if (_autoDeriveVertexTangents && _vertexTangentsDirty)
+				_vertexData = updateVertexTangents(_vertexData);
+			if (_uvsDirty && _autoGenerateUVs)
+				_vertexData = updateDummyUVs(_vertexData);
 			return _vertexData;
+		}
+
+
+		override protected function updateVertexNormals(target : Vector.<Number>) : Vector.<Number>
+		{
+			invalidateBuffers(_vertexDataInvalid);
+			return super.updateVertexNormals(target);
+		}
+
+		override protected function updateVertexTangents(target : Vector.<Number>) : Vector.<Number>
+		{
+			if (_vertexNormalsDirty) _vertexData = updateVertexNormals(_vertexData);
+			invalidateBuffers(_vertexDataInvalid);
+			return super.updateVertexTangents(target);
 		}
 
 		override public function get vertexNormalData() : Vector.<Number>
 		{
-			if (_autoDeriveVertexNormals && _vertexNormalsDirty) _vertexData = updateVertexNormals(_vertexData);
+			if (_autoDeriveVertexNormals && _vertexNormalsDirty)
+				_vertexData = updateVertexNormals(_vertexData);
+
 			return _vertexData;
 		}
 
 		override public function get vertexTangentData() : Vector.<Number>
 		{
-			if (_autoDeriveVertexTangents && _vertexTangentsDirty) _vertexData = updateVertexTangents(_vertexData);
+			if (_autoDeriveVertexTangents && _vertexTangentsDirty)
+				_vertexData = updateVertexTangents(_vertexData);
 			return _vertexData;
 		}
 
 		override public function get UVData() : Vector.<Number>
 		{
+			if (_uvsDirty && _autoGenerateUVs) {
+				_vertexData = updateDummyUVs(_vertexData);
+				invalidateBuffers(_vertexDataInvalid);
+			}
 			return _vertexData;
 		}
 
@@ -254,7 +284,21 @@ package away3d.core.base
 
 		public function get SecondaryUVOffset() : int
 		{
-			return 13;
+			return 11;
+		}
+
+		override public function dispose() : void
+		{
+			super.dispose();
+			disposeVertexBuffers(_vertexBuffer);
+			_vertexBuffer = null;
+		}
+
+
+		override protected function invalidateBuffers(invalid : Vector.<Boolean>) : void
+		{
+			super.invalidateBuffers(invalid);
+			_activeDataInvalid = true;
 		}
 	}
 }
