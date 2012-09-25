@@ -1,6 +1,7 @@
 package away3d.loaders.parsers
 {
 	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.core.base.ISubGeometry;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.nodes.UVClipNode;
 	import flash.display.Sprite;
@@ -726,7 +727,7 @@ package away3d.loaders.parsers
 			while (subs_parsed < num_subs) {
 				var i : uint;
 				var sm_len : uint, sm_end : uint;
-				var sub_geoms : Vector.<SubGeometry>;
+				var sub_geoms : Vector.<ISubGeometry>;
 				var w_indices : Vector.<Number>;
 				var weights : Vector.<Number>;
 				
@@ -853,7 +854,7 @@ package away3d.loaders.parsers
 					
 					key = _body.readUnsignedShort();
 					len = _body.readUnsignedInt();
-					if (expected.hasOwnProperty(key)) {
+					if (expected.hasOwnProperty(key.toString())) {
 						type = expected[key];
 						props.set(key, parseAttrValue(type, len));
 					}

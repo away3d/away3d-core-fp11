@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.core.base.ISubGeometry;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
@@ -334,7 +335,7 @@ package away3d.loaders.parsers
 			var face:FaceData;
 			var numFaces:uint = faces.length;
 			var numVerts:uint;
-			var subs : Vector.<SubGeometry>;
+			var subs : Vector.<ISubGeometry>;
 			
 			var vertices:Vector.<Number> = new Vector.<Number>();
 			var uvs:Vector.<Number> = new Vector.<Number>();

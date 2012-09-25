@@ -2,6 +2,7 @@ package away3d.loaders.parsers
 {
 	import away3d.arcane;
 	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.errors.AbstractMethodError;
@@ -543,10 +544,10 @@ package away3d.loaders.parsers
 		*/
 		protected function constructSubGeometries(	verts : Vector.<Number>, indices : Vector.<uint>, uvs : Vector.<Number>,
 													normals : Vector.<Number>, tangents : Vector.<Number>,
-													weights : Vector.<Number>, jointIndices : Vector.<Number>) : Vector.<SubGeometry>
+													weights : Vector.<Number>, jointIndices : Vector.<Number>) : Vector.<ISubGeometry>
 		{
 			const LIMIT : uint = 3*0xffff;
-			var subs : Vector.<SubGeometry> = new Vector.<SubGeometry>();
+			var subs : Vector.<ISubGeometry> = new Vector.<ISubGeometry>();
 			
 			if (verts.length >= LIMIT || indices.length >= LIMIT) {
 				var i : uint, len : uint, outIndex : uint;

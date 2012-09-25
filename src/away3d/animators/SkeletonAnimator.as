@@ -253,7 +253,6 @@ package away3d.animators
 			var ox : Number, oy : Number, oz : Number, ow : Number;
 			var xy2 : Number, xz2 : Number, xw2 : Number;
 			var yz2 : Number, yw2 : Number, zw2 : Number;
-			var xx : Number, yy : Number, zz : Number, ww : Number;
 			var n11 : Number, n12 : Number, n13 : Number, n14 : Number;
 			var n21 : Number, n22 : Number, n23 : Number, n24 : Number;
 			var n31 : Number, n32 : Number, n33 : Number, n34 : Number;
@@ -264,38 +263,59 @@ package away3d.animators
 			var pose : JointPose;
 			var quat : Quaternion;
 			var vec : Vector3D;
-			
+			var t : Number;
+
 			for (var i : uint = 0; i < _numJoints; ++i) {
 				pose = globalPoses[i];
 				quat = pose.orientation;
 				vec = pose.translation;
 				ox = quat.x;	oy = quat.y;	oz = quat.z;	ow = quat.w;
-				xy2 = 2.0 * ox * oy; 	xz2 = 2.0 * ox * oz; 	xw2 = 2.0 * ox * ow;
-				yz2 = 2.0 * oy * oz; 	yw2 = 2.0 * oy * ow; 	zw2 = 2.0 * oz * ow;
-				xx = ox * ox;			yy = oy * oy;			zz = oz * oz; 			ww = ow * ow;
-				
-				n11 = xx - yy - zz + ww;	n12 = xy2 - zw2;			n13 = xz2 + yw2;			n14 = vec.x;
-				n21 = xy2 + zw2;			n22 = -xx + yy - zz + ww;	n23 = yz2 - xw2;			n24 = vec.y;
-				n31 = xz2 - yw2;			n32 = yz2 + xw2;			n33 = -xx - yy + zz + ww;	n34 = vec.z;
+
+				xy2 = (t = 2.0*ox) * oy;
+				xz2 = t * oz;
+				xw2 = t * ow;
+				yz2 = (t = 2.0 * oy) * oz;
+				yw2 = t * ow;
+				zw2 = 2.0 * oz * ow;
+
+				yz2 = 2.0 * oy * oz;
+				yw2 = 2.0 * oy * ow;
+				zw2 = 2.0 * oz * ow;
+				ox *= ox;
+				oy *= oy;
+				oz *= oz;
+				ow *= ow;
+
+				n11 = (t = ox - oy) - oz + ow;
+				n12 = xy2 - zw2;
+				n13 = xz2 + yw2;
+				n21 = xy2 + zw2;
+				n22 = -t - oz + ow;
+				n23 = yz2 - xw2;
+				n31 = xz2 - yw2;
+				n32 = yz2 + xw2;
+				n33 = -ox - oy + oz + ow;
 				
 				// prepend inverse bind pose
 				raw = joints[i].inverseBindPose;
 				m11 = raw[0];	m12 = raw[4];	m13 = raw[8];	m14 = raw[12];
 				m21 = raw[1];	m22 = raw[5];   m23 = raw[9];	m24 = raw[13];
 				m31 = raw[2];   m32 = raw[6];   m33 = raw[10];  m34 = raw[14];
-				
-				_globalMatrices[mtxOffset++] = n11 * m11 + n12 * m21 + n13 * m31;
-				_globalMatrices[mtxOffset++] = n11 * m12 + n12 * m22 + n13 * m32;
-				_globalMatrices[mtxOffset++] = n11 * m13 + n12 * m23 + n13 * m33;
-				_globalMatrices[mtxOffset++] = n11 * m14 + n12 * m24 + n13 * m34 + n14;
-				_globalMatrices[mtxOffset++] = n21 * m11 + n22 * m21 + n23 * m31;
-				_globalMatrices[mtxOffset++] = n21 * m12 + n22 * m22 + n23 * m32;
-				_globalMatrices[mtxOffset++] = n21 * m13 + n22 * m23 + n23 * m33;
-				_globalMatrices[mtxOffset++] = n21 * m14 + n22 * m24 + n23 * m34 + n24;
-				_globalMatrices[mtxOffset++] = n31 * m11 + n32 * m21 + n33 * m31;
-				_globalMatrices[mtxOffset++] = n31 * m12 + n32 * m22 + n33 * m32;
-				_globalMatrices[mtxOffset++] = n31 * m13 + n32 * m23 + n33 * m33;
-				_globalMatrices[mtxOffset++] = n31 * m14 + n32 * m24 + n33 * m34 + n34;
+
+				_globalMatrices[uint(mtxOffset)] = n11 * m11 + n12 * m21 + n13 * m31;
+				_globalMatrices[uint(mtxOffset+1)] = n11 * m12 + n12 * m22 + n13 * m32;
+				_globalMatrices[uint(mtxOffset+2)] = n11 * m13 + n12 * m23 + n13 * m33;
+				_globalMatrices[uint(mtxOffset+3)] = n11 * m14 + n12 * m24 + n13 * m34 + vec.x;
+				_globalMatrices[uint(mtxOffset+4)] = n21 * m11 + n22 * m21 + n23 * m31;
+				_globalMatrices[uint(mtxOffset+5)] = n21 * m12 + n22 * m22 + n23 * m32;
+				_globalMatrices[uint(mtxOffset+6)] = n21 * m13 + n22 * m23 + n23 * m33;
+				_globalMatrices[uint(mtxOffset+7)] = n21 * m14 + n22 * m24 + n23 * m34 + vec.y;
+				_globalMatrices[uint(mtxOffset+8)] = n31 * m11 + n32 * m21 + n33 * m31;
+				_globalMatrices[uint(mtxOffset+9)] = n31 * m12 + n32 * m22 + n33 * m32;
+				_globalMatrices[uint(mtxOffset+10)] = n31 * m13 + n32 * m23 + n33 * m33;
+				_globalMatrices[uint(mtxOffset+11)] = n31 * m14 + n32 * m24 + n33 * m34 + vec.z;
+
+				mtxOffset = uint(mtxOffset + 12);
 			}
 		}
 		
