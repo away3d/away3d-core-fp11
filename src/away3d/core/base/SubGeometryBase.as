@@ -1,16 +1,22 @@
 package away3d.core.base
 {
 	import away3d.arcane;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.errors.AbstractMethodError;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.IndexBuffer3D;
+	import flash.display3D.VertexBuffer3D;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
 	use namespace  arcane;
 
 	public class SubGeometryBase
 	{
+		private var _parentGeometry : Geometry;
+
 		protected var _faceNormalsDirty : Boolean = true;
 		protected var _faceTangentsDirty : Boolean = true;
 		protected var _faceTangents : Vector.<Number>;
@@ -30,7 +36,8 @@ package away3d.core.base
 		protected var _faceNormalsData : Vector.<Number>;
 		protected var _faceWeights : Vector.<Number>;
 
-
+		private var _scaleU : Number = 1;
+		private var _scaleV : Number = 1;
 
 		public function SubGeometryBase()
 		{
@@ -233,7 +240,7 @@ package away3d.core.base
 			var v1 : uint;
 			var f1 : uint = 0, f2 : uint = 1, f3 : uint = 2;
 			var lenV : uint = vertexData.length;
-			var vertexStride : int = vertexStride;
+			var vertexStride : int = vertexNormalStride;
 			var normalOffset : int = vertexNormalOffset;
 
 			// reset, yo
@@ -300,7 +307,7 @@ package away3d.core.base
 			var v1 : uint, v2 : uint, v3 : uint;
 			var f1 : uint = 0, f2 : uint = 1, f3 : uint = 2;
 			var lenV : uint = vertexData.length;
-			var vertexStride : int = vertexStride;
+			var vertexStride : int = vertexTangentStride;
 			var tangentOffset : int = vertexTangentOffset;
 
 			if (target) {
@@ -407,6 +414,20 @@ package away3d.core.base
 		}
 
 		/**
+		 * Disposes all buffers in a given vector.
+		 * @param buffers The vector of buffers to dispose.
+		 */
+		protected function disposeVertexBuffers(buffers : Vector.<VertexBuffer3D>) : void
+		{
+			for (var i : int = 0; i < 8; ++i) {
+				if (buffers[i]) {
+					buffers[i].dispose();
+					buffers[i] = null;
+				}
+			}
+		}
+
+		/**
 		 * True if the vertex tangents should be derived from the geometry, false if the vertex normals are set
 		 * explicitly.
 		 */
@@ -453,12 +474,32 @@ package away3d.core.base
 			throw new AbstractMethodError();
 		}
 
+		public function get vertexNormalData() : Vector.<Number>
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function get vertexTangentData() : Vector.<Number>
+		{
+			throw new AbstractMethodError();
+		}
+
 		public function get UVData() : Vector.<Number>
 		{
 			throw new AbstractMethodError();
 		}
 
 		public function get vertexStride() : uint
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function get vertexNormalStride() : uint
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function get vertexTangentStride() : uint
 		{
 			throw new AbstractMethodError();
 		}
@@ -482,5 +523,153 @@ package away3d.core.base
 		{
 			throw new AbstractMethodError();
 		}
+
+		protected function invalidateBounds() : void
+		{
+			if (_parentGeometry) _parentGeometry.invalidateBounds(ISubGeometry(this));
+		}
+
+		/**
+		 * The Geometry object that 'owns' this SubGeometry object.
+		 *
+		 * @private
+		 */
+		public function get parentGeometry() : Geometry
+		{
+			return _parentGeometry;
+		}
+
+		public function set parentGeometry(value : Geometry) : void
+		{
+			_parentGeometry = value;
+		}
+
+		/**
+		 * Scales the uv coordinates
+		 * @param scaleU The amount by which to scale on the u axis. Default is 1;
+		 * @param scaleV The amount by which to scale on the v axis. Default is 1;
+		 */
+		public function get scaleU():Number
+		{
+			return _scaleU;
+		}
+
+		public function get scaleV():Number
+		{
+			return _scaleV;
+		}
+
+		public function scaleUV(scaleU : Number = 1, scaleV : Number = 1):void
+		{
+			var offset : int = UVOffset;
+			var stride : int = UVStride;
+			var uvs : Vector.<Number> = UVData;
+			var len : int = uvs.length;
+			var ratioU : Number = scaleU/_scaleU;
+			var ratioV : Number = scaleV/_scaleV;
+
+			for (var i : uint = offset; i < len; i += stride) {
+				uvs[i] *= ratioU;
+				uvs[i+1] *= ratioV;
+			}
+
+			_scaleU = scaleU;
+			_scaleV = scaleV;
+		}
+
+		/**
+		 * Scales the geometry.
+		 * @param scale The amount by which to scale.
+		 */
+		public function scale(scale : Number):void
+		{
+			var vertices : Vector.<Number> = UVData;
+			var len : uint = vertices.length;
+			var offset : int = vertexOffset;
+			var stride : int = vertexStride;
+
+			for (var i : uint = offset; i < len; i += stride) {
+				vertices[i] *= scale;
+				vertices[i+1] *= scale;
+				vertices[i+2] *= scale;
+			}
+		}
+
+		public function applyTransformation(transform:Matrix3D):void
+		{
+			var vertices : Vector.<Number> = vertexData;
+			var normals : Vector.<Number> = vertexNormalData;
+			var tangents : Vector.<Number> = vertexTangentData;
+			var posStride : int = vertexStride;
+			var normalStride : int = vertexNormalStride;
+			var tangentStride : int = vertexTangentStride;
+			var posOffset : int = vertexOffset;
+			var normalOffset : int = vertexNormalOffset;
+			var tangentOffset : int = vertexTangentOffset;
+			var len : uint = vertices.length/posStride;
+			var i:uint, i1:uint, i2:uint;
+			var vector:Vector3D = new Vector3D();
+
+			var bakeNormals:Boolean = normals != null;
+			var bakeTangents:Boolean = tangents != null;
+			var invTranspose:Matrix3D;
+
+			if (bakeNormals || bakeTangents) {
+				invTranspose = transform.clone();
+				invTranspose.invert();
+				invTranspose.transpose();
+			}
+
+			var vi0 : int = posOffset;
+			var ni0 : int = normalOffset;
+			var ti0 : int = tangentOffset;
+
+			for (i = 0; i < len; ++i) {
+				i1 = vi0 + 1;
+				i2 = vi0 + 2;
+
+				// bake position
+				vector.x = vertices[vi0];
+				vector.y = vertices[i1];
+				vector.z = vertices[i2];
+				vector = transform.transformVector(vector);
+				vertices[vi0] = vector.x;
+				vertices[i1] = vector.y;
+				vertices[i2] = vector.z;
+				vi0 += posStride;
+
+				// bake normal
+				if(bakeNormals)
+				{
+					i1 = ni0 + 1;
+					i2 = ni0 + 2;
+					vector.x = normals[ni0];
+					vector.y = normals[i1];
+					vector.z = normals[i2];
+					vector = invTranspose.deltaTransformVector(vector);
+					normals[ni0] = vector.x;
+					normals[i1] = vector.y;
+					normals[i2] = vector.z;
+					ni0 += normalStride;
+				}
+
+				// bake tangent
+				if(bakeTangents)
+				{
+					i1 = ti0 + 1;
+					i2 = ti0 + 2;
+					vector.x = tangents[ti0];
+					vector.y = tangents[i1];
+					vector.z = tangents[i2];
+					vector = invTranspose.deltaTransformVector(vector);
+					tangents[ti0] = vector.x;
+					tangents[i1] = vector.y;
+					tangents[i2] = vector.z;
+					ti0 += tangentStride;
+				}
+			}
+		}
+
+
 	}
 }

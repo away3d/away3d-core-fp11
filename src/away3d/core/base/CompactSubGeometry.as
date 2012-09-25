@@ -1,0 +1,260 @@
+package away3d.core.base
+{
+	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
+
+	import flash.display3D.Context3D;
+	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.display3D.VertexBuffer3D;
+	import flash.geom.Matrix3D;
+
+	use namespace arcane;
+
+	public class CompactSubGeometry extends SubGeometryBase implements ISubGeometry
+	{
+		protected var _vertexDataInvalid : Vector.<Boolean> = new Vector.<Boolean>(8, true);
+		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
+		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _vertexData : Vector.<Number>;
+		private var _numVertices : uint;
+		private var _contextIndex : int;
+		private var _activeBuffer : VertexBuffer3D;
+		private var _activeContext : Context3D;
+		private var _activeDataInvalid : Boolean;
+
+		public function CompactSubGeometry()
+		{
+		}
+
+		public function get numVertices() : uint
+		{
+			return _numVertices;
+		}
+
+		/**
+		 * Updates the vertex data. All vertex properties are contained in a single Vector, and the order is as follows:
+		 * 0 - 2: vertex position X, Y, Z
+		 * 3 - 5: normal X, Y, Z
+		 * 6 - 8: tangent X, Y, Z
+		 * 9 - 10: U V
+		 * 11 - 12: Secondary U V
+		 */
+		public function updateData(data : Vector.<Number>) : void
+		{
+			if (_autoDeriveVertexNormals) _vertexNormalsDirty = true;
+			if (_autoDeriveVertexTangents) _vertexTangentsDirty = true;
+
+			_faceNormalsDirty = true;
+
+			_vertexData = data;
+			var numVertices : int = _vertexData.length / 13;
+			if (numVertices != _numVertices) disposeVertexBuffers(_vertexBuffer);
+			_numVertices = numVertices;
+
+			invalidateBuffers(_vertexDataInvalid);
+
+			invalidateBounds();
+		}
+
+		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (contextIndex != _contextIndex) updateActiveBuffer(contextIndex);
+
+			if (!_activeBuffer || _activeContext != context)
+				createBuffer(contextIndex, context);
+			if (_activeDataInvalid) {
+				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
+				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
+			}
+
+			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 0);
+		}
+
+		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (contextIndex != _contextIndex) updateActiveBuffer(contextIndex);
+
+			if (!_activeBuffer || _activeContext != context)
+				createBuffer(contextIndex, context);
+			if (_activeDataInvalid) {
+				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
+				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
+			}
+
+			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_2, 9);
+		}
+
+		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (contextIndex != _contextIndex) updateActiveBuffer(contextIndex);
+
+			if (!_activeBuffer || _activeContext != context)
+				createBuffer(contextIndex, context);
+			if (_activeDataInvalid) {
+				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
+				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
+			}
+
+			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_2, 11);
+		}
+
+		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (contextIndex != _contextIndex) updateActiveBuffer(contextIndex);
+
+			if (!_activeBuffer || _activeContext != context)
+				createBuffer(contextIndex, context);
+			if (_activeDataInvalid) {
+				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
+				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
+			}
+
+			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 3);
+		}
+
+		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			var contextIndex : int = stage3DProxy._stage3DIndex;
+			var context : Context3D = stage3DProxy._context3D;
+
+			if (contextIndex != _contextIndex) updateActiveBuffer(contextIndex);
+
+			if (!_activeBuffer || _activeContext != context)
+				createBuffer(contextIndex, context);
+			if (_activeDataInvalid) {
+				_activeBuffer.uploadFromVector(_vertexData, 0, _numVertices);
+				_vertexDataInvalid[contextIndex] = _activeDataInvalid = false;
+			}
+
+			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 6);
+		}
+
+		private function createBuffer(contextIndex : int, context : Context3D) : void
+		{
+			_vertexBuffer[contextIndex] = _activeBuffer = context.createVertexBuffer(_numVertices, 13);
+			_bufferContext[contextIndex] = _activeContext = context;
+			_vertexDataInvalid[contextIndex] = _activeDataInvalid = true;
+		}
+
+		private function updateActiveBuffer(contextIndex : int) : void
+		{
+			_contextIndex = contextIndex;
+			_activeDataInvalid = _vertexDataInvalid[contextIndex];
+			_activeBuffer = _vertexBuffer[contextIndex];
+			_activeContext = _bufferContext[contextIndex];
+		}
+
+		override public function get vertexData() : Vector.<Number>
+		{
+			return _vertexData;
+		}
+
+		override public function get vertexNormalData() : Vector.<Number>
+		{
+			if (_autoDeriveVertexNormals && _vertexNormalsDirty) _vertexData = updateVertexNormals(_vertexData);
+			return _vertexData;
+		}
+
+		override public function get vertexTangentData() : Vector.<Number>
+		{
+			if (_autoDeriveVertexTangents && _vertexTangentsDirty) _vertexData = updateVertexTangents(_vertexData);
+			return _vertexData;
+		}
+
+		override public function get UVData() : Vector.<Number>
+		{
+			return _vertexData;
+		}
+
+		override public function applyTransformation(transform : Matrix3D) : void
+		{
+			super.applyTransformation(transform);
+			invalidateBuffers(_vertexDataInvalid);
+		}
+
+		override public function scale(scale : Number) : void
+		{
+			super.scale(scale);
+			invalidateBuffers(_vertexDataInvalid);
+		}
+
+		public function clone() : ISubGeometry
+		{
+			var clone : CompactSubGeometry = new CompactSubGeometry();
+			clone._autoDeriveVertexNormals = _autoDeriveVertexNormals;
+			clone._autoDeriveVertexTangents = _autoDeriveVertexTangents;
+			clone.updateData(_vertexData.concat());
+			clone.updateIndexData(_indices.concat());
+			return clone;
+		}
+
+		override public function scaleUV(scaleU : Number = 1, scaleV : Number = 1) : void
+		{
+			super.scaleUV(scaleU, scaleV);
+			invalidateBuffers(_vertexDataInvalid);
+		}
+
+		override public function get vertexStride() : uint
+		{
+			return 13;
+		}
+
+		override public function get vertexNormalStride() : uint
+		{
+			return 13;
+		}
+
+		override public function get vertexTangentStride() : uint
+		{
+			return 13;
+		}
+
+		override public function get UVStride() : uint
+		{
+			return 13;
+		}
+
+
+		public function get SecondaryUVStride() : uint
+		{
+			return 13;
+		}
+
+		override public function get vertexOffset() : int
+		{
+			return 0;
+		}
+
+		override public function get vertexNormalOffset() : int
+		{
+			return 3;
+		}
+
+		override public function get vertexTangentOffset() : int
+		{
+			return 6;
+		}
+
+		override public function get UVOffset() : int
+		{
+			return 9;
+		}
+
+		public function get SecondaryUVOffset() : int
+		{
+			return 13;
+		}
+	}
+}

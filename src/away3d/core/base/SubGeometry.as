@@ -22,8 +22,6 @@
 	 */
 	public class SubGeometry extends SubGeometryBase implements ISubGeometry
 	{
-		private var _parentGeometry : Geometry;
-
 		// raw data:
 		protected var _vertices : Vector.<Number>;
 		protected var _uvs : Vector.<Number>;
@@ -207,61 +205,19 @@
 			stage3DProxy.setSimpleVertexBuffer(index, _vertexTangentBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
 		}
 
-		public function applyTransformation(transform:Matrix3D):void
+		override public function applyTransformation(transform:Matrix3D):void
 		{
-			var len : uint = _vertices.length/3;
-			var i:uint, i0:uint, i1:uint, i2:uint;
-			var v3:Vector3D = new Vector3D();
-
-			var bakeNormals:Boolean = _vertexNormals != null;
-			var bakeTangents:Boolean = _vertexTangents != null;
-
-			for (i = 0; i < len; ++i) {
-
-				i0 = 3 * i;
-				i1 = i0 + 1;
-				i2 = i0 + 2;
-
-				// bake position
-				v3.x = _vertices[i0];
-				v3.y = _vertices[i1];
-				v3.z = _vertices[i2];
-				v3 = transform.transformVector(v3);
-				_vertices[i0] = v3.x;
-				_vertices[i1] = v3.y;
-				_vertices[i2] = v3.z;
-
-				// bake normal
-				if(bakeNormals)
-				{
-					v3.x = _vertexNormals[i0];
-					v3.y = _vertexNormals[i1];
-					v3.z = _vertexNormals[i2];
-					v3 = transform.deltaTransformVector(v3);
-					_vertexNormals[i0] = v3.x;
-					_vertexNormals[i1] = v3.y;
-					_vertexNormals[i2] = v3.z;
-				}
-
-				// bake tangent
-				if(bakeTangents)
-				{
-					v3.x = _vertexTangents[i0];
-					v3.y = _vertexTangents[i1];
-					v3.z = _vertexTangents[i2];
-					v3 = transform.deltaTransformVector(v3);
-					_vertexTangents[i0] = v3.x;
-					_vertexTangents[i1] = v3.y;
-					_vertexTangents[i2] = v3.z;
-				}
-			}
+			super.applyTransformation(transform);
+			invalidateBuffers(_verticesInvalid);
+			invalidateBuffers(_normalsInvalid);
+			invalidateBuffers(_tangentsInvalid);
 		}
 
 		/**
 		 * Clones the current object
 		 * @return An exact duplicate of the current object.
 		 */
-		public function clone() : SubGeometry
+		public function clone() : ISubGeometry
 		{
 			var clone : SubGeometry = new SubGeometry();
 			clone.updateVertexData(_vertices.concat());
@@ -274,48 +230,20 @@
 		}
 
 		/**
-		 * Scales the geometry.
-		 * @param scale The amount by which to scale.
+		 * @inheritDoc
 		 */
-		public function scale(scale : Number):void
+		override public function scale(scale : Number):void
 		{
-			var len : uint = _vertices.length;
-			for (var i : uint = 0; i < len; ++i)
-				_vertices[i] *= scale;
+			super.scale(scale);
 			invalidateBuffers(_verticesInvalid);
 		}
 
 		/**
-		 * Scales the uv coordinates
-		 * @param scaleU The amount by which to scale on the u axis. Default is 1;
-		 * @param scaleV The amount by which to scale on the v axis. Default is 1;
+		 * @inheritDoc
 		 */
-		private var _scaleU : Number = 1;
-		private var _scaleV : Number = 1;
-
-		public function get scaleU():Number
+		override public function scaleUV(scaleU : Number = 1, scaleV : Number = 1):void
 		{
-			return _scaleU;
-		}
-		
-		public function get scaleV():Number
-		{
-			return _scaleV;
-		}
-		 
-		public function scaleUV(scaleU : Number = 1, scaleV : Number = 1):void
-		{
-			for (var i : uint = 0; i < _uvs.length;++i) {
-				_uvs[i] /= _scaleU;
-				_uvs[i] *= scaleU;
-				i++;
-				_uvs[i] /= _scaleV;
-				_uvs[i] *= scaleV;
-			}
-			
-			_scaleU = scaleU;
-			_scaleV = scaleV;
-			 
+			super.scaleUV(scaleU, scaleV);
 			invalidateBuffers(_uvsInvalid);
 		}
 
@@ -385,11 +313,6 @@
 			invalidateBounds();
 		}
 
-		private function invalidateBounds() : void
-		{
-			if (_parentGeometry) _parentGeometry.invalidateBounds(this);
-		}
-
 		/**
 		 * The raw texture coordinate data.
 		 */
@@ -425,7 +348,7 @@
 		/**
 		 * The raw vertex normal data.
 		 */
-		public function get vertexNormalData() : Vector.<Number>
+		override public function get vertexNormalData() : Vector.<Number>
 		{
 			if (_autoDeriveVertexNormals && _vertexNormalsDirty) _vertexNormals = updateVertexNormals(_vertexNormals);
 			return _vertexNormals;
@@ -449,7 +372,7 @@
 		 *
 		 * @private
 		 */
-		public function get vertexTangentData() : Vector.<Number>
+		override public function get vertexTangentData() : Vector.<Number>
 		{
 			if (_autoDeriveVertexTangents && _vertexTangentsDirty) _vertexTangents = updateVertexTangents(_vertexTangents);
 			return _vertexTangents;
@@ -466,35 +389,6 @@
 			_autoDeriveVertexTangents = (vertexTangents == null);
 			_vertexTangents = vertexTangents;
 			invalidateBuffers(_tangentsInvalid);
-		}
-
-		/**
-		 * The Geometry object that 'owns' this SubGeometry object.
-		 *
-		 * @private
-		 */
-		public function get parentGeometry() : Geometry
-		{
-			return _parentGeometry;
-		}
-
-		public function set parentGeometry(value : Geometry) : void
-		{
-			_parentGeometry = value;
-		}
-
-		/**
-		 * Disposes all buffers in a given vector.
-		 * @param buffers The vector of buffers to dispose.
-		 */
-		protected function disposeVertexBuffers(buffers : Vector.<VertexBuffer3D>) : void
-		{
-			for (var i : int = 0; i < 8; ++i) {
-				if (buffers[i]) {
-					buffers[i].dispose();
-					buffers[i] = null;
-				}
-			}
 		}
 
 		override protected function updateVertexNormals(target : Vector.<Number>) : Vector.<Number>
@@ -576,14 +470,29 @@
 			}
 		}
 
+		override public function get vertexStride() : uint
+		{
+			return 3;
+		}
+
+		override public function get vertexTangentStride() : uint
+		{
+			return 3;
+		}
+
+		override public function get vertexNormalStride() : uint
+		{
+			return 3;
+		}
+
 		override public function get UVStride() : uint
 		{
 			return 2;
 		}
 
-		override public function get vertexStride() : uint
+		public function get SecondaryUVStride() : uint
 		{
-			return 3;
+			return 2;
 		}
 
 		override public function get vertexOffset() : int
@@ -602,6 +511,11 @@
 		}
 
 		override public function get UVOffset() : int
+		{
+			return 0;
+		}
+
+		public function get SecondaryUVOffset() : int
 		{
 			return 0;
 		}

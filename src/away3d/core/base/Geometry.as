@@ -59,7 +59,7 @@ package away3d.core.base
 		 * Adds a new SubGeometry object to the list.
 		 * @param subGeometry The SubGeometry object to be added.
 		 */
-		public function addSubGeometry(subGeometry : SubGeometry) : void
+		public function addSubGeometry(subGeometry : ISubGeometry) : void
 		{
 			_subGeometries.push(subGeometry);
 			

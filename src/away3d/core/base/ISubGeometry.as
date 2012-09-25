@@ -24,9 +24,26 @@ package away3d.core.base
 		function get vertexStride() : uint;
 
 		/**
-		 * The distance between two consecutive UV or secondary UV elements
+		 * The distance between two consecutive normal elements
+		 * This always applies to vertices, normals and tangents.
+		 */
+		function get vertexNormalStride() : uint;
+
+		/**
+		 * The distance between two consecutive tangent elements
+		 * This always applies to vertices, normals and tangents.
+		 */
+		function get vertexTangentStride() : uint;
+
+		/**
+		 * The distance between two consecutive UV elements
 		 */
 		function get UVStride() : uint;
+
+		/**
+		 * The distance between two secondary UV elements
+		 */
+		function get SecondaryUVStride() : uint;
 
 		/**
 		 * Assigns the attribute stream for vertex positions.
@@ -107,6 +124,12 @@ package away3d.core.base
 		function get UVOffset() : int;
 
 		/**
+		 * The offset into SecondaryUVData vector where the UVs are placed
+		 */
+		function get SecondaryUVOffset() : int;
+
+
+		/**
 		 * Retrieves the object's indices as a uint array.
 		 */
 		function get indexData() : Vector.<uint>;
@@ -120,7 +143,7 @@ package away3d.core.base
 		function scale(scale : Number):void;
 
 		function dispose() : void;
-		function clone() : SubGeometry;
+		function clone() : ISubGeometry;
 		function get scaleU():Number;
 		function get scaleV():Number;
 		function scaleUV(scaleU : Number = 1, scaleV : Number = 1):void;

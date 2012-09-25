@@ -221,7 +221,7 @@ package away3d.core.base
 		 * Clones the current object.
 		 * @return An exact duplicate of the current object.
 		 */
-		override public function clone() : SubGeometry
+		override public function clone() : ISubGeometry
 		{
 			var clone : SkinnedSubGeometry = new SkinnedSubGeometry(_jointsPerVertex);
 			clone.updateVertexData(_vertices.concat());
