@@ -1,6 +1,7 @@
 package away3d.primitives
 {
 	import away3d.arcane;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
@@ -18,7 +19,7 @@ package away3d.primitives
 		protected var _geomDirty : Boolean = true;
 		protected var _uvDirty : Boolean = true;
 
-		private var _subGeometry : SubGeometry;
+		private var _subGeometry : CompactSubGeometry;
 
 		/**
 		 * Creates a new PrimitiveBase object.
@@ -26,7 +27,7 @@ package away3d.primitives
 		 */
 		public function PrimitiveBase()
 		{
-			_subGeometry = new SubGeometry();
+			_subGeometry = new CompactSubGeometry();
 			addSubGeometry(_subGeometry);
 		}
 
@@ -85,7 +86,7 @@ package away3d.primitives
 		 * Builds the primitive's geometry when invalid. This method should not be called directly. The calling should
 		 * be triggered by the invalidateGeometry method (and in turn by updateGeometry).
 		 */
-		protected function buildGeometry(target : SubGeometry) : void
+		protected function buildGeometry(target : CompactSubGeometry) : void
 		{
 			throw new AbstractMethodError();
 		}
@@ -94,7 +95,7 @@ package away3d.primitives
 		 * Builds the primitive's uv coordinates when invalid. This method should not be called directly. The calling
 		 * should be triggered by the invalidateUVs method (and in turn by updateUVs).
 		 */
-		protected function buildUVs(target : SubGeometry) : void
+		protected function buildUVs(target : CompactSubGeometry) : void
 		{
 			throw new AbstractMethodError();
 		}

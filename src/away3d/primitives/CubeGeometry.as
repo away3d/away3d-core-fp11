@@ -1,6 +1,7 @@
 package away3d.primitives
 {
 	import away3d.arcane;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.SubGeometry;
 
 	use namespace arcane;
@@ -152,11 +153,9 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target : SubGeometry):void
+		protected override function buildGeometry(target : CompactSubGeometry):void
 		{
-			var vertices : Vector.<Number>;
-			var vertexNormals : Vector.<Number>;
-			var vertexTangents : Vector.<Number>;
+			var data : Vector.<Number>;
 			var indices : Vector.<uint>;
 
 			var tl : uint, tr : uint, bl : uint, br : uint;
@@ -165,28 +164,28 @@ package away3d.primitives
 			var vidx  :  uint, fidx  :  uint; // indices
 			var hw : Number, hh : Number, hd : Number; // halves
 			var dw : Number, dh : Number, dd : Number; // deltas
-			
+
 			var outer_pos : Number;
 
 			var numVerts : uint = 	((_segmentsW + 1) * (_segmentsH + 1) +
 									(_segmentsW + 1) * (_segmentsD + 1) +
 									(_segmentsH + 1) * (_segmentsD + 1)) * 2;
 
+			var stride:uint = target.vertexStride;
+			var skip:uint = stride - 9;
+
 			if (numVerts == target.numVertices) {
-				vertices = target.vertexData;
-				vertexNormals = target.vertexNormalData;
-				vertexTangents = target.vertexTangentData;
+				data = target.vertexData;
 				indices = target.indexData;
 			}
 			else {
-				vertices = new Vector.<Number>(numVerts * 3, true);
-				vertexNormals = new Vector.<Number>(numVerts * 3, true);
-				vertexTangents = new Vector.<Number>(numVerts * 3, true);
+				data = new Vector.<Number>(numVerts * stride, true);
 				indices = new Vector.<uint>((_segmentsW*_segmentsH + _segmentsW*_segmentsD + _segmentsH*_segmentsD)*12, true);
+				invalidateUVs();
 			}
 
 			// Indices
-			vidx = 0;
+			vidx = target.vertexOffset;
 			fidx = 0;
 
 			// half cube dimensions
@@ -204,27 +203,29 @@ package away3d.primitives
 
 				for (j = 0; j <= _segmentsH; j++) {
 					// front
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 1;
-					vertices[vidx++] = outer_pos;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hh + j*dh;
-					vertexNormals[vidx] = -1;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hd;
+					data[vidx++] = outer_pos;
+					data[vidx++] = -hh + j*dh;
+					data[vidx++] = -hd;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = -1;
+					data[vidx++] = 1;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					vidx += skip;
 
 					// back
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = -1;
-					vertices[vidx++] = outer_pos;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hh + j*dh;
-					vertexNormals[vidx] = 1;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = hd;
-					
+					data[vidx++] = outer_pos;
+					data[vidx++] = -hh + j*dh;
+					data[vidx++] = hd;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = 1;
+					data[vidx++] = -1;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					vidx += skip;
+
 					if (i && j) {
 						tl = 2 * ((i-1) * (_segmentsH + 1) + (j-1));
 						tr = 2 * (i * (_segmentsH + 1) + (j-1));
@@ -254,26 +255,28 @@ package away3d.primitives
 
 				for (j = 0; j <= _segmentsD; j++) {
 					// top
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 1;
-					vertices[vidx++] = outer_pos;
-					vertexNormals[vidx] = 1;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = hh;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hd + j*dd;
-					
+					data[vidx++] = outer_pos;
+					data[vidx++] = hh;
+					data[vidx++] = -hd + j*dd;
+					data[vidx++] = 0;
+					data[vidx++] = 1;
+					data[vidx++] = 0;
+					data[vidx++] = 1;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					vidx += skip;
+
 					// bottom
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 1;
-					vertices[vidx++] = outer_pos;
-					vertexNormals[vidx] = -1;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hh;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hd + j*dd;
+					data[vidx++] = outer_pos;
+					data[vidx++] = -hh;
+					data[vidx++] = -hd + j*dd;
+					data[vidx++] = 0;
+					data[vidx++] = -1;
+					data[vidx++] = 0;
+					data[vidx++] = 1;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					vidx += skip;
 
 					if (i && j) {
 						tl = inc + 2 * ((i-1) * (_segmentsD + 1) + (j-1));
@@ -304,26 +307,28 @@ package away3d.primitives
 
 				for (j = 0; j <= _segmentsH; j++) {
 					// left
-					vertexNormals[vidx] = -1;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hw;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hh + j*dh;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = -1;
-					vertices[vidx++] = outer_pos;
-					
+					data[vidx++] = -hw;
+					data[vidx++] = -hh + j*dh;
+					data[vidx++] = outer_pos;
+					data[vidx++] = -1;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = -1;
+					vidx += skip;
+
 					// right
-					vertexNormals[vidx] = 1;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = hw;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 0;
-					vertices[vidx++] = -hh + j*dh;
-					vertexNormals[vidx] = 0;
-					vertexTangents[vidx] = 1;
-					vertices[vidx++] = outer_pos;
+					data[vidx++] = hw;
+					data[vidx++] = -hh + j*dh;
+					data[vidx++] = outer_pos;
+					data[vidx++] = 1;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = 0;
+					data[vidx++] = 1;
+					vidx += skip;
 
 					if (i && j) {
 						tl = inc + 2 * ((i-1) * (_segmentsH + 1) + (j-1));
@@ -347,34 +352,35 @@ package away3d.primitives
 				}
 			}
 			
-			target.updateVertexData(vertices);
-			target.updateVertexNormalData(vertexNormals);
-			target.updateVertexTangentData(vertexTangents);
+			target.updateData(data);
 			target.updateIndexData(indices);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function buildUVs(target : SubGeometry) : void
+		override protected function buildUVs(target : CompactSubGeometry) : void
 		{
-			var i : uint, j : uint, uidx : uint = 0;
-			var uvData : Vector.<Number>;
+			var i : uint, j : uint, uidx : uint;
+			var data : Vector.<Number>;
 
 			var u_tile_dim : Number, v_tile_dim : Number;
 			var u_tile_step : Number, v_tile_step : Number;
 			var tl0u : Number, tl0v : Number;
 			var tl1u : Number, tl1v : Number;
 			var du : Number, dv : Number;
-
+			var stride:uint = target.UVStride;
 			var numUvs : uint = ((_segmentsW + 1) * (_segmentsH + 1) +
 								(_segmentsW + 1) * (_segmentsD + 1) +
-								(_segmentsH + 1) * (_segmentsD + 1)) * 4;
+								(_segmentsH + 1) * (_segmentsD + 1)) * 2 * stride;
+			var skip:uint = stride - 2;
 
 			if (target.UVData && numUvs == target.UVData.length)
-				uvData = target.UVData;
-			else
-				uvData = new Vector.<Number>(numUvs, true);
+				data = target.UVData;
+			else {
+				data = new Vector.<Number>(numUvs, true);
+				invalidateGeometry();
+			}
 
 			if (_tile6) {
 				u_tile_dim = u_tile_step = 1/3;
@@ -396,7 +402,9 @@ package away3d.primitives
 			//       |-----+-----+-----|
 			//       |  L  |  F  |  R  |
 			// (0,0)'-----'-----'-----'
-			
+
+			uidx = target.UVOffset;
+
 			// FRONT / BACK
 			tl0u = 1 * u_tile_step;
 			tl0v = 1 * v_tile_step;
@@ -406,10 +414,12 @@ package away3d.primitives
 			dv = v_tile_dim / _segmentsH;
 			for (i=0; i<=_segmentsW; i++) {
 				for (j=0; j<=_segmentsH; j++) {
-					uvData[uidx++] = tl0u + i * du;
-					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
-					uvData[uidx++] = tl1u + (u_tile_dim - i * du);
-					uvData[uidx++] = tl1v + (v_tile_dim - j * dv);
+					data[uidx++] = tl0u + i * du;
+					data[uidx++] = tl0v + (v_tile_dim - j * dv);
+					uidx += skip;
+					data[uidx++] = tl1u + (u_tile_dim - i * du);
+					data[uidx++] = tl1v + (v_tile_dim - j * dv);
+					uidx += skip;
 				}
 			}
 			
@@ -422,10 +432,12 @@ package away3d.primitives
 			dv = v_tile_dim / _segmentsD;
 			for (i=0; i<=_segmentsW; i++) {
 				for (j=0; j<=_segmentsD; j++) {
-					uvData[uidx++] = tl0u + i * du;
-					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
-					uvData[uidx++] = tl1u + i * du;
-					uvData[uidx++] = tl1v + j * dv;
+					data[uidx++] = tl0u + i * du;
+					data[uidx++] = tl0v + (v_tile_dim - j * dv);
+					uidx += skip;
+					data[uidx++] = tl1u + i * du;
+					data[uidx++] = tl1v + j * dv;
+					uidx += skip;
 				}
 			}
 			
@@ -438,14 +450,16 @@ package away3d.primitives
 			dv = v_tile_dim / _segmentsH;
 			for (i=0; i<=_segmentsD; i++) {
 				for (j=0; j<=_segmentsH; j++) {
-					uvData[uidx++] = tl0u + i * du;
-					uvData[uidx++] = tl0v + (v_tile_dim - j * dv);
-					uvData[uidx++] = tl1u + (u_tile_dim - i * du);
-					uvData[uidx++] = tl1v + (v_tile_dim - j * dv);
+					data[uidx++] = tl0u + i * du;
+					data[uidx++] = tl0v + (v_tile_dim - j * dv);
+					uidx += skip;
+					data[uidx++] = tl1u + (u_tile_dim - i * du);
+					data[uidx++] = tl1v + (v_tile_dim - j * dv);
+					uidx += skip;
 				}
 			}
 
-			target.updateUVData(uvData);
+			target.updateData(data);
 		}
 	}
 }

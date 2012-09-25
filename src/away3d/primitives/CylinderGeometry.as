@@ -1,6 +1,7 @@
 package away3d.primitives
 {
 	import away3d.arcane;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.SubGeometry;
 	
 	use namespace arcane;
@@ -19,32 +20,29 @@ package away3d.primitives
 		protected var _bottomClosed : Boolean;
 		protected var _surfaceClosed: Boolean;
 		protected var _yUp : Boolean;
-		private var _rawVertexPositions:Vector.<Number>;
-		private var _rawVertexNormals:Vector.<Number>;
-		private var _rawVertexTangents:Vector.<Number>;
-		private var _rawUvs:Vector.<Number>;
+		private var _rawData:Vector.<Number>;
 		private var _rawIndices:Vector.<uint>;
 		private var _nextVertexIndex:uint;
 		private var _currentIndex:uint;
 		private var _currentTriangleIndex:uint;
-		private var _vertexIndexOffset:uint;
 		private var _numVertices:uint;
-		private var _numTriangles:uint;
+		private var _stride : uint;
+		private var _vertexOffset : uint;
 
 		private function addVertex(px:Number, py:Number, pz:Number,
 								   nx:Number, ny:Number, nz:Number,
 								   tx:Number, ty:Number, tz:Number):void
 		{
-			var compVertInd:uint = _nextVertexIndex * 3; // current component vertex index
-			_rawVertexPositions[compVertInd]     = px;
-			_rawVertexPositions[compVertInd + 1] = py;
-			_rawVertexPositions[compVertInd + 2] = pz;
-			_rawVertexNormals[compVertInd]       = nx;
-			_rawVertexNormals[compVertInd + 1]   = ny;
-			_rawVertexNormals[compVertInd + 2]   = nz;
-			_rawVertexTangents[compVertInd]      = tx;
-			_rawVertexTangents[compVertInd + 1]  = ty;
-			_rawVertexTangents[compVertInd + 2]  = tz;
+			var compVertInd:uint = _vertexOffset + _nextVertexIndex * _stride; // current component vertex index
+			_rawData[compVertInd++] = px;
+			_rawData[compVertInd++] = py;
+			_rawData[compVertInd++] = pz;
+			_rawData[compVertInd++] = nx;
+			_rawData[compVertInd++] = ny;
+			_rawData[compVertInd++] = nz;
+			_rawData[compVertInd++] = tx;
+			_rawData[compVertInd++] = ty;
+			_rawData[compVertInd++] = tz;
 			_nextVertexIndex++;
 		}
 
@@ -59,50 +57,49 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target : SubGeometry) : void
+		protected override function buildGeometry(target : CompactSubGeometry) : void
 		{
-			var i:uint, j:uint;
-			var x:Number, y:Number, z:Number, radius:Number, revolutionAngle:Number;
+			var i : uint, j : uint;
+			var x : Number, y : Number, z : Number, radius : Number, revolutionAngle : Number;
 			var dr : Number, latNormElev : Number, latNormBase : Number;
+			var numTriangles : uint = 0;
+
+			_stride = target.vertexStride;
+			_vertexOffset = target.vertexOffset;
 
 			// reset utility variables
 			_numVertices = 0;
-			_numTriangles = 0;
 			_nextVertexIndex = 0;
 			_currentIndex = 0;
 			_currentTriangleIndex = 0;
 
 			// evaluate target number of vertices, triangles and indices
-			if(_surfaceClosed) {
+			if (_surfaceClosed) {
 				_numVertices += (_segmentsH + 1) * (_segmentsW + 1); // segmentsH + 1 because of closure, segmentsW + 1 because of UV unwrapping
-				_numTriangles += _segmentsH * _segmentsW * 2; // each level has segmentW quads, each of 2 triangles
+				numTriangles += _segmentsH * _segmentsW * 2; // each level has segmentW quads, each of 2 triangles
 			}
-			if(_topClosed) {
+			if (_topClosed) {
 				_numVertices += 2 * (_segmentsW + 1); // segmentsW + 1 because of unwrapping
-				_numTriangles += _segmentsW; // one triangle for each segment
+				numTriangles += _segmentsW; // one triangle for each segment
 			}
-			if(_bottomClosed) {
+			if (_bottomClosed) {
 				_numVertices += 2 * (_segmentsW + 1);
-				_numTriangles += _segmentsW;
+				numTriangles += _segmentsW;
 			}
 
 			// need to initialize raw arrays or can be reused?
 			if (_numVertices == target.numVertices) {
-				_rawVertexPositions = target.vertexData;
-				_rawVertexNormals = target.vertexNormalData;
-				_rawVertexTangents = target.vertexTangentData;
+				_rawData = target.vertexData;
 				_rawIndices = target.indexData;
 			}
 			else {
-				var numVertComponents:uint = _numVertices * 3;
-				_rawVertexPositions = new Vector.<Number>(numVertComponents, true);
-				_rawVertexNormals = new Vector.<Number>(numVertComponents, true);
-				_rawVertexTangents = new Vector.<Number>(numVertComponents, true);
-				_rawIndices = new Vector.<uint>(_numTriangles * 3, true);
+				var numVertComponents : uint = _numVertices * _stride;
+				_rawData = new Vector.<Number>(numVertComponents, true);
+				_rawIndices = new Vector.<uint>(numTriangles * 3, true);
 			}
 
 			// evaluate revolution steps
-			var revolutionAngleDelta:Number = 2 * Math.PI / _segmentsW;
+			var revolutionAngleDelta : Number = 2 * Math.PI / _segmentsW;
 
 			// top
 			if (_topClosed && _topRadius > 0) {
@@ -111,25 +108,23 @@ package away3d.primitives
 
 				for (i = 0; i <= _segmentsW; ++i) {
 					// central vertex
-					if(_yUp)
-						addVertex(0, -z, 0,   0, 1, 0,   1, 0, 0);
+					if (_yUp)
+						addVertex(0, -z, 0, 0, 1, 0, 1, 0, 0);
 					else
-						addVertex(0, 0, z,   0, 0, -1,   1, 0, 0);
+						addVertex(0, 0, z, 0, 0, -1, 1, 0, 0);
 
 					// revolution vertex
 					revolutionAngle = i * revolutionAngleDelta;
 					x = _topRadius * Math.cos(revolutionAngle);
 					y = _topRadius * Math.sin(revolutionAngle);
-					if(_yUp)
-						addVertex(x, -z, y,   0, 1, 0,   1, 0, 0);
+					if (_yUp)
+						addVertex(x, -z, y, 0, 1, 0, 1, 0, 0);
 					else
-						addVertex(x, y, z,   0, 0, -1,   1, 0, 0);
+						addVertex(x, y, z, 0, 0, -1, 1, 0, 0);
 
-					if(i > 0) // add triangle
+					if (i > 0) // add triangle
 						addTriangleClockWise(_nextVertexIndex - 1, _nextVertexIndex - 3, _nextVertexIndex - 2);
 				}
-
-				_vertexIndexOffset = _nextVertexIndex;
 			}
 
 			// bottom
@@ -137,71 +132,64 @@ package away3d.primitives
 
 				z = 0.5 * _height;
 
-				for (i = 0; i <= _segmentsW; ++i)
-				{
+				for (i = 0; i <= _segmentsW; ++i) {
 					// central vertex
-					if(_yUp)
-						addVertex(0, -z, 0,   0, -1, 0,   1, 0, 0);
+					if (_yUp)
+						addVertex(0, -z, 0, 0, -1, 0, 1, 0, 0);
 					else
-						addVertex(0, 0, z,   0, 0, 1,   1, 0, 0);
+						addVertex(0, 0, z, 0, 0, 1, 1, 0, 0);
 
 					// revolution vertex
 					revolutionAngle = i * revolutionAngleDelta;
 					x = _bottomRadius * Math.cos(revolutionAngle);
 					y = _bottomRadius * Math.sin(revolutionAngle);
-					if(_yUp)
-						addVertex(x, -z, y,   0, -1, 0,   1, 0, 0);
+					if (_yUp)
+						addVertex(x, -z, y, 0, -1, 0, 1, 0, 0);
 					else
-						addVertex(x, y, z,   0, 0, 1,   1, 0, 0);
+						addVertex(x, y, z, 0, 0, 1, 1, 0, 0);
 
-					if(i > 0) // add triangle
+					if (i > 0) // add triangle
 						addTriangleClockWise(_nextVertexIndex - 2, _nextVertexIndex - 3, _nextVertexIndex - 1);
 				}
-
-				_vertexIndexOffset = _nextVertexIndex;
 			}
-			
+
 			// The normals on the lateral surface all have the same incline, i.e.
 			// the "elevation" component (Y or Z depending on yUp) is constant.
 			// Same principle goes for the "base" of these vectors, which will be
 			// calculated such that a vector [base,elev] will be a unit vector.
 			dr = (_bottomRadius - _topRadius);
 			latNormElev = dr / _height;
-			latNormBase = (latNormElev==0)? 1 : _height / dr;
-			
+			latNormBase = (latNormElev == 0) ? 1 : _height / dr;
+
 
 			// lateral surface
-			if(_surfaceClosed)
-			{
-				var a:uint, b:uint, c:uint, d:uint;
+			if (_surfaceClosed) {
+				var a : uint, b : uint, c : uint, d : uint;
 				var na0 : Number, na1 : Number;
 
-				for(j = 0; j <= _segmentsH; ++j)
-				{
+				for (j = 0; j <= _segmentsH; ++j) {
 					radius = _topRadius - ((j / _segmentsH) * (_topRadius - _bottomRadius));
 					z = -(_height / 2) + (j / _segmentsH * _height);
 
-					for(i = 0; i <= _segmentsW; ++i)
-					{
+					for (i = 0; i <= _segmentsW; ++i) {
 						// revolution vertex
 						revolutionAngle = i * revolutionAngleDelta;
 						x = radius * Math.cos(revolutionAngle);
 						y = radius * Math.sin(revolutionAngle);
 						na0 = latNormBase * Math.cos(revolutionAngle);
 						na1 = latNormBase * Math.sin(revolutionAngle);
-						
-						if(_yUp)
+
+						if (_yUp)
 							addVertex(x, -z, y,
-									  na0, latNormElev, na1,
-									  na1, 0, -na0);
+									na0, latNormElev, na1,
+									na1, 0, -na0);
 						else
 							addVertex(x, y, z,
-									  na0, na1, latNormElev,
-									  na1, -na0, 0);
+									na0, na1, latNormElev,
+									na1, -na0, 0);
 
 						// close triangle
-						if(i > 0 && j > 0)
-						{
+						if (i > 0 && j > 0) {
 							a = _nextVertexIndex - 1; // current
 							b = _nextVertexIndex - 2; // previous
 							c = b - _segmentsW - 1; // previous of last level
@@ -214,34 +202,37 @@ package away3d.primitives
 			}
 
 			// build real data from raw data
-			target.updateVertexData(_rawVertexPositions);
-			target.updateVertexNormalData(_rawVertexNormals);
-			target.updateVertexTangentData(_rawVertexTangents);
+			target.updateData(_rawData);
 			target.updateIndexData(_rawIndices);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildUVs(target : SubGeometry) : void
+		protected override function buildUVs(target : CompactSubGeometry) : void
 		{
 			var i:int, j:int;
 			var x:Number, y:Number, revolutionAngle:Number;
+			var stride:uint = target.UVStride;
+			var skip:uint = stride - 2;
+			var UVData:Vector.<Number>;
 
 			// evaluate num uvs
-			var numUvs:uint = _numVertices * 2;
+			var numUvs:uint = _numVertices * stride;
 
 			// need to initialize raw array or can be reused?
 			if (target.UVData && numUvs == target.UVData.length)
-				_rawUvs = target.UVData;
-			else
-				_rawUvs = new Vector.<Number>(numUvs, true);
+				UVData = target.UVData;
+			else {
+				UVData = new Vector.<Number>(numUvs, true);
+				invalidateGeometry();
+			}
 
 			// evaluate revolution steps
 			var revolutionAngleDelta:Number = 2 * Math.PI / _segmentsW;
 
 			// current uv component index
-			var currentUvCompIndex:uint = 0;
+			var currentUvCompIndex:uint = target.UVOffset;
 
 			// top
 			if (_topClosed) {
@@ -251,10 +242,12 @@ package away3d.primitives
 					x = 0.5 + 0.5 * Math.cos(revolutionAngle);
 					y = 0.5 + 0.5 * Math.sin(revolutionAngle);
 
-					_rawUvs[currentUvCompIndex++] = 0.5; // central vertex
-					_rawUvs[currentUvCompIndex++] = 0.5;
-					_rawUvs[currentUvCompIndex++] = x; // revolution vertex
-					_rawUvs[currentUvCompIndex++] = y;
+					UVData[currentUvCompIndex++] = 0.5; // central vertex
+					UVData[currentUvCompIndex++] = 0.5;
+					currentUvCompIndex += skip;
+					UVData[currentUvCompIndex++] = x; // revolution vertex
+					UVData[currentUvCompIndex++] = y;
+					currentUvCompIndex += skip;
 				}
 			}
 
@@ -266,10 +259,12 @@ package away3d.primitives
 					x = 0.5 + 0.5 * Math.cos(revolutionAngle);
 					y = 0.5 + 0.5 * Math.sin(revolutionAngle);
 
-					_rawUvs[currentUvCompIndex++] = 0.5; // central vertex
-					_rawUvs[currentUvCompIndex++] = 0.5;
-					_rawUvs[currentUvCompIndex++] = x; // revolution vertex
-					_rawUvs[currentUvCompIndex++] = y;
+					UVData[currentUvCompIndex++] = 0.5; // central vertex
+					UVData[currentUvCompIndex++] = 0.5;
+					currentUvCompIndex += skip;
+					UVData[currentUvCompIndex++] = x; // revolution vertex
+					UVData[currentUvCompIndex++] = y;
+					currentUvCompIndex += skip;
 				}
 			}
 
@@ -281,14 +276,15 @@ package away3d.primitives
 					for(i = 0; i <= _segmentsW; ++i)
 					{
 						// revolution vertex
-						_rawUvs[currentUvCompIndex++] = i / _segmentsW;
-						_rawUvs[currentUvCompIndex++] = j / _segmentsH;
+						UVData[currentUvCompIndex++] = i / _segmentsW;
+						UVData[currentUvCompIndex++] = j / _segmentsH;
+						currentUvCompIndex += skip;
 					}
 				}
 			}
 
 			// build real data from raw data
-			target.updateUVData(_rawUvs);
+			target.updateData(UVData);
 		}
 		
 		/**
