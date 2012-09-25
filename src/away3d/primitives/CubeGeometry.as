@@ -176,7 +176,7 @@ package away3d.primitives
 
 			if (numVerts == target.numVertices) {
 				data = target.vertexData;
-				indices = target.indexData;
+				indices = target.indexData || new Vector.<uint>((_segmentsW*_segmentsH + _segmentsW*_segmentsD + _segmentsH*_segmentsD)*12, true);
 			}
 			else {
 				data = new Vector.<Number>(numVerts * stride, true);

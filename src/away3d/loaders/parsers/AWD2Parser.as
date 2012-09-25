@@ -574,13 +574,9 @@ package away3d.loaders.parsers
 		
 		private function parseSkeletonAnimation(blockLength : uint) : SkeletonClipNode
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var num_frames : uint;
 			var frames_parsed : uint;
-			// TODO: not used
-			//var frame_rate : uint;
 			var frame_dur : Number;
 			
 			name = parseVarStr();
@@ -613,8 +609,6 @@ package away3d.loaders.parsers
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var par_id : uint;
 			var mtx : Matrix3D;
@@ -643,8 +637,6 @@ package away3d.loaders.parsers
 		
 		private function parseMeshInstance(blockLength : uint) : Mesh
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var mesh : Mesh, geom : Geometry;
 			var par_id : uint, data_id : uint;

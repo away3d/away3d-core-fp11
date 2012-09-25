@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.nodes.VertexClipNode;
 	import away3d.animators.VertexAnimationSet;
@@ -58,7 +59,7 @@ package away3d.loaders.parsers
 		
 		// the current subgeom being built
 		private var _animationSet : VertexAnimationSet = new VertexAnimationSet();
-		private var _firstSubGeom : SubGeometry;
+		private var _firstSubGeom : CompactSubGeometry;
 		private var _uvs : Vector.<Number>;
 		private var _finalUV : Vector.<Number>;
 		
@@ -353,7 +354,7 @@ package away3d.loaders.parsers
 			var sx : Number, sy : Number, sz : Number;
 			var tx : Number, ty : Number, tz : Number;
 			var geometry : Geometry;
-			var subGeom : SubGeometry;
+			var subGeom : CompactSubGeometry;
 			var vertLen : uint = _vertIndices.length;
 			var fvertices : Vector.<Number>;
 			var tvertices : Vector.<Number>;
@@ -364,7 +365,7 @@ package away3d.loaders.parsers
 			_byteData.position = _offsetFrames;
 			
 			for (i = 0; i < _numFrames; i++) {
-				subGeom = new SubGeometry();
+				subGeom = new CompactSubGeometry();
 				_firstSubGeom ||= subGeom;
 				geometry = new Geometry();
 				geometry.addSubGeometry(subGeom);
@@ -393,11 +394,14 @@ package away3d.loaders.parsers
 					fvertices[k++] = tvertices[uint(_vertIndices[j] * 3 + 2)];
 					fvertices[k++] = tvertices[uint(_vertIndices[j] * 3 + 1)];
 				}
-				
-				subGeom.updateVertexData(fvertices);
-				subGeom.updateUVData(_finalUV);
+
+				constructVertexData(subGeom, fvertices, _finalUV, null, null);
 				subGeom.updateIndexData(_indices);
-				
+				subGeom.vertexNormalData;
+				subGeom.vertexTangentData;
+				subGeom.autoDeriveVertexNormals = false;
+				subGeom.autoDeriveVertexTangents = false;
+
 				var clip : VertexClipNode = _clipNodes[name];
 				
 				if (!clip) {

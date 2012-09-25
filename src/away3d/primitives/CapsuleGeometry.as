@@ -50,7 +50,7 @@ package away3d.primitives
 			if(numVerts == target.numVertices)
 			{
 				data = target.vertexData;
-				indices = target.indexData;
+				indices = target.indexData || new Vector.<uint>((_segmentsH - 1)*_segmentsW*6, true);
 			}
 			else
 			{

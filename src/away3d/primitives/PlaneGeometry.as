@@ -144,7 +144,7 @@ package away3d.primitives
 
 			if (numVertices == target.numVertices) {
 				data = target.vertexData;
-				indices = target.indexData;
+				indices = target.indexData || new Vector.<uint>(numIndices, true);
 			}
 			else {
 				data = new Vector.<Number>(numVertices * stride, true);

@@ -113,7 +113,7 @@ package away3d.core.base
 				_jointIndicesInvalid[contextIndex] = true;
 			}
 			if (_jointIndicesInvalid[contextIndex]) {
-				_jointIndexBuffer[contextIndex].uploadFromVector(_jointWeightsData, 0, _jointWeightsData.length / _jointsPerVertex);
+				_jointIndexBuffer[contextIndex].uploadFromVector(_jointIndexData, 0, _jointIndexData.length / _jointsPerVertex);
 				_jointIndicesInvalid[contextIndex] = false;
 			}
 			context.setVertexBufferAt(index, _jointIndexBuffer[contextIndex], 0, _bufferFormat);

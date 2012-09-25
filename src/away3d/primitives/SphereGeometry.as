@@ -47,7 +47,7 @@
 
 			if (numVerts == target.numVertices) {
 				vertices = target.vertexData;
-				indices = target.indexData;
+				indices = target.indexData || new Vector.<uint>((_segmentsH - 1) * _segmentsW * 6, true);
 			}
 			else {
 				vertices = new Vector.<Number>(numVerts * stride, true);

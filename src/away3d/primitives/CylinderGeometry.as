@@ -90,7 +90,7 @@ package away3d.primitives
 			// need to initialize raw arrays or can be reused?
 			if (_numVertices == target.numVertices) {
 				_rawData = target.vertexData;
-				_rawIndices = target.indexData;
+				_rawIndices = target.indexData || new Vector.<uint>(numTriangles * 3, true);
 			}
 			else {
 				var numVertComponents : uint = _numVertices * _stride;
