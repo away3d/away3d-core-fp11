@@ -494,9 +494,9 @@ package away3d.loaders.parsers
 				data[index++] = verts[v++];
 
 				if (normals && normals.length) {
-					data[index++] = verts[n++];
-					data[index++] = verts[n++];
-					data[index++] = verts[n++];
+					data[index++] = normals[n++];
+					data[index++] = normals[n++];
+					data[index++] = normals[n++];
 				}
 				else {
 					data[index++] = 0;
@@ -549,7 +549,7 @@ package away3d.loaders.parsers
 			const LIMIT : uint = 3*0xffff;
 			var subs : Vector.<ISubGeometry> = new Vector.<ISubGeometry>();
 			
-			if (verts.length >= LIMIT || indices.length >= LIMIT) {
+			if (indices.length >= LIMIT) {
 				var i : uint, len : uint, outIndex : uint;
 				var splitVerts : Vector.<Number> = new Vector.<Number>();
 				var splitIndices : Vector.<uint> = new Vector.<uint>();

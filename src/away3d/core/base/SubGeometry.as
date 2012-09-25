@@ -83,7 +83,7 @@
 				_verticesInvalid[contextIndex] = false;
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(index, _vertexBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(index, _vertexBuffer[contextIndex], 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 
 		/**
@@ -107,7 +107,7 @@
 				_uvsInvalid[contextIndex] = false;
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(index, _uvBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_2);
+			context.setVertexBufferAt(index, _uvBuffer[contextIndex], 0, Context3DVertexBufferFormat.FLOAT_2);
 		}
 
 		/**
@@ -128,7 +128,7 @@
 				_secondaryUvsInvalid[contextIndex] = false;
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(index, _secondaryUvBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_2);
+			context.setVertexBufferAt(index, _secondaryUvBuffer[contextIndex], 0, Context3DVertexBufferFormat.FLOAT_2);
 		}
 
 		/**
@@ -154,7 +154,7 @@
 				_normalsInvalid[contextIndex] = false;
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(index, _vertexNormalBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(index, _vertexNormalBuffer[contextIndex], 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 
 		/**
@@ -179,7 +179,7 @@
 				_vertexTangentBuffer[contextIndex].uploadFromVector(_vertexTangents, 0, _numVertices);
 				_tangentsInvalid[contextIndex] = false;
 			}
-			stage3DProxy.setSimpleVertexBuffer(index, _vertexTangentBuffer[contextIndex], Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(index, _vertexTangentBuffer[contextIndex], 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 
 		override public function applyTransformation(transform:Matrix3D):void

@@ -117,8 +117,8 @@ package away3d.core.render
 			len = _tasks.length;
 
 			if (len > 1) {
-				stage3DProxy.setSimpleVertexBuffer(0, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 0);
-				stage3DProxy.setSimpleVertexBuffer(1, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 2);
+				context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
+				context.setVertexBufferAt(1, vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
 			}
 
 			for (i = 0; i < len; ++i) {
@@ -128,8 +128,8 @@ package away3d.core.render
 				if (!task.target) {
 					stage3DProxy.scissorRect = null;
 					vertexBuffer = _rttManager.renderToScreenVertexBuffer;
-					stage3DProxy.setSimpleVertexBuffer(0, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 0);
-					stage3DProxy.setSimpleVertexBuffer(1, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 2);
+					context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
+					context.setVertexBufferAt(1, vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
 				}
 				stage3DProxy.setTextureAt(0, task.getMainInputTexture(stage3DProxy));
 				stage3DProxy.setProgram(task.getProgram3D(stage3DProxy));
@@ -140,8 +140,8 @@ package away3d.core.render
 			}
 
 			stage3DProxy.setTextureAt(0, null);
-			stage3DProxy.setSimpleVertexBuffer(0, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(1, null, null, 0);
+			context.setVertexBufferAt(0, null);
+			context.setVertexBufferAt(1, null);
 		}
 
 		private function updateFilterSizes() : void

@@ -93,7 +93,7 @@ package away3d.core.base
 				_jointWeightsBuffer[contextIndex].uploadFromVector(_jointWeightsData, 0, _jointWeightsData.length / _jointsPerVertex);
 				_jointWeightsInvalid[contextIndex] = false;
 			}
-			stage3DProxy.setSimpleVertexBuffer(index, _jointWeightsBuffer[contextIndex], _bufferFormat);
+			context.setVertexBufferAt(index, _jointWeightsBuffer[contextIndex], 0, _bufferFormat);
 		}
 
 		/**
@@ -116,7 +116,7 @@ package away3d.core.base
 				_jointIndexBuffer[contextIndex].uploadFromVector(_jointWeightsData, 0, _jointWeightsData.length / _jointsPerVertex);
 				_jointIndicesInvalid[contextIndex] = false;
 			}
-			stage3DProxy.setSimpleVertexBuffer(index, _jointIndexBuffer[contextIndex], _bufferFormat);
+			context.setVertexBufferAt(index, _jointIndexBuffer[contextIndex], 0, _bufferFormat);
 		}
 
 		override protected function uploadData(contextIndex : int) : void

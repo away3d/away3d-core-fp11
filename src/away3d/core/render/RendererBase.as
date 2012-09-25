@@ -236,7 +236,7 @@ package away3d.core.render
 
 			// clear buffers
 			for (var i : uint = 0; i < 8; ++i) {
-				_stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
+				_context.setVertexBufferAt(i, null);
 				_stage3DProxy.setTextureAt(i, null);
 			}
 		}

@@ -149,10 +149,11 @@
 		 */
 		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(0, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(1, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(2, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(3, null, null, 0);
+			var context : Context3D = stage3DProxy._context3D;
+			context.setVertexBufferAt(0, null);
+			context.setVertexBufferAt(1, null);
+			context.setVertexBufferAt(2, null);
+			context.setVertexBufferAt(3, null);
 		}
 	}
 }

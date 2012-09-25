@@ -212,10 +212,11 @@
 				_vertexContext3D = stage3DProxy.context3D;
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(0, _vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 0);
-			stage3DProxy.setSimpleVertexBuffer(1, _vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 3);
-			stage3DProxy.setSimpleVertexBuffer(2, _vertexBuffer, Context3DVertexBufferFormat.FLOAT_1, 6);
-			stage3DProxy.setSimpleVertexBuffer(3, _vertexBuffer, Context3DVertexBufferFormat.FLOAT_4, 7);
+			var contex : Context3D = stage3DProxy._context3D;
+			contex.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
+			contex.setVertexBufferAt(1, _vertexBuffer, 3, Context3DVertexBufferFormat.FLOAT_3);
+			contex.setVertexBufferAt(2, _vertexBuffer, 6, Context3DVertexBufferFormat.FLOAT_1);
+			contex.setVertexBufferAt(3, _vertexBuffer, 7, Context3DVertexBufferFormat.FLOAT_4);
 		}
 
 		public function activateUVBuffer(index : int,  stage3DProxy : Stage3DProxy) : void {}

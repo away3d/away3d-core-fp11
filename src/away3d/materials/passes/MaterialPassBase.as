@@ -320,7 +320,7 @@ package away3d.materials.passes
 			var prevUsed : int = _previousUsedStreams[contextIndex];
 			var i : uint;
 			for (i = _numUsedStreams; i < prevUsed; ++i) {
-				stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
+				context.setVertexBufferAt(i, null);
 			}
 
 			prevUsed = _previousUsedTexs[contextIndex];

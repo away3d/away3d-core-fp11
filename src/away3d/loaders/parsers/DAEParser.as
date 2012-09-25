@@ -390,7 +390,7 @@ package away3d.loaders.parsers
 			for (i = 0; i < base.subGeometries.length; i++) {
 				sub = CompactSubGeometry(base.subGeometries[i]);
 				vertexData = sub.vertexData.concat();
-				for (var v = 0; v < vertexData.length/13; v++) {
+				for (var v : int = 0; v < vertexData.length/13; v++) {
 					j = sub.vertexOffset + v*sub.vertexStride;
 					vertexData[j] = morph.method == "NORMALIZED" ? startWeight * sub.vertexData[j] : sub.vertexData[j];
 					for (k = 0; k < morph.targets.length; k++) {

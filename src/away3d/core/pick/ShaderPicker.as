@@ -94,7 +94,7 @@ package away3d.core.pick
 			draw( collector, null );
 
 			// clear buffers
-			_stage3DProxy.setSimpleVertexBuffer( 0, null, null, 0 );
+			_context.setVertexBufferAt(0, null);
 
 			if (!_context || !_potentialFound)
 				return null;

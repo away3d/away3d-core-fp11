@@ -1,8 +1,12 @@
 package away3d.animators
 {
-	import away3d.animators.*;
-	import away3d.core.managers.*;
-	import away3d.materials.passes.*;
+	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.passes.MaterialPassBase;
+
+	import flash.display3D.Context3D;
+
+	use namespace arcane;
 
 	/**
 	 * The animation data set used by skeleton-based animators, containing skeleton animation state data.
@@ -88,9 +92,9 @@ package away3d.animators
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
 			var streamOffset : uint = pass.numUsedStreams;
-
-			stage3DProxy.setSimpleVertexBuffer(streamOffset, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(streamOffset + 1, null, null, 0);
+			var context : Context3D = stage3DProxy._context3D;
+			context.setVertexBufferAt(streamOffset, null);
+			context.setVertexBufferAt(streamOffset+1, null);
 		}
 	}
 }

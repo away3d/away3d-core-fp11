@@ -4,7 +4,6 @@ package away3d.loaders.parsers
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
@@ -15,11 +14,9 @@ package away3d.loaders.parsers
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.ColorMaterial;
-	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
 
 	use namespace arcane;
 	
@@ -403,7 +400,6 @@ package away3d.loaders.parsers
 				}
 
 			} else {
-				
 				index = _realIndices[face.indexIds[vertexIndex]] - 1;
 			}
 			

@@ -105,21 +105,6 @@ package away3d.core.managers
 		}
 
 		/**
-		 * Assign the vertex buffer in the Context3D ready for use in the shader.
-		 * @param index The index for the vertex buffer setting
-		 * @param buffer The Vertex Buffer 
-		 * @param format The format of the buffer. See Context3DVertexBufferFormat
-		 * @param offset An offset from the start of the data
-		 */
-		public function setSimpleVertexBuffer(index : int, buffer : VertexBuffer3D, format : String, offset : int = 0) : void
-		{
-			if (_activeVertexBuffers[index] == buffer) return;
-
-			_context3D.setVertexBufferAt(index, buffer, offset, format);
-			_activeVertexBuffers[index] = buffer;
-		}
-
-		/**
 		 * Assign the texture in the Context3D ready for use in the shader.
 		 * @param index The index where the texture is set
 		 * @param texture The texture to set

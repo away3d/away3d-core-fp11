@@ -70,7 +70,7 @@ package away3d.core.base
 			if (_activeDataInvalid)
 				uploadData(contextIndex);
 
-			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 0);
+			context.setVertexBufferAt(index, _activeBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 
 		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
@@ -90,7 +90,7 @@ package away3d.core.base
 			if (_activeDataInvalid)
 				uploadData(contextIndex);
 
-			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_2, 9);
+			context.setVertexBufferAt(index, _activeBuffer, 9, Context3DVertexBufferFormat.FLOAT_2);
 		}
 
 		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
@@ -105,7 +105,7 @@ package away3d.core.base
 			if (_activeDataInvalid)
 				uploadData(contextIndex);
 
-			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_2, 11);
+			context.setVertexBufferAt(index, _activeBuffer, 11, Context3DVertexBufferFormat.FLOAT_2);
 		}
 
 		protected function uploadData(contextIndex : int) : void
@@ -126,7 +126,7 @@ package away3d.core.base
 			if (_activeDataInvalid)
 				uploadData(contextIndex);
 
-			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 3);
+			context.setVertexBufferAt(index, _activeBuffer, 3, Context3DVertexBufferFormat.FLOAT_3);
 		}
 
 		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void
@@ -141,7 +141,7 @@ package away3d.core.base
 			if (_activeDataInvalid)
 				uploadData(contextIndex);
 
-			stage3DProxy.setSimpleVertexBuffer(index, _activeBuffer, Context3DVertexBufferFormat.FLOAT_3, 6);
+			context.setVertexBufferAt(index, _activeBuffer, 6, Context3DVertexBufferFormat.FLOAT_3);
 		}
 
 		protected function createBuffer(contextIndex : int, context : Context3D) : void
