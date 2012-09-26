@@ -154,5 +154,10 @@ package away3d.core.base
 		function get faceNormals() : Vector.<Number>;
 
 		function cloneWithSeperateBuffers() : SubGeometry;
+
+		function get autoDeriveVertexNormals() : Boolean;
+		function set autoDeriveVertexNormals(value : Boolean) : void;
+		function get autoDeriveVertexTangents() : Boolean;
+		function set autoDeriveVertexTangents(value : Boolean) : void;
 	}
 }

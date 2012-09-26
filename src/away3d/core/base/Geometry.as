@@ -135,6 +135,23 @@ package away3d.core.base
 			for (var i : uint = 0; i < numSubGeoms; ++i)
 				_subGeometries[i].scaleUV(scaleU, scaleV);
 		}
+
+		/**
+		 * Updates the SubGeometries so all vertex data is represented in different buffers.
+		 * Use this for compatibility with Pixel Bender and PBPickingCollider
+		 */
+		public function convertToSeparateBuffers() : void
+		{
+			var subGeom : ISubGeometry;
+			var numSubGeoms : int = _subGeometries.length;
+			for (var i : int = 0; i < numSubGeoms; ++i) {
+				subGeom = _subGeometries[i];
+				if (subGeom is SubGeometry) continue;
+				removeSubGeometry(subGeom);
+				addSubGeometry(subGeom.cloneWithSeperateBuffers());
+				subGeom.dispose();
+			}
+		}
 		
 		arcane function validate() : void
 		{

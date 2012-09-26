@@ -316,7 +316,7 @@ package away3d.core.base
 			return clone;
 		}
 
-		private function stripBuffer(offset : int, numEntries : int) : Vector.<Number>
+		protected function stripBuffer(offset : int, numEntries : int) : Vector.<Number>
 		{
 			var data : Vector.<Number> = new Vector.<Number>(_numVertices*numEntries);
 			var i : int = 0, j : int = offset;
