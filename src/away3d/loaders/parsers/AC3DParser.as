@@ -5,7 +5,6 @@ package away3d.loaders.parsers
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
@@ -13,7 +12,6 @@ package away3d.loaders.parsers
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.ColorMaterial;
-	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	import away3d.materials.utils.DefaultMaterialManager;
 	
@@ -36,11 +34,11 @@ package away3d.loaders.parsers
 		
 		private var _textData:String;
 		private var _startedParsing : Boolean;
-		private var _container:ObjectContainer3D;
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
 		private var _trunk:Array;
 		private var _containersList:Array = [];
+		private var _tmpcontainerpos:Vector3D = new Vector3D(0.0,0.0,0.0);
 		private var _tmpos:Vector3D = new Vector3D(0.0,0.0,0.0);
 		private var _kidsCount:int = 0;
 		private var _activeMesh:Mesh;
@@ -54,6 +52,8 @@ package away3d.loaders.parsers
 		private var _oldIndex:uint;
 		private var _stringLen:uint;
 		private var _materialList:Array;
+		
+		private var _groupCount:uint;
 		
 		/**
 		 * Creates a new AC3DParser object.
@@ -130,10 +130,10 @@ package away3d.loaders.parsers
 		{
 			var line:String;
 			
-			if (!_container)
-				_container = new ObjectContainer3D();
-			
 			if(!_startedParsing) {
+				_groupCount = 0;
+				_activeContainer = null;
+				
 				_textData = getTextData();
 				var re:RegExp = new RegExp(String.fromCharCode(13),"g");
 				_textData = _textData.replace(re, "");
@@ -192,6 +192,9 @@ package away3d.loaders.parsers
 					
 					case "kids"://howmany children in the upcomming object. Probably need it later on, to couple with container/group generation
 						_kidsCount = parseInt(_trunk[1]);
+						
+						if(_lastType == "group") _groupCount = _kidsCount;
+						 
 						break;
 					
 					case "OBJECT":
@@ -204,7 +207,17 @@ package away3d.loaders.parsers
 						
 						if(_trunk[1] == "world"){
 							_lastType = "world";
-							_activeContainer = _container;
+							
+						} else if(_trunk[1] == "group"){
+							cont = new ObjectContainer3D();
+							if(_activeContainer) _activeContainer.addChild(cont);
+							cont.name = "c_"+_containersList.length;
+							_containersList.push(cont);
+							_activeContainer = cont;
+							 
+							 finalizeAsset(cont);
+							
+							_lastType = "group";
 							
 						} else {
 							//validate if it's a definition that we can use
@@ -228,22 +241,12 @@ package away3d.loaders.parsers
 							_activeMesh = new Mesh(geometry, null );
 							if(_vertices) cleanUpBuffers();
 							_vertices = new Vector.<Vertex>();
-							//_indices = new Vector.<uint>();
 							_uvs = [];
 							_activeMesh.name = "m_"+_meshList.length;
 							_meshList[_meshList.length] = _activeMesh;
 							//in case of groups, numvert might not be there
 							_parsesV = true;
 							_lastType = "poly";
-						}
-						
-						if(_trunk[1] == "group"){
-							cont = new ObjectContainer3D();
-							_activeContainer.addChild(cont);
-							cont.name = "c_"+_containersList.length;
-							_containersList.push(cont);
-							_activeContainer = cont;
-							_lastType = "group";
 						}
 						break;
 					
@@ -266,7 +269,6 @@ package away3d.loaders.parsers
 							_isQuad = true;
 							_quadCount = 0;
 						} else if( refscount<3 || refscount > 4){
-							trace("AC3D Parser: Unsupported polygon type with "+refscount+" sides found. Triangulate in AC3D!");
 							continue;
 						} else{
 							_isQuad = false;
@@ -280,7 +282,6 @@ package away3d.loaders.parsers
 						break;
 					
 					case "texture":
-						//var bmd:BitmapData = DefaultMaterialManager.getDefaultBitmapData(true);
 						_activeMesh.material = new TextureMaterial( DefaultMaterialManager.getDefaultTexture() );
 						_activeMesh.material.name = "m_"+_activeMesh.name;
 						addDependency(String(_meshList.length-1), new URLRequest(tUrl));
@@ -292,9 +293,17 @@ package away3d.loaders.parsers
 						relative to the parent - i.e. not a global position.  If this is not found then
 						the default centre of the object will be 0, 0, 0.
 						*/
-						_tmpos.x = parseFloat(_trunk[1]);
-						_tmpos.y = parseFloat(_trunk[2]);
-						_tmpos.z = parseFloat(_trunk[3]);
+						 
+						if(_lastType == "group"){
+							_tmpcontainerpos.x = parseFloat(_trunk[1]);
+							_tmpcontainerpos.y = parseFloat(_trunk[2]);
+							_tmpcontainerpos.z = parseFloat(_trunk[3]);
+
+						} else {
+							_tmpos.x = parseFloat(_trunk[1]);
+							_tmpos.y = parseFloat(_trunk[2]);
+							_tmpos.z = parseFloat(_trunk[3]);
+						}
 					
 					case "rot"://%f %f %f  %f %f %f  %f %f %f
 						/*The 3x3 rotation matrix for this objects vertices.  Note that the rotation is relative
@@ -342,16 +351,27 @@ package away3d.loaders.parsers
 			
 			if(_charIndex >= _stringLen){
 				
-				if(_activeMesh != null)
-					buildMeshGeometry(_activeMesh);
+				if(_activeMesh != null) buildMeshGeometry(_activeMesh);
 				
-				finalizeAsset(_container);
+				//finalizeAsset(_container);
 				cleanUP();
 				
 				return PARSING_DONE;
 			} 
 			
 			return MORE_TO_PARSE;
+		}
+		
+		private function checkGroup(mesh:Mesh):void
+		{
+			if(_groupCount >0) _groupCount --;
+			
+			if(_activeContainer) _activeContainer.addChild(_activeMesh);
+			
+			if(_activeContainer && _groupCount == 0){
+				_activeContainer = null;
+				_tmpcontainerpos.x = _tmpcontainerpos.y = _tmpcontainerpos.z = 0;
+			}
 		}
 		
 		private function buildMeshGeometry(mesh:Mesh):void
@@ -433,13 +453,17 @@ package away3d.loaders.parsers
 				sub_geom.updateIndexData(subGeomsData[i+1]);
 				geom.addSubGeometry(sub_geom);
 			}
-			
-			_activeContainer.addChild(mesh);
-			
+			 
 			mesh.x = -_tmpos.x;
 			mesh.y = _tmpos.y;
 			mesh.z = _tmpos.z;
 			
+			mesh.x -= _tmpcontainerpos.x;
+			mesh.y += _tmpcontainerpos.y;
+			mesh.z += _tmpcontainerpos.z;
+			
+			checkGroup(_activeMesh);
+			 
 			finalizeAsset(mesh);
 			
 			dic = null;

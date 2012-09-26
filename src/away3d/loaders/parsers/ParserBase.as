@@ -355,6 +355,10 @@ package away3d.loaders.parsers
 					type_name = 'entity';
 					type_event = AssetEvent.ENTITY_COMPLETE;
 					break;
+				case AssetType.SEGMENT_SET:
+					type_name = 'segmentSet';
+					type_event = AssetEvent.SEGMENT_SET_COMPLETE;
+					break;
 				default:
 					throw new Error('Unhandled asset type '+asset.assetType+'. Report as bug!');
 					break;
