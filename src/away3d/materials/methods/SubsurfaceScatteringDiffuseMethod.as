@@ -4,6 +4,7 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.SingleObjectDepthPass;
 	import away3d.materials.compilation.ShaderRegisterCache;
@@ -225,7 +226,7 @@ package away3d.materials.methods
 		/**
 		 * Generates the code for this method
 		 */
-		private function scatterLight(vo : MethodVO, targetReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function scatterLight(vo : MethodVO, targetReg : ShaderRegisterElement, regCache : ShaderRegisterCache, sharedRegisters : ShaderRegisterData) : String
 		{
 			// only scatter first light
 			if (!_isFirstLight) return "";
@@ -235,8 +236,8 @@ package away3d.materials.methods
 			var depthReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 
 
-			if (_sharedRegisters.viewDirFragment) {
-				_targetReg = _sharedRegisters.viewDirFragment;
+			if (sharedRegisters.viewDirFragment) {
+				_targetReg = sharedRegisters.viewDirFragment;
 			}
 			else {
 				_targetReg = regCache.getFreeFragmentVectorTemp();
