@@ -64,7 +64,7 @@ package away3d.core.pick
 			var uvData:Vector.<Number> = subMesh.UVData;
 			var numericIndexData:Vector.<Number> = Vector.<Number>( indexData );
 			var indexBufferDims:Point = evaluateArrayAsGrid( numericIndexData );
-			
+
 			// if working on a clone, no need to resend data to pb
 			// TODO: next line avoids re-upload if its the same renderable, but not if its 2 renderables referring to the same geometry or source
 			// TODO: perhaps implement a geom id?
@@ -119,7 +119,7 @@ package away3d.core.pick
 				v = _kernelOutputBuffer[ collisionTriangleIndex + 1 ]; // barycentric coord 1
 				w = _kernelOutputBuffer[ collisionTriangleIndex + 2 ]; // barycentric coord 2
 				u = 1.0 - v - w;
-				pickingCollisionVO.uv = getCollisionUV( indexData, uvData, collisionTriangleIndex, v, w, u );
+				pickingCollisionVO.uv = getCollisionUV( indexData, uvData, collisionTriangleIndex, v, w, u, 0, 2 );
 				
 				return true;
 			}

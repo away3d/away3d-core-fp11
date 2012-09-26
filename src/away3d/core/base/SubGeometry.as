@@ -1,6 +1,7 @@
 ﻿package away3d.core.base
 {
 	import away3d.arcane;
+	import away3d.core.base.SubGeometry;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DVertexBufferFormat;
@@ -463,6 +464,11 @@
 		public function get SecondaryUVOffset() : int
 		{
 			return 0;
+		}
+
+		public function cloneWithSeperateBuffers() : SubGeometry
+		{
+			return SubGeometry(clone());
 		}
 	}
 }

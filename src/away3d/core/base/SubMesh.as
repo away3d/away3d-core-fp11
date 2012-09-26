@@ -342,6 +342,11 @@ package away3d.core.base
 			return _subGeometry.vertexStride;
 		}
 
+		public function get UVStride() : uint
+		{
+			return _subGeometry.UVStride;
+		}
+
 		public function get vertexNormalData() : Vector.<Number>
 		{
 			return _subGeometry.vertexNormalData;
@@ -352,17 +357,22 @@ package away3d.core.base
 			return _subGeometry.vertexTangentData;
 		}
 
-		public function get vertexOffset() : int
+		public function get UVOffset() : uint
+		{
+			return _subGeometry.UVOffset;
+		}
+
+		public function get vertexOffset() : uint
 		{
 			return _subGeometry.vertexOffset;
 		}
 
-		public function get vertexNormalOffset() : int
+		public function get vertexNormalOffset() : uint
 		{
 			return _subGeometry.vertexNormalOffset;
 		}
 
-		public function get vertexTangentOffset() : int
+		public function get vertexTangentOffset() : uint
 		{
 			return _subGeometry.vertexTangentOffset;
 		}

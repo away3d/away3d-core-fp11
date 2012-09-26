@@ -152,5 +152,7 @@ package away3d.core.base
 		function set parentGeometry(value : Geometry) : void;
 
 		function get faceNormals() : Vector.<Number>;
+
+		function cloneWithSeperateBuffers() : SubGeometry;
 	}
 }

@@ -300,5 +300,35 @@ package away3d.core.base
 			super.invalidateBuffers(invalid);
 			_activeDataInvalid = true;
 		}
+
+
+		public function cloneWithSeperateBuffers() : SubGeometry
+		{
+			var clone : SubGeometry = new SubGeometry();
+			clone.updateVertexData(stripBuffer(0, 3));
+			clone.autoDeriveVertexNormals = _autoDeriveVertexNormals;
+			clone.autoDeriveVertexTangents = _autoDeriveVertexTangents;
+			if (!_autoDeriveVertexNormals) clone.updateVertexNormalData(stripBuffer(3, 3));
+			if (!_autoDeriveVertexTangents) clone.updateVertexTangentData(stripBuffer(6, 3));
+			clone.updateUVData(stripBuffer(9, 2));
+			clone.updateSecondaryUVData(stripBuffer(11, 2));
+			clone.updateIndexData(indexData.concat());
+			return clone;
+		}
+
+		private function stripBuffer(offset : int, numEntries : int) : Vector.<Number>
+		{
+			var data : Vector.<Number> = new Vector.<Number>(_numVertices*numEntries);
+			var i : int = 0, j : int = offset;
+			var skip : int = 13 - numEntries;
+
+			for (var v : int = 0; v < _numVertices; ++v) {
+				for (var k : int = 0; k < numEntries; ++k)
+					data[i++] = _vertexData[j++];
+				j += skip;
+			}
+
+			return data;
+		}
 	}
 }
