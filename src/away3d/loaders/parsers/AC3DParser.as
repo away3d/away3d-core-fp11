@@ -3,6 +3,7 @@ package away3d.loaders.parsers
 	import away3d.arcane;
 	
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.UV;
@@ -38,7 +39,6 @@ package away3d.loaders.parsers
 		private var _container:ObjectContainer3D;
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
-		private var _inited:Boolean;
 		private var _trunk:Array;
 		private var _containersList:Array = [];
 		private var _tmpos:Vector3D = new Vector3D(0.0,0.0,0.0);
@@ -424,16 +424,13 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			var sub_geom:SubGeometry;
+			var sub_geom:CompactSubGeometry;
 			var geom:Geometry = mesh.geometry;
 			
 			for(i=0;i<subGeomsData.length;i+=3){
-				sub_geom = new SubGeometry();
-				sub_geom.autoDeriveVertexNormals = true;
-				sub_geom.autoDeriveVertexTangents = true;
-				sub_geom.updateVertexData(subGeomsData[i]);
+				sub_geom = new CompactSubGeometry();
+				constructVertexData(sub_geom, subGeomsData[i], subGeomsData[i+2], null, null);
 				sub_geom.updateIndexData(subGeomsData[i+1]);
-				sub_geom.updateUVData(subGeomsData[i+2]);
 				geom.addSubGeometry(sub_geom);
 			}
 			
