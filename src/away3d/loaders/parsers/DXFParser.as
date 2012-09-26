@@ -131,34 +131,36 @@ package away3d.loaders.parsers
 				_stringLen = _textData.length;
 				_oldIndex = 0;
 				_segCount = 0;
+				_vSet = 0;
+				
+				if(_textData.indexOf(CR) == -1) return PARSING_DONE;
+
 			}
 			
 			var tag:String;
 			var isBlock:Boolean;
 			var isTag:Boolean;
-			var dataSet:uint;
+			var _vSet:uint;
 			var lineVal:Number;
 			
-			while(_charIndex<_stringLen  && hasTime()){
+			while(_charIndex<_stringLen && (hasTime() || isBlock)){
 				 
 				_charIndex = _textData.indexOf(CR, _oldIndex);
 							
-				if(_charIndex == -1)
-					_charIndex = _stringLen;
-								
 				line = _textData.substring(_oldIndex, _charIndex);
 				if(line == "") continue;
 				
 				line = line.replace(_trim, "");
 				
 				if(line == FACE || line == LINE){
-					if(_blockType == FACE && dataSet == 12) finalizeFace();
-					dataSet = 0;
+					if(_blockType == FACE && _vSet == 11) finalizeFace();
+					_vSet = 0;
 					isBlock = true;
 					_blockType = (line == LINE)? LINE : FACE;
 					isTag = false;
 					_meshName = "";
 					_oldIndex = _charIndex+1;
+					
 					continue;
 				}
 				
@@ -173,73 +175,66 @@ package away3d.loaders.parsers
 								switch(tag){
 										case "10":
 											_v0.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "20":
 											_v0.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "30":
 											_v0.z = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "11":
 											_v1.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "21":
 											_v1.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "31":
 											_v1.z = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "12":
 											_v2.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "22":
 											_v2.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "32":
 											_v2.z = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "13":
 											_v3.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "23":
 											_v3.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "33":
 											_v3.z = lineVal;
-											dataSet++;
+											if(_vSet == 11){
+												if(_meshName == "") _meshName = "mesh";
+												finalizeFace();
+												isBlock = false;
+											}  
 											break;
 										
 										case "62":
 											_itemColor = getDXFColor(lineVal);
 											break;
-										
 											
 										//ignoring visibility tag
 										 default:
-											
-											if( isNaN(lineVal) ){
-												if(dataSet == 0){
-													_meshName = line;
-												}else if(dataSet == 12){
-													if(_meshName == "") _meshName = "mesh";
-													finalizeFace();
-													isBlock = false;
-												}  
-											}
-											
+											if( isNaN(lineVal) && tag == "8" && _vSet == 0) _meshName = line;
+											 
 									}
-									
 									
 						
 							} else {
@@ -247,28 +242,28 @@ package away3d.loaders.parsers
 								switch(tag){
 									case "10":
 										_v0.x = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "20":
 										_v0.y = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "30":
 										_v0.z = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									
 									case "11":
 										_v1.x = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "21":
 										_v1.y = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "31":
 										_v1.z = lineVal;
-										if(dataSet == 5){
+										if(_vSet == 5){
 											finalizeLine();
 											isBlock = false;
 										}
@@ -288,8 +283,9 @@ package away3d.loaders.parsers
 					
 					isTag = !isTag;
 				}
-					
+				 
 				_oldIndex = _charIndex+1;
+				 
 			}
 
 
@@ -305,7 +301,7 @@ package away3d.loaders.parsers
 		
 		private function finalizeFace():void
 		{
-			 
+
 			if(_lastMeshName == "" || _meshName != _lastMeshName){
 				
 				if(_activeMesh) finalizeMesh();
@@ -343,7 +339,6 @@ package away3d.loaders.parsers
 			
 			//This format writes twice v2 as v3 even if its not a quad face. 
 			// if v3 values are not equal to v2, it's a quad.
-			
 			if( _v2.x != _v3.x || _v2.y!= _v3.y || _v2.z != _v3.z){
 				
 				if(_indices.length+3 > LIMIT ){
@@ -352,9 +347,12 @@ package away3d.loaders.parsers
 					_subGeometry.updateUVData(_uvs);
 					
 					addSubGeometry(_activeMesh.geometry);
+					
+					ind = 0;
+					
+				} else {
+					ind += 3;
 				}
-				
-				ind = _vertices.length/3;
 				_vertices.push(_v0.x, _v0.y, _v0.z, _v2.x, _v2.y, _v2.z, _v3.x, _v3.y, _v3.z);
 				_uvs.push(0, 1, .5, 0, 1, 1);
 				_indices.push(ind, ind+1, ind+2);
