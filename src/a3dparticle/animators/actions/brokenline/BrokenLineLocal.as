@@ -115,17 +115,17 @@ package a3dparticle.animators.actions.brokenline
 			for (var i:int = 0; i < _brokenRegisters.length; i++)
 			{
 				code += "min " + max.toString() + "," + time.toString() + "," + _brokenRegisters[i].toString() + ".w\n";
-				code += "max " + max.toString() + "," + max.toString() + "," + _animation.zeroConst.toString() + "\n";
+				code += "max " + max.toString() + "," + max.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
 				code += "mul " + distance.toString() + "," + _brokenRegisters[i].toString() + ".xyz," + max.toString() + "\n";
 				code += "add " + _animation.offsetTarget.toString() + "," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
 				if (_animation.needVelocity)
 				{
-					code += "slt " + slt.toString() + "," + _animation.zeroConst.toString() + "," + time.toString() + "\n";
+					code += "slt " + slt.toString() + "," + _animation.vertexZeroConst.toString() + "," + time.toString() + "\n";
 				}
 				code += "sub " + time.toString() + "," + time.toString() + "," + _brokenRegisters[i].toString() + ".w\n";
 				if (_animation.needVelocity)
 				{
-					code += "sge " + sge.toString() + "," + _animation.zeroConst.toString() + "," + time.toString() + "\n";
+					code += "sge " + sge.toString() + "," + _animation.vertexZeroConst.toString() + "," + time.toString() + "\n";
 					code += "mul " + sge.toString() + "," + sge.toString() + "," + slt.toString() + "\n";
 					code += "mul " + distance.toString() + "," + sge.toString() + "," + _brokenRegisters[i].toString() + ".xyz\n";
 					code += "add " + _animation.velocityTarget.toString() + "," + _animation.velocityTarget.toString() + "," + distance.toString() + "\n";

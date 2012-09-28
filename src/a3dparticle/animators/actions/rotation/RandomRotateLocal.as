@@ -96,7 +96,7 @@ package a3dparticle.animators.actions.rotation
 			code += "mov " + matrix2.toString() + ".xyz," + roatateAttribute.toString() + ".yyy\n";
 			code += "mov " + matrix3.toString() + ".xyz," + roatateAttribute.toString() + ".zzz\n";
 			
-			code += "sub " + temp2.toString() +".x," + _animation.OneConst.toString() + ".x," + cos_degree.toString() + "\n";
+			code += "sub " + temp2.toString() +".x," + _animation.vertexOneConst.toString() + ".x," + cos_degree.toString() + "\n";
 			code += "mov " + _rev_cos_degree.toString() +"," + temp2.toString() + ".x\n";
 			
 			
@@ -127,10 +127,10 @@ package a3dparticle.animators.actions.rotation
 			code += "mov " +temp2.toString() + ".z," + cos_degree.toString() + "\n";
 			code += "add " + matrix3.toString() +".xyz," + matrix3.toString() + ".xyz," + temp2.toString() + ".xyz\n";
 			
-			code += "mov " +matrix1.toString() + ".w," + _animation.zeroConst.toString() + "\n";
-			code += "mov " +matrix2.toString() + ".w," + _animation.zeroConst.toString() + "\n";
-			code += "mov " +matrix3.toString() + ".w," + _animation.zeroConst.toString() + "\n";
-			code += "mov " +matrix4.toString() + ".w," + _animation.zeroConst.toString() + "\n";
+			code += "mov " +matrix1.toString() + ".w," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " +matrix2.toString() + ".w," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " +matrix3.toString() + ".w," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " +matrix4.toString() + ".w," + _animation.vertexZeroConst.toString() + "\n";
 			
 			code += "m44 " + temp2.toString() +"," + _animation.positionAttribute.toString() + "," + matrix1.toString() + "\n";
 			code += "sub " + temp2.toString() +"," + temp2.toString() + "," + _animation.positionAttribute.toString() + "\n";
@@ -161,7 +161,7 @@ package a3dparticle.animators.actions.rotation
 			
 			var code:String = "";
 			code += "mov " + nrmVel.toString() + ".xyz," + roatateAttribute.toString() + ".xyz\n";
-			code += "mov " + nrmVel.toString() + ".w," + _animation.zeroConst.toString() + "\n";
+			code += "mov " + nrmVel.toString() + ".w," + _animation.vertexZeroConst.toString() + "\n";
 			
 			code += "mul " + tempSingle.toString() + "," + _animation.vertexTime.toString() + "," + roatateAttribute.toString() + ".w\n";
 			

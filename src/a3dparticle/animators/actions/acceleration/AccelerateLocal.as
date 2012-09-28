@@ -63,7 +63,7 @@ package a3dparticle.animators.actions.acceleration
 			if (_animation.needVelocity)
 			{
 				var temp2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-				code += "mul " + temp2.toString() + "," + temp.toString() + "," + _animation.TwoConst.toString() + "\n";
+				code += "mul " + temp2.toString() + "," + temp.toString() + "," + _animation.vertexTwoConst.toString() + "\n";
 				code += "add " + _animation.velocityTarget.toString() + ".xyz," + temp2.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";
 			}
 			shaderRegisterCache.removeVertexTempUsage(temp);

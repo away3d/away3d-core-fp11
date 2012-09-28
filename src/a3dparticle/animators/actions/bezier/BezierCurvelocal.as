@@ -77,11 +77,11 @@ package a3dparticle.animators.actions.bezier
 			shaderRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "sub " + rev_time.toString() + "," + _animation.OneConst.toString() + "," + _animation.vertexLife.toString() + "\n";
+			code += "sub " + rev_time.toString() + "," + _animation.vertexOneConst.toString() + "," + _animation.vertexLife.toString() + "\n";
 			code += "mul " + time_2.toString() + "," + _animation.vertexLife.toString() + "," + _animation.vertexLife.toString() + "\n";
 			
 			code += "mul " + time_temp.toString() + "," + _animation.vertexLife.toString() +"," + rev_time.toString() + "\n";
-			code += "mul " + time_temp.toString() + "," + time_temp.toString() +"," + _animation.TwoConst.toString() + "\n";
+			code += "mul " + time_temp.toString() + "," + time_temp.toString() +"," + _animation.vertexTwoConst.toString() + "\n";
 			code += "mul " + distance.toString() + "," + time_temp.toString() +"," + p1Attribute.toString() + "\n";
 			code += "add " + _animation.offsetTarget.toString() +".xyz," + distance.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";
 			code += "mul " + distance.toString() + "," + time_2.toString() +"," + p2Attribute.toString() + "\n";
@@ -89,9 +89,9 @@ package a3dparticle.animators.actions.bezier
 			
 			if (_animation.needVelocity)
 			{
-				code += "mul " + time_2.toString() + "," + _animation.vertexLife.toString() + "," + _animation.TwoConst.toString() + "\n";
-				code += "sub " + time_temp.toString() + "," + _animation.OneConst.toString() + "," + time_2.toString() + "\n";
-				code += "mul " + time_temp.toString() + "," + _animation.TwoConst.toString() + "," + time_temp.toString() + "\n";
+				code += "mul " + time_2.toString() + "," + _animation.vertexLife.toString() + "," + _animation.vertexTwoConst.toString() + "\n";
+				code += "sub " + time_temp.toString() + "," + _animation.vertexOneConst.toString() + "," + time_2.toString() + "\n";
+				code += "mul " + time_temp.toString() + "," + _animation.vertexTwoConst.toString() + "," + time_temp.toString() + "\n";
 				code += "mul " + distance.toString() + "," + p1Attribute.toString() + "," + time_temp.toString() + "\n";
 				code += "add " + _animation.velocityTarget.toString() + ".xyz," + distance.toString() + "," + _animation.velocityTarget.toString() + ".xyz\n";
 				code += "mul " + distance.toString() + "," + p2Attribute.toString() + "," + time_2.toString() + "\n";

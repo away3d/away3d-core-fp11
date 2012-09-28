@@ -100,7 +100,7 @@ package a3dparticle.animators.actions.circle
 			code += "sin " + sin.toString() +"," + degree.toString() + "\n";
 			code += "mul " + distance.toString() +".x," + cos.toString() +"," + circleAttribute.toString() + ".x\n";
 			code += "mul " + distance.toString() +".y," + sin.toString() +"," + circleAttribute.toString() + ".x\n";
-			code += "mov " + distance.toString() + ".wz" + _animation.zeroConst.toString() + "\n";
+			code += "mov " + distance.toString() + ".wz" + _animation.vertexZeroConst.toString() + "\n";
 			code += "m44 " + distance.toString() + "," + distance.toString() + "," +eulersMatrixRegister.toString() + "\n";
 			code += "add " + _animation.offsetTarget.toString() + ".xyz," + distance.toString() + ".xyz," + _animation.offsetTarget.toString() + ".xyz\n";
 			
@@ -108,7 +108,7 @@ package a3dparticle.animators.actions.circle
 			{
 				code += "neg " + distance.toString() + ".x," + sin.toString() + "\n";
 				code += "mov " + distance.toString() + ".y," + cos.toString() + "\n";
-				code += "mov " + distance.toString() + ".zw," + _animation.zeroConst.toString() + "\n";
+				code += "mov " + distance.toString() + ".zw," + _animation.vertexZeroConst.toString() + "\n";
 				code += "m44 " + distance.toString() + "," + distance.toString() + "," +eulersMatrixRegister.toString() + "\n";
 				code += "mul " + distance.toString() + "," + distance.toString() + "," +circleAttribute.toString() + ".z\n";
 				code += "div " + distance.toString() + "," + distance.toString() + "," +circleAttribute.toString() + ".y\n";

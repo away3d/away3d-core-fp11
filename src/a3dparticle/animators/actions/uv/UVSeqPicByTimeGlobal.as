@@ -85,7 +85,7 @@ package a3dparticle.animators.actions.uv
 				if (_hasStartTime)
 				{
 					code += "sub " + time.toString() + "," + _animation.vertexTime.toString() + "," + startTime.toString() + "\n";
-					code += "max " + time.toString() + "," + time.toString() + "," + _animation.zeroConst.toString() + "\n";
+					code += "max " + time.toString() + "," + time.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
 				}
 				else
 				{

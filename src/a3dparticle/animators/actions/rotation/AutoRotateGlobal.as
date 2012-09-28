@@ -53,8 +53,8 @@ package a3dparticle.animators.actions.rotation
 			shaderRegisterCache.removeVertexTempUsage(R);
 			
 			var code:String = "";
-			code += "mov " + xAxis.toString() + ".x," + _animation.OneConst.toString() + ".x\n";
-			code += "mov " + xAxis.toString() + ".yz," + _animation.zeroConst.toString() + ".xy\n";
+			code += "mov " + xAxis.toString() + ".x," + _animation.vertexOneConst.toString() + ".x\n";
+			code += "mov " + xAxis.toString() + ".yz," + _animation.vertexZeroConst.toString() + ".xy\n";
 			
 			
 			code += "nrm " + nrmVel.toString() + ".xyz," + _animation.velocityTarget.toString() + ".xyz\n";
@@ -64,16 +64,16 @@ package a3dparticle.animators.actions.rotation
 			//use R as temp to judge if nrm is (0,0,0).
 			//if nrm is (0,0,0) ,change it to (0,0,1).
 			code += "dp3 " + R.toString() + ".x," + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
-			code += "sge " + R.toString() + ".x," + _animation.zeroConst.toString() + ".x," + R.toString() + ".x\n";
+			code += "sge " + R.toString() + ".x," + _animation.vertexZeroConst.toString() + ".x," + R.toString() + ".x\n";
 			code += "add " +nrmVel.toString() + ".z," + R.toString() + ".x," + nrmVel.toString() + ".z\n";
 			
 			
-			code += "add " + tempSingle.toString() + "," + cos2.toString() + "," + _animation.OneConst.toString() + "\n";
-			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + _animation.TwoConst.toString() + "\n";
+			code += "add " + tempSingle.toString() + "," + cos2.toString() + "," + _animation.vertexOneConst.toString() + "\n";
+			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + _animation.vertexTwoConst.toString() + "\n";
 			code += "sqt " + cos.toString() + "," + tempSingle.toString() + "\n";
 			
-			code += "sub " + tempSingle.toString() + "," + _animation.OneConst.toString() + "," + cos2.toString() + "\n";
-			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + _animation.TwoConst.toString() + "\n";
+			code += "sub " + tempSingle.toString() + "," + _animation.vertexOneConst.toString() + "," + cos2.toString() + "\n";
+			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + _animation.vertexTwoConst.toString() + "\n";
 			code += "sqt " + sin.toString() + "," + tempSingle.toString() + "\n";
 			
 			

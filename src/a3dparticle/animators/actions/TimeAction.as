@@ -121,7 +121,7 @@ package a3dparticle.animators.actions
 			
 			var code:String = "";
 			code += "sub " + _animation.vertexTime.toString() + "," + _animation.timeConst.toString() + ".x," + timeAtt.toString() + ".x\n";
-			code += "max " + _animation.vertexTime.toString() + "," + _animation.zeroConst.toString() + "," +  _animation.vertexTime.toString() + "\n";
+			code += "max " + _animation.vertexTime.toString() + "," + _animation.vertexZeroConst.toString() + "," +  _animation.vertexTime.toString() + "\n";
 			if (hasDuringTime)
 			{
 				if (_loop)

@@ -64,9 +64,9 @@ package a3dparticle.animators
 		public var velocityTarget:ShaderRegisterElement;
 		public var vertexTime:ShaderRegisterElement;
 		public var vertexLife:ShaderRegisterElement;
-		public var zeroConst:ShaderRegisterElement;
-		public var OneConst:ShaderRegisterElement;
-		public var TwoConst:ShaderRegisterElement;
+		public var vertexZeroConst:ShaderRegisterElement;
+		public var vertexOneConst:ShaderRegisterElement;
+		public var vertexTwoConst:ShaderRegisterElement;
 		public var cameraPosConst:ShaderRegisterElement;
 		public var uvTarget:ShaderRegisterElement;
 		//vary
@@ -184,8 +184,8 @@ package a3dparticle.animators
 			//set some const
 			var context : Context3D = stage3DProxy._context3D;
 			
-			//set zeroConst,OneConst,TwoConst
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, zeroConst.index, VERTEX_CONST, 3);
+			//set vertexZeroConst,vertexOneConst,vertexTwoConst
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexZeroConst.index, VERTEX_CONST, 3);
 			//set fragmentZeroConst,fragmentOneConst
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentZeroConst.index, FRAGMENT_CONST, 2);
 		}
@@ -214,9 +214,9 @@ package a3dparticle.animators
 			positionAttribute = new ShaderRegisterElement("va", 0);
 			//allot const register
 			timeConst = shaderRegisterCache.getFreeVertexConstant();
-			zeroConst = shaderRegisterCache.getFreeVertexConstant();
-			OneConst = shaderRegisterCache.getFreeVertexConstant();
-			TwoConst = shaderRegisterCache.getFreeVertexConstant();
+			vertexZeroConst = shaderRegisterCache.getFreeVertexConstant();
+			vertexOneConst = shaderRegisterCache.getFreeVertexConstant();
+			vertexTwoConst = shaderRegisterCache.getFreeVertexConstant();
 			if (needCameraPosition) cameraPosConst = shaderRegisterCache.getFreeVertexConstant();
 			
 			colorDefalut = shaderRegisterCache.getFreeFragmentConstant();
@@ -267,11 +267,11 @@ package a3dparticle.animators
 			_AGALVertexCode = "";
 			if (needVelocity)
 			{
-				_AGALVertexCode += "mov " + velocityTarget.toString() + "," + zeroConst.toString() + "\n";
+				_AGALVertexCode += "mov " + velocityTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			}
 			
-			_AGALVertexCode += "mov " + varyTime.toString() + ".zw," + zeroConst.toString() + "\n";
-			_AGALVertexCode += "mov " + offsetTarget.toString() + "," + zeroConst.toString() + "\n";
+			_AGALVertexCode += "mov " + varyTime.toString() + ".zw," + vertexZeroConst.toString() + "\n";
+			_AGALVertexCode += "mov " + offsetTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			_AGALVertexCode += "mov " + scaleAndRotateTarget.toString() + "," + positionAttribute.toString() + "\n";
 			var action:ActionBase;
 			for each(action in _particleActions)
@@ -316,11 +316,11 @@ package a3dparticle.animators
 				_AGALVertexCode += "mov " + uvVar.toString() + "," + uvTarget.toString() + "\n";
 			}
 			
-			_AGALVertexCode += "mov " + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + ".w," + OneConst.toString() + "\n";
+			_AGALVertexCode += "mov " + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + ".w," + vertexOneConst.toString() + "\n";
 			//if time=0,set the final position to zero.
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexSingleTemp();
 			_AGALVertexCode += "neg " + temp.toString() + "," + vertexTime.toString() + "\n";
-			_AGALVertexCode += "slt " + temp.toString() + "," + temp.toString() + "," + zeroConst.toString() + "\n";
+			_AGALVertexCode += "slt " + temp.toString() + "," + temp.toString() + "," + vertexZeroConst.toString() + "\n";
 			_AGALVertexCode += "mul " + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + "," + scaleAndRotateTarget.regName + scaleAndRotateTarget.index.toString() + "," + temp.toString() + "\n";
 			return _AGALVertexCode;
 		}

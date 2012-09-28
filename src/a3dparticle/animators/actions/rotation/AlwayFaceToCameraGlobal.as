@@ -59,7 +59,7 @@ package a3dparticle.animators.actions.rotation
 			
 			code += "mov " + sin.toString() + "," + nrmVel.toString() + ".y\n";
 			code += "mul " + cos.toString() + "," + sin.toString() + "," + sin.toString() + "\n";
-			code += "sub " + cos.toString() + "," + _animation.OneConst.toString() + "," + cos.toString() + "\n";
+			code += "sub " + cos.toString() + "," + _animation.vertexOneConst.toString() + "," + cos.toString() + "\n";
 			code += "sqt " + cos.toString() + "," + cos.toString() + "\n";
 			
 			code += "mul " + R.toString() + ".x," + cos.toString() + "," + o_y.toString() + "\n";
@@ -72,25 +72,25 @@ package a3dparticle.animators.actions.rotation
 			
 			
 			code += "abs " + R.toString() + ".y," + nrmVel.toString() + ".y\n";
-			code += "sge " + R.toString() + ".z," + R.toString() + ".y," + _animation.OneConst.toString() + "\n";
+			code += "sge " + R.toString() + ".z," + R.toString() + ".y," + _animation.vertexOneConst.toString() + "\n";
 			code += "mul " + R.toString() + ".x," + R.toString() + ".y," + nrmVel.toString() + ".y\n";
 			
 			
 			//judgu if nrmVel=(0,1,0);
-			code += "mov " + nrmVel.toString() + ".y," + _animation.zeroConst.toString() + "\n";
+			code += "mov " + nrmVel.toString() + ".y," + _animation.vertexZeroConst.toString() + "\n";
 			code += "dp3 " + sin.toString() + "," + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
-			code += "sge " + tempSingle.toString() + "," + _animation.zeroConst.toString() +"," + sin.toString() + "\n";
+			code += "sge " + tempSingle.toString() + "," + _animation.vertexZeroConst.toString() +"," + sin.toString() + "\n";
 			
-			code += "mov " + nrmVel.toString() + ".y," + _animation.zeroConst.toString() + "\n";
+			code += "mov " + nrmVel.toString() + ".y," + _animation.vertexZeroConst.toString() + "\n";
 			code += "nrm " + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
 				
 
-			code += "sub " + sin.toString() + "," +  _animation.OneConst.toString() + "," + tempSingle.toString() + "\n";
+			code += "sub " + sin.toString() + "," +  _animation.vertexOneConst.toString() + "," + tempSingle.toString() + "\n";
 			code += "mul " + sin.toString() + "," +  sin.toString() + "," + nrmVel.toString() + ".x\n";
 			
 			code += "mov " + cos.toString() + "," + nrmVel.toString() + ".z\n";
 			code += "neg " + cos.toString() + "," + cos.toString() + "\n";
-			code += "sub " + o_temp.toString() + "," +  _animation.OneConst.toString() + "," + cos.toString() + "\n";
+			code += "sub " + o_temp.toString() + "," +  _animation.vertexOneConst.toString() + "," + cos.toString() + "\n";
 			code += "mul " + o_temp.toString() + "," +  R.toString() + ".x," + tempSingle.toString() + "\n";
 			code += "add " + cos.toString() + "," +  cos.toString() + "," + o_temp.toString() + "\n";
 
