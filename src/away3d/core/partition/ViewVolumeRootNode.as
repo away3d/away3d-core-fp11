@@ -12,6 +12,7 @@ package away3d.core.partition
 	{
 		// todo: provide a better data structure to find the containing view volume faster
 		private var _viewVolumes : Vector.<ViewVolume>;
+		private var _activeVolume : ViewVolume;
 
 		public function ViewVolumeRootNode()
 		{
@@ -33,22 +34,20 @@ package away3d.core.partition
 				_viewVolumes.splice(index, 1);
 		}
 
-		override public function set showDebugBounds(value : Boolean) : void
-		{
-			var numVolumes : uint = _viewVolumes.length;
-			for (var i : uint = 0; i < numVolumes; ++i) {
-				_viewVolumes[i].showDebugBounds = value;
-			}
-		}
-
 		override public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
 			var volume : ViewVolume = getVolumeContaining(traverser.entryPoint);
-			if (!volume) {
+
+			if (!volume)
 				trace("WARNING: No view volume found for the current position.");
-				return;
+			// keep the active one if no volume is found (it may be just be a small error)
+			else if (volume != _activeVolume) {
+				if (_activeVolume) _activeVolume._active = false;
+				_activeVolume = volume;
+				if (_activeVolume) _activeVolume._active = true;
 			}
-			volume.acceptTraverser(traverser);
+
+			super.acceptTraverser(traverser);
 		}
 
 		private function getVolumeContaining(entryPoint : Vector3D) : ViewVolume

@@ -22,7 +22,7 @@ package away3d.core.partition
 		protected var _parent : NodeBase;
 		protected var _childNodes : Vector.<NodeBase>;
 		protected var _numChildNodes : uint;
-		private var _debugPrimitive : WireframePrimitiveBase;
+		protected var _debugPrimitive : WireframePrimitiveBase;
 
 		arcane var _numEntities : int;
 
@@ -118,8 +118,18 @@ package away3d.core.partition
 		 */
 		public function isInFrustum(camera : Camera3D) : Boolean
 		{
+			var inFrustum : Boolean = isInFrustumImpl(camera);
+			if (inFrustum && _debugPrimitive)
+				_debugPrimitive.pushModelViewProjection(camera);
+			return inFrustum;
+		}
+
+		protected function isInFrustumImpl(camera : Camera3D) : Boolean
+		{
 			return true;
 		}
+
+
 
 		/**
 		 * Finds the partition that contains (or should contain) the given entity.

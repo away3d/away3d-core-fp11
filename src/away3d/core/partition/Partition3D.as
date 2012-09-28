@@ -35,7 +35,7 @@ package away3d.core.partition
 
 		public function set showDebugBounds(value : Boolean) : void
 		{
-
+			_rootNode.showDebugBounds = value;
 		}
 
 		/**
@@ -46,7 +46,7 @@ package away3d.core.partition
 		 */
 		public function traverse(traverser : PartitionTraverser) : void
 		{
-			if (_updatesMade && traverser is EntityCollector && !(traverser is ShadowCasterCollector))
+			if (_updatesMade/* && traverser is EntityCollector && !(traverser is ShadowCasterCollector)*/)
 				updateEntities();
 			
 			_rootNode.acceptTraverser(traverser);

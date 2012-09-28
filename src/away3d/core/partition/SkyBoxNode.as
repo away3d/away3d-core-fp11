@@ -36,7 +36,7 @@ package away3d.core.partition
 		/**
 		 * @inheritDoc
 		 */
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
 		{
 			_skyBox.pushModelViewProjection(camera);
 			return _skyBox.bounds.isInFrustum(_skyBox.getModelViewProjectionUnsafe());

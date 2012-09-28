@@ -29,6 +29,7 @@ package away3d.core.partition
 		private var _maxX : Number;
 		private var _maxY : Number;
 		private var _maxZ : Number;
+		arcane var _active : Boolean;
 
 		/**
 		 * Creates a new ViewVolume with given dimensions. A ViewVolume is a region where the camera or a shadow casting light could reside in.
@@ -54,17 +55,25 @@ package away3d.core.partition
 
 		override public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
-			var entryPoint : Vector3D = traverser.entryPoint;
+			if (traverser.enterNode(this)) {
+				if (_debugPrimitive)
+					traverser.applyRenderable(_debugPrimitive);
 
-			var cell : ViewCell = getCellContaining(entryPoint);
+				if (!_active) return;
 
-			var visibleStatics : Vector.<EntityNode> = cell.visibleStatics;
-			var numVisibles : uint = visibleStatics.length;
-			for (var i : int = 0; i < numVisibles; ++i)
-				visibleStatics[i].acceptTraverser(traverser);
+				var entryPoint : Vector3D = traverser.entryPoint;
+
+				var cell : ViewCell = getCellContaining(entryPoint);
+
+				var visibleStatics : Vector.<EntityNode> = cell.visibleStatics;
+				var numVisibles : uint = visibleStatics.length;
+				for (var i : int = 0; i < numVisibles; ++i)
+					visibleStatics[i].acceptTraverser(traverser);
+			}
+
 		}
 
-		public function addVisibleStatic(entity : Entity, indexX : uint = 1, indexY : uint = 1, indexZ : uint = 1) : void
+		public function addVisibleStatic(entity : Entity, indexX : uint = 0, indexY : uint = 0, indexZ : uint = 0) : void
 		{
 			if (!entity.static)
 				throw new Error("Entity being added as a visible static object must have static set to true");
@@ -75,7 +84,7 @@ package away3d.core.partition
 			updateNumEntities(_numEntities+1);
 		}
 
-		public function removeVisibleStatic(entity : Entity, indexX : uint = 1, indexY : uint = 1, indexZ : uint = 1) : void
+		public function removeVisibleStatic(entity : Entity, indexX : uint = 0, indexY : uint = 0, indexZ : uint = 0) : void
 		{
 			var index : int = getCellIndex(indexX, indexY, indexZ);
 			var statics : Vector.<EntityNode> = _cells[index].visibleStatics;
@@ -100,7 +109,7 @@ package away3d.core.partition
 			_cells = new Vector.<ViewCell>(_numCellsX*_numCellsY*_numCellsZ);
 
 			if (_gridSize == -1)
-				_cells.push(new ViewCell());
+				_cells[0] = new ViewCell();
 
 			// else: do not automatically populate with cells as it may be sparse!
 		}
@@ -201,8 +210,8 @@ package away3d.core.partition
 		public function contains(entryPoint : Vector3D) : Boolean
 		{
 			return 	entryPoint.x >=  _minX && entryPoint.x <= _maxX &&
-					entryPoint.y >=  _minY && entryPoint.x <= _maxY &&
-					entryPoint.z >=  _minZ && entryPoint.x <= _maxZ;
+					entryPoint.y >=  _minY && entryPoint.y <= _maxY &&
+					entryPoint.z >=  _minZ && entryPoint.z <= _maxZ;
 		}
 
 		private function getCellContaining(entryPoint : Vector3D) : ViewCell

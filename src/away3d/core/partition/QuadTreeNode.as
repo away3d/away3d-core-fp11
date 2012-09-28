@@ -50,7 +50,7 @@ package away3d.core.partition
 		}
 
 		// todo: fix to infinite height so that height needn't be passed in constructor
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
 		{
 			var a : Number, b : Number, c : Number, d : Number;
 			var dd : Number, rr : Number;
