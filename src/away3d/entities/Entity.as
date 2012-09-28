@@ -31,6 +31,7 @@ package away3d.entities
 		
 		arcane var _pickingCollisionVO:PickingCollisionVO;
 		arcane var _pickingCollider:IPickingCollider;
+		arcane var _static:Boolean;
 
 		protected var _mvpTransformStack : Vector.<Matrix3D> = new Vector.<Matrix3D>();
 		protected var _zIndices : Vector.<Number> = new Vector.<Number>();
@@ -55,7 +56,21 @@ package away3d.entities
 		{
 			_shaderPickingDetails = value;
 		}
-		
+
+		/**
+		 * Defines whether or not the object will be moved or animated at runtime. This property is used by some partitioning systems to improve performance.
+		 * Warning: if set to true, they may not be processed by certain partition systems using static visibility lists, unless they're specifically assigned to the visibility list.
+		 */
+		public function get static() : Boolean
+		{
+			return _static;
+		}
+
+		public function set static(value : Boolean) : void
+		{
+			_static = value;
+		}
+
 		/**
 		 * Returns a unique picking collision value object for the entity.
 		 */

@@ -326,7 +326,7 @@
 			return 0;
 		}
 
-		public override function get AssetType() : String
+		public override function get assetType() : String
 		{
 			return AssetType.SEGMENT_SET;
 		}

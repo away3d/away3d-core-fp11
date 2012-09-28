@@ -15,7 +15,7 @@ package away3d.core.partition
 	 */
 	public class Partition3D
 	{
-		private var _rootNode : NodeBase;
+		protected var _rootNode : NodeBase;
 		private var _updatesMade : Boolean;
 		private var _updateQueue : EntityNode;
 

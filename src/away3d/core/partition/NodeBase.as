@@ -71,7 +71,7 @@ package away3d.core.partition
 		 *
 		 * @param node The node to be added as a child of the current node.
 		 */
-		public function addNode(node : NodeBase) : void
+		arcane function addNode(node : NodeBase) : void
 		{
 			node._parent = this;
 			_numEntities += node._numEntities;
@@ -91,7 +91,7 @@ package away3d.core.partition
 		 * Removes a child node from the tree.
 		 * @param node The child node to be removed.
 		 */
-		public function removeNode(node : NodeBase) : void
+		arcane function removeNode(node : NodeBase) : void
 		{
 			// a bit faster than splice(i, 1), works only if order is not important
 			// override item to be removed with the last in the list, then remove that last one
@@ -126,8 +126,6 @@ package away3d.core.partition
 		 */
 		public function findPartitionForEntity(entity : Entity) : NodeBase
 		{
-			// TODO: not used
-			entity = null; 
 			return this;
 		}
 
@@ -159,6 +157,21 @@ package away3d.core.partition
 		protected function createDebugBounds() : WireframePrimitiveBase
 		{
 			return null;
+		}
+
+		protected function get numEntities() : int
+		{
+			return _numEntities;
+		}
+
+		protected function updateNumEntities(value : int) : void
+		{
+			var diff : int = value - _numEntities;
+			var node : NodeBase = this;
+
+			do {
+				node._numEntities += diff;
+			} while (node = node._parent);
 		}
 	}
 }

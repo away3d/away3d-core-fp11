@@ -1,10 +1,13 @@
 package away3d.core.partition
 {
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframeCube;
 	import away3d.primitives.WireframePrimitiveBase;
+
+	use namespace arcane;
 
 	public class OctreeNode extends NodeBase
 	{
