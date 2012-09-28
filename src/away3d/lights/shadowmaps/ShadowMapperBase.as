@@ -24,10 +24,28 @@ package away3d.lights.shadowmaps
 		protected var _depthMapSize : uint = 2048;
 		protected var _light : LightBase;
 		private var _explicitDepthMap : Boolean;
+		private var _autoUpdateShadows : Boolean = true;
+		arcane var _shadowsInvalid : Boolean;
+
 
 		public function ShadowMapperBase()
 		{
 			_casterCollector = new ShadowCasterCollector();
+		}
+
+		public function get autoUpdateShadows() : Boolean
+		{
+			return _autoUpdateShadows;
+		}
+
+		public function set autoUpdateShadows(value : Boolean) : void
+		{
+			_autoUpdateShadows = value;
+		}
+
+		public function updateShadows() : void
+		{
+			_shadowsInvalid = true;
 		}
 
 		/**
@@ -102,6 +120,7 @@ package away3d.lights.shadowmaps
 		 */
 		arcane function renderDepthMap(stage3DProxy : Stage3DProxy, entityCollector : EntityCollector, renderer : DepthRenderer) : void
 		{
+			_shadowsInvalid = false;
 			updateDepthProjection(entityCollector.camera);
 			_depthMap ||= createDepthTexture();
 			drawDepthMap(_depthMap.getTextureForStage3D(stage3DProxy), entityCollector.scene, renderer);

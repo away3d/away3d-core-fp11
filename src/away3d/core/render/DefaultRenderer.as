@@ -9,6 +9,7 @@ package away3d.core.render
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
+	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
 
 	import flash.display3D.Context3DBlendFactor;
@@ -68,19 +69,22 @@ package away3d.core.render
 			var pointLights : Vector.<PointLight> = entityCollector.pointLights;
 			var len : uint, i : uint;
 			var light : LightBase;
+			var shadowMapper : ShadowMapperBase;
 
 			len = dirLights.length;
 			for (i = 0; i < len; ++i) {
 				light = dirLights[i];
-				if (light.castsShadows)
-					light.shadowMapper.renderDepthMap(_stage3DProxy, entityCollector, _depthRenderer);
+				shadowMapper = light.shadowMapper;
+				if (light.castsShadows && (shadowMapper.autoUpdateShadows || shadowMapper._shadowsInvalid))
+					shadowMapper.renderDepthMap(_stage3DProxy, entityCollector, _depthRenderer);
 			}
 
 			len = pointLights.length;
 			for (i = 0; i < len; ++i) {
 				light = pointLights[i];
-				if (light.castsShadows)
-					light.shadowMapper.renderDepthMap(_stage3DProxy, entityCollector, _distanceRenderer);
+				shadowMapper = light.shadowMapper;
+				if (light.castsShadows && (shadowMapper.autoUpdateShadows || shadowMapper._shadowsInvalid))
+					shadowMapper.renderDepthMap(_stage3DProxy, entityCollector, _distanceRenderer);
 			}
 		}
 
