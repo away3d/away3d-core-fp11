@@ -27,8 +27,8 @@ package a3dparticle.animators
 	{
 		public static const POST_PRIORITY:int = 9;
 		
-		private static const VERTEX_CONST:Vector.<Number> = Vector.<Number>([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2]);
-		private static const FRAGMENT_CONST:Vector.<Number> = Vector.<Number>([0, 0, 0, 0, 1, 1, 1, 1]);
+		private static const VERTEX_CONST:Vector.<Number> = Vector.<Number>([0, 1, 2, 0]);
+		private static const FRAGMENT_CONST:Vector.<Number> = Vector.<Number>([0, 1, 0, 0]);
 		
 		private var _hasGen:Boolean;
 		
@@ -185,9 +185,9 @@ package a3dparticle.animators
 			var context : Context3D = stage3DProxy._context3D;
 			
 			//set vertexZeroConst,vertexOneConst,vertexTwoConst
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexZeroConst.index, VERTEX_CONST, 3);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexZeroConst.index, VERTEX_CONST, 1);
 			//set fragmentZeroConst,fragmentOneConst
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentZeroConst.index, FRAGMENT_CONST, 2);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, fragmentZeroConst.index, FRAGMENT_CONST, 1);
 		}
 		
 		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
@@ -215,13 +215,15 @@ package a3dparticle.animators
 			//allot const register
 			timeConst = shaderRegisterCache.getFreeVertexConstant();
 			vertexZeroConst = shaderRegisterCache.getFreeVertexConstant();
-			vertexOneConst = shaderRegisterCache.getFreeVertexConstant();
-			vertexTwoConst = shaderRegisterCache.getFreeVertexConstant();
+			vertexZeroConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "x");
+			vertexOneConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "y");
+			vertexTwoConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "z");
 			if (needCameraPosition) cameraPosConst = shaderRegisterCache.getFreeVertexConstant();
 			
 			colorDefalut = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
-			fragmentOneConst = shaderRegisterCache.getFreeFragmentConstant();
+			fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
+			fragmentOneConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "y");
 			//allot attribute register
 			if (needUV)
 			{
