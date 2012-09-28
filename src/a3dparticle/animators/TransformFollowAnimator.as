@@ -178,7 +178,7 @@ package a3dparticle.animators
 			
 			for (var i:uint = 0; i < data.length; i++)
 			{
-				var k:Number = (_absoluteTime-data[i].startTime) / data[i].lifeTime;
+				var k:Number = (_absoluteTime / 1000 - data[i].startTime) / data[i].lifeTime;
 				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
 				if ( _followTarget && t - (_absoluteTime-_lastTime)/1000 <= 0)
 				{
