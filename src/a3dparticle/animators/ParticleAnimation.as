@@ -28,7 +28,7 @@ package a3dparticle.animators
 		public static const POST_PRIORITY:int = 9;
 		
 		private static const VERTEX_CONST:Vector.<Number> = Vector.<Number>([0, 1, 2, 0]);
-		private static const FRAGMENT_CONST:Vector.<Number> = Vector.<Number>([0, 1, 0, 0]);
+		private static const FRAGMENT_CONST:Vector.<Number> = Vector.<Number>([0, 1, 1 / 255, 0]);
 		
 		private var _hasGen:Boolean;
 		
@@ -81,6 +81,7 @@ package a3dparticle.animators
 		public var uvVar:ShaderRegisterElement;
 		public var fragmentZeroConst:ShaderRegisterElement;
 		public var fragmentOneConst:ShaderRegisterElement;
+		public var fragmentMinConst:ShaderRegisterElement;
 		public var fadeFactorConst:ShaderRegisterElement;
 		
 		
@@ -224,6 +225,7 @@ package a3dparticle.animators
 			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
 			fragmentOneConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "y");
+			fragmentMinConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "z");
 			//allot attribute register
 			if (needUV)
 			{

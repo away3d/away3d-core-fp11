@@ -27,13 +27,15 @@ package a3dparticle.particle
 		private var _alphaThreshold:Number;
 		private var _cutOffData : Vector.<Number>;
 		private var cutOffReg:ShaderRegisterElement;
+		private var _alphaPremultiplied:Boolean;
 		
-		public function ParticleBitmapMaterial(bitmap:BitmapData, smooth:Boolean = true, repeat : Boolean = false, mipmap : Boolean = true, alphaThreshold:Number = 0)
+		public function ParticleBitmapMaterial(bitmap:BitmapData, smooth:Boolean = true, repeat : Boolean = false, mipmap : Boolean = true, alphaThreshold:Number = 0, alphaPremultiplied:Boolean = true)
 		{
 			this.numUsedTextures = 1;
 			this._smooth = smooth;
 			this._repeat = repeat;
 			this._mipmap = mipmap;
+			this._alphaPremultiplied = alphaPremultiplied;
 			_texture = new BitmapTexture(bitmap);
 			_cutOffData = new Vector.<Number>(4, true);
 			
@@ -71,13 +73,21 @@ package a3dparticle.particle
 				else tex = "<2d," + wrap + "," + "nearest,nomip>";
 			}
 			code += "tex " + _particleAnimation.colorTarget.toString() + "," + _particleAnimation.uvVar.toString() + "," + _particleAnimation.textSample.toString() + tex + "\n";
+			
+			var temp:ShaderRegisterElement;
 			if (_alphaThreshold > 0)
 			{
 				cutOffReg = _particleAnimation.shaderRegisterCache.getFreeFragmentConstant();
-				var temp:ShaderRegisterElement = _particleAnimation.shaderRegisterCache.getFreeFragmentSingleTemp();
+				temp = _particleAnimation.shaderRegisterCache.getFreeFragmentSingleTemp();
 				code += "sub " + temp +", " +  _particleAnimation.colorTarget.toString() + ".w, " + cutOffReg.toString() + ".x\n";
 				code += "kil " + temp +"\n";
             }
+			if (_alphaPremultiplied)
+			{
+				temp = _particleAnimation.shaderRegisterCache.getFreeFragmentSingleTemp();
+				code += "add " + temp + ", " + _particleAnimation.colorTarget.toString() + ".w, " + _particleAnimation.fragmentMinConst.toString() + "\n" +
+						"div " + _particleAnimation.colorTarget.toString() + ".xyz, " + _particleAnimation.colorTarget.toString() + ".xyz, " + temp + "\n";
+			}
 			return code;
 		}
 		
