@@ -63,6 +63,7 @@ package a3dparticle
 			clone.alwaysInFrustum = alwaysInFrustum;
 			
 			if (_isStart) clone.start();
+			clone.time = time;
 			for (var j:uint = 0; j < _subContainers.length; j++)
 			{
 				clone._subContainers[j] = _subContainers[j].clone(clone);
