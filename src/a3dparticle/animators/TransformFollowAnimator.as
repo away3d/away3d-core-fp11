@@ -195,9 +195,9 @@ package a3dparticle.animators
 			}
 			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
 			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 6);
-			var context : Context3D = stage3DProxy.context3D;
-			context.setVertexBufferAt(_followAction.offsetAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
-			context.setVertexBufferAt(_followAction.rotationAttribute.index, buffer, 3, Context3DVertexBufferFormat.FLOAT_3);
+
+			stage3DProxy.setSimpleVertexBuffer(_followAction.offsetAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 3);
 		}
 		
 		private function getBuffer(stage3DProxy:Stage3DProxy, subContainer:SubContainer):VertexBuffer3D
