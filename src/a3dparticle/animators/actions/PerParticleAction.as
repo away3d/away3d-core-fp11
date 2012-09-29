@@ -40,24 +40,12 @@ package a3dparticle.animators.actions
 		
 		public function getExtraData(subContainer:SubContainer):Vector.<Number>
 		{
-			var t:Vector.<Number>;
-			if (!(t=subContainer.extraDatas[_name]))
-			{
-				t = subContainer.extraDatas[_name] = new Vector.<Number>;
-			}
-			return t;
+			return subContainer.getExtraData(_name);
 		}
 		
 		public function getExtraBuffer(stage3DProxy : Stage3DProxy,subContainer:SubContainer) : VertexBuffer3D
 		{
-			var t:VertexBuffer3D;
-			if (!(t=subContainer.extraBuffers[_name]) || context3D != stage3DProxy.context3D)
-			{
-				t = subContainer.extraBuffers[_name] = stage3DProxy._context3D.createVertexBuffer(subContainer.extraDatas[_name].length / dataLenght, dataLenght);
-				t.uploadFromVector(subContainer.extraDatas[_name], 0, subContainer.extraDatas[_name].length / dataLenght);
-				context3D = stage3DProxy.context3D;
-			}
-			return t;
+			return subContainer.getExtraBuffer(stage3DProxy, _name, dataLenght);
 		}
 		
 	}

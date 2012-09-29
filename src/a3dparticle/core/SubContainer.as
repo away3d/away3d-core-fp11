@@ -125,45 +125,27 @@ package a3dparticle.core
 		
 		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._vertexBuffer || _shareAtt._vertexContex3D != stage3DProxy.context3D)
-			{
-				_shareAtt._vertexBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._vertices.length/3, 3);
-				_shareAtt._vertexBuffer.uploadFromVector(_shareAtt._vertices, 0, _shareAtt._vertices.length / 3);
-				_shareAtt._vertexContex3D = stage3DProxy.context3D;
-			}
-			return _shareAtt._vertexBuffer;
+			return _shareAtt.getVertexBuffer(stage3DProxy);
 		}
 		
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
-			if (!_shareAtt._indexBuffer || _shareAtt._indexContex3D != stage3DProxy.context3D)
-			{
-				_shareAtt._indexBuffer = stage3DProxy._context3D.createIndexBuffer(_shareAtt._indices.length);
-				_shareAtt._indexBuffer.uploadFromVector(_shareAtt._indices, 0, _shareAtt._indices.length);
-				_shareAtt._indexContex3D = stage3DProxy.context3D;
-			}
-			return _shareAtt._indexBuffer;
+			return _shareAtt.getIndexBuffer(stage3DProxy);
 		}
 		
 		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			if (!_shareAtt._uvBuffer || _shareAtt._uvContex3D != stage3DProxy.context3D)
-			{
-				_shareAtt._uvBuffer = stage3DProxy._context3D.createVertexBuffer(_shareAtt._uvData.length/2, 2);
-				_shareAtt._uvBuffer.uploadFromVector(_shareAtt._uvData, 0, _shareAtt._uvData.length / 2);
-				_shareAtt._uvContex3D = stage3DProxy.context3D;
-			}
-			return _shareAtt._uvBuffer;
+			return _shareAtt.getUVBuffer(stage3DProxy);
 		}
 		
-		public function get extraBuffers() : Object
+		public function getExtraBuffer(stage3DProxy:Stage3DProxy, bufferName:String, dataLenght:uint) : VertexBuffer3D
 		{
-			return _shareAtt._extraBuffers;
+			return _shareAtt.getExtraBuffer(stage3DProxy, bufferName, dataLenght);
 		}
 		
-		public function get extraDatas():Object
+		public function getExtraData(bufferName:String):Vector.<Number>
 		{
-			return _shareAtt._extraDatas;
+			return _shareAtt.getExtraData(bufferName);
 		}
 		
 		public function get indexData():Vector.<uint>
@@ -241,23 +223,25 @@ package a3dparticle.core
 	}
 }
 
+import away3d.core.managers.Stage3DProxy;
 import flash.display3D.Context3D;
 import flash.display3D.IndexBuffer3D;
 import flash.display3D.VertexBuffer3D;
 
 class cloneShareAtt
 {
-	public var _vertexBuffer : VertexBuffer3D;
-	public var _indexBuffer : IndexBuffer3D;
-	public var _uvBuffer : VertexBuffer3D;
+	private var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
+	private var _indexBuffer : Vector.<IndexBuffer3D> = new Vector.<IndexBuffer3D>(8, true);
+	private var _uvBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 	public var _vertices : Vector.<Number>=new Vector.<Number>();
 	public var _indices : Vector.<uint> = new Vector.<uint>;
 	public var _uvData:Vector.<Number> = new Vector.<Number>();
-	public var _vertexContex3D:Context3D;
-	public var _indexContex3D:Context3D;
-	public var _uvContex3D:Context3D;
+	private var _vertexContex3D:Vector.<Context3D> = new Vector.<Context3D>(8, true);
+	private var _indexContex3D:Vector.<Context3D> = new Vector.<Context3D>(8, true);
+	private var _uvContex3D:Vector.<Context3D> = new Vector.<Context3D>(8, true);
 	public var _extraDatas:Object = { };
-	public var _extraBuffers:Object = { };
+	private var _extraBuffers:Object = { };
+	private var _extraContex3Ds:Object = { };
 	
 	private static var currentId:int;
 	private var _geometryId : int;
@@ -269,4 +253,79 @@ class cloneShareAtt
 	{
 		return _geometryId;
 	}
+	
+	public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+	{
+		var contextIndex : int = stage3DProxy.stage3DIndex;
+		var context : Context3D = stage3DProxy.context3D;
+		var t : VertexBuffer3D = _vertexBuffer[contextIndex];
+		if (!t || _vertexContex3D[contextIndex] != context)
+		{
+			t = _vertexBuffer[contextIndex] = context.createVertexBuffer(_vertices.length / 3, 3);
+			t.uploadFromVector(_vertices, 0, _vertices.length / 3);
+			_vertexContex3D[contextIndex] = context;
+		}
+		return t;
+	}
+	
+	public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
+	{
+		var contextIndex : int = stage3DProxy.stage3DIndex;
+		var context : Context3D = stage3DProxy.context3D;
+		var t : IndexBuffer3D = _indexBuffer[contextIndex];
+		if (!t || _indexContex3D[contextIndex] != context)
+		{
+			t = _indexBuffer[contextIndex] = context.createIndexBuffer(_indices.length);
+			t.uploadFromVector(_indices, 0, _indices.length);
+			_indexContex3D[contextIndex] = context;
+		}
+		return t;
+	}
+	
+	public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+	{
+		var contextIndex : int = stage3DProxy.stage3DIndex;
+		var context : Context3D = stage3DProxy.context3D;
+		var t : VertexBuffer3D = _uvBuffer[contextIndex];
+		if (!t || _uvContex3D[contextIndex] != context)
+		{
+			t = _uvBuffer[contextIndex] = context.createVertexBuffer(_uvData.length / 2, 2);
+			t.uploadFromVector(_uvData, 0, _uvData.length / 2);
+			_uvContex3D[contextIndex] != context;
+		}
+		return t;
+	}
+	
+	public function getExtraBuffer(stage3DProxy:Stage3DProxy, bufferName:String, dataLenght:uint) : VertexBuffer3D
+	{
+		var buffer:Vector.<VertexBuffer3D> = _extraBuffers[bufferName];
+		var context3D:Vector.<Context3D> = _extraContex3Ds[bufferName];
+		if (!buffer)
+		{
+			buffer = _extraBuffers[bufferName] = new Vector.<VertexBuffer3D>(8, true);
+			context3D = _extraContex3Ds[bufferName] = new Vector.<Context3D>(8, true);
+		}
+		var contextIndex : int = stage3DProxy.stage3DIndex;
+		var context : Context3D = stage3DProxy.context3D;
+		var t : VertexBuffer3D = buffer[contextIndex];
+		if (!t || context3D[contextIndex] != context)
+		{
+			var data:Vector.<Number> = getExtraData(bufferName);
+			t = buffer[contextIndex] = context.createVertexBuffer(data.length / dataLenght, dataLenght);
+			t.uploadFromVector(data, 0, data.length / dataLenght);
+			context3D[contextIndex] = context;
+		}
+		return t;
+	}
+	
+	public function getExtraData(bufferName:String):Vector.<Number>
+	{
+		var t : Vector.<Number> = _extraDatas[bufferName];
+		if (!t)
+		{
+			t = _extraDatas[bufferName] = new Vector.<Number>();
+		}
+		return t;
+	}
+
 }
