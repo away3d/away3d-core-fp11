@@ -4,6 +4,8 @@ package away3d.core.partition
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframePrimitiveBase;
 
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 
 	public class ViewVolumePartition extends Partition3D
@@ -29,5 +31,6 @@ package away3d.core.partition
 		{
 			ViewVolumeRootNode(_rootNode).removeViewVolume(viewVolume);
 		}
+
 	}
 }

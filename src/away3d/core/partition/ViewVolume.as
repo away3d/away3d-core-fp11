@@ -16,7 +16,7 @@ package away3d.core.partition
 		private var _width : Number;
 		private var _height : Number;
 		private var _depth : Number;
-		private var _gridSize : Number;
+		private var _cellSize : Number;
 		private var _numCellsX : uint;
 		private var _numCellsY : uint;
 		private var _numCellsZ : uint;
@@ -36,9 +36,9 @@ package away3d.core.partition
 		 *
 		 * @param minBound The minimum boundaries of the view volume (the bottom-left-near corner)
 		 * @param maxBound The maximum boundaries of the view volume (the top-right-far corner)
-		 * @param gridSize The size of cell subdivisions for the view volume. The default value is -1, meaning the view volume will not be subdivided. This is the value that should usually be used when setting visibility info manually.
+		 * @param cellSize The size of cell subdivisions for the view volume. The default value is -1, meaning the view volume will not be subdivided. This is the value that should usually be used when setting visibility info manually.
 		 */
-		public function ViewVolume(minBound : Vector3D, maxBound : Vector3D, gridSize : Number = -1)
+		public function ViewVolume(minBound : Vector3D, maxBound : Vector3D, cellSize : Number = -1)
 		{
 			_minX = minBound.x;
 			_minY = minBound.y;
@@ -49,7 +49,7 @@ package away3d.core.partition
 			_width = _maxX - _minX;
 			_height = _maxY - _minY;
 			_depth = _maxZ - _minZ;
-			_gridSize = gridSize;
+			_cellSize = cellSize;
 			initCells();
 		}
 
@@ -95,12 +95,12 @@ package away3d.core.partition
 
 		private function initCells() : void
 		{
-			if (_gridSize == -1)
+			if (_cellSize == -1)
 				_numCellsX = _numCellsY = _numCellsZ = 1;
 			else {
-				_numCellsX = Math.ceil(_width/_numCellsX);
-				_numCellsY = Math.ceil(_height/_numCellsY);
-				_numCellsZ = Math.ceil(_depth/_numCellsZ);
+				_numCellsX = Math.ceil(_width/_cellSize);
+				_numCellsY = Math.ceil(_height/_cellSize);
+				_numCellsZ = Math.ceil(_depth/_cellSize);
 			}
 
 			_yCellStride = _numCellsX;
@@ -108,7 +108,7 @@ package away3d.core.partition
 
 			_cells = new Vector.<ViewCell>(_numCellsX*_numCellsY*_numCellsZ);
 
-			if (_gridSize == -1)
+			if (_cellSize == -1)
 				_cells[0] = new ViewCell();
 
 			// else: do not automatically populate with cells as it may be sparse!
@@ -218,12 +218,12 @@ package away3d.core.partition
 		{
 			var cellIndex : uint;
 
-			if (_gridSize == -1)
+			if (_cellSize == -1)
 				cellIndex = 0;
 			else {
-				var indexX : int = (entryPoint.x - _minX) / _width * _numCellsX;
-				var indexY : int = (entryPoint.y - _minY) / _height * _numCellsY;
-				var indexZ : int = (entryPoint.z - _minZ) / _depth * _numCellsZ;
+				var indexX : int = (entryPoint.x - _minX) / _cellSize;
+				var indexY : int = (entryPoint.y - _minY) / _cellSize;
+				var indexZ : int = (entryPoint.z - _minZ) / _cellSize;
 				cellIndex = indexX + indexY * _yCellStride + indexZ * _zCellStride;
 			}
 			return _cells[cellIndex];
