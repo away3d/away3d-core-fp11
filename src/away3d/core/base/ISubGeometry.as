@@ -43,7 +43,7 @@ package away3d.core.base
 		/**
 		 * The distance between two secondary UV elements
 		 */
-		function get SecondaryUVStride() : uint;
+		function get secondaryUVStride() : uint;
 
 		/**
 		 * Assigns the attribute stream for vertex positions.
@@ -126,7 +126,7 @@ package away3d.core.base
 		/**
 		 * The offset into SecondaryUVData vector where the UVs are placed
 		 */
-		function get SecondaryUVOffset() : int;
+		function get secondaryUVOffset() : int;
 
 
 		/**

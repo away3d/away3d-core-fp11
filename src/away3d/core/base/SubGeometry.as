@@ -436,7 +436,7 @@
 			return 2;
 		}
 
-		public function get SecondaryUVStride() : uint
+		public function get secondaryUVStride() : uint
 		{
 			return 2;
 		}
@@ -461,7 +461,7 @@
 			return 0;
 		}
 
-		public function get SecondaryUVOffset() : int
+		public function get secondaryUVOffset() : int
 		{
 			return 0;
 		}

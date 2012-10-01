@@ -11,6 +11,8 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
 
+	import flash.events.Event;
+
 	use namespace arcane;
 
 	public class CascadeShadowMapMethod extends ShadowMapMethodBase
@@ -33,7 +35,22 @@ package away3d.materials.methods
 			if (!_cascadeShadowMapper)
 				throw new Error("NearShadowMapMethod requires a light that has a CascadeShadowMapper instance assigned to shadowMapper.");
 
-			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_cascadeShadowMapper.addEventListener(Event.CHANGE, onCascadeChange, false, 0, true);
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+		}
+
+		public function get baseMethod() : SimpleShadowMapMethodBase
+		{
+			return _baseMethod;
+		}
+
+		public function set baseMethod(value : SimpleShadowMapMethodBase) : void
+		{
+			if (_baseMethod == value) return;
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = value;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+			invalidateShaderProgram();
 		}
 
 		override arcane function initVO(vo : MethodVO) : void
@@ -186,11 +203,9 @@ package away3d.materials.methods
 			vertexData[vertexIndex + 3] = -_epsilon;
 
 			var numCascades : int = _cascadeShadowMapper.numCascades;
-			var k : int = numCascades;
-
 			vertexIndex += 4;
-			for (var i : uint = 0; i < numCascades; ++i) {
-				_cascadeShadowMapper.getDepthProjections(--k).copyRawDataTo(vertexData, vertexIndex, true);
+			for (var k : int = numCascades-1; k >= 0; --k) {
+				_cascadeShadowMapper.getDepthProjections(k).copyRawDataTo(vertexData, vertexIndex, true);
 				vertexIndex += 16;
 			}
 
@@ -204,6 +219,11 @@ package away3d.materials.methods
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 
+		}
+
+		private function onCascadeChange(event : Event) : void
+		{
+			invalidateShaderProgram();
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

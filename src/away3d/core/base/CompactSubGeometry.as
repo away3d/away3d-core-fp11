@@ -257,7 +257,7 @@ package away3d.core.base
 		}
 
 
-		public function get SecondaryUVStride() : uint
+		public function get secondaryUVStride() : uint
 		{
 			return 13;
 		}
@@ -282,7 +282,7 @@ package away3d.core.base
 			return 9;
 		}
 
-		public function get SecondaryUVOffset() : int
+		public function get secondaryUVOffset() : int
 		{
 			return 11;
 		}

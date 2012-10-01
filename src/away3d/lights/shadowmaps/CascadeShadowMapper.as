@@ -8,13 +8,16 @@ package away3d.lights.shadowmaps
 	import away3d.core.render.DepthRenderer;
 	import away3d.lights.DirectionalLight;
 	import flash.display3D.textures.TextureBase;
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
+	import flash.events.IEventDispatcher;
 	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
-	public class CascadeShadowMapper extends ShadowMapperBase
+	public class CascadeShadowMapper extends ShadowMapperBase implements IEventDispatcher
 	{
 		protected var _scissorRects : Vector.<Rectangle>;
 		private var _scissorRectsInvalid : Boolean = true;
@@ -31,11 +34,14 @@ package away3d.lights.shadowmaps
 
 		private static var _calcMatrix : Matrix3D = new Matrix3D();
 
+		private var _changeDispatcher : EventDispatcher;
+
 		public function CascadeShadowMapper(numCascades : uint = 3)
 		{
 			super();
 			if (numCascades < 1 || numCascades > 4) throw new Error("numCascades must be an integer between 1 and 4");
 			_numCascades = numCascades;
+			_changeDispatcher = new EventDispatcher(this);
 			init();
 		}
 
@@ -62,7 +68,7 @@ package away3d.lights.shadowmaps
 		private function init() : void
 		{
 			_localFrustum = new Vector.<Number>(8 * 3);
-			_splitRatios = new Vector.<Number>(4, true);
+			_splitRatios = new Vector.<Number>(_numCascades, true);
 
 			var s : Number = 1;
 			for (var i : int = _numCascades-1; i >= 0; --i) {
@@ -108,6 +114,16 @@ package away3d.lights.shadowmaps
 		public function get numCascades() : int
 		{
 			return _numCascades;
+		}
+
+		public function set numCascades(value : int) : void
+		{
+			if (value == _numCascades) return;
+			if (value < 1 || value > 4) throw new Error("numCascades must be an integer between 1 and 4");
+			_numCascades = value;
+			invalidateScissorRects();
+			init();
+			dispatchEvent(new Event(Event.CHANGE));
 		}
 
 		override protected function drawDepthMap(target : TextureBase, scene : Scene3D, renderer : DepthRenderer) : void
@@ -168,9 +184,9 @@ package away3d.lights.shadowmaps
 			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
 			var depthCam : Camera3D = _depthCameras[0];
 			depthCam.transform = _light.sceneTransform;
-			depthCam.x = viewCamera.x - dir.x * _lightOffset;
-			depthCam.y = viewCamera.y - dir.y * _lightOffset;
-			depthCam.z = viewCamera.z - dir.z * _lightOffset;
+			depthCam.x = -dir.x * _lightOffset;
+			depthCam.y = -dir.y * _lightOffset;
+			depthCam.z = -dir.z * _lightOffset;
 
 			_calcMatrix.copyFrom(depthCam.inverseSceneTransform);
 			_calcMatrix.prepend(viewCamera.sceneTransform);
@@ -181,7 +197,6 @@ package away3d.lights.shadowmaps
 		private function updateProjectionPartition(matrix : Matrix3D, minRatio : Number, maxRatio : Number, texOffsetX : Number, texOffsetY : Number) : void
 		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			var d : Number;
 			var x1 : Number, y1 : Number, z1 : Number;
 			var x2 : Number, y2 : Number, z2 : Number;
 			var xN : Number, yN : Number, zN : Number;
@@ -203,45 +218,75 @@ package away3d.lights.shadowmaps
 				y2 = _localFrustum[j++] - y1;
 				zF = _localFrustum[j++];
 				xN = x1 + x2*minRatio;
-				xF = x1 + x2*maxRatio;
 				yN = y1 + y2*minRatio;
+				xF = x1 + x2*maxRatio;
 				yF = y1 + y2*maxRatio;
 				if (xN < minX) minX = xN;
 				if (xN > maxX) maxX = xN;
 				if (yN < minY) minY = yN;
 				if (yN > maxY) maxY = yN;
-				if (zN < minZ) minZ = zN;
 				if (zN > maxZ) maxZ = zN;
 				if (xF < minX) minX = xF;
 				if (xF > maxX) maxX = xF;
 				if (yF < minY) minY = yF;
 				if (yF > maxY) maxY = yF;
-				if (zF < minZ) minZ = zF;
 				if (zF > maxZ) maxZ = zF;
 			}
 
-			// counter shadow map swimming
-			scaleX = 64 / Math.ceil((maxX - minX)*32);
-			scaleY = 64 / Math.ceil((maxY - minY)*32);
+			minZ = 10;
+
+			var quantizeFactor : Number = 128;
+			var invQuantizeFactor : Number = 1/quantizeFactor;
+
+			scaleX = 2*invQuantizeFactor/Math.ceil((maxX - minX)*invQuantizeFactor);
+			scaleY = 2*invQuantizeFactor/Math.ceil((maxY - minY)*invQuantizeFactor);
+
 			offsX = Math.ceil(-.5*(maxX + minX)*scaleX*halfSize) / halfSize;
 			offsY = Math.ceil(-.5*(maxY + minY)*scaleY*halfSize) / halfSize;
 
-			minZ = 10;
+			var d : Number = 1/(maxZ - minZ);
 
-			d = 1 / (maxZ - minZ);
-			raw[0] = raw[5] = raw[15] = 1;
+			raw[0] = scaleX;
+			raw[5] = scaleY;
 			raw[10] = d;
+			raw[12] = offsX;
+			raw[13] = offsY;
 			raw[14] = -minZ * d;
-			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = raw[12] = raw[13] = 0;
+			raw[15] = 1;
+			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;
 
-			// todo: optimize this
 			matrix.copyRawDataFrom(raw);
-			matrix.prependTranslation(offsX, offsY, 0);
-			matrix.prependScale(scaleX, scaleY, 1);
-			// need some padding for filtering
 			matrix.appendScale(.96, .96, 1);
 			matrix.appendTranslation(texOffsetX, texOffsetY, 0);
 			matrix.appendScale(.5, .5, 1);
+
+//			_projectionXScales[index] = scaleX*.48;	// *.96*.5
+//			_projectionYScales[index] = scaleY*.48;
+		}
+
+		public function addEventListener(type : String, listener : Function, useCapture : Boolean = false, priority : int = 0, useWeakReference : Boolean = false) : void
+		{
+			_changeDispatcher.addEventListener(type, listener, useCapture, priority, useWeakReference);
+		}
+
+		public function removeEventListener(type : String, listener : Function, useCapture : Boolean = false) : void
+		{
+			_changeDispatcher.removeEventListener(type, listener, useCapture);
+		}
+
+		public function dispatchEvent(event : Event) : Boolean
+		{
+			return _changeDispatcher.dispatchEvent(event);
+		}
+
+		public function hasEventListener(type : String) : Boolean
+		{
+			return _changeDispatcher.hasEventListener(type);
+		}
+
+		public function willTrigger(type : String) : Boolean
+		{
+			return _changeDispatcher.willTrigger(type);
 		}
 	}
 }
