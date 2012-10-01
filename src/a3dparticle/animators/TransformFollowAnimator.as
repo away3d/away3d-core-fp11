@@ -1,5 +1,6 @@
 package a3dparticle.animators
 {
+	import a3dparticle.animators.actions.FollowingItem;
 	import a3dparticle.animators.actions.TransformFollowAction;
 	import a3dparticle.animators.ParticleAnimation;
 	import a3dparticle.core.SubContainer;
@@ -27,6 +28,8 @@ package a3dparticle.animators
 		
 		private var _offset:Boolean;
 		private var _rotation:Boolean;
+		
+		private var _newBuffer:Boolean;
 		
 		private var _bufferDict:Dictionary=new Dictionary();
 		private var _context3DDict:Dictionary = new Dictionary();
@@ -104,28 +107,42 @@ package a3dparticle.animators
 			var position : Vector3D = new Vector3D();
 			if (_followTarget) position = _followTarget.position.clone();
 			
-			var data:Vector.<Object> = _followAction.particlesData[subContainer.shareAtt];
-			var last:Object = data[data.length - 1];
-			if (!_followData[subContainer.shareAtt])
+			var data:Vector.<FollowingItem> = _followAction.particlesData[subContainer.shareAtt];
+			var last:FollowingItem = data[data.length - 1];
+			
+			var temp:Vector.<Number> = _followData[subContainer.shareAtt];
+			if (!temp)
 			{
-				_followData[subContainer.shareAtt] = new Vector.<Number>((last.start + last.num) * 3, true);
+				temp = _followData[subContainer.shareAtt] = new Vector.<Number>((last.start + last.num) * 3, true);
 			}
+			var changed:Boolean = false;
+			
 			for (var i:uint = 0; i < data.length; i++)
 			{
 				var k:Number = (_absoluteTime / 1000 - data[i].startTime) / data[i].lifeTime;
 				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
 				if ( _followTarget && t - (_absoluteTime-_lastTime)/1000 <= 0)
 				{
-					for (var j:uint = 0; j < data[i].num; j++)
+					var inc:int = data[i].start * 3;
+					
+					if (temp[inc] != position.x || temp[inc + 1] != position.y || temp[inc + 2] != position.z)
 					{
-						_followData[subContainer.shareAtt][(data[i].start + j) * 3] = position.x;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 3 + 1] = position.y;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 3 + 2] = position.z;
+						changed = true;
+						for (var j:uint = 0; j < data[i].num; j++)
+						{
+							temp[inc++] = position.x;
+							temp[inc++] = position.y;
+							temp[inc++] = position.z;
+						}
 					}
 				}
 			}
 			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
-			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 3);
+			if (changed || _newBuffer)
+			{
+				buffer.uploadFromVector(temp, 0, temp.length / 3);
+				_newBuffer = false;
+			}
 			stage3DProxy.setSimpleVertexBuffer(_followAction.offsetAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
 		
@@ -135,12 +152,15 @@ package a3dparticle.animators
 			if (_followTarget) euler = _followTarget.eulers.clone();
 			euler.scaleBy(MathConsts.DEGREES_TO_RADIANS);
 			
-			var data:Vector.<Object> = _followAction.particlesData[subContainer.shareAtt];
-			var last:Object = data[data.length - 1];
-			if (!_followData[subContainer.shareAtt])
+			var data:Vector.<FollowingItem> = _followAction.particlesData[subContainer.shareAtt];
+			var last:FollowingItem = data[data.length - 1];
+			
+			var temp:Vector.<Number> = _followData[subContainer.shareAtt];
+			if (!temp)
 			{
-				_followData[subContainer.shareAtt] = new Vector.<Number>((last.start + last.num) * 3, true);
+				temp = _followData[subContainer.shareAtt] = new Vector.<Number>((last.start + last.num) * 3, true);
 			}
+			var changed:Boolean = false;
 			
 			for (var i:uint = 0; i < data.length; i++)
 			{
@@ -148,16 +168,26 @@ package a3dparticle.animators
 				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
 				if ( _followTarget && t - (_absoluteTime-_lastTime)/1000 <= 0)
 				{
-					for (var j:uint = 0; j < data[i].num; j++)
+					var inc:int = data[i].start * 3;
+					
+					if (temp[inc] != euler.x || temp[inc + 1] != euler.y || temp[inc + 2] != euler.z)
 					{
-						_followData[subContainer.shareAtt][(data[i].start + j) * 3] = euler.x;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 3 + 1] = euler.y;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 3 + 2] = euler.z;
+						changed = true;
+						for (var j:uint = 0; j < data[i].num; j++)
+						{
+							temp[inc++] = euler.x;
+							temp[inc++] = euler.y;
+							temp[inc++] = euler.z;
+						}
 					}
 				}
 			}
 			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
-			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 3);
+			if (changed || _newBuffer)
+			{
+				buffer.uploadFromVector(temp, 0, temp.length / 3);
+				_newBuffer = false;
+			}
 			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 		}
 		
@@ -169,12 +199,15 @@ package a3dparticle.animators
 			if (_followTarget) euler = _followTarget.eulers.clone();
 			euler.scaleBy(MathConsts.DEGREES_TO_RADIANS);
 			
-			var data:Vector.<Object> = _followAction.particlesData[subContainer.shareAtt];
-			var last:Object = data[data.length - 1];
-			if (!_followData[subContainer.shareAtt])
+			var data:Vector.<FollowingItem> = _followAction.particlesData[subContainer.shareAtt];
+			var last:FollowingItem = data[data.length - 1];
+			
+			var temp:Vector.<Number> = _followData[subContainer.shareAtt];
+			if (!temp)
 			{
-				_followData[subContainer.shareAtt] = new Vector.<Number>((last.start + last.num) * 6, true);
+				temp = _followData[subContainer.shareAtt] = new Vector.<Number>((last.start + last.num) * 6, true);
 			}
+			var changed:Boolean = false;
 			
 			for (var i:uint = 0; i < data.length; i++)
 			{
@@ -182,19 +215,30 @@ package a3dparticle.animators
 				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
 				if ( _followTarget && t - (_absoluteTime-_lastTime)/1000 <= 0)
 				{
-					for (var j:uint = 0; j < data[i].num; j++)
+					var inc:int = data[i].start * 6;
+					if (temp[inc] != position.x || temp[inc + 1] != position.y || temp[inc + 2] != position.z ||
+						temp[inc + 3] != euler.x || temp[inc + 4] != euler.y || temp[inc + 5] != euler.z)
 					{
-						_followData[subContainer.shareAtt][(data[i].start + j) * 6] = position.x;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 6 + 1] = position.y;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 6 + 2] = position.z;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 6 + 3] = euler.x;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 6 + 4] = euler.y;
-						_followData[subContainer.shareAtt][(data[i].start + j) * 6 + 5] = euler.z;
+						changed = true;
+						for (var j:uint = 0; j < data[i].num; j++)
+						{
+							temp[inc++] = position.x;
+							temp[inc++] = position.y;
+							temp[inc++] = position.z;
+							temp[inc++] = euler.x;
+							temp[inc++] = euler.y;
+							temp[inc++] = euler.z;
+						}
 					}
 				}
 			}
+			
 			var buffer:VertexBuffer3D = getBuffer(stage3DProxy, subContainer);
-			buffer.uploadFromVector(_followData[subContainer.shareAtt], 0, _followData[subContainer.shareAtt].length / 6);
+			if (changed || _newBuffer)
+			{
+				buffer.uploadFromVector(temp, 0, temp.length / 6);
+				_newBuffer = false;
+			}
 
 			stage3DProxy.setSimpleVertexBuffer(_followAction.offsetAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
 			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 3);
@@ -213,6 +257,7 @@ package a3dparticle.animators
 					_bufferDict[subContainer.shareAtt]=stage3DProxy.context3D.createVertexBuffer(_followData[subContainer.shareAtt].length / 3, 3);
 				}
 				_context3DDict[subContainer.shareAtt] = stage3DProxy.context3D;
+				_newBuffer = true;
 			}
 			return _bufferDict[subContainer.shareAtt];
 		}

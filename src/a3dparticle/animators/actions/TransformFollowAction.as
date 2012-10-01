@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions
 {
 	import a3dparticle.animators.actions.PerParticleAction;
 	import a3dparticle.core.SubContainer;
@@ -42,24 +42,24 @@ package a3dparticle.animators.actions
 		{
 			if (!particlesData[subContainer.shareAtt])
 			{
-				particlesData[subContainer.shareAtt] = new Vector.<Object>();
+				particlesData[subContainer.shareAtt] = new Vector.<FollowingItem>();
 			}
-			var vector:Vector.<Object> = particlesData[subContainer.shareAtt];
+			var vector:Vector.<FollowingItem> = particlesData[subContainer.shareAtt];
 			if (temp)
 			{
-				var obj:Object = new Object;
-				obj.startTime = temp.x;
-				obj.lifeTime = temp.y;
-				obj.num = 0;
+				var item:FollowingItem = new FollowingItem;
+				item.startTime = temp.x;
+				item.lifeTime = temp.y;
+				item.num = 0;
 				if (vector.length == 0)
 				{
-					obj.start = 0;
+					item.start = 0;
 				}
 				else
 				{
-					obj.start = vector[vector.length - 1].start + vector[vector.length - 1].num;
+					item.start = vector[vector.length - 1].start + vector[vector.length - 1].num;
 				}
-				vector.push(obj);
+				vector.push(item);
 				temp = null;
 			}
 			vector[vector.length - 1].num++;
@@ -94,7 +94,7 @@ package a3dparticle.animators.actions
 			var temp3:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			
 			shaderRegisterCache.removeVertexTempUsage(temp1);
-			shaderRegisterCache.removeVertexTempUsage(temp2);			
+			shaderRegisterCache.removeVertexTempUsage(temp2);
 			
 			var code:String = "";
 			
