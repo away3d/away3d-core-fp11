@@ -30,7 +30,6 @@ package away3d.core.partition
 				super.acceptTraverser(traverser);
 				traverser.applySkyBox(_skyBox);
 			}
-			traverser.leaveNode(this);
 		}
 
 		/**

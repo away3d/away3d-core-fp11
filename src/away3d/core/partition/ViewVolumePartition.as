@@ -1,6 +1,7 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
+	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframePrimitiveBase;
 
@@ -22,6 +23,9 @@ package away3d.core.partition
 				super.markForUpdate(entity);
 		}
 
+		/**
+		 * Adds a view volume to provide visibility info for a given region.
+		 */
 		public function addViewVolume(viewVolume : ViewVolume) : void
 		{
 			ViewVolumeRootNode(_rootNode).addViewVolume(viewVolume);
@@ -32,5 +36,18 @@ package away3d.core.partition
 			ViewVolumeRootNode(_rootNode).removeViewVolume(viewVolume);
 		}
 
+		/**
+		 * A dynamic grid to be able to determine visibility of dynamic objects. If none is provided, dynamic objects are only frustum-culled.
+		 * If provided, ViewVolumes need to have visible grid cells assigned from the same DynamicGrid instance.
+		 */
+		public function get dynamicGrid() : DynamicGrid
+		{
+			return ViewVolumeRootNode(_rootNode).dynamicGrid;
+		}
+
+		public function set dynamicGrid(value : DynamicGrid) : void
+		{
+			ViewVolumeRootNode(_rootNode).dynamicGrid = value;
+		}
 	}
 }

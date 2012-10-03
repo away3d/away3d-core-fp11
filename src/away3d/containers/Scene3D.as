@@ -20,7 +20,7 @@ package away3d.containers
 	 */
 	public class Scene3D extends EventDispatcher
 	{
-		private var _sceneGraphRoot : ObjectContainer3D;
+		arcane var _sceneGraphRoot : ObjectContainer3D;
 		private var _partitions : Vector.<Partition3D>;
 
 		/**

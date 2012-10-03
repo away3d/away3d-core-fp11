@@ -2,21 +2,44 @@ package away3d.core.partition
 {
 	import away3d.arcane;
 	import away3d.core.traverse.PartitionTraverser;
+	import away3d.entities.Entity;
 
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
-	// TODO: handle dynamic objects, right now, if not a static, it's being treated the same as a NullPartition
 	public class ViewVolumeRootNode extends NodeBase
 	{
 		// todo: provide a better data structure to find the containing view volume faster
 		private var _viewVolumes : Vector.<ViewVolume>;
 		private var _activeVolume : ViewVolume;
+		private var _dynamicGrid : DynamicGrid;
 
 		public function ViewVolumeRootNode()
 		{
 			_viewVolumes = new Vector.<ViewVolume>();
+		}
+
+		override public function set showDebugBounds(value : Boolean) : void
+		{
+			super.showDebugBounds = value;
+			if (_dynamicGrid) _dynamicGrid.showDebugBounds = true;
+		}
+
+		override public function findPartitionForEntity(entity : Entity) : NodeBase
+		{
+			return _dynamicGrid? _dynamicGrid.findPartitionForEntity(entity) : this;
+		}
+
+		public function get dynamicGrid() : DynamicGrid
+		{
+			return _dynamicGrid;
+		}
+
+		public function set dynamicGrid(value : DynamicGrid) : void
+		{
+			_dynamicGrid = value;
+			_dynamicGrid.showDebugBounds = showDebugBounds;
 		}
 
 		public function addViewVolume(viewVolume : ViewVolume) : void
@@ -36,15 +59,18 @@ package away3d.core.partition
 
 		override public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
-			var volume : ViewVolume = getVolumeContaining(traverser.entryPoint);
+			if (!(_activeVolume && _activeVolume.contains(traverser.entryPoint))) {
+				var volume : ViewVolume = getVolumeContaining(traverser.entryPoint);
 
-			if (!volume)
-				trace("WARNING: No view volume found for the current position.");
-			// keep the active one if no volume is found (it may be just be a small error)
-			else if (volume != _activeVolume) {
-				if (_activeVolume) _activeVolume._active = false;
-				_activeVolume = volume;
-				if (_activeVolume) _activeVolume._active = true;
+				if (!volume)
+					trace("WARNING: No view volume found for the current position.");
+
+				// keep the active one if no volume is found (it may be just be a small error)
+				else if (volume != _activeVolume) {
+					if (_activeVolume) _activeVolume._active = false;
+					_activeVolume = volume;
+					if (_activeVolume) _activeVolume._active = true;
+				}
 			}
 
 			super.acceptTraverser(traverser);

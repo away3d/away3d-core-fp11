@@ -19,12 +19,13 @@ package away3d.core.partition
 	 */
 	public class NodeBase
 	{
-		protected var _parent : NodeBase;
+		arcane var _parent : NodeBase;
 		protected var _childNodes : Vector.<NodeBase>;
 		protected var _numChildNodes : uint;
 		protected var _debugPrimitive : WireframePrimitiveBase;
 
 		arcane var _numEntities : int;
+		arcane var _collectionMark : uint;
 
 		/**
 		 * Creates a new NodeBase object.
@@ -76,7 +77,7 @@ package away3d.core.partition
 			node._parent = this;
 			_numEntities += node._numEntities;
 			_childNodes[_numChildNodes++] = node;
-			node.showDebugBounds = showDebugBounds;
+			node.showDebugBounds = _debugPrimitive != null;
 
 			// update numEntities in the tree
 			var numEntities : int = node._numEntities;
@@ -129,8 +130,6 @@ package away3d.core.partition
 			return true;
 		}
 
-
-
 		/**
 		 * Finds the partition that contains (or should contain) the given entity.
 		 */
@@ -151,7 +150,7 @@ package away3d.core.partition
 		 */
 		public function acceptTraverser(traverser : PartitionTraverser) : void
 		{
-			if (_numEntities == 0) return;
+			if (_numEntities == 0 && !_debugPrimitive) return;
 
 			if (traverser.enterNode(this)) {
 				var i : uint;
@@ -160,8 +159,6 @@ package away3d.core.partition
 				if (_debugPrimitive)
 					traverser.applyRenderable(_debugPrimitive);
 			}
-
-			traverser.leaveNode(this);
 		}
 
 		protected function createDebugBounds() : WireframePrimitiveBase

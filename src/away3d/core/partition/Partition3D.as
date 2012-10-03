@@ -46,9 +46,11 @@ package away3d.core.partition
 		 */
 		public function traverse(traverser : PartitionTraverser) : void
 		{
-			if (_updatesMade/* && traverser is EntityCollector && !(traverser is ShadowCasterCollector)*/)
+			if (_updatesMade)
 				updateEntities();
-			
+
+			++PartitionTraverser._collectionMark;
+
 			_rootNode.acceptTraverser(traverser);
 		}
 
@@ -115,9 +117,8 @@ package away3d.core.partition
 			var targetNode : NodeBase;
 			var t : EntityNode;
 			
-			//clear updateQueue early to allow for newly marked entity updates
+			// clear updateQueue early to allow for newly marked entity updates
 			_updateQueue = null;
-			
 			_updatesMade = false;
 
 			do {

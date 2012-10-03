@@ -112,9 +112,9 @@ package away3d.core.partition
 			return findPartitionForBounds(_entityWorldBounds);
 		}
 
+		// TODO: this can be done quicker through inversion
 		private function findPartitionForBounds(entityWorldBounds : Vector.<Number>) : OctreeNode
 		{
-			var i : int;
 			var x : Number, y : Number, z : Number;
 			var left : Boolean, right : Boolean;
 			var far : Boolean, near : Boolean;
@@ -123,10 +123,10 @@ package away3d.core.partition
 			if (_leaf)
 				return this;
 
-			while (i < 24) {
-				x = entityWorldBounds[i++];
-				y = entityWorldBounds[i++];
-				z = entityWorldBounds[i++];
+			for (var i : uint = 0; i < 24; i += 3) {
+				x = entityWorldBounds[uint(i)];
+				y = entityWorldBounds[uint(i+1)];
+				z = entityWorldBounds[uint(i+2)];
 
 				if (x > _centerX) {
 					if (left) return this;
