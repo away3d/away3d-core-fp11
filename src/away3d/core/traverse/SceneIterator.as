@@ -39,21 +39,22 @@ package away3d.core.traverse
 			do {
 				switch (_traverseState) {
 					case PRE:
+					// just entered a node
+						_childIndexStack[_stackPos++] = _childIndex;
+						_childIndex = 0;
 						_traverseState = IN;
 						return _node;
 					case IN:
 						if (_childIndex == _node.numChildren)
 							_traverseState = POST;
 						else {
-							_childIndexStack[_stackPos++] = ++_childIndex;
-							_childIndex = 0;
 							_node = _node.getChildAt(_childIndex);
 							_traverseState = PRE;
 						}
 						break;
 					case POST:
 						_node = _node.parent;
-						_childIndex = _childIndexStack[--_stackPos];
+						_childIndex = _childIndexStack[--_stackPos] + 1;
 						_traverseState = IN;
 						break;
 				}

@@ -312,21 +312,31 @@ package away3d.core.partition
 			var iterator : SceneIterator = new SceneIterator(scene);
 			var visibleStatics : Vector.<EntityNode> = cell.visibleStatics ||= new Vector.<EntityNode>();
 			var object : ObjectContainer3D;
+			var numAdded : int = 0;
 
 			_entityWorldBounds = new Vector.<Number>();
 
 			while ((object = iterator.next())) {
 				var entity : Entity = object as Entity;
-				if (entity && staticIntersects(entity, minBounds, maxBounds))
-					visibleStatics.push(entity.getEntityPartitionNode());
+				if (entity && staticIntersects(entity, minBounds, maxBounds)) {
+					var node : EntityNode = entity.getEntityPartitionNode();
+					if (visibleStatics.indexOf(node) == -1) {
+						visibleStatics.push(node);
+						++numAdded;
+					}
+				}
 			}
 
+			updateNumEntities(_numEntities+numAdded);
 			_entityWorldBounds = null;
 		}
 
 		private function addDynamicsForRegion(dynamicGrid : DynamicGrid, minBounds : Vector3D, maxBounds : Vector3D, cell : ViewCell) : void
 		{
-			cell.visibleDynamics = dynamicGrid.getCellsIntersecting(minBounds, maxBounds);
+			var cells : Vector.<InvertedOctreeNode> = dynamicGrid.getCellsIntersecting(minBounds, maxBounds);
+			cell.visibleDynamics ||= new Vector.<InvertedOctreeNode>();
+			cell.visibleDynamics = cell.visibleDynamics.concat(cells);
+			updateNumEntities(_numEntities+cells.length);
 		}
 
 		private function staticIntersects(entity : Entity, minBounds : Vector3D, maxBounds : Vector3D) : Boolean
@@ -340,6 +350,10 @@ package away3d.core.partition
 			var maxY : Number = minY;
 			var maxZ : Number = minZ;
 
+			// NullBounds
+			if (minX != minX || minY != minY || minZ != minZ)
+				return true;
+
 			for (var i : uint = 3; i < 24; i += 3) {
 				var x : Number = _entityWorldBounds[i];
 				var y : Number = _entityWorldBounds[uint(i + 1)];
@@ -352,12 +366,19 @@ package away3d.core.partition
 				else if (z > maxZ) maxZ = z;
 			}
 
-			return !((minX < minBounds.x && maxX < minBounds.x) ||
-					(minX > maxBounds.x && maxX < maxBounds.x) ||
-					(minY < minBounds.y && maxY < minBounds.y) ||
-					(minY > maxBounds.y && maxY < maxBounds.y) ||
-					(minZ < minBounds.z && maxZ < minBounds.z) ||
-					(minZ > maxBounds.z && maxZ < maxBounds.z));
+			var epsMinX : Number = minBounds.x + .001;
+			var epsMinY : Number = minBounds.y + .001;
+			var epsMinZ : Number = minBounds.z + .001;
+			var epsMaxX : Number = maxBounds.x - .001;
+			var epsMaxY : Number = maxBounds.y - .001;
+			var epsMaxZ : Number = maxBounds.z - .001;
+
+			return !((minX < epsMinX && maxX < epsMinX) ||
+					(minX > epsMaxX && maxX > epsMaxX) ||
+					(minY < epsMinY && maxY < epsMinY) ||
+					(minY > epsMaxY && maxY > epsMaxY) ||
+					(minZ < epsMinZ && maxZ < epsMinZ) ||
+					(minZ > epsMaxZ && maxZ > epsMaxZ));
 		}
 	}
 }

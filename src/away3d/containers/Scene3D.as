@@ -146,7 +146,7 @@ package away3d.containers
 		}
 
 		/**
-		 * When a partition is removed from an object somewhere in the scene graph, remove the partition from the list if it isn't in there yet
+		 * When a partition is removed from an object somewhere in the scene graph, remove the partition from the list
 		 */
 		arcane function unregisterPartition(entity : Entity) : void
 		{
