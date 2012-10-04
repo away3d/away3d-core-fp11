@@ -12,7 +12,7 @@ package away3d.core.sort
 	 * are sorted front to back, while objects that require blending are sorted back to front, to ensure correct
 	 * blending.
 	 */
-	public class RenderableMergeSort extends EntitySorterBase
+	public class RenderableMergeSort implements IEntitySorter
 	{
 		/**
 		 * Creates a RenderableSorter objects
@@ -24,7 +24,7 @@ package away3d.core.sort
 		/**
 		 * @inheritDoc
 		 */
-		override public function sort(collector : EntityCollector) : void
+		public function sort(collector : EntityCollector) : void
 		{
 			collector.opaqueRenderableHead = mergeSortByMaterial(collector.opaqueRenderableHead);
 			collector.blendedRenderableHead = mergeSortByDepth(collector.blendedRenderableHead);

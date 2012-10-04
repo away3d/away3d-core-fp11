@@ -302,5 +302,25 @@ package away3d.bounds
 		override protected function createBoundingRenderable():WireframePrimitiveBase {
 			return new WireframeCube( 1, 1, 1 );
 		}
+
+
+		override public function classifyToPlane(plane : Plane3D) : int
+		{
+			var a : Number = plane.a;
+			var b : Number = plane.b;
+			var c : Number = plane.c;
+			var d : Number = plane.d;
+			var dd : Number = a * _centerX + b * _centerY + c * _centerZ;
+			if( a < 0 ) a = -a;
+			if( b < 0 ) b = -b;
+			if( c < 0 ) c = -c;
+			var rr : Number = a * _halfExtentsX + b * _halfExtentsY + c * _halfExtentsZ;
+			var sum : Number = dd + rr;
+
+			return 	sum > d? PlaneClassification.FRONT :
+					sum < -d? PlaneClassification.BACK :
+							PlaneClassification.INTERSECT;
+
+		}
 	}
 }

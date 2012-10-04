@@ -30,7 +30,12 @@ package away3d.lights.shadowmaps
 
 		public function ShadowMapperBase()
 		{
-			_casterCollector = new ShadowCasterCollector();
+			_casterCollector = createCasterCollector();
+		}
+
+		protected function createCasterCollector() : ShadowCasterCollector
+		{
+			return new ShadowCasterCollector();
 		}
 
 		public function get autoUpdateShadows() : Boolean

@@ -89,14 +89,15 @@ package away3d.lights.shadowmaps
 
 			i = 0;
 			while (i < 24) {
-				x = _localFrustum[uint(i++)];
-				y = _localFrustum[uint(i++)];
-				z = _localFrustum[uint(i++)];
+				x = _localFrustum[i];
+				y = _localFrustum[uint(i+1)];
+				z = _localFrustum[uint(i+2)];
 				if (x < minX) minX = x;
 				if (x > maxX) maxX = x;
 				if (y < minY) minY = y;
 				if (y > maxY) maxY = y;
 				if (z > maxZ) maxZ = z;
+				i += 3;
 			}
 			minZ = 10;
 

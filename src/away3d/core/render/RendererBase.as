@@ -2,7 +2,7 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.sort.EntitySorterBase;
+	import away3d.core.sort.IEntitySorter;
 	import away3d.core.sort.RenderableMergeSort;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.errors.AbstractMethodError;
@@ -41,7 +41,7 @@ package away3d.core.render
 		protected var _viewWidth : Number;
 		protected var _viewHeight : Number;
 
-		private var _renderableSorter : EntitySorterBase;
+		protected var _renderableSorter : IEntitySorter;
 		private var _backgroundImageRenderer : BackgroundImageRenderer;
 		private var _background : Texture2DBase;
 		
@@ -94,12 +94,12 @@ package away3d.core.render
 			return _renderToTexture;
 		}
 
-		public function get renderableSorter() : EntitySorterBase
+		public function get renderableSorter() : IEntitySorter
 		{
 			return _renderableSorter;
 		}
 
-		public function set renderableSorter(value : EntitySorterBase) : void
+		public function set renderableSorter(value : IEntitySorter) : void
 		{
 			_renderableSorter = value;
 		}
