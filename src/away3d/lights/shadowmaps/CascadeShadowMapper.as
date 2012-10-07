@@ -3,6 +3,7 @@ package away3d.lights.shadowmaps
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.cameras.lenses.FreeMatrixLens;
+	import away3d.cameras.lenses.LensBase;
 	import away3d.cameras.lenses.OrthographicOffCenterLens;
 	import away3d.containers.Scene3D;
 	import away3d.core.math.Matrix3DUtils;
@@ -38,6 +39,7 @@ package away3d.lights.shadowmaps
 		private static var _calcMatrix : Matrix3D = new Matrix3D();
 
 		private var _changeDispatcher : EventDispatcher;
+		private var _nearPlaneDistances : Vector.<Number>;
 
 		public function CascadeShadowMapper(numCascades : uint = 3)
 		{
@@ -72,6 +74,7 @@ package away3d.lights.shadowmaps
 		{
 			_localFrustum = new Vector.<Number>(8 * 3);
 			_splitRatios = new Vector.<Number>(_numCascades, true);
+			_nearPlaneDistances = new Vector.<Number>(_numCascades, true);
 
 			var s : Number = 1;
 			for (var i : int = _numCascades-1; i >= 0; --i) {
@@ -179,6 +182,7 @@ package away3d.lights.shadowmaps
 		{
 			var corners : Vector.<Number> = viewCamera.lens.frustumCorners;
 			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
+
 			_overallCamera.transform = _light.sceneTransform;
 			_overallCamera.x = -dir.x * _lightOffset;
 			_overallCamera.y = -dir.y * _lightOffset;
@@ -188,6 +192,12 @@ package away3d.lights.shadowmaps
 			_calcMatrix.prepend(viewCamera.sceneTransform);
 			_calcMatrix.transformVectors(corners, _localFrustum);
 
+			var lens : LensBase = viewCamera.lens;
+			var near : Number = lens.near;
+			var frustumDepth : Number = lens.far - near;
+
+			for (var i : uint = 0; i < _numCascades; ++i)
+				_nearPlaneDistances[i] = near + _splitRatios[i]*frustumDepth;
 		}
 
 		private function updateOverallMatrix() : void
@@ -307,6 +317,11 @@ package away3d.lights.shadowmaps
 		public function willTrigger(type : String) : Boolean
 		{
 			return _changeDispatcher.willTrigger(type);
+		}
+
+		arcane function get nearPlaneDistances() : Vector.<Number>
+		{
+			return _nearPlaneDistances;
 		}
 	}
 }

@@ -7,6 +7,7 @@ package away3d.materials.methods
 	import away3d.events.ShadingMethodEvent;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.shadowmaps.CascadeShadowMapper;
+	import away3d.lights.shadowmaps.CascadeShadowMapper;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -58,7 +59,7 @@ package away3d.materials.methods
 			var tempVO : MethodVO = new MethodVO();
 			_baseMethod.initVO(tempVO);
 			vo.needsGlobalVertexPos = true;
-			vo.needsProjection = tempVO.needsProjection;
+			vo.needsProjection = true;
 		}
 
 		override arcane function set sharedRegisters(value : ShaderRegisterData) : void
@@ -79,11 +80,6 @@ package away3d.materials.methods
 
 			fragmentData[index+6] = .5;
 			fragmentData[index+7] = -.5;
-
-			fragmentData[index+8] = 0.04;
-			fragmentData[index+9] = .96;
-			fragmentData[index+10] = -.96;
-			fragmentData[index+11] = -0.04;
 
 			index = vo.vertexConstantsIndex;
 			vertexData[index] = .5;
@@ -110,7 +106,6 @@ package away3d.materials.methods
 
 			for (var i : int = 0; i < _cascadeShadowMapper.numCascades; ++i) {
 				code += "m44 " + temp + ", " + _sharedRegisters.globalPositionVertex + ", " + _cascadeProjections[i] + "\n" +
-						"div " + temp + ", " + temp + ", " + temp + ".w\n" +
 						"add " + _depthMapCoordVaryings[i] + ", " + temp + ", " + dataReg + ".zzwz\n";
 			}
 
@@ -137,11 +132,10 @@ package away3d.materials.methods
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			var boundsReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			var minBounds : Vector.<String> = new <String>[	boundsReg + ".x", boundsReg + ".z", boundsReg + ".z", boundsReg + ".z", boundsReg + ".x", boundsReg + ".x", boundsReg + ".z", boundsReg + ".x" ];
-			var maxBounds : Vector.<String> = new <String>[	boundsReg + ".y", boundsReg + ".w", boundsReg + ".w", boundsReg + ".w", boundsReg + ".y", boundsReg + ".y", boundsReg + ".w", boundsReg + ".y" ];
+			var planeDistanceReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var planeDistances : Vector.<String> = new <String>[ planeDistanceReg + ".x", planeDistanceReg + ".y", planeDistanceReg + ".z", planeDistanceReg + ".w" ];
 			var code : String;
-			var boundIndex : int = (4-numCascades)*2;
+			var boundIndex : int = numCascades - 1;
 
 			vo.fragmentConstantsIndex = decReg.index*4;
 			vo.texturesIndex = depthMapRegister.index;
@@ -155,19 +149,10 @@ package away3d.materials.methods
 			code = "mov " + uvCoord + ", " + _depthMapCoordVaryings[0] + "\n";
 
 			for (var i : int = 1; i < numCascades; ++i) {
-				boundIndex += 2;
 				var uvProjection : ShaderRegisterElement = _depthMapCoordVaryings[i];
 
 				// calculate if in texturemap (result == 0 or 1, only 1 for a single partition)
-				code += "sge " + inQuad + ".z, " + uvProjection + ".x, " + minBounds[boundIndex] + "\n" + // z = x > minX, w = y > minY
-						"sge " + inQuad + ".w, " + uvProjection + ".y, " + minBounds[boundIndex+1] + "\n" + // z = x > minX, w = y > minY
-						"sge " + inQuad + ".x, " + maxBounds[boundIndex] + ", " + uvProjection + ".x \n" + // z = x < maxX, w = y < maxY
-						"sge " + inQuad + ".y, " + maxBounds[boundIndex+1] + ", " + uvProjection + ".y\n" + // z = x < maxX, w = y < maxY
-
-						// if all are true (so point is in this quad), then the multiplication of all == 1, if any is 0, multiplication is 0
-						// this is basically (x && y) && (z && w)
-						"mul " + inQuad + ".xz, " + inQuad + ".xz, " + inQuad + ".yw\n" +
-						"mul " + inQuad + ".z, " + inQuad + ".z, " + inQuad + ".x\n";
+				code += "slt " + inQuad + ".z, " + _sharedRegisters.projectionFragment + ".w, " + planeDistances[--boundIndex] + "\n"; // z = x > minX, w = y > minY
 
 				var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
@@ -179,7 +164,8 @@ package away3d.materials.methods
 
 			regCache.removeFragmentTempUsage(inQuad);
 
-			code += "mul " + uvCoord + ".xy, " + uvCoord + ".xy, " + dataReg + ".zw\n" +
+			code += "div " + uvCoord + ", " + uvCoord + ", " + uvCoord + ".w\n" +
+					"mul " + uvCoord + ".xy, " + uvCoord + ".xy, " + dataReg + ".zw\n" +
 					"add " + uvCoord + ".xy, " + uvCoord + ".xy, " + dataReg + ".zz\n";
 
 			code += _baseMethod.getCascadeFragmentCode(vo, regCache, decReg, depthMapRegister, uvCoord, targetReg) +
@@ -211,14 +197,20 @@ package away3d.materials.methods
 
 			var fragmentData : Vector.<Number> = vo.fragmentData;
 			var fragmentIndex : int = vo.fragmentConstantsIndex;
-			fragmentData[fragmentIndex + 5] = 1-_alpha;
+			fragmentData[uint(fragmentIndex + 5)] = 1-_alpha;
+
+			var nearPlaneDistances : Vector.<Number> = _cascadeShadowMapper.nearPlaneDistances;
+
+			fragmentIndex += 8;
+			for (var i : uint = 0; i < numCascades; ++i)
+				fragmentData[uint(fragmentIndex+i)] = nearPlaneDistances[i];
+
 
 			_baseMethod.activateForCascade(vo,stage3DProxy);
 		}
 
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-
 		}
 
 		private function onCascadeChange(event : Event) : void

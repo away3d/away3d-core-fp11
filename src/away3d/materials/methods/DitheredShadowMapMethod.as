@@ -13,7 +13,6 @@ package away3d.materials.methods
 
 	/**
 	 * DitheredShadowMapMethod provides a soft shadowing technique by randomly distributing sample points.
-	 * When combining with CascadeShadowMapMethod, but sure that the number of cascades is 3 or less, or compilation will fail!
 	 */
 	public class DitheredShadowMapMethod extends SimpleShadowMapMethodBase
 	{
