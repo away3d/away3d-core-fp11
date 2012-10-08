@@ -2,7 +2,7 @@ package fire
 {
 	import a3dparticle.animators.actions.color.ChangeColorByLifeGlobal;
 	import a3dparticle.animators.actions.drift.DriftLocal;
-	import a3dparticle.animators.actions.rotation.AlwayFaceToCameraGlobal;
+	import a3dparticle.animators.actions.rotation.BillboardGlobal;
 	import a3dparticle.animators.actions.scale.ScaleByLifeGlobal;
 	import a3dparticle.animators.actions.velocity.VelocityLocal;
 	import a3dparticle.generater.SingleGenerater;
@@ -47,7 +47,7 @@ package fire
 			var action2:ChangeColorByLifeGlobal = new ChangeColorByLifeGlobal(new ColorTransform(0.5, 0.5, 0.5, 0.5), new ColorTransform(0.5, 0.5, 0.5, 0));
 			particle.addAction(action2);
 			
-			var action3:AlwayFaceToCameraGlobal = new AlwayFaceToCameraGlobal();
+			var action3:BillboardGlobal = new BillboardGlobal();
 			particle.addAction(action3);
 			
 			var action4:ScaleByLifeGlobal = new ScaleByLifeGlobal(0.5,2);
