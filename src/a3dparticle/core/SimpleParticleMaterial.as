@@ -33,10 +33,10 @@ package a3dparticle.core
 			this._particleMaterial = particleMaterial;
 			addPass(_screenPass = new SimpleParticlePass(particleMaterial));
 			_screenPass.material = this;
-			cpoyParam();
+			copyParam();
 		}
 		
-		private function cpoyParam():void
+		private function copyParam():void
 		{
 			bothSides = _particleMaterial.bothSides;
 			blendMode = _particleMaterial.blendMode;
@@ -75,7 +75,7 @@ package a3dparticle.core
 		
 		override arcane function updateMaterial(context : Context3D) : void
 		{
-			cpoyParam();
+			copyParam();
 			if (renderTimes != _particleMaterial.renderTimes)
 			{
 				invalidatePasses(null);

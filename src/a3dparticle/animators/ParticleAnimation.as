@@ -76,7 +76,7 @@ package a3dparticle.animators
 		public var fragmentVelocity:ShaderRegisterElement;
 		//fragment
 		public var colorTarget:ShaderRegisterElement;
-		public var colorDefalut:ShaderRegisterElement;
+		public var colorDefault:ShaderRegisterElement;
 		public var textSample:ShaderRegisterElement;
 		public var uvVar:ShaderRegisterElement;
 		public var fragmentZeroConst:ShaderRegisterElement;
@@ -221,7 +221,7 @@ package a3dparticle.animators
 			vertexTwoConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "z");
 			if (needCameraPosition) cameraPosConst = shaderRegisterCache.getFreeVertexConstant();
 			
-			colorDefalut = shaderRegisterCache.getFreeFragmentConstant();
+			colorDefault = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
 			fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
 			fragmentOneConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "y");
