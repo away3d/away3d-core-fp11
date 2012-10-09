@@ -24,7 +24,7 @@ package a3dparticle.animators.actions.scale
 		
 		public function ScaleByLifeGlobal(startScale:Number,endScale:Number) 
 		{
-			priority = 3;
+			priority = 2;
 			_startScale = startScale;
 			_endScale = endScale;
 			_delta = _endScale - _startScale;

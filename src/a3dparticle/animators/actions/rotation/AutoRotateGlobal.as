@@ -19,7 +19,7 @@ package a3dparticle.animators.actions.rotation
 		
 		public function AutoRotateGlobal() 
 		{
-			priority = 2;
+			priority = 3;
 		}
 		
 		override public function set animation(value:ParticleAnimation):void

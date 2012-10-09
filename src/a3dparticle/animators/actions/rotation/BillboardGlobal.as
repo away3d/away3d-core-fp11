@@ -24,7 +24,7 @@ package a3dparticle.animators.actions.rotation
 		
 		public function BillboardGlobal()
 		{
-			priority = 2;
+			priority = 3;
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String

@@ -23,7 +23,7 @@ package a3dparticle.animators.actions.scale
 		
 		public function ScaleByTimeGlobal(min:Number,max:Number,time:Number) 
 		{
-			priority = 3;
+			priority = 2;
 			
 			var delta:Number = Math.abs(max - min) / 2;
 			var center:Number = (max + min) / 2;

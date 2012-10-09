@@ -30,6 +30,7 @@ package a3dparticle.animators.actions.rotation
 		 */
 		public function RandomRotateLocal(fun:Function=null)
 		{
+			priority = 3;
 			dataLenght = 4;
 			_name = "RandomRotateLocal";
 			_genFun = fun;

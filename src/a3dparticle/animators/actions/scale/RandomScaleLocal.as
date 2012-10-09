@@ -26,7 +26,7 @@ package a3dparticle.animators.actions.scale
 		 */
 		public function RandomScaleLocal(fun:Function = null)
 		{
-			priority = 3;
+			priority = 2;
 			dataLenght = 3;
 			_name = "RandomScaleLocal";
 			_scaleFun = fun;
