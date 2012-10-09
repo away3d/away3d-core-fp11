@@ -110,7 +110,7 @@ package away3d.entities
 			return _geometry.getIndexBuffer(stage3DProxy);
 		}
 
-		override public function pushModelViewProjection(camera : Camera3D) : void
+		override public function pushModelViewProjection(camera : Camera3D, updateZIndex : Boolean = true) : void
 		{
 			var comps : Vector.<Vector3D>;
 			var rot : Vector3D;
@@ -128,8 +128,10 @@ package away3d.entities
 			rot.x = rot.y = rot.z = 0;
 			mvp.recompose(comps);
 			mvp.append(camera.lens.matrix);
-			mvp.copyColumnTo(3, _pos);
-			_zIndices[_mvpIndex] = -_pos.z;
+			if (updateZIndex) {
+				mvp.copyColumnTo(3, _pos);
+				_zIndices[_mvpIndex] = -_pos.z;
+			}
 		}
 
 		public function get numTriangles() : uint

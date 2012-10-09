@@ -7,6 +7,7 @@ package away3d.lights.shadowmaps
 	import away3d.cameras.lenses.OrthographicOffCenterLens;
 	import away3d.containers.Scene3D;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Plane3D;
 	import away3d.core.render.DepthRenderer;
 	import away3d.lights.DirectionalLight;
 	import flash.display3D.textures.TextureBase;
@@ -37,9 +38,11 @@ package away3d.lights.shadowmaps
 		private var _texOffsetsY : Vector.<Number>;
 
 		private static var _calcMatrix : Matrix3D = new Matrix3D();
+		private static var _calcVector : Vector3D = new Vector3D();
 
 		private var _changeDispatcher : EventDispatcher;
 		private var _nearPlaneDistances : Vector.<Number>;
+		private var _splitPlanes : Vector.<Plane3D>;
 
 		public function CascadeShadowMapper(numCascades : uint = 3)
 		{
@@ -75,11 +78,12 @@ package away3d.lights.shadowmaps
 			_localFrustum = new Vector.<Number>(8 * 3);
 			_splitRatios = new Vector.<Number>(_numCascades, true);
 			_nearPlaneDistances = new Vector.<Number>(_numCascades, true);
+			_splitPlanes = new Vector.<Plane3D>(_numCascades, true);
 
 			var s : Number = 1;
 			for (var i : int = _numCascades-1; i >= 0; --i) {
 				_splitRatios[i] = s;
-				s *= .25;
+				s *= .3333;
 			}
 
 			_texOffsetsX = new <Number>[-1, 1, -1, 1];
@@ -92,6 +96,7 @@ package away3d.lights.shadowmaps
 			_overallCamera = new Camera3D(_overallLens);
 
 			for (i = 0; i < _numCascades; ++i) {
+				_splitPlanes[i] = new Plane3D();
 				_depthLenses[i] = new FreeMatrixLens();
 				_depthCameras[i] = new Camera3D(_depthLenses[i]);
 			}
@@ -143,7 +148,7 @@ package away3d.lights.shadowmaps
 			_casterCollector.camera = _overallCamera;
 			scene.traversePartitions(_casterCollector);
 
-			renderer.renderCascades(_casterCollector, target, _numCascades, _scissorRects, _splitRatios, _depthCameras);
+			renderer.renderCascades(_casterCollector, target, _numCascades, _scissorRects, _splitPlanes, _depthCameras);
 
 			_casterCollector.cleanUp();
 		}
@@ -153,9 +158,9 @@ package away3d.lights.shadowmaps
 			var half : Number = _depthMapSize*.5;
 
 			_scissorRects[0] = new Rectangle(0, 0, half, half);
-			_scissorRects[1] = new Rectangle(half, 0, _depthMapSize, half);
-			_scissorRects[2] = new Rectangle(0, half, half, _depthMapSize);
-			_scissorRects[3] = new Rectangle(half, half, _depthMapSize, _depthMapSize);
+			_scissorRects[1] = new Rectangle(half, 0, half, half);
+			_scissorRects[2] = new Rectangle(0, half, half, half);
+			_scissorRects[3] = new Rectangle(half, half, half, half);
 
 			_scissorRectsInvalid = false;
 		}
@@ -184,20 +189,34 @@ package away3d.lights.shadowmaps
 			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
 
 			_overallCamera.transform = _light.sceneTransform;
-			_overallCamera.x = -dir.x * _lightOffset;
-			_overallCamera.y = -dir.y * _lightOffset;
-			_overallCamera.z = -dir.z * _lightOffset;
+			_overallCamera.x = viewCamera.x-dir.x * _lightOffset;
+			_overallCamera.y = viewCamera.y-dir.y * _lightOffset;
+			_overallCamera.z = viewCamera.z-dir.z * _lightOffset;
 
 			_calcMatrix.copyFrom(_overallCamera.inverseSceneTransform);
 			_calcMatrix.prepend(viewCamera.sceneTransform);
 			_calcMatrix.transformVectors(corners, _localFrustum);
 
+			viewCamera.sceneTransform.copyColumnTo(2, _calcVector);
+			var point : Vector3D = viewCamera.scenePosition;
+			var a : Number = -_calcVector.x;
+			var b : Number = -_calcVector.y;
+			var c : Number = -_calcVector.z;
+			var len : Number = Math.sqrt(a*a + b*b + c*c);
+			var d : Number = a*point.x + b*point.y + c*point.z;
 			var lens : LensBase = viewCamera.lens;
 			var near : Number = lens.near;
 			var frustumDepth : Number = lens.far - near;
 
-			for (var i : uint = 0; i < _numCascades; ++i)
-				_nearPlaneDistances[i] = near + _splitRatios[i]*frustumDepth;
+			for (var i : uint = 0; i < _numCascades; ++i) {
+				var dist : Number = near + _splitRatios[i]*frustumDepth;
+				var plane : Plane3D = _splitPlanes[i];
+				plane.a = a;
+				plane.b = b;
+				plane.c = c;
+				plane.d = d - dist * len;
+				_nearPlaneDistances[i] = dist;
+			}
 		}
 
 		private function updateOverallMatrix() : void
@@ -230,8 +249,8 @@ package away3d.lights.shadowmaps
 		private function updateProjectionPartition(matrix : Matrix3D, minRatio : Number, maxRatio : Number, texOffsetX : Number, texOffsetY : Number) : void
 		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			var x1 : Number, y1 : Number;
-			var x2 : Number, y2 : Number;
+			var x1 : Number, y1 : Number, z1 : Number;
+			var x2 : Number, y2 : Number, z2 : Number;
 			var xN : Number, yN : Number, zN : Number;
 			var xF : Number, yF : Number, zF : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number;
@@ -245,14 +264,16 @@ package away3d.lights.shadowmaps
 			while (i < 12) {
 				x1 = _localFrustum[i];
 				y1 = _localFrustum[uint(i+1)];
-				zN = _localFrustum[uint(i+2)];
+				z1 = _localFrustum[uint(i+2)];
 				x2 = _localFrustum[uint(i+12)] - x1;
 				y2 = _localFrustum[uint(i+13)] - y1;
-				zF = _localFrustum[uint(i+14)];
+				z2 = _localFrustum[uint(i+14)] - z1;
 				xN = x1 + x2*minRatio;
 				yN = y1 + y2*minRatio;
+				zN = z1 + z2*maxRatio;
 				xF = x1 + x2*maxRatio;
 				yF = y1 + y2*maxRatio;
+				zF = z1 + z2*maxRatio;
 				if (xN < minX) minX = xN;
 				if (xN > maxX) maxX = xN;
 				if (yN < minY) minY = yN;

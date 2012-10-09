@@ -245,16 +245,14 @@ package away3d.bounds
 			var a : Number = plane.a;
 			var b : Number = plane.b;
 			var c : Number = plane.c;
-			var d : Number = plane.d;
-			var dd : Number = a * _centerX + b * _centerY + c * _centerZ;
-			if( a < 0 ) a = -a;
-			if( b < 0 ) b = -b;
-			if( c < 0 ) c = -c;
-			var rr : Number = (a + b + c) * _radius;
-			var sum : Number = dd + rr;
+			var dd : Number = a * _centerX + b * _centerY + c * _centerZ - plane.d;
+			if (a < 0) a = -a;
+			if (b < 0) b = -b;
+			if (c < 0) c = -c;
+			var rr : Number = (a  + b + c) * _radius;
 
-			return 	sum > d? PlaneClassification.FRONT :
-					sum < -d? PlaneClassification.BACK :
+			return  dd > rr ? 	PlaneClassification.FRONT :
+					dd < -rr ? 	PlaneClassification.BACK :
 							PlaneClassification.INTERSECT;
 		}
 	}

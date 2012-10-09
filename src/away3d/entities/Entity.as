@@ -275,18 +275,21 @@ package away3d.entities
 		 * and places it on the stack. The stack allows nested rendering while keeping the MVP intact.
 		 * @param camera The camera which will perform the view transformation and projection.
 		 */
-		public function pushModelViewProjection(camera : Camera3D) : void
+		public function pushModelViewProjection(camera : Camera3D, updateZIndex : Boolean = true) : void
 		{
 			if (++_mvpIndex == _stackLen) {
 				_mvpTransformStack[_mvpIndex] = new Matrix3D();
-				_stackLen++;
+				++_stackLen;
 			}
 
 			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
 			mvp.copyFrom(sceneTransform);
 			mvp.append(camera.viewProjection);
-			mvp.copyColumnTo(3, _pos);
-			_zIndices[_mvpIndex] = -_pos.z;
+
+			if (updateZIndex) {
+				mvp.copyColumnTo(3, _pos);
+				_zIndices[_mvpIndex] = -_pos.z;
+			}
 		}
 		
 		/**

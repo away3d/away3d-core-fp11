@@ -17,7 +17,6 @@ package away3d.primitives
 	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 
@@ -129,7 +128,7 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		override public function pushModelViewProjection(camera : Camera3D) : void
+		override public function pushModelViewProjection(camera : Camera3D, updateZIndex : Boolean = true) : void
 		{
 			var size : Number = camera.lens.far / Math.sqrt(2) * .5;
 			if (++_mvpIndex == _stackLen) {

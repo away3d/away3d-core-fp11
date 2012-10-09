@@ -8,11 +8,13 @@ package away3d.core.render
 	import away3d.core.math.Plane3D;
 	import away3d.core.math.PlaneClassification;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.entities.Entity;
 	import away3d.materials.MaterialBase;
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
+	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
 
@@ -66,20 +68,20 @@ package away3d.core.render
 		{
 		}
 
-		arcane function renderCascades(entityCollector : EntityCollector, target : TextureBase, numCascades : uint, scissorRects : Vector.<Rectangle>, splitRatios : Vector.<Number>, cameras : Vector.<Camera3D>) : void
+		arcane function renderCascades(entityCollector : EntityCollector, target : TextureBase, numCascades : uint, scissorRects : Vector.<Rectangle>, splitPlanes : Vector.<Plane3D>, cameras : Vector.<Camera3D>) : void
 		{
 			_renderTarget = target;
 			_renderTargetSurface = 0;
 			_renderableSorter.sort(entityCollector);
 			_stage3DProxy.setRenderTarget(target, true, 0);
-			_context.clear(0, 0, 0, 1, 1, 0);
+			_context.clear(1, 1, 1, 1, 1, 0);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 
 			var head : RenderableListItem = entityCollector.opaqueRenderableHead;
 			for (var i : uint = 0; i < numCascades; ++i) {
 				_stage3DProxy.scissorRect = scissorRects[i];
-				head = drawCascadeRenderables(head, entityCollector, splitRatios[i], cameras[i]);
+				drawCascadeRenderables(head, cameras[i]);
 			}
 
 			if (_activeMaterial)
@@ -93,49 +95,30 @@ package away3d.core.render
 			_stage3DProxy.scissorRect = null;
 		}
 
-		private function drawCascadeRenderables(item : RenderableListItem, entityCollector : EntityCollector, ratio : Number, camera : Camera3D) : RenderableListItem
+		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D) : void
 		{
-			var prev : RenderableListItem;
-			var classification : int;
-			var head : RenderableListItem = item;
-			var plane : Plane3D = new Plane3D();
-			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var material : MaterialBase;
 
 			while (item) {
 				var renderable : IRenderable = item.renderable;
-				renderable.getModelViewProjectionUnsafe().copyRawDataTo(raw);
-				// linear interpolation of mvp-derived near and far planes (inverted near plane to assure both pointing toward camera)
-				plane.a = raw[2]-ratio*raw[3];
-				plane.b = raw[6]-ratio*raw[7];
-				plane.c = raw[10]-ratio*raw[11];
-				plane.d = raw[14]-ratio*raw[15];
-				classification = renderable.sourceEntity.bounds.classifyToPlane(plane);
+				var entity : Entity = renderable.sourceEntity;
 
-				// skip if doesn't need to be rendered in this pass
-				if (classification != PlaneClassification.BACK) {
+				entity.pushModelViewProjection(camera, false);
+
+				if (entity.bounds.isInFrustum(entity.getModelViewProjectionUnsafe())) {
 					material = renderable.material;
-					renderable.sourceEntity.pushModelViewProjection(camera);
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
 						_activeMaterial = material;
 						_activeMaterial.activateForDepth(_stage3DProxy, camera, false, 1, 1);
 					}
-
 					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera);
-					renderable.sourceEntity.popModelViewProjection();
 				}
 
-				if (classification == PlaneClassification.FRONT) {
-					if (prev) prev.next = item;
-					else head = item;
-				}
-				else prev = item;
+				entity.popModelViewProjection();
 
 				item = item.next;
 			}
-
-			return head;
 		}
 
 		/**
