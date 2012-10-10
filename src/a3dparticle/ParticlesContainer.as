@@ -68,11 +68,11 @@ package a3dparticle
 		}
 		public function set time(value:Number):void
 		{
-			_animator.absoluteTime = value * 1000;
+			_animator.animatorTime = value ;
 		}
 		public function get time():Number
 		{
-			return _animator.absoluteTime /1000;
+			return _animator.animatorTime ;
 		}
 		
 		public function addAction(action:ActionBase):void

@@ -63,10 +63,10 @@ package a3dparticle.animators
 			return _rotation;
 		}
 		
-		override public function set absoluteTime(value:Number):void
+		override public function set animatorTime(value:Number):void
 		{
-			_lastTime = absoluteTime;
-			super.absoluteTime = value;
+			_lastTime = animatorTime;
+			super.animatorTime = value;
 		}
 		
 		

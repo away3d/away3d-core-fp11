@@ -15,6 +15,7 @@ package a3dparticle.animators
 		
 		private var _particleAnimation:ParticleAnimation;
 		private var _programConstantData:Vector.<Number>;
+		private var _animatorTime:Number=0;
 		
 		//for multiple-pass-rendering
 		public var offestTime:Number = 0;
@@ -29,9 +30,13 @@ package a3dparticle.animators
 			_programConstantData[3] = 0;
 		}
 		
-		public function set absoluteTime(value:Number):void
+		public function set animatorTime(value:Number):void
 		{
-			_absoluteTime = value;
+			_animatorTime = value;
+		}
+		public function get animatorTime():Number
+		{
+			return _animatorTime;
 		}
 		
 		
@@ -39,7 +44,7 @@ package a3dparticle.animators
 		{
 			if (_particleAnimation.hasGen)
 			{
-				var actionTime:Number = _absoluteTime / 1000;
+				var actionTime:Number = _animatorTime;
 				if (passCount != 0)
 				{
 					actionTime += offestTime;
@@ -60,7 +65,7 @@ package a3dparticle.animators
 		
 		override protected function updateDeltaTime(dt : Number) : void
 		{
-			absoluteTime += dt;
+			_animatorTime += dt / 1000;
 		}
 		
 		public function testGPUCompatibility(pass : MaterialPassBase) : void
