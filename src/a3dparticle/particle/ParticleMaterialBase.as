@@ -1,7 +1,7 @@
 package a3dparticle.particle
 {
 	import a3dparticle.animators.ParticleAnimation;
-	import a3dparticle.animators.ParticleAnimationtor;
+	import a3dparticle.animators.ParticleAnimator;
 	import a3dparticle.core.SubContainer;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -98,7 +98,7 @@ package a3dparticle.particle
 		{
 			if (renderTimes > 1)
 			{
-				var passCount:int = ParticleAnimationtor(SubContainer(renderable).animator).passCount;
+				var passCount:int = ParticleAnimator(SubContainer(renderable).animator).passCount;
 				rawData[0] = Math.pow(redFade, passCount);
 				rawData[1] = Math.pow(greenFade, passCount);
 				rawData[2] = Math.pow(bluFade, passCount);

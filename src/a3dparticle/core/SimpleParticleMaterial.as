@@ -1,7 +1,7 @@
 package a3dparticle.core
 {
 	import a3dparticle.animators.ParticleAnimation;
-	import a3dparticle.animators.ParticleAnimationtor;
+	import a3dparticle.animators.ParticleAnimator;
 	import a3dparticle.particle.ParticleMaterialBase;
 	import away3d.animators.AnimationSetBase;
 	import away3d.animators.IAnimationSet;
@@ -94,8 +94,8 @@ package a3dparticle.core
 				(subContainer.animator.animationSet as ParticleAnimation).camera = entityCollector.camera;
 				for (var i:int = 0; i < renderTimes; i++)
 				{
-					ParticleAnimationtor(subContainer.animator).passCount = i;
-					ParticleAnimationtor(subContainer.animator).offestTime = -i * _particleMaterial.timeInterval;
+					ParticleAnimator(subContainer.animator).passCount = i;
+					ParticleAnimator(subContainer.animator).offestTime = -i * _particleMaterial.timeInterval;
 					super.renderPass(index, renderable, stage3DProxy, entityCollector);
 				}
 			}

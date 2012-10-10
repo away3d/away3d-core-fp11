@@ -17,7 +17,7 @@ package a3dparticle.animators
 	 * ...
 	 * @author Cheng Liao
 	 */
-	public class TransformFollowAnimator extends ParticleAnimationtor
+	public class TransformFollowAnimator extends ParticleAnimator
 	{
 		private var _followTarget:Object3D;
 		private var _followAction:TransformFollowAction;

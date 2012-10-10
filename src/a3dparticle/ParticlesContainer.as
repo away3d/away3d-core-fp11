@@ -2,7 +2,7 @@ package a3dparticle
 {
 	import a3dparticle.animators.actions.ActionBase;
 	import a3dparticle.animators.ParticleAnimation;
-	import a3dparticle.animators.ParticleAnimationtor;
+	import a3dparticle.animators.ParticleAnimator;
 	import a3dparticle.core.ParticlesNode;
 	import a3dparticle.core.SubContainer;
 	import a3dparticle.generater.GeneraterBase;
@@ -25,7 +25,7 @@ package a3dparticle
 	{
 		public var initParticleFun:Function;
 		
-		protected var _animator:ParticleAnimationtor;
+		protected var _animator:ParticleAnimator;
 		protected var _particleAnimation : ParticleAnimation;
 		
 		protected var _isStart:Boolean;
@@ -42,7 +42,7 @@ package a3dparticle
 			{
 				_particleAnimation = new ParticleAnimation();
 				
-				_animator = new ParticleAnimationtor(_particleAnimation);
+				_animator = new ParticleAnimator(_particleAnimation);
 				_subContainers = new Vector.<SubContainer>();
 			}
 		}
@@ -213,7 +213,7 @@ package a3dparticle
 			return _particleAnimation;
 		}
 		
-		public function get animator() : ParticleAnimationtor
+		public function get animator() : ParticleAnimator
 		{
 			return _animator;
 		}
@@ -228,7 +228,7 @@ package a3dparticle
 			var clone : ParticlesContainer = new ParticlesContainer(true);
 			clone._hasGen = _hasGen;
 			clone._particleAnimation = _particleAnimation;
-			clone._animator = new ParticleAnimationtor(_particleAnimation);
+			clone._animator = new ParticleAnimator(_particleAnimation);
 			clone._subContainers = new Vector.<SubContainer>();
 			clone._isStart = _isStart;
 			clone.alwaysInFrustum = alwaysInFrustum;

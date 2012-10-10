@@ -10,7 +10,7 @@ package a3dparticle.animators
 	 * ...
 	 * @author ...
 	 */
-	public class ParticleAnimationtor extends AnimatorBase implements IAnimator
+	public class ParticleAnimator extends AnimatorBase implements IAnimator
 	{
 		
 		private var _particleAnimation:ParticleAnimation;
@@ -22,7 +22,7 @@ package a3dparticle.animators
 		public var passCount:int = 0;
 		
 		
-		public function ParticleAnimationtor(animationSet : ParticleAnimation)
+		public function ParticleAnimator(animationSet : ParticleAnimation)
 		{
 			super(animationSet);
 			_particleAnimation = animationSet;
