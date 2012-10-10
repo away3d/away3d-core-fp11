@@ -47,6 +47,11 @@ package a3dparticle
 			}
 		}
 		
+		public function get isPlaying():Boolean
+		{
+			return _isStart;
+		}
+		
 		public function set alwaysInFrustum(value:Boolean):void
 		{
 			_alwaysInFrustum = value;
