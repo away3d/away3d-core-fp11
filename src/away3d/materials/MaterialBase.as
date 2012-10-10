@@ -1,7 +1,6 @@
 package away3d.materials
 {
 	import away3d.animators.IAnimationSet;
-	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
@@ -42,6 +41,7 @@ package away3d.materials
 		arcane var _uniqueId : uint;
 
 		arcane var _renderOrderId : int;
+		arcane var _depthPassId : int;
 		arcane var _name : String = "material";
 
 		private var _bothSides : Boolean;
@@ -76,6 +76,8 @@ package away3d.materials
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
 			_distancePass = new DistanceMapPass();
+			_depthPass.addEventListener(Event.CHANGE, onDepthPassChange);
+			_distancePass.addEventListener(Event.CHANGE, onDistancePassChange);
 			
 			// Default to considering pre-multiplied textures while blending
 			alphaPremultiplied = true;
@@ -163,6 +165,8 @@ package away3d.materials
 
 			_depthPass.dispose();
 			_distancePass.dispose();
+			_depthPass.removeEventListener(Event.CHANGE, onDepthPassChange);
+			_distancePass.removeEventListener(Event.CHANGE, onDistancePassChange);
 		}
 
 		/**
@@ -497,6 +501,36 @@ package away3d.materials
 					}
 				}
 				mult *= 1000;
+			}
+		}
+
+		private function onDistancePassChange(event : Event) : void
+		{
+			var ids : Vector.<int> = _distancePass._program3Dids;
+			var len : uint = ids.length;
+
+			_depthPassId = 0;
+
+			for (var j : int = 0; j < len; ++j) {
+				if (ids[j] != -1) {
+					_depthPassId += ids[j];
+					j = len;
+				}
+			}
+		}
+
+		private function onDepthPassChange(event : Event) : void
+		{
+			var ids : Vector.<int> = _depthPass._program3Dids;
+			var len : uint = ids.length;
+
+			_depthPassId = 0;
+
+			for (var j : int = 0; j < len; ++j) {
+				if (ids[j] != -1) {
+					_depthPassId += ids[j];
+					j = len;
+				}
 			}
 		}
 	}

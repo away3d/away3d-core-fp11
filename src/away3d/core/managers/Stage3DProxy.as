@@ -474,7 +474,7 @@ package away3d.core.managers
 			// If not, we can't be sure and should stick to the
 			// old value (will likely be same if re-requesting.)
 			_usesSoftwareRendering ||= forceSoftware;
-			
+
 			_stage3D.requestContext3D(forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO);
 			_contextRequested = true;
 		}
