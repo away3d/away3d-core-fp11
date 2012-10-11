@@ -19,6 +19,8 @@ package away3d.bounds
 			super();
 			_alwaysIn = alwaysIn;
 			_renderable = renderable;
+			_max.x = _max.y = _max.z = Number.POSITIVE_INFINITY;
+			_min.x = _min.y = _min.z = _alwaysIn? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
 		}
 
 		override protected function createBoundingRenderable() : WireframePrimitiveBase
