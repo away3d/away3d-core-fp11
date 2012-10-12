@@ -181,7 +181,7 @@ package away3d.core.base
 		 */
 		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return _subGeometry.activateVertexBuffer(index, stage3DProxy);
+			_subGeometry.activateVertexBuffer(index, stage3DProxy);
 		}
 
 		/**
@@ -189,7 +189,7 @@ package away3d.core.base
 		 */
 		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return _subGeometry.activateVertexNormalBuffer(index, stage3DProxy);
+			_subGeometry.activateVertexNormalBuffer(index, stage3DProxy);
 		}
 
 		/**
@@ -197,7 +197,7 @@ package away3d.core.base
 		 */
 		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return _subGeometry.activateVertexTangentBuffer(index, stage3DProxy);
+			_subGeometry.activateVertexTangentBuffer(index, stage3DProxy);
 		}
 
 		/**
@@ -205,7 +205,7 @@ package away3d.core.base
 		 */
 		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return _subGeometry.activateUVBuffer(index, stage3DProxy);
+			_subGeometry.activateUVBuffer(index, stage3DProxy);
 		}
 
 		/**
@@ -213,7 +213,7 @@ package away3d.core.base
 		 */
 		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return _subGeometry.activateSecondaryUVBuffer(index, stage3DProxy);
+			_subGeometry.activateSecondaryUVBuffer(index, stage3DProxy);
 		}
 
 		/**
