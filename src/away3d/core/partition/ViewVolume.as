@@ -94,7 +94,7 @@ package away3d.core.partition
 
 		public function addVisibleStatic(entity : Entity, indexX : uint = 0, indexY : uint = 0, indexZ : uint = 0) : void
 		{
-			if (!entity.static)
+			if (!entity.staticNode)
 				throw new Error("Entity being added as a visible static object must have static set to true");
 
 			var index : int = getCellIndex(indexX, indexY, indexZ);

@@ -19,7 +19,7 @@ package away3d.core.partition
 		override arcane function markForUpdate(entity : Entity) : void
 		{
 			// ignore if static, will be handled separately by visibility list
-			if (!entity.static)
+			if (!entity.staticNode)
 				super.markForUpdate(entity);
 		}
 
