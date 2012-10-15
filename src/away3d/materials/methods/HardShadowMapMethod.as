@@ -25,7 +25,7 @@ package away3d.materials.methods
 		{
 			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			// needs to be reserved anyway:
+			// needs to be reserved anyway. DO NOT REMOVE
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";

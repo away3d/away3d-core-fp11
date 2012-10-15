@@ -29,6 +29,7 @@ package away3d.core.pick
 		
 		/**
 		 * PixelBender-based picking collider that returns the first encountered hit on an Entity. Useful for fast picking high poly meshes on desktop devices.
+		 * To use this, the SubGeometry must have its vertex data in separate buffers: use Geometry::convertToSeparateBuffers() to ensure this.
 		 * 
 		 * @see away3d.core.pick.PBPickingCollider
 		 */
@@ -36,7 +37,8 @@ package away3d.core.pick
 				
 		/**
 		 * PixelBender-based picking collider that returns the best (closest) hit on an Entity. Useful for fast picking high poly meshes on desktop devices.
-		 * 
+		 * To use this, the SubGeometry must have its vertex data in separate buffers: use Geometry::convertToSeparateBuffers() to ensure this.
+		 *
 		 * @see away3d.core.pick.PBPickingCollider
 		 */
 		public static const PB_BEST_HIT:IPickingCollider = new PBPickingCollider( true );

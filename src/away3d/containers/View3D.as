@@ -609,6 +609,7 @@
 			if (_requireDepthRender)
 				renderSceneDepthToTexture(_entityCollector);
 
+			// todo: perform depth prepass after light update and before final render
 			if (_depthPrepass)
 				renderDepthPrepass(_entityCollector);
 

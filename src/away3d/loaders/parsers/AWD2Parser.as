@@ -1,6 +1,7 @@
 package away3d.loaders.parsers
 {
 	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.core.base.ISubGeometry;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.animators.nodes.UVClipNode;
 	import flash.display.Sprite;
@@ -573,13 +574,9 @@ package away3d.loaders.parsers
 		
 		private function parseSkeletonAnimation(blockLength : uint) : SkeletonClipNode
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var num_frames : uint;
 			var frames_parsed : uint;
-			// TODO: not used
-			//var frame_rate : uint;
 			var frame_dur : Number;
 			
 			name = parseVarStr();
@@ -612,8 +609,6 @@ package away3d.loaders.parsers
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var par_id : uint;
 			var mtx : Matrix3D;
@@ -642,8 +637,6 @@ package away3d.loaders.parsers
 		
 		private function parseMeshInstance(blockLength : uint) : Mesh
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var mesh : Mesh, geom : Geometry;
 			var par_id : uint, data_id : uint;
@@ -726,7 +719,7 @@ package away3d.loaders.parsers
 			while (subs_parsed < num_subs) {
 				var i : uint;
 				var sm_len : uint, sm_end : uint;
-				var sub_geoms : Vector.<SubGeometry>;
+				var sub_geoms : Vector.<ISubGeometry>;
 				var w_indices : Vector.<Number>;
 				var weights : Vector.<Number>;
 				
@@ -853,7 +846,7 @@ package away3d.loaders.parsers
 					
 					key = _body.readUnsignedShort();
 					len = _body.readUnsignedInt();
-					if (expected.hasOwnProperty(key)) {
+					if (expected.hasOwnProperty(key.toString())) {
 						type = expected[key];
 						props.set(key, parseAttrValue(type, len));
 					}

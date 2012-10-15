@@ -8,6 +8,7 @@ package away3d.core.traverse
 	import away3d.lights.LightBase;
 	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
+	import away3d.materials.MaterialBase;
 
 	use namespace arcane;
 
@@ -36,12 +37,13 @@ package away3d.core.traverse
 		override public function applyRenderable(renderable : IRenderable) : void
 		{
 			// the test for material is temporary, you SHOULD be hammered with errors if you try to render anything without a material
-			if (renderable.castsShadows && renderable.material) {
+			var material : MaterialBase = renderable.material;
+			if (renderable.castsShadows && material) {
 				var item : RenderableListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
 				item.zIndex = renderable.zIndex;
-				item.renderOrderId = renderable.material._uniqueId;
+				item.renderOrderId = material._depthPassId;
 				_opaqueRenderableHead = item;
 			}
 		}

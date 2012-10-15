@@ -17,7 +17,6 @@ package away3d.primitives
 	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 
@@ -35,12 +34,12 @@ package away3d.primitives
 		private var _material : SkyBoxMaterial;
 		private var _uvTransform : Matrix = new Matrix();
 		private var _animator : IAnimator;
-		
-		public function get animator():IAnimator
+
+		public function get animator() : IAnimator
 		{
 			return _animator;
 		}
-		
+
 		/**
 		 * Create a new SkyBox object.
 		 * @param cubeMap The CubeMap to use for the sky box's texture.
@@ -56,49 +55,41 @@ package away3d.primitives
 		}
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex positions.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex positions.
+		 * @inheritDoc
 		 */
-		public function getVertexBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return _geometry.getVertexBuffer(stage3DProxy);
+			_geometry.activateVertexBuffer(index, stage3DProxy);
 		}
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains texture coordinates.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains texture coordinates.
+		 * @inheritDoc
 		 */
-		public function getUVBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return null;
 		}
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex normals.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex normals.
+		 * @inheritDoc
 		 */
-		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return null;
 		}
 
 		/**
-		 * Retrieves the VertexBuffer3D object that contains vertex tangents.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains vertex tangents.
+		 * @inheritDoc
 		 */
-		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void
 		{
-			return null;
 		}
 
+		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void {}
+		public function activateCustomBuffer(index : int, stage3DProxy : Stage3DProxy) : void {}
+
+
+
 		/**
-		 * Retrieves the VertexBuffer3D object that contains triangle indices.
-		 * @param context The Context3D for which we request the buffer
-		 * @return The VertexBuffer3D object that contains triangle indices.
+		 * @inheritDoc
 		 */
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
@@ -137,7 +128,7 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		override public function pushModelViewProjection(camera : Camera3D) : void
+		override public function pushModelViewProjection(camera : Camera3D, updateZIndex : Boolean = true) : void
 		{
 			var size : Number = camera.lens.far / Math.sqrt(2) * .5;
 			if (++_mvpIndex == _stackLen) {
@@ -187,7 +178,7 @@ package away3d.primitives
 		/**
 		 * Builds the geometry that forms the SkyBox
 		 */
-		private function buildGeometry(target : SubGeometry):void
+		private function buildGeometry(target : SubGeometry) : void
 		{
 			var vertices : Vector.<Number>;
 			var indices : Vector.<uint>;
@@ -206,17 +197,23 @@ package away3d.primitives
 			vertices.fixed = true;
 
 			// top
-			indices.push(0, 1, 2);	indices.push(2, 3, 0);
+			indices.push(0, 1, 2);
+			indices.push(2, 3, 0);
 			// bottom
-			indices.push(6, 5, 4);	indices.push(4, 7, 6);
+			indices.push(6, 5, 4);
+			indices.push(4, 7, 6);
 			// far
-			indices.push(2, 6, 7);	indices.push(7, 3, 2);
+			indices.push(2, 6, 7);
+			indices.push(7, 3, 2);
 			// near
-			indices.push(4, 5, 1);	indices.push(1, 0, 4);
+			indices.push(4, 5, 1);
+			indices.push(1, 0, 4);
 			// left
-			indices.push(4, 0, 3);	indices.push(3, 7, 4);
+			indices.push(4, 0, 3);
+			indices.push(3, 7, 4);
 			// right
-			indices.push(2, 1, 5);	indices.push(5, 6, 2);
+			indices.push(2, 1, 5);
+			indices.push(5, 6, 2);
 
 			target.updateVertexData(vertices);
 			target.updateIndexData(indices);
@@ -232,50 +229,54 @@ package away3d.primitives
 			return _uvTransform;
 		}
 
-		public function getSecondaryUVBuffer( stage3DProxy:Stage3DProxy ):VertexBuffer3D {
-			return null;
-		}
-
-		public function getCustomBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+		public function get vertexData() : Vector.<Number>
 		{
-			return null;
-		}
-
-		public function get vertexBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get normalBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get tangentBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get UVBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get secondaryUVBufferOffset() : int
-		{
-			return 0;
-		}
-
-		public function get vertexData():Vector.<Number> {
 			return _geometry.vertexData;
 		}
 
-		public function get indexData():Vector.<uint> {
+		public function get indexData() : Vector.<uint>
+		{
 			return _geometry.indexData;
 		}
 
-		public function get UVData():Vector.<Number> {
+		public function get UVData() : Vector.<Number>
+		{
 			return _geometry.UVData;
+		}
+
+		public function get numVertices() : uint
+		{
+			return _geometry.numVertices;
+		}
+
+		public function get vertexStride() : uint
+		{
+			return _geometry.vertexStride;
+		}
+
+		public function get vertexNormalData() : Vector.<Number>
+		{
+			return _geometry.vertexNormalData;
+		}
+
+		public function get vertexTangentData() : Vector.<Number>
+		{
+			return _geometry.vertexTangentData;
+		}
+
+		public function get vertexOffset() : int
+		{
+			return _geometry.vertexOffset;
+		}
+
+		public function get vertexNormalOffset() : int
+		{
+			return _geometry.vertexNormalOffset;
+		}
+
+		public function get vertexTangentOffset() : int
+		{
+			return _geometry.vertexTangentOffset;
 		}
 	}
 }

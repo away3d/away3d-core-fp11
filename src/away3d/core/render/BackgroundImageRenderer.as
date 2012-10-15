@@ -74,11 +74,11 @@ package away3d.core.render
 
 			_stage3DProxy.setProgram(_program3d);
 			_stage3DProxy.setTextureAt(0, _texture.getTextureForStage3D(_stage3DProxy));
-			_stage3DProxy.setSimpleVertexBuffer(0, _vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 0);
-			_stage3DProxy.setSimpleVertexBuffer(1, _vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 2);
+			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
+			context.setVertexBufferAt(1, _vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
 			context.drawTriangles(_indexBuffer, 0, 2);
-			_stage3DProxy.setSimpleVertexBuffer(0, null, null, 0);
-			_stage3DProxy.setSimpleVertexBuffer(1, null, null, 0);
+			context.setVertexBufferAt(0, null);
+			context.setVertexBufferAt(1, null);
 			_stage3DProxy.setTextureAt(0, null);
 		}
 

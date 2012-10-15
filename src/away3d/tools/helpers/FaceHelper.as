@@ -1,6 +1,9 @@
 package away3d.tools.helpers
 {
 	import away3d.arcane;
+	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
@@ -30,7 +33,7 @@ package away3d.tools.helpers
 			if(mesh.geometry.subGeometries.length-1 < subGeomIndice)
 				throw new Error("no subGeometry at index provided:"+subGeomIndice);
 			
-			subGeom = mesh.geometry.subGeometries[subGeomIndice];
+			subGeom = SubGeometry(mesh.geometry.subGeometries[subGeomIndice]);
 			 
 			var vertices:Vector.<Number> = subGeom.vertexData || new Vector.<Number>();
 			var indices:Vector.<uint>;
@@ -470,7 +473,7 @@ package away3d.tools.helpers
 		
 		private static function applyMethod(methodID:uint, mesh:Mesh, value:Number = 0):void
 		{
-			var subGeoms:Vector.<SubGeometry> = mesh.geometry.subGeometries;
+			var subGeoms:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
 			var indices:Vector.<uint>;
 			var faceNumber:uint;
 			var j:uint;
@@ -509,12 +512,12 @@ package away3d.tools.helpers
 		
 		private static function getSubGeometry(mesh:Mesh, subGeomIndice:uint):SubGeometry
 		{
-			var subGeoms:Vector.<SubGeometry> = mesh.geometry.subGeometries;
+			var subGeoms:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
 			
 			if(subGeomIndice>subGeoms.length-1)
 				throw new Error("ERROR >> subGeomIndice is out of range!");
 			
-			return subGeoms[subGeomIndice];
+			return SubGeometry(subGeoms[subGeomIndice]);
 		}
 		
 		private static function getUsedIndice(vertices:Vector.<Number>, x:Number, y:Number, z:Number):int

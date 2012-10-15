@@ -25,16 +25,15 @@ package away3d.core.pick
 			return normal;
 		}
 
-		protected function getCollisionUV( indexData:Vector.<uint>, uvData:Vector.<Number>, triangleIndex:uint, v:Number, w:Number, u:Number ):Point {
+		protected function getCollisionUV( indexData:Vector.<uint>, uvData:Vector.<Number>, triangleIndex:uint, v:Number, w:Number, u:Number, uvOffset : uint, uvStride : uint):Point {
 			var uv:Point = new Point();
-			var uvIndex:Number = indexData[ triangleIndex ] * 2;
-			var uv0:Vector3D = new Vector3D( uvData[ uvIndex ], uvData[ uvIndex + 1 ] );
-			triangleIndex++;
-			uvIndex = indexData[ triangleIndex ] * 2;
-			var uv1:Vector3D = new Vector3D( uvData[ uvIndex ], uvData[ uvIndex + 1 ] );
-			triangleIndex++;
-			uvIndex = indexData[ triangleIndex ] * 2;
-			var uv2:Vector3D = new Vector3D( uvData[ uvIndex ], uvData[ uvIndex + 1 ] );
+			var uIndex:uint = indexData[ triangleIndex ] * uvStride + uvOffset;
+			var vIndex:uint = uIndex + 1;
+			var uv0:Vector3D = new Vector3D( uvData[ uIndex ], uvData[ vIndex ] );
+			uIndex = indexData[ triangleIndex+1 ] * uvStride + uvOffset;
+			var uv1:Vector3D = new Vector3D( uvData[ uIndex ], uvData[ vIndex ] );
+			uIndex = indexData[ triangleIndex+2 ] * uvStride + uvOffset;
+			var uv2:Vector3D = new Vector3D( uvData[ uIndex ], uvData[ vIndex ] );
 			uv.x = u * uv0.x + v * uv1.x + w * uv2.x;
 			uv.y = u * uv0.y + v * uv1.y + w * uv2.y;
 			return uv;

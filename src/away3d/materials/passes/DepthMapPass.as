@@ -118,7 +118,7 @@
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (_alphaThreshold > 0)
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.UVBufferOffset);
+				renderable.activateUVBuffer(1, stage3DProxy);
 
 			super.render(renderable, stage3DProxy, camera);
 		}

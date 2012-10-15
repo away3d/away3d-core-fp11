@@ -439,10 +439,10 @@ package away3d.materials.passes
 		{
 			var i : uint;
 			var context : Context3D = stage3DProxy._context3D;
-			if (_uvBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_uvBufferIndex, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.UVBufferOffset);
-			if (_secondaryUVBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_secondaryUVBufferIndex, renderable.getSecondaryUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.secondaryUVBufferOffset);
-			if (_normalBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_normalBufferIndex, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
-			if (_tangentBufferIndex >= 0) stage3DProxy.setSimpleVertexBuffer(_tangentBufferIndex, renderable.getVertexTangentBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.tangentBufferOffset);
+			if (_uvBufferIndex >= 0) renderable.activateUVBuffer(_uvBufferIndex, stage3DProxy);
+			if (_secondaryUVBufferIndex >= 0) renderable.activateSecondaryUVBuffer(_secondaryUVBufferIndex, stage3DProxy);
+			if (_normalBufferIndex >= 0) renderable.activateVertexNormalBuffer(_normalBufferIndex, stage3DProxy);
+			if (_tangentBufferIndex >= 0) renderable.activateVertexTangentBuffer(_tangentBufferIndex, stage3DProxy);
 
 			if (_animateUVs) {
 				var uvTransform : Matrix = renderable.uvTransform;

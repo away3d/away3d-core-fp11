@@ -26,7 +26,6 @@ package away3d.animators
         private var _globalPose : SkeletonPose = new SkeletonPose();
 		private var _globalPropertiesDirty : Boolean;
 		private var _numJoints : uint;
-		private var _bufferFormat : String;
 		private var _animationStates : Dictionary = new Dictionary();
 		private var _condensedMatrices : Vector.<Number>;
 		
@@ -112,8 +111,7 @@ package away3d.animators
 			
 			_numJoints = _skeleton.numJoints;
 			_globalMatrices = new Vector.<Number>(_numJoints*12, true);
-			_bufferFormat = "float" + _jointsPerVertex;
-			
+
 			var j : int;
 			for (var i : uint = 0; i < _numJoints; ++i) {
 				_globalMatrices[j++] = 1; _globalMatrices[j++] = 0; _globalMatrices[j++] = 0; _globalMatrices[j++] = 0;
@@ -190,16 +188,14 @@ package away3d.animators
 						morphGeometry(subGeomAnimState, skinnedGeom);
 						subGeomAnimState.dirty = false;
 					}
-					skinnedGeom.animatedVertexData = subGeomAnimState.animatedVertexData;
-					skinnedGeom.animatedNormalData = subGeomAnimState.animatedNormalData;
-					skinnedGeom.animatedTangentData = subGeomAnimState.animatedTangentData;
+					skinnedGeom.updateAnimatedData(subGeomAnimState.animatedVertexData);
 					return;
 				}
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _globalMatrices, _numJoints*3);
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset, skinnedGeom.getJointIndexBuffer(stage3DProxy), _bufferFormat, 0);
-			stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset+1, skinnedGeom.getJointWeightsBuffer(stage3DProxy), _bufferFormat, 0);
+			skinnedGeom.activateJointIndexBuffer(vertexStreamOffset, stage3DProxy);
+			skinnedGeom.activateJointWeightsBuffer(vertexStreamOffset + 1, stage3DProxy);
 		}
 				
         /**
@@ -257,7 +253,6 @@ package away3d.animators
 			var ox : Number, oy : Number, oz : Number, ow : Number;
 			var xy2 : Number, xz2 : Number, xw2 : Number;
 			var yz2 : Number, yw2 : Number, zw2 : Number;
-			var xx : Number, yy : Number, zz : Number, ww : Number;
 			var n11 : Number, n12 : Number, n13 : Number, n14 : Number;
 			var n21 : Number, n22 : Number, n23 : Number, n24 : Number;
 			var n31 : Number, n32 : Number, n33 : Number, n34 : Number;
@@ -268,38 +263,59 @@ package away3d.animators
 			var pose : JointPose;
 			var quat : Quaternion;
 			var vec : Vector3D;
-			
+			var t : Number;
+
 			for (var i : uint = 0; i < _numJoints; ++i) {
 				pose = globalPoses[i];
 				quat = pose.orientation;
 				vec = pose.translation;
 				ox = quat.x;	oy = quat.y;	oz = quat.z;	ow = quat.w;
-				xy2 = 2.0 * ox * oy; 	xz2 = 2.0 * ox * oz; 	xw2 = 2.0 * ox * ow;
-				yz2 = 2.0 * oy * oz; 	yw2 = 2.0 * oy * ow; 	zw2 = 2.0 * oz * ow;
-				xx = ox * ox;			yy = oy * oy;			zz = oz * oz; 			ww = ow * ow;
-				
-				n11 = xx - yy - zz + ww;	n12 = xy2 - zw2;			n13 = xz2 + yw2;			n14 = vec.x;
-				n21 = xy2 + zw2;			n22 = -xx + yy - zz + ww;	n23 = yz2 - xw2;			n24 = vec.y;
-				n31 = xz2 - yw2;			n32 = yz2 + xw2;			n33 = -xx - yy + zz + ww;	n34 = vec.z;
+
+				xy2 = (t = 2.0*ox) * oy;
+				xz2 = t * oz;
+				xw2 = t * ow;
+				yz2 = (t = 2.0 * oy) * oz;
+				yw2 = t * ow;
+				zw2 = 2.0 * oz * ow;
+
+				yz2 = 2.0 * oy * oz;
+				yw2 = 2.0 * oy * ow;
+				zw2 = 2.0 * oz * ow;
+				ox *= ox;
+				oy *= oy;
+				oz *= oz;
+				ow *= ow;
+
+				n11 = (t = ox - oy) - oz + ow;
+				n12 = xy2 - zw2;
+				n13 = xz2 + yw2;
+				n21 = xy2 + zw2;
+				n22 = -t - oz + ow;
+				n23 = yz2 - xw2;
+				n31 = xz2 - yw2;
+				n32 = yz2 + xw2;
+				n33 = -ox - oy + oz + ow;
 				
 				// prepend inverse bind pose
 				raw = joints[i].inverseBindPose;
 				m11 = raw[0];	m12 = raw[4];	m13 = raw[8];	m14 = raw[12];
 				m21 = raw[1];	m22 = raw[5];   m23 = raw[9];	m24 = raw[13];
 				m31 = raw[2];   m32 = raw[6];   m33 = raw[10];  m34 = raw[14];
-				
-				_globalMatrices[mtxOffset++] = n11 * m11 + n12 * m21 + n13 * m31;
-				_globalMatrices[mtxOffset++] = n11 * m12 + n12 * m22 + n13 * m32;
-				_globalMatrices[mtxOffset++] = n11 * m13 + n12 * m23 + n13 * m33;
-				_globalMatrices[mtxOffset++] = n11 * m14 + n12 * m24 + n13 * m34 + n14;
-				_globalMatrices[mtxOffset++] = n21 * m11 + n22 * m21 + n23 * m31;
-				_globalMatrices[mtxOffset++] = n21 * m12 + n22 * m22 + n23 * m32;
-				_globalMatrices[mtxOffset++] = n21 * m13 + n22 * m23 + n23 * m33;
-				_globalMatrices[mtxOffset++] = n21 * m14 + n22 * m24 + n23 * m34 + n24;
-				_globalMatrices[mtxOffset++] = n31 * m11 + n32 * m21 + n33 * m31;
-				_globalMatrices[mtxOffset++] = n31 * m12 + n32 * m22 + n33 * m32;
-				_globalMatrices[mtxOffset++] = n31 * m13 + n32 * m23 + n33 * m33;
-				_globalMatrices[mtxOffset++] = n31 * m14 + n32 * m24 + n33 * m34 + n34;
+
+				_globalMatrices[uint(mtxOffset)] = n11 * m11 + n12 * m21 + n13 * m31;
+				_globalMatrices[uint(mtxOffset+1)] = n11 * m12 + n12 * m22 + n13 * m32;
+				_globalMatrices[uint(mtxOffset+2)] = n11 * m13 + n12 * m23 + n13 * m33;
+				_globalMatrices[uint(mtxOffset+3)] = n11 * m14 + n12 * m24 + n13 * m34 + vec.x;
+				_globalMatrices[uint(mtxOffset+4)] = n21 * m11 + n22 * m21 + n23 * m31;
+				_globalMatrices[uint(mtxOffset+5)] = n21 * m12 + n22 * m22 + n23 * m32;
+				_globalMatrices[uint(mtxOffset+6)] = n21 * m13 + n22 * m23 + n23 * m33;
+				_globalMatrices[uint(mtxOffset+7)] = n21 * m14 + n22 * m24 + n23 * m34 + vec.y;
+				_globalMatrices[uint(mtxOffset+8)] = n31 * m11 + n32 * m21 + n33 * m31;
+				_globalMatrices[uint(mtxOffset+9)] = n31 * m12 + n32 * m22 + n33 * m32;
+				_globalMatrices[uint(mtxOffset+10)] = n31 * m13 + n32 * m23 + n33 * m33;
+				_globalMatrices[uint(mtxOffset+11)] = n31 * m14 + n32 * m24 + n33 * m34 + vec.z;
+
+				mtxOffset = uint(mtxOffset + 12);
 			}
 		}
 		
@@ -307,26 +323,19 @@ package away3d.animators
 		 * If the animation can't be performed on GPU, transform vertices manually
 		 * @param subGeom The subgeometry containing the weights and joint index data per vertex.
 		 * @param pass The material pass for which we need to transform the vertices
-		 *
-		 * todo: we may be able to transform tangents more easily, similar to how it happens on gpu
 		 */
 		private function morphGeometry(state : SubGeomAnimationState, subGeom : SkinnedSubGeometry) : void
 		{
-			// todo: improve performance, should be able to use cache coherency better once buffers are merged
-			var verts : Vector.<Number> = subGeom.vertexData;
-			var normals : Vector.<Number> = subGeom.vertexNormalData;
-			var tangents : Vector.<Number> = subGeom.vertexTangentData;
-			var targetVerts : Vector.<Number> = state.animatedVertexData;
-			var targetNormals : Vector.<Number> = state.animatedNormalData;
-			var targetTangents : Vector.<Number> = state.animatedTangentData;
+			var vertexData : Vector.<Number> = subGeom.vertexData;
+			var targetData : Vector.<Number> = state.animatedVertexData;
 			var jointIndices : Vector.<Number> = subGeom.jointIndexData;
 			var jointWeights : Vector.<Number> = subGeom.jointWeightsData;
-			var i1 : uint, i2 : uint, i3 : uint;
+			var index : uint;
 			var j : uint, k : uint;
 			var vx : Number, vy : Number, vz : Number;
 			var nx : Number, ny : Number, nz : Number;
 			var tx : Number, ty : Number, tz : Number;
-			var len : int = verts.length;
+			var len : int = vertexData.length;
 			var weight : Number;
 			var vertX : Number, vertY : Number, vertZ : Number;
 			var normX : Number, normY : Number, normZ : Number;
@@ -335,45 +344,44 @@ package away3d.animators
 			var m21 : Number, m22 : Number, m23 : Number, m24 : Number;
 			var m31 : Number, m32 : Number, m33 : Number, m34 : Number;
 
-			while (i1 < len) {
-				i2 = uint(i1 + 1);
-				i3 = uint(i1 + 2);
-				vertX = verts[i1]; vertY = verts[i2]; vertZ = verts[i3];
-				normX = normals[i1]; normY = normals[i2]; normZ = normals[i3];
-				tangX = tangents[i1]; tangY = tangents[i2]; tangZ = tangents[i3];
+			while (index < len) {
+				vertX = vertexData[index]; vertY = vertexData[uint(index+1)]; vertZ = vertexData[uint(index+2)];
+				normX = vertexData[uint(index+3)]; normY = vertexData[uint(index+4)]; normZ = vertexData[uint(index+5)];
+				tangX = vertexData[uint(index+6)]; tangY = vertexData[uint(index+7)]; tangZ = vertexData[uint(index+8)];
 				vx = 0; vy = 0; vz = 0;
 				nx = 0; ny = 0; nz = 0;
 				tx = 0; ty = 0; tz = 0;
 				k = 0;
 				while (k < _jointsPerVertex) {
 					weight = jointWeights[j];
-					if (weight == 0) {
-						j += _jointsPerVertex - k;
-						k = _jointsPerVertex;
-						continue;
+					if (weight > 0) {
+						// implicit /3*12 (/3 because indices are multiplied by 3 for gpu matrix access, *12 because it's the matrix size)
+						var mtxOffset : uint = uint(jointIndices[j++]) << 2;
+						m11 = _globalMatrices[mtxOffset]; m12 = _globalMatrices[uint(mtxOffset+1)]; m13 = _globalMatrices[uint(mtxOffset+2)]; m14 = _globalMatrices[uint(mtxOffset+3)];
+						m21 = _globalMatrices[uint(mtxOffset+4)]; m22 = _globalMatrices[uint(mtxOffset+5)]; m23 = _globalMatrices[uint(mtxOffset+6)]; m24 = _globalMatrices[uint(mtxOffset+7)];
+						m31 = _globalMatrices[uint(mtxOffset+8)]; m32 = _globalMatrices[uint(mtxOffset+9)]; m33 = _globalMatrices[uint(mtxOffset+10)];  m34 = _globalMatrices[uint(mtxOffset+11)];
+						vx += weight*(m11*vertX + m12*vertY + m13*vertZ + m14);
+						vy += weight*(m21*vertX + m22*vertY + m23*vertZ + m24);
+						vz += weight*(m31*vertX + m32*vertY + m33*vertZ + m34);
+						nx += weight*(m11*normX + m12*normY + m13*normZ);
+						ny += weight*(m21*normX + m22*normY + m23*normZ);
+						nz += weight*(m31*normX + m32*normY + m33*normZ);
+						tx += weight*(m11*tangX + m12*tangY + m13*tangZ);
+						ty += weight*(m21*tangX + m22*tangY + m23*tangZ);
+						tz += weight*(m31*tangX + m32*tangY + m33*tangZ);
+						++k;
 					}
-					// implicit /3*12 (/3 because indices are multiplied by 3 for gpu matrix access, *12 because it's the matrix size)
-					var mtxOffset : uint = uint(jointIndices[uint(j++)]) << 2;
-					m11 = _globalMatrices[mtxOffset]; m12 = _globalMatrices[uint(mtxOffset+1)]; m13 = _globalMatrices[uint(mtxOffset+2)]; m14 = _globalMatrices[uint(mtxOffset+3)];
-					m21 = _globalMatrices[uint(mtxOffset+4)]; m22 = _globalMatrices[uint(mtxOffset+5)]; m23 = _globalMatrices[uint(mtxOffset+6)]; m24 = _globalMatrices[uint(mtxOffset+7)];
-					m31 = _globalMatrices[uint(mtxOffset+8)]; m32 = _globalMatrices[uint(mtxOffset+9)]; m33 = _globalMatrices[uint(mtxOffset+10)];  m34 = _globalMatrices[uint(mtxOffset+11)];
-					vx += weight*(m11*vertX + m12*vertY + m13*vertZ + m14);
-					vy += weight*(m21*vertX + m22*vertY + m23*vertZ + m24);
-					vz += weight*(m31*vertX + m32*vertY + m33*vertZ + m34);
-					nx += weight*(m11*normX + m12*normY + m13*normZ);
-					ny += weight*(m21*normX + m22*normY + m23*normZ);
-					nz += weight*(m31*normX + m32*normY + m33*normZ);
-					tx += weight*(m11*tangX + m12*tangY + m13*tangZ);
-					ty += weight*(m21*tangX + m22*tangY + m23*tangZ);
-					tz += weight*(m31*tangX + m32*tangY + m33*tangZ);
-					k++;
+					else {
+						j += uint(_jointsPerVertex - k);
+						k = _jointsPerVertex;
+					}
 				}
 
-				targetVerts[i1] = vx; targetVerts[i2] = vy; targetVerts[i3] = vz;
-				targetNormals[i1] = nx; targetNormals[i2] = ny; targetNormals[i3] = nz;
-				targetTangents[i1] = tx; targetTangents[i2] = ty; targetTangents[i3] = tz;
-				
-				i1 += 3;
+				targetData[index] = vx; targetData[uint(index+1)] = vy; targetData[uint(index+2)] = vz;
+				targetData[uint(index+3)] = nx; targetData[uint(index+4)] = ny; targetData[uint(index+5)] = nz;
+				targetData[uint(index+6)] = tx; targetData[uint(index+7)] = ty; targetData[uint(index+8)] = tz;
+
+				index = uint(index + 13);
 			}
 		}
 		
@@ -486,19 +494,15 @@ package away3d.animators
 	}
 }
 
-import away3d.core.base.SubGeometry;
+import away3d.core.base.CompactSubGeometry;
 
 class SubGeomAnimationState
 {
 	public var animatedVertexData : Vector.<Number>;
-	public var animatedNormalData : Vector.<Number>;
-	public var animatedTangentData : Vector.<Number>;
 	public var dirty : Boolean = true;
 	
-	public function SubGeomAnimationState(subGeom : SubGeometry)
+	public function SubGeomAnimationState(subGeom : CompactSubGeometry)
 	{
 		animatedVertexData = subGeom.vertexData.concat();
-		animatedNormalData = subGeom.vertexNormalData.concat();
-		animatedTangentData = subGeom.vertexTangentData.concat();
 	}
 }

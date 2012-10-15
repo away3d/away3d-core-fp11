@@ -94,7 +94,7 @@ package away3d.core.pick
 			draw( collector, null );
 
 			// clear buffers
-			_stage3DProxy.setSimpleVertexBuffer( 0, null, null, 0 );
+			_context.setVertexBufferAt(0, null);
 
 			if (!_context || !_potentialFound)
 				return null;
@@ -183,7 +183,7 @@ package away3d.core.pick
 
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
-				_stage3DProxy.setSimpleVertexBuffer( 0, renderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, 0);
+				renderable.activateVertexBuffer(0, _stage3DProxy);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
 
 				item = item.next;
@@ -279,7 +279,7 @@ package away3d.core.pick
 			_context.setScissorRectangle(MOUSE_SCISSOR_RECT);
 			_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, localViewProjection, true);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _boundOffsetScale, 2);
-			_stage3DProxy.setSimpleVertexBuffer( 0, _hitRenderable.getVertexBuffer(_stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, 0);
+			_hitRenderable.activateVertexBuffer(0, _stage3DProxy);
 			_context.drawTriangles(_hitRenderable.getIndexBuffer(_stage3DProxy), 0, _hitRenderable.numTriangles);
 			_context.drawToBitmapData(_bitmapData);
 
@@ -297,7 +297,7 @@ package away3d.core.pick
 		 */
 		private function getPreciseDetails(camera : Camera3D) : void {
 
-			var subGeom : SubGeometry = SubMesh(_hitRenderable).subGeometry;
+			var subGeom : ISubGeometry = SubMesh(_hitRenderable).subGeometry;
 			var indices : Vector.<uint> = subGeom.indexData;
 			var vertices : Vector.<Number> = subGeom.vertexData;
 			var len : int = indices.length;
@@ -312,21 +312,23 @@ package away3d.core.pick
 			var dot00 : Number, dot01 : Number, dot02 : Number, dot11 : Number, dot12 : Number;
 			var s : Number, t : Number, invDenom : Number;
 			var uvs : Vector.<Number> = subGeom.UVData;
-			var normals : Vector.<Number> = subGeom.faceNormalsData;
+			var normals : Vector.<Number> = subGeom.faceNormals;
 			var x : Number = _localHitPosition.x, y : Number = _localHitPosition.y, z : Number = _localHitPosition.z;
 			var u : Number, v : Number;
 			var ui1 : uint, ui2 : uint, ui3 : uint;
 			var s0x:Number, s0y:Number, s0z:Number;
 			var s1x:Number, s1y:Number, s1z:Number;
 			var nl:Number;
+			var stride:int = subGeom.vertexStride;
+			var vertexOffset:int = subGeom.vertexOffset;
 
 			updateRay(camera);
 
 
 			while (i < len) {
-				t1 = indices[i]*3;
-				t2 = indices[j]*3;
-				t3 = indices[k]*3;
+				t1 = vertexOffset + indices[i]*stride;
+				t2 = vertexOffset + indices[j]*stride;
+				t3 = vertexOffset + indices[k]*stride;
 				x1 = vertices[t1];	y1 = vertices[t1+1];	z1 = vertices[t1+2];
 				x2 = vertices[t2];	y2 = vertices[t2+1];	z2 = vertices[t2+2];
 				x3 = vertices[t3];	y3 = vertices[t3+1];	z3 = vertices[t3+2];

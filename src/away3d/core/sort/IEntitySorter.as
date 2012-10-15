@@ -7,15 +7,12 @@ package away3d.core.sort
 	 * EntitySorterBase provides an abstract base class to sort geometry information in an EntityCollector object for
 	 * rendering.
 	 */
-	public class EntitySorterBase
+	public interface IEntitySorter
 	{
 		/**
 		 * Sort the potentially visible data in an EntityCollector for rendering.
 		 * @param collector The EntityCollector object containing the potentially visible data.
 		 */
-		public function sort(collector : EntityCollector) : void
-		{
-			throw new AbstractMethodError();
-		}
+		function sort(collector : EntityCollector) : void;
 	}
 }

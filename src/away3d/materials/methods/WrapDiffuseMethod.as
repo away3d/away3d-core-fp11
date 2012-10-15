@@ -102,7 +102,7 @@ package away3d.materials.methods
 					"sat " + t + ".w, " + t + ".y\n" +
 					"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
-			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache);
+			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
 			if (_scatterTexture) {
 				code += "mul " + t + ".x, " + t + ".w, " + _wrapDataRegister + ".z\n" +

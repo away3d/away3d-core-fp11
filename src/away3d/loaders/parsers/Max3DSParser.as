@@ -1,10 +1,10 @@
 package away3d.loaders.parsers
 {
+	import away3d.core.base.ISubGeometry;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
@@ -476,7 +476,7 @@ package away3d.loaders.parsers
 		{
 			if (obj.type == AssetType.MESH) {
 				var i : uint;
-				var subs : Vector.<SubGeometry>;
+				var subs : Vector.<ISubGeometry>;
 				var geom : Geometry;
 				var mat : MaterialBase;
 				var mesh : Mesh;

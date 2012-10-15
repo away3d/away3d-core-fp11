@@ -1,5 +1,6 @@
 package away3d.tools.helpers
 {
+	import away3d.core.base.ISubGeometry;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
@@ -104,7 +105,7 @@ package away3d.tools.helpers
 		public static function applyRotations(mesh:Mesh):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:int = geometries.length;
 			var vertices:Vector.<Number>;
 			var normals:Vector.<Number>;
@@ -187,7 +188,7 @@ package away3d.tools.helpers
 				return;
 			}
 			 
-			var geometries:Vector.<SubGeometry> = mesh.geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
 			var numSubGeoms:int = geometries.length;
 			var vertices:Vector.<Number>;
 			var len: uint;
@@ -249,7 +250,7 @@ package away3d.tools.helpers
 		public static function applyPosition(mesh:Mesh, dx:Number, dy:Number, dz:Number):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:int = geometries.length;
 			var vertices:Vector.<Number>;
 			var verticesLength: uint;
@@ -315,7 +316,7 @@ package away3d.tools.helpers
 		*/
 		public static function invertFaces(mesh:Mesh, invertU:Boolean = false):void
 		{
-			var subGeometries:Vector.<SubGeometry> = mesh.geometry.subGeometries;
+			var subGeometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
 			var numSubGeoms:uint = subGeometries.length;
 			var indices:Vector.<uint>;
 			var normals:Vector.<Number>;
@@ -478,7 +479,7 @@ package away3d.tools.helpers
 		public static function splitMesh(mesh:Mesh, disposeSource:Boolean = false) : Vector.<Mesh>
 		{
 			var meshes:Vector.<Mesh> = new Vector.<Mesh>();
-			var geometries:Vector.<SubGeometry> = mesh.geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
 			if(numSubGeoms == 1){
@@ -501,7 +502,7 @@ package away3d.tools.helpers
 			var j : uint = 0;
 			
 			for (var i : uint = 0; i < numSubGeoms; ++i){
-				subGeom = geometries[i];
+				subGeom = SubGeometry(geometries[i]);
 				vertices = subGeom.vertexData;
 				indices = subGeom.indexData;
 				uvs = subGeom.UVData;

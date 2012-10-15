@@ -1,6 +1,7 @@
 package away3d.primitives
 {
 	import away3d.arcane;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.SubGeometry;
 
 	use namespace arcane;
@@ -128,72 +129,80 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target : SubGeometry) : void
+		protected override function buildGeometry(target : CompactSubGeometry) : void
 		{
-			var vertices : Vector.<Number>;
-			var normals : Vector.<Number>;
-			var tangents : Vector.<Number>;
+			var data : Vector.<Number>;
 			var indices : Vector.<uint>;
 			var x : Number, y : Number;
 			var numIndices : uint = 0;
 			var base : uint;
 			var tw : uint = _segmentsW+1;
 			var numVertices : uint = (_segmentsH + 1) * tw;
+			var stride:uint = target.vertexStride;
+			var skip:uint = stride - 9;
 			if (_doubleSided) numVertices *= 2;
 
 			if (numVertices == target.numVertices) {
-				vertices = target.vertexData;
-				normals = target.vertexNormalData;
-				tangents = target.vertexTangentData;
-				indices = target.indexData;
+				data = target.vertexData;
+				indices = target.indexData || new Vector.<uint>(numIndices, true);
 			}
 			else {
-				vertices = new Vector.<Number>(numVertices * 3, true);
-				normals = new Vector.<Number>(numVertices * 3, true);
-				tangents = new Vector.<Number>(numVertices * 3, true);
+				data = new Vector.<Number>(numVertices * stride, true);
 				numIndices = _segmentsH * _segmentsW * 6;
 				if (_doubleSided) numIndices <<= 1;
 				indices = new Vector.<uint>(numIndices, true);
+				invalidateUVs();
 			}
 
 			numIndices = 0;
-			numVertices = 0;
+			var index : uint = target.vertexOffset;
 			for (var yi : uint = 0; yi <= _segmentsH; ++yi) {
 				for (var xi : uint = 0; xi <= _segmentsW; ++xi) {
 					x = (xi/_segmentsW-.5)*_width;
 					y = (yi/_segmentsH-.5)*_height;
 
-					vertices[numVertices] = x;
-					normals[numVertices] = 0;
-					tangents[numVertices++] = 1;
-
+					data[index++] = x;
 					if (_yUp) {
-						vertices[numVertices] = 0;
-						normals[numVertices] = 1;
-						tangents[numVertices++] = 0;
-
-						vertices[numVertices] = y;
-						normals[numVertices] = 0;
-						tangents[numVertices++] = 0;
+						data[index++] = 0;
+						data[index++] = y;
 					}
 					else {
-						vertices[numVertices] = y;
-						normals[numVertices] = 0;
-						tangents[numVertices++] = 0;
-
-						vertices[numVertices] = 0;
-						normals[numVertices] = -1;
-						tangents[numVertices++] = 0;
+						data[index++] = y;
+						data[index++] = 0;
 					}
+
+					data[index++] = 0;
+					if (_yUp) {
+						data[index++] = 1;
+						data[index++] = 0;
+					}
+					else {
+						data[index++] = 0;
+						data[index++] = -1;
+					}
+
+					data[index++] = 1;
+					data[index++] = 0;
+					data[index++] = 0;
+
+					index += skip;
+
 
 					// add vertex with same position, but with inverted normal & tangent
 					if (_doubleSided) {
 						for (var i : int = 0; i < 3; ++i) {
-							vertices[numVertices] = vertices[numVertices-3];
-							normals[numVertices] = -normals[numVertices-3];
-							tangents[numVertices] = -tangents[numVertices-3];
-							++numVertices;
+							data[index] = data[index-stride];
+							++index;
 						}
+						for (i = 0; i < 3; ++i) {
+							data[index] = -data[index-stride];
+							++index;
+						}
+						for (i = 0; i < 3; ++i) {
+							data[index] = -data[index-stride];
+							++index
+						}
+						index +=skip;
 					}
 
 					if (xi != _segmentsW && yi != _segmentsH) {
@@ -219,39 +228,46 @@ package away3d.primitives
 				}
 			}
 
-			target.updateVertexData(vertices);
-			target.updateVertexNormalData(normals);
-			target.updateVertexTangentData(tangents);
+			target.updateData(data);
 			target.updateIndexData(indices);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function buildUVs(target : SubGeometry) : void
+		override protected function buildUVs(target : CompactSubGeometry) : void
 		{
-			var uvs : Vector.<Number>;
-			var numUvs : uint = (_segmentsH + 1) * (_segmentsW + 1) * 2;
+			var data : Vector.<Number>;
+			var stride:uint = target.UVStride;
+			var numUvs : uint = (_segmentsH + 1) * (_segmentsW + 1) * stride;
+			var skip:uint = stride - 2;
+
+			if (_doubleSided) numUvs *= 2;
 
 			if (target.UVData && numUvs == target.UVData.length)
-				uvs = target.UVData;
-			else
-				uvs = new Vector.<Number>(numUvs*(int(_doubleSided)+1), true);
+				data = target.UVData;
+			else {
+				data = new Vector.<Number>(numUvs, true);
+				invalidateGeometry();
+			}
 
-			numUvs = 0;
+			var index : uint = target.UVOffset;
+
 			for (var yi : uint = 0; yi <= _segmentsH; ++yi) {
 				for (var xi : uint = 0; xi <= _segmentsW; ++xi) {
-					uvs[numUvs++] = xi/_segmentsW;
-					uvs[numUvs++] = 1 - yi/_segmentsH;
+					data[index++] = xi/_segmentsW;
+					data[index++] = 1 - yi/_segmentsH;
+					index += skip;
 
 					if (_doubleSided) {
-						uvs[numUvs++] = xi/_segmentsW;
-						uvs[numUvs++] = 1 - yi/_segmentsH;
+						data[index++] = xi/_segmentsW;
+						data[index++] = 1 - yi/_segmentsH;
+						index += skip;
 					}
 				}
 			}
 
-			target.updateUVData(uvs);
+			target.updateData(data);
 		}
 	}
 }

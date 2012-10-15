@@ -1,6 +1,7 @@
 package away3d.materials.utils
 {
 	import away3d.arcane;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 
@@ -62,7 +63,7 @@ package away3d.materials.utils
 		/**
 		 * Draws the actual lines.
 		 */
-		private static function drawLines(lineColor : uint, lineThickness : Number, bitmapData : BitmapData, subGeom : SubGeometry) : void
+		private static function drawLines(lineColor : uint, lineThickness : Number, bitmapData : BitmapData, subGeom : ISubGeometry) : void
 		{
 			var sprite : Sprite = new Sprite();
 			var g : Graphics = sprite.graphics;
