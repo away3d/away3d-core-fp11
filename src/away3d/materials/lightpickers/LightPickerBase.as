@@ -17,10 +17,14 @@ package away3d.materials.lightpickers
 	{
 		protected var _numPointLights : uint;
 		protected var _numDirectionalLights : uint;
+		protected var _numCastingPointLights : uint;
+		protected var _numCastingDirectionalLights : uint;
 		protected var _numLightProbes : uint;
 		protected var _allPickedLights : Vector.<LightBase>;
 		protected var _pointLights : Vector.<PointLight>;
+		protected var _castingPointLights : Vector.<PointLight>;
 		protected var _directionalLights : Vector.<DirectionalLight>;
+		protected var _castingDirectionalLights : Vector.<DirectionalLight>;
 		protected var _lightProbes : Vector.<LightProbe>;
 		protected var _lightProbeWeights : Vector.<Number>;
 
@@ -43,6 +47,22 @@ package away3d.materials.lightpickers
 		}
 
 		/**
+		 * The maximum amount of directional lights that cast shadows
+		 */
+		public function get numCastingDirectionalLights() : uint
+		{
+			return _numCastingDirectionalLights;
+		}
+
+		/**
+		 * The amount of point lights that cast shadows
+		 */
+		public function get numCastingPointLights() : uint
+		{
+			return _numCastingPointLights;
+		}
+
+		/**
 		 * The maximum amount of light probes that will be provided
 		 */
 		public function get numLightProbes() : uint
@@ -58,6 +78,16 @@ package away3d.materials.lightpickers
 		public function get directionalLights() : Vector.<DirectionalLight>
 		{
 			return _directionalLights;
+		}
+
+		public function get castingPointLights() : Vector.<PointLight>
+		{
+			return _castingPointLights;
+		}
+
+		public function get castingDirectionalLights() : Vector.<DirectionalLight>
+		{
+			return _castingDirectionalLights;
 		}
 
 		public function get lightProbes() : Vector.<LightProbe>
@@ -80,9 +110,6 @@ package away3d.materials.lightpickers
 		 */
 		public function collectLights(renderable : IRenderable, entityCollector : EntityCollector) : void
 		{
-			// TODO: not used
-			entityCollector = entityCollector;
-			
 			updateProbeWeights(renderable);
 		}
 

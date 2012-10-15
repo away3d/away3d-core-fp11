@@ -3,8 +3,8 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.methods.MethodVO;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3DProgramType;
@@ -97,11 +97,13 @@ package away3d.materials.methods
 			var uv : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uv, 1);
 
-			code += "mul " + uv + ", " + _uvVaryingReg + ", " + scaleRegister + ".x\n" +
+			var uvReg : ShaderRegisterElement = _sharedRegisters.uvVarying;
+
+			code += "mul " + uv + ", " + uvReg + ", " + scaleRegister + ".x\n" +
 					getSplatSampleCode(vo, albedo, _diffuseInputRegister, uv);
 
 			if (_detailTexture) {
-				code += "mul " + uv + ", " + _uvVaryingReg + ", " + detailScaleRegister + ".x\n" +
+				code += "mul " + uv + ", " + uvReg + ", " + detailScaleRegister + ".x\n" +
 						getSplatSampleCode(vo, uv, detailTexRegister, uv) +
 						"mul " + uv + ", " + uv + ", " + detailBlendFactorRegister + ".x\n" +
 						"mul " + albedo + ", " + albedo + ", " + uv + ".x\n";
@@ -111,7 +113,7 @@ package away3d.materials.methods
 			regCache.addFragmentTempUsages(temp, 1);
 			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
-			code += "tex "+temp+", "+_uvVaryingReg +", "+blendTexReg+" <2d,linear,miplinear,clamp>\n";
+			code += "tex "+temp+", "+uvReg +", "+blendTexReg+" <2d,linear,miplinear,clamp>\n";
 			var splatTexReg : ShaderRegisterElement;
 
 			vo.fragmentConstantsIndex = scaleRegister.index*4;
@@ -120,11 +122,11 @@ package away3d.materials.methods
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
 				var scaleRegName : String = i < 3? scaleRegister + comps[i+1] : scaleRegister2 + ".x";
 				splatTexReg = regCache.getFreeTextureReg();
-				code += "mul " + uv + ", " + _uvVaryingReg + ", " + scaleRegName + "\n" +
+				code += "mul " + uv + ", " + uvReg + ", " + scaleRegName + "\n" +
 						getSplatSampleCode(vo, uv, splatTexReg, uv);
 
 				if (_detailTexture) {
-					code += "mul " + temp2 + ", " + _uvVaryingReg + ", " + detailScaleRegister + comps[i+1] + "\n" +
+					code += "mul " + temp2 + ", " + uvReg + ", " + detailScaleRegister + comps[i+1] + "\n" +
 							getSplatSampleCode(vo, temp2, detailTexRegister, temp2) +
 							"mul " + temp2 + ", " + temp2 + ", " + detailBlendFactorRegister + comps[i+1] + "\n" +
 							"mul " + uv + ", " + temp2 + comps[i+1] + ", " + uv + "\n";
@@ -183,7 +185,7 @@ package away3d.materials.methods
 			if (vo.useSmoothTextures) filter = vo.useMipmapping ? "linear,miplinear" : "linear";
 			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
 
-			uvReg ||= _uvVaryingReg;
+			uvReg ||= _sharedRegisters.uvVarying;
 			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + ",wrap>\n";
 		}
 	}

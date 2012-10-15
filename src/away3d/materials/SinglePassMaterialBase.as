@@ -3,13 +3,14 @@
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.methods.BasicAmbientMethod;
 	import away3d.materials.methods.BasicDiffuseMethod;
 	import away3d.materials.methods.BasicNormalMethod;
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.passes.DefaultScreenPass;
+	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
@@ -21,18 +22,18 @@
 	 * DefaultMaterialBase forms an abstract base class for the default materials provided by Away3D and use methods
 	 * to define their appearance.
 	 */
-	public class DefaultMaterialBase extends MaterialBase
+	public class SinglePassMaterialBase extends MaterialBase
 	{
-		protected var _screenPass : DefaultScreenPass;
+		protected var _screenPass : SuperShaderPass;
 		private var _alphaBlending : Boolean;
 
 		/**
 		 * Creates a new DefaultMaterialBase object.
 		 */
-		public function DefaultMaterialBase()
+		public function SinglePassMaterialBase()
 		{
 			super();
-			addPass(_screenPass = new DefaultScreenPass(this));
+			addPass(_screenPass = new SuperShaderPass(this));
 		}
 
 		/**
@@ -52,14 +53,25 @@
 			_distancePass.alphaThreshold = value;
 		}
 
+
+		override public function set blendMode(value : String) : void
+		{
+			super.blendMode = value;
+			_screenPass.setBlendMode(value, requiresBlending);
+		}
+
+		override public function set depthCompareMode(value : String) : void
+		{
+			super.depthCompareMode = value;
+			_screenPass.depthCompareMode = value;
+		}
+
 		arcane override function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void
 		{
-			if (distanceBased) {
+			if (distanceBased)
 				_distancePass.alphaMask = _screenPass.diffuseMethod.texture;
-			}
-			else {
+			else
 				_depthPass.alphaMask = _screenPass.diffuseMethod.texture;
-			}
 			super.activateForDepth(stage3DProxy, camera, distanceBased, textureRatioX, textureRatioY);
 		}
 
@@ -327,6 +339,8 @@
 		public function set alphaBlending(value : Boolean) : void
 		{
 			_alphaBlending = value;
+			_screenPass.setBlendMode(blendMode, requiresBlending);
+			_screenPass.preserveAlpha = requiresBlending;
 		}
 
 		/**
@@ -343,8 +357,14 @@
 				}
 
 				addPass(_screenPass);
-				_screenPass._passesDirty = false;
+				_screenPass._passesDirty = false
 			}
+		}
+
+		override public function set lightPicker(value : LightPickerBase) : void
+		{
+			super.lightPicker = value;
+			_screenPass.lightPicker = value;
 		}
 	}
 }

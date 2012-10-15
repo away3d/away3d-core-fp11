@@ -2,8 +2,8 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 
 	import flash.display3D.Context3DProgramType;
 
@@ -94,9 +94,10 @@ package away3d.materials.methods
 			var dataRegister2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
+
 			vo.fragmentConstantsIndex = dataRegister.index*4;
 
-			code += "dp3 " + temp + ".x, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz	\n" +
+			code += "dp3 " + temp + ".x, " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.normalFragment + ".xyz	\n" +
 					"sat " + temp + ".x, " + temp + ".x														\n" +
 					"sub " + temp + ".x, " + dataRegister + ".w, " + temp + ".x								\n" +
 					"pow " + temp + ".x, " + temp + ".x, " + dataRegister2 + ".y							\n" +

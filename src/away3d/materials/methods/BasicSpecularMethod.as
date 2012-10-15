@@ -3,8 +3,8 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.methods.MethodVO;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.display3D.Context3D;
@@ -203,34 +203,37 @@ package away3d.materials.methods
 				regCache.addFragmentTempUsages(t, 1);
 			}
 
+			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+			var normalReg : ShaderRegisterElement  = _sharedRegisters.normalFragment;
+
 			switch (_shadingModel) {
 				case SpecularShadingModel.BLINN_PHONG:
 
 					// half vector
-					code += "add " + t + ".xyz, " + lightDirReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n" +
+					code += "add " + t + ".xyz, " + lightDirReg + ".xyz, " + viewDirReg + ".xyz\n" +
 							"nrm " + t + ".xyz, " + t + ".xyz\n" +
-							"dp3 " + t + ".w, " + _normalFragmentReg + ".xyz, " + t + ".xyz\n" +
+							"dp3 " + t + ".w, " + normalReg + ".xyz, " + t + ".xyz\n" +
 							"sat " + t + ".w, " + t + ".w\n";
 
 					break;
 				case SpecularShadingModel.PHONG:
 
 					// phong model
-					code += "dp3 " + t + ".w, " + lightDirReg + ".xyz, " + _normalFragmentReg + ".xyz\n" + // sca1 = light.normal
+					code += "dp3 " + t + ".w, " + lightDirReg + ".xyz, " + normalReg + ".xyz\n" + // sca1 = light.normal
 
 						//find the reflected light vector R
 							"add " + t + ".w, " + t + ".w, " + t + ".w\n" + // sca1 = sca1*2
-							"mul " + t + ".xyz, " + _normalFragmentReg + ".xyz, " + t + ".w\n" + // vec1 = normal*sca1
+							"mul " + t + ".xyz, " + normalReg + ".xyz, " + t + ".w\n" + // vec1 = normal*sca1
 							"sub " + t + ".xyz, " + t + ".xyz, " + lightDirReg + ".xyz\n" + // vec1 = vec1 - light (light vector is negative)
 
 						//smooth the edge as incidence angle approaches 90
-							"add" + t + ".w, " + t + ".w, " + _viewDirVaryingReg + ".w\n" + // sca1 = sca1 + smoothtep;
+							"add" + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".w\n" + // sca1 = sca1 + smoothtep;
 						//"div" + t + ".w, " + t + ".w, " + _specularDataRegister2 + ".z\n" + // sca1 = sca1/smoothtep;
 							"sat " + t + ".w, " + t + ".w\n" + // sca1 range 0 - 1
 							"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" + // vec1 = vec1*sca1
 
 						//find the dot product between R and V
-							"dp3 " + t + ".w, " + t + ".xyz, " + _viewDirFragmentReg + ".xyz\n" + // sca1 = vec1.view
+							"dp3 " + t + ".w, " + t + ".xyz, " + viewDirReg + ".xyz\n" + // sca1 = vec1.view
 							"sat " + t + ".w, " + t + ".w\n";
 
 					break;
@@ -278,10 +281,12 @@ package away3d.materials.methods
 				regCache.addFragmentTempUsages(t, 1);
 			}
 
-			code += "dp3 " + t + ".w, " + _normalFragmentReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n" +
+			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
+			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+			code += "dp3 " + t + ".w, " + normalReg + ".xyz, " + viewDirReg + ".xyz\n" +
 					"add " + t + ".w, " + t + ".w, " + t + ".w\n" +
-					"mul " + t + ", " + t + ".w, " + _normalFragmentReg + "\n" +
-					"sub " + t + ", " + t + ", " + _viewDirFragmentReg + "\n" +
+					"mul " + t + ", " + t + ".w, " + normalReg + "\n" +
+					"sub " + t + ", " + t + ", " + viewDirReg + "\n" +
 					"tex " + t + ", " + t + ", " + cubeMapReg + " <cube," + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear>\n" +
 					"mul " + t + ".xyz, " + t + ".xyz, " + weightRegister + "\n";
 

@@ -20,6 +20,7 @@ package away3d.core.render
 		private var _activeMaterial : MaterialBase;
 		private var _renderBlended : Boolean;
 		private var _distanceBased : Boolean;
+		private var _disableColor : Boolean;
 
 		/**
 		 * Creates a new DepthRenderer object.
@@ -37,6 +38,15 @@ package away3d.core.render
 			_backgroundB = 1;
 		}
 
+		public function get disableColor() : Boolean
+		{
+			return _disableColor;
+		}
+
+		public function set disableColor(value : Boolean) : void
+		{
+			_disableColor = value;
+		}
 
 		arcane override function set backgroundR(value : Number) : void
 		{
@@ -58,6 +68,9 @@ package away3d.core.render
 		{
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
+
+			if (_disableColor) _context.setColorMask(false, false, false, false);
+
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector);
 
 			if (_renderBlended)
@@ -65,6 +78,8 @@ package away3d.core.render
 
 			if (_activeMaterial)
 				_activeMaterial.deactivateForDepth(_stage3DProxy);
+
+			if (_disableColor) _context.setColorMask(true, true, true, true);
 
 			_activeMaterial = null;
 		}
@@ -82,13 +97,23 @@ package away3d.core.render
 			while (item) {
 				_activeMaterial = item.renderable.material;
 
-				_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased, _textureRatioX, _textureRatioY);
-				item2 = item;
-				do {
-					_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);
-					item2 = item2.next;
-				} while(item2 && item2.renderable.material == _activeMaterial);
-				_activeMaterial.deactivateForDepth(_stage3DProxy);
+				// otherwise this would result in depth rendered anyway because fragment shader kil is ignored
+				if (_disableColor && _activeMaterial.hasDepthAlphaThreshold()) {
+					item2 = item;
+					// fast forward
+					do {
+						item2 = item2.next;
+					} while(item2 && item2.renderable.material == _activeMaterial);
+				}
+				else {
+					_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased, _textureRatioX, _textureRatioY);
+					item2 = item;
+					do {
+						_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);
+						item2 = item2.next;
+					} while(item2 && item2.renderable.material == _activeMaterial);
+					_activeMaterial.deactivateForDepth(_stage3DProxy);
+				}
 				item = item2;
 			}
 		}

@@ -17,7 +17,7 @@ package away3d.loaders.parsers
 	import away3d.library.assets.BitmapDataAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.materials.ColorMaterial;
-	import away3d.materials.DefaultMaterialBase;
+	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicAmbientMethod;
@@ -680,7 +680,7 @@ package away3d.loaders.parsers
 		{
 			if (!effect || !material) return null;
 			
-			var mat:DefaultMaterialBase = _defaultColorMaterial;
+			var mat:SinglePassMaterialBase = _defaultColorMaterial;
 			var textureMaterial : TextureMaterial;
 			var ambient:DAEColorOrTexture = effect.shader.props["ambient"];
 			var diffuse:DAEColorOrTexture = effect.shader.props["diffuse"];

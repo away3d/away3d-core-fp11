@@ -4,8 +4,8 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 
 	use namespace arcane;
 
@@ -43,9 +43,9 @@ package away3d.materials.methods
 
 			// (sin(l,t) * sin(v,t) - cos(l,t)*cos(v,t)) ^ k
 
-			code += "nrm " + t + ".xyz, " + _tangentVaryingReg + ".xyz\n" +
+			code += "nrm " + t + ".xyz, " + _sharedRegisters.tangentVarying + ".xyz\n" +
 					"dp3 " + t + ".w, " + t + ".xyz, " + lightDirReg + ".xyz\n" +
-					"dp3 " + t + ".z, " + t + ".xyz, " + _viewDirFragmentReg + ".xyz\n";
+					"dp3 " + t + ".z, " + t + ".xyz, " + _sharedRegisters.viewDirFragment + ".xyz\n";
 
 			// (sin(t.w) * sin(t.z) - cos(t.w)*cos(t.z)) ^ k
 			code += "sin " + t + ".x, " + t + ".w\n" +

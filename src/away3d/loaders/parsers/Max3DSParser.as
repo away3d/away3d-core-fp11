@@ -11,7 +11,7 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
-	import away3d.materials.DefaultMaterialBase;
+	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.textures.BitmapTexture;
@@ -691,7 +691,7 @@ package away3d.loaders.parsers
 		
 		private function finalizeCurrentMaterial() : void
 		{
-			var mat : DefaultMaterialBase;
+			var mat : SinglePassMaterialBase;
 			
 			if (_cur_mat.colorMap) {
 				mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
