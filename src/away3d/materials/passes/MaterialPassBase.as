@@ -50,6 +50,7 @@ package away3d.materials.passes
 		protected var _numUsedTextures : uint;
 		protected var _numUsedVertexConstants : uint;
 		protected var _numUsedFragmentConstants : uint;
+		protected var _numUsedVaryings : uint;
 
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
@@ -65,6 +66,7 @@ package away3d.materials.passes
 		protected var _lightPicker : LightPickerBase;
 		protected var _animatableAttributes : Array = ["va0"];
 		protected var _animationTargetRegisters : Array = ["vt0"];
+		protected var _shadedTarget:String = "ft0";
 		
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
 		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
@@ -234,7 +236,17 @@ package away3d.materials.passes
 		{
 			return _numUsedVertexConstants;
 		}
-
+		
+		public function get numUsedVaryings() : uint
+		{
+			return _numUsedVaryings;
+		}
+		
+		public function get numUsedFragmentConstants() : uint
+		{
+			return _numUsedFragmentConstants;
+		}
+		
 		/**
 		 * Sets up the animation state. This needs to be called before render()
 		 *
@@ -263,7 +275,7 @@ package away3d.materials.passes
 			throw new AbstractMethodError();
 		}
 
-		arcane function getFragmentCode() : String
+		arcane function getFragmentCode(code:String) : String
 		{
 			throw new AbstractMethodError();
 		}
@@ -394,9 +406,11 @@ package away3d.materials.passes
 		arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
 			var animatorCode : String = "";
+			var fragmentAnimatorCode:String = "";
 			
 			if (_animationSet && !_animationSet.usesCPU) {
 				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
+				fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget);
 			} else {
 				var len : uint = _animatableAttributes.length;
 	
@@ -406,9 +420,10 @@ package away3d.materials.passes
 					animatorCode += "mov " + _animationTargetRegisters[i] + ", " + _animatableAttributes[i] + "\n";
 			}
 			
+			
 			var vertexCode : String = getVertexCode(animatorCode);
-			var fragmentCode : String = getFragmentCode();
-			if (Debug.active) {
+			var fragmentCode : String = getFragmentCode(fragmentAnimatorCode);
+			if (true) {
 				trace ("Compiling AGAL Code:");
 				trace ("--------------------");
 				trace (vertexCode);

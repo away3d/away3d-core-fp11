@@ -34,7 +34,12 @@ package away3d.materials.passes
 		protected var _diffuseLightSources : uint = 0x03;
 
 		protected var _vertexCode : String;
-		protected var _fragmentCode : String;
+		protected var _fragmentLightCode : String;
+		protected var _fragmentAnimationCode : String;
+		protected var _framentPostLightCode : String;
+		
+		
+		protected var _needFragmentAnimation:Boolean = true;
 
 		protected var _vertexConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _fragmentConstantData : Vector.<Number> = new Vector.<Number>();
@@ -99,7 +104,6 @@ package away3d.materials.passes
 		override arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
 			reset();
-
 			super.updateProgram(stage3DProxy);
 		}
 
@@ -120,6 +124,8 @@ package away3d.materials.passes
 			_numUsedFragmentConstants = _compiler.numUsedFragmentConstants;
 			_numUsedStreams = _compiler.numUsedStreams;
 			_numUsedTextures = _compiler.numUsedTextures;
+			_numUsedVaryings = _compiler.numUsedVaryings;
+			_numUsedFragmentConstants = _compiler.numUsedFragmentConstants;
 		}
 
 		private function initConstantData() : void
@@ -163,7 +169,9 @@ package away3d.materials.passes
 			_animatableAttributes = _compiler.animatableAttributes;
 			_animationTargetRegisters = _compiler.animationTargetRegisters;
 			_vertexCode = _compiler.vertexCode;
-			_fragmentCode = _compiler.fragmentCode;
+			_fragmentLightCode = _compiler.fragmentLightCode;
+			_framentPostLightCode = _compiler.framentPostLightCode;
+			_shadedTarget = _compiler.shadedTarget;
 			_usingSpecularMethod = _compiler.usingSpecularMethod;
 			_usesNormals = _compiler.usesNormals;
 
@@ -411,9 +419,12 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animatorCode : String) : String
 		{
-			return _fragmentCode;
+			trace(_fragmentLightCode);
+			trace(animatorCode);
+			trace(_framentPostLightCode);
+			return _fragmentLightCode + animatorCode + _framentPostLightCode;
 		}
 
 // RENDER LOOP

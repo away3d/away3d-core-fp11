@@ -7,6 +7,7 @@ package a3dparticle.core
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 	import away3d.materials.MaterialBase;
+	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
@@ -20,22 +21,23 @@ package a3dparticle.core
 	 */
 	public class SubContainer implements IRenderable
 	{
-		private var _particleMaterial:ParticleMaterialBase;
-		private var _material:SimpleParticleMaterial;
+		private var _particleMaterial:MaterialBase;
+		private var _material:MaterialBase;
 		private var _shareAtt:cloneShareAtt;
 		
 		private var _numTriangles:uint;
 		private var _parent:ParticlesContainer;
 		
-		public function SubContainer(parent:ParticlesContainer, particleMaterial:ParticleMaterialBase, clone:Boolean = false )
+		public function SubContainer(parent:ParticlesContainer, particleMaterial:MaterialBase, clone:Boolean = false )
 		{
 			this._parent = parent;
 			this._particleMaterial = particleMaterial;
 			if (!clone)
 			{
 				this._shareAtt = new cloneShareAtt;
-				this._material = new SimpleParticleMaterial(particleMaterial);
-				this._material.animation = parent.animation;
+				this._material = particleMaterial;
+				_material.addOwner(this);
+				//this._material = parent.animation;
 			}
 		}
 		
@@ -54,10 +56,10 @@ package a3dparticle.core
 			return clone;
 		}
 		
-		public function get particleMaterial():ParticleMaterialBase
+		/*public function get particleMaterial():ParticleMaterialBase
 		{
 			return _particleMaterial;
-		}
+		}*/
 		
 		public function get material() : MaterialBase
 		{
@@ -102,7 +104,7 @@ package a3dparticle.core
 		
 		public function get castsShadows() : Boolean
 		{
-			return false;
+			return true;
 		}
 		
 		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
@@ -222,8 +224,15 @@ package a3dparticle.core
 		
 		
 		
-		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
-		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
+		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			stage3DProxy.context3D.setVertexBufferAt(index, getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+		}
+		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			stage3DProxy.context3D.setVertexBufferAt(index, getUVBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_2);
+		}
+		
 		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
 		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
 		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
@@ -302,7 +311,7 @@ class cloneShareAtt
 		{
 			t = _uvBuffer[contextIndex] = context.createVertexBuffer(_uvData.length / 2, 2);
 			t.uploadFromVector(_uvData, 0, _uvData.length / 2);
-			_uvContex3D[contextIndex] != context;
+			_uvContex3D[contextIndex] = context;
 		}
 		return t;
 	}

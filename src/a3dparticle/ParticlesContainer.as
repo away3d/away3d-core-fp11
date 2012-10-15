@@ -138,7 +138,7 @@ package a3dparticle
 			{
 				for (j = 0; j < _subContainers.length; j++)
 				{
-					if (_subContainers[j].particleMaterial == _vec[i].material) break;
+					if (_subContainers[j].material == _vec[i].material) break;
 				}
 				if (j == _subContainers.length)
 				{

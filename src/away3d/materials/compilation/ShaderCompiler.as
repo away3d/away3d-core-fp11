@@ -28,6 +28,8 @@ package away3d.materials.compilation
 
 		protected var _vertexCode : String;
 		protected var _fragmentCode : String;
+		protected var _fragmentLightCode : String;
+		protected var _framentPostLightCode : String;
 		private var _commonsDataIndex : int = -1;
 
 		protected var _animatableAttributes : Array;
@@ -149,6 +151,7 @@ package away3d.materials.compilation
 			compileMethodsCode();
 			compileProjectionCode();
 			compileFragmentOutput();
+			_framentPostLightCode = fragmentCode;
 		}
 
 		protected function compileMethodsCode() : void
@@ -160,6 +163,8 @@ package away3d.materials.compilation
 			if (_dependencyCounter.normalDependencies > 0) compileNormalCode();
 			if (_dependencyCounter.viewDirDependencies > 0) compileViewDirCode();
 			compileLightingCode();
+			_fragmentLightCode = _fragmentCode;
+			_fragmentCode = "";
 			compileMethods();
 		}
 
@@ -385,6 +390,11 @@ package away3d.materials.compilation
 		{
 			return _registerCache.numUsedTextures;
 		}
+		
+		public function get numUsedVaryings() : uint
+		{
+			return _registerCache.numUsedVaryings;
+		}
 
 		protected function usesLightsForSpecular() : Boolean
 		{
@@ -519,6 +529,21 @@ package away3d.materials.compilation
 		public function get fragmentCode() : String
 		{
 			return _fragmentCode;
+		}
+		
+		public function get fragmentLightCode() : String
+		{
+			return _fragmentLightCode;
+		}
+		
+		public function get framentPostLightCode() : String
+		{
+			return _framentPostLightCode;
+		}
+		
+		public function get shadedTarget():String
+		{
+			return _sharedRegisters.shadedTarget.toString();
 		}
 
 

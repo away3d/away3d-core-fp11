@@ -35,7 +35,7 @@ package a3dparticle.animators
 		private var _AGALVertexCode:String;
 		private var _AGALFragmentCode:String;
 		
-		public var shaderRegisterCache:ShaderRegisterCache;
+		public var shaderRegisterCache:ShaderRegisterCache = new ShaderRegisterCache();
 		
 		private var _particleActions:Vector.<ActionBase> = new Vector.<ActionBase>();
 		
@@ -201,11 +201,12 @@ package a3dparticle.animators
 		}
 		
 		
-		private function reset(simpleParticlePass:SimpleParticlePass):void
+		private function reset(pass:MaterialPassBase, sourceRegisters : Array, targetRegisters : Array):void
 		{
-			shaderRegisterCache = new ShaderRegisterCache();
-			shaderRegisterCache.vertexConstantOffset = 5;
-			shaderRegisterCache.vertexAttributesOffset = 1;
+			shaderRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
+			shaderRegisterCache.vertexAttributesOffset = pass.numUsedStreams;
+			shaderRegisterCache.varyingsOffset = pass.numUsedVaryings;
+			shaderRegisterCache.fragmentConstantOffset = pass.numUsedFragmentConstants;
 			shaderRegisterCache.reset();
 			
 			//because of projectionVertexCode,I set these value directly
@@ -246,6 +247,7 @@ package a3dparticle.animators
 				shaderRegisterCache.addVertexTempUsages(velocityTarget, 1);
 			}
 			
+			//TOdo:
 			colorTarget = shaderRegisterCache.getFreeFragmentVectorTemp();
 			shaderRegisterCache.addFragmentTempUsages(colorTarget,1);
 			
@@ -265,9 +267,7 @@ package a3dparticle.animators
 		
 		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
-			var simpleParticlePass:SimpleParticlePass = SimpleParticlePass(pass);
-			reset(simpleParticlePass);
-			
+			reset(pass, sourceRegisters, targetRegisters);
 			_AGALVertexCode = "";
 			if (needVelocity)
 			{
@@ -329,7 +329,7 @@ package a3dparticle.animators
 			return _AGALVertexCode;
 		}
 		
-		public function getAGALFragmentCode(pass : MaterialPassBase) : String
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
 		{
 			_AGALFragmentCode = "";
 			var action:ActionBase;
