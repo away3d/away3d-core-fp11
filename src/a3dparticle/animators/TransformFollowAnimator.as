@@ -143,7 +143,7 @@ package a3dparticle.animators
 				buffer.uploadFromVector(temp, 0, temp.length / 3);
 				_newBuffer = false;
 			}
-			stage3DProxy.setSimpleVertexBuffer(_followAction.offsetAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.context3D.setVertexBufferAt(_followAction.offsetAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 		private function precessRotation(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
@@ -188,7 +188,7 @@ package a3dparticle.animators
 				buffer.uploadFromVector(temp, 0, temp.length / 3);
 				_newBuffer = false;
 			}
-			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.context3D.setVertexBufferAt(_followAction.rotationAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 		private function processOffsetAndRotation(stage3DProxy : Stage3DProxy, subContainer : SubContainer):void
@@ -240,8 +240,8 @@ package a3dparticle.animators
 				_newBuffer = false;
 			}
 
-			stage3DProxy.setSimpleVertexBuffer(_followAction.offsetAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 0);
-			stage3DProxy.setSimpleVertexBuffer(_followAction.rotationAttribute.index, buffer, Context3DVertexBufferFormat.FLOAT_3, 3);
+			stage3DProxy.context3D.setVertexBufferAt(_followAction.offsetAttribute.index, buffer, 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.context3D.setVertexBufferAt(_followAction.rotationAttribute.index, buffer, 3, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 		private function getBuffer(stage3DProxy:Stage3DProxy, subContainer:SubContainer):VertexBuffer3D

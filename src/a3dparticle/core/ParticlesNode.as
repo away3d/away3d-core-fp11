@@ -1,4 +1,4 @@
-package a3dparticle.core 
+package a3dparticle.core
 {
 	import a3dparticle.ParticlesContainer;
 	import away3d.cameras.Camera3D;
@@ -15,7 +15,7 @@ package a3dparticle.core
 	{
 		private var _particlesContainer : ParticlesContainer;
 		
-		public function ParticlesNode(particlesContainer:ParticlesContainer) 
+		public function ParticlesNode(particlesContainer:ParticlesContainer)
 		{
 			super(particlesContainer);
 			this._particlesContainer = particlesContainer;
@@ -34,7 +34,6 @@ package a3dparticle.core
 				while (i < len)
 					traverser.applyRenderable(subs[i++]);
 			}
-			traverser.leaveNode(this);
 		}
 		
 		/**
@@ -44,7 +43,7 @@ package a3dparticle.core
 		{
 			if (_particlesContainer.isVisible == false) return false;
 			_particlesContainer.pushModelViewProjection(camera);
-			if (_particlesContainer.alwaysInFrustum) 
+			if (_particlesContainer.alwaysInFrustum)
 			{
 				return true;
 			}
@@ -54,7 +53,7 @@ package a3dparticle.core
 				{
 					return true;
 				}
-				else 
+				else
 				{
 					_particlesContainer.popModelViewProjection();
 					return false;

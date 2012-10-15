@@ -4,7 +4,7 @@ package a3dparticle.animators.actions
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterCache;
 
 	/**
 	 * ...

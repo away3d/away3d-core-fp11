@@ -3,13 +3,13 @@ package a3dparticle.animators.actions.texture
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.textures.BitmapTexture;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display.BitmapData;
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	

@@ -6,7 +6,7 @@ package a3dparticle.animators.actions.velocity
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 	/**
@@ -67,7 +67,7 @@ package a3dparticle.animators.actions.velocity
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(velocityAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3, 0);
+			stage3DProxy.context3D.setVertexBufferAt(velocityAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

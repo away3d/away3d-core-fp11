@@ -94,22 +94,27 @@ package a3dparticle.core
 			return code;
 		}
 		
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			var subContainer:SubContainer = renderable as SubContainer;
 			if (_particleAnimation && _particleAnimation.hasGen)
 			{
+				var context : Context3D = stage3DProxy._context3D;
 				if (_particleAnimation.needCameraPosition)
 				{
-					var context : Context3D = stage3DProxy._context3D;
 					var pos:Vector3D = Utils3D.projectVector(renderable.inverseSceneTransform, camera.scenePosition);
 					context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.cameraPosConst.index, Vector.<Number>([pos.x,pos.y,pos.z,0]));
 				}
 				if (_particleAnimation.needUV)
 				{
-					stage3DProxy.setSimpleVertexBuffer(_particleAnimation.uvAttribute.index, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, 0);
+					stage3DProxy.context3D.setVertexBufferAt(_particleAnimation.uvAttribute.index, subContainer.getUVBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_2);
 				}
 				_particleMaterial.render(_particleAnimation, renderable, stage3DProxy , camera );
-				super.render(renderable, stage3DProxy , camera , lightPicker);
+				
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
+				stage3DProxy.context3D.setVertexBufferAt(0, subContainer.getVertexBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
+				//super.render(renderable, stage3DProxy , camera);
 			}
 		}
 		

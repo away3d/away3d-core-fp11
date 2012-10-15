@@ -4,7 +4,7 @@ package a3dparticle.animators.actions
 	import a3dparticle.core.SubContainer;
 	import a3dparticle.particle.ParticleParam;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
 	

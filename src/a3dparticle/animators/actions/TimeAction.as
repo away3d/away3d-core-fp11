@@ -5,7 +5,7 @@ package a3dparticle.animators.actions
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display3D.Context3DVertexBufferFormat;
 	
 	import away3d.arcane;
@@ -157,7 +157,7 @@ package a3dparticle.animators.actions
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(timeAtt.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_4, 0);
+			stage3DProxy.context3D.setVertexBufferAt(timeAtt.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
 		}
 		
 	}

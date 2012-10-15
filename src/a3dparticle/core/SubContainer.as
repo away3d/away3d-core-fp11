@@ -220,6 +220,17 @@ package a3dparticle.core
 			return _shareAtt.geometryId;
 		}
 		
+		
+		
+		public function activateVertexBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
+		public function activateUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
+		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
+		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
+		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
+		public function get numVertices() : uint { return 0 };
+		public function get vertexStride() : uint { return 0 };
+		public function get vertexNormalData() : Vector.<Number>{return null};
+		public function get vertexTangentData() : Vector.<Number> { return null};
 	}
 }
 

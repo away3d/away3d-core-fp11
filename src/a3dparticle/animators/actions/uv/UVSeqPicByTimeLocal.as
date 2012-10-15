@@ -7,7 +7,7 @@ package a3dparticle.animators.actions.uv
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
@@ -160,7 +160,7 @@ package a3dparticle.animators.actions.uv
 			if (_animation.needUV)
 			{
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, uvParamConst.index, _data, 1);
-				stage3DProxy.setSimpleVertexBuffer(uvParamAttrubite.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3, 0);
+				stage3DProxy.context3D.setVertexBufferAt(uvParamAttrubite.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 			}
 		}
 		

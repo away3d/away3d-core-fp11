@@ -5,7 +5,7 @@ package a3dparticle.animators.actions.rotation
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.MathConsts;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Matrix3D;
 	import flash.geom.Orientation3D;

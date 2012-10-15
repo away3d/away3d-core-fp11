@@ -6,7 +6,7 @@ package a3dparticle.animators.actions.circle
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
@@ -120,8 +120,8 @@ package a3dparticle.animators.actions.circle
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			if (_animation.needVelocity) stage3DProxy.setSimpleVertexBuffer(circleAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_3, 0);
-			else stage3DProxy.setSimpleVertexBuffer(circleAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), Context3DVertexBufferFormat.FLOAT_2, 0);
+			if (_animation.needVelocity) stage3DProxy.context3D.setVertexBufferAt(circleAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			else stage3DProxy.context3D.setVertexBufferAt(circleAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_2);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, eulersMatrixRegister.index, _eulersMatrix.rawData, 4);
 		}
 		

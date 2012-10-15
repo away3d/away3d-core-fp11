@@ -6,7 +6,7 @@ package a3dparticle.animators.actions.brokenline
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 	import flash.display3D.VertexBuffer3D;
@@ -139,7 +139,7 @@ package a3dparticle.animators.actions.brokenline
 		{
 			for (var i:int = 0; i < _brokenCount; i++)
 			{
-				stage3DProxy.setSimpleVertexBuffer(_brokenRegisters[i].index, getExtraBufferByIndex(stage3DProxy, SubContainer(renderable), i), Context3DVertexBufferFormat.FLOAT_4, 0);
+				stage3DProxy.context3D.setVertexBufferAt(_brokenRegisters[i].index, getExtraBufferByIndex(stage3DProxy, SubContainer(renderable), i), 0, Context3DVertexBufferFormat.FLOAT_4);
 			}
 		}
 		
