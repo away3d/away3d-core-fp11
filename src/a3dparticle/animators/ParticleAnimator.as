@@ -54,7 +54,7 @@ package a3dparticle.animators
 				_programConstantData[1] = actionTime;
 				_programConstantData[2] = actionTime;
 				
-				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.timeConst.index, _programConstantData);
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _particleAnimation.animationRegistersManager.timeConst.index, _programConstantData);
 				
 				if (passCount == 0)
 				{

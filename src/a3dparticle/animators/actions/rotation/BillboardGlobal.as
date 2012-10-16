@@ -36,7 +36,7 @@ package a3dparticle.animators.actions.rotation
 			
 			var code:String = "";
 			
-			code += "m33 " + _animation.scaleAndRotateTarget.toString() + "," + _animation.scaleAndRotateTarget.toString() + "," + rotationMatrixRegister.toString() + "\n";
+			code += "m33 " + animationRegistersManager.scaleAndRotateTarget.toString() + "," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + rotationMatrixRegister.toString() + "\n";
 			
 			return code;
 		}
@@ -44,7 +44,7 @@ package a3dparticle.animators.actions.rotation
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			matrix.copyFrom(renderable.sceneTransform);
-			matrix.append(_animation.camera.inverseSceneTransform);
+			matrix.append(animationRegistersManager.camera.inverseSceneTransform);
 			var comps : Vector.<Vector3D> = matrix.decompose(Orientation3D.AXIS_ANGLE);
 			matrix.identity();
 			matrix.appendRotation( -comps[1].w * MathConsts.RADIANS_TO_DEGREES, comps[1]);

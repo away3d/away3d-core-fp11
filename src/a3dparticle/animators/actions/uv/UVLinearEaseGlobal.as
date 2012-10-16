@@ -43,20 +43,20 @@ package a3dparticle.animators.actions.uv
 		
 		override public function getAGALVertexCode(pass:MaterialPassBase):String
 		{
-			if (_animation.needUV)
+			if (animationRegistersManager.needUV)
 			{
 				uvParamConst = shaderRegisterCache.getFreeVertexConstant();
 				
 				var target:ShaderRegisterElement;
-				if (_axis == U_AXIS) target = new ShaderRegisterElement(_animation.uvTarget.regName, _animation.uvTarget.index, "x");
-				else target = new ShaderRegisterElement(_animation.uvTarget.regName, _animation.uvTarget.index, "y");
+				if (_axis == U_AXIS) target = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "x");
+				else target = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "y");
 				
 				var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexSingleTemp();
 				
 				var code:String = "";
 				
 				if (_isScale) code += "mul " + target.toString() + "," + target.toString() + "," + uvParamConst.toString() + ".y\n";
-				code += "mul " + temp.toString() + "," + _animation.vertexTime.toString() + "," + uvParamConst.toString() + ".x\n";
+				code += "mul " + temp.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + uvParamConst.toString() + ".x\n";
 				code += "add " + target.toString() + "," + target.toString() + "," + temp.toString() + "\n";
 				
 				return code;
@@ -69,7 +69,7 @@ package a3dparticle.animators.actions.uv
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable):void
 		{
-			if (_animation.needUV)
+			if (animationRegistersManager.needUV)
 			{
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, uvParamConst.index, _data);
 			}

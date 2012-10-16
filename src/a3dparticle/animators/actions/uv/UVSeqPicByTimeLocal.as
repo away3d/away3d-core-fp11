@@ -78,7 +78,7 @@ package a3dparticle.animators.actions.uv
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			if (_animation.needUV)
+			if (animationRegistersManager.needUV)
 			{
 				uvParamConst = shaderRegisterCache.getFreeVertexConstant();
 				uvParamAttrubite = shaderRegisterCache.getFreeVertexAttribute();
@@ -99,8 +99,8 @@ package a3dparticle.animators.actions.uv
 				var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "w");
 				
 				
-				var u:ShaderRegisterElement = new ShaderRegisterElement(_animation.uvTarget.regName, _animation.uvTarget.index, "x");
-				var v:ShaderRegisterElement = new ShaderRegisterElement(_animation.uvTarget.regName, _animation.uvTarget.index, "y");
+				var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "x");
+				var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "y");
 				
 				var code:String = "";
 				//scale uv
@@ -109,12 +109,12 @@ package a3dparticle.animators.actions.uv
 				
 				if (_hasStartTime)
 				{
-					code += "sub " + time.toString() + "," + _animation.vertexTime.toString() + "," + startTime.toString() + "\n";
-					code += "max " + time.toString() + "," + time.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
+					code += "sub " + time.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + startTime.toString() + "\n";
+					code += "max " + time.toString() + "," + time.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 				}
 				else
 				{
-					code += "mov " + time.toString() +"," + _animation.vertexTime.toString() + "\n";
+					code += "mov " + time.toString() +"," + animationRegistersManager.vertexTime.toString() + "\n";
 				}
 				if (!_loop)
 				{
@@ -157,7 +157,7 @@ package a3dparticle.animators.actions.uv
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable):void
 		{
-			if (_animation.needUV)
+			if (animationRegistersManager.needUV)
 			{
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, uvParamConst.index, _data, 1);
 				stage3DProxy.context3D.setVertexBufferAt(uvParamAttrubite.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);

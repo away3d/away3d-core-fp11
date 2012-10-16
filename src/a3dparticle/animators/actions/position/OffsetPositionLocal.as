@@ -22,7 +22,6 @@ package a3dparticle.animators.actions.position
 		
 		private var _tempOffset:Vector3D;
 		
-		private var _offsetAttribute:ShaderRegisterElement;
 		
 		/**
 		 *
@@ -55,15 +54,16 @@ package a3dparticle.animators.actions.position
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			_offsetAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			var offsetAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			animationRegistersManager.setRegisterIndex(this, "offsetAttribute", offsetAttribute.index);
 			var code:String = "";
-			code += "add " + _animation.offsetTarget.toString() +"," + _offsetAttribute.toString() + ".xyz," + _animation.offsetTarget.toString() + "\n";
+			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + offsetAttribute.toString() + ".xyz," + animationRegistersManager.offsetTarget.toString() + "\n";
 			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(_offsetAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.context3D.setVertexBufferAt(animationRegistersManager.getRegisterIndex(this, "offsetAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

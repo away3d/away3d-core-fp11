@@ -79,7 +79,7 @@ package a3dparticle.animators.actions
 		{
 			offsetAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
-			code += "add " + _animation.scaleAndRotateTarget.toString() +"," + offsetAttribute.toString() + ".xyz," + _animation.scaleAndRotateTarget.toString() + "\n";
+			code += "add " + animationRegistersManager.scaleAndRotateTarget.toString() +"," + offsetAttribute.toString() + ".xyz," + animationRegistersManager.scaleAndRotateTarget.toString() + "\n";
 			return code;
 		}
 		
@@ -98,35 +98,35 @@ package a3dparticle.animators.actions
 			
 			var code:String = "";
 			
-			code += "mov " + temp1.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp1.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 			code += "cos " + temp1.toString() + ".x," + rotationAttribute.toString() + ".x\n";
 			code += "sin " + temp1.toString() + ".y," + rotationAttribute.toString() + ".x\n";
-			code += "mov " + temp2.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp2.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 			code += "neg " + temp2.toString() + ".x," + temp1.toString() + ".y\n";
 			code += "mov " + temp2.toString() + ".y," + temp1.toString() + ".x\n";
-			code += "mov " + temp3.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
-			code += "mov " + temp3.toString() + ".z," + _animation.vertexOneConst.toString() + "\n";
-			code += "m33 " + _animation.scaleAndRotateTarget.toString() +"," + _animation.scaleAndRotateTarget.toString() + "," + temp1.toString() + "\n";
+			code += "mov " + temp3.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp3.toString() + ".z," + animationRegistersManager.vertexOneConst.toString() + "\n";
+			code += "m33 " + animationRegistersManager.scaleAndRotateTarget.toString() +"," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + temp1.toString() + "\n";
 			
-			code += "mov " + temp1.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
-			code += "mov " + temp1.toString() + ".x," + _animation.vertexOneConst.toString() + "\n";
-			code += "mov " + temp2.toString() + ".x," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp1.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp1.toString() + ".x," + animationRegistersManager.vertexOneConst.toString() + "\n";
+			code += "mov " + temp2.toString() + ".x," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 			code += "cos " + temp2.toString() + ".y," + rotationAttribute.toString() + ".y\n";
 			code += "sin " + temp2.toString() + ".z," + rotationAttribute.toString() + ".y\n";
-			code += "mov " + temp3.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp3.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 			code += "neg " + temp3.toString() + ".y," + temp2.toString() + ".z\n";
 			code += "mov " + temp3.toString() + ".z," + temp2.toString() + ".y\n";
-			code += "m33 " + _animation.scaleAndRotateTarget.toString() +"," + _animation.scaleAndRotateTarget.toString() + "," + temp1.toString() + "\n";
+			code += "m33 " + animationRegistersManager.scaleAndRotateTarget.toString() +"," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + temp1.toString() + "\n";
 			
 			code += "cos " + temp1.toString() + ".x," + rotationAttribute.toString() + ".z\n";
 			code += "sin " + temp1.toString() + ".y," + rotationAttribute.toString() + ".z\n";
-			code += "mov " + temp1.toString() + ".z," + _animation.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp1.toString() + ".z," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 			code += "neg " + temp2.toString() + ".x," + temp1.toString() + ".y\n";
 			code += "mov " + temp2.toString() + ".y," + temp1.toString() + ".x\n";
-			code += "mov " + temp2.toString() + ".z," + _animation.vertexZeroConst.toString() + "\n";
-			code += "mov " + temp3.toString() + "," + _animation.vertexZeroConst.toString() + "\n";
-			code += "mov " + temp3.toString() + ".z," + _animation.vertexOneConst.toString() + "\n";
-			code += "m33 " + _animation.scaleAndRotateTarget.toString() +"," + _animation.scaleAndRotateTarget.toString() + "," + temp1.toString() + "\n";
+			code += "mov " + temp2.toString() + ".z," + animationRegistersManager.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp3.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
+			code += "mov " + temp3.toString() + ".z," + animationRegistersManager.vertexOneConst.toString() + "\n";
+			code += "m33 " + animationRegistersManager.scaleAndRotateTarget.toString() +"," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + temp1.toString() + "\n";
 			
 			return code;
 		}

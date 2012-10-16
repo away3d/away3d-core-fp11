@@ -63,15 +63,15 @@ package a3dparticle.animators.actions.drift
 			shaderRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "mul " + dgree.toString() + "," + _animation.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
+			code += "mul " + dgree.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
 			code += "sin " + sin.toString() + "," + dgree.toString() + "\n";
 			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
-			code += "add " + _animation.offsetTarget.toString() +"," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
+			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
 			
-			if (_animation.needVelocity)
+			if (animationRegistersManager.needVelocity)
 			{	code += "cos " + cos.toString() + "," + dgree.toString() + "\n";
 				code += "mul " + distance.toString() + "," + cos.toString() + "," + driftAttribute.toString() + ".xyz\n";
-				code += "add " + _animation.velocityTarget.toString() + ".xyz," + distance.toString() + "," + _animation.velocityTarget.toString() + ".xyz\n";
+				code += "add " + animationRegistersManager.velocityTarget.toString() + ".xyz," + distance.toString() + "," + animationRegistersManager.velocityTarget.toString() + ".xyz\n";
 			}
 			
 			return code;

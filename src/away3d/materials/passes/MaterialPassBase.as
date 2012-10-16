@@ -84,6 +84,7 @@ package away3d.materials.passes
 		private static var _rttData : Vector.<Number>;
 
 		protected var _alphaPremultiplied : Boolean;
+		protected var _needFragmentAnimation:Boolean;
 
 		/**
 		 * Creates a new MaterialPassBase object.
@@ -245,6 +246,11 @@ package away3d.materials.passes
 		public function get numUsedFragmentConstants() : uint
 		{
 			return _numUsedFragmentConstants;
+		}
+		
+		public function get needFragmentAnimation():Boolean
+		{
+			return _needFragmentAnimation;
 		}
 		
 		/**
@@ -410,7 +416,8 @@ package away3d.materials.passes
 			
 			if (_animationSet && !_animationSet.usesCPU) {
 				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
-				fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget);
+				if(_needFragmentAnimation)
+					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget);
 			} else {
 				var len : uint = _animatableAttributes.length;
 	

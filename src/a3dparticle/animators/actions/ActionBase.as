@@ -1,5 +1,6 @@
-package a3dparticle.animators.actions 
+package a3dparticle.animators.actions
 {
+	import a3dparticle.animators.AnimationRegistersManager;
 	import a3dparticle.animators.ParticleAnimation;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -10,13 +11,13 @@ package a3dparticle.animators.actions
 	 * ...
 	 * @author ...
 	 */
-	public class ActionBase 
+	public class ActionBase
 	{
 		public var _animation:ParticleAnimation;
 		
 		public var priority:int=1;
 		
-		public function ActionBase() 
+		public function ActionBase()
 		{
 			
 		}
@@ -36,7 +37,12 @@ package a3dparticle.animators.actions
 		
 		protected function get shaderRegisterCache():ShaderRegisterCache
 		{
-			return _animation.shaderRegisterCache;
+			return _animation.animationRegistersManager.shaderRegisterCache;
+		}
+		
+		protected function get animationRegistersManager():AnimationRegistersManager
+		{
+			return _animation.animationRegistersManager;
 		}
 		
 		public function getAGALVertexCode(pass : MaterialPassBase) : String

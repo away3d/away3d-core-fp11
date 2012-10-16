@@ -38,12 +38,12 @@ package a3dparticle.animators.actions.scale
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexSingleTemp();
 			
 			var code:String = "";
-			code += "mul " + temp.toString() + "," + _animation.vertexTime.toString() + "," + scaleByTimeConst.toString() + ".w\n";
+			code += "mul " + temp.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + scaleByTimeConst.toString() + ".w\n";
 			code += "sin " + temp.toString() + "," + temp.toString() + "\n";
 			code += "mul " + temp.toString() + "," + temp.toString() + "," + scaleByTimeConst.toString() + ".y\n";
 			code += "add " + temp.toString() + "," + temp.toString() + "," + scaleByTimeConst.toString() + ".x\n";
 			
-			code += "mul " + _animation.scaleAndRotateTarget.toString() +"," +_animation.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
+			code += "mul " + animationRegistersManager.scaleAndRotateTarget.toString() +"," +animationRegistersManager.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
 			return code;
 		}
 		

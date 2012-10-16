@@ -39,8 +39,6 @@ package away3d.materials.passes
 		protected var _framentPostLightCode : String;
 		
 		
-		protected var _needFragmentAnimation:Boolean = true;
-
 		protected var _vertexConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _fragmentConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _commonsDataIndex : int;

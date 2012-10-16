@@ -19,7 +19,6 @@ package a3dparticle.animators.actions.velocity
 		
 		private var _tempVelocity:Vector3D;
 		
-		private var velocityAttribute:ShaderRegisterElement;
 		/**
 		 *
 		 * @param	fun Function.The fun should return a Vector3D whick (x,y,z) is the velocity.
@@ -54,20 +53,21 @@ package a3dparticle.animators.actions.velocity
 			
 			var distance:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			distance = new ShaderRegisterElement(distance.regName, distance.index, "xyz");
-			velocityAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			var velocityAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			animationRegistersManager.setRegisterIndex(this, "velocityAttribute", velocityAttribute.index);
 			var code:String = "";
-			code += "mul " + distance.toString() + "," + _animation.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
-			code += "add " + _animation.offsetTarget.toString() +"," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
-			if (_animation.needVelocity)
+			code += "mul " + distance.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
+			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
+			if (animationRegistersManager.needVelocity)
 			{
-				code += "add " + _animation.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";
+				code += "add " + animationRegistersManager.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + animationRegistersManager.velocityTarget.toString() + "\n";
 			}
 			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(velocityAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.context3D.setVertexBufferAt(animationRegistersManager.getRegisterIndex(this, "velocityAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

@@ -38,10 +38,10 @@ package a3dparticle.animators.actions.scale
 			var scale:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index,"w");
 			
 			var code:String = "";
-			code += "mul " + scale.toString() + "," + _animation.vertexLife.toString() + "," + scaleByLifeConst.toString() + ".y\n";
+			code += "mul " + scale.toString() + "," + animationRegistersManager.vertexLife.toString() + "," + scaleByLifeConst.toString() + ".y\n";
 			code += "add " + scale.toString() + "," + scale.toString() + "," + scaleByLifeConst.toString() + ".x\n";
 			
-			code += "mul " + _animation.scaleAndRotateTarget.toString() +"," +_animation.scaleAndRotateTarget.toString() + "," + scale.toString() + "\n";
+			code += "mul " + animationRegistersManager.scaleAndRotateTarget.toString() +"," +animationRegistersManager.scaleAndRotateTarget.toString() + "," + scale.toString() + "\n";
 			return code;
 			
 		}

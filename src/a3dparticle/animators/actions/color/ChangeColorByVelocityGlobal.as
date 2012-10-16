@@ -76,16 +76,16 @@ package a3dparticle.animators.actions.color
 			
 			if (_hasMult)
 			{
-				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  _animation.fragmentVelocity.toString() + "\n";
+				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  animationRegistersManager.fragmentVelocity.toString() + "\n";
 				code += "mul " + temp.toString() + "," + temp.toString() + "," +  multFactor.toString() + "\n";
-				code += "add " + temp.toString() + "," + temp.toString() + "," + _animation.fragmentOneConst.toString() + "\n";
-				code += "mul " + _animation.colorTarget.toString() +"," + temp.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "add " + temp.toString() + "," + temp.toString() + "," + animationRegistersManager.fragmentOneConst.toString() + "\n";
+				code += "mul " + animationRegistersManager.colorTarget.toString() +"," + temp.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			if (_hasOffset)
 			{
-				code += "mul " + temp.toString() + "," + deltaOffsetConst.toString() +"," + _animation.fragmentVelocity.toString() + "\n";
+				code += "mul " + temp.toString() + "," + deltaOffsetConst.toString() +"," + animationRegistersManager.fragmentVelocity.toString() + "\n";
 				code += "mul " + temp.toString() + "," + temp.toString() +"," + offsetFactor.toString() + "\n";
-				code += "add " + _animation.colorTarget.toString() +"," +temp.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "add " + animationRegistersManager.colorTarget.toString() +"," +temp.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			return code;
 		}

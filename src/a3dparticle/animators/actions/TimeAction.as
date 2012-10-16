@@ -26,7 +26,6 @@ package a3dparticle.animators.actions
 		private var _tempSleepTime:Number;
 		
 		
-		private var timeAtt:ShaderRegisterElement;
 		
 		public var hasDuringTime:Boolean;
 		public var hasSleepTime:Boolean;
@@ -117,11 +116,11 @@ package a3dparticle.animators.actions
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			timeAtt = shaderRegisterCache.getFreeVertexAttribute();//timeAtt.x is start，timeAtt.y is during time
-			
+			var timeAtt:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();//timeAtt.x is start，timeAtt.y is during time
+			animationRegistersManager.setRegisterIndex(this, "timeAtt", timeAtt.index);
 			var code:String = "";
-			code += "sub " + _animation.vertexTime.toString() + "," + _animation.timeConst.toString() + ".x," + timeAtt.toString() + ".x\n";
-			code += "max " + _animation.vertexTime.toString() + "," + _animation.vertexZeroConst.toString() + "," +  _animation.vertexTime.toString() + "\n";
+			code += "sub " + animationRegistersManager.vertexTime.toString() + "," + animationRegistersManager.timeConst.toString() + ".x," + timeAtt.toString() + ".x\n";
+			code += "max " + animationRegistersManager.vertexTime.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "," +  animationRegistersManager.vertexTime.toString() + "\n";
 			if (hasDuringTime)
 			{
 				if (_loop)
@@ -129,35 +128,35 @@ package a3dparticle.animators.actions
 					var div:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 					if (hasSleepTime)
 					{
-						code += "div " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".z\n";
+						code += "div " + div.toString() + ".x," + animationRegistersManager.vertexTime.toString() + "," + timeAtt.toString() + ".z\n";
 						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
-						code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".z\n";
-						code += "slt " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
-						code += "mul " + _animation.vertexTime.toString() + "," + _animation.vertexTime.toString() + "," + div.toString() + ".x\n";
+						code += "mul " + animationRegistersManager.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".z\n";
+						code += "slt " + div.toString() + ".x," + animationRegistersManager.vertexTime.toString() + "," + timeAtt.toString() + ".y\n";
+						code += "mul " + animationRegistersManager.vertexTime.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + div.toString() + ".x\n";
 					}
 					else
 					{
-						code += "mul " + div.toString() + ".x," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".w\n";
+						code += "mul " + div.toString() + ".x," + animationRegistersManager.vertexTime.toString() + "," + timeAtt.toString() + ".w\n";
 						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
-						code += "mul " + _animation.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".y\n";
+						code += "mul " + animationRegistersManager.vertexTime.toString() + "," +div.toString() + ".x," + timeAtt.toString() + ".y\n";
 					}
 				}
 				else
 				{
 					var sge:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-					code += "sge " + sge.toString() + ".x," +  timeAtt.toString() + ".y," + _animation.vertexTime.toString() + "\n";
-					code += "mul " + _animation.vertexTime.toString() + "," +sge.toString() + ".x," + _animation.vertexTime.toString() + "\n";
+					code += "sge " + sge.toString() + ".x," +  timeAtt.toString() + ".y," + animationRegistersManager.vertexTime.toString() + "\n";
+					code += "mul " + animationRegistersManager.vertexTime.toString() + "," +sge.toString() + ".x," + animationRegistersManager.vertexTime.toString() + "\n";
 				}
 			}
-			code += "mul " + _animation.vertexLife.toString() + "," + _animation.vertexTime.toString() + "," + timeAtt.toString() + ".w\n";
-			code += "mov " + _animation.fragmentTime.toString() + "," + _animation.vertexTime.toString() +"\n";
-			code += "mov " + _animation.fragmentLife.toString() + "," + _animation.vertexLife.toString() +"\n";
+			code += "mul " + animationRegistersManager.vertexLife.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + timeAtt.toString() + ".w\n";
+			code += "mov " + animationRegistersManager.fragmentTime.toString() + "," + animationRegistersManager.vertexTime.toString() +"\n";
+			code += "mov " + animationRegistersManager.fragmentLife.toString() + "," + animationRegistersManager.vertexLife.toString() +"\n";
 			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(timeAtt.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
+			stage3DProxy.context3D.setVertexBufferAt(animationRegistersManager.getRegisterIndex(this, "timeAtt"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
 		}
 		
 	}

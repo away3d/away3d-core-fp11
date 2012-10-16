@@ -57,11 +57,15 @@ package a3dparticle.animators.actions.color
 			{
 				startMultiplierConst = shaderRegisterCache.getFreeFragmentConstant();
 				deltaMultiplierConst = shaderRegisterCache.getFreeFragmentConstant();
+				animationRegistersManager.setRegisterIndex(this, "startMultiplierConst", startMultiplierConst.index);
+				animationRegistersManager.setRegisterIndex(this, "deltaMultiplierConst", deltaMultiplierConst.index);
 			}
 			if (_hasOffset)
 			{
 				startOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
 				deltaOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
+				animationRegistersManager.setRegisterIndex(this, "startOffsetConst", startOffsetConst.index);
+				animationRegistersManager.setRegisterIndex(this, "deltaOffsetConst", deltaOffsetConst.index);
 			}
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentVectorTemp();
@@ -70,34 +74,35 @@ package a3dparticle.animators.actions.color
 			
 			if (_hasMult)
 			{
-				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  _animation.fragmentLife.toString()+ "\n";
+				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  animationRegistersManager.fragmentLife.toString()+ "\n";
 				code += "add " + temp.toString() + "," + temp.toString() + "," + startMultiplierConst.toString() + "\n";
-				code += "mul " + _animation.colorTarget.toString() +"," + temp.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "mul " + animationRegistersManager.colorTarget.toString() +"," + temp.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			if (_hasOffset)
 			{
-				code += "mul " + temp.toString() + "," + _animation.fragmentLife.toString() +"," + deltaOffsetConst.toString() + "\n";
+				code += "mul " + temp.toString() + "," + animationRegistersManager.fragmentLife.toString() +"," + deltaOffsetConst.toString() + "\n";
 				code += "add " + temp.toString() + "," + temp.toString() +"," + startOffsetConst.toString() + "\n";
-				code += "add " + _animation.colorTarget.toString() +"," +temp.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "add " + animationRegistersManager.colorTarget.toString() +"," +temp.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			
-			var context : Context3D = stage3DProxy._context3D;
-			if (_hasMult)
+			if (animationRegistersManager.needFragmentAnimation)
 			{
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, startMultiplierConst.index, startMultiplier);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaMultiplierConst.index, deltaMultiplier);
+				var context : Context3D = stage3DProxy._context3D;
+				if (_hasMult)
+				{
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "startMultiplierConst"), startMultiplier);
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "deltaMultiplierConst"), deltaMultiplier);
+				}
+				if (_hasOffset)
+				{
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "startOffsetConst"), startOffset);
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "deltaOffsetConst"), deltaOffset);
+				}
 			}
-			if (_hasOffset)
-			{
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, startOffsetConst.index, startOffset);
-				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, deltaOffsetConst.index, deltaOffset);
-			}
-			
 		}
 		
 	}

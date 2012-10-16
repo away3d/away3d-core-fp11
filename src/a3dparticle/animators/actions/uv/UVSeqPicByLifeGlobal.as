@@ -43,7 +43,7 @@ package a3dparticle.animators.actions.uv
 		
 		override public function getAGALVertexCode(pass:MaterialPassBase):String
 		{
-			if (_animation.needUV)
+			if (animationRegistersManager.needUV)
 			{
 				uvParamConst = shaderRegisterCache.getFreeVertexConstant();
 				
@@ -58,15 +58,15 @@ package a3dparticle.animators.actions.uv
 				var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
 				
 				
-				var u:ShaderRegisterElement = new ShaderRegisterElement(_animation.uvTarget.regName, _animation.uvTarget.index, "x");
-				var v:ShaderRegisterElement = new ShaderRegisterElement(_animation.uvTarget.regName, _animation.uvTarget.index, "y");
+				var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "x");
+				var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "y");
 				
 				var code:String = "";
 				//scale uv
 				code += "mul " + u.toString() + "," + u.toString() + "," + uStep.toString() + "\n";
 				if (_needV) code += "mul " + v.toString() + "," + v.toString() + "," + vStep.toString() + "\n";
 				
-				code += "mul " + temp.toString() + "," + _animation.vertexLife.toString() + "," + uTotal.toString() + "\n";
+				code += "mul " + temp.toString() + "," + animationRegistersManager.vertexLife.toString() + "," + uTotal.toString() + "\n";
 				if (_needV)
 				{
 					code += "frc " + temp2.toString() + "," + temp.toString() + "\n";
@@ -95,7 +95,7 @@ package a3dparticle.animators.actions.uv
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable):void
 		{
-			if (_animation.needUV)
+			if (animationRegistersManager.needUV)
 			{
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, uvParamConst.index, _data, 1);
 			}

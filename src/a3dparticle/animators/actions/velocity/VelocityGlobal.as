@@ -31,11 +31,11 @@ package a3dparticle.animators.actions.velocity
 			velocityConst = shaderRegisterCache.getFreeVertexConstant();
 			var distance:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var code:String = "";
-			code += "mul " + distance.toString() + "," + _animation.vertexTime.toString() + "," + velocityConst.toString() + "\n";
-			code += "add " + _animation.offsetTarget.toString() +"," + distance.toString() + "," + _animation.offsetTarget.toString() + "\n";
-			if (_animation.needVelocity)
+			code += "mul " + distance.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + velocityConst.toString() + "\n";
+			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
+			if (animationRegistersManager.needVelocity)
 			{
-				code += "add " + _animation.velocityTarget.toString() + ".xyz," + velocityConst.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";
+				code += "add " + animationRegistersManager.velocityTarget.toString() + ".xyz," + velocityConst.toString() + ".xyz," + animationRegistersManager.velocityTarget.toString() + "\n";
 			}
 			return code;
 		}

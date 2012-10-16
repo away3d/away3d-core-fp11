@@ -44,7 +44,7 @@ package a3dparticle.animators.actions.fog
 			_fogConst = shaderRegisterCache.getFreeFragmentConstant();
 			
 			var code:String = "";
-			code += "sub " + _camerVary.toString() + "," + _animation.offsetTarget.toString() + "," + _animation.cameraPosConst.toString() + "\n";
+			code += "sub " + _camerVary.toString() + "," + animationRegistersManager.offsetTarget.toString() + "," + animationRegistersManager.cameraPosConst.toString() + "\n";
 			return code;
 		}
 		
@@ -55,13 +55,13 @@ package a3dparticle.animators.actions.fog
 			code += "dp3 " + temp.toString() + ".w," + _camerVary + ".xyz," + _camerVary.toString() + ".xyz\n";
 			code += "sqt " + temp.toString() + ".w," + temp.toString() + ".w\n";
 			code += "mul " + temp.toString() + ".w," + temp.toString() + ".w," + _fogConst.toString() + ".w\n";
-			code += "sub " + temp.toString() + ".w," + temp.toString() + ".w," + _animation.fragmentOneConst.toString() + "\n";
-			code += "max " + temp.toString() + ".w," + _animation.fragmentZeroConst.toString() + "," + temp.toString() + ".w\n";
+			code += "sub " + temp.toString() + ".w," + temp.toString() + ".w," + animationRegistersManager.fragmentOneConst.toString() + "\n";
+			code += "max " + temp.toString() + ".w," + animationRegistersManager.fragmentZeroConst.toString() + "," + temp.toString() + ".w\n";
 			code += "neg " + temp.toString() + ".w," + temp.toString() + ".w\n";
 			code += "exp " + temp.toString() + ".w," + temp.toString() + ".w\n";
-			code += "sub " + temp.toString() + ".xyz," + _animation.colorTarget.toString() + ".xyz, " + _fogConst.toString() + ".xyz\n";
+			code += "sub " + temp.toString() + ".xyz," + animationRegistersManager.colorTarget.toString() + ".xyz, " + _fogConst.toString() + ".xyz\n";
 			code += "mul " + temp.toString() + ".xyz," + temp.toString() + ".xyz," + temp.toString() + ".w\n";
-			code += "add " + _animation.colorTarget.toString() + ".xyz, " + _fogConst.toString() + ".xyz, " + temp.toString() + ".xyz\n";
+			code += "add " + animationRegistersManager.colorTarget.toString() + ".xyz, " + _fogConst.toString() + ".xyz, " + temp.toString() + ".xyz\n";
 			
 			return code;
 		}

@@ -95,11 +95,11 @@ package a3dparticle.animators.actions.color
 			
 			if (_hasMult)
 			{
-				code += "mul " + _animation.colorTarget.toString() +"," + multiplierVary.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "mul " + animationRegistersManager.colorTarget.toString() +"," + multiplierVary.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			if (_hasOffset)
 			{
-				code += "add " + _animation.colorTarget.toString() +"," +offsetVary.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "add " + animationRegistersManager.colorTarget.toString() +"," +offsetVary.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			return code;
 		}

@@ -80,7 +80,7 @@ package a3dparticle.animators.actions.color
 			
 			var code:String = "";
 			
-			code += "mul " + sin.toString() + "," + _animation.fragmentTime.toString() + "," + cycleConst.toString() + ".x\n";
+			code += "mul " + sin.toString() + "," + animationRegistersManager.fragmentTime.toString() + "," + cycleConst.toString() + ".x\n";
 			if (_hasPhaseAngle)
 			{
 				code += "add " + sin.toString() + "," + sin.toString() + "," + cycleConst.toString() + ".y\n";
@@ -91,13 +91,13 @@ package a3dparticle.animators.actions.color
 			{
 				code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  sin.toString()+ "\n";
 				code += "add " + temp.toString() + "," + temp.toString() + "," + startMultiplierConst.toString() + "\n";
-				code += "mul " + _animation.colorTarget.toString() +"," + temp.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "mul " + animationRegistersManager.colorTarget.toString() +"," + temp.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			if (_hasOffset)
 			{
 				code += "mul " + temp.toString() + "," + deltaOffsetConst.toString() +"," + sin.toString() + "\n";
 				code += "add " + temp.toString() + "," + temp.toString() +"," + startOffsetConst.toString() + "\n";
-				code += "add " + _animation.colorTarget.toString() +"," +temp.toString() + "," + _animation.colorTarget.toString() + "\n";
+				code += "add " + animationRegistersManager.colorTarget.toString() +"," +temp.toString() + "," + animationRegistersManager.colorTarget.toString() + "\n";
 			}
 			return code;
 		}

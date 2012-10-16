@@ -53,27 +53,27 @@ package a3dparticle.animators.actions.rotation
 			shaderRegisterCache.removeVertexTempUsage(R);
 			
 			var code:String = "";
-			code += "mov " + xAxis.toString() + ".x," + _animation.vertexOneConst.toString() + ".x\n";
-			code += "mov " + xAxis.toString() + ".yz," + _animation.vertexZeroConst.toString() + ".xy\n";
+			code += "mov " + xAxis.toString() + ".x," + animationRegistersManager.vertexOneConst.toString() + ".x\n";
+			code += "mov " + xAxis.toString() + ".yz," + animationRegistersManager.vertexZeroConst.toString() + ".xy\n";
 			
 			
-			code += "nrm " + nrmVel.toString() + ".xyz," + _animation.velocityTarget.toString() + ".xyz\n";
+			code += "nrm " + nrmVel.toString() + ".xyz," + animationRegistersManager.velocityTarget.toString() + ".xyz\n";
 			code += "dp3 " + cos2.toString() + "," + nrmVel.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
 			code += "crs " + nrmVel.toString() + ".xyz," + xAxis.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
 			code += "nrm " + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
 			//use R as temp to judge if nrm is (0,0,0).
 			//if nrm is (0,0,0) ,change it to (0,0,1).
 			code += "dp3 " + R.toString() + ".x," + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
-			code += "sge " + R.toString() + ".x," + _animation.vertexZeroConst.toString() + ".x," + R.toString() + ".x\n";
+			code += "sge " + R.toString() + ".x," + animationRegistersManager.vertexZeroConst.toString() + ".x," + R.toString() + ".x\n";
 			code += "add " +nrmVel.toString() + ".z," + R.toString() + ".x," + nrmVel.toString() + ".z\n";
 			
 			
-			code += "add " + tempSingle.toString() + "," + cos2.toString() + "," + _animation.vertexOneConst.toString() + "\n";
-			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + _animation.vertexTwoConst.toString() + "\n";
+			code += "add " + tempSingle.toString() + "," + cos2.toString() + "," + animationRegistersManager.vertexOneConst.toString() + "\n";
+			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
 			code += "sqt " + cos.toString() + "," + tempSingle.toString() + "\n";
 			
-			code += "sub " + tempSingle.toString() + "," + _animation.vertexOneConst.toString() + "," + cos2.toString() + "\n";
-			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + _animation.vertexTwoConst.toString() + "\n";
+			code += "sub " + tempSingle.toString() + "," + animationRegistersManager.vertexOneConst.toString() + "," + cos2.toString() + "\n";
+			code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
 			code += "sqt " + sin.toString() + "," + tempSingle.toString() + "\n";
 			
 			
@@ -87,12 +87,12 @@ package a3dparticle.animators.actions.rotation
 			//use cos as R_rev.w
 			
 			//nrmVel and xAxis are used as temp register
-			code += "crs " + nrmVel.toString() + ".xyz," + R.toString() + ".xyz," +_animation.scaleAndRotateTarget.toString() + ".xyz\n";
-			//code += "mul " + xAxis.toString() + ".xyz," + R.toString() +".w," + _animation.scaleAndRotateTarget.toString() + ".xyz\n";
+			code += "crs " + nrmVel.toString() + ".xyz," + R.toString() + ".xyz," +animationRegistersManager.scaleAndRotateTarget.toString() + ".xyz\n";
+			//code += "mul " + xAxis.toString() + ".xyz," + R.toString() +".w," + animationRegistersManager.scaleAndRotateTarget.toString() + ".xyz\n";
 			//use cos as R.w
-			code += "mul " + xAxis.toString() + ".xyz," + cos.toString() +"," + _animation.scaleAndRotateTarget.toString() + ".xyz\n";
+			code += "mul " + xAxis.toString() + ".xyz," + cos.toString() +"," + animationRegistersManager.scaleAndRotateTarget.toString() + ".xyz\n";
 			code += "add " + nrmVel.toString() + ".xyz," + nrmVel.toString() +".xyz," + xAxis.toString() + ".xyz\n";
-			code += "dp3 " + xAxis.toString() + ".w," + R.toString() + ".xyz," +_animation.scaleAndRotateTarget.toString() + ".xyz\n";
+			code += "dp3 " + xAxis.toString() + ".w," + R.toString() + ".xyz," +animationRegistersManager.scaleAndRotateTarget.toString() + ".xyz\n";
 			code += "neg " + nrmVel.toString() + ".w," + xAxis.toString() + ".w\n";
 			
 			
@@ -102,7 +102,7 @@ package a3dparticle.animators.actions.rotation
 			code += "add " + R.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
 			code += "mul " + xAxis.toString() + ".xyz," + nrmVel.toString() + ".w," +R_rev.toString() + ".xyz\n";
 			
-			code += "add " + _animation.scaleAndRotateTarget.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+			code += "add " + animationRegistersManager.scaleAndRotateTarget.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
 			
 			return code;
 		}

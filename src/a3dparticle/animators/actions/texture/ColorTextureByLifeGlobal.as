@@ -46,11 +46,11 @@ package a3dparticle.animators.actions.texture
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentVectorTemp();
 			
 			var code:String = "";
-			//code += "mov " + temp.toString() + "," + _animation.fragmentZeroConst.toString() + "\n";
-			code += "mov " + temp.toString() + ".y," + _animation.fragmentOneConst.toString() + "\n";
-			code += "mov " + temp.toString() + ".x," + _animation.fragmentLife.toString() + "\n";
+			//code += "mov " + temp.toString() + "," + animationRegistersManager.fragmentZeroConst.toString() + "\n";
+			code += "mov " + temp.toString() + ".y," + animationRegistersManager.fragmentOneConst.toString() + "\n";
+			code += "mov " + temp.toString() + ".x," + animationRegistersManager.fragmentLife.toString() + "\n";
 			code += "tex " + temp.toString() + "," + temp.toString() + ".xy," + _textureRegister.toString() + "<2d," + (_smooth?"linear":"nearest") + "clamp,nomip>\n";
-			code += _mode + " " + _animation.colorTarget.toString() + "," + _animation.colorTarget.toString() + "," + temp.toString() + "\n";
+			code += _mode + " " + animationRegistersManager.colorTarget.toString() + "," + animationRegistersManager.colorTarget.toString() + "," + temp.toString() + "\n";
 			return code;
 		}
 		

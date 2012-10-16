@@ -32,18 +32,18 @@ package a3dparticle.animators.actions.acceleration
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			shaderRegisterCache.addVertexTempUsages(temp,1);
 			var code:String = "";
-			code += "mul " + temp.toString() +"," + _animation.vertexTime.toString() + "," + accVelConst.toString() + "\n";
+			code += "mul " + temp.toString() +"," + animationRegistersManager.vertexTime.toString() + "," + accVelConst.toString() + "\n";
 			
-			if (_animation.needVelocity)
+			if (animationRegistersManager.needVelocity)
 			{
 				var temp2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-				code += "mul " + temp2.toString() + "," + temp.toString() + "," + _animation.vertexTwoConst.toString() + "\n";
-				code += "add " + _animation.velocityTarget.toString() + ".xyz," + temp2.toString() + ".xyz," + _animation.velocityTarget.toString() + "\n";
+				code += "mul " + temp2.toString() + "," + temp.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
+				code += "add " + animationRegistersManager.velocityTarget.toString() + ".xyz," + temp2.toString() + ".xyz," + animationRegistersManager.velocityTarget.toString() + "\n";
 			}
 			shaderRegisterCache.removeVertexTempUsage(temp);
 			
-			code += "mul " + temp.toString() +"," + temp.toString() + "," + _animation.vertexTime.toString() + "\n";
-			code += "add " + _animation.offsetTarget.toString() +".xyz," + temp.toString() + "," + _animation.offsetTarget.toString() + ".xyz\n";
+			code += "mul " + temp.toString() +"," + temp.toString() + "," + animationRegistersManager.vertexTime.toString() + "\n";
+			code += "add " + animationRegistersManager.offsetTarget.toString() +".xyz," + temp.toString() + "," + animationRegistersManager.offsetTarget.toString() + ".xyz\n";
 			return code;
 		}
 		

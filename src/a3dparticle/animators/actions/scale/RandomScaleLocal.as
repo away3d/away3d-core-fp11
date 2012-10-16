@@ -54,7 +54,7 @@ package a3dparticle.animators.actions.scale
 		{
 			scaleAttribute = shaderRegisterCache.getFreeVertexAttribute();
 			var code:String = "";
-			code += "mul " + _animation.scaleAndRotateTarget.toString() +"," +_animation.scaleAndRotateTarget.toString() + "," + scaleAttribute.toString() + "\n";
+			code += "mul " + animationRegistersManager.scaleAndRotateTarget.toString() +"," +animationRegistersManager.scaleAndRotateTarget.toString() + "," + scaleAttribute.toString() + "\n";
 			return code;
 		}
 		
