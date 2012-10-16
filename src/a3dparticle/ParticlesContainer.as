@@ -126,6 +126,7 @@ package a3dparticle
 			
 			var vertexData:Vector.<Number>;
 			var uvData:Vector.<Number>;
+			var normalData:Vector.<Number>;
 			var indexData:Vector.<uint>;
 			var j:uint;
 			var length:uint;
@@ -148,6 +149,7 @@ package a3dparticle
 				indexData = _vec[i].subGem.indexData;
 				vertexData = _vec[i].subGem.vertexData;
 				uvData = _vec[i].subGem.UVData;
+				normalData = _vec[i].subGem.vertexNormalData;
 				
 				_subContainers[j].numTriangles += _vec[i].subGem.numTriangles;
 				nowVertexLen = _subContainers[j].vertexData.length / 3;
@@ -158,6 +160,10 @@ package a3dparticle
 				for (tempIndex = 0; tempIndex < uvData.length; tempIndex += 2)
 				{
 					_subContainers[j].UVData.push(uvData[tempIndex], uvData[tempIndex + 1]);
+				}
+				for (tempIndex = 0; tempIndex < normalData.length; tempIndex += 3)
+				{
+					_subContainers[j].normalData.push(normalData[tempIndex], normalData[tempIndex + 1], normalData[tempIndex + 2]);
 				}
 				
 				param = initParticleParam();

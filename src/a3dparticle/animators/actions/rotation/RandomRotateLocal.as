@@ -22,7 +22,6 @@ package a3dparticle.animators.actions.rotation
 		
 		private var _tempRotateRate:Number;
 		
-		private var roatateAttribute:ShaderRegisterElement;
 		
 		/**
 		 *
@@ -60,7 +59,8 @@ package a3dparticle.animators.actions.rotation
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			roatateAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			var roatateAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			animationRegistersManager.setRegisterIndex(this, "roatateAttribute", roatateAttribute.index);
 			/*
 			var matrix1:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			//make sure there are enough registers
@@ -197,13 +197,51 @@ package a3dparticle.animators.actions.rotation
 			code += "mul " + xAxis.toString() + ".xyz," + nrmVel.toString() + ".w," +R_rev.toString() + ".xyz\n";
 			
 			code += "add " + animationRegistersManager.scaleAndRotateTarget.toString() + "," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
-			
+			if (animationRegistersManager.rotationRegisters.length > 0)
+			{
+				code += "mov " + nrmVel.toString() + ".xyz," + roatateAttribute.toString() + ".xyz\n";
+				code += "mov " + nrmVel.toString() + ".w," + animationRegistersManager.vertexZeroConst.toString() + "\n";
+				
+				code += "mul " + tempSingle.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + roatateAttribute.toString() + ".w\n";
+				
+				code += "cos " + cos.toString() + "," + tempSingle.toString() + "\n";
+				code += "sin " + sin.toString() + "," + tempSingle.toString() + "\n";
+				
+				
+				code += "mul " + R.toString() + ".xyz," + sin.toString() +"," + nrmVel.toString() + ".xyz\n";
+				//code += "mov " + R.toString() + ".w," + cos.toString() + "\n";
+				//use cos as R.w
+				
+				code += "mul " + R_rev.toString() + ".xyz," + sin.toString() + "," + nrmVel.toString() + ".xyz\n";
+				code += "neg " + R_rev.toString() + ".xyz," + R_rev.toString() + ".xyz\n";
+				//code += "mov " + R_rev.toString() + ".w," + cos.toString() + "\n";
+				//use cos as R_rev.w
+				
+				//nrmVel and xAxis are used as temp register
+				code += "crs " + nrmVel.toString() + ".xyz," + R.toString() + ".xyz," +animationRegistersManager.rotationRegisters[0].toString() + ".xyz\n";
+				//code += "mul " + xAxis.toString() + ".xyz," + R.toString() +".w," + animationRegistersManager.rotationRegisters[0].toString() + ".xyz\n";
+				//use cos as R.w
+				code += "mul " + xAxis.toString() + ".xyz," + cos.toString() +"," + animationRegistersManager.rotationRegisters[0].toString() + ".xyz\n";
+				code += "add " + nrmVel.toString() + ".xyz," + nrmVel.toString() +".xyz," + xAxis.toString() + ".xyz\n";
+				code += "dp3 " + xAxis.toString() + ".w," + R.toString() + ".xyz," +animationRegistersManager.rotationRegisters[0].toString() + ".xyz\n";
+				code += "neg " + nrmVel.toString() + ".w," + xAxis.toString() + ".w\n";
+				
+				
+				code += "crs " + R.toString() + ".xyz," + nrmVel.toString() + ".xyz," +R_rev.toString() + ".xyz\n";
+				//code += "mul " + xAxis.toString() + ".xyzw," + nrmVel.toString() + ".xyzw," +R_rev.toString() + ".w\n";
+				//use cos as R_rev.w
+				code += "mul " + xAxis.toString() + ".xyzw," + nrmVel.toString() + ".xyzw," +cos.toString() + ".w\n";
+				code += "add " + R.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+				code += "mul " + xAxis.toString() + ".xyz," + nrmVel.toString() + ".w," +R_rev.toString() + ".xyz\n";
+				
+				code += "add " + animationRegistersManager.rotationRegisters[0].toString() + "," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+			}
 			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(roatateAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
+			stage3DProxy.context3D.setVertexBufferAt(animationRegistersManager.getRegisterIndex(this, "roatateAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
 		}
 		
 	}

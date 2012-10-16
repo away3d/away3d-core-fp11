@@ -137,9 +137,14 @@ package away3d.animators
 		{
 		}
 		
-		function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
 		{
 			return "";
+		}
+		
+		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
+		{
+			return "mov " + UVTarget + "," + UVSource + "\n";
 		}
 	}
 }

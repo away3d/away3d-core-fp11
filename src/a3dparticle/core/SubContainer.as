@@ -109,7 +109,7 @@ package a3dparticle.core
 		
 		public function getVertexNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
 		{
-			return null;
+			return _shareAtt.getNormalBuffer(stage3DProxy);;
 		}
 
 		public function getVertexTangentBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
@@ -161,6 +161,10 @@ package a3dparticle.core
 		public function get vertexData():Vector.<Number>
 		{
 			return _shareAtt._vertices;
+		}
+		public function get normalData():Vector.<Number>
+		{
+			return _shareAtt._normalData;
 		}
 		
 		
@@ -234,7 +238,10 @@ package a3dparticle.core
 		}
 		
 		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
-		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
+		public function activateVertexNormalBuffer(index : int, stage3DProxy : Stage3DProxy) : void
+		{
+			stage3DProxy.context3D.setVertexBufferAt(index, getVertexNormalBuffer(stage3DProxy), 0, Context3DVertexBufferFormat.FLOAT_3);
+		}
 		public function activateVertexTangentBuffer(index : int, stage3DProxy : Stage3DProxy) : void{};
 		public function get numVertices() : uint { return 0 };
 		public function get vertexStride() : uint { return 0 };
@@ -253,12 +260,15 @@ class cloneShareAtt
 	private var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 	private var _indexBuffer : Vector.<IndexBuffer3D> = new Vector.<IndexBuffer3D>(8, true);
 	private var _uvBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
+	private var _normalBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 	public var _vertices : Vector.<Number>=new Vector.<Number>();
 	public var _indices : Vector.<uint> = new Vector.<uint>;
 	public var _uvData:Vector.<Number> = new Vector.<Number>();
+	public var _normalData:Vector.<Number> = new Vector.<Number>();
 	private var _vertexContex3D:Vector.<Context3D> = new Vector.<Context3D>(8, true);
 	private var _indexContex3D:Vector.<Context3D> = new Vector.<Context3D>(8, true);
 	private var _uvContex3D:Vector.<Context3D> = new Vector.<Context3D>(8, true);
+	private var _normalContex3D:Vector.<Context3D> = new Vector.<Context3D>(8, true);
 	public var _extraDatas:Object = { };
 	private var _extraBuffers:Object = { };
 	private var _extraContex3Ds:Object = { };
@@ -312,6 +322,20 @@ class cloneShareAtt
 			t = _uvBuffer[contextIndex] = context.createVertexBuffer(_uvData.length / 2, 2);
 			t.uploadFromVector(_uvData, 0, _uvData.length / 2);
 			_uvContex3D[contextIndex] = context;
+		}
+		return t;
+	}
+
+	public function getNormalBuffer(stage3DProxy : Stage3DProxy) : VertexBuffer3D
+	{
+		var contextIndex : int = stage3DProxy.stage3DIndex;
+		var context : Context3D = stage3DProxy.context3D;
+		var t : VertexBuffer3D = _normalBuffer[contextIndex];
+		if (!t || _normalContex3D[contextIndex] != context)
+		{
+			t = _normalBuffer[contextIndex] = context.createVertexBuffer(_normalData.length / 3, 3);
+			t.uploadFromVector(_normalData, 0, _normalData.length / 3);
+			_normalContex3D[contextIndex] = context;
 		}
 		return t;
 	}

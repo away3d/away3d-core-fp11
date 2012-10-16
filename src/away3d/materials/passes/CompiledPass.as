@@ -172,6 +172,9 @@ package away3d.materials.passes
 			_shadedTarget = _compiler.shadedTarget;
 			_usingSpecularMethod = _compiler.usingSpecularMethod;
 			_usesNormals = _compiler.usesNormals;
+			_needUVAnimation = _compiler.needUVAnimation;
+			_UVSource = _compiler.UVSource;
+			_UVTarget = _compiler.UVTarget;
 
 			updateRegisterIndices();
 			updateUsedOffsets();
@@ -419,9 +422,6 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animatorCode : String) : String
 		{
-			trace(_fragmentLightCode);
-			trace(animatorCode);
-			trace(_framentPostLightCode);
 			return _fragmentLightCode + animatorCode + _framentPostLightCode;
 		}
 

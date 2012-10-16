@@ -85,6 +85,9 @@ package away3d.materials.passes
 
 		protected var _alphaPremultiplied : Boolean;
 		protected var _needFragmentAnimation:Boolean;
+		protected var _needUVAnimation:Boolean;
+		protected var _UVTarget:String;
+		protected var _UVSource:String;
 
 		/**
 		 * Creates a new MaterialPassBase object.
@@ -253,6 +256,11 @@ package away3d.materials.passes
 			return _needFragmentAnimation;
 		}
 		
+		public function get needUVAnimation():Boolean
+		{
+			return _needUVAnimation;
+		}
+		
 		/**
 		 * Sets up the animation state. This needs to be called before render()
 		 *
@@ -412,12 +420,15 @@ package away3d.materials.passes
 		arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
 			var animatorCode : String = "";
+			var UVAnimatorCode : String = "";
 			var fragmentAnimatorCode:String = "";
 			
 			if (_animationSet && !_animationSet.usesCPU) {
 				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
 				if(_needFragmentAnimation)
 					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget);
+				if (_needUVAnimation)
+					UVAnimatorCode = _animationSet.getAGALUVCode(this, _UVSource, _UVTarget);
 			} else {
 				var len : uint = _animatableAttributes.length;
 	
@@ -425,8 +436,11 @@ package away3d.materials.passes
 				// projection will pick up on targets[0] to do the projection
 				for (var i : uint = 0; i < len; ++i)
 					animatorCode += "mov " + _animationTargetRegisters[i] + ", " + _animatableAttributes[i] + "\n";
+				if (_needUVAnimation)
+					UVAnimatorCode = "mov " + _UVTarget + "," + _UVSource + "\n";
 			}
 			
+			animatorCode += UVAnimatorCode;
 			
 			var vertexCode : String = getVertexCode(animatorCode);
 			var fragmentCode : String = getFragmentCode(fragmentAnimatorCode);

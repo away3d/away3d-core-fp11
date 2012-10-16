@@ -60,7 +60,10 @@ package away3d.animators
 		 * @private
 		 */
 		function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String;
-
+		
+		
+		function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String;
+		
 		/**
 		 * Sets the GPU render state required by the animation that is independent of the rendered mesh.
 		 * @param context The context which is currently performing the rendering.

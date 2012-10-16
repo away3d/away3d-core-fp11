@@ -60,6 +60,10 @@ package away3d.materials.compilation
 		protected var _combinedLightSources : uint;
 
 		protected var _usingSpecularMethod : Boolean;
+		
+		protected var _needUVAnimation:Boolean;
+		protected var _UVTarget:String;
+		protected var _UVSource:String;
 
 		use namespace arcane;
 
@@ -68,6 +72,21 @@ package away3d.materials.compilation
 			_sharedRegisters = new ShaderRegisterData();
 			_dependencyCounter = new MethodDependencyCounter();
 			initRegisterCache();
+		}
+		
+		public function get needUVAnimation():Boolean
+		{
+			return _needUVAnimation;
+		}
+		
+		public function get UVTarget():String
+		{
+			return _UVTarget;
+		}
+		
+		public function get UVSource():String
+		{
+			return _UVSource;
 		}
 
 		private function initRegisterCache() : void
@@ -213,7 +232,9 @@ package away3d.materials.compilation
 			}
 			else {
 				_uvTransformIndex = -1;
-				_vertexCode += "mov " + varying + ", " + uvAttributeReg + "\n";
+				_needUVAnimation = true;
+				_UVTarget = varying.toString();
+				_UVSource = uvAttributeReg.toString();
 			}
 		}
 

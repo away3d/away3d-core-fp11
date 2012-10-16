@@ -149,8 +149,11 @@ package a3dparticle.animators.actions
 				}
 			}
 			code += "mul " + animationRegistersManager.vertexLife.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + timeAtt.toString() + ".w\n";
-			code += "mov " + animationRegistersManager.fragmentTime.toString() + "," + animationRegistersManager.vertexTime.toString() +"\n";
-			code += "mov " + animationRegistersManager.fragmentLife.toString() + "," + animationRegistersManager.vertexLife.toString() +"\n";
+			if (animationRegistersManager.needFragmentAnimation)
+			{
+				code += "mov " + animationRegistersManager.fragmentTime.toString() + "," + animationRegistersManager.vertexTime.toString() +"\n";
+				code += "mov " + animationRegistersManager.fragmentLife.toString() + "," + animationRegistersManager.vertexLife.toString() +"\n";
+			}
 			return code;
 		}
 		

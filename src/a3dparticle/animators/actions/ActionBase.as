@@ -22,7 +22,7 @@ package a3dparticle.animators.actions
 			
 		}
 		
-		public function set animation(value:ParticleAnimation):void
+		public function reset(value:ParticleAnimation):void
 		{
 			if (!_animation)
 			{
@@ -51,6 +51,11 @@ package a3dparticle.animators.actions
 		}
 		
 		public function getAGALFragmentCode(pass : MaterialPassBase) : String
+		{
+			return "";
+		}
+		
+		public function getAGALUVCode(pass:MaterialPassBase):String
 		{
 			return "";
 		}

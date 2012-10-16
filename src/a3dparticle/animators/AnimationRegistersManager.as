@@ -27,24 +27,34 @@ package a3dparticle.animators
 		public var varyTime:ShaderRegisterElement;
 		public var fragmentTime:ShaderRegisterElement;
 		public var fragmentLife:ShaderRegisterElement;
-		public var fragmentVelocity:ShaderRegisterElement;
+
 		//fragment
 		public var colorTarget:ShaderRegisterElement;
-		public var textSample:ShaderRegisterElement;
 		public var uvVar:ShaderRegisterElement;
 		public var fragmentZeroConst:ShaderRegisterElement;
 		public var fragmentOneConst:ShaderRegisterElement;
 		public var fragmentMinConst:ShaderRegisterElement;
 		public var fadeFactorConst:ShaderRegisterElement;
 		
+		//these are targets only need to rotate ( normal and tangent )
+		public var rotationRegisters:Array;
+		
+		
 		public var shaderRegisterCache:ShaderRegisterCache = new ShaderRegisterCache();
 		
 		
 		
-		public var needCameraPosition:Boolean;
-		public var needUV:Boolean;
+		public var hasUVAction:Boolean;
+		
+		//set if it need to share velocity in other actions
 		public var needVelocity:Boolean;
+		
 		public var needFragmentAnimation:Boolean;
+		
+		public var needUVAnimation:Boolean;
+		
+		public var sourceRegisters:Array;
+		public var targetRegisters:Array;
 		
 		private var indexDictionary:Dictionary = new Dictionary(true);
 		
@@ -56,34 +66,41 @@ package a3dparticle.animators
 		
 		public function reset():void
 		{
-			//because of projectionVertexCode,I set these value directly
-			scaleAndRotateTarget = new ShaderRegisterElement("vt", 0);
+			rotationRegisters = [];
+			positionAttribute = getRegisterFromString(sourceRegisters[0]);
+			scaleAndRotateTarget = getRegisterFromString(targetRegisters[0]);
 			shaderRegisterCache.addVertexTempUsages(scaleAndRotateTarget, 1);
+			
+			for (var i:int = 1; i < targetRegisters.length; i++)
+			{
+				rotationRegisters.push(getRegisterFromString(targetRegisters[i]));
+				shaderRegisterCache.addVertexTempUsages(rotationRegisters[i - 1], 1);
+			}
+			
 			scaleAndRotateTarget = new ShaderRegisterElement(scaleAndRotateTarget.regName, scaleAndRotateTarget.index, "xyz");//only use xyz, w is used as vertexLife
-			positionAttribute = new ShaderRegisterElement("va", 0);
+
 			//allot const register
 			timeConst = shaderRegisterCache.getFreeVertexConstant();
 			vertexZeroConst = shaderRegisterCache.getFreeVertexConstant();
 			vertexZeroConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "x");
 			vertexOneConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "y");
 			vertexTwoConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "z");
-			if (needCameraPosition)
-				cameraPosConst = shaderRegisterCache.getFreeVertexConstant();
 			
-			fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
-			fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
-			fragmentOneConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "y");
-			fragmentMinConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "z");
-			//allot attribute register
-			if (needUV)
+			if (needFragmentAnimation)
 			{
-				uvAttribute = shaderRegisterCache.getFreeVertexAttribute();
+				fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
+				fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
+				fragmentOneConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "y");
+				fragmentMinConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "z");
+				
+				varyTime = shaderRegisterCache.getFreeVarying();
+				fragmentTime = new ShaderRegisterElement(varyTime.regName, varyTime.index, "x");
+				fragmentLife = new ShaderRegisterElement(varyTime.regName, varyTime.index, "y");
 			}
+
 			//allot temp register
 			var tempTime:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			offsetTarget = new ShaderRegisterElement(tempTime.regName, tempTime.index, "xyz");
-			//uv action is processed after normal actions,so use offsetTarget as uvTarget
-			uvTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xy");
 			
 			shaderRegisterCache.addVertexTempUsages(tempTime, 1);
 			vertexTime = new ShaderRegisterElement(tempTime.regName, tempTime.index, "w");
@@ -94,19 +111,20 @@ package a3dparticle.animators
 				shaderRegisterCache.addVertexTempUsages(velocityTarget, 1);
 			}
 			
-			//TOdo:
-			colorTarget = shaderRegisterCache.getFreeFragmentVectorTemp();
+		}
+		
+		public function setShadedTarget(shadedTarget:String):void
+		{
+			colorTarget = getRegisterFromString(shadedTarget);
 			shaderRegisterCache.addFragmentTempUsages(colorTarget,1);
-			
-			//allot vary register
-			varyTime = shaderRegisterCache.getFreeVarying();
-			fragmentTime = new ShaderRegisterElement(varyTime.regName, varyTime.index, "x");
-			fragmentLife = new ShaderRegisterElement(varyTime.regName, varyTime.index, "y");
-			fragmentVelocity = new ShaderRegisterElement(varyTime.regName, varyTime.index, "z");
-			if (needUV)
-			{
-				uvVar = shaderRegisterCache.getFreeVarying();
-			}
+		}
+		
+		public function setUVSourceAndTarget(UVAttribute : String, UVVaring:String):void
+		{
+			uvVar = getRegisterFromString(UVVaring);
+			uvAttribute = getRegisterFromString(UVAttribute);
+			//uv action is processed after normal actions,so use offsetTarget as uvTarget
+			uvTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xy");
 		}
 		
 		public function setRegisterIndex(action:Object, name:String, index:int):void
@@ -120,12 +138,34 @@ package a3dparticle.animators
 			return indexDictionary[action][name];
 		}
 		
-		public  function getRegisterFromString(code:String):ShaderRegisterElement
+		public function getInitCode():String
+		{
+			var len:int = sourceRegisters.length;
+			var code:String = "";
+			for (var i:int = 0; i < len; i++)
+			{
+				code += "mov " + targetRegisters[i] + "," + sourceRegisters[i] + "\n";
+			}
+			
+			code += "mov " + offsetTarget.toString() + "," + vertexZeroConst.toString() + "\n";
+			
+			if (needVelocity)
+			{
+				code += "mov " + velocityTarget.toString() + "," + vertexZeroConst.toString() + "\n";
+			}
+			if (needFragmentAnimation)
+			{
+				code += "mov " + varyTime.toString() + ".zw," + vertexZeroConst.toString() + "\n";
+			}
+			
+			return code;
+		}
+		
+		private function getRegisterFromString(code:String):ShaderRegisterElement
 		{
 			var temp:Array = code.split(/(\d+)/);
 			return new ShaderRegisterElement(temp[0], temp[1]);
 		}
-		
 	}
 
 }

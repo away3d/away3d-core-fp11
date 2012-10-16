@@ -47,16 +47,6 @@ package a3dparticle.animators
 		//dependent and global action
 		private var timeAction:TimeAction;
 		
-		//set if it need to share velocity in other actions
-		public var needVelocity:Boolean;
-		
-		public var needVelocityInFragment:Boolean;
-		
-		public var needCameraPosition:Boolean;
-		
-		public var needUV:Boolean;
-		public var hasUVAction:Boolean;
-		
 		
 		
 		
@@ -68,7 +58,6 @@ package a3dparticle.animators
 			super();
 			
 			timeAction = new TimeAction();
-			timeAction.animation = this;
 			addAction(timeAction);
 			
 		}
@@ -134,7 +123,6 @@ package a3dparticle.animators
 				}
 			}
 			_particleActions.splice(i + 1, 0, action);
-			action.animation = this;
 		}
 		
 		public function genOne(param:ParticleParam):void
@@ -164,8 +152,11 @@ package a3dparticle.animators
 			
 			//set vertexZeroConst,vertexOneConst,vertexTwoConst
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, animationRegistersManager.vertexZeroConst.index, VERTEX_CONST, 1);
-			//set fragmentZeroConst,fragmentOneConst
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.fragmentZeroConst.index, FRAGMENT_CONST, 1);
+			if (animationRegistersManager.needFragmentAnimation)
+			{
+				//set fragmentZeroConst,fragmentOneConst
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.fragmentZeroConst.index, FRAGMENT_CONST, 1);
+			}
 		}
 		
 		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
@@ -187,26 +178,28 @@ package a3dparticle.animators
 			shaderRegisterCache.varyingsOffset = pass.numUsedVaryings;
 			shaderRegisterCache.fragmentConstantOffset = pass.numUsedFragmentConstants;
 			shaderRegisterCache.reset();
-			animationRegistersManager.needCameraPosition = needCameraPosition;
-			animationRegistersManager.needUV = needUV;
-			animationRegistersManager.needVelocity = needVelocity;
+			animationRegistersManager.sourceRegisters = sourceRegisters;
+			animationRegistersManager.targetRegisters = targetRegisters;
 			animationRegistersManager.needFragmentAnimation = pass.needFragmentAnimation;
+			animationRegistersManager.needUVAnimation = pass.needUVAnimation;
 			animationRegistersManager.reset();
+			var action:ActionBase;
+			for each(action in _particleActions)
+			{
+				action.reset(this);
+			}
 		}
 
 		
 		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
 			reset(pass, sourceRegisters, targetRegisters);
-			_AGALVertexCode = "";
-			if (needVelocity)
-			{
-				_AGALVertexCode += "mov " + animationRegistersManager.velocityTarget.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
-			}
 			
-			_AGALVertexCode += "mov " + animationRegistersManager.varyTime.toString() + ".zw," + animationRegistersManager.vertexZeroConst.toString() + "\n";
-			_AGALVertexCode += "mov " + animationRegistersManager.offsetTarget.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
-			_AGALVertexCode += "mov " + animationRegistersManager.scaleAndRotateTarget.toString() + "," + animationRegistersManager.positionAttribute.toString() + "\n";
+			_AGALVertexCode = "";
+			
+			_AGALVertexCode += animationRegistersManager.getInitCode();
+			
+			
 			var action:ActionBase;
 			for each(action in _particleActions)
 			{
@@ -215,27 +208,10 @@ package a3dparticle.animators
 					_AGALVertexCode += action.getAGALVertexCode(pass);
 				}
 			}
-			if (needVelocity && needVelocityInFragment)
-			{
-				_AGALVertexCode += "dp3 " + animationRegistersManager.velocityTarget.toString() + ".x," + animationRegistersManager.velocityTarget.toString() + "," + animationRegistersManager.velocityTarget.toString() + "\n";
-				_AGALVertexCode += "sqt " + animationRegistersManager.fragmentVelocity.toString() + "," + animationRegistersManager.velocityTarget.toString() + ".x\n";
-			}
+
 			_AGALVertexCode += "add " + animationRegistersManager.scaleAndRotateTarget.toString() +"," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
 			//in post_priority stage,the offsetTarget temp register if free for use,we use is as uv temp register
 			
-			if (needUV)
-			{
-				if (hasUVAction)
-				{
-					//if has uv action,mov uv attribute to the uvTarget temp register
-					_AGALVertexCode += "mov " + animationRegistersManager.uvTarget.toString() + "," + animationRegistersManager.uvAttribute.toString() + "\n";
-				}
-				else
-				{
-					//if has not uv action,mov uv attribute to uvVar vary register directly
-					_AGALVertexCode += "mov " + animationRegistersManager.uvVar.toString() + "," + animationRegistersManager.uvAttribute.toString() + "\n";
-				}
-			}
 			
 			for each(action in _particleActions)
 			{
@@ -245,10 +221,6 @@ package a3dparticle.animators
 				}
 			}
 			
-			if (needUV && hasUVAction)
-			{
-				_AGALVertexCode += "mov " + animationRegistersManager.uvVar.toString() + "," + animationRegistersManager.uvTarget.toString() + "\n";
-			}
 			
 			_AGALVertexCode += "mov " + animationRegistersManager.scaleAndRotateTarget.regName + animationRegistersManager.scaleAndRotateTarget.index.toString() + ".w," + animationRegistersManager.vertexOneConst.toString() + "\n";
 			//if time=0,set the final position to zero.
@@ -256,12 +228,36 @@ package a3dparticle.animators
 			_AGALVertexCode += "neg " + temp.toString() + "," + animationRegistersManager.vertexTime.toString() + "\n";
 			_AGALVertexCode += "slt " + temp.toString() + "," + temp.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 			_AGALVertexCode += "mul " + animationRegistersManager.scaleAndRotateTarget.regName + animationRegistersManager.scaleAndRotateTarget.index.toString() + "," + animationRegistersManager.scaleAndRotateTarget.regName + animationRegistersManager.scaleAndRotateTarget.index.toString() + "," + temp.toString() + "\n";
+			
+			trace(_AGALVertexCode)
+			
 			return _AGALVertexCode;
+		}
+		
+		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
+		{
+			var code:String = "";
+			if (animationRegistersManager.hasUVAction)
+			{
+				animationRegistersManager.setUVSourceAndTarget(UVSource, UVTarget);
+				code += "mov " + animationRegistersManager.uvTarget.toString() + "," + animationRegistersManager.uvAttribute.toString() + "\n";
+				var action:ActionBase;
+				for each(action in _particleActions)
+				{
+					code += action.getAGALUVCode(pass);
+				}
+				code += "mov " + animationRegistersManager.uvVar.toString() + "," + animationRegistersManager.uvTarget.toString() + "\n";
+			}
+			else
+			{
+				code += "mov " + UVTarget + "," + UVSource + "\n";
+			}
+			return code;
 		}
 		
 		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
 		{
-			animationRegistersManager.needFragmentAnimation = true;
+			animationRegistersManager.setShadedTarget(shadedTarget);
 			_AGALFragmentCode = "";
 			var action:ActionBase;
 			for each(action in _particleActions)

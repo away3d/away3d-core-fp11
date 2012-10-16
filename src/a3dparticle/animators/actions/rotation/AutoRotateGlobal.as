@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.rotation 
+package a3dparticle.animators.actions.rotation
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import a3dparticle.animators.ParticleAnimation;
@@ -17,14 +17,14 @@ package a3dparticle.animators.actions.rotation
 	public class AutoRotateGlobal extends AllParticleAction
 	{
 		
-		public function AutoRotateGlobal() 
+		public function AutoRotateGlobal()
 		{
 			priority = 3;
 		}
 		
 		override public function set animation(value:ParticleAnimation):void
 		{
-			value.needVelocity = true;
+			value.animationRegistersManager.needVelocity = true;
 			super.animation = value;
 		}
 		
