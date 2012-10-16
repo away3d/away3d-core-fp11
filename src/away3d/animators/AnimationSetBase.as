@@ -3,6 +3,7 @@ package away3d.animators
 	import away3d.animators.nodes.*;
 	import away3d.errors.*;
 	import away3d.library.assets.*;
+	import away3d.materials.passes.MaterialPassBase;
 	
 	import flash.utils.*;
 	
@@ -20,7 +21,7 @@ package away3d.animators
 		
 		/**
 		 * Retrieves a temporary GPU register that's still free.
-		 * 
+		 *
 		 * @param exclude An array of non-free temporary registers.
 		 * @param excludeAnother An additional register that's not free.
 		 * @return A temporary register that can be used.
@@ -53,7 +54,7 @@ package away3d.animators
 		/**
 		 * Called by the material to reset the GPU indicator before testing whether register space in the shader
 		 * is available for running GPU-based animation code.
-		 * 
+		 *
 		 * @private
 		 */
 		public function resetGPUCompatibility() : void
@@ -92,7 +93,7 @@ package away3d.animators
 		
 		/**
 		 * Check to determine whether a state is registered in the animation set under the given name.
-		 * 
+		 *
 		 * @param stateName The name of the animation state object to be checked.
 		 */
 		public function hasAnimation(name:String):Boolean
@@ -102,7 +103,7 @@ package away3d.animators
 		
 		/**
 		 * Retrieves the animation state object registered in the animation data set under the given name.
-		 * 
+		 *
 		 * @param stateName The name of the animation state object to be retrieved.
 		 */
 		public function getAnimation(name:String):AnimationNodeBase
@@ -113,7 +114,7 @@ package away3d.animators
 		
 		/**
 		 * Adds an animation state object to the aniamtion data set under the given name.
-		 * 
+		 *
 		 * @param stateName The name under which the animation state object will be stored.
 		 * @param animationState The animation state object to be staored in the set.
 		 */
@@ -134,6 +135,11 @@ package away3d.animators
 		 */
 		public function dispose() : void
 		{
+		}
+		
+		function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		{
+			return "";
 		}
 	}
 }
