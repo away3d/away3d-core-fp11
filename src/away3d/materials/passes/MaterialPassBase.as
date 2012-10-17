@@ -444,7 +444,7 @@ package away3d.materials.passes
 			
 			var vertexCode : String = getVertexCode(animatorCode);
 			var fragmentCode : String = getFragmentCode(fragmentAnimatorCode);
-			if (true) {
+			if (Debug.active) {
 				trace ("Compiling AGAL Code:");
 				trace ("--------------------");
 				trace (vertexCode);
