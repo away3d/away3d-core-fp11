@@ -19,7 +19,6 @@ package a3dparticle.animators.actions.scale
 		
 		private var _tempScale:Vector3D;
 		
-		private var scaleAttribute:ShaderRegisterElement;
 		/**
 		 *
 		 * @param	fun Function.The fun return a Vector3D which (x,y,z) is a (scaleX,scaleY,scaleZ)
@@ -52,7 +51,8 @@ package a3dparticle.animators.actions.scale
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			scaleAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			var scaleAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			saveRegisterIndex("scaleAttribute", scaleAttribute.index);
 			var code:String = "";
 			code += "mul " + animationRegistersManager.scaleAndRotateTarget.toString() +"," +animationRegistersManager.scaleAndRotateTarget.toString() + "," + scaleAttribute.toString() + "\n";
 			return code;
@@ -60,7 +60,7 @@ package a3dparticle.animators.actions.scale
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(scaleAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.context3D.setVertexBufferAt(getRegisterIndex("scaleAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

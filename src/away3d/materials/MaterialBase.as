@@ -290,12 +290,12 @@ package away3d.materials
 		{
 			if (_distanceBasedDepthRender) {
 				if (renderable.animator)
-					_distancePass.updateAnimationState(renderable, stage3DProxy);
+					_distancePass.updateAnimationState(renderable, stage3DProxy, camera);
 				_distancePass.render(renderable, stage3DProxy, camera);
 			}
 			else {
 				if (renderable.animator)
-					_depthPass.updateAnimationState(renderable, stage3DProxy);
+					_depthPass.updateAnimationState(renderable, stage3DProxy, camera);
 				_depthPass.render(renderable, stage3DProxy, camera);
 			}
 		}
@@ -341,7 +341,7 @@ package away3d.materials
 			var pass : MaterialPassBase = _passes[index];
 
 			if (renderable.animator)
-				pass.updateAnimationState(renderable, stage3DProxy);
+				pass.updateAnimationState(renderable, stage3DProxy, entityCollector.camera);
 
 			pass.render(renderable, stage3DProxy, entityCollector.camera);
 		}

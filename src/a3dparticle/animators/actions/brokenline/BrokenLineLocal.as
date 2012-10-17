@@ -14,7 +14,7 @@ package a3dparticle.animators.actions.brokenline
 	import away3d.arcane;
 	use namespace arcane;
 	/**
-	 * ...
+	 * TODO to be tidied
 	 * @author ...
 	 */
 	public class BrokenLineLocal extends PerParticleAction
@@ -118,12 +118,12 @@ package a3dparticle.animators.actions.brokenline
 				code += "max " + max.toString() + "," + max.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 				code += "mul " + distance.toString() + "," + _brokenRegisters[i].toString() + ".xyz," + max.toString() + "\n";
 				code += "add " + animationRegistersManager.offsetTarget.toString() + "," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
-				if (animationRegistersManager.needVelocity)
+				if (_animation.needVelocity)
 				{
 					code += "slt " + slt.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "," + time.toString() + "\n";
 				}
 				code += "sub " + time.toString() + "," + time.toString() + "," + _brokenRegisters[i].toString() + ".w\n";
-				if (animationRegistersManager.needVelocity)
+				if (_animation.needVelocity)
 				{
 					code += "sge " + sge.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "," + time.toString() + "\n";
 					code += "mul " + sge.toString() + "," + sge.toString() + "," + slt.toString() + "\n";

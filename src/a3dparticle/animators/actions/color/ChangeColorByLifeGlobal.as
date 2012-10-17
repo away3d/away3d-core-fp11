@@ -57,15 +57,15 @@ package a3dparticle.animators.actions.color
 			{
 				startMultiplierConst = shaderRegisterCache.getFreeFragmentConstant();
 				deltaMultiplierConst = shaderRegisterCache.getFreeFragmentConstant();
-				animationRegistersManager.setRegisterIndex(this, "startMultiplierConst", startMultiplierConst.index);
-				animationRegistersManager.setRegisterIndex(this, "deltaMultiplierConst", deltaMultiplierConst.index);
+				saveRegisterIndex("startMultiplierConst", startMultiplierConst.index);
+				saveRegisterIndex("deltaMultiplierConst", deltaMultiplierConst.index);
 			}
 			if (_hasOffset)
 			{
 				startOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
 				deltaOffsetConst = shaderRegisterCache.getFreeFragmentConstant();
-				animationRegistersManager.setRegisterIndex(this, "startOffsetConst", startOffsetConst.index);
-				animationRegistersManager.setRegisterIndex(this, "deltaOffsetConst", deltaOffsetConst.index);
+				saveRegisterIndex("startOffsetConst", startOffsetConst.index);
+				saveRegisterIndex("deltaOffsetConst", deltaOffsetConst.index);
 			}
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeFragmentVectorTemp();
@@ -94,13 +94,13 @@ package a3dparticle.animators.actions.color
 				var context : Context3D = stage3DProxy._context3D;
 				if (_hasMult)
 				{
-					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "startMultiplierConst"), startMultiplier);
-					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "deltaMultiplierConst"), deltaMultiplier);
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, getRegisterIndex("startMultiplierConst"), startMultiplier);
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, getRegisterIndex("deltaMultiplierConst"), deltaMultiplier);
 				}
 				if (_hasOffset)
 				{
-					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "startOffsetConst"), startOffset);
-					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegistersManager.getRegisterIndex(this, "deltaOffsetConst"), deltaOffset);
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, getRegisterIndex("startOffsetConst"), startOffset);
+					context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, getRegisterIndex("deltaOffsetConst"), deltaOffset);
 				}
 			}
 		}

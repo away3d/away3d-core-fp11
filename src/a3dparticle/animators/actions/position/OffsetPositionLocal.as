@@ -55,7 +55,7 @@ package a3dparticle.animators.actions.position
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
 			var offsetAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
-			animationRegistersManager.setRegisterIndex(this, "offsetAttribute", offsetAttribute.index);
+			saveRegisterIndex("offsetAttribute", offsetAttribute.index);
 			var code:String = "";
 			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + offsetAttribute.toString() + ".xyz," + animationRegistersManager.offsetTarget.toString() + "\n";
 			return code;
@@ -63,7 +63,7 @@ package a3dparticle.animators.actions.position
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(animationRegistersManager.getRegisterIndex(this, "offsetAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.context3D.setVertexBufferAt(getRegisterIndex("offsetAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

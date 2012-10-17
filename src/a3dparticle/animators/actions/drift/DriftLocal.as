@@ -52,7 +52,8 @@ package a3dparticle.animators.actions.drift
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			driftAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			var driftAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			saveRegisterIndex("driftAttribute", driftAttribute.index);
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
 			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
@@ -68,7 +69,7 @@ package a3dparticle.animators.actions.drift
 			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
 			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
 			
-			if (animationRegistersManager.needVelocity)
+			if (_animation.needVelocity)
 			{	code += "cos " + cos.toString() + "," + dgree.toString() + "\n";
 				code += "mul " + distance.toString() + "," + cos.toString() + "," + driftAttribute.toString() + ".xyz\n";
 				code += "add " + animationRegistersManager.velocityTarget.toString() + ".xyz," + distance.toString() + "," + animationRegistersManager.velocityTarget.toString() + ".xyz\n";
@@ -79,7 +80,7 @@ package a3dparticle.animators.actions.drift
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(driftAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
+			stage3DProxy.context3D.setVertexBufferAt(getRegisterIndex("driftAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
 		}
 	}
 

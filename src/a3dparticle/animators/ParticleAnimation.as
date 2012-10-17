@@ -49,6 +49,10 @@ package a3dparticle.animators
 		
 		
 		
+		public var hasUVAction:Boolean;
+		//set if it need to share velocity in other actions
+		public var needVelocity:Boolean;
+		
 		
 		//rendering camera
 		public var camera:Camera3D;
@@ -111,7 +115,7 @@ package a3dparticle.animators
 		public function addAction(action:ActionBase):void
 		{
 			var i:int;
-			
+			action._animation = this;
 			if (action is PerParticleAction)
 				_perActions.push(action);
 			
@@ -182,12 +186,12 @@ package a3dparticle.animators
 			animationRegistersManager.targetRegisters = targetRegisters;
 			animationRegistersManager.needFragmentAnimation = pass.needFragmentAnimation;
 			animationRegistersManager.needUVAnimation = pass.needUVAnimation;
-			animationRegistersManager.reset();
 			var action:ActionBase;
 			for each(action in _particleActions)
 			{
 				action.reset(this);
 			}
+			animationRegistersManager.reset(needVelocity);
 		}
 
 		
@@ -212,7 +216,6 @@ package a3dparticle.animators
 			_AGALVertexCode += "add " + animationRegistersManager.scaleAndRotateTarget.toString() +"," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
 			//in post_priority stage,the offsetTarget temp register if free for use,we use is as uv temp register
 			
-			
 			for each(action in _particleActions)
 			{
 				if (action.priority >= POST_PRIORITY)
@@ -221,15 +224,11 @@ package a3dparticle.animators
 				}
 			}
 			
-			
-			_AGALVertexCode += "mov " + animationRegistersManager.scaleAndRotateTarget.regName + animationRegistersManager.scaleAndRotateTarget.index.toString() + ".w," + animationRegistersManager.vertexOneConst.toString() + "\n";
 			//if time=0,set the final position to zero.
 			var temp:ShaderRegisterElement = animationRegistersManager.shaderRegisterCache.getFreeVertexSingleTemp();
 			_AGALVertexCode += "neg " + temp.toString() + "," + animationRegistersManager.vertexTime.toString() + "\n";
 			_AGALVertexCode += "slt " + temp.toString() + "," + temp.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
-			_AGALVertexCode += "mul " + animationRegistersManager.scaleAndRotateTarget.regName + animationRegistersManager.scaleAndRotateTarget.index.toString() + "," + animationRegistersManager.scaleAndRotateTarget.regName + animationRegistersManager.scaleAndRotateTarget.index.toString() + "," + temp.toString() + "\n";
-			
-			trace(_AGALVertexCode)
+			_AGALVertexCode += "mul " + animationRegistersManager.scaleAndRotateTarget.toString() + "," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
 			
 			return _AGALVertexCode;
 		}
@@ -237,7 +236,7 @@ package a3dparticle.animators
 		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
 		{
 			var code:String = "";
-			if (animationRegistersManager.hasUVAction)
+			if (hasUVAction)
 			{
 				animationRegistersManager.setUVSourceAndTarget(UVSource, UVTarget);
 				code += "mov " + animationRegistersManager.uvTarget.toString() + "," + animationRegistersManager.uvAttribute.toString() + "\n";

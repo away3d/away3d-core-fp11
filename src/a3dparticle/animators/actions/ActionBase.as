@@ -65,6 +65,16 @@ package a3dparticle.animators.actions
 			
 		}
 		
+		protected function saveRegisterIndex(registerName:String, index:int):void
+		{
+			animationRegistersManager.setRegisterIndex(this, registerName, index);
+		}
+		
+		protected function getRegisterIndex(registerName:String):int
+		{
+			return animationRegistersManager.getRegisterIndex(this, registerName);
+		}
+		
 	}
 
 }

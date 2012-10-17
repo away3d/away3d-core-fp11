@@ -30,8 +30,6 @@ package a3dparticle.animators.actions.circle
 		private var _cycle:Number;
 		private var _eulersMatrix:Matrix3D;
 		
-		private var circleAttribute:ShaderRegisterElement;
-		private var eulersMatrixRegister:ShaderRegisterElement;
 		/**
 		 *
 		 * @param	fun Function.The fun return a a Vector3D. Vector3D.x is radius,Vector3D.y is cycle
@@ -68,17 +66,19 @@ package a3dparticle.animators.actions.circle
 		override public function distributeOne(index:int, verticeIndex:uint, subContainer:SubContainer):void
 		{
 			getExtraData(subContainer).push(_radius, Math.PI * 2 / _cycle);
-			if (animationRegistersManager.needVelocity) getExtraData(subContainer).push(_radius * Math.PI * 2);
+			if (_animation.needVelocity) getExtraData(subContainer).push(_radius * Math.PI * 2);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			if (animationRegistersManager.needVelocity) dataLenght = 3;
+			if (_animation.needVelocity) dataLenght = 3;
 			else dataLenght = 2;
 			
 			
-			circleAttribute = shaderRegisterCache.getFreeVertexAttribute();
-			eulersMatrixRegister = shaderRegisterCache.getFreeVertexConstant();
+			var circleAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			saveRegisterIndex("circleAttribute", circleAttribute.index);
+			var eulersMatrixRegister:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("eulersMatrixRegister", eulersMatrixRegister.index);
 			shaderRegisterCache.getFreeVertexConstant();
 			shaderRegisterCache.getFreeVertexConstant();
 			shaderRegisterCache.getFreeVertexConstant();
@@ -104,7 +104,7 @@ package a3dparticle.animators.actions.circle
 			code += "m44 " + distance.toString() + "," + distance.toString() + "," +eulersMatrixRegister.toString() + "\n";
 			code += "add " + animationRegistersManager.offsetTarget.toString() + ".xyz," + distance.toString() + ".xyz," + animationRegistersManager.offsetTarget.toString() + ".xyz\n";
 			
-			if (animationRegistersManager.needVelocity)
+			if (_animation.needVelocity)
 			{
 				code += "neg " + distance.toString() + ".x," + sin.toString() + "\n";
 				code += "mov " + distance.toString() + ".y," + cos.toString() + "\n";
@@ -120,9 +120,9 @@ package a3dparticle.animators.actions.circle
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			if (animationRegistersManager.needVelocity) stage3DProxy.context3D.setVertexBufferAt(circleAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
-			else stage3DProxy.context3D.setVertexBufferAt(circleAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_2);
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, eulersMatrixRegister.index, _eulersMatrix.rawData, 4);
+			if (_animation.needVelocity) stage3DProxy.context3D.setVertexBufferAt(getRegisterIndex("circleAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			else stage3DProxy.context3D.setVertexBufferAt(getRegisterIndex("circleAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_2);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("eulersMatrixRegister"), _eulersMatrix.rawData, 4);
 		}
 		
 	}

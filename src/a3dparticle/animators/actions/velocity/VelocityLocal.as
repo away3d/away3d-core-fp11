@@ -54,11 +54,11 @@ package a3dparticle.animators.actions.velocity
 			var distance:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			distance = new ShaderRegisterElement(distance.regName, distance.index, "xyz");
 			var velocityAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
-			animationRegistersManager.setRegisterIndex(this, "velocityAttribute", velocityAttribute.index);
+			saveRegisterIndex("velocityAttribute", velocityAttribute.index);
 			var code:String = "";
 			code += "mul " + distance.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
 			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
-			if (animationRegistersManager.needVelocity)
+			if (_animation.needVelocity)
 			{
 				code += "add " + animationRegistersManager.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + animationRegistersManager.velocityTarget.toString() + "\n";
 			}
@@ -67,7 +67,7 @@ package a3dparticle.animators.actions.velocity
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(animationRegistersManager.getRegisterIndex(this, "velocityAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.context3D.setVertexBufferAt(getRegisterIndex("velocityAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

@@ -19,7 +19,6 @@ package a3dparticle.animators.actions.rotation
 	 */
 	public class BillboardGlobal extends AllParticleAction
 	{
-		private var rotationMatrixRegister:ShaderRegisterElement;
 		private var matrix:Matrix3D = new Matrix3D;
 		
 		public function BillboardGlobal()
@@ -29,26 +28,31 @@ package a3dparticle.animators.actions.rotation
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			rotationMatrixRegister = shaderRegisterCache.getFreeVertexConstant();
+			var rotationMatrixRegister:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("rotationMatrixRegister", rotationMatrixRegister.index);
 			shaderRegisterCache.getFreeVertexConstant();
 			shaderRegisterCache.getFreeVertexConstant();
 			shaderRegisterCache.getFreeVertexConstant();
-			
+
 			var code:String = "";
 			
 			code += "m33 " + animationRegistersManager.scaleAndRotateTarget.toString() + "," + animationRegistersManager.scaleAndRotateTarget.toString() + "," + rotationMatrixRegister.toString() + "\n";
-			
+			var len:int = animationRegistersManager.rotationRegisters.length;
+			for (var i:int = 0; i < len; i++)
+			{
+				code += "m33 " + animationRegistersManager.rotationRegisters[i].regName+animationRegistersManager.rotationRegisters[i].index + ".xyz," + animationRegistersManager.rotationRegisters[i].toString() + "," + rotationMatrixRegister.toString() + "\n";
+			}
 			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			matrix.copyFrom(renderable.sceneTransform);
-			matrix.append(animationRegistersManager.camera.inverseSceneTransform);
+			matrix.append(_animation.camera.inverseSceneTransform);
 			var comps : Vector.<Vector3D> = matrix.decompose(Orientation3D.AXIS_ANGLE);
 			matrix.identity();
 			matrix.appendRotation( -comps[1].w * MathConsts.RADIANS_TO_DEGREES, comps[1]);
-			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, rotationMatrixRegister.index, matrix, true);
+			stage3DProxy._context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, getRegisterIndex("rotationMatrixRegister"), matrix, true);
 		}
 		
 	}

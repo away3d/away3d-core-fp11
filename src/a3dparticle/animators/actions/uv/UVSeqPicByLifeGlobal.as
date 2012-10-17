@@ -15,8 +15,7 @@ package a3dparticle.animators.actions.uv
 	 * @author liaocheng
 	 */
 	public class UVSeqPicByLifeGlobal extends AllParticleAction
-	{		
-		private var uvParamConst:ShaderRegisterElement;
+	{
 		
 		private var _needV:Boolean;
 		
@@ -34,55 +33,49 @@ package a3dparticle.animators.actions.uv
 			_data = Vector.<Number>([uTotal, uStep, vStep, 0]);
 		}
 		
-		override public function set animation(value:ParticleAnimation):void
+		override public function reset(value:ParticleAnimation):void
 		{
-			super.animation = value;
+			super.reset(value);
 			value.hasUVAction = true;
 		}
 		
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase):String
+		override public function getAGALUVCode(pass:MaterialPassBase):String
 		{
-			if (animationRegistersManager.needUV)
+			var uvParamConst:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("uvParamConst", uvParamConst.index);
+			
+			var uTotal:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst.regName, uvParamConst.index, "x");
+			var uStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst.regName, uvParamConst.index, "y");
+			var vStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst.regName, uvParamConst.index, "z");
+			
+			
+			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
+			var vOffset:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
+			temp = new ShaderRegisterElement(temp.regName, temp.index, "x");
+			var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
+			
+			
+			var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "x");
+			var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "y");
+			
+			var code:String = "";
+			//scale uv
+			code += "mul " + u.toString() + "," + u.toString() + "," + uStep.toString() + "\n";
+			if (_needV) code += "mul " + v.toString() + "," + v.toString() + "," + vStep.toString() + "\n";
+			
+			code += "mul " + temp.toString() + "," + animationRegistersManager.vertexLife.toString() + "," + uTotal.toString() + "\n";
+			if (_needV)
 			{
-				uvParamConst = shaderRegisterCache.getFreeVertexConstant();
-				
-				var uTotal:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst.regName, uvParamConst.index, "x");
-				var uStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst.regName, uvParamConst.index, "y");
-				var vStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst.regName, uvParamConst.index, "z");
-				
-				
-				var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-				var vOffset:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
-				temp = new ShaderRegisterElement(temp.regName, temp.index, "x");
-				var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
-				
-				
-				var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "x");
-				var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "y");
-				
-				var code:String = "";
-				//scale uv
-				code += "mul " + u.toString() + "," + u.toString() + "," + uStep.toString() + "\n";
-				if (_needV) code += "mul " + v.toString() + "," + v.toString() + "," + vStep.toString() + "\n";
-				
-				code += "mul " + temp.toString() + "," + animationRegistersManager.vertexLife.toString() + "," + uTotal.toString() + "\n";
-				if (_needV)
-				{
-					code += "frc " + temp2.toString() + "," + temp.toString() + "\n";
-					code += "sub " + vOffset.toString() + "," + temp.toString() + "," + temp2.toString() + "\n";
-					code += "mul " + vOffset.toString() + "," + vOffset.toString() + "," + vStep.toString() + "\n";
-					code += "add " + v.toString() + "," + v.toString() + "," + vOffset.toString() + "\n";
-				}
-				code += stepDiv(temp, temp, uStep, temp2);
-				code += "add " + u.toString() + "," + u.toString() + "," + temp.toString() + "\n";
-				
-				return code;
+				code += "frc " + temp2.toString() + "," + temp.toString() + "\n";
+				code += "sub " + vOffset.toString() + "," + temp.toString() + "," + temp2.toString() + "\n";
+				code += "mul " + vOffset.toString() + "," + vOffset.toString() + "," + vStep.toString() + "\n";
+				code += "add " + v.toString() + "," + v.toString() + "," + vOffset.toString() + "\n";
 			}
-			else
-			{
-				return "";
-			}
+			code += stepDiv(temp, temp, uStep, temp2);
+			code += "add " + u.toString() + "," + u.toString() + "," + temp.toString() + "\n";
+			
+			return code;
 		}
 		
 		private function stepDiv(destination:ShaderRegisterElement, source1:ShaderRegisterElement, source2:ShaderRegisterElement, temp:ShaderRegisterElement):String
@@ -95,9 +88,9 @@ package a3dparticle.animators.actions.uv
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable):void
 		{
-			if (animationRegistersManager.needUV)
+			if (animationRegistersManager.needUVAnimation)
 			{
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, uvParamConst.index, _data, 1);
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("uvParamConst"), _data, 1);
 			}
 		}
 	

@@ -2,6 +2,7 @@ package a3dparticle.animators
 {
 	import away3d.animators.AnimatorBase;
 	import away3d.animators.IAnimator;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -40,8 +41,9 @@ package a3dparticle.animators
 		}
 		
 		
-		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int, camera:Camera3D) : void
 		{
+			_particleAnimation.camera = camera;
 			if (_particleAnimation.hasGen)
 			{
 				var actionTime:Number = _animatorTime;

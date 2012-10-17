@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.bezier 
+package a3dparticle.animators.actions.bezier
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
@@ -20,10 +20,8 @@ package a3dparticle.animators.actions.bezier
 		
 		private var _controlPoint:Vector3D;
 		private var _endPoint:Vector3D;
-		private var _controlConst:ShaderRegisterElement;
-		private var _endConst:ShaderRegisterElement;
 		
-		public function BezierCurvelGlobal(control:Vector3D,end:Vector3D) 
+		public function BezierCurvelGlobal(control:Vector3D,end:Vector3D)
 		{
 			_controlPoint = control;
 			_endPoint = end;
@@ -31,8 +29,10 @@ package a3dparticle.animators.actions.bezier
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			_controlConst = shaderRegisterCache.getFreeVertexConstant();
-			_endConst = shaderRegisterCache.getFreeVertexConstant();
+			var _controlConst:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("_controlConst", _controlConst.index);
+			var _endConst:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("_endConst", _endConst.index);
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var rev_time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
@@ -54,8 +54,8 @@ package a3dparticle.animators.actions.bezier
 			code += "mul " + distance.toString() + "," + time_2.toString() +"," + _endConst.toString() + "\n";
 			code += "add " + animationRegistersManager.offsetTarget.toString() +".xyz," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + ".xyz\n";
 			
-			if (animationRegistersManager.needVelocity)
-			{	
+			if (_animation.needVelocity)
+			{
 				code += "mul " + time_2.toString() + "," + animationRegistersManager.vertexLife.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
 				code += "sub " + time_temp.toString() + "," + animationRegistersManager.vertexOneConst.toString() + "," + time_2.toString() + "\n";
 				code += "mul " + time_temp.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "," + time_temp.toString() + "\n";
@@ -71,8 +71,8 @@ package a3dparticle.animators.actions.bezier
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _controlConst.index, Vector.<Number>([ _controlPoint.x, _controlPoint.y, _controlPoint.z, 0 ]));
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _endConst.index, Vector.<Number>([ _endPoint.x, _endPoint.y, _endPoint.z, 0 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("_controlConst"), Vector.<Number>([ _controlPoint.x, _controlPoint.y, _controlPoint.z, 0 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("_endConst"), Vector.<Number>([ _endPoint.x, _endPoint.y, _endPoint.z, 0 ]));
 		}
 		
 	}

@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.velocity 
+package a3dparticle.animators.actions.velocity
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
@@ -19,21 +19,21 @@ package a3dparticle.animators.actions.velocity
 	{
 		private var _velocity:Vector3D;
 		
-		private var velocityConst:ShaderRegisterElement;
 		
-		public function VelocityGlobal(velocity:Vector3D) 
+		public function VelocityGlobal(velocity:Vector3D)
 		{
 			_velocity = velocity;
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			velocityConst = shaderRegisterCache.getFreeVertexConstant();
+			var velocityConst:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("velocityConst", velocityConst.index);
 			var distance:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var code:String = "";
 			code += "mul " + distance.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + velocityConst.toString() + "\n";
 			code += "add " + animationRegistersManager.offsetTarget.toString() +"," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
-			if (animationRegistersManager.needVelocity)
+			if (_animation.needVelocity)
 			{
 				code += "add " + animationRegistersManager.velocityTarget.toString() + ".xyz," + velocityConst.toString() + ".xyz," + animationRegistersManager.velocityTarget.toString() + "\n";
 			}
@@ -43,7 +43,7 @@ package a3dparticle.animators.actions.velocity
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, velocityConst.index, Vector.<Number>([ _velocity.x, _velocity.y, _velocity.z, 0 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("velocityConst"), Vector.<Number>([ _velocity.x, _velocity.y, _velocity.z, 0 ]));
 		}
 		
 	}

@@ -20,8 +20,6 @@ package a3dparticle.animators.actions.bezier
 	 */
 	public class BezierCurvelocal extends PerParticleAction
 	{
-		private var p1Attribute:ShaderRegisterElement;
-		private var p2Attribute:ShaderRegisterElement;
 		
 		private var _fun:Function;
 		
@@ -64,9 +62,10 @@ package a3dparticle.animators.actions.bezier
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			p1Attribute = shaderRegisterCache.getFreeVertexAttribute();
-			p2Attribute = shaderRegisterCache.getFreeVertexAttribute();
-			
+			var p1Attribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			saveRegisterIndex("p1Attribute", p1Attribute.index);
+			var p2Attribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			saveRegisterIndex("p2Attribute", p2Attribute.index);
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var rev_time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
 			var time_2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
@@ -87,7 +86,7 @@ package a3dparticle.animators.actions.bezier
 			code += "mul " + distance.toString() + "," + time_2.toString() +"," + p2Attribute.toString() + "\n";
 			code += "add " + animationRegistersManager.offsetTarget.toString() +".xyz," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + ".xyz\n";
 			
-			if (animationRegistersManager.needVelocity)
+			if (_animation.needVelocity)
 			{
 				code += "mul " + time_2.toString() + "," + animationRegistersManager.vertexLife.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
 				code += "sub " + time_temp.toString() + "," + animationRegistersManager.vertexOneConst.toString() + "," + time_2.toString() + "\n";
@@ -104,8 +103,8 @@ package a3dparticle.animators.actions.bezier
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			context.setVertexBufferAt(p1Attribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
-			context.setVertexBufferAt(p2Attribute.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 3, Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(getRegisterIndex("p1Attribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			context.setVertexBufferAt(getRegisterIndex("p2Attribute"), getExtraBuffer(stage3DProxy,SubContainer(renderable)), 3, Context3DVertexBufferFormat.FLOAT_3);
 		}
 	}
 

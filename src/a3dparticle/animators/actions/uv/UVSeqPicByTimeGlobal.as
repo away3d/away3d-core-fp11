@@ -47,16 +47,16 @@ package a3dparticle.animators.actions.uv
 		override public function reset(value:ParticleAnimation):void
 		{
 			super.reset(value);
-			value.animationRegistersManager.hasUVAction = true;
+			value.hasUVAction = true;
 		}
 		
 		
 		override public function getAGALUVCode(pass:MaterialPassBase):String
 		{
 			//get 2 vc
-			uvParamConst1 = shaderRegisterCache.getFreeVertexConstant();
-			uvParamConst2 = shaderRegisterCache.getFreeVertexConstant();
-			animationRegistersManager.setRegisterIndex(this, "uvParamConst", uvParamConst1.index);
+			var uvParamConst1:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			var uvParamConst2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("uvParamConst", uvParamConst1.index);
 			
 			var uSpeed:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "x");
 			var uStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "y");
@@ -128,7 +128,7 @@ package a3dparticle.animators.actions.uv
 		{
 			if (animationRegistersManager.needUVAnimation)
 			{
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, animationRegistersManager.getRegisterIndex(this, "uvParamConst"), _data, 2);
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("uvParamConst"), _data, 2);
 			}
 		}
 	

@@ -19,7 +19,7 @@ package a3dparticle.animators.actions.uv
 		public static const U_AXIS:int = 0;
 		public static const V_AXIS:int = 1;
 		
-		private var uvParamConst:ShaderRegisterElement;		
+		private var uvParamConst:ShaderRegisterElement;
 		private var _data:Vector.<Number>;
 		
 		private var _isScale:Boolean;
@@ -34,45 +34,38 @@ package a3dparticle.animators.actions.uv
 			_data = Vector.<Number>([Math.PI * 2 / cycle, scale, 0, 0]);
 		}
 		
-		override public function set animation(value:ParticleAnimation):void
+		override public function reset(value:ParticleAnimation):void
 		{
-			super.animation = value;
-			value.hasUVAction = true;
+			super.reset(value);
+			value._animation.hasUVAction = true;
 		}
 		
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase):String
+		override public function getAGALUVCode(pass:MaterialPassBase):String
 		{
-			if (animationRegistersManager.needUV)
-			{
-				uvParamConst = shaderRegisterCache.getFreeVertexConstant();
-				
-				var target:ShaderRegisterElement;
-				if (_axis == U_AXIS) target = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "x");
-				else target = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "y");
-				
-				var sin:ShaderRegisterElement = shaderRegisterCache.getFreeVertexSingleTemp();
-				
-				var code:String = "";
-				
-				if (_isScale) code += "mul " + target.toString() + "," + target.toString() + "," + uvParamConst.toString() + ".y\n";
-				code += "mul " + sin.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + uvParamConst.toString() + ".x\n";
-				code += "sin " + sin.toString() + "," + sin.toString() + "\n";
-				code += "add " + target.toString() + "," + target.toString() + "," + sin.toString() + "\n";
-				
-				return code;
-			}
-			else
-			{
-				return "";
-			}
+			var uvParamConst:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("uvParamConst", uvParamConst.index);
+			var target:ShaderRegisterElement;
+			if (_axis == U_AXIS) target = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "x");
+			else target = new ShaderRegisterElement(animationRegistersManager.uvTarget.regName, animationRegistersManager.uvTarget.index, "y");
+			
+			var sin:ShaderRegisterElement = shaderRegisterCache.getFreeVertexSingleTemp();
+			
+			var code:String = "";
+			
+			if (_isScale) code += "mul " + target.toString() + "," + target.toString() + "," + uvParamConst.toString() + ".y\n";
+			code += "mul " + sin.toString() + "," + animationRegistersManager.vertexTime.toString() + "," + uvParamConst.toString() + ".x\n";
+			code += "sin " + sin.toString() + "," + sin.toString() + "\n";
+			code += "add " + target.toString() + "," + target.toString() + "," + sin.toString() + "\n";
+			
+			return code;
 		}
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable):void
 		{
-			if (animationRegistersManager.needUV)
+			if (animationRegistersManager.needUVAnimation)
 			{
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, uvParamConst.index, _data);
+				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("uvParamConst"), _data);
 			}
 		}
 	

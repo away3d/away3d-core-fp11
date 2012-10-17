@@ -22,10 +22,10 @@ package a3dparticle.animators.actions.rotation
 			priority = 3;
 		}
 		
-		override public function set animation(value:ParticleAnimation):void
+		override public function reset(value:ParticleAnimation):void
 		{
-			value.animationRegistersManager.needVelocity = true;
-			super.animation = value;
+			value._animation.needVelocity = true;
+			super.reset(value);
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
@@ -36,20 +36,17 @@ package a3dparticle.animators.actions.rotation
 			var xAxis:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			shaderRegisterCache.addVertexTempUsages(xAxis, 1);
 			
-			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-			shaderRegisterCache.addVertexTempUsages(temp,1);
-			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
-			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
-			var cos2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
-			var tempSingle:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "w");
-			
 			var R:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			shaderRegisterCache.addVertexTempUsages(R,1);
 			var R_rev:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
+			var cos:ShaderRegisterElement = new ShaderRegisterElement(R.regName, R.index, "w");
+			var sin:ShaderRegisterElement = new ShaderRegisterElement(R_rev.regName, R_rev.index, "w");
+			var cos2:ShaderRegisterElement = new ShaderRegisterElement(nrmVel.regName, nrmVel.index, "w");
+			var tempSingle:ShaderRegisterElement = sin;
+			
 			
 			shaderRegisterCache.removeVertexTempUsage(nrmVel);
 			shaderRegisterCache.removeVertexTempUsage(xAxis);
-			shaderRegisterCache.removeVertexTempUsage(temp);
 			shaderRegisterCache.removeVertexTempUsage(R);
 			
 			var code:String = "";
@@ -103,6 +100,41 @@ package a3dparticle.animators.actions.rotation
 			code += "mul " + xAxis.toString() + ".xyz," + nrmVel.toString() + ".w," +R_rev.toString() + ".xyz\n";
 			
 			code += "add " + animationRegistersManager.scaleAndRotateTarget.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+			
+			var len:int = animationRegistersManager.rotationRegisters.length;
+			for (var i:int = 0; i < len; i++)
+			{
+				//just repeat the calculate above
+				//because of the limited registers, no need to optimise
+				code += "mov " + xAxis.toString() + ".x," + animationRegistersManager.vertexOneConst.toString() + ".x\n";
+				code += "mov " + xAxis.toString() + ".yz," + animationRegistersManager.vertexZeroConst.toString() + ".xy\n";
+				code += "nrm " + nrmVel.toString() + ".xyz," + animationRegistersManager.velocityTarget.toString() + ".xyz\n";
+				code += "dp3 " + cos2.toString() + "," + nrmVel.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+				code += "crs " + nrmVel.toString() + ".xyz," + xAxis.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
+				code += "nrm " + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
+				code += "dp3 " + R.toString() + ".x," + nrmVel.toString() + ".xyz," + nrmVel.toString() + ".xyz\n";
+				code += "sge " + R.toString() + ".x," + animationRegistersManager.vertexZeroConst.toString() + ".x," + R.toString() + ".x\n";
+				code += "add " +nrmVel.toString() + ".z," + R.toString() + ".x," + nrmVel.toString() + ".z\n";
+				code += "add " + tempSingle.toString() + "," + cos2.toString() + "," + animationRegistersManager.vertexOneConst.toString() + "\n";
+				code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
+				code += "sqt " + cos.toString() + "," + tempSingle.toString() + "\n";
+				code += "sub " + tempSingle.toString() + "," + animationRegistersManager.vertexOneConst.toString() + "," + cos2.toString() + "\n";
+				code += "div " + tempSingle.toString() + "," + tempSingle.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
+				code += "sqt " + sin.toString() + "," + tempSingle.toString() + "\n";
+				code += "mul " + R.toString() + ".xyz," + sin.toString() +"," + nrmVel.toString() + ".xyz\n";
+				code += "mul " + R_rev.toString() + ".xyz," + sin.toString() + "," + nrmVel.toString() + ".xyz\n";
+				code += "neg " + R_rev.toString() + ".xyz," + R_rev.toString() + ".xyz\n";
+				code += "crs " + nrmVel.toString() + ".xyz," + R.toString() + ".xyz," +animationRegistersManager.rotationRegisters[i].toString() + ".xyz\n";
+				code += "mul " + xAxis.toString() + ".xyz," + cos.toString() +"," + animationRegistersManager.rotationRegisters[i].toString() + ".xyz\n";
+				code += "add " + nrmVel.toString() + ".xyz," + nrmVel.toString() +".xyz," + xAxis.toString() + ".xyz\n";
+				code += "dp3 " + xAxis.toString() + ".w," + R.toString() + ".xyz," +animationRegistersManager.rotationRegisters[i].toString() + ".xyz\n";
+				code += "neg " + nrmVel.toString() + ".w," + xAxis.toString() + ".w\n";
+				code += "crs " + R.toString() + ".xyz," + nrmVel.toString() + ".xyz," +R_rev.toString() + ".xyz\n";
+				code += "mul " + xAxis.toString() + ".xyzw," + nrmVel.toString() + ".xyzw," +cos.toString() + "\n";
+				code += "add " + R.toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+				code += "mul " + xAxis.toString() + ".xyz," + nrmVel.toString() + ".w," +R_rev.toString() + ".xyz\n";
+				code += "add " + animationRegistersManager.rotationRegisters[i].toString() + ".xyz," + R.toString() + ".xyz," + xAxis.toString() + ".xyz\n";
+			}
 			
 			return code;
 		}

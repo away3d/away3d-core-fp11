@@ -44,13 +44,7 @@ package a3dparticle.animators
 		
 		
 		
-		public var hasUVAction:Boolean;
-		
-		//set if it need to share velocity in other actions
-		public var needVelocity:Boolean;
-		
 		public var needFragmentAnimation:Boolean;
-		
 		public var needUVAnimation:Boolean;
 		
 		public var sourceRegisters:Array;
@@ -58,14 +52,17 @@ package a3dparticle.animators
 		
 		private var indexDictionary:Dictionary = new Dictionary(true);
 		
+		private var needVelocity:Boolean;
+		
 		
 		public function AnimationRegistersManager()
 		{
 			
 		}
 		
-		public function reset():void
+		public function reset(needVelocity:Boolean):void
 		{
+			this.needVelocity = needVelocity;
 			rotationRegisters = [];
 			positionAttribute = getRegisterFromString(sourceRegisters[0]);
 			scaleAndRotateTarget = getRegisterFromString(targetRegisters[0]);
@@ -99,16 +96,24 @@ package a3dparticle.animators
 			}
 
 			//allot temp register
-			var tempTime:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-			offsetTarget = new ShaderRegisterElement(tempTime.regName, tempTime.index, "xyz");
-			
-			shaderRegisterCache.addVertexTempUsages(tempTime, 1);
-			vertexTime = new ShaderRegisterElement(tempTime.regName, tempTime.index, "w");
-			vertexLife = new ShaderRegisterElement(scaleAndRotateTarget.regName, scaleAndRotateTarget.index, "w");
+			offsetTarget = shaderRegisterCache.getFreeVertexVectorTemp();
+			shaderRegisterCache.addVertexTempUsages(offsetTarget, 1);
+			offsetTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xyz");
+
 			if (needVelocity)
 			{
 				velocityTarget = shaderRegisterCache.getFreeVertexVectorTemp();
 				shaderRegisterCache.addVertexTempUsages(velocityTarget, 1);
+				velocityTarget = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "xyz");
+				vertexTime = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "w");
+				vertexLife = new ShaderRegisterElement(offsetTarget.regName, velocityTarget.index, "w");
+			}
+			else
+			{
+				var tempTime:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
+				shaderRegisterCache.addVertexTempUsages(tempTime, 1);
+				vertexTime = new ShaderRegisterElement(tempTime.regName, tempTime.index, "x");
+				vertexLife = new ShaderRegisterElement(tempTime.regName, tempTime.index, "y");
 			}
 			
 		}

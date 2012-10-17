@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.acceleration 
+package a3dparticle.animators.actions.acceleration
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
@@ -17,24 +17,27 @@ package a3dparticle.animators.actions.acceleration
 	 */
 	public class AccelerateGlobal extends AllParticleAction
 	{
-		private var _acc:Vector3D;
+		private var _data:Vector.<Number>;
 		
-		private var accVelConst:ShaderRegisterElement;
-		
-		public function AccelerateGlobal(acc:Vector3D) 
+		public function AccelerateGlobal(acc:Vector3D)
 		{
-			_acc = acc;
+			_data = new Vector.<Number>(4, true);
+			_data[0] = acc.x / 2;
+			_data[1] = acc.y / 2;
+			_data[2] = acc.z / 2;
+			_data[3] = 0;
 		}
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			accVelConst = shaderRegisterCache.getFreeVertexConstant();
+			var accVelConst:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("accVelConst", accVelConst.index);
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			shaderRegisterCache.addVertexTempUsages(temp,1);
 			var code:String = "";
 			code += "mul " + temp.toString() +"," + animationRegistersManager.vertexTime.toString() + "," + accVelConst.toString() + "\n";
 			
-			if (animationRegistersManager.needVelocity)
+			if (_animation.needVelocity)
 			{
 				var temp2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 				code += "mul " + temp2.toString() + "," + temp.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
@@ -50,7 +53,7 @@ package a3dparticle.animators.actions.acceleration
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, accVelConst.index, Vector.<Number>([ _acc.x/2, _acc.y/2, _acc.z/2, 0 ]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("accVelConst"), _data);
 		}
 		
 	}

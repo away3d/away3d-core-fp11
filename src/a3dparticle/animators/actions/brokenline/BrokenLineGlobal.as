@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.brokenline 
+package a3dparticle.animators.actions.brokenline
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
@@ -22,10 +22,10 @@ package a3dparticle.animators.actions.brokenline
 		private var _brokenCount:uint;
 		
 		/**
-		 * 
+		 *
 		 * @param	brokenData Array.the element of array is Vector3D which (x,y,z) is the velocity,w is the during time.Because agal only allow 200 opcode,the broken.lenght is limited.
 		 */
-		public function BrokenLineGlobal(brokenData:Array) 
+		public function BrokenLineGlobal(brokenData:Array)
 		{
 			_brokenCount = brokenData.length;
 			for (var i:int; i < brokenData.length; i++)
@@ -40,9 +40,11 @@ package a3dparticle.animators.actions.brokenline
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
+			_brokenRegisters.length = 0;
 			for (var j:int = 0; j < vertices_vec.length; j++)
 			{
 				_brokenRegisters.push(shaderRegisterCache.getFreeVertexConstant());
+				saveRegisterIndex("_brokenRegisters" + j, _brokenRegisters[j].index);
 			}
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
@@ -68,12 +70,12 @@ package a3dparticle.animators.actions.brokenline
 				code += "max " + max.toString() + "," + max.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "\n";
 				code += "mul " + distance.toString() + "," + _brokenRegisters[i].toString() + ".xyz," + max.toString() + "\n";
 				code += "add " + animationRegistersManager.offsetTarget.toString() + "," + distance.toString() + "," + animationRegistersManager.offsetTarget.toString() + "\n";
-				if (animationRegistersManager.needVelocity)
+				if (_animation.needVelocity)
 				{
 					code += "slt " + slt.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "," + time.toString() + "\n";
 				}
 				code += "sub " + time.toString() + "," + time.toString() + "," + _brokenRegisters[i].toString() + ".w\n";
-				if (animationRegistersManager.needVelocity)
+				if (_animation.needVelocity)
 				{
 					code += "sge " + sge.toString() + "," + animationRegistersManager.vertexZeroConst.toString() + "," + time.toString() + "\n";
 					code += "mul " + sge.toString() + "," + sge.toString() + "," + slt.toString() + "\n";
@@ -90,7 +92,7 @@ package a3dparticle.animators.actions.brokenline
 			var context : Context3D = stage3DProxy._context3D;
 			for (var i:int = 0; i < _brokenCount; i++)
 			{
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _brokenRegisters[i].index, vertices_vec[i]);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("_brokenRegisters"+i), vertices_vec[i]);
 			}
 		}
 	}

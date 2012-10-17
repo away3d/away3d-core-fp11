@@ -1,4 +1,4 @@
-package a3dparticle.animators.actions.scale 
+package a3dparticle.animators.actions.scale
 {
 	import a3dparticle.animators.actions.AllParticleAction;
 	import away3d.core.base.IRenderable;
@@ -20,9 +20,7 @@ package a3dparticle.animators.actions.scale
 		private var _endScale:Number;
 		private var _delta:Number;
 		
-		private var scaleByLifeConst:ShaderRegisterElement;
-		
-		public function ScaleByLifeGlobal(startScale:Number,endScale:Number) 
+		public function ScaleByLifeGlobal(startScale:Number,endScale:Number)
 		{
 			priority = 2;
 			_startScale = startScale;
@@ -32,7 +30,8 @@ package a3dparticle.animators.actions.scale
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			scaleByLifeConst = shaderRegisterCache.getFreeVertexConstant();
+			var scaleByLifeConst:ShaderRegisterElement = shaderRegisterCache.getFreeVertexConstant();
+			saveRegisterIndex("scaleByLifeConst", scaleByLifeConst.index);
 			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			var scale:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index,"w");
@@ -49,7 +48,7 @@ package a3dparticle.animators.actions.scale
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, scaleByLifeConst.index, Vector.<Number>([_startScale,_delta,0,0]));
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, getRegisterIndex("scaleByLifeConst"), Vector.<Number>([_startScale,_delta,0,0]));
 		}
 		
 	}

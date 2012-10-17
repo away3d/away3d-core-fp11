@@ -19,7 +19,6 @@ package a3dparticle.animators.actions.acceleration
 		
 		private var _tempAcc:Vector3D;
 		
-		private var accAttribute:ShaderRegisterElement;
 		
 		/**
 		 *
@@ -52,7 +51,9 @@ package a3dparticle.animators.actions.acceleration
 		
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
-			accAttribute = shaderRegisterCache.getFreeVertexAttribute();
+			var accAttribute:ShaderRegisterElement = shaderRegisterCache.getFreeVertexAttribute();
+			saveRegisterIndex("accAttribute", accAttribute.index);
+			
 			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 			shaderRegisterCache.addVertexTempUsages(temp,1);
 			
@@ -60,7 +61,7 @@ package a3dparticle.animators.actions.acceleration
 			
 			code += "mul " + temp.toString() +"," + animationRegistersManager.vertexTime.toString() + "," + accAttribute.toString() + "\n";
 			
-			if (animationRegistersManager.needVelocity)
+			if (_animation.needVelocity)
 			{
 				var temp2:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
 				code += "mul " + temp2.toString() + "," + temp.toString() + "," + animationRegistersManager.vertexTwoConst.toString() + "\n";
@@ -75,7 +76,7 @@ package a3dparticle.animators.actions.acceleration
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			stage3DProxy.context3D.setVertexBufferAt(accAttribute.index, getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
+			stage3DProxy.context3D.setVertexBufferAt(getRegisterIndex("accAttribute"), getExtraBuffer(stage3DProxy, SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

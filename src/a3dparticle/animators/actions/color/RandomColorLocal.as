@@ -72,18 +72,22 @@ package a3dparticle.animators.actions.color
 		override public function getAGALVertexCode(pass : MaterialPassBase) : String
 		{
 			var code:String = "";
-			
-			if (_hasMult)
+			if (animationRegistersManager.needFragmentAnimation)
 			{
-				multiplierAtt = shaderRegisterCache.getFreeVertexAttribute();
-				multiplierVary = shaderRegisterCache.getFreeVarying();
-				code += "mov " + multiplierVary.toString() + "," + multiplierAtt.toString() + "\n";
-			}
-			if (_hasOffset)
-			{
-				offsetAtt = shaderRegisterCache.getFreeVertexAttribute();
-				offsetVary = shaderRegisterCache.getFreeVarying();
-				code += "mov " + offsetVary.toString() + "," + offsetAtt.toString() + "\n";
+				if (_hasMult)
+				{
+					multiplierAtt = shaderRegisterCache.getFreeVertexAttribute();
+					saveRegisterIndex("multiplierAtt", multiplierAtt.index);
+					multiplierVary = shaderRegisterCache.getFreeVarying();
+					code += "mov " + multiplierVary.toString() + "," + multiplierAtt.toString() + "\n";
+				}
+				if (_hasOffset)
+				{
+					offsetAtt = shaderRegisterCache.getFreeVertexAttribute();
+					saveRegisterIndex("offsetAtt", offsetAtt.index);
+					offsetVary = shaderRegisterCache.getFreeVarying();
+					code += "mov " + offsetVary.toString() + "," + offsetAtt.toString() + "\n";
+				}
 			}
 			return code;
 		}
@@ -106,16 +110,19 @@ package a3dparticle.animators.actions.color
 		
 		override public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
-			if (_hasMult)
+			if (animationRegistersManager.needFragmentAnimation)
 			{
-				context.setVertexBufferAt(multiplierAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
-				if (_hasOffset)
-					context.setVertexBufferAt(offsetAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 4, Context3DVertexBufferFormat.FLOAT_4);
-			}
-			else
-			{
-				context.setVertexBufferAt(offsetAtt.index, getExtraBuffer(stage3DProxy,SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
+				var context : Context3D = stage3DProxy._context3D;
+				if (_hasMult)
+				{
+					context.setVertexBufferAt(getRegisterIndex("multiplierAtt"), getExtraBuffer(stage3DProxy,SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
+					if (_hasOffset)
+						context.setVertexBufferAt(getRegisterIndex("offsetAtt"), getExtraBuffer(stage3DProxy,SubContainer(renderable)), 4, Context3DVertexBufferFormat.FLOAT_4);
+				}
+				else
+				{
+					context.setVertexBufferAt(getRegisterIndex("offsetAtt"), getExtraBuffer(stage3DProxy,SubContainer(renderable)), 0, Context3DVertexBufferFormat.FLOAT_4);
+				}
 			}
 		}
 		

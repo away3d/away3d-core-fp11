@@ -266,9 +266,9 @@ package away3d.materials.passes
 		 *
 		 * @private
 		 */
-		arcane function updateAnimationState(renderable : IRenderable, stage3DProxy : Stage3DProxy) : void
+		arcane function updateAnimationState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera:Camera3D) : void
 		{
-			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
+			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams, camera);
 		}
 
 		/**
