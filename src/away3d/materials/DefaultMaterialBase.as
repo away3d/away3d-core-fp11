@@ -221,7 +221,16 @@
 			if (_mipmap == value) return;
 			super.mipmap = value;
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function set textureFormat(value:String):void
+		{
+			if (_textureFormat == value) return;
+			super.textureFormat = value;
+		}
+		
 		/**
 		 * The tangent space normal map to influence the direction of the surface for each texel.
 		 */

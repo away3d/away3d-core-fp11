@@ -29,7 +29,6 @@ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-
 package com.adobe.utils
 {
 	// ===========================================================================
@@ -44,6 +43,13 @@ package com.adobe.utils
 	public class AGALMiniAssembler
 	{
 		// ======================================================================
+		//	Constants
+		// ----------------------------------------------------------------------
+		protected static const USE_NEW_SYNTAX:Boolean			= false;
+		
+		protected static const REGEXP_OUTER_SPACES:RegExp		= /^\s+|\s+$/g;
+		
+		// ======================================================================
 		//	Properties
 		// ----------------------------------------------------------------------
 		// AGAL bytes and error buffer 
@@ -53,6 +59,7 @@ package com.adobe.utils
 		private var debugEnabled:Boolean						= false;
 		
 		private static var initialized:Boolean					= false;
+		public var verbose:Boolean								= false;
 		
 		// ======================================================================
 		//	Getters
@@ -72,11 +79,11 @@ package com.adobe.utils
 		// ======================================================================
 		//	Methods
 		// ----------------------------------------------------------------------
-		public function assemble( mode:String, source:String, verbose:Boolean = false ):ByteArray
+		public function assemble( mode:String, source:String ):ByteArray
 		{
 			var start:uint = getTimer();
 			
-			_agalcode = new ByteArray();			
+			_agalcode							= new ByteArray();
 			_error = "";
 			
 			var isFrag:Boolean = false;
@@ -101,6 +108,7 @@ package com.adobe.utils
 			for ( i = 0; i < lng && _error == ""; i++ )
 			{
 				var line:String = new String( lines[i] );
+				line = line.replace( REGEXP_OUTER_SPACES, "" );
 				
 				// remove comments
 				var startcomment:int = line.search( "//" );
@@ -118,6 +126,12 @@ package com.adobe.utils
 				
 				// find opcode
 				var opCode:Array = line.match( /^\w{3}/ig );
+				if ( !opCode ) 
+				{
+					if ( line.length >= 3 )
+						trace( "warning: bad line "+i+": "+lines[i] );
+					continue;
+				}
 				var opFound:OpCode = OPMAP[ opCode[0] ];
 				
 				// if debug is enabled, output the opcodes
@@ -170,11 +184,16 @@ package com.adobe.utils
 				}
 				
 				// get operands, use regexp
-				var regs:Array = line.match( /vc\[([vof][actps]?)(\d*)?(\.[xyzw](\+\d{1,3})?)?\](\.[xyzw]{1,4})?|([vof][actps]?)(\d*)?(\.[xyzw]{1,4})?/gi );
-				if ( regs.length != opFound.numRegister )
+				var regs:Array;
+				if ( USE_NEW_SYNTAX )
+					regs = line.match( /vc\[([vif][acost]?)(\d*)?(\.[xyzw](\+\d{1,3})?)?\](\.[xyzw]{1,4})?|([vif][acost]?)(\d*)?(\.[xyzw]{1,4})?/gi );
+				else
+					regs = line.match( /vc\[([vof][actps]?)(\d*)?(\.[xyzw](\+\d{1,3})?)?\](\.[xyzw]{1,4})?|([vof][actps]?)(\d*)?(\.[xyzw]{1,4})?/gi );
+				
+				if ( !regs || regs.length != opFound.numRegister )
 				{
 					_error = "error: wrong number of operands. found "+regs.length+" but expected "+opFound.numRegister+".";
-					break;
+					break;					
 				}
 				
 				var badreg:Boolean	= false;
@@ -185,7 +204,7 @@ package com.adobe.utils
 				{
 					var isRelative:Boolean = false;
 					var relreg:Array = regs[ j ].match( /\[.*\]/ig );
-					if ( relreg.length > 0 )
+					if ( relreg && relreg.length > 0 )
 					{
 						regs[ j ] = regs[ j ].replace( relreg[ 0 ], "0" );
 						
@@ -195,6 +214,12 @@ package com.adobe.utils
 					}
 					
 					var res:Array = regs[j].match( /^\b[A-Za-z]{1,2}/ig );
+					if ( !res ) 
+					{
+						_error = "error: could not parse operand "+j+" ("+regs[j]+").";
+						badreg = true;
+						break;
+					}
 					var regFound:Register = REGMAP[ res[ 0 ] ];
 					
 					// if debug is enabled, output the registers
@@ -336,7 +361,7 @@ package com.adobe.utils
 							if ( verbose )
 								trace( "  emit sampler" );
 							var samplerbits:uint = 5; // type 5 
-							var optsLength:uint = opts.length;
+							var optsLength:uint = opts == null ? 0 : opts.length;
 							var bias:Number = 0; 
 							for ( k = 0; k<optsLength; k++ )
 							{
@@ -477,32 +502,37 @@ package com.adobe.utils
 			OPMAP[ SGE ] = new OpCode( SGE, 3, 0x29, 0 );
 			OPMAP[ SLT ] = new OpCode( SLT, 3, 0x2a, 0 );
 			OPMAP[ SGN ] = new OpCode( SGN, 2, 0x2b, 0 );
+			OPMAP[ SEQ ] = new OpCode( SEQ, 3, 0x2c, 0 );
+			OPMAP[ SNE ] = new OpCode( SNE, 3, 0x2d, 0 );
 			
 			REGMAP[ VA ]	= new Register( VA,	"vertex attribute",		0x0,	7,		REG_VERT | REG_READ );
 			REGMAP[ VC ]	= new Register( VC,	"vertex constant",		0x1,	127,	REG_VERT | REG_READ );
 			REGMAP[ VT ]	= new Register( VT,	"vertex temporary",		0x2,	7,		REG_VERT | REG_WRITE | REG_READ );
-			REGMAP[ OP ]	= new Register( OP,	"vertex output",		0x3,	0,		REG_VERT | REG_WRITE );
-			REGMAP[ V ]		= new Register( V,	"varying",				0x4,	7,		REG_VERT | REG_FRAG | REG_READ | REG_WRITE );
+			REGMAP[ VO ]	= new Register( VO,	"vertex output",		0x3,	0,		REG_VERT | REG_WRITE );
+			REGMAP[ I ]		= new Register( I,	"varying",				0x4,	7,		REG_VERT | REG_FRAG | REG_READ | REG_WRITE );
 			REGMAP[ FC ]	= new Register( FC,	"fragment constant",	0x1,	27,		REG_FRAG | REG_READ );
 			REGMAP[ FT ]	= new Register( FT,	"fragment temporary",	0x2,	7,		REG_FRAG | REG_WRITE | REG_READ );
 			REGMAP[ FS ]	= new Register( FS,	"texture sampler",		0x5,	7,		REG_FRAG | REG_READ );
-			REGMAP[ OC ]	= new Register( OC,	"fragment output",		0x3,	0,		REG_FRAG | REG_WRITE );
+			REGMAP[ FO ]	= new Register( FO,	"fragment output",		0x3,	0,		REG_FRAG | REG_WRITE );
 			
-			SAMPLEMAP[ D2 ]			= new Sampler( D2,			SAMPLER_DIM_SHIFT,		0 );
-			SAMPLEMAP[ D3 ]			= new Sampler( D3,			SAMPLER_DIM_SHIFT,		2 );
-			SAMPLEMAP[ CUBE ]		= new Sampler( CUBE,		SAMPLER_DIM_SHIFT,		1 );
-			SAMPLEMAP[ MIPNEAREST ]	= new Sampler( MIPNEAREST,	SAMPLER_MIPMAP_SHIFT,	1 );
-			SAMPLEMAP[ MIPLINEAR ]	= new Sampler( MIPLINEAR,	SAMPLER_MIPMAP_SHIFT,	2 );
-			SAMPLEMAP[ MIPNONE ]	= new Sampler( MIPNONE,		SAMPLER_MIPMAP_SHIFT,	0 );
-			SAMPLEMAP[ NOMIP ]		= new Sampler( NOMIP,		SAMPLER_MIPMAP_SHIFT,	0 );
-			SAMPLEMAP[ NEAREST ]	= new Sampler( NEAREST,		SAMPLER_FILTER_SHIFT,	0 );
-			SAMPLEMAP[ LINEAR ]		= new Sampler( LINEAR,		SAMPLER_FILTER_SHIFT,	1 );
-			SAMPLEMAP[ CENTROID ]	= new Sampler( CENTROID,	SAMPLER_SPECIAL_SHIFT,	1 << 0 );
-			SAMPLEMAP[ SINGLE ]		= new Sampler( SINGLE,		SAMPLER_SPECIAL_SHIFT,	1 << 1 );
-			SAMPLEMAP[ DEPTH ]		= new Sampler( DEPTH,		SAMPLER_SPECIAL_SHIFT,	1 << 2 );
-			SAMPLEMAP[ REPEAT ]		= new Sampler( REPEAT,		SAMPLER_REPEAT_SHIFT,	1 );
-			SAMPLEMAP[ WRAP ]		= new Sampler( WRAP,		SAMPLER_REPEAT_SHIFT,	1 );
-			SAMPLEMAP[ CLAMP ]		= new Sampler( CLAMP,		SAMPLER_REPEAT_SHIFT,	0 );
+			SAMPLEMAP[ RGBA ]		= new Sampler( RGBA,		SAMPLER_TYPE_SHIFT,			0 );
+			SAMPLEMAP[ DXT1 ]		= new Sampler( DXT1,		SAMPLER_TYPE_SHIFT,			1 );
+			SAMPLEMAP[ DXT5 ]		= new Sampler( DXT5,		SAMPLER_TYPE_SHIFT,			2 );
+			SAMPLEMAP[ D2 ]			= new Sampler( D2,			SAMPLER_DIM_SHIFT,			0 );
+			SAMPLEMAP[ D3 ]			= new Sampler( D3,			SAMPLER_DIM_SHIFT,			2 );
+			SAMPLEMAP[ CUBE ]		= new Sampler( CUBE,		SAMPLER_DIM_SHIFT,			1 );
+			SAMPLEMAP[ MIPNEAREST ]	= new Sampler( MIPNEAREST,	SAMPLER_MIPMAP_SHIFT,		1 );
+			SAMPLEMAP[ MIPLINEAR ]	= new Sampler( MIPLINEAR,	SAMPLER_MIPMAP_SHIFT,		2 );
+			SAMPLEMAP[ MIPNONE ]	= new Sampler( MIPNONE,		SAMPLER_MIPMAP_SHIFT,		0 );
+			SAMPLEMAP[ NOMIP ]		= new Sampler( NOMIP,		SAMPLER_MIPMAP_SHIFT,		0 );
+			SAMPLEMAP[ NEAREST ]	= new Sampler( NEAREST,		SAMPLER_FILTER_SHIFT,		0 );
+			SAMPLEMAP[ LINEAR ]		= new Sampler( LINEAR,		SAMPLER_FILTER_SHIFT,		1 );
+			SAMPLEMAP[ CENTROID ]	= new Sampler( CENTROID,	SAMPLER_SPECIAL_SHIFT,		1 << 0 );
+			SAMPLEMAP[ SINGLE ]		= new Sampler( SINGLE,		SAMPLER_SPECIAL_SHIFT,		1 << 1 );
+			SAMPLEMAP[ DEPTH ]		= new Sampler( DEPTH,		SAMPLER_SPECIAL_SHIFT,		1 << 2 );
+			SAMPLEMAP[ REPEAT ]		= new Sampler( REPEAT,		SAMPLER_REPEAT_SHIFT,		1 );
+			SAMPLEMAP[ WRAP ]		= new Sampler( WRAP,		SAMPLER_REPEAT_SHIFT,		1 );
+			SAMPLEMAP[ CLAMP ]		= new Sampler( CLAMP,		SAMPLER_REPEAT_SHIFT,		0 );
 		}
 		
 		// ======================================================================
@@ -519,6 +549,7 @@ package com.adobe.utils
 		private static const VERTEX:String						= "vertex";
 		
 		// masks and shifts
+		private static const SAMPLER_TYPE_SHIFT:uint			= 8;
 		private static const SAMPLER_DIM_SHIFT:uint				= 12;
 		private static const SAMPLER_SPECIAL_SHIFT:uint			= 16;
 		private static const SAMPLER_REPEAT_SHIFT:uint			= 20;
@@ -538,8 +569,7 @@ package com.adobe.utils
 		private static const OP_SPECIAL_TEX:uint				= 0x8;
 		private static const OP_SPECIAL_MATRIX:uint				= 0x10;
 		private static const OP_FRAG_ONLY:uint					= 0x20;
-		// TODO not used
-		// private static const OP_VERT_ONLY:uint					= 0x40;
+		//private static const OP_VERT_ONLY:uint				= 0x40;
 		private static const OP_NO_DEST:uint					= 0x80;
 		
 		// opcodes
@@ -587,17 +617,19 @@ package com.adobe.utils
 		private static const SGE:String							= "sge";
 		private static const SLT:String							= "slt";
 		private static const SGN:String							= "sgn";
+		private static const SEQ:String							= "seq";
+		private static const SNE:String							= "sne";
 		
 		// registers
 		private static const VA:String							= "va";
 		private static const VC:String							= "vc";
 		private static const VT:String							= "vt";
-		private static const OP:String							= "op";
-		private static const V:String							= "v";
+		private static const VO:String							= USE_NEW_SYNTAX ? "vo" : "op";
+		private static const I:String							= USE_NEW_SYNTAX ? "i" : "v";
 		private static const FC:String							= "fc";
 		private static const FT:String							= "ft";
 		private static const FS:String							= "fs";
-		private static const OC:String							= "oc";
+		private static const FO:String							= USE_NEW_SYNTAX ? "fo" : "oc";
 		
 		// samplers
 		private static const D2:String							= "2d";
@@ -615,128 +647,136 @@ package com.adobe.utils
 		private static const REPEAT:String						= "repeat";
 		private static const WRAP:String						= "wrap";
 		private static const CLAMP:String						= "clamp";
+		private static const RGBA:String						= "rgba";
+		private static const DXT1:String						= "dxt1";
+		private static const DXT5:String						= "dxt5";
 	}
 }
 
-// ===========================================================================
-//	Class
-// ---------------------------------------------------------------------------
-class OpCode
-{		
-	// ======================================================================
-	//	Properties
-	// ----------------------------------------------------------------------
-	private var _emitCode:uint;
-	private var _flags:uint;
-	private var _name:String;
-	private var _numRegister:uint;
-	
-	// ======================================================================
-	//	Getters
-	// ----------------------------------------------------------------------
-	public function get emitCode():uint		{ return _emitCode; }
-	public function get flags():uint		{ return _flags; }
-	public function get name():String		{ return _name; }
-	public function get numRegister():uint	{ return _numRegister; }
-	
-	// ======================================================================
-	//	Constructor
-	// ----------------------------------------------------------------------
-	public function OpCode( name:String, numRegister:uint, emitCode:uint, flags:uint)
-	{
-		_name = name;
-		_numRegister = numRegister;
-		_emitCode = emitCode;
-		_flags = flags;
-	}		
-	
-	// ======================================================================
-	//	Methods
-	// ----------------------------------------------------------------------
-	public function toString():String
-	{
-		return "[OpCode name=\""+_name+"\", numRegister="+_numRegister+", emitCode="+_emitCode+", flags="+_flags+"]";
-	}
-}
-
-// ===========================================================================
-//	Class
-// ---------------------------------------------------------------------------
-class Register
+// ================================================================================
+//	Helper Classes
+// --------------------------------------------------------------------------------
 {
-	// ======================================================================
-	//	Properties
-	// ----------------------------------------------------------------------
-	private var _emitCode:uint;
-	private var _name:String;
-	private var _longName:String;
-	private var _flags:uint;
-	private var _range:uint;
-	
-	// ======================================================================
-	//	Getters
-	// ----------------------------------------------------------------------
-	public function get emitCode():uint		{ return _emitCode; }
-	public function get longName():String	{ return _longName; }
-	public function get name():String		{ return _name; }
-	public function get flags():uint		{ return _flags; }
-	public function get range():uint		{ return _range; }
-	
-	// ======================================================================
-	//	Constructor
-	// ----------------------------------------------------------------------
-	public function Register( name:String, longName:String, emitCode:uint, range:uint, flags:uint)
-	{
-		_name = name;
-		_longName = longName;
-		_emitCode = emitCode;
-		_range = range;
-		_flags = flags;
+	// ===========================================================================
+	//	Class
+	// ---------------------------------------------------------------------------
+	class OpCode
+	{		
+		// ======================================================================
+		//	Properties
+		// ----------------------------------------------------------------------
+		private var _emitCode:uint;
+		private var _flags:uint;
+		private var _name:String;
+		private var _numRegister:uint;
+		
+		// ======================================================================
+		//	Getters
+		// ----------------------------------------------------------------------
+		public function get emitCode():uint		{ return _emitCode; }
+		public function get flags():uint		{ return _flags; }
+		public function get name():String		{ return _name; }
+		public function get numRegister():uint	{ return _numRegister; }
+		
+		// ======================================================================
+		//	Constructor
+		// ----------------------------------------------------------------------
+		public function OpCode( name:String, numRegister:uint, emitCode:uint, flags:uint)
+		{
+			_name = name;
+			_numRegister = numRegister;
+			_emitCode = emitCode;
+			_flags = flags;
+		}		
+		
+		// ======================================================================
+		//	Methods
+		// ----------------------------------------------------------------------
+		public function toString():String
+		{
+			return "[OpCode name=\""+_name+"\", numRegister="+_numRegister+", emitCode="+_emitCode+", flags="+_flags+"]";
+		}
 	}
 	
-	// ======================================================================
-	//	Methods
-	// ----------------------------------------------------------------------
-	public function toString():String
+	// ===========================================================================
+	//	Class
+	// ---------------------------------------------------------------------------
+	class Register
 	{
-		return "[Register name=\""+_name+"\", longName=\""+_longName+"\", emitCode="+_emitCode+", range="+_range+", flags="+ _flags+"]";
+		// ======================================================================
+		//	Properties
+		// ----------------------------------------------------------------------
+		private var _emitCode:uint;
+		private var _name:String;
+		private var _longName:String;
+		private var _flags:uint;
+		private var _range:uint;
+		
+		// ======================================================================
+		//	Getters
+		// ----------------------------------------------------------------------
+		public function get emitCode():uint		{ return _emitCode; }
+		public function get longName():String	{ return _longName; }
+		public function get name():String		{ return _name; }
+		public function get flags():uint		{ return _flags; }
+		public function get range():uint		{ return _range; }
+		
+		// ======================================================================
+		//	Constructor
+		// ----------------------------------------------------------------------
+		public function Register( name:String, longName:String, emitCode:uint, range:uint, flags:uint)
+		{
+			_name = name;
+			_longName = longName;
+			_emitCode = emitCode;
+			_range = range;
+			_flags = flags;
+		}
+		
+		// ======================================================================
+		//	Methods
+		// ----------------------------------------------------------------------
+		public function toString():String
+		{
+			return "[Register name=\""+_name+"\", longName=\""+_longName+"\", emitCode="+_emitCode+", range="+_range+", flags="+ _flags+"]";
+		}
 	}
-}
-
-// ===========================================================================
-//	Class
-// ---------------------------------------------------------------------------
-class Sampler
-{
-	// ======================================================================
-	//	Properties
-	// ----------------------------------------------------------------------
-	private var _flag:uint;
-	private var _mask:uint;
-	private var _name:String;
 	
-	// ======================================================================
-	//	Getters
-	// ----------------------------------------------------------------------
-	public function get flag():uint		{ return _flag; }
-	public function get mask():uint		{ return _mask; }
-	public function get name():String	{ return _name; }
-	
-	// ======================================================================
-	//	Constructor
-	// ----------------------------------------------------------------------
-	public function Sampler( name:String, flag:uint, mask:uint )
+	// ===========================================================================
+	//	Class
+	// ---------------------------------------------------------------------------
+	class Sampler
 	{
-		_name = name;
-		_flag = flag;
-		_mask = mask;
-	}
-	
-	// ======================================================================
-	//	Methods
-	// ----------------------------------------------------------------------
-	public function toString():String
-	{
-		return "[Sampler name=\""+_name+"\", flag=\""+_flag+"\", mask="+mask+"]";
+		// ======================================================================
+		//	Properties
+		// ----------------------------------------------------------------------
+		private var _flag:uint;
+		private var _mask:uint;
+		private var _name:String;
+		
+		// ======================================================================
+		//	Getters
+		// ----------------------------------------------------------------------
+		public function get flag():uint		{ return _flag; }
+		public function get mask():uint		{ return _mask; }
+		public function get name():String	{ return _name; }
+		
+		// ======================================================================
+		//	Constructor
+		// ----------------------------------------------------------------------
+		public function Sampler( name:String, flag:uint, mask:uint )
+		{
+			_name = name;
+			_flag = flag;
+			_mask = mask;
+		}
+		
+		// ======================================================================
+		//	Methods
+		// ----------------------------------------------------------------------
+		public function toString():String
+		{
+			return "[Sampler name=\""+_name+"\", flag=\""+_flag+"\", mask="+mask+"]";
+		}
 	}
 }

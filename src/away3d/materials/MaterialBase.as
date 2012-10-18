@@ -66,6 +66,7 @@ package away3d.materials
 		protected var _mipmap : Boolean = true;
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean;
+		protected var _textureFormat:String;
 		protected var _depthCompareMode:String = Context3DCompareMode.LESS;
 
 		protected var _depthPass : DepthMapPass;
@@ -139,7 +140,21 @@ package away3d.materials
 			_mipmap = value;
 			for (var i : int = 0; i < _numPasses; ++i) _passes[i].mipmap = value;
 		}
+		
+		/**
+		 * Indicates what textureformat passes should use.
+		 */
+		public function get textureFormat() : String
+		{
+			return _textureFormat;
+		}
 
+		public function set textureFormat(value : String) : void
+		{
+			_textureFormat = value;
+			for (var i : int = 0; i < _numPasses; ++i) _passes[i].textureFormat = value;
+		}
+		
 		/**
 		 * Indicates whether or not any used textures should use smoothing.
 		 */

@@ -1,5 +1,6 @@
 package away3d.materials.passes
 {
+	import flash.display3D.Context3DTextureFormat;
 	import away3d.animators.IAnimationSet;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
@@ -47,6 +48,7 @@ package away3d.materials.passes
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = true;
+		protected var _textureFormat : String = Context3DTextureFormat.BGRA;
 		protected var _depthCompareMode:String = Context3DCompareMode.LESS;
 
 		private var _bothSides : Boolean;
@@ -109,7 +111,22 @@ package away3d.materials.passes
 			_mipmap = value;
 			invalidateShaderProgram();
 		}
+		
+		/**
+		 * Defines what textureformat should be used
+		 */
+		public function get textureFormat() : String
+		{
+			return _textureFormat;
+		}
 
+		public function set textureFormat(value : String) : void
+		{
+			if (_textureFormat == value) return;
+			_textureFormat = value;
+			invalidateShaderProgram();
+		}
+		
 		/**
 		 * Defines whether smoothing should be applied to any used textures.
 		 */

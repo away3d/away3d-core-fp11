@@ -958,6 +958,7 @@ package away3d.materials.passes
 			methodVO.useSmoothTextures = _smooth;
 			methodVO.repeatTextures = _repeat;
 			methodVO.useMipmapping = _mipmap;
+			methodVO.textureFormat = _textureFormat;
 			methodVO.numLights = _numLights + _numLightProbes;
 			method.initVO(methodVO);
 		}

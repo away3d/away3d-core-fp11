@@ -1,13 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.methods.MethodVO;
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
-	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -179,12 +177,23 @@ package away3d.materials.methods
 		protected function getSplatSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
 		{
 			var filter : String;
+			var format : String = "";
 
-			if (vo.useSmoothTextures) filter = vo.useMipmapping ? "linear,miplinear" : "linear";
-			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
+			if (vo.useSmoothTextures) 
+			{
+				filter = vo.useMipmapping ? "linear,miplinear" : "linear";
+			}else{
+				filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
+			}
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == Context3DTextureFormat.COMPRESSED_ALPHA) {
+            	format = ",dxt5";
+			}
 
 			uvReg ||= _uvVaryingReg;
-			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + ",wrap>\n";
+			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + format + ",wrap>\n";
 		}
 	}
 }

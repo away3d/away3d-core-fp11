@@ -1,5 +1,4 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -9,6 +8,7 @@ package away3d.materials.methods
 	import away3d.materials.utils.ShaderRegisterCache;
 	import away3d.materials.utils.ShaderRegisterElement;
 
+	import flash.display3D.Context3DTextureFormat;
 	import flash.events.EventDispatcher;
 
 	use namespace arcane;
@@ -231,12 +231,24 @@ package away3d.materials.methods
 		{
 			var wrap : String = forceWrap || (vo.repeatTextures ? "wrap" : "clamp");
 			var filter : String;
+			var format : String = "";
 
-			if (vo.useSmoothTextures) filter = vo.useMipmapping? "linear,miplinear" : "linear";
-			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
+			if (vo.useSmoothTextures) {
+				filter = vo.useMipmapping? "linear,miplinear" : "linear";
+			}else{
+				filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
+			}
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == Context3DTextureFormat.COMPRESSED_ALPHA) {
+            	format = ",dxt5";
+			}
+			
+			trace("FORMAT "+vo.textureFormat);
 
             uvReg ||= _uvVaryingReg;
-            return "tex "+targetReg.toString()+", "+uvReg.toString()+", "+inputReg.toString()+" <2d,"+filter+","+wrap+">\n";
+            return "tex "+targetReg.toString()+", "+uvReg.toString()+", "+inputReg.toString()+" <2d,"+filter+format+","+wrap+">\n";
 		}
 
 		/**
