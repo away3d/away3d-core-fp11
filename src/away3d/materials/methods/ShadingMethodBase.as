@@ -245,8 +245,6 @@ package away3d.materials.methods {
             	format = ",dxt5";
 			}
 			
-			trace("FORMAT "+vo.textureFormat);
-
             uvReg ||= _uvVaryingReg;
             return "tex "+targetReg.toString()+", "+uvReg.toString()+", "+inputReg.toString()+" <2d,"+filter+format+","+wrap+">\n";
 		}
