@@ -16,26 +16,18 @@ package away3d.animators.nodes
 		public static const NAME:String = "ParticleVelocityLocalNode";
 		public static const VELOCITY_STREAM_REGISTER:int = 0;
 		
-		private var _velFun:Function;
-		private var _tempVelocity:Vector3D;
-		
-		/**
-		 *
-		 * @param	fun Function.The fun should return a Vector3D whick (x,y,z) is the velocity.
-		 */
-		public function ParticleVelocityLocalNode(fun:Function=null)
+		public function ParticleVelocityLocalNode()
 		{
 			super(NAME);
 			_stateClass = ParticleVelocityLocalState;
 			_dataLenght = 3;
 			initOneData();
-			_velFun = fun;
 		}
 		
 		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
 		{
-			if (!param[NAME]) throw new Error("there is no " + NAME + " in param!");
-			_tempVelocity = param[NAME];
+			var _tempVelocity:Vector3D = param[NAME];
+			if (!_tempVelocity) throw new Error("there is no " + NAME + " in param!");
 			
 			_oneData[0] = _tempVelocity.x;
 			_oneData[1] = _tempVelocity.y;
