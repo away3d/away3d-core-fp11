@@ -64,6 +64,8 @@ package away3d.animators
 		
 		function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String;
 		
+		function doneAGALCode(pass:MaterialPassBase):void;
+		
 		/**
 		 * Sets the GPU render state required by the animation that is independent of the rendered mesh.
 		 * @param context The context which is currently performing the rendering.

@@ -146,5 +146,10 @@ package away3d.animators
 		{
 			return "mov " + UVTarget + "," + UVSource + "\n";
 		}
+		
+		public function doneAGALCode(pass : MaterialPassBase):void
+		{
+			
+		}
 	}
 }

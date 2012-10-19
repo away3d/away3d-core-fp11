@@ -429,6 +429,7 @@ package away3d.materials.passes
 					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget);
 				if (_needUVAnimation)
 					UVAnimatorCode = _animationSet.getAGALUVCode(this, _UVSource, _UVTarget);
+				_animationSet.doneAGALCode(this);
 			} else {
 				var len : uint = _animatableAttributes.length;
 	

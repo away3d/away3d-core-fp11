@@ -55,10 +55,25 @@ package away3d.tools.helpers
 					
 					_vertexCounters[j] += particleData.numVertices;
 					
+					var k:int;
+					var tempLen:int;
 					var compact:CompactSubGeometry = sourceSubGeomerty as CompactSubGeometry;
+					var product:uint;
+					var sourceVertexData:Vector.<Number>;
 					if (compact)
 					{
-						_vertexDatas[j] = vertexData = vertexData.concat(compact.vertexData);
+						tempLen = compact.numVertices;
+						compact.numTriangles
+						sourceVertexData = compact.vertexData;
+						for (k = 0; k < tempLen; k++)
+						{
+							product = k * 13;
+							//this is faster than that only push one data
+							vertexData.push(sourceVertexData[product], sourceVertexData[product + 1], sourceVertexData[product + 2], sourceVertexData[product + 3],
+											sourceVertexData[product + 4], sourceVertexData[product + 5], sourceVertexData[product + 6], sourceVertexData[product + 7],
+											sourceVertexData[product + 8], sourceVertexData[product + 9], sourceVertexData[product + 10], sourceVertexData[product + 11],
+											sourceVertexData[product + 12]);
+						}
 					}
 					else
 					{
@@ -66,10 +81,11 @@ package away3d.tools.helpers
 					}
 					
 					var sourceIndexices:Vector.<uint> = sourceSubGeomerty.indexData;
-					var _indicesLen:uint = sourceIndexices.length;
-					for (var k:int = 0; k < _indicesLen; k++)
+					tempLen = sourceSubGeomerty.numTriangles;
+					for (k = 0; k < tempLen; k++)
 					{
-						_indices.push(sourceIndexices[k] + vertexCounter);
+						product = k * 3;
+						_indices.push(sourceIndexices[product] + vertexCounter, sourceIndexices[product + 1] + vertexCounter, sourceIndexices[product + 2] + vertexCounter);
 					}
 				}
 			}
