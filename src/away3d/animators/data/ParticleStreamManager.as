@@ -1,15 +1,16 @@
 package away3d.animators.data
 {
+	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.Context3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.utils.Dictionary;
 	/**
 	 * ...
 	 */
 	public class ParticleStreamManager
 	{
 		protected var _vertexData:Vector.<Number>;
-		protected var _offsetRecord:Vector.<int> = new Vector.<int>;
 		
 		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
@@ -19,27 +20,29 @@ package away3d.animators.data
 		
 		public var numInitedVertices:int;
 		
+		private var _recorder:Dictionary = new Dictionary(true);
 		
 		public function get totalLenOfOneVertex():int
 		{
 			return _totalLenOfOneVertex;
 		}
 		
-		public function applyData(dataLen:int):int
+		public function getNodeDataOffset(node:ParticleNodeBase):int
 		{
-			var oldLen:int = _offsetRecord.length;
-			if (oldLen > 0)
+			return _recorder[node];
+		}
+		
+		public function applyData(dataLen:int,node:ParticleNodeBase):void
+		{
+			if (_totalLenOfOneVertex > 0)
 			{
-				var offset:int = _totalLenOfOneVertex;
+				_recorder[node] = _totalLenOfOneVertex;
 				_totalLenOfOneVertex += dataLen;
-				_offsetRecord.push(_totalLenOfOneVertex);
-				return offset;
 			}
 			else
 			{
+				_recorder[node] = 0;
 				_totalLenOfOneVertex = dataLen;
-				_offsetRecord.push(_totalLenOfOneVertex);
-				return 0;
 			}
 		}
 		

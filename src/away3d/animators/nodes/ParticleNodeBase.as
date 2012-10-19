@@ -22,7 +22,6 @@ package away3d.animators.nodes
 		protected var _nodeName:String;
 		
 		protected var _dataLenght:uint = 3;
-		protected var _dataOffset:int;
 				
 		public function ParticleNodeBase(name:String,type:int,priority:int)
 		{
@@ -75,16 +74,6 @@ package away3d.animators.nodes
 		public function get dataLenght():int
 		{
 			return this._dataLenght;
-		}
-		
-		public function set dataOffset(value:int):void
-		{
-			_dataOffset = value;
-		}
-		
-		public function get dataOffset():int
-		{
-			return _dataOffset;
 		}
 		
 	}

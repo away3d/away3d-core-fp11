@@ -287,7 +287,7 @@ package away3d.animators
 				streamManager = sharedData[subGeometries[i]] = new ParticleStreamManager();
 				for each(var node:LocalParticleNodeBase in _localNodes)
 				{
-					node.dataOffset = streamManager.applyData(node.dataLenght);
+					streamManager.applyData(node.dataLenght, node);
 				}
 				streamManager.setVertexNum(subGeometries[i].numVertices);
 			}
@@ -321,7 +321,7 @@ package away3d.animators
 				{
 					oneData = _localNodes[j].oneData;
 					oneDataLen = _localNodes[j].dataLenght;
-					oneDataOffset = _localNodes[j].dataOffset;
+					oneDataOffset = streamManager.getNodeDataOffset(_localNodes[j]);
 					for (counterForVertex = 0; counterForVertex < numVertex; counterForVertex++)
 					{
 						for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
@@ -350,7 +350,7 @@ package away3d.animators
 						{
 							oneData = _localNodes[j].oneData;
 							oneDataLen = _localNodes[j].dataLenght;
-							oneDataOffset = _localNodes[j].dataOffset;
+							oneDataOffset = streamManager.getNodeDataOffset(_localNodes[j]);
 							for (counterForVertex = 0; counterForVertex < numVertex; counterForVertex++)
 							{
 								for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
