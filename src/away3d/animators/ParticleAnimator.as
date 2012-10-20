@@ -69,6 +69,7 @@ package away3d.animators
 			_renderParameter.stage3DProxy = stage3DProxy;
 			_renderParameter.streamManager = streamManager;
 			_renderParameter.constantData = activatedConstantData;
+			_renderParameter.renderable = renderable;
 			for each(var state:ParticleStateBase in _allParticleStates)
 			{
 				state.setRenderState(_renderParameter);

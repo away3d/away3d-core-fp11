@@ -1,5 +1,6 @@
 package away3d.animators.data
 {
+	import flash.geom.Matrix3D;
 	/**
 	 * ...
 	 */
@@ -49,6 +50,29 @@ package away3d.animators.data
 			vertexConstantData[_index++] = y;
 			vertexConstantData[_index++] = z;
 			vertexConstantData[_index] = w;
+		}
+		
+		public function setVertexConstFromMatrix(index:int, matrix:Matrix3D):void
+		{
+			var rawData:Vector.<Number> = matrix.rawData;
+			var _index:int = (index - _vertexConstantOffset) * 4;
+			vertexConstantData[_index++] = rawData[0];
+			vertexConstantData[_index++] = rawData[4];
+			vertexConstantData[_index++] = rawData[8];
+			vertexConstantData[_index++] = rawData[12];
+			vertexConstantData[_index++] = rawData[1];
+			vertexConstantData[_index++] = rawData[5];
+			vertexConstantData[_index++] = rawData[9];
+			vertexConstantData[_index++] = rawData[13];
+			vertexConstantData[_index++] = rawData[2];
+			vertexConstantData[_index++] = rawData[6];
+			vertexConstantData[_index++] = rawData[10];
+			vertexConstantData[_index++] = rawData[14];
+			vertexConstantData[_index++] = rawData[3];
+			vertexConstantData[_index++] = rawData[7];
+			vertexConstantData[_index++] = rawData[11];
+			vertexConstantData[_index] = rawData[15];
+			
 		}
 		public function setFragmentConst(index:int, x:Number = 0, y:Number = 0, z:Number = 0, w:Number = 0):void
 		{
