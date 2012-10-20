@@ -194,9 +194,17 @@ package away3d.animators.utils
 		{
 			return shaderRegisterCache.getFreeVertexVectorTemp();
 		}
+		public function getFreeVertexSingleTemp():ShaderRegisterElement
+		{
+			return shaderRegisterCache.getFreeVertexSingleTemp();
+		}
 		public function getFreeFragmentVectorTemp():ShaderRegisterElement
 		{
 			return shaderRegisterCache.getFreeFragmentVectorTemp();
+		}
+		public function getFreeFragmentSingleTemp():ShaderRegisterElement
+		{
+			return shaderRegisterCache.getFreeFragmentSingleTemp();
 		}
 		public function getFreeFragmentConstant():ShaderRegisterElement
 		{
