@@ -233,20 +233,29 @@ package away3d.primitives
 			var uvs : Vector.<Number>;
 			var numUvs : uint = (_segmentsH + 1) * (_segmentsW + 1) * 2;
 
+			if(_doubleSided) numUvs *= 2;
+
 			if (target.UVData && numUvs == target.UVData.length)
 				uvs = target.UVData;
 			else
-				uvs = new Vector.<Number>(numUvs*(int(_doubleSided)+1), true);
+				uvs = new Vector.<Number>(numUvs, true);
 
 			numUvs = 0;
-			for (var yi : uint = 0; yi <= _segmentsH; ++yi) {
-				for (var xi : uint = 0; xi <= _segmentsW; ++xi) {
-					uvs[numUvs++] = xi/_segmentsW;
-					uvs[numUvs++] = 1 - yi/_segmentsH;
+			var i:uint;
+			var j:uint;
+			var u:Number;
+			var v:Number;
+
+			for (i = 0; i <= _segmentsH; ++i) {
+				for (j = 0; j <= _segmentsW; ++j) {
+					u = j/_segmentsW;
+					v = 1 - i/_segmentsH;
+					uvs[numUvs++] = u;
+					uvs[numUvs++] = v;
 
 					if (_doubleSided) {
-						uvs[numUvs++] = xi/_segmentsW;
-						uvs[numUvs++] = 1 - yi/_segmentsH;
+						uvs[numUvs++] = 1-u;
+						uvs[numUvs++] = v;
 					}
 				}
 			}
