@@ -11,10 +11,11 @@ package away3d.animators.nodes
 	 */
 	public class ParticleAccelerateGlobalNode extends GlobalParticleNodeBase
 	{
-		public static const NAME:String = "ParticleScaleByTimeGlobalNode";
+		public static const NAME:String = "ParticleAccelerateGlobalNode";
 		public static const ACCELERATE_CONSTANT_REGISTER:int = 0;
 		
 		private var _accelrate:Vector3D;
+		private var _halfAccelerate:Vector3D;
 		
 		public function ParticleAccelerateGlobalNode(acc:Vector3D)
 		{
@@ -22,6 +23,8 @@ package away3d.animators.nodes
 			_stateClass = ParticleAccelerateGlobalState;
 			
 			_accelrate = acc.clone();
+			_halfAccelerate = _accelrate.clone();
+			_halfAccelerate.scaleBy(0.5);
 		}
 		
 		public function get accelrate():Vector3D
@@ -29,11 +32,19 @@ package away3d.animators.nodes
 			return _accelrate;
 		}
 		
+		public function get halfAccelerate():Vector3D
+		{
+			return _halfAccelerate;
+		}
+		
 		public function set accelrate(value:Vector3D):void
 		{
 			_accelrate.x = value.x;
 			_accelrate.y = value.y;
 			_accelrate.z = value.z;
+			_halfAccelerate.x = value.x / 2;
+			_halfAccelerate.y = value.y / 2;
+			_halfAccelerate.z = value.z / 2;
 		}
 		
 		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
