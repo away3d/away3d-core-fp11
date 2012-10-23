@@ -1,7 +1,7 @@
 package away3d.animators.nodes
 {
-	import a3dparticle.animators.ParticleAnimation;
 	import away3d.animators.data.ParticleAnimationSetting;
+	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.states.ParticleUVDriftGlobalState;
 	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -26,7 +26,7 @@ package away3d.animators.nodes
 
 		public function ParticleUVDriftGlobalNode(cycle:Number,scale:Number=1, axis:int=U_AXIS)
 		{
-			super(NAME, ParticleAnimation.POST_PRIORITY + 1);
+			super(NAME, ParticleAnimationSet.POST_PRIORITY + 1);
 			_stateClass = ParticleUVDriftGlobalState;
 			
 			if (scale != 1)_isScale = true;
