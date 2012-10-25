@@ -1,12 +1,12 @@
 package away3d.materials.lightpickers
 {
+	import flash.events.Event;
+	
 	import away3d.events.LightEvent;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
-
-	import flash.events.Event;
 
 	public class StaticLightPicker extends LightPickerBase
 	{
@@ -94,14 +94,14 @@ package away3d.materials.lightpickers
 			var light : LightBase = LightBase(event.target);
 
 			if (light is PointLight)
-				updatePointCasting(light);
+				updatePointCasting(light as PointLight);
 			else if (light is DirectionalLight)
-				updateDirectionalCasting(light);
+				updateDirectionalCasting(light as DirectionalLight);
 
 			dispatchEvent(new Event(Event.CHANGE));
 		}
 
-		private function updateDirectionalCasting(light : LightBase) : void
+		private function updateDirectionalCasting(light : DirectionalLight) : void
 		{
 			if (light.castsShadows) {
 				--_numDirectionalLights;
@@ -117,7 +117,7 @@ package away3d.materials.lightpickers
 			}
 		}
 
-		private function updatePointCasting(light : LightBase) : void
+		private function updatePointCasting(light : PointLight) : void
 		{
 			if (light.castsShadows) {
 				--_numPointLights;
