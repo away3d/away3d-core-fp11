@@ -87,27 +87,27 @@ package away3d.animators.nodes
 			{
 				if (_loop)
 				{
-					var div:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+					var div:ShaderRegisterElement = activatedCompiler.getFreeVertexSingleTemp();
 					if (hasSleepTime)
 					{
-						code += "div " + div.toString() + ".x," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".z\n";
-						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
-						code += "mul " + activatedCompiler.vertexTime.toString() + "," +div.toString() + ".x," + timeStreamRegister.toString() + ".z\n";
-						code += "slt " + div.toString() + ".x," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".y\n";
-						code += "mul " + activatedCompiler.scaleAndRotateTarget.toString() + "," + activatedCompiler.scaleAndRotateTarget.toString() + "," + div.toString() + ".x\n";
+						code += "div " + div.toString() + "," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".z\n";
+						code += "frc " + div.toString() + "," + div.toString() + "\n";
+						code += "mul " + activatedCompiler.vertexTime.toString() + "," +div.toString() + "," + timeStreamRegister.toString() + ".z\n";
+						code += "slt " + div.toString() + "," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".y\n";
+						code += "mul " + activatedCompiler.scaleAndRotateTarget.toString() + "," + activatedCompiler.scaleAndRotateTarget.toString() + "," + div.toString() + "\n";
 					}
 					else
 					{
-						code += "mul " + div.toString() + ".x," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".w\n";
-						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
-						code += "mul " + activatedCompiler.vertexTime.toString() + "," +div.toString() + ".x," + timeStreamRegister.toString() + ".y\n";
+						code += "mul " + div.toString() + "," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".w\n";
+						code += "frc " + div.toString() + "," + div.toString() + "\n";
+						code += "mul " + activatedCompiler.vertexTime.toString() + "," +div.toString() + "," + timeStreamRegister.toString() + ".y\n";
 					}
 				}
 				else
 				{
-					var sge:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
-					code += "sge " + sge.toString() + ".x," +  timeStreamRegister.toString() + ".y," + activatedCompiler.vertexTime.toString() + "\n";
-					code += "mul " + activatedCompiler.vertexTime.toString() + "," +sge.toString() + ".x," + activatedCompiler.vertexTime.toString() + "\n";
+					var sge:ShaderRegisterElement = activatedCompiler.getFreeVertexSingleTemp();
+					code += "sge " + sge.toString() + "," +  timeStreamRegister.toString() + ".y," + activatedCompiler.vertexTime.toString() + "\n";
+					code += "mul " + activatedCompiler.scaleAndRotateTarget.toString() + "," + activatedCompiler.scaleAndRotateTarget.toString() + "," + sge.toString() + "\n";
 				}
 			}
 			code += "mul " + activatedCompiler.vertexLife.toString() + "," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".w\n";
