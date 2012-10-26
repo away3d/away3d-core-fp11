@@ -194,7 +194,6 @@ package away3d.animators
 					code += node.getAGALVertexCode(pass, _sharedSetting, _activatedCompiler);
 				}
 			}
-			code += _activatedCompiler.getCheckingTimeCode();
 			
 			return code;
 		}

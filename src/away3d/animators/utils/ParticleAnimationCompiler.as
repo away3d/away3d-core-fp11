@@ -172,16 +172,6 @@ package away3d.animators.utils
 			return "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offsetTarget.toString() + "\n";
 		}
 		
-		public function getCheckingTimeCode():String
-		{
-			//if time=0,set the final position to zero.
-			var temp:ShaderRegisterElement = shaderRegisterCache.getFreeVertexSingleTemp();
-			var code:String = "neg " + temp.toString() + "," + vertexTime.toString() + "\n";
-			code += "slt " + temp.toString() + "," + temp.toString() + "," + vertexZeroConst.toString() + "\n";
-			code += "mul " + scaleAndRotateTarget.toString() + "," + scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
-			return code;
-		}
-		
 		public function getFreeVertexAttribute():ShaderRegisterElement
 		{
 			return shaderRegisterCache.getFreeVertexAttribute();

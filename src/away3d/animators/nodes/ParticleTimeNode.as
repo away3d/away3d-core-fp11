@@ -79,7 +79,10 @@ package away3d.animators.nodes
 			
 			var code:String = "";
 			code += "sub " + activatedCompiler.vertexTime.toString() + "," + timeConst.toString() + "," + timeStreamRegister.toString() + ".x\n";
-			code += "max " + activatedCompiler.vertexTime.toString() + "," + activatedCompiler.vertexZeroConst.toString() + "," +  activatedCompiler.vertexTime.toString() + "\n";
+			//if time=0,set the position to zero.
+			var temp:ShaderRegisterElement = activatedCompiler.getFreeVertexSingleTemp();
+			code += "sge " + temp.toString() + "," + activatedCompiler.vertexTime.toString() + "," + activatedCompiler.vertexZeroConst.toString() + "\n";
+			code += "mul " + activatedCompiler.scaleAndRotateTarget.toString() + "," + activatedCompiler.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
 			if (hasDuringTime)
 			{
 				if (_loop)
@@ -91,7 +94,7 @@ package away3d.animators.nodes
 						code += "frc " + div.toString() + ".x," + div.toString() + ".x\n";
 						code += "mul " + activatedCompiler.vertexTime.toString() + "," +div.toString() + ".x," + timeStreamRegister.toString() + ".z\n";
 						code += "slt " + div.toString() + ".x," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".y\n";
-						code += "mul " + activatedCompiler.vertexTime.toString() + "," + activatedCompiler.vertexTime.toString() + "," + div.toString() + ".x\n";
+						code += "mul " + activatedCompiler.scaleAndRotateTarget.toString() + "," + activatedCompiler.scaleAndRotateTarget.toString() + "," + div.toString() + ".x\n";
 					}
 					else
 					{
