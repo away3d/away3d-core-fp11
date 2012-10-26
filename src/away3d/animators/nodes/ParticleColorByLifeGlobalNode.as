@@ -54,8 +54,8 @@ package away3d.animators.nodes
 		{
 			_startMultiplierData = Vector.<Number>([_startColor.redMultiplier , _startColor.greenMultiplier , _startColor.blueMultiplier , _startColor.alphaMultiplier ]);
 			_deltaMultiplierData = Vector.<Number>([(_endColor.redMultiplier - _startColor.redMultiplier) , (_endColor.greenMultiplier - _startColor.greenMultiplier) , (_endColor.blueMultiplier - _startColor.blueMultiplier) , (_endColor.alphaMultiplier - _startColor.alphaMultiplier)]);
-			_startOffsetData = Vector.<Number>([_startColor.redOffset / 256, _startColor.greenOffset / 256, _startColor.blueOffset / 256, _startColor.alphaOffset / 256]);
-			_deltaOffsetData = Vector.<Number>([(_endColor.redOffset - _startColor.redOffset) / 256, (endColor.greenOffset - _startColor.greenOffset) / 256, (endColor.blueOffset - _startColor.blueOffset ) / 256, (endColor.alphaOffset - startColor.alphaOffset) / 256]);
+			_startOffsetData = Vector.<Number>([_startColor.redOffset / 255, _startColor.greenOffset / 255, _startColor.blueOffset / 255, _startColor.alphaOffset / 255]);
+			_deltaOffsetData = Vector.<Number>([(_endColor.redOffset - _startColor.redOffset) / 255, (endColor.greenOffset - _startColor.greenOffset) / 255, (endColor.blueOffset - _startColor.blueOffset ) / 255, (endColor.alphaOffset - startColor.alphaOffset) / 255]);
 		}
 		
 		public function set startColor(value:ColorTransform):void
