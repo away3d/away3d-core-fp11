@@ -239,6 +239,7 @@ package away3d.loaders.parsers
 					break;
 				case "usemtl":
 					if(_mtlLib){
+						if(!trunk[1]) trunk[1]) = "def000";
 						_materialIDs.push(trunk[1]);
 						_activeMaterialID = trunk[1];
 						if(_currentGroup) _currentGroup.materialID = _activeMaterialID;
@@ -547,15 +548,15 @@ package away3d.loaders.parsers
 				for(j = 0;j<lines.length;++j){
 					lines[j] = lines[j].replace(/\s+$/,"");
 					
-					if(lines[j].substring(0,1) != "#" && lines[j] != ""){
+					if(lines[j].substring(0,1) != "#" && (j == 0 || lines[j] != "") ){
 						trunk = lines[j].split(" ");
 						
 						if(String(trunk[0]).charCodeAt(0) == 9 || String(trunk[0]).charCodeAt(0) == 32)
 							trunk[0] = trunk[0].substring(1, trunk[0].length);
 						
 						if(j == 0){
-							
 							_lastMtlID = trunk.join("");
+							_lastMtlID = (_lastMtlID == "")? "def000" : _lastMtlID;
 							
 						} else {
 							
