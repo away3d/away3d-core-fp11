@@ -239,7 +239,7 @@ package away3d.loaders.parsers
 					break;
 				case "usemtl":
 					if(_mtlLib){
-						if(!trunk[1]) trunk[1]) = "def000";
+						if(!trunk[1]) trunk[1] = "def000";
 						_materialIDs.push(trunk[1]);
 						_activeMaterialID = trunk[1];
 						if(_currentGroup) _currentGroup.materialID = _activeMaterialID;
