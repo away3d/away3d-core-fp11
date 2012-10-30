@@ -15,6 +15,7 @@ package away3d.tools.helpers
 	 */
 	public class ParticleGeometryHelper
 	{
+		public static const MAX_VERTEX:int = 65535;
 		
 		public static function generateCompactGeometry(geometries:Vector.<Geometry>):Geometry
 		{
@@ -32,25 +33,45 @@ package away3d.tools.helpers
 			var _indices:Vector.<uint>;
 			var vertexCounter:uint;
 			var i:int;
-			
+			var j:int;
+			var sub2SubMap:Vector.<int> = new Vector.<int>;
 			for (i = 0; i < len; i++)
 			{
 				sourceSubGeometries = geometries[i].subGeometries;
 				numSub = sourceSubGeometries.length;
-				for (var j:int = 0; j < numSub; j++)
+				for (var srcIndex:int = 0; srcIndex < numSub; srcIndex++)
 				{
-					sourceSubGeomerty = sourceSubGeometries[j];
-					if (_vertexDatas.length <= j)
+					if (sub2SubMap.length <= srcIndex)
 					{
+						sub2SubMap.push(_vertexDatas.length);
 						_vertexDatas.push(new Vector.<Number>);
 						_indicesVector.push(new Vector.<uint>);
 						_particleDatasVector.push(new Vector.<ParticleData>);
 						_vertexCounters.push(0);
+						
 					}
+					j = sub2SubMap[srcIndex];
+
+					
+					sourceSubGeomerty = sourceSubGeometries[srcIndex];
+					
+					if (_particleDatasVector[j].length > 0)
+					{
+						var lastParticleData:ParticleData = _particleDatasVector[j][_particleDatasVector[j].length - 1];
+						if (lastParticleData.numVertices + lastParticleData.startVertexIndex + sourceSubGeomerty.numVertices > MAX_VERTEX)
+						{
+							j = sub2SubMap[srcIndex] = _vertexDatas.length;
+							_vertexDatas.push(new Vector.<Number>);
+							_indicesVector.push(new Vector.<uint>);
+							_particleDatasVector.push(new Vector.<ParticleData>);
+							_vertexCounters.push(0);
+						}
+					}
+					
 					vertexData = _vertexDatas[j];
 					_indices = _indicesVector[j];
-					_particleDatasVector[j];
 					vertexCounter = _vertexCounters[j];
+					
 					var particleData:ParticleData = new ParticleData;
 					particleData.numVertices = sourceSubGeomerty.numVertices;
 					particleData.numTriangles = sourceSubGeomerty.numTriangles;
@@ -126,6 +147,8 @@ package away3d.tools.helpers
 			var _indices:Vector.<uint>;
 			var vertexCounter:uint;
 			var i:int;
+			var j:int;
+			var sub2SubMap:Vector.<int> = new Vector.<int>;
 			
 			var tempVertex:Vector3D = new Vector3D;
 			var tempNormal:Vector3D = new Vector3D;
@@ -136,19 +159,36 @@ package away3d.tools.helpers
 			{
 				sourceSubGeometries = geometries[i].subGeometries;
 				numSub = sourceSubGeometries.length;
-				for (var j:int = 0; j < numSub; j++)
+				for (var srcIndex:int = 0; srcIndex < numSub; srcIndex++)
 				{
-					sourceSubGeomerty = sourceSubGeometries[j];
-					if (_vertexDatas.length <= j)
+					if (sub2SubMap.length <= srcIndex)
 					{
+						sub2SubMap.push(_vertexDatas.length);
 						_vertexDatas.push(new Vector.<Number>);
 						_indicesVector.push(new Vector.<uint>);
 						_particleDatasVector.push(new Vector.<ParticleData>);
 						_vertexCounters.push(0);
+						
 					}
+					j = sub2SubMap[srcIndex];
+					
+					sourceSubGeomerty = sourceSubGeometries[srcIndex];
+					
+					if (_particleDatasVector[j].length > 0)
+					{
+						var lastParticleData:ParticleData = _particleDatasVector[j][_particleDatasVector[j].length - 1];
+						if (lastParticleData.numVertices + lastParticleData.startVertexIndex + sourceSubGeomerty.numVertices > MAX_VERTEX)
+						{
+							j = sub2SubMap[srcIndex] = _vertexDatas.length;
+							_vertexDatas.push(new Vector.<Number>);
+							_indicesVector.push(new Vector.<uint>);
+							_particleDatasVector.push(new Vector.<ParticleData>);
+							_vertexCounters.push(0);
+						}
+					}
+					
 					vertexData = _vertexDatas[j];
 					_indices = _indicesVector[j];
-					_particleDatasVector[j];
 					vertexCounter = _vertexCounters[j];
 					var particleData:ParticleData = new ParticleData;
 					particleData.numVertices = sourceSubGeomerty.numVertices;

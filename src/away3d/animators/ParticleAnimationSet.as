@@ -283,20 +283,23 @@ package away3d.animators
 			}
 				
 			var numParticles:uint = firstSubGeometry.particles.length;
-			var numCursors:uint = subGeometries.length - 1;
-			var cursors:Vector.<uint> = new Vector.<uint>(numCursors, true);
+			var numCursors:uint = subGeometries.length;
+			var cursors:Vector.<int> = new Vector.<int>(numCursors, true);
+			var finished:int;
 			var param:ParticleParamter = new ParticleParamter();
 			param.total = numParticles;
 			//default value
 			param.startTime = 0;
 			param.duringTime = 1000;
 			param.sleepTime = 0.1;
-
 			
-			for (i = 0; i < firstSubGeometry.particles.length; i++)
+			i = 0;
+			
+			while (finished < numCursors)
 			{
 				param.index = i;
-				if (_initParticleFun != null) _initParticleFun(param);
+				
+				_initParticleFun(param);
 				
 				var len:int = _localNodes.length;
 				var j:int;
@@ -306,44 +309,22 @@ package away3d.animators
 					_localNodes[j].generatePorpertyOfOneParticle(param);
 				}
 				
-				
-				var oneData:Vector.<Number>;
-				var numVertex:uint = firstSubGeometry.particles[i].numVertices;
-				streamManager = ParticleStreamManager(sharedData[firstSubGeometry]);
-				var targetData:Vector.<Number> = streamManager.vertexData;
-				var totalLenOfOneVertex:uint = streamManager.totalLenOfOneVertex;
-				var initedOffset:uint = streamManager.numInitedVertices * totalLenOfOneVertex;
-				var oneDataLen:int;
-				var oneDataOffset:int;
-				var counterForVertex:int;
-				var counterForOneData:int;
-				for (j = 0; j < len; j++)
-				{
-					oneData = _localNodes[j].oneData;
-					oneDataLen = _localNodes[j].dataLenght;
-					oneDataOffset = streamManager.getNodeDataOffset(_localNodes[j]);
-					for (counterForVertex = 0; counterForVertex < numVertex; counterForVertex++)
-					{
-						for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
-						{
-							targetData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
-						}
-					}
-					_localNodes[j].procressExtraData(param, streamManager, numVertex);
-				}
-				streamManager.numInitedVertices += numVertex;
-				
 				for (var k:int = 0; k < numCursors; k++)
 				{
-					var otherSubGeometry:IParticleSubGeometry = IParticleSubGeometry(subGeometries[k + 1]);
-					if (cursors[k] == otherSubGeometry.particles.length)
+					if (cursors[k] == -1)
 						continue;
+					var otherSubGeometry:IParticleSubGeometry = IParticleSubGeometry(subGeometries[k]);
 					var particle:ParticleData = otherSubGeometry.particles[cursors[k]];
 					streamManager = sharedData[otherSubGeometry];
-					numVertex = particle.numVertices;
-					targetData = streamManager.vertexData;
-					totalLenOfOneVertex = streamManager.totalLenOfOneVertex;
-					initedOffset = streamManager.numInitedVertices * totalLenOfOneVertex;;
+					var numVertex:uint = particle.numVertices;
+					var targetData:Vector.<Number> = streamManager.vertexData;
+					var totalLenOfOneVertex:int = streamManager.totalLenOfOneVertex;
+					var initedOffset:int = streamManager.numInitedVertices * totalLenOfOneVertex;;
+					var oneDataLen:int;
+					var oneDataOffset:int;
+					var counterForVertex:int;
+					var counterForOneData:int;
+					var oneData:Vector.<Number>;
 					
 					if (i == particle.particleIndex)
 					{
@@ -364,9 +345,16 @@ package away3d.animators
 						streamManager.numInitedVertices += numVertex;
 						
 						cursors[k]++;
+						if (cursors[k] == otherSubGeometry.particles.length)
+						{
+							cursors[k] = -1;
+							finished++;
+						}
 					}
 				}
+				i++;
 			}
+			
 		}
 		
 	}
