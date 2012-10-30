@@ -124,15 +124,6 @@ package away3d.animators
 			addAnimation(node.nodeName, node);
 		}
 		
-		public function generatePorperty(param:ParticleParamter):void
-		{
-			var len:int = _localNodes.length;
-			for (var i:int = 0; i < len; i++)
-			{
-				_localNodes[i].generatePorpertyOfOneParticle(param);
-			}
-		}
-		
 		
 		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
@@ -306,10 +297,16 @@ package away3d.animators
 			{
 				param.index = i;
 				if (_initParticleFun != null) _initParticleFun(param);
-				generatePorperty(param);
 				
 				var len:int = _localNodes.length;
 				var j:int;
+				
+				for (j = 0; j < len; j++)
+				{
+					_localNodes[j].generatePorpertyOfOneParticle(param);
+				}
+				
+				
 				var oneData:Vector.<Number>;
 				var numVertex:uint = firstSubGeometry.particles[i].numVertices;
 				streamManager = ParticleStreamManager(sharedData[firstSubGeometry]);
