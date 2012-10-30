@@ -166,9 +166,9 @@ package away3d.tools.helpers
 					var sourceVertexData:Vector.<Number>;
 					
 					var particleGeometryTransform:ParticleGeometryTransform = transforms[i];
-					var vertexTransform:Matrix3D = particleGeometryTransform.getSubVertexTransform(j);
-					var invVertexTransform:Matrix3D = particleGeometryTransform.getSubInvVertexTransform(j);
-					var UVTransform:Matrix = particleGeometryTransform.getSubUVTransform(j);
+					var vertexTransform:Matrix3D = particleGeometryTransform.vertexTransform;
+					var invVertexTransform:Matrix3D = particleGeometryTransform.invVertexTransform;
+					var UVTransform:Matrix = particleGeometryTransform.UVTransform;
 					
 					if (compact)
 					{
