@@ -22,6 +22,8 @@ package away3d.animators.data
 		
 		private var _recorder:Dictionary = new Dictionary(true);
 		
+		public var extraStorage:Dictionary = new Dictionary(true);
+		
 		public function get totalLenOfOneVertex():int
 		{
 			return _totalLenOfOneVertex;
@@ -70,6 +72,11 @@ package away3d.animators.data
 		public function get vertexData():Vector.<Number>
 		{
 			return _vertexData;
+		}
+		
+		public function get numVertices():uint
+		{
+			return _numVertices;
 		}
 		
 	}

@@ -1,6 +1,7 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleStreamManager;
 	import flash.display3D.Context3D;
 	import flash.display3D.VertexBuffer3D;
 	
@@ -31,6 +32,12 @@ package away3d.animators.nodes
 		public function get oneData():Vector.<Number>
 		{
 			return _oneData;
+		}
+		
+		//give a chance to lookup paramters other nodes generated
+		public function procressExtraData(param:ParticleParamter, streamManager:ParticleStreamManager, numVertex:int):void
+		{
+			
 		}
 		
 		

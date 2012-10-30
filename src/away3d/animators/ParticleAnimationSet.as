@@ -296,6 +296,10 @@ package away3d.animators
 			var cursors:Vector.<uint> = new Vector.<uint>(numCursors, true);
 			var param:ParticleParamter = new ParticleParamter();
 			param.total = numParticles;
+			//default value
+			param.startTime = 0;
+			param.duringTime = 1000;
+			param.sleepTime = 0.1;
 
 			
 			for (i = 0; i < firstSubGeometry.particles.length; i++)
@@ -328,6 +332,7 @@ package away3d.animators
 							targetData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
 						}
 					}
+					_localNodes[j].procressExtraData(param, streamManager, numVertex);
 				}
 				streamManager.numInitedVertices += numVertex;
 				
@@ -357,6 +362,7 @@ package away3d.animators
 									targetData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
 								}
 							}
+							_localNodes[j].procressExtraData(param, streamManager, numVertex);
 						}
 						streamManager.numInitedVertices += numVertex;
 						

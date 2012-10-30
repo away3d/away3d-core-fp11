@@ -14,7 +14,7 @@ package away3d.animators.states
 		
 		public function ParticleTimeState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
-			super(animator, particleNode);
+			super(animator, particleNode, true);
 		}
 		
 		override public function setRenderState(parameter:ParticleRenderParameter):void

@@ -19,14 +19,14 @@ package away3d.animators.nodes
 		
 		
 		private var _tempStartTime:Number;
-		private var _tempEndTime:Number;
+		private var _tempDuringTime:Number;
 		private var _tempSleepTime:Number;
 		
 		
-		public var hasDuringTime:Boolean;
-		public var hasSleepTime:Boolean;
+		protected var _hasDuringTime:Boolean;
+		protected var _hasSleepTime:Boolean;
+		protected var _loop:Boolean;
 		
-		private var _loop:Boolean;
 		
 		public function ParticleTimeNode()
 		{
@@ -36,37 +36,63 @@ package away3d.animators.nodes
 			initOneData();
 		}
 		
-		
+		public function get loop():Boolean
+		{
+			return _loop;
+		}
 		public function set loop(value:Boolean):void
 		{
 			_loop = value;
-			if (value)
+			if (_loop)
 			{
-				hasDuringTime = true;
+				_hasDuringTime = true;
+			}
+			else
+			{
+				_hasSleepTime = false;
+			}
+		}
+		
+		public function get hasDuringTime():Boolean
+		{
+			return _hasDuringTime;
+		}
+		
+		public function set hasDuringTime(value:Boolean):void
+		{
+			_hasDuringTime = value;
+			if (!_hasDuringTime)
+			{
+				_hasSleepTime = false;
+				_loop = false;
+			}
+		}
+		
+		public function get hasSleepTime():Boolean
+		{
+			return _hasSleepTime;
+		}
+		
+		public function set hasSleepTime(value:Boolean):void
+		{
+			_hasSleepTime = value;
+			if (_hasSleepTime)
+			{
+				_loop = true;
+				_hasDuringTime = true;
 			}
 		}
 		
 		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
 		{
-			if (isNaN(param.startTime)) throw("there is no startTime in param!");
 			_tempStartTime = param.startTime;
-			_tempEndTime = 1000;
-			if (hasDuringTime)
-			{
-				if (isNaN(param.duringTime)) throw("there is no duringTime in param!");
-				_tempEndTime = param.duringTime;
-			}
-			_tempSleepTime = 0;
-			if (hasSleepTime)
-			{
-				if (isNaN(param.sleepTime)) throw("there is no sleepTime in param!");
-				_tempSleepTime = param.sleepTime;
-			}
+			_tempDuringTime = param.duringTime
+			_tempSleepTime = param.sleepTime;
 			
 			_oneData[0] = _tempStartTime;
-			_oneData[1] = _tempEndTime;
-			_oneData[2] = _tempSleepTime + _tempEndTime;
-			_oneData[3] = 1 / _tempEndTime;
+			_oneData[1] = _tempDuringTime;
+			_oneData[2] = _tempSleepTime + _tempDuringTime;
+			_oneData[3] = 1 / _tempDuringTime;
 			
 		}
 		
@@ -83,12 +109,12 @@ package away3d.animators.nodes
 			var temp:ShaderRegisterElement = activatedCompiler.getFreeVertexSingleTemp();
 			code += "sge " + temp.toString() + "," + activatedCompiler.vertexTime.toString() + "," + activatedCompiler.vertexZeroConst.toString() + "\n";
 			code += "mul " + activatedCompiler.scaleAndRotateTarget.toString() + "," + activatedCompiler.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
-			if (hasDuringTime)
+			if (_hasDuringTime)
 			{
 				if (_loop)
 				{
 					var div:ShaderRegisterElement = activatedCompiler.getFreeVertexSingleTemp();
-					if (hasSleepTime)
+					if (_hasSleepTime)
 					{
 						code += "div " + div.toString() + "," + activatedCompiler.vertexTime.toString() + "," + timeStreamRegister.toString() + ".z\n";
 						code += "frc " + div.toString() + "," + div.toString() + "\n";
