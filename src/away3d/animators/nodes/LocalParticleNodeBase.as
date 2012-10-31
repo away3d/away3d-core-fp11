@@ -35,7 +35,7 @@ package away3d.animators.nodes
 		}
 		
 		//give a chance to lookup paramters other nodes generated
-		public function procressExtraData(param:ParticleParameter, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
+		public function processExtraData(param:ParticleParameter, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
 		{
 			
 		}

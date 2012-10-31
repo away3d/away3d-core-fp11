@@ -11,12 +11,12 @@ package away3d.animators.states
 	 */
 	public class ParticleFreeColorLocalState extends ParticleStateBase
 	{
-		private var colorNode:ParticleFreeColorLocalNode;
+		private var _particleFreeColorLocalState:ParticleFreeColorLocalNode;
 		
 		public function ParticleFreeColorLocalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			colorNode = particleNode as ParticleFreeColorLocalNode;
+			_particleFreeColorLocalState = particleNode as ParticleFreeColorLocalNode;
 		}
 			
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
@@ -24,20 +24,20 @@ package away3d.animators.states
 			if (parameter.animationRegisterCache.needFragmentAnimation)
 			{
 				var index:int;
-				if (colorNode.hasMult)
+				if (_particleFreeColorLocalState.hasMult)
 				{
 					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_MULTIPLE_STREAM_REGISTER);
-					parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
-					if (colorNode.hasOffset)
+					parameter.animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalState.dataOffset, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+					if (_particleFreeColorLocalState.hasOffset)
 					{
 						index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
-						parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode) + 4, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+						parameter.animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalState.dataOffset + 4, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 					}
 				}
 				else
 				{
 					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
-					parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+					parameter.animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalState.dataOffset, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 				}
 			}
 		}

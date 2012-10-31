@@ -10,16 +10,19 @@ package away3d.animators.states
 	 */
 	public class ParticleAccelerateLocalState extends ParticleStateBase
 	{
+		private var _particleAccelerateLocalNode:ParticleAccelerateLocalNode;
 		
 		public function ParticleAccelerateLocalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
+			
+			_particleAccelerateLocalNode = particleNode as ParticleAccelerateLocalNode;
 		}
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
 			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleAccelerateLocalNode.ACCELERATELOCAL_STREAM_REGISTER);
-			parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+			parameter.animationSubGeometry.activateVertexBuffer(index, _particleAccelerateLocalNode.dataOffset, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 		}
 	}
 

@@ -19,7 +19,9 @@ package away3d.animators.nodes
 		private var _priority:int;
 		
 		protected var _dataLength:uint = 3;
-				
+		
+		public var dataOffset:uint;
+		
 		public function ParticleNodeBase(name:String,type:int,priority:int)
 		{
 			_nodeType = type;

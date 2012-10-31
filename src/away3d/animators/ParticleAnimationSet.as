@@ -37,6 +37,8 @@ package away3d.animators
 		
 		private var _localNodes:Vector.<LocalParticleNodeBase> = new Vector.<LocalParticleNodeBase>();
 		
+		private var _totalLenOfOneVertex:int = 0;
+		
 		//set true if has an node which will change UV
 		public var hasUVNode:Boolean;
 		//set true if has an node which will change color
@@ -87,16 +89,16 @@ package away3d.animators
 			var i:int;
 			var n:ParticleNodeBase = node as ParticleNodeBase;
 			n.processAnimationSetting(this);
-			if (n.nodeType==ParticleNodeBase.LOCAL)
+			if (n.nodeType==ParticleNodeBase.LOCAL) {
+				n.dataOffset = _totalLenOfOneVertex;
+				_totalLenOfOneVertex += n.dataLength;
 				_localNodes.push(n);
+			}
 			
 			for (i = _particleNodes.length - 1; i >= 0; i--)
-			{
 				if (_particleNodes[i].priority <= n.priority)
-				{
 					break;
-				}
-			}
+			
 			_particleNodes.splice(i + 1, 0, n);
 			
 			super.addAnimation(node);
@@ -116,9 +118,9 @@ package away3d.animators
 				context.setVertexBufferAt(i, null);
 		}
 		
-		
-		private function reset(pass:MaterialPassBase, sourceRegisters : Array, targetRegisters : Array):void
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
+			//reset animationRegisterCache
 			_animationRegisterCache = compilers[pass] ||= new AnimationRegisterCache();
 			
 			_animationRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
@@ -133,12 +135,6 @@ package away3d.animators
 			_animationRegisterCache.needFragmentAnimation = pass.needFragmentAnimation;
 			_animationRegisterCache.needUVAnimation = pass.needUVAnimation;
 			_animationRegisterCache.reset();
-		}
-
-		
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
-		{
-			reset(pass, sourceRegisters, targetRegisters);
 			
 			var code:String = "";
 			
@@ -245,10 +241,11 @@ package away3d.animators
 			if (!geometry)
 				throw(new Error("It must be ParticleGeometry"));
 			
-			var i:int, j:int, k:int;
+			var i:int, j:int;
 			var animationSubGeometry:AnimationSubGeometry;
 			var newAnimationSubGeometry:Boolean;
 			var subGeometry:ISubGeometry;
+			var localNode:LocalParticleNodeBase;
 			
 			for (i = 0; i < mesh.subMeshes.length; i++)
 			{
@@ -262,11 +259,7 @@ package away3d.animators
 				
 				newAnimationSubGeometry = true;
 				
-				for each(var node:LocalParticleNodeBase in _localNodes)
-				{
-					animationSubGeometry.applyData(node.dataLength, node);
-				}
-				animationSubGeometry.setVertexNum(subGeometry.numVertices);
+				animationSubGeometry.createVertexData(subGeometry.numVertices, _totalLenOfOneVertex);
 			}
 			
 			if (!newAnimationSubGeometry)
@@ -275,7 +268,6 @@ package away3d.animators
 			var particles:Vector.<ParticleData> = geometry.particles;
 			var particlesLength:uint = particles.length;
 			var numParticles:uint = geometry.numParticles;
-			var numNodes:int = _localNodes.length;
 			var param:ParticleParameter = new ParticleParameter();
 			var particle:ParticleData;
 			
@@ -286,8 +278,7 @@ package away3d.animators
 			var oneData:Vector.<Number>;
 			var numVertices:uint;
 			var vertexData:Vector.<Number>;
-			var totalLenOfOneVertex:int;
-			var initedOffset:int;
+			var startingOffset:int;
 					
 			//default values for particle param
 			param.total = numParticles;
@@ -296,7 +287,7 @@ package away3d.animators
 			param.sleepTime = 0.1;
 			
 			i = 0;
-			k = 0;
+			j = 0;
 			while (i < numParticles)
 			{
 				param.index = i;
@@ -304,37 +295,32 @@ package away3d.animators
 				//call the init function on the particle parameters
 				_initParticleFunc(param);
 				
-				
 				//create the next set of node properties for the particle
-				for (j = 0; j < numNodes; j++)
-					_localNodes[j].generatePropertyOfOneParticle(param);
+				for each (localNode in _localNodes)
+					localNode.generatePropertyOfOneParticle(param);
 				
-				while (k < particlesLength && (particle = particles[k]).particleIndex == i) {
+				while (j < particlesLength && (particle = particles[j]).particleIndex == i) {
 					animationSubGeometry = _animationSubGeometries[particle.subGeometry];
 					numVertices = particle.numVertices;
 					vertexData = animationSubGeometry.vertexData;
-					totalLenOfOneVertex = animationSubGeometry.totalLenOfOneVertex;
-					initedOffset = animationSubGeometry.numInitedVertices * totalLenOfOneVertex;
+					startingOffset = animationSubGeometry.numProcessedVertices * _totalLenOfOneVertex;
 					
-					for (j = 0; j < numNodes; j++)
-					{
-					
-						oneData = _localNodes[j].oneData;
-						oneDataLen = _localNodes[j].dataLength;
-						oneDataOffset = animationSubGeometry.getNodeDataOffset(_localNodes[j]);
+					for each (localNode in _localNodes) {
+						oneData = localNode.oneData;
+						oneDataLen = localNode.dataLength;
+						oneDataOffset = localNode.dataOffset;
+						
 						for (counterForVertex = 0; counterForVertex < numVertices; counterForVertex++)
-						{
 							for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
-							{
-								vertexData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
-							}
-						}
-						_localNodes[j].procressExtraData(param, animationSubGeometry, numVertices);
+								vertexData[startingOffset + oneDataOffset + _totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
+						
+						localNode.processExtraData(param, animationSubGeometry, numVertices);
 					}
-					animationSubGeometry.numInitedVertices += numVertices;
+					
+					animationSubGeometry.numProcessedVertices += numVertices;
 					
 					//next index
-					k++;
+					j++;
 				}
 				
 				//next particle

@@ -10,21 +10,21 @@ package away3d.animators.states
 	 */
 	public class ParticleCircleLocalState extends ParticleStateBase
 	{
-		private var circleNode:ParticleCircleLocalNode;
+		private var _particleCircleLocalState:ParticleCircleLocalNode;
 		
 		public function ParticleCircleLocalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			circleNode = particleNode as ParticleCircleLocalNode;
+			_particleCircleLocalState = particleNode as ParticleCircleLocalNode;
 		}
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
 			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleCircleLocalNode.CIRCLE_STREAM_REGISTER);
-			parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+			parameter.animationSubGeometry.activateVertexBuffer(index, _particleCircleLocalState.dataOffset, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			
 			index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleCircleLocalNode.EULERS_CONSTANT_REGISTER);
-			parameter.animationRegisterCache.setVertexConstFromMatrix(index, circleNode.eulersMatrix);
+			parameter.animationRegisterCache.setVertexConstFromMatrix(index, _particleCircleLocalState.eulersMatrix);
 		}
 	}
 

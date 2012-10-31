@@ -17,7 +17,7 @@ package away3d.animators.states
 	 */
 	public class ParticleFollowState extends ParticleStateBase
 	{
-		private var followNode:ParticleFollowNode;
+		private var _particleFollowState:ParticleFollowNode;
 		private var _followTarget:Object3D;
 		
 		private var _targetPos:Vector3D = new Vector3D;
@@ -28,7 +28,7 @@ package away3d.animators.states
 		public function ParticleFollowState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode, true);
-			followNode = particleNode as ParticleFollowNode;
+			_particleFollowState = particleNode as ParticleFollowNode;
 		}
 		
 		public function get followTarget():Object3D
@@ -47,13 +47,13 @@ package away3d.animators.states
 			
 			if (_followTarget)
 			{
-				if (followNode.needOffset)
+				if (_particleFollowState.needOffset)
 				{
 					_targetPos.x = _followTarget.position.x;
 					_targetPos.y = _followTarget.position.y;
 					_targetPos.z = _followTarget.position.z;
 				}
-				if (followNode.needRotate)
+				if (_particleFollowState.needRotate)
 				{
 					_targetEuler.x = _followTarget.rotationX;
 					_targetEuler.y = _followTarget.rotationY;
@@ -69,7 +69,7 @@ package away3d.animators.states
 			var needProcess:Boolean = previousTime != currentTime;
 			
 			var index:int;
-			if (followNode.needOffset && followNode.needRotate)
+			if (_particleFollowState.needOffset && _particleFollowState.needRotate)
 			{
 				if (needProcess)
 					processOffsetAndRotation(currentTime, deltaTime, followStream);
@@ -78,14 +78,14 @@ package away3d.animators.states
 				index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
 				followStream.activateVertexBuffer(index, 3, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (followNode.needOffset)
+			else if (_particleFollowState.needOffset)
 			{
 				if (needProcess)
 					processOffset(currentTime, deltaTime, followStream);
 				index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
 				followStream.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (followNode.needRotate)
+			else if (_particleFollowState.needRotate)
 			{
 				if (needProcess)
 					precessRotation(currentTime, deltaTime, followStream);

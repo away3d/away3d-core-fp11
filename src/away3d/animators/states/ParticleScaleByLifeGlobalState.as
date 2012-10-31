@@ -9,18 +9,18 @@ package away3d.animators.states
 	 */
 	public class ParticleScaleByLifeGlobalState extends ParticleStateBase
 	{
-		private var scaleNode:ParticleScaleByLifeGlobalNode;
+		private var _particleScaleByLifeGlobalNode:ParticleScaleByLifeGlobalNode;
 		
 		public function ParticleScaleByLifeGlobalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			this.scaleNode = particleNode as ParticleScaleByLifeGlobalNode;
+			_particleScaleByLifeGlobalNode = particleNode as ParticleScaleByLifeGlobalNode;
 		}
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
 			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleScaleByLifeGlobalNode.SCALE_CONSTANT_REGISTER);
-			parameter.animationRegisterCache.setVertexConst(index, scaleNode.startScale, scaleNode.delta);
+			parameter.animationRegisterCache.setVertexConst(index, _particleScaleByLifeGlobalNode.startScale, _particleScaleByLifeGlobalNode.delta);
 		}
 		
 	}

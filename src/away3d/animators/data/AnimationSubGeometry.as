@@ -15,43 +15,19 @@ package away3d.animators.data
 		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
 		
-		protected var _numVertices:uint;
-		protected var _totalLenOfOneVertex:int;
+		private var _numVertices:uint;
 		
-		public var numInitedVertices:int;
+		private var _totalLenOfOneVertex:uint;
 		
-		private var _recorder:Dictionary = new Dictionary(true);
+		public var numProcessedVertices:int = 0;
 		
 		public var extraStorage:Dictionary = new Dictionary(true);
 		
-		public function get totalLenOfOneVertex():int
+		public function createVertexData(numVertices:uint, totalLenOfOneVertex:uint):void
 		{
-			return _totalLenOfOneVertex;
-		}
-		
-		public function getNodeDataOffset(node:AnimationNodeBase):int
-		{
-			return _recorder[node];
-		}
-		
-		public function applyData(dataLen:int,node:AnimationNodeBase):void
-		{
-			if (_totalLenOfOneVertex > 0)
-			{
-				_recorder[node] = _totalLenOfOneVertex;
-				_totalLenOfOneVertex += dataLen;
-			}
-			else
-			{
-				_recorder[node] = 0;
-				_totalLenOfOneVertex = dataLen;
-			}
-		}
-		
-		public function setVertexNum(value:uint):void
-		{
-			_numVertices = value;
-			_vertexData = new Vector.<Number>(value * _totalLenOfOneVertex, true);
+			_numVertices = numVertices;
+			_totalLenOfOneVertex = totalLenOfOneVertex;
+			_vertexData = new Vector.<Number>(numVertices * totalLenOfOneVertex, true);
 		}
 		
 		public function activateVertexBuffer(index : int, bufferOffset:int, stage3DProxy : Stage3DProxy, format:String) : void

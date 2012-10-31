@@ -11,12 +11,12 @@ package away3d.animators.states
 	public class ParticleUVSeqPicByTimeGlobalState extends ParticleStateBase
 	{
 		
-		private var uvNode:ParticleUVSeqPicByTimeGlobalNode;
+		private var _particleUVSeqPicByTimeGlobalNode:ParticleUVSeqPicByTimeGlobalNode;
 
 		public function ParticleUVSeqPicByTimeGlobalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			this.uvNode = particleNode as ParticleUVSeqPicByTimeGlobalNode;
+			_particleUVSeqPicByTimeGlobalNode = particleNode as ParticleUVSeqPicByTimeGlobalNode;
 		}
 		
 		
@@ -25,7 +25,7 @@ package away3d.animators.states
 			if (parameter.animationRegisterCache.needUVAnimation)
 			{
 				var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
-				var data:Vector.<Number> = uvNode.renderData;
+				var data:Vector.<Number> = _particleUVSeqPicByTimeGlobalNode.renderData;
 				parameter.animationRegisterCache.setVertexConst(index, data[0], data[1], data[2], data[3]);
 				parameter.animationRegisterCache.setVertexConst(index + 1, data[4], data[5]);
 			}

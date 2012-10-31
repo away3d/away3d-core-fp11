@@ -11,12 +11,12 @@ package away3d.animators.states
 	public class ParticleUVDriftGlobalState extends ParticleStateBase
 	{
 		
-		private var uvDriftNode:ParticleUVDriftGlobalNode;
+		private var _particleUVDriftGlobalNode:ParticleUVDriftGlobalNode;
 
 		public function ParticleUVDriftGlobalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			this.uvDriftNode = particleNode as ParticleUVDriftGlobalNode;
+			_particleUVDriftGlobalNode = particleNode as ParticleUVDriftGlobalNode;
 		}
 		
 		
@@ -25,7 +25,7 @@ package away3d.animators.states
 			if (parameter.animationRegisterCache.needUVAnimation)
 			{
 				var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleUVDriftGlobalNode.UV_CONSTANT_REGISTER);
-				var data:Vector.<Number> = uvDriftNode.renderData;
+				var data:Vector.<Number> = _particleUVDriftGlobalNode.renderData;
 				parameter.animationRegisterCache.setVertexConst(index, data[0], data[1]);
 			}
 		}

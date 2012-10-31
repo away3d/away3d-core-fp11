@@ -10,18 +10,19 @@ package away3d.animators.states
 	 */
 	public class ParticleAccelerateGlobalState extends ParticleStateBase
 	{
-		private var accNode:ParticleAccelerateGlobalNode;
+		private var _particleAccelerateGlobalNode:ParticleAccelerateGlobalNode;
+		
 		public function ParticleAccelerateGlobalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			accNode = particleNode as ParticleAccelerateGlobalNode;
+			_particleAccelerateGlobalNode = particleNode as ParticleAccelerateGlobalNode;
 		}
 		
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
 			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleAccelerateGlobalNode.ACCELERATE_CONSTANT_REGISTER);
-			var halfAccelerate:Vector3D = accNode.halfAcceleration;
+			var halfAccelerate:Vector3D = _particleAccelerateGlobalNode.halfAcceleration;
 			parameter.animationRegisterCache.setVertexConst(index, halfAccelerate.x, halfAccelerate.y, halfAccelerate.z);
 		}
 		

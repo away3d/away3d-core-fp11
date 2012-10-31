@@ -10,16 +10,18 @@ package away3d.animators.states
 	 */
 	public class ParticleTimeState extends ParticleStateBase
 	{
+		private var _particleTimeNode:ParticleTimeNode;
 		
 		public function ParticleTimeState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode, true);
+			_particleTimeNode = particleNode as ParticleTimeNode;
 		}
 		
 		override public function setRenderState(parameter:ParticleRenderParameter):void
 		{
 			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleTimeNode.TIME_STREAM_REGISTER);
-			parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+			parameter.animationSubGeometry.activateVertexBuffer(index, _particleTimeNode.dataOffset, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 			
 			var particleTime:Number = _time / 1000;
 			index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleTimeNode.TIME_CONSTANT_REGISTER);
