@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.core.base.SubMesh;
 	import away3d.core.base.ParticleGeometry;
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -231,7 +232,7 @@ package away3d.animators
 		
 		
 		
-		public function generateStreamData(mesh:Mesh):void
+		public function generateAnimationSubGeometries(mesh:Mesh):void
 		{
 			if (_initParticleFunc == null)
 				throw(new Error("no initParticleFunc"));			
@@ -245,20 +246,23 @@ package away3d.animators
 			var animationSubGeometry:AnimationSubGeometry;
 			var newAnimationSubGeometry:Boolean;
 			var subGeometry:ISubGeometry;
+			var subMesh:SubMesh;
 			var localNode:LocalParticleNodeBase;
 			
 			for (i = 0; i < mesh.subMeshes.length; i++)
 			{
-				subGeometry = mesh.subMeshes[i].subGeometry;
+				subMesh = mesh.subMeshes[i];
+				subGeometry = subMesh.subGeometry;
 				if ((animationSubGeometry = _animationSubGeometries[subGeometry])) {
-					mesh.subMeshes[i].animationSubGeometry = animationSubGeometry;
+					subMesh.animationSubGeometry = animationSubGeometry;
 					continue;
 				}
 				
-				animationSubGeometry = mesh.subMeshes[i].animationSubGeometry = _animationSubGeometries[subGeometry] = new AnimationSubGeometry();
+				animationSubGeometry = subMesh.animationSubGeometry = _animationSubGeometries[subGeometry] = new AnimationSubGeometry();
 				
 				newAnimationSubGeometry = true;
 				
+				//create the vertexData vector that will be used for local node data
 				animationSubGeometry.createVertexData(subGeometry.numVertices, _totalLenOfOneVertex);
 			}
 			

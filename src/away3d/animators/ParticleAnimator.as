@@ -23,9 +23,8 @@ package away3d.animators
 		
 		private var _particleAnimationSet:ParticleAnimationSet;
 		private var _renderParameter:ParticleRenderParameter = new ParticleRenderParameter;
-		
-		protected var _allParticleStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
-		protected var _needTimeStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
+		private var _allParticleStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
+		private var _timeParticleStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
 		
 		public function ParticleAnimator(animationSet:ParticleAnimationSet)
 		{
@@ -33,19 +32,15 @@ package away3d.animators
 			_particleAnimationSet = animationSet;
 			
 			var state:ParticleStateBase;
-			for each (var node:ParticleNodeBase in _particleAnimationSet.particleNodes)
+			var node:ParticleNodeBase;
+			for each (node in _particleAnimationSet.particleNodes)
 			{
 				state = getAnimationState(node) as ParticleStateBase;
 				_allParticleStates.push(state);
 				if (state.needUpdateTime)
-					_needTimeStates.push(state);
+					_timeParticleStates.push(state);
 			}
 			
-		}
-		
-		public function getAnimationStateByName(name:String):ParticleStateBase
-		{
-			return getAnimationState(_particleAnimationSet.getAnimation(name)) as ParticleStateBase;
 		}
 		
 		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
@@ -57,9 +52,7 @@ package away3d.animators
 				throw(new Error("Must be subMesh"));
 			
 			if (!subMesh.animationSubGeometry)
-			{
-				_particleAnimationSet.generateStreamData(subMesh.parentMesh);
-			}
+				_particleAnimationSet.generateAnimationSubGeometries(subMesh.parentMesh);
 			
 			var animationSubGeometry:AnimationSubGeometry = subMesh.animationSubGeometry;
 			
@@ -68,10 +61,9 @@ package away3d.animators
 			_renderParameter.stage3DProxy = stage3DProxy;
 			_renderParameter.animationSubGeometry = animationSubGeometry;
 			_renderParameter.renderable = renderable;
+			
 			for each (var state:ParticleStateBase in _allParticleStates)
-			{
 				state.setRenderState(_renderParameter);
-			}
 			
 			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, animationRegisterCache.vertexConstantOffset, animationRegisterCache.vertexConstantData, animationRegisterCache.numVertexConstant);
 			if (animationRegisterCache.numFragmentConstant > 0)
@@ -88,7 +80,7 @@ package away3d.animators
 		override public function start():void
 		{
 			super.start();
-			for each (var state:ParticleStateBase in _needTimeStates)
+			for each (var state:ParticleStateBase in _timeParticleStates)
 			{
 				state.offset(_absoluteTime);
 			}
@@ -98,7 +90,7 @@ package away3d.animators
 		{
 			_absoluteTime += dt;
 			
-			for each (var state:ParticleStateBase in _needTimeStates)
+			for each (var state:ParticleStateBase in _timeParticleStates)
 			{
 				state.update(_absoluteTime);
 			}
@@ -106,7 +98,7 @@ package away3d.animators
 		
 		public function resetTime(offset : int = 0) : void
 		{
-			for each (var state:ParticleStateBase in _needTimeStates)
+			for each (var state:ParticleStateBase in _timeParticleStates)
 			{
 				state.offset(_absoluteTime + offset);
 			}
