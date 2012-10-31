@@ -47,7 +47,7 @@ package away3d.animators
 		
 		//all other nodes dependent on it
 		private var timeNode:ParticleTimeNode;
-		public var _initParticleFun:Function;
+		private var _initParticleFunc:Function;
 		
 		
 		public function ParticleAnimationSet()
@@ -86,11 +86,6 @@ package away3d.animators
 		public function set loop(value:Boolean):void
 		{
 			timeNode.loop = value;
-		}
-		
-		public function set initParticleFun(value:Function):void
-		{
-			_initParticleFun = value;
 		}
 		
 		override public function addAnimation(node:AnimationNodeBase):void
@@ -229,6 +224,16 @@ package away3d.animators
 			return false;
 		}
 		
+		public function get initParticleFunc():Function
+		{
+			return _initParticleFunc;
+		}
+		
+		public function set initParticleFunc(value:Function):void
+		{
+			_initParticleFunc = value;
+		}
+		
 		override public function cancelGPUCompatibility() : void
         {
 			
@@ -238,8 +243,8 @@ package away3d.animators
 		
 		public function generateStreamData(mesh:Mesh):void
 		{
-			if (_initParticleFun == null)
-				throw(new Error("no initParticleFun"));
+			if (_initParticleFunc == null)
+				throw(new Error("no initParticleFunc"));
 				
 			var sharedData:Dictionary;
 			if (_streamDatas[mesh.geometry])
@@ -286,7 +291,7 @@ package away3d.animators
 			{
 				param.index = i;
 				
-				_initParticleFun(param);
+				_initParticleFunc(param);
 				
 				var len:int = _localNodes.length;
 				var j:int;
