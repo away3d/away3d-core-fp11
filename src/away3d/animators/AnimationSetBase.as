@@ -118,16 +118,16 @@ package away3d.animators
 		 * @param stateName The name under which the animation state object will be stored.
 		 * @param animationState The animation state object to be staored in the set.
 		 */
-		public function addAnimation(name:String, node:AnimationNodeBase):void
+		public function addAnimation(node:AnimationNodeBase):void
 		{
-			if (_animationDictionary[name])
-				throw new AnimationSetError("root node name already exists in the set");
+			if (_animationDictionary[node.name])
+				throw new AnimationSetError("root node name '" + node.name + "' already exists in the set");
 			
-			_animationDictionary[name] = node;
+			_animationDictionary[node.name] = node;
 			
 			_animations.push(node);
 			
-			_animationNames.push(name);
+			_animationNames.push(node.name);
 		}
 		
 		/**

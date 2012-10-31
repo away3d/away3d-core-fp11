@@ -17,7 +17,6 @@ package away3d.animators.nodes
 		
 		private var _nodeType:int;
 		private var _priority:int;
-		protected var _nodeName:String;
 		
 		protected var _dataLenght:uint = 3;
 				
@@ -25,12 +24,7 @@ package away3d.animators.nodes
 		{
 			_nodeType = type;
 			_priority = priority;
-			_nodeName = name;
-		}
-		
-		public function get nodeName():String
-		{
-			return _nodeName;
+			this.name = name;
 		}
 		
 		public function get nodeType():int

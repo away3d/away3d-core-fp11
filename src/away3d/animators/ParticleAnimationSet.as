@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
@@ -51,7 +52,7 @@ package away3d.animators
 		{
 			super();
 			timeNode = new ParticleTimeNode();
-			addParticleNode(timeNode);
+			addAnimation(timeNode);
 		}
 		
 		public function get particleNodes():Vector.<ParticleNodeBase>
@@ -95,22 +96,24 @@ package away3d.animators
 			_initParticleFun = value;
 		}
 		
-		public function addParticleNode(node:ParticleNodeBase):void
+		override public function addAnimation(node:AnimationNodeBase):void
 		{
 			var i:int;
-			node.processAnimationSetting(_sharedSetting);
-			if (node.nodeType==ParticleNodeBase.LOCAL)
-				_localNodes.push(node);
+			var n:ParticleNodeBase = node as ParticleNodeBase;
+			n.processAnimationSetting(_sharedSetting);
+			if (n.nodeType==ParticleNodeBase.LOCAL)
+				_localNodes.push(n);
 			
 			for (i = _particleNodes.length - 1; i >= 0; i--)
 			{
-				if (_particleNodes[i].priority <= node.priority)
+				if (_particleNodes[i].priority <= n.priority)
 				{
 					break;
 				}
 			}
-			_particleNodes.splice(i + 1, 0, node);
-			addAnimation(node.nodeName, node);
+			_particleNodes.splice(i + 1, 0, n);
+			
+			super.addAnimation(node);
 		}
 		
 		
