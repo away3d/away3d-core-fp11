@@ -1,6 +1,6 @@
 package away3d.animators.data
 {
-	import away3d.animators.nodes.ParticleNodeBase;
+	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.Context3D;
 	import flash.display3D.VertexBuffer3D;
@@ -8,7 +8,7 @@ package away3d.animators.data
 	/**
 	 * ...
 	 */
-	public class ParticleStreamManager
+	public class AnimationSubGeometry
 	{
 		protected var _vertexData:Vector.<Number>;
 		
@@ -29,12 +29,12 @@ package away3d.animators.data
 			return _totalLenOfOneVertex;
 		}
 		
-		public function getNodeDataOffset(node:ParticleNodeBase):int
+		public function getNodeDataOffset(node:AnimationNodeBase):int
 		{
 			return _recorder[node];
 		}
 		
-		public function applyData(dataLen:int,node:ParticleNodeBase):void
+		public function applyData(dataLen:int,node:AnimationNodeBase):void
 		{
 			if (_totalLenOfOneVertex > 0)
 			{

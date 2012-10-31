@@ -27,17 +27,17 @@ package away3d.animators.states
 				if (colorNode.hasMult)
 				{
 					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_MULTIPLE_STREAM_REGISTER);
-					parameter.streamManager.activateVertexBuffer(index, parameter.streamManager.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+					parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 					if (colorNode.hasOffset)
 					{
 						index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
-						parameter.streamManager.activateVertexBuffer(index, parameter.streamManager.getNodeDataOffset(particleNode) + 4, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+						parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode) + 4, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 					}
 				}
 				else
 				{
 					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
-					parameter.streamManager.activateVertexBuffer(index, parameter.streamManager.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+					parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 				}
 			}
 		}

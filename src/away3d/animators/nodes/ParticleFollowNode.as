@@ -6,7 +6,7 @@ package away3d.animators.nodes
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleFollowingItem;
 	import away3d.animators.data.ParticleParameter;
-	import away3d.animators.data.ParticleStreamManager;
+	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.states.ParticleFollowState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -38,29 +38,29 @@ package away3d.animators.nodes
 			this._rotation = rotation;
 		}
 		
-		override public function procressExtraData(param:ParticleParameter, streamManager:ParticleStreamManager, numVertex:int):void
+		override public function procressExtraData(param:ParticleParameter, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
 		{
 			
-			var stroage:FollowStorage = streamManager.extraStorage[this];
-			if (!stroage)
+			var storage:FollowStorage = animationSubGeometry.extraStorage[this];
+			if (!storage)
 			{
-				stroage = streamManager.extraStorage[this] = new FollowStorage;
+				storage = animationSubGeometry.extraStorage[this] = new FollowStorage;
 				if (needOffset && needRotate)
-					stroage.initData(streamManager.numVertices, 6);
+					storage.initData(animationSubGeometry.numVertices, 6);
 				else
-					stroage.initData(streamManager.numVertices, 3);
+					storage.initData(animationSubGeometry.numVertices, 3);
 			}
 			var item:ParticleFollowingItem = new ParticleFollowingItem();
 			item.startTime = param.startTime;
 			item.lifeTime = param.sleepTime + param.duringTime;
 			item.numVertex = numVertex;
-			var len:uint = stroage.itemList.length;
+			var len:uint = storage.itemList.length;
 			if (len > 0)
 			{
-				var lastItem:ParticleFollowingItem = stroage.itemList[len - 1];
+				var lastItem:ParticleFollowingItem = storage.itemList[len - 1];
 				item.startIndex = lastItem.startIndex + lastItem.numVertex;
 			}
-			stroage.itemList.push(item);
+			storage.itemList.push(item);
 		}
 		
 		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache):String

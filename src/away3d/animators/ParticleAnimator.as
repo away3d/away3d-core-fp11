@@ -3,7 +3,7 @@ package away3d.animators
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleRenderParameter;
-	import away3d.animators.data.ParticleStreamManager;
+	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.states.ParticleStateBase;
 	import away3d.arcane;
@@ -63,13 +63,13 @@ package away3d.animators
 				_particleAnimationSet.generateStreamData(subMesh.parentMesh);
 			}
 			
-			var streamManager:ParticleStreamManager = _particleAnimationSet.streamDatas[subMesh.parentMesh.geometry][subMesh.subGeometry];
+			var animationSubGeometry:AnimationSubGeometry = _particleAnimationSet.streamDatas[subMesh.parentMesh.geometry][subMesh.subGeometry];
 			
 			_renderParameter.animationRegisterCache = animationRegisterCache;
 			_renderParameter.camera = camera;
 			_renderParameter.sharedSetting = sharedSetting;
 			_renderParameter.stage3DProxy = stage3DProxy;
-			_renderParameter.streamManager = streamManager;
+			_renderParameter.animationSubGeometry = animationSubGeometry;
 			_renderParameter.renderable = renderable;
 			for each (var state:ParticleStateBase in _allParticleStates)
 			{

@@ -40,7 +40,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter):void
 		{
-			var stroage:FollowStorage = parameter.streamManager.extraStorage[particleNode];
+			var stroage:FollowStorage = parameter.animationSubGeometry.extraStorage[particleNode];
 			
 			if (_followTarget)
 			{

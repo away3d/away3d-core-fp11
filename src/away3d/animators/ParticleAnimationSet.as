@@ -3,7 +3,7 @@ package away3d.animators
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
-	import away3d.animators.data.ParticleStreamManager;
+	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.LocalParticleNodeBase;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleTimeNode;
@@ -256,15 +256,15 @@ package away3d.animators
 				throw(new Error("It must be IParticleSubGeometry"));
 			
 			var i:int;
-			var streamManager:ParticleStreamManager;
+			var animationSubGeometry:AnimationSubGeometry;
 			for (i = 0; i < mesh.subMeshes.length; i++)
 			{
-				streamManager = sharedData[subGeometries[i]] = new ParticleStreamManager();
+				animationSubGeometry = sharedData[subGeometries[i]] = new AnimationSubGeometry();
 				for each(var node:LocalParticleNodeBase in _localNodes)
 				{
-					streamManager.applyData(node.dataLength, node);
+					animationSubGeometry.applyData(node.dataLength, node);
 				}
-				streamManager.setVertexNum(subGeometries[i].numVertices);
+				animationSubGeometry.setVertexNum(subGeometries[i].numVertices);
 			}
 				
 			var numParticles:uint = firstSubGeometry.particles.length;
@@ -300,11 +300,11 @@ package away3d.animators
 						continue;
 					var otherSubGeometry:IParticleSubGeometry = IParticleSubGeometry(subGeometries[k]);
 					var particle:ParticleData = otherSubGeometry.particles[cursors[k]];
-					streamManager = sharedData[otherSubGeometry];
+					animationSubGeometry = sharedData[otherSubGeometry];
 					var numVertex:uint = particle.numVertices;
-					var targetData:Vector.<Number> = streamManager.vertexData;
-					var totalLenOfOneVertex:int = streamManager.totalLenOfOneVertex;
-					var initedOffset:int = streamManager.numInitedVertices * totalLenOfOneVertex;;
+					var targetData:Vector.<Number> = animationSubGeometry.vertexData;
+					var totalLenOfOneVertex:int = animationSubGeometry.totalLenOfOneVertex;
+					var initedOffset:int = animationSubGeometry.numInitedVertices * totalLenOfOneVertex;;
 					var oneDataLen:int;
 					var oneDataOffset:int;
 					var counterForVertex:int;
@@ -317,7 +317,7 @@ package away3d.animators
 						{
 							oneData = _localNodes[j].oneData;
 							oneDataLen = _localNodes[j].dataLength;
-							oneDataOffset = streamManager.getNodeDataOffset(_localNodes[j]);
+							oneDataOffset = animationSubGeometry.getNodeDataOffset(_localNodes[j]);
 							for (counterForVertex = 0; counterForVertex < numVertex; counterForVertex++)
 							{
 								for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
@@ -325,9 +325,9 @@ package away3d.animators
 									targetData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
 								}
 							}
-							_localNodes[j].procressExtraData(param, streamManager, numVertex);
+							_localNodes[j].procressExtraData(param, animationSubGeometry, numVertex);
 						}
-						streamManager.numInitedVertices += numVertex;
+						animationSubGeometry.numInitedVertices += numVertex;
 						
 						cursors[k]++;
 						if (cursors[k] == otherSubGeometry.particles.length)

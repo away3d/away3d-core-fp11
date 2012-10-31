@@ -10,7 +10,7 @@ package away3d.animators.data
 	public class ParticleRenderParameter
 	{
 		public var stage3DProxy : Stage3DProxy;
-		public var streamManager : ParticleStreamManager;
+		public var animationSubGeometry : AnimationSubGeometry;
 		public var sharedSetting:ParticleAnimationSetting;
 		public var animationRegisterCache:AnimationRegisterCache;
 		public var camera:Camera3D;
