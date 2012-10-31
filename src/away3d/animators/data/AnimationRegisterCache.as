@@ -49,7 +49,12 @@ package away3d.animators.data
 		
 		private var indexDictionary:Dictionary = new Dictionary(true);
 		
-		public var sharedSetting:ParticleAnimationSetting;
+		//set true if has an node which will change UV
+		public var hasUVNode:Boolean;
+		//set true if has an node which will change color
+		public var hasColorNode:Boolean;
+		//set if the other nodes need to access the velocity
+		public var needVelocity:Boolean;
 		
 		
 		public function AnimationRegisterCache()
@@ -81,7 +86,7 @@ package away3d.animators.data
 			vertexOneConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "y");
 			vertexTwoConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "z");
 			
-			if (needFragmentAnimation && sharedSetting.hasColorNode)
+			if (needFragmentAnimation && hasColorNode)
 			{
 				fragmentZeroConst = getFreeFragmentConstant();
 				fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
@@ -98,7 +103,7 @@ package away3d.animators.data
 			addVertexTempUsages(offsetTarget, 1);
 			offsetTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xyz");
 
-			if (sharedSetting.needVelocity)
+			if (needVelocity)
 			{
 				velocityTarget = getFreeVertexVectorTemp();
 				addVertexTempUsages(velocityTarget, 1);
@@ -153,11 +158,11 @@ package away3d.animators.data
 			
 			code += "mov " + offsetTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			
-			if (sharedSetting.needVelocity)
+			if (needVelocity)
 			{
 				code += "mov " + velocityTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			}
-			if (needFragmentAnimation&&sharedSetting.hasColorNode)
+			if (needFragmentAnimation&&hasColorNode)
 			{
 				code += "mov " + varyTime.toString() + ".zw," + vertexZeroConst.toString() + "\n";
 			}

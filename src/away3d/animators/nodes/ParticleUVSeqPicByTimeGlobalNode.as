@@ -2,7 +2,6 @@ package away3d.animators.nodes
 {
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleUVSeqPicByTimeGlobalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -86,13 +85,13 @@ package away3d.animators.nodes
 			_data = Vector.<Number>([uSpeed, uStep, vStep, _cycle, _startTime, endThreshold, 0, 0]);
 		}
 		
-		override public function processAnimationSetting(setting:ParticleAnimationSetting):void
+		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
 		{
-			setting.hasUVNode = true;
+			particleAnimationSet.hasUVNode = true;
 		}
 		
 		
-		override public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			//get 2 vc
 			var uvParamConst1:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();

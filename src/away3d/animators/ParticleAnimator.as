@@ -1,7 +1,6 @@
 package away3d.animators
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleRenderParameter;
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.ParticleNodeBase;
@@ -51,7 +50,6 @@ package away3d.animators
 		
 		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
-			var sharedSetting:ParticleAnimationSetting = _particleAnimationSet.sharedSetting;
 			var animationRegisterCache:AnimationRegisterCache = _particleAnimationSet.animationRegisterCache;
 			
 			var subMesh:SubMesh = renderable as SubMesh;
@@ -67,7 +65,6 @@ package away3d.animators
 			
 			_renderParameter.animationRegisterCache = animationRegisterCache;
 			_renderParameter.camera = camera;
-			_renderParameter.sharedSetting = sharedSetting;
 			_renderParameter.stage3DProxy = stage3DProxy;
 			_renderParameter.animationSubGeometry = animationSubGeometry;
 			_renderParameter.renderable = renderable;

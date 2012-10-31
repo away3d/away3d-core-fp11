@@ -1,7 +1,7 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleColorByLifeGlobalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -45,9 +45,9 @@ package away3d.animators.nodes
 			reset();
 		}
 		
-		override public function processAnimationSetting(setting:ParticleAnimationSetting):void
+		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
 		{
-			setting.hasColorNode = true;
+			particleAnimationSet.hasColorNode = true;
 		}
 		
 		private function reset():void
@@ -104,9 +104,9 @@ package away3d.animators.nodes
 		}
 		
 		
-		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			if (animationRegisterCache.needFragmentAnimation && sharedSetting.hasColorNode)
+			if (animationRegisterCache.needFragmentAnimation && animationRegisterCache.hasColorNode)
 			{
 				if (_hasMult)
 				{

@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleTimeState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -96,7 +95,7 @@ package away3d.animators.nodes
 			
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var timeStreamRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();//timeStreamRegister.x is start，timeStreamRegister.y is during time
 			animationRegisterCache.setRegisterIndex(this, TIME_STREAM_REGISTER, timeStreamRegister.index);
@@ -137,7 +136,7 @@ package away3d.animators.nodes
 				}
 			}
 			code += "mul " + animationRegisterCache.vertexLife.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + timeStreamRegister.toString() + ".w\n";
-			if (animationRegisterCache.needFragmentAnimation && sharedSetting.hasColorNode)
+			if (animationRegisterCache.needFragmentAnimation && animationRegisterCache.hasColorNode)
 			{
 				code += "mov " + animationRegisterCache.fragmentTime.toString() + "," + animationRegisterCache.vertexTime.toString() +"\n";
 				code += "mov " + animationRegisterCache.fragmentLife.toString() + "," + animationRegisterCache.vertexLife.toString() +"\n";
