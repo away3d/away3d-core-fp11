@@ -76,10 +76,10 @@ package away3d.animators
 				state.setRenderState(_renderParameter);
 			}
 			
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, activatedCompiler.vertexConstantOffset, activatedCompiler.vertexConstantData, activatedCompiler.usedVertexConstant);
-			if (activatedCompiler.usedFragmentConstant > 0)
+			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, activatedCompiler.vertexConstantOffset, activatedCompiler.vertexConstantData, activatedCompiler.numVertexConstant);
+			if (activatedCompiler.numFragmentConstant > 0)
 			{
-				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, activatedCompiler.fragmentConstantOffset, activatedCompiler.fragmentConstantData, activatedCompiler.usedFragmentConstant);
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, activatedCompiler.fragmentConstantOffset, activatedCompiler.fragmentConstantData, activatedCompiler.numFragmentConstant);
 			}
 		}
 		

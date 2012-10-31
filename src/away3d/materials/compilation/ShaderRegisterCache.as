@@ -13,15 +13,15 @@ package away3d.materials.compilation
 		private var _vertexConstantsCache : RegisterPool;
 		private var _textureCache : RegisterPool;
 		private var _vertexAttributesCache : RegisterPool;
-		private var _vertexConstantOffset : uint;
+		protected var _vertexConstantOffset : uint;
 		private var _vertexAttributesOffset : uint;
 		private var _varyingsOffset : uint;
-		private var _fragmentConstantOffset : uint;
+		protected var _fragmentConstantOffset : uint;
 
 		private var _fragmentOutputRegister : ShaderRegisterElement;
 		private var _vertexOutputRegister : ShaderRegisterElement;
-		private var _numUsedVertexConstants : uint;
-		private var _numUsedFragmentConstants : uint;
+		protected var _numUsedVertexConstants : uint;
+		protected var _numUsedFragmentConstants : uint;
 		private var _numUsedStreams : uint;
 		private var _numUsedTextures : uint;
 		private var _numUsedVaryings : uint;

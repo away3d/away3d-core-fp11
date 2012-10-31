@@ -121,8 +121,8 @@ package away3d.animators
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
 			var context : Context3D = stage3DProxy.context3D;
-			var offset:int = _activatedCompiler.shaderRegisterCache.vertexAttributesOffset;
-			var used:int = _activatedCompiler.shaderRegisterCache.numUsedStreams;
+			var offset:int = _activatedCompiler.vertexAttributesOffset;
+			var used:int = _activatedCompiler.numUsedStreams;
 			for (var i:int = offset; i < used; i++)
 				context.setVertexBufferAt(i, null);
 		}
@@ -132,17 +132,16 @@ package away3d.animators
 		{
 			_activatedCompiler = compilers[pass] ||= new ParticleAnimationCompiler();
 			
-			var shaderRegisterCache:ShaderRegisterCache = _activatedCompiler.shaderRegisterCache;
-			shaderRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
-			shaderRegisterCache.vertexAttributesOffset = pass.numUsedStreams;
-			shaderRegisterCache.varyingsOffset = pass.numUsedVaryings;
-			shaderRegisterCache.fragmentConstantOffset = pass.numUsedFragmentConstants;
-			shaderRegisterCache.reset();
+			_activatedCompiler.vertexConstantOffset = pass.numUsedVertexConstants;
+			_activatedCompiler.vertexAttributesOffset = pass.numUsedStreams;
+			_activatedCompiler.varyingsOffset = pass.numUsedVaryings;
+			_activatedCompiler.fragmentConstantOffset = pass.numUsedFragmentConstants;
+			_activatedCompiler.sharedSetting = _sharedSetting;
 			_activatedCompiler.sourceRegisters = sourceRegisters;
 			_activatedCompiler.targetRegisters = targetRegisters;
 			_activatedCompiler.needFragmentAnimation = pass.needFragmentAnimation;
 			_activatedCompiler.needUVAnimation = pass.needUVAnimation;
-			_activatedCompiler.reset(_sharedSetting);
+			_activatedCompiler.reset();
 		}
 
 		
@@ -211,12 +210,11 @@ package away3d.animators
 		
 		override public function doneAGALCode(pass : MaterialPassBase):void
 		{
-			var shaderRegisterCache:ShaderRegisterCache = _activatedCompiler.shaderRegisterCache;
-			_activatedCompiler.setDataLength(shaderRegisterCache.numUsedVertexConstants, shaderRegisterCache.vertexConstantOffset, shaderRegisterCache.numUsedFragmentConstants, shaderRegisterCache.fragmentConstantOffset);
+			_activatedCompiler.setDataLength();
 			
 			//set vertexZeroConst,vertexOneConst,vertexTwoConst
 			_activatedCompiler.setVertexConst(_activatedCompiler.vertexZeroConst.index, 0, 1, 2, 0);
-			if (_activatedCompiler.usedFragmentConstant > 0)
+			if (_activatedCompiler.numFragmentConstant > 0)
 			{
 				//set fragmentZeroConst,fragmentOneConst
 				_activatedCompiler.setFragmentConst(_activatedCompiler.fragmentZeroConst.index, 0, 1, 1 / 255, 0);
