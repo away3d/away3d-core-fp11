@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleVelocityLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -34,7 +33,7 @@ package away3d.animators.nodes
 			_oneData[2] = _tempVelocity.z;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			
 			var distance:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
@@ -46,7 +45,7 @@ package away3d.animators.nodes
 			var code:String = "";
 			code += "mul " + distance.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
 			code += "add " + animationRegisterCache.offsetTarget.toString() +"," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + "\n";
-			if (sharedSetting.needVelocity)
+			if (animationRegisterCache.needVelocity)
 			{
 				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + animationRegisterCache.velocityTarget.toString() + "\n";
 			}

@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleDriftLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -38,7 +37,7 @@ package away3d.animators.nodes
 		}
 		
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var driftAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, DRIFT_STREAM_REGISTER, driftAttribute.index);
@@ -57,7 +56,7 @@ package away3d.animators.nodes
 			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
 			code += "add " + animationRegisterCache.offsetTarget.toString() +"," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + "\n";
 			
-			if (sharedSetting.needVelocity)
+			if (animationRegisterCache.needVelocity)
 			{	code += "cos " + cos.toString() + "," + dgree.toString() + "\n";
 				code += "mul " + distance.toString() + "," + cos.toString() + "," + driftAttribute.toString() + ".xyz\n";
 				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + distance.toString() + "," + animationRegisterCache.velocityTarget.toString() + ".xyz\n";

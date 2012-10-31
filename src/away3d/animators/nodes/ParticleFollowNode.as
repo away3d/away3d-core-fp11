@@ -3,7 +3,6 @@ package away3d.animators.nodes
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.FollowStorage;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleFollowingItem;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.data.AnimationSubGeometry;
@@ -63,7 +62,7 @@ package away3d.animators.nodes
 			storage.itemList.push(item);
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache):String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
 			var code:String = "";
 			if (_rotation)

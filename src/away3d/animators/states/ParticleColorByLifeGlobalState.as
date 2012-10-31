@@ -21,7 +21,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
-			if (parameter.sharedSetting.hasColorNode && parameter.animationRegisterCache.needFragmentAnimation)
+			if (parameter.animationRegisterCache.hasColorNode && parameter.animationRegisterCache.needFragmentAnimation)
 			{
 				var index:int;
 				var data:Vector.<Number>;

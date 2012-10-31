@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleFreeColorLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -80,7 +79,7 @@ package away3d.animators.nodes
 			
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var code:String = "";
 			if (animationRegisterCache.needFragmentAnimation)
@@ -107,7 +106,7 @@ package away3d.animators.nodes
 			return code;
 		}
 		
-		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			
 			var code:String = "";

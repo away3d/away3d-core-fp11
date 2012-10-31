@@ -2,7 +2,6 @@ package away3d.animators
 {
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.LocalParticleNodeBase;
@@ -37,11 +36,14 @@ package away3d.animators
 		
 		private var _localNodes:Vector.<LocalParticleNodeBase> = new Vector.<LocalParticleNodeBase>();
 		
-		
-		private var _sharedSetting:ParticleAnimationSetting = new ParticleAnimationSetting;
-		
 		private var _streamDatas:Dictionary = new Dictionary(true);
 		
+		//set true if has an node which will change UV
+		public var hasUVNode:Boolean;
+		//set true if has an node which will change color
+		public var hasColorNode:Boolean;
+		//set if the other nodes need to access the velocity
+		public var needVelocity:Boolean;
 		
 		//all other nodes dependent on it
 		private var timeNode:ParticleTimeNode;
@@ -58,11 +60,6 @@ package away3d.animators
 		public function get particleNodes():Vector.<ParticleNodeBase>
 		{
 			return _particleNodes;
-		}
-		
-		public function get sharedSetting():ParticleAnimationSetting
-		{
-			return _sharedSetting;
 		}
 		
 		public function get animationRegisterCache():AnimationRegisterCache
@@ -100,7 +97,7 @@ package away3d.animators
 		{
 			var i:int;
 			var n:ParticleNodeBase = node as ParticleNodeBase;
-			n.processAnimationSetting(_sharedSetting);
+			n.processAnimationSetting(this);
 			if (n.nodeType==ParticleNodeBase.LOCAL)
 				_localNodes.push(n);
 			
@@ -139,7 +136,9 @@ package away3d.animators
 			_animationRegisterCache.vertexAttributesOffset = pass.numUsedStreams;
 			_animationRegisterCache.varyingsOffset = pass.numUsedVaryings;
 			_animationRegisterCache.fragmentConstantOffset = pass.numUsedFragmentConstants;
-			_animationRegisterCache.sharedSetting = _sharedSetting;
+			_animationRegisterCache.hasUVNode = hasUVNode;
+			_animationRegisterCache.hasColorNode = hasColorNode;
+			_animationRegisterCache.needVelocity = needVelocity;
 			_animationRegisterCache.sourceRegisters = sourceRegisters;
 			_animationRegisterCache.targetRegisters = targetRegisters;
 			_animationRegisterCache.needFragmentAnimation = pass.needFragmentAnimation;
@@ -162,7 +161,7 @@ package away3d.animators
 			{
 				if (node.priority < POST_PRIORITY)
 				{
-					code += node.getAGALVertexCode(pass, _sharedSetting, _animationRegisterCache);
+					code += node.getAGALVertexCode(pass, _animationRegisterCache);
 				}
 			}
 			code += _animationRegisterCache.getCombinationCode();
@@ -171,7 +170,7 @@ package away3d.animators
 			{
 				if (node.priority >= POST_PRIORITY)
 				{
-					code += node.getAGALVertexCode(pass, _sharedSetting, _animationRegisterCache);
+					code += node.getAGALVertexCode(pass, _animationRegisterCache);
 				}
 			}
 			
@@ -181,14 +180,14 @@ package away3d.animators
 		override public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
 		{
 			var code:String = "";
-			if (sharedSetting.hasUVNode)
+			if (hasUVNode)
 			{
 				_animationRegisterCache.setUVSourceAndTarget(UVSource, UVTarget);
 				code += "mov " + _animationRegisterCache.uvTarget.toString() + "," + _animationRegisterCache.uvAttribute.toString() + "\n";
 				var node:ParticleNodeBase;
 				for each(node in _particleNodes)
 				{
-					code += node.getAGALUVCode(pass, _sharedSetting, _animationRegisterCache);
+					code += node.getAGALUVCode(pass, _animationRegisterCache);
 				}
 				code += "mov " + _animationRegisterCache.uvVar.toString() + "," + _animationRegisterCache.uvTarget.toString() + "\n";
 			}
@@ -206,7 +205,7 @@ package away3d.animators
 			var node:ParticleNodeBase;
 			for each(node in _particleNodes)
 			{
-				code += node.getAGALFragmentCode(pass, _sharedSetting, _animationRegisterCache);
+				code += node.getAGALFragmentCode(pass, _animationRegisterCache);
 			}
 			return code;
 		}

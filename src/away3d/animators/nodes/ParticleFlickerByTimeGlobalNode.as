@@ -1,7 +1,7 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleFlickerByTimeGlobalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -60,9 +60,9 @@ package away3d.animators.nodes
 			_cycleData = Vector.<Number>([Math.PI * 2 / _cycle, _phaseAngle * Math.PI / 180, 0, 0]);
 		}
 		
-		override public function processAnimationSetting(setting:ParticleAnimationSetting):void
+		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
 		{
-			setting.hasColorNode = true;
+			particleAnimationSet.hasColorNode = true;
 		}
 		
 		public function get needMultiple():Boolean
@@ -138,7 +138,7 @@ package away3d.animators.nodes
 			return _phaseAngle;
 		}
 		
-		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache):String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
 			var code:String = "";
 			if (animationRegisterCache.needFragmentAnimation)

@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleBezierCurveByLifeGlobalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -45,7 +44,7 @@ package away3d.animators.nodes
 			_endPoint = value;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var _controlConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, BEZIER_CONSTANT_REGISTER, _controlConst.index);
@@ -71,7 +70,7 @@ package away3d.animators.nodes
 			code += "mul " + distance.toString() + "," + time_2.toString() +"," + _endConst.toString() + "\n";
 			code += "add " + animationRegisterCache.offsetTarget.toString() +".xyz," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + ".xyz\n";
 			
-			if (sharedSetting.needVelocity)
+			if (animationRegisterCache.needVelocity)
 			{
 				code += "mul " + time_2.toString() + "," + animationRegisterCache.vertexLife.toString() + "," + animationRegisterCache.vertexTwoConst.toString() + "\n";
 				code += "sub " + time_temp.toString() + "," + animationRegisterCache.vertexOneConst.toString() + "," + time_2.toString() + "\n";

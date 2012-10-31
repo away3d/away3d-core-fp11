@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleAccelerateLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -35,7 +34,7 @@ package away3d.animators.nodes
 			_oneData[2] = _tempAccelerate.z / 2;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var accAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, ACCELERATELOCAL_STREAM_REGISTER, accAttribute.index);
@@ -46,7 +45,7 @@ package away3d.animators.nodes
 			
 			var code:String = "mul " + temp.toString() +"," + animationRegisterCache.vertexTime.toString() + "," + accAttribute.toString() + "\n";
 			
-			if (sharedSetting.needVelocity)
+			if (animationRegisterCache.needVelocity)
 			{
 				var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				code += "mul " + temp2.toString() + "," + temp.toString() + "," + animationRegisterCache.vertexTwoConst.toString() + "\n";

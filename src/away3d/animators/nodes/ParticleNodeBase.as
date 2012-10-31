@@ -1,7 +1,7 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -37,22 +37,22 @@ package away3d.animators.nodes
 			return _priority;
 		}
 		
-		public function processAnimationSetting(setting:ParticleAnimationSetting):void
+		public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
 		{
 			
 		}
 		
-		public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			return "";
 		}
 		
-		public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		public function getAGALFragmentCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			return "";
 		}
 		
-		public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache):String
+		public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
 			return "";
 		}

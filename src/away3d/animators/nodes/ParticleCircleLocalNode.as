@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleCircleLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -70,7 +69,7 @@ package away3d.animators.nodes
 			_oneData[2] = temp.x * Math.PI * 2;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			
 			var circleAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
@@ -103,7 +102,7 @@ package away3d.animators.nodes
 			code += "m44 " + distance.toString() + "," + distance.toString() + "," +eulersMatrixRegister.toString() + "\n";
 			code += "add " + animationRegisterCache.offsetTarget.toString() + ".xyz," + distance.toString() + ".xyz," + animationRegisterCache.offsetTarget.toString() + ".xyz\n";
 			
-			if (sharedSetting.needVelocity)
+			if (animationRegisterCache.needVelocity)
 			{
 				code += "neg " + distance.toString() + ".x," + sin.toString() + "\n";
 				code += "mov " + distance.toString() + ".y," + cos.toString() + "\n";

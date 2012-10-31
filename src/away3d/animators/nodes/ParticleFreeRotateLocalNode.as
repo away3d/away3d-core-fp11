@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleFreeRotateLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -37,7 +36,7 @@ package away3d.animators.nodes
 			_oneData[3] = Math.PI / rotate.w;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var roatateAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, ROTATE_STREAM_REGISTER, roatateAttribute.index);
