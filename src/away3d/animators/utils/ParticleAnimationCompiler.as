@@ -14,7 +14,7 @@ package away3d.animators.utils
 		public var positionAttribute:ShaderRegisterElement;
 		public var uvAttribute:ShaderRegisterElement;
 		public var offsetTarget:ShaderRegisterElement;
-		public var scaleAndRotateTarget:ShaderRegisterElement
+		public var scaleAndRotateTarget:ShaderRegisterElement;
 		public var velocityTarget:ShaderRegisterElement;
 		public var vertexTime:ShaderRegisterElement;
 		public var vertexLife:ShaderRegisterElement;

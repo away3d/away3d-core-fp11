@@ -86,7 +86,7 @@ package away3d.animators.nodes
 		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
 		{
 			_tempStartTime = param.startTime;
-			_tempDuringTime = param.duringTime
+			_tempDuringTime = param.duringTime;
 			_tempSleepTime = param.sleepTime;
 			
 			_oneData[0] = _tempStartTime;

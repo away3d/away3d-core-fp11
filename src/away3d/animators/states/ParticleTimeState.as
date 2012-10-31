@@ -5,7 +5,6 @@ package away3d.animators.states
 	import away3d.animators.nodes.ParticleTimeNode;
 	import away3d.animators.ParticleAnimator;
 	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.display3D.VertexBuffer3D;
 	/**
 	 * ...
 	 */

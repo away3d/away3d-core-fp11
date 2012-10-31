@@ -7,11 +7,9 @@ package away3d.animators
 	import away3d.animators.data.ParticleStreamManager;
 	import away3d.animators.IAnimator;
 	import away3d.animators.nodes.ParticleNodeBase;
-	import away3d.animators.nodes.ParticleTimeNode;
 	import away3d.animators.states.ParticleStateBase;
 	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.cameras.Camera3D;
-	import away3d.core.base.IParticleSubGeometry;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;

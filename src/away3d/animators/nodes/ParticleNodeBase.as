@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -18,7 +17,6 @@ package away3d.animators.nodes
 		
 		private var _nodeType:int;
 		private var _priority:int;
-		private var _animation:ParticleAnimationSet;
 		protected var _nodeName:String;
 		
 		protected var _dataLenght:uint = 3;

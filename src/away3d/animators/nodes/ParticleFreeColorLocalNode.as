@@ -113,7 +113,7 @@ package away3d.animators.nodes
 			var code:String = "";
 			if (activatedCompiler.needFragmentAnimation)
 			{
-				var varIndex:int
+				var varIndex:int;
 				if (_hasMult)
 				{
 					varIndex = activatedCompiler.getRegisterIndex(this, COLOR_MULTIPLE_VARYING_REGISTER);
