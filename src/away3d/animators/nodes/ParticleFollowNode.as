@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.FollowStorage;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleFollowingItem;
+	import away3d.animators.data.ParticleFollowStorage;
 	import away3d.animators.data.ParticleParamter;
 	import away3d.animators.data.ParticleStreamManager;
 	import away3d.animators.ParticleAnimationSet;
@@ -41,10 +41,10 @@ package away3d.animators.nodes
 		override public function procressExtraData(param:ParticleParamter, streamManager:ParticleStreamManager, numVertex:int):void
 		{
 			
-			var stroage:FollowStorage = streamManager.extraStorage[this];
+			var stroage:ParticleFollowStorage = streamManager.extraStorage[this];
 			if (!stroage)
 			{
-				stroage = streamManager.extraStorage[this] = new FollowStorage;
+				stroage = streamManager.extraStorage[this] = new ParticleFollowStorage;
 				if (needOffset && needRotate)
 					stroage.initData(streamManager.numVertices, 6);
 				else

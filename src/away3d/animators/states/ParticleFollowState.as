@@ -1,7 +1,7 @@
 package away3d.animators.states
 {
-	import away3d.animators.data.FollowStorage;
 	import away3d.animators.data.ParticleFollowingItem;
+	import away3d.animators.data.ParticleFollowStream;
 	import away3d.animators.data.ParticleRenderParameter;
 	import away3d.animators.nodes.ParticleFollowNode;
 	import away3d.animators.nodes.ParticleNodeBase;
@@ -10,6 +10,7 @@ package away3d.animators.states
 	import away3d.core.math.MathConsts;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
+	import flash.utils.Dictionary;
 	
 	/**
 	 * ...
@@ -21,6 +22,8 @@ package away3d.animators.states
 		
 		private var _targetPos:Vector3D = new Vector3D;
 		private var _targetEuler:Vector3D = new Vector3D;
+		
+		private var followStreams:Dictionary = new Dictionary(true);
 		
 		public function ParticleFollowState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
@@ -40,7 +43,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter):void
 		{
-			var stroage:FollowStorage = parameter.streamManager.extraStorage[particleNode];
+			var followStream:ParticleFollowStream = followStreams[parameter.renderable] ||= new ParticleFollowStream(parameter.streamManager.extraStorage[particleNode]);
 			
 			if (_followTarget)
 			{
@@ -60,7 +63,7 @@ package away3d.animators.states
 			}
 			
 			var currentTime:Number = _time / 1000;
-			var previousTime:Number = stroage.previousTime;
+			var previousTime:Number = followStream.previousTime;
 			var deltaTime:Number = currentTime - previousTime;
 			
 			var needProcess:Boolean = previousTime != currentTime;
@@ -69,35 +72,35 @@ package away3d.animators.states
 			if (followNode.needOffset && followNode.needRotate)
 			{
 				if (needProcess)
-					processOffsetAndRotation(currentTime, deltaTime, stroage);
+					processOffsetAndRotation(currentTime, deltaTime, followStream);
 				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
-				stroage.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followStream.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
-				stroage.activateVertexBuffer(index, 3, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followStream.activateVertexBuffer(index, 3, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (followNode.needOffset)
 			{
 				if (needProcess)
-					processOffset(currentTime, deltaTime, stroage);
+					processOffset(currentTime, deltaTime, followStream);
 				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
-				stroage.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followStream.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (followNode.needRotate)
 			{
 				if (needProcess)
-					precessRotation(currentTime, deltaTime, stroage);
+					precessRotation(currentTime, deltaTime, followStream);
 				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
-				stroage.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followStream.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			
-			stroage.previousTime = currentTime;
+			followStream.previousTime = currentTime;
 		
 		}
 		
-		private function processOffset(currentTime:Number, deltaTime:Number, stroage:FollowStorage):void
+		private function processOffset(currentTime:Number, deltaTime:Number, followStream:ParticleFollowStream):void
 		{
-			var data:Vector.<ParticleFollowingItem> = stroage.itemList;
-			var vertexData:Vector.<Number> = stroage.vertexData;
+			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
+			var vertexData:Vector.<Number> = followStream.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
@@ -122,14 +125,14 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				stroage.invalidateBuffer();
+				followStream.invalidateBuffer();
 		
 		}
 		
-		private function precessRotation(currentTime:Number, deltaTime:Number, stroage:FollowStorage):void
+		private function precessRotation(currentTime:Number, deltaTime:Number, followStream:ParticleFollowStream):void
 		{
-			var data:Vector.<ParticleFollowingItem> = stroage.itemList;
-			var vertexData:Vector.<Number> = stroage.vertexData;
+			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
+			var vertexData:Vector.<Number> = followStream.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
@@ -154,14 +157,14 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				stroage.invalidateBuffer();
+				followStream.invalidateBuffer();
 		
 		}
 		
-		private function processOffsetAndRotation(currentTime:Number, deltaTime:Number, stroage:FollowStorage):void
+		private function processOffsetAndRotation(currentTime:Number, deltaTime:Number, followStream:ParticleFollowStream):void
 		{
-			var data:Vector.<ParticleFollowingItem> = stroage.itemList;
-			var vertexData:Vector.<Number> = stroage.vertexData;
+			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
+			var vertexData:Vector.<Number> = followStream.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
@@ -188,7 +191,7 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				stroage.invalidateBuffer();
+				followStream.invalidateBuffer();
 		}
 	
 	}
