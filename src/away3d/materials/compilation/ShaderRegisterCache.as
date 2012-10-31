@@ -51,6 +51,7 @@ package away3d.materials.compilation
 			_numUsedStreams = 0;
 			_numUsedTextures = 0;
 			_numUsedVaryings = 0;
+			_numUsedFragmentConstants = 0;
 			var i : int;
 			for (i = 0; i < _vertexAttributesOffset; ++i) getFreeVertexAttribute();
 			for (i = 0; i < _vertexConstantOffset; ++i) getFreeVertexConstant();
