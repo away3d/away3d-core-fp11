@@ -1,9 +1,9 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.ParticleAnimationSet;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleUVDriftGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	
@@ -76,21 +76,21 @@ package away3d.animators.nodes
 		}
 		
 		
-		override public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var uvParamConst:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
-			activatedCompiler.setRegisterIndex(this, UV_CONSTANT_REGISTER, uvParamConst.index);
+			var uvParamConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, UV_CONSTANT_REGISTER, uvParamConst.index);
 	
 			var target:ShaderRegisterElement;
-			if (_axis == U_AXIS) target = new ShaderRegisterElement(activatedCompiler.uvTarget.regName, activatedCompiler.uvTarget.index, "x");
-			else target = new ShaderRegisterElement(activatedCompiler.uvTarget.regName, activatedCompiler.uvTarget.index, "y");
+			if (_axis == U_AXIS) target = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, "x");
+			else target = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, "y");
 			
-			var sin:ShaderRegisterElement = activatedCompiler.getFreeVertexSingleTemp();
+			var sin:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			
 			var code:String = "";
 			
 			if (_isScale) code += "mul " + target.toString() + "," + target.toString() + "," + uvParamConst.toString() + ".y\n";
-			code += "mul " + sin.toString() + "," + activatedCompiler.vertexTime.toString() + "," + uvParamConst.toString() + ".x\n";
+			code += "mul " + sin.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + uvParamConst.toString() + ".x\n";
 			code += "sin " + sin.toString() + "," + sin.toString() + "\n";
 			code += "add " + target.toString() + "," + target.toString() + "," + sin.toString() + "\n";
 			

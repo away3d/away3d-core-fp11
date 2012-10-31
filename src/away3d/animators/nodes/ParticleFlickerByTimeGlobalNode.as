@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleFlickerByTimeGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.ColorTransform;
@@ -138,20 +138,20 @@ package away3d.animators.nodes
 			return _phaseAngle;
 		}
 		
-		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler):String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache):String
 		{
 			var code:String = "";
-			if (activatedCompiler.needFragmentAnimation)
+			if (animationRegisterCache.needFragmentAnimation)
 			{
-				var cycleConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-				activatedCompiler.setRegisterIndex(this, CYCLE_CONSTANT_REGISTER, cycleConst.index);
+				var cycleConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+				animationRegisterCache.setRegisterIndex(this, CYCLE_CONSTANT_REGISTER, cycleConst.index);
 				
-				var temp:ShaderRegisterElement = activatedCompiler.getFreeFragmentVectorTemp();
-				activatedCompiler.addFragmentTempUsages(temp,1);
-				var sin:ShaderRegisterElement = activatedCompiler.getFreeFragmentSingleTemp();
-				activatedCompiler.removeFragmentTempUsage(temp);
+				var temp:ShaderRegisterElement = animationRegisterCache.getFreeFragmentVectorTemp();
+				animationRegisterCache.addFragmentTempUsages(temp,1);
+				var sin:ShaderRegisterElement = animationRegisterCache.getFreeFragmentSingleTemp();
+				animationRegisterCache.removeFragmentTempUsage(temp);
 				
-				code += "mul " + sin.toString() + "," + activatedCompiler.fragmentTime.toString() + "," + cycleConst.toString() + ".x\n";
+				code += "mul " + sin.toString() + "," + animationRegisterCache.fragmentTime.toString() + "," + cycleConst.toString() + ".x\n";
 				if (_hasPhaseAngle)
 				{
 					code += "add " + sin.toString() + "," + sin.toString() + "," + cycleConst.toString() + ".y\n";
@@ -160,25 +160,25 @@ package away3d.animators.nodes
 				
 				if (_hasMult)
 				{
-					var startMultiplierConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					activatedCompiler.setRegisterIndex(this, START_MULTIPLIER_CONSTANT_REGISTER, startMultiplierConst.index);
-					var deltaMultiplierConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					activatedCompiler.setRegisterIndex(this, DELTA_MULTIPLIER_CONSTANT_REGISTER, deltaMultiplierConst.index);
+					var startMultiplierConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_CONSTANT_REGISTER, startMultiplierConst.index);
+					var deltaMultiplierConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_CONSTANT_REGISTER, deltaMultiplierConst.index);
 				
 					code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  sin.toString()+ "\n";
 					code += "add " + temp.toString() + "," + temp.toString() + "," + startMultiplierConst.toString() + "\n";
-					code += "mul " + activatedCompiler.colorTarget.toString() +"," + temp.toString() + "," + activatedCompiler.colorTarget.toString() + "\n";
+					code += "mul " + animationRegisterCache.colorTarget.toString() +"," + temp.toString() + "," + animationRegisterCache.colorTarget.toString() + "\n";
 				}
 				if (_hasOffset)
 				{
-					var startOffsetConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					activatedCompiler.setRegisterIndex(this, START_OFFSET_CONSTANT_REGISTER, startOffsetConst.index);
-					var deltaOffsetConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					activatedCompiler.setRegisterIndex(this, DELTA_OFFSET_CONSTANT_REGISTER, deltaOffsetConst.index);
+					var startOffsetConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, START_OFFSET_CONSTANT_REGISTER, startOffsetConst.index);
+					var deltaOffsetConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_CONSTANT_REGISTER, deltaOffsetConst.index);
 				
 					code += "mul " + temp.toString() + "," + deltaOffsetConst.toString() +"," + sin.toString() + "\n";
 					code += "add " + temp.toString() + "," + temp.toString() +"," + startOffsetConst.toString() + "\n";
-					code += "add " + activatedCompiler.colorTarget.toString() +"," +temp.toString() + "," + activatedCompiler.colorTarget.toString() + "\n";
+					code += "add " + animationRegisterCache.colorTarget.toString() +"," +temp.toString() + "," + animationRegisterCache.colorTarget.toString() + "\n";
 				}
 			}
 			return code;

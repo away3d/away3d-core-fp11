@@ -1,8 +1,7 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
@@ -13,12 +12,11 @@ package away3d.animators.nodes
 	 */
 	public class ParticleNodeBase extends AnimationNodeBase
 	{
-		public static const GLOABE:int = 0;
+		public static const GLOBAL:int = 0;
 		public static const LOCAL:int = 1;
 		
 		private var _nodeType:int;
 		private var _priority:int;
-		private var _animation:ParticleAnimationSet;
 		protected var _nodeName:String;
 		
 		protected var _dataLenght:uint = 3;
@@ -50,17 +48,17 @@ package away3d.animators.nodes
 			
 		}
 		
-		public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			return "";
 		}
 		
-		public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			return "";
 		}
 		
-		public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler):String
+		public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache):String
 		{
 			return "";
 		}
@@ -71,7 +69,7 @@ package away3d.animators.nodes
 		}
 		
 		
-		public function get dataLenght():int
+		public function get dataLength():int
 		{
 			return this._dataLenght;
 		}

@@ -1,24 +1,19 @@
 package away3d.animators
 {
-	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleConstantManager;
 	import away3d.animators.data.ParticleRenderParameter;
-	import away3d.animators.data.ParticleStreamManager;
-	import away3d.animators.IAnimator;
+	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.ParticleNodeBase;
-	import away3d.animators.nodes.ParticleTimeNode;
 	import away3d.animators.states.ParticleStateBase;
-	import away3d.animators.utils.ParticleAnimationCompiler;
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
-	import away3d.core.base.IParticleSubGeometry;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.display3D.Context3DProgramType;
 	
-	import away3d.arcane;
 	use namespace arcane;
 	
 	/**
@@ -57,8 +52,7 @@ package away3d.animators
 		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
 			var sharedSetting:ParticleAnimationSetting = _particleAnimationSet.sharedSetting;
-			var activatedCompiler:ParticleAnimationCompiler = _particleAnimationSet.activatedCompiler;
-			var activatedConstantData:ParticleConstantManager = _particleAnimationSet.activatedConstantData;
+			var animationRegisterCache:AnimationRegisterCache = _particleAnimationSet.animationRegisterCache;
 			
 			var subMesh:SubMesh = renderable as SubMesh;
 			if (!subMesh)
@@ -69,24 +63,23 @@ package away3d.animators
 				_particleAnimationSet.generateStreamData(subMesh.parentMesh);
 			}
 			
-			var streamManager:ParticleStreamManager = _particleAnimationSet.streamDatas[subMesh.parentMesh.geometry][subMesh.subGeometry];
+			var animationSubGeometry:AnimationSubGeometry = _particleAnimationSet.streamDatas[subMesh.parentMesh.geometry][subMesh.subGeometry];
 			
-			_renderParameter.activatedCompiler = activatedCompiler;
+			_renderParameter.animationRegisterCache = animationRegisterCache;
 			_renderParameter.camera = camera;
 			_renderParameter.sharedSetting = sharedSetting;
 			_renderParameter.stage3DProxy = stage3DProxy;
-			_renderParameter.streamManager = streamManager;
-			_renderParameter.constantData = activatedConstantData;
+			_renderParameter.animationSubGeometry = animationSubGeometry;
 			_renderParameter.renderable = renderable;
 			for each (var state:ParticleStateBase in _allParticleStates)
 			{
 				state.setRenderState(_renderParameter);
 			}
 			
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, activatedConstantData.vertexConstantOffset, activatedConstantData.vertexConstantData, activatedConstantData.usedVertexConstant);
-			if (activatedConstantData.usedFragmentConstant > 0)
+			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, animationRegisterCache.vertexConstantOffset, animationRegisterCache.vertexConstantData, animationRegisterCache.numVertexConstant);
+			if (animationRegisterCache.numFragmentConstant > 0)
 			{
-				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, activatedConstantData.fragmentConstantOffset, activatedConstantData.fragmentConstantData, activatedConstantData.usedFragmentConstant);
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegisterCache.fragmentConstantOffset, animationRegisterCache.fragmentConstantData, animationRegisterCache.numFragmentConstant);
 			}
 		}
 		

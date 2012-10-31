@@ -1,18 +1,16 @@
 package away3d.animators
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleConstantManager;
-	import away3d.animators.data.ParticleParamter;
-	import away3d.animators.data.ParticleStreamManager;
-	import away3d.animators.IAnimationSet;
+	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.LocalParticleNodeBase;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleTimeNode;
-	import away3d.animators.utils.ParticleAnimationCompiler;
-	import away3d.cameras.Camera3D;
-	import away3d.core.base.data.ParticleData;
+	import away3d.arcane;
 	import away3d.core.base.IParticleSubGeometry;
 	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.data.ParticleData;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
 	import away3d.materials.compilation.ShaderRegisterCache;
@@ -20,7 +18,6 @@ package away3d.animators
 	import flash.display3D.Context3D;
 	import flash.utils.Dictionary;
 	
-	import away3d.arcane;
 	use namespace arcane;
 	/**
 	 * ...
@@ -33,7 +30,7 @@ package away3d.animators
 		
 		private var compilers:Dictionary = new Dictionary(true);
 		
-		private var _activatedCompiler:ParticleAnimationCompiler;
+		private var _animationRegisterCache:AnimationRegisterCache;
 		
 		private var _particleNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
 		
@@ -41,9 +38,6 @@ package away3d.animators
 		
 		
 		private var _sharedSetting:ParticleAnimationSetting = new ParticleAnimationSetting;
-		
-		private var _constantDatas:Dictionary = new Dictionary(true);
-		private var _activatedConstantData:ParticleConstantManager;
 		
 		private var _streamDatas:Dictionary = new Dictionary(true);
 		
@@ -70,14 +64,9 @@ package away3d.animators
 			return _sharedSetting;
 		}
 		
-		public function get activatedCompiler():ParticleAnimationCompiler
+		public function get animationRegisterCache():AnimationRegisterCache
 		{
-			return _activatedCompiler;
-		}
-		
-		public function get activatedConstantData():ParticleConstantManager
-		{
-			return _activatedConstantData;
+			return _animationRegisterCache;
 		}
 		
 		public function get streamDatas():Dictionary
@@ -127,14 +116,13 @@ package away3d.animators
 		
 		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			_activatedCompiler = compilers[pass];
-			_activatedConstantData = _constantDatas[pass];
+			_animationRegisterCache = compilers[pass];
 		}
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
 			var context : Context3D = stage3DProxy.context3D;
-			var offset:int = _activatedCompiler.shaderRegisterCache.vertexAttributesOffset;
-			var used:int = _activatedCompiler.shaderRegisterCache.numUsedStreams;
+			var offset:int = _animationRegisterCache.vertexAttributesOffset;
+			var used:int = _animationRegisterCache.numUsedStreams;
 			for (var i:int = offset; i < used; i++)
 				context.setVertexBufferAt(i, null);
 		}
@@ -142,20 +130,18 @@ package away3d.animators
 		
 		private function reset(pass:MaterialPassBase, sourceRegisters : Array, targetRegisters : Array):void
 		{
-			_activatedCompiler = compilers[pass] ||= new ParticleAnimationCompiler();
-			_activatedConstantData = _constantDatas[pass] ||= new ParticleConstantManager();
+			_animationRegisterCache = compilers[pass] ||= new AnimationRegisterCache();
 			
-			var shaderRegisterCache:ShaderRegisterCache = _activatedCompiler.shaderRegisterCache;
-			shaderRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
-			shaderRegisterCache.vertexAttributesOffset = pass.numUsedStreams;
-			shaderRegisterCache.varyingsOffset = pass.numUsedVaryings;
-			shaderRegisterCache.fragmentConstantOffset = pass.numUsedFragmentConstants;
-			shaderRegisterCache.reset();
-			_activatedCompiler.sourceRegisters = sourceRegisters;
-			_activatedCompiler.targetRegisters = targetRegisters;
-			_activatedCompiler.needFragmentAnimation = pass.needFragmentAnimation;
-			_activatedCompiler.needUVAnimation = pass.needUVAnimation;
-			_activatedCompiler.reset(_sharedSetting);
+			_animationRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
+			_animationRegisterCache.vertexAttributesOffset = pass.numUsedStreams;
+			_animationRegisterCache.varyingsOffset = pass.numUsedVaryings;
+			_animationRegisterCache.fragmentConstantOffset = pass.numUsedFragmentConstants;
+			_animationRegisterCache.sharedSetting = _sharedSetting;
+			_animationRegisterCache.sourceRegisters = sourceRegisters;
+			_animationRegisterCache.targetRegisters = targetRegisters;
+			_animationRegisterCache.needFragmentAnimation = pass.needFragmentAnimation;
+			_animationRegisterCache.needUVAnimation = pass.needUVAnimation;
+			_animationRegisterCache.reset();
 		}
 
 		
@@ -165,7 +151,7 @@ package away3d.animators
 			
 			var code:String = "";
 			
-			code += _activatedCompiler.getInitCode();
+			code += _animationRegisterCache.getInitCode();
 			
 			
 			var node:ParticleNodeBase;
@@ -173,16 +159,16 @@ package away3d.animators
 			{
 				if (node.priority < POST_PRIORITY)
 				{
-					code += node.getAGALVertexCode(pass, _sharedSetting, _activatedCompiler);
+					code += node.getAGALVertexCode(pass, _sharedSetting, _animationRegisterCache);
 				}
 			}
-			code += _activatedCompiler.getCombinationCode();
+			code += _animationRegisterCache.getCombinationCode();
 			
 			for each(node in _particleNodes)
 			{
 				if (node.priority >= POST_PRIORITY)
 				{
-					code += node.getAGALVertexCode(pass, _sharedSetting, _activatedCompiler);
+					code += node.getAGALVertexCode(pass, _sharedSetting, _animationRegisterCache);
 				}
 			}
 			
@@ -194,14 +180,14 @@ package away3d.animators
 			var code:String = "";
 			if (sharedSetting.hasUVNode)
 			{
-				_activatedCompiler.setUVSourceAndTarget(UVSource, UVTarget);
-				code += "mov " + _activatedCompiler.uvTarget.toString() + "," + _activatedCompiler.uvAttribute.toString() + "\n";
+				_animationRegisterCache.setUVSourceAndTarget(UVSource, UVTarget);
+				code += "mov " + _animationRegisterCache.uvTarget.toString() + "," + _animationRegisterCache.uvAttribute.toString() + "\n";
 				var node:ParticleNodeBase;
 				for each(node in _particleNodes)
 				{
-					code += node.getAGALUVCode(pass, _sharedSetting, _activatedCompiler);
+					code += node.getAGALUVCode(pass, _sharedSetting, _animationRegisterCache);
 				}
-				code += "mov " + _activatedCompiler.uvVar.toString() + "," + _activatedCompiler.uvTarget.toString() + "\n";
+				code += "mov " + _animationRegisterCache.uvVar.toString() + "," + _animationRegisterCache.uvTarget.toString() + "\n";
 			}
 			else
 			{
@@ -212,27 +198,26 @@ package away3d.animators
 		
 		override public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
 		{
-			_activatedCompiler.setShadedTarget(shadedTarget);
+			_animationRegisterCache.setShadedTarget(shadedTarget);
 			var code:String = "";
 			var node:ParticleNodeBase;
 			for each(node in _particleNodes)
 			{
-				code += node.getAGALFragmentCode(pass, _sharedSetting, _activatedCompiler);
+				code += node.getAGALFragmentCode(pass, _sharedSetting, _animationRegisterCache);
 			}
 			return code;
 		}
 		
 		override public function doneAGALCode(pass : MaterialPassBase):void
 		{
-			var shaderRegisterCache:ShaderRegisterCache = _activatedCompiler.shaderRegisterCache;
-			_activatedConstantData.setDataLength(shaderRegisterCache.numUsedVertexConstants, shaderRegisterCache.vertexConstantOffset, shaderRegisterCache.numUsedFragmentConstants, shaderRegisterCache.fragmentConstantOffset);
+			_animationRegisterCache.setDataLength();
 			
 			//set vertexZeroConst,vertexOneConst,vertexTwoConst
-			_activatedConstantData.setVertexConst(_activatedCompiler.vertexZeroConst.index, 0, 1, 2, 0);
-			if (_activatedConstantData.usedFragmentConstant > 0)
+			_animationRegisterCache.setVertexConst(_animationRegisterCache.vertexZeroConst.index, 0, 1, 2, 0);
+			if (_animationRegisterCache.numFragmentConstant > 0)
 			{
 				//set fragmentZeroConst,fragmentOneConst
-				_activatedConstantData.setFragmentConst(_activatedCompiler.fragmentZeroConst.index, 0, 1, 1 / 255, 0);
+				_animationRegisterCache.setFragmentConst(_animationRegisterCache.fragmentZeroConst.index, 0, 1, 1 / 255, 0);
 			}
 		}
 		
@@ -271,22 +256,22 @@ package away3d.animators
 				throw(new Error("It must be IParticleSubGeometry"));
 			
 			var i:int;
-			var streamManager:ParticleStreamManager;
+			var animationSubGeometry:AnimationSubGeometry;
 			for (i = 0; i < mesh.subMeshes.length; i++)
 			{
-				streamManager = sharedData[subGeometries[i]] = new ParticleStreamManager();
+				animationSubGeometry = sharedData[subGeometries[i]] = new AnimationSubGeometry();
 				for each(var node:LocalParticleNodeBase in _localNodes)
 				{
-					streamManager.applyData(node.dataLenght, node);
+					animationSubGeometry.applyData(node.dataLength, node);
 				}
-				streamManager.setVertexNum(subGeometries[i].numVertices);
+				animationSubGeometry.setVertexNum(subGeometries[i].numVertices);
 			}
 				
 			var numParticles:uint = firstSubGeometry.particles.length;
 			var numCursors:uint = subGeometries.length;
 			var cursors:Vector.<int> = new Vector.<int>(numCursors, true);
 			var finished:int;
-			var param:ParticleParamter = new ParticleParamter();
+			var param:ParticleParameter = new ParticleParameter();
 			param.total = numParticles;
 			//default value
 			param.startTime = 0;
@@ -306,7 +291,7 @@ package away3d.animators
 				
 				for (j = 0; j < len; j++)
 				{
-					_localNodes[j].generatePorpertyOfOneParticle(param);
+					_localNodes[j].generatePropertyOfOneParticle(param);
 				}
 				
 				for (var k:int = 0; k < numCursors; k++)
@@ -315,11 +300,11 @@ package away3d.animators
 						continue;
 					var otherSubGeometry:IParticleSubGeometry = IParticleSubGeometry(subGeometries[k]);
 					var particle:ParticleData = otherSubGeometry.particles[cursors[k]];
-					streamManager = sharedData[otherSubGeometry];
+					animationSubGeometry = sharedData[otherSubGeometry];
 					var numVertex:uint = particle.numVertices;
-					var targetData:Vector.<Number> = streamManager.vertexData;
-					var totalLenOfOneVertex:int = streamManager.totalLenOfOneVertex;
-					var initedOffset:int = streamManager.numInitedVertices * totalLenOfOneVertex;;
+					var targetData:Vector.<Number> = animationSubGeometry.vertexData;
+					var totalLenOfOneVertex:int = animationSubGeometry.totalLenOfOneVertex;
+					var initedOffset:int = animationSubGeometry.numInitedVertices * totalLenOfOneVertex;;
 					var oneDataLen:int;
 					var oneDataOffset:int;
 					var counterForVertex:int;
@@ -331,8 +316,8 @@ package away3d.animators
 						for (j = 0; j < len; j++)
 						{
 							oneData = _localNodes[j].oneData;
-							oneDataLen = _localNodes[j].dataLenght;
-							oneDataOffset = streamManager.getNodeDataOffset(_localNodes[j]);
+							oneDataLen = _localNodes[j].dataLength;
+							oneDataOffset = animationSubGeometry.getNodeDataOffset(_localNodes[j]);
 							for (counterForVertex = 0; counterForVertex < numVertex; counterForVertex++)
 							{
 								for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
@@ -340,9 +325,9 @@ package away3d.animators
 									targetData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
 								}
 							}
-							_localNodes[j].procressExtraData(param, streamManager, numVertex);
+							_localNodes[j].procressExtraData(param, animationSubGeometry, numVertex);
 						}
-						streamManager.numInitedVertices += numVertex;
+						animationSubGeometry.numInitedVertices += numVertex;
 						
 						cursors[k]++;
 						if (cursors[k] == otherSubGeometry.particles.length)

@@ -1,7 +1,7 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticleParamter;
-	import away3d.animators.data.ParticleStreamManager;
+	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.AnimationSubGeometry;
 	import flash.display3D.Context3D;
 	import flash.display3D.VertexBuffer3D;
 	
@@ -24,7 +24,7 @@ package away3d.animators.nodes
 			super(name, ParticleNodeBase.LOCAL, priority);
 		}
 		
-		public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			
 		}
@@ -35,7 +35,7 @@ package away3d.animators.nodes
 		}
 		
 		//give a chance to lookup paramters other nodes generated
-		public function procressExtraData(param:ParticleParamter, streamManager:ParticleStreamManager, numVertex:int):void
+		public function procressExtraData(param:ParticleParameter, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
 		{
 			
 		}

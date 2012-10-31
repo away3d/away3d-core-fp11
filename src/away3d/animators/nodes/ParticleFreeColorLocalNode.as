@@ -1,9 +1,9 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleFreeColorLocalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.ColorTransform;
@@ -51,7 +51,7 @@ package away3d.animators.nodes
 			return _hasOffset;
 		}
 		
-		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			var colorTransform:ColorTransform = param[NAME];
 			if (!colorTransform)
@@ -80,26 +80,26 @@ package away3d.animators.nodes
 			
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var code:String = "";
-			if (activatedCompiler.needFragmentAnimation)
+			if (animationRegisterCache.needFragmentAnimation)
 			{
 				if (_hasMult)
 				{
-					var multiplierAtt:ShaderRegisterElement = activatedCompiler.getFreeVertexAttribute();
-					activatedCompiler.setRegisterIndex(this, COLOR_MULTIPLE_STREAM_REGISTER, multiplierAtt.index);
-					var multiplierVary:ShaderRegisterElement = activatedCompiler.getFreeVarying();
-					activatedCompiler.setRegisterIndex(this, COLOR_MULTIPLE_VARYING_REGISTER, multiplierVary.index);
+					var multiplierAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+					animationRegisterCache.setRegisterIndex(this, COLOR_MULTIPLE_STREAM_REGISTER, multiplierAtt.index);
+					var multiplierVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
+					animationRegisterCache.setRegisterIndex(this, COLOR_MULTIPLE_VARYING_REGISTER, multiplierVary.index);
 					
 					code += "mov " + multiplierVary.toString() + "," + multiplierAtt.toString() + "\n";
 				}
 				if (_hasOffset)
 				{
-					var offsetAtt:ShaderRegisterElement = activatedCompiler.getFreeVertexAttribute();
-					activatedCompiler.setRegisterIndex(this, COLOR_OFFSET_STREAM_REGISTER, offsetAtt.index);
-					var offsetVary:ShaderRegisterElement = activatedCompiler.getFreeVarying();
-					activatedCompiler.setRegisterIndex(this, COLOR_OFFSET_VARYING_REGISTER, offsetVary.index);
+					var offsetAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+					animationRegisterCache.setRegisterIndex(this, COLOR_OFFSET_STREAM_REGISTER, offsetAtt.index);
+					var offsetVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
+					animationRegisterCache.setRegisterIndex(this, COLOR_OFFSET_VARYING_REGISTER, offsetVary.index);
 					
 					code += "mov " + offsetVary.toString() + "," + offsetAtt.toString() + "\n";
 				}
@@ -107,24 +107,24 @@ package away3d.animators.nodes
 			return code;
 		}
 		
-		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			
 			var code:String = "";
-			if (activatedCompiler.needFragmentAnimation)
+			if (animationRegisterCache.needFragmentAnimation)
 			{
-				var varIndex:int
+				var varIndex:int;
 				if (_hasMult)
 				{
-					varIndex = activatedCompiler.getRegisterIndex(this, COLOR_MULTIPLE_VARYING_REGISTER);
+					varIndex = animationRegisterCache.getRegisterIndex(this, COLOR_MULTIPLE_VARYING_REGISTER);
 					var multiplierVary:ShaderRegisterElement = new ShaderRegisterElement("v", varIndex);
-					code += "mul " + activatedCompiler.colorTarget.toString() +"," + multiplierVary.toString() + "," + activatedCompiler.colorTarget.toString() + "\n";
+					code += "mul " + animationRegisterCache.colorTarget.toString() +"," + multiplierVary.toString() + "," + animationRegisterCache.colorTarget.toString() + "\n";
 				}
 				if (_hasOffset)
 				{
-					varIndex = activatedCompiler.getRegisterIndex(this, COLOR_OFFSET_VARYING_REGISTER);
+					varIndex = animationRegisterCache.getRegisterIndex(this, COLOR_OFFSET_VARYING_REGISTER);
 					var offsetVary:ShaderRegisterElement = new ShaderRegisterElement("v", varIndex);
-					code += "add " + activatedCompiler.colorTarget.toString() +"," +offsetVary.toString() + "," + activatedCompiler.colorTarget.toString() + "\n";
+					code += "add " + animationRegisterCache.colorTarget.toString() +"," +offsetVary.toString() + "," + animationRegisterCache.colorTarget.toString() + "\n";
 				}
 			}
 			return code;

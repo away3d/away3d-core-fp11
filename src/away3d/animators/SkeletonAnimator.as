@@ -254,9 +254,9 @@ package away3d.animators
 			var ox : Number, oy : Number, oz : Number, ow : Number;
 			var xy2 : Number, xz2 : Number, xw2 : Number;
 			var yz2 : Number, yw2 : Number, zw2 : Number;
-			var n11 : Number, n12 : Number, n13 : Number, n14 : Number;
-			var n21 : Number, n22 : Number, n23 : Number, n24 : Number;
-			var n31 : Number, n32 : Number, n33 : Number, n34 : Number;
+			var n11 : Number, n12 : Number, n13 : Number;
+			var n21 : Number, n22 : Number, n23 : Number;
+			var n31 : Number, n32 : Number, n33 : Number;
 			var m11 : Number, m12 : Number, m13 : Number, m14 : Number;
 			var m21 : Number, m22 : Number, m23 : Number, m24 : Number;
 			var m31 : Number, m32 : Number, m33 : Number, m34 : Number;

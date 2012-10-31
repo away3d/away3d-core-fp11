@@ -22,12 +22,12 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter):void
 		{
-			if (parameter.activatedCompiler.needUVAnimation)
+			if (parameter.animationRegisterCache.needUVAnimation)
 			{
-				var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
+				var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
 				var data:Vector.<Number> = uvNode.renderData;
-				parameter.constantData.setVertexConst(index, data[0], data[1], data[2], data[3]);
-				parameter.constantData.setVertexConst(index + 1, data[4], data[5]);
+				parameter.animationRegisterCache.setVertexConst(index, data[0], data[1], data[2], data[3]);
+				parameter.animationRegisterCache.setVertexConst(index + 1, data[4], data[5]);
 			}
 		}
 	

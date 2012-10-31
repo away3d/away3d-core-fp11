@@ -20,11 +20,11 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
-			var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleCircleLocalNode.CIRCLE_STREAM_REGISTER);
-			parameter.streamManager.activateVertexBuffer(index, parameter.streamManager.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleCircleLocalNode.CIRCLE_STREAM_REGISTER);
+			parameter.animationSubGeometry.activateVertexBuffer(index, parameter.animationSubGeometry.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			
-			index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleCircleLocalNode.EULERS_CONSTANT_REGISTER);
-			parameter.constantData.setVertexConstFromMatrix(index, circleNode.eulersMatrix);
+			index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleCircleLocalNode.EULERS_CONSTANT_REGISTER);
+			parameter.animationRegisterCache.setVertexConstFromMatrix(index, circleNode.eulersMatrix);
 		}
 	}
 

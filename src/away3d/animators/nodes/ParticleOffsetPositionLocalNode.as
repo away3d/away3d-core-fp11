@@ -1,9 +1,9 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleOffsetPositionLocalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.Vector3D;
@@ -25,7 +25,7 @@ package away3d.animators.nodes
 			initOneData();
 		}
 		
-		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			var offset:Vector3D = param[NAME];
 			if (!offset) throw(new Error("there is no " + NAME + " in param!"));
@@ -35,11 +35,11 @@ package away3d.animators.nodes
 			_oneData[2] = offset.z;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var offsetAttribute:ShaderRegisterElement = activatedCompiler.getFreeVertexAttribute();
-			activatedCompiler.setRegisterIndex(this, OFFSET_STREAM_REGISTER, offsetAttribute.index);
-			return "add " + activatedCompiler.offsetTarget.toString() +"," + offsetAttribute.toString() + ".xyz," + activatedCompiler.offsetTarget.toString() + "\n";
+			var offsetAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+			animationRegisterCache.setRegisterIndex(this, OFFSET_STREAM_REGISTER, offsetAttribute.index);
+			return "add " + animationRegisterCache.offsetTarget.toString() +"," + offsetAttribute.toString() + ".xyz," + animationRegisterCache.offsetTarget.toString() + "\n";
 		}
 		
 	}

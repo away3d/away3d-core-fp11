@@ -1,9 +1,9 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleDriftLocalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.Vector3D;
@@ -24,7 +24,7 @@ package away3d.animators.nodes
 			initOneData();
 		}
 		
-		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			//(Vector3D.x,Vector3D.y,Vector3D.z) is drift position,Vector3D.w is drift cycle
 			var drift:Vector3D = param[NAME];
@@ -38,29 +38,29 @@ package away3d.animators.nodes
 		}
 		
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var driftAttribute:ShaderRegisterElement = activatedCompiler.getFreeVertexAttribute();
-			activatedCompiler.setRegisterIndex(this, DRIFT_STREAM_REGISTER, driftAttribute.index);
-			var temp:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+			var driftAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+			animationRegisterCache.setRegisterIndex(this, DRIFT_STREAM_REGISTER, driftAttribute.index);
+			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
 			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
 			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
-			activatedCompiler.addVertexTempUsages(temp, 1);
-			var temp2:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+			animationRegisterCache.addVertexTempUsages(temp, 1);
+			var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "xyz");
-			activatedCompiler.removeVertexTempUsage(temp);
+			animationRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "mul " + dgree.toString() + "," + activatedCompiler.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
+			code += "mul " + dgree.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
 			code += "sin " + sin.toString() + "," + dgree.toString() + "\n";
 			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
-			code += "add " + activatedCompiler.offsetTarget.toString() +"," + distance.toString() + "," + activatedCompiler.offsetTarget.toString() + "\n";
+			code += "add " + animationRegisterCache.offsetTarget.toString() +"," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + "\n";
 			
 			if (sharedSetting.needVelocity)
 			{	code += "cos " + cos.toString() + "," + dgree.toString() + "\n";
 				code += "mul " + distance.toString() + "," + cos.toString() + "," + driftAttribute.toString() + ".xyz\n";
-				code += "add " + activatedCompiler.velocityTarget.toString() + ".xyz," + distance.toString() + "," + activatedCompiler.velocityTarget.toString() + ".xyz\n";
+				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + distance.toString() + "," + animationRegisterCache.velocityTarget.toString() + ".xyz\n";
 			}
 			
 			return code;

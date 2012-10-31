@@ -1,20 +1,20 @@
-package away3d.animators.utils
+package away3d.animators.data
 {
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
+	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
 	/**
 	 * ...
 	 * @author Cheng Liao
 	 */
-	public class ParticleAnimationCompiler
+	public class AnimationRegisterCache extends ShaderRegisterCache
 	{
 		//vertex
 		public var positionAttribute:ShaderRegisterElement;
 		public var uvAttribute:ShaderRegisterElement;
 		public var offsetTarget:ShaderRegisterElement;
-		public var scaleAndRotateTarget:ShaderRegisterElement
+		public var scaleAndRotateTarget:ShaderRegisterElement;
 		public var velocityTarget:ShaderRegisterElement;
 		public var vertexTime:ShaderRegisterElement;
 		public var vertexLife:ShaderRegisterElement;
@@ -40,9 +40,6 @@ package away3d.animators.utils
 		public var rotationRegisters:Array;
 		
 		
-		public var shaderRegisterCache:ShaderRegisterCache = new ShaderRegisterCache();
-		
-		
 		
 		public var needFragmentAnimation:Boolean;
 		public var needUVAnimation:Boolean;
@@ -52,66 +49,67 @@ package away3d.animators.utils
 		
 		private var indexDictionary:Dictionary = new Dictionary(true);
 		
-		private var _sharedSetting:ParticleAnimationSetting;
+		public var sharedSetting:ParticleAnimationSetting;
 		
 		
-		public function ParticleAnimationCompiler()
+		public function AnimationRegisterCache()
 		{
 			
 		}
 		
-		public function reset(sharedSetting:ParticleAnimationSetting):void
+		override public function reset():void
 		{
-			this._sharedSetting = sharedSetting;
+			super.reset();
+			
 			rotationRegisters = [];
 			positionAttribute = getRegisterFromString(sourceRegisters[0]);
 			scaleAndRotateTarget = getRegisterFromString(targetRegisters[0]);
-			shaderRegisterCache.addVertexTempUsages(scaleAndRotateTarget, 1);
+			addVertexTempUsages(scaleAndRotateTarget, 1);
 			
 			for (var i:int = 1; i < targetRegisters.length; i++)
 			{
 				rotationRegisters.push(getRegisterFromString(targetRegisters[i]));
-				shaderRegisterCache.addVertexTempUsages(rotationRegisters[i - 1], 1);
+				addVertexTempUsages(rotationRegisters[i - 1], 1);
 			}
 			
 			scaleAndRotateTarget = new ShaderRegisterElement(scaleAndRotateTarget.regName, scaleAndRotateTarget.index, "xyz");//only use xyz, w is used as vertexLife
 
 			//allot const register
 			
-			vertexZeroConst = shaderRegisterCache.getFreeVertexConstant();
+			vertexZeroConst = getFreeVertexConstant();
 			vertexZeroConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "x");
 			vertexOneConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "y");
 			vertexTwoConst = new ShaderRegisterElement(vertexZeroConst.regName, vertexZeroConst.index, "z");
 			
-			if (needFragmentAnimation && _sharedSetting.hasColorNode)
+			if (needFragmentAnimation && sharedSetting.hasColorNode)
 			{
-				fragmentZeroConst = shaderRegisterCache.getFreeFragmentConstant();
+				fragmentZeroConst = getFreeFragmentConstant();
 				fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
 				fragmentOneConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "y");
 				fragmentMinConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "z");
 				
-				varyTime = shaderRegisterCache.getFreeVarying();
+				varyTime = getFreeVarying();
 				fragmentTime = new ShaderRegisterElement(varyTime.regName, varyTime.index, "x");
 				fragmentLife = new ShaderRegisterElement(varyTime.regName, varyTime.index, "y");
 			}
 
 			//allot temp register
-			offsetTarget = shaderRegisterCache.getFreeVertexVectorTemp();
-			shaderRegisterCache.addVertexTempUsages(offsetTarget, 1);
+			offsetTarget = getFreeVertexVectorTemp();
+			addVertexTempUsages(offsetTarget, 1);
 			offsetTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xyz");
 
-			if (_sharedSetting.needVelocity)
+			if (sharedSetting.needVelocity)
 			{
-				velocityTarget = shaderRegisterCache.getFreeVertexVectorTemp();
-				shaderRegisterCache.addVertexTempUsages(velocityTarget, 1);
+				velocityTarget = getFreeVertexVectorTemp();
+				addVertexTempUsages(velocityTarget, 1);
 				velocityTarget = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "xyz");
 				vertexTime = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "w");
 				vertexLife = new ShaderRegisterElement(offsetTarget.regName, velocityTarget.index, "w");
 			}
 			else
 			{
-				var tempTime:ShaderRegisterElement = shaderRegisterCache.getFreeVertexVectorTemp();
-				shaderRegisterCache.addVertexTempUsages(tempTime, 1);
+				var tempTime:ShaderRegisterElement = getFreeVertexVectorTemp();
+				addVertexTempUsages(tempTime, 1);
 				vertexTime = new ShaderRegisterElement(tempTime.regName, tempTime.index, "x");
 				vertexLife = new ShaderRegisterElement(tempTime.regName, tempTime.index, "y");
 			}
@@ -121,7 +119,7 @@ package away3d.animators.utils
 		public function setShadedTarget(shadedTarget:String):void
 		{
 			colorTarget = getRegisterFromString(shadedTarget);
-			shaderRegisterCache.addFragmentTempUsages(colorTarget,1);
+			addFragmentTempUsages(colorTarget,1);
 		}
 		
 		public function setUVSourceAndTarget(UVAttribute : String, UVVaring:String):void
@@ -155,11 +153,11 @@ package away3d.animators.utils
 			
 			code += "mov " + offsetTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			
-			if (_sharedSetting.needVelocity)
+			if (sharedSetting.needVelocity)
 			{
 				code += "mov " + velocityTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			}
-			if (needFragmentAnimation&&_sharedSetting.hasColorNode)
+			if (needFragmentAnimation&&sharedSetting.hasColorNode)
 			{
 				code += "mov " + varyTime.toString() + ".zw," + vertexZeroConst.toString() + "\n";
 			}
@@ -172,60 +170,73 @@ package away3d.animators.utils
 			return "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offsetTarget.toString() + "\n";
 		}
 		
-		public function getFreeVertexAttribute():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeVertexAttribute();
-		}
-		public function getFreeVertexConstant():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeVertexConstant();
-		}
-		public function getFreeVertexVectorTemp():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeVertexVectorTemp();
-		}
-		public function getFreeVertexSingleTemp():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeVertexSingleTemp();
-		}
-		public function getFreeFragmentVectorTemp():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeFragmentVectorTemp();
-		}
-		public function getFreeFragmentSingleTemp():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeFragmentSingleTemp();
-		}
-		public function getFreeFragmentConstant():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeFragmentConstant();
-		}
-		public function getFreeVarying():ShaderRegisterElement
-		{
-			return shaderRegisterCache.getFreeVarying();
-		}
-		public function addFragmentTempUsages(register:ShaderRegisterElement, usageCount:uint):void
-		{
-			shaderRegisterCache.addFragmentTempUsages(register,usageCount);
-		}
-		public function addVertexTempUsages(register:ShaderRegisterElement, usageCount:uint):void
-		{
-			shaderRegisterCache.addVertexTempUsages(register,usageCount);
-		}
-		public function removeVertexTempUsage(register:ShaderRegisterElement):void
-		{
-			shaderRegisterCache.removeVertexTempUsage(register);
-		}
-		public function removeFragmentTempUsage(register:ShaderRegisterElement):void
-		{
-			shaderRegisterCache.removeFragmentTempUsage(register);
-		}
-		
-		
 		private function getRegisterFromString(code:String):ShaderRegisterElement
 		{
 			var temp:Array = code.split(/(\d+)/);
 			return new ShaderRegisterElement(temp[0], temp[1]);
+		}
+		
+		public var vertexConstantData : Vector.<Number> = new Vector.<Number>();
+		public var fragmentConstantData : Vector.<Number> = new Vector.<Number>();
+		
+		private var _numVertexConstant:int;
+		private var _numFragmentConstant:int;
+		
+		public function get numVertexConstant():int
+		{
+			return _numVertexConstant;
+		}
+		public function get numFragmentConstant():int
+		{
+			return _numFragmentConstant;
+		}
+		
+		public function setDataLength():void
+		{
+			_numVertexConstant = _numUsedVertexConstants - _vertexConstantOffset;
+			_numFragmentConstant = _numUsedFragmentConstants - _fragmentConstantOffset;
+			vertexConstantData.length = _numVertexConstant * 4;
+			fragmentConstantData.length = _numFragmentConstant * 4;
+		}
+		
+		public function setVertexConst(index:int, x:Number = 0, y:Number = 0, z:Number = 0, w:Number = 0):void
+		{
+			var _index:int = (index - _vertexConstantOffset) * 4;
+			vertexConstantData[_index++] = x;
+			vertexConstantData[_index++] = y;
+			vertexConstantData[_index++] = z;
+			vertexConstantData[_index] = w;
+		}
+		
+		public function setVertexConstFromMatrix(index:int, matrix:Matrix3D):void
+		{
+			var rawData:Vector.<Number> = matrix.rawData;
+			var _index:int = (index - _vertexConstantOffset) * 4;
+			vertexConstantData[_index++] = rawData[0];
+			vertexConstantData[_index++] = rawData[4];
+			vertexConstantData[_index++] = rawData[8];
+			vertexConstantData[_index++] = rawData[12];
+			vertexConstantData[_index++] = rawData[1];
+			vertexConstantData[_index++] = rawData[5];
+			vertexConstantData[_index++] = rawData[9];
+			vertexConstantData[_index++] = rawData[13];
+			vertexConstantData[_index++] = rawData[2];
+			vertexConstantData[_index++] = rawData[6];
+			vertexConstantData[_index++] = rawData[10];
+			vertexConstantData[_index++] = rawData[14];
+			vertexConstantData[_index++] = rawData[3];
+			vertexConstantData[_index++] = rawData[7];
+			vertexConstantData[_index++] = rawData[11];
+			vertexConstantData[_index] = rawData[15];
+			
+		}
+		public function setFragmentConst(index:int, x:Number = 0, y:Number = 0, z:Number = 0, w:Number = 0):void
+		{
+			var _index:int = (index - _fragmentConstantOffset) * 4;
+			fragmentConstantData[_index++] = x;
+			fragmentConstantData[_index++] = y;
+			fragmentConstantData[_index++] = z;
+			fragmentConstantData[_index] = w;
 		}
 	}
 

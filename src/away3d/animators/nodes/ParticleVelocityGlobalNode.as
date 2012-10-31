@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleVelocityGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.Vector3D;
@@ -35,18 +35,18 @@ package away3d.animators.nodes
 			_velocity = value.clone();
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var velocityConst:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
-			activatedCompiler.setRegisterIndex(this, VELOCITY_STREAM_REGISTER, velocityConst.index);
+			var velocityConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, VELOCITY_STREAM_REGISTER, velocityConst.index);
 
-			var distance:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+			var distance:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var code:String = "";
-			code += "mul " + distance.toString() + "," + activatedCompiler.vertexTime.toString() + "," + velocityConst.toString() + "\n";
-			code += "add " + activatedCompiler.offsetTarget.toString() +"," + distance.toString() + "," + activatedCompiler.offsetTarget.toString() + "\n";
+			code += "mul " + distance.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + velocityConst.toString() + "\n";
+			code += "add " + animationRegisterCache.offsetTarget.toString() +"," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + "\n";
 			if (sharedSetting.needVelocity)
 			{
-				code += "add " + activatedCompiler.velocityTarget.toString() + ".xyz," + velocityConst.toString() + ".xyz," + activatedCompiler.velocityTarget.toString() + "\n";
+				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + velocityConst.toString() + ".xyz," + animationRegisterCache.velocityTarget.toString() + "\n";
 			}
 			return code;
 		}
