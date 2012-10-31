@@ -1,15 +1,12 @@
 package away3d.animators.nodes
 {
 
-	import away3d.animators.data.ParticleAnimationSetting;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.data.ParticleFollowingItem;
 	import away3d.animators.data.ParticleFollowStorage;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleFollowingItem;
 	import away3d.animators.data.ParticleParameter;
-	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.states.ParticleFollowState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
