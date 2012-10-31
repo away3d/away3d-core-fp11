@@ -368,12 +368,15 @@ package away3d.materials
 					throw new Error("A Material instance cannot be shared across renderables with different animator libraries");
 				}
 				else {
-					_animationSet = owner.animator.animationSet;
-					for (var i : int = 0; i < _numPasses; ++i)
-						_passes[i].animationSet = _animationSet;
-					_depthPass.animationSet = _animationSet;
-					_distancePass.animationSet = _animationSet;
-					invalidatePasses(null);
+					if (_animationSet != owner.animator.animationSet)
+					{
+						_animationSet = owner.animator.animationSet;
+						for (var i : int = 0; i < _numPasses; ++i)
+							_passes[i].animationSet = _animationSet;
+						_depthPass.animationSet = _animationSet;
+						_distancePass.animationSet = _animationSet;
+						invalidatePasses(null);
+					}
 				}
 			}
 		}
