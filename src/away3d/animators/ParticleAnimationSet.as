@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.core.base.ParticleGeometry;
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleParameter;
@@ -8,12 +9,10 @@ package away3d.animators
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleTimeNode;
 	import away3d.arcane;
-	import away3d.core.base.IParticleSubGeometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.data.ParticleData;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
-	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.display3D.Context3D;
 	import flash.utils.Dictionary;
@@ -32,11 +31,11 @@ package away3d.animators
 		
 		private var _animationRegisterCache:AnimationRegisterCache;
 		
+		private var _animationSubGeometries:Dictionary = new Dictionary(true);
+		
 		private var _particleNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
 		
 		private var _localNodes:Vector.<LocalParticleNodeBase> = new Vector.<LocalParticleNodeBase>();
-		
-		private var _streamDatas:Dictionary = new Dictionary(true);
 		
 		//set true if has an node which will change UV
 		public var hasUVNode:Boolean;
@@ -65,11 +64,6 @@ package away3d.animators
 		public function get animationRegisterCache():AnimationRegisterCache
 		{
 			return _animationRegisterCache;
-		}
-		
-		public function get streamDatas():Dictionary
-		{
-			return _streamDatas;
 		}
 		
 		public function set hasDuringTime(value:Boolean):void
@@ -244,106 +238,106 @@ package away3d.animators
 		public function generateStreamData(mesh:Mesh):void
 		{
 			if (_initParticleFunc == null)
-				throw(new Error("no initParticleFunc"));
-				
-			var sharedData:Dictionary;
-			if (_streamDatas[mesh.geometry])
-			{
-				return;
-			}
-			else
-			{
-				sharedData = _streamDatas[mesh.geometry] = new Dictionary(true);
-			}
+				throw(new Error("no initParticleFunc"));			
 			
+			var geometry:ParticleGeometry =  mesh.geometry as ParticleGeometry;
 			
-			var subGeometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
-			var firstSubGeometry:IParticleSubGeometry = subGeometries[0] as IParticleSubGeometry;
-			if (!firstSubGeometry)
-				throw(new Error("It must be IParticleSubGeometry"));
+			if (!geometry)
+				throw(new Error("It must be ParticleGeometry"));
 			
-			var i:int;
+			var i:int, j:int, k:int;
 			var animationSubGeometry:AnimationSubGeometry;
+			var newAnimationSubGeometry:Boolean;
+			var subGeometry:ISubGeometry;
+			
 			for (i = 0; i < mesh.subMeshes.length; i++)
 			{
-				animationSubGeometry = sharedData[subGeometries[i]] = new AnimationSubGeometry();
+				subGeometry = mesh.subMeshes[i].subGeometry;
+				if ((animationSubGeometry = _animationSubGeometries[subGeometry])) {
+					mesh.subMeshes[i].animationSubGeometry = animationSubGeometry;
+					continue;
+				}
+				
+				animationSubGeometry = mesh.subMeshes[i].animationSubGeometry = _animationSubGeometries[subGeometry] = new AnimationSubGeometry();
+				
+				newAnimationSubGeometry = true;
+				
 				for each(var node:LocalParticleNodeBase in _localNodes)
 				{
 					animationSubGeometry.applyData(node.dataLength, node);
 				}
-				animationSubGeometry.setVertexNum(subGeometries[i].numVertices);
+				animationSubGeometry.setVertexNum(subGeometry.numVertices);
 			}
-				
-			var numParticles:uint = firstSubGeometry.particles.length;
-			var numCursors:uint = subGeometries.length;
-			var cursors:Vector.<int> = new Vector.<int>(numCursors, true);
-			var finished:int;
+			
+			if (!newAnimationSubGeometry)
+				return;
+			
+			var particles:Vector.<ParticleData> = geometry.particles;
+			var particlesLength:uint = particles.length;
+			var numParticles:uint = geometry.numParticles;
+			var numNodes:int = _localNodes.length;
 			var param:ParticleParameter = new ParticleParameter();
+			var particle:ParticleData;
+			
+			var oneDataLen:int;
+			var oneDataOffset:int;
+			var counterForVertex:int;
+			var counterForOneData:int;
+			var oneData:Vector.<Number>;
+			var numVertices:uint;
+			var vertexData:Vector.<Number>;
+			var totalLenOfOneVertex:int;
+			var initedOffset:int;
+					
+			//default values for particle param
 			param.total = numParticles;
-			//default value
 			param.startTime = 0;
 			param.duringTime = 1000;
 			param.sleepTime = 0.1;
 			
 			i = 0;
-			
-			while (finished < numCursors)
+			k = 0;
+			while (i < numParticles)
 			{
 				param.index = i;
 				
+				//call the init function on the particle parameters
 				_initParticleFunc(param);
 				
-				var len:int = _localNodes.length;
-				var j:int;
 				
-				for (j = 0; j < len; j++)
-				{
+				//create the next set of node properties for the particle
+				for (j = 0; j < numNodes; j++)
 					_localNodes[j].generatePropertyOfOneParticle(param);
+				
+				while (k < particlesLength && (particle = particles[k]).particleIndex == i) {
+					animationSubGeometry = _animationSubGeometries[particle.subGeometry];
+					numVertices = particle.numVertices;
+					vertexData = animationSubGeometry.vertexData;
+					totalLenOfOneVertex = animationSubGeometry.totalLenOfOneVertex;
+					initedOffset = animationSubGeometry.numInitedVertices * totalLenOfOneVertex;
+					
+					for (j = 0; j < numNodes; j++)
+					{
+					
+						oneData = _localNodes[j].oneData;
+						oneDataLen = _localNodes[j].dataLength;
+						oneDataOffset = animationSubGeometry.getNodeDataOffset(_localNodes[j]);
+						for (counterForVertex = 0; counterForVertex < numVertices; counterForVertex++)
+						{
+							for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
+							{
+								vertexData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
+							}
+						}
+						_localNodes[j].procressExtraData(param, animationSubGeometry, numVertices);
+					}
+					animationSubGeometry.numInitedVertices += numVertices;
+					
+					//next index
+					k++;
 				}
 				
-				for (var k:int = 0; k < numCursors; k++)
-				{
-					if (cursors[k] == -1)
-						continue;
-					var otherSubGeometry:IParticleSubGeometry = IParticleSubGeometry(subGeometries[k]);
-					var particle:ParticleData = otherSubGeometry.particles[cursors[k]];
-					animationSubGeometry = sharedData[otherSubGeometry];
-					var numVertex:uint = particle.numVertices;
-					var targetData:Vector.<Number> = animationSubGeometry.vertexData;
-					var totalLenOfOneVertex:int = animationSubGeometry.totalLenOfOneVertex;
-					var initedOffset:int = animationSubGeometry.numInitedVertices * totalLenOfOneVertex;;
-					var oneDataLen:int;
-					var oneDataOffset:int;
-					var counterForVertex:int;
-					var counterForOneData:int;
-					var oneData:Vector.<Number>;
-					
-					if (i == particle.particleIndex)
-					{
-						for (j = 0; j < len; j++)
-						{
-							oneData = _localNodes[j].oneData;
-							oneDataLen = _localNodes[j].dataLength;
-							oneDataOffset = animationSubGeometry.getNodeDataOffset(_localNodes[j]);
-							for (counterForVertex = 0; counterForVertex < numVertex; counterForVertex++)
-							{
-								for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
-								{
-									targetData[initedOffset + oneDataOffset + totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
-								}
-							}
-							_localNodes[j].procressExtraData(param, animationSubGeometry, numVertex);
-						}
-						animationSubGeometry.numInitedVertices += numVertex;
-						
-						cursors[k]++;
-						if (cursors[k] == otherSubGeometry.particles.length)
-						{
-							cursors[k] = -1;
-							finished++;
-						}
-					}
-				}
+				//next particle
 				i++;
 			}
 			

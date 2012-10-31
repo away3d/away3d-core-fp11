@@ -31,7 +31,7 @@ package away3d.animators.nodes
 		{
 			super(NAME, 0);
 			_stateClass = ParticleTimeState;
-			_dataLenght = 4;
+			_dataLength = 4;
 			initOneData();
 		}
 		

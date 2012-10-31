@@ -20,7 +20,7 @@ package away3d.animators.nodes
 		{
 			super(NAME, 0);
 			_stateClass = ParticleOffsetPositionLocalState;
-			_dataLenght = 3;
+			_dataLength = 3;
 			initOneData();
 		}
 		

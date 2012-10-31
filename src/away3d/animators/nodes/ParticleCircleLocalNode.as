@@ -33,7 +33,7 @@ package away3d.animators.nodes
 			_eulersMatrix.appendRotation(_eulers.z, Vector3D.Z_AXIS);
 			
 			//TODO: If do not need velocity, it can be reduced to 2
-			_dataLenght = 3;
+			_dataLength = 3;
 			initOneData();
 		}
 		

@@ -19,7 +19,7 @@ package away3d.animators.nodes
 		{
 			super(NAME, 0);
 			_stateClass = ParticleDriftLocalState;
-			_dataLenght = 4;
+			_dataLength = 4;
 			initOneData();
 		}
 		

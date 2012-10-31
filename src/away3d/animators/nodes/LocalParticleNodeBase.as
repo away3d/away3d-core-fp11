@@ -43,7 +43,7 @@ package away3d.animators.nodes
 		
 		protected function initOneData():void
 		{
-			_oneData = new Vector.<Number>(_dataLenght, true);
+			_oneData = new Vector.<Number>(_dataLength, true);
 		}
 		
 		

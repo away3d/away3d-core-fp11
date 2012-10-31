@@ -18,7 +18,7 @@ package away3d.animators.nodes
 		private var _nodeType:int;
 		private var _priority:int;
 		
-		protected var _dataLenght:uint = 3;
+		protected var _dataLength:uint = 3;
 				
 		public function ParticleNodeBase(name:String,type:int,priority:int)
 		{
@@ -65,7 +65,7 @@ package away3d.animators.nodes
 		
 		public function get dataLength():int
 		{
-			return this._dataLenght;
+			return _dataLength;
 		}
 		
 	}

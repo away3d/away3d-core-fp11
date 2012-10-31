@@ -19,7 +19,7 @@ package away3d.animators.nodes
 			super(NAME);
 			_stateClass = ParticleBezierCurveByLifeLocalState;
 			
-			_dataLenght = 6;
+			_dataLength = 6;
 			initOneData();
 		}
 		

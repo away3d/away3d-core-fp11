@@ -56,12 +56,12 @@ package away3d.animators
 			if (!subMesh)
 				throw(new Error("Must be subMesh"));
 			
-			if (!_particleAnimationSet.streamDatas[subMesh.parentMesh.geometry])
+			if (!subMesh.animationSubGeometry)
 			{
 				_particleAnimationSet.generateStreamData(subMesh.parentMesh);
 			}
 			
-			var animationSubGeometry:AnimationSubGeometry = _particleAnimationSet.streamDatas[subMesh.parentMesh.geometry][subMesh.subGeometry];
+			var animationSubGeometry:AnimationSubGeometry = subMesh.animationSubGeometry;
 			
 			_renderParameter.animationRegisterCache = animationRegisterCache;
 			_renderParameter.camera = camera;

@@ -31,7 +31,7 @@ package away3d.animators.nodes
 		{
 			super(NAME, ParticleAnimationSet.POST_PRIORITY);
 			_stateClass = ParticleFollowState;
-			_dataLenght = 0;
+			_dataLength = 0;
 			initOneData();
 			
 			this._offset = offset;

@@ -1,6 +1,6 @@
 package away3d.tools.helpers
 {
-	import away3d.core.base.CompactParticleSubGeometry;
+	import away3d.core.base.ParticleGeometry;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.data.ParticleData;
 	import away3d.core.base.Geometry;
@@ -17,135 +17,22 @@ package away3d.tools.helpers
 	{
 		public static const MAX_VERTEX:int = 65535;
 		
-		public static function generateCompactGeometry(geometries:Vector.<Geometry>):Geometry
+		public static function generateGeometry(geometries:Vector.<Geometry>, transforms:Vector.<ParticleGeometryTransform> = null):ParticleGeometry
 		{
-			var _vertexDatas:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>;
-			var _indicesVector:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>;
-			var _vertexCounters:Vector.<uint> = new Vector.<uint>;
-			var _particleDatasVector:Vector.<Vector.<ParticleData>> = new Vector.<Vector.<ParticleData>>;
-			var len:uint = geometries.length;
+			var verticesVector:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>();
+			var indicesVector:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>();
+			var vertexCounters:Vector.<uint> = new Vector.<uint>();
+			var particles:Vector.<ParticleData> = new Vector.<ParticleData>();
+			var subGeometries:Vector.<CompactSubGeometry> = new Vector.<CompactSubGeometry>();
+			var numParticles:uint = geometries.length;
 			
-			var sourceGeometry:Geometry;
 			var sourceSubGeometries:Vector.<ISubGeometry>;
-			var sourceSubGeomerty:ISubGeometry;
-			var numSub:uint;
-			var vertexData:Vector.<Number>;
-			var _indices:Vector.<uint>;
+			var sourceSubGeometry:ISubGeometry;
+			var numSubGeometries:uint;
+			var vertices:Vector.<Number>;
+			var indices:Vector.<uint>;
 			var vertexCounter:uint;
-			var i:int;
-			var j:int;
-			var sub2SubMap:Vector.<int> = new Vector.<int>;
-			for (i = 0; i < len; i++)
-			{
-				sourceSubGeometries = geometries[i].subGeometries;
-				numSub = sourceSubGeometries.length;
-				for (var srcIndex:int = 0; srcIndex < numSub; srcIndex++)
-				{
-					if (sub2SubMap.length <= srcIndex)
-					{
-						sub2SubMap.push(_vertexDatas.length);
-						_vertexDatas.push(new Vector.<Number>);
-						_indicesVector.push(new Vector.<uint>);
-						_particleDatasVector.push(new Vector.<ParticleData>);
-						_vertexCounters.push(0);
-						
-					}
-					j = sub2SubMap[srcIndex];
-
-					
-					sourceSubGeomerty = sourceSubGeometries[srcIndex];
-					
-					if (_particleDatasVector[j].length > 0)
-					{
-						var lastParticleData:ParticleData = _particleDatasVector[j][_particleDatasVector[j].length - 1];
-						if (lastParticleData.numVertices + lastParticleData.startVertexIndex + sourceSubGeomerty.numVertices > MAX_VERTEX)
-						{
-							j = sub2SubMap[srcIndex] = _vertexDatas.length;
-							_vertexDatas.push(new Vector.<Number>);
-							_indicesVector.push(new Vector.<uint>);
-							_particleDatasVector.push(new Vector.<ParticleData>);
-							_vertexCounters.push(0);
-						}
-					}
-					
-					vertexData = _vertexDatas[j];
-					_indices = _indicesVector[j];
-					vertexCounter = _vertexCounters[j];
-					
-					var particleData:ParticleData = new ParticleData;
-					particleData.numVertices = sourceSubGeomerty.numVertices;
-					particleData.numTriangles = sourceSubGeomerty.numTriangles;
-					particleData.startVertexIndex = vertexCounter;
-					particleData.particleIndex = i;
-					_particleDatasVector[j].push(particleData);
-					
-					_vertexCounters[j] += particleData.numVertices;
-					
-					var k:int;
-					var tempLen:int;
-					var compact:CompactSubGeometry = sourceSubGeomerty as CompactSubGeometry;
-					var product:uint;
-					var sourceVertexData:Vector.<Number>;
-					if (compact)
-					{
-						tempLen = compact.numVertices;
-						compact.numTriangles
-						sourceVertexData = compact.vertexData;
-						for (k = 0; k < tempLen; k++)
-						{
-							product = k * 13;
-							//this is faster than that only push one data
-							vertexData.push(sourceVertexData[product], sourceVertexData[product + 1], sourceVertexData[product + 2], sourceVertexData[product + 3],
-											sourceVertexData[product + 4], sourceVertexData[product + 5], sourceVertexData[product + 6], sourceVertexData[product + 7],
-											sourceVertexData[product + 8], sourceVertexData[product + 9], sourceVertexData[product + 10], sourceVertexData[product + 11],
-											sourceVertexData[product + 12]);
-						}
-					}
-					else
-					{
-						//Todo
-					}
-					
-					var sourceIndexices:Vector.<uint> = sourceSubGeomerty.indexData;
-					tempLen = sourceSubGeomerty.numTriangles;
-					for (k = 0; k < tempLen; k++)
-					{
-						product = k * 3;
-						_indices.push(sourceIndexices[product] + vertexCounter, sourceIndexices[product + 1] + vertexCounter, sourceIndexices[product + 2] + vertexCounter);
-					}
-				}
-			}
-			
-			var result:Geometry = new Geometry();
-			var particleSubGeometry:CompactParticleSubGeometry;
-			len = _vertexDatas.length;
-			for (i = 0; i < len; i++)
-			{
-				particleSubGeometry = new CompactParticleSubGeometry();
-				particleSubGeometry.particles = _particleDatasVector[i];
-				particleSubGeometry.updateData(_vertexDatas[i]);
-				particleSubGeometry.updateIndexData(_indicesVector[i]);
-				result.addSubGeometry(particleSubGeometry);
-			}
-			return result;
-		}
-		
-		//for performance, don't combine it with generateCompactGeometry
-		public static function generateCompactGeometryWithTransform(geometries:Vector.<Geometry>,transforms:Vector.<ParticleGeometryTransform>):Geometry
-		{
-			var _vertexDatas:Vector.<Vector.<Number>> = new Vector.<Vector.<Number>>;
-			var _indicesVector:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>;
-			var _vertexCounters:Vector.<uint> = new Vector.<uint>;
-			var _particleDatasVector:Vector.<Vector.<ParticleData>> = new Vector.<Vector.<ParticleData>>;
-			var len:uint = geometries.length;
-			
-			var sourceGeometry:Geometry;
-			var sourceSubGeometries:Vector.<ISubGeometry>;
-			var sourceSubGeomerty:ISubGeometry;
-			var numSub:uint;
-			var vertexData:Vector.<Number>;
-			var _indices:Vector.<uint>;
-			var vertexCounter:uint;
+			var subGeometry:CompactSubGeometry;
 			var i:int;
 			var j:int;
 			var sub2SubMap:Vector.<int> = new Vector.<int>;
@@ -155,101 +42,116 @@ package away3d.tools.helpers
 			var tempTangents:Vector3D = new Vector3D;
 			var tempUV:Point = new Point;
 			
-			for (i = 0; i < len; i++)
+			for (i = 0; i < numParticles; i++)
 			{
 				sourceSubGeometries = geometries[i].subGeometries;
-				numSub = sourceSubGeometries.length;
-				for (var srcIndex:int = 0; srcIndex < numSub; srcIndex++)
+				numSubGeometries = sourceSubGeometries.length;
+				for (var srcIndex:int = 0; srcIndex < numSubGeometries; srcIndex++)
 				{
+					//create a different particle subgeometry group for each source subgeometry in a particle.
 					if (sub2SubMap.length <= srcIndex)
 					{
-						sub2SubMap.push(_vertexDatas.length);
-						_vertexDatas.push(new Vector.<Number>);
-						_indicesVector.push(new Vector.<uint>);
-						_particleDatasVector.push(new Vector.<ParticleData>);
-						_vertexCounters.push(0);
-						
+						sub2SubMap.push(subGeometries.length);
+						verticesVector.push(new Vector.<Number>);
+						indicesVector.push(new Vector.<uint>);
+						subGeometries.push(new CompactSubGeometry());
+						vertexCounters.push(0);
 					}
+					
+					sourceSubGeometry = sourceSubGeometries[srcIndex];
+					
+					//add a new particle subgeometry if this source subgeometry will take us over the maxvertex limit
+					if (sourceSubGeometry.numVertices + vertexCounters[sub2SubMap[srcIndex]] > MAX_VERTEX)
+					{
+						//update submap and add new subgeom vectors
+						sub2SubMap[srcIndex] = subGeometries.length;
+						verticesVector.push(new Vector.<Number>);
+						indicesVector.push(new Vector.<uint>);
+						subGeometries.push(new CompactSubGeometry());
+						vertexCounters.push(0);
+					}
+					
 					j = sub2SubMap[srcIndex];
 					
-					sourceSubGeomerty = sourceSubGeometries[srcIndex];
+					//select the correct vector
+					vertices = verticesVector[j];
+					indices = indicesVector[j];
+					vertexCounter = vertexCounters[j];
+					subGeometry = subGeometries[j];
 					
-					if (_particleDatasVector[j].length > 0)
-					{
-						var lastParticleData:ParticleData = _particleDatasVector[j][_particleDatasVector[j].length - 1];
-						if (lastParticleData.numVertices + lastParticleData.startVertexIndex + sourceSubGeomerty.numVertices > MAX_VERTEX)
-						{
-							j = sub2SubMap[srcIndex] = _vertexDatas.length;
-							_vertexDatas.push(new Vector.<Number>);
-							_indicesVector.push(new Vector.<uint>);
-							_particleDatasVector.push(new Vector.<ParticleData>);
-							_vertexCounters.push(0);
-						}
-					}
-					
-					vertexData = _vertexDatas[j];
-					_indices = _indicesVector[j];
-					vertexCounter = _vertexCounters[j];
-					var particleData:ParticleData = new ParticleData;
-					particleData.numVertices = sourceSubGeomerty.numVertices;
-					particleData.numTriangles = sourceSubGeomerty.numTriangles;
+					var particleData:ParticleData = new ParticleData();
+					particleData.numVertices = sourceSubGeometry.numVertices;
 					particleData.startVertexIndex = vertexCounter;
 					particleData.particleIndex = i;
-					_particleDatasVector[j].push(particleData);
+					particleData.subGeometry = subGeometry;
+					particles.push(particleData);
 					
-					_vertexCounters[j] += particleData.numVertices;
+					vertexCounters[j] += sourceSubGeometry.numVertices;
 					
 					var k:int;
 					var tempLen:int;
-					var compact:CompactSubGeometry = sourceSubGeomerty as CompactSubGeometry;
+					var compact:CompactSubGeometry = sourceSubGeometry as CompactSubGeometry;
 					var product:uint;
-					var sourceVertexData:Vector.<Number>;
-					
-					var particleGeometryTransform:ParticleGeometryTransform = transforms[i];
-					var vertexTransform:Matrix3D = particleGeometryTransform.vertexTransform;
-					var invVertexTransform:Matrix3D = particleGeometryTransform.invVertexTransform;
-					var UVTransform:Matrix = particleGeometryTransform.UVTransform;
+					var sourceVertices:Vector.<Number>;
 					
 					if (compact)
 					{
 						tempLen = compact.numVertices;
-						compact.numTriangles
-						sourceVertexData = compact.vertexData;
-						for (k = 0; k < tempLen; k++)
-						{
-							/*
-							* 0 - 2: vertex position X, Y, Z
-							 * 3 - 5: normal X, Y, Z
-							 * 6 - 8: tangent X, Y, Z
-							 * 9 - 10: U V
-							 * 11 - 12: Secondary U V*/
-							product = k * 13;
-							tempVertex.x = sourceVertexData[product];
-							tempVertex.y = sourceVertexData[product + 1];
-							tempVertex.z = sourceVertexData[product + 2];
-							tempNormal.x = sourceVertexData[product + 3];
-							tempNormal.y = sourceVertexData[product + 4];
-							tempNormal.z = sourceVertexData[product + 5];
-							tempTangents.x = sourceVertexData[product + 6];
-							tempTangents.y = sourceVertexData[product + 7];
-							tempTangents.z = sourceVertexData[product + 8];
-							tempUV.x = sourceVertexData[product + 9];
-							tempUV.y = sourceVertexData[product + 10];
-							if (vertexTransform)
+						compact.numTriangles;
+						sourceVertices = compact.vertexData;
+						
+						if (transforms) {
+							var particleGeometryTransform:ParticleGeometryTransform = transforms[i];
+							var vertexTransform:Matrix3D = particleGeometryTransform.vertexTransform;
+							var invVertexTransform:Matrix3D = particleGeometryTransform.invVertexTransform;
+							var UVTransform:Matrix = particleGeometryTransform.UVTransform;
+							
+							for (k = 0; k < tempLen; k++)
 							{
-								tempVertex = vertexTransform.transformVector(tempVertex);
-								tempNormal = invVertexTransform.deltaTransformVector(tempNormal);
-								tempTangents = invVertexTransform.deltaTransformVector(tempNormal);
+								/*
+								* 0 - 2: vertex position X, Y, Z
+								 * 3 - 5: normal X, Y, Z
+								 * 6 - 8: tangent X, Y, Z
+								 * 9 - 10: U V
+								 * 11 - 12: Secondary U V*/
+								product = k * 13;
+								tempVertex.x = sourceVertices[product];
+								tempVertex.y = sourceVertices[product + 1];
+								tempVertex.z = sourceVertices[product + 2];
+								tempNormal.x = sourceVertices[product + 3];
+								tempNormal.y = sourceVertices[product + 4];
+								tempNormal.z = sourceVertices[product + 5];
+								tempTangents.x = sourceVertices[product + 6];
+								tempTangents.y = sourceVertices[product + 7];
+								tempTangents.z = sourceVertices[product + 8];
+								tempUV.x = sourceVertices[product + 9];
+								tempUV.y = sourceVertices[product + 10];
+								if (vertexTransform)
+								{
+									tempVertex = vertexTransform.transformVector(tempVertex);
+									tempNormal = invVertexTransform.deltaTransformVector(tempNormal);
+									tempTangents = invVertexTransform.deltaTransformVector(tempNormal);
+								}
+								if (UVTransform)
+								{
+									tempUV = UVTransform.transformPoint(tempUV);
+								}
+								//this is faster than that only push one data
+								vertices.push(tempVertex.x, tempVertex.y, tempVertex.z, tempNormal.x,
+												tempNormal.y, tempNormal.z, tempTangents.x, tempTangents.y,
+												tempTangents.z, tempUV.x, tempUV.y, sourceVertices[product + 11],
+												sourceVertices[product + 12]);
 							}
-							if (UVTransform)
+						} else {
+							for (k = 0; k < tempLen; k++)
 							{
-								tempUV = UVTransform.transformPoint(tempUV);
+								product = k * 13;
+								//this is faster than that only push one data
+								vertices.push(sourceVertices[product], sourceVertices[product + 1], sourceVertices[product + 2], sourceVertices[product + 3],
+												sourceVertices[product + 4], sourceVertices[product + 5], sourceVertices[product + 6], sourceVertices[product + 7],
+												sourceVertices[product + 8], sourceVertices[product + 9], sourceVertices[product + 10], sourceVertices[product + 11],
+												sourceVertices[product + 12]);
 							}
-							//this is faster than that only push one data
-							vertexData.push(tempVertex.x, tempVertex.y, tempVertex.z, tempNormal.x,
-											tempNormal.y, tempNormal.z, tempTangents.x, tempTangents.y,
-											tempTangents.z, tempUV.x, tempUV.y, sourceVertexData[product + 11],
-											sourceVertexData[product + 12]);
 						}
 					}
 					else
@@ -257,34 +159,30 @@ package away3d.tools.helpers
 						//Todo
 					}
 					
-					var sourceIndexices:Vector.<uint> = sourceSubGeomerty.indexData;
-					tempLen = sourceSubGeomerty.numTriangles;
+					var sourceIndices:Vector.<uint> = sourceSubGeometry.indexData;
+					tempLen = sourceSubGeometry.numTriangles;
 					for (k = 0; k < tempLen; k++)
 					{
 						product = k * 3;
-						_indices.push(sourceIndexices[product] + vertexCounter, sourceIndexices[product + 1] + vertexCounter, sourceIndexices[product + 2] + vertexCounter);
+						indices.push(sourceIndices[product] + vertexCounter, sourceIndices[product + 1] + vertexCounter, sourceIndices[product + 2] + vertexCounter);
 					}
 				}
 			}
 			
-			var result:Geometry = new Geometry();
-			var particleSubGeometry:CompactParticleSubGeometry;
-			len = _vertexDatas.length;
-			for (i = 0; i < len; i++)
+			var particleGeometry:ParticleGeometry = new ParticleGeometry();
+			particleGeometry.particles = particles;
+			particleGeometry.numParticles = numParticles;
+			
+			numParticles = subGeometries.length;
+			for (i = 0; i < numParticles; i++)
 			{
-				particleSubGeometry = new CompactParticleSubGeometry();
-				particleSubGeometry.particles = _particleDatasVector[i];
-				particleSubGeometry.updateData(_vertexDatas[i]);
-				particleSubGeometry.updateIndexData(_indicesVector[i]);
-				result.addSubGeometry(particleSubGeometry);
+				subGeometry = subGeometries[i];
+				subGeometry.updateData(verticesVector[i]);
+				subGeometry.updateIndexData(indicesVector[i]);
+				particleGeometry.addSubGeometry(subGeometry);
 			}
-			return result;
-		}
-		
-		public static function generateGeometry(geometries:Vector.<Geometry>):Geometry
-		{
-			//TODO
-			return null;
+			
+			return particleGeometry;
 		}
 	}
 

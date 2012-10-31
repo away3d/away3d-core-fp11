@@ -33,9 +33,9 @@ package away3d.animators.nodes
 				throw("no need to use this node");
 				
 			if (_hasMult && _hasOffset)
-				_dataLenght = 8;
+				_dataLength = 8;
 			else
-				_dataLenght = 4;
+				_dataLength = 4;
 				
 			initOneData();
 		}
