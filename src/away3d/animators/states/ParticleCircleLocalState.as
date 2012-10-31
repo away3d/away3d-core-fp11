@@ -24,7 +24,7 @@ package away3d.animators.states
 			parameter.streamManager.activateVertexBuffer(index, parameter.streamManager.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			
 			index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleCircleLocalNode.EULERS_CONSTANT_REGISTER);
-			parameter.constantData.setVertexConstFromMatrix(index, circleNode.eulersMatrix);
+			parameter.activatedCompiler.setVertexConstFromMatrix(index, circleNode.eulersMatrix);
 		}
 	}
 

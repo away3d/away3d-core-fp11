@@ -22,7 +22,7 @@ package away3d.animators.states
 		{
 			var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleAccelerateGlobalNode.ACCELERATE_CONSTANT_REGISTER);
 			var halfAccelerate:Vector3D = accNode.halfAccelerate;
-			parameter.constantData.setVertexConst(index, halfAccelerate.x, halfAccelerate.y, halfAccelerate.z);
+			parameter.activatedCompiler.setVertexConst(index, halfAccelerate.x, halfAccelerate.y, halfAccelerate.z);
 		}
 		
 	}

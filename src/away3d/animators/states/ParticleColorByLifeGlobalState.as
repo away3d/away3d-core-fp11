@@ -29,19 +29,19 @@ package away3d.animators.states
 				{
 					index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_MULTIPLIER_CONSTANT_REGISTER);
 					data = colorNode.startMultiplierData;
-					parameter.constantData.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					parameter.activatedCompiler.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 					index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_MULTIPLIER_CONSTANT_REGISTER);
 					data = colorNode.deltaMultiplierData;
-					parameter.constantData.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					parameter.activatedCompiler.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
 				if (colorNode.needOffset)
 				{
 					index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_OFFSET_CONSTANT_REGISTER);
 					data = colorNode.startOffsetData;
-					parameter.constantData.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					parameter.activatedCompiler.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 					index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_OFFSET_CONSTANT_REGISTER);
 					data = colorNode.deltaOffsetData;
-					parameter.constantData.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					parameter.activatedCompiler.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
 			}
 		}

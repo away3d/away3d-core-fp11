@@ -23,7 +23,7 @@ package away3d.animators.states
 		{
 			var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleScaleByTimeGlobalNode.SCALE_CONSTANT_REGISTER);
 			var data:Vector.<Number> = scaleNode.data;
-			parameter.constantData.setVertexConst(index, data[0], data[1], data[2], data[3]);
+			parameter.activatedCompiler.setVertexConst(index, data[0], data[1], data[2], data[3]);
 		}
 		
 	}

@@ -26,7 +26,7 @@ package away3d.animators.states
 			{
 				var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleUVDriftGlobalNode.UV_CONSTANT_REGISTER);
 				var data:Vector.<Number> = uvDriftNode.renderData;
-				parameter.constantData.setVertexConst(index, data[0], data[1]);
+				parameter.activatedCompiler.setVertexConst(index, data[0], data[1]);
 			}
 		}
 	

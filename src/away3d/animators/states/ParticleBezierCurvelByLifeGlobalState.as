@@ -22,9 +22,9 @@ package away3d.animators.states
 		{
 			var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleBezierCurvelByLifeGlobalNode.BEZIER_CONSTANT_REGISTER);
 			var temp:Vector3D = bzeierNode.controlPoint;
-			parameter.constantData.setVertexConst(index, temp.x, temp.y, temp.z);
+			parameter.activatedCompiler.setVertexConst(index, temp.x, temp.y, temp.z);
 			temp = bzeierNode.endPoint;
-			parameter.constantData.setVertexConst(index + 1, temp.x, temp.y, temp.z);
+			parameter.activatedCompiler.setVertexConst(index + 1, temp.x, temp.y, temp.z);
 		}
 		
 	}

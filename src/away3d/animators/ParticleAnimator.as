@@ -1,14 +1,12 @@
 package away3d.animators
 {
-	import away3d.animators.AnimatorBase;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleConstantManager;
 	import away3d.animators.data.ParticleRenderParameter;
 	import away3d.animators.data.ParticleStreamManager;
-	import away3d.animators.IAnimator;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.states.ParticleStateBase;
 	import away3d.animators.utils.ParticleAnimationCompiler;
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.SubMesh;
@@ -16,7 +14,6 @@ package away3d.animators
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.display3D.Context3DProgramType;
 	
-	import away3d.arcane;
 	use namespace arcane;
 	
 	/**
@@ -56,7 +53,6 @@ package away3d.animators
 		{
 			var sharedSetting:ParticleAnimationSetting = _particleAnimationSet.sharedSetting;
 			var activatedCompiler:ParticleAnimationCompiler = _particleAnimationSet.activatedCompiler;
-			var activatedConstantData:ParticleConstantManager = _particleAnimationSet.activatedConstantData;
 			
 			var subMesh:SubMesh = renderable as SubMesh;
 			if (!subMesh)
@@ -74,17 +70,16 @@ package away3d.animators
 			_renderParameter.sharedSetting = sharedSetting;
 			_renderParameter.stage3DProxy = stage3DProxy;
 			_renderParameter.streamManager = streamManager;
-			_renderParameter.constantData = activatedConstantData;
 			_renderParameter.renderable = renderable;
 			for each (var state:ParticleStateBase in _allParticleStates)
 			{
 				state.setRenderState(_renderParameter);
 			}
 			
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, activatedConstantData.vertexConstantOffset, activatedConstantData.vertexConstantData, activatedConstantData.usedVertexConstant);
-			if (activatedConstantData.usedFragmentConstant > 0)
+			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, activatedCompiler.vertexConstantOffset, activatedCompiler.vertexConstantData, activatedCompiler.usedVertexConstant);
+			if (activatedCompiler.usedFragmentConstant > 0)
 			{
-				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, activatedConstantData.fragmentConstantOffset, activatedConstantData.fragmentConstantData, activatedConstantData.usedFragmentConstant);
+				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, activatedCompiler.fragmentConstantOffset, activatedCompiler.fragmentConstantData, activatedCompiler.usedFragmentConstant);
 			}
 		}
 		

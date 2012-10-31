@@ -1,17 +1,16 @@
 package away3d.animators
 {
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleConstantManager;
 	import away3d.animators.data.ParticleParamter;
 	import away3d.animators.data.ParticleStreamManager;
-	import away3d.animators.IAnimationSet;
 	import away3d.animators.nodes.LocalParticleNodeBase;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleTimeNode;
 	import away3d.animators.utils.ParticleAnimationCompiler;
-	import away3d.core.base.data.ParticleData;
+	import away3d.arcane;
 	import away3d.core.base.IParticleSubGeometry;
 	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.data.ParticleData;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Mesh;
 	import away3d.materials.compilation.ShaderRegisterCache;
@@ -19,7 +18,6 @@ package away3d.animators
 	import flash.display3D.Context3D;
 	import flash.utils.Dictionary;
 	
-	import away3d.arcane;
 	use namespace arcane;
 	/**
 	 * ...
@@ -40,9 +38,6 @@ package away3d.animators
 		
 		
 		private var _sharedSetting:ParticleAnimationSetting = new ParticleAnimationSetting;
-		
-		private var _constantDatas:Dictionary = new Dictionary(true);
-		private var _activatedConstantData:ParticleConstantManager;
 		
 		private var _streamDatas:Dictionary = new Dictionary(true);
 		
@@ -72,11 +67,6 @@ package away3d.animators
 		public function get activatedCompiler():ParticleAnimationCompiler
 		{
 			return _activatedCompiler;
-		}
-		
-		public function get activatedConstantData():ParticleConstantManager
-		{
-			return _activatedConstantData;
 		}
 		
 		public function get streamDatas():Dictionary
@@ -127,7 +117,6 @@ package away3d.animators
 		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
 			_activatedCompiler = compilers[pass];
-			_activatedConstantData = _constantDatas[pass];
 		}
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
@@ -142,7 +131,6 @@ package away3d.animators
 		private function reset(pass:MaterialPassBase, sourceRegisters : Array, targetRegisters : Array):void
 		{
 			_activatedCompiler = compilers[pass] ||= new ParticleAnimationCompiler();
-			_activatedConstantData = _constantDatas[pass] ||= new ParticleConstantManager();
 			
 			var shaderRegisterCache:ShaderRegisterCache = _activatedCompiler.shaderRegisterCache;
 			shaderRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
@@ -224,14 +212,14 @@ package away3d.animators
 		override public function doneAGALCode(pass : MaterialPassBase):void
 		{
 			var shaderRegisterCache:ShaderRegisterCache = _activatedCompiler.shaderRegisterCache;
-			_activatedConstantData.setDataLength(shaderRegisterCache.numUsedVertexConstants, shaderRegisterCache.vertexConstantOffset, shaderRegisterCache.numUsedFragmentConstants, shaderRegisterCache.fragmentConstantOffset);
+			_activatedCompiler.setDataLength(shaderRegisterCache.numUsedVertexConstants, shaderRegisterCache.vertexConstantOffset, shaderRegisterCache.numUsedFragmentConstants, shaderRegisterCache.fragmentConstantOffset);
 			
 			//set vertexZeroConst,vertexOneConst,vertexTwoConst
-			_activatedConstantData.setVertexConst(_activatedCompiler.vertexZeroConst.index, 0, 1, 2, 0);
-			if (_activatedConstantData.usedFragmentConstant > 0)
+			_activatedCompiler.setVertexConst(_activatedCompiler.vertexZeroConst.index, 0, 1, 2, 0);
+			if (_activatedCompiler.usedFragmentConstant > 0)
 			{
 				//set fragmentZeroConst,fragmentOneConst
-				_activatedConstantData.setFragmentConst(_activatedCompiler.fragmentZeroConst.index, 0, 1, 1 / 255, 0);
+				_activatedCompiler.setFragmentConst(_activatedCompiler.fragmentZeroConst.index, 0, 1, 1 / 255, 0);
 			}
 		}
 		

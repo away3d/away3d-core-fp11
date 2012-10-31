@@ -15,7 +15,6 @@ package away3d.animators.data
 		public var sharedSetting:ParticleAnimationSetting;
 		public var activatedCompiler:ParticleAnimationCompiler;
 		public var camera:Camera3D;
-		public var constantData:ParticleConstantManager;
 		public var renderable:IRenderable;
 	}
 

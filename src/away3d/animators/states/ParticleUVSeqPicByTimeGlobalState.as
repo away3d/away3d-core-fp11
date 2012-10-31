@@ -26,8 +26,8 @@ package away3d.animators.states
 			{
 				var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
 				var data:Vector.<Number> = uvNode.renderData;
-				parameter.constantData.setVertexConst(index, data[0], data[1], data[2], data[3]);
-				parameter.constantData.setVertexConst(index + 1, data[4], data[5]);
+				parameter.activatedCompiler.setVertexConst(index, data[0], data[1], data[2], data[3]);
+				parameter.activatedCompiler.setVertexConst(index + 1, data[4], data[5]);
 			}
 		}
 	

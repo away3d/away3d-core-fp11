@@ -23,7 +23,7 @@ package away3d.animators.states
 			
 			var particleTime:Number = _time / 1000;
 			index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleTimeNode.TIME_CONSTANT_REGISTER);
-			parameter.constantData.setVertexConst(index, particleTime, particleTime, particleTime, 0);
+			parameter.activatedCompiler.setVertexConst(index, particleTime, particleTime, particleTime, 0);
 		}
 		
 	}
