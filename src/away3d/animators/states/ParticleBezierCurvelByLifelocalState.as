@@ -18,7 +18,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
-			var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleBezierCurvelByLifelocalNode.BEZIER_STREAM_REGISTER);
+			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleBezierCurvelByLifelocalNode.BEZIER_STREAM_REGISTER);
 			parameter.streamManager.activateVertexBuffer(index, parameter.streamManager.getNodeDataOffset(particleNode), parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			parameter.streamManager.activateVertexBuffer(index + 1, parameter.streamManager.getNodeDataOffset(particleNode) + 3, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 		}

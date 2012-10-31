@@ -20,11 +20,11 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
-			var index:int = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleBezierCurvelByLifeGlobalNode.BEZIER_CONSTANT_REGISTER);
+			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleBezierCurvelByLifeGlobalNode.BEZIER_CONSTANT_REGISTER);
 			var temp:Vector3D = bzeierNode.controlPoint;
-			parameter.activatedCompiler.setVertexConst(index, temp.x, temp.y, temp.z);
+			parameter.animationRegisterCache.setVertexConst(index, temp.x, temp.y, temp.z);
 			temp = bzeierNode.endPoint;
-			parameter.activatedCompiler.setVertexConst(index + 1, temp.x, temp.y, temp.z);
+			parameter.animationRegisterCache.setVertexConst(index + 1, temp.x, temp.y, temp.z);
 		}
 		
 	}

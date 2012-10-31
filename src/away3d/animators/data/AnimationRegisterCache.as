@@ -1,15 +1,14 @@
-package away3d.animators.utils
+package away3d.animators.data
 {
-	import flash.geom.Matrix3D;
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
+	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
 	/**
 	 * ...
 	 * @author Cheng Liao
 	 */
-	public class ParticleAnimationCompiler extends ShaderRegisterCache
+	public class AnimationRegisterCache extends ShaderRegisterCache
 	{
 		//vertex
 		public var positionAttribute:ShaderRegisterElement;
@@ -53,7 +52,7 @@ package away3d.animators.utils
 		public var sharedSetting:ParticleAnimationSetting;
 		
 		
-		public function ParticleAnimationCompiler()
+		public function AnimationRegisterCache()
 		{
 			
 		}

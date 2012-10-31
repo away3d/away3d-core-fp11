@@ -1,9 +1,9 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleParamter;
 	import away3d.animators.states.ParticleVelocityLocalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.Vector3D;
@@ -34,21 +34,21 @@ package away3d.animators.nodes
 			_oneData[2] = _tempVelocity.z;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			
-			var distance:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+			var distance:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			distance = new ShaderRegisterElement(distance.regName, distance.index, "xyz");
 			
-			var velocityAttribute:ShaderRegisterElement = activatedCompiler.getFreeVertexAttribute();
-			activatedCompiler.setRegisterIndex(this, VELOCITY_STREAM_REGISTER, velocityAttribute.index);
+			var velocityAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+			animationRegisterCache.setRegisterIndex(this, VELOCITY_STREAM_REGISTER, velocityAttribute.index);
 			
 			var code:String = "";
-			code += "mul " + distance.toString() + "," + activatedCompiler.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
-			code += "add " + activatedCompiler.offsetTarget.toString() +"," + distance.toString() + "," + activatedCompiler.offsetTarget.toString() + "\n";
+			code += "mul " + distance.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + velocityAttribute.toString() + "\n";
+			code += "add " + animationRegisterCache.offsetTarget.toString() +"," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + "\n";
 			if (sharedSetting.needVelocity)
 			{
-				code += "add " + activatedCompiler.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + activatedCompiler.velocityTarget.toString() + "\n";
+				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + velocityAttribute.toString() + ".xyz," + animationRegisterCache.velocityTarget.toString() + "\n";
 			}
 			return code;
 		}

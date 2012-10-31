@@ -70,23 +70,23 @@ package away3d.animators.states
 			{
 				if (needProcess)
 					processOffsetAndRotation(currentTime, deltaTime, stroage);
-				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
+				index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
 				stroage.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
+				index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
 				stroage.activateVertexBuffer(index, 3, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (followNode.needOffset)
 			{
 				if (needProcess)
 					processOffset(currentTime, deltaTime, stroage);
-				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
+				index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
 				stroage.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (followNode.needRotate)
 			{
 				if (needProcess)
 					precessRotation(currentTime, deltaTime, stroage);
-				index = parameter.activatedCompiler.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
+				index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
 				stroage.activateVertexBuffer(index, 0, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			

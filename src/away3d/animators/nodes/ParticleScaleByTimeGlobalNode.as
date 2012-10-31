@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleScaleByTimeGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	/**
@@ -74,20 +74,20 @@ package away3d.animators.nodes
 			_data[3] = Math.PI * 2 / _scaleCycle;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var scaleByTimeConst:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
-			activatedCompiler.setRegisterIndex(this, SCALE_CONSTANT_REGISTER, scaleByTimeConst.index);
+			var scaleByTimeConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, SCALE_CONSTANT_REGISTER, scaleByTimeConst.index);
 			
-			var temp:ShaderRegisterElement = activatedCompiler.getFreeVertexSingleTemp();
+			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			
 			var code:String = "";
-			code += "mul " + temp.toString() + "," + activatedCompiler.vertexTime.toString() + "," + scaleByTimeConst.toString() + ".w\n";
+			code += "mul " + temp.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + scaleByTimeConst.toString() + ".w\n";
 			code += "sin " + temp.toString() + "," + temp.toString() + "\n";
 			code += "mul " + temp.toString() + "," + temp.toString() + "," + scaleByTimeConst.toString() + ".y\n";
 			code += "add " + temp.toString() + "," + temp.toString() + "," + scaleByTimeConst.toString() + ".x\n";
 			
-			code += "mul " + activatedCompiler.scaleAndRotateTarget.toString() +"," +activatedCompiler.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
+			code += "mul " + animationRegisterCache.scaleAndRotateTarget.toString() +"," +animationRegisterCache.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
 			return code;
 		}
 		

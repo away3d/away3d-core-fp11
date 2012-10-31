@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleBezierCurvelByLifeGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.Vector3D;
@@ -45,41 +45,41 @@ package away3d.animators.nodes
 			_endPoint = value;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var _controlConst:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
-			activatedCompiler.setRegisterIndex(this, BEZIER_CONSTANT_REGISTER, _controlConst.index);
-			var _endConst:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
+			var _controlConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, BEZIER_CONSTANT_REGISTER, _controlConst.index);
+			var _endConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 			
-			var temp:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var rev_time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
 			var time_2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
 			var time_temp:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
-			activatedCompiler.addVertexTempUsages(temp, 1);
-			var temp2:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+			animationRegisterCache.addVertexTempUsages(temp, 1);
+			var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "xyz");
-			activatedCompiler.removeVertexTempUsage(temp);
+			animationRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "sub " + rev_time.toString() + "," + activatedCompiler.vertexOneConst.toString() + "," + activatedCompiler.vertexLife.toString() + "\n";
-			code += "mul " + time_2.toString() + "," + activatedCompiler.vertexLife.toString() + "," + activatedCompiler.vertexLife.toString() + "\n";
+			code += "sub " + rev_time.toString() + "," + animationRegisterCache.vertexOneConst.toString() + "," + animationRegisterCache.vertexLife.toString() + "\n";
+			code += "mul " + time_2.toString() + "," + animationRegisterCache.vertexLife.toString() + "," + animationRegisterCache.vertexLife.toString() + "\n";
 			
-			code += "mul " + time_temp.toString() + "," + activatedCompiler.vertexLife.toString() +"," + rev_time.toString() + "\n";
-			code += "mul " + time_temp.toString() + "," + time_temp.toString() +"," + activatedCompiler.vertexTwoConst.toString() + "\n";
+			code += "mul " + time_temp.toString() + "," + animationRegisterCache.vertexLife.toString() +"," + rev_time.toString() + "\n";
+			code += "mul " + time_temp.toString() + "," + time_temp.toString() +"," + animationRegisterCache.vertexTwoConst.toString() + "\n";
 			code += "mul " + distance.toString() + "," + time_temp.toString() +"," + _controlConst.toString() + "\n";
-			code += "add " + activatedCompiler.offsetTarget.toString() +".xyz," + distance.toString() + "," + activatedCompiler.offsetTarget.toString() + ".xyz\n";
+			code += "add " + animationRegisterCache.offsetTarget.toString() +".xyz," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + ".xyz\n";
 			code += "mul " + distance.toString() + "," + time_2.toString() +"," + _endConst.toString() + "\n";
-			code += "add " + activatedCompiler.offsetTarget.toString() +".xyz," + distance.toString() + "," + activatedCompiler.offsetTarget.toString() + ".xyz\n";
+			code += "add " + animationRegisterCache.offsetTarget.toString() +".xyz," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + ".xyz\n";
 			
 			if (sharedSetting.needVelocity)
 			{
-				code += "mul " + time_2.toString() + "," + activatedCompiler.vertexLife.toString() + "," + activatedCompiler.vertexTwoConst.toString() + "\n";
-				code += "sub " + time_temp.toString() + "," + activatedCompiler.vertexOneConst.toString() + "," + time_2.toString() + "\n";
-				code += "mul " + time_temp.toString() + "," + activatedCompiler.vertexTwoConst.toString() + "," + time_temp.toString() + "\n";
+				code += "mul " + time_2.toString() + "," + animationRegisterCache.vertexLife.toString() + "," + animationRegisterCache.vertexTwoConst.toString() + "\n";
+				code += "sub " + time_temp.toString() + "," + animationRegisterCache.vertexOneConst.toString() + "," + time_2.toString() + "\n";
+				code += "mul " + time_temp.toString() + "," + animationRegisterCache.vertexTwoConst.toString() + "," + time_temp.toString() + "\n";
 				code += "mul " + distance.toString() + "," + _controlConst.toString() + "," + time_temp.toString() + "\n";
-				code += "add " + activatedCompiler.velocityTarget.toString() + ".xyz," + distance.toString() + "," + activatedCompiler.velocityTarget.toString() + ".xyz\n";
+				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + distance.toString() + "," + animationRegisterCache.velocityTarget.toString() + ".xyz\n";
 				code += "mul " + distance.toString() + "," + _endConst.toString() + "," + time_2.toString() + "\n";
-				code += "add " + activatedCompiler.velocityTarget.toString() + ".xyz," + distance.toString() + "," + activatedCompiler.velocityTarget.toString() + ".xyz\n";
+				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + distance.toString() + "," + animationRegisterCache.velocityTarget.toString() + ".xyz\n";
 			}
 			
 			return code;

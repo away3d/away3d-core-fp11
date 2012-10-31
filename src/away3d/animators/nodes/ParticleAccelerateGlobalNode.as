@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleAccelerateGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.Vector3D;
@@ -47,25 +47,25 @@ package away3d.animators.nodes
 			_halfAccelerate.z = value.z / 2;
 		}
 		
-		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var accVelConst:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
-			activatedCompiler.setRegisterIndex(this, ACCELERATE_CONSTANT_REGISTER, accVelConst.index);
-			var temp:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
-			activatedCompiler.addVertexTempUsages(temp,1);
+			var accVelConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, ACCELERATE_CONSTANT_REGISTER, accVelConst.index);
+			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
+			animationRegisterCache.addVertexTempUsages(temp,1);
 			var code:String = "";
-			code += "mul " + temp.toString() +"," + activatedCompiler.vertexTime.toString() + "," + accVelConst.toString() + "\n";
+			code += "mul " + temp.toString() +"," + animationRegisterCache.vertexTime.toString() + "," + accVelConst.toString() + "\n";
 			
 			if (sharedSetting.needVelocity)
 			{
-				var temp2:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
-				code += "mul " + temp2.toString() + "," + temp.toString() + "," + activatedCompiler.vertexTwoConst.toString() + "\n";
-				code += "add " + activatedCompiler.velocityTarget.toString() + ".xyz," + temp2.toString() + ".xyz," + activatedCompiler.velocityTarget.toString() + "\n";
+				var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
+				code += "mul " + temp2.toString() + "," + temp.toString() + "," + animationRegisterCache.vertexTwoConst.toString() + "\n";
+				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + temp2.toString() + ".xyz," + animationRegisterCache.velocityTarget.toString() + "\n";
 			}
-			activatedCompiler.removeVertexTempUsage(temp);
+			animationRegisterCache.removeVertexTempUsage(temp);
 			
-			code += "mul " + temp.toString() +"," + temp.toString() + "," + activatedCompiler.vertexTime.toString() + "\n";
-			code += "add " + activatedCompiler.offsetTarget.toString() +".xyz," + temp.toString() + "," + activatedCompiler.offsetTarget.toString() + ".xyz\n";
+			code += "mul " + temp.toString() +"," + temp.toString() + "," + animationRegisterCache.vertexTime.toString() + "\n";
+			code += "add " + animationRegisterCache.offsetTarget.toString() +".xyz," + temp.toString() + "," + animationRegisterCache.offsetTarget.toString() + ".xyz\n";
 			return code;
 		}
 		

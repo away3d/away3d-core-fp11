@@ -1,9 +1,9 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.ParticleAnimationSet;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleUVSeqPicByTimeGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	/**
@@ -92,13 +92,13 @@ package away3d.animators.nodes
 		}
 		
 		
-		override public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALUVCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			//get 2 vc
-			var uvParamConst1:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
-			var uvParamConst2:ShaderRegisterElement = activatedCompiler.getFreeVertexConstant();
-			activatedCompiler.setRegisterIndex(this, UV_CONSTANT_REGISTER_0, uvParamConst1.index);
-			activatedCompiler.setRegisterIndex(this, UV_CONSTANT_REGISTER_1, uvParamConst2.index);
+			var uvParamConst1:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
+			var uvParamConst2:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, UV_CONSTANT_REGISTER_0, uvParamConst1.index);
+			animationRegisterCache.setRegisterIndex(this, UV_CONSTANT_REGISTER_1, uvParamConst2.index);
 			
 			var uSpeed:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "x");
 			var uStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "y");
@@ -108,15 +108,15 @@ package away3d.animators.nodes
 			var endThreshold:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, "y");
 			
 			
-			var temp:ShaderRegisterElement = activatedCompiler.getFreeVertexVectorTemp();
+			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
 			var vOffset:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
 			temp = new ShaderRegisterElement(temp.regName, temp.index, "z");
 			var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "w");
 			
 			
-			var u:ShaderRegisterElement = new ShaderRegisterElement(activatedCompiler.uvTarget.regName, activatedCompiler.uvTarget.index, "x");
-			var v:ShaderRegisterElement = new ShaderRegisterElement(activatedCompiler.uvTarget.regName, activatedCompiler.uvTarget.index, "y");
+			var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, "x");
+			var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, "y");
 			
 			var code:String = "";
 			//scale uv
@@ -125,12 +125,12 @@ package away3d.animators.nodes
 			
 			if (_hasStartTime)
 			{
-				code += "sub " + time.toString() + "," + activatedCompiler.vertexTime.toString() + "," + startTime.toString() + "\n";
-				code += "max " + time.toString() + "," + time.toString() + "," + activatedCompiler.vertexZeroConst.toString() + "\n";
+				code += "sub " + time.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + startTime.toString() + "\n";
+				code += "max " + time.toString() + "," + time.toString() + "," + animationRegisterCache.vertexZeroConst.toString() + "\n";
 			}
 			else
 			{
-				code += "mov " + time.toString() +"," + activatedCompiler.vertexTime.toString() + "\n";
+				code += "mov " + time.toString() +"," + animationRegisterCache.vertexTime.toString() + "\n";
 			}
 			if (!_loop)
 			{

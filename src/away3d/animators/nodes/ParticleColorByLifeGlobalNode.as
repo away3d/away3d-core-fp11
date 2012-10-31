@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.states.ParticleColorByLifeGlobalState;
-	import away3d.animators.utils.ParticleAnimationCompiler;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.ColorTransform;
@@ -104,40 +104,40 @@ package away3d.animators.nodes
 		}
 		
 		
-		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, activatedCompiler:ParticleAnimationCompiler) : String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			if (activatedCompiler.needFragmentAnimation && sharedSetting.hasColorNode)
+			if (animationRegisterCache.needFragmentAnimation && sharedSetting.hasColorNode)
 			{
 				if (_hasMult)
 				{
-					var startMultiplierConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					var deltaMultiplierConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					activatedCompiler.setRegisterIndex(this, START_MULTIPLIER_CONSTANT_REGISTER, startMultiplierConst.index);
-					activatedCompiler.setRegisterIndex(this, DELTA_MULTIPLIER_CONSTANT_REGISTER, deltaMultiplierConst.index);
+					var startMultiplierConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					var deltaMultiplierConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_CONSTANT_REGISTER, startMultiplierConst.index);
+					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_CONSTANT_REGISTER, deltaMultiplierConst.index);
 				}
 				if (_hasOffset)
 				{
-					var startOffsetConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					var deltaOffsetConst:ShaderRegisterElement = activatedCompiler.getFreeFragmentConstant();
-					activatedCompiler.setRegisterIndex(this, START_OFFSET_CONSTANT_REGISTER, startOffsetConst.index);
-					activatedCompiler.setRegisterIndex(this, DELTA_OFFSET_CONSTANT_REGISTER, deltaOffsetConst.index);
+					var startOffsetConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					var deltaOffsetConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, START_OFFSET_CONSTANT_REGISTER, startOffsetConst.index);
+					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_CONSTANT_REGISTER, deltaOffsetConst.index);
 				}
 				
-				var temp:ShaderRegisterElement = activatedCompiler.getFreeFragmentVectorTemp();
+				var temp:ShaderRegisterElement = animationRegisterCache.getFreeFragmentVectorTemp();
 				
 				var code:String = "";
 				
 				if (_hasMult)
 				{
-					code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  activatedCompiler.fragmentLife.toString()+ "\n";
+					code += "mul " + temp.toString() + "," + deltaMultiplierConst.toString() + "," +  animationRegisterCache.fragmentLife.toString()+ "\n";
 					code += "add " + temp.toString() + "," + temp.toString() + "," + startMultiplierConst.toString() + "\n";
-					code += "mul " + activatedCompiler.colorTarget.toString() +"," + temp.toString() + "," + activatedCompiler.colorTarget.toString() + "\n";
+					code += "mul " + animationRegisterCache.colorTarget.toString() +"," + temp.toString() + "," + animationRegisterCache.colorTarget.toString() + "\n";
 				}
 				if (_hasOffset)
 				{
-					code += "mul " + temp.toString() + "," + activatedCompiler.fragmentLife.toString() +"," + deltaOffsetConst.toString() + "\n";
+					code += "mul " + temp.toString() + "," + animationRegisterCache.fragmentLife.toString() +"," + deltaOffsetConst.toString() + "\n";
 					code += "add " + temp.toString() + "," + temp.toString() +"," + startOffsetConst.toString() + "\n";
-					code += "add " + activatedCompiler.colorTarget.toString() +"," +temp.toString() + "," + activatedCompiler.colorTarget.toString() + "\n";
+					code += "add " + animationRegisterCache.colorTarget.toString() +"," +temp.toString() + "," + animationRegisterCache.colorTarget.toString() + "\n";
 				}
 				return code;
 			}
