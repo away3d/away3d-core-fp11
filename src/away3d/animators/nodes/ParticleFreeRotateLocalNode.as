@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleFreeRotateLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -24,7 +24,7 @@ package away3d.animators.nodes
 			initOneData();
 		}
 		
-		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			//(Vector3d.x,Vector3d.y,Vector3d.z) is rotation axis,Vector3d.w is cycle time
 			var rotate:Vector3D = param[NAME];

@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleTimeState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -83,7 +83,7 @@ package away3d.animators.nodes
 			}
 		}
 		
-		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			_tempStartTime = param.startTime;
 			_tempDuringTime = param.duringTime;

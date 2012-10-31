@@ -5,7 +5,7 @@ package away3d.animators.nodes
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
 	import away3d.animators.data.ParticleFollowingItem;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.data.ParticleStreamManager;
 	import away3d.animators.states.ParticleFollowState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -38,7 +38,7 @@ package away3d.animators.nodes
 			this._rotation = rotation;
 		}
 		
-		override public function procressExtraData(param:ParticleParamter, streamManager:ParticleStreamManager, numVertex:int):void
+		override public function procressExtraData(param:ParticleParameter, streamManager:ParticleStreamManager, numVertex:int):void
 		{
 			
 			var stroage:FollowStorage = streamManager.extraStorage[this];

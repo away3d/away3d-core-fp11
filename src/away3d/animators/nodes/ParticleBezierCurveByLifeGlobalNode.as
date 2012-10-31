@@ -2,24 +2,24 @@ package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.states.ParticleBezierCurvelByLifeGlobalState;
+	import away3d.animators.states.ParticleBezierCurveByLifeGlobalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import flash.geom.Vector3D;
 	/**
 	 * ...
 	 */
-	public class ParticleBezierCurvelByLifeGlobalNode extends GlobalParticleNodeBase
+	public class ParticleBezierCurveByLifeGlobalNode extends GlobalParticleNodeBase
 	{
 		public static const NAME:String = "ParticleBezierCurvelByLifeGlobalNode";
 		public static const BEZIER_CONSTANT_REGISTER:int = 0;
 		private var _controlPoint:Vector3D;
 		private var _endPoint:Vector3D;
 		
-		public function ParticleBezierCurvelByLifeGlobalNode(control:Vector3D,end:Vector3D)
+		public function ParticleBezierCurveByLifeGlobalNode(control:Vector3D,end:Vector3D)
 		{
 			super(NAME);
-			_stateClass = ParticleBezierCurvelByLifeGlobalState;
+			_stateClass = ParticleBezierCurveByLifeGlobalState;
 			
 			_controlPoint = control;
 			_endPoint = end;

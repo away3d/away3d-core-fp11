@@ -2,29 +2,29 @@ package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
-	import away3d.animators.states.ParticleBezierCurvelByLifelocalState;
+	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.states.ParticleBezierCurveByLifeLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	/**
 	 * Bezier formula : P(t)=2t*(1-t)*P1+t*t*P2
 	 */
-	public class ParticleBezierCurvelByLifelocalNode extends LocalParticleNodeBase
+	public class ParticleBezierCurveByLifeLocalNode extends LocalParticleNodeBase
 	{
 		public static const NAME:String = "ParticleBezierCurvelByLifelocalNode";
 		public static const BEZIER_STREAM_REGISTER:int = 0;
 		
 		
-		public function ParticleBezierCurvelByLifelocalNode()
+		public function ParticleBezierCurveByLifeLocalNode()
 		{
 			super(NAME);
-			_stateClass = ParticleBezierCurvelByLifelocalState;
+			_stateClass = ParticleBezierCurveByLifeLocalState;
 			
 			_dataLenght = 6;
 			initOneData();
 		}
 		
-		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			//[controlPoint:Vector3D,endPoint:Vector3D].
 			var bezierPoints:Array = param[NAME];

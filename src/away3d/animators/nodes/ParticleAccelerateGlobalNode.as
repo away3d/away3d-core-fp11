@@ -14,37 +14,37 @@ package away3d.animators.nodes
 		public static const NAME:String = "ParticleAccelerateGlobalNode";
 		public static const ACCELERATE_CONSTANT_REGISTER:int = 0;
 		
-		private var _accelrate:Vector3D;
-		private var _halfAccelerate:Vector3D;
+		private var _acceleration:Vector3D;
+		private var _halfAcceleration:Vector3D;
 		
-		public function ParticleAccelerateGlobalNode(acc:Vector3D)
+		public function ParticleAccelerateGlobalNode(acceleration:Vector3D)
 		{
 			super(NAME);
 			_stateClass = ParticleAccelerateGlobalState;
 			
-			_accelrate = acc.clone();
-			_halfAccelerate = _accelrate.clone();
-			_halfAccelerate.scaleBy(0.5);
+			_acceleration = acceleration.clone();
+			_halfAcceleration = _acceleration.clone();
+			_halfAcceleration.scaleBy(0.5);
 		}
 		
-		public function get accelrate():Vector3D
+		public function get acceleration():Vector3D
 		{
-			return _accelrate;
+			return _acceleration;
 		}
 		
-		public function get halfAccelerate():Vector3D
+		public function get halfAcceleration():Vector3D
 		{
-			return _halfAccelerate;
+			return _halfAcceleration;
 		}
 		
-		public function set accelrate(value:Vector3D):void
+		public function set acceleration(value:Vector3D):void
 		{
-			_accelrate.x = value.x;
-			_accelrate.y = value.y;
-			_accelrate.z = value.z;
-			_halfAccelerate.x = value.x / 2;
-			_halfAccelerate.y = value.y / 2;
-			_halfAccelerate.z = value.z / 2;
+			_acceleration.x = value.x;
+			_acceleration.y = value.y;
+			_acceleration.z = value.z;
+			_halfAcceleration.x = value.x / 2;
+			_halfAcceleration.y = value.y / 2;
+			_halfAcceleration.z = value.z / 2;
 		}
 		
 		override public function getAGALVertexCode(pass:MaterialPassBase, sharedSetting:ParticleAnimationSetting, animationRegisterCache:AnimationRegisterCache) : String

@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleCircleLocalState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -58,7 +58,7 @@ package away3d.animators.nodes
 			return _eulersMatrix;
 		}
 		
-		override public function generatePorpertyOfOneParticle(param:ParticleParamter):void
+		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
 			//Vector3D.x is radius,Vector3D.y is cycle
 			var temp:Vector3D = param[NAME];

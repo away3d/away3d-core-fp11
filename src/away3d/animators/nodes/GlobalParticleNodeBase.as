@@ -9,7 +9,7 @@ package away3d.animators.nodes
 		
 		public function GlobalParticleNodeBase(name:String, priority:int = 1)
 		{
-			super(name, ParticleNodeBase.GLOABE, priority);
+			super(name, ParticleNodeBase.GLOBAL, priority);
 		}
 		
 	}

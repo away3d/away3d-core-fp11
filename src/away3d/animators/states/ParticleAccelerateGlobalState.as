@@ -21,7 +21,7 @@ package away3d.animators.states
 		override public function setRenderState(parameter:ParticleRenderParameter) : void
 		{
 			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleAccelerateGlobalNode.ACCELERATE_CONSTANT_REGISTER);
-			var halfAccelerate:Vector3D = accNode.halfAccelerate;
+			var halfAccelerate:Vector3D = accNode.halfAcceleration;
 			parameter.animationRegisterCache.setVertexConst(index, halfAccelerate.x, halfAccelerate.y, halfAccelerate.z);
 		}
 		

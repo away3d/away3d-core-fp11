@@ -2,7 +2,7 @@ package away3d.animators
 {
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleAnimationSetting;
-	import away3d.animators.data.ParticleParamter;
+	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.data.ParticleStreamManager;
 	import away3d.animators.nodes.LocalParticleNodeBase;
 	import away3d.animators.nodes.ParticleNodeBase;
@@ -262,7 +262,7 @@ package away3d.animators
 				streamManager = sharedData[subGeometries[i]] = new ParticleStreamManager();
 				for each(var node:LocalParticleNodeBase in _localNodes)
 				{
-					streamManager.applyData(node.dataLenght, node);
+					streamManager.applyData(node.dataLength, node);
 				}
 				streamManager.setVertexNum(subGeometries[i].numVertices);
 			}
@@ -271,7 +271,7 @@ package away3d.animators
 			var numCursors:uint = subGeometries.length;
 			var cursors:Vector.<int> = new Vector.<int>(numCursors, true);
 			var finished:int;
-			var param:ParticleParamter = new ParticleParamter();
+			var param:ParticleParameter = new ParticleParameter();
 			param.total = numParticles;
 			//default value
 			param.startTime = 0;
@@ -291,7 +291,7 @@ package away3d.animators
 				
 				for (j = 0; j < len; j++)
 				{
-					_localNodes[j].generatePorpertyOfOneParticle(param);
+					_localNodes[j].generatePropertyOfOneParticle(param);
 				}
 				
 				for (var k:int = 0; k < numCursors; k++)
@@ -316,7 +316,7 @@ package away3d.animators
 						for (j = 0; j < len; j++)
 						{
 							oneData = _localNodes[j].oneData;
-							oneDataLen = _localNodes[j].dataLenght;
+							oneDataLen = _localNodes[j].dataLength;
 							oneDataOffset = streamManager.getNodeDataOffset(_localNodes[j]);
 							for (counterForVertex = 0; counterForVertex < numVertex; counterForVertex++)
 							{
