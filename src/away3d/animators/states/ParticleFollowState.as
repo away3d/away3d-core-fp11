@@ -1,7 +1,7 @@
 package away3d.animators.states
 {
 	import away3d.animators.data.ParticleFollowingItem;
-	import away3d.animators.data.ParticleFollowStream;
+	import away3d.animators.data.FollowSubGeometry;
 	import away3d.animators.data.ParticleRenderParameter;
 	import away3d.animators.nodes.ParticleFollowNode;
 	import away3d.animators.nodes.ParticleNodeBase;
@@ -43,7 +43,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(parameter:ParticleRenderParameter):void
 		{
-			var followStream:ParticleFollowStream = followStreams[parameter.renderable] ||= new ParticleFollowStream(parameter.animationSubGeometry.extraStorage[particleNode]);
+			var followStream:FollowSubGeometry = followStreams[parameter.renderable] ||= new FollowSubGeometry(parameter.animationSubGeometry.extraStorage[particleNode]);
 			
 			if (_followTarget)
 			{
@@ -97,7 +97,7 @@ package away3d.animators.states
 		
 		}
 		
-		private function processOffset(currentTime:Number, deltaTime:Number, followStream:ParticleFollowStream):void
+		private function processOffset(currentTime:Number, deltaTime:Number, followStream:FollowSubGeometry):void
 		{
 			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
 			var vertexData:Vector.<Number> = followStream.vertexData;
@@ -129,7 +129,7 @@ package away3d.animators.states
 		
 		}
 		
-		private function precessRotation(currentTime:Number, deltaTime:Number, followStream:ParticleFollowStream):void
+		private function precessRotation(currentTime:Number, deltaTime:Number, followStream:FollowSubGeometry):void
 		{
 			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
 			var vertexData:Vector.<Number> = followStream.vertexData;
@@ -161,7 +161,7 @@ package away3d.animators.states
 		
 		}
 		
-		private function processOffsetAndRotation(currentTime:Number, deltaTime:Number, followStream:ParticleFollowStream):void
+		private function processOffsetAndRotation(currentTime:Number, deltaTime:Number, followStream:FollowSubGeometry):void
 		{
 			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
 			var vertexData:Vector.<Number> = followStream.vertexData;

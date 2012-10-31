@@ -6,7 +6,7 @@ package away3d.animators.data
 	/**
 	 * ...
 	 */
-	public class ParticleFollowStream
+	public class FollowSubGeometry
 	{
 		public var previousTime:Number;
 		private var _storage:ParticleFollowStorage;
@@ -17,7 +17,7 @@ package away3d.animators.data
 		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
 		protected var _bufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		
-		public function ParticleFollowStream(stroage:ParticleFollowStorage)
+		public function FollowSubGeometry(stroage:ParticleFollowStorage)
 		{
 			_storage = stroage;
 			_vertexData = new Vector.<Number>(_storage.numVertices * _storage.dataLength, true);
