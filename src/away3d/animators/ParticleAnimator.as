@@ -104,6 +104,14 @@ package away3d.animators
 			}
 		}
 		
+		public function resetTime(offset : int = 0) : void
+		{
+			for each (var state:ParticleStateBase in _needTimeStates)
+			{
+				state.offset(_absoluteTime + offset);
+			}
+		}
+		
 	}
 
 }
