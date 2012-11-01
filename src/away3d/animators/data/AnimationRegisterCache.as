@@ -1,5 +1,6 @@
 package away3d.animators.data
 {
+	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.geom.Matrix3D;
@@ -135,14 +136,14 @@ package away3d.animators.data
 			uvTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xy");
 		}
 		
-		public function setRegisterIndex(node:Object, parameterIndex:int, registerIndex:int):void
+		public function setRegisterIndex(node:AnimationNodeBase, parameterIndex:int, registerIndex:int):void
 		{
 			//8 should be enough for any node.
 			var t:Vector.<int> = indexDictionary[node] ||= new Vector.<int>(8, true);
 			t[parameterIndex] = registerIndex;
 		}
 		
-		public function getRegisterIndex(node:Object, parameterIndex:int):int
+		public function getRegisterIndex(node:AnimationNodeBase, parameterIndex:int):int
 		{
 			return indexDictionary[node][parameterIndex];
 		}

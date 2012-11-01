@@ -15,12 +15,12 @@ package away3d.animators.states
 	 */
 	public class ParticleFreeColorLocalState extends ParticleStateBase
 	{
-		private var _particleFreeColorLocalState:ParticleFreeColorLocalNode;
+		private var _particleFreeColorLocalNode:ParticleFreeColorLocalNode;
 		
 		public function ParticleFreeColorLocalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			_particleFreeColorLocalState = particleNode as ParticleFreeColorLocalNode;
+			_particleFreeColorLocalNode = particleNode as ParticleFreeColorLocalNode;
 		}
 			
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
@@ -28,20 +28,20 @@ package away3d.animators.states
 			if (animationRegisterCache.needFragmentAnimation)
 			{
 				var index:int;
-				if (_particleFreeColorLocalState.hasMult)
+				if (_particleFreeColorLocalNode.hasMult)
 				{
-					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_MULTIPLE_STREAM_REGISTER);
-					animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalState.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
-					if (_particleFreeColorLocalState.hasOffset)
+					index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFreeColorLocalNode.COLOR_MULTIPLE_STREAM_REGISTER);
+					animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+					if (_particleFreeColorLocalNode.hasOffset)
 					{
-						index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
-						animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalState.dataOffset + 4, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+						index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
+						animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalNode.dataOffset + 4, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 					}
 				}
 				else
 				{
-					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
-					animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalState.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+					index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFreeColorLocalNode.COLOR_OFFSET_STREAM_REGISTER);
+					animationSubGeometry.activateVertexBuffer(index, _particleFreeColorLocalNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 				}
 			}
 		}

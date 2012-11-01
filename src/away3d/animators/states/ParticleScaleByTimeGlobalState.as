@@ -14,18 +14,18 @@ package away3d.animators.states
 	 */
 	public class ParticleScaleByTimeGlobalState extends ParticleStateBase
 	{
-		private var _particleScaleByTimeGlobalState:ParticleScaleByTimeGlobalNode;
+		private var _particleScaleByTimeGlobalNode:ParticleScaleByTimeGlobalNode;
 		
 		public function ParticleScaleByTimeGlobalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			_particleScaleByTimeGlobalState = particleNode as ParticleScaleByTimeGlobalNode;
+			_particleScaleByTimeGlobalNode = particleNode as ParticleScaleByTimeGlobalNode;
 		}
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleScaleByTimeGlobalNode.SCALE_CONSTANT_REGISTER);
-			var data:Vector.<Number> = _particleScaleByTimeGlobalState.data;
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleScaleByTimeGlobalNode.SCALE_CONSTANT_REGISTER);
+			var data:Vector.<Number> = _particleScaleByTimeGlobalNode.data;
 			animationRegisterCache.setVertexConst(index, data[0], data[1], data[2], data[3]);
 		}
 		

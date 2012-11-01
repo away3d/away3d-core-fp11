@@ -32,7 +32,7 @@ package away3d.animators.states
 			var comps : Vector.<Vector3D> = matrix.decompose(Orientation3D.AXIS_ANGLE);
 			matrix.identity();
 			matrix.appendRotation( -comps[1].w * MathConsts.RADIANS_TO_DEGREES, comps[1]);
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleBillboardGlobalNode.MATRIX_CONSTANT_REGISTER);
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBillboardGlobalNode.MATRIX_CONSTANT_REGISTER);
 			animationRegisterCache.setVertexConstFromMatrix(index, matrix);
 		}
 		

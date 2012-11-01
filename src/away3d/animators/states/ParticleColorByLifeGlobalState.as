@@ -14,12 +14,12 @@ package away3d.animators.states
 	 */
 	public class ParticleColorByLifeGlobalState extends ParticleStateBase
 	{
-		private var _particleColorByLifeGlobalState:ParticleColorByLifeGlobalNode;
+		private var _particleColorByLifeGlobalNode:ParticleColorByLifeGlobalNode;
 		
 		public function ParticleColorByLifeGlobalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			_particleColorByLifeGlobalState = particleNode as ParticleColorByLifeGlobalNode;
+			_particleColorByLifeGlobalNode = particleNode as ParticleColorByLifeGlobalNode;
 			
 		}
 		
@@ -29,22 +29,22 @@ package away3d.animators.states
 			{
 				var index:int;
 				var data:Vector.<Number>;
-				if (_particleColorByLifeGlobalState.needMultiple)
+				if (_particleColorByLifeGlobalNode.needMultiple)
 				{
-					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_MULTIPLIER_CONSTANT_REGISTER);
-					data = _particleColorByLifeGlobalState.startMultiplierData;
+					index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorByLifeGlobalNode.START_MULTIPLIER_CONSTANT_REGISTER);
+					data = _particleColorByLifeGlobalNode.startMultiplierData;
 					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
-					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_MULTIPLIER_CONSTANT_REGISTER);
-					data = _particleColorByLifeGlobalState.deltaMultiplierData;
+					index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorByLifeGlobalNode.DELTA_MULTIPLIER_CONSTANT_REGISTER);
+					data = _particleColorByLifeGlobalNode.deltaMultiplierData;
 					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
-				if (_particleColorByLifeGlobalState.needOffset)
+				if (_particleColorByLifeGlobalNode.needOffset)
 				{
-					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_OFFSET_CONSTANT_REGISTER);
-					data = _particleColorByLifeGlobalState.startOffsetData;
+					index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorByLifeGlobalNode.START_OFFSET_CONSTANT_REGISTER);
+					data = _particleColorByLifeGlobalNode.startOffsetData;
 					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
-					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_OFFSET_CONSTANT_REGISTER);
-					data = _particleColorByLifeGlobalState.deltaOffsetData;
+					index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorByLifeGlobalNode.DELTA_OFFSET_CONSTANT_REGISTER);
+					data = _particleColorByLifeGlobalNode.deltaOffsetData;
 					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
 			}

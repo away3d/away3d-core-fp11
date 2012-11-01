@@ -25,7 +25,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleAccelerateLocalNode.ACCELERATELOCAL_STREAM_REGISTER);
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleAccelerateLocalNode.ACCELERATELOCAL_STREAM_REGISTER);
 			animationSubGeometry.activateVertexBuffer(index, _particleAccelerateLocalNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 		}
 	}

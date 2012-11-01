@@ -14,21 +14,21 @@ package away3d.animators.states
 	 */
 	public class ParticleBezierCurveByLifeGlobalState extends ParticleStateBase
 	{
-		private var _particleBezierCurveByLifeGlobalState:ParticleBezierCurveByLifeGlobalNode;
+		private var _particleBezierCurveByLifeGlobalNode:ParticleBezierCurveByLifeGlobalNode;
 		
 		public function ParticleBezierCurveByLifeGlobalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			_particleBezierCurveByLifeGlobalState = particleNode as ParticleBezierCurveByLifeGlobalNode;
+			_particleBezierCurveByLifeGlobalNode = particleNode as ParticleBezierCurveByLifeGlobalNode;
 		}
 		
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleBezierCurveByLifeGlobalNode.BEZIER_CONSTANT_REGISTER);
-			var temp:Vector3D = _particleBezierCurveByLifeGlobalState.controlPoint;
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveByLifeGlobalNode.BEZIER_CONSTANT_REGISTER);
+			var temp:Vector3D = _particleBezierCurveByLifeGlobalNode.controlPoint;
 			animationRegisterCache.setVertexConst(index, temp.x, temp.y, temp.z);
-			temp = _particleBezierCurveByLifeGlobalState.endPoint;
+			temp = _particleBezierCurveByLifeGlobalNode.endPoint;
 			animationRegisterCache.setVertexConst(index + 1, temp.x, temp.y, temp.z);
 		}
 		

@@ -23,7 +23,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleScaleByLifeGlobalNode.SCALE_CONSTANT_REGISTER);
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleScaleByLifeGlobalNode.SCALE_CONSTANT_REGISTER);
 			animationRegisterCache.setVertexConst(index, _particleScaleByLifeGlobalNode.startScale, _particleScaleByLifeGlobalNode.delta);
 		}
 		

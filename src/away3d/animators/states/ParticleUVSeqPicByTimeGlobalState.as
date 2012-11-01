@@ -28,7 +28,7 @@ package away3d.animators.states
 		{
 			if (animationRegisterCache.needUVAnimation)
 			{
-				var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
+				var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
 				var data:Vector.<Number> = _particleUVSeqPicByTimeGlobalNode.renderData;
 				animationRegisterCache.setVertexConst(index, data[0], data[1], data[2], data[3]);
 				animationRegisterCache.setVertexConst(index + 1, data[4], data[5]);

@@ -14,19 +14,19 @@ package away3d.animators.states
 	 */
 	public class ParticleDriftLocalState extends ParticleStateBase
 	{
-		private var _particleDriftLocalState:ParticleDriftLocalNode;
+		private var _particleDriftLocalNode:ParticleDriftLocalNode;
 		
 		public function ParticleDriftLocalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			_particleDriftLocalState = particleNode as ParticleDriftLocalNode;
+			_particleDriftLocalNode = particleNode as ParticleDriftLocalNode;
 		}
 		
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleDriftLocalNode.DRIFT_STREAM_REGISTER);
-			animationSubGeometry.activateVertexBuffer(index, _particleDriftLocalState.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleDriftLocalNode.DRIFT_STREAM_REGISTER);
+			animationSubGeometry.activateVertexBuffer(index, _particleDriftLocalNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 		}
 		
 	}

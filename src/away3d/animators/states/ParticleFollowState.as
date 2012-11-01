@@ -21,7 +21,7 @@ package away3d.animators.states
 	 */
 	public class ParticleFollowState extends ParticleStateBase
 	{
-		private var _particleFollowState:ParticleFollowNode;
+		private var _particleFollowNode:ParticleFollowNode;
 		private var _followTarget:Object3D;
 		
 		private var _targetPos:Vector3D = new Vector3D;
@@ -32,7 +32,7 @@ package away3d.animators.states
 		public function ParticleFollowState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode, true);
-			_particleFollowState = particleNode as ParticleFollowNode;
+			_particleFollowNode = particleNode as ParticleFollowNode;
 		}
 		
 		public function get followTarget():Object3D
@@ -47,17 +47,17 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
-			var followStream:FollowSubGeometry = followStreams[renderable] ||= new FollowSubGeometry(animationSubGeometry.extraStorage[particleNode]);
+			var followStream:FollowSubGeometry = followStreams[renderable] ||= new FollowSubGeometry(animationSubGeometry.extraStorage[_animationNode]);
 			
 			if (_followTarget)
 			{
-				if (_particleFollowState.needOffset)
+				if (_particleFollowNode.needOffset)
 				{
 					_targetPos.x = _followTarget.position.x;
 					_targetPos.y = _followTarget.position.y;
 					_targetPos.z = _followTarget.position.z;
 				}
-				if (_particleFollowState.needRotate)
+				if (_particleFollowNode.needRotate)
 				{
 					_targetEuler.x = _followTarget.rotationX;
 					_targetEuler.y = _followTarget.rotationY;
@@ -73,27 +73,27 @@ package away3d.animators.states
 			var needProcess:Boolean = previousTime != currentTime;
 			
 			var index:int;
-			if (_particleFollowState.needOffset && _particleFollowState.needRotate)
+			if (_particleFollowNode.needOffset && _particleFollowNode.needRotate)
 			{
 				if (needProcess)
 					processOffsetAndRotation(currentTime, deltaTime, followStream);
-				index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
 				followStream.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
 				followStream.activateVertexBuffer(index, 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (_particleFollowState.needOffset)
+			else if (_particleFollowNode.needOffset)
 			{
 				if (needProcess)
 					processOffset(currentTime, deltaTime, followStream);
-				index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
 				followStream.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (_particleFollowState.needRotate)
+			else if (_particleFollowNode.needRotate)
 			{
 				if (needProcess)
 					precessRotation(currentTime, deltaTime, followStream);
-				index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
 				followStream.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			

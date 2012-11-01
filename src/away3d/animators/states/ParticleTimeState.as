@@ -24,11 +24,11 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleTimeNode.TIME_STREAM_REGISTER);
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleTimeNode.TIME_STREAM_REGISTER);
 			animationSubGeometry.activateVertexBuffer(index, _particleTimeNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 			
 			var particleTime:Number = _time / 1000;
-			index = animationRegisterCache.getRegisterIndex(particleNode, ParticleTimeNode.TIME_CONSTANT_REGISTER);
+			index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleTimeNode.TIME_CONSTANT_REGISTER);
 			animationRegisterCache.setVertexConst(index, particleTime, particleTime, particleTime, 0);
 		}
 		

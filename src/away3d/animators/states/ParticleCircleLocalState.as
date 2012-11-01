@@ -14,21 +14,21 @@ package away3d.animators.states
 	 */
 	public class ParticleCircleLocalState extends ParticleStateBase
 	{
-		private var _particleCircleLocalState:ParticleCircleLocalNode;
+		private var _particleCircleLocalNode:ParticleCircleLocalNode;
 		
 		public function ParticleCircleLocalState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
 			super(animator, particleNode);
-			_particleCircleLocalState = particleNode as ParticleCircleLocalNode;
+			_particleCircleLocalNode = particleNode as ParticleCircleLocalNode;
 		}
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleCircleLocalNode.CIRCLE_STREAM_REGISTER);
-			animationSubGeometry.activateVertexBuffer(index, _particleCircleLocalState.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleCircleLocalNode.CIRCLE_STREAM_REGISTER);
+			animationSubGeometry.activateVertexBuffer(index, _particleCircleLocalNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			
-			index = animationRegisterCache.getRegisterIndex(particleNode, ParticleCircleLocalNode.EULERS_CONSTANT_REGISTER);
-			animationRegisterCache.setVertexConstFromMatrix(index, _particleCircleLocalState.eulersMatrix);
+			index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleCircleLocalNode.EULERS_CONSTANT_REGISTER);
+			animationRegisterCache.setVertexConstFromMatrix(index, _particleCircleLocalNode.eulersMatrix);
 		}
 	}
 
