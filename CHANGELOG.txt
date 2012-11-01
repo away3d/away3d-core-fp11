@@ -1,0 +1,85 @@
+4.0.1
+- Fixes to object controllers
+
+4.0.2
+- Fixed cone geometry normals
+
+4.0.3
+- Added WireframeCylinder primitive
+- Added View3D.queueSnapshot() to take screen shots of view
+
+4.0.4
+- Fixed issues with geometry validation in primitives
+
+4.0.5
+- Implemented changes related to finalized AWD 2.0 specification
+- Improved LookAtController (#217)
+- Fixed visual bug in AwayStats (#220)
+- Added torus geometry primitive
+- Optimized Fresnel specular method
+- Added texture support in ambient method
+
+4.0.6
+- Implemented geometry splitting in AWD2Parser (large meshes) (#136)
+- Added support for alpha in video texture (#54)
+
+4.0.7
+- Fixed crash caused by null alpha mask in shadow depth rendering (#274)
+- Fixed bounds calculation for flat geometries (#273)
+- Fixed issue related to primitive validation (#257)
+- Fixed device loss (#263, #269)
+- Fixed issue with removing assets from library (#162)
+- Fixed bug related to RTT dimensions (#279)
+- Unified and improved sub-mesh splitting (better support for large meshes)
+- Improved tool classes
+- Optimized Object3D.updateTransform() (#232)
+- Fixed crash issue in AIR (#230)
+- Fixed lightPicker invalidation bug (#216)
+- Fixed bug only appearing in software rendering (#234)
+- Fixed issues in 3DS parser (#294, #291)
+- Added NearShadowMapMethod
+- Implemented support for nested objects in Drag3D (#283)
+- Fixes to segment rendering and management
+- Implemented visible property on View3D (#155)
+- Enabled texture repeating in materials loaded from OBJ files (#5)
+- Properly implemented and tested Sound3D (#227, #41)
+- Fixed bug in MD5 parser caused by zero-weights (#65)
+- Added alpha property for shadow map methods
+- Added WebcamTexture
+- Improved Stage3DProxy interface
+- Added doubleSided property to PlaneGeometry
+- Added backbuffer cap to avoid bug caused by too large backbuffers (#285)
+- Fixed issue with small OBJ files (#304)
+- Fixed wrap issue in HoverController (#299)
+- Enabled integration of other Stage3D frameworks (e.g. Starling)
+- Fixed Sprite3D clipping bug (#309)
+- Lowered texture limit to 1x1 (#308)
+- Fixed OBJParser issue related to specular shading (#70, #64)
+- Fixed delegation issue in composit AWDParser (#315)
+- Fixed issue with texture disposal (#316)
+- Implemented Tim Knip's DAEParser
+- Slightly refactored loading system internals, renamed some events
+- Removed deprecated bitmap/video materials
+- Refactored picking system
+- Optimizations to scene graph and picking
+- Fixed parsing of texture names from AWD2 files (#200)
+- Fixed bug in OBJParser concerning escaped line-breaks (#330)
+- Fixed pivot point issue (#333)
+- Added path data classes
+- Refactored animation system
+- Refactored object controllers (328, #331)
+- Fix MD2 render state for different passes (#340)
+- Fixed normal/tangent issues in CylinderGeometry (#209)
+- Added default materials for objects (#170)
+- Added skeleton and forceCPU properties to SkeletonAnimator
+- Fixed bug in UV generation for cube primitives
+- Fixed bug in SkeletonAnimator playback with negative playbackSpeed
+- Fixed bug in SegmentSet (#198)
+
+4.0.8
+- Fixed infinite recursion issue in SkeletonDifferenceNode
+- Fix for Gold alpha blending regression
+
+4.0.9
+- Fixed MD5 mesh bug (#364)
+
