@@ -17,9 +17,9 @@ package away3d.animators.data
 		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
 		protected var _bufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		
-		public function FollowSubGeometry(stroage:ParticleFollowStorage)
+		public function FollowSubGeometry(storage:ParticleFollowStorage)
 		{
-			_storage = stroage;
+			_storage = storage;
 			_vertexData = new Vector.<Number>(_storage.numVertices * _storage.dataLength, true);
 			for (var i:int = 0; i < 8; i++)
 			{

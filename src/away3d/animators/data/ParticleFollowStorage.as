@@ -1,8 +1,5 @@
 package away3d.animators.data
 {
-	import away3d.core.managers.Stage3DProxy;
-	import flash.display3D.Context3D;
-	import flash.display3D.VertexBuffer3D;
 	/**
 	 * ...
 	 */

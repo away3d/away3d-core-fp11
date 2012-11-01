@@ -1,6 +1,10 @@
 package away3d.animators.states
 {
-	import away3d.animators.data.ParticleRenderParameter;
+	import away3d.cameras.Camera3D;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleColorByLifeGlobalNode;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.ParticleAnimator;
@@ -19,29 +23,29 @@ package away3d.animators.states
 			
 		}
 		
-		override public function setRenderState(parameter:ParticleRenderParameter) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			if (parameter.animationRegisterCache.hasColorNode && parameter.animationRegisterCache.needFragmentAnimation)
+			if (animationRegisterCache.hasColorNode && animationRegisterCache.needFragmentAnimation)
 			{
 				var index:int;
 				var data:Vector.<Number>;
 				if (_particleColorByLifeGlobalState.needMultiple)
 				{
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_MULTIPLIER_CONSTANT_REGISTER);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_MULTIPLIER_CONSTANT_REGISTER);
 					data = _particleColorByLifeGlobalState.startMultiplierData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_MULTIPLIER_CONSTANT_REGISTER);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_MULTIPLIER_CONSTANT_REGISTER);
 					data = _particleColorByLifeGlobalState.deltaMultiplierData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
 				if (_particleColorByLifeGlobalState.needOffset)
 				{
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_OFFSET_CONSTANT_REGISTER);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.START_OFFSET_CONSTANT_REGISTER);
 					data = _particleColorByLifeGlobalState.startOffsetData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_OFFSET_CONSTANT_REGISTER);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleColorByLifeGlobalNode.DELTA_OFFSET_CONSTANT_REGISTER);
 					data = _particleColorByLifeGlobalState.deltaOffsetData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
 			}
 		}

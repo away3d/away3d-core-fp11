@@ -1,6 +1,10 @@
 package away3d.animators.states
 {
-	import away3d.animators.data.ParticleRenderParameter;
+	import away3d.cameras.Camera3D;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleVelocityGlobalNode;
 	import away3d.animators.ParticleAnimator;
@@ -19,11 +23,11 @@ package away3d.animators.states
 		}
 		
 		
-		override public function setRenderState(parameter:ParticleRenderParameter) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleVelocityGlobalNode.VELOCITY_STREAM_REGISTER);
+			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleVelocityGlobalNode.VELOCITY_STREAM_REGISTER);
 			var velocity:Vector3D = _particleVelocityGlobalNode.velocity;
-			parameter.animationRegisterCache.setVertexConst(index, velocity.x, velocity.y, velocity.z);
+			animationRegisterCache.setVertexConst(index, velocity.x, velocity.y, velocity.z);
 		}
 		
 	}

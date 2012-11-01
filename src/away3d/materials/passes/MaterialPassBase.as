@@ -1,5 +1,6 @@
 package away3d.materials.passes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.IAnimationSet;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
@@ -88,7 +89,9 @@ package away3d.materials.passes
 		protected var _needUVAnimation:Boolean;
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
-
+		
+		public var animationRegisterCache:AnimationRegisterCache;
+		
 		/**
 		 * Creates a new MaterialPassBase object.
 		 *

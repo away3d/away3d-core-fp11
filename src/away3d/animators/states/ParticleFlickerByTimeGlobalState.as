@@ -1,6 +1,10 @@
 package away3d.animators.states
 {
-	import away3d.animators.data.ParticleRenderParameter;
+	import away3d.cameras.Camera3D;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleFlickerByTimeGlobalNode;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.ParticleAnimator;
@@ -18,31 +22,31 @@ package away3d.animators.states
 			
 		}
 		
-		override public function setRenderState(parameter:ParticleRenderParameter) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			if (parameter.animationRegisterCache.needFragmentAnimation)
+			if (animationRegisterCache.needFragmentAnimation)
 			{
-				var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.CYCLE_CONSTANT_REGISTER);;
+				var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.CYCLE_CONSTANT_REGISTER);;
 				var data:Vector.<Number> = _particleFlickerByTimeGlobalState.cycleData;
-				parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+				animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				
 				if (_particleFlickerByTimeGlobalState.needMultiple)
 				{
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.START_MULTIPLIER_CONSTANT_REGISTER);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.START_MULTIPLIER_CONSTANT_REGISTER);
 					data = _particleFlickerByTimeGlobalState.startMultiplierData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.DELTA_MULTIPLIER_CONSTANT_REGISTER);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.DELTA_MULTIPLIER_CONSTANT_REGISTER);
 					data = _particleFlickerByTimeGlobalState.deltaMultiplierData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
 				if (_particleFlickerByTimeGlobalState.needOffset)
 				{
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.START_OFFSET_CONSTANT_REGISTER);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.START_OFFSET_CONSTANT_REGISTER);
 					data = _particleFlickerByTimeGlobalState.startOffsetData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
-					index = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.DELTA_OFFSET_CONSTANT_REGISTER);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					index = animationRegisterCache.getRegisterIndex(particleNode, ParticleFlickerByTimeGlobalNode.DELTA_OFFSET_CONSTANT_REGISTER);
 					data = _particleFlickerByTimeGlobalState.deltaOffsetData;
-					parameter.animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
+					animationRegisterCache.setFragmentConst(index, data[0], data[1], data[2], data[3]);
 				}
 			}
 		}

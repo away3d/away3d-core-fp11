@@ -1,6 +1,10 @@
 package away3d.animators.states
 {
-	import away3d.animators.data.ParticleRenderParameter;
+	import away3d.cameras.Camera3D;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleOffsetPositionLocalNode;
 	import away3d.animators.ParticleAnimator;
@@ -20,10 +24,10 @@ package away3d.animators.states
 		}
 		
 		
-		override public function setRenderState(parameter:ParticleRenderParameter) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleOffsetPositionLocalNode.OFFSET_STREAM_REGISTER);
-			parameter.animationSubGeometry.activateVertexBuffer(index, _particleOffsetPositionLocalNode.dataOffset, parameter.stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleOffsetPositionLocalNode.OFFSET_STREAM_REGISTER);
+			animationSubGeometry.activateVertexBuffer(index, _particleOffsetPositionLocalNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 		}
 		
 	}

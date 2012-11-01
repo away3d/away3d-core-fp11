@@ -152,20 +152,16 @@ package away3d.animators.data
 			var len:int = sourceRegisters.length;
 			var code:String = "";
 			for (var i:int = 0; i < len; i++)
-			{
 				code += "mov " + targetRegisters[i] + "," + sourceRegisters[i] + "\n";
-			}
 			
 			code += "mov " + offsetTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			
 			if (needVelocity)
-			{
 				code += "mov " + velocityTarget.toString() + "," + vertexZeroConst.toString() + "\n";
-			}
+			
 			if (needFragmentAnimation&&hasColorNode)
-			{
 				code += "mov " + varyTime.toString() + ".zw," + vertexZeroConst.toString() + "\n";
-			}
+			
 			
 			return code;
 		}

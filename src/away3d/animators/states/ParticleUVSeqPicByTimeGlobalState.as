@@ -1,6 +1,10 @@
 package away3d.animators.states
 {
-	import away3d.animators.data.ParticleRenderParameter;
+	import away3d.cameras.Camera3D;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleUVSeqPicByTimeGlobalNode;
 	import away3d.animators.ParticleAnimator;
@@ -20,14 +24,14 @@ package away3d.animators.states
 		}
 		
 		
-		override public function setRenderState(parameter:ParticleRenderParameter):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
-			if (parameter.animationRegisterCache.needUVAnimation)
+			if (animationRegisterCache.needUVAnimation)
 			{
-				var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
+				var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleUVSeqPicByTimeGlobalNode.UV_CONSTANT_REGISTER_0);
 				var data:Vector.<Number> = _particleUVSeqPicByTimeGlobalNode.renderData;
-				parameter.animationRegisterCache.setVertexConst(index, data[0], data[1], data[2], data[3]);
-				parameter.animationRegisterCache.setVertexConst(index + 1, data[4], data[5]);
+				animationRegisterCache.setVertexConst(index, data[0], data[1], data[2], data[3]);
+				animationRegisterCache.setVertexConst(index + 1, data[4], data[5]);
 			}
 		}
 	

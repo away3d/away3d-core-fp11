@@ -27,9 +27,6 @@ package away3d.animators
 	{
 		public static const POST_PRIORITY:int = 9;
 		
-		
-		private var compilers:Dictionary = new Dictionary(true);
-		
 		private var _animationRegisterCache:AnimationRegisterCache;
 		
 		private var _animationSubGeometries:Dictionary = new Dictionary(true);
@@ -108,7 +105,7 @@ package away3d.animators
 		
 		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			_animationRegisterCache = compilers[pass];
+			_animationRegisterCache = pass.animationRegisterCache;
 		}
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
@@ -121,9 +118,10 @@ package away3d.animators
 		
 		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
 		{
-			//reset animationRegisterCache
-			_animationRegisterCache = compilers[pass] ||= new AnimationRegisterCache();
+			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
+			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache();
 			
+			//reset animationRegisterCache
 			_animationRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
 			_animationRegisterCache.vertexAttributesOffset = pass.numUsedStreams;
 			_animationRegisterCache.varyingsOffset = pass.numUsedVaryings;
@@ -144,21 +142,14 @@ package away3d.animators
 			
 			var node:ParticleNodeBase;
 			for each(node in _particleNodes)
-			{
 				if (node.priority < POST_PRIORITY)
-				{
 					code += node.getAGALVertexCode(pass, _animationRegisterCache);
-				}
-			}
+			
 			code += _animationRegisterCache.getCombinationCode();
 			
 			for each(node in _particleNodes)
-			{
 				if (node.priority >= POST_PRIORITY)
-				{
 					code += node.getAGALVertexCode(pass, _animationRegisterCache);
-				}
-			}
 			
 			return code;
 		}
@@ -282,7 +273,9 @@ package away3d.animators
 			var oneData:Vector.<Number>;
 			var numVertices:uint;
 			var vertexData:Vector.<Number>;
-			var startingOffset:int;
+			var vertexLength:uint;
+			var startingOffset:uint;
+			var vertexOffset:uint;
 					
 			//default values for particle param
 			param.total = numParticles;
@@ -303,20 +296,28 @@ package away3d.animators
 				for each (localNode in _localNodes)
 					localNode.generatePropertyOfOneParticle(param);
 				
+				//loop through all particle data for the curent particle
 				while (j < particlesLength && (particle = particles[j]).particleIndex == i) {
 					animationSubGeometry = _animationSubGeometries[particle.subGeometry];
 					numVertices = particle.numVertices;
 					vertexData = animationSubGeometry.vertexData;
+					vertexLength = numVertices * _totalLenOfOneVertex;
 					startingOffset = animationSubGeometry.numProcessedVertices * _totalLenOfOneVertex;
 					
+					//loop through each local node in the animation set
 					for each (localNode in _localNodes) {
 						oneData = localNode.oneData;
 						oneDataLen = localNode.dataLength;
-						oneDataOffset = localNode.dataOffset;
+						oneDataOffset = startingOffset + localNode.dataOffset;
 						
-						for (counterForVertex = 0; counterForVertex < numVertices; counterForVertex++)
+						//loop through each vertex set in the vertex data
+						for (counterForVertex = 0; counterForVertex < vertexLength; counterForVertex+=_totalLenOfOneVertex) {
+							vertexOffset = oneDataOffset + counterForVertex;
+							
+							//add the data for the local node to the vertex data
 							for (counterForOneData = 0; counterForOneData < oneDataLen; counterForOneData++)
-								vertexData[startingOffset + oneDataOffset + _totalLenOfOneVertex * counterForVertex + counterForOneData] = oneData[counterForOneData];
+								vertexData[vertexOffset + counterForOneData] = oneData[counterForOneData];
+						}
 						
 						localNode.processExtraData(param, animationSubGeometry, numVertices);
 					}

@@ -1,6 +1,10 @@
 package away3d.animators.states
 {
-	import away3d.animators.data.ParticleRenderParameter;
+	import away3d.cameras.Camera3D;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.core.base.IRenderable;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleBillboardGlobalNode;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.ParticleAnimator;
@@ -21,15 +25,15 @@ package away3d.animators.states
 		}
 		
 		
-		override public function setRenderState(parameter:ParticleRenderParameter) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			matrix.copyFrom(parameter. renderable.sceneTransform);
-			matrix.append(parameter.camera.inverseSceneTransform);
+			matrix.copyFrom( renderable.sceneTransform);
+			matrix.append(camera.inverseSceneTransform);
 			var comps : Vector.<Vector3D> = matrix.decompose(Orientation3D.AXIS_ANGLE);
 			matrix.identity();
 			matrix.appendRotation( -comps[1].w * MathConsts.RADIANS_TO_DEGREES, comps[1]);
-			var index:int = parameter.animationRegisterCache.getRegisterIndex(particleNode, ParticleBillboardGlobalNode.MATRIX_CONSTANT_REGISTER);
-			parameter.animationRegisterCache.setVertexConstFromMatrix(index, matrix);
+			var index:int = animationRegisterCache.getRegisterIndex(particleNode, ParticleBillboardGlobalNode.MATRIX_CONSTANT_REGISTER);
+			animationRegisterCache.setVertexConstFromMatrix(index, matrix);
 		}
 		
 	}
