@@ -27,7 +27,7 @@ package away3d.animators.states
 		private var _targetPos:Vector3D = new Vector3D;
 		private var _targetEuler:Vector3D = new Vector3D;
 		
-		private var followStreams:Dictionary = new Dictionary(true);
+		private var followSubGeometries:Dictionary = new Dictionary(true);
 		
 		public function ParticleFollowState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
 		{
@@ -47,7 +47,7 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
-			var followStream:FollowSubGeometry = followStreams[renderable] ||= new FollowSubGeometry(animationSubGeometry.extraStorage[_animationNode]);
+			var followSubGeometry:FollowSubGeometry = followSubGeometries[renderable] ||= new FollowSubGeometry(animationSubGeometry.extraStorage[_animationNode]);
 			
 			if (_followTarget)
 			{
@@ -67,7 +67,7 @@ package away3d.animators.states
 			}
 			
 			var currentTime:Number = _time / 1000;
-			var previousTime:Number = followStream.previousTime;
+			var previousTime:Number = followSubGeometry.previousTime;
 			var deltaTime:Number = currentTime - previousTime;
 			
 			var needProcess:Boolean = previousTime != currentTime;
@@ -76,35 +76,35 @@ package away3d.animators.states
 			if (_particleFollowNode.needOffset && _particleFollowNode.needRotate)
 			{
 				if (needProcess)
-					processOffsetAndRotation(currentTime, deltaTime, followStream);
+					processOffsetAndRotation(currentTime, deltaTime, followSubGeometry);
 				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
-				followStream.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
-				followStream.activateVertexBuffer(index, 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followSubGeometry.activateVertexBuffer(index, 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (_particleFollowNode.needOffset)
 			{
 				if (needProcess)
-					processOffset(currentTime, deltaTime, followStream);
+					processOffset(currentTime, deltaTime, followSubGeometry);
 				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
-				followStream.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (_particleFollowNode.needRotate)
 			{
 				if (needProcess)
-					precessRotation(currentTime, deltaTime, followStream);
+					precessRotation(currentTime, deltaTime, followSubGeometry);
 				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
-				followStream.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			
-			followStream.previousTime = currentTime;
+			followSubGeometry.previousTime = currentTime;
 		
 		}
 		
-		private function processOffset(currentTime:Number, deltaTime:Number, followStream:FollowSubGeometry):void
+		private function processOffset(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
 		{
-			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
-			var vertexData:Vector.<Number> = followStream.vertexData;
+			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
+			var vertexData:Vector.<Number> = followSubGeometry.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
@@ -129,14 +129,14 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				followStream.invalidateBuffer();
+				followSubGeometry.invalidateBuffer();
 		
 		}
 		
-		private function precessRotation(currentTime:Number, deltaTime:Number, followStream:FollowSubGeometry):void
+		private function precessRotation(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
 		{
-			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
-			var vertexData:Vector.<Number> = followStream.vertexData;
+			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
+			var vertexData:Vector.<Number> = followSubGeometry.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
@@ -161,14 +161,14 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				followStream.invalidateBuffer();
+				followSubGeometry.invalidateBuffer();
 		
 		}
 		
-		private function processOffsetAndRotation(currentTime:Number, deltaTime:Number, followStream:FollowSubGeometry):void
+		private function processOffsetAndRotation(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
 		{
-			var data:Vector.<ParticleFollowingItem> = followStream.itemList;
-			var vertexData:Vector.<Number> = followStream.vertexData;
+			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
+			var vertexData:Vector.<Number> = followSubGeometry.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
@@ -195,7 +195,7 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				followStream.invalidateBuffer();
+				followSubGeometry.invalidateBuffer();
 		}
 	
 	}
