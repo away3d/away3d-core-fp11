@@ -8,7 +8,7 @@ package away3d.animators.data
 	 */
 	public class FollowSubGeometry
 	{
-		public var previousTime:Number;
+		public var previousTime:Number=0;
 		private var _storage:ParticleFollowStorage;
 		
 		protected var _vertexData:Vector.<Number>;
