@@ -14,7 +14,7 @@ package away3d.animators.data
 		//vertex
 		public var positionAttribute:ShaderRegisterElement;
 		public var uvAttribute:ShaderRegisterElement;
-		public var offsetTarget:ShaderRegisterElement;
+		public var positionTarget:ShaderRegisterElement;
 		public var scaleAndRotateTarget:ShaderRegisterElement;
 		public var velocityTarget:ShaderRegisterElement;
 		public var vertexTime:ShaderRegisterElement;
@@ -100,9 +100,9 @@ package away3d.animators.data
 			}
 
 			//allot temp register
-			offsetTarget = getFreeVertexVectorTemp();
-			addVertexTempUsages(offsetTarget, 1);
-			offsetTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xyz");
+			positionTarget = getFreeVertexVectorTemp();
+			addVertexTempUsages(positionTarget, 1);
+			positionTarget = new ShaderRegisterElement(positionTarget.regName, positionTarget.index, "xyz");
 
 			if (needVelocity)
 			{
@@ -110,7 +110,7 @@ package away3d.animators.data
 				addVertexTempUsages(velocityTarget, 1);
 				velocityTarget = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "xyz");
 				vertexTime = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "w");
-				vertexLife = new ShaderRegisterElement(offsetTarget.regName, velocityTarget.index, "w");
+				vertexLife = new ShaderRegisterElement(positionTarget.regName, velocityTarget.index, "w");
 			}
 			else
 			{
@@ -133,7 +133,7 @@ package away3d.animators.data
 			uvVar = getRegisterFromString(UVVaring);
 			uvAttribute = getRegisterFromString(UVAttribute);
 			//uv action is processed after normal actions,so use offsetTarget as uvTarget
-			uvTarget = new ShaderRegisterElement(offsetTarget.regName, offsetTarget.index, "xy");
+			uvTarget = new ShaderRegisterElement(positionTarget.regName, positionTarget.index, "xy");
 		}
 		
 		public function setRegisterIndex(node:AnimationNodeBase, parameterIndex:int, registerIndex:int):void
@@ -155,7 +155,7 @@ package away3d.animators.data
 			for (var i:int = 0; i < len; i++)
 				code += "mov " + targetRegisters[i] + "," + sourceRegisters[i] + "\n";
 			
-			code += "mov " + offsetTarget.toString() + "," + vertexZeroConst.toString() + "\n";
+			code += "mov " + positionTarget.toString() + "," + vertexZeroConst.toString() + "\n";
 			
 			if (needVelocity)
 				code += "mov " + velocityTarget.toString() + "," + vertexZeroConst.toString() + "\n";
@@ -169,7 +169,7 @@ package away3d.animators.data
 		
 		public function getCombinationCode():String
 		{
-			return "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + offsetTarget.toString() + "\n";
+			return "add " + scaleAndRotateTarget.toString() +"," + scaleAndRotateTarget.toString() + "," + positionTarget.toString() + "\n";
 		}
 		
 		private function getRegisterFromString(code:String):ShaderRegisterElement

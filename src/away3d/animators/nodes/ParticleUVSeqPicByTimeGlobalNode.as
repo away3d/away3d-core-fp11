@@ -119,50 +119,50 @@ package away3d.animators.nodes
 			
 			var code:String = "";
 			//scale uv
-			code += "mul " + u.toString() + "," + u.toString() + "," + uStep.toString() + "\n";
-			if (_needV) code += "mul " + v.toString() + "," + v.toString() + "," + vStep.toString() + "\n";
+			code += "mul " + u + "," + u + "," + uStep + "\n";
+			if (_needV) code += "mul " + v + "," + v + "," + vStep + "\n";
 			
 			if (_hasStartTime)
 			{
-				code += "sub " + time.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + startTime.toString() + "\n";
-				code += "max " + time.toString() + "," + time.toString() + "," + animationRegisterCache.vertexZeroConst.toString() + "\n";
+				code += "sub " + time + "," + animationRegisterCache.vertexTime + "," + startTime + "\n";
+				code += "max " + time + "," + time + "," + animationRegisterCache.vertexZeroConst + "\n";
 			}
 			else
 			{
-				code += "mov " + time.toString() +"," + animationRegisterCache.vertexTime.toString() + "\n";
+				code += "mov " + time +"," + animationRegisterCache.vertexTime + "\n";
 			}
 			if (!_loop)
 			{
-				code += "min " + time.toString() + "," + time.toString() + "," + endThreshold.toString() + "\n";
+				code += "min " + time + "," + time + "," + endThreshold + "\n";
 			}
 			else
 			{
-				code += "div " + time.toString() + "," + time.toString() + "," + cycle.toString() + "\n";
-				code += "frc " + time.toString() + "," + time.toString() + "\n";
-				code += "mul " + time.toString() + "," + time.toString() + "," + cycle.toString() + "\n";
+				code += "div " + time + "," + time + "," + cycle + "\n";
+				code += "frc " + time + "," + time + "\n";
+				code += "mul " + time + "," + time + "," + cycle + "\n";
 			}
 			
 			
-			code += "mul " + temp.toString() + "," + time.toString() + "," + uSpeed.toString() + "\n";
+			code += "mul " + temp + "," + time + "," + uSpeed + "\n";
 			if (_needV)
 			{
-				code += "frc " + temp2.toString() + "," + temp.toString() + "\n";
-				code += "sub " + vOffset.toString() + "," + temp.toString() + "," + temp2.toString() + "\n";
-				code += "mul " + vOffset.toString() + "," + vOffset.toString() + "," + vStep.toString() + "\n";
-				code += "add " + v.toString() + "," + v.toString() + "," + vOffset.toString() + "\n";
+				code += "frc " + temp2 + "," + temp + "\n";
+				code += "sub " + vOffset + "," + temp + "," + temp2 + "\n";
+				code += "mul " + vOffset + "," + vOffset + "," + vStep + "\n";
+				code += "add " + v + "," + v + "," + vOffset + "\n";
 			}
 			code += stepDiv(temp, temp, uStep, temp2);
-			code += "add " + u.toString() + "," + u.toString() + "," + temp.toString() + "\n";
+			code += "add " + u + "," + u + "," + temp + "\n";
 			
 			return code;
 		}
 		
 		private function stepDiv(destination:ShaderRegisterElement, source1:ShaderRegisterElement, source2:ShaderRegisterElement, temp:ShaderRegisterElement):String
 		{
-			return "div " + temp.toString() + "," + source1.toString() + "," + source2.toString() + "\n" +
-					"frc " + destination.toString() + "," + temp.toString() + "\n"+
-					"sub " + temp.toString() + "," + temp.toString() + "," + destination.toString() + "\n" +
-					"mul " + destination.toString() + "," + temp.toString() + "," + source2.toString() + "\n";
+			return "div " + temp + "," + source1 + "," + source2 + "\n" +
+					"frc " + destination + "," + temp + "\n"+
+					"sub " + temp + "," + temp + "," + destination + "\n" +
+					"mul " + destination + "," + temp + "," + source2 + "\n";
 		}
 	
 	}

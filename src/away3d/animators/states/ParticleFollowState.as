@@ -1,5 +1,6 @@
 package away3d.animators.states
 {
+	import away3d.arcane;
 	import away3d.animators.data.ParticleFollowingItem;
 	import away3d.animators.data.FollowSubGeometry;
 	import away3d.cameras.Camera3D;
@@ -8,13 +9,14 @@ package away3d.animators.states
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleFollowNode;
-	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.ParticleAnimator;
 	import away3d.core.base.Object3D;
 	import away3d.core.math.MathConsts;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
+	
+	use namespace arcane;
 	
 	/**
 	 * ...
@@ -29,10 +31,11 @@ package away3d.animators.states
 		
 		private var followSubGeometries:Dictionary = new Dictionary(true);
 		
-		public function ParticleFollowState(animator:ParticleAnimator, particleNode:ParticleNodeBase)
+		public function ParticleFollowState(animator:ParticleAnimator, particleFollowNode:ParticleFollowNode)
 		{
-			super(animator, particleNode, true);
-			_particleFollowNode = particleNode as ParticleFollowNode;
+			super(animator, particleFollowNode, true);
+			
+			_particleFollowNode = particleFollowNode;
 		}
 		
 		public function get followTarget():Object3D
@@ -45,19 +48,22 @@ package away3d.animators.states
 			_followTarget = value;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			var followSubGeometry:FollowSubGeometry = followSubGeometries[renderable] ||= new FollowSubGeometry(animationSubGeometry.extraStorage[_animationNode]);
 			
 			if (_followTarget)
 			{
-				if (_particleFollowNode.needOffset)
+				if (_particleFollowNode._hasPosition)
 				{
 					_targetPos.x = _followTarget.position.x;
 					_targetPos.y = _followTarget.position.y;
 					_targetPos.z = _followTarget.position.z;
 				}
-				if (_particleFollowNode.needRotate)
+				if (_particleFollowNode._hasRotation)
 				{
 					_targetEuler.x = _followTarget.rotationX;
 					_targetEuler.y = _followTarget.rotationY;
@@ -73,27 +79,27 @@ package away3d.animators.states
 			var needProcess:Boolean = previousTime != currentTime;
 			
 			var index:int;
-			if (_particleFollowNode.needOffset && _particleFollowNode.needRotate)
+			if (_particleFollowNode._hasPosition && _particleFollowNode._hasRotation)
 			{
 				if (needProcess)
-					processOffsetAndRotation(currentTime, deltaTime, followSubGeometry);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
+					processPositionAndRotation(currentTime, deltaTime, followSubGeometry);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX);
 				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX);
 				followSubGeometry.activateVertexBuffer(index, 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (_particleFollowNode.needOffset)
+			else if (_particleFollowNode._hasPosition)
 			{
 				if (needProcess)
-					processOffset(currentTime, deltaTime, followSubGeometry);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_OFFSET_STREAM_REGISTER);
+					processPosition(currentTime, deltaTime, followSubGeometry);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX);
 				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (_particleFollowNode.needRotate)
+			else if (_particleFollowNode._hasRotation)
 			{
 				if (needProcess)
 					precessRotation(currentTime, deltaTime, followSubGeometry);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_STREAM_REGISTER);
+				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX);
 				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			
@@ -101,7 +107,7 @@ package away3d.animators.states
 		
 		}
 		
-		private function processOffset(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
+		private function processPosition(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
 		{
 			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
 			var vertexData:Vector.<Number> = followSubGeometry.vertexData;
@@ -165,7 +171,7 @@ package away3d.animators.states
 		
 		}
 		
-		private function processOffsetAndRotation(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
+		private function processPositionAndRotation(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
 		{
 			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
 			var vertexData:Vector.<Number> = followSubGeometry.vertexData;

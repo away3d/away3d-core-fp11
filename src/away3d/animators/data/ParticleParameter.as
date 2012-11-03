@@ -11,8 +11,8 @@ package away3d.animators.data
 		public var total:uint;
 		
 		public var startTime:Number;
-		public var duringTime:Number;
-		public var sleepTime:Number;
+		public var duration:Number;
+		public var delay:Number;
 	}
 
 }

@@ -1,40 +1,38 @@
 package away3d.animators.nodes
 {
+	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.states.ParticleTimeState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	
+	use namespace arcane;
+	
 	/**
 	 * ...
 	 * @author ...
 	 */
-	public class ParticleTimeNode extends LocalParticleNodeBase
+	public class ParticleTimeNode extends ParticleNodeBase
 	{
-		public static const NAME:String = "ParticleTimeNode";
-		public static const TIME_STREAM_REGISTER:int = 0;
-		public static const TIME_CONSTANT_REGISTER:int = 1;
+		/** @private */
+		arcane static const TIME_STREAM_INDEX:uint = 0;
 		
+		/** @private */
+		arcane static const TIME_CONSTANT_INDEX:uint = 1;
 		
-		private var _tempStartTime:Number;
-		private var _tempDuringTime:Number;
-		private var _tempSleepTime:Number;
-		
-		
-		protected var _hasDuringTime:Boolean;
-		protected var _hasSleepTime:Boolean;
+		protected var _hasDuration:Boolean;
+		protected var _hasDelay:Boolean;
 		protected var _loop:Boolean;
 		
+		/**
+		 * Used to set the time node into local property mode.
+		 */
+		public static const LOCAL:uint = 0;
 		
-		public function ParticleTimeNode()
-		{
-			super(NAME, 0);
-			_stateClass = ParticleTimeState;
-			_dataLength = 4;
-			initOneData();
-		}
-		
+		/**
+		 * Defines whether the time track is in loop mode. Defaults to false.
+		 */
 		public function get loop():Boolean
 		{
 			return _loop;
@@ -42,108 +40,125 @@ package away3d.animators.nodes
 		public function set loop(value:Boolean):void
 		{
 			_loop = value;
+			
 			if (_loop)
-			{
-				_hasDuringTime = true;
-			}
+				_hasDuration = true;
 			else
-			{
-				_hasSleepTime = false;
-			}
+				_hasDelay = false;
 		}
 		
-		public function get hasDuringTime():Boolean
+		/**
+		 * 
+		 */
+		public function get hasDuration():Boolean
 		{
-			return _hasDuringTime;
+			return _hasDuration;
 		}
 		
-		public function set hasDuringTime(value:Boolean):void
+		public function set hasDuration(value:Boolean):void
 		{
-			_hasDuringTime = value;
-			if (!_hasDuringTime)
-			{
-				_hasSleepTime = false;
+			_hasDuration = value;
+			if (!_hasDuration) {
+				_hasDelay = false;
 				_loop = false;
 			}
 		}
 		
-		public function get hasSleepTime():Boolean
+		/**
+		 * 
+		 */
+		public function get hasDelay():Boolean
 		{
-			return _hasSleepTime;
+			return _hasDelay;
 		}
 		
-		public function set hasSleepTime(value:Boolean):void
+		public function set hasDelay(value:Boolean):void
 		{
-			_hasSleepTime = value;
-			if (_hasSleepTime)
+			_hasDelay = value;
+			if (_hasDelay)
 			{
 				_loop = true;
-				_hasDuringTime = true;
+				_hasDuration = true;
 			}
 		}
 		
-		override public function generatePropertyOfOneParticle(param:ParticleParameter):void
+		/**
+		 * Creates a new <code>ParticleTimeNode</code>
+		 *
+		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 * @param    [optional] loop            Defines whether the time track is in loop mode. Defaults to false.
+		 */
+		public function ParticleTimeNode(mode:uint, loop:Boolean = false)
 		{
-			_tempStartTime = param.startTime;
-			_tempDuringTime = param.duringTime;
-			_tempSleepTime = param.sleepTime;
+			_stateClass = ParticleTimeState;
 			
-			_oneData[0] = _tempStartTime;
-			_oneData[1] = _tempDuringTime;
-			_oneData[2] = _tempSleepTime + _tempDuringTime;
-			_oneData[3] = 1 / _tempDuringTime;
+			_loop = loop;
 			
+			super("ParticleTimeNode" + mode, mode, 4, 0);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var timeStreamRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();//timeStreamRegister.x is start，timeStreamRegister.y is during time
-			animationRegisterCache.setRegisterIndex(this, TIME_STREAM_REGISTER, timeStreamRegister.index);
+			animationRegisterCache.setRegisterIndex(this, TIME_STREAM_INDEX, timeStreamRegister.index);
 			var timeConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
-			animationRegisterCache.setRegisterIndex(this, TIME_CONSTANT_REGISTER, timeConst.index);
+			animationRegisterCache.setRegisterIndex(this, TIME_CONSTANT_INDEX, timeConst.index);
 			
 			var code:String = "";
-			code += "sub " + animationRegisterCache.vertexTime.toString() + "," + timeConst.toString() + "," + timeStreamRegister.toString() + ".x\n";
+			code += "sub " + animationRegisterCache.vertexTime + "," + timeConst + "," + timeStreamRegister + ".x\n";
 			//if time=0,set the position to zero.
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
-			code += "sge " + temp.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + animationRegisterCache.vertexZeroConst.toString() + "\n";
-			code += "mul " + animationRegisterCache.scaleAndRotateTarget.toString() + "," + animationRegisterCache.scaleAndRotateTarget.toString() + "," + temp.toString() + "\n";
-			if (_hasDuringTime)
+			code += "sge " + temp + "," + animationRegisterCache.vertexTime + "," + animationRegisterCache.vertexZeroConst + "\n";
+			code += "mul " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
+			if (_hasDuration)
 			{
 				if (_loop)
 				{
 					var div:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
-					if (_hasSleepTime)
+					if (_hasDelay)
 					{
-						code += "div " + div.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + timeStreamRegister.toString() + ".z\n";
-						code += "frc " + div.toString() + "," + div.toString() + "\n";
-						code += "mul " + animationRegisterCache.vertexTime.toString() + "," +div.toString() + "," + timeStreamRegister.toString() + ".z\n";
-						code += "slt " + div.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + timeStreamRegister.toString() + ".y\n";
-						code += "mul " + animationRegisterCache.scaleAndRotateTarget.toString() + "," + animationRegisterCache.scaleAndRotateTarget.toString() + "," + div.toString() + "\n";
+						code += "div " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".z\n";
+						code += "frc " + div + "," + div + "\n";
+						code += "mul " + animationRegisterCache.vertexTime + "," +div + "," + timeStreamRegister + ".z\n";
+						code += "slt " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".y\n";
+						code += "mul " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + div + "\n";
 					}
 					else
 					{
-						code += "mul " + div.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + timeStreamRegister.toString() + ".w\n";
-						code += "frc " + div.toString() + "," + div.toString() + "\n";
-						code += "mul " + animationRegisterCache.vertexTime.toString() + "," +div.toString() + "," + timeStreamRegister.toString() + ".y\n";
+						code += "mul " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".w\n";
+						code += "frc " + div + "," + div + "\n";
+						code += "mul " + animationRegisterCache.vertexTime + "," +div + "," + timeStreamRegister + ".y\n";
 					}
 				}
 				else
 				{
 					var sge:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
-					code += "sge " + sge.toString() + "," +  timeStreamRegister.toString() + ".y," + animationRegisterCache.vertexTime.toString() + "\n";
-					code += "mul " + animationRegisterCache.scaleAndRotateTarget.toString() + "," + animationRegisterCache.scaleAndRotateTarget.toString() + "," + sge.toString() + "\n";
+					code += "sge " + sge + "," +  timeStreamRegister + ".y," + animationRegisterCache.vertexTime + "\n";
+					code += "mul " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + sge + "\n";
 				}
 			}
-			code += "mul " + animationRegisterCache.vertexLife.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + timeStreamRegister.toString() + ".w\n";
+			code += "mul " + animationRegisterCache.vertexLife + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".w\n";
 			if (animationRegisterCache.needFragmentAnimation && animationRegisterCache.hasColorNode)
 			{
-				code += "mov " + animationRegisterCache.fragmentTime.toString() + "," + animationRegisterCache.vertexTime.toString() +"\n";
-				code += "mov " + animationRegisterCache.fragmentLife.toString() + "," + animationRegisterCache.vertexLife.toString() +"\n";
+				code += "mov " + animationRegisterCache.fragmentTime + "," + animationRegisterCache.vertexTime +"\n";
+				code += "mov " + animationRegisterCache.fragmentLife + "," + animationRegisterCache.vertexLife +"\n";
 			}
 			return code;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		{
+			_oneData[0] = param.startTime;
+			_oneData[1] = param.duration;
+			_oneData[2] = param.delay + param.duration;
+			_oneData[3] = 1 / param.duration;
+			
+		}
 	}
-
 }

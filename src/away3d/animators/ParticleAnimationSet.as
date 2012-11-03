@@ -6,7 +6,6 @@ package away3d.animators
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleParameter;
 	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.animators.nodes.LocalParticleNodeBase;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleTimeNode;
 	import away3d.arcane;
@@ -33,7 +32,7 @@ package away3d.animators
 		
 		private var _particleNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
 		
-		private var _localNodes:Vector.<LocalParticleNodeBase> = new Vector.<LocalParticleNodeBase>();
+		private var _localNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
 		
 		private var _totalLenOfOneVertex:int = 0;
 		
@@ -52,7 +51,7 @@ package away3d.animators
 		public function ParticleAnimationSet()
 		{
 			super();
-			timeNode = new ParticleTimeNode();
+			timeNode = new ParticleTimeNode(ParticleTimeNode.LOCAL);
 			addAnimation(timeNode);
 		}
 		
@@ -66,14 +65,14 @@ package away3d.animators
 			return _animationRegisterCache;
 		}
 		
-		public function set hasDuringTime(value:Boolean):void
+		public function set hasDuration(value:Boolean):void
 		{
-			timeNode.hasDuringTime = value;
+			timeNode.hasDuration = value;
 		}
 		
-		public function set hasSleepTime(value:Boolean):void
+		public function set hasDelay(value:Boolean):void
 		{
-			timeNode.hasSleepTime = value;
+			timeNode.hasDelay = value;
 		}
 		
 		
@@ -87,7 +86,7 @@ package away3d.animators
 			var i:int;
 			var n:ParticleNodeBase = node as ParticleNodeBase;
 			n.processAnimationSetting(this);
-			if (n.nodeType==ParticleNodeBase.LOCAL) {
+			if (n.mode == ParticleNodeBase.LOCAL) {
 				n.dataOffset = _totalLenOfOneVertex;
 				_totalLenOfOneVertex += n.dataLength;
 				_localNodes.push(n);
@@ -238,7 +237,7 @@ package away3d.animators
 			var newAnimationSubGeometry:Boolean;
 			var subGeometry:ISubGeometry;
 			var subMesh:SubMesh;
-			var localNode:LocalParticleNodeBase;
+			var localNode:ParticleNodeBase;
 			
 			for (i = 0; i < mesh.subMeshes.length; i++)
 			{
@@ -280,8 +279,8 @@ package away3d.animators
 			//default values for particle param
 			param.total = numParticles;
 			param.startTime = 0;
-			param.duringTime = 1000;
-			param.sleepTime = 0.1;
+			param.particleDuration = 1000;
+			param.delay = 0.1;
 			
 			i = 0;
 			j = 0;

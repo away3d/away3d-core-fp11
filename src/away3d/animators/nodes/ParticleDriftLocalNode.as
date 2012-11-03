@@ -51,15 +51,15 @@ package away3d.animators.nodes
 			animationRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "mul " + dgree.toString() + "," + animationRegisterCache.vertexTime.toString() + "," + driftAttribute.toString() + ".w\n";
-			code += "sin " + sin.toString() + "," + dgree.toString() + "\n";
-			code += "mul " + distance.toString() + "," + sin.toString() + "," + driftAttribute.toString() + ".xyz\n";
-			code += "add " + animationRegisterCache.offsetTarget.toString() +"," + distance.toString() + "," + animationRegisterCache.offsetTarget.toString() + "\n";
+			code += "mul " + dgree + "," + animationRegisterCache.vertexTime + "," + driftAttribute + ".w\n";
+			code += "sin " + sin + "," + dgree + "\n";
+			code += "mul " + distance + "," + sin + "," + driftAttribute + ".xyz\n";
+			code += "add " + animationRegisterCache.positionTarget +"," + distance + "," + animationRegisterCache.positionTarget + "\n";
 			
 			if (animationRegisterCache.needVelocity)
-			{	code += "cos " + cos.toString() + "," + dgree.toString() + "\n";
-				code += "mul " + distance.toString() + "," + cos.toString() + "," + driftAttribute.toString() + ".xyz\n";
-				code += "add " + animationRegisterCache.velocityTarget.toString() + ".xyz," + distance.toString() + "," + animationRegisterCache.velocityTarget.toString() + ".xyz\n";
+			{	code += "cos " + cos + "," + dgree + "\n";
+				code += "mul " + distance + "," + cos + "," + driftAttribute + ".xyz\n";
+				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + "," + animationRegisterCache.velocityTarget + ".xyz\n";
 			}
 			
 			return code;
