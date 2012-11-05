@@ -78,29 +78,27 @@ package away3d.animators.states
 			
 			var needProcess:Boolean = previousTime != currentTime;
 			
-			var index:int;
 			if (_particleFollowNode._hasPosition && _particleFollowNode._hasRotation)
 			{
 				if (needProcess)
 					processPositionAndRotation(currentTime, deltaTime, followSubGeometry);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX);
-				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX);
-				followSubGeometry.activateVertexBuffer(index, 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				
+				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX), 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (_particleFollowNode._hasPosition)
 			{
 				if (needProcess)
 					processPosition(currentTime, deltaTime, followSubGeometry);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX);
-				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				
+				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (_particleFollowNode._hasRotation)
 			{
 				if (needProcess)
 					precessRotation(currentTime, deltaTime, followSubGeometry);
-				index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX);
-				followSubGeometry.activateVertexBuffer(index, 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				
+				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			
 			followSubGeometry.previousTime = currentTime;
