@@ -34,7 +34,7 @@ package away3d.animators.states
 			if (_particleAccelerationNode.mode == ParticleAccelerationNode.LOCAL) {
 				animationSubGeometry.activateVertexBuffer(index, _particleAccelerationNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {
-				var halfAcceleration:Vector3D = _particleAccelerationNode.halfAcceleration;
+				var halfAcceleration:Vector3D = _particleAccelerationNode._halfAcceleration;
 				animationRegisterCache.setVertexConst(index, halfAcceleration.x, halfAcceleration.y, halfAcceleration.z);
 			}
 		}
