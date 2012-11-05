@@ -115,7 +115,7 @@ package away3d.animators
 				context.setVertexBufferAt(i, null);
 		}
 		
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
 			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache();

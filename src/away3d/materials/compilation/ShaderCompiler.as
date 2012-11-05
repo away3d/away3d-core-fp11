@@ -32,8 +32,8 @@ package away3d.materials.compilation
 		protected var _framentPostLightCode : String;
 		private var _commonsDataIndex : int = -1;
 
-		protected var _animatableAttributes : Array;
-		protected var _animationTargetRegisters : Array;
+		protected var _animatableAttributes : Vector.<String>;
+		protected var _animationTargetRegisters : Vector.<String>;
 
 		protected var _lightProbeDiffuseIndices : Vector.<uint>;
 		protected var _lightProbeSpecularIndices : Vector.<uint>;
@@ -155,8 +155,8 @@ package away3d.materials.compilation
 			initRegisterIndices();
 			initLightData();
 
-			_animatableAttributes = ["va0"];
-			_animationTargetRegisters = ["vt0"];
+			_animatableAttributes = Vector.<String>(["va0"]);
+			_animationTargetRegisters = Vector.<String>(["vt0"]);
 			_vertexCode = "";
 			_fragmentCode = "";
 
@@ -605,12 +605,12 @@ package away3d.materials.compilation
 			return _usingSpecularMethod;
 		}
 
-		public function get animatableAttributes() : Array
+		public function get animatableAttributes() : Vector.<String>
 		{
 			return _animatableAttributes;
 		}
 
-		public function get animationTargetRegisters() : Array
+		public function get animationTargetRegisters() : Vector.<String>
 		{
 			return _animationTargetRegisters;
 		}
