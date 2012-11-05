@@ -19,15 +19,18 @@ package away3d.animators.nodes
 		arcane static const SCALE_INDEX:uint = 0;
 		
 		/** @private */
-		arcane var _startScale:Number;
+		arcane var _minScale:Number;
 		
 		/** @private */
 		arcane var _hasCycle:Boolean;
 		
 		/** @private */
+		arcane var _hasPhase:Boolean;
+		
+		/** @private */
 		arcane var _scaleData:Vector3D;
 		
-		private var _endScale:Number;
+		private var _maxScale:Number;
 		private var _cycleSpeed:Number;
 		private var _cyclePhase:Number;
 		
@@ -50,14 +53,14 @@ package away3d.animators.nodes
 		/**
 		 * Defines the end scale of the node, when in global mode.
 		 */
-		public function get startScale():Number
+		public function get minScale():Number
 		{
-			return _startScale;
+			return _minScale;
 		}
 		
-		public function set startScale(value:Number):void
+		public function set minScale(value:Number):void
 		{
-			_startScale = value;
+			_minScale = value;
 			
 			updateScaleData();
 		}
@@ -65,13 +68,13 @@ package away3d.animators.nodes
 		/**
 		 * Defines the end scale of the node, when in global mode.
 		 */
-		public function get endScale():Number
+		public function get maxScale():Number
 		{
-			return _endScale;
+			return _maxScale;
 		}
-		public function set endScale(value:Number):void
+		public function set maxScale(value:Number):void
 		{
-			_endScale = value;
+			_maxScale = value;
 			
 			updateScaleData();
 		}
@@ -108,22 +111,28 @@ package away3d.animators.nodes
 		 * Creates a new <code>ParticleScaleNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
-		 * @param    [optional] startScale      Defines the start scale transform of the node, when in global mode.
-		 * @param    [optional] endScale        Defines the end color transform of the node, when in global mode.
+		 * @param    [optional] minScale      Defines the min scale transform of the node, when in global mode.
+		 * @param    [optional] maxScale        Defines the max color transform of the node, when in global mode.
 		 * @param    [optional] cycleSpeed      Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to zero.
 		 * @param    [optional] cyclePhase      Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
 		 */
-		public function ParticleScaleNode(mode:uint, startScale:Number = 1, endScale:Number = 1, cycleSpeed:Number = 0, cyclePhase:Number = 0)
+		public function ParticleScaleNode(mode:uint, minScale:Number = 1, maxScale:Number = 1, cycleSpeed:Number = 0, cyclePhase:Number = 0)
 		{
-			super("ParticleScaleNode" + mode, mode, 3, 2);
+			var len:int = 2;
+			if (cycleSpeed)
+				len++;
+			if (cyclePhase)
+				len++;
+			super("ParticleScaleNode" + mode, mode, len, 3);
 			
 			_stateClass = ParticleScaleState;
 			
-			_startScale = startScale;
-			_endScale = endScale;
+			_minScale = minScale;
+			_maxScale = maxScale;
 			_cycleSpeed = cycleSpeed;
 			_cyclePhase = cyclePhase;
-			
+			_hasCycle = (_cycleSpeed != 0);
+			_hasPhase = (_cyclePhase != 0);
 			updateScaleData();
 		}
 		
@@ -135,40 +144,33 @@ package away3d.animators.nodes
 			var code:String = "";
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			
-			if (_mode == LOCAL) {
-				var scaleAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
-				animationRegisterCache.setRegisterIndex(this, SCALE_INDEX, scaleAttribute.index);
+			var scaleRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, SCALE_INDEX, scaleRegister.index);
+			
+			
+			
+			if (_hasCycle) {
+				code += "mul " + temp + "," + animationRegisterCache.vertexTime + "," + scaleRegister + ".z\n";
 				
+				if (_hasPhase)
+					code += "add " + temp + "," + temp + "," + scaleRegister + ".w\n";
 				
-				code += "mul " + temp + "," + animationRegisterCache.vertexLife + "," + scaleAttribute + ".y\n";
-				code += "add " + temp + "," + temp + "," + scaleAttribute + ".x\n";
-				code += "mul " + animationRegisterCache.scaleAndRotateTarget +"," +animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
-			} else {
-				var scaleConstant:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
-				animationRegisterCache.setRegisterIndex(this, SCALE_INDEX, scaleConstant.index);
-				
-				if (_cycleSpeed) {
-					code += "mul " + temp + "," + animationRegisterCache.vertexTime + "," + scaleConstant + ".z\n";
-					
-					if (_cyclePhase)
-						code += "add " + temp + "," + temp + "," + scaleConstant + ".w\n";
-					
-					code += "sin " + temp + "," + temp + "\n";
-				}
-				
-				code += "mul " + temp + "," + scaleConstant + ".y," + ((_cycleSpeed)? temp : animationRegisterCache.vertexLife) + "\n";
-				code += "add " + temp + "," + scaleConstant + ".x," + temp + "\n";
-				code += "mul " + animationRegisterCache.scaleAndRotateTarget +"," +animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";				
+				code += "sin " + temp + "," + temp + "\n";
 			}
+			
+			code += "mul " + temp + "," + scaleRegister + ".y," + ((_hasCycle)? temp : animationRegisterCache.vertexLife) + "\n";
+			code += "add " + temp + "," + scaleRegister + ".x," + temp + "\n";
+			code += "mul " + animationRegisterCache.scaleAndRotateTarget +"," +animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
+			
 			return code;
 		}
 		
 		private function updateScaleData():void
 		{
 			if (_hasCycle) {
-				_scaleData = new Vector3D((_startScale + _endScale) / 2, Math.abs(_startScale - _endScale) / 2, Math.PI * 2 / _cycleSpeed, _cyclePhase * Math.PI / 180);
+				_scaleData = new Vector3D((_minScale + _maxScale) / 2, Math.abs(_minScale - _maxScale) / 2, Math.PI * 2 / _cycleSpeed, _cyclePhase * Math.PI / 180);
 			} else {
-				_scaleData = new Vector3D(_startScale, _endScale - _startScale, Math.PI * 2 / _cycleSpeed, _cyclePhase * Math.PI / 180);
+				_scaleData = new Vector3D(_minScale, _maxScale - _minScale, 0, 0);
 			}
 		}
 		
@@ -177,12 +179,24 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
-			var offset:Vector3D = param[SCALE_VECTOR3D];
-			if (!offset)
+			var scale:Vector3D = param[SCALE_VECTOR3D];
+			if (!scale)
 				throw(new Error("there is no " + SCALE_VECTOR3D + " in param!"));
 			
-			_oneData[0] = offset.x;
-			_oneData[1] = offset.y;
+			if (_hasCycle)
+			{
+				_oneData[0] = (scale.x + scale.y) / 2;
+				_oneData[1] = Math.abs(_minScale - _maxScale) / 2;
+				_oneData[2] = Math.PI * 2 / (scale.z || cycleSpeed);
+				if (_hasPhase)
+					_oneData[3] = scale.w * Math.PI / 180;
+			}
+			else
+			{
+				_oneData[0] = scale.x;
+				_oneData[1] = scale.y - scale.x;
+			}
+			
 		}
 	}
 
