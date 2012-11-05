@@ -31,7 +31,7 @@ package away3d.animators.states
 		{
 			if (animationRegisterCache.needUVAnimation)
 			{
-				var data:Vector.<Number> = _particleSpriteSheetNode.renderData;
+				var data:Vector.<Number> = _particleSpriteSheetNode._spriteSheetData;
 				animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_0), data[0], data[1], data[2], data[3]);
 				animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_1), data[4], data[5]);
 			}
