@@ -1,46 +1,91 @@
 package away3d.animators.nodes
 {
+	import flash.geom.Vector3D;
+	import away3d.arcane;
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleUVSeqPicByTimeGlobalState;
+	import away3d.animators.states.ParticleSpriteSheetState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
+	
+	use namespace arcane;
+	
 	/**
 	 * Note: to use this class, make sure material::repeat is ture
 	 */
-	public class ParticleUVSeqPicByTimeGlobalNode extends GlobalParticleNodeBase
+	public class ParticleSpriteSheetNode extends ParticleNodeBase
 	{
-		public static const NAME:String = "ParticleUVSeqPicByTimeGlobalNode";
-		public static const UV_CONSTANT_REGISTER_0:int = 0;
-		public static const UV_CONSTANT_REGISTER_1:int = 1;
+		/** @private */
+		arcane static const UV_INDEX_0:uint = 0;
 		
-		private var _hasStartTime:Boolean;
+		/** @private */
+		arcane static const UV_INDEX_1:uint = 1;
+		
+		/** @private */
+		arcane var _cycleData:Vector3D;
+		
+		private var _frameRate:Number;
+		
+		/**
+		 * Used to set the spritesheet node into global property mode.
+		 */
+		public static const GLOBAL:uint = 1;
+		
+		/**
+		 * Defines the frame rate, when in global mode. Defaults to zero.
+		 */
+		public function get frameRate():Number
+		{
+			return _frameRate;
+		}
+		public function set frameRate(value:Number):void
+		{
+			_frameRate = value;
+			
+			updateSpriteSheetData();
+		}
+		
+		/**
+		 * Defines the start time, when in global mode. Defaults to zero.
+		 */
+		public function get startTime():Number
+		{
+			return _startTime;
+		}
+		public function set startTime(value:Number):void
+		{
+			_startTime = value;
+			
+			updateSpriteSheetData();
+		}
+		
 		private var _loop:Boolean;
-		private var _needV:Boolean;
 		private var _total:int;
 		
 		private var _data:Vector.<Number>;
-		private var _cycle:Number;
-		private var _columns:int;
-		private var _rows:int;
+		private var _numColumns:int;
+		private var _numRows:int;
 		private var _startTime:Number;
 		
-		
-		public function ParticleUVSeqPicByTimeGlobalNode(columns:int, rows:int , cycle:Number, usingNum:int = int.MAX_VALUE, startTime:Number = 0, loop:Boolean = true)
+		/**
+		 * Creates a new <code>ParticleColorNode</code>
+		 *
+		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 */
+		public function ParticleSpriteSheetNode(mode:uint, numColumns:int, numRows:uint, startTime:Number = 0, frameRate:uint = 60, totalFrames:uint = uint.MAX_VALUE, loop:Boolean = true)
 		{
-			super(NAME, ParticleAnimationSet.POST_PRIORITY + 1);
-			_stateClass = ParticleUVSeqPicByTimeGlobalState;
+			super("ParticleSpriteSheetState" + mode, mode, 4, ParticleAnimationSet.POST_PRIORITY + 1);
 			
-			_total = Math.min(usingNum, columns * rows);
-			if (startTime != 0)
-				_hasStartTime = true;
+			_stateClass = ParticleSpriteSheetState;
+			
+			_total = Math.min(totalFrames, numColumns * numRows);
 			_loop = loop;
-			if (rows > 1)_needV = true;
-			_cycle = cycle;
-			_columns = columns;
-			_rows = rows;
+			_frameRate = frameRate;
+			_numColumns = numColumns;
+			_numRows = numRows;
 			_startTime = startTime;
-			reset();
+			
+			updateSpriteSheetData();
 		}
 		
 		public function get renderData():Vector.<Number>
@@ -48,41 +93,17 @@ package away3d.animators.nodes
 			return _data;
 		}
 		
-		public function get cycle():Number
+		public function get numColumns():int
 		{
-			return _cycle;
+			return _numColumns;
 		}
-		public function set cycle(value:Number):void
+		public function get numRows():int
 		{
-			_cycle = value;
-			reset();
-		}
-		
-		public function get columns():int
-		{
-			return _columns;
-		}
-		public function get rows():int
-		{
-			return _rows;
+			return _numRows;
 		}
 		public function get total():int
 		{
 			return _total;
-		}
-		public function get startTime():Number
-		{
-			return _startTime;
-		}
-		
-		private function reset():void
-		{
-			var uTotal:Number = _total / _columns;
-			var uSpeed:Number = uTotal / _cycle;
-			var uStep:Number = 1 / _columns;
-			var vStep:Number = 1 / _rows;
-			var endThreshold:Number = _cycle - _cycle / _total / 2;
-			_data = Vector.<Number>([uSpeed, uStep, vStep, _cycle, _startTime, endThreshold, 0, 0]);
 		}
 		
 		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
@@ -96,8 +117,8 @@ package away3d.animators.nodes
 			//get 2 vc
 			var uvParamConst1:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 			var uvParamConst2:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
-			animationRegisterCache.setRegisterIndex(this, UV_CONSTANT_REGISTER_0, uvParamConst1.index);
-			animationRegisterCache.setRegisterIndex(this, UV_CONSTANT_REGISTER_1, uvParamConst2.index);
+			animationRegisterCache.setRegisterIndex(this, UV_INDEX_0, uvParamConst1.index);
+			animationRegisterCache.setRegisterIndex(this, UV_INDEX_1, uvParamConst2.index);
 			
 			var uSpeed:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "x");
 			var uStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "y");
@@ -120,9 +141,9 @@ package away3d.animators.nodes
 			var code:String = "";
 			//scale uv
 			code += "mul " + u + "," + u + "," + uStep + "\n";
-			if (_needV) code += "mul " + v + "," + v + "," + vStep + "\n";
+			if (_numRows > 1) code += "mul " + v + "," + v + "," + vStep + "\n";
 			
-			if (_hasStartTime)
+			if (_startTime != 0)
 			{
 				code += "sub " + time + "," + animationRegisterCache.vertexTime + "," + startTime + "\n";
 				code += "max " + time + "," + time + "," + animationRegisterCache.vertexZeroConst + "\n";
@@ -144,7 +165,7 @@ package away3d.animators.nodes
 			
 			
 			code += "mul " + temp + "," + time + "," + uSpeed + "\n";
-			if (_needV)
+			if (_numRows > 1)
 			{
 				code += "frc " + temp2 + "," + temp + "\n";
 				code += "sub " + vOffset + "," + temp + "," + temp2 + "\n";
@@ -164,6 +185,17 @@ package away3d.animators.nodes
 					"sub " + temp + "," + temp + "," + destination + "\n" +
 					"mul " + destination + "," + temp + "," + source2 + "\n";
 		}
+		
+		private function updateSpriteSheetData():void
+		{
+			var uTotal:Number = _total / _numColumns;
+			var uSpeed:Number = uTotal / _frameRate;
+			var uStep:Number = 1 / _numColumns;
+			var vStep:Number = 1 / _numRows;
+			var endThreshold:Number = _frameRate - _frameRate / _total / 2;
+			_data = Vector.<Number>([uSpeed, uStep, vStep, _frameRate, _startTime, endThreshold, 0, 0]);
+		}
+		
 	
 	}
 
