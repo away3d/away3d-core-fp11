@@ -25,29 +25,23 @@ package away3d.animators.nodes
 		arcane static const FOLLOW_ROTATION_INDEX:uint = 1;
 		
 		/** @private */
-		arcane var _hasPosition:Boolean;
+		arcane var _usesPosition:Boolean;
 		
 		/** @private */
-		arcane var _hasRotation:Boolean;
-		
-		/**
-		 * Used to set the color node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
+		arcane var _usesRotation:Boolean;
 						
 		/**
-		 * Creates a new <code>ParticleColorNode</code>
+		 * Creates a new <code>ParticleFollowNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
-		 * @param    [optional] hasPosition     Defines wehether the individual particle reacts to the position of the target.
-		 * @param    [optional] hasRotation     Defines wehether the individual particle reacts to the rotation of the target.
+		 * @param    [optional] usesPosition     Defines wehether the individual particle reacts to the position of the target.
+		 * @param    [optional] usesRotation     Defines wehether the individual particle reacts to the rotation of the target.
 		 */
-		public function ParticleFollowNode(mode:uint, hasPosition:Boolean = true, hasRotation:Boolean = true)
+		public function ParticleFollowNode(usesPosition:Boolean = true, usesRotation:Boolean = true)
 		{
 			_stateClass = ParticleFollowState;
 			
-			_hasPosition = hasPosition;
-			_hasRotation = hasRotation;
+			_usesPosition = usesPosition;
+			_usesRotation = usesRotation;
 			
 			super("ParticleFollowNode" + mode, mode, 0, ParticleAnimationSet.POST_PRIORITY);
 		}
@@ -62,7 +56,7 @@ package away3d.animators.nodes
 			if (!storage)
 			{
 				storage = animationSubGeometry.extraStorage[this] = new ParticleFollowStorage;
-				if (_hasPosition && _hasRotation)
+				if (_usesPosition && _usesRotation)
 					storage.initData(animationSubGeometry.numVertices, 6);
 				else
 					storage.initData(animationSubGeometry.numVertices, 3);
@@ -86,7 +80,7 @@ package away3d.animators.nodes
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
 			var code:String = "";
-			if (_hasRotation) {
+			if (_usesRotation) {
 				var rotationAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
 				animationRegisterCache.setRegisterIndex(this, FOLLOW_ROTATION_INDEX, rotationAttribute.index);
 				
@@ -130,7 +124,7 @@ package away3d.animators.nodes
 				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
 			}
 			
-			if (_hasPosition) {
+			if (_usesPosition) {
 				var positionAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
 				animationRegisterCache.setRegisterIndex(this, FOLLOW_POSITION_INDEX, positionAttribute.index);
 				code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + positionAttribute + "," + animationRegisterCache.scaleAndRotateTarget + "\n";

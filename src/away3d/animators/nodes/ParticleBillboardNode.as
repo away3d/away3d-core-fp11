@@ -18,8 +18,6 @@ package away3d.animators.nodes
 		
 		/**
 		 * Creates a new <code>ParticleBillboardNode</code>
-		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 */
 		public function ParticleBillboardNode()
 		{
@@ -40,11 +38,11 @@ package away3d.animators.nodes
 			animationRegisterCache.getFreeVertexConstant();
 			
 			var code:String = "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + rotationMatrixRegister + "\n";
-			var len:int = animationRegisterCache.rotationRegisters.length;
-			for (var i:int = 0; i < len; i++)
-			{
-				code += "m33 " + animationRegisterCache.rotationRegisters[i].regName+animationRegisterCache.rotationRegisters[i].index + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + rotationMatrixRegister + "\n";
-			}
+			
+			var shaderRegisterElement:ShaderRegisterElement;
+			for each (shaderRegisterElement in animationRegisterCache.rotationRegisters)
+				code += "m33 " + shaderRegisterElement.regName + shaderRegisterElement.index + ".xyz," + shaderRegisterElement + "," + rotationMatrixRegister + "\n";
+			
 			return code;
 		}
 	}

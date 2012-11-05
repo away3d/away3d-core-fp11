@@ -57,13 +57,13 @@ package away3d.animators.states
 			
 			if (_followTarget)
 			{
-				if (_particleFollowNode._hasPosition)
+				if (_particleFollowNode._usesPosition)
 				{
 					_targetPos.x = _followTarget.position.x;
 					_targetPos.y = _followTarget.position.y;
 					_targetPos.z = _followTarget.position.z;
 				}
-				if (_particleFollowNode._hasRotation)
+				if (_particleFollowNode._usesRotation)
 				{
 					_targetEuler.x = _followTarget.rotationX;
 					_targetEuler.y = _followTarget.rotationY;
@@ -78,7 +78,7 @@ package away3d.animators.states
 			
 			var needProcess:Boolean = previousTime != currentTime;
 			
-			if (_particleFollowNode._hasPosition && _particleFollowNode._hasRotation)
+			if (_particleFollowNode._usesPosition && _particleFollowNode._usesRotation)
 			{
 				if (needProcess)
 					processPositionAndRotation(currentTime, deltaTime, followSubGeometry);
@@ -86,14 +86,14 @@ package away3d.animators.states
 				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX), 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (_particleFollowNode._hasPosition)
+			else if (_particleFollowNode._usesPosition)
 			{
 				if (needProcess)
 					processPosition(currentTime, deltaTime, followSubGeometry);
 				
 				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
-			else if (_particleFollowNode._hasRotation)
+			else if (_particleFollowNode._usesRotation)
 			{
 				if (needProcess)
 					precessRotation(currentTime, deltaTime, followSubGeometry);
