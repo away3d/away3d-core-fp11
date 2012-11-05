@@ -33,7 +33,7 @@ package away3d.animators.nodes
 		/**
 		 * Used to set the color node into local property mode.
 		 */
-		public static const LOCAL:uint = 1;
+		public static const LOCAL:uint = 0;
 						
 		/**
 		 * Creates a new <code>ParticleColorNode</code>
@@ -69,7 +69,7 @@ package away3d.animators.nodes
 			}
 			var item:ParticleFollowingItem = new ParticleFollowingItem();
 			item.startTime = param.startTime;
-			item.lifeTime = param.sleepDuration + param.duration;
+			item.lifeTime = param.delay + param.duration;
 			item.numVertex = numVertex;
 			var len:uint = storage.itemList.length;
 			if (len > 0)
@@ -88,7 +88,7 @@ package away3d.animators.nodes
 			var code:String = "";
 			if (_hasRotation) {
 				var rotationAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
-				animationRegisterCache.setRegisterIndex(this, FOLLOW_POSITION_INDEX, rotationAttribute.index);
+				animationRegisterCache.setRegisterIndex(this, FOLLOW_ROTATION_INDEX, rotationAttribute.index);
 				
 				var temp1:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				animationRegisterCache.addVertexTempUsages(temp1, 1);
@@ -131,9 +131,9 @@ package away3d.animators.nodes
 			}
 			
 			if (_hasPosition) {
-				var offsetAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
-				animationRegisterCache.setRegisterIndex(this, FOLLOW_POSITION_INDEX, offsetAttribute.index);
-				code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + offsetAttribute + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+				var positionAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+				animationRegisterCache.setRegisterIndex(this, FOLLOW_POSITION_INDEX, positionAttribute.index);
+				code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + positionAttribute + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
 			}
 			
 			return code;
