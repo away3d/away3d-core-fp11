@@ -52,6 +52,7 @@
 			colorTransform ||= new ColorTransform();
 			colorTransform.alphaMultiplier = value;
 			_screenPass.preserveAlpha = requiresBlending;
+			_screenPass.setBlendMode(blendMode, requiresBlending);
 		}
 
 		/**
