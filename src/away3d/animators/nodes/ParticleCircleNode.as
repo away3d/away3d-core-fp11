@@ -135,7 +135,7 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
-			//Vector3D.x is radius, Vector3D.y is cycle speed
+			//Vector3D.x is radius, Vector3D.y is cycle speed, Vector3D.z is circumference
 			var temp:Vector3D = param[CIRCLE_VECTOR3D];
 			if (!temp)
 				throw new Error("there is no " + CIRCLE_VECTOR3D + " in param!");
