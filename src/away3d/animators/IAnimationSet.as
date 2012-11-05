@@ -49,7 +49,7 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String;
+		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String;
 		
 		
 		/**

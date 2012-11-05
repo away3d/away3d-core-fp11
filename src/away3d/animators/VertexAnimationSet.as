@@ -70,7 +70,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
 		{
 			if (_blendMode == VertexAnimationMode.ABSOLUTE)
 				return getAbsoluteAGALCode(pass, sourceRegisters, targetRegisters);
@@ -105,7 +105,7 @@ package away3d.animators
 		/**
 		 * Generates the vertex AGAL code for absolute blending.
 		 */
-		private function getAbsoluteAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+		private function getAbsoluteAGALCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
 		{
 			var code : String = "";
 			var temp1 : String = findTempReg(targetRegisters);
@@ -146,7 +146,7 @@ package away3d.animators
 		/**
 		 * Generates the vertex AGAL code for additive blending.
 		 */
-		private function getAdditiveAGALCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String
+		private function getAdditiveAGALCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
 		{
 			var code : String = "";
 			var len : uint = sourceRegisters.length;

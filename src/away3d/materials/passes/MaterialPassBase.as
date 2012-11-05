@@ -65,8 +65,8 @@ package away3d.materials.passes
 		private var _bothSides : Boolean;
 
 		protected var _lightPicker : LightPickerBase;
-		protected var _animatableAttributes : Array = ["va0"];
-		protected var _animationTargetRegisters : Array = ["vt0"];
+		protected var _animatableAttributes : Vector.<String> = Vector.<String>(["va0"]);
+		protected var _animationTargetRegisters : Vector.<String> = Vector.<String>(["vt0"]);
 		protected var _shadedTarget:String = "ft0";
 		
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures

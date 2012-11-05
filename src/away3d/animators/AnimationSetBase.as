@@ -26,7 +26,7 @@ package away3d.animators
 		 * @param excludeAnother An additional register that's not free.
 		 * @return A temporary register that can be used.
 		 */
-		protected function findTempReg(exclude : Array, excludeAnother : String = null) : String
+		protected function findTempReg(exclude : Vector.<String>, excludeAnother : String = null) : String
 		{
 			var i : uint;
 			var reg : String;

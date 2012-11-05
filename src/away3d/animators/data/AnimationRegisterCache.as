@@ -38,15 +38,15 @@ package away3d.animators.data
 		public var fadeFactorConst:ShaderRegisterElement;
 		
 		//these are targets only need to rotate ( normal and tangent )
-		public var rotationRegisters:Array;
+		public var rotationRegisters:Vector.<ShaderRegisterElement>;
 		
 		
 		
 		public var needFragmentAnimation:Boolean;
 		public var needUVAnimation:Boolean;
 		
-		public var sourceRegisters:Array;
-		public var targetRegisters:Array;
+		public var sourceRegisters:Vector.<String>;
+		public var targetRegisters:Vector.<String>;
 		
 		private var indexDictionary:Dictionary = new Dictionary(true);
 		
@@ -67,7 +67,7 @@ package away3d.animators.data
 		{
 			super.reset();
 			
-			rotationRegisters = [];
+			rotationRegisters = new Vector.<ShaderRegisterElement>();
 			positionAttribute = getRegisterFromString(sourceRegisters[0]);
 			scaleAndRotateTarget = getRegisterFromString(targetRegisters[0]);
 			addVertexTempUsages(scaleAndRotateTarget, 1);
