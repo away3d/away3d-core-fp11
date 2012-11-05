@@ -17,18 +17,13 @@ package away3d.animators.nodes
 		arcane static const MATRIX_INDEX:int = 0;
 		
 		/**
-		 * Used to set the billboard node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
-		
-		/**
 		 * Creates a new <code>ParticleBillboardNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 */
-		public function ParticleBillboardNode(mode:uint)
+		public function ParticleBillboardNode()
 		{
-			super("ParticleBillboardNode" + mode, mode, 3, 3);
+			super("ParticleBillboardNode", 1, 0, 3);
 			
 			_stateClass = ParticleBillboardState;
 		}
@@ -52,7 +47,5 @@ package away3d.animators.nodes
 			}
 			return code;
 		}
-		
 	}
-
 }
