@@ -24,6 +24,15 @@ package away3d.animators.nodes
 		public static const LOCAL:uint = 0;
 		
 		/**
+		 * Used to set the acceleration node into global property mode.
+		 */
+		public static const GLOBAL:uint = 1;
+		
+		private var _rotationVelocity:Vector3D;
+		
+		arcane var _rotationVelocityData:Vector3D;
+		
+		/**
 		 * Reference for rotational velocity node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the rotational velocity around an axis of the particle.
 		 */
@@ -34,11 +43,15 @@ package away3d.animators.nodes
 		 *
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 */
-		public function ParticleRotationalVelocityNode(mode:uint)
+		public function ParticleRotationalVelocityNode(mode:uint, rotationVelocity:Vector3D = null)
 		{
 			_stateClass = ParticleRotationalVelocityState;
 			
 			super("ParticleRotationalVelocityNode" + mode, mode, 4);
+			
+			_rotationVelocity = rotationVelocity;
+			_rotationVelocityData = new Vector3D;
+			updateOscillatorData();
 		}
 		
 		/**
@@ -46,8 +59,8 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var rotationAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
-			animationRegisterCache.setRegisterIndex(this, ROTATIONALVELOCITY_INDEX, rotationAttribute.index);
+			var rotationRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, ROTATIONALVELOCITY_INDEX, rotationRegister.index);
 			
 			var nrmVel:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			animationRegisterCache.addVertexTempUsages(nrmVel, 1);
@@ -70,10 +83,10 @@ package away3d.animators.nodes
 			animationRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "mov " + nrmVel + ".xyz," + rotationAttribute + ".xyz\n";
+			code += "mov " + nrmVel + ".xyz," + rotationRegister + ".xyz\n";
 			code += "mov " + nrmVel + ".w," + animationRegisterCache.vertexZeroConst + "\n";
 			
-			code += "mul " + cos + "," + animationRegisterCache.vertexTime + "," + rotationAttribute + ".w\n";
+			code += "mul " + cos + "," + animationRegisterCache.vertexTime + "," + rotationRegister + ".w\n";
 			
 			code += "sin " + sin + "," + cos + "\n";
 			code += "cos " + cos + "," + cos + "\n";
@@ -104,9 +117,9 @@ package away3d.animators.nodes
 			var len:int = animationRegisterCache.rotationRegisters.length;
 			for (var i:int = 0; i < len; i++)
 			{
-				code += "mov " + nrmVel + ".xyz," + rotationAttribute + ".xyz\n";
+				code += "mov " + nrmVel + ".xyz," + rotationRegister + ".xyz\n";
 				code += "mov " + nrmVel + ".w," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "mul " + cos + "," + animationRegisterCache.vertexTime + "," + rotationAttribute + ".w\n";
+				code += "mul " + cos + "," + animationRegisterCache.vertexTime + "," + rotationRegister + ".w\n";
 				code += "sin " + sin + "," + cos + "\n";
 				code += "cos " + cos + "," + cos + "\n";
 				code += "mul " + R + "," + sin +"," + nrmVel + ".xyz\n";
@@ -138,6 +151,35 @@ package away3d.animators.nodes
 			_oneData[1] = rotate.y;
 			_oneData[2] = rotate.z;
 			_oneData[3] = Math.PI / rotate.w;
+		}
+		
+		/**
+		 * Defines the default rotationVelocity of the node, used when in global mode.
+		 */
+		public function get rotationVelocity():Vector3D
+		{
+			return _rotationVelocity;
+		}
+		
+		public function set rotationVelocity(value:Vector3D):void
+		{
+			_rotationVelocity = value;
+			updateOscillatorData();
+		}
+		
+		private function updateOscillatorData():void
+		{
+			if (mode == GLOBAL)
+			{
+				if (_rotationVelocity.w <= 0)
+					throw(new Error("the cycle must greater than zero"));
+				if (_rotationVelocity.length == 0)
+					throw(new Error("must define a axis"));
+				_rotationVelocityData.x = _rotationVelocity.x;
+				_rotationVelocityData.y = _rotationVelocity.y;
+				_rotationVelocityData.z = _rotationVelocity.z;
+				_rotationVelocityData.w = Math.PI / _rotationVelocity.w;
+			}
 		}
 	}
 }
