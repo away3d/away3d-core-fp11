@@ -17,12 +17,34 @@ package away3d.animators.nodes
 	{
 		/** @private */
 		arcane static const OSCILLATOR_INDEX:uint = 0;
+		
+		arcane var _oscillatorData:Vector3D;
 				
+		private var _oscillator:Vector3D;
+		
 		/**
 		 * Used to set the circle node into local property mode.
 		 */
 		public static const LOCAL:uint = 0;
 		
+		/**
+		 * Used to set the circle node into global property mode.
+		 */
+		public static const GLOBAL:uint = 1;
+		
+		/**
+		 * Defines the default oscillator of the node, used when in global mode.
+		 */
+		public function get oscillator():Vector3D
+		{
+			return _oscillator;
+		}
+		
+		public function set oscillator(value:Vector3D):void
+		{
+			_oscillator = value;
+			updateOscillatorData();
+		}
 		/**
 		 * Reference for ocsillator node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the axis (x,y,z) and cycle speed (w) of the motion on the particle.
@@ -34,11 +56,15 @@ package away3d.animators.nodes
 		 *
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 */
-		public function ParticleOscillatorNode(mode:uint)
+		public function ParticleOscillatorNode(mode:uint, oscillator:Vector3D = null)
 		{
 			super("ParticleOscillatorNode" + mode, mode, 4);
 			
 			_stateClass = ParticleOscillatorState;
+			
+			_oscillator = oscillator;
+			_oscillatorData = new Vector3D;
+			updateOscillatorData();
 		}
 		
 		/**
@@ -46,8 +72,8 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var driftAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
-			animationRegisterCache.setRegisterIndex(this, OSCILLATOR_INDEX, driftAttribute.index);
+			var oscillatorRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, OSCILLATOR_INDEX, oscillatorRegister.index);
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
 			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
@@ -58,14 +84,14 @@ package away3d.animators.nodes
 			animationRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
-			code += "mul " + dgree + "," + animationRegisterCache.vertexTime + "," + driftAttribute + ".w\n";
+			code += "mul " + dgree + "," + animationRegisterCache.vertexTime + "," + oscillatorRegister + ".w\n";
 			code += "sin " + sin + "," + dgree + "\n";
-			code += "mul " + distance + "," + sin + "," + driftAttribute + ".xyz\n";
+			code += "mul " + distance + "," + sin + "," + oscillatorRegister + ".xyz\n";
 			code += "add " + animationRegisterCache.positionTarget +"," + distance + "," + animationRegisterCache.positionTarget + "\n";
 			
 			if (animationRegisterCache.needVelocity)
 			{	code += "cos " + cos + "," + dgree + "\n";
-				code += "mul " + distance + "," + cos + "," + driftAttribute + ".xyz\n";
+				code += "mul " + distance + "," + cos + "," + oscillatorRegister + ".xyz\n";
 				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + "," + animationRegisterCache.velocityTarget + ".xyz\n";
 			}
 			
@@ -87,5 +113,19 @@ package away3d.animators.nodes
 			_oneData[2] = drift.z;
 			_oneData[3] = Math.PI * 2 / drift.w;
 		}
+		
+		private function updateOscillatorData():void
+		{
+			if (mode == GLOBAL)
+			{
+				if (_oscillator.w <= 0)
+					throw(new Error("the cycle must greater than zero"));
+				_oscillatorData.x = _oscillator.x;
+				_oscillatorData.y = _oscillator.y;
+				_oscillatorData.z = _oscillator.z;
+				_oscillatorData.w = Math.PI * 2 / _oscillator.w;
+			}
+		}
+		
 	}
 }

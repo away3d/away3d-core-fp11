@@ -9,6 +9,7 @@ package away3d.animators.states
 	import away3d.animators.nodes.ParticleOscillatorNode;
 	import away3d.animators.ParticleAnimator;
 	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.geom.Vector3D;
 	
 	use namespace arcane;
 	
@@ -31,7 +32,14 @@ package away3d.animators.states
 		 */
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleOscillatorNode.OSCILLATOR_INDEX), _particleOscillatorNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOscillatorNode.OSCILLATOR_INDEX);
+			if (_particleOscillatorNode.mode == ParticleOscillatorNode.LOCAL)
+				animationSubGeometry.activateVertexBuffer(index, _particleOscillatorNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+			else
+			{
+				var oscillatorData:Vector3D = _particleOscillatorNode._oscillatorData;
+				animationRegisterCache.setVertexConst(index, oscillatorData.x, oscillatorData.y, oscillatorData.z, oscillatorData.w);
+			}
 		}
 	}
 }
