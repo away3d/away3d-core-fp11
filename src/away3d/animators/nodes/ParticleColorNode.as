@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.ParticlePropertiesMode;
-	import flash.geom.Vector3D;
 	import away3d.animators.data.ParticleProperties;
 	import away3d.arcane;
 	import away3d.animators.ParticleAnimationSet;

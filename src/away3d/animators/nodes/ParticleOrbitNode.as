@@ -33,79 +33,19 @@ package away3d.animators.nodes
 		arcane var _usesPhase:Boolean;
 		
 		/** @private */
-		arcane var _orbitData:Vector3D;
-		
+		arcane var _radius:Number;
 		/** @private */
-		arcane var _eulersMatrix:Matrix3D;
-		
-		private var _radius:Number;
-		private var _cycleDuration:Number;
-		private var _cyclePhase:Number;
-		private var _eulers:Vector3D;
+		arcane var _cycleDuration:Number;
+		/** @private */
+		arcane var _cyclePhase:Number;
+		/** @private */
+		arcane var _eulers:Vector3D;
 		
 		/**
 		 * Reference for orbit node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the radius (x), cycle speed (y) and cycle phase (z) of the motion on the particle.
 		 */
 		public static const ORBIT_VECTOR3D:String = "OrbitVector3D";
-		
-		/**
-		 * Defines the radius of the orbit when in global mode. Defaults to 100.
-		 */
-		public function get radius():Number
-		{
-			return _radius;
-		}
-		public function set radius(value:Number):void
-		{
-			_radius = value;
-			
-			updateOrbitData();
-		}
-		
-		/**
-		 * Defines the duration of the orbit in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
-		 */
-		public function get cycleDuration():Number
-		{
-			return _cycleDuration;
-		}
-		public function set cycleDuration(value:Number):void
-		{
-			_cycleDuration = value;
-			
-			updateOrbitData();
-		}
-		
-		/**
-		 * Defines the phase of the orbit in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
-		 */
-		public function get cyclePhase():Number
-		{
-			return _cyclePhase;
-		}
-		public function set cyclePhase(value:Number):void
-		{
-			_cyclePhase = value;
-			
-			updateOrbitData();
-		}
-		
-		/**
-		 * Defines the euler rotation in degrees, applied to the orientation of the orbit when in global mode.
-		 */
-		public function get eulers():Vector3D
-		{
-			return _eulers;
-		}
-		
-		public function set eulers(value:Vector3D):void
-		{
-			_eulers = value;
-			
-			updateOrbitData();
-			
-		}
 		
 		/**
 		 * Creates a new <code>ParticleOrbitNode</code> object.
@@ -136,8 +76,6 @@ package away3d.animators.nodes
 			_cycleDuration = cycleDuration;
 			_cyclePhase = cyclePhase;
 			_eulers = eulers || new Vector3D();
-			
-			updateOrbitData();
 		}
 		
 		/**
@@ -219,19 +157,6 @@ package away3d.animators.nodes
 			_oneData[2] = orbit.x * Math.PI * 2;
 			if (_usesPhase)
 				_oneData[3] = orbit.z * Math.PI / 180;
-		}
-		
-		private function updateOrbitData():void
-		{
-			if (_usesEulers) {
-				_eulersMatrix = new Matrix3D();
-				_eulersMatrix.appendRotation(_eulers.x, Vector3D.X_AXIS);
-				_eulersMatrix.appendRotation(_eulers.y, Vector3D.Y_AXIS);
-				_eulersMatrix.appendRotation(_eulers.z, Vector3D.Z_AXIS);
-			}
-			if (_cycleDuration <= 0)
-				throw(new Error("the cycle duration must be greater than zero"));
-			_orbitData = new Vector3D(_radius, Math.PI * 2 / _cycleDuration, _radius * Math.PI * 2, _cyclePhase * Math.PI / 180);
 		}
 	}
 }
