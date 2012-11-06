@@ -47,100 +47,29 @@ package away3d.animators.nodes
 		/** @private */
 		arcane static const CYCLE_INDEX:uint = 8;
 		
+		//default values used when creating states
 		/** @private */
 		arcane var _usesMultiplier:Boolean;
-		
 		/** @private */
 		arcane var _usesOffset:Boolean;
-		
 		/** @private */
 		arcane var _usesCycle:Boolean;
-		
 		/** @private */
 		arcane var _usesPhase:Boolean;
-		
 		/** @private */
-		arcane var _startMultiplierData:Vector3D;
-		
+		arcane var _startColor:ColorTransform;
 		/** @private */
-		arcane var _deltaMultiplierData:Vector3D;
-		
+		arcane var _endColor:ColorTransform;
 		/** @private */
-		arcane var _startOffsetData:Vector3D;
-		
+		arcane var _cycleDuration:Number;
 		/** @private */
-		arcane var _deltaOffsetData:Vector3D;
-		
-		/** @private */
-		arcane var _cycleData:Vector3D;
-		
-		private var _startColor:ColorTransform;
-		private var _endColor:ColorTransform;
-		private var _cycleDuration:Number;
-		private var _cyclePhase:Number;
+		arcane var _cyclePhase:Number;
 				
 		/**
 		 * Reference for color node properties on a single particle (when in local property mode).
 		 * Expects a <code>ColorTransform</code> object representing the color transform applied to the particle.
 		 */
 		public static const COLOR_VECTOR_COLORTRANSFORM:String = "ColorVectorColorTransform";
-		
-		/**
-		 * Defines the start color transform of the node, when in global mode.
-		 */
-		public function get startColor():ColorTransform
-		{
-			return _startColor;
-		}
-		
-		public function set startColor(value:ColorTransform):void
-		{
-			_startColor = value;
-			
-			updateColorData();
-		}
-		
-		/**
-		 * Defines the end color transform of the node, when in global mode.
-		 */
-		public function get endColor():ColorTransform
-		{
-			return _endColor;
-		}
-		public function set endColor(value:ColorTransform):void
-		{
-			_endColor = value;
-			
-			updateColorData();
-		}
-		
-		/**
-		 * Defines the duration of the animation in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
-		 */
-		public function get cycleDuration():Number
-		{
-			return _cycleDuration;
-		}
-		public function set cycleDuration(value:Number):void
-		{
-			_cycleDuration = value;
-			
-			updateColorData();
-		}
-		
-		/**
-		 * Defines the phase of the cycle in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
-		 */
-		public function get cyclePhase():Number
-		{
-			return _cyclePhase;
-		}
-		public function set cyclePhase(value:Number):void
-		{
-			_cyclePhase = value;
-			
-			updateColorData();
-		}
 				
 		/**
 		 * Creates a new <code>ParticleColorNode</code>
@@ -168,8 +97,6 @@ package away3d.animators.nodes
 			_endColor = endColor || new ColorTransform();
 			_cycleDuration = cycleDuration;
 			_cyclePhase = cyclePhase;
-			
-			updateColorData();
 			
 			super("ParticleColorNode" + mode, mode, (_usesMultiplier && _usesOffset)? 16 : 8);
 		}
@@ -271,34 +198,6 @@ package away3d.animators.nodes
 			}
 			
 			return code;
-		}
-		
-		private function updateColorData():void
-		{
-			if (_usesCycle) {
-				if (_cycleDuration <= 0)
-					throw(new Error("the cycle duration must be greater than zero"));
-				_cycleData = new Vector3D(Math.PI * 2 / _cycleDuration, _cyclePhase * Math.PI / 180, 0, 0);
-				if (_usesMultiplier) {
-					_startMultiplierData = new Vector3D((_startColor.redMultiplier + _endColor.redMultiplier) / 2, (_startColor.greenMultiplier + _endColor.greenMultiplier) / 2, (_startColor.blueMultiplier + _endColor.blueMultiplier) / 2, (_startColor.alphaMultiplier + _endColor.alphaMultiplier) / 2);
-					_deltaMultiplierData = new Vector3D((_endColor.redMultiplier - _startColor.redMultiplier) / 2, (_endColor.greenMultiplier - _startColor.greenMultiplier) / 2, (_endColor.blueMultiplier - _startColor.blueMultiplier) / 2, (_endColor.alphaMultiplier - _startColor.alphaMultiplier) / 2);
-				}
-				
-				if (_usesOffset) {
-					_startOffsetData = new Vector3D((_startColor.redOffset + _endColor.redOffset) / (255 * 2), (_startColor.greenOffset + _endColor.greenOffset) / (255 * 2), (_startColor.blueOffset + _endColor.blueOffset) / (255 * 2), (_startColor.alphaOffset + _endColor.alphaOffset) / (255 * 2));
-					_deltaOffsetData = new Vector3D((_endColor.redOffset - _startColor.redOffset) / (255 * 2), (_endColor.greenOffset - _startColor.greenOffset) / (255 * 2), (_endColor.blueOffset - _startColor.blueOffset) / (255 * 2), (_endColor.alphaOffset - _startColor.alphaOffset) / (255 * 2));
-				}
-			} else {
-				if (_usesMultiplier) {
-					_startMultiplierData = new Vector3D(_startColor.redMultiplier , _startColor.greenMultiplier , _startColor.blueMultiplier , _startColor.alphaMultiplier);
-					_deltaMultiplierData = new Vector3D((_endColor.redMultiplier - _startColor.redMultiplier) , (_endColor.greenMultiplier - _startColor.greenMultiplier) , (_endColor.blueMultiplier - _startColor.blueMultiplier) , (_endColor.alphaMultiplier - _startColor.alphaMultiplier));
-				}
-				
-				if (_usesOffset) {
-					_startOffsetData = new Vector3D(_startColor.redOffset / 255, _startColor.greenOffset / 255, _startColor.blueOffset / 255, _startColor.alphaOffset / 255);
-					_deltaOffsetData = new Vector3D((_endColor.redOffset - _startColor.redOffset) / 255, (endColor.greenOffset - _startColor.greenOffset) / 255, (endColor.blueOffset - _startColor.blueOffset ) / 255, (endColor.alphaOffset - startColor.alphaOffset) / 255);
-				}
-			}
 		}
 		
 		/**

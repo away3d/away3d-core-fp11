@@ -1,7 +1,6 @@
 package away3d.animators.states
 {
 	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.data.ParticleProperties;
 	import away3d.arcane;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import away3d.cameras.Camera3D;
