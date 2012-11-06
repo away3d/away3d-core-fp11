@@ -20,30 +20,13 @@ package away3d.animators.nodes
 		arcane static const ROTATIONALVELOCITY_INDEX:uint = 0;
 		
 		/** @private */
-		arcane var _rotationalVelocityData:Vector3D;
-		
-		private var _rotationalVelocity:Vector3D;
+		arcane var _rotationalVelocity:Vector3D;
 		
 		/**
 		 * Reference for rotational velocity node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the rotational velocity around an axis of the particle.
 		 */
 		public static const ROTATIONALVELOCITY_VECTOR3D:String = "RotationalVelocityVector3D";
-		
-		/**
-		 * Defines the default rotationalVelocity of the node, used when in global mode.
-		 */
-		public function get rotationalVelocity():Vector3D
-		{
-			return _rotationalVelocity;
-		}
-		
-		public function set rotationalVelocity(value:Vector3D):void
-		{
-			_rotationalVelocity = value;
-			
-			updateRotationalVelocityData();
-		}
 		
 		/**
 		 * Creates a new <code>ParticleRotationalVelocityNode</code>
@@ -56,9 +39,7 @@ package away3d.animators.nodes
 			
 			super("ParticleRotationalVelocityNode" + mode, mode, 4);
 			
-			_rotationalVelocity = rotationalVelocity;
-			
-			updateRotationalVelocityData();
+			_rotationalVelocity = rotationalVelocity || new Vector3D();
 		}
 		
 		/**
@@ -161,19 +142,6 @@ package away3d.animators.nodes
 				throw(new Error("the cycle duration must greater than zero"));
 			// it's used as angle/2 in agal
 			_oneData[3] = Math.PI / rotate.w;
-		}
-		
-		private function updateRotationalVelocityData():void
-		{
-			if (_mode == ParticlePropertiesMode.GLOBAL) {
-				if (_rotationalVelocity.w <= 0)
-					throw(new Error("the cycle duration must greater than zero"));
-				
-				if (_rotationalVelocity.length == 0)
-					throw(new Error("must define an axis"));
-				
-				_rotationalVelocityData = new Vector3D(_rotationalVelocity.x, _rotationalVelocity.y, _rotationalVelocity.z, Math.PI * 2 / _rotationalVelocity.w);
-			}
 		}
 	}
 }

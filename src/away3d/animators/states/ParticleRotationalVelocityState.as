@@ -20,12 +20,32 @@ package away3d.animators.states
 	public class ParticleRotationalVelocityState extends ParticleStateBase
 	{
 		private var _particleRotationalVelocityNode:ParticleRotationalVelocityNode;
+		private var _rotationalVelocityData:Vector3D;
+		private var _rotationalVelocity:Vector3D;
+		
+		/**
+		 * Defines the default rotationalVelocity of the state, used when in global mode.
+		 */
+		public function get rotationalVelocity():Vector3D
+		{
+			return _rotationalVelocity;
+		}
+		
+		public function set rotationalVelocity(value:Vector3D):void
+		{
+			_rotationalVelocity = value;
+			
+			updateRotationalVelocityData();
+		}
 		
 		public function ParticleRotationalVelocityState(animator:ParticleAnimator, particleRotationNode:ParticleRotationalVelocityNode)
 		{
 			super(animator, particleRotationNode);
 			
 			_particleRotationalVelocityNode = particleRotationNode;
+			_rotationalVelocity = _particleRotationalVelocityNode._rotationalVelocity;
+			
+			updateRotationalVelocityData();
 		}
 		
 		/**
@@ -35,11 +55,22 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotationalVelocityNode.ROTATIONALVELOCITY_INDEX);
 			
-			if (_particleRotationalVelocityNode.mode == ParticlePropertiesMode.LOCAL) {
+			if (_particleRotationalVelocityNode.mode == ParticlePropertiesMode.LOCAL)
 				animationSubGeometry.activateVertexBuffer(index, _particleRotationalVelocityNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
-			} else {
-				var rotationVelocityData:Vector3D = _particleRotationalVelocityNode._rotationalVelocityData;
-				animationRegisterCache.setVertexConst(index, rotationVelocityData.x, rotationVelocityData.y, rotationVelocityData.z, rotationVelocityData.w);
+			else
+				animationRegisterCache.setVertexConst(index, _rotationalVelocityData.x, _rotationalVelocityData.y, _rotationalVelocityData.z, _rotationalVelocityData.w);
+		}
+		
+		private function updateRotationalVelocityData():void
+		{
+			if (_particleRotationalVelocityNode.mode == ParticlePropertiesMode.GLOBAL) {
+				if (_rotationalVelocity.w <= 0)
+					throw(new Error("the cycle duration must greater than zero"));
+				
+				if (_rotationalVelocity.length == 0)
+					throw(new Error("must define an axis"));
+				
+				_rotationalVelocityData = new Vector3D(_rotationalVelocity.x, _rotationalVelocity.y, _rotationalVelocity.z, Math.PI * 2 / _rotationalVelocity.w);
 			}
 		}
 	}
