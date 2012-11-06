@@ -66,9 +66,15 @@ package away3d.animators.nodes
 				
 		/**
 		 * Reference for color node properties on a single particle (when in local property mode).
-		 * Expects a <code>ColorTransform</code> object representing the color transform applied to the particle.
+		 * Expects a <code>ColorTransform</code> object representing the start color transform applied to the particle.
 		 */
-		public static const COLOR_VECTOR_COLORTRANSFORM:String = "ColorVectorColorTransform";
+		public static const COLOR_START_COLORTRANSFORM:String = "ColorStartColorTransform";
+				
+		/**
+		 * Reference for color node properties on a single particle (when in local property mode).
+		 * Expects a <code>ColorTransform</code> object representing the end color transform applied to the particle.
+		 */
+		public static const COLOR_END_COLORTRANSFORM:String = "ColorEndColorTransform";
 				
 		/**
 		 * Creates a new <code>ParticleColorNode</code>
@@ -204,13 +210,15 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
-			var colorVector:Vector.<ColorTransform> = param[COLOR_VECTOR_COLORTRANSFORM];
-			if (!colorVector)
-				throw(new Error("there is no " + COLOR_VECTOR_COLORTRANSFORM + " in param!"));
+			var startColor:ColorTransform = param[COLOR_START_COLORTRANSFORM];
+			if (!startColor)
+				throw(new Error("there is no " + COLOR_START_COLORTRANSFORM + " in param!"));
+			
+			var endColor:ColorTransform = param[COLOR_END_COLORTRANSFORM];
+			if (!endColor)
+				throw(new Error("there is no " + COLOR_END_COLORTRANSFORM + " in param!"));
 			
 			var i:uint;
-			var startColor:ColorTransform = colorVector[0];
-			var endColor:ColorTransform = colorVector[1];
 			
 			if (_usesCycle) {
 				//multiplier
