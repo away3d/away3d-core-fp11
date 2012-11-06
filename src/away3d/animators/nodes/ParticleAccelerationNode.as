@@ -19,33 +19,13 @@ package away3d.animators.nodes
 		arcane static const ACCELERATION_INDEX:int = 0;
 		
 		/** @private */
-		arcane var _halfAcceleration:Vector3D;
-		
-		private var _acceleration:Vector3D;
+		arcane var _acceleration:Vector3D;
 		
 		/**
 		 * Reference for acceleration node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the direction of acceleration on the particle.
 		 */
 		public static const ACCELERATION_VECTOR3D:String = "AccelerationVector3D";
-		
-		/**
-		 * Defines the default acceleration vector of the node, used when in global mode.
-		 */
-		public function get acceleration():Vector3D
-		{
-			return _acceleration;
-		}
-		
-		public function set acceleration(value:Vector3D):void
-		{
-			_acceleration.x = value.x;
-			_acceleration.y = value.y;
-			_acceleration.z = value.z;
-			_halfAcceleration.x = value.x / 2;
-			_halfAcceleration.y = value.y / 2;
-			_halfAcceleration.z = value.z / 2;
-		}
 		
 		/**
 		 * Creates a new <code>ParticleAccelerationNode</code>
@@ -60,9 +40,6 @@ package away3d.animators.nodes
 			_stateClass = ParticleAccelerationState;
 			
 			_acceleration = acceleration || new Vector3D();
-			
-			_halfAcceleration = _acceleration.clone();
-			_halfAcceleration.scaleBy(0.5);
 		}
 		
 		/**

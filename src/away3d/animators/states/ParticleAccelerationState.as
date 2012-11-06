@@ -20,12 +20,34 @@ package away3d.animators.states
 	public class ParticleAccelerationState extends ParticleStateBase
 	{
 		private var _particleAccelerationNode:ParticleAccelerationNode;
+		private var _acceleration:Vector3D;
+		private var _halfAcceleration:Vector3D;
+		
+		/**
+		 * Defines the acceleration vector of the state, used when in global mode.
+		 */
+		public function get acceleration():Vector3D
+		{
+			return _acceleration;
+		}
+		
+		public function set acceleration(value:Vector3D):void
+		{
+			_acceleration.x = value.x;
+			_acceleration.y = value.y;
+			_acceleration.z = value.z;
+			
+			updateAccelerationData();
+		}
 		
 		public function ParticleAccelerationState(animator:ParticleAnimator, particleAccelerationNode:ParticleAccelerationNode)
 		{
 			super(animator, particleAccelerationNode);
 			
 			_particleAccelerationNode = particleAccelerationNode;
+			_acceleration = _particleAccelerationNode._acceleration;
+			
+			updateAccelerationData();
 		}
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
@@ -35,11 +57,15 @@ package away3d.animators.states
 			if (_particleAccelerationNode.mode == ParticlePropertiesMode.LOCAL) {
 				animationSubGeometry.activateVertexBuffer(index, _particleAccelerationNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {
-				var halfAcceleration:Vector3D = _particleAccelerationNode._halfAcceleration;
-				animationRegisterCache.setVertexConst(index, halfAcceleration.x, halfAcceleration.y, halfAcceleration.z);
+				animationRegisterCache.setVertexConst(index, _halfAcceleration.x, _halfAcceleration.y, _halfAcceleration.z);
 			}
 		}
 		
+		private function updateAccelerationData():void
+		{
+			if (_particleAccelerationNode.mode == ParticlePropertiesMode.GLOBAL)
+				_halfAcceleration = new Vector3D(_acceleration.x / 2, _acceleration.y / 2, _acceleration.z / 2);
+		}
 	}
 
 }
