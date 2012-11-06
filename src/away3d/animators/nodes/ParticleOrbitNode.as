@@ -7,7 +7,6 @@ package away3d.animators.nodes
 	import away3d.animators.states.ParticleOrbitState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;

@@ -19,23 +19,9 @@ package away3d.animators.nodes
 		/** @private */
 		arcane static const OSCILLATOR_INDEX:uint = 0;
 		
-		arcane var _oscillatorData:Vector3D;
-				
-		private var _oscillator:Vector3D;
+		/** @private */
+		arcane var _oscillator:Vector3D;
 		
-		/**
-		 * Defines the default oscillator axis (x, y, z) and cycleDuration (w) of the node, used when in global mode.
-		 */
-		public function get oscillator():Vector3D
-		{
-			return _oscillator;
-		}
-		
-		public function set oscillator(value:Vector3D):void
-		{
-			_oscillator = value;
-			updateOscillatorData();
-		}
 		/**
 		 * Reference for ocsillator node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the axis (x,y,z) and cycle speed (w) of the motion on the particle.
@@ -54,9 +40,7 @@ package away3d.animators.nodes
 			
 			_stateClass = ParticleOscillatorState;
 			
-			_oscillator = oscillator;
-			_oscillatorData = new Vector3D;
-			updateOscillatorData();
+			_oscillator = oscillator || new Vector3D();
 		}
 		
 		/**
@@ -107,19 +91,5 @@ package away3d.animators.nodes
 				throw(new Error("the cycle duration must greater than zero"));
 			_oneData[3] = Math.PI * 2 / drift.w;
 		}
-		
-		private function updateOscillatorData():void
-		{
-			if (mode == ParticleProperties.GLOBAL)
-			{
-				if (_oscillator.w <= 0)
-					throw(new Error("the cycle duration must greater than zero"));
-				_oscillatorData.x = _oscillator.x;
-				_oscillatorData.y = _oscillator.y;
-				_oscillatorData.z = _oscillator.z;
-				_oscillatorData.w = Math.PI * 2 / _oscillator.w;
-			}
-		}
-		
 	}
 }
