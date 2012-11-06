@@ -33,9 +33,9 @@ package away3d.animators.states
 			
 			if (_particleScaleNode.mode == ParticleScaleNode.LOCAL)
 			{
-				if (_particleScaleNode._hasCycle)
+				if (_particleScaleNode._usesCycle)
 				{
-					if(_particleScaleNode._hasPhase)
+					if(_particleScaleNode._usesPhase)
 						animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 					else
 						animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
@@ -49,5 +49,4 @@ package away3d.animators.states
 		}
 		
 	}
-
 }

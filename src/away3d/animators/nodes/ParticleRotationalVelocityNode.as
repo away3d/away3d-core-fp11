@@ -158,7 +158,7 @@ package away3d.animators.nodes
 		/** @private */
 		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
-			//(Vector3d.x,Vector3d.y,Vector3d.z) is rotation axis,Vector3d.w is cycle time
+			//(Vector3d.x,Vector3d.y,Vector3d.z) is rotation axis,Vector3d.w is cycle speed
 			var rotate:Vector3D = param[ROTATIONALVELOCITY_VECTOR3D];
 			if (!rotate)
 				throw(new Error("there is no " + ROTATIONALVELOCITY_VECTOR3D + " in param!"));

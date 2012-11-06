@@ -22,6 +22,7 @@ package away3d.animators.states
 		public function ParticleTimeState(animator:ParticleAnimator, particleTimeNode:ParticleTimeNode)
 		{
 			super(animator, particleTimeNode, true);
+			
 			_particleTimeNode = particleTimeNode;
 		}
 		
