@@ -33,7 +33,7 @@ package away3d.animators.nodes
 		public static const GLOBAL:uint = 1;
 		
 		/**
-		 * Defines the default oscillator of the node, used when in global mode.
+		 * Defines the default oscillator axis (x, y, z) and cycleDuration (w) of the node, used when in global mode.
 		 */
 		public function get oscillator():Vector3D
 		{
@@ -54,7 +54,8 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticleOscillatorNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
+		 * @param    [optional] oscillator      Defines the default oscillator axis (x, y, z) and cycleDuration (w) of the node, used when in global mode.
 		 */
 		public function ParticleOscillatorNode(mode:uint, oscillator:Vector3D = null)
 		{

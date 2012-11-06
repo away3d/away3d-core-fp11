@@ -59,7 +59,7 @@ package away3d.animators.nodes
 		public static const ORBIT_VECTOR3D:String = "OrbitVector3D";
 		
 		/**
-		 * Defines the radius of the orbit, when in global mode. Defaults to 100.
+		 * Defines the radius of the orbit when in global mode. Defaults to 100.
 		 */
 		public function get radius():Number
 		{
@@ -73,7 +73,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to 1.
+		 * Defines the duration of the orbit in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
 		 */
 		public function get cycleDuration():Number
 		{
@@ -87,7 +87,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
+		 * Defines the phase of the orbit in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
 		 */
 		public function get cyclePhase():Number
 		{
@@ -101,7 +101,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the global euler rotation applied to the orientation of the motion.
+		 * Defines the euler rotation in degrees, applied to the orientation of the orbit when in global mode.
 		 */
 		public function get eulers():Vector3D
 		{
@@ -117,10 +117,16 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Creates a new <code>ParticleCircleNode</code>
+		 * Creates a new <code>ParticleOrbitNode</code> object.
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
-		 * @param    [optional] eulers          Defines the global euler rotation applied to the orientation of the motion.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
+		 * @param    [optional] usesEulers      Defines whether the node uses the <code>eulers</code> property in the shader to calculate a rotation on the orbit. Defaults to true.
+		 * @param    [optional] usesCycle       Defines whether the node uses the <code>cycleDuration</code> property in the shader to calculate the period of the orbit independent of particle duration. Defaults to false.
+		 * @param    [optional] usesPhase       Defines whether the node uses the <code>cyclePhase</code> property in the shader to calculate a starting offset to the cycle rotation of the particle. Defaults to false.
+		 * @param    [optional] radius          Defines the radius of the orbit when in global mode. Defaults to 100.
+		 * @param    [optional] cycleDuration   Defines the duration of the orbit in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
+		 * @param    [optional] cyclePhase      Defines the phase of the orbit in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
+		 * @param    [optional] eulers          Defines the euler rotation in degrees, applied to the orientation of the orbit when in global mode.
 		 */
 		public function ParticleOrbitNode(mode:uint, usesEulers:Boolean = true, usesCycle:Boolean = false, usesPhase:Boolean = false, radius:Number = 100, cycleDuration:Number = 1, cyclePhase:Number = 0, eulers:Vector3D = null)
 		{

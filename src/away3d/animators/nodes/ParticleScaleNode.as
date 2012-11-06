@@ -78,7 +78,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to 1.
+		 * Defines the duration of the animation in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
 		 */
 		public function get cycleDuration():Number
 		{
@@ -92,7 +92,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
+		 * Defines the phase of the cycle in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
 		 */
 		public function get cyclePhase():Number
 		{
@@ -108,14 +108,15 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticleScaleNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
-		 * @param    [optional] usesCycle       Defines whether the node uses cycle data in its scale transformations. Defaults to false.
-		 * @param    [optional] usesPhase       Defines whether the node uses phase data in its scale transformations. Defaults to false.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
+		 * @param    [optional] usesCycle       Defines whether the node uses the <code>cycleDuration</code> property in the shader to calculate the period of animation independent of particle duration. Defaults to false.
+		 * @param    [optional] usesPhase       Defines whether the node uses the <code>cyclePhase</code> property in the shader to calculate a starting offset to the animation cycle. Defaults to false.
 		 * @param    [optional] minScale        Defines the min scale transform of the node, when in global mode. Defaults to 1.
 		 * @param    [optional] maxScale        Defines the max color transform of the node, when in global mode. Defaults to 1.
-		 * @param    [optional] cycleDuration   Defines the cycle time per round, when in global mode. Defaults to 1.
-		 * @param    [optional] cyclePhase      Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
+		 * @param    [optional] cycleDuration   Defines the duration of the animation in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
+		 * @param    [optional] cyclePhase      Defines the phase of the cycle in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
 		 */
+		 
 		public function ParticleScaleNode(mode:uint, usesCycle:Boolean, usesPhase:Boolean, minScale:Number = 1, maxScale:Number = 1, cycleDuration:Number = 1, cyclePhase:Number = 0)
 		{
 			var len:int = 2;

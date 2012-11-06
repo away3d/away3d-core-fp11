@@ -124,7 +124,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to zero.
+		 * Defines the duration of the animation in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
 		 */
 		public function get cycleDuration():Number
 		{
@@ -138,7 +138,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
+		 * Defines the phase of the cycle in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
 		 */
 		public function get cyclePhase():Number
 		{
@@ -154,15 +154,15 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticleColorNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
-		 * @param    [optional] usesMultiplier  Defines whether the node uses multiplier data in its color transformations. Defaults to true.
-		 * @param    [optional] usesOffset      Defines whether the node uses offset data in its color transformations. Defaults to true.
-		 * @param    [optional] usesCycle       Defines whether the node uses cycle data in its color transformations. Defaults to false.
-		 * @param    [optional] usesPhase       Defines whether the node uses phase data in its color transformations. Defaults to false.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
+		 * @param    [optional] usesMultiplier  Defines whether the node uses multiplier data in the shader for its color transformations. Defaults to true.
+		 * @param    [optional] usesOffset      Defines whether the node uses offset data in the shader for its color transformations. Defaults to true.
+		 * @param    [optional] usesCycle       Defines whether the node uses the <code>cycleDuration</code> property in the shader to calculate the period of the animation independent of particle duration. Defaults to false.
+		 * @param    [optional] usesPhase       Defines whether the node uses the <code>cyclePhase</code> property in the shader to calculate a starting offset to the cycle rotation of the particle. Defaults to false.
 		 * @param    [optional] startColor      Defines the default start color transform of the node, when in global mode.
 		 * @param    [optional] endColor        Defines the default end color transform of the node, when in global mode.
-		 * @param    [optional] cycleDuration   Defines the default cycle time per round, when in global mode. Defaults to 1.
-		 * @param    [optional] cyclePhase      Defines the default cycle phase of the node in degrees, when in global mode. Defaults to zero.
+		 * @param    [optional] cycleDuration   Defines the duration of the animation in seconds, used as a period independent of particle duration when in global mode. Defaults to 1.
+		 * @param    [optional] cyclePhase      Defines the phase of the cycle in degrees, used as the starting offset of the cycle when in global mode. Defaults to 0.
 		 */
 		public function ParticleColorNode(mode:uint, usesMultiplier:Boolean = true, usesOffset:Boolean = true, usesCycle:Boolean = false, usesPhase:Boolean = false, startColor:ColorTransform = null, endColor:ColorTransform = null, cycleDuration:Number = 1, cyclePhase:Number = 0)
 		{
