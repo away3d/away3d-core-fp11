@@ -8,6 +8,7 @@ package away3d.animators.states
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleSpriteSheetNode;
 	import away3d.animators.ParticleAnimator;
+	import flash.display3D.Context3DVertexBufferFormat;
 	
 	use namespace arcane;
 	
@@ -33,7 +34,19 @@ package away3d.animators.states
 			{
 				var data:Vector.<Number> = _particleSpriteSheetNode._spriteSheetData;
 				animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_0), data[0], data[1], data[2], data[3]);
-				animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_1), data[4], data[5]);
+				if (_particleSpriteSheetNode._usesCycle)
+				{
+					var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_1);
+					if(_particleSpriteSheetNode.mode == ParticleSpriteSheetNode.GLOBAL)
+						animationRegisterCache.setVertexConst(index, data[4], data[5]);
+					else
+					{
+						if (_particleSpriteSheetNode._usesPhase)
+							animationSubGeometry.activateVertexBuffer(index, _particleSpriteSheetNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+						else
+							animationSubGeometry.activateVertexBuffer(index, _particleSpriteSheetNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_2);
+					}
+				}
 			}
 		}
 	
