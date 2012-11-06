@@ -1,5 +1,6 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.data.ParticleProperties;
 	import flash.geom.Vector3D;
 	import away3d.arcane;
@@ -137,7 +138,7 @@ package away3d.animators.nodes
 			var code:String = "";
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			
-			var scaleRegister:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var scaleRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, SCALE_INDEX, scaleRegister.index);
 			
 			if (_usesCycle) {

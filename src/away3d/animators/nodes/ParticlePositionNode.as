@@ -1,5 +1,6 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleProperties;
@@ -61,7 +62,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var positionAttribute:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var positionAttribute:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, POSITION_INDEX, positionAttribute.index);
 			
 			return "add " + animationRegisterCache.positionTarget +"," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + "\n";
