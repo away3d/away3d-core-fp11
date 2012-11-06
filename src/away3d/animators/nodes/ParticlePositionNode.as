@@ -19,6 +19,7 @@ package away3d.animators.nodes
 	{
 		/** @private */
 		arcane static const POSITION_INDEX:uint = 0;
+		
 		/** @private */
 		arcane var _position:Vector3D;
 		
@@ -28,33 +29,19 @@ package away3d.animators.nodes
 		 */
 		public static const POSITION_VECTOR3D:String = "PositionVector3D";
 		
-		
-		/**
-		 * Defines the position of the particle when in global mode. Defaults to 0,0,0.
-		 */
-		public function get position():Vector3D
-		{
-			return _position;
-		}
-		
-		public function set position(value:Vector3D):void
-		{
-			_position = value;
-		}
-		
 		/**
 		 * Creates a new <code>ParticlePositionNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
-		 * @param    [optional] position        Defines the position of the particle when in global mode. Defaults to 0,0,0.
+		 * @param    [optional] position        Defines the default position of the particle when in global mode. Defaults to 0,0,0.
 		 */
 		public function ParticlePositionNode(mode:uint, position:Vector3D = null)
 		{
+			super("ParticlePositionNode" + mode, mode, 3);
+			
 			_stateClass = ParticlePositionState;
 			
 			_position = position || new Vector3D();
-			
-			super("ParticlePositionNode" + mode, mode, 3);
 		}
 		
 		/**
@@ -82,5 +69,4 @@ package away3d.animators.nodes
 			_oneData[2] = offset.z;
 		}
 	}
-
 }

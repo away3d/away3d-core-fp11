@@ -21,12 +21,27 @@ package away3d.animators.states
 	public class ParticlePositionState extends ParticleStateBase
 	{
 		private var _particlePositionNode:ParticlePositionNode;
+		private var _position:Vector3D;
+		
+		/**
+		 * Defines the position of the particle when in global mode. Defaults to 0,0,0.
+		 */
+		public function get position():Vector3D
+		{
+			return _position;
+		}
+		
+		public function set position(value:Vector3D):void
+		{
+			_position = value;
+		}
 		
 		public function ParticlePositionState(animator:ParticleAnimator, particlePositionNode:ParticlePositionNode)
 		{
 			super(animator, particlePositionNode);
 			
 			_particlePositionNode = particlePositionNode;
+			_position = _particlePositionNode._position;
 		}
 		
 		
@@ -34,12 +49,10 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticlePositionNode.POSITION_INDEX);
 			
-			if (_particlePositionNode.mode == ParticlePropertiesMode.LOCAL) {
+			if (_particlePositionNode.mode == ParticlePropertiesMode.LOCAL)
 				animationSubGeometry.activateVertexBuffer(index, _particlePositionNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-			} else {
-				var position:Vector3D = _particlePositionNode._position;
-				animationRegisterCache.setVertexConst(index, position.x, position.y, position.z);
-			}
+			else
+				animationRegisterCache.setVertexConst(index, _position.x, _position.y, _position.z);
 		}
 	}
 }
