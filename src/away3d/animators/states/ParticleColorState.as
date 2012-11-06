@@ -37,7 +37,7 @@ package away3d.animators.states
 		private var _deltaOffsetData:Vector3D;
 		
 		/**
-		 * Defines the start color transform of the node, when in global mode.
+		 * Defines the start color transform of the state, when in global mode.
 		 */
 		public function get startColor():ColorTransform
 		{
@@ -52,7 +52,7 @@ package away3d.animators.states
 		}
 		
 		/**
-		 * Defines the end color transform of the node, when in global mode.
+		 * Defines the end color transform of the state, when in global mode.
 		 */
 		public function get endColor():ColorTransform
 		{

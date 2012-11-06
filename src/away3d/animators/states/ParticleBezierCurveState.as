@@ -20,12 +20,42 @@ package away3d.animators.states
 	public class ParticleBezierCurveState extends ParticleStateBase
 	{
 		private var _particleBezierCurveNode:ParticleBezierCurveNode;
+		private var _controlPoint:Vector3D;
+		private var _endPoint:Vector3D;
+		
+		/**
+		 * Defines the default control point of the node, used when in global mode.
+		 */
+		public function get controlPoint():Vector3D
+		{
+			return _controlPoint;
+		}
+		
+		public function set controlPoint(value:Vector3D):void
+		{
+			_controlPoint = value;
+		}
+		
+		/**
+		 * Defines the default end point of the node, used when in global mode.
+		 */
+		public function get endPoint():Vector3D
+		{
+			return _endPoint;
+		}
+		
+		public function set endPoint(value:Vector3D):void
+		{
+			_endPoint = value;
+		}
 		
 		public function ParticleBezierCurveState(animator:ParticleAnimator, particleBezierCurveNode:ParticleBezierCurveNode)
 		{
 			super(animator, particleBezierCurveNode);
 			
 			_particleBezierCurveNode = particleBezierCurveNode;
+			_controlPoint = _particleBezierCurveNode._controlPoint;
+			_endPoint = _particleBezierCurveNode._endPoint;
 		}
 		
 		
@@ -37,10 +67,8 @@ package away3d.animators.states
 				animationSubGeometry.activateVertexBuffer(index, _particleBezierCurveNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 				animationSubGeometry.activateVertexBuffer(index + 1, _particleBezierCurveNode.dataOffset + 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {
-				var temp:Vector3D = _particleBezierCurveNode.controlPoint;
-				animationRegisterCache.setVertexConst(index, temp.x, temp.y, temp.z);
-				temp = _particleBezierCurveNode.endPoint;
-				animationRegisterCache.setVertexConst(index + 1, temp.x, temp.y, temp.z);
+				animationRegisterCache.setVertexConst(index, _controlPoint.x, _controlPoint.y, _controlPoint.z);
+				animationRegisterCache.setVertexConst(index + 1, _endPoint.x, _endPoint.y, _endPoint.z);
 			}
 		}
 	}

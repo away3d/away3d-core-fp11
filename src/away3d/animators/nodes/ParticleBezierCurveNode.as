@@ -18,40 +18,16 @@ package away3d.animators.nodes
 		/** @private */
 		arcane static const BEZIER_INDEX:int = 0;
 		
-		private var _controlPoint:Vector3D;
-		private var _endPoint:Vector3D;
+		/** @private */
+		arcane var _controlPoint:Vector3D;
+		/** @private */
+		arcane var _endPoint:Vector3D;
 		
 		/**
 		 * Reference for bezier curve node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector</code> object representing the control point position (0, 1, 2) and end point position (3, 4, 6) of the curve on the particle.
 		 */
 		public static const BEZIER_VECTOR:String = "BezierVector";
-		
-		/**
-		 * Defines the default control point of the node, used when in global mode.
-		 */
-		public function get controlPoint():Vector3D
-		{
-			return _controlPoint;
-		}
-		
-		public function set controlPoint(value:Vector3D):void
-		{
-			_controlPoint = value;
-		}
-		
-		/**
-		 * Defines the default end point of the node, used when in global mode.
-		 */
-		public function get endPoint():Vector3D
-		{
-			return _endPoint;
-		}
-		
-		public function set endPoint(value:Vector3D):void
-		{
-			_endPoint = value;
-		}
 		
 		/**
 		 * Creates a new <code>ParticleBezierCurveNode</code>
