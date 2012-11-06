@@ -23,25 +23,40 @@ package away3d.animators.nodes
 		arcane static const START_MULTIPLIER_INDEX:uint = 0;
 		
 		/** @private */
-		arcane static const DELTA_MULTIPLIER_INDEX:uint = 1;
+		arcane static const VARYING_START_MULTIPLIER_INDEX:uint = 1;
 		
 		/** @private */
-		arcane static const START_OFFSET_INDEX:uint = 2;
+		arcane static const DELTA_MULTIPLIER_INDEX:uint = 2;
 		
 		/** @private */
-		arcane static const DELTA_OFFSET_INDEX:uint = 3;
+		arcane static const VARYING_DELTA_MULTIPLIER_INDEX:uint = 3;
 		
 		/** @private */
-		arcane static const CYCLE_INDEX:uint = 4;
+		arcane static const START_OFFSET_INDEX:uint = 4;
 		
 		/** @private */
-		arcane var _hasMult:Boolean;
+		arcane static const VARYING_START_OFFSET_INDEX:uint = 5;
 		
 		/** @private */
-		arcane var _hasOffset:Boolean;
+		arcane static const DELTA_OFFSET_INDEX:uint = 6;
 		
 		/** @private */
-		arcane var _hasCycle:Boolean;
+		arcane static const VARYING_DELTA_OFFSET_INDEX:uint = 7;
+		
+		/** @private */
+		arcane static const CYCLE_INDEX:uint = 8;
+		
+		/** @private */
+		arcane var _usesMultiplier:Boolean;
+		
+		/** @private */
+		arcane var _usesOffset:Boolean;
+		
+		/** @private */
+		arcane var _usesCycle:Boolean;
+		
+		/** @private */
+		arcane var _usesPhase:Boolean;
 		
 		/** @private */
 		arcane var _startMultiplierData:Vector3D;
@@ -77,7 +92,7 @@ package away3d.animators.nodes
 		 * Reference for color node properties on a single particle (when in local property mode).
 		 * Expects a <code>ColorTransform</code> object representing the color transform applied to the particle.
 		 */
-		public static const COLOR_COLORTRANSFORM:String = "ColorColorTransform";
+		public static const COLOR_VECTOR_COLORTRANSFORM:String = "ColorVectorColorTransform";
 		
 		/**
 		 * Defines the start color transform of the node, when in global mode.
@@ -140,14 +155,23 @@ package away3d.animators.nodes
 		 * Creates a new <code>ParticleColorNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
-		 * @param    [optional] startColor      Defines the start color transform of the node, when in global mode.
-		 * @param    [optional] endColor        Defines the end color transform of the node, when in global mode.
-		 * @param    [optional] cycleSpeed      Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to zero.
-		 * @param    [optional] cyclePhase      Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
+		 * @param    [optional] usesMultiplier  Defines whether the node uses multiplier data in its color transformations. Defaults to true.
+		 * @param    [optional] usesOffset      Defines whether the node uses offset data in its color transformations. Defaults to true.
+		 * @param    [optional] usesCycle       Defines whether the node uses cycle data in its color transformations. Defaults to false.
+		 * @param    [optional] usesPhase       Defines whether the node uses phase data in its color transformations. Defaults to false.
+		 * @param    [optional] startColor      Defines the default start color transform of the node, when in global mode.
+		 * @param    [optional] endColor        Defines the default end color transform of the node, when in global mode.
+		 * @param    [optional] cycleSpeed      Defines the default cycle speed of the node in revolutions per second, when in global mode. Defaults to 1.
+		 * @param    [optional] cyclePhase      Defines the default cycle phase of the node in degrees, when in global mode. Defaults to zero.
 		 */
-		public function ParticleColorNode(mode:uint, startColor:ColorTransform = null, endColor:ColorTransform = null, cycleSpeed:Number = 0, cyclePhase:Number = 0)
+		public function ParticleColorNode(mode:uint, usesMultiplier:Boolean = true, usesOffset:Boolean = true, usesCycle:Boolean = false, usesPhase:Boolean = false, startColor:ColorTransform = null, endColor:ColorTransform = null, cycleSpeed:Number = 1, cyclePhase:Number = 0)
 		{
 			_stateClass = ParticleColorState;
+			
+			_usesMultiplier = usesMultiplier;
+			_usesOffset = usesOffset;
+			_usesCycle = usesCycle;
+			_usesPhase = usesPhase;
 			
 			_startColor = startColor || new ColorTransform();
 			_endColor = endColor || new ColorTransform();
@@ -156,8 +180,7 @@ package away3d.animators.nodes
 			
 			updateColorData();
 			
-			//TODO: adjust the data length for local particle properties when only multipliers or offsets are used.
-			super("ParticleColorNode" + mode, mode, 8);
+			super("ParticleColorNode" + mode, mode, (_usesMultiplier && _usesOffset)? 16 : 8);
 		}
 		
 		/**
@@ -176,20 +199,34 @@ package away3d.animators.nodes
 			var code:String = "";
 			if (animationRegisterCache.needFragmentAnimation && _mode == LOCAL)
 			{
-				if (_hasMult) {
-					var multiplierAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
-					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, multiplierAtt.index);
-					var multiplierVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
-					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, multiplierVary.index);
+				if (_usesMultiplier) {
+					var startMultiplierAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierAtt.index);
+					var startMultiplierVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
+					animationRegisterCache.setRegisterIndex(this, VARYING_START_MULTIPLIER_INDEX, startMultiplierVary.index);
 					
-					code += "mov " + multiplierVary + "," + multiplierAtt + "\n";
-				} if (_hasOffset) {
-					var offsetAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
-					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, offsetAtt.index);
-					var offsetVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
-					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, offsetVary.index);
+					var deltaMultiplierAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierAtt.index);
+					var deltaMultiplierVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
+					animationRegisterCache.setRegisterIndex(this, VARYING_DELTA_MULTIPLIER_INDEX, deltaMultiplierVary.index);
 					
-					code += "mov " + offsetVary + "," + offsetAtt + "\n";
+					code += "mov " + startMultiplierVary + "," + startMultiplierAtt + "\n";
+					code += "mov " + deltaMultiplierVary + "," + deltaMultiplierAtt + "\n";
+				}
+				
+				if (_usesOffset) {
+					var startOffsetAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetAtt.index);
+					var startOffsetVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
+					animationRegisterCache.setRegisterIndex(this, VARYING_START_OFFSET_INDEX, startOffsetVary.index);
+					
+					var deltaOffsetAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetAtt.index);
+					var deltaOffsetVary:ShaderRegisterElement = animationRegisterCache.getFreeVarying();
+					animationRegisterCache.setRegisterIndex(this, VARYING_DELTA_OFFSET_INDEX, deltaOffsetVary.index);
+					
+					code += "mov " + startOffsetVary + "," + startOffsetAtt + "\n";
+					code += "mov " + deltaOffsetVary + "," + deltaOffsetAtt + "\n";
 				}
 			}
 			return code;
@@ -205,52 +242,40 @@ package away3d.animators.nodes
 			{
 				var temp:ShaderRegisterElement = animationRegisterCache.getFreeFragmentVectorTemp();
 				
-				if (_mode == LOCAL) {
-					if (_hasMult) {
-						var multiplierVary:ShaderRegisterElement = new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, DELTA_MULTIPLIER_INDEX));
-						code += "mul " + animationRegisterCache.colorTarget +"," + multiplierVary + "," + animationRegisterCache.colorTarget + "\n";
-					}
+				if (_usesCycle) {
+					var cycleConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, CYCLE_INDEX, cycleConst.index);
 					
-					if (_hasOffset) {
-						var offsetVary:ShaderRegisterElement = new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, DELTA_OFFSET_INDEX));
-						code += "add " + animationRegisterCache.colorTarget +"," +offsetVary + "," + animationRegisterCache.colorTarget + "\n";
-					}
-				} else {
-					if (_cycleSpeed) {
-						var cycleConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
-						animationRegisterCache.setRegisterIndex(this, CYCLE_INDEX, cycleConst.index);
-						
-						animationRegisterCache.addFragmentTempUsages(temp,1);
-						var sin:ShaderRegisterElement = animationRegisterCache.getFreeFragmentSingleTemp();
-						animationRegisterCache.removeFragmentTempUsage(temp);
-						
-						code += "mul " + sin + "," + animationRegisterCache.fragmentTime + "," + cycleConst + ".x\n";
-						
-						if (_cyclePhase)
-							code += "add " + sin + "," + sin + "," + cycleConst + ".y\n";
-						
-						code += "sin " + sin + "," + sin + "\n";
-					}
+					animationRegisterCache.addFragmentTempUsages(temp,1);
+					var sin:ShaderRegisterElement = animationRegisterCache.getFreeFragmentSingleTemp();
+					animationRegisterCache.removeFragmentTempUsage(temp);
 					
-					if (_hasMult) {
-						var startMultiplierConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
-						var deltaMultiplierConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
-						animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierConst.index);
-						animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierConst.index);
-						code += "mul " + temp + "," + deltaMultiplierConst + "," + ((_cycleSpeed)? sin : animationRegisterCache.fragmentLife) + "\n";
-						code += "add " + temp + "," + temp + "," + startMultiplierConst + "\n";
-						code += "mul " + animationRegisterCache.colorTarget +"," + temp + "," + animationRegisterCache.colorTarget + "\n";
-					}
+					code += "mul " + sin + "," + animationRegisterCache.fragmentTime + "," + cycleConst + ".x\n";
 					
-					if (_hasOffset) {
-						var startOffsetConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
-						var deltaOffsetConst:ShaderRegisterElement = animationRegisterCache.getFreeFragmentConstant();
-						animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetConst.index);
-						animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetConst.index);
-						code += "mul " + temp + "," + deltaOffsetConst +"," + ((_cycleSpeed)? sin : animationRegisterCache.fragmentLife) + "\n";
-						code += "add " + temp + "," + temp +"," + startOffsetConst + "\n";
-						code += "add " + animationRegisterCache.colorTarget +"," +temp + "," + animationRegisterCache.colorTarget + "\n";
-					}
+					if (_usesPhase)
+						code += "add " + sin + "," + sin + "," + cycleConst + ".y\n";
+					
+					code += "sin " + sin + "," + sin + "\n";
+				}
+				
+				if (_usesMultiplier) {
+					var startMultiplierValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var deltaMultiplierValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierValue.index);
+					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierValue.index);
+					code += "mul " + temp + "," + deltaMultiplierValue + "," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
+					code += "add " + temp + "," + temp + "," + startMultiplierValue + "\n";
+					code += "mul " + animationRegisterCache.colorTarget +"," + temp + "," + animationRegisterCache.colorTarget + "\n";
+				}
+				
+				if (_usesOffset) {
+					var startOffsetValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var deltaOffsetValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetValue.index);
+					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetValue.index);
+					code += "mul " + temp + "," + deltaOffsetValue +"," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
+					code += "add " + temp + "," + temp +"," + startOffsetValue + "\n";
+					code += "add " + animationRegisterCache.colorTarget +"," +temp + "," + animationRegisterCache.colorTarget + "\n";
 				}
 			}
 			
@@ -259,34 +284,28 @@ package away3d.animators.nodes
 		
 		private function updateColorData():void
 		{
-			_hasMult = !(startColor.redMultiplier == 1 && startColor.greenMultiplier == 1 && startColor.blueMultiplier == 1 && startColor.alphaMultiplier == 1 && endColor.redMultiplier == 1 && endColor.greenMultiplier == 1 && endColor.blueMultiplier == 1 && endColor.alphaMultiplier == 1);
-			_hasOffset = !(startColor.redOffset == 0 && startColor.greenOffset == 0 && startColor.blueOffset == 0 && startColor.alphaOffset == 0 && endColor.redOffset == 0 && endColor.greenOffset == 0 && endColor.blueOffset == 0 && endColor.alphaOffset == 0);
-			_hasCycle = !(_cycleSpeed == 0);
-			
-			if (_hasCycle) {
+			if (_usesCycle) {
 				_cycleData = new Vector3D(Math.PI * 2 / _cycleSpeed, _cyclePhase * Math.PI / 180, 0, 0);
-				if (_hasMult) {
+				if (_usesMultiplier) {
 					_startMultiplierData = new Vector3D((_startColor.redMultiplier + _endColor.redMultiplier) / 2, (_startColor.greenMultiplier + _endColor.greenMultiplier) / 2, (_startColor.blueMultiplier + _endColor.blueMultiplier) / 2, (_startColor.alphaMultiplier + _endColor.alphaMultiplier) / 2);
 					_deltaMultiplierData = new Vector3D((_endColor.redMultiplier - _startColor.redMultiplier) / 2, (_endColor.greenMultiplier - _startColor.greenMultiplier) / 2, (_endColor.blueMultiplier - _startColor.blueMultiplier) / 2, (_endColor.alphaMultiplier - _startColor.alphaMultiplier) / 2);
 				}
 				
-				if (_hasOffset) {
+				if (_usesOffset) {
 					_startOffsetData = new Vector3D((_startColor.redOffset + _endColor.redOffset) / (255 * 2), (_startColor.greenOffset + _endColor.greenOffset) / (255 * 2), (_startColor.blueOffset + _endColor.blueOffset) / (255 * 2), (_startColor.alphaOffset + _endColor.alphaOffset) / (255 * 2));
 					_deltaOffsetData = new Vector3D((_endColor.redOffset - _startColor.redOffset) / (255 * 2), (_endColor.greenOffset - _startColor.greenOffset) / (255 * 2), (_endColor.blueOffset - _startColor.blueOffset) / (255 * 2), (_endColor.alphaOffset - _startColor.alphaOffset) / (255 * 2));
 				}
 			} else {
-				if (_hasMult) {
+				if (_usesMultiplier) {
 					_startMultiplierData = new Vector3D(_startColor.redMultiplier , _startColor.greenMultiplier , _startColor.blueMultiplier , _startColor.alphaMultiplier);
 					_deltaMultiplierData = new Vector3D((_endColor.redMultiplier - _startColor.redMultiplier) , (_endColor.greenMultiplier - _startColor.greenMultiplier) , (_endColor.blueMultiplier - _startColor.blueMultiplier) , (_endColor.alphaMultiplier - _startColor.alphaMultiplier));
 				}
 				
-				if (_hasOffset) {
+				if (_usesOffset) {
 					_startOffsetData = new Vector3D(_startColor.redOffset / 255, _startColor.greenOffset / 255, _startColor.blueOffset / 255, _startColor.alphaOffset / 255);
 					_deltaOffsetData = new Vector3D((_endColor.redOffset - _startColor.redOffset) / 255, (endColor.greenOffset - _startColor.greenOffset) / 255, (endColor.blueOffset - _startColor.blueOffset ) / 255, (endColor.alphaOffset - startColor.alphaOffset) / 255);
 				}
 			}
-			
-			
 		}
 		
 		/**
@@ -294,25 +313,62 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
-			var colorTransform:ColorTransform = param[COLOR_COLORTRANSFORM];
-			if (!colorTransform)
-				throw(new Error("there is no " + COLOR_COLORTRANSFORM + " in param!"));
-			if (_hasMult) {
-				_oneData[0] = colorTransform.redMultiplier;
-				_oneData[1] = colorTransform.greenMultiplier;
-				_oneData[2] = colorTransform.blueMultiplier;
-				_oneData[3] = colorTransform.alphaMultiplier;
-				if (_hasOffset) {
-					_oneData[4] = colorTransform.redOffset / 255;
-					_oneData[5] = colorTransform.greenOffset / 255;
-					_oneData[6] = colorTransform.blueOffset / 255;
-					_oneData[7] = colorTransform.alphaOffset / 255;
+			var colorVector:Vector.<ColorTransform> = param[COLOR_VECTOR_COLORTRANSFORM];
+			if (!colorVector)
+				throw(new Error("there is no " + COLOR_VECTOR_COLORTRANSFORM + " in param!"));
+			
+			var i:uint;
+			var startColor:ColorTransform = colorVector[0];
+			var endColor:ColorTransform = colorVector[1]; 
+			
+			if (_usesCycle) {
+				//multiplier
+				if (_usesMultiplier) {
+					_oneData[i++] = startColor.redMultiplier;
+					_oneData[i++] = startColor.greenMultiplier;
+					_oneData[i++] = startColor.blueMultiplier;
+					_oneData[i++] = startColor.alphaMultiplier;
+					_oneData[i++] = endColor.redMultiplier - startColor.redMultiplier;
+					_oneData[i++] = endColor.greenMultiplier - startColor.greenMultiplier;
+					_oneData[i++] = endColor.blueMultiplier - startColor.blueMultiplier;
+					_oneData[i++] = endColor.alphaMultiplier - startColor.alphaMultiplier;
+				}
+				
+				//offset
+				if (_usesOffset) {
+					_oneData[i++] = startColor.redOffset / 255;
+					_oneData[i++] = startColor.greenOffset / 255;
+					_oneData[i++] = startColor.blueOffset / 255;
+					_oneData[i++] = startColor.alphaOffset / 255;
+					_oneData[i++] = (endColor.redOffset - startColor.redOffset) / 255;
+					_oneData[i++] = (endColor.greenOffset - startColor.greenOffset) / 255;
+					_oneData[i++] = (endColor.blueOffset - startColor.blueOffset) / 255;
+					_oneData[i++] = (endColor.alphaOffset - startColor.alphaOffset) / 255;
 				}
 			} else {
-				_oneData[0] = colorTransform.redOffset / 255;
-				_oneData[1] = colorTransform.greenOffset / 255;
-				_oneData[2] = colorTransform.blueOffset / 255;
-				_oneData[3] = colorTransform.alphaOffset / 255;
+				//multiplier
+				if (_usesMultiplier) {
+					_oneData[i++] = (startColor.redMultiplier + endColor.redMultiplier) / 2;
+					_oneData[i++] = (startColor.greenMultiplier + endColor.greenMultiplier) / 2;
+					_oneData[i++] = (startColor.blueMultiplier + endColor.blueMultiplier) / 2;
+					_oneData[i++] = (startColor.alphaMultiplier + endColor.alphaMultiplier) / 2;
+					_oneData[i++] = (startColor.redMultiplier - endColor.redMultiplier) / 2;
+					_oneData[i++] = (startColor.greenMultiplier - endColor.greenMultiplier) / 2;
+					_oneData[i++] = (startColor.blueMultiplier - endColor.blueMultiplier) / 2;
+					_oneData[i++] = (startColor.alphaMultiplier - endColor.alphaMultiplier) / 2;
+				}
+				
+				//offset
+				if (_usesOffset) {
+					_oneData[i++] = (startColor.redOffset + endColor.redOffset) / (255 * 2);
+					_oneData[i++] = (startColor.greenOffset + endColor.greenOffset) / (255 * 2);
+					_oneData[i++] = (startColor.blueOffset + endColor.blueOffset) / (255 * 2);
+					_oneData[i++] = (startColor.alphaOffset + endColor.alphaOffset) / (255 * 2);
+					_oneData[i++] = (startColor.redOffset - endColor.redOffset) / (255 * 2);
+					_oneData[i++] = (startColor.greenOffset - endColor.greenOffset) / (255 * 2);
+					_oneData[i++] = (startColor.blueOffset - endColor.blueOffset) / (255 * 2);
+					_oneData[i++] = (startColor.alphaOffset - endColor.alphaOffset) / (255 * 2);
+				}
 			}
 			
 		}

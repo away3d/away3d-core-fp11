@@ -35,30 +35,33 @@ package away3d.animators.states
 			{
 				var data:Vector3D;
 				var dataOffset:uint = _particleColorNode.dataOffset;
-				if (_particleColorNode.mode == ParticleColorNode.LOCAL) {
-					if (_particleColorNode._hasMult)
-					{
+				if (_particleColorNode._usesCycle) {
+					data = _particleColorNode._cycleData;
+					animationRegisterCache.setFragmentConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.CYCLE_INDEX), data.x, data.y, data.z, data.w);
+				}
+				
+				if (_particleColorNode._usesMultiplier)
+				{
+					if (_particleColorNode.mode == ParticleColorNode.LOCAL) {
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_MULTIPLIER_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 						dataOffset += 4;
-					}
-					if (_particleColorNode._hasOffset)
-					{
-						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_OFFSET_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
-					}
-				} else {
-					if (_particleColorNode._hasCycle) {
-						data = _particleColorNode._cycleData;
-						animationRegisterCache.setFragmentConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.CYCLE_INDEX), data.x, data.y, data.z, data.w);
-					}
-					if (_particleColorNode._hasMult)
-					{
+						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.DELTA_MULTIPLIER_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+						dataOffset += 4;
+					} else {
 						data = _particleColorNode._startMultiplierData;
 						animationRegisterCache.setFragmentConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_MULTIPLIER_INDEX), data.x, data.y, data.z, data.w);
 						data = _particleColorNode._deltaMultiplierData;
 						animationRegisterCache.setFragmentConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.DELTA_MULTIPLIER_INDEX), data.x, data.y, data.z, data.w);
 					}
-					if (_particleColorNode._hasOffset)
-					{
+				}
+				if (_particleColorNode._usesOffset)
+				{
+					if (_particleColorNode.mode == ParticleColorNode.LOCAL) {
+						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_OFFSET_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+						dataOffset += 4;
+						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.DELTA_OFFSET_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
+						dataOffset += 4;
+					} else {
 						data = _particleColorNode._startOffsetData;
 						animationRegisterCache.setFragmentConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_OFFSET_INDEX), data.x, data.y, data.z, data.w);
 						data = _particleColorNode._deltaOffsetData;

@@ -138,8 +138,8 @@ package away3d.animators.data
 		
 		public function setRegisterIndex(node:AnimationNodeBase, parameterIndex:int, registerIndex:int):void
 		{
-			//8 should be enough for any node.
-			var t:Vector.<int> = indexDictionary[node] ||= new Vector.<int>(8, true);
+			//9 should be enough for any node. (see color node)
+			var t:Vector.<int> = indexDictionary[node] ||= new Vector.<int>(9, true);
 			t[parameterIndex] = registerIndex;
 		}
 		
