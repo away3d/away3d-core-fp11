@@ -18,6 +18,9 @@ package away3d.animators.nodes
 		/** @private */
 		arcane static const ROTATIONALVELOCITY_INDEX:uint = 0;
 		
+		/** @private */
+		arcane var _rotationalVelocityData:Vector3D;
+		
 		/**
 		 * Used to set the rotational velocity node into local property mode.
 		 */
@@ -28,9 +31,7 @@ package away3d.animators.nodes
 		 */
 		public static const GLOBAL:uint = 1;
 		
-		private var _rotationVelocity:Vector3D;
-		
-		arcane var _rotationVelocityData:Vector3D;
+		private var _rotationalVelocity:Vector3D;
 		
 		/**
 		 * Reference for rotational velocity node properties on a single particle (when in local property mode).
@@ -39,19 +40,34 @@ package away3d.animators.nodes
 		public static const ROTATIONALVELOCITY_VECTOR3D:String = "RotationalVelocityVector3D";
 		
 		/**
+		 * Defines the default rotationalVelocity of the node, used when in global mode.
+		 */
+		public function get rotationalVelocity():Vector3D
+		{
+			return _rotationalVelocity;
+		}
+		
+		public function set rotationalVelocity(value:Vector3D):void
+		{
+			_rotationalVelocity = value;
+			
+			updateRotationalVelocityData();
+		}
+		
+		/**
 		 * Creates a new <code>ParticleRotationalVelocityNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 */
-		public function ParticleRotationalVelocityNode(mode:uint, rotationVelocity:Vector3D = null)
+		public function ParticleRotationalVelocityNode(mode:uint, rotationalVelocity:Vector3D = null)
 		{
 			_stateClass = ParticleRotationalVelocityState;
 			
 			super("ParticleRotationalVelocityNode" + mode, mode, 4);
 			
-			_rotationVelocity = rotationVelocity;
-			_rotationVelocityData = new Vector3D;
-			updateOscillatorData();
+			_rotationalVelocity = rotationalVelocity;
+			
+			updateRotationalVelocityData();
 		}
 		
 		/**
@@ -150,35 +166,19 @@ package away3d.animators.nodes
 			_oneData[0] = rotate.x;
 			_oneData[1] = rotate.y;
 			_oneData[2] = rotate.z;
-			_oneData[3] = Math.PI / rotate.w;
+			_oneData[3] = Math.PI * 2 / rotate.w;
 		}
 		
-		/**
-		 * Defines the default rotationVelocity of the node, used when in global mode.
-		 */
-		public function get rotationVelocity():Vector3D
+		private function updateRotationalVelocityData():void
 		{
-			return _rotationVelocity;
-		}
-		
-		public function set rotationVelocity(value:Vector3D):void
-		{
-			_rotationVelocity = value;
-			updateOscillatorData();
-		}
-		
-		private function updateOscillatorData():void
-		{
-			if (mode == GLOBAL)
-			{
-				if (_rotationVelocity.w <= 0)
-					throw(new Error("the cycle must greater than zero"));
-				if (_rotationVelocity.length == 0)
+			if (_mode == GLOBAL) {
+				if (_rotationalVelocity.w <= 0)
+					throw(new Error("the cycle speed must greater than zero"));
+				
+				if (_rotationalVelocity.length == 0)
 					throw(new Error("must define a axis"));
-				_rotationVelocityData.x = _rotationVelocity.x;
-				_rotationVelocityData.y = _rotationVelocity.y;
-				_rotationVelocityData.z = _rotationVelocity.z;
-				_rotationVelocityData.w = Math.PI / _rotationVelocity.w;
+				
+				_rotationalVelocityData = new Vector3D(_rotationalVelocity.x, _rotationalVelocity.y, _rotationalVelocity.z, Math.PI * 2 / _rotationalVelocity.w);
 			}
 		}
 	}

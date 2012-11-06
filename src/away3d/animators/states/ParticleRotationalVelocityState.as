@@ -33,11 +33,11 @@ package away3d.animators.states
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotationalVelocityNode.ROTATIONALVELOCITY_INDEX);
-			if (_particleRotationalVelocityNode.mode == ParticleRotationalVelocityNode.LOCAL)
+			
+			if (_particleRotationalVelocityNode.mode == ParticleRotationalVelocityNode.LOCAL) {
 				animationSubGeometry.activateVertexBuffer(index, _particleRotationalVelocityNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
-			else
-			{
-				var rotationVelocityData:Vector3D = _particleRotationalVelocityNode._rotationVelocityData;
+			} else {
+				var rotationVelocityData:Vector3D = _particleRotationalVelocityNode._rotationalVelocityData;
 				animationRegisterCache.setVertexConst(index, rotationVelocityData.x, rotationVelocityData.y, rotationVelocityData.z, rotationVelocityData.w);
 			}
 		}
