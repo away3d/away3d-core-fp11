@@ -57,47 +57,46 @@ package away3d.core.partition
 			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
 			var plane : Plane3D;
 
-			// this is basically a p/n vertex test in object space against the frustum planes with a lot of inlining
 			plane = frustum[0];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[1];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[2];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[3];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[4];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[5];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			return true;
