@@ -123,7 +123,7 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticleSpriteSheetNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
 		 * @param    [optional] numColumns      Defines the number of columns in the spritesheet, when in global mode. Defaults to 1.
 		 * @param    [optional] numRows         Defines the number of rows in the spritesheet, when in global mode. Defaults to 1.
 		 * @param    [optional] startTime       Defines the start time, when in global mode. Defaults to zero.

@@ -66,7 +66,7 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticleBezierCurveNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
 		 * @param    [optional] controlPoint    Defines the default control point of the node, used when in global mode.
 		 * @param    [optional] endPoint        Defines the default end point of the node, used when in global mode.
 		 */

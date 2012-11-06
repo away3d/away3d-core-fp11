@@ -80,7 +80,7 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticleTimeNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
 		 * @param    [optional] loop            Defines whether the time track is in loop mode. Defaults to false.
 		 */
 		public function ParticleTimeNode(loop:Boolean = false)

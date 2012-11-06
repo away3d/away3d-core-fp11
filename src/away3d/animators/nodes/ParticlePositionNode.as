@@ -33,7 +33,7 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticlePositionNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
 		 */
 		public function ParticlePositionNode(mode:uint)
 		{

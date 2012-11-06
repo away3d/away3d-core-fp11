@@ -57,7 +57,7 @@ package away3d.animators.nodes
 		/**
 		 * Creates a new <code>ParticleRotationalVelocityNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
+		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
 		 */
 		public function ParticleRotationalVelocityNode(mode:uint, rotationalVelocity:Vector3D = null)
 		{
@@ -158,7 +158,7 @@ package away3d.animators.nodes
 		/** @private */
 		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
-			//(Vector3d.x,Vector3d.y,Vector3d.z) is rotation axis,Vector3d.w is cycle speed
+			//(Vector3d.x,Vector3d.y,Vector3d.z) is rotation axis,Vector3d.w is cycle duration
 			var rotate:Vector3D = param[ROTATIONALVELOCITY_VECTOR3D];
 			if (!rotate)
 				throw(new Error("there is no " + ROTATIONALVELOCITY_VECTOR3D + " in param!"));
@@ -179,7 +179,7 @@ package away3d.animators.nodes
 					throw(new Error("the cycle duration must greater than zero"));
 				
 				if (_rotationalVelocity.length == 0)
-					throw(new Error("must define a axis"));
+					throw(new Error("must define an axis"));
 				
 				_rotationalVelocityData = new Vector3D(_rotationalVelocity.x, _rotationalVelocity.y, _rotationalVelocity.z, Math.PI * 2 / _rotationalVelocity.w);
 			}
