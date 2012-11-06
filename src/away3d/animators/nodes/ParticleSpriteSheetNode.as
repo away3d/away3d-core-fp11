@@ -30,13 +30,15 @@ package away3d.animators.nodes
 		arcane var _usesPhase:Boolean;
 		
 		/** @private */
-		arcane var _spriteSheetData:Vector.<Number>;
-		
-		private var _cycleDuration:Number;
-		private var _totalFrames:int;
-		private var _numColumns:int;
-		private var _numRows:int;
-		private var _phaseTime:Number;
+		arcane var _totalFrames:int;
+		/** @private */
+		arcane var _numColumns:int;
+		/** @private */
+		arcane var _numRows:int;
+		/** @private */
+		arcane var _cycleDuration:Number;
+		/** @private */
+		arcane var _cyclePhase:Number;
 		
 		/**
 		 * Reference for spritesheet node properties on a single particle (when in local property mode).
@@ -61,34 +63,6 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the phase time, when in global mode. Defaults to zero.
-		 */
-		public function get phaseTime():Number
-		{
-			return _phaseTime;
-		}
-		public function set phaseTime(value:Number):void
-		{
-			_phaseTime = value;
-			
-			updateSpriteSheetData();
-		}
-		
-		/**
-		 * Defines the frame rate, when in global mode. Defaults to 60.
-		 */
-		public function get cycleDuration():Number
-		{
-			return _cycleDuration;
-		}
-		public function set cycleDuration(value:Number):void
-		{
-			_cycleDuration = value;
-			
-			updateSpriteSheetData();
-		}
-		
-		/**
 		 * Defines the total number of frames used by the spritesheet, when in global mode. Defaults to the number defined by numColumns and numRows. Read only.
 		 */
 		public function get totalFrames():Number
@@ -96,19 +70,18 @@ package away3d.animators.nodes
 			return _totalFrames;
 		}
 		
-		
 		/**
 		 * Creates a new <code>ParticleSpriteSheetNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
 		 * @param    [optional] numColumns      Defines the number of columns in the spritesheet, when in global mode. Defaults to 1.
 		 * @param    [optional] numRows         Defines the number of rows in the spritesheet, when in global mode. Defaults to 1.
-		 * @param    [optional] phaseTime       Defines the start time, when in global mode. Defaults to zero.
-		 * @param    [optional] cycleDurion     Defines the cycle time, when in global mode. Defaults to 1.
+		 * @param    [optional] cycleDuration   Defines the default cycle duration in seconds, when in global mode. Defaults to 1.
+		 * @param    [optional] cyclePhase      Defines the default cycle phase, when in global mode. Defaults to 0.
 		 * @param    [optional] totalFrames     Defines the total number of frames used by the spritesheet, when in global mode. Defaults to the number defined by numColumns and numRows.
 		 * @param    [optional] looping         Defines whether the spritesheet animation is set to loop indefinitely. Defaults to true.
 		 */
-		public function ParticleSpriteSheetNode(mode:uint, usesCycle:Boolean, usesPhase:Boolean, numColumns:int = 1, numRows:uint = 1, cycleDuration:Number = 1, phaseTime:Number = 0, totalFrames:uint = uint.MAX_VALUE)
+		public function ParticleSpriteSheetNode(mode:uint, usesCycle:Boolean, usesPhase:Boolean, numColumns:int = 1, numRows:uint = 1, cycleDuration:Number = 1, cyclePhase:Number = 0, totalFrames:uint = uint.MAX_VALUE)
 		{
 			var len:int;
 			if (usesCycle)
@@ -126,12 +99,9 @@ package away3d.animators.nodes
 			
 			_numColumns = numColumns;
 			_numRows = numRows;
-			_phaseTime = phaseTime;
+			_cyclePhase = cyclePhase;
 			_cycleDuration = cycleDuration;
 			_totalFrames = Math.min(totalFrames, numColumns * numRows);
-			
-			_spriteSheetData = new Vector.<Number>(8, true);
-			updateSpriteSheetData();
 		}
 		
 		/**
@@ -214,26 +184,6 @@ package away3d.animators.nodes
 					"frc " + destination + "," + temp + "\n"+
 					"sub " + temp + "," + temp + "," + destination + "\n" +
 					"mul " + destination + "," + temp + "," + source2 + "\n";
-		}
-		
-		private function updateSpriteSheetData():void
-		{
-			var uTotal:Number = _totalFrames / _numColumns;
-			var uStep:Number = 1 / _numColumns;
-			var vStep:Number = 1 / _numRows;
-			_spriteSheetData[0] = uTotal;
-			_spriteSheetData[1] = uStep;
-			_spriteSheetData[2] = vStep;
-			if (_usesCycle)
-			{
-				if (_cycleDuration <= 0)
-					throw(new Error("the cycle duration must be greater than zero"));
-				var uSpeed:Number = uTotal / _cycleDuration;
-				_spriteSheetData[4] = uSpeed;
-				_spriteSheetData[5] = _cycleDuration;
-				if (_usesPhase)
-					_spriteSheetData[6] = _phaseTime;
-			}
 		}
 		
 		/**
