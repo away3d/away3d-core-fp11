@@ -1,5 +1,6 @@
 package away3d.animators.states
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -33,7 +34,7 @@ package away3d.animators.states
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOscillatorNode.OSCILLATOR_INDEX);
-			if (_particleOscillatorNode.mode == ParticleOscillatorNode.LOCAL)
+			if (_particleOscillatorNode.mode == ParticlePropertiesMode.LOCAL)
 				animationSubGeometry.activateVertexBuffer(index, _particleOscillatorNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 			else
 			{

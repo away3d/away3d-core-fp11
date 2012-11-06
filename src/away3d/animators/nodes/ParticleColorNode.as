@@ -1,7 +1,7 @@
 package away3d.animators.nodes
 {
 	import flash.geom.Vector3D;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.arcane;
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -77,16 +77,6 @@ package away3d.animators.nodes
 		private var _endColor:ColorTransform;
 		private var _cycleDuration:Number;
 		private var _cyclePhase:Number;
-		
-		/**
-		 * Used to set the color node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		
-		/**
-		 * Used to set the color node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 				
 		/**
 		 * Reference for color node properties on a single particle (when in local property mode).
@@ -197,7 +187,7 @@ package away3d.animators.nodes
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var code:String = "";
-			if (animationRegisterCache.needFragmentAnimation && _mode == LOCAL)
+			if (animationRegisterCache.needFragmentAnimation && _mode == ParticleProperties.LOCAL)
 			{
 				if (_usesMultiplier) {
 					var startMultiplierAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
@@ -259,8 +249,8 @@ package away3d.animators.nodes
 				}
 				
 				if (_usesMultiplier) {
-					var startMultiplierValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
-					var deltaMultiplierValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var startMultiplierValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var deltaMultiplierValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
 					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierValue.index);
 					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierValue.index);
 					code += "mul " + temp + "," + deltaMultiplierValue + "," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
@@ -269,8 +259,8 @@ package away3d.animators.nodes
 				}
 				
 				if (_usesOffset) {
-					var startOffsetValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
-					var deltaOffsetValue:ShaderRegisterElement = (_mode == LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var startOffsetValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var deltaOffsetValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
 					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetValue.index);
 					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetValue.index);
 					code += "mul " + temp + "," + deltaOffsetValue +"," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
@@ -313,7 +303,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			var colorVector:Vector.<ColorTransform> = param[COLOR_VECTOR_COLORTRANSFORM];
 			if (!colorVector)

@@ -1,5 +1,6 @@
 package away3d.animators.states
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import flash.geom.Vector3D;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import away3d.arcane;
@@ -42,7 +43,7 @@ package away3d.animators.states
 				
 				if (_particleColorNode._usesMultiplier)
 				{
-					if (_particleColorNode.mode == ParticleColorNode.LOCAL) {
+					if (_particleColorNode.mode == ParticlePropertiesMode.LOCAL) {
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_MULTIPLIER_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 						dataOffset += 4;
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.DELTA_MULTIPLIER_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
@@ -56,7 +57,7 @@ package away3d.animators.states
 				}
 				if (_particleColorNode._usesOffset)
 				{
-					if (_particleColorNode.mode == ParticleColorNode.LOCAL) {
+					if (_particleColorNode.mode == ParticlePropertiesMode.LOCAL) {
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_OFFSET_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 						dataOffset += 4;
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.DELTA_OFFSET_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);

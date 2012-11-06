@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.states.ParticleTimeState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -147,7 +147,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			_oneData[0] = param.startTime;
 			_oneData[1] = param.duration;

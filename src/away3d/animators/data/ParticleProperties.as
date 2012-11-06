@@ -3,7 +3,7 @@ package away3d.animators.data
 	/**
 	 * ...
 	 */
-	dynamic public class ParticleParameter
+	dynamic public class ParticleProperties
 	{
 		
 		public var index:uint;

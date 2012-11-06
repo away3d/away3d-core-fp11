@@ -1,5 +1,6 @@
 package away3d.animators.states
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import away3d.cameras.Camera3D;
@@ -32,7 +33,7 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_INDEX);
 			
-			if (_particleBezierCurveNode.mode == ParticleBezierCurveNode.LOCAL) {
+			if (_particleBezierCurveNode.mode == ParticlePropertiesMode.LOCAL) {
 				animationSubGeometry.activateVertexBuffer(index, _particleBezierCurveNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 				animationSubGeometry.activateVertexBuffer(index + 1, _particleBezierCurveNode.dataOffset + 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {

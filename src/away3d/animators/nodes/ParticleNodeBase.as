@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.arcane;
 	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.materials.passes.MaterialPassBase;
@@ -15,9 +15,6 @@ package away3d.animators.nodes
 	 */
 	public class ParticleNodeBase extends AnimationNodeBase
 	{
-		public static const LOCAL:int = 0;
-		public static const GLOBAL:int = 1;
-		
 		protected var _mode:uint;
 		private var _priority:int;
 		
@@ -68,13 +65,13 @@ package away3d.animators.nodes
 			_oneData = new Vector.<Number>(_dataLength, true);
 		}
 		
-		arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			
 		}
 		
 		//give a chance to lookup paramters other nodes generated
-		public function processExtraData(param:ParticleParameter, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
+		public function processExtraData(param:ParticleProperties, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
 		{
 			
 		}

@@ -1,7 +1,7 @@
 package away3d.animators.nodes
 {
 	import away3d.arcane;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.states.ParticleBezierCurveState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -20,16 +20,6 @@ package away3d.animators.nodes
 		
 		private var _controlPoint:Vector3D;
 		private var _endPoint:Vector3D;
-				
-		/**
-		 * Used to set the bezier curve node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		
-		/**
-		 * Used to set the bezier curve node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 		
 		/**
 		 * Reference for bezier curve node properties on a single particle (when in local property mode).
@@ -85,10 +75,10 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var controlValue:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var controlValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, BEZIER_INDEX, controlValue.index);
 			
-			var endValue:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var endValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var rev_time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
@@ -127,7 +117,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			//[controlPoint:Vector3D,endPoint:Vector3D].
 			var bezierPoints:Vector.<Vector3D> = param[BEZIER_VECTOR];

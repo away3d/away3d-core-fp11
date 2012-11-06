@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.states.ParticleOscillatorState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -21,16 +21,6 @@ package away3d.animators.nodes
 		arcane var _oscillatorData:Vector3D;
 				
 		private var _oscillator:Vector3D;
-		
-		/**
-		 * Used to set the circle node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		
-		/**
-		 * Used to set the circle node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 		
 		/**
 		 * Defines the default oscillator axis (x, y, z) and cycleDuration (w) of the node, used when in global mode.
@@ -73,7 +63,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var oscillatorRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var oscillatorRegister:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, OSCILLATOR_INDEX, oscillatorRegister.index);
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
@@ -102,7 +92,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			//(Vector3D.x,Vector3D.y,Vector3D.z) is oscillator axis, Vector3D.w is oscillator cycle duration
 			var drift:Vector3D = param[OSCILLATOR_VECTOR3D];
@@ -119,7 +109,7 @@ package away3d.animators.nodes
 		
 		private function updateOscillatorData():void
 		{
-			if (mode == GLOBAL)
+			if (mode == ParticleProperties.GLOBAL)
 			{
 				if (_oscillator.w <= 0)
 					throw(new Error("the cycle duration must greater than zero"));

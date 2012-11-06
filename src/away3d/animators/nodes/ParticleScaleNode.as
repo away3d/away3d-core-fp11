@@ -1,6 +1,6 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import flash.geom.Vector3D;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -31,16 +31,6 @@ package away3d.animators.nodes
 		private var _maxScale:Number;
 		private var _cycleDuration:Number;
 		private var _cyclePhase:Number;
-		
-		/**
-		 * Used to set the scale node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		
-		/**
-		 * Used to set the scale node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 				
 		/**
 		 * Reference for scale node properties on a single particle (when in local property mode).
@@ -147,7 +137,7 @@ package away3d.animators.nodes
 			var code:String = "";
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			
-			var scaleRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var scaleRegister:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, SCALE_INDEX, scaleRegister.index);
 			
 			if (_usesCycle) {
@@ -180,7 +170,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			var scale:Vector3D = param[SCALE_VECTOR3D];
 			if (!scale)

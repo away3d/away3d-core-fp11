@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.states.ParticleOrbitState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -41,16 +41,6 @@ package away3d.animators.nodes
 		private var _cycleDuration:Number;
 		private var _cyclePhase:Number;
 		private var _eulers:Vector3D;
-				
-		/**
-		 * Used to set the orbit node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-				
-		/**
-		 * Used to set the orbit node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 		
 		/**
 		 * Reference for orbit node properties on a single particle (when in local property mode).
@@ -155,7 +145,7 @@ package away3d.animators.nodes
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			
-			var orbitRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var orbitRegister:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, ORBIT_INDEX, orbitRegister.index);
 			
 			var eulersMatrixRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
@@ -214,7 +204,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			//Vector3D.x is radius, Vector3D.y is cycle duration, Vector3D.z is phase
 			var orbit:Vector3D = param[ORBIT_VECTOR3D];

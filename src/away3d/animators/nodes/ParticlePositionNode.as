@@ -2,7 +2,7 @@ package away3d.animators.nodes
 {
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.states.ParticlePositionState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -18,26 +18,40 @@ package away3d.animators.nodes
 	{
 		/** @private */
 		arcane static const POSITION_INDEX:uint = 0;
+		/** @private */
+		arcane var _position:Vector3D;
 		
-		/**
-		 * Used to set the position node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-				
 		/**
 		 * Reference for position node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing position of the particle.
 		 */
 		public static const POSITION_VECTOR3D:String = "PositionVector3D";
 		
+		
+		/**
+		 * Defines the position of the particle when in global mode. Defaults to 0,0,0.
+		 */
+		public function get position():Vector3D
+		{
+			return _position;
+		}
+		
+		public function set position(value:Vector3D):void
+		{
+			_position = value;
+		}
+		
 		/**
 		 * Creates a new <code>ParticlePositionNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
+		 * @param    [optional] position        Defines the position of the particle when in global mode. Defaults to 0,0,0.
 		 */
-		public function ParticlePositionNode(mode:uint)
+		public function ParticlePositionNode(mode:uint, position:Vector3D = null)
 		{
 			_stateClass = ParticlePositionState;
+			
+			_position = position || new Vector3D();
 			
 			super("ParticlePositionNode" + mode, mode, 3);
 		}
@@ -47,15 +61,16 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var positionAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
+			var positionAttribute:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, POSITION_INDEX, positionAttribute.index);
+			
 			return "add " + animationRegisterCache.positionTarget +"," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + "\n";
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			var offset:Vector3D = param[POSITION_VECTOR3D];
 			if (!offset)

@@ -1,5 +1,6 @@
 package away3d.animators.states
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import flash.geom.Vector3D;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import away3d.arcane;
@@ -31,7 +32,7 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleScaleNode.SCALE_INDEX);
 			
-			if (_particleScaleNode.mode == ParticleScaleNode.LOCAL)
+			if (_particleScaleNode.mode == ParticlePropertiesMode.LOCAL)
 			{
 				if (_particleScaleNode._usesCycle)
 				{

@@ -1,8 +1,9 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.states.ParticleRotationalVelocityState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
@@ -20,16 +21,6 @@ package away3d.animators.nodes
 		
 		/** @private */
 		arcane var _rotationalVelocityData:Vector3D;
-		
-		/**
-		 * Used to set the rotational velocity node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		
-		/**
-		 * Used to set the acceleration node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 		
 		private var _rotationalVelocity:Vector3D;
 		
@@ -75,7 +66,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var rotationRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var rotationRegister:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, ROTATIONALVELOCITY_INDEX, rotationRegister.index);
 			
 			var nrmVel:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
@@ -156,7 +147,7 @@ package away3d.animators.nodes
 		}
 		
 		/** @private */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			//(Vector3d.x,Vector3d.y,Vector3d.z) is rotation axis,Vector3d.w is cycle duration
 			var rotate:Vector3D = param[ROTATIONALVELOCITY_VECTOR3D];
@@ -174,7 +165,7 @@ package away3d.animators.nodes
 		
 		private function updateRotationalVelocityData():void
 		{
-			if (_mode == GLOBAL) {
+			if (_mode == ParticlePropertiesMode.GLOBAL) {
 				if (_rotationalVelocity.w <= 0)
 					throw(new Error("the cycle duration must greater than zero"));
 				

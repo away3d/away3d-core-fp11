@@ -1,6 +1,6 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import flash.geom.Vector3D;
 	import away3d.arcane;
 	import away3d.animators.ParticleAnimationSet;
@@ -247,7 +247,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			if (_usesCycle)
 			{

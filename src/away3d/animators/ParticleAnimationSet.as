@@ -4,7 +4,7 @@ package away3d.animators
 	import away3d.core.base.ParticleGeometry;
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.nodes.ParticleTimeNode;
@@ -262,7 +262,7 @@ package away3d.animators
 			var particles:Vector.<ParticleData> = geometry.particles;
 			var particlesLength:uint = particles.length;
 			var numParticles:uint = geometry.numParticles;
-			var param:ParticleParameter = new ParticleParameter();
+			var param:ParticleProperties = new ParticleProperties();
 			var particle:ParticleData;
 			
 			var oneDataLen:int;

@@ -1,5 +1,7 @@
 package away3d.animators.states
 {
+	import away3d.animators.data.ParticlePropertiesMode;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.arcane;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import away3d.cameras.Camera3D;
@@ -31,7 +33,7 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleAccelerationNode.ACCELERATION_INDEX);
 			
-			if (_particleAccelerationNode.mode == ParticleAccelerationNode.LOCAL) {
+			if (_particleAccelerationNode.mode == ParticlePropertiesMode.LOCAL) {
 				animationSubGeometry.activateVertexBuffer(index, _particleAccelerationNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {
 				var halfAcceleration:Vector3D = _particleAccelerationNode._halfAcceleration;

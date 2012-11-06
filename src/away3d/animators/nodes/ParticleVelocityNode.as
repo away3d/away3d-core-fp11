@@ -1,6 +1,6 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticleParameter;
+	import away3d.animators.data.ParticleProperties;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.states.ParticleVelocityState;
@@ -19,16 +19,6 @@ package away3d.animators.nodes
 		arcane static const VELOCITY_INDEX:int = 0;
 		
 		private var _velocity:Vector3D;
-		
-		/**
-		 * Used to set the acceleration node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		
-		/**
-		 * Used to set the acceleration node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 		
 		/**
 		 * Reference for velocity node properties on a single particle (when in local property mode).
@@ -69,7 +59,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var velocityValue:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var velocityValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, VELOCITY_INDEX, velocityValue.index);
 
 			var distance:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
@@ -86,7 +76,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
 			var _tempVelocity:Vector3D = param[VELOCITY_VECTOR3D];
 			if (!_tempVelocity)
