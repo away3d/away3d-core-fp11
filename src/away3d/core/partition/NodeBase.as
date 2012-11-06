@@ -85,7 +85,7 @@ package away3d.core.partition
 
 			do {
 				node._numEntities += numEntities;
-			} while (node = node._parent);
+			} while ((node = node._parent));
 		}
 
 		/**
@@ -108,7 +108,7 @@ package away3d.core.partition
 
 			do {
 				node._numEntities -= numEntities;
-			} while (node = node._parent);
+			} while ((node = node._parent));
 		}
 
 		/**
@@ -178,7 +178,7 @@ package away3d.core.partition
 
 			do {
 				node._numEntities += diff;
-			} while (node = node._parent);
+			} while ((node = node._parent));
 		}
 	}
 }
