@@ -19,9 +19,6 @@ package away3d.animators.nodes
 		arcane static const SCALE_INDEX:uint = 0;
 		
 		/** @private */
-		arcane var _minScale:Number;
-		
-		/** @private */
 		arcane var _usesCycle:Boolean;
 		
 		/** @private */
@@ -30,6 +27,7 @@ package away3d.animators.nodes
 		/** @private */
 		arcane var _scaleData:Vector3D;
 		
+		private var _minScale:Number;
 		private var _maxScale:Number;
 		private var _cycleSpeed:Number;
 		private var _cyclePhase:Number;
@@ -46,12 +44,12 @@ package away3d.animators.nodes
 				
 		/**
 		 * Reference for scale node properties on a single particle (when in local property mode).
-		 * Expects a <code>Vector3D</code> representing the start scale (x), end scale(y), optional cycle speed (z) and phase offset (w) applied to the particle.
+		 * Expects a <code>Vector3D</code> representing the min scale (x), max scale(y), optional cycle speed (z) and phase offset (w) applied to the particle.
 		 */
 		public static const SCALE_VECTOR3D:String = "ScaleVector3D";
 		
 		/**
-		 * Defines the end scale of the node, when in global mode.
+		 * Defines the end scale of the node, when in global mode. Defaults to 1.
 		 */
 		public function get minScale():Number
 		{
@@ -66,7 +64,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the end scale of the node, when in global mode.
+		 * Defines the end scale of the node, when in global mode. Defaults to 1.
 		 */
 		public function get maxScale():Number
 		{
@@ -80,7 +78,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to zero.
+		 * Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to 1.
 		 */
 		public function get cycleSpeed():Number
 		{
@@ -113,9 +111,9 @@ package away3d.animators.nodes
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 * @param    [optional] usesCycle       Defines whether the node uses cycle data in its scale transformations. Defaults to false.
 		 * @param    [optional] usesPhase       Defines whether the node uses phase data in its scale transformations. Defaults to false.
-		 * @param    [optional] minScale        Defines the min scale transform of the node, when in global mode.
-		 * @param    [optional] maxScale        Defines the max color transform of the node, when in global mode.
-		 * @param    [optional] cycleSpeed      Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to zero.
+		 * @param    [optional] minScale        Defines the min scale transform of the node, when in global mode. Defaults to 1.
+		 * @param    [optional] maxScale        Defines the max color transform of the node, when in global mode. Defaults to 1.
+		 * @param    [optional] cycleSpeed      Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to 1.
 		 * @param    [optional] cyclePhase      Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
 		 */
 		public function ParticleScaleNode(mode:uint, usesCycle:Boolean, usesPhase:Boolean, minScale:Number = 1, maxScale:Number = 1, cycleSpeed:Number = 1, cyclePhase:Number = 0)

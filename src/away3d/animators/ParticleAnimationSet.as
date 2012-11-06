@@ -51,7 +51,7 @@ package away3d.animators
 		public function ParticleAnimationSet()
 		{
 			super();
-			timeNode = new ParticleTimeNode(ParticleTimeNode.LOCAL);
+			timeNode = new ParticleTimeNode();
 			addAnimation(timeNode);
 		}
 		

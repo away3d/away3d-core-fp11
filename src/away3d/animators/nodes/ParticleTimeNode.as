@@ -26,11 +26,6 @@ package away3d.animators.nodes
 		protected var _loop:Boolean;
 		
 		/**
-		 * Used to set the time node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		
-		/**
 		 * Defines whether the time track is in loop mode. Defaults to false.
 		 */
 		public function get loop():Boolean
@@ -88,13 +83,13 @@ package away3d.animators.nodes
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 * @param    [optional] loop            Defines whether the time track is in loop mode. Defaults to false.
 		 */
-		public function ParticleTimeNode(mode:uint, loop:Boolean = false)
+		public function ParticleTimeNode(loop:Boolean = false)
 		{
 			_stateClass = ParticleTimeState;
 			
 			_loop = loop;
 			
-			super("ParticleTimeNode" + mode, mode, 4, 0);
+			super("ParticleTimeNode", 0, 4, 0);
 		}
 		
 		/**
