@@ -188,7 +188,7 @@ package away3d.materials.methods {
 			
 			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
 				format = ",dxt1";
-			}else if (vo.textureFormat == Context3DTextureFormat.COMPRESSED_ALPHA) {
+			}else if (vo.textureFormat == "compressedAlpha") {	// using string literal instead of constant for backward compatibility
             	format = ",dxt5";
 			}
 
