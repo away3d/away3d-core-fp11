@@ -166,7 +166,8 @@ package away3d.animators.nodes
 			_oneData[0] = rotate.x;
 			_oneData[1] = rotate.y;
 			_oneData[2] = rotate.z;
-			_oneData[3] = Math.PI * 2 / rotate.w;
+			// it's used as angle/2 in agal
+			_oneData[3] = Math.PI / rotate.w;
 		}
 		
 		private function updateRotationalVelocityData():void
