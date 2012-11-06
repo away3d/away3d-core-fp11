@@ -22,10 +22,10 @@ package away3d.animators.nodes
 		arcane var _minScale:Number;
 		
 		/** @private */
-		arcane var _hasCycle:Boolean;
+		arcane var _usesCycle:Boolean;
 		
 		/** @private */
-		arcane var _hasPhase:Boolean;
+		arcane var _usesPhase:Boolean;
 		
 		/** @private */
 		arcane var _scaleData:Vector3D;
@@ -46,7 +46,7 @@ package away3d.animators.nodes
 				
 		/**
 		 * Reference for scale node properties on a single particle (when in local property mode).
-		 * Expects a <code>Vector3D</code> representing the start scale (x) and end scale(y) applied to the particle.
+		 * Expects a <code>Vector3D</code> representing the start scale (x), end scale(y), optional cycle speed (z) and phase offset (w) applied to the particle.
 		 */
 		public static const SCALE_VECTOR3D:String = "ScaleVector3D";
 		
@@ -111,28 +111,32 @@ package away3d.animators.nodes
 		 * Creates a new <code>ParticleScaleNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
-		 * @param    [optional] minScale      Defines the min scale transform of the node, when in global mode.
+		 * @param    [optional] usesCycle       Defines whether the node uses cycle data in its scale transformations. Defaults to false.
+		 * @param    [optional] usesPhase       Defines whether the node uses phase data in its scale transformations. Defaults to false.
+		 * @param    [optional] minScale        Defines the min scale transform of the node, when in global mode.
 		 * @param    [optional] maxScale        Defines the max color transform of the node, when in global mode.
 		 * @param    [optional] cycleSpeed      Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to zero.
 		 * @param    [optional] cyclePhase      Defines the cycle phase of the node in degrees, when in global mode. Defaults to zero.
 		 */
-		public function ParticleScaleNode(mode:uint, minScale:Number = 1, maxScale:Number = 1, cycleSpeed:Number = 0, cyclePhase:Number = 0)
+		public function ParticleScaleNode(mode:uint, usesCycle:Boolean, usesPhase:Boolean, minScale:Number = 1, maxScale:Number = 1, cycleSpeed:Number = 1, cyclePhase:Number = 0)
 		{
 			var len:int = 2;
-			if (cycleSpeed)
+			if (usesCycle)
 				len++;
-			if (cyclePhase)
+			if (usesPhase)
 				len++;
 			super("ParticleScaleNode" + mode, mode, len, 3);
 			
 			_stateClass = ParticleScaleState;
 			
+			_usesCycle = usesCycle;
+			_usesPhase = usesPhase;
+			
 			_minScale = minScale;
 			_maxScale = maxScale;
 			_cycleSpeed = cycleSpeed;
 			_cyclePhase = cyclePhase;
-			_hasCycle = (_cycleSpeed != 0);
-			_hasPhase = (_cyclePhase != 0);
+			
 			updateScaleData();
 		}
 		
@@ -147,18 +151,16 @@ package away3d.animators.nodes
 			var scaleRegister:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, SCALE_INDEX, scaleRegister.index);
 			
-			
-			
-			if (_hasCycle) {
+			if (_usesCycle) {
 				code += "mul " + temp + "," + animationRegisterCache.vertexTime + "," + scaleRegister + ".z\n";
 				
-				if (_hasPhase)
+				if (_usesPhase)
 					code += "add " + temp + "," + temp + "," + scaleRegister + ".w\n";
 				
 				code += "sin " + temp + "," + temp + "\n";
 			}
 			
-			code += "mul " + temp + "," + scaleRegister + ".y," + ((_hasCycle)? temp : animationRegisterCache.vertexLife) + "\n";
+			code += "mul " + temp + "," + scaleRegister + ".y," + ((_usesCycle)? temp : animationRegisterCache.vertexLife) + "\n";
 			code += "add " + temp + "," + scaleRegister + ".x," + temp + "\n";
 			code += "mul " + animationRegisterCache.scaleAndRotateTarget +"," +animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
 			
@@ -167,7 +169,7 @@ package away3d.animators.nodes
 		
 		private function updateScaleData():void
 		{
-			if (_hasCycle) {
+			if (_usesCycle) {
 				_scaleData = new Vector3D((_minScale + _maxScale) / 2, Math.abs(_minScale - _maxScale) / 2, Math.PI * 2 / _cycleSpeed, _cyclePhase * Math.PI / 180);
 			} else {
 				_scaleData = new Vector3D(_minScale, _maxScale - _minScale, 0, 0);
@@ -183,12 +185,12 @@ package away3d.animators.nodes
 			if (!scale)
 				throw(new Error("there is no " + SCALE_VECTOR3D + " in param!"));
 			
-			if (_hasCycle)
+			if (_usesCycle)
 			{
 				_oneData[0] = (scale.x + scale.y) / 2;
 				_oneData[1] = Math.abs(_minScale - _maxScale) / 2;
 				_oneData[2] = Math.PI * 2 / (scale.z || cycleSpeed);
-				if (_hasPhase)
+				if (_usesPhase)
 					_oneData[3] = scale.w * Math.PI / 180;
 			}
 			else
