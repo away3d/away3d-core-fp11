@@ -1,5 +1,6 @@
 package away3d.animators.states
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -37,7 +38,7 @@ package away3d.animators.states
 				if (_particleSpriteSheetNode._usesCycle)
 				{
 					var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_1);
-					if(_particleSpriteSheetNode.mode == ParticleSpriteSheetNode.GLOBAL)
+					if(_particleSpriteSheetNode.mode == ParticlePropertiesMode.GLOBAL)
 						animationRegisterCache.setVertexConst(index, data[4], data[5]);
 					else
 					{

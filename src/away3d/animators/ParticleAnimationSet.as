@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.core.base.SubMesh;
 	import away3d.core.base.ParticleGeometry;
 	import away3d.animators.nodes.AnimationNodeBase;
@@ -86,7 +87,7 @@ package away3d.animators
 			var i:int;
 			var n:ParticleNodeBase = node as ParticleNodeBase;
 			n.processAnimationSetting(this);
-			if (n.mode == ParticleNodeBase.LOCAL) {
+			if (n.mode == ParticlePropertiesMode.LOCAL) {
 				n.dataOffset = _totalLenOfOneVertex;
 				_totalLenOfOneVertex += n.dataLength;
 				_localNodes.push(n);

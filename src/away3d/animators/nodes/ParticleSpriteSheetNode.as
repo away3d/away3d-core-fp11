@@ -1,5 +1,6 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.data.ParticleProperties;
 	import flash.geom.Vector3D;
 	import away3d.arcane;
@@ -36,15 +37,6 @@ package away3d.animators.nodes
 		private var _numColumns:int;
 		private var _numRows:int;
 		private var _phaseTime:Number;
-		
-		/**
-		 * Used to set the spritesheet node into local property mode.
-		 */
-		public static const LOCAL:uint = 0;
-		/**
-		 * Used to set the spritesheet node into global property mode.
-		 */
-		public static const GLOBAL:uint = 1;
 		
 		/**
 		 * Reference for spritesheet node properties on a single particle (when in local property mode).
@@ -157,7 +149,7 @@ package away3d.animators.nodes
 		{
 			//get 2 vc
 			var uvParamConst1:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
-			var uvParamConst2:ShaderRegisterElement = (_mode == LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var uvParamConst2:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, UV_INDEX_0, uvParamConst1.index);
 			animationRegisterCache.setRegisterIndex(this, UV_INDEX_1, uvParamConst2.index);
 			
