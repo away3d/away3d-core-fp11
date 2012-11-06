@@ -20,26 +20,37 @@ package away3d.animators.states
 	public class ParticleVelocityState extends ParticleStateBase
 	{
 		private var _particleVelocityNode:ParticleVelocityNode;
+		private var _velocity:Vector3D;
+		
+		/**
+		 * Defines the default velocity vector of the state, used when in global mode.
+		 */
+		public function get velocity():Vector3D
+		{
+			return _velocity;
+		}
+		
+		public function set velocity(value:Vector3D):void
+		{
+			_velocity = value;
+		}
 		
 		public function ParticleVelocityState(animator:ParticleAnimator, particleVelocityNode:ParticleVelocityNode)
 		{
 			super(animator, particleVelocityNode);
 			
 			_particleVelocityNode = particleVelocityNode;
+			_velocity = _particleVelocityNode._velocity;
 		}
-		
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleVelocityNode.VELOCITY_INDEX);
-			if (_particleVelocityNode.mode == ParticlePropertiesMode.LOCAL) {
+			
+			if (_particleVelocityNode.mode == ParticlePropertiesMode.LOCAL)
 				animationSubGeometry.activateVertexBuffer(index, _particleVelocityNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-			} else {
-				var velocity:Vector3D = _particleVelocityNode.velocity;
-				animationRegisterCache.setVertexConst(index, velocity.x, velocity.y, velocity.z);
-			}
+			else
+				animationRegisterCache.setVertexConst(index, _velocity.x, _velocity.y, _velocity.z);
 		}
-		
 	}
-
 }

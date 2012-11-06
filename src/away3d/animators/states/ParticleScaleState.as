@@ -104,17 +104,15 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleScaleNode.SCALE_INDEX);
 			
-			if (_particleScaleNode.mode == ParticlePropertiesMode.LOCAL)
-			{
-				if (_usesCycle)
-				{
+			if (_particleScaleNode.mode == ParticlePropertiesMode.LOCAL) {
+				if (_usesCycle) {
 					if(_usesPhase)
 						animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 					else
 						animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				}
-				else
+				} else {
 					animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_2);
+				}
 			} else {
 				animationRegisterCache.setVertexConst(index, _scaleData.x, _scaleData.y, _scaleData.z, _scaleData.w);
 			}

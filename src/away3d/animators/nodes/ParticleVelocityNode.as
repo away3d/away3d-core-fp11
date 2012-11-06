@@ -19,26 +19,14 @@ package away3d.animators.nodes
 		/** @private */
 		arcane static const VELOCITY_INDEX:int = 0;
 		
-		private var _velocity:Vector3D;
+		/** @private */
+		arcane var _velocity:Vector3D;
 		
 		/**
 		 * Reference for velocity node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the direction of movement on the particle.
 		 */
 		public static const VELOCITY_VECTOR3D:String = "VelocityVector3D";
-		
-		/**
-		 * Defines the default velocity vector of the node, used when in global mode.
-		 */
-		public function get velocity():Vector3D
-		{
-			return _velocity;
-		}
-		
-		public function set velocity(value:Vector3D):void
-		{
-			_velocity = value.clone();
-		}
 		
 		/**
 		 * Creates a new <code>ParticleVelocityNode</code>
@@ -88,5 +76,4 @@ package away3d.animators.nodes
 			_oneData[2] = _tempVelocity.z;
 		}
 	}
-
 }
