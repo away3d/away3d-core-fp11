@@ -38,7 +38,7 @@ package away3d.animators.nodes
 		arcane var _eulersMatrix:Matrix3D;
 		
 		private var _radius:Number;
-		private var _cycleSpeed:Number;
+		private var _cycleDuration:Number;
 		private var _cyclePhase:Number;
 		private var _eulers:Vector3D;
 				
@@ -75,13 +75,13 @@ package away3d.animators.nodes
 		/**
 		 * Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to 1.
 		 */
-		public function get cycleSpeed():Number
+		public function get cycleDuration():Number
 		{
-			return _cycleSpeed;
+			return _cycleDuration;
 		}
-		public function set cycleSpeed(value:Number):void
+		public function set cycleDuration(value:Number):void
 		{
-			_cycleSpeed = value;
+			_cycleDuration = value;
 			
 			updateOrbitData();
 		}
@@ -122,7 +122,7 @@ package away3d.animators.nodes
 		 * @param               mode            Defines whether the mode of operation defaults to acting on local properties of a particle or global properties of the node.
 		 * @param    [optional] eulers          Defines the global euler rotation applied to the orientation of the motion.
 		 */
-		public function ParticleOrbitNode(mode:uint, usesEulers:Boolean = true, usesCycle:Boolean = false, usesPhase:Boolean = false, radius:Number = 100, cycleSpeed:Number = 1, cyclePhase:Number = 0, eulers:Vector3D = null)
+		public function ParticleOrbitNode(mode:uint, usesEulers:Boolean = true, usesCycle:Boolean = false, usesPhase:Boolean = false, radius:Number = 100, cycleDuration:Number = 1, cyclePhase:Number = 0, eulers:Vector3D = null)
 		{
 			var len:int = 3;
 			if (usesPhase)
@@ -136,7 +136,7 @@ package away3d.animators.nodes
 			_usesPhase = usesPhase;
 			
 			_radius = radius;
-			_cycleSpeed = cycleSpeed;
+			_cycleDuration = cycleDuration;
 			_cyclePhase = cyclePhase;
 			_eulers = eulers || new Vector3D();
 			
@@ -185,7 +185,8 @@ package away3d.animators.nodes
 			code += "mul " + distance +".x," + cos +"," + orbitRegister + ".x\n";
 			code += "mul " + distance +".y," + sin +"," + orbitRegister + ".x\n";
 			code += "mov " + distance + ".wz" + animationRegisterCache.vertexZeroConst + "\n";
-			code += "m44 " + distance + "," + distance + "," +eulersMatrixRegister + "\n";
+			if(_usesEulers)
+				code += "m44 " + distance + "," + distance + "," +eulersMatrixRegister + "\n";
 			code += "add " + animationRegisterCache.positionTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 			
 			if (animationRegisterCache.needVelocity)
@@ -193,7 +194,8 @@ package away3d.animators.nodes
 				code += "neg " + distance + ".x," + sin + "\n";
 				code += "mov " + distance + ".y," + cos + "\n";
 				code += "mov " + distance + ".zw," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "m44 " + distance + "," + distance + "," + eulersMatrixRegister + "\n";
+				if(_usesEulers)
+					code += "m44 " + distance + "," + distance + "," + eulersMatrixRegister + "\n";
 				code += "mul " + distance + "," + distance + "," + orbitRegister + ".z\n";
 				code += "div " + distance + "," + distance + "," + orbitRegister + ".y\n";
 				if (!_usesCycle)
@@ -208,12 +210,14 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
-			//Vector3D.x is radius, Vector3D.y is cycle speed, Vector3D.z is phase
+			//Vector3D.x is radius, Vector3D.y is cycle duration, Vector3D.z is phase
 			var orbit:Vector3D = param[ORBIT_VECTOR3D];
 			if (!orbit)
 				throw new Error("there is no " + ORBIT_VECTOR3D + " in param!");
 				
 			_oneData[0] = orbit.x;
+			if (_usesCycle && orbit.y <= 0)
+				throw(new Error("the cycle duration must be greater than zero"));
 			_oneData[1] = Math.PI * 2 / (!_usesCycle? 1 : orbit.y);
 			_oneData[2] = orbit.x * Math.PI * 2;
 			if (_usesPhase)
@@ -228,8 +232,9 @@ package away3d.animators.nodes
 				_eulersMatrix.appendRotation(_eulers.y, Vector3D.Y_AXIS);
 				_eulersMatrix.appendRotation(_eulers.z, Vector3D.Z_AXIS);
 			}
-			
-			_orbitData = new Vector3D(_radius, Math.PI * 2 / _cycleSpeed, _radius * Math.PI * 2, _cyclePhase * Math.PI / 180);
+			if (_cycleDuration <= 0)
+				throw(new Error("the cycle duration must be greater than zero"));
+			_orbitData = new Vector3D(_radius, Math.PI * 2 / _cycleDuration, _radius * Math.PI * 2, _cyclePhase * Math.PI / 180);
 		}
 	}
 }

@@ -24,7 +24,7 @@ package away3d.animators.nodes
 		/** @private */
 		arcane var _spriteSheetData:Vector.<Number>;
 		
-		private var _frameRate:Number;
+		private var _cycleDuration:Number;
 		private var _looping:Boolean;
 		private var _totalFrames:int;
 		private var _numColumns:int;
@@ -81,13 +81,13 @@ package away3d.animators.nodes
 		/**
 		 * Defines the frame rate, when in global mode. Defaults to 60.
 		 */
-		public function get frameRate():Number
+		public function get cycleDuration():Number
 		{
-			return _frameRate;
+			return _cycleDuration;
 		}
-		public function set frameRate(value:Number):void
+		public function set cycleDuration(value:Number):void
 		{
-			_frameRate = value;
+			_cycleDuration = value;
 			
 			updateSpriteSheetData();
 		}
@@ -127,11 +127,11 @@ package away3d.animators.nodes
 		 * @param    [optional] numColumns      Defines the number of columns in the spritesheet, when in global mode. Defaults to 1.
 		 * @param    [optional] numRows         Defines the number of rows in the spritesheet, when in global mode. Defaults to 1.
 		 * @param    [optional] startTime       Defines the start time, when in global mode. Defaults to zero.
-		 * @param    [optional] frameRate       Defines the frame rate, when in global mode. Defaults to 60.
+		 * @param    [optional] cycleDurion     Defines the cycle time, when in global mode. Defaults to 1.
 		 * @param    [optional] totalFrames     Defines the total number of frames used by the spritesheet, when in global mode. Defaults to the number defined by numColumns and numRows.
 		 * @param    [optional] looping         Defines whether the spritesheet animation is set to loop indefinitely. Defaults to true.
 		 */
-		public function ParticleSpriteSheetNode(mode:uint, numColumns:int = 1, numRows:uint = 1, startTime:Number = 0, frameRate:uint = 60, totalFrames:uint = uint.MAX_VALUE, looping:Boolean = true)
+		public function ParticleSpriteSheetNode(mode:uint, numColumns:int = 1, numRows:uint = 1, startTime:Number = 0, cycleDuration:Number = 1, totalFrames:uint = uint.MAX_VALUE, looping:Boolean = true)
 		{
 			super("ParticleSpriteSheetNode" + mode, mode, 4, ParticleAnimationSet.POST_PRIORITY + 1);
 			
@@ -140,7 +140,7 @@ package away3d.animators.nodes
 			_numColumns = numColumns;
 			_numRows = numRows;
 			_startTime = startTime;
-			_frameRate = frameRate;
+			_cycleDuration = cycleDuration;
 			_totalFrames = Math.min(totalFrames, numColumns * numRows);
 			_looping = looping;
 			
@@ -234,12 +234,14 @@ package away3d.animators.nodes
 		
 		private function updateSpriteSheetData():void
 		{
+			if (_cycleDuration <= 0)
+				throw(new Error("the cycle duration must be greater than zero"));
 			var uTotal:Number = _totalFrames / _numColumns;
-			var uSpeed:Number = uTotal / _frameRate;
+			var uSpeed:Number = uTotal / _cycleDuration;
 			var uStep:Number = 1 / _numColumns;
 			var vStep:Number = 1 / _numRows;
-			var endThreshold:Number = _frameRate - _frameRate / _totalFrames / 2;
-			_spriteSheetData = Vector.<Number>([uSpeed, uStep, vStep, _frameRate, _startTime, endThreshold, 0, 0]);
+			var endThreshold:Number = _cycleDuration - _cycleDuration / _totalFrames / 2;
+			_spriteSheetData = Vector.<Number>([uSpeed, uStep, vStep, _cycleDuration, _startTime, endThreshold, 0, 0]);
 		}
 	}
 }

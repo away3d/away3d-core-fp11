@@ -75,7 +75,7 @@ package away3d.animators.nodes
 		
 		private var _startColor:ColorTransform;
 		private var _endColor:ColorTransform;
-		private var _cycleSpeed:Number;
+		private var _cycleDuration:Number;
 		private var _cyclePhase:Number;
 		
 		/**
@@ -126,13 +126,13 @@ package away3d.animators.nodes
 		/**
 		 * Defines the cycle speed of the node in revolutions per second, when in global mode. Defaults to zero.
 		 */
-		public function get cycleSpeed():Number
+		public function get cycleDuration():Number
 		{
-			return _cycleSpeed;
+			return _cycleDuration;
 		}
-		public function set cycleSpeed(value:Number):void
+		public function set cycleDuration(value:Number):void
 		{
-			_cycleSpeed = value;
+			_cycleDuration = value;
 			
 			updateColorData();
 		}
@@ -161,10 +161,10 @@ package away3d.animators.nodes
 		 * @param    [optional] usesPhase       Defines whether the node uses phase data in its color transformations. Defaults to false.
 		 * @param    [optional] startColor      Defines the default start color transform of the node, when in global mode.
 		 * @param    [optional] endColor        Defines the default end color transform of the node, when in global mode.
-		 * @param    [optional] cycleSpeed      Defines the default cycle speed of the node in revolutions per second, when in global mode. Defaults to 1.
+		 * @param    [optional] cycleDuration   Defines the default cycle time per round, when in global mode. Defaults to 1.
 		 * @param    [optional] cyclePhase      Defines the default cycle phase of the node in degrees, when in global mode. Defaults to zero.
 		 */
-		public function ParticleColorNode(mode:uint, usesMultiplier:Boolean = true, usesOffset:Boolean = true, usesCycle:Boolean = false, usesPhase:Boolean = false, startColor:ColorTransform = null, endColor:ColorTransform = null, cycleSpeed:Number = 1, cyclePhase:Number = 0)
+		public function ParticleColorNode(mode:uint, usesMultiplier:Boolean = true, usesOffset:Boolean = true, usesCycle:Boolean = false, usesPhase:Boolean = false, startColor:ColorTransform = null, endColor:ColorTransform = null, cycleDuration:Number = 1, cyclePhase:Number = 0)
 		{
 			_stateClass = ParticleColorState;
 			
@@ -175,7 +175,7 @@ package away3d.animators.nodes
 			
 			_startColor = startColor || new ColorTransform();
 			_endColor = endColor || new ColorTransform();
-			_cycleSpeed = cycleSpeed;
+			_cycleDuration = cycleDuration;
 			_cyclePhase = cyclePhase;
 			
 			updateColorData();
@@ -285,7 +285,9 @@ package away3d.animators.nodes
 		private function updateColorData():void
 		{
 			if (_usesCycle) {
-				_cycleData = new Vector3D(Math.PI * 2 / _cycleSpeed, _cyclePhase * Math.PI / 180, 0, 0);
+				if (_cycleDuration <= 0)
+					throw(new Error("the cycle duration must be greater than zero"));
+				_cycleData = new Vector3D(Math.PI * 2 / _cycleDuration, _cyclePhase * Math.PI / 180, 0, 0);
 				if (_usesMultiplier) {
 					_startMultiplierData = new Vector3D((_startColor.redMultiplier + _endColor.redMultiplier) / 2, (_startColor.greenMultiplier + _endColor.greenMultiplier) / 2, (_startColor.blueMultiplier + _endColor.blueMultiplier) / 2, (_startColor.alphaMultiplier + _endColor.alphaMultiplier) / 2);
 					_deltaMultiplierData = new Vector3D((_endColor.redMultiplier - _startColor.redMultiplier) / 2, (_endColor.greenMultiplier - _startColor.greenMultiplier) / 2, (_endColor.blueMultiplier - _startColor.blueMultiplier) / 2, (_endColor.alphaMultiplier - _startColor.alphaMultiplier) / 2);
@@ -319,7 +321,7 @@ package away3d.animators.nodes
 			
 			var i:uint;
 			var startColor:ColorTransform = colorVector[0];
-			var endColor:ColorTransform = colorVector[1]; 
+			var endColor:ColorTransform = colorVector[1];
 			
 			if (_usesCycle) {
 				//multiplier

@@ -103,7 +103,7 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleParameter):void
 		{
-			//(Vector3D.x,Vector3D.y,Vector3D.z) is oscillator axis, Vector3D.w is oscillator cycle speed
+			//(Vector3D.x,Vector3D.y,Vector3D.z) is oscillator axis, Vector3D.w is oscillator cycle duration
 			var drift:Vector3D = param[OSCILLATOR_VECTOR3D];
 			if (!drift)
 				throw(new Error("there is no " + OSCILLATOR_VECTOR3D + " in param!"));
@@ -111,6 +111,8 @@ package away3d.animators.nodes
 			_oneData[0] = drift.x;
 			_oneData[1] = drift.y;
 			_oneData[2] = drift.z;
+			if (drift.w <= 0)
+				throw(new Error("the cycle duration must greater than zero"));
 			_oneData[3] = Math.PI * 2 / drift.w;
 		}
 		
@@ -119,7 +121,7 @@ package away3d.animators.nodes
 			if (mode == GLOBAL)
 			{
 				if (_oscillator.w <= 0)
-					throw(new Error("the cycle must greater than zero"));
+					throw(new Error("the cycle duration must greater than zero"));
 				_oscillatorData.x = _oscillator.x;
 				_oscillatorData.y = _oscillator.y;
 				_oscillatorData.z = _oscillator.z;

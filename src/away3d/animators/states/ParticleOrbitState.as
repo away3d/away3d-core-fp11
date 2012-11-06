@@ -43,7 +43,8 @@ package away3d.animators.states
 			}
 			
 			index = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOrbitNode.EULERS_INDEX);
-			animationRegisterCache.setVertexConstFromMatrix(index, _particleOrbitNode._eulersMatrix);
+			if(_particleOrbitNode._usesEulers)
+				animationRegisterCache.setVertexConstFromMatrix(index, _particleOrbitNode._eulersMatrix);
 		}
 	}
 

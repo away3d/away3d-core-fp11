@@ -166,6 +166,8 @@ package away3d.animators.nodes
 			_oneData[0] = rotate.x;
 			_oneData[1] = rotate.y;
 			_oneData[2] = rotate.z;
+			if (rotate.w <= 0)
+				throw(new Error("the cycle duration must greater than zero"));
 			// it's used as angle/2 in agal
 			_oneData[3] = Math.PI / rotate.w;
 		}
@@ -174,7 +176,7 @@ package away3d.animators.nodes
 		{
 			if (_mode == GLOBAL) {
 				if (_rotationalVelocity.w <= 0)
-					throw(new Error("the cycle speed must greater than zero"));
+					throw(new Error("the cycle duration must greater than zero"));
 				
 				if (_rotationalVelocity.length == 0)
 					throw(new Error("must define a axis"));
