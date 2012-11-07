@@ -1,7 +1,5 @@
-package away3d.materials.passes
-{
+package away3d.materials.passes {
 	import away3d.animators.IAnimationSet;
-	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -13,13 +11,12 @@ package away3d.materials.passes
 	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display.BlendMode;
-
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DTriangleFace;
-	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
@@ -54,8 +51,9 @@ package away3d.materials.passes
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = true;
+		protected var _textureFormat : String = Context3DTextureFormat.BGRA;
 		protected var _depthCompareMode : String = Context3DCompareMode.LESS_EQUAL;
-
+		
 		private var _srcBlend : String = Context3DBlendFactor.ONE;
 		private var _destBlend : String = Context3DBlendFactor.ZERO;
 		private var _enableBlending : Boolean;
@@ -121,6 +119,21 @@ package away3d.materials.passes
 		{
 			if (_mipmap == value) return;
 			_mipmap = value;
+			invalidateShaderProgram();
+		}
+		
+		/**
+		 * Defines what textureformat should be used
+		 */
+		public function get textureFormat() : String
+		{
+			return _textureFormat;
+		}
+
+		public function set textureFormat(value : String) : void
+		{
+			if (_textureFormat == value) return;
+			_textureFormat = value;
 			invalidateShaderProgram();
 		}
 

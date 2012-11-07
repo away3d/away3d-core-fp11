@@ -1,13 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.methods.MethodVO;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
-	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -120,7 +118,7 @@ package away3d.materials.methods
 			var comps : Array = [ ".x",".y",".z",".w" ];
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
-				var scaleRegName : String = i < 3? scaleRegister + comps[i+1] : scaleRegister2 + ".x";
+				var scaleRegName : String = i < 3? scaleRegister.component + comps[i+1] : scaleRegister2 + ".x";
 				splatTexReg = regCache.getFreeTextureReg();
 				code += "mul " + uv + ", " + uvReg + ", " + scaleRegName + "\n" +
 						getSplatSampleCode(vo, uv, splatTexReg, uv);
@@ -181,12 +179,19 @@ package away3d.materials.methods
 		protected function getSplatSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null) : String
 		{
 			var filter : String;
+			var format : String = "";
 
 			if (vo.useSmoothTextures) filter = vo.useMipmapping ? "linear,miplinear" : "linear";
 			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
-
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 			uvReg ||= _sharedRegisters.uvVarying;
-			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + ",wrap>\n";
+			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + format + ",wrap>\n";
 		}
 	}
 }
