@@ -62,35 +62,42 @@ package away3d.animators.nodes
 				animationRegisterCache.removeVertexTempUsage(temp1);
 				animationRegisterCache.removeVertexTempUsage(temp2);
 				
-				code += "mov " + temp1 + "," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "cos " + temp1 + ".x," + rotationAttribute + ".x\n";
-				code += "sin " + temp1 + ".y," + rotationAttribute + ".x\n";
-				code += "mov " + temp2 + "," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "neg " + temp2 + ".x," + temp1 + ".y\n";
-				code += "mov " + temp2 + ".y," + temp1 + ".x\n";
-				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "mov " + temp3 + ".z," + animationRegisterCache.vertexOneConst + "\n";
-				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
 				
+				//x axis
 				code += "mov " + temp1 + "," + animationRegisterCache.vertexZeroConst + "\n";
 				code += "mov " + temp1 + ".x," + animationRegisterCache.vertexOneConst + "\n";
-				code += "mov " + temp2 + ".x," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "cos " + temp2 + ".y," + rotationAttribute + ".y\n";
-				code += "sin " + temp2 + ".z," + rotationAttribute + ".y\n";
 				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "neg " + temp3 + ".y," + temp2 + ".z\n";
-				code += "mov " + temp3 + ".z," + temp2 + ".y\n";
+				code += "sin " + temp3 + ".y," + rotationAttribute + ".x\n";
+				code += "cos " + temp3 + ".z," + rotationAttribute + ".x\n";
+				code += "mov " + temp2 + ".x," + animationRegisterCache.vertexZeroConst + "\n";
+				code += "mov " + temp2 + ".y," + temp3 + ".z\n";
+				code += "neg " + temp2 + ".z," + temp3 + ".y\n";
+				
 				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
 				
-				code += "cos " + temp1 + ".x," + rotationAttribute + ".z\n";
-				code += "sin " + temp1 + ".y," + rotationAttribute + ".z\n";
-				code += "mov " + temp1 + ".z," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "neg " + temp2 + ".x," + temp1 + ".y\n";
-				code += "mov " + temp2 + ".y," + temp1 + ".x\n";
-				code += "mov " + temp2 + ".z," + animationRegisterCache.vertexZeroConst + "\n";
+				//y axis
+				code += "mov " + temp1 + "," + animationRegisterCache.vertexZeroConst + "\n";
+				code += "cos " + temp1 + ".x," + rotationAttribute + ".y\n";
+				code += "sin " + temp1 + ".z," + rotationAttribute + ".y\n";
+				code += "mov " + temp2 + "," + animationRegisterCache.vertexZeroConst + "\n";
+				code += "mov " + temp2 + ".y," + animationRegisterCache.vertexOneConst + "\n";
+				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
+				code += "neg " + temp3 + ".x," + temp1 + ".z\n";
+				code += "mov " + temp3 + ".z," + temp1 + ".x\n";
+				
+				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+				
+				//z axis
+				code += "mov " + temp2 + "," + animationRegisterCache.vertexZeroConst + "\n";
+				code += "sin " + temp2 + ".x," + rotationAttribute + ".z\n";
+				code += "cos " + temp2 + ".y," + rotationAttribute + ".z\n";
+				code += "mov " + temp1 + "," + animationRegisterCache.vertexZeroConst + "\n";
+				code += "mov " + temp1 + ".x," + temp2 + ".y\n";
+				code += "neg " + temp1 + ".y," + temp2 + ".x\n";
 				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
 				code += "mov " + temp3 + ".z," + animationRegisterCache.vertexOneConst + "\n";
 				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+				
 			}
 			
 			if (_usesPosition) {
