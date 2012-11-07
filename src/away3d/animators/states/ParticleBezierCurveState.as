@@ -61,14 +61,15 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_INDEX);
+			var controlIndex:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_CONTROL_INDEX);
+			var endIndex:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_END_INDEX);
 			
 			if (_particleBezierCurveNode.mode == ParticlePropertiesMode.LOCAL) {
-				animationSubGeometry.activateVertexBuffer(index, _particleBezierCurveNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				animationSubGeometry.activateVertexBuffer(index + 1, _particleBezierCurveNode.dataOffset + 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				animationSubGeometry.activateVertexBuffer(controlIndex, _particleBezierCurveNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				animationSubGeometry.activateVertexBuffer(endIndex, _particleBezierCurveNode.dataOffset + 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {
-				animationRegisterCache.setVertexConst(index, _controlPoint.x, _controlPoint.y, _controlPoint.z);
-				animationRegisterCache.setVertexConst(index + 1, _endPoint.x, _endPoint.y, _endPoint.z);
+				animationRegisterCache.setVertexConst(controlIndex, _controlPoint.x, _controlPoint.y, _controlPoint.z);
+				animationRegisterCache.setVertexConst(endIndex, _endPoint.x, _endPoint.y, _endPoint.z);
 			}
 		}
 	}

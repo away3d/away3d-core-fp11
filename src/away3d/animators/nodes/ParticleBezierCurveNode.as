@@ -16,7 +16,10 @@ package away3d.animators.nodes
 	public class ParticleBezierCurveNode extends ParticleNodeBase
 	{
 		/** @private */
-		arcane static const BEZIER_INDEX:int = 0;
+		arcane static const BEZIER_CONTROL_INDEX:int = 0;
+		
+		/** @private */
+		arcane static const BEZIER_END_INDEX:int = 0;
 		
 		/** @private */
 		arcane var _controlPoint:Vector3D;
@@ -25,9 +28,16 @@ package away3d.animators.nodes
 		
 		/**
 		 * Reference for bezier curve node properties on a single particle (when in local property mode).
-		 * Expects a <code>Vector</code> object representing the control point position (0, 1, 2) and end point position (3, 4, 6) of the curve on the particle.
+		 * Expects a <code>Vector3D</code> object representing the control point position (0, 1, 2) of the curve.
 		 */
-		public static const BEZIER_VECTOR:String = "BezierVector";
+		public static const BEZIER_CONTROL_VECTOR3D:String = "BezierControlVector3D";
+		
+		
+		/**
+		 * Reference for bezier curve node properties on a single particle (when in local property mode).
+		 * Expects a <code>Vector3D</code> object representing the end point position (0, 1, 2) of the curve.
+		 */
+		public static const BEZIER_END_VECTOR3D:String = "BezierEndVector3D";
 		
 		/**
 		 * Creates a new <code>ParticleBezierCurveNode</code>
@@ -52,9 +62,10 @@ package away3d.animators.nodes
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var controlValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
-			animationRegisterCache.setRegisterIndex(this, BEZIER_INDEX, controlValue.index);
+			animationRegisterCache.setRegisterIndex(this, BEZIER_CONTROL_INDEX, controlValue.index);
 			
 			var endValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			animationRegisterCache.setRegisterIndex(this, BEZIER_END_INDEX, endValue.index);
 			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var rev_time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
@@ -95,17 +106,20 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
-			//[controlPoint:Vector3D,endPoint:Vector3D].
-			var bezierPoints:Vector.<Vector3D> = param[BEZIER_VECTOR];
-			if (!bezierPoints)
-				throw new Error("there is no " + BEZIER_VECTOR + " in param!");
+			var bezierControl:Vector.<Vector3D> = param[BEZIER_CONTROL_VECTOR3D];
+			if (!bezierControl)
+				throw new Error("there is no " + BEZIER_CONTROL_VECTOR3D + " in param!");
+				
+			var bezierEnd:Vector.<Vector3D> = param[BEZIER_END_VECTOR3D];
+			if (!bezierEnd)
+				throw new Error("there is no " + BEZIER_END_VECTOR3D + " in param!");
 			
-			_oneData[0] = bezierPoints[0].x;
-			_oneData[1] = bezierPoints[0].y;
-			_oneData[2] = bezierPoints[0].z;
-			_oneData[3] = bezierPoints[1].x;
-			_oneData[4] = bezierPoints[1].y;
-			_oneData[5] = bezierPoints[1].z;
+			_oneData[0] = bezierControl.x;
+			_oneData[1] = bezierControl.y;
+			_oneData[2] = bezierControl.z;
+			_oneData[3] = bezierEnd.x;
+			_oneData[4] = bezierEnd.y;
+			_oneData[5] = bezierEnd.z;
 		}
 	}
 
