@@ -5,7 +5,7 @@ package away3d.animators.data
 	 */
 	public class ParticleFollowStorage
 	{
-		protected var _itemList:Vector.<ParticleFollowingItem> = new Vector.<ParticleFollowingItem>;
+		protected var _itemList:Vector.<ParticleAnimationData> = new Vector.<ParticleAnimationData>;
 		protected var _numVertices:uint;
 		protected var _dataLength:int;
 		
@@ -24,7 +24,7 @@ package away3d.animators.data
 			return _numVertices;
 		}
 		
-		public function get itemList():Vector.<ParticleFollowingItem>
+		public function get itemList():Vector.<ParticleAnimationData>
 		{
 			return _itemList;
 		}

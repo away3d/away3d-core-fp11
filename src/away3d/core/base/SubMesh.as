@@ -39,6 +39,8 @@ package away3d.core.base
 		
 		public var animationSubGeometry : AnimationSubGeometry;
 		
+		public var animatorSubGeometry : AnimationSubGeometry;
+		
 		/**
 		 * Creates a new SubMesh object
 		 * @param subGeometry The SubGeometry object which provides the geometry data for this SubMesh.

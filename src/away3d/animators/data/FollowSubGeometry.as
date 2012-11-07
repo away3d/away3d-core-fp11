@@ -59,7 +59,7 @@ package away3d.animators.data
 			return _vertexData;
 		}
 		
-		public function get itemList():Vector.<ParticleFollowingItem>
+		public function get itemList():Vector.<ParticleAnimationData>
 		{
 			return _storage.itemList;
 		}

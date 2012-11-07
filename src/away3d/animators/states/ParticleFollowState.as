@@ -1,8 +1,7 @@
 package away3d.animators.states
 {
 	import away3d.arcane;
-	import away3d.animators.data.ParticleFollowingItem;
-	import away3d.animators.data.FollowSubGeometry;
+	import away3d.animators.data.ParticleAnimationData;
 	import away3d.cameras.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
@@ -14,7 +13,6 @@ package away3d.animators.states
 	import away3d.core.math.MathConsts;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
-	import flash.utils.Dictionary;
 	
 	use namespace arcane;
 	
@@ -28,8 +26,6 @@ package away3d.animators.states
 		
 		private var _targetPos:Vector3D = new Vector3D;
 		private var _targetEuler:Vector3D = new Vector3D;
-		
-		private var followSubGeometries:Dictionary = new Dictionary(true);
 		
 		public function ParticleFollowState(animator:ParticleAnimator, particleFollowNode:ParticleFollowNode)
 		{
@@ -53,8 +49,6 @@ package away3d.animators.states
 		 */
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
-			var followSubGeometry:FollowSubGeometry = followSubGeometries[renderable] ||= new FollowSubGeometry(animationSubGeometry.extraStorage[_animationNode]);
-			
 			if (_followTarget)
 			{
 				if (_particleFollowNode._usesPosition)
@@ -73,7 +67,7 @@ package away3d.animators.states
 			}
 			
 			var currentTime:Number = _time / 1000;
-			var previousTime:Number = followSubGeometry.previousTime;
+			var previousTime:Number = animationSubGeometry.previousTime;
 			var deltaTime:Number = currentTime - previousTime;
 			
 			var needProcess:Boolean = previousTime != currentTime;
@@ -81,49 +75,49 @@ package away3d.animators.states
 			if (_particleFollowNode._usesPosition && _particleFollowNode._usesRotation)
 			{
 				if (needProcess)
-					processPositionAndRotation(currentTime, deltaTime, followSubGeometry);
+					processPositionAndRotation(currentTime, deltaTime, animationSubGeometry);
 				
-				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX), 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX), 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (_particleFollowNode._usesPosition)
 			{
 				if (needProcess)
-					processPosition(currentTime, deltaTime, followSubGeometry);
+					processPosition(currentTime, deltaTime, animationSubGeometry);
 				
-				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_POSITION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			else if (_particleFollowNode._usesRotation)
 			{
 				if (needProcess)
-					precessRotation(currentTime, deltaTime, followSubGeometry);
+					precessRotation(currentTime, deltaTime, animationSubGeometry);
 				
-				followSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
+				animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleFollowNode.FOLLOW_ROTATION_INDEX), 0, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			}
 			
-			followSubGeometry.previousTime = currentTime;
+			animationSubGeometry.previousTime = currentTime;
 		
 		}
 		
-		private function processPosition(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
+		private function processPosition(currentTime:Number, deltaTime:Number, animationSubGeometry:AnimationSubGeometry):void
 		{
-			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
-			var vertexData:Vector.<Number> = followSubGeometry.vertexData;
+			var data:Vector.<ParticleAnimationData> = animationSubGeometry.animationParticles;
+			var vertexData:Vector.<Number> = animationSubGeometry.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
 			for (var i:uint = 0; i < len; i++)
 			{
-				var k:Number = (currentTime - data[i].startTime) / data[i].lifeTime;
-				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
+				var k:Number = (currentTime - data[i].startTime) / data[i].totalTime;
+				var t:Number = (k - Math.floor(k)) * data[i].totalTime;
 				if (t - deltaTime <= 0)
 				{
-					var inc:int = data[i].startIndex * 3;
+					var inc:int = data[i].startVertexIndex * 3;
 					
 					if (vertexData[inc] != _targetPos.x || vertexData[inc + 1] != _targetPos.y || vertexData[inc + 2] != _targetPos.z)
 					{
 						changed = true;
-						for (var j:uint = 0; j < data[i].numVertex; j++)
+						for (var j:uint = 0; j < data[i].numVertices; j++)
 						{
 							vertexData[inc++] = _targetPos.x;
 							vertexData[inc++] = _targetPos.y;
@@ -133,29 +127,29 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				followSubGeometry.invalidateBuffer();
+				animationSubGeometry.invalidateBuffer();
 		
 		}
 		
-		private function precessRotation(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
+		private function precessRotation(currentTime:Number, deltaTime:Number, animationSubGeometry:AnimationSubGeometry):void
 		{
-			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
-			var vertexData:Vector.<Number> = followSubGeometry.vertexData;
+			var data:Vector.<ParticleAnimationData> = animationSubGeometry.animationParticles;
+			var vertexData:Vector.<Number> = animationSubGeometry.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
 			for (var i:uint = 0; i < len; i++)
 			{
-				var k:Number = (currentTime - data[i].startTime) / data[i].lifeTime;
-				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
+				var k:Number = (currentTime - data[i].startTime) / data[i].totalTime;
+				var t:Number = (k - Math.floor(k)) * data[i].totalTime;
 				if (t - deltaTime <= 0)
 				{
-					var inc:int = data[i].startIndex * 3;
+					var inc:int = data[i].startVertexIndex * 3;
 					
 					if (vertexData[inc] != _targetEuler.x || vertexData[inc + 1] != _targetEuler.y || vertexData[inc + 2] != _targetEuler.z)
 					{
 						changed = true;
-						for (var j:uint = 0; j < data[i].numVertex; j++)
+						for (var j:uint = 0; j < data[i].numVertices; j++)
 						{
 							vertexData[inc++] = _targetEuler.x;
 							vertexData[inc++] = _targetEuler.y;
@@ -165,28 +159,28 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				followSubGeometry.invalidateBuffer();
+				animationSubGeometry.invalidateBuffer();
 		
 		}
 		
-		private function processPositionAndRotation(currentTime:Number, deltaTime:Number, followSubGeometry:FollowSubGeometry):void
+		private function processPositionAndRotation(currentTime:Number, deltaTime:Number, animationSubGeometry:AnimationSubGeometry):void
 		{
-			var data:Vector.<ParticleFollowingItem> = followSubGeometry.itemList;
-			var vertexData:Vector.<Number> = followSubGeometry.vertexData;
+			var data:Vector.<ParticleAnimationData> = animationSubGeometry.animationParticles;
+			var vertexData:Vector.<Number> = animationSubGeometry.vertexData;
 			
 			var changed:Boolean = false;
 			var len:uint = data.length;
 			for (var i:uint = 0; i < len; i++)
 			{
-				var k:Number = (currentTime - data[i].startTime) / data[i].lifeTime;
-				var t:Number = (k - Math.floor(k)) * data[i].lifeTime;
+				var k:Number = (currentTime - data[i].startTime) / data[i].totalTime;
+				var t:Number = (k - Math.floor(k)) * data[i].totalTime;
 				if (t - deltaTime <= 0)
 				{
-					var inc:int = data[i].startIndex * 6;
+					var inc:int = data[i].startVertexIndex * 6;
 					if (vertexData[inc] != _targetPos.x || vertexData[inc + 1] != _targetPos.y || vertexData[inc + 2] != _targetPos.z || vertexData[inc + 3] != _targetEuler.x || vertexData[inc + 4] != _targetEuler.y || vertexData[inc + 5] != _targetEuler.z)
 					{
 						changed = true;
-						for (var j:uint = 0; j < data[i].numVertex; j++)
+						for (var j:uint = 0; j < data[i].numVertices; j++)
 						{
 							vertexData[inc++] = _targetPos.x;
 							vertexData[inc++] = _targetPos.y;
@@ -199,7 +193,7 @@ package away3d.animators.states
 				}
 			}
 			if (changed)
-				followSubGeometry.invalidateBuffer();
+				animationSubGeometry.invalidateBuffer();
 		}
 	
 	}

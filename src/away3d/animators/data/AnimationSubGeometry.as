@@ -3,7 +3,7 @@ package away3d.animators.data
 	import away3d.core.managers.Stage3DProxy;
 	import flash.display3D.Context3D;
 	import flash.display3D.VertexBuffer3D;
-	import flash.utils.Dictionary;
+	
 	/**
 	 * ...
 	 */
@@ -13,6 +13,7 @@ package away3d.animators.data
 		
 		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
 		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _bufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
 		
 		private var _numVertices:uint;
 		
@@ -20,7 +21,15 @@ package away3d.animators.data
 		
 		public var numProcessedVertices:int = 0;
 		
-		public var extraStorage:Dictionary = new Dictionary(true);
+		public var previousTime:Number = 0;
+		
+		public var animationParticles:Vector.<ParticleAnimationData> = new Vector.<ParticleAnimationData>();
+		
+		public function AnimationSubGeometry()
+		{
+			for (var i:int = 0; i < 8; i++)
+				_bufferDirty[i] = true;
+		}
 		
 		public function createVertexData(numVertices:uint, totalLenOfOneVertex:uint):void
 		{
@@ -35,13 +44,21 @@ package away3d.animators.data
 			var context : Context3D = stage3DProxy.context3D;
 			
 			var buffer:VertexBuffer3D = _vertexBuffer[contextIndex];
-			if (!buffer || _bufferContext[contextIndex] != context)
-			{
+			if (!buffer || _bufferContext[contextIndex] != context) {
 				buffer = _vertexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, _totalLenOfOneVertex);
-				buffer.uploadFromVector(vertexData, 0, _numVertices);
 				_bufferContext[contextIndex] = context;
 			}
+			if (_bufferDirty[contextIndex]) {
+				buffer.uploadFromVector(_vertexData, 0, _numVertices);
+				_bufferDirty[contextIndex] = false;
+			}
 			context.setVertexBufferAt(index, buffer, bufferOffset, format);
+		}
+		
+		public function invalidateBuffer():void
+		{
+			for (var i:int = 0; i < 8; i++)
+				_bufferDirty[i] = true;
 		}
 		
 		public function get vertexData():Vector.<Number>
@@ -53,7 +70,5 @@ package away3d.animators.data
 		{
 			return _numVertices;
 		}
-		
 	}
-
 }

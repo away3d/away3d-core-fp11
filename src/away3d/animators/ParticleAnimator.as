@@ -1,5 +1,12 @@
 package away3d.animators
 {
+	import flash.utils.Dictionary;
+	import away3d.entities.Mesh;
+	import away3d.core.base.ParticleGeometry;
+	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.data.ParticleData;
+	import away3d.animators.data.ParticleProperties;
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.ParticleNodeBase;
@@ -21,8 +28,11 @@ package away3d.animators
 	{
 		
 		private var _particleAnimationSet:ParticleAnimationSet;
-		private var _allParticleStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
+		private var _animationParticleStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
+		private var _animatorParticleStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
 		private var _timeParticleStates:Vector.<ParticleStateBase> = new Vector.<ParticleStateBase>;
+		private var _totalLenOfOneVertex:uint = 0;
+		private var _animatorSubGeometries:Dictionary = new Dictionary(true);
 		
 		public function ParticleAnimator(animationSet:ParticleAnimationSet)
 		{
@@ -34,7 +44,13 @@ package away3d.animators
 			for each (node in _particleAnimationSet.particleNodes)
 			{
 				state = getAnimationState(node) as ParticleStateBase;
-				_allParticleStates.push(state);
+				if (node.mode == ParticlePropertiesMode.LOCAL_DYNAMIC) {
+					_animatorParticleStates.push(state);
+					node.dataOffset = _totalLenOfOneVertex;
+					_totalLenOfOneVertex += node.dataLength;
+				} else {
+					_animationParticleStates.push(state);
+				}
 				if (state.needUpdateTime)
 					_timeParticleStates.push(state);
 			}
@@ -46,17 +62,28 @@ package away3d.animators
 			var animationRegisterCache:AnimationRegisterCache = _particleAnimationSet.animationRegisterCache;
 			
 			var subMesh:SubMesh = renderable as SubMesh;
+			var state:ParticleStateBase;
 			
 			if (!subMesh)
 				throw(new Error("Must be subMesh"));
 			
+			//process animation sub geometries
 			if (!subMesh.animationSubGeometry)
 				_particleAnimationSet.generateAnimationSubGeometries(subMesh.parentMesh);
 			
 			var animationSubGeometry:AnimationSubGeometry = subMesh.animationSubGeometry;
 			
-			for each (var state:ParticleStateBase in _allParticleStates)
+			for each (state in _animationParticleStates)
 				state.setRenderState(stage3DProxy, renderable, animationSubGeometry, animationRegisterCache, camera);
+			
+			//process animator subgeometries
+			if (!subMesh.animatorSubGeometry && _animatorParticleStates.length)
+				generateAnimatorSubGeometry(subMesh);
+			
+			var animatorSubGeometry:AnimationSubGeometry = subMesh.animatorSubGeometry;
+			
+			for each (state in _animatorParticleStates)
+				state.setRenderState(stage3DProxy, renderable, animatorSubGeometry, animationRegisterCache, camera);
 			
 			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, animationRegisterCache.vertexConstantOffset, animationRegisterCache.vertexConstantData, animationRegisterCache.numVertexConstant);
 			
@@ -96,6 +123,17 @@ package away3d.animators
 			}
 		}
 		
+		private function generateAnimatorSubGeometry(subMesh:SubMesh):void
+		{
+			var subGeometry:ISubGeometry = subMesh.subGeometry;
+			var animatorSubGeometry:AnimationSubGeometry = subMesh.animatorSubGeometry = _animatorSubGeometries[subGeometry] = new AnimationSubGeometry();
+			
+			//create the vertexData vector that will be used for local state data
+			animatorSubGeometry.createVertexData(subGeometry.numVertices, _totalLenOfOneVertex);
+			
+			//pass the particles data to the animator subGeometry
+			animatorSubGeometry.animationParticles = subMesh.animationSubGeometry.animationParticles;
+		}
 	}
 
 }

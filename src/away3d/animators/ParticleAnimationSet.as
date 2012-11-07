@@ -1,5 +1,6 @@
 package away3d.animators
 {
+	import away3d.animators.data.ParticleAnimationData;
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.core.base.SubMesh;
 	import away3d.core.base.ParticleGeometry;
@@ -33,7 +34,9 @@ package away3d.animators
 		
 		private var _particleNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
 		
-		private var _localNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
+		private var _localDynamicNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
+		
+		private var _localStaticNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
 		
 		private var _totalLenOfOneVertex:int = 0;
 		
@@ -90,7 +93,9 @@ package away3d.animators
 			if (n.mode == ParticlePropertiesMode.LOCAL) {
 				n.dataOffset = _totalLenOfOneVertex;
 				_totalLenOfOneVertex += n.dataLength;
-				_localNodes.push(n);
+				_localStaticNodes.push(n);
+			} else if (n.mode == ParticlePropertiesMode.LOCAL_DYNAMIC) {
+				_localDynamicNodes.push(n);
 			}
 			
 			for (i = _particleNodes.length - 1; i >= 0; i--)
@@ -231,7 +236,7 @@ package away3d.animators
 			var geometry:ParticleGeometry =  mesh.geometry as ParticleGeometry;
 			
 			if (!geometry)
-				throw(new Error("It must be ParticleGeometry"));
+				throw(new Error("Particle animation can only be performed on a ParticleGeometry object"));
 			
 			var i:int, j:int;
 			var animationSubGeometry:AnimationSubGeometry;
@@ -263,7 +268,7 @@ package away3d.animators
 			var particles:Vector.<ParticleData> = geometry.particles;
 			var particlesLength:uint = particles.length;
 			var numParticles:uint = geometry.numParticles;
-			var param:ParticleProperties = new ParticleProperties();
+			var particleProperties:ParticleProperties = new ParticleProperties();
 			var particle:ParticleData;
 			
 			var oneDataLen:int;
@@ -278,23 +283,23 @@ package away3d.animators
 			var vertexOffset:uint;
 					
 			//default values for particle param
-			param.total = numParticles;
-			param.startTime = 0;
-			param.particleDuration = 1000;
-			param.delay = 0.1;
+			particleProperties.total = numParticles;
+			particleProperties.startTime = 0;
+			particleProperties.particleDuration = 1000;
+			particleProperties.delay = 0.1;
 			
 			i = 0;
 			j = 0;
 			while (i < numParticles)
 			{
-				param.index = i;
+				particleProperties.index = i;
 				
 				//call the init function on the particle parameters
-				_initParticleFunc(param);
+				_initParticleFunc(particleProperties);
 				
 				//create the next set of node properties for the particle
-				for each (localNode in _localNodes)
-					localNode.generatePropertyOfOneParticle(param);
+				for each (localNode in _localStaticNodes)
+					localNode.generatePropertyOfOneParticle(particleProperties);
 				
 				//loop through all particle data for the curent particle
 				while (j < particlesLength && (particle = particles[j]).particleIndex == i) {
@@ -304,8 +309,8 @@ package away3d.animators
 					vertexLength = numVertices * _totalLenOfOneVertex;
 					startingOffset = animationSubGeometry.numProcessedVertices * _totalLenOfOneVertex;
 					
-					//loop through each local node in the animation set
-					for each (localNode in _localNodes) {
+					//loop through each static local node in the animation set
+					for each (localNode in _localStaticNodes) {
 						oneData = localNode.oneData;
 						oneDataLen = localNode.dataLength;
 						oneDataOffset = startingOffset + localNode.dataOffset;
@@ -319,8 +324,11 @@ package away3d.animators
 								vertexData[vertexOffset + counterForOneData] = oneData[counterForOneData];
 						}
 						
-						localNode.processExtraData(param, animationSubGeometry, numVertices);
 					}
+					
+					//store particle properties if they need to be retreived for dynamic local nodes
+					if (_localDynamicNodes.length)
+						animationSubGeometry.animationParticles.push(new ParticleAnimationData(particleProperties.startTime, particleProperties.duration, particleProperties.delay, particle));
 					
 					animationSubGeometry.numProcessedVertices += numVertices;
 					

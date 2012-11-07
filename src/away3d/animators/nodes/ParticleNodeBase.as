@@ -1,7 +1,6 @@
 package away3d.animators.nodes
 {
 	import away3d.arcane;
-	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -66,12 +65,6 @@ package away3d.animators.nodes
 		}
 		
 		arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
-		{
-			
-		}
-		
-		//give a chance to lookup paramters other nodes generated
-		public function processExtraData(param:ParticleProperties, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
 		{
 			
 		}

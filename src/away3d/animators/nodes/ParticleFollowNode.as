@@ -2,10 +2,6 @@ package away3d.animators.nodes
 {
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.animators.data.ParticleFollowingItem;
-	import away3d.animators.data.ParticleFollowStorage;
-	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.states.ParticleFollowState;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -43,35 +39,7 @@ package away3d.animators.nodes
 			_usesPosition = usesPosition;
 			_usesRotation = usesRotation;
 			
-			super("ParticleFollowNode" + mode, mode, 0, ParticleAnimationSet.POST_PRIORITY);
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function processExtraData(param:ParticleProperties, animationSubGeometry:AnimationSubGeometry, numVertex:int):void
-		{
-			
-			var storage:ParticleFollowStorage = animationSubGeometry.extraStorage[this];
-			if (!storage)
-			{
-				storage = animationSubGeometry.extraStorage[this] = new ParticleFollowStorage;
-				if (_usesPosition && _usesRotation)
-					storage.initData(animationSubGeometry.numVertices, 6);
-				else
-					storage.initData(animationSubGeometry.numVertices, 3);
-			}
-			var item:ParticleFollowingItem = new ParticleFollowingItem();
-			item.startTime = param.startTime;
-			item.lifeTime = param.delay + param.duration;
-			item.numVertex = numVertex;
-			var len:uint = storage.itemList.length;
-			if (len > 0)
-			{
-				var lastItem:ParticleFollowingItem = storage.itemList[len - 1];
-				item.startIndex = lastItem.startIndex + lastItem.numVertex;
-			}
-			storage.itemList.push(item);
+			super("ParticleFollowNode0", 2, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
 		}
 		
 		/**
