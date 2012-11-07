@@ -1,5 +1,6 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.ParticleAnimationSet;
@@ -39,7 +40,7 @@ package away3d.animators.nodes
 			_usesPosition = usesPosition;
 			_usesRotation = usesRotation;
 			
-			super("ParticleFollowNode0", 2, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
+			super("ParticleFollowNode", ParticlePropertiesMode.LOCAL_DYNAMIC, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
 		}
 		
 		/**

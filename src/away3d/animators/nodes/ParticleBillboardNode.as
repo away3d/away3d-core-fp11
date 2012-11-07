@@ -1,5 +1,6 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.states.ParticleBillboardState;
@@ -21,7 +22,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleBillboardNode()
 		{
-			super("ParticleBillboardNode", 1, 0, 3);
+			super("ParticleBillboardNode", ParticlePropertiesMode.GLOBAL, 0, 3);
 			
 			_stateClass = ParticleBillboardState;
 		}

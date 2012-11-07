@@ -1,5 +1,6 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.ParticleProperties;
@@ -89,7 +90,7 @@ package away3d.animators.nodes
 			
 			_loop = loop;
 			
-			super("ParticleTimeNode", 0, 4, 0);
+			super("ParticleTimeNode", ParticlePropertiesMode.LOCAL, 4, 0);
 		}
 		
 		/**
