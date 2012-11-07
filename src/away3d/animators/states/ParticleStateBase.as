@@ -50,7 +50,7 @@ package away3d.animators.states
 			var animationParticles:Vector.<ParticleAnimationData> = animationSubGeometry.animationParticles;
 			var vertexData:Vector.<Number> = animationSubGeometry.vertexData;
 			var totalLenOfOneVertex:uint = animationSubGeometry.totalLenOfOneVertex;
-//			var dataLength:uint = _particleNode.dataLength;
+			var dataLength:uint = _particleNode.dataLength;
 			var dataOffset:uint = _particleNode.dataOffset;
 			var vertexLength:uint;
 //			var particleOffset:uint;
@@ -83,6 +83,9 @@ package away3d.animators.states
 							vertexData[vertexOffset++] = data.x;
 							vertexData[vertexOffset++] = data.y;
 							vertexData[vertexOffset++] = data.z;
+							
+							if (dataLength == 4)
+								vertexData[vertexOffset++] = data.w;
 						}
 						//loop through each value in the particle vertex
 //						switch(dataLength) {

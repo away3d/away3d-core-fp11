@@ -1,5 +1,6 @@
 package away3d.animators.states
 {
+	import flash.utils.Dictionary;
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -38,6 +39,21 @@ package away3d.animators.states
 			updateRotationalVelocityData();
 		}
 		
+		/**
+		 * 
+		 */
+		public function getRotationalVelocities():Vector.<Vector3D>
+		{
+			return _dynamicProperties;
+		}
+		
+		public function setRotationalVelocities(value:Vector.<Vector3D>):void
+		{
+			_dynamicProperties = value;
+			
+			_dynamicPropertiesDirty = new Dictionary(true);
+		}
+		
 		public function ParticleRotationalVelocityState(animator:ParticleAnimator, particleRotationNode:ParticleRotationalVelocityNode)
 		{
 			super(animator, particleRotationNode);
@@ -53,12 +69,15 @@ package away3d.animators.states
 		 */
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
+			if (ParticlePropertiesMode.LOCAL_DYNAMIC && !_dynamicPropertiesDirty[animationSubGeometry])
+				updateDynamicProperties(animationSubGeometry);
+			
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotationalVelocityNode.ROTATIONALVELOCITY_INDEX);
 			
-			if (_particleRotationalVelocityNode.mode == ParticlePropertiesMode.LOCAL)
-				animationSubGeometry.activateVertexBuffer(index, _particleRotationalVelocityNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
-			else
+			if (_particleRotationalVelocityNode.mode == ParticlePropertiesMode.GLOBAL)
 				animationRegisterCache.setVertexConst(index, _rotationalVelocityData.x, _rotationalVelocityData.y, _rotationalVelocityData.z, _rotationalVelocityData.w);
+			else
+				animationSubGeometry.activateVertexBuffer(index, _particleRotationalVelocityNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 		}
 		
 		private function updateRotationalVelocityData():void
