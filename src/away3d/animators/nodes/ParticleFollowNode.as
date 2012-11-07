@@ -62,6 +62,8 @@ package away3d.animators.nodes
 				animationRegisterCache.removeVertexTempUsage(temp1);
 				animationRegisterCache.removeVertexTempUsage(temp2);
 				
+				var len:int = animationRegisterCache.rotationRegisters.length;
+				var i:int;
 				
 				//x axis
 				code += "mov " + temp1 + "," + animationRegisterCache.vertexZeroConst + "\n";
@@ -73,7 +75,20 @@ package away3d.animators.nodes
 				code += "mov " + temp2 + ".y," + temp3 + ".z\n";
 				code += "neg " + temp2 + ".z," + temp3 + ".y\n";
 				
-				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+				if (animationRegisterCache.hasBillboard)
+				{
+					code += "m33 " + temp1 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
+					code += "sub " + temp1 + "," + temp1 + "," + animationRegisterCache.positionTarget + "\n";
+					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+				}
+				else
+				{
+					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+					for (i = 0; i < len; i++)
+					{
+						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
+					}
+				}
 				
 				//y axis
 				code += "mov " + temp1 + "," + animationRegisterCache.vertexZeroConst + "\n";
@@ -85,7 +100,20 @@ package away3d.animators.nodes
 				code += "neg " + temp3 + ".x," + temp1 + ".z\n";
 				code += "mov " + temp3 + ".z," + temp1 + ".x\n";
 				
-				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+				if (animationRegisterCache.hasBillboard)
+				{
+					code += "m33 " + temp1 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
+					code += "sub " + temp1 + "," + temp1 + "," + animationRegisterCache.positionTarget + "\n";
+					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+				}
+				else
+				{
+					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+					for (i = 0; i < len; i++)
+					{
+						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
+					}
+				}
 				
 				//z axis
 				code += "mov " + temp2 + "," + animationRegisterCache.vertexZeroConst + "\n";
@@ -96,7 +124,21 @@ package away3d.animators.nodes
 				code += "neg " + temp1 + ".y," + temp2 + ".x\n";
 				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
 				code += "mov " + temp3 + ".z," + animationRegisterCache.vertexOneConst + "\n";
-				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+				
+				if (animationRegisterCache.hasBillboard)
+				{
+					code += "m33 " + temp1 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
+					code += "sub " + temp1 + "," + temp1 + "," + animationRegisterCache.positionTarget + "\n";
+					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+				}
+				else
+				{
+					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+					for (i = 0; i < len; i++)
+					{
+						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
+					}
+				}
 				
 			}
 			

@@ -46,6 +46,8 @@ package away3d.animators
 		public var hasColorNode:Boolean;
 		//set if the other nodes need to access the velocity
 		public var needVelocity:Boolean;
+		//set if has a billboard node.
+		public var hasBillboard:Boolean;
 		
 		//all other nodes dependent on it
 		private var timeNode:ParticleTimeNode;
@@ -134,6 +136,7 @@ package away3d.animators
 			_animationRegisterCache.hasUVNode = hasUVNode;
 			_animationRegisterCache.hasColorNode = hasColorNode;
 			_animationRegisterCache.needVelocity = needVelocity;
+			_animationRegisterCache.hasBillboard = hasBillboard;
 			_animationRegisterCache.sourceRegisters = sourceRegisters;
 			_animationRegisterCache.targetRegisters = targetRegisters;
 			_animationRegisterCache.needFragmentAnimation = pass.needFragmentAnimation;
@@ -231,7 +234,7 @@ package away3d.animators
 		public function generateAnimationSubGeometries(mesh:Mesh):void
 		{
 			if (_initParticleFunc == null)
-				throw(new Error("no initParticleFunc"));			
+				throw(new Error("no initParticleFunc"));
 			
 			var geometry:ParticleGeometry =  mesh.geometry as ParticleGeometry;
 			

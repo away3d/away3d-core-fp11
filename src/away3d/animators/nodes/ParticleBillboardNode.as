@@ -1,6 +1,7 @@
 package away3d.animators.nodes
 {
 	import away3d.animators.data.ParticlePropertiesMode;
+	import away3d.animators.ParticleAnimationSet;
 	import away3d.arcane;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.states.ParticleBillboardState;
@@ -29,7 +30,7 @@ package away3d.animators.nodes
 		
 		/**
 		 * @inheritDoc
-		 */		
+		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
 			var rotationMatrixRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
@@ -45,6 +46,14 @@ package away3d.animators.nodes
 				code += "m33 " + shaderRegisterElement.regName + shaderRegisterElement.index + ".xyz," + shaderRegisterElement + "," + rotationMatrixRegister + "\n";
 			
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
+		{
+			particleAnimationSet.hasBillboard = true;
 		}
 	}
 }
