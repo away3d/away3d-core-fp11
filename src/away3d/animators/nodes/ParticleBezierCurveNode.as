@@ -1,12 +1,14 @@
 package away3d.animators.nodes
 {
+	import flash.geom.Vector3D;
+	
 	import away3d.arcane;
-	import away3d.animators.data.ParticleProperties;
 	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.ParticleProperties;
+	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.animators.states.ParticleBezierCurveState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.Vector3D;
 	
 	use namespace arcane;
 	
@@ -61,10 +63,10 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var controlValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var controlValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, BEZIER_CONTROL_INDEX, controlValue.index);
 			
-			var endValue:ShaderRegisterElement = (_mode == ParticleProperties.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var endValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, BEZIER_END_INDEX, endValue.index);
 			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
@@ -106,11 +108,11 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
-			var bezierControl:Vector.<Vector3D> = param[BEZIER_CONTROL_VECTOR3D];
+			var bezierControl:Vector3D = param[BEZIER_CONTROL_VECTOR3D];
 			if (!bezierControl)
 				throw new Error("there is no " + BEZIER_CONTROL_VECTOR3D + " in param!");
 				
-			var bezierEnd:Vector.<Vector3D> = param[BEZIER_END_VECTOR3D];
+			var bezierEnd:Vector3D = param[BEZIER_END_VECTOR3D];
 			if (!bezierEnd)
 				throw new Error("there is no " + BEZIER_END_VECTOR3D + " in param!");
 			

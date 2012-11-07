@@ -48,8 +48,8 @@ package away3d.materials.passes
 										1.0 / 255.0,1.0 / 255.0,1.0 / 255.0,0.0
 									]);
 			
-			_animatableAttributes = ["va0", "va1"];
-			_animationTargetRegisters = ["vt0", "vt1"];
+			_animatableAttributes = Vector.<String>(["va0", "va1"]);
+			_animationTargetRegisters = Vector.<String>(["vt0", "vt1"]);
 		}
 
 		/**
