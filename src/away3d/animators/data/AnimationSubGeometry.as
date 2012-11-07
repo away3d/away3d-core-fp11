@@ -70,5 +70,10 @@ package away3d.animators.data
 		{
 			return _numVertices;
 		}
+		
+		public function get totalLenOfOneVertex():uint
+		{
+			return _totalLenOfOneVertex;
+		}
 	}
 }
