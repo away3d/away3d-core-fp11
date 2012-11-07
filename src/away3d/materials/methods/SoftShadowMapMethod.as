@@ -12,6 +12,7 @@ package away3d.materials.methods
 	{
 		private var _range : Number = 1;
 		private var _numSamples : int;
+		private var _offsets : Vector.<Number>;
 
 		/**
 		 * Creates a new BasicDiffuseMethod object.
@@ -21,6 +22,14 @@ package away3d.materials.methods
 			super(castingLight);
 
 			this.numSamples = numSamples;
+
+			_offsets = new <Number>[-.5, -.5, .5, .5, .5, -.5, -.5, .5,
+									-1.5, -1.5, 1.5, 1.5, 1.5, -1.5, -1.5, 1.5,
+									-.5, -1.5, 1.5,-.5,.5, 1.5, -1.5, .5,
+									.5, -1.5, 1.5,.5, -.5, 1.5, -1.5, -.5 ];
+
+			for (var i : int = 0; i < 32; ++i)
+				_offsets[i+32] = _offsets[i] * .75;
 		}
 
 		public function get numSamples() : int
@@ -32,7 +41,7 @@ package away3d.materials.methods
 		{
 			_numSamples = value;
 			if (_numSamples < 1) _numSamples = 1;
-			else if (_numSamples > 8) _numSamples = 8;
+			else if (_numSamples > 32) _numSamples = 32;
 			invalidateShaderProgram();
 		}
 
@@ -51,6 +60,7 @@ package away3d.materials.methods
 			super.initConstants(vo);
 
 			vo.fragmentData[vo.fragmentConstantsIndex+8] = 1/_numSamples;
+			vo.fragmentData[vo.fragmentConstantsIndex+9] = 0;
 		}
 
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
@@ -58,9 +68,11 @@ package away3d.materials.methods
 			super.activate(vo, stage3DProxy);
 			var texRange : Number = _range/_castingLight.shadowMapper.depthMapSize;
 			var data : Vector.<Number> = vo.fragmentData;
-			var index : uint = vo.fragmentConstantsIndex;
-			data[index+9] = texRange;
-			data[index+10] = -texRange;
+			var index : uint = vo.fragmentConstantsIndex+10;
+			var len : uint = _numSamples << 1;
+
+			for (var i : int = 0; i < len; ++i)
+				data[uint(index + i)] = _offsets[i]*texRange;
 		}
 
 		/**
@@ -91,12 +103,16 @@ package away3d.materials.methods
 
 		override arcane function activateForCascade(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
+			super.activate(vo, stage3DProxy);
 			var texRange : Number = _range/_castingLight.shadowMapper.depthMapSize;
 			var data : Vector.<Number> = vo.fragmentData;
 			var index : uint = vo.secondaryFragmentConstantsIndex;
+			var len : uint = _numSamples << 1;
 			data[index] = 1/_numSamples;
-			data[index+1] = texRange;
-			data[index+2] = -texRange;
+			data[uint(index + 1)] = 0;
+			index += 2;
+			for (var i : int = 0; i < len; ++i)
+				data[uint(index+i)] = _offsets[i]*texRange;
 		}
 
 		override arcane function getCascadeFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, decodeRegister : ShaderRegisterElement, depthTexture : ShaderRegisterElement, depthProjection : ShaderRegisterElement, targetRegister : ShaderRegisterElement) : String
@@ -113,48 +129,31 @@ package away3d.materials.methods
 		{
 			var uvReg : ShaderRegisterElement;
 			var code : String;
+			var offsets : Vector.<String> = new <String>[ dataReg + ".zw" ];
 			uvReg = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uvReg, 1);
 
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
-			code = "mov " + uvReg + ", " + _depthMapCoordReg + "\n" +
-					"tex " + temp + ", " + _depthMapCoordReg + ", " + depthTexture + " <2d,nearest,clamp>\n" +
-					"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
-					"slt " + targetRegister + ".w, " + _depthMapCoordReg + ".z, " + temp + ".z\n";    // 0 if in shadow;
+			var numRegs : int = _numSamples >> 1;
+			for (var i : int = 0; i < numRegs; ++i) {
+				var reg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+				offsets.push(reg+".xy");
+				offsets.push(reg+".zw");
+			}
 
-			if (_numSamples > 1)
-				code += "add " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + dataReg + ".zz\n" + // (-1, -1)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
-			if (_numSamples > 5)
-				code += "add " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".zz\n" + // (-2, -2)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
-			if (_numSamples > 2)
-				code += "add " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + dataReg + ".yz\n" + // (1, -1)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
-			if (_numSamples > 6)
-				code += "add " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".yz\n" + // (2, -2)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
-			if (_numSamples > 3)
-				code += "add " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + dataReg + ".zy\n" + // (-1, 1)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
-			if (_numSamples > 7)
-				code += "sub " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".zy\n" + // (-2, 2)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
-			if (_numSamples > 4)
-				code += "add " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + dataReg + ".yy\n" + // (1, 1)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
-			if (_numSamples > 8)
-				code += "add " + uvReg + ".xy, " + uvReg + ".xy, " + dataReg + ".yy\n" + // (2, 2)
-						addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
-
+			for (i = 0; i < _numSamples; ++i) {
+				if (i == 0) {
+					code = "add " + uvReg + ", " + _depthMapCoordReg + ", " + dataReg + ".zwyy\n";
+					code += "tex " + temp + ", " + uvReg + ", " + depthTexture + " <2d,nearest,clamp>\n" +
+							"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
+							"slt " + targetRegister + ".w, " + _depthMapCoordReg + ".z, " + temp + ".z\n";    // 0 if in shadow;
+				}
+				else {
+					code += "add " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + offsets[i] + "\n";
+					code += addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
+				}
+			}
 
 			regCache.removeFragmentTempUsage(uvReg);
 			code += "mul " + targetRegister + ".w, " + targetRegister + ".w, " + dataReg + ".x\n";  // average
