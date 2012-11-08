@@ -112,7 +112,7 @@ package away3d.animators.data
 				addVertexTempUsages(velocityTarget, 1);
 				velocityTarget = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "xyz");
 				vertexTime = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, "w");
-				vertexLife = new ShaderRegisterElement(positionTarget.regName, velocityTarget.index, "w");
+				vertexLife = new ShaderRegisterElement(positionTarget.regName, positionTarget.index, "w");
 			}
 			else
 			{
