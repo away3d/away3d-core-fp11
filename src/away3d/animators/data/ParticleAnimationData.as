@@ -7,6 +7,7 @@ package away3d.animators.data
 	 */
 	public class ParticleAnimationData
 	{
+		public var index:uint;
 		public var startTime:Number;
 		public var totalTime:Number;
 		public var duration:Number;
@@ -15,8 +16,9 @@ package away3d.animators.data
 		public var numVertices:uint;
 		
 		
-		public function ParticleAnimationData(startTime:Number, duration:Number, delay:Number, particle:ParticleData)
+		public function ParticleAnimationData(index:uint, startTime:Number, duration:Number, delay:Number, particle:ParticleData)
 		{
+			this.index = index;
 			this.startTime = startTime;
 			this.totalTime = duration + delay;
 			this.duration = duration;

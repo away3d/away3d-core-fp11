@@ -51,5 +51,7 @@ package away3d.animators
 		function removeOwner(mesh : Mesh) : void
 		
 		function getAnimationState(node:AnimationNodeBase):AnimationStateBase;
+		
+		function getAnimationStateByName(name:String):AnimationStateBase;
 	}
 }

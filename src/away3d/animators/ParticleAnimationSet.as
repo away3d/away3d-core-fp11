@@ -331,7 +331,7 @@ package away3d.animators
 					
 					//store particle properties if they need to be retreived for dynamic local nodes
 					if (_localDynamicNodes.length)
-						animationSubGeometry.animationParticles.push(new ParticleAnimationData(particleProperties.startTime, particleProperties.duration, particleProperties.delay, particle));
+						animationSubGeometry.animationParticles.push(new ParticleAnimationData(i, particleProperties.startTime, particleProperties.duration, particleProperties.delay, particle));
 					
 					animationSubGeometry.numProcessedVertices += numVertices;
 					
