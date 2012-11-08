@@ -97,7 +97,10 @@ package away3d.animators.states
 			_usesEulers = _particleOrbitNode._usesEulers;
 			_usesCycle = _particleOrbitNode._usesCycle;
 			_usesPhase = _particleOrbitNode._usesPhase;
-			
+			_eulers = _particleOrbitNode._eulers;
+			_radius = _particleOrbitNode._radius;
+			_cycleDuration = _particleOrbitNode._cycleDuration;
+			_cyclePhase = _particleOrbitNode._cyclePhase;
 			updateOrbitData();
 		}
 		
