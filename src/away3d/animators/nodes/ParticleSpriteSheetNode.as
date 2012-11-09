@@ -172,18 +172,16 @@ package away3d.animators.nodes
 				code += "mul " + vOffset + "," + vOffset + "," + vStep + "\n";
 				code += "add " + v + "," + v + "," + vOffset + "\n";
 			}
-			code += stepDiv(temp, temp, uStep, temp2);
+			
+			code += "div " + temp2 + "," + temp + "," + uStep + "\n";
+			code += "frc " + temp + "," + temp2 + "\n";
+			code += "sub " + temp2 + "," + temp2 + "," + temp + "\n";
+			code += "mul " + temp + "," + temp2 + "," + uStep + "\n";
+
 			code += "add " + u + "," + u + "," + temp + "\n";
 			
+			
 			return code;
-		}
-		
-		private function stepDiv(destination:ShaderRegisterElement, source1:ShaderRegisterElement, source2:ShaderRegisterElement, temp:ShaderRegisterElement):String
-		{
-			return "div " + temp + "," + source1 + "," + source2 + "\n" +
-					"frc " + destination + "," + temp + "\n"+
-					"sub " + temp + "," + temp + "," + destination + "\n" +
-					"mul " + destination + "," + temp + "," + source2 + "\n";
 		}
 		
 		/**
