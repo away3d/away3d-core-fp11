@@ -271,7 +271,7 @@ package away3d.materials.passes {
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
-		arcane function getVertexCode(code:String) : String
+		arcane function getVertexCode() : String
 		{
 			throw new AbstractMethodError();
 		}
@@ -407,7 +407,8 @@ package away3d.materials.passes {
 		arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
 			var animatorCode : String = "";
-			
+			var vertexCode : String = getVertexCode();
+
 			if (_animationSet && !_animationSet.usesCPU) {
 				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
 			} else {
@@ -418,8 +419,9 @@ package away3d.materials.passes {
 				for (var i : uint = 0; i < len; ++i)
 					animatorCode += "mov " + _animationTargetRegisters[i] + ", " + _animatableAttributes[i] + "\n";
 			}
-			
-			var vertexCode : String = getVertexCode(animatorCode);
+
+			vertexCode = animatorCode + vertexCode;
+
 			var fragmentCode : String = getFragmentCode();
 			if (Debug.active) {
 				trace ("Compiling AGAL Code:");

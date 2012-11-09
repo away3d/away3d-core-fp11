@@ -62,10 +62,11 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
+			var code : String;
 			// project
-			code += "m44 vt1, vt0, vc0		\n" +
+			code = "m44 vt1, vt0, vc0		\n" +
 					"mul op, vt1, vc4\n";
 
 			if (_alphaThreshold > 0) {

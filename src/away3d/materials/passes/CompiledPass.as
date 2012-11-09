@@ -403,9 +403,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(animatorCode : String) : String
+		arcane override function getVertexCode() : String
 		{
-			return animatorCode + _vertexCode;
+			return _vertexCode;
 		}
 
 		/**

@@ -89,11 +89,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
-
+			var code : String;
 			// offset
-			code += "mul vt7, vt1, vc4.x	\n" +
+			code = 	"mul vt7, vt1, vc4.x	\n" +
 					"add vt7, vt7, vt0		\n" +
 					"mov vt7.w, vt0.w		\n";
 			// project

@@ -39,10 +39,9 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
-			code =
-					"m44 vt0, va0, vc8				\n" + // transform Q0 to eye space
+			return 	"m44 vt0, va0, vc8				\n" + // transform Q0 to eye space
 					"m44 vt1, va1, vc8				\n" + // transform Q1 to eye space
 
 					"sub vt2, vt1, vt0 				\n" + // L = Q1 - Q0
@@ -98,7 +97,6 @@
 
 				// interpolate color
 					"mov v0, va3					\n";
-			return code;
 		}
 
 		/**
