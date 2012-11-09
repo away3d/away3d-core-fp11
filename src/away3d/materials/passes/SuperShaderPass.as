@@ -37,9 +37,9 @@ package away3d.materials.passes
 			super(material);
 		}
 
-		override protected function createCompiler() : ShaderCompiler
+		override protected function createCompiler(profile : String) : ShaderCompiler
 		{
-			return new SuperShaderCompiler();
+			return new SuperShaderCompiler(profile);
 		}
 
 		public function get includeCasters() : Boolean

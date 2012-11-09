@@ -13,9 +13,9 @@ package away3d.materials.compilation
 
 		use namespace arcane;
 
-		public function LightingShaderCompiler()
+		public function LightingShaderCompiler(profile : String)
 		{
-			super();
+			super(profile);
 		}
 
 		public function get lightVertexConstantIndex() : int

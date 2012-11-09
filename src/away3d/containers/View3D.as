@@ -82,6 +82,7 @@
 		private var _viewScissorRect:Rectangle;
 
 		private var _depthPrepass:Boolean;
+		private var _profile : String;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -136,10 +137,10 @@
 		}
 		
 		
-		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null, forceSoftware:Boolean = false)
+		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null, forceSoftware:Boolean = false, profile:String = "baseline")
 		{
 			super();
-
+			_profile = profile;
 			_scene = scene || new Scene3D();
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
@@ -791,7 +792,7 @@
 			_addedToStage = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
-			if (!_stage3DProxy) _stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
+			if (!_stage3DProxy) _stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware, _profile);
 
 			_stage3DProxy.x = _globalPos.x;
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);

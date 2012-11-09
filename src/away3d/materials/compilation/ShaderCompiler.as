@@ -63,16 +63,16 @@ package away3d.materials.compilation {
 
 		use namespace arcane;
 
-		public function ShaderCompiler()
+		public function ShaderCompiler(profile : String)
 		{
 			_sharedRegisters = new ShaderRegisterData();
 			_dependencyCounter = new MethodDependencyCounter();
-			initRegisterCache();
+			initRegisterCache(profile);
 		}
 
-		private function initRegisterCache() : void
+		private function initRegisterCache(profile : String) : void
 		{
-			_registerCache = new ShaderRegisterCache();
+			_registerCache = new ShaderRegisterCache(profile);
 			_vertexConstantsOffset = _registerCache.vertexConstantOffset = 5;
 			_registerCache.vertexAttributesOffset = 1;
 			_registerCache.reset();
@@ -254,16 +254,17 @@ package away3d.materials.compilation {
 			var pos : String = _animationTargetRegisters[0];
 			var projectedTarget : ShaderRegisterElement =  _sharedRegisters.projectedTarget;
 			var code : String;
+			var tempReg : ShaderRegisterElement = _registerCache.getFreeVertexVectorTemp();
 
 			// if we need projection somewhere
 			if (projectedTarget) {
 				code =	"m44 " + projectedTarget + ", " + pos + ", vc0		\n" +
-						"mov vt7, " + projectedTarget + "\n" +
-						"mul op, vt7, vc4\n";
+						"mov " + tempReg + ", " + projectedTarget + "\n" +
+						"mul op, " + tempReg + ", vc4\n";
 			}
 			else {
-				code = 	"m44 vt7, " + pos + ", vc0		\n" +
-						"mul op, vt7, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
+				code = 	"m44 " + tempReg +  ", " + pos + ", vc0		\n" +
+						"mul op, " + tempReg + ", vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
 			}
 
 			_vertexCode = code + _vertexCode;

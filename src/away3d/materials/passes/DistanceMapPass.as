@@ -4,6 +4,7 @@
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.textures.Texture2DBase;
 	import flash.display3D.Context3DProgramType;
@@ -68,8 +69,8 @@
 		 */
 		arcane override function getVertexCode(code:String) : String
 		{
-			code += "m44 vt7, vt0, vc0		\n" +
-					"mul op, vt7, vc4		\n" +
+			code += "m44 vt2, vt0, vc0		\n" +
+					"mul op, vt2, vc4		\n" +
 					"m44 vt1, vt0, vc5		\n" +
 					"sub v0, vt1, vc9		\n";
 

@@ -34,9 +34,9 @@ package away3d.materials.passes
 			super(material);
 		}
 
-		override protected function createCompiler() : ShaderCompiler
+		override protected function createCompiler(profile : String) : ShaderCompiler
 		{
-			return new LightingShaderCompiler();
+			return new LightingShaderCompiler(profile);
 		}
 
 		override protected function updateLights() : void

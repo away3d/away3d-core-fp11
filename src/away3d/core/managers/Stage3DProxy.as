@@ -57,6 +57,7 @@ package away3d.core.managers
 		private var _viewPort : Rectangle;
 		private var _enterFrame : Event;
 		private var _exitFrame : Event;
+		private var _profile : String;
 		
 		private function notifyEnterFrame():void
 		{
@@ -88,7 +89,7 @@ package away3d.core.managers
 		 * @param stage3DManager
 		 * @param forceSoftware Whether to force software mode even if hardware acceleration is available.
 		 */
-		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager, forceSoftware : Boolean = false)
+		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager, forceSoftware : Boolean = false, profile : String = "baseline")
 		{
 			_stage3DIndex = stage3DIndex;
 			_stage3D = stage3D;
@@ -101,7 +102,12 @@ package away3d.core.managers
 			
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
-			requestContext(forceSoftware);
+			requestContext(forceSoftware, profile);
+		}
+
+		public function get profile() : String
+		{
+			return _profile;
 		}
 
 		/**
@@ -467,15 +473,22 @@ package away3d.core.managers
 		/**
 		 * Requests a Context3D object to attach to the managed Stage3D.
 		 */
-		private function requestContext(forceSoftware : Boolean = false) : void
+		private function requestContext(forceSoftware : Boolean = false, profile : String = "baseline") : void
 		{
 			// If forcing software, we can be certain that the
 			// returned Context3D will be running software mode.
 			// If not, we can't be sure and should stick to the
 			// old value (will likely be same if re-requesting.)
 			_usesSoftwareRendering ||= forceSoftware;
+			_profile = profile;
 
-			_stage3D.requestContext3D(forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO);
+			// ugly stuff for backward compatibility
+			var renderMode : String = forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO;
+			if (profile == "baseline")
+				_stage3D.requestContext3D(renderMode);
+			else
+				_stage3D["requestContext3D"](renderMode, profile);
+
 			_contextRequested = true;
 		}
 		

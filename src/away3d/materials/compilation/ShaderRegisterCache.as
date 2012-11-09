@@ -22,12 +22,14 @@ package away3d.materials.compilation
 		private var _numUsedFragmentConstants : uint;
 		private var _numUsedStreams : uint;
 		private var _numUsedTextures : uint;
+		private var _profile : String;
 
 		/**
 		 * Create a new ShaderRegisterCache object.
 		 */
-		public function ShaderRegisterCache()
+		public function ShaderRegisterCache(profile : String)
 		{
+			_profile = profile;
 		}
 
 		/**

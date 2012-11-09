@@ -44,9 +44,9 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode(code:String) : String
 		{
-			return  "m44 vt7, va0, vc0		\n" +
+			return  "m44 vt2, va0, vc0		\n" +
 					// fit within texture range
-					"mul op, vt7, vc4\n" +
+					"mul op, vt2, vc4\n" +
 					"mov v0, va0\n";
 		}
 

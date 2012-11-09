@@ -98,7 +98,7 @@ package away3d.materials.passes
 		 */
 		override arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
-			reset();
+			reset(stage3DProxy.profile);
 
 			super.updateProgram(stage3DProxy);
 		}
@@ -106,9 +106,9 @@ package away3d.materials.passes
 		/**
 		 * Resets the compilation state.
 		 */
-		private function reset() : void
+		private function reset(profile : String) : void
 		{
-			initCompiler();
+			initCompiler(profile);
 			updateShaderProperties();
 			initConstantData();
 			cleanUp();
@@ -136,9 +136,9 @@ package away3d.materials.passes
 			updateMethodConstants();
 		}
 
-		protected function initCompiler() : void
+		protected function initCompiler(profile : String) : void
 		{
-			_compiler = createCompiler();
+			_compiler = createCompiler(profile);
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
 			_compiler.numLightProbes = _numLightProbes;
@@ -153,7 +153,7 @@ package away3d.materials.passes
 			_compiler.compile();
 		}
 
-		protected function createCompiler() : ShaderCompiler
+		protected function createCompiler(profile : String) : ShaderCompiler
 		{
 			throw new AbstractMethodError();
 		}
