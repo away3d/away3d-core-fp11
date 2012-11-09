@@ -177,9 +177,10 @@ package away3d.animators.nodes
 			code += "frc " + temp + "," + temp2 + "\n";
 			code += "sub " + temp2 + "," + temp2 + "," + temp + "\n";
 			code += "mul " + temp + "," + temp2 + "," + uStep + "\n";
-
-			code += "add " + u + "," + u + "," + temp + "\n";
 			
+			if (_numRows > 1)
+				code += "frc " + temp + "," + temp + "\n";
+			code += "add " + u + "," + u + "," + temp + "\n";
 			
 			return code;
 		}
