@@ -371,7 +371,7 @@ package away3d.loaders.parsers
 			}
 
 			subGeom.updateIndexData(indices);
-			constructVertexData(subGeom, vertices, uvs, null, null);
+			subGeom.fromVectors(vertices, uvs, null, null);
 			// cause explicit updates
 			subGeom.vertexNormalData;
 			subGeom.vertexTangentData;

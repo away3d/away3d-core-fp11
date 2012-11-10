@@ -395,7 +395,7 @@ package away3d.loaders.parsers
 					fvertices[k++] = tvertices[uint(_vertIndices[j] * 3 + 1)];
 				}
 
-				constructVertexData(subGeom, fvertices, _finalUV, null, null);
+				subGeom.fromVectors(fvertices, _finalUV, null, null);
 				subGeom.updateIndexData(_indices);
 				subGeom.vertexNormalData;
 				subGeom.vertexTangentData;

@@ -1,9 +1,7 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
-	
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
@@ -94,9 +92,12 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			if(!data is String) return false;
+			var str : String = ParserUtil.toString(data);
+			if (!str)
+				return false;
 			
-			if(data.indexOf("ENDSEC") != -1 && data.indexOf("EOF") != -1)  return true;
+			if(str.indexOf("ENDSEC") != -1 && str.indexOf("EOF") != -1)
+				return true;
 
 			return false;
 		}
@@ -331,7 +332,7 @@ package away3d.loaders.parsers
 			}
 			 
 			if(_indices.length+3 > LIMIT ){
-				constructVertexData(_subGeometry, _vertices, _uvs, null, null);
+				_subGeometry.fromVectors(_vertices, _uvs, null, null);
 				_subGeometry.updateIndexData(_indices);
 
 				addSubGeometry(_activeMesh.geometry);
@@ -348,7 +349,7 @@ package away3d.loaders.parsers
 			if( _v2.x != _v3.x || _v2.y!= _v3.y || _v2.z != _v3.z){
 				
 				if(_indices.length+3 > LIMIT ){
-					constructVertexData(_subGeometry, _vertices, _uvs, null, null);
+					_subGeometry.fromVectors(_vertices, _uvs, null, null);
 					_subGeometry.updateIndexData(_indices);
 
 					addSubGeometry(_activeMesh.geometry);
@@ -421,7 +422,7 @@ package away3d.loaders.parsers
 		
 		private function finalizeMesh():void
 		{
-			constructVertexData(_subGeometry, _vertices, _uvs, null, null);
+			_subGeometry.fromVectors(_vertices, _uvs, null, null);
 			_subGeometry.updateIndexData(_indices);
 
 			 finalizeAsset(_activeMesh);

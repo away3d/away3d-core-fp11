@@ -159,5 +159,7 @@ package away3d.core.base
 		function set autoDeriveVertexNormals(value : Boolean) : void;
 		function get autoDeriveVertexTangents() : Boolean;
 		function set autoDeriveVertexTangents(value : Boolean) : void;
+		
+		function fromVectors(vertices : Vector.<Number>, uvs : Vector.<Number>, normals : Vector.<Number>, tangents : Vector.<Number>) : void;
 	}
 }

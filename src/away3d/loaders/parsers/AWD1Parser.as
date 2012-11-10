@@ -327,7 +327,7 @@ package away3d.loaders.parsers
 				if(indices.length+3 > LIMIT ){
 					sub_geom = new CompactSubGeometry();
 					sub_geom.updateIndexData(indices);
-					constructVertexData(sub_geom, vertices, uvs, null, null);
+					sub_geom.fromVectors(vertices, uvs, null, null);
 					geom.addSubGeometry(sub_geom);
 
 					vertices = new Vector.<Number>();
@@ -374,7 +374,7 @@ package away3d.loaders.parsers
 
 			sub_geom = new CompactSubGeometry();
 			sub_geom.updateIndexData(indices);
-			constructVertexData(sub_geom, vertices, uvs, null, null);
+			sub_geom.fromVectors(vertices, uvs, null, null);
 			geom.addSubGeometry(sub_geom);
 		}
 		
