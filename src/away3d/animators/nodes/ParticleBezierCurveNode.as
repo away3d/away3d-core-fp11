@@ -21,7 +21,7 @@ package away3d.animators.nodes
 		arcane static const BEZIER_CONTROL_INDEX:int = 0;
 		
 		/** @private */
-		arcane static const BEZIER_END_INDEX:int = 0;
+		arcane static const BEZIER_END_INDEX:int = 1;
 		
 		/** @private */
 		arcane var _controlPoint:Vector3D;
@@ -54,8 +54,8 @@ package away3d.animators.nodes
 			
 			_stateClass = ParticleBezierCurveState;
 			
-			_controlPoint = controlPoint.clone() || new Vector3D();
-			_endPoint = endPoint.clone() || new Vector3D();
+			_controlPoint = controlPoint || new Vector3D();
+			_endPoint = endPoint || new Vector3D();
 		}
 		
 		/**
