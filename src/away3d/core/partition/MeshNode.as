@@ -42,7 +42,6 @@ package away3d.core.partition
 				while (i < len)
 					traverser.applyRenderable(subs[i++]);
 			}
-			traverser.leaveNode(this);
 		}
 
 	}

@@ -115,7 +115,7 @@ package away3d.materials.methods {
 			var splatTexReg : ShaderRegisterElement;
 
 			vo.fragmentConstantsIndex = scaleRegister.index*4;
-			var comps : Array = [ ".x",".y",".z",".w" ];
+			var comps : Vector.<String> = Vector.<String>([ ".x",".y",".z",".w" ]);
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
 				var scaleRegName : String = i < 3? scaleRegister.component + comps[i+1] : scaleRegister2 + ".x";

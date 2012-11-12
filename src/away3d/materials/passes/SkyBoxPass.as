@@ -53,7 +53,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			return 	"tex ft0, v0, fs0 <cube,linear,clamp,miplinear>	\n" +
 					"mov oc, ft0							\n";

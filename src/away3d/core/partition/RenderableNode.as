@@ -31,7 +31,6 @@ package away3d.core.partition
 				super.acceptTraverser(traverser);
 				traverser.applyRenderable(_renderable);
 			}
-			traverser.leaveNode(this);
 		}
 
 	}

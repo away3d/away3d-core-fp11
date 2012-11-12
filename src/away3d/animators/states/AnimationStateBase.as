@@ -10,7 +10,7 @@ package away3d.animators.states
 	 */
 	public class AnimationStateBase implements IAnimationState
 	{
-		private var _animationNode:AnimationNodeBase;
+		protected var _animationNode:AnimationNodeBase;
 		protected var _rootDelta : Vector3D = new Vector3D();
 		protected var _positionDeltaDirty : Boolean = true;
 		

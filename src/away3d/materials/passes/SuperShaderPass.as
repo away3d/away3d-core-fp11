@@ -35,6 +35,7 @@ package away3d.materials.passes
 		public function SuperShaderPass(material : MaterialBase)
 		{
 			super(material);
+			_needFragmentAnimation = true;
 		}
 
 		override protected function createCompiler() : ShaderCompiler

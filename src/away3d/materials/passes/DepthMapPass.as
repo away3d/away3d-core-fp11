@@ -88,7 +88,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(code:String) : String
 		{
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var filter : String;

@@ -4,6 +4,7 @@ package away3d.animators
 	import away3d.animators.data.*;
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.core.math.*;
@@ -37,7 +38,7 @@ package away3d.animators
 		
 		/**
 		 * returns the calculated global matrices of the current skeleton pose.
-		 * 
+		 *
 		 * @see #globalPose
 		 */
 		public function get globalMatrices():Vector.<Number>
@@ -50,7 +51,7 @@ package away3d.animators
 		
 		/**
 		 * returns the current skeleton pose output from the animator.
-		 * 
+		 *
 		 * @see away3d.animators.data.SkeletonPose
 		 */
 		public function get globalPose():SkeletonPose
@@ -96,7 +97,7 @@ package away3d.animators
 		
 		/**
 		 * Creates a new <code>SkeletonAnimator</code> object.
-		 * 
+		 *
 		 * @param skeletonAnimationSet The animation data set containing the skeleton animation states used by the animator.
 		 * @param skeleton The skeleton object used for calculating the resulting global matrices for transforming skinned mesh data.
 		 * @param forceCPU Optional value that only allows the animator to perform calculation on the CPU. Defaults to false.
@@ -122,7 +123,7 @@ package away3d.animators
 		
 		/**
 		 * Plays an animation state registered with the given name in the animation data set.
-		 * 
+		 *
 		 * @param stateName The data set name of the animation state to be played.
 		 * @param stateTransition An optional transition object that determines how the animator will transition from the currently active animation state.
 		 */
@@ -164,7 +165,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-        public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+        public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int, camera:Camera3D) : void
 		{
 			// do on request of globalProperties
 			if (_globalPropertiesDirty)
@@ -253,9 +254,9 @@ package away3d.animators
 			var ox : Number, oy : Number, oz : Number, ow : Number;
 			var xy2 : Number, xz2 : Number, xw2 : Number;
 			var yz2 : Number, yw2 : Number, zw2 : Number;
-			var n11 : Number, n12 : Number, n13 : Number, n14 : Number;
-			var n21 : Number, n22 : Number, n23 : Number, n24 : Number;
-			var n31 : Number, n32 : Number, n33 : Number, n34 : Number;
+			var n11 : Number, n12 : Number, n13 : Number;
+			var n21 : Number, n22 : Number, n23 : Number;
+			var n31 : Number, n32 : Number, n33 : Number;
 			var m11 : Number, m12 : Number, m13 : Number, m14 : Number;
 			var m21 : Number, m22 : Number, m23 : Number, m24 : Number;
 			var m31 : Number, m32 : Number, m33 : Number, m34 : Number;

@@ -65,7 +65,7 @@ package away3d.core.partition
 		/**
 		 * @inheritDoc
 		 */
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
 		{
 			if (_entity.isVisible == false) return false;
 

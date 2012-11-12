@@ -13,14 +13,14 @@ package away3d.animators
 	{
 		/**
 		 * Check to determine whether a state is registered in the animation set under the given name.
-		 * 
+		 *
 		 * @param stateName The name of the animation state object to be checked.
 		 */
 		function hasAnimation(name:String):Boolean;
 		
 		/**
 		 * Retrieves the animation state object registered in the animation data set under the given name.
-		 * 
+		 *
 		 * @param stateName The name of the animation state object to be retrieved.
 		 */
 		function getAnimation(name:String):AnimationNodeBase;
@@ -35,7 +35,7 @@ package away3d.animators
 		/**
 		 * Called by the material to reset the GPU indicator before testing whether register space in the shader
 		 * is available for running GPU-based animation code.
-		 * 
+		 *
 		 * @private
 		 */
 		function resetGPUCompatibility() : void;
@@ -49,8 +49,23 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Array, targetRegisters : Array) : String;
-
+		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String;
+		
+		
+		/**
+		 * Generates the AGAL Fragment code for the animation, tailored to the material pass's requirements.
+		 * @param pass The MaterialPassBase object to whose vertex code the animation's code will be prepended.
+		 * @return The AGAL Vertex code that animates the vertex data.
+		 *
+		 * @private
+		 */
+		function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String;
+		
+		
+		function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String;
+		
+		function doneAGALCode(pass:MaterialPassBase):void;
+		
 		/**
 		 * Sets the GPU render state required by the animation that is independent of the rendered mesh.
 		 * @param context The context which is currently performing the rendering.

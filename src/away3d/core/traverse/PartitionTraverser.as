@@ -30,19 +30,18 @@ package away3d.core.traverse
 		arcane var _entryPoint : Vector3D;
 
 		/**
+		 * A property that can be used to avoid processing a partition more than once.
+		 */
+		arcane static var _collectionMark : uint;
+
+		/**
 		 * Called when the traversers enters a node. At minimum, it notifies the currently visited Partition3DNode whether or not further recursion is necessary.
 		 * @param node The currently entered node.
 		 * @return true if further recursion down children is necessary, false if not.
 		 */
-		public function enterNode(node : NodeBase) : Boolean { 
+		public function enterNode(node : NodeBase) : Boolean {
 		 	return true;
 		}
-
-		/**
-		 * Called when the traverser leaves a node. This method is still called when enterNode returned false.
-		 * @param node The node being left by the traverser.
-		 */
-		public function leaveNode(node : NodeBase) : void {}
 
 		/**
 		 * Passes a skybox to be processed by the traverser.

@@ -1,4 +1,5 @@
 package away3d.materials.passes {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -47,6 +48,7 @@ package away3d.materials.passes {
 		protected var _numUsedTextures : uint;
 		protected var _numUsedVertexConstants : uint;
 		protected var _numUsedFragmentConstants : uint;
+		protected var _numUsedVaryings : uint;
 
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
@@ -61,8 +63,9 @@ package away3d.materials.passes {
 		private var _bothSides : Boolean;
 
 		protected var _lightPicker : LightPickerBase;
-		protected var _animatableAttributes : Array = ["va0"];
-		protected var _animationTargetRegisters : Array = ["vt0"];
+		protected var _animatableAttributes : Vector.<String> = Vector.<String>(["va0"]);
+		protected var _animationTargetRegisters : Vector.<String> = Vector.<String>(["vt0"]);
+		protected var _shadedTarget:String = "ft0";
 		
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
 		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
@@ -80,7 +83,13 @@ package away3d.materials.passes {
 		private static var _rttData : Vector.<Number>;
 
 		protected var _alphaPremultiplied : Boolean;
-
+		protected var _needFragmentAnimation:Boolean;
+		protected var _needUVAnimation:Boolean;
+		protected var _UVTarget:String;
+		protected var _UVSource:String;
+		
+		public var animationRegisterCache:AnimationRegisterCache;
+		
 		/**
 		 * Creates a new MaterialPassBase object.
 		 *
@@ -247,15 +256,35 @@ package away3d.materials.passes {
 		{
 			return _numUsedVertexConstants;
 		}
-
+		
+		public function get numUsedVaryings() : uint
+		{
+			return _numUsedVaryings;
+		}
+		
+		public function get numUsedFragmentConstants() : uint
+		{
+			return _numUsedFragmentConstants;
+		}
+		
+		public function get needFragmentAnimation():Boolean
+		{
+			return _needFragmentAnimation;
+		}
+		
+		public function get needUVAnimation():Boolean
+		{
+			return _needUVAnimation;
+		}
+		
 		/**
 		 * Sets up the animation state. This needs to be called before render()
 		 *
 		 * @private
 		 */
-		arcane function updateAnimationState(renderable : IRenderable, stage3DProxy : Stage3DProxy) : void
+		arcane function updateAnimationState(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera:Camera3D) : void
 		{
-			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
+			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams, camera);
 		}
 
 		/**
@@ -276,7 +305,7 @@ package away3d.materials.passes {
 			throw new AbstractMethodError();
 		}
 
-		arcane function getFragmentCode() : String
+		arcane function getFragmentCode(code:String) : String
 		{
 			throw new AbstractMethodError();
 		}
@@ -407,10 +436,17 @@ package away3d.materials.passes {
 		arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
 			var animatorCode : String = "";
+			var UVAnimatorCode : String = "";
+			var fragmentAnimatorCode:String = "";
 			var vertexCode : String = getVertexCode();
 
 			if (_animationSet && !_animationSet.usesCPU) {
 				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
+				if(_needFragmentAnimation)
+					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget);
+				if (_needUVAnimation)
+					UVAnimatorCode = _animationSet.getAGALUVCode(this, _UVSource, _UVTarget);
+				_animationSet.doneAGALCode(this);
 			} else {
 				var len : uint = _animatableAttributes.length;
 	
@@ -418,11 +454,13 @@ package away3d.materials.passes {
 				// projection will pick up on targets[0] to do the projection
 				for (var i : uint = 0; i < len; ++i)
 					animatorCode += "mov " + _animationTargetRegisters[i] + ", " + _animatableAttributes[i] + "\n";
+				if (_needUVAnimation)
+					UVAnimatorCode = "mov " + _UVTarget + "," + _UVSource + "\n";
 			}
 
-			vertexCode = animatorCode + vertexCode;
+			vertexCode = animatorCode + UVAnimatorCode + vertexCode;
 
-			var fragmentCode : String = getFragmentCode();
+			var fragmentCode : String = getFragmentCode(fragmentAnimatorCode);
 			if (Debug.active) {
 				trace ("Compiling AGAL Code:");
 				trace ("--------------------");
