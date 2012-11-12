@@ -31,7 +31,7 @@ package away3d.lights
 		public function PointLight()
 		{
 			super();
-			_fallOffFactor = 1 / (_fallOff - _radius);
+			_fallOffFactor = 1 / (_fallOff*_fallOff - _radius*_radius);
 		}
 
 		override protected function createShadowMapper() : ShadowMapperBase
@@ -62,7 +62,7 @@ package away3d.lights
 				invalidateBounds();
 			}
 
-			_fallOffFactor = 1 / (_fallOff - _radius);
+			_fallOffFactor = 1 / (_fallOff*_fallOff - _radius*_radius);
 		}
 
 		arcane function fallOffFactor() : Number
@@ -83,7 +83,7 @@ package away3d.lights
 			_fallOff = value;
 			if (_fallOff < 0) _fallOff = 0;
 			if (_fallOff < _radius) _radius = _fallOff;
-			_fallOffFactor = 1 / (_fallOff - _radius);
+			_fallOffFactor = 1 / (_fallOff*_fallOff - _radius*_radius);
 			invalidateBounds();
 		}
 

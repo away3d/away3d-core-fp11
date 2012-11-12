@@ -213,7 +213,7 @@ package away3d.materials.methods
 					code += "add " + t + ".xyz, " + lightDirReg + ".xyz, " + viewDirReg + ".xyz\n" +
 							"nrm " + t + ".xyz, " + t + ".xyz\n" +
 							"dp3 " + t + ".w, " + normalReg + ".xyz, " + t + ".xyz\n" +
-							"sat " + t + ".w, " + t + ".w\n";
+							"max " + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".y\n";
 
 					break;
 				case SpecularShadingModel.PHONG:
@@ -229,12 +229,12 @@ package away3d.materials.methods
 						//smooth the edge as incidence angle approaches 90
 							"add" + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".w\n" + // sca1 = sca1 + smoothtep;
 						//"div" + t + ".w, " + t + ".w, " + _specularDataRegister2 + ".z\n" + // sca1 = sca1/smoothtep;
-							"sat " + t + ".w, " + t + ".w\n" + // sca1 range 0 - 1
+							"max " + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".y\n" + // sca1 range 0 - 1
 							"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" + // vec1 = vec1*sca1
 
 						//find the dot product between R and V
 							"dp3 " + t + ".w, " + t + ".xyz, " + viewDirReg + ".xyz\n" + // sca1 = vec1.view
-							"sat " + t + ".w, " + t + ".w\n";
+							"max " + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".y\n"; // sca1 range 0 - 1
 
 					break;
 				default:

@@ -342,12 +342,11 @@ package away3d.materials.compilation
 					_vertexCode += "sub " + lightVarying + ", " + lightPosReg + ", " + _sharedRegisters.globalPositionVertex + "\n";
 				}
 
-				// calculate direction
+				// calculate attenuation
 				_fragmentCode +=
 					// attenuate
 						"dp3 " + lightDirReg + ".w, " + lightVarying + ".xyz, " + lightVarying + ".xyz\n" +
-						"sqt " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
-					// w = d - radis
+					// w = d - radius
 						"sub " + lightDirReg + ".w, " + lightDirReg + ".w, " + diffuseColorReg + ".w\n" +
 					// w = (d - radius)/(max-min)
 						"mul " + lightDirReg + ".w, " + lightDirReg + ".w, " + specularColorReg + ".w\n" +

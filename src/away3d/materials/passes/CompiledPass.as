@@ -148,8 +148,8 @@ package away3d.materials.passes
 			_compiler.setTextureSampling(_smooth, _repeat, _mipmap, _textureFormat);
 			_compiler.setConstantDataBuffers(_vertexConstantData, _fragmentConstantData);
 			_compiler.animateUVs = _animateUVs;
-			_compiler.alphaPremultiplied = _alphaPremultiplied;
-			_compiler.preserveAlpha = _preserveAlpha;
+			_compiler.alphaPremultiplied = _alphaPremultiplied && _enableBlending;
+			_compiler.preserveAlpha = _preserveAlpha && _enableBlending;
 			_compiler.compile();
 		}
 

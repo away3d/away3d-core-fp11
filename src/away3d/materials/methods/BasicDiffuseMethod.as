@@ -178,7 +178,7 @@ package away3d.materials.methods
 			}
 
 			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _sharedRegisters.normalFragment + ".xyz\n" +
-					"sat " + t + ".w, " + t + ".x\n" +
+					"max " + t + ".w, " + t + ".x, " + _sharedRegisters.commons + ".y\n" +
 				// attenuation
 					"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
@@ -272,16 +272,16 @@ package away3d.materials.methods
 			
 			
 			if (_useDiffuseTexture) {
-				code += "sat " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
-					"mul " + t + ".xyz, " + t + ".xyz, " + _totalLightColorReg + ".xyz\n" +
-					"mul " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
-					"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
-					"add " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n";
+				code += "min " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _sharedRegisters.commons + ".www\n" +
+						"mul " + t + ".xyz, " + t + ".xyz, " + _totalLightColorReg + ".xyz\n" +
+						"mul " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
+						"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
+						"add " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n";
 			} else {
 				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz\n" +
-					"sat " + targetReg + ".xyz, " + targetReg + ".xyz\n" +
-					"mul " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n" +
-					"mov " + targetReg + ".w, " + t + ".w\n"; 
+						"min " + targetReg + ".xyz, " + targetReg + ".xyz, " + _sharedRegisters.commons + ".www\n" +
+						"mul " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n" +
+						"mov " + targetReg + ".w, " + t + ".w\n";
 			}
 
 			regCache.removeFragmentTempUsage(_totalLightColorReg);
