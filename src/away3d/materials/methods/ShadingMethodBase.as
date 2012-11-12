@@ -140,7 +140,6 @@ package away3d.materials.methods {
 			var wrap : String = forceWrap || (vo.repeatTextures ? "wrap" : "clamp");
 			var filter : String;
 			var format : String = "";
-			var format : String = "";
 			
 			if (vo.useSmoothTextures) {
 				filter = vo.useMipmapping? "linear,miplinear" : "linear";
