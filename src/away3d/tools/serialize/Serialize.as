@@ -8,6 +8,7 @@ package away3d.tools.serialize
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
@@ -118,7 +119,7 @@ package away3d.tools.serialize
 			serializer.endObject();
 		}
 		
-		public static function serializeSubGeometry(subGeometry:SubGeometry, serializer:SerializerBase):void
+		public static function serializeSubGeometry(subGeometry:ISubGeometry, serializer:SerializerBase):void
 		{
 			serializer.beginObject(classNameFromInstance(subGeometry), null);
 			serializer.writeUint("numTriangles", subGeometry.numTriangles);

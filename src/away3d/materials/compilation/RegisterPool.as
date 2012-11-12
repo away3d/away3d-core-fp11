@@ -1,4 +1,4 @@
-package away3d.materials.utils
+package away3d.materials.compilation
 {
 	/**
 	 * RegisterPool is used by the shader compilation process to keep track of which registers of a certain type are

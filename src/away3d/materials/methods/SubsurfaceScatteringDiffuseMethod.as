@@ -4,10 +4,11 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.SingleObjectDepthPass;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 
 	import flash.display3D.textures.Texture;
 	import flash.geom.Matrix3D;
@@ -191,7 +192,7 @@ package away3d.materials.methods
 					"mul " + temp+".xyz, " + temp+".xyz, " + _colorReg+".xyz\n" +
 					"add " + targetReg+".xyz, " + targetReg+".xyz, " + temp+".xyz\n";
 
-			if(_targetReg != _viewDirFragmentReg)
+			if(_targetReg != _sharedRegisters.viewDirFragment)
 				regCache.removeFragmentTempUsage(targetReg);
 
 			return code;
@@ -215,17 +216,17 @@ package away3d.materials.methods
 
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			var depthMaps : Vector.<Texture> = _depthPass.getDepthMaps(renderable, stage3DProxy);
-			var projections : Vector.<Matrix3D> = _depthPass.getProjections(renderable);
+			var depthMap : Texture = _depthPass.getDepthMap(renderable, stage3DProxy);
+			var projection : Matrix3D = _depthPass.getProjection(renderable);
 
-			stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, depthMaps[0]);
-			projections[0].copyRawDataTo(vo.vertexData, vo.secondaryVertexConstantsIndex+4, true);
+			stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, depthMap);
+			projection.copyRawDataTo(vo.vertexData, vo.secondaryVertexConstantsIndex+4, true);
 		}
 
 		/**
 		 * Generates the code for this method
 		 */
-		private function scatterLight(vo : MethodVO, targetReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function scatterLight(vo : MethodVO, targetReg : ShaderRegisterElement, regCache : ShaderRegisterCache, sharedRegisters : ShaderRegisterData) : String
 		{
 			// only scatter first light
 			if (!_isFirstLight) return "";
@@ -235,8 +236,8 @@ package away3d.materials.methods
 			var depthReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 
 
-			if (_viewDirFragmentReg) {
-				_targetReg = _viewDirFragmentReg;
+			if (sharedRegisters.viewDirFragment) {
+				_targetReg = sharedRegisters.viewDirFragment;
 			}
 			else {
 				_targetReg = regCache.getFreeFragmentVectorTemp();

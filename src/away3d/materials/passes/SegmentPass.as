@@ -5,7 +5,6 @@
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -40,10 +39,9 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
-			code =
-					"m44 vt0, va0, vc8				\n" + // transform Q0 to eye space
+			return 	"m44 vt0, va0, vc8				\n" + // transform Q0 to eye space
 					"m44 vt1, va1, vc8				\n" + // transform Q1 to eye space
 
 					"sub vt2, vt1, vt0 				\n" + // L = Q1 - Q0
@@ -99,13 +97,12 @@
 
 				// interpolate color
 					"mov v0, va3					\n";
-			return code;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			return "mov oc, v0\n";
 		}
@@ -114,14 +111,10 @@
 		 * @inheritDoc
 		 * todo: keep maps in dictionary per renderable
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			var vertexBuffer : VertexBuffer3D = renderable.getVertexBuffer(stage3DProxy);
-			stage3DProxy.setSimpleVertexBuffer(0, vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 0);
-			stage3DProxy.setSimpleVertexBuffer(1, vertexBuffer, Context3DVertexBufferFormat.FLOAT_3, 3);
-			stage3DProxy.setSimpleVertexBuffer(2, vertexBuffer, Context3DVertexBufferFormat.FLOAT_1, 6);
-			stage3DProxy.setSimpleVertexBuffer(3, vertexBuffer, Context3DVertexBufferFormat.FLOAT_4, 7);
+			renderable.activateVertexBuffer(0, stage3DProxy);
 
 			_calcMatrix.copyFrom(renderable.sourceEntity.sceneTransform);
 			_calcMatrix.append(camera.inverseSceneTransform);
@@ -154,10 +147,11 @@
 		 */
 		arcane override function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy.setSimpleVertexBuffer(0, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(1, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(2, null, null, 0);
-			stage3DProxy.setSimpleVertexBuffer(3, null, null, 0);
+			var context : Context3D = stage3DProxy._context3D;
+			context.setVertexBufferAt(0, null);
+			context.setVertexBufferAt(1, null);
+			context.setVertexBufferAt(2, null);
+			context.setVertexBufferAt(3, null);
 		}
 	}
 }

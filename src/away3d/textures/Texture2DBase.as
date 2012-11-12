@@ -12,7 +12,7 @@ package away3d.textures
 	{
 		public var textureFormat	:String = Context3DTextureFormat.BGRA;
 		public var hasMipmaps		:Boolean = false;
-			
+		
 		public function Texture2DBase()
 		{
 			super();

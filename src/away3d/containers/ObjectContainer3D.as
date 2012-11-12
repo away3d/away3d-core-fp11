@@ -99,6 +99,29 @@ package away3d.containers
 		private var _listenToSceneTransformChanged : Boolean;
 		private var _listenToSceneChanged : Boolean;
 		// visibility passed on from parents
+
+		protected var _ignoreTransform : Boolean = false;
+
+		/**
+		 * Does not apply any transformations to this object. Allows static objects to be described in world coordinates without any matrix calculations.
+		 */
+		public function get ignoreTransform() : Boolean
+		{
+			return _ignoreTransform;
+		}
+
+		public function set ignoreTransform(value : Boolean) : void
+		{
+			_ignoreTransform = value;
+			_sceneTransformDirty = !value;
+			_inverseSceneTransformDirty = !value;
+			_scenePositionDirty = !value;
+
+			if (!value) {
+				_sceneTransform.identity();
+				_scenePosition.setTo(0, 0, 0);
+			}
+		}
 		
 		/**
 		 * @private
@@ -151,7 +174,7 @@ package away3d.containers
 		
 		private function notifySceneTransformChange():void
 		{
-			if (_sceneTransformDirty)
+			if (_sceneTransformDirty || _ignoreTransform)
 				return;
 			
 			invalidateSceneTransform();
@@ -237,9 +260,9 @@ package away3d.containers
 		 */
 		protected function invalidateSceneTransform() : void
 		{
-			_sceneTransformDirty = true;
-			_inverseSceneTransformDirty = true;
-			_scenePositionDirty = true;
+			_sceneTransformDirty = !_ignoreTransform;
+			_inverseSceneTransformDirty = !_ignoreTransform;
+			_scenePositionDirty = !_ignoreTransform;
 		}
 		
 		/**
@@ -253,7 +276,7 @@ package away3d.containers
 			} else {
 				_sceneTransform.copyFrom(transform);
 			}
-			
+
 			_sceneTransformDirty = false;
 		}
 		

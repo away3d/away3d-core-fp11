@@ -1,6 +1,8 @@
 package away3d.bounds
 {
 	import away3d.core.base.*;
+	import away3d.core.math.Plane3D;
+	import away3d.core.math.PlaneClassification;
 	import away3d.primitives.*;
 
 	import flash.geom.*;
@@ -50,5 +52,10 @@ package away3d.bounds
 		 * @inheritDoc
 		 */
 		override public function fromExtremes(minX : Number, minY : Number, minZ : Number, maxX : Number, maxY : Number, maxZ : Number) : void {}
+
+		override public function classifyToPlane(plane : Plane3D) : int
+		{
+			return PlaneClassification.INTERSECT;
+		}
 	}
 }

@@ -2,8 +2,8 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.Context3DProgramType;
@@ -150,9 +150,12 @@ package away3d.materials.methods
 
 			temp = regCache.getFreeFragmentVectorTemp();
 
-			code += "neg " + _viewDirFragmentReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n";
+			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
 
-			code +=	"dp3 " + temp + ".x, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
+			code += "neg " + viewDirReg + ".xyz, " + viewDirReg + ".xyz\n";
+
+			code +=	"dp3 " + temp + ".x, " + viewDirReg + ".xyz, " + normalReg + ".xyz\n" +
 					"mul " + temp + ".w, " + temp + ".x, " + temp + ".x\n" +
 					"sub " + temp + ".w, " + data2 + ".x, " + temp + ".w\n" +
 					"mul " + temp + ".w, " + data + ".x, " + temp + ".w\n" +
@@ -162,9 +165,9 @@ package away3d.materials.methods
 
 					"mul " + temp + ".x, " + data + ".x, " + temp + ".x\n" +
 					"add " + temp + ".x, " + temp + ".x, " + temp + ".y\n" +
-					"mul " + temp + ".xyz, " + temp + ".x, " + _normalFragmentReg + ".xyz\n" +
+					"mul " + temp + ".xyz, " + temp + ".x, " + normalReg + ".xyz\n" +
 
-					"mul " + refractionDir + ", " + data + ".x, " + _viewDirFragmentReg + "\n" +
+					"mul " + refractionDir + ", " + data + ".x, " + viewDirReg + "\n" +
 					"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 					"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
@@ -175,7 +178,7 @@ package away3d.materials.methods
 			if (_useDispersion) {
 				// GREEN
 
-				code +=	"dp3 " + temp + ".x, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
+				code +=	"dp3 " + temp + ".x, " + viewDirReg + ".xyz, " + normalReg + ".xyz\n" +
 						"mul " + temp + ".w, " + temp + ".x, " + temp + ".x\n" +
 						"sub " + temp + ".w, " + data2 + ".x, " + temp + ".w\n" +
 						"mul " + temp + ".w, " + data + ".y, " + temp + ".w\n" +
@@ -185,9 +188,9 @@ package away3d.materials.methods
 
 						"mul " + temp + ".x, " + data + ".y, " + temp + ".x\n" +
 						"add " + temp + ".x, " + temp + ".x, " + temp + ".y\n" +
-						"mul " + temp + ".xyz, " + temp + ".x, " + _normalFragmentReg + ".xyz\n" +
+						"mul " + temp + ".xyz, " + temp + ".x, " + normalReg + ".xyz\n" +
 
-						"mul " + refractionDir + ", " + data + ".y, " + _viewDirFragmentReg + "\n" +
+						"mul " + refractionDir + ", " + data + ".y, " + viewDirReg + "\n" +
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 	//
@@ -198,7 +201,7 @@ package away3d.materials.methods
 
 				// BLUE
 
-				code +=	"dp3 " + temp + ".x, " + _viewDirFragmentReg + ".xyz, " + _normalFragmentReg + ".xyz\n" +
+				code +=	"dp3 " + temp + ".x, " + viewDirReg + ".xyz, " + normalReg + ".xyz\n" +
 						"mul " + temp + ".w, " + temp + ".x, " + temp + ".x\n" +
 						"sub " + temp + ".w, " + data2 + ".x, " + temp + ".w\n" +
 						"mul " + temp + ".w, " + data + ".z, " + temp + ".w\n" +
@@ -208,9 +211,9 @@ package away3d.materials.methods
 
 						"mul " + temp + ".x, " + data + ".z, " + temp + ".x\n" +
 						"add " + temp + ".x, " + temp + ".x, " + temp + ".y\n" +
-						"mul " + temp + ".xyz, " + temp + ".x, " + _normalFragmentReg + ".xyz\n" +
+						"mul " + temp + ".xyz, " + temp + ".x, " + normalReg + ".xyz\n" +
 
-						"mul " + refractionDir + ", " + data + ".z, " + _viewDirFragmentReg + "\n" +
+						"mul " + refractionDir + ", " + data + ".z, " + viewDirReg + "\n" +
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
@@ -226,7 +229,7 @@ package away3d.materials.methods
 			regCache.removeFragmentTempUsage(refractionColor);
 
 			// restore
-			code += "neg " + _viewDirFragmentReg + ".xyz, " + _viewDirFragmentReg + ".xyz\n";
+			code += "neg " + viewDirReg + ".xyz, " + viewDirReg + ".xyz\n";
 
 			return code;
 		}

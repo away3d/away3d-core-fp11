@@ -66,9 +66,10 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
-			code += "m44 vt7, vt0, vc0		\n" +
+			var code : String;
+			code = "m44 vt7, vt0, vc0		\n" +
 					"mul op, vt7, vc4		\n" +
 					"m44 vt1, vt0, vc5		\n" +
 					"sub v0, vt1, vc9		\n";
@@ -89,7 +90,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			var code : String;
 			var wrap : String = _repeat ? "wrap" : "clamp";
@@ -118,7 +119,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var pos : Vector3D = camera.scenePosition;
 
@@ -131,9 +132,9 @@
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 9, _vertexData, 1);
 
 			if (_alphaThreshold > 0)
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.UVBufferOffset);
+				renderable.activateUVBuffer(1, stage3DProxy);
 
-			super.render(renderable, stage3DProxy, camera, lightPicker);
+			super.render(renderable, stage3DProxy, camera);
 		}
 
 		/**

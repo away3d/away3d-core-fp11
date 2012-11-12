@@ -2,8 +2,8 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3DProgramType;
@@ -138,12 +138,15 @@ package away3d.materials.methods
 			vo.texturesIndex = _normalTextureRegister.index;
 
 			vo.fragmentConstantsIndex = dataReg.index*4;
-			return	 "add " + temp + ", " + _uvVaryingReg + ", " + dataReg2 + ".xyxy\n" +
+			return	 "add " + temp + ", " + _sharedRegisters.uvVarying + ", " + dataReg2 + ".xyxy\n" +
 					getTexSampleCode(vo, targetReg, _normalTextureRegister, temp) +
-					"add " + temp + ", " + _uvVaryingReg + ", " + dataReg2 + ".zwzw\n" +
+					"add " + temp + ", " + _sharedRegisters.uvVarying + ", " + dataReg2 + ".zwzw\n" +
 					getTexSampleCode(vo, temp, _normalTextureRegister2, temp) +
 					"add " + targetReg + ", " + targetReg + ", " + temp + "		\n" +
-					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n";
+					"mul " + targetReg + ", " + targetReg + ", " + dataReg + ".x	\n" +
+					"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _sharedRegisters.commons + ".xxx	\n" +
+					"nrm " + targetReg + ".xyz, " + targetReg + ".xyz							\n";
+
 		}
 	}
 }

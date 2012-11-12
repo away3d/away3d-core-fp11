@@ -12,6 +12,7 @@ package away3d.cameras.lenses
 		private var _yMax : Number;
 		private var _xMax : Number;
 
+
 		/**
 		 * Creates a new PerspectiveLens object.
 		 * @param fieldOfView The vertical field of view of the projection.

@@ -1,21 +1,23 @@
 package away3d.loaders.parsers
 {
-	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
-	import away3d.materials.DefaultMaterialBase;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
+	import away3d.tools.utils.GeomUtil;
 	
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -476,7 +478,7 @@ package away3d.loaders.parsers
 		{
 			if (obj.type == AssetType.MESH) {
 				var i : uint;
-				var subs : Vector.<SubGeometry>;
+				var subs : Vector.<ISubGeometry>;
 				var geom : Geometry;
 				var mat : MaterialBase;
 				var mesh : Mesh;
@@ -525,7 +527,7 @@ package away3d.loaders.parsers
 				
 				// Construct sub-geometries (potentially splitting buffers)
 				// and add them to geometry.
-				subs = constructSubGeometries(obj.verts, obj.indices, obj.uvs, null, null, null, null);
+				subs = GeomUtil.fromVectors(obj.verts, obj.indices, obj.uvs, null, null, null, null);
 				for (i=0; i<subs.length; i++) {
 					geom.subGeometries.push(subs[i]);
 				}
@@ -691,7 +693,7 @@ package away3d.loaders.parsers
 		
 		private function finalizeCurrentMaterial() : void
 		{
-			var mat : DefaultMaterialBase;
+			var mat : SinglePassMaterialBase;
 			
 			if (_cur_mat.colorMap) {
 				mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());

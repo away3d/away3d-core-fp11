@@ -135,7 +135,7 @@
 				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_ADDED, onSubGeometryAdded);
 				_geometry.addEventListener(GeometryEvent.SUB_GEOMETRY_REMOVED, onSubGeometryRemoved);
 				
-				var subGeoms : Vector.<SubGeometry> = _geometry.subGeometries;
+				var subGeoms : Vector.<ISubGeometry> = _geometry.subGeometries;
 
 				for (i = 0; i < subGeoms.length; ++i)
 					addSubMesh(subGeoms[i]);
@@ -258,7 +258,7 @@
 		private function onSubGeometryRemoved(event : GeometryEvent) : void
 		{
 			var subMesh : SubMesh;
-			var subGeom : SubGeometry = event.subGeometry;
+			var subGeom : ISubGeometry = event.subGeometry;
 			var len : int = _subMeshes.length;
 			var i : uint;
 			
@@ -285,7 +285,7 @@
 		/**
 		 * Adds a SubMesh wrapping a SubGeometry.
 		 */
-		private function addSubMesh(subGeometry : SubGeometry) : void
+		private function addSubMesh(subGeometry : ISubGeometry) : void
 		{
 			var subMesh : SubMesh = new SubMesh(subGeometry, this, null);
 			var len : uint = _subMeshes.length;

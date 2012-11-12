@@ -26,7 +26,8 @@ package away3d.materials.methods {
 		public var needsTangents : Boolean;
 		public var needsUV : Boolean;
 		public var needsSecondaryUV : Boolean;
-		public var needsGlobalPos : Boolean;
+		public var needsGlobalVertexPos : Boolean;
+		public var needsGlobalFragmentPos : Boolean;
 
 		public var numLights : int;
 
@@ -48,7 +49,8 @@ package away3d.materials.methods {
 			needsTangents = false;
 			needsUV = false;
 			needsSecondaryUV = false;
-			needsGlobalPos = false;
+			needsGlobalVertexPos = false;
+			needsGlobalFragmentPos = false;
 
 			numLights = 0;
 		}

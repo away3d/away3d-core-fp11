@@ -3,6 +3,7 @@ package away3d.bounds
 
 	import away3d.arcane;
 	import away3d.core.base.*;
+	import away3d.core.math.Plane3D;
 	import away3d.core.pick.*;
 	import away3d.errors.*;
 	import away3d.primitives.*;
@@ -131,36 +132,35 @@ package away3d.bounds
 		 * @param geometry The Geometry object to be bounded.
 		 */
 		public function fromGeometry( geometry:Geometry ):void {
-			var subs:Vector.<SubGeometry> = geometry.subGeometries;
-			var lenS:uint = subs.length;
+			var subGeoms:Vector.<ISubGeometry> = geometry.subGeometries;
+			var numSubGeoms:uint = subGeoms.length;
+			var first : ISubGeometry = subGeoms[0];
+			var minX:Number, minY:Number, minZ:Number;
+			var maxX:Number, maxY:Number, maxZ:Number;
 
-			if (lenS > 0 && subs[0].vertexData.length >= 3) {
-				var j:uint;
-				var lenV:uint;
-				var vertices:Vector.<Number>;
-				var i:uint;
-				var v:Number;
-				var minX:Number, minY:Number, minZ:Number;
-				var maxX:Number, maxY:Number, maxZ:Number;
+			if (numSubGeoms > 0) {
+				var j:uint = 0;
+				minX = minY = minZ = Number.POSITIVE_INFINITY;
+				maxX = maxY = maxZ = Number.NEGATIVE_INFINITY;
 
-				minX = maxX = subs[0].vertexData[0];
-				minY = maxY = subs[0].vertexData[1];
-				minZ = maxZ = subs[0].vertexData[2];
+				while( j < numSubGeoms ) {
+					var subGeom : ISubGeometry = subGeoms[j++];
+					var vertices:Vector.<Number> = subGeom.vertexData;
+					var vertexDataLen:uint = vertices.length;
+					var i:uint = subGeom.vertexOffset;
+					var stride : uint = subGeom.vertexStride;
 
-				while( j < lenS ) {
-					vertices = subs[j++].vertexData;
-					lenV = vertices.length;
-					i = 0;
-					while( i < lenV ) {
-						v = vertices[i++];
+					while( i < vertexDataLen ) {
+						var v:Number = vertices[i];
 						if( v < minX ) minX = v;
 						else if( v > maxX ) maxX = v;
-						v = vertices[i++];
+						v = vertices[i+1];
 						if( v < minY ) minY = v;
 						else if( v > maxY ) maxY = v;
-						v = vertices[i++];
+						v = vertices[i+2];
 						if( v < minZ ) minZ = v;
 						else if( v > maxZ ) maxZ = v;
+						i += stride;
 					}
 				}
 
@@ -290,6 +290,9 @@ package away3d.bounds
 			throw new AbstractMethodError();
 		}
 
-		
+		public function classifyToPlane(plane : Plane3D) : int
+		{
+			throw new AbstractMethodError();
+		}
 	}
 }

@@ -7,30 +7,29 @@ package away3d.materials.methods
 	import away3d.events.ShadingMethodEvent;
 	import away3d.lights.LightBase;
 	import away3d.lights.shadowmaps.NearDirectionalShadowMapper;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
+	import away3d.materials.compilation.ShaderRegisterElement;
 
 	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
 	// TODO: shadow mappers references in materials should be an interface so that this class should NOT extend ShadowMapMethodBase just for some delegation work
-	public class NearShadowMapMethod extends ShadowMapMethodBase
+	public class NearShadowMapMethod extends SimpleShadowMapMethodBase
 	{
-		private var _baseMethod : ShadowMapMethodBase;
+		private var _baseMethod : SimpleShadowMapMethodBase;
 
 		private var _fadeRatio : Number;
-		private var _shadowMapper : NearDirectionalShadowMapper;
-		private var _light : LightBase;
+		private var _nearShadowMapper : NearDirectionalShadowMapper;
 
-		public function NearShadowMapMethod(baseMethod : ShadowMapMethodBase, fadeRatio : Number = .1)
+		public function NearShadowMapMethod(baseMethod : SimpleShadowMapMethodBase, fadeRatio : Number = .1)
 		{
 			super(baseMethod.castingLight);
 			_baseMethod = baseMethod;
 			_fadeRatio = fadeRatio;
-			_light = baseMethod.castingLight;
-			_shadowMapper = _light.shadowMapper as NearDirectionalShadowMapper;
-			if (!_shadowMapper)
+			_nearShadowMapper = _castingLight.shadowMapper as NearDirectionalShadowMapper;
+			if (!_nearShadowMapper)
 				throw new Error("NearShadowMapMethod requires a light that has a NearDirectionalShadowMapper instance assigned to shadowMapper.");
 			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
@@ -94,7 +93,7 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentSingleTemp();
 			vo.secondaryFragmentConstantsIndex = dataReg.index*4;
 
-			code +=	"abs " + temp + ", " + _projectionReg + ".w\n" +
+			code +=	"abs " + temp + ", " + _sharedRegisters.projectionFragment + ".w\n" +
 					"sub " + temp + ", " + temp + ", " + dataReg + ".x\n" +
 					"mul " + temp + ", " + temp + ", " + dataReg + ".y\n" +
 					"sat " + temp + ", " + temp + "\n" +
@@ -124,7 +123,7 @@ package away3d.materials.methods
 			// todo: move this to activate (needs camera)
 			var near : Number = camera.lens.near;
 			var d : Number = camera.lens.far - near;
-			var maxDistance : Number = _shadowMapper.coverageRatio;
+			var maxDistance : Number = _nearShadowMapper.coverageRatio;
 			var minDistance : Number = maxDistance*(1-_fadeRatio);
 
 			maxDistance = near + maxDistance*d;
@@ -164,49 +163,9 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
+		override arcane function set sharedRegisters(value : ShaderRegisterData) : void
 		{
-			_baseMethod.globalPosReg = _globalPosReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set UVVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.UVVaryingReg = _uvVaryingReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.secondaryUVFragmentReg = _secondaryUVFragmentReg = value;
-		}
-
-		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.viewDirFragmentReg = _viewDirFragmentReg = value;
-		}
-
-		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_viewDirVaryingReg = _baseMethod.viewDirVaryingReg = value;
-		}
-
-
-		arcane override function set projectionReg(value : ShaderRegisterElement) : void
-		{
-			_projectionReg = _baseMethod.projectionReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseMethod.normalFragmentReg = _normalFragmentReg = value;
+			super.sharedRegisters = _baseMethod.sharedRegisters = value;
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

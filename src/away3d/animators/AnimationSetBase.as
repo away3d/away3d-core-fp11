@@ -3,6 +3,7 @@ package away3d.animators
 	import away3d.animators.nodes.*;
 	import away3d.errors.*;
 	import away3d.library.assets.*;
+	import away3d.materials.passes.MaterialPassBase;
 	
 	import flash.utils.*;
 	
@@ -20,12 +21,12 @@ package away3d.animators
 		
 		/**
 		 * Retrieves a temporary GPU register that's still free.
-		 * 
+		 *
 		 * @param exclude An array of non-free temporary registers.
 		 * @param excludeAnother An additional register that's not free.
 		 * @return A temporary register that can be used.
 		 */
-		protected function findTempReg(exclude : Array, excludeAnother : String = null) : String
+		protected function findTempReg(exclude : Vector.<String>, excludeAnother : String = null) : String
 		{
 			var i : uint;
 			var reg : String;
@@ -53,7 +54,7 @@ package away3d.animators
 		/**
 		 * Called by the material to reset the GPU indicator before testing whether register space in the shader
 		 * is available for running GPU-based animation code.
-		 * 
+		 *
 		 * @private
 		 */
 		public function resetGPUCompatibility() : void
@@ -92,7 +93,7 @@ package away3d.animators
 		
 		/**
 		 * Check to determine whether a state is registered in the animation set under the given name.
-		 * 
+		 *
 		 * @param stateName The name of the animation state object to be checked.
 		 */
 		public function hasAnimation(name:String):Boolean
@@ -102,7 +103,7 @@ package away3d.animators
 		
 		/**
 		 * Retrieves the animation state object registered in the animation data set under the given name.
-		 * 
+		 *
 		 * @param stateName The name of the animation state object to be retrieved.
 		 */
 		public function getAnimation(name:String):AnimationNodeBase
@@ -113,20 +114,20 @@ package away3d.animators
 		
 		/**
 		 * Adds an animation state object to the aniamtion data set under the given name.
-		 * 
+		 *
 		 * @param stateName The name under which the animation state object will be stored.
 		 * @param animationState The animation state object to be staored in the set.
 		 */
-		public function addAnimation(name:String, node:AnimationNodeBase):void
+		public function addAnimation(node:AnimationNodeBase):void
 		{
-			if (_animationDictionary[name])
-				throw new AnimationSetError("root node name already exists in the set");
+			if (_animationDictionary[node.name])
+				throw new AnimationSetError("root node name '" + node.name + "' already exists in the set");
 			
-			_animationDictionary[name] = node;
+			_animationDictionary[node.name] = node;
 			
 			_animations.push(node);
 			
-			_animationNames.push(name);
+			_animationNames.push(node.name);
 		}
 		
 		/**
@@ -134,6 +135,21 @@ package away3d.animators
 		 */
 		public function dispose() : void
 		{
+		}
+		
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		{
+			return "";
+		}
+		
+		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
+		{
+			return "mov " + UVTarget + "," + UVSource + "\n";
+		}
+		
+		public function doneAGALCode(pass : MaterialPassBase):void
+		{
+			
 		}
 	}
 }

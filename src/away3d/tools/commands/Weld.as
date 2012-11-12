@@ -2,7 +2,9 @@ package away3d.tools.commands
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
@@ -18,209 +20,182 @@ package away3d.tools.commands
 	*/
 	public class Weld {
 		
-		private static var _delv:uint;
+		//private static var _delv:uint;
 		
-		/**
-		*  Apply the welding code to a given ObjectContainer3D.
-		* @param	 	obj				ObjectContainer3D. The target Object3d object.
-		* @param	 	keepUVs		[otional]Boolean. If true the existing UV-mapping is not be altered by the welding operation, possibly adding extra data. Default is true.
-		* @param	 	keepNormals	[otional]Boolean. If true normals of shared vertices will be averaged. If false autoDeriveVertexNormals will be set to true. Default is true.
-		*/
-		public static function apply(obj:ObjectContainer3D, keepUVs:Boolean = true, keepNormals:Boolean = true):void
+		private var _keepUvs : Boolean;
+		private var _normalThreshold : Number;
+		
+		public function Weld()
 		{
-			_delv = 0;
-			parse(obj, keepUVs, keepNormals);
+		}
+		
+		
+		public function apply(geom : Geometry, keepUvs : Boolean = true, normalAngleThresholdRadians : Number = 0) : void
+		{
+			_keepUvs = keepUvs;
+			_normalThreshold = normalAngleThresholdRadians;
+			applyToGeom(geom);
+		}
+		
+		
+		public function applyToContainer(obj : ObjectContainer3D, keepUVs : Boolean = true, normalThreshold : Number = 0):void
+		{
+			//_delv = 0;
+			_keepUvs = keepUVs;
+			_normalThreshold = normalThreshold;
+			parse(obj);
 		}
 		
 		/**
 		* returns howmany vertices were deleted during the welding operation.
 		*/
+		/*
 		public static function get verticesRemovedCount():uint
 		{
 			return _delv;
 		}
+		*/
 		 
-		private static function parse(obj:ObjectContainer3D, keepUVs:Boolean, keepNormals:Boolean):void
+		private function parse(obj:ObjectContainer3D):void
 		{
 			var child:ObjectContainer3D;
 			if(obj is Mesh && obj.numChildren == 0)
-				weld(Mesh(obj), keepUVs, keepNormals);
+				applyToGeom(Mesh(obj).geometry);
 				 
 			for(var i:uint = 0;i<obj.numChildren;++i){
 				child = obj.getChildAt(i);
-				parse(child, keepUVs, keepNormals);
+				parse(child);
 			}
-		}
-	
-		private static function weld(m:Mesh, keepUV:Boolean, keepNormals:Boolean):void
-		{
-			var geometry:Geometry = m.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
-			var numSubGeoms:int = geometries.length;
-			
-			var vertices:Vector.<Number>;
-			var normals:Vector.<Number>;
-			var indices:Vector.<uint>;
-			var uvs:Vector.<Number>;
-			
-			var v:Vertex = new Vertex();
-			var normal:Vertex = new Vertex();
-			var uv:UV = new UV();
-			
-			var nvertices:Vector.<Number>;
-			var nnormals:Vector.<Number>;
-			var nindices:Vector.<uint>;
-			var nuvs:Vector.<Number>;
-			
-			var vectors:Array = [];
-			var index:uint;
-			var indexuv:uint;
-			
-			var nIndex:uint;
-			var nIndexind:uint;
-			var checkIndex:int;
-			
-			var nInd:uint;
-			
-			var j : uint;
-			var i : uint;
-			var vecLength : uint;
-			var subGeom:SubGeometry;
-			
-			var normalcalc:Vector3D=new Vector3D();
-			var dic_key:String;
-			var dic:Dictionary;
-			
-			for (i = 0; i < numSubGeoms; ++i){
-				
-				if(dic) dic = null;
-				dic = new Dictionary();
-				subGeom = SubGeometry(geometries[i]);
-				vertices = subGeom.vertexData;
-				indices = subGeom.indexData;
-				uvs = subGeom.UVData;
-				vecLength = indices.length;
-				
-				nvertices = new Vector.<Number>();
-				nindices = new Vector.<uint>();
-				nuvs = new Vector.<Number>();
-				
-				subGeom.autoDeriveVertexTangents = true;
-				subGeom.autoDeriveVertexNormals = true;
-				
-				vectors.push([nvertices,nindices,nuvs]);
-				
-				nIndexind = nIndex = indexuv = nIndexind = checkIndex = 0;
-				
-				if (keepNormals){
-					subGeom.autoDeriveVertexNormals = false;
-					nnormals = new Vector.<Number>();
-					normals = subGeom.vertexNormalData;
-					vectors[i].push(nnormals);
-				}
-				 
-				for (j = 0; j < vecLength;++j){
-					index = indices[j]*3;
-					
-					v.x = vertices[index];
-					v.y = vertices[index+1];
-					v.z = vertices[index+2];
-					
-					if (keepNormals){			
-						normal.x = normals[index];
-						normal.y = normals[index+1];
-						normal.z = normals[index+2];
-					}
-					
-					dic_key=v.toString();
-					
-					if( keepUV ){	
-						indexuv = indices[j]*2;
-						uv.u = uvs[indexuv];
-						uv.v = uvs[indexuv+1];
-						dic_key+="#"+uv.toString();
-					}
-					
-					checkIndex=-1;
-					
-					if ( dic[dic_key] != undefined){
-						checkIndex=dic[dic_key];
-					}
-					
-					if (checkIndex==-1){
-
-						if(keepUV==false){
-							indexuv = indices[j]*2;
-							uv.u = uvs[indexuv];
-							uv.v = uvs[indexuv+1];
-						}
-							
-						dic[dic_key] = nvertices.length/3;
-						
-						nindices.push(nvertices.length/3);
-						nvertices.push(v.x);
-						nvertices.push(v.y);
-						
-						if (keepNormals) nnormals.push(normal.x, normal.y, normal.z);
-						
-						
-						nvertices.push(v.z);
-						nuvs.push(uv.u);
-						nuvs.push(uv.v);
-						
-					} else {
-						
-						if (keepNormals == true){
-							nInd = checkIndex*3;
-							normalcalc.x= (nnormals[nInd]+normal.x)*.5;
-							normalcalc.y = (nnormals[nInd+1]+normal.y)*.5;
-							normalcalc.z = (nnormals[nInd+2]+normal.z)*.5;
-							normalcalc = normalizeNormalVector(normalcalc);
-							nnormals[nInd] = normalcalc.x;
-							nnormals[nInd+1] = normalcalc.y;
-							nnormals[nInd+2] = normalcalc.z;
-						}
-						
-						nindices.push(checkIndex);
-					}
-				}
-				
-				_delv += (vertices.length - nvertices.length)/3;
-			}
-			
-			for (i = 0; i<vectors.length; ++i){
-				subGeom = SubGeometry(geometries[i]); 
-				
-				subGeom.updateVertexData(vectors[i][0]);
-				subGeom.updateIndexData(vectors[i][1]);
-				subGeom.updateUVData(vectors[i][2]);
-				
-				if(keepNormals && vectors[i][3] && vectors[i][3].length>0 )
-					subGeom.updateVertexNormalData(vectors[i][3]);
-			}
-			
-			dic = null;
-			vectors = null;
 		}
 		
-		private static function normalizeNormalVector(v:Vector3D):Vector3D
+		
+		private function applyToGeom(geom : Geometry) : void
 		{
-			var c:Number = 0;
+			var i : uint;
 			
-			if((v.x*v.x>=v.y*v.y)&&(v.x*v.x>=v.z*v.z)){
-				c = 1/Math.sqrt(v.x*v.x);
-			} else if((v.y*v.y>=v.x*v.x)&&(v.y*v.y>=v.z*v.z)){
-				c = 1/Math.sqrt(v.y*v.y);
-			} else if((v.z*v.z>=v.y*v.y)&&(v.z*v.z>=v.x*v.x)){
-				c = 1/Math.sqrt(v.z*v.z);
+			for (i=0; i<geom.subGeometries.length; i++) {
+				var subGeom : ISubGeometry = geom.subGeometries[i];
+				
+				// TODO: Remove this check when ISubGeometry can always
+				// be updated using a single unified method (from vectors.)
+				if (subGeom is CompactSubGeometry) {
+					applyToSubGeom(subGeom, CompactSubGeometry(subGeom));
+				}
+				else {
+					var outSubGeom : CompactSubGeometry;
+					
+					outSubGeom = new CompactSubGeometry();
+					applyToSubGeom(subGeom, outSubGeom);
+					
+					geom.removeSubGeometry(subGeom);
+					geom.addSubGeometry(outSubGeom);
+				}
+			}
+		}
+		
+		
+		private function applyToSubGeom(subGeom : ISubGeometry, outSubGeom : CompactSubGeometry) : void
+		{
+			var i : uint;
+			var inLen : uint;
+			var outVertices : Vector.<Number>;
+			var outNormals : Vector.<Number>;
+			var outUvs : Vector.<Number>;
+			var inIndices : Vector.<uint>;
+			var outIndices : Vector.<uint>;
+			var numOutIndices : uint;
+			
+			var vStride : uint, nStride : uint, uStride : uint;
+			var vOffs : uint, nOffs : uint, uOffs : uint;
+			var vd : Vector.<Number>, nd : Vector.<Number>, ud : Vector.<Number>;
+			
+			vd = subGeom.vertexData;
+			vStride = subGeom.vertexStride;
+			vOffs = subGeom.vertexOffset;
+			nd = subGeom.vertexNormalData;
+			nStride = subGeom.vertexNormalStride;
+			nOffs = subGeom.vertexNormalOffset;
+			ud = subGeom.UVData;
+			uStride = subGeom.UVStride;
+			uOffs = subGeom.UVOffset;
+			
+			outIndices = new Vector.<uint>();
+			outVertices = new Vector.<Number>();
+			outNormals = new Vector.<Number>();
+			outUvs = new Vector.<Number>();
+			
+			numOutIndices = 0;
+			inIndices = subGeom.indexData;
+			inLen = inIndices.length;
+			for (i=0; i<inLen; i++) {
+				var origIndex : uint;
+				var searchIndex : uint;
+				var searchLen : uint;
+				var outIndex : int;
+				var px : Number, py : Number, pz : Number;
+				var nx : Number, ny : Number, nz : Number;
+				var u : Number, v : Number;
+				
+				origIndex = inIndices[i];
+				px = vd[vOffs + origIndex*vStride + 0];
+				py = vd[vOffs + origIndex*vStride + 1];
+				pz = vd[vOffs + origIndex*vStride + 2];
+				nx = nd[nOffs + origIndex*nStride + 0];
+				ny = nd[nOffs + origIndex*nStride + 1];
+				nz = nd[nOffs + origIndex*nStride + 2];
+				u = ud[uOffs + origIndex*uStride + 0];
+				v = ud[uOffs + origIndex*uStride + 1];
+				
+				outIndex = -1;
+				searchLen = outVertices.length / 3;
+				for (searchIndex=0; searchIndex<searchLen; searchIndex++) {
+					// Skip if position doesn't match
+					if (px != outVertices[searchIndex*3+0] || py != outVertices[searchIndex*3+1] || pz != outVertices[searchIndex*3+2])
+						continue;
+					
+					// Skip if UVs don't match (but only if UVs are to be respected at all)
+					if (_keepUvs && (u != outUvs[searchIndex*2+0] || v != outUvs[searchIndex*2+1]))
+						continue;
+					
+					if (_normalThreshold>0) {
+						var dp : Number;
+						var angle : Number;
+						
+						// Calculate dot product, assuming normalized vector
+						dp = nx * outNormals[searchIndex*3+0] + ny * outNormals[searchIndex*3+1] + nz * outNormals[searchIndex*3+2];
+						angle = Math.acos(dp);
+						if (angle > _normalThreshold)
+							continue;
+					}
+					else if (nx != outNormals[searchIndex*3+0] || ny != outNormals[searchIndex*3+1] || nz != outNormals[searchIndex*3+2]) {
+						// No threshold for normals, i.e. they have to be identical. Since they
+						// are not identical, skip this
+						continue;
+					}
+					
+					// If this far, the vertices match
+					outIndex = searchIndex;
+					break;
+				}
+				
+				// No vertex found, so create it
+				if (outIndex < 0) {
+					outIndex = outVertices.length/3;
+					outVertices[outIndex*3+0] = px;
+					outVertices[outIndex*3+1] = py;
+					outVertices[outIndex*3+2] = pz;
+					outNormals[outIndex*3+0] = nx;
+					outNormals[outIndex*3+1] = ny;
+					outNormals[outIndex*3+2] = nz;
+					outUvs[outIndex*2+0] = u;
+					outUvs[outIndex*2+1] = v;
+				}
+				
+				outIndices[numOutIndices++] = outIndex;
 			}
 			
-			v.x *= c;
-			v.y *= c;
-			v.z *= c;
-			
-			return v;
+			outSubGeom.fromVectors(outVertices, outUvs, outNormals, null);
+			outSubGeom.updateIndexData(outIndices);
 		}
-		 
 	}
 }

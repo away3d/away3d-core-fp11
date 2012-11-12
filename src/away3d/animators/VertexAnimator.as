@@ -4,6 +4,7 @@ package away3d.animators
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
 	import away3d.animators.data.*;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.materials.passes.*;
@@ -89,7 +90,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int, camera:Camera3D) : void
 		{
 			// todo: add code for when running on cpu
 
@@ -101,7 +102,7 @@ package away3d.animators
 
 			// this type of animation can only be SubMesh
 			var subMesh : SubMesh = SubMesh(renderable);
-			var subGeom : SubGeometry;
+			var subGeom : ISubGeometry;
 			var i : uint;
 			var len : uint = _numPoses;
 
@@ -119,10 +120,10 @@ package away3d.animators
 			for (; i < len; ++i) {
 				subGeom = _poses[i].subGeometries[subMesh._index] || subMesh.subGeometry;
 
-				stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, subGeom.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.vertexBufferOffset);
+				subGeom.activateVertexBuffer(vertexStreamOffset++, stage3DProxy);
 
 				if (_vertexAnimationSet.useNormals)
-					stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, subGeom.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, subGeom.normalBufferOffset);
+					subGeom.activateVertexNormalBuffer(vertexStreamOffset++, stage3DProxy);
 
 			}
 		}
@@ -134,10 +135,10 @@ package away3d.animators
 			if (_blendMode == VertexAnimationMode.ABSOLUTE) {
 				var len : uint = _numPoses;
 				for (var i : uint = 1; i < len; ++i) {
-					stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
+					renderable.activateVertexBuffer(vertexStreamOffset++, stage3DProxy);
 
 					if (_vertexAnimationSet.useNormals)
-						stage3DProxy.setSimpleVertexBuffer(vertexStreamOffset++, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
+						renderable.activateVertexNormalBuffer(vertexStreamOffset++, stage3DProxy);
 				}
 			}
 			// todo: set temp data for additive?

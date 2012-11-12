@@ -3,8 +3,9 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.events.ShadingMethodEvent;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
@@ -182,79 +183,15 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
+		override arcane function set sharedRegisters(value : ShaderRegisterData) : void
 		{
-			_baseDiffuseMethod.globalPosReg = _globalPosReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set UVVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.UVVaryingReg = _uvVaryingReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.secondaryUVFragmentReg = _secondaryUVFragmentReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get viewDirFragmentReg() : ShaderRegisterElement
-		{
-			return _viewDirFragmentReg;
-		}
-
-		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.viewDirFragmentReg = _viewDirFragmentReg = value;
-		}
-
-		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_viewDirVaryingReg = _baseDiffuseMethod.viewDirVaryingReg = value;
-		}
-
-
-		arcane override function set projectionReg(value : ShaderRegisterElement) : void
-		{
-			_projectionReg = _baseDiffuseMethod.projectionReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get normalFragmentReg() : ShaderRegisterElement
-		{
-			return _normalFragmentReg;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.normalFragmentReg = _normalFragmentReg = value;
+			super.sharedRegisters = _baseDiffuseMethod.sharedRegisters = value;
 		}
 
 		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
 		{
-
 			super.shadowRegister = value;
 			_baseDiffuseMethod.shadowRegister = value;
-		}
-
-
-		override arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
-		{
-			super.tangentVaryingReg = value;
-			_baseDiffuseMethod.tangentVaryingReg = value;
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

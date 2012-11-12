@@ -1,4 +1,4 @@
-package away3d.materials.utils
+package away3d.materials.compilation
 {
 	/**
 	 * A single register element (an entire register or a single register's component) used by the RegisterPool.

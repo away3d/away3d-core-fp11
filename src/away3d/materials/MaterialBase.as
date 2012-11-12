@@ -1,7 +1,6 @@
 package away3d.materials
 {
 	import away3d.animators.IAnimationSet;
-	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IMaterialOwner;
@@ -18,7 +17,6 @@ package away3d.materials
 	
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
-	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.events.Event;
 
@@ -26,9 +24,6 @@ package away3d.materials
 
 	/**
 	 * MaterialBase forms an abstract base class for any material.
-	 *
-	 * Vertex stream index 0 is reserved for vertex positions.
-	 * Vertex shader constants index 0-3 are reserved for projections, constant 4 for viewport positioning
 	 */
 	public class MaterialBase extends NamedAssetBase implements IAsset
 	{
@@ -46,6 +41,7 @@ package away3d.materials
 		arcane var _uniqueId : uint;
 
 		arcane var _renderOrderId : int;
+		arcane var _depthPassId : int;
 		arcane var _name : String = "material";
 
 		private var _bothSides : Boolean;
@@ -54,11 +50,8 @@ package away3d.materials
 		private var _owners : Vector.<IMaterialOwner>;
 
 		private var _alphaPremultiplied : Boolean;
-		private var _requiresBlending : Boolean;
 
 		private var _blendMode : String = BlendMode.NORMAL;
-		private var _srcBlend : String = Context3DBlendFactor.SOURCE_ALPHA;
-		private var _destBlend : String = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
 
 		protected var _numPasses : uint;
 		protected var _passes : Vector.<MaterialPassBase>;
@@ -67,13 +60,13 @@ package away3d.materials
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean;
 		protected var _textureFormat:String;
-		protected var _depthCompareMode:String = Context3DCompareMode.LESS;
 
 		protected var _depthPass : DepthMapPass;
 		protected var _distancePass : DistanceMapPass;
 
-		private var _lightPicker : LightPickerBase;
+		protected var _lightPicker : LightPickerBase;
 		private var _distanceBasedDepthRender : Boolean;
+		private var _depthCompareMode : String = Context3DCompareMode.LESS_EQUAL;
 
 		/**
 		 * Creates a new MaterialBase object.
@@ -84,6 +77,8 @@ package away3d.materials
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
 			_distancePass = new DistanceMapPass();
+			_depthPass.addEventListener(Event.CHANGE, onDepthPassChange);
+			_distancePass.addEventListener(Event.CHANGE, onDistancePassChange);
 			
 			// Default to considering pre-multiplied textures while blending
 			alphaPremultiplied = true;
@@ -103,28 +98,8 @@ package away3d.materials
 
 		public function set lightPicker(value : LightPickerBase) : void
 		{
-			if (value != _lightPicker) {
-				if (_lightPicker)
-					_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
-				
+			if (value != _lightPicker)
 				_lightPicker = value;
-	
-				if (_lightPicker)
-					_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
-				
-				invalidatePasses(null);
-			}
-		}
-
-		private function onLightsChange(event : Event) : void
-		{
-			var pass : MaterialPassBase;
-			for (var i : uint = 0; i < _numPasses; ++i) {
-				pass = _passes[i];
-				pass.numPointLights = _lightPicker.numPointLights;
-				pass.numDirectionalLights = _lightPicker.numDirectionalLights;
-				pass.numLightProbes = _lightPicker.numLightProbes;
-			}
 		}
 
 		/**
@@ -171,12 +146,12 @@ package away3d.materials
 		
 		public function get depthCompareMode() : String
 		{
-			return _passes[_numPasses-1].depthCompareMode;
+			return _depthCompareMode;
 		}
 		
 		public function set depthCompareMode(value : String) : void
 		{
-			_passes[_numPasses-1].depthCompareMode = value;
+			_depthCompareMode = value;
 		}
 
 		/**
@@ -205,9 +180,8 @@ package away3d.materials
 
 			_depthPass.dispose();
 			_distancePass.dispose();
-
-			if (_lightPicker)
-				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+			_depthPass.removeEventListener(Event.CHANGE, onDepthPassChange);
+			_distancePass.removeEventListener(Event.CHANGE, onDistancePassChange);
 		}
 
 		/**
@@ -246,8 +220,6 @@ package away3d.materials
 		public function set blendMode(value : String) : void
 		{
 			_blendMode = value;
-
-			updateBlendFactors();
 		}
 		
 		
@@ -274,7 +246,7 @@ package away3d.materials
 		 */
 		public function get requiresBlending() : Boolean
 		{
-			return _requiresBlending;
+			return _blendMode != BlendMode.NORMAL;
 		}
 
 		/**
@@ -306,6 +278,11 @@ package away3d.materials
 			return _numPasses;
 		}
 
+		arcane function hasDepthAlphaThreshold() : Boolean
+		{
+			return _depthPass.alphaThreshold > 0;
+		}
+
 		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void
 		{
 			_distanceBasedDepthRender = distanceBased;
@@ -328,13 +305,13 @@ package away3d.materials
 		{
 			if (_distanceBasedDepthRender) {
 				if (renderable.animator)
-					_distancePass.updateAnimationState(renderable, stage3DProxy);
-				_distancePass.render(renderable, stage3DProxy, camera, _lightPicker);
+					_distancePass.updateAnimationState(renderable, stage3DProxy, camera);
+				_distancePass.render(renderable, stage3DProxy, camera);
 			}
 			else {
 				if (renderable.animator)
-					_depthPass.updateAnimationState(renderable, stage3DProxy);
-				_depthPass.render(renderable, stage3DProxy, camera, _lightPicker);
+					_depthPass.updateAnimationState(renderable, stage3DProxy, camera);
+				_depthPass.render(renderable, stage3DProxy, camera);
 			}
 		}
 
@@ -352,19 +329,7 @@ package away3d.materials
 		 */
 		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
 		{
-			var pass : MaterialPassBase = _passes[index];
-			var enableDepthWrite : Boolean = true;
-			var context : Context3D = stage3DProxy._context3D;
-
-			if (index == _numPasses-1) {
-				if (requiresBlending) {
-					enableDepthWrite = false;
-					context.setBlendFactors(_srcBlend, _destBlend);
-				}
-			}
-
-			context.setDepthTest(enableDepthWrite, pass.depthCompareMode);
-			pass.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			_passes[index].activate(stage3DProxy, camera, textureRatioX, textureRatioY);
 		}
 
 		/**
@@ -391,9 +356,9 @@ package away3d.materials
 			var pass : MaterialPassBase = _passes[index];
 
 			if (renderable.animator)
-				pass.updateAnimationState(renderable, stage3DProxy);
+				pass.updateAnimationState(renderable, stage3DProxy, entityCollector.camera);
 
-			pass.render(renderable, stage3DProxy, entityCollector.camera, _lightPicker);
+			pass.render(renderable, stage3DProxy, entityCollector.camera);
 		}
 
 
@@ -418,12 +383,15 @@ package away3d.materials
 					throw new Error("A Material instance cannot be shared across renderables with different animator libraries");
 				}
 				else {
-					_animationSet = owner.animator.animationSet;
-					for (var i : int = 0; i < _numPasses; ++i)
-						_passes[i].animationSet = _animationSet;
-					_depthPass.animationSet = _animationSet;
-					_distancePass.animationSet = _animationSet;
-					invalidatePasses(null);
+					if (_animationSet != owner.animator.animationSet)
+					{
+						_animationSet = owner.animator.animationSet;
+						for (var i : int = 0; i < _numPasses; ++i)
+							_passes[i].animationSet = _animationSet;
+						_depthPass.animationSet = _animationSet;
+						_distancePass.animationSet = _animationSet;
+						invalidatePasses(null);
+					}
 				}
 			}
 		}
@@ -475,13 +443,13 @@ package away3d.materials
 		}
 
 		/**
-		 * Marks the depth shader program as invalid, so it will be recompiled before the next render.
+		 * Marks the depth shader programs as invalid, so it will be recompiled before the next render.
 		 * @param triggerPass The pass triggering the invalidation, if any, so no infinite loop will occur.
 		 */
 		arcane function invalidatePasses(triggerPass : MaterialPassBase) : void
 		{
 			var owner : IMaterialOwner;
-			
+
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
 			
@@ -510,12 +478,11 @@ package away3d.materials
 		 */
 		protected function clearPasses() : void
 		{
-			for (var i : int = 0; i < _numPasses; ++i) {
+			for (var i : int = 0; i < _numPasses; ++i)
 				_passes[i].removeEventListener(Event.CHANGE, onPassChange);
-			}
+
 			_passes.length = 0;
 			_numPasses = 0;
-
 		}
 
 		/**
@@ -530,45 +497,9 @@ package away3d.materials
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
-			pass.numPointLights = _lightPicker? _lightPicker.numPointLights : 0;
-			pass.numDirectionalLights = _lightPicker? _lightPicker.numDirectionalLights : 0;
-			pass.numLightProbes = _lightPicker? _lightPicker.numLightProbes : 0;
+			pass.textureFormat = _textureFormat;
 			pass.addEventListener(Event.CHANGE, onPassChange);
-			calculateRenderId();
 			invalidatePasses(null);
-		}
-		
-		private function updateBlendFactors() : void
-		{
-			switch (_blendMode) {
-				case BlendMode.NORMAL:
-				case BlendMode.LAYER:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
-					_requiresBlending = false; // only requires blending if a subtype needs it
-					break;
-				case BlendMode.MULTIPLY:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
-					_requiresBlending = true;
-					break;
-				case BlendMode.ADD:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE;
-					_requiresBlending = true;
-					break;
-				case BlendMode.ALPHA:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_requiresBlending = true;
-					break;
-				default:
-					throw new ArgumentError("Unsupported blend mode!");
-			}
-		}
-		
-		private function calculateRenderId() : void
-		{
 		}
 
 		private function onPassChange(event : Event) : void
@@ -589,6 +520,36 @@ package away3d.materials
 					}
 				}
 				mult *= 1000;
+			}
+		}
+
+		private function onDistancePassChange(event : Event) : void
+		{
+			var ids : Vector.<int> = _distancePass._program3Dids;
+			var len : uint = ids.length;
+
+			_depthPassId = 0;
+
+			for (var j : int = 0; j < len; ++j) {
+				if (ids[j] != -1) {
+					_depthPassId += ids[j];
+					j = len;
+				}
+			}
+		}
+
+		private function onDepthPassChange(event : Event) : void
+		{
+			var ids : Vector.<int> = _depthPass._program3Dids;
+			var len : uint = ids.length;
+
+			_depthPassId = 0;
+
+			for (var j : int = 0; j < len; ++j) {
+				if (ids[j] != -1) {
+					_depthPassId += ids[j];
+					j = len;
+				}
 			}
 		}
 	}

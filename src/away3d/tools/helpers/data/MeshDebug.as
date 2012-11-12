@@ -1,6 +1,7 @@
 package away3d.tools.helpers.data
 {
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.entities.SegmentSet;
@@ -25,7 +26,7 @@ package away3d.tools.helpers.data
 		public function displayNormals(mesh:Mesh, color:uint = 0xFF3399 , length:Number = 30):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
 			var vertices:Vector.<Number>;
@@ -40,20 +41,26 @@ package away3d.tools.helpers.data
 			var l0 : Vector3D = new Vector3D();
 			var l1 : Vector3D = new Vector3D();
 			
-			for (var i:uint = 0; i<numSubGeoms; ++i){					
-			 	vertices = SubGeometry(geometries[i]).vertexData;
+			for (var i:uint = 0; i<numSubGeoms; ++i){
+				var subGeom : ISubGeometry = geometries[i];
+				var stride : int = subGeom.vertexStride;
+				var offset : int = subGeom.vertexOffset;
+				vertices = subGeom.vertexData;
 				indices = SubGeometry(geometries[i]).indexData;
-				for (j = 0; j < indices.length; j+=3){
-					
-					v0.x = vertices[index = indices[j]*3];
+				for (j = 0; j < indices.length; j += 3){
+
+					index = offset + indices[j]*stride;
+					v0.x = vertices[index];
 					v0.y = vertices[index+1];
 					v0.z = vertices[index+2];
-					
-					v1.x = vertices[index = indices[j+1]*3];
+
+					index = offset + indices[j+1]*stride;
+					v1.x = vertices[index];
 					v1.y = vertices[index+1];
 					v1.z = vertices[index+2];
-					
-					v2.x = vertices[index = indices[j+2]*3];
+
+					index = offset + indices[j+2]*stride;
+					v2.x = vertices[index];
 					v2.y = vertices[index+1];
 					v2.z = vertices[index+2];
 					
@@ -85,7 +92,7 @@ package away3d.tools.helpers.data
 		private function build(mesh:Mesh, type:uint, color:uint = 0x66CCFF, length:Number = 30):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
 			var vertices:Vector.<Number>; 
@@ -101,17 +108,21 @@ package away3d.tools.helpers.data
 			
 			var l0 : Vector3D = new Vector3D();
 			 
-			for (var i:uint = 0; i<numSubGeoms; ++i){					
-			 	vertices = SubGeometry(geometries[i]).vertexData;
+			for (var i:uint = 0; i<numSubGeoms; ++i){
+				var subGeom : ISubGeometry = geometries[i];
+				var stride : int = subGeom.vertexStride;
+				var offset : int = subGeom.vertexOffset;
+			 	vertices = subGeom.vertexData;
 				try{
-					vectorTarget = (type == 1)? SubGeometry(geometries[i]).vertexNormalData : SubGeometry(geometries[i]).vertexTangentData;
+					vectorTarget = (type == 1)? subGeom.vertexNormalData : subGeom.vertexTangentData;
 				} catch(e:Error){
 					continue;
 				}
 				indices = SubGeometry(geometries[i]).indexData;
 				for (j = 0; j < indices.length; j+=3){
-					
-					v0.x = vertices[index = indices[j]*3];
+
+					index = offset + indices[j]*stride;
+					v0.x = vertices[index];
 					_normal.x = vectorTarget[index];
 					v0.y = vertices[index+1];
 					_normal.y = vectorTarget[index+1];
@@ -123,8 +134,8 @@ package away3d.tools.helpers.data
 					l0.z = v0.z + (_normal.z*length);
 					
 					addSegment(new LineSegment(v0, l0, color, color, 1 ));
-					 
-					
+
+					index = offset + indices[j+1]*stride;
 					v1.x = vertices[index = indices[j+1]*3];
 					_normal.x = vectorTarget[index];
 					v1.y = vertices[index+1];
@@ -137,8 +148,8 @@ package away3d.tools.helpers.data
 					l0.z = v1.z + (_normal.z*length);
 					
 					addSegment(new LineSegment(v1, l0, color, color, 1 ));
-					
-					
+
+					index = offset + indices[j+2]*stride;
 					v2.x = vertices[index = indices[j+2]*3];
 					_normal.x = vectorTarget[index];
 					v2.y = vertices[index+1];

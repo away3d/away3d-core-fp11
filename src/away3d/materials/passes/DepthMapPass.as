@@ -62,10 +62,11 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
+			var code : String;
 			// project
-			code += "m44 vt1, vt0, vc0		\n" +
+			code = "m44 vt1, vt0, vc0		\n" +
 					"mul op, vt1, vc4\n";
 
 			if (_alphaThreshold > 0) {
@@ -87,7 +88,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(code:String) : String
 		{
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var filter : String;
@@ -115,12 +116,12 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (_alphaThreshold > 0)
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getUVBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_2, renderable.UVBufferOffset);
+				renderable.activateUVBuffer(1, stage3DProxy);
 
-			super.render(renderable, stage3DProxy, camera, lightPicker);
+			super.render(renderable, stage3DProxy, camera);
 		}
 
 		/**

@@ -24,6 +24,8 @@ package away3d.controllers
 		private var _walkIncrement:Number = 0;
 		private var _strafeIncrement:Number = 0;
 		
+		public var fly:Boolean = false;
+		
 		/**
 		 * Fractional step taken each time the <code>hover()</code> method is called. Defaults to 8.
 		 * 
@@ -185,8 +187,12 @@ package away3d.controllers
 			targetObject.rotationY = _currentPanAngle;
 			
 			if (_walkIncrement) {
-				targetObject.x += _walkIncrement*Math.sin(panAngle*MathConsts.DEGREES_TO_RADIANS);
-				targetObject.z += _walkIncrement*Math.cos(panAngle*MathConsts.DEGREES_TO_RADIANS);
+				if (fly) {
+					targetObject.moveForward(_walkIncrement);
+				} else {
+					targetObject.x += _walkIncrement*Math.sin(panAngle*MathConsts.DEGREES_TO_RADIANS);
+					targetObject.z += _walkIncrement*Math.cos(panAngle*MathConsts.DEGREES_TO_RADIANS);
+				}
 				_walkIncrement = 0;
 			}
 			

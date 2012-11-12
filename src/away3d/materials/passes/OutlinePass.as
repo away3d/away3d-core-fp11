@@ -4,6 +4,7 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.IRenderable;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
@@ -52,8 +53,8 @@ package away3d.materials.passes
 			if (dedicatedMeshes)
 				_outlineMeshes = new Dictionary();
 				
-			_animatableAttributes = ["va0", "va1"];
-			_animationTargetRegisters = ["vt0", "vt1"];
+			_animatableAttributes = Vector.<String>(["va0", "va1"]);
+			_animationTargetRegisters = Vector.<String>(["vt0", "vt1"]);
 			
 		}
 
@@ -126,10 +127,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
+			var code : String;
 			// offset
-			code += "mul vt7, vt1, vc5.x\n" +
+			code = "mul vt7, vt1, vc5.x\n" +
 					"add vt7, vt7, vt0\n" +
 					"mov vt7.w, vt0.w\n" +
 			// project and scale to viewport
@@ -142,7 +144,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			return 	"mov oc, fc0\n";
 		}
@@ -172,7 +174,7 @@ package away3d.materials.passes
 		}
 
 
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var mesh : Mesh, dedicatedRenderable : IRenderable;
 			if (_dedicatedMeshes) {
@@ -181,19 +183,19 @@ package away3d.materials.passes
 
 				var context : Context3D = stage3DProxy._context3D;
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
-				stage3DProxy.setSimpleVertexBuffer(0, dedicatedRenderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, dedicatedRenderable.vertexBufferOffset);
-				stage3DProxy.setSimpleVertexBuffer(1, dedicatedRenderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, dedicatedRenderable.normalBufferOffset);
+				dedicatedRenderable.activateVertexBuffer(0, stage3DProxy);
+				dedicatedRenderable.activateVertexNormalBuffer(1, stage3DProxy);
 				context.drawTriangles(dedicatedRenderable.getIndexBuffer(stage3DProxy), 0, dedicatedRenderable.numTriangles);
 			}
 			else {
-				stage3DProxy.setSimpleVertexBuffer(1, renderable.getVertexNormalBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.normalBufferOffset);
+				renderable.activateVertexNormalBuffer(1, stage3DProxy);
 
-				super.render(renderable, stage3DProxy, camera, lightPicker);
+				super.render(renderable, stage3DProxy, camera);
 			}
 		}
 
 		// creates a new mesh in which all vertices are unique
-		private function createDedicatedMesh(source : SubGeometry) : Mesh
+		private function createDedicatedMesh(source : ISubGeometry) : Mesh
 		{
 			var mesh : Mesh = new Mesh(new Geometry(), null);
 			var dest : SubGeometry = new SubGeometry();
@@ -209,9 +211,11 @@ package away3d.materials.passes
 			var vertexCount : int;
 			var len : int = srcIndices.length;
 			var maxIndex : int;
+			var stride : int = source.vertexStride;
+			var offset : int = source.vertexOffset;
 
 			for (var i : int = 0; i < len; ++i) {
-				index = srcIndices[i]*3;
+				index = offset + srcIndices[i]*stride;
 				x = srcVertices[index];
 				y = srcVertices[index+1];
 				z = srcVertices[index+2];

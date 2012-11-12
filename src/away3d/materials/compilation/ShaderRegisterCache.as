@@ -1,5 +1,6 @@
-package away3d.materials.utils
+package away3d.materials.compilation
 {
+	import away3d.materials.utils.*;
 	/**
 	 * ShaderRegister Cache provides the usage management system for all registers during shading compilation.
 	 */
@@ -12,15 +13,18 @@ package away3d.materials.utils
 		private var _vertexConstantsCache : RegisterPool;
 		private var _textureCache : RegisterPool;
 		private var _vertexAttributesCache : RegisterPool;
-		private var _vertexConstantOffset : uint;
+		protected var _vertexConstantOffset : uint;
 		private var _vertexAttributesOffset : uint;
+		private var _varyingsOffset : uint;
+		protected var _fragmentConstantOffset : uint;
 
 		private var _fragmentOutputRegister : ShaderRegisterElement;
 		private var _vertexOutputRegister : ShaderRegisterElement;
-		private var _numUsedVertexConstants : uint;
-		private var _numUsedFragmentConstants : uint;
+		protected var _numUsedVertexConstants : uint;
+		protected var _numUsedFragmentConstants : uint;
 		private var _numUsedStreams : uint;
 		private var _numUsedTextures : uint;
+		private var _numUsedVaryings : uint;
 
 		/**
 		 * Create a new ShaderRegisterCache object.
@@ -46,9 +50,14 @@ package away3d.materials.utils
 			_numUsedVertexConstants = 0;
 			_numUsedStreams = 0;
 			_numUsedTextures = 0;
+			_numUsedVaryings = 0;
+			_numUsedFragmentConstants = 0;
 			var i : int;
 			for (i = 0; i < _vertexAttributesOffset; ++i) getFreeVertexAttribute();
 			for (i = 0; i < _vertexConstantOffset; ++i) getFreeVertexConstant();
+			for (i = 0; i < _varyingsOffset; ++i) getFreeVarying();
+			for (i = 0; i < _fragmentConstantOffset; ++i) getFreeFragmentConstant();
+			
 		}
 
 		public function dispose() : void
@@ -127,6 +136,7 @@ package away3d.materials.utils
 		 */
 		public function getFreeVarying() : ShaderRegisterElement
 		{
+			++_numUsedVaryings;
 			return _varyingCache.requestFreeVectorReg();
 		}
 
@@ -207,6 +217,26 @@ package away3d.materials.utils
 		{
 			_vertexAttributesOffset = value;
 		}
+		
+		public function get varyingsOffset() : uint
+		{
+			return _varyingsOffset;
+		}
+
+		public function set varyingsOffset(value : uint) : void
+		{
+			_varyingsOffset = value;
+		}
+		
+		public function get fragmentConstantOffset() : uint
+		{
+			return _fragmentConstantOffset;
+		}
+
+		public function set fragmentConstantOffset(value : uint) : void
+		{
+			_fragmentConstantOffset = value;
+		}
 
 		/**
 		 * The fragment output register.
@@ -243,6 +273,11 @@ package away3d.materials.utils
 		public function get numUsedTextures() : uint
 		{
 			return _numUsedTextures;
+		}
+		
+		public function get numUsedVaryings() : uint
+		{
+			return _numUsedVaryings;
 		}
 	}
 }

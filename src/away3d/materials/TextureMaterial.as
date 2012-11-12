@@ -10,7 +10,7 @@
 	/**
 	 * TextureMaterial is a material that uses a texture as the surface's diffuse colour.
 	 */
-	public class TextureMaterial extends DefaultMaterialBase
+	public class TextureMaterial extends SinglePassMaterialBase
 	{
 		/**
 		 * Creates a new TextureMaterial.
@@ -54,12 +54,9 @@
 
 			colorTransform ||= new ColorTransform();
 			colorTransform.alphaMultiplier = value;
+			_screenPass.preserveAlpha = requiresBlending;
+			_screenPass.setBlendMode(blendMode, requiresBlending);
 		}
-
-//		arcane override function activatePass(index : uint, context : Context3D, contextIndex : uint, camera : Camera3D) : void
-//		{
-//			super.arcane::activatePass(index, context, contextIndex, camera);
-//		}
 
 		/**
 		 * The texture object to use for the albedo colour.

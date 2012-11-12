@@ -1,8 +1,8 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
-	
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
@@ -50,7 +50,7 @@ package away3d.loaders.parsers
 		private var _vertices:Vector.<Number>;
 		private var _uvs:Vector.<Number>;
 		private var _indices:Vector.<uint>;
-		private var _subGeometry:SubGeometry;
+		private var _subGeometry:CompactSubGeometry;
 		
 		private var _polyLines:Vector.<Vector3D>;
 		private var _polyLinesIndices:Vector.<int>;
@@ -99,7 +99,12 @@ package away3d.loaders.parsers
 		{
 			if(data is ByteArray) return false;
 			
-			if(data.indexOf("ENDSEC") != -1 && data.indexOf("EOF") != -1)  return true;
+			var str : String = ParserUtil.toString(data);
+			if (!str)
+				return false;
+			
+			if(str.indexOf("ENDSEC") != -1 && str.indexOf("EOF") != -1)
+				return true;
 
 			return false;
 		}
@@ -428,7 +433,7 @@ package away3d.loaders.parsers
 				} else {
 					// glad we keeped track. Lets reuse this mesh.
 					_activeMesh = _meshesDic[_meshName];
-					_subGeometry = _activeMesh.geometry.subGeometries[_activeMesh.geometry.subGeometries.length-1];
+					_subGeometry = CompactSubGeometry(_activeMesh.geometry.subGeometries[_activeMesh.geometry.subGeometries.length-1]);
 					_vertices = _subGeometry.vertexData;
 					_uvs = _subGeometry.UVData;
 					_indices = _subGeometry.indexData;
@@ -437,10 +442,9 @@ package away3d.loaders.parsers
 			}
 			 
 			if(_indices.length+3 > LIMIT ){
-				_subGeometry.updateVertexData(_vertices);
+				_subGeometry.fromVectors(_vertices, _uvs, null, null);
 				_subGeometry.updateIndexData(_indices);
-				_subGeometry.updateUVData(_uvs);
-				
+
 				addSubGeometry(_activeMesh.geometry);
 			}
 			
@@ -454,10 +458,9 @@ package away3d.loaders.parsers
 			if( _v2.x != _v3.x || _v2.y!= _v3.y || _v2.z != _v3.z){
 				
 				if(_indices.length+3 > LIMIT ){
-					_subGeometry.updateVertexData(_vertices);
+					_subGeometry.fromVectors(_vertices, _uvs, null, null);
 					_subGeometry.updateIndexData(_indices);
-					_subGeometry.updateUVData(_uvs);
-					
+
 					addSubGeometry(_activeMesh.geometry);
 					
 					ind = 0;
@@ -499,7 +502,7 @@ package away3d.loaders.parsers
 		
 		private function addSubGeometry(geom:Geometry):void
 		{
-			_subGeometry = new SubGeometry();
+			_subGeometry = new CompactSubGeometry();
 			_subGeometry.autoDeriveVertexNormals = true;
 			_subGeometry.autoDeriveVertexTangents = true;
 			geom.addSubGeometry(_subGeometry);
@@ -531,10 +534,9 @@ package away3d.loaders.parsers
 		
 		private function finalizeMesh():void
 		{
-			_subGeometry.updateVertexData(_vertices);
+			_subGeometry.fromVectors(_vertices, _uvs, null, null);
 			_subGeometry.updateIndexData(_indices);
-			_subGeometry.updateUVData(_uvs);
-					
+
 			 finalizeAsset(_activeMesh);
 			 
 			 _itemColor = NaN;

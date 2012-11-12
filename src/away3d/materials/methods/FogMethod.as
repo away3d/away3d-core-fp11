@@ -2,10 +2,8 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
-
-	import flash.display3D.Context3DProgramType;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 
 	use namespace arcane;
 
@@ -89,18 +87,21 @@ package away3d.materials.methods
 			var fogColor : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var fogData : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			regCache.addFragmentTempUsages(temp, 1);
+			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 			vo.fragmentConstantsIndex = fogColor.index*4;
 
-			code += "dp3 " + temp + ".w, " + _viewDirVaryingReg+".xyz	, " + _viewDirVaryingReg+".xyz\n" + 	// dist²
-					"sqt " + temp + ".w, " + temp + ".w										\n" + 	// dist
-					"sub " + temp + ".w, " + temp + ".w, " + fogData + ".x					\n" +
-					"mul " + temp + ".w, " + temp + ".w, " + fogData + ".y					\n" +
-					"sat " + temp + ".w, " + temp + ".w										\n" +
-					"sub " + temp + ".xyz, " + fogColor + ".xyz, " + targetReg + ".xyz\n" + 			// (fogColor- col)
-					"mul " + temp + ".xyz, " + temp + ".xyz, " + temp + ".w					\n" +			// (fogColor- col)*fogRatio
-					"add " + targetReg + ".xyz, " + targetReg + ".xyz, " + temp + ".xyz\n";			// fogRatio*(fogColor- col) + col
+			code += "dp3 " + temp2 + ".w, " + _sharedRegisters.viewDirVarying+".xyz	, " + _sharedRegisters.viewDirVarying+".xyz\n" + 	// dist²
+					"sqt " + temp2 + ".w, " + temp2 + ".w										\n" + 	// dist
+					"sub " + temp2 + ".w, " + temp2 + ".w, " + fogData + ".x					\n" +
+					"mul " + temp2 + ".w, " + temp2 + ".w, " + fogData + ".y					\n" +
+					"sat " + temp2 + ".w, " + temp2 + ".w										\n" +
+					"sub " + temp + ", " + fogColor + ", " + targetReg + "\n" + 			// (fogColor- col)
+					"mul " + temp + ", " + temp + ", " + temp2 + ".w					\n" +			// (fogColor- col)*fogRatio
+					"add " + targetReg + ", " + targetReg + ", " + temp + "\n";			// fogRatio*(fogColor- col) + col
 
+			regCache.removeFragmentTempUsage(temp);
 
 			return code;
 		}

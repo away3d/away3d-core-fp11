@@ -3,6 +3,7 @@ package away3d.tools.utils
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 
@@ -110,7 +111,7 @@ package away3d.tools.utils
 		private function snap(mesh:Mesh):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:int = geometries.length;
 			
 			var vertices:Vector.<Number>;
@@ -118,14 +119,18 @@ package away3d.tools.utils
 			var i : uint;
 			var vecLength : uint;
 			var subGeom:SubGeometry;
+			var stride : uint;
 			
 			for (i = 0; i < numSubGeoms; ++i){
 				subGeom = SubGeometry(geometries[i]);
 				vertices = subGeom.vertexData;
 				vecLength = vertices.length;
+				stride = subGeom.vertexStride;
 
-				for (j = 0; j < vecLength;++j){
+				for (j = subGeom.vertexOffset; j < vecLength; j += stride){
 					vertices[j] -= vertices[j]%_unit;
+					vertices[j+1] -= vertices[j+1]%_unit;
+					vertices[j+2] -= vertices[j+2]%_unit;
 				}
 				
 				subGeom.updateVertexData(vertices);

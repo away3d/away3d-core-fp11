@@ -23,14 +23,27 @@ package away3d.core.base
 	 */
 	public class Geometry extends NamedAssetBase implements IAsset
 	{
-		private var _subGeometries : Vector.<SubGeometry>;
+		private var _subGeometries : Vector.<ISubGeometry>;
+		
+		public function get assetType() : String
+		{
+			return AssetType.GEOMETRY;
+		}
+		
+		/**
+		 * A collection of SubGeometry objects, each of which contain geometrical data such as vertices, normals, etc.
+		 */
+		public function get subGeometries() : Vector.<ISubGeometry>
+		{
+			return _subGeometries;
+		}
 		
 		/**
 		 * Creates a new Geometry object.
 		 */
 		public function Geometry()
 		{
-			_subGeometries = new Vector.<SubGeometry>();
+			_subGeometries = new Vector.<ISubGeometry>();
 		}
 
 		public function applyTransformation(transform:Matrix3D):void
@@ -41,25 +54,11 @@ package away3d.core.base
 			}
 		}
 		
-		
-		public function get assetType() : String
-		{
-			return AssetType.GEOMETRY;
-		}
-		
-		/**
-		 * A collection of SubGeometry objects, each of which contain geometrical data such as vertices, normals, etc.
-		 */
-		public function get subGeometries() : Vector.<SubGeometry>
-		{
-			return _subGeometries;
-		}
-		
 		/**
 		 * Adds a new SubGeometry object to the list.
 		 * @param subGeometry The SubGeometry object to be added.
 		 */
-		public function addSubGeometry(subGeometry : SubGeometry) : void
+		public function addSubGeometry(subGeometry : ISubGeometry) : void
 		{
 			_subGeometries.push(subGeometry);
 			
@@ -74,7 +73,7 @@ package away3d.core.base
 		 * Removes a new SubGeometry object from the list.
 		 * @param subGeometry The SubGeometry object to be removed.
 		 */
-		public function removeSubGeometry(subGeometry : SubGeometry) : void
+		public function removeSubGeometry(subGeometry : ISubGeometry) : void
 		{
 			_subGeometries.splice(_subGeometries.indexOf(subGeometry), 1);
 			subGeometry.parentGeometry = null;
@@ -118,7 +117,7 @@ package away3d.core.base
 
 			for (var i : uint = 0; i < numSubGeoms; ++i)
 			{
-				var subGeom:SubGeometry = _subGeometries[0];
+				var subGeom:ISubGeometry = _subGeometries[0];
 				removeSubGeometry(subGeom);
 				subGeom.dispose();
 			}
@@ -135,13 +134,30 @@ package away3d.core.base
 			for (var i : uint = 0; i < numSubGeoms; ++i)
 				_subGeometries[i].scaleUV(scaleU, scaleV);
 		}
+
+		/**
+		 * Updates the SubGeometries so all vertex data is represented in different buffers.
+		 * Use this for compatibility with Pixel Bender and PBPickingCollider
+		 */
+		public function convertToSeparateBuffers() : void
+		{
+			var subGeom : ISubGeometry;
+			var numSubGeoms : int = _subGeometries.length;
+			for (var i : int = 0; i < numSubGeoms; ++i) {
+				subGeom = _subGeometries[i];
+				if (subGeom is SubGeometry) continue;
+				removeSubGeometry(subGeom);
+				addSubGeometry(subGeom.cloneWithSeperateBuffers());
+				subGeom.dispose();
+			}
+		}
 		
 		arcane function validate() : void
 		{
 			// To be overridden when necessary
 		}
 		
-		arcane function invalidateBounds(subGeom : SubGeometry) : void
+		arcane function invalidateBounds(subGeom : ISubGeometry) : void
 		{
 			if (hasEventListener(GeometryEvent.BOUNDS_INVALID))
 				dispatchEvent(new GeometryEvent(GeometryEvent.BOUNDS_INVALID, subGeom));

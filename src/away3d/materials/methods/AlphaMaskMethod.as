@@ -2,8 +2,8 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
@@ -61,7 +61,7 @@ package away3d.materials.methods
 		{
 			var textureReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			var uvReg : ShaderRegisterElement = _useSecondaryUV? _secondaryUVFragmentReg : _uvVaryingReg;
+			var uvReg : ShaderRegisterElement = _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying;
 			vo.texturesIndex = textureReg.index;
 
 			return 	getTexSampleCode(vo, temp, textureReg, uvReg) +

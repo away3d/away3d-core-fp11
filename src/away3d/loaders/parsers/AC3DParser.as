@@ -1,20 +1,18 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
-	
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.TextureMaterial;
 	import away3d.materials.ColorMaterial;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DBase;
+	import away3d.materials.TextureMaterial;
 	import away3d.materials.utils.DefaultMaterialManager;
+	import away3d.textures.Texture2DBase;
 	
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
@@ -37,7 +35,6 @@ package away3d.loaders.parsers
 		private var _startedParsing : Boolean;
 		private var _activeContainer:ObjectContainer3D;
 		private var _meshList:Vector.<Mesh>;
-		private var _inited:Boolean;
 		private var _trunk:Array;
 		private var _containersList:Array = [];
 		private var _tmpcontainerpos:Vector3D = new Vector3D(0.0,0.0,0.0);
@@ -446,16 +443,13 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			var sub_geom:SubGeometry;
+			var sub_geom:CompactSubGeometry;
 			var geom:Geometry = mesh.geometry;
 			
 			for(i=0;i<subGeomsData.length;i+=3){
-				sub_geom = new SubGeometry();
-				sub_geom.autoDeriveVertexNormals = true;
-				sub_geom.autoDeriveVertexTangents = true;
-				sub_geom.updateVertexData(subGeomsData[i]);
+				sub_geom = new CompactSubGeometry();
+				sub_geom.fromVectors(subGeomsData[i], subGeomsData[i+2], null, null);
 				sub_geom.updateIndexData(subGeomsData[i+1]);
-				sub_geom.updateUVData(subGeomsData[i+2]);
 				geom.addSubGeometry(sub_geom);
 			}
 			 

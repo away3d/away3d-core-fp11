@@ -42,7 +42,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
 			return  "m44 vt7, va0, vc0		\n" +
 					// fit within texture range
@@ -53,7 +53,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			return 	"tex ft0, v0, fs0 <cube,linear,clamp,miplinear>	\n" +
 					"mov oc, ft0							\n";
