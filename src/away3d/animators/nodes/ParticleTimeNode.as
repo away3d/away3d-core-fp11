@@ -22,73 +22,27 @@ package away3d.animators.nodes
 		/** @private */
 		arcane static const TIME_CONSTANT_INDEX:uint = 1;
 		
-		protected var _hasDuration:Boolean;
-		protected var _hasDelay:Boolean;
-		protected var _loop:Boolean;
-		
-		/**
-		 * Defines whether the time track is in loop mode. Defaults to false.
-		 */
-		public function get loop():Boolean
-		{
-			return _loop;
-		}
-		public function set loop(value:Boolean):void
-		{
-			_loop = value;
-			
-			if (_loop)
-				_hasDuration = true;
-			else
-				_hasDelay = false;
-		}
-		
-		/**
-		 * 
-		 */
-		public function get hasDuration():Boolean
-		{
-			return _hasDuration;
-		}
-		
-		public function set hasDuration(value:Boolean):void
-		{
-			_hasDuration = value;
-			if (!_hasDuration) {
-				_hasDelay = false;
-				_loop = false;
-			}
-		}
-		
-		/**
-		 * 
-		 */
-		public function get hasDelay():Boolean
-		{
-			return _hasDelay;
-		}
-		
-		public function set hasDelay(value:Boolean):void
-		{
-			_hasDelay = value;
-			if (_hasDelay)
-			{
-				_loop = true;
-				_hasDuration = true;
-			}
-		}
+		/** @private */
+		arcane var _usesDuration:Boolean;
+		/** @private */
+		arcane var _usesDelay:Boolean;
+		/** @private */
+		arcane var _usesLooping:Boolean;
 		
 		/**
 		 * Creates a new <code>ParticleTimeNode</code>
 		 *
-		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
-		 * @param    [optional] loop            Defines whether the time track is in loop mode. Defaults to false.
+		 * @param    [optional] usesDuration    Defines whether the node uses the <code>duration</code> data in the static properties function to determine how long a particle is visible for. Defaults to false.
+		 * @param    [optional] usesDelay       Defines whether the node uses the <code>delay</code> data in the static properties function to determine how long a particle is hidden for. Defaults to false. Requires <code>usesDuration</code> to be true.
+		 * @param    [optional] usesLooping     Defines whether the node creates a looping timeframe for each particle determined by the <code>startTime</code>, <code>duration</code> and <code>delay</code> data in the static properties function. Defaults to false. Requires <code>usesLooping</code> to be true.
 		 */
-		public function ParticleTimeNode(loop:Boolean = false)
+		public function ParticleTimeNode(usesDuration:Boolean = false, usesLooping:Boolean = false, usesDelay:Boolean = false)
 		{
 			_stateClass = ParticleTimeState;
 			
-			_loop = loop;
+			_usesDuration = usesDuration;
+			_usesLooping = usesLooping;
+			_usesDelay = usesDelay;
 			
 			super("ParticleTimeNode", ParticlePropertiesMode.LOCAL, 4, 0);
 		}
@@ -109,12 +63,12 @@ package away3d.animators.nodes
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			code += "sge " + temp + "," + animationRegisterCache.vertexTime + "," + animationRegisterCache.vertexZeroConst + "\n";
 			code += "mul " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
-			if (_hasDuration)
+			if (_usesDuration)
 			{
-				if (_loop)
+				if (_usesLooping)
 				{
 					var div:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
-					if (_hasDelay)
+					if (_usesDelay)
 					{
 						code += "div " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".z\n";
 						code += "frc " + div + "," + div + "\n";

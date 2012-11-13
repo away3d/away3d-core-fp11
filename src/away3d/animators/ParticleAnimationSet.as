@@ -26,18 +26,19 @@ package away3d.animators
 	 */
 	public class ParticleAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
+		//all other nodes dependent on it
+		private var _timeNode:ParticleTimeNode;
+		
+		/**
+		 * Property used by particle nodes that require compilation at the end of the shader
+		 */
 		public static const POST_PRIORITY:int = 9;
 		
 		private var _animationRegisterCache:AnimationRegisterCache;
-		
 		private var _animationSubGeometries:Dictionary = new Dictionary(true);
-		
 		private var _particleNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
-		
 		private var _localDynamicNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
-		
 		private var _localStaticNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
-		
 		private var _totalLenOfOneVertex:int = 0;
 		
 		//set true if has an node which will change UV
@@ -48,17 +49,20 @@ package away3d.animators
 		public var needVelocity:Boolean;
 		//set if has a billboard node.
 		public var hasBillboard:Boolean;
-		
-		//all other nodes dependent on it
-		private var timeNode:ParticleTimeNode;
 		private var _initParticleFunc:Function;
 		
 		
-		public function ParticleAnimationSet()
+		/**
+		 * Creates a new <code>ParticleAnimationSet</code>
+		 *
+		 * @param    [optional] usesDuration    Defines whether the animation set uses the <code>duration</code> data in its static properties function to determine how long a particle is visible for. Defaults to false.
+		 * @param    [optional] usesLooping     Defines whether the animation set uses a looping timeframe for each particle determined by the <code>startTime</code>, <code>duration</code> and <code>delay</code> data in its static properties function. Defaults to false. Requires <code>usesDuration</code> to be true.
+		 * @param    [optional] usesDelay       Defines whether the animation set uses the <code>delay</code> data in its static properties function to determine how long a particle is hidden for. Defaults to false. Requires <code>usesLooping</code> to be true.
+		 */
+		public function ParticleAnimationSet(usesDuration:Boolean = false, usesLooping:Boolean = false, usesDelay:Boolean = false)
 		{
-			super();
-			timeNode = new ParticleTimeNode();
-			addAnimation(timeNode);
+			//automatically add a particle time node to the set
+			addAnimation(_timeNode = new ParticleTimeNode(usesDuration, usesLooping, usesDelay));
 		}
 		
 		public function get particleNodes():Vector.<ParticleNodeBase>
@@ -71,22 +75,9 @@ package away3d.animators
 			return _animationRegisterCache;
 		}
 		
-		public function set hasDuration(value:Boolean):void
-		{
-			timeNode.hasDuration = value;
-		}
-		
-		public function set hasDelay(value:Boolean):void
-		{
-			timeNode.hasDelay = value;
-		}
-		
-		
-		public function set loop(value:Boolean):void
-		{
-			timeNode.loop = value;
-		}
-		
+		/**
+		 * @inheritDoc
+		 */
 		override public function addAnimation(node:AnimationNodeBase):void
 		{
 			var i:int;
