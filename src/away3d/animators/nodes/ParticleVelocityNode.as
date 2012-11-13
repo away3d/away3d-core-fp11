@@ -1,18 +1,18 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleVelocityState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to set the starting velocity of a particle.
 	 */
 	public class ParticleVelocityNode extends ParticleNodeBase
 	{
@@ -60,6 +60,14 @@ package away3d.animators.nodes
 				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + velocityValue + ".xyz," + animationRegisterCache.velocityTarget + "\n";
 			
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleVelocityState
+		{
+			return animator.getAnimationState(this) as ParticleVelocityState;
 		}
 		
 		/**

@@ -1,18 +1,16 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.animators.states.ParticleTimeState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
-	 * @author ...
+	 * A particle animation node used as the base node for timekeeping inside a particle. Automatically added to a particle animation set on instatiation.
 	 */
 	public class ParticleTimeNode extends ParticleNodeBase
 	{
@@ -97,6 +95,14 @@ package away3d.animators.nodes
 				code += "mov " + animationRegisterCache.fragmentLife + "," + animationRegisterCache.vertexLife +"\n";
 			}
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleTimeState
+		{
+			return animator.getAnimationState(this) as ParticleTimeState;
 		}
 		
 		/**

@@ -1,19 +1,19 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.data.ParticleProperties;
-	import flash.geom.Vector3D;
-	import away3d.arcane;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleSpriteSheetState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * Note: to use this class, make sure material::repeat is ture
+	 * A particle animation node used when a spritesheet texture is required to animate the particle.
+	 * NB: to enable use of this node, the <code>repeat</code> property on the material has to be set to true.
 	 */
 	public class ParticleSpriteSheetNode extends ParticleNodeBase
 	{
@@ -107,14 +107,6 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
-		{
-			particleAnimationSet.hasUVNode = true;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
 		override public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			//get 2 vc
@@ -183,6 +175,22 @@ package away3d.animators.nodes
 			code += "add " + u + "," + u + "," + temp + "\n";
 			
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleSpriteSheetState
+		{
+			return animator.getAnimationState(this) as ParticleSpriteSheetState;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
+		{
+			particleAnimationSet.hasUVNode = true;
 		}
 		
 		/**

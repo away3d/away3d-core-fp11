@@ -9,8 +9,7 @@ package away3d.animators.nodes
 	use namespace arcane;
 	
 	/**
-	 * ...
-	 * @author ...
+	 * Provides an abstract base class for particle animation nodes.
 	 */
 	public class ParticleNodeBase extends AnimationNodeBase
 	{
@@ -69,7 +68,7 @@ package away3d.animators.nodes
 			
 		}
 		
-		public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
+		arcane function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
 		{
 			
 		}

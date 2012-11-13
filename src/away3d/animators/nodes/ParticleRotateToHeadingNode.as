@@ -1,17 +1,16 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleRotateToHeadingState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to control the rotation of a particle to match its heading vector.
 	 */
 	public class ParticleRotateToHeadingNode extends ParticleNodeBase
 	{
@@ -26,14 +25,6 @@ package away3d.animators.nodes
 			super("ParticleRotateToHeadingNode", ParticlePropertiesMode.GLOBAL, 0, 3);
 			
 			_stateClass = ParticleRotateToHeadingState;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
-		{
-			particleAnimationSet.needVelocity = true;
 		}
 		
 		/**
@@ -194,6 +185,22 @@ package away3d.animators.nodes
 				
 			}
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleRotateToHeadingState
+		{
+			return animator.getAnimationState(this) as ParticleRotateToHeadingState;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
+		{
+			particleAnimationSet.needVelocity = true;
 		}
 	}
 }

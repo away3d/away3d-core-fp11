@@ -1,18 +1,18 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.arcane;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleAccelerationState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to apply a constant acceleration vector to the motion of a particle.
 	 */
 	public class ParticleAccelerationNode extends ParticleNodeBase
 	{
@@ -68,6 +68,14 @@ package away3d.animators.nodes
 			code += "mul " + temp +"," + temp + "," + animationRegisterCache.vertexTime + "\n";
 			code += "add " + animationRegisterCache.positionTarget +".xyz," + temp + "," + animationRegisterCache.positionTarget + ".xyz\n";
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleAccelerationState
+		{
+			return animator.getAnimationState(this) as ParticleAccelerationState;
 		}
 		
 		/**

@@ -1,18 +1,18 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.data.ParticleProperties;
-	import flash.geom.Vector3D;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleScaleState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to control the scale variation of a particle over time.
 	 */
 	public class ParticleScaleNode extends ParticleNodeBase
 	{
@@ -96,6 +96,14 @@ package away3d.animators.nodes
 			code += "mul " + animationRegisterCache.scaleAndRotateTarget +"," +animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
 			
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleScaleState
+		{
+			return animator.getAnimationState(this) as ParticleScaleState;
 		}
 		
 		/**
