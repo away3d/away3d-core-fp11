@@ -60,9 +60,9 @@ package away3d.animators.data
 		public var hasBillboard:Boolean;
 		
 		
-		public function AnimationRegisterCache()
+		public function AnimationRegisterCache(profile : String)
 		{
-			
+			super(profile);
 		}
 		
 		override public function reset():void

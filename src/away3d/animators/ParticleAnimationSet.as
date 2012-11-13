@@ -123,10 +123,10 @@ package away3d.animators
 				context.setVertexBufferAt(i, null);
 		}
 		
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
-			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache();
+			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache(profile);
 			
 			//reset animationRegisterCache
 			_animationRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
@@ -183,7 +183,7 @@ package away3d.animators
 			return code;
 		}
 		
-		override public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		override public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String
 		{
 			_animationRegisterCache.setShadedTarget(shadedTarget);
 			var code:String = "";

@@ -49,7 +49,7 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String;
+		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String;
 		
 		
 		/**
@@ -59,7 +59,7 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String;
+		function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String;
 		
 		
 		function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String;
