@@ -306,12 +306,12 @@ package away3d.materials
 		{
 			if (_distanceBasedDepthRender) {
 				if (renderable.animator)
-					_distancePass.updateAnimationState(renderable, stage3DProxy);
+					_distancePass.updateAnimationState(renderable, stage3DProxy, camera);
 				_distancePass.render(renderable, stage3DProxy, camera);
 			}
 			else {
 				if (renderable.animator)
-					_depthPass.updateAnimationState(renderable, stage3DProxy);
+					_depthPass.updateAnimationState(renderable, stage3DProxy, camera);
 				_depthPass.render(renderable, stage3DProxy, camera);
 			}
 		}
@@ -357,7 +357,7 @@ package away3d.materials
 			var pass : MaterialPassBase = _passes[index];
 
 			if (renderable.animator)
-				pass.updateAnimationState(renderable, stage3DProxy);
+				pass.updateAnimationState(renderable, stage3DProxy, entityCollector.camera);
 
 			pass.render(renderable, stage3DProxy, entityCollector.camera);
 		}
@@ -384,12 +384,15 @@ package away3d.materials
 					throw new Error("A Material instance cannot be shared across renderables with different animator libraries");
 				}
 				else {
-					_animationSet = owner.animator.animationSet;
-					for (var i : int = 0; i < _numPasses; ++i)
-						_passes[i].animationSet = _animationSet;
-					_depthPass.animationSet = _animationSet;
-					_distancePass.animationSet = _animationSet;
-					invalidatePasses(null);
+					if (_animationSet != owner.animator.animationSet)
+					{
+						_animationSet = owner.animator.animationSet;
+						for (var i : int = 0; i < _numPasses; ++i)
+							_passes[i].animationSet = _animationSet;
+						_depthPass.animationSet = _animationSet;
+						_distancePass.animationSet = _animationSet;
+						invalidatePasses(null);
+					}
 				}
 			}
 		}

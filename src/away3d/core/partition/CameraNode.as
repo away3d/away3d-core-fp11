@@ -24,16 +24,5 @@ package away3d.core.partition
 		{
 			// todo: dead end for now, if it has a debug mesh, then sure accept that
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function isInFrustum(camera : Camera3D) : Boolean
-		{
-			// TODO: not used
-			camera = camera; 
-			// todo: maybe test the debug mesh when present
-			return true;
-		}
 	}
 }

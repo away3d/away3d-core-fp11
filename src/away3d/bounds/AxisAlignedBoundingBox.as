@@ -223,13 +223,11 @@ package away3d.bounds
 		/**
 		 * @inheritDoc
 		 */
-		override public function containsPoint(position : Vector3D) : Boolean
-		{
-			var px : Number = position.x - _centerX, py : Number = position.y - _centerY, pz : Number = position.z - _centerZ;
-			if (px > _halfExtentsX || px < -_halfExtentsX) return false;
-			if (py > _halfExtentsY || py < -_halfExtentsY) return false;
-			if (pz > _halfExtentsZ || pz < -_halfExtentsZ) return false;
-			return true;
+		override public function containsPoint( position:Vector3D ):Boolean {
+			var px:Number = position.x - _centerX, py:Number = position.y - _centerY, pz:Number = position.z - _centerZ;
+			return 	px <= _halfExtentsX && px >= -_halfExtentsX &&
+					py <= _halfExtentsY && py >= -_halfExtentsY &&
+					pz <= _halfExtentsZ && pz >= -_halfExtentsZ;
 		}
 
 		/**
@@ -271,6 +269,12 @@ package away3d.bounds
 			return _halfExtentsZ;
 		}
 
+		/**
+		 * Finds the closest point on the bounding volume to another given point. This can be used for maximum error calculations for content within a given bound.
+		 * @param point The point for which to find the closest point on the bounding volume
+		 * @param target An optional Vector3D to store the result to prevent creating a new object.
+		 * @return
+		 */
 		public function closestPointToPoint(point : Vector3D, target : Vector3D = null) : Vector3D
 		{
 			var p : Number;

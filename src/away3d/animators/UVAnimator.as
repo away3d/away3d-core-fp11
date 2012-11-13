@@ -3,6 +3,7 @@ package away3d.animators
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
 	import away3d.animators.data.*;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.materials.*;
@@ -21,7 +22,7 @@ package away3d.animators
 		
 		/**
 		 * Creates a new <code>UVAnimator</code> object.
-		 * 
+		 *
 		 * @param uvAnimationSet The animation data set containing the uv animation states used by the animator.
 		 */
 		public function UVAnimator(uvAnimationSet:UVAnimationSet)
@@ -34,7 +35,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int, camera:Camera3D) : void
 		{
 			var material:TextureMaterial = renderable.material as TextureMaterial;
 			var subMesh:SubMesh = renderable as SubMesh;

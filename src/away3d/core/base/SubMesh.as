@@ -1,6 +1,7 @@
 package away3d.core.base
 {
 
+	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
@@ -35,7 +36,11 @@ package away3d.core.base
 		private var _scaleV : Number = 1;
 		private var _offsetU : Number = 0;
 		private var _offsetV : Number = 0;
-
+		
+		public var animationSubGeometry : AnimationSubGeometry;
+		
+		public var animatorSubGeometry : AnimationSubGeometry;
+		
 		/**
 		 * Creates a new SubMesh object
 		 * @param subGeometry The SubGeometry object which provides the geometry data for this SubMesh.

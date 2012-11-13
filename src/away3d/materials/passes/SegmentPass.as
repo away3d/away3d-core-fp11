@@ -102,7 +102,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			return "mov oc, v0\n";
 		}
