@@ -293,7 +293,7 @@ package away3d.materials.compilation {
 						"mul op, " + tempReg + ", vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
 			}
 
-			_vertexCode = code + _vertexCode;
+			_vertexCode += code;
 		}
 
 		protected function initRegisterIndices() : void
