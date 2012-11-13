@@ -22,6 +22,7 @@
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
+	import flash.events.Event;
 
 	use namespace arcane;
 
@@ -117,7 +118,9 @@
 
 		override public function set lightPicker(value : LightPickerBase) : void
 		{
+			if (_lightPicker) _lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
 			super.lightPicker = value;
+			if (_lightPicker) _lightPicker.addEventListener(Event.CHANGE, onLightsChange);
 			invalidateScreenPasses();
 		}
 
@@ -208,7 +211,7 @@
 			_specularMethod = value;
 			invalidateScreenPasses();
 		}
-		
+
  		/**
 		 * Adds a shading method to the end of the shader. Note that shading methods can
 		 * not be reused across materials.
@@ -364,28 +367,22 @@
 		 */
 		arcane override function updateMaterial(context : Context3D) : void
 		{
-			var passesInvalid : Boolean;
+			clearPasses();
 
-			if (_screenPassesInvalid) {
+			if (_screenPassesInvalid)
 				updateScreenPasses();
-				passesInvalid = true;
-			}
 
-			if (passesInvalid || isAnyScreenPassInvalid()) {
-				clearPasses();
+			addChildPassesFor(_casterLightPass);
+			if (_nonCasterLightPasses)
+				for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
+					addChildPassesFor(_nonCasterLightPasses[i]);
+			addChildPassesFor(_effectsPass);
 
-				addChildPassesFor(_casterLightPass);
-				if (_nonCasterLightPasses)
-					for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
-						addChildPassesFor(_nonCasterLightPasses[i]);
-				addChildPassesFor(_effectsPass);
-
-				addScreenPass(_casterLightPass);
-				if (_nonCasterLightPasses)
-					for (i = 0; i < _nonCasterLightPasses.length; ++i)
-						addScreenPass(_nonCasterLightPasses[i]);
-				addScreenPass(_effectsPass);
-			}
+			addScreenPass(_casterLightPass);
+			if (_nonCasterLightPasses)
+				for (i = 0; i < _nonCasterLightPasses.length; ++i)
+					addScreenPass(_nonCasterLightPasses[i]);
+			addScreenPass(_effectsPass);
 		}
 
 		private function addScreenPass(pass : CompiledPass) : void
@@ -609,6 +606,11 @@
 		protected function invalidateScreenPasses() : void
 		{
 			_screenPassesInvalid = true;
+		}
+
+		private function onLightsChange(event : Event) : void
+		{
+			invalidateScreenPasses();
 		}
 	}
 }
