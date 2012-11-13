@@ -295,6 +295,12 @@ package away3d.core.base
 		}
 
 
+		override protected function disposeVertexBuffers(buffers : Vector.<VertexBuffer3D>) : void
+		{
+			super.disposeVertexBuffers(buffers);
+			_activeBuffer = null;
+		}
+
 		override protected function invalidateBuffers(invalid : Vector.<Boolean>) : void
 		{
 			super.invalidateBuffers(invalid);
