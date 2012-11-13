@@ -37,7 +37,7 @@ package away3d.textures
 
 		public function get format() : String
 		{
-			return Context3DTextureFormat.BGRA;
+			return _format;
 		}
 		
 		public function get assetType() : String

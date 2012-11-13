@@ -22,11 +22,6 @@
 			_hasMipmaps = _atfData.numTextures > 1;
 		}
 
-		override public function get format() : String
-		{
-			return Context3DTextureFormat.COMPRESSED;
-		}
-
 		public function get atfData() : ATFData
 		{
 			return _atfData;
