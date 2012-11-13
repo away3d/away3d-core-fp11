@@ -65,6 +65,11 @@ package away3d.animators
 			return _animationStates[node] ||= new className(this, node);
 		}
 		
+		public function getAnimationStateByName(name:String):AnimationStateBase
+		{
+			return getAnimationState(_animationSet.getAnimation(name));
+		}
+		
 		/**
 		 * Returns the internal absolute time of the animator, calculated by the current time and the playback speed.
 		 * 

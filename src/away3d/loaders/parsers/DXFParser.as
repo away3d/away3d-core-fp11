@@ -1,9 +1,7 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
-	
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
@@ -18,12 +16,13 @@ package away3d.loaders.parsers
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
-
+	 
 	use namespace arcane;
 	
 	/**
 	* DXFParser provides a parser for the dxf 3D renderable data.
 	* supported blocks type: FACEDATA, LINE. Color from dxf color table is set where index is encountered 
+	* POLYLINE(64 polyface mesh) and VERTEX.
 	*/
 	
 	public class DXFParser extends ParserBase
@@ -34,6 +33,8 @@ package away3d.loaders.parsers
 		
 		private const FACE:String = "3DFACE";
 		private const LINE:String = "LINE";
+		private const VERTEX:String = "VERTEX";
+		private const POLYLINE:String = "POLYLINE";
 		
 		private var _textData:String;
 		private var _startedParsing : Boolean;
@@ -50,6 +51,9 @@ package away3d.loaders.parsers
 		private var _uvs:Vector.<Number>;
 		private var _indices:Vector.<uint>;
 		private var _subGeometry:CompactSubGeometry;
+		
+		private var _polyLines:Vector.<Vector3D>;
+		private var _polyLinesIndices:Vector.<int>;
 		 
 		private var _charIndex:uint;
 		private var _oldIndex:uint;
@@ -70,7 +74,6 @@ package away3d.loaders.parsers
 		 * @param uri The url or id of the data or file to be parsed.
 		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
-		
 		public function DXFParser()
 		{
 			super(ParserDataFormat.PLAIN_TEXT);
@@ -94,9 +97,14 @@ package away3d.loaders.parsers
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			if(!data is String) return false;
+			if(data is ByteArray) return false;
 			
-			if(data.indexOf("ENDSEC") != -1 && data.indexOf("EOF") != -1)  return true;
+			var str : String = ParserUtil.toString(data);
+			if (!str)
+				return false;
+			
+			if(str.indexOf("ENDSEC") != -1 && str.indexOf("EOF") != -1)
+				return true;
 
 			return false;
 		}
@@ -110,8 +118,8 @@ package away3d.loaders.parsers
 			
 			if(!_startedParsing) {
 				_textData = getTextData();
-				
-				if(_textData.indexOf(FACE) == -1 && _textData.indexOf(LINE) == -1){
+				 
+				if(_textData.indexOf(FACE) == -1 && _textData.indexOf(LINE) == -1 && _textData.indexOf(POLYLINE) == -1 && _textData.indexOf(VERTEX) == -1){
 					//we're done, nothing we do support in there
 					return PARSING_DONE;
 				}
@@ -133,37 +141,43 @@ package away3d.loaders.parsers
 				_stringLen = _textData.length;
 				_oldIndex = 0;
 				_segCount = 0;
+				_vSet = 0;
+				
+				if(_textData.indexOf(CR) == -1)
+					return PARSING_DONE;
 			}
 			
 			var tag:String;
 			var isBlock:Boolean;
 			var isTag:Boolean;
-			var dataSet:uint;
+			var _vSet:uint;
 			var lineVal:Number;
 			
-			while(_charIndex<_stringLen  && hasTime()){
+			while(_charIndex<_stringLen && (hasTime() || isBlock)){
 				 
 				_charIndex = _textData.indexOf(CR, _oldIndex);
 							
-				if(_charIndex == -1)
-					_charIndex = _stringLen;
-								
 				line = _textData.substring(_oldIndex, _charIndex);
-				if(line == "") continue;
-				
 				line = line.replace(_trim, "");
 				
-				if(line == FACE || line == LINE){
-					if(_blockType == FACE && dataSet == 12) finalizeFace();
-					dataSet = 0;
+				if(line == ""){
+					_oldIndex = _charIndex+1;
+					continue;
+				}
+				 
+				if(line == FACE || line == LINE || line == POLYLINE || (line == VERTEX && _polyLines) ){
+					if(_blockType == FACE && _vSet == 11) finalizeFace();
+					if(line != VERTEX && _blockType == VERTEX && _polyLines.length>= 3) constructPolyfaceMesh();
+
+					_vSet = 0;
 					isBlock = true;
-					_blockType = (line == LINE)? LINE : FACE;
+					_blockType = line;
 					isTag = false;
 					_meshName = "";
 					_oldIndex = _charIndex+1;
 					continue;
 				}
-				
+				 
 				if(isBlock){
 					 
 					if(isTag){
@@ -175,102 +189,95 @@ package away3d.loaders.parsers
 								switch(tag){
 										case "10":
 											_v0.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "20":
 											_v0.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "30":
 											_v0.z = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "11":
 											_v1.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "21":
 											_v1.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "31":
 											_v1.z = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "12":
 											_v2.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "22":
 											_v2.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "32":
 											_v2.z = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "13":
 											_v3.x = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "23":
 											_v3.y = lineVal;
-											dataSet++;
+											_vSet++;
 											break;
 										case "33":
 											_v3.z = lineVal;
-											dataSet++;
+											if(_vSet == 11){
+												if(_meshName == "") _meshName = "mesh";
+												finalizeFace();
+												isBlock = false;
+											}  
 											break;
 										
 										case "62":
 											_itemColor = getDXFColor(lineVal);
 											break;
-										
 											
 										//ignoring visibility tag
 										 default:
-											
-											if( isNaN(lineVal) ){
-												if(dataSet == 0){
-													_meshName = line;
-												}else if(dataSet == 12){
-													if(_meshName == "") _meshName = "mesh";
-													finalizeFace();
-													isBlock = false;
-												}  
-											}
-											
+											if( isNaN(lineVal) && tag == "8" && _vSet == 0) _meshName = line;
+											 
 									}
 									
-									
 						
-							} else {
+							} else if(_blockType == LINE){
 								
 								switch(tag){
 									case "10":
 										_v0.x = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "20":
 										_v0.y = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "30":
 										_v0.z = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									
 									case "11":
 										_v1.x = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "21":
 										_v1.y = lineVal;
-										dataSet++;
+										_vSet++;
 										break;
 									case "31":
 										_v1.z = lineVal;
-										if(dataSet == 5){
+										if(_vSet == 5){
 											finalizeLine();
 											isBlock = false;
 										}
@@ -281,6 +288,66 @@ package away3d.loaders.parsers
 										
 								}
 								
+							
+							} else if(_blockType == VERTEX){
+								
+								switch(tag){
+									
+									case "8":
+										 if(isNaN(lineVal)) _meshName = line;
+										break;
+									case "10":
+										_v0.x = lineVal;
+										_vSet++;
+										break;
+									case "20":
+										_v0.y = lineVal;
+										_vSet++;
+										break;
+									case "30":
+										_v0.z = lineVal;
+										_vSet++;
+										break;
+										
+									case "70":
+										// 128, is the closing tag for a face.
+										if(lineVal != 128 && _vSet == 3)
+											_polyLines.push(_v0.clone()); 
+											
+										_vSet = 0;
+										break;
+										
+									case "71":
+									case "72":
+										_polyLinesIndices.push(int(Math.abs(lineVal))-1);
+										break;
+									case "73":
+										//in case of negative, invisible edges (line draw for faces not supported anyway)
+										_polyLinesIndices.push(int(Math.abs(lineVal))-1 , -1); //pushing already 4th component to make sure all is quad
+										break;
+										
+									case "74":
+										_polyLinesIndices[_polyLinesIndices.length-1] = int(Math.abs(lineVal))-1;
+										break;
+										
+								}
+										
+										
+							} else if(_blockType == POLYLINE){
+								if(tag == "70"){
+									//The polyline is a polyface mesh.
+									if(lineVal == 64){
+										_polyLines = new Vector.<Vector3D>();
+										_polyLinesIndices = new Vector.<int>();
+										_meshName = "polyline";
+									} else {
+										trace("Skip: unsupported POLYLINE structure");
+										_polyLines = null;
+										_polyLinesIndices = null;
+									}
+									isBlock = false;
+								}
+								/*unused if(tag == "71") --> lineVal == vertexcount*/
 							}
 
 					} else {			
@@ -290,12 +357,14 @@ package away3d.loaders.parsers
 					
 					isTag = !isTag;
 				}
-					
+				 
 				_oldIndex = _charIndex+1;
+				 
 			}
 
 
 			if(_charIndex >= _stringLen){
+				if(_blockType == VERTEX && _polyLines.length>= 3) constructPolyfaceMesh();
 				if(_activeMesh) finalizeMesh();
 				cleanUP();
 				return PARSING_DONE;
@@ -305,9 +374,51 @@ package away3d.loaders.parsers
 		}
 		
 		
+		private function constructPolyfaceMesh():void
+		{
+			if( _polyLinesIndices.length == 0 && (_polyLines.length == 3 || _polyLines.length == 4) ){
+				// we try display some data from this pourly defined dxf file. Purely to give some visual clues. Chances for holes very high.
+				_v0 = _polyLines[0];
+				_v1 = _polyLines[1];
+				_v2 = _polyLines[2];
+				
+				if(_polyLines.length >=4){
+					_v3 = _polyLines[3];
+				} else {
+					_v3 = _v2;
+				}
+				
+				finalizeFace();
+				
+			 } else {
+				 
+				 //indices were set in the vertex tags so we expect 4 indices per face (we forced push a negative index to make sure there are 4)
+				 if(_polyLinesIndices.length % 4 == 0){
+					 
+					 for(var i:uint = 0;i<_polyLinesIndices.length;i+=4){
+						_v0 = _polyLines[_polyLinesIndices[i]];
+						_v1 = _polyLines[_polyLinesIndices[i+1]];
+						_v2 = _polyLines[_polyLinesIndices[i+2]];
+						
+						if(_polyLinesIndices[i+3] > -1){
+							_v3 = _polyLines[_polyLinesIndices[i+3]];
+						} else{
+							_v3 = _v2;
+						}
+						
+						finalizeFace();
+					 }
+				 }
+				 
+			 }
+			 
+			_polyLines = null;
+			_polyLinesIndices = null;
+		}
+											
 		private function finalizeFace():void
 		{
-			 
+
 			if(_lastMeshName == "" || _meshName != _lastMeshName){
 				
 				if(_activeMesh) finalizeMesh();
@@ -331,7 +442,7 @@ package away3d.loaders.parsers
 			}
 			 
 			if(_indices.length+3 > LIMIT ){
-				constructVertexData(_subGeometry, _vertices, _uvs, null, null);
+				_subGeometry.fromVectors(_vertices, _uvs, null, null);
 				_subGeometry.updateIndexData(_indices);
 
 				addSubGeometry(_activeMesh.geometry);
@@ -344,17 +455,19 @@ package away3d.loaders.parsers
 			
 			//This format writes twice v2 as v3 even if its not a quad face. 
 			// if v3 values are not equal to v2, it's a quad.
-			
 			if( _v2.x != _v3.x || _v2.y!= _v3.y || _v2.z != _v3.z){
 				
 				if(_indices.length+3 > LIMIT ){
-					constructVertexData(_subGeometry, _vertices, _uvs, null, null);
+					_subGeometry.fromVectors(_vertices, _uvs, null, null);
 					_subGeometry.updateIndexData(_indices);
 
 					addSubGeometry(_activeMesh.geometry);
+					
+					ind = 0;
+					
+				} else {
+					ind += 3;
 				}
-				
-				ind = _vertices.length/3;
 				_vertices.push(_v0.x, _v0.y, _v0.z, _v2.x, _v2.y, _v2.z, _v3.x, _v3.y, _v3.z);
 				_uvs.push(0, 1, .5, 0, 1, 1);
 				_indices.push(ind, ind+1, ind+2);
@@ -421,7 +534,7 @@ package away3d.loaders.parsers
 		
 		private function finalizeMesh():void
 		{
-			constructVertexData(_subGeometry, _vertices, _uvs, null, null);
+			_subGeometry.fromVectors(_vertices, _uvs, null, null);
 			_subGeometry.updateIndexData(_indices);
 
 			 finalizeAsset(_activeMesh);

@@ -15,7 +15,7 @@ package away3d.core.partition
 	 */
 	public class Partition3D
 	{
-		private var _rootNode : NodeBase;
+		protected var _rootNode : NodeBase;
 		private var _updatesMade : Boolean;
 		private var _updateQueue : EntityNode;
 
@@ -35,7 +35,7 @@ package away3d.core.partition
 
 		public function set showDebugBounds(value : Boolean) : void
 		{
-
+			_rootNode.showDebugBounds = value;
 		}
 
 		/**
@@ -46,9 +46,11 @@ package away3d.core.partition
 		 */
 		public function traverse(traverser : PartitionTraverser) : void
 		{
-			if (_updatesMade && traverser is EntityCollector && !(traverser is ShadowCasterCollector))
+			if (_updatesMade)
 				updateEntities();
-			
+
+			++PartitionTraverser._collectionMark;
+
 			_rootNode.acceptTraverser(traverser);
 		}
 
@@ -115,9 +117,8 @@ package away3d.core.partition
 			var targetNode : NodeBase;
 			var t : EntityNode;
 			
-			//clear updateQueue early to allow for newly marked entity updates
+			// clear updateQueue early to allow for newly marked entity updates
 			_updateQueue = null;
-			
 			_updatesMade = false;
 
 			do {

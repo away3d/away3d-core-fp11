@@ -1,10 +1,13 @@
 package away3d.core.partition
 {
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframeCube;
 	import away3d.primitives.WireframePrimitiveBase;
+
+	use namespace arcane;
 
 	public class OctreeNode extends NodeBase
 	{
@@ -79,7 +82,7 @@ package away3d.core.partition
 		}
 
 
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
 		{
 			var a : Number, b : Number, c : Number;
 			var dd : Number, rr : Number;
@@ -109,9 +112,9 @@ package away3d.core.partition
 			return findPartitionForBounds(_entityWorldBounds);
 		}
 
+		// TODO: this can be done quicker through inversion
 		private function findPartitionForBounds(entityWorldBounds : Vector.<Number>) : OctreeNode
 		{
-			var i : int;
 			var x : Number, y : Number, z : Number;
 			var left : Boolean, right : Boolean;
 			var far : Boolean, near : Boolean;
@@ -120,10 +123,10 @@ package away3d.core.partition
 			if (_leaf)
 				return this;
 
-			while (i < 24) {
-				x = entityWorldBounds[i++];
-				y = entityWorldBounds[i++];
-				z = entityWorldBounds[i++];
+			for (var i : uint = 0; i < 24; i += 3) {
+				x = entityWorldBounds[uint(i)];
+				y = entityWorldBounds[uint(i+1)];
+				z = entityWorldBounds[uint(i+2)];
 
 				if (x > _centerX) {
 					if (left) return this;

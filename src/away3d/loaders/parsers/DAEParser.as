@@ -485,7 +485,8 @@ package away3d.loaders.parsers
 					//var state:SkeletonAnimationState = SkeletonAnimationState(mesh.animationState);
 					//animator = new SmoothSkeletonAnimator(state);
 					//SmoothSkeletonAnimator(animator).addSequence(SkeletonAnimationSequence(sequence));
-					animationSet.addAnimation("node_" + _rootNodes.length, clip);
+					clip.name = "node_" + _rootNodes.length;
+					animationSet.addAnimation(clip);
 
 					//_animators.push(animator);
 					_rootNodes.push(clip);

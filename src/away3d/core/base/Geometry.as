@@ -25,6 +25,19 @@ package away3d.core.base
 	{
 		private var _subGeometries : Vector.<ISubGeometry>;
 		
+		public function get assetType() : String
+		{
+			return AssetType.GEOMETRY;
+		}
+		
+		/**
+		 * A collection of SubGeometry objects, each of which contain geometrical data such as vertices, normals, etc.
+		 */
+		public function get subGeometries() : Vector.<ISubGeometry>
+		{
+			return _subGeometries;
+		}
+		
 		/**
 		 * Creates a new Geometry object.
 		 */
@@ -39,20 +52,6 @@ package away3d.core.base
 			for (var i : int = 0; i < len; ++i) {
 				_subGeometries[i].applyTransformation(transform);
 			}
-		}
-		
-		
-		public function get assetType() : String
-		{
-			return AssetType.GEOMETRY;
-		}
-		
-		/**
-		 * A collection of SubGeometry objects, each of which contain geometrical data such as vertices, normals, etc.
-		 */
-		public function get subGeometries() : Vector.<ISubGeometry>
-		{
-			return _subGeometries;
 		}
 		
 		/**

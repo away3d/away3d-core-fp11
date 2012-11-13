@@ -141,18 +141,20 @@ package away3d.materials.methods {
 			var filter : String;
 			var format : String = "";
 			
-			if (vo.useSmoothTextures) filter = vo.useMipmapping? "linear,miplinear" : "linear";
-			else filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
+			if (vo.useSmoothTextures) {
+				filter = vo.useMipmapping? "linear,miplinear" : "linear";
+			}else{
+				filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
+			}
 			
 			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
 				format = ",dxt1";
-			}else if (vo.textureFormat == "compressedAlpha") {
+			}else if (vo.textureFormat == "compressedAlpha") {	// using string literal instead of constant for backward compatibility
             	format = ",dxt5";
 			}
 			
             uvReg ||= _sharedRegisters.uvVarying;
             return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d,"+filter+format+","+wrap+">\n";
-			
 		}
 
 		/**

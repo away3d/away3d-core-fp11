@@ -67,9 +67,10 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
-			code += "m44 vt2, vt0, vc0		\n" +
+			var code : String;
+			code = "m44 vt2, vt0, vc0		\n" +
 					"mul op, vt2, vc4		\n" +
 					"m44 vt1, vt0, vc5		\n" +
 					"sub v0, vt1, vc9		\n";
@@ -90,7 +91,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			var code : String;
 			var wrap : String = _repeat ? "wrap" : "clamp";

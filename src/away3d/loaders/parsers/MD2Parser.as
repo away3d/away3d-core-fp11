@@ -395,7 +395,7 @@ package away3d.loaders.parsers
 					fvertices[k++] = tvertices[uint(_vertIndices[j] * 3 + 1)];
 				}
 
-				constructVertexData(subGeom, fvertices, _finalUV, null, null);
+				subGeom.fromVectors(fvertices, _finalUV, null, null);
 				subGeom.updateIndexData(_indices);
 				subGeom.vertexNormalData;
 				subGeom.vertexTangentData;
@@ -410,7 +410,7 @@ package away3d.loaders.parsers
 					// hence be finalized.
 					if (prevClip) {
 						finalizeAsset(prevClip);
-						_animationSet.addAnimation(prevClip.name, prevClip);
+						_animationSet.addAnimation(prevClip);
 					}
 						
 					clip = new VertexClipNode();
@@ -427,7 +427,7 @@ package away3d.loaders.parsers
 			// Finalize the last state
 			if (prevClip) {
 				finalizeAsset(prevClip);
-				_animationSet.addAnimation(prevClip.name, prevClip);
+				_animationSet.addAnimation(prevClip);
 			}
 			
 			// Force finalizeAsset() to decide name

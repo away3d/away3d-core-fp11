@@ -366,6 +366,14 @@
 			_vertexTangents = vertexTangents;
 			invalidateBuffers(_tangentsInvalid);
 		}
+		
+		public function fromVectors(vertices : Vector.<Number>, uvs : Vector.<Number>, normals : Vector.<Number>, tangents : Vector.<Number>) : void
+		{
+			updateVertexData(vertices);
+			updateUVData(uvs);
+			updateVertexNormalData(normals);
+			updateVertexTangentData(tangents);
+		}
 
 		override protected function updateVertexNormals(target : Vector.<Number>) : Vector.<Number>
 		{

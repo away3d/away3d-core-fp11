@@ -1,30 +1,33 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.nodes.AnimationNodeBase;
-	import away3d.core.base.ISubGeometry;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.animators.nodes.UVClipNode;
-	import flash.display.Sprite;
-	import away3d.animators.data.UVAnimationFrame;
 	import away3d.animators.data.JointPose;
 	import away3d.animators.data.Skeleton;
 	import away3d.animators.data.SkeletonJoint;
 	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.data.UVAnimationFrame;
+	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.nodes.SkeletonClipNode;
+	import away3d.animators.nodes.UVClipNode;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
-	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
+	import away3d.tools.utils.GeomUtil;
+	
+	import flash.display.Sprite;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
@@ -799,7 +802,7 @@ package away3d.loaders.parsers
 				// Ignore sub-mesh attributes for now
 				parseUserAttributes();
 				
-				sub_geoms = constructSubGeometries(verts, indices, uvs, normals, null, weights, w_indices);
+				sub_geoms = GeomUtil.fromVectors(verts, indices, uvs, normals, null, weights, w_indices);
 				for (i=0; i<sub_geoms.length; i++) {
 					geom.addSubGeometry(sub_geoms[i]);
 					// TODO: Somehow map in-sub to out-sub indices to enable look-up

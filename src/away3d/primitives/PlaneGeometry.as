@@ -244,6 +244,8 @@ package away3d.primitives
 
 			if (_doubleSided) numUvs *= 2;
 
+			if(_doubleSided) numUvs *= 2;
+
 			if (target.UVData && numUvs == target.UVData.length)
 				data = target.UVData;
 			else {

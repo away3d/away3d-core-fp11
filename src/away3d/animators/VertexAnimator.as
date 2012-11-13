@@ -4,6 +4,7 @@ package away3d.animators
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
 	import away3d.animators.data.*;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.materials.passes.*;
@@ -89,7 +90,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int) : void
+		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int, camera:Camera3D) : void
 		{
 			// todo: add code for when running on cpu
 

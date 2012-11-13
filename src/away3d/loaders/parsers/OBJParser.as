@@ -1,9 +1,9 @@
 package away3d.loaders.parsers
 {
-	import away3d.core.base.ISubGeometry;
-	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.arcane;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
@@ -11,10 +11,12 @@ package away3d.loaders.parsers
 	import away3d.library.assets.IAsset;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
+	import away3d.materials.ColorMaterial;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.methods.BasicSpecularMethod;
-	import away3d.materials.ColorMaterial;
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
+	import away3d.tools.utils.GeomUtil;
 	
 	import flash.net.URLRequest;
 
@@ -237,6 +239,7 @@ package away3d.loaders.parsers
 					break;
 				case "usemtl":
 					if(_mtlLib){
+						if(!trunk[1]) trunk[1] = "def000";
 						_materialIDs.push(trunk[1]);
 						_activeMaterialID = trunk[1];
 						if(_currentGroup) _currentGroup.materialID = _activeMaterialID;
@@ -353,7 +356,7 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			subs = constructSubGeometries(vertices, indices, uvs, normals, null, null, null);
+			subs = GeomUtil.fromVectors(vertices, indices, uvs, normals, null, null, null);
 			for (i=0; i<subs.length; i++) {
 				geometry.addSubGeometry(subs[i]);
 			}
@@ -544,15 +547,15 @@ package away3d.loaders.parsers
 				for(j = 0;j<lines.length;++j){
 					lines[j] = lines[j].replace(/\s+$/,"");
 					
-					if(lines[j].substring(0,1) != "#" && lines[j] != ""){
+					if(lines[j].substring(0,1) != "#" && (j == 0 || lines[j] != "") ){
 						trunk = lines[j].split(" ");
 						
 						if(String(trunk[0]).charCodeAt(0) == 9 || String(trunk[0]).charCodeAt(0) == 32)
 							trunk[0] = trunk[0].substring(1, trunk[0].length);
 						
 						if(j == 0){
-							
 							_lastMtlID = trunk.join("");
+							_lastMtlID = (_lastMtlID == "")? "def000" : _lastMtlID;
 							
 						} else {
 							

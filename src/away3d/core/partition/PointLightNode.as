@@ -37,7 +37,6 @@ package away3d.core.partition
 				super.acceptTraverser(traverser);
 				traverser.applyPointLight(_light);
 			}
-			traverser.leaveNode(this);
 		}
 	}
 }

@@ -37,7 +37,6 @@ package away3d.core.partition
 				super.acceptTraverser(traverser);
 				traverser.applyUnknownLight(_light);
 			}
-			traverser.leaveNode(this);
 		}
 	}
 }

@@ -1,8 +1,11 @@
 package away3d.core.partition
 {
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
+
+	use namespace arcane;
 
 	public class QuadTreeNode extends NodeBase
 	{
@@ -47,54 +50,53 @@ package away3d.core.partition
 		}
 
 		// todo: fix to infinite height so that height needn't be passed in constructor
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
 		{
 			var a : Number, b : Number, c : Number, d : Number;
 			var dd : Number, rr : Number;
 			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
 			var plane : Plane3D;
 
-			// this is basically a p/n vertex test in object space against the frustum planes with a lot of inlining
 			plane = frustum[0];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[1];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[2];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[3];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[4];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			plane = frustum[5];
 			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
 			dd = a*_centerX + c*_centerZ;
 			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) * _halfExtentY*b;
+			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
 			if (dd + rr < -d) return false;
 
 			return true;

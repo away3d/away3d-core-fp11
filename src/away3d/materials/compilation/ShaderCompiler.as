@@ -30,10 +30,12 @@ package away3d.materials.compilation {
 
 		protected var _vertexCode : String;
 		protected var _fragmentCode : String;
+		protected var _fragmentLightCode : String;
+		protected var _framentPostLightCode : String;
 		private var _commonsDataIndex : int = -1;
 
-		protected var _animatableAttributes : Array;
-		protected var _animationTargetRegisters : Array;
+		protected var _animatableAttributes : Vector.<String>;
+		protected var _animationTargetRegisters : Vector.<String>;
 
 		protected var _lightProbeDiffuseIndices : Vector.<uint>;
 		protected var _lightProbeSpecularIndices : Vector.<uint>;
@@ -60,6 +62,10 @@ package away3d.materials.compilation {
 		protected var _combinedLightSources : uint;
 
 		protected var _usingSpecularMethod : Boolean;
+		
+		protected var _needUVAnimation:Boolean;
+		protected var _UVTarget:String;
+		protected var _UVSource:String;
 
 		use namespace arcane;
 
@@ -68,6 +74,21 @@ package away3d.materials.compilation {
 			_sharedRegisters = new ShaderRegisterData();
 			_dependencyCounter = new MethodDependencyCounter();
 			initRegisterCache(profile);
+		}
+		
+		public function get needUVAnimation():Boolean
+		{
+			return _needUVAnimation;
+		}
+		
+		public function get UVTarget():String
+		{
+			return _UVTarget;
+		}
+		
+		public function get UVSource():String
+		{
+			return _UVSource;
 		}
 
 		private function initRegisterCache(profile : String) : void
@@ -137,8 +158,8 @@ package away3d.materials.compilation {
 			initRegisterIndices();
 			initLightData();
 
-			_animatableAttributes = ["va0"];
-			_animationTargetRegisters = ["vt0"];
+			_animatableAttributes = Vector.<String>(["va0"]);
+			_animationTargetRegisters = Vector.<String>(["vt0"]);
 			_vertexCode = "";
 			_fragmentCode = "";
 
@@ -152,6 +173,7 @@ package away3d.materials.compilation {
 			compileMethodsCode();
 			compileProjectionCode();
 			compileFragmentOutput();
+			_framentPostLightCode = fragmentCode;
 		}
 
 		protected function compileMethodsCode() : void
@@ -163,6 +185,8 @@ package away3d.materials.compilation {
 			if (_dependencyCounter.normalDependencies > 0) compileNormalCode();
 			if (_dependencyCounter.viewDirDependencies > 0) compileViewDirCode();
 			compileLightingCode();
+			_fragmentLightCode = _fragmentCode;
+			_fragmentCode = "";
 			compileMethods();
 		}
 
@@ -211,7 +235,9 @@ package away3d.materials.compilation {
 			}
 			else {
 				_uvTransformIndex = -1;
-				_vertexCode += "mov " + varying + ", " + uvAttributeReg + "\n";
+				_needUVAnimation = true;
+				_UVTarget = varying.toString();
+				_UVSource = uvAttributeReg.toString();
 			}
 		}
 
@@ -390,6 +416,11 @@ package away3d.materials.compilation {
 		{
 			return _registerCache.numUsedTextures;
 		}
+		
+		public function get numUsedVaryings() : uint
+		{
+			return _registerCache.numUsedVaryings;
+		}
 
 		protected function usesLightsForSpecular() : Boolean
 		{
@@ -525,6 +556,21 @@ package away3d.materials.compilation {
 		{
 			return _fragmentCode;
 		}
+		
+		public function get fragmentLightCode() : String
+		{
+			return _fragmentLightCode;
+		}
+		
+		public function get framentPostLightCode() : String
+		{
+			return _framentPostLightCode;
+		}
+		
+		public function get shadedTarget():String
+		{
+			return _sharedRegisters.shadedTarget.toString();
+		}
 
 
 		public function get numPointLights() : uint
@@ -564,12 +610,12 @@ package away3d.materials.compilation {
 			return _usingSpecularMethod;
 		}
 
-		public function get animatableAttributes() : Array
+		public function get animatableAttributes() : Vector.<String>
 		{
 			return _animatableAttributes;
 		}
 
-		public function get animationTargetRegisters() : Array
+		public function get animationTargetRegisters() : Vector.<String>
 		{
 			return _animationTargetRegisters;
 		}

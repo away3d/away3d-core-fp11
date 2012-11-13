@@ -30,13 +30,12 @@ package away3d.core.partition
 				super.acceptTraverser(traverser);
 				traverser.applySkyBox(_skyBox);
 			}
-			traverser.leaveNode(this);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
 		{
 			_skyBox.pushModelViewProjection(camera);
 			return _skyBox.bounds.isInFrustum(_skyBox.getModelViewProjectionUnsafe());

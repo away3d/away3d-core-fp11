@@ -51,8 +51,8 @@ package away3d.materials.passes
 			if (dedicatedMeshes)
 				_outlineMeshes = new Dictionary();
 				
-			_animatableAttributes = ["va0", "va1"];
-			_animationTargetRegisters = ["vt0", "vt1"];
+			_animatableAttributes = Vector.<String>(["va0", "va1"]);
+			_animationTargetRegisters = Vector.<String>(["vt0", "vt1"]);
 			
 		}
 
@@ -125,10 +125,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getVertexCode(code:String) : String
+		arcane override function getVertexCode() : String
 		{
+			var code : String;
 			// offset
-			code += "mul vt7, vt1, vc5.x\n" +
+			code = "mul vt7, vt1, vc5.x\n" +
 					"add vt7, vt7, vt0\n" +
 					"mov vt7.w, vt0.w\n" +
 			// project and scale to viewport
@@ -141,7 +142,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCode() : String
+		arcane override function getFragmentCode(animationCode:String) : String
 		{
 			return 	"mov oc, fc0\n";
 		}
