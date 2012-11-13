@@ -86,7 +86,9 @@ package away3d.materials.methods
 		
 		public function set texture(value : Texture2DBase) : void
 		{
-			if (Boolean(value) != _useTexture) invalidateShaderProgram();
+			if (Boolean(value) != _useTexture ||
+				(value && _texture && value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format))
+				invalidateShaderProgram();
 			_useTexture = Boolean(value);
 			_texture = value;
 		}
@@ -117,7 +119,7 @@ package away3d.materials.methods
 			if (_useTexture) {
 				_ambientInputRegister = regCache.getFreeTextureReg();
 				vo.texturesIndex = _ambientInputRegister.index;
-				code += getTexSampleCode(vo, targetReg, _ambientInputRegister) +
+				code += getTex2DSampleCode(vo, targetReg, _ambientInputRegister, _texture) +
 					// apparently, still needs to un-premultiply :s
 					"div " + targetReg + ".xyz, " + targetReg + ".xyz, " + targetReg + ".w\n";
 			}

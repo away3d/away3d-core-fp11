@@ -64,7 +64,7 @@ package away3d.materials.methods
 			var uvReg : ShaderRegisterElement = _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying;
 			vo.texturesIndex = textureReg.index;
 
-			return 	getTexSampleCode(vo, temp, textureReg, uvReg) +
+			return 	getTex2DSampleCode(vo, temp, textureReg, _texture, uvReg) +
 					"mul " + targetReg + ", " + targetReg + ", " + temp + ".x\n";
 		}
 	}

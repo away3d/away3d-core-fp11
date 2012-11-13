@@ -2,6 +2,7 @@
 	import away3d.arcane;
 
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.utils.ByteArray;
@@ -10,25 +11,30 @@
 
 	public class ATFTexture extends Texture2DBase
 	{
-		private var _atfdata	:ATFData;
+		private var _atfData : ATFData;
 		
-		public function ATFTexture(data : ByteArray)
+		public function ATFTexture(byteArray : ByteArray)
 		{
 			super();
 			
-			this.atfdata = new ATFData(data);
-			this.textureFormat = atfdata.format;
-			this.hasMipmaps = _atfdata.numTextures > 1;
-		}
-		
-		public function get atfdata() : ATFData
-		{
-			return _atfdata;
+			atfData = new ATFData(byteArray);
+			_format = atfData.format;
+			_hasMipmaps = _atfData.numTextures > 1;
 		}
 
-		public function set atfdata(value : ATFData) : void
+		override public function get format() : String
 		{
-			_atfdata = value;
+			return Context3DTextureFormat.COMPRESSED;
+		}
+
+		public function get atfData() : ATFData
+		{
+			return _atfData;
+		}
+
+		public function set atfData(value : ATFData) : void
+		{
+			_atfData = value;
 			
 			invalidateContent();
 			
@@ -37,12 +43,12 @@
 		
 		override protected function uploadContent(texture : TextureBase) : void
 		{
-			Texture(texture).uploadCompressedTextureFromByteArray(_atfdata.data, 0, false);
+			Texture(texture).uploadCompressedTextureFromByteArray(_atfData.data, 0, false);
 		}
 		
 		override protected function createTexture(context : Context3D) : TextureBase
 		{
-			return context.createTexture(_width, _height, atfdata.format, false);
+			return context.createTexture(_width, _height, atfData.format, false);
 		}
 	}
 }

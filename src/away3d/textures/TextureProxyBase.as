@@ -8,12 +8,16 @@ package away3d.textures
 	import away3d.library.assets.NamedAssetBase;
 	
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;
 
 	public class TextureProxyBase extends NamedAssetBase implements IAsset
 	{
+		protected var _format : String = Context3DTextureFormat.BGRA;
+		protected var _hasMipmaps : Boolean = true;
+
 		protected var _textures : Vector.<TextureBase>;
 		protected var _dirty : Vector.<Context3D>;
 
@@ -25,7 +29,16 @@ package away3d.textures
 			_textures = new Vector.<TextureBase>(8);
 			_dirty = new Vector.<Context3D>(8);
 		}
-		
+
+		public function get hasMipMaps() : Boolean
+		{
+			return _hasMipmaps;
+		}
+
+		public function get format() : String
+		{
+			return Context3DTextureFormat.BGRA;
+		}
 		
 		public function get assetType() : String
 		{

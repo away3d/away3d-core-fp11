@@ -8,6 +8,7 @@ package away3d.core.render
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.Program3D;
@@ -54,7 +55,18 @@ package away3d.core.render
 
 		private function getFragmentCode() : String
 		{
-			return	"tex ft0, v0, fs0 <2d, linear>	\n" +
+			var format : String;
+			switch (_texture.format) {
+				case Context3DTextureFormat.COMPRESSED:
+					format = "dxt1,";
+					break;
+				case "compressedAlpha":
+					format = "dxt5,";
+					break;
+				default:
+					format = "";
+			}
+			return	"tex ft0, v0, fs0 <2d, " + format + "linear>	\n" +
 					"mov oc, ft0";
 		}
 

@@ -43,7 +43,8 @@ package away3d.materials.methods
 
 		public function set mask(value : Texture2DBase) : void
 		{
-			if (Boolean(value) != Boolean(_mask))
+			if (Boolean(value) != Boolean(_mask) ||
+				(value && _mask && value.hasMipMaps != _mask.hasMipMaps || value.format != _mask.format))
 				invalidateShaderProgram();
 			_mask = value;
 		}
@@ -133,7 +134,7 @@ package away3d.materials.methods
 					"add " + temp + ".w, " + temp + ".w, " + temp + ".w											\n" +
 					"mul " + temp + ".xyz, " + normalReg + ".xyz, " + temp + ".w						\n" +
 					"sub " + temp + ".xyz, " + temp + ".xyz, " + viewDirReg + ".xyz					\n" +
-					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+					getTexCubeSampleCode(vo, temp, cubeMapReg, _cubeTexture, temp) +
 					"sub " + temp2 + ".w, " + temp + ".w, fc0.x									\n" +               	// -.5
 					"kil " + temp2 + ".w\n" +	// used for real time reflection mapping - if alpha is not 1 (mock texture) kil output
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n";
@@ -153,7 +154,7 @@ package away3d.materials.methods
 
 			if (_mask) {
 				var maskReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-				code += getTexSampleCode(vo, temp2, maskReg, _sharedRegisters.uvVarying) +
+				code += getTex2DSampleCode(vo, temp2, maskReg, _mask, _sharedRegisters.uvVarying) +
 						"mul " + viewDirReg + ".w, " + temp2 + ".x, " + viewDirReg + ".w\n";
 			}
 

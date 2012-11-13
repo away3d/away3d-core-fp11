@@ -52,6 +52,8 @@ package away3d.materials.methods
 
 		public function set texture(value : Texture2DBase) : void
 		{
+			if (value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format)
+				invalidateShaderProgram();
 			_texture = value;
 		}
 
@@ -68,7 +70,7 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			vo.texturesIndex = lightMapReg.index;
 
-			code = getTexSampleCode(vo, temp, lightMapReg, _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying);
+			code = getTex2DSampleCode(vo, temp, lightMapReg, _texture, _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying);
 
 			switch (_blendMode) {
 				case MULTIPLY:

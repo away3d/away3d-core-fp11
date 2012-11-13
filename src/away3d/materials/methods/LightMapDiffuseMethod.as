@@ -67,7 +67,7 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			vo.secondaryTexturesIndex = lightMapReg.index;
 
-			code = getTexSampleCode(vo, temp, lightMapReg, _sharedRegisters.secondaryUVVarying);
+			code = getTex2DSampleCode(vo, temp, lightMapReg, _texture, _sharedRegisters.secondaryUVVarying);
 
 			switch (_blendMode) {
 				case MULTIPLY:

@@ -128,7 +128,9 @@ package away3d.materials.methods
 
 		public function set texture(value : Texture2DBase) : void
 		{
-			if (Boolean(value) != _useTexture) invalidateShaderProgram();
+			if (Boolean(value) != _useTexture ||
+				(value && _texture && value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format))
+				invalidateShaderProgram();
 			_useTexture = Boolean(value);
 			_texture = value;
 		}
@@ -176,7 +178,7 @@ package away3d.materials.methods
 					regCache.addFragmentTempUsages(_specularTexData, 1);
 					_specularTextureRegister = regCache.getFreeTextureReg();
 					vo.texturesIndex = _specularTextureRegister.index;
-					code = getTexSampleCode(vo, _specularTexData, _specularTextureRegister);
+					code = getTex2DSampleCode(vo, _specularTexData, _specularTextureRegister, _texture);
 				}
 				else
 					_specularTextureRegister = null;
