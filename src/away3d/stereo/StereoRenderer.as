@@ -99,8 +99,8 @@ package away3d.stereo
 			
 			_method.activate(stage3DProxy);
 			
-			stage3DProxy.setSimpleVertexBuffer(0, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 0);
-			stage3DProxy.setSimpleVertexBuffer(1, vertexBuffer, Context3DVertexBufferFormat.FLOAT_2, 2);
+			stage3DProxy.context3D.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
+			stage3DProxy.context3D.setVertexBufferAt(1, vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
 			
 			stage3DProxy.setTextureAt(0, _leftTexture);
 			stage3DProxy.setTextureAt(1, _rightTexture);
@@ -112,8 +112,8 @@ package away3d.stereo
 			_method.deactivate(stage3DProxy);
 			stage3DProxy.setTextureAt(0, null);
 			stage3DProxy.setTextureAt(1, null);
-			stage3DProxy.setSimpleVertexBuffer(0, null, null);
-			stage3DProxy.setSimpleVertexBuffer(1, null, null);
+			stage3DProxy.context3D.setVertexBufferAt(0, null, 0, null);
+			stage3DProxy.context3D.setVertexBufferAt(1, null, 2, null);
 		}
 		
 		private function setupRTTManager(stage3DProxy : Stage3DProxy) : void
@@ -125,6 +125,7 @@ package away3d.stereo
 		private function getProgram3D(stage3DProxy : Stage3DProxy) : Program3D
 		{
 			if (_program3DInvalid) {
+				var assembler : AGALMiniAssembler;
 				var vertexCode : String;
 				var fragmentCode : String;
 				
@@ -135,9 +136,11 @@ package away3d.stereo
 				fragmentCode = _method.getFragmentCode();
 				
 				if (_program3D) _program3D.dispose();
+				assembler = new AGALMiniAssembler(Debug.active);
+				
 				_program3D = stage3DProxy.context3D.createProgram();
-				_program3D.upload(new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode, Debug.active),
-					new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, fragmentCode, Debug.active));
+				_program3D.upload(assembler.assemble(Context3DProgramType.VERTEX, vertexCode),
+					assembler.assemble(Context3DProgramType.FRAGMENT, fragmentCode));
 					
 				_program3DInvalid = false;
 			}

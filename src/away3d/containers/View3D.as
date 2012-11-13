@@ -666,7 +666,7 @@
 			}
 		}
 
-		private function renderDepthPrepass(entityCollector : EntityCollector) : void
+		protected function renderDepthPrepass(entityCollector : EntityCollector) : void
 		{
 			_depthRenderer.disableColor = true;
 			if (_filter3DRenderer || _renderer.renderToTexture) {

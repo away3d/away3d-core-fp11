@@ -123,7 +123,7 @@ package away3d.stereo
 			//			updateLights(_entityCollector);
 			
 			if (_requireDepthRender)
-				renderSceneDepth(_entityCollector);
+				renderDepthPrepass(_entityCollector);
 			
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
