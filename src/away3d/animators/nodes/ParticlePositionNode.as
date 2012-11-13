@@ -36,7 +36,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticlePositionNode(mode:uint, position:Vector3D = null)
 		{
-			super("ParticlePositionNode", mode, 3);
+			super("ParticlePosition", mode, 3);
 			
 			_stateClass = ParticlePositionState;
 			

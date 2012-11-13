@@ -22,7 +22,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleRotateToHeadingNode()
 		{
-			super("ParticleRotateToHeadingNode", ParticlePropertiesMode.GLOBAL, 0, 3);
+			super("ParticleRotateToHeading", ParticlePropertiesMode.GLOBAL, 0, 3);
 			
 			_stateClass = ParticleRotateToHeadingState;
 		}

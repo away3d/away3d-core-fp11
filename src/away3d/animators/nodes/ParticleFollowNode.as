@@ -39,7 +39,7 @@ package away3d.animators.nodes
 			_usesPosition = usesPosition;
 			_usesRotation = usesRotation;
 			
-			super("ParticleFollowNode", ParticlePropertiesMode.LOCAL_DYNAMIC, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
+			super("ParticleFollow", ParticlePropertiesMode.LOCAL_DYNAMIC, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
 		}
 		
 		/**

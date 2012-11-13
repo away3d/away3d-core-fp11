@@ -42,7 +42,7 @@ package away3d.animators.nodes
 			_usesLooping = usesLooping;
 			_usesDelay = usesDelay;
 			
-			super("ParticleTimeNode", ParticlePropertiesMode.LOCAL_STATIC, 4, 0);
+			super("ParticleTime", ParticlePropertiesMode.LOCAL_STATIC, 4, 0);
 		}
 		
 		/**

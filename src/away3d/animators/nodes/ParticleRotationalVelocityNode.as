@@ -37,7 +37,7 @@ package away3d.animators.nodes
 		{
 			_stateClass = ParticleRotationalVelocityState;
 			
-			super("ParticleRotationalVelocityNode", mode, 4);
+			super("ParticleRotationalVelocity", mode, 4);
 			
 			_rotationalVelocity = rotationalVelocity || new Vector3D();
 		}

@@ -101,7 +101,7 @@ package away3d.animators.nodes
 			_cycleDuration = cycleDuration;
 			_cyclePhase = cyclePhase;
 			
-			super("ParticleColorNode", mode, (_usesMultiplier && _usesOffset)? 16 : 8);
+			super("ParticleColor", mode, (_usesMultiplier && _usesOffset)? 16 : 8);
 		}
 		
 		/**

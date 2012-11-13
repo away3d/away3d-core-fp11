@@ -22,7 +22,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleBillboardNode()
 		{
-			super("ParticleBillboardNode", ParticlePropertiesMode.GLOBAL, 0, 4);
+			super("ParticleBillboard", ParticlePropertiesMode.GLOBAL, 0, 4);
 			
 			_stateClass = ParticleBillboardState;
 		}

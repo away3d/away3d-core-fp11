@@ -58,7 +58,7 @@ package away3d.animators.nodes
 				len++;
 			if (usesPhase)
 				len++;
-			super("ParticleScaleNode", mode, len, 3);
+			super("ParticleScale", mode, len, 3);
 			
 			_stateClass = ParticleScaleState;
 			

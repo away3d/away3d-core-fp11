@@ -36,7 +36,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleVelocityNode(mode:uint, velocity:Vector3D = null)
 		{
-			super("ParticleVelocityNode", mode, 3);
+			super("ParticleVelocity", mode, 3);
 			
 			_stateClass = ParticleVelocityState;
 			
