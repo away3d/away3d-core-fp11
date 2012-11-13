@@ -139,7 +139,6 @@ package away3d.materials.methods {
 			
 			var wrap : String = forceWrap || (vo.repeatTextures ? "wrap" : "clamp");
 			var filter : String;
-			var format : String = "";
 			
 			if (vo.useSmoothTextures) {
 				filter = vo.useMipmapping? "linear,miplinear" : "linear";
@@ -147,14 +146,8 @@ package away3d.materials.methods {
 				filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
 			}
 			
-			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
-				format = ",dxt1";
-			}else if (vo.textureFormat == "compressedAlpha") {	// using string literal instead of constant for backward compatibility
-            	format = ",dxt5";
-			}
-			
-            uvReg ||= _sharedRegisters.uvVarying;
-            return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d,"+filter+format+","+wrap+">\n";
+			uvReg ||= _sharedRegisters.uvVarying;
+            return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d,"+filter+","+wrap+">\n";
 		}
 
 		/**
