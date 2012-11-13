@@ -83,3 +83,6 @@
 4.0.9
 - Fixed MD5 mesh bug (#364)
 
+
+4.1.0 (Alpha)
+- Merged stereo rendering feature
