@@ -1,5 +1,4 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -8,7 +7,7 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 
-	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -118,13 +117,20 @@ package away3d.materials.methods
 			var mapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var col : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var toTexReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
 			vo.fragmentConstantsIndex = toTexReg.index*4;
 			vo.texturesIndex = mapRegister.index;
 
 			code += "div " + col + ", " + _uvVarying + ", " + _uvVarying + ".w						\n" +
 					"mul " + col + ".xy, " + col + ".xy, " + toTexReg+".xy	\n" +
 					"add " + col + ".xy, " + col + ".xy, " + toTexReg+".xx	\n" +
-					"tex " + col + ", " + col + ", " + mapRegister + " <2d,linear,miplinear,clamp>\n";
+					"tex " + col + ", " + col + ", " + mapRegister + " <2d"+format+",linear,miplinear,clamp>\n";
 
 			if (_mode == MULTIPLY)
 				code += "mul " + targetReg + ".xyz, " + targetReg + ".xyz, " + col + ".xyz			\n";

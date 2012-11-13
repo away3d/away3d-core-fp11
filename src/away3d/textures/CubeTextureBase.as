@@ -10,6 +10,9 @@ package away3d.textures
 
 	public class CubeTextureBase extends TextureProxyBase
 	{
+		public var textureFormat	:String = Context3DTextureFormat.BGRA;
+		public var hasMipmaps		:Boolean = false;
+		
 		public function CubeTextureBase()
 		{
 			super();

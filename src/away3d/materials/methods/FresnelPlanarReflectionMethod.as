@@ -1,10 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.PlanarReflectionTexture;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -116,6 +117,14 @@ package away3d.materials.methods
 			vo.texturesIndex = textureReg.index;
 			vo.fragmentConstantsIndex = dataReg.index*4;
 			// fc0.x = .5
+			
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
 
 			var projectionReg : ShaderRegisterElement = _sharedRegisters.projectionFragment;
 			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
@@ -135,7 +144,7 @@ package away3d.materials.methods
 						"max " + temp + ".x, " + temp + ".x, " + dataReg2 + ".w\n";
 			}
 
-			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d,"+filter+">\n" +
+			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d"+format+","+filter+">\n" +
 					"sub " + viewDirReg + ".w, " + temp + ".w,  fc0.x\n" +
 					"kil " + viewDirReg + ".w\n";
 

@@ -1,6 +1,7 @@
-package away3d.materials
-{
+package away3d.materials {
 	import away3d.textures.Texture2DBase;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	public class TextureMultiPassMaterial extends MultiPassMaterialBase
 	{
@@ -12,7 +13,12 @@ package away3d.materials
 			this.texture = texture;
 			this.smooth = smooth;
 			this.repeat = repeat;
-			this.mipmap = mipmap;
+			this.textureFormat = texture.textureFormat;
+			if(this.textureFormat == Context3DTextureFormat.BGRA) {
+				this.mipmap = mipmap;
+			}else{
+				this.mipmap = texture.hasMipmaps;
+			}
 		}
 
 		public function get animateUVs() : Boolean

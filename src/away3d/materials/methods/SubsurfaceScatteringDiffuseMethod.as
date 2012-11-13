@@ -1,15 +1,15 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterData;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.SingleObjectDepthPass;
-	import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
 
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.geom.Matrix3D;
 
@@ -231,7 +231,14 @@ package away3d.materials.methods
 			// only scatter first light
 			if (!_isFirstLight) return "";
 			_isFirstLight = false;
-
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 			var code : String = "";
 			var depthReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 
@@ -247,7 +254,7 @@ package away3d.materials.methods
 			vo.secondaryTexturesIndex = depthReg.index;
 
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			code += "tex " + temp + ", " + _lightProjVarying + ", " + depthReg +  " <2d,nearest,clamp>\n" +
+			code += "tex " + temp + ", " + _lightProjVarying + ", " + depthReg +  " <2d"+format+",nearest,clamp>\n" +
 			// reencode RGBA
 					"dp4 " + targetReg+".z, " + temp + ", " + _decReg + "\n";
 			// currentDistanceToLight - closestDistanceToLight

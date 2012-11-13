@@ -1,14 +1,12 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.methods.MethodVO;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-	
+
 	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -280,6 +278,14 @@ package away3d.materials.methods
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);
 			}
+			
+			var format:String = "";
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 
 			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
 			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
@@ -287,7 +293,7 @@ package away3d.materials.methods
 					"add " + t + ".w, " + t + ".w, " + t + ".w\n" +
 					"mul " + t + ", " + t + ".w, " + normalReg + "\n" +
 					"sub " + t + ", " + t + ", " + viewDirReg + "\n" +
-					"tex " + t + ", " + t + ", " + cubeMapReg + " <cube," + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear>\n" +
+					"tex " + t + ", " + t + ", " + cubeMapReg + " <cube"+format+"," + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear>\n" +
 					"mul " + t + ".xyz, " + t + ".xyz, " + weightRegister + "\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);

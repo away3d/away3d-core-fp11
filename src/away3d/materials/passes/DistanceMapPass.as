@@ -1,13 +1,12 @@
-﻿package away3d.materials.passes
-{
+﻿package away3d.materials.passes {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.textures.Texture2DBase;
+
 	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -95,10 +94,17 @@
 			var code : String;
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var filter : String;
-
+			var format : String;
+			
 			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
 			else filter = _mipmap ? "nearest,mipnearest" : "nearest";
-
+			
+			if (textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 			// squared distance to view
 			code =	"dp3 ft2.z, v0.xyz, v0.xyz	\n" +
 					"mul ft0, fc0, ft2.z	\n" +
@@ -106,7 +112,7 @@
 					"mul ft1, ft0.yzww, fc1	\n";
 
 			if (_alphaThreshold > 0) {
-				code += "tex ft3, v1, fs0 <2d,"+filter+","+wrap+">\n" +
+				code += "tex ft3, v1, fs0 <2d,"+filter+format+","+wrap+">\n" +
 						"sub ft3.w, ft3.w, fc2.x\n" +
 						"kil ft3.w\n";
 			}

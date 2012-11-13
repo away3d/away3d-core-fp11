@@ -1,11 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.methods.MethodVO;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -71,8 +71,14 @@ package away3d.materials.methods
 			var code : String = "";
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			vo.texturesIndex = cubeMapReg.index;
-
-			code += "tex " + targetReg + ", " + _sharedRegisters.normalFragment + ", " + cubeMapReg + " <cube,linear,miplinear,clamp>\n";
+			var format:String = "";
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
+			code += "tex " + targetReg + ", " + _sharedRegisters.normalFragment + ", " + cubeMapReg + " <cube"+format+",linear,miplinear,clamp>\n";
 
 			_ambientInputRegister = regCache.getFreeFragmentConstant();
 			vo.fragmentConstantsIndex = _ambientInputRegister.index;

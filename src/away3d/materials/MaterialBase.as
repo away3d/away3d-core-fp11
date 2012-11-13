@@ -1,5 +1,6 @@
 package away3d.materials
 {
+	import flash.display3D.Context3DTextureFormat;
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -59,7 +60,7 @@ package away3d.materials
 		protected var _mipmap : Boolean = true;
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean;
-		protected var _textureFormat:String;
+		protected var _textureFormat:String = Context3DTextureFormat.BGRA;
 
 		protected var _depthPass : DepthMapPass;
 		protected var _distancePass : DistanceMapPass;

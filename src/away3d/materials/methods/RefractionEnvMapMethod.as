@@ -1,12 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
 
-	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -139,7 +138,14 @@ package away3d.materials.methods
 			var refractionDir : ShaderRegisterElement;
 			var refractionColor : ShaderRegisterElement;
 			var temp : ShaderRegisterElement;
-
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 			vo.texturesIndex = cubeMapReg.index;
 			vo.fragmentConstantsIndex = data.index*4;
 
@@ -171,7 +177,7 @@ package away3d.materials.methods
 					"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 					"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
-			code +=	"tex " + refractionColor + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+			code +=	"tex " + refractionColor + ", " + refractionDir + ", " + cubeMapReg + " <cube"+format+", " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 					"sub " + refractionColor + ".w, " + refractionColor + ".w, fc0.x	\n" +
 					"kil " + refractionColor + ".w\n";
 
@@ -194,7 +200,7 @@ package away3d.materials.methods
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 	//
-				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube"+format+", " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 						"mov " + refractionColor + ".y, " + temp + ".y\n";
 
 
@@ -217,7 +223,7 @@ package away3d.materials.methods
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
-				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube"+format+", " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 						"mov " + refractionColor + ".z, " + temp + ".z\n";
 			}
 

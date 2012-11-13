@@ -1,8 +1,9 @@
-package away3d.materials
-{
+package away3d.materials {
 	import away3d.arcane;
 	import away3d.materials.passes.SkyBoxPass;
 	import away3d.textures.CubeTextureBase;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -25,6 +26,13 @@ package away3d.materials
 			_cubeMap = cubeMap;
 			addPass(_skyboxPass = new SkyBoxPass());
 			_skyboxPass.cubeTexture = _cubeMap;
+			
+			this.textureFormat = cubeMap.textureFormat;
+			//if(this.textureFormat == Context3DTextureFormat.BGRA) {
+			//	this.mipmap = mipmap;
+			////}else{
+			//	this.mipmap = cubeMap.hasMipmaps;
+			//}
 		}
 
 		/**

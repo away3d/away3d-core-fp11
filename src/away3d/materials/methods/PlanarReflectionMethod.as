@@ -1,11 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.PlanarReflectionTexture;
-	import away3d.textures.Texture2DBase;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -102,7 +102,13 @@ package away3d.materials.methods
 			var textureReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
 			var filter : String = vo.useSmoothTextures? "linear" : "nearest";
 			var code : String;
 			vo.texturesIndex = textureReg.index;
@@ -129,7 +135,7 @@ package away3d.materials.methods
 			}
 
 			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentSingleTemp();
-			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d,"+filter+">\n" +
+			code += "tex " + temp + ", " + temp + ", " + textureReg + " <2d"+format+","+filter+">\n" +
 					"sub " + temp2 + ", " + temp + ".w,  fc0.x\n" +
 					"kil " + temp2 + "\n" +
 					"sub " + temp + ", " + temp + ", " + targetReg + "\n" +

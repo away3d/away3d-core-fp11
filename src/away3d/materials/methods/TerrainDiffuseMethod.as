@@ -63,7 +63,14 @@ package away3d.materials.methods {
 			var detailBlendFactorRegister : ShaderRegisterElement;
 			var detailTexRegister : ShaderRegisterElement;
 			var scaleRegister2 : ShaderRegisterElement;
-
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 			// incorporate input from ambient
 			if (vo.numLights > 0) {
 				if (_shadowRegister)
@@ -111,7 +118,7 @@ package away3d.materials.methods {
 			regCache.addFragmentTempUsages(temp, 1);
 			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
-			code += "tex "+temp+", "+uvReg +", "+blendTexReg+" <2d,linear,miplinear,clamp>\n";
+			code += "tex "+temp+", "+uvReg +", "+blendTexReg+" <2d"+format+",linear,miplinear,clamp>\n";
 			var splatTexReg : ShaderRegisterElement;
 
 			vo.fragmentConstantsIndex = scaleRegister.index*4;

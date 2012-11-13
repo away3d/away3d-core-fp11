@@ -1,10 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.LightBase;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -29,11 +30,17 @@ package away3d.materials.methods
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
-
+			var format:String = "";
+			
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+            //	format = ",dxt5";
+			//}
 			vo.fragmentConstantsIndex = decReg.index*4;
 			vo.texturesIndex = depthMapRegister.index;
 
-			code += "tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+			code += "tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + targetReg + ".w, " + _depthMapCoordReg+".z, " + depthCol+".z\n";   // 0 if in shadow
 
@@ -50,7 +57,13 @@ package away3d.materials.methods
 			regCache.addFragmentTempUsages(depthSampleCol, 1);
 			var lightDir : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
-
+			var format:String = "";
+			
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+            //	format = ",dxt5";
+			//}
 			vo.fragmentConstantsIndex = decReg.index*4;
 			vo.texturesIndex = depthMapRegister.index;
 
@@ -59,7 +72,7 @@ package away3d.materials.methods
 					"mul " + lightDir + ".w, " + lightDir + ".w, " + posReg + ".w\n" +
 					"nrm " + lightDir + ".xyz, " + lightDir + ".xyz\n" +
 
-					"tex " + depthSampleCol + ", " + lightDir + ", " + depthMapRegister + " <cube, nearest, clamp>\n" +
+					"tex " + depthSampleCol + ", " + lightDir + ", " + depthMapRegister + " <cube"+format+", nearest, clamp>\n" +
 					"dp4 " + depthSampleCol+".z, " + depthSampleCol + ", " + decReg + "\n" +
 					"add " + targetReg + ".w, " + lightDir+".w, " + epsReg+".x\n" +    // offset by epsilon
 
@@ -73,8 +86,15 @@ package away3d.materials.methods
 
 		override arcane function getCascadeFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, decodeRegister : ShaderRegisterElement, depthTexture : ShaderRegisterElement, depthProjection : ShaderRegisterElement, targetRegister : ShaderRegisterElement) : String
 		{
+			var format:String = "";
+			
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+            //	format = ",dxt5";
+			//}
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			return 	"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d, nearest, clamp>\n" +
+			return 	"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
 					"slt " + targetRegister + ".w, " + depthProjection + ".z, " + temp + ".z\n";   // 0 if in shadow
 		}

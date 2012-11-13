@@ -1,5 +1,6 @@
 package away3d.materials.passes
 {
+	import flash.display3D.Context3DTextureFormat;
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -55,8 +56,23 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode() : String
 		{
-			return 	"tex ft0, v0, fs0 <cube,linear,clamp,miplinear>	\n" +
+			var format:String = "";
+			var mip:String = "";
+			
+			if (_cubeTexture.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (_cubeTexture.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			//if(_cubeTexture.hasMipmaps)
+			//{
+			//	mip = ",miplinear";
+			//}else{
+				//mip = ",mipnone";
+			//}
+            return 	"tex ft0, v0, fs0 <cube"+format+",linear,clamp"+mip+">	\n" +
 					"mov oc, ft0							\n";
+			
 		}
 
 		/**

@@ -173,7 +173,12 @@ package away3d.materials.methods
 
 
 			regCache.removeFragmentTempUsage(uvCoord);
-
+			
+			//trace("FOOOOOOOOOOOOOOOOOOOOO--------------");
+			//trace(code);
+			//trace("FAAAAAAAAAAAAAAAAAAAAA--------------");
+			
+			
 			return code;
 		}
 

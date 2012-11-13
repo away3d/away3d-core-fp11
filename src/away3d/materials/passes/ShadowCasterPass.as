@@ -69,6 +69,7 @@ package away3d.materials.passes
 
 		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			trace("RENDER ShadowCasterPass "+renderable);
 			renderable.inverseSceneTransform.copyRawDataTo(_inverseSceneMatrix);
 
 			if (_tangentSpace && _cameraPositionIndex >= 0) {

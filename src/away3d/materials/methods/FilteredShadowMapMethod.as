@@ -1,10 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -45,7 +46,14 @@ package away3d.materials.methods
 			var uvReg : ShaderRegisterElement;
 			var code : String = "";
 			vo.fragmentConstantsIndex = decReg.index*4;
-
+			
+			var format:String = "";
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+           	//	format = ",dxt5";
+			//}
+			
 			regCache.addFragmentTempUsages(depthCol, 1);
 
 			uvReg = regCache.getFreeFragmentVectorTemp();
@@ -53,12 +61,12 @@ package away3d.materials.methods
 
 			code += "mov " + uvReg + ", " + _depthMapCoordReg + "\n" +
 
-					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + _depthMapCoordReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".z, " + _depthMapCoordReg+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
 					"add " + uvReg+".x, " + _depthMapCoordReg+".x, " + customDataReg+".z\n" + 	// (1, 0)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
@@ -70,12 +78,12 @@ package away3d.materials.methods
 
 					"mov " + uvReg+".x, " + _depthMapCoordReg+".x\n" +
 					"add " + uvReg+".y, " + _depthMapCoordReg+".y, " + customDataReg+".z\n" +	// (0, 1)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".z, " + _depthMapCoordReg+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
 					"add " + uvReg+".x, " + _depthMapCoordReg+".x, " + customDataReg+".z\n" +	// (1, 1)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z\n" +   // 0 if in shadow
 
@@ -119,23 +127,32 @@ package away3d.materials.methods
 			regCache.addFragmentTempUsages(temp, 1);
 			var predicate : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(predicate, 1);
-
-			code =	"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d, nearest, clamp>\n" +
+			
+			var format:String = "";
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+            //	format = ",dxt5";
+			//}
+			
+			trace("FIII "+getCascadeFragmentCode);
+			
+			code =	"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
 					"slt " + predicate + ".x, " + depthProjection+".z, " + temp + ".z\n" +
 
 					"add " + depthProjection + ".x, " + depthProjection + ".x, " + dataReg + ".y\n" +
-					"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d, nearest, clamp>\n" +
+					"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
 					"slt " + predicate + ".z, " + depthProjection+".z, " + temp + ".z\n" +
 
 					"add " + depthProjection + ".y, " + depthProjection + ".y, " + dataReg + ".y\n" +
-					"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d, nearest, clamp>\n" +
+					"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
 					"slt " + predicate + ".w, " + depthProjection+".z, " + temp + ".z\n" +
 
 					"sub " + depthProjection + ".x, " + depthProjection + ".x, " + dataReg + ".y\n" +
-					"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d, nearest, clamp>\n" +
+					"tex " + temp + ", " + depthProjection + ", " + depthTexture + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
 					"slt " + predicate + ".y, " + depthProjection+".z, " + temp + ".z\n" +
 

@@ -1,11 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
-	import away3d.debug.Debug;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.PointLight;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -46,6 +46,14 @@ package away3d.materials.methods
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var uvReg : ShaderRegisterElement;
 			var code : String;
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 			vo.fragmentConstantsIndex = decReg.index*4;
 
 			regCache.addFragmentTempUsages(depthCol, 1);
@@ -56,12 +64,12 @@ package away3d.materials.methods
 			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
 
 			code = 	"mov " + uvReg + ", " + _depthMapCoordReg + "\n" +
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".z, " + _depthMapCoordReg+".z, " + depthCol + ".z	\n" +    // 0 if in shadow
 
 					"add " + uvReg+".x, " + uvReg+".x, " + customDataReg+".z		\n" + // (1, 0)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z		\n" +    // 0 if in shadow
 
@@ -73,12 +81,12 @@ package away3d.materials.methods
 
 					"sub " + uvReg+".x, " + _depthMapCoordReg+".x, " + customDataReg+".z	\n" +
 					"add " + uvReg+".y, " + _depthMapCoordReg+".y, " + customDataReg+".z	\n" +	// (0, 1)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg + ".z, " + _depthMapCoordReg+".z, " + depthCol+".z		\n" +   // 0 if in shadow
 
 					"add " + uvReg + ".x, " + uvReg+".x, " + customDataReg+".z						\n" +	// (1, 1)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg + ".w, " + _depthMapCoordReg+".z, " + depthCol+".z			\n" +   // 0 if in shadow
 
@@ -97,12 +105,12 @@ package away3d.materials.methods
 
 
 					"sub " + uvReg + ".xy, " + _depthMapCoordReg+".xy, " + customDataReg+".zz		\n" +
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg + ".z, " + _depthMapCoordReg + ".z, " + depthCol+".z	\n" +   // 0 if in shadow
 
 					"add " + uvReg + ".x, " + uvReg+".x, " + customDataReg+".z			\n" +	// (1, 0)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z					\n" +   // 0 if in shadow
 
@@ -114,13 +122,13 @@ package away3d.materials.methods
 
 					"mov " + uvReg+".x, " + _depthMapCoordReg + ".x							\n" +
 					"add " + uvReg+".y, " + uvReg+".y, " + customDataReg + ".z				\n" +	// (0, 1)
-					"tex " + depthCol + ", " + uvReg+ ", " + depthMapRegister+ " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg+ ", " + depthMapRegister+ " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"sub " + depthCol+".z, " + depthCol + ".z, " + dataReg + ".x		\n" +	// offset by epsilon
 					"slt " + uvReg+".z, " + _depthMapCoordReg + ".z, " + depthCol + ".z		\n" +   // 0 if in shadow
 
 					"add " + uvReg+".x, " + uvReg+".x, " + customDataReg + ".z				\n" +	// (1, 1)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
 					"slt " + uvReg+".w, " + _depthMapCoordReg + ".z, " + depthCol + ".z		\n" +   // 0 if in shadow
 
@@ -141,12 +149,12 @@ package away3d.materials.methods
 
 			code +=	"add " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + customDataReg + ".zz						\n" +	// (1, 0)
 //					"mov " + uvReg + ".y, " + _depthMapVar + ".y										\n" +	// (1, 0)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg + 		"\n" +
 					"slt " + uvReg + ".z, " + _depthMapCoordReg + ".z, " + depthCol + ".z					\n" +   // 0 if in shadow
 
 					"add " + uvReg + ".x, " + uvReg + ".x, " + customDataReg + ".z							\n" +	// (2, 0)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg +		"\n" +
 					"slt " + uvReg + ".w, " + _depthMapCoordReg + ".z, " + depthCol + ".z					\n" +   // 0 if in shadow
 
@@ -157,12 +165,12 @@ package away3d.materials.methods
 					"add " + viewDirReg + ".w, " + uvReg + ".z, " + uvReg + ".w				\n" +
 
 					"add " + uvReg+".xy, " + _depthMapCoordReg+".xy, " + customDataReg+".zz				\n" +	// (0, 1)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol + ".z, " + depthCol + ", " + decReg +		"\n" +
 					"slt " + uvReg + ".z, " + _depthMapCoordReg+".z, " + depthCol + ".z					\n" +   // 0 if in shadow
 
 					"add " + uvReg+".x, " + uvReg+".x, " + customDataReg+".z							\n" +	// (1, 1)
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d, nearest, clamp>\n" +
+					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+", nearest, clamp>\n" +
 					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + 		"\n" +
 					"slt " + uvReg+".w, " + _depthMapCoordReg+".z, " + depthCol+".z						\n" +   // 0 if in shadow
 

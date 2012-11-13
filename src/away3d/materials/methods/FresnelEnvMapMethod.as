@@ -1,11 +1,12 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
 	import away3d.textures.Texture2DBase;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -121,7 +122,13 @@ package away3d.materials.methods
 			var cubeMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
 			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
-
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
 			vo.texturesIndex = cubeMapReg.index;
 			vo.fragmentConstantsIndex = dataRegister.index*4;
 
@@ -133,7 +140,7 @@ package away3d.materials.methods
 					"add " + temp + ".w, " + temp + ".w, " + temp + ".w											\n" +
 					"mul " + temp + ".xyz, " + normalReg + ".xyz, " + temp + ".w						\n" +
 					"sub " + temp + ".xyz, " + temp + ".xyz, " + viewDirReg + ".xyz					\n" +
-					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+					"tex " + temp + ", " + temp + ", " + cubeMapReg + " <cube"+format+", " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
 					"sub " + temp2 + ".w, " + temp + ".w, fc0.x									\n" +               	// -.5
 					"kil " + temp2 + ".w\n" +	// used for real time reflection mapping - if alpha is not 1 (mock texture) kil output
 					"sub " + temp + ", " + temp + ", " + targetReg + "											\n";

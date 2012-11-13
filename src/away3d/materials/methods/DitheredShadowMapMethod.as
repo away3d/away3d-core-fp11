@@ -1,5 +1,4 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
@@ -8,6 +7,7 @@ package away3d.materials.methods
 	import away3d.textures.BitmapTexture;
 
 	import flash.display.BitmapData;
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -139,17 +139,24 @@ package away3d.materials.methods
 			vo.fragmentConstantsIndex = decReg.index*4;
 			vo.texturesIndex = depthMapRegister.index;
 
-			return getSampleCode(regCache, customDataReg, depthMapRegister, decReg, targetReg);
+			return getSampleCode(vo, regCache, customDataReg, depthMapRegister, decReg, targetReg);
 		}
 
-		private function getSampleCode(regCache : ShaderRegisterCache, customDataReg : ShaderRegisterElement, depthMapRegister : ShaderRegisterElement, decReg : ShaderRegisterElement, targetReg : ShaderRegisterElement) : String
+		private function getSampleCode(vo : MethodVO, regCache : ShaderRegisterCache, customDataReg : ShaderRegisterElement, depthMapRegister : ShaderRegisterElement, decReg : ShaderRegisterElement, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
 			var grainRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
 			var uvReg : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var numSamples : int = _numSamples;
 			regCache.addFragmentTempUsages(uvReg, 1);
-
+			
+			var format : String = "";
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+           // 	format = ",dxt5";
+			//}
+			
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
 			var projectionReg : ShaderRegisterElement = _sharedRegisters.projectionFragment;
@@ -159,9 +166,9 @@ package away3d.materials.methods
 
 			while (numSamples > 0) {
 				if (numSamples == _numSamples)
-					code += "tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n";
+					code += "tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d"+format+",nearest,repeat,mipnone>\n";
 				else
-					code += "tex " + uvReg + ", " + uvReg + ".zwxy, " + grainRegister + " <2d,nearest,repeat,mipnone>\n";
+					code += "tex " + uvReg + ", " + uvReg + ".zwxy, " + grainRegister + " <2d"+format+",nearest,repeat,mipnone>\n";
 
 				// keep grain in uvReg.zw
 				code += "sub " + uvReg + ".zw, " + uvReg + ".xy, fc0.xx\n" + // uv-.5
@@ -172,42 +179,42 @@ package away3d.materials.methods
 				if (numSamples == _numSamples) {
 					// first sample
 					code += "add " + uvReg + ".xy, " + uvReg + ".zw, " + _depthMapCoordReg + ".xy\n" +
-							"tex " + temp + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+							"tex " + temp + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+",nearest,clamp,mipnone>\n" +
 							"dp4 " + temp + ".z, " + temp + ", " + decReg + "\n" +
 							"slt " + targetReg + ".w, " + _depthMapCoordReg + ".z, " + temp + ".z\n";    // 0 if in shadow
 				}
-				else code += addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				else code += addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 
 				if (numSamples > 4)
 					code += "add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".zw\n" +
-							addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+							addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 
 				if (numSamples > 1)
 					code += "sub " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + uvReg + ".zw\n" +
-							addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+							addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 
 				if (numSamples > 5)
 					code += "sub " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".zw\n" +
-							addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+							addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 
 				if (numSamples > 2) {
 					code += "neg " + uvReg + ".w, " + uvReg + ".w\n";	// will be rotated 90 degrees when being accessed as wz
 
 					code += "add " + uvReg + ".xy, " + uvReg + ".wz, " + _depthMapCoordReg + ".xy\n" +
-							addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+							addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 				}
 
 				if (numSamples > 6)
 					code += "add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".wz\n" +
-							addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+							addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 
 				if (numSamples > 3)
 					code += "sub " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + uvReg + ".wz\n" +
-							addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+							addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 
 				if (numSamples > 7)
 					code += "sub " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".wz\n" +
-							addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+							addSample(vo, uvReg, depthMapRegister, decReg, targetReg, regCache);
 
 				numSamples -= 8;
 			}
@@ -217,10 +224,17 @@ package away3d.materials.methods
 			return code;
 		}
 
-		private function addSample(uvReg : ShaderRegisterElement, depthMapRegister : ShaderRegisterElement, decReg : ShaderRegisterElement, targetReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function addSample(vo : MethodVO, uvReg : ShaderRegisterElement, depthMapRegister : ShaderRegisterElement, decReg : ShaderRegisterElement, targetReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			var format : String = "";
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+            //	format = ",dxt5";
+			//}
+			
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			return "tex " + temp + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+			return "tex " + temp + ", " + uvReg + ", " + depthMapRegister + " <2d"+format+",nearest,clamp,mipnone>\n" +
 					"dp4 " + temp + ".z, " + temp + ", " + decReg + "\n" +
 					"slt " + temp + ".z, " + _depthMapCoordReg + ".z, " + temp + ".z\n" + // 0 if in shadow
 					"add " + targetReg + ".w, " + targetReg + ".w, " + temp + ".z\n";
@@ -245,7 +259,7 @@ package away3d.materials.methods
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			vo.secondaryFragmentConstantsIndex = dataReg.index*4;
 
-			return getSampleCode(regCache, dataReg, depthTexture, decodeRegister, targetRegister);
+			return getSampleCode(vo, regCache, dataReg, depthTexture, decodeRegister, targetRegister);
 		}
 	}
 }

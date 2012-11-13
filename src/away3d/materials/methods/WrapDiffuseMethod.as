@@ -1,12 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-	
-	import flash.display3D.Context3DProgramType;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -87,7 +86,14 @@ package away3d.materials.methods
 		{
 			var code : String = "";
 			var t : ShaderRegisterElement;
-
+			var format:String = "";
+			
+			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+				format = ",dxt1";
+			}else if (vo.textureFormat == "compressedAlpha") {
+            	format = ",dxt5";
+			}
+			
 			// write in temporary if not first light, so we can add to total diffuse colour
 			if (_isFirstLight)
 				t = _totalLightColorReg;
@@ -103,11 +109,11 @@ package away3d.materials.methods
 					"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
-
+			
 			if (_scatterTexture) {
 				code += "mul " + t + ".x, " + t + ".w, " + _wrapDataRegister + ".z\n" +
 						"add " + t + ".x, " + t + ".x, " + t + ".x\n" +
-						"tex " + t + ".xyz, " + t + ".xxx, " + _scatterTextureRegister + " <2d, linear, clamp>\n" +
+						"tex " + t + ".xyz, " + t + ".xxx, " + _scatterTextureRegister + " <2d"+format+", linear, clamp>\n" +
 						"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" +
 						"mul " + t + ".xyz, " + t + ".xyz, " + lightColReg + ".xyz\n";
 

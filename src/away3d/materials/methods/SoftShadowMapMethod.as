@@ -1,10 +1,11 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
+
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -89,13 +90,19 @@ package away3d.materials.methods
 			vo.fragmentConstantsIndex = decReg.index*4;
 			vo.texturesIndex = depthMapRegister.index;
 
-			return getSampleCode(regCache, depthMapRegister, decReg, targetReg, customDataReg);
+			return getSampleCode(vo, regCache, depthMapRegister, decReg, targetReg, customDataReg);
 		}
 
-		private function addSample(uv : ShaderRegisterElement, texture : ShaderRegisterElement, decode : ShaderRegisterElement, target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		private function addSample(vo : MethodVO, uv : ShaderRegisterElement, texture : ShaderRegisterElement, decode : ShaderRegisterElement, target : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			var format : String = "";
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+            //	format = ",dxt5";
+			//}
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			return 	"tex " + temp + ", " + uv + ", " + texture + " <2d,nearest,clamp>\n" +
+			return 	"tex " + temp + ", " + uv + ", " + texture + " <2d"+format+",nearest,clamp>\n" +
 					"dp4 " + temp + ".z, " + temp + ", " + decode + "\n" +
 					"slt " + uv + ".w, " + _depthMapCoordReg + ".z, " + temp + ".z\n" + // 0 if in shadow
 					"add " + target + ".w, " + target + ".w, " + uv + ".w\n";
@@ -122,17 +129,24 @@ package away3d.materials.methods
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			vo.secondaryFragmentConstantsIndex = dataReg.index*4;
 
-			return getSampleCode(regCache, depthTexture, decodeRegister, targetRegister, dataReg);
+			return getSampleCode(vo, regCache, depthTexture, decodeRegister, targetRegister, dataReg);
 		}
 
-		private function getSampleCode(regCache : ShaderRegisterCache, depthTexture : ShaderRegisterElement, decodeRegister : ShaderRegisterElement, targetRegister : ShaderRegisterElement, dataReg : ShaderRegisterElement) : String
+		private function getSampleCode(vo : MethodVO, regCache : ShaderRegisterCache, depthTexture : ShaderRegisterElement, decodeRegister : ShaderRegisterElement, targetRegister : ShaderRegisterElement, dataReg : ShaderRegisterElement) : String
 		{
 			var uvReg : ShaderRegisterElement;
 			var code : String;
 			var offsets : Vector.<String> = new <String>[ dataReg + ".zw" ];
 			uvReg = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(uvReg, 1);
-
+			
+			var format : String = "";
+			//if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
+			//	format = ",dxt1";
+			//}else if (vo.textureFormat == "compressedAlpha") {
+            //	format = ",dxt5";
+			//}
+			
 			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
 			var numRegs : int = _numSamples >> 1;
@@ -145,13 +159,13 @@ package away3d.materials.methods
 			for (i = 0; i < _numSamples; ++i) {
 				if (i == 0) {
 					code = "add " + uvReg + ", " + _depthMapCoordReg + ", " + dataReg + ".zwyy\n";
-					code += "tex " + temp + ", " + uvReg + ", " + depthTexture + " <2d,nearest,clamp>\n" +
+					code += "tex " + temp + ", " + uvReg + ", " + depthTexture + " <2d"+format+",nearest,clamp>\n" +
 							"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
 							"slt " + targetRegister + ".w, " + _depthMapCoordReg + ".z, " + temp + ".z\n";    // 0 if in shadow;
 				}
 				else {
 					code += "add " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + offsets[i] + "\n";
-					code += addSample(uvReg, depthTexture, decodeRegister, targetRegister, regCache);
+					code += addSample(vo, uvReg, depthTexture, decodeRegister, targetRegister, regCache);
 				}
 			}
 
