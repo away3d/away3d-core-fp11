@@ -90,7 +90,7 @@ package away3d.animators.nodes
 				if (usesPhase)
 					len++;
 			}
-			super("ParticleSpriteSheetNode" + mode, mode, len, ParticleAnimationSet.POST_PRIORITY + 1);
+			super("ParticleSpriteSheetNode", mode, len, ParticleAnimationSet.POST_PRIORITY + 1);
 			
 			_stateClass = ParticleSpriteSheetState;
 			

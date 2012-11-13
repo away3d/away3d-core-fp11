@@ -49,7 +49,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleBezierCurveNode(mode:uint, controlPoint:Vector3D = null, endPoint:Vector3D = null)
 		{
-			super("ParticleBezierCurveNode" + mode, mode, 6);
+			super("ParticleBezierCurveNode", mode, 6);
 			
 			_stateClass = ParticleBezierCurveState;
 			

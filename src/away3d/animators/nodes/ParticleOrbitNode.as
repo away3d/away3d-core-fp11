@@ -63,7 +63,7 @@ package away3d.animators.nodes
 			var len:int = 3;
 			if (usesPhase)
 				len++;
-			super("ParticleOrbitNode" + mode, mode, len);
+			super("ParticleOrbitNode", mode, len);
 			
 			_stateClass = ParticleOrbitState;
 			

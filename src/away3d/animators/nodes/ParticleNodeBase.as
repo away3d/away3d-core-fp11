@@ -55,6 +55,19 @@ package away3d.animators.nodes
 		
 		public function ParticleNodeBase(name:String, mode:uint, dataLength:uint, priority:int = 1)
 		{
+			switch(mode) {
+				case 0:
+					name = name + "Global";
+					break;
+				case 1:
+					name = name + "LocalStatic";
+					break;
+				case 2:
+					name = name + "LocalDynamic";
+					break;
+				default:
+			}
+			
 			this.name = name;
 			_mode = mode;
 			_priority = priority;

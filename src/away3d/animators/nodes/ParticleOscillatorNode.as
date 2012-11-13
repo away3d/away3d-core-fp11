@@ -36,7 +36,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleOscillatorNode(mode:uint, oscillator:Vector3D = null)
 		{
-			super("ParticleOscillatorNode" + mode, mode, 4);
+			super("ParticleOscillatorNode", mode, 4);
 			
 			_stateClass = ParticleOscillatorState;
 			

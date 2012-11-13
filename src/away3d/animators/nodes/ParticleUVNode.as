@@ -51,7 +51,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleUVNode(mode:uint, cycle:Number = 1, scale:Number = 1, axis:String = "x")
 		{
-			super("ParticleUVNode" + mode, mode, 4, ParticleAnimationSet.POST_PRIORITY + 1);
+			super("ParticleUVNode", mode, 4, ParticleAnimationSet.POST_PRIORITY + 1);
 			
 			_stateClass = ParticleUVState;
 			
