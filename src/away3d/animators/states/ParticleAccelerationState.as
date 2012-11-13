@@ -54,7 +54,7 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleAccelerationNode.ACCELERATION_INDEX);
 			
-			if (_particleAccelerationNode.mode == ParticlePropertiesMode.LOCAL) {
+			if (_particleAccelerationNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 				animationSubGeometry.activateVertexBuffer(index, _particleAccelerationNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {
 				animationRegisterCache.setVertexConst(index, _halfAcceleration.x, _halfAcceleration.y, _halfAcceleration.z);

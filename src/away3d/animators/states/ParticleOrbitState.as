@@ -108,7 +108,7 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOrbitNode.ORBIT_INDEX);
 			
-			if (_particleOrbitNode.mode == ParticlePropertiesMode.LOCAL) {
+			if (_particleOrbitNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 				if(_usesPhase)
 					animationSubGeometry.activateVertexBuffer(index, _particleOrbitNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 				else

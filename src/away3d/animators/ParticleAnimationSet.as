@@ -83,7 +83,7 @@ package away3d.animators
 			var i:int;
 			var n:ParticleNodeBase = node as ParticleNodeBase;
 			n.processAnimationSetting(this);
-			if (n.mode == ParticlePropertiesMode.LOCAL) {
+			if (n.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 				n.dataOffset = _totalLenOfOneVertex;
 				_totalLenOfOneVertex += n.dataLength;
 				_localStaticNodes.push(n);

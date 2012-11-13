@@ -121,7 +121,7 @@ package away3d.animators.states
 				
 				if (_usesMultiplier)
 				{
-					if (_particleColorNode.mode == ParticlePropertiesMode.LOCAL) {
+					if (_particleColorNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_MULTIPLIER_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 						dataOffset += 4;
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.DELTA_MULTIPLIER_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
@@ -133,7 +133,7 @@ package away3d.animators.states
 				}
 				if (_usesOffset)
 				{
-					if (_particleColorNode.mode == ParticlePropertiesMode.LOCAL) {
+					if (_particleColorNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.START_OFFSET_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 						dataOffset += 4;
 						animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleColorNode.DELTA_OFFSET_INDEX), dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);

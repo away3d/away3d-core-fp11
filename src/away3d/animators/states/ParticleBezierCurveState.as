@@ -64,7 +64,7 @@ package away3d.animators.states
 			var controlIndex:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_CONTROL_INDEX);
 			var endIndex:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_END_INDEX);
 			
-			if (_particleBezierCurveNode.mode == ParticlePropertiesMode.LOCAL) {
+			if (_particleBezierCurveNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 				animationSubGeometry.activateVertexBuffer(controlIndex, _particleBezierCurveNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 				animationSubGeometry.activateVertexBuffer(endIndex, _particleBezierCurveNode.dataOffset + 3, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 			} else {
