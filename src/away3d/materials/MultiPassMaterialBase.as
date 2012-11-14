@@ -46,6 +46,7 @@
 		private var _specularMethod : BasicSpecularMethod = new BasicSpecularMethod();
 
 		private var _screenPassesInvalid : Boolean = true;
+		private var _enableLightFallOff : Boolean = true;
 
 		/**
 		 * Creates a new DefaultMaterialBase object.
@@ -53,6 +54,20 @@
 		public function MultiPassMaterialBase()
 		{
 			super();
+		}
+
+		/**
+		 * Whether or not to use fallOff and radius properties for lights.
+		 */
+		public function get enableLightFallOff() : Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			if (_enableLightFallOff != value) invalidateScreenPasses();
+			_enableLightFallOff = value;
 		}
 
 		/**
@@ -495,6 +510,7 @@
 		private function initCasterLightPass() : void
 		{
 			_casterLightPass ||= new ShadowCasterPass(this);
+			_casterLightPass.enableLightFallOff = _enableLightFallOff;
 			_casterLightPass.diffuseMethod = null;
 			_casterLightPass.ambientMethod = null;
 			_casterLightPass.normalMethod = null;
@@ -536,6 +552,7 @@
 			_nonCasterLightPasses = new Vector.<LightingPass>();
 			while (dirLightOffset < numDirLights || pointLightOffset < numPointLights || probeOffset < numLightProbes) {
 				pass = new LightingPass(this);
+				pass.enableLightFallOff = _enableLightFallOff;
 				pass.includeCasters = _shadowMethod == null;
 				pass.directionalLightsOffset = dirLightOffset;
 				pass.pointLightsOffset = pointLightOffset;
@@ -578,6 +595,7 @@
 		private function initEffectsPass() : SuperShaderPass
 		{
 			_effectsPass ||= new SuperShaderPass(this);
+			_effectsPass.enableLightFallOff = _enableLightFallOff;
 			if (numLights == 0) {
 				_effectsPass.diffuseMethod = null;
 				_effectsPass.diffuseMethod = _diffuseMethod;

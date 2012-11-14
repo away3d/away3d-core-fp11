@@ -20,9 +20,8 @@ package away3d.lights
 	 */
 	public class PointLight extends LightBase
 	{
-		//private static var _pos : Vector3D = new Vector3D();
-		arcane var _radius : Number = Number.MAX_VALUE;
-		arcane var _fallOff : Number = Number.MAX_VALUE;
+		arcane var _radius : Number = 90000;
+		arcane var _fallOff : Number = 100000;
 		arcane var _fallOffFactor : Number;
 
 		/**

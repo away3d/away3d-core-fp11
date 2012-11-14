@@ -21,6 +21,7 @@ package away3d.materials.compilation {
 		protected var _smooth : Boolean;
 		protected var _repeat : Boolean;
 		protected var _mipmap : Boolean;
+		protected var _enableLightFallOff : Boolean;
 		protected var _textureFormat : String = Context3DTextureFormat.BGRA;
 		protected var _preserveAlpha : Boolean = true;
 		protected var _animateUVs : Boolean;
@@ -67,15 +68,28 @@ package away3d.materials.compilation {
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
 
+		protected var _profile : String;
+
 		use namespace arcane;
 
 		public function ShaderCompiler(profile : String)
 		{
 			_sharedRegisters = new ShaderRegisterData();
 			_dependencyCounter = new MethodDependencyCounter();
+			_profile = profile;
 			initRegisterCache(profile);
 		}
-		
+
+		public function get enableLightFallOff() : Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			_enableLightFallOff = value;
+		}
+
 		public function get needUVAnimation():Boolean
 		{
 			return _needUVAnimation;
@@ -280,20 +294,19 @@ package away3d.materials.compilation {
 			var pos : String = _animationTargetRegisters[0];
 			var projectedTarget : ShaderRegisterElement =  _sharedRegisters.projectedTarget;
 			var code : String;
-			var tempReg : ShaderRegisterElement = _registerCache.getFreeVertexVectorTemp();
 
 			// if we need projection somewhere
 			if (projectedTarget) {
 				code =	"m44 " + projectedTarget + ", " + pos + ", vc0		\n" +
-						"mov " + tempReg + ", " + projectedTarget + "\n" +
-						"mul op, " + tempReg + ", vc4\n";
+						"mov vt5, " + projectedTarget + "\n" +
+						"mul op, vt5, vc4\n";
 			}
 			else {
-				code = 	"m44 " + tempReg +  ", " + pos + ", vc0		\n" +
-						"mul op, " + tempReg + ", vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
+				code = 	"m44 vt5, " + pos + ", vc0		\n" +
+						"mul op, vt5, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
 			}
 
-			_vertexCode += code;
+			_vertexCode = code + _vertexCode;
 		}
 
 		protected function initRegisterIndices() : void
@@ -374,6 +387,7 @@ package away3d.materials.compilation {
 			methodVO.useMipmapping = _mipmap;
 			methodVO.textureFormat = _textureFormat;
 			methodVO.numLights = _numLights + _numLightProbes;
+			methodVO.useLightFallOff = _enableLightFallOff && _profile != "baselineConstrained";
 			method.initVO(methodVO);
 		}
 

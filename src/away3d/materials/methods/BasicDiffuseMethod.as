@@ -17,7 +17,7 @@ package away3d.materials.methods
 	public class BasicDiffuseMethod extends LightingMethodBase
 	{
 		arcane var _useDiffuseTexture : Boolean;
-		
+
 		protected var _useTexture : Boolean;
 		internal var _totalLightColorReg : ShaderRegisterElement;
 
@@ -177,10 +177,12 @@ package away3d.materials.methods
 				regCache.addFragmentTempUsages(t, 1);
 			}
 
-			code += "dp3 " + t + ".x, " + lightDirReg + ".xyz, " + _sharedRegisters.normalFragment + ".xyz\n" +
-					"max " + t + ".w, " + t + ".x, " + _sharedRegisters.commons + ".y\n" +
-				// attenuation
-					"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
+			code += "dp3 " + t + ".x, " + lightDirReg + ", " + _sharedRegisters.normalFragment + "\n" +
+					"sat " + t + ".w, " + t + ".x\n";
+
+			// attenuation
+			if (vo.useLightFallOff)
+				code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
@@ -188,7 +190,7 @@ package away3d.materials.methods
 
 
 			if (!_isFirstLight) {
-				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + t + "\n";
 				regCache.removeFragmentTempUsage(t);
 			}
 
@@ -219,7 +221,7 @@ package away3d.materials.methods
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
 			if (!_isFirstLight) {
-				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + t + "\n";
 				regCache.removeFragmentTempUsage(t);
 			}
 
@@ -234,59 +236,67 @@ package away3d.materials.methods
 		override arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			var code : String = "";
-			var t : ShaderRegisterElement;
+			var albedo : ShaderRegisterElement;
 			var cutOffReg : ShaderRegisterElement;
 
 			// incorporate input from ambient
 			if (vo.numLights > 0) {
-				t = regCache.getFreeFragmentVectorTemp();
-				regCache.addFragmentTempUsages(t, 1);
-				
+				albedo = regCache.getFreeFragmentVectorTemp();
+				regCache.addFragmentTempUsages(albedo, 1);
+
 				if (_shadowRegister)
-					code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
+					code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + _shadowRegister + ".w\n";
 			} else {
-				t = targetReg;
+				albedo = targetReg;
 			}
 
 
 			if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
 				vo.texturesIndex = _diffuseInputRegister.index;
-				code += getTexSampleCode(vo, t, _diffuseInputRegister);
+				code += getTexSampleCode(vo, albedo, _diffuseInputRegister);
+
 				if (_alphaThreshold > 0) {
 					cutOffReg = regCache.getFreeFragmentConstant();
 					vo.fragmentConstantsIndex = cutOffReg.index*4;
-					code += "sub " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n" +
-							"kil " + t + ".w\n" +
-							"add " + t + ".w, " + t + ".w, " + cutOffReg + ".x\n";
+					code += "sub " + albedo + ".w, " + albedo + ".w, " + cutOffReg + ".x\n" +
+							"kil " + albedo + ".w\n" +
+							"add " + albedo + ".w, " + albedo + ".w, " + cutOffReg + ".x\n";
 				}
 			}
 			else {
 				_diffuseInputRegister = regCache.getFreeFragmentConstant();
 				vo.fragmentConstantsIndex = _diffuseInputRegister.index*4;
-				code += "mov " + t + ", " + _diffuseInputRegister + "\n";
 			}
 
 			if (vo.numLights == 0)
 				return code;
-			
-			
+
+
+			// blend with ambient texture
 			if (_useDiffuseTexture) {
-				code += "min " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _sharedRegisters.commons + ".www\n" +
-						"mul " + t + ".xyz, " + t + ".xyz, " + _totalLightColorReg + ".xyz\n" +
-						"mul " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
-						"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n" +
-						"add " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n";
-			} else {
-				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz, " + targetReg + ".xyz\n" +
-						"min " + targetReg + ".xyz, " + targetReg + ".xyz, " + _sharedRegisters.commons + ".www\n" +
-						"mul " + targetReg + ".xyz, " + t + ".xyz, " + targetReg + ".xyz\n" +
-						"mov " + targetReg + ".w, " + t + ".w\n";
+				 code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ", " + targetReg + "\n" +
+//				 "sat " + targetReg + ", " + targetReg + "\n" +
+				 "mul " + _totalLightColorReg + ".xyz, " + targetReg + ", " + _totalLightColorReg + "\n" +
+				 "sub " + targetReg + ".xyz, " + targetReg + ", " + _totalLightColorReg + "\n" +
+				 "add " + targetReg + ".xyz, " + albedo + ", " + targetReg + "\n";
+			}
+			else {
+				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ", " + targetReg + "\n";
+				if (_useTexture) {
+					code += "mul " + targetReg + ".xyz, " + albedo + ", " + targetReg + "\n" +
+							"mov " + targetReg + ".w, " + albedo + ".w\n";
+				}
+				else {
+					code += "mul " + targetReg + ".xyz, " + _diffuseInputRegister + ", " + targetReg + "\n" +
+							"mov " + targetReg + ".w, " + _diffuseInputRegister + ".w\n";
+				}
 			}
 
+
 			regCache.removeFragmentTempUsage(_totalLightColorReg);
-			regCache.removeFragmentTempUsage(t);
-			
+			regCache.removeFragmentTempUsage(albedo);
+
 			return code;
 		}
 

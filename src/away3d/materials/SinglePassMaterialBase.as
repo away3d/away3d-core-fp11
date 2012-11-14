@@ -37,6 +37,19 @@
 		}
 
 		/**
+		 * Whether or not to use fallOff and radius properties for lights.
+		 */
+		public function get enableLightFallOff() : Boolean
+		{
+			return _screenPass.enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			_screenPass.enableLightFallOff = value;
+		}
+
+		/**
 		 * The minimum alpha value for which pixels should be drawn. This is used for transparency that is either
 		 * invisible or entirely opaque, often used with textures for foliage, etc.
 		 * Recommended values are 0 to disable alpha, or 0.5 to create smooth edges. Default value is 0 (disabled).

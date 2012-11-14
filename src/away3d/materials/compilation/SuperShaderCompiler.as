@@ -65,10 +65,10 @@ package away3d.materials.compilation
 				compileTangentNormalMapFragmentCode();
 			}
 			else {
-				_vertexCode += "m33 " + _sharedRegisters.normalVarying + ".xyz, " + _sharedRegisters.animatedNormal + ".xyz, " + normalMatrix[0] + "\n" +
+				_vertexCode += "m33 " + _sharedRegisters.normalVarying + ".xyz, " + _sharedRegisters.animatedNormal + ", " + normalMatrix[0] + "\n" +
 						"mov " + _sharedRegisters.normalVarying + ".w, " + _sharedRegisters.animatedNormal + ".w	\n";
 
-				_fragmentCode += "nrm " + _sharedRegisters.normalFragment + ".xyz, " + _sharedRegisters.normalVarying + ".xyz	\n" +
+				_fragmentCode += "nrm " + _sharedRegisters.normalFragment + ".xyz, " + _sharedRegisters.normalVarying + "\n" +
 						"mov " + _sharedRegisters.normalFragment + ".w, " + _sharedRegisters.normalVarying + ".w		\n";
 
 
@@ -85,11 +85,6 @@ package away3d.materials.compilation
 
 		private function compileTangentVertexCode(matrix : Vector.<ShaderRegisterElement>) : void
 		{
-			var normalTemp : ShaderRegisterElement;
-			var tanTemp : ShaderRegisterElement;
-			var bitanTemp1 : ShaderRegisterElement;
-			var bitanTemp2 : ShaderRegisterElement;
-
 			_sharedRegisters.tangentVarying = _registerCache.getFreeVarying();
 			_sharedRegisters.bitangentVarying = _registerCache.getFreeVarying();
 
@@ -101,42 +96,29 @@ package away3d.materials.compilation
 			_animatableAttributes.push(_sharedRegisters.tangentInput.toString());
 			_animationTargetRegisters.push(_sharedRegisters.animatedTangent.toString());
 
-			normalTemp = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(normalTemp, 1);
+			_vertexCode += 	"m33 " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + ", " + matrix[0] + "\n" +
+							"nrm " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + "\n";
 
-			_vertexCode += 	"m33 " + normalTemp + ".xyz, " + _sharedRegisters.animatedNormal + ".xyz, " + matrix[0].toString() + "\n" +
-					"nrm " + normalTemp + ".xyz, " + normalTemp + ".xyz	\n";
+			_vertexCode += 	"m33 " + _sharedRegisters.animatedTangent + ".xyz, " + _sharedRegisters.animatedTangent + ", " + matrix[0] + "\n" +
+							"nrm " + _sharedRegisters.animatedTangent + ".xyz, " + _sharedRegisters.animatedTangent + "\n";
 
-			tanTemp = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(tanTemp, 1);
+			var bitanTemp : ShaderRegisterElement = _registerCache.getFreeVertexVectorTemp();
+			_vertexCode +=
+							"mov " + _sharedRegisters.tangentVarying + ".x, " + _sharedRegisters.animatedTangent + ".x	\n" +
+							"mov " + _sharedRegisters.tangentVarying + ".z, " + _sharedRegisters.animatedNormal + ".x	\n" +
+							"mov " + _sharedRegisters.tangentVarying + ".w, " + _sharedRegisters.normalInput + ".w	\n" +
+							"mov " + _sharedRegisters.bitangentVarying + ".x, " + _sharedRegisters.animatedTangent + ".y	\n" +
+							"mov " + _sharedRegisters.bitangentVarying + ".z, " + _sharedRegisters.animatedNormal + ".y	\n" +
+							"mov " + _sharedRegisters.bitangentVarying + ".w, " + _sharedRegisters.normalInput + ".w	\n" +
+							"mov " + _sharedRegisters.normalVarying + ".x, " + _sharedRegisters.animatedTangent + ".z	\n" +
+							"mov " + _sharedRegisters.normalVarying + ".z, " + _sharedRegisters.animatedNormal + ".z	\n" +
+							"mov " + _sharedRegisters.normalVarying + ".w, " + _sharedRegisters.normalInput + ".w	\n" +
+							"crs " + bitanTemp + ".xyz, " + _sharedRegisters.animatedNormal + ", " + _sharedRegisters.animatedTangent + "\n" +
+							"mov " + _sharedRegisters.tangentVarying + ".y, " + bitanTemp + ".x		\n" +
+							"mov " + _sharedRegisters.bitangentVarying + ".y, " + bitanTemp + ".y	\n" +
+							"mov " + _sharedRegisters.normalVarying + ".y, " + bitanTemp + ".z		\n";
 
-			_vertexCode += 	"m33 " + tanTemp + ".xyz, " + _sharedRegisters.animatedTangent + ".xyz, " + matrix[0].toString() + "\n" +
-					"nrm " + tanTemp + ".xyz, " + tanTemp + ".xyz	\n";
 
-			bitanTemp1 = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(bitanTemp1, 1);
-			bitanTemp2 = _registerCache.getFreeVertexVectorTemp();
-
-			_vertexCode += "mul " + bitanTemp1 + ".xyz, " + normalTemp + ".yzx, " + tanTemp + ".zxy	\n" +
-					"mul " + bitanTemp2 + ".xyz, " + normalTemp + ".zxy, " + tanTemp + ".yzx	\n" +
-					"sub " + bitanTemp2 + ".xyz, " + bitanTemp1 + ".xyz, " + bitanTemp2 + ".xyz	\n" +
-
-					"mov " + _sharedRegisters.tangentVarying + ".x, " + tanTemp + ".x	\n" +
-					"mov " + _sharedRegisters.tangentVarying + ".y, " + bitanTemp2 + ".x	\n" +
-					"mov " + _sharedRegisters.tangentVarying + ".z, " + normalTemp + ".x	\n" +
-					"mov " + _sharedRegisters.tangentVarying + ".w, " + _sharedRegisters.normalInput + ".w	\n" +
-					"mov " + _sharedRegisters.bitangentVarying + ".x, " + tanTemp + ".y	\n" +
-					"mov " + _sharedRegisters.bitangentVarying + ".y, " + bitanTemp2 + ".y	\n" +
-					"mov " + _sharedRegisters.bitangentVarying + ".z, " + normalTemp + ".y	\n" +
-					"mov " + _sharedRegisters.bitangentVarying + ".w, " + _sharedRegisters.normalInput + ".w	\n" +
-					"mov " + _sharedRegisters.normalVarying + ".x, " + tanTemp + ".z	\n" +
-					"mov " + _sharedRegisters.normalVarying + ".y, " + bitanTemp2 + ".z	\n" +
-					"mov " + _sharedRegisters.normalVarying + ".z, " + normalTemp + ".z	\n" +
-					"mov " + _sharedRegisters.normalVarying + ".w, " + _sharedRegisters.normalInput + ".w	\n";
-
-			_registerCache.removeVertexTempUsage(normalTemp);
-			_registerCache.removeVertexTempUsage(tanTemp);
-			_registerCache.removeVertexTempUsage(bitanTemp1);
 			_registerCache.removeVertexTempUsage(_sharedRegisters.animatedTangent);
 		}
 
@@ -153,15 +135,15 @@ package away3d.materials.compilation
 			n = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(n, 1);
 
-			_fragmentCode += 	"nrm " + t + ".xyz, " + _sharedRegisters.tangentVarying + ".xyz	\n" +
+			_fragmentCode += 	"nrm " + t + ".xyz, " + _sharedRegisters.tangentVarying + "\n" +
 					"mov " + t + ".w, " + _sharedRegisters.tangentVarying + ".w	\n" +
-					"nrm " + b + ".xyz, " + _sharedRegisters.bitangentVarying + ".xyz	\n" +
-					"nrm " + n + ".xyz, " + _sharedRegisters.normalVarying + ".xyz	\n";
+					"nrm " + b + ".xyz, " + _sharedRegisters.bitangentVarying + "\n" +
+					"nrm " + n + ".xyz, " + _sharedRegisters.normalVarying + "\n";
 
 			var temp : ShaderRegisterElement = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(temp, 1);
 			_fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _registerCache, temp) +
-					"m33 " + _sharedRegisters.normalFragment + ".xyz, " + temp + ".xyz, " + t + "	\n" +
+					"m33 " + _sharedRegisters.normalFragment + ".xyz, " + temp + ", " + t + "	\n" +
 					"mov " + _sharedRegisters.normalFragment + ".w,   " + _sharedRegisters.normalVarying + ".w			\n";
 
 			_registerCache.removeFragmentTempUsage(temp);
@@ -183,8 +165,8 @@ package away3d.materials.compilation
 			_cameraPositionIndex = (cameraPositionReg.index-_vertexConstantsOffset)*4;
 
 			_vertexCode += "sub " + _sharedRegisters.viewDirVarying + ", " + cameraPositionReg + ", " + _sharedRegisters.globalPositionVertex + "\n";
-			_fragmentCode += 	"nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + ".xyz		\n" +
-								"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
+			_fragmentCode += 	"nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + "		\n" +
+					"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
 
 			_registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 		}
@@ -238,9 +220,9 @@ package away3d.materials.compilation
 
 			if (_alphaPremultiplied) {
 				_fragmentCode += "add " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.commons + ".z\n" +
-						"div " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ".w\n" +
+						"div " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ", " + _sharedRegisters.shadedTarget + ".w\n" +
 						"sub " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.commons + ".z\n" +
-						"sat " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ".xyz\n";
+						"sat " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + "\n";
 			}
 
 			// resolve other dependencies as well?
@@ -316,9 +298,11 @@ package away3d.materials.compilation
 				_registerCache.addFragmentTempUsages(lightDirReg, 1);
 
 				// calculate direction
-				_fragmentCode += "sub " + lightDirReg + ", " + lightPosReg + ", " + _sharedRegisters.globalPositionVarying + "\n" +
+				_fragmentCode += "sub " + lightDirReg + ", " + lightPosReg + ", " + _sharedRegisters.globalPositionVarying + "\n";
+				if (_enableLightFallOff && _profile != "baselineConstrained") {
+					_fragmentCode +=
 					// attenuate
-						"dp3 " + lightDirReg + ".w, " + lightDirReg + ".xyz, " + lightDirReg + ".xyz\n" +
+						"dp3 " + lightDirReg + ".w, " + lightDirReg + ", " + lightDirReg + "\n" +
 					// w = d - radius
 						"sub " + lightDirReg + ".w, " + lightDirReg + ".w, " + diffuseColorReg + ".w\n" +
 					// w = (d - radius)/(max-min)
@@ -326,9 +310,10 @@ package away3d.materials.compilation
 					// w = clamp(w, 0, 1)
 						"sat " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
 					// w = 1-w
-						"sub " + lightDirReg + ".w, " + lightPosReg + ".w, " + lightDirReg + ".w\n" +
+						"sub " + lightDirReg + ".w, " + lightPosReg + ".w, " + lightDirReg + ".w\n";
+				}
 					// normalize
-						"nrm " + lightDirReg + ".xyz, " + lightDirReg + ".xyz	\n";
+				_fragmentCode += "nrm " + lightDirReg + ".xyz, " + lightDirReg + "\n";
 
 				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = lightPosReg.index*4;
 

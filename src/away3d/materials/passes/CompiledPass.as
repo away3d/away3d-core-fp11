@@ -73,6 +73,8 @@ package away3d.materials.passes
 		protected var _numDirectionalLights : uint;
 		protected var _numLightProbes : uint;
 
+		protected var _enableLightFallOff : Boolean = true;
+
 		public function CompiledPass(material : MaterialBase)
 		{
 			_material = material;
@@ -80,6 +82,16 @@ package away3d.materials.passes
 			init();
 		}
 
+		public function get enableLightFallOff() : Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			if (value != _enableLightFallOff) invalidateShaderProgram(true);
+			_enableLightFallOff = value;
+		}
 
 		arcane function get numPointLights() : uint
 		{
@@ -154,6 +166,7 @@ package away3d.materials.passes
 			_compiler.animateUVs = _animateUVs;
 			_compiler.alphaPremultiplied = _alphaPremultiplied && _enableBlending;
 			_compiler.preserveAlpha = _preserveAlpha && _enableBlending;
+			_compiler.enableLightFallOff = _enableLightFallOff;
 			_compiler.compile();
 		}
 
