@@ -16,10 +16,11 @@ package away3d.animators
 	import flash.utils.*;
 	
 	use namespace arcane;
+	
 	/**
-	 * Provides and interface for assigning skeleton-based animation data sets to mesh-based entity objects
+	 * Provides an interface for assigning skeleton-based animation data sets to mesh-based entity objects
 	 * and controlling the various available states of animation through an interative playhead that can be
-	 * automatically updated or manually triggered
+	 * automatically updated or manually triggered.
 	 */
 	public class SkeletonAnimator extends AnimatorBase implements IAnimator
 	{
@@ -98,7 +99,7 @@ package away3d.animators
 		/**
 		 * Creates a new <code>SkeletonAnimator</code> object.
 		 *
-		 * @param skeletonAnimationSet The animation data set containing the skeleton animation states used by the animator.
+		 * @param skeletonAnimationSet The animation data set containing the skeleton animations used by the animator.
 		 * @param skeleton The skeleton object used for calculating the resulting global matrices for transforming skinned mesh data.
 		 * @param forceCPU Optional value that only allows the animator to perform calculation on the CPU. Defaults to false.
 		 */

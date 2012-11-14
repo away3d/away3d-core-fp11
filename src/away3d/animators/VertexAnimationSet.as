@@ -15,7 +15,6 @@ package away3d.animators
 	 * The animation data set used by vertex-based animators, containing vertex animation state data.
 	 * 
 	 * @see away3d.animators.VertexAnimator
-	 * @see away3d.animators.VertexAnimationState
 	 */
 	public class VertexAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
@@ -100,6 +99,30 @@ package away3d.animators
 				context.setVertexBufferAt(index + 1, null);
 			if (_uploadTangents)
 				context.setVertexBufferAt(index + 2, null);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		{
+			return "";
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
+		{
+			return "mov " + UVTarget + "," + UVSource + "\n";
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function doneAGALCode(pass : MaterialPassBase):void
+		{
+			
 		}
 		
 		/**

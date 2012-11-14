@@ -5,9 +5,9 @@ package away3d.animators.data
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
+	
 	/**
 	 * ...
-	 * @author Cheng Liao
 	 */
 	public class AnimationRegisterCache extends ShaderRegisterCache
 	{

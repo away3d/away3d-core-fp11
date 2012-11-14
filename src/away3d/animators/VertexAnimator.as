@@ -28,7 +28,9 @@ package away3d.animators
 		private var _activeVertexState:IVertexAnimationState;
 		
 		/**
-		 * Creates a new AnimationSequenceController object.
+		 * Creates a new <code>VertexAnimator</code> object.
+		 *
+		 * @param vertexAnimationSet The animation data set containing the vertex animations used by the animator.
 		 */
 		public function VertexAnimator(vertexAnimationSet:VertexAnimationSet )
 		{

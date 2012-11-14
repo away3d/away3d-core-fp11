@@ -9,10 +9,9 @@ package away3d.animators
 	use namespace arcane;
 
 	/**
-	 * The animation data set used by skeleton-based animators, containing skeleton animation state data.
+	 * The animation data set used by skeleton-based animators, containing skeleton animation data.
 	 * 
 	 * @see away3d.animators.SkeletonAnimator
-	 * @see away3d.animators.SkeletonAnimationState
 	 */
 	public class SkeletonAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
@@ -95,6 +94,30 @@ package away3d.animators
 			var context : Context3D = stage3DProxy._context3D;
 			context.setVertexBufferAt(streamOffset, null);
 			context.setVertexBufferAt(streamOffset+1, null);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		{
+			return "";
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
+		{
+			return "mov " + UVTarget + "," + UVSource + "\n";
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function doneAGALCode(pass : MaterialPassBase):void
+		{
+			
 		}
 	}
 }

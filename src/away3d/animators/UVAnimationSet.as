@@ -34,5 +34,29 @@ package away3d.animators
 		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		{
+			return "";
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
+		{
+			return "mov " + UVTarget + "," + UVSource + "\n";
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function doneAGALCode(pass : MaterialPassBase):void
+		{
+			
+		}
 	}
 }

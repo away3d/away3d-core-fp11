@@ -50,6 +50,9 @@ package away3d.animators.states
 			updateAccelerationData();
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleAccelerationNode.ACCELERATION_INDEX);

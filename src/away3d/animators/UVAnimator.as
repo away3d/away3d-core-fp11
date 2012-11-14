@@ -23,7 +23,7 @@ package away3d.animators
 		/**
 		 * Creates a new <code>UVAnimator</code> object.
 		 *
-		 * @param uvAnimationSet The animation data set containing the uv animation states used by the animator.
+		 * @param uvAnimationSet The animation data set containing the uv animations used by the animator.
 		 */
 		public function UVAnimator(uvAnimationSet:UVAnimationSet)
 		{
