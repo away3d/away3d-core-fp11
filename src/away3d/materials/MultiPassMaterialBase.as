@@ -367,22 +367,28 @@
 		 */
 		arcane override function updateMaterial(context : Context3D) : void
 		{
-			clearPasses();
+			var passesInvalid : Boolean;
 
-			if (_screenPassesInvalid)
+			if (_screenPassesInvalid) {
 				updateScreenPasses();
+				passesInvalid = true;
+			}
 
-			addChildPassesFor(_casterLightPass);
-			if (_nonCasterLightPasses)
-				for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
-					addChildPassesFor(_nonCasterLightPasses[i]);
-			addChildPassesFor(_effectsPass);
+			if (passesInvalid || isAnyScreenPassInvalid()) {
+				clearPasses();
 
-			addScreenPass(_casterLightPass);
-			if (_nonCasterLightPasses)
-				for (i = 0; i < _nonCasterLightPasses.length; ++i)
-					addScreenPass(_nonCasterLightPasses[i]);
-			addScreenPass(_effectsPass);
+				addChildPassesFor(_casterLightPass);
+				if (_nonCasterLightPasses)
+					for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
+						addChildPassesFor(_nonCasterLightPasses[i]);
+				addChildPassesFor(_effectsPass);
+
+				addScreenPass(_casterLightPass);
+				if (_nonCasterLightPasses)
+					for (i = 0; i < _nonCasterLightPasses.length; ++i)
+						addScreenPass(_nonCasterLightPasses[i]);
+				addScreenPass(_effectsPass);
+			}
 		}
 
 		private function addScreenPass(pass : CompiledPass) : void
@@ -511,6 +517,7 @@
 		{
 			if (!_casterLightPass) return;
 			_casterLightPass.dispose();
+			removePass(_casterLightPass);
 			_casterLightPass = null;
 		}
 
@@ -559,8 +566,10 @@
 		private function removeNonCasterLightPasses() : void
 		{
 			if (!_nonCasterLightPasses) return;
-			for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
+			for (var i : int = 0; i < _nonCasterLightPasses.length; ++i) {
+				removePass(_nonCasterLightPasses[i]);
 				_nonCasterLightPasses[i].dispose();
+			}
 			_nonCasterLightPasses = null;
 		}
 
@@ -568,6 +577,7 @@
 		{
 			if (_effectsPass.diffuseMethod != _diffuseMethod)
 				_effectsPass.diffuseMethod.dispose();
+			removePass(_effectsPass);
 			_effectsPass.dispose();
 			_effectsPass = null;
 		}

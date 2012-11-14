@@ -458,6 +458,12 @@ package away3d.materials
 			}
 		}
 
+		protected function removePass(pass : MaterialPassBase) : void
+		{
+			_passes.splice(_passes.indexOf(pass), 1);
+			--_numPasses;
+		}
+
 		/**
 		 * Clears all passes in the material.
 		 */
