@@ -22,7 +22,6 @@ package away3d.animators.data
 		public var vertexZeroConst:ShaderRegisterElement;
 		public var vertexOneConst:ShaderRegisterElement;
 		public var vertexTwoConst:ShaderRegisterElement;
-		public var cameraPosConst:ShaderRegisterElement;
 		public var uvTarget:ShaderRegisterElement;
 		//vary
 		public var varyTime:ShaderRegisterElement;
@@ -34,8 +33,6 @@ package away3d.animators.data
 		public var uvVar:ShaderRegisterElement;
 		public var fragmentZeroConst:ShaderRegisterElement;
 		public var fragmentOneConst:ShaderRegisterElement;
-		public var fragmentMinConst:ShaderRegisterElement;
-		public var fadeFactorConst:ShaderRegisterElement;
 		
 		//these are targets only need to rotate ( normal and tangent )
 		public var rotationRegisters:Vector.<ShaderRegisterElement>;
@@ -94,7 +91,6 @@ package away3d.animators.data
 				fragmentZeroConst = getFreeFragmentConstant();
 				fragmentZeroConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "x");
 				fragmentOneConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "y");
-				fragmentMinConst = new ShaderRegisterElement(fragmentZeroConst.regName, fragmentZeroConst.index, "z");
 				
 				varyTime = getFreeVarying();
 				fragmentTime = new ShaderRegisterElement(varyTime.regName, varyTime.index, "x");

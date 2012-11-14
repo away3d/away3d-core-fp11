@@ -16,7 +16,7 @@ package away3d.animators
 	
 	/**
 	 * The animation data set used by particle-based animators, containing particle animation data.
-	 * 
+	 *
 	 * @see away3d.animators.ParticleAnimator
 	 */
 	public class ParticleAnimationSet extends AnimationSetBase implements IAnimationSet
@@ -50,14 +50,14 @@ package away3d.animators
 		
 		/**
 		 * Initialiser function for static particle properties. Needs to reference a function with teh following format
-		 * 
+		 *
 		 * <code>
 		 * function initParticleFunc(prop:ParticleProperties):void
 		 * {
 		 * 		//code for settings local properties
 		 * }
 		 * </code>
-		 * 
+		 *
 		 * Aside from setting any properties required in particle animation nodes using local static properties, the initParticleFunc function
 		 * is required to time node requirements as they may be needed. These properties on the ParticleProperties object can include
 		 * <code>startTime</code>, <code>duration</code> and <code>delay</code>. The use of these properties is determined by the setting
@@ -225,7 +225,7 @@ package away3d.animators
 			if (_animationRegisterCache.numFragmentConstant > 0)
 			{
 				//set fragmentZeroConst,fragmentOneConst
-				_animationRegisterCache.setFragmentConst(_animationRegisterCache.fragmentZeroConst.index, 0, 1, 1 / 255, 0);
+				_animationRegisterCache.setFragmentConst(_animationRegisterCache.fragmentZeroConst.index, 0, 1, 0, 0);
 			}
 		}
 		
