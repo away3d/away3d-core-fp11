@@ -55,8 +55,6 @@ package away3d.textures {
 			this.height = Math.pow( 2, data.readUnsignedByte( ) );
 			this.numTextures = data.readUnsignedByte( );
 			this.data = data;
-			
-			
         }
 		
 	}
