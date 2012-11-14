@@ -89,7 +89,10 @@ package away3d.materials.methods
 
 		public function set texture(value : Texture2DBase) : void
 		{
-			if (Boolean(value) != _useTexture) invalidateShaderProgram();
+			if (Boolean(value) != _useTexture ||
+				(value && _texture && value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format))
+				invalidateShaderProgram();
+
 			_useTexture = Boolean(value);
 			_texture = value;
 		}
@@ -254,7 +257,7 @@ package away3d.materials.methods
 			if (_useTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
 				vo.texturesIndex = _diffuseInputRegister.index;
-				code += getTexSampleCode(vo, albedo, _diffuseInputRegister);
+				code += getTex2DSampleCode(vo, albedo, _diffuseInputRegister, _texture);
 
 				if (_alphaThreshold > 0) {
 					cutOffReg = regCache.getFreeFragmentConstant();
@@ -271,7 +274,6 @@ package away3d.materials.methods
 
 			if (vo.numLights == 0)
 				return code;
-
 
 			// blend with ambient texture
 			if (_useDiffuseTexture) {

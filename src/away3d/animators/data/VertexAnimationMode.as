@@ -3,7 +3,7 @@ package away3d.animators.data
 	/**
 	 * Options for setting the animation mode of a vertex animator object.
 	 * 
-	 * @see away3d.aimators.VertexAnimator
+	 * @see away3d.animators.VertexAnimator
 	 */
 	public class VertexAnimationMode
 	{

@@ -1,17 +1,18 @@
 package away3d.animators.nodes
 {
-	import flash.geom.Vector3D;
-	import away3d.arcane;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleUVState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to control the UV offset and scale of a particle over time.
 	 */
 	public class ParticleUVNode extends ParticleNodeBase
 	{
@@ -50,7 +51,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleUVNode(mode:uint, cycle:Number = 1, scale:Number = 1, axis:String = "x")
 		{
-			super("ParticleUVNode" + mode, mode, 4, ParticleAnimationSet.POST_PRIORITY + 1);
+			super("ParticleUV", mode, 4, ParticleAnimationSet.POST_PRIORITY + 1);
 			
 			_stateClass = ParticleUVState;
 			
@@ -59,11 +60,6 @@ package away3d.animators.nodes
 			_axis = axis;
 			
 			updateUVData();
-		}
-		
-		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
-		{
-			particleAnimationSet.hasUVNode = true;
 		}
 		
 		/**
@@ -137,9 +133,25 @@ package away3d.animators.nodes
 			return code;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleUVState
+		{
+			return animator.getAnimationState(this) as ParticleUVState;
+		}
+		
 		private function updateUVData():void
 		{
 			_uvData = new Vector3D(Math.PI * 2 / _cycle, _scale, 0, 0);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
+		{
+			particleAnimationSet.hasUVNode = true;
 		}
 	}
 }

@@ -1,7 +1,15 @@
-/.flexLibProperties
-/target
-/.project
-/.settings
-/.actionScriptProperties
+# Build and Release Folders
+bin/
+bin-debug/
+bin-release/
+out/
+target/
+
+# Project property files
+.actionScriptProperties
+.flexLibProperties
+.settings/
+.idea/
+.project
+.DS_Store
 *.iml
-out

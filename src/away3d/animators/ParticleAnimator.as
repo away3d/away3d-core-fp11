@@ -1,28 +1,27 @@
 package away3d.animators
 {
-	import flash.utils.Dictionary;
-	import away3d.entities.Mesh;
-	import away3d.core.base.ParticleGeometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.data.ParticleData;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.animators.nodes.ParticleNodeBase;
-	import away3d.animators.states.ParticleStateBase;
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.base.IRenderable;
-	import away3d.core.base.SubMesh;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.display3D.Context3DProgramType;
+	import flash.display3D.*;
+	import flash.utils.*;
+	
+	import away3d.*;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.animators.states.*;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.managers.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * Provides an interface for assigning paricle-based animation data sets to mesh-based entity objects
+	 * and controlling the various available states of animation through an interative playhead that can be
+	 * automatically updated or manually triggered.
+	 * 
+	 * Requires that the containing geometry of the parent mesh is particle geometry
+	 * 
+	 * @see away3d.core.base.ParticleGeometry
 	 */
 	public class ParticleAnimator extends AnimatorBase implements IAnimator
 	{
@@ -34,10 +33,15 @@ package away3d.animators
 		private var _totalLenOfOneVertex:uint = 0;
 		private var _animatorSubGeometries:Dictionary = new Dictionary(true);
 		
-		public function ParticleAnimator(animationSet:ParticleAnimationSet)
+		/**
+		 * Creates a new <code>ParticleAnimator</code> object.
+		 *
+		 * @param particleAnimationSet The animation data set containing the particle animations used by the animator.
+		 */
+		public function ParticleAnimator(particleAnimationSet:ParticleAnimationSet)
 		{
-			super(animationSet);
-			_particleAnimationSet = animationSet;
+			super(particleAnimationSet);
+			_particleAnimationSet = particleAnimationSet;
 			
 			var state:ParticleStateBase;
 			var node:ParticleNodeBase;
@@ -54,12 +58,14 @@ package away3d.animators
 				if (state.needUpdateTime)
 					_timeParticleStates.push(state);
 			}
-			
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
-			var animationRegisterCache:AnimationRegisterCache = _particleAnimationSet.animationRegisterCache;
+			var animationRegisterCache:AnimationRegisterCache = _particleAnimationSet._animationRegisterCache;
 			
 			var subMesh:SubMesh = renderable as SubMesh;
 			var state:ParticleStateBase;
@@ -91,11 +97,17 @@ package away3d.animators
 				stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, animationRegisterCache.fragmentConstantOffset, animationRegisterCache.fragmentConstantData, animationRegisterCache.numFragmentConstant);
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function testGPUCompatibility(pass:MaterialPassBase):void
 		{
 		
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override public function start():void
 		{
 			super.start();
@@ -105,6 +117,9 @@ package away3d.animators
 			}
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateDeltaTime(dt:Number):void
 		{
 			_absoluteTime += dt;
@@ -115,6 +130,9 @@ package away3d.animators
 			}
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		public function resetTime(offset : int = 0) : void
 		{
 			for each (var state:ParticleStateBase in _timeParticleStates)

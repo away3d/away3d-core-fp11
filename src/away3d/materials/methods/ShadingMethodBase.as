@@ -8,8 +8,10 @@ package away3d.materials.methods {
 	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
+	import away3d.textures.TextureProxyBase;
 
 	import flash.display3D.Context3DTextureFormat;
+	import flash.display3D.textures.TextureBase;
 	import flash.events.EventDispatcher;
 
 	use namespace arcane;
@@ -134,27 +136,50 @@ package away3d.materials.methods {
 		 * @param inputReg The texture stream register.
 		 * @return The fragment code that performs the sampling.
 		 */
-		protected function getTexSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, uvReg : ShaderRegisterElement = null, forceWrap : String = null) : String
+		protected function getTex2DSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, texture : TextureProxyBase, uvReg : ShaderRegisterElement = null, forceWrap : String = null) : String
 		{
-			
 			var wrap : String = forceWrap || (vo.repeatTextures ? "wrap" : "clamp");
 			var filter : String;
-			var format : String = "";
-			
+			var format : String = getFormatStringForTexture(texture);
+			var enableMipMaps : Boolean = vo.useMipmapping && texture.hasMipMaps;
+
 			if (vo.useSmoothTextures) {
-				filter = vo.useMipmapping? "linear,miplinear" : "linear";
+				filter = enableMipMaps? "linear,miplinear" : "linear";
 			}else{
-				filter = vo.useMipmapping ? "nearest,mipnearest" : "nearest";
+				filter = enableMipMaps? "nearest,mipnearest" : "nearest";
 			}
-			
-			if (vo.textureFormat == Context3DTextureFormat.COMPRESSED) {
-				format = ",dxt1";
-			}else if (vo.textureFormat == "compressedAlpha") {	// using string literal instead of constant for backward compatibility
-            	format = ",dxt5";
+
+			uvReg ||= _sharedRegisters.uvVarying;
+            return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d,"+filter+","+format+wrap+">\n";
+		}
+
+		protected function getTexCubeSampleCode(vo : MethodVO, targetReg : ShaderRegisterElement, inputReg : ShaderRegisterElement, texture : TextureProxyBase, uvReg : ShaderRegisterElement) : String
+		{
+			var filter : String;
+			var format : String = getFormatStringForTexture(texture);
+			var enableMipMaps : Boolean = vo.useMipmapping && texture.hasMipMaps;
+
+			if (vo.useSmoothTextures) {
+				filter = enableMipMaps? "linear,miplinear" : "linear";
+			}else{
+				filter = enableMipMaps? "nearest,mipnearest" : "nearest";
 			}
-			
-            uvReg ||= _sharedRegisters.uvVarying;
-            return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d,"+filter+format+","+wrap+">\n";
+
+			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <cube,"+format+filter+">\n";
+		}
+
+		private function getFormatStringForTexture(texture : TextureProxyBase) : String
+		{
+			switch (texture.format) {
+				case Context3DTextureFormat.COMPRESSED:
+					return "dxt1,";
+					break;
+				case "compressedAlpha":
+					return "dxt5,";
+					break;
+				default:
+					return "";
+			}
 		}
 
 		/**

@@ -1,18 +1,18 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.animators.states.ParticleOrbitState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to control the position of a particle over time around a circular orbit.
 	 */
 	public class ParticleOrbitNode extends ParticleNodeBase
 	{
@@ -63,7 +63,7 @@ package away3d.animators.nodes
 			var len:int = 3;
 			if (usesPhase)
 				len++;
-			super("ParticleOrbitNode" + mode, mode, len);
+			super("ParticleOrbit", mode, len);
 			
 			_stateClass = ParticleOrbitState;
 			
@@ -83,7 +83,7 @@ package away3d.animators.nodes
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			
-			var orbitRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var orbitRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, ORBIT_INDEX, orbitRegister.index);
 			
 			var eulersMatrixRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
@@ -137,6 +137,14 @@ package away3d.animators.nodes
 				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + animationRegisterCache.velocityTarget + ".xyz," +distance + ".xyz\n";
 			}
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleOrbitState
+		{
+			return animator.getAnimationState(this) as ParticleOrbitState;
 		}
 		
 		/**

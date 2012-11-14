@@ -55,7 +55,7 @@ package away3d.animators.states
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOscillatorNode.OSCILLATOR_INDEX);
 			
-			if (_particleOscillatorNode.mode == ParticlePropertiesMode.LOCAL)
+			if (_particleOscillatorNode.mode == ParticlePropertiesMode.LOCAL_STATIC)
 				animationSubGeometry.activateVertexBuffer(index, _particleOscillatorNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 			else
 				animationRegisterCache.setVertexConst(index, _oscillatorData.x, _oscillatorData.y, _oscillatorData.z, _oscillatorData.w);

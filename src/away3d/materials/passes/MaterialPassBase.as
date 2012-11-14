@@ -54,7 +54,6 @@ package away3d.materials.passes {
 		protected var _smooth : Boolean = true;
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = true;
-		protected var _textureFormat : String = Context3DTextureFormat.BGRA;
 		protected var _depthCompareMode : String = Context3DCompareMode.LESS_EQUAL;
 		
 		private var _srcBlend : String = Context3DBlendFactor.ONE;
@@ -132,20 +131,6 @@ package away3d.materials.passes {
 			invalidateShaderProgram();
 		}
 		
-		/**
-		 * Defines what textureformat should be used
-		 */
-		public function get textureFormat() : String
-		{
-			return _textureFormat;
-		}
-
-		public function set textureFormat(value : String) : void
-		{
-			if (_textureFormat == value) return;
-			_textureFormat = value;
-			invalidateShaderProgram();
-		}
 		
 		/**
 		 * Defines whether smoothing should be applied to any used textures.

@@ -136,20 +136,5 @@ package away3d.animators
 		public function dispose() : void
 		{
 		}
-		
-		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String
-		{
-			return "";
-		}
-		
-		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
-		{
-			return "mov " + UVTarget + "," + UVSource + "\n";
-		}
-		
-		public function doneAGALCode(pass : MaterialPassBase):void
-		{
-			
-		}
 	}
 }

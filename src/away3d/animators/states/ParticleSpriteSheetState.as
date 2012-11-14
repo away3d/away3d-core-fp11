@@ -80,7 +80,7 @@ package away3d.animators.states
 				animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_0), _spriteSheetData[0], _spriteSheetData[1], _spriteSheetData[2], _spriteSheetData[3]);
 				if (_usesCycle) {
 					var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_1);
-					if(_particleSpriteSheetNode.mode == ParticlePropertiesMode.LOCAL) {
+					if(_particleSpriteSheetNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 						if (_usesPhase)
 							animationSubGeometry.activateVertexBuffer(index, _particleSpriteSheetNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 						else

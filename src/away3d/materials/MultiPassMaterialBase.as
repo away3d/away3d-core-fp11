@@ -22,6 +22,7 @@
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
+	import flash.events.Event;
 
 	use namespace arcane;
 
@@ -132,7 +133,9 @@
 
 		override public function set lightPicker(value : LightPickerBase) : void
 		{
+			if (_lightPicker) _lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
 			super.lightPicker = value;
+			if (_lightPicker) _lightPicker.addEventListener(Event.CHANGE, onLightsChange);
 			invalidateScreenPasses();
 		}
 
@@ -223,7 +226,7 @@
 			_specularMethod = value;
 			invalidateScreenPasses();
 		}
-		
+
  		/**
 		 * Adds a shading method to the end of the shader. Note that shading methods can
 		 * not be reused across materials.
@@ -530,6 +533,7 @@
 		{
 			if (!_casterLightPass) return;
 			_casterLightPass.dispose();
+			removePass(_casterLightPass);
 			_casterLightPass = null;
 		}
 
@@ -579,8 +583,10 @@
 		private function removeNonCasterLightPasses() : void
 		{
 			if (!_nonCasterLightPasses) return;
-			for (var i : int = 0; i < _nonCasterLightPasses.length; ++i)
+			for (var i : int = 0; i < _nonCasterLightPasses.length; ++i) {
+				removePass(_nonCasterLightPasses[i]);
 				_nonCasterLightPasses[i].dispose();
+			}
 			_nonCasterLightPasses = null;
 		}
 
@@ -588,6 +594,7 @@
 		{
 			if (_effectsPass.diffuseMethod != _diffuseMethod)
 				_effectsPass.diffuseMethod.dispose();
+			removePass(_effectsPass);
 			_effectsPass.dispose();
 			_effectsPass = null;
 		}
@@ -627,6 +634,11 @@
 		protected function invalidateScreenPasses() : void
 		{
 			_screenPassesInvalid = true;
+		}
+
+		private function onLightsChange(event : Event) : void
+		{
+			invalidateScreenPasses();
 		}
 	}
 }

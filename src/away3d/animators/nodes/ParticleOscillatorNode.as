@@ -1,18 +1,18 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.animators.states.ParticleOscillatorState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to control the position of a particle over time using simple harmonic motion.
 	 */
 	public class ParticleOscillatorNode extends ParticleNodeBase
 	{
@@ -36,7 +36,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleOscillatorNode(mode:uint, oscillator:Vector3D = null)
 		{
-			super("ParticleOscillatorNode" + mode, mode, 4);
+			super("ParticleOscillator", mode, 4);
 			
 			_stateClass = ParticleOscillatorState;
 			
@@ -48,7 +48,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
-			var oscillatorRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
+			var oscillatorRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, OSCILLATOR_INDEX, oscillatorRegister.index);
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
@@ -72,6 +72,14 @@ package away3d.animators.nodes
 			}
 			
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleOscillatorState
+		{
+			return animator.getAnimationState(this) as ParticleOscillatorState;
 		}
 		
 		/**

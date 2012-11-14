@@ -1,17 +1,16 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleBillboardState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node that controls the rotation of a particle to always face the camera.
 	 */
 	public class ParticleBillboardNode extends ParticleNodeBase
 	{
@@ -23,7 +22,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleBillboardNode()
 		{
-			super("ParticleBillboardNode", ParticlePropertiesMode.GLOBAL, 0, 4);
+			super("ParticleBillboard", ParticlePropertiesMode.GLOBAL, 0, 4);
 			
 			_stateClass = ParticleBillboardState;
 		}
@@ -51,7 +50,15 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
+		public function getAnimationState(animator:IAnimator):ParticleBillboardState
+		{
+			return animator.getAnimationState(this) as ParticleBillboardState;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
 		{
 			particleAnimationSet.hasBillboard = true;
 		}

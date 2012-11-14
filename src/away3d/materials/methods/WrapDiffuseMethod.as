@@ -47,7 +47,9 @@ package away3d.materials.methods
 
 		public function set scatterTexture(value : Texture2DBase) : void
 		{
-			if (Boolean(_scatterTexture) != Boolean(value)) invalidateShaderProgram();
+			if (Boolean(_scatterTexture) != Boolean(value) ||
+				(value && _scatterTexture && value.hasMipMaps != _scatterTexture.hasMipMaps || value.format != _scatterTexture.format))
+				invalidateShaderProgram();
 			_scatterTexture = value;
 		}
 
@@ -107,7 +109,7 @@ package away3d.materials.methods
 			if (_scatterTexture) {
 				code += "mul " + t + ".x, " + t + ".w, " + _wrapDataRegister + ".z\n" +
 						"add " + t + ".x, " + t + ".x, " + t + ".x\n" +
-						"tex " + t + ".xyz, " + t + ".xxx, " + _scatterTextureRegister + " <2d, linear, clamp>\n" +
+						getTex2DSampleCode(vo, t, _scatterTextureRegister, _scatterTexture, t, "clamp") +
 						"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" +
 						"mul " + t + ".xyz, " + t + ".xyz, " + lightColReg + ".xyz\n";
 

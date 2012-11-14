@@ -8,6 +8,7 @@
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.textures.Texture2DBase;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 
@@ -107,7 +108,18 @@
 					"mul ft1, ft0.yzww, fc1	\n";
 
 			if (_alphaThreshold > 0) {
-				code += "tex ft3, v1, fs0 <2d,"+filter+","+wrap+">\n" +
+				var format : String;
+				switch (_alphaMask.format) {
+					case Context3DTextureFormat.COMPRESSED:
+						format = "dxt1,";
+						break;
+					case "compressedAlpha":
+						format ="dxt5,";
+						break;
+					default:
+						format = "";
+				}
+				code += "tex ft3, v1, fs0 <2d,"+filter+","+format+wrap+">\n" +
 						"sub ft3.w, ft3.w, fc2.x\n" +
 						"kil ft3.w\n";
 			}

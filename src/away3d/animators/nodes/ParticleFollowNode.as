@@ -1,17 +1,16 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.animators.states.ParticleFollowState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
+	 * A particle animation node used to create a follow behaviour on a particle system.
 	 */
 	public class ParticleFollowNode extends ParticleNodeBase
 	{
@@ -40,7 +39,7 @@ package away3d.animators.nodes
 			_usesPosition = usesPosition;
 			_usesRotation = usesRotation;
 			
-			super("ParticleFollowNode", ParticlePropertiesMode.LOCAL_DYNAMIC, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
+			super("ParticleFollow", ParticlePropertiesMode.LOCAL_DYNAMIC, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
 		}
 		
 		/**
@@ -149,6 +148,14 @@ package away3d.animators.nodes
 			}
 			
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleFollowState
+		{
+			return animator.getAnimationState(this) as ParticleFollowState;
 		}
 	}
 

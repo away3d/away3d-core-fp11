@@ -1,43 +1,41 @@
 package away3d.animators
 {
-	import away3d.animators.data.ParticleAnimationData;
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.core.base.SubMesh;
-	import away3d.core.base.ParticleGeometry;
-	import away3d.animators.nodes.AnimationNodeBase;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.animators.nodes.ParticleNodeBase;
-	import away3d.animators.nodes.ParticleTimeNode;
-	import away3d.arcane;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.data.ParticleData;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.entities.Mesh;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.display3D.Context3D;
-	import flash.utils.Dictionary;
+	import flash.display3D.*;
+	import flash.utils.*;
+	
+	import away3d.*;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.core.base.*;
+	import away3d.core.base.data.*;
+	import away3d.core.managers.*;
+	import away3d.entities.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
+	
 	/**
-	 * ...
-	 * @author ...
+	 * The animation data set used by particle-based animators, containing particle animation data.
+	 *
+	 * @see away3d.animators.ParticleAnimator
 	 */
 	public class ParticleAnimationSet extends AnimationSetBase implements IAnimationSet
 	{
+		/** @private */
+		arcane var _animationRegisterCache:AnimationRegisterCache;
+		
+		//all other nodes dependent on it
+		private var _timeNode:ParticleTimeNode;
+		
+		/**
+		 * Property used by particle nodes that require compilation at the end of the shader
+		 */
 		public static const POST_PRIORITY:int = 9;
 		
-		private var _animationRegisterCache:AnimationRegisterCache;
-		
 		private var _animationSubGeometries:Dictionary = new Dictionary(true);
-		
 		private var _particleNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
-		
 		private var _localDynamicNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
-		
 		private var _localStaticNodes:Vector.<ParticleNodeBase> = new Vector.<ParticleNodeBase>();
-		
 		private var _totalLenOfOneVertex:int = 0;
 		
 		//set true if has an node which will change UV
@@ -49,50 +47,55 @@ package away3d.animators
 		//set if has a billboard node.
 		public var hasBillboard:Boolean;
 		
-		//all other nodes dependent on it
-		private var timeNode:ParticleTimeNode;
-		private var _initParticleFunc:Function;
+		
+		/**
+		 * Initialiser function for static particle properties. Needs to reference a function with teh following format
+		 *
+		 * <code>
+		 * function initParticleFunc(prop:ParticleProperties):void
+		 * {
+		 * 		//code for settings local properties
+		 * }
+		 * </code>
+		 *
+		 * Aside from setting any properties required in particle animation nodes using local static properties, the initParticleFunc function
+		 * is required to time node requirements as they may be needed. These properties on the ParticleProperties object can include
+		 * <code>startTime</code>, <code>duration</code> and <code>delay</code>. The use of these properties is determined by the setting
+		 * arguments passed in the constructor of the particle animation set. By default, only the <code>startTime</code> property is required.
+		 */
+		public var initParticleFunc:Function;
 		
 		
-		public function ParticleAnimationSet()
+		/**
+		 * Creates a new <code>ParticleAnimationSet</code>
+		 *
+		 * @param    [optional] usesDuration    Defines whether the animation set uses the <code>duration</code> data in its static properties function to determine how long a particle is visible for. Defaults to false.
+		 * @param    [optional] usesLooping     Defines whether the animation set uses a looping timeframe for each particle determined by the <code>startTime</code>, <code>duration</code> and <code>delay</code> data in its static properties function. Defaults to false. Requires <code>usesDuration</code> to be true.
+		 * @param    [optional] usesDelay       Defines whether the animation set uses the <code>delay</code> data in its static properties function to determine how long a particle is hidden for. Defaults to false. Requires <code>usesLooping</code> to be true.
+		 */
+		public function ParticleAnimationSet(usesDuration:Boolean = false, usesLooping:Boolean = false, usesDelay:Boolean = false)
 		{
-			super();
-			timeNode = new ParticleTimeNode();
-			addAnimation(timeNode);
+			//automatically add a particle time node to the set
+			addAnimation(_timeNode = new ParticleTimeNode(usesDuration, usesLooping, usesDelay));
 		}
 		
+		/**
+		 * Returns a vector of the particle animation nodes contained within the set.
+		 */
 		public function get particleNodes():Vector.<ParticleNodeBase>
 		{
 			return _particleNodes;
 		}
 		
-		public function get animationRegisterCache():AnimationRegisterCache
-		{
-			return _animationRegisterCache;
-		}
-		
-		public function set hasDuration(value:Boolean):void
-		{
-			timeNode.hasDuration = value;
-		}
-		
-		public function set hasDelay(value:Boolean):void
-		{
-			timeNode.hasDelay = value;
-		}
-		
-		
-		public function set loop(value:Boolean):void
-		{
-			timeNode.loop = value;
-		}
-		
+		/**
+		 * @inheritDoc
+		 */
 		override public function addAnimation(node:AnimationNodeBase):void
 		{
 			var i:int;
 			var n:ParticleNodeBase = node as ParticleNodeBase;
 			n.processAnimationSetting(this);
-			if (n.mode == ParticlePropertiesMode.LOCAL) {
+			if (n.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 				n.dataOffset = _totalLenOfOneVertex;
 				_totalLenOfOneVertex += n.dataLength;
 				_localStaticNodes.push(n);
@@ -109,11 +112,17 @@ package away3d.animators
 			super.addAnimation(node);
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
 			_animationRegisterCache = pass.animationRegisterCache;
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
 			var context : Context3D = stage3DProxy.context3D;
@@ -122,7 +131,10 @@ package away3d.animators
 			for (var i:int = offset; i < used; i++)
 				context.setVertexBufferAt(i, null);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
@@ -162,7 +174,7 @@ package away3d.animators
 			return code;
 		}
 		
-		override public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
+		public function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String
 		{
 			var code:String = "";
 			if (hasUVNode)
@@ -182,8 +194,8 @@ package away3d.animators
 			}
 			return code;
 		}
-		
-		override public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String
+
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String
 		{
 			_animationRegisterCache.setShadedTarget(shadedTarget);
 			var code:String = "";
@@ -195,7 +207,10 @@ package away3d.animators
 			return code;
 		}
 		
-		override public function doneAGALCode(pass : MaterialPassBase):void
+		/**
+		 * @inheritDoc
+		 */
+		public function doneAGALCode(pass : MaterialPassBase):void
 		{
 			_animationRegisterCache.setDataLength();
 			
@@ -204,37 +219,31 @@ package away3d.animators
 			if (_animationRegisterCache.numFragmentConstant > 0)
 			{
 				//set fragmentZeroConst,fragmentOneConst
-				_animationRegisterCache.setFragmentConst(_animationRegisterCache.fragmentZeroConst.index, 0, 1, 1 / 255, 0);
+				_animationRegisterCache.setFragmentConst(_animationRegisterCache.fragmentZeroConst.index, 0, 1, 0, 0);
 			}
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		override public function get usesCPU() : Boolean
 		{
 			return false;
 		}
 		
-		public function get initParticleFunc():Function
-		{
-			return _initParticleFunc;
-		}
-		
-		public function set initParticleFunc(value:Function):void
-		{
-			_initParticleFunc = value;
-		}
-		
+		/**
+		 * @inheritDoc
+		 */
 		override public function cancelGPUCompatibility() : void
         {
 			
         }
 		
-		
-		
-		public function generateAnimationSubGeometries(mesh:Mesh):void
+		/** @private */
+		arcane function generateAnimationSubGeometries(mesh:Mesh):void
 		{
-			if (_initParticleFunc == null)
-				throw(new Error("no initParticleFunc"));
+			if (initParticleFunc == null)
+				throw(new Error("no initParticleFunc set"));
 			
 			var geometry:ParticleGeometry =  mesh.geometry as ParticleGeometry;
 			
@@ -252,7 +261,9 @@ package away3d.animators
 			{
 				subMesh = mesh.subMeshes[i];
 				subGeometry = subMesh.subGeometry;
-				if ((animationSubGeometry = _animationSubGeometries[subGeometry])) {
+				animationSubGeometry = _animationSubGeometries[subGeometry];
+				
+				if (animationSubGeometry) {
 					subMesh.animationSubGeometry = animationSubGeometry;
 					continue;
 				}
@@ -298,7 +309,7 @@ package away3d.animators
 				particleProperties.index = i;
 				
 				//call the init function on the particle parameters
-				_initParticleFunc(particleProperties);
+				initParticleFunc(particleProperties);
 				
 				//create the next set of node properties for the particle
 				for each (localNode in _localStaticNodes)
@@ -342,9 +353,6 @@ package away3d.animators
 				//next particle
 				i++;
 			}
-			
 		}
-		
 	}
-
 }

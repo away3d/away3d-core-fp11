@@ -1,19 +1,18 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.arcane;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.animators.states.ParticlePositionState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
-	 * @author ...
+	 * A particle animation node used to set the starting position of a particle.
 	 */
 	public class ParticlePositionNode extends ParticleNodeBase
 	{
@@ -37,7 +36,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticlePositionNode(mode:uint, position:Vector3D = null)
 		{
-			super("ParticlePositionNode" + mode, mode, 3);
+			super("ParticlePosition", mode, 3);
 			
 			_stateClass = ParticlePositionState;
 			
@@ -53,6 +52,14 @@ package away3d.animators.nodes
 			animationRegisterCache.setRegisterIndex(this, POSITION_INDEX, positionAttribute.index);
 			
 			return "add " + animationRegisterCache.positionTarget +"," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + "\n";
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticlePositionState
+		{
+			return animator.getAnimationState(this) as ParticlePositionState;
 		}
 		
 		/**

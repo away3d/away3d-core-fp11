@@ -1,21 +1,19 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.ParticlePropertiesMode;
-	import away3d.animators.data.ParticleProperties;
-	import away3d.arcane;
-	import away3d.animators.ParticleAnimationSet;
-	import away3d.animators.data.AnimationRegisterCache;
-	import away3d.animators.states.ParticleColorState;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
-	import flash.geom.ColorTransform;
+	import flash.geom.*;
+	
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.states.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
 	
 	
 	use namespace arcane;
 	
 	/**
-	 * ...
-	 * @author ...
+	 * A particle animation node used to control the color variation of a particle over time.
 	 */
 	public class ParticleColorNode extends ParticleNodeBase
 	{
@@ -103,15 +101,7 @@ package away3d.animators.nodes
 			_cycleDuration = cycleDuration;
 			_cyclePhase = cyclePhase;
 			
-			super("ParticleColorNode" + mode, mode, (_usesMultiplier && _usesOffset)? 16 : 8);
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
-		{
-			particleAnimationSet.hasColorNode = true;
+			super("ParticleColor", mode, (_usesMultiplier && _usesOffset)? 16 : 8);
 		}
 		
 		/**
@@ -120,7 +110,7 @@ package away3d.animators.nodes
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
 			var code:String = "";
-			if (animationRegisterCache.needFragmentAnimation && _mode == ParticlePropertiesMode.LOCAL)
+			if (animationRegisterCache.needFragmentAnimation && _mode != ParticlePropertiesMode.GLOBAL)
 			{
 				if (_usesMultiplier) {
 					var startMultiplierAtt:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
@@ -182,8 +172,8 @@ package away3d.animators.nodes
 				}
 				
 				if (_usesMultiplier) {
-					var startMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
-					var deltaMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_MULTIPLIER_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var startMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeFragmentConstant() : new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_MULTIPLIER_INDEX));
+					var deltaMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeFragmentConstant() : new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_MULTIPLIER_INDEX));
 					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierValue.index);
 					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierValue.index);
 					code += "mul " + temp + "," + deltaMultiplierValue + "," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
@@ -192,8 +182,8 @@ package away3d.animators.nodes
 				}
 				
 				if (_usesOffset) {
-					var startOffsetValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
-					var deltaOffsetValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var startOffsetValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL_STATIC)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
+					var deltaOffsetValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL_STATIC)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
 					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetValue.index);
 					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetValue.index);
 					code += "mul " + temp + "," + deltaOffsetValue +"," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
@@ -203,6 +193,22 @@ package away3d.animators.nodes
 			}
 			
 			return code;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function getAnimationState(animator:IAnimator):ParticleColorState
+		{
+			return animator.getAnimationState(this) as ParticleColorState;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
+		{
+			particleAnimationSet.hasColorNode = true;
 		}
 		
 		/**

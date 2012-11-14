@@ -7,8 +7,6 @@ package away3d.materials.compilation {
 	import away3d.materials.methods.ShaderMethodSetup;
 	import away3d.materials.methods.ShadingMethodBase;
 
-	import flash.display3D.Context3DTextureFormat;
-
 	public class ShaderCompiler
 	{
 		protected var _sharedRegisters : ShaderRegisterData;
@@ -22,7 +20,7 @@ package away3d.materials.compilation {
 		protected var _repeat : Boolean;
 		protected var _mipmap : Boolean;
 		protected var _enableLightFallOff : Boolean;
-		protected var _textureFormat : String = Context3DTextureFormat.BGRA;
+
 		protected var _preserveAlpha : Boolean = true;
 		protected var _animateUVs : Boolean;
 		protected var _alphaPremultiplied : Boolean;
@@ -143,12 +141,11 @@ package away3d.materials.compilation {
 			_preserveAlpha = value;
 		}
 
-		public function setTextureSampling(smooth : Boolean, repeat : Boolean, mipmap : Boolean, textureFormat:String) : void
+		public function setTextureSampling(smooth : Boolean, repeat : Boolean, mipmap : Boolean) : void
 		{
 			_smooth = smooth;
 			_repeat = repeat;
 			_mipmap = mipmap;
-			_textureFormat = textureFormat;
 		}
 
 		public function setConstantDataBuffers(vertexConstantData : Vector.<Number>, fragmentConstantData : Vector.<Number>) : void
@@ -385,7 +382,6 @@ package away3d.materials.compilation {
 			methodVO.useSmoothTextures = _smooth;
 			methodVO.repeatTextures = _repeat;
 			methodVO.useMipmapping = _mipmap;
-			methodVO.textureFormat = _textureFormat;
 			methodVO.numLights = _numLights + _numLightProbes;
 			methodVO.useLightFallOff = _enableLightFallOff && _profile != "baselineConstrained";
 			method.initVO(methodVO);
