@@ -5,8 +5,6 @@
 	import away3d.primitives.data.NURBSVertex;
 	import flash.geom.Vector3D;
 
-	import org.osmf.layout.LayoutTargetRenderers;
-
 	use namespace arcane;
 
 	/**
