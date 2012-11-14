@@ -134,7 +134,7 @@ package away3d.primitives
 			var data : Vector.<Number>;
 			var indices : Vector.<uint>;
 			var x : Number, y : Number;
-			var numIndices : uint = 0;
+			var numIndices : uint;
 			var base : uint;
 			var tw : uint = _segmentsW+1;
 			var numVertices : uint = (_segmentsH + 1) * tw;
@@ -142,14 +142,15 @@ package away3d.primitives
 			var skip:uint = stride - 9;
 			if (_doubleSided) numVertices *= 2;
 
+			numIndices = _segmentsH * _segmentsW * 6;
+			if (_doubleSided) numIndices <<= 1;
+
 			if (numVertices == target.numVertices) {
 				data = target.vertexData;
 				indices = target.indexData || new Vector.<uint>(numIndices, true);
 			}
 			else {
 				data = new Vector.<Number>(numVertices * stride, true);
-				numIndices = _segmentsH * _segmentsW * 6;
-				if (_doubleSided) numIndices <<= 1;
 				indices = new Vector.<uint>(numIndices, true);
 				invalidateUVs();
 			}
@@ -243,8 +244,6 @@ package away3d.primitives
 			var skip:uint = stride - 2;
 
 			if (_doubleSided) numUvs *= 2;
-
-			if(_doubleSided) numUvs *= 2;
 
 			if (target.UVData && numUvs == target.UVData.length)
 				data = target.UVData;
