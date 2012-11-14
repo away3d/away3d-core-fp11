@@ -16,7 +16,6 @@ package away3d.materials.methods {
 
 		public var useMipmapping : Boolean;
 		public var useSmoothTextures : Boolean;
-		public var textureFormat : String;
 		public var repeatTextures : Boolean;
 
 		// internal stuff for the material to know before assembling code
@@ -41,8 +40,7 @@ package away3d.materials.methods {
 			useMipmapping = true;
 			useSmoothTextures = true;
 			repeatTextures = false;
-			textureFormat = Context3DTextureFormat.BGRA;
-
+			
 			needsProjection = false;
 			needsView = false;
 			needsNormals = false;

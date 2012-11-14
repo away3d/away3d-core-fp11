@@ -21,12 +21,8 @@
 			this.texture = texture;
 			this.smooth = smooth;
 			this.repeat = repeat;
-			this.textureFormat = texture.textureFormat;
-			if(this.textureFormat == Context3DTextureFormat.BGRA) {
-				this.mipmap = mipmap;
-			}else{
-				this.mipmap = texture.hasMipmaps;
-			}
+			this.mipmap = mipmap;
+			
 		}
 
 		public function get animateUVs() : Boolean

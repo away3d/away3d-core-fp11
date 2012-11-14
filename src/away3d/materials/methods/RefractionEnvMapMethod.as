@@ -171,7 +171,8 @@ package away3d.materials.methods
 					"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 					"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
-			code +=	"tex " + refractionColor + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+
+			code +=	getTexCubeSampleCode(vo, refractionColor, cubeMapReg, _envMap, refractionDir) +
 					"sub " + refractionColor + ".w, " + refractionColor + ".w, fc0.x	\n" +
 					"kil " + refractionColor + ".w\n";
 
@@ -194,7 +195,7 @@ package away3d.materials.methods
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 	//
-				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+				code +=	getTexCubeSampleCode(vo, temp, cubeMapReg, _envMap, refractionDir) +
 						"mov " + refractionColor + ".y, " + temp + ".y\n";
 
 
@@ -217,7 +218,7 @@ package away3d.materials.methods
 						"sub " + refractionDir + ".xyz, " + refractionDir+ ".xyz, " + temp+ ".xyz\n" +
 						"nrm " + refractionDir + ".xyz, " + refractionDir+ ".xyz\n";
 
-				code +=	"tex " + temp + ", " + refractionDir + ", " + cubeMapReg + " <cube, " + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear,clamp>\n" +
+				code +=	getTexCubeSampleCode(vo, temp, cubeMapReg, _envMap, refractionDir) +
 						"mov " + refractionColor + ".z, " + temp + ".z\n";
 			}
 

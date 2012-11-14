@@ -7,6 +7,7 @@ package away3d.materials.passes
 	import away3d.textures.CubeTextureBase;
 
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
 
@@ -55,7 +56,23 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animationCode:String) : String
 		{
-			return 	"tex ft0, v0, fs0 <cube,linear,clamp,miplinear>	\n" +
+			var format : String;
+			switch (_cubeTexture.format) {
+				case Context3DTextureFormat.COMPRESSED:
+					format = "dxt1,";
+					break;
+				case "compressedAlpha":
+					format ="dxt5,";
+					break;
+				default:
+					format = "";
+			}
+			var mip : String = ",mipnone";
+			if(_cubeTexture.hasMipMaps)
+			{
+				mip = ",miplinear";
+			}
+			return 	"tex ft0, v0, fs0 <cube,"+format+"linear,clamp"+mip+">	\n" +
 					"mov oc, ft0							\n";
 		}
 
