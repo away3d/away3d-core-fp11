@@ -32,7 +32,7 @@ package away3d.materials.methods
 		public function set mask(value : Texture2DBase) : void
 		{
 			if (Boolean(value) != Boolean(_mask) ||
-				(value && _mask && value.hasMipMaps != _mask.hasMipMaps || value.format != _mask.format))
+				(value && _mask && (value.hasMipMaps != _mask.hasMipMaps || value.format != _mask.format)))
 				invalidateShaderProgram();
 			_mask = value;
 		}

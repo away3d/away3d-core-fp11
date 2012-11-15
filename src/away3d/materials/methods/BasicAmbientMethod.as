@@ -87,7 +87,7 @@ package away3d.materials.methods
 		public function set texture(value : Texture2DBase) : void
 		{
 			if (Boolean(value) != _useTexture ||
-				(value && _texture && value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format))
+				(value && _texture && (value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format)))
 				invalidateShaderProgram();
 			_useTexture = Boolean(value);
 			_texture = value;

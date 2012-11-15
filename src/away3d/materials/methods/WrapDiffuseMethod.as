@@ -48,7 +48,7 @@ package away3d.materials.methods
 		public function set scatterTexture(value : Texture2DBase) : void
 		{
 			if (Boolean(_scatterTexture) != Boolean(value) ||
-				(value && _scatterTexture && value.hasMipMaps != _scatterTexture.hasMipMaps || value.format != _scatterTexture.format))
+				(value && _scatterTexture && (value.hasMipMaps != _scatterTexture.hasMipMaps || value.format != _scatterTexture.format)))
 				invalidateShaderProgram();
 			_scatterTexture = value;
 		}
