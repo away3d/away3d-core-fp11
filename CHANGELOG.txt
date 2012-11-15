@@ -86,3 +86,23 @@
 
 4.1.0 (Alpha)
 - Merged stereo rendering feature
+- Merged particle animation feature
+- Merged compact geometry feature
+- Merged ATF texture feature
+- Merged view volume partitions feature
+- Merged multipass materials feature
+- Merged realtime reflections feature
+- Rebuilt tools package to work with new compact geometry feature
+- Removed name arg in animation set interface method addAnimation, name to be set on asset.
+- Renamed rootDelta property on AnimatorBase to positionDelta
+- Deprecated TripleFilterShadowMethod in favour of SoftShadowMethod
+- Added DXF parser
+- Fix order of material vs animation code generation. Closes #405
+- Increased max shadow map samples for DitheredShadowMapMethod
+- Increased max shadow map samples for SoftShadowMethod
+- Updated DirectionalLight's scene transform (and as a result the sceneDirection) if dirty when sceneDirection is queried. Closes #391
+- Replaced Texture constants not available in older compilers with string literals for backward compatibility
+- PlaneGeometry: Fix faulty and missing uv's when doubleSided is true.
+- Changed composite shader methods to work by passing in a method rather than subclassing
+- Moved responsibility for light picker updates to material passes
+- Moved shader compilation classes into own package, extracted dependency counts into class
