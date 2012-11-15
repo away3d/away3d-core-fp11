@@ -33,13 +33,6 @@ package away3d.materials.methods
 			this.scatterTexture = scatterTexture;
 		}
 
-
-		override arcane function initConstants(vo : MethodVO) : void
-		{
-			super.initConstants(vo);
-			vo.fragmentData[vo.secondaryFragmentConstantsIndex+2] = .5;
-		}
-
 		public function get scatterTexture() : Texture2DBase
 		{
 			return _scatterTexture;
@@ -102,20 +95,18 @@ package away3d.materials.methods
 					"add " + t + ".y, " + t + ".x, " + _wrapDataRegister + ".x\n" +
 					"mul " + t + ".y, " + t + ".y, " + _wrapDataRegister + ".y\n" +
 					"sat " + t + ".w, " + t + ".y\n" +
-					"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
+					"mul " + t + ".xz, " + t + ".w, " + lightDirReg + ".wz\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
 			if (_scatterTexture) {
-				code += "mul " + t + ".x, " + t + ".w, " + _wrapDataRegister + ".z\n" +
-						"add " + t + ".x, " + t + ".x, " + t + ".x\n" +
-						getTex2DSampleCode(vo, t, _scatterTextureRegister, _scatterTexture, t, "clamp") +
+				code += getTex2DSampleCode(vo, t, _scatterTextureRegister, _scatterTexture, t, "clamp") +
 						"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" +
 						"mul " + t + ".xyz, " + t + ".xyz, " + lightColReg + ".xyz\n";
 
 			}
 			else {
-				code += "mul " + t + ", " + t + ".w, " + lightColReg + "\n";
+				code += "mul " + t + ", " + t + ".x, " + lightColReg + "\n";
 			}
 
 
