@@ -16,7 +16,6 @@ package away3d.materials.methods {
 		private var _splats : Vector.<Texture2DBase>;
 		private var _numSplattingLayers : uint;
 		private var _tileData : Array;
-		private var _blendFactors : Array;
 
 		/**
 		 *
@@ -39,12 +38,12 @@ package away3d.materials.methods {
 			var data : Vector.<Number> = vo.fragmentData;
 			var index : int = vo.fragmentConstantsIndex;
 			data[index] = _tileData ? _tileData[0] : 1;
-			for (var i : int = 1; i < 4; ++i) {
-				data[index+i] = _tileData ? _tileData[i] : 50;
+			for (var i : int = 0; i < _numSplattingLayers; ++i) {
+				if (i < 3)
+					data[uint(index+i+1)] = _tileData ? _tileData[i+1] : 50;
+				else
+					data[uint(index+i-4)] = _tileData ? _tileData[i+1] : 50;
 			}
-
-			if (_numSplattingLayers == 4)
-				data[index+4] = _tileData ? _tileData[4] : 50;
 		}
 
 		arcane override function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
@@ -84,36 +83,34 @@ package away3d.materials.methods {
 			code += "mul " + uv + ", " + uvReg + ", " + scaleRegister + ".x\n" +
 					getSplatSampleCode(vo, albedo, _diffuseInputRegister, texture, uv);
 
-			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			regCache.addFragmentTempUsages(temp, 1);
-			var temp2 : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-
-			code += getTex2DSampleCode(vo, temp, blendTexReg, _blendingTexture, uvReg, "clamp");
+			var blendValues : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			regCache.addFragmentTempUsages(blendValues, 1);
+			code += getTex2DSampleCode(vo, blendValues, blendTexReg, _blendingTexture, uvReg, "clamp");
 			var splatTexReg : ShaderRegisterElement;
 
 			vo.fragmentConstantsIndex = scaleRegister.index*4;
 			var comps : Vector.<String> = Vector.<String>([ ".x",".y",".z",".w" ]);
 
 			for (var i : int = 0; i < _numSplattingLayers; ++i) {
-				var scaleRegName : String = i < 3? scaleRegister.component + comps[i+1] : scaleRegister2 + ".x";
+				var scaleRegName : String = i < 3? scaleRegister + comps[i+1] : scaleRegister2 + comps[i - 3];
 				splatTexReg = regCache.getFreeTextureReg();
 				code += "mul " + uv + ", " + uvReg + ", " + scaleRegName + "\n" +
 						getSplatSampleCode(vo, uv, splatTexReg, _splats[i], uv);
 
 				code += "sub " + uv + ", " + uv + ", " + albedo + "\n" +
-						"mul " + uv + ", " + uv + ", " + temp + comps[i] + "\n" +
+						"mul " + uv + ", " + uv + ", " + blendValues + comps[i] + "\n" +
 						"add " + albedo + ", " + albedo + ", " + uv + "\n";
 			}
 			regCache.removeFragmentTempUsage(uv);
-			regCache.removeFragmentTempUsage(temp);
+			regCache.removeFragmentTempUsage(blendValues);
 
-			if (vo.numLights == 0)
-				return code;
+			if (vo.numLights > 0) {
+				code += "mul " + targetReg + ".xyz, " + albedo + ".xyz, " + targetReg + ".xyz\n" +
+						"mov " + targetReg + ".w, " + albedo + ".w\n";
 
-			code += "mul " + targetReg + ".xyz, " + albedo + ".xyz, " + targetReg + ".xyz\n" +
-					"mov " + targetReg + ".w, " + albedo + ".w\n";
+				regCache.removeFragmentTempUsage(albedo);
+			}
 
-			regCache.removeFragmentTempUsage(albedo);
 			return code;
 		}
 
