@@ -9,8 +9,8 @@ package away3d
 		
 		public static const MAJOR_VERSION:uint = 4;
 		
-		public static const MINOR_VERSION:uint = 0;
+		public static const MINOR_VERSION:uint = 1;
 		
-		public static const REVISION:uint = 9;
+		public static const REVISION:uint = 0;
 	}
 }
