@@ -1,22 +1,18 @@
 package away3d.loaders.parsers
 {
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.animators.nodes.VertexClipNode;
-	import away3d.animators.VertexAnimationSet;
-	import flash.utils.Dictionary;
-	import away3d.arcane;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.TextureMaterial;
-	import away3d.textures.Texture2DBase;
+	import flash.net.*;
+	import flash.utils.*;
 	
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.nodes.*;
+	import away3d.core.base.*;
+	import away3d.entities.*;
+	import away3d.loaders.misc.*;
+	import away3d.loaders.parsers.utils.*;
+	import away3d.materials.*;
+	import away3d.materials.utils.*;
+	import away3d.textures.*;
 
 	use namespace arcane;
 	
@@ -456,9 +452,8 @@ package away3d.loaders.parsers
 
 		private function createDefaultSubGeometry() : void
 		{
-			var sub : SubGeometry = new SubGeometry();
-			sub.updateVertexData(_firstSubGeom.vertexData);
-			sub.updateUVData(_firstSubGeom.UVData);
+			var sub : CompactSubGeometry = new CompactSubGeometry();
+			sub.updateData(_firstSubGeom.vertexData);
 			sub.updateIndexData(_indices);
 			_geometry.addSubGeometry(sub);
 		}
