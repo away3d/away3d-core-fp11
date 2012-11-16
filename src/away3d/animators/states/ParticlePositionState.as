@@ -39,7 +39,7 @@ package away3d.animators.states
 		}
 		
 		/**
-		 * 
+		 *
 		 */
 		public function getPositions():Vector.<Vector3D>
 		{
@@ -66,7 +66,7 @@ package away3d.animators.states
 		 */
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			if (ParticlePropertiesMode.LOCAL_DYNAMIC && !_dynamicPropertiesDirty[animationSubGeometry])
+			if (_particlePositionNode.mode == ParticlePropertiesMode.LOCAL_DYNAMIC && !_dynamicPropertiesDirty[animationSubGeometry])
 				updateDynamicProperties(animationSubGeometry);
 			
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticlePositionNode.POSITION_INDEX);
