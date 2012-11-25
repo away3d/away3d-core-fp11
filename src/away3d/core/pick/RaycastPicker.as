@@ -95,6 +95,8 @@ package away3d.core.pick
 						pickingCollisionVO.rayEntryDistance = rayEntryDistance;
 						pickingCollisionVO.localRayPosition = localRayPosition;
 						pickingCollisionVO.localRayDirection = localRayDirection;
+						pickingCollisionVO.rayPosition = rayPosition;
+						pickingCollisionVO.rayDirection = rayDirection;
 						pickingCollisionVO.rayOriginIsInsideBounds = rayEntryDistance == 0;
 
 						// Store in new data set.
@@ -129,7 +131,6 @@ package away3d.core.pick
 					if( (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) && entity.collidesBefore(shortestCollisionDistance, _findClosestCollision) ) {
 						shortestCollisionDistance = pickingCollisionVO.rayEntryDistance;
 						bestCollisionVO = pickingCollisionVO;
-						//TODO: break loop unless best hit is required
 						if (!_findClosestCollision) {
 							updateLocalPosition(pickingCollisionVO);
 							return pickingCollisionVO;

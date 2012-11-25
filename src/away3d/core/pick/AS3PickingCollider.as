@@ -118,7 +118,6 @@ package away3d.core.pick
 						pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
 						pickingCollisionVO.localNormal = new Vector3D( nx, ny, nz );
 						pickingCollisionVO.uv = getCollisionUV( indexData, uvData, index, v, w, u );
-						
 						// if not looking for best hit, first found will do...
 						if (!_findClosestCollision)
 							return true;

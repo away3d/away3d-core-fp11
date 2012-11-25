@@ -43,6 +43,16 @@ package away3d.core.pick
 		 * The direction of the colliding ray in local coordinates.
 		 */		
 		public var localRayDirection:Vector3D;
+
+		/**
+		 * The starting position of the colliding ray in scene coordinates.
+		 */
+		public var rayPosition:Vector3D;
+
+		/**
+		 * The direction of the colliding ray in scene coordinates.
+		 */
+		public var rayDirection:Vector3D;
 		
 		/**
 		 * Determines if the ray position is contained within the entity bounds.
