@@ -286,7 +286,7 @@ package away3d.entities
 			mvp.copyFrom(sceneTransform);
 			mvp.append(camera.viewProjection);
 			mvp.copyColumnTo(3, _pos);
-			_zIndices[_mvpIndex] = -_pos.z;
+			_zIndices[_mvpIndex] = -_pos.z + 1000000 + _zOffset;
 		}
 		
 		/**

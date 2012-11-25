@@ -135,7 +135,7 @@ package away3d.entities
 			mvp.recompose( comps );
 			mvp.append( camera.lens.matrix );
 			mvp.copyColumnTo( 3, _pos );
-			_zIndices[_mvpIndex] = -_pos.z;
+			_zIndices[_mvpIndex] = -_pos.z + 1000000 + _zOffset;
 		}
 
 		public function get numTriangles():uint {
