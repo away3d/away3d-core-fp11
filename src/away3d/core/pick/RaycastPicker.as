@@ -138,8 +138,13 @@ package away3d.core.pick
 					}
 				}
 				else if (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) { // A bounds collision with no triangle collider stops all checks.
-					updateLocalPosition(pickingCollisionVO);
-					return pickingCollisionVO;
+					// Note: rayEntryDistances of 0 mean a collision caused by the ray starting inside the bounds.
+					// This makes the object eligible for triangle picking but should not represent a successful pick
+					// if the object's picker is bounds only.
+					if( pickingCollisionVO.rayEntryDistance != 0 ) {
+						updateLocalPosition( pickingCollisionVO );
+						return pickingCollisionVO;
+					}
 				}
 			}
 

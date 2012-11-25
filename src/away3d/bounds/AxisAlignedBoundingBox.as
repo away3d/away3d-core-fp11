@@ -126,6 +126,7 @@ package away3d.bounds
 		}
 
 		override public function rayIntersection(position:Vector3D, direction:Vector3D, targetNormal:Vector3D):Number {
+
 			if (containsPoint(position)) return 0;
 
 			var px:Number = position.x - _centerX, py:Number = position.y - _centerY, pz:Number = position.z - _centerZ;
