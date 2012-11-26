@@ -20,6 +20,8 @@ package away3d.core.base
 		protected var _activeBuffer : VertexBuffer3D;
 		protected var _activeContext : Context3D;
 		protected var _activeDataInvalid : Boolean;
+		private var _isolatedVertexPositionData:Vector.<Number>;
+		private var _isolatedVertexPositionDataDirty:Boolean;
 
 		public function CompactSubGeometry()
 		{
@@ -47,6 +49,7 @@ package away3d.core.base
 
 			_faceNormalsDirty = true;
 			_faceTangentsDirty = true;
+			_isolatedVertexPositionDataDirty = true;
 
 			_vertexData = data;
 			var numVertices : int = _vertexData.length / 13;
@@ -311,7 +314,7 @@ package away3d.core.base
 		public function cloneWithSeperateBuffers() : SubGeometry
 		{
 			var clone : SubGeometry = new SubGeometry();
-			clone.updateVertexData(stripBuffer(0, 3));
+			clone.updateVertexData( _isolatedVertexPositionData ? _isolatedVertexPositionData : _isolatedVertexPositionData = stripBuffer(0, 3) );
 			clone.autoDeriveVertexNormals = _autoDeriveVertexNormals;
 			clone.autoDeriveVertexTangents = _autoDeriveVertexTangents;
 			if (!_autoDeriveVertexNormals) clone.updateVertexNormalData(stripBuffer(3, 3));
@@ -320,6 +323,14 @@ package away3d.core.base
 			clone.updateSecondaryUVData(stripBuffer(11, 2));
 			clone.updateIndexData(indexData.concat());
 			return clone;
+		}
+
+		override public function get vertexPositionData():Vector.<Number> {
+			if( _isolatedVertexPositionDataDirty || !_isolatedVertexPositionData ) {
+				_isolatedVertexPositionData = stripBuffer( 0, 3 );
+				_isolatedVertexPositionDataDirty = false;
+			}
+			return _isolatedVertexPositionData;
 		}
 
 		protected function stripBuffer(offset : int, numEntries : int) : Vector.<Number>
