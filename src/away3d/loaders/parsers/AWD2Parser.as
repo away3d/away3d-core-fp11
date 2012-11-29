@@ -1,38 +1,23 @@
 package away3d.loaders.parsers
 {
-	import away3d.animators.data.JointPose;
-	import away3d.animators.data.Skeleton;
-	import away3d.animators.data.SkeletonJoint;
-	import away3d.animators.data.SkeletonPose;
-	import away3d.animators.data.UVAnimationFrame;
-	import away3d.animators.nodes.AnimationNodeBase;
-	import away3d.animators.nodes.SkeletonClipNode;
-	import away3d.animators.nodes.UVClipNode;
-	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.library.assets.IAsset;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.SinglePassMaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DBase;
-	import away3d.tools.utils.GeomUtil;
+	import flash.display.*;
+	import flash.geom.*;
+	import flash.net.*;
+	import flash.utils.*;
 	
-	import flash.display.Sprite;
-	import flash.geom.Matrix;
-	import flash.geom.Matrix3D;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
+	import away3d.*;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.entities.*;
+	import away3d.library.assets.*;
+	import away3d.loaders.misc.*;
+	import away3d.loaders.parsers.utils.*;
+	import away3d.materials.*;
+	import away3d.materials.utils.*;
+	import away3d.textures.*;
+	import away3d.tools.utils.*;
 	
 	
 	use namespace arcane;
@@ -1025,6 +1010,24 @@ package away3d.loaders.parsers
 			mtx_raw[13] = _body.readFloat();
 			mtx_raw[14] = _body.readFloat();
 			mtx_raw[15] = 1.0;
+			
+			
+			//TODO: fix max exporter to remove NaN values in joint 0 inverse bind pose
+			if (isNaN(mtx_raw[0])) {
+				mtx_raw[0] = 1;
+				mtx_raw[1] = 0;
+				mtx_raw[2] = 0;
+				mtx_raw[4] = 0;
+				mtx_raw[5] = 1;
+				mtx_raw[6] = 0;
+				mtx_raw[8] = 0;
+				mtx_raw[9] = 0;
+				mtx_raw[10] = 1;
+				mtx_raw[12] = 0;
+				mtx_raw[13] = 0;
+				mtx_raw[14] = 0;
+				
+			}
 			
 			return mtx_raw;
 		}
