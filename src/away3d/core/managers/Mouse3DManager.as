@@ -174,6 +174,7 @@ package away3d.core.managers
 
 		private function onMouseDown(event : MouseEvent) : void
 		{
+			updateCollider( _activeView ); // ensures collision check is done with correct mouse coordinates on mobile
 			if (_collidingObject) queueDispatch(_mouseDown, event);
 			_updateDirty = true;
 		}
