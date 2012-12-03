@@ -57,7 +57,7 @@
 		}
 
 		/**
-		 * Indicates whether or not the Mesh can cast shadows
+		 * Indicates whether or not the Mesh can cast shadows. Default value is <code>true</code>.
 		 */
 		public function get castsShadows() : Boolean
 		{
@@ -70,7 +70,7 @@
 		}
 
 		/**
-		 * Defines the animator of the mesh. Act on the mesh's geometry. Defaults to null
+		 * Defines the animator of the mesh. Act on the mesh's geometry. Default value is <code>null</code>.
 		 */
 		public function get animator() : IAnimator
 		{
