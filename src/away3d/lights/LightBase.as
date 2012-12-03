@@ -78,7 +78,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The specular emission strength of the light.
+		 * The specular emission strength of the light. Default value is <code>1</code>.
 		 */
 		public function get specular() : Number
 		{
@@ -94,7 +94,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The diffuse emission strength of the light.
+		 * The diffuse emission strength of the light. Default value is <code>1</code>.
 		 */
 		public function get diffuse() : Number
 		{
@@ -110,7 +110,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The color of the light.
+		 * The color of the light. Default value is <code>0xffffff</code>.
 		 */
 		public function get color() : uint
 		{
@@ -128,7 +128,7 @@ package away3d.lights
 		}
 
 		/**
-		 * The ambient emission strength of the light.
+		 * The ambient emission strength of the light. Default value is <code>0</code>.
 		 */
 		public function get ambient() : Number
 		{
@@ -143,6 +143,9 @@ package away3d.lights
 			updateAmbient();
 		}
 
+		/**
+		 * The ambient emission color of the light. Default value is <code>0xffffff</code>.
+		 */
 		public function get ambientColor() : uint
 		{
 			return _ambientColor;
@@ -160,10 +163,6 @@ package away3d.lights
 			_ambientG = ((_ambientColor >> 8) & 0xff)/0xff*_ambient;
 			_ambientB = (_ambientColor & 0xff)/0xff*_ambient;
 		}
-
-		/**
-		 * The ambient emission colour of the light
-		 */
 
 		/**
 		 * Gets the optimal projection matrix to render a light-based depth map for a single object.
