@@ -266,6 +266,10 @@
 			return _vertexData;
 		}
 
+		override public function get vertexPositionData():Vector.<Number> {
+			return _vertexData;
+		}
+
 		/**
 		 * Updates the vertex data of the SubGeometry.
 		 * @param vertices The new vertex data to upload.

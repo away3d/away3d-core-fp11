@@ -194,6 +194,7 @@ package away3d.events
 			result.uv = uv;
 			result.localPosition = localPosition;
 			result.localNormal = localNormal;
+			result.delta = delta;
 
 			result.ctrlKey = ctrlKey;
 			result.shiftKey = shiftKey;

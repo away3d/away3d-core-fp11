@@ -6,9 +6,6 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
-
 	use namespace arcane;
 
 	/**
@@ -242,11 +239,10 @@ package away3d.materials.methods
 
 			// incorporate input from ambient
 			if (vo.numLights > 0) {
+				if (_shadowRegister)
+					code += applyShadow(vo, regCache);
 				t = regCache.getFreeFragmentVectorTemp();
 				regCache.addFragmentTempUsages(t, 1);
-
-				if (_shadowRegister)
-					code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
 			} else {
 				t = targetReg;
 			}
@@ -291,6 +287,11 @@ package away3d.materials.methods
 			regCache.removeFragmentTempUsage(t);
 			
 			return code;
+		}
+
+		protected function applyShadow(vo : MethodVO, regCache : ShaderRegisterCache) : String
+		{
+			return "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
 		}
 
 		/**

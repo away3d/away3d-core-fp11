@@ -496,6 +496,10 @@ package away3d.core.base
 			throw new AbstractMethodError();
 		}
 
+		public function get vertexPositionData():Vector.<Number> {
+			throw new AbstractMethodError();
+		}
+
 		public function get vertexNormalData() : Vector.<Number>
 		{
 			throw new AbstractMethodError();

@@ -102,6 +102,10 @@ package away3d.cameras.lenses
 			var v : Vector3D = matrix.transformVector(point3d);
 			v.x = v.x/v.w;
 			v.y = -v.y/v.w;
+			
+			//z is unaffected by transform
+			v.z = point3d.z;
+			
 			return v;
 		}
 
@@ -127,16 +131,15 @@ package away3d.cameras.lenses
 		public function unproject(mX:Number, mY:Number, mZ : Number):Vector3D
 		{
 			var v : Vector3D = new Vector3D(mX, -mY, mZ, 1.0);
-
+			
+            v.x *= mZ;
+            v.y *= mZ;
+			
 			v = unprojectionMatrix.transformVector(v);
-
-			var inv : Number = 1/v.w;
-
-            v.x *= inv;
-            v.y *= inv;
-            v.z *= inv;
-			v.w = 1.0;
-
+			
+			//z is unaffected by transform
+            v.z = mZ;
+			
 			return v;
 		}
 
