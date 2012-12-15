@@ -305,7 +305,7 @@ package away3d.animators
 			//default values for particle param
 			particleProperties.total = numParticles;
 			particleProperties.startTime = 0;
-			particleProperties.particleDuration = 1000;
+			particleProperties.duration = 1000;
 			particleProperties.delay = 0.1;
 			
 			i = 0;
