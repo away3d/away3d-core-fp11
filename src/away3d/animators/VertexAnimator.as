@@ -40,7 +40,15 @@ package away3d.animators
 			_numPoses = vertexAnimationSet.numPoses;
 			_blendMode = vertexAnimationSet.blendMode;
 		}
-
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function clone():void
+		{
+			return new VertexAnimator(_vertexAnimationSet);
+		}
+		
 		/**
 		 * Plays a sequence with a given name. If the sequence is not found, it may not be loaded yet, and it will retry every frame.
 		 * @param sequenceName The name of the clip to be played.

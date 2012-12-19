@@ -35,6 +35,14 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
+		public function clone():IAnimator
+		{
+			return new UVAnimator(_uvAnimationSet);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function setRenderState(stage3DProxy : Stage3DProxy, renderable : IRenderable, vertexConstantOffset : int, vertexStreamOffset : int, camera:Camera3D) : void
 		{
 			var material:TextureMaterial = renderable.material as TextureMaterial;

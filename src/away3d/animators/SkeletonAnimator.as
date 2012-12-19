@@ -123,6 +123,16 @@ package away3d.animators
 		}
 		
 		/**
+		 * @inheritDoc
+		 */
+		public function clone():IAnimator
+		{
+			/* The cast to SkeletonAnimationSet should never fail, as _animationSet can only be set
+			   through the constructor, which will only accept a SkeletonAnimationSet. */ 
+			return new SkeletonAnimator(_animationSet as SkeletonAnimationSet, _skeleton, _forceCPU);
+		}
+
+		/**
 		 * Plays an animation state registered with the given name in the animation data set.
 		 *
 		 * @param stateName The data set name of the animation state to be played.
