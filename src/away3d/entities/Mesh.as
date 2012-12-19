@@ -224,6 +224,10 @@
 				clone.addChild(ObjectContainer3D(getChildAt(i).clone()));
 			}
 
+			if (_animator) {
+				clone.animator = _animator.clone();
+			}
+
 			return clone;
 		}
 
