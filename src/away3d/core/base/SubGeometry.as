@@ -991,5 +991,21 @@
 		{
 			return 0;
 		}
+
+		public function get vertices():Vector.<Number> {
+			return _vertices;
+		}
+
+		public function get vertexNormals():Vector.<Number> {
+			return _vertexNormals;
+		}
+
+		public function get uvs():Vector.<Number> {
+			return _uvs;
+		}
+
+		public function get indices():Vector.<uint> {
+			return _indices;
+		}
 	}
 }
