@@ -174,8 +174,12 @@ package away3d.animators.nodes
 				if (_usesMultiplier) {
 					var startMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeFragmentConstant() : new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_MULTIPLIER_INDEX));
 					var deltaMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeFragmentConstant() : new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_MULTIPLIER_INDEX));
-					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierValue.index);
-					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierValue.index);
+					if (_mode == ParticlePropertiesMode.GLOBAL)
+					{
+						//if _mode==LOCAL, the START_MULTIPLIER_INDEX has been set in getAGALVertexCode()
+						animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierValue.index);
+						animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierValue.index);
+					}
 					code += "mul " + temp + "," + deltaMultiplierValue + "," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
 					code += "add " + temp + "," + temp + "," + startMultiplierValue + "\n";
 					code += "mul " + animationRegisterCache.colorTarget +"," + temp + "," + animationRegisterCache.colorTarget + "\n";
@@ -184,8 +188,11 @@ package away3d.animators.nodes
 				if (_usesOffset) {
 					var startOffsetValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL_STATIC)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_START_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
 					var deltaOffsetValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL_STATIC)? new ShaderRegisterElement("v", animationRegisterCache.getRegisterIndex(this, VARYING_DELTA_OFFSET_INDEX)) : animationRegisterCache.getFreeFragmentConstant();
-					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetValue.index);
-					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetValue.index);
+					if (_mode == ParticlePropertiesMode.GLOBAL)
+					{
+						animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetValue.index);
+						animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetValue.index);
+					}
 					code += "mul " + temp + "," + deltaOffsetValue +"," + (_usesCycle? sin : animationRegisterCache.fragmentLife) + "\n";
 					code += "add " + temp + "," + temp +"," + startOffsetValue + "\n";
 					code += "add " + animationRegisterCache.colorTarget +"," +temp + "," + animationRegisterCache.colorTarget + "\n";
