@@ -233,7 +233,7 @@ package away3d.animators.nodes
 			
 			var i:uint;
 			
-			if (_usesCycle) {
+			if (!_usesCycle) {
 				//multiplier
 				if (_usesMultiplier) {
 					_oneData[i++] = startColor.redMultiplier;
