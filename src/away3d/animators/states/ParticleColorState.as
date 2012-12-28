@@ -148,11 +148,13 @@ package away3d.animators.states
 		
 		private function updateColorData():void
 		{
+			if (_usesCycle)
+			{
+				if (_cycleDuration <= 0)
+					throw(new Error("the cycle duration must be greater than zero"));
+				_cycleData = new Vector3D(Math.PI * 2 / _cycleDuration, _cyclePhase * Math.PI / 180, 0, 0);
+			}
 			if (_particleColorNode.mode == ParticlePropertiesMode.GLOBAL) {
-				if (_usesCycle) {
-					if (_cycleDuration <= 0)
-						throw(new Error("the cycle duration must be greater than zero"));
-					_cycleData = new Vector3D(Math.PI * 2 / _cycleDuration, _cyclePhase * Math.PI / 180, 0, 0);
 					if (_usesMultiplier) {
 						_startMultiplierData = new Vector3D((_startColor.redMultiplier + _endColor.redMultiplier) / 2, (_startColor.greenMultiplier + _endColor.greenMultiplier) / 2, (_startColor.blueMultiplier + _endColor.blueMultiplier) / 2, (_startColor.alphaMultiplier + _endColor.alphaMultiplier) / 2);
 						_deltaMultiplierData = new Vector3D((_endColor.redMultiplier - _startColor.redMultiplier) / 2, (_endColor.greenMultiplier - _startColor.greenMultiplier) / 2, (_endColor.blueMultiplier - _startColor.blueMultiplier) / 2, (_endColor.alphaMultiplier - _startColor.alphaMultiplier) / 2);
