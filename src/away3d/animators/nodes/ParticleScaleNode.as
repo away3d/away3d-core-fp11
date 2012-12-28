@@ -118,7 +118,7 @@ package away3d.animators.nodes
 			if (_usesCycle)
 			{
 				_oneData[0] = (scale.x + scale.y) / 2;
-				_oneData[1] = Math.abs(_minScale - _maxScale) / 2;
+				_oneData[1] = Math.abs(scale.x - scale.y) / 2;
 				if (scale.z <= 0)
 					throw(new Error("the cycle duration must be greater than zero"));
 				_oneData[2] = Math.PI * 2 / scale.z;
