@@ -145,6 +145,11 @@ package away3d.animators.nodes
 			if (!rotate)
 				throw(new Error("there is no " + ROTATIONALVELOCITY_VECTOR3D + " in param!"));
 			
+			if (rotate.length <= 0)
+				rotate.z = 1;//set the default direction
+			else
+				rotate.normalize();
+				
 			_oneData[0] = rotate.x;
 			_oneData[1] = rotate.y;
 			_oneData[2] = rotate.z;

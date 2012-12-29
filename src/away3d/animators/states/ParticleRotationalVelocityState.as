@@ -85,11 +85,14 @@ package away3d.animators.states
 			if (_particleRotationalVelocityNode.mode == ParticlePropertiesMode.GLOBAL) {
 				if (_rotationalVelocity.w <= 0)
 					throw(new Error("the cycle duration must greater than zero"));
+				var rotation:Vector3D = _rotationalVelocity.clone();
 				
-				if (_rotationalVelocity.length == 0)
-					throw(new Error("must define an axis"));
+				if (rotation.length <= 0)
+					rotation.z = 1;//set the default direction
+				else
+					rotation.normalize();
 				
-				_rotationalVelocityData = new Vector3D(_rotationalVelocity.x, _rotationalVelocity.y, _rotationalVelocity.z, Math.PI * 2 / _rotationalVelocity.w);
+				_rotationalVelocityData = new Vector3D(rotation.x, rotation.y, rotation.z, Math.PI * 2 / rotation.w);
 			}
 		}
 	}
