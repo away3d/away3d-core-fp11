@@ -91,8 +91,8 @@ package away3d.animators.states
 					rotation.z = 1;//set the default direction
 				else
 					rotation.normalize();
-				
-				_rotationalVelocityData = new Vector3D(rotation.x, rotation.y, rotation.z, Math.PI * 2 / rotation.w);
+				// w is used as angle/2 in agal
+				_rotationalVelocityData = new Vector3D(rotation.x, rotation.y, rotation.z, Math.PI / rotation.w);
 			}
 		}
 	}
