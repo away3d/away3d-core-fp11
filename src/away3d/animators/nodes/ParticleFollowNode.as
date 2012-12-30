@@ -47,6 +47,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
+			//TODO: use Quaternion to implement this function
 			var code:String = "";
 			if (_usesRotation) {
 				var rotationAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
@@ -58,8 +59,17 @@ package away3d.animators.nodes
 				animationRegisterCache.addVertexTempUsages(temp2, 1);
 				var temp3:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				
+				var temp4:ShaderRegisterElement
+				if(animationRegisterCache.hasBillboard)
+				{
+					animationRegisterCache.addVertexTempUsages(temp3, 1);
+					temp4= animationRegisterCache.getFreeVertexVectorTemp();
+				}
+				
 				animationRegisterCache.removeVertexTempUsage(temp1);
 				animationRegisterCache.removeVertexTempUsage(temp2);
+				if(animationRegisterCache.hasBillboard)
+					animationRegisterCache.removeVertexTempUsage(temp3);
 				
 				var len:int = animationRegisterCache.rotationRegisters.length;
 				var i:int;
@@ -76,9 +86,7 @@ package away3d.animators.nodes
 				
 				if (animationRegisterCache.hasBillboard)
 				{
-					code += "m33 " + temp1 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
-					code += "sub " + temp1 + "," + temp1 + "," + animationRegisterCache.positionTarget + "\n";
-					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+					code += "m33 " + temp4 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
 				}
 				else
 				{
@@ -101,9 +109,7 @@ package away3d.animators.nodes
 				
 				if (animationRegisterCache.hasBillboard)
 				{
-					code += "m33 " + temp1 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
-					code += "sub " + temp1 + "," + temp1 + "," + animationRegisterCache.positionTarget + "\n";
-					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+					code += "m33 " + temp4 + ".xyz," + temp4 + ".xyz," + temp1 + "\n";
 				}
 				else
 				{
@@ -126,9 +132,9 @@ package away3d.animators.nodes
 				
 				if (animationRegisterCache.hasBillboard)
 				{
-					code += "m33 " + temp1 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
-					code += "sub " + temp1 + "," + temp1 + "," + animationRegisterCache.positionTarget + "\n";
-					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+					code += "m33 " + temp4 + ".xyz," + temp4 + ".xyz," + temp1 + "\n";
+					code += "sub " + temp4 + ".xyz," + temp4 + ".xyz," + animationRegisterCache.positionTarget + "\n";
+					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp4 + ".xyz," + animationRegisterCache.scaleAndRotateTarget + "\n";
 				}
 				else
 				{
