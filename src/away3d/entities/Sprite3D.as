@@ -262,7 +262,7 @@ package away3d.entities
 			_pickingCollider.setLocalRay( localRayPosition, localRayDirection );
 
 			_pickingCollisionVO.renderable = null;
-			if ( _pickingCollider.testSubMeshCollision( _pickingSubMesh, _pickingCollisionVO, shortestCollisionDistance, false ) ) {
+			if ( _pickingCollider.testSubMeshCollision( _pickingSubMesh, _pickingCollisionVO, shortestCollisionDistance ) ) {
 				_pickingCollisionVO.renderable = _pickingSubMesh;
 			}
 

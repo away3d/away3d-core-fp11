@@ -1,8 +1,8 @@
 package away3d.core.pick
 {
-	import away3d.core.base.*;
+	import flash.geom.Vector3D;
 	
-	import flash.geom.*;
+	import away3d.core.base.SubMesh;
 	
 	/**
 	 * Pure AS3 picking collider for entity objects. Used with the <code>RaycastPicker</code> picking object.
@@ -27,7 +27,7 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, ignoreFacesLookingAway:Boolean ):Boolean
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			var i:uint;
 			var t:Number;
@@ -48,6 +48,8 @@ package away3d.core.pick
 			var vertexData:Vector.<Number> = subMesh.vertexData;
 			var uvData:Vector.<Number> = subMesh.UVData;
 			var collisionTriangleIndex:int = -1;
+			var bothSides:Boolean = subMesh.material.bothSides;
+			
 			numTriangles = subMesh.numTriangles;
 			
 			for( i = 0; i < numTriangles; ++i ) { // sweep all triangles
@@ -87,7 +89,7 @@ package away3d.core.pick
 
 				// -- plane intersection test --
 				nDotV = nx * rayDirection.x + ny * + rayDirection.y + nz * rayDirection.z; // rayDirection . normal
-				if( ( ignoreFacesLookingAway && nDotV < 0.0 ) || ( !ignoreFacesLookingAway && nDotV != 0.0 ) ) { // an intersection must exist
+				if( ( !bothSides && nDotV < 0.0 ) || ( bothSides && nDotV != 0.0 ) ) { // an intersection must exist
 					// find collision t
 					D = -( nx * p0x + ny * p0y + nz * p0z );
 					disToPlane = -( nx * rayPosition.x + ny * rayPosition.y + nz * rayPosition.z + D );

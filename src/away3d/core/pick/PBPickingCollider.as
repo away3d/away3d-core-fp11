@@ -51,7 +51,7 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, ignoreFacesLookingAway:Boolean ):Boolean
+		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			var cx:Number, cy:Number, cz:Number;
 			var u:Number, v:Number, w:Number;
@@ -70,7 +70,7 @@ package away3d.core.pick
 				_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
 				_rayTriangleKernel.data.vertexBufferWidth.value = [ vertexBufferDims.x ];
 				_rayTriangleKernel.data.vertexBuffer.input = duplicateVertexData;
-				_rayTriangleKernel.data.ignoreFacesLookingAway.value = [ ignoreFacesLookingAway ? 1.0 : 0.0 ];
+				_rayTriangleKernel.data.bothSides.value = [ subMesh.material.bothSides ? 1.0 : 0.0 ];
 	
 				// send indices to pb
 				_rayTriangleKernel.data.indexBuffer.width = indexBufferDims.x;
