@@ -77,15 +77,6 @@ package away3d.cameras.lenses
 			invalidateMatrix();
 		}
 
-		override public function clone() : LensBase
-		{
-			var clone : PerspectiveOffAxisLens = new PerspectiveOffAxisLens(_stageProxy, _viewArea, _fieldOfView);
-			clone._near = _near;
-			clone._far = _far;
-			clone._aspectRatio = _aspectRatio;
-			return clone;
-		}
-
 		/**
 		 * @inheritDoc
 		 */
@@ -96,37 +87,25 @@ package away3d.cameras.lenses
 			_yMax = _near*_focalLengthInv;
 			_xMax = _yMax*_aspectRatio;
 
-			var left:Number = _viewArea.x - _stageProxy.width * 0.5;
-			var right:Number = _viewArea.x + _viewArea.width - _stageProxy.width * 0.5;
-			var top:Number = _stageProxy.height * 0.5 - _viewArea.y;
-			var bottom:Number = _stageProxy.height * 0.5 - _viewArea.y - _viewArea.height;
-
-			var ym2:Number = _yMax * 2;
-			var xWid:Number = ym2 * (stageProxy.width / _viewArea.width) * _aspectRatio;
-			var yHgt:Number = ym2 * (stageProxy.height / _viewArea.height);
-			var centre:Number = left + (_viewArea.width * 0.5);
-			var centerScaled:Number = ym2 * (centre / _viewArea.height);
-			var middle:Number = bottom + (_viewArea.height * 0.5);
-			var middleScaled:Number = ym2 * (middle / _viewArea.height);
-			left = centerScaled - xWid * 0.5;
-			right = centerScaled + xWid * 0.5;
-			top = middleScaled + yHgt * 0.5;
-			bottom = middleScaled - yHgt * 0.5;
-
-			var a:Number = (right + left) / (right - left);
-    		var b:Number = (bottom + top) / (top - bottom);
-    		var c:Number = (_far + _near) / (_far - _near);
-    		var d:Number = -2 * _far * _near / (_far - _near);
+			var xWid:Number = _xMax * (stageProxy.width / _viewArea.width);
+			var yHgt:Number = _yMax * (stageProxy.height / _viewArea.height);
+			var center:Number = _xMax * ((_viewArea.x - _stageProxy.x) * 2 - _stageProxy.width) / _viewArea.width + _xMax;
+			var middle:Number = -_yMax * ((_viewArea.y - _stageProxy.y) * 2 - _stageProxy.height) / _viewArea.height - _yMax;
+			
+			var left:Number = center - xWid;
+			var right:Number = center + xWid;
+			var top:Number = middle - yHgt;
+			var bottom:Number = middle + yHgt;
 			
 			raw[uint(0)] = 2 * _near / (right - left);
-			raw[uint(5)] = 2 * _near / (top - bottom);
-			raw[uint(8)] = a;
-			raw[uint(9)] = b;
-			raw[uint(10)] = c;
+			raw[uint(5)] = 2 * _near / (bottom - top);
+			raw[uint(8)] = (right + left) / (right - left);
+			raw[uint(9)] = (bottom + top) / (bottom - top);
+			raw[uint(10)] = (_far + _near) / (_far - _near);
 			raw[uint(11)] = 1;
 			raw[uint(1)] = raw[uint(2)] = raw[uint(3)] = raw[uint(4)] =
 			raw[uint(6)] = raw[uint(7)] = raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
-			raw[uint(14)] = d;
+			raw[uint(14)] = -2 * _far * _near / (_far - _near);
 
 			_matrix.copyRawDataFrom(raw);
 

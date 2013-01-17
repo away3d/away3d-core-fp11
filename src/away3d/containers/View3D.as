@@ -452,10 +452,14 @@
 			
 			_localPos.x = value;
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
-			_viewScissoRect.x = value;
 			
-			if (_stage3DProxy && !_shareContext)
-				_stage3DProxy.x = _globalPos.x;
+			if (_stage3DProxy) {
+				if (_shareContext) {
+					_viewScissoRect.x = _globalPos.x - _stage3DProxy.x;
+				} else {
+					_stage3DProxy.x = _viewScissoRect.x = _globalPos.x;
+				}
+			}
 		}
 
 		override public function set y(value : Number) : void
@@ -466,8 +470,13 @@
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
 			_viewScissoRect.y = value;
 			
-			if (_stage3DProxy && !_shareContext)
-				_stage3DProxy.y = _globalPos.y;
+			if (_stage3DProxy) {
+				if (_shareContext) {
+					_viewScissoRect.y = _globalPos.y - _stage3DProxy.y;
+				} else {
+					_stage3DProxy.y = _viewScissoRect.y = _globalPos.y;
+				}
+			}
 		}
 		
 		override public function set visible(value : Boolean) : void
