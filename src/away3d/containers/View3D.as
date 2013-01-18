@@ -1,19 +1,5 @@
 ﻿package away3d.containers
 {
-	import away3d.core.pick.IPicker;
-	import away3d.Away3D;
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Mouse3DManager;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DManager;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.render.DefaultRenderer;
-	import away3d.core.render.DepthRenderer;
-	import away3d.core.render.Filter3DRenderer;
-	import away3d.core.render.RendererBase;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.textures.Texture2DBase;
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -29,6 +15,23 @@
 	import flash.ui.ContextMenu;
 	import flash.ui.ContextMenuItem;
 	import flash.utils.getTimer;
+	
+	import away3d.Away3D;
+	import away3d.arcane;
+	import away3d.cameras.Camera3D;
+	import away3d.core.managers.Mouse3DManager;
+	import away3d.core.managers.RTTBufferManager;
+	import away3d.core.managers.Stage3DManager;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.pick.IPicker;
+	import away3d.core.render.DefaultRenderer;
+	import away3d.core.render.DepthRenderer;
+	import away3d.core.render.Filter3DRenderer;
+	import away3d.core.render.RendererBase;
+	import away3d.core.traverse.EntityCollector;
+	import away3d.events.CameraEvent;
+	import away3d.events.Stage3DEvent;
+	import away3d.textures.Texture2DBase;
 	
 
 	use namespace arcane;
@@ -79,7 +82,9 @@
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
 		private var _shareContext:Boolean = false;
-		private var _viewScissoRect:Rectangle;
+		private var _scissorRect:Rectangle;
+		private var _scissorRectDirty:Boolean = true;
+		private var _viewportDirty:Boolean = true;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -137,7 +142,7 @@
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
-			_viewScissoRect = new Rectangle();
+			_scissorRect = new Rectangle();
 
 			initHitField();
 			
@@ -146,6 +151,9 @@
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
+			
+			
+			_camera.addEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
 			
 			_camera.partition = _scene.partition;
 			
@@ -184,7 +192,7 @@
 			_localPos.y = _stage3DProxy.y;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
 			
-			_viewScissoRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
+			_scissorRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
 		}
 
 		/**
@@ -292,11 +300,6 @@
 			_renderer.viewWidth = _width;
 			_renderer.viewHeight = _height;
 
-			invalidateBackBuffer();
-		}
-
-		private function invalidateBackBuffer() : void
-		{
 			_backBufferInvalid = true;
 		}
 
@@ -345,10 +348,17 @@
 		 */
 		public function set camera(camera:Camera3D) : void
 		{
+			_camera.removeEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
+			
 			_camera = camera;
 			
 			if (_scene)
 				_camera.partition = _scene.partition;
+			
+			_camera.addEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
+			
+			_scissorRectDirty = true;
+			_viewportDirty = true;
 		}
 		
 		/**
@@ -407,9 +417,10 @@
 
 			_renderer.viewWidth = value;
 			
-			_viewScissoRect.width = value;
+			_scissorRect.width = value;
 
-			invalidateBackBuffer();
+			_backBufferInvalid = true;
+			_scissorRectDirty = true;
 		}
 
 		/**
@@ -440,9 +451,10 @@
 
 			_renderer.viewHeight = value;
 
-			_viewScissoRect.height = value;
+			_scissorRect.height = value;
 			
-			invalidateBackBuffer();
+			_backBufferInvalid = true;
+			_scissorRectDirty = true;
 		}
 
 
@@ -455,11 +467,13 @@
 			
 			if (_stage3DProxy) {
 				if (_shareContext) {
-					_viewScissoRect.x = _globalPos.x - _stage3DProxy.x;
+					_scissorRect.x = _globalPos.x - _stage3DProxy.x;
 				} else {
-					_stage3DProxy.x = _viewScissoRect.x = _globalPos.x;
+					_stage3DProxy.x = _scissorRect.x = _globalPos.x;
 				}
 			}
+			
+			_scissorRectDirty = true;
 		}
 
 		override public function set y(value : Number) : void
@@ -468,15 +482,17 @@
 			
 			_localPos.y = value;
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
-			_viewScissoRect.y = value;
+			_scissorRect.y = value;
 			
 			if (_stage3DProxy) {
 				if (_shareContext) {
-					_viewScissoRect.y = _globalPos.y - _stage3DProxy.y;
+					_scissorRect.y = _globalPos.y - _stage3DProxy.y;
 				} else {
-					_stage3DProxy.y = _viewScissoRect.y = _globalPos.y;
+					_stage3DProxy.y = _scissorRect.y = _globalPos.y;
 				}
 			}
+			
+			_scissorRectDirty = true;
 		}
 		
 		override public function set visible(value : Boolean) : void
@@ -500,7 +516,7 @@
 			_antiAlias = value;
 			_renderer.antiAlias = value;
 			
-			invalidateBackBuffer();
+			_backBufferInvalid = true;
 		}
 		
 		/**
@@ -615,7 +631,7 @@
 			} else {
 				_renderer.shareContext = _shareContext;
 				if (_shareContext) {
-					_renderer.render(_entityCollector, null, _viewScissoRect);
+					_renderer.render(_entityCollector, null, _scissorRect);
 				} else {
 					_renderer.render(_entityCollector);
 				}
@@ -648,6 +664,17 @@
 		private function updateViewSizeData() : void
 		{
 			_camera.lens.aspectRatio = _aspectRatio;
+			
+			if (_scissorRectDirty) {
+				_scissorRectDirty = false;
+				_camera.lens.updateScissorRect(_scissorRect.x, _scissorRect.y, _scissorRect.width, _scissorRect.height);
+			}
+			
+			if (_viewportDirty) {
+				_viewportDirty = false;
+				_camera.lens.updateViewport(_stage3DProxy.viewPort.x, _stage3DProxy.viewPort.y, _stage3DProxy.viewPort.width, _stage3DProxy.viewPort.height);
+			}
+			
 			_entityCollector.camera = _camera;
 
 			if (_filter3DRenderer || _renderer.renderToTexture) {
@@ -757,7 +784,13 @@
 		{
 			return _entityCollector;
 		}
-
+		
+		private function onLensChanged(event : CameraEvent) : void
+		{
+			_scissorRectDirty = true;
+			_viewportDirty = true;
+		}
+		
 		/**
 		 * When added to the stage, retrieve a Stage3D instance
 		 */
@@ -769,7 +802,10 @@
 			_addedToStage = true;
 
 			_stage3DManager = Stage3DManager.getInstance(stage);
-			if (!_stage3DProxy) _stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
+			if (!_stage3DProxy) {
+				_stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
+				_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+			}
 
 			_stage3DProxy.x = _globalPos.x;
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
@@ -792,7 +828,17 @@
 				_stage3DProxy.y = _globalPos.y;
 			}
 		}
-
+		
+		private function onViewportUpdated(event : Stage3DEvent) : void
+		{
+			if (_shareContext) {
+				_scissorRect.x = _globalPos.x - _stage3DProxy.x;
+				_scissorRect.y = _globalPos.y - _stage3DProxy.y;
+				_scissorRectDirty = true;
+			}
+			
+			_viewportDirty = true;
+		}
 
 // dead ends:
 		override public function set z(value : Number) : void {}

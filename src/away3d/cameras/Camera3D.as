@@ -1,5 +1,8 @@
 package away3d.cameras
 {
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	
 	import away3d.arcane;
 	import away3d.cameras.lenses.LensBase;
 	import away3d.cameras.lenses.PerspectiveLens;
@@ -8,10 +11,8 @@ package away3d.cameras
 	import away3d.core.partition.CameraNode;
 	import away3d.core.partition.EntityNode;
 	import away3d.entities.Entity;
+	import away3d.events.CameraEvent;
 	import away3d.events.LensEvent;
-
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -187,8 +188,8 @@ package away3d.cameras
 			_lens = value;
 			
 			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
-
-			dispatchEvent(new LensEvent(LensEvent.MATRIX_CHANGED, value));
+			
+			dispatchEvent(new CameraEvent(CameraEvent.LENS_CHANGED, this));
 		}
 
 		/**

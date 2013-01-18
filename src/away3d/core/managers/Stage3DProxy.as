@@ -1,10 +1,6 @@
 package away3d.core.managers
 {
 	import flash.display.Shape;
-	import away3d.arcane;
-	import away3d.debug.Debug;
-	import away3d.events.Stage3DEvent;
-	
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DRenderMode;
@@ -15,6 +11,10 @@ package away3d.core.managers
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
 	import flash.system.System;
+	
+	import away3d.arcane;
+	import away3d.debug.Debug;
+	import away3d.events.Stage3DEvent;
 
 	use namespace arcane;
 
@@ -57,6 +57,24 @@ package away3d.core.managers
 		private var _viewPort : Rectangle;
 		private var _enterFrame : Event;
 		private var _exitFrame : Event;
+		private var _viewportUpdated : Stage3DEvent;
+		private var _viewportDirty : Boolean;
+		
+		private function notifyViewportUpdated():void
+		{
+			if (_viewportDirty)
+				return;
+			
+			_viewportDirty = true;
+			
+			if (!hasEventListener(Stage3DEvent.VIEWPORT_UPDATED))
+				return;
+			
+			if (!_viewportUpdated)
+				_viewportUpdated = new Stage3DEvent(Stage3DEvent.VIEWPORT_UPDATED);
+			
+			dispatchEvent(_viewportUpdated);
+		}
 		
 		private function notifyEnterFrame():void
 		{
@@ -346,6 +364,8 @@ package away3d.core.managers
 		public function set x(value : Number) : void
 		{
 			_stage3D.x = _viewPort.x = value;
+			
+			notifyViewportUpdated();
 		}
 
 		/**
@@ -359,6 +379,8 @@ package away3d.core.managers
 		public function set y(value : Number) : void
 		{
 			_stage3D.y = _viewPort.y = value;
+			
+			notifyViewportUpdated();
 		}
 
 
@@ -374,6 +396,8 @@ package away3d.core.managers
 		{ 
 			_backBufferWidth = _viewPort.width = width; 
 			_backBufferDirty = true;
+			
+			notifyViewportUpdated();
 		}
 
 		/**
@@ -388,6 +412,8 @@ package away3d.core.managers
 		{ 
 			_backBufferHeight = _viewPort.height = height; 
 			_backBufferDirty = true;
+			
+			notifyViewportUpdated();
 		}
 
 		/**
@@ -408,7 +434,9 @@ package away3d.core.managers
 		 * A viewPort rectangle equivalent of the Stage3D size and position.
 		 */
 		public function get viewPort() : Rectangle
-		{ 
+		{
+			_viewportDirty = false;
+			
 			return _viewPort;
 		}
 
