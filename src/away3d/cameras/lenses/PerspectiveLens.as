@@ -54,6 +54,11 @@ package away3d.cameras.lenses
 			
 			if (_scissorRect.x == 0 && _scissorRect.y == 0 && _scissorRect.width == _viewPort.width && _scissorRect.height == _viewPort.height) {
 				// assume unscissored frustum
+				left = -_xMax;
+				right = _xMax;
+				top = -_yMax;
+				bottom = _yMax;
+				
 				raw[uint(0)] = _near/_xMax;
 				raw[uint(5)] = _near/_yMax;
 				raw[uint(10)] = _far/(_far-_near);

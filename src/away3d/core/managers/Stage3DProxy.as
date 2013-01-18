@@ -70,7 +70,8 @@ package away3d.core.managers
 			if (!hasEventListener(Stage3DEvent.VIEWPORT_UPDATED))
 				return;
 			
-			if (!_viewportUpdated)
+			//TODO: investigate bug causing coercion error
+			//if (!_viewportUpdated)
 				_viewportUpdated = new Stage3DEvent(Stage3DEvent.VIEWPORT_UPDATED);
 			
 			dispatchEvent(_viewportUpdated);
@@ -185,8 +186,15 @@ package away3d.core.managers
 		 */
 		public function configureBackBuffer(backBufferWidth : int, backBufferHeight : int, antiAlias : int, enableDepthAndStencil : Boolean) : void
 		{
-			_backBufferWidth = backBufferWidth;
-			_backBufferHeight = backBufferHeight;
+			var oldWidth:uint = _backBufferWidth;
+			var oldHeight:uint = _backBufferHeight;
+			
+			_backBufferWidth = _viewPort.width = backBufferWidth;
+			_backBufferHeight = _viewPort.height = backBufferHeight;
+			
+			if (oldWidth != _backBufferWidth || oldHeight != _backBufferHeight)
+				notifyViewportUpdated();
+			
 			_antiAlias = antiAlias;
 			_enableDepthAndStencil = enableDepthAndStencil;
 
@@ -363,6 +371,9 @@ package away3d.core.managers
 
 		public function set x(value : Number) : void
 		{
+			if (_viewPort.x == value)
+				return;
+			
 			_stage3D.x = _viewPort.x = value;
 			
 			notifyViewportUpdated();
@@ -378,6 +389,9 @@ package away3d.core.managers
 
 		public function set y(value : Number) : void
 		{
+			if (_viewPort.y == value)
+				return;
+			
 			_stage3D.y = _viewPort.y = value;
 			
 			notifyViewportUpdated();
@@ -388,12 +402,15 @@ package away3d.core.managers
 		 * The width of the Stage3D.
 		 */
 		public function get width() : int
-		{ 
+		{
 			return _backBufferWidth;
 		}
 
 		public function set width(width : int) : void
-		{ 
+		{
+			if (_viewPort.width == width)
+				return;
+			
 			_backBufferWidth = _viewPort.width = width; 
 			_backBufferDirty = true;
 			
@@ -404,12 +421,15 @@ package away3d.core.managers
 		 * The height of the Stage3D.
 		 */
 		public function get height() : int
-		{ 
+		{
 			return _backBufferHeight;
 		}
 		
 		public function set height(height : int) : void
-		{ 
+		{
+			if (_viewPort.height == height)
+				return;
+			
 			_backBufferHeight = _viewPort.height = height; 
 			_backBufferDirty = true;
 			

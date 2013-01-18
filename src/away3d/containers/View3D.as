@@ -42,6 +42,7 @@
 		private var _height : Number = 0;
 		private var _localPos : Point = new Point();
 		private var _globalPos : Point = new Point();
+		private var _globalPosDirty:Boolean;
 		protected var _scene : Scene3D;
 		protected var _camera : Camera3D;
 		protected var _entityCollector : EntityCollector;
@@ -53,7 +54,6 @@
 		private var _backgroundAlpha : Number = 1;
 
 		private var _mouse3DManager : Mouse3DManager;
-		private var _stage3DManager : Stage3DManager;
 
 		protected var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
@@ -179,20 +179,17 @@
 
 		public function set stage3DProxy(stage3DProxy:Stage3DProxy) : void
 		{
+			if (_stage3DProxy)
+				_stage3DProxy.removeEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+			
 			_stage3DProxy = stage3DProxy;
+			
+			_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+			
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
-
-			super.x = _stage3DProxy.x;
 			
-			_localPos.x = _stage3DProxy.x;
-			_globalPos.x = parent? parent.localToGlobal(_localPos).x : _stage3DProxy.x;
-
-			super.y = _stage3DProxy.y;
-			
-			_localPos.y = _stage3DProxy.y;
-			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
-			
-			_scissorRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
+			_globalPosDirty = true;
+			_backBufferInvalid = true;
 		}
 
 		/**
@@ -418,7 +415,7 @@
 			_renderer.viewWidth = value;
 			
 			_scissorRect.width = value;
-
+			
 			_backBufferInvalid = true;
 			_scissorRectDirty = true;
 		}
@@ -460,39 +457,24 @@
 
 		override public function set x(value : Number) : void
 		{
-			super.x = value;
+			if (x == value)
+				return;
 			
-			_localPos.x = value;
+			_localPos.x = super.x = value;
+			
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
-			
-			if (_stage3DProxy) {
-				if (_shareContext) {
-					_scissorRect.x = _globalPos.x - _stage3DProxy.x;
-				} else {
-					_stage3DProxy.x = _scissorRect.x = _globalPos.x;
-				}
-			}
-			
-			_scissorRectDirty = true;
+			_globalPosDirty = true;
 		}
 
 		override public function set y(value : Number) : void
 		{
-			super.y = value;
+			if (y == value)
+				return;
 			
-			_localPos.y = value;
+			_localPos.y = super.y = value;
+			
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
-			_scissorRect.y = value;
-			
-			if (_stage3DProxy) {
-				if (_shareContext) {
-					_scissorRect.y = _globalPos.y - _stage3DProxy.y;
-				} else {
-					_stage3DProxy.y = _scissorRect.y = _globalPos.y;
-				}
-			}
-			
-			_scissorRectDirty = true;
+			_globalPosDirty = true;
 		}
 		
 		override public function set visible(value : Boolean) : void
@@ -538,7 +520,11 @@
 
 		public function set shareContext(value : Boolean) : void
 		{
+			if (_shareContext == value)
+				return;
+			
 			_shareContext = value;
+			_globalPosDirty = true;
 		}
 
 		/**
@@ -604,7 +590,15 @@
 			if (_backBufferInvalid)
 				updateBackBuffer();
 				
-			if (!_parentIsStage)
+			if (!_parentIsStage) {
+				var globalPos : Point = parent.localToGlobal(_localPos);
+				if (_globalPos.x != globalPos.x || _globalPos.y != globalPos.y) {
+					_globalPos = globalPos;
+					_globalPosDirty = true;
+				}
+			}
+			
+			if (_globalPosDirty)
 				updateGlobalPos();
 
 			updateTime();
@@ -647,10 +641,22 @@
 
 		protected function updateGlobalPos() : void
 		{
-			var globalPos : Point = parent.localToGlobal(_localPos);
-			if (_globalPos.x != globalPos.x) _stage3DProxy.x = globalPos.x;
-			if (_globalPos.y != globalPos.y) _stage3DProxy.y = globalPos.y;
-			_globalPos = globalPos;
+			_globalPosDirty = false;
+			
+			if (!_stage3DProxy)
+				return;
+			
+			if (_shareContext) {
+				_scissorRect.x = _globalPos.x - _stage3DProxy.x;
+				_scissorRect.y = _globalPos.y - _stage3DProxy.y;
+			} else {
+				_scissorRect.x = 0;
+				_scissorRect.y = 0;
+				_stage3DProxy.x = _globalPos.x;
+				_stage3DProxy.y = _globalPos.y;
+			}
+			
+			_scissorRectDirty = true;
 		}
 
 		protected function updateTime() : void
@@ -762,13 +768,12 @@
 		{
 			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
 		}
-
-
+		
 		public function get mousePicker() : IPicker
 		{
 			return _mouse3DManager.mousePicker;
 		}
-
+		
 		public function set mousePicker(value : IPicker) : void
 		{
 			_mouse3DManager.mousePicker = value;
@@ -800,33 +805,32 @@
 				return;
 			
 			_addedToStage = true;
-
-			_stage3DManager = Stage3DManager.getInstance(stage);
+			
 			if (!_stage3DProxy) {
-				_stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
+				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware);
 				_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+				
 			}
-
-			_stage3DProxy.x = _globalPos.x;
+			
+			_globalPosDirty = true;
+			
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
-			_stage3DProxy.y = _globalPos.y;
-
+			
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
+			
+			//default wiidth/height to stageWidth/stageHeight
 			if (_width == 0) width = stage.stageWidth;
 			else _rttBufferManager.viewWidth = _width;
 			if (_height == 0) height = stage.stageHeight;
 			else _rttBufferManager.viewHeight = _height;
-
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void
 		{
 			_parentIsStage = (parent == stage);
-			_globalPos = parent.localToGlobal(new Point(x, y));
-			if (_stage3DProxy) {
-				_stage3DProxy.x = _globalPos.x;
-				_stage3DProxy.y = _globalPos.y;
-			}
+			
+			_globalPos = parent.localToGlobal(_localPos);
+			_globalPosDirty = true;
 		}
 		
 		private function onViewportUpdated(event : Stage3DEvent) : void
