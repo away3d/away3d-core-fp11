@@ -314,6 +314,29 @@ package away3d.entities
 			return _partitionNode ||= createEntityPartitionNode();
 		}
 		
+		public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
+		{
+			// convert ray to entity space
+			var localRayPosition:Vector3D = inverseSceneTransform.transformVector( rayPosition );
+			var localRayDirection:Vector3D = inverseSceneTransform.deltaTransformVector( rayDirection );
+			
+			// check for ray-bounds collision
+			var rayEntryDistance:Number = bounds.rayIntersection( localRayPosition, localRayDirection, pickingCollisionVO.localNormal ||= new Vector3D());
+			
+			if( rayEntryDistance < 0 )
+				return false;
+			
+			// Store collision data.
+			pickingCollisionVO.rayEntryDistance = rayEntryDistance;
+			pickingCollisionVO.localRayPosition = localRayPosition;
+			pickingCollisionVO.localRayDirection = localRayDirection;
+			pickingCollisionVO.rayPosition = rayPosition;
+			pickingCollisionVO.rayDirection = rayDirection;
+			pickingCollisionVO.rayOriginIsInsideBounds = rayEntryDistance == 0;
+			
+			return true;
+		}
+		
 		/**
 		 * Factory method that returns the current partition node. Needs to be overridden by concrete subclasses
 		 * such as Mesh to return the correct concrete subtype of EntityPartition3DNode (for Mesh = MeshPartition3DNode,

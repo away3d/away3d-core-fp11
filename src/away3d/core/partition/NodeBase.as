@@ -1,5 +1,7 @@
 package away3d.core.partition
 {
+	import flash.geom.Vector3D;
+	
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.traverse.PartitionTraverser;
@@ -122,7 +124,22 @@ package away3d.core.partition
 			camera = null; 
 			return true;
 		}
-
+		
+		/**
+		 * Tests if the current node is intersecting with a ray.
+		 * @param rayPosition The starting position of the ray
+		 * @param rayDirection The direction vector of the ray
+		 *
+		 * @return Whether or not the node is at least partly intersecting the ray.
+		 */
+		public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
+		{
+			// TODO: not used
+			rayPosition = null; 
+			rayDirection = null;
+			return false;
+		}
+		
 		/**
 		 * Finds the partition that contains (or should contain) the given entity.
 		 */

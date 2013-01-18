@@ -1,7 +1,12 @@
 package away3d.core.partition
 {
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.cameras.Camera3D;
+	import away3d.core.pick.PickingCollisionVO;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
 
@@ -78,5 +83,16 @@ package away3d.core.partition
 				return false;
 			}
 		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
+		{
+			if (!_entity.isVisible || !_entity._ancestorsAllowMouseEnabled || !_entity.mouseEnabled) return false;
+			
+			return _entity.isIntersectingRay(rayPosition, rayDirection);
+		}
+
 	}
 }

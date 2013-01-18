@@ -1,17 +1,16 @@
 package away3d.core.pick
 {
 
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	
+	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
-	import away3d.arcane;
 	import away3d.core.data.EntityListItem;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
-
-	import flash.geom.Matrix3D;
-
-	import flash.geom.Vector3D;
 
 	use namespace arcane;
 	
@@ -60,60 +59,28 @@ package away3d.core.pick
 			var rayDirection:Vector3D = view.unproject( x, y, 1 );
 			rayDirection = rayDirection.subtract( rayPosition );
 
-			//reset
-			_hasCollisions = false;
-
 			// Perform ray-bounds collision checks.
-			var localRayPosition:Vector3D;
-			var localRayDirection:Vector3D;
-
-			var rayEntryDistance:Number;
-			var pickingCollisionVO:PickingCollisionVO;
-
-			// Sweep all filtered entities.
-
 			_numEntities = 0;
 			var node : EntityListItem = collector.entityHead;
 			while (node) {
 				entity = node.entity;
-
-				if( entity.visible && entity._ancestorsAllowMouseEnabled && entity.mouseEnabled ) {
-					pickingCollisionVO = entity.pickingCollisionVO;
-					// convert ray to entity space
-					var invSceneTransform : Matrix3D = entity.inverseSceneTransform;
-					var bounds:BoundingVolumeBase = entity.bounds;
-					localRayPosition = invSceneTransform.transformVector( rayPosition );
-					localRayDirection = invSceneTransform.deltaTransformVector( rayDirection );
-
-					// check for ray-bounds collision
-					rayEntryDistance = bounds.rayIntersection( localRayPosition, localRayDirection, pickingCollisionVO.localNormal ||= new Vector3D());
-
-					if( rayEntryDistance >= 0 ) {
-						_hasCollisions = true;
-
-						// Store collision data.
-						pickingCollisionVO.rayEntryDistance = rayEntryDistance;
-						pickingCollisionVO.localRayPosition = localRayPosition;
-						pickingCollisionVO.localRayDirection = localRayDirection;
-						pickingCollisionVO.rayPosition = rayPosition;
-						pickingCollisionVO.rayDirection = rayDirection;
-						pickingCollisionVO.rayOriginIsInsideBounds = rayEntryDistance == 0;
-
-						// Store in new data set.
+				
+				// If collision detected, store in new data set.
+				if( entity.isVisible && entity._ancestorsAllowMouseEnabled && entity.mouseEnabled && entity.isIntersectingRay(rayPosition, rayDirection ))
 						_entities[_numEntities++] = entity;
-					}
-				}
+				
 				node = node.next;
 			}
+			
+			//early out if no collisions detected
+			if( !_numEntities )
+				return null;
 
 			// trim before sorting
 			_entities.length = _numEntities;
 
 			// Sort entities from closest to furthest.
 			_entities = _entities.sort( sortOnNearT );
-
-			if( !_hasCollisions )
-				return null;
 
 			// ---------------------------------------------------------------------
 			// Evaluate triangle collisions when needed.
@@ -122,7 +89,8 @@ package away3d.core.pick
 
 			var shortestCollisionDistance:Number = Number.MAX_VALUE;
 			var bestCollisionVO:PickingCollisionVO;
-
+			var pickingCollisionVO:PickingCollisionVO;
+			
 			for( i = 0; i < _numEntities; ++i ) {
 				entity = _entities[i];
 				pickingCollisionVO = entity._pickingCollisionVO;
