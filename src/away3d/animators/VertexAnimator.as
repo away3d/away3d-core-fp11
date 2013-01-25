@@ -44,7 +44,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function clone():void
+		public function clone():IAnimator
 		{
 			return new VertexAnimator(_vertexAnimationSet);
 		}
