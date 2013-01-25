@@ -72,15 +72,16 @@ package away3d.core.partition
 		 */
 		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
-			if (_entity.isVisible == false) return false;
+			if (!_entity.isVisible) return false;
 
 			_entity.pushModelViewProjection(camera);
 			
 			if (_entity.bounds.isInFrustum(_entity.getModelViewProjectionUnsafe()))
 				return true;
-			else
-				_entity.popModelViewProjection();
-				return false;
+			
+			_entity.popModelViewProjection();
+			
+			return false;
 		}
 		
 		/**
@@ -88,7 +89,7 @@ package away3d.core.partition
 		 */
 		override public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
 		{
-			if (!_entity.isVisible || !_entity._ancestorsAllowMouseEnabled || !_entity.mouseEnabled) return false;
+			if (!_entity.isVisible) return false;
 			
 			return _entity.isIntersectingRay(rayPosition, rayDirection);
 		}
