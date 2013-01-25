@@ -1,5 +1,6 @@
 package away3d.cameras.lenses
 {
+	import away3d.containers.View3D;
 	import away3d.core.math.Matrix3DUtils;
 
 	/**
@@ -55,29 +56,60 @@ package away3d.cameras.lenses
 		override protected function updateMatrix() : void
 		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-
+			
 			_yMax = _near*_focalLengthInv;
 			_xMax = _yMax*_aspectRatio;
 
-			// assume symmetric frustum
-			raw[uint(0)] = _near/_xMax;
-			raw[uint(5)] = _near/_yMax;
-			raw[uint(10)] = _far/(_far-_near);
-			raw[uint(11)] = 1;
-			raw[uint(1)] = raw[uint(2)] = raw[uint(3)] = raw[uint(4)] =
-			raw[uint(6)] = raw[uint(7)] = raw[uint(8)] = raw[uint(9)] =
-			raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
-			raw[uint(14)] = -_near*raw[uint(10)];
+			var left:Number, right:Number, top:Number, bottom:Number;
+			
+			if (_scissorRect.x == 0 && _scissorRect.y == 0 && _scissorRect.width == _viewPort.width && _scissorRect.height == _viewPort.height) {
+				// assume unscissored frustum
+				left = -_xMax;
+				right = _xMax;
+				top = -_yMax;
+				bottom = _yMax;
+				
+				raw[uint(0)] = _near/_xMax;
+				raw[uint(5)] = _near/_yMax;
+				raw[uint(10)] = _far/(_far-_near);
+				raw[uint(11)] = 1;
+				raw[uint(1)] = raw[uint(2)] = raw[uint(3)] = raw[uint(4)] =
+				raw[uint(6)] = raw[uint(7)] = raw[uint(8)] = raw[uint(9)] =
+				raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
+				raw[uint(14)] = -_near*raw[uint(10)];
+			} else {
+				// assume scissored frustum
+				var xWidth:Number = _xMax * (_viewPort.width / _scissorRect.width);
+				var yHgt:Number = _yMax * (_viewPort.height / _scissorRect.height);
+				var center:Number = _xMax * (_scissorRect.x * 2 - _viewPort.width) / _scissorRect.width + _xMax;
+				var middle:Number = -_yMax * (_scissorRect.y * 2 - _viewPort.height) / _scissorRect.height - _yMax;
+				
+				left = center - xWidth;
+				right = center + xWidth;
+				top = middle - yHgt;
+				bottom = middle + yHgt;
+				
+				raw[uint(0)] = 2 * _near / (right - left);
+				raw[uint(5)] = 2 * _near / (bottom - top);
+				raw[uint(8)] = (right + left) / (right - left);
+				raw[uint(9)] = (bottom + top) / (bottom - top);
+				raw[uint(10)] = (_far + _near) / (_far - _near);
+				raw[uint(11)] = 1;
+				raw[uint(1)] = raw[uint(2)] = raw[uint(3)] = raw[uint(4)] =
+				raw[uint(6)] = raw[uint(7)] = raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
+				raw[uint(14)] = -2 * _far * _near / (_far - _near);
+			}
+			
 
 			_matrix.copyRawDataFrom(raw);
 
 			var yMaxFar : Number = _far*_focalLengthInv;
 			var xMaxFar : Number = yMaxFar*_aspectRatio;
 
-			_frustumCorners[0] = _frustumCorners[9] = -_xMax;
-			_frustumCorners[3] = _frustumCorners[6] = _xMax;
-			_frustumCorners[1] = _frustumCorners[4] = -_yMax;
-			_frustumCorners[7] = _frustumCorners[10] = _yMax;
+			_frustumCorners[0] = _frustumCorners[9] = left;
+			_frustumCorners[3] = _frustumCorners[6] = right;
+			_frustumCorners[1] = _frustumCorners[4] = top;
+			_frustumCorners[7] = _frustumCorners[10] = bottom;
 
 			_frustumCorners[12] = _frustumCorners[21] = -xMaxFar;
 			_frustumCorners[15] = _frustumCorners[18] = xMaxFar;

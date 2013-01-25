@@ -108,6 +108,8 @@ package away3d.core.base
 		private var _listenToRotationChanged : Boolean;
 		private var _listenToScaleChanged : Boolean;
 
+		protected var _zOffset:int = 0;
+
 		private function invalidatePivot():void
 		{
 			_pivotZero = (_pivotPoint.x == 0) && (_pivotPoint.y == 0) && (_pivotPoint.z == 0);
@@ -902,6 +904,14 @@ package away3d.core.base
 			_positionDirty = false;
 			_rotationDirty = false;
 			_scaleDirty = false;
+		}
+
+		public function get zOffset():int {
+			return _zOffset;
+		}
+
+		public function set zOffset( value:int ):void {
+			_zOffset = value;
 		}
 	}
 }

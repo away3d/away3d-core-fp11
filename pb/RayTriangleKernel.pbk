@@ -26,9 +26,9 @@ kernel RayTriangleKernel
     	defaultValue : 0.0;
     >;
 
-    parameter float ignoreFacesLookingAway
+    parameter float bothSides
     <
-	defaultValue : 1.0; 
+	defaultValue : 0.0; 
     >;
 
     void evaluatePixel()
@@ -62,7 +62,7 @@ kernel RayTriangleKernel
 			normal = normalize( normal );
 			// evaluate ray-plane intersection
 			float nDotV = dot( normal, rayDirection );
-			if( ( ignoreFacesLookingAway == 1.0 && nDotV < 0.0 ) || ( ignoreFacesLookingAway == 0.0 && nDotV != 0.0 ) ) {
+			if( ( bothSides == 0.0 && nDotV < 0.0 ) || ( bothSides == 1.0 && nDotV != 0.0 ) ) {
 				float D = -dot( normal, p0 );
 				float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
 				t = distanceToPlane / nDotV;

@@ -317,7 +317,7 @@ package away3d.entities
 
 			if (updateZIndex) {
 				mvp.copyColumnTo(3, _pos);
-				_zIndices[_mvpIndex] = -_pos.z;
+				_zIndices[_mvpIndex] = -_pos.z + 1000000 + _zOffset;
 			}
 		}
 		
@@ -344,6 +344,29 @@ package away3d.entities
 		public function getEntityPartitionNode() : EntityNode
 		{
 			return _partitionNode ||= createEntityPartitionNode();
+		}
+		
+		public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
+		{
+			// convert ray to entity space
+			var localRayPosition:Vector3D = inverseSceneTransform.transformVector( rayPosition );
+			var localRayDirection:Vector3D = inverseSceneTransform.deltaTransformVector( rayDirection );
+			
+			// check for ray-bounds collision
+			var rayEntryDistance:Number = bounds.rayIntersection( localRayPosition, localRayDirection, pickingCollisionVO.localNormal ||= new Vector3D());
+			
+			if( rayEntryDistance < 0 )
+				return false;
+			
+			// Store collision data.
+			pickingCollisionVO.rayEntryDistance = rayEntryDistance;
+			pickingCollisionVO.localRayPosition = localRayPosition;
+			pickingCollisionVO.localRayDirection = localRayDirection;
+			pickingCollisionVO.rayPosition = rayPosition;
+			pickingCollisionVO.rayDirection = rayDirection;
+			pickingCollisionVO.rayOriginIsInsideBounds = rayEntryDistance == 0;
+			
+			return true;
 		}
 		
 		/**

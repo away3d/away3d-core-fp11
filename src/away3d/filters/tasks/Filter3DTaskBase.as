@@ -111,8 +111,8 @@ package away3d.filters.tasks
 		{
 			if (_program3D) _program3D.dispose();
 			_program3D = stage.context3D.createProgram();
-			_program3D.upload(	new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, getVertexCode()),//, Debug.active),
-								new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, getFragmentCode()));//, Debug.active));
+			_program3D.upload(	new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, getVertexCode()),
+								new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, getFragmentCode()));
 			_program3DInvalid = false;
 		}
 

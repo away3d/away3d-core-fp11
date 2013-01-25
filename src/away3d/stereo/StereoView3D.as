@@ -132,7 +132,7 @@ package away3d.stereo
 			} else {
 				_renderer.shareContext = _shareContext;
 				if (_shareContext) {
-					_renderer.render(_entityCollector, texture, _viewScissorRect);
+					_renderer.render(_entityCollector, texture, _scissorRect);
 				} else {
 					_renderer.render(_entityCollector, texture, _rttBufferManager.renderToTextureRect);
 				}

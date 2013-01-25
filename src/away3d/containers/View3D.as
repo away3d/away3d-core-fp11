@@ -1,19 +1,5 @@
 ﻿package away3d.containers
 {
-	import away3d.core.pick.IPicker;
-	import away3d.Away3D;
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Mouse3DManager;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DManager;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.render.DefaultRenderer;
-	import away3d.core.render.DepthRenderer;
-	import away3d.core.render.Filter3DRenderer;
-	import away3d.core.render.RendererBase;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.textures.Texture2DBase;
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -30,6 +16,23 @@
 	import flash.ui.ContextMenuItem;
 	import flash.utils.getTimer;
 	
+	import away3d.Away3D;
+	import away3d.arcane;
+	import away3d.cameras.Camera3D;
+	import away3d.core.managers.Mouse3DManager;
+	import away3d.core.managers.RTTBufferManager;
+	import away3d.core.managers.Stage3DManager;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.pick.IPicker;
+	import away3d.core.render.DefaultRenderer;
+	import away3d.core.render.DepthRenderer;
+	import away3d.core.render.Filter3DRenderer;
+	import away3d.core.render.RendererBase;
+	import away3d.core.traverse.EntityCollector;
+	import away3d.events.CameraEvent;
+	import away3d.events.Stage3DEvent;
+	import away3d.textures.Texture2DBase;
+	
 
 	use namespace arcane;
 
@@ -39,6 +42,7 @@
 		private var _height : Number = 0;
 		private var _localPos : Point = new Point();
 		private var _globalPos : Point = new Point();
+		private var _globalPosDirty:Boolean;
 		protected var _scene : Scene3D;
 		protected var _camera : Camera3D;
 		protected var _entityCollector : EntityCollector;
@@ -50,7 +54,6 @@
 		private var _backgroundAlpha : Number = 1;
 
 		protected var _mouse3DManager : Mouse3DManager;
-		private var _stage3DManager : Stage3DManager;
 
 		protected var _renderer : RendererBase;
 		private var _depthRenderer : DepthRenderer;
@@ -79,8 +82,10 @@
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
 		protected var _shareContext:Boolean = false;
-		protected var _viewScissorRect:Rectangle;
-
+		protected var _scissorRect:Rectangle;
+		private var _scissorRectDirty:Boolean = true;
+		private var _viewportDirty:Boolean = true;
+		
 		private var _depthPrepass:Boolean;
 		
 		private function viewSource(e:ContextMenuEvent):void 
@@ -149,7 +154,7 @@
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
 
-			_viewScissorRect = new Rectangle();
+			_scissorRect = new Rectangle();
 
 			initHitField();
 			
@@ -158,6 +163,9 @@
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage, false, 0, true);
 			addEventListener(Event.ADDED, onAdded, false, 0, true);
+			
+			
+			_camera.addEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
 			
 			_camera.partition = _scene.partition;
 			
@@ -183,20 +191,17 @@
 
 		public function set stage3DProxy(stage3DProxy:Stage3DProxy) : void
 		{
+			if (_stage3DProxy)
+				_stage3DProxy.removeEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+			
 			_stage3DProxy = stage3DProxy;
+			
+			_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+			
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
-
-			super.x = _stage3DProxy.x;
 			
-			_localPos.x = _stage3DProxy.x;
-			_globalPos.x = parent? parent.localToGlobal(_localPos).x : _stage3DProxy.x;
-
-			super.y = _stage3DProxy.y;
-			
-			_localPos.y = _stage3DProxy.y;
-			_globalPos.y = parent? parent.localToGlobal(_localPos).y : _stage3DProxy.y;
-			
-			_viewScissorRect = new Rectangle(_stage3DProxy.x, _stage3DProxy.y, _stage3DProxy.width, _stage3DProxy.height);
+			_globalPosDirty = true;
+			_backBufferInvalid = true;
 		}
 
 		/**
@@ -304,11 +309,6 @@
 			_renderer.viewWidth = _width;
 			_renderer.viewHeight = _height;
 
-			invalidateBackBuffer();
-		}
-
-		private function invalidateBackBuffer() : void
-		{
 			_backBufferInvalid = true;
 		}
 
@@ -357,10 +357,17 @@
 		 */
 		public function set camera(camera:Camera3D) : void
 		{
+			_camera.removeEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
+			
 			_camera = camera;
 			
 			if (_scene)
 				_camera.partition = _scene.partition;
+			
+			_camera.addEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
+			
+			_scissorRectDirty = true;
+			_viewportDirty = true;
 		}
 		
 		/**
@@ -419,9 +426,10 @@
 
 			_renderer.viewWidth = value;
 			
-			_viewScissorRect.width = value;
-
-			invalidateBackBuffer();
+			_scissorRect.width = value;
+			
+			_backBufferInvalid = true;
+			_scissorRectDirty = true;
 		}
 
 		/**
@@ -452,34 +460,33 @@
 
 			_renderer.viewHeight = value;
 
-			_viewScissorRect.height = value;
+			_scissorRect.height = value;
 			
-			invalidateBackBuffer();
+			_backBufferInvalid = true;
+			_scissorRectDirty = true;
 		}
 
 
 		override public function set x(value : Number) : void
 		{
-			super.x = value;
+			if (x == value)
+				return;
 			
-			_localPos.x = value;
+			_localPos.x = super.x = value;
+			
 			_globalPos.x = parent? parent.localToGlobal(_localPos).x : value;
-			_viewScissorRect.x = value;
-			
-			if (_stage3DProxy && !_shareContext)
-				_stage3DProxy.x = _globalPos.x;
+			_globalPosDirty = true;
 		}
 
 		override public function set y(value : Number) : void
 		{
-			super.y = value;
+			if (y == value)
+				return;
 			
-			_localPos.y = value;
+			_localPos.y = super.y = value;
+			
 			_globalPos.y = parent? parent.localToGlobal(_localPos).y : value;
-			_viewScissorRect.y = value;
-			
-			if (_stage3DProxy && !_shareContext)
-				_stage3DProxy.y = _globalPos.y;
+			_globalPosDirty = true;
 		}
 		
 		override public function set visible(value : Boolean) : void
@@ -503,7 +510,7 @@
 			_antiAlias = value;
 			_renderer.antiAlias = value;
 			
-			invalidateBackBuffer();
+			_backBufferInvalid = true;
 		}
 		
 		/**
@@ -525,7 +532,11 @@
 
 		public function set shareContext(value : Boolean) : void
 		{
+			if (_shareContext == value)
+				return;
+			
 			_shareContext = value;
+			_globalPosDirty = true;
 		}
 
 		/**
@@ -591,7 +602,15 @@
 			if (_backBufferInvalid)
 				updateBackBuffer();
 				
-			if (!_parentIsStage)
+			if (!_parentIsStage) {
+				var globalPos : Point = parent.localToGlobal(_localPos);
+				if (_globalPos.x != globalPos.x || _globalPos.y != globalPos.y) {
+					_globalPos = globalPos;
+					_globalPosDirty = true;
+				}
+			}
+			
+			if (_globalPosDirty)
 				updateGlobalPos();
 
 			updateTime();
@@ -620,10 +639,11 @@
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
 			} else {
 				_renderer.shareContext = _shareContext;
-				if (_shareContext)
-					_renderer.render(_entityCollector, null, _viewScissorRect);
-				else
+				if (_shareContext) {
+					_renderer.render(_entityCollector, null, _scissorRect);
+				} else {
 					_renderer.render(_entityCollector);
+				}
 
 			}
 			if (!_shareContext) stage3DProxy.present();
@@ -637,10 +657,22 @@
 
 		protected function updateGlobalPos() : void
 		{
-			var globalPos : Point = parent.localToGlobal(_localPos);
-			if (_globalPos.x != globalPos.x) _stage3DProxy.x = globalPos.x;
-			if (_globalPos.y != globalPos.y) _stage3DProxy.y = globalPos.y;
-			_globalPos = globalPos;
+			_globalPosDirty = false;
+			
+			if (!_stage3DProxy)
+				return;
+			
+			if (_shareContext) {
+				_scissorRect.x = _globalPos.x - _stage3DProxy.x;
+				_scissorRect.y = _globalPos.y - _stage3DProxy.y;
+			} else {
+				_scissorRect.x = 0;
+				_scissorRect.y = 0;
+				_stage3DProxy.x = _globalPos.x;
+				_stage3DProxy.y = _globalPos.y;
+			}
+			
+			_scissorRectDirty = true;
 		}
 
 		protected function updateTime() : void
@@ -654,6 +686,17 @@
 		protected function updateViewSizeData() : void
 		{
 			_camera.lens.aspectRatio = _aspectRatio;
+			
+			if (_scissorRectDirty) {
+				_scissorRectDirty = false;
+				_camera.lens.updateScissorRect(_scissorRect.x, _scissorRect.y, _scissorRect.width, _scissorRect.height);
+			}
+			
+			if (_viewportDirty) {
+				_viewportDirty = false;
+				_camera.lens.updateViewport(_stage3DProxy.viewPort.x, _stage3DProxy.viewPort.y, _stage3DProxy.viewPort.width, _stage3DProxy.viewPort.height);
+			}
+			
 			_entityCollector.camera = _camera;
 
 			if (_filter3DRenderer || _renderer.renderToTexture) {
@@ -757,13 +800,12 @@
 		{
 			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
 		}
-
-
+		
 		public function get mousePicker() : IPicker
 		{
 			return _mouse3DManager.mousePicker;
 		}
-
+		
 		public function set mousePicker(value : IPicker) : void
 		{
 			_mouse3DManager.mousePicker = value;
@@ -779,7 +821,13 @@
 		{
 			return _entityCollector;
 		}
-
+		
+		private function onLensChanged(event : CameraEvent) : void
+		{
+			_scissorRectDirty = true;
+			_viewportDirty = true;
+		}
+		
 		/**
 		 * When added to the stage, retrieve a Stage3D instance
 		 */
@@ -789,32 +837,44 @@
 				return;
 			
 			_addedToStage = true;
-
-			_stage3DManager = Stage3DManager.getInstance(stage);
-			if (!_stage3DProxy) _stage3DProxy = _stage3DManager.getFreeStage3DProxy(_forceSoftware);
-
-			_stage3DProxy.x = _globalPos.x;
+			
+			if (!_stage3DProxy) {
+				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware);
+				_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+				
+			}
+			
+			_globalPosDirty = true;
+			
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
-			_stage3DProxy.y = _globalPos.y;
-
+			
+			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
+			
+			//default wiidth/height to stageWidth/stageHeight
 			if (_width == 0) width = stage.stageWidth;
 			else _rttBufferManager.viewWidth = _width;
 			if (_height == 0) height = stage.stageHeight;
 			else _rttBufferManager.viewHeight = _height;
-
-			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 		}
 
 		private function onAdded(event : Event) : void
 		{
 			_parentIsStage = (parent == stage);
-			_globalPos = parent.localToGlobal(new Point(x, y));
-			if (_stage3DProxy) {
-				_stage3DProxy.x = _globalPos.x;
-				_stage3DProxy.y = _globalPos.y;
-			}
+			
+			_globalPos = parent.localToGlobal(_localPos);
+			_globalPosDirty = true;
 		}
-
+		
+		private function onViewportUpdated(event : Stage3DEvent) : void
+		{
+			if (_shareContext) {
+				_scissorRect.x = _globalPos.x - _stage3DProxy.x;
+				_scissorRect.y = _globalPos.y - _stage3DProxy.y;
+				_scissorRectDirty = true;
+			}
+			
+			_viewportDirty = true;
+		}
 
 // dead ends:
 		override public function set z(value : Number) : void {}

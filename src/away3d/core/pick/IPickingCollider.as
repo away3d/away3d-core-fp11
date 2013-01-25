@@ -27,6 +27,6 @@ package away3d.core.pick
 		 * @param pickingCollisionVO The collision object used to store the collision results
 		 * @param shortestCollisionDistance The current value of the shortest distance to a detected collision along the ray.
 		 */
-		function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, ignoreFacesLookingAway:Boolean):Boolean
+		function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 	}
 }

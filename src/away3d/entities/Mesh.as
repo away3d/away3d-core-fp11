@@ -308,7 +308,7 @@
 				var subMesh : SubMesh = _subMeshes[i];
 
 				var ignoreFacesLookingAway:Boolean = _material ? !_material.bothSides : true;
-				if (_pickingCollider.testSubMeshCollision(subMesh, _pickingCollisionVO, shortestCollisionDistance, ignoreFacesLookingAway)) {
+				if (_pickingCollider.testSubMeshCollision(subMesh, _pickingCollisionVO, shortestCollisionDistance)) {
 					shortestCollisionDistance = _pickingCollisionVO.rayEntryDistance;
 					_pickingCollisionVO.renderable = subMesh;
 					if (!findClosest)
