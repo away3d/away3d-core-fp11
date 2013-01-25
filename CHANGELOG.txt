@@ -83,6 +83,21 @@
 4.0.9
 - Fixed MD5 mesh bug (#364)
 
+4.0.10
+- Fixed incorrect z values in project() and x/y/z values in unproject() methods of lensbase
+- Fixed incorrect bounds normals returned by mouse event on an object with triangle picking enabled
+- Fixed missing delta data on MouseEvent3D.MOUSE_WHEEL events
+
+4.0.11
+- Doublesided materials considered correctly in triangle picking
+- Fixed incorrect mouse events from Sprite3D
+- Introduced zOffset parameter on all scenegraph objects to allow manual sorting offsets
+- Fixed incorrect picking event from firing when a bounds collision is detected from inside the bounds
+- Fixed missing mouse down events when running on tablets
+- Added ability to resize the viewport of a View3D object independent of Stage3DProxy when sharing a context
+- Updated Adobe's AGALMiniAssembler to the latest from https://github.com/graphicscore/graphicscorelib
+- Implemented getSceneCollision on RaycastPicker (#418)
+
 
 4.1.0 (Alpha)
 - Merged stereo rendering feature
