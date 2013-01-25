@@ -137,7 +137,7 @@ package away3d.core.partition
 			// TODO: not used
 			rayPosition = null; 
 			rayDirection = null;
-			return false;
+			return true;
 		}
 		
 		/**
