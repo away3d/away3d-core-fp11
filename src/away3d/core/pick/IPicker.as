@@ -26,5 +26,11 @@ package away3d.core.pick
 		 * @param scene The scene on which the picking object acts. 
 		 */
 		function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO;
+		
+		/**
+		 * Determines whether the picker takes account of the mouseEnabled properties of entities. Defaults to true.
+		 */
+		function get onlyMouseEnabled():Boolean;
+		function set onlyMouseEnabled(value:Boolean):void;
 	}
 }

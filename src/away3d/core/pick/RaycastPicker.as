@@ -23,11 +23,26 @@ package away3d.core.pick
 
 		private var _findClosestCollision:Boolean;
 		private var _raycastCollector:RaycastCollector = new RaycastCollector();
+		private var _ignoredEntities:Array = new Array();
+		private var _onlyMouseEnabled:Boolean = true;
 		
 		protected var _entities:Vector.<Entity>;
 		protected var _numEntities:uint;
 		protected var _hasCollisions:Boolean;
-
+		
+		/**
+		 * @inheritDoc
+		 */
+		public function get onlyMouseEnabled():Boolean
+		{
+			return _onlyMouseEnabled;
+		}
+		
+		public function set onlyMouseEnabled(value:Boolean):void
+		{
+			_onlyMouseEnabled = value;
+		}
+		
 		/**
 		 * Creates a new <code>RaycastPicker</code> object.
 		 * 
@@ -64,9 +79,14 @@ package away3d.core.pick
 			while (node) {
 				entity = node.entity;
 				
+				if (isIgnored(entity)) {
+					node = node.next;
+					continue;
+				}
+				
 				// If collision detected, store in new data set.
-				if( entity.isVisible && entity._ancestorsAllowMouseEnabled && entity.mouseEnabled && entity.isIntersectingRay(rayPosition, rayDirection ))
-						_entities[_numEntities++] = entity;
+				if( entity.isVisible && entity.isIntersectingRay(rayPosition, rayDirection ))
+					_entities[_numEntities++] = entity;
 				
 				node = node.next;
 			}
@@ -83,11 +103,14 @@ package away3d.core.pick
 		 */
 		public function getSceneCollision(position:Vector3D, direction:Vector3D, scene:Scene3D):PickingCollisionVO
 		{
+			//clear collector
+			_raycastCollector.clear();
+			
 			//setup ray vectors
 			_raycastCollector.rayPosition = position;
 			_raycastCollector.rayDirection = direction;
 			
-			// collect stuff to test
+			// collect entities to test
 			scene.traversePartitions(_raycastCollector);
 			
 			_numEntities = 0;
@@ -95,6 +118,11 @@ package away3d.core.pick
 			var entity : Entity;
 			while (node) {
 				entity = node.entity;
+				
+				if (isIgnored(entity)) {
+					node = node.next;
+					continue;
+				}
 				
 				_entities[_numEntities++] = entity;
 				
@@ -107,7 +135,25 @@ package away3d.core.pick
 			
 			return getPickingCollisionVO();
 		}
-
+		
+		public function setIgnoreList(entities:Array):void
+		{
+			_ignoredEntities = entities;
+		}
+		
+		private function isIgnored(entity:Entity):Boolean
+		{
+			if (_onlyMouseEnabled && (!entity._ancestorsAllowMouseEnabled ||!entity.mouseEnabled))
+				return true;
+			
+			var ignoredEntity:Entity;
+			for each (ignoredEntity in _ignoredEntities)
+				if (ignoredEntity == entity)
+					return true;
+			
+			return false;
+		}
+		
 		private function sortOnNearT( entity1:Entity, entity2:Entity ):Number
 		{
 			return entity1.pickingCollisionVO.rayEntryDistance > entity2.pickingCollisionVO.rayEntryDistance ? 1 : -1;
@@ -147,10 +193,11 @@ package away3d.core.pick
 					}
 				}
 				else if (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) { // A bounds collision with no triangle collider stops all checks.
-					// Note: rayEntryDistances of 0 mean a collision caused by the ray starting inside the bounds.
-					// This makes the object eligible for triangle picking but should not represent a successful pick
-					// if the object's picker is bounds only.
-					if( pickingCollisionVO.rayEntryDistance != 0 ) {
+					// Note: a bounds collision with a ray origin inside its bounds is ONLY ever used
+					// to enable the detection of a corresponsding triangle collision.
+					// Therefore, bounds collisions with a ray origin inside its bounds can be ignored
+					// if it has been established that there is NO triangle collider to test
+					if( !pickingCollisionVO.rayOriginIsInsideBounds ) {
 						updateLocalPosition( pickingCollisionVO );
 						return pickingCollisionVO;
 					}
