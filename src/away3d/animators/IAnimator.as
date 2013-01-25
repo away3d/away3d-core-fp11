@@ -53,5 +53,10 @@ package away3d.animators
 		function getAnimationState(node:AnimationNodeBase):AnimationStateBase;
 		
 		function getAnimationStateByName(name:String):AnimationStateBase;
+		
+		/**
+		 * Returns a shallow clone (re-using the same IAnimationSet) of this IAnimator.
+		 */
+		function clone():IAnimator;
 	}
 }

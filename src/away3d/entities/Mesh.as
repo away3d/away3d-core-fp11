@@ -190,12 +190,12 @@
 
 		/**
 		 * Clones this Mesh instance along with all it's children, while re-using the same
-		 * material and geometry instance. The returned result will be a copy of this mesh,
+		 * material, geometry and animation set. The returned result will be a copy of this mesh,
 		 * containing copies of all of it's children.
 		 * 
 		 * Properties that are re-used (i.e. not cloned) by the new copy include name, 
 		 * geometry, and material. Properties that are cloned or created anew for the copy
-		 * include subMeshes, animation and animationState and the children of the mesh.
+		 * include subMeshes, children of the mesh, and the animator.
 		 * 
 		 * If you want to copy just the mesh, reusing it's geometry and material while not
 		 * cloning it's children, the simplest way is to create a new mesh manually:
@@ -222,6 +222,10 @@
 			len = numChildren;
 			for (i = 0; i < len; ++i) {
 				clone.addChild(ObjectContainer3D(getChildAt(i).clone()));
+			}
+
+			if (_animator) {
+				clone.animator = _animator.clone();
 			}
 
 			return clone;

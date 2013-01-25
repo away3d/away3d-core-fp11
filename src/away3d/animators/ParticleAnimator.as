@@ -63,6 +63,14 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
+		public function clone():IAnimator 
+		{
+			return new ParticleAnimator(_particleAnimationSet);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
 			var animationRegisterCache:AnimationRegisterCache = _particleAnimationSet._animationRegisterCache;
