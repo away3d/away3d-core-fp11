@@ -18,9 +18,9 @@ package away3d.animators
 	 * Provides an interface for assigning paricle-based animation data sets to mesh-based entity objects
 	 * and controlling the various available states of animation through an interative playhead that can be
 	 * automatically updated or manually triggered.
-	 * 
+	 *
 	 * Requires that the containing geometry of the parent mesh is particle geometry
-	 * 
+	 *
 	 * @see away3d.core.base.ParticleGeometry
 	 */
 	public class ParticleAnimator extends AnimatorBase implements IAnimator
@@ -63,7 +63,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function clone():IAnimator 
+		public function clone():IAnimator
 		{
 			return new ParticleAnimator(_particleAnimationSet);
 		}
@@ -147,6 +147,7 @@ package away3d.animators
 			{
 				state.offset(_absoluteTime + offset);
 			}
+			update(time);
 		}
 		
 		private function generateAnimatorSubGeometry(subMesh:SubMesh):void
