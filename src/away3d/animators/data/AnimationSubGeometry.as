@@ -21,7 +21,7 @@ package away3d.animators.data
 		
 		public var numProcessedVertices:int = 0;
 		
-		public var previousTime:Number = 0;
+		public var previousTime:Number = Number.NEGATIVE_INFINITY;
 		
 		public var animationParticles:Vector.<ParticleAnimationData> = new Vector.<ParticleAnimationData>();
 		
