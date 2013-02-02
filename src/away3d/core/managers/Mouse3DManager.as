@@ -53,7 +53,6 @@ package away3d.core.managers
 
 		public function updateCollider(view : View3D) : void
 		{
-			_previousCollidingObject = _collidingObject;
 
 			if (view == _activeView && (_forceMouseMove || _updateDirty)) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
 				_collidingObject = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
@@ -94,6 +93,8 @@ package away3d.core.managers
 					dispatcher.dispatchEvent(event);
 			}
 			_queuedEvents.length = 0;
+			
+			_previousCollidingObject = _collidingObject;
 		}
 
 		// ---------------------------------------------------------------------
