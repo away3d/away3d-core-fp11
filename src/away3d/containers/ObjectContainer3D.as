@@ -340,7 +340,8 @@ package away3d.containers
 			var m : Number;
 			
 			while (i < len) {
-				m = _children[i++].minX;
+				var child:ObjectContainer3D = _children[i++];
+				m = child.minX + child.x;
 				if (m < min)
 					min = m;
 			}
@@ -359,7 +360,8 @@ package away3d.containers
 			var m : Number;
 			
 			while (i < len) {
-				m = _children[i++].minY;
+				var child:ObjectContainer3D = _children[i++];
+				m = child.minY + child.y;
 				if (m < min)
 					min = m;
 			}
@@ -378,7 +380,8 @@ package away3d.containers
 			var m : Number;
 			
 			while (i < len) {
-				m = _children[i++].minZ;
+				var child:ObjectContainer3D = _children[i++];
+				m = child.minZ + child.z;
 				if (m < min)
 					min = m;
 			}
@@ -398,7 +401,8 @@ package away3d.containers
 			var m : Number;
 			
 			while (i < len) {
-				m = _children[i++].maxX;
+				var child:ObjectContainer3D = _children[i++];
+				m = child.maxX + child.x;
 				if (m > max)
 					max = m;
 			}
@@ -417,7 +421,8 @@ package away3d.containers
 			var m : Number;
 			
 			while (i < len) {
-				m = _children[i++].maxY;
+				var child:ObjectContainer3D = _children[i++];
+				m = child.maxY + child.y;
 				if (m > max)
 					max = m;
 			}
@@ -436,7 +441,8 @@ package away3d.containers
 			var m : Number;
 			
 			while (i < len) {
-				m = _children[i++].maxZ;
+				var child:ObjectContainer3D = _children[i++];
+				m = child.maxZ + child.z;
 				if (m > max)
 					max = m;
 			}
