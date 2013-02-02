@@ -605,6 +605,24 @@ package away3d.containers
 			
 			if (childIndex == -1) throw new Error("Parameter is not a child of the caller");
 			
+			removeChildInternal(childIndex, child);
+		}
+		
+		
+		/**
+		 * Removes a 3d object from the child array of the container
+		 *
+		 * @param	index	Index of 3d object to be removed
+		 */
+		public function removeChildAt(index:uint):void 
+		{
+			var child:ObjectContainer3D = _children[index];
+			
+			removeChildInternal(index, child);
+		}
+		
+		private function removeChildInternal(childIndex:uint, child:ObjectContainer3D):void
+		{
 			// index is important because getChildAt needs to be regular.
 			_children.splice(childIndex, 1);
 			
