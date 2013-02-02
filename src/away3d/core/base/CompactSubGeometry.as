@@ -55,6 +55,11 @@ package away3d.core.base
 			var numVertices : int = _vertexData.length / 13;
 			if (numVertices != _numVertices) disposeVertexBuffers(_vertexBuffer);
 			_numVertices = numVertices;
+			
+			if (_numVertices == 0)
+			{
+				throw new Error("Bad data: geometry can't have zero triangles");
+			}
 
 			invalidateBuffers(_vertexDataInvalid);
 
