@@ -267,14 +267,19 @@ package away3d.animators
 			{
 				subMesh = mesh.subMeshes[i];
 				subGeometry = subMesh.subGeometry;
-				animationSubGeometry = _animationSubGeometries[subGeometry];
-				
-				if (animationSubGeometry) {
-					subMesh.animationSubGeometry = animationSubGeometry;
-					continue;
+				if (mesh.shareAnimationGeometry)
+				{
+					animationSubGeometry = _animationSubGeometries[subGeometry];
+					
+					if (animationSubGeometry) {
+						subMesh.animationSubGeometry = animationSubGeometry;
+						continue;
+					}
 				}
 				
-				animationSubGeometry = subMesh.animationSubGeometry = _animationSubGeometries[subGeometry] = new AnimationSubGeometry();
+				animationSubGeometry = subMesh.animationSubGeometry = new AnimationSubGeometry();
+				if (mesh.shareAnimationGeometry)
+					_animationSubGeometries[subGeometry] = animationSubGeometry;
 				
 				newAnimationSubGeometry = true;
 				
@@ -323,7 +328,15 @@ package away3d.animators
 				
 				//loop through all particle data for the curent particle
 				while (j < particlesLength && (particle = particles[j]).particleIndex == i) {
-					animationSubGeometry = _animationSubGeometries[particle.subGeometry];
+					//find the target animationSubGeometry
+					for each(subMesh in mesh.subMeshes)
+					{
+						if (subMesh.subGeometry == particle.subGeometry)
+						{
+							animationSubGeometry = subMesh.animationSubGeometry;
+							break;
+						}
+					}
 					numVertices = particle.numVertices;
 					vertexData = animationSubGeometry.vertexData;
 					vertexLength = numVertices * _totalLenOfOneVertex;

@@ -24,6 +24,7 @@
 		private var _material : MaterialBase;
 		private var _animator : IAnimator;
 		private var _castsShadows : Boolean = true;
+		private var _shareAnimationGeometry:Boolean = true;
 
 		/**
 		 * Create a new Mesh object.
@@ -177,6 +178,30 @@
 			
 			return _subMeshes;
 		}
+		
+		/**
+		 * Indicates whether or not the mesh share the same animation geometry.
+		 */
+		public function get shareAnimationGeometry():Boolean
+		{
+			return _shareAnimationGeometry;
+		}
+		
+		public function set shareAnimationGeometry(value:Boolean):void
+		{
+			_shareAnimationGeometry = value;
+		}
+		
+		/**
+		 * Clears the animation geometry of this mesh. It will cause animation to generate a new animation geometry. Work only when shareAnimationGeometry is false.
+		 */
+		public function clearAnimationGeometry():void
+		{
+			var len : int = _subMeshes.length;
+			for (var i : int = 0; i < len; ++i) {
+				_subMeshes[i].animationSubGeometry = null;
+			}
+		}
 
 		/**
 		 * @inheritDoc
@@ -192,14 +217,14 @@
 		 * Clones this Mesh instance along with all it's children, while re-using the same
 		 * material, geometry and animation set. The returned result will be a copy of this mesh,
 		 * containing copies of all of it's children.
-		 * 
-		 * Properties that are re-used (i.e. not cloned) by the new copy include name, 
+		 *
+		 * Properties that are re-used (i.e. not cloned) by the new copy include name,
 		 * geometry, and material. Properties that are cloned or created anew for the copy
 		 * include subMeshes, children of the mesh, and the animator.
-		 * 
+		 *
 		 * If you want to copy just the mesh, reusing it's geometry and material while not
 		 * cloning it's children, the simplest way is to create a new mesh manually:
-		 * 
+		 *
 		 * <code>
 		 * var clone : Mesh = new Mesh(original.geometry, original.material);
 		 * </code>
@@ -213,6 +238,7 @@
 			clone.bounds = _bounds.clone();
 			clone.name = name;
 			clone.castsShadows = castsShadows;
+			clone.shareAnimationGeometry = shareAnimationGeometry;
 			clone.mouseEnabled=this.mouseEnabled;
 			clone.mouseChildren=this.mouseChildren;
 			//this is of course no proper cloning
