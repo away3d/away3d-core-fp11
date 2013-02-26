@@ -71,7 +71,8 @@ package away3d.tools.commands
 		}
 		
 		/**
-		 *  Merges all the children of a container into a single Mesh. If no Mesh object is found, class returns the receiver without modification.
+		 * Merges all the children of a container into a single Mesh. If no Mesh object is found, method returns the receiver without modification.
+		 * 
 		 * @param	 receiver 			The Mesh that will receive the merged contents of the container.
 		 * @param	 objectContainer	The ObjectContainer3D holding meshes to merge as one mesh.
 		 *
@@ -89,15 +90,6 @@ package away3d.tools.commands
 			
 			//collect receiver
 			collect(receiver, true);
-			
-			//clear out receiver ready for receiving
-			var subGeometries:Vector.<ISubGeometry> = receiver.geometry.subGeometries;
-			var i:uint = subGeometries.length;
-			
-			while (i--) {
-				receiver.geometry.removeSubGeometry(subGeometries[i]);
-				subGeometries[i].dispose();
-			}
 			
 			//merge to receiver
 			merge(receiver);
