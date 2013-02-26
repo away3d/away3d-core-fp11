@@ -255,8 +255,6 @@ package away3d.tools.commands
 							vo.normals[nIdx++] = normals[i];
 						}
 					}
-					
-					_geomVOs.push(vo);
 				}
 				
 				if (_disposeSources) {
@@ -296,6 +294,8 @@ package away3d.tools.commands
 				data.uvs = new Vector.<Number>();
 				data.indices = new Vector.<uint>();
 				data.material = material;
+				
+				_geomVOs.push(data);
 			}
 			
 			return data;
