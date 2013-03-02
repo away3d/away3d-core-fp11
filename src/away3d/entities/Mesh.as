@@ -28,15 +28,17 @@
 
 		/**
 		 * Create a new Mesh object.
-		 * @param material The material with which to render the Mesh.
-		 * @param geometry The geometry used by the mesh that provides it with its shape.
+		 * 
+		 * @param geometry					The geometry used by the mesh that provides it with its shape.
+		 * @param material	[optional]		The material with which to render the Mesh.
 		 */
 		public function Mesh(geometry : Geometry, material : MaterialBase = null)
 		{
 			super();
 			_subMeshes = new Vector.<SubMesh>();
 
-			this.geometry = geometry;
+			this.geometry = geometry || new Geometry(); //this should never happen, but if people insist on trying to create their meshes before they have geometry to fill it, it becomes necessary
+			
 			this.material = material || DefaultMaterialManager.getDefaultMaterial(this);
 		}
 		
@@ -231,7 +233,7 @@
 		*/
 		override public function clone() : Object3D
 		{
-			var clone : Mesh = new Mesh(geometry, _material);
+			var clone : Mesh = new Mesh(_geometry, _material);
 			clone.transform = transform;
 			clone.pivotPoint = pivotPoint;
 			clone.partition = partition;

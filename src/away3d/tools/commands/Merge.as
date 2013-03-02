@@ -1,17 +1,14 @@
 package away3d.tools.commands
 {
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.materials.MaterialBase;
-	import away3d.tools.utils.GeomUtil;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.entities.*;
+	import away3d.materials.*;
+	import away3d.tools.utils.*;
 
 	/**
-	*  Class Merge merges two or more static meshes into one.<code>Merge</code>
-	*/
+	 *  Class Merge merges two or more static meshes into one.<code>Merge</code>
+	 */
 	public class Merge{
 		
 		private const LIMIT:uint = 196605;
@@ -21,13 +18,12 @@ package away3d.tools.commands
 		private var _geomVOs:Vector.<GeometryVO>;
 		   
 		/**
-		* @param	 keepMaterial		[optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
-		* If set to false and receiver object has multiple materials, the last material found in mesh1 submeshes is applied to mesh2 submeshes. 
-		* @param	 disposeSources	[optional] Boolean. Defines if mesh2 (or sources meshes in case applyToContainer is used) are kept untouched or disposed. Default is false.
-		* If keepMaterial is true, only geometry and eventual ObjectContainers3D are cleared from memory.
-		* @param	 objectSpace		[optional] Boolean. Defines if mesh2 is merge using its objectSpace or worldspace. Default is false.
-		*/
-		
+		 * @param	 keepMaterial		[optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
+		 * If set to false and receiver object has multiple materials, the last material found in mesh1 submeshes is applied to mesh2 submeshes. 
+		 * @param	 disposeSources	[optional] Boolean. Defines if mesh2 (or sources meshes in case applyToContainer is used) are kept untouched or disposed. Default is false.
+		 * If keepMaterial is true, only geometry and eventual ObjectContainers3D are cleared from memory.
+		 * @param	 objectSpace		[optional] Boolean. Defines if mesh2 is merge using its objectSpace or worldspace. Default is false.
+		 */
 		function Merge(keepMaterial:Boolean = false, disposeSources:Boolean = false, objectSpace:Boolean = false ):void
 		{
 			_keepMaterial = keepMaterial;
@@ -36,8 +32,8 @@ package away3d.tools.commands
 		}
 		
 		/**
-		* Defines if the mesh(es) sources used for the merging are kept or disposed.
-		*/
+		 * Defines if the mesh(es) sources used for the merging are kept or disposed.
+		 */
 		public function set disposeSources(b:Boolean):void
 		{
 			_disposeSources = b;
@@ -47,9 +43,10 @@ package away3d.tools.commands
 		{
 			return _disposeSources;
 		}
+		
 		/**
-		* Defines if mesh2 will be merged using its own material information.
-		*/
+		 * Defines if mesh2 will be merged using its own material information.
+		 */
 		public function set keepMaterial(b:Boolean):void
 		{
 			_keepMaterial = b;
@@ -61,8 +58,8 @@ package away3d.tools.commands
 		}
 		
 		/**
-		* Defines if mesh2 is merged using its objectSpace.
-		*/
+		 * Defines if mesh2 is merged using its objectSpace.
+		 */
 		public function set objectSpace(b:Boolean):void
 		{
 			_objectSpace = b;
@@ -74,59 +71,72 @@ package away3d.tools.commands
 		}
 		
 		/**
-		*  Merges all the children of a container as one single Mesh.
-		* 	The first Mesh child encountered becomes the receiver. This is mesh that is returned.
-		* 	If no Mesh object is found, class returns null.
-		* @param	 objectContainer The ObjectContainer3D holding meshes to merge as one mesh.
-		* @param	 name [optional]  As the class picks the first mesh it finds, the name is applied to the merged mesh.
-		*
-		* @return The merged Mesh instance renamed to the name parameter if one was provided.
-		*/
-		public function applyToContainer(object:ObjectContainer3D, name:String = ""):Mesh
+		 * Merges all the children of a container into a single Mesh. If no Mesh object is found, method returns the receiver without modification.
+		 * 
+		 * @param	 receiver 			The Mesh that will receive the merged contents of the container.
+		 * @param	 objectContainer	The ObjectContainer3D holding meshes to merge as one mesh.
+		 *
+		 * @return The merged Mesh instance.
+		 */
+		public function applyToContainer(receiver:Mesh, objectContainer:ObjectContainer3D):void
 		{
-			var receiver : Mesh;
-			
 			reset();
 			
-			receiver = new Mesh(new Geometry(), null);
-			receiver.position = object.position;
+			//collect container meshes
+			parseContainer(objectContainer);
 			
-			parseContainer(object);
+			if (!_geomVOs.length)
+				return;
+			
+			//collect receiver
+			collect(receiver, true);
+			
+			//merge to receiver
 			merge(receiver);
-			if(name != "") receiver.name = name;
-			
-			return receiver;
 		}
 		
 		/**
-		*  Merges all the meshes found into the Vector.&lt;Mesh&gt; parameter with the receiver Mesh.
-		* @param	 receiver 	Mesh. The Mesh receiver.
-		* @param	 meshes		Vector.&lt;Mesh&gt;. A series of Meshes to be merged with the reciever mesh.
-		*
-		* @return The merged receiver Mesh instance.
-		*/
-		public function applyToMeshes(receiver:Mesh, meshes:Vector.<Mesh>):Mesh
+		 * Merges all the meshes found in the Vector.&lt;Mesh&gt; into a single Mesh.
+		 * 
+		 * @param	 receiver 			The Mesh that will receive the merged contents of the meshes.
+		 * @param	 meshes				Vector.&lt;Mesh&gt;. A series of Meshes to be merged with the reciever mesh.
+		 */
+		public function applyToMeshes(receiver:Mesh, meshes:Vector.<Mesh>):void
 		{
 			reset();
 			
+			if (!meshes.length)
+				return;
+			
+			//collect meshes in vector
 			for(var i:uint = 0;i<meshes.length;i++)
-				collect(meshes[i]);
-			 
+				collect(meshes[i], _disposeSources);
+			
+			//collect receiver
+			collect(receiver, true);
+			
+			//merge to receiver
 			merge(receiver);
-
-			return receiver;
 		}
 		 
 		/**
-		*  Merge 2 meshes into one. It is recommand to use apply when 2 meshes are to be merged. If more need to be merged, use either applyToMeshes or applyToContainer methods.
-		* @param	 mesh1				Mesh. The receiver object that will hold both meshes information.
-		* @param	 mesh2				Mesh. The Mesh object to be merge with mesh1.
-		*/
-		public function apply(mesh1:Mesh, mesh2:Mesh):void
+		 *  Merge 2 meshes into one. It is recommand to use apply when 2 meshes are to be merged. If more need to be merged, use either applyToMeshes or applyToContainer methods.
+		 * 
+		 * @param	 receiver			The Mesh that will receive the merged contents of both meshes.
+		 * @param	 mesh				The Mesh that will be merged with the receiver mesh
+		 */
+		public function apply(receiver:Mesh, mesh:Mesh):void
 		{
 			reset();
-			collect(mesh2);
-			merge(mesh1);
+			
+			//collect mesh
+			collect(mesh, _disposeSources);
+			
+			//collect receiver
+			collect(receiver, true);
+			
+			//merge to receiver
+			merge(receiver);
 		}
 		
 		private function reset():void
@@ -147,7 +157,7 @@ package away3d.tools.commands
 			
 			// Only apply materials directly to sub-meshes if necessary,
 			// i.e. if there is more than one material available.
-			useSubMaterials = (_geomVOs.length > 0);
+			useSubMaterials = (_geomVOs.length > 1);
 			
 			for (i=0; i<_geomVOs.length; i++) {
 				var s : uint;
@@ -171,7 +181,7 @@ package away3d.tools.commands
 				destMesh.material = _geomVOs[0].material;
 		}
 		
-		private function collect(mesh:Mesh):void
+		private function collect(mesh:Mesh, dispose:Boolean):void
 		{
 			if (mesh.geometry) {
 				var subIdx : uint;
@@ -255,11 +265,9 @@ package away3d.tools.commands
 							vo.normals[nIdx++] = normals[i];
 						}
 					}
-					
-					_geomVOs.push(vo);
 				}
 				
-				if (_disposeSources) {
+				if (dispose) {
 					mesh.geometry.dispose();
 				}
 			}
@@ -296,6 +304,8 @@ package away3d.tools.commands
 				data.uvs = new Vector.<Number>();
 				data.indices = new Vector.<uint>();
 				data.material = material;
+				
+				_geomVOs.push(data);
 			}
 			
 			return data;
@@ -307,7 +317,7 @@ package away3d.tools.commands
 			var i:uint;
 			
 			if(object is Mesh)
-				collect(Mesh(object));
+				collect(Mesh(object), _disposeSources);
 			
 			for(i = 0;i<object.numChildren;++i){
 				child = object.getChildAt(i);
