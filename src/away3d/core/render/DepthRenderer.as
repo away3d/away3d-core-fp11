@@ -98,6 +98,7 @@ package away3d.core.render
 		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D) : void
 		{
 			var material : MaterialBase;
+			var frustumPlanes : Vector.<Plane3D> = camera.frustumPlanes;
 
 			while (item) {
 				var renderable : IRenderable = item.renderable;
@@ -105,7 +106,7 @@ package away3d.core.render
 
 				entity.pushModelViewProjection(camera, false);
 
-				if (entity.bounds.isInFrustum(entity.getModelViewProjectionUnsafe())) {
+				if (entity.worldBounds.isInFrustum(frustumPlanes)) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);

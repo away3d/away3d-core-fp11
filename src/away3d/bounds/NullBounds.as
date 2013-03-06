@@ -33,7 +33,7 @@ package away3d.bounds
 		/**
 		 * @inheritDoc
 		 */
-		override public function isInFrustum(mvpMatrix : Matrix3D) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
 		{
 			return _alwaysIn;
 		}

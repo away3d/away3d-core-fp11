@@ -146,14 +146,6 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		override public function get zIndex() : Number
-		{
-			return 0;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
 		override protected function invalidateBounds() : void
 		{
 			// dead end

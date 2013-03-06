@@ -15,6 +15,8 @@ package away3d.core.traverse
 	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
 
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 
 	/**
@@ -44,6 +46,7 @@ package away3d.core.traverse
 		private var _numDirectionalLights : uint;
 		private var _numPointLights : uint;
 		private var _numLightProbes : uint;
+		protected var _cameraForward : Vector3D;
 
 		/**
 		 * Creates a new EntityCollector object.
@@ -75,6 +78,7 @@ package away3d.core.traverse
 		{
 			_camera = value;
 			_entryPoint = _camera.scenePosition;
+			_cameraForward = _camera.forwardVector;
 		}
 
 		/**
@@ -194,7 +198,7 @@ package away3d.core.traverse
 		override public function applyRenderable(renderable : IRenderable) : void
 		{
 			var material : MaterialBase;
-
+			var entity : Entity = renderable.sourceEntity;
 			if( renderable.mouseEnabled ) ++_numMouseEnableds;
 			_numTriangles += renderable.numTriangles;
 
@@ -204,7 +208,11 @@ package away3d.core.traverse
 				item.renderable = renderable;
 				item.materialId = material._uniqueId;
 				item.renderOrderId = material._renderOrderId;
-				item.zIndex = renderable.zIndex;
+				var dx : Number = _entryPoint.x - entity.x;
+				var dy : Number = _entryPoint.y - entity.y;
+				var dz : Number = _entryPoint.z - entity.z;
+				// project onto camera's z-axis
+				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z;
 				if (material.requiresBlending) {
 					item.next = _blendedRenderableHead;
 					_blendedRenderableHead = item;

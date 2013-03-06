@@ -76,7 +76,7 @@ package away3d.core.partition
 
 			_entity.pushModelViewProjection(camera);
 			
-			if (_entity.bounds.isInFrustum(_entity.getModelViewProjectionUnsafe()))
+			if (_entity.worldBounds.isInFrustum(camera.frustumPlanes))
 				return true;
 			
 			_entity.popModelViewProjection();

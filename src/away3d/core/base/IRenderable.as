@@ -36,11 +36,6 @@ package away3d.core.base
 		function getModelViewProjectionUnsafe() : Matrix3D;
 
 		/**
-		 * The distance of the IRenderable object to the view, used to sort per object.
-		 */
-		function get zIndex() : Number;
-
-		/**
 		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
 		 */
 		function get mouseEnabled() : Boolean;

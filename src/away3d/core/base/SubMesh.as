@@ -158,14 +158,6 @@ package away3d.core.base
 		}
 
 		/**
-		 * The distance of the SubMesh object to the view, used to sort per object.
-		 */
-		public function get zIndex() : Number
-		{
-			return _parentMesh.zIndex;
-		}
-
-		/**
 		 * The scene transform object that transforms from model to world space.
 		 */
 		public function get sceneTransform() : Matrix3D

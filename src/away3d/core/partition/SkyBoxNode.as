@@ -38,7 +38,7 @@ package away3d.core.partition
 		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
 		{
 			_skyBox.pushModelViewProjection(camera);
-			return _skyBox.bounds.isInFrustum(_skyBox.getModelViewProjectionUnsafe());
+			return _skyBox.worldBounds.isInFrustum(camera.frustumPlanes);
 		}
 	}
 }

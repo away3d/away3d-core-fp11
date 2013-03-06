@@ -39,6 +39,8 @@ package away3d.entities
 		protected var _stackLen : uint;
 		protected var _bounds : BoundingVolumeBase;
 		protected var _boundsInvalid : Boolean = true;
+		private var _worldBounds : BoundingVolumeBase;
+		private var _worldBoundsInvalid : Boolean = true;
 
 
 		override public function set ignoreTransform(value : Boolean) : void
@@ -193,7 +195,7 @@ package away3d.entities
 		{
 			if (_boundsInvalid)
 				updateBounds();
-			
+
 			return _bounds;
 		}
 		
@@ -201,11 +203,26 @@ package away3d.entities
 		{
 			removeBounds();
 			_bounds = value;
-			_boundsInvalid = true;
+			_worldBounds = value.clone();
+			invalidateBounds();
 			if (_showBounds)
 				addBounds();
 		}
-		
+
+		public function get worldBounds() : BoundingVolumeBase
+		{
+			if (_worldBoundsInvalid)
+				updateWorldBounds();
+
+			return _worldBounds;
+		}
+
+		private function updateWorldBounds() : void
+		{
+			_worldBounds.transformFrom(bounds, sceneTransform);
+			_worldBoundsInvalid = false;
+		}
+
 		/**
 		 * @inheritDoc
 		 */
@@ -254,16 +271,6 @@ package away3d.entities
 			// assume base if popped (only happens when all rendering is complete, and no matrices are on the stack)
 			return _mvpTransformStack[uint(uint(_mvpIndex > 0)*_mvpIndex)];
 		}
-		
-		/**
-		 * The distance of the IRenderable object to the view, used to sort per object. Should never be called manually.
-		 *
-		 * @private
-		 */
-		public function get zIndex() : Number
-		{
-			return _zIndices[_mvpIndex];
-		}
 
 		/**
 		 * Used by the raycast-based picking system to determine how the geometric contents of an entity are processed
@@ -290,6 +297,7 @@ package away3d.entities
 			super();
 			
 			_bounds = getDefaultBoundingVolume();
+			_worldBounds = getDefaultBoundingVolume();
 		}
 		
 		/**
@@ -405,7 +413,7 @@ package away3d.entities
 		{
 			if (!_ignoreTransform) {
 				super.invalidateSceneTransform();
-
+				_worldBoundsInvalid = true;
 				notifySceneBoundsInvalid();
 			}
 		}
@@ -416,7 +424,7 @@ package away3d.entities
 		protected function invalidateBounds() : void
 		{
 			_boundsInvalid = true;
-			
+			_worldBoundsInvalid = true;
 			notifySceneBoundsInvalid();
 		}
 
