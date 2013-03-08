@@ -23,19 +23,6 @@ package away3d.core.base
 		function get inverseSceneTransform() : Matrix3D;
 
 		/**
-		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
-		 */
-		function get modelViewProjection() : Matrix3D;
-
-		/**
-		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
-		 * NOT guarded, should never be called outside the render loop.
-		 *
-		 * @private
-		 */
-		function getModelViewProjectionUnsafe() : Matrix3D;
-
-		/**
 		 * Indicates whether the IRenderable should trigger mouse events, and hence should be rendered for hit testing.
 		 */
 		function get mouseEnabled() : Boolean;

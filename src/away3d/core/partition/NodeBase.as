@@ -121,17 +121,9 @@ package away3d.core.partition
 		 */
 		public function isInFrustum(camera : Camera3D) : Boolean
 		{
-			var inFrustum : Boolean = isInFrustumImpl(camera);
-			if (inFrustum && _debugPrimitive)
-				_debugPrimitive.pushModelViewProjection(camera);
-			return inFrustum;
-		}
-
-		protected function isInFrustumImpl(camera : Camera3D) : Boolean
-		{
 			return true;
 		}
-		
+
 		/**
 		 * Tests if the current node is intersecting with a ray.
 		 * @param rayPosition The starting position of the ray
@@ -141,9 +133,6 @@ package away3d.core.partition
 		 */
 		public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
 		{
-			// TODO: not used
-			rayPosition = null; 
-			rayDirection = null;
 			return true;
 		}
 		

@@ -166,18 +166,17 @@ package away3d.materials.compilation {
 			calculateDependencies();
 			updateMethodRegisters();
 
-			compileMethodsCode();
+			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
 			compileProjectionCode();
+			compileMethodsCode();
 			compileFragmentOutput();
 			_framentPostLightCode = fragmentCode;
 		}
 
 		protected function compileMethodsCode() : void
 		{
-			if (_dependencyCounter.projectionDependencies > 0) compileProjCode();
 			if (_dependencyCounter.uvDependencies > 0) compileUVCode();
 			if (_dependencyCounter.secondaryUVDependencies > 0) compileSecondaryUVCode();
-			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
 			if (_dependencyCounter.normalDependencies > 0) compileNormalCode();
 			if (_dependencyCounter.viewDirDependencies > 0) compileViewDirCode();
 			compileLightingCode();
@@ -199,14 +198,6 @@ package away3d.materials.compilation {
 		protected function compileNormalCode() : void
 		{
 
-		}
-
-		private function compileProjCode() : void
-		{
-			_sharedRegisters.projectionFragment = _registerCache.getFreeVarying();
-			_sharedRegisters.projectedTarget = _registerCache.getFreeVertexVectorTemp();
-
-			_vertexCode += "mov " + _sharedRegisters.projectionFragment + ", " + _sharedRegisters.projectedTarget + "\n";
 		}
 
 		private function compileUVCode() : void
@@ -247,11 +238,9 @@ package away3d.materials.compilation {
 
 		protected function compileGlobalPositionCode() : void
 		{
-			var positionMatrixReg : ShaderRegisterElement;
 			_sharedRegisters.globalPositionVertex = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(_sharedRegisters.globalPositionVertex, _dependencyCounter.globalPosDependencies);
-
-			positionMatrixReg = _registerCache.getFreeVertexConstant();
+			var positionMatrixReg : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
@@ -265,30 +254,29 @@ package away3d.materials.compilation {
 			}
 		}
 
+		private function compileProjectionCode() : void
+		{
+			var pos : String = _animationTargetRegisters[0];
+			var code : String;
+
+			if (_dependencyCounter.projectionDependencies > 0) {
+				_sharedRegisters.projectionFragment = _registerCache.getFreeVarying();
+				code =	"m44 vt5, " + pos + ", vc0		\n" +
+						"mov " + _sharedRegisters.projectionFragment + ", vt5\n" +
+						"mul op, vt5, vc4\n";
+			}
+			else {
+				code = 	"m44 vt5, " + pos + ", vc0		\n" +
+						"mul op, vt5, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
+			}
+
+			_vertexCode += code;
+		}
+
 		private function compileFragmentOutput() : void
 		{
 			_fragmentCode += "mov " + _registerCache.fragmentOutputRegister + ", " + _sharedRegisters.shadedTarget + "\n";
 			_registerCache.removeFragmentTempUsage(_sharedRegisters.shadedTarget);
-		}
-
-		private function compileProjectionCode() : void
-		{
-			var pos : String = _animationTargetRegisters[0];
-			var projectedTarget : ShaderRegisterElement =  _sharedRegisters.projectedTarget;
-			var code : String;
-
-			// if we need projection somewhere
-			if (projectedTarget) {
-				code =	"m44 " + projectedTarget + ", " + pos + ", vc0		\n" +
-						"mov vt7, " + projectedTarget + "\n" +
-						"mul op, vt7, vc4\n";
-			}
-			else {
-				code = 	"m44 vt7, " + pos + ", vc0		\n" +
-						"mul op, vt7, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
-			}
-
-			_vertexCode = code + _vertexCode;
 		}
 
 		protected function initRegisterIndices() : void

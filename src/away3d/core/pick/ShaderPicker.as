@@ -175,7 +175,9 @@ package away3d.core.pick
 		 */
 		private function drawRenderables(item : RenderableListItem, camera : Camera3D) : void
 		{
+			var matrix : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			var renderable : IRenderable;
+			var viewProjection : Matrix3D = camera.viewProjection;
 
 			while (item) {
 				renderable = item.renderable;
@@ -195,7 +197,9 @@ package away3d.core.pick
 				_id[1] = (_interactiveId >> 8)/255;	    // on green channel
 				_id[2] = (_interactiveId & 0xff)/255;  	// on blue channel
 
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
+				matrix.copyFrom(renderable.sceneTransform);
+				matrix.append(viewProjection);
+				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
 				renderable.activateVertexBuffer(0, _stage3DProxy);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
@@ -277,8 +281,9 @@ package away3d.core.pick
 			var col : uint;
 			var scX : Number, scY : Number, scZ : Number;
 			var offsX : Number, offsY : Number, offsZ : Number;
-			var localViewProjection : Matrix3D = _hitRenderable.modelViewProjection;
-
+			var localViewProjection : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+			localViewProjection.copyFrom(_hitRenderable.sceneTransform);
+			localViewProjection.append(camera.viewProjection);
 			if (!_triangleProgram3D) initTriangleProgram3D();
 
 			_boundOffsetScale[4] = scX = 1/(entity.maxX-entity.minX);

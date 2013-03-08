@@ -12,6 +12,10 @@ package away3d.materials.passes
 	import away3d.materials.compilation.LightingShaderCompiler;
 	import away3d.materials.compilation.ShaderCompiler;
 
+	import flash.display3D.Context3D;
+
+	import flash.display3D.Context3DProgramType;
+
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -164,6 +168,7 @@ package away3d.materials.passes
 				_vertexConstantData[_cameraPositionIndex + 1] = _inverseSceneMatrix[1]*x + _inverseSceneMatrix[5]*y + _inverseSceneMatrix[9]*z + _inverseSceneMatrix[13];
 				_vertexConstantData[_cameraPositionIndex + 2] = _inverseSceneMatrix[2]*x + _inverseSceneMatrix[6]*y + _inverseSceneMatrix[10]*z + _inverseSceneMatrix[14];
 			}
+
 			super.render(renderable, stage3DProxy, camera);
 		}
 

@@ -274,16 +274,13 @@ package away3d.materials.passes {
 		}
 
 		/**
-		 * Renders an object to the current render target5.
+		 * Renders an object to the current render target.
 		 *
 		 * @private
 		 */
 		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
-			renderable.activateVertexBuffer(0, stage3DProxy);
-			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
+			throw new AbstractMethodError();
 		}
 
 		arcane function getVertexCode() : String

@@ -25,6 +25,11 @@ package away3d.bounds
 			_min.x = _min.y = _min.z = _alwaysIn? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
 		}
 
+		override public function clone():BoundingVolumeBase
+		{
+			return new NullBounds(_alwaysIn);
+		}
+
 		override protected function createBoundingRenderable() : WireframePrimitiveBase
 		{
 			return _renderable || new WireframeSphere(100);
@@ -56,6 +61,11 @@ package away3d.bounds
 		override public function classifyToPlane(plane : Plane3D) : int
 		{
 			return PlaneClassification.INTERSECT;
+		}
+
+		override public function transformFrom(bounds : BoundingVolumeBase, matrix : Matrix3D) : void
+		{
+			_alwaysIn = NullBounds(bounds)._alwaysIn;
 		}
 	}
 }

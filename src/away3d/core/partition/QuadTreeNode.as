@@ -50,54 +50,17 @@ package away3d.core.partition
 		}
 
 		// todo: fix to infinite height so that height needn't be passed in constructor
-		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
+		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
-			var a : Number, b : Number, c : Number, d : Number;
-			var dd : Number, rr : Number;
-			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
-			var plane : Plane3D;
-
-			plane = frustum[0];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[1];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[2];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[3];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[4];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[5];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
+			var planes : Vector.<Plane3D> = camera.frustumPlanes;
+			for (var i : uint = 0; i < 6; ++i) {
+				var plane : Plane3D = planes[i];
+				var flippedExtentX : Number = plane.a < 0? - _halfExtentXZ : _halfExtentXZ;
+				var flippedExtentY : Number = plane.b < 0? - _halfExtentY : _halfExtentY;
+				var flippedExtentZ : Number = plane.c < 0? - _halfExtentXZ : _halfExtentXZ;
+				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * flippedExtentY + plane.c * (_centerZ + flippedExtentZ) + plane.d;
+				if (projDist < 0) return false;
+			}
 
 			return true;
 		}

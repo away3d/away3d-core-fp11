@@ -280,11 +280,6 @@ package away3d.core.traverse
 		 */
 		public function cleanUp() : void
 		{
-			var node : EntityListItem = _entityHead;
-			while (node) {
-				node.entity.popModelViewProjection();
-				node = node.next;
-			}
 		}
 	}
 }

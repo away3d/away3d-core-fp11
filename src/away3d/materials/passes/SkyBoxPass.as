@@ -3,10 +3,14 @@ package away3d.materials.passes
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
+	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.textures.CubeTextureBase;
 
+	import flash.display3D.Context3D;
+
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
@@ -49,6 +53,14 @@ package away3d.materials.passes
 					// fit within texture range
 					"mul op, vt7, vc4\n" +
 					"mov v0, va0\n";
+		}
+
+		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		{
+			var context : Context3D = stage3DProxy._context3D;
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.viewProjection, true);
+			renderable.activateVertexBuffer(0, stage3DProxy);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		/**

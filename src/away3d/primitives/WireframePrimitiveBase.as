@@ -61,12 +61,6 @@ package away3d.primitives
 			super.removeAllSegments();
 		}
 
-		override public function pushModelViewProjection(camera : Camera3D, updateZIndex : Boolean = true) : void
-		{
-			if (_geomDirty) updateGeometry();
-			super.pushModelViewProjection(camera, updateZIndex);
-		}
-
 		override public function get bounds() : BoundingVolumeBase
 		{
 			if (_geomDirty) updateGeometry();

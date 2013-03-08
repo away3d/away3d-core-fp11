@@ -104,8 +104,6 @@ package away3d.core.render
 				var renderable : IRenderable = item.renderable;
 				var entity : Entity = renderable.sourceEntity;
 
-				entity.pushModelViewProjection(camera, false);
-
 				if (entity.worldBounds.isInFrustum(frustumPlanes)) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
@@ -115,8 +113,6 @@ package away3d.core.render
 					}
 					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera);
 				}
-
-				entity.popModelViewProjection();
 
 				item = item.next;
 			}

@@ -4,6 +4,7 @@ package away3d.materials.passes
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.ShadingMethodEvent;
 	import away3d.materials.LightSources;
@@ -22,6 +23,7 @@ package away3d.materials.passes
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Matrix;
+	import flash.geom.Matrix3D;
 
 	use namespace arcane;
 
@@ -482,8 +484,16 @@ package away3d.materials.passes
 			if (usesProbes())
 				updateProbes(stage3DProxy);
 
-			if (_sceneMatrixIndex >= 0)
+			if (_sceneMatrixIndex >= 0) {
 				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
+//				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.viewProjection, true);
+			}
+//			else {
+				var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+				matrix3D.copyFrom(renderable.sceneTransform);
+				matrix3D.append(camera.viewProjection);
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
+//			}
 
 			if (_sceneNormalMatrixIndex >= 0)
 				renderable.inverseSceneTransform.copyRawDataTo(_vertexConstantData, _sceneNormalMatrixIndex, false);
@@ -512,7 +522,8 @@ package away3d.materials.passes
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexConstantsOffset, _vertexConstantData, _numUsedVertexConstants - _vertexConstantsOffset);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentConstantData, _numUsedFragmentConstants);
 
-			super.render(renderable, stage3DProxy, camera);
+			renderable.activateVertexBuffer(0, stage3DProxy);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		protected function usesProbes() : Boolean

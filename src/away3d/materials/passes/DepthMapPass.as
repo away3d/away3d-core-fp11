@@ -4,12 +4,16 @@
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.textures.Texture2DBase;
+
+	import flash.display3D.Context3D;
 
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.geom.Matrix3D;
 
 	use namespace arcane;
 
@@ -133,7 +137,13 @@
 			if (_alphaThreshold > 0)
 				renderable.activateUVBuffer(1, stage3DProxy);
 
-			super.render(renderable, stage3DProxy, camera);
+			var context : Context3D = stage3DProxy._context3D;
+			var matrix : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+			matrix.copyFrom(renderable.sceneTransform);
+			matrix.append(camera.viewProjection);
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
+			renderable.activateVertexBuffer(0, stage3DProxy);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		/**

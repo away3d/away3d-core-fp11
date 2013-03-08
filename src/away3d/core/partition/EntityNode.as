@@ -67,23 +67,14 @@ package away3d.core.partition
 			_parent = null;
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
+
+		override public function isInFrustum(camera : Camera3D) : Boolean
 		{
 			if (!_entity.isVisible) return false;
 
-			_entity.pushModelViewProjection(camera);
-			
-			if (_entity.worldBounds.isInFrustum(camera.frustumPlanes))
-				return true;
-			
-			_entity.popModelViewProjection();
-			
-			return false;
+			return _entity.worldBounds.isInFrustum(camera.frustumPlanes);
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
