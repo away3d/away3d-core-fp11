@@ -109,9 +109,9 @@ package away3d.core.render
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
 						_activeMaterial = material;
-						_activeMaterial.activateForDepth(_stage3DProxy, camera, false, 1, 1);
+						_activeMaterial.activateForDepth(_stage3DProxy, camera, false);
 					}
-					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera);
+					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera, _rttViewProjectionMatrix);
 				}
 
 				item = item.next;
@@ -162,10 +162,10 @@ package away3d.core.render
 					} while(item2 && item2.renderable.material == _activeMaterial);
 				}
 				else {
-					_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased, _textureRatioX, _textureRatioY);
+					_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased);
 					item2 = item;
 					do {
-						_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);
+						_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera, _rttViewProjectionMatrix);
 						item2 = item2.next;
 					} while(item2 && item2.renderable.material == _activeMaterial);
 					_activeMaterial.deactivateForDepth(_stage3DProxy);

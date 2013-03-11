@@ -137,8 +137,7 @@ package away3d.materials.passes
 					"add vt7, vt7, vt0\n" +
 					"mov vt7.w, vt0.w\n" +
 			// project and scale to viewport
-					"m44 vt7, vt7, vc0		\n" +
-					"mul op, vt7, vc4\n";
+					"m44 op, vt7, vc0		\n";
 
 			return code;
 		}
@@ -154,10 +153,10 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			super.activate(stage3DProxy, camera);
 
 			// do not write depth if not drawing inner lines (will cause the overdraw to hide inner lines)
 			if (!_showInnerLines)
@@ -176,14 +175,14 @@ package away3d.materials.passes
 		}
 
 
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			var mesh : Mesh, dedicatedRenderable : IRenderable;
 
 			var context : Context3D = stage3DProxy._context3D;
 			var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			matrix3D.copyFrom(renderable.sceneTransform);
-			matrix3D.append(camera.viewProjection);
+			matrix3D.append(viewProjection);
 
 			if (_dedicatedMeshes) {
 				mesh = _outlineMeshes[renderable] ||= createDedicatedMesh(SubMesh(renderable).subGeometry);

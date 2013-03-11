@@ -15,6 +15,7 @@ package away3d.materials.passes
 	import flash.display3D.Context3D;
 
 	import flash.display3D.Context3DProgramType;
+	import flash.geom.Matrix3D;
 
 	import flash.geom.Vector3D;
 
@@ -155,7 +156,7 @@ package away3d.materials.passes
 		}
 
 
-		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			renderable.inverseSceneTransform.copyRawDataTo(_inverseSceneMatrix);
 
@@ -169,15 +170,15 @@ package away3d.materials.passes
 				_vertexConstantData[_cameraPositionIndex + 2] = _inverseSceneMatrix[2]*x + _inverseSceneMatrix[6]*y + _inverseSceneMatrix[10]*z + _inverseSceneMatrix[14];
 			}
 
-			super.render(renderable, stage3DProxy, camera);
+			super.render(renderable, stage3DProxy, camera, viewProjection);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			super.activate(stage3DProxy, camera);
 
 			if (!_tangentSpace && _cameraPositionIndex >= 0) {
 				var pos : Vector3D = camera.scenePosition;

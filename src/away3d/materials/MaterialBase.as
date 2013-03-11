@@ -19,6 +19,7 @@ package away3d.materials
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.events.Event;
+	import flash.geom.Matrix3D;
 
 	use namespace arcane;
 
@@ -268,14 +269,14 @@ package away3d.materials
 			return _depthPass.alphaThreshold > 0;
 		}
 
-		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false, textureRatioX : Number = 1, textureRatioY : Number = 1) : void
+		arcane function activateForDepth(stage3DProxy : Stage3DProxy, camera : Camera3D, distanceBased : Boolean = false) : void
 		{
 			_distanceBasedDepthRender = distanceBased;
 
 			if (distanceBased)
-				_distancePass.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+				_distancePass.activate(stage3DProxy, camera);
 			else
-				_depthPass.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+				_depthPass.activate(stage3DProxy, camera);
 		}
 
 		arcane function deactivateForDepth(stage3DProxy : Stage3DProxy) : void
@@ -286,17 +287,17 @@ package away3d.materials
 				_depthPass.deactivate(stage3DProxy);
 		}
 
-		arcane function renderDepth(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function renderDepth(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			if (_distanceBasedDepthRender) {
 				if (renderable.animator)
 					_distancePass.updateAnimationState(renderable, stage3DProxy, camera);
-				_distancePass.render(renderable, stage3DProxy, camera);
+				_distancePass.render(renderable, stage3DProxy, camera, viewProjection);
 			}
 			else {
 				if (renderable.animator)
 					_depthPass.updateAnimationState(renderable, stage3DProxy, camera);
-				_depthPass.render(renderable, stage3DProxy, camera);
+				_depthPass.render(renderable, stage3DProxy, camera, viewProjection);
 			}
 		}
 
@@ -312,9 +313,9 @@ package away3d.materials
 		 * @param camera The camera from which the scene is viewed.
 		 * @private
 		 */
-		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		arcane function activatePass(index : uint, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			_passes[index].activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			_passes[index].activate(stage3DProxy, camera);
 		}
 
 		/**
@@ -333,7 +334,7 @@ package away3d.materials
 		 * @param index The pass to render with.
 		 * @private
 		 */
-		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, entityCollector : EntityCollector) : void
+		arcane function renderPass(index : uint, renderable : IRenderable, stage3DProxy : Stage3DProxy, entityCollector : EntityCollector, viewProjection : Matrix3D) : void
 		{
 			if (_lightPicker)
 				_lightPicker.collectLights(renderable, entityCollector);
@@ -343,7 +344,7 @@ package away3d.materials
 			if (renderable.animator)
 				pass.updateAnimationState(renderable, stage3DProxy, entityCollector.camera);
 
-			pass.render(renderable, stage3DProxy, entityCollector.camera);
+			pass.render(renderable, stage3DProxy, entityCollector.camera, viewProjection);
 		}
 
 

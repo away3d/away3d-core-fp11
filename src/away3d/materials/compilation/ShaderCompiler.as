@@ -91,7 +91,7 @@ package away3d.materials.compilation {
 		private function initRegisterCache() : void
 		{
 			_registerCache = new ShaderRegisterCache();
-			_vertexConstantsOffset = _registerCache.vertexConstantOffset = 5;
+			_vertexConstantsOffset = _registerCache.vertexConstantOffset = 4;
 			_registerCache.vertexAttributesOffset = 1;
 			_registerCache.reset();
 		}
@@ -263,11 +263,10 @@ package away3d.materials.compilation {
 				_sharedRegisters.projectionFragment = _registerCache.getFreeVarying();
 				code =	"m44 vt5, " + pos + ", vc0		\n" +
 						"mov " + _sharedRegisters.projectionFragment + ", vt5\n" +
-						"mul op, vt5, vc4\n";
+						"mov op, vt5\n";
 			}
 			else {
-				code = 	"m44 vt5, " + pos + ", vc0		\n" +
-						"mul op, vt5, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
+				code = 	"m44 op, " + pos + ", vc0		\n";
 			}
 
 			_vertexCode += code;

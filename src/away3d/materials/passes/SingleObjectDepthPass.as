@@ -146,7 +146,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			var matrix : Matrix3D;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
@@ -181,11 +181,11 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			if (_projectionTexturesInvalid) updateProjectionTextures();
 			// never scale
-			super.activate(stage3DProxy, camera, 1, 1);
+			super.activate(stage3DProxy, camera);
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _polyOffset, 1);
 		}
 	}

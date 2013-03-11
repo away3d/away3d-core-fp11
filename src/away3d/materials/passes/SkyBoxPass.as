@@ -12,6 +12,7 @@ package away3d.materials.passes
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
+	import flash.geom.Matrix3D;
 
 	use namespace arcane;
 
@@ -49,16 +50,14 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			return  "m44 vt7, va0, vc0		\n" +
-					// fit within texture range
-					"mul op, vt7, vc4\n" +
+			return  "m44 op, va0, vc0		\n" +
 					"mov v0, va0\n";
 		}
 
-		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.viewProjection, true);
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
 			renderable.activateVertexBuffer(0, stage3DProxy);
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
@@ -91,9 +90,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			super.activate(stage3DProxy, camera);
 
 			stage3DProxy._context3D.setDepthTest(false, Context3DCompareMode.LESS);
 			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));

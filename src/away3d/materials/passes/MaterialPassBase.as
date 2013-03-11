@@ -23,6 +23,7 @@ package away3d.materials.passes {
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
 
 	use namespace arcane;
@@ -80,8 +81,6 @@ package away3d.materials.passes {
 		private var _oldDepthStencil : Boolean;
 		private var _oldRect : Rectangle;
 
-		private static var _rttData : Vector.<Number>;
-
 		protected var _alphaPremultiplied : Boolean;
 		protected var _needFragmentAnimation:Boolean;
 		protected var _needUVAnimation:Boolean;
@@ -100,7 +99,6 @@ package away3d.materials.passes {
 			_renderToTexture = renderToTexture;
 			_numUsedStreams = 1;
 			_numUsedVertexConstants = 5;
-			if (!_rttData) _rttData = new <Number>[1, 1, 1, 1];
 		}
 
 		/**
@@ -278,7 +276,7 @@ package away3d.materials.passes {
 		 *
 		 * @private
 		 */
-		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			throw new AbstractMethodError();
 		}
@@ -328,7 +326,7 @@ package away3d.materials.passes {
 			}
 		}
 
-		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
@@ -361,17 +359,10 @@ package away3d.materials.passes {
 			context.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
 
 			if (_renderToTexture) {
-				_rttData[0] = 1;
-				_rttData[1] = 1;
 				_oldTarget = stage3DProxy.renderTarget;
 				_oldSurface = stage3DProxy.renderSurfaceSelector;
 				_oldDepthStencil = stage3DProxy.enableDepthAndStencil;
 				_oldRect = stage3DProxy.scissorRect;
-			}
-			else {
-				_rttData[0] = textureRatioX;
-				_rttData[1] = textureRatioY;
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _rttData, 1);
 			}
 		}
 

@@ -74,8 +74,7 @@
 		arcane override function getVertexCode() : String
 		{
 			var code : String;
-			code = "m44 vt7, vt0, vc0		\n" +
-					"mul op, vt7, vc4		\n" +
+			code = "m44 op, vt0, vc0		\n" +
 					"m44 vt1, vt0, vc5		\n" +
 					"sub v0, vt1, vc9		\n";
 
@@ -135,7 +134,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			var pos : Vector3D = camera.scenePosition;
 
@@ -153,7 +152,7 @@
 			var context : Context3D = stage3DProxy._context3D;
 			var matrix : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			matrix.copyFrom(renderable.sceneTransform);
-			matrix.append(camera.viewProjection);
+			matrix.append(viewProjection);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 			renderable.activateVertexBuffer(0, stage3DProxy);
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
@@ -162,9 +161,9 @@
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			super.activate(stage3DProxy, camera);
 
 			var f : Number = camera.lens.far;
 
