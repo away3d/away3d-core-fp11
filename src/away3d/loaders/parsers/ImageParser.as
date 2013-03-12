@@ -4,6 +4,7 @@ package away3d.loaders.parsers
 	import away3d.arcane;
 	import away3d.textures.BitmapTexture;
 	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.utils.ByteArray;
@@ -55,6 +56,9 @@ package away3d.loaders.parsers
 			//shortcut if asset is IFlexAsset
 			if (data is Bitmap)
 				return true;
+				
+			if (data is BitmapData)
+				return true;
 
 			if (!(data is ByteArray))
 				return false;
@@ -84,8 +88,16 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing() : Boolean
 		{
+			var asset:BitmapTexture;
 			if (_data is Bitmap) {
-				var asset : BitmapTexture = new BitmapTexture(Bitmap(_data).bitmapData);
+				asset = new BitmapTexture(Bitmap(_data).bitmapData);
+				finalizeAsset(asset, _fileName);
+				return PARSING_DONE;
+			}
+			
+			if (_data is BitmapData)
+			{
+				asset = new BitmapTexture(_data as BitmapData);
 				finalizeAsset(asset, _fileName);
 				return PARSING_DONE;
 			}
