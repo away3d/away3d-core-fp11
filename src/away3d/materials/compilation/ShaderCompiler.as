@@ -256,7 +256,7 @@ package away3d.materials.compilation {
 
 		private function compileProjectionCode() : void
 		{
-			var pos : String = _animationTargetRegisters[0];
+			var pos : String = _dependencyCounter.globalPosDependencies > 0? _sharedRegisters.globalPositionVertex.toString() : _animationTargetRegisters[0];
 			var code : String;
 
 			if (_dependencyCounter.projectionDependencies > 0) {

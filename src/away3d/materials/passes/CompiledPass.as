@@ -486,14 +486,14 @@ package away3d.materials.passes
 
 			if (_sceneMatrixIndex >= 0) {
 				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
-//				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.viewProjection, true);
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.viewProjection, true);
 			}
-//			else {
+			else {
 				var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 				matrix3D.copyFrom(renderable.sceneTransform);
 				matrix3D.append(viewProjection);
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
-//			}
+			}
 
 			if (_sceneNormalMatrixIndex >= 0)
 				renderable.inverseSceneTransform.copyRawDataTo(_vertexConstantData, _sceneNormalMatrixIndex, false);
