@@ -55,7 +55,7 @@ package away3d.animators.data
 		public var needVelocity:Boolean;
 		//set if has a billboard node.
 		public var hasBillboard:Boolean;
-		
+
 		
 		public function AnimationRegisterCache()
 		{

@@ -44,7 +44,6 @@ package away3d.materials.passes
 		protected var _vertexConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _fragmentConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _commonsDataIndex : int;
-		protected var _vertexConstantsOffset : uint;
 		protected var _probeWeightsIndex : int;
 		protected var _uvBufferIndex : int;
 		protected var _secondaryUVBufferIndex : int;
@@ -130,7 +129,7 @@ package away3d.materials.passes
 
 		private function initConstantData() : void
 		{
-			_vertexConstantData.length = (_numUsedVertexConstants - _vertexConstantsOffset) * 4;
+			_vertexConstantData.length = _numUsedVertexConstants * 4;
 			_fragmentConstantData.length = _numUsedFragmentConstants * 4;
 
 			initCommonsData();
@@ -184,7 +183,6 @@ package away3d.materials.passes
 
 		protected function updateRegisterIndices() : void
 		{
-			_vertexConstantsOffset = _compiler.vertexConstantsOffset;
 			_uvBufferIndex = _compiler.uvBufferIndex;
 			_uvTransformIndex = _compiler.uvTransformIndex;
 			_secondaryUVBufferIndex = _compiler.secondaryUVBufferIndex;
@@ -486,13 +484,13 @@ package away3d.materials.passes
 
 			if (_sceneMatrixIndex >= 0) {
 				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
-				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.viewProjection, true);
+				camera.viewProjection.copyRawDataTo(_vertexConstantData, 0, true);
 			}
 			else {
 				var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 				matrix3D.copyFrom(renderable.sceneTransform);
 				matrix3D.append(viewProjection);
-				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
+				matrix3D.copyRawDataTo(_vertexConstantData, 0, true);
 			}
 
 			if (_sceneNormalMatrixIndex >= 0)
@@ -519,7 +517,7 @@ package away3d.materials.passes
 				set.method.setRenderState(set.data, renderable, stage3DProxy, camera);
 			}
 
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _vertexConstantsOffset, _vertexConstantData, _numUsedVertexConstants - _vertexConstantsOffset);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 0, _vertexConstantData, _numUsedVertexConstants);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentConstantData, _numUsedFragmentConstants);
 
 			renderable.activateVertexBuffer(0, stage3DProxy);

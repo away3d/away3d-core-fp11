@@ -14,8 +14,6 @@ package away3d.materials.compilation {
 		protected var _dependencyCounter : MethodDependencyCounter;
 		protected var _methodSetup : ShaderMethodSetup;
 
-		protected var _vertexConstantsOffset : uint;
-
 		protected var _smooth : Boolean;
 		protected var _repeat : Boolean;
 		protected var _mipmap : Boolean;
@@ -91,7 +89,6 @@ package away3d.materials.compilation {
 		private function initRegisterCache() : void
 		{
 			_registerCache = new ShaderRegisterCache();
-			_vertexConstantsOffset = _registerCache.vertexConstantOffset = 4;
 			_registerCache.vertexAttributesOffset = 1;
 			_registerCache.reset();
 		}
@@ -166,6 +163,9 @@ package away3d.materials.compilation {
 			calculateDependencies();
 			updateMethodRegisters();
 
+			for (var i : uint = 0; i < 4; ++i)
+				_registerCache.getFreeVertexConstant();
+
 			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
 			compileProjectionCode();
 			compileMethodsCode();
@@ -214,7 +214,7 @@ package away3d.materials.compilation {
 				// c, d, 0, ty
 				var uvTransform1 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
 				var uvTransform2 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
-				_uvTransformIndex = (uvTransform1.index - vertexConstantsOffset)*4;
+				_uvTransformIndex = uvTransform1.index*4;
 
 				_vertexCode +=	"dp4 " + varying + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
 						"dp4 " + varying + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
@@ -244,7 +244,7 @@ package away3d.materials.compilation {
 			_registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
-			_sceneMatrixIndex = (positionMatrixReg.index - _vertexConstantsOffset)*4;
+			_sceneMatrixIndex = positionMatrixReg.index*4;
 
 			_vertexCode += 	"m44 " + _sharedRegisters.globalPositionVertex + ", " + _sharedRegisters.localPosition + ", " + positionMatrixReg + "\n";
 
@@ -350,7 +350,6 @@ package away3d.materials.compilation {
 			methodVO.reset();
 			methodVO.vertexData = _vertexConstantData;
 			methodVO.fragmentData = _fragmentConstantData;
-			methodVO.vertexConstantsOffset = _vertexConstantsOffset;
 			methodVO.useSmoothTextures = _smooth;
 			methodVO.repeatTextures = _repeat;
 			methodVO.useMipmapping = _mipmap;
@@ -471,11 +470,6 @@ package away3d.materials.compilation {
 		protected function usesProbes() : Boolean
 		{
 			return _numLightProbes > 0 && ((_diffuseLightSources | _specularLightSources) & LightSources.PROBES) != 0;
-		}
-
-		public function get vertexConstantsOffset() : uint
-		{
-			return _vertexConstantsOffset;
 		}
 
 		public function get uvBufferIndex() : int

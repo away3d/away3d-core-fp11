@@ -100,7 +100,7 @@ package away3d.materials.methods
 			var dataReg : ShaderRegisterElement = regCache.getFreeVertexConstant();
 
 			initProjectionsRegs(regCache);
-			vo.vertexConstantsIndex = (dataReg.index-vo.vertexConstantsOffset)*4;
+			vo.vertexConstantsIndex = dataReg.index*4;
 
 			var temp : ShaderRegisterElement = regCache.getFreeVertexVectorTemp();
 

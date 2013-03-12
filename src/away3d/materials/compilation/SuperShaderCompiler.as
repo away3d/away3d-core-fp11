@@ -57,7 +57,7 @@ package away3d.materials.compilation
 			normalMatrix[1] = _registerCache.getFreeVertexConstant();
 			normalMatrix[2] = _registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
-			_sceneNormalMatrixIndex = (normalMatrix[0].index-_vertexConstantsOffset)*4;
+			_sceneNormalMatrixIndex = normalMatrix[0].index*4;
 
 			if (_methodSetup._normalMethod.hasOutput) {
 				// tangent stream required
@@ -180,7 +180,7 @@ package away3d.materials.compilation
 			_sharedRegisters.viewDirFragment = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_sharedRegisters.viewDirFragment, _dependencyCounter.viewDirDependencies);
 
-			_cameraPositionIndex = (cameraPositionReg.index-_vertexConstantsOffset)*4;
+			_cameraPositionIndex = cameraPositionReg.index*4;
 
 			_vertexCode += "sub " + _sharedRegisters.viewDirVarying + ", " + cameraPositionReg + ", " + _sharedRegisters.globalPositionVertex + "\n";
 			_fragmentCode += 	"nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + ".xyz		\n" +
