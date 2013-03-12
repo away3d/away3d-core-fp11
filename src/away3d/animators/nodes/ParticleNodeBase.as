@@ -5,6 +5,7 @@ package away3d.animators.nodes
 	import away3d.animators.ParticleAnimationSet;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.materials.passes.MaterialPassBase;
+	import flash.utils.getQualifiedClassName;
 	
 	use namespace arcane;
 	
@@ -64,6 +65,40 @@ package away3d.animators.nodes
 			return _oneData;
 		}
 		
+		//modes alias
+		private static var GLOBAL:String = 'Global';
+		private static var LOCAL_STATIC:String = 'LocalStatic';
+		private static var LOCAL_DYNAMIC:String = 'LocalDynamic';
+		
+		//modes list
+		private static var MODES:Object = 
+											{
+												0:GLOBAL,
+												1:LOCAL_STATIC,
+												2:LOCAL_DYNAMIC
+											};
+		
+		/**
+		 * 
+		 * @param	particleNodeClass - class of ParticleNodeBase child e.g ParticleBillboardNode, ParticleFollowNode...
+		 * @param	particleNodeMode  - mode of particle node ParticlePropertiesMode.GLOBAL, ParticlePropertiesMode.LOCAL_DYNAMIC or ParticlePropertiesMode.LOCAL_STATIC
+		 * @return 	particle node name
+		 */
+		public static function getParticleNodeName(particleNodeClass:Object, particleNodeMode:uint):String
+		{
+			var nodeName:String = particleNodeClass['ANIMATION_NODE_NAME'];
+			
+			if (!nodeName)
+				nodeName = getNodeNameFromClass(particleNodeClass);
+				
+			return nodeName + MODES[particleNodeMode];
+		}
+		
+		private static function getNodeNameFromClass(particleNodeClass:Object):String
+		{
+			return getQualifiedClassName(particleNodeClass).replace('Node', '').split('::')[1];
+		}
+		
 		/**
 		 * Creates a new <code>ParticleNodeBase</code> object.
 		 * 
@@ -74,18 +109,7 @@ package away3d.animators.nodes
 		 */
 		public function ParticleNodeBase(name:String, mode:uint, dataLength:uint, priority:int = 1)
 		{
-			switch(mode) {
-				case 0:
-					name = name + "Global";
-					break;
-				case 1:
-					name = name + "LocalStatic";
-					break;
-				case 2:
-					name = name + "LocalDynamic";
-					break;
-				default:
-			}
+			name = name + MODES[mode];
 			
 			this.name = name;
 			_mode = mode;
