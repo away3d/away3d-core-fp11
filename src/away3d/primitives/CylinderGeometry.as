@@ -159,46 +159,6 @@ package away3d.primitives
 				
 				startIndex = _vertexOffset + _nextVertexIndex * _stride;
 				
-				
-				/*for (i = 0; i <= _segmentsW; ++i) {
-					// central vertex
-					if(_yUp){
-						t1 = 1;
-						t2 = 0;
-						comp1 = -z;
-						comp2 = 0;
-						
-					} else {
-						t1 = 0;
-						t2 = -1;
-						comp1 = 0;
-						comp2 = z;
-					}
-					
-					addVertex(0, comp1, comp2,   0, t1, t2,   1, 0, 0);
-					 
-					// revolution vertex
-					revolutionAngle = i * revolutionAngleDelta;
-					x = _topRadius * Math.cos(revolutionAngle);
-					y = _topRadius * Math.sin(revolutionAngle);
-					
-					if(_yUp){
-						comp1 = -z;
-						comp2 = y;
-					} else {
-						comp1 = y;
-						comp2 = z;
-					}
-					
-					if (i == _segmentsW){
-						addVertex(_rawData[startIndex+_stride], _rawData[startIndex+_stride+1], _rawData[startIndex+_stride+2], 0, t1, t2,   1, 0, 0);
-					} else {
-						addVertex(x, comp1, comp2,   0, t1, t2,   1, 0, 0);
-					}
-					
-					if (i > 0) // add triangle
-						addTriangleClockWise(_nextVertexIndex - 1, _nextVertexIndex - 3, _nextVertexIndex - 2);
-				}*/
 				for (i = 0; i <= _segmentsW; ++i)
 				{
 					if(_yUp){
@@ -288,15 +248,6 @@ package away3d.primitives
 									  		na0, na1, latNormElev,
 									  		na1, t1, t2);
 						}
-
-						/*if (_yUp)
-							addVertex(x, -z, y,
-									na0, latNormElev, na1,
-									na1, 0, -na0);
-						else
-							addVertex(x, y, z,
-									na0, na1, latNormElev,
-									na1, -na0, 0);*/
 
 						// close triangle
 						if (i > 0 && j > 0) {
