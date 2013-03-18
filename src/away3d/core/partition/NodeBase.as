@@ -1,9 +1,10 @@
 package away3d.core.partition
 {
+	import away3d.core.math.Plane3D;
+
 	import flash.geom.Vector3D;
 	
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframePrimitiveBase;
@@ -119,7 +120,7 @@ package away3d.core.partition
 		 *
 		 * @return Whether or not the node is at least partly inside the view frustum.
 		 */
-		public function isInFrustum(camera : Camera3D) : Boolean
+		public function isInFrustum(cullPlanes : Vector.<Plane3D>) : Boolean
 		{
 			return true;
 		}

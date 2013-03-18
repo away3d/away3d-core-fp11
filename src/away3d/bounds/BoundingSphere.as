@@ -211,6 +211,14 @@ package away3d.bounds
 			var ry : Number = m21 + m22 + m23;
 			var rz : Number = m31 + m32 + m33;
 			_radius = r*Math.sqrt(rx*rx + ry*ry + rz*rz);
+
+			_min.x = _centerX - _radius;
+			_min.y = _centerY - _radius;
+			_min.z = _centerZ - _radius;
+
+			_max.x = _centerX + _radius;
+			_max.y = _centerY + _radius;
+			_max.z = _centerZ + _radius;
 		}
 	}
 }

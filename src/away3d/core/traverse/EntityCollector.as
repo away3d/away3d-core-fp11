@@ -7,6 +7,7 @@ package away3d.core.traverse
 	import away3d.core.data.EntityListItemPool;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.data.RenderableListItemPool;
+	import away3d.core.math.Plane3D;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
 	import away3d.lights.DirectionalLight;
@@ -47,6 +48,7 @@ package away3d.core.traverse
 		private var _numPointLights : uint;
 		private var _numLightProbes : uint;
 		protected var _cameraForward : Vector3D;
+		protected var _cullPlanes : Vector.<Plane3D>;
 
 		/**
 		 * Creates a new EntityCollector object.
@@ -79,6 +81,7 @@ package away3d.core.traverse
 			_camera = value;
 			_entryPoint = _camera.scenePosition;
 			_cameraForward = _camera.forwardVector;
+			_cullPlanes = _camera.frustumPlanes;
 		}
 
 		/**
@@ -177,7 +180,7 @@ package away3d.core.traverse
 		 */
 		override public function enterNode(node : NodeBase) : Boolean
 		{
-			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_camera);
+			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_cullPlanes);
 			node._collectionMark = _collectionMark;
 			return enter;
 		}

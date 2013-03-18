@@ -5,6 +5,8 @@ package away3d.core.partition
 
 	import flash.geom.Vector3D;
 
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 
 	/**
@@ -102,26 +104,15 @@ package away3d.core.partition
 
 		public function findPartitionForEntity(entity : Entity) : NodeBase
 		{
-			entity.sceneTransform.transformVectors(entity.bounds.aabbPoints, _entityWorldBounds);
+			var min : Vector3D = entity.worldBounds.min;
+			var max : Vector3D = entity.worldBounds.max;
 
-			var minX : Number = _entityWorldBounds[0];
-			var minY : Number = _entityWorldBounds[1];
-			var minZ : Number = _entityWorldBounds[2];
-			var maxX : Number = minX;
-			var maxY : Number = minY;
-			var maxZ : Number = minZ;
-
-			for (var i : uint = 3; i < 24; i += 3) {
-				var x : Number = _entityWorldBounds[i];
-				var y : Number = _entityWorldBounds[uint(i + 1)];
-				var z : Number = _entityWorldBounds[uint(i + 2)];
-				if (x < minX) minX = x;
-				else if (x > maxX) maxX = x;
-				if (y < minX) minY = y;
-				else if (y > maxY) maxY = y;
-				if (z < minX) minZ = z;
-				else if (z > maxZ) maxZ = z;
-			}
+			var minX : Number = min.x;
+			var minY : Number = min.y;
+			var minZ : Number = min.z;
+			var maxX : Number = max.x;
+			var maxY : Number = max.y;
+			var maxZ : Number = max.z;
 
 			var minIndexX : int = (minX-_minX)/_cellWidth;
 			var maxIndexX : int = (maxX-_minX)/_cellWidth;

@@ -289,6 +289,14 @@ package away3d.bounds
 			_halfExtentsX = hx*m11 + hy*m12 + hz*m13;
 			_halfExtentsY = hx*m21 + hy*m22 + hz*m23;
 			_halfExtentsZ = hx*m31 + hy*m32 + hz*m33;
+
+			_min.x = _centerX - _halfExtentsX;
+			_min.y = _centerY - _halfExtentsY;
+			_min.z = _centerZ - _halfExtentsZ;
+
+			_max.x = _centerX + _halfExtentsX;
+			_max.y = _centerY + _halfExtentsY;
+			_max.z = _centerZ + _halfExtentsZ;
 		}
 	}
 }
