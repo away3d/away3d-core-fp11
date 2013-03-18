@@ -2,7 +2,7 @@ package away3d.tools.helpers.data
 {
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.entities.Mesh;
 	import away3d.entities.SegmentSet;
 	import away3d.primitives.LineSegment;
@@ -41,12 +41,17 @@ package away3d.tools.helpers.data
 			var l0 : Vector3D = new Vector3D();
 			var l1 : Vector3D = new Vector3D();
 			
+			var subGeom : SubGeometryBase;
+			var stride : uint;
+			var offset : uint;
+			
 			for (var i:uint = 0; i<numSubGeoms; ++i){
-				var subGeom : ISubGeometry = geometries[i];
-				var stride : int = subGeom.vertexStride;
-				var offset : int = subGeom.vertexOffset;
+				subGeom = SubGeometryBase(geometries[i]);
+				stride = subGeom.vertexStride;
+				offset = subGeom.vertexOffset;
 				vertices = subGeom.vertexData;
-				indices = SubGeometry(geometries[i]).indexData;
+				indices = subGeom.indexData;
+				
 				for (j = 0; j < indices.length; j += 3){
 
 					index = offset + indices[j]*stride;
@@ -105,20 +110,23 @@ package away3d.tools.helpers.data
 			var v0 : Vector3D = new Vector3D();
 			var v1 : Vector3D = new Vector3D();
 			var v2 : Vector3D = new Vector3D();
-			
 			var l0 : Vector3D = new Vector3D();
+			var subGeom : SubGeometryBase;
+			var stride : uint;
+			var offset : uint;
 			 
 			for (var i:uint = 0; i<numSubGeoms; ++i){
-				var subGeom : ISubGeometry = geometries[i];
-				var stride : int = subGeom.vertexStride;
-				var offset : int = subGeom.vertexOffset;
+				subGeom = SubGeometryBase(geometries[i]);
+				stride = subGeom.vertexStride;
+				offset = subGeom.vertexOffset;
 			 	vertices = subGeom.vertexData;
 				try{
 					vectorTarget = (type == 1)? subGeom.vertexNormalData : subGeom.vertexTangentData;
 				} catch(e:Error){
 					continue;
 				}
-				indices = SubGeometry(geometries[i]).indexData;
+				indices = subGeom.indexData;
+				
 				for (j = 0; j < indices.length; j+=3){
 
 					index = offset + indices[j]*stride;
