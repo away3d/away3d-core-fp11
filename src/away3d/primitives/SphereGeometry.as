@@ -1,4 +1,4 @@
-﻿package away3d.primitives
+package away3d.primitives
 {
 	import away3d.arcane;
 	import away3d.core.base.CompactSubGeometry;
@@ -54,9 +54,15 @@
 				indices = new Vector.<uint>((_segmentsH - 1) * _segmentsW * 6, true);
 				invalidateGeometry();
 			}
-
+			
+			var startIndex:uint;
 			var index : uint = target.vertexOffset;
+			var comp1 :Number, comp2 :Number, t1:Number, t2:Number;
+			
 			for (j = 0; j <= _segmentsH; ++j) {
+				
+				startIndex = index;
+				
 				var horangle : Number = Math.PI * j / _segmentsH;
 				var z : Number = -_radius * Math.cos(horangle);
 				var ringradius : Number = _radius * Math.sin(horangle);
@@ -67,31 +73,43 @@
 					var y : Number = ringradius * Math.sin(verangle);
 					var normLen : Number = 1 / Math.sqrt(x * x + y * y + z * z);
 					var tanLen : Number = Math.sqrt(y * y + x * x);
-
-					if (_yUp) {
-						vertices[index++] = x;
-						vertices[index++] = -z;
-						vertices[index++] = y;
-						vertices[index++] = x * normLen;
-						vertices[index++] = -z * normLen;
-						vertices[index++] = y * normLen;
-						vertices[index++] = tanLen > .007 ? -y / tanLen : 1;
-						vertices[index++] = 0;
-						vertices[index++] = tanLen > .007 ? x / tanLen : 0;
+					
+					if(_yUp){
+						t1 = 0;
+						t2 = tanLen > .007 ? x / tanLen : 0;
+						comp1 = -z;
+						comp2 = y;
+						
+					} else {
+						t1 = tanLen > .007 ? x / tanLen : 0;
+						t2 = 0;
+						comp1 = y;
+						comp2 = z;
 					}
-					else {
-						vertices[index++] = x;
-						vertices[index++] = y;
-						vertices[index++] = z;
-						vertices[index++] = x * normLen;
-						vertices[index++] = y * normLen;
-						vertices[index++] = z * normLen;
+					 
+					if (i == _segmentsW) {
+						vertices[index++] = vertices[startIndex];
+						vertices[index++] = vertices[startIndex+1];
+						vertices[index++] = vertices[startIndex+2];
+						vertices[index++] = vertices[startIndex+3] + (x * normLen) * .5 ;
+						vertices[index++] = vertices[startIndex+4] +( comp1 * normLen) * .5;
+						vertices[index++] = vertices[startIndex+5] +(comp2 * normLen) * .5;
 						vertices[index++] = tanLen > .007 ? -y / tanLen : 1;
-						vertices[index++] = tanLen > .007 ? x / tanLen : 0;
-						vertices[index++] = 0;
+						vertices[index++] = t1;
+						vertices[index++] = t2;
+						
+					} else {
+						vertices[index++] = x;
+						vertices[index++] = comp1;
+						vertices[index++] = comp2;
+						vertices[index++] = x * normLen;
+						vertices[index++] = comp1 * normLen;
+						vertices[index++] = comp2 * normLen;
+						vertices[index++] = tanLen > .007 ? -y / tanLen : 1;
+						vertices[index++] = t1;
+						vertices[index++] = t2;
 					}
-					index += skip;
-
+					
 					if (i > 0 && j > 0) {
 						var a : int = (_segmentsW + 1) * j + i;
 						var b : int = (_segmentsW + 1) * j + i - 1;
@@ -99,16 +117,20 @@
 						var d : int = (_segmentsW + 1) * (j - 1) + i;
 
 						if (j == _segmentsH) {
+							vertices[index-9] = vertices[startIndex];
+							vertices[index-8] = vertices[startIndex+1];
+							vertices[index-7] = vertices[startIndex+2];
+							
 							indices[triIndex++] = a;
 							indices[triIndex++] = c;
 							indices[triIndex++] = d;
-						}
-						else if (j == 1) {
+							
+						} else if (j == 1) {
 							indices[triIndex++] = a;
 							indices[triIndex++] = b;
 							indices[triIndex++] = c;
-						}
-						else {
+							
+						} else {
 							indices[triIndex++] = a;
 							indices[triIndex++] = b;
 							indices[triIndex++] = c;
@@ -117,6 +139,8 @@
 							indices[triIndex++] = d;
 						}
 					}
+					
+					index += skip;
 				}
 			}
 
