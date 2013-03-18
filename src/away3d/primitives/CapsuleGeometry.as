@@ -6,7 +6,7 @@ package away3d.primitives
 	import away3d.core.base.SubGeometry;
 
 	/**
-	 * A UV Capsule primitive mesh.
+	 * A Capsule primitive mesh.
 	 */
 	public class CapsuleGeometry extends PrimitiveBase
 	{
@@ -90,15 +90,13 @@ package away3d.primitives
 					}
 					
 					if (i == _segmentsW) {
-						// vertex
+						
 						data[index++] = data[startIndex];
 						data[index++] = data[startIndex+1];
 						data[index++] = data[startIndex+2];
-						// normal
-						data[index++] = (data[startIndex+3] + (x * normLen)) * .5 ;
+						data[index++] = (data[startIndex+3] + (x * normLen)) * .5;
 						data[index++] = (data[startIndex+4] +( comp1 * normLen)) * .5;
 						data[index++] = (data[startIndex+5] +(comp2 * normLen)) * .5;
-						// tangent
 						data[index++] = (data[startIndex+6] + (tanLen > .007 ? -y/tanLen : 1)) *.5;
 						data[index++] = (data[startIndex+7] + t1) *.5;
 						data[index++] = (data[startIndex+8] + t2) *.5;
@@ -168,9 +166,9 @@ package away3d.primitives
 			var UVlen:uint = (_segmentsH + 1)*(_segmentsW + 1)*stride;
 			var skip:uint = stride - 2;
 
-			if(target.UVData && UVlen == target.UVData.length)
+			if(target.UVData && UVlen == target.UVData.length){
 				data = target.UVData;
-			else {
+			} else {
 				data = new Vector.<Number>(UVlen, true);
 				invalidateGeometry();
 			}
