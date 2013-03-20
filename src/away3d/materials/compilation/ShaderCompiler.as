@@ -62,6 +62,8 @@ package away3d.materials.compilation {
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
 
+		private var _forceSeperateMVP:Boolean;
+
 		use namespace arcane;
 
 		public function ShaderCompiler()
@@ -84,6 +86,16 @@ package away3d.materials.compilation {
 		public function get UVSource():String
 		{
 			return _UVSource;
+		}
+
+		public function get forceSeperateMVP() : Boolean
+		{
+			return _forceSeperateMVP;
+		}
+
+		public function set forceSeperateMVP(value : Boolean) : void
+		{
+			_forceSeperateMVP = value;
 		}
 
 		private function initRegisterCache() : void
@@ -161,6 +173,7 @@ package away3d.materials.compilation {
 
 			createCommons();
 			calculateDependencies();
+			if (_forceSeperateMVP) _dependencyCounter.addWorldSpaceDependencies(false);
 			updateMethodRegisters();
 
 			for (var i : uint = 0; i < 4; ++i)

@@ -111,7 +111,8 @@ package away3d.core.render
 						_activeMaterial = material;
 						_activeMaterial.activateForDepth(_stage3DProxy, camera, false);
 					}
-					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera, _rttViewProjectionMatrix);
+
+					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera, camera.viewProjection);
 				}
 
 				item = item.next;

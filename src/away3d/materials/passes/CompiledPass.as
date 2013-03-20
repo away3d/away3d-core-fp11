@@ -73,6 +73,7 @@ package away3d.materials.passes
 		protected var _numPointLights : uint;
 		protected var _numDirectionalLights : uint;
 		protected var _numLightProbes : uint;
+		private var _forceSeperateMVP : Boolean;
 
 		public function CompiledPass(material : MaterialBase)
 		{
@@ -81,6 +82,16 @@ package away3d.materials.passes
 			init();
 		}
 
+
+		public function get forceSeperateMVP() : Boolean
+		{
+			return _forceSeperateMVP;
+		}
+
+		public function set forceSeperateMVP(value : Boolean) : void
+		{
+			_forceSeperateMVP = value;
+		}
 
 		arcane function get numPointLights() : uint
 		{
@@ -144,6 +155,7 @@ package away3d.materials.passes
 		protected function initCompiler() : void
 		{
 			_compiler = createCompiler();
+			_compiler.forceSeperateMVP = _forceSeperateMVP;
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
 			_compiler.numLightProbes = _numLightProbes;

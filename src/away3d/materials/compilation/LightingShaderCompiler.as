@@ -112,6 +112,7 @@ package away3d.materials.compilation
 				_registerCache.getFreeVertexConstant();
 				_sceneNormalMatrixIndex = normalMatrix[0].index*4;
 				_sharedRegisters.normalVarying = _registerCache.getFreeVarying();
+
 				// no output, world space is enough
 				_vertexCode += 	"m33 " + _sharedRegisters.normalVarying + ".xyz, " + _sharedRegisters.animatedNormal + ".xyz, " + normalMatrix[0] + "\n" +
 								"mov " + _sharedRegisters.normalVarying + ".w, " + _sharedRegisters.animatedNormal + ".w	\n";
