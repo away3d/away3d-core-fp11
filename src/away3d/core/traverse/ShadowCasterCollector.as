@@ -43,6 +43,7 @@ package away3d.core.traverse
 				var item : RenderableListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
+				item.cascaded = false;
 				var dx : Number = _entryPoint.x - entity.x;
 				var dy : Number = _entryPoint.y - entity.y;
 				var dz : Number = _entryPoint.z - entity.z;

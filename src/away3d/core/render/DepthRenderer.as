@@ -4,9 +4,7 @@ package away3d.core.render
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Plane3D;
-	import away3d.core.math.PlaneClassification;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.materials.MaterialBase;
@@ -14,8 +12,6 @@ package away3d.core.render
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
-	import flash.geom.Matrix;
-	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
 
 	use namespace arcane;
@@ -81,7 +77,7 @@ package away3d.core.render
 			var head : RenderableListItem = entityCollector.opaqueRenderableHead;
 			for (var i : uint = 0; i < numCascades; ++i) {
 				_stage3DProxy.scissorRect = scissorRects[i];
-				drawCascadeRenderables(head, cameras[i]);
+				drawCascadeRenderables(head, cameras[i], splitPlanes[i]);
 			}
 
 			if (_activeMaterial)
@@ -95,16 +91,22 @@ package away3d.core.render
 			_stage3DProxy.scissorRect = null;
 		}
 
-		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D) : void
+		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D, splitPlane : Plane3D) : void
 		{
 			var material : MaterialBase;
-			var frustumPlanes : Vector.<Plane3D> = camera.frustumPlanes;
 
 			while (item) {
+				if (item.cascaded) {
+					item = item.next;
+					continue;
+				}
+
 				var renderable : IRenderable = item.renderable;
 				var entity : Entity = renderable.sourceEntity;
+				var classification : int = entity.worldBounds.classifyToPlane(splitPlane);
 
-				if (entity.worldBounds.isInFrustum(frustumPlanes)) {
+				// if completely in front, it will fall in a different cascade
+				if (classification != 1) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
@@ -113,6 +115,10 @@ package away3d.core.render
 					}
 
 					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera, camera.viewProjection);
+
+					// fell completely in this cascade
+					if (classification == 0)
+						item.cascaded = true;
 				}
 
 				item = item.next;

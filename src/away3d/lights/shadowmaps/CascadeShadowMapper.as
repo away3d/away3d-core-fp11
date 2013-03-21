@@ -38,7 +38,6 @@ package away3d.lights.shadowmaps
 		private var _texOffsetsY : Vector.<Number>;
 
 		private static var _calcMatrix : Matrix3D = new Matrix3D();
-		private static var _calcVector : Vector3D = new Vector3D();
 
 		private var _changeDispatcher : EventDispatcher;
 		private var _nearPlaneDistances : Vector.<Number>;
@@ -197,25 +196,37 @@ package away3d.lights.shadowmaps
 			_calcMatrix.prepend(viewCamera.sceneTransform);
 			_calcMatrix.transformVectors(corners, _localFrustum);
 
-			viewCamera.sceneTransform.copyColumnTo(2, _calcVector);
-			var point : Vector3D = viewCamera.scenePosition;
-			var a : Number = -_calcVector.x;
-			var b : Number = -_calcVector.y;
-			var c : Number = -_calcVector.z;
-			var len : Number = Math.sqrt(a*a + b*b + c*c);
-			var d : Number = a*point.x + b*point.y + c*point.z;
+			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			viewCamera.viewProjection.copyRawDataTo(raw);
 			var lens : LensBase = viewCamera.lens;
-			var near : Number = lens.near;
-			var frustumDepth : Number = lens.far - near;
+			var lensNear : Number = lens.near;
+			var lensRange : Number = lens.far - lensNear;
+			var a : Number = raw[uint(2)];
+			var b : Number = raw[uint(6)];
+			var c : Number = raw[uint(10)];
+			var nearD : Number = raw[uint(14)];
+			var farA : Number = a - raw[uint(3)];	// invert plane
+			var farB : Number = b - raw[uint(7)];	// invert plane
+			var farC : Number = c - raw[uint(11)];	// invert plane
+			var farD : Number = nearD - raw[uint(15)];
+			var invLen : Number = 1/Math.sqrt(a*a + b*b + c*c);
+
+			a *= invLen;
+			b *= invLen;
+			c *= invLen;
+			nearD *= invLen;
+			farD /= Math.sqrt(farA*farA + farB*farB + farC*farC);
+
+			var planeRange : Number = farD - nearD;
 
 			for (var i : uint = 0; i < _numCascades; ++i) {
-				var dist : Number = near + _splitRatios[i]*frustumDepth;
+				var ratio : Number = _splitRatios[i];
 				var plane : Plane3D = _splitPlanes[i];
 				plane.a = a;
 				plane.b = b;
 				plane.c = c;
-				plane.d = d - dist * len;
-				_nearPlaneDistances[i] = dist;
+				plane.d = -(nearD + planeRange*ratio);
+				_nearPlaneDistances[i] = lensNear + ratio*lensRange;
 			}
 		}
 

@@ -208,6 +208,7 @@ package away3d.core.traverse
 				item.renderable = renderable;
 				item.materialId = material._uniqueId;
 				item.renderOrderId = material._renderOrderId;
+				item.cascaded = false;
 				var dx : Number = _entryPoint.x - entity.x;
 				var dy : Number = _entryPoint.y - entity.y;
 				var dz : Number = _entryPoint.z - entity.z;

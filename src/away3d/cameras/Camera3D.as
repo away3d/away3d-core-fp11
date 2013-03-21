@@ -102,42 +102,42 @@ package away3d.cameras
 			p.a = c41 + c11;
 			p.b = c42 + c12;
 			p.c = c43 + c13;
-			p.d = c44 + c14;
+			p.d = -(c44 + c14);
 
 			// right plane
 			p = _frustumPlanes[1];
 			p.a = c41 - c11;
 			p.b = c42 - c12;
 			p.c = c43 - c13;
-			p.d = c44 - c14;
+			p.d = c14 - c44;
 
 			// bottom
 			p = _frustumPlanes[2];
 			p.a = c41 + c21;
 			p.b = c42 + c22;
 			p.c = c43 + c23;
-			p.d = c44 + c24;
+			p.d = -(c44 + c24);
 
 			// top
 			p = _frustumPlanes[3];
 			p.a = c41 - c21;
 			p.b = c42 - c22;
 			p.c = c43 - c23;
-			p.d = c44 - c24;
+			p.d = c24 - c44;
 
 			// near
 			p = _frustumPlanes[4];
 			p.a = c31;
 			p.b = c32;
 			p.c = c33;
-			p.d = c34;
+			p.d = -c34;
 
 			// far
 			p = _frustumPlanes[5];
 			p.a = c41 - c31;
 			p.b = c42 - c32;
 			p.c = c43 - c33;
-			p.d = c44 - c34;
+			p.d = c34 - c44;
 
 			_frustumPlanesDirty = false;
 		}

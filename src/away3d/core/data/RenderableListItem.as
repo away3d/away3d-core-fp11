@@ -12,5 +12,7 @@ package away3d.core.data
 		public var materialId : int;
 		public var renderOrderId : int;
 		public var zIndex : Number;
+
+		public var cascaded : Boolean;
 	}
 }

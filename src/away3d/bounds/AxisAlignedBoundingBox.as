@@ -46,10 +46,13 @@ package away3d.bounds
 		{
 			for (var i : uint = 0; i < 6; ++i) {
 				var plane : Plane3D = planes[i];
-				var flippedExtentX : Number = plane.a < 0? - _halfExtentsX : _halfExtentsX;
-				var flippedExtentY : Number = plane.b < 0? - _halfExtentsY : _halfExtentsY;
-				var flippedExtentZ : Number = plane.c < 0? - _halfExtentsZ : _halfExtentsZ;
-				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * (_centerY + flippedExtentY) + plane.c * (_centerZ + flippedExtentZ) + plane.d;
+				var a : Number = plane.a;
+				var b : Number = plane.b;
+				var c : Number = plane.c;
+				var flippedExtentX : Number = a < 0? - _halfExtentsX : _halfExtentsX;
+				var flippedExtentY : Number = b < 0? - _halfExtentsY : _halfExtentsY;
+				var flippedExtentZ : Number = c < 0? - _halfExtentsZ : _halfExtentsZ;
+				var projDist : Number = a * (_centerX + flippedExtentX) + b * (_centerY + flippedExtentY) + c * (_centerZ + flippedExtentZ) - plane.d;
 				if (projDist < 0) return false;
 			}
 
