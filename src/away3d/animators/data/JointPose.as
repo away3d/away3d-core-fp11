@@ -29,6 +29,10 @@ package away3d.animators.data
 		 */
 		public var translation : Vector3D = new Vector3D();
 		
+		public function JointPose() {
+			
+		}
+		
 		/**
 		 * Converts the transformation to a Matrix3D representation.
 		 * 

@@ -1040,6 +1040,7 @@ internal class AWDBlock
 	public var id : uint;
 	public var name : String;
 	public var data : *;
+	public function AWDBlock() {} 
 }
 
 internal dynamic class AWDProperties
