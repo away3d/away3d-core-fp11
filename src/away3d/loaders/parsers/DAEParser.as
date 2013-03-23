@@ -691,8 +691,12 @@ package away3d.loaders.parsers
 			if (diffuse && diffuse.texture && effect.surface) {
 				var image : DAEImage = _libImages[effect.surface.init_from];
 
-				if (isBitmapDataValid(image.resource.bitmapData)) {
+				if (image.resource !== null && isBitmapDataValid(image.resource.bitmapData)) {
 					mat = textureMaterial = buildDefaultMaterial(image.resource.bitmapData);
+					textureMaterial.alpha = transparency;
+				}
+				else {
+					mat = textureMaterial = buildDefaultMaterial();
 					textureMaterial.alpha = transparency;
 				}
 
