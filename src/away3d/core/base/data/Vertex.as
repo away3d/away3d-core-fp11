@@ -18,7 +18,7 @@ package away3d.core.base.data
 		* @param	z			[optional]	The z value. Defaults to 0.
 		* @param	index		[optional]	The index value. Defaults is NaN.
 		*/
-        public function Vertex(x:Number = 0, y:Number = 0, z:Number = 0, index:uint = NaN)
+        public function Vertex(x:Number = 0, y:Number = 0, z:Number = 0, index:uint = 0)
         {
             _x = x;
             _y = y;

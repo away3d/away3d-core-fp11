@@ -30,6 +30,10 @@ package away3d.materials.methods {
 
 		public var numLights : int;
 
+		public function MethodVO() {
+		
+		}
+
 		public function reset() : void
 		{
 			vertexConstantsOffset = 0;

@@ -22,5 +22,10 @@ package away3d.materials.compilation
 		public var viewDirFragment : ShaderRegisterElement;
 		public var projectedTarget : ShaderRegisterElement;
 		public var bitangent : ShaderRegisterElement;
-	}
+	
+	
+		public function ShaderRegisterData() {
+		
+		}
+	}	
 }
