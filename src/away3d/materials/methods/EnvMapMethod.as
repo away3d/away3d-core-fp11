@@ -1,13 +1,10 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.CubeTextureBase;
 	import away3d.textures.Texture2DBase;
-
-	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
@@ -41,6 +38,7 @@ package away3d.materials.methods
 		{
 			vo.needsNormals = true;
 			vo.needsView = true;
+			vo.needsUV = _mask != null;
 		}
 
 		/**
@@ -109,7 +107,7 @@ package away3d.materials.methods
 			if (_mask) {
 				var maskReg : ShaderRegisterElement = regCache.getFreeTextureReg();
 				code += getTex2DSampleCode(vo, temp2, maskReg, _mask, _sharedRegisters.uvVarying) +
-						"mul " + temp + ", " + temp2 + ", " + dataRegister + ".x\n";
+						"mul " + temp + ", " + temp2 + ", " + temp + "\n";
 			}
 			code +=	"mul " + temp + ", " + temp + ", " + dataRegister + ".x										\n" +
 					"add " + targetReg + ", " + targetReg+", " + temp + "										\n";
