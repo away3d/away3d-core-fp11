@@ -11,7 +11,7 @@ package away3d.tools.commands
 	 */
 	public class Merge{
 		
-		private const LIMIT:uint = 196605;
+		//private const LIMIT:uint = 196605;
 		private var _objectSpace:Boolean;
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;
@@ -338,4 +338,5 @@ class GeometryVO {
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
 	public var material:MaterialBase;
+	public function GeometryVO() {} 
 }
