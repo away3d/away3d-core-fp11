@@ -92,7 +92,7 @@ package away3d.cameras.lenses
 
 			raw[0] = 2*w;
 			raw[5] = 2*h;
-			raw[10] = 1*d;
+			raw[10] = d;
 			raw[12] = -(_maxX + _minX)*w;
 			raw[13] = -(_maxY + _minY)*h;
 			raw[14] = -_near*d;

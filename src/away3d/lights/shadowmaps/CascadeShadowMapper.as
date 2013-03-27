@@ -41,6 +41,7 @@ package away3d.lights.shadowmaps
 
 		private var _changeDispatcher : EventDispatcher;
 		private var _nearPlaneDistances : Vector.<Number>;
+		private var _snap : Number = 64;
 
 		public function CascadeShadowMapper(numCascades : uint = 3)
 		{
@@ -49,6 +50,16 @@ package away3d.lights.shadowmaps
 			_numCascades = numCascades;
 			_changeDispatcher = new EventDispatcher(this);
 			init();
+		}
+
+		public function get snap() : Number
+		{
+			return _snap;
+		}
+
+		public function set snap(value : Number) : void
+		{
+			_snap = value;
 		}
 
 		public function getSplitRatio(index : uint) : Number
@@ -173,7 +184,7 @@ package away3d.lights.shadowmaps
 
 				_depthCameras[i].transform = _overallCamera.transform;
 
-				updateProjectionPartition(matrix, 0, _splitRatios[i], _texOffsetsX[i], _texOffsetsY[i]);
+				updateProjectionPartition(matrix, _splitRatios[i], _texOffsetsX[i], _texOffsetsY[i]);
 
 				_depthLenses[i].matrix = matrix;
 			}
@@ -228,34 +239,22 @@ package away3d.lights.shadowmaps
 			_overallLens.far = maxZ;
 		}
 
-		private function updateProjectionPartition(matrix : Matrix3D, minRatio : Number, maxRatio : Number, texOffsetX : Number, texOffsetY : Number) : void
+		private function updateProjectionPartition(matrix : Matrix3D, splitRatio : Number, texOffsetX : Number, texOffsetY : Number) : void
 		{
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			var x1 : Number, y1 : Number, z1 : Number;
-			var x2 : Number, y2 : Number, z2 : Number;
 			var xN : Number, yN : Number, zN : Number;
 			var xF : Number, yF : Number, zF : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number;
 			var maxX : Number = Number.NEGATIVE_INFINITY, maxY : Number = Number.NEGATIVE_INFINITY, maxZ : Number = Number.NEGATIVE_INFINITY;
-			var scaleX : Number, scaleY : Number;
-			var offsX : Number, offsY : Number;
-			var halfSize : Number = _depthMapSize*.5;
-			var i : uint;
+			var i : uint = 0;
 
-			i = 0;
 			while (i < 12) {
-				x1 = _localFrustum[i];
-				y1 = _localFrustum[uint(i+1)];
-				z1 = _localFrustum[uint(i+2)];
-				x2 = _localFrustum[uint(i+12)] - x1;
-				y2 = _localFrustum[uint(i+13)] - y1;
-				z2 = _localFrustum[uint(i+14)] - z1;
-				xN = x1 + x2*minRatio;
-				yN = y1 + y2*minRatio;
-				zN = z1 + z2*maxRatio;
-				xF = x1 + x2*maxRatio;
-				yF = y1 + y2*maxRatio;
-				zF = z1 + z2*maxRatio;
+				xN = _localFrustum[i];
+				yN = _localFrustum[uint(i+1)];
+				zN = _localFrustum[uint(i+2)];
+				xF = xN + (_localFrustum[uint(i+12)] - xN)*splitRatio;
+				yF = yN + (_localFrustum[uint(i+13)] - yN)*splitRatio;
+				zF = zN + (_localFrustum[uint(i+14)] - zN)*splitRatio;
 				if (xN < minX) minX = xN;
 				if (xN > maxX) maxX = xN;
 				if (yN < minY) minY = yN;
@@ -271,22 +270,20 @@ package away3d.lights.shadowmaps
 
 			minZ = 10;
 
-			var quantizeFactor : Number = 128;
-			var invQuantizeFactor : Number = 1/quantizeFactor;
+			minX = int(minX / _snap) * _snap;
+			maxX = Math.ceil(maxX / _snap) * _snap;
+			minY = int(minY / _snap) * _snap;
+			maxY = Math.ceil(maxY / _snap) * _snap;
 
-			scaleX = 2*invQuantizeFactor/Math.ceil((maxX - minX)*invQuantizeFactor);
-			scaleY = 2*invQuantizeFactor/Math.ceil((maxY - minY)*invQuantizeFactor);
-
-			offsX = Math.ceil(-.5*(maxX + minX)*scaleX*halfSize) / halfSize;
-			offsY = Math.ceil(-.5*(maxY + minY)*scaleY*halfSize) / halfSize;
-
+			var w : Number = 1/(maxX - minX);
+			var h : Number = 1/(maxY - minY);
 			var d : Number = 1/(maxZ - minZ);
 
-			raw[0] = scaleX;
-			raw[5] = scaleY;
+			raw[0] = 2*w;
+			raw[5] = 2*h;
 			raw[10] = d;
-			raw[12] = offsX;
-			raw[13] = offsY;
+			raw[12] = -(maxX + minX)*w;
+			raw[13] = -(maxY + minY)*h;
 			raw[14] = -minZ * d;
 			raw[15] = 1;
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;

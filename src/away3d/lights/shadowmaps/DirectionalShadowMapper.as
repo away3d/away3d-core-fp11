@@ -22,6 +22,7 @@ package away3d.lights.shadowmaps
 		protected var _lightOffset : Number = 10000;
 		protected var _matrix : Matrix3D;
 		protected var _depthLens : FreeMatrixLens;
+		private var _snap : Number = 64;
 
 		public function DirectionalShadowMapper()
 		{
@@ -31,6 +32,17 @@ package away3d.lights.shadowmaps
 			_localFrustum = new Vector.<Number>(8 * 3);
 			_matrix = new Matrix3D();
 		}
+
+		public function get snap() : Number
+		{
+			return _snap;
+		}
+
+		public function set snap(value : Number) : void
+		{
+			_snap = value;
+		}
+
 
 		public function get lightOffset() : Number
 		{
@@ -72,16 +84,13 @@ package away3d.lights.shadowmaps
 			var x : Number, y : Number, z : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number = Number.POSITIVE_INFINITY;
 			var maxX : Number = Number.NEGATIVE_INFINITY, maxY : Number = Number.NEGATIVE_INFINITY, maxZ : Number = Number.NEGATIVE_INFINITY;
-			var scaleX : Number, scaleY : Number;
-			var offsX : Number, offsY : Number;
-			var halfSize : Number = _depthMapSize * .5;
 			var i : uint;
 
 			dir = DirectionalLight(_light).sceneDirection;
 			_depthCamera.transform = _light.sceneTransform;
-			_depthCamera.x = -dir.x * _lightOffset;
-			_depthCamera.y = -dir.y * _lightOffset;
-			_depthCamera.z = -dir.z * _lightOffset;
+			_depthCamera.x = viewCamera.x-dir.x * _lightOffset;
+			_depthCamera.y = viewCamera.y-dir.y * _lightOffset;
+			_depthCamera.z = viewCamera.z-dir.z * _lightOffset;
 
 			_matrix.copyFrom(_depthCamera.inverseSceneTransform);
 			_matrix.prepend(viewCamera.sceneTransform);
@@ -101,22 +110,20 @@ package away3d.lights.shadowmaps
 			}
 			minZ = 10;
 
-			var quantizeFactor : Number = 128;
-			var invQuantizeFactor : Number = 1/quantizeFactor;
+			minX = int(minX / _snap) * _snap;
+			maxX = Math.ceil(maxX / _snap) * _snap;
+			minY = int(minY / _snap) * _snap;
+			maxY = Math.ceil(maxY / _snap) * _snap;
 
-			scaleX = 2*invQuantizeFactor/Math.ceil((maxX - minX)*invQuantizeFactor);
-			scaleY = 2*invQuantizeFactor/Math.ceil((maxY - minY)*invQuantizeFactor);
-
-			offsX = Math.ceil(-.5*(maxX + minX)*scaleX*halfSize) / halfSize;
-			offsY = Math.ceil(-.5*(maxY + minY)*scaleY*halfSize) / halfSize;
-
+			var w : Number = 1/(maxX - minX);
+			var h : Number = 1/(maxY - minY);
 			var d : Number = 1/(maxZ - minZ);
 
-			raw[0] = scaleX;
-			raw[5] = scaleY;
+			raw[0] = 2*w;
+			raw[5] = 2*h;
 			raw[10] = d;
-			raw[12] = offsX;
-			raw[13] = offsY;
+			raw[12] = -(maxX + minX)*w;
+			raw[13] = -(maxY + minY)*h;
 			raw[14] = -minZ * d;
 			raw[15] = 1;
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;
