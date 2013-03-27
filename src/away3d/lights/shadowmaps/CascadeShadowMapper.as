@@ -41,7 +41,6 @@ package away3d.lights.shadowmaps
 
 		private var _changeDispatcher : EventDispatcher;
 		private var _nearPlaneDistances : Vector.<Number>;
-		private var _splitPlanes : Vector.<Plane3D>;
 
 		public function CascadeShadowMapper(numCascades : uint = 3)
 		{
@@ -77,7 +76,6 @@ package away3d.lights.shadowmaps
 			_localFrustum = new Vector.<Number>(8 * 3);
 			_splitRatios = new Vector.<Number>(_numCascades, true);
 			_nearPlaneDistances = new Vector.<Number>(_numCascades, true);
-			_splitPlanes = new Vector.<Plane3D>(_numCascades, true);
 
 			var s : Number = 1;
 			for (var i : int = _numCascades-1; i >= 0; --i) {
@@ -95,7 +93,6 @@ package away3d.lights.shadowmaps
 			_overallCamera = new Camera3D(_overallLens);
 
 			for (i = 0; i < _numCascades; ++i) {
-				_splitPlanes[i] = new Plane3D();
 				_depthLenses[i] = new FreeMatrixLens();
 				_depthCameras[i] = new Camera3D(_depthLenses[i]);
 			}
@@ -147,7 +144,7 @@ package away3d.lights.shadowmaps
 			_casterCollector.camera = _overallCamera;
 			scene.traversePartitions(_casterCollector);
 
-			renderer.renderCascades(_casterCollector, target, _numCascades, _scissorRects, _splitPlanes, _depthCameras);
+			renderer.renderCascades(_casterCollector, target, _numCascades, _scissorRects, _depthCameras);
 
 			_casterCollector.cleanUp();
 		}
@@ -176,7 +173,7 @@ package away3d.lights.shadowmaps
 
 				_depthCameras[i].transform = _overallCamera.transform;
 
-				updateProjectionPartition(matrix, i == 0? 0 : _splitRatios[i-1], _splitRatios[i], _texOffsetsX[i], _texOffsetsY[i]);
+				updateProjectionPartition(matrix, 0, _splitRatios[i], _texOffsetsX[i], _texOffsetsY[i]);
 
 				_depthLenses[i].matrix = matrix;
 			}
@@ -188,46 +185,20 @@ package away3d.lights.shadowmaps
 			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
 
 			_overallCamera.transform = _light.sceneTransform;
-			_overallCamera.x = viewCamera.x-dir.x * _lightOffset;
-			_overallCamera.y = viewCamera.y-dir.y * _lightOffset;
-			_overallCamera.z = viewCamera.z-dir.z * _lightOffset;
+			_overallCamera.x = viewCamera.x - dir.x * _lightOffset;
+			_overallCamera.y = viewCamera.y - dir.y * _lightOffset;
+			_overallCamera.z = viewCamera.z - dir.z * _lightOffset;
 
-			_calcMatrix.copyFrom(_overallCamera.inverseSceneTransform);
-			_calcMatrix.prepend(viewCamera.sceneTransform);
+			_calcMatrix.copyFrom(viewCamera.sceneTransform);
+			_calcMatrix.append(_overallCamera.inverseSceneTransform);
 			_calcMatrix.transformVectors(corners, _localFrustum);
 
-			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			viewCamera.viewProjection.copyRawDataTo(raw);
 			var lens : LensBase = viewCamera.lens;
 			var lensNear : Number = lens.near;
 			var lensRange : Number = lens.far - lensNear;
-			var a : Number = raw[uint(2)];
-			var b : Number = raw[uint(6)];
-			var c : Number = raw[uint(10)];
-			var nearD : Number = raw[uint(14)];
-			var farA : Number = a - raw[uint(3)];	// invert plane
-			var farB : Number = b - raw[uint(7)];	// invert plane
-			var farC : Number = c - raw[uint(11)];	// invert plane
-			var farD : Number = nearD - raw[uint(15)];
-			var invLen : Number = 1/Math.sqrt(a*a + b*b + c*c);
 
-			a *= invLen;
-			b *= invLen;
-			c *= invLen;
-			nearD *= invLen;
-			farD /= Math.sqrt(farA*farA + farB*farB + farC*farC);
-
-			var planeRange : Number = farD - nearD;
-
-			for (var i : uint = 0; i < _numCascades; ++i) {
-				var ratio : Number = _splitRatios[i];
-				var plane : Plane3D = _splitPlanes[i];
-				plane.a = a;
-				plane.b = b;
-				plane.c = c;
-				plane.d = -(nearD + planeRange*ratio);
-				_nearPlaneDistances[i] = lensNear + ratio*lensRange;
-			}
+			for (var i : uint = 0; i < _numCascades; ++i)
+				_nearPlaneDistances[i] = lensNear + _splitRatios[i]*lensRange;
 		}
 
 		private function updateOverallMatrix() : void

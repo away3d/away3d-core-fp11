@@ -71,13 +71,14 @@ package away3d.cameras
 
 		private function updateFrustum() : void
 		{
+			var a : Number, b : Number, c : Number, d : Number;
 			var c11 : Number, c12 : Number, c13 : Number, c14 : Number;
 			var c21 : Number, c22 : Number, c23 : Number, c24 : Number;
 			var c31 : Number, c32 : Number, c33 : Number, c34 : Number;
 			var c41 : Number, c42 : Number, c43 : Number, c44 : Number;
 			var p : Plane3D;
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-
+			var invLen : Number;
 			viewProjection.copyRawDataTo(raw);
 
 			c11 = raw[uint(0)];
@@ -99,45 +100,69 @@ package away3d.cameras
 
 			// left plane
 			p = _frustumPlanes[0];
-			p.a = c41 + c11;
-			p.b = c42 + c12;
-			p.c = c43 + c13;
-			p.d = -(c44 + c14);
+			a = c41 + c11;
+			b = c42 + c12;
+			c = c43 + c13;
+			invLen = 1/Math.sqrt(a*a+b*b+c*c);
+			p.a = a*invLen;
+			p.b = b*invLen;
+			p.c = c*invLen;
+			p.d = -(c44 + c14)*invLen;
 
 			// right plane
 			p = _frustumPlanes[1];
-			p.a = c41 - c11;
-			p.b = c42 - c12;
-			p.c = c43 - c13;
-			p.d = c14 - c44;
+			a = c41 - c11;
+			b = c42 - c12;
+			c = c43 - c13;
+			invLen = 1/Math.sqrt(a*a+b*b+c*c);
+			p.a = a*invLen;
+			p.b = b*invLen;
+			p.c = c*invLen;
+			p.d = (c14 - c44)*invLen;
 
 			// bottom
 			p = _frustumPlanes[2];
-			p.a = c41 + c21;
-			p.b = c42 + c22;
-			p.c = c43 + c23;
-			p.d = -(c44 + c24);
+			a = c41 + c21;
+			b = c42 + c22;
+			c = c43 + c23;
+			invLen = 1/Math.sqrt(a*a+b*b+c*c);
+			p.a = a*invLen;
+			p.b = b*invLen;
+			p.c = c*invLen;
+			p.d = -(c44 + c24)*invLen;
 
 			// top
 			p = _frustumPlanes[3];
-			p.a = c41 - c21;
-			p.b = c42 - c22;
-			p.c = c43 - c23;
-			p.d = c24 - c44;
+			a = c41 - c21;
+			b = c42 - c22;
+			c = c43 - c23;
+			invLen = 1/Math.sqrt(a*a+b*b+c*c);
+			p.a = a*invLen;
+			p.b = b*invLen;
+			p.c = c*invLen;
+			p.d = (c24 - c44)*invLen;
 
 			// near
 			p = _frustumPlanes[4];
-			p.a = c31;
-			p.b = c32;
-			p.c = c33;
-			p.d = -c34;
+			a = c31;
+			b = c32;
+			c = c33;
+			invLen = 1/Math.sqrt(a*a+b*b+c*c);
+			p.a = a*invLen;
+			p.b = b*invLen;
+			p.c = c*invLen;
+			p.d = -c34*invLen;
 
 			// far
 			p = _frustumPlanes[5];
-			p.a = c41 - c31;
-			p.b = c42 - c32;
-			p.c = c43 - c33;
-			p.d = c34 - c44;
+			a = c41 - c31;
+			b = c42 - c32;
+			c = c43 - c33;
+			invLen = 1/Math.sqrt(a*a+b*b+c*c);
+			p.a = a*invLen;
+			p.b = b*invLen;
+			p.c = c*invLen;
+			p.d = (c34 - c44)*invLen;
 
 			_frustumPlanesDirty = false;
 		}
