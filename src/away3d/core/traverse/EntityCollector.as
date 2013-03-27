@@ -177,7 +177,7 @@ package away3d.core.traverse
 		 */
 		override public function enterNode(node : NodeBase) : Boolean
 		{
-			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_camera);
+			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_camera.frustumPlanes);
 			node._collectionMark = _collectionMark;
 			return enter;
 		}

@@ -50,9 +50,8 @@ package away3d.core.partition
 		}
 
 		// todo: fix to infinite height so that height needn't be passed in constructor
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
 		{
-			var planes : Vector.<Plane3D> = camera.frustumPlanes;
 			for (var i : uint = 0; i < 6; ++i) {
 				var plane : Plane3D = planes[i];
 				var flippedExtentX : Number = plane.a < 0? - _halfExtentXZ : _halfExtentXZ;

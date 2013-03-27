@@ -1,5 +1,7 @@
 package away3d.core.partition
 {
+	import away3d.core.math.Plane3D;
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	
@@ -68,11 +70,11 @@ package away3d.core.partition
 		}
 
 
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
 		{
 			if (!_entity.isVisible) return false;
 
-			return _entity.worldBounds.isInFrustum(camera.frustumPlanes);
+			return _entity.worldBounds.isInFrustum(planes);
 		}
 
 		/**

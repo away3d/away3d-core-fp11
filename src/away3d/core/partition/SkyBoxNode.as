@@ -1,6 +1,7 @@
 package away3d.core.partition
 {
 	import away3d.cameras.Camera3D;
+	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.primitives.SkyBox;
 
@@ -33,7 +34,7 @@ package away3d.core.partition
 		}
 
 
-		override public function isInFrustum(camera : Camera3D) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
 		{
 			return true;
 		}
