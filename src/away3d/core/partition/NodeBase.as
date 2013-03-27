@@ -121,7 +121,7 @@ package away3d.core.partition
 		 *
 		 * @return Whether or not the node is at least partly inside the view frustum.
 		 */
-		public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
+		public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
 			return true;
 		}

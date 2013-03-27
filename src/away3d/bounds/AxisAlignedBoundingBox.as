@@ -42,9 +42,9 @@ package away3d.bounds
 		/**
 		 * @inheritDoc
 		 */
-		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
-			for (var i : uint = 0; i < 6; ++i) {
+			for (var i : uint = 0; i < numPlanes; ++i) {
 				var plane : Plane3D = planes[i];
 				var a : Number = plane.a;
 				var b : Number = plane.b;

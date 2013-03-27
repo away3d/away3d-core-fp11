@@ -5,6 +5,7 @@ package away3d.lights.shadowmaps
 	import away3d.cameras.lenses.FreeMatrixLens;
 	import away3d.containers.Scene3D;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Plane3D;
 	import away3d.core.render.DepthRenderer;
 	import away3d.lights.DirectionalLight;
 
@@ -24,9 +25,12 @@ package away3d.lights.shadowmaps
 		protected var _depthLens : FreeMatrixLens;
 		private var _snap : Number = 64;
 
+		private var _cullPlanes : Vector.<Plane3D>;
+
 		public function DirectionalShadowMapper()
 		{
 			super();
+			_cullPlanes = new Vector.<Plane3D>();
 			_depthCamera = new Camera3D();
 			_depthCamera.lens = _depthLens = new FreeMatrixLens();
 			_localFrustum = new Vector.<Number>(8 * 3);
@@ -64,17 +68,42 @@ package away3d.lights.shadowmaps
 
 		override protected function drawDepthMap(target : TextureBase, scene : Scene3D, renderer : DepthRenderer) : void
 		{
-			_casterCollector.clear();
 			_casterCollector.camera = _depthCamera;
+			_casterCollector.cullPlanes = _cullPlanes;
+			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);
 			renderer.render(_casterCollector, target);
 			_casterCollector.cleanUp();
+		}
+
+		private function updateCullPlanes(viewCamera : Camera3D) : void
+		{
+			var lightFrustumPlanes : Vector.<Plane3D> = _depthCamera.frustumPlanes;
+			var viewFrustumPlanes : Vector.<Plane3D> = viewCamera.frustumPlanes;
+			_cullPlanes.length = 4;
+
+			_cullPlanes[0] = lightFrustumPlanes[0];
+			_cullPlanes[1] = lightFrustumPlanes[1];
+			_cullPlanes[2] = lightFrustumPlanes[2];
+			_cullPlanes[3] = lightFrustumPlanes[3];
+
+			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
+			var dirX : Number = dir.x;
+			var dirY : Number = dir.y;
+			var dirZ : Number = dir.z;
+			var j : int = 4;
+			for (var i : int = 0; i < 6; ++i) {
+				var plane : Plane3D = viewFrustumPlanes[i];
+				if (plane.a * dirX + plane.b * dirY + plane.c * dirZ < 0)
+					_cullPlanes[j++] = plane;
+			}
 		}
 
 		override protected function updateDepthProjection(viewCamera : Camera3D) : void
 		{
 			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners, _matrix);
 			_depthLens.matrix = _matrix;
+			updateCullPlanes(viewCamera);
 		}
 
 		protected function updateProjectionFromFrustumCorners(viewCamera : Camera3D, corners : Vector.<Number>, matrix : Matrix3D) : void

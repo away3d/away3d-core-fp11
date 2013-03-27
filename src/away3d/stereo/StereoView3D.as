@@ -102,13 +102,13 @@ package away3d.stereo
 		private function renderWithCamera(cam : Camera3D, texture : Texture, doMouse : Boolean) : void
 		{
 			_entityCollector.clear();
-			
-			updateViewSizeData();
-			
+
 			_camera = cam;
 			_camera.lens.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
-			
+
+			updateViewSizeData();
+
 			// Always use RTT for stereo rendering
 			_renderer.textureRatioX = _rttBufferManager.textureRatioX;
 			_renderer.textureRatioY = _rttBufferManager.textureRatioY;

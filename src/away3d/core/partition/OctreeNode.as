@@ -81,9 +81,9 @@ package away3d.core.partition
 			return cube;
 		}
 
-		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
-			for (var i : uint = 0; i < 6; ++i) {
+			for (var i : uint = 0; i < numPlanes; ++i) {
 				var plane : Plane3D = planes[i];
 				var flippedExtentX : Number = plane.a < 0? - _halfExtent : _halfExtent;
 				var flippedExtentY : Number = plane.b < 0? - _halfExtent : _halfExtent;

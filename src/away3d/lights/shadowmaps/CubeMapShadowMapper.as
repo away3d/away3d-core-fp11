@@ -79,8 +79,8 @@ package away3d.lights.shadowmaps
 		{
 			for (var i : uint = 0; i < 6; ++i) {
 				if (_needsRender[i]) {
-					_casterCollector.clear();
 					_casterCollector.camera = _depthCameras[i];
+					_casterCollector.clear();
 					scene.traversePartitions(_casterCollector);
 					renderer.render(_casterCollector, target, null, i);
 					_casterCollector.cleanUp();

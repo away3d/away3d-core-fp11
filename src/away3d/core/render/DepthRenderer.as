@@ -105,7 +105,7 @@ package away3d.core.render
 				var entity : Entity = renderable.sourceEntity;
 
 				// if completely in front, it will fall in a different cascade
-				if (entity.worldBounds.isInFrustum(cullPlanes)) {
+				if (entity.worldBounds.isInFrustum(cullPlanes, 6)) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);

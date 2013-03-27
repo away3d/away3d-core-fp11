@@ -43,10 +43,13 @@ package away3d.lights.shadowmaps
 		private var _nearPlaneDistances : Vector.<Number>;
 		private var _snap : Number = 64;
 
+		private var _cullPlanes : Vector.<Plane3D>;
+
 		public function CascadeShadowMapper(numCascades : uint = 3)
 		{
 			super();
 			if (numCascades < 1 || numCascades > 4) throw new Error("numCascades must be an integer between 1 and 4");
+			_cullPlanes = new Vector.<Plane3D>();
 			_numCascades = numCascades;
 			_changeDispatcher = new EventDispatcher(this);
 			init();
@@ -151,13 +154,37 @@ package away3d.lights.shadowmaps
 		{
 			if (_scissorRectsInvalid) updateScissorRects();
 
-			_casterCollector.clear();
+			_casterCollector.cullPlanes = _cullPlanes
 			_casterCollector.camera = _overallCamera;
+			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);
 
 			renderer.renderCascades(_casterCollector, target, _numCascades, _scissorRects, _depthCameras);
 
 			_casterCollector.cleanUp();
+		}
+
+		private function updateCullPlanes(viewCamera : Camera3D) : void
+		{
+			var lightFrustumPlanes : Vector.<Plane3D> = _overallCamera.frustumPlanes;
+			var viewFrustumPlanes : Vector.<Plane3D> = viewCamera.frustumPlanes;
+			_cullPlanes.length = 4;
+
+			_cullPlanes[0] = lightFrustumPlanes[0];
+			_cullPlanes[1] = lightFrustumPlanes[1];
+			_cullPlanes[2] = lightFrustumPlanes[2];
+			_cullPlanes[3] = lightFrustumPlanes[3];
+
+			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
+			var dirX : Number = dir.x;
+			var dirY : Number = dir.y;
+			var dirZ : Number = dir.z;
+			var j : int = 4;
+			for (var i : int = 0; i < 6; ++i) {
+				var plane : Plane3D = viewFrustumPlanes[i];
+				if (plane.a * dirX + plane.b * dirY + plane.c * dirZ < 0)
+					_cullPlanes[j++] = plane;
+			}
 		}
 
 		private function updateScissorRects() : void
@@ -178,6 +205,7 @@ package away3d.lights.shadowmaps
 
 			updateLocalFrustum(viewCamera);
 			updateOverallMatrix();
+			updateCullPlanes(viewCamera);
 
 			for (var i : int = 0; i < _numCascades; ++i) {
 				matrix = _depthLenses[i].matrix;

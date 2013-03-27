@@ -34,7 +34,7 @@ package away3d.core.partition
 		}
 
 
-		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
 			return true;
 		}

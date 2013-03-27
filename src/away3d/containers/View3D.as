@@ -615,9 +615,9 @@
 
 			updateTime();
 
-			_entityCollector.clear();
-
 			updateViewSizeData();
+
+			_entityCollector.clear();
 
 			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
