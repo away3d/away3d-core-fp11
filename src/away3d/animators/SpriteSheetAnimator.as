@@ -28,16 +28,13 @@ package away3d.animators
 		private var _spriteSheetAnimationSet:SpriteSheetAnimationSet;
 		private var _frame : SpriteSheetAnimationFrame = new SpriteSheetAnimationFrame();
 		private var _vectorFrame : Vector.<Number>;
-
 		private var _fps : uint = 10;
 		private var _ms : uint = 100;
 		private var _lastTime : uint;
 		private var _reverse : Boolean;
 		private var _backAndForth : Boolean;
 		private var _specsDirty : Boolean;
-
 		private var _mapDirty : Boolean;
-		
 		
 		/**
 		 * Creates a new <code>SpriteSheetAnimator</code> object.
@@ -94,13 +91,17 @@ package away3d.animators
 			var subMesh:SubMesh = renderable as SubMesh;
 			if (!subMesh) return;
 
-			_vectorFrame[0] = _frame.offsetU;
-			_vectorFrame[1] = _frame.offsetV;
-			_vectorFrame[2] = _frame.scaleU;
-			_vectorFrame[3] = _frame.scaleV;
-			
-			if( material is SpriteSheetMaterial && _mapDirty){
-				SpriteSheetMaterial(material).swap(_frame.mapID);
+			//because textures are already uploaded, we can't offset the uv's yet
+			var swapped:Boolean;
+
+			if( material is SpriteSheetMaterial && _mapDirty)
+				swapped = SpriteSheetMaterial(material).swap(_frame.mapID);
+
+			if(!swapped){
+				_vectorFrame[0] = _frame.offsetU;
+				_vectorFrame[1] = _frame.offsetV;
+				_vectorFrame[2] = _frame.scaleU;
+				_vectorFrame[3] = _frame.scaleV;
 			}
 
  			//vc[vertexConstantOffset]
@@ -141,15 +142,17 @@ package away3d.animators
 			
 			_absoluteTime += dt;
 			var now:int = getTimer();
+
 			if((now-_lastTime) > _ms) {
 				_mapDirty = true;
 				_activeSpriteSheetState.update(_absoluteTime);
+				_frame = SpriteSheetAnimationState(_activeSpriteSheetState).currentFrameData; 
 				_lastTime = now;
+
 			} else {
 				_mapDirty = false;
 			}
-			
-			_frame = SpriteSheetAnimationState(_activeSpriteSheetState).currentFrameData; 
+
 		}
 		
 		/**
