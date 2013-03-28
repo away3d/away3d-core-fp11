@@ -4,12 +4,101 @@ package away3d.tools.helpers
 	import away3d.animators.nodes.SpriteSheetClipNode;
 	import away3d.animators.data.SpriteSheetAnimationFrame;
 
+	import flash.display.BitmapData;
+	import flash.display.MovieClip;
+	import flash.geom.Matrix;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import away3d.tools.utils.TextureUtils;
+
 	/**
 	 * SpriteSheetHelper, a class to ease sprite sheet animation data generation
 	 */
 	public class SpriteSheetHelper
 	{
 		function SpriteSheetHelper(){}
+
+		/**
+		 * Generates and returns one or more bitmapData "sprite sheets" from a given movieClip
+		 *
+		 * @param sourceMC 				MovieClip: A movieclip with timeline animation
+		 * @param cols 					uint: Howmany cells along the u axis.
+		 * @param rows 					uint: Howmany cells along the v axis.
+		 * @param width 				uint: The result bitmapData(s) width.
+		 * @param height 				uint: The result bitmapData(s) height.
+		 * @param transparent				Boolean: if the bitmapData(s) must be transparent.
+		 * 
+		 * @return Vector.<BitmapData> 		The generated bitmapDatas for the SpriteSheetMaterial.
+		 */
+		public function generateFromMovieClip(sourceMC:MovieClip, cols:uint, rows:uint, width:uint, height:uint, transparent:Boolean = false) : Vector.<BitmapData>
+		{
+			var spriteSheets:Vector.<BitmapData> = new Vector.<BitmapData>();
+			var framesCount:uint = sourceMC.totalFrames;
+			var i:uint = framesCount;
+			var w:uint = width;
+			var h:uint = height;
+
+			if(!TextureUtils.isPowerOfTwo(w)) w = TextureUtils.getBestPowerOf2(w);
+			if(!TextureUtils.isPowerOfTwo(h)) h = TextureUtils.getBestPowerOf2(h);
+
+			var spriteSheet:BitmapData;
+			var destCellW:Number  = Math.floor(h/cols);
+			var destCellH:Number  = Math.floor(w/rows);
+			var cellRect:Rectangle = new Rectangle(0, 0, destCellW, destCellH);
+
+			var mcFrameW:uint = sourceMC.width;
+			var mcFrameH:uint = sourceMC.height;
+ 			
+			var tmpCache:BitmapData = new BitmapData(mcFrameW, mcFrameH, transparent, transparent? 0x00FFFFFF : 0xFFFFFF);
+
+			var sclw:Number = destCellW/mcFrameW;
+			var sclh:Number = destCellH/mcFrameH;
+			var t:Matrix = new Matrix();
+			t.scale(sclw, sclh);
+		 
+			var u:uint, v:uint;
+			var cellsPerMap:uint = cols*rows;
+			var maps:uint = framesCount/cellsPerMap;
+		 	if(maps < framesCount/cellsPerMap) maps++;
+
+			var pastePoint:Point = new Point();
+			var frameNum:uint = 0;
+
+			while(maps--){
+
+				u = v = 0;
+				spriteSheet = new BitmapData(w, h, transparent, transparent? 0x00FFFFFF : 0xFFFFFF);
+
+				for (i = 0; i < cellsPerMap; i++) {
+					frameNum++;
+					if(frameNum<=framesCount){
+						pastePoint.x = Math.floor(destCellW * u);
+						pastePoint.y = Math.floor(destCellH * v);
+						sourceMC.gotoAndStop(frameNum);
+						tmpCache.draw(sourceMC, t, null, "normal", tmpCache.rect, true);
+						spriteSheet.copyPixels(tmpCache, tmpCache.rect, pastePoint);
+
+						if(transparent) tmpCache.fillRect(tmpCache.rect, 0x00FFFFFF);
+						
+						u++;
+						if(u == cols){
+							u = 0;
+							v++;
+						}
+
+					} else {
+						break;
+					}
+					
+				}
+
+				spriteSheets.push(spriteSheet);
+			}
+
+			tmpCache.dispose();
+		 
+			return spriteSheets;
+		}
 
 		/**
 		 * Returns a SpriteSheetAnimationSet to pass to animator from animation id , cols and rows.
@@ -32,9 +121,10 @@ package away3d.tools.helpers
 			 
 			var u:uint, v:uint;
 			var framesCount:uint = cols*rows;
- 
-			if(to == 0 || to < from || to > framesCount ) to = framesCount;
-			if(mapCount<1) mapCount = 1;
+ 			
+ 			if(mapCount<1) mapCount = 1;
+			if(to == 0 || to < from || to > framesCount*mapCount ) to = cols*rows*mapCount;
+			
 			if(from > to)
 				throw new Error("Param 'from' must be lower than the 'to' param.")
 
@@ -44,13 +134,14 @@ package away3d.tools.helpers
 			var frame:SpriteSheetAnimationFrame;
 
 			var i:uint, j:uint;
+			var animFrames:uint = 0;
 
 			for(i = 0;i<mapCount; ++i){
 				u = v = 0;
 
 				for(j = 0;j<framesCount; ++j){
 
-					if(j >= from){
+					if(animFrames >= from && animFrames < to) {
 
 						frame = new SpriteSheetAnimationFrame();
 						frame.offsetU = scaleU*u;
@@ -62,8 +153,10 @@ package away3d.tools.helpers
 						node.addFrame(frame, 16);
 					}
 					
-					if(j == to) break;
+					if(animFrames == to) return spriteSheetAnimationSet;
 
+					animFrames++;
+					
 					u++;
 					if(u == cols){
 						u = 0;
@@ -75,5 +168,4 @@ package away3d.tools.helpers
 			return spriteSheetAnimationSet;
 		}
 	}
-
 }
