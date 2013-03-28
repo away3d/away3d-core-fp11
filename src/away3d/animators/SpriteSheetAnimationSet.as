@@ -16,6 +16,8 @@ package away3d.animators
 		private var _frame:SpriteSheetAnimationFrame; 
 		private var _agalCode:String;
 
+		function SpriteSheetAnimationSet(){}
+
 		/**
 		* @inheritDoc
 		*/
