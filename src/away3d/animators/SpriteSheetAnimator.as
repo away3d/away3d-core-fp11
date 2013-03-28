@@ -35,6 +35,9 @@ package away3d.animators
 		private var _reverse : Boolean;
 		private var _backAndForth : Boolean;
 		private var _specsDirty : Boolean;
+
+		private var _mapDirty : Boolean;
+		
 		
 		/**
 		 * Creates a new <code>SpriteSheetAnimator</code> object.
@@ -96,7 +99,7 @@ package away3d.animators
 			_vectorFrame[2] = _frame.scaleU;
 			_vectorFrame[3] = _frame.scaleV;
 			
-			if( material is SpriteSheetMaterial ){
+			if( material is SpriteSheetMaterial && _mapDirty){
 				SpriteSheetMaterial(material).swap(_frame.mapID);
 			}
 
@@ -138,9 +141,12 @@ package away3d.animators
 			
 			_absoluteTime += dt;
 			var now:int = getTimer();
-			if((now-_lastTime) > _ms){
+			if((now-_lastTime) > _ms) {
+				_mapDirty = true;
 				_activeSpriteSheetState.update(_absoluteTime);
 				_lastTime = now;
+			} else {
+				_mapDirty = false;
 			}
 			
 			_frame = SpriteSheetAnimationState(_activeSpriteSheetState).currentFrameData; 
