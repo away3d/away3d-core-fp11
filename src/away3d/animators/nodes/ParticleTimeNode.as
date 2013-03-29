@@ -89,11 +89,6 @@ package away3d.animators.nodes
 				}
 			}
 			code += "mul " + animationRegisterCache.vertexLife + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".w\n";
-			if (animationRegisterCache.needFragmentAnimation && animationRegisterCache.hasColorNode)
-			{
-				code += "mov " + animationRegisterCache.fragmentTime + "," + animationRegisterCache.vertexTime +"\n";
-				code += "mov " + animationRegisterCache.fragmentLife + "," + animationRegisterCache.vertexLife +"\n";
-			}
 			return code;
 		}
 		
