@@ -1,13 +1,13 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.data.*;
+	import away3d.animators.data.SpriteSheetAnimationFrame;
 	
 	/**
 	 * Provides an interface for animation node classes that hold animation data for use in the SpriteSheetAnimator class.
 	 * 
 	 * @see away3d.animators.SpriteSheetAnimator
 	 */
-	public interface ISpriteSheetAnimationNode extends IAnimationNode
+	public interface ISpriteSheetAnimationNode
 	{
 		/**
 		 * Returns the current SpriteSheetAnimationFrame of animation in the clip based on the internal playhead position.
