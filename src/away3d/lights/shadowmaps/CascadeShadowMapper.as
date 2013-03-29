@@ -94,7 +94,7 @@ package away3d.lights.shadowmaps
 			var s : Number = 1;
 			for (var i : int = _numCascades-1; i >= 0; --i) {
 				_splitRatios[i] = s;
-				s *= .3333;
+				s *= .4;
 			}
 
 			_texOffsetsX = new <Number>[-1, 1, -1, 1];
@@ -258,6 +258,11 @@ package away3d.lights.shadowmaps
 				if (zN > maxZ) maxZ = zN;
 				i += 3;
 			}
+
+			minX = int(minX / _snap) * _snap;
+			maxX = Math.ceil(maxX / _snap) * _snap;
+			minY = int(minY / _snap) * _snap;
+			maxY = Math.ceil(maxY / _snap) * _snap;
 
 			_overallLens.minX = minX;
 			_overallLens.minY = minY;

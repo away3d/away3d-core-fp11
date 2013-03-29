@@ -29,8 +29,7 @@ package away3d.core.render
 		/**
 		 * Creates a new DepthRenderer object.
 		 * @param renderBlended Indicates whether semi-transparent objects should be rendered.
-		 * @param antiAlias The amount of anti-aliasing to be used.
-		 * @param renderMode The render mode to be used.
+		 * @param distanceBased Indicates whether the written depth value is distance-based or projected depth-based
 		 */
 		public function DepthRenderer(renderBlended : Boolean = false, distanceBased : Boolean = false)
 		{
@@ -105,7 +104,8 @@ package away3d.core.render
 				var entity : Entity = renderable.sourceEntity;
 
 				// if completely in front, it will fall in a different cascade
-				if (entity.worldBounds.isInFrustum(cullPlanes, 6)) {
+				// do not use near and far planes
+				if (entity.worldBounds.isInFrustum(cullPlanes, 4)) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
