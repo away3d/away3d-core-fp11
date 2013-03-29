@@ -175,7 +175,10 @@ package away3d.core.render
 				return;
 			
 			if (!value) {
-				if (_stage3DProxy) _stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
+				if (_stage3DProxy) {
+					_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
+					_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContextUpdate);
+				}
 				_stage3DProxy = null;
 				_context = null;
 				return;
@@ -183,12 +186,12 @@ package away3d.core.render
 			//else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
 
 			_stage3DProxy = value;
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContextUpdate);
 			if (_backgroundImageRenderer) _backgroundImageRenderer.stage3DProxy = value;
 
 			if (value.context3D)
 				_context = value.context3D;
-			else
-				value.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 		}
 
 		/**
