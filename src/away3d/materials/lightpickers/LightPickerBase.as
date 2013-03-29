@@ -30,6 +30,10 @@ package away3d.materials.lightpickers
 
 		public var name : String;
 
+		public function LightPickerBase() {
+			
+		}
+
 		/**
 		 * The maximum amount of directional lights that will be provided
 		 */

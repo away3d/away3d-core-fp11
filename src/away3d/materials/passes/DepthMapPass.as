@@ -97,7 +97,7 @@
 			if (_smooth) filter = _mipmap ? "linear,miplinear" : "linear";
 			else filter = _mipmap ? "nearest,mipnearest" : "nearest";
 
-			var code : String =
+			var codeF : String =
 					"div ft2, v0, v0.w		\n" +
 					"mul ft0, fc0, ft2.z	\n" +
 					"frc ft0, ft0			\n" +
@@ -115,14 +115,14 @@
 					default:
 						format = "";
 				}
-				code += "tex ft3, v1, fs0 <2d,"+filter+","+format+wrap+">\n" +
+				codeF += "tex ft3, v1, fs0 <2d,"+filter+","+format+wrap+">\n" +
 						"sub ft3.w, ft3.w, fc2.x\n" +
 						"kil ft3.w\n";
 			}
 
-			code += "sub oc, ft0, ft1		\n";
+			codeF += "sub oc, ft0, ft1		\n";
 
-			return code;
+			return codeF;
 		}
 
 		/**

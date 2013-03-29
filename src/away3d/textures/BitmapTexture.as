@@ -1,10 +1,10 @@
-﻿package away3d.textures
-{
+﻿package away3d.textures {
 	import away3d.arcane;
 	import away3d.materials.utils.MipmapGenerator;
 	import away3d.tools.utils.TextureUtils;
 
 	import flash.display.BitmapData;
+	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 
 	use namespace arcane;
@@ -16,12 +16,14 @@
 
 		private var _bitmapData : BitmapData;
 		private var _mipMapHolder : BitmapData;
+		private var _generateMipmaps: Boolean;
 
-		public function BitmapTexture(bitmapData : BitmapData)
+		public function BitmapTexture(bitmapData : BitmapData, generateMipmaps:Boolean = true)
 		{
 			super();
 
 			this.bitmapData = bitmapData;
+			_generateMipmaps = generateMipmaps;
 		}
 
 		public function get bitmapData() : BitmapData
@@ -41,12 +43,13 @@
 
 			_bitmapData = value;
 
-			setMipMap();
+			if (_generateMipmaps) setMipMap();
 		}
 
 		override protected function uploadContent(texture : TextureBase) : void
 		{
-			MipmapGenerator.generateMipMaps(_bitmapData, texture, _mipMapHolder, true);
+			if (_generateMipmaps) MipmapGenerator.generateMipMaps(_bitmapData, texture, _mipMapHolder, true);
+			else Texture(texture).uploadFromBitmapData (_bitmapData, 0);
 		}
 
 		private function setMipMap() : void

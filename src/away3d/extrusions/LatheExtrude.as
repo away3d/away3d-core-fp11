@@ -1,5 +1,4 @@
-package away3d.extrusions
-{
+package away3d.extrusions {
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SubGeometry;
@@ -7,11 +6,9 @@ package away3d.extrusions
 	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.TextureMaterial;
 	import away3d.materials.utils.MultipleMaterials;
-	import away3d.textures.BitmapTexture;
 	import away3d.tools.helpers.MeshHelper;
-	
+
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
 
@@ -1473,7 +1470,6 @@ package away3d.extrusions
 		}
 	}
 }
-
 import away3d.core.base.SubGeometry;
 import away3d.materials.MaterialBase;
 
@@ -1487,6 +1483,7 @@ class SubGeometryList {
 	public var indices:Vector.<uint>;
 	public var subGeometry:SubGeometry;
 	public var material:MaterialBase;
+	public function SubGeometryList() {}
 }
  
 class RenderSide {
@@ -1496,6 +1493,7 @@ class RenderSide {
 	public var left:Boolean;
 	public var front:Boolean;
 	public var back:Boolean;
+	public function RenderSide() {}
 }
 
 class Line {
@@ -1503,6 +1501,7 @@ class Line {
 	public var ay:Number;
 	public var bx:Number;
 	public var by:Number;
+	public function Line() {}
 }
 
 class FourPoints {
@@ -1510,5 +1509,6 @@ class FourPoints {
 	public var pt2:Point;
 	public var pt3:Point;
 	public var pt4:Point;
+	public function FourPoints() {}
 }
 

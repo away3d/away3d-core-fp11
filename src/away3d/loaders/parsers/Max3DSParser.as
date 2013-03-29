@@ -1,8 +1,6 @@
-package away3d.loaders.parsers
-{
+package away3d.loaders.parsers {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.entities.Mesh;
@@ -15,10 +13,9 @@ package away3d.loaders.parsers
 	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.TextureMaterial;
 	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.GeomUtil;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
@@ -791,15 +788,16 @@ package away3d.loaders.parsers
 		}
 	}
 }
-
-import flash.geom.Vector3D;
 import away3d.materials.MaterialBase;
 import away3d.textures.Texture2DBase;
+
+import flash.geom.Vector3D;
 
 internal class TextureVO
 {
 	public var url : String;
 	public var texture : Texture2DBase;
+	public function TextureVO() {} 
 }
 
 internal class MaterialVO
@@ -812,6 +810,7 @@ internal class MaterialVO
 	public var colorMap : TextureVO;
 	public var specularMap : TextureVO;
 	public var material : MaterialBase;
+	public function MaterialVO() {}
 }
 
 internal class ObjectVO
@@ -828,6 +827,7 @@ internal class ObjectVO
 	public var materialFaces : Object;
 	public var materials : Vector.<String>;
 	public var smoothingGroups:Vector.<uint>;
+	public function ObjectVO() {}
 }
 
 internal class VertexVO {
@@ -838,6 +838,7 @@ internal class VertexVO {
 	public var v:Number;
 	public var normal:Vector3D;
 	public var tangent:Vector3D;
+	public function VertexVO() {}
 }
 
 internal class FaceVO {
@@ -845,4 +846,5 @@ internal class FaceVO {
 	public var b:uint;
 	public var c:uint;
 	public var smoothGroup:uint;
+	public function FaceVO() {}
 }

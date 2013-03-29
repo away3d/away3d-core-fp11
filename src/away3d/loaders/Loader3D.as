@@ -140,8 +140,8 @@ package away3d.loaders
 	 * ends up in the library. To circumvent this, Loader3D can be configured to not use the 
 	 * AssetLibrary in which case it will use the AssetLoader directly.
 	 * 
-	 * @see away3d.loading.AssetLoader
-	 * @see away3d.loading.AssetLibrary
+	 * @see away3d.loaders.AssetLoader
+	 * @see away3d.library.AssetLibrary
 	 */
 	public class Loader3D extends ObjectContainer3D
 	{

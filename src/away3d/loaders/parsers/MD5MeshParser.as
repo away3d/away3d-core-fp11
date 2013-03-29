@@ -1,7 +1,5 @@
-package away3d.loaders.parsers
-{
+package away3d.loaders.parsers {
 	import away3d.animators.SkeletonAnimationSet;
-	import away3d.animators.SkeletonAnimator;
 	import away3d.animators.data.Skeleton;
 	import away3d.animators.data.SkeletonJoint;
 	import away3d.arcane;
@@ -9,6 +7,7 @@ package away3d.loaders.parsers
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.math.Quaternion;
 	import away3d.entities.Mesh;
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
@@ -626,7 +625,6 @@ package away3d.loaders.parsers
 		}
 	}
 }
-
 import flash.geom.Vector3D;
 
 class VertexData
@@ -636,6 +634,7 @@ class VertexData
 	public var t : Number;
 	public var startWeight : int;
 	public var countWeight : int;
+	public function VertexData() {}
 }
 
 class JointData
@@ -644,6 +643,7 @@ class JointData
 	public var joint : int;
 	public var bias : Number;
 	public var pos : Vector3D;
+	public function JointData() {}
 }
 
 class MeshData
@@ -651,5 +651,5 @@ class MeshData
 	public var vertexData : Vector.<VertexData>;
 	public var weightData : Vector.<JointData>;
 	public var indices : Vector.<uint>;
+	public function MeshData() {}
 }
-

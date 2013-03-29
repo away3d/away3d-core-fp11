@@ -7,5 +7,9 @@ package away3d.core.data
 	{
 		public var entity:Entity;
 		public var next:EntityListItem;
+		
+		public function EntityListItem() {
+			
+		}
 	}
 }

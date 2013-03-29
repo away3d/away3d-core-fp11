@@ -747,7 +747,9 @@
 		 */
 		public function dispose() : void
 		{
-			_stage3DProxy.dispose();
+			if (!shareContext) {
+				_stage3DProxy.dispose();
+			}
 			_renderer.dispose();
 			
 			if (_depthRender)

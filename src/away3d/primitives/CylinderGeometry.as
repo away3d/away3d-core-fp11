@@ -7,7 +7,7 @@ package away3d.primitives
 	use namespace arcane;
 
 	/**
-	 * A UV Cylinder primitive mesh.
+	 * A Cylinder primitive mesh.
 	 */
 	public class CylinderGeometry extends PrimitiveBase
 	{
@@ -63,6 +63,11 @@ package away3d.primitives
 			var x : Number, y : Number, z : Number, radius : Number, revolutionAngle : Number;
 			var dr : Number, latNormElev : Number, latNormBase : Number;
 			var numTriangles : uint = 0;
+			
+			var comp1 :Number, comp2 :Number;
+			var startIndex:uint;
+			//numvert:uint = 0;
+			var t1:Number, t2:Number;
 
 			_stride = target.vertexStride;
 			_vertexOffset = target.vertexOffset;
@@ -105,23 +110,43 @@ package away3d.primitives
 			if (_topClosed && _topRadius > 0) {
 
 				z = -0.5 * _height;
-
+				
 				for (i = 0; i <= _segmentsW; ++i) {
 					// central vertex
-					if (_yUp)
-						addVertex(0, -z, 0, 0, 1, 0, 1, 0, 0);
-					else
-						addVertex(0, 0, z, 0, 0, -1, 1, 0, 0);
-
+					if(_yUp){
+						t1 = 1;
+						t2 = 0;
+						comp1 = -z;
+						comp2 = 0;
+						
+					} else {
+						t1 = 0;
+						t2 = -1;
+						comp1 = 0;
+						comp2 = z;
+					}
+					
+					addVertex(0, comp1, comp2,   0, t1, t2,   1, 0, 0);
+					 
 					// revolution vertex
 					revolutionAngle = i * revolutionAngleDelta;
 					x = _topRadius * Math.cos(revolutionAngle);
 					y = _topRadius * Math.sin(revolutionAngle);
-					if (_yUp)
-						addVertex(x, -z, y, 0, 1, 0, 1, 0, 0);
-					else
-						addVertex(x, y, z, 0, 0, -1, 1, 0, 0);
-
+					
+					if(_yUp){
+						comp1 = -z;
+						comp2 = y;
+					} else {
+						comp1 = y;
+						comp2 = z;
+					}
+					
+					if (i == _segmentsW){
+						addVertex(_rawData[startIndex+_stride], _rawData[startIndex+_stride+1], _rawData[startIndex+_stride+2], 0, t1, t2,   1, 0, 0);
+					} else {
+						addVertex(x, comp1, comp2,   0, t1, t2,   1, 0, 0);
+					}
+					
 					if (i > 0) // add triangle
 						addTriangleClockWise(_nextVertexIndex - 1, _nextVertexIndex - 3, _nextVertexIndex - 2);
 				}
@@ -131,28 +156,49 @@ package away3d.primitives
 			if (_bottomClosed && _bottomRadius > 0) {
 
 				z = 0.5 * _height;
-
-				for (i = 0; i <= _segmentsW; ++i) {
-					// central vertex
-					if (_yUp)
-						addVertex(0, -z, 0, 0, -1, 0, 1, 0, 0);
-					else
-						addVertex(0, 0, z, 0, 0, 1, 1, 0, 0);
-
+				
+				startIndex = _vertexOffset + _nextVertexIndex * _stride;
+				
+				for (i = 0; i <= _segmentsW; ++i)
+				{
+					if(_yUp){
+						t1 = -1;
+						t2 = 0;
+						comp1 = -z;
+						comp2 = 0;
+					} else {
+						t1 = 0;
+						t2 = 1;
+						comp1 = 0;
+						comp2 = z;
+					}
+					 
+					addVertex(0, comp1, comp2,   0, t1, t2,   1, 0, 0);
+					 
 					// revolution vertex
 					revolutionAngle = i * revolutionAngleDelta;
 					x = _bottomRadius * Math.cos(revolutionAngle);
 					y = _bottomRadius * Math.sin(revolutionAngle);
-					if (_yUp)
-						addVertex(x, -z, y, 0, -1, 0, 1, 0, 0);
-					else
-						addVertex(x, y, z, 0, 0, 1, 1, 0, 0);
-
-					if (i > 0) // add triangle
+					
+					if(_yUp){
+						comp1 = -z;
+						comp2 = y;
+					} else {
+						comp1 = y;
+						comp2 = z;
+					}
+					
+					if (i == _segmentsW){
+						addVertex(x, _rawData[startIndex+1], _rawData[startIndex+2], 0, t1, t2,   1, 0, 0);
+					} else {
+						addVertex(x, comp1, comp2,   0, t1, t2,   1, 0, 0);
+					}
+					
+					if(i > 0) // add triangle
 						addTriangleClockWise(_nextVertexIndex - 2, _nextVertexIndex - 3, _nextVertexIndex - 1);
 				}
 			}
-
+			 
 			// The normals on the lateral surface all have the same incline, i.e.
 			// the "elevation" component (Y or Z depending on yUp) is constant.
 			// Same principle goes for the "base" of these vectors, which will be
@@ -170,7 +216,9 @@ package away3d.primitives
 				for (j = 0; j <= _segmentsH; ++j) {
 					radius = _topRadius - ((j / _segmentsH) * (_topRadius - _bottomRadius));
 					z = -(_height / 2) + (j / _segmentsH * _height);
-
+					
+					startIndex = _vertexOffset + _nextVertexIndex * _stride;
+					
 					for (i = 0; i <= _segmentsW; ++i) {
 						// revolution vertex
 						revolutionAngle = i * revolutionAngleDelta;
@@ -178,15 +226,28 @@ package away3d.primitives
 						y = radius * Math.sin(revolutionAngle);
 						na0 = latNormBase * Math.cos(revolutionAngle);
 						na1 = latNormBase * Math.sin(revolutionAngle);
-
-						if (_yUp)
-							addVertex(x, -z, y,
-									na0, latNormElev, na1,
-									na1, 0, -na0);
-						else
-							addVertex(x, y, z,
-									na0, na1, latNormElev,
-									na1, -na0, 0);
+						
+						if(_yUp){
+							t1 = 0;
+							t2 = -na0;
+							comp1 = -z;
+							comp2 = y;
+						} else {
+							t1 = -na0;
+							t2 = 0;
+							comp1 = y;
+							comp2 = z;
+						}
+					
+						if (i == _segmentsW) {
+							addVertex(	_rawData[startIndex], _rawData[startIndex+1], _rawData[startIndex+2],
+									  		na0, latNormElev, na1,
+									  		na1, t1, t2);
+						} else {
+							addVertex(	x, comp1, comp2,
+									  		na0, na1, latNormElev,
+									  		na1, t1, t2);
+						}
 
 						// close triangle
 						if (i > 0 && j > 0) {

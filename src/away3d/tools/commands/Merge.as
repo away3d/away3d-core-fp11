@@ -11,7 +11,7 @@ package away3d.tools.commands
 	 */
 	public class Merge{
 		
-		private const LIMIT:uint = 196605;
+		//private const LIMIT:uint = 196605;
 		private var _objectSpace:Boolean;
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;
@@ -186,7 +186,7 @@ package away3d.tools.commands
 			if (mesh.geometry) {
 				var subIdx : uint;
 				var subGeometries : Vector.<ISubGeometry> = mesh.geometry.subGeometries;
-				 
+				var calc : uint;
 				for (subIdx = 0; subIdx<subGeometries.length; subIdx++){					 
 					var i : uint;
 					var len : uint;
@@ -196,7 +196,6 @@ package away3d.tools.commands
 					var vo : GeometryVO;
 					var vertices : Vector.<Number>;
 					var normals : Vector.<Number>;
-					
 					var vStride : uint, nStride : uint, uStride : uint;
 					var vOffs : uint, nOffs : uint, uOffs : uint;
 					var vd : Vector.<Number>, nd : Vector.<Number>, ud : Vector.<Number>;
@@ -228,18 +227,21 @@ package away3d.tools.commands
 					len = subGeom.numVertices;
 					for (i=0; i<len; i++) {
 						// Position
-						vertices[vIdx++] = vd[vOffs + i*vStride + 0];
-						vertices[vIdx++] = vd[vOffs + i*vStride + 1];
-						vertices[vIdx++] = vd[vOffs + i*vStride + 2];
+						calc = vOffs + i*vStride;
+						vertices[vIdx++] = vd[calc];
+						vertices[vIdx++] = vd[calc + 1];
+						vertices[vIdx++] = vd[calc + 2];
 						
 						// Normal
-						normals[nIdx++] = nd[nOffs + i*nStride + 0];
-						normals[nIdx++] = nd[nOffs + i*nStride + 1];
-						normals[nIdx++] = nd[nOffs + i*nStride + 2];
+						calc = nOffs + i*nStride;
+						normals[nIdx++] = nd[calc];
+						normals[nIdx++] = nd[calc + 1];
+						normals[nIdx++] = nd[calc + 2];
 						
 						// UV
-						vo.uvs[uIdx++] = ud[uOffs + i*uStride + 0];
-						vo.uvs[uIdx++] = ud[uOffs + i*uStride + 1];
+						calc = uOffs + i*uStride;
+						vo.uvs[uIdx++] = ud[calc];
+						vo.uvs[uIdx++] = ud[calc + 1];
 					}
 					
 					// Copy over triangle indices
@@ -247,9 +249,10 @@ package away3d.tools.commands
 					iIdx = vo.indices.length;
 					len = subGeom.numTriangles;
 					for (i=0; i<len; i++) {
-						vo.indices[iIdx++] = subGeom.indexData[i*3+0] + indexOffset;
-						vo.indices[iIdx++] = subGeom.indexData[i*3+1] + indexOffset;
-						vo.indices[iIdx++] = subGeom.indexData[i*3+2] + indexOffset;
+						calc = i*3;
+						vo.indices[iIdx++] = subGeom.indexData[calc] + indexOffset;
+						vo.indices[iIdx++] = subGeom.indexData[calc+1] + indexOffset;
+						vo.indices[iIdx++] = subGeom.indexData[calc+2] + indexOffset;
 					}
 					
 					if (!_objectSpace) {
@@ -335,4 +338,5 @@ class GeometryVO {
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
 	public var material:MaterialBase;
+	public function GeometryVO() {} 
 }

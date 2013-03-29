@@ -34,6 +34,11 @@ package away3d.animators.data
 		 * @see away3d.animators.ParticleAnimationSet
 		 */
 		public var delay:Number;
+	
+	
+		public function ParticleProperties() {
+		
+		}
 	}
 
 }

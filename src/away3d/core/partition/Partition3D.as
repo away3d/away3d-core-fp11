@@ -138,7 +138,7 @@ package away3d.core.partition
 				//call an internal update on the entity to fire any attached logic
 				node.entity.internalUpdate();
 				
-			} while (node = t);
+			} while ((node = t) != null);
 		}
 	}
 }

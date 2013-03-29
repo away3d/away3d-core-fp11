@@ -1,7 +1,6 @@
 package away3d.loaders.parsers
 {
 	import away3d.arcane;
-	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.data.UV;
@@ -17,7 +16,7 @@ package away3d.loaders.parsers
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.GeomUtil;
-	
+
 	import flash.net.URLRequest;
 
 	use namespace arcane;
@@ -767,7 +766,6 @@ package away3d.loaders.parsers
 		}
 	}
 }
-
 import away3d.materials.methods.BasicSpecularMethod;
 import away3d.textures.Texture2DBase;
 
@@ -775,6 +773,7 @@ class ObjectGroup
 {
 	public var name:String;
 	public var groups:Vector.<Group> = new Vector.<Group>();
+	public function ObjectGroup() {}
 }
 
 class Group
@@ -782,12 +781,14 @@ class Group
 	public var name:String;
 	public var materialID:String;
 	public var materialGroups:Vector.<MaterialGroup> = new Vector.<MaterialGroup>();
+	public function Group() {}
 }
 
 class MaterialGroup
 {
 	public var url:String;
 	public var faces:Vector.<FaceData> = new Vector.<FaceData>();
+	public function MaterialGroup() {}
 }
 
 class SpecularData
@@ -796,6 +797,7 @@ class SpecularData
 	public var basicSpecularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
 	public var alpha:Number = 1;
+	public function SpecularData() {}
 }
 
 class LoadedMaterial
@@ -808,6 +810,7 @@ class LoadedMaterial
 	public var specularMethod:BasicSpecularMethod;
 	public var ambientColor:uint = 0xFFFFFF;
 	public var alpha:Number = 1;
+	public function LoadedMaterial() {}
 }
 
 class FaceData
@@ -816,4 +819,5 @@ class FaceData
 	public var uvIndices:Vector.<uint> = new Vector.<uint>();
 	public var normalIndices:Vector.<uint> = new Vector.<uint>();
 	public var indexIds:Vector.<String> = new Vector.<String>();	// used for real index lookups
+	public function FaceData() {}
 }

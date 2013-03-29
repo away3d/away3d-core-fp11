@@ -589,23 +589,27 @@ class HierarchyData
 	public var parentIndex : int;
 	public var flags : int;
 	public var startIndex : int;
+	public function HierarchyData() {} 
 }
 
 class BoundsData
 {
 	public var min : Vector3D;
 	public var max : Vector3D;
+	public function BoundsData() {}
 }
 
 class BaseFrameData
 {
 	public var position : Vector3D;
 	public var orientation : Quaternion;
+	public function BaseFrameData() {}
 }
 
 class FrameData
 {
 	public var index : int;
 	public var components : Vector.<Number>;
+	public function FrameData() {}
 }
 
