@@ -788,7 +788,7 @@
 		 */
 		public function unproject(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
 		{
-			return _camera.unproject((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
+ 			return _camera.unproject((mX * 2 - _width)/_stage3DProxy.width, (mY * 2 - _height)/_stage3DProxy.height, mZ);
 		}
 
 		/**
