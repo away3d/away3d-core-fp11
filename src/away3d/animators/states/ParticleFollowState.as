@@ -163,7 +163,7 @@ package away3d.animators.states
 							vertexData[inc++] = interpolatedPos.x;
 							vertexData[inc++] = interpolatedPos.y;
 							vertexData[inc++] = interpolatedPos.z;
-						}trace(interpolatedPos);
+						}
 					}
 				}
 			}
