@@ -74,9 +74,11 @@ package away3d.core.render
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 
 			var head : RenderableListItem = entityCollector.opaqueRenderableHead;
+			var first : Boolean = true;
 			for (var i : int = numCascades - 1; i >=  0; --i) {
 				_stage3DProxy.scissorRect = scissorRects[i];
-				drawCascadeRenderables(head, cameras[i], cameras[i].frustumPlanes);
+				drawCascadeRenderables(head, cameras[i], first? null : cameras[i].frustumPlanes);
+				first = false;
 			}
 
 			if (_activeMaterial)
@@ -105,7 +107,7 @@ package away3d.core.render
 
 				// if completely in front, it will fall in a different cascade
 				// do not use near and far planes
-				if (entity.worldBounds.isInFrustum(cullPlanes, 4)) {
+				if (!cullPlanes || entity.worldBounds.isInFrustum(cullPlanes, 4)) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
