@@ -28,12 +28,17 @@ package away3d.animators.states
 		private var _targetEuler:Vector3D = new Vector3D;
 		private var _prePos:Vector3D;
 		private var _preEuler:Vector3D;
+		private var _smooth:Boolean;
+		
+		//temporary vector3D for calculation
+		private var temp:Vector3D = new Vector3D();
 		
 		public function ParticleFollowState(animator:ParticleAnimator, particleFollowNode:ParticleFollowNode)
 		{
 			super(animator, particleFollowNode, true);
 			
 			_particleFollowNode = particleFollowNode;
+			_smooth = particleFollowNode._smooth;
 		}
 		
 		public function get followTarget():Object3D
@@ -44,6 +49,16 @@ package away3d.animators.states
 		public function set followTarget(value:Object3D):void
 		{
 			_followTarget = value;
+		}
+		
+		public function get smooth():Boolean
+		{
+			return _smooth;
+		}
+		
+		public function set smooth(value:Boolean):void
+		{
+			_smooth = value;
 		}
 		
 		/**
@@ -115,9 +130,16 @@ package away3d.animators.states
 			var changed:Boolean = false;
 			var len:uint = data.length;
 			var interpolatedPos:Vector3D;
-			var temp:Vector3D = new Vector3D();
-			var posVelocity:Vector3D = _prePos.subtract(_targetPos);
-			posVelocity.scaleBy(1 / deltaTime);
+			var posVelocity:Vector3D;
+			if (_smooth)
+			{
+				posVelocity = _prePos.subtract(_targetPos);
+				posVelocity.scaleBy(1 / deltaTime);
+			}
+			else
+			{
+				interpolatedPos = _targetPos;
+			}
 			for (var i:uint = 0; i < len; i++)
 			{
 				var k:Number = (currentTime - data[i].startTime) / data[i].totalTime;
@@ -125,9 +147,14 @@ package away3d.animators.states
 				if (t - deltaTime <= 0)
 				{
 					var inc:int = data[i].startVertexIndex * 3;
-					temp.copyFrom(posVelocity);
-					temp.scaleBy(t);
-					interpolatedPos = _targetPos.add(temp);
+					
+					if (_smooth)
+					{
+						temp.copyFrom(posVelocity);
+						temp.scaleBy(t);
+						interpolatedPos = _targetPos.add(temp);
+					}
+					
 					if (vertexData[inc] != interpolatedPos.x || vertexData[inc + 1] != interpolatedPos.y || vertexData[inc + 2] != interpolatedPos.z)
 					{
 						changed = true;
@@ -136,7 +163,7 @@ package away3d.animators.states
 							vertexData[inc++] = interpolatedPos.x;
 							vertexData[inc++] = interpolatedPos.y;
 							vertexData[inc++] = interpolatedPos.z;
-						}
+						}trace(interpolatedPos);
 					}
 				}
 			}
@@ -154,9 +181,18 @@ package away3d.animators.states
 			var len:uint = data.length;
 			
 			var interpolatedRotation:Vector3D;
-			var temp:Vector3D = new Vector3D();
-			var rotationVelocity:Vector3D = _preEuler.subtract(_targetEuler);
-			rotationVelocity.scaleBy(1 / deltaTime);
+			var rotationVelocity:Vector3D;
+			
+			if (_smooth)
+			{
+				rotationVelocity = _preEuler.subtract(_targetEuler);
+				rotationVelocity.scaleBy(1 / deltaTime);
+			}
+			else
+			{
+				interpolatedRotation = _targetEuler;
+			}
+			
 			for (var i:uint = 0; i < len; i++)
 			{
 				var k:Number = (currentTime - data[i].startTime) / data[i].totalTime;
@@ -165,9 +201,12 @@ package away3d.animators.states
 				{
 					var inc:int = data[i].startVertexIndex * 3;
 					
-					temp.copyFrom(rotationVelocity);
-					temp.scaleBy(t);
-					interpolatedRotation = _targetEuler.add(temp);
+					if (_smooth)
+					{
+						temp.copyFrom(rotationVelocity);
+						temp.scaleBy(t);
+						interpolatedRotation = _targetEuler.add(temp);
+					}
 					
 					if (vertexData[inc] != interpolatedRotation.x || vertexData[inc + 1] != interpolatedRotation.y || vertexData[inc + 2] != interpolatedRotation.z)
 					{
@@ -197,11 +236,20 @@ package away3d.animators.states
 			var interpolatedPos:Vector3D;
 			var interpolatedRotation:Vector3D;
 			
-			var temp:Vector3D = new Vector3D();
-			var posVelocity:Vector3D = _prePos.subtract(_targetPos);
-			posVelocity.scaleBy(1 / deltaTime);
-			var rotationVelocity:Vector3D = _preEuler.subtract(_targetEuler);
-			rotationVelocity.scaleBy(1 / deltaTime);
+			var posVelocity:Vector3D;
+			var rotationVelocity:Vector3D;
+			if (_smooth)
+			{
+				posVelocity = _prePos.subtract(_targetPos);
+				posVelocity.scaleBy(1 / deltaTime);
+				rotationVelocity = _preEuler.subtract(_targetEuler);
+				rotationVelocity.scaleBy(1 / deltaTime);
+			}
+			else
+			{
+				interpolatedPos = _targetPos;
+				interpolatedRotation = _targetEuler;
+			}
 			
 			for (var i:uint = 0; i < len; i++)
 			{
@@ -210,14 +258,16 @@ package away3d.animators.states
 				if (t - deltaTime <= 0)
 				{
 					var inc:int = data[i].startVertexIndex * 6;
-					
-					temp.copyFrom(posVelocity);
-					temp.scaleBy(t);
-					interpolatedPos = _targetPos.add(temp);
-					
-					temp.copyFrom(rotationVelocity);
-					temp.scaleBy(t);
-					interpolatedRotation = _targetEuler.add(temp);
+					if (_smooth)
+					{
+						temp.copyFrom(posVelocity);
+						temp.scaleBy(t);
+						interpolatedPos = _targetPos.add(temp);
+						
+						temp.copyFrom(rotationVelocity);
+						temp.scaleBy(t);
+						interpolatedRotation = _targetEuler.add(temp);
+					}
 					
 					if (vertexData[inc] != interpolatedPos.x || vertexData[inc + 1] != interpolatedPos.y || vertexData[inc + 2] != interpolatedPos.z || vertexData[inc + 3] != interpolatedRotation.x || vertexData[inc + 4] != interpolatedRotation.y || vertexData[inc + 5] != interpolatedRotation.z)
 					{

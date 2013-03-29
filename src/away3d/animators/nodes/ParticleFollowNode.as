@@ -25,19 +25,24 @@ package away3d.animators.nodes
 		
 		/** @private */
 		arcane var _usesRotation:Boolean;
+		
+		/** @private */
+		arcane var _smooth:Boolean;
 						
 		/**
 		 * Creates a new <code>ParticleFollowNode</code>
 		 *
 		 * @param    [optional] usesPosition     Defines wehether the individual particle reacts to the position of the target.
 		 * @param    [optional] usesRotation     Defines wehether the individual particle reacts to the rotation of the target.
+		 * @param    [optional] smooth     Defines wehether the state calculate the interpolated value.
 		 */
-		public function ParticleFollowNode(usesPosition:Boolean = true, usesRotation:Boolean = true)
+		public function ParticleFollowNode(usesPosition:Boolean = true, usesRotation:Boolean = true, smooth:Boolean = false )
 		{
 			_stateClass = ParticleFollowState;
 			
 			_usesPosition = usesPosition;
 			_usesRotation = usesRotation;
+			_smooth = smooth;
 			
 			super("ParticleFollow", ParticlePropertiesMode.LOCAL_DYNAMIC, (_usesPosition && _usesRotation)? 6 : 3, ParticleAnimationSet.POST_PRIORITY);
 		}
