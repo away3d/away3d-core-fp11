@@ -165,7 +165,7 @@ package away3d.animators.data
 				code += "mov " +colorMulTarget + "," + vertexOneConst + "\n";
 				code += "mov " +colorAddTarget + "," + vertexZeroConst + "\n";
 			}
-			else if (hasColorMulNode || hasColorMulNode)
+			else if (hasColorMulNode || hasColorAddNode)
 			{
 				if (hasColorMulNode)
 				{
@@ -247,6 +247,15 @@ package away3d.animators.data
 			vertexConstantData[_index++] = y;
 			vertexConstantData[_index++] = z;
 			vertexConstantData[_index] = w;
+		}
+		
+		public function setVertexConstFromVector(index:int, data:Vector.<Number>):void
+		{
+			var _index:int = (index - _vertexConstantOffset) * 4;
+			for (var i:int = 0; i < data.length; i++)
+			{
+				vertexConstantData[_index++] = data[i];
+			}
 		}
 		
 		public function setVertexConstFromMatrix(index:int, matrix:Matrix3D):void
