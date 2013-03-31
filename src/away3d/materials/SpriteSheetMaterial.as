@@ -78,9 +78,9 @@ package away3d.materials
   
 		}
 
-		arcane function swap(mapID:uint = 0) : void
+		arcane function swap(mapID:uint = 0) : Boolean
 		{
-		
+
 			if(_currentMapID != mapID) {
 
 				_currentMapID = mapID;
@@ -91,7 +91,11 @@ package away3d.materials
 
 				if(_TBSpecular) _TBSpecular.bitmapData = _speculars[mapID];
 
+				return true;
+
 			}
+
+			return false;
 
 		}
 		 
