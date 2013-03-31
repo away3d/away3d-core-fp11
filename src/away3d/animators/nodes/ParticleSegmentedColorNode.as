@@ -172,7 +172,7 @@ package away3d.animators.nodes
 					switch(_numSegmentPoint)
 					{
 						case 1:
-							code += "sub " + accTime + "," + accTime + "," + lifeTimeRegister + ".x\n";
+							code += "sub " + accTime + "," + animationRegisterCache.vertexLife + "," + lifeTimeRegister + ".x\n";
 							break;
 						case 2:
 							code += "sub " + accTime + "," + accTime + "," + lifeTimeRegister + ".y\n";

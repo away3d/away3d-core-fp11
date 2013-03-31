@@ -166,6 +166,8 @@ package away3d.animators.states
 				else
 					_offsetData.push((_endColor.redOffset - _segmentPoints[i - 1].color.redOffset) / _timeLifeData[i] / 255 , (_endColor.greenOffset - _segmentPoints[i - 1].color.greenOffset) / _timeLifeData[i] / 255 , (_endColor.blueOffset - _segmentPoints[i - 1].color.blueOffset) / _timeLifeData[i] / 255 , (_endColor.alphaOffset - _segmentPoints[i - 1].color.alphaOffset) / _timeLifeData[i] / 255);
 			}
+			//cut off the data
+			_timeLifeData.length = 4;
 		}
 	}
 }
