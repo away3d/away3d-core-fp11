@@ -14,8 +14,6 @@ package away3d.materials.compilation {
 		protected var _dependencyCounter : MethodDependencyCounter;
 		protected var _methodSetup : ShaderMethodSetup;
 
-		protected var _vertexConstantsOffset : uint;
-
 		protected var _smooth : Boolean;
 		protected var _repeat : Boolean;
 		protected var _mipmap : Boolean;
@@ -64,6 +62,8 @@ package away3d.materials.compilation {
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
 
+		private var _forceSeperateMVP:Boolean;
+
 		use namespace arcane;
 
 		public function ShaderCompiler()
@@ -88,10 +88,19 @@ package away3d.materials.compilation {
 			return _UVSource;
 		}
 
+		public function get forceSeperateMVP() : Boolean
+		{
+			return _forceSeperateMVP;
+		}
+
+		public function set forceSeperateMVP(value : Boolean) : void
+		{
+			_forceSeperateMVP = value;
+		}
+
 		private function initRegisterCache() : void
 		{
 			_registerCache = new ShaderRegisterCache();
-			_vertexConstantsOffset = _registerCache.vertexConstantOffset = 5;
 			_registerCache.vertexAttributesOffset = 1;
 			_registerCache.reset();
 		}
@@ -164,20 +173,23 @@ package away3d.materials.compilation {
 
 			createCommons();
 			calculateDependencies();
+			if (_forceSeperateMVP) _dependencyCounter.addWorldSpaceDependencies(false);
 			updateMethodRegisters();
 
-			compileMethodsCode();
+			for (var i : uint = 0; i < 4; ++i)
+				_registerCache.getFreeVertexConstant();
+
+			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
 			compileProjectionCode();
+			compileMethodsCode();
 			compileFragmentOutput();
 			_framentPostLightCode = fragmentCode;
 		}
 
 		protected function compileMethodsCode() : void
 		{
-			if (_dependencyCounter.projectionDependencies > 0) compileProjCode();
 			if (_dependencyCounter.uvDependencies > 0) compileUVCode();
 			if (_dependencyCounter.secondaryUVDependencies > 0) compileSecondaryUVCode();
-			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
 			if (_dependencyCounter.normalDependencies > 0) compileNormalCode();
 			if (_dependencyCounter.viewDirDependencies > 0) compileViewDirCode();
 			compileLightingCode();
@@ -201,14 +213,6 @@ package away3d.materials.compilation {
 
 		}
 
-		private function compileProjCode() : void
-		{
-			_sharedRegisters.projectionFragment = _registerCache.getFreeVarying();
-			_sharedRegisters.projectedTarget = _registerCache.getFreeVertexVectorTemp();
-
-			_vertexCode += "mov " + _sharedRegisters.projectionFragment + ", " + _sharedRegisters.projectedTarget + "\n";
-		}
-
 		private function compileUVCode() : void
 		{
 			var uvAttributeReg : ShaderRegisterElement = _registerCache.getFreeVertexAttribute();
@@ -223,7 +227,7 @@ package away3d.materials.compilation {
 				// c, d, 0, ty
 				var uvTransform1 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
 				var uvTransform2 : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
-				_uvTransformIndex = (uvTransform1.index - vertexConstantsOffset)*4;
+				_uvTransformIndex = uvTransform1.index*4;
 
 				_vertexCode +=	"dp4 " + varying + ".x, " + uvAttributeReg + ", " + uvTransform1 + "\n" +
 						"dp4 " + varying + ".y, " + uvAttributeReg + ", " + uvTransform2 + "\n" +
@@ -247,15 +251,13 @@ package away3d.materials.compilation {
 
 		protected function compileGlobalPositionCode() : void
 		{
-			var positionMatrixReg : ShaderRegisterElement;
 			_sharedRegisters.globalPositionVertex = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(_sharedRegisters.globalPositionVertex, _dependencyCounter.globalPosDependencies);
-
-			positionMatrixReg = _registerCache.getFreeVertexConstant();
+			var positionMatrixReg : ShaderRegisterElement = _registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
 			_registerCache.getFreeVertexConstant();
-			_sceneMatrixIndex = (positionMatrixReg.index - _vertexConstantsOffset)*4;
+			_sceneMatrixIndex = positionMatrixReg.index*4;
 
 			_vertexCode += 	"m44 " + _sharedRegisters.globalPositionVertex + ", " + _sharedRegisters.localPosition + ", " + positionMatrixReg + "\n";
 
@@ -265,30 +267,28 @@ package away3d.materials.compilation {
 			}
 		}
 
+		private function compileProjectionCode() : void
+		{
+			var pos : String = _dependencyCounter.globalPosDependencies > 0? _sharedRegisters.globalPositionVertex.toString() : _animationTargetRegisters[0];
+			var code : String;
+
+			if (_dependencyCounter.projectionDependencies > 0) {
+				_sharedRegisters.projectionFragment = _registerCache.getFreeVarying();
+				code =	"m44 vt5, " + pos + ", vc0		\n" +
+						"mov " + _sharedRegisters.projectionFragment + ", vt5\n" +
+						"mov op, vt5\n";
+			}
+			else {
+				code = 	"m44 op, " + pos + ", vc0		\n";
+			}
+
+			_vertexCode += code;
+		}
+
 		private function compileFragmentOutput() : void
 		{
 			_fragmentCode += "mov " + _registerCache.fragmentOutputRegister + ", " + _sharedRegisters.shadedTarget + "\n";
 			_registerCache.removeFragmentTempUsage(_sharedRegisters.shadedTarget);
-		}
-
-		private function compileProjectionCode() : void
-		{
-			var pos : String = _animationTargetRegisters[0];
-			var projectedTarget : ShaderRegisterElement =  _sharedRegisters.projectedTarget;
-			var code : String;
-
-			// if we need projection somewhere
-			if (projectedTarget) {
-				code =	"m44 " + projectedTarget + ", " + pos + ", vc0		\n" +
-						"mov vt7, " + projectedTarget + "\n" +
-						"mul op, vt7, vc4\n";
-			}
-			else {
-				code = 	"m44 vt7, " + pos + ", vc0		\n" +
-						"mul op, vt7, vc4\n";	// 4x4 matrix transform from stream 0 to output clipspace
-			}
-
-			_vertexCode = code + _vertexCode;
 		}
 
 		protected function initRegisterIndices() : void
@@ -363,7 +363,6 @@ package away3d.materials.compilation {
 			methodVO.reset();
 			methodVO.vertexData = _vertexConstantData;
 			methodVO.fragmentData = _fragmentConstantData;
-			methodVO.vertexConstantsOffset = _vertexConstantsOffset;
 			methodVO.useSmoothTextures = _smooth;
 			methodVO.repeatTextures = _repeat;
 			methodVO.useMipmapping = _mipmap;
@@ -484,11 +483,6 @@ package away3d.materials.compilation {
 		protected function usesProbes() : Boolean
 		{
 			return _numLightProbes > 0 && ((_diffuseLightSources | _specularLightSources) & LightSources.PROBES) != 0;
-		}
-
-		public function get vertexConstantsOffset() : uint
-		{
-			return _vertexConstantsOffset;
 		}
 
 		public function get uvBufferIndex() : int

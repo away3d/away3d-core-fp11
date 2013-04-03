@@ -84,9 +84,6 @@ package away3d.primitives
 		}
 
 		public function activateSecondaryUVBuffer(index : int, stage3DProxy : Stage3DProxy) : void {}
-		public function activateCustomBuffer(index : int, stage3DProxy : Stage3DProxy) : void {}
-
-
 
 		/**
 		 * @inheritDoc
@@ -128,32 +125,6 @@ package away3d.primitives
 		/**
 		 * @inheritDoc
 		 */
-		override public function pushModelViewProjection(camera : Camera3D, updateZIndex : Boolean = true) : void
-		{
-			var size : Number = camera.lens.far / Math.sqrt(2) * .5;
-			if (++_mvpIndex == _stackLen) {
-				_mvpTransformStack[_mvpIndex] = new Matrix3D();
-				++_stackLen;
-			}
-
-			var mvp : Matrix3D = _mvpTransformStack[_mvpIndex];
-			mvp.identity();
-			mvp.appendScale(size, size, size);
-			mvp.appendTranslation(camera.x, camera.y, camera.z);
-			mvp.append(camera.viewProjection);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function get zIndex() : Number
-		{
-			return 0;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
 		override protected function invalidateBounds() : void
 		{
 			// dead end
@@ -180,40 +151,22 @@ package away3d.primitives
 		 */
 		private function buildGeometry(target : SubGeometry) : void
 		{
-			var vertices : Vector.<Number>;
-			var indices : Vector.<uint>;
-
-			vertices = new Vector.<Number>();
-			indices = new Vector.<uint>();
-
-			vertices.push(-1, 1, -1);	// top left near
-			vertices.push(1, 1, -1);		// top right near
-			vertices.push(1, 1, 1);		// top right far
-			vertices.push(-1, 1, 1);		// top left far
-			vertices.push(-1, -1, -1);	// bottom left near
-			vertices.push(1, -1, -1);	// bottom right near
-			vertices.push(1, -1, 1);		// bottom right far
-			vertices.push(-1, -1, 1);	// bottom left far
+			var vertices : Vector.<Number> = new <Number>[
+				-1, 1, -1, 1, 1, -1,
+				1, 1, 1, -1, 1, 1,
+				-1, -1, -1, 1, -1, -1,
+				1, -1, 1, -1, -1, 1
+			];
 			vertices.fixed = true;
 
-			// top
-			indices.push(0, 1, 2);
-			indices.push(2, 3, 0);
-			// bottom
-			indices.push(6, 5, 4);
-			indices.push(4, 7, 6);
-			// far
-			indices.push(2, 6, 7);
-			indices.push(7, 3, 2);
-			// near
-			indices.push(4, 5, 1);
-			indices.push(1, 0, 4);
-			// left
-			indices.push(4, 0, 3);
-			indices.push(3, 7, 4);
-			// right
-			indices.push(2, 1, 5);
-			indices.push(5, 6, 2);
+			var indices : Vector.<uint> = new <uint>[
+				0, 1, 2, 2, 3, 0,
+				6, 5, 4, 4, 7, 6,
+				2, 6, 7, 7, 3, 2,
+				4, 5, 1, 1, 0, 4,
+				4, 0, 3, 3, 7, 4,
+				2, 1, 5, 5, 6, 2
+			];
 
 			target.updateVertexData(vertices);
 			target.updateIndexData(indices);

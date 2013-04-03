@@ -1,7 +1,9 @@
 package away3d.core.render
 {
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.debug.Debug;
 
@@ -14,6 +16,7 @@ package away3d.core.render
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
+	import flash.geom.Matrix3D;
 
 	/**
 	 * The PositionRenderer renders normalized position coordinates.
@@ -43,6 +46,8 @@ package away3d.core.render
 		{
 			var item : RenderableListItem;
 			var renderable : IRenderable;
+			var matrix : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+			var viewProjection : Matrix3D = entityCollector.camera.viewProjection;
 
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
@@ -54,7 +59,9 @@ package away3d.core.render
 			while (item) {
 				renderable = item.renderable;
 				renderable.activateVertexBuffer(0, _stage3DProxy);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
+				matrix.copyFrom(renderable.sceneTransform);
+				matrix.append(viewProjection);
+				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
 				item = item.next;
 			}
@@ -65,7 +72,9 @@ package away3d.core.render
 			while (item) {
 				renderable = item.renderable;
 				renderable.activateVertexBuffer(0, _stage3DProxy);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
+				matrix.copyFrom(renderable.sceneTransform);
+				matrix.append(viewProjection);
+				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
 				item = item.next;
 			}

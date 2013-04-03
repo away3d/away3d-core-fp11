@@ -4,9 +4,7 @@ package away3d.core.render
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Plane3D;
-	import away3d.core.math.PlaneClassification;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;
 	import away3d.materials.MaterialBase;
@@ -14,8 +12,6 @@ package away3d.core.render
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
-	import flash.geom.Matrix;
-	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
 
 	use namespace arcane;
@@ -33,8 +29,7 @@ package away3d.core.render
 		/**
 		 * Creates a new DepthRenderer object.
 		 * @param renderBlended Indicates whether semi-transparent objects should be rendered.
-		 * @param antiAlias The amount of anti-aliasing to be used.
-		 * @param renderMode The render mode to be used.
+		 * @param distanceBased Indicates whether the written depth value is distance-based or projected depth-based
 		 */
 		public function DepthRenderer(renderBlended : Boolean = false, distanceBased : Boolean = false)
 		{
@@ -68,7 +63,7 @@ package away3d.core.render
 		{
 		}
 
-		arcane function renderCascades(entityCollector : EntityCollector, target : TextureBase, numCascades : uint, scissorRects : Vector.<Rectangle>, splitPlanes : Vector.<Plane3D>, cameras : Vector.<Camera3D>) : void
+		arcane function renderCascades(entityCollector : EntityCollector, target : TextureBase, numCascades : uint, scissorRects : Vector.<Rectangle>, cameras : Vector.<Camera3D>) : void
 		{
 			_renderTarget = target;
 			_renderTargetSurface = 0;
@@ -79,9 +74,11 @@ package away3d.core.render
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 
 			var head : RenderableListItem = entityCollector.opaqueRenderableHead;
-			for (var i : uint = 0; i < numCascades; ++i) {
+			var first : Boolean = true;
+			for (var i : int = numCascades - 1; i >=  0; --i) {
 				_stage3DProxy.scissorRect = scissorRects[i];
-				drawCascadeRenderables(head, cameras[i]);
+				drawCascadeRenderables(head, cameras[i], first? null : cameras[i].frustumPlanes);
+				first = false;
 			}
 
 			if (_activeMaterial)
@@ -95,27 +92,33 @@ package away3d.core.render
 			_stage3DProxy.scissorRect = null;
 		}
 
-		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D) : void
+		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D, cullPlanes : Vector.<Plane3D>) : void
 		{
 			var material : MaterialBase;
 
 			while (item) {
+				if (item.cascaded) {
+					item = item.next;
+					continue;
+				}
+
 				var renderable : IRenderable = item.renderable;
 				var entity : Entity = renderable.sourceEntity;
 
-				entity.pushModelViewProjection(camera, false);
-
-				if (entity.bounds.isInFrustum(entity.getModelViewProjectionUnsafe())) {
+				// if completely in front, it will fall in a different cascade
+				// do not use near and far planes
+				if (!cullPlanes || entity.worldBounds.isInFrustum(cullPlanes, 4)) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
 						_activeMaterial = material;
-						_activeMaterial.activateForDepth(_stage3DProxy, camera, false, 1, 1);
+						_activeMaterial.activateForDepth(_stage3DProxy, camera, false);
 					}
-					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera);
-				}
 
-				entity.popModelViewProjection();
+					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera, camera.viewProjection);
+				}
+				else
+					item.cascaded = true;
 
 				item = item.next;
 			}
@@ -165,10 +168,10 @@ package away3d.core.render
 					} while(item2 && item2.renderable.material == _activeMaterial);
 				}
 				else {
-					_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased, _textureRatioX, _textureRatioY);
+					_activeMaterial.activateForDepth(_stage3DProxy, camera, _distanceBased);
 					item2 = item;
 					do {
-						_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera);
+						_activeMaterial.renderDepth(item2.renderable, _stage3DProxy, camera, _rttViewProjectionMatrix);
 						item2 = item2.next;
 					} while(item2 && item2.renderable.material == _activeMaterial);
 					_activeMaterial.deactivateForDepth(_stage3DProxy);

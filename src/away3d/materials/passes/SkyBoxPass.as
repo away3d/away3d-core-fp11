@@ -3,11 +3,17 @@ package away3d.materials.passes
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
+	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.textures.CubeTextureBase;
 
+	import flash.display3D.Context3D;
+
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -17,6 +23,7 @@ package away3d.materials.passes
 	public class SkyBoxPass extends MaterialPassBase
 	{
 		private var _cubeTexture : CubeTextureBase;
+		private var _vertexData : Vector.<Number>;
 
 		/**
 		 * Creates a new SkyBoxPass object.
@@ -26,6 +33,7 @@ package away3d.materials.passes
 			super();
 			mipmap = false;
 			_numUsedTextures = 1;
+			_vertexData = new <Number>[0, 0, 0, 0];
 		}
 		/**
 		 * The cube texture to use as the skybox.
@@ -45,10 +53,22 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			return  "m44 vt7, va0, vc0		\n" +
-					// fit within texture range
-					"mul op, vt7, vc4\n" +
+			return  "add vt0, va0, vc4		\n" +
+					"m44 op, vt0, vc0		\n" +
 					"mov v0, va0\n";
+		}
+
+		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
+		{
+			var context : Context3D = stage3DProxy._context3D;
+			var pos : Vector3D = camera.scenePosition;
+			_vertexData[0] = pos.x;
+			_vertexData[1] = pos.y;
+			_vertexData[2] = pos.z;
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _vertexData, 1);
+			renderable.activateVertexBuffer(0, stage3DProxy);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		/**
@@ -79,9 +99,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			super.activate(stage3DProxy, camera);
 
 			stage3DProxy._context3D.setDepthTest(false, Context3DCompareMode.LESS);
 			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));

@@ -210,7 +210,7 @@ package away3d.bounds
 		 * @param mvpMatrix The model view projection matrix for the object to which this bounding box belongs.
 		 * @return True if the bounding box is at least partially inside the frustum
 		 */
-		public function isInFrustum( mvpMatrix:Matrix3D ):Boolean
+		public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int):Boolean
 		{
 			throw new AbstractMethodError();
 		}
@@ -291,6 +291,11 @@ package away3d.bounds
 		}
 
 		public function classifyToPlane(plane : Plane3D) : int
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function transformFrom(bounds : BoundingVolumeBase, matrix : Matrix3D) : void
 		{
 			throw new AbstractMethodError();
 		}

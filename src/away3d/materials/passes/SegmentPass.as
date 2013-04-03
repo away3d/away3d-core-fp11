@@ -92,8 +92,7 @@
 				// add scaled side vector to Q0 and transform to clip space
 					"add vt0.xyz, vt0.xyz, vt3.xyz	\n" + // Q0 + S
 
-					"m44 vt0, vt0, vc0				\n" + // transform Q0 to clip space
-					"mul op, vt0, vc4				\n" + // transform Q0 to viewport
+					"m44 op, vt0, vc0				\n" + // transform Q0 to clip space
 
 				// interpolate color
 					"mov v0, va3					\n";
@@ -111,7 +110,7 @@
 		 * @inheritDoc
 		 * todo: keep maps in dictionary per renderable
 		 */
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
 			renderable.activateVertexBuffer(0, stage3DProxy);
@@ -125,10 +124,10 @@
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			super.activate(stage3DProxy, camera);
 
 			_constants[0] = _thickness/Math.min(stage3DProxy.width, stage3DProxy.height);
 			// value to convert distance from camera to model length per pixel width

@@ -50,85 +50,16 @@ package away3d.bounds
 		 * todo: pass planes?
 		 * @inheritDoc
 		 */
-		override public function isInFrustum(mvpMatrix : Matrix3D) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
-			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			mvpMatrix.copyRawDataTo(raw);
-			var c11 : Number = raw[uint(0)], c12 : Number = raw[uint(4)], c13 : Number = raw[uint(8)], c14 : Number = raw[uint(12)];
-			var c21 : Number = raw[uint(1)], c22 : Number = raw[uint(5)], c23 : Number = raw[uint(9)], c24 : Number = raw[uint(13)];
-			var c31 : Number = raw[uint(2)], c32 : Number = raw[uint(6)], c33 : Number = raw[uint(10)], c34 : Number = raw[uint(14)];
-			var c41 : Number = raw[uint(3)], c42 : Number = raw[uint(7)], c43 : Number = raw[uint(11)], c44 : Number = raw[uint(15)];
-			var a : Number, b : Number, c : Number, d : Number;
-			var dd : Number, rr : Number = _radius;
-
-			// TODO: this can be (much) faster: http://www.racer.nl/reference/vfc_markmorley.htm
-
-			// left plane
-			a = c41 + c11;
-			b = c42 + c12;
-			c = c43 + c13;
-			d = c44 + c14;
-			dd = a * _centerX + b * _centerY + c * _centerZ;
-			if (a < 0) a = -a;
-			if (b < 0) b = -b;
-			if (c < 0) c = -c;
-			rr = (a + b + c) * _radius;
-			if (dd + rr < -d) return false;
-			// right plane
-			a = c41 - c11;
-			b = c42 - c12;
-			c = c43 - c13;
-			d = c44 - c14;
-			dd = a * _centerX + b * _centerY + c * _centerZ;
-			if (a < 0) a = -a;
-			if (b < 0) b = -b;
-			if (c < 0) c = -c;
-			rr = (a + b + c) * _radius;
-			if (dd + rr < -d) return false;
-			// bottom plane
-			a = c41 + c21;
-			b = c42 + c22;
-			c = c43 + c23;
-			d = c44 + c24;
-			dd = a * _centerX + b * _centerY + c * _centerZ;
-			if (a < 0) a = -a;
-			if (b < 0) b = -b;
-			if (c < 0) c = -c;
-			rr = (a + b + c) * _radius;
-			if (dd + rr < -d) return false;
-			// top plane
-			a = c41 - c21;
-			b = c42 - c22;
-			c = c43 - c23;
-			d = c44 - c24;
-			dd = a * _centerX + b * _centerY + c * _centerZ;
-			if (a < 0) a = -a;
-			if (b < 0) b = -b;
-			if (c < 0) c = -c;
-			rr = (a + b + c) * _radius;
-			if (dd + rr < -d) return false;
-			// near plane
-			a = c31;
-			b = c32;
-			c = c33;
-			d = c34;
-			dd = a * _centerX + b * _centerY + c * _centerZ;
-			if (a < 0) a = -a;
-			if (b < 0) b = -b;
-			if (c < 0) c = -c;
-			rr = (a + b + c) * _radius;
-			if (dd + rr < -d) return false;
-			// far plane
-			a = c41 - c31;
-			b = c42 - c32;
-			c = c43 - c33;
-			d = c44 - c34;
-			dd = a * _centerX + b * _centerY + c * _centerZ;
-			if (a < 0) a = -a;
-			if (b < 0) b = -b;
-			if (c < 0) c = -c;
-			rr = (a + b + c) * _radius;
-			if (dd + rr < -d) return false;
+			for (var i : uint = 0; i < numPlanes; ++i) {
+				var plane : Plane3D = planes[i];
+				var flippedExtentX : Number = plane.a < 0? -_radius : _radius;
+				var flippedExtentY : Number = plane.b < 0? -_radius : _radius;
+				var flippedExtentZ : Number = plane.c < 0? -_radius : _radius;
+				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * (_centerY + flippedExtentY) + plane.c * (_centerZ + flippedExtentZ) - plane.d;
+				if (projDist < 0) return false;
+			}
 
 			return true;
 		}
@@ -249,11 +180,45 @@ package away3d.bounds
 			if (a < 0) a = -a;
 			if (b < 0) b = -b;
 			if (c < 0) c = -c;
-			var rr : Number = (a  + b + c) * _radius;
+			var rr : Number = (a + b + c) * _radius;
 
 			return  dd > rr ? 	PlaneClassification.FRONT :
 					dd < -rr ? 	PlaneClassification.BACK :
 							PlaneClassification.INTERSECT;
+		}
+
+		override public function transformFrom(bounds : BoundingVolumeBase, matrix : Matrix3D) : void
+		{
+			var sphere : BoundingSphere = BoundingSphere(bounds);
+			var cx : Number = sphere._centerX;
+			var cy : Number = sphere._centerY;
+			var cz : Number = sphere._centerZ;
+			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			matrix.copyRawDataTo(raw);
+			var m11 : Number = raw[0], m12 : Number = raw[4], m13 : Number = raw[8], m14 : Number = raw[12];
+			var m21 : Number = raw[1], m22 : Number = raw[5], m23 : Number = raw[9], m24 : Number = raw[13];
+			var m31 : Number = raw[2], m32 : Number = raw[6], m33 : Number = raw[10], m34 : Number = raw[14];
+
+			_centerX = cx*m11 + cy*m12 + cz*m13 + m14;
+			_centerY = cx*m21 + cy*m22 + cz*m23 + m24;
+			_centerZ = cx*m31 + cy*m32 + cz*m33 + m34;
+
+			if (m11 < 0) m11 = -m11; if (m12 < 0) m12 = -m12; if (m13 < 0) m13 = -m13;
+			if (m21 < 0) m21 = -m21; if (m22 < 0) m22 = -m22; if (m23 < 0) m23 = -m23;
+			if (m31 < 0) m31 = -m31; if (m32 < 0) m32 = -m32; if (m33 < 0) m33 = -m33;
+			var r : Number = sphere._radius;
+			var rx : Number = m11 + m12 + m13;
+			var ry : Number = m21 + m22 + m23;
+			var rz : Number = m31 + m32 + m33;
+			_radius = r*Math.sqrt(rx*rx + ry*ry + rz*rz);
+
+			_min.x = _centerX - _radius;
+			_min.y = _centerY - _radius;
+			_min.z = _centerZ - _radius;
+
+			_max.x = _centerX + _radius;
+			_max.y = _centerY + _radius;
+			_max.z = _centerZ + _radius;
 		}
 	}
 }

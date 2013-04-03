@@ -58,7 +58,6 @@ package away3d.animators.data
 		//set if has an node which will apply color add operation
 		public var hasColorAddNode:Boolean;
 		
-		
 		public function AnimationRegisterCache()
 		{
 			

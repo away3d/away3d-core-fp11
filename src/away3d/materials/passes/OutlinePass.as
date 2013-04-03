@@ -8,6 +8,7 @@ package away3d.materials.passes
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.Mesh;
 	import away3d.materials.lightpickers.LightPickerBase;
 
@@ -16,6 +17,7 @@ package away3d.materials.passes
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Context3DVertexBufferFormat;
+	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
 
 	use namespace arcane;
@@ -135,8 +137,7 @@ package away3d.materials.passes
 					"add vt7, vt7, vt0\n" +
 					"mov vt7.w, vt0.w\n" +
 			// project and scale to viewport
-					"m44 vt7, vt7, vc0		\n" +
-					"mul op, vt7, vc4\n";
+					"m44 op, vt7, vc0		\n";
 
 			return code;
 		}
@@ -152,10 +153,10 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			var context : Context3D = stage3DProxy._context3D;
-			super.activate(stage3DProxy, camera, textureRatioX, textureRatioY);
+			super.activate(stage3DProxy, camera);
 
 			// do not write depth if not drawing inner lines (will cause the overdraw to hide inner lines)
 			if (!_showInnerLines)
@@ -174,15 +175,20 @@ package away3d.materials.passes
 		}
 
 
-		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
+		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
 			var mesh : Mesh, dedicatedRenderable : IRenderable;
+
+			var context : Context3D = stage3DProxy._context3D;
+			var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+			matrix3D.copyFrom(renderable.sceneTransform);
+			matrix3D.append(viewProjection);
+
 			if (_dedicatedMeshes) {
 				mesh = _outlineMeshes[renderable] ||= createDedicatedMesh(SubMesh(renderable).subGeometry);
 				dedicatedRenderable = mesh.subMeshes[0];
 
-				var context : Context3D = stage3DProxy._context3D;
-				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.modelViewProjection, true);
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
 				dedicatedRenderable.activateVertexBuffer(0, stage3DProxy);
 				dedicatedRenderable.activateVertexNormalBuffer(1, stage3DProxy);
 				context.drawTriangles(dedicatedRenderable.getIndexBuffer(stage3DProxy), 0, dedicatedRenderable.numTriangles);
@@ -190,7 +196,10 @@ package away3d.materials.passes
 			else {
 				renderable.activateVertexNormalBuffer(1, stage3DProxy);
 
-				super.render(renderable, stage3DProxy, camera);
+				var context : Context3D = stage3DProxy._context3D;
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
+				renderable.activateVertexBuffer(0, stage3DProxy);
+				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 			}
 		}
 

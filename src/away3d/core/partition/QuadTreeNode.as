@@ -1,9 +1,14 @@
 package away3d.core.partition
 {
+	import avmplus.argXml;
+
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.cameras.Camera3D;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
+
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -11,7 +16,6 @@ package away3d.core.partition
 	{
 		private var _centerX : Number;
 		private var _centerZ : Number;
-		private var _quadSize : Number;
 		private var _depth : Number;
 		private var _leaf : Boolean;
 		private var _height : Number;
@@ -21,7 +25,6 @@ package away3d.core.partition
 		private var _rightNear : QuadTreeNode;
 		private var _leftNear : QuadTreeNode;
 
-		private var _entityWorldBounds : Vector.<Number> = new Vector.<Number>();
 		private var _halfExtentXZ : Number;
 		private var _halfExtentY : Number;
 
@@ -33,7 +36,6 @@ package away3d.core.partition
 			_centerX = centerX;
 			_centerZ = centerZ;
 			_height = height;
-			_quadSize = size;
 			_depth = depth;
 			_halfExtentXZ = size*.5;
 			_halfExtentY = height*.5;
@@ -50,106 +52,52 @@ package away3d.core.partition
 		}
 
 		// todo: fix to infinite height so that height needn't be passed in constructor
-		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
-			var a : Number, b : Number, c : Number, d : Number;
-			var dd : Number, rr : Number;
-			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
-			var plane : Plane3D;
-
-			plane = frustum[0];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[1];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[2];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[3];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[4];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
-
-			plane = frustum[5];
-			a = plane.a; b = plane.b; c = plane.c; d = plane.d;
-			dd = a*_centerX + c*_centerZ;
-			if (a < 0) a = -a; if (b < 0) b = -b; if (c < 0) c = -c;
-			rr = _halfExtentXZ*(a + c) + _halfExtentY*b;
-			if (dd + rr < -d) return false;
+			for (var i : uint = 0; i < numPlanes; ++i) {
+				var plane : Plane3D = planes[i];
+				var flippedExtentX : Number = plane.a < 0? - _halfExtentXZ : _halfExtentXZ;
+				var flippedExtentY : Number = plane.b < 0? - _halfExtentY : _halfExtentY;
+				var flippedExtentZ : Number = plane.c < 0? - _halfExtentXZ : _halfExtentXZ;
+				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * flippedExtentY + plane.c * (_centerZ + flippedExtentZ) + plane.d;
+				if (projDist < 0) return false;
+			}
 
 			return true;
 		}
 
 		override public function findPartitionForEntity(entity : Entity) : NodeBase
 		{
-			entity.sceneTransform.transformVectors(entity.bounds.aabbPoints, _entityWorldBounds);
-
-			return findPartitionForBounds(_entityWorldBounds);
+			var bounds : BoundingVolumeBase = entity.worldBounds;
+			var min : Vector3D = bounds.min;
+			var max : Vector3D = bounds.max;
+			return findPartitionForBounds(min.x, min.z, max.x, max.z);
 		}
 
-		private function findPartitionForBounds(entityWorldBounds : Vector.<Number>) : QuadTreeNode
+		private function findPartitionForBounds(minX : Number, minZ : Number, maxX : Number, maxZ : Number) : QuadTreeNode
 		{
-			var i : int;
-			var x : Number, z : Number;
 			var left : Boolean, right : Boolean;
 			var far : Boolean, near : Boolean;
 
 			if (_leaf)
 				return this;
 
-			while (i < 24) {
-				x = entityWorldBounds[i];
-				z = entityWorldBounds[i + 2];
-				i += 3;
+			right = maxX > _centerX;
+			left = minX < _centerX;
+			far = maxZ  > _centerZ;
+			near = minZ < _centerZ;
 
-				if (x > _centerX) {
-					if (left) return this;
-					right = true;
-				}
-				else {
-					if (right) return this;
-					left = true;
-				}
-
-				if (z > _centerZ) {
-					if (near) return this;
-					far = true;
-				}
-				else {
-					if (far) return this;
-					near = true;
-				}
-			}
+			if (left && right) return this;
 
 			if (near) {
-				if (left) return _leftNear.findPartitionForBounds(entityWorldBounds);
-				else return _rightNear.findPartitionForBounds(entityWorldBounds);
+				if (far) return this;
+
+				if (left) return _leftNear.findPartitionForBounds(minX, minZ, maxX, maxZ);
+				else return _rightNear.findPartitionForBounds(minX, minZ, maxX, maxZ);
 			}
 			else {
-				if (left) return _leftFar.findPartitionForBounds(entityWorldBounds);
-				else return _rightFar.findPartitionForBounds(entityWorldBounds);
+				if (left) return _leftFar.findPartitionForBounds(minX, minZ, maxX, maxZ);
+				else return _rightFar.findPartitionForBounds(minX, minZ, maxX, maxZ);
 			}
 		}
 	}

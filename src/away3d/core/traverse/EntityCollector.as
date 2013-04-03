@@ -7,6 +7,7 @@ package away3d.core.traverse
 	import away3d.core.data.EntityListItemPool;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.data.RenderableListItemPool;
+	import away3d.core.math.Plane3D;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
 	import away3d.lights.DirectionalLight;
@@ -14,6 +15,8 @@ package away3d.core.traverse
 	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
+
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -44,6 +47,10 @@ package away3d.core.traverse
 		private var _numDirectionalLights : uint;
 		private var _numPointLights : uint;
 		private var _numLightProbes : uint;
+		protected var _cameraForward : Vector3D;
+		private var _customCullPlanes : Vector.<Plane3D>;
+		private var _cullPlanes : Vector.<Plane3D>;
+		private var _numCullPlanes : uint;
 
 		/**
 		 * Creates a new EntityCollector object.
@@ -75,6 +82,18 @@ package away3d.core.traverse
 		{
 			_camera = value;
 			_entryPoint = _camera.scenePosition;
+			_cameraForward = _camera.forwardVector;
+			_cullPlanes = _camera.frustumPlanes;
+		}
+
+		public function get cullPlanes() : Vector.<Plane3D>
+		{
+			return _customCullPlanes;
+		}
+
+		public function set cullPlanes(value : Vector.<Plane3D>) : void
+		{
+			_customCullPlanes = value;
 		}
 
 		/**
@@ -153,6 +172,8 @@ package away3d.core.traverse
 		 */
 		public function clear() : void
 		{
+			_cullPlanes = _customCullPlanes? _customCullPlanes : _camera.frustumPlanes;
+			_numCullPlanes = _cullPlanes.length;
 			_numTriangles = _numMouseEnableds = 0;
 			_blendedRenderableHead = null;
 			_opaqueRenderableHead = null;
@@ -173,7 +194,7 @@ package away3d.core.traverse
 		 */
 		override public function enterNode(node : NodeBase) : Boolean
 		{
-			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_camera);
+			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_cullPlanes, _numCullPlanes);
 			node._collectionMark = _collectionMark;
 			return enter;
 		}
@@ -194,7 +215,7 @@ package away3d.core.traverse
 		override public function applyRenderable(renderable : IRenderable) : void
 		{
 			var material : MaterialBase;
-
+			var entity : Entity = renderable.sourceEntity;
 			if( renderable.mouseEnabled ) ++_numMouseEnableds;
 			_numTriangles += renderable.numTriangles;
 
@@ -204,7 +225,12 @@ package away3d.core.traverse
 				item.renderable = renderable;
 				item.materialId = material._uniqueId;
 				item.renderOrderId = material._renderOrderId;
-				item.zIndex = renderable.zIndex;
+				item.cascaded = false;
+				var dx : Number = _entryPoint.x - entity.x;
+				var dy : Number = _entryPoint.y - entity.y;
+				var dz : Number = _entryPoint.z - entity.z;
+				// project onto camera's z-axis
+				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z;
 				if (material.requiresBlending) {
 					item.next = _blendedRenderableHead;
 					_blendedRenderableHead = item;
@@ -272,11 +298,6 @@ package away3d.core.traverse
 		 */
 		public function cleanUp() : void
 		{
-			var node : EntityListItem = _entityHead;
-			while (node) {
-				node.entity.popModelViewProjection();
-				node = node.next;
-			}
 		}
 	}
 }

@@ -232,7 +232,7 @@ package away3d.loaders.parsers
 				pose.orientation.y = -pose.orientation.y;
 				pose.orientation.z = -pose.orientation.z;
 				pose.translation.x = -pose.translation.x;
-				
+
 				jointPoses[i] = pose;
 			}
 			

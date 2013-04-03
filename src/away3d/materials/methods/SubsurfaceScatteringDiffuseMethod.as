@@ -138,7 +138,7 @@ package away3d.materials.methods
 			var temp : ShaderRegisterElement = regCache.getFreeVertexVectorTemp();
 
 			toTexRegister = regCache.getFreeVertexConstant();
-			vo.secondaryVertexConstantsIndex = (toTexRegister.index - vo.vertexConstantsOffset)*4;
+			vo.secondaryVertexConstantsIndex = toTexRegister.index*4;
 
 			_lightProjVarying = regCache.getFreeVarying();
 			lightProjection = regCache.getFreeVertexConstant();

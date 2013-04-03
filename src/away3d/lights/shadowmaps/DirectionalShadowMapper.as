@@ -5,6 +5,7 @@ package away3d.lights.shadowmaps
 	import away3d.cameras.lenses.FreeMatrixLens;
 	import away3d.containers.Scene3D;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Plane3D;
 	import away3d.core.render.DepthRenderer;
 	import away3d.lights.DirectionalLight;
 
@@ -22,15 +23,30 @@ package away3d.lights.shadowmaps
 		protected var _lightOffset : Number = 10000;
 		protected var _matrix : Matrix3D;
 		protected var _depthLens : FreeMatrixLens;
+		private var _snap : Number = 64;
+
+		private var _cullPlanes : Vector.<Plane3D>;
 
 		public function DirectionalShadowMapper()
 		{
 			super();
+			_cullPlanes = new Vector.<Plane3D>();
 			_depthCamera = new Camera3D();
 			_depthCamera.lens = _depthLens = new FreeMatrixLens();
 			_localFrustum = new Vector.<Number>(8 * 3);
 			_matrix = new Matrix3D();
 		}
+
+		public function get snap() : Number
+		{
+			return _snap;
+		}
+
+		public function set snap(value : Number) : void
+		{
+			_snap = value;
+		}
+
 
 		public function get lightOffset() : Number
 		{
@@ -52,17 +68,42 @@ package away3d.lights.shadowmaps
 
 		override protected function drawDepthMap(target : TextureBase, scene : Scene3D, renderer : DepthRenderer) : void
 		{
-			_casterCollector.clear();
 			_casterCollector.camera = _depthCamera;
+			_casterCollector.cullPlanes = _cullPlanes;
+			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);
 			renderer.render(_casterCollector, target);
 			_casterCollector.cleanUp();
+		}
+
+		private function updateCullPlanes(viewCamera : Camera3D) : void
+		{
+			var lightFrustumPlanes : Vector.<Plane3D> = _depthCamera.frustumPlanes;
+			var viewFrustumPlanes : Vector.<Plane3D> = viewCamera.frustumPlanes;
+			_cullPlanes.length = 4;
+
+			_cullPlanes[0] = lightFrustumPlanes[0];
+			_cullPlanes[1] = lightFrustumPlanes[1];
+			_cullPlanes[2] = lightFrustumPlanes[2];
+			_cullPlanes[3] = lightFrustumPlanes[3];
+
+			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
+			var dirX : Number = dir.x;
+			var dirY : Number = dir.y;
+			var dirZ : Number = dir.z;
+			var j : int = 4;
+			for (var i : int = 0; i < 6; ++i) {
+				var plane : Plane3D = viewFrustumPlanes[i];
+				if (plane.a * dirX + plane.b * dirY + plane.c * dirZ < 0)
+					_cullPlanes[j++] = plane;
+			}
 		}
 
 		override protected function updateDepthProjection(viewCamera : Camera3D) : void
 		{
 			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners, _matrix);
 			_depthLens.matrix = _matrix;
+			updateCullPlanes(viewCamera);
 		}
 
 		protected function updateProjectionFromFrustumCorners(viewCamera : Camera3D, corners : Vector.<Number>, matrix : Matrix3D) : void
@@ -72,16 +113,13 @@ package away3d.lights.shadowmaps
 			var x : Number, y : Number, z : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number = Number.POSITIVE_INFINITY;
 			var maxX : Number = Number.NEGATIVE_INFINITY, maxY : Number = Number.NEGATIVE_INFINITY, maxZ : Number = Number.NEGATIVE_INFINITY;
-			var scaleX : Number, scaleY : Number;
-			var offsX : Number, offsY : Number;
-			var halfSize : Number = _depthMapSize * .5;
 			var i : uint;
 
 			dir = DirectionalLight(_light).sceneDirection;
 			_depthCamera.transform = _light.sceneTransform;
-			_depthCamera.x = viewCamera.x -dir.x * _lightOffset;
-			_depthCamera.y = viewCamera.y -dir.y * _lightOffset;
-			_depthCamera.z = viewCamera.z -dir.z * _lightOffset;
+			_depthCamera.x = viewCamera.x-dir.x * _lightOffset;
+			_depthCamera.y = viewCamera.y-dir.y * _lightOffset;
+			_depthCamera.z = viewCamera.z-dir.z * _lightOffset;
 
 			_matrix.copyFrom(_depthCamera.inverseSceneTransform);
 			_matrix.prepend(viewCamera.sceneTransform);
@@ -101,22 +139,20 @@ package away3d.lights.shadowmaps
 			}
 			minZ = 10;
 
-			var quantizeFactor : Number = 128;
-			var invQuantizeFactor : Number = 1/quantizeFactor;
+			minX = int(minX / _snap) * _snap;
+			maxX = Math.ceil(maxX / _snap) * _snap;
+			minY = int(minY / _snap) * _snap;
+			maxY = Math.ceil(maxY / _snap) * _snap;
 
-			scaleX = 2*invQuantizeFactor/Math.ceil((maxX - minX)*invQuantizeFactor);
-			scaleY = 2*invQuantizeFactor/Math.ceil((maxY - minY)*invQuantizeFactor);
-
-			offsX = Math.ceil(-.5*(maxX + minX)*scaleX*halfSize) / halfSize;
-			offsY = Math.ceil(-.5*(maxY + minY)*scaleY*halfSize) / halfSize;
-
+			var w : Number = 1/(maxX - minX);
+			var h : Number = 1/(maxY - minY);
 			var d : Number = 1/(maxZ - minZ);
 
-			raw[0] = scaleX;
-			raw[5] = scaleY;
+			raw[0] = 2*w;
+			raw[5] = 2*h;
 			raw[10] = d;
-			raw[12] = offsX;
-			raw[13] = offsY;
+			raw[12] = -(maxX + minX)*w;
+			raw[13] = -(maxY + minY)*h;
 			raw[14] = -minZ * d;
 			raw[15] = 1;
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;

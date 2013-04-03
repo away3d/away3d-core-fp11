@@ -103,7 +103,7 @@ package away3d.materials.methods
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexVectorTemp();
-			vo.vertexConstantsIndex = (projReg.index-vo.vertexConstantsOffset)*4;
+			vo.vertexConstantsIndex = projReg.index*4;
 			_uvVarying = regCache.getFreeVarying();
 
 			return "m44 " + _uvVarying + ", vt0, " + projReg + "\n";

@@ -13,6 +13,8 @@ package away3d.core.data
 		public var renderOrderId : int;
 		public var zIndex : Number;
 		
+		public var cascaded : Boolean;
+		
 		public function RenderableListItem() {
 		
 		}

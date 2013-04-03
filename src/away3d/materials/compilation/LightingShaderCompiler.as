@@ -110,8 +110,9 @@ package away3d.materials.compilation
 				normalMatrix[1] = _registerCache.getFreeVertexConstant();
 				normalMatrix[2] = _registerCache.getFreeVertexConstant();
 				_registerCache.getFreeVertexConstant();
-				_sceneNormalMatrixIndex = (normalMatrix[0].index-_vertexConstantsOffset)*4;
+				_sceneNormalMatrixIndex = normalMatrix[0].index*4;
 				_sharedRegisters.normalVarying = _registerCache.getFreeVarying();
+
 				// no output, world space is enough
 				_vertexCode += 	"m33 " + _sharedRegisters.normalVarying + ".xyz, " + _sharedRegisters.animatedNormal + ".xyz, " + normalMatrix[0] + "\n" +
 								"mov " + _sharedRegisters.normalVarying + ".w, " + _sharedRegisters.animatedNormal + ".w	\n";
@@ -150,7 +151,7 @@ package away3d.materials.compilation
 			_sharedRegisters.viewDirFragment = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_sharedRegisters.viewDirFragment, _dependencyCounter.viewDirDependencies);
 
-			_cameraPositionIndex = (cameraPositionReg.index-_vertexConstantsOffset)*4;
+			_cameraPositionIndex = cameraPositionReg.index*4;
 
 			if (tangentSpace) {
 				var temp : ShaderRegisterElement = _registerCache.getFreeVertexVectorTemp();
@@ -247,14 +248,14 @@ package away3d.materials.compilation
 				len = _dirLightVertexConstants.length;
 				for (i = 0; i < len; ++i) {
 					_dirLightVertexConstants[i] = _registerCache.getFreeVertexConstant();
-					if (_lightVertexConstantIndex == -1) _lightVertexConstantIndex = (_dirLightVertexConstants[i].index - _vertexConstantsOffset)*4;
+					if (_lightVertexConstantIndex == -1) _lightVertexConstantIndex = _dirLightVertexConstants[i].index*4;
 				}
 			}
 
 			len = _pointLightVertexConstants.length;
 			for (i = 0; i < len; ++i) {
 				_pointLightVertexConstants[i] = _registerCache.getFreeVertexConstant();
-				if (_lightVertexConstantIndex == -1) _lightVertexConstantIndex = (_pointLightVertexConstants[i].index - _vertexConstantsOffset)*4;
+				if (_lightVertexConstantIndex == -1) _lightVertexConstantIndex = _pointLightVertexConstants[i].index*4;
 			}
 
 			len = _dirLightFragmentConstants.length;

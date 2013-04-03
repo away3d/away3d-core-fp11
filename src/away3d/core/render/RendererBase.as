@@ -15,6 +15,7 @@ package away3d.core.render
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
+	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
 
 	use namespace arcane;
@@ -54,6 +55,7 @@ package away3d.core.render
         private var _snapshotRequired:Boolean;
 
 		private var _clearOnRender : Boolean = true;
+		protected var _rttViewProjectionMatrix : Matrix3D = new Matrix3D();
 
 		/**
 		 * Creates a new RendererBase object.
@@ -234,6 +236,9 @@ package away3d.core.render
 		arcane function render(entityCollector : EntityCollector, target : TextureBase = null, scissorRect : Rectangle = null, surfaceSelector : int = 0) : void
 		{
 			if (!_stage3DProxy || !_context) return;
+
+			_rttViewProjectionMatrix.copyFrom(entityCollector.camera.viewProjection);
+			_rttViewProjectionMatrix.appendScale(_textureRatioX, _textureRatioY, 1);
 
 			executeRender(entityCollector, target, scissorRect, surfaceSelector);
 

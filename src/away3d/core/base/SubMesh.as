@@ -158,14 +158,6 @@ package away3d.core.base
 		}
 
 		/**
-		 * The distance of the SubMesh object to the view, used to sort per object.
-		 */
-		public function get zIndex() : Number
-		{
-			return _parentMesh.zIndex;
-		}
-
-		/**
 		 * The scene transform object that transforms from model to world space.
 		 */
 		public function get sceneTransform() : Matrix3D
@@ -227,24 +219,6 @@ package away3d.core.base
 		public function getIndexBuffer(stage3DProxy : Stage3DProxy) : IndexBuffer3D
 		{
 			return _subGeometry.getIndexBuffer(stage3DProxy);
-		}
-
-		/**
-		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
-		 */
-		public function get modelViewProjection() : Matrix3D
-		{
-			return _parentMesh.modelViewProjection;
-		}
-
-		/**
-		 * The model-view-projection (MVP) matrix used to transform from model to homogeneous projection space.
-		 *
-		 * @private
-		 */
-		public function getModelViewProjectionUnsafe() : Matrix3D
-		{
-			return _parentMesh.getModelViewProjectionUnsafe();
 		}
 
 		/**

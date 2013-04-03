@@ -1,6 +1,7 @@
 package away3d.core.partition
 {
 	import away3d.cameras.Camera3D;
+	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.primitives.SkyBox;
 
@@ -32,13 +33,10 @@ package away3d.core.partition
 			}
 		}
 
-		/**
-		 * @inheritDoc
-		 */
-		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
+
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
-			_skyBox.pushModelViewProjection(camera);
-			return _skyBox.bounds.isInFrustum(_skyBox.getModelViewProjectionUnsafe());
+			return true;
 		}
 	}
 }

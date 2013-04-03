@@ -38,11 +38,16 @@ package away3d.core.traverse
 		{
 			// the test for material is temporary, you SHOULD be hammered with errors if you try to render anything without a material
 			var material : MaterialBase = renderable.material;
+			var entity : Entity = renderable.sourceEntity;
 			if (renderable.castsShadows && material) {
 				var item : RenderableListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
-				item.zIndex = renderable.zIndex;
+				item.cascaded = false;
+				var dx : Number = _entryPoint.x - entity.x;
+				var dy : Number = _entryPoint.y - entity.y;
+				var dz : Number = _entryPoint.z - entity.z;
+				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z;
 				item.renderOrderId = material._depthPassId;
 				_opaqueRenderableHead = item;
 			}

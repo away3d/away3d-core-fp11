@@ -105,7 +105,7 @@ package away3d.materials.methods
 			regCache.getFreeVertexConstant();
 			regCache.getFreeVertexConstant();
 			_depthMapCoordReg = regCache.getFreeVarying();
-			vo.vertexConstantsIndex = (dataReg.index-vo.vertexConstantsOffset)*4;
+			vo.vertexConstantsIndex = dataReg.index*4;
 
 			// todo: can epsilon be applied here instead of fragment shader?
 

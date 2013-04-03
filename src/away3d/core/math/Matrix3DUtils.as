@@ -12,6 +12,8 @@ package away3d.core.math
 		 */
 		public static const RAW_DATA_CONTAINER : Vector.<Number> = new Vector.<Number>(16);
 
+		public static const CALCULATION_MATRIX : Matrix3D = new Matrix3D();
+
         /**
         * Fills the 3d matrix object with values representing the transformation made by the given quaternion.
         * 

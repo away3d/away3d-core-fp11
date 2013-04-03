@@ -53,24 +53,15 @@ package away3d.core.partition
 			_parent = value;
 		}
 
-		override protected function isInFrustumImpl(camera : Camera3D) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
-			var a : Number, b : Number, c : Number;
-			var dd : Number, rr : Number;
-			var plane : Plane3D;
-			var frustum : Vector.<Plane3D> = camera.frustumPlanes;
-
-			for (var i : uint = 0; i < 6; ++i) {
-				plane = frustum[i];
-				a = plane.a;
-				b = plane.b;
-				c = plane.c;
-				dd = a*_centerX + b*_centerY + c*_centerZ;
-				if (a < 0) a = -a;
-				if (b < 0) b = -b;
-				if (c < 0) c = -c;
-				rr = _halfExtentX*a + _halfExtentY*b + _halfExtentZ*c;
-				if (dd + rr < -plane.d) return false;
+			for (var i : uint = 0; i < numPlanes; ++i) {
+				var plane : Plane3D = planes[i];
+				var flippedExtentX : Number = plane.a < 0? - _halfExtentX : _halfExtentX;
+				var flippedExtentY : Number = plane.b < 0? - _halfExtentY : _halfExtentY;
+				var flippedExtentZ : Number = plane.c < 0? - _halfExtentZ : _halfExtentZ;
+				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * (_centerY + flippedExtentY) + plane.c * (_centerZ + flippedExtentZ) + plane.d;
+				if (projDist < 0) return false;
 			}
 
 			return true;
