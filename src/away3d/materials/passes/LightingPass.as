@@ -77,9 +77,9 @@ package away3d.materials.passes
 			_lightProbesOffset = value;
 		}
 
-		override protected function createCompiler() : ShaderCompiler
+		override protected function createCompiler(profile : String) : ShaderCompiler
 		{
-			return new LightingShaderCompiler();
+			return new LightingShaderCompiler(profile);
 		}
 
 		public function get includeCasters() : Boolean

@@ -9,9 +9,9 @@ package away3d.materials.compilation
 
 		use namespace arcane;
 
-		public function SuperShaderCompiler()
+		public function SuperShaderCompiler(profile : String)
 		{
-			super();
+			super(profile);
 		}
 
 		override protected function initLightData() : void

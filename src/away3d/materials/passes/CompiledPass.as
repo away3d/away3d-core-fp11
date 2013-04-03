@@ -37,9 +37,7 @@ package away3d.materials.passes
 
 		protected var _vertexCode : String;
 		protected var _fragmentLightCode : String;
-		protected var _fragmentAnimationCode : String;
 		protected var _framentPostLightCode : String;
-		
 		
 		protected var _vertexConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _fragmentConstantData : Vector.<Number> = new Vector.<Number>();
@@ -113,16 +111,16 @@ package away3d.materials.passes
 		 */
 		override arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
-			reset();
+			reset(stage3DProxy.profile);
 			super.updateProgram(stage3DProxy);
 		}
 
 		/**
 		 * Resets the compilation state.
 		 */
-		private function reset() : void
+		private function reset(profile : String) : void
 		{
-			initCompiler();
+			initCompiler(profile);
 			updateShaderProperties();
 			initConstantData();
 			cleanUp();
@@ -152,9 +150,9 @@ package away3d.materials.passes
 			updateMethodConstants();
 		}
 
-		protected function initCompiler() : void
+		protected function initCompiler(profile : String) : void
 		{
-			_compiler = createCompiler();
+			_compiler = createCompiler(profile);
 			_compiler.forceSeperateMVP = _forceSeperateMVP;
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
@@ -170,7 +168,7 @@ package away3d.materials.passes
 			_compiler.compile();
 		}
 
-		protected function createCompiler() : ShaderCompiler
+		protected function createCompiler(profile : String) : ShaderCompiler
 		{
 			throw new AbstractMethodError();
 		}

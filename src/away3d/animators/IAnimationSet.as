@@ -58,7 +58,7 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String;
+		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String;
 		
 		/**
 		 * Generates the AGAL Fragment code for the animation, tailored to the material pass's requirements.

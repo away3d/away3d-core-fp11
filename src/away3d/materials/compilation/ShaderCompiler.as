@@ -66,11 +66,11 @@ package away3d.materials.compilation {
 
 		use namespace arcane;
 
-		public function ShaderCompiler()
+		public function ShaderCompiler(profile : String)
 		{
 			_sharedRegisters = new ShaderRegisterData();
 			_dependencyCounter = new MethodDependencyCounter();
-			initRegisterCache();
+			initRegisterCache(profile);
 		}
 		
 		public function get needUVAnimation():Boolean
@@ -98,9 +98,9 @@ package away3d.materials.compilation {
 			_forceSeperateMVP = value;
 		}
 
-		private function initRegisterCache() : void
+		private function initRegisterCache(profile : String) : void
 		{
-			_registerCache = new ShaderRegisterCache();
+			_registerCache = new ShaderRegisterCache(profile);
 			_registerCache.vertexAttributesOffset = 1;
 			_registerCache.reset();
 		}
@@ -273,10 +273,11 @@ package away3d.materials.compilation {
 			var code : String;
 
 			if (_dependencyCounter.projectionDependencies > 0) {
+				var tempReg : ShaderRegisterElement = _registerCache.getFreeVertexVectorTemp();
 				_sharedRegisters.projectionFragment = _registerCache.getFreeVarying();
-				code =	"m44 vt5, " + pos + ", vc0		\n" +
-						"mov " + _sharedRegisters.projectionFragment + ", vt5\n" +
-						"mov op, vt5\n";
+				code =	"m44 " + tempReg + ", " + pos + ", vc0		\n" +
+						"mov " + _sharedRegisters.projectionFragment + ", " + tempReg + "\n" +
+						"mov op, " + tempReg + "\n";
 			}
 			else {
 				code = 	"m44 op, " + pos + ", vc0		\n";

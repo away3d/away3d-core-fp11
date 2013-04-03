@@ -142,10 +142,10 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
-			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache();
+			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache(profile);
 			
 			//reset animationRegisterCache
 			_animationRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
