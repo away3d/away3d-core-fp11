@@ -48,7 +48,9 @@ package away3d.core.traverse
 		private var _numPointLights : uint;
 		private var _numLightProbes : uint;
 		protected var _cameraForward : Vector3D;
-		protected var _cullPlanes : Vector.<Plane3D>;
+		private var _customCullPlanes : Vector.<Plane3D>;
+		private var _cullPlanes : Vector.<Plane3D>;
+		private var _numCullPlanes : uint;
 
 		/**
 		 * Creates a new EntityCollector object.
@@ -82,6 +84,16 @@ package away3d.core.traverse
 			_entryPoint = _camera.scenePosition;
 			_cameraForward = _camera.forwardVector;
 			_cullPlanes = _camera.frustumPlanes;
+		}
+
+		public function get cullPlanes() : Vector.<Plane3D>
+		{
+			return _customCullPlanes;
+		}
+
+		public function set cullPlanes(value : Vector.<Plane3D>) : void
+		{
+			_customCullPlanes = value;
 		}
 
 		/**
@@ -160,6 +172,8 @@ package away3d.core.traverse
 		 */
 		public function clear() : void
 		{
+			_cullPlanes = _customCullPlanes? _customCullPlanes : _camera.frustumPlanes;
+			_numCullPlanes = _cullPlanes.length;
 			_numTriangles = _numMouseEnableds = 0;
 			_blendedRenderableHead = null;
 			_opaqueRenderableHead = null;
@@ -180,7 +194,7 @@ package away3d.core.traverse
 		 */
 		override public function enterNode(node : NodeBase) : Boolean
 		{
-			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_cullPlanes);
+			var enter : Boolean = _collectionMark != node._collectionMark && node.isInFrustum(_cullPlanes, _numCullPlanes);
 			node._collectionMark = _collectionMark;
 			return enter;
 		}

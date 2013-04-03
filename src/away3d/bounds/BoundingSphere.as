@@ -50,14 +50,14 @@ package away3d.bounds
 		 * todo: pass planes?
 		 * @inheritDoc
 		 */
-		override public function isInFrustum(planes : Vector.<Plane3D>) : Boolean
+		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
-			for (var i : uint = 0; i < 6; ++i) {
+			for (var i : uint = 0; i < numPlanes; ++i) {
 				var plane : Plane3D = planes[i];
 				var flippedExtentX : Number = plane.a < 0? -_radius : _radius;
 				var flippedExtentY : Number = plane.b < 0? -_radius : _radius;
 				var flippedExtentZ : Number = plane.c < 0? -_radius : _radius;
-				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * (_centerY + flippedExtentY) + plane.c * (_centerZ + flippedExtentZ) + plane.d;
+				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * (_centerY + flippedExtentY) + plane.c * (_centerZ + flippedExtentZ) - plane.d;
 				if (projDist < 0) return false;
 			}
 
@@ -180,7 +180,7 @@ package away3d.bounds
 			if (a < 0) a = -a;
 			if (b < 0) b = -b;
 			if (c < 0) c = -c;
-			var rr : Number = (a  + b + c) * _radius;
+			var rr : Number = (a + b + c) * _radius;
 
 			return  dd > rr ? 	PlaneClassification.FRONT :
 					dd < -rr ? 	PlaneClassification.BACK :

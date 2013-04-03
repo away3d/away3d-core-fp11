@@ -29,8 +29,7 @@ package away3d.core.render
 		/**
 		 * Creates a new DepthRenderer object.
 		 * @param renderBlended Indicates whether semi-transparent objects should be rendered.
-		 * @param antiAlias The amount of anti-aliasing to be used.
-		 * @param renderMode The render mode to be used.
+		 * @param distanceBased Indicates whether the written depth value is distance-based or projected depth-based
 		 */
 		public function DepthRenderer(renderBlended : Boolean = false, distanceBased : Boolean = false)
 		{
@@ -64,7 +63,7 @@ package away3d.core.render
 		{
 		}
 
-		arcane function renderCascades(entityCollector : EntityCollector, target : TextureBase, numCascades : uint, scissorRects : Vector.<Rectangle>, splitPlanes : Vector.<Plane3D>, cameras : Vector.<Camera3D>) : void
+		arcane function renderCascades(entityCollector : EntityCollector, target : TextureBase, numCascades : uint, scissorRects : Vector.<Rectangle>, cameras : Vector.<Camera3D>) : void
 		{
 			_renderTarget = target;
 			_renderTargetSurface = 0;
@@ -75,9 +74,11 @@ package away3d.core.render
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 
 			var head : RenderableListItem = entityCollector.opaqueRenderableHead;
-			for (var i : uint = 0; i < numCascades; ++i) {
+			var first : Boolean = true;
+			for (var i : int = numCascades - 1; i >=  0; --i) {
 				_stage3DProxy.scissorRect = scissorRects[i];
-				drawCascadeRenderables(head, cameras[i], splitPlanes[i]);
+				drawCascadeRenderables(head, cameras[i], first? null : cameras[i].frustumPlanes);
+				first = false;
 			}
 
 			if (_activeMaterial)
@@ -91,7 +92,7 @@ package away3d.core.render
 			_stage3DProxy.scissorRect = null;
 		}
 
-		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D, splitPlane : Plane3D) : void
+		private function drawCascadeRenderables(item : RenderableListItem, camera : Camera3D, cullPlanes : Vector.<Plane3D>) : void
 		{
 			var material : MaterialBase;
 
@@ -103,10 +104,10 @@ package away3d.core.render
 
 				var renderable : IRenderable = item.renderable;
 				var entity : Entity = renderable.sourceEntity;
-				var classification : int = entity.worldBounds.classifyToPlane(splitPlane);
 
 				// if completely in front, it will fall in a different cascade
-				if (classification != 1) {
+				// do not use near and far planes
+				if (!cullPlanes || entity.worldBounds.isInFrustum(cullPlanes, 4)) {
 					material = renderable.material;
 					if (_activeMaterial != material) {
 						if (_activeMaterial) _activeMaterial.deactivateForDepth(_stage3DProxy);
@@ -115,11 +116,9 @@ package away3d.core.render
 					}
 
 					_activeMaterial.renderDepth(renderable, _stage3DProxy, camera, camera.viewProjection);
-
-					// fell completely in this cascade
-					if (classification == 0)
-						item.cascaded = true;
 				}
+				else
+					item.cascaded = true;
 
 				item = item.next;
 			}

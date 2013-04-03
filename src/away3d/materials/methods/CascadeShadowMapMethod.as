@@ -7,7 +7,6 @@ package away3d.materials.methods
 	import away3d.events.ShadingMethodEvent;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.shadowmaps.CascadeShadowMapper;
-	import away3d.lights.shadowmaps.CascadeShadowMapper;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterData;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -135,7 +134,6 @@ package away3d.materials.methods
 			var planeDistanceReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var planeDistances : Vector.<String> = new <String>[ planeDistanceReg + ".x", planeDistanceReg + ".y", planeDistanceReg + ".z", planeDistanceReg + ".w" ];
 			var code : String;
-			var boundIndex : int = numCascades - 1;
 
 			vo.fragmentConstantsIndex = decReg.index*4;
 			vo.texturesIndex = depthMapRegister.index;
@@ -146,13 +144,13 @@ package away3d.materials.methods
 			regCache.addFragmentTempUsages(uvCoord, 1);
 
 			// assume lowest partition is selected, will be overwritten later otherwise
-			code = "mov " + uvCoord + ", " + _depthMapCoordVaryings[0] + "\n";
+			code = "mov " + uvCoord + ", " + _depthMapCoordVaryings[numCascades-1] + "\n";
 
-			for (var i : int = 1; i < numCascades; ++i) {
+			for (var i : int = numCascades - 2; i >= 0; --i) {
 				var uvProjection : ShaderRegisterElement = _depthMapCoordVaryings[i];
 
 				// calculate if in texturemap (result == 0 or 1, only 1 for a single partition)
-				code += "slt " + inQuad + ".z, " + _sharedRegisters.projectionFragment + ".w, " + planeDistances[--boundIndex] + "\n"; // z = x > minX, w = y > minY
+				code += "slt " + inQuad + ".z, " + _sharedRegisters.projectionFragment + ".z, " + planeDistances[i] + "\n"; // z = x > minX, w = y > minY
 
 				var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 
@@ -190,7 +188,7 @@ package away3d.materials.methods
 
 			var numCascades : int = _cascadeShadowMapper.numCascades;
 			vertexIndex += 4;
-			for (var k : int = numCascades-1; k >= 0; --k) {
+			for (var k : int = 0; k < numCascades; ++k) {
 				_cascadeShadowMapper.getDepthProjections(k).copyRawDataTo(vertexData, vertexIndex, true);
 				vertexIndex += 16;
 			}
