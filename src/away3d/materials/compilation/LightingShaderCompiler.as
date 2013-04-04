@@ -114,10 +114,10 @@ package away3d.materials.compilation
 				_sharedRegisters.normalVarying = _registerCache.getFreeVarying();
 
 				// no output, world space is enough
-				_vertexCode += 	"m33 " + _sharedRegisters.normalVarying + ".xyz, " + _sharedRegisters.animatedNormal + ".xyz, " + normalMatrix[0] + "\n" +
+				_vertexCode += 	"m33 " + _sharedRegisters.normalVarying + ".xyz, " + _sharedRegisters.animatedNormal + ", " + normalMatrix[0] + "\n" +
 								"mov " + _sharedRegisters.normalVarying + ".w, " + _sharedRegisters.animatedNormal + ".w	\n";
 
-				_fragmentCode += 	"nrm " + _sharedRegisters.normalFragment + ".xyz, " + _sharedRegisters.normalVarying + ".xyz	\n" +
+				_fragmentCode += 	"nrm " + _sharedRegisters.normalFragment + ".xyz, " + _sharedRegisters.normalVarying + "\n" +
 									"mov " + _sharedRegisters.normalFragment + ".w, " + _sharedRegisters.normalVarying + ".w		\n";
 
 			}
@@ -133,9 +133,9 @@ package away3d.materials.compilation
 		private function compileTangentSpaceNormalMapCode() : void
 		{
 			// crs is broken?
-			_vertexCode += "nrm " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + ".xyz\n" +
-							"nrm " + _sharedRegisters.animatedTangent + ".xyz, " + _sharedRegisters.animatedTangent + ".xyz\n";
-			_vertexCode += 	"crs " + _sharedRegisters.bitangent + ".xyz, " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedTangent + ".xyz	\n" +
+			_vertexCode += "nrm " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + "\n" +
+							"nrm " + _sharedRegisters.animatedTangent + ".xyz, " + _sharedRegisters.animatedTangent + "\n";
+			_vertexCode += 	"crs " + _sharedRegisters.bitangent + ".xyz, " + _sharedRegisters.animatedNormal + ", " + _sharedRegisters.animatedTangent + "\n" +
 							"mov " + _sharedRegisters.bitangent + ".w, " + _sharedRegisters.animatedNormal + ".w\n";
 
 			_fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _registerCache, _sharedRegisters.normalFragment);
@@ -164,7 +164,7 @@ package away3d.materials.compilation
 				_registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 			}
 
-			_fragmentCode += 	"nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + ".xyz		\n" +
+			_fragmentCode += 	"nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + "\n" +
 								"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
 		}
 
@@ -205,9 +205,9 @@ package away3d.materials.compilation
 
 			if (_alphaPremultiplied) {
 				_fragmentCode += 	"add " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.commons + ".z\n" +
-									"div " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ".w\n" +
+									"div " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ", " + _sharedRegisters.shadedTarget + ".w\n" +
 									"sub " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.shadedTarget + ".w, " + _sharedRegisters.commons + ".z\n" +
-									"sat " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + ".xyz\n";
+									"sat " + _sharedRegisters.shadedTarget + ".xyz, " + _sharedRegisters.shadedTarget + "\n";
 			}
 
 			// resolve other dependencies as well?
@@ -294,7 +294,7 @@ package away3d.materials.compilation
 
 					lightDirReg = _registerCache.getFreeFragmentVectorTemp();
 					_registerCache.addVertexTempUsages(lightDirReg, 1);
-					_fragmentCode += "nrm " + lightDirReg + ".xyz, " + lightVarying + ".xyz\n";
+					_fragmentCode += "nrm " + lightDirReg + ".xyz, " + lightVarying + "\n";
 					_fragmentCode += "mov " + lightDirReg + ".w, " + lightVarying + ".w\n";
 				}
 				else
@@ -343,21 +343,26 @@ package away3d.materials.compilation
 					_vertexCode += "sub " + lightVarying + ", " + lightPosReg + ", " + _sharedRegisters.globalPositionVertex + "\n";
 				}
 
-				// calculate attenuation
-				_fragmentCode +=
-					// attenuate
-						"dp3 " + lightDirReg + ".w, " + lightVarying + ".xyz, " + lightVarying + ".xyz\n" +
-					// w = d - radius
-						"sub " + lightDirReg + ".w, " + lightDirReg + ".w, " + diffuseColorReg + ".w\n" +
-					// w = (d - radius)/(max-min)
-						"mul " + lightDirReg + ".w, " + lightDirReg + ".w, " + specularColorReg + ".w\n" +
-					// w = clamp(w, 0, 1)
-						"sat " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
-					// w = 1-w
-						"sub " + lightDirReg + ".w, " + _sharedRegisters.commons + ".w, " + lightDirReg + ".w\n" +
-					// normalize
-						"nrm " + lightDirReg + ".xyz, " + lightVarying + ".xyz	\n";
-
+				if (_enableLightFallOff && _profile != "baselineConstrained") {
+					// calculate attenuation
+					_fragmentCode +=
+						// attenuate
+							"dp3 " + lightDirReg + ".w, " + lightVarying + ", " + lightVarying + "\n" +
+						// w = d - radius
+							"sub " + lightDirReg + ".w, " + lightDirReg + ".w, " + diffuseColorReg + ".w\n" +
+						// w = (d - radius)/(max-min)
+							"mul " + lightDirReg + ".w, " + lightDirReg + ".w, " + specularColorReg + ".w\n" +
+						// w = clamp(w, 0, 1)
+							"sat " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
+						// w = 1-w
+							"sub " + lightDirReg + ".w, " + _sharedRegisters.commons + ".w, " + lightDirReg + ".w\n" +
+						// normalize
+							"nrm " + lightDirReg + ".xyz, " + lightVarying + "\n";
+				}
+				else {
+					_fragmentCode +=   "nrm " + lightDirReg + ".xyz, " + lightVarying + "\n" +
+										"mov " + lightDirReg + ".w, " + lightVarying + ".w\n";
+				}
 				if (_lightFragmentConstantIndex == -1) _lightFragmentConstantIndex = lightPosReg.index*4;
 
 				if (addDiff)
@@ -367,6 +372,7 @@ package away3d.materials.compilation
 					_fragmentCode += _methodSetup._specularMethod.getFragmentCodePerLight(_methodSetup._specularMethodVO, lightDirReg, specularColorReg, _registerCache);
 
 				_registerCache.removeFragmentTempUsage(lightDirReg);
+
 			}
 		}
 

@@ -37,6 +37,7 @@ package away3d.materials.passes
 		private var _directionalLightsOffset : uint;
 		private var _pointLightsOffset : uint;
 		private var _lightProbesOffset : uint;
+		private var _maxLights : int = 3;
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
@@ -79,6 +80,7 @@ package away3d.materials.passes
 
 		override protected function createCompiler(profile : String) : ShaderCompiler
 		{
+			_maxLights = profile == "baselineConstrained"? 1 : 3;
 			return new LightingShaderCompiler(profile);
 		}
 
@@ -120,16 +122,12 @@ package away3d.materials.passes
 
 		private function calculateNumDirectionalLights(numDirectionalLights : uint) : int
 		{
-			// allow 3 varyings per light
-			// TODO: calculate free varyings properly
-			return Math.min(numDirectionalLights - _directionalLightsOffset, 3);
+			return Math.min(numDirectionalLights - _directionalLightsOffset, _maxLights);
 		}
 
 		private function calculateNumPointLights(numPointLights : uint) : int
 		{
-			// allow 3 varyings, but only those that aren't used by directional lights
-			// TODO: calculate free varyings properly
-			var numFree : int = 3 - _numDirectionalLights;
+			var numFree : int = _maxLights - _numDirectionalLights;
 			return Math.min(numPointLights - _pointLightsOffset, numFree);
 		}
 

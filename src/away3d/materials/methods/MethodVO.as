@@ -28,6 +28,7 @@ package away3d.materials.methods
 		public var needsGlobalFragmentPos : Boolean;
 
 		public var numLights : int;
+		public var useLightFallOff : Boolean = true;
 
 		public function MethodVO() {
 		
@@ -53,6 +54,7 @@ package away3d.materials.methods
 			needsGlobalFragmentPos = false;
 
 			numLights = 0;
+			useLightFallOff = true;
 		}
 	}
 }

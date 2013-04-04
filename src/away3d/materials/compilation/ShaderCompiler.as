@@ -17,6 +17,7 @@ package away3d.materials.compilation {
 		protected var _smooth : Boolean;
 		protected var _repeat : Boolean;
 		protected var _mipmap : Boolean;
+		protected var _enableLightFallOff : Boolean;
 		protected var _preserveAlpha : Boolean = true;
 		protected var _animateUVs : Boolean;
 		protected var _alphaPremultiplied : Boolean;
@@ -62,6 +63,8 @@ package away3d.materials.compilation {
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
 
+		protected var _profile : String;
+
 		private var _forceSeperateMVP:Boolean;
 
 		use namespace arcane;
@@ -70,9 +73,20 @@ package away3d.materials.compilation {
 		{
 			_sharedRegisters = new ShaderRegisterData();
 			_dependencyCounter = new MethodDependencyCounter();
+			_profile = profile;
 			initRegisterCache(profile);
 		}
-		
+
+		public function get enableLightFallOff() : Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			_enableLightFallOff = value;
+		}
+
 		public function get needUVAnimation():Boolean
 		{
 			return _needUVAnimation;
@@ -273,11 +287,10 @@ package away3d.materials.compilation {
 			var code : String;
 
 			if (_dependencyCounter.projectionDependencies > 0) {
-				var tempReg : ShaderRegisterElement = _registerCache.getFreeVertexVectorTemp();
 				_sharedRegisters.projectionFragment = _registerCache.getFreeVarying();
-				code =	"m44 " + tempReg + ", " + pos + ", vc0		\n" +
-						"mov " + _sharedRegisters.projectionFragment + ", " + tempReg + "\n" +
-						"mov op, " + tempReg + "\n";
+				code =	"m44 vt5, " + pos + ", vc0		\n" +
+						"mov " + _sharedRegisters.projectionFragment + ", vt5\n" +
+						"mov op, vt5\n";
 			}
 			else {
 				code = 	"m44 op, " + pos + ", vc0		\n";
@@ -367,6 +380,7 @@ package away3d.materials.compilation {
 			methodVO.useSmoothTextures = _smooth;
 			methodVO.repeatTextures = _repeat;
 			methodVO.useMipmapping = _mipmap;
+			methodVO.useLightFallOff = _enableLightFallOff && _profile != "baselineConstrained";
 			methodVO.numLights = _numLights + _numLightProbes;
 			method.initVO(methodVO);
 		}
