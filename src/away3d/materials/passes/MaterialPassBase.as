@@ -59,7 +59,7 @@ package away3d.materials.passes {
 		
 		private var _srcBlend : String = Context3DBlendFactor.ONE;
 		private var _destBlend : String = Context3DBlendFactor.ZERO;
-		private var _enableBlending : Boolean;
+		protected var _enableBlending : Boolean;
 
 		private var _bothSides : Boolean;
 
@@ -477,6 +477,7 @@ package away3d.materials.passes {
 		public function set alphaPremultiplied(value : Boolean) : void
 		{
 			_alphaPremultiplied = value;
+			invalidateShaderProgram(false);
 		}
 	}
 }

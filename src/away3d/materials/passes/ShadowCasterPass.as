@@ -183,7 +183,7 @@ package away3d.materials.passes
 				_fragmentConstantData[k++] = pointLight._diffuseR;
 				_fragmentConstantData[k++] = pointLight._diffuseG;
 				_fragmentConstantData[k++] = pointLight._diffuseB;
-				_fragmentConstantData[k++] = pointLight._radius;
+				_fragmentConstantData[k++] = pointLight._radius*pointLight._radius;
 
 				_fragmentConstantData[k++] = pointLight._specularR;
 				_fragmentConstantData[k++] = pointLight._specularG;

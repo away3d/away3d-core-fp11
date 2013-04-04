@@ -315,11 +315,10 @@ package away3d.materials.compilation
 				lightDirReg = _registerCache.getFreeFragmentVectorTemp();
 				_registerCache.addFragmentTempUsages(lightDirReg, 1);
 
-				// calculate direction
+				// calculate attenuation
 				_fragmentCode += "sub " + lightDirReg + ", " + lightPosReg + ", " + _sharedRegisters.globalPositionVarying + "\n" +
 					// attenuate
 						"dp3 " + lightDirReg + ".w, " + lightDirReg + ".xyz, " + lightDirReg + ".xyz\n" +
-						"sqt " + lightDirReg + ".w, " + lightDirReg + ".w\n" +
 					// w = d - radis
 						"sub " + lightDirReg + ".w, " + lightDirReg + ".w, " + diffuseColorReg + ".w\n" +
 					// w = (d - radius)/(max-min)
