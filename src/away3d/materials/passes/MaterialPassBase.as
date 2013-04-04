@@ -417,7 +417,7 @@ package away3d.materials.passes {
 			if (_animationSet && !_animationSet.usesCPU) {
 				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters, stage3DProxy.profile);
 				if(_needFragmentAnimation)
-					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget);
+					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget, stage3DProxy.profile);
 				if (_needUVAnimation)
 					UVAnimatorCode = _animationSet.getAGALUVCode(this, _UVSource, _UVTarget);
 				_animationSet.doneAGALCode(this);
