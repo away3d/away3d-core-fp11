@@ -1,5 +1,11 @@
 package away3d.core.managers
 {
+	import flash.display.DisplayObject;
+	import flash.utils.Dictionary;
+	import flash.display.Stage;
+	import flash.display.DisplayObjectContainer;
+	import flash.geom.Point;
+	import flash.display.Sprite;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
@@ -13,19 +19,23 @@ package away3d.core.managers
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
-
 	/**
+
 	 * Mouse3DManager enforces a singleton pattern and is not intended to be instanced.
 	 * it provides a manager class for detecting 3D mouse hits on View3D objects and sending out 3D mouse events.
 	 */
 	public class Mouse3DManager
 	{
+		private static var _view3Ds : Dictionary;
+		private static var _viewCount : int = 0;
+		
 		private var _activeView : View3D;
 		private var _updateDirty : Boolean;
 		private var _nullVector : Vector3D = new Vector3D();
-		protected var _collidingObject : PickingCollisionVO;
-		private var _previousCollidingObject : PickingCollisionVO;
-		private var _queuedEvents : Vector.<MouseEvent3D> = new Vector.<MouseEvent3D>();
+		protected static var _collidingObject : PickingCollisionVO;
+		private static var _previousCollidingObject : PickingCollisionVO;
+		private static var _collidingViewObjects : Vector.<PickingCollisionVO>;
+		private static var _queuedEvents : Vector.<MouseEvent3D> = new Vector.<MouseEvent3D>();
 
 		private var _mouseMoveEvent : MouseEvent = new MouseEvent(MouseEvent.MOUSE_MOVE);
 
@@ -39,12 +49,16 @@ package away3d.core.managers
 		private static var _mouseDoubleClick : MouseEvent3D = new MouseEvent3D(MouseEvent3D.DOUBLE_CLICK);
 		private var _forceMouseMove : Boolean;
 		private var _mousePicker : IPicker = PickingType.RAYCAST_FIRST_ENCOUNTERED;
+		private var _childDepth : int = 0;
+		private static var _previousCollidingView : int = -1;
+		private static var _collidingView : int = -1;
 
 		/**
 		 * Creates a new <code>Mouse3DManager</code> object.
 		 */
 		public function Mouse3DManager()
 		{
+			if (!_view3Ds) _view3Ds = new Dictionary();
 		}
 
 		// ---------------------------------------------------------------------
@@ -54,12 +68,23 @@ package away3d.core.managers
 		public function updateCollider(view : View3D) : void
 		{
 			_previousCollidingObject = _collidingObject;
+			_previousCollidingView = _collidingView;
 
-			if (view == _activeView && (_forceMouseMove || _updateDirty)) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
-				_collidingObject = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
+			if (view) {
+				// Clear the current colliding objects for multiple views if backBuffer just cleared
+				if (view.stage3DProxy.bufferClear) {
+					_collidingViewObjects = new Vector.<PickingCollisionVO>(_viewCount);
+				}
+			
+				if (!view.shareContext) {
+					if (view == _activeView && (_forceMouseMove || _updateDirty)) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.		
+						_collidingObject = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
+					}
+				} else { 
+					if (view.getBounds(view.parent).contains(view.mouseX + view.x, view.mouseY + view.y)) 
+						_collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
+				}
 			}
-
-			_updateDirty = false;
 		}
 
 		public function fireMouseEvents() : void
@@ -69,6 +94,19 @@ package away3d.core.managers
 			var event : MouseEvent3D;
 			var dispatcher : ObjectContainer3D;
 
+			// If multiple view are used, determine the best hit based on the depth intersection.
+			if (_collidingViewObjects) {
+				_collidingObject = null;
+				// Get the top-most view colliding object
+				var distance:Number = Infinity;
+				for (var v:int = _viewCount-1; v>=0; v--) {
+					if (_collidingViewObjects[v] && _collidingViewObjects[v].rayEntryDistance < distance) {
+						distance = _collidingViewObjects[v].rayEntryDistance;
+						_collidingObject = _collidingViewObjects[v];
+					}
+				}
+			}
+			
 			// If colliding object has changed, queue over/out events.
 			if (_collidingObject != _previousCollidingObject) {
 				if (_previousCollidingObject) queueDispatch(_mouseOut, _mouseMoveEvent, _previousCollidingObject);
@@ -94,7 +132,10 @@ package away3d.core.managers
 					dispatcher.dispatchEvent(event);
 			}
 			_queuedEvents.length = 0;
+
+			_updateDirty = false;
 		}
+
 
 		// ---------------------------------------------------------------------
 		// Private.
@@ -136,13 +177,27 @@ package away3d.core.managers
 			_queuedEvents.push(event);
 		}
 
+		private function reThrowEvent(event : MouseEvent) : void {
+			if (!_activeView || (_activeView && _activeView.shareContext)) return;
+			
+			for (var v:* in _view3Ds) {
+				if (v != _activeView && _view3Ds[v] < _view3Ds[_activeView]) {
+					v.dispatchEvent(event);
+				}
+			}
+		}
+		
+		
 		// ---------------------------------------------------------------------
 		// Listeners.
 		// ---------------------------------------------------------------------
 
 		private function onMouseMove(event : MouseEvent) : void
 		{
-			if (_collidingObject) queueDispatch(_mouseMove, _mouseMoveEvent = event);
+			if (_collidingObject)
+				queueDispatch(_mouseMove, _mouseMoveEvent = event);
+			else
+				reThrowEvent(event);
 			_updateDirty = true;
 		}
 
@@ -156,40 +211,101 @@ package away3d.core.managers
 		private function onMouseOver(event : MouseEvent) : void
 		{
 			_activeView = (event.currentTarget as View3D);
-			if (_collidingObject) queueDispatch(_mouseOver, event, _collidingObject);
+			if (_collidingObject && _previousCollidingObject != _collidingObject)
+				queueDispatch(_mouseOver, event, _collidingObject);
+			else
+				reThrowEvent(event);
 			_updateDirty = true;
 		}
 
 		private function onClick(event : MouseEvent) : void
 		{
-			if (_collidingObject) queueDispatch(_mouseClick, event);
+			if (_collidingObject)
+				queueDispatch(_mouseClick, event);
+			else
+				reThrowEvent(event);
 			_updateDirty = true;
 		}
 
 		private function onDoubleClick(event : MouseEvent) : void
 		{
-			if (_collidingObject) queueDispatch(_mouseDoubleClick, event);
+			if (_collidingObject) 
+				queueDispatch(_mouseDoubleClick, event);
+			else
+				reThrowEvent(event);
 			_updateDirty = true;
 		}
 
 		private function onMouseDown(event : MouseEvent) : void
 		{
 			updateCollider( _activeView ); // ensures collision check is done with correct mouse coordinates on mobile
-			if (_collidingObject) queueDispatch(_mouseDown, event);
+			if (_collidingObject)
+				queueDispatch(_mouseDown, event);
+			else
+				reThrowEvent(event);
 			_updateDirty = true;
 		}
 
 		private function onMouseUp(event : MouseEvent) : void
 		{
-			if (_collidingObject) queueDispatch(_mouseUp, event);
+			if (_collidingObject)
+				queueDispatch(_mouseUp, event);
+			else
+				reThrowEvent(event);
 			_updateDirty = true;
 		}
 
 		private function onMouseWheel(event : MouseEvent) : void
 		{
-			if (_collidingObject) queueDispatch(_mouseWheel, event);
+			if (_collidingObject)
+				queueDispatch(_mouseWheel, event);
+			else 
+				reThrowEvent(event);
 			_updateDirty = true;
 		}
+
+		public function addViewLayer(view : View3D) : void {
+			var stg:Stage = view.stage;
+
+			// Add instance to mouse3dmanager to fire mouse events for multiple views
+			if (!view.stage3DProxy.mouse3DManager) view.stage3DProxy.mouse3DManager = this;
+			
+			if (!hasKey(view)) {
+				_view3Ds[view] = 0;
+			}
+			
+			_childDepth = 0;
+			traverseDisplayObjects(stg);
+			_viewCount = _childDepth;
+		}
+		
+		private function hasKey(view : View3D) : Boolean {
+			for ( var v:* in _view3Ds) {
+				if (v === view) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		private function traverseDisplayObjects(container : DisplayObjectContainer) : void {
+			var childCount:int = container.numChildren;
+			var c:int = 0;
+			var child:DisplayObject;
+			for (c = 0; c<childCount; c++) {
+				child = container.getChildAt(c);
+				for ( var v:* in _view3Ds) {
+					if (child == v) { 	
+						_view3Ds[child] = _childDepth; 
+						_childDepth++;
+					}
+				}
+				if (child is DisplayObjectContainer) {
+					traverseDisplayObjects(child as DisplayObjectContainer);
+				}
+			}
+		}
+		
 
 		public function enableMouseListeners(view : View3D) : void
 		{

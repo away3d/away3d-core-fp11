@@ -59,6 +59,8 @@ package away3d.core.managers
 		private var _exitFrame : Event;
 		private var _viewportUpdated : Stage3DEvent;
 		private var _viewportDirty : Boolean;
+		private var _bufferClear : Boolean;
+		private var _mouse3DManager : Mouse3DManager;
 		
 		private function notifyViewportUpdated():void
 		{
@@ -240,6 +242,8 @@ package away3d.core.managers
                 ((_color >> 8) & 0xff) / 255.0, 
                 (_color & 0xff) / 255.0,
                 ((_color >> 24) & 0xff) / 255.0 );
+				
+			_bufferClear = true;
 		}
 
 
@@ -253,6 +257,8 @@ package away3d.core.managers
 			_context3D.present();
 						
 			_activeProgram3D = null;
+
+			if (_mouse3DManager) _mouse3DManager.fireMouseEvents();
 		}
 		
 		/**
@@ -471,6 +477,29 @@ package away3d.core.managers
 			_stage3D.visible = value;
 		}
 		
+
+		/**
+		 * The freshly cleared state of the backbuffer before any rendering
+		 */
+		public function get bufferClear() : Boolean {
+			return _bufferClear;
+		}
+
+		public function set bufferClear(newBufferClear : Boolean) : void {
+			_bufferClear = newBufferClear;
+		}
+
+		/*
+		 * Access to fire mouseevents across multiple layered view3D instances
+		 */
+		public function get mouse3DManager() : Mouse3DManager {
+			return _mouse3DManager;
+		}
+
+		public function set mouse3DManager(mouse3DManager : Mouse3DManager) : void {
+			_mouse3DManager = mouse3DManager;
+		}
+
 
 		/**
 		 * Frees the Context3D associated with this Stage3DProxy.

@@ -646,13 +646,19 @@
 				}
 
 			}
-			if (!_shareContext) stage3DProxy.present();
+			
+			if (!_shareContext) {
+				stage3DProxy.present();
+
+				// fire collected mouse events
+				_mouse3DManager.fireMouseEvents();
+			}
 
 			// clean up data for this render
 			_entityCollector.cleanUp();
-
-			// fire collected mouse events
-			_mouse3DManager.fireMouseEvents();
+			
+			// register that a view has been rendered
+			stage3DProxy.bufferClear = false;
 		}
 
 		protected function updateGlobalPos() : void
@@ -857,6 +863,8 @@
 			else _rttBufferManager.viewWidth = _width;
 			if (_height == 0) height = stage.stageHeight;
 			else _rttBufferManager.viewHeight = _height;
+			
+			if (_shareContext) _mouse3DManager.addViewLayer(this);
 		}
 
 		private function onAdded(event : Event) : void
