@@ -151,8 +151,8 @@ package away3d.textures
 			camera.lens.far = _farPlaneDistance;
 			camera.position = position;
 
-			_entityCollector.clear();
 			_entityCollector.camera = camera;
+			_entityCollector.clear();
 			scene.traversePartitions(_entityCollector);
 
 			_renderer.render(_entityCollector, targetTexture, null, surfaceIndex);

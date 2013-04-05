@@ -141,8 +141,8 @@ package away3d.textures
 			updateSize(view.width, view.height);
 			updateCamera(camera);
 
-			_entityCollector.clear();
 			_entityCollector.camera = _camera;
+			_entityCollector.clear();
 			view.scene.traversePartitions(_entityCollector);
 			_renderer.stage3DProxy = view.stage3DProxy;
 			_renderer.render(_entityCollector, super.getTextureForStage3D(view.stage3DProxy), _scissorRect);
