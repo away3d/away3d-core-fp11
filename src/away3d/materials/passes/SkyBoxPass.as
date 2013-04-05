@@ -33,7 +33,7 @@ package away3d.materials.passes
 			super();
 			mipmap = false;
 			_numUsedTextures = 1;
-			_vertexData = new <Number>[0, 0, 0, 0];
+			_vertexData = new <Number>[0, 0, 0, 0, 1, 1, 1, 1];
 		}
 		/**
 		 * The cube texture to use as the skybox.
@@ -53,22 +53,10 @@ package away3d.materials.passes
 		 */
 		arcane override function getVertexCode() : String
 		{
-			return  "add vt0, va0, vc4		\n" +
+			return  "mul vt0, va0, vc5		\n" +
+					"add vt0, vt0, vc4		\n" +
 					"m44 op, vt0, vc0		\n" +
 					"mov v0, va0\n";
-		}
-
-		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
-		{
-			var context : Context3D = stage3DProxy._context3D;
-			var pos : Vector3D = camera.scenePosition;
-			_vertexData[0] = pos.x;
-			_vertexData[1] = pos.y;
-			_vertexData[2] = pos.z;
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
-			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _vertexData, 1);
-			renderable.activateVertexBuffer(0, stage3DProxy);
-			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		/**
@@ -94,6 +82,20 @@ package away3d.materials.passes
 			}
 			return 	"tex ft0, v0, fs0 <cube,"+format+"linear,clamp"+mip+">	\n" +
 					"mov oc, ft0							\n";
+		}
+
+		override arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
+		{
+			var context : Context3D = stage3DProxy._context3D;
+			var pos : Vector3D = camera.scenePosition;
+			_vertexData[0] = pos.x;
+			_vertexData[1] = pos.y;
+			_vertexData[2] = pos.z;
+			_vertexData[4] = _vertexData[5] = _vertexData[6] = camera.lens.far*.5;
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
+			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _vertexData, 2);
+			renderable.activateVertexBuffer(0, stage3DProxy);
+			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
 
 		/**

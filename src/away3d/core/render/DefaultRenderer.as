@@ -101,7 +101,7 @@ package away3d.core.render
 
 			_context.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-			
+
 			var which : int = target? SCREEN_PASSES : ALL_PASSES;
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, which);
 			drawRenderables(entityCollector.blendedRenderableHead, entityCollector, which);
