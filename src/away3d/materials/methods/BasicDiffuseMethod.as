@@ -181,7 +181,7 @@ package away3d.materials.methods
 					"max " + t + ".w, " + t + ".x, " + _sharedRegisters.commons + ".y\n";
 
 			if (vo.useLightFallOff)
-				"mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
+				code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
@@ -306,7 +306,7 @@ package away3d.materials.methods
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			if (_useTexture) {
-				stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+				stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 				if (_alphaThreshold > 0)
 					vo.fragmentData[vo.fragmentConstantsIndex] = _alphaThreshold;
 			}

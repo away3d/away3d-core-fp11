@@ -53,7 +53,7 @@ package away3d.core.render
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
 			if (!_program3D) initProgram3D(_context);
-			_stage3DProxy.setProgram(_program3D);
+			_context.setProgram(_program3D);
 
 			item = entityCollector.opaqueRenderableHead;
 			while (item) {

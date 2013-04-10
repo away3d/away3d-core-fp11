@@ -345,6 +345,7 @@ package away3d.materials.passes
 
 		override protected function updateProbes(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			var probe : LightProbe;
 			var lightProbes : Vector.<LightProbe> = _lightPicker.lightProbes;
 			var weights : Vector.<Number> = _lightPicker.lightProbeWeights;
@@ -360,9 +361,9 @@ package away3d.materials.passes
 				probe = lightProbes[_lightProbesOffset + i];
 
 				if (addDiff)
-					stage3DProxy.setTextureAt(_lightProbeDiffuseIndices[i], probe.diffuseMap.getTextureForStage3D(stage3DProxy));
+					context.setTextureAt(_lightProbeDiffuseIndices[i], probe.diffuseMap.getTextureForStage3D(stage3DProxy));
 				if (addSpec)
-					stage3DProxy.setTextureAt(_lightProbeSpecularIndices[i], probe.specularMap.getTextureForStage3D(stage3DProxy));
+					context.setTextureAt(_lightProbeSpecularIndices[i], probe.specularMap.getTextureForStage3D(stage3DProxy));
 			}
 
 			for (i = 0; i < len; ++i)

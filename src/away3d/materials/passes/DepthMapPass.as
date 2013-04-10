@@ -151,14 +151,15 @@
 		 */
 		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			super.activate(stage3DProxy, camera);
 
 			if (_alphaThreshold > 0) {
-				stage3DProxy.setTextureAt(0, _alphaMask.getTextureForStage3D(stage3DProxy));
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 3);
+				context.setTextureAt(0, _alphaMask.getTextureForStage3D(stage3DProxy));
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 3);
 			}
 			else {
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 2);
+				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 2);
 			}
 		}
 	}

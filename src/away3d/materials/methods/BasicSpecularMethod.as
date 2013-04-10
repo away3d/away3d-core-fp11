@@ -342,7 +342,7 @@ package away3d.materials.methods
 
 			if (vo.numLights == 0) return;
 
-			if (_useTexture) stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+			if (_useTexture) stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 			var index : int = vo.fragmentConstantsIndex;
 			var data : Vector.<Number> = vo.fragmentData;
 			data[index] = _specularR;

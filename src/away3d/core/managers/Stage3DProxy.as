@@ -130,31 +130,6 @@ package away3d.core.managers
 		}
 
 		/**
-		 * Assign the texture in the Context3D ready for use in the shader.
-		 * @param index The index where the texture is set
-		 * @param texture The texture to set
-		 */
-		public function setTextureAt(index : int, texture : TextureBase) : void
-		{
-			if (_activeTextures[index] == texture) return;
-
-			_context3D.setTextureAt(index,  texture);
-
-			_activeTextures[index] = texture;
-		}
-
-		/**
-		 * Set the shader program for the subsequent rendering calls.
-		 * @param program3D The program to be used in the shader
-		 */
-		public function setProgram(program3D : Program3D) : void
-		{
-			if (_activeProgram3D == program3D) return;
-			_context3D.setProgram(program3D);
-			_activeProgram3D = program3D;
-		}
-
-		/**
 		 * Disposes the Stage3DProxy object, freeing the Context3D attached to the Stage3D.
 		 */
 		public function dispose() : void

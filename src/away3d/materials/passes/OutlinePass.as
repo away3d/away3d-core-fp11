@@ -194,7 +194,6 @@ package away3d.materials.passes
 			else {
 				renderable.activateVertexNormalBuffer(1, stage3DProxy);
 
-				var context : Context3D = stage3DProxy._context3D;
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
 				renderable.activateVertexBuffer(0, stage3DProxy);
 				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);

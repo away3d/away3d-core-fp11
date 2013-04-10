@@ -130,13 +130,13 @@ package away3d.filters.tasks
 			_data[6] = f / (f - n);
 			_data[7] = -n * _data[6];
 
-			stage3DProxy.setTextureAt(1, depthTexture);
+			context.setTextureAt(1, depthTexture);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 4);
 		}
 
 		override public function deactivate(stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy.setTextureAt(1, null);
+			stage3DProxy._context3D.setTextureAt(1, null);
 		}
 
 		override protected function updateTextures(stage : Stage3DProxy) : void

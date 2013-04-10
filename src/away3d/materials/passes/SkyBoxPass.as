@@ -102,9 +102,9 @@ package away3d.materials.passes
 		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			super.activate(stage3DProxy, camera);
-
-			stage3DProxy._context3D.setDepthTest(false, Context3DCompareMode.LESS);
-			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
+			var context : Context3D = stage3DProxy._context3D;
+			context.setDepthTest(false, Context3DCompareMode.LESS);
+			context.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 	}
 }

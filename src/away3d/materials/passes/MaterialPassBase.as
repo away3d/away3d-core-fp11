@@ -59,6 +59,7 @@ package away3d.materials.passes {
 		
 		private var _srcBlend : String = Context3DBlendFactor.ONE;
 		private var _destBlend : String = Context3DBlendFactor.ZERO;
+
 		protected var _enableBlending : Boolean;
 
 		private var _bothSides : Boolean;
@@ -86,6 +87,8 @@ package away3d.materials.passes {
 		protected var _needUVAnimation:Boolean;
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
+
+		private var _writeDepth : Boolean = true;
 		
 		public var animationRegisterCache:AnimationRegisterCache;
 		
@@ -112,6 +115,19 @@ package away3d.materials.passes {
 		public function set material(value : MaterialBase) : void
 		{
 			_material = value;
+		}
+
+		/**
+		 * Indicate whether this pass should write to the depth buffer or not. Ignored when blending is enabled.
+		 */
+		public function get writeDepth() : Boolean
+		{
+			return _writeDepth;
+		}
+
+		public function set writeDepth(value : Boolean) : void
+		{
+			_writeDepth = value;
 		}
 
 		/**
@@ -286,7 +302,7 @@ package away3d.materials.passes {
 			throw new AbstractMethodError();
 		}
 
-		arcane function getFragmentCode(code:String) : String
+		arcane function getFragmentCode(fragmentAnimatorCode:String) : String
 		{
 			throw new AbstractMethodError();
 		}
@@ -331,7 +347,7 @@ package away3d.materials.passes {
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;
 
-			context.setDepthTest(!_enableBlending, _depthCompareMode);
+			context.setDepthTest(_writeDepth && !_enableBlending, _depthCompareMode);
 			if (_enableBlending) context.setBlendFactors(_srcBlend, _destBlend);
 
 			if (_context3Ds[contextIndex] != context || !_program3Ds[contextIndex]) {
@@ -349,12 +365,12 @@ package away3d.materials.passes {
 			prevUsed = _previousUsedTexs[contextIndex];
 
 			for (i = _numUsedTextures; i < prevUsed; ++i)
-				stage3DProxy.setTextureAt(i, null);
+				context.setTextureAt(i, null);
 
 			if (_animationSet && !_animationSet.usesCPU)
 				_animationSet.activate(stage3DProxy, this);
-			
-			stage3DProxy.setProgram(_program3Ds[contextIndex]);
+
+			context.setProgram(_program3Ds[contextIndex]);
 
 			context.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
 

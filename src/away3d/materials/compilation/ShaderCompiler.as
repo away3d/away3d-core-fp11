@@ -187,13 +187,12 @@ package away3d.materials.compilation {
 
 			createCommons();
 			calculateDependencies();
-			if (_forceSeperateMVP) _dependencyCounter.addWorldSpaceDependencies(false);
 			updateMethodRegisters();
 
 			for (var i : uint = 0; i < 4; ++i)
 				_registerCache.getFreeVertexConstant();
 
-			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
+			if (_dependencyCounter.globalPosDependencies > 0 || _forceSeperateMVP) compileGlobalPositionCode();
 			compileProjectionCode();
 			compileMethodsCode();
 			compileFragmentOutput();

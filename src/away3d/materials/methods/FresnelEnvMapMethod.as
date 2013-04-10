@@ -7,6 +7,8 @@ package away3d.materials.methods
 	import away3d.textures.CubeTextureBase;
 	import away3d.textures.Texture2DBase;
 
+	import flash.display3D.Context3D;
+
 	use namespace arcane;
 
 	public class FresnelEnvMapMethod extends EffectMethodBase
@@ -106,12 +108,13 @@ package away3d.materials.methods
 		{
 			var data : Vector.<Number> = vo.fragmentData;
 			var index : int = vo.fragmentConstantsIndex;
+			var context : Context3D = stage3DProxy._context3D;
 			data[index] = _alpha;
 			data[index+1] = _normalReflectance;
 			data[index+2] = _fresnelPower;
-			stage3DProxy.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
+			context.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 			if (_mask)
-				stage3DProxy.setTextureAt(vo.texturesIndex+1, _mask.getTextureForStage3D(stage3DProxy));
+				context.setTextureAt(vo.texturesIndex+1, _mask.getTextureForStage3D(stage3DProxy));
 		}
 
 		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String

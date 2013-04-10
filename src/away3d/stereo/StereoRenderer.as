@@ -98,22 +98,22 @@ package away3d.stereo
 			indexBuffer = _rttManager.indexBuffer;
 			
 			_method.activate(stage3DProxy);
-			
-			stage3DProxy.context3D.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
-			stage3DProxy.context3D.setVertexBufferAt(1, vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
-			
-			stage3DProxy.setTextureAt(0, _leftTexture);
-			stage3DProxy.setTextureAt(1, _rightTexture);
-			stage3DProxy.setProgram(getProgram3D(stage3DProxy));
+
+			context.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
+			context.setVertexBufferAt(1, vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
+
+			context.setTextureAt(0, _leftTexture);
+			context.setTextureAt(1, _rightTexture);
+			context.setProgram(getProgram3D(stage3DProxy));
 			context.clear(0.0, 0.0, 0.0, 1.0);
 			context.drawTriangles(indexBuffer, 0, 2);
 			
 			// Clean up
 			_method.deactivate(stage3DProxy);
-			stage3DProxy.setTextureAt(0, null);
-			stage3DProxy.setTextureAt(1, null);
-			stage3DProxy.context3D.setVertexBufferAt(0, null, 0, null);
-			stage3DProxy.context3D.setVertexBufferAt(1, null, 2, null);
+			context.setTextureAt(0, null);
+			context.setTextureAt(1, null);
+			context.setVertexBufferAt(0, null, 0, null);
+			context.setVertexBufferAt(1, null, 2, null);
 		}
 		
 		private function setupRTTManager(stage3DProxy : Stage3DProxy) : void

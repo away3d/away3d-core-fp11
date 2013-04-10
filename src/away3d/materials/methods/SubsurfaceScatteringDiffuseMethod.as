@@ -219,7 +219,7 @@ package away3d.materials.methods
 			var depthMap : Texture = _depthPass.getDepthMap(renderable, stage3DProxy);
 			var projection : Matrix3D = _depthPass.getProjection(renderable);
 
-			stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, depthMap);
+			stage3DProxy._context3D.setTextureAt(vo.secondaryTexturesIndex, depthMap);
 			projection.copyRawDataTo(vo.vertexData, vo.secondaryVertexConstantsIndex+4, true);
 		}
 
