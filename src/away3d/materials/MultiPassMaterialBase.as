@@ -492,14 +492,12 @@
 					_nonCasterLightPasses[0].forceSeperateMVP = true;
 					_nonCasterLightPasses[0].setBlendMode(BlendMode.NORMAL, false);
 					_nonCasterLightPasses[0].depthCompareMode = depthCompareMode;
-					_nonCasterLightPasses[0].writeDepth = false;
 					firstAdditiveIndex = 1;
 				}
 				for (var i : int = firstAdditiveIndex; i < _nonCasterLightPasses.length; ++i) {
 					_nonCasterLightPasses[i].forceSeperateMVP = true;
 					_nonCasterLightPasses[i].setBlendMode(BlendMode.ADD, false);
 					_nonCasterLightPasses[i].depthCompareMode = Context3DCompareMode.LESS_EQUAL;
-					if (i == 0) _nonCasterLightPasses[i].writeDepth = true;
 				}
 			}
 
@@ -507,7 +505,6 @@
 				if (_effectsPass) {
 					_effectsPass.depthCompareMode = Context3DCompareMode.LESS_EQUAL;
 					_effectsPass.setBlendMode(BlendMode.NORMAL, true);
-					_effectsPass.writeDepth = false;
 					_effectsPass.forceSeperateMVP = true;
 				}
 			}

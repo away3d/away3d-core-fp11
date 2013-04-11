@@ -98,8 +98,12 @@ package away3d.materials
 
 		public function set lightPicker(value : LightPickerBase) : void
 		{
-			if (value != _lightPicker)
+			if (value != _lightPicker) {
 				_lightPicker = value;
+				var len : uint = _passes.length;
+				for (var i : uint = 0; i < len; ++i)
+					_passes[i].lightPicker = _lightPicker;
+			}
 		}
 
 		/**
@@ -489,6 +493,7 @@ package away3d.materials
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
+			pass.lightPicker = _lightPicker;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			invalidatePasses(null);
 		}

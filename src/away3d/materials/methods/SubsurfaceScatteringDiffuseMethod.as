@@ -147,8 +147,7 @@ package away3d.materials.methods
 			regCache.getFreeVertexConstant();
 
 			code += "m44 " + temp+ ", vt0, " + lightProjection + "\n" +
-					"rcp " + temp+".w, " + temp+".w\n" +
-					"mul " + temp+".xyz, " + temp+".xyz, " + temp+".w\n" +
+					"div " + temp+".xyz, " + temp+".xyz, " + temp+".w\n" +
 					"mul " + temp+".xy, " + temp+".xy, " + toTexRegister+".xy\n" +
 					"add " + temp+".xy, " + temp+".xy, " + toTexRegister+".xx\n" +
 					"mov " + _lightProjVarying + ".xyz, " + temp+".xyz\n" +

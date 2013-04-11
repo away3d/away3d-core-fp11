@@ -129,14 +129,21 @@ package away3d.materials.passes
 
 		override protected function updateLights() : void
 		{
-			super.updateLights();
-			_numPointLights = _lightPicker.numPointLights;
-			_numDirectionalLights = _lightPicker.numDirectionalLights;
-			_numLightProbes = _lightPicker.numLightProbes;
+//			super.updateLights();
+			if (_lightPicker) {
+				_numPointLights = _lightPicker.numPointLights;
+				_numDirectionalLights = _lightPicker.numDirectionalLights;
+				_numLightProbes = _lightPicker.numLightProbes;
 
-			if (_includeCasters) {
-				_numPointLights += _lightPicker.numCastingPointLights;
-				_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
+				if (_includeCasters) {
+					_numPointLights += _lightPicker.numCastingPointLights;
+					_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
+				}
+			}
+			else {
+				_numPointLights = 0;
+				_numDirectionalLights = 0;
+				_numLightProbes = 0;
 			}
 
 			invalidateShaderProgram();

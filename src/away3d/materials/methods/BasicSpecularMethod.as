@@ -230,7 +230,6 @@ package away3d.materials.methods
 
 						//smooth the edge as incidence angle approaches 90
 							"add" + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".w\n" + // sca1 = sca1 + smoothtep;
-						//"div" + t + ".w, " + t + ".w, " + _specularDataRegister2 + ".z\n" + // sca1 = sca1/smoothtep;
 							"max " + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".y\n" + // sca1 range 0 - 1
 							"mul " + t + ".xyz, " + t + ", " + t + ".w\n" + // vec1 = vec1*sca1
 

@@ -571,11 +571,11 @@ package away3d.materials.passes
 			if (_usingSpecularMethod) _methodSetup._specularMethod.deactivate(_methodSetup._specularMethodVO, stage3DProxy);
 		}
 
-		override protected function updateLights() : void
-		{
-			for (var i : int = 0; i < _passes.length; ++i)
-				_passes[i].lightPicker = _lightPicker;
-		}
+//		override protected function updateLights() : void
+//		{
+//			for (var i : int = 0; i < _passes.length; ++i)
+//				_passes[i].lightPicker = _lightPicker;
+//		}
 
 		public function get specularLightSources() : uint
 		{
