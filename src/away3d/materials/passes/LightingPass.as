@@ -37,6 +37,7 @@ package away3d.materials.passes
 		private var _directionalLightsOffset : uint;
 		private var _pointLightsOffset : uint;
 		private var _lightProbesOffset : uint;
+		private var _maxLights : int = 3;
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
@@ -77,9 +78,10 @@ package away3d.materials.passes
 			_lightProbesOffset = value;
 		}
 
-		override protected function createCompiler() : ShaderCompiler
+		override protected function createCompiler(profile : String) : ShaderCompiler
 		{
-			return new LightingShaderCompiler();
+			_maxLights = profile == "baselineConstrained"? 1 : 3;
+			return new LightingShaderCompiler(profile);
 		}
 
 		public function get includeCasters() : Boolean
@@ -120,16 +122,12 @@ package away3d.materials.passes
 
 		private function calculateNumDirectionalLights(numDirectionalLights : uint) : int
 		{
-			// allow 3 varyings per light
-			// TODO: calculate free varyings properly
-			return Math.min(numDirectionalLights - _directionalLightsOffset, 3);
+			return Math.min(numDirectionalLights - _directionalLightsOffset, _maxLights);
 		}
 
 		private function calculateNumPointLights(numPointLights : uint) : int
 		{
-			// allow 3 varyings, but only those that aren't used by directional lights
-			// TODO: calculate free varyings properly
-			var numFree : int = 3 - _numDirectionalLights;
+			var numFree : int = _maxLights - _numDirectionalLights;
 			return Math.min(numPointLights - _pointLightsOffset, numFree);
 		}
 
@@ -321,7 +319,8 @@ package away3d.materials.passes
 					_fragmentConstantData[k++] = pointLight._diffuseR;
 					_fragmentConstantData[k++] = pointLight._diffuseG;
 					_fragmentConstantData[k++] = pointLight._diffuseB;
-					_fragmentConstantData[k++] = pointLight._radius;
+					var radius : Number = pointLight._radius;
+					_fragmentConstantData[k++] = radius*radius;
 
 					_fragmentConstantData[k++] = pointLight._specularR;
 					_fragmentConstantData[k++] = pointLight._specularG;
@@ -346,6 +345,7 @@ package away3d.materials.passes
 
 		override protected function updateProbes(stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			var probe : LightProbe;
 			var lightProbes : Vector.<LightProbe> = _lightPicker.lightProbes;
 			var weights : Vector.<Number> = _lightPicker.lightProbeWeights;
@@ -361,9 +361,9 @@ package away3d.materials.passes
 				probe = lightProbes[_lightProbesOffset + i];
 
 				if (addDiff)
-					stage3DProxy.setTextureAt(_lightProbeDiffuseIndices[i], probe.diffuseMap.getTextureForStage3D(stage3DProxy));
+					context.setTextureAt(_lightProbeDiffuseIndices[i], probe.diffuseMap.getTextureForStage3D(stage3DProxy));
 				if (addSpec)
-					stage3DProxy.setTextureAt(_lightProbeSpecularIndices[i], probe.specularMap.getTextureForStage3D(stage3DProxy));
+					context.setTextureAt(_lightProbeSpecularIndices[i], probe.specularMap.getTextureForStage3D(stage3DProxy));
 			}
 
 			for (i = 0; i < len; ++i)

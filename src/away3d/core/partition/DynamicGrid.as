@@ -1,6 +1,7 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.entities.Entity;
 
 	import flash.geom.Vector3D;
@@ -24,7 +25,6 @@ package away3d.core.partition
 		private var _cellWidth : Number;
 		private var _cellHeight : Number;
 		private var _cellDepth : Number;
-		private static var _entityWorldBounds : Vector.<Number> = new Vector.<Number>();
 		private var _showDebugBounds : Boolean;
 
 		public function DynamicGrid(minBounds : Vector3D, maxBounds : Vector3D, numCellsX : uint, numCellsY : uint, numCellsZ : uint)
@@ -104,8 +104,9 @@ package away3d.core.partition
 
 		public function findPartitionForEntity(entity : Entity) : NodeBase
 		{
-			var min : Vector3D = entity.worldBounds.min;
-			var max : Vector3D = entity.worldBounds.max;
+			var bounds : BoundingVolumeBase = entity.worldBounds;
+			var min : Vector3D = bounds.min;
+			var max : Vector3D = bounds.max;
 
 			var minX : Number = min.x;
 			var minY : Number = min.y;

@@ -47,13 +47,28 @@
 		private var _specularMethod : BasicSpecularMethod = new BasicSpecularMethod();
 
 		private var _screenPassesInvalid : Boolean = true;
+		private var _enableLightFallOff : Boolean = true;
 
 		/**
-		 * Creates a new DefaultMaterialBase object.
+		 * Creates a new MultiPassMaterialBase object.
 		 */
 		public function MultiPassMaterialBase()
 		{
 			super();
+		}
+
+		/**
+		 * Whether or not to use fallOff and radius properties for lights.
+		 */
+		public function get enableLightFallOff() : Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			if (_enableLightFallOff != value) invalidateScreenPasses();
+			_enableLightFallOff = value;
 		}
 
 		/**
@@ -477,19 +492,22 @@
 					_nonCasterLightPasses[0].forceSeperateMVP = true;
 					_nonCasterLightPasses[0].setBlendMode(BlendMode.NORMAL, false);
 					_nonCasterLightPasses[0].depthCompareMode = depthCompareMode;
+					_nonCasterLightPasses[0].writeDepth = false;
 					firstAdditiveIndex = 1;
 				}
 				for (var i : int = firstAdditiveIndex; i < _nonCasterLightPasses.length; ++i) {
 					_nonCasterLightPasses[i].forceSeperateMVP = true;
 					_nonCasterLightPasses[i].setBlendMode(BlendMode.ADD, false);
-					_nonCasterLightPasses[i].depthCompareMode = Context3DCompareMode.EQUAL;
+					_nonCasterLightPasses[i].depthCompareMode = Context3DCompareMode.LESS_EQUAL;
+					if (i == 0) _nonCasterLightPasses[i].writeDepth = true;
 				}
 			}
 
 			if (_casterLightPass || _nonCasterLightPasses) {
 				if (_effectsPass) {
-					_effectsPass.depthCompareMode = Context3DCompareMode.EQUAL;
+					_effectsPass.depthCompareMode = Context3DCompareMode.LESS_EQUAL;
 					_effectsPass.setBlendMode(BlendMode.NORMAL, true);
+					_effectsPass.writeDepth = false;
 					_effectsPass.forceSeperateMVP = true;
 				}
 			}
@@ -508,6 +526,7 @@
 			_casterLightPass.normalMethod = null;
 			_casterLightPass.specularMethod = null;
 			_casterLightPass.shadowMethod = null;
+			_casterLightPass.enableLightFallOff = _enableLightFallOff;
 			_casterLightPass.lightPicker = new StaticLightPicker([_shadowMethod.castingLight]);
 			_casterLightPass.shadowMethod = _shadowMethod;
 			_casterLightPass.diffuseMethod = _diffuseMethod;
@@ -545,6 +564,7 @@
 			_nonCasterLightPasses = new Vector.<LightingPass>();
 			while (dirLightOffset < numDirLights || pointLightOffset < numPointLights || probeOffset < numLightProbes) {
 				pass = new LightingPass(this);
+				pass.enableLightFallOff = _enableLightFallOff;
 				pass.includeCasters = _shadowMethod == null;
 				pass.directionalLightsOffset = dirLightOffset;
 				pass.pointLightsOffset = pointLightOffset;
@@ -590,6 +610,7 @@
 		private function initEffectsPass() : SuperShaderPass
 		{
 			_effectsPass ||= new SuperShaderPass(this);
+			_effectsPass.enableLightFallOff = _enableLightFallOff;
 			if (numLights == 0) {
 				_effectsPass.diffuseMethod = null;
 				_effectsPass.diffuseMethod = _diffuseMethod;

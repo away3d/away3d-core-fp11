@@ -10,13 +10,11 @@ package away3d.materials.passes
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.Mesh;
-	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
-	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
 
@@ -196,7 +194,6 @@ package away3d.materials.passes
 			else {
 				renderable.activateVertexNormalBuffer(1, stage3DProxy);
 
-				var context : Context3D = stage3DProxy._context3D;
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
 				renderable.activateVertexBuffer(0, stage3DProxy);
 				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);

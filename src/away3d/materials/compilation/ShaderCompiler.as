@@ -17,6 +17,7 @@ package away3d.materials.compilation {
 		protected var _smooth : Boolean;
 		protected var _repeat : Boolean;
 		protected var _mipmap : Boolean;
+		protected var _enableLightFallOff : Boolean;
 		protected var _preserveAlpha : Boolean = true;
 		protected var _animateUVs : Boolean;
 		protected var _alphaPremultiplied : Boolean;
@@ -62,17 +63,30 @@ package away3d.materials.compilation {
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
 
+		protected var _profile : String;
+
 		private var _forceSeperateMVP:Boolean;
 
 		use namespace arcane;
 
-		public function ShaderCompiler()
+		public function ShaderCompiler(profile : String)
 		{
 			_sharedRegisters = new ShaderRegisterData();
 			_dependencyCounter = new MethodDependencyCounter();
-			initRegisterCache();
+			_profile = profile;
+			initRegisterCache(profile);
 		}
-		
+
+		public function get enableLightFallOff() : Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			_enableLightFallOff = value;
+		}
+
 		public function get needUVAnimation():Boolean
 		{
 			return _needUVAnimation;
@@ -98,9 +112,9 @@ package away3d.materials.compilation {
 			_forceSeperateMVP = value;
 		}
 
-		private function initRegisterCache() : void
+		private function initRegisterCache(profile : String) : void
 		{
-			_registerCache = new ShaderRegisterCache();
+			_registerCache = new ShaderRegisterCache(profile);
 			_registerCache.vertexAttributesOffset = 1;
 			_registerCache.reset();
 		}
@@ -173,13 +187,12 @@ package away3d.materials.compilation {
 
 			createCommons();
 			calculateDependencies();
-			if (_forceSeperateMVP) _dependencyCounter.addWorldSpaceDependencies(false);
 			updateMethodRegisters();
 
 			for (var i : uint = 0; i < 4; ++i)
 				_registerCache.getFreeVertexConstant();
 
-			if (_dependencyCounter.globalPosDependencies > 0) compileGlobalPositionCode();
+			if (_dependencyCounter.globalPosDependencies > 0 || _forceSeperateMVP) compileGlobalPositionCode();
 			compileProjectionCode();
 			compileMethodsCode();
 			compileFragmentOutput();
@@ -366,6 +379,7 @@ package away3d.materials.compilation {
 			methodVO.useSmoothTextures = _smooth;
 			methodVO.repeatTextures = _repeat;
 			methodVO.useMipmapping = _mipmap;
+			methodVO.useLightFallOff = _enableLightFallOff && _profile != "baselineConstrained";
 			methodVO.numLights = _numLights + _numLightProbes;
 			method.initVO(methodVO);
 		}

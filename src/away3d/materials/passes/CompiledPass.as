@@ -21,7 +21,6 @@ package away3d.materials.passes
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
 
@@ -37,10 +36,8 @@ package away3d.materials.passes
 
 		protected var _vertexCode : String;
 		protected var _fragmentLightCode : String;
-		protected var _fragmentAnimationCode : String;
 		protected var _framentPostLightCode : String;
-		
-		
+
 		protected var _vertexConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _fragmentConstantData : Vector.<Number> = new Vector.<Number>();
 		protected var _commonsDataIndex : int;
@@ -73,6 +70,9 @@ package away3d.materials.passes
 		protected var _numPointLights : uint;
 		protected var _numDirectionalLights : uint;
 		protected var _numLightProbes : uint;
+
+		protected var _enableLightFallOff : Boolean = true;
+
 		private var _forceSeperateMVP : Boolean;
 
 		public function CompiledPass(material : MaterialBase)
@@ -82,6 +82,16 @@ package away3d.materials.passes
 			init();
 		}
 
+		public function get enableLightFallOff() : Boolean
+		{
+			return _enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			if (value != _enableLightFallOff) invalidateShaderProgram(true);
+			_enableLightFallOff = value;
+		}
 
 		public function get forceSeperateMVP() : Boolean
 		{
@@ -113,16 +123,16 @@ package away3d.materials.passes
 		 */
 		override arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
 		{
-			reset();
+			reset(stage3DProxy.profile);
 			super.updateProgram(stage3DProxy);
 		}
 
 		/**
 		 * Resets the compilation state.
 		 */
-		private function reset() : void
+		private function reset(profile : String) : void
 		{
-			initCompiler();
+			initCompiler(profile);
 			updateShaderProperties();
 			initConstantData();
 			cleanUp();
@@ -152,9 +162,9 @@ package away3d.materials.passes
 			updateMethodConstants();
 		}
 
-		protected function initCompiler() : void
+		protected function initCompiler(profile : String) : void
 		{
-			_compiler = createCompiler();
+			_compiler = createCompiler(profile);
 			_compiler.forceSeperateMVP = _forceSeperateMVP;
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
@@ -165,12 +175,13 @@ package away3d.materials.passes
 			_compiler.setTextureSampling(_smooth, _repeat, _mipmap);
 			_compiler.setConstantDataBuffers(_vertexConstantData, _fragmentConstantData);
 			_compiler.animateUVs = _animateUVs;
-			_compiler.alphaPremultiplied = _alphaPremultiplied;
-			_compiler.preserveAlpha = _preserveAlpha;
+			_compiler.alphaPremultiplied = _alphaPremultiplied && _enableBlending;
+			_compiler.preserveAlpha = _preserveAlpha && _enableBlending;
+			_compiler.enableLightFallOff = _enableLightFallOff;
 			_compiler.compile();
 		}
 
-		protected function createCompiler() : ShaderCompiler
+		protected function createCompiler(profile : String) : ShaderCompiler
 		{
 			throw new AbstractMethodError();
 		}

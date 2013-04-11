@@ -74,12 +74,12 @@ package away3d.materials.methods
 			code += "dp3 " + t + ".w, " + lightDirReg + ".xyz, " + _sharedRegisters.normalFragment + ".xyz\n" +
 					"mul " + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".x\n" +
 					"add " + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".x\n" +
-					"mul " + t + ".xyz, " + t + ".w, " + lightDirReg + ".wyz\n";
+					"mul " + t + ".xyz, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
 			code += getTex2DSampleCode(vo, t, _gradientTextureRegister, _gradient, t, "clamp") +
-					"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" +
+//					"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" +
 					"mul " + t + ".xyz, " + t + ".xyz, " + lightColReg + ".xyz\n";
 
 			if (!_isFirstLight) {
@@ -105,7 +105,7 @@ package away3d.materials.methods
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(vo, stage3DProxy);
-			stage3DProxy.setTextureAt(vo.secondaryTexturesIndex, _gradient.getTextureForStage3D(stage3DProxy));
+			stage3DProxy._context3D.setTextureAt(vo.secondaryTexturesIndex, _gradient.getTextureForStage3D(stage3DProxy));
 		}
 	}
 }

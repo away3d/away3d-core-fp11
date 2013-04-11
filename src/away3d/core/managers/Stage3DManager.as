@@ -49,13 +49,14 @@ package away3d.core.managers
 		 * Requests the Stage3DProxy for the given index.
 		 * @param index The index of the requested Stage3D.
 		 * @param forceSoftware Whether to force software mode even if hardware acceleration is available.
+		 * @param profile The compatibility profile, an enumeration of Context3DProfile
 		 * @return The Stage3DProxy for the given index.
 		 */
-		public function getStage3DProxy(index : uint, forceSoftware : Boolean = false) : Stage3DProxy
+		public function getStage3DProxy(index : uint, forceSoftware : Boolean = false, profile : String = "baseline") : Stage3DProxy
 		{
 			if(!_stageProxies[index]){
 				_numStageProxies++;
-				_stageProxies[index] = new Stage3DProxy(index, _stage.stage3Ds[index], this, forceSoftware);
+				_stageProxies[index] = new Stage3DProxy(index, _stage.stage3Ds[index], this, forceSoftware, profile);
 			}
 
 			return _stageProxies[index];
@@ -75,16 +76,17 @@ package away3d.core.managers
 		/**
 		 * Get the next available stage3DProxy. An error is thrown if there are no Stage3DProxies available 
 		 * @param forceSoftware Whether to force software mode even if hardware acceleration is available.
+		 * @param profile The compatibility profile, an enumeration of Context3DProfile
 		 * @return The allocated stage3DProxy
 		 */
-		public function getFreeStage3DProxy(forceSoftware:Boolean = false) : Stage3DProxy
+		public function getFreeStage3DProxy(forceSoftware:Boolean = false, profile: String = "baseline") : Stage3DProxy
 		{
 			var i : uint;
 			var len : uint = _stageProxies.length;
 
 			while (i < len) {
 				if (!_stageProxies[i]) {
-					getStage3DProxy(i, forceSoftware);
+					getStage3DProxy(i, forceSoftware, profile);
 					_stageProxies[i].width = _stage.stageWidth;
 					_stageProxies[i].height = _stage.stageHeight;
 					return _stageProxies[i];

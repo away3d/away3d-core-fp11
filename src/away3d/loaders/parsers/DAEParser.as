@@ -1104,8 +1104,8 @@ class DAEVertex
 	public var uvx2 : Number;
 	public var uvy2 : Number;
 	public var numTexcoordSets : uint = 0;
-	public var index : uint = NaN;
-	public var daeIndex : uint = NaN;
+	public var index : uint = 0;
+	public var daeIndex : uint = 0;
 
 	public function DAEVertex(numTexcoordSets : uint)
 	{

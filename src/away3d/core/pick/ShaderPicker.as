@@ -162,7 +162,7 @@ package away3d.core.pick
 			if (!_objectProgram3D) initObjectProgram3D();
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
-			_stage3DProxy.setProgram(_objectProgram3D);
+			_context.setProgram(_objectProgram3D);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _viewportData, 1);
 			drawRenderables(entityCollector.opaqueRenderableHead, camera);
 			drawRenderables(entityCollector.blendedRenderableHead, camera);
@@ -293,7 +293,7 @@ package away3d.core.pick
 			_boundOffsetScale[1] = offsY = -entity.minY;
 			_boundOffsetScale[2] = offsZ = -entity.minZ;
 
-			_stage3DProxy.setProgram(_triangleProgram3D);
+			_context.setProgram(_triangleProgram3D);
 			_context.clear(0, 0, 0, 0, 1, 0, Context3DClearMask.DEPTH);
 			_context.setScissorRectangle(MOUSE_SCISSOR_RECT);
 			_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, localViewProjection, true);

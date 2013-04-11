@@ -21,7 +21,7 @@ package away3d.animators
 		/**
 		* @inheritDoc
 		*/
-		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>):String
+		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile : String):String
 		{
 			_agalCode = "mov "+targetRegisters[0]+", "+sourceRegisters[0]+"\n";
 			_agalCode += "mov "+targetRegisters[1]+", "+sourceRegisters[1]+"\n";
@@ -46,7 +46,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String
 		{
 			return "";
 		}

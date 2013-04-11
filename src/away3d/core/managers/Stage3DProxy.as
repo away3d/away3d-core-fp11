@@ -39,6 +39,7 @@ package away3d.core.managers
 		arcane var _stage3DIndex : int = -1;
 
 		private var _usesSoftwareRendering : Boolean;
+		private var _profile : String;
 		private var _stage3D : Stage3D;
 		private var _activeProgram3D : Program3D;
 		private var _stage3DManager : Stage3DManager;
@@ -109,7 +110,7 @@ package away3d.core.managers
 		 * @param stage3DManager
 		 * @param forceSoftware Whether to force software mode even if hardware acceleration is available.
 		 */
-		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager, forceSoftware : Boolean = false)
+		public function Stage3DProxy(stage3DIndex : int, stage3D : Stage3D, stage3DManager : Stage3DManager, forceSoftware : Boolean = false, profile : String = "baseline")
 		{
 			_stage3DIndex = stage3DIndex;
 			_stage3D = stage3D;
@@ -122,32 +123,12 @@ package away3d.core.managers
 			
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
-			requestContext(forceSoftware);
+			requestContext(forceSoftware, profile);
 		}
 
-		/**
-		 * Assign the texture in the Context3D ready for use in the shader.
-		 * @param index The index where the texture is set
-		 * @param texture The texture to set
-		 */
-		public function setTextureAt(index : int, texture : TextureBase) : void
+		public function get profile() : String
 		{
-			if (_activeTextures[index] == texture) return;
-
-			_context3D.setTextureAt(index,  texture);
-
-			_activeTextures[index] = texture;
-		}
-
-		/**
-		 * Set the shader program for the subsequent rendering calls.
-		 * @param program3D The program to be used in the shader
-		 */
-		public function setProgram(program3D : Program3D) : void
-		{
-			if (_activeProgram3D == program3D) return;
-			_context3D.setProgram(program3D);
-			_activeProgram3D = program3D;
+			return _profile;
 		}
 
 		/**
@@ -544,15 +525,22 @@ package away3d.core.managers
 		/**
 		 * Requests a Context3D object to attach to the managed Stage3D.
 		 */
-		private function requestContext(forceSoftware : Boolean = false) : void
+		private function requestContext(forceSoftware : Boolean = false, profile : String = "baseline") : void
 		{
 			// If forcing software, we can be certain that the
 			// returned Context3D will be running software mode.
 			// If not, we can't be sure and should stick to the
 			// old value (will likely be same if re-requesting.)
 			_usesSoftwareRendering ||= forceSoftware;
+			_profile = profile;
 
-			_stage3D.requestContext3D(forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO);
+			// ugly stuff for backward compatibility
+			var renderMode : String = forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO;
+			if (profile == "baseline")
+				_stage3D.requestContext3D(renderMode);
+			else
+				_stage3D["requestContext3D"](renderMode, profile);
+
 			_contextRequested = true;
 		}
 		

@@ -70,7 +70,7 @@ package away3d.materials.methods
 
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			if (vo.texturesIndex >= 0) stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+			if (vo.texturesIndex >= 0) stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 		}
 
 		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
