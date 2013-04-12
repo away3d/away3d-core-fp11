@@ -91,6 +91,16 @@ package away3d.containers
 		}
 
 		/**
+		 * Removes a child from the scene's root.
+		 * @param index Index of child to be removed from the scene.
+		 */
+		public function removeChildAt(index : uint) : void
+		{
+			_sceneGraphRoot.removeChildAt(index);
+		}
+		
+		
+		/**
 		 * Retrieves the child with the given index
 		 * @param index The index for the child to be retrieved.
 		 * @return The child with the given index

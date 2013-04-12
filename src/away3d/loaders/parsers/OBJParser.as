@@ -354,10 +354,12 @@ package away3d.loaders.parsers
 					translateVertexData(face, j+1, vertices, uvs, indices, normals);
 				}
 			}
-			
-			subs = GeomUtil.fromVectors(vertices, indices, uvs, normals, null, null, null);
-			for (i=0; i<subs.length; i++) {
-				geometry.addSubGeometry(subs[i]);
+			if (vertices.length > 0)
+			{
+				subs = GeomUtil.fromVectors(vertices, indices, uvs, normals, null, null, null);
+				for (i=0; i<subs.length; i++) {
+					geometry.addSubGeometry(subs[i]);
+				}
 			}
 		}
 		
