@@ -67,7 +67,6 @@ package away3d.core.managers
 
 		public function updateCollider(view : View3D) : void
 		{
-			_previousCollidingObject = _collidingObject;
 			_previousCollidingView = _collidingView;
 
 			if (view) {
