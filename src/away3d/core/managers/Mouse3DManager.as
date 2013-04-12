@@ -134,6 +134,7 @@ package away3d.core.managers
 			_queuedEvents.length = 0;
 
 			_updateDirty = false;
+			_previousCollidingObject = _collidingObject;
 		}
 
 
