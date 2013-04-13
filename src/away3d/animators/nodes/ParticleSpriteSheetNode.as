@@ -115,24 +115,24 @@ package away3d.animators.nodes
 			animationRegisterCache.setRegisterIndex(this, UV_INDEX_0, uvParamConst1.index);
 			animationRegisterCache.setRegisterIndex(this, UV_INDEX_1, uvParamConst2.index);
 			
-			var uTotal:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "x");
-			var uStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "y");
-			var vStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, "z");
+			var uTotal:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, 0);
+			var uStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, 1);
+			var vStep:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst1.regName, uvParamConst1.index, 2);
 			
-			var uSpeed:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, "x");
-			var cycle:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, "y");
-			var phaseTime:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, "z");
+			var uSpeed:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, 0);
+			var cycle:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, 1);
+			var phaseTime:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, 2);
 			
 			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			var time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
-			var vOffset:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
-			temp = new ShaderRegisterElement(temp.regName, temp.index, "z");
-			var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "w");
+			var time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 0);
+			var vOffset:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 1);
+			temp = new ShaderRegisterElement(temp.regName, temp.index, 2);
+			var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 3);
 			
 			
-			var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, "x");
-			var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, "y");
+			var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, 0);
+			var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, 1);
 			
 			var code:String = "";
 			//scale uv

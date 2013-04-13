@@ -54,10 +54,10 @@ package away3d.animators.nodes
 			var distance:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var code:String = "";
 			code += "mul " + distance + "," + animationRegisterCache.vertexTime + "," + velocityValue + "\n";
-			code += "add " + animationRegisterCache.positionTarget +"," + distance + "," + animationRegisterCache.positionTarget + "\n";
+			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + "," + animationRegisterCache.positionTarget + ".xyz\n";
 			
 			if (animationRegisterCache.needVelocity)
-				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + velocityValue + ".xyz," + animationRegisterCache.velocityTarget + "\n";
+				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + velocityValue + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";
 			
 			return code;
 		}

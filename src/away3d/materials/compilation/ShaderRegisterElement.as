@@ -8,9 +8,9 @@ package away3d.materials.compilation
 		private var _regName : String;
 		private var _index : int;
 		private var _toStr : String;
-		
+
 		private static const COMPONENTS : Array = ["x", "y", "z", "w"];
-		
+
 		internal var _component : int;
 
 		/**
@@ -23,12 +23,12 @@ package away3d.materials.compilation
 			_component = component;
 			_regName = regName;
 			_index = index;
-			
+
 			_toStr = _regName;
-			
+
 			if (_index >= 0 )
 				_toStr += _index;
-				
+
 			if ( component > -1 )
 				_toStr += "." + COMPONENTS[component];
 		}

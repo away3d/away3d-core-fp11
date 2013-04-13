@@ -196,13 +196,13 @@ package away3d.animators
 			if (hasUVNode)
 			{
 				_animationRegisterCache.setUVSourceAndTarget(UVSource, UVTarget);
-				code += "mov " + _animationRegisterCache.uvTarget.toString() + "," + _animationRegisterCache.uvAttribute.toString() + "\n";
+				code += "mov " + _animationRegisterCache.uvTarget + ".xy," + _animationRegisterCache.uvAttribute.toString() + "\n";
 				var node:ParticleNodeBase;
 				for each(node in _particleNodes)
 				{
 					code += node.getAGALUVCode(pass, _animationRegisterCache);
 				}
-				code += "mov " + _animationRegisterCache.uvVar.toString() + "," + _animationRegisterCache.uvTarget.toString() + "\n";
+				code += "mov " + _animationRegisterCache.uvVar.toString() + "," + _animationRegisterCache.uvTarget + ".xy\n";
 			}
 			else
 			{

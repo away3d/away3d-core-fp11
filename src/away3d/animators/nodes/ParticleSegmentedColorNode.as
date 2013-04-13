@@ -83,8 +83,8 @@ package away3d.animators.nodes
 				animationRegisterCache.addVertexTempUsages(tempColor, 1);
 				
 				var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-				var accTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
-				var tempTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName,temp.index,"y");
+				var accTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 0);
+				var tempTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName,temp.index, 1);
 				
 				if (_usesMultiplier)
 					animationRegisterCache.removeVertexTempUsage(accMultiplierColor);

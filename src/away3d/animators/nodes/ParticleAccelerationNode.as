@@ -61,7 +61,7 @@ package away3d.animators.nodes
 			{
 				var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				code += "mul " + temp2 + "," + temp + "," + animationRegisterCache.vertexTwoConst + "\n";
-				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + temp2 + ".xyz," + animationRegisterCache.velocityTarget + "\n";
+				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + temp2 + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";
 			}
 			animationRegisterCache.removeVertexTempUsage(temp);
 			

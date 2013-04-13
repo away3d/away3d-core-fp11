@@ -51,7 +51,7 @@ package away3d.animators.nodes
 			var positionAttribute:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, POSITION_INDEX, positionAttribute.index);
 			
-			return "add " + animationRegisterCache.positionTarget +"," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + "\n";
+			return "add " + animationRegisterCache.positionTarget +".xyz," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 		}
 		
 		/**

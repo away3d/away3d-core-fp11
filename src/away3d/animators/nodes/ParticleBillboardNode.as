@@ -45,7 +45,7 @@ package away3d.animators.nodes
 			animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.getFreeVertexConstant();
 			
-			var code:String = "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + rotationMatrixRegister + "\n";
+			var code:String = "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + rotationMatrixRegister + "\n";
 			
 			var shaderRegisterElement:ShaderRegisterElement;
 			for each (shaderRegisterElement in animationRegisterCache.rotationRegisters)

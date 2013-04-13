@@ -59,12 +59,12 @@ package away3d.animators.nodes
 			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			animationRegisterCache.addVertexTempUsages(temp, 1);
-			var R:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "xyz");
+			var Rtemp:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index);
 			var R_rev:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			R_rev = new ShaderRegisterElement(R_rev.regName, R_rev.index, "xyz");
+			R_rev = new ShaderRegisterElement(R_rev.regName, R_rev.index);
 			
-			var cos:ShaderRegisterElement = new ShaderRegisterElement(R.regName, R.index, "w");
-			var sin:ShaderRegisterElement = new ShaderRegisterElement(R_rev.regName, R_rev.index, "w");
+			var cos:ShaderRegisterElement = new ShaderRegisterElement(Rtemp.regName, Rtemp.index, 3);
+			var sin:ShaderRegisterElement = new ShaderRegisterElement(R_rev.regName, R_rev.index, 3);
 			
 			animationRegisterCache.removeVertexTempUsage(nrmVel);
 			animationRegisterCache.removeVertexTempUsage(xAxis);
@@ -79,28 +79,28 @@ package away3d.animators.nodes
 			code += "sin " + sin + "," + cos + "\n";
 			code += "cos " + cos + "," + cos + "\n";
 			
-			code += "mul " + R + "," + sin +"," + nrmVel + ".xyz\n";
+			code += "mul " + Rtemp + ".xyz," + sin +"," + nrmVel + ".xyz\n";
 			
-			code += "mul " + R_rev + "," + sin + "," + nrmVel + ".xyz\n";
-			code += "neg " + R_rev + "," + R_rev + "\n";
+			code += "mul " + R_rev + ".xyz," + sin + "," + nrmVel + ".xyz\n";
+			code += "neg " + R_rev + ".xyz," + R_rev + ".xyz\n";
 			
 			//nrmVel and xAxis are used as temp register
-			code += "crs " + nrmVel + ".xyz," + R + ".xyz," +animationRegisterCache.scaleAndRotateTarget + ".xyz\n";
+			code += "crs " + nrmVel + ".xyz," + Rtemp + ".xyz," +animationRegisterCache.scaleAndRotateTarget + ".xyz\n";
 
-			code += "mul " + xAxis + ".xyz," + cos +"," + animationRegisterCache.scaleAndRotateTarget + "\n";
+			code += "mul " + xAxis + ".xyz," + cos +"," + animationRegisterCache.scaleAndRotateTarget + ".xyz\n";
 			code += "add " + nrmVel + ".xyz," + nrmVel +".xyz," + xAxis + ".xyz\n";
-			code += "dp3 " + xAxis + ".w," + R + "," +animationRegisterCache.scaleAndRotateTarget + "\n";
+			code += "dp3 " + xAxis + ".w," + Rtemp + ".xyz," +animationRegisterCache.scaleAndRotateTarget + ".xyz\n";
 			code += "neg " + nrmVel + ".w," + xAxis + ".w\n";
 			
 			
-			code += "crs " + R + "," + nrmVel + ".xyz," +R_rev + "\n";
+			code += "crs " + Rtemp + ".xyz," + nrmVel + ".xyz," +R_rev + ".xyz\n";
 
 			//use cos as R_rev.w
 			code += "mul " + xAxis + ".xyzw," + nrmVel + ".xyzw," +cos + "\n";
-			code += "add " + R + "," + R + "," + xAxis + ".xyz\n";
-			code += "mul " + xAxis + ".xyz," + nrmVel + ".w," +R_rev + "\n";
+			code += "add " + Rtemp + ".xyz," + Rtemp + ".xyz," + xAxis + ".xyz\n";
+			code += "mul " + xAxis + ".xyz," + nrmVel + ".w," +R_rev + ".xyz\n";
 			
-			code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + R + "," + xAxis + ".xyz\n";
+			code += "add " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + Rtemp + ".xyz," + xAxis + ".xyz\n";
 			
 			var len:int = animationRegisterCache.rotationRegisters.length;
 			for (var i:int = 0; i < len; i++)
@@ -110,19 +110,19 @@ package away3d.animators.nodes
 				code += "mul " + cos + "," + animationRegisterCache.vertexTime + "," + rotationRegister + ".w\n";
 				code += "sin " + sin + "," + cos + "\n";
 				code += "cos " + cos + "," + cos + "\n";
-				code += "mul " + R + "," + sin +"," + nrmVel + ".xyz\n";
-				code += "mul " + R_rev + "," + sin + "," + nrmVel + ".xyz\n";
-				code += "neg " + R_rev + "," + R_rev + "\n";
-				code += "crs " + nrmVel + ".xyz," + R + ".xyz," +animationRegisterCache.rotationRegisters[i] + ".xyz\n";
+				code += "mul " + Rtemp + ".xyz," + sin +"," + nrmVel + ".xyz\n";
+				code += "mul " + R_rev + ".xyz," + sin + "," + nrmVel + ".xyz\n";
+				code += "neg " + R_rev + ".xyz," + R_rev + ".xyz\n";
+				code += "crs " + nrmVel + ".xyz," + Rtemp + ".xyz," +animationRegisterCache.rotationRegisters[i] + ".xyz\n";
 				code += "mul " + xAxis + ".xyz," + cos +"," + animationRegisterCache.rotationRegisters[i] + "\n";
 				code += "add " + nrmVel + ".xyz," + nrmVel +".xyz," + xAxis + ".xyz\n";
-				code += "dp3 " + xAxis + ".w," + R + "," +animationRegisterCache.rotationRegisters[i] + "\n";
+				code += "dp3 " + xAxis + ".w," + Rtemp + ".xyz," +animationRegisterCache.rotationRegisters[i] + "\n";
 				code += "neg " + nrmVel + ".w," + xAxis + ".w\n";
-				code += "crs " + R + "," + nrmVel + ".xyz," +R_rev + "\n";
+				code += "crs " + Rtemp + ".xyz," + nrmVel + ".xyz," +R_rev + ".xyz\n";
 				code += "mul " + xAxis + ".xyzw," + nrmVel + ".xyzw," +cos + "\n";
-				code += "add " + R + "," + R + "," + xAxis + ".xyz\n";
-				code += "mul " + xAxis + ".xyz," + nrmVel + ".w," +R_rev + "\n";
-				code += "add " + animationRegisterCache.rotationRegisters[i] + "," + R + "," + xAxis + ".xyz\n";
+				code += "add " + Rtemp + ".xyz," + Rtemp + ".xyz," + xAxis + ".xyz\n";
+				code += "mul " + xAxis + ".xyz," + nrmVel + ".w," +R_rev + ".xyz\n";
+				code += "add " + animationRegisterCache.rotationRegisters[i] + "," + Rtemp + ".xyz," + xAxis + ".xyz\n";
 			}
 			return code;
 		}
