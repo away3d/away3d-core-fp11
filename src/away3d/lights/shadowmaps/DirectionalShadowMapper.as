@@ -117,9 +117,12 @@ package away3d.lights.shadowmaps
 
 			dir = DirectionalLight(_light).sceneDirection;
 			_depthCamera.transform = _light.sceneTransform;
-			_depthCamera.x = viewCamera.x-dir.x * _lightOffset;
-			_depthCamera.y = viewCamera.y-dir.y * _lightOffset;
-			_depthCamera.z = viewCamera.z-dir.z * _lightOffset;
+			x = int((viewCamera.x-dir.x * _lightOffset)/_snap)*_snap;
+			y = int((viewCamera.y-dir.y * _lightOffset)/_snap)*_snap;
+			z = int((viewCamera.z-dir.z * _lightOffset)/_snap)*_snap;
+			_depthCamera.x = x;
+			_depthCamera.y = y;
+			_depthCamera.z = z;
 
 			_matrix.copyFrom(_depthCamera.inverseSceneTransform);
 			_matrix.prepend(viewCamera.sceneTransform);
@@ -143,6 +146,8 @@ package away3d.lights.shadowmaps
 			var h : Number = (maxY - minY);
 			var d : Number = 1/(maxZ - minZ);
 
+			if (minX < 0) minX -= _snap;	// because int() rounds up for < 0
+			if (minY < 0) minY -= _snap;
 			minX = int(minX / _snap) * _snap;
 			minY = int(minY / _snap) * _snap;
 

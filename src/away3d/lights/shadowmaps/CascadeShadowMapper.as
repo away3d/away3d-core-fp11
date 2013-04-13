@@ -224,9 +224,12 @@ package away3d.lights.shadowmaps
 			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
 
 			_overallCamera.transform = _light.sceneTransform;
-			_overallCamera.x = viewCamera.x - dir.x * _lightOffset;
-			_overallCamera.y = viewCamera.y - dir.y * _lightOffset;
-			_overallCamera.z = viewCamera.z - dir.z * _lightOffset;
+			var x : Number = int((viewCamera.x-dir.x * _lightOffset)/_snap)*_snap;
+			var y : Number = int((viewCamera.y-dir.y * _lightOffset)/_snap)*_snap;
+			var z : Number = int((viewCamera.z-dir.z * _lightOffset)/_snap)*_snap;
+			_overallCamera.x = x;
+			_overallCamera.y = y;
+			_overallCamera.z = z;
 
 			_calcMatrix.copyFrom(viewCamera.sceneTransform);
 			_calcMatrix.append(_overallCamera.inverseSceneTransform);
@@ -268,6 +271,8 @@ package away3d.lights.shadowmaps
 			var h : Number = (maxY - minY);
 			var d : Number = 1/(maxZ - minZ);
 
+			if (minX < 0) minX -= _snap;	// because int() rounds up for < 0
+			if (minY < 0) minY -= _snap;
 			minX = int(minX / _snap) * _snap;
 			minY = int(minY / _snap) * _snap;
 
@@ -330,6 +335,8 @@ package away3d.lights.shadowmaps
 			var h : Number = (maxY - minY);
 			var d : Number = 1/(maxZ - minZ);
 
+			if (minX < 0) minX -= _snap;	// because int() rounds up for < 0
+			if (minY < 0) minY -= _snap;
 			minX = int(minX / _snap) * _snap;
 			minY = int(minY / _snap) * _snap;
 
