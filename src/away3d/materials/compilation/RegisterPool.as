@@ -1,5 +1,6 @@
 package away3d.materials.compilation
 {
+	import flash.utils.Dictionary;
 	/**
 	 * RegisterPool is used by the shader compilation process to keep track of which registers of a certain type are
 	 * currently used. Either entire registers can be requested and locked, or single components (x, y, z, w) of a
@@ -7,16 +8,21 @@ package away3d.materials.compilation
 	 */
 	internal class RegisterPool
 	{
-		private var _regName : String;
+		private static const _regPool : Dictionary = new Dictionary();
+		private static const _regCompsPool : Dictionary = new Dictionary();
+		
+		
 		private var _vectorRegisters : Vector.<ShaderRegisterElement>;
 		private var _registerComponents : Array;
-		private var _usedSingleCount : Array;
+		
+		private var _regName : String;
+		private var _usedSingleCount : Vector.<Vector.<uint>>;
 		private var _usedVectorCount : Vector.<uint>;
 		private var _regCount : int;
 
 		private var _persistent : Boolean;
 
-		private static const COMPONENTS : Array = ["x", "y", "z", "w"];
+		
 
 		/**
 		 * Creates a new RegisterPool object.
@@ -39,7 +45,7 @@ package away3d.materials.compilation
 		{
 			for (var i : int = 0; i < _regCount; ++i)
 				if (!isRegisterUsed(i)) {
-					if (_persistent) addUsage(_vectorRegisters[i], 1);
+					if (_persistent) _usedVectorCount[i]++;
 					return _vectorRegisters[i];
 				}
 
@@ -51,14 +57,12 @@ package away3d.materials.compilation
 		 */
 		public function requestFreeRegComponent() : ShaderRegisterElement
 		{
-			var comp : String;
 			for (var i : int = 0; i < _regCount; ++i) {
 				if (_usedVectorCount[i] > 0) continue;
 				for (var j : int = 0; j < 4; ++j) {
-					comp = COMPONENTS[j];
-					if (_usedSingleCount[comp][i] == 0) {
-						if (_persistent) addUsage(_usedSingleCount[comp][i], 1);
-						return _registerComponents[comp][i];
+					if (_usedSingleCount[j][i] == 0) {
+						if (_persistent) _usedSingleCount[j][i]++;
+						return _registerComponents[j][i];
 					}
 				}
 			}
@@ -73,8 +77,8 @@ package away3d.materials.compilation
 		 */
 		public function addUsage(register : ShaderRegisterElement, usageCount : int) : void
 		{
-			if (register.component) {
-				_usedSingleCount[register.component][register.index] += usageCount;
+			if (register._component > -1 ) {
+				_usedSingleCount[register._component][register.index] += usageCount;
 			}
 			else {
 				_usedVectorCount[register.index] += usageCount;
@@ -87,8 +91,8 @@ package away3d.materials.compilation
 		 */
 		public function removeUsage(register : ShaderRegisterElement) : void
 		{
-			if (register.component) {
-				if (--_usedSingleCount[register.component][register.index] < 0) {
+			if (register._component > -1 ) {
+				if (--_usedSingleCount[register._component][register.index] < 0) {
 					throw new Error("More usages removed than exist!");
 				}
 			}
@@ -123,25 +127,42 @@ package away3d.materials.compilation
 		 */
 		private function initRegisters(regName : String, regCount : int) : void
 		{
-			var comp : String;
+			
+			var hash : String = RegisterPool._initPool( regName, regCount );
 
-			_vectorRegisters = new Vector.<ShaderRegisterElement>(regCount, true);
-			_registerComponents = [];
+			_vectorRegisters = RegisterPool._regPool[hash];
+			_registerComponents = RegisterPool._regCompsPool[hash];
+			
 			_usedVectorCount = new Vector.<uint>(regCount, true);
-			_usedSingleCount = [];
+			_usedSingleCount = new Vector.<Vector.<uint>>( 4, true );
+			
+			_usedSingleCount[0] = new Vector.<uint>( regCount, true );
+			_usedSingleCount[1] = new Vector.<uint>( regCount, true );
+			_usedSingleCount[2] = new Vector.<uint>( regCount, true );
+			_usedSingleCount[3] = new Vector.<uint>( regCount, true );
+			
+		}
 
+		private static function _initPool(regName : String, regCount : int) : String
+		{
+			var hash : String = regName+regCount;
+			
+			if( _regPool[hash] != undefined ) return hash;
+			
+			var vectorRegisters : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>(regCount, true);
+			_regPool[hash] = vectorRegisters;
+			
+			var registerComponents : Array = [[], [], [], []];
+			_regCompsPool[hash] = registerComponents;
+			
 			for (var i : int = 0; i < regCount; ++i) {
-				_vectorRegisters[i] = new ShaderRegisterElement(regName, i);
-				_usedVectorCount[i] = 0;
+				vectorRegisters[i] = new ShaderRegisterElement(regName, i);
 
 				for (var j : int = 0; j < 4; ++j) {
-					comp = COMPONENTS[j];
-					_registerComponents[comp] ||= [];
-					_usedSingleCount[comp] ||= [];
-					_registerComponents[comp][i] = new ShaderRegisterElement(regName, i, comp);
-					_usedSingleCount[comp][i] = 0;
+					registerComponents[j][i] = new ShaderRegisterElement(regName, i, j);
 				}
 			}
+			return hash;
 		}
 
 		/**
@@ -151,7 +172,7 @@ package away3d.materials.compilation
 		{
 			if (_usedVectorCount[index] > 0) return true;
 			for (var i : int = 0; i < 4; ++i)
-				if (_usedSingleCount[COMPONENTS[i]][index] > 0) return true;
+				if (_usedSingleCount[i][index] > 0) return true;
 
 			return false;
 		}
