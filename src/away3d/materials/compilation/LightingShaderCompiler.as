@@ -29,13 +29,7 @@ package away3d.materials.compilation
 			_lightVertexConstantIndex = -1;
 		}
 
-		override protected function compileMethodsCode() : void
-		{
-			createNormalRegisters();
-			super.compileMethodsCode();
-		}
-
-		protected function createNormalRegisters() : void
+		override protected function createNormalRegisters() : void
 		{
 			// need to be created FIRST and in this order
 			if (tangentSpace) {
@@ -126,17 +120,14 @@ package away3d.materials.compilation
 				_sharedRegisters.tangentInput = _registerCache.getFreeVertexAttribute();
 				_tangentBufferIndex = _sharedRegisters.tangentInput.index;
 				_sharedRegisters.tangentVarying = _registerCache.getFreeVarying();
-				_vertexCode += "mov " + _sharedRegisters.tangentVarying + ", " + _sharedRegisters.tangentInput + "\n";
 			}
 		}
 
 		private function compileTangentSpaceNormalMapCode() : void
 		{
-			// crs is broken?
 			_vertexCode += "nrm " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + "\n" +
 							"nrm " + _sharedRegisters.animatedTangent + ".xyz, " + _sharedRegisters.animatedTangent + "\n";
-			_vertexCode += 	"crs " + _sharedRegisters.bitangent + ".xyz, " + _sharedRegisters.animatedNormal + ", " + _sharedRegisters.animatedTangent + "\n" +
-							"mov " + _sharedRegisters.bitangent + ".w, " + _sharedRegisters.animatedNormal + ".w\n";
+			_vertexCode += 	"crs " + _sharedRegisters.bitangent + ".xyz, " + _sharedRegisters.animatedNormal + ", " + _sharedRegisters.animatedTangent + "\n";
 
 			_fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _registerCache, _sharedRegisters.normalFragment);
 

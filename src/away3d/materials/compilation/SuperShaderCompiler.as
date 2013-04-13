@@ -34,8 +34,7 @@ package away3d.materials.compilation
 		override protected function compileNormalCode() : void
 		{
 			var normalMatrix : Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>(3, true);
-			_sharedRegisters.animatedNormal = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(_sharedRegisters.animatedNormal, 1);
+
 			_sharedRegisters.normalFragment = _registerCache.getFreeFragmentVectorTemp();
 			_registerCache.addFragmentTempUsages(_sharedRegisters.normalFragment, _dependencyCounter.normalDependencies);
 
@@ -83,23 +82,27 @@ package away3d.materials.compilation
 			_registerCache.removeVertexTempUsage(_sharedRegisters.animatedNormal);
 		}
 
+		override protected function createNormalRegisters() : void
+		{
+			_sharedRegisters.animatedNormal = _registerCache.getFreeVertexVectorTemp();
+			_registerCache.addVertexTempUsages(_sharedRegisters.animatedNormal, 1);
+
+			if (_methodSetup._normalMethod.hasOutput) {
+				_sharedRegisters.tangentInput = _registerCache.getFreeVertexAttribute();
+				_tangentBufferIndex = _sharedRegisters.tangentInput.index;
+
+				_sharedRegisters.animatedTangent = _registerCache.getFreeVertexVectorTemp();
+				_registerCache.addVertexTempUsages(_sharedRegisters.animatedTangent, 1);
+
+				_animatableAttributes.push(_sharedRegisters.tangentInput.toString());
+				_animationTargetRegisters.push(_sharedRegisters.animatedTangent.toString());
+			}
+		}
+
 		private function compileTangentVertexCode(matrix : Vector.<ShaderRegisterElement>) : void
 		{
-			var normalTemp : ShaderRegisterElement;
-			var tanTemp : ShaderRegisterElement;
-			var bitanTemp1 : ShaderRegisterElement;
-			var bitanTemp2 : ShaderRegisterElement;
-
 			_sharedRegisters.tangentVarying = _registerCache.getFreeVarying();
 			_sharedRegisters.bitangentVarying = _registerCache.getFreeVarying();
-
-			_sharedRegisters.tangentInput = _registerCache.getFreeVertexAttribute();
-			_tangentBufferIndex = _sharedRegisters.tangentInput.index;
-
-			_sharedRegisters.animatedTangent = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(_sharedRegisters.animatedTangent, 1);
-			_animatableAttributes.push(_sharedRegisters.tangentInput.toString());
-			_animationTargetRegisters.push(_sharedRegisters.animatedTangent.toString());
 
 			_vertexCode += 	"m33 " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + ", " + matrix[0] + "\n" +
 							"nrm " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + "\n";

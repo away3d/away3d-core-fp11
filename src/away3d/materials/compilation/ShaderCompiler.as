@@ -192,11 +192,17 @@ package away3d.materials.compilation {
 			for (var i : uint = 0; i < 4; ++i)
 				_registerCache.getFreeVertexConstant();
 
+			createNormalRegisters();
 			if (_dependencyCounter.globalPosDependencies > 0 || _forceSeperateMVP) compileGlobalPositionCode();
 			compileProjectionCode();
 			compileMethodsCode();
 			compileFragmentOutput();
 			_fragmentPostLightCode = fragmentCode;
+		}
+
+		protected function createNormalRegisters() : void
+		{
+
 		}
 
 		protected function compileMethodsCode() : void
