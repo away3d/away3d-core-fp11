@@ -275,7 +275,7 @@ package away3d.core.base
 			var i : uint, k : uint;
 			var lenI : uint = _indices.length;
 			var index : uint;
-			var weight : uint;
+			var weight : Number;
 
 			while (i < lenI) {
 				weight = _useFaceWeights? _faceWeights[k++] : 1;
@@ -339,7 +339,7 @@ package away3d.core.base
 			var k : uint;
 			var lenI : uint = _indices.length;
 			var index : uint;
-			var weight : uint;
+			var weight : Number;
 			var f1 : uint = 0, f2 : uint = 1, f3 : uint = 2;
 
 			i = 0;
