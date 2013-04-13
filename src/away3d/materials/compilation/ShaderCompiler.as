@@ -27,7 +27,7 @@ package away3d.materials.compilation {
 		protected var _vertexCode : String;
 		protected var _fragmentCode : String;
 		protected var _fragmentLightCode : String;
-		protected var _framentPostLightCode : String;
+		protected var _fragmentPostLightCode : String;
 		private var _commonsDataIndex : int = -1;
 
 		protected var _animatableAttributes : Vector.<String>;
@@ -65,7 +65,7 @@ package away3d.materials.compilation {
 
 		protected var _profile : String;
 
-		private var _forceSeperateMVP:Boolean;
+		protected var _forceSeperateMVP:Boolean;
 
 		use namespace arcane;
 
@@ -196,7 +196,7 @@ package away3d.materials.compilation {
 			compileProjectionCode();
 			compileMethodsCode();
 			compileFragmentOutput();
-			_framentPostLightCode = fragmentCode;
+			_fragmentPostLightCode = fragmentCode;
 		}
 
 		protected function compileMethodsCode() : void
@@ -282,7 +282,7 @@ package away3d.materials.compilation {
 
 		private function compileProjectionCode() : void
 		{
-			var pos : String = _dependencyCounter.globalPosDependencies > 0? _sharedRegisters.globalPositionVertex.toString() : _animationTargetRegisters[0];
+			var pos : String = _dependencyCounter.globalPosDependencies > 0 || _forceSeperateMVP? _sharedRegisters.globalPositionVertex.toString() : _animationTargetRegisters[0];
 			var code : String;
 
 			if (_dependencyCounter.projectionDependencies > 0) {
@@ -564,9 +564,9 @@ package away3d.materials.compilation {
 			return _fragmentLightCode;
 		}
 		
-		public function get framentPostLightCode() : String
+		public function get fragmentPostLightCode() : String
 		{
-			return _framentPostLightCode;
+			return _fragmentPostLightCode;
 		}
 		
 		public function get shadedTarget():String

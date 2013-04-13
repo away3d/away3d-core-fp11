@@ -480,22 +480,25 @@
 
 		private function setBlendAndCompareModes() : void
 		{
+//			var forceSeparateMVP : Boolean = _casterLightPass || _effectsPass;
+			var forceSeparateMVP : Boolean = true;
+
 			if (_casterLightPass) {
 				_casterLightPass.setBlendMode(BlendMode.NORMAL, false);
 				_casterLightPass.depthCompareMode = depthCompareMode;
-				_casterLightPass.forceSeperateMVP = true;
+				_casterLightPass.forceSeparateMVP = forceSeparateMVP;
 			}
 
 			if (_nonCasterLightPasses) {
 				var firstAdditiveIndex : int = 0;
 				if (!_casterLightPass) {
-					_nonCasterLightPasses[0].forceSeperateMVP = true;
+					_nonCasterLightPasses[0].forceSeparateMVP = forceSeparateMVP;
 					_nonCasterLightPasses[0].setBlendMode(BlendMode.NORMAL, false);
 					_nonCasterLightPasses[0].depthCompareMode = depthCompareMode;
 					firstAdditiveIndex = 1;
 				}
 				for (var i : int = firstAdditiveIndex; i < _nonCasterLightPasses.length; ++i) {
-					_nonCasterLightPasses[i].forceSeperateMVP = true;
+					_nonCasterLightPasses[i].forceSeparateMVP = forceSeparateMVP;
 					_nonCasterLightPasses[i].setBlendMode(BlendMode.ADD, false);
 					_nonCasterLightPasses[i].depthCompareMode = Context3DCompareMode.LESS_EQUAL;
 				}
@@ -505,13 +508,13 @@
 				if (_effectsPass) {
 					_effectsPass.depthCompareMode = Context3DCompareMode.LESS_EQUAL;
 					_effectsPass.setBlendMode(BlendMode.NORMAL, true);
-					_effectsPass.forceSeperateMVP = true;
+					_effectsPass.forceSeparateMVP = forceSeparateMVP;
 				}
 			}
 			else if (_effectsPass) {
 				_effectsPass.depthCompareMode = depthCompareMode;
 				_effectsPass.setBlendMode(BlendMode.NORMAL, false);
-				_effectsPass.forceSeperateMVP = false;
+				_effectsPass.forceSeparateMVP = false;
 			}
 		}
 

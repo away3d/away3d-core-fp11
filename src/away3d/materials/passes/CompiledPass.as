@@ -73,7 +73,7 @@ package away3d.materials.passes
 
 		protected var _enableLightFallOff : Boolean = true;
 
-		private var _forceSeperateMVP : Boolean;
+		private var _forceSeparateMVP : Boolean;
 
 		public function CompiledPass(material : MaterialBase)
 		{
@@ -93,14 +93,14 @@ package away3d.materials.passes
 			_enableLightFallOff = value;
 		}
 
-		public function get forceSeperateMVP() : Boolean
+		public function get forceSeparateMVP() : Boolean
 		{
-			return _forceSeperateMVP;
+			return _forceSeparateMVP;
 		}
 
-		public function set forceSeperateMVP(value : Boolean) : void
+		public function set forceSeparateMVP(value : Boolean) : void
 		{
-			_forceSeperateMVP = value;
+			_forceSeparateMVP = value;
 		}
 
 		arcane function get numPointLights() : uint
@@ -165,7 +165,7 @@ package away3d.materials.passes
 		protected function initCompiler(profile : String) : void
 		{
 			_compiler = createCompiler(profile);
-			_compiler.forceSeperateMVP = _forceSeperateMVP;
+			_compiler.forceSeperateMVP = _forceSeparateMVP;
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
 			_compiler.numLightProbes = _numLightProbes;
@@ -192,7 +192,7 @@ package away3d.materials.passes
 			_animationTargetRegisters = _compiler.animationTargetRegisters;
 			_vertexCode = _compiler.vertexCode;
 			_fragmentLightCode = _compiler.fragmentLightCode;
-			_framentPostLightCode = _compiler.framentPostLightCode;
+			_framentPostLightCode = _compiler.fragmentPostLightCode;
 			_shadedTarget = _compiler.shadedTarget;
 			_usingSpecularMethod = _compiler.usingSpecularMethod;
 			_usesNormals = _compiler.usesNormals;
