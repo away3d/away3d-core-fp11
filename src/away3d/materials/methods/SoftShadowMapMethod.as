@@ -2,6 +2,7 @@ package away3d.materials.methods
 {
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.math.PoissonLookup;
 	import away3d.lights.DirectionalLight;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
@@ -22,14 +23,6 @@ package away3d.materials.methods
 			super(castingLight);
 
 			this.numSamples = numSamples;
-
-			_offsets = new <Number>[-.5, -.5, .5, .5, .5, -.5, -.5, .5,
-									-1.5, -1.5, 1.5, 1.5, 1.5, -1.5, -1.5, 1.5,
-									-.5, -1.5, 1.5,-.5,.5, 1.5, -1.5, .5,
-									.5, -1.5, 1.5,.5, -.5, 1.5, -1.5, -.5 ];
-
-			for (var i : int = 0; i < 32; ++i)
-				_offsets[i+32] = _offsets[i] * .75;
 		}
 
 		public function get numSamples() : int
@@ -42,6 +35,8 @@ package away3d.materials.methods
 			_numSamples = value;
 			if (_numSamples < 1) _numSamples = 1;
 			else if (_numSamples > 32) _numSamples = 32;
+
+			_offsets = PoissonLookup.getDistribution(_numSamples);
 			invalidateShaderProgram();
 		}
 
@@ -66,7 +61,7 @@ package away3d.materials.methods
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
 			super.activate(vo, stage3DProxy);
-			var texRange : Number = _range/_castingLight.shadowMapper.depthMapSize;
+			var texRange : Number = .5*_range/_castingLight.shadowMapper.depthMapSize;
 			var data : Vector.<Number> = vo.fragmentData;
 			var index : uint = vo.fragmentConstantsIndex+10;
 			var len : uint = _numSamples << 1;
