@@ -241,7 +241,7 @@ package away3d.cameras
 		 * @param mY The y coordinate relative to the View3D. -1 corresponds to the top side of the viewport, 1 to the bottom.
 		 * @return The scene position of the given screen coordinates.
 		 */
-		public function unproject(mX : Number, mY : Number, mZ : Number = 0):Vector3D
+		public function unproject(mX : Number, mY : Number, mZ : Number):Vector3D
 		{
 			return sceneTransform.transformVector(lens.unproject(mX, mY, mZ));
 		}
