@@ -84,12 +84,12 @@ package away3d.animators
 		/* sets the animation pointer to a given frame and plays from there. Equivalent to ActionScript, the first frame is at 1, not 0.*/
 		public function gotoAndPlay(frameNumber:uint):void
 		{
-			goto(frameNumber, true);
+			gotoFrame(frameNumber, true);
 		}
 		/* sets the animation pointer to a given frame and stops there. Equivalent to ActionScript, the first frame is at 1, not 0.*/
 		public function gotoAndStop(frameNumber:uint):void
 		{
-			goto(frameNumber, false);
+			gotoFrame(frameNumber, false);
 		}
  
 		/* returns the current frame*/
@@ -186,7 +186,7 @@ package away3d.animators
 			return new SpriteSheetAnimator(_spriteSheetAnimationSet);
 		}
 
-		private function goto(frameNumber:uint, doPlay:Boolean):void
+		private function gotoFrame(frameNumber:uint, doPlay:Boolean):void
 		{
 			if(!_activeState) return;
 			SpriteSheetAnimationState(_activeState).currentFrameNumber = (frameNumber == 0)? frameNumber : frameNumber-1;
