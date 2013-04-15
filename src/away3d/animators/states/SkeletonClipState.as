@@ -79,10 +79,12 @@ package away3d.animators.states
 			
 			_currentPose = _frames[_currentFrame];
 			
-			if (_skeletonClipNode.looping && _nextFrame >= _skeletonClipNode.lastFrame)
+			if (_skeletonClipNode.looping && _nextFrame >= _skeletonClipNode.lastFrame){
 				_nextPose = _frames[0];
-			else
+				SkeletonAnimator(_animator).dispatchCycleEvent();
+			} else {
 				_nextPose = _frames[_nextFrame];
+			}
 		}
 		
 		/**
