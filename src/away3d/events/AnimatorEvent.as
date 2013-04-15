@@ -10,14 +10,19 @@ package away3d.events
 	public class AnimatorEvent extends Event
 	{
 		/**
-    	 * Defines the value of the type property of a start event object.
-    	 */
-    	public static const START:String = "start";
+	    	* Defines the value of the type property of a start event object.
+	    	*/
+	    	public static const START:String = "start";
 
-    	/**
-    	 * Defines the value of the type property of a stop event object.
-    	 */
-    	public static const STOP:String = "stop";
+	    	/**
+	    	* Defines the value of the type property of a stop event object.
+	    	*/
+	    	public static const STOP:String = "stop";
+
+	    	/**
+	    	* Defines the value of the type property of a cycle complete event object.
+	    	*/
+	    	public static const CYCLE_COMPLETE:String = "cycle_complete";
 		
 		private var _animator : AnimatorBase;
 
