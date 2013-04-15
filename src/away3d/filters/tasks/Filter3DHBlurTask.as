@@ -64,11 +64,11 @@ package away3d.filters.tasks
 			code = 		"mov ft0, v0	\n" +
 						"sub ft0.x, v0.x, fc0.x\n";
 
-			code += "tex ft1, ft0, fs0 <2d,nearest,clamp>\n";
+			code += "tex ft1, ft0, fs0 <2d,linear,clamp>\n";
 
 			for (var x : Number = _realStepSize; x <= _amount; x += _realStepSize) {
 				code += "add ft0.x, ft0.x, fc0.y	\n" +
-						"tex ft2, ft0, fs0 <2d,nearest,clamp>\n" +
+						"tex ft2, ft0, fs0 <2d,linear,clamp>\n" +
 						"add ft1, ft1, ft2 \n";
 				++numSamples;
 			}
@@ -106,6 +106,7 @@ package away3d.filters.tasks
 			_realStepSize = _stepSize > 0? 				_stepSize :
 							_amount > MAX_AUTO_SAMPLES? _amount/MAX_AUTO_SAMPLES :
 														1;
+
 		}
 	}
 }
