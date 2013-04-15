@@ -1,8 +1,11 @@
 package away3d.animators.states
 {
+	import away3d.arcane;
 	import away3d.animators.*;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
+
+	use namespace arcane;
 	
 	public class SpriteSheetAnimationState extends AnimationClipState implements ISpriteSheetAnimationState
 	{
@@ -12,6 +15,7 @@ package away3d.animators.states
 		private var _reverse : Boolean;
 		private var _back : Boolean;
 		private var _backAndForth : Boolean;
+		private var _forcedFrame : Boolean;
 		
 		function SpriteSheetAnimationState(animator:IAnimator, clipNode:SpriteSheetClipNode)
 		{
@@ -45,31 +49,56 @@ package away3d.animators.states
 			return _frames[_currentFrameID];
 		}
 		
+		/**
+		* returns current frame index of the animation.
+		* The index is zero based and counts from first frame of the defined animation.
+		*/
 		public function get currentFrameNumber() : uint
 		{
 			return _currentFrameID;
 		}
-		
-		
+		public function set currentFrameNumber(frameNumber : uint) :void
+		{
+			_currentFrameID = (frameNumber > _frames.length-1 )? _frames.length-1 : frameNumber;
+			_forcedFrame = true;
+		}
+ 		/**
+		* returns the total frames for the current animation.
+		*/
+		arcane function get totalFrames() : uint
+		{
+			return (!_frames)? 0 : _frames.length;
+		}
+	   
 		/**
 		* @inheritDoc
 		*/
 		override protected function updateFrames() : void
 		{
+			if(_forcedFrame){
+				_forcedFrame = false;
+				return;
+			}
+
 			super.updateFrames();
 			
 			if(_reverse){
 
 				if(_currentFrameID-1>-1){
 					_currentFrameID--;
-				} else if (_clipNode.looping){
-
-					if(_backAndForth){
-						_reverse = false;
-					} else {
-						_currentFrameID = _frames.length-1;	
-					}
 					
+				} else {
+
+					if (_clipNode.looping){
+
+						if(_backAndForth){
+							_reverse = false;
+						} else {
+							_currentFrameID = _frames.length-1;	
+						}
+					}
+
+					SpriteSheetAnimator(_animator).dispatchCycleEvent();
 				}
 
 			} else {
@@ -77,14 +106,18 @@ package away3d.animators.states
 				if(_currentFrameID<_frames.length-1){
 					_currentFrameID++;
 
-				} else if (_clipNode.looping){
+				} else {
 
-					if(_backAndForth){
-						_reverse = true;
-					} else {
-						_currentFrameID = 0;
+					if (_clipNode.looping){
+
+						if(_backAndForth){
+							_reverse = true;
+						} else {
+							_currentFrameID = 0;
+						}
 					}
-					
+
+					SpriteSheetAnimator(_animator).dispatchCycleEvent();
 				}
 			}
 			

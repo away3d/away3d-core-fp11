@@ -14,6 +14,7 @@ package away3d.animators
 
 	import flash.display3D.Context3DProgramType;
 	import flash.utils.getTimer;
+	import flash.utils.setTimeout;
 
 	use namespace arcane;
 	
@@ -78,6 +79,29 @@ package away3d.animators
 		public function get backAndForth():Boolean
 		{
 			return _backAndForth;
+		}
+
+		/* sets the animation pointer to a given frame and plays from there. Equivalent to ActionScript, the first frame is at 1, not 0.*/
+		public function gotoAndPlay(frameNumber:uint):void
+		{
+			goto(frameNumber, true);
+		}
+		/* sets the animation pointer to a given frame and stops there. Equivalent to ActionScript, the first frame is at 1, not 0.*/
+		public function gotoAndStop(frameNumber:uint):void
+		{
+			goto(frameNumber, false);
+		}
+ 
+		/* returns the current frame*/
+		public function get currentFrameNumber():uint
+		{
+			return SpriteSheetAnimationState(_activeState).currentFrameNumber;
+		}
+ 
+		/* returns the total amount of frame for the current animation*/
+		public function get totalFrames():uint
+		{
+			return SpriteSheetAnimationState(_activeState).totalFrames;
 		}
 		
 		/**
@@ -155,15 +179,31 @@ package away3d.animators
 
 		}
 		
-		/**
-	         * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
-		* Needs to be called if gpu code is potentially required.
-	         */
 	        public function testGPUCompatibility(pass : MaterialPassBase) : void {}
 		
 		public function clone():IAnimator
 		{
 			return new SpriteSheetAnimator(_spriteSheetAnimationSet);
+		}
+
+		private function goto(frameNumber:uint, doPlay:Boolean):void
+		{
+			if(!_activeState) return;
+			SpriteSheetAnimationState(_activeState).currentFrameNumber = (frameNumber == 0)? frameNumber : frameNumber-1;
+			var currentMapID:uint = _frame.mapID ;
+			_frame = SpriteSheetAnimationState(_activeSpriteSheetState).currentFrameData; 
+ 
+			if(doPlay){
+				start();
+			} else {
+				if(currentMapID != _frame.mapID){
+					_mapDirty = true;
+					setTimeout(stop, _fps);	
+				} else {
+					stop();					
+				}
+
+			}
 		}
 		
 	}
