@@ -270,6 +270,7 @@ package away3d.materials.methods
 			if (vo.numLights == 0)
 				return code;
 
+			code += "sat " + _totalLightColorReg + ", " + _totalLightColorReg + "\n";
 
 			if (_useDiffuseTexture) {
 				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ", " + targetReg + "\n" +
