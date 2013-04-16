@@ -127,6 +127,12 @@ package away3d.library
 	 */
 	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
 	
+	/**
+	 * Dispatched when an image assets dimensions are not a power of 2
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureSizeError", type="away3d.events.AssetEvent")]
 	
 	
 	/**
@@ -475,6 +481,7 @@ package away3d.library
 			_loadingSessions.push(loader);
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
+			loader.addEventListener(AssetEvent.TEXTURE_SIZE_ERROR, onTextureSizeError);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
@@ -509,6 +516,7 @@ package away3d.library
 			_loadingSessions.push(loader);
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
+			loader.addEventListener(AssetEvent.TEXTURE_SIZE_ERROR, onTextureSizeError);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
@@ -578,6 +586,11 @@ package away3d.library
 			
 			dispatchEvent(event.clone());
 		}
+
+		private function onTextureSizeError(event : AssetEvent) : void
+		{
+			this.dispatchEvent(event.clone());
+		}
 		
 		/**
 		 * Called when the resource and all of its dependencies was retrieved.
@@ -590,6 +603,7 @@ package away3d.library
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
 			loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
+			loader.removeEventListener(AssetEvent.TEXTURE_SIZE_ERROR, onTextureSizeError);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);

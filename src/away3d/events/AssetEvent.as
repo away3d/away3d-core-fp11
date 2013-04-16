@@ -24,6 +24,8 @@ package away3d.events
 		public static const ASSET_RENAME : String = 'assetRename';
 		public static const ASSET_CONFLICT_RESOLVED : String = 'assetConflictResolved';
 		
+		public static const TEXTURE_SIZE_ERROR : String = 'textureSizeError';
+
 		private var _asset : IAsset;
 		private var _prevName : String;
 		

@@ -121,6 +121,13 @@ package away3d.loaders
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
+
+	/**
+	 * Dispatched when an image asset dimensions are not a power of 2
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureSizeError", type="away3d.events.AssetEvent")]
 	
 	
 	/**
@@ -481,12 +488,21 @@ package away3d.loaders
 				retrieveNext();
 			}
 		}
+
+		/**
+		 * Called when an image assets dimensions are not a power of 2
+		 * @param event
+		 */
+		private function onTextureSizeError(event : AssetEvent) : void {
+			dispatchEvent(event);
+		}
 		
 		
 		private function addEventListeners(loader : SingleFileLoader) : void
 		{
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onRetrievalComplete);
 			loader.addEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
+			loader.addEventListener(AssetEvent.TEXTURE_SIZE_ERROR, onTextureSizeError);
 			loader.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
@@ -509,6 +525,7 @@ package away3d.loaders
 			loader.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onRetrievalComplete);
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onRetrievalFailed);
+			loader.removeEventListener(AssetEvent.TEXTURE_SIZE_ERROR, onTextureSizeError);
 			loader.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);

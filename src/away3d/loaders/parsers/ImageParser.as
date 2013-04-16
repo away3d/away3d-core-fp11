@@ -2,7 +2,10 @@ package away3d.loaders.parsers
 
 {
 	import away3d.arcane;
+	import away3d.events.AssetEvent;
+	import away3d.library.assets.BitmapDataAsset;
 	import away3d.textures.BitmapTexture;
+	import away3d.tools.utils.TextureUtils;
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Loader;
@@ -118,10 +121,32 @@ package away3d.loaders.parsers
 		 */
 		private function onLoadComplete(event : Event) : void
 		{
-			var asset : BitmapTexture = new BitmapTexture(Bitmap(_loader.content).bitmapData);
+			var bmp : BitmapData = Bitmap(_loader.content).bitmapData;
+			var asset : BitmapTexture;
+			
 			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoadComplete);
-			_doneParsing = true;
+
+			if (!TextureUtils.isBitmapDataValid(bmp)) {
+				var bmdAsset:BitmapDataAsset = new BitmapDataAsset(bmp);
+				bmdAsset.name = _loader.contentLoaderInfo.url;
+				
+				dispatchEvent(new AssetEvent(AssetEvent.TEXTURE_SIZE_ERROR, bmdAsset));
+				
+				bmp = new BitmapData(8, 8, false, 0x0);
+		
+				//create chekerboard for this texture rather than a new Default Material
+				var i:uint, j:uint;
+				for (i=0; i<8; i++) {
+					for (j=0; j<8; j++) {
+						if ((j & 1) ^ (i & 1))
+							bmp.setPixel(i, j, 0XFFFFFF);
+					}
+				}			
+			}
+			
+			asset = new BitmapTexture(bmp);
 			finalizeAsset(asset, _fileName);
+			_doneParsing = true;
 		}
 	}
 }
