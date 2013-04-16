@@ -474,7 +474,7 @@ package away3d.loaders
 			
 			// Retrieve any last dependencies remaining on this loader, or
 			// if none exists, just move on.
-			if (loader.dependencies.length) {
+			if (loader.dependencies.length && _context.includeDependencies) {
 				retrieveLoaderDependencies(loader);
 			}
 			else {
