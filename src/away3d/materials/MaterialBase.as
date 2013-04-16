@@ -196,7 +196,8 @@ package away3d.materials
 		/**
 		 * The blend mode to use when drawing this renderable. The following blend modes are supported:
 		 * <ul>
-		 * <li>BlendMode.NORMAL</li>
+		 * <li>BlendMode.NORMAL: No blending, unless the material inherently needs it</li>
+		 * <li>BlendMode.LAYER: Force blending. This will draw the object the same as NORMAL, but without writing depth writes.</li>
 		 * <li>BlendMode.MULTIPLY</li>
 		 * <li>BlendMode.ADD</li>
 		 * <li>BlendMode.ALPHA</li>

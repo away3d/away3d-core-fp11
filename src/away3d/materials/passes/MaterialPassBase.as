@@ -307,20 +307,18 @@ package away3d.materials.passes {
 			throw new AbstractMethodError();
 		}
 
-		public function setBlendMode(value : String, force : Boolean = false) : void
+		public function setBlendMode(value : String) : void
 		{
 			switch (value) {
 				case BlendMode.NORMAL:
+					_srcBlend = Context3DBlendFactor.ONE;
+					_destBlend = Context3DBlendFactor.ZERO;
+					_enableBlending = false;
+					break;
 				case BlendMode.LAYER:
-					if (force) {
-						_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-						_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
-					}
-					else {
-						_srcBlend = Context3DBlendFactor.ONE;
-						_destBlend = Context3DBlendFactor.ZERO;
-					}
-					_enableBlending = force; // only requires blending if a subtype needs it
+					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
+					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+					_enableBlending = true;
 					break;
 				case BlendMode.MULTIPLY:
 					_srcBlend = Context3DBlendFactor.ZERO;

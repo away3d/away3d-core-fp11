@@ -2,6 +2,8 @@
 	import away3d.arcane;
 	import away3d.textures.Texture2DBase;
 
+	import flash.display.BlendMode;
+
 	import flash.display3D.Context3DTextureFormat;
 	import flash.geom.ColorTransform;
 
@@ -51,7 +53,7 @@
 			colorTransform ||= new ColorTransform();
 			colorTransform.alphaMultiplier = value;
 			_screenPass.preserveAlpha = requiresBlending;
-			_screenPass.setBlendMode(blendMode, requiresBlending);
+			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 		}
 
 		/**

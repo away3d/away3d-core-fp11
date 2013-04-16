@@ -13,6 +13,8 @@
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 
+	import flash.display.BlendMode;
+
 	import flash.display3D.Context3D;
 	import flash.geom.ColorTransform;
 
@@ -70,7 +72,7 @@
 		override public function set blendMode(value : String) : void
 		{
 			super.blendMode = value;
-			_screenPass.setBlendMode(value, requiresBlending);
+			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 		}
 
 		override public function set depthCompareMode(value : String) : void
@@ -352,7 +354,7 @@
 		public function set alphaBlending(value : Boolean) : void
 		{
 			_alphaBlending = value;
-			_screenPass.setBlendMode(blendMode, requiresBlending);
+			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 			_screenPass.preserveAlpha = requiresBlending;
 		}
 
