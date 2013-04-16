@@ -775,7 +775,13 @@
 			_renderer = null;
 			_entityCollector = null;
 		}
-
+		
+		/**
+		 * Calculates the projected position in screen space of the given scene position.
+		 * 
+		 * @param point3d the position vector of the point to be projected.
+		 * @return The absolute screen position of the given scene coordinates.
+		 */
 		public function project(point3d : Vector3D) : Vector3D
 		{
 			var v : Vector3D = _camera.project(point3d);
@@ -788,28 +794,32 @@
 
 		/**
 		 * Calculates the scene position of the given screen coordinates.
-		 * @param mX The x coordinate relative to the View3D.
-		 * @param mY The y coordinate relative to the View3D.
-		 * @param mZ The z coordinate relative to the View3D.
-		 * @return The scene position of the given screen coordinates. The returned point corresponds to a point on the projection plane.
-		 * example
-		 * unproject(view.mouseX, view.MouseY, 500) returns scene position of the mouse 500 units from the view plane.
+		 * 
+		 * eg. unproject(view.mouseX, view.mouseY, 500) returns the scene position of the mouse 500 units into the screen.
+		 * 
+		 * @param sX The absolute x coordinate in 2D relative to View3D, representing the screenX coordinate.
+		 * @param sY The absolute y coordinate in 2D relative to View3D, representing the screenY coordinate.
+		 * @param sZ The distance into the screen, representing the screenZ coordinate.
+		 * @return The scene position of the given screen coordinates.
 		 */
-		public function unproject(mX : Number, mY : Number, mZ : Number) : Vector3D
+		public function unproject(sX : Number, sY : Number, sZ : Number) : Vector3D
 		{
- 			return _camera.unproject((mX * 2 - _width)/_stage3DProxy.width, (mY * 2 - _height)/_stage3DProxy.height, mZ);
+ 			return _camera.unproject((sX * 2 - _width)/_stage3DProxy.width, (sY * 2 - _height)/_stage3DProxy.height, sZ);
 		}
 
 		/**
-		 * Returns the ray in scene space from the camera to the point on the screen.
-		 * @param mX The x coordinate relative to the View3D.
-		 * @param mY The y coordinate relative to the View3D.
-		 * @param mZ The z coordinate relative to the View3D.
-		 * @return The ray from the camera to the scene space position of a point on the projection plane.
+		 * Calculates the ray in scene space from the camera to the given screen coordinates.
+		 * 
+		 * eg. getRay(view.mouseX, view.mouseY, 500) returns the ray from the camera to a position under the mouse, 500 units into the screen.
+		 * 
+		 * @param sX The absolute x coordinate in 2D relative to View3D, representing the screenX coordinate.
+		 * @param sY The absolute y coordinate in 2D relative to View3D, representing the screenY coordinate.
+		 * @param sZ The distance into the screen, representing the screenZ coordinate.
+		 * @return The ray from the camera to the scene space position of the given screen coordinates.
 		 */
-		public function getRay(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
+		public function getRay(sX : Number, sY : Number, sZ : Number) : Vector3D
 		{
-			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
+			return _camera.getRay((sX * 2 - _width)/_width, (sY * 2 - _height)/_height, sZ);
 		}
 		
 		public function get mousePicker() : IPicker

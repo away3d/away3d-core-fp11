@@ -1,18 +1,13 @@
 package away3d.cameras
 {
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import away3d.*;
+	import away3d.cameras.lenses.*;
+	import away3d.core.math.*;
+	import away3d.core.partition.*;
+	import away3d.entities.*;
+	import away3d.events.*;
 	
-	import away3d.arcane;
-	import away3d.cameras.lenses.LensBase;
-	import away3d.cameras.lenses.PerspectiveLens;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Plane3D;
-	import away3d.core.partition.CameraNode;
-	import away3d.core.partition.EntityNode;
-	import away3d.entities.Entity;
-	import away3d.events.CameraEvent;
-	import away3d.events.LensEvent;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -236,29 +231,36 @@ package away3d.cameras
 		}
 
 		/**
-		 * Calculates the scene position of the given normalized coordinates.
-		 * @param mX The x coordinate relative to the View3D. -1 corresponds to the utter left side of the viewport, 1 to the right.
-		 * @param mY The y coordinate relative to the View3D. -1 corresponds to the top side of the viewport, 1 to the bottom.
+		 * Calculates the scene position of the given normalized coordinates in screen space.
+		 * 
+		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
+		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
+		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
 		 * @return The scene position of the given screen coordinates.
 		 */
-		public function unproject(mX : Number, mY : Number, mZ : Number):Vector3D
+		public function unproject(nX : Number, nY : Number, sZ : Number):Vector3D
 		{
-			return sceneTransform.transformVector(lens.unproject(mX, mY, mZ));
+			return sceneTransform.transformVector(lens.unproject(nX, nY, sZ));
 		}
 
 		/**
-		 * Returns the ray in scene space from the camera to the point on the screen in normalized coordinates.
-		 * @param mX The x coordinate relative to the View3D. -1 corresponds to the utter left side of the viewport, 1 to the right.
-		 * @param mY The y coordinate relative to the View3D. -1 corresponds to the top side of the viewport, 1 to the bottom.
-		 * @return The ray from the camera to the scene space position of a point on the projection plane.
+		 * Calculates the ray in scene space from the camera to the given normalized coordinates in screen space.
+		 * 
+		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
+		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
+		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
+		 * @return The ray from the camera to the scene space position of the given screen coordinates.
 		 */
-		public function getRay(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
+		public function getRay(nX : Number, nY : Number, sZ : Number) : Vector3D
 		{
-			return sceneTransform.deltaTransformVector(lens.unproject(mX, mY, mZ));
+			return sceneTransform.deltaTransformVector(lens.unproject(nX, nY, sZ));
 		}
 
 		/**
-		 *
+		 * Calculates the normalised position in screen space of the given scene position.
+		 * 
+		 * @param point3d the position vector of the scene coordinates to be projected.
+		 * @return The normalised screen position of the given scene coordinates.
 		 */
 		public function project(point3d : Vector3D) : Vector3D
 		{
