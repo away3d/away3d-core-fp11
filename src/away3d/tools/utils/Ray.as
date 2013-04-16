@@ -85,7 +85,7 @@ package away3d.tools.utils
 		* @return		Vector3D	The intersection vector3D or the normal vector3D of the hitpoint. Default is false.
 		*
 		* example of a ray triggered from mouse
-			var pMouse:Vector3D = _view.unproject(_view.mouseX, _view.mouseY);
+			var pMouse:Vector3D = _view.unproject(_view.mouseX, _view.mouseY, 1);
 			var cam:Vector3D = _view.camera.position;
 			var dir:Vector3D = new Vector3D( pMouse.x-cam.x,  pMouse.y-cam.y, pMouse.z-cam.z);
 			dir.normalize();

@@ -792,8 +792,10 @@
 		 * @param mY The y coordinate relative to the View3D.
 		 * @param mZ The z coordinate relative to the View3D.
 		 * @return The scene position of the given screen coordinates. The returned point corresponds to a point on the projection plane.
+		 * example
+		 * unproject(view.mouseX, view.MouseY, 500) returns scene position of the mouse 500 units from the view plane.
 		 */
-		public function unproject(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
+		public function unproject(mX : Number, mY : Number, mZ : Number) : Vector3D
 		{
  			return _camera.unproject((mX * 2 - _width)/_stage3DProxy.width, (mY * 2 - _height)/_stage3DProxy.height, mZ);
 		}
