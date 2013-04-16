@@ -79,7 +79,6 @@
 		
 		public function set ambientTexture(value : Texture2DBase) : void
 		{
-			_screenPass.diffuseMethod._useDiffuseTexture = true;
 			_screenPass.ambientMethod.texture = value;
 		}
 	}
