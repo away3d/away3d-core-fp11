@@ -161,9 +161,9 @@ package away3d.core.managers
 				// UV.
 				event.uv = collider.uv;
 				// Position.
-				event.localPosition = collider.localPosition.clone();
+				event.localPosition = collider.localPosition? collider.localPosition.clone() : null;
 				// Normal.
-				event.localNormal = collider.localNormal.clone();
+				event.localNormal = collider.localNormal? collider.localNormal.clone() : null;
 			}
 			else {
 				// Set all to null.
