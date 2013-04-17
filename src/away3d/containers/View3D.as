@@ -154,7 +154,8 @@
 			
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
-
+			_entityCollector.camera = _camera;
+			
 			_scissorRect = new Rectangle();
 
 			initHitField();
@@ -301,6 +302,7 @@
 			_renderer.dispose();
 			_renderer = value;
 			_entityCollector = _renderer.createEntityCollector();
+			_entityCollector.camera = _camera;
 			_renderer.stage3DProxy = _stage3DProxy;
 			_renderer.antiAlias = _antiAlias;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
@@ -361,6 +363,7 @@
 			_camera.removeEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
 			
 			_camera = camera;
+			_entityCollector.camera = _camera;
 			
 			if (_scene)
 				_camera.partition = _scene.partition;
@@ -703,8 +706,6 @@
 				_viewportDirty = false;
 				_camera.lens.updateViewport(_stage3DProxy.viewPort.x, _stage3DProxy.viewPort.y, _stage3DProxy.viewPort.width, _stage3DProxy.viewPort.height);
 			}
-			
-			_entityCollector.camera = _camera;
 
 			if (_filter3DRenderer || _renderer.renderToTexture) {
 				_renderer.textureRatioX = _rttBufferManager.textureRatioX;
