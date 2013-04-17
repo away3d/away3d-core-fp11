@@ -211,7 +211,7 @@ package away3d.core.pick
 		private function updateRay(camera : Camera3D) : void
 		{
 			_rayPos = camera.scenePosition;
-			_rayDir = camera.getRay(_projX, _projY);
+			_rayDir = camera.getRay(_projX, _projY, 1);
 			_rayDir.normalize();
 		}
 
