@@ -48,6 +48,7 @@ package away3d.core.pick
 		private var _projY : Number;
 		
 		private var _hitRenderable : IRenderable;
+		private var _hitEntity : Entity;
 		private var _localHitPosition : Vector3D = new Vector3D();
 		private var _hitUV : Point = new Point();
 		
@@ -122,9 +123,11 @@ package away3d.core.pick
 			}
 			
 			_hitRenderable = _interactives[_hitColor-1];
-
-			var _collisionVO:PickingCollisionVO = _hitRenderable.sourceEntity.pickingCollisionVO;
+			_hitEntity = _hitRenderable.sourceEntity;
+			if (_onlyMouseEnabled && (!_hitEntity._ancestorsAllowMouseEnabled ||!_hitEntity.mouseEnabled))
+				return null;
 			
+			var _collisionVO:PickingCollisionVO = _hitEntity.pickingCollisionVO;
 			if (_hitRenderable.shaderPickingDetails) {
 				getHitDetails(view.camera);
 				_collisionVO.localPosition = _localHitPosition;
