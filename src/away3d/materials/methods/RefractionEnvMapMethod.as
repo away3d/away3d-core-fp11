@@ -47,7 +47,20 @@ package away3d.materials.methods
 			vo.needsNormals = true;
 			vo.needsView = true;
 		}
-
+		
+		/**
+		 * The cube environment map to use for the refraction.
+		 */
+		public function get envMap() : CubeTextureBase
+		{
+			return _envMap;
+		}
+		
+		public function set envMap(value : CubeTextureBase) : void
+		{
+			_envMap = value;
+		}
+		
 		public function get refractionIndex() : Number
 		{
 			return _refractionIndex;
