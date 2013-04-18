@@ -42,20 +42,20 @@ package away3d.tools.helpers
 			if(!TextureUtils.isPowerOfTwo(h)) h = TextureUtils.getBestPowerOf2(h);
 
 			var spriteSheet:BitmapData;
-			var destCellW:Number  = Math.floor(h/cols);
-			var destCellH:Number  = Math.floor(w/rows);
+			var destCellW:Number = Math.floor(h/cols);
+			var destCellH:Number = Math.floor(w/rows);
 			var cellRect:Rectangle = new Rectangle(0, 0, destCellW, destCellH);
-
+ 
 			var mcFrameW:uint = sourceMC.width;
 			var mcFrameH:uint = sourceMC.height;
- 			
-			var tmpCache:BitmapData = new BitmapData(mcFrameW, mcFrameH, transparent, transparent? 0x00FFFFFF : 0xFFFFFF);
 
 			var sclw:Number = destCellW/mcFrameW;
 			var sclh:Number = destCellH/mcFrameH;
 			var t:Matrix = new Matrix();
 			t.scale(sclw, sclh);
-		 
+
+			var tmpCache:BitmapData = new BitmapData(mcFrameW*sclw, mcFrameH*sclh, transparent, transparent? 0x00FFFFFF : 0xFFFFFF);
+ 
 			var u:uint, v:uint;
 			var cellsPerMap:uint = cols*rows;
 			var maps:uint = framesCount/cellsPerMap;
