@@ -83,8 +83,7 @@ package away3d.core.traverse
 			_camera = value;
 			_entryPoint = _camera.scenePosition;
 			_cameraForward = _camera.forwardVector;
-			_cullPlanes = _customCullPlanes? _customCullPlanes : _camera.frustumPlanes;
-			_numCullPlanes = _cullPlanes.length;
+			_cullPlanes = _camera.frustumPlanes;
 		}
 
 		public function get cullPlanes() : Vector.<Plane3D>
@@ -95,9 +94,6 @@ package away3d.core.traverse
 		public function set cullPlanes(value : Vector.<Plane3D>) : void
 		{
 			_customCullPlanes = value;
-			
-			_cullPlanes = _customCullPlanes? _customCullPlanes : _camera.frustumPlanes;
-			_numCullPlanes = _cullPlanes.length;
 		}
 
 		/**
@@ -176,6 +172,8 @@ package away3d.core.traverse
 		 */
 		public function clear() : void
 		{
+			_cullPlanes = _customCullPlanes? _customCullPlanes : (_camera? _camera.frustumPlanes : null);
+			_numCullPlanes = _cullPlanes? _cullPlanes.length : 0;
 			_numTriangles = _numMouseEnableds = 0;
 			_blendedRenderableHead = null;
 			_opaqueRenderableHead = null;
