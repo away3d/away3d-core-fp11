@@ -27,10 +27,11 @@ package away3d.tools.helpers
 		 * @param width 				uint: The result bitmapData(s) width.
 		 * @param height 				uint: The result bitmapData(s) height.
 		 * @param transparent				Boolean: if the bitmapData(s) must be transparent.
-		 * 
+		 * @param backgroundColor			uint: the bitmapData(s) background color if not transparent.
+		 *
 		 * @return Vector.<BitmapData> 		The generated bitmapDatas for the SpriteSheetMaterial.
 		 */
-		public function generateFromMovieClip(sourceMC:MovieClip, cols:uint, rows:uint, width:uint, height:uint, transparent:Boolean = false) : Vector.<BitmapData>
+		public function generateFromMovieClip(sourceMC:MovieClip, cols:uint, rows:uint, width:uint, height:uint, transparent:Boolean = false, backgroundColor:uint = 0) : Vector.<BitmapData>
 		{
 			var spriteSheets:Vector.<BitmapData> = new Vector.<BitmapData>();
 			var framesCount:uint = sourceMC.totalFrames;
@@ -42,8 +43,8 @@ package away3d.tools.helpers
 			if(!TextureUtils.isPowerOfTwo(h)) h = TextureUtils.getBestPowerOf2(h);
 
 			var spriteSheet:BitmapData;
-			var destCellW:Number = Math.floor(h/cols);
-			var destCellH:Number = Math.floor(w/rows);
+			var destCellW:Number = Math.round(h/cols);
+			var destCellH:Number = Math.round(w/rows);
 			var cellRect:Rectangle = new Rectangle(0, 0, destCellW, destCellH);
  
 			var mcFrameW:uint = sourceMC.width;
@@ -54,7 +55,7 @@ package away3d.tools.helpers
 			var t:Matrix = new Matrix();
 			t.scale(sclw, sclh);
 
-			var tmpCache:BitmapData = new BitmapData(mcFrameW*sclw, mcFrameH*sclh, transparent, transparent? 0x00FFFFFF : 0xFFFFFF);
+			var tmpCache:BitmapData = new BitmapData(mcFrameW*sclw, mcFrameH*sclh, transparent, transparent? 0x00FFFFFF : backgroundColor);
  
 			var u:uint, v:uint;
 			var cellsPerMap:uint = cols*rows;
@@ -67,13 +68,13 @@ package away3d.tools.helpers
 			while(maps--){
 
 				u = v = 0;
-				spriteSheet = new BitmapData(w, h, transparent, transparent? 0x00FFFFFF : 0xFFFFFF);
+				spriteSheet = new BitmapData(w, h, transparent, transparent? 0x00FFFFFF : backgroundColor);
 
 				for (i = 0; i < cellsPerMap; i++) {
 					frameNum++;
 					if(frameNum<=framesCount){
-						pastePoint.x = Math.floor(destCellW * u);
-						pastePoint.y = Math.floor(destCellH * v);
+						pastePoint.x = Math.round(destCellW * u);
+						pastePoint.y = Math.round(destCellH * v);
 						sourceMC.gotoAndStop(frameNum);
 						tmpCache.draw(sourceMC, t, null, "normal", tmpCache.rect, true);
 						spriteSheet.copyPixels(tmpCache, tmpCache.rect, pastePoint);
