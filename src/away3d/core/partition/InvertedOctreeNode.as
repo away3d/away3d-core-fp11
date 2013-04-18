@@ -60,7 +60,7 @@ package away3d.core.partition
 				var flippedExtentX : Number = plane.a < 0? - _halfExtentX : _halfExtentX;
 				var flippedExtentY : Number = plane.b < 0? - _halfExtentY : _halfExtentY;
 				var flippedExtentZ : Number = plane.c < 0? - _halfExtentZ : _halfExtentZ;
-				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * (_centerY + flippedExtentY) + plane.c * (_centerZ + flippedExtentZ) + plane.d;
+				var projDist : Number = plane.a * (_centerX + flippedExtentX) + plane.b * (_centerY + flippedExtentY) + plane.c * (_centerZ + flippedExtentZ) - plane.d;
 				if (projDist < 0) return false;
 			}
 

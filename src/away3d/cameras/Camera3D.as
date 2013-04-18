@@ -1,6 +1,8 @@
 package away3d.cameras
 {
 	import away3d.*;
+	import away3d.bounds.BoundingVolumeBase;
+	import away3d.bounds.NullBounds;
 	import away3d.cameras.lenses.*;
 	import away3d.core.math.*;
 	import away3d.core.partition.*;
@@ -43,6 +45,11 @@ package away3d.cameras
 				_frustumPlanes[i] = new Plane3D();
 
 			z = -1000;
+		}
+
+		override protected function getDefaultBoundingVolume() : BoundingVolumeBase
+		{
+			return new NullBounds();
 		}
 
 		private function onLensMatrixChanged(event : LensEvent) : void

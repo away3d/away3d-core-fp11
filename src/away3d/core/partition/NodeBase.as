@@ -161,7 +161,8 @@ package away3d.core.partition
 
 			if (traverser.enterNode(this)) {
 				var i : uint;
-				while (i < _numChildNodes) _childNodes[i++].acceptTraverser(traverser);
+				while (i < _numChildNodes)
+					_childNodes[i++].acceptTraverser(traverser);
 
 				if (_debugPrimitive)
 					traverser.applyRenderable(_debugPrimitive);
