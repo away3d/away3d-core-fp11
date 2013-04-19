@@ -121,5 +121,15 @@
 		{
 			if (_parentParser) _parentParser.resolveDependencyFailure(this);
 		}
+		
+		/**
+		 * Resolve the dependencies name
+		 */
+		public function resolveName(asset:IAsset) : String
+		{
+			if (_parentParser) return _parentParser.resolveDependencyName(this, asset);
+			return asset.name;
+		}
+		
 	}
 }

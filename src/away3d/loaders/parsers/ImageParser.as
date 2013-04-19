@@ -128,7 +128,7 @@ package away3d.loaders.parsers
 
 			if (!TextureUtils.isBitmapDataValid(bmp)) {
 				var bmdAsset:BitmapDataAsset = new BitmapDataAsset(bmp);
-				bmdAsset.name = _loader.contentLoaderInfo.url;
+				bmdAsset.name = _fileName;
 				
 				dispatchEvent(new AssetEvent(AssetEvent.TEXTURE_SIZE_ERROR, bmdAsset));
 				

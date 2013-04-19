@@ -153,6 +153,27 @@ package away3d.loaders.parsers
 		}
 		
 		/**
+		 * Resolve a dependency name
+		 *
+		 * @param resourceDependency The dependency to be resolved.
+		 */
+		arcane override function resolveDependencyName(resourceDependency : ResourceDependency, asset:IAsset) : String
+		{
+			var oldName:String = asset.name;
+			if (asset) {
+				var block : AWDBlock = _blocks[parseInt(resourceDependency.id)];
+			
+				// Reset name of texture to the one defined in the AWD file,
+				// as opposed to whatever the image parser came up with.
+				asset.resetAssetPath(block.name, null, true);
+			}
+			var newName:String = asset.name;
+			asset.name = oldName;
+			
+			return newName;
+		}
+		
+		/**
 		 * Tests whether a data block can be parsed by the parser.
 		 * @param data The data block to potentially be parsed.
 		 * @return Whether or not the given data is supported.

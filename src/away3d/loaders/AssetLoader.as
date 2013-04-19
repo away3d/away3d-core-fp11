@@ -1,5 +1,6 @@
 package away3d.loaders
 {
+	import away3d.library.assets.BitmapDataAsset;
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
@@ -490,10 +491,11 @@ package away3d.loaders
 		}
 
 		/**
-		 * Called when an image assets dimensions are not a power of 2
+		 * Called when an image is too large or it's dimensions are not a power of 2
 		 * @param event
 		 */
-		private function onTextureSizeError(event : AssetEvent) : void {
+		private function onTextureSizeError(event : AssetEvent) : void {			
+			event.asset.name = _loadingDependency.resolveName(event.asset);
 			dispatchEvent(event);
 		}
 		

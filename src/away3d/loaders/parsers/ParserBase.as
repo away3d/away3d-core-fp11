@@ -289,6 +289,16 @@ package away3d.loaders.parsers
 		{
 			throw new AbstractMethodError();
 		}
+
+		/**
+		 * Resolve a dependency name
+		 *
+		 * @param resourceDependency The dependency to be resolved.
+		 */
+		arcane function resolveDependencyName(resourceDependency : ResourceDependency, asset:IAsset) : String
+		{
+			return asset.name;
+		}
 		
 		arcane function resumeParsingAfterDependencies() : void
 		{
