@@ -1,6 +1,5 @@
 package away3d.materials.passes {
 	import away3d.animators.data.AnimationRegisterCache;
-	import flash.display3D.Context3DTextureFormat;
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -16,8 +15,6 @@ package away3d.materials.passes {
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
@@ -56,9 +53,9 @@ package away3d.materials.passes {
 		protected var _repeat : Boolean = false;
 		protected var _mipmap : Boolean = true;
 		protected var _depthCompareMode : String = Context3DCompareMode.LESS_EQUAL;
-		
-		private var _srcBlend : String = Context3DBlendFactor.ONE;
-		private var _destBlend : String = Context3DBlendFactor.ZERO;
+
+		protected var _blendFactorSource : String = Context3DBlendFactor.ONE;
+		protected var _blendFactorDest : String = Context3DBlendFactor.ZERO;
 
 		protected var _enableBlending : Boolean;
 
@@ -88,7 +85,7 @@ package away3d.materials.passes {
 		protected var _UVTarget:String;
 		protected var _UVSource:String;
 
-		private var _writeDepth : Boolean = true;
+		protected var _writeDepth : Boolean = true;
 		
 		public var animationRegisterCache:AnimationRegisterCache;
 		
@@ -311,28 +308,28 @@ package away3d.materials.passes {
 		{
 			switch (value) {
 				case BlendMode.NORMAL:
-					_srcBlend = Context3DBlendFactor.ONE;
-					_destBlend = Context3DBlendFactor.ZERO;
+					_blendFactorSource = Context3DBlendFactor.ONE;
+					_blendFactorDest = Context3DBlendFactor.ZERO;
 					_enableBlending = false;
 					break;
 				case BlendMode.LAYER:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+					_blendFactorSource = Context3DBlendFactor.SOURCE_ALPHA;
+					_blendFactorDest = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
 					_enableBlending = true;
 					break;
 				case BlendMode.MULTIPLY:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_COLOR;
+					_blendFactorSource = Context3DBlendFactor.ZERO;
+					_blendFactorDest = Context3DBlendFactor.SOURCE_COLOR;
 					_enableBlending = true;
 					break;
 				case BlendMode.ADD:
-					_srcBlend = Context3DBlendFactor.SOURCE_ALPHA;
-					_destBlend = Context3DBlendFactor.ONE;
+					_blendFactorSource = Context3DBlendFactor.SOURCE_ALPHA;
+					_blendFactorDest = Context3DBlendFactor.ONE;
 					_enableBlending = true;
 					break;
 				case BlendMode.ALPHA:
-					_srcBlend = Context3DBlendFactor.ZERO;
-					_destBlend = Context3DBlendFactor.SOURCE_ALPHA;
+					_blendFactorSource = Context3DBlendFactor.ZERO;
+					_blendFactorDest = Context3DBlendFactor.SOURCE_ALPHA;
 					_enableBlending = true;
 					break;
 				default:
@@ -346,7 +343,7 @@ package away3d.materials.passes {
 			var context : Context3D = stage3DProxy._context3D;
 
 			context.setDepthTest(_writeDepth && !_enableBlending, _depthCompareMode);
-			if (_enableBlending) context.setBlendFactors(_srcBlend, _destBlend);
+			if (_enableBlending) context.setBlendFactors(_blendFactorSource, _blendFactorDest);
 
 			if (_context3Ds[contextIndex] != context || !_program3Ds[contextIndex]) {
 				_context3Ds[contextIndex] = context;

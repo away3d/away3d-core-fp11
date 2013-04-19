@@ -215,6 +215,21 @@ package away3d.bounds
 			throw new AbstractMethodError();
 		}
 
+		/**
+		 * Tests if the bounds overlap other bounds, treating both bounds as AABBs.
+		 */
+		public function overlaps(bounds : BoundingVolumeBase):Boolean
+		{
+			var min : Vector3D = bounds._min;
+			var max : Vector3D = bounds._max;
+			return 	_max.x > min.x &&
+					_min.x < max.x &&
+					_max.y > min.y &&
+					_min.y < max.y &&
+					_max.z > min.z &&
+					_min.z < max.z;
+		}
+
 		/*public function classifyAgainstPlane(plane : Plane3D) : int
 		 {
 		 throw new AbstractMethodError();

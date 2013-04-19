@@ -1,5 +1,7 @@
 ﻿package away3d.containers
 {
+	import away3d.events.Scene3DEvent;
+
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -147,6 +149,7 @@
 			super();
 			_profile = profile;
 			_scene = scene || new Scene3D();
+			_scene.addEventListener(Scene3DEvent.PARTITION_CHANGED, onScenePartitionChanged);
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
 			_depthRenderer = new DepthRenderer();
@@ -172,6 +175,11 @@
 			_camera.partition = _scene.partition;
 			
 			initRightClickMenu();
+		}
+
+		private function onScenePartitionChanged(event : Scene3DEvent) : void
+		{
+			if (_camera) _camera.partition = scene.partition;
 		}
 		
 		public function get rightClickMenuEnabled() : Boolean
@@ -387,7 +395,9 @@
 		 */
 		public function set scene(scene:Scene3D) : void
 		{
+			_scene.removeEventListener(Scene3DEvent.PARTITION_CHANGED, onScenePartitionChanged);
 			_scene = scene;
+			_scene.addEventListener(Scene3DEvent.PARTITION_CHANGED, onScenePartitionChanged);
 			
 			if (_camera)
 				_camera.partition = _scene.partition;

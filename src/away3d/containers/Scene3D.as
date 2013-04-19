@@ -5,6 +5,7 @@ package away3d.containers
 	import away3d.core.partition.Partition3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
+	import away3d.events.Scene3DEvent;
 
 	import flash.events.EventDispatcher;
 
@@ -64,6 +65,8 @@ package away3d.containers
 		public function set partition(value : Partition3D) : void
 		{
 			_sceneGraphRoot.partition = value;
+
+			dispatchEvent(new Scene3DEvent(Scene3DEvent.PARTITION_CHANGED, _sceneGraphRoot));
 		}
 
 		public function contains(child : ObjectContainer3D) : Boolean
