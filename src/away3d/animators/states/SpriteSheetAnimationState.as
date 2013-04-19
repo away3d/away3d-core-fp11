@@ -93,6 +93,7 @@ package away3d.animators.states
 
 						if(_backAndForth){
 							_reverse = false;
+							_currentFrameID++;
 						} else {
 							_currentFrameID = _frames.length-1;	
 						}
@@ -112,6 +113,7 @@ package away3d.animators.states
 
 						if(_backAndForth){
 							_reverse = true;
+							_currentFrameID--;
 						} else {
 							_currentFrameID = 0;
 						}
