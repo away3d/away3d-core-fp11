@@ -506,7 +506,7 @@ package away3d.materials.passes
 
 			if (_sceneMatrixIndex >= 0) {
 				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
-				camera.viewProjection.copyRawDataTo(_vertexConstantData, 0, true);
+				viewProjection.copyRawDataTo(_vertexConstantData, 0, true);
 			}
 			else {
 				var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
