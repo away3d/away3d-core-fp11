@@ -13,7 +13,6 @@ package away3d.animators
 	 */
 	public class SpriteSheetAnimationSet extends AnimationSetBase implements IAnimationSet
 	{	
-		private var _frame:SpriteSheetAnimationFrame; 
 		private var _agalCode:String;
 
 		function SpriteSheetAnimationSet(){}

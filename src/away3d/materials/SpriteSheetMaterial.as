@@ -52,7 +52,7 @@ package away3d.materials
 
 		}
 
-		private function initTextures(mapID:uint = 0) : void
+		private function initTextures() : void
 		{
 			if(!_diffuses || _diffuses.length == 0)
 				throw new Error("you must pass at least one bitmapdata into diffuses param!");
