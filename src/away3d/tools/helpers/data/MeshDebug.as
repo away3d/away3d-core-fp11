@@ -1,5 +1,6 @@
 package away3d.tools.helpers.data
 {
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometryBase;
@@ -44,11 +45,15 @@ package away3d.tools.helpers.data
 			var subGeom : SubGeometryBase;
 			var stride : uint;
 			var offset : uint;
+			var normalOffset : uint;
+			var tangentOffset : uint;
 			
 			for (var i:uint = 0; i<numSubGeoms; ++i){
 				subGeom = SubGeometryBase(geometries[i]);
 				stride = subGeom.vertexStride;
 				offset = subGeom.vertexOffset;
+				normalOffset = subGeom.vertexNormalOffset;
+				tangentOffset = subGeom.vertexTangentOffset;
 				vertices = subGeom.vertexData;
 				indices = subGeom.indexData;
 				
@@ -114,29 +119,37 @@ package away3d.tools.helpers.data
 			var subGeom : SubGeometryBase;
 			var stride : uint;
 			var offset : uint;
+			var offsettarget : uint;
 			 
 			for (var i:uint = 0; i<numSubGeoms; ++i){
 				subGeom = SubGeometryBase(geometries[i]);
 				stride = subGeom.vertexStride;
 				offset = subGeom.vertexOffset;
-			 	vertices = subGeom.vertexData;
+				vertices = subGeom.vertexData;
+				offsettarget = subGeom.vertexNormalOffset;
+
+				if (type == 2) offsettarget = subGeom.vertexTangentOffset;
+
 				try{
 					vectorTarget = (type == 1)? subGeom.vertexNormalData : subGeom.vertexTangentData;
 				} catch(e:Error){
 					continue;
 				}
+
 				indices = subGeom.indexData;
 				
 				for (j = 0; j < indices.length; j+=3){
 
 					index = offset + indices[j]*stride;
 					v0.x = vertices[index];
-					_normal.x = vectorTarget[index];
 					v0.y = vertices[index+1];
+					v0.z = vertices[index + 2];
+
+					index = offsettarget + indices[j]*stride;
+					_normal.x = vectorTarget[index];
 					_normal.y = vectorTarget[index+1];
-					v0.z = vertices[index+2];
 					_normal.z = vectorTarget[index+2];
-					
+					_normal.normalize();
 					l0.x = v0.x + (_normal.x*length);
 					l0.y = v0.y + (_normal.y*length);
 					l0.z = v0.z + (_normal.z*length);
@@ -144,12 +157,15 @@ package away3d.tools.helpers.data
 					addSegment(new LineSegment(v0, l0, color, color, 1 ));
 
 					index = offset + indices[j+1]*stride;
-					v1.x = vertices[index = indices[j+1]*3];
-					_normal.x = vectorTarget[index];
+					v1.x = vertices[index];
 					v1.y = vertices[index+1];
+					v1.z = vertices[index + 2];
+
+					index = offsettarget + indices[j+1]*stride;
+					_normal.x = vectorTarget[index];
 					_normal.y = vectorTarget[index+1];
-					v1.z = vertices[index+2];
 					_normal.z = vectorTarget[index+2];
+					_normal.normalize();
 					
 					l0.x = v1.x + (_normal.x*length);
 					l0.y = v1.y + (_normal.y*length);
@@ -158,12 +174,15 @@ package away3d.tools.helpers.data
 					addSegment(new LineSegment(v1, l0, color, color, 1 ));
 
 					index = offset + indices[j+2]*stride;
-					v2.x = vertices[index = indices[j+2]*3];
-					_normal.x = vectorTarget[index];
+					v2.x = vertices[index];
 					v2.y = vertices[index+1];
+					v2.z = vertices[index + 2];
+
+					index = offsettarget + indices[j+2]*stride;
+					_normal.x = vectorTarget[index];
 					_normal.y = vectorTarget[index+1];
-					v2.z = vertices[index+2];
 					_normal.z = vectorTarget[index+2];
+					_normal.normalize();
 					
 					l0.x = v2.x + (_normal.x*length);
 					l0.y = v2.y + (_normal.y*length);
