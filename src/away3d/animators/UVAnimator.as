@@ -94,6 +94,7 @@ package away3d.animators
 		*/
 		public function setTranslateIncrease(u:Number, v:Number):void
 		{
+			if(!_translateIncrease) _translateIncrease = Vector.<Number>([0,0]);
 			_translateIncrease[0] = u;
 			_translateIncrease[1] = v;
 		}
