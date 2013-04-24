@@ -2,6 +2,7 @@ package away3d.cameras.lenses
 {
 	import away3d.containers.*;
 	import away3d.core.math.*;
+	import flash.geom.Vector3D;
 
 	/**
 	 * The PerspectiveLens object provides a projection matrix that projects 3D geometry with perspective distortion.
@@ -26,7 +27,7 @@ package away3d.cameras.lenses
 		 * 
 		 * @param fieldOfView The vertical field of view of the projection.
 		 */
-		public function PerspectiveOffCenterLens(minAngleX : Number = 40, maxAngleX : Number = 40, minAngleY : Number = 40, maxAngleY : Number = 40)
+		public function PerspectiveOffCenterLens(minAngleX : Number = -40, maxAngleX : Number = 40, minAngleY : Number = -40, maxAngleY : Number = 40)
 		{
 			super();
 			
@@ -91,7 +92,30 @@ package away3d.cameras.lenses
 			
 			invalidateMatrix();
 		}
-		
+
+		/**
+		 * Calculates the scene position relative to the camera of the given normalized coordinates in screen space.
+		 * 
+		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
+		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
+		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
+		 * @return The scene position relative to the camera of the given screen coordinates.
+		 */
+		override public function unproject(nX:Number, nY:Number, sZ : Number):Vector3D
+		{
+			var v : Vector3D = new Vector3D(nX, -nY, sZ, 1.0);
+			
+            v.x *= sZ;
+            v.y *= sZ;
+			
+			v = unprojectionMatrix.transformVector(v);
+			
+			//z is unaffected by transform
+            v.z = sZ;
+			
+			return v;
+		}
+
 		override public function clone() : LensBase
 		{
 			var clone : PerspectiveOffCenterLens = new PerspectiveOffCenterLens(_minAngleX, _maxAngleX, _minAngleY, _maxAngleY);
