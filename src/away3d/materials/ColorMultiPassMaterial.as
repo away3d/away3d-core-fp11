@@ -11,8 +11,8 @@ package away3d.materials
 	{
 		/**
 		 * Creates a new ColorMaterial object.
+		 * 
 		 * @param color The material's diffuse surface color.
-		 * @param alpha The material's surface alpha.
 		 */
 		public function ColorMultiPassMaterial(color : uint = 0xcccccc)
 		{

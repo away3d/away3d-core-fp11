@@ -27,7 +27,7 @@
 	use namespace arcane;
 
 	/**
-	 * DefaultMaterialBase forms an abstract base class for the default materials provided by Away3D and use methods
+	 * MultiPassMaterialBase forms an abstract base class for the default multi-pass materials provided by Away3D, using material methods
 	 * to define their appearance.
 	 */
 	public class MultiPassMaterialBase extends MaterialBase
