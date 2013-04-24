@@ -153,31 +153,19 @@ package away3d.animators.data
 		public function initColorRegisters():String
 		{
 			var code:String = "";
-			if (hasColorMulNode && hasColorAddNode)
+			if (hasColorMulNode)
 			{
-				//color node is processed after normal actions,so use offsetTarget as uvTarget
-				colorMulTarget = new ShaderRegisterElement(positionTarget.regName, positionTarget.index);
+				colorMulTarget = getFreeVertexVectorTemp();
+				addVertexTempUsages(colorMulTarget, 1);
+				colorMulVary = getFreeVarying();
+				code += "mov " +colorMulTarget + "," + vertexOneConst + "\n";
+			}
+			if (hasColorAddNode)
+			{
 				colorAddTarget = getFreeVertexVectorTemp();
 				addVertexTempUsages(colorAddTarget, 1);
-				colorMulVary = getFreeVarying();
 				colorAddVary = getFreeVarying();
-				code += "mov " +colorMulTarget + "," + vertexOneConst + "\n";
 				code += "mov " +colorAddTarget + "," + vertexZeroConst + "\n";
-			}
-			else if (hasColorMulNode || hasColorAddNode)
-			{
-				if (hasColorMulNode)
-				{
-					colorMulTarget = new ShaderRegisterElement(positionTarget.regName, positionTarget.index);
-					colorMulVary = getFreeVarying();
-					code += "mov " +colorMulTarget + "," + vertexOneConst + "\n";
-				}
-				else
-				{
-					colorAddTarget = new ShaderRegisterElement(positionTarget.regName, positionTarget.index);
-					colorAddVary = getFreeVarying();
-					code += "mov " +colorAddTarget + "," + vertexZeroConst + "\n";
-				}
 			}
 			return code;
 		}
