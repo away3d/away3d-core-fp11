@@ -510,7 +510,7 @@ package away3d.loaders.parsers
 			}
 			MaterialBase(mat).smooth=props.get(5,true);
 			MaterialBase(mat).mipmap=props.get(6,true);
-			MaterialBase(mat).bothSides=props.get(7,true);
+			MaterialBase(mat).bothSides=props.get(7,false);
 			MaterialBase(mat).alphaPremultiplied=props.get(8,false);
 			MaterialBase(mat).blendMode=blendModeDic[props.get(9, 0)];
 			MaterialBase(mat).repeat=props.get(13, false);
@@ -519,10 +519,10 @@ package away3d.loaders.parsers
 			
 				if (normalTexture) {	SinglePassMaterialBase(mat).normalMap = normalTexture;}
 				SinglePassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
-				SinglePassMaterialBase(mat).ambient=props.get(15,true);
+				SinglePassMaterialBase(mat).ambient=props.get(15,0.0);
 				SinglePassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
-				SinglePassMaterialBase(mat).specular=props.get(18,0.0);
-				SinglePassMaterialBase(mat).gloss=props.get(19,0.0);
+				SinglePassMaterialBase(mat).specular=props.get(18,1.0);
+				SinglePassMaterialBase(mat).gloss=props.get(19,1.0);
 				SinglePassMaterialBase(mat).specularColor=props.get(20,0xffffff);
 				if (specTexture) {		SinglePassMaterialBase(mat).specularMap = specTexture;}
 			
@@ -531,10 +531,10 @@ package away3d.loaders.parsers
 			
 				if (normalTexture) {	MultiPassMaterialBase(mat).normalMap = normalTexture;}
 				MultiPassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
-				MultiPassMaterialBase(mat).ambient=props.get(15,true);
+				MultiPassMaterialBase(mat).ambient=props.get(15,0.0);
 				MultiPassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
-				MultiPassMaterialBase(mat).specular=props.get(18,0.0);
-				MultiPassMaterialBase(mat).gloss=props.get(19,0.0);
+				MultiPassMaterialBase(mat).specular=props.get(18,1.0);
+				MultiPassMaterialBase(mat).gloss=props.get(19,1.0);
 				MultiPassMaterialBase(mat).specularColor=props.get(20,0xffffff);
 				if (specTexture) {		MultiPassMaterialBase(mat).specularMap = specTexture;}
 			}
