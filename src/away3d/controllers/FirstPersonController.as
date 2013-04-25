@@ -162,22 +162,19 @@ package away3d.controllers
 				
 				notifyUpdate();
 				
-				if (_panAngle < 0)
-					panAngle = (_panAngle % 360) + 360;
-				else
-					panAngle = _panAngle % 360;
-				
-				if (panAngle - _currentPanAngle < -180)
-					panAngle += 360;
-				else if (panAngle - _currentPanAngle > 180)
-					panAngle -= 360;
-				
 				_currentTiltAngle += (_tiltAngle - _currentTiltAngle)/(steps + 1);
 				_currentPanAngle += (_panAngle - _currentPanAngle)/(steps + 1);
 				
-				
 				//snap coords if angle differences are close
 				if ((Math.abs(tiltAngle - _currentTiltAngle) < 0.01) && (Math.abs(_panAngle - _currentPanAngle) < 0.01)) {
+					
+					if(Math.abs(_panAngle) > 360) {
+                        if (_panAngle < 0)
+                            panAngle = (_panAngle % 360) + 360;
+                        else
+                            panAngle = _panAngle % 360;
+                    }
+					
 					_currentTiltAngle = _tiltAngle;
 					_currentPanAngle = _panAngle;
 				}
