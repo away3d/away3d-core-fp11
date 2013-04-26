@@ -20,8 +20,10 @@ package away3d.controllers
 			super(targetObject, lookAtObject, 0, tiltAngle, distance);
 		}
 		
-		override public function update():void 
+		override public function update(interpolate:Boolean = true):void 
 		{
+			interpolate = interpolate;// unused: prevents warning
+
 			if (!lookAtObject)
 				return;			
 			
