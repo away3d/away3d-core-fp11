@@ -519,7 +519,7 @@ package away3d.loaders.parsers
 			
 				if (normalTexture) {	SinglePassMaterialBase(mat).normalMap = normalTexture;}
 				SinglePassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
-				SinglePassMaterialBase(mat).ambient=props.get(15,0.0);
+				SinglePassMaterialBase(mat).ambient=props.get(15,1.0);
 				SinglePassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
 				SinglePassMaterialBase(mat).specular=props.get(18,1.0);
 				SinglePassMaterialBase(mat).gloss=props.get(19,50);
@@ -531,7 +531,7 @@ package away3d.loaders.parsers
 			
 				if (normalTexture) {	MultiPassMaterialBase(mat).normalMap = normalTexture;}
 				MultiPassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
-				MultiPassMaterialBase(mat).ambient=props.get(15,0.0);
+				MultiPassMaterialBase(mat).ambient=props.get(15,1.0);
 				MultiPassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
 				MultiPassMaterialBase(mat).specular=props.get(18,1.0);
 				MultiPassMaterialBase(mat).gloss=props.get(19,50);
