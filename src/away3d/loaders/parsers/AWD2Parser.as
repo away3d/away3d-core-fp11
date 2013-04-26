@@ -304,7 +304,6 @@ package away3d.loaders.parsers
 				case 41:
 					assetData = parseLight(len);
 					break;
-				//disable case 51 to get it working in AwayBuilder
 				case 51:
 					assetData = parseLightPicker(len);
 					break;
@@ -513,7 +512,7 @@ package away3d.loaders.parsers
 			MaterialBase(mat).bothSides=props.get(7,false);
 			MaterialBase(mat).alphaPremultiplied=props.get(8,false);
 			MaterialBase(mat).blendMode=blendModeDic[props.get(9, 0)];
-			MaterialBase(mat).repeat=props.get(13, false);
+			MaterialBase(mat).repeat=props.get(13, true);
 			
 			if (isSingle==true){	// this is a multiPass material
 			
@@ -527,7 +526,7 @@ package away3d.loaders.parsers
 				if (specTexture) {		SinglePassMaterialBase(mat).specularMap = specTexture;}
 			
 			}
-			else if (isSingle==false){	// this is a singleMaterial
+			else {	// this is a singleMaterial
 			
 				if (normalTexture) {	MultiPassMaterialBase(mat).normalMap = normalTexture;}
 				MultiPassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
