@@ -522,7 +522,7 @@ package away3d.loaders.parsers
 				SinglePassMaterialBase(mat).ambient=props.get(15,0.0);
 				SinglePassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
 				SinglePassMaterialBase(mat).specular=props.get(18,1.0);
-				SinglePassMaterialBase(mat).gloss=props.get(19,1.0);
+				SinglePassMaterialBase(mat).gloss=props.get(19,50);
 				SinglePassMaterialBase(mat).specularColor=props.get(20,0xffffff);
 				if (specTexture) {		SinglePassMaterialBase(mat).specularMap = specTexture;}
 			
@@ -534,7 +534,7 @@ package away3d.loaders.parsers
 				MultiPassMaterialBase(mat).ambient=props.get(15,0.0);
 				MultiPassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
 				MultiPassMaterialBase(mat).specular=props.get(18,1.0);
-				MultiPassMaterialBase(mat).gloss=props.get(19,1.0);
+				MultiPassMaterialBase(mat).gloss=props.get(19,50);
 				MultiPassMaterialBase(mat).specularColor=props.get(20,0xffffff);
 				if (specTexture) {		MultiPassMaterialBase(mat).specularMap = specTexture;}
 			}
