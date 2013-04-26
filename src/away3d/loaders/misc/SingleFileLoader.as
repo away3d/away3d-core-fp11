@@ -280,11 +280,10 @@ package away3d.loaders.misc
 		 */
 		private function decomposeFilename(url : String) : void
 		{
-			var base : String;
-			var i : int = url.lastIndexOf('.');
 			
 			// Get rid of query string if any and extract suffix
-			base = (url.indexOf('?')>0)? url.split('?')[0] : url;
+			var base : String = (url.indexOf('?')>0)? url.split('?')[0] : url;
+			var i : int = base.lastIndexOf('.');
 			_fileExtension = base.substr(i + 1).toLowerCase();
 			_fileName = base.substr(0, i);
 		}
