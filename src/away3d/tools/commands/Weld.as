@@ -11,7 +11,7 @@ package away3d.tools.commands
 	import away3d.core.math.Vector3DUtils;
 	import away3d.core.math.MathConsts;
 	import away3d.entities.Mesh;
-	
+
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
 
@@ -42,7 +42,6 @@ package away3d.tools.commands
 		* @param useNormalMode 		If the face normals or vertex normals are used for comparison. VERTEXNORMALS keeps intact the original data. Default uses USE_FACENORMALS.
 		* @param smoothNormals 		Smooth. Default is true.
 		*/
- 	
 		public function apply(mesh : Mesh, keepUvs : Boolean = true, normalAngleDegree : Number = 180, useNormalMode: String = USE_FACENORMALS, smoothNormals:Boolean = true) : void
 		{
 			_keepUvs = keepUvs;
@@ -54,7 +53,7 @@ package away3d.tools.commands
 
 		/**
 		* Perfoms a weld operation on all children Mesh object geometries of the specified ObjectContainer3D.
-		* 
+		*
 		* @param obj  				The ObjectContainer3D to weld
 		* @param keepUVs 			If the uvs should be kept as defined. Default is true.
 		* @param normalAngleDegree	Threshold to compair the normals. Default is 180.
@@ -71,7 +70,9 @@ package away3d.tools.commands
 		}
 
 		/**
+		*
 		* returns howmany vertices were deleted during the welding operation.
+		*
 		*/
 		public function get verticesRemovedCount():uint
 		{
@@ -79,13 +80,15 @@ package away3d.tools.commands
 
 			return (_vertCnt>0)? _vertCnt : 0;  
 		}
+
 		/**
+		*
 		* returns howmany vertices were added during the welding operation.
+		*
 		*/
 		public function get verticesAddedCount():uint
 		{
 			if (isNaN(_vertCnt)) return 0;
-
 			return (_vertCnt<0)? Math.abs(_vertCnt) : 0;  
 		}
 
@@ -93,9 +96,10 @@ package away3d.tools.commands
 		{
 			_vertCnt = 0;
 			var child:ObjectContainer3D;
+
 			if(obj is Mesh && obj.numChildren == 0)
 				_vertCnt += applyToGeom(Mesh(obj).geometry);
-				 
+
 			for(var i:uint = 0;i<obj.numChildren;++i){
 				child = obj.getChildAt(i);
 				_vertCnt += parse(child);
@@ -111,14 +115,12 @@ package away3d.tools.commands
 
 			for (var i : uint = 0; i<geom.subGeometries.length; i++) {
 				var subGeom : ISubGeometry = geom.subGeometries[i];
-				
 				// TODO: Remove this check when ISubGeometry can always
 				// be updated using a single unified method (from vectors.)
 				if (subGeom is CompactSubGeometry) {
 					removedVertsCnt += applyToSubGeom(subGeom, CompactSubGeometry(subGeom));
 
 				} else {
-
 					outSubGeom = new CompactSubGeometry();
 					removedVertsCnt += applyToSubGeom(subGeom, outSubGeom);
 
@@ -137,13 +139,11 @@ package away3d.tools.commands
 			var i : uint;
 			var numOutIndices : uint = 0;
 			var searchStringFinal:String;
-
 			var vStride : uint, nStride : uint, uStride : uint;
 			var vOffs : uint, nOffs : uint, uOffs : uint, sn:uint;
 			var vd : Vector.<Number>, nd : Vector.<Number>, ud : Vector.<Number>;
 			var sharedNormalsDic:Dictionary = new Dictionary();
 			var outnormal:Vector3D = new Vector3D();
-
 			vd = subGeom.vertexData;
 			vStride = subGeom.vertexStride;
 			vOffs = subGeom.vertexOffset;
@@ -162,7 +162,6 @@ package away3d.tools.commands
 			var outIndices : Vector.<uint> = new Vector.<uint>();
 			var oldTargetNormals:Vector.<Vector3D> = new Vector.<Vector3D>();
 			var sharedPointNormals:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
-
 			var usedVertices:Dictionary = new Dictionary();
 			var searchString:String = "";
 			var inLen:uint = inIndices.length;
@@ -186,8 +185,10 @@ package away3d.tools.commands
 			var difUvs:Boolean;
 
 			for (i = 0; i < inLen; i++) {
+
 				origIndex = inIndices[i];
 				sharedNormalIndex = -1;
+
 				px = vd[vOffs + origIndex*vStride + 0];
 				py = vd[vOffs + origIndex*vStride + 1];
 				pz = vd[vOffs + origIndex*vStride + 2];
@@ -213,27 +214,26 @@ package away3d.tools.commands
 
 					faceIdxCnt += 1;
 				}
-				
+
 				searchString = "#" + px + "#" + py + "#" + pz + "#"; 
 				searchStringFinal = searchString + "0"; 
 				outIndex = -1;
-				
+
 				if (usedVertices[searchStringFinal] != undefined) {
-					
 					outIndex = usedVertices[searchStringFinal];
 					foundNormalsCnt = 0;
 					searchforNormal = true;
 					difUvs = false;		
 
 					while (searchforNormal) {
-
 						// if this is not the first iteration over the while-loopm, reset the "outIndex" and create searchString for new Dictionary-lookup.
 						if (foundNormalsCnt > 0) {
 							outIndex = -1;
 							searchStringFinal = searchString + String(foundNormalsCnt);
 						}
-						 
+
 						if (usedVertices[searchStringFinal] != undefined) {
+
 							outIndex = usedVertices[searchStringFinal];
 							storedFaceNormal = oldTargetNormals[outIndex]; // get the Normal-Vector of this allready-existing vertex. (if _useNormalMode==USE_FACENORMALS, this Normal is the Facenormal off the face, the vertex is used by) 
 							// calculate the angle between the normals of the two vertices.
@@ -243,9 +243,9 @@ package away3d.tools.commands
 
 							//if uv should kept intact, check if this must be a new vertex or can be shared (because of uv)
 							if (_keepUvs && (u != outUvs[outIndex * 2 + 0]) || (v != outUvs[outIndex * 2 + 1])) difUvs = true;
+
 							
 							if (curangle < _normalThreshold) {
-								
 								// if the angle is smaller than the threshold, but has different uv, the vertex cannot be merged, 
 								// but the normals should have the same values, so we set he "normalIndex" of this vertex to be the "normalIndex" of the vertex it would get merged with, if uv would not differ.
 								if (difUvs) {
@@ -254,23 +254,25 @@ package away3d.tools.commands
 									// if the angle is smaller than the threshold and uv is the same, the vertex can be merged, stop the while loop by setting searchforNormal to false
 									searchforNormal = false;
 								}
+
 								sharedPointNormals[outIndex].push(targetNormal);//add the normal to the sharedPointNormals-list (to calculate the shared normal later)
-				 
+
 								// if the angle is bigger than our treshold, the verticles will not be merged, and the normals for both verticles should have their own unique values too.
 								// we do nothing, but keep searching for another allready parsed point, thats on the same position (increment "foundNormalsCnt", add it to the searchstring, and check if this exists)  
 								// if no other vertex at the same scene-position exists, the outindex will have been put back to -1, so a new verticle will be created.
 								//if (curangle >= _normalThreshold) {}
 							} 
 						}
+
 						if (outIndex < 0) searchforNormal = false;
-							
+
 						foundNormalsCnt ++;
-						
 					}
 				}
 
 				// No vertex found, so create it
 				if (outIndex < 0) {
+
 					outIndex = outVertices.length / 3;
 
 					if (sharedNormalIndex < 0) {
@@ -283,12 +285,15 @@ package away3d.tools.commands
 					sharedPointNormals[outIndex][0] = targetNormal;
 					usedVertices[searchStringFinal] = outIndex;
 					sharedNormalIndices[outIndex] = sharedNormalIndex;
+
 					outVertices[outIndex * 3 + 0] = px;
 					outVertices[outIndex * 3 + 1] = py;
 					outVertices[outIndex * 3 + 2] = pz;
+
 					outNormals[outIndex * 3 + 0] = targetNormal.x;
 					outNormals[outIndex * 3 + 1] = targetNormal.y;
 					outNormals[outIndex * 3 + 2] = targetNormal.z;
+
 					outUvs[outIndex * 2 + 0] = u;
 					outUvs[outIndex * 2 + 1] = v;
 				}
@@ -307,14 +312,17 @@ package away3d.tools.commands
 				inLen = outVertices.length / 3;
 
 				for (i = 0; i < inLen; i++) {
+
 					outnormal = new Vector3D();
 					foundVector = -1;
 					curIdx = sharedNormalIndices[i];
+
 					// the curIdx could point to list-position, thats pointing to another shared-Normal again, 
 					//so we need to make shure, we follow the redirection until we get a normal-index smaller than maxNormalIdx
 					while ( curIdx > maxNormalIdx) {
 						curIdx = sharedNormalIndices[curIdx];
 					}					
+
 					if (sharedPointsfinalDic[curIdx.toString()] != undefined) {
 						foundVector = sharedPointsfinalDic[curIdx.toString()];
 						outnormal = sharedPointsfinalVectors[foundVector];
@@ -328,32 +336,33 @@ package away3d.tools.commands
 						for (sn = 0; sn < sharedPointNormals[curIdx].length; sn ++) {
 
 							if (sharedNormalsDic[sharedPointNormals[curIdx][sn].toString()] != undefined) continue;
-							
+
 							foundNormalsCnt ++;
 							sharedNormalsDic[sharedPointNormals[curIdx][sn].toString()] = 1;
 							outnormal.x += sharedPointNormals[curIdx][sn].x;
 							outnormal.y += sharedPointNormals[curIdx][sn].y;
 							outnormal.z += sharedPointNormals[curIdx][sn].z;
+
 						}
 
 						outnormal.x /= foundNormalsCnt;
 						outnormal.y /= foundNormalsCnt;
 						outnormal.z /= foundNormalsCnt;
-						
+
 						sharedPointsfinalDic[curIdx.toString()] = sharedPointsfinalVectors.length;
 						sharedPointsfinalVectors[sharedPointsfinalVectors.length] = outnormal;
+
 					}
 
 					outNormals[i * 3] = outnormal.x ;
 					outNormals[i * 3 + 1] = outnormal.y;
 					outNormals[i * 3 + 2] = outnormal.z;
+
 				}
-			 
 			}
 
 			outSubGeom.fromVectors(outVertices, outUvs, outNormals, null);
 			outSubGeom.updateIndexData(outIndices);
-
 			return int(oldVerticleCount - outSubGeom.numVertices);
 		}
 
