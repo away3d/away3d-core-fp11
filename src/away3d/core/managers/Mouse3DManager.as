@@ -52,6 +52,8 @@ package away3d.core.managers
 		private var _childDepth : int = 0;
 		private static var _previousCollidingView : int = -1;
 		private static var _collidingView : int = -1;
+		private var _collidingDownObject:PickingCollisionVO;
+		private var _collidingUpObject:PickingCollisionVO;
 
 		/**
 		 * Creates a new <code>Mouse3DManager</code> object.
@@ -220,8 +222,12 @@ package away3d.core.managers
 
 		private function onClick(event : MouseEvent) : void
 		{
-			if (_collidingObject)
+			if (_collidingObject && _collidingUpObject == _collidingDownObject)
+			{
 				queueDispatch(_mouseClick, event);
+				_collidingUpObject = null;
+				_collidingDownObject = null;
+			}
 			else
 				reThrowEvent(event);
 			_updateDirty = true;
@@ -229,7 +235,7 @@ package away3d.core.managers
 
 		private function onDoubleClick(event : MouseEvent) : void
 		{
-			if (_collidingObject) 
+			if (_collidingObject && _collidingUpObject == _collidingDownObject) 
 				queueDispatch(_mouseDoubleClick, event);
 			else
 				reThrowEvent(event);
@@ -240,7 +246,11 @@ package away3d.core.managers
 		{
 			updateCollider( _activeView ); // ensures collision check is done with correct mouse coordinates on mobile
 			if (_collidingObject)
+			{
 				queueDispatch(_mouseDown, event);
+				_collidingUpObject = null;
+				_collidingDownObject = _collidingObject;
+			}
 			else
 				reThrowEvent(event);
 			_updateDirty = true;
@@ -249,7 +259,10 @@ package away3d.core.managers
 		private function onMouseUp(event : MouseEvent) : void
 		{
 			if (_collidingObject)
+			{
 				queueDispatch(_mouseUp, event);
+				_collidingUpObject = _collidingObject;
+			}
 			else
 				reThrowEvent(event);
 			_updateDirty = true;
