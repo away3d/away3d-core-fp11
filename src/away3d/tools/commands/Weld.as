@@ -91,10 +91,10 @@ package away3d.tools.commands
 
 		private function parse(obj:ObjectContainer3D):int
 		{
-			_removedVertCnt = 0;
+			var _vertCnt:int = 0;
 			var child:ObjectContainer3D;
 			if(obj is Mesh && obj.numChildren == 0)
-				_removedVertCnt += applyToGeom(Mesh(obj).geometry);
+				_vertCnt += applyToGeom(Mesh(obj).geometry);
 				 
 			for(var i:uint = 0;i<obj.numChildren;++i){
 				child = obj.getChildAt(i);
