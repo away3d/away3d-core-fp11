@@ -91,17 +91,17 @@ package away3d.tools.commands
 
 		private function parse(obj:ObjectContainer3D):int
 		{
-			var _vertCnt:int = 0;
+			var _removedVertCnt:int = 0;
 			var child:ObjectContainer3D;
 			if(obj is Mesh && obj.numChildren == 0)
-				_vertCnt += applyToGeom(Mesh(obj).geometry);
+				_removedVertCnt += applyToGeom(Mesh(obj).geometry);
 				 
 			for(var i:uint = 0;i<obj.numChildren;++i){
 				child = obj.getChildAt(i);
-				_vertCnt += parse(child);
+				_removedVertCnt += parse(child);
 			}
 
-			return _vertCnt;
+			return _removedVertCnt;
 		}
 
 		private function applyToGeom(geom : Geometry) : int
@@ -171,7 +171,7 @@ package away3d.tools.commands
 			var faceIdxCnt : uint = 3;
 			var targetNormal:Vector3D;
 			var storedFaceNormal:Vector3D;
-			var sharedNormalIndex : uint;
+			var sharedNormalIndex : int;
 			var origIndex : uint;
 			var foundNormalsCnt : uint=0;
 			var searchforNormal : Boolean = true;
@@ -260,7 +260,7 @@ package away3d.tools.commands
 								// if no other vertex at the same scene-position exists, the outindex will have been put back to -1, so a new verticle will be created.
 								//if (curangle >= _normalThreshold) {}
 							} 
-
+						}
 						if (outIndex < 0) searchforNormal = false;
 							
 						foundNormalsCnt ++;
@@ -349,7 +349,7 @@ package away3d.tools.commands
 
 			outSubGeom.fromVectors(outVertices, outUvs, outNormals, null);
 			outSubGeom.updateIndexData(outIndices);
-
+			
 			return int(oldVerticleCount - outSubGeom.numVertices);
 		}
 
