@@ -16,6 +16,10 @@ package away3d.animators
 	{
 		private var _agalCode:String;
 
+		public function UVAnimationSet() {
+			
+		}
+
 		/**
 		* @inheritDoc
 		*/
