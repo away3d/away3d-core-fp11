@@ -317,7 +317,7 @@ package away3d.loaders.parsers
 				asset.name = name;
 			
 			switch (asset.assetType) {
-				case AssetType.LIGHTPICKER:
+				case AssetType.LIGHT_PICKER:
 					type_name = 'lightPicker';
 					type_event = AssetEvent.LIGHTPICKER_COMPLETE;
 					break;

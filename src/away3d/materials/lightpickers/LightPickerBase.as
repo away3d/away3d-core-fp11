@@ -1,21 +1,16 @@
 package away3d.materials.lightpickers
 {
-	import away3d.arcane;
-	import away3d.core.base.IRenderable;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.library.assets.NamedAssetBase;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.LightProbe;
-	import away3d.lights.PointLight;
+	import away3d.*;
+	import away3d.core.base.*;
+	import away3d.core.traverse.*;
+	import away3d.library.assets.*;
+	import away3d.lights.*;
 	
-	import flash.events.EventDispatcher;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 
 	use namespace arcane;
-	public class LightPickerBase extends EventDispatcher implements IAsset
+
+	public class LightPickerBase extends NamedAssetBase implements IAsset
 	{
 		protected var _numPointLights : uint;
 		protected var _numDirectionalLights : uint;
@@ -30,56 +25,18 @@ package away3d.materials.lightpickers
 		protected var _lightProbes : Vector.<LightProbe>;
 		protected var _lightProbeWeights : Vector.<Number>;
 
-		private var _name : String;
-		private var _full_path : Array;
-		
-		private var _namespace : String;
 		public function LightPickerBase() {
 			
-			updateFullPath();
-		}
-		
-		
-		
-		/**
-		 * Functions needed by IAsset // they are dummy functions for a part
-		 */
-		public function assetPathEquals(name : String, ns : String) : Boolean
-		{
-			return (_name == name && (!ns || _namespace==ns));
-		}
-		
-		public function get assetFullPath() : Array
-		{
-			return _full_path;
 		}
 		
 		public function dispose() : void
 		{
 		}
-		public function resetAssetPath(name : String, ns : String = null, overrideOriginal : Boolean = true) : void
-		{
-		}
-		public function get assetNamespace() : String
-		{
-			return _namespace;
-		}
-		public function get name():String {
-			return _name;
-		}
-		public function set name(newName:String):void {
-			_name=newName;
-		}
+		
 		public function get assetType() : String
 		{
-			return AssetType.LIGHTPICKER;
+			return AssetType.LIGHT_PICKER;
 		}
-		private function updateFullPath() : void
-		{
-			_full_path = [ _namespace, _name ];
-		}
-		
-		
 		
 		/**
 		 * The maximum amount of directional lights that will be provided
