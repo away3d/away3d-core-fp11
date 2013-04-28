@@ -487,7 +487,6 @@ package away3d.materials.passes
 					_vertexConstantData[_uvTransformIndex + 7] = uvTransform.ty;
 				}
 				else {
-					trace("Warning: animateUVs is set to true with an IRenderable without a uvTransform. Identity matrix assumed.");
 					_vertexConstantData[_uvTransformIndex] = 1;
 					_vertexConstantData[_uvTransformIndex + 1] = 0;
 					_vertexConstantData[_uvTransformIndex + 3] = 0;
