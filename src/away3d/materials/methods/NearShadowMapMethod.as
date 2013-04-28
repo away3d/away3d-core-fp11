@@ -1,17 +1,14 @@
 package away3d.materials.methods
 {
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.base.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.events.ShadingMethodEvent;
-	import away3d.lights.LightBase;
-	import away3d.lights.shadowmaps.NearDirectionalShadowMapper;
-	import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterData;
-	import away3d.materials.compilation.ShaderRegisterElement;
+	import away3d.*;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.managers.*;
+	import away3d.events.*;
+	import away3d.lights.*;
+	import away3d.lights.shadowmaps.*;
+	import away3d.materials.compilation.*;
 
-	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
@@ -22,7 +19,24 @@ package away3d.materials.methods
 
 		private var _fadeRatio : Number;
 		private var _nearShadowMapper : NearDirectionalShadowMapper;
-
+		
+		/**
+		 * The base shadow map method on which this method's shading is based.
+		 */
+		public function get baseMethod() : SimpleShadowMapMethodBase
+		{
+			return _baseMethod;
+		}
+		
+		public function set baseMethod(value : SimpleShadowMapMethodBase) : void
+		{
+			if (_baseMethod == value) return;
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = value;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+			invalidateShaderProgram();
+		}
+		
 		public function NearShadowMapMethod(baseMethod : SimpleShadowMapMethodBase, fadeRatio : Number = .1)
 		{
 			super(baseMethod.castingLight);
