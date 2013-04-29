@@ -139,7 +139,7 @@
 
 			var context : Context3D = stage3DProxy._context3D;
 			var matrix : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			matrix.copyFrom(renderable.sceneTransform);
+			matrix.copyFrom(renderable.getRenderSceneTransform(camera));
 			matrix.append(viewProjection);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 			renderable.activateVertexBuffer(0, stage3DProxy);

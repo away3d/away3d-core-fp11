@@ -505,12 +505,12 @@ package away3d.materials.passes
 				updateProbes(stage3DProxy);
 
 			if (_sceneMatrixIndex >= 0) {
-				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
+				renderable.getRenderSceneTransform(camera).copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
 				viewProjection.copyRawDataTo(_vertexConstantData, 0, true);
 			}
 			else {
 				var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-				matrix3D.copyFrom(renderable.sceneTransform);
+				matrix3D.copyFrom(renderable.getRenderSceneTransform(camera));
 				matrix3D.append(viewProjection);
 				matrix3D.copyRawDataTo(_vertexConstantData, 0, true);
 			}

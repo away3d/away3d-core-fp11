@@ -236,5 +236,10 @@ package away3d.primitives
 		{
 			return _geometry.vertexTangentOffset;
 		}
+
+		public function getRenderSceneTransform(camera : Camera3D) : Matrix3D
+		{
+			return _sceneTransform;
+		}
 	}
 }

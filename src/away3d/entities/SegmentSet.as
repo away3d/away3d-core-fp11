@@ -5,6 +5,7 @@
 	import away3d.arcane;
 	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
+	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.partition.EntityNode;
@@ -20,6 +21,7 @@
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix;
+	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -345,6 +347,11 @@
 		override public function get assetType() : String
 		{
 			return AssetType.SEGMENT_SET;
+		}
+
+		public function getRenderSceneTransform(camera : Camera3D) : Matrix3D
+		{
+			return _sceneTransform;
 		}
 	}
 }

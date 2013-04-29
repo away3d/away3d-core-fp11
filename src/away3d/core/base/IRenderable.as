@@ -1,5 +1,6 @@
 package away3d.core.base
 {
+	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 
@@ -16,6 +17,13 @@ package away3d.core.base
 		 * The transformation matrix that transforms from model to world space.
 		 */
 		function get sceneTransform() : Matrix3D;
+
+		/**
+		 * The transformation matrix that transforms from model to world space, adapted with any special operations needed to render.
+		 * For example, assuring certain alignedness which is not inherent in the scene transform. By default, this would
+		 * return the scene transform.
+		 */
+		function getRenderSceneTransform(camera : Camera3D) : Matrix3D;
 
 		/**
 		 * The inverse scene transform object that transforms from world to model space.

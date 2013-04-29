@@ -274,5 +274,16 @@ package away3d.entities
 
 			return _pickingCollisionVO.renderable != null;
 		}
+
+		public function getRenderSceneTransform(camera : Camera3D) : Matrix3D
+		{
+			var comps : Vector.<Vector3D> = camera.sceneTransform.decompose();
+			var scale : Vector3D = comps[2];
+			comps[0] = scenePosition;
+			scale.x = _width*_scaleX;
+			scale.y = _height*_scaleY;
+			_spriteMatrix.recompose(comps);
+			return _spriteMatrix;
+		}
 	}
 }

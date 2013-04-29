@@ -145,7 +145,7 @@ package away3d.materials.methods
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			_projMatrix.copyFrom(_projector.viewProjection);
-			_projMatrix.prepend(renderable.sceneTransform);
+			_projMatrix.prepend(renderable.getRenderSceneTransform(camera));
 			_projMatrix.copyRawDataTo(vo.vertexData, vo.vertexConstantsIndex, true);
 		}
 

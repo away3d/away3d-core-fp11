@@ -231,6 +231,7 @@ package away3d.core.traverse
 				var dz : Number = _entryPoint.z - entity.z;
 				// project onto camera's z-axis
 				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z;
+				item.renderSceneTransform = renderable.getRenderSceneTransform(_camera);
 				if (material.requiresBlending) {
 					item.next = _blendedRenderableHead;
 					_blendedRenderableHead = item;

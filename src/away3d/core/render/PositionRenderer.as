@@ -59,7 +59,7 @@ package away3d.core.render
 			while (item) {
 				renderable = item.renderable;
 				renderable.activateVertexBuffer(0, _stage3DProxy);
-				matrix.copyFrom(renderable.sceneTransform);
+				matrix.copyFrom(item.renderSceneTransform);
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
@@ -72,7 +72,7 @@ package away3d.core.render
 			while (item) {
 				renderable = item.renderable;
 				renderable.activateVertexBuffer(0, _stage3DProxy);
-				matrix.copyFrom(renderable.sceneTransform);
+				matrix.copyFrom(item.renderSceneTransform);
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);

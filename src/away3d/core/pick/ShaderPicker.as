@@ -200,7 +200,7 @@ package away3d.core.pick
 				_id[1] = (_interactiveId >> 8)/255;	    // on green channel
 				_id[2] = (_interactiveId & 0xff)/255;  	// on blue channel
 
-				matrix.copyFrom(renderable.sceneTransform);
+				matrix.copyFrom(renderable.getRenderSceneTransform(camera));
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
@@ -285,7 +285,7 @@ package away3d.core.pick
 			var scX : Number, scY : Number, scZ : Number;
 			var offsX : Number, offsY : Number, offsZ : Number;
 			var localViewProjection : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			localViewProjection.copyFrom(_hitRenderable.sceneTransform);
+			localViewProjection.copyFrom(_hitRenderable.getRenderSceneTransform(camera));
 			localViewProjection.append(camera.viewProjection);
 			if (!_triangleProgram3D) initTriangleProgram3D();
 
