@@ -15,5 +15,9 @@ package away3d.library.assets
 		public static const ANIMATION_STATE : String = 'animationState';
 		public static const ANIMATION_NODE : String = 'animationNode';
 		public static const STATE_TRANSITION : String = 'stateTransition';
+		public static const LIGHT : String = 'light';
+		public static const LIGHT_PICKER : String = 'lightPicker';
+		public static const SHADOW_MAP_METHOD : String = 'shadowMapMethod';
+		public static const EFFECTS_METHOD : String = 'effectsMethod';
 	}
 }

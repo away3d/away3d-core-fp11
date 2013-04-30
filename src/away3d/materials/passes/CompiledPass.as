@@ -487,7 +487,6 @@ package away3d.materials.passes
 					_vertexConstantData[_uvTransformIndex + 7] = uvTransform.ty;
 				}
 				else {
-					trace("Warning: animateUVs is set to true with an IRenderable without a uvTransform. Identity matrix assumed.");
 					_vertexConstantData[_uvTransformIndex] = 1;
 					_vertexConstantData[_uvTransformIndex + 1] = 0;
 					_vertexConstantData[_uvTransformIndex + 3] = 0;
@@ -506,12 +505,12 @@ package away3d.materials.passes
 				updateProbes(stage3DProxy);
 
 			if (_sceneMatrixIndex >= 0) {
-				renderable.sceneTransform.copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
-				camera.viewProjection.copyRawDataTo(_vertexConstantData, 0, true);
+				renderable.getRenderSceneTransform(camera).copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
+				viewProjection.copyRawDataTo(_vertexConstantData, 0, true);
 			}
 			else {
 				var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-				matrix3D.copyFrom(renderable.sceneTransform);
+				matrix3D.copyFrom(renderable.getRenderSceneTransform(camera));
 				matrix3D.append(viewProjection);
 				matrix3D.copyRawDataTo(_vertexConstantData, 0, true);
 			}

@@ -151,33 +151,38 @@ package away3d.controllers
 		 * Updates the current tilt angle and pan angle values.
 		 * 
 		 * Values are calculated using the defined <code>tiltAngle</code>, <code>panAngle</code> and <code>steps</code> variables.
-		 * 
+		 *
+		 * @param interpolate   If the update to a target pan- or tiltAngle is interpolated. Default is true.
+		 *
 		 * @see	#tiltAngle
 		 * @see	#panAngle
 		 * @see	#steps
 		 */
-		public override function update():void
+		public override function update(interpolate:Boolean = true):void
 		{
 			if (_tiltAngle != _currentTiltAngle || _panAngle != _currentPanAngle) {
 				
 				notifyUpdate();
 				
-				if (_panAngle < 0)
-					panAngle = (_panAngle % 360) + 360;
-				else
-					panAngle = _panAngle % 360;
-				
-				if (panAngle - _currentPanAngle < -180)
-					panAngle += 360;
-				else if (panAngle - _currentPanAngle > 180)
-					panAngle -= 360;
-				
-				_currentTiltAngle += (_tiltAngle - _currentTiltAngle)/(steps + 1);
-				_currentPanAngle += (_panAngle - _currentPanAngle)/(steps + 1);
-				
+				if(interpolate){
+					_currentTiltAngle += (_tiltAngle - _currentTiltAngle)/(steps + 1);
+					_currentPanAngle += (_panAngle - _currentPanAngle)/(steps + 1);
+				} else {
+					_currentTiltAngle = _tiltAngle;
+					_currentPanAngle = _panAngle;
+				}
 				
 				//snap coords if angle differences are close
 				if ((Math.abs(tiltAngle - _currentTiltAngle) < 0.01) && (Math.abs(_panAngle - _currentPanAngle) < 0.01)) {
+					
+					if(Math.abs(_panAngle) > 360) {
+
+						if (_panAngle < 0)
+							panAngle = (_panAngle % 360) + 360;
+						else
+							panAngle = _panAngle % 360;
+					}
+						
 					_currentTiltAngle = _tiltAngle;
 					_currentPanAngle = _panAngle;
 				}

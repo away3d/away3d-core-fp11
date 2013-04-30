@@ -13,7 +13,22 @@ package away3d.materials.methods
 	 */
 	public class BasicDiffuseMethod extends LightingMethodBase
 	{
-		arcane var _useDiffuseTexture : Boolean;
+		private var _useAmbientTexture : Boolean;
+		
+		arcane function get useAmbientTexture() : Boolean
+		{
+			return _useAmbientTexture;
+		}
+		
+		arcane function set useAmbientTexture(value : Boolean) : void
+		{
+			if (_useAmbientTexture == value)
+				return;
+			
+			_useAmbientTexture = value;
+			
+			invalidateShaderProgram();
+		}
 
 		protected var _useTexture : Boolean;
 		internal var _totalLightColorReg : ShaderRegisterElement;
@@ -132,6 +147,7 @@ package away3d.materials.methods
 			var diff : BasicDiffuseMethod = BasicDiffuseMethod(method);
 			alphaThreshold = diff.alphaThreshold;
 			texture = diff.texture;
+			useAmbientTexture = diff.useAmbientTexture;
 			diffuseAlpha = diff.diffuseAlpha;
 			diffuseColor = diff.diffuseColor;
 		}
@@ -272,8 +288,8 @@ package away3d.materials.methods
 
 			code += "sat " + _totalLightColorReg + ", " + _totalLightColorReg + "\n";
 
-			if (_useDiffuseTexture) {
-				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ", " + targetReg + "\n" +
+			if (_useAmbientTexture) {
+				code += "mul " + albedo + ".xyz, " + albedo + ", " + _totalLightColorReg + "\n" +
 						"mul " + _totalLightColorReg + ".xyz, " + targetReg + ", " + _totalLightColorReg + "\n" +
 						"sub " + targetReg + ".xyz, " + targetReg + ", " + _totalLightColorReg + "\n" +
 						"add " + targetReg + ".xyz, " + albedo + ", " + targetReg + "\n";

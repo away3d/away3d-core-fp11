@@ -1,10 +1,5 @@
 package away3d.loaders.parsers
 {
-	import flash.display.*;
-	import flash.geom.*;
-	import flash.net.*;
-	import flash.utils.*;
-	
 	import away3d.*;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
@@ -12,12 +7,22 @@ package away3d.loaders.parsers
 	import away3d.core.base.*;
 	import away3d.entities.*;
 	import away3d.library.assets.*;
+	import away3d.lights.DirectionalLight;
+	import away3d.lights.LightBase;
+	import away3d.lights.PointLight;
 	import away3d.loaders.misc.*;
 	import away3d.loaders.parsers.utils.*;
 	import away3d.materials.*;
+	import away3d.materials.lightpickers.LightPickerBase;
+	import away3d.materials.lightpickers.StaticLightPicker;
 	import away3d.materials.utils.*;
 	import away3d.textures.*;
 	import away3d.tools.utils.*;
+	
+	import flash.display.*;
+	import flash.geom.*;
+	import flash.net.*;
+	import flash.utils.*;
 	
 	
 	use namespace arcane;
@@ -71,6 +76,7 @@ package away3d.loaders.parsers
 		public static const AWD_FIELD_MTX4x3 : uint = 46;
 		public static const AWD_FIELD_MTX4x4 : uint = 47;
 		
+		private var blendModeDic:Vector.<String>;
 		
 		
 		/**
@@ -86,6 +92,23 @@ package away3d.loaders.parsers
 			_blocks[0] = new AWDBlock();
 			_blocks[0].data = null; // Zero address means null in AWD
 			
+			blendModeDic=new Vector.<String>();
+			blendModeDic.push(BlendMode.NORMAL);
+			blendModeDic.push(BlendMode.ADD);
+			blendModeDic.push(BlendMode.ALPHA);
+			blendModeDic.push(BlendMode.DARKEN);
+			blendModeDic.push(BlendMode.DIFFERENCE);
+			blendModeDic.push(BlendMode.ERASE);
+			blendModeDic.push(BlendMode.HARDLIGHT);
+			blendModeDic.push(BlendMode.INVERT);
+			blendModeDic.push(BlendMode.LAYER);
+			blendModeDic.push(BlendMode.LIGHTEN);
+			blendModeDic.push(BlendMode.MULTIPLY);
+			blendModeDic.push(BlendMode.NORMAL);
+			blendModeDic.push(BlendMode.OVERLAY);
+			blendModeDic.push(BlendMode.SCREEN);
+			blendModeDic.push(BlendMode.SHADER);
+			blendModeDic.push(BlendMode.OVERLAY);
 			_version = [];
 		}
 		
@@ -278,6 +301,12 @@ package away3d.loaders.parsers
 				case 23:
 					assetData = parseMeshInstance(len);
 					break;
+				case 41:
+					assetData = parseLight(len);
+					break;
+				case 51:
+					assetData = parseLightPicker(len);
+					break;
 				case 81:
 					assetData = parseMaterial(len);
 					break;
@@ -361,11 +390,16 @@ package away3d.loaders.parsers
 			var name : String;
 			var type : uint;
 			var props : AWDProperties;
-			var mat : SinglePassMaterialBase;
+			var mat : MaterialBase;
 			var attributes : Object;
 			var finalize : Boolean;
 			var num_methods : uint;
 			var methods_parsed : uint;
+			
+			var normalTexture : Texture2DBase;
+			var normalTex_addr : uint;
+			var specTexture : Texture2DBase;
+			var specTex_addr : uint;
 			
 			name = parseVarStr();
 			type = _body.readUnsignedByte();
@@ -373,11 +407,145 @@ package away3d.loaders.parsers
 			
 			// Read material numerical properties
 			// (1=color, 2=bitmap url, 10=alpha, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
-			props = parseProperties({ 1:AWD_FIELD_INT32, 2:AWD_FIELD_BADDR, 
-				10:AWD_FIELD_FLOAT32, 11:AWD_FIELD_BOOL, 
-				12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
+			props = parseProperties({ 	1:AWD_FIELD_UINT32, 	2:AWD_FIELD_BADDR,		3:AWD_FIELD_BADDR,		4:AWD_FIELD_BOOL,		5:AWD_FIELD_BOOL,
+										6:AWD_FIELD_BOOL,		7:AWD_FIELD_BOOL,		8:AWD_FIELD_BOOL,		9:AWD_FIELD_UINT8,		10:AWD_FIELD_FLOAT32, 
+										11:AWD_FIELD_BOOL, 		12:AWD_FIELD_FLOAT32, 	13:AWD_FIELD_BOOL,		15:AWD_FIELD_FLOAT32,	16:AWD_FIELD_UINT32, 
+										17:AWD_FIELD_BADDR,		18:AWD_FIELD_FLOAT32, 	19:AWD_FIELD_FLOAT32,	20:AWD_FIELD_UINT32, 	21:AWD_FIELD_BADDR,
+										22:AWD_FIELD_BADDR});	
+			
+			
+			//MaterialProperties
+			// 1 color - 				used for ColorMaterials/ColorMultiPassMaterials
+			// 2 texture - 				used for TextureMaterials/TextureMultiPassMaterials
+			// 3 normalMap - 			used for SinglePassBaseMaterial/MultiPassBaseMaterial
+			// 4 isSingle - 			decides if Single or Multi
+			// 5 smooth - 				used for BaseMaterial
+			// 6 mipmap - 				used for BaseMaterial
+			// 7 bothSides - 			used for BaseMaterial
+			// 8 alphaPremultiplied - 	used for BaseMaterial
+			// 9 blendMode - 			used for BaseMaterial
+			// 10 alpha - 				used for SinglePassBaseMaterials only
+			// 11 alpha-Blending - 		used for SinglePassBaseMaterials only
+			// 12 alphaThreshold - 		used for SinglePassBaseMaterial/MultiPassBaseMaterial
+			// 13 repeat - 				used for BaseMaterial
+			// 14 diffuse-Level - 		NOT USED IN THIS VERSION
+			// 15 ambient - 			used for SinglePassBaseMaterial/MultiPassBaseMaterial
+			// 16 ambientColor - 		used for SinglePassBaseMaterial/MultiPassBaseMaterial
+			// 18 ambient-textur - 		used for TextureMaterial/TextureMultiPassMaterial
+			// 17 specular - 			used for SinglePassBaseMaterial/MultiPassBaseMaterial
+			// 19 gloss - 				used for SinglePassBaseMaterial/MultiPassBaseMaterial
+			// 20 specularColor - 		used for SinglePassBaseMaterial/MultiPassBaseMaterial
+			// 21 specular-texture - 	used for SinglePassBaseMaterial/MultiPassBaseMaterial			
+			
+			
+			var isSingle:Boolean=props.get(4,true);			
+			
+			
+			if (type == 1) { // Color material
+				var color : uint = color = props.get(1, 0xcccccc);
+				if (isSingle==false){	//	MultiPassMaterial
+					mat = new ColorMultiPassMaterial(color);}
+				else {	//	SinglePassMaterial
+					mat = new ColorMaterial(color, props.get(10, 1.0));
+					ColorMaterial(mat).alphaBlending=props.get(11,false);
+					}
+			}
+			else if (type == 2) { // texture material
+				
+				var texture : Texture2DBase;
+				var tex_addr : uint;
+				var ambientTexture : Texture2DBase;
+				var ambientTex_addr : uint;
+				
+				tex_addr = props.get(2, 0);				
+				texture = _blocks[tex_addr].data;	
+				
+				ambientTex_addr = props.get(17, 0);
+				if (ambientTex_addr>0){
+					ambientTexture = _blocks[ambientTex_addr].data;	}
+				
+				if (isSingle==false){	// MultiPassMaterial
+					mat = new TextureMultiPassMaterial(texture);
+					if (ambientTexture) {TextureMultiPassMaterial(mat).ambientTexture = ambientTexture;}		
+					}
+				else {	//	SinglePassMaterial
+					mat = new TextureMaterial(texture);
+					if (ambientTexture) {TextureMaterial(mat).ambientTexture = ambientTexture;}
+					TextureMaterial(mat).alpha=props.get(10,1.0);
+					TextureMaterial(mat).alphaBlending=props.get(11,false);
+					}				
+				//I disabled the following code, because i am not shure if it will ever be executed. will ask Richerd, and ahve a closer look later....	
+				// If bitmap asset has already been loaded
+				/*
+				if (texture) {
+				mat = new TextureMaterial(texture);
+				TextureMaterial(mat).alphaBlending = props.get(11, false);
+				TextureMaterial(mat).alpha = props.get(10, 1.0);
+				finalize = true;
+				}
+				else {
+				// No bitmap available yet. Material will be finalized
+				// when texture finishes loading.
+				mat = new TextureMaterial(null);
+				if (tex_addr > 0)
+				_texture_users[tex_addr.toString()].push(mat);
+				
+				finalize = false;
+				}
+				*/
+				
+			}
+			normalTex_addr = props.get(3, 0);
+			if (normalTex_addr>0){
+				normalTexture = _blocks[normalTex_addr].data;}					
+			specTex_addr = props.get(21, 0);
+			if (specTex_addr>0){
+				specTexture = _blocks[specTex_addr].data;}
+			
+			
+			var lightPickerAddr:int=props.get(22,0);
+			if (lightPickerAddr>0){
+				MaterialBase(mat).lightPicker=_blocks[lightPickerAddr].data;
+			}
+			MaterialBase(mat).smooth=props.get(5,true);
+			MaterialBase(mat).mipmap=props.get(6,true);
+			MaterialBase(mat).bothSides=props.get(7,false);
+			MaterialBase(mat).alphaPremultiplied=props.get(8,false);
+			MaterialBase(mat).blendMode=blendModeDic[props.get(9, 0)];
+			MaterialBase(mat).repeat=props.get(13, true);
+			
+			if (isSingle==true){	// this is a multiPass material
+			
+				if (normalTexture) {	SinglePassMaterialBase(mat).normalMap = normalTexture;}
+				SinglePassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
+				SinglePassMaterialBase(mat).ambient=props.get(15,1.0);
+				SinglePassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
+				SinglePassMaterialBase(mat).specular=props.get(18,1.0);
+				SinglePassMaterialBase(mat).gloss=props.get(19,50);
+				SinglePassMaterialBase(mat).specularColor=props.get(20,0xffffff);
+				if (specTexture) {		SinglePassMaterialBase(mat).specularMap = specTexture;}
+			
+			}
+			else {	// this is a singleMaterial
+			
+				if (normalTexture) {	MultiPassMaterialBase(mat).normalMap = normalTexture;}
+				MultiPassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
+				MultiPassMaterialBase(mat).ambient=props.get(15,1.0);
+				MultiPassMaterialBase(mat).ambientColor=props.get(16,0xffffff);
+				MultiPassMaterialBase(mat).specular=props.get(18,1.0);
+				MultiPassMaterialBase(mat).gloss=props.get(19,50);
+				MultiPassMaterialBase(mat).specularColor=props.get(20,0xffffff);
+				if (specTexture) {		MultiPassMaterialBase(mat).specularMap = specTexture;}
+			}
+			
+			
+			
+			/*
+			here we will read the material-methods;
+			*/
 			
 			methods_parsed = 0;
+			//trace("num_methods = "+num_methods)
 			while (methods_parsed < num_methods) {
 				var method_type : uint;
 				
@@ -386,53 +554,81 @@ package away3d.loaders.parsers
 				parseUserAttributes();
 			}
 			
+			
+			
 			attributes = parseUserAttributes();
+			//mat.extra = attributes;
 			
-			if (type == 1) { // Color material
-				var color : uint;
-				
-				color = props.get(1, 0xcccccc);
-				mat = new ColorMaterial(color, props.get(10, 1.0));
-			}
-			else if (type == 2) { // Bitmap material
-				//TODO: not used
-				//var bmp : BitmapData;
-				var texture : Texture2DBase;
-				var tex_addr : uint;
-				
-				tex_addr = props.get(2, 0);
-				texture = _blocks[tex_addr].data;
-				
-				// If bitmap asset has already been loaded
-				if (texture) {
-					mat = new TextureMaterial(texture);
-					TextureMaterial(mat).alphaBlending = props.get(11, false);
-					TextureMaterial(mat).alpha = props.get(10, 1.0);
-					finalize = true;
-				}
-				else {
-					// No bitmap available yet. Material will be finalized
-					// when texture finishes loading.
-					mat = new TextureMaterial(null);
-					if (tex_addr > 0)
-						_texture_users[tex_addr.toString()].push(mat);
-					
-					finalize = false;
-				}
-			}
-			
-			mat.extra = attributes;
-			mat.alphaThreshold = props.get(12, 0.0);
-			mat.repeat = props.get(13, false);
-			
-			if (finalize) {
-				finalizeAsset(mat, name);
-			}
+			//if (finalize) {
+			finalizeAsset(mat, name);
+			//}
 			
 			return mat;
 		}
 		
 		
+		private function parseLight(blockLength : uint) : LightBase
+		{
+			var name : String;
+			var par_id : uint;
+			var lightType : uint;
+			var mtx : Matrix3D;
+			var light : LightBase;
+			var parent : ObjectContainer3D;
+			var props : AWDProperties;
+			
+			par_id = _body.readUnsignedInt();
+			mtx = parseMatrix3D();
+			name = parseVarStr();
+			lightType=_body.readUnsignedByte();
+			props = parseProperties({ 	1:AWD_FIELD_FLOAT32, 	2:AWD_FIELD_FLOAT32,	3:AWD_FIELD_COLOR,		4:AWD_FIELD_FLOAT32,
+										5:AWD_FIELD_FLOAT32,	6:AWD_FIELD_BOOL,		7:AWD_FIELD_COLOR,		8:AWD_FIELD_FLOAT32});	
+			
+			if (lightType==1){
+				light=new PointLight();
+				PointLight(light).radius = props.get(1,90000);
+				PointLight(light).fallOff = props.get(2,100000);
+			}
+			if (lightType==2){
+				light=new DirectionalLight();
+			}
+			light.transform = mtx;
+			
+			light.color = props.get(3,0xffffff);
+			light.specular = props.get(4,1.0);
+			light.diffuse = props.get(5,1.0);
+			light.castsShadows = props.get(6,false);
+			light.ambientColor = props.get(7,0xffffff);
+			light.ambient =  props.get(8,0.0);
+			
+			parent = _blocks[par_id].data as ObjectContainer3D;
+			if (parent) {
+				parent.addChild(light);
+			}
+			
+			parseUserAttributes();
+			parseUserAttributes();
+			
+			finalizeAsset(light, name);
+			
+			return light;
+			
+		}
+		private function parseLightPicker(blockLength : uint) : LightPickerBase
+		{
+			var name:String=parseVarStr();
+			var numLights:uint=_body.readUnsignedShort();
+			var lightsArray:Array=new Array();
+			var k:int=0;
+			for (k=0;k<numLights;k++){
+				lightsArray.push(_blocks[_body.readUnsignedInt()].data);
+			}
+			var lightPick:LightPickerBase=new StaticLightPicker(lightsArray);
+			parseUserAttributes();
+			finalizeAsset(lightPick, lightPick.name);
+			
+			return lightPick
+		}
 		private function parseTexture(blockLength : uint, block : AWDBlock) : Texture2DBase
 		{
 			// TODO: not used
@@ -693,8 +889,7 @@ package away3d.loaders.parsers
 				for (i=0; i<mesh.subMeshes.length; i++) {
 					mesh.subMeshes[i].material = materials[Math.min(materials.length-1, i)];
 				}
-			}
-			
+			}			
 			// Ignore for now
 			parseProperties(null);
 			mesh.extra = parseUserAttributes();

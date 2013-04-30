@@ -5,6 +5,7 @@ package away3d.core.base
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
+	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Entity;
 	import away3d.entities.Mesh;
@@ -354,6 +355,11 @@ package away3d.core.base
 		public function get vertexTangentOffset() : uint
 		{
 			return _subGeometry.vertexTangentOffset;
+		}
+
+		public function getRenderSceneTransform(camera : Camera3D) : Matrix3D
+		{
+			return _parentMesh.sceneTransform;
 		}
 	}
 }

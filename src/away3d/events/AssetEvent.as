@@ -20,6 +20,8 @@ package away3d.events
 		public static const ANIMATION_NODE_COMPLETE : String = "animationNodeComplete";
 		public static const STATE_TRANSITION_COMPLETE : String = "stateTransitionComplete";
 		public static const SEGMENT_SET_COMPLETE : String = "segmentSetComplete";
+		public static const LIGHT_COMPLETE : String = "lightComplete";
+		public static const LIGHTPICKER_COMPLETE : String = "lightPickerComplete";
 		
 		public static const ASSET_RENAME : String = 'assetRename';
 		public static const ASSET_CONFLICT_RESOLVED : String = 'assetConflictResolved';

@@ -80,8 +80,10 @@
 		/**
 		 * @inheritDoc
 		 */
-		public override function update():void
+		public override function update(interpolate:Boolean = true):void
 		{
+			interpolate = interpolate;// prevents unused warning
+
 			if (_targetObject) {
 				
 				if(_lookAtPosition) {

@@ -138,17 +138,7 @@ package away3d.cameras.lenses
 		 */
 		public function unproject(nX:Number, nY:Number, sZ : Number):Vector3D
 		{
-			var v : Vector3D = new Vector3D(nX, -nY, sZ, 1.0);
-			
-            v.x *= sZ;
-            v.y *= sZ;
-			
-			v = unprojectionMatrix.transformVector(v);
-			
-			//z is unaffected by transform
-            v.z = sZ;
-			
-			return v;
+			throw new AbstractMethodError();
 		}
 
 		/**

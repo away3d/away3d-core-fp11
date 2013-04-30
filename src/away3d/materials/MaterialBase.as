@@ -43,7 +43,6 @@ package away3d.materials
 
 		arcane var _renderOrderId : int;
 		arcane var _depthPassId : int;
-		arcane var _name : String = "material";
 
 		private var _bothSides : Boolean;
 		private var _animationSet : IAnimationSet;
@@ -247,17 +246,6 @@ package away3d.materials
 		{
 			return _uniqueId;
 		}
-
-		public override function get name() : String
-		{
-			return _name;
-		}
-
-		public override function set name(value : String) : void
-		{
-			_name = value;
-		}
-
 
 		/**
 		 * The amount of passes used by the material.

@@ -179,7 +179,7 @@ package away3d.materials.passes
 
 			var context : Context3D = stage3DProxy._context3D;
 			var matrix3D : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			matrix3D.copyFrom(renderable.sceneTransform);
+			matrix3D.copyFrom(renderable.getRenderSceneTransform(camera));
 			matrix3D.append(viewProjection);
 
 			if (_dedicatedMeshes) {
