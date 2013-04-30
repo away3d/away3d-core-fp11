@@ -1,5 +1,6 @@
 package away3d.core.managers
 {
+	import flash.display3D.Context3DClearMask;
 	import flash.display.Shape;
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
@@ -581,6 +582,11 @@ package away3d.core.managers
 				return false;
 			}
 			return true;
+		}
+
+		public function clearDepthBuffer() : void {
+			if (!_context3D) return;
+			_context3D.clear(0, 0, 0, 1, 1, 0, Context3DClearMask.DEPTH);
 		}
 	}
 }

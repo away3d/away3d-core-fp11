@@ -90,6 +90,7 @@
 		
 		private var _depthPrepass:Boolean;
 		private var _profile : String;
+		private var _layeredView : Boolean = false;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -237,6 +238,22 @@
 		{
 			_background = value;
 			_renderer.background = _background;
+		}
+
+		/**
+		 * Used in a sharedContext. When true, clears the depth buffer prior to rendering this particular
+		 * view to avoid depth sorting with lower layers. When false, the depth buffer is not cleared
+		 * from the previous (lower) view's render so objects in this view may be occluded by the lower
+		 * layer. Defaults to false.
+		 */
+		public function get layeredView() : Boolean
+		{
+			return _layeredView;
+		}
+
+		public function set layeredView(value : Boolean) : void
+		{
+			_layeredView = value;
 		}
 
 		private function initHitField() : void
@@ -615,7 +632,10 @@
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();
-				
+			
+			if (_shareContext && _layeredView)
+				stage3DProxy.clearDepthBuffer();
+
 			if (!_parentIsStage) {
 				var globalPos : Point = parent.localToGlobal(_localPos);
 				if (_globalPos.x != globalPos.x || _globalPos.y != globalPos.y) {

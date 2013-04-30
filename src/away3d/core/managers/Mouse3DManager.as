@@ -27,6 +27,7 @@ package away3d.core.managers
 	public class Mouse3DManager
 	{
 		private static var _view3Ds : Dictionary;
+		private static var _view3DLookup : Vector.<View3D>;
 		private static var _viewCount : int = 0;
 		
 		private var _activeView : View3D;
@@ -60,7 +61,10 @@ package away3d.core.managers
 		 */
 		public function Mouse3DManager()
 		{
-			if (!_view3Ds) _view3Ds = new Dictionary();
+			if (!_view3Ds) {
+				_view3Ds = new Dictionary();
+				_view3DLookup = new Vector.<View3D>();
+			}
 		}
 
 		// ---------------------------------------------------------------------
@@ -100,10 +104,14 @@ package away3d.core.managers
 				_collidingObject = null;
 				// Get the top-most view colliding object
 				var distance:Number = Infinity;
+				var view:View3D;
 				for (var v:int = _viewCount-1; v>=0; v--) {
-					if (_collidingViewObjects[v] && _collidingViewObjects[v].rayEntryDistance < distance) {
+					view = _view3DLookup[v];
+					if (_collidingViewObjects[v] && (view.layeredView || _collidingViewObjects[v].rayEntryDistance < distance)) {
 						distance = _collidingViewObjects[v].rayEntryDistance;
 						_collidingObject = _collidingViewObjects[v];
+						if (view.layeredView)
+							break;
 					}
 				}
 			}
@@ -300,7 +308,7 @@ package away3d.core.managers
 			}
 			return false;
 		}
-		
+
 		private function traverseDisplayObjects(container : DisplayObjectContainer) : void {
 			var childCount:int = container.numChildren;
 			var c:int = 0;
@@ -309,7 +317,8 @@ package away3d.core.managers
 				child = container.getChildAt(c);
 				for ( var v:* in _view3Ds) {
 					if (child == v) { 	
-						_view3Ds[child] = _childDepth; 
+						_view3Ds[child] = _childDepth;
+						_view3DLookup[_childDepth] = v;
 						_childDepth++;
 					}
 				}
