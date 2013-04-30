@@ -338,19 +338,10 @@ package away3d.materials.passes
 		 */
 		arcane override function invalidateShaderProgram(updateMaterial : Boolean = true) : void
 		{
-			super.invalidateShaderProgram(updateMaterial);
-			addPassesFromMethods();
-		}
-
-		protected function addPassesFromMethods() : void
-		{
 			var oldPasses : Vector.<MaterialPassBase> = _passes;
 			_passes = new Vector.<MaterialPassBase>();
-			if (_methodSetup._normalMethod && _methodSetup._normalMethod.hasOutput) addPasses(_methodSetup._normalMethod.passes);
-			if (_methodSetup._ambientMethod) addPasses(_methodSetup._ambientMethod.passes);
-			if (_methodSetup._shadowMethod) addPasses(_methodSetup._shadowMethod.passes);
-			if (_methodSetup._diffuseMethod) addPasses(_methodSetup._diffuseMethod.passes);
-			if (_methodSetup._specularMethod) addPasses(_methodSetup._specularMethod.passes);
+
+			addPassesFromMethods();
 
 			if (!oldPasses || _passes.length != oldPasses.length) {
 				_passesDirty = true;
@@ -363,6 +354,17 @@ package away3d.materials.passes
 					return;
 				}
 			}
+
+			super.invalidateShaderProgram(updateMaterial);
+		}
+
+		protected function addPassesFromMethods() : void
+		{
+			if (_methodSetup._normalMethod && _methodSetup._normalMethod.hasOutput) addPasses(_methodSetup._normalMethod.passes);
+			if (_methodSetup._ambientMethod) addPasses(_methodSetup._ambientMethod.passes);
+			if (_methodSetup._shadowMethod) addPasses(_methodSetup._shadowMethod.passes);
+			if (_methodSetup._diffuseMethod) addPasses(_methodSetup._diffuseMethod.passes);
+			if (_methodSetup._specularMethod) addPasses(_methodSetup._specularMethod.passes);
 		}
 
 		/**

@@ -194,6 +194,7 @@ package away3d.materials.passes
 		override protected function addPassesFromMethods() : void
 		{
 			super.addPassesFromMethods();
+
 			if (_methodSetup._colorTransformMethod) addPasses(_methodSetup._colorTransformMethod.passes);
 
 			var methods : Vector.<MethodVOSet> = _methodSetup._methods;
