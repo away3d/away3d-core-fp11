@@ -15,7 +15,9 @@ package away3d.core.render
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
+	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 
@@ -31,6 +33,7 @@ package away3d.core.render
 		private var _activeMaterial : MaterialBase;
 		private var _distanceRenderer : DepthRenderer;
 		private var _depthRenderer : DepthRenderer;
+		private var _skyboxProjection : Matrix3D = new Matrix3D();
 
 		/**
 		 * Creates a new DefaultRenderer object.
@@ -93,16 +96,19 @@ package away3d.core.render
 		 */
 		override protected function draw(entityCollector : EntityCollector, target : TextureBase) : void
 		{
+			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+
 			if (entityCollector.skyBox) {
 				if (_activeMaterial) _activeMaterial.deactivate(_stage3DProxy);
 				_activeMaterial = null;
+
+				_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 				drawSkyBox(entityCollector);
 			}
 
 			_context.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
-			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
-			var which : int = target? SCREEN_PASSES : ALL_PASSES;
+			var which : int = target ? SCREEN_PASSES : ALL_PASSES;
 			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, which);
 			drawRenderables(entityCollector.blendedRenderableHead, entityCollector, which);
 
@@ -123,9 +129,34 @@ package away3d.core.render
 			var material : MaterialBase = skyBox.material;
 			var camera : Camera3D = entityCollector.camera;
 
+			updateSkyBoxProjection(camera);
+
 			material.activatePass(0, _stage3DProxy, camera);
-			material.renderPass(0, skyBox, _stage3DProxy, entityCollector, _rttViewProjectionMatrix);
+			material.renderPass(0, skyBox, _stage3DProxy, entityCollector, _skyboxProjection);
 			material.deactivatePass(0, _stage3DProxy);
+		}
+
+		private function updateSkyBoxProjection(camera : Camera3D) : void
+		{
+			var near : Vector3D = new Vector3D();
+			_skyboxProjection.copyFrom(_rttViewProjectionMatrix);
+			_skyboxProjection.copyRowTo(2, near);
+			var camPos : Vector3D = camera.scenePosition;
+
+			var cx : Number = near.x;
+			var cy : Number = near.y;
+			var cz : Number = near.z;
+			var cw : Number = -(near.x * camPos.x + near.y * camPos.y + near.z * camPos.z + Math.sqrt(cx*cx+cy*cy+cz*cz));
+			var signX : Number = cx >= 0 ? 1 : -1;
+			var signY : Number = cy >= 0 ? 1 : -1;
+			var p : Vector3D = new Vector3D(signX, signY, 1, 1);
+			var inverse : Matrix3D = _skyboxProjection.clone();
+			inverse.invert();
+			var q : Vector3D = inverse.transformVector(p);
+			_skyboxProjection.copyRowTo(3, p);
+			var a : Number = (q.x*p.x + q.y*p.y + q.z*p.z + q.w*p.w)/(cx*q.x + cy*q.y+ cz*q.z + cw*q.w);
+			_skyboxProjection.copyRowFrom(2, new Vector3D(cx*a, cy*a, cz*a, cw*a));
+
 		}
 
 		/**
@@ -150,7 +181,7 @@ package away3d.core.render
 				do {
 					item2 = item;
 
-					var rttMask : int = _activeMaterial.passRendersToTexture(j)? 1 : 2;
+					var rttMask : int = _activeMaterial.passRendersToTexture(j) ? 1 : 2;
 
 					if ((rttMask & which) != 0) {
 						_activeMaterial.activatePass(j, _stage3DProxy, camera);

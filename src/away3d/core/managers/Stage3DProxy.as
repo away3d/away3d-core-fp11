@@ -538,8 +538,14 @@ package away3d.core.managers
 			var renderMode : String = forceSoftware? Context3DRenderMode.SOFTWARE : Context3DRenderMode.AUTO;
 			if (profile == "baseline")
 				_stage3D.requestContext3D(renderMode);
-			else
-				_stage3D["requestContext3D"](renderMode, profile);
+			else {
+				try {
+					_stage3D["requestContext3D"](renderMode, profile);
+				}
+				catch(error : Error) {
+					throw "An error occurred creating a context using the given profile. Profiles are not supported for the SDK this was compiled with.";
+				}
+			}
 
 			_contextRequested = true;
 		}
