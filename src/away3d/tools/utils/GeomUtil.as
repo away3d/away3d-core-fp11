@@ -23,6 +23,21 @@ package away3d.tools.utils
 			
 			var subs : Vector.<ISubGeometry> = new Vector.<ISubGeometry>();
 			
+			if (uvs && !uvs.length)
+				uvs = null;
+			
+			if (normals && !normals.length)
+				normals = null;
+			
+			if (tangents && !tangents.length)
+				tangents = null;
+			
+			if (weights && !weights.length)
+				weights = null;
+			
+			if (jointIndices && !jointIndices.length)
+				jointIndices = null;
+			
 			if ((indices.length >= LIMIT_INDICES)||(verts.length>=LIMIT_VERTS)) {
 				var i : uint, len : uint, outIndex : uint, j : uint;
 				var splitVerts : Vector.<Number> = new Vector.<Number>();
