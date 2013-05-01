@@ -317,7 +317,7 @@ package away3d.containers
 		}
 		
 		/**
-		 * The global position of the ObjectContainer3D in the scene.
+		 * The global position of the ObjectContainer3D in the scene. The value of the return object should not be changed.
 		 */
 		public function get scenePosition() : Vector3D
 		{
