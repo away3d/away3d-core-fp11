@@ -3,6 +3,8 @@ package away3d.tools.helpers
 	import away3d.animators.SpriteSheetAnimationSet;
 	import away3d.animators.nodes.SpriteSheetClipNode;
 	import away3d.animators.data.SpriteSheetAnimationFrame;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
 
 	import flash.display.BitmapData;
 	import flash.display.MovieClip;
@@ -19,7 +21,7 @@ package away3d.tools.helpers
 		function SpriteSheetHelper(){}
 
 		/**
-		 * Generates and returns one or more bitmapData "sprite sheets" from a given movieClip
+		 * Generates and returns one or more "sprite sheets" BitmapTexture from a given movieClip
 		 *
 		 * @param sourceMC 				MovieClip: A movieclip with timeline animation
 		 * @param cols 					uint: Howmany cells along the u axis.
@@ -29,11 +31,11 @@ package away3d.tools.helpers
 		 * @param transparent				Boolean: if the bitmapData(s) must be transparent.
 		 * @param backgroundColor			uint: the bitmapData(s) background color if not transparent.
 		 *
-		 * @return Vector.<BitmapData> 		The generated bitmapDatas for the SpriteSheetMaterial.
+		 * @return Vector.<Texture2DBase> 	The generated Texture2DBase vector for the SpriteSheetMaterial.
 		 */
-		public function generateFromMovieClip(sourceMC:MovieClip, cols:uint, rows:uint, width:uint, height:uint, transparent:Boolean = false, backgroundColor:uint = 0) : Vector.<BitmapData>
+		public function generateFromMovieClip(sourceMC:MovieClip, cols:uint, rows:uint, width:uint, height:uint, transparent:Boolean = false, backgroundColor:uint = 0) : Vector.<Texture2DBase>
 		{
-			var spriteSheets:Vector.<BitmapData> = new Vector.<BitmapData>();
+			var spriteSheets:Vector.<Texture2DBase> = new Vector.<Texture2DBase>();
 			var framesCount:uint = sourceMC.totalFrames;
 			var i:uint = framesCount;
 			var w:uint = width;
@@ -64,6 +66,7 @@ package away3d.tools.helpers
 
 			var pastePoint:Point = new Point();
 			var frameNum:uint = 0;
+			var bitmapTexture:BitmapTexture;
 
 			while(maps--){
 
@@ -93,7 +96,8 @@ package away3d.tools.helpers
 					
 				}
 
-				spriteSheets.push(spriteSheet);
+				bitmapTexture = new BitmapTexture(spriteSheet);
+				spriteSheets.push(bitmapTexture);
 			}
 
 			tmpCache.dispose();
@@ -102,7 +106,7 @@ package away3d.tools.helpers
 		}
 
 		/**
-		 * Returns a SpriteSheetAnimationSet to pass to animator from animation id , cols and rows.
+		 * Returns a SpriteSheetClipNode to pass to animator from animation id , cols and rows.
 		 * @param animID 				String:The name of the animation
 		 * @param cols 					uint: Howmany cells along the u axis.
 		 * @param rows 					uint: Howmany cells along the v axis.
@@ -110,15 +114,12 @@ package away3d.tools.helpers
 		 * @param from 					uint: The offset start if the animation first frame isn't in first cell top left on the map. zero based. Default is 0.
 		 * @param to 					uint: The last cell if the animation last frame cell isn't located down right on the map. zero based. Default is 0.
 		 * 
-		 * @return SpriteSheetAnimationSet 	SpriteSheetAnimationSet: The SpriteSheetAnimationSet filled with the data
+		 * @return SpriteSheetClipNode 		SpriteSheetClipNode: The SpriteSheetClipNode filled with the data
 		 */
-		public function generateAnimationSet(animID:String, cols:uint, rows:uint, mapCount:uint = 1, from:uint = 0, to:uint = 0) : SpriteSheetAnimationSet
+		public function generateSpriteSheetClipNode(animID:String, cols:uint, rows:uint, mapCount:uint = 1, from:uint = 0, to:uint = 0) : SpriteSheetClipNode
 		{
-			var spriteSheetAnimationSet:SpriteSheetAnimationSet = new SpriteSheetAnimationSet();
-			var node:SpriteSheetClipNode = new SpriteSheetClipNode();
-			node.name = animID;
-			
-			spriteSheetAnimationSet.addAnimation(node);
+			var spriteSheetClipNode:SpriteSheetClipNode = new SpriteSheetClipNode();
+			spriteSheetClipNode.name = animID;
 			 
 			var u:uint, v:uint;
 			var framesCount:uint = cols*rows;
@@ -151,10 +152,10 @@ package away3d.tools.helpers
 						frame.scaleV = scaleV;
 						frame.mapID = i;
 
-						node.addFrame(frame, 16);
+						spriteSheetClipNode.addFrame(frame, 16);
 					}
 					
-					if(animFrames == to) return spriteSheetAnimationSet;
+					if(animFrames == to) return spriteSheetClipNode;
 
 					animFrames++;
 					
@@ -166,7 +167,7 @@ package away3d.tools.helpers
 				}
 			}
 
-			return spriteSheetAnimationSet;
+			return spriteSheetClipNode;
 		}
 	}
 }
