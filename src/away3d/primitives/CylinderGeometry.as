@@ -300,7 +300,7 @@ package away3d.primitives
 				for (i = 0; i <= _segmentsW; ++i) {
 
 					revolutionAngle = i * revolutionAngleDelta;
-					x = 0.5 + 0.5 * Math.cos(revolutionAngle);
+					x = 0.5 + 0.5 * -Math.cos(revolutionAngle);
 					y = 0.5 + 0.5 * Math.sin(revolutionAngle);
 
 					UVData[currentUvCompIndex++] = 0.5; // central vertex
