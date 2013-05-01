@@ -217,5 +217,9 @@ package away3d.core.pick
 			collisionPos.y = rayPos.y + t*rayDir.y;
 			collisionPos.z = rayPos.z + t*rayDir.z;
 		}
+
+		public function dispose() : void
+		{
+		}
 	}
 }

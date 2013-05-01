@@ -469,5 +469,10 @@ package away3d.core.pick
 			_localHitPosition.y = oy + ry*t;
 			_localHitPosition.z = oz + rz*t;
 		}
+
+		public function dispose() : void
+		{
+			_bitmapData.dispose();
+		}
 	}
 }

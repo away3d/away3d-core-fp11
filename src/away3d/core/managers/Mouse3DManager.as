@@ -372,5 +372,10 @@ package away3d.core.managers
 		{
 			_mousePicker = value;
 		}
+
+		public function dispose() : void
+		{
+			_mousePicker.dispose();
+		}
 	}
 }

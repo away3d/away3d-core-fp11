@@ -795,8 +795,9 @@
 			
 			if (_rttBufferManager)
 				_rttBufferManager.dispose();
-			
+
 			_mouse3DManager.disableMouseListeners(this);
+			_mouse3DManager.dispose();
 			
 			_rttBufferManager = null;
 			_depthRender = null;
