@@ -21,6 +21,7 @@ package away3d.core.render
 		private var _indexBuffer : IndexBuffer3D;
 		private var _vertexBuffer : VertexBuffer3D;
 		private var _stage3DProxy : Stage3DProxy;
+		private var _context : Context3D;
 
 		public function BackgroundImageRenderer(stage3DProxy : Stage3DProxy)
 		{
@@ -37,6 +38,11 @@ package away3d.core.render
 			if (value == _stage3DProxy) return;
 			_stage3DProxy = value;
 
+			removeBuffers();
+		}
+
+		private function removeBuffers() : void
+		{
 			if (_vertexBuffer) {
 				_vertexBuffer.dispose();
 				_vertexBuffer = null;
@@ -72,13 +78,17 @@ package away3d.core.render
 
 		public function dispose() : void
 		{
-			if (_vertexBuffer) _vertexBuffer.dispose();
-			if (_program3d) _program3d.dispose();
+			removeBuffers();
 		}
 
 		public function render() : void
 		{
 			var context : Context3D = _stage3DProxy.context3D;
+
+			if (context != _context) {
+				removeBuffers();
+				_context = context;
+			}
 
 			if (!context) return;
 
