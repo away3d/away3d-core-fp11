@@ -187,8 +187,10 @@ package away3d.animators
 			// using condensed data
 			var numCondensedJoints : uint = skinnedGeom.numCondensedJoints;
 			if (_useCondensedIndices) {
-				if (skinnedGeom.numCondensedJoints == 0)
+				if (skinnedGeom.numCondensedJoints == 0) {
 					skinnedGeom.condenseIndexData();
+					numCondensedJoints = skinnedGeom.numCondensedJoints;
+				}
 				updateCondensedMatrices(skinnedGeom.condensedIndexLookUp, numCondensedJoints);
 				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _condensedMatrices, numCondensedJoints*3);
 			}
