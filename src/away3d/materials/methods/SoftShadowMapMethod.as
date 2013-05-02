@@ -108,6 +108,11 @@ package away3d.materials.methods
 			index += 2;
 			for (var i : int = 0; i < len; ++i)
 				data[uint(index+i)] = _offsets[i]*texRange;
+
+			if (len % 4 == 0) {
+				data[uint(index+len)] = 0;
+				data[uint(index+len+1)] = 0;
+			}
 		}
 
 		override arcane function getCascadeFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, decodeRegister : ShaderRegisterElement, depthTexture : ShaderRegisterElement, depthProjection : ShaderRegisterElement, targetRegister : ShaderRegisterElement) : String

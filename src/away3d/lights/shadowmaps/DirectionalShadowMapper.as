@@ -111,8 +111,8 @@ package away3d.lights.shadowmaps
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var dir : Vector3D;
 			var x : Number, y : Number, z : Number;
-			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY, minZ : Number = Number.POSITIVE_INFINITY;
-			var maxX : Number = Number.NEGATIVE_INFINITY, maxY : Number = Number.NEGATIVE_INFINITY, maxZ : Number = Number.NEGATIVE_INFINITY;
+			var minX : Number, minY : Number, minZ : Number;
+			var maxX : Number, maxY : Number, maxZ : Number;
 			var i : uint;
 
 			dir = DirectionalLight(_light).sceneDirection;
@@ -128,7 +128,11 @@ package away3d.lights.shadowmaps
 			_matrix.prepend(viewCamera.sceneTransform);
 			_matrix.transformVectors(corners, _localFrustum);
 
-			i = 0;
+			minX = maxX = _localFrustum[0];
+			minY = maxY = _localFrustum[1];
+			maxZ = _localFrustum[2];
+
+			i = 3;
 			while (i < 24) {
 				x = _localFrustum[i];
 				y = _localFrustum[uint(i+1)];
@@ -140,7 +144,7 @@ package away3d.lights.shadowmaps
 				if (z > maxZ) maxZ = z;
 				i += 3;
 			}
-			minZ = 10;
+			minZ = 1;
 
 			var w : Number = (maxX - minX);
 			var h : Number = (maxY - minY);

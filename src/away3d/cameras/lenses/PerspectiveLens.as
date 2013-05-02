@@ -111,7 +111,14 @@ package away3d.cameras.lenses
 			_yMax = _near*_focalLengthInv;
 			_xMax = _yMax*_aspectRatio;
 
+			var left:Number, right:Number, top:Number, bottom:Number;
+
 			if (_scissorRect.x == 0 && _scissorRect.y == 0 && _scissorRect.width == _viewPort.width && _scissorRect.height == _viewPort.height) {
+				// assume unscissored frustum
+				left = -_xMax;
+				right = _xMax;
+				top = -_yMax;
+				bottom = _yMax;
 				// assume unscissored frustum
 				raw[uint(0)] = _near/_xMax;
 				raw[uint(5)] = _near/_yMax;
@@ -128,7 +135,6 @@ package away3d.cameras.lenses
 				var center:Number = _xMax * (_scissorRect.x * 2 - _viewPort.width) / _scissorRect.width + _xMax;
 				var middle:Number = -_yMax * (_scissorRect.y * 2 - _viewPort.height) / _scissorRect.height - _yMax;
 
-				var left:Number, right:Number, top:Number, bottom:Number;
 				left = center - xWidth;
 				right = center + xWidth;
 				top = middle - yHgt;
