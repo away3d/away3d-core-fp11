@@ -480,7 +480,7 @@
 
 		private function setBlendAndCompareModes() : void
 		{
-			var forceSeparateMVP : Boolean = _casterLightPass || _effectsPass;
+			var forceSeparateMVP : Boolean = Boolean(_casterLightPass || _effectsPass);
 
 			if (_casterLightPass) {
 				_casterLightPass.setBlendMode(BlendMode.NORMAL);
