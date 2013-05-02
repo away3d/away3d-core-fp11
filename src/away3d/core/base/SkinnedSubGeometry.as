@@ -110,10 +110,10 @@ package away3d.core.base
 				_jointIndexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, _jointsPerVertex);
 				_jointIndexBuffer[contextIndex].uploadFromVector(_numCondensedJoints > 0? _condensedJointIndexData : _jointIndexData, 0, _jointIndexData.length / _jointsPerVertex);
 				_jointIndexContext[contextIndex] = context;
-				_jointIndicesInvalid[contextIndex] = true;
+				_jointIndicesInvalid[contextIndex] = false;
 			}
 			if (_jointIndicesInvalid[contextIndex]) {
-				_jointIndexBuffer[contextIndex].uploadFromVector(_jointIndexData, 0, _jointIndexData.length / _jointsPerVertex);
+				_jointIndexBuffer[contextIndex].uploadFromVector(_numCondensedJoints > 0? _condensedJointIndexData : _jointIndexData, 0, _jointIndexData.length / _jointsPerVertex);
 				_jointIndicesInvalid[contextIndex] = false;
 			}
 			context.setVertexBufferAt(index, _jointIndexBuffer[contextIndex], 0, _bufferFormat);
