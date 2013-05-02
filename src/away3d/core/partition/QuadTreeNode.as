@@ -1,7 +1,5 @@
 package away3d.core.partition
 {
-	import avmplus.argXml;
-
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.cameras.Camera3D;
