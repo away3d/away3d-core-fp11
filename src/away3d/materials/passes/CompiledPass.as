@@ -341,7 +341,7 @@ package away3d.materials.passes
 			var oldPasses : Vector.<MaterialPassBase> = _passes;
 			_passes = new Vector.<MaterialPassBase>();
 
-			addPassesFromMethods();
+			if (_methodSetup) addPassesFromMethods();
 
 			if (!oldPasses || _passes.length != oldPasses.length) {
 				_passesDirty = true;
