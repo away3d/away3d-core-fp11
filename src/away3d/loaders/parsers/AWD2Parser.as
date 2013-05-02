@@ -15,6 +15,26 @@ package away3d.loaders.parsers
 	import away3d.materials.*;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.lightpickers.StaticLightPicker;
+	import away3d.materials.methods.AlphaMaskMethod;
+	import away3d.materials.methods.CascadeShadowMapMethod;
+	import away3d.materials.methods.ColorMatrixMethod;
+	import away3d.materials.methods.ColorTransformMethod;
+	import away3d.materials.methods.DitheredShadowMapMethod;
+	import away3d.materials.methods.EffectMethodBase;
+	import away3d.materials.methods.EnvMapMethod;
+	import away3d.materials.methods.FilteredShadowMapMethod;
+	import away3d.materials.methods.FogMethod;
+	import away3d.materials.methods.FresnelEnvMapMethod;
+	import away3d.materials.methods.HardShadowMapMethod;
+	import away3d.materials.methods.LightMapMethod;
+	import away3d.materials.methods.NearShadowMapMethod;
+	import away3d.materials.methods.OutlineMethod;
+	import away3d.materials.methods.ProjectiveTextureMethod;
+	import away3d.materials.methods.RefractionEnvMapMethod;
+	import away3d.materials.methods.RimLightMethod;
+	import away3d.materials.methods.ShadingMethodBase;
+	import away3d.materials.methods.ShadowMapMethodBase;
+	import away3d.materials.methods.SoftShadowMapMethod;
 	import away3d.materials.utils.*;
 	import away3d.textures.*;
 	import away3d.tools.utils.*;
@@ -45,6 +65,8 @@ package away3d.loaders.parsers
 		
 		private var _parsed_header : Boolean;
 		private var _body : ByteArray;
+		
+		private var _defaultTexture :BitmapTexture;
 		
 		public static const UNCOMPRESSED : uint = 0;
 		public static const DEFLATE : uint = 1;
@@ -78,7 +100,7 @@ package away3d.loaders.parsers
 		
 		private var blendModeDic:Vector.<String>;
 		
-		
+		private var _debug:Boolean=true;
 		/**
 		 * Creates a new AWDParser object.
 		 * @param uri The url or id of the data or file to be parsed.
@@ -185,7 +207,7 @@ package away3d.loaders.parsers
 			var oldName:String = asset.name;
 			if (asset) {
 				var block : AWDBlock = _blocks[parseInt(resourceDependency.id)];
-			
+				
 				// Reset name of texture to the one defined in the AWD file,
 				// as opposed to whatever the image parser came up with.
 				asset.resetAssetPath(block.name, null, true);
@@ -264,6 +286,8 @@ package away3d.loaders.parsers
 			_version[0] = _byteData.readUnsignedByte();
 			_version[1] = _byteData.readUnsignedByte();
 			
+			if(_debug)trace("version = "+_version[0]+" - "+_version[1]);
+			
 			// Parse bit flags and compression
 			flags = _byteData.readUnsignedShort();
 			_streaming 	= (flags & 0x1) == 0x1;
@@ -290,45 +314,108 @@ package away3d.loaders.parsers
 			len = _body.readUnsignedInt();
 			
 			block = new AWDBlock();
-			
-			switch (type) {
-				case 1:
-					assetData = parseMeshData(len);
-					break;
-				case 22:
-					assetData = parseContainer(len);
-					break;
-				case 23:
-					assetData = parseMeshInstance(len);
-					break;
-				case 41:
-					assetData = parseLight(len);
-					break;
-				case 51:
-					assetData = parseLightPicker(len);
-					break;
-				case 81:
-					assetData = parseMaterial(len);
-					break;
-				case 82:
-					assetData = parseTexture(len, block);
-					break;
-				case 101:
-					assetData = parseSkeleton(len);
-					break;
-				case 102:
-					assetData = parseSkeletonPose(len);
-					break;
-				case 103:
-					assetData = parseSkeletonAnimation(len);
-					break;
-				case 121:
-					assetData = parseUVAnimation(len);
-					break;
-				default:
-					//trace('Ignoring block!');
-					_body.position += len;
-					break;
+			if ((_version[0]==2)&&(_version[1]==1)){// change this to any other values than version[0] = 2 and version[1] = 1, to parse like AWD2.0 (with some addional bug fixes)
+				if(_debug)trace("Import AWD2.1-File");
+				switch (type) {
+					case 1:
+						if(_debug)trace("import parseMeshData");
+						assetData = parseMeshData(len);
+						break;
+					case 22:
+						if(_debug)trace("import parseContainer");
+						assetData = parseContainer(len);
+						break;
+					case 23:
+						if(_debug)trace("import parseMeshInstance");
+						assetData = parseMeshInstance(len);
+						break;
+					case 41:
+						if(_debug)trace("import parseLight");
+						assetData = parseLight(len);
+						break;
+					case 51:
+						if(_debug)trace("import parseLightPicker");
+						assetData = parseLightPicker(len);
+						break;
+					case 81:
+						if(_debug)trace("import parseMaterial_v1");
+						assetData = parseMaterial_v1(len);
+						break;
+					case 82:
+						if(_debug)trace("import parseTexture");
+						assetData = parseTexture(len, block);
+						break;
+					case 91:
+						if(_debug)trace("import parseSharedMethodBlock");
+						var effectOrShadowMapMethod:ShadingMethodBase=parseSharedMethodBlock(len,block);
+						if (effectOrShadowMapMethod is EffectMethodBase){
+							assetData = EffectMethodBase(effectOrShadowMapMethod);							
+						}
+						if (effectOrShadowMapMethod is ShadowMapMethodBase){
+							assetData = ShadowMapMethodBase(effectOrShadowMapMethod);							
+						}
+						else{
+							if(_debug)trace("unknown SharedMethod");
+						}
+						break;
+					case 101:
+						if(_debug)trace("import parseSkeleton");
+						assetData = parseSkeleton(len);
+						break;
+					case 102:
+						if(_debug)trace("import parseSkeletonPose");
+						assetData = parseSkeletonPose(len);
+						break;
+					case 103:
+						if(_debug)trace("import parseSkeletonAnimation");
+						assetData = parseSkeletonAnimation(len);
+						break;
+					case 121:
+						if(_debug)trace("import parseUVAnimation");
+						assetData = parseUVAnimation(len);
+						break;
+					default:
+						//trace('Ignoring block!');
+						_body.position += len;
+						break;
+				}
+			}
+			else{
+				if(_debug)trace("Import AWD2.0-File");
+				
+				switch (type) {
+					case 1:
+						assetData = parseMeshData(len);
+						break;
+					case 22:
+						assetData = parseContainer(len);
+						break;
+					case 23:
+						assetData = parseMeshInstance(len);
+						break;
+					case 81:
+						assetData = parseMaterial(len);
+						break;
+					case 82:
+						assetData = parseTexture(len, block);
+						break;
+					case 101:
+						assetData = parseSkeleton(len);
+						break;
+					case 102:
+						assetData = parseSkeletonPose(len);
+						break;
+					case 103:
+						assetData = parseSkeletonAnimation(len);
+						break;
+					case 121:
+						assetData = parseUVAnimation(len);
+						break;
+					default:
+						//trace('Ignoring block!');
+						_body.position += len;
+						break;
+				}
 			}
 			
 			// Store block reference for later use
@@ -383,7 +470,80 @@ package away3d.loaders.parsers
 			return clip;
 		}
 		
+		
+		
 		private function parseMaterial(blockLength : uint) : MaterialBase
+		{
+			// TODO: not used
+			blockLength = blockLength; 
+			var name : String;
+			var type : uint;
+			var props : AWDProperties;
+			var mat :MaterialBase;
+			var attributes : Object;
+			var finalize : Boolean;
+			var num_methods : uint;
+			var methods_parsed : uint;
+			
+			name = parseVarStr();
+			type = _body.readUnsignedByte();
+			num_methods = _body.readUnsignedByte();
+			
+			// Read material numerical properties
+			// (1=color, 2=bitmap url, 10=alpha, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
+			props = parseProperties({ 1:AWD_FIELD_INT32, 2:AWD_FIELD_BADDR, 
+				10:AWD_FIELD_FLOAT32, 11:AWD_FIELD_BOOL, 
+				12:AWD_FIELD_FLOAT32, 13:AWD_FIELD_BOOL });
+			
+			methods_parsed = 0;
+			while (methods_parsed < num_methods) {
+				var method_type : uint;
+				
+				method_type = _body.readUnsignedShort();
+				parseProperties(new Object());
+				parseUserAttributes();
+				methods_parsed+=1;
+			}
+			
+			attributes = parseUserAttributes();
+			
+			if (type == 1) { // Color material
+				var color : uint;
+				
+				color = props.get(1, 0xcccccc);
+				mat = new ColorMaterial(color, props.get(10, 1.0));
+				
+			}
+			else if (type == 2) { // Bitmap material
+				//TODO: not used
+				//var bmp : BitmapData;
+				var texture : Texture2DBase;
+				var tex_addr : uint;
+				
+				tex_addr = props.get(2, 0);
+				if ((_blocks[tex_addr]) && (tex_addr > 0)) {
+					texture = _blocks[tex_addr].data;				
+				}
+				else {
+					texture = _defaultTexture; }
+				// If bitmap asset has already been loaded
+				mat = new TextureMaterial(texture);
+				TextureMaterial(mat).alphaBlending = props.get(11, false);
+				TextureMaterial(mat).alpha = props.get(10, 1.0);
+			}
+			
+			mat.extra = attributes;
+			SinglePassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
+			mat.repeat = props.get(13, false);
+			
+			finalizeAsset(mat, name);
+			
+			return mat;
+		}
+		
+		
+		
+		private function parseMaterial_v1(blockLength : uint) : MaterialBase
 		{
 			// TODO: not used
 			blockLength = blockLength; 
@@ -407,18 +567,34 @@ package away3d.loaders.parsers
 			
 			// Read material numerical properties
 			// (1=color, 2=bitmap url, 10=alpha, 11=alpha_blending, 12=alpha_threshold, 13=repeat)
-			props = parseProperties({ 	1:AWD_FIELD_UINT32, 	2:AWD_FIELD_BADDR,		3:AWD_FIELD_BADDR,		4:AWD_FIELD_BOOL,		5:AWD_FIELD_BOOL,
-										6:AWD_FIELD_BOOL,		7:AWD_FIELD_BOOL,		8:AWD_FIELD_BOOL,		9:AWD_FIELD_UINT8,		10:AWD_FIELD_FLOAT32, 
-										11:AWD_FIELD_BOOL, 		12:AWD_FIELD_FLOAT32, 	13:AWD_FIELD_BOOL,		15:AWD_FIELD_FLOAT32,	16:AWD_FIELD_UINT32, 
-										17:AWD_FIELD_BADDR,		18:AWD_FIELD_FLOAT32, 	19:AWD_FIELD_FLOAT32,	20:AWD_FIELD_UINT32, 	21:AWD_FIELD_BADDR,
-										22:AWD_FIELD_BADDR});	
+			props = parseProperties({ 	1:AWD_FIELD_UINT32, 	
+				2:AWD_FIELD_BADDR,		
+				3:AWD_FIELD_BADDR,		
+				4:AWD_FIELD_UINT8,		
+				5:AWD_FIELD_BOOL,
+				6:AWD_FIELD_BOOL,		
+				7:AWD_FIELD_BOOL,		
+				8:AWD_FIELD_BOOL,		
+				9:AWD_FIELD_UINT8,		
+				10:AWD_FIELD_FLOAT32, 
+				11:AWD_FIELD_BOOL, 		
+				12:AWD_FIELD_FLOAT32, 	
+				13:AWD_FIELD_BOOL,		
+				15:AWD_FIELD_FLOAT32,	
+				16:AWD_FIELD_UINT32, 
+				17:AWD_FIELD_BADDR,		
+				18:AWD_FIELD_FLOAT32, 	
+				19:AWD_FIELD_FLOAT32,	
+				20:AWD_FIELD_UINT32, 	
+				21:AWD_FIELD_BADDR,
+				22:AWD_FIELD_BADDR});	
 			
 			
 			//MaterialProperties
 			// 1 color - 				used for ColorMaterials/ColorMultiPassMaterials
 			// 2 texture - 				used for TextureMaterials/TextureMultiPassMaterials
 			// 3 normalMap - 			used for SinglePassBaseMaterial/MultiPassBaseMaterial
-			// 4 isSingle - 			decides if Single or Multi
+			// 4 isSingle - 			0: singlepass, 1:Multipass, 2:skybox
 			// 5 smooth - 				used for BaseMaterial
 			// 6 mipmap - 				used for BaseMaterial
 			// 7 bothSides - 			used for BaseMaterial
@@ -438,69 +614,52 @@ package away3d.loaders.parsers
 			// 21 specular-texture - 	used for SinglePassBaseMaterial/MultiPassBaseMaterial			
 			
 			
-			var isSingle:Boolean=props.get(4,true);			
+			var isSingle:Boolean=props.get(4,0);			
 			
-			
+			if(_debug)trace("type = " + type);
+			if(_debug)trace("spezialType = " + isSingle);
 			if (type == 1) { // Color material
 				var color : uint = color = props.get(1, 0xcccccc);
-				if (isSingle==false){	//	MultiPassMaterial
+				if (isSingle==1){	//	MultiPassMaterial
 					mat = new ColorMultiPassMaterial(color);}
 				else {	//	SinglePassMaterial
 					mat = new ColorMaterial(color, props.get(10, 1.0));
 					ColorMaterial(mat).alphaBlending=props.get(11,false);
-					}
+				}
 			}
 			else if (type == 2) { // texture material
 				
-				var texture : Texture2DBase;
+				var texture : Texture2DBase;// = new BitmapTexture(new BitmapData(1024, 1024, false));
 				var tex_addr : uint;
 				var ambientTexture : Texture2DBase;
 				var ambientTex_addr : uint;
 				
-				tex_addr = props.get(2, 0);				
-				texture = _blocks[tex_addr].data;	
+				tex_addr = props.get(2, 0);			
+				if (tex_addr>0)	texture = _blocks[tex_addr].data;	
 				
 				ambientTex_addr = props.get(17, 0);
-				if (ambientTex_addr>0){
-					ambientTexture = _blocks[ambientTex_addr].data;	}
+				if (ambientTex_addr>0)	ambientTexture = _blocks[ambientTex_addr].data;
 				
-				if (isSingle==false){	// MultiPassMaterial
+				if (isSingle==1){	// MultiPassMaterial
 					mat = new TextureMultiPassMaterial(texture);
 					if (ambientTexture) {TextureMultiPassMaterial(mat).ambientTexture = ambientTexture;}		
-					}
+				}
 				else {	//	SinglePassMaterial
 					mat = new TextureMaterial(texture);
 					if (ambientTexture) {TextureMaterial(mat).ambientTexture = ambientTexture;}
 					TextureMaterial(mat).alpha=props.get(10,1.0);
-					TextureMaterial(mat).alphaBlending=props.get(11,false);
-					}				
-				//I disabled the following code, because i am not shure if it will ever be executed. will ask Richerd, and ahve a closer look later....	
-				// If bitmap asset has already been loaded
-				/*
-				if (texture) {
-				mat = new TextureMaterial(texture);
-				TextureMaterial(mat).alphaBlending = props.get(11, false);
-				TextureMaterial(mat).alpha = props.get(10, 1.0);
-				finalize = true;
-				}
-				else {
-				// No bitmap available yet. Material will be finalized
-				// when texture finishes loading.
-				mat = new TextureMaterial(null);
-				if (tex_addr > 0)
-				_texture_users[tex_addr.toString()].push(mat);
-				
-				finalize = false;
-				}
-				*/
+					TextureMaterial(mat).alphaBlending = props.get(11, false);
+				}		
 				
 			}
 			normalTex_addr = props.get(3, 0);
 			if (normalTex_addr>0){
-				normalTexture = _blocks[normalTex_addr].data;}					
+				normalTexture = _blocks[normalTex_addr].data;
+			}					
 			specTex_addr = props.get(21, 0);
 			if (specTex_addr>0){
-				specTexture = _blocks[specTex_addr].data;}
+				specTexture = _blocks[specTex_addr].data;
+			}
 			
 			
 			var lightPickerAddr:int=props.get(22,0);
@@ -514,8 +673,8 @@ package away3d.loaders.parsers
 			MaterialBase(mat).blendMode=blendModeDic[props.get(9, 0)];
 			MaterialBase(mat).repeat=props.get(13, true);
 			
-			if (isSingle==true){	// this is a multiPass material
-			
+			if (isSingle==0){	// this is a multiPass material
+				
 				if (normalTexture) {	SinglePassMaterialBase(mat).normalMap = normalTexture;}
 				SinglePassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
 				SinglePassMaterialBase(mat).ambient=props.get(15,1.0);
@@ -524,10 +683,10 @@ package away3d.loaders.parsers
 				SinglePassMaterialBase(mat).gloss=props.get(19,50);
 				SinglePassMaterialBase(mat).specularColor=props.get(20,0xffffff);
 				if (specTexture) {		SinglePassMaterialBase(mat).specularMap = specTexture;}
-			
+				
 			}
 			else {	// this is a singleMaterial
-			
+				
 				if (normalTexture) {	MultiPassMaterialBase(mat).normalMap = normalTexture;}
 				MultiPassMaterialBase(mat).alphaThreshold=props.get(12, 0.0);
 				MultiPassMaterialBase(mat).ambient=props.get(15,1.0);
@@ -540,18 +699,24 @@ package away3d.loaders.parsers
 			
 			
 			
-			/*
-			here we will read the material-methods;
-			*/
-			
 			methods_parsed = 0;
 			//trace("num_methods = "+num_methods)
+			// trace: material methods: this can be: multiple shadingMethods, one shadowMethod (SharedMethodBlock), multiple effectsMethods (SharedMethodBlock)
 			while (methods_parsed < num_methods) {
-				var method_type : uint;
-				
+				var method_type : uint;				
 				method_type = _body.readUnsignedShort();
-				parseProperties(null);
+				props = parseProperties({ 	1130:AWD_FIELD_BADDR	});	
+				if (method_type==999){
+					// to do: check if this SharedMethodBlock is a ShadowMethod, and if it allready has been created ( ShadowMethods will be created when creating a light that casts shadows)
+					if (_blocks[props.get(1130,0)].data is EffectMethodBase)SinglePassMaterialBase(mat).addMethod(_blocks[props.get(1130,0)].data);
+				}
+				else{
+					// to do: if method_type!=999 this method must be a ShadingMethod, and must be created and applied.
+					// composite Methods will allways appear later in order than theyre basemethods, 
+					// so first we will apply the baseMethod, than we for example the mat.diffuseMethod as baseMethod for a DiffuseCompositeMethod
+				}
 				parseUserAttributes();
+				methods_parsed+=1;
 			}
 			
 			
@@ -559,19 +724,142 @@ package away3d.loaders.parsers
 			attributes = parseUserAttributes();
 			//mat.extra = attributes;
 			
-			//if (finalize) {
 			finalizeAsset(mat, name);
-			//}
+			
 			
 			return mat;
 		}
 		
 		
+		private function parseSharedMethodBlock(blockLength : uint, block : AWDBlock) : ShadingMethodBase
+		{
+			// TODO: not used
+			blockLength = blockLength; 
+			var type : uint;
+			var data_len : uint;
+			var asset:ShadingMethodBase;
+			
+			block.name = parseVarStr();
+			if(_debug)trace("blockname = "+block.name);
+			asset=parseSharedMethodList(); 
+			// Ignore for now
+			parseUserAttributes();
+			block.data=asset;
+			if (asset is EffectMethodBase){
+				finalizeAsset(EffectMethodBase(asset), block.name);}
+			if (asset is ShadowMapMethodBase){
+				finalizeAsset(ShadowMapMethodBase(asset), block.name);}
+			
+			
+			return asset;
+		}
+		
+		// this functions reads a Method found in a SharedMethod-Block - possible Method-Types: EffectMethods / ShadowMethod
+		private function parseSharedMethodList() :ShadingMethodBase
+		{
+			
+			var methodType:uint = _body.readUnsignedShort();
+			var shadingMethodReturn:Object;
+			var props:Object;
+			// to do: reduce number of properties (
+			props = parseProperties({ 	1:AWD_FIELD_COLOR, 	2:AWD_FIELD_COLOR,	3:AWD_FIELD_FLOAT32,100:AWD_FIELD_BADDR,101:AWD_FIELD_BADDR,102:AWD_FIELD_BADDR,103:AWD_FIELD_BADDR,104:AWD_FIELD_BADDR,
+				105:AWD_FIELD_BADDR,201:AWD_FIELD_BOOL,202:AWD_FIELD_BOOL,203:AWD_FIELD_BOOL,204:AWD_FIELD_BOOL,1001:AWD_FIELD_MTX4x4,1101:AWD_FIELD_FLOAT32,1102:AWD_FIELD_FLOAT32,1103:AWD_FIELD_FLOAT32,1104:AWD_FIELD_FLOAT32,
+				1105:AWD_FIELD_COLOR,1106:AWD_FIELD_FLOAT32,1107:AWD_FIELD_FLOAT32,1108:AWD_FIELD_FLOAT32,1109:AWD_FIELD_FLOAT32,1110:AWD_FIELD_FLOAT32,1111:AWD_FIELD_FLOAT32,1112:AWD_FIELD_FLOAT32,
+				1113:AWD_FIELD_FLOAT32,1114:AWD_FIELD_FLOAT32,1115:AWD_FIELD_FLOAT32,1116:AWD_FIELD_FLOAT32,1117:AWD_FIELD_FLOAT32,1118:AWD_FIELD_FLOAT32,1119:AWD_FIELD_FLOAT32,1120:AWD_FIELD_FLOAT32,1121:AWD_FIELD_FLOAT32,
+				1121:AWD_FIELD_FLOAT32,1122:AWD_FIELD_FLOAT32,1123:AWD_FIELD_UINT8,1124:AWD_FIELD_UINT8,1125:AWD_FIELD_UINT8,1127:AWD_FIELD_UINT32,1128:AWD_FIELD_UINT32,1129:AWD_FIELD_INT32,
+				1130:AWD_FIELD_BADDR,1140:AWD_FIELD_FLOAT32,1141:AWD_FIELD_FLOAT32,1142:AWD_FIELD_FLOAT32, 1143:AWD_FIELD_FLOAT32, 1144:AWD_FIELD_FLOAT32,1145:AWD_FIELD_FLOAT32, 1146:AWD_FIELD_FLOAT32,
+				1501:AWD_FIELD_FLOAT32,1502:AWD_FIELD_FLOAT32,1503:AWD_FIELD_FLOAT32,1504:AWD_FIELD_FLOAT32	});	
+			
+			switch (methodType){
+				// Effect Methods
+				case 401://ColorMatrix
+					// to do - map the values to a colormatrix
+					shadingMethodReturn=new ColorMatrixMethod(props.get(1001,new Matrix3D()));
+					break;
+				case 402://ColorTransform
+					shadingMethodReturn=new ColorTransformMethod();
+					var offSetColor:uint=props.get(1105,0x00000000);// to do: apply offsetColor into colortransform
+					var newColorTransform:ColorTransform=new ColorTransform(props.get(1102,1),props.get(1103,1),props.get(1104,1),props.get(1101,1),0,0,0,0);
+					ColorTransformMethod(shadingMethodReturn).colorTransform=newColorTransform;
+					
+					break;
+				case 403://EnvMap
+					if (props.get(101,0)>0){
+						shadingMethodReturn=new EnvMapMethod(_blocks[props.get(101,0)].data,props.get(3,1));
+						if (props.get(1146,0)>0)EnvMapMethod(shadingMethodReturn).mask=_blocks[props.get(1146,0)].data;
+					}
+					break;
+				case 404://LightMapMethod
+					if (props.get(100,0)>0){
+						shadingMethodReturn=new LightMapMethod(_blocks[props.get(100,0)].data,blendModeDic[props.get(1124,10)]);//usesecondaryUV not set
+					}
+					break;
+				case 405://ProjectiveTextureMethod
+					if (props.get(102,0)>0){
+						shadingMethodReturn=new ProjectiveTextureMethod(_blocks[props.get(102,0)].data,blendModeDic[props.get(1124,10)]);
+					}
+					break;
+				case 406://RimLightMethod
+					shadingMethodReturn=new RimLightMethod(props.get(1,0xffffff),props.get(1107,0.4),props.get(1106,2));//blendMode
+					break;
+				case 407://AlphaMaskMethod
+					if (props.get(100,0)>0){
+						shadingMethodReturn=new AlphaMaskMethod(_blocks[props.get(100,0)].data,props.get(203,false));
+					}
+					break;
+				case 408://RefractionEnvMapMethod
+					if (props.get(101,0)>0){
+						shadingMethodReturn=new RefractionEnvMapMethod(_blocks[props.get(101,0)].data,props.get(1129,0.1),props.get(1111,0.01),props.get(1143,0.01),props.get(1144,0.01));
+					}
+					break;
+				case 409://OutlineMethod
+					shadingMethodReturn=new OutlineMethod(props.get(2,0x00000000),props.get(1121,1),props.get(202,true),props.get(201,false));
+					break;
+				case 410://FresnelEnvMapMethod
+					if (props.get(101,0)>0){
+						shadingMethodReturn=new FresnelEnvMapMethod(props.get(101,0),props.get(3,1));
+					}
+					break;
+				case 411://FogMethod
+					shadingMethodReturn=new FogMethod(props.get(1122,0),props.get(1145,1000),props.get(1,0x808080));
+					break;
+				
+				//shadowMapMethods
+				// shadowMethods cannot be created at this point, since there constructior might needs access to a light, that has not been parsed yet
+				// to do: add the needed data to tha AWDBlock, and finalize when needed (by light)
+				/*
+				case 1001://CascadeShadowMapMethod
+					//shadingMethodReturn=new CascadeShadowMapMethod(_blocks[props.get(1130,0)].data);
+					break;
+				case 1002://NearShadowMapMethod
+					//shadingMethodReturn=new NearShadowMapMethod(_blocks[props.get(1130,0)].data);
+					break;
+				case 1003://NearShadowMapMethod
+					//shadingMethodReturn=new FilteredShadowMapMethod(_blocks[props.get(1130,0)].data);
+					break;
+				case 1004://DitheredShadowMapMethod
+					//shadingMethodReturn=new DitheredShadowMapMethod(_blocks[props.get(1130,0)].data);
+					break;
+				case 1005://SoftShadowMapMethod
+					//shadingMethodReturn=new SoftShadowMapMethod(_blocks[props.get(1130,0)].data);
+					break;
+				case 1006://HardShadowMapMethod
+					//shadingMethodReturn=new HardShadowMapMethod(_blocks[props.get(1130,0)].data);
+					//shadingMethodReturn=new NearShadowMapMethod(_blocks[props.get(1130,0)].data);
+					break;
+				*/
+				
+				
+			}
+			parseUserAttributes();
+			return shadingMethodReturn as ShadingMethodBase;
+		}
 		private function parseLight(blockLength : uint) : LightBase
 		{
 			var name : String;
 			var par_id : uint;
 			var lightType : uint;
+			var numShadowMethods : uint;
 			var mtx : Matrix3D;
 			var light : LightBase;
 			var parent : ObjectContainer3D;
@@ -581,8 +869,9 @@ package away3d.loaders.parsers
 			mtx = parseMatrix3D();
 			name = parseVarStr();
 			lightType=_body.readUnsignedByte();
+			numShadowMethods=_body.readUnsignedByte();
 			props = parseProperties({ 	1:AWD_FIELD_FLOAT32, 	2:AWD_FIELD_FLOAT32,	3:AWD_FIELD_COLOR,		4:AWD_FIELD_FLOAT32,
-										5:AWD_FIELD_FLOAT32,	6:AWD_FIELD_BOOL,		7:AWD_FIELD_COLOR,		8:AWD_FIELD_FLOAT32});	
+				5:AWD_FIELD_FLOAT32,	6:AWD_FIELD_BOOL,		7:AWD_FIELD_COLOR,		8:AWD_FIELD_FLOAT32});	
 			
 			if (lightType==1){
 				light=new PointLight();
@@ -601,12 +890,37 @@ package away3d.loaders.parsers
 			light.ambientColor = props.get(7,0xffffff);
 			light.ambient =  props.get(8,0.0);
 			
+			// read List of Methods for the Lights - Method can either be a ShadowMapMethod in a SharedMethodBlock, or a ShadowMapper for the specific type of light
+			var methods_parsed:uint = 0;
+			while (methods_parsed < numShadowMethods) {
+				var method_type : uint;				
+				method_type = _body.readUnsignedShort();
+				props = parseProperties({ 	1130:AWD_FIELD_BADDR, 1125:AWD_FIELD_UINT8, 1120:AWD_FIELD_FLOAT32, 1128:AWD_FIELD_UINT16	});	
+				if (method_type==999){
+					if(_debug)trace("SharedMethod = "+_blocks[props.get(1125,0)].data);// to do: create and apply ShadowMapMethod
+				}
+				if ((method_type==1501)&&(light is DirectionalLight)){
+					if(_debug)trace("to do create and apply  DirectionalShadowMapper= "+_blocks[props.get(1130,0)].data);// to do: create and apply DirectionalShadowMapper
+				}
+				if ((method_type==1502)&&(light is DirectionalLight)){
+					if(_debug)trace("to do create and apply  NearDirectionalShadowMapper= "+_blocks[props.get(1130,0)].data);// to do: create and apply NearDirectionalShadowMapper					
+				}
+				if ((method_type==1503)&&(light is DirectionalLight)){
+					if(_debug)trace("to do create and apply  CascadeShadowMapper= "+_blocks[props.get(1130,0)].data);// to do: create and apply CascadeShadowMapper					
+				}
+				if ((method_type==1504)&&(light is PointLight)){
+					if(_debug)trace("to do create and apply  CubeMapShadowMapper= "+_blocks[props.get(1130,0)].data);// to do: create and apply CubeMapShadowMapper					
+				}
+				parseUserAttributes();
+				methods_parsed+=1;
+			}
+			
+			
 			parent = _blocks[par_id].data as ObjectContainer3D;
 			if (parent) {
 				parent.addChild(light);
 			}
 			
-			parseUserAttributes();
 			parseUserAttributes();
 			
 			finalizeAsset(light, name);
@@ -653,8 +967,6 @@ package away3d.loaders.parsers
 			}
 			else {
 				var data : ByteArray;
-				// TODO: not used
-				// var loader : Loader;
 				
 				data = new ByteArray();
 				_body.readBytes(data, 0, data_len);
@@ -665,12 +977,6 @@ package away3d.loaders.parsers
 			// Ignore for now
 			parseProperties(null);
 			parseUserAttributes();
-			
-			
-			// TODO: Don't do this. Get texture properly
-			/*
-			finalizeAsset(asset, name);
-			*/
 			
 			pauseAndRetrieveDependencies();
 			
@@ -834,7 +1140,7 @@ package away3d.loaders.parsers
 			
 			parseProperties(null);
 			ctr.extra = parseUserAttributes();
-		
+			
 			finalizeAsset(ctr, name);
 			
 			return ctr;
@@ -891,6 +1197,7 @@ package away3d.loaders.parsers
 				}
 			}			
 			// Ignore for now
+			// to do: use the properties to read the mesh.castShadow - not encoded atm
 			parseProperties(null);
 			mesh.extra = parseUserAttributes();
 			

@@ -303,7 +303,7 @@ package away3d.loaders.parsers
 		arcane function resumeParsingAfterDependencies() : void
 		{
 			_parsingPaused = false;
-			_timer.start();
+			if (_timer){	_timer.start();}
 		}
 		
 		
@@ -376,6 +376,14 @@ package away3d.loaders.parsers
 				case AssetType.SEGMENT_SET:
 					type_name = 'segmentSet';
 					type_event = AssetEvent.SEGMENT_SET_COMPLETE;
+					break;
+				case AssetType.EFFECTS_METHOD:
+					type_name = 'effectsMethod';
+					type_event = AssetEvent.EFFECTMETHOD_COMPLETE;
+					break;
+				case AssetType.SHADOW_MAP_METHOD:
+					type_name = 'effectsMethod';
+					type_event = AssetEvent.SHADOWMAPMETHOD_COMPLETE;
 					break;
 				default:
 					throw new Error('Unhandled asset type '+asset.assetType+'. Report as bug!');

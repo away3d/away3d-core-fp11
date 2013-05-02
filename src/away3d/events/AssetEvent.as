@@ -22,6 +22,8 @@ package away3d.events
 		public static const SEGMENT_SET_COMPLETE : String = "segmentSetComplete";
 		public static const LIGHT_COMPLETE : String = "lightComplete";
 		public static const LIGHTPICKER_COMPLETE : String = "lightPickerComplete";
+		public static const EFFECTMETHOD_COMPLETE : String = "effectMethodComplete";
+		public static const SHADOWMAPMETHOD_COMPLETE : String = "shadowMapMethodComplete";
 		
 		public static const ASSET_RENAME : String = 'assetRename';
 		public static const ASSET_CONFLICT_RESOLVED : String = 'assetConflictResolved';
