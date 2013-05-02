@@ -289,9 +289,9 @@ package away3d.core.pick
 			localViewProjection.append(camera.viewProjection);
 			if (!_triangleProgram3D) initTriangleProgram3D();
 
-			_boundOffsetScale[4] = scX = 1/(entity.maxX-entity.minX);
-			_boundOffsetScale[5] = scY = 1/(entity.maxY-entity.minY);
-			_boundOffsetScale[6] = scZ = 1/(entity.maxZ-entity.minZ);
+			_boundOffsetScale[4] = 1/(scX = entity.maxX-entity.minX);
+			_boundOffsetScale[5] = 1/(scY = entity.maxY-entity.minY);
+			_boundOffsetScale[6] = 1/(scZ = entity.maxZ-entity.minZ);
 			_boundOffsetScale[0] = offsX = -entity.minX;
 			_boundOffsetScale[1] = offsY = -entity.minY;
 			_boundOffsetScale[2] = offsZ = -entity.minZ;
@@ -307,9 +307,9 @@ package away3d.core.pick
 
 			col = _bitmapData.getPixel(0, 0);
 
-			_localHitPosition.x = ((col >> 16) & 0xff)/(scX*255) - offsX;
-			_localHitPosition.y = ((col >> 8) & 0xff)/(scY*255) - offsY;
-			_localHitPosition.z = (col & 0xff)/(scZ*255) - offsZ;
+			_localHitPosition.x = ((col >> 16) & 0xff)*scX/255 - offsX;
+			_localHitPosition.y = ((col >> 8) & 0xff)*scY/255 - offsY;
+			_localHitPosition.z = (col & 0xff)*scZ/255 - offsZ;
 		}
 
 		/**
