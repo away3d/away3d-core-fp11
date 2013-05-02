@@ -1,9 +1,11 @@
 ﻿package away3d.materials {
-	import away3d.arcane;
-	import away3d.textures.Texture2DBase;
-
-	import flash.display3D.Context3DTextureFormat;
-	import flash.geom.ColorTransform;
+	import away3d.*;
+	import away3d.materials.methods.*;
+	import away3d.textures.*;
+	
+	import flash.display.*;
+	import flash.display3D.*;
+	import flash.geom.*;
 
 	use namespace arcane;
 
@@ -51,7 +53,7 @@
 			colorTransform ||= new ColorTransform();
 			colorTransform.alphaMultiplier = value;
 			_screenPass.preserveAlpha = requiresBlending;
-			_screenPass.setBlendMode(blendMode, requiresBlending);
+			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 		}
 
 		/**
@@ -77,8 +79,8 @@
 		
 		public function set ambientTexture(value : Texture2DBase) : void
 		{
-			_screenPass.diffuseMethod._useDiffuseTexture = true;
 			_screenPass.ambientMethod.texture = value;
+			_screenPass.diffuseMethod.useAmbientTexture = Boolean(value);
 		}
 	}
 }

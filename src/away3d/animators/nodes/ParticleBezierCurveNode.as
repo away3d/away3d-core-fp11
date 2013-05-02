@@ -69,12 +69,12 @@ package away3d.animators.nodes
 			animationRegisterCache.setRegisterIndex(this, BEZIER_END_INDEX, endValue.index);
 			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			var rev_time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
-			var time_2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
-			var time_temp:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
+			var rev_time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 0);
+			var time_2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 1);
+			var time_temp:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 2);
 			animationRegisterCache.addVertexTempUsages(temp, 1);
 			var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "xyz");
+			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index);
 			animationRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
@@ -83,20 +83,20 @@ package away3d.animators.nodes
 			
 			code += "mul " + time_temp + "," + animationRegisterCache.vertexLife +"," + rev_time + "\n";
 			code += "mul " + time_temp + "," + time_temp +"," + animationRegisterCache.vertexTwoConst + "\n";
-			code += "mul " + distance + "," + time_temp +"," + controlValue + "\n";
-			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + "," + animationRegisterCache.positionTarget + ".xyz\n";
-			code += "mul " + distance + "," + time_2 +"," + endValue + "\n";
-			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + "," + animationRegisterCache.positionTarget + ".xyz\n";
+			code += "mul " + distance + ".xyz," + time_temp +"," + controlValue + "\n";
+			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
+			code += "mul " + distance + ".xyz," + time_2 +"," + endValue + "\n";
+			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 			
 			if (animationRegisterCache.needVelocity)
 			{
 				code += "mul " + time_2 + "," + animationRegisterCache.vertexLife + "," + animationRegisterCache.vertexTwoConst + "\n";
 				code += "sub " + time_temp + "," + animationRegisterCache.vertexOneConst + "," + time_2 + "\n";
 				code += "mul " + time_temp + "," + animationRegisterCache.vertexTwoConst + "," + time_temp + "\n";
-				code += "mul " + distance + "," + controlValue + "," + time_temp + "\n";
-				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + "," + animationRegisterCache.velocityTarget + ".xyz\n";
-				code += "mul " + distance + "," + endValue + "," + time_2 + "\n";
-				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + "," + animationRegisterCache.velocityTarget + ".xyz\n";
+				code += "mul " + distance + ".xyz," + controlValue + "," + time_temp + "\n";
+				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";
+				code += "mul " + distance + ".xyz," + endValue + "," + time_2 + "\n";
+				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";
 			}
 			
 			return code;

@@ -145,7 +145,7 @@ package away3d.materials.methods
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			_projMatrix.copyFrom(_projector.viewProjection);
-			_projMatrix.prepend(renderable.sceneTransform);
+			_projMatrix.prepend(renderable.getRenderSceneTransform(camera));
 			_projMatrix.copyRawDataTo(vo.vertexData, vo.vertexConstantsIndex, true);
 		}
 
@@ -154,7 +154,7 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy.setTextureAt(vo.texturesIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
+			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _projector.texture.getTextureForStage3D(stage3DProxy));
 		}
 	}
 }

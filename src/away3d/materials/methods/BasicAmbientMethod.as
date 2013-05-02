@@ -140,7 +140,7 @@ package away3d.materials.methods
 			updateAmbient();
 			
 			if (_useTexture)
-				stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+				stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 			else {
 				var index : int = vo.fragmentConstantsIndex;
 				var data : Vector.<Number> = vo.fragmentData;

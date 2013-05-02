@@ -60,7 +60,7 @@ package away3d.animators.nodes
 			//if time=0,set the position to zero.
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			code += "sge " + temp + "," + animationRegisterCache.vertexTime + "," + animationRegisterCache.vertexZeroConst + "\n";
-			code += "mul " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
+			code += "mul " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp + "\n";
 			if (_usesDuration)
 			{
 				if (_usesLooping)
@@ -72,7 +72,7 @@ package away3d.animators.nodes
 						code += "frc " + div + "," + div + "\n";
 						code += "mul " + animationRegisterCache.vertexTime + "," +div + "," + timeStreamRegister + ".z\n";
 						code += "slt " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".y\n";
-						code += "mul " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + div + "\n";
+						code += "mul " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + div + "\n";
 					}
 					else
 					{
@@ -85,7 +85,7 @@ package away3d.animators.nodes
 				{
 					var sge:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 					code += "sge " + sge + "," +  timeStreamRegister + ".y," + animationRegisterCache.vertexTime + "\n";
-					code += "mul " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + sge + "\n";
+					code += "mul " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + sge + "\n";
 				}
 			}
 			code += "mul " + animationRegisterCache.vertexLife + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".w\n";

@@ -28,7 +28,7 @@ package away3d.lights.shadowmaps
 
 		private var _numCascades : int;
 		private var _overallCamera : Camera3D;
-		private var _overallLens : OrthographicOffCenterLens;
+		private var _overallLens : FreeMatrixLens;
 		private var _depthCameras : Vector.<Camera3D>;
 		private var _depthLenses : Vector.<FreeMatrixLens>;
 
@@ -103,7 +103,7 @@ package away3d.lights.shadowmaps
 			_depthLenses = new Vector.<FreeMatrixLens>();
 			_depthCameras = new Vector.<Camera3D>();
 
-			_overallLens = new OrthographicOffCenterLens(-1, 1, -1, 1);
+			_overallLens = new FreeMatrixLens();
 			_overallCamera = new Camera3D(_overallLens);
 
 			for (i = 0; i < _numCascades; ++i) {
@@ -224,9 +224,12 @@ package away3d.lights.shadowmaps
 			var dir : Vector3D = DirectionalLight(_light).sceneDirection;
 
 			_overallCamera.transform = _light.sceneTransform;
-			_overallCamera.x = viewCamera.x - dir.x * _lightOffset;
-			_overallCamera.y = viewCamera.y - dir.y * _lightOffset;
-			_overallCamera.z = viewCamera.z - dir.z * _lightOffset;
+			var x : Number = int((viewCamera.x-dir.x * _lightOffset)/_snap)*_snap;
+			var y : Number = int((viewCamera.y-dir.y * _lightOffset)/_snap)*_snap;
+			var z : Number = int((viewCamera.z-dir.z * _lightOffset)/_snap)*_snap;
+			_overallCamera.x = x;
+			_overallCamera.y = y;
+			_overallCamera.z = z;
 
 			_calcMatrix.copyFrom(viewCamera.sceneTransform);
 			_calcMatrix.append(_overallCamera.inverseSceneTransform);
@@ -242,6 +245,8 @@ package away3d.lights.shadowmaps
 
 		private function updateOverallMatrix() : void
 		{
+			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			var matrix : Matrix3D = _overallLens.matrix;
 			var i : uint;
 			var xN : Number, yN : Number, zN : Number;
 			var minX : Number = Number.POSITIVE_INFINITY, minY : Number = Number.POSITIVE_INFINITY;
@@ -259,17 +264,40 @@ package away3d.lights.shadowmaps
 				i += 3;
 			}
 
-			minX = int(minX / _snap) * _snap;
-			maxX = Math.ceil(maxX / _snap) * _snap;
-			minY = int(minY / _snap) * _snap;
-			maxY = Math.ceil(maxY / _snap) * _snap;
+			var minZ : Number = 1;
 
-			_overallLens.minX = minX;
-			_overallLens.minY = minY;
-			_overallLens.near = 1;
-			_overallLens.maxX = maxX;
-			_overallLens.maxY = maxY;
-			_overallLens.far = maxZ;
+
+			var w : Number = (maxX - minX);
+			var h : Number = (maxY - minY);
+			var d : Number = 1/(maxZ - minZ);
+
+			if (minX < 0) minX -= _snap;	// because int() rounds up for < 0
+			if (minY < 0) minY -= _snap;
+			minX = int(minX / _snap) * _snap;
+			minY = int(minY / _snap) * _snap;
+
+			var snap2 : Number = 2*_snap;
+			w = int(w/snap2 + 1)*snap2;
+			h = int(h/snap2 + 1)*snap2;
+
+			maxX = minX + w;
+			maxY = minY + h;
+
+			w = 1/w;
+			h = 1/h;
+
+			raw[0] = 2*w;
+			raw[5] = 2*h;
+			raw[10] = d;
+			raw[12] = -(maxX + minX)*w;
+			raw[13] = -(maxY + minY)*h;
+			raw[14] = -minZ * d;
+			raw[15] = 1;
+			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;
+
+			matrix.copyRawDataFrom(raw);
+			matrix.appendScale(.96, .96, 1);
+			_overallLens.matrix = matrix;
 		}
 
 		private function updateProjectionPartition(matrix : Matrix3D, splitRatio : Number, texOffsetX : Number, texOffsetY : Number) : void
@@ -301,16 +329,26 @@ package away3d.lights.shadowmaps
 				i += 3;
 			}
 
-			minZ = 10;
+			minZ = 1;
 
-			minX = int(minX / _snap) * _snap;
-			maxX = Math.ceil(maxX / _snap) * _snap;
-			minY = int(minY / _snap) * _snap;
-			maxY = Math.ceil(maxY / _snap) * _snap;
-
-			var w : Number = 1/(maxX - minX);
-			var h : Number = 1/(maxY - minY);
+			var w : Number = (maxX - minX);
+			var h : Number = (maxY - minY);
 			var d : Number = 1/(maxZ - minZ);
+
+			if (minX < 0) minX -= _snap;	// because int() rounds up for < 0
+			if (minY < 0) minY -= _snap;
+			minX = int(minX / _snap) * _snap;
+			minY = int(minY / _snap) * _snap;
+
+			var snap2 : Number = 2*_snap;
+			w = int(w/snap2 + 1)*snap2;
+			h = int(h/snap2 + 1)*snap2;
+
+			maxX = minX + w;
+			maxY = minY + h;
+
+			w = 1/w;
+			h = 1/h;
 
 			raw[0] = 2*w;
 			raw[5] = 2*h;

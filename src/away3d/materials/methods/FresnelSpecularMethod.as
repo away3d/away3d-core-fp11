@@ -38,12 +38,30 @@ package away3d.materials.methods
 			vo.fragmentData[index+2] = 1;
 			vo.fragmentData[index+3] = 0;
 		}
-
+		
+		/**
+		 * Defines whether the fresnel effect should be based on the view angle on the surface (if true), or on the angle between the light and the view.
+		 */
+		public function get basedOnSurface() : Boolean
+		{
+			return !_incidentLight;
+		}
+		
+		public function set basedOnSurface(value : Boolean) : void
+		{
+			if (_incidentLight != value)
+				return;
+			
+			_incidentLight = !value;
+			
+			invalidateShaderProgram();
+		}
+		
 		public function get fresnelPower() : Number
 		{
 			return _fresnelPower;
 		}
-
+		
 		public function set fresnelPower(value : Number) : void
 		{
 			_fresnelPower = value;

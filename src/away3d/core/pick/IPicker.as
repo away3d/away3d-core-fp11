@@ -32,5 +32,10 @@ package away3d.core.pick
 		 */
 		function get onlyMouseEnabled():Boolean;
 		function set onlyMouseEnabled(value:Boolean):void;
+
+		/**
+		 * Disposes memory used by the IPicker object
+		 */
+		function dispose() : void;
 	}
 }

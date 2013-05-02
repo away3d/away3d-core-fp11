@@ -2,6 +2,8 @@ package away3d.materials
 {
 	import away3d.arcane;
 
+	import flash.display.BlendMode;
+
 	use namespace arcane;
 
 	/**
@@ -37,7 +39,7 @@ package away3d.materials
 			else if (value < 0) value = 0;
 			_screenPass.diffuseMethod.diffuseAlpha = _diffuseAlpha = value;
 			_screenPass.preserveAlpha = requiresBlending;
-			_screenPass.setBlendMode(blendMode, requiresBlending);
+			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 		}
 
 		/**

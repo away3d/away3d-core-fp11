@@ -2,8 +2,14 @@ package away3d.loaders.parsers
 
 {
 	import away3d.arcane;
+	import away3d.events.AssetEvent;
+	import away3d.library.assets.BitmapDataAsset;
+	import away3d.textures.ATFTexture;
 	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
+	import away3d.tools.utils.TextureUtils;
 	import flash.display.Bitmap;
+	import flash.display.BitmapData;
 	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.utils.ByteArray;
@@ -41,7 +47,7 @@ package away3d.loaders.parsers
 		public static function supportsType(extension : String) : Boolean
 		{
 			extension = extension.toLowerCase();
-			return extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "gif" || extension == "bmp";
+			return extension == "jpg" || extension == "jpeg" || extension == "png" || extension == "gif" || extension == "bmp" || extension == "atf";
 		}
 
 
@@ -54,6 +60,9 @@ package away3d.loaders.parsers
 		{
 			//shortcut if asset is IFlexAsset
 			if (data is Bitmap)
+				return true;
+				
+			if (data is BitmapData)
 				return true;
 
 			if (!(data is ByteArray))
@@ -75,7 +84,11 @@ package away3d.loaders.parsers
 			ba.position = 0;
 			if (ba.readUTFBytes(3) == 'GIF' && ba.readShort() == 0x3839 && ba.readByte() == 0x61)
 				return true;
-
+			
+			ba.position = 0;
+			if (ba.readUTFBytes(3) == 'ATF')
+				return true;
+				
 			return false;
 		}
 
@@ -84,18 +97,37 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing() : Boolean
 		{
+			var asset:Texture2DBase;
 			if (_data is Bitmap) {
-				var asset : BitmapTexture = new BitmapTexture(Bitmap(_data).bitmapData);
+				asset = new BitmapTexture(Bitmap(_data).bitmapData);
+				finalizeAsset(asset, _fileName);
+				return PARSING_DONE;
+			}
+			
+			if (_data is BitmapData)
+			{
+				asset = new BitmapTexture(_data as BitmapData);
 				finalizeAsset(asset, _fileName);
 				return PARSING_DONE;
 			}
 
 			_byteData = getByteData();
 			if (!_startedParsing) {
-				_loader = new Loader();
-				_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadComplete);
-				_loader.loadBytes(_byteData);
-				_startedParsing = true;
+				if (_byteData.readUTFBytes(3) == 'ATF')
+				{
+					_byteData.position = 0;
+					asset = new ATFTexture(_byteData);
+					finalizeAsset(asset, _fileName);
+					return PARSING_DONE;
+				}
+				else
+				{
+					_byteData.position = 0;
+					_loader = new Loader();
+					_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadComplete);
+					_loader.loadBytes(_byteData);
+					_startedParsing = true;
+				}
 			}
 
 			return _doneParsing;
@@ -106,10 +138,32 @@ package away3d.loaders.parsers
 		 */
 		private function onLoadComplete(event : Event) : void
 		{
-			var asset : BitmapTexture = new BitmapTexture(Bitmap(_loader.content).bitmapData);
+			var bmp : BitmapData = Bitmap(_loader.content).bitmapData;
+			var asset : BitmapTexture;
+			
 			_loader.contentLoaderInfo.removeEventListener(Event.COMPLETE, onLoadComplete);
-			_doneParsing = true;
+
+			if (!TextureUtils.isBitmapDataValid(bmp)) {
+				var bmdAsset:BitmapDataAsset = new BitmapDataAsset(bmp);
+				bmdAsset.name = _fileName;
+				
+				dispatchEvent(new AssetEvent(AssetEvent.TEXTURE_SIZE_ERROR, bmdAsset));
+				
+				bmp = new BitmapData(8, 8, false, 0x0);
+		
+				//create chekerboard for this texture rather than a new Default Material
+				var i:uint, j:uint;
+				for (i=0; i<8; i++) {
+					for (j=0; j<8; j++) {
+						if ((j & 1) ^ (i & 1))
+							bmp.setPixel(i, j, 0XFFFFFF);
+					}
+				}
+			}
+			
+			asset = new BitmapTexture(bmp);
 			finalizeAsset(asset, _fileName);
+			_doneParsing = true;
 		}
 	}
 }

@@ -142,13 +142,21 @@ package away3d.core.base
 		public function convertToSeparateBuffers() : void
 		{
 			var subGeom : ISubGeometry;
-			var numSubGeoms : int = _subGeometries.length;
+			var numSubGeoms : int = _subGeometries.length;          
+			var _removableCompactSubGeometries:Vector.<CompactSubGeometry> =  new Vector.<CompactSubGeometry>();
+			
 			for (var i : int = 0; i < numSubGeoms; ++i) {
 				subGeom = _subGeometries[i];
-				if (subGeom is SubGeometry) continue;
-				removeSubGeometry(subGeom);
+				if (subGeom is SubGeometry)
+					continue;
+				
+				_removableCompactSubGeometries.push(subGeom);
 				addSubGeometry(subGeom.cloneWithSeperateBuffers());
-				subGeom.dispose();
+			}
+			
+			for each(var s:CompactSubGeometry in _removableCompactSubGeometries) {
+				removeSubGeometry(s);
+				s.dispose();
 			}
 		}
 		

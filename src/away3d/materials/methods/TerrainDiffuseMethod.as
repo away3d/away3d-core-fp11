@@ -6,6 +6,8 @@ package away3d.materials.methods {
 	import away3d.textures.Texture2DBase;
 	import away3d.textures.TextureProxyBase;
 
+	import flash.display3D.Context3D;
+
 	import flash.display3D.Context3DTextureFormat;
 
 	use namespace arcane;
@@ -116,14 +118,15 @@ package away3d.materials.methods {
 
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
+			var context : Context3D = stage3DProxy._context3D;
 			var i : int;
 			var texIndex : int = vo.texturesIndex;
 			super.activate(vo, stage3DProxy);
-			stage3DProxy.setTextureAt(texIndex+1, _blendingTexture.getTextureForStage3D(stage3DProxy));
+			context.setTextureAt(texIndex+1, _blendingTexture.getTextureForStage3D(stage3DProxy));
 
 			texIndex += 2;
 			for (i = 0; i < _numSplattingLayers; ++i)
-				stage3DProxy.setTextureAt(i + texIndex, _splats[i].getTextureForStage3D(stage3DProxy));
+				context.setTextureAt(i + texIndex, _splats[i].getTextureForStage3D(stage3DProxy));
 		}
 
 		override public function set alphaThreshold(value : Number) : void

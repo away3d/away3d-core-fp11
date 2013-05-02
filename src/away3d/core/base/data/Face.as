@@ -210,7 +210,7 @@
 		 */
 		public function set v0Index(ind:uint):void
   		{
-			_v0Index;
+			_v0Index = ind;
 		}
 		/**
 		* @return Returns the index value of the v0 stored in the Face value object
@@ -255,7 +255,7 @@
 		 */
 		public function set v1Index(ind:uint):void
   		{
-			_v1Index;
+			_v1Index = ind;
 		}
 		/**
 		* @return Returns the index value of the v1 stored in the Face value object
@@ -300,7 +300,7 @@
 		 */
 		public function set v2Index(ind:uint):void
   		{
-			_v2Index;
+			_v2Index = ind;
 		}
 		/**
 		* @return return the index value of the v2 stored in the Face value object

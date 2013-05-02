@@ -1,13 +1,11 @@
 package away3d.materials.methods
 {
-	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.events.ShadingMethodEvent;
-	import away3d.materials.compilation.ShaderRegisterData;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.textures.Texture2DBase;
+	import away3d.*;
+	import away3d.core.managers.*;
+	import away3d.events.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
+	import away3d.textures.*;
 
 	use namespace arcane;
 
@@ -17,7 +15,7 @@ package away3d.materials.methods
 	 */
 	public class CompositeSpecularMethod extends BasicSpecularMethod
 	{
-		private var _baseSpecularMethod : BasicSpecularMethod;
+		private var _baseMethod : BasicSpecularMethod;
 
 		/**
 		 * Creates a new WrapSpecularMethod object.
@@ -27,32 +25,49 @@ package away3d.materials.methods
 		public function CompositeSpecularMethod(modulateMethod : Function, baseSpecularMethod : BasicSpecularMethod = null)
 		{
 			super();
-			_baseSpecularMethod = baseSpecularMethod || new BasicSpecularMethod();
-			_baseSpecularMethod._modulateMethod = modulateMethod;
-			_baseSpecularMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = baseSpecularMethod || new BasicSpecularMethod();
+			_baseMethod._modulateMethod = modulateMethod;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
 
 		override arcane function initVO(vo : MethodVO) : void
 		{
-			_baseSpecularMethod.initVO(vo);
+			_baseMethod.initVO(vo);
 		}
 
 		override arcane function initConstants(vo : MethodVO) : void
 		{
-			_baseSpecularMethod.initConstants(vo);
+			_baseMethod.initConstants(vo);
 		}
-
+		
+		/**
+		 * The base specular method on which this method's shading is based.
+		 */
+		public function get baseMethod() : BasicSpecularMethod
+		{
+			return _baseMethod;
+		}
+		
+		public function set baseMethod(value : BasicSpecularMethod) : void
+		{
+			if (_baseMethod == value) return;
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = value;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+			invalidateShaderProgram();
+		}
+		
 		/**
 		 * @inheritDoc
 		 */
 		override public function get gloss() : Number
 		{
-			return _baseSpecularMethod.gloss;
+			return _baseMethod.gloss;
 		}
 
 		override public function set gloss(value : Number) : void
 		{
-			_baseSpecularMethod.gloss = value;
+			_baseMethod.gloss = value;
 		}
 
 		/**
@@ -60,25 +75,12 @@ package away3d.materials.methods
 		 */
 		override public function get specular() : Number
 		{
-			return _baseSpecularMethod.specular;
+			return _baseMethod.specular;
 		}
 
 		override public function set specular(value : Number) : void
 		{
-			_baseSpecularMethod.specular = value;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function get shadingModel() : String
-		{
-			return _baseSpecularMethod.shadingModel;
-		}
-		
-		override public function set shadingModel(value : String) : void
-		{
-			_baseSpecularMethod.shadingModel = value;
+			_baseMethod.specular = value;
 		}
 		
 		/**
@@ -86,7 +88,7 @@ package away3d.materials.methods
 		 */
 		override public function get passes() : Vector.<MaterialPassBase>
 		{
-			return _baseSpecularMethod.passes;
+			return _baseMethod.passes;
 		}
 
 		/**
@@ -94,8 +96,8 @@ package away3d.materials.methods
 		 */
 		override public function dispose() : void
 		{
-			_baseSpecularMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_baseSpecularMethod.dispose();
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod.dispose();
 		}
 
 		/**
@@ -103,12 +105,12 @@ package away3d.materials.methods
 		 */
 		override public function get texture() : Texture2DBase
 		{
-			return _baseSpecularMethod.texture;
+			return _baseMethod.texture;
 		}
 
 		override public function set texture(value : Texture2DBase) : void
 		{
-			_baseSpecularMethod.texture = value;
+			_baseMethod.texture = value;
 		}
 
 		/**
@@ -116,12 +118,12 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			_baseSpecularMethod.activate(vo, stage3DProxy);
+			_baseMethod.activate(vo, stage3DProxy);
 		}
 
 		arcane override function deactivate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			_baseSpecularMethod.deactivate(vo, stage3DProxy);
+			_baseMethod.deactivate(vo, stage3DProxy);
 		}
 
 		/**
@@ -129,7 +131,7 @@ package away3d.materials.methods
 		 */
 		override arcane function set sharedRegisters(value : ShaderRegisterData) : void
 		{
-			super.sharedRegisters = _baseSpecularMethod.sharedRegisters = value;
+			super.sharedRegisters = _baseMethod.sharedRegisters = value;
 		}
 
 		/**
@@ -137,7 +139,7 @@ package away3d.materials.methods
 		 */
 		override arcane function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getVertexCode(vo, regCache);
+			return _baseMethod.getVertexCode(vo, regCache);
 		}
 
 		/**
@@ -145,7 +147,7 @@ package away3d.materials.methods
 		 */
 		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentPreLightingCode(vo, regCache);
+			return _baseMethod.getFragmentPreLightingCode(vo, regCache);
 		}
 
 		/**
@@ -153,7 +155,7 @@ package away3d.materials.methods
 		 */
 		override arcane function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
+			return _baseMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
 		}
 
 		/**
@@ -162,7 +164,7 @@ package away3d.materials.methods
 		 */
 		arcane override function getFragmentCodePerProbe(vo : MethodVO, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
-			return _baseSpecularMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
+			return _baseMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
 		}
 
 		/**
@@ -170,7 +172,7 @@ package away3d.materials.methods
 		 */
 		override arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			return _baseSpecularMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
+			return _baseMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
 		}
 
 		/**
@@ -178,19 +180,19 @@ package away3d.materials.methods
 		 */
 		arcane override function reset() : void
 		{
-			_baseSpecularMethod.reset();
+			_baseMethod.reset();
 		}
 
 		arcane override function cleanCompilationData() : void
 		{
 			super.cleanCompilationData();
-			_baseSpecularMethod.cleanCompilationData();
+			_baseMethod.cleanCompilationData();
 		}
 
 		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
 		{
 			super.shadowRegister = value;
-			_baseSpecularMethod.shadowRegister = value;
+			_baseMethod.shadowRegister = value;
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

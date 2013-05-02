@@ -13,13 +13,15 @@
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 
+	import flash.display.BlendMode;
+
 	import flash.display3D.Context3D;
 	import flash.geom.ColorTransform;
 
 	use namespace arcane;
 
 	/**
-	 * DefaultMaterialBase forms an abstract base class for the default materials provided by Away3D and use methods
+	 * SinglePassMaterialBase forms an abstract base class for the default single-pass materials provided by Away3D, using material methods
 	 * to define their appearance.
 	 */
 	public class SinglePassMaterialBase extends MaterialBase
@@ -34,6 +36,19 @@
 		{
 			super();
 			addPass(_screenPass = new SuperShaderPass(this));
+		}
+
+		/**
+		 * Whether or not to use fallOff and radius properties for lights.
+		 */
+		public function get enableLightFallOff() : Boolean
+		{
+			return _screenPass.enableLightFallOff;
+		}
+
+		public function set enableLightFallOff(value : Boolean) : void
+		{
+			_screenPass.enableLightFallOff = value;
 		}
 
 		/**
@@ -57,7 +72,7 @@
 		override public function set blendMode(value : String) : void
 		{
 			super.blendMode = value;
-			_screenPass.setBlendMode(value, requiresBlending);
+			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 		}
 
 		override public function set depthCompareMode(value : String) : void
@@ -339,7 +354,7 @@
 		public function set alphaBlending(value : Boolean) : void
 		{
 			_alphaBlending = value;
-			_screenPass.setBlendMode(blendMode, requiresBlending);
+			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 			_screenPass.preserveAlpha = requiresBlending;
 		}
 

@@ -372,7 +372,8 @@ package away3d.tools.utils{
 		
 		private function intersect(x:Number = NaN, y:Number = NaN):void
 		{
-			var pMouse:Vector3D = (isNaN(x) && isNaN(y))?_view.unproject(_view.mouseX, _view.mouseY) : _view.unproject(x, y);		 
+			var pMouse:Vector3D = (isNaN(x) && isNaN(y))?_view.unproject(_view.mouseX, _view.mouseY, 1) : _view.unproject(x, y, 1);
+		 
 			var cam:Vector3D = _view.camera.position;
 			var d0: Number = _np.x * cam.x + _np.y * cam.y + _np.z * cam.z - _d;
 			var d1: Number = _np.x * pMouse.x + _np.y * pMouse.y + _np.z * pMouse.z - _d;

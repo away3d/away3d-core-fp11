@@ -136,6 +136,17 @@ package away3d.core.pick
 			return getPickingCollisionVO();
 		}
 		
+		public function getEntityCollision(position:Vector3D, direction:Vector3D, entities:Vector.<Entity>):PickingCollisionVO
+		{
+			_numEntities = 0;
+			
+			var entity : Entity;
+			for each (entity in entities)
+				_entities[_numEntities++] = entity;
+			
+			return getPickingCollisionVO();
+		}
+		
 		public function setIgnoreList(entities:Array):void
 		{
 			_ignoredEntities = entities;
@@ -216,6 +227,10 @@ package away3d.core.pick
 			collisionPos.x = rayPos.x + t*rayDir.x;
 			collisionPos.y = rayPos.y + t*rayDir.y;
 			collisionPos.z = rayPos.z + t*rayDir.z;
+		}
+
+		public function dispose() : void
+		{
 		}
 	}
 }

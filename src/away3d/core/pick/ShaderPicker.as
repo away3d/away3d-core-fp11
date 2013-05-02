@@ -48,6 +48,7 @@ package away3d.core.pick
 		private var _projY : Number;
 		
 		private var _hitRenderable : IRenderable;
+		private var _hitEntity : Entity;
 		private var _localHitPosition : Vector3D = new Vector3D();
 		private var _hitUV : Point = new Point();
 		
@@ -122,9 +123,11 @@ package away3d.core.pick
 			}
 			
 			_hitRenderable = _interactives[_hitColor-1];
-
-			var _collisionVO:PickingCollisionVO = _hitRenderable.sourceEntity.pickingCollisionVO;
+			_hitEntity = _hitRenderable.sourceEntity;
+			if (_onlyMouseEnabled && (!_hitEntity._ancestorsAllowMouseEnabled ||!_hitEntity.mouseEnabled))
+				return null;
 			
+			var _collisionVO:PickingCollisionVO = _hitEntity.pickingCollisionVO;
 			if (_hitRenderable.shaderPickingDetails) {
 				getHitDetails(view.camera);
 				_collisionVO.localPosition = _localHitPosition;
@@ -162,7 +165,7 @@ package away3d.core.pick
 			if (!_objectProgram3D) initObjectProgram3D();
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
-			_stage3DProxy.setProgram(_objectProgram3D);
+			_context.setProgram(_objectProgram3D);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _viewportData, 1);
 			drawRenderables(entityCollector.opaqueRenderableHead, camera);
 			drawRenderables(entityCollector.blendedRenderableHead, camera);
@@ -197,7 +200,7 @@ package away3d.core.pick
 				_id[1] = (_interactiveId >> 8)/255;	    // on green channel
 				_id[2] = (_interactiveId & 0xff)/255;  	// on blue channel
 
-				matrix.copyFrom(renderable.sceneTransform);
+				matrix.copyFrom(renderable.getRenderSceneTransform(camera));
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
@@ -211,7 +214,7 @@ package away3d.core.pick
 		private function updateRay(camera : Camera3D) : void
 		{
 			_rayPos = camera.scenePosition;
-			_rayDir = camera.getRay(_projX, _projY);
+			_rayDir = camera.getRay(_projX, _projY, 1);
 			_rayDir.normalize();
 		}
 
@@ -282,18 +285,18 @@ package away3d.core.pick
 			var scX : Number, scY : Number, scZ : Number;
 			var offsX : Number, offsY : Number, offsZ : Number;
 			var localViewProjection : Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			localViewProjection.copyFrom(_hitRenderable.sceneTransform);
+			localViewProjection.copyFrom(_hitRenderable.getRenderSceneTransform(camera));
 			localViewProjection.append(camera.viewProjection);
 			if (!_triangleProgram3D) initTriangleProgram3D();
 
-			_boundOffsetScale[4] = scX = 1/(entity.maxX-entity.minX);
-			_boundOffsetScale[5] = scY = 1/(entity.maxY-entity.minY);
-			_boundOffsetScale[6] = scZ = 1/(entity.maxZ-entity.minZ);
+			_boundOffsetScale[4] = 1/(scX = entity.maxX-entity.minX);
+			_boundOffsetScale[5] = 1/(scY = entity.maxY-entity.minY);
+			_boundOffsetScale[6] = 1/(scZ = entity.maxZ-entity.minZ);
 			_boundOffsetScale[0] = offsX = -entity.minX;
 			_boundOffsetScale[1] = offsY = -entity.minY;
 			_boundOffsetScale[2] = offsZ = -entity.minZ;
 
-			_stage3DProxy.setProgram(_triangleProgram3D);
+			_context.setProgram(_triangleProgram3D);
 			_context.clear(0, 0, 0, 0, 1, 0, Context3DClearMask.DEPTH);
 			_context.setScissorRectangle(MOUSE_SCISSOR_RECT);
 			_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, localViewProjection, true);
@@ -304,9 +307,9 @@ package away3d.core.pick
 
 			col = _bitmapData.getPixel(0, 0);
 
-			_localHitPosition.x = ((col >> 16) & 0xff)/(scX*255) - offsX;
-			_localHitPosition.y = ((col >> 8) & 0xff)/(scY*255) - offsY;
-			_localHitPosition.z = (col & 0xff)/(scZ*255) - offsZ;
+			_localHitPosition.x = ((col >> 16) & 0xff)*scX/255 - offsX;
+			_localHitPosition.y = ((col >> 8) & 0xff)*scY/255 - offsY;
+			_localHitPosition.z = (col & 0xff)*scZ/255 - offsZ;
 		}
 
 		/**
@@ -465,6 +468,11 @@ package away3d.core.pick
 			_localHitPosition.x = ox + rx*t;
 			_localHitPosition.y = oy + ry*t;
 			_localHitPosition.z = oz + rz*t;
+		}
+
+		public function dispose() : void
+		{
+			_bitmapData.dispose();
 		}
 	}
 }

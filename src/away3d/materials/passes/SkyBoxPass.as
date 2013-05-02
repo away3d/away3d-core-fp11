@@ -91,7 +91,7 @@ package away3d.materials.passes
 			_vertexData[0] = pos.x;
 			_vertexData[1] = pos.y;
 			_vertexData[2] = pos.z;
-			_vertexData[4] = _vertexData[5] = _vertexData[6] = camera.lens.far*.5;
+			_vertexData[4] = _vertexData[5] = _vertexData[6] = camera.lens.far/Math.sqrt(3);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _vertexData, 2);
 			renderable.activateVertexBuffer(0, stage3DProxy);
@@ -104,9 +104,9 @@ package away3d.materials.passes
 		override arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
 			super.activate(stage3DProxy, camera);
-
-			stage3DProxy._context3D.setDepthTest(false, Context3DCompareMode.LESS);
-			stage3DProxy.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
+			var context : Context3D = stage3DProxy._context3D;
+			context.setDepthTest(false, Context3DCompareMode.LESS);
+			context.setTextureAt(0, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 	}
 }

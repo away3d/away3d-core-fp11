@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	import away3d.library.assets.IAsset;
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.ParserEvent;
@@ -80,6 +81,15 @@ package away3d.loaders.parsers
 			if (_parser) _parser.resolveDependencyFailure(resourceDependency);
 		}
 		
+		/**
+		 * @private
+		 * Delagate to the concrete parser.
+		 */
+		arcane override function resolveDependencyName(resourceDependency : ResourceDependency, asset:IAsset) : String
+		{
+			if (_parser) return _parser.resolveDependencyName(resourceDependency, asset);
+			return asset.name;
+		}
 		
 		arcane override function resumeParsingAfterDependencies():void
 		{

@@ -53,13 +53,13 @@ package away3d.core.render
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
 			if (!_program3D) initProgram3D(_context);
-			_stage3DProxy.setProgram(_program3D);
+			_context.setProgram(_program3D);
 
 			item = entityCollector.opaqueRenderableHead;
 			while (item) {
 				renderable = item.renderable;
 				renderable.activateVertexBuffer(0, _stage3DProxy);
-				matrix.copyFrom(renderable.sceneTransform);
+				matrix.copyFrom(item.renderSceneTransform);
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
@@ -72,7 +72,7 @@ package away3d.core.render
 			while (item) {
 				renderable = item.renderable;
 				renderable.activateVertexBuffer(0, _stage3DProxy);
-				matrix.copyFrom(renderable.sceneTransform);
+				matrix.copyFrom(item.renderSceneTransform);
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);

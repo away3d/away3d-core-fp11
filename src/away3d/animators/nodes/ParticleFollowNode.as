@@ -91,11 +91,11 @@ package away3d.animators.nodes
 				
 				if (animationRegisterCache.hasBillboard)
 				{
-					code += "m33 " + temp4 + ".xyz," + animationRegisterCache.positionTarget + "," + temp1 + "\n";
+					code += "m33 " + temp4 + ".xyz," + animationRegisterCache.positionTarget + ".xyz," + temp1 + "\n";
 				}
 				else
 				{
-					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp1 + "\n";
 					for (i = 0; i < len; i++)
 					{
 						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
@@ -118,7 +118,7 @@ package away3d.animators.nodes
 				}
 				else
 				{
-					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp1 + "\n";
 					for (i = 0; i < len; i++)
 					{
 						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
@@ -138,12 +138,12 @@ package away3d.animators.nodes
 				if (animationRegisterCache.hasBillboard)
 				{
 					code += "m33 " + temp4 + ".xyz," + temp4 + ".xyz," + temp1 + "\n";
-					code += "sub " + temp4 + ".xyz," + temp4 + ".xyz," + animationRegisterCache.positionTarget + "\n";
-					code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + temp4 + ".xyz," + animationRegisterCache.scaleAndRotateTarget + "\n";
+					code += "sub " + temp4 + ".xyz," + temp4 + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
+					code += "add " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp4 + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz\n";
 				}
 				else
 				{
-					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + "," + animationRegisterCache.scaleAndRotateTarget + "," + temp1 + "\n";
+					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp1 + "\n";
 					for (i = 0; i < len; i++)
 					{
 						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
@@ -155,7 +155,7 @@ package away3d.animators.nodes
 			if (_usesPosition) {
 				var positionAttribute:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();
 				animationRegisterCache.setRegisterIndex(this, FOLLOW_POSITION_INDEX, positionAttribute.index);
-				code += "add " + animationRegisterCache.scaleAndRotateTarget + "," + positionAttribute + "," + animationRegisterCache.scaleAndRotateTarget + "\n";
+				code += "add " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + positionAttribute + "," + animationRegisterCache.scaleAndRotateTarget + ".xyz\n";
 			}
 			
 			return code;

@@ -7,7 +7,11 @@ package away3d.materials.compilation
 	{
 		private var _regName : String;
 		private var _index : int;
-		private var _component : String;
+		private var _toStr : String;
+
+		private static const COMPONENTS : Array = ["x", "y", "z", "w"];
+
+		internal var _component : int;
 
 		/**
 		 * Creates a new ShaderRegisterElement object.
@@ -15,11 +19,18 @@ package away3d.materials.compilation
 		 * @param index The index of the register.
 		 * @param component The register's component, if not the entire register is represented.
 		 */
-		public function ShaderRegisterElement(regName : String, index : int, component : String = null)
-		{
+		public function ShaderRegisterElement(regName : String, index : int, component : int = -1) {
+			_component = component;
 			_regName = regName;
 			_index = index;
-			_component = component;
+
+			_toStr = _regName;
+
+			if (_index >= 0 )
+				_toStr += _index;
+
+			if ( component > -1 )
+				_toStr += "." + COMPONENTS[component];
 		}
 
 		/**
@@ -27,10 +38,7 @@ package away3d.materials.compilation
 		 */
 		public function toString() : String
 		{
-			if (_index >= 0)
-				return _regName + _index + (_component? "."+_component : "");
-			else
-				return _regName + (_component? "."+_component : "");
+			return _toStr;
 		}
 
 		/**
@@ -52,9 +60,5 @@ package away3d.materials.compilation
 		/**
 		 * The register's component, if not the entire register is represented.
 		 */
-		public function get component() : String
-		{
-			return _component;
-		}
 	}
 }

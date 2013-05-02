@@ -97,7 +97,13 @@ package away3d.cameras.lenses
 			_far = value;
 			invalidateMatrix();
 		}
-
+		
+		/**
+		 * Calculates the normalised position in screen space of the given scene position relative to the camera.
+		 * 
+		 * @param point3d the position vector of the scene coordinates to be projected.
+		 * @return The normalised screen position of the given scene coordinates relative to the camera.
+		 */
 		public function project(point3d : Vector3D) : Vector3D
 		{
 			var v : Vector3D = matrix.transformVector(point3d);
@@ -123,25 +129,16 @@ package away3d.cameras.lenses
 		}
 
 		/**
-		 * Calculates the position of the given normalized coordinates relative to the camera.
-		 * @param mX The x coordinate relative to the View3D. -1 corresponds to the utter left side of the viewport, 1 to the right.
-		 * @param mY The y coordinate relative to the View3D. -1 corresponds to the top side of the viewport, 1 to the bottom.
-		 * @param mZ The distance from the projection plane.
-		 * @return The scene position of the given screen coordinates.
+		 * Calculates the scene position relative to the camera of the given normalized coordinates in screen space.
+		 * 
+		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
+		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
+		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
+		 * @return The scene position relative to the camera of the given screen coordinates.
 		 */
-		public function unproject(mX:Number, mY:Number, mZ : Number):Vector3D
+		public function unproject(nX:Number, nY:Number, sZ : Number):Vector3D
 		{
-			var v : Vector3D = new Vector3D(mX, -mY, mZ, 1.0);
-			
-            v.x *= mZ;
-            v.y *= mZ;
-			
-			v = unprojectionMatrix.transformVector(v);
-			
-			//z is unaffected by transform
-            v.z = mZ;
-			
-			return v;
+			throw new AbstractMethodError();
 		}
 
 		/**

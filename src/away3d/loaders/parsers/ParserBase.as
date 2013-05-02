@@ -289,6 +289,16 @@ package away3d.loaders.parsers
 		{
 			throw new AbstractMethodError();
 		}
+
+		/**
+		 * Resolve a dependency name
+		 *
+		 * @param resourceDependency The dependency to be resolved.
+		 */
+		arcane function resolveDependencyName(resourceDependency : ResourceDependency, asset:IAsset) : String
+		{
+			return asset.name;
+		}
 		
 		arcane function resumeParsingAfterDependencies() : void
 		{
@@ -307,6 +317,14 @@ package away3d.loaders.parsers
 				asset.name = name;
 			
 			switch (asset.assetType) {
+				case AssetType.LIGHT_PICKER:
+					type_name = 'lightPicker';
+					type_event = AssetEvent.LIGHTPICKER_COMPLETE;
+					break;
+				case AssetType.LIGHT:
+					type_name = 'light';
+					type_event = AssetEvent.LIGHT_COMPLETE;
+					break;
 				case AssetType.ANIMATION_SET:
 					type_name = 'animationSet';
 					type_event = AssetEvent.ANIMATION_SET_COMPLETE;

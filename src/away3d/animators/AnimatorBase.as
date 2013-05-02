@@ -27,6 +27,13 @@ package away3d.animators
 	 * @eventType away3d.events.AnimatorEvent
 	 */
 	[Event(name="stop",type="away3d.events.AnimatorEvent")]
+
+	/**
+	 * Dispatched when playback of an animation reaches the end of an animation.
+	 *
+	 * @eventType away3d.events.AnimatorEvent
+	 */
+	[Event(name="cycle_complete",type="away3d.events.AnimatorEvent")]
 	
 	/**
 	 * Provides an abstract base class for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
@@ -40,6 +47,7 @@ package away3d.animators
 		private var _autoUpdate : Boolean = true;
 		private var _startEvent : AnimatorEvent;
 		private var _stopEvent : AnimatorEvent;
+		private var _cycleEvent : AnimatorEvent;
 		private var _time : int;
 		private var _playbackSpeed : Number = 1;
 		
@@ -306,6 +314,17 @@ package away3d.animators
 				for (var i : uint = 0; i < len; ++i)
 					_owners[i].translateLocal(delta, dist);
 			}
+		}
+
+		/**
+		 *  for internal use.
+		 *
+		 * @private
+		 */
+		public function dispatchCycleEvent() : void
+		{
+			if (hasEventListener(AnimatorEvent.CYCLE_COMPLETE))
+				dispatchEvent(_cycleEvent || (_cycleEvent = new AnimatorEvent(AnimatorEvent.CYCLE_COMPLETE, this)));
 		}
 	}
 }

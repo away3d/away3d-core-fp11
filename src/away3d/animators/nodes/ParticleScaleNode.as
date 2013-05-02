@@ -93,7 +93,7 @@ package away3d.animators.nodes
 			
 			code += "mul " + temp + "," + scaleRegister + ".y," + ((_usesCycle)? temp : animationRegisterCache.vertexLife) + "\n";
 			code += "add " + temp + "," + scaleRegister + ".x," + temp + "\n";
-			code += "mul " + animationRegisterCache.scaleAndRotateTarget +"," +animationRegisterCache.scaleAndRotateTarget + "," + temp + "\n";
+			code += "mul " + animationRegisterCache.scaleAndRotateTarget +".xyz," +animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp + "\n";
 			
 			return code;
 		}

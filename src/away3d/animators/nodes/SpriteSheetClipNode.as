@@ -9,7 +9,6 @@ package away3d.animators.nodes
 	public class SpriteSheetClipNode extends AnimationClipNodeBase
 	{
 		private var _frames : Vector.<SpriteSheetAnimationFrame> = new Vector.<SpriteSheetAnimationFrame>();
-		private var _currentFrameID : uint = 0;
 		
 		/**
 		 * Creates a new <code>SpriteSheetClipNode</code> object.
@@ -40,23 +39,6 @@ package away3d.animators.nodes
 			_numFrames = _durations.length;
 			
 			_stitchDirty = false;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function updateStitch():void
-		{
-			/*super.updateStitch();
-			
-			var i:uint = _numFrames - 1;
-			while (i--) {
-				_totalDuration += _durations[i];
-			}
-			
-			if (_stitchFinalFrame || !_looping) {
-				_totalDuration += _durations[_numFrames - 1];
-			}*/
 		}
 	}
 }

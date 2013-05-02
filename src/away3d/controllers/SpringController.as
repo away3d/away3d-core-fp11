@@ -60,8 +60,10 @@ package away3d.controllers
 		
 		}
 		
-		public override function update() : void
+		public override function update(interpolate:Boolean = true) : void
 		{
+			interpolate = interpolate;// prevents unused warning
+
 			var offs : Vector3D;
 			
 			if (!_lookAtObject || !_targetObject)

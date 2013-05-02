@@ -172,8 +172,8 @@ package away3d.core.traverse
 		 */
 		public function clear() : void
 		{
-			_cullPlanes = _customCullPlanes? _customCullPlanes : _camera.frustumPlanes;
-			_numCullPlanes = _cullPlanes.length;
+			_cullPlanes = _customCullPlanes? _customCullPlanes : (_camera? _camera.frustumPlanes : null);
+			_numCullPlanes = _cullPlanes? _cullPlanes.length : 0;
 			_numTriangles = _numMouseEnableds = 0;
 			_blendedRenderableHead = null;
 			_opaqueRenderableHead = null;
@@ -231,6 +231,7 @@ package away3d.core.traverse
 				var dz : Number = _entryPoint.z - entity.z;
 				// project onto camera's z-axis
 				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z;
+				item.renderSceneTransform = renderable.getRenderSceneTransform(_camera);
 				if (material.requiresBlending) {
 					item.next = _blendedRenderableHead;
 					_blendedRenderableHead = item;

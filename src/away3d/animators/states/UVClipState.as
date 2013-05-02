@@ -4,9 +4,6 @@ package away3d.animators.states
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
 	
-	/**
-	 * 
-	 */
 	public class UVClipState extends AnimationClipState implements IUVAnimationState
 	{
 		private var _frames:Vector.<UVAnimationFrame>;
@@ -50,13 +47,27 @@ package away3d.animators.states
 		override protected function updateFrames() : void
 		{
 			super.updateFrames();
-			
-			_currentUVFrame = _frames[_currentFrame];
-			
-			if (_uvClipNode.looping && _nextFrame >= _uvClipNode.lastFrame)
-				_nextUVFrame = _frames[0];
-			else
-				_nextUVFrame = _frames[_nextFrame];
+
+			if(_frames.length > 0) {
+
+				if(_frames.length == 2 && _currentFrame == 0){
+
+					_currentUVFrame = _frames[1];
+					_nextUVFrame = _frames[0];
+
+				} else {
+
+					_currentUVFrame = _frames[_currentFrame];
+				
+					if (_uvClipNode.looping && _nextFrame >= _uvClipNode.lastFrame)
+						_nextUVFrame = _frames[0];
+					else
+						_nextUVFrame = _frames[_nextFrame];
+
+				}			
+
+			}
 		}
+
 	}
 }

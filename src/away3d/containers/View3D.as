@@ -1,5 +1,7 @@
 ﻿package away3d.containers
 {
+	import away3d.events.Scene3DEvent;
+
 	import flash.display.Sprite;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DTextureFormat;
@@ -87,6 +89,8 @@
 		private var _viewportDirty:Boolean = true;
 		
 		private var _depthPrepass:Boolean;
+		private var _profile : String;
+		private var _layeredView : Boolean = false;
 		
 		private function viewSource(e:ContextMenuEvent):void 
 		{
@@ -141,11 +145,12 @@
 		}
 		
 		
-		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null, forceSoftware:Boolean = false)
+		public function View3D(scene : Scene3D = null, camera : Camera3D = null, renderer : RendererBase = null, forceSoftware:Boolean = false, profile:String = "baseline")
 		{
 			super();
-
+			_profile = profile;
 			_scene = scene || new Scene3D();
+			_scene.addEventListener(Scene3DEvent.PARTITION_CHANGED, onScenePartitionChanged);
 			_camera = camera || new Camera3D();
 			_renderer = renderer || new DefaultRenderer();
 			_depthRenderer = new DepthRenderer();
@@ -153,7 +158,8 @@
 			
 			// todo: entity collector should be defined by renderer
 			_entityCollector = _renderer.createEntityCollector();
-
+			_entityCollector.camera = _camera;
+			
 			_scissorRect = new Rectangle();
 
 			initHitField();
@@ -170,6 +176,11 @@
 			_camera.partition = _scene.partition;
 			
 			initRightClickMenu();
+		}
+
+		private function onScenePartitionChanged(event : Scene3DEvent) : void
+		{
+			if (_camera) _camera.partition = scene.partition;
 		}
 		
 		public function get rightClickMenuEnabled() : Boolean
@@ -227,6 +238,22 @@
 		{
 			_background = value;
 			_renderer.background = _background;
+		}
+
+		/**
+		 * Used in a sharedContext. When true, clears the depth buffer prior to rendering this particular
+		 * view to avoid depth sorting with lower layers. When false, the depth buffer is not cleared
+		 * from the previous (lower) view's render so objects in this view may be occluded by the lower
+		 * layer. Defaults to false.
+		 */
+		public function get layeredView() : Boolean
+		{
+			return _layeredView;
+		}
+
+		public function set layeredView(value : Boolean) : void
+		{
+			_layeredView = value;
 		}
 
 		private function initHitField() : void
@@ -300,6 +327,7 @@
 			_renderer.dispose();
 			_renderer = value;
 			_entityCollector = _renderer.createEntityCollector();
+			_entityCollector.camera = _camera;
 			_renderer.stage3DProxy = _stage3DProxy;
 			_renderer.antiAlias = _antiAlias;
 			_renderer.backgroundR = ((_backgroundColor >> 16) & 0xff) / 0xff;
@@ -360,6 +388,7 @@
 			_camera.removeEventListener(CameraEvent.LENS_CHANGED, onLensChanged);
 			
 			_camera = camera;
+			_entityCollector.camera = _camera;
 			
 			if (_scene)
 				_camera.partition = _scene.partition;
@@ -383,7 +412,9 @@
 		 */
 		public function set scene(scene:Scene3D) : void
 		{
+			_scene.removeEventListener(Scene3DEvent.PARTITION_CHANGED, onScenePartitionChanged);
 			_scene = scene;
+			_scene.addEventListener(Scene3DEvent.PARTITION_CHANGED, onScenePartitionChanged);
 			
 			if (_camera)
 				_camera.partition = _scene.partition;
@@ -601,7 +632,10 @@
 			// reset or update render settings
 			if (_backBufferInvalid)
 				updateBackBuffer();
-				
+			
+			if (_shareContext && _layeredView)
+				stage3DProxy.clearDepthBuffer();
+
 			if (!_parentIsStage) {
 				var globalPos : Point = parent.localToGlobal(_localPos);
 				if (_globalPos.x != globalPos.x || _globalPos.y != globalPos.y) {
@@ -702,8 +736,6 @@
 				_viewportDirty = false;
 				_camera.lens.updateViewport(_stage3DProxy.viewPort.x, _stage3DProxy.viewPort.y, _stage3DProxy.viewPort.width, _stage3DProxy.viewPort.height);
 			}
-			
-			_entityCollector.camera = _camera;
 
 			if (_filter3DRenderer || _renderer.renderToTexture) {
 				_renderer.textureRatioX = _rttBufferManager.textureRatioX;
@@ -763,8 +795,9 @@
 			
 			if (_rttBufferManager)
 				_rttBufferManager.dispose();
-			
+
 			_mouse3DManager.disableMouseListeners(this);
+			_mouse3DManager.dispose();
 			
 			_rttBufferManager = null;
 			_depthRender = null;
@@ -774,7 +807,13 @@
 			_renderer = null;
 			_entityCollector = null;
 		}
-
+		
+		/**
+		 * Calculates the projected position in screen space of the given scene position.
+		 * 
+		 * @param point3d the position vector of the point to be projected.
+		 * @return The absolute screen position of the given scene coordinates.
+		 */
 		public function project(point3d : Vector3D) : Vector3D
 		{
 			var v : Vector3D = _camera.project(point3d);
@@ -787,26 +826,32 @@
 
 		/**
 		 * Calculates the scene position of the given screen coordinates.
-		 * @param mX The x coordinate relative to the View3D.
-		 * @param mY The y coordinate relative to the View3D.
-		 * @param mZ The z coordinate relative to the View3D.
-		 * @return The scene position of the given screen coordinates. The returned point corresponds to a point on the projection plane.
+		 * 
+		 * eg. unproject(view.mouseX, view.mouseY, 500) returns the scene position of the mouse 500 units into the screen.
+		 * 
+		 * @param sX The absolute x coordinate in 2D relative to View3D, representing the screenX coordinate.
+		 * @param sY The absolute y coordinate in 2D relative to View3D, representing the screenY coordinate.
+		 * @param sZ The distance into the screen, representing the screenZ coordinate.
+		 * @return The scene position of the given screen coordinates.
 		 */
-		public function unproject(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
+		public function unproject(sX : Number, sY : Number, sZ : Number) : Vector3D
 		{
- 			return _camera.unproject((mX * 2 - _width)/_stage3DProxy.width, (mY * 2 - _height)/_stage3DProxy.height, mZ);
+ 			return _camera.unproject((sX * 2 - _width)/_stage3DProxy.width, (sY * 2 - _height)/_stage3DProxy.height, sZ);
 		}
 
 		/**
-		 * Returns the ray in scene space from the camera to the point on the screen.
-		 * @param mX The x coordinate relative to the View3D.
-		 * @param mY The y coordinate relative to the View3D.
-		 * @param mZ The z coordinate relative to the View3D.
-		 * @return The ray from the camera to the scene space position of a point on the projection plane.
+		 * Calculates the ray in scene space from the camera to the given screen coordinates.
+		 * 
+		 * eg. getRay(view.mouseX, view.mouseY, 500) returns the ray from the camera to a position under the mouse, 500 units into the screen.
+		 * 
+		 * @param sX The absolute x coordinate in 2D relative to View3D, representing the screenX coordinate.
+		 * @param sY The absolute y coordinate in 2D relative to View3D, representing the screenY coordinate.
+		 * @param sZ The distance into the screen, representing the screenZ coordinate.
+		 * @return The ray from the camera to the scene space position of the given screen coordinates.
 		 */
-		public function getRay(mX : Number, mY : Number, mZ : Number = 0) : Vector3D
+		public function getRay(sX : Number, sY : Number, sZ : Number) : Vector3D
 		{
-			return _camera.getRay((mX * 2 - _width)/_width, (mY * 2 - _height)/_height, mZ);
+			return _camera.getRay((sX * 2 - _width)/_width, (sY * 2 - _height)/_height, sZ);
 		}
 		
 		public function get mousePicker() : IPicker
@@ -847,7 +892,7 @@
 			_addedToStage = true;
 			
 			if (!_stage3DProxy) {
-				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware);
+				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
 				_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
 				
 			}

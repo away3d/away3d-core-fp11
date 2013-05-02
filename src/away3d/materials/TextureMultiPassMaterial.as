@@ -1,7 +1,10 @@
 package away3d.materials
 {
 	import away3d.textures.Texture2DBase;
-
+	import away3d.arcane;
+	
+	use namespace arcane;
+	
 	public class TextureMultiPassMaterial extends MultiPassMaterialBase
 	{
 		private var _animateUVs : Boolean;
@@ -49,6 +52,7 @@ package away3d.materials
 		public function set ambientTexture(value : Texture2DBase) : void
 		{
 			ambientMethod.texture = value;
+			diffuseMethod.useAmbientTexture = Boolean(value);
 		}
 
 

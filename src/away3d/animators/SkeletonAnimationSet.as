@@ -39,7 +39,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String
 		{
 			var len : uint = sourceRegisters.length;
 
@@ -99,7 +99,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String
 		{
 			return "";
 		}

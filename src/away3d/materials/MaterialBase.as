@@ -43,7 +43,6 @@ package away3d.materials
 
 		arcane var _renderOrderId : int;
 		arcane var _depthPassId : int;
-		arcane var _name : String = "material";
 
 		private var _bothSides : Boolean;
 		private var _animationSet : IAnimationSet;
@@ -98,8 +97,12 @@ package away3d.materials
 
 		public function set lightPicker(value : LightPickerBase) : void
 		{
-			if (value != _lightPicker)
+			if (value != _lightPicker) {
 				_lightPicker = value;
+				var len : uint = _passes.length;
+				for (var i : uint = 0; i < len; ++i)
+					_passes[i].lightPicker = _lightPicker;
+			}
 		}
 
 		/**
@@ -192,7 +195,8 @@ package away3d.materials
 		/**
 		 * The blend mode to use when drawing this renderable. The following blend modes are supported:
 		 * <ul>
-		 * <li>BlendMode.NORMAL</li>
+		 * <li>BlendMode.NORMAL: No blending, unless the material inherently needs it</li>
+		 * <li>BlendMode.LAYER: Force blending. This will draw the object the same as NORMAL, but without writing depth writes.</li>
 		 * <li>BlendMode.MULTIPLY</li>
 		 * <li>BlendMode.ADD</li>
 		 * <li>BlendMode.ALPHA</li>
@@ -242,17 +246,6 @@ package away3d.materials
 		{
 			return _uniqueId;
 		}
-
-		public override function get name() : String
-		{
-			return _name;
-		}
-
-		public override function set name(value : String) : void
-		{
-			_name = value;
-		}
-
 
 		/**
 		 * The amount of passes used by the material.
@@ -489,6 +482,7 @@ package away3d.materials
 			pass.mipmap = _mipmap;
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
+			pass.lightPicker = _lightPicker;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			invalidatePasses(null);
 		}

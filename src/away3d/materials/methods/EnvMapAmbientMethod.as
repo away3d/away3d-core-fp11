@@ -60,7 +60,7 @@ package away3d.materials.methods
 		{
 			super.activate(vo, stage3DProxy);
 
-			stage3DProxy.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
+			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _cubeTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 		/**

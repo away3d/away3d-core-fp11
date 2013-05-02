@@ -26,7 +26,7 @@ package away3d.materials.methods
 
 		override arcane function initVO(vo : MethodVO) : void
 		{
-			vo.needsView = true;
+			vo.needsProjection = true;
 		}
 
 		override arcane function initConstants(vo : MethodVO) : void
@@ -92,9 +92,7 @@ package away3d.materials.methods
 			var code : String = "";
 			vo.fragmentConstantsIndex = fogColor.index*4;
 
-			code += "dp3 " + temp2 + ".w, " + _sharedRegisters.viewDirVarying+".xyz	, " + _sharedRegisters.viewDirVarying+".xyz\n" + 	// dist²
-					"sqt " + temp2 + ".w, " + temp2 + ".w										\n" + 	// dist
-					"sub " + temp2 + ".w, " + temp2 + ".w, " + fogData + ".x					\n" +
+			code += "sub " + temp2 + ".w, " + _sharedRegisters.projectionFragment + ".z, " + fogData + ".x          \n" +
 					"mul " + temp2 + ".w, " + temp2 + ".w, " + fogData + ".y					\n" +
 					"sat " + temp2 + ".w, " + temp2 + ".w										\n" +
 					"sub " + temp + ", " + fogColor + ", " + targetReg + "\n" + 			// (fogColor- col)

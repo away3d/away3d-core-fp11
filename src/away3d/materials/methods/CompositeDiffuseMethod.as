@@ -16,8 +16,25 @@ package away3d.materials.methods
 	 */
 	public class CompositeDiffuseMethod extends BasicDiffuseMethod
 	{
-		protected var _baseDiffuseMethod : BasicDiffuseMethod;
-
+		protected var _baseMethod : BasicDiffuseMethod;
+		
+		/**
+		 * The base diffuse method on which this method's shading is based.
+		 */
+		public function get baseMethod() : BasicDiffuseMethod
+		{
+			return _baseMethod;
+		}
+		
+		public function set baseMethod(value : BasicDiffuseMethod) : void
+		{
+			if (_baseMethod == value) return;
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = value;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+			invalidateShaderProgram();
+		}
+		
 		/**
 		 * Creates a new WrapDiffuseMethod object.
 		 * @param modulateMethod The method which will add the code to alter the base method's strength. It needs to have the signature clampDiffuse(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String, in which t.w will contain the diffuse strength.
@@ -25,19 +42,19 @@ package away3d.materials.methods
 		 */
 		public function CompositeDiffuseMethod(modulateMethod : Function = null, baseDiffuseMethod : BasicDiffuseMethod = null)
 		{
-			_baseDiffuseMethod = baseDiffuseMethod || new BasicDiffuseMethod();
-			_baseDiffuseMethod._modulateMethod = modulateMethod;
-			_baseDiffuseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = baseDiffuseMethod || new BasicDiffuseMethod();
+			_baseMethod._modulateMethod = modulateMethod;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
 
 		override arcane function initVO(vo : MethodVO) : void
 		{
-			_baseDiffuseMethod.initVO(vo);
+			_baseMethod.initVO(vo);
 		}
 
 		override arcane function initConstants(vo : MethodVO) : void
 		{
-			_baseDiffuseMethod.initConstants(vo);
+			_baseMethod.initConstants(vo);
 		}
 
 		/**
@@ -45,18 +62,18 @@ package away3d.materials.methods
 		 */
 		override public function dispose() : void
 		{
-			_baseDiffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_baseDiffuseMethod.dispose();
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod.dispose();
 		}
 
         override public function get alphaThreshold() : Number
         {
-            return _baseDiffuseMethod.alphaThreshold;
+            return _baseMethod.alphaThreshold;
         }
 
         override public function set alphaThreshold(value : Number) : void
         {
-            _baseDiffuseMethod.alphaThreshold = value;
+            _baseMethod.alphaThreshold = value;
         }
 
 		/**
@@ -64,7 +81,7 @@ package away3d.materials.methods
 		 */
 		override public function get texture() : Texture2DBase
 		{
-			return _baseDiffuseMethod.texture;
+			return _baseMethod.texture;
 		}
 
 		/**
@@ -72,7 +89,7 @@ package away3d.materials.methods
 		 */
 		override public function set texture(value : Texture2DBase) : void
 		{
-			_baseDiffuseMethod.texture = value;
+			_baseMethod.texture = value;
 		}
 
 		/**
@@ -80,7 +97,7 @@ package away3d.materials.methods
 		 */
 		override public function get diffuseAlpha() : Number
 		{
-			return _baseDiffuseMethod.diffuseAlpha;
+			return _baseMethod.diffuseAlpha;
 		}
 
 		/**
@@ -88,7 +105,7 @@ package away3d.materials.methods
 		 */
 		override public function get diffuseColor() : uint
 		{
-			return _baseDiffuseMethod.diffuseColor;
+			return _baseMethod.diffuseColor;
 		}
 
 		/**
@@ -96,7 +113,7 @@ package away3d.materials.methods
 		 */
 		override public function set diffuseColor(diffuseColor : uint) : void
 		{
-			_baseDiffuseMethod.diffuseColor = diffuseColor;
+			_baseMethod.diffuseColor = diffuseColor;
 		}
 
 		/**
@@ -104,7 +121,7 @@ package away3d.materials.methods
 		 */
 		override public function set diffuseAlpha(value : Number) : void
 		{
-			_baseDiffuseMethod.diffuseAlpha = value;
+			_baseMethod.diffuseAlpha = value;
 		}
 
 		/**
@@ -112,7 +129,7 @@ package away3d.materials.methods
 		 */
 		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _baseDiffuseMethod.getFragmentPreLightingCode(vo, regCache);
+			return _baseMethod.getFragmentPreLightingCode(vo, regCache);
 		}
 
 		/**
@@ -120,8 +137,8 @@ package away3d.materials.methods
 		 */
 		override arcane function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = _baseDiffuseMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
-			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
+			var code : String = _baseMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
+			_totalLightColorReg = _baseMethod._totalLightColorReg;
 			return code;
 		}
 
@@ -131,8 +148,8 @@ package away3d.materials.methods
 		 */
 		arcane override function getFragmentCodePerProbe(vo : MethodVO, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
-			var code : String = _baseDiffuseMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
-			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
+			var code : String = _baseMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
+			_totalLightColorReg = _baseMethod._totalLightColorReg;
 			return code;
 		}
 
@@ -141,12 +158,12 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			_baseDiffuseMethod.activate(vo, stage3DProxy);
+			_baseMethod.activate(vo, stage3DProxy);
 		}
 
 		arcane override function deactivate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			_baseDiffuseMethod.deactivate(vo, stage3DProxy);
+			_baseMethod.deactivate(vo, stage3DProxy);
 		}
 
 		/**
@@ -154,7 +171,7 @@ package away3d.materials.methods
 		 */
 		override arcane function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
-			return _baseDiffuseMethod.getVertexCode(vo, regCache);
+			return _baseMethod.getVertexCode(vo, regCache);
 		}
 
 		/**
@@ -162,7 +179,7 @@ package away3d.materials.methods
 		 */
 		override arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
-			return _baseDiffuseMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
+			return _baseMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
 		}
 
 		/**
@@ -170,14 +187,14 @@ package away3d.materials.methods
 		 */
 		override arcane function reset() : void
 		{
-			_baseDiffuseMethod.reset();
+			_baseMethod.reset();
 		}
 
 
 		arcane override function cleanCompilationData() : void
 		{
 			super.cleanCompilationData();
-			_baseDiffuseMethod.cleanCompilationData();
+			_baseMethod.cleanCompilationData();
 		}
 
 		/**
@@ -185,13 +202,13 @@ package away3d.materials.methods
 		 */
 		override arcane function set sharedRegisters(value : ShaderRegisterData) : void
 		{
-			super.sharedRegisters = _baseDiffuseMethod.sharedRegisters = value;
+			super.sharedRegisters = _baseMethod.sharedRegisters = value;
 		}
 
 		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
 		{
 			super.shadowRegister = value;
-			_baseDiffuseMethod.shadowRegister = value;
+			_baseMethod.shadowRegister = value;
 		}
 
 		private function onShaderInvalidated(event : ShadingMethodEvent) : void

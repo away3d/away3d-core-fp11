@@ -1,23 +1,20 @@
 package away3d.materials.methods
 {
-	import away3d.lights.shadowmaps.DirectionalShadowMapper;
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.base.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.errors.AbstractMethodError;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
-	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
-
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+	import away3d.*;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.managers.*;
+	import away3d.errors.*;
+	import away3d.library.assets.*;
+	import away3d.lights.*;
+	import away3d.lights.shadowmaps.*;
+	import away3d.materials.compilation.*;
+	
+	import flash.geom.*;
 
 	use namespace arcane;
 
-	public class ShadowMapMethodBase extends ShadingMethodBase
+	public class ShadowMapMethodBase extends ShadingMethodBase implements IAsset
 	{
 		protected var _castingLight : LightBase;
 		protected var _shadowMapper : ShadowMapperBase;
@@ -33,7 +30,12 @@ package away3d.materials.methods
 			castingLight.castsShadows = true;
 			_shadowMapper = castingLight.shadowMapper;
 		}
-
+		
+		public function get assetType() : String
+		{
+			return AssetType.SHADOW_MAP_METHOD;
+		}
+		
 		public function get alpha() : Number
 		{
 			return _alpha;
@@ -58,7 +60,7 @@ package away3d.materials.methods
 		{
 			_epsilon = value;
 		}
-
+		
 		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();

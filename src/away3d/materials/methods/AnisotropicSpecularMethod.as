@@ -22,13 +22,6 @@ package away3d.materials.methods
 			vo.needsView = true;
 		}
 
-
-		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
-		{
-			_isFirstLight = true;
-			return super.getFragmentPreLightingCode(vo, regCache);
-		}
-
 		arcane override function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
 			var code : String = "";

@@ -1,9 +1,12 @@
 package away3d.stereo.methods
 {
+	import away3d.arcane;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
 	
 	import flash.display3D.Context3DProgramType;
+
+	use namespace arcane;
 
 	public class InterleavedStereoRenderMethod extends StereoRenderMethodBase
 	{
@@ -40,7 +43,7 @@ package away3d.stereo.methods
 		
 		override public function deactivate(stage3DProxy:Stage3DProxy):void
 		{
-			stage3DProxy.setTextureAt(2, null);
+			stage3DProxy._context3D.setTextureAt(2, null);
 		}
 		
 		

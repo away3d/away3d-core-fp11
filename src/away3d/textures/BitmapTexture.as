@@ -43,7 +43,7 @@
 
 			_bitmapData = value;
 
-			if (_generateMipmaps) setMipMap();
+			if (_generateMipmaps) getMipMapHolder();
 		}
 
 		override protected function uploadContent(texture : TextureBase) : void
@@ -52,23 +52,18 @@
 			else Texture(texture).uploadFromBitmapData (_bitmapData, 0);
 		}
 
-		private function setMipMap() : void
+		private function getMipMapHolder() : void
 		{
-			var oldW : uint, oldH : uint;
 			var newW : uint, newH : uint;
 
 			newW = _bitmapData.width;
 			newH = _bitmapData.height;
 
 			if (_mipMapHolder) {
-				oldW = _mipMapHolder.width;
-				oldH = _mipMapHolder.height;
-				if (oldW == _bitmapData.width && oldH == _bitmapData.height) return;
+				if (_mipMapHolder.width == newW && _bitmapData.height == newH)
+					return;
 
-				if (--_mipMapUses[oldW][_mipMapHolder.height] == 0) {
-					_mipMaps[oldW][oldH].dispose();
-					_mipMaps[oldW][oldH] = null;
-				}
+				freeMipMapHolder();
 			}
 
 			if (!_mipMaps[newW]) {
@@ -80,9 +75,28 @@
 				_mipMapUses[newW][newH] = 1;
 			}
 			else {
-				++_mipMapUses[newW][newH];
+				_mipMapUses[newW][newH] = _mipMapUses[newW][newH] + 1;
 				_mipMapHolder = _mipMaps[newW][newH];
 			}
+		}
+
+		private function freeMipMapHolder() : void
+		{
+			var holderWidth : uint = _mipMapHolder.width;
+			var holderHeight : uint = _mipMapHolder.height;
+
+			if (--_mipMapUses[holderWidth][holderHeight] == 0) {
+				_mipMaps[holderWidth][holderHeight].dispose();
+				_mipMaps[holderWidth][holderHeight] = null;
+			}
+		}
+
+		override public function dispose() : void
+		{
+			super.dispose();
+
+			if (_mipMapHolder)
+				freeMipMapHolder();
 		}
 	}
 }

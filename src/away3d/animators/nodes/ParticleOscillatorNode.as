@@ -51,24 +51,24 @@ package away3d.animators.nodes
 			var oscillatorRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, OSCILLATOR_INDEX, oscillatorRegister.index);
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "x");
-			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "y");
-			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, "z");
+			var dgree:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 0);
+			var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 1);
+			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 2);
 			animationRegisterCache.addVertexTempUsages(temp, 1);
 			var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, "xyz");
+			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index);
 			animationRegisterCache.removeVertexTempUsage(temp);
 			
 			var code:String = "";
 			code += "mul " + dgree + "," + animationRegisterCache.vertexTime + "," + oscillatorRegister + ".w\n";
 			code += "sin " + sin + "," + dgree + "\n";
-			code += "mul " + distance + "," + sin + "," + oscillatorRegister + ".xyz\n";
-			code += "add " + animationRegisterCache.positionTarget +"," + distance + "," + animationRegisterCache.positionTarget + "\n";
+			code += "mul " + distance + ".xyz," + sin + "," + oscillatorRegister + ".xyz\n";
+			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 			
 			if (animationRegisterCache.needVelocity)
 			{	code += "cos " + cos + "," + dgree + "\n";
-				code += "mul " + distance + "," + cos + "," + oscillatorRegister + ".xyz\n";
-				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + "," + animationRegisterCache.velocityTarget + ".xyz\n";
+				code += "mul " + distance + ".xyz," + cos + "," + oscillatorRegister + ".xyz\n";
+				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";
 			}
 			
 			return code;

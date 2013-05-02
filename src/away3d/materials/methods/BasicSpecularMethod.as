@@ -1,14 +1,12 @@
 package away3d.materials.methods
 {
-	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.methods.MethodVO;
-	import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.textures.Texture2DBase;
+	import away3d.*;
+	import away3d.core.managers.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.methods.*;
+	import away3d.textures.*;
 	
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
+	import flash.display3D.*;
 
 	use namespace arcane;
 
@@ -30,7 +28,6 @@ package away3d.materials.methods
 		private var _specularColor : uint = 0xffffff;
 		arcane var _specularR : Number = 1, _specularG : Number = 1, _specularB : Number = 1;
 		private var _shadowRegister : ShaderRegisterElement;
-		private var _shadingModel:String;
 		protected var _isFirstLight : Boolean;
 
 		
@@ -40,7 +37,6 @@ package away3d.materials.methods
 		public function BasicSpecularMethod()
 		{
 			super();
-			_shadingModel = SpecularShadingModel.BLINN_PHONG;
 		}
 
 		override arcane function initVO(vo : MethodVO) : void
@@ -77,25 +73,6 @@ package away3d.materials.methods
 
 			_specular = value;
 			updateSpecular();
-		}
-		
-		/**
-		 * The model used by the specular shader
-		 * 
-		 * @see away3d.materials.methods.SpecularShadingModel
-		 */
-		public function get shadingModel() : String
-		{
-			return _shadingModel;
-		}
-		
-		public function set shadingModel(value : String) : void
-		{
-			if (value == _shadingModel) return;
-			
-			_shadingModel = value;
-			
-			invalidateShaderProgram();
 		}
 		
 		/**
@@ -207,41 +184,14 @@ package away3d.materials.methods
 
 			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
 			var normalReg : ShaderRegisterElement  = _sharedRegisters.normalFragment;
-
-			switch (_shadingModel) {
-				case SpecularShadingModel.BLINN_PHONG:
-
-					// half vector
-					code += "add " + t + ".xyz, " + lightDirReg + ".xyz, " + viewDirReg + ".xyz\n" +
-							"nrm " + t + ".xyz, " + t + ".xyz\n" +
-							"dp3 " + t + ".w, " + normalReg + ".xyz, " + t + ".xyz\n" +
-							"sat " + t + ".w, " + t + ".w\n";
-
-					break;
-				case SpecularShadingModel.PHONG:
-
-					// phong model
-					code += "dp3 " + t + ".w, " + lightDirReg + ".xyz, " + normalReg + ".xyz\n" + // sca1 = light.normal
-
-						//find the reflected light vector R
-							"add " + t + ".w, " + t + ".w, " + t + ".w\n" + // sca1 = sca1*2
-							"mul " + t + ".xyz, " + normalReg + ".xyz, " + t + ".w\n" + // vec1 = normal*sca1
-							"sub " + t + ".xyz, " + t + ".xyz, " + lightDirReg + ".xyz\n" + // vec1 = vec1 - light (light vector is negative)
-
-						//smooth the edge as incidence angle approaches 90
-							"add" + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".w\n" + // sca1 = sca1 + smoothtep;
-						//"div" + t + ".w, " + t + ".w, " + _specularDataRegister2 + ".z\n" + // sca1 = sca1/smoothtep;
-							"sat " + t + ".w, " + t + ".w\n" + // sca1 range 0 - 1
-							"mul " + t + ".xyz, " + t + ".xyz, " + t + ".w\n" + // vec1 = vec1*sca1
-
-						//find the dot product between R and V
-							"dp3 " + t + ".w, " + t + ".xyz, " + viewDirReg + ".xyz\n" + // sca1 = vec1.view
-							"sat " + t + ".w, " + t + ".w\n";
-
-					break;
-				default:
-			}
-
+			
+			// blinn-phong half vector model
+			code += "add " + t + ", " + lightDirReg + ", " + viewDirReg + "\n" +
+					"nrm " + t + ".xyz, " + t + "\n" +
+					"dp3 " + t + ".w, " + normalReg + ", " + t + "\n" +
+					"sat " + t + ".w, " + t + ".w\n";
+			
+			
 			if (_useTexture) {
 				// apply gloss modulation from texture
 				code += "mul " + _specularTexData + ".w, " + _specularTexData + ".y, " + _specularDataRegister + ".w\n" +
@@ -251,14 +201,15 @@ package away3d.materials.methods
 				code += "pow " + t + ".w, " + t + ".w, " + _specularDataRegister + ".w\n";
 
 			// attenuate
-			code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
+			if (vo.useLightFallOff)
+				code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
-			code += "mul " + t + ".xyz, " + lightColReg + ".xyz, " + t + ".w\n";
+			code += "mul " + t + ".xyz, " + lightColReg + ", " + t + ".w\n";
 
 			if (!_isFirstLight) {
-				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + t + "\n";
 				regCache.removeFragmentTempUsage(t);
 			}
 
@@ -285,17 +236,17 @@ package away3d.materials.methods
 
 			var normalReg : ShaderRegisterElement = _sharedRegisters.normalFragment;
 			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
-			code += "dp3 " + t + ".w, " + normalReg + ".xyz, " + viewDirReg + ".xyz\n" +
+			code += "dp3 " + t + ".w, " + normalReg + ", " + viewDirReg + "\n" +
 					"add " + t + ".w, " + t + ".w, " + t + ".w\n" +
 					"mul " + t + ", " + t + ".w, " + normalReg + "\n" +
 					"sub " + t + ", " + t + ", " + viewDirReg + "\n" +
 					"tex " + t + ", " + t + ", " + cubeMapReg + " <cube," + (vo.useSmoothTextures? "linear" : "nearest") + ",miplinear>\n" +
-					"mul " + t + ".xyz, " + t + ".xyz, " + weightRegister + "\n";
+					"mul " + t + ".xyz, " + t + ", " + weightRegister + "\n";
 
 			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 
 			if (!_isFirstLight) {
-				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + t + ".xyz\n";
+				code += "add " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + t + "\n";
 				regCache.removeFragmentTempUsage(t);
 			}
 
@@ -316,17 +267,17 @@ package away3d.materials.methods
 				return code;
 
 			if (_shadowRegister)
-				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _shadowRegister + ".w\n";
+				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + _shadowRegister + ".w\n";
 
 			if (_useTexture) {
 				// apply strength modulation from texture
-				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _specularTexData + ".x\n";
+				code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + _specularTexData + ".x\n";
 				regCache.removeFragmentTempUsage(_specularTexData);
 			}
 
 			// apply material's specular reflection
-			code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ".xyz, " + _specularDataRegister + ".xyz\n" +
-					"add " + targetReg + ".xyz, " + targetReg + ".xyz, " + _totalLightColorReg + ".xyz\n";
+			code += "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + _specularDataRegister + "\n" +
+					"add " + targetReg + ".xyz, " + targetReg + ", " + _totalLightColorReg + "\n";
 			regCache.removeFragmentTempUsage(_totalLightColorReg);
 
 			return code;
@@ -341,7 +292,7 @@ package away3d.materials.methods
 
 			if (vo.numLights == 0) return;
 
-			if (_useTexture) stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+			if (_useTexture) stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 			var index : int = vo.fragmentConstantsIndex;
 			var data : Vector.<Number> = vo.fragmentData;
 			data[index] = _specularR;

@@ -36,9 +36,8 @@ package away3d.animators.nodes
 		{
 			_frames.push(uvFrame);
 			_durations.push(duration);
-			
 			_numFrames = _durations.length;
-			
+
 			_stitchDirty = true;
 		}
 		
@@ -48,15 +47,21 @@ package away3d.animators.nodes
 		override protected function updateStitch():void
 		{
 			super.updateStitch();
+			var i:uint;
+
+			if(_durations.length>0) {
+
+				i = _numFrames  - 1;
+				while (i--) {
+					_totalDuration += _durations[i];
+				}
+
+				if (_stitchFinalFrame || !_looping) {
+					_totalDuration += _durations[_numFrames - 1];
+				}
+			} 
 			
-			var i:uint = _numFrames - 1;
-			while (i--) {
-				_totalDuration += _durations[i];
-			}
-			
-			if (_stitchFinalFrame || !_looping) {
-				_totalDuration += _durations[_numFrames - 1];
-			}
+		
 		}
 	}
 }

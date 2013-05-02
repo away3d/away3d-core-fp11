@@ -5,7 +5,6 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.PlanarReflectionTexture;
-	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
@@ -84,16 +83,17 @@ package away3d.materials.methods
 
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			stage3DProxy.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
-			vo.fragmentData[vo.fragmentConstantsIndex] = _texture.textureRatioX*.5;
-			vo.fragmentData[vo.fragmentConstantsIndex+1] = _texture.textureRatioY*.5;
-			vo.fragmentData[vo.fragmentConstantsIndex+3] = _alpha;
+			var index : int = vo.fragmentConstantsIndex;
+			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
+			vo.fragmentData[index] = _texture.textureRatioX*.5;
+			vo.fragmentData[uint(index+1)] = _texture.textureRatioY*.5;
+			vo.fragmentData[uint(index+3)] = _alpha;
 			if(_normalDisplacement > 0) {
-				vo.fragmentData[vo.fragmentConstantsIndex+2] = _normalDisplacement;
-				vo.fragmentData[vo.fragmentConstantsIndex+4] = .5+_texture.textureRatioX*.5 - 1/_texture.width;
-				vo.fragmentData[vo.fragmentConstantsIndex+5] = .5+_texture.textureRatioY*.5 - 1/_texture.height;
-				vo.fragmentData[vo.fragmentConstantsIndex+6] = .5-_texture.textureRatioX*.5 + 1/_texture.width;
-				vo.fragmentData[vo.fragmentConstantsIndex+7] = .5-_texture.textureRatioY*.5 + 1/_texture.height;
+				vo.fragmentData[uint(index+2)] = _normalDisplacement;
+				vo.fragmentData[uint(index+4)] = .5+_texture.textureRatioX*.5 - 1/_texture.width;
+				vo.fragmentData[uint(index+5)] = .5+_texture.textureRatioY*.5 - 1/_texture.height;
+				vo.fragmentData[uint(index+6)] = .5-_texture.textureRatioX*.5 + 1/_texture.width;
+				vo.fragmentData[uint(index+7)] = .5-_texture.textureRatioY*.5 + 1/_texture.height;
 			}
 		}
 
@@ -114,8 +114,8 @@ package away3d.materials.methods
 			regCache.addFragmentTempUsages(temp, 1);
 
 			code = 	"div " + temp + ", " + projectionReg + ", " + projectionReg + ".w\n" +
-					"mul " + temp + ", " + temp + ", " + dataReg + ".xyww\n" +
-					"add " + temp + ".xy, " + temp + ".xy, fc0.xx\n";
+					"mul " + temp + ", " + temp + ", " + dataReg + "\n" +
+					"add " + temp + ", " + temp + ", fc0.xx\n";
 
 			if (_normalDisplacement > 0) {
 				var dataReg2 : ShaderRegisterElement = regCache.getFreeFragmentConstant();

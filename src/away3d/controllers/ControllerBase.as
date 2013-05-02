@@ -2,6 +2,7 @@ package away3d.controllers
 {
 	import away3d.arcane;
 	import away3d.entities.*;
+	import away3d.errors.AbstractMethodError;
 	
 	use namespace arcane;
 	
@@ -76,8 +77,9 @@ package away3d.controllers
 		/**
 		 * Manually applies updates to the target 3D object.
 		 */
-		public function update():void
+		public function update(interpolate:Boolean = true):void
 		{
+			throw new AbstractMethodError();
 		}
 	}
 }

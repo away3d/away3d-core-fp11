@@ -1,19 +1,16 @@
 package away3d.materials.lightpickers
 {
-	import away3d.arcane;
-	import away3d.core.base.IRenderable;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.LightProbe;
-	import away3d.lights.PointLight;
-
-	import flash.events.EventDispatcher;
-	import flash.geom.Vector3D;
+	import away3d.*;
+	import away3d.core.base.*;
+	import away3d.core.traverse.*;
+	import away3d.library.assets.*;
+	import away3d.lights.*;
+	
+	import flash.geom.*;
 
 	use namespace arcane;
 
-	public class LightPickerBase extends EventDispatcher
+	public class LightPickerBase extends NamedAssetBase implements IAsset
 	{
 		protected var _numPointLights : uint;
 		protected var _numDirectionalLights : uint;
@@ -28,12 +25,19 @@ package away3d.materials.lightpickers
 		protected var _lightProbes : Vector.<LightProbe>;
 		protected var _lightProbeWeights : Vector.<Number>;
 
-		public var name : String;
-
 		public function LightPickerBase() {
 			
 		}
-
+		
+		public function dispose() : void
+		{
+		}
+		
+		public function get assetType() : String
+		{
+			return AssetType.LIGHT_PICKER;
+		}
+		
 		/**
 		 * The maximum amount of directional lights that will be provided
 		 */

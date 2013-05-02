@@ -3,6 +3,7 @@ package away3d.primitives
 
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.bounds.NullBounds;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -40,6 +41,11 @@ package away3d.primitives
 			return _animator;
 		}
 
+		override protected function getDefaultBoundingVolume() : BoundingVolumeBase
+		{
+			return new NullBounds();
+		}
+
 		/**
 		 * Create a new SkyBox object.
 		 * @param cubeMap The CubeMap to use for the sky box's texture.
@@ -50,7 +56,6 @@ package away3d.primitives
 			_material = new SkyBoxMaterial(cubeMap);
 			_material.addOwner(this);
 			_geometry = new SubGeometry();
-			_bounds = new NullBounds();
 			buildGeometry(_geometry);
 		}
 
@@ -230,6 +235,11 @@ package away3d.primitives
 		public function get vertexTangentOffset() : int
 		{
 			return _geometry.vertexTangentOffset;
+		}
+
+		public function getRenderSceneTransform(camera : Camera3D) : Matrix3D
+		{
+			return _sceneTransform;
 		}
 	}
 }

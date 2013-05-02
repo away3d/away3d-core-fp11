@@ -142,10 +142,10 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>) : String
+		public function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
-			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache();
+			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache(profile);
 			
 			//reset animationRegisterCache
 			_animationRegisterCache.vertexConstantOffset = pass.numUsedVertexConstants;
@@ -196,13 +196,13 @@ package away3d.animators
 			if (hasUVNode)
 			{
 				_animationRegisterCache.setUVSourceAndTarget(UVSource, UVTarget);
-				code += "mov " + _animationRegisterCache.uvTarget.toString() + "," + _animationRegisterCache.uvAttribute.toString() + "\n";
+				code += "mov " + _animationRegisterCache.uvTarget + ".xy," + _animationRegisterCache.uvAttribute.toString() + "\n";
 				var node:ParticleNodeBase;
 				for each(node in _particleNodes)
 				{
 					code += node.getAGALUVCode(pass, _animationRegisterCache);
 				}
-				code += "mov " + _animationRegisterCache.uvVar.toString() + "," + _animationRegisterCache.uvTarget.toString() + "\n";
+				code += "mov " + _animationRegisterCache.uvVar.toString() + "," + _animationRegisterCache.uvTarget + ".xy\n";
 			}
 			else
 			{
@@ -214,7 +214,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String) : String
+		public function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String
 		{
 			return _animationRegisterCache.getColorCombinationCode(shadedTarget);
 		}
