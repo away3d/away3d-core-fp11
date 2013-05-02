@@ -277,8 +277,8 @@ package away3d.lights.shadowmaps
 			minY = int(minY / _snap) * _snap;
 
 			var snap2 : Number = 2*_snap;
-			w = int(w/snap2 + 1)*snap2;
-			h = int(h/snap2 + 1)*snap2;
+			w = int(w/snap2 + 2)*snap2;
+			h = int(h/snap2 + 2)*snap2;
 
 			maxX = minX + w;
 			maxY = minY + h;

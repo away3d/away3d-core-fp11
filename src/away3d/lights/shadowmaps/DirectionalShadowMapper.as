@@ -146,8 +146,8 @@ package away3d.lights.shadowmaps
 			}
 			minZ = 1;
 
-			var w : Number = (maxX - minX);
-			var h : Number = (maxY - minY);
+			var w : Number = maxX - minX;
+			var h : Number = maxY - minY;
 			var d : Number = 1/(maxZ - minZ);
 
 			if (minX < 0) minX -= _snap;	// because int() rounds up for < 0
@@ -156,8 +156,8 @@ package away3d.lights.shadowmaps
 			minY = int(minY / _snap) * _snap;
 
 			var snap2 : Number = 2*_snap;
-			w = int(w/snap2 + 1)*snap2;
-			h = int(h/snap2 + 1)*snap2;
+			w = int(w/snap2 + 2)*snap2;
+			h = int(h/snap2 + 2)*snap2;
 
 			maxX = minX + w;
 			maxY = minY + h;
