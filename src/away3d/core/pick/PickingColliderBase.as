@@ -10,6 +10,10 @@ package away3d.core.pick
 		protected var rayPosition:Vector3D;
 		protected var rayDirection:Vector3D;
 
+		public function PickingColliderBase() {
+			
+		}
+
 		protected function getCollisionNormal( indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint ):Vector3D {
 			var normal:Vector3D = new Vector3D();
 			var i0:uint = indexData[ triangleIndex ] * 3;
