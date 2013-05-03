@@ -119,7 +119,7 @@ package away3d.loaders.parsers
 		private var blendModeDic:Vector.<String>;
 		private var _depthSizeDic:Vector.<uint>;
 		
-		private var _debug:Boolean=true;
+		private var _debug:Boolean=false;
 		/**
 		 * Creates a new AWDParser object.
 		 * @param uri The url or id of the data or file to be parsed.
