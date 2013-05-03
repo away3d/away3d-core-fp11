@@ -134,7 +134,6 @@ package away3d.bounds
 		public function fromGeometry( geometry:Geometry ):void {
 			var subGeoms:Vector.<ISubGeometry> = geometry.subGeometries;
 			var numSubGeoms:uint = subGeoms.length;
-			var first : ISubGeometry = subGeoms[0];
 			var minX:Number, minY:Number, minZ:Number;
 			var maxX:Number, maxY:Number, maxZ:Number;
 
