@@ -7,8 +7,9 @@ package away3d.lights
 	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.LightEvent;
+	import away3d.library.assets.AssetType;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
-
+	
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -57,7 +58,7 @@ package away3d.lights
 		{
 			return _castsShadows;
 		}
-
+		
 		public function set castsShadows(value : Boolean) : void
 		{
 			if (_castsShadows == value) return;
@@ -185,6 +186,16 @@ package away3d.lights
 		{
 			return new LightNode(this);
 		}
+		
+		
+		/**
+		 * @inheritDoc
+		 */		
+		override public function get assetType() : String
+		{
+			return AssetType.LIGHT;
+		}
+		
 
 		/**
 		 * Updates the total specular components of the light.
