@@ -187,7 +187,6 @@ package away3d.lights
 			return new LightNode(this);
 		}
 		
-		
 		/**
 		 * @inheritDoc
 		 */		

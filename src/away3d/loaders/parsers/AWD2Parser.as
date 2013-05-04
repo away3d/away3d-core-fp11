@@ -726,7 +726,6 @@ package away3d.loaders.parsers
 						case 52://GradientDiffuseMethod
 							methodObj1=_defaultTexture;
 							if(_blocks[props.get(1,0)].data) methodObj1=_blocks[props.get(1,0)].data;
-							trace("gradientdiffuse= "+methodObj1);
 							if(spezialType==0)	SinglePassMaterialBase(mat).diffuseMethod=new GradientDiffuseMethod(methodObj1);
 							if(spezialType==1)	MultiPassMaterialBase(mat).diffuseMethod=new GradientDiffuseMethod(methodObj1);
 							break;
@@ -929,19 +928,22 @@ package away3d.loaders.parsers
 			var methodType:uint = _body.readUnsignedShort();
 			var effectMethodReturn:EffectMethodBase;
 			var props:Object;
-			props = parseProperties({ 	1:BADDR,2:BADDR,3:BADDR,
-										101:FLOAT32,102:FLOAT32,103:FLOAT32,104:FLOAT32,105:FLOAT32,106:FLOAT32,107:FLOAT32,
-										201:UINT32,202:UINT32,
-										301:UINT16,302:UINT16,
-										401:UINT8,402:UINT8,
-										601:COLOR,602:COLOR,
-										701:BOOL,702:BOOL,
-										801:MTX4x4});	
+			props = parseProperties({ 	1:BADDR,		2:BADDR,		3:BADDR,
+										101:FLOAT32,	102:FLOAT32,	103:FLOAT32,	104:FLOAT32,	105:FLOAT32,	106:FLOAT32,	107:FLOAT32,
+										201:UINT32,		202:UINT32,
+										301:UINT16,		302:UINT16,
+										401:UINT8,		402:UINT8,
+										601:COLOR,		602:COLOR,
+										701:BOOL,		702:BOOL});	
+			var effectTex1:Texture2DBase= _defaultTexture;
+			var effectTex2:Texture2DBase= _defaultTexture;
+			var cubetex1:CubeTextureBase=new CubeTextureBase();
+			var cubetex2:CubeTextureBase=new CubeTextureBase();
 			switch (methodType){
 				// Effect Methods
 				case 401://ColorMatrix
 					// to do - map the values to a colormatrix
-					effectMethodReturn=new ColorMatrixMethod(props.get(801,new Matrix3D()));
+					effectMethodReturn=new ColorMatrixMethod(props.get(101,new Array(0,0,0,1, 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1)));
 					break;
 				case 402://ColorTransform
 					effectMethodReturn=new ColorTransformMethod();
@@ -951,42 +953,39 @@ package away3d.loaders.parsers
 					
 					break;
 				case 403://EnvMap
-					if (props.get(1,0)>0){
-						effectMethodReturn=new EnvMapMethod(_blocks[props.get(1,0)].data,props.get(101,1));
-						if (props.get(2,0)>0)EnvMapMethod(effectMethodReturn).mask=_blocks[props.get(2,0)].data;
-					}
+					cubetex1=new BitmapCubeTexture(_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData);
+					if(_blocks[props.get(1,0)].data) cubetex1=_blocks[props.get(1,0)].data;
+					effectMethodReturn=new EnvMapMethod(cubetex1,props.get(101,1));
+					if (props.get(2,0)>0)EnvMapMethod(effectMethodReturn).mask=_blocks[props.get(2,0)].data;
 					break;
 				case 404://LightMapMethod
-					if (props.get(1,0)>0){
-						effectMethodReturn=new LightMapMethod(_blocks[props.get(1,0)].data,blendModeDic[props.get(401,10)]);//usesecondaryUV not set
-					}
+					if (props.get(1,0)>0)effectTex1=_blocks[props.get(1,0)].data;
+					effectMethodReturn=new LightMapMethod(effectTex1,blendModeDic[props.get(401,10)]);//usesecondaryUV not set					
 					break;
 				case 405://ProjectiveTextureMethod
-					if (props.get(1,0)>0){
-						effectMethodReturn=new ProjectiveTextureMethod(_blocks[props.get(1,0)].data,blendModeDic[props.get(401,10)]);
-					}
+					var textureprojector:TextureProjector= new TextureProjector(effectTex1);
+					if (props.get(1,0)>0) textureprojector=_blocks[props.get(1,0)].data;
+					effectMethodReturn=new ProjectiveTextureMethod(textureprojector,blendModeDic[props.get(401,10)]);					
 					break;
 				case 406://RimLightMethod
 					effectMethodReturn=new RimLightMethod(props.get(601,0xffffff),props.get(101,0.4),props.get(101,2));//blendMode
 					break;
 				case 407://AlphaMaskMethod
-					if (props.get(1,0)>0){
-						effectMethodReturn=new AlphaMaskMethod(_blocks[props.get(1,0)].data,props.get(701,false));
-					}
+					if (props.get(1,0)>0)effectTex1=_blocks[props.get(1,0)].data;
+					effectMethodReturn=new AlphaMaskMethod(effectTex1,props.get(701,false));					
 					break;
 				case 408://RefractionEnvMapMethod
-					if (props.get(1,0)>0){
-						effectMethodReturn=new RefractionEnvMapMethod(_blocks[props.get(1,0)].data,props.get(101,0.1),props.get(102,0.01),props.get(103,0.01),props.get(104,0.01));
-						RefractionEnvMapMethod(effectMethodReturn).alpha=props.get(104,1);
-					}
+					if (props.get(1,0)>0)cubetex1=_blocks[props.get(1,0)].data;
+					effectMethodReturn=new RefractionEnvMapMethod(cubetex1,props.get(101,0.1),props.get(102,0.01),props.get(103,0.01),props.get(104,0.01));
+					RefractionEnvMapMethod(effectMethodReturn).alpha=props.get(104,1);					
 					break;
 				case 409://OutlineMethod
 					effectMethodReturn=new OutlineMethod(props.get(601,0x00000000),props.get(101,1),props.get(701,true),props.get(702,false));
 					break;
 				case 410://FresnelEnvMapMethod
-					if (props.get(1,0)>0){
-						effectMethodReturn=new FresnelEnvMapMethod(_blocks[props.get(1,0)].data,props.get(101,1));
-					}
+					cubetex1=new BitmapCubeTexture(_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData);
+					if(_blocks[props.get(1,0)].data) cubetex1=_blocks[props.get(1,0)].data;
+					effectMethodReturn=new FresnelEnvMapMethod(cubetex1,props.get(101,1));
 					break;
 				case 411://FogMethod
 					effectMethodReturn=new FogMethod(props.get(101,0),props.get(102,1000),props.get(601,0x808080));
@@ -1072,8 +1071,9 @@ package away3d.loaders.parsers
 				lightsArray.push(_blocks[_body.readUnsignedInt()].data);
 			}
 			var lightPick:LightPickerBase=new StaticLightPicker(lightsArray);
+			lightPick.name=name;
 			parseUserAttributes();
-			finalizeAsset(lightPick, lightPick.name);
+			finalizeAsset(lightPick, name);
 			
 			return lightPick
 		}
@@ -1625,6 +1625,7 @@ package away3d.loaders.parsers
 					read_func = _body.readUnsignedShort;
 					break;
 				case UINT32:
+				case COLOR:
 				case BADDR:
 					elem_len = 4;
 					read_func = _body.readUnsignedInt;
