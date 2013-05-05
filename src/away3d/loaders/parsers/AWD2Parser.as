@@ -85,6 +85,7 @@ package away3d.loaders.parsers
 		private var _body : ByteArray;
 		
 		private var _defaultTexture :BitmapTexture;
+		private var _cubeTextures :Array;
 		
 		public static const UNCOMPRESSED : uint = 0;
 		public static const DEFLATE : uint = 1;
@@ -178,27 +179,54 @@ package away3d.loaders.parsers
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length == 1) {
-				var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
-				if (asset) {
-					var mat : TextureMaterial;
-					var users : Array;
-					var block : AWDBlock = _blocks[parseInt(resourceDependency.id)];
-					
-					// Store finished asset
-					block.data = asset;
-					
-					// Reset name of texture to the one defined in the AWD file,
-					// as opposed to whatever the image parser came up with.
-					asset.resetAssetPath(block.name, null, true);
-					
-					// Finalize texture asset to dispatch texture event, which was
-					// previously suppressed while the dependency was loaded.
-					finalizeAsset(asset);
-					
-					users = _texture_users[resourceDependency.id];
-					for each (mat in users) {
-						mat.texture = asset;
-						finalizeAsset(mat);
+				var isCubeTextureArray:Array=resourceDependency.id.split("#");
+				var ressourceID:String=isCubeTextureArray[0];
+				var asset :TextureProxyBase;
+				var thisBitmapTexture:Texture2DBase;
+				var block : AWDBlock;
+				if (isCubeTextureArray.length==1){
+					asset = resourceDependency.assets[0] as Texture2DBase;
+					if (asset) {
+						var mat : TextureMaterial;
+						var users : Array;
+						block = _blocks[parseInt(resourceDependency.id)];
+						
+						// Store finished asset
+						block.data = asset;
+						
+						// Reset name of texture to the one defined in the AWD file,
+						// as opposed to whatever the image parser came up with.
+						asset.resetAssetPath(block.name, null, true);
+						
+						// Finalize texture asset to dispatch texture event, which was
+						// previously suppressed while the dependency was loaded.
+						finalizeAsset(asset);
+						
+						users = _texture_users[resourceDependency.id];
+						for each (mat in users) {
+							mat.texture = asset as BitmapTexture;
+							finalizeAsset(mat);
+						}
+					}
+				}
+				if (isCubeTextureArray.length>1){
+					thisBitmapTexture = resourceDependency.assets[0] as BitmapTexture;
+					_cubeTextures[uint(isCubeTextureArray[1])] = BitmapTexture(thisBitmapTexture).bitmapData; 
+					_texture_users[ressourceID].push(1);
+					if(_texture_users[ressourceID].length==_cubeTextures.length){
+						//
+						asset = new BitmapCubeTexture(_cubeTextures[0],_cubeTextures[1],_cubeTextures[2],_cubeTextures[3],_cubeTextures[4],_cubeTextures[5]);
+						block = _blocks[ressourceID];
+						// Store finished asset
+						block.data = asset;
+						
+						// Reset name of texture to the one defined in the AWD file,
+						// as opposed to whatever the image parser came up with.
+						asset.resetAssetPath(block.name, null, true);
+						
+						// Finalize texture asset to dispatch texture event, which was
+						// previously suppressed while the dependency was loaded.
+						finalizeAsset(asset);
 					}
 				}
 			}
@@ -370,6 +398,10 @@ package away3d.loaders.parsers
 					case 82:
 						if(_debug)trace("import Texture");
 						assetData = parseTexture(len, block);
+						break;
+					case 83:
+						if(_debug)trace("import CubeTexture");
+						assetData = parseCubeTexture(len, block);
 						break;
 					case 92:
 						if(_debug)trace("import ShadowMapMethodBlock");
@@ -1076,6 +1108,48 @@ package away3d.loaders.parsers
 			finalizeAsset(lightPick, name);
 			
 			return lightPick
+		}
+		private function parseCubeTexture(blockLength : uint, block : AWDBlock) :CubeTextureBase
+		{
+			blockLength = blockLength; 
+			var type : uint;
+			var data_len : uint;
+			var asset : CubeTextureBase;
+			var i:int;
+			_cubeTextures=new Array()
+			_texture_users[_cur_block_id.toString()] = [];	
+			type = _body.readUnsignedByte();
+			block.name = parseVarStr();
+			
+			for (i=0;i<6;i++){
+				data_len = _body.readUnsignedInt();			
+				_texture_users[_cur_block_id.toString()] = [];	
+				_cubeTextures.push(null);
+				// External
+				if (type == 0) {
+					var url : String;
+					
+					url = _body.readUTFBytes(data_len);
+					
+					addDependency(_cur_block_id.toString()+"#"+i, new URLRequest(url), false, null, true);
+				}
+				else {
+					var data : ByteArray;
+					
+					data = new ByteArray();
+					_body.readBytes(data, 0, data_len);
+					
+					addDependency(_cur_block_id.toString()+"#"+i, null, false, data, true);
+				}
+			}
+			
+			// Ignore for now
+			parseProperties(null);
+			parseUserAttributes();
+			
+			pauseAndRetrieveDependencies();
+			
+			return asset;
 		}
 		private function parseTexture(blockLength : uint, block : AWDBlock) : Texture2DBase
 		{
