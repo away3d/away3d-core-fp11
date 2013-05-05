@@ -37,7 +37,12 @@ package away3d.materials
 
 		public function set cubeMap(value : CubeTextureBase) : void
 		{
+			if (value && _cubeMap && (value.hasMipMaps != _cubeMap.hasMipMaps || value.format != _cubeMap.format))
+				invalidatePasses(null);
+			
 			_cubeMap = value;
+			
+			_skyboxPass.cubeTexture = _cubeMap;
 		}
 	}
 }
