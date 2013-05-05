@@ -164,7 +164,7 @@ package away3d.library
 			_assetDictionary = {};
 			_loadingSessions = new Vector.<AssetLoader>;
 			
-			conflictStrategy = ConflictStrategy.APPEND_NUM_SUFFIX.create();
+			conflictStrategy = ConflictStrategy.IGNORE.create();
 			conflictPrecedence = ConflictPrecedence.FAVOR_NEW;
 		}
 		
