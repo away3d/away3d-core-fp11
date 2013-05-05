@@ -53,6 +53,7 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.SubsurfaceScatteringDiffuseMethod;
 	import away3d.materials.methods.WrapDiffuseMethod;
 	import away3d.materials.utils.*;
+	import away3d.primitives.SkyBox;
 	import away3d.textures.*;
 	import away3d.tools.utils.*;
 	
@@ -70,6 +71,8 @@ package away3d.loaders.parsers
 	 */
 	public class AWD2Parser extends ParserBase
 	{
+		//set to "true" to have some traces in the Console
+		private var _debug:Boolean=false;
 		private var _byteData : ByteArray;
 		private var _startedParsing : Boolean;
 		private var _cur_block_id : uint;
@@ -120,7 +123,6 @@ package away3d.loaders.parsers
 		private var blendModeDic:Vector.<String>;
 		private var _depthSizeDic:Vector.<uint>;
 		
-		private var _debug:Boolean=false;
 		/**
 		 * Creates a new AWDParser object.
 		 * @param uri The url or id of the data or file to be parsed.
@@ -202,11 +204,6 @@ package away3d.loaders.parsers
 						// previously suppressed while the dependency was loaded.
 						finalizeAsset(asset);
 						
-						users = _texture_users[resourceDependency.id];
-						for each (mat in users) {
-							mat.texture = asset as BitmapTexture;
-							finalizeAsset(mat);
-						}
 					}
 				}
 				if (isCubeTextureArray.length>1){
@@ -383,6 +380,10 @@ package away3d.loaders.parsers
 						if(_debug)trace("import MeshInstance");
 						assetData = parseMeshInstance(len);
 						break;
+					case 31:
+						if(_debug)trace("import SkyBox");
+						assetData = parseSkyBoxInstance(len);
+						break;
 					case 41:
 						if(_debug)trace("import Light");
 						assetData = parseLight(len);
@@ -403,13 +404,13 @@ package away3d.loaders.parsers
 						if(_debug)trace("import CubeTexture");
 						assetData = parseCubeTexture(len, block);
 						break;
-					case 92:
-						if(_debug)trace("import ShadowMapMethodBlock");
-						assetData = parseShadowMethodBlock(len,block);	
-						break;
 					case 91:
 						if(_debug)trace("import SharedMethodBlock");
 						assetData = parseSharedMethodBlock(len,block);
+						break;
+					case 92:
+						if(_debug)trace("import ShadowMapMethodBlock");
+						assetData = parseShadowMethodBlock(len,block);	
 						break;
 					case 101:
 						if(_debug)trace("import parseSkeleton");
@@ -522,9 +523,30 @@ package away3d.loaders.parsers
 			
 			return clip;
 		}
-		
-		
-		
+				
+		private function parseSkyBoxInstance(blockLength : uint) : SkyBox
+		{		
+			// TODO: not used
+			blockLength = blockLength; 
+			var type : uint;
+			var data_len : uint;
+			var cubetex:BitmapCubeTexture;
+			var name:String;
+			name = parseVarStr();
+			if(_debug)trace("SkyBox name = "+name);
+			cubetex=_blocks[_body.readUnsignedInt()].data;
+			if(_debug)trace("SkyBox found its texture = "+cubetex.name);
+			var asset:SkyBox=new SkyBox(cubetex)
+				
+			parseProperties(null)	
+			parseUserAttributes();
+			
+			//block.data=asset;
+			finalizeAsset(asset, name);
+			
+			return asset;
+			
+		}
 		private function parseMaterial(blockLength : uint) : MaterialBase
 		{
 			// TODO: not used
@@ -829,7 +851,6 @@ package away3d.loaders.parsers
 						//case 151://HeightMapNormalMethod
 							//break;
 						case 152://SimpleWaterNormalMethod
-							var sdhfdsj:SimpleWaterNormalMethod
 							methodObj1=_defaultTexture;
 							if(_blocks[props.get(1,0)].data)methodObj1=_blocks[props.get(1,0)].data;
 							if(spezialType==0){
