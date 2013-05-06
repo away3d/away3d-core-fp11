@@ -93,9 +93,10 @@ package away3d.filters.tasks
 			code = "tex ft0, v0, fs1 <2d, nearest>	\n" +
 					"dp4 ft1.z, ft0, fc3				\n" +
 					"sub ft1.z, ft1.z, fc1.z			\n" + // d = d - f
-					"div ft1.z, fc1.w, ft1.z			\n" + // screenZ = -n*f/(d-f)
+					"rcp ft1.z, ft1.z			\n" + // screenZ = -n*f/(d-f)
+					"mul ft1.z, fc1.w, ft1.z			\n" + // screenZ = -n*f/(d-f)
 					"sub ft1.z, ft1.z, fc0.w			\n" + // screenZ - dist
-					"div ft1.z, ft1.z, fc2.x			\n" + // (screenZ - dist)/range
+					"mul ft1.z, ft1.z, fc2.x			\n" + // (screenZ - dist)/range
 
 					"abs ft1.z, ft1.z					\n" + // abs(screenZ - dist)/range
 					"sat ft1.z, ft1.z					\n" + // sat(abs(screenZ - dist)/range)

@@ -133,7 +133,7 @@ package away3d.core.render
 				}
 				context.setTextureAt(0, task.getMainInputTexture(stage3DProxy));
 				context.setProgram(task.getProgram3D(stage3DProxy));
-				context.clear(0.0, 0.0, 0.0, 1.0);
+				context.clear(0.0, 0.0, 0.0, 0.0);
 				task.activate(stage3DProxy, camera3D, depthTexture);
 				context.drawTriangles(indexBuffer, 0, 2);
 				task.deactivate(stage3DProxy);
