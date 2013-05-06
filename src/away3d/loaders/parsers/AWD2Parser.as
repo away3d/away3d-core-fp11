@@ -761,7 +761,10 @@ package away3d.loaders.parsers
 							break;
 						case 998://wrapper-Methods that will load a previous parsed ShadowMapMethod 
 							if(_blocks[props.get(1,0)].data){
-								if(spezialType==0)	SinglePassMaterialBase(mat).shadowMethod=_blocks[props.get(1,0)].data;
+								if(spezialType==0){
+									SinglePassMaterialBase(mat).shadowMethod=_blocks[props.get(1,0)].data;
+									if(_debug)trace("SinglePassMaterial has shadowmerthod applied:  "+SinglePassMaterialBase(mat).shadowMethod);
+								}
 								if(spezialType==1)	MultiPassMaterialBase(mat).shadowMethod=_blocks[props.get(1,0)].data;
 							}
 							break;
@@ -1066,7 +1069,7 @@ package away3d.loaders.parsers
 			name = parseVarStr();
 			lightType=_body.readUnsignedByte();
 			props = parseProperties({ 	1:FLOAT32, 	2:FLOAT32,	3:COLOR,		4:FLOAT32,
-				5:FLOAT32,	6:BOOL,		7:COLOR,		8:FLOAT32});	
+				5:FLOAT32,	6:BOOL,		7:COLOR,		8:FLOAT32, 9:UINT8, 10:UINT8 ,11:FLOAT32 ,12:UINT16 });	
 			
 			var shadowMapperType:uint=props.get(9,0);
 			if (lightType==1){
