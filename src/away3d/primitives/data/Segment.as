@@ -50,7 +50,7 @@
 			if(_endColor != colorEnd)
 				endColor = colorEnd;
 			 
-			_thickness = thickness;
+			_thickness = thickness *.5;
 			update();
 		}
 
@@ -89,7 +89,7 @@
 		 */
         public function get thickness():Number
         {
-            return _thickness;
+            return _thickness*2;
         }
 		
         public function set thickness(value:Number):void
