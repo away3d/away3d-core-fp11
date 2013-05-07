@@ -30,9 +30,9 @@ package away3d.materials
 		* Creates a new SpriteSheetMaterial required for a SpriteSheetAnimator
 		* 
 		* (the sprite sheet maps of each textures must have power of 2 sizes)
-		* @param diffuses 		Vector.<Texture2DBase> : One or more Texture2DBase representing the diffuse information of the spritesheets. Must hold at least 1 diffuse.
-		* @param normals 		Vector.<Texture2DBase> : One or more Texture2DBase representing the normal information of the spritesheets. Default is null. If not null, must hold same amount of textures as diffuses.
-		* @param speculars 		Vector.<Texture2DBase> : One or more Texture2DBase representing the specular information of the spritesheets. Default is null. If not null, must hold same amount of textures as diffuses.
+		* @param diffuses 		Vector.&lt;Texture2DBase&gt; : One or more Texture2DBase representing the diffuse information of the spritesheets. Must hold at least 1 diffuse.
+		* @param normals 		Vector.&lt;Texture2DBase&gt; : One or more Texture2DBase representing the normal information of the spritesheets. Default is null. If not null, must hold same amount of textures as diffuses.
+		* @param speculars 		Vector.&lt;Texture2DBase&gt; : One or more Texture2DBase representing the specular information of the spritesheets. Default is null. If not null, must hold same amount of textures as diffuses.
 		* @param smooth 		Boolean : Material smoothing. Default is true.
 		* @param repeat 		Boolean : Material repeat. Default is false.
 		* @param mipmap 		Boolean : Material mipmap. Set it to false if the animation graphics have thin lines or text information in them. Default is true. 

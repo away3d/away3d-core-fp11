@@ -31,7 +31,7 @@ package away3d.tools.helpers
 		 * @param transparent				Boolean: if the bitmapData(s) must be transparent.
 		 * @param backgroundColor			uint: the bitmapData(s) background color if not transparent.
 		 *
-		 * @return Vector.<Texture2DBase> 	The generated Texture2DBase vector for the SpriteSheetMaterial.
+		 * @return Vector.&lt;Texture2DBase&gt; 	The generated Texture2DBase vector for the SpriteSheetMaterial.
 		 */
 		public function generateFromMovieClip(sourceMC:MovieClip, cols:uint, rows:uint, width:uint, height:uint, transparent:Boolean = false, backgroundColor:uint = 0) : Vector.<Texture2DBase>
 		{
