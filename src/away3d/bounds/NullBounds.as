@@ -32,7 +32,7 @@ package away3d.bounds
 
 		override protected function createBoundingRenderable() : WireframePrimitiveBase
 		{
-			return _renderable || new WireframeSphere(100);
+			return _renderable || new WireframeSphere(100, 16, 12, 0xffffff, 0.5);
 		}
 
 		/**

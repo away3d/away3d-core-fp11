@@ -168,7 +168,7 @@ package away3d.bounds
 
 		override protected function createBoundingRenderable() : WireframePrimitiveBase
 		{
-			return new WireframeSphere(1);
+			return new WireframeSphere(1, 16, 12, 0xffffff, 0.5);
 		}
 
 		override public function classifyToPlane(plane : Plane3D) : int

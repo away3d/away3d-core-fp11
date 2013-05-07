@@ -244,7 +244,7 @@ package away3d.bounds
 
 		override protected function createBoundingRenderable() : WireframePrimitiveBase
 		{
-			return new WireframeCube(1, 1, 1);
+			return new WireframeCube(1, 1, 1, 0xffffff, 0.5);
 		}
 
 
