@@ -1069,29 +1069,30 @@ package away3d.loaders.parsers
 			name = parseVarStr();
 			lightType=_body.readUnsignedByte();
 			props = parseProperties({ 	1:FLOAT32, 	2:FLOAT32,	3:COLOR,		4:FLOAT32,
-				5:FLOAT32,	6:BOOL,		7:COLOR,		8:FLOAT32, 9:UINT8, 10:UINT8 ,11:FLOAT32 ,12:UINT16 });	
+				5:FLOAT32,	6:BOOL,		7:COLOR,		8:FLOAT32, 9:UINT8, 10:UINT8 ,11:FLOAT32 ,12:UINT16 , 21:FLOAT32, 22:FLOAT32,23:FLOAT32});	
 			
 			var shadowMapperType:uint=props.get(9,0);
 			if (lightType==1){
-				trace("shadowMapperType = "+shadowMapperType);
+				if(_debug)trace("shadowMapperType = "+shadowMapperType);
 				light=new PointLight();
 				PointLight(light).radius = props.get(1,90000);
 				PointLight(light).fallOff = props.get(2,100000);				
 				if(shadowMapperType>0){
 					if(shadowMapperType==4) newShadowMapper=new CubeMapShadowMapper();
 				}
+				light.transform = mtx;
 				
 			}
 			if (lightType==2){
-				light=new DirectionalLight();			
+				
+				light=new DirectionalLight(props.get(21,0),props.get(22,-1),props.get(23,1));			
 				if(shadowMapperType>0){
-					trace("shadowMapperType = "+shadowMapperType);
+					if(_debug)trace("shadowMapperType = "+shadowMapperType);
 					if(shadowMapperType==1) newShadowMapper=new DirectionalShadowMapper();
 					if(shadowMapperType==2) newShadowMapper=new NearDirectionalShadowMapper(props.get(11,0.5));
 					if(shadowMapperType==3)	newShadowMapper=new CascadeShadowMapper(props.get(12,3));
 				}
 			}
-			light.transform = mtx;
 			
 			light.color = props.get(3,0xffffff);
 			light.specular = props.get(4,1.0);
@@ -1108,7 +1109,6 @@ package away3d.loaders.parsers
 			
 			// dont know if this makes trouble intern in AwayBuilders scenegraph. For Away3d "stand-alone, this seams to be correct, but for Awaybuilder they should be inserted into Root ?
 			parent = _blocks[par_id].data as ObjectContainer3D;
-            trace(parent);
 			if (parent) {
 				parent.addChild(light);
 			}
