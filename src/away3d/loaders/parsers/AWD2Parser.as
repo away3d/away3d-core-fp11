@@ -609,7 +609,7 @@ package away3d.loaders.parsers
 			
 			mat.extra = attributes;
 			SinglePassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
-			mat.repeat = props.get(13, false);
+			mat.repeat = props.get(13, true);
 			
 			finalizeAsset(mat, name);
 			
@@ -1073,6 +1073,7 @@ package away3d.loaders.parsers
 			
 			var shadowMapperType:uint=props.get(9,0);
 			if (lightType==1){
+				trace("shadowMapperType = "+shadowMapperType);
 				light=new PointLight();
 				PointLight(light).radius = props.get(1,90000);
 				PointLight(light).fallOff = props.get(2,100000);				
@@ -1084,6 +1085,7 @@ package away3d.loaders.parsers
 			if (lightType==2){
 				light=new DirectionalLight();			
 				if(shadowMapperType>0){
+					trace("shadowMapperType = "+shadowMapperType);
 					if(shadowMapperType==1) newShadowMapper=new DirectionalShadowMapper();
 					if(shadowMapperType==2) newShadowMapper=new NearDirectionalShadowMapper(props.get(11,0.5));
 					if(shadowMapperType==3)	newShadowMapper=new CascadeShadowMapper(props.get(12,3));
@@ -1106,6 +1108,7 @@ package away3d.loaders.parsers
 			
 			// dont know if this makes trouble intern in AwayBuilders scenegraph. For Away3d "stand-alone, this seams to be correct, but for Awaybuilder they should be inserted into Root ?
 			parent = _blocks[par_id].data as ObjectContainer3D;
+            trace(parent);
 			if (parent) {
 				parent.addChild(light);
 			}
@@ -1446,7 +1449,9 @@ package away3d.loaders.parsers
 				//to do: add to documentation: Mes properties extent the Container Properties with 5:Bool castShadows
 				var props:Object = parseProperties({ 	1:FLOAT32, 	2:FLOAT32,	3:FLOAT32,		4:UINT8, 5:BOOL});	
 				mesh.pivotPoint=new Vector3D(props.get(1,0),props.get(2,0),props.get(3,0));
-				mesh.castsShadows=props.get(5,false)
+				mesh.castsShadows=props.get(5,false);
+				mesh.castsShadows=true;
+				trace("MeshCastShadows = "+mesh.castsShadows);
 				
 			}
 			else{
