@@ -1446,7 +1446,7 @@ package away3d.loaders.parsers
 				//to do: add to documentation: Mes properties extent the Container Properties with 5:Bool castShadows
 				var props:Object = parseProperties({ 	1:FLOAT32, 	2:FLOAT32,	3:FLOAT32,		4:UINT8, 5:BOOL});	
 				mesh.pivotPoint=new Vector3D(props.get(1,0),props.get(2,0),props.get(3,0));
-				mesh.castsShadows=props.get(3,true)
+				mesh.castsShadows=props.get(5,false)
 				
 			}
 			else{
