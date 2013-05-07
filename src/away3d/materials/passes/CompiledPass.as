@@ -524,10 +524,10 @@ package away3d.materials.passes
 				_methodSetup._normalMethod.setRenderState(_methodSetup._normalMethodVO, renderable, stage3DProxy, camera);
 
 			var ambientMethod : BasicAmbientMethod = _methodSetup._ambientMethod;
-			ambientMethod.setRenderState(_methodSetup._ambientMethodVO, renderable, stage3DProxy, camera);
 			ambientMethod._lightAmbientR = _ambientLightR;
 			ambientMethod._lightAmbientG = _ambientLightG;
 			ambientMethod._lightAmbientB = _ambientLightB;
+			ambientMethod.setRenderState(_methodSetup._ambientMethodVO, renderable, stage3DProxy, camera);
 
 			if (_methodSetup._shadowMethod) _methodSetup._shadowMethod.setRenderState(_methodSetup._shadowMethodVO, renderable, stage3DProxy, camera);
 			_methodSetup._diffuseMethod.setRenderState(_methodSetup._diffuseMethodVO, renderable, stage3DProxy, camera);
