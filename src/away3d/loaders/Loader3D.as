@@ -7,6 +7,7 @@ package away3d.loaders
 	import away3d.events.LoaderEvent;
 	import away3d.library.AssetLibraryBundle;
 	import away3d.library.assets.AssetType;
+    import away3d.lights.LightBase;
 	import away3d.loaders.misc.AssetLoaderContext;
 	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
@@ -283,8 +284,10 @@ package away3d.loaders
 				// TODO: not used
 				// var type : String = ev.asset.assetType;
 				var obj : ObjectContainer3D;
-				
 				switch (ev.asset.assetType) {
+					case AssetType.LIGHT:
+						obj = LightBase(ev.asset);
+						break;
 					case AssetType.CONTAINER:
 						obj = ObjectContainer3D(ev.asset);
 						break;
