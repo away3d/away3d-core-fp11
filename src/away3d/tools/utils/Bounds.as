@@ -151,8 +151,8 @@ package away3d.tools.utils {
 		private static function parseObjectContainerBounds(obj:ObjectContainer3D):void
 		{
 			var child:ObjectContainer3D;
-			
-			if(obj is Mesh && obj.numChildren == 0)
+
+			if(obj is Mesh)
 				parseMeshBounds(Mesh(obj), obj.position);
 				 
 			for(var i:uint = 0;i<obj.numChildren;++i){
