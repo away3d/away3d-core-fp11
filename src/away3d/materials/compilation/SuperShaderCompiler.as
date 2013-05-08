@@ -44,13 +44,7 @@ package away3d.materials.compilation
 				return;
 			}
 
-			_sharedRegisters.normalInput = _registerCache.getFreeVertexAttribute();
-			_normalBufferIndex = _sharedRegisters.normalInput.index;
-
 			_sharedRegisters.normalVarying = _registerCache.getFreeVarying();
-
-			_animatableAttributes.push(_sharedRegisters.normalInput.toString());
-			_animationTargetRegisters.push(_sharedRegisters.animatedNormal.toString());
 
 			normalMatrix[0] = _registerCache.getFreeVertexConstant();
 			normalMatrix[1] = _registerCache.getFreeVertexConstant();
@@ -84,8 +78,12 @@ package away3d.materials.compilation
 
 		override protected function createNormalRegisters() : void
 		{
+			_sharedRegisters.normalInput = _registerCache.getFreeVertexAttribute();
+			_normalBufferIndex = _sharedRegisters.normalInput.index;
 			_sharedRegisters.animatedNormal = _registerCache.getFreeVertexVectorTemp();
 			_registerCache.addVertexTempUsages(_sharedRegisters.animatedNormal, 1);
+			_animatableAttributes.push(_sharedRegisters.normalInput.toString());
+			_animationTargetRegisters.push(_sharedRegisters.animatedNormal.toString());
 
 			if (_methodSetup._normalMethod.hasOutput) {
 				_sharedRegisters.tangentInput = _registerCache.getFreeVertexAttribute();
