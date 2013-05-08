@@ -103,6 +103,7 @@
 		 */
 		arcane override function getFragmentCode(animationCode:String) : String
 		{
+			animationCode=animationCode;
 			return "mov oc, v0\n";
 		}
 
@@ -112,6 +113,7 @@
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
+			viewProjection=viewProjection;
 			var context : Context3D = stage3DProxy._context3D;
 			renderable.activateVertexBuffer(0, stage3DProxy);
 

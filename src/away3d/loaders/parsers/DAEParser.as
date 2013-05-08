@@ -1194,8 +1194,8 @@ class DAEPrimitive extends DAEElement
 		var numInputs : uint = _inputs.length;
 		var idx : uint = 0, index : uint;
 		var i : uint, j : uint;
-		var x : Number, y : Number, z : Number;
-		var vertexIndex : uint = 0;
+		//var x : Number, y : Number, z : Number;
+		//var vertexIndex : uint = 0;
 		var vertexDict : Object = {};
 		var idx32 : uint;
 		this.vertices = new Vector.<DAEVertex>();
@@ -1957,7 +1957,9 @@ class DAENode extends DAEElement
 		var channel : DAEChannel;
 		var minTime : Number = Number.MAX_VALUE;
 		var maxTime : Number = -minTime;
-		var i : uint, j : uint, frame : int;
+		var i : uint;
+		//var j : uint;
+		//var frame : int;
 
 		for (i = 0; i < this.channels.length; i++) {
 			channel = this.channels[i];
@@ -1971,7 +1973,7 @@ class DAENode extends DAEElement
 			tdata = transform.data;
 			if (channelsBySID.hasOwnProperty(transform.sid)) {
 				var m : Matrix3D = new Matrix3D();
-				var found : Boolean = false;
+				//var found : Boolean = false;
 				var frameData : DAEFrameData = null;
 				channel = channelsBySID[transform.sid] as DAEChannel;
 				frameData = channel.sampler.getFrameData(time);
@@ -2346,6 +2348,7 @@ class DAESkin extends DAEElement
 		var vcount : Vector.<int> = readIntArray(element.ns::vcount[0]);
 		var v : Vector.<int> = readIntArray(element.ns::v[0]);
 		var numWeights : uint = parseInt(element.@count.toString(), 10);
+		numWeights=numWeights;
 		var index : uint = 0;
 		this.maxBones = 0;
 

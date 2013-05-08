@@ -37,6 +37,9 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
+			// TODO: not used
+			animationSubGeometry=animationSubGeometry;
+			
 			var comps:Vector.<Vector3D>;
 			if (_billboardAxis)
 			{

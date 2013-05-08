@@ -79,7 +79,7 @@ package away3d.textures
 		 */
 		public function applyTransform(matrix : Matrix3D) : void
 		{
-			var rawData : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			//var rawData : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			_matrix.copyFrom(matrix);
 			// invert transpose
 			_matrix.invert();

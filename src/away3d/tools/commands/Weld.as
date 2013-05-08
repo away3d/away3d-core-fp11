@@ -175,8 +175,8 @@ package away3d.tools.commands
 			var origIndex : uint;
 			var foundNormalsCnt : uint=0;
 			var searchforNormal : Boolean = true;
-			var searchIndex : uint;
-			var searchLen : uint;
+			//var searchIndex : uint;
+			//var searchLen : uint;
 			var outIndex : int;
 			var curangle:Number;
 			var dp:Number;

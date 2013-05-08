@@ -47,7 +47,7 @@ package away3d.tools.helpers
 			var spriteSheet:BitmapData;
 			var destCellW:Number = Math.round(h/cols);
 			var destCellH:Number = Math.round(w/rows);
-			var cellRect:Rectangle = new Rectangle(0, 0, destCellW, destCellH);
+			//var cellRect:Rectangle = new Rectangle(0, 0, destCellW, destCellH);
  
 			var mcFrameW:uint = sourceMC.width;
 			var mcFrameH:uint = sourceMC.height;

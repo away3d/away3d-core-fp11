@@ -145,6 +145,8 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animationCode:String) : String
 		{
+			// TODO: not used
+			animationCode=animationCode;
 			return 	"mov oc, fc0\n";
 		}
 

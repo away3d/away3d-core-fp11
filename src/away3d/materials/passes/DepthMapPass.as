@@ -95,6 +95,9 @@
 		 */
 		arcane override function getFragmentCode(code:String) : String
 		{
+			// TODO never used
+			code=code;
+			
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var filter : String;
 

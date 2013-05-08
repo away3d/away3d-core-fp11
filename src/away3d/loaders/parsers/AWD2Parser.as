@@ -189,8 +189,8 @@ package away3d.loaders.parsers
 				if (isCubeTextureArray.length==1){
 					asset = resourceDependency.assets[0] as Texture2DBase;
 					if (asset) {
-						var mat : TextureMaterial;
-						var users : Array;
+						//var mat : TextureMaterial;
+						///var users : Array;
 						block = _blocks[parseInt(resourceDependency.id)];
 						
 						// Store finished asset
@@ -528,8 +528,8 @@ package away3d.loaders.parsers
 		{		
 			// TODO: not used
 			blockLength = blockLength; 
-			var type : uint;
-			var data_len : uint;
+			//var type : uint;
+			//var data_len : uint;
 			var cubetex:BitmapCubeTexture;
 			var name:String;
 			name = parseVarStr();
@@ -556,7 +556,7 @@ package away3d.loaders.parsers
 			var props : AWDProperties;
 			var mat :MaterialBase;
 			var attributes : Object;
-			var finalize : Boolean;
+			//var finalize : Boolean;
 			var num_methods : uint;
 			var methods_parsed : uint;
 			
@@ -627,7 +627,7 @@ package away3d.loaders.parsers
 			var props : AWDProperties;
 			var mat : MaterialBase;
 			var attributes : Object;
-			var finalize : Boolean;
+			//var finalize : Boolean;
 			var num_methods : uint;
 			var methods_parsed : uint;
 			
@@ -650,7 +650,7 @@ package away3d.loaders.parsers
 			
 			spezialType=props.get(4,0);			
 			
-			var skyboxMateri:SkyBoxMaterial;
+			//var skyboxMateri:SkyBoxMaterial;
 			
 			if(_debug)trace("type = " + type);
 			if(_debug)trace("spezialType = " + spezialType);
@@ -667,7 +667,7 @@ package away3d.loaders.parsers
 						mat = new ColorMultiPassMaterial(color);}
 					else {	//	SinglePassMaterial
 						mat = new ColorMaterial(color, props.get(10, 1.0));
-						ColorMaterial(mat).alphaBlending=props.get(11,false);
+						ColorMaterial(mat).alphaBlending=Boolean(props.get(11,false));
 					}
 				}
 				else if (type == 2) { // texture material
@@ -691,7 +691,7 @@ package away3d.loaders.parsers
 						mat = new TextureMaterial(texture);
 						if (ambientTexture) {TextureMaterial(mat).ambientTexture = ambientTexture;}
 						TextureMaterial(mat).alpha=props.get(10,1.0);
-						TextureMaterial(mat).alphaBlending = props.get(11, false);
+						TextureMaterial(mat).alphaBlending = Boolean(props.get(11, false));
 					}		
 					
 				}
@@ -709,12 +709,12 @@ package away3d.loaders.parsers
 				if (lightPickerAddr>0){
 					MaterialBase(mat).lightPicker=_blocks[lightPickerAddr].data;
 				}
-				MaterialBase(mat).smooth=props.get(5,true);
-				MaterialBase(mat).mipmap=props.get(6,true);
-				MaterialBase(mat).bothSides=props.get(7,false);
-				MaterialBase(mat).alphaPremultiplied=props.get(8,false);
+				MaterialBase(mat).smooth=Boolean(props.get(5,true));
+				MaterialBase(mat).mipmap=Boolean(props.get(6,true));
+				MaterialBase(mat).bothSides=Boolean(props.get(7,false));
+				MaterialBase(mat).alphaPremultiplied=Boolean(props.get(8,false));
 				MaterialBase(mat).blendMode=blendModeDic[props.get(9, 0)];
-				MaterialBase(mat).repeat=props.get(13, true);
+				MaterialBase(mat).repeat= Boolean(props.get(13, true));
 				
 				if (spezialType==0){// this is a SinglePassMaterial
 					
@@ -841,12 +841,12 @@ package away3d.loaders.parsers
 							break;
 						case 104://FresnelSpecularMethod
 							if(spezialType==0){	
-								SinglePassMaterialBase(mat).specularMethod=new FresnelSpecularMethod(props.get(701,true),SinglePassMaterialBase(mat).specularMethod);
+								SinglePassMaterialBase(mat).specularMethod=new FresnelSpecularMethod(Boolean(props.get(701,true)),SinglePassMaterialBase(mat).specularMethod);
 								FresnelSpecularMethod(SinglePassMaterialBase(mat).specularMethod).fresnelPower=props.get(101,5);
 								FresnelSpecularMethod(SinglePassMaterialBase(mat).specularMethod).normalReflectance=props.get(102,0.1);
 							}
 							if(spezialType==1){
-								MultiPassMaterialBase(mat).specularMethod=new FresnelSpecularMethod(props.get(701,true),MultiPassMaterialBase(mat).specularMethod);
+								MultiPassMaterialBase(mat).specularMethod=new FresnelSpecularMethod(Boolean(props.get(701,true)),MultiPassMaterialBase(mat).specularMethod);
 								FresnelSpecularMethod(MultiPassMaterialBase(mat).specularMethod).fresnelPower=props.get(101,5);
 								FresnelSpecularMethod(MultiPassMaterialBase(mat).specularMethod).normalReflectance=props.get(102,0.1);
 							}
@@ -886,8 +886,8 @@ package away3d.loaders.parsers
 		{		
 			// TODO: not used
 			blockLength = blockLength; 
-			var type : uint;
-			var data_len : uint;
+			//var type : uint;
+			//var data_len : uint;
 			var asset:ShadowMapMethodBase;
 			var thisLight:LightBase;
 			block.name = parseVarStr();
@@ -962,8 +962,8 @@ package away3d.loaders.parsers
 		{
 			// TODO: not used
 			blockLength = blockLength; 
-			var type : uint;
-			var data_len : uint;
+			//var type : uint;
+			//var data_len : uint;
 			var asset:EffectMethodBase;
 			
 			block.name = parseVarStr();
@@ -992,9 +992,9 @@ package away3d.loaders.parsers
 										601:COLOR,		602:COLOR,
 										701:BOOL,		702:BOOL});	
 			var effectTex1:Texture2DBase= _defaultTexture;
-			var effectTex2:Texture2DBase= _defaultTexture;
+			//var effectTex2:Texture2DBase= _defaultTexture;
 			var cubetex1:CubeTextureBase=new CubeTextureBase();
-			var cubetex2:CubeTextureBase=new CubeTextureBase();
+			//var cubetex2:CubeTextureBase=new CubeTextureBase();
 			switch (methodType){
 				// Effect Methods
 				case 401://ColorMatrix
@@ -1028,7 +1028,7 @@ package away3d.loaders.parsers
 					break;
 				case 407://AlphaMaskMethod
 					if (props.get(1,0)>0)effectTex1=_blocks[props.get(1,0)].data;
-					effectMethodReturn=new AlphaMaskMethod(effectTex1,props.get(701,false));					
+					effectMethodReturn=new AlphaMaskMethod(effectTex1,Boolean(props.get(701,false)));					
 					break;
 				case 408://RefractionEnvMapMethod
 					if (props.get(1,0)>0)cubetex1=_blocks[props.get(1,0)].data;
@@ -1036,7 +1036,7 @@ package away3d.loaders.parsers
 					RefractionEnvMapMethod(effectMethodReturn).alpha=props.get(104,1);					
 					break;
 				case 409://OutlineMethod
-					effectMethodReturn=new OutlineMethod(props.get(601,0x00000000),props.get(101,1),props.get(701,true),props.get(702,false));
+					effectMethodReturn=new OutlineMethod(props.get(601,0x00000000),props.get(101,1),Boolean(props.get(701,true)),Boolean(props.get(702,false)));
 					break;
 				case 410://FresnelEnvMapMethod
 					cubetex1=new BitmapCubeTexture(_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData,_defaultTexture.bitmapData);
@@ -1054,10 +1054,12 @@ package away3d.loaders.parsers
 		}
 		private function parseLight(blockLength : uint) : LightBase
 		{
+			// TODO: not used
+			blockLength=blockLength;
 			var name : String;
 			var par_id : uint;
 			var lightType : uint;
-			var numShadowMethods : uint;
+			//var numShadowMethods : uint;
 			var mtx : Matrix3D;
 			var light : LightBase;
 			var parent : ObjectContainer3D;
@@ -1122,6 +1124,9 @@ package away3d.loaders.parsers
 		}
 		private function parseLightPicker(blockLength : uint) : LightPickerBase
 		{
+			// TODO: not used
+			blockLength=blockLength;
+			
 			var name:String=parseVarStr();
 			var numLights:uint=_body.readUnsignedShort();
 			var lightsArray:Array=new Array();
@@ -1320,6 +1325,9 @@ package away3d.loaders.parsers
 		
 		private function parseSkeletonAnimation(blockLength : uint) : SkeletonClipNode
 		{
+			// TODO: not used
+			blockLength=blockLength;
+			
 			var name : String;
 			var num_frames : uint;
 			var frames_parsed : uint;
@@ -1355,6 +1363,9 @@ package away3d.loaders.parsers
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D
 		{
+			// TODO: not used
+			blockLength=blockLength;
+			
 			var name : String;
 			var par_id : uint;
 			var mtx : Matrix3D;
@@ -1394,6 +1405,9 @@ package away3d.loaders.parsers
 		
 		private function parseMeshInstance(blockLength : uint) : Mesh
 		{
+			// TODO: not used
+			blockLength=blockLength;
+			
 			var name : String;
 			var mesh : Mesh, geom : Geometry;
 			var par_id : uint, data_id : uint;
@@ -1449,7 +1463,7 @@ package away3d.loaders.parsers
 				//to do: add to documentation: Mes properties extent the Container Properties with 5:Bool castShadows
 				var props:Object = parseProperties({ 	1:FLOAT32, 	2:FLOAT32,	3:FLOAT32,		4:UINT8, 5:BOOL});	
 				mesh.pivotPoint=new Vector3D(props.get(1,0),props.get(2,0),props.get(3,0));
-				mesh.castsShadows=props.get(5,false);
+				mesh.castsShadows=Boolean(props.get(5,false));
 				mesh.castsShadows=true;
 				trace("MeshCastShadows = "+mesh.castsShadows);
 				
@@ -1469,12 +1483,13 @@ package away3d.loaders.parsers
 		
 		private function parseMeshData(blockLength : uint) : Geometry
 		{
+			blockLength=blockLength;
 			var name : String;
 			var geom : Geometry;
 			var num_subs : uint;
 			var subs_parsed : uint;
 			var props : AWDProperties;
-			var bsm : Matrix3D;
+			//var bsm : Matrix3D;
 			
 			// Read name and sub count
 			name = parseVarStr();

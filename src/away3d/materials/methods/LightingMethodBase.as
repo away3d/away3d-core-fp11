@@ -29,6 +29,7 @@ package away3d.materials.methods
 		 */
 		arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
 		{
+			vo=vo;regCache=regCache;
 			return "";
 		}
 
@@ -37,6 +38,7 @@ package away3d.materials.methods
 		 */
 		arcane function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
 		{
+			vo=vo;lightDirReg=lightDirReg;lightColReg=lightColReg;regCache=regCache;
 			return "";
 		}
 
@@ -48,6 +50,7 @@ package away3d.materials.methods
 		 */
 		arcane function getFragmentCodePerProbe(vo : MethodVO, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
 		{
+			vo=vo;cubeMapReg=cubeMapReg;weightRegister=weightRegister;regCache=regCache;
 			return "";
 		}
 
@@ -58,6 +61,7 @@ package away3d.materials.methods
 		 */
 		arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
+			vo=vo;regCache=regCache;targetReg=targetReg;
 			return "";
 		}
 	}

@@ -335,9 +335,9 @@ package away3d.materials.compilation {
 			else
 				_combinedLightSources = _diffuseLightSources;
 
-			_usingSpecularMethod = 	_methodSetup._specularMethod && (
+			_usingSpecularMethod = 	Boolean(_methodSetup._specularMethod && (
 									usesLightsForSpecular() ||
-									usesProbesForSpecular());
+									usesProbesForSpecular()));
 		}
 
 		private function createCommons() : void

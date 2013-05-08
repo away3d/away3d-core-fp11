@@ -73,7 +73,7 @@ package away3d.tools.commands
 			_offset = offset;
 			_additionalOffset = additionalOffset;
 
-			var originalDuplicateMode:Boolean = _duplicate;
+			//var originalDuplicateMode:Boolean = _duplicate;
 			_duplicate = false;
 
 			var newMesh:Mesh = Mesh(mesh.clone());
@@ -98,7 +98,7 @@ package away3d.tools.commands
 			_offset = offset;
 			_additionalOffset = additionalOffset;
 
-			var originalDuplicateMode:Boolean = _duplicate; //store the _duplicateMode, because for this function we want to set it to false, but want to restore it later
+			//var originalDuplicateMode:Boolean = _duplicate; //store the _duplicateMode, because for this function we want to set it to false, but want to restore it later
 			_duplicate = false;
 						
 			var newObjectContainer:ObjectContainer3D = ObjectContainer3D(ctr.clone());
@@ -312,7 +312,7 @@ package away3d.tools.commands
 		{
 			var ox : Number, oy : Number, oz : Number;
 			var sx : Number, sy : Number, sz : Number;
-			var addx : Number, addy : Number, addz : Number;
+			//var addx : Number, addy : Number, addz : Number;
 			
 			if (!_scaleTransform) {
 				_scaleTransform = new Matrix3D();

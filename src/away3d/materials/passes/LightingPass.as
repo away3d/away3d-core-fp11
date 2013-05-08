@@ -351,7 +351,7 @@ package away3d.materials.passes
 			var weights : Vector.<Number> = _lightPicker.lightProbeWeights;
 			var len : int = lightProbes.length - _lightProbesOffset;
 			var addDiff : Boolean = usesProbesForDiffuse();
-			var addSpec : Boolean = _methodSetup._specularMethod && usesProbesForSpecular();
+			var addSpec : Boolean = Boolean(_methodSetup._specularMethod && usesProbesForSpecular());
 
 			if (!(addDiff || addSpec)) return;
 

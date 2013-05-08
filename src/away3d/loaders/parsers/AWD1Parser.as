@@ -273,7 +273,7 @@ package away3d.loaders.parsers
 						mesh.transform = ref.transform;
 						mesh.material = new TextureMaterial( DefaultMaterialManager.getDefaultTexture());
 						
-						mesh.material.bothSides = ref.bothSides;
+						mesh.material.bothSides = Boolean(ref.bothSides);
 						 
 						if(ref.material && ref.material != "")
 							addDependency(ref.name, new URLRequest(ref.material));

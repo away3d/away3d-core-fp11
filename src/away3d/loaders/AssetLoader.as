@@ -408,7 +408,7 @@ package away3d.loaders
 				var i : uint, len : uint = _errorHandlers.length;
 				for (i=0; i<len; i++) {
 					var handlerFunction : Function = _errorHandlers[i];
-					handled ||= handlerFunction(event);
+					handled ||= Boolean(handlerFunction(event));
 				}
 			}
 			

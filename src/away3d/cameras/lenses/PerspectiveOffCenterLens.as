@@ -139,8 +139,8 @@ package away3d.cameras.lenses
 			
 			var minLengthFracX:Number = -_minLengthX/(_maxLengthX - _minLengthX);
 			var minLengthFracY:Number = -_minLengthY/(_maxLengthY - _minLengthY);
-			var _xMax:Number = - _minLengthX;
-			var _yMax:Number = - _minLengthY;
+			//var _xMax:Number = - _minLengthX;
+			//var _yMax:Number = - _minLengthY;
 			
 			var left:Number, right:Number, top:Number, bottom:Number;
 			

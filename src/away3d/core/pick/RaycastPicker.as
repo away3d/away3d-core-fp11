@@ -62,7 +62,7 @@ package away3d.core.pick
 		{
 			//cast ray through the collection of entities on the view
 			var collector:EntityCollector = view.entityCollector;
-			var i:uint;
+			//var i:uint;
 
 			if( collector.numMouseEnableds == 0 )
 				return null;

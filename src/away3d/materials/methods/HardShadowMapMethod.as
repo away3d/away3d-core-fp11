@@ -27,6 +27,8 @@ package away3d.materials.methods
 			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			// needs to be reserved anyway. DO NOT REMOVE
 			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			// TODO not used
+			dataReg=dataReg;
 			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			var code : String = "";
 

@@ -73,7 +73,8 @@ package away3d.cameras
 
 		private function updateFrustum() : void
 		{
-			var a : Number, b : Number, c : Number, d : Number;
+			var a : Number, b : Number, c : Number;
+			//var d : Number;
 			var c11 : Number, c12 : Number, c13 : Number, c14 : Number;
 			var c21 : Number, c22 : Number, c23 : Number, c24 : Number;
 			var c31 : Number, c32 : Number, c33 : Number, c34 : Number;

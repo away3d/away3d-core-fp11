@@ -156,6 +156,10 @@ package away3d.materials.methods
 
 		override arcane function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			renderable=renderable;
+			camera=camera;
+			
 			updateAmbient();
 
 			var index : int = vo.fragmentConstantsIndex;

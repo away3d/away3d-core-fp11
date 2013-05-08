@@ -72,7 +72,7 @@ package away3d.animators.nodes
 			if (animationRegisterCache.needFragmentAnimation)
 			{
 				var accMultiplierColor:ShaderRegisterElement;
-				var accOffsetColor:ShaderRegisterElement;
+				//var accOffsetColor:ShaderRegisterElement;
 				if (_usesMultiplier)
 				{
 					accMultiplierColor = animationRegisterCache.getFreeVertexVectorTemp();

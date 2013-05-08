@@ -64,6 +64,8 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animationCode:String) : String
 		{
+			// TODO: not used
+			animationCode=animationCode;
 			var format : String;
 			switch (_cubeTexture.format) {
 				case Context3DTextureFormat.COMPRESSED:

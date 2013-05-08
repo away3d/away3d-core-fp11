@@ -111,6 +111,8 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animationCode:String) : String
 		{
+			// TODO: not used
+			animationCode=animationCode;
 			var code : String = "";
 
 			// encode float -> rgba
@@ -148,6 +150,11 @@ package away3d.materials.passes
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
+			// TODO: not used
+			renderable=renderable;
+			camera=camera;
+			viewProjection=viewProjection;
+			
 			var matrix : Matrix3D;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;

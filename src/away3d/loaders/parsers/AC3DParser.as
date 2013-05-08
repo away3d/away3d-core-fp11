@@ -154,7 +154,7 @@ package away3d.loaders.parsers
 			var nameid:String;
 			var refscount:int;
 			var tUrl:String = "";
-			var m:Mesh;
+			//var m:Mesh;
 			var cont:ObjectContainer3D;
 			var nextObject:uint;
 			var nextSurface:uint;
@@ -388,7 +388,7 @@ package away3d.loaders.parsers
 			var uvs:Vector.<Number> = new Vector.<Number>();
 			
 			var subGeomsData:Array = [vertices,indices,uvs];
-			var j:uint;
+			//var j:uint;
 			var dic:Dictionary = new Dictionary();
 			var ref:String;
 			

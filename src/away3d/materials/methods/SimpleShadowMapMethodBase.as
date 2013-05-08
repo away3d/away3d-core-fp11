@@ -139,6 +139,11 @@ package away3d.materials.methods
 
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			renderable=renderable;
+			camera=camera;
+			stage3DProxy=stage3DProxy;
+			
 			if (!_usePoint)
 				DirectionalShadowMapper(_shadowMapper).depthProjection.copyRawDataTo(vo.vertexData, vo.vertexConstantsIndex + 4, true);
 		}

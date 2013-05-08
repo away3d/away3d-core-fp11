@@ -445,7 +445,7 @@ package away3d.tools.helpers {
 				var uvind:uint;
 				var vind:uint;
 				var ind:uint;
-				var j:uint;
+				//var j:uint;
 				var vertex:Vertex = new Vertex();
 				
 				for (i = 0; i < indices.length; ++i) {
@@ -614,8 +614,8 @@ package away3d.tools.helpers {
 				return meshes;
 			}
 			
-			var vertices:Vector.<Number>;
-			var indices:Vector.<uint>;
+			//var vertices:Vector.<Number>;
+			//var indices:Vector.<uint>;
 			var subGeom:ISubGeometry;
 			
 			var nGeom:Geometry;

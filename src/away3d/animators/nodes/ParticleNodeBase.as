@@ -124,6 +124,8 @@ package away3d.animators.nodes
 		 */
 		public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
+			pass=pass;
+			animationRegisterCache=animationRegisterCache;
 			return "";
 		}
 		
@@ -132,6 +134,8 @@ package away3d.animators.nodes
 		 */
 		public function getAGALFragmentCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
+			pass=pass;
+			animationRegisterCache=animationRegisterCache;
 			return "";
 		}
 		
@@ -140,6 +144,8 @@ package away3d.animators.nodes
 		 */
 		public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
+			pass=pass;
+			animationRegisterCache=animationRegisterCache;
 			return "";
 		}
 		

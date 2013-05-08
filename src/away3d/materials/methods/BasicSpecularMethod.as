@@ -288,7 +288,7 @@ package away3d.materials.methods
 		 */
 		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
 		{
-			var context : Context3D = stage3DProxy._context3D;
+			//var context : Context3D = stage3DProxy._context3D;
 
 			if (vo.numLights == 0) return;
 

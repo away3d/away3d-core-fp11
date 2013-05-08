@@ -344,7 +344,7 @@
 			for (var i : int = 0; i < len; ++i) {
 				var subMesh : SubMesh = _subMeshes[i];
 
-				var ignoreFacesLookingAway:Boolean = _material ? !_material.bothSides : true;
+				//var ignoreFacesLookingAway:Boolean = _material ? !_material.bothSides : true;
 				if (_pickingCollider.testSubMeshCollision(subMesh, _pickingCollisionVO, shortestCollisionDistance)) {
 					shortestCollisionDistance = _pickingCollisionVO.rayEntryDistance;
 					_pickingCollisionVO.renderable = subMesh;

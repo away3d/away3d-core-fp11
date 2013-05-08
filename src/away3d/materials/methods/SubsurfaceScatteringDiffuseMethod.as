@@ -215,6 +215,9 @@ package away3d.materials.methods
 
 		arcane override function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
+			// TODO: not used
+			camera=camera;
+			
 			var depthMap : Texture = _depthPass.getDepthMap(renderable, stage3DProxy);
 			var projection : Matrix3D = _depthPass.getProjection(renderable);
 
