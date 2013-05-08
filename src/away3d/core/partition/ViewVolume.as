@@ -287,7 +287,7 @@ package away3d.core.partition
 		{
 			var cell : ViewCell = _cells[getCellIndex(indexX, indexY, indexZ)];
 			addStaticsForRegion(scene, minBounds, maxBounds, cell);
-			if (dynamicGrid) addDynamicsForRegion(dynamicGrid, minBounds, maxBounds, cell)
+			if (dynamicGrid) addDynamicsForRegion(dynamicGrid, minBounds, maxBounds, cell);
 		}
 
 		/**

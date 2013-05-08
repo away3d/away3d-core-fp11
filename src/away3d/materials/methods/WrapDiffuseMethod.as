@@ -37,7 +37,7 @@ package away3d.materials.methods
 
 		public function get wrapFactor() : Number
 		{
-			return _wrapFactor
+			return _wrapFactor;
 		}
 
 		public function set wrapFactor(value : Number) : void

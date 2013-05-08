@@ -261,7 +261,7 @@ package away3d.loaders.parsers {
 			var skinned_sub_geom : SkinnedSubGeometry;
 			var primitive : DAEPrimitive;
 			var jointIndices : Vector.<Number>;
-			var jointWeights : Vector.<Number>
+			var jointWeights : Vector.<Number>;
 			var i : uint, j : uint, k : uint, l : int;
 
 			for (i = 0; i < geometry.subGeometries.length; i++) {

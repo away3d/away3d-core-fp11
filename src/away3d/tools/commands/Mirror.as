@@ -284,7 +284,7 @@ package away3d.tools.commands
 			} else {
 
 				len = indices.length;
-				var oldindicies:Vector.<uint> = indices.concat()
+				var oldindicies:Vector.<uint> = indices.concat();
 
 				if (_flipWinding) {
 					for (i = 0; i < len; i += 3) {

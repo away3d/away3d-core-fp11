@@ -154,7 +154,7 @@ package away3d.lights.shadowmaps
 		{
 			if (_scissorRectsInvalid) updateScissorRects();
 
-			_casterCollector.cullPlanes = _cullPlanes
+			_casterCollector.cullPlanes = _cullPlanes;
 			_casterCollector.camera = _overallCamera;
 			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);

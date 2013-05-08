@@ -398,7 +398,7 @@ package away3d.tools.helpers {
 		 * @ returns Mesh
 		 */
 		public static function build(vertices:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number> = null, name:String = "", material:MaterialBase = null, shareVertices:Boolean = true, useDefaultMap:Boolean = true, useCompactSubGeometry:Boolean = true):Mesh {
-			var i:uint
+			var i:uint;
 			
 			if (useCompactSubGeometry) {
 				var subGeoms:Vector.<ISubGeometry> = GeomUtil.fromVectors(vertices, indices, uvs, null, null, null, null);

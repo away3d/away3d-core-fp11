@@ -166,7 +166,7 @@ package away3d.core.math
 			rawData[3] = 0;			rawData[7] = 0;			rawData[11] = 0;		rawData[15] = 1;
 			target.copyRawDataFrom(rawData);
 
-			return target
+			return target;
 		}
 	}
 }

@@ -83,8 +83,8 @@ package away3d.animators
 		 */
 		public function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
 		{
-			_uploadNormals = _useNormals[pass];
-			_uploadTangents = _useTangents[pass];
+			_uploadNormals = Boolean(_useNormals[pass]);
+			_uploadTangents = Boolean(_useTangents[pass]);
 		}
 		
 		/**
@@ -136,7 +136,7 @@ package away3d.animators
 			var regs : Array = ["x", "y", "z", "w"];
 			var len : uint = sourceRegisters.length;
 			var constantReg : String = "vc" + pass.numUsedVertexConstants;
-			var useTangents : Boolean = _useTangents[pass] = len > 2;
+			var useTangents : Boolean = Boolean(_useTangents[pass] = len > 2);
 			_useNormals[pass] = len > 1;
 
 			if (len > 2) len = 2;
@@ -176,8 +176,8 @@ package away3d.animators
 			var regs : Array = ["x", "y", "z", "w"];
 			var temp1 : String = findTempReg(targetRegisters);
 			var k : uint;
-			var useTangents : Boolean = _useTangents[pass] = len > 2;
-			var useNormals : Boolean = _useNormals[pass] = len > 1;
+			var useTangents : Boolean = Boolean(_useTangents[pass] = len > 2);
+			var useNormals : Boolean = Boolean(_useNormals[pass] = len > 1);
 			var streamIndex : uint = _streamIndices[pass] = pass.numUsedStreams;
 
 			if (len > 2) len = 2;

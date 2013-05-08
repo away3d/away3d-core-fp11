@@ -201,7 +201,7 @@ package away3d.primitives
 						}
 						for (i = 0; i < 3; ++i) {
 							data[index] = -data[index-stride];
-							++index
+							++index;
 						}
 						index +=skip;
 					}

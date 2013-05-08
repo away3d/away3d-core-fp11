@@ -536,9 +536,9 @@ package away3d.loaders.parsers
 			if(_debug)trace("SkyBox name = "+name);
 			cubetex=_blocks[_body.readUnsignedInt()].data;
 			if(_debug)trace("SkyBox found its texture = "+cubetex.name);
-			var asset:SkyBox=new SkyBox(cubetex)
+			var asset:SkyBox=new SkyBox(cubetex);
 				
-			parseProperties(null)	
+			parseProperties(null);
 			parseUserAttributes();
 			
 			//block.data=asset;
@@ -603,13 +603,13 @@ package away3d.loaders.parsers
 					texture = _defaultTexture; }
 				// If bitmap asset has already been loaded
 				mat = new TextureMaterial(texture);
-				TextureMaterial(mat).alphaBlending = props.get(11, false);
+				TextureMaterial(mat).alphaBlending = Boolean(props.get(11, false));
 				TextureMaterial(mat).alpha = props.get(10, 1.0);
 			}
 			
 			mat.extra = attributes;
 			SinglePassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
-			mat.repeat = props.get(13, true);
+			mat.repeat = Boolean(props.get(13, true));
 			
 			finalizeAsset(mat, name);
 			
@@ -650,7 +650,7 @@ package away3d.loaders.parsers
 			
 			spezialType=props.get(4,0);			
 			
-			var skyboxMateri:SkyBoxMaterial
+			var skyboxMateri:SkyBoxMaterial;
 			
 			if(_debug)trace("type = " + type);
 			if(_debug)trace("spezialType = " + spezialType);
@@ -1134,7 +1134,7 @@ package away3d.loaders.parsers
 			parseUserAttributes();
 			finalizeAsset(lightPick, name);
 			
-			return lightPick
+			return lightPick;
 		}
 		private function parseCubeTexture(blockLength : uint, block : AWDBlock) :CubeTextureBase
 		{
@@ -1143,7 +1143,7 @@ package away3d.loaders.parsers
 			var data_len : uint;
 			var asset : CubeTextureBase;
 			var i:int;
-			_cubeTextures=new Array()
+			_cubeTextures=new Array();
 			_texture_users[_cur_block_id.toString()] = [];	
 			type = _body.readUnsignedByte();
 			block.name = parseVarStr();

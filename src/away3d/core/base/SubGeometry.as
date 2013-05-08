@@ -146,7 +146,7 @@
 				_vertexNormals = updateVertexNormals(_vertexNormals);
 
 			if (!_vertexNormalBuffer[contextIndex] || _vertexNormalBufferContext[contextIndex] != context) {
-				_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
+				_vertexNormalBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
 				_vertexNormalBufferContext[contextIndex] = context;
 				_normalsInvalid[contextIndex] = true;
  			}
@@ -172,7 +172,7 @@
 				_vertexTangents = updateVertexTangents(_vertexTangents);
 
 			if (!_vertexTangentBuffer[contextIndex] || _vertexTangentBufferContext[contextIndex] != context) {
-				_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3)
+				_vertexTangentBuffer[contextIndex] = context.createVertexBuffer(_numVertices, 3);
 				_vertexTangentBufferContext[contextIndex] = context;
 				_tangentsInvalid[contextIndex] = true;
  			}

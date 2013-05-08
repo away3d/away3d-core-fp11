@@ -51,7 +51,7 @@ package away3d.materials.methods
 			data[index] = .5;
 			data[index+1] = -.5;
 			data[index+2] = 1.0;
-			data[index+3] = 1.0
+			data[index+3] = 1.0;
 		}
 
 		arcane override function cleanCompilationData() : void

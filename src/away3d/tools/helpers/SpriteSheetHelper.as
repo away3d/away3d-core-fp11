@@ -128,7 +128,7 @@ package away3d.tools.helpers
 			if(to == 0 || to < from || to > framesCount*mapCount ) to = cols*rows*mapCount;
 			
 			if(from > to)
-				throw new Error("Param 'from' must be lower than the 'to' param.")
+				throw new Error("Param 'from' must be lower than the 'to' param.");
 
 			var scaleV:Number  = 1/rows;
 			var scaleU:Number  = 1/cols;

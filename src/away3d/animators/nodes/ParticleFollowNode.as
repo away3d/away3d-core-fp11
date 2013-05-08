@@ -64,7 +64,7 @@ package away3d.animators.nodes
 				animationRegisterCache.addVertexTempUsages(temp2, 1);
 				var temp3:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				
-				var temp4:ShaderRegisterElement
+				var temp4:ShaderRegisterElement;
 				if(animationRegisterCache.hasBillboard)
 				{
 					animationRegisterCache.addVertexTempUsages(temp3, 1);

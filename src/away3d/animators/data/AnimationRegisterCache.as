@@ -60,7 +60,7 @@ package away3d.animators.data
 		
 		public function AnimationRegisterCache(profile : String)
 		{
-			super(profile)
+			super(profile);
 		}
 		
 		override public function reset():void
