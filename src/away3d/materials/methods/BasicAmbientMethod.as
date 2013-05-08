@@ -4,13 +4,9 @@ package away3d.materials.methods
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.materials.methods.MethodVO;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-	
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DProgramType;
 
 	use namespace arcane;
 
@@ -156,17 +152,15 @@ package away3d.materials.methods
 
 		override arcane function setRenderState(vo : MethodVO, renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D) : void
 		{
-			// TODO: not used
-			renderable=renderable;
-			camera=camera;
-			
 			updateAmbient();
 
-			var index : int = vo.fragmentConstantsIndex;
-			var data : Vector.<Number> = vo.fragmentData;
-			data[index] = _ambientR;
-			data[index+1] = _ambientG;
-			data[index+2] = _ambientB;
+			if (!_useTexture) {
+				var index : int = vo.fragmentConstantsIndex;
+				var data : Vector.<Number> = vo.fragmentData;
+				data[index] = _ambientR;
+				data[index+1] = _ambientG;
+				data[index+2] = _ambientB;
+			}
 		}
 	}
 }
