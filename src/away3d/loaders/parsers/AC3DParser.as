@@ -363,6 +363,7 @@ package away3d.loaders.parsers
 		
 		private function checkGroup(mesh:Mesh):void
 		{
+			mesh=mesh;
 			if(_groupCount >0) _groupCount --;
 			
 			if(_activeContainer) _activeContainer.addChild(_activeMesh);

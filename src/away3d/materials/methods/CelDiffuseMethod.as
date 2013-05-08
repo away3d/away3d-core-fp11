@@ -103,6 +103,10 @@ package away3d.materials.methods
 		 */
 		private function clampDiffuse(vo : MethodVO, t : ShaderRegisterElement, regCache : ShaderRegisterCache, sharedRegisters : ShaderRegisterData) : String
 		{
+			vo=vo;
+			regCache=regCache;
+			sharedRegisters=sharedRegisters;
+			
 			return 	"mul " + t+".w, " + t+".w, " + _dataReg+".x\n" +
 					"frc " + t+".z, " + t+".w\n" +
 					"sub " + t+".y, " +  t+".w, " + t+".z\n" +

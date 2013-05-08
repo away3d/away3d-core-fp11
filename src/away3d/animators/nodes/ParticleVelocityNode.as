@@ -48,6 +48,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
+			pass=pass;
 			var velocityValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, VELOCITY_INDEX, velocityValue.index);
 

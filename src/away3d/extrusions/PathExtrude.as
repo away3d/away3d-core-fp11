@@ -96,6 +96,8 @@ package away3d.extrusions
 		 */
 		function PathExtrude(material : MaterialBase = null, path : IPath = null, profile : Vector.<Vector3D> = null, subdivision : uint = 2, coverAll : Boolean = true, coverSegment : Boolean = false, alignToPath : Boolean = true, centerMesh : Boolean = false, mapFit : Boolean = false, flip : Boolean = false, closePath : Boolean = false, materials : Vector.<MaterialBase> = null, scales : Vector.<Vector3D> = null, smoothScale : Boolean = true, rotations : Vector.<Vector3D> = null, smoothSurface : Boolean = true, distribute : Boolean = false, distributeU : Boolean = true, keepExtremes : Boolean = false)
 		{
+			distribute=distribute;
+			
 			var geom : Geometry = new Geometry();
 			_subGeometry = new SubGeometry();
 			super(geom, material);

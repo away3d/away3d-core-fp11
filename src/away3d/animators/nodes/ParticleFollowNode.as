@@ -52,6 +52,8 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
+			pass=pass;
+			
 			//TODO: use Quaternion to implement this function
 			var code:String = "";
 			if (_usesRotation) {

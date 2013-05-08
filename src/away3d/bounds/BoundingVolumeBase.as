@@ -253,6 +253,7 @@ package away3d.bounds
 		 * @return A Boolean value representing the detection of an intersection.
 		 */
 		public function rayIntersection(position:Vector3D, direction:Vector3D, targetNormal:Vector3D):Number {
+			position=position;direction=direction;targetNormal=targetNormal;
 			return -1;
 		}
 
@@ -263,6 +264,7 @@ package away3d.bounds
 		 * @return A Boolean value representing the detection of a contained position.
 		 */
 		public function containsPoint( position:Vector3D ):Boolean {
+			position=position;
 			return false;
 		}
 

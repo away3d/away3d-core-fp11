@@ -128,12 +128,14 @@ package away3d.materials.methods
 		protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();
+			vo=vo;regCache=regCache;targetReg=targetReg;
 			return "";
 		}
 
 		protected function getPointFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();
+			vo=vo;regCache=regCache;targetReg=targetReg;
 			return "";
 		}
 

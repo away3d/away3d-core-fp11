@@ -122,6 +122,8 @@ package away3d.core.partition
 		 */
 		public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
+			planes=planes;
+			numPlanes=numPlanes;
 			return true;
 		}
 
@@ -134,6 +136,8 @@ package away3d.core.partition
 		 */
 		public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
 		{
+			rayPosition=rayPosition;
+			rayDirection=rayDirection;
 			return true;
 		}
 		
@@ -142,6 +146,7 @@ package away3d.core.partition
 		 */
 		public function findPartitionForEntity(entity : Entity) : NodeBase
 		{
+			entity=entity;
 			return this;
 		}
 

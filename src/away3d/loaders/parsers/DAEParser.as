@@ -502,6 +502,7 @@ package away3d.loaders.parsers {
 
 		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonClipNode
 		{
+			mesh=mesh;
 			//var useGPU : Boolean = _configFlags & CONFIG_USE_GPU ? true : false;
 			//var animation : SkeletonAnimation = new SkeletonAnimation(skeleton, skin.maxBones, useGPU);
 			var animated : Boolean = isAnimatedSkeleton(skeleton);
@@ -1329,6 +1330,7 @@ class DAEVertices extends DAEElement
 
 	protected override function traverseChildHandler(child : XML, nodeName : String) : void
 	{
+		nodeName=nodeName;
 		this.inputs.push(new DAEInput(child));
 	}
 }

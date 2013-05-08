@@ -146,6 +146,8 @@ package away3d.animators
 		*/
 		public function play(name : String, transition : IAnimationTransition = null, offset : Number = NaN) : void
 		{
+			transition=transition;
+			offset=offset;
 			if (_name == name) return;
 			
 			_name = name;

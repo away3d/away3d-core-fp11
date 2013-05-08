@@ -235,6 +235,8 @@ package away3d.tools.helpers {
 		 * @param scaleZ			Number. The scale factor to apply on all vertices z values.
 		 */
 		public static function applyScalesContainer(obj:ObjectContainer3D, scaleX:Number, scaleY:Number, scaleZ:Number, parent:ObjectContainer3D = null):void {
+			parent=parent;
+			
 			var child:ObjectContainer3D;
 			
 			if (obj is Mesh && ObjectContainer3D(obj).numChildren == 0)

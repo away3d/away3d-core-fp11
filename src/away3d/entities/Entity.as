@@ -94,6 +94,8 @@ package away3d.entities
 		 */
 		arcane function collidesBefore(shortestCollisionDistance : Number, findClosest : Boolean) : Boolean
 		{
+			shortestCollisionDistance=shortestCollisionDistance;
+			findClosest=findClosest;
 			return true;
 		}
 

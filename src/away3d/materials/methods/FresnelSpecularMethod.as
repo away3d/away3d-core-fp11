@@ -117,6 +117,9 @@ package away3d.materials.methods
 		 */
 		private function modulateSpecular(vo : MethodVO, target : ShaderRegisterElement, regCache : ShaderRegisterCache, sharedRegisters : ShaderRegisterData) : String
 		{
+			vo=vo;
+			regCache=regCache;
+			
 			var code : String;
 
             code = 	"dp3 " + target+".y, " + sharedRegisters.viewDirFragment+".xyz, " + (_incidentLight? target+".xyz\n" : sharedRegisters.normalFragment+".xyz\n") +   // dot(V, H)

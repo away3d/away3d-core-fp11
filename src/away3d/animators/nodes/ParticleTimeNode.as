@@ -50,6 +50,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
+			pass=pass;
 			var timeStreamRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();//timeStreamRegister.x is start，timeStreamRegister.y is during time
 			animationRegisterCache.setRegisterIndex(this, TIME_STREAM_INDEX, timeStreamRegister.index);
 			var timeConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();

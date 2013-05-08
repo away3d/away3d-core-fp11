@@ -138,6 +138,8 @@ package away3d.core.pick
 		
 		public function getEntityCollision(position:Vector3D, direction:Vector3D, entities:Vector.<Entity>):PickingCollisionVO
 		{
+			position=position;
+			direction=direction;
 			_numEntities = 0;
 			
 			var entity : Entity;

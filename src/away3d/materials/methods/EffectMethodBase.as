@@ -31,6 +31,7 @@ package away3d.materials.methods
 		arcane function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
 		{
 			throw new AbstractMethodError();
+			vo=vo;regCache=regCache;targetReg=targetReg;
 			return "";
 		}
 	}

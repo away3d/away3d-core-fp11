@@ -109,6 +109,8 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
+			pass=pass;
+			
 			//get 2 vc
 			var uvParamConst1:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 			var uvParamConst2:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();

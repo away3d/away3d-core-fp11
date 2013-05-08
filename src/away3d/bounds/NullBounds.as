@@ -40,6 +40,8 @@ package away3d.bounds
 		 */
 		override public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
 		{
+			planes=planes;
+			numPlanes=numPlanes;
 			return _alwaysIn;
 		}
 
@@ -60,11 +62,13 @@ package away3d.bounds
 
 		override public function classifyToPlane(plane : Plane3D) : int
 		{
+			plane=plane;
 			return PlaneClassification.INTERSECT;
 		}
 
 		override public function transformFrom(bounds : BoundingVolumeBase, matrix : Matrix3D) : void
 		{
+			matrix=matrix;
 			_alwaysIn = NullBounds(bounds)._alwaysIn;
 		}
 	}

@@ -47,6 +47,8 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
 		{
+			pass=pass;
+			
 			var code:String = "";
 			if (animationRegisterCache.needFragmentAnimation)
 			{

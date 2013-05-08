@@ -319,6 +319,7 @@ package away3d.tools.utils
 
 		private static function remapSpherical(geometries:Vector.<ISubGeometry>, position:Vector3D):void
 		{
+			position=position;
 			var numSubGeoms:uint = geometries.length;
 			var sub_geom:SubGeometry;
 

@@ -246,6 +246,7 @@ package away3d.entities
 
 		override arcane function collidesBefore(shortestCollisionDistance : Number, findClosest : Boolean) : Boolean
 		{
+			findClosest=findClosest;
 			var viewTransform:Matrix3D = _camera.inverseSceneTransform.clone();
 			viewTransform.transpose();
 			var rawViewTransform:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
