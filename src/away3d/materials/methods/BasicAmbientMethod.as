@@ -162,11 +162,13 @@ package away3d.materials.methods
 			
 			updateAmbient();
 
-			var index : int = vo.fragmentConstantsIndex;
-			var data : Vector.<Number> = vo.fragmentData;
-			data[index] = _ambientR;
-			data[index+1] = _ambientG;
-			data[index+2] = _ambientB;
+			if (!_useTexture) {
+				var index : int = vo.fragmentConstantsIndex;
+				var data : Vector.<Number> = vo.fragmentData;
+				data[index] = _ambientR;
+				data[index+1] = _ambientG;
+				data[index+2] = _ambientB;
+			}
 		}
 	}
 }
