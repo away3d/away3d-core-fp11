@@ -33,10 +33,10 @@ package away3d.tools.helpers
 		*/
 		public function debug(mesh:Mesh, scene:Scene3D, displayNormals:Boolean = true, displayVertexNormals:Boolean = false, displayTangents:Boolean = false):MeshDebugData
 		{
-			meshDebugData = isMeshDebug(mesh);
+			var meshDebugData:MeshDebugData = isMeshDebug(mesh);
 			
 			if(!meshDebugData){
-				var meshDebugData:MeshDebugData = new MeshDebugData();
+				meshDebugData = new MeshDebugData();
 				meshDebugData.meshDebug = new MeshDebug();
 				meshDebugData.mesh = mesh;
 				meshDebugData.scene = scene;

@@ -1,18 +1,13 @@
-package away3d.tools.commands
-{
+package away3d.tools.commands {
 	import away3d.arcane;
-	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.tools.utils.GeomUtil;
-	
-	
+
 	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
 
 	use namespace arcane;
 	
@@ -238,10 +233,10 @@ package away3d.tools.commands
 				uvs[uIdx++] = ud[uOffs + i * uStride + 1];                
 			}
 
-			indexOffset = 0;
+			var indexOffset:uint = 0;
 
 			if (_duplicate) {
-				var indexOffset : uint;
+				//var indexOffset : uint;
 				var flippedVertices : Vector.<Number> = new Vector.<Number>();
 				var flippedNormals : Vector.<Number> = new Vector.<Number>();
 

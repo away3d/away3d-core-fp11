@@ -9,8 +9,6 @@
 	 */
 	public class LineSegment extends Segment {
 		
-		// TODO not used
-		// private var _index:uint;
 		public const TYPE:String = "line";
 		
 		/**

@@ -1,18 +1,14 @@
-﻿package away3d.materials.passes
-{
+﻿package away3d.materials.passes {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
-	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
-
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -95,8 +91,6 @@
 		 */
 		arcane override function getFragmentCode(code:String) : String
 		{
-			// TODO never used
-			code=code;
 			
 			var wrap : String = _repeat ? "wrap" : "clamp";
 			var filter : String;

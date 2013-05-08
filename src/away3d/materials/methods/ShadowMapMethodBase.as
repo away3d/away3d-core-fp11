@@ -1,16 +1,10 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.*;
-	import away3d.cameras.*;
-	import away3d.core.base.*;
-	import away3d.core.managers.*;
 	import away3d.errors.*;
 	import away3d.library.assets.*;
 	import away3d.lights.*;
 	import away3d.lights.shadowmaps.*;
 	import away3d.materials.compilation.*;
-	
-	import flash.geom.*;
 
 	use namespace arcane;
 

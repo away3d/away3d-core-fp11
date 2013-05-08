@@ -1,7 +1,6 @@
-package away3d.cameras.lenses
-{
-	import away3d.containers.*;
+package away3d.cameras.lenses {
 	import away3d.core.math.*;
+
 	import flash.geom.Vector3D;
 
 	/**

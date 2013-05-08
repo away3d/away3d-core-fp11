@@ -1,14 +1,11 @@
-﻿package away3d.core.base
-{
+﻿package away3d.core.base {
 	import away3d.arcane;
-	import away3d.core.base.SubGeometry;
 	import away3d.core.managers.Stage3DProxy;
+
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DVertexBufferFormat;
-
 	import flash.display3D.VertexBuffer3D;
 	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
 
 	use namespace arcane;
 

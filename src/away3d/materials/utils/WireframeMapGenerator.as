@@ -1,8 +1,6 @@
-package away3d.materials.utils
-{
+package away3d.materials.utils {
 	import away3d.arcane;
 	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 
 	import flash.display.BitmapData;

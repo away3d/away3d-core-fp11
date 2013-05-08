@@ -1,8 +1,6 @@
-package away3d.primitives
-{
+package away3d.primitives {
 	import away3d.arcane;
 	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.SubGeometry;
 
 	use namespace arcane;
 

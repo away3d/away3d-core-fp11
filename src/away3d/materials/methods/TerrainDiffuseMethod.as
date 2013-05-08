@@ -8,8 +8,6 @@ package away3d.materials.methods {
 
 	import flash.display3D.Context3D;
 
-	import flash.display3D.Context3DTextureFormat;
-
 	use namespace arcane;
 
 	public class TerrainDiffuseMethod extends BasicDiffuseMethod

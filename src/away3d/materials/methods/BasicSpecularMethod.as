@@ -1,12 +1,8 @@
-package away3d.materials.methods
-{
+package away3d.materials.methods {
 	import away3d.*;
 	import away3d.core.managers.*;
 	import away3d.materials.compilation.*;
-	import away3d.materials.methods.*;
 	import away3d.textures.*;
-	
-	import flash.display3D.*;
 
 	use namespace arcane;
 

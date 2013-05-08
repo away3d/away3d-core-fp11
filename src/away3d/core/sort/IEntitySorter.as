@@ -1,7 +1,5 @@
-package away3d.core.sort
-{
+package away3d.core.sort {
 	import away3d.core.traverse.EntityCollector;
-	import away3d.errors.AbstractMethodError;
 
 	/**
 	 * EntitySorterBase provides an abstract base class to sort geometry information in an EntityCollector object for

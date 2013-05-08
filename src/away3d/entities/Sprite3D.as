@@ -1,10 +1,8 @@
 package away3d.entities
 {
-
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.bounds.AxisAlignedBoundingBox;
-	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -15,7 +13,6 @@ package away3d.entities
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.RenderableNode;
 	import away3d.core.pick.IPickingCollider;
-	import away3d.core.pick.PickingColliderType;
 	import away3d.materials.MaterialBase;
 
 	import flash.display3D.IndexBuffer3D;
@@ -35,7 +32,7 @@ package away3d.entities
 	{
 		// TODO: Replace with CompactSubGeometry
 		private static var _geometry : SubGeometry;
-		private static var _pickingSubMesh:SubGeometry;
+		//private static var _pickingSubMesh:SubGeometry;
 
 		private var _material : MaterialBase;
 		private var _spriteMatrix : Matrix3D;

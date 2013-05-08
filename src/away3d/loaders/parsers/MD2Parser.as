@@ -117,8 +117,6 @@ package away3d.loaders.parsers
 		 */
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
-			// TODO: not used
-			resourceDependency = resourceDependency; 			
 			// apply system default
 			_mesh.material = DefaultMaterialManager.getDefaultMaterial();
 		} 

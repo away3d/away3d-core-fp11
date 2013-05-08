@@ -1,8 +1,6 @@
-package away3d.entities
-{
+package away3d.entities {
 	import away3d.arcane;
 	import away3d.bounds.*;
-	import away3d.cameras.*;
 	import away3d.containers.*;
 	import away3d.core.partition.*;
 	import away3d.core.pick.*;

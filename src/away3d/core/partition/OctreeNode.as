@@ -1,8 +1,6 @@
-package away3d.core.partition
-{
+package away3d.core.partition {
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
-	import away3d.cameras.Camera3D;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframeCube;
@@ -36,7 +34,7 @@ package away3d.core.partition
 		private var _rightBottomNear : OctreeNode;
 		private var _leftBottomNear : OctreeNode;
 
-		private var _entityWorldBounds : Vector.<Number> = new Vector.<Number>();
+		//private var _entityWorldBounds : Vector.<Number> = new Vector.<Number>();
 		private var _halfExtent : Number;
 
 		public function OctreeNode(maxDepth : int = 5, size : Number = 10000, centerX : Number = 0, centerY : Number = 0, centerZ : Number = 0, depth : int = 0)

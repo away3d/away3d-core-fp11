@@ -1,9 +1,6 @@
 package away3d.primitives
 {
-
 	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
 
 	/**
 	 * A Capsule primitive mesh.

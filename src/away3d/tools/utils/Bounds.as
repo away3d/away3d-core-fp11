@@ -1,9 +1,7 @@
-package away3d.tools.utils
-{
+package away3d.tools.utils {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 
 	import flash.geom.Vector3D;

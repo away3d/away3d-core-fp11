@@ -1,16 +1,13 @@
-package away3d.materials.passes
-{
+package away3d.materials.passes {
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.LightBase;
-	import away3d.materials.lightpickers.LightPickerBase;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.textures.Texture;
 	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
@@ -150,11 +147,6 @@ package away3d.materials.passes
 		 */
 		arcane override function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, viewProjection : Matrix3D) : void
 		{
-			// TODO: not used
-			renderable=renderable;
-			camera=camera;
-			viewProjection=viewProjection;
-			
 			var matrix : Matrix3D;
 			var contextIndex : int = stage3DProxy._stage3DIndex;
 			var context : Context3D = stage3DProxy._context3D;

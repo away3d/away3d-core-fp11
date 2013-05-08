@@ -1,11 +1,6 @@
-package away3d.core.partition
-{
+package away3d.core.partition {
 	import away3d.arcane;
-	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.entities.Entity;
-	import away3d.primitives.WireframePrimitiveBase;
-
-	import flash.geom.Vector3D;
 
 	use namespace arcane;
 

@@ -1,9 +1,8 @@
-package away3d.animators.data
-{
+package away3d.animators.data {
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
-	import away3d.materials.passes.MaterialPassBase;
+
 	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
 	

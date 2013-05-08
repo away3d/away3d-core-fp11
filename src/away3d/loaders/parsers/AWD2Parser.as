@@ -1,5 +1,4 @@
-package away3d.loaders.parsers
-{
+package away3d.loaders.parsers {
 	import away3d.*;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
@@ -46,7 +45,6 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.ProjectiveTextureMethod;
 	import away3d.materials.methods.RefractionEnvMapMethod;
 	import away3d.materials.methods.RimLightMethod;
-	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.methods.SimpleWaterNormalMethod;
 	import away3d.materials.methods.SoftShadowMapMethod;
@@ -56,9 +54,8 @@ package away3d.loaders.parsers
 	import away3d.primitives.SkyBox;
 	import away3d.textures.*;
 	import away3d.tools.utils.*;
-	
+
 	import flash.display.*;
-	import flash.display3D.textures.CubeTexture;
 	import flash.geom.*;
 	import flash.net.*;
 	import flash.utils.*;
@@ -526,8 +523,6 @@ package away3d.loaders.parsers
 				
 		private function parseSkyBoxInstance(blockLength : uint) : SkyBox
 		{		
-			// TODO: not used
-			blockLength = blockLength; 
 			//var type : uint;
 			//var data_len : uint;
 			var cubetex:BitmapCubeTexture;
@@ -549,8 +544,6 @@ package away3d.loaders.parsers
 		}
 		private function parseMaterial(blockLength : uint) : MaterialBase
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var type : uint;
 			var props : AWDProperties;
@@ -590,8 +583,6 @@ package away3d.loaders.parsers
 				
 			}
 			else if (type == 2) { // Bitmap material
-				//TODO: not used
-				//var bmp : BitmapData;
 				var texture : Texture2DBase;
 				var tex_addr : uint;
 				
@@ -620,8 +611,6 @@ package away3d.loaders.parsers
 		
 		private function parseMaterial_v1(blockLength : uint) : MaterialBase
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var type : uint;
 			var props : AWDProperties;
@@ -884,8 +873,6 @@ package away3d.loaders.parsers
 		
 		private function parseShadowMethodBlock(blockLength : uint, block : AWDBlock) : ShadowMapMethodBase
 		{		
-			// TODO: not used
-			blockLength = blockLength; 
 			//var type : uint;
 			//var data_len : uint;
 			var asset:ShadowMapMethodBase;
@@ -960,8 +947,6 @@ package away3d.loaders.parsers
 		//sharedMethodBlocks are EffectMethods
 		private function parseSharedMethodBlock(blockLength : uint, block : AWDBlock) : EffectMethodBase
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			//var type : uint;
 			//var data_len : uint;
 			var asset:EffectMethodBase;
@@ -1054,8 +1039,6 @@ package away3d.loaders.parsers
 		}
 		private function parseLight(blockLength : uint) : LightBase
 		{
-			// TODO: not used
-			blockLength=blockLength;
 			var name : String;
 			var par_id : uint;
 			var lightType : uint;
@@ -1124,9 +1107,6 @@ package away3d.loaders.parsers
 		}
 		private function parseLightPicker(blockLength : uint) : LightPickerBase
 		{
-			// TODO: not used
-			blockLength=blockLength;
-			
 			var name:String=parseVarStr();
 			var numLights:uint=_body.readUnsignedShort();
 			var lightsArray:Array=new Array();
@@ -1185,8 +1165,6 @@ package away3d.loaders.parsers
 		}
 		private function parseTexture(blockLength : uint, block : AWDBlock) : Texture2DBase
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var type : uint;
 			var data_len : uint;
 			var asset : Texture2DBase;
@@ -1226,8 +1204,6 @@ package away3d.loaders.parsers
 		
 		private function parseSkeleton(blockLength : uint) : Skeleton
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var num_joints : uint;
 			var joints_parsed : uint;
@@ -1277,8 +1253,6 @@ package away3d.loaders.parsers
 		
 		private function parseSkeletonPose(blockLength : uint) : SkeletonPose
 		{
-			// TODO: not used
-			blockLength = blockLength; 
 			var name : String;
 			var pose : SkeletonPose;
 			var num_joints : uint;
@@ -1325,9 +1299,6 @@ package away3d.loaders.parsers
 		
 		private function parseSkeletonAnimation(blockLength : uint) : SkeletonClipNode
 		{
-			// TODO: not used
-			blockLength=blockLength;
-			
 			var name : String;
 			var num_frames : uint;
 			var frames_parsed : uint;
@@ -1363,9 +1334,6 @@ package away3d.loaders.parsers
 		
 		private function parseContainer(blockLength : uint) : ObjectContainer3D
 		{
-			// TODO: not used
-			blockLength=blockLength;
-			
 			var name : String;
 			var par_id : uint;
 			var mtx : Matrix3D;
@@ -1405,9 +1373,6 @@ package away3d.loaders.parsers
 		
 		private function parseMeshInstance(blockLength : uint) : Mesh
 		{
-			// TODO: not used
-			blockLength=blockLength;
-			
 			var name : String;
 			var mesh : Mesh, geom : Geometry;
 			var par_id : uint, data_id : uint;

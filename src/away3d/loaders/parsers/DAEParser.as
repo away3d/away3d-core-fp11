@@ -366,11 +366,11 @@ package away3d.loaders.parsers {
 		{
 			var morph : DAEMorph = controller.morph;
 
-			if (!base) base = processController(_libControllers[morph.source], instance);
+			var base:Geometry = processController(_libControllers[morph.source], instance);
 			if (!base) return null;
 
 			var targets : Vector.<Geometry> = new Vector.<Geometry>();
-			var base : Geometry = getGeometryByName(morph.source);
+			base = getGeometryByName(morph.source);
 			var vertexData : Vector.<Number>;
 			var sub : CompactSubGeometry;
 			var startWeight : Number = 1.0;

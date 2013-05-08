@@ -1,19 +1,14 @@
-package away3d.loaders.parsers
-{
+package away3d.loaders.parsers {
 	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.entities.SegmentSet;
-	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
 	import away3d.primitives.LineSegment;
-	
+
 	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Dictionary;
 	 
@@ -55,7 +50,7 @@ package away3d.loaders.parsers
 		private var _polyLines:Vector.<Vector3D>;
 		private var _polyLinesIndices:Vector.<int>;
 		 
-		private var _charIndex:uint;
+		//private var _charIndex:uint;
 		private var _oldIndex:uint;
 		private var _stringLen:uint;
 		
@@ -115,6 +110,7 @@ package away3d.loaders.parsers
 		protected override function proceedParsing() : Boolean
 		{
 			var line:String;
+			var _vSet:uint;
 			
 			if(!_startedParsing) {
 				_textData = getTextData();
@@ -150,7 +146,7 @@ package away3d.loaders.parsers
 			var tag:String;
 			var isBlock:Boolean;
 			var isTag:Boolean;
-			var _vSet:uint;
+			
 			var lineVal:Number;
 			
 			while(_charIndex<_stringLen && (hasTime() || isBlock)){

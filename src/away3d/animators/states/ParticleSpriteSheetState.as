@@ -76,10 +76,6 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
-			// TODO: not used
-			renderable=renderable;
-			camera=camera;
-
 			if (animationRegisterCache.needUVAnimation) {
 				animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_0), _spriteSheetData[0], _spriteSheetData[1], _spriteSheetData[2], _spriteSheetData[3]);
 				if (_usesCycle) {

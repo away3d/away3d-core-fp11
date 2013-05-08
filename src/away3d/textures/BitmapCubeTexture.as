@@ -12,7 +12,7 @@ package away3d.textures
 	public class BitmapCubeTexture extends CubeTextureBase
 	{
 		private var _bitmapDatas : Vector.<BitmapData>;
-		private var _useAlpha : Boolean;
+		//private var _useAlpha : Boolean;
 
 		public function BitmapCubeTexture(posX : BitmapData, negX : BitmapData, posY : BitmapData, negY : BitmapData, posZ : BitmapData, negZ : BitmapData)
 		{

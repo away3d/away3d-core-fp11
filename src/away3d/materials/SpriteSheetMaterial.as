@@ -1,9 +1,6 @@
-package away3d.materials
-{
+package away3d.materials {
 	import away3d.arcane;
 	import away3d.textures.Texture2DBase;
-
-	import flash.display.BitmapData;
 
 	use namespace arcane;
 
@@ -14,7 +11,7 @@ package away3d.materials
 
 	public class SpriteSheetMaterial extends TextureMaterial
 	{
-		private var currentID:uint = 0;
+		//private var currentID:uint = 0;
 
 		private var _diffuses : Vector.<Texture2DBase>; 
 		private var _normals : Vector.<Texture2DBase>;

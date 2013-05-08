@@ -12,12 +12,6 @@ package away3d.library.naming
 		
 		public override function resolveConflict(changedAsset:IAsset, oldAsset:IAsset, assetsDictionary:Object, precedence:String):void
 		{
-			// TODO: not used
-			oldAsset = oldAsset; 
-			changedAsset = changedAsset;
-			assetsDictionary = assetsDictionary;
-			precedence = precedence;
-			
 			// Do nothing, ignore the fact that there is a conflict.
 			return;
 		}

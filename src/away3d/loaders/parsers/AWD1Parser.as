@@ -1,18 +1,15 @@
-package away3d.loaders.parsers
-{
+package away3d.loaders.parsers {
 	import away3d.arcane;
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
-	import away3d.textures.BitmapTexture;
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;

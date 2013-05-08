@@ -1,16 +1,10 @@
-package away3d.core.partition
-{
-	import away3d.core.math.Plane3D;
-
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-	
+package away3d.core.partition {
 	import away3d.arcane;
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.cameras.Camera3D;
-	import away3d.core.pick.PickingCollisionVO;
+	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
+
+	import flash.geom.Vector3D;
 
 	use namespace arcane;
 

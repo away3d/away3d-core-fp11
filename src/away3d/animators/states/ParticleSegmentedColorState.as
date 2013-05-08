@@ -1,17 +1,15 @@
-package away3d.animators.states
-{
-	import away3d.arcane;
+package away3d.animators.states {
+	import away3d.animators.ParticleAnimator;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.data.ColorSegmentPoint;
-	import away3d.animators.nodes.ParticleColorNode;
 	import away3d.animators.nodes.ParticleSegmentedColorNode;
-	import away3d.animators.ParticleAnimator;
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+
 	import flash.geom.ColorTransform;
-	import flash.geom.Vector3D;
 	
 	use namespace arcane;
 	
@@ -106,12 +104,6 @@ package away3d.animators.states
 		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
-			// TODO: not used
-			animationSubGeometry=animationSubGeometry;
-			camera=camera;
-			renderable=renderable;
-			stage3DProxy=stage3DProxy;
-
 			if (animationRegisterCache.needFragmentAnimation)
 			{
 				if (_numSegmentPoint > 0)

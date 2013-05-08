@@ -1,17 +1,12 @@
-package away3d.tools.commands
-{
+package away3d.tools.commands {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.data.UV;
-	import away3d.core.base.data.Vertex;
-	import away3d.core.math.Vector3DUtils;
 	import away3d.core.math.MathConsts;
 	import away3d.entities.Mesh;
-	
+
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
 

@@ -475,7 +475,8 @@ package away3d.loaders.parsers
 			
 			return null;
 		}
-		 
+
+		/*		 
 		private function getVersionFromHex(char:String):int
 		{
 			switch (char) 
@@ -502,6 +503,8 @@ package away3d.loaders.parsers
 					return new Number(char);
 			}    
 		}
+		 * 
+		 */
 
 		private function generateMaterial(materialString:String):void
 		{	

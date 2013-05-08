@@ -1,8 +1,5 @@
-package away3d.core.math
-{
+package away3d.core.math {
 	import away3d.arcane;
-
-	import flash.geom.Matrix3D;
 
 	import flash.geom.Vector3D;
 

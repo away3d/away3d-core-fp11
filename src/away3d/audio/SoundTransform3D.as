@@ -17,8 +17,6 @@ package away3d.audio
 		private var _scale : Number;
 		private var _volume : Number;
 		private var _soundTransform : SoundTransform;
-		// TODO not used
-		// private var _targetSoundTransform : SoundTransform;
 		
 		private var _emitter : ObjectContainer3D;
 		private var _listener : ObjectContainer3D;

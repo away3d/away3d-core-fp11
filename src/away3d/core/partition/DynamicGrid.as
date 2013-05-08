@@ -1,10 +1,7 @@
-package away3d.core.partition
-{
+package away3d.core.partition {
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.entities.Entity;
-
-	import flash.geom.Vector3D;
 
 	import flash.geom.Vector3D;
 

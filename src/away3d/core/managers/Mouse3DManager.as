@@ -1,11 +1,4 @@
-package away3d.core.managers
-{
-	import flash.display.DisplayObject;
-	import flash.utils.Dictionary;
-	import flash.display.Stage;
-	import flash.display.DisplayObjectContainer;
-	import flash.geom.Point;
-	import flash.display.Sprite;
+package away3d.core.managers {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
@@ -14,9 +7,12 @@ package away3d.core.managers
 	import away3d.core.pick.PickingType;
 	import away3d.events.MouseEvent3D;
 
+	import flash.display.DisplayObject;
+	import flash.display.DisplayObjectContainer;
+	import flash.display.Stage;
 	import flash.events.MouseEvent;
-
 	import flash.geom.Vector3D;
+	import flash.utils.Dictionary;
 
 	use namespace arcane;
 	/**

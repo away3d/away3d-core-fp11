@@ -1,6 +1,5 @@
 package away3d.materials.passes
 {
-	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -64,8 +63,6 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animationCode:String) : String
 		{
-			// TODO: not used
-			animationCode=animationCode;
 			var format : String;
 			switch (_cubeTexture.format) {
 				case Context3DTextureFormat.COMPRESSED:

@@ -1,6 +1,4 @@
-package away3d.core.render
-{
-	import away3d.cameras.Camera3D;
+package away3d.core.render {
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.math.Matrix3DUtils;
@@ -13,7 +11,6 @@ package away3d.core.render
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;

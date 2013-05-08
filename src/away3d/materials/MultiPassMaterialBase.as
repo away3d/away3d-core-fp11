@@ -382,9 +382,6 @@
 		 */
 		arcane override function updateMaterial(context : Context3D) : void
 		{
-			// TODO never used
-			context=context;
-			
 			var passesInvalid : Boolean;
 
 			if (_screenPassesInvalid) {

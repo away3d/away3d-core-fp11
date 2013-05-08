@@ -1,6 +1,5 @@
 package away3d.loaders
 {
-	import away3d.library.assets.BitmapDataAsset;
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;

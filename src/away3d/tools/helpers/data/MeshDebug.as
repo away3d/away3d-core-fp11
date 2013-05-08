@@ -1,6 +1,4 @@
-package away3d.tools.helpers.data
-{
-	import away3d.containers.ObjectContainer3D;
+package away3d.tools.helpers.data {
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometryBase;

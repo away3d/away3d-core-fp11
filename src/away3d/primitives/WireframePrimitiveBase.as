@@ -1,9 +1,7 @@
 package away3d.primitives
 {
-
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
-	import away3d.cameras.Camera3D;
 	import away3d.entities.SegmentSet;
 	import away3d.errors.AbstractMethodError;
 	import away3d.primitives.data.Segment;

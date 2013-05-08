@@ -1,21 +1,18 @@
-package away3d.core.managers
-{
-	import flash.display3D.Context3DClearMask;
+package away3d.core.managers {
+	import away3d.arcane;
+	import away3d.debug.Debug;
+	import away3d.events.Stage3DEvent;
+
 	import flash.display.Shape;
 	import flash.display.Stage3D;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DClearMask;
 	import flash.display3D.Context3DRenderMode;
 	import flash.display3D.Program3D;
-	import flash.display3D.VertexBuffer3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
-	import flash.system.System;
-	
-	import away3d.arcane;
-	import away3d.debug.Debug;
-	import away3d.events.Stage3DEvent;
 
 	use namespace arcane;
 
@@ -49,8 +46,8 @@ package away3d.core.managers
 		private var _antiAlias : int;
 		private var _enableDepthAndStencil : Boolean;
 		private var _contextRequested : Boolean;
-		private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
-		private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
+		//private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
+		//private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
 		private var _renderTarget : TextureBase;
 		private var _renderSurfaceSelector : int;
 		private var _scissorRect : Rectangle;

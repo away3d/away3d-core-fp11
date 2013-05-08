@@ -1,20 +1,17 @@
-package away3d.animators
-{
-	import away3d.arcane;
+package away3d.animators {
+	import away3d.animators.data.*;
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
-	import away3d.animators.data.*;
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
+	import away3d.core.math.MathConsts;
 	import away3d.materials.*;
 	import away3d.materials.passes.*;
-	import away3d.core.math.MathConsts;
 
-	import flash.geom.Matrix3D;
-	import flash.geom.Matrix;
-	import flash.geom.Vector3D;
 	import flash.display3D.Context3DProgramType;
+	import flash.geom.Matrix;
 
 	use namespace arcane;
 	

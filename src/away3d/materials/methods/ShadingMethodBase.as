@@ -8,10 +8,8 @@ package away3d.materials.methods {
 	import away3d.materials.compilation.*;
 	import away3d.materials.passes.*;
 	import away3d.textures.*;
-	
+
 	import flash.display3D.*;
-	import flash.display3D.textures.*;
-	import flash.events.*;
 
 	use namespace arcane;
 

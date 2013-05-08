@@ -1,10 +1,8 @@
 ﻿package away3d.materials {
 	import away3d.*;
-	import away3d.materials.methods.*;
 	import away3d.textures.*;
-	
+
 	import flash.display.*;
-	import flash.display3D.*;
 	import flash.geom.*;
 
 	use namespace arcane;

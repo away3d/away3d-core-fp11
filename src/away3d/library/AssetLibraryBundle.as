@@ -298,7 +298,6 @@ package away3d.library
 		 */
 		public function getAsset(name : String, ns : String = null) : IAsset
 		{
-			// TODO not used
 			//var asset : IAsset;
 			
 			if (_assetDictDirty)
