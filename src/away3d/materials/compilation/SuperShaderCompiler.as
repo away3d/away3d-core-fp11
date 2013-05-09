@@ -78,12 +78,14 @@ package away3d.materials.compilation
 
 		override protected function createNormalRegisters() : void
 		{
-			_sharedRegisters.normalInput = _registerCache.getFreeVertexAttribute();
-			_normalBufferIndex = _sharedRegisters.normalInput.index;
-			_sharedRegisters.animatedNormal = _registerCache.getFreeVertexVectorTemp();
-			_registerCache.addVertexTempUsages(_sharedRegisters.animatedNormal, 1);
-			_animatableAttributes.push(_sharedRegisters.normalInput.toString());
-			_animationTargetRegisters.push(_sharedRegisters.animatedNormal.toString());
+			if (_dependencyCounter.normalDependencies > 0) {
+				_sharedRegisters.normalInput = _registerCache.getFreeVertexAttribute();
+				_normalBufferIndex = _sharedRegisters.normalInput.index;
+				_sharedRegisters.animatedNormal = _registerCache.getFreeVertexVectorTemp();
+				_registerCache.addVertexTempUsages(_sharedRegisters.animatedNormal, 1);
+				_animatableAttributes.push(_sharedRegisters.normalInput.toString());
+				_animationTargetRegisters.push(_sharedRegisters.animatedNormal.toString());
+			}
 
 			if (_methodSetup._normalMethod.hasOutput) {
 				_sharedRegisters.tangentInput = _registerCache.getFreeVertexAttribute();
