@@ -55,7 +55,7 @@ package away3d.filters.tasks
 		public function set range(value : Number) : void
 		{
 			_range = value;
-			_data[8] = value;
+			_data[8] = 1/value;
 		}
 
 
@@ -91,8 +91,8 @@ package away3d.filters.tasks
 
 			// sample depth, unpack & get blur amount (offset point + step size)
 			code = "tex ft0, v0, fs1 <2d, nearest>	\n" +
-
 					"dp4 ft1.z, ft0, fc3				\n" +
+					"sub ft1.z, ft1.z, fc1.z			\n" + // d = d - f
 					"rcp ft1.z, ft1.z			\n" + // screenZ = -n*f/(d-f)
 					"mul ft1.z, fc1.w, ft1.z			\n" + // screenZ = -n*f/(d-f)
 					"sub ft1.z, ft1.z, fc0.w			\n" + // screenZ - dist

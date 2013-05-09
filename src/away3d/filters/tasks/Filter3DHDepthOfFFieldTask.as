@@ -55,7 +55,7 @@ package away3d.filters.tasks
 		public function set range(value : Number) : void
 		{
 			_range = value;
-			_data[8] = value;
+			_data[8] = 1/value;
 		}
 
 
