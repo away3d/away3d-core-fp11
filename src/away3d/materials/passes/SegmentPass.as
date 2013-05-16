@@ -56,6 +56,11 @@
 				// solve for t where line crosses Camera.near
 					"add vt4.x, vt0.z, vc7.z		\n" + // Q0.z + ( -Camera.near )
 					"sub vt4.y, vt0.z, vt1.z		\n" + // Q0.z - Q1.z
+					
+				// fix divide by zero for horizontal lines	
+					"seq vt4.z, vt4.y vc6.x			\n" + // offset = (Q0.z - Q1.z)==0 ? 1 : 0
+					"add vt4.y, vt4.y, vt4.z		\n" + // ( Q0.z - Q1.z ) + offset
+					
 					"div vt4.z, vt4.x, vt4.y		\n" + // t = ( Q0.z - near ) / ( Q0.z - Q1.z )
 
 					"mul vt4.xyz, vt4.zzz, vt2.xyz	\n" + // t(L)
