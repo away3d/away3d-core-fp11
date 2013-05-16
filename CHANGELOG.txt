@@ -121,3 +121,48 @@
 - Changed composite shader methods to work by passing in a method rather than subclassing
 - Moved responsibility for light picker updates to material passes
 - Moved shader compilation classes into own package, extracted dependency counts into class
+
+4.1.1 (Beta)
+- Added mouseEnabled, mouseChildren and extra properties to Mesh.clone(). Closes #414
+- Added WireframeTetrahedron geometry primitive (#375)
+- Added support for constrained mode
+- Added BlendMode.LAYER support for entities.
+- Refactor to worldspace calcuations for scene partitions
+- Improvements to shadow rendering
+- Fixes to normal values for various primitive geometry classes
+- Fixes to Merge, Mirror, Explode and GeomUtil tools. Closes #437, #438, #439, #440, #441
+- Compiler warnings removed
+- Background texture can deactivate mipmapping on creation. Closes #468
+- View doesn't dispose of a shared stage3DProxy when has shareContext = true (#475)
+- Fixes to DAE parser (#486 & #484)
+- Fixed EnvMapMethod using mask. Closes #480
+- Fixed shadows for large scene position values. Closes #412
+- Various fixes: unpaired mouse over/mouse out events, ObjectContainer3D bounds, missing removeChildAt(), OBJ parser ignores zero-length geometries, check for zero length geometries in CompactSubGeometry, normalise normals & tangents after transform (#472)
+- Added OcclusionMaterial
+- Added getParticleNodeName() to ParticleNodeNBase (#488)
+- Added ParticleInitialColorNode to allow different initial colors for each particle
+- Added BitmapData & ATF option for ImageParser (#489, #526)
+- Added spritesheet animation to the animators classes
+- Optimised ShaderRegisterCache creation/reset (#477)
+- Fix incorrect values from uproject() method on view and camera
+- Fix SubGeometry faceWeights variable (incorrect uint cast). Closes #511 & #505
+- Added fix for steps = 0 in HoverController. Closes #467
+- Fixed viewport scaling and offset when using a shared context. Closes #329
+- Added PerspectiveOffCenterLens
+- Fix to convertToSeparateBuffers in CompactSubGometry. Closes #491
+- Fixed FirstPersonController wrap issue on panAngle. Closes #506
+- Fix for SingleFileLoader when getting file extensions for urls with query strings. Closes #463
+- Fixed 3D mouse events when using OrthographicLens. Closes #469
+- Fixed mouse picking with 2 views. Closes #483
+- Fixed mouse click event to behave correctly for a mouse click. Closes #399
+- Fixed incorrect aspect ratio on a view when using Filter3D API. Closes #501
+- Fixed scene partition error for floating cameras. Closes #519
+- Added constrained mode option
+- Fix to SkyBox clipping when using extreme frustum values. Closes #481
+- Fixed materials ignoring invalidation when new effects methods are assigned. Closes #476
+- Fixed ShaderPicker memory leak when view is disposed. Closes #461
+- Mipmaps explicitly disposed when calling dispose() on TextureMaterial. Closes #459 & #417
+- Fix for mesh normals data when using PickingType.SHADER on view.mousePicker. Closes #537
+- Fix for incorrect thickness value being get/set on Segment. Closes #392
+- Fixed single frame glitch for ambient light on startup of a scene. Closes #410
+- Fix to MeshHelper class for correctly handling CompactSubGeometry classes. Closes #444
