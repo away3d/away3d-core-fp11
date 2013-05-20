@@ -4,8 +4,9 @@ package away3d.entities
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.events.LensEvent;
+	import away3d.library.assets.AssetType;
 	import away3d.textures.Texture2DBase;
-
+	
 	import flash.geom.Matrix3D;
 
 	use namespace arcane;
@@ -65,7 +66,11 @@ package away3d.entities
 		{
 			_lens.fieldOfView = value;
 		}
-
+		
+		public override function get assetType() : String
+		{
+			return AssetType.TEXTURE_PROJECTOR;
+		}
 		/**
 		 * The texture to be projected on the geometry.
 		 * IMPORTANT: Since any point that is projected out of the range of the projector's cone is clamped to the texture's edges,

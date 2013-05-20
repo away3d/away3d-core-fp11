@@ -8,12 +8,14 @@ package away3d.events
 	{
 		public static const ASSET_COMPLETE : String = "assetComplete";
 		public static const ENTITY_COMPLETE : String = "entityComplete";
+		public static const SKYBOX_COMPLETE : String = "skyboxComplete";
 		public static const MESH_COMPLETE : String = "meshComplete";
 		public static const GEOMETRY_COMPLETE : String = "geometryComplete";
 		public static const SKELETON_COMPLETE : String = "skeletonComplete";
 		public static const SKELETON_POSE_COMPLETE : String = "skeletonPoseComplete";
 		public static const CONTAINER_COMPLETE : String = "containerComplete";
 		public static const TEXTURE_COMPLETE : String = "textureComplete";
+		public static const TEXTURE_PROJECTOR_COMPLETE : String = "textureProjectorComplete";
 		public static const MATERIAL_COMPLETE : String = "materialComplete";
 		public static const ANIMATION_SET_COMPLETE : String = "animationSetComplete";
 		public static const ANIMATION_STATE_COMPLETE : String = "animationStateComplete";

@@ -13,10 +13,11 @@ package away3d.primitives
 	import away3d.core.partition.SkyBoxNode;
 	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
+	import away3d.library.assets.AssetType;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SkyBoxMaterial;
 	import away3d.textures.CubeTextureBase;
-
+	
 	import flash.display3D.IndexBuffer3D;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
@@ -126,7 +127,11 @@ package away3d.primitives
 		{
 			throw new AbstractMethodError("Unsupported method!");
 		}
-
+		
+		public override function get assetType() : String
+		{
+			return AssetType.SKYBOX;
+		}
 		/**
 		 * @inheritDoc
 		 */

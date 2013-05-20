@@ -251,7 +251,6 @@ package away3d.loaders.parsers {
 		public function parseAsync(data : *, frameLimit : Number = 30) : void
 		{
 			_data = data;
-			
 			startParsing(frameLimit);
 		}
 		
@@ -340,6 +339,10 @@ package away3d.loaders.parsers {
 					type_name = 'texture';
 					type_event = AssetEvent.TEXTURE_COMPLETE;
 					break;
+				case AssetType.TEXTURE_PROJECTOR:
+					type_name = 'textureProjector';
+					type_event = AssetEvent.TEXTURE_PROJECTOR_COMPLETE;
+					break;
 				case AssetType.CONTAINER:
 					type_name = 'container';
 					type_event = AssetEvent.CONTAINER_COMPLETE;
@@ -368,6 +371,10 @@ package away3d.loaders.parsers {
 					type_name = 'entity';
 					type_event = AssetEvent.ENTITY_COMPLETE;
 					break;
+				case AssetType.SKYBOX:
+					type_name = 'skybox';
+					type_event = AssetEvent.SKYBOX_COMPLETE;
+					break;
 				case AssetType.SEGMENT_SET:
 					type_name = 'segmentSet';
 					type_event = AssetEvent.SEGMENT_SET_COMPLETE;
@@ -383,7 +390,7 @@ package away3d.loaders.parsers {
 				default:
 					throw new Error('Unhandled asset type '+asset.assetType+'. Report as bug!');
 					break;
-			}
+			};
 				
 			// If the asset has no name, give it
 			// a per-type default name.
@@ -443,7 +450,6 @@ package away3d.loaders.parsers {
 		protected function onInterval(event : TimerEvent = null) : void
 		{
 			_lastFrameTime = getTimer();
-			
 			if (proceedParsing() && !_parsingFailure)
 				finishParsing();
 		}
