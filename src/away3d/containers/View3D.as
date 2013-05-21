@@ -785,6 +785,7 @@
 		 */
 		public function dispose() : void
 		{
+			_stage3DProxy.removeEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
 			if (!shareContext) {
 				_stage3DProxy.dispose();
 			}
