@@ -7,14 +7,11 @@ package away3d.paths
 		/**
 		 * The number of <code>CubicPathSegment</code> instances in the path.
 		 */
-		[Deprecated]
 		function get numSegments():uint;
-
 
 		/**
 		 * The <code>IPathSegment</code> instances which make up this path.
 		 */
-		[Deprecated]
 		function get segments():Vector.<IPathSegment>;
 
 		/**
@@ -22,27 +19,21 @@ package away3d.paths
 		 * @param index The index of the segment
 		 * @return A <code>CubicPathSegment</code> instance
 		 */
-		[Deprecated]
 		function getSegmentAt(index:uint):IPathSegment;
-
 
 		/**
 		 * Adds a <code>CubicPathSegment</code> to the end of the path
 		 * @param segment
 		 */
-		[Deprecated]
 		function addSegment(segment:IPathSegment):void;
-
 
 		/**
 		 * Removes a segment from the path
 		 * @param index The index of the <code>CubicPathSegment</code> to be removed
 		 * @param join Determines if the segments on either side of the removed segment should be adjusted so there is no gap.
 		 */
-		[Deprecated]
 		function removeSegment(index:uint, join:Boolean = false):void;
-
-
+ 
 		/**
 		 * Disposes the path and all the segments
 		 */
@@ -52,10 +43,7 @@ package away3d.paths
 		 * Discretizes the segment into a set of sample points.
 		 *
 		 * @param numSegments The amount of segments to split the sampling in. The amount of points returned is numSegments + 1
-		 *
-		 * TODO: is this really even necessary? We should be able to simply call getPointOnCurve(t) instead, oblivious of segments
 		 */
-		[Deprecated]
 		function getPointsOnCurvePerSegment(numSegments : uint) : Vector.<Vector.<Vector3D>>;
 
 		/**
