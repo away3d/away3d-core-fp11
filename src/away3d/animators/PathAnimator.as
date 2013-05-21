@@ -9,7 +9,6 @@ package away3d.animators
 	import flash.events.EventDispatcher;
 	import flash.geom.Vector3D;
 
-	[Deprecated]
 	public class PathAnimator extends EventDispatcher
 	{
 		private var _path:IPath;
