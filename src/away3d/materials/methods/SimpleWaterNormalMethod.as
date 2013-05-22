@@ -36,8 +36,8 @@ package away3d.materials.methods {
 		override arcane function initVO(vo : MethodVO) : void
 		{
 			super.initVO(vo);
-			if (normalMap == secondaryNormalMap)
-				_useSecondNormalMap = false;
+			
+			_useSecondNormalMap = normalMap != secondaryNormalMap; 
 		}
 
 		public function get water1OffsetX() : Number
