@@ -317,29 +317,36 @@ package away3d.loaders.parsers {
 
 			return library;
 		}
-
-		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D = null, tab:String = "") : void
+		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D, tab:String = "") : void
 		{
 			var _tab:String = tab + "-";
 			
 			Debug.trace(_tab + node.name);
 			
-			var container : ObjectContainer3D;
-			
 			if (node.type != "JOINT") {
 				Debug.trace(_tab + "ObjectContainer3D : " + node.name);
 				
-				container = new ObjectContainer3D();
-				container.name = node.id;
-				container.transform.rawData = node.matrix.rawData;
-				processGeometries(node, container);
-				processControllers(node, container);
-
-				if (parent) parent.addChild(container);
+				if (node.instance_geometries.length > 0)
+					processGeometries(node, parent) 
+				else if (node.instance_controllers.length > 0)
+					processControllers(node, parent); 
+				else
+				{
+					// trace("Should be a container " + node.id)
+					var container : ObjectContainer3D  = new ObjectContainer3D();
+					container.name = node.id;
+					container.transform.rawData = node.matrix.rawData;
+					finalizeAsset(container, node.id);
+					
+					if (parent) parent.addChild(container);
+				}
+				
+				if (parent.numChildren > 0)
+					parent = parent.getChildAt(parent.numChildren - 1)
+				
 			}
-
 			for (var i : uint = 0; i < node.nodes.length; i++)
-				parseSceneGraph(node.nodes[i], container, _tab);
+				parseSceneGraph(node.nodes[i], parent, _tab);
 		}
 
 		private function processController(controller : DAEController, instance : DAEInstanceController) : Geometry
@@ -453,8 +460,8 @@ package away3d.loaders.parsers {
 				mesh = new Mesh(geometry, null);
 				hasMaterial = false;
 
-				if (daeGeometry.meshName && daeGeometry.meshName != "")
-					mesh.name = daeGeometry.meshName;
+				if (node.name != "")
+					mesh.name = node.name;
 
 				if (effects.length > 0) {
 					for (j = 0; j < mesh.subMeshes.length; j++) {
@@ -564,38 +571,38 @@ package away3d.loaders.parsers {
 
 			return false;
 		}
-
 		private function processGeometries(node : DAENode, container : ObjectContainer3D) : void
 		{
 			Debug.trace(" * processGeometries : " + node.name);
-			
 			var instance : DAEInstanceGeometry;
 			var daeGeometry : DAEGeometry;
 			var effects : Vector.<DAEEffect>;
 			var mesh : Mesh;
 			var geometry : Geometry;
 			var i : uint, j : uint;
-
+			
 			for (i = 0; i < node.instance_geometries.length; i++) {
 				instance = node.instance_geometries[i];
 				daeGeometry = _libGeometries[instance.url] as DAEGeometry;
-
+				
 				if (daeGeometry && daeGeometry.mesh) {
 					geometry = getGeometryByName(instance.url);
 					effects = getMeshEffects(instance.bind_material, daeGeometry.mesh);
-
+					
 					if (geometry) {
 						mesh = new Mesh(geometry);
-
-						if (daeGeometry.meshName && daeGeometry.meshName != "")
-							mesh.name = daeGeometry.meshName;
-
+						
+						if (node.name != "")
+							mesh.name = node.name;
+						   
 						if (effects.length == geometry.subGeometries.length) {
 							for (j = 0; j < mesh.subMeshes.length; j++) {
 								mesh.subMeshes[j].material = effects[j].material;
 							}
 						}
+						mesh.transform = node.matrix;
 						container.addChild(mesh);
+						
 						finalizeAsset(mesh);
 					}
 				}
