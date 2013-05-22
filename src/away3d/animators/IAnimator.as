@@ -58,5 +58,7 @@ package away3d.animators
 		 * Returns a shallow clone (re-using the same IAnimationSet) of this IAnimator.
 		 */
 		function clone():IAnimator;
+		
+		function dispose():void;
 	}
 }
