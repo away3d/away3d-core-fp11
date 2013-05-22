@@ -1,33 +1,21 @@
 package away3d.loaders.parsers {
-	import away3d.animators.SkeletonAnimationSet;
-	import away3d.animators.data.JointPose;
-	import away3d.animators.data.Skeleton;
-	import away3d.animators.data.SkeletonJoint;
-	import away3d.animators.data.SkeletonPose;
-	import away3d.animators.nodes.AnimationNodeBase;
-	import away3d.animators.nodes.SkeletonClipNode;
-	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.SkinnedSubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.SinglePassMaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.materials.methods.BasicAmbientMethod;
-	import away3d.materials.methods.BasicDiffuseMethod;
-	import away3d.materials.methods.BasicSpecularMethod;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DBase;
-
-	import flash.display.BitmapData;
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.debug.*;
+	import away3d.entities.*;
+	import away3d.loaders.misc.*;
+	import away3d.materials.*;
+	import away3d.materials.methods.*;
+	import away3d.materials.utils.*;
+	import away3d.textures.*;
+	
+	import flash.display.*;
+	import flash.geom.*;
+	import flash.net.*;
 
 	use namespace arcane;
 
@@ -43,7 +31,7 @@ package away3d.loaders.parsers {
 		public static const PARSE_MATERIALS : uint = 4;
 		public static const PARSE_VISUAL_SCENES : uint = 8;
 		public static const PARSE_DEFAULT : uint = PARSE_GEOMETRIES | PARSE_IMAGES | PARSE_MATERIALS | PARSE_VISUAL_SCENES;
-
+		
 		private var _doc : XML;
 		private var _ns : Namespace;
 		private var _parseState : uint = 0;
@@ -330,11 +318,17 @@ package away3d.loaders.parsers {
 			return library;
 		}
 
-		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D = null) : void
+		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D = null, tab:String = "") : void
 		{
+			var _tab:String = tab + "-";
+			
+			Debug.trace(_tab + node.name);
+			
 			var container : ObjectContainer3D;
-
+			
 			if (node.type != "JOINT") {
+				Debug.trace(_tab + "ObjectContainer3D : " + node.name);
+				
 				container = new ObjectContainer3D();
 				container.name = node.id;
 				container.transform.rawData = node.matrix.rawData;
@@ -345,7 +339,7 @@ package away3d.loaders.parsers {
 			}
 
 			for (var i : uint = 0; i < node.nodes.length; i++)
-				parseSceneGraph(node.nodes[i], container);
+				parseSceneGraph(node.nodes[i], container, _tab);
 		}
 
 		private function processController(controller : DAEController, instance : DAEInstanceController) : Geometry
@@ -364,6 +358,8 @@ package away3d.loaders.parsers {
 
 		private function processControllerMorph(controller : DAEController, instance : DAEInstanceController) : Geometry
 		{
+			Debug.trace(" * processControllerMorph : " + controller);
+			
 			var morph : DAEMorph = controller.morph;
 
 			var base:Geometry = processController(_libControllers[morph.source], instance);
@@ -403,6 +399,8 @@ package away3d.loaders.parsers {
 
 		private function processControllerSkin(controller : DAEController, instance : DAEInstanceController) : Geometry
 		{
+			Debug.trace(" * processControllerSkin : " + controller);
+			
 			var geometry : Geometry = getGeometryByName(controller.skin.source);
 
 			if (!geometry)
@@ -415,14 +413,18 @@ package away3d.loaders.parsers {
 			applySkinBindShape(geometry, controller.skin);
 			applySkinController(geometry, daeGeometry.mesh, controller.skin, skeleton);
 			controller.skin.userData = skeleton;
-
+			
+			finalizeAsset(skeleton);
+			
 			return geometry;
 		}
 
 		private function processControllers(node : DAENode, container : ObjectContainer3D) : void
 		{
 			if (!node.instance_controllers || node.instance_controllers.length == 0) return;
-
+			
+			Debug.trace(" * processControllers : " + node.name);
+			
 			var instance : DAEInstanceController;
 			var daeGeometry : DAEGeometry;
 			var controller : DAEController;
@@ -491,9 +493,6 @@ package away3d.loaders.parsers {
 				}
 
 				finalizeAsset(mesh);
-
-
-				break;
 			}
 
 			if (animationSet)
@@ -502,7 +501,8 @@ package away3d.loaders.parsers {
 
 		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonClipNode
 		{
-			mesh=mesh;
+			Debug.trace(" * processSkinAnimation : " + mesh.name);
+			
 			//var useGPU : Boolean = _configFlags & CONFIG_USE_GPU ? true : false;
 			//var animation : SkeletonAnimation = new SkeletonAnimation(skeleton, skin.maxBones, useGPU);
 			var animated : Boolean = isAnimatedSkeleton(skeleton);
@@ -567,6 +567,8 @@ package away3d.loaders.parsers {
 
 		private function processGeometries(node : DAENode, container : ObjectContainer3D) : void
 		{
+			Debug.trace(" * processGeometries : " + node.name);
+			
 			var instance : DAEInstanceGeometry;
 			var daeGeometry : DAEGeometry;
 			var effects : Vector.<DAEEffect>;
@@ -629,7 +631,9 @@ package away3d.loaders.parsers {
 		private function parseSkeleton(instance_controller : DAEInstanceController) : Skeleton
 		{
 			if (!instance_controller.skeleton.length) return null;
-
+			
+			Debug.trace(" * parseSkeleton : " + instance_controller);
+			
 			var controller : DAEController = _libControllers[instance_controller.url] as DAEController;
 			var skeletonId : String = instance_controller.skeleton[0];
 			var skeletonRoot : DAENode = _root.findNodeById(skeletonId) || _root.findNodeBySid(skeletonId);
@@ -640,31 +644,40 @@ package away3d.loaders.parsers {
 			skeleton.joints = new Vector.<SkeletonJoint>(controller.skin.joints.length, true);
 			parseSkeletonHierarchy(skeletonRoot, controller.skin, skeleton);
 
-			finalizeAsset(skeleton);
-
 			return skeleton;
 		}
 
-		private function parseSkeletonHierarchy(node : DAENode, skin : DAESkin, skeleton : Skeleton, parent : int = -1) : void
+		private function parseSkeletonHierarchy(node : DAENode, skin : DAESkin, skeleton : Skeleton, parent : int = -1, tab:String="") : void
 		{
-			var jointIndex : uint = skin.jointSourceType == "IDREF_array" ? skin.getJointIndex(node.id) : skin.getJointIndex(node.sid);
-			if (jointIndex < 0) return;
-
-			var joint : SkeletonJoint = new SkeletonJoint();
-			joint.parentIndex = parent;
-
-			if (!isNaN(jointIndex) && jointIndex < skin.joints.length) {
-				if (skin.joints[jointIndex]) joint.name = skin.joints[jointIndex];
-			} else {
-				trace("Error: skin.joints index out of range");
-				return;
+			var _tab:String = tab + "-";
+			
+			Debug.trace(_tab + "[" + node.id + "," + node.sid + "]");
+			
+			var jointIndex :int = skin.jointSourceType == "IDREF_array" ?  skin.getJointIndex(node.id) : skin.getJointIndex(node.sid);
+			
+			if (jointIndex >= 0) {
+				var joint : SkeletonJoint = new SkeletonJoint();
+				joint.parentIndex = parent;
+				
+				if(!isNaN(jointIndex) && jointIndex < skin.joints.length)
+				{
+					if(skin.joints[jointIndex])
+						joint.name = skin.joints[jointIndex];
+				} else {
+					Debug.trace("Error: skin.joints index out of range");
+					return;
+				}
+				
+				var ibm:Matrix3D = skin.inv_bind_matrix[jointIndex];
+				
+				joint.inverseBindPose = ibm.rawData;
+				
+				skeleton.joints[jointIndex] = joint;
 			}
-
-			var ibm : Matrix3D = skin.inv_bind_matrix[jointIndex];
-
-			joint.inverseBindPose = ibm.rawData;
-
-			skeleton.joints[jointIndex] = joint;
+			else
+			{
+				Debug.trace(_tab +"no jointIndex!");
+			}
 
 			for (var i : uint = 0; i < node.nodes.length; i++) {
 				try {
@@ -837,10 +850,9 @@ package away3d.loaders.parsers {
 
 	}
 }
-import away3d.loaders.parsers.DAEParser;
+import away3d.loaders.parsers.*;
 
-import flash.geom.Matrix3D;
-import flash.geom.Vector3D;
+import flash.geom.*;
 
 class DAEAnimationInfo
 {
