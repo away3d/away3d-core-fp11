@@ -673,7 +673,14 @@ package away3d.containers
 		 */
 		override public function dispose() : void
 		{
-			if (parent) parent.removeChild(this);
+			if (parent) 
+			{
+				while (numChildren)
+				{
+					getChildAt(0).dispose();
+				}
+				parent.removeChild(this);
+			}
 		}
 
 		/**
