@@ -114,6 +114,8 @@ package away3d.loaders.parsers
 		private var _defaultBitmapMaterial:TextureMaterial;
 		private var _cubeTextures:Array;
 		
+		public static const COMPRESSIONMODE_LZMA:String = "lzma";
+		
 		public static const UNCOMPRESSED:uint = 0;
 		public static const DEFLATE:uint = 1;
 		public static const LZMA:uint = 2;
@@ -327,7 +329,7 @@ package away3d.loaders.parsers
 					case LZMA: 
 						_body = new ByteArray();
 						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
-						_body.uncompress(CompressionAlgorithm.LZMA);
+						_body.uncompress(COMPRESSIONMODE_LZMA);
 						break;
 					case UNCOMPRESSED: 
 						_body = _byteData;
@@ -426,7 +428,7 @@ package away3d.loaders.parsers
 			_body.readBytes(_newBlockBytes, 0, len);
 			if(blockCompression){
 				if(blockCompressionLZMA)
-					_newBlockBytes.uncompress(CompressionAlgorithm.LZMA);						
+					_newBlockBytes.uncompress(COMPRESSIONMODE_LZMA);						
 				else		
 					_newBlockBytes.uncompress();		
 			}
@@ -886,7 +888,7 @@ package away3d.loaders.parsers
 			{
 				var props:Object = parseProperties({1: _matrixNrType, 2: _matrixNrType, 3: _matrixNrType, 4: UINT8, 5: BOOL});
 				mesh.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
-				mesh.castsShadows = props.get(5, false);
+				mesh.castsShadows = props.get(5, true);
 			}
 			else
 			{
