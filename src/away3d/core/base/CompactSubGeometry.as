@@ -338,7 +338,16 @@ package away3d.core.base
 			return _isolatedVertexPositionData;
 		}
 
-		protected function stripBuffer(offset : int, numEntries : int) : Vector.<Number>
+		/**
+		* Isolate and returns a Vector.Number of a specific buffer type
+		*
+		* - stripBuffer(0, 3), return only the vertices
+		* - stripBuffer(3, 3): return only the normals
+		* - stripBuffer(6, 3): return only the tangents
+		* - stripBuffer(9, 2): return only the uv's
+		* - stripBuffer(11, 2): return only the secondary uv's
+		*/
+		public function stripBuffer(offset : int, numEntries : int) : Vector.<Number>
 		{
 			var data : Vector.<Number> = new Vector.<Number>(_numVertices*numEntries);
 			var i : int = 0, j : int = offset;
