@@ -872,15 +872,14 @@ package away3d.loaders.parsers
 				var mat_id:uint;
 				mat_id = _newBlockBytes.readUnsignedInt();
 				returnedArrayMaterial = getAssetByID(mat_id, [AssetType.MATERIAL])
-				if (returnedArrayMaterial[0] == true)
-					materials.push(returnedArrayMaterial[1] as MaterialBase);
-				else if (mat_id > 0)
+				if ((!returnedArrayMaterial[0])&&(mat_id > 0))
 					_blocks[blockID].addError("Could not find Material Nr " + materials_parsed + " (ID = " + mat_id + " ) for this Mesh");
 				materials.push(returnedArrayMaterial[1] as MaterialBase);
 				materialNames.push(MaterialBase(returnedArrayMaterial[1]).name);
 				
 				materials_parsed++;
 			}
+			
 			
 			var mesh:Mesh = new Mesh(geom, null);
 			mesh.transform = mtx;
