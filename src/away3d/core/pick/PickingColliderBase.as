@@ -2,6 +2,10 @@ package away3d.core.pick
 {
 	import flash.geom.*;
 
+	import away3d.tools.utils.GeomUtil;
+	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubMesh;
+
 	/**
 	 * An abstract base class for all picking collider classes. It should not be instantiated directly.
 	 */
@@ -40,6 +44,16 @@ package away3d.core.pick
 			uv.x = u * uv0.x + v * uv1.x + w * uv2.x;
 			uv.y = u * uv0.y + v * uv1.y + w * uv2.y;
 			return uv;
+		}
+
+		protected function getMeshSubgeometryIndex(subGeometry:SubGeometry):uint
+		{
+			return GeomUtil.getMeshSubgeometryIndex(subGeometry);
+		}
+
+		protected function getMeshSubMeshIndex(subMesh:SubMesh):uint
+		{
+			return GeomUtil.getMeshSubMeshIndex(subMesh);
 		}
 
 		/**

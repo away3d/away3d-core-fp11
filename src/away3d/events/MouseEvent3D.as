@@ -108,6 +108,16 @@ package away3d.events
 		public var uv : Point;
 
 		/**
+		 * The index of the face where the event took place.
+		 */
+		public var index : uint;
+
+		/**
+		 * The index of the subGeometry where the event took place.
+		 */
+		public var subGeometryIndex : uint;
+
+		/**
 		 * The position in object space where the event took place
 		 */
 		public var localPosition : Vector3D;
@@ -200,6 +210,8 @@ package away3d.events
 			result.uv = uv;
 			result.localPosition = localPosition;
 			result.localNormal = localNormal;
+			result.index = index;
+			result.subGeometryIndex = subGeometryIndex;
 			result.delta = delta;
 
 			result.ctrlKey = ctrlKey;

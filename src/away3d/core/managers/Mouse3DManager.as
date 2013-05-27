@@ -16,7 +16,6 @@ package away3d.core.managers {
 
 	use namespace arcane;
 	/**
-
 	 * Mouse3DManager enforces a singleton pattern and is not intended to be instanced.
 	 * it provides a manager class for detecting 3D mouse hits on View3D objects and sending out 3D mouse events.
 	 */
@@ -27,7 +26,7 @@ package away3d.core.managers {
 		private static var _viewCount : int = 0;
 		
 		private var _activeView : View3D;
-		private var _updateDirty : Boolean;
+		private var _updateDirty : Boolean = true;
 		private var _nullVector : Vector3D = new Vector3D();
 		protected static var _collidingObject : PickingCollisionVO;
 		private static var _previousCollidingObject : PickingCollisionVO;
@@ -158,7 +157,7 @@ package away3d.core.managers {
 			event.screenY = sourceEvent.localY;
 
 			collider ||= _collidingObject;
-
+  
 			// 3D properties.
 			if( collider ) {
 				// Object.
@@ -170,6 +169,11 @@ package away3d.core.managers {
 				event.localPosition = collider.localPosition? collider.localPosition.clone() : null;
 				// Normal.
 				event.localNormal = collider.localNormal? collider.localNormal.clone() : null;
+				// Face index.
+				event.index = collider.index;
+				// SubGeometryIndex.
+				event.subGeometryIndex = collider.subGeometryIndex;
+  
 			}
 			else {
 				// Set all to null.
@@ -177,8 +181,10 @@ package away3d.core.managers {
 				event.object = null;
 				event.localPosition = _nullVector;
 				event.localNormal = _nullVector;
+				event.index = 0;
+				event.subGeometryIndex = 0;
 			}
-
+			
 			// Store event to be dispatched later.
 			_queuedEvents.push(event);
 		}

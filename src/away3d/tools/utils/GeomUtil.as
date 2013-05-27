@@ -4,6 +4,7 @@ package away3d.tools.utils
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SkinnedSubGeometry;
+	import away3d.core.base.SubMesh;
 	
 	use namespace arcane;
 
@@ -236,6 +237,41 @@ package away3d.tools.utils
 			}
 			
 			return interleavedBuffer;
+		}
+
+
+		/*
+		* returns the subGeometry index in its parent mesh subgeometries vector
+		*/
+		public static function getMeshSubgeometryIndex(subGeometry:ISubGeometry):uint
+		{
+			var index:uint;
+			var subGeometries:Vector.<ISubGeometry> = subGeometry.parentGeometry.subGeometries;
+			for(var i:uint = 0; i<subGeometries.length;++i){
+				if(subGeometries[i] == subGeometry){
+					index = i;
+					break;
+				}
+			}
+
+			return index;
+		}
+
+		/*
+		* returns the subMesh index in its parent mesh subMeshes vector
+		*/
+		public static function getMeshSubMeshIndex(subMesh:SubMesh):uint
+		{
+			var index:uint;
+			var subMeshes:Vector.<SubMesh> = subMesh.parentMesh.subMeshes;
+			for(var i:uint = 0; i<subMeshes.length;++i){
+				if(subMeshes[i] == subMesh){
+					index = i;
+					break;
+				}
+			}
+
+			return index;
 		}
 	}
 }
