@@ -58,7 +58,7 @@ package away3d.animators.nodes
 				
 				
 				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
-				code += "mov " + temp3 + ".xy," + temp1 + "\n";
+				code += "mov " + temp3 + ".xy," + temp1 + ".xy\n";
 				code += "nrm " + temp3 + ".xyz," + temp3 + ".xyz\n";
 				
 				//temp3.x=cos,temp3.y=sin
