@@ -1,16 +1,35 @@
 package away3d.loaders.parsers
 {
-	import away3d.*;
+	import flash.display.BitmapData;
+	import flash.display.BlendMode;
+	import flash.display.Sprite;
+	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
+	
+	import away3d.arcane;
 	import away3d.animators.SkeletonAnimationSet;
 	import away3d.animators.VertexAnimationSet;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	import away3d.animators.states.VertexClipState;
-	import away3d.bounds.NullBounds;
-	import away3d.containers.*;
-	import away3d.core.base.*;
-	import away3d.entities.*;
-	import away3d.library.assets.*;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.data.UVAnimationFrame;
+	import away3d.animators.nodes.SkeletonClipNode;
+	import away3d.animators.nodes.UVClipNode;
+	import away3d.animators.nodes.VertexClipNode;
+	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
+	import away3d.entities.Mesh;
+	import away3d.entities.TextureProjector;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
@@ -19,9 +38,15 @@ package away3d.loaders.parsers
 	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.NearDirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.loaders.misc.*;
-	import away3d.loaders.parsers.utils.*;
-	import away3d.materials.*;
+	import away3d.loaders.misc.ResourceDependency;
+	import away3d.loaders.parsers.utils.ParserUtil;
+	import away3d.materials.ColorMaterial;
+	import away3d.materials.ColorMultiPassMaterial;
+	import away3d.materials.MaterialBase;
+	import away3d.materials.MultiPassMaterialBase;
+	import away3d.materials.SinglePassMaterialBase;
+	import away3d.materials.TextureMaterial;
+	import away3d.materials.TextureMultiPassMaterial;
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.lightpickers.StaticLightPicker;
 	import away3d.materials.methods.AlphaMaskMethod;
@@ -50,13 +75,12 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.ProjectiveTextureMethod;
 	import away3d.materials.methods.RefractionEnvMapMethod;
 	import away3d.materials.methods.RimLightMethod;
-	import away3d.materials.methods.ShadingMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.methods.SimpleWaterNormalMethod;
 	import away3d.materials.methods.SoftShadowMapMethod;
 	import away3d.materials.methods.SubsurfaceScatteringDiffuseMethod;
 	import away3d.materials.methods.WrapDiffuseMethod;
-	import away3d.materials.utils.*;
+	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.primitives.CapsuleGeometry;
 	import away3d.primitives.ConeGeometry;
 	import away3d.primitives.CubeGeometry;
@@ -65,14 +89,12 @@ package away3d.loaders.parsers
 	import away3d.primitives.SkyBox;
 	import away3d.primitives.SphereGeometry;
 	import away3d.primitives.TorusGeometry;
-	import away3d.textures.*;
-	import away3d.tools.utils.*;
-	
-	import flash.display.*;
-	import flash.display3D.textures.CubeTexture;
-	import flash.geom.*;
-	import flash.net.*;
-	import flash.utils.*;
+	import away3d.textures.BitmapCubeTexture;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.CubeTextureBase;
+	import away3d.textures.Texture2DBase;
+	import away3d.textures.TextureProxyBase;
+	import away3d.tools.utils.GeomUtil;
 	
 	use namespace arcane;
 	
@@ -113,6 +135,8 @@ package away3d.loaders.parsers
 		private var _defaultCubeTexture:BitmapCubeTexture;
 		private var _defaultBitmapMaterial:TextureMaterial;
 		private var _cubeTextures:Array;
+		
+		public static const COMPRESSIONMODE_LZMA:String = "lzma";
 		
 		public static const UNCOMPRESSED:uint = 0;
 		public static const DEFLATE:uint = 1;
@@ -180,6 +204,7 @@ package away3d.loaders.parsers
 			_depthSizeDic.push(256);
 			_depthSizeDic.push(512);
 			_depthSizeDic.push(2048);
+			_depthSizeDic.push(1024);
 			_version = [];// will contain 2 int (major-version, minor-version) for awd-version-check
 		}
 		
@@ -327,7 +352,7 @@ package away3d.loaders.parsers
 					case LZMA: 
 						_body = new ByteArray();
 						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
-						_body.uncompress(CompressionAlgorithm.LZMA);
+						_body.uncompress(COMPRESSIONMODE_LZMA);
 						break;
 					case UNCOMPRESSED: 
 						_body = _byteData;
@@ -426,7 +451,7 @@ package away3d.loaders.parsers
 			_body.readBytes(_newBlockBytes, 0, len);
 			if(blockCompression){
 				if(blockCompressionLZMA)
-					_newBlockBytes.uncompress(CompressionAlgorithm.LZMA);						
+					_newBlockBytes.uncompress(COMPRESSIONMODE_LZMA);						
 				else		
 					_newBlockBytes.uncompress();		
 			}
@@ -847,15 +872,14 @@ package away3d.loaders.parsers
 				var mat_id:uint;
 				mat_id = _newBlockBytes.readUnsignedInt();
 				returnedArrayMaterial = getAssetByID(mat_id, [AssetType.MATERIAL])
-				if (returnedArrayMaterial[0] == true)
-					materials.push(returnedArrayMaterial[1] as MaterialBase);
-				else if (mat_id > 0)
+				if ((!returnedArrayMaterial[0])&&(mat_id > 0))
 					_blocks[blockID].addError("Could not find Material Nr " + materials_parsed + " (ID = " + mat_id + " ) for this Mesh");
 				materials.push(returnedArrayMaterial[1] as MaterialBase);
 				materialNames.push(MaterialBase(returnedArrayMaterial[1]).name);
 				
 				materials_parsed++;
 			}
+			
 			
 			var mesh:Mesh = new Mesh(geom, null);
 			mesh.transform = mtx;
@@ -886,7 +910,7 @@ package away3d.loaders.parsers
 			{
 				var props:Object = parseProperties({1: _matrixNrType, 2: _matrixNrType, 3: _matrixNrType, 4: UINT8, 5: BOOL});
 				mesh.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
-				mesh.castsShadows = props.get(5, false);
+				mesh.castsShadows = props.get(5, true);
 			}
 			else
 			{
@@ -968,8 +992,15 @@ package away3d.loaders.parsers
 			// if a shadowMapper has been created, adjust the depthMapSize if needed, assign to light and set castShadows to true
 			if (newShadowMapper)
 			{
-				if (props.get(10, 0) > 0)
-					newShadowMapper.depthMapSize = _depthSizeDic[props.get(10, 0)];
+				if (newShadowMapper is CubeMapShadowMapper){
+					if(props.get(10, 1)!=1)
+						newShadowMapper.depthMapSize = _depthSizeDic[props.get(10, 1)];
+				}
+				else{
+					if(props.get(10, 2)!=2)
+						newShadowMapper.depthMapSize = _depthSizeDic[props.get(10, 2)];			
+				}
+				
 				light.shadowMapper = newShadowMapper;
 				light.castsShadows = true;
 			}
@@ -1715,7 +1746,7 @@ package away3d.loaders.parsers
 				case 1104: //HardShadowMapMethod
 					shadowMethod = new HardShadowMapMethod(light);
 					HardShadowMapMethod(shadowMethod).alpha = props.get(101, 1);
-					HardShadowMapMethod(shadowMethod).alpha = props.get(102, 0.002);
+					HardShadowMapMethod(shadowMethod).epsilon = props.get(102, 0.002);
 					break;
 			
 			}

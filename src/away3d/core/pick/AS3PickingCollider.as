@@ -53,7 +53,7 @@ package away3d.core.pick
 			var uvStride:uint = subMesh.UVStride;
 			var uvOffset:uint = subMesh.UVOffset;
 			var numIndices:int = indexData.length;
-
+ 
 			for(var index:uint = 0; index < numIndices; index+=3 ) { // sweep all triangles
 				// evaluate triangle indices
 				i0 = vertexOffset + indexData[ index ] * vertexStride;
@@ -119,6 +119,8 @@ package away3d.core.pick
 						pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
 						pickingCollisionVO.localNormal = new Vector3D( nx, ny, nz );
 						pickingCollisionVO.uv = getCollisionUV( indexData, uvData, index, v, w, u, uvOffset, uvStride );
+						pickingCollisionVO.index = index ;
+						pickingCollisionVO.subGeometryIndex = getMeshSubMeshIndex(subMesh);
 						
 						// if not looking for best hit, first found will do...
 						if (!_findClosestCollision)

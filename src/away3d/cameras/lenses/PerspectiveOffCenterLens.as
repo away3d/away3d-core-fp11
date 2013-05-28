@@ -160,12 +160,12 @@ package away3d.cameras.lenses {
 			
 			
 			var center:Number = -_minLengthX * (_scissorRect.x + _scissorRect.width*minLengthFracX) / (_scissorRect.width*minLengthFracX);
-			var middle:Number = -_minLengthY * (_scissorRect.y + _scissorRect.height*minLengthFracY) / (_scissorRect.height*minLengthFracY);
+			var middle:Number = _minLengthY * (_scissorRect.y + _scissorRect.height*minLengthFracY) / (_scissorRect.height*minLengthFracY);
 			
 			left = center - (_maxLengthX - _minLengthX)*(_viewPort.width / _scissorRect.width);
 			right = center;
-			top = middle - (_maxLengthY - _minLengthY)*(_viewPort.height / _scissorRect.height);
-			bottom = middle;
+			top = middle;
+			bottom = middle + (_maxLengthY - _minLengthY)*(_viewPort.height / _scissorRect.height);
 			
 			raw[uint(0)] = 2 * _near / (right - left);
 			raw[uint(5)] = 2 * _near / (bottom - top);

@@ -33,6 +33,16 @@ package away3d.core.pick
 		 * The uv coordinate at the position of the collision.
 		 */
 		public var uv:Point;
+
+		/**
+		 * The index of the face where the event took pl ace.
+		 */
+		public var index : uint;
+
+		/**
+		 * The index of the subGeometry where the event took place.
+		 */
+		public var subGeometryIndex : uint;
 		
 		/**
 		 * The starting position of the colliding ray in local coordinates.
@@ -80,5 +90,6 @@ package away3d.core.pick
 		{
 			this.entity = entity;
 		}
+
 	}
 }

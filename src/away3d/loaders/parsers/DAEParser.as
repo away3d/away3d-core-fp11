@@ -49,7 +49,7 @@ package away3d.loaders.parsers {
 		private var _libAnimations : Object;
 		private var _scene : DAEScene;
 		private var _root : DAEVisualScene;
-		private var _rootContainer : ObjectContainer3D;
+		//private var _rootContainer : ObjectContainer3D;
 		private var _geometries : Vector.<Geometry>;
 		private var _animationInfo : DAEAnimationInfo;
 		//private var _animators : Vector.<IAnimator>;
@@ -189,11 +189,11 @@ package away3d.loaders.parsers {
 						var list : XMLList = _doc.._ns::visual_scene.(@id == _scene.instance_visual_scene.url);
 
 						if (list.length()) {
-							_rootContainer = new ObjectContainer3D();
+							//_rootContainer = new ObjectContainer3D();
 							_root = new DAEVisualScene(this, list[0]);
 							_root.updateTransforms(_root);
 							_animationInfo = parseAnimationInfo();
-							parseSceneGraph(_root, _rootContainer);
+							parseSceneGraph(_root);
 						}
 					}
 					_parseState = isAnimated ? DAEParserState.PARSE_ANIMATIONS : DAEParserState.PARSE_COMPLETE;
@@ -204,7 +204,7 @@ package away3d.loaders.parsers {
 					break;
 
 				case DAEParserState.PARSE_COMPLETE:
-					finalizeAsset(_rootContainer, "COLLADA_ROOT_" + (_numInstances++));
+					//finalizeAsset(_rootContainer, "COLLADA_ROOT_" + (_numInstances++));
 					return PARSING_DONE;
 			}
 
@@ -317,7 +317,7 @@ package away3d.loaders.parsers {
 
 			return library;
 		}
-		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D, tab:String = "") : void
+		private function parseSceneGraph(node : DAENode, parent : ObjectContainer3D = null, tab:String = "") : void
 		{
 			var _tab:String = tab + "-";
 			
@@ -326,24 +326,25 @@ package away3d.loaders.parsers {
 			if (node.type != "JOINT") {
 				Debug.trace(_tab + "ObjectContainer3D : " + node.name);
 				
+				var container : ObjectContainer3D;
+				
 				if (node.instance_geometries.length > 0)
-					processGeometries(node, parent) 
+					container = processGeometries(node, parent);
 				else if (node.instance_controllers.length > 0)
-					processControllers(node, parent); 
+					container = processControllers(node, parent); 
 				else
 				{
 					// trace("Should be a container " + node.id)
-					var container : ObjectContainer3D  = new ObjectContainer3D();
+					container = new ObjectContainer3D();
 					container.name = node.id;
 					container.transform.rawData = node.matrix.rawData;
 					finalizeAsset(container, node.id);
 					
-					if (parent) parent.addChild(container);
+					if (parent)
+						parent.addChild(container);
 				}
 				
-				if (parent.numChildren > 0)
-					parent = parent.getChildAt(parent.numChildren - 1)
-				
+				parent = container;
 			}
 			for (var i : uint = 0; i < node.nodes.length; i++)
 				parseSceneGraph(node.nodes[i], parent, _tab);
@@ -426,10 +427,8 @@ package away3d.loaders.parsers {
 			return geometry;
 		}
 
-		private function processControllers(node : DAENode, container : ObjectContainer3D) : void
+		private function processControllers(node : DAENode, container : ObjectContainer3D) : Mesh
 		{
-			if (!node.instance_controllers || node.instance_controllers.length == 0) return;
-			
 			Debug.trace(" * processControllers : " + node.name);
 			
 			var instance : DAEInstanceController;
@@ -473,7 +472,9 @@ package away3d.loaders.parsers {
 				}
 
 				if (!hasMaterial) mesh.material = _defaultBitmapMaterial;
-				container.addChild(mesh);
+				
+				if (container)
+					container.addChild(mesh);
 
 				if (controller.skin && controller.skin.userData is Skeleton) {
 
@@ -504,6 +505,8 @@ package away3d.loaders.parsers {
 
 			if (animationSet)
 				finalizeAsset(animationSet);
+			
+			return mesh;
 		}
 
 		private function processSkinAnimation(skin : DAESkin, mesh : Mesh, skeleton : Skeleton) : SkeletonClipNode
@@ -571,7 +574,7 @@ package away3d.loaders.parsers {
 
 			return false;
 		}
-		private function processGeometries(node : DAENode, container : ObjectContainer3D) : void
+		private function processGeometries(node : DAENode, container : ObjectContainer3D) : Mesh
 		{
 			Debug.trace(" * processGeometries : " + node.name);
 			var instance : DAEInstanceGeometry;
@@ -601,12 +604,16 @@ package away3d.loaders.parsers {
 							}
 						}
 						mesh.transform = node.matrix;
-						container.addChild(mesh);
+						
+						if (container)
+							container.addChild(mesh);
 						
 						finalizeAsset(mesh);
 					}
 				}
 			}
+			
+			return mesh;
 		}
 
 		private function getMeshEffects(bindMaterial : DAEBindMaterial, mesh : DAEMesh) : Vector.<DAEEffect>

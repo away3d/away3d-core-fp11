@@ -9,6 +9,7 @@ package away3d.core.pick
 	import away3d.core.math.*;
 	import away3d.core.traverse.*;
 	import away3d.entities.*;
+	import away3d.tools.utils.GeomUtil;
 
 	import flash.display.*;
 	import flash.display3D.*;
@@ -51,6 +52,8 @@ package away3d.core.pick
 		private var _hitEntity : Entity;
 		private var _localHitPosition : Vector3D = new Vector3D();
 		private var _hitUV : Point = new Point();
+		private var _faceIndex:uint;
+		private var _subGeometryIndex:uint;
 		
 		private var _localHitNormal:Vector3D = new Vector3D();
 		
@@ -133,10 +136,15 @@ package away3d.core.pick
 				_collisionVO.localPosition = _localHitPosition;
 				_collisionVO.localNormal = _localHitNormal;
 				_collisionVO.uv = _hitUV;
+				_collisionVO.index = _faceIndex;
+				_collisionVO.subGeometryIndex = _subGeometryIndex;
+
 			} else {
 				_collisionVO.localPosition = null;
 				_collisionVO.localNormal = null;
 				_collisionVO.uv = null;
+				_collisionVO.index = 0;
+				_collisionVO.subGeometryIndex = 0;
 			}
 
 			return _collisionVO;
@@ -416,6 +424,9 @@ package away3d.core.pick
 						u = uvs[ui1]; v = uvs[ui1+1];
 						_hitUV.x = u + t*(uvs[ui2] - u) + s*(uvs[ui3] - u);
 						_hitUV.y = v + t*(uvs[ui2+1] - v) + s*(uvs[ui3+1] - v);
+
+						_faceIndex = i;
+						_subGeometryIndex = GeomUtil.getMeshSubMeshIndex(SubMesh(_hitRenderable));
 
 						return;
 					}
