@@ -55,10 +55,10 @@ package away3d.animators
 		 */
 		public function play(name : String, transition : IAnimationTransition = null, offset : Number = NaN) : void
 		{
-			if (_name == name)
+			if (_activeAnimationName == name)
 				return;
 			
-			_name = name;
+			_activeAnimationName = name;
 			
 			//TODO: implement transitions in vertex animator
 			

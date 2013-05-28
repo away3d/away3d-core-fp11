@@ -17,6 +17,7 @@ package away3d.events
 		public static const TEXTURE_COMPLETE : String = "textureComplete";
 		public static const TEXTURE_PROJECTOR_COMPLETE : String = "textureProjectorComplete";
 		public static const MATERIAL_COMPLETE : String = "materialComplete";
+		public static const ANIMATOR_COMPLETE : String = "animatorComplete";
 		public static const ANIMATION_SET_COMPLETE : String = "animationSetComplete";
 		public static const ANIMATION_STATE_COMPLETE : String = "animationStateComplete";
 		public static const ANIMATION_NODE_COMPLETE : String = "animationNodeComplete";
