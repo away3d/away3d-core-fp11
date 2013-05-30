@@ -12,8 +12,12 @@ package away3d.loaders.parsers
 	import flash.utils.Endian;
 	
 	import away3d.arcane;
+	import away3d.animators.AnimationSetBase;
+	import away3d.animators.AnimatorBase;
 	import away3d.animators.SkeletonAnimationSet;
+	import away3d.animators.SkeletonAnimator;
 	import away3d.animators.VertexAnimationSet;
+	import away3d.animators.VertexAnimator;
 	import away3d.animators.data.JointPose;
 	import away3d.animators.data.Skeleton;
 	import away3d.animators.data.SkeletonJoint;
@@ -521,6 +525,10 @@ package away3d.loaders.parsers
 						break;
 					case 113: 
 						parseVertexAnimationSet(_cur_block_id);
+						isParsed = true;
+						break;
+					case 122: 
+						parseAnimatorSet(_cur_block_id);
 						isParsed = true;
 						break;
 				}
@@ -1970,43 +1978,134 @@ package away3d.loaders.parsers
 				trace("Parsed a VertexClipNode: Name = "+clip.name+" | Target-Geometry-Name = "+Geometry(returnedArray[1]).name+" | Number of Frames = "+clip.frames.length);
 		}
 		
+		
+		//BlockID 113
+		private function parseAnimatorSet(blockID:uint):void
+		{
+			var meshBlockAdress:int;			
+			var targetMesh:Mesh;
+			var animSetBlockAdress:int
+			var targetAnimationSet:AnimationSetBase;
+			var outputString:String="";
+			var name:String = parseVarStr();
+			var type:uint = _newBlockBytes.readUnsignedShort();
+			
+			var props:AWDProperties=parseProperties({1:BADDR});
+			
+			animSetBlockAdress = _newBlockBytes.readUnsignedInt();	
+			meshBlockAdress = _newBlockBytes.readUnsignedInt();
+			
+			var activeState:uint = _newBlockBytes.readUnsignedShort();
+			var autoplay:Boolean = Boolean(_newBlockBytes.readUnsignedByte());
+			parseUserAttributes();
+			parseUserAttributes();
+			
+			
+			var returnedArray:Array = getAssetByID(meshBlockAdress, [AssetType.MESH])
+			if (returnedArray[0] == false)
+			{
+				_blocks[blockID].addError("Could not find the targetMesh ( " + meshBlockAdress + " ) for this Animator");
+			}
+			targetMesh=returnedArray[1] as Mesh;
+			returnedArray = getAssetByID(animSetBlockAdress, [AssetType.ANIMATION_SET])
+			if (returnedArray[0] == false)
+			{
+				_blocks[blockID].addError("Could not find the AnimationSet ( " + animSetBlockAdress + " ) for this Animator");;
+				return
+			}
+			targetAnimationSet=returnedArray[1] as AnimationSetBase;
+			var thisAnimator:AnimatorBase;
+			if(type==1)
+			{
+				
+				returnedArray = getAssetByID(props.get(1,0), [AssetType.SKELETON])
+				if (returnedArray[0] == false)
+				{
+					_blocks[blockID].addError("Could not find the Skeleton ( " + props.get(1,0) + " ) for this Animator");
+					return
+				}
+				thisAnimator=new SkeletonAnimator(targetAnimationSet as SkeletonAnimationSet,returnedArray[1] as Skeleton);
+				
+			}
+			else if (type==2){
+				thisAnimator=new VertexAnimator(targetAnimationSet as VertexAnimationSet);
+			}
+
+			finalizeAsset(thisAnimator, name);
+			_blocks[blockID].data = thisAnimator;
+			if(targetMesh){
+				if(type==1)
+					targetMesh.animator=SkeletonAnimator(thisAnimator);
+				if(type==2)
+					targetMesh.animator=VertexAnimator(thisAnimator);
+					
+			}
+			
+			if (_debug)
+				trace("Parsed a Animator: Name = "+name);
+				
+			
+			
+		}
+		
+		
 		//BlockID 113
 		private function parseVertexAnimationSet(blockID:uint):void
 		{
 			var poseBlockAdress:int
+			var outputString:String="";
 			var name:String = parseVarStr();
 			var num_frames:uint = _newBlockBytes.readUnsignedShort();
-			parseProperties(null);
-			var newVertexAnimationSet:VertexAnimationSet = new VertexAnimationSet();
-			var newSkeletonAnimationSet:SkeletonAnimationSet = new SkeletonAnimationSet();
+			var props:AWDProperties=parseProperties({1:UINT16});
 			var frames_parsed:uint = 0;
+			var skeletonFrames:Vector.<SkeletonClipNode>=new Vector.<SkeletonClipNode>;
+			var vertexFrames:Vector.<VertexClipNode>=new Vector.<VertexClipNode>;
 			while (frames_parsed < num_frames)
 			{
 				poseBlockAdress = _newBlockBytes.readUnsignedInt();
 				var returnedArray:Array = getAssetByID(poseBlockAdress, [AssetType.ANIMATION_NODE])
 				if (returnedArray[0] == false)
 				{
-					_blocks[blockID].addError("Could not find the AnimationClipNode Nr " + frames_parsed + " ( " + poseBlockAdress + " ) for this VertexAnimationSet");
+					_blocks[blockID].addError("Could not find the AnimationClipNode Nr " + frames_parsed + " ( " + poseBlockAdress + " ) for this AnimationSet");
 				}
 				else
 				{
 					if (returnedArray[1] is VertexClipNode)
-						newVertexAnimationSet.addAnimation(returnedArray[1])
+						vertexFrames.push(returnedArray[1])
 					if (returnedArray[1] is SkeletonClipNode)
-						newSkeletonAnimationSet.addAnimation(returnedArray[1])
+						skeletonFrames.push(returnedArray[1])
 				}
 				frames_parsed++;
 			}
-			if (newVertexAnimationSet.animations.length == 0)
+			if ((vertexFrames.length == 0)&&(skeletonFrames.length==0))
 			{
-				_blocks[blockID].addError("Could not create this VertexAnimationSet, because it contains no animations");
+				_blocks[blockID].addError("Could not create this AnimationSet, because it contains no animations");
 				return;
 			}
 			parseUserAttributes();
-			finalizeAsset(newVertexAnimationSet, name);
-			_blocks[blockID].data = newVertexAnimationSet;
-			if (_debug)
-				trace("Parsed a VertexAnimationSet: Name = "+name+" | Animations = "+newVertexAnimationSet.animations.length+" | Animation-Names = "+newVertexAnimationSet.animationNames.toString());
+			if (vertexFrames.length>0){
+				var newVertexAnimationSet:VertexAnimationSet = new VertexAnimationSet();
+				for each (var vertexFrame:VertexClipNode in vertexFrames)
+					newVertexAnimationSet.addAnimation(vertexFrame);	
+				finalizeAsset(newVertexAnimationSet, name);
+				_blocks[blockID].data = newVertexAnimationSet;
+				if (_debug)
+					trace("Parsed a VertexAnimationSet: Name = "+name+" | Animations = "+newVertexAnimationSet.animations.length+" | Animation-Names = "+newVertexAnimationSet.animationNames.toString());
+											
+			}
+			else if (skeletonFrames.length>0){
+				returnedArray = getAssetByID(poseBlockAdress, [AssetType.ANIMATION_NODE])
+				var newSkeletonAnimationSet:SkeletonAnimationSet = new SkeletonAnimationSet(props.get(1,4));//props.get(1,4));
+				for each (var skeletFrame:SkeletonClipNode in skeletonFrames)
+					newSkeletonAnimationSet.addAnimation(skeletFrame);	
+				finalizeAsset(newSkeletonAnimationSet, name);
+				_blocks[blockID].data = newSkeletonAnimationSet;
+				if (_debug)
+					trace("Parsed a SkeletonAnimationSet: Name = "+name+" | Animations = "+newSkeletonAnimationSet.animations.length+" | Animation-Names = "+newSkeletonAnimationSet.animationNames.toString());
+					
+					
+				
+			}
 		}
 		
 		//blockID 121
