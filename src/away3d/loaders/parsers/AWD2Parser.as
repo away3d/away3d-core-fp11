@@ -391,10 +391,12 @@ package away3d.loaders.parsers
 			
 			flags = _byteData.readUnsignedShort(); // Parse bit flags 
 			_streaming = bitFlags.test(flags, bitFlags.FLAG1);
-			_accuracyMatrix = bitFlags.test(flags, bitFlags.FLAG2);
-			_accuracyGeo = bitFlags.test(flags, bitFlags.FLAG3);
-			_accuracyProps = bitFlags.test(flags, bitFlags.FLAG4);
-			_accuracyOnBlocks = bitFlags.test(flags, bitFlags.FLAG5);							
+			if ((_version[0] == 2) && (_version[1] == 1)){
+				_accuracyMatrix = bitFlags.test(flags, bitFlags.FLAG2);
+				_accuracyGeo = bitFlags.test(flags, bitFlags.FLAG3);
+				_accuracyProps = bitFlags.test(flags, bitFlags.FLAG4);
+				_accuracyOnBlocks = bitFlags.test(flags, bitFlags.FLAG5);	
+			}
 			
 			// set storagePrecision types
 			_geoNrType=FLOAT32;
@@ -407,7 +409,7 @@ package away3d.loaders.parsers
 			_compression = _byteData.readUnsignedByte(); // compression	
 			
 			if (_debug){
-				trace("Import AWDFile of version = " + _version[0] + " - " + _version[1] +" | Compression = "+_compression+" | Streaming = "+_streaming);	
+				trace("Import AWDFile of version = " + _version[0] + " - " + _version[1] );	
 				trace("Global Settings = Compression = "+_compression+" | Streaming = "+_streaming+" | Matrix-Precision = "+_accuracyMatrix+" | Geometry-Precision = "+_accuracyGeo+" | Properties-Precision = "+_accuracyProps);	
 			}
 			
