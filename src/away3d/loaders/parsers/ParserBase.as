@@ -319,6 +319,10 @@ package away3d.loaders.parsers {
 					type_name = 'light';
 					type_event = AssetEvent.LIGHT_COMPLETE;
 					break;
+				case AssetType.ANIMATOR:
+					type_name = 'animator';
+					type_event = AssetEvent.ANIMATOR_COMPLETE;
+					break;
 				case AssetType.ANIMATION_SET:
 					type_name = 'animationSet';
 					type_event = AssetEvent.ANIMATION_SET_COMPLETE;

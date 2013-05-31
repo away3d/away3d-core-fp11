@@ -140,10 +140,10 @@ package away3d.animators
 		 */
 		public function play(name : String, transition : IAnimationTransition = null, offset : Number = NaN) : void
 		{
-			if (_name == name)
+			if (_activeAnimationName == name)
 				return;
 			
-			_name = name;
+			_activeAnimationName = name;
 			
 			if (!_animationSet.hasAnimation(name))
 				throw new Error("Animation root node " + name + " not found!");
@@ -499,7 +499,7 @@ package away3d.animators
 				event.animationNode.removeEventListener(AnimationStateEvent.TRANSITION_COMPLETE, onTransitionComplete);
 				//if this is the current active state transition, revert control to the active node
 				if (_activeState == event.animationState) {
-					_activeNode = _animationSet.getAnimation(_name);
+					_activeNode = _animationSet.getAnimation(_activeAnimationName);
 					_activeState = getAnimationState(_activeNode);
 					_activeSkeletonState = _activeState as ISkeletonAnimationState;
 				}

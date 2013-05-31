@@ -138,10 +138,10 @@ package away3d.animators
 		{
 			transition=transition;
 			offset=offset;
-			if (_name == name)
+			if (_activeAnimationName == name)
 				return;
 			
-			_name = name;
+			_activeAnimationName = name;
 			
 			if (!_animationSet.hasAnimation(name))
 				throw new Error("Animation root node " + name + " not found!");

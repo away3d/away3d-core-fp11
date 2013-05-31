@@ -148,7 +148,7 @@ package away3d.loaders.parsers {
 				if (_reachedEOF) {
 					calculateMaxJointCount();
 					_animationSet = new SkeletonAnimationSet(_maxJointCount);
-
+					
 					_mesh = new Mesh(new Geometry(), null);
 					_geometry = _mesh.geometry;
 
@@ -158,7 +158,8 @@ package away3d.loaders.parsers {
 
 					//_geometry.animation = _animation;
 //					_mesh.animationController = _animationController;
-
+					
+					finalizeAsset(_geometry);
 					finalizeAsset(_mesh);
 					finalizeAsset(_skeleton);
 					finalizeAsset(_animationSet);

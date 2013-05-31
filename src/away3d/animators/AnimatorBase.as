@@ -1,15 +1,20 @@
 package away3d.animators
 {
-	import away3d.animators.nodes.*;
-	import away3d.animators.states.*;
-	import away3d.arcane;
-	import away3d.entities.*;
-	import away3d.events.*;
+	import flash.display.Sprite;
+	import flash.events.Event;
+	import flash.geom.Vector3D;
+	import flash.utils.Dictionary;
+	import flash.utils.getTimer;
 	
-	import flash.display.*;
-	import flash.events.*;
-	import flash.geom.*;
-	import flash.utils.*;
+	import away3d.arcane;
+	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.animators.states.AnimationStateBase;
+	import away3d.animators.states.IAnimationState;
+	import away3d.entities.Mesh;
+	import away3d.events.AnimatorEvent;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
 	
 	use namespace arcane;
 	
@@ -40,7 +45,7 @@ package away3d.animators
 	 *
 	 * @see away3d.animators.AnimationSetBase
 	 */
-	public class AnimatorBase extends EventDispatcher
+	public class AnimatorBase extends NamedAssetBase implements IAsset
 	{
 		private var _broadcaster : Sprite = new Sprite();
 		private var _isPlaying : Boolean;
@@ -55,7 +60,7 @@ package away3d.animators
 		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
 		protected var _activeNode:AnimationNodeBase;
 		protected var _activeState:IAnimationState;
-		protected var _name:String;
+		protected var _activeAnimationName:String;
 		protected var _absoluteTime : Number = 0;
 		private var _animationStates:Dictionary = new Dictionary(true);
 		
@@ -110,7 +115,7 @@ package away3d.animators
 		 */
 		public function get activeAnimation():AnimationNodeBase
 		{
-			return _animationSet.getAnimation(_name);
+			return _animationSet.getAnimation(_activeAnimationName);
 		}
 		
 		/**
@@ -118,7 +123,7 @@ package away3d.animators
 		 */
 		public function get activeAnimationName():String
 		{
-			return _name;
+			return _activeAnimationName;
 		}
 		
 		/**
@@ -325,6 +330,19 @@ package away3d.animators
 		{
 			if (hasEventListener(AnimatorEvent.CYCLE_COMPLETE))
 				dispatchEvent(_cycleEvent || (_cycleEvent = new AnimatorEvent(AnimatorEvent.CYCLE_COMPLETE, this)));
+		}
+		/**
+		 * @inheritDoc
+		 */
+		public function dispose():void
+		{
+		}
+		/**
+		 * @inheritDoc
+		 */
+		public function get assetType() : String
+		{
+			return AssetType.ANIMATOR;
 		}
 	}
 }
