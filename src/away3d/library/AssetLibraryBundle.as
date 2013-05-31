@@ -1,5 +1,8 @@
 package away3d.library
 {
+	import flash.events.EventDispatcher;
+	import flash.net.URLRequest;
+	
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
@@ -9,14 +12,12 @@ package away3d.library
 	import away3d.library.naming.ConflictStrategy;
 	import away3d.library.naming.ConflictStrategyBase;
 	import away3d.library.utils.AssetLibraryIterator;
+	import away3d.library.utils.IDUtil;
 	import away3d.loaders.AssetLoader;
 	import away3d.loaders.misc.AssetLoaderContext;
 	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
-	
-	import flash.events.EventDispatcher;
-	import flash.net.URLRequest;
 	
 	use namespace arcane;
 	
@@ -330,6 +331,9 @@ package away3d.library
 			if (old != null) {
 				_strategy.resolveConflict(asset, old, _assetDictionary[ns], _strategyPreference);
 			}
+			
+			//create unique-id (for now this is used in AwayBuilder only
+			asset.id=IDUtil.createUID();
 			
 			// Add it
 			_assets.push(asset);

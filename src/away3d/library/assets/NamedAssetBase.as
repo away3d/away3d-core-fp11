@@ -12,6 +12,7 @@ package away3d.library.assets
 		private var _originalName : String;
 		private var _namespace : String;
 		private var _name : String;
+		private var _id : String;
 		private var _full_path : Array;
 		
 		
@@ -39,6 +40,14 @@ package away3d.library.assets
 			return _originalName;
 		}
 		
+		public function get id() : String
+		{
+			return _id;
+		}
+		public function set id(newID : String) : void
+		{
+			_id=newID;
+		}
 		
 		public function get name() : String
 		{

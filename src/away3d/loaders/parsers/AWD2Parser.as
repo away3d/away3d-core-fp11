@@ -1981,75 +1981,6 @@ package away3d.loaders.parsers
 		}
 		
 		
-		//BlockID 113
-		private function parseAnimatorSet(blockID:uint):void
-		{
-			var meshBlockAdress:int;			
-			var targetMesh:Mesh;
-			var animSetBlockAdress:int
-			var targetAnimationSet:AnimationSetBase;
-			var outputString:String="";
-			var name:String = parseVarStr();
-			var type:uint = _newBlockBytes.readUnsignedShort();
-			
-			var props:AWDProperties=parseProperties({1:BADDR});
-			
-			animSetBlockAdress = _newBlockBytes.readUnsignedInt();	
-			meshBlockAdress = _newBlockBytes.readUnsignedInt();
-			
-			var activeState:uint = _newBlockBytes.readUnsignedShort();
-			var autoplay:Boolean = Boolean(_newBlockBytes.readUnsignedByte());
-			parseUserAttributes();
-			parseUserAttributes();
-			
-			
-			var returnedArray:Array = getAssetByID(meshBlockAdress, [AssetType.MESH])
-			if (returnedArray[0] == false)
-			{
-				_blocks[blockID].addError("Could not find the targetMesh ( " + meshBlockAdress + " ) for this Animator");
-			}
-			targetMesh=returnedArray[1] as Mesh;
-			returnedArray = getAssetByID(animSetBlockAdress, [AssetType.ANIMATION_SET])
-			if (returnedArray[0] == false)
-			{
-				_blocks[blockID].addError("Could not find the AnimationSet ( " + animSetBlockAdress + " ) for this Animator");;
-				return
-			}
-			targetAnimationSet=returnedArray[1] as AnimationSetBase;
-			var thisAnimator:AnimatorBase;
-			if(type==1)
-			{
-				
-				returnedArray = getAssetByID(props.get(1,0), [AssetType.SKELETON])
-				if (returnedArray[0] == false)
-				{
-					_blocks[blockID].addError("Could not find the Skeleton ( " + props.get(1,0) + " ) for this Animator");
-					return
-				}
-				thisAnimator=new SkeletonAnimator(targetAnimationSet as SkeletonAnimationSet,returnedArray[1] as Skeleton);
-				
-			}
-			else if (type==2){
-				thisAnimator=new VertexAnimator(targetAnimationSet as VertexAnimationSet);
-			}
-
-			finalizeAsset(thisAnimator, name);
-			_blocks[blockID].data = thisAnimator;
-			if(targetMesh){
-				if(type==1)
-					targetMesh.animator=SkeletonAnimator(thisAnimator);
-				if(type==2)
-					targetMesh.animator=VertexAnimator(thisAnimator);
-					
-			}
-			
-			if (_debug)
-				trace("Parsed a Animator: Name = "+name);
-				
-			
-			
-		}
-		
 		
 		//BlockID 113
 		private function parseVertexAnimationSet(blockID:uint):void
@@ -2137,6 +2068,79 @@ package away3d.loaders.parsers
 			if (_debug)
 				trace("Parsed a UVClipNode: Name = "+name+" | Number of Frames = "+frames_parsed);
 		}
+		
+		
+		
+		//BlockID 122
+		private function parseAnimatorSet(blockID:uint):void
+		{
+			var meshBlockAdress:int;			
+			var targetMesh:Mesh;
+			var animSetBlockAdress:int
+			var targetAnimationSet:AnimationSetBase;
+			var outputString:String="";
+			var name:String = parseVarStr();
+			var type:uint = _newBlockBytes.readUnsignedShort();
+			
+			var props:AWDProperties=parseProperties({1:BADDR});
+			
+			animSetBlockAdress = _newBlockBytes.readUnsignedInt();	
+			meshBlockAdress = _newBlockBytes.readUnsignedInt();
+			
+			var activeState:uint = _newBlockBytes.readUnsignedShort();
+			var autoplay:Boolean = Boolean(_newBlockBytes.readUnsignedByte());
+			parseUserAttributes();
+			parseUserAttributes();
+			
+			
+			var returnedArray:Array = getAssetByID(meshBlockAdress, [AssetType.MESH])
+			if (returnedArray[0] == false)
+			{
+				_blocks[blockID].addError("Could not find the targetMesh ( " + meshBlockAdress + " ) for this Animator");
+			}
+			targetMesh=returnedArray[1] as Mesh;
+			returnedArray = getAssetByID(animSetBlockAdress, [AssetType.ANIMATION_SET])
+			if (returnedArray[0] == false)
+			{
+				_blocks[blockID].addError("Could not find the AnimationSet ( " + animSetBlockAdress + " ) for this Animator");;
+				return
+			}
+			targetAnimationSet=returnedArray[1] as AnimationSetBase;
+			var thisAnimator:AnimatorBase;
+			if(type==1)
+			{
+				
+				returnedArray = getAssetByID(props.get(1,0), [AssetType.SKELETON])
+				if (returnedArray[0] == false)
+				{
+					_blocks[blockID].addError("Could not find the Skeleton ( " + props.get(1,0) + " ) for this Animator");
+					return
+				}
+				thisAnimator=new SkeletonAnimator(targetAnimationSet as SkeletonAnimationSet,returnedArray[1] as Skeleton);
+				
+			}
+			else if (type==2){
+				thisAnimator=new VertexAnimator(targetAnimationSet as VertexAnimationSet);
+			}
+			
+			finalizeAsset(thisAnimator, name);
+			_blocks[blockID].data = thisAnimator;
+			if(targetMesh){
+				if(type==1)
+					targetMesh.animator=SkeletonAnimator(thisAnimator);
+				if(type==2)
+					targetMesh.animator=VertexAnimator(thisAnimator);
+				
+			}
+			
+			if (_debug)
+				trace("Parsed a Animator: Name = "+name);
+			
+			
+			
+		}
+		
+		
 		
 		//blockID 254
 		private function parseNameSpace(blockID:uint):void

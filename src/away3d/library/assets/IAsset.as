@@ -6,6 +6,8 @@ package away3d.library.assets
 	{
 		function get name() : String;
 		function set name(val : String) : void;
+		function get id() : String;
+		function set id(val : String) : void;
 		function get assetNamespace() : String;
 		function get assetType() : String;
 		function get assetFullPath() : Array;
