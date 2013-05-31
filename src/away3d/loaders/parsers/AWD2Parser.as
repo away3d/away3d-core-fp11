@@ -2073,8 +2073,7 @@ package away3d.loaders.parsers
 		
 		//BlockID 122
 		private function parseAnimatorSet(blockID:uint):void
-		{
-			var meshBlockAdress:int;			
+		{			
 			var targetMesh:Mesh;
 			var animSetBlockAdress:int
 			var targetAnimationSet:AnimationSetBase;
@@ -2085,20 +2084,26 @@ package away3d.loaders.parsers
 			var props:AWDProperties=parseProperties({1:BADDR});
 			
 			animSetBlockAdress = _newBlockBytes.readUnsignedInt();	
-			meshBlockAdress = _newBlockBytes.readUnsignedInt();
+			var targetMeshLength:uint=_newBlockBytes.readUnsignedShort();
+			var meshAdresses:Vector.<uint> = new Vector.<uint>;
+			for(var i:int=0;i<targetMeshLength;i++){
+				meshAdresses.push(_newBlockBytes.readUnsignedInt());
+			}
+				
 			
 			var activeState:uint = _newBlockBytes.readUnsignedShort();
 			var autoplay:Boolean = Boolean(_newBlockBytes.readUnsignedByte());
 			parseUserAttributes();
 			parseUserAttributes();
 			
+			var returnedArray:Array;
+			var targetMeshes:Vector.<Mesh> = new Vector.<Mesh>;
 			
-			var returnedArray:Array = getAssetByID(meshBlockAdress, [AssetType.MESH])
-			if (returnedArray[0] == false)
-			{
-				_blocks[blockID].addError("Could not find the targetMesh ( " + meshBlockAdress + " ) for this Animator");
+			for(i=0;i<meshAdresses.length;i++){
+				returnedArray = getAssetByID(meshAdresses[i], [AssetType.MESH])
+				if (returnedArray[0] == true)
+					targetMeshes.push(returnedArray[1] as Mesh);
 			}
-			targetMesh=returnedArray[1] as Mesh;
 			returnedArray = getAssetByID(animSetBlockAdress, [AssetType.ANIMATION_SET])
 			if (returnedArray[0] == false)
 			{
@@ -2125,11 +2130,11 @@ package away3d.loaders.parsers
 			
 			finalizeAsset(thisAnimator, name);
 			_blocks[blockID].data = thisAnimator;
-			if(targetMesh){
+			for(i=0;i<targetMeshes.length;i++){
 				if(type==1)
-					targetMesh.animator=SkeletonAnimator(thisAnimator);
+					targetMeshes[i].animator=SkeletonAnimator(thisAnimator);
 				if(type==2)
-					targetMesh.animator=VertexAnimator(thisAnimator);
+					targetMeshes[i].animator=VertexAnimator(thisAnimator);
 				
 			}
 			
