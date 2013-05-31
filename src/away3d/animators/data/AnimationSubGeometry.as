@@ -47,6 +47,7 @@ package away3d.animators.data
 			if (!buffer || _bufferContext[contextIndex] != context) {
 				buffer = _vertexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, _totalLenOfOneVertex);
 				_bufferContext[contextIndex] = context;
+				_bufferDirty[contextIndex] = true;
 			}
 			if (_bufferDirty[contextIndex]) {
 				buffer.uploadFromVector(_vertexData, 0, _numVertices);
