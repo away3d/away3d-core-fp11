@@ -77,7 +77,7 @@ package away3d.core.managers {
 				}
 			
 				if (!view.shareContext) {
-					if (view == _activeView && (_forceMouseMove || _updateDirty)) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.		
+					if (view == _activeView && (_forceMouseMove || _updateDirty)) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
 						_collidingObject = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
 					}
 				} else { 
@@ -141,6 +141,49 @@ package away3d.core.managers {
 			_previousCollidingObject = _collidingObject;
 		}
 
+		public function addViewLayer(view : View3D) : void {
+			var stg:Stage = view.stage;
+
+			// Add instance to mouse3dmanager to fire mouse events for multiple views
+			if (!view.stage3DProxy.mouse3DManager) view.stage3DProxy.mouse3DManager = this;
+
+			if (!hasKey(view)) {
+				_view3Ds[view] = 0;
+			}
+
+			_childDepth = 0;
+			traverseDisplayObjects(stg);
+			_viewCount = _childDepth;
+		}
+
+		public function enableMouseListeners(view : View3D) : void
+		{
+			view.addEventListener(MouseEvent.CLICK, onClick);
+			view.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
+			view.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			view.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+			view.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			view.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+			view.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
+			view.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+		}
+
+		public function disableMouseListeners(view : View3D) : void
+		{
+			view.removeEventListener(MouseEvent.CLICK, onClick);
+			view.removeEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
+			view.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
+			view.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
+			view.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
+			view.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
+			view.removeEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
+			view.removeEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
+		}
+
+		public function dispose() : void
+		{
+			_mousePicker.dispose();
+		}
 
 		// ---------------------------------------------------------------------
 		// Private.
@@ -198,8 +241,35 @@ package away3d.core.managers {
 				}
 			}
 		}
-		
-		
+
+		private function hasKey(view : View3D) : Boolean {
+			for ( var v:* in _view3Ds) {
+				if (v === view) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		private function traverseDisplayObjects(container : DisplayObjectContainer) : void {
+			var childCount:int = container.numChildren;
+			var c:int = 0;
+			var child:DisplayObject;
+			for (c = 0; c<childCount; c++) {
+				child = container.getChildAt(c);
+				for ( var v:* in _view3Ds) {
+					if (child == v) {
+						_view3Ds[child] = _childDepth;
+						_view3DLookup[_childDepth] = v;
+						_childDepth++;
+					}
+				}
+				if (child is DisplayObjectContainer) {
+					traverseDisplayObjects(child as DisplayObjectContainer);
+				}
+			}
+		}
+
 		// ---------------------------------------------------------------------
 		// Listeners.
 		// ---------------------------------------------------------------------
@@ -287,73 +357,9 @@ package away3d.core.managers {
 			_updateDirty = true;
 		}
 
-		public function addViewLayer(view : View3D) : void {
-			var stg:Stage = view.stage;
-
-			// Add instance to mouse3dmanager to fire mouse events for multiple views
-			if (!view.stage3DProxy.mouse3DManager) view.stage3DProxy.mouse3DManager = this;
-			
-			if (!hasKey(view)) {
-				_view3Ds[view] = 0;
-			}
-			
-			_childDepth = 0;
-			traverseDisplayObjects(stg);
-			_viewCount = _childDepth;
-		}
-		
-		private function hasKey(view : View3D) : Boolean {
-			for ( var v:* in _view3Ds) {
-				if (v === view) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		private function traverseDisplayObjects(container : DisplayObjectContainer) : void {
-			var childCount:int = container.numChildren;
-			var c:int = 0;
-			var child:DisplayObject;
-			for (c = 0; c<childCount; c++) {
-				child = container.getChildAt(c);
-				for ( var v:* in _view3Ds) {
-					if (child == v) { 	
-						_view3Ds[child] = _childDepth;
-						_view3DLookup[_childDepth] = v;
-						_childDepth++;
-					}
-				}
-				if (child is DisplayObjectContainer) {
-					traverseDisplayObjects(child as DisplayObjectContainer);
-				}
-			}
-		}
-		
-
-		public function enableMouseListeners(view : View3D) : void
-		{
-			view.addEventListener(MouseEvent.CLICK, onClick);
-			view.addEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
-			view.addEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			view.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-			view.addEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			view.addEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
-			view.addEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
-			view.addEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
-		}
-
-		public function disableMouseListeners(view : View3D) : void
-		{
-			view.removeEventListener(MouseEvent.CLICK, onClick);
-			view.removeEventListener(MouseEvent.DOUBLE_CLICK, onDoubleClick);
-			view.removeEventListener(MouseEvent.MOUSE_DOWN, onMouseDown);
-			view.removeEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);
-			view.removeEventListener(MouseEvent.MOUSE_UP, onMouseUp);
-			view.removeEventListener(MouseEvent.MOUSE_WHEEL, onMouseWheel);
-			view.removeEventListener(MouseEvent.MOUSE_OVER, onMouseOver);
-			view.removeEventListener(MouseEvent.MOUSE_OUT, onMouseOut);
-		}
+		// ---------------------------------------------------------------------
+		// Getters & setters.
+		// ---------------------------------------------------------------------
 
 		public function get forceMouseMove() : Boolean
 		{
@@ -373,11 +379,6 @@ package away3d.core.managers {
 		public function set mousePicker(value : IPicker) : void
 		{
 			_mousePicker = value;
-		}
-
-		public function dispose() : void
-		{
-			_mousePicker.dispose();
 		}
 	}
 }

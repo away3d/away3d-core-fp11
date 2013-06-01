@@ -60,7 +60,8 @@ package away3d.core.managers {
 		private var _viewportDirty : Boolean;
 		private var _bufferClear : Boolean;
 		private var _mouse3DManager : Mouse3DManager;
-		
+		private var _touch3DManager : Touch3DManager;
+
 		private function notifyViewportUpdated():void
 		{
 			if (_viewportDirty)
@@ -475,8 +476,16 @@ package away3d.core.managers {
 			return _mouse3DManager;
 		}
 
-		public function set mouse3DManager(mouse3DManager : Mouse3DManager) : void {
-			_mouse3DManager = mouse3DManager;
+		public function set mouse3DManager(value : Mouse3DManager) : void {
+			_mouse3DManager = value;
+		}
+
+		public function get touch3DManager() : Touch3DManager {
+			return _touch3DManager;
+		}
+
+		public function set touch3DManager(value : Touch3DManager) : void {
+			_touch3DManager = value;
 		}
 
 
