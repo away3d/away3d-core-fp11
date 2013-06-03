@@ -1,7 +1,9 @@
 package away3d.tools.utils {
+	import flash.utils.Dictionary;
+	import away3d.entities.Entity;
+	import flash.geom.Matrix3D;
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.ISubGeometry;
 	import away3d.entities.Mesh;
 
 	import flash.geom.Vector3D;
@@ -20,7 +22,8 @@ package away3d.tools.utils {
 		private static var _maxX:Number;
 		private static var _maxY:Number;
 		private static var _maxZ:Number;
-		private static var _defaultPosition:Vector3D = new Vector3D(0.0,0.0,0.0);
+		private static var _defaultPosition : Vector3D = new Vector3D(0.0, 0.0, 0.0);
+		private static var _containers : Dictionary;
 		 
 		/**
 		* Calculate the bounds of a Mesh object
@@ -30,17 +33,31 @@ package away3d.tools.utils {
 		public static function getMeshBounds(mesh:Mesh):void
 		{
 			reset();
-			parseMeshBounds(mesh);
+			parseObjectBounds(mesh);
 		}
 		/**
 		* Calculate the bounds of an ObjectContainer3D object
 		* @param container		ObjectContainer3D. The ObjectContainer3D to get the bounds from.
 		* Use the getters of this class to retrieve the results
 		*/
-		public static function getObjectContainerBounds(container : ObjectContainer3D):void
+		public static function getObjectContainerBounds(container : ObjectContainer3D, worldBased:Boolean = true):void
 		{
 			reset();
+			_containers = new Dictionary();
 			parseObjectContainerBounds(container);
+			
+			// Transform min/max values to the scene if requrired
+			if (worldBased && !(container is Entity)) {
+				var b:Vector.<Number> = Vector.<Number>([Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
+				var c:Vector.<Number> = getBoundsCorners(_minX, _minY, _minZ, _maxX, _maxY, _maxZ);
+				transformContainer(b, c, container.sceneTransform);
+				_minX = b[0];
+				_minY = b[1];
+				_minZ = b[2];
+				_maxX = b[3];
+				_maxY = b[4];
+				_maxZ = b[5];
+			}
 		}
 		
 		/**
@@ -147,89 +164,114 @@ package away3d.tools.utils {
 			_defaultPosition.y = 0.0;
 			_defaultPosition.z = 0.0;
 		}
-		
-		private static function parseObjectContainerBounds(obj:ObjectContainer3D):void
-		{
-			var child:ObjectContainer3D;
 
-			if(obj is Mesh)
-				parseMeshBounds(Mesh(obj), obj.position);
-				 
-			for(var i:uint = 0;i<obj.numChildren;++i){
+		private static function parseObjectContainerBounds(obj:ObjectContainer3D, parentTransform:Matrix3D = null):void
+		{
+			if (!obj.visible) return;
+
+			var containerBounds:Vector.<Number> = _containers[obj] ||= Vector.<Number>([Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
+			
+			var child:ObjectContainer3D;
+			var isEntity:Entity = obj as Entity;
+			var containerTransform:Matrix3D;
+
+			if (isEntity) {
+				parseObjectBounds(obj, parentTransform);
+
+				containerTransform = obj.transform.clone(); 
+				if (parentTransform) containerTransform.append(parentTransform);
+			} else {
+				containerTransform = new Matrix3D(); //obj.transform.clone(); 
+			}
+
+			for(var i:uint = 0; i<obj.numChildren; ++i) {
 				child = obj.getChildAt(i);
-				parseObjectContainerBounds(ObjectContainer3D(child));
+				parseObjectContainerBounds(child, containerTransform);
+			}
+			
+			var parentBounds:Vector.<Number> = _containers[obj.parent];
+			if (!isEntity && parentTransform) { 
+				parseObjectBounds(obj, parentTransform, true);
+			}
+			
+			if (parentBounds) {
+				parentBounds[0] = Math.min(parentBounds[0], containerBounds[0]);
+				parentBounds[1] = Math.min(parentBounds[1], containerBounds[1]);
+				parentBounds[2] = Math.min(parentBounds[2], containerBounds[2]);
+				parentBounds[3] = Math.max(parentBounds[3], containerBounds[3]);
+				parentBounds[4] = Math.max(parentBounds[4], containerBounds[4]);
+				parentBounds[5] = Math.max(parentBounds[5], containerBounds[5]);
+			} else {
+				_minX = containerBounds[0];
+				_minY = containerBounds[1];
+				_minZ = containerBounds[2];
+				_maxX = containerBounds[3];
+				_maxY = containerBounds[4];
+				_maxZ = containerBounds[5];
 			}
 		}
 		
-		private static function parseMeshBounds(m:Mesh, position:Vector3D = null):void
+		private static function parseObjectBounds(oC:ObjectContainer3D, parentTransform:Matrix3D = null, resetBounds:Boolean = false):void
 		{
-			var offsetPosition:Vector3D = position || _defaultPosition;
+			var e:Entity = oC as Entity;
+			var corners:Vector.<Number>;
+			var mat:Matrix3D = oC.transform.clone();
+			var cB:Vector.<Number> = _containers[oC];
+			if (e) {
+				if (e.minX==Number.POSITIVE_INFINITY || e.minY==Number.POSITIVE_INFINITY || e.minZ==Number.POSITIVE_INFINITY ||
+				    e.maxX==Number.NEGATIVE_INFINITY || e.maxY==Number.NEGATIVE_INFINITY || e.maxZ==Number.NEGATIVE_INFINITY) return;
+				
+				corners = getBoundsCorners(e.minX, e.minY, e.minZ, e.maxX, e.maxY, e.maxZ);
+				if (parentTransform) mat.append(parentTransform);
+			} else {
+				corners = getBoundsCorners(cB[0], cB[1], cB[2], cB[3], cB[4], cB[5]);
+				if (parentTransform) mat.prepend(parentTransform);
+			}
+			
+			if (resetBounds) {
+				cB[0] = cB[1] = cB[2] = Infinity;
+				cB[3] = cB[4] = cB[5] = -Infinity;
+			}
+			
+			transformContainer(cB, corners, mat);
+		}	
+		
+		private static function getBoundsCorners(minX:Number, minY:Number, minZ:Number, maxX:Number, maxY:Number, maxZ:Number) : Vector.<Number> {
+			return Vector.<Number>([
+				minX, minY, minZ,
+				minX, minY, maxZ,
+				minX, maxY, minZ,
+				minX, maxY, maxZ,
+				maxX, minY, minZ,
+				maxX, minY, maxZ,
+				maxX, maxY, minZ,
+				maxX, maxY, maxZ
+			]);
+		}
+		
+		private static function transformContainer(bounds:Vector.<Number>, corners:Vector.<Number>, matrix:Matrix3D) : void {
+
+			matrix.transformVectors(corners, corners);
+
 			var x:Number;
 			var y:Number;
 			var z:Number;
 			
-			try{
-					x = offsetPosition.x;
-					y = offsetPosition.y;
-					z = offsetPosition.z;
-					
-					if(x + m.minX < _minX) _minX = x+ m.minX;
-					if(x + m.maxX > _maxX) _maxX = x+ m.maxX;
-					
-					if(y + m.minY < _minY) _minY = y+m.minY;
-					if(y +m.maxY > _maxY) _maxY = y+m.maxY;
-					
-					if(z +m.minZ < _minZ) _minZ = z+m.minZ;
-					if(z +m.maxZ > _maxZ) _maxZ = z+m.maxZ;
-					
-					if(m.scaleX != 1){
-						_minX *= m.scaleX;
-						_maxX *= m.scaleX;
-					}
-					if(m.scaleY != 1){
-						_minY *= m.scaleY;
-						_maxY *= m.scaleY;
-					}
-					if(m.scaleZ != 1){
-						_minZ *= m.scaleZ;
-						_maxZ*= m.scaleZ;
-					}
- 
-			} catch(e:Error){
+			var pCtr:int=0;
+			while (pCtr<corners.length) {
+				x = corners[pCtr++];
+				y = corners[pCtr++];
+				z = corners[pCtr++];
 				
-				var geometries:Vector.<ISubGeometry> = m.geometry.subGeometries;
-				var numSubGeoms:int = geometries.length;
+				if(x < bounds[0]) bounds[0] = x;
+				if(x > bounds[3]) bounds[3] = x;
 				
-				var subGeom:ISubGeometry;
-				var vertices:Vector.<Number>;
-	
-				var j : uint;
-				var vecLength : uint;
-				var stride : uint;
+				if(y < bounds[1]) bounds[1] = y;
+				if(y > bounds[4]) bounds[4] = y;
 				
-				for (var i : uint = 0; i < numSubGeoms; ++i){
-					subGeom = geometries[i];
-					vertices = subGeom.vertexData;
-					vecLength = vertices.length;
-					stride = subGeom.vertexStride;
-					for (j = subGeom.vertexOffset; j < vecLength; j+=stride){
-						//not using Math.min or max to go faster
-						x = (vertices[j]*m.scaleX)+offsetPosition.x;
-						y = (vertices[j+1]*m.scaleY)+offsetPosition.y;
-						z = (vertices[j+2]*m.scaleZ)+offsetPosition.z;
-						
-						if(x < _minX) _minX = x;
-						if(x > _maxX) _maxX = x;
-						
-						if(y < _minY) _minY = y;
-						if(y > _maxY) _maxY = y;
-						
-						if(z < _minZ) _minZ = z;
-						if(z > _maxZ) _maxZ = z;
-					}
-				}
+				if(z < bounds[2]) bounds[2] = z;
+				if(z > bounds[5]) bounds[5] = z;
 			}
 		}
-		
 	}
 }

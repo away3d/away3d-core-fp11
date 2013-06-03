@@ -76,6 +76,7 @@
 			_vertexBufferDirty = true;
 			_indexBufferDirty = true;
 			_lineCount++;
+			_boundsInvalid = true;
 		}
 
 		arcane function updateSegment(segment : Segment) : void
@@ -140,6 +141,7 @@
 			_vertices[index++] = 1;
 
 			_vertexBufferDirty = true;
+			_boundsInvalid = true;
 		}
 
 		private function removeSegmentByIndex(index : uint) : void
@@ -280,7 +282,36 @@
 		override protected function updateBounds() : void
 		{
 			// todo: fix bounds
-			_bounds.fromExtremes(-10000, -10000, 0, 10000, 10000, 0);
+			//_bounds.fromExtremes(-10000, -10000, 0, 10000, 10000, 0);
+
+			var i:uint;
+			var len:uint = _vertices.length;
+			var minX:Number, minY:Number, minZ:Number;
+			var maxX:Number, maxY:Number, maxZ:Number;
+
+			if( len == 0 ) return;
+
+			var v:Number;
+
+			minX = maxX = _vertices[uint( i++ )];
+			minY = maxY = _vertices[uint( i++ )];
+			minZ = maxZ = _vertices[uint( i++ )];
+
+			while( i < len ) {
+				v = _vertices[i++];
+				if( v < minX ) minX = v;
+				else if( v > maxX ) maxX = v;
+				v = _vertices[i++];
+				if( v < minY ) minY = v;
+				else if( v > maxY ) maxY = v;
+				v = _vertices[i++];
+				if( v < minZ ) minZ = v;
+				else if( v > maxZ ) maxZ = v;
+				i+=8;
+			}
+
+			_bounds.fromExtremes( minX, minY, minZ, maxX, maxY, maxZ );
+			
 			_boundsInvalid = false;
 		}
 
