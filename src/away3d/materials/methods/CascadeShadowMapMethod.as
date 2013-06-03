@@ -1,17 +1,15 @@
 package away3d.materials.methods
 {
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.base.IRenderable;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.events.ShadingMethodEvent;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.shadowmaps.CascadeShadowMapper;
-	import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderRegisterData;
-	import away3d.materials.compilation.ShaderRegisterElement;
-
-	import flash.events.Event;
+	import away3d.*;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.managers.*;
+	import away3d.events.*;
+	import away3d.lights.*;
+	import away3d.lights.shadowmaps.*;
+	import away3d.materials.compilation.*;
+	
+	import flash.events.*;
 
 	use namespace arcane;
 
@@ -184,7 +182,8 @@ package away3d.materials.methods
 
 			var vertexData : Vector.<Number> = vo.vertexData;
 			var vertexIndex : int = vo.vertexConstantsIndex;
-			vertexData[vertexIndex + 3] = -_epsilon;
+			
+			vo.vertexData[vo.vertexConstantsIndex + 3] = -1/(DirectionalShadowMapper(_shadowMapper).depth*_epsilon);
 
 			var numCascades : int = _cascadeShadowMapper.numCascades;
 			vertexIndex += 4;

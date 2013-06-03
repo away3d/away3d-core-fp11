@@ -26,6 +26,8 @@ package away3d.lights.shadowmaps
 		private var _snap : Number = 64;
 
 		private var _cullPlanes : Vector.<Plane3D>;
+		private var _minZ:Number;
+		private var _maxZ:Number;
 
 		public function DirectionalShadowMapper()
 		{
@@ -65,7 +67,15 @@ package away3d.lights.shadowmaps
 		{
 			return _depthCamera.viewProjection;
 		}
-
+		
+		/**
+		 * Depth projection matrix that projects from scene space to depth map.
+		 */
+		arcane function get depth() : Number
+		{
+			return _maxZ - _minZ;
+		}
+		
 		override protected function drawDepthMap(target : TextureBase, scene : Scene3D, renderer : DepthRenderer) : void
 		{
 			_casterCollector.camera = _depthCamera;
@@ -111,8 +121,8 @@ package away3d.lights.shadowmaps
 			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var dir : Vector3D;
 			var x : Number, y : Number, z : Number;
-			var minX : Number, minY : Number, minZ : Number;
-			var maxX : Number, maxY : Number, maxZ : Number;
+			var minX : Number, minY : Number;
+			var maxX : Number, maxY : Number;
 			var i : uint;
 
 			dir = DirectionalLight(_light).sceneDirection;
@@ -130,7 +140,7 @@ package away3d.lights.shadowmaps
 
 			minX = maxX = _localFrustum[0];
 			minY = maxY = _localFrustum[1];
-			maxZ = _localFrustum[2];
+			_maxZ = _localFrustum[2];
 
 			i = 3;
 			while (i < 24) {
@@ -141,14 +151,14 @@ package away3d.lights.shadowmaps
 				if (x > maxX) maxX = x;
 				if (y < minY) minY = y;
 				if (y > maxY) maxY = y;
-				if (z > maxZ) maxZ = z;
+				if (z > _maxZ) _maxZ = z;
 				i += 3;
 			}
-			minZ = 1;
+			_minZ = 1;
 
 			var w : Number = maxX - minX;
 			var h : Number = maxY - minY;
-			var d : Number = 1/(maxZ - minZ);
+			var d : Number = 1/(_maxZ - _minZ);
 
 			if (minX < 0) minX -= _snap;	// because int() rounds up for < 0
 			if (minY < 0) minY -= _snap;
@@ -170,7 +180,7 @@ package away3d.lights.shadowmaps
 			raw[10] = d;
 			raw[12] = -(maxX + minX)*w;
 			raw[13] = -(maxY + minY)*h;
-			raw[14] = -minZ * d;
+			raw[14] = -_minZ * d;
 			raw[15] = 1;
 			raw[1] = raw[2] = raw[3] = raw[4] = raw[6] = raw[7] = raw[8] = raw[9] = raw[11] = 0;
 
