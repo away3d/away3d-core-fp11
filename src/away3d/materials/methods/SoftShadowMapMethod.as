@@ -18,11 +18,12 @@ package away3d.materials.methods
 		/**
 		 * Creates a new BasicDiffuseMethod object.
 		 */
-		public function SoftShadowMapMethod(castingLight : DirectionalLight, numSamples : int = 5)
+		public function SoftShadowMapMethod(castingLight : DirectionalLight, numSamples : int = 5, range : Number = 1)
 		{
 			super(castingLight);
 
 			this.numSamples = numSamples;
+			this.range = range;
 		}
 
 		public function get numSamples() : int
