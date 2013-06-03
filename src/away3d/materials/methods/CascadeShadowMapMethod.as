@@ -183,7 +183,7 @@ package away3d.materials.methods
 			var vertexData : Vector.<Number> = vo.vertexData;
 			var vertexIndex : int = vo.vertexConstantsIndex;
 			
-			vo.vertexData[vo.vertexConstantsIndex + 3] = -1/(DirectionalShadowMapper(_shadowMapper).depth*_epsilon);
+			vo.vertexData[vo.vertexConstantsIndex + 3] = -1/(_cascadeShadowMapper.depth*_epsilon);
 
 			var numCascades : int = _cascadeShadowMapper.numCascades;
 			vertexIndex += 4;
