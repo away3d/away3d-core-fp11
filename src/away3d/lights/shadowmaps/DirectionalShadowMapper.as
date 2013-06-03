@@ -17,24 +17,24 @@ package away3d.lights.shadowmaps
 
 	public class DirectionalShadowMapper extends ShadowMapperBase
 	{
-		protected var _depthCamera : Camera3D;
+		protected var _overallDepthCamera : Camera3D;
 		protected var _localFrustum : Vector.<Number>;
 
 		protected var _lightOffset : Number = 10000;
 		protected var _matrix : Matrix3D;
-		protected var _depthLens : FreeMatrixLens;
-		private var _snap : Number = 64;
+		protected var _overallDepthLens : FreeMatrixLens;
+		protected var _snap : Number = 64;
 
-		private var _cullPlanes : Vector.<Plane3D>;
-		private var _minZ:Number;
-		private var _maxZ:Number;
+		protected var _cullPlanes : Vector.<Plane3D>;
+		protected var _minZ:Number;
+		protected var _maxZ:Number;
 
 		public function DirectionalShadowMapper()
 		{
 			super();
 			_cullPlanes = new Vector.<Plane3D>();
-			_depthCamera = new Camera3D();
-			_depthCamera.lens = _depthLens = new FreeMatrixLens();
+			_overallDepthLens = new FreeMatrixLens();
+			_overallDepthCamera = new Camera3D(_overallDepthLens);
 			_localFrustum = new Vector.<Number>(8 * 3);
 			_matrix = new Matrix3D();
 		}
@@ -65,7 +65,7 @@ package away3d.lights.shadowmaps
 		 */
 		arcane function get depthProjection() : Matrix3D
 		{
-			return _depthCamera.viewProjection;
+			return _overallDepthCamera.viewProjection;
 		}
 		
 		/**
@@ -78,7 +78,7 @@ package away3d.lights.shadowmaps
 		
 		override protected function drawDepthMap(target : TextureBase, scene : Scene3D, renderer : DepthRenderer) : void
 		{
-			_casterCollector.camera = _depthCamera;
+			_casterCollector.camera = _overallDepthCamera;
 			_casterCollector.cullPlanes = _cullPlanes;
 			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);
@@ -86,9 +86,9 @@ package away3d.lights.shadowmaps
 			_casterCollector.cleanUp();
 		}
 
-		private function updateCullPlanes(viewCamera : Camera3D) : void
+		protected function updateCullPlanes(viewCamera : Camera3D) : void
 		{
-			var lightFrustumPlanes : Vector.<Plane3D> = _depthCamera.frustumPlanes;
+			var lightFrustumPlanes : Vector.<Plane3D> = _overallDepthCamera.frustumPlanes;
 			var viewFrustumPlanes : Vector.<Plane3D> = viewCamera.frustumPlanes;
 			_cullPlanes.length = 4;
 
@@ -112,7 +112,7 @@ package away3d.lights.shadowmaps
 		override protected function updateDepthProjection(viewCamera : Camera3D) : void
 		{
 			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners, _matrix);
-			_depthLens.matrix = _matrix;
+			_overallDepthLens.matrix = _matrix;
 			updateCullPlanes(viewCamera);
 		}
 
@@ -126,15 +126,15 @@ package away3d.lights.shadowmaps
 			var i : uint;
 
 			dir = DirectionalLight(_light).sceneDirection;
-			_depthCamera.transform = _light.sceneTransform;
+			_overallDepthCamera.transform = _light.sceneTransform;
 			x = int((viewCamera.x-dir.x * _lightOffset)/_snap)*_snap;
 			y = int((viewCamera.y-dir.y * _lightOffset)/_snap)*_snap;
 			z = int((viewCamera.z-dir.z * _lightOffset)/_snap)*_snap;
-			_depthCamera.x = x;
-			_depthCamera.y = y;
-			_depthCamera.z = z;
+			_overallDepthCamera.x = x;
+			_overallDepthCamera.y = y;
+			_overallDepthCamera.z = z;
 
-			_matrix.copyFrom(_depthCamera.inverseSceneTransform);
+			_matrix.copyFrom(_overallDepthCamera.inverseSceneTransform);
 			_matrix.prepend(viewCamera.sceneTransform);
 			_matrix.transformVectors(corners, _localFrustum);
 
