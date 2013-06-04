@@ -378,9 +378,10 @@ package away3d.tools.commands {
 				if (oz == 0) {
 					recenterZ = ((bounds.min.z + bounds.max.z) / 2) * -1;
 				}
-					//_centerTransform.identity();
-					//_centerTransform.appendTranslation( -ox * .5 + recenterX, -oy * .5 + recenterY, -oz * .5 + recenterZ);
-
+				
+				_centerTransform.identity();
+				_centerTransform.appendTranslation( -ox * .5 + recenterX, -oy * .5 + recenterY, -oz * .5 + recenterZ);
+				
 			}
 			
 			_flipWinding = !((sx * sy * sz) > 0);
