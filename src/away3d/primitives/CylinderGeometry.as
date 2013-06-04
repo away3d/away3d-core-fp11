@@ -222,9 +222,9 @@ package away3d.primitives {
 						revolutionAngle = i * revolutionAngleDelta;
 						x = radius * Math.cos(revolutionAngle);
 						y = radius * Math.sin(revolutionAngle);
-						na0 = latNormBase * Math.cos(revolutionAngle);
-						na1 = latNormBase * Math.sin(revolutionAngle);
-						
+						na0 = -latNormBase * Math.cos(revolutionAngle);
+						na1 = -latNormBase * Math.sin(revolutionAngle);
+
 						if(_yUp){
 							t1 = 0;
 							t2 = -na0;
