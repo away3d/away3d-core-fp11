@@ -143,8 +143,10 @@ package away3d.core.pick
 			_numEntities = 0;
 			
 			var entity : Entity;
-			for each (entity in entities)
-				_entities[_numEntities++] = entity;
+			for each (entity in entities) {
+				if (entity.isIntersectingRay(position, direction))
+					_entities[_numEntities++] = entity;
+			}
 			
 			return getPickingCollisionVO();
 		}
