@@ -20,7 +20,7 @@ package away3d.tools.utils
 												triangleOffset : int = 0) : Vector.<ISubGeometry>
 		{
 			const LIMIT_VERTS : uint = 3 * 0xffff;
-			const LIMIT_INDICES : uint = 3 * 0xffff; // could be set to (15 * 0xffff) +13 = results in fewer subgeometrys, but possible more memory;
+			const LIMIT_INDICES : uint = 15 * 0xffff;
 			
 			var subs : Vector.<ISubGeometry> = new Vector.<ISubGeometry>();
 			
