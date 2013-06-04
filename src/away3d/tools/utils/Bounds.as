@@ -47,7 +47,7 @@ package away3d.tools.utils {
 			parseObjectContainerBounds(container);
 			
 			// Transform min/max values to the scene if requrired
-			if (worldBased && !(container is Entity)) {
+			if (worldBased) {
 				var b:Vector.<Number> = Vector.<Number>([Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
 				var c:Vector.<Number> = getBoundsCorners(_minX, _minY, _minZ, _maxX, _maxY, _maxZ);
 				transformContainer(b, c, container.sceneTransform);
@@ -175,13 +175,17 @@ package away3d.tools.utils {
 			var isEntity:Entity = obj as Entity;
 			var containerTransform:Matrix3D;
 
-			if (isEntity) {
+			if (isEntity && parentTransform) {
 				parseObjectBounds(obj, parentTransform);
 
 				containerTransform = obj.transform.clone(); 
 				if (parentTransform) containerTransform.append(parentTransform);
+			} else if (isEntity && !parentTransform) {
+				var mat:Matrix3D = obj.transform.clone();
+				mat.invert();
+				parseObjectBounds(obj, mat);
 			} else {
-				containerTransform = new Matrix3D(); //obj.transform.clone(); 
+				containerTransform = new Matrix3D();  
 			}
 
 			for(var i:uint = 0; i<obj.numChildren; ++i) {
