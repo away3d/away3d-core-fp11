@@ -1362,7 +1362,7 @@ package away3d.loaders.parsers
 						case 52: //GradientDiffuseMethod
 							targetID = props.get(1, 0);
 							returnedArray = getAssetByID(targetID, [AssetType.TEXTURE])
-							if (returnedArray[0] == false)
+							if (!returnedArray[0])
 								_blocks[blockID].addError("Could not find the GradientDiffuseTexture (ID = " + targetID + " ) for this GradientDiffuseMethod");
 							if (spezialType == 0)
 								SinglePassMaterialBase(mat).diffuseMethod = new GradientDiffuseMethod(returnedArray[1]);
@@ -1503,19 +1503,20 @@ package away3d.loaders.parsers
 			
 			_blocks[blockID].name = parseVarStr();
 			var type:uint = _newBlockBytes.readUnsignedByte();
-			var data_len:uint = _newBlockBytes.readUnsignedInt();
-			
+			var data_len:uint;
 			_texture_users[_cur_block_id.toString()] = [];
 			
 			// External
 			if (type == 0)
 			{
+				data_len = _newBlockBytes.readShort();
 				var url:String;
 				url = _newBlockBytes.readUTFBytes(data_len);
 				addDependency(_cur_block_id.toString(), new URLRequest(url), false, null, true);
 			}
 			else
 			{
+				data_len = _newBlockBytes.readUnsignedInt();
 				var data:ByteArray;
 				data = new ByteArray();
 				_newBlockBytes.readBytes(data, 0, data_len);
@@ -1546,18 +1547,19 @@ package away3d.loaders.parsers
 			
 			for (i = 0; i < 6; i++)
 			{
-				data_len = _newBlockBytes.readUnsignedInt();
 				_texture_users[_cur_block_id.toString()] = [];
 				_cubeTextures.push(null);
 				// External
 				if (type == 0)
 				{
+					data_len = _newBlockBytes.readShort();
 					var url:String;
 					url = _newBlockBytes.readUTFBytes(data_len);
 					addDependency(_cur_block_id.toString() + "#" + i, new URLRequest(url), false, null, true);
 				}
 				else
 				{
+					data_len = _newBlockBytes.readUnsignedInt();
 					var data:ByteArray;
 					data = new ByteArray();
 					_newBlockBytes.readBytes(data, 0, data_len);
