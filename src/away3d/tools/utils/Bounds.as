@@ -173,7 +173,7 @@ package away3d.tools.utils {
 			
 			var child:ObjectContainer3D;
 			var isEntity:Entity = obj as Entity;
-			var containerTransform:Matrix3D;
+			var containerTransform:Matrix3D = new Matrix3D(); 
 
 			if (isEntity && parentTransform) {
 				parseObjectBounds(obj, parentTransform);
@@ -184,8 +184,6 @@ package away3d.tools.utils {
 				var mat:Matrix3D = obj.transform.clone();
 				mat.invert();
 				parseObjectBounds(obj, mat);
-			} else {
-				containerTransform = new Matrix3D();  
 			}
 
 			for(var i:uint = 0; i<obj.numChildren; ++i) {
