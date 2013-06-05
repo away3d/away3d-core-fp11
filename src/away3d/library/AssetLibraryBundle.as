@@ -503,7 +503,7 @@ package away3d.library
 			
 			// Error are handled separately (see documentation for addErrorHandler)
 			loader.addErrorHandler(onDependencyRetrievingError);
-			loader.addErrorHandler(onDependencyRetrievingParseError);
+			loader.addParseErrorHandler(onDependencyRetrievingParseError);
 			
 			return loader.load(req, context, ns, parser);
 		}
@@ -550,7 +550,7 @@ package away3d.library
 			
 			// Error are handled separately (see documentation for addErrorHandler)
 			loader.addErrorHandler(onDependencyRetrievingError);
-			loader.addErrorHandler(onDependencyRetrievingParseError);
+			loader.addParseErrorHandler(onDependencyRetrievingParseError);
 			
 			return loader.loadData(data, '', context, ns, parser);
 		}

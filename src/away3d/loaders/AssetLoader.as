@@ -464,17 +464,8 @@ package away3d.loaders
 			}
 			
 			if (handled) {
-				if (isDependency && !event.isDefaultPrevented()) {
-					_loadingDependency.resolveFailure();
-					retrieveNext();
-				}
-				else {
-					// Either this was the base file (last left in the stack) or
-					// default behavior was prevented by the handlers, and hence
-					// there is nothing more to do than clean up and bail.
 					dispose();
 					return;
-				}
 			}
 			else {
 				// Error event was not handled by listeners directly on AssetLoader or
@@ -592,6 +583,7 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			loader.removeEventListener(ParserEvent.PARSE_ERROR, onParserError);
 		}
 		
         public function stop():void {

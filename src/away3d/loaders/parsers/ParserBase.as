@@ -418,9 +418,11 @@ package away3d.loaders.parsers {
 		
 		protected function dieWithError(message : String = 'Unknown parsing error') : void
 		{
-			_timer.removeEventListener(TimerEvent.TIMER, onInterval);
-			_timer.stop();
-			_timer = null;
+            if(_timer){
+			    _timer.removeEventListener(TimerEvent.TIMER, onInterval);
+			    _timer.stop();
+			    _timer = null;
+                }
 			dispatchEvent(new ParserEvent(ParserEvent.PARSE_ERROR, message));
 		}
 		
@@ -433,7 +435,8 @@ package away3d.loaders.parsers {
 		
 		protected function pauseAndRetrieveDependencies() : void
 		{
-			_timer.stop();
+            if(_timer)
+			    _timer.stop();
 			_parsingPaused = true;
 			dispatchEvent(new ParserEvent(ParserEvent.READY_FOR_DEPENDENCIES));
 		}
@@ -476,8 +479,9 @@ package away3d.loaders.parsers {
 		 */
 		protected function finishParsing() : void
 		{
-			_timer.removeEventListener(TimerEvent.TIMER, onInterval);
-			_timer.stop();
+            if(_timer){
+			    _timer.removeEventListener(TimerEvent.TIMER, onInterval);
+			    _timer.stop();}
 			_timer = null;
 			_parsingComplete = true;
 			dispatchEvent(new ParserEvent(ParserEvent.PARSE_COMPLETE));

@@ -375,6 +375,7 @@ package away3d.loaders.misc
 			
 			if(_parser){
 				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
+				_parser.addEventListener(ParserEvent.PARSE_ERROR, onParseError);
 				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 				_parser.addEventListener(AssetEvent.TEXTURE_SIZE_ERROR, onTextureSizeError);
 				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
@@ -405,6 +406,11 @@ package away3d.loaders.misc
 			}
 		}
 		
+		private function onParseError(event : ParserEvent) : void
+		{
+			if(hasEventListener(ParserEvent.PARSE_ERROR))
+				dispatchEvent(event.clone());
+		}
 		
 		private function onReadyForDependencies(event : ParserEvent) : void
 		{
@@ -430,6 +436,7 @@ package away3d.loaders.misc
 			
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
+			_parser.removeEventListener(ParserEvent.PARSE_ERROR, onParseError);
 			_parser.removeEventListener(AssetEvent.TEXTURE_SIZE_ERROR, onTextureSizeError);
 			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
