@@ -13,11 +13,18 @@ package away3d.materials.methods
 	{
 		private var _outlinePass : OutlinePass;
 
-		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 1, showInnerLines : Boolean = true, dedicatedMeshes : Boolean = false)
+		/**
+		 * Creates a new OutlineMethod object.
+		 * @param outlineColor The colour of the outline stroke
+		 * @param outlineSize The size of the outline stroke
+		 * @param showInnerLines Indicates whether or not strokes should be potentially drawn over the existing model.
+		 * @param dedicatedWaterProofMesh Used to stitch holes appearing due to mismatching normals for overlapping vertices. Warning: this will create a new mesh that is incompatible with animations!
+		 */
+		public function OutlineMethod(outlineColor : uint = 0x000000,  outlineSize : Number = 1, showInnerLines : Boolean = true, dedicatedWaterProofMesh : Boolean = false)
 		{
 			super();
 			_passes = new Vector.<MaterialPassBase>();
-			_outlinePass = new OutlinePass(outlineColor, outlineSize, showInnerLines, dedicatedMeshes);
+			_outlinePass = new OutlinePass(outlineColor, outlineSize, showInnerLines, dedicatedWaterProofMesh);
 			_passes.push(_outlinePass);
 		}
 
@@ -26,6 +33,11 @@ package away3d.materials.methods
 			vo.needsNormals = true;
 		}
 
+		/**
+		 * Indicates whether or not strokes should be potentially drawn over the existing model.
+		 * Set this to true to draw outlines for geometry overlapping in the view, useful to achieve a cel-shaded drawing outline.
+		 * Setting this to false will only cause the outline to appear around the 2D projection of the geometry.
+		 */
 		public function get showInnerLines() : Boolean
 		{
 			return _outlinePass.showInnerLines;
@@ -36,6 +48,9 @@ package away3d.materials.methods
 			_outlinePass.showInnerLines = value;
 		}
 
+		/**
+		 * The colour of the outline.
+		 */
 		public function get outlineColor() : uint
 		{
 			return _outlinePass.outlineColor;
@@ -46,6 +61,9 @@ package away3d.materials.methods
 			_outlinePass.outlineColor = value;
 		}
 
+		/**
+		 * The size of the outline.
+		 */
 		public function get outlineSize() : Number
 		{
 			return _outlinePass.outlineSize;
