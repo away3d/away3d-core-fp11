@@ -37,7 +37,7 @@ package away3d.core.pick
 		
 		private var _objectProgram3D : Program3D;
 		private var _triangleProgram3D : Program3D;
-		private var _bitmapData : BitmapData = new BitmapData(1, 1, false, 0);
+		private var _bitmapData : BitmapData;
 		private var _viewportData : Vector.<Number>;
 		private var _boundOffsetScale : Vector.<Number>;
 		private var _id : Vector.<Number>;
@@ -116,7 +116,10 @@ package away3d.core.pick
 
 			if (!_context || !_potentialFound)
 				return null;
-			
+
+			if (!_bitmapData)
+				_bitmapData = new BitmapData(1, 1, false, 0);
+
 			_context.drawToBitmapData(_bitmapData);
 			_hitColor = _bitmapData.getPixel(0, 0);
 
@@ -484,6 +487,13 @@ package away3d.core.pick
 		public function dispose() : void
 		{
 			_bitmapData.dispose();
+			if (_triangleProgram3D) _triangleProgram3D.dispose();
+			if (_objectProgram3D) _objectProgram3D.dispose();
+			_triangleProgram3D = null;
+			_objectProgram3D = null;
+			_bitmapData = null;
+			_hitRenderable = null;
+			_hitEntity = null;
 		}
 	}
 }
