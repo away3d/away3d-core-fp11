@@ -1,4 +1,8 @@
 package away3d.loaders.parsers {
+	import flash.geom.Vector3D;
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	
 	import away3d.arcane;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
@@ -6,11 +10,9 @@ package away3d.loaders.parsers {
 	import away3d.entities.SegmentSet;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
+	import away3d.materials.ColorMultiPassMaterial;
+	import away3d.materials.MaterialBase;
 	import away3d.primitives.LineSegment;
-
-	import flash.geom.Vector3D;
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
 	 
 	use namespace arcane;
 	
@@ -92,8 +94,6 @@ package away3d.loaders.parsers {
 		 */
 		public static function supportsData(data : *) : Boolean
 		{
-			if(data is ByteArray) return false;
-			
 			var str : String = ParserUtil.toString(data);
 			if (!str)
 				return false;
@@ -360,7 +360,7 @@ package away3d.loaders.parsers {
 
 
 			if(_charIndex >= _stringLen){
-				if(_blockType == VERTEX && _polyLines.length>= 3) constructPolyfaceMesh();
+				if (_blockType == VERTEX && _polyLines.length >= 3) constructPolyfaceMesh();
 				if(_activeMesh) finalizeMesh();
 				cleanUP();
 				return PARSING_DONE;
@@ -478,18 +478,23 @@ package away3d.loaders.parsers {
 			var geom:Geometry = new Geometry();
 			addSubGeometry(geom);
 			
-			var material:ColorMaterial;
-			
+			var material:MaterialBase;
+			var color:uint=0xffffff;
 			if(!_itemColor || isNaN(_itemColor) ){
 				
 				var r:int = Math.random() * 255;
 				var g:int = Math.random() * 255;
 				var b:int = Math.random() * 255;
 				
-			 	material = new ColorMaterial( r << 16 | g << 8 | b);
-			} else {
-				material = new ColorMaterial(_itemColor);
+				color = r << 16 | g << 8 | b;
+			} 
+			else {
+				color = _itemColor;
 			}
+			if(materialMode<2)
+				material = new ColorMaterial(color);
+			else
+				material = new ColorMultiPassMaterial(color);
 			var mesh:Mesh = new Mesh(geom, material);
 			mesh.name = _meshName;
 			

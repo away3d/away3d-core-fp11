@@ -30,7 +30,7 @@ package away3d.loaders.parsers
 		
 		public static function supportsData(data : *) : Boolean
 		{
-			return (AWD1Parser.supportsData(data) || AWD2Parser.supportsData(data));
+			return (AWD1Parser.supportsData(data) || AWD2Parser.supportsData(data));
 		}
 		
 		
@@ -110,10 +110,11 @@ package away3d.loaders.parsers
 					_parser = new AWD2Parser();
 				else
 					_parser = new AWD1Parser();
-			
+			    _parser.materialMode = materialMode;
 				// Listen for events that need to be bubbled
 				_parser.addEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
 				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
+				_parser.addEventListener(ParserEvent.PARSE_ERROR, onParseError);
 				_parser.addEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
 				_parser.addEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);
@@ -143,6 +144,14 @@ package away3d.loaders.parsers
 		 * @private
 		 * Just bubble events from concrete parser.
 		*/
+		private function onParseError(ev : ParserEvent) : void
+		{
+			dispatchEvent(ev.clone());
+		}
+		/**
+		 * @private
+		 * Just bubble events from concrete parser.
+		*/
 		private function onReadyForDependencies(ev : ParserEvent) : void
 		{
 			dispatchEvent(ev.clone());
@@ -166,6 +175,7 @@ package away3d.loaders.parsers
 		{
 			_parser.removeEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
 			_parser.removeEventListener(ParserEvent.PARSE_COMPLETE, onParseComplete);
+			_parser.removeEventListener(ParserEvent.PARSE_ERROR, onParseError);
 			_parser.removeEventListener(AssetEvent.ASSET_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.ANIMATION_SET_COMPLETE, onAssetComplete);
 			_parser.removeEventListener(AssetEvent.ANIMATION_STATE_COMPLETE, onAssetComplete);

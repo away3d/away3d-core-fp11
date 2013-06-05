@@ -7,6 +7,7 @@ package away3d.loaders.parsers {
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.TextureMaterial;
+    import away3d.materials.TextureMultiPassMaterial;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
 
@@ -102,8 +103,13 @@ package away3d.loaders.parsers {
 			var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
 			var m:Mesh = retrieveMeshFromID(resourceDependency.id);
 			
-			if(m && asset)
-				TextureMaterial(m.material).texture = asset;
+			if (m && asset) {
+                if(materialMode<2)
+				    TextureMaterial(m.material).texture = asset;
+                else
+				    TextureMultiPassMaterial(m.material).texture = asset;
+                    
+            }
 		}
 		
 		/**
@@ -270,7 +276,10 @@ package away3d.loaders.parsers {
 							_aC[ref.container].addChild(mesh);
 						
 						mesh.transform = ref.transform;
-						mesh.material = new TextureMaterial( DefaultMaterialManager.getDefaultTexture());
+                        if (materialMode<2)
+						    mesh.material = new TextureMaterial( DefaultMaterialManager.getDefaultTexture());
+                        else
+						    mesh.material = new TextureMultiPassMaterial( DefaultMaterialManager.getDefaultTexture());
 						
 						mesh.material.bothSides = Boolean(ref.bothSides);
 						 

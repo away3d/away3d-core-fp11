@@ -1,4 +1,10 @@
 package away3d.loaders.parsers {
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
+	
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
@@ -9,18 +15,15 @@ package away3d.loaders.parsers {
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
+	import away3d.materials.ColorMultiPassMaterial;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.MultiPassMaterialBase;
 	import away3d.materials.SinglePassMaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.materials.TextureMultiPassMaterial;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.GeomUtil;
-
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
 	
 	use namespace arcane;
 
@@ -367,7 +370,7 @@ package away3d.loaders.parsers {
 				_byteData.position += 2;
 			}
                         
-                        _cur_obj.smoothingGroups = new Vector.<uint>(count, true);
+            _cur_obj.smoothingGroups = new Vector.<uint>(count, true);
 		}
 		
 		private function parseSmoothingGroups():void {
@@ -690,17 +693,28 @@ package away3d.loaders.parsers {
 		
 		private function finalizeCurrentMaterial() : void
 		{
-			var mat : SinglePassMaterialBase;
-			
-			if (_cur_mat.colorMap) {
-				mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+			var mat : MaterialBase;
+			if (materialMode<2){			
+				if (_cur_mat.colorMap) {
+					mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+				}
+				else {
+					mat = new ColorMaterial(_cur_mat.diffuseColor);
+				}
+				SinglePassMaterialBase(mat).ambientColor = _cur_mat.ambientColor;
+				SinglePassMaterialBase(mat).specularColor = _cur_mat.specularColor;
 			}
-			else {
-				mat = new ColorMaterial(_cur_mat.diffuseColor);
+			else{			
+				if (_cur_mat.colorMap) {
+					mat = new TextureMultiPassMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+				}
+				else {
+					mat = new ColorMultiPassMaterial(_cur_mat.diffuseColor);
+				}
+				MultiPassMaterialBase(mat).ambientColor = _cur_mat.ambientColor;
+				MultiPassMaterialBase(mat).specularColor = _cur_mat.specularColor;
 			}
 			
-			mat.ambientColor = _cur_mat.ambientColor;
-			mat.specularColor = _cur_mat.specularColor;
 			mat.bothSides = _cur_mat.twoSided;
 			
 			finalizeAsset(mat, _cur_mat.name);

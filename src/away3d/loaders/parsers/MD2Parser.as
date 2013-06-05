@@ -108,9 +108,12 @@ package away3d.loaders.parsers
 			
 			var asset : Texture2DBase = resourceDependency.assets[0] as Texture2DBase;
 			
-			if (asset)
-				TextureMaterial(_mesh.material).texture = asset;
-			
+			if (asset){
+                if(materialMode<2)
+				    TextureMaterial(_mesh.material).texture = asset;
+                else
+                    TextureMultiPassMaterial(_mesh.material).texture = asset;
+			}
 		}
 		/**
 		 * @inheritDoc
@@ -118,7 +121,11 @@ package away3d.loaders.parsers
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
 			// apply system default
-			_mesh.material = DefaultMaterialManager.getDefaultMaterial();
+            if (materialMode<2)
+			    _mesh.material = DefaultMaterialManager.getDefaultMaterial();
+            else 
+			    _mesh.material = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
+                
 		} 
 		
 		
@@ -144,7 +151,11 @@ package away3d.loaders.parsers
 					// for this file format) and return it using finalizeAsset()
 					_geometry = new Geometry();
 					_mesh = new Mesh(_geometry, null);
-					_mesh.material = DefaultMaterialManager.getDefaultMaterial();
+                    if (materialMode<2)
+					    _mesh.material = DefaultMaterialManager.getDefaultMaterial();
+                    else 
+					    _mesh.material = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
+                        
 					
 					//_geometry.animation = new VertexAnimation(2, VertexAnimationMode.ABSOLUTE);
 					//_animator = new VertexAnimator(VertexAnimationState(_mesh.animationState));

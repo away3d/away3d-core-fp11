@@ -1,5 +1,10 @@
 package away3d.loaders.parsers
 {
+	import flash.geom.Vector3D;
+	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
+	import flash.utils.Dictionary;
+	
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.CompactSubGeometry;
@@ -10,14 +15,12 @@ package away3d.loaders.parsers
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
+	import away3d.materials.ColorMultiPassMaterial;
+	import away3d.materials.MaterialBase;
 	import away3d.materials.TextureMaterial;
+	import away3d.materials.TextureMultiPassMaterial;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
-	
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
 
 	use namespace arcane;
 	
@@ -112,9 +115,11 @@ package away3d.loaders.parsers
 				asset = resourceDependency.assets[0] as Texture2DBase;
 				mesh = retrieveMeshFromID(resourceDependency.id);
 			}
-			
 			if(mesh && asset)
-				TextureMaterial(mesh.material).texture = asset;
+				if(materialMode<2)
+					TextureMaterial(mesh.material).texture = asset;
+				else
+					TextureMultiPassMaterial(mesh.material).texture = asset;
 		}
 		
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
@@ -281,7 +286,10 @@ package away3d.loaders.parsers
 						break;
 					
 					case "texture":
-						_activeMesh.material = new TextureMaterial( DefaultMaterialManager.getDefaultTexture() );
+						if(materialMode<2)
+							_activeMesh.material = new TextureMaterial( DefaultMaterialManager.getDefaultTexture() );
+						else
+							_activeMesh.material = new TextureMultiPassMaterial( DefaultMaterialManager.getDefaultTexture() );
 						_activeMesh.material.name = "m_"+_activeMesh.name;
 						addDependency(String(_meshList.length-1), new URLRequest(tUrl));
 						break;
@@ -511,17 +519,24 @@ package away3d.loaders.parsers
 			_materialList.push(parseMaterialLine(materialString));
 		}
 		
-		private function parseMaterialLine(materialString:String):ColorMaterial
+		private function parseMaterialLine(materialString:String):MaterialBase
 		{
 			var trunk:Array = materialString.split(" ");
-			var colorMaterial:ColorMaterial = new ColorMaterial(0xFFFFFF);
-
+			
+			
+			var color:uint=0x000000;
+			var name:String="";
+			var ambient:Number=0;
+			var specular:Number=0;
+			var gloss:Number=0;
+			var alpha:Number=0;
+			
 			for(var i:uint = 0;i<trunk.length;++i){
 				
 				if(trunk[i] == "") continue;
 				
 				if(trunk[i].indexOf("\"") != -1 || trunk[i].indexOf("\'") != -1){
-					colorMaterial.name = trunk[i].substring(1, trunk[i].length-1);
+					name = trunk[i].substring(1, trunk[i].length-1);
 					continue;
 				}
 				
@@ -531,30 +546,50 @@ package away3d.loaders.parsers
 						var g:uint = (parseFloat(trunk[i+2])*255);
 						var b:uint = (parseFloat(trunk[i+3])*255);
 						i+=3;
-						colorMaterial.color = r << 16| g << 8 | b;
+						color = r << 16| g << 8 | b;
 					break;
 					
 					case "amb":
-						colorMaterial.ambient = parseFloat(trunk[i+1]);
+						ambient = parseFloat(trunk[i+1]);
 						i+=2;
 					break;
 					
 					case "spec":
-						colorMaterial.specular = parseFloat(trunk[i+1]);
+						specular = parseFloat(trunk[i+1]);
 						i+=2;
 					break;
 					
 					case "shi":
-						colorMaterial.gloss = parseFloat(trunk[i+1])/255;
+						gloss = parseFloat(trunk[i+1])/255;
 						i+=2;
 					break;
 					
 					case "trans":
-						colorMaterial.alpha = (1-parseFloat(trunk[i+1]));
+						alpha = (1-parseFloat(trunk[i+1]));
 					break;
 				}
 			}
 			
+			var colorMaterial:MaterialBase;
+			
+			if(materialMode<2){
+				colorMaterial = new ColorMaterial(0xFFFFFF);
+				ColorMaterial(colorMaterial).name=name;
+				ColorMaterial(colorMaterial).color=color;
+				ColorMaterial(colorMaterial).ambient=ambient;
+				ColorMaterial(colorMaterial).specular=specular;
+				ColorMaterial(colorMaterial).gloss=gloss;
+				ColorMaterial(colorMaterial).alpha=alpha;
+			}
+			else{
+				colorMaterial = new ColorMultiPassMaterial (0xFFFFFF);
+				ColorMultiPassMaterial(colorMaterial).name=name;
+				ColorMultiPassMaterial(colorMaterial).color=color;
+				ColorMultiPassMaterial(colorMaterial).ambient=ambient;
+				ColorMultiPassMaterial(colorMaterial).specular=specular;
+				ColorMultiPassMaterial(colorMaterial).gloss=gloss;
+				//ColorMultiPassMaterial(colorMaterial).alpha=alpha;
+			}
 			return colorMaterial;
 		}
 		

@@ -1140,7 +1140,11 @@ package away3d.loaders.parsers
 				debugString+="Parsed a ColorMaterial(SinglePass): Name = '"+name+"' | "; 
 				var color:uint;
 				color = props.get(1, 0xcccccc);
-				mat = new ColorMaterial(color, props.get(10, 1.0));
+                if(materialMode<2)
+				    mat = new ColorMaterial(color, props.get(10, 1.0));
+                else
+				    mat = new ColorMultiPassMaterial(color);
+                    
 				
 			}
 			else if (type == 2)
@@ -1150,14 +1154,23 @@ package away3d.loaders.parsers
 				if ((returnedArray[0] == false)&&(tex_addr>0))
 					_blocks[blockID].addError("Could not find the DiffsueTexture (ID = " + tex_addr + " ) for this Material");
 				
-				mat = new TextureMaterial(returnedArray[1]);
-				TextureMaterial(mat).alphaBlending = props.get(11, false);
-				TextureMaterial(mat).alpha = props.get(10, 1.0);
-				debugString+="Parsed a TextureMaterial(SinglePass): Name = '"+name+"' | Texture-Name = "+mat.name; 
+                if(materialMode<2){
+                    mat = new TextureMaterial(returnedArray[1]);
+                    TextureMaterial(mat).alphaBlending = props.get(11, false);
+                    TextureMaterial(mat).alpha = props.get(10, 1.0);
+                    debugString += "Parsed a TextureMaterial(SinglePass): Name = '" + name + "' | Texture-Name = " + mat.name; 
+                    }
+                else{
+                    mat = new TextureMultiPassMaterial(returnedArray[1]);
+                    debugString += "Parsed a TextureMaterial(MultipAss): Name = '" + name + "' | Texture-Name = " + mat.name; 
+                    }
 			}
 			
 			mat.extra = attributes;
-			SinglePassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
+            if(materialMode<2)
+			    SinglePassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
+            else
+			    MultiPassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
 			mat.repeat = props.get(13, true);
 			
 			finalizeAsset(mat, name);
@@ -1186,6 +1199,10 @@ package away3d.loaders.parsers
 				_blocks[blockID].addError("Material-spezialType '"+spezialType+"' is not supported, can only be 0:singlePass, 1:MultiPass !");
 				return;
 			}
+            if (materialMode == 1)
+                spezialType = 0;
+            else if (materialMode == 2)
+                spezialType = 1;
 			if (spezialType < 2)
 			{ //this is SinglePass or MultiPass					
 				if (type == 1)

@@ -142,6 +142,7 @@ package away3d.loaders.misc
 		private var _fileExtension : String;
 		private var _fileName : String;
 		private var _loadAsRawData : Boolean;
+		private var _materialMode : uint;
 		private var _data : *;
 		
 		// Image parser only parser that is added by default, to save file size.
@@ -151,8 +152,10 @@ package away3d.loaders.misc
 		/**
 		 * Creates a new SingleFileLoader object.
 		 */
-		public function SingleFileLoader()
+		public function SingleFileLoader(materialMode:uint=0)
 		{
+			
+			_materialMode=materialMode;
 		}
 		
 		
@@ -394,7 +397,7 @@ package away3d.loaders.misc
 				
 				if (_req && _req.url)
 					_parser._fileName = _req.url;
-				
+				_parser.materialMode=_materialMode;
 				_parser.parseAsync(data);
 			} else{
 				var msg:String = "No parser defined. To enable all parsers for auto-detection, use Parsers.enableAllBundled()";

@@ -273,8 +273,11 @@ package away3d.loaders
 		{
 			var data : *;
 			
+			var matMode:uint=0;
+			if(_context && _context.materialMode!=0)
+				matMode=_context.materialMode;
 			_loadingDependency = dependency;
-			_loadingDependency.loader = new SingleFileLoader();
+			_loadingDependency.loader = new SingleFileLoader(matMode);
 			addEventListeners(_loadingDependency.loader);
 			
 			// Get already loaded (or mapped) data if available

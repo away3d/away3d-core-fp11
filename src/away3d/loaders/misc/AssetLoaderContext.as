@@ -4,10 +4,15 @@ package away3d.loaders.misc
 
 	public class AssetLoaderContext
 	{
+		public static const  UNDEFINED : uint = 0;
+		public static const  SINGLEPASS_MATERIALS : uint = 1;
+		public static const  MULTIPASS_MATERIALS : uint = 2;
 		private var _includeDependencies : Boolean;
 		private var _dependencyBaseUrl : String;
 		private var _embeddedDataByUrl : Object;
 		private var _remappedUrls : Object;
+		private var _materialMode : uint; 
+        
 		
 		private var _overrideAbsPath : Boolean;
 		private var _overrideFullUrls : Boolean;
@@ -25,6 +30,7 @@ package away3d.loaders.misc
 			_dependencyBaseUrl = dependencyBaseUrl || '';
 			_embeddedDataByUrl = {};
 			_remappedUrls = {};
+			_materialMode = UNDEFINED;
 		}
 		
 		
@@ -39,6 +45,21 @@ package away3d.loaders.misc
 		public function set includeDependencies(val : Boolean) : void
 		{
 			_includeDependencies = val;
+		}
+		
+		/**
+		 * MaterialMode defines, if the Parser should create SinglePass or MultiPass Materials
+		 * 0 (Default / undefined) - All Parsers will create SinglePassMaterials, but the AWD2.1parser will create Materials as they are defined in the file
+		 * 1 (Force SinglePass) - All Parsers create SinglePassMaterials
+		 * 2 (Force MultiPass) - All Parsers will create MultiPassMaterials
+		*/
+		public function get materialMode() : uint
+		{
+			return _materialMode;
+		}
+		public function set materialMode(materialMode : uint) : void
+		{
+			_materialMode = materialMode;
 		}
 		
 		

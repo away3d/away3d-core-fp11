@@ -1,21 +1,37 @@
 package away3d.loaders.parsers {
-	import away3d.*;
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	import away3d.containers.*;
-	import away3d.core.base.*;
-	import away3d.debug.*;
-	import away3d.entities.*;
-	import away3d.loaders.misc.*;
-	import away3d.materials.*;
-	import away3d.materials.methods.*;
-	import away3d.materials.utils.*;
-	import away3d.textures.*;
+	import flash.display.BitmapData;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	import flash.net.URLRequest;
 	
-	import flash.display.*;
-	import flash.geom.*;
-	import flash.net.*;
+	import away3d.arcane;
+	import away3d.animators.SkeletonAnimationSet;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonJoint;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.animators.nodes.SkeletonClipNode;
+	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.Geometry;
+	import away3d.core.base.SkinnedSubGeometry;
+	import away3d.debug.Debug;
+	import away3d.entities.Mesh;
+	import away3d.loaders.misc.ResourceDependency;
+	import away3d.materials.ColorMaterial;
+	import away3d.materials.ColorMultiPassMaterial;
+	import away3d.materials.MaterialBase;
+	import away3d.materials.MultiPassMaterialBase;
+	import away3d.materials.SinglePassMaterialBase;
+	import away3d.materials.TextureMaterial;
+	import away3d.materials.TextureMultiPassMaterial;
+	import away3d.materials.methods.BasicAmbientMethod;
+	import away3d.materials.methods.BasicDiffuseMethod;
+	import away3d.materials.methods.BasicSpecularMethod;
+	import away3d.materials.utils.DefaultMaterialManager;
+	import away3d.textures.BitmapTexture;
+	import away3d.textures.Texture2DBase;
 
 	use namespace arcane;
 
@@ -54,8 +70,9 @@ package away3d.loaders.parsers {
 		private var _animationInfo : DAEAnimationInfo;
 		//private var _animators : Vector.<IAnimator>;
 		private var _rootNodes : Vector.<AnimationNodeBase>;
-		private var _defaultBitmapMaterial : TextureMaterial = DefaultMaterialManager.getDefaultMaterial();
+		private var _defaultBitmapMaterial : MaterialBase = DefaultMaterialManager.getDefaultMaterial();
 		private var _defaultColorMaterial : ColorMaterial = new ColorMaterial(0xff0000);
+		private var _defaultColorMaterialMulti : ColorMultiPassMaterial = new ColorMultiPassMaterial(0xff0000);
 		private static var _numInstances : uint = 0;
 
 		/**
@@ -212,13 +229,20 @@ package away3d.loaders.parsers {
 		}
 
 
-		private function buildDefaultMaterial(map : BitmapData = null) : TextureMaterial
+		private function buildDefaultMaterial(map : BitmapData = null) : MaterialBase
 		{
 			//TODO:fix this duplication mess
-			if (map)
-				_defaultBitmapMaterial = new TextureMaterial(new BitmapTexture(map));
+			if (map){
+				if(materialMode<2)
+					_defaultBitmapMaterial = new TextureMaterial(new BitmapTexture(map));
+				else
+					_defaultBitmapMaterial = new TextureMultiPassMaterial(new BitmapTexture(map));
+			}
 			else
-				_defaultBitmapMaterial = DefaultMaterialManager.getDefaultMaterial();
+				if(materialMode<2)
+					_defaultBitmapMaterial = DefaultMaterialManager.getDefaultMaterial();
+				else
+					_defaultBitmapMaterial = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
 
 			return _defaultBitmapMaterial;
 		}
@@ -705,8 +729,13 @@ package away3d.loaders.parsers {
 		private function setupMaterial(material : DAEMaterial, effect : DAEEffect) : MaterialBase
 		{
 			if (!effect || !material) return null;
-
-			var mat : SinglePassMaterialBase = _defaultColorMaterial;
+			
+			var mat : MaterialBase
+			if(materialMode<2)
+				mat= _defaultColorMaterial;
+			else
+				mat = new ColorMultiPassMaterial(_defaultColorMaterial.color);
+			
 			var textureMaterial : TextureMaterial;
 			var ambient : DAEColorOrTexture = effect.shader.props["ambient"];
 			var diffuse : DAEColorOrTexture = effect.shader.props["diffuse"];
@@ -718,28 +747,45 @@ package away3d.loaders.parsers {
 				var image : DAEImage = _libImages[effect.surface.init_from];
 
 				if (image.resource !== null && isBitmapDataValid(image.resource.bitmapData)) {
-					mat = textureMaterial = buildDefaultMaterial(image.resource.bitmapData);
-					textureMaterial.alpha = transparency;
+					mat = buildDefaultMaterial(image.resource.bitmapData);
+					if(materialMode<2)
+						TextureMaterial(mat).alpha = transparency;
 				}
 				else {
-					mat = textureMaterial = buildDefaultMaterial();
-					textureMaterial.alpha = transparency;
+					mat = buildDefaultMaterial();
 				}
 
-			} else if (diffuse && diffuse.color) {
-				mat = new ColorMaterial(diffuse.color.rgb, transparency);
+			} 
+			
+			else if (diffuse && diffuse.color) {
+				if(materialMode<2)
+				    mat = new ColorMaterial(diffuse.color.rgb, transparency);
+                else
+				    mat = new ColorMultiPassMaterial(diffuse.color.rgb);
 			}
-
+            trace("mat = " + materialMode);
 			if (mat) {
-				mat.ambientMethod = new BasicAmbientMethod();
-				mat.diffuseMethod = new BasicDiffuseMethod();
-				mat.specularMethod = new BasicSpecularMethod();
-				mat.ambientColor = (ambient && ambient.color) ? ambient.color.rgb : 0x303030;
-				mat.specularColor = (specular && specular.color) ? specular.color.rgb : 0x202020;
-
-				mat.gloss = shininess;
-				mat.ambient = 1;
-				mat.specular = 1;
+				if(materialMode<2){
+					SinglePassMaterialBase(mat).ambientMethod = new BasicAmbientMethod();
+					SinglePassMaterialBase(mat).diffuseMethod = new BasicDiffuseMethod();
+					SinglePassMaterialBase(mat).specularMethod = new BasicSpecularMethod();
+					SinglePassMaterialBase(mat).ambientColor = (ambient && ambient.color) ? ambient.color.rgb : 0x303030;
+					SinglePassMaterialBase(mat).specularColor = (specular && specular.color) ? specular.color.rgb : 0x202020;	
+					SinglePassMaterialBase(mat).gloss = shininess;
+					SinglePassMaterialBase(mat).ambient = 1;
+					SinglePassMaterialBase(mat).specular = 1;
+				}
+				else{
+					MultiPassMaterialBase(mat).ambientMethod = new BasicAmbientMethod();
+					MultiPassMaterialBase(mat).diffuseMethod = new BasicDiffuseMethod();
+					MultiPassMaterialBase(mat).specularMethod = new BasicSpecularMethod();
+					MultiPassMaterialBase(mat).ambientColor = (ambient && ambient.color) ? ambient.color.rgb : 0x303030;
+					MultiPassMaterialBase(mat).specularColor = (specular && specular.color) ? specular.color.rgb : 0x202020;	
+					MultiPassMaterialBase(mat).gloss = shininess;
+					MultiPassMaterialBase(mat).ambient = 1;
+					MultiPassMaterialBase(mat).specular = 1;
+					
+				}
 			}
 
 			mat.name = material.id;

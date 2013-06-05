@@ -173,6 +173,7 @@ package away3d.loaders.parsers {
 		private var _parsingComplete : Boolean;
 		private var _parsingFailure:Boolean;
 		private var _timer : Timer;
+		private var _materialMode:uint;
 		
 		/**
 		 * Returned by <code>proceedParsing</code> to indicate no more parsing is needed.
@@ -193,6 +194,7 @@ package away3d.loaders.parsers {
 		 */
 		public function ParserBase(format : String)
 		{
+			_materialMode=0;
 			_dataFormat = format;
 			_dependencies = new Vector.<ResourceDependency>();
 		}
@@ -229,6 +231,15 @@ package away3d.loaders.parsers {
 			return _parsingComplete;
 		}
 		
+		public function set materialMode(newMaterialMode:uint) : void
+		{
+			_materialMode=newMaterialMode;
+		}
+		
+		public function get materialMode() : uint
+		{
+			return _materialMode;
+		}
 		
 		/**
 		 * The data format of the file data to be parsed. Can be either <code>ParserDataFormat.BINARY</code> or <code>ParserDataFormat.PLAIN_TEXT</code>.
