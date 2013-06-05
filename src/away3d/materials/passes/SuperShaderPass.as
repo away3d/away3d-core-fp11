@@ -30,6 +30,7 @@ package away3d.materials.passes
 	public class SuperShaderPass extends CompiledPass
 	{
 		private var _includeCasters : Boolean = true;
+		private var _ignoreLights : Boolean;
 
 		/**
 		 * Creates a new DefaultScreenPass objects.
@@ -130,7 +131,7 @@ package away3d.materials.passes
 		override protected function updateLights() : void
 		{
 //			super.updateLights();
-			if (_lightPicker) {
+			if (_lightPicker && !_ignoreLights) {
 				_numPointLights = _lightPicker.numPointLights;
 				_numDirectionalLights = _lightPicker.numDirectionalLights;
 				_numLightProbes = _lightPicker.numLightProbes;
@@ -342,6 +343,16 @@ package away3d.materials.passes
 			_fragmentConstantData[_probeWeightsIndex + 1] = weights[1];
 			_fragmentConstantData[_probeWeightsIndex + 2] = weights[2];
 			_fragmentConstantData[_probeWeightsIndex + 3] = weights[3];
+		}
+
+		arcane function set ignoreLights(ignoreLights : Boolean) : void
+		{
+			_ignoreLights = ignoreLights;
+		}
+
+		arcane function get ignoreLights() : Boolean
+		{
+			return _ignoreLights;
 		}
 	}
 }

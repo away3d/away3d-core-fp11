@@ -505,12 +505,14 @@
 
 			if (_casterLightPass || _nonCasterLightPasses) {
 				if (_effectsPass) {
+					_effectsPass.ignoreLights = true;
 					_effectsPass.depthCompareMode = Context3DCompareMode.LESS_EQUAL;
 					_effectsPass.setBlendMode(BlendMode.LAYER);
 					_effectsPass.forceSeparateMVP = forceSeparateMVP;
 				}
 			}
 			else if (_effectsPass) {
+				_effectsPass.ignoreLights = false;
 				_effectsPass.depthCompareMode = depthCompareMode;
 				_effectsPass.setBlendMode(BlendMode.NORMAL);
 				_effectsPass.forceSeparateMVP = false;
