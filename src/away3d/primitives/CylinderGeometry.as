@@ -222,7 +222,7 @@ package away3d.primitives {
 						revolutionAngle = i * revolutionAngleDelta;
 						x = radius * Math.cos(revolutionAngle);
 						y = radius * Math.sin(revolutionAngle);
-						na0 = -latNormBase * Math.cos(revolutionAngle);
+						na0 = latNormBase * Math.cos(revolutionAngle);
 						na1 = -latNormBase * Math.sin(revolutionAngle);
 
 						if(_yUp){
@@ -243,8 +243,8 @@ package away3d.primitives {
 									  		na1, t1, t2);
 						} else {
 							addVertex(	x, comp1, comp2,
-									  		na0, na1, latNormElev,
-									  		na1, t1, t2);
+									  		na0, -na1, -latNormElev,
+									  		-na1, t1, t2);
 						}
 
 						// close triangle
