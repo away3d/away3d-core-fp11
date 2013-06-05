@@ -369,8 +369,9 @@ package away3d.loaders.misc
 		{
 			// If no parser has been defined, try to find one by letting
 			// all plugged in parsers inspect the actual data.
-			if (!_parser)
+			if (!_parser){
 				_parser = getParserFromData(data);
+			}
 			
 			if(_parser){
 				_parser.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);

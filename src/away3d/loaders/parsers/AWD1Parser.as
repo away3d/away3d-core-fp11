@@ -72,18 +72,20 @@ package away3d.loaders.parsers {
 		 */
 		public static function supportsData(data : *) : Boolean {
 			var ba : ByteArray;
-			var str : String;
+			var str1 : String;
+			var str2 : String;
 			
 			ba = ParserUtil.toByteArray(data);
 			if (ba) {
 				ba.position = 0;
-				str = ba.readUTFBytes(5);
+				str1 = ba.readUTFBytes(2);
+				str2 = ba.readUTFBytes(100);
 			}
 			else {
-				str = (data is String)? String(data).substr(0, 5) : null;
+				str1 = (data is String)? String(data).substr(0, 5) : null;
+				str2 = (data is String)? String(data).substr(0, 100) : null;
 			}
-			
-			if (str == '//AWD')
+			if ((str1 == '//')&&(str2.indexOf("#v:")!=-1))
 				return true;
 			
 			return false;

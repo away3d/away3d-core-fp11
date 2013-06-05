@@ -1,11 +1,9 @@
 package away3d.library
 {
-	import flash.events.EventDispatcher;
-	import flash.net.URLRequest;
-	
 	import away3d.arcane;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
+    import away3d.events.ParserEvent;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 	import away3d.library.naming.ConflictPrecedence;
@@ -18,6 +16,9 @@ package away3d.library
 	import away3d.loaders.misc.AssetLoaderToken;
 	import away3d.loaders.misc.SingleFileLoader;
 	import away3d.loaders.parsers.ParserBase;
+	
+	import flash.events.EventDispatcher;
+	import flash.net.URLRequest;
 	
 	use namespace arcane;
 	
@@ -481,6 +482,7 @@ package away3d.library
 		private function loadResource(req : URLRequest, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			var loader : AssetLoader = new AssetLoader();
+            if (!_loadingSessions)_loadingSessions = new Vector.<AssetLoader>;
 			_loadingSessions.push(loader);
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
@@ -501,10 +503,21 @@ package away3d.library
 			
 			// Error are handled separately (see documentation for addErrorHandler)
 			loader.addErrorHandler(onDependencyRetrievingError);
+			loader.addErrorHandler(onDependencyRetrievingParseError);
 			
 			return loader.load(req, context, ns, parser);
 		}
 		
+        public function stopAllLoadingSessions():void {
+            var i:int;
+            if (!_loadingSessions)_loadingSessions = new Vector.<AssetLoader>;
+            var length:int = _loadingSessions.length;
+            for (i = 0; i < length; i++) {
+                killLoadingSession(_loadingSessions[i]);
+            }
+			_loadingSessions = null;
+        }
+        
 		/**
 		 * Retrieves an unloaded resource parsed from the given data.
 		 * @param data The data to be parsed.
@@ -516,6 +529,7 @@ package away3d.library
 		private function parseResource(data : *, context : AssetLoaderContext = null, ns : String = null, parser : ParserBase = null) : AssetLoaderToken
 		{
 			var loader : AssetLoader = new AssetLoader();
+            if (!_loadingSessions)_loadingSessions = new Vector.<AssetLoader>;
 			_loadingSessions.push(loader);
 			loader.addEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.addEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
@@ -536,6 +550,7 @@ package away3d.library
 			
 			// Error are handled separately (see documentation for addErrorHandler)
 			loader.addErrorHandler(onDependencyRetrievingError);
+			loader.addErrorHandler(onDependencyRetrievingParseError);
 			
 			return loader.loadData(data, '', context, ns, parser);
 		}
@@ -580,6 +595,19 @@ package away3d.library
 				return false;
 			}
 		}
+		/**
+		 * Called when a an error occurs during parsing.
+		 */
+		private function onDependencyRetrievingParseError(event : ParserEvent) : Boolean
+		{
+			if (hasEventListener(ParserEvent.PARSE_ERROR)) {
+				dispatchEvent(event);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
 		
 		private function onAssetComplete(event : AssetEvent) : void
 		{
@@ -601,8 +629,22 @@ package away3d.library
 		private function onResourceRetrieved(event : LoaderEvent) : void
 		{
 			var loader : AssetLoader = AssetLoader(event.target);
-			
+			killLoadingSession(loader);
 			var index : int = _loadingSessions.indexOf(loader);
+			_loadingSessions.splice(index, 1);
+			
+			/*
+			if(session.handle){
+				dispatchEvent(event);
+			}else{
+				onResourceError((session is IResource)? IResource(session) : null);
+			}
+			*/
+			
+			dispatchEvent(event.clone());
+		}
+        private function killLoadingSession(loader:AssetLoader):void {
+        
 			loader.removeEventListener(LoaderEvent.LOAD_ERROR, onDependencyRetrievingError);
 			loader.removeEventListener(LoaderEvent.RESOURCE_COMPLETE, onResourceRetrieved);
 			loader.removeEventListener(LoaderEvent.DEPENDENCY_COMPLETE, onDependencyRetrieved);
@@ -620,19 +662,9 @@ package away3d.library
 			loader.removeEventListener(AssetEvent.ENTITY_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
+			loader.stop();
 			
-			_loadingSessions.splice(index, 1);
-			
-			/*
-			if(session.handle){
-				dispatchEvent(event);
-			}else{
-				onResourceError((session is IResource)? IResource(session) : null);
-			}
-			*/
-			
-			dispatchEvent(event.clone());
-		}
+        }
 		
 		/**
 		 * Called when unespected error occurs

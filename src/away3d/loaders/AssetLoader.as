@@ -149,6 +149,7 @@ package away3d.loaders
 		private var _uri : String;
 		
 		private var _errorHandlers : Vector.<Function>;
+		private var _parseErrorHandlers : Vector.<Function>;
 		
 		private var _stack : Vector.<ResourceDependency>;
 		private var _baseDependency : ResourceDependency;
@@ -162,6 +163,7 @@ package away3d.loaders
 		{
 			_stack = new Vector.<ResourceDependency>();
 			_errorHandlers = new Vector.<Function>();
+			_parseErrorHandlers = new Vector.<Function>();
 		}
 		
 		
@@ -369,6 +371,11 @@ package away3d.loaders
 		
 		private function retrieveLoaderDependencies(loader : SingleFileLoader) : void
 		{
+            if (!_loadingDependency) {
+                //loader.parser = null;
+                //loader = null;
+                return;
+            }
 			var i : int, len : int = loader.dependencies.length;
 			
 			for (i=0; i<len; i++) {
@@ -432,6 +439,49 @@ package away3d.loaders
 			}
 		}
 		
+		private function onParserError(event : ParserEvent) : void
+		{
+			var handled : Boolean;
+			var isDependency : Boolean = (_loadingDependency != _baseDependency);
+			var loader : SingleFileLoader = SingleFileLoader(event.target);
+			
+			removeEventListeners(loader);
+			
+			event = new ParserEvent(ParserEvent.PARSE_ERROR,event.message);
+			
+			if (hasEventListener(ParserEvent.PARSE_ERROR)) {
+				dispatchEvent(event);
+				handled = true;
+			}
+			else {
+				// TODO: Consider not doing this even when AssetLoader does
+				// have it's own LOAD_ERROR listener
+				var i : uint, len : uint = _parseErrorHandlers.length;
+				for (i=0; i<len; i++) {
+					var handlerFunction : Function = _parseErrorHandlers[i];
+					handled ||= Boolean(handlerFunction(event));
+				}
+			}
+			
+			if (handled) {
+				if (isDependency && !event.isDefaultPrevented()) {
+					_loadingDependency.resolveFailure();
+					retrieveNext();
+				}
+				else {
+					// Either this was the base file (last left in the stack) or
+					// default behavior was prevented by the handlers, and hence
+					// there is nothing more to do than clean up and bail.
+					dispose();
+					return;
+				}
+			}
+			else {
+				// Error event was not handled by listeners directly on AssetLoader or
+				// on any of the subscribed loaders (in the list of error handlers.)
+				throw new Error(event.message);
+			}
+		}
 		
 		private function onAssetComplete(event : AssetEvent) : void
 		{
@@ -494,7 +544,7 @@ package away3d.loaders
 		 * Called when an image is too large or it's dimensions are not a power of 2
 		 * @param event
 		 */
-		private function onTextureSizeError(event : AssetEvent) : void {			
+		private function onTextureSizeError(event : AssetEvent) : void {	
 			event.asset.name = _loadingDependency.resolveName(event.asset);
 			dispatchEvent(event);
 		}
@@ -519,6 +569,7 @@ package away3d.loaders
 			loader.addEventListener(AssetEvent.SKELETON_COMPLETE, onAssetComplete);
 			loader.addEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 			loader.addEventListener(ParserEvent.READY_FOR_DEPENDENCIES, onReadyForDependencies);
+			loader.addEventListener(ParserEvent.PARSE_ERROR, onParserError);
 		}
 		
 		
@@ -543,11 +594,14 @@ package away3d.loaders
 			loader.removeEventListener(AssetEvent.SKELETON_POSE_COMPLETE, onAssetComplete);
 		}
 		
+        public function stop():void {
+            dispose();
+        }
 		
 		private function dispose() : void
 		{
-			_loadingDependency = null;
 			_errorHandlers = null;
+			_parseErrorHandlers = null;
 			_context = null;
 			_token = null;
 			_stack = null;
@@ -555,6 +609,7 @@ package away3d.loaders
 			if (_loadingDependency && _loadingDependency.loader) {
 				removeEventListeners(_loadingDependency.loader);
 			}
+			_loadingDependency = null;
 		}
 		
 		
@@ -569,6 +624,13 @@ package away3d.loaders
 		 * whether they in turn had any client code listening for the event.) If no handlers
 		 * return true, the AssetLoader knows that the event wasn't handled and will throw an RTE.
 		*/
+        
+		arcane function addParseErrorHandler(handler : Function) : void
+		{
+			if (_parseErrorHandlers.indexOf(handler)<0) 
+				_parseErrorHandlers.push(handler);
+			
+		}
 		arcane function addErrorHandler(handler : Function) : void
 		{
 			if (_errorHandlers.indexOf(handler)<0) {

@@ -119,6 +119,10 @@ package away3d.library
 		{
 			return getBundle().loadData(data, context, ns, parser);
 		}
+		public static function stopLoad() : void
+		{
+			return getBundle().stopAllLoadingSessions();
+		}
 		
 		/**
 		 * Short-hand for getAsset() method on default asset library bundle.

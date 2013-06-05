@@ -5,6 +5,7 @@ package away3d.loaders
 	import away3d.entities.Mesh;
 	import away3d.events.AssetEvent;
 	import away3d.events.LoaderEvent;
+    import away3d.events.ParserEvent;
 	import away3d.library.AssetLibraryBundle;
 	import away3d.library.assets.AssetType;
     import away3d.lights.LightBase;
@@ -146,6 +147,7 @@ package away3d.loaders
 	 */
 	public class Loader3D extends ObjectContainer3D
 	{
+		private var _loadingSessions : Vector.<AssetLoader>;
 		private var _useAssetLib : Boolean;
 		private var _assetLibId : String;
 		
@@ -176,6 +178,7 @@ package away3d.loaders
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
+                _loadingSessions.push(loader);
 				token = loader.load(req, context, ns, parser);
 			}
 			
@@ -219,6 +222,7 @@ package away3d.loaders
 			}
 			else {
 				var loader : AssetLoader = new AssetLoader();
+                _loadingSessions.push(loader);
 				token = loader.loadData(data, '', context, ns, parser);
 			}
 			
@@ -306,7 +310,34 @@ package away3d.loaders
 			this.dispatchEvent(ev.clone());
 		}
 		
+		private function onParseError(ev : ParserEvent) : Boolean
+		{
+			if (hasEventListener(ParserEvent.PARSE_ERROR)){
+				dispatchEvent(ev);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
 		
+        public function stopLoad():void {
+			if (_useAssetLib) {
+				var lib : AssetLibraryBundle;
+				lib = AssetLibraryBundle.getInstance(_assetLibId);
+                lib.stopAllLoadingSessions();
+			    _loadingSessions = null;
+                return
+			}
+            var i:int;
+            var length:int = _loadingSessions.length;
+            for (i = 0; i < length; i++) {
+                removeListeners(_loadingSessions[i]);
+                _loadingSessions[i].stop();
+                _loadingSessions[i] = null;
+            }
+			_loadingSessions = null;
+        }
 		private function onLoadError(ev : LoaderEvent) : Boolean
 		{
 			if (hasEventListener(LoaderEvent.LOAD_ERROR)) {
