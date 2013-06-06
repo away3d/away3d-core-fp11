@@ -2495,6 +2495,7 @@ package away3d.loaders.parsers
 				}
 				var defaultBitmap:BitmapData = _defaultTexture.bitmapData;
 				_defaultCubeTexture = new BitmapCubeTexture(defaultBitmap, defaultBitmap, defaultBitmap, defaultBitmap, defaultBitmap, defaultBitmap);
+				_defaultCubeTexture.name="defaultTexture";
 			}
 			return _defaultCubeTexture;
 		}

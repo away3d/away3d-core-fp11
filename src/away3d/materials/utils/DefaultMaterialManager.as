@@ -50,6 +50,7 @@ package away3d.materials.utils
 			}
 			
 			_defaultTexture = new BitmapTexture(_defaultTextureBitmapData);
+			_defaultTexture.name="defaultTexture";
 		}
 		
 		private static function createDefaultMaterial():void
@@ -57,6 +58,7 @@ package away3d.materials.utils
 			_defaultMaterial = new TextureMaterial(_defaultTexture);
 			_defaultMaterial.mipmap = false;
 			_defaultMaterial.smooth = false;
+			_defaultMaterial.name="defaultMaterial";
 		}
 	}
 }
