@@ -161,8 +161,10 @@ package away3d.events
 		 */
 		public override function get bubbles() : Boolean
 		{
+			var doesBubble:Boolean = super.bubbles && _allowedToPropagate;
+			_allowedToPropagate = true;
 			// Don't bubble if propagation has been stopped.
-			return super.bubbles && _allowedToPropagate;
+			return doesBubble;
 		}
 
 		/**
@@ -173,7 +175,7 @@ package away3d.events
 			super.stopPropagation();
 			_allowedToPropagate = false;
 			if( _parentEvent ) {
-				_parentEvent._allowedToPropagate = false;
+				_parentEvent.stopPropagation();
 			}
 		}
 		
@@ -185,7 +187,7 @@ package away3d.events
 			super.stopImmediatePropagation();
 			_allowedToPropagate = false;
 			if( _parentEvent ) {
-				_parentEvent._allowedToPropagate = false;
+				_parentEvent.stopImmediatePropagation();
 			}
 		}
 		
@@ -218,6 +220,7 @@ package away3d.events
 			result.shiftKey = shiftKey;
 
 			result._parentEvent = this;
+			result._allowedToPropagate = _allowedToPropagate;
 
 			return result;
 		}
