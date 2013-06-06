@@ -222,11 +222,6 @@ package away3d.animators
 			}
         }
 		
-		public function dispose():void 
-		{
-			
-		}
-		
 		/**
 		 * Applies the calculated time delta to the active animation state node or state transition object.
 		 */

@@ -150,7 +150,7 @@ package away3d.animators
 			update(time);
 		}
 		
-		public function dispose():void 
+		override public function dispose():void
 		{
 			var subGeometry:AnimationSubGeometry;
 			for each(subGeometry in _animatorSubGeometries)

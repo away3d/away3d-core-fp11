@@ -211,12 +211,21 @@
 		override public function dispose() : void
 		{
 			super.dispose();
-			
-			if(_animator)
-				_animator.dispose();
-				
+
 			material = null;
 			geometry = null;
+		}
+
+		/**
+		 * Disposes mesh including the animator and children. This is a merely a convenience method.
+		 * @return
+		 */
+		public function disposeWithAnimatorAndChildren() : void
+		{
+			disposeWithChildren();
+
+			if(_animator)
+				_animator.dispose();
 		}
 
 		/**

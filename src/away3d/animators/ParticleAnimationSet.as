@@ -248,11 +248,10 @@ package away3d.animators
 		override public function dispose():void 
 		{
 			var subGeometry:AnimationSubGeometry;
+
 			for each(subGeometry in _animationSubGeometries)
-			{
 				subGeometry.dispose();
-			}
-			
+
 			super.dispose();
 		}
 		
