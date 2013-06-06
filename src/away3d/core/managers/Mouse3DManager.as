@@ -81,8 +81,10 @@ package away3d.core.managers {
 						_collidingObject = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
 					}
 				} else { 
-					if (view.getBounds(view.parent).contains(view.mouseX + view.x, view.mouseY + view.y)) 
+					if (view.getBounds(view.parent).contains(view.mouseX + view.x, view.mouseY + view.y)) {
+						if( !_collidingViewObjects ) _collidingViewObjects = new Vector.<PickingCollisionVO>(_viewCount);
 						_collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
+					}
 				}
 			}
 		}
