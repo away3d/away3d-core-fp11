@@ -26,6 +26,11 @@ package away3d.loaders.parsers
 	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.animators.nodes.UVClipNode;
 	import away3d.animators.nodes.VertexClipNode;
+	import away3d.cameras.Camera3D;
+	import away3d.cameras.lenses.LensBase;
+	import away3d.cameras.lenses.OrthographicLens;
+	import away3d.cameras.lenses.OrthographicOffCenterLens;
+	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.Geometry;
@@ -493,6 +498,10 @@ package away3d.loaders.parsers
 						parseLight(_cur_block_id);
 						isParsed = true;
 						break;
+					case 42: 
+						parseCamera(_cur_block_id);
+						isParsed = true;
+						break;
 					case 43: 
 						parseTextureProjector(_cur_block_id);
 						isParsed = true;
@@ -531,6 +540,10 @@ package away3d.loaders.parsers
 						break;
 					case 122: 
 						parseAnimatorSet(_cur_block_id);
+						isParsed = true;
+						break;
+					case 253: 
+						parseCommand(_cur_block_id);
 						isParsed = true;
 						break;
 				}
@@ -1035,6 +1048,54 @@ package away3d.loaders.parsers
 		}
 		
 		//Block ID = 43
+		private function parseCamera(blockID:uint):void
+		{
+			
+			var par_id:uint = _newBlockBytes.readUnsignedInt();
+			var mtx:Matrix3D = parseMatrix3D();
+			var name:String = parseVarStr();
+			var parentName:String = "Root (TopLevel)";
+			var lens:LensBase;
+			_newBlockBytes.readUnsignedByte();//set as active camera
+			_newBlockBytes.readShort();//lengthof lenses - not used yet
+			var lenstype:uint=_newBlockBytes.readShort();
+			var props:AWDProperties = parseProperties({101: _propsNrType, 102: _propsNrType, 103: _propsNrType, 104: _propsNrType});
+			switch (lenstype){
+				case 5001:
+					lens=new PerspectiveLens(props.get(101,60));
+					break;
+				case 5002:
+					lens=new OrthographicLens(props.get(101,500));
+					break;
+				case 5003:
+					lens=new OrthographicOffCenterLens(props.get(101,-400),props.get(102,400),props.get(103,-300),props.get(104,300));
+					break;
+				default:
+					trace("unsupportedLenstype");
+					return;
+			}
+			var camera:Camera3D=new Camera3D(lens);
+			camera.transform=mtx;
+			var returnedArrayParent:Array = getAssetByID(par_id, [AssetType.CONTAINER, AssetType.LIGHT, AssetType.MESH, AssetType.ENTITY, AssetType.SEGMENT_SET])
+			if (returnedArrayParent[0]){
+				ObjectContainer3D(returnedArrayParent[1]).addChild(camera);
+				parentName=ObjectContainer3D(returnedArrayParent[1]).name;
+			}
+			else if (par_id > 0)
+				_blocks[blockID].addError("Could not find a parent for this Camera");
+			camera.name = name;
+			props = parseProperties({1: _matrixNrType, 2: _matrixNrType, 3: _matrixNrType, 4: UINT8});
+			camera.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
+			camera.extra = parseUserAttributes();
+			finalizeAsset(camera, name);
+			
+			_blocks[blockID].data = camera
+			if (_debug)
+				trace("Parsed a Camera: Name = '"+name+"' | Lenstype = "+lens+" | Parent-Name = "+parentName);
+			
+		}
+		
+		//Block ID = 43
 		private function parseTextureProjector(blockID:uint):void
 		{
 			
@@ -1044,7 +1105,7 @@ package away3d.loaders.parsers
 			var parentName:String = "Root (TopLevel)";
 			var tex_id:uint = _newBlockBytes.readUnsignedInt();
 			var returnedArrayGeometry:Array = getAssetByID(tex_id, [AssetType.TEXTURE])
-			if ((returnedArrayGeometry[0] == false) && (tex_id != 0))
+			if ((!returnedArrayGeometry[0]) && (tex_id != 0))
 			{
 				_blocks[blockID].addError("Could not find the Texture (ID = " + tex_id + " ( for this TextureProjector!");
 			}
@@ -1052,7 +1113,8 @@ package away3d.loaders.parsers
 			textureProjector.name = name;
 			textureProjector.aspectRatio = _newBlockBytes.readFloat();
 			textureProjector.fieldOfView = _newBlockBytes.readFloat();
-			var props:Object = parseProperties({1: _matrixNrType, 2: _matrixNrType, 3: _matrixNrType, 4: UINT8});
+			textureProjector.transform=mtx;
+			var props:AWDProperties = parseProperties({1: _matrixNrType, 2: _matrixNrType, 3: _matrixNrType, 4: UINT8});
 			textureProjector.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
 			textureProjector.extra = parseUserAttributes();
 			finalizeAsset(textureProjector, name);
@@ -2164,6 +2226,50 @@ package away3d.loaders.parsers
 			
 		}
 		
+		//Block ID = 253
+		private function parseCommand(blockID:uint):void
+		{
+			var hasBlocks:Boolean=Boolean(_newBlockBytes.readUnsignedByte());
+			var par_id:uint = _newBlockBytes.readUnsignedInt();
+			var mtx:Matrix3D = parseMatrix3D();
+			var name:String = parseVarStr();
+			
+			var parentObject:ObjectContainer3D;
+			var targetObject:ObjectContainer3D;
+			var returnedArray:Array = getAssetByID(par_id, [AssetType.CONTAINER, AssetType.LIGHT, AssetType.MESH, AssetType.ENTITY, AssetType.SEGMENT_SET])
+			if (returnedArray[0] == true)
+			{
+				parentObject=ObjectContainer3D(returnedArray[1]);
+			}
+			
+			var numCommands:uint=_newBlockBytes.readShort();
+			var typeCommand:uint=_newBlockBytes.readShort();
+			var props:AWDProperties=parseProperties({1: BADDR});
+			switch(typeCommand){
+				case 1:
+					var targetID:uint = props.get(1,0);
+					var returnedArrayTarget:Array = getAssetByID(targetID, [AssetType.LIGHT]);//for no only light is requested!!!!
+					if ((!returnedArrayTarget[0]) && (targetID != 0))
+					{
+						_blocks[blockID].addError("Could not find the light (ID = " + targetID + " ( for this CommandBock!");
+						return;
+					}
+					targetObject=returnedArrayTarget[1];
+					
+					parentObject.addChild(targetObject);
+					targetObject.transform=mtx;
+					break;
+			}
+			if(targetObject){
+				props = parseProperties({1: _matrixNrType, 2: _matrixNrType, 3: _matrixNrType, 4: UINT8});
+				targetObject.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
+				targetObject.extra = parseUserAttributes();
+			}
+			_blocks[blockID].data = targetObject
+			if (_debug)
+				trace("Parsed a CommandBlock: Name = '"+name);
+			
+		}
 		
 		
 		//blockID 254

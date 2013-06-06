@@ -390,6 +390,10 @@ package away3d.loaders.parsers {
 					type_name = 'skybox';
 					type_event = AssetEvent.SKYBOX_COMPLETE;
 					break;
+				case AssetType.CAMERA:
+					type_name = 'camera';
+					type_event = AssetEvent.CAMERA_COMPLETE;
+					break;
 				case AssetType.SEGMENT_SET:
 					type_name = 'segmentSet';
 					type_event = AssetEvent.SEGMENT_SET_COMPLETE;

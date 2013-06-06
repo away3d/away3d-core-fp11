@@ -9,6 +9,7 @@ package away3d.events
 		public static const ASSET_COMPLETE : String = "assetComplete";
 		public static const ENTITY_COMPLETE : String = "entityComplete";
 		public static const SKYBOX_COMPLETE : String = "skyboxComplete";
+		public static const CAMERA_COMPLETE : String = "cameraComplete";
 		public static const MESH_COMPLETE : String = "meshComplete";
 		public static const GEOMETRY_COMPLETE : String = "geometryComplete";
 		public static const SKELETON_COMPLETE : String = "skeletonComplete";

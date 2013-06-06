@@ -4,6 +4,7 @@ package away3d.library.assets
 	{
 		public static const ENTITY : String = 'entity';
 		public static const SKYBOX : String = 'skybox';
+		public static const CAMERA : String = 'camera';
 		public static const SEGMENT_SET : String = 'segmentSet';
 		public static const MESH : String = 'mesh';
 		public static const GEOMETRY : String = 'geometry';
