@@ -206,6 +206,8 @@ package away3d.entities
 			_subSets = new Vector.<SubSet>();
 			_segments = new Dictionary();
 
+			addSubSet();
+
 			_hasData = false;
 		}
 
@@ -387,6 +389,9 @@ package away3d.entities
 			removeAllSegments();
 			_segments = null
 			_material = null;
+			var subSet:SubSet = _subSets[0];
+			subSet.vertices = null;
+			subSet.indices = null;
 			_subSets = null;
 		}
 		/**
