@@ -47,12 +47,12 @@ package away3d.cameras.lenses
 		 */
 		override public function unproject(nX:Number, nY:Number, sZ : Number):Vector3D
 		{
-			var v : Vector3D = new Vector3D(nX, -nY, sZ, 1.0);
+			var v : Vector3D = new Vector3D(nX + matrix.rawData[12], -nY + matrix.rawData[13], sZ, 1.0);
 			
 			v = unprojectionMatrix.transformVector(v);
 			
 			//z is unaffected by transform
-            v.z = sZ;
+			v.z = sZ;
 			
 			return v;
 		}
