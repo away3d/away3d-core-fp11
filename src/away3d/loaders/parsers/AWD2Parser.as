@@ -2255,8 +2255,8 @@ package away3d.loaders.parsers
 						return;
 					}
 					targetObject=returnedArrayTarget[1];
-					
-					parentObject.addChild(targetObject);
+					if (parentObject)			
+						parentObject.addChild(targetObject);
 					targetObject.transform=mtx;
 					break;
 			}
