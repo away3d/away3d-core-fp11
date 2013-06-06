@@ -214,7 +214,7 @@ package away3d.entities
 		/**
 		* @returns a segment object from a given index.
 		*/
-		public function getSegmentByIndex(index : uint) : Segment
+		public function getSegment(index : uint) : Segment
 		{
 			if(!index >_indexSegments-1) return null;
 
