@@ -164,7 +164,6 @@ package away3d.loaders.parsers
 			
 			if(!_startedParsing) {
 				_textData = getTextData();
-				
 				// Merge linebreaks that are immediately preceeded by
 				// the "escape" backward slash into single lines.
 				_textData = _textData.replace(/\\[\r\n]+\s*/gm, ' ');
@@ -196,8 +195,8 @@ package away3d.loaders.parsers
 				
 				line = _textData.substring(_oldIndex, _charIndex);
 				line = line.split('\r').join("");
-				
-				trunk = line.replace("  "," ").split(" ");
+				line = line.replace("  "," ");
+				trunk = line.split(" ");
 				_oldIndex = _charIndex+1;
 				parseLine(trunk);
 				
@@ -360,8 +359,7 @@ package away3d.loaders.parsers
 					translateVertexData(face, j+1, vertices, uvs, indices, normals);
 				}
 			}
-			if (vertices.length > 0)
-			{
+			if (vertices.length > 0) {
 				subs = GeomUtil.fromVectors(vertices, indices, uvs, normals, null, null, null);
 				for (i=0; i<subs.length; i++) {
 					geometry.addSubGeometry(subs[i]);
@@ -463,8 +461,20 @@ package away3d.loaders.parsers
 		 * @param trunk The data block containing the vertex tag and its parameters
 		 */
 		private function parseVertex(trunk:Array):void
-		{
-			_vertices.push(new Vertex(parseFloat(trunk[1]), parseFloat(trunk[2]), -parseFloat(trunk[3])));
+		{	
+			//for the very rare cases of other delimiters/charcodes seen in some obj files
+			if(trunk.length > 4){
+				var nTrunk:Array = [];
+				var val:Number;
+				for(var i:uint = 1;i<trunk.length;++i){
+					val = parseFloat(trunk[i]);
+					if(!isNaN(val)) nTrunk.push(val);
+				}
+				_vertices.push(new Vertex(nTrunk[0], nTrunk[1], -nTrunk[2]) );
+			} else {
+				_vertices.push(new Vertex(parseFloat(trunk[1]), parseFloat(trunk[2]), -parseFloat(trunk[3])));
+			}
+
 		}
 		
 		/**
@@ -473,7 +483,19 @@ package away3d.loaders.parsers
 		 */
 		private function parseUV(trunk:Array):void
 		{
-			_uvs.push(new UV(parseFloat(trunk[1]), 1-parseFloat(trunk[2])));
+			if(trunk.length > 3){
+				var nTrunk:Array = [];
+				var val:Number;
+				for(var i:uint = 1;i<trunk.length;++i){
+					val = parseFloat(trunk[i]);
+					if(!isNaN(val)) nTrunk.push(val);
+				}
+				_uvs.push(new UV(nTrunk[0], nTrunk[1]) );
+
+			} else {
+				_uvs.push(new UV(parseFloat(trunk[1]), 1-parseFloat(trunk[2])));
+			}
+			
 		}
 		
 		/**
@@ -482,7 +504,18 @@ package away3d.loaders.parsers
 		 */
 		private function parseVertexNormal(trunk:Array):void
 		{
-			_vertexNormals.push(new Vertex(parseFloat(trunk[1]), parseFloat(trunk[2]), -parseFloat(trunk[3])));
+			if(trunk.length > 4){
+				var nTrunk:Array = [];
+				var val:Number;
+				for(var i:uint = 1;i<trunk.length;++i){
+					val = parseFloat(trunk[i]);
+					if(!isNaN(val)) nTrunk.push(val);
+				}
+				_vertexNormals.push(new Vertex(nTrunk[0], nTrunk[1], -nTrunk[2]) );
+				
+			} else {
+				_vertexNormals.push(new Vertex(parseFloat(trunk[1]), parseFloat(trunk[2]), -parseFloat(trunk[3])));
+			}
 		}
 		
 		/**
@@ -495,7 +528,7 @@ package away3d.loaders.parsers
 			var face:FaceData = new FaceData();
 			
 			if (!_currentGroup) createGroup(null);
-			
+
 			var indices:Array;
 			for (var i:uint = 1; i < len; ++i) {
 				if (trunk[i] == "") continue;
