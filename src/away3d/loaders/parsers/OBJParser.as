@@ -490,7 +490,7 @@ package away3d.loaders.parsers
 					val = parseFloat(trunk[i]);
 					if(!isNaN(val)) nTrunk.push(val);
 				}
-				_uvs.push(new UV(nTrunk[0], nTrunk[1]) );
+				_uvs.push(new UV(nTrunk[0], 1-nTrunk[1]) );
 
 			} else {
 				_uvs.push(new UV(parseFloat(trunk[1]), 1-parseFloat(trunk[2])));
