@@ -211,6 +211,10 @@
 		override public function dispose() : void
 		{
 			super.dispose();
+			
+			if(_animator)
+				_animator.dispose();
+				
 			material = null;
 			geometry = null;
 		}

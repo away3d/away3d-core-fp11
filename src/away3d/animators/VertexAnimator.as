@@ -162,5 +162,10 @@ package away3d.animators
         public function testGPUCompatibility(pass : MaterialPassBase) : void
         {
         }
+
+		public function dispose():void 
+		{
+			
+		}
 	}
 }

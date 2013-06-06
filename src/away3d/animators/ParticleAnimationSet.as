@@ -54,7 +54,6 @@ package away3d.animators
 		//set if has an node which will apply color add operation
 		public var hasColorAddNode:Boolean;
 		
-		
 		/**
 		 * Initialiser function for static particle properties. Needs to reference a function with teh following format
 		 *
@@ -245,6 +244,17 @@ package away3d.animators
         {
 			
         }
+		
+		override public function dispose():void 
+		{
+			var subGeometry:AnimationSubGeometry;
+			for each(subGeometry in _animationSubGeometries)
+			{
+				subGeometry.dispose();
+			}
+			
+			super.dispose();
+		}
 		
 		/** @private */
 		arcane function generateAnimationSubGeometries(mesh:Mesh):void

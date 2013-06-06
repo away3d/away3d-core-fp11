@@ -1,6 +1,7 @@
 package away3d.animators.data
 {
 	import away3d.core.managers.Stage3DProxy;
+	
 	import flash.display3D.Context3D;
 	import flash.display3D.VertexBuffer3D;
 	
@@ -54,6 +55,17 @@ package away3d.animators.data
 				_bufferDirty[contextIndex] = false;
 			}
 			context.setVertexBufferAt(index, buffer, bufferOffset, format);
+		}
+		
+		public function dispose():void
+		{
+			while(_vertexBuffer.length)
+			{
+				var vertexBuffer:VertexBuffer3D = _vertexBuffer.pop()
+				
+				if(vertexBuffer)
+					vertexBuffer.dispose();
+			}
 		}
 		
 		public function invalidateBuffer():void
