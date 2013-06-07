@@ -209,7 +209,7 @@ package away3d.primitives {
 			// lateral surface
 			if (_surfaceClosed) {
 				var a : uint, b : uint, c : uint, d : uint;
-				var na0 : Number, na1 : Number;
+				var na0 : Number, na1 : Number, naComp1: Number, naComp2: Number;
 
 				for (j = 0; j <= _segmentsH; ++j) {
 					radius = _topRadius - ((j / _segmentsH) * (_topRadius - _bottomRadius));
@@ -223,30 +223,35 @@ package away3d.primitives {
 						x = radius * Math.cos(revolutionAngle);
 						y = radius * Math.sin(revolutionAngle);
 						na0 = latNormBase * Math.cos(revolutionAngle);
-						na1 = -latNormBase * Math.sin(revolutionAngle);
+						na1 = latNormBase * Math.sin(revolutionAngle);
 
 						if(_yUp){
 							t1 = 0;
 							t2 = -na0;
 							comp1 = -z;
 							comp2 = y;
+							naComp1 = latNormElev;
+							naComp2 = na1;
+
 						} else {
 							t1 = -na0;
 							t2 = 0;
 							comp1 = y;
 							comp2 = z;
+							naComp1 = na1;
+							naComp2 = latNormElev;
 						}
-					
+
 						if (i == _segmentsW) {
 							addVertex(	_rawData[startIndex], _rawData[startIndex+1], _rawData[startIndex+2],
 									  		na0, latNormElev, na1,
 									  		na1, t1, t2);
 						} else {
 							addVertex(	x, comp1, comp2,
-									  		na0, -na1, -latNormElev,
+									  		na0, naComp1, naComp2,
 									  		-na1, t1, t2);
 						}
-
+					 
 						// close triangle
 						if (i > 0 && j > 0) {
 							a = _nextVertexIndex - 1; // current
