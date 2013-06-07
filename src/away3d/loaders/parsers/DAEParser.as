@@ -1264,11 +1264,22 @@ class DAEPrimitive extends DAEElement
 		var faces : Vector.<DAEFace> = new Vector.<DAEFace>();
 		var input : DAEInput;
 		var source : DAESource;
-		var numInputs : uint = _inputs.length;
+		//var numInputs : uint = _inputs.length;  //shared inputs offsets VERTEX and TEXCOORD
+		var numInputs:uint;
+		if (_inputs.length > 1) {
+			var offsets:Array = [];
+			for each (var daei:DAEInput in _inputs){
+				if (!offsets[daei.offset]){
+					offsets[daei.offset] = true;
+					numInputs++;
+				}
+			}
+		} else {
+			numInputs = _inputs.length;
+		}
+
 		var idx : uint = 0, index : uint;
 		var i : uint, j : uint;
-		//var x : Number, y : Number, z : Number;
-		//var vertexIndex : uint = 0;
 		var vertexDict : Object = {};
 		var idx32 : uint;
 		this.vertices = new Vector.<DAEVertex>();
