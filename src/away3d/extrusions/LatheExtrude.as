@@ -28,6 +28,7 @@ package away3d.extrusions {
 		private var _revolutions:Number;
 		private var _subdivision:uint;
 		private var _offsetRadius:Number;
+		private var _prevOffsetRadius:Number = 0;
 		private var _materials:MultipleMaterials;
 		private var _coverAll:Boolean;
 		private var _flip:Boolean;
@@ -113,78 +114,78 @@ package away3d.extrusions {
 		}
 		
 		/*
-    	* A Vector.<Vector3D> representing the profile information to be repeated/rotated around a given axis.
-    	*/
+		* A Vector.<Vector3D> representing the profile information to be repeated/rotated around a given axis.
+		*/
 		public function get profile():Vector.<Vector3D>
-    	{
-    		return _profile;
-    	}
+		{
+			return _profile;
+		}
 		
 		public function set profile(val:Vector.<Vector3D>):void
-    	{
+		{
 			if (val.length > 1) {
 				_profile = val;
 				invalidateGeometry();
 			} else {
 				throw new Error("LatheExtrude error: the profile Vector.<Vector3D> must hold a mimimun of 2 vector3D's");
 			}
-    	}
+		}
 		
 		/*
-    	* A Number, to offset the original start angle of the rotation. Default is 0;
-    	*/
+		* A Number, to offset the original start angle of the rotation. Default is 0;
+		*/
 		public function get startRotationOffset():Number
-    	{
-    		return _startRotationOffset;
-    	}
-		
+		{
+			return _startRotationOffset;
+		}
+
 		public function set startRotationOffset(val:Number):void
-    	{
+		{
 			_startRotationOffset = val;
-    	}
+		}
 		
 		/**
-    	 * Defines the axis used for the lathe rotation. Defaults to "y".
-    	 */
+		* Defines the axis used for the lathe rotation. Defaults to "y".
+		*/
 		public function get axis():String
-    	{
-    		return _axis;
-    	}
-		
+		{
+			return _axis;
+		}
+
 		public function set axis(val:String):void
-    	{
-    		if (_axis == val) return;
-			
-    		_axis = val;
+		{
+			if (_axis == val) return;
+
+			_axis = val;
 			invalidateGeometry();
-    	}
+		}
 		 
 		/**
-    	 * Defines the number of revolutions performed by the lathe extrusion. Defaults to 1.
-    	 */
+		* Defines the number of revolutions performed by the lathe extrusion. Defaults to 1.
+		*/
 		public function get revolutions():Number
-    	{
-    		return _revolutions;
-    	}
-		
+		{
+			return _revolutions;
+		}
+
 		public function set revolutions(val:Number):void
-    	{
-    		if (_revolutions == val) return;
+		{
+			if (_revolutions == val) return;
 			_revolutions = (_revolutions>.001)? _revolutions : .001;
-    		_revolutions = val;
+			_revolutions = val;
 			invalidateGeometry();
-    	}
+		}
     	
 		/**
-    	 * Defines the subdivisions created in the mesh for the total number of revolutions. Defaults to 2, minimum 2.
-    	 * 
-    	 * @see #revolutions
-    	 */ 
+		* Defines the subdivisions created in the mesh for the total number of revolutions. Defaults to 2, minimum 2.
+		* 
+		* @see #revolutions
+		*/ 
 		public function get subdivision():uint
 		{
 			return _subdivision;
 		}
-		
+
 		public function set subdivision(val:uint):void
 		{
 			val = (val<3)? 3 : val;
@@ -194,42 +195,41 @@ package away3d.extrusions {
 		}
 		
 		/**
-    	 * Defines an offset radius applied to the profile. Defaults to 0.
-    	 */
+		* Defines an offset radius applied to the profile. Defaults to 0.
+		*/
 		public function get offsetRadius():Number
-    	{
-    		return _offsetRadius;
-    	}
-		
+		{
+			return _offsetRadius;
+		}
+
 		public function set offsetRadius(val:Number):void
-    	{
-    		if (_offsetRadius == val) return;
-			
-    		_offsetRadius = val;
+		{
+			if (_offsetRadius == val) return;
+			_offsetRadius = val;
 			invalidateGeometry();
-    	}
+		}
     	
 		/**
-		 * An optional object that defines left, right, front, back, top and bottom materials to be set on the resulting lathe extrusion.
-    	 */
+		* An optional object that defines left, right, front, back, top and bottom materials to be set on the resulting lathe extrusion.
+		*/
 		public function get materials():MultipleMaterials
-    	{
-    		return _materials;
-    	}
-    	
+		{
+			return _materials;
+		}
+
 		public function set materials(val:MultipleMaterials):void
-    	{
-    		_materials = val;
-			
+		{
+			_materials = val;
+
 			if(_materials.front && this.material != _materials.front)
-				this.material = _materials.front;
-				
+			this.material = _materials.front;
+
 			invalidateGeometry();
-    	}
-    	
+		}
+
 		/**
-    	 * Defines if the texture(s) should be stretched to cover the entire mesh or per step between segments. Defaults to true.
-    	 */
+		* Defines if the texture(s) should be stretched to cover the entire mesh or per step between segments. Defaults to true.
+		*/
 		public function get coverAll():Boolean
 		{
 			return _coverAll;
@@ -244,8 +244,8 @@ package away3d.extrusions {
 		}
 		
 		/**
-    	 * Defines if the generated faces should be inversed. Default false.
-    	 */
+		* Defines if the generated faces should be inversed. Default false.
+		*/
 		public function get flip():Boolean
 		{
 			return _flip;
@@ -260,8 +260,8 @@ package away3d.extrusions {
 		}
 		
 		/**
-    	 * Defines if the surface of the mesh must be smoothed or not.
-    	 */
+		* Defines if the surface of the mesh must be smoothed or not.
+		*/
 		public function get smoothSurface():Boolean
 		{
 			return _smoothSurface;
@@ -277,8 +277,8 @@ package away3d.extrusions {
 		}
 		
 		/**
-    	 * Defines if the last transformed profile values are saved or not. Useful in combo with rotations less than 1, to ease combinations with other extrusions classes such as SkinExtrude.
-    	 */
+		* Defines if the last transformed profile values are saved or not. Useful in combo with rotations less than 1, to ease combinations with other extrusions classes such as SkinExtrude.
+		*/
 		public function get keepLastProfile():Boolean
 		{
 			return _keepLastProfile;
@@ -292,8 +292,8 @@ package away3d.extrusions {
 			_keepLastProfile = val;
 		}
 		/**
-    	 * returns the last rotated profile values, if keepLastProfile was true
-    	 */
+		* returns the last rotated profile values, if keepLastProfile was true
+		*/
 		public function get lastProfile():Vector.<Vector3D>
 		{
 			if(keepLastProfile && !_lastProfile)
@@ -304,8 +304,8 @@ package away3d.extrusions {
 		
 		
 		/**
-    	* Defines if thickness is greater than 0 if the thickness is equally distributed along the volume. Default is false.
-    	*/
+		* Defines if thickness is greater than 0 if the thickness is equally distributed along the volume. Default is false.
+		*/
 		public function get preciseThickness():Boolean
 		{
 			return _preciseThickness;
@@ -319,72 +319,72 @@ package away3d.extrusions {
 			invalidateGeometry();
 		}
 		    	
-    	/**
-    	 * Defines whether the mesh is recentered of not after generation
-    	 */
-    	public function get centerMesh():Boolean
-    	{
-    		return _centerMesh;
-    	}
-    	
-    	public function set centerMesh(val:Boolean):void
-    	{
-    		if (_centerMesh == val)
-    			return;
-    		
-    		_centerMesh = val;
+		/**
+		 * Defines whether the mesh is recentered of not after generation
+		 */
+		public function get centerMesh():Boolean
+		{
+			return _centerMesh;
+		}
+
+		public function set centerMesh(val:Boolean):void
+		{
+			if (_centerMesh == val)
+				return;
 			
+			_centerMesh = val;
+
 			if (_centerMesh && _subGeometry.vertexData.length > 0){
 				MeshHelper.recenter( this);
 			} else {
 				invalidateGeometry();
 			}
-    	}
+		}
 		 
 		/**
-    	 * Defines the thickness of the resulting lathed geometry. Defaults to 0 (single face).
-    	 */
+		* Defines the thickness of the resulting lathed geometry. Defaults to 0 (single face).
+		*/
 		public function get thickness():Number
-    	{
-    		return _thickness;
-    	}
-		
+		{
+			return _thickness;
+		}
+
 		public function set thickness(val:Number):void
-    	{
-    		if (_thickness == val)
-				return;
-			
-    		_thickness = (val>0)? val : _thickness;
+		{
+			if (_thickness == val)
+			return;
+
+			_thickness = (val>0)? val : _thickness;
 			invalidateGeometry();
-    	}
+		}
     	
 		/**
 		 * Defines if the top, bottom, left, right, front or back of the the extrusion is left open.
-    	 */
+		*/
 		public function get ignoreSides():String
-    	{
-    		return _ignoreSides;
-    	}
-    	
+		{
+			return _ignoreSides;
+		}
+
 		public function set ignoreSides(val:String):void
-    	{
-    		_ignoreSides = val;
-    		invalidateGeometry();
-    	}
-    	
+		{
+			_ignoreSides = val;
+			invalidateGeometry();
+		}
+
 		/**
 		 * Allows the building of shapes such as springs. Rotation must be higher than 1 to have significant effect. Properties of the objects are x,y,z,radius and rotation
-    	 */
+		*/
 		public function get tweek():Object
-    	{
-    		return _tweek;
-    	}
-    	
+		{
+			return _tweek;
+		}
+
 		public function set tweek(val:Object):void
-    	{
-    		_tweek = val;
-    		invalidateGeometry();
-    	}
+		{
+			_tweek = val;
+			invalidateGeometry();
+		}
 		
 		/**
 		 * @inheritDoc
@@ -397,8 +397,8 @@ package away3d.extrusions {
 		}
 
 		/**
-		 * @inheritDoc
-		 */
+		* @inheritDoc
+		*/
 		override public function get geometry() : Geometry
 		{
 			if (_geomDirty) buildExtrude();
@@ -407,8 +407,8 @@ package away3d.extrusions {
 		}
 
 		/**
-		 * @inheritDoc
-		 */
+		* @inheritDoc
+		*/
 		override public function get subMeshes():Vector.<SubMesh>
 		{
 			if (_geomDirty) buildExtrude();
@@ -601,6 +601,7 @@ package away3d.extrusions {
 			}
 			
 			var offsetradius:Number = -_offsetRadius;
+			offsetradius += _prevOffsetRadius;
 			var factor:Number = 0;
 			var stepm:Number = 360*_revolutions;
 			
@@ -686,6 +687,8 @@ package away3d.extrusions {
 				angle += step;
 				
 			}
+
+			_prevOffsetRadius = _offsetRadius;
 			 
 			if (render) {
 
@@ -781,8 +784,8 @@ package away3d.extrusions {
 			}
 		}
 		 
-    	private function buildExtrude():void
-    	{
+		private function buildExtrude():void
+		{
 			if(!_profile) throw new Error("LatheExtrude error: No profile Vector.<Vector3D> set");
 			_MaterialsSubGeometries = null;
 			_geomDirty = false;
@@ -1232,11 +1235,11 @@ package away3d.extrusions {
 				_normal1 = new Vector3D(0.0, 0.0, 0.0);
 				_normal2 = new Vector3D(0.0, 0.0, 0.0);
 				_normalTmp = new Vector3D(0.0, 0.0, 0.0); 	
-			} else{
+			} else {
 				_subGeometry.autoDeriveVertexNormals = true;
 			}
 			 
-            _subGeometry.autoDeriveVertexTangents = true;
+			_subGeometry.autoDeriveVertexTangents = true;
 			
 			if(_materials && _thickness>0) initSubGeometryList();
 		}
@@ -1400,8 +1403,8 @@ package away3d.extrusions {
 		}
 		 
 		/**
-		 * Invalidates the geometry, causing it to be rebuilded when requested.
-		 */
+		* Invalidates the geometry, causing it to be rebuilded when requested.
+		*/
 		private function invalidateGeometry() : void
 		{
 			_geomDirty = true;
@@ -1470,9 +1473,9 @@ package away3d.extrusions {
 		}
 	}
 }
+
 import away3d.core.base.SubGeometry;
 import away3d.materials.MaterialBase;
-
 import flash.geom.Point;
 
 class SubGeometryList {
