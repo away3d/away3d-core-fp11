@@ -55,8 +55,8 @@ package away3d.animators.states
 			}
 			
 			if (_particleRotateToPositionNode.mode == ParticlePropertiesMode.GLOBAL) {
-				_offset = renderable.sceneTransform.position;
-				animationRegisterCache.setVertexConst(index, _offset.x + _position.x, _offset.y + _position.y, _offset.z + _position.z);
+				_offset = renderable.inverseSceneTransform.transformVector(_position);
+				animationRegisterCache.setVertexConst(index, _offset.x, _offset.y, _offset.z);
 			} else
 				animationSubGeometry.activateVertexBuffer(index, _particleRotateToPositionNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 
