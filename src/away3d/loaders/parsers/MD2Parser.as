@@ -139,6 +139,10 @@ package away3d.loaders.parsers
 			    _mesh.material = DefaultMaterialManager.getDefaultMaterial();
             else 
 			    _mesh.material = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
+			
+			finalizeAsset(_mesh.geometry);
+			finalizeAsset(_mesh);
+			materialFinal=true;
                 
 		} 
 		
