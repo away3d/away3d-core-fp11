@@ -46,7 +46,10 @@ package away3d.tools.utils {
 			_containers = new Dictionary();
 			parseObjectContainerBounds(container);
 			
-			// Transform min/max values to the scene if requrired
+			if (isInfinite(_minX) || isInfinite(_minY) || isInfinite(_minZ) ||
+			    isInfinite(_maxX) || isInfinite(_maxY) || isInfinite(_maxZ)) return;
+			
+			// Transform min/max values to the scene if required
 			if (worldBased) {
 				var b:Vector.<Number> = Vector.<Number>([Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
 				var c:Vector.<Number> = getBoundsCorners(_minX, _minY, _minZ, _maxX, _maxY, _maxZ);
@@ -212,7 +215,11 @@ package away3d.tools.utils {
 				_maxZ = containerBounds[5];
 			}
 		}
-		
+
+		private static function isInfinite( value:Number ):Boolean {
+			return value == Number.POSITIVE_INFINITY || value == Number.NEGATIVE_INFINITY;
+		}
+
 		private static function parseObjectBounds(oC:ObjectContainer3D, parentTransform:Matrix3D = null, resetBounds:Boolean = false):void
 		{
 			var e:Entity = oC as Entity;
@@ -220,8 +227,8 @@ package away3d.tools.utils {
 			var mat:Matrix3D = oC.transform.clone();
 			var cB:Vector.<Number> = _containers[oC];
 			if (e) {
-				if (e.minX==Number.POSITIVE_INFINITY || e.minY==Number.POSITIVE_INFINITY || e.minZ==Number.POSITIVE_INFINITY ||
-				    e.maxX==Number.NEGATIVE_INFINITY || e.maxY==Number.NEGATIVE_INFINITY || e.maxZ==Number.NEGATIVE_INFINITY) return;
+				if (isInfinite(e.minX) || isInfinite(e.minY) || isInfinite(e.minZ) ||
+				    isInfinite(e.maxX) || isInfinite(e.maxY) || isInfinite(e.maxZ)) return;
 				
 				corners = getBoundsCorners(e.minX, e.minY, e.minZ, e.maxX, e.maxY, e.maxZ);
 				if (parentTransform) mat.append(parentTransform);
