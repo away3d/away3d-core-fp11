@@ -216,7 +216,7 @@ package away3d.entities
 		*/
 		public function getSegment(index : uint) : Segment
 		{
-			if(!index >_indexSegments-1) return null;
+			if(index >_indexSegments-1) return null;
 
 			return _segments[index].segment;
 		}
