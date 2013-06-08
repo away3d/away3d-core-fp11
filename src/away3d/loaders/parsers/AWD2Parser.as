@@ -1588,7 +1588,7 @@ package away3d.loaders.parsers
 			// External
 			if (type == 0)
 			{
-				data_len = _newBlockBytes.readShort();
+				data_len = _newBlockBytes.readUnsignedInt();
 				var url:String;
 				url = _newBlockBytes.readUTFBytes(data_len);
 				addDependency(_cur_block_id.toString(), new URLRequest(url), false, null, true);
