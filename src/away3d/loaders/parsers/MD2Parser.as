@@ -273,11 +273,14 @@ package away3d.loaders.parsers
 				// only support 1 skin TODO: really?
 				if (dependencies.length == 0){
 					addDependency(name, new URLRequest(url));
-					materialFinal=false;
 				}
 			}
 			
-			_mesh.material.name = _materialNames[0];
+            if (_materialNames.length>0)
+			    _mesh.material.name = _materialNames[0];
+            else
+                materialFinal=true;
+            
 		}
 		
 		/**
