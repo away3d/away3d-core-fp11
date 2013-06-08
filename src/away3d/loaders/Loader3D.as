@@ -155,6 +155,7 @@ package away3d.loaders
 		{
 			super();
 			
+			_loadingSessions = new Vector.<AssetLoader>();
 			_useAssetLib = useAssetLibrary;
 			_assetLibId = assetLibraryId;
 		}
