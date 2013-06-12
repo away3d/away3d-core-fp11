@@ -61,11 +61,11 @@ package away3d.tools.commands
 			if (_weight > 1) { _weight = 1; }
             if (_radiusMode==USE_BOUNDS_MAX){
                 var meshBounds:BoundingVolumeBase = mesh.bounds;
-                var vectorMax:Vector3D=new Vector3D(meshBounds.max.x,meshBounds.max.y,meshBounds.max.z)
-                var vectorMin:Vector3D=new Vector3D(meshBounds.min.x,meshBounds.min.y,meshBounds.min.z)
+                var vectorMax:Vector3D=new Vector3D(meshBounds.max.x,meshBounds.max.y,meshBounds.max.z);
+                var vectorMin:Vector3D=new Vector3D(meshBounds.min.x,meshBounds.min.y,meshBounds.min.z);
                 var vectorMaxlength:Number = vectorMax.length;
                 var vectorMinlength:Number = vectorMin.length;
-                var _radius:Number = vectorMaxlength;
+                _radius = vectorMaxlength;
 			    if (_radius < vectorMinlength)
 				    _radius = vectorMinlength;
 			}
