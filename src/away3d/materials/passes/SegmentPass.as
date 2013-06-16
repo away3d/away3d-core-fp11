@@ -139,7 +139,12 @@
 			var context : Context3D = stage3DProxy._context3D;
 			super.activate(stage3DProxy, camera);
 
-			_constants[0] = _thickness/Math.min(stage3DProxy.width, stage3DProxy.height);
+			if (stage3DProxy.scissorRect){
+				_constants[0] = _thickness / Math.min(stage3DProxy.scissorRect.width, stage3DProxy.scissorRect.height);
+			} else {
+				_constants[0] = _thickness/Math.min(stage3DProxy.width, stage3DProxy.height);
+			}
+
 			// value to convert distance from camera to model length per pixel width
 			_constants[2] = camera.lens.near;
 
