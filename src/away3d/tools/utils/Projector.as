@@ -1,14 +1,11 @@
 package away3d.tools.utils
 {
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.data.UV;
-	import away3d.entities.Mesh;
-
-	import flash.geom.Vector3D;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.core.base.data.*;
+	import away3d.entities.*;
+	
+	import flash.geom.*;
 
 	public class Projector
 	{
@@ -136,108 +133,104 @@ package away3d.tools.utils
 			var numSubGeoms:uint = geometries.length;
 			var sub_geom:ISubGeometry;
 			var vertices:Vector.<Number>;
+			var vertexOffset:int;
+			var vertexStride:int;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
-			var tangents:Vector.<Number>;
-			var normals:Vector.<Number>;
+			var uvOffset:int;
+			var uvStride:int;
 			var i:uint;
 			var j:uint;
-			var xindex:uint;
-			var uindex:uint;
-			var indLoop:uint;
+			var vIndex:uint;
+			var uvIndex:uint;
+			var numIndices:uint;
 			var offsetU:Number;
 			var offsetV:Number;
 
-			var isCompact:Boolean = (geometries[0] is CompactSubGeometry)? true : false;
-
 			 for (i = 0; i<numSubGeoms; ++i){
 				sub_geom = geometries[i];
-
-				if(isCompact){
-					vertices = CompactSubGeometry(sub_geom).stripBuffer(0, 3);
-					indices = CompactSubGeometry(sub_geom).indexData;
-					uvs = CompactSubGeometry(sub_geom).stripBuffer(9, 2);
-					tangents = CompactSubGeometry(sub_geom).stripBuffer(6, 3);
-					normals = CompactSubGeometry(sub_geom).stripBuffer(3, 3);
-
-				} else {
-					vertices = SubGeometry(sub_geom).vertexData;
-					indices = SubGeometry(sub_geom).indexData;
-					uvs = SubGeometry(sub_geom).UVData;
-					
-				}
-
-				indLoop = indices.length;
+				
+				vertices = sub_geom.vertexData
+				vertexOffset = sub_geom.vertexOffset;
+				vertexStride = sub_geom.vertexStride;
+				
+				uvs = sub_geom.UVData;
+				uvOffset = sub_geom.UVOffset;
+				uvStride = sub_geom.UVStride;
+				
+				indices = sub_geom.indexData;
+				
+				numIndices = indices.length;
 
 				switch(_orientation){
 					case FRONT:
-						offsetU = _offsetW+position.x;
-						offsetV = _offsetH+position.y;
-						for (j = 0; j<indLoop; ++j){
-							xindex = indices[j]*3;
-							uindex = indices[j]<<1;
-							uvs[uindex] = (vertices[xindex]+offsetU)/_width;
-							uvs[uindex+1] = 1- (vertices[xindex+1]+offsetV)/_height;
+						offsetU = _offsetW + position.x;
+						offsetV = _offsetH + position.y;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = (vertices[vIndex] + offsetU)/_width;
+							uvs[uvIndex+1] = 1 - (vertices[vIndex+1] + offsetV)/_height;
 						}
 						break;
 
 					case BACK:
 						offsetU = _offsetW+position.x;
 						offsetV = _offsetH+position.y;
-						for (j = 0; j<indLoop; ++j){
-							xindex = indices[j]*3;
-							uindex = indices[j]<<1;
-							uvs[uindex] = 1-(vertices[xindex]+offsetU)/_width;
-							uvs[uindex+1] = 1- (vertices[xindex+1]+offsetV)/_height;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = 1-(vertices[vIndex]+offsetU)/_width;
+							uvs[uvIndex+1] = 1- (vertices[vIndex+1]+offsetV)/_height;
 						}
 						break;
 
 					case RIGHT:
 						offsetU = _offsetW+position.z;
 						offsetV = _offsetH+position.y;
-						for (j = 0; j<indLoop; ++j){
-							xindex = indices[j]*3 + 1;
-							uindex = indices[j]<<1;
-							uvs[uindex] = (vertices[xindex+1]+offsetU)/_width;
-							uvs[uindex+1] = 1- (vertices[xindex]+offsetV)/_height;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]] + 1;
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = (vertices[vIndex+1]+offsetU)/_width;
+							uvs[uvIndex+1] = 1- (vertices[vIndex]+offsetV)/_height;
 						}
 						break;
 
 					case LEFT:
 						offsetU = _offsetW+position.z;
 						offsetV = _offsetH+position.y;
-						for (j = 0; j<indLoop; ++j){
-							xindex = indices[j]*3 + 1;
-							uindex = indices[j]<<1;
-							uvs[uindex] = 1-(vertices[xindex+1]+offsetU)/_width;
-							uvs[uindex+1] = 1- (vertices[xindex]+offsetV)/_height;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]] + 1;
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = 1-(vertices[vIndex+1]+offsetU)/_width;
+							uvs[uvIndex+1] = 1- (vertices[vIndex]+offsetV)/_height;
 						}
 						break;
 
 					case TOP:
 						offsetU = _offsetW+position.x;
 						offsetV = _offsetH+position.z;
-						for (j = 0; j<indLoop; ++j){
-							xindex = indices[j]*3;
-							uindex = indices[j]<<1;
-							uvs[uindex] = (vertices[xindex]+offsetU)/_width;
-							uvs[uindex+1] = 1- (vertices[xindex+2]+offsetV)/_height;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = (vertices[vIndex]+offsetU)/_width;
+							uvs[uvIndex+1] = 1- (vertices[vIndex+2]+offsetV)/_height;
 						}
 						break;
 
 					case BOTTOM:
 						offsetU = _offsetW+position.x;
 						offsetV = _offsetH+position.z;
-						for (j = 0; j<indLoop; ++j){
-							xindex = indices[j]*3;
-							uindex = indices[j]<<1;
-							uvs[uindex] = 1-(vertices[xindex]+offsetU)/_width;
-							uvs[uindex+1] = 1- (vertices[xindex+2]+offsetV)/_height;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = 1-(vertices[vIndex]+offsetU)/_width;
+							uvs[uvIndex+1] = 1- (vertices[vIndex+2]+offsetV)/_height;
 						}
 				}
 
-				if(isCompact){
-					CompactSubGeometry(sub_geom).fromVectors(vertices, uvs, normals, tangents);
+				if(sub_geom is CompactSubGeometry){
+					CompactSubGeometry(sub_geom).updateData(uvs);
 				} else {
 					SubGeometry(sub_geom).updateUVData(uvs);
 				}
@@ -249,100 +242,70 @@ package away3d.tools.utils
 			var numSubGeoms:uint = geometries.length;
 			var sub_geom:ISubGeometry;
 			var vertices:Vector.<Number>;
+			var vertexOffset:int;
+			var vertexStride:int;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
-			var tangents:Vector.<Number>;
-			var normals:Vector.<Number>;
-			var isCompact:Boolean = (geometries[0] is CompactSubGeometry)? true : false;
+			var uvOffset:int;
+			var uvStride:int;
 			var i:uint;
 			var j:uint;
-			var xindex:uint;
-			var uindex:uint;
-			var indLoop:uint;
+			var vIndex:uint;
+			var uvIndex:uint;
+			var numIndices:uint;
 			var offset:Number;
 
 			 for (i = 0; i<numSubGeoms; ++i){
 				sub_geom = geometries[i];
 				 
-				if(isCompact){
-					vertices = CompactSubGeometry(sub_geom).stripBuffer(0, 3);
-					indices = CompactSubGeometry(sub_geom).indexData;
-					uvs = CompactSubGeometry(sub_geom).stripBuffer(9, 2);
-					tangents = CompactSubGeometry(sub_geom).stripBuffer(6, 3);
-					normals = CompactSubGeometry(sub_geom).stripBuffer(3, 3);
+				vertices = sub_geom.vertexData
+				vertexOffset = sub_geom.vertexOffset;
+				vertexStride = sub_geom.vertexStride;
+				
+				uvs = sub_geom.UVData;
+				uvOffset = sub_geom.UVOffset;
+				uvStride = sub_geom.UVStride;
+				
+				indices = sub_geom.indexData;
 
-				} else {
-					vertices = SubGeometry(sub_geom).vertexData;
-					indices = SubGeometry(sub_geom).indexData;
-					uvs = SubGeometry(sub_geom).UVData;
-				}
-
-				indLoop = indices.length;
+				numIndices = indices.length;
 
 				switch(_orientation){
 
 					case CYLINDRICAL_X:
 
 						offset = _offsetW+position.x;
-						for (j = 0; j<indLoop; j+=3){
-							xindex = indices[j]*3;
-							uindex = indices[j]<<1;
-							uvs[uindex] = (vertices[xindex]+offset)/_width;
-							uvs[uindex+1] = (PI + Math.atan2( vertices[xindex+1], vertices[xindex+2]))/DOUBLEPI;
-
-							xindex = indices[j+1]*3;
-							uindex = indices[j+1]<<1;
-							uvs[uindex] = (vertices[xindex]+offset)/_width;
-							uvs[uindex+1] = (PI + Math.atan2( vertices[xindex+1], vertices[xindex+2]))/DOUBLEPI;
-
-							xindex = indices[j+2]*3;
-							uindex = indices[j+2]<<1;
-							uvs[uindex] = (vertices[xindex]+offset)/_width;
-							uvs[uindex+1] = (PI + Math.atan2( vertices[xindex+1], vertices[xindex+2]))/DOUBLEPI;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = (vertices[vIndex]+offset)/_width;
+							uvs[uvIndex+1] = (PI + Math.atan2( vertices[vIndex+1], vertices[vIndex+2]))/DOUBLEPI;
 						}
 						break;
 
 					case CYLINDRICAL_Y:
 						offset = _offsetD+position.y;
-						for (j = 0; j<indLoop; j+=3){
-							xindex = indices[j]*3;
-							uindex = indices[j]<<1;
-							uvs[uindex] = (PI + Math.atan2(vertices[xindex], vertices[xindex+2]))/DOUBLEPI;
-							uvs[uindex+1]  = 1- (vertices[xindex+1]+offset)/_depth;
-
-							xindex = indices[j+1]*3;
-							uindex = indices[j+1]<<1;
-							uvs[uindex] =  (PI + Math.atan2(vertices[xindex], vertices[xindex+2]))/DOUBLEPI;
-							uvs[uindex+1]  = 1- (vertices[xindex+1]+offset)/_depth;
-
-							xindex = indices[j+2]*3;
-							uindex = indices[j+2]<<1;
-							uvs[uindex] = (PI + Math.atan2(vertices[xindex], vertices[xindex+2]))/DOUBLEPI;
-							uvs[uindex+1]  = 1- (vertices[xindex+1]+offset)/_depth;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex] = (PI + Math.atan2(vertices[vIndex], vertices[vIndex+2]))/DOUBLEPI;
+							uvs[uvIndex+1]  = 1- (vertices[vIndex+1]+offset)/_depth;
 						}
 						break;
 
 					case CYLINDRICAL_Z:
 						offset = _offsetW+position.z;
-						for (j = 0; j<indLoop; j+=3){
-							xindex = indices[j]*3;
-							uindex = indices[j]<<1;
-							uvs[uindex+1]  = (vertices[xindex+2]+offset)/_width;
-							uvs[uindex] = (PI + Math.atan2(vertices[xindex+1], vertices[xindex]))/DOUBLEPI;
-							xindex = indices[j+1]*3;
-							uindex = indices[j+1]<<1;
-							uvs[uindex+1]  = (vertices[xindex+2]+offset)/_width;
-							uvs[uindex] = (PI + Math.atan2(vertices[xindex+1], vertices[xindex]))/DOUBLEPI;
-							xindex = indices[j+2]*3;
-							uindex = indices[j+2]<<1;
-							uvs[uindex+1]  = (vertices[xindex+2]+offset)/_width;
-							uvs[uindex] = (PI + Math.atan2(vertices[xindex+1], vertices[xindex]))/DOUBLEPI;
+						for (j = 0; j<numIndices; ++j){
+							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							uvs[uvIndex+1]  = (vertices[vIndex+2]+offset)/_width;
+							uvs[uvIndex] = (PI + Math.atan2(vertices[vIndex+1], vertices[vIndex]))/DOUBLEPI;
 						}
 
 				}
 
-				if(isCompact){
-					CompactSubGeometry(sub_geom).fromVectors(vertices, uvs, normals, tangents);
+				if(sub_geom is CompactSubGeometry){
+					CompactSubGeometry(sub_geom).updateData(uvs);
 				} else {
 					SubGeometry(sub_geom).updateUVData(uvs);
 				}
@@ -357,48 +320,47 @@ package away3d.tools.utils
 			var sub_geom:ISubGeometry;
 
 			var vertices:Vector.<Number>;
+			var vertexOffset:int;
+			var vertexStride:int;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
-			var tangents:Vector.<Number>;
-			var normals:Vector.<Number>;
-
-			var isCompact:Boolean = (geometries[0] is CompactSubGeometry)? true : false;
-
+			var uvOffset:int;
+			var uvStride:int;
+			
 			var i:uint;
 			var j:uint;
-			var xindex:uint;
-			var uindex:uint;
-			var indLoop:uint;
+			var vIndex:uint;
+			var uvIndex:uint;
+			var numIndices:uint;
 
 			 for (i = 0; i<numSubGeoms; ++i){
 				sub_geom = geometries[i];
 
-				if(isCompact){
-					vertices = CompactSubGeometry(sub_geom).stripBuffer(0, 3);
-					indices = CompactSubGeometry(sub_geom).indexData;
-					uvs = CompactSubGeometry(sub_geom).stripBuffer(9, 2);
-					tangents = CompactSubGeometry(sub_geom).stripBuffer(6, 3);
-					normals = CompactSubGeometry(sub_geom).stripBuffer(3, 3);
+				vertices = sub_geom.vertexData
+				vertexOffset = sub_geom.vertexOffset;
+				vertexStride = sub_geom.vertexStride;
+				
+				uvs = sub_geom.UVData;
+				uvOffset = sub_geom.UVOffset;
+				uvStride = sub_geom.UVStride;
+				
+				indices = sub_geom.indexData;
+				
+				numIndices = indices.length;
 
-				} else {
-					vertices = SubGeometry(sub_geom).vertexData;
-					indices = SubGeometry(sub_geom).indexData;
-					uvs = SubGeometry(sub_geom).UVData;
+				numIndices = indices.length;
+
+				 for (j = 0; j<numIndices; ++j){
+					vIndex = vertices[vertexOffset + vertexStride*indices[j]];
+					uvIndex = uvs[uvOffset + uvStride*indices[j]];
+
+					projectVertex(vertices[vIndex], vertices[vIndex+1], vertices[vIndex+2]);
+					uvs[uvIndex] = _uv.u;
+					uvs[uvIndex+1] = _uv.v;
 				}
 
-				indLoop = indices.length;
-
-				 for (j = 0; j<indLoop; ++j){
-					xindex = indices[j]*3;
-					uindex = indices[j]<<1;
-
-					projectVertex(vertices[xindex], vertices[xindex+1], vertices[xindex+2]);
-					uvs[uindex] = _uv.u;
-					uvs[uindex+1] = _uv.v;
-				}
-
-				if(isCompact){
-					CompactSubGeometry(sub_geom).fromVectors(vertices, uvs, normals, tangents);
+				if(sub_geom is CompactSubGeometry){
+					CompactSubGeometry(sub_geom).updateData(uvs);
 				} else {
 					SubGeometry(sub_geom).updateUVData(uvs);
 				}
