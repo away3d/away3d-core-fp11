@@ -32,9 +32,9 @@ package away3d.tools.utils {
 		*/
 		public static function getMeshBounds(mesh:Mesh):void
 		{
-			reset();
-			parseObjectBounds(mesh);
+			getObjectContainerBounds(mesh);
 		}
+
 		/**
 		* Calculate the bounds of an ObjectContainer3D object
 		* @param container		ObjectContainer3D. The ObjectContainer3D to get the bounds from.
@@ -43,7 +43,6 @@ package away3d.tools.utils {
 		public static function getObjectContainerBounds(container : ObjectContainer3D, worldBased:Boolean = true):void
 		{
 			reset();
-			_containers = new Dictionary();
 			parseObjectContainerBounds(container);
 			
 			if (isInfinite(_minX) || isInfinite(_minY) || isInfinite(_minZ) ||
@@ -161,6 +160,7 @@ package away3d.tools.utils {
 		
 		private static function reset():void
 		{
+			_containers = new Dictionary();
 			_minX = _minY = _minZ = Infinity;
 			_maxX = _maxY = _maxZ = -Infinity;
 			_defaultPosition.x = 0.0;
