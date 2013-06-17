@@ -4,6 +4,7 @@ package away3d.tools.utils
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
+	import away3d.core.base.CompactSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
 
@@ -91,18 +92,16 @@ package away3d.tools.utils
 				_offsetW = (minX>0)? -minX : Math.abs(minX);
 				_offsetH= (minY>0)? -minY : Math.abs(minY);
 				_offsetD= (minZ>0)? -minZ : Math.abs(minZ);
-			}
 
-			if(_orientation == LEFT || _orientation == RIGHT || _orientation == CYLINDRICAL_Z){
+			} else if(_orientation == LEFT || _orientation == RIGHT || _orientation == CYLINDRICAL_Z){
 				_width = maxZ - minZ;
 				_height = maxY - minY;
 				_depth = maxX - minX;
 				_offsetW = (minZ>0)? -minZ : Math.abs(minZ);
 				_offsetH= (minY>0)? -minY : Math.abs(minY);
 				_offsetD= (minX>0)? -minX : Math.abs(minX);
-			}
 
-			if(_orientation == TOP || _orientation == BOTTOM || _orientation == CYLINDRICAL_Y){
+			} else if(_orientation == TOP || _orientation == BOTTOM || _orientation == CYLINDRICAL_Y){
 				_width = maxX - minX;
 				_height = maxZ - minZ;
 				_depth = maxY - minY;
@@ -123,8 +122,10 @@ package away3d.tools.utils
 				_center.x = _center.y = _center.z = .0001;
 
 				remapSpherical(geometries, mesh.scenePosition);
+
 			} else if(_orientation.indexOf("cylindrical") != -1){
 				remapCylindrical(geometries, mesh.scenePosition);
+
 			} else {
 				remapLinear(geometries, mesh.scenePosition);
 			}
@@ -133,26 +134,39 @@ package away3d.tools.utils
 		private static function remapLinear(geometries:Vector.<ISubGeometry>, position:Vector3D):void
 		{
 			var numSubGeoms:uint = geometries.length;
-			var sub_geom:SubGeometry;
-
+			var sub_geom:ISubGeometry;
 			var vertices:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
-
+			var tangents:Vector.<Number>;
+			var normals:Vector.<Number>;
 			var i:uint;
 			var j:uint;
 			var xindex:uint;
 			var uindex:uint;
 			var indLoop:uint;
-
 			var offsetU:Number;
 			var offsetV:Number;
 
+			var isCompact:Boolean = (geometries[0] is CompactSubGeometry)? true : false;
+
 			 for (i = 0; i<numSubGeoms; ++i){
-				sub_geom = SubGeometry(geometries[i]);
-				vertices = sub_geom.vertexData;
-				indices = sub_geom.indexData;
-				uvs = sub_geom.UVData;
+				sub_geom = geometries[i];
+
+				if(isCompact){
+					vertices = CompactSubGeometry(sub_geom).stripBuffer(0, 3);
+					indices = CompactSubGeometry(sub_geom).indexData;
+					uvs = CompactSubGeometry(sub_geom).stripBuffer(9, 2);
+					tangents = CompactSubGeometry(sub_geom).stripBuffer(6, 3);
+					normals = CompactSubGeometry(sub_geom).stripBuffer(3, 3);
+
+				} else {
+					vertices = SubGeometry(sub_geom).vertexData;
+					indices = SubGeometry(sub_geom).indexData;
+					uvs = SubGeometry(sub_geom).UVData;
+					
+				}
+
 				indLoop = indices.length;
 
 				switch(_orientation){
@@ -222,32 +236,47 @@ package away3d.tools.utils
 						}
 				}
 
-				sub_geom.updateUVData(uvs);
+				if(isCompact){
+					CompactSubGeometry(sub_geom).fromVectors(vertices, uvs, normals, tangents);
+				} else {
+					SubGeometry(sub_geom).updateUVData(uvs);
+				}
 			}
 		}
 
 		private static function remapCylindrical(geometries:Vector.<ISubGeometry>, position:Vector3D):void
 		{
 			var numSubGeoms:uint = geometries.length;
-			var sub_geom:SubGeometry;
-
+			var sub_geom:ISubGeometry;
 			var vertices:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
-
+			var tangents:Vector.<Number>;
+			var normals:Vector.<Number>;
+			var isCompact:Boolean = (geometries[0] is CompactSubGeometry)? true : false;
 			var i:uint;
 			var j:uint;
 			var xindex:uint;
 			var uindex:uint;
 			var indLoop:uint;
-
 			var offset:Number;
 
 			 for (i = 0; i<numSubGeoms; ++i){
-				sub_geom = SubGeometry(geometries[i]);
-				vertices = sub_geom.vertexData;
-				indices = sub_geom.indexData;
-				uvs = sub_geom.UVData;
+				sub_geom = geometries[i];
+				 
+				if(isCompact){
+					vertices = CompactSubGeometry(sub_geom).stripBuffer(0, 3);
+					indices = CompactSubGeometry(sub_geom).indexData;
+					uvs = CompactSubGeometry(sub_geom).stripBuffer(9, 2);
+					tangents = CompactSubGeometry(sub_geom).stripBuffer(6, 3);
+					normals = CompactSubGeometry(sub_geom).stripBuffer(3, 3);
+
+				} else {
+					vertices = SubGeometry(sub_geom).vertexData;
+					indices = SubGeometry(sub_geom).indexData;
+					uvs = SubGeometry(sub_geom).UVData;
+				}
+
 				indLoop = indices.length;
 
 				switch(_orientation){
@@ -312,20 +341,28 @@ package away3d.tools.utils
 
 				}
 
-				sub_geom.updateUVData(uvs);
+				if(isCompact){
+					CompactSubGeometry(sub_geom).fromVectors(vertices, uvs, normals, tangents);
+				} else {
+					SubGeometry(sub_geom).updateUVData(uvs);
+				}
 
 			}
 		}
 
 		private static function remapSpherical(geometries:Vector.<ISubGeometry>, position:Vector3D):void
 		{
-			position=position;
+			position = position;
 			var numSubGeoms:uint = geometries.length;
-			var sub_geom:SubGeometry;
+			var sub_geom:ISubGeometry;
 
 			var vertices:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
+			var tangents:Vector.<Number>;
+			var normals:Vector.<Number>;
+
+			var isCompact:Boolean = (geometries[0] is CompactSubGeometry)? true : false;
 
 			var i:uint;
 			var j:uint;
@@ -334,10 +371,21 @@ package away3d.tools.utils
 			var indLoop:uint;
 
 			 for (i = 0; i<numSubGeoms; ++i){
-				sub_geom = SubGeometry(geometries[i]);
-				vertices = sub_geom.vertexData;
-				indices = sub_geom.indexData;
-				uvs = sub_geom.UVData;
+				sub_geom = geometries[i];
+
+				if(isCompact){
+					vertices = CompactSubGeometry(sub_geom).stripBuffer(0, 3);
+					indices = CompactSubGeometry(sub_geom).indexData;
+					uvs = CompactSubGeometry(sub_geom).stripBuffer(9, 2);
+					tangents = CompactSubGeometry(sub_geom).stripBuffer(6, 3);
+					normals = CompactSubGeometry(sub_geom).stripBuffer(3, 3);
+
+				} else {
+					vertices = SubGeometry(sub_geom).vertexData;
+					indices = SubGeometry(sub_geom).indexData;
+					uvs = SubGeometry(sub_geom).UVData;
+				}
+
 				indLoop = indices.length;
 
 				 for (j = 0; j<indLoop; ++j){
@@ -348,7 +396,12 @@ package away3d.tools.utils
 					uvs[uindex] = _uv.u;
 					uvs[uindex+1] = _uv.v;
 				}
-				sub_geom.updateUVData(uvs);
+
+				if(isCompact){
+					CompactSubGeometry(sub_geom).fromVectors(vertices, uvs, normals, tangents);
+				} else {
+					SubGeometry(sub_geom).updateUVData(uvs);
+				}
 			}
 		}
 
