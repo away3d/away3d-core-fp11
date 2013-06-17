@@ -167,8 +167,8 @@ package away3d.tools.utils
 						offsetU = _offsetW + position.x;
 						offsetV = _offsetH + position.y;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j];
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = (vertices[vIndex] + offsetU)/_width;
 							uvs[uvIndex+1] = 1 - (vertices[vIndex+1] + offsetV)/_height;
 						}
@@ -178,8 +178,8 @@ package away3d.tools.utils
 						offsetU = _offsetW+position.x;
 						offsetV = _offsetH+position.y;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j];
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = 1-(vertices[vIndex]+offsetU)/_width;
 							uvs[uvIndex+1] = 1- (vertices[vIndex+1]+offsetV)/_height;
 						}
@@ -189,8 +189,8 @@ package away3d.tools.utils
 						offsetU = _offsetW+position.z;
 						offsetV = _offsetH+position.y;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]] + 1;
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j] + 1;
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = (vertices[vIndex+1]+offsetU)/_width;
 							uvs[uvIndex+1] = 1- (vertices[vIndex]+offsetV)/_height;
 						}
@@ -200,8 +200,8 @@ package away3d.tools.utils
 						offsetU = _offsetW+position.z;
 						offsetV = _offsetH+position.y;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]] + 1;
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j] + 1;
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = 1-(vertices[vIndex+1]+offsetU)/_width;
 							uvs[uvIndex+1] = 1- (vertices[vIndex]+offsetV)/_height;
 						}
@@ -211,8 +211,8 @@ package away3d.tools.utils
 						offsetU = _offsetW+position.x;
 						offsetV = _offsetH+position.z;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j];
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = (vertices[vIndex]+offsetU)/_width;
 							uvs[uvIndex+1] = 1- (vertices[vIndex+2]+offsetV)/_height;
 						}
@@ -222,8 +222,8 @@ package away3d.tools.utils
 						offsetU = _offsetW+position.x;
 						offsetV = _offsetH+position.z;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j];
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = 1-(vertices[vIndex]+offsetU)/_width;
 							uvs[uvIndex+1] = 1- (vertices[vIndex+2]+offsetV)/_height;
 						}
@@ -276,8 +276,8 @@ package away3d.tools.utils
 
 						offset = _offsetW+position.x;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j];
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = (vertices[vIndex]+offset)/_width;
 							uvs[uvIndex+1] = (PI + Math.atan2( vertices[vIndex+1], vertices[vIndex+2]))/DOUBLEPI;
 						}
@@ -286,8 +286,8 @@ package away3d.tools.utils
 					case CYLINDRICAL_Y:
 						offset = _offsetD+position.y;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j];
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex] = (PI + Math.atan2(vertices[vIndex], vertices[vIndex+2]))/DOUBLEPI;
 							uvs[uvIndex+1]  = 1- (vertices[vIndex+1]+offset)/_depth;
 						}
@@ -296,8 +296,8 @@ package away3d.tools.utils
 					case CYLINDRICAL_Z:
 						offset = _offsetW+position.z;
 						for (j = 0; j<numIndices; ++j){
-							vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-							uvIndex = uvs[uvOffset + uvStride*indices[j]];
+							vIndex = vertexOffset + vertexStride*indices[j];
+							uvIndex = uvOffset + uvStride*indices[j];
 							uvs[uvIndex+1]  = (vertices[vIndex+2]+offset)/_width;
 							uvs[uvIndex] = (PI + Math.atan2(vertices[vIndex+1], vertices[vIndex]))/DOUBLEPI;
 						}
@@ -351,8 +351,8 @@ package away3d.tools.utils
 				numIndices = indices.length;
 
 				 for (j = 0; j<numIndices; ++j){
-					vIndex = vertices[vertexOffset + vertexStride*indices[j]];
-					uvIndex = uvs[uvOffset + uvStride*indices[j]];
+					vIndex = vertexOffset + vertexStride*indices[j];
+					uvIndex = uvOffset + uvStride*indices[j];
 
 					projectVertex(vertices[vIndex], vertices[vIndex+1], vertices[vIndex+2]);
 					uvs[uvIndex] = _uv.u;
