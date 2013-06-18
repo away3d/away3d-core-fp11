@@ -150,7 +150,7 @@ package away3d.animators.states
 				var t:Number = (k - Math.floor(k)) * data[i].totalTime;
 				if (t - deltaTime <= 0)
 				{
-					var inc:int = data[i].startVertexIndex * 3;
+					var inc:int = data[i].startVertexIndex * animationSubGeometry.totalLenOfOneVertex + _particleFollowNode.dataOffset;
 					
 					if (_smooth)
 					{
@@ -203,7 +203,7 @@ package away3d.animators.states
 				var t:Number = (k - Math.floor(k)) * data[i].totalTime;
 				if (t - deltaTime <= 0)
 				{
-					var inc:int = data[i].startVertexIndex * 3;
+					var inc:int = data[i].startVertexIndex * animationSubGeometry.totalLenOfOneVertex + _particleFollowNode.dataOffset;
 					
 					if (_smooth)
 					{
@@ -261,7 +261,7 @@ package away3d.animators.states
 				var t:Number = (k - Math.floor(k)) * data[i].totalTime;
 				if (t - deltaTime <= 0)
 				{
-					var inc:int = data[i].startVertexIndex * 6;
+					var inc:int = data[i].startVertexIndex * animationSubGeometry.totalLenOfOneVertex + _particleFollowNode.dataOffset;
 					if (_smooth)
 					{
 						temp.copyFrom(posVelocity);
