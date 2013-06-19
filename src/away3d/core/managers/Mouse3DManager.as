@@ -83,12 +83,29 @@ package away3d.core.managers {
 				} else { 
 					if (view.getBounds(view.parent).contains(view.mouseX + view.x, view.mouseY + view.y)) {
 						if( !_collidingViewObjects ) _collidingViewObjects = new Vector.<PickingCollisionVO>(_viewCount);
-						_collidingObject = _collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
+						_collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
 					}
 				}
 			}
 		}
-
+		
+		private function updateSharedContextCollider() : void
+		{
+			_collidingObject = null;
+			// Get the top-most view colliding object
+			var distance:Number = Infinity;
+			var view:View3D;
+			for (var v:int = _viewCount-1; v>=0; v--) {
+				view = _view3DLookup[v];
+				if (_collidingViewObjects[v] && (view.layeredView || _collidingViewObjects[v].rayEntryDistance < distance)) {
+					distance = _collidingViewObjects[v].rayEntryDistance;
+					_collidingObject = _collidingViewObjects[v];
+					if (view.layeredView)
+						break;
+				}
+			}
+		}
+		
 		public function fireMouseEvents() : void
 		{
 			var i : uint;
@@ -98,19 +115,7 @@ package away3d.core.managers {
 
 			// If multiple view are used, determine the best hit based on the depth intersection.
 			if (_collidingViewObjects) {
-				_collidingObject = null;
-				// Get the top-most view colliding object
-				var distance:Number = Infinity;
-				var view:View3D;
-				for (var v:int = _viewCount-1; v>=0; v--) {
-					view = _view3DLookup[v];
-					if (_collidingViewObjects[v] && (view.layeredView || _collidingViewObjects[v].rayEntryDistance < distance)) {
-						distance = _collidingViewObjects[v].rayEntryDistance;
-						_collidingObject = _collidingViewObjects[v];
-						if (view.layeredView)
-							break;
-					}
-				}
+				updateSharedContextCollider();
 			}
 			
 			// If colliding object has changed, queue over/out events.
@@ -328,6 +333,9 @@ package away3d.core.managers {
 		{
 			_activeView = (event.currentTarget as View3D);
 			updateCollider( _activeView ); // ensures collision check is done with correct mouse coordinates on mobile
+			if (_collidingViewObjects) { // If multiple view are used, determine the best hit based on the depth intersection.
+				updateSharedContextCollider();
+			}
 			if (_collidingObject)
 			{
 				queueDispatch(_mouseDown, event);
