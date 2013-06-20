@@ -1,17 +1,12 @@
 package away3d.loaders
 {
-	import away3d.arcane;
-	import away3d.events.AssetEvent;
-	import away3d.events.LoaderEvent;
-	import away3d.events.ParserEvent;
-	import away3d.loaders.misc.AssetLoaderContext;
-	import away3d.loaders.misc.AssetLoaderToken;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.misc.SingleFileLoader;
-	import away3d.loaders.parsers.ParserBase;
+	import away3d.*;
+	import away3d.events.*;
+	import away3d.loaders.misc.*;
+	import away3d.loaders.parsers.*;
 	
-	import flash.events.EventDispatcher;
-	import flash.net.URLRequest;
+	import flash.events.*;
+	import flash.net.*;
 
 	use namespace arcane;
 	
@@ -155,6 +150,14 @@ package away3d.loaders
 		private var _baseDependency : ResourceDependency;
 		private var _loadingDependency : ResourceDependency;
 		private var _namespace : String;
+		
+		/**
+		 * Returns the base dependency of the loader
+		 */
+		public function get baseDependency():ResourceDependency
+		{
+			return _baseDependency;
+		}
 		
 		/**
 		 * Create a new ResourceLoadSession object.
