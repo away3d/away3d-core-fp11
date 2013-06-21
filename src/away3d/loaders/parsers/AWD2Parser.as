@@ -400,8 +400,8 @@ package away3d.loaders.parsers
 				_accuracyMatrix = bitFlags.test(flags, bitFlags.FLAG2);
 				_accuracyGeo = bitFlags.test(flags, bitFlags.FLAG3);
 				_accuracyProps = bitFlags.test(flags, bitFlags.FLAG4);
-				_accuracyOnBlocks = bitFlags.test(flags, bitFlags.FLAG5);	
 			}
+			// if we set _accuracyOnBlocks, the precision-values are read from each block-header.
 			
 			// set storagePrecision types
 			_geoNrType=FLOAT32;
@@ -2022,9 +2022,9 @@ package away3d.loaders.parsers
 							idx = 0;
 							while (_newBlockBytes.position < str_end)
 							{
-								x = _newBlockBytes.readFloat();
-								y = _newBlockBytes.readFloat();
-								z = _newBlockBytes.readFloat();
+								x = readNumber(_accuracyGeo)
+								y = readNumber(_accuracyGeo)
+								z = readNumber(_accuracyGeo)
 								verts[idx++] = x;
 								verts[idx++] = y;
 								verts[idx++] = z;
