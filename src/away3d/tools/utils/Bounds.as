@@ -92,6 +92,20 @@ package away3d.tools.utils {
 				if(z > _maxZ) _maxZ = z;
 			}
 		}
+
+		/**
+		* @param outCenter		Vector3D. Optional Vector3D, if provided the same Vector3D is returned with the bounds center.
+		* @return the center of the bound
+		*/
+		public static function getCenter(outCenter:Vector3D = null):Vector3D
+		{
+			var center:Vector3D = outCenter || new Vector3D();
+			center.x = _minX + (_maxX - _minX)*.5;
+			center.y = _minY + (_maxY - _minY)*.5;
+			center.z = _minZ + (_maxZ - _minZ)*.5;
+
+			return center;
+		}
 		
 		/**
 		* @return the smalest x value
