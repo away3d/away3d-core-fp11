@@ -18,27 +18,26 @@ package away3d.animators
 	
 	use namespace arcane;
 	
-	
 	/**
 	 * Dispatched when playback of an animation inside the animator object starts.
 	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
-	[Event(name="start",type="away3d.events.AnimatorEvent")]
-			
+	[Event(name="start", type="away3d.events.AnimatorEvent")]
+	
 	/**
 	 * Dispatched when playback of an animation inside the animator object stops.
 	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
-	[Event(name="stop",type="away3d.events.AnimatorEvent")]
-
+	[Event(name="stop", type="away3d.events.AnimatorEvent")]
+	
 	/**
 	 * Dispatched when playback of an animation reaches the end of an animation.
 	 *
 	 * @eventType away3d.events.AnimatorEvent
 	 */
-	[Event(name="cycle_complete",type="away3d.events.AnimatorEvent")]
+	[Event(name="cycle_complete", type="away3d.events.AnimatorEvent")]
 	
 	/**
 	 * Provides an abstract base class for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
@@ -47,26 +46,26 @@ package away3d.animators
 	 */
 	public class AnimatorBase extends NamedAssetBase implements IAsset
 	{
-		private var _broadcaster : Sprite = new Sprite();
-		private var _isPlaying : Boolean;
-		private var _autoUpdate : Boolean = true;
-		private var _startEvent : AnimatorEvent;
-		private var _stopEvent : AnimatorEvent;
-		private var _cycleEvent : AnimatorEvent;
-		private var _time : int;
-		private var _playbackSpeed : Number = 1;
+		private var _broadcaster:Sprite = new Sprite();
+		private var _isPlaying:Boolean;
+		private var _autoUpdate:Boolean = true;
+		private var _startEvent:AnimatorEvent;
+		private var _stopEvent:AnimatorEvent;
+		private var _cycleEvent:AnimatorEvent;
+		private var _time:int;
+		private var _playbackSpeed:Number = 1;
 		
-		protected var _animationSet : IAnimationSet;
-		protected var _owners : Vector.<Mesh> = new Vector.<Mesh>();
+		protected var _animationSet:IAnimationSet;
+		protected var _owners:Vector.<Mesh> = new Vector.<Mesh>();
 		protected var _activeNode:AnimationNodeBase;
 		protected var _activeState:IAnimationState;
 		protected var _activeAnimationName:String;
-		protected var _absoluteTime : Number = 0;
+		protected var _absoluteTime:Number = 0;
 		private var _animationStates:Dictionary = new Dictionary(true);
 		
 		/**
 		 * Enables translation of the animated mesh from data returned per frame via the positionDelta property of the active animation node. Defaults to true.
-		 * 
+		 *
 		 * @see away3d.animators.states.IAnimationState#positionDelta
 		 */
 		public var updatePosition:Boolean = true;
@@ -85,7 +84,7 @@ package away3d.animators
 		
 		/**
 		 * Returns the internal absolute time of the animator, calculated by the current time and the playback speed.
-		 * 
+		 *
 		 * @see #time
 		 * @see #playbackSpeed
 		 */
@@ -97,7 +96,7 @@ package away3d.animators
 		/**
 		 * Returns the animation data set in use by the animator.
 		 */
-		public function get animationSet() : IAnimationSet
+		public function get animationSet():IAnimationSet
 		{
 			return _animationSet;
 		}
@@ -170,7 +169,7 @@ package away3d.animators
 		
 		/**
 		 * Sets the animation phase of the current active state's animation clip(s).
-		 * 
+		 *
 		 * @param value The phase value to use. 0 represents the beginning of an animation clip, 1 represents the end.
 		 */
 		public function phase(value:Number):void
@@ -191,12 +190,12 @@ package away3d.animators
 		/**
 		 * The amount by which passed time should be scaled. Used to slow down or speed up animations. Defaults to 1.
 		 */
-		public function get playbackSpeed() : Number
+		public function get playbackSpeed():Number
 		{
 			return _playbackSpeed;
 		}
-
-		public function set playbackSpeed(value : Number) : void
+		
+		public function set playbackSpeed(value:Number):void
 		{
 			_playbackSpeed = value;
 		}
@@ -204,7 +203,7 @@ package away3d.animators
 		/**
 		 * Resumes the automatic playback clock controling the active state of the animator.
 		 */
-		public function start() : void
+		public function start():void
 		{
 			if (_isPlaying || !_autoUpdate)
 				return;
@@ -229,16 +228,16 @@ package away3d.animators
 		 * @see #time
 		 * @see #update()
 		 */
-		public function stop() : void
+		public function stop():void
 		{
 			if (!_isPlaying)
 				return;
-
+			
 			_isPlaying = false;
-
+			
 			if (_broadcaster.hasEventListener(Event.ENTER_FRAME))
 				_broadcaster.removeEventListener(Event.ENTER_FRAME, onEnterFrame);
-
+			
 			if (!hasEventListener(AnimatorEvent.STOP))
 				return;
 			
@@ -252,16 +251,16 @@ package away3d.animators
 		 * @see #stop()
 		 * @see #autoUpdate
 		 */
-		public function update(time : int) : void
+		public function update(time:int):void
 		{
-			var dt : Number = (time-_time)*playbackSpeed;
+			var dt:Number = (time - _time)*playbackSpeed;
 			
 			updateDeltaTime(dt);
 			
 			_time = time;
 		}
 		
-		public function reset(name : String, offset : Number = 0) : void
+		public function reset(name:String, offset:Number = 0):void
 		{
 			getAnimationState(_animationSet.getAnimation(name)).offset(offset + _absoluteTime);
 		}
@@ -271,7 +270,7 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		public function addOwner(mesh : Mesh) : void
+		public function addOwner(mesh:Mesh):void
 		{
 			_owners.push(mesh);
 		}
@@ -281,7 +280,7 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		public function removeOwner(mesh : Mesh) : void
+		public function removeOwner(mesh:Mesh):void
 		{
 			_owners.splice(_owners.indexOf(mesh), 1);
 		}
@@ -304,43 +303,45 @@ package away3d.animators
 		/**
 		 * Enter frame event handler for automatically updating the active state of the animator.
 		 */
-		private function onEnterFrame(event : Event = null) : void
+		private function onEnterFrame(event:Event = null):void
 		{
 			update(getTimer());
 		}
 		
-		private function applyPositionDelta() : void
+		private function applyPositionDelta():void
 		{
-			var delta : Vector3D = _activeState.positionDelta;
-			var dist : Number = delta.length;
-			var len : uint;
+			var delta:Vector3D = _activeState.positionDelta;
+			var dist:Number = delta.length;
+			var len:uint;
 			if (dist > 0) {
 				len = _owners.length;
-				for (var i : uint = 0; i < len; ++i)
+				for (var i:uint = 0; i < len; ++i)
 					_owners[i].translateLocal(delta, dist);
 			}
 		}
-
+		
 		/**
 		 *  for internal use.
 		 *
 		 * @private
 		 */
-		public function dispatchCycleEvent() : void
+		public function dispatchCycleEvent():void
 		{
 			if (hasEventListener(AnimatorEvent.CYCLE_COMPLETE))
 				dispatchEvent(_cycleEvent || (_cycleEvent = new AnimatorEvent(AnimatorEvent.CYCLE_COMPLETE, this)));
 		}
+		
 		/**
 		 * @inheritDoc
 		 */
 		public function dispose():void
 		{
 		}
+		
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType() : String
+		public function get assetType():String
 		{
 			return AssetType.ANIMATOR;
 		}

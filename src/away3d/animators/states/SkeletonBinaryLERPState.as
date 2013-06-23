@@ -3,33 +3,34 @@ package away3d.animators.states
 	import away3d.animators.IAnimator;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
+	
 	import flash.geom.*;
 	
 	/**
-	 * 
+	 *
 	 */
 	public class SkeletonBinaryLERPState extends AnimationStateBase implements ISkeletonAnimationState
 	{
-		private var _blendWeight : Number = 0;
+		private var _blendWeight:Number = 0;
 		private var _skeletonAnimationNode:SkeletonBinaryLERPNode;
-		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean = true;
+		private var _skeletonPose:SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty:Boolean = true;
 		private var _inputA:ISkeletonAnimationState;
 		private var _inputB:ISkeletonAnimationState;
 		
 		/**
 		 * Defines a fractional value between 0 and 1 representing the blending ratio between inputA (0) and inputB (1),
 		 * used to produce the skeleton pose output.
-		 * 
+		 *
 		 * @see inputA
 		 * @see inputB
 		 */
-		public function get blendWeight() : Number
+		public function get blendWeight():Number
 		{
 			return _blendWeight;
 		}
-
-		public function set blendWeight(value : Number) : void
+		
+		public function set blendWeight(value:Number):void
 		{
 			_blendWeight = value;
 			
@@ -63,7 +64,7 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateTime(time : int) : void
+		override protected function updateTime(time:int):void
 		{
 			_skeletonPoseDirty = true;
 			
@@ -87,12 +88,12 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updatePositionDelta() : void
+		override protected function updatePositionDelta():void
 		{
 			_positionDeltaDirty = false;
 			
-			var deltA : Vector3D = _inputA.positionDelta;
-			var deltB : Vector3D = _inputB.positionDelta;
+			var deltA:Vector3D = _inputA.positionDelta;
+			var deltB:Vector3D = _inputB.positionDelta;
 			
 			_rootDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
 			_rootDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
@@ -101,30 +102,32 @@ package away3d.animators.states
 		
 		/**
 		 * Updates the output skeleton pose of the node based on the blendWeight value between input nodes.
-		 * 
-		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 *
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose.
 		 */
-		private function updateSkeletonPose(skeleton : Skeleton) : void
+		private function updateSkeletonPose(skeleton:Skeleton):void
 		{
 			_skeletonPoseDirty = false;
 			
-			var endPose : JointPose;
-			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
-			var poses1 : Vector.<JointPose> = _inputA.getSkeletonPose(skeleton).jointPoses;
-			var poses2 : Vector.<JointPose> = _inputB.getSkeletonPose(skeleton).jointPoses;
-			var pose1 : JointPose, pose2 : JointPose;
-			var p1 : Vector3D, p2 : Vector3D;
-			var tr : Vector3D;
-			var numJoints : uint = skeleton.numJoints;
+			var endPose:JointPose;
+			var endPoses:Vector.<JointPose> = _skeletonPose.jointPoses;
+			var poses1:Vector.<JointPose> = _inputA.getSkeletonPose(skeleton).jointPoses;
+			var poses2:Vector.<JointPose> = _inputB.getSkeletonPose(skeleton).jointPoses;
+			var pose1:JointPose, pose2:JointPose;
+			var p1:Vector3D, p2:Vector3D;
+			var tr:Vector3D;
+			var numJoints:uint = skeleton.numJoints;
 			
 			// :s
-			if (endPoses.length != numJoints) endPoses.length = numJoints;
+			if (endPoses.length != numJoints)
+				endPoses.length = numJoints;
 			
-			for (var i : uint = 0; i < numJoints; ++i) {
+			for (var i:uint = 0; i < numJoints; ++i) {
 				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
 				pose2 = poses2[i];
-				p1 = pose1.translation; p2 = pose2.translation;
+				p1 = pose1.translation;
+				p2 = pose2.translation;
 				
 				endPose.orientation.lerp(pose1.orientation, pose2.orientation, _blendWeight);
 				

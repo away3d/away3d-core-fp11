@@ -1,8 +1,10 @@
 package away3d.animators.states
 {
 	import away3d.animators.data.ParticlePropertiesMode;
+	
 	import flash.geom.Vector3D;
 	import flash.display3D.Context3DVertexBufferFormat;
+	
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -50,6 +52,7 @@ package away3d.animators.states
 		{
 			return _maxScale;
 		}
+		
 		public function set maxScale(value:Number):void
 		{
 			_maxScale = value;
@@ -64,6 +67,7 @@ package away3d.animators.states
 		{
 			return _cycleDuration;
 		}
+		
 		public function set cycleDuration(value:Number):void
 		{
 			_cycleDuration = value;
@@ -78,6 +82,7 @@ package away3d.animators.states
 		{
 			return _cyclePhase;
 		}
+		
 		public function set cyclePhase(value:Number):void
 		{
 			_cyclePhase = value;
@@ -100,22 +105,20 @@ package away3d.animators.states
 			updateScaleData();
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleScaleNode.SCALE_INDEX);
 			
 			if (_particleScaleNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 				if (_usesCycle) {
-					if(_usesPhase)
+					if (_usesPhase)
 						animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 					else
 						animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-				} else {
+				} else
 					animationSubGeometry.activateVertexBuffer(index, _particleScaleNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_2);
-				}
-			} else {
+			} else
 				animationRegisterCache.setVertexConst(index, _scaleData.x, _scaleData.y, _scaleData.z, _scaleData.w);
-			}
 		}
 		
 		private function updateScaleData():void
@@ -124,10 +127,9 @@ package away3d.animators.states
 				if (_usesCycle) {
 					if (_cycleDuration <= 0)
 						throw(new Error("the cycle duration must be greater than zero"));
-					_scaleData = new Vector3D((_minScale + _maxScale) / 2, Math.abs(_minScale - _maxScale) / 2, Math.PI * 2 / _cycleDuration, _cyclePhase * Math.PI / 180);
-				} else {
+					_scaleData = new Vector3D((_minScale + _maxScale)/2, Math.abs(_minScale - _maxScale)/2, Math.PI*2/_cycleDuration, _cyclePhase*Math.PI/180);
+				} else
 					_scaleData = new Vector3D(_minScale, _maxScale - _minScale, 0, 0);
-				}
 			}
 		}
 	}

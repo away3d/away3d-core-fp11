@@ -9,6 +9,7 @@ package away3d.animators.states
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleSpriteSheetNode;
 	import away3d.animators.ParticleAnimator;
+	
 	import flash.display3D.Context3DVertexBufferFormat;
 	
 	use namespace arcane;
@@ -35,6 +36,7 @@ package away3d.animators.states
 		{
 			return _cyclePhase;
 		}
+		
 		public function set cyclePhase(value:Number):void
 		{
 			_cyclePhase = value;
@@ -49,6 +51,7 @@ package away3d.animators.states
 		{
 			return _cycleDuration;
 		}
+		
 		public function set cycleDuration(value:Number):void
 		{
 			_cycleDuration = value;
@@ -73,21 +76,19 @@ package away3d.animators.states
 			updateSpriteSheetData();
 		}
 		
-		
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			if (animationRegisterCache.needUVAnimation) {
 				animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_0), _spriteSheetData[0], _spriteSheetData[1], _spriteSheetData[2], _spriteSheetData[3]);
 				if (_usesCycle) {
 					var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleSpriteSheetNode.UV_INDEX_1);
-					if(_particleSpriteSheetNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
+					if (_particleSpriteSheetNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
 						if (_usesPhase)
 							animationSubGeometry.activateVertexBuffer(index, _particleSpriteSheetNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
 						else
 							animationSubGeometry.activateVertexBuffer(index, _particleSpriteSheetNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_2);
-					} else {
+					} else
 						animationRegisterCache.setVertexConst(index, _spriteSheetData[4], _spriteSheetData[5]);
-					}
 				}
 			}
 		}
@@ -96,16 +97,16 @@ package away3d.animators.states
 		{
 			_spriteSheetData = new Vector.<Number>(8, true);
 			
-			var uTotal:Number = _totalFrames / _numColumns;
+			var uTotal:Number = _totalFrames/_numColumns;
 			
 			_spriteSheetData[0] = uTotal;
-			_spriteSheetData[1] = 1 / _numColumns;
-			_spriteSheetData[2] = 1 / _numRows;
+			_spriteSheetData[1] = 1/_numColumns;
+			_spriteSheetData[2] = 1/_numRows;
 			
 			if (_usesCycle) {
 				if (_cycleDuration <= 0)
 					throw(new Error("the cycle duration must be greater than zero"));
-				_spriteSheetData[4] = uTotal / _cycleDuration;
+				_spriteSheetData[4] = uTotal/_cycleDuration;
 				_spriteSheetData[5] = _cycleDuration;
 				if (_usesPhase)
 					_spriteSheetData[6] = _cyclePhase;

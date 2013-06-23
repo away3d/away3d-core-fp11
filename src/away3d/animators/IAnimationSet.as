@@ -30,7 +30,7 @@ package away3d.animators
 		 * the vertex registers aslready in use on shading materials allows the animation data to utilise
 		 * GPU calls.
 		 */
-		function get usesCPU() : Boolean;
+		function get usesCPU():Boolean;
 		
 		/**
 		 * Called by the material to reset the GPU indicator before testing whether register space in the shader
@@ -38,7 +38,7 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function resetGPUCompatibility() : void;
+		function resetGPUCompatibility():void;
 		
 		/**
 		 * Called by the animator to void the GPU indicator when register space in the shader
@@ -46,11 +46,11 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function cancelGPUCompatibility() : void;
+		function cancelGPUCompatibility():void;
 		
 		/**
 		 * Generates the AGAL Vertex code for the animation, tailored to the material pass's requirements.
-		 * 
+		 *
 		 * @param pass The MaterialPassBase object to whose vertex code the animation's code will be prepended.
 		 * @sourceRegisters The animatable attribute registers of the material pass.
 		 * @targetRegisters The animatable target registers of the material pass.
@@ -58,21 +58,21 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function getAGALVertexCode(pass : MaterialPassBase, sourceRegisters : Vector.<String>, targetRegisters : Vector.<String>, profile : String) : String;
+		function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String;
 		
 		/**
 		 * Generates the AGAL Fragment code for the animation, tailored to the material pass's requirements.
-		 * 
+		 *
 		 * @param pass The MaterialPassBase object to whose vertex code the animation's code will be prepended.
 		 * @return The AGAL Vertex code that animates the vertex data.
 		 *
 		 * @private
 		 */
-		function getAGALFragmentCode(pass : MaterialPassBase, shadedTarget : String, profile : String) : String;
+		function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String;
 		
 		/**
 		 * Generates the extra AGAL Fragment code for the animation when UVs are required, tailored to the material pass's requirements.
-		 * 
+		 *
 		 * @param pass The MaterialPassBase object to whose vertex code the animation's code will be prepended.
 		 * @param UVSource String representing the UV source register.
 		 * @param UVTarget String representing the UV target register.
@@ -80,11 +80,11 @@ package away3d.animators
 		 *
 		 * @private
 		 */
-		function getAGALUVCode(pass : MaterialPassBase, UVSource : String, UVTarget:String) : String;
+		function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String;
 		
 		/**
 		 * Resets any constants used in the creation of AGAL for the vertex and fragment shaders.
-		 * 
+		 *
 		 * @param pass The material pass currently being used to render the geometry.
 		 *
 		 * @private
@@ -93,22 +93,22 @@ package away3d.animators
 		
 		/**
 		 * Sets the GPU render state required by the animation that is independent of the rendered mesh.
-		 * 
+		 *
 		 * @param stage3DProxy The proxy currently performing the rendering.
 		 * @param pass The material pass currently being used to render the geometry.
 		 *
 		 * @private
 		 */
-		function activate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
-
+		function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		
 		/**
 		 * Clears the GPU render state that has been set by the current animation.
-		 * 
+		 *
 		 * @param stage3DProxy The proxy currently performing the rendering.
 		 * @param pass The material pass currently being used to render the geometry.
 		 *
 		 * @private
 		 */
-		function deactivate(stage3DProxy : Stage3DProxy, pass : MaterialPassBase) : void
+		function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 	}
 }

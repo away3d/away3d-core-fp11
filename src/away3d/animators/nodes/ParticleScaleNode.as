@@ -33,13 +33,13 @@ package away3d.animators.nodes
 		arcane var _cycleDuration:Number;
 		/** @private */
 		arcane var _cyclePhase:Number;
-				
+		
 		/**
 		 * Reference for scale node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> representing the min scale (x), max scale(y), optional cycle speed (z) and phase offset (w) applied to the particle.
 		 */
 		public static const SCALE_VECTOR3D:String = "ScaleVector3D";
-				
+		
 		/**
 		 * Creates a new <code>ParticleScaleNode</code>
 		 *
@@ -74,9 +74,9 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			
 			var code:String = "";
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
@@ -95,7 +95,7 @@ package away3d.animators.nodes
 			
 			code += "mul " + temp + "," + scaleRegister + ".y," + ((_usesCycle)? temp : animationRegisterCache.vertexLife) + "\n";
 			code += "add " + temp + "," + scaleRegister + ".x," + temp + "\n";
-			code += "mul " + animationRegisterCache.scaleAndRotateTarget +".xyz," +animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp + "\n";
+			code += "mul " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp + "\n";
 			
 			return code;
 		}
@@ -117,18 +117,15 @@ package away3d.animators.nodes
 			if (!scale)
 				throw(new Error("there is no " + SCALE_VECTOR3D + " in param!"));
 			
-			if (_usesCycle)
-			{
-				_oneData[0] = (scale.x + scale.y) / 2;
-				_oneData[1] = Math.abs(scale.x - scale.y) / 2;
+			if (_usesCycle) {
+				_oneData[0] = (scale.x + scale.y)/2;
+				_oneData[1] = Math.abs(scale.x - scale.y)/2;
 				if (scale.z <= 0)
 					throw(new Error("the cycle duration must be greater than zero"));
-				_oneData[2] = Math.PI * 2 / scale.z;
+				_oneData[2] = Math.PI*2/scale.z;
 				if (_usesPhase)
-					_oneData[3] = scale.w * Math.PI / 180;
-			}
-			else
-			{
+					_oneData[3] = scale.w*Math.PI/180;
+			} else {
 				_oneData[0] = scale.x;
 				_oneData[1] = scale.y - scale.x;
 			}

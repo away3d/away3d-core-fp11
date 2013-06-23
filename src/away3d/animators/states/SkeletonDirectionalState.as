@@ -3,20 +3,20 @@ package away3d.animators.states
 	import away3d.animators.*;
 	import away3d.animators.data.*;
 	import away3d.animators.nodes.*;
+	
 	import flash.geom.*;
 	
-	
 	/**
-	 * 
+	 *
 	 */
 	public class SkeletonDirectionalState extends AnimationStateBase implements ISkeletonAnimationState
 	{
 		private var _skeletonAnimationNode:SkeletonDirectionalNode;
-		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean = true;
-		private var _inputA : ISkeletonAnimationState;
-		private var _inputB : ISkeletonAnimationState;
-		private var _blendWeight : Number = 0;
+		private var _skeletonPose:SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty:Boolean = true;
+		private var _inputA:ISkeletonAnimationState;
+		private var _inputB:ISkeletonAnimationState;
+		private var _blendWeight:Number = 0;
 		private var _direction:Number = 0;
 		private var _blendDirty:Boolean = true;
 		private var _forward:ISkeletonAnimationState;
@@ -25,10 +25,10 @@ package away3d.animators.states
 		private var _right:ISkeletonAnimationState;
 		
 		/**
-		 * Defines the direction in degrees of the aniamtion between the forwards (0), right(90) backwards (180) and left(270) input nodes, 
+		 * Defines the direction in degrees of the aniamtion between the forwards (0), right(90) backwards (180) and left(270) input nodes,
 		 * used to produce the skeleton pose output.
 		 */
-		public function set direction(value : Number) : void
+		public function set direction(value:Number):void
 		{
 			if (_direction == value)
 				return;
@@ -77,7 +77,7 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateTime(time : int) : void
+		override protected function updateTime(time:int):void
 		{
 			if (_blendDirty)
 				updateBlend();
@@ -104,15 +104,15 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updatePositionDelta() : void
+		override protected function updatePositionDelta():void
 		{
 			_positionDeltaDirty = false;
 			
 			if (_blendDirty)
 				updateBlend();
 			
-			var deltA : Vector3D = _inputA.positionDelta;
-			var deltB : Vector3D = _inputB.positionDelta;
+			var deltA:Vector3D = _inputA.positionDelta;
+			var deltB:Vector3D = _inputB.positionDelta;
 			
 			positionDelta.x = deltA.x + _blendWeight*(deltB.x - deltA.x);
 			positionDelta.y = deltA.y + _blendWeight*(deltB.y - deltA.y);
@@ -121,36 +121,38 @@ package away3d.animators.states
 		
 		/**
 		 * Updates the output skeleton pose of the node based on the direction value between forward, backwards, left and right input nodes.
-		 * 
-		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 *
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose.
 		 */
-		private function updateSkeletonPose(skeleton : Skeleton) : void
+		private function updateSkeletonPose(skeleton:Skeleton):void
 		{
 			_skeletonPoseDirty = false;
 			
 			if (_blendDirty)
 				updateBlend();
 			
-			var endPose : JointPose;
-			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
-			var poses1 : Vector.<JointPose> = _inputA.getSkeletonPose(skeleton).jointPoses;
-			var poses2 : Vector.<JointPose> = _inputB.getSkeletonPose(skeleton).jointPoses;
-			var pose1 : JointPose, pose2 : JointPose;
-			var p1 : Vector3D, p2 : Vector3D;
-			var tr : Vector3D;
-			var numJoints : uint = skeleton.numJoints;
-
-			// :s
-			if (endPoses.length != numJoints) endPoses.length = numJoints;
+			var endPose:JointPose;
+			var endPoses:Vector.<JointPose> = _skeletonPose.jointPoses;
+			var poses1:Vector.<JointPose> = _inputA.getSkeletonPose(skeleton).jointPoses;
+			var poses2:Vector.<JointPose> = _inputB.getSkeletonPose(skeleton).jointPoses;
+			var pose1:JointPose, pose2:JointPose;
+			var p1:Vector3D, p2:Vector3D;
+			var tr:Vector3D;
+			var numJoints:uint = skeleton.numJoints;
 			
-			for (var i : uint = 0; i < numJoints; ++i) {
+			// :s
+			if (endPoses.length != numJoints)
+				endPoses.length = numJoints;
+			
+			for (var i:uint = 0; i < numJoints; ++i) {
 				endPose = endPoses[i] ||= new JointPose();
 				pose1 = poses1[i];
 				pose2 = poses2[i];
-				p1 = pose1.translation; p2 = pose2.translation;
-
+				p1 = pose1.translation;
+				p2 = pose2.translation;
+				
 				endPose.orientation.lerp(pose1.orientation, pose2.orientation, _blendWeight);
-
+				
 				tr = endPose.translation;
 				tr.x = p1.x + _blendWeight*(p2.x - p1.x);
 				tr.y = p1.y + _blendWeight*(p2.y - p1.y);
@@ -160,37 +162,35 @@ package away3d.animators.states
 		
 		/**
 		 * Updates the blend value for the animation output based on the direction value between forward, backwards, left and right input nodes.
-		 * 
+		 *
 		 * @private
 		 */
-		private function updateBlend() : void
+		private function updateBlend():void
 		{
 			_blendDirty = false;
-
+			
 			if (_direction < 0 || _direction > 360) {
-				 _direction %= 360;
-				 if (_direction < 0) _direction += 360;
+				_direction %= 360;
+				if (_direction < 0)
+					_direction += 360;
 			}
-
+			
 			if (_direction < 90) {
 				_inputA = _forward;
 				_inputB = _right;
 				_blendWeight = _direction/90;
-			}
-			else if (_direction < 180) {
+			} else if (_direction < 180) {
 				_inputA = _right;
 				_inputB = _backward;
-				_blendWeight = (_direction-90)/90;
-			}
-			else if (_direction < 270) {
+				_blendWeight = (_direction - 90)/90;
+			} else if (_direction < 270) {
 				_inputA = _backward;
 				_inputB = _left;
-				_blendWeight = (_direction-180)/90;
-			}
-			else {
+				_blendWeight = (_direction - 180)/90;
+			} else {
 				_inputA = _left;
 				_inputB = _forward;
-				_blendWeight = (_direction-270)/90;
+				_blendWeight = (_direction - 270)/90;
 			}
 		}
 	}

@@ -47,15 +47,14 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			var positionAttribute:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, POSITION_INDEX, positionAttribute.index);
 			
 			var code:String = "";
 			var len:int = animationRegisterCache.rotationRegisters.length;
 			var i:int;
-			if (animationRegisterCache.hasBillboard)
-			{
+			if (animationRegisterCache.hasBillboard) {
 				var temp1:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				animationRegisterCache.addVertexTempUsages(temp1, 1);
 				var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
@@ -75,7 +74,6 @@ package away3d.animators.nodes
 				code += "sub " + temp1 + ".xyz," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 				code += "m33 " + temp1 + ".xyz," + temp1 + ".xyz," + rotationMatrixRegister + "\n";
 				
-				
 				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
 				code += "mov " + temp3 + ".xy," + temp1 + ".xy\n";
 				code += "nrm " + temp3 + ".xyz," + temp3 + ".xyz\n";
@@ -92,32 +90,27 @@ package away3d.animators.nodes
 				code += "mov " + temp3 + ".z," + animationRegisterCache.vertexOneConst + "\n";
 				code += "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp1 + "\n";
 				for (i = 0; i < len; i++)
-				{
 					code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
-				}
-			}
-			else
-			{
+			} else {
 				var nrmDirection:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				animationRegisterCache.addVertexTempUsages(nrmDirection, 1);
 				
 				var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-				animationRegisterCache.addVertexTempUsages(temp,1);
+				animationRegisterCache.addVertexTempUsages(temp, 1);
 				var cos:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 0);
 				var sin:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 1);
 				var o_temp:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 2);
 				var tempSingle:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 3);
 				
 				var R:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-				animationRegisterCache.addVertexTempUsages(R,1);
+				animationRegisterCache.addVertexTempUsages(R, 1);
 				
 				animationRegisterCache.removeVertexTempUsage(nrmDirection);
 				animationRegisterCache.removeVertexTempUsage(temp);
 				animationRegisterCache.removeVertexTempUsage(R);
 				
 				code += "sub " + nrmDirection + ".xyz," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
-				code += "nrm " + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";			
-				
+				code += "nrm " + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";
 				
 				code += "mov " + sin + "," + nrmDirection + ".y\n";
 				code += "mul " + cos + "," + sin + "," + sin + "\n";
@@ -132,30 +125,26 @@ package away3d.animators.nodes
 				code += "sub " + animationRegisterCache.scaleAndRotateTarget + ".y," + R + ".x," + R + ".y\n";
 				code += "add " + animationRegisterCache.scaleAndRotateTarget + ".z," + R + ".z," + R + ".w\n";
 				
-				
 				code += "abs " + R + ".y," + nrmDirection + ".y\n";
 				code += "sge " + R + ".z," + R + ".y," + animationRegisterCache.vertexOneConst + "\n";
 				code += "mul " + R + ".x," + R + ".y," + nrmDirection + ".y\n";
 				
-				
 				//judgu if nrmDirection=(0,1,0);
 				code += "mov " + nrmDirection + ".y," + animationRegisterCache.vertexZeroConst + "\n";
 				code += "dp3 " + sin + "," + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";
-				code += "sge " + tempSingle + "," + animationRegisterCache.vertexZeroConst +"," + sin + "\n";
+				code += "sge " + tempSingle + "," + animationRegisterCache.vertexZeroConst + "," + sin + "\n";
 				
 				code += "mov " + nrmDirection + ".y," + animationRegisterCache.vertexZeroConst + "\n";
 				code += "nrm " + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";
 				
-				
-				code += "sub " + sin + "," +  animationRegisterCache.vertexOneConst + "," + tempSingle + "\n";
-				code += "mul " + sin + "," +  sin + "," + nrmDirection + ".x\n";
+				code += "sub " + sin + "," + animationRegisterCache.vertexOneConst + "," + tempSingle + "\n";
+				code += "mul " + sin + "," + sin + "," + nrmDirection + ".x\n";
 				
 				code += "mov " + cos + "," + nrmDirection + ".z\n";
 				code += "neg " + cos + "," + cos + "\n";
-				code += "sub " + o_temp + "," +  animationRegisterCache.vertexOneConst + "," + cos + "\n";
-				code += "mul " + o_temp + "," +  R + ".x," + tempSingle + "\n";
-				code += "add " + cos + "," +  cos + "," + o_temp + "\n";
-				
+				code += "sub " + o_temp + "," + animationRegisterCache.vertexOneConst + "," + cos + "\n";
+				code += "mul " + o_temp + "," + R + ".x," + tempSingle + "\n";
+				code += "add " + cos + "," + cos + "," + o_temp + "\n";
 				
 				code += "mul " + R + ".x," + cos + "," + animationRegisterCache.scaleAndRotateTarget + ".x\n";
 				code += "mul " + R + ".y," + sin + "," + animationRegisterCache.scaleAndRotateTarget + ".z\n";
@@ -165,12 +154,11 @@ package away3d.animators.nodes
 				code += "sub " + animationRegisterCache.scaleAndRotateTarget + ".x," + R + ".x," + R + ".y\n";
 				code += "add " + animationRegisterCache.scaleAndRotateTarget + ".z," + R + ".z," + R + ".w\n";
 				
-				for (i = 0; i < len; i++)
-				{
+				for (i = 0; i < len; i++) {
 					//just repeat the calculate above
 					//because of the limited registers, no need to optimise
 					code += "sub " + nrmDirection + ".xyz," + positionAttribute + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
-					code += "nrm " + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";			
+					code += "nrm " + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";
 					code += "mov " + sin + "," + nrmDirection + ".y\n";
 					code += "mul " + cos + "," + sin + "," + sin + "\n";
 					code += "sub " + cos + "," + animationRegisterCache.vertexOneConst + "," + cos + "\n";
@@ -186,16 +174,16 @@ package away3d.animators.nodes
 					code += "mul " + R + ".x," + R + ".y," + nrmDirection + ".y\n";
 					code += "mov " + nrmDirection + ".y," + animationRegisterCache.vertexZeroConst + "\n";
 					code += "dp3 " + sin + "," + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";
-					code += "sge " + tempSingle + "," + animationRegisterCache.vertexZeroConst +"," + sin + "\n";
+					code += "sge " + tempSingle + "," + animationRegisterCache.vertexZeroConst + "," + sin + "\n";
 					code += "mov " + nrmDirection + ".y," + animationRegisterCache.vertexZeroConst + "\n";
 					code += "nrm " + nrmDirection + ".xyz," + nrmDirection + ".xyz\n";
-					code += "sub " + sin + "," +  animationRegisterCache.vertexOneConst + "," + tempSingle + "\n";
-					code += "mul " + sin + "," +  sin + "," + nrmDirection + ".x\n";
+					code += "sub " + sin + "," + animationRegisterCache.vertexOneConst + "," + tempSingle + "\n";
+					code += "mul " + sin + "," + sin + "," + nrmDirection + ".x\n";
 					code += "mov " + cos + "," + nrmDirection + ".z\n";
 					code += "neg " + cos + "," + cos + "\n";
-					code += "sub " + o_temp + "," +  animationRegisterCache.vertexOneConst + "," + cos + "\n";
-					code += "mul " + o_temp + "," +  R + ".x," + tempSingle + "\n";
-					code += "add " + cos + "," +  cos + "," + o_temp + "\n";
+					code += "sub " + o_temp + "," + animationRegisterCache.vertexOneConst + "," + cos + "\n";
+					code += "mul " + o_temp + "," + R + ".x," + tempSingle + "\n";
+					code += "add " + cos + "," + cos + "," + o_temp + "\n";
 					code += "mul " + R + ".x," + cos + "," + animationRegisterCache.rotationRegisters[i] + ".x\n";
 					code += "mul " + R + ".y," + sin + "," + animationRegisterCache.rotationRegisters[i] + ".z\n";
 					code += "mul " + R + ".z," + sin + "," + animationRegisterCache.rotationRegisters[i] + ".x\n";

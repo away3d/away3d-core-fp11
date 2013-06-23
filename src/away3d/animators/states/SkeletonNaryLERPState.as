@@ -11,14 +11,14 @@ package away3d.animators.states
 	use namespace arcane;
 	
 	/**
-	 * 
+	 *
 	 */
 	public class SkeletonNaryLERPState extends AnimationStateBase implements ISkeletonAnimationState
 	{
 		private var _skeletonAnimationNode:SkeletonNaryLERPNode;
-		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean = true;
-		private var _blendWeights : Vector.<Number> = new Vector.<Number>();
+		private var _skeletonPose:SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty:Boolean = true;
+		private var _blendWeights:Vector.<Number> = new Vector.<Number>();
 		private var _inputs:Vector.<ISkeletonAnimationState> = new Vector.<ISkeletonAnimationState>();
 		
 		function SkeletonNaryLERPState(animator:IAnimator, skeletonAnimationNode:SkeletonNaryLERPNode)
@@ -42,19 +42,21 @@ package away3d.animators.states
 			
 			_positionDeltaDirty = true;
 			
-			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j)
+			for (var j:uint = 0; j < _skeletonAnimationNode.numInputs; ++j) {
 				if (_blendWeights[j])
 					_inputs[j].update(value);
+			}
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateTime(time : int) : void
+		override protected function updateTime(time:int):void
 		{
-			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j)
+			for (var j:uint = 0; j < _skeletonAnimationNode.numInputs; ++j) {
 				if (_blendWeights[j])
 					_inputs[j].update(time);
+			}
 			
 			super.updateTime(time);
 		}
@@ -72,21 +74,21 @@ package away3d.animators.states
 		
 		/**
 		 * Returns the blend weight of the skeleton aniamtion node that resides at the given input index.
-		 * 
+		 *
 		 * @param index The input index for which the skeleton animation node blend weight is requested.
 		 */
-		public function getBlendWeightAt(index : uint) : Number
+		public function getBlendWeightAt(index:uint):Number
 		{
 			return _blendWeights[index];
 		}
 		
 		/**
 		 * Sets the blend weight of the skeleton aniamtion node that resides at the given input index.
-		 * 
+		 *
 		 * @param index The input index on which the skeleton animation node blend weight is to be set.
 		 * @param blendWeight The blend weight value to use for the given skeleton animation node index.
 		 */
-		public function setBlendWeightAt(index : uint, blendWeight:Number) : void
+		public function setBlendWeightAt(index:uint, blendWeight:Number):void
 		{
 			_blendWeights[index] = blendWeight;
 			
@@ -97,18 +99,18 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updatePositionDelta() : void
+		override protected function updatePositionDelta():void
 		{
 			_positionDeltaDirty = false;
 			
-			var delta : Vector3D;
-			var weight : Number;
-
+			var delta:Vector3D;
+			var weight:Number;
+			
 			positionDelta.x = 0;
 			positionDelta.y = 0;
 			positionDelta.z = 0;
-
-			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j) {
+			
+			for (var j:uint = 0; j < _skeletonAnimationNode.numInputs; ++j) {
 				weight = _blendWeights[j];
 				
 				if (weight) {
@@ -122,29 +124,30 @@ package away3d.animators.states
 		
 		/**
 		 * Updates the output skeleton pose of the node based on the blend weight values given to the input nodes.
-		 * 
-		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 *
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose.
 		 */
-		private function updateSkeletonPose(skeleton : Skeleton) : void
+		private function updateSkeletonPose(skeleton:Skeleton):void
 		{
 			_skeletonPoseDirty = false;
 			
-			var weight : Number;
-			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
-			var poses : Vector.<JointPose>;
-			var endPose : JointPose, pose : JointPose;
-			var endTr : Vector3D, tr : Vector3D;
-			var endQuat : Quaternion, q : Quaternion;
-			var firstPose : Vector.<JointPose>;
-			var i : uint;
-			var w0 : Number, x0 : Number, y0 : Number, z0 : Number;
-			var w1 : Number, x1 : Number, y1 : Number, z1 : Number;
-			var numJoints : uint = skeleton.numJoints;
+			var weight:Number;
+			var endPoses:Vector.<JointPose> = _skeletonPose.jointPoses;
+			var poses:Vector.<JointPose>;
+			var endPose:JointPose, pose:JointPose;
+			var endTr:Vector3D, tr:Vector3D;
+			var endQuat:Quaternion, q:Quaternion;
+			var firstPose:Vector.<JointPose>;
+			var i:uint;
+			var w0:Number, x0:Number, y0:Number, z0:Number;
+			var w1:Number, x1:Number, y1:Number, z1:Number;
+			var numJoints:uint = skeleton.numJoints;
 			
 			// :s
-			if (endPoses.length != numJoints) endPoses.length = numJoints;
+			if (endPoses.length != numJoints)
+				endPoses.length = numJoints;
 			
-			for (var j : uint = 0; j < _skeletonAnimationNode.numInputs; ++j) {
+			for (var j:uint = 0; j < _skeletonAnimationNode.numInputs; ++j) {
 				weight = _blendWeights[j];
 				
 				if (!weight)
@@ -172,19 +175,24 @@ package away3d.animators.states
 						endTr.y = weight*tr.y;
 						endTr.z = weight*tr.z;
 					}
-				}
-				else {
+				} else {
 					for (i = 0; i < skeleton.numJoints; ++i) {
 						endPose = endPoses[i];
 						pose = poses[i];
 						
 						q = firstPose[i].orientation;
-						x0 = q.x; y0 = q.y; z0 = q.z; w0 = q.w;
+						x0 = q.x;
+						y0 = q.y;
+						z0 = q.z;
+						w0 = q.w;
 						
 						q = pose.orientation;
 						tr = pose.translation;
 						
-						x1 = q.x; y1 = q.y; z1 = q.z; w1 = q.w;
+						x1 = q.x;
+						y1 = q.y;
+						z1 = q.z;
+						w1 = q.w;
 						// find shortest direction
 						if (x0*x1 + y0*y1 + z0*z1 + w0*w1 < 0) {
 							x1 = -x1;
@@ -206,9 +214,8 @@ package away3d.animators.states
 				}
 			}
 			
-			for (i = 0; i < skeleton.numJoints; ++i) {
+			for (i = 0; i < skeleton.numJoints; ++i)
 				endPoses[i].orientation.normalize();
-			}
 		}
 	}
 }

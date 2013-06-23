@@ -1,8 +1,9 @@
-package away3d.animators {
+package away3d.animators
+{
 	import away3d.animators.nodes.*;
 	import away3d.errors.*;
 	import away3d.library.assets.*;
-
+	
 	import flash.utils.*;
 	
 	/**
@@ -17,8 +18,9 @@ package away3d.animators {
 		private var _animationNames:Vector.<String> = new Vector.<String>();
 		private var _animationDictionary:Dictionary = new Dictionary(true);
 		
-		public function AnimationSetBase() {
-			
+		public function AnimationSetBase()
+		{
+		
 		}
 		
 		/**
@@ -28,17 +30,18 @@ package away3d.animators {
 		 * @param excludeAnother An additional register that's not free.
 		 * @return A temporary register that can be used.
 		 */
-		protected function findTempReg(exclude : Vector.<String>, excludeAnother : String = null) : String
+		protected function findTempReg(exclude:Vector.<String>, excludeAnother:String = null):String
 		{
-			var i : uint;
-			var reg : String;
-
+			var i:uint;
+			var reg:String;
+			
 			while (true) {
 				reg = "vt" + i;
-				if (exclude.indexOf(reg) == -1 && excludeAnother != reg) return reg;
+				if (exclude.indexOf(reg) == -1 && excludeAnother != reg)
+					return reg;
 				++i;
 			}
-
+			
 			// can't be reached
 			return null;
 		}
@@ -48,7 +51,7 @@ package away3d.animators {
 		 * the vertex registers aslready in use on shading materials allows the animation data to utilise
 		 * GPU calls.
 		 */
-		public function get usesCPU() : Boolean
+		public function get usesCPU():Boolean
 		{
 			return _usesCPU;
 		}
@@ -59,20 +62,20 @@ package away3d.animators {
 		 *
 		 * @private
 		 */
-		public function resetGPUCompatibility() : void
-        {
-            _usesCPU = false;
-        }
+		public function resetGPUCompatibility():void
+		{
+			_usesCPU = false;
+		}
 		
-		public function cancelGPUCompatibility() : void
-        {
-            _usesCPU = true;
-        }
+		public function cancelGPUCompatibility():void
+		{
+			_usesCPU = true;
+		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType() : String
+		public function get assetType():String
 		{
 			return AssetType.ANIMATION_SET;
 		}
@@ -113,7 +116,6 @@ package away3d.animators {
 			return _animationDictionary[name];
 		}
 		
-		
 		/**
 		 * Adds an animation state object to the aniamtion data set under the given name.
 		 *
@@ -135,7 +137,7 @@ package away3d.animators {
 		/**
 		 * Cleans up any resources used by the current object.
 		 */
-		public function dispose() : void
+		public function dispose():void
 		{
 		}
 	}

@@ -28,7 +28,7 @@ package away3d.animators.nodes
 		
 		/** @private */
 		arcane var _smooth:Boolean;
-						
+		
 		/**
 		 * Creates a new <code>ParticleFollowNode</code>
 		 *
@@ -36,7 +36,7 @@ package away3d.animators.nodes
 		 * @param    [optional] usesRotation     Defines wehether the individual particle reacts to the rotation of the target.
 		 * @param    [optional] smooth     Defines wehether the state calculate the interpolated value.
 		 */
-		public function ParticleFollowNode(usesPosition:Boolean = true, usesRotation:Boolean = true, smooth:Boolean = false )
+		public function ParticleFollowNode(usesPosition:Boolean = true, usesRotation:Boolean = true, smooth:Boolean = false)
 		{
 			_stateClass = ParticleFollowState;
 			
@@ -52,7 +52,7 @@ package away3d.animators.nodes
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			
 			//TODO: use Quaternion to implement this function
 			var code:String = "";
@@ -67,15 +67,14 @@ package away3d.animators.nodes
 				var temp3:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				
 				var temp4:ShaderRegisterElement;
-				if(animationRegisterCache.hasBillboard)
-				{
+				if (animationRegisterCache.hasBillboard) {
 					animationRegisterCache.addVertexTempUsages(temp3, 1);
-					temp4= animationRegisterCache.getFreeVertexVectorTemp();
+					temp4 = animationRegisterCache.getFreeVertexVectorTemp();
 				}
 				
 				animationRegisterCache.removeVertexTempUsage(temp1);
 				animationRegisterCache.removeVertexTempUsage(temp2);
-				if(animationRegisterCache.hasBillboard)
+				if (animationRegisterCache.hasBillboard)
 					animationRegisterCache.removeVertexTempUsage(temp3);
 				
 				var len:int = animationRegisterCache.rotationRegisters.length;
@@ -92,16 +91,11 @@ package away3d.animators.nodes
 				code += "neg " + temp2 + ".z," + temp3 + ".y\n";
 				
 				if (animationRegisterCache.hasBillboard)
-				{
 					code += "m33 " + temp4 + ".xyz," + animationRegisterCache.positionTarget + ".xyz," + temp1 + "\n";
-				}
-				else
-				{
+				else {
 					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp1 + "\n";
 					for (i = 0; i < len; i++)
-					{
 						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
-					}
 				}
 				
 				//y axis
@@ -115,16 +109,11 @@ package away3d.animators.nodes
 				code += "mov " + temp3 + ".z," + temp1 + ".x\n";
 				
 				if (animationRegisterCache.hasBillboard)
-				{
 					code += "m33 " + temp4 + ".xyz," + temp4 + ".xyz," + temp1 + "\n";
-				}
-				else
-				{
+				else {
 					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp1 + "\n";
 					for (i = 0; i < len; i++)
-					{
 						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
-					}
 				}
 				
 				//z axis
@@ -137,19 +126,14 @@ package away3d.animators.nodes
 				code += "mov " + temp3 + "," + animationRegisterCache.vertexZeroConst + "\n";
 				code += "mov " + temp3 + ".z," + animationRegisterCache.vertexOneConst + "\n";
 				
-				if (animationRegisterCache.hasBillboard)
-				{
+				if (animationRegisterCache.hasBillboard) {
 					code += "m33 " + temp4 + ".xyz," + temp4 + ".xyz," + temp1 + "\n";
 					code += "sub " + temp4 + ".xyz," + temp4 + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 					code += "add " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp4 + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz\n";
-				}
-				else
-				{
+				} else {
 					code += "m33 " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp1 + "\n";
 					for (i = 0; i < len; i++)
-					{
 						code += "m33 " + animationRegisterCache.rotationRegisters[i] + ".xyz," + animationRegisterCache.rotationRegisters[i] + "," + temp1 + "\n";
-					}
 				}
 				
 			}

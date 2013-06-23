@@ -33,7 +33,6 @@ package away3d.animators.nodes
 		 */
 		public static const BEZIER_CONTROL_VECTOR3D:String = "BezierControlVector3D";
 		
-		
 		/**
 		 * Reference for bezier curve node properties on a single particle (when in local property mode).
 		 * Expects a <code>Vector3D</code> object representing the end point position (0, 1, 2) of the curve.
@@ -60,9 +59,9 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			var controlValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, BEZIER_CONTROL_INDEX, controlValue.index);
 			
@@ -82,15 +81,14 @@ package away3d.animators.nodes
 			code += "sub " + rev_time + "," + animationRegisterCache.vertexOneConst + "," + animationRegisterCache.vertexLife + "\n";
 			code += "mul " + time_2 + "," + animationRegisterCache.vertexLife + "," + animationRegisterCache.vertexLife + "\n";
 			
-			code += "mul " + time_temp + "," + animationRegisterCache.vertexLife +"," + rev_time + "\n";
-			code += "mul " + time_temp + "," + time_temp +"," + animationRegisterCache.vertexTwoConst + "\n";
-			code += "mul " + distance + ".xyz," + time_temp +"," + controlValue + "\n";
-			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
-			code += "mul " + distance + ".xyz," + time_2 +"," + endValue + "\n";
-			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
+			code += "mul " + time_temp + "," + animationRegisterCache.vertexLife + "," + rev_time + "\n";
+			code += "mul " + time_temp + "," + time_temp + "," + animationRegisterCache.vertexTwoConst + "\n";
+			code += "mul " + distance + ".xyz," + time_temp + "," + controlValue + "\n";
+			code += "add " + animationRegisterCache.positionTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
+			code += "mul " + distance + ".xyz," + time_2 + "," + endValue + "\n";
+			code += "add " + animationRegisterCache.positionTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 			
-			if (animationRegisterCache.needVelocity)
-			{
+			if (animationRegisterCache.needVelocity) {
 				code += "mul " + time_2 + "," + animationRegisterCache.vertexLife + "," + animationRegisterCache.vertexTwoConst + "\n";
 				code += "sub " + time_temp + "," + animationRegisterCache.vertexOneConst + "," + time_2 + "\n";
 				code += "mul " + time_temp + "," + animationRegisterCache.vertexTwoConst + "," + time_temp + "\n";
@@ -119,7 +117,7 @@ package away3d.animators.nodes
 			var bezierControl:Vector3D = param[BEZIER_CONTROL_VECTOR3D];
 			if (!bezierControl)
 				throw new Error("there is no " + BEZIER_CONTROL_VECTOR3D + " in param!");
-				
+			
 			var bezierEnd:Vector3D = param[BEZIER_END_VECTOR3D];
 			if (!bezierEnd)
 				throw new Error("there is no " + BEZIER_END_VECTOR3D + " in param!");

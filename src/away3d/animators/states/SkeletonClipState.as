@@ -7,22 +7,22 @@ package away3d.animators.states
 	import flash.geom.*;
 	
 	/**
-	 * 
+	 *
 	 */
 	public class SkeletonClipState extends AnimationClipState implements ISkeletonAnimationState
 	{
-		private var _rootPos : Vector3D = new Vector3D();
+		private var _rootPos:Vector3D = new Vector3D();
 		private var _frames:Vector.<SkeletonPose>;
-		private var _skeletonClipNode : SkeletonClipNode;
-		private var _skeletonPose : SkeletonPose = new SkeletonPose();
-		private var _skeletonPoseDirty : Boolean = true;
-		private var _currentPose : SkeletonPose;
-		private var _nextPose : SkeletonPose;
+		private var _skeletonClipNode:SkeletonClipNode;
+		private var _skeletonPose:SkeletonPose = new SkeletonPose();
+		private var _skeletonPoseDirty:Boolean = true;
+		private var _currentPose:SkeletonPose;
+		private var _nextPose:SkeletonPose;
 		
 		/**
 		 * Returns the current skeleton pose frame of animation in the clip based on the internal playhead position.
 		 */
-		public function get currentPose() : SkeletonPose
+		public function get currentPose():SkeletonPose
 		{
 			if (_framesDirty)
 				updateFrames();
@@ -33,7 +33,7 @@ package away3d.animators.states
 		/**
 		 * Returns the next skeleton pose frame of animation in the clip based on the internal playhead position.
 		 */
-		public function get nextPose() : SkeletonPose
+		public function get nextPose():SkeletonPose
 		{
 			if (_framesDirty)
 				updateFrames();
@@ -73,26 +73,25 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateFrames() : void
+		override protected function updateFrames():void
 		{
 			super.updateFrames();
 			
 			_currentPose = _frames[_currentFrame];
 			
-			if (_skeletonClipNode.looping && _nextFrame >= _skeletonClipNode.lastFrame){
+			if (_skeletonClipNode.looping && _nextFrame >= _skeletonClipNode.lastFrame) {
 				_nextPose = _frames[0];
 				SkeletonAnimator(_animator).dispatchCycleEvent();
-			} else {
+			} else
 				_nextPose = _frames[_nextFrame];
-			}
 		}
 		
 		/**
 		 * Updates the output skeleton pose of the node based on the internal playhead position.
-		 * 
-		 * @param skeleton The skeleton used by the animator requesting the ouput pose. 
+		 *
+		 * @param skeleton The skeleton used by the animator requesting the ouput pose.
 		 */
-		private function updateSkeletonPose(skeleton:Skeleton) : void
+		private function updateSkeletonPose(skeleton:Skeleton):void
 		{
 			_skeletonPoseDirty = false;
 			
@@ -102,26 +101,28 @@ package away3d.animators.states
 			if (_framesDirty)
 				updateFrames();
 			
-			var currentPose : Vector.<JointPose> = _currentPose.jointPoses;
-			var nextPose : Vector.<JointPose> = _nextPose.jointPoses;
-			var numJoints : uint = skeleton.numJoints;
-			var p1 : Vector3D, p2 : Vector3D;
-			var pose1 : JointPose, pose2 : JointPose;
-			var endPoses : Vector.<JointPose> = _skeletonPose.jointPoses;
-			var endPose : JointPose;
-			var tr : Vector3D;
+			var currentPose:Vector.<JointPose> = _currentPose.jointPoses;
+			var nextPose:Vector.<JointPose> = _nextPose.jointPoses;
+			var numJoints:uint = skeleton.numJoints;
+			var p1:Vector3D, p2:Vector3D;
+			var pose1:JointPose, pose2:JointPose;
+			var endPoses:Vector.<JointPose> = _skeletonPose.jointPoses;
+			var endPose:JointPose;
+			var tr:Vector3D;
 			
 			// :s
-			if (endPoses.length != numJoints) endPoses.length = numJoints;
+			if (endPoses.length != numJoints)
+				endPoses.length = numJoints;
 			
 			if ((numJoints != currentPose.length) || (numJoints != nextPose.length))
 				throw new Error("joint counts don't match!");
 			
-			for (var i : uint = 0; i < numJoints; ++i) {
+			for (var i:uint = 0; i < numJoints; ++i) {
 				endPose = endPoses[i] ||= new JointPose();
 				pose1 = currentPose[i];
 				pose2 = nextPose[i];
-				p1 = pose1.translation; p2 = pose2.translation;
+				p1 = pose1.translation;
+				p2 = pose2.translation;
 				
 				if (_skeletonClipNode.highQuality)
 					endPose.orientation.slerp(pose1.orientation, pose2.orientation, _blendWeight);
@@ -140,15 +141,15 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updatePositionDelta() : void
+		override protected function updatePositionDelta():void
 		{
 			_positionDeltaDirty = false;
 			
 			if (_framesDirty)
 				updateFrames();
 			
-			var p1 : Vector3D, p2 : Vector3D, p3 : Vector3D;
-			var totalDelta : Vector3D = _skeletonClipNode.totalDelta;
+			var p1:Vector3D, p2:Vector3D, p3:Vector3D;
+			var totalDelta:Vector3D = _skeletonClipNode.totalDelta;
 			
 			// jumping back, need to reset position
 			if ((_timeDir > 0 && _nextFrame < _oldFrame) || (_timeDir < 0 && _nextFrame > _oldFrame)) {
@@ -157,9 +158,9 @@ package away3d.animators.states
 				_rootPos.z -= totalDelta.z*_timeDir;
 			}
 			
-			var dx : Number = _rootPos.x;
-			var dy : Number = _rootPos.y;
-			var dz : Number = _rootPos.z;
+			var dx:Number = _rootPos.x;
+			var dy:Number = _rootPos.y;
+			var dz:Number = _rootPos.z;
 			
 			if (_skeletonClipNode.stitchFinalFrame && _nextFrame == _skeletonClipNode.lastFrame) {
 				p1 = _frames[0].jointPoses[0].translation;

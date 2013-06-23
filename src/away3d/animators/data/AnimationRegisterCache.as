@@ -1,8 +1,9 @@
-package away3d.animators.data {
+package away3d.animators.data
+{
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
-
+	
 	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
 	
@@ -28,15 +29,13 @@ package away3d.animators.data {
 		//vary
 		public var colorAddVary:ShaderRegisterElement;
 		public var colorMulVary:ShaderRegisterElement;
-
+		
 		//fragment
 		
 		public var uvVar:ShaderRegisterElement;
 		
 		//these are targets only need to rotate ( normal and tangent )
 		public var rotationRegisters:Vector.<ShaderRegisterElement>;
-		
-		
 		
 		public var needFragmentAnimation:Boolean;
 		public var needUVAnimation:Boolean;
@@ -57,7 +56,7 @@ package away3d.animators.data {
 		//set if has an node which will apply color add operation
 		public var hasColorAddNode:Boolean;
 		
-		public function AnimationRegisterCache(profile : String)
+		public function AnimationRegisterCache(profile:String)
 		{
 			super(profile);
 		}
@@ -71,14 +70,13 @@ package away3d.animators.data {
 			scaleAndRotateTarget = getRegisterFromString(targetRegisters[0]);
 			addVertexTempUsages(scaleAndRotateTarget, 1);
 			
-			for (var i:int = 1; i < targetRegisters.length; i++)
-			{
+			for (var i:int = 1; i < targetRegisters.length; i++) {
 				rotationRegisters.push(getRegisterFromString(targetRegisters[i]));
 				addVertexTempUsages(rotationRegisters[i - 1], 1);
 			}
 			
-			scaleAndRotateTarget = new ShaderRegisterElement(scaleAndRotateTarget.regName, scaleAndRotateTarget.index);//only use xyz, w is used as vertexLife
-
+			scaleAndRotateTarget = new ShaderRegisterElement(scaleAndRotateTarget.regName, scaleAndRotateTarget.index); //only use xyz, w is used as vertexLife
+			
 			//allot const register
 			
 			vertexZeroConst = getFreeVertexConstant();
@@ -90,26 +88,23 @@ package away3d.animators.data {
 			positionTarget = getFreeVertexVectorTemp();
 			addVertexTempUsages(positionTarget, 1);
 			positionTarget = new ShaderRegisterElement(positionTarget.regName, positionTarget.index);
-
-			if (needVelocity)
-			{
+			
+			if (needVelocity) {
 				velocityTarget = getFreeVertexVectorTemp();
 				addVertexTempUsages(velocityTarget, 1);
 				velocityTarget = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index);
 				vertexTime = new ShaderRegisterElement(velocityTarget.regName, velocityTarget.index, 3);
 				vertexLife = new ShaderRegisterElement(positionTarget.regName, positionTarget.index, 3);
-			}
-			else
-			{
+			} else {
 				var tempTime:ShaderRegisterElement = getFreeVertexVectorTemp();
 				addVertexTempUsages(tempTime, 1);
 				vertexTime = new ShaderRegisterElement(tempTime.regName, tempTime.index, 0);
 				vertexLife = new ShaderRegisterElement(tempTime.regName, tempTime.index, 1);
 			}
-			
+		
 		}
 		
-		public function setUVSourceAndTarget(UVAttribute : String, UVVaring:String):void
+		public function setUVSourceAndTarget(UVAttribute:String, UVVaring:String):void
 		{
 			uvVar = getRegisterFromString(UVVaring);
 			uvAttribute = getRegisterFromString(UVAttribute);
@@ -146,25 +141,23 @@ package away3d.animators.data {
 		
 		public function getCombinationCode():String
 		{
-			return "add " + scaleAndRotateTarget +".xyz," + scaleAndRotateTarget + ".xyz," + positionTarget + ".xyz\n";
+			return "add " + scaleAndRotateTarget + ".xyz," + scaleAndRotateTarget + ".xyz," + positionTarget + ".xyz\n";
 		}
 		
 		public function initColorRegisters():String
 		{
 			var code:String = "";
-			if (hasColorMulNode)
-			{
+			if (hasColorMulNode) {
 				colorMulTarget = getFreeVertexVectorTemp();
 				addVertexTempUsages(colorMulTarget, 1);
 				colorMulVary = getFreeVarying();
-				code += "mov " +colorMulTarget + "," + vertexOneConst + "\n";
+				code += "mov " + colorMulTarget + "," + vertexOneConst + "\n";
 			}
-			if (hasColorAddNode)
-			{
+			if (hasColorAddNode) {
 				colorAddTarget = getFreeVertexVectorTemp();
 				addVertexTempUsages(colorAddTarget, 1);
 				colorAddVary = getFreeVarying();
-				code += "mov " +colorAddTarget + "," + vertexZeroConst + "\n";
+				code += "mov " + colorAddTarget + "," + vertexZeroConst + "\n";
 			}
 			return code;
 		}
@@ -172,8 +165,7 @@ package away3d.animators.data {
 		public function getColorPassCode():String
 		{
 			var code:String = "";
-			if (needFragmentAnimation && (hasColorAddNode || hasColorMulNode))
-			{
+			if (needFragmentAnimation && (hasColorAddNode || hasColorMulNode)) {
 				if (hasColorMulNode)
 					code += "mov " + colorMulVary + "," + colorMulTarget + "\n";
 				if (hasColorAddNode)
@@ -185,8 +177,7 @@ package away3d.animators.data {
 		public function getColorCombinationCode(shadedTarget:String):String
 		{
 			var code:String = "";
-			if (needFragmentAnimation && (hasColorAddNode || hasColorMulNode))
-			{
+			if (needFragmentAnimation && (hasColorAddNode || hasColorMulNode)) {
 				var colorTarget:ShaderRegisterElement = getRegisterFromString(shadedTarget);
 				addFragmentTempUsages(colorTarget, 1);
 				if (hasColorMulNode)
@@ -203,8 +194,8 @@ package away3d.animators.data {
 			return new ShaderRegisterElement(temp[0], temp[1]);
 		}
 		
-		public var vertexConstantData : Vector.<Number> = new Vector.<Number>();
-		public var fragmentConstantData : Vector.<Number> = new Vector.<Number>();
+		public var vertexConstantData:Vector.<Number> = new Vector.<Number>();
+		public var fragmentConstantData:Vector.<Number> = new Vector.<Number>();
 		
 		private var _numVertexConstant:int;
 		private var _numFragmentConstant:int;
@@ -213,6 +204,7 @@ package away3d.animators.data {
 		{
 			return _numVertexConstant;
 		}
+		
 		public function get numFragmentConstant():int
 		{
 			return _numFragmentConstant;
@@ -222,13 +214,13 @@ package away3d.animators.data {
 		{
 			_numVertexConstant = _numUsedVertexConstants - _vertexConstantOffset;
 			_numFragmentConstant = _numUsedFragmentConstants - _fragmentConstantOffset;
-			vertexConstantData.length = _numVertexConstant * 4;
-			fragmentConstantData.length = _numFragmentConstant * 4;
+			vertexConstantData.length = _numVertexConstant*4;
+			fragmentConstantData.length = _numFragmentConstant*4;
 		}
 		
 		public function setVertexConst(index:int, x:Number = 0, y:Number = 0, z:Number = 0, w:Number = 0):void
 		{
-			var _index:int = (index - _vertexConstantOffset) * 4;
+			var _index:int = (index - _vertexConstantOffset)*4;
 			vertexConstantData[_index++] = x;
 			vertexConstantData[_index++] = y;
 			vertexConstantData[_index++] = z;
@@ -237,17 +229,15 @@ package away3d.animators.data {
 		
 		public function setVertexConstFromVector(index:int, data:Vector.<Number>):void
 		{
-			var _index:int = (index - _vertexConstantOffset) * 4;
+			var _index:int = (index - _vertexConstantOffset)*4;
 			for (var i:int = 0; i < data.length; i++)
-			{
 				vertexConstantData[_index++] = data[i];
-			}
 		}
 		
 		public function setVertexConstFromMatrix(index:int, matrix:Matrix3D):void
 		{
 			var rawData:Vector.<Number> = matrix.rawData;
-			var _index:int = (index - _vertexConstantOffset) * 4;
+			var _index:int = (index - _vertexConstantOffset)*4;
 			vertexConstantData[_index++] = rawData[0];
 			vertexConstantData[_index++] = rawData[4];
 			vertexConstantData[_index++] = rawData[8];
@@ -264,11 +254,12 @@ package away3d.animators.data {
 			vertexConstantData[_index++] = rawData[7];
 			vertexConstantData[_index++] = rawData[11];
 			vertexConstantData[_index] = rawData[15];
-			
+		
 		}
+		
 		public function setFragmentConst(index:int, x:Number = 0, y:Number = 0, z:Number = 0, w:Number = 0):void
 		{
-			var _index:int = (index - _fragmentConstantOffset) * 4;
+			var _index:int = (index - _fragmentConstantOffset)*4;
 			fragmentConstantData[_index++] = x;
 			fragmentConstantData[_index++] = y;
 			fragmentConstantData[_index++] = z;

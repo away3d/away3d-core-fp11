@@ -11,12 +11,12 @@ package away3d.animators.nodes
 		/**
 		 * Defines a base input node to use for the blended output.
 		 */
-		public var baseInput : AnimationNodeBase;
+		public var baseInput:AnimationNodeBase;
 		
 		/**
 		 * Defines a difference input node to use for the blended output.
 		 */
-		public var differenceInput : AnimationNodeBase;
+		public var differenceInput:AnimationNodeBase;
 		
 		/**
 		 * Creates a new <code>SkeletonAdditiveNode</code> object.

@@ -11,28 +11,28 @@ package away3d.animators.nodes
 		/**
 		 * Defines the forward configured input node to use for the blended output.
 		 */
-		public var forward : AnimationNodeBase;
+		public var forward:AnimationNodeBase;
 		
 		/**
 		 * Defines the backwards configured input node to use for the blended output.
 		 */
-		public var backward : AnimationNodeBase;
+		public var backward:AnimationNodeBase;
 		
 		/**
 		 * Defines the left configured input node to use for the blended output.
 		 */
-		public var left : AnimationNodeBase;
+		public var left:AnimationNodeBase;
 		
 		/**
 		 * Defines the right configured input node to use for the blended output.
 		 */
-		public var right : AnimationNodeBase;
+		public var right:AnimationNodeBase;
 		
 		public function SkeletonDirectionalNode()
 		{
 			_stateClass = SkeletonDirectionalState;
 		}
-				
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -40,6 +40,6 @@ package away3d.animators.nodes
 		{
 			return animator.getAnimationState(this) as SkeletonDirectionalState;
 		}
-		
+	
 	}
 }

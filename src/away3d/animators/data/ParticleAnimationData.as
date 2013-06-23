@@ -15,7 +15,6 @@ package away3d.animators.data
 		public var startVertexIndex:uint;
 		public var numVertices:uint;
 		
-		
 		public function ParticleAnimationData(index:uint, startTime:Number, duration:Number, delay:Number, particle:ParticleData)
 		{
 			this.index = index;

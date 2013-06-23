@@ -1,5 +1,6 @@
 package away3d.animators.data
 {
+	
 	/**
 	 * Options for setting the properties mode of a particle animation node.
 	 */

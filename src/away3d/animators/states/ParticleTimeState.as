@@ -8,6 +8,7 @@ package away3d.animators.states
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleTimeNode;
 	import away3d.animators.ParticleAnimator;
+	
 	import flash.display3D.Context3DVertexBufferFormat;
 	
 	use namespace arcane;
@@ -30,10 +31,10 @@ package away3d.animators.states
 		{
 			animationSubGeometry.activateVertexBuffer(animationRegisterCache.getRegisterIndex(_animationNode, ParticleTimeNode.TIME_STREAM_INDEX), _particleTimeNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 			
-			var particleTime:Number = _time / 1000;
+			var particleTime:Number = _time/1000;
 			animationRegisterCache.setVertexConst(animationRegisterCache.getRegisterIndex(_animationNode, ParticleTimeNode.TIME_CONSTANT_INDEX), particleTime, particleTime, particleTime, particleTime);
 		}
-		
+	
 	}
 
 }

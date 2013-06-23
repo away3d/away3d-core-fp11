@@ -28,12 +28,12 @@ package away3d.animators.nodes
 		public static const GLOBAL:uint = 1;
 		
 		/**
-		 * 
+		 *
 		 */
 		public static const U_AXIS:String = "x";
 		
 		/**
-		 * 
+		 *
 		 */
 		public static const V_AXIS:String = "y";
 		
@@ -63,7 +63,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * 
+		 *
 		 */
 		public function get cycle():Number
 		{
@@ -78,7 +78,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * 
+		 *
 		 */
 		public function get scale():Number
 		{
@@ -93,7 +93,7 @@ package away3d.animators.nodes
 		}
 		
 		/**
-		 * 
+		 *
 		 */
 		public function get axis():String
 		{
@@ -108,23 +108,21 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			var code:String = "";
 			
-			if (animationRegisterCache.needUVAnimation)
-			{
+			if (animationRegisterCache.needUVAnimation) {
 				var uvConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 				animationRegisterCache.setRegisterIndex(this, UV_INDEX, uvConst.index);
-
-				var axisIndex : Number = 	_axis == "x"? 	0 :
-											_axis == "y"? 	1 :
-															2;
-				var target:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, axisIndex);
-							
-				var sin:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 				
+				var axisIndex:Number = _axis == "x"? 0 :
+					_axis == "y"? 1 :
+					2;
+				var target:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, axisIndex);
+				
+				var sin:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 				
 				if (_scale != 1)
 					code += "mul " + target + "," + target + "," + uvConst + ".y\n";
@@ -147,7 +145,7 @@ package away3d.animators.nodes
 		
 		private function updateUVData():void
 		{
-			_uvData = new Vector3D(Math.PI * 2 / _cycle, _scale, 0, 0);
+			_uvData = new Vector3D(Math.PI*2/_cycle, _scale, 0, 0);
 		}
 		
 		/**

@@ -12,9 +12,9 @@ package away3d.animators.data
 	{
 		protected var _vertexData:Vector.<Number>;
 		
-		protected var _vertexBuffer : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
-		protected var _bufferContext : Vector.<Context3D> = new Vector.<Context3D>(8);
-		protected var _bufferDirty : Vector.<Boolean> = new Vector.<Boolean>(8);
+		protected var _vertexBuffer:Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8);
+		protected var _bufferContext:Vector.<Context3D> = new Vector.<Context3D>(8);
+		protected var _bufferDirty:Vector.<Boolean> = new Vector.<Boolean>(8);
 		
 		private var _numVertices:uint;
 		
@@ -36,13 +36,13 @@ package away3d.animators.data
 		{
 			_numVertices = numVertices;
 			_totalLenOfOneVertex = totalLenOfOneVertex;
-			_vertexData = new Vector.<Number>(numVertices * totalLenOfOneVertex, true);
+			_vertexData = new Vector.<Number>(numVertices*totalLenOfOneVertex, true);
 		}
 		
-		public function activateVertexBuffer(index : int, bufferOffset:int, stage3DProxy : Stage3DProxy, format:String) : void
+		public function activateVertexBuffer(index:int, bufferOffset:int, stage3DProxy:Stage3DProxy, format:String):void
 		{
-			var contextIndex : int = stage3DProxy.stage3DIndex;
-			var context : Context3D = stage3DProxy.context3D;
+			var contextIndex:int = stage3DProxy.stage3DIndex;
+			var context:Context3D = stage3DProxy.context3D;
 			
 			var buffer:VertexBuffer3D = _vertexBuffer[contextIndex];
 			if (!buffer || _bufferContext[contextIndex] != context) {
@@ -59,11 +59,10 @@ package away3d.animators.data
 		
 		public function dispose():void
 		{
-			while(_vertexBuffer.length)
-			{
+			while (_vertexBuffer.length) {
 				var vertexBuffer:VertexBuffer3D = _vertexBuffer.pop()
 				
-				if(vertexBuffer)
+				if (vertexBuffer)
 					vertexBuffer.dispose();
 			}
 		}

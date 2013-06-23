@@ -1,4 +1,5 @@
-package away3d.animators.states {
+package away3d.animators.states
+{
 	import away3d.animators.ParticleAnimator;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
@@ -8,7 +9,7 @@ package away3d.animators.states {
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
-
+	
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
@@ -63,7 +64,7 @@ package away3d.animators.states {
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			if (_particlePositionNode.mode == ParticlePropertiesMode.LOCAL_DYNAMIC && !_dynamicPropertiesDirty[animationSubGeometry])
 				updateDynamicProperties(animationSubGeometry);

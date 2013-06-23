@@ -84,8 +84,7 @@ package away3d.animators.nodes
 		public function ParticleSpriteSheetNode(mode:uint, usesCycle:Boolean, usesPhase:Boolean, numColumns:int = 1, numRows:uint = 1, cycleDuration:Number = 1, cyclePhase:Number = 0, totalFrames:uint = uint.MAX_VALUE)
 		{
 			var len:int;
-			if (usesCycle)
-			{
+			if (usesCycle) {
 				len = 2;
 				if (usesPhase)
 					len++;
@@ -101,15 +100,15 @@ package away3d.animators.nodes
 			_numRows = numRows;
 			_cyclePhase = cyclePhase;
 			_cycleDuration = cycleDuration;
-			_totalFrames = Math.min(totalFrames, numColumns * numRows);
+			_totalFrames = Math.min(totalFrames, numColumns*numRows);
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALUVCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			
 			//get 2 vc
 			var uvParamConst1:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
@@ -125,13 +124,11 @@ package away3d.animators.nodes
 			var cycle:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, 1);
 			var phaseTime:ShaderRegisterElement = new ShaderRegisterElement(uvParamConst2.regName, uvParamConst2.index, 2);
 			
-			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var time:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 0);
 			var vOffset:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 1);
 			temp = new ShaderRegisterElement(temp.regName, temp.index, 2);
 			var temp2:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 3);
-			
 			
 			var u:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, 0);
 			var v:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, 1);
@@ -139,28 +136,22 @@ package away3d.animators.nodes
 			var code:String = "";
 			//scale uv
 			code += "mul " + u + "," + u + "," + uStep + "\n";
-			if (_numRows > 1) code += "mul " + v + "," + v + "," + vStep + "\n";
+			if (_numRows > 1)
+				code += "mul " + v + "," + v + "," + vStep + "\n";
 			
-			if (_usesCycle)
-			{
+			if (_usesCycle) {
 				if (_usesPhase)
 					code += "add " + time + "," + animationRegisterCache.vertexTime + "," + phaseTime + "\n";
 				else
-					code += "mov " + time +"," + animationRegisterCache.vertexTime + "\n";
+					code += "mov " + time + "," + animationRegisterCache.vertexTime + "\n";
 				code += "div " + time + "," + time + "," + cycle + "\n";
 				code += "frc " + time + "," + time + "\n";
 				code += "mul " + time + "," + time + "," + cycle + "\n";
 				code += "mul " + temp + "," + time + "," + uSpeed + "\n";
-			}
-			else
-			{
+			} else
 				code += "mul " + temp.toString() + "," + animationRegisterCache.vertexLife + "," + uTotal + "\n";
-			}
 			
-			
-			
-			if (_numRows > 1)
-			{
+			if (_numRows > 1) {
 				code += "frc " + temp2 + "," + temp + "\n";
 				code += "sub " + vOffset + "," + temp + "," + temp2 + "\n";
 				code += "mul " + vOffset + "," + vOffset + "," + vStep + "\n";
@@ -200,15 +191,14 @@ package away3d.animators.nodes
 		 */
 		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
 		{
-			if (_usesCycle)
-			{
+			if (_usesCycle) {
 				var uvCycle:Vector3D = param[UV_VECTOR3D];
 				if (!uvCycle)
 					throw(new Error("there is no " + UV_VECTOR3D + " in param!"));
 				if (uvCycle.x <= 0)
 					throw(new Error("the cycle duration must be greater than zero"));
-				var uTotal:Number = _totalFrames / _numColumns;
-				_oneData[0] = uTotal / uvCycle.x;
+				var uTotal:Number = _totalFrames/_numColumns;
+				_oneData[0] = uTotal/uvCycle.x;
 				_oneData[1] = uvCycle.x;
 				if (_usesPhase)
 					_oneData[2] = uvCycle.y;

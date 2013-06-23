@@ -4,7 +4,7 @@ package away3d.animators.nodes
 	
 	/**
 	 * Provides an interface for animation node classes that hold animation data for use in the SpriteSheetAnimator class.
-	 * 
+	 *
 	 * @see away3d.animators.SpriteSheetAnimator
 	 */
 	public interface ISpriteSheetAnimationNode
@@ -12,12 +12,12 @@ package away3d.animators.nodes
 		/**
 		 * Returns the current SpriteSheetAnimationFrame of animation in the clip based on the internal playhead position.
 		 */
-		function get currentFrameData() : SpriteSheetAnimationFrame;
+		function get currentFrameData():SpriteSheetAnimationFrame;
 		
 		/**
 		 * Returns the current frame number.
 		 */
-		function get currentFrameNumber() : uint;
-		
+		function get currentFrameNumber():uint;
+	
 	}
 }

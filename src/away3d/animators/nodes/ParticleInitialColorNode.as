@@ -6,11 +6,11 @@ package away3d.animators.nodes
 	import away3d.animators.states.*;
 	import away3d.materials.compilation.*;
 	import away3d.materials.passes.*;
+	
 	import flash.geom.*;
 	
 	use namespace arcane;
 	
-
 	public class ParticleInitialColorNode extends ParticleNodeBase
 	{
 		/** @private */
@@ -45,26 +45,25 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			
 			var code:String = "";
-			if (animationRegisterCache.needFragmentAnimation)
-			{
+			if (animationRegisterCache.needFragmentAnimation) {
 				
 				if (_usesMultiplier) {
 					var multiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 					animationRegisterCache.setRegisterIndex(this, MULTIPLIER_INDEX, multiplierValue.index);
-
-					code += "mul " + animationRegisterCache.colorMulTarget +"," + multiplierValue + "," + animationRegisterCache.colorMulTarget + "\n";
+					
+					code += "mul " + animationRegisterCache.colorMulTarget + "," + multiplierValue + "," + animationRegisterCache.colorMulTarget + "\n";
 				}
 				
 				if (_usesOffset) {
 					var offsetValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.LOCAL_STATIC)? animationRegisterCache.getFreeVertexAttribute() : animationRegisterCache.getFreeVertexConstant();
 					animationRegisterCache.setRegisterIndex(this, OFFSET_INDEX, offsetValue.index);
 					
-					code += "add " + animationRegisterCache.colorAddTarget +"," +offsetValue + "," + animationRegisterCache.colorAddTarget + "\n";
+					code += "add " + animationRegisterCache.colorAddTarget + "," + offsetValue + "," + animationRegisterCache.colorAddTarget + "\n";
 				}
 			}
 			
@@ -102,14 +101,14 @@ package away3d.animators.nodes
 			}
 			//offset
 			if (_usesOffset) {
-				_oneData[i++] = initialColor.redOffset / 255;
-				_oneData[i++] = initialColor.greenOffset / 255;
-				_oneData[i++] = initialColor.blueOffset / 255;
-				_oneData[i++] = initialColor.alphaOffset / 255;
+				_oneData[i++] = initialColor.redOffset/255;
+				_oneData[i++] = initialColor.greenOffset/255;
+				_oneData[i++] = initialColor.blueOffset/255;
+				_oneData[i++] = initialColor.alphaOffset/255;
 			}
-			
-		}
 		
+		}
+	
 	}
 
 }

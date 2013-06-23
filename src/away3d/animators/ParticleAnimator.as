@@ -45,16 +45,14 @@ package away3d.animators
 			
 			var state:ParticleStateBase;
 			var node:ParticleNodeBase;
-			for each (node in _particleAnimationSet.particleNodes)
-			{
+			for each (node in _particleAnimationSet.particleNodes) {
 				state = getAnimationState(node) as ParticleStateBase;
 				if (node.mode == ParticlePropertiesMode.LOCAL_DYNAMIC) {
 					_animatorParticleStates.push(state);
 					node.dataOffset = _totalLenOfOneVertex;
 					_totalLenOfOneVertex += node.dataLength;
-				} else {
+				} else
 					_animationParticleStates.push(state);
-				}
 				if (state.needUpdateTime)
 					_timeParticleStates.push(state);
 			}
@@ -120,9 +118,7 @@ package away3d.animators
 		{
 			super.start();
 			for each (var state:ParticleStateBase in _timeParticleStates)
-			{
 				state.offset(_absoluteTime);
-			}
 		}
 		
 		/**
@@ -133,30 +129,24 @@ package away3d.animators
 			_absoluteTime += dt;
 			
 			for each (var state:ParticleStateBase in _timeParticleStates)
-			{
 				state.update(_absoluteTime);
-			}
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function resetTime(offset : int = 0) : void
+		public function resetTime(offset:int = 0):void
 		{
 			for each (var state:ParticleStateBase in _timeParticleStates)
-			{
 				state.offset(_absoluteTime + offset);
-			}
 			update(time);
 		}
 		
 		override public function dispose():void
 		{
 			var subGeometry:AnimationSubGeometry;
-			for each(subGeometry in _animatorSubGeometries)
-			{
+			for each (subGeometry in _animatorSubGeometries)
 				subGeometry.dispose();
-			}
 		}
 		
 		private function generateAnimatorSubGeometry(subMesh:SubMesh):void

@@ -2,7 +2,9 @@ package away3d.animators.states
 {
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
+	
 	import flash.display3D.Context3DVertexBufferFormat;
+	
 	import away3d.cameras.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
@@ -10,6 +12,7 @@ package away3d.animators.states
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleBezierCurveNode;
 	import away3d.animators.ParticleAnimator;
+	
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -58,13 +61,12 @@ package away3d.animators.states
 			_endPoint = _particleBezierCurveNode._endPoint;
 		}
 		
-		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			// TODO: not used
-			renderable=renderable;
-			camera=camera;
-
+			renderable = renderable;
+			camera = camera;
+			
 			var controlIndex:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_CONTROL_INDEX);
 			var endIndex:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleBezierCurveNode.BEZIER_END_INDEX);
 			

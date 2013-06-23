@@ -18,8 +18,8 @@ package away3d.animators.nodes
 	{
 		/** @private */
 		arcane static const MATRIX_INDEX:int = 0;
-
-        /** @private */
+		
+		/** @private */
 		arcane var _billboardAxis:Vector3D;
 		
 		/**
@@ -30,16 +30,16 @@ package away3d.animators.nodes
 			super("ParticleBillboard", ParticlePropertiesMode.GLOBAL, 0, 4);
 			
 			_stateClass = ParticleBillboardState;
-
-            _billboardAxis = billboardAxis;
+			
+			_billboardAxis = billboardAxis;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
 		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			var rotationMatrixRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, MATRIX_INDEX, rotationMatrixRegister.index);
 			animationRegisterCache.getFreeVertexConstant();

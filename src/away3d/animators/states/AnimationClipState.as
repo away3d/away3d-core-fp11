@@ -5,28 +5,28 @@ package away3d.animators.states
 	import away3d.events.*;
 	
 	/**
-	 * 
+	 *
 	 */
 	public class AnimationClipState extends AnimationStateBase
 	{
 		private var _animationClipNode:AnimationClipNodeBase;
 		private var _animationStatePlaybackComplete:AnimationStateEvent;
 		protected var _blendWeight:Number;
-		protected var _currentFrame : uint;
-		protected var _nextFrame : uint;
+		protected var _currentFrame:uint;
+		protected var _nextFrame:uint;
 		
-		protected var _oldFrame : uint;
-		protected var _timeDir : int;
-		protected var _framesDirty : Boolean = true;
+		protected var _oldFrame:uint;
+		protected var _timeDir:int;
+		protected var _framesDirty:Boolean = true;
 		
 		/**
 		 * Returns a fractional value between 0 and 1 representing the blending ratio of the current playhead position
 		 * between the current frame (0) and next frame (1) of the animation.
-		 * 
+		 *
 		 * @see #currentFrame
 		 * @see #nextFrame
 		 */
-		public function get blendWeight() : Number
+		public function get blendWeight():Number
 		{
 			if (_framesDirty)
 				updateFrames();
@@ -37,7 +37,7 @@ package away3d.animators.states
 		/**
 		 * Returns the current frame of animation in the clip based on the internal playhead position.
 		 */
-		public function get currentFrame() : uint
+		public function get currentFrame():uint
 		{
 			if (_framesDirty)
 				updateFrames();
@@ -48,7 +48,7 @@ package away3d.animators.states
 		/**
 		 * Returns the next frame of animation in the clip based on the internal playhead position.
 		 */
-		public function get nextFrame() : uint
+		public function get nextFrame():uint
 		{
 			if (_framesDirty)
 				updateFrames();
@@ -65,7 +65,7 @@ package away3d.animators.states
 		
 		/**
 		 * @inheritDoc
-		 */		
+		 */
 		override public function update(time:int):void
 		{
 			if (!_animationClipNode.looping) {
@@ -97,7 +97,7 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateTime(time : int) : void
+		override protected function updateTime(time:int):void
 		{
 			_framesDirty = true;
 			
@@ -108,24 +108,25 @@ package away3d.animators.states
 		
 		/**
 		 * Updates the nodes internal playhead to determine the current and next animation frame, and the blendWeight between the two.
-		 * 
+		 *
 		 * @see #currentFrame
 		 * @see #nextFrame
 		 * @see #blendWeight
 		 */
-		protected function updateFrames() : void
+		protected function updateFrames():void
 		{
 			_framesDirty = false;
 			
-			var looping : Boolean = _animationClipNode.looping;
-			var totalDuration : uint = _animationClipNode.totalDuration;
-			var lastFrame : uint = _animationClipNode.lastFrame;
-			var time : int = _time;
+			var looping:Boolean = _animationClipNode.looping;
+			var totalDuration:uint = _animationClipNode.totalDuration;
+			var lastFrame:uint = _animationClipNode.lastFrame;
+			var time:int = _time;
 			
 			//trace("time", time, totalDuration)
 			if (looping && (time >= totalDuration || time < 0)) {
 				time %= totalDuration;
-				if (time < 0) time += totalDuration;
+				if (time < 0)
+					time += totalDuration;
 			}
 			
 			if (!looping && time >= totalDuration) {
@@ -133,24 +134,21 @@ package away3d.animators.states
 				_currentFrame = lastFrame;
 				_nextFrame = lastFrame;
 				_blendWeight = 0;
-			}
-			else if (!looping && time <= 0) {
+			} else if (!looping && time <= 0) {
 				_currentFrame = 0;
 				_nextFrame = 0;
 				_blendWeight = 0;
-			}
-			else if (_animationClipNode.fixedFrameRate) {
-				var t : Number = time/totalDuration * lastFrame;
+			} else if (_animationClipNode.fixedFrameRate) {
+				var t:Number = time/totalDuration*lastFrame;
 				_currentFrame = t;
 				_blendWeight = t - _currentFrame;
 				_nextFrame = _currentFrame + 1;
-			}
-			else {
+			} else {
 				_currentFrame = 0;
 				_nextFrame = 0;
 				
-				var dur : uint = 0, frameTime : uint;
-				var durations : Vector.<uint> = _animationClipNode.durations;
+				var dur:uint = 0, frameTime:uint;
+				var durations:Vector.<uint> = _animationClipNode.durations;
 				
 				do {
 					frameTime = dur;
@@ -163,7 +161,7 @@ package away3d.animators.states
 					_nextFrame = 1;
 				}
 				
-				_blendWeight = (time - frameTime) / durations[_currentFrame];
+				_blendWeight = (time - frameTime)/durations[_currentFrame];
 			}
 		}
 		

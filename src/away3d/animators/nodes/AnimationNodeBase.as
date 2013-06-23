@@ -31,7 +31,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType() : String
+		public function get assetType():String
 		{
 			return AssetType.ANIMATION_NODE;
 		}

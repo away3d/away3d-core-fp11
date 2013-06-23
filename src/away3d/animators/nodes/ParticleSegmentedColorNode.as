@@ -8,9 +8,11 @@ package away3d.animators.nodes
 	import away3d.animators.states.ParticleSegmentedColorState;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.passes.MaterialPassBase;
+	
 	import flash.geom.ColorTransform;
-
+	
 	use namespace arcane;
+	
 	public class ParticleSegmentedColorNode extends ParticleNodeBase
 	{
 		/** @private */
@@ -21,7 +23,7 @@ package away3d.animators.nodes
 		
 		/** @private */
 		arcane static const TIME_DATA_INDEX:uint = 2;
-
+		
 		/** @private */
 		arcane var _usesMultiplier:Boolean;
 		/** @private */
@@ -66,17 +68,15 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			
 			var code:String = "";
-			if (animationRegisterCache.needFragmentAnimation)
-			{
+			if (animationRegisterCache.needFragmentAnimation) {
 				var accMultiplierColor:ShaderRegisterElement;
 				//var accOffsetColor:ShaderRegisterElement;
-				if (_usesMultiplier)
-				{
+				if (_usesMultiplier) {
 					accMultiplierColor = animationRegisterCache.getFreeVertexVectorTemp();
 					animationRegisterCache.addVertexTempUsages(accMultiplierColor, 1);
 				}
@@ -86,11 +86,11 @@ package away3d.animators.nodes
 				
 				var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				var accTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 0);
-				var tempTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName,temp.index, 1);
+				var tempTime:ShaderRegisterElement = new ShaderRegisterElement(temp.regName, temp.index, 1);
 				
 				if (_usesMultiplier)
 					animationRegisterCache.removeVertexTempUsage(accMultiplierColor);
-					
+				
 				animationRegisterCache.removeVertexTempUsage(tempColor);
 				
 				//for saving all the life values (at most 4)
@@ -101,40 +101,31 @@ package away3d.animators.nodes
 				
 				var startMulValue:ShaderRegisterElement;
 				var deltaMulValues:Vector.<ShaderRegisterElement>;
-				if (_usesMultiplier)
-				{
+				if (_usesMultiplier) {
 					startMulValue = animationRegisterCache.getFreeVertexConstant();
 					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMulValue.index);
 					deltaMulValues = new Vector.<ShaderRegisterElement>;
 					for (i = 0; i < _numSegmentPoint + 1; i++)
-					{
 						deltaMulValues.push(animationRegisterCache.getFreeVertexConstant());
-					}
 				}
 				
 				var startOffsetValue:ShaderRegisterElement;
 				var deltaOffsetValues:Vector.<ShaderRegisterElement>;
-				if (_usesOffset)
-				{
+				if (_usesOffset) {
 					startOffsetValue = animationRegisterCache.getFreeVertexConstant();
 					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetValue.index);
 					deltaOffsetValues = new Vector.<ShaderRegisterElement>;
 					for (i = 0; i < _numSegmentPoint + 1; i++)
-					{
 						deltaOffsetValues.push(animationRegisterCache.getFreeVertexConstant());
-					}
 				}
-				
 				
 				if (_usesMultiplier)
 					code += "mov " + accMultiplierColor + "," + startMulValue + "\n";
 				if (_usesOffset)
-					code += "add " + animationRegisterCache.colorAddTarget + "," +animationRegisterCache.colorAddTarget + "," + startOffsetValue + "\n";
+					code += "add " + animationRegisterCache.colorAddTarget + "," + animationRegisterCache.colorAddTarget + "," + startOffsetValue + "\n";
 				
-				for (i = 0; i < _numSegmentPoint; i++)
-				{
-					switch(i)
-					{
+				for (i = 0; i < _numSegmentPoint; i++) {
+					switch (i) {
 						case 0:
 							code += "min " + tempTime + "," + animationRegisterCache.vertexLife + "," + lifeTimeRegister + ".x\n";
 							break;
@@ -154,13 +145,11 @@ package away3d.animators.nodes
 							code += "min " + tempTime + "," + tempTime + "," + lifeTimeRegister + ".w\n";
 							break;
 					}
-					if (_usesMultiplier)
-					{
+					if (_usesMultiplier) {
 						code += "mul " + tempColor + "," + tempTime + "," + deltaMulValues[i] + "\n";
 						code += "add " + accMultiplierColor + "," + accMultiplierColor + "," + tempColor + "\n";
 					}
-					if (_usesOffset)
-					{
+					if (_usesOffset) {
 						code += "mul " + tempColor + "," + tempTime + "," + deltaOffsetValues[i] + "\n";
 						code += "add " + animationRegisterCache.colorAddTarget + "," + animationRegisterCache.colorAddTarget + "," + tempColor + "\n";
 					}
@@ -169,10 +158,8 @@ package away3d.animators.nodes
 				//for the last segment:
 				if (_numSegmentPoint == 0)
 					tempTime = animationRegisterCache.vertexLife;
-				else
-				{
-					switch(_numSegmentPoint)
-					{
+				else {
+					switch (_numSegmentPoint) {
 						case 1:
 							code += "sub " + accTime + "," + animationRegisterCache.vertexLife + "," + lifeTimeRegister + ".x\n";
 							break;
@@ -188,14 +175,12 @@ package away3d.animators.nodes
 					}
 					code += "max " + tempTime + "," + accTime + "," + animationRegisterCache.vertexZeroConst + "\n";
 				}
-				if (_usesMultiplier)
-				{
+				if (_usesMultiplier) {
 					code += "mul " + tempColor + "," + tempTime + "," + deltaMulValues[_numSegmentPoint] + "\n";
 					code += "add " + accMultiplierColor + "," + accMultiplierColor + "," + tempColor + "\n";
 					code += "mul " + animationRegisterCache.colorMulTarget + "," + animationRegisterCache.colorMulTarget + "," + accMultiplierColor + "\n";
 				}
-				if (_usesOffset)
-				{
+				if (_usesOffset) {
 					code += "mul " + tempColor + "," + tempTime + "," + deltaOffsetValues[_numSegmentPoint] + "\n";
 					code += "add " + animationRegisterCache.colorAddTarget + "," + animationRegisterCache.colorAddTarget + "," + tempColor + "\n";
 				}
@@ -203,7 +188,7 @@ package away3d.animators.nodes
 			}
 			return code;
 		}
-		
+	
 	}
 
 }

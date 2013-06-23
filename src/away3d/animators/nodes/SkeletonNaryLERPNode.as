@@ -12,9 +12,9 @@ package away3d.animators.nodes
 	public class SkeletonNaryLERPNode extends AnimationNodeBase
 	{
 		arcane var _inputs:Vector.<AnimationNodeBase> = new Vector.<AnimationNodeBase>();
-		private var _numInputs : uint;
+		private var _numInputs:uint;
 		
-		public function get numInputs() : uint
+		public function get numInputs():uint
 		{
 			return _numInputs;
 		}
@@ -29,20 +29,20 @@ package away3d.animators.nodes
 		
 		/**
 		 * Returns an integer representing the input index of the given skeleton animation node.
-		 * 
+		 *
 		 * @param input The skeleton animation node for with the input index is requested.
 		 */
-		public function getInputIndex(input : AnimationNodeBase) : int
+		public function getInputIndex(input:AnimationNodeBase):int
 		{
 			return _inputs.indexOf(input);
 		}
 		
 		/**
 		 * Returns the skeleton animation node object that resides at the given input index.
-		 * 
+		 *
 		 * @param index The input index for which the skeleton animation node is requested.
 		 */
-		public function getInputAt(index : uint) : AnimationNodeBase
+		public function getInputAt(index:uint):AnimationNodeBase
 		{
 			return _inputs[index];
 		}
@@ -50,7 +50,7 @@ package away3d.animators.nodes
 		/**
 		 * Adds a new skeleton animation node input to the animation node.
 		 */
-		public function addInput(input : AnimationNodeBase) : void
+		public function addInput(input:AnimationNodeBase):void
 		{
 			_inputs[_numInputs++] = input;
 		}

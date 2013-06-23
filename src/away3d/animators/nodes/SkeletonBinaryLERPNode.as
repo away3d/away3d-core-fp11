@@ -11,12 +11,12 @@ package away3d.animators.nodes
 		/**
 		 * Defines input node A to use for the blended output.
 		 */
-		public var inputA : AnimationNodeBase;
+		public var inputA:AnimationNodeBase;
 		
 		/**
 		 * Defines input node B to use for the blended output.
 		 */
-		public var inputB : AnimationNodeBase;
+		public var inputB:AnimationNodeBase;
 		
 		/**
 		 * Creates a new <code>SkeletonBinaryLERPNode</code> object.

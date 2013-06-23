@@ -27,7 +27,7 @@ package away3d.animators.nodes
 		 * Expects a <code>Vector3D</code> object representing the axis (x,y,z) and cycle speed (w) of the motion on the particle.
 		 */
 		public static const OSCILLATOR_VECTOR3D:String = "OscillatorVector3D";
-				
+		
 		/**
 		 * Creates a new <code>ParticleOscillatorNode</code>
 		 *
@@ -46,9 +46,9 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			var oscillatorRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, OSCILLATOR_INDEX, oscillatorRegister.index);
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
@@ -64,10 +64,10 @@ package away3d.animators.nodes
 			code += "mul " + dgree + "," + animationRegisterCache.vertexTime + "," + oscillatorRegister + ".w\n";
 			code += "sin " + sin + "," + dgree + "\n";
 			code += "mul " + distance + ".xyz," + sin + "," + oscillatorRegister + ".xyz\n";
-			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
+			code += "add " + animationRegisterCache.positionTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 			
-			if (animationRegisterCache.needVelocity)
-			{	code += "cos " + cos + "," + dgree + "\n";
+			if (animationRegisterCache.needVelocity) {
+				code += "cos " + cos + "," + dgree + "\n";
 				code += "mul " + distance + ".xyz," + cos + "," + oscillatorRegister + ".xyz\n";
 				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";
 			}
@@ -98,7 +98,7 @@ package away3d.animators.nodes
 			_oneData[2] = drift.z;
 			if (drift.w <= 0)
 				throw(new Error("the cycle duration must greater than zero"));
-			_oneData[3] = Math.PI * 2 / drift.w;
+			_oneData[3] = Math.PI*2/drift.w;
 		}
 	}
 }

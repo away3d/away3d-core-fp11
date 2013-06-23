@@ -80,9 +80,9 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			
 			var orbitRegister:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, ORBIT_INDEX, orbitRegister.index);
@@ -94,9 +94,8 @@ package away3d.animators.nodes
 			animationRegisterCache.getFreeVertexConstant();
 			
 			var temp1:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			animationRegisterCache.addVertexTempUsages(temp1,1);
+			animationRegisterCache.addVertexTempUsages(temp1, 1);
 			var distance:ShaderRegisterElement = new ShaderRegisterElement(temp1.regName, temp1.index);
-			
 			
 			var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var cos:ShaderRegisterElement = new ShaderRegisterElement(temp2.regName, temp2.index, 0);
@@ -111,31 +110,29 @@ package away3d.animators.nodes
 				
 				if (_usesPhase)
 					code += "add " + degree + "," + degree + "," + orbitRegister + ".w\n";
-			} else {
+			} else
 				code += "mul " + degree + "," + animationRegisterCache.vertexLife + "," + orbitRegister + ".y\n";
-			}
 			
-			code += "cos " + cos +"," + degree + "\n";
-			code += "sin " + sin +"," + degree + "\n";
-			code += "mul " + distance +".x," + cos +"," + orbitRegister + ".x\n";
-			code += "mul " + distance +".y," + sin +"," + orbitRegister + ".x\n";
+			code += "cos " + cos + "," + degree + "\n";
+			code += "sin " + sin + "," + degree + "\n";
+			code += "mul " + distance + ".x," + cos + "," + orbitRegister + ".x\n";
+			code += "mul " + distance + ".y," + sin + "," + orbitRegister + ".x\n";
 			code += "mov " + distance + ".wz" + animationRegisterCache.vertexZeroConst + "\n";
-			if(_usesEulers)
-				code += "m44 " + distance + "," + distance + "," +eulersMatrixRegister + "\n";
+			if (_usesEulers)
+				code += "m44 " + distance + "," + distance + "," + eulersMatrixRegister + "\n";
 			code += "add " + animationRegisterCache.positionTarget + ".xyz," + distance + ".xyz," + animationRegisterCache.positionTarget + ".xyz\n";
 			
-			if (animationRegisterCache.needVelocity)
-			{
+			if (animationRegisterCache.needVelocity) {
 				code += "neg " + distance + ".x," + sin + "\n";
 				code += "mov " + distance + ".y," + cos + "\n";
 				code += "mov " + distance + ".zw," + animationRegisterCache.vertexZeroConst + "\n";
-				if(_usesEulers)
+				if (_usesEulers)
 					code += "m44 " + distance + "," + distance + "," + eulersMatrixRegister + "\n";
 				code += "mul " + distance + "," + distance + "," + orbitRegister + ".z\n";
 				code += "div " + distance + "," + distance + "," + orbitRegister + ".y\n";
 				if (!_usesCycle)
 					code += "div " + distance + "," + distance + "," + animationRegisterCache.vertexLife + "\n";
-				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + animationRegisterCache.velocityTarget + ".xyz," +distance + ".xyz\n";
+				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + animationRegisterCache.velocityTarget + ".xyz," + distance + ".xyz\n";
 			}
 			return code;
 		}
@@ -157,14 +154,14 @@ package away3d.animators.nodes
 			var orbit:Vector3D = param[ORBIT_VECTOR3D];
 			if (!orbit)
 				throw new Error("there is no " + ORBIT_VECTOR3D + " in param!");
-				
+			
 			_oneData[0] = orbit.x;
 			if (_usesCycle && orbit.y <= 0)
 				throw(new Error("the cycle duration must be greater than zero"));
-			_oneData[1] = Math.PI * 2 / (!_usesCycle? 1 : orbit.y);
-			_oneData[2] = orbit.x * Math.PI * 2;
+			_oneData[1] = Math.PI*2/(!_usesCycle? 1 : orbit.y);
+			_oneData[2] = orbit.x*Math.PI*2;
 			if (_usesPhase)
-				_oneData[3] = orbit.z * Math.PI / 180;
+				_oneData[3] = orbit.z*Math.PI/180;
 		}
 	}
 }

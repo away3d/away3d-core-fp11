@@ -9,7 +9,6 @@ package away3d.animators.nodes
 	import away3d.materials.compilation.*;
 	import away3d.materials.passes.*;
 	
-	
 	use namespace arcane;
 	
 	/**
@@ -20,14 +19,11 @@ package away3d.animators.nodes
 		/** @private */
 		arcane static const START_MULTIPLIER_INDEX:uint = 0;
 		
-		
 		/** @private */
 		arcane static const DELTA_MULTIPLIER_INDEX:uint = 1;
 		
-		
 		/** @private */
 		arcane static const START_OFFSET_INDEX:uint = 2;
-		
 		
 		/** @private */
 		arcane static const DELTA_OFFSET_INDEX:uint = 3;
@@ -52,19 +48,19 @@ package away3d.animators.nodes
 		arcane var _cycleDuration:Number;
 		/** @private */
 		arcane var _cyclePhase:Number;
-				
+		
 		/**
 		 * Reference for color node properties on a single particle (when in local property mode).
 		 * Expects a <code>ColorTransform</code> object representing the start color transform applied to the particle.
 		 */
 		public static const COLOR_START_COLORTRANSFORM:String = "ColorStartColorTransform";
-				
+		
 		/**
 		 * Reference for color node properties on a single particle (when in local property mode).
 		 * Expects a <code>ColorTransform</code> object representing the end color transform applied to the particle.
 		 */
 		public static const COLOR_END_COLORTRANSFORM:String = "ColorEndColorTransform";
-				
+		
 		/**
 		 * Creates a new <code>ParticleColorNode</code>
 		 *
@@ -98,19 +94,18 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			var code:String = "";
-			if (animationRegisterCache.needFragmentAnimation)
-			{
+			if (animationRegisterCache.needFragmentAnimation) {
 				var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				
 				if (_usesCycle) {
 					var cycleConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 					animationRegisterCache.setRegisterIndex(this, CYCLE_INDEX, cycleConst.index);
 					
-					animationRegisterCache.addVertexTempUsages(temp,1);
+					animationRegisterCache.addVertexTempUsages(temp, 1);
 					var sin:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 					animationRegisterCache.removeVertexTempUsage(temp);
 					
@@ -125,13 +120,13 @@ package away3d.animators.nodes
 				if (_usesMultiplier) {
 					var startMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 					var deltaMultiplierValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
-
+					
 					animationRegisterCache.setRegisterIndex(this, START_MULTIPLIER_INDEX, startMultiplierValue.index);
 					animationRegisterCache.setRegisterIndex(this, DELTA_MULTIPLIER_INDEX, deltaMultiplierValue.index);
-
+					
 					code += "mul " + temp + "," + deltaMultiplierValue + "," + (_usesCycle? sin : animationRegisterCache.vertexLife) + "\n";
 					code += "add " + temp + "," + temp + "," + startMultiplierValue + "\n";
-					code += "mul " + animationRegisterCache.colorMulTarget +"," + temp + "," + animationRegisterCache.colorMulTarget + "\n";
+					code += "mul " + animationRegisterCache.colorMulTarget + "," + temp + "," + animationRegisterCache.colorMulTarget + "\n";
 				}
 				
 				if (_usesOffset) {
@@ -141,9 +136,9 @@ package away3d.animators.nodes
 					animationRegisterCache.setRegisterIndex(this, START_OFFSET_INDEX, startOffsetValue.index);
 					animationRegisterCache.setRegisterIndex(this, DELTA_OFFSET_INDEX, deltaOffsetValue.index);
 					
-					code += "mul " + temp + "," + deltaOffsetValue +"," + (_usesCycle? sin : animationRegisterCache.vertexLife) + "\n";
-					code += "add " + temp + "," + temp +"," + startOffsetValue + "\n";
-					code += "add " + animationRegisterCache.colorAddTarget +"," +temp + "," + animationRegisterCache.colorAddTarget + "\n";
+					code += "mul " + temp + "," + deltaOffsetValue + "," + (_usesCycle? sin : animationRegisterCache.vertexLife) + "\n";
+					code += "add " + temp + "," + temp + "," + startOffsetValue + "\n";
+					code += "add " + animationRegisterCache.colorAddTarget + "," + temp + "," + animationRegisterCache.colorAddTarget + "\n";
 				}
 			}
 			
@@ -199,41 +194,41 @@ package away3d.animators.nodes
 				
 				//offset
 				if (_usesOffset) {
-					_oneData[i++] = startColor.redOffset / 255;
-					_oneData[i++] = startColor.greenOffset / 255;
-					_oneData[i++] = startColor.blueOffset / 255;
-					_oneData[i++] = startColor.alphaOffset / 255;
-					_oneData[i++] = (endColor.redOffset - startColor.redOffset) / 255;
-					_oneData[i++] = (endColor.greenOffset - startColor.greenOffset) / 255;
-					_oneData[i++] = (endColor.blueOffset - startColor.blueOffset) / 255;
-					_oneData[i++] = (endColor.alphaOffset - startColor.alphaOffset) / 255;
+					_oneData[i++] = startColor.redOffset/255;
+					_oneData[i++] = startColor.greenOffset/255;
+					_oneData[i++] = startColor.blueOffset/255;
+					_oneData[i++] = startColor.alphaOffset/255;
+					_oneData[i++] = (endColor.redOffset - startColor.redOffset)/255;
+					_oneData[i++] = (endColor.greenOffset - startColor.greenOffset)/255;
+					_oneData[i++] = (endColor.blueOffset - startColor.blueOffset)/255;
+					_oneData[i++] = (endColor.alphaOffset - startColor.alphaOffset)/255;
 				}
 			} else {
 				//multiplier
 				if (_usesMultiplier) {
-					_oneData[i++] = (startColor.redMultiplier + endColor.redMultiplier) / 2;
-					_oneData[i++] = (startColor.greenMultiplier + endColor.greenMultiplier) / 2;
-					_oneData[i++] = (startColor.blueMultiplier + endColor.blueMultiplier) / 2;
-					_oneData[i++] = (startColor.alphaMultiplier + endColor.alphaMultiplier) / 2;
-					_oneData[i++] = (startColor.redMultiplier - endColor.redMultiplier) / 2;
-					_oneData[i++] = (startColor.greenMultiplier - endColor.greenMultiplier) / 2;
-					_oneData[i++] = (startColor.blueMultiplier - endColor.blueMultiplier) / 2;
-					_oneData[i++] = (startColor.alphaMultiplier - endColor.alphaMultiplier) / 2;
+					_oneData[i++] = (startColor.redMultiplier + endColor.redMultiplier)/2;
+					_oneData[i++] = (startColor.greenMultiplier + endColor.greenMultiplier)/2;
+					_oneData[i++] = (startColor.blueMultiplier + endColor.blueMultiplier)/2;
+					_oneData[i++] = (startColor.alphaMultiplier + endColor.alphaMultiplier)/2;
+					_oneData[i++] = (startColor.redMultiplier - endColor.redMultiplier)/2;
+					_oneData[i++] = (startColor.greenMultiplier - endColor.greenMultiplier)/2;
+					_oneData[i++] = (startColor.blueMultiplier - endColor.blueMultiplier)/2;
+					_oneData[i++] = (startColor.alphaMultiplier - endColor.alphaMultiplier)/2;
 				}
 				
 				//offset
 				if (_usesOffset) {
-					_oneData[i++] = (startColor.redOffset + endColor.redOffset) / (255 * 2);
-					_oneData[i++] = (startColor.greenOffset + endColor.greenOffset) / (255 * 2);
-					_oneData[i++] = (startColor.blueOffset + endColor.blueOffset) / (255 * 2);
-					_oneData[i++] = (startColor.alphaOffset + endColor.alphaOffset) / (255 * 2);
-					_oneData[i++] = (startColor.redOffset - endColor.redOffset) / (255 * 2);
-					_oneData[i++] = (startColor.greenOffset - endColor.greenOffset) / (255 * 2);
-					_oneData[i++] = (startColor.blueOffset - endColor.blueOffset) / (255 * 2);
-					_oneData[i++] = (startColor.alphaOffset - endColor.alphaOffset) / (255 * 2);
+					_oneData[i++] = (startColor.redOffset + endColor.redOffset)/(255*2);
+					_oneData[i++] = (startColor.greenOffset + endColor.greenOffset)/(255*2);
+					_oneData[i++] = (startColor.blueOffset + endColor.blueOffset)/(255*2);
+					_oneData[i++] = (startColor.alphaOffset + endColor.alphaOffset)/(255*2);
+					_oneData[i++] = (startColor.redOffset - endColor.redOffset)/(255*2);
+					_oneData[i++] = (startColor.greenOffset - endColor.greenOffset)/(255*2);
+					_oneData[i++] = (startColor.blueOffset - endColor.blueOffset)/(255*2);
+					_oneData[i++] = (startColor.alphaOffset - endColor.alphaOffset)/(255*2);
 				}
 			}
-			
+		
 		}
 	}
 }

@@ -1,8 +1,11 @@
 package away3d.animators.states
 {
 	import flash.geom.Matrix3D;
+	
 	import away3d.animators.data.ParticlePropertiesMode;
+	
 	import flash.geom.Vector3D;
+	
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -11,6 +14,7 @@ package away3d.animators.states
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleOrbitNode;
 	import away3d.animators.ParticleAnimator;
+	
 	import flash.display3D.Context3DVertexBufferFormat;
 	
 	use namespace arcane;
@@ -38,6 +42,7 @@ package away3d.animators.states
 		{
 			return _radius;
 		}
+		
 		public function set radius(value:Number):void
 		{
 			_radius = value;
@@ -52,6 +57,7 @@ package away3d.animators.states
 		{
 			return _cycleDuration;
 		}
+		
 		public function set cycleDuration(value:Number):void
 		{
 			_cycleDuration = value;
@@ -66,6 +72,7 @@ package away3d.animators.states
 		{
 			return _cyclePhase;
 		}
+		
 		public function set cyclePhase(value:Number):void
 		{
 			_cyclePhase = value;
@@ -86,7 +93,7 @@ package away3d.animators.states
 			_eulers = value;
 			
 			updateOrbitData();
-			
+		
 		}
 		
 		public function ParticleOrbitState(animator:ParticleAnimator, particleOrbitNode:ParticleOrbitNode)
@@ -104,42 +111,38 @@ package away3d.animators.states
 			updateOrbitData();
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOrbitNode.ORBIT_INDEX);
 			
 			if (_particleOrbitNode.mode == ParticlePropertiesMode.LOCAL_STATIC) {
-				if(_usesPhase)
+				if (_usesPhase)
 					animationSubGeometry.activateVertexBuffer(index, _particleOrbitNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_4);
 				else
 					animationSubGeometry.activateVertexBuffer(index, _particleOrbitNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-			} else {
+			} else
 				animationRegisterCache.setVertexConst(index, _orbitData.x, _orbitData.y, _orbitData.z, _orbitData.w);
-			}
 			
-			if(_usesEulers)
+			if (_usesEulers)
 				animationRegisterCache.setVertexConstFromMatrix(animationRegisterCache.getRegisterIndex(_animationNode, ParticleOrbitNode.EULERS_INDEX), _eulersMatrix);
 		}
 		
 		private function updateOrbitData():void
 		{
 			if (_usesEulers) {
-					_eulersMatrix = new Matrix3D();
-					_eulersMatrix.appendRotation(_eulers.x, Vector3D.X_AXIS);
-					_eulersMatrix.appendRotation(_eulers.y, Vector3D.Y_AXIS);
-					_eulersMatrix.appendRotation(_eulers.z, Vector3D.Z_AXIS);
+				_eulersMatrix = new Matrix3D();
+				_eulersMatrix.appendRotation(_eulers.x, Vector3D.X_AXIS);
+				_eulersMatrix.appendRotation(_eulers.y, Vector3D.Y_AXIS);
+				_eulersMatrix.appendRotation(_eulers.z, Vector3D.Z_AXIS);
 			}
-			if (_particleOrbitNode.mode == ParticlePropertiesMode.GLOBAL)
-			{
-				_orbitData = new Vector3D(_radius, 0, _radius * Math.PI * 2, _cyclePhase * Math.PI / 180);
-				if (_usesCycle)
-				{
+			if (_particleOrbitNode.mode == ParticlePropertiesMode.GLOBAL) {
+				_orbitData = new Vector3D(_radius, 0, _radius*Math.PI*2, _cyclePhase*Math.PI/180);
+				if (_usesCycle) {
 					if (_cycleDuration <= 0)
 						throw(new Error("the cycle duration must be greater than zero"));
-					_orbitData.y = Math.PI * 2 / _cycleDuration;
-				}
-				else
-					_orbitData.y = Math.PI * 2;
+					_orbitData.y = Math.PI*2/_cycleDuration;
+				} else
+					_orbitData.y = Math.PI*2;
 			}
 		}
 	}

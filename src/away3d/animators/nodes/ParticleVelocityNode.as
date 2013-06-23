@@ -46,16 +46,16 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			var velocityValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, VELOCITY_INDEX, velocityValue.index);
-
+			
 			var distance:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 			var code:String = "";
 			code += "mul " + distance + "," + animationRegisterCache.vertexTime + "," + velocityValue + "\n";
-			code += "add " + animationRegisterCache.positionTarget +".xyz," + distance + "," + animationRegisterCache.positionTarget + ".xyz\n";
+			code += "add " + animationRegisterCache.positionTarget + ".xyz," + distance + "," + animationRegisterCache.positionTarget + ".xyz\n";
 			
 			if (animationRegisterCache.needVelocity)
 				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + velocityValue + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";

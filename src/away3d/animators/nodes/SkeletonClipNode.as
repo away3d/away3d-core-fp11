@@ -3,15 +3,15 @@ package away3d.animators.nodes
 	import away3d.animators.*;
 	import away3d.animators.data.*;
 	import away3d.animators.states.*;
+	
 	import flash.geom.*;
 	
-
 	/**
 	 * A skeleton animation node containing time-based animation data as individual skeleton poses.
 	 */
 	public class SkeletonClipNode extends AnimationClipNodeBase
 	{
-		private var _frames : Vector.<SkeletonPose> = new Vector.<SkeletonPose>();
+		private var _frames:Vector.<SkeletonPose> = new Vector.<SkeletonPose>();
 		
 		/**
 		 * Determines whether to use SLERP equations (true) or LERP equations (false) in the calculation
@@ -37,11 +37,11 @@ package away3d.animators.nodes
 		
 		/**
 		 * Adds a skeleton pose frame to the internal timeline of the animation node.
-		 * 
+		 *
 		 * @param skeletonPose The skeleton pose object to add to the timeline of the node.
 		 * @param duration The specified duration of the frame in milliseconds.
 		 */
-		public function addFrame(skeletonPose : SkeletonPose, duration : uint) : void
+		public function addFrame(skeletonPose:SkeletonPose, duration:uint):void
 		{
 			_frames.push(skeletonPose);
 			_durations.push(duration);
@@ -67,11 +67,11 @@ package away3d.animators.nodes
 			super.updateStitch();
 			
 			var i:uint = _numFrames - 1;
-			var p1 : Vector3D, p2 : Vector3D, delta : Vector3D;
+			var p1:Vector3D, p2:Vector3D, delta:Vector3D;
 			while (i--) {
 				_totalDuration += _durations[i];
 				p1 = _frames[i].jointPoses[0].translation;
-				p2 = _frames[i+1].jointPoses[0].translation;
+				p2 = _frames[i + 1].jointPoses[0].translation;
 				delta = p2.subtract(p1);
 				_totalDelta.x += delta.x;
 				_totalDelta.y += delta.y;

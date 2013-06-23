@@ -9,6 +9,7 @@ package away3d.animators.states
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleOscillatorNode;
 	import away3d.animators.ParticleAnimator;
+	
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 	
@@ -51,7 +52,7 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOscillatorNode.OSCILLATOR_INDEX);
 			
@@ -63,15 +64,14 @@ package away3d.animators.states
 		
 		private function updateOscillatorData():void
 		{
-			if (_particleOscillatorNode.mode == ParticlePropertiesMode.GLOBAL)
-			{
+			if (_particleOscillatorNode.mode == ParticlePropertiesMode.GLOBAL) {
 				if (_oscillator.w <= 0)
 					throw(new Error("the cycle duration must greater than zero"));
 				_oscillatorData ||= new Vector3D;
 				_oscillatorData.x = _oscillator.x;
 				_oscillatorData.y = _oscillator.y;
 				_oscillatorData.z = _oscillator.z;
-				_oscillatorData.w = Math.PI * 2 / _oscillator.w;
+				_oscillatorData.w = Math.PI*2/_oscillator.w;
 			}
 		}
 	}

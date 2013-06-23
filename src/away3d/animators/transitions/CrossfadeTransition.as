@@ -3,7 +3,6 @@ package away3d.animators.transitions
 	import away3d.animators.*;
 	import away3d.animators.nodes.*;
 	
-	
 	public class CrossfadeTransition implements IAnimationTransition
 	{
 		public var blendSpeed:Number = 0.5;

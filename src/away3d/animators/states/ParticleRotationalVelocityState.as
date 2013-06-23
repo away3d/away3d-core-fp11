@@ -1,6 +1,7 @@
 package away3d.animators.states
 {
 	import flash.utils.Dictionary;
+	
 	import away3d.animators.data.ParticlePropertiesMode;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
@@ -10,6 +11,7 @@ package away3d.animators.states
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleRotationalVelocityNode;
 	import away3d.animators.ParticleAnimator;
+	
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.geom.Vector3D;
 	
@@ -67,12 +69,12 @@ package away3d.animators.states
 		/**
 		 * @inheritDoc
 		 */
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			// TODO: not used
-			renderable=renderable;
-			camera=camera;
-
+			renderable = renderable;
+			camera = camera;
+			
 			if (_particleRotationalVelocityNode.mode == ParticlePropertiesMode.LOCAL_DYNAMIC && !_dynamicPropertiesDirty[animationSubGeometry])
 				updateDynamicProperties(animationSubGeometry);
 			
@@ -92,11 +94,11 @@ package away3d.animators.states
 				var rotation:Vector3D = _rotationalVelocity.clone();
 				
 				if (rotation.length <= 0)
-					rotation.z = 1;//set the default direction
+					rotation.z = 1; //set the default direction
 				else
 					rotation.normalize();
 				// w is used as angle/2 in agal
-				_rotationalVelocityData = new Vector3D(rotation.x, rotation.y, rotation.z, Math.PI / rotation.w);
+				_rotationalVelocityData = new Vector3D(rotation.x, rotation.y, rotation.z, Math.PI/rotation.w);
 			}
 		}
 	}

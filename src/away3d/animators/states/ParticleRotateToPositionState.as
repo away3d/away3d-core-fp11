@@ -10,8 +10,9 @@ package away3d.animators.states
 	
 	import flash.display3D.*;
 	import flash.geom.*;
-
+	
 	use namespace arcane;
+	
 	/**
 	 * ...
 	 */
@@ -43,13 +44,12 @@ package away3d.animators.states
 			_position = _particleRotateToPositionNode._position;
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotateToPositionNode.POSITION_INDEX);
 			
-			if (animationRegisterCache.hasBillboard)
-			{
-				_matrix.copyFrom( renderable.sceneTransform);
+			if (animationRegisterCache.hasBillboard) {
+				_matrix.copyFrom(renderable.sceneTransform);
 				_matrix.append(camera.inverseSceneTransform);
 				animationRegisterCache.setVertexConstFromMatrix(animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotateToPositionNode.MATRIX_INDEX), _matrix);
 			}
@@ -59,9 +59,9 @@ package away3d.animators.states
 				animationRegisterCache.setVertexConst(index, _offset.x, _offset.y, _offset.z);
 			} else
 				animationSubGeometry.activateVertexBuffer(index, _particleRotateToPositionNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);
-
-		}
 		
+		}
+	
 	}
 
 }

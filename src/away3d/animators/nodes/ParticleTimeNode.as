@@ -48,10 +48,10 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
-			var timeStreamRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute();//timeStreamRegister.x is start，timeStreamRegister.y is during time
+			pass = pass;
+			var timeStreamRegister:ShaderRegisterElement = animationRegisterCache.getFreeVertexAttribute(); //timeStreamRegister.x is start，timeStreamRegister.y is during time
 			animationRegisterCache.setRegisterIndex(this, TIME_STREAM_INDEX, timeStreamRegister.index);
 			var timeConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
 			animationRegisterCache.setRegisterIndex(this, TIME_CONSTANT_INDEX, timeConst.index);
@@ -62,30 +62,23 @@ package away3d.animators.nodes
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 			code += "sge " + temp + "," + animationRegisterCache.vertexTime + "," + animationRegisterCache.vertexZeroConst + "\n";
 			code += "mul " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + temp + "\n";
-			if (_usesDuration)
-			{
-				if (_usesLooping)
-				{
+			if (_usesDuration) {
+				if (_usesLooping) {
 					var div:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
-					if (_usesDelay)
-					{
+					if (_usesDelay) {
 						code += "div " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".z\n";
 						code += "frc " + div + "," + div + "\n";
-						code += "mul " + animationRegisterCache.vertexTime + "," +div + "," + timeStreamRegister + ".z\n";
+						code += "mul " + animationRegisterCache.vertexTime + "," + div + "," + timeStreamRegister + ".z\n";
 						code += "slt " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".y\n";
 						code += "mul " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + div + "\n";
-					}
-					else
-					{
+					} else {
 						code += "mul " + div + "," + animationRegisterCache.vertexTime + "," + timeStreamRegister + ".w\n";
 						code += "frc " + div + "," + div + "\n";
-						code += "mul " + animationRegisterCache.vertexTime + "," +div + "," + timeStreamRegister + ".y\n";
+						code += "mul " + animationRegisterCache.vertexTime + "," + div + "," + timeStreamRegister + ".y\n";
 					}
-				}
-				else
-				{
+				} else {
 					var sge:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
-					code += "sge " + sge + "," +  timeStreamRegister + ".y," + animationRegisterCache.vertexTime + "\n";
+					code += "sge " + sge + "," + timeStreamRegister + ".y," + animationRegisterCache.vertexTime + "\n";
 					code += "mul " + animationRegisterCache.scaleAndRotateTarget + ".xyz," + animationRegisterCache.scaleAndRotateTarget + ".xyz," + sge + "\n";
 				}
 			}
@@ -109,8 +102,8 @@ package away3d.animators.nodes
 			_oneData[0] = param.startTime;
 			_oneData[1] = param.duration;
 			_oneData[2] = param.delay + param.duration;
-			_oneData[3] = 1 / param.duration;
-			
+			_oneData[3] = 1/param.duration;
+		
 		}
 	}
 }

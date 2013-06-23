@@ -5,7 +5,7 @@ package away3d.animators.transitions
 	import away3d.events.*;
 	
 	/**
-	 * 
+	 *
 	 */
 	public class CrossfadeTransitionState extends SkeletonBinaryLERPState
 	{
@@ -22,7 +22,7 @@ package away3d.animators.transitions
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateTime(time : int) : void
+		override protected function updateTime(time:int):void
 		{
 			blendWeight = Math.abs(time - _skeletonAnimationNode.startBlend)/(1000*_skeletonAnimationNode.blendSpeed);
 			

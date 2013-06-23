@@ -46,29 +46,27 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache) : String
+		override public function getAGALVertexCode(pass:MaterialPassBase, animationRegisterCache:AnimationRegisterCache):String
 		{
-			pass=pass;
+			pass = pass;
 			
 			var accelerationValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
 			animationRegisterCache.setRegisterIndex(this, ACCELERATION_INDEX, accelerationValue.index);
 			
 			var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
-			animationRegisterCache.addVertexTempUsages(temp,1);
+			animationRegisterCache.addVertexTempUsages(temp, 1);
 			
+			var code:String = "mul " + temp + "," + animationRegisterCache.vertexTime + "," + accelerationValue + "\n";
 			
-			var code:String = "mul " + temp +"," + animationRegisterCache.vertexTime + "," + accelerationValue + "\n";
-			
-			if (animationRegisterCache.needVelocity)
-			{
+			if (animationRegisterCache.needVelocity) {
 				var temp2:ShaderRegisterElement = animationRegisterCache.getFreeVertexVectorTemp();
 				code += "mul " + temp2 + "," + temp + "," + animationRegisterCache.vertexTwoConst + "\n";
 				code += "add " + animationRegisterCache.velocityTarget + ".xyz," + temp2 + ".xyz," + animationRegisterCache.velocityTarget + ".xyz\n";
 			}
 			animationRegisterCache.removeVertexTempUsage(temp);
 			
-			code += "mul " + temp +"," + temp + "," + animationRegisterCache.vertexTime + "\n";
-			code += "add " + animationRegisterCache.positionTarget +".xyz," + temp + "," + animationRegisterCache.positionTarget + ".xyz\n";
+			code += "mul " + temp + "," + temp + "," + animationRegisterCache.vertexTime + "\n";
+			code += "add " + animationRegisterCache.positionTarget + ".xyz," + temp + "," + animationRegisterCache.positionTarget + ".xyz\n";
 			return code;
 		}
 		
@@ -89,9 +87,9 @@ package away3d.animators.nodes
 			if (!tempAcceleration)
 				throw new Error("there is no " + ACCELERATION_VECTOR3D + " in param!");
 			
-			_oneData[0] = tempAcceleration.x / 2;
-			_oneData[1] = tempAcceleration.y / 2;
-			_oneData[2] = tempAcceleration.z / 2;
+			_oneData[0] = tempAcceleration.x/2;
+			_oneData[1] = tempAcceleration.y/2;
+			_oneData[2] = tempAcceleration.z/2;
 		}
 	}
 }
