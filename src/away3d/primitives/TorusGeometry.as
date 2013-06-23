@@ -184,8 +184,8 @@ package away3d.primitives {
 				for(i = 0; i <= _segmentsR; ++i)
 				{
 					// revolution vertex
-					data[currentUvCompIndex++] = i / _segmentsR;
-					data[currentUvCompIndex++] = j / _segmentsT;
+					data[currentUvCompIndex++] = ( i / _segmentsR ) * target.scaleU;
+					data[currentUvCompIndex++] = ( j / _segmentsT ) * target.scaleV;
 					currentUvCompIndex += skip;
 				}
 			}

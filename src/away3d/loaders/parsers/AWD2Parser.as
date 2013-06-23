@@ -1,17 +1,5 @@
 package away3d.loaders.parsers
 {
-	import flash.display.BitmapData;
-	import flash.display.BlendMode;
-	import flash.display.Sprite;
-	import flash.geom.ColorTransform;
-	import flash.geom.Matrix;
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
-	
-	import away3d.arcane;
 	import away3d.animators.AnimationSetBase;
 	import away3d.animators.AnimatorBase;
 	import away3d.animators.SkeletonAnimationSet;
@@ -26,6 +14,7 @@ package away3d.loaders.parsers
 	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.animators.nodes.UVClipNode;
 	import away3d.animators.nodes.VertexClipNode;
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.cameras.lenses.LensBase;
 	import away3d.cameras.lenses.OrthographicLens;
@@ -104,6 +93,17 @@ package away3d.loaders.parsers
 	import away3d.textures.Texture2DBase;
 	import away3d.textures.TextureProxyBase;
 	import away3d.tools.utils.GeomUtil;
+	
+	import flash.display.BitmapData;
+	import flash.display.BlendMode;
+	import flash.display.Sprite;
+	import flash.geom.ColorTransform;
+	import flash.geom.Matrix;
+	import flash.geom.Matrix3D;
+	import flash.geom.Vector3D;
+	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 	
 	use namespace arcane;
 	
@@ -642,8 +642,9 @@ package away3d.loaders.parsers
 			var num_subs:uint = _newBlockBytes.readUnsignedShort();
 			
 			// Read optional properties
-			var props:AWDProperties = parseProperties(null);
-			
+			var props:AWDProperties = parseProperties({1:_geoNrType,2:_geoNrType});
+			var geoScaleU:Number=props.get(1,1);
+			var geoScaleV:Number=props.get(2,1);
 			// Loop through sub meshes
 			var subs_parsed:uint = 0;
 			while (subs_parsed < num_subs)
@@ -658,8 +659,7 @@ package away3d.loaders.parsers
 				sm_end = _newBlockBytes.position + sm_len;
 				
 				// Ignore for now
-				parseProperties(null);
-				
+				var subProps:AWDProperties=parseProperties({1:_geoNrType,2:_geoNrType});
 				// Loop through data streams
 				while (_newBlockBytes.position < sm_end)
 				{
@@ -738,14 +738,28 @@ package away3d.loaders.parsers
 				parseUserAttributes(); // Ignore sub-mesh attributes for now
 				
 				sub_geoms = GeomUtil.fromVectors(verts, indices, uvs, normals, null, weights, w_indices);
+				
+				var scaleU:Number=subProps.get(1,1);
+				var scaleV:Number=subProps.get(2,1);
+				var setSubUVs:Boolean=false; //this should remain false atm, because in AwayBuilder the uv is only scaled by the geometry
+				if ((geoScaleU!=scaleU)||(geoScaleV!=scaleV)){
+					trace("set sub uvs");
+					setSubUVs=true;
+					scaleU=geoScaleU/scaleU;
+					scaleV=geoScaleV/scaleV;
+				}
 				for (i = 0; i < sub_geoms.length; i++)
 				{
+					if(setSubUVs)
+						sub_geoms[i].scaleUV(scaleU,scaleV);
 					geom.addSubGeometry(sub_geoms[i]);
 						// TODO: Somehow map in-sub to out-sub indices to enable look-up
 						// when creating meshes (and their material assignments.)
 				}
 				subs_parsed++;
 			}
+			if ((geoScaleU!=1)||(geoScaleV!=1))
+				geom.scaleUV(geoScaleU,geoScaleV);
 			parseUserAttributes();
 			finalizeAsset(geom, name);
 			_blocks[blockID].data = geom;
@@ -770,7 +784,7 @@ package away3d.loaders.parsers
 			// Read name and sub count
 			name = parseVarStr();
 			primType = _newBlockBytes.readUnsignedByte();
-			props = parseProperties({101: _geoNrType, 102: _geoNrType, 103: _geoNrType, 301: UINT16, 302: UINT16, 303: UINT16, 701: BOOL, 702: BOOL, 703: BOOL, 704: BOOL});
+			props = parseProperties({101: _geoNrType, 102: _geoNrType, 103: _geoNrType, 110: _geoNrType, 111: _geoNrType, 301: UINT16, 302: UINT16, 303: UINT16, 701: BOOL, 702: BOOL, 703: BOOL, 704: BOOL});
 			
 			var primitveTypes:Array=["Unsupported Type-ID","PlaneGeometry","CubeGeometry","SphereGeometry","CylinderGeometry","ConeGeometry","CapsuleGeometry","TorusGeometry"]
 			switch (primType)
@@ -803,7 +817,12 @@ package away3d.loaders.parsers
 					break;
 				default: 
 					geom = new Geometry();
+					trace("ERROR: UNSUPPORTED PRIMITIVE_TYPE");
 					break;
+			}
+			if((props.get(110,1)!=1)||(props.get(111,1)!=1)){
+				geom.subGeometries;
+				geom.scaleUV(props.get(110,1),props.get(111,1));
 			}
 			parseUserAttributes();
 			geom.name=name;

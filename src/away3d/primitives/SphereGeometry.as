@@ -167,8 +167,8 @@ package away3d.primitives {
 			var index : int = target.UVOffset;
 			for (j = 0; j <= _segmentsH; ++j) {
 				for (i = 0; i <= _segmentsW; ++i) {
-					data[index++] = i / _segmentsW;
-					data[index++] = j / _segmentsH;
+					data[index++] = ( i / _segmentsW ) * target.scaleU;
+					data[index++] = ( j / _segmentsH ) * target.scaleV;
 					index += skip;
 				}
 			}

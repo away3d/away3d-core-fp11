@@ -254,13 +254,13 @@ package away3d.primitives {
 
 			for (var yi : uint = 0; yi <= _segmentsH; ++yi) {
 				for (var xi : uint = 0; xi <= _segmentsW; ++xi) {
-					data[index++] = xi/_segmentsW;
-					data[index++] = 1 - yi/_segmentsH;
+					data[index++] = xi/_segmentsW * target.scaleU;
+					data[index++] = 1 - yi/_segmentsH * target.scaleV;
 					index += skip;
 
 					if (_doubleSided) {
-						data[index++] = xi/_segmentsW;
-						data[index++] = 1 - yi/_segmentsH;
+						data[index++] = xi/_segmentsW * target.scaleU;
+						data[index++] = 1 - yi/_segmentsH * target.scaleV;
 						index += skip;
 					}
 				}

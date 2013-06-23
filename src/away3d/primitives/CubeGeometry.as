@@ -412,11 +412,11 @@ package away3d.primitives {
 			dv = v_tile_dim / _segmentsH;
 			for (i=0; i<=_segmentsW; i++) {
 				for (j=0; j<=_segmentsH; j++) {
-					data[uidx++] = tl0u + i * du;
-					data[uidx++] = tl0v + (v_tile_dim - j * dv);
+					data[uidx++] = ( tl0u + i * du ) * target.scaleU;
+					data[uidx++] = ( tl0v + (v_tile_dim - j * dv)) * target.scaleV;
 					uidx += skip;
-					data[uidx++] = tl1u + (u_tile_dim - i * du);
-					data[uidx++] = tl1v + (v_tile_dim - j * dv);
+					data[uidx++] = ( tl1u + (u_tile_dim - i * du)) * target.scaleU;
+					data[uidx++] = ( tl1v + (v_tile_dim - j * dv)) * target.scaleV;
 					uidx += skip;
 				}
 			}
@@ -430,11 +430,11 @@ package away3d.primitives {
 			dv = v_tile_dim / _segmentsD;
 			for (i=0; i<=_segmentsW; i++) {
 				for (j=0; j<=_segmentsD; j++) {
-					data[uidx++] = tl0u + i * du;
-					data[uidx++] = tl0v + (v_tile_dim - j * dv);
+					data[uidx++] = ( tl0u + i * du) * target.scaleU;
+					data[uidx++] = ( tl0v + (v_tile_dim - j * dv)) * target.scaleV;
 					uidx += skip;
-					data[uidx++] = tl1u + i * du;
-					data[uidx++] = tl1v + j * dv;
+					data[uidx++] = ( tl1u + i * du) * target.scaleU;
+					data[uidx++] = ( tl1v + j * dv) * target.scaleV;
 					uidx += skip;
 				}
 			}
@@ -448,11 +448,11 @@ package away3d.primitives {
 			dv = v_tile_dim / _segmentsH;
 			for (i=0; i<=_segmentsD; i++) {
 				for (j=0; j<=_segmentsH; j++) {
-					data[uidx++] = tl0u + i * du;
-					data[uidx++] = tl0v + (v_tile_dim - j * dv);
+					data[uidx++] = ( tl0u + i * du) * target.scaleU;;
+					data[uidx++] = ( tl0v + (v_tile_dim - j * dv)) * target.scaleV;
 					uidx += skip;
-					data[uidx++] = tl1u + (u_tile_dim - i * du);
-					data[uidx++] = tl1v + (v_tile_dim - j * dv);
+					data[uidx++] = ( tl1u + (u_tile_dim - i * du)) * target.scaleU;
+					data[uidx++] = ( tl1v + (v_tile_dim - j * dv)) * target.scaleV;
 					uidx += skip;
 				}
 			}

@@ -4,7 +4,7 @@ package away3d.primitives {
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.errors.AbstractMethodError;
-
+	
 	import flash.geom.Matrix3D;
 	
 	use namespace arcane;
@@ -67,7 +67,8 @@ package away3d.primitives {
 		 */
 		override public function scaleUV(scaleU:Number=1, scaleV:Number=1):void
 		{
-			if (_uvDirty) updateUVs();
+			if (_uvDirty)	updateUVs();
+			
 			
 			super.scaleUV(scaleU, scaleV);
 		}

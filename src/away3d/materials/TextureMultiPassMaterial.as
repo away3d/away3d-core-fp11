@@ -9,7 +9,7 @@ package away3d.materials
 	{
 		private var _animateUVs : Boolean;
 
-		public function TextureMultiPassMaterial(texture : Texture2DBase = null, smooth : Boolean = true, repeat : Boolean = false, mipmap : Boolean = true)
+		public function TextureMultiPassMaterial(texture : Texture2DBase = null, smooth : Boolean = true, repeat : Boolean = true, mipmap : Boolean = true)
 		{
 			super();
 			this.texture = texture;

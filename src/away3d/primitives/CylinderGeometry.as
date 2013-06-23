@@ -306,11 +306,11 @@ package away3d.primitives {
 					x = 0.5 + 0.5 * -Math.cos(revolutionAngle);
 					y = 0.5 + 0.5 * Math.sin(revolutionAngle);
 
-					UVData[currentUvCompIndex++] = 0.5; // central vertex
-					UVData[currentUvCompIndex++] = 0.5;
+					UVData[currentUvCompIndex++] = 0.5 * target.scaleU; // central vertex
+					UVData[currentUvCompIndex++] = 0.5 * target.scaleV;
 					currentUvCompIndex += skip;
-					UVData[currentUvCompIndex++] = x; // revolution vertex
-					UVData[currentUvCompIndex++] = y;
+					UVData[currentUvCompIndex++] = x * target.scaleU; // revolution vertex
+					UVData[currentUvCompIndex++] = y * target.scaleV;
 					currentUvCompIndex += skip;
 				}
 			}
@@ -323,11 +323,11 @@ package away3d.primitives {
 					x = 0.5 + 0.5 * Math.cos(revolutionAngle);
 					y = 0.5 + 0.5 * Math.sin(revolutionAngle);
 
-					UVData[currentUvCompIndex++] = 0.5; // central vertex
-					UVData[currentUvCompIndex++] = 0.5;
+					UVData[currentUvCompIndex++] = 0.5 * target.scaleU; // central vertex
+					UVData[currentUvCompIndex++] = 0.5 * target.scaleV;
 					currentUvCompIndex += skip;
-					UVData[currentUvCompIndex++] = x; // revolution vertex
-					UVData[currentUvCompIndex++] = y;
+					UVData[currentUvCompIndex++] = x * target.scaleU; // revolution vertex
+					UVData[currentUvCompIndex++] = y * target.scaleV;
 					currentUvCompIndex += skip;
 				}
 			}
@@ -340,8 +340,8 @@ package away3d.primitives {
 					for(i = 0; i <= _segmentsW; ++i)
 					{
 						// revolution vertex
-						UVData[currentUvCompIndex++] = i / _segmentsW;
-						UVData[currentUvCompIndex++] = j / _segmentsH;
+						UVData[currentUvCompIndex++] = ( i / _segmentsW ) * target.scaleU;
+						UVData[currentUvCompIndex++] = ( j / _segmentsH ) * target.scaleV;
 						currentUvCompIndex += skip;
 					}
 				}
