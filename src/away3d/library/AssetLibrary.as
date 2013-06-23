@@ -121,7 +121,7 @@ package away3d.library
 		}
 		public static function stopLoad() : void
 		{
-			return getBundle().stopAllLoadingSessions();
+			getBundle().stopAllLoadingSessions();
 		}
 		
 		/**
