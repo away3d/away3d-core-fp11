@@ -2,15 +2,15 @@ package away3d.library.naming
 {
 	import away3d.arcane;
 	import away3d.library.assets.IAsset;
-
+	
 	use namespace arcane;
 	
 	public class NumSuffixConflictStrategy extends ConflictStrategyBase
 	{
-		private var _separator : String;
-		private var _next_suffix : Object;
+		private var _separator:String;
+		private var _next_suffix:Object;
 		
-		public function NumSuffixConflictStrategy(separator : String = '.')
+		public function NumSuffixConflictStrategy(separator:String = '.')
 		{
 			super();
 			
@@ -18,12 +18,11 @@ package away3d.library.naming
 			_next_suffix = {};
 		}
 		
-		
-		public override function resolveConflict(changedAsset:IAsset, oldAsset:IAsset, assetsDictionary:Object, precedence:String) : void
+		public override function resolveConflict(changedAsset:IAsset, oldAsset:IAsset, assetsDictionary:Object, precedence:String):void
 		{
-			var orig : String;
-			var new_name : String;
-			var base : String, suffix : int;
+			var orig:String;
+			var new_name:String;
+			var base:String, suffix:int;
 			
 			orig = changedAsset.name;
 			if (orig.indexOf(_separator) >= 0) {
@@ -31,13 +30,12 @@ package away3d.library.naming
 				// unless suffix is non-numerical, in which case revert to zero and 
 				// use entire name as base
 				base = orig.substring(0, orig.lastIndexOf(_separator));
-				suffix = parseInt(orig.substring(base.length-1));
+				suffix = parseInt(orig.substring(base.length - 1));
 				if (isNaN(suffix)) {
 					base = orig;
 					suffix = 0;
 				}
-			}
-			else {
+			} else {
 				base = orig;
 				suffix = 0;
 			}
@@ -57,8 +55,7 @@ package away3d.library.naming
 			updateNames(oldAsset.assetNamespace, new_name, oldAsset, changedAsset, assetsDictionary, precedence);
 		}
 		
-		
-		public override function create() : ConflictStrategyBase
+		public override function create():ConflictStrategyBase
 		{
 			return new NumSuffixConflictStrategy(_separator);
 		}
