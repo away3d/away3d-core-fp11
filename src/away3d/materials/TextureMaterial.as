@@ -16,7 +16,7 @@
 		/**
 		 * Creates a new TextureMaterial.
 		 */
-		public function TextureMaterial(texture:Texture2DBase = null, smooth:Boolean = true, repeat:Boolean = false, mipmap:Boolean = true)
+		public function TextureMaterial(texture:Texture2DBase = null, smooth:Boolean = true, repeat:Boolean = true, mipmap:Boolean = true)
 		{
 			super();
 			this.texture = texture;

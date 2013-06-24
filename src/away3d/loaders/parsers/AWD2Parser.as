@@ -1,109 +1,31 @@
 package away3d.loaders.parsers
 {
-	import flash.display.BitmapData;
-	import flash.display.BlendMode;
-	import flash.display.Sprite;
-	import flash.geom.ColorTransform;
-	import flash.geom.Matrix;
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Endian;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.data.*;
+	import away3d.animators.nodes.*;
+	import away3d.cameras.*;
+	import away3d.cameras.lenses.*;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.entities.*;
+	import away3d.library.assets.*;
+	import away3d.lights.*;
+	import away3d.lights.shadowmaps.*;
+	import away3d.loaders.misc.*;
+	import away3d.loaders.parsers.utils.*;
+	import away3d.materials.*;
+	import away3d.materials.lightpickers.*;
+	import away3d.materials.methods.*;
+	import away3d.materials.utils.*;
+	import away3d.primitives.*;
+	import away3d.textures.*;
+	import away3d.tools.utils.*;
 	
-	import away3d.arcane;
-	import away3d.animators.AnimationSetBase;
-	import away3d.animators.AnimatorBase;
-	import away3d.animators.SkeletonAnimationSet;
-	import away3d.animators.SkeletonAnimator;
-	import away3d.animators.VertexAnimationSet;
-	import away3d.animators.VertexAnimator;
-	import away3d.animators.data.JointPose;
-	import away3d.animators.data.Skeleton;
-	import away3d.animators.data.SkeletonJoint;
-	import away3d.animators.data.SkeletonPose;
-	import away3d.animators.data.UVAnimationFrame;
-	import away3d.animators.nodes.SkeletonClipNode;
-	import away3d.animators.nodes.UVClipNode;
-	import away3d.animators.nodes.VertexClipNode;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.LensBase;
-	import away3d.cameras.lenses.OrthographicLens;
-	import away3d.cameras.lenses.OrthographicOffCenterLens;
-	import away3d.cameras.lenses.PerspectiveLens;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.entities.TextureProjector;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
-	import away3d.lights.shadowmaps.CascadeShadowMapper;
-	import away3d.lights.shadowmaps.CubeMapShadowMapper;
-	import away3d.lights.shadowmaps.DirectionalShadowMapper;
-	import away3d.lights.shadowmaps.NearDirectionalShadowMapper;
-	import away3d.lights.shadowmaps.ShadowMapperBase;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.ColorMultiPassMaterial;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.MultiPassMaterialBase;
-	import away3d.materials.SinglePassMaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.materials.TextureMultiPassMaterial;
-	import away3d.materials.lightpickers.LightPickerBase;
-	import away3d.materials.lightpickers.StaticLightPicker;
-	import away3d.materials.methods.AlphaMaskMethod;
-	import away3d.materials.methods.AnisotropicSpecularMethod;
-	import away3d.materials.methods.CascadeShadowMapMethod;
-	import away3d.materials.methods.CelDiffuseMethod;
-	import away3d.materials.methods.CelSpecularMethod;
-	import away3d.materials.methods.ColorMatrixMethod;
-	import away3d.materials.methods.ColorTransformMethod;
-	import away3d.materials.methods.DepthDiffuseMethod;
-	import away3d.materials.methods.DitheredShadowMapMethod;
-	import away3d.materials.methods.EffectMethodBase;
-	import away3d.materials.methods.EnvMapAmbientMethod;
-	import away3d.materials.methods.EnvMapMethod;
-	import away3d.materials.methods.FilteredShadowMapMethod;
-	import away3d.materials.methods.FogMethod;
-	import away3d.materials.methods.FresnelEnvMapMethod;
-	import away3d.materials.methods.FresnelSpecularMethod;
-	import away3d.materials.methods.GradientDiffuseMethod;
-	import away3d.materials.methods.HardShadowMapMethod;
-	import away3d.materials.methods.LightMapDiffuseMethod;
-	import away3d.materials.methods.LightMapMethod;
-	import away3d.materials.methods.NearShadowMapMethod;
-	import away3d.materials.methods.OutlineMethod;
-	import away3d.materials.methods.PhongSpecularMethod;
-	import away3d.materials.methods.ProjectiveTextureMethod;
-	import away3d.materials.methods.RefractionEnvMapMethod;
-	import away3d.materials.methods.RimLightMethod;
-	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.methods.SimpleWaterNormalMethod;
-	import away3d.materials.methods.SoftShadowMapMethod;
-	import away3d.materials.methods.SubsurfaceScatteringDiffuseMethod;
-	import away3d.materials.methods.WrapDiffuseMethod;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.primitives.CapsuleGeometry;
-	import away3d.primitives.ConeGeometry;
-	import away3d.primitives.CubeGeometry;
-	import away3d.primitives.CylinderGeometry;
-	import away3d.primitives.PlaneGeometry;
-	import away3d.primitives.SkyBox;
-	import away3d.primitives.SphereGeometry;
-	import away3d.primitives.TorusGeometry;
-	import away3d.textures.BitmapCubeTexture;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.CubeTextureBase;
-	import away3d.textures.Texture2DBase;
-	import away3d.textures.TextureProxyBase;
-	import away3d.tools.utils.GeomUtil;
+	import flash.display.*;
+	import flash.geom.*;
+	import flash.net.*;
+	import flash.utils.*;
 	
 	use namespace arcane;
 	
@@ -616,8 +538,9 @@ package away3d.loaders.parsers
 			var num_subs:uint = _newBlockBytes.readUnsignedShort();
 			
 			// Read optional properties
-			var props:AWDProperties = parseProperties(null);
-			
+			var props:AWDProperties = parseProperties({1:_geoNrType, 2:_geoNrType});
+			var geoScaleU:Number = props.get(1, 1);
+			var geoScaleV:Number = props.get(2, 1);
 			// Loop through sub meshes
 			var subs_parsed:uint = 0;
 			while (subs_parsed < num_subs) {
@@ -631,8 +554,7 @@ package away3d.loaders.parsers
 				sm_end = _newBlockBytes.position + sm_len;
 				
 				// Ignore for now
-				parseProperties(null);
-				
+				var subProps:AWDProperties = parseProperties({1:_geoNrType, 2:_geoNrType});
 				// Loop through data streams
 				while (_newBlockBytes.position < sm_end) {
 					var idx:uint = 0;
@@ -686,13 +608,27 @@ package away3d.loaders.parsers
 				parseUserAttributes(); // Ignore sub-mesh attributes for now
 				
 				sub_geoms = GeomUtil.fromVectors(verts, indices, uvs, normals, null, weights, w_indices);
+				
+				var scaleU:Number = subProps.get(1, 1);
+				var scaleV:Number = subProps.get(2, 1);
+				var setSubUVs:Boolean = false; //this should remain false atm, because in AwayBuilder the uv is only scaled by the geometry
+				if ((geoScaleU != scaleU) || (geoScaleV != scaleV)) {
+					trace("set sub uvs");
+					setSubUVs = true;
+					scaleU = geoScaleU/scaleU;
+					scaleV = geoScaleV/scaleV;
+				}
 				for (i = 0; i < sub_geoms.length; i++) {
+					if (setSubUVs)
+						sub_geoms[i].scaleUV(scaleU, scaleV);
 					geom.addSubGeometry(sub_geoms[i]);
 						// TODO: Somehow map in-sub to out-sub indices to enable look-up
 						// when creating meshes (and their material assignments.)
 				}
 				subs_parsed++;
 			}
+			if ((geoScaleU != 1) || (geoScaleV != 1))
+				geom.scaleUV(geoScaleU, geoScaleV);
 			parseUserAttributes();
 			finalizeAsset(geom, name);
 			_blocks[blockID].data = geom;
@@ -715,7 +651,7 @@ package away3d.loaders.parsers
 			// Read name and sub count
 			name = parseVarStr();
 			primType = _newBlockBytes.readUnsignedByte();
-			props = parseProperties({101:_geoNrType, 102:_geoNrType, 103:_geoNrType, 301:UINT16, 302:UINT16, 303:UINT16, 701:BOOL, 702:BOOL, 703:BOOL, 704:BOOL});
+			props = parseProperties({101:_geoNrType, 102:_geoNrType, 103:_geoNrType, 110:_geoNrType, 111:_geoNrType, 301:UINT16, 302:UINT16, 303:UINT16, 701:BOOL, 702:BOOL, 703:BOOL, 704:BOOL});
 			
 			var primitveTypes:Array = ["Unsupported Type-ID", "PlaneGeometry", "CubeGeometry", "SphereGeometry", "CylinderGeometry", "ConeGeometry", "CapsuleGeometry", "TorusGeometry"]
 			switch (primType) {
@@ -750,7 +686,12 @@ package away3d.loaders.parsers
 					break;
 				default:
 					geom = new Geometry();
+					trace("ERROR: UNSUPPORTED PRIMITIVE_TYPE");
 					break;
+			}
+			if ((props.get(110, 1) != 1) || (props.get(111, 1) != 1)) {
+				geom.subGeometries;
+				geom.scaleUV(props.get(110, 1), props.get(111, 1));
 			}
 			parseUserAttributes();
 			geom.name = name;

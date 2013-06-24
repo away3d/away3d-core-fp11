@@ -1,4 +1,4 @@
-﻿package away3d.primitives.data
+package away3d.primitives.data
 {
 	import away3d.arcane;
 	import away3d.entities.SegmentSet;
