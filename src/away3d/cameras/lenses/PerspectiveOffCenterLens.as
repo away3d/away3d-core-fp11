@@ -1,32 +1,33 @@
-package away3d.cameras.lenses {
+package away3d.cameras.lenses
+{
 	import away3d.core.math.*;
-
+	
 	import flash.geom.Vector3D;
-
+	
 	/**
 	 * The PerspectiveLens object provides a projection matrix that projects 3D geometry with perspective distortion.
 	 */
 	public class PerspectiveOffCenterLens extends LensBase
 	{
-		private var _minAngleX : Number;
-		private var _minLengthX : Number;
-		private var _tanMinX : Number;
-		private var _maxAngleX : Number;
-		private var _maxLengthX : Number;
-		private var _tanMaxX : Number;
-		private var _minAngleY : Number;
-		private var _minLengthY : Number;
-		private var _tanMinY : Number;
-		private var _maxAngleY : Number;
-		private var _maxLengthY : Number;
-		private var _tanMaxY : Number;
-
+		private var _minAngleX:Number;
+		private var _minLengthX:Number;
+		private var _tanMinX:Number;
+		private var _maxAngleX:Number;
+		private var _maxLengthX:Number;
+		private var _tanMaxX:Number;
+		private var _minAngleY:Number;
+		private var _minLengthY:Number;
+		private var _tanMinY:Number;
+		private var _maxAngleY:Number;
+		private var _maxLengthY:Number;
+		private var _tanMaxY:Number;
+		
 		/**
 		 * Creates a new PerspectiveLens object.
-		 * 
+		 *
 		 * @param fieldOfView The vertical field of view of the projection.
 		 */
-		public function PerspectiveOffCenterLens(minAngleX : Number = -40, maxAngleX : Number = 40, minAngleY : Number = -40, maxAngleY : Number = 40)
+		public function PerspectiveOffCenterLens(minAngleX:Number = -40, maxAngleX:Number = 40, minAngleY:Number = -40, maxAngleY:Number = 40)
 		{
 			super();
 			
@@ -36,12 +37,12 @@ package away3d.cameras.lenses {
 			this.maxAngleY = maxAngleY;
 		}
 		
-		public function get minAngleX() : Number
+		public function get minAngleX():Number
 		{
 			return _minAngleX;
 		}
 		
-		public function set minAngleX(value : Number) : void
+		public function set minAngleX(value:Number):void
 		{
 			_minAngleX = value;
 			
@@ -50,12 +51,12 @@ package away3d.cameras.lenses {
 			invalidateMatrix();
 		}
 		
-		public function get maxAngleX() : Number
+		public function get maxAngleX():Number
 		{
 			return _maxAngleX;
 		}
 		
-		public function set maxAngleX(value : Number) : void
+		public function set maxAngleX(value:Number):void
 		{
 			_maxAngleX = value;
 			
@@ -64,12 +65,12 @@ package away3d.cameras.lenses {
 			invalidateMatrix();
 		}
 		
-		public function get minAngleY() : Number
+		public function get minAngleY():Number
 		{
 			return _minAngleY;
 		}
 		
-		public function set minAngleY(value : Number) : void
+		public function set minAngleY(value:Number):void
 		{
 			_minAngleY = value;
 			
@@ -78,12 +79,12 @@ package away3d.cameras.lenses {
 			invalidateMatrix();
 		}
 		
-		public function get maxAngleY() : Number
+		public function get maxAngleY():Number
 		{
 			return _maxAngleY;
 		}
 		
-		public function set maxAngleY(value : Number) : void
+		public function set maxAngleY(value:Number):void
 		{
 			_maxAngleY = value;
 			
@@ -91,45 +92,45 @@ package away3d.cameras.lenses {
 			
 			invalidateMatrix();
 		}
-
+		
 		/**
 		 * Calculates the scene position relative to the camera of the given normalized coordinates in screen space.
-		 * 
+		 *
 		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
 		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
 		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
 		 * @return The scene position relative to the camera of the given screen coordinates.
 		 */
-		override public function unproject(nX:Number, nY:Number, sZ : Number):Vector3D
+		override public function unproject(nX:Number, nY:Number, sZ:Number):Vector3D
 		{
-			var v : Vector3D = new Vector3D(nX, -nY, sZ, 1.0);
+			var v:Vector3D = new Vector3D(nX, -nY, sZ, 1.0);
 			
-            v.x *= sZ;
-            v.y *= sZ;
+			v.x *= sZ;
+			v.y *= sZ;
 			
 			v = unprojectionMatrix.transformVector(v);
 			
 			//z is unaffected by transform
-            v.z = sZ;
+			v.z = sZ;
 			
 			return v;
 		}
-
-		override public function clone() : LensBase
+		
+		override public function clone():LensBase
 		{
-			var clone : PerspectiveOffCenterLens = new PerspectiveOffCenterLens(_minAngleX, _maxAngleX, _minAngleY, _maxAngleY);
+			var clone:PerspectiveOffCenterLens = new PerspectiveOffCenterLens(_minAngleX, _maxAngleX, _minAngleY, _maxAngleY);
 			clone._near = _near;
 			clone._far = _far;
 			clone._aspectRatio = _aspectRatio;
 			return clone;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override protected function updateMatrix() : void
+		override protected function updateMatrix():void
 		{
-			var raw : Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			
 			_minLengthX = _near*_tanMinX;
 			_maxLengthX = _near*_tanMaxX;
@@ -138,50 +139,29 @@ package away3d.cameras.lenses {
 			
 			var minLengthFracX:Number = -_minLengthX/(_maxLengthX - _minLengthX);
 			var minLengthFracY:Number = -_minLengthY/(_maxLengthY - _minLengthY);
-			//var _xMax:Number = - _minLengthX;
-			//var _yMax:Number = - _minLengthY;
 			
 			var left:Number, right:Number, top:Number, bottom:Number;
 			
 			// assume scissored frustum
-//			var xWidth:Number = _xMax * (_viewPort.width / _scissorRect.width);
-//			var yHgt:Number = _yMax * (_viewPort.height / _scissorRect.height);
-//			var center:Number = _xMax * (_scissorRect.x * 2 - _viewPort.width) / _scissorRect.width + _xMax;
-//			var middle:Number = -_yMax * (_scissorRect.y * 2 - _viewPort.height) / _scissorRect.height - _yMax;
-//			
-//			left = center - xWidth;
-//			right = center + xWidth;
-//			top = middle - yHgt;
-//			bottom = middle + yHgt;
+			var center:Number = -_minLengthX*(_scissorRect.x + _scissorRect.width*minLengthFracX)/(_scissorRect.width*minLengthFracX);
+			var middle:Number = _minLengthY*(_scissorRect.y + _scissorRect.height*minLengthFracY)/(_scissorRect.height*minLengthFracY);
 			
-			//var center:Number = _maxLengthX * (_scissorRect.x * 2 - _viewPort.width) / _scissorRect.width - _minLengthX;
-			
-			//var center:Number = _xMax * 2 * (_scissorRect.x * 2 + _scissorRect.width) / (2 * _scissorRect.width) - xWidth;
-			
-			
-			var center:Number = -_minLengthX * (_scissorRect.x + _scissorRect.width*minLengthFracX) / (_scissorRect.width*minLengthFracX);
-			var middle:Number = _minLengthY * (_scissorRect.y + _scissorRect.height*minLengthFracY) / (_scissorRect.height*minLengthFracY);
-			
-			left = center - (_maxLengthX - _minLengthX)*(_viewPort.width / _scissorRect.width);
+			left = center - (_maxLengthX - _minLengthX)*(_viewPort.width/_scissorRect.width);
 			right = center;
 			top = middle;
-			bottom = middle + (_maxLengthY - _minLengthY)*(_viewPort.height / _scissorRect.height);
+			bottom = middle + (_maxLengthY - _minLengthY)*(_viewPort.height/_scissorRect.height);
 			
-			raw[uint(0)] = 2 * _near / (right - left);
-			raw[uint(5)] = 2 * _near / (bottom - top);
-			raw[uint(8)] = (right + left) / (right - left);
-			raw[uint(9)] = (bottom + top) / (bottom - top);
-			raw[uint(10)] = (_far + _near) / (_far - _near);
+			raw[uint(0)] = 2*_near/(right - left);
+			raw[uint(5)] = 2*_near/(bottom - top);
+			raw[uint(8)] = (right + left)/(right - left);
+			raw[uint(9)] = (bottom + top)/(bottom - top);
+			raw[uint(10)] = (_far + _near)/(_far - _near);
 			raw[uint(11)] = 1;
 			raw[uint(1)] = raw[uint(2)] = raw[uint(3)] = raw[uint(4)] =
-			raw[uint(6)] = raw[uint(7)] = raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
-			raw[uint(14)] = -2 * _far * _near / (_far - _near);
+				raw[uint(6)] = raw[uint(7)] = raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
+			raw[uint(14)] = -2*_far*_near/(_far - _near);
 			
-
 			_matrix.copyRawDataFrom(raw);
-			
-			//var yMaxFar : Number = _far*_focalLengthInv;
-			//var xMaxFar : Number = yMaxFar*_aspectRatio;
 			
 			_minLengthX = _far*_tanMinX;
 			_maxLengthX = _far*_tanMaxX;
@@ -192,15 +172,15 @@ package away3d.cameras.lenses {
 			_frustumCorners[3] = _frustumCorners[6] = right;
 			_frustumCorners[1] = _frustumCorners[4] = top;
 			_frustumCorners[7] = _frustumCorners[10] = bottom;
-
+			
 			_frustumCorners[12] = _frustumCorners[21] = _minLengthX;
 			_frustumCorners[15] = _frustumCorners[18] = _maxLengthX;
 			_frustumCorners[13] = _frustumCorners[16] = _minLengthY;
 			_frustumCorners[19] = _frustumCorners[22] = _maxLengthY;
-
+			
 			_frustumCorners[2] = _frustumCorners[5] = _frustumCorners[8] = _frustumCorners[11] = _near;
 			_frustumCorners[14] = _frustumCorners[17] = _frustumCorners[20] = _frustumCorners[23] = _far;
-
+			
 			_matrixInvalid = false;
 		}
 	}
