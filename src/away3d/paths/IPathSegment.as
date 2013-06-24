@@ -1,14 +1,14 @@
 package away3d.paths
 {
 	import flash.geom.Vector3D;
-
+	
 	public interface IPathSegment
 	{
 		/**
 		 * Destroys the segment
 		 */
 		function dispose():void;
-
+		
 		/**
 		 * Calculates the position of the curve on this segment.
 		 *
@@ -18,5 +18,5 @@ package away3d.paths
 		 */
 		function getPointOnSegment(phase:Number, target:Vector3D = null):Vector3D;
 	}
-	
+
 }
