@@ -10,26 +10,26 @@ package away3d.textures
 	
 	public class WebcamTexture extends BitmapTexture
 	{
-		private var _materialSize : uint;
-		private var _video : Video;
-		private var _camera : Camera;
+		private var _materialSize:uint;
+		private var _video:Video;
+		private var _camera:Camera;
 		private var _matrix:Matrix;
-		private var _smoothing : Boolean;
-		private var _playing : Boolean;
-		private var _autoUpdate : Boolean;
+		private var _smoothing:Boolean;
+		private var _playing:Boolean;
+		private var _autoUpdate:Boolean;
 		
-		public function WebcamTexture( cameraWidth : uint = 320, cameraHeight : uint = 240, materialSize : uint = 256, autoStart : Boolean = true, camera : Camera = null, smoothing : Boolean = true )
+		public function WebcamTexture(cameraWidth:uint = 320, cameraHeight:uint = 240, materialSize:uint = 256, autoStart:Boolean = true, camera:Camera = null, smoothing:Boolean = true)
 		{
-			_materialSize  = validateMaterialSize( materialSize );
+			_materialSize = validateMaterialSize(materialSize);
 			
 			super(new BitmapData(_materialSize, _materialSize, false, 0));
 			
 			// Use default camera if none supplied
 			_camera = camera || Camera.getCamera();
-			_video = new Video( cameraWidth, cameraHeight );
+			_video = new Video(cameraWidth, cameraHeight);
 			
 			_matrix = new Matrix();
-			_matrix.scale(  _materialSize / cameraWidth, _materialSize / cameraHeight );
+			_matrix.scale(_materialSize/cameraWidth, _materialSize/cameraHeight);
 			
 			if (autoStart) {
 				_autoUpdate = true;
@@ -39,16 +39,16 @@ package away3d.textures
 			_smoothing = smoothing;
 		}
 		
-		
 		/**
 		 * Defines whether the texture should automatically update while camera stream is
 		 * playing. If false, the update() method must be invoked for the texture to redraw.
-		*/
-		public function get autoUpdate() : Boolean
+		 */
+		public function get autoUpdate():Boolean
 		{
 			return _autoUpdate;
 		}
-		public function set autoUpdate(val : Boolean) : void
+		
+		public function set autoUpdate(val:Boolean):void
 		{
 			_autoUpdate = val;
 			
@@ -56,15 +56,13 @@ package away3d.textures
 				invalidateContent();
 		}
 		
-		
 		/**
 		 * The Camera instance (webcam) used by this texture.
-		*/
+		 */
 		public function get camera():Camera
 		{
 			return _camera;
 		}
-		
 		
 		/**
 		 * Toggles smoothing on the texture as it's drawn (and potentially scaled)
@@ -80,34 +78,31 @@ package away3d.textures
 			_smoothing = value;
 		}
 		
-		
 		/**
 		 * Start subscribing to camera stream. For the texture to update the update()
 		 * method must be repeatedly invoked, or autoUpdate set to true.
-		*/
+		 */
 		public function start():void
 		{
-			_video.attachCamera( _camera );
+			_video.attachCamera(_camera);
 			_playing = true;
 			invalidateContent();
 		}
 		
-		
 		/**
 		 * Detaches from the camera stream.
-		*/
+		 */
 		public function stop():void
 		{
 			_playing = false;
-			_video.attachCamera( null );
+			_video.attachCamera(null);
 		}
-		
 		
 		/**
 		 * Draws the video and updates the bitmap texture
 		 * If autoUpdate is false and this function is not called the bitmap texture will not update!
 		 */
-		public function update() : void
+		public function update():void
 		{
 			// draw
 			bitmapData.lock();
@@ -117,14 +112,13 @@ package away3d.textures
 			invalidateContent();
 		}
 		
-		
 		/**
 		 * Flips the image from the webcam horizontally
 		 */
 		public function flipHorizontal():void
 		{
-			_matrix.a=-1*_matrix.a;
-			_matrix.a > 0 ? _matrix.tx = _video.x - _video.width * Math.abs( _matrix.a ) : _matrix.tx = _video.width * Math.abs( _matrix.a ) +  _video.x;
+			_matrix.a = -1*_matrix.a;
+			_matrix.a > 0? _matrix.tx = _video.x - _video.width*Math.abs(_matrix.a) : _matrix.tx = _video.width*Math.abs(_matrix.a) + _video.x;
 		}
 		
 		/**
@@ -132,26 +126,23 @@ package away3d.textures
 		 */
 		public function flipVertical():void
 		{
-			_matrix.d=-1*_matrix.d;
-			_matrix.d > 0 ? _matrix.ty = _video.y - _video.height * Math.abs( _matrix.d ) : _matrix.ty = _video.height * Math.abs( _matrix.d ) +  _video.y;
+			_matrix.d = -1*_matrix.d;
+			_matrix.d > 0? _matrix.ty = _video.y - _video.height*Math.abs(_matrix.d) : _matrix.ty = _video.height*Math.abs(_matrix.d) + _video.y;
 		}
-		
 		
 		/**
 		 * Clean up used resources.
-		*/
-		override public function dispose() : void
+		 */
+		override public function dispose():void
 		{
 			super.dispose();
 			stop();
 			bitmapData.dispose();
-			_video.attachCamera( null );
+			_video.attachCamera(null);
 			_camera = null;
 			_video = null;
 			_matrix = null;
 		}
-		
-		
 		
 		override protected function uploadContent(texture:TextureBase):void
 		{
@@ -164,13 +155,12 @@ package away3d.textures
 			}
 		}
 		
-		
-		private function validateMaterialSize( size:uint ):int
+		private function validateMaterialSize(size:uint):int
 		{
 			if (!TextureUtils.isDimensionValid(size)) {
-				var oldSize : uint = size;
+				var oldSize:uint = size;
 				size = TextureUtils.getBestPowerOf2(size);
-				trace("Warning: "+ oldSize + " is not a valid material size. Updating to the closest supported resolution: " + size);
+				trace("Warning: " + oldSize + " is not a valid material size. Updating to the closest supported resolution: " + size);
 			}
 			
 			return size;
