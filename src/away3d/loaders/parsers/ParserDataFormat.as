@@ -1,5 +1,6 @@
 package away3d.loaders.parsers
 {
+	
 	/**
 	 * An enumeration providing values to describe the data format of parsed data.
 	 */
@@ -8,12 +9,12 @@ package away3d.loaders.parsers
 		/**
 		 * Describes the format of a binary file.
 		 */
-		public static const BINARY : String = "binary";
-
+		public static const BINARY:String = "binary";
+		
 		/**
 		 * Describes the format of a plain text file.
 		 */
-		public static const PLAIN_TEXT : String = "plainText";
+		public static const PLAIN_TEXT:String = "plainText";
 	}
 }
 

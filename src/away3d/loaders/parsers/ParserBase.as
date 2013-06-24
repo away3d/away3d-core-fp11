@@ -1,4 +1,5 @@
-package away3d.loaders.parsers {
+package away3d.loaders.parsers
+{
 	import away3d.arcane;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.AssetEvent;
@@ -8,7 +9,7 @@ package away3d.loaders.parsers {
 	import away3d.loaders.misc.ResourceDependency;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.tools.utils.TextureUtils;
-
+	
 	import flash.display.BitmapData;
 	import flash.events.EventDispatcher;
 	import flash.events.TimerEvent;
@@ -16,13 +17,12 @@ package away3d.loaders.parsers {
 	import flash.utils.ByteArray;
 	import flash.utils.Timer;
 	import flash.utils.getTimer;
-
-	use namespace arcane;
 	
+	use namespace arcane;
 	
 	/**
 	 * Dispatched when the parsing finishes.
-	 * 
+	 *
 	 * @eventType away3d.events.ParserEvent
 	 */
 	[Event(name="parseComplete", type="away3d.events.ParserEvent")]
@@ -31,14 +31,14 @@ package away3d.loaders.parsers {
 	 * Dispatched when parser pauses to wait for dependencies, used internally to trigger
 	 * loading of dependencies which are then returned to the parser through it's interface
 	 * in the arcane namespace.
-	 * 
+	 *
 	 * @eventType away3d.events.ParserEvent
 	 */
 	[Event(name="readyForDependencies", type="away3d.events.ParserEvent")]
 	
 	/**
 	 * Dispatched if an error was caught during parsing.
-	 * 
+	 *
 	 * @eventType away3d.events.ParserEvent
 	 */
 	[Event(name="parseError", type="away3d.events.ParserEvent")]
@@ -46,89 +46,87 @@ package away3d.loaders.parsers {
 	/**
 	 * Dispatched when any asset finishes parsing. Also see specific events for each
 	 * individual asset type (meshes, materials et c.)
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a geometry asset has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="geometryComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a skeleton asset has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="skeletonComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a skeleton pose asset has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="skeletonPoseComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a container asset has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
-		
+	
 	/**
 	 * Dispatched when an animation set has been constructed from a group of animation state resources.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when an animation state has been constructed from a group of animation node resources.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when an animation node has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a texture asset has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a material asset has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a animator asset has been constructed from a resource.
-	 * 
+	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
-	
-	
 	
 	/**
 	 * <code>ParserBase</code> provides an abstract base class for objects that convert blocks of data to data structures
@@ -153,10 +151,10 @@ package away3d.loaders.parsers {
 	public class ParserBase extends EventDispatcher
 	{
 		arcane var _fileName:String;
-		protected var _dataFormat : String;
-		protected var _data : *;
-		protected var _frameLimit : Number;
-		protected var _lastFrameTime : Number;
+		protected var _dataFormat:String;
+		protected var _data:*;
+		protected var _frameLimit:Number;
+		protected var _lastFrameTime:Number;
 		
 		protected function getTextData():String
 		{
@@ -168,23 +166,22 @@ package away3d.loaders.parsers {
 			return ParserUtil.toByteArray(_data);
 		}
 		
-		private var _dependencies : Vector.<ResourceDependency>;
-		private var _parsingPaused : Boolean;
-		private var _parsingComplete : Boolean;
+		private var _dependencies:Vector.<ResourceDependency>;
+		private var _parsingPaused:Boolean;
+		private var _parsingComplete:Boolean;
 		private var _parsingFailure:Boolean;
-		private var _timer : Timer;
+		private var _timer:Timer;
 		private var _materialMode:uint;
 		
 		/**
 		 * Returned by <code>proceedParsing</code> to indicate no more parsing is needed.
 		 */
-		protected static const PARSING_DONE : Boolean = true;
+		protected static const PARSING_DONE:Boolean = true;
 		
 		/**
 		 * Returned by <code>proceedParsing</code> to indicate more parsing is needed, allowing asynchronous parsing.
 		 */
-		protected static const MORE_TO_PARSE : Boolean = false;
-		
+		protected static const MORE_TO_PARSE:Boolean = false;
 		
 		/**
 		 * Creates a new ParserBase object
@@ -192,51 +189,51 @@ package away3d.loaders.parsers {
 		 *
 		 * @see away3d.loading.parsers.ParserDataFormat
 		 */
-		public function ParserBase(format : String)
+		public function ParserBase(format:String)
 		{
-			_materialMode=0;
+			_materialMode = 0;
 			_dataFormat = format;
 			_dependencies = new Vector.<ResourceDependency>();
 		}
 		
 		/**
-		 * Validates a bitmapData loaded before assigning to a default BitmapMaterial 
+		 * Validates a bitmapData loaded before assigning to a default BitmapMaterial
 		 */
-		public function isBitmapDataValid(bitmapData: BitmapData) : Boolean
+		public function isBitmapDataValid(bitmapData:BitmapData):Boolean
 		{
 			var isValid:Boolean = TextureUtils.isBitmapDataValid(bitmapData);
-			if(!isValid) trace(">> Bitmap loaded is not having power of 2 dimensions or is higher than 2048");
+			if (!isValid)
+				trace(">> Bitmap loaded is not having power of 2 dimensions or is higher than 2048");
 			
 			return isValid;
 		}
 		
-		public function set parsingFailure(b:Boolean) : void
+		public function set parsingFailure(b:Boolean):void
 		{
 			_parsingFailure = b;
 		}
-		public function get parsingFailure() : Boolean
+		
+		public function get parsingFailure():Boolean
 		{
 			return _parsingFailure;
 		}
 		
-		
-		public function get parsingPaused() : Boolean
+		public function get parsingPaused():Boolean
 		{
 			return _parsingPaused;
 		}
 		
-		
-		public function get parsingComplete() : Boolean
+		public function get parsingComplete():Boolean
 		{
 			return _parsingComplete;
 		}
 		
-		public function set materialMode(newMaterialMode:uint) : void
+		public function set materialMode(newMaterialMode:uint):void
 		{
-			_materialMode=newMaterialMode;
+			_materialMode = newMaterialMode;
 		}
 		
-		public function get materialMode() : uint
+		public function get materialMode():uint
 		{
 			return _materialMode;
 		}
@@ -244,7 +241,7 @@ package away3d.loaders.parsers {
 		/**
 		 * The data format of the file data to be parsed. Can be either <code>ParserDataFormat.BINARY</code> or <code>ParserDataFormat.PLAIN_TEXT</code>.
 		 */
-		public function get dataFormat() : String
+		public function get dataFormat():String
 		{
 			return _dataFormat;
 		}
@@ -259,7 +256,7 @@ package away3d.loaders.parsers {
 		 * actual time spent on a frame can exceed this number since time-checks can
 		 * only be performed between logical sections of the parsing procedure.
 		 */
-		public function parseAsync(data : *, frameLimit : Number = 30) : void
+		public function parseAsync(data:*, frameLimit:Number = 30):void
 		{
 			_data = data;
 			startParsing(frameLimit);
@@ -268,7 +265,7 @@ package away3d.loaders.parsers {
 		/**
 		 * A list of dependencies that need to be loaded and resolved for the object being parsed.
 		 */
-		public function get dependencies() : Vector.<ResourceDependency>
+		public function get dependencies():Vector.<ResourceDependency>
 		{
 			return _dependencies;
 		}
@@ -280,7 +277,7 @@ package away3d.loaders.parsers {
 		 *
 		 * @param resourceDependency The dependency to be resolved.
 		 */
-		arcane function resolveDependency(resourceDependency : ResourceDependency) : void
+		arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			throw new AbstractMethodError();
 		}
@@ -290,33 +287,32 @@ package away3d.loaders.parsers {
 		 *
 		 * @param resourceDependency The dependency to be resolved.
 		 */
-		arcane function resolveDependencyFailure(resourceDependency : ResourceDependency) : void
+		arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
 			throw new AbstractMethodError();
 		}
-
+		
 		/**
 		 * Resolve a dependency name
 		 *
 		 * @param resourceDependency The dependency to be resolved.
 		 */
-		arcane function resolveDependencyName(resourceDependency : ResourceDependency, asset:IAsset) : String
+		arcane function resolveDependencyName(resourceDependency:ResourceDependency, asset:IAsset):String
 		{
 			return asset.name;
 		}
 		
-		arcane function resumeParsingAfterDependencies() : void
+		arcane function resumeParsingAfterDependencies():void
 		{
 			_parsingPaused = false;
-			if (_timer){	_timer.start();}
+			if (_timer)
+				_timer.start();
 		}
 		
-		
-		
-		protected function finalizeAsset(asset : IAsset, name : String=null) : void
+		protected function finalizeAsset(asset:IAsset, name:String = null):void
 		{
-			var type_event : String;
-			var type_name : String;
+			var type_event:String;
+			var type_name:String;
 			
 			if (name != null)
 				asset.name = name;
@@ -407,10 +403,10 @@ package away3d.loaders.parsers {
 					type_event = AssetEvent.SHADOWMAPMETHOD_COMPLETE;
 					break;
 				default:
-					throw new Error('Unhandled asset type '+asset.assetType+'. Report as bug!');
+					throw new Error('Unhandled asset type ' + asset.assetType + '. Report as bug!');
 					break;
 			};
-				
+			
 			// If the asset has no name, give it
 			// a per-type default name.
 			if (!asset.name)
@@ -425,43 +421,40 @@ package away3d.loaders.parsers {
 		 * @return Whether or not more data needs to be parsed. Can be <code>ParserBase.PARSING_DONE</code> or
 		 * <code>ParserBase.MORE_TO_PARSE</code>.
 		 */
-		protected function proceedParsing() : Boolean
+		protected function proceedParsing():Boolean
 		{
 			throw new AbstractMethodError();
 			return true;
 		}
 		
-		protected function dieWithError(message : String = 'Unknown parsing error') : void
+		protected function dieWithError(message:String = 'Unknown parsing error'):void
 		{
-            if(_timer){
-			    _timer.removeEventListener(TimerEvent.TIMER, onInterval);
-			    _timer.stop();
-			    _timer = null;
-                }
+			if (_timer) {
+				_timer.removeEventListener(TimerEvent.TIMER, onInterval);
+				_timer.stop();
+				_timer = null;
+			}
 			dispatchEvent(new ParserEvent(ParserEvent.PARSE_ERROR, message));
 		}
 		
-		
-		protected function addDependency(id : String, req : URLRequest, retrieveAsRawData : Boolean = false, data : * = null, suppressErrorEvents : Boolean = false) : void
+		protected function addDependency(id:String, req:URLRequest, retrieveAsRawData:Boolean = false, data:* = null, suppressErrorEvents:Boolean = false):void
 		{
 			_dependencies.push(new ResourceDependency(id, req, data, this, retrieveAsRawData, suppressErrorEvents));
 		}
 		
-		
-		protected function pauseAndRetrieveDependencies() : void
+		protected function pauseAndRetrieveDependencies():void
 		{
-            if(_timer)
-			    _timer.stop();
+			if (_timer)
+				_timer.stop();
 			_parsingPaused = true;
 			dispatchEvent(new ParserEvent(ParserEvent.READY_FOR_DEPENDENCIES));
 		}
-		
 		
 		/**
 		 * Tests whether or not there is still time left for parsing within the maximum allowed time frame per session.
 		 * @return True if there is still time left, false if the maximum allotted time was exceeded and parsing should be interrupted.
 		 */
-		protected function hasTime() : Boolean
+		protected function hasTime():Boolean
 		{
 			return ((getTimer() - _lastFrameTime) < _frameLimit);
 		}
@@ -469,7 +462,7 @@ package away3d.loaders.parsers {
 		/**
 		 * Called when the parsing pause interval has passed and parsing can proceed.
 		 */
-		protected function onInterval(event : TimerEvent = null) : void
+		protected function onInterval(event:TimerEvent = null):void
 		{
 			_lastFrameTime = getTimer();
 			if (proceedParsing() && !_parsingFailure)
@@ -480,7 +473,7 @@ package away3d.loaders.parsers {
 		 * Initializes the parsing of data.
 		 * @param frameLimit The maximum duration of a parsing session.
 		 */
-		private function startParsing(frameLimit : Number) : void
+		private function startParsing(frameLimit:Number):void
 		{
 			_frameLimit = frameLimit;
 			_timer = new Timer(_frameLimit, 0);
@@ -488,15 +481,15 @@ package away3d.loaders.parsers {
 			_timer.start();
 		}
 		
-		
 		/**
 		 * Finish parsing the data.
 		 */
-		protected function finishParsing() : void
+		protected function finishParsing():void
 		{
-            if(_timer){
-			    _timer.removeEventListener(TimerEvent.TIMER, onInterval);
-			    _timer.stop();}
+			if (_timer) {
+				_timer.removeEventListener(TimerEvent.TIMER, onInterval);
+				_timer.stop();
+			}
 			_timer = null;
 			_parsingComplete = true;
 			dispatchEvent(new ParserEvent(ParserEvent.PARSE_COMPLETE));
