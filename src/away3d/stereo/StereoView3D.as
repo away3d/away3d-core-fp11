@@ -13,13 +13,12 @@ package away3d.stereo
 	
 	public class StereoView3D extends View3D
 	{
-		private var _stereoCam : StereoCamera3D;
-		private var _stereoRenderer : StereoRenderer;
+		private var _stereoCam:StereoCamera3D;
+		private var _stereoRenderer:StereoRenderer;
 		
-		private var _stereoEnabled : Boolean;
+		private var _stereoEnabled:Boolean;
 		
-		
-		public function StereoView3D(scene:Scene3D=null, camera:Camera3D=null, renderer:RendererBase=null, stereoRenderMethod:StereoRenderMethodBase=null)
+		public function StereoView3D(scene:Scene3D = null, camera:Camera3D = null, renderer:RendererBase = null, stereoRenderMethod:StereoRenderMethodBase = null)
 		{
 			super(scene, camera, renderer);
 			
@@ -28,45 +27,41 @@ package away3d.stereo
 			_stereoRenderer = new StereoRenderer(stereoRenderMethod);
 		}
 		
-		
-		public function get stereoRenderMethod() : StereoRenderMethodBase
+		public function get stereoRenderMethod():StereoRenderMethodBase
 		{
 			return _stereoRenderer.renderMethod;
 		}
-		public function set stereoRenderMethod(value : StereoRenderMethodBase) : void
+		
+		public function set stereoRenderMethod(value:StereoRenderMethodBase):void
 		{
 			_stereoRenderer.renderMethod = value;
 		}
-		
 		
 		override public function get camera():Camera3D
 		{
 			return _stereoCam;
 		}
-		override public function set camera(value : Camera3D) : void
+		
+		override public function set camera(value:Camera3D):void
 		{
 			if (value == _stereoCam)
 				return;
 			
-			if (value is StereoCamera3D) {
+			if (value is StereoCamera3D)
 				_stereoCam = StereoCamera3D(value);
-			}
-			else {
+			else
 				throw new Error('StereoView3D must be used with StereoCamera3D');
-			}
 		}
 		
-		
-		public function get stereoEnabled() : Boolean
+		public function get stereoEnabled():Boolean
 		{
 			return _stereoEnabled;
 		}
-		public function set stereoEnabled(val : Boolean) : void
+		
+		public function set stereoEnabled(val:Boolean):void
 		{
 			_stereoEnabled = val;
 		}
-		
-		
 		
 		override public function render():void
 		{
@@ -90,25 +85,22 @@ package away3d.stereo
 				
 				// fire collected mouse events
 				_mouse3DManager.fireMouseEvents();
-			}
-			else {
+			} else {
 				_camera = _stereoCam;
 				super.render();
 			}
 		}
 		
-		
-		
-		private function renderWithCamera(cam : Camera3D, texture : Texture, doMouse : Boolean) : void
+		private function renderWithCamera(cam:Camera3D, texture:Texture, doMouse:Boolean):void
 		{
 			_entityCollector.clear();
-
+			
 			_camera = cam;
 			_camera.lens.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
-
+			
 			updateViewSizeData();
-
+			
 			// Always use RTT for stereo rendering
 			_renderer.textureRatioX = _rttBufferManager.textureRatioX;
 			_renderer.textureRatioY = _rttBufferManager.textureRatioY;
@@ -128,14 +120,14 @@ package away3d.stereo
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
-				if (!_shareContext) _stage3DProxy._context3D.present();
+				if (!_shareContext)
+					_stage3DProxy._context3D.present();
 			} else {
 				_renderer.shareContext = _shareContext;
-				if (_shareContext) {
+				if (_shareContext)
 					_renderer.render(_entityCollector, texture, _scissorRect);
-				} else {
+				else
 					_renderer.render(_entityCollector, texture, _rttBufferManager.renderToTextureRect);
-				}
 				
 			}
 			

@@ -11,19 +11,19 @@ package away3d.stereo
 	
 	public class StereoCamera3D extends Camera3D
 	{
-		private var _leftCam : Camera3D;
-		private var _rightCam : Camera3D;
+		private var _leftCam:Camera3D;
+		private var _rightCam:Camera3D;
 		
-		private var _offset : Number;
-		private var _focus : Number;
-		private var _focusPoint : Vector3D;
-		private var _focusInfinity : Boolean;
+		private var _offset:Number;
+		private var _focus:Number;
+		private var _focusPoint:Vector3D;
+		private var _focusInfinity:Boolean;
 		
-		private var _leftCamDirty : Boolean = true;
-		private var _rightCamDirty : Boolean = true;
-		private var _focusPointDirty : Boolean = true;
+		private var _leftCamDirty:Boolean = true;
+		private var _rightCamDirty:Boolean = true;
+		private var _focusPointDirty:Boolean = true;
 		
-		public function StereoCamera3D(lens:LensBase=null)
+		public function StereoCamera3D(lens:LensBase = null)
 		{
 			super(lens);
 			
@@ -35,7 +35,7 @@ package away3d.stereo
 			_focusPoint = new Vector3D();
 		}
 		
-		override public function set lens(value : LensBase) : void
+		override public function set lens(value:LensBase):void
 		{
 			_leftCam.lens = value;
 			_rightCam.lens = value;
@@ -43,11 +43,10 @@ package away3d.stereo
 			super.lens = value;
 		}
 		
-		
-		public function get leftCamera() : Camera3D
+		public function get leftCamera():Camera3D
 		{
 			if (_leftCamDirty) {
-				var tf : Matrix3D;
+				var tf:Matrix3D;
 				
 				if (_focusPointDirty)
 					updateFocusPoint();
@@ -66,11 +65,10 @@ package away3d.stereo
 			return _leftCam;
 		}
 		
-		
-		public function get rightCamera() : Camera3D
+		public function get rightCamera():Camera3D
 		{
 			if (_rightCamDirty) {
-				var tf : Matrix3D;
+				var tf:Matrix3D;
 				
 				if (_focusPointDirty)
 					updateFocusPoint();
@@ -89,35 +87,33 @@ package away3d.stereo
 			return _rightCam;
 		}
 		
-
 		public function get stereoFocus():Number
 		{
 			return _focus;
 		}
-
+		
 		public function set stereoFocus(value:Number):void
 		{
 			_focus = value;
-//			trace('focus:', _focus);
+			//			trace('focus:', _focus);
 			invalidateStereoCams();
 		}
-
+		
 		public function get stereoOffset():Number
 		{
 			return _offset;
 		}
+		
 		public function set stereoOffset(value:Number):void
 		{
 			_offset = value;
 			invalidateStereoCams();
 		}
 		
-		
-		protected function updateFocusPoint() : void
+		protected function updateFocusPoint():void
 		{
-			if (_focus == Infinity) {
+			if (_focus == Infinity)
 				_focusInfinity = true;
-			}
 			else {
 				_focusPoint.x = 0;
 				_focusPoint.y = 0;
@@ -130,15 +126,13 @@ package away3d.stereo
 			}
 		}
 		
-		
-		override arcane function invalidateTransform() : void
+		override arcane function invalidateTransform():void
 		{
 			super.invalidateTransform();
 			invalidateStereoCams();
 		}
 		
-		
-		arcane function invalidateStereoCams() : void
+		arcane function invalidateStereoCams():void
 		{
 			_leftCamDirty = true;
 			_rightCamDirty = true;
