@@ -66,8 +66,8 @@ package away3d.controllers
 		
 		/**
 		 * Base controller class for dynamically adjusting the propeties of a 3D object.
-		 * 
-		 * @param	targetObject	The 3D object on which to act.
+		 *
+		 * @param    targetObject    The 3D object on which to act.
 		 */
 		public function ControllerBase(targetObject:Entity = null):void
 		{
