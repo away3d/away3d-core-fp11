@@ -1,16 +1,16 @@
 package away3d.core.partition
 {
 	import away3d.core.math.Plane3D;
-
+	
 	import flash.geom.Vector3D;
 	
 	import away3d.arcane;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
 	import away3d.primitives.WireframePrimitiveBase;
-
+	
 	use namespace arcane;
-
+	
 	/**
 	 * The NodeBase class is an abstract base class for any type of space partition tree node. The concrete
 	 * subtype will control the creation of its child nodes, which are necessarily of the same type. The exception is
@@ -22,14 +22,14 @@ package away3d.core.partition
 	 */
 	public class NodeBase
 	{
-		arcane var _parent : NodeBase;
-		protected var _childNodes : Vector.<NodeBase>;
-		protected var _numChildNodes : uint;
-		protected var _debugPrimitive : WireframePrimitiveBase;
-
-		arcane var _numEntities : int;
-		arcane var _collectionMark : uint;
-
+		arcane var _parent:NodeBase;
+		protected var _childNodes:Vector.<NodeBase>;
+		protected var _numChildNodes:uint;
+		protected var _debugPrimitive:WireframePrimitiveBase;
+		
+		arcane var _numEntities:int;
+		arcane var _collectionMark:uint;
+		
 		/**
 		 * Creates a new NodeBase object.
 		 */
@@ -37,37 +37,36 @@ package away3d.core.partition
 		{
 			_childNodes = new Vector.<NodeBase>();
 		}
-
-		public function get showDebugBounds() : Boolean
+		
+		public function get showDebugBounds():Boolean
 		{
 			return _debugPrimitive != null;
 		}
-
-		public function set showDebugBounds(value : Boolean) : void
+		
+		public function set showDebugBounds(value:Boolean):void
 		{
-			if (Boolean(_debugPrimitive) == value) return;
-
-			if (value) {
+			if (Boolean(_debugPrimitive) == value)
+				return;
+			
+			if (value)
 				_debugPrimitive = createDebugBounds();
-			}
 			else {
 				_debugPrimitive.dispose();
 				_debugPrimitive = null;
 			}
-
-			for (var i : uint = 0; i < _numChildNodes; ++i)  {
+			
+			for (var i:uint = 0; i < _numChildNodes; ++i)
 				_childNodes[i].showDebugBounds = value;
-			}
 		}
-
+		
 		/**
 		 * The parent node. Null if this node is the root.
 		 */
-		public function get parent() : NodeBase
+		public function get parent():NodeBase
 		{
 			return _parent;
 		}
-
+		
 		/**
 		 * Adds a node to the tree. By default, this is used for both static as dynamic nodes, but for some data
 		 * structures such as BSP trees, it can be more efficient to only use this for dynamic nodes, and add the
@@ -75,58 +74,58 @@ package away3d.core.partition
 		 *
 		 * @param node The node to be added as a child of the current node.
 		 */
-		arcane function addNode(node : NodeBase) : void
+		arcane function addNode(node:NodeBase):void
 		{
 			node._parent = this;
 			_numEntities += node._numEntities;
 			_childNodes[_numChildNodes++] = node;
 			node.showDebugBounds = _debugPrimitive != null;
-
+			
 			// update numEntities in the tree
-			var numEntities : int = node._numEntities;
+			var numEntities:int = node._numEntities;
 			node = this;
-
-			do {
+			
+			do
 				node._numEntities += numEntities;
-			} while ((node = node._parent) != null);
+			while ((node = node._parent) != null);
 		}
-
+		
 		/**
 		 * Removes a child node from the tree.
 		 * @param node The child node to be removed.
 		 */
-		arcane function removeNode(node : NodeBase) : void
+		arcane function removeNode(node:NodeBase):void
 		{
 			// a bit faster than splice(i, 1), works only if order is not important
 			// override item to be removed with the last in the list, then remove that last one
 			// Also, the "real partition nodes" of the tree will always remain unmoved, first in the list, so if there's
 			// an order dependency for them, it's still okay
-			var index : uint = _childNodes.indexOf(node);
+			var index:uint = _childNodes.indexOf(node);
 			_childNodes[index] = _childNodes[--_numChildNodes];
 			_childNodes.pop();
-
+			
 			// update numEntities in the tree
-			var numEntities : int = node._numEntities;
+			var numEntities:int = node._numEntities;
 			node = this;
-
-			do {
+			
+			do
 				node._numEntities -= numEntities;
-			} while ((node = node._parent) != null);
+			while ((node = node._parent) != null);
 		}
-
+		
 		/**
 		 * Tests if the current node is at least partly inside the frustum.
 		 * @param viewProjectionRaw The raw data of the view projection matrix
 		 *
 		 * @return Whether or not the node is at least partly inside the view frustum.
 		 */
-		public function isInFrustum(planes : Vector.<Plane3D>, numPlanes : int) : Boolean
+		public function isInFrustum(planes:Vector.<Plane3D>, numPlanes:int):Boolean
 		{
-			planes=planes;
-			numPlanes=numPlanes;
+			planes = planes;
+			numPlanes = numPlanes;
 			return true;
 		}
-
+		
 		/**
 		 * Tests if the current node is intersecting with a ray.
 		 * @param rayPosition The starting position of the ray
@@ -134,22 +133,22 @@ package away3d.core.partition
 		 *
 		 * @return Whether or not the node is at least partly intersecting the ray.
 		 */
-		public function isIntersectingRay(rayPosition : Vector3D, rayDirection : Vector3D) : Boolean
+		public function isIntersectingRay(rayPosition:Vector3D, rayDirection:Vector3D):Boolean
 		{
-			rayPosition=rayPosition;
-			rayDirection=rayDirection;
+			rayPosition = rayPosition;
+			rayDirection = rayDirection;
 			return true;
 		}
 		
 		/**
 		 * Finds the partition that contains (or should contain) the given entity.
 		 */
-		public function findPartitionForEntity(entity : Entity) : NodeBase
+		public function findPartitionForEntity(entity:Entity):NodeBase
 		{
-			entity=entity;
+			entity = entity;
 			return this;
 		}
-
+		
 		/**
 		 * Allows the traverser to visit the current node. If the traverser's enterNode method returns true, the
 		 * traverser will be sent down the child nodes of the tree.
@@ -160,38 +159,39 @@ package away3d.core.partition
 		 *
 		 * @see away3d.core.traverse.PartitionTraverser
 		 */
-		public function acceptTraverser(traverser : PartitionTraverser) : void
+		public function acceptTraverser(traverser:PartitionTraverser):void
 		{
-			if (_numEntities == 0 && !_debugPrimitive) return;
-
+			if (_numEntities == 0 && !_debugPrimitive)
+				return;
+			
 			if (traverser.enterNode(this)) {
-				var i : uint;
+				var i:uint;
 				while (i < _numChildNodes)
 					_childNodes[i++].acceptTraverser(traverser);
-
+				
 				if (_debugPrimitive)
 					traverser.applyRenderable(_debugPrimitive);
 			}
 		}
-
-		protected function createDebugBounds() : WireframePrimitiveBase
+		
+		protected function createDebugBounds():WireframePrimitiveBase
 		{
 			return null;
 		}
-
-		protected function get numEntities() : int
+		
+		protected function get numEntities():int
 		{
 			return _numEntities;
 		}
-
-		protected function updateNumEntities(value : int) : void
+		
+		protected function updateNumEntities(value:int):void
 		{
-			var diff : int = value - _numEntities;
-			var node : NodeBase = this;
-
-			do {
+			var diff:int = value - _numEntities;
+			var node:NodeBase = this;
+			
+			do
 				node._numEntities += diff;
-			} while ((node = node._parent) != null);
+			while ((node = node._parent) != null);
 		}
 	}
 }

@@ -9,8 +9,9 @@ package away3d.core.base.data
 		public var startVertexIndex:uint;
 		public var subGeometry:CompactSubGeometry;
 		
-		public function ParticleData() {
-			
+		public function ParticleData()
+		{
+		
 		}
 	}
 

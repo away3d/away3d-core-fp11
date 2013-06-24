@@ -1,6 +1,7 @@
 package away3d.core.base
 {
 	import away3d.core.base.data.ParticleData;
+	
 	/**
 	 * ...
 	 */
@@ -12,9 +13,9 @@ package away3d.core.base
 		
 		public function ParticleGeometry()
 		{
-			
-		}
 		
+		}
+	
 	}
 
 }

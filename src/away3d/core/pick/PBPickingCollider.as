@@ -8,7 +8,7 @@ package away3d.core.pick
 	
 	/**
 	 * PixelBender-based picking collider for entity objects. Used with the <code>RaycastPicker</code> picking object.
-	 * 
+	 *
 	 * @see away3d.entities.Entity#pickingCollider
 	 * @see away3d.core.pick.RaycastPicker
 	 */
@@ -25,15 +25,15 @@ package away3d.core.pick
 		
 		/**
 		 * Creates a new <code>PBPickingCollider</code> object.
-		 * 
+		 *
 		 * @param findClosestCollision Determines whether the picking collider searches for the closest collision along the ray. Defaults to false.
 		 */
-		public function PBPickingCollider( findClosestCollision:Boolean = false )
+		public function PBPickingCollider(findClosestCollision:Boolean = false)
 		{
 			_findClosestCollision = findClosestCollision;
 			
 			_kernelOutputBuffer = new Vector.<Number>();
-			_rayTriangleKernel = new Shader( new RayTriangleKernelClass() as ByteArray );
+			_rayTriangleKernel = new Shader(new RayTriangleKernelClass() as ByteArray);
 		}
 		
 		/**
@@ -58,20 +58,20 @@ package away3d.core.pick
 			var indexData:Vector.<uint> = subMesh.indexData;
 			var vertexData:Vector.<Number> = subMesh.subGeometry.vertexPositionData;
 			var uvData:Vector.<Number> = subMesh.UVData;
-			var numericIndexData:Vector.<Number> = Vector.<Number>( indexData );
-			var indexBufferDims:Point = evaluateArrayAsGrid( numericIndexData );
-
+			var numericIndexData:Vector.<Number> = Vector.<Number>(indexData);
+			var indexBufferDims:Point = evaluateArrayAsGrid(numericIndexData);
+			
 			// if working on a clone, no need to resend data to pb
-			if( !_lastSubMeshUploaded || _lastSubMeshUploaded !== subMesh ) {
+			if (!_lastSubMeshUploaded || _lastSubMeshUploaded !== subMesh) {
 				// send vertices to pb
 				var duplicateVertexData:Vector.<Number> = vertexData.concat();
-				var vertexBufferDims:Point = evaluateArrayAsGrid( duplicateVertexData );
+				var vertexBufferDims:Point = evaluateArrayAsGrid(duplicateVertexData);
 				_rayTriangleKernel.data.vertexBuffer.width = vertexBufferDims.x;
 				_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
 				_rayTriangleKernel.data.vertexBufferWidth.value = [ vertexBufferDims.x ];
 				_rayTriangleKernel.data.vertexBuffer.input = duplicateVertexData;
-				_rayTriangleKernel.data.bothSides.value = [ subMesh.material.bothSides ? 1.0 : 0.0 ];
-	
+				_rayTriangleKernel.data.bothSides.value = [ subMesh.material.bothSides? 1.0 : 0.0 ];
+				
 				// send indices to pb
 				_rayTriangleKernel.data.indexBuffer.width = indexBufferDims.x;
 				_rayTriangleKernel.data.indexBuffer.height = indexBufferDims.y;
@@ -81,17 +81,17 @@ package away3d.core.pick
 			_lastSubMeshUploaded = subMesh;
 			
 			// run kernel.
-			var shaderJob:ShaderJob = new ShaderJob( _rayTriangleKernel, _kernelOutputBuffer, indexBufferDims.x, indexBufferDims.y );
-			shaderJob.start( true );
-
+			var shaderJob:ShaderJob = new ShaderJob(_rayTriangleKernel, _kernelOutputBuffer, indexBufferDims.x, indexBufferDims.y);
+			shaderJob.start(true);
+			
 			// find a proper collision from pb's output
 			var i:uint;
 			var t:Number;
 			var collisionTriangleIndex:int = -1;
 			var len:uint = _kernelOutputBuffer.length;
-			for( i = 0; i < len; i += 3 ) {
+			for (i = 0; i < len; i += 3) {
 				t = _kernelOutputBuffer[ i ];
-				if( t > 0 && t < shortestCollisionDistance ) {
+				if (t > 0 && t < shortestCollisionDistance) {
 					shortestCollisionDistance = t;
 					collisionTriangleIndex = i;
 					
@@ -102,18 +102,18 @@ package away3d.core.pick
 			}
 			
 			// Detect collision
-			if( collisionTriangleIndex >= 0 ) {
+			if (collisionTriangleIndex >= 0) {
 				
 				pickingCollisionVO.rayEntryDistance = shortestCollisionDistance;
-				cx = rayPosition.x + shortestCollisionDistance * rayDirection.x;
-				cy = rayPosition.y + shortestCollisionDistance * rayDirection.y;
-				cz = rayPosition.z + shortestCollisionDistance * rayDirection.z;
-				pickingCollisionVO.localPosition = new Vector3D( cx, cy, cz );
-				pickingCollisionVO.localNormal = getCollisionNormal( indexData, vertexData, collisionTriangleIndex );
+				cx = rayPosition.x + shortestCollisionDistance*rayDirection.x;
+				cy = rayPosition.y + shortestCollisionDistance*rayDirection.y;
+				cz = rayPosition.z + shortestCollisionDistance*rayDirection.z;
+				pickingCollisionVO.localPosition = new Vector3D(cx, cy, cz);
+				pickingCollisionVO.localNormal = getCollisionNormal(indexData, vertexData, collisionTriangleIndex);
 				v = _kernelOutputBuffer[ collisionTriangleIndex + 1 ]; // barycentric coord 1
 				w = _kernelOutputBuffer[ collisionTriangleIndex + 2 ]; // barycentric coord 2
 				u = 1.0 - v - w;
-				pickingCollisionVO.uv = getCollisionUV( indexData, uvData, collisionTriangleIndex, v, w, u, 0, 2 );
+				pickingCollisionVO.uv = getCollisionUV(indexData, uvData, collisionTriangleIndex, v, w, u, 0, 2);
 				
 				return true;
 			}
@@ -121,18 +121,18 @@ package away3d.core.pick
 			return false;
 		}
 		
-		private function evaluateArrayAsGrid( array:Vector.<Number> ):Point {
-			var count:uint = array.length / 3;
-			var w:uint = Math.floor( Math.sqrt( count ) );
+		private function evaluateArrayAsGrid(array:Vector.<Number>):Point
+		{
+			var count:uint = array.length/3;
+			var w:uint = Math.floor(Math.sqrt(count));
 			var h:uint = w;
 			var i:uint;
-			while( w * h < count ) {
-				for( i = 0; i < w; ++i ) {
-					array.push( 0.0, 0.0, 0.0 );
-				}
+			while (w*h < count) {
+				for (i = 0; i < w; ++i)
+					array.push(0.0, 0.0, 0.0);
 				h++;
 			}
-			return new Point( w, h );
+			return new Point(w, h);
 		}
 	}
 }

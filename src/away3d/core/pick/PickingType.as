@@ -1,8 +1,9 @@
 package away3d.core.pick
 {
+	
 	/**
 	 * Options for the different 3D object picking approaches available in Away3D. Can be used for automatic mouse picking on the view.
-	 * 
+	 *
 	 * @see away3d.containers.View3D#mousePicker
 	 */
 	public class PickingType
@@ -16,11 +17,11 @@ package away3d.core.pick
 		/**
 		 * Uses AS3 and Pixel Bender to pick objects based on ray intersection. Returns the hit on the first encountered Entity.
 		 */
-		public static const RAYCAST_FIRST_ENCOUNTERED:IPicker = new RaycastPicker( false );
-				
+		public static const RAYCAST_FIRST_ENCOUNTERED:IPicker = new RaycastPicker(false);
+		
 		/**
 		 * Uses AS3 and Pixel Bender to pick objects based on ray intersection. Returns the best (closest) hit on an Entity.
 		 */
-		public static const RAYCAST_BEST_HIT:IPicker = new RaycastPicker( true );
+		public static const RAYCAST_BEST_HIT:IPicker = new RaycastPicker(true);
 	}
 }
