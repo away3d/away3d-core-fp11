@@ -9,7 +9,7 @@ package away3d.materials.utils
 	import flash.media.Video;
 	import flash.net.NetConnection;
 	import flash.net.NetStream;
-
+	
 	public class SimpleVideoPlayer implements IVideoPlayer
 	{
 		
@@ -35,7 +35,6 @@ package away3d.materials.utils
 			_paused = false;
 			_lastVolume = 1;
 			
-			
 			// client object that'll redirect various calls from the video stream
 			_nsClient = {};
 			_nsClient["onCuePoint"] = metaDataHandler;
@@ -46,29 +45,28 @@ package away3d.materials.utils
 			// NetConnection
 			_nc = new NetConnection();
 			_nc.client = _nsClient;
-			_nc.addEventListener(NetStatusEvent.NET_STATUS, 		netStatusHandler, false, 0, true);
+			_nc.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler, false, 0, true);
 			_nc.addEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler, false, 0, true);
-			_nc.addEventListener(IOErrorEvent.IO_ERROR, 			ioErrorHandler, false, 0, true);
-			_nc.addEventListener(AsyncErrorEvent.ASYNC_ERROR, 		asyncErrorHandler, false, 0, true);
+			_nc.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
+			_nc.addEventListener(AsyncErrorEvent.ASYNC_ERROR, asyncErrorHandler, false, 0, true);
 			_nc.connect(null);
 			
 			// NetStream
 			_ns = new NetStream(_nc);
 			_ns.checkPolicyFile = true;
 			_ns.client = _nsClient;
-			_ns.addEventListener(NetStatusEvent.NET_STATUS, 	netStatusHandler, false, 0, true);
-			_ns.addEventListener(AsyncErrorEvent.ASYNC_ERROR, 	asyncErrorHandler, false, 0, true);
-			_ns.addEventListener(IOErrorEvent.IO_ERROR, 		ioErrorHandler, false, 0, true);
+			_ns.addEventListener(NetStatusEvent.NET_STATUS, netStatusHandler, false, 0, true);
+			_ns.addEventListener(AsyncErrorEvent.ASYNC_ERROR, asyncErrorHandler, false, 0, true);
+			_ns.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler, false, 0, true);
 			
 			// video
 			_video = new Video();
-			_video.attachNetStream( _ns );
+			_video.attachNetStream(_ns);
 			
 			// container
 			_container = new Sprite();
-			_container.addChild( _video );
+			_container.addChild(_video);
 		}
-		
 		
 		//////////////////////////////////////////////////////
 		// public methods
@@ -77,20 +75,16 @@ package away3d.materials.utils
 		public function play():void
 		{
 			
-			if(!_src)
-			{
+			if (!_src) {
 				trace("Video source not set.");
 				return;
 			}
 			
-			if(_paused)
-			{
+			if (_paused) {
 				_ns.resume();
 				_paused = false;
 				_playing = true;
-			}
-			else if(!_playing)
-			{
+			} else if (!_playing) {
 				_ns.play(_src);
 				_playing = true;
 				_paused = false;
@@ -99,8 +93,7 @@ package away3d.materials.utils
 		
 		public function pause():void
 		{
-			if(!_paused)
-			{
+			if (!_paused) {
 				_ns.pause();
 				_paused = true;
 			}
@@ -109,7 +102,7 @@ package away3d.materials.utils
 		public function seek(val:Number):void
 		{
 			pause();
-			_ns.seek( val );
+			_ns.seek(val);
 			_ns.resume();
 		}
 		
@@ -119,53 +112,48 @@ package away3d.materials.utils
 			_playing = false;
 			_paused = false;
 		}
-
 		
 		public function dispose():void
 		{
 			
 			_ns.close();
 			
-			_video.attachNetStream( null );
+			_video.attachNetStream(null);
 			
-			_ns.removeEventListener( NetStatusEvent.NET_STATUS, 	netStatusHandler );
-			_ns.removeEventListener( AsyncErrorEvent.ASYNC_ERROR, 	asyncErrorHandler );
-			_ns.removeEventListener( IOErrorEvent.IO_ERROR,			ioErrorHandler );
+			_ns.removeEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+			_ns.removeEventListener(AsyncErrorEvent.ASYNC_ERROR, asyncErrorHandler);
+			_ns.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
 			
-			_nc.removeEventListener( NetStatusEvent.NET_STATUS, 		netStatusHandler );
-			_nc.removeEventListener( SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler );
-			_nc.removeEventListener( IOErrorEvent.IO_ERROR, 			ioErrorHandler );
-			_nc.removeEventListener( AsyncErrorEvent.ASYNC_ERROR, 		asyncErrorHandler );
+			_nc.removeEventListener(NetStatusEvent.NET_STATUS, netStatusHandler);
+			_nc.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
+			_nc.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+			_nc.removeEventListener(AsyncErrorEvent.ASYNC_ERROR, asyncErrorHandler);
 			
 			_nsClient["onCuePoint"] = null;
-			_nsClient["onMetaData"]	= null;
-			_nsClient["onBWDone"] 	= null;
-			_nsClient["close"]		= null;
+			_nsClient["onMetaData"] = null;
+			_nsClient["onBWDone"] = null;
+			_nsClient["close"] = null;
 			
-			_container.removeChild( _video );
+			_container.removeChild(_video);
 			_container = null;
 			
-			_src =  null;
+			_src = null;
 			_ns = null;
 			_nc = null;
 			_nsClient = null;
 			_video = null;
 			_soundTransform = null;
-
+			
 			_playing = false;
 			_paused = false;
-			
+		
 		}
-		
-		
-		
 		
 		//////////////////////////////////////////////////////
 		// event handlers
 		//////////////////////////////////////////////////////
 		
-		
-		private function asyncErrorHandler(event:AsyncErrorEvent): void
+		private function asyncErrorHandler(event:AsyncErrorEvent):void
 		{
 			// Must be present to prevent errors, but won't do anything
 		}
@@ -178,30 +166,30 @@ package away3d.materials.utils
 		
 		private function ioErrorHandler(e:IOErrorEvent):void
 		{
-			trace("An IOerror occured: "+e.text);
+			trace("An IOerror occured: " + e.text);
 		}
 		
 		private function securityErrorHandler(e:SecurityErrorEvent):void
 		{
-			trace("A security error occured: "+e.text+" Remember that the FLV must be in the same security sandbox as your SWF.");
+			trace("A security error occured: " + e.text + " Remember that the FLV must be in the same security sandbox as your SWF.");
 		}
 		
 		private function onBWDone():void
 		{
 			// Must be present to prevent errors for RTMP, but won't do anything
 		}
+		
 		private function streamClose():void
 		{
 			trace("The stream was closed. Incorrect URL?");
 		}
 		
-		
 		private function netStatusHandler(e:NetStatusEvent):void
 		{
 			switch (e.info["code"]) {
-				case "NetStream.Play.Stop": 
+				case "NetStream.Play.Stop":
 					//this.dispatchEvent( new VideoEvent(VideoEvent.STOP,_netStream, file) ); 
-					if(loop)
+					if (loop)
 						_ns.play(_src);
 					
 					break;
@@ -209,7 +197,7 @@ package away3d.materials.utils
 					//this.dispatchEvent( new VideoEvent(VideoEvent.PLAY,_netStream, file) );
 					break;
 				case "NetStream.Play.StreamNotFound":
-					trace("The file "+ _src +" was not found", e);
+					trace("The file " + _src + " was not found", e);
 					break;
 				case "NetConnection.Connect.Success":
 					trace("Connected to stream", e);
@@ -217,11 +205,9 @@ package away3d.materials.utils
 			}
 		}
 		
-		
 		//////////////////////////////////////////////////////
 		// get / set functions
 		//////////////////////////////////////////////////////
-		
 		
 		public function get source():String
 		{
@@ -231,7 +217,8 @@ package away3d.materials.utils
 		public function set source(src:String):void
 		{
 			_src = src;
-			if(_playing) _ns.play(_src);
+			if (_playing)
+				_ns.play(_src);
 		}
 		
 		public function get loop():Boolean
@@ -308,7 +295,6 @@ package away3d.materials.utils
 			_video.height = val;
 		}
 		
-		
 		//////////////////////////////////////////////////////
 		// read-only vars
 		//////////////////////////////////////////////////////
@@ -327,12 +313,11 @@ package away3d.materials.utils
 		{
 			return _playing;
 		}
-
+		
 		public function get paused():Boolean
 		{
 			return _paused;
 		}
-		
-		
+	
 	}
 }

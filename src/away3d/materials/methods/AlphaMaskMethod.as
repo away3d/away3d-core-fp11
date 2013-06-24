@@ -5,67 +5,68 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-
+	
 	use namespace arcane;
-
+	
 	/**
 	 * Allows the use of an additional texture to specify the alpha value of the material. When used with the secondary uv
 	 * set, it allows for a tiled main texture with independently varying alpha (useful for water etc).
 	 */
 	public class AlphaMaskMethod extends EffectMethodBase
 	{
-		private var _texture : Texture2DBase;
-		private var _useSecondaryUV : Boolean;
-
-		public function AlphaMaskMethod(texture : Texture2DBase, useSecondaryUV : Boolean = false)
+		private var _texture:Texture2DBase;
+		private var _useSecondaryUV:Boolean;
+		
+		public function AlphaMaskMethod(texture:Texture2DBase, useSecondaryUV:Boolean = false)
 		{
 			super();
 			_texture = texture;
 			_useSecondaryUV = useSecondaryUV;
 		}
-
-		override arcane function initVO(vo : MethodVO) : void
+		
+		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsSecondaryUV = _useSecondaryUV;
 			vo.needsUV = !_useSecondaryUV;
 		}
-
-		public function get useSecondaryUV() : Boolean
+		
+		public function get useSecondaryUV():Boolean
 		{
 			return _useSecondaryUV;
 		}
-
-		public function set useSecondaryUV(value : Boolean) : void
+		
+		public function set useSecondaryUV(value:Boolean):void
 		{
-			if (_useSecondaryUV == value) return;
+			if (_useSecondaryUV == value)
+				return;
 			_useSecondaryUV = value;
 			invalidateShaderProgram();
 		}
-
-		public function get texture() : Texture2DBase
+		
+		public function get texture():Texture2DBase
 		{
 			return _texture;
 		}
-
-		public function set texture(value : Texture2DBase) : void
+		
+		public function set texture(value:Texture2DBase):void
 		{
 			_texture = value;
 		}
-
-		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
+		
+		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 		}
-
-		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		
+		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
-			var textureReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			var uvReg : ShaderRegisterElement = _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying;
+			var textureReg:ShaderRegisterElement = regCache.getFreeTextureReg();
+			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			var uvReg:ShaderRegisterElement = _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying;
 			vo.texturesIndex = textureReg.index;
-
-			return 	getTex2DSampleCode(vo, temp, textureReg, _texture, uvReg) +
-					"mul " + targetReg + ", " + targetReg + ", " + temp + ".x\n";
+			
+			return getTex2DSampleCode(vo, temp, textureReg, _texture, uvReg) +
+				"mul " + targetReg + ", " + targetReg + ", " + temp + ".x\n";
 		}
 	}
 }

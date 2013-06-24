@@ -1,9 +1,10 @@
-package away3d.materials {
+package away3d.materials
+{
 	import away3d.arcane;
 	import away3d.materials.passes.SegmentPass;
-
+	
 	use namespace arcane;
-
+	
 	/**
 	 * SegmentMaterial is a material exclusively used to render wireframe object
 	 *
@@ -11,14 +12,15 @@ package away3d.materials {
 	 */
 	public class SegmentMaterial extends MaterialBase
 	{
-		private var _screenPass : SegmentPass;
-
+		private var _screenPass:SegmentPass;
+		
 		/**
 		 * Creates a new WireframeMaterial object.
 		 */
-		public function SegmentMaterial(thickness : Number = 1.25){
+		public function SegmentMaterial(thickness:Number = 1.25)
+		{
 			super();
-
+			
 			bothSides = true;
 			addPass(_screenPass = new SegmentPass(thickness));
 			_screenPass.material = this;

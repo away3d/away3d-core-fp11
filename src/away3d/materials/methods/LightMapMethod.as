@@ -5,73 +5,75 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-
+	
 	use namespace arcane;
-
+	
 	public class LightMapMethod extends EffectMethodBase
 	{
-		public static const MULTIPLY : String = "multiply";
-		public static const ADD : String = "add";
-
-		private var _texture : Texture2DBase;
-
-		private var _blendMode : String;
-		private var _useSecondaryUV : Boolean;
-
-		public function LightMapMethod(texture : Texture2DBase, blendMode : String = "multiply", useSecondaryUV : Boolean = false)
+		public static const MULTIPLY:String = "multiply";
+		public static const ADD:String = "add";
+		
+		private var _texture:Texture2DBase;
+		
+		private var _blendMode:String;
+		private var _useSecondaryUV:Boolean;
+		
+		public function LightMapMethod(texture:Texture2DBase, blendMode:String = "multiply", useSecondaryUV:Boolean = false)
 		{
 			super();
 			_useSecondaryUV = useSecondaryUV;
 			_texture = texture;
 			this.blendMode = blendMode;
 		}
-
-		override arcane function initVO(vo : MethodVO) : void
+		
+		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsUV = !_useSecondaryUV;
 			vo.needsSecondaryUV = _useSecondaryUV;
 		}
-
-		public function get blendMode() : String
+		
+		public function get blendMode():String
 		{
 			return _blendMode;
 		}
-
-		public function set blendMode(value : String) : void
+		
+		public function set blendMode(value:String):void
 		{
-			if (value != ADD && value != MULTIPLY) throw new Error("Unknown blendmode!");
-			if (_blendMode == value) return;
+			if (value != ADD && value != MULTIPLY)
+				throw new Error("Unknown blendmode!");
+			if (_blendMode == value)
+				return;
 			_blendMode = value;
 			invalidateShaderProgram();
 		}
-
-		public function get texture() : Texture2DBase
+		
+		public function get texture():Texture2DBase
 		{
 			return _texture;
 		}
-
-		public function set texture(value : Texture2DBase) : void
+		
+		public function set texture(value:Texture2DBase):void
 		{
 			if (value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format)
 				invalidateShaderProgram();
 			_texture = value;
 		}
-
-		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
+		
+		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
 			super.activate(vo, stage3DProxy);
 		}
-
-		arcane override function getFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		
+		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
-			var code : String;
-			var lightMapReg : ShaderRegisterElement = regCache.getFreeTextureReg();
-			var temp : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			var code:String;
+			var lightMapReg:ShaderRegisterElement = regCache.getFreeTextureReg();
+			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			vo.texturesIndex = lightMapReg.index;
-
+			
 			code = getTex2DSampleCode(vo, temp, lightMapReg, _texture, _useSecondaryUV? _sharedRegisters.secondaryUVVarying : _sharedRegisters.uvVarying);
-
+			
 			switch (_blendMode) {
 				case MULTIPLY:
 					code += "mul " + targetReg + ", " + targetReg + ", " + temp + "\n";
@@ -80,7 +82,7 @@ package away3d.materials.methods
 					code += "add " + targetReg + ", " + targetReg + ", " + temp + "\n";
 					break;
 			}
-
+			
 			return code;
 		}
 	}

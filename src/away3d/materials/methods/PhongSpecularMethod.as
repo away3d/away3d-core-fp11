@@ -18,10 +18,10 @@ package away3d.materials.methods
 			super();
 		}
 		
-		arcane override function getFragmentCodePerLight(vo : MethodVO, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerLight(vo:MethodVO, lightDirReg:ShaderRegisterElement, lightColReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
 		{
-			var code : String = "";
-			var t : ShaderRegisterElement;
+			var code:String = "";
+			var t:ShaderRegisterElement;
 			
 			if (_isFirstLight)
 				t = _totalLightColorReg;
@@ -30,39 +30,39 @@ package away3d.materials.methods
 				regCache.addFragmentTempUsages(t, 1);
 			}
 			
-			var viewDirReg : ShaderRegisterElement = _sharedRegisters.viewDirFragment;
-			var normalReg : ShaderRegisterElement  = _sharedRegisters.normalFragment;
+			var viewDirReg:ShaderRegisterElement = _sharedRegisters.viewDirFragment;
+			var normalReg:ShaderRegisterElement = _sharedRegisters.normalFragment;
 			
 			// phong model
 			code += "dp3 " + t + ".w, " + lightDirReg + ", " + normalReg + "\n" + // sca1 = light.normal
-			
-			//find the reflected light vector R
-			"add " + t + ".w, " + t + ".w, " + t + ".w\n" + // sca1 = sca1*2
-			"mul " + t + ".xyz, " + normalReg + ", " + t + ".w\n" + // vec1 = normal*sca1
-			"sub " + t + ".xyz, " + t + ", " + lightDirReg + "\n" + // vec1 = vec1 - light (light vector is negative)
-			
-			//smooth the edge as incidence angle approaches 90
-			"add" + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".w\n" + // sca1 = sca1 + smoothtep;
-			"sat " + t + ".w, " + t + ".w\n" + // sca1 range 0 - 1
-			"mul " + t + ".xyz, " + t + ", " + t + ".w\n" + // vec1 = vec1*sca1
-			
-			//find the dot product between R and V
-			"dp3 " + t + ".w, " + t + ", " + viewDirReg + "\n" + // sca1 = vec1.view
-			"sat " + t + ".w, " + t + ".w\n";
+				
+				//find the reflected light vector R
+				"add " + t + ".w, " + t + ".w, " + t + ".w\n" + // sca1 = sca1*2
+				"mul " + t + ".xyz, " + normalReg + ", " + t + ".w\n" + // vec1 = normal*sca1
+				"sub " + t + ".xyz, " + t + ", " + lightDirReg + "\n" + // vec1 = vec1 - light (light vector is negative)
+				
+				//smooth the edge as incidence angle approaches 90
+				"add" + t + ".w, " + t + ".w, " + _sharedRegisters.commons + ".w\n" + // sca1 = sca1 + smoothtep;
+				"sat " + t + ".w, " + t + ".w\n" + // sca1 range 0 - 1
+				"mul " + t + ".xyz, " + t + ", " + t + ".w\n" + // vec1 = vec1*sca1
+				
+				//find the dot product between R and V
+				"dp3 " + t + ".w, " + t + ", " + viewDirReg + "\n" + // sca1 = vec1.view
+				"sat " + t + ".w, " + t + ".w\n";
 			
 			if (_useTexture) {
 				// apply gloss modulation from texture
 				code += "mul " + _specularTexData + ".w, " + _specularTexData + ".y, " + _specularDataRegister + ".w\n" +
 					"pow " + t + ".w, " + t + ".w, " + _specularTexData + ".w\n";
-			}
-			else
+			} else
 				code += "pow " + t + ".w, " + t + ".w, " + _specularDataRegister + ".w\n";
 			
 			// attenuate
 			if (vo.useLightFallOff)
 				code += "mul " + t + ".w, " + t + ".w, " + lightDirReg + ".w\n";
 			
-			if (_modulateMethod != null) code += _modulateMethod(vo, t, regCache, _sharedRegisters);
+			if (_modulateMethod != null)
+				code += _modulateMethod(vo, t, regCache, _sharedRegisters);
 			
 			code += "mul " + t + ".xyz, " + lightColReg + ".xyz, " + t + ".w\n";
 			
