@@ -5,26 +5,27 @@ package away3d.tools.commands
 	import away3d.entities.*;
 	import away3d.materials.*;
 	import away3d.tools.utils.*;
-
+	
 	/**
 	 *  Class Merge merges two or more static meshes into one.<code>Merge</code>
 	 */
-	public class Merge{
+	public class Merge
+	{
 		
 		//private const LIMIT:uint = 196605;
 		private var _objectSpace:Boolean;
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;
 		private var _geomVOs:Vector.<GeometryVO>;
-		   
+		
 		/**
-		 * @param	 keepMaterial		[optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
-		 * If set to false and receiver object has multiple materials, the last material found in mesh1 submeshes is applied to mesh2 submeshes. 
-		 * @param	 disposeSources	[optional] Boolean. Defines if mesh2 (or sources meshes in case applyToContainer is used) are kept untouched or disposed. Default is false.
+		 * @param     keepMaterial        [optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
+		 * If set to false and receiver object has multiple materials, the last material found in mesh1 submeshes is applied to mesh2 submeshes.
+		 * @param     disposeSources    [optional] Boolean. Defines if mesh2 (or sources meshes in case applyToContainer is used) are kept untouched or disposed. Default is false.
 		 * If keepMaterial is true, only geometry and eventual ObjectContainers3D are cleared from memory.
-		 * @param	 objectSpace		[optional] Boolean. Defines if mesh2 is merge using its objectSpace or worldspace. Default is false.
+		 * @param     objectSpace        [optional] Boolean. Defines if mesh2 is merge using its objectSpace or worldspace. Default is false.
 		 */
-		function Merge(keepMaterial:Boolean = false, disposeSources:Boolean = false, objectSpace:Boolean = false ):void
+		function Merge(keepMaterial:Boolean = false, disposeSources:Boolean = false, objectSpace:Boolean = false):void
 		{
 			_keepMaterial = keepMaterial;
 			_disposeSources = disposeSources;
@@ -72,9 +73,9 @@ package away3d.tools.commands
 		
 		/**
 		 * Merges all the children of a container into a single Mesh. If no Mesh object is found, method returns the receiver without modification.
-		 * 
-		 * @param	 receiver 			The Mesh that will receive the merged contents of the container.
-		 * @param	 objectContainer	The ObjectContainer3D holding meshes to merge as one mesh.
+		 *
+		 * @param     receiver            The Mesh that will receive the merged contents of the container.
+		 * @param     objectContainer    The ObjectContainer3D holding meshes to merge as one mesh.
 		 *
 		 * @return The merged Mesh instance.
 		 */
@@ -97,9 +98,9 @@ package away3d.tools.commands
 		
 		/**
 		 * Merges all the meshes found in the Vector.&lt;Mesh&gt; into a single Mesh.
-		 * 
-		 * @param	 receiver 			The Mesh that will receive the merged contents of the meshes.
-		 * @param	 meshes				Vector.&lt;Mesh&gt;. A series of Meshes to be merged with the reciever mesh.
+		 *
+		 * @param     receiver            The Mesh that will receive the merged contents of the meshes.
+		 * @param     meshes                Vector.&lt;Mesh&gt;. A series of Meshes to be merged with the reciever mesh.
 		 */
 		public function applyToMeshes(receiver:Mesh, meshes:Vector.<Mesh>):void
 		{
@@ -109,7 +110,7 @@ package away3d.tools.commands
 				return;
 			
 			//collect meshes in vector
-			for(var i:uint = 0;i<meshes.length;i++)
+			for (var i:uint = 0; i < meshes.length; i++)
 				collect(meshes[i], _disposeSources);
 			
 			//collect receiver
@@ -118,12 +119,12 @@ package away3d.tools.commands
 			//merge to receiver
 			merge(receiver);
 		}
-		 
+		
 		/**
 		 *  Merge 2 meshes into one. It is recommand to use apply when 2 meshes are to be merged. If more need to be merged, use either applyToMeshes or applyToContainer methods.
-		 * 
-		 * @param	 receiver			The Mesh that will receive the merged contents of both meshes.
-		 * @param	 mesh				The Mesh that will be merged with the receiver mesh
+		 *
+		 * @param     receiver            The Mesh that will receive the merged contents of both meshes.
+		 * @param     mesh                The Mesh that will be merged with the receiver mesh
 		 */
 		public function apply(receiver:Mesh, mesh:Mesh):void
 		{
@@ -141,16 +142,15 @@ package away3d.tools.commands
 		
 		private function reset():void
 		{
-			_geomVOs= new Vector.<GeometryVO>();
+			_geomVOs = new Vector.<GeometryVO>();
 		}
-		
 		
 		private function merge(destMesh:Mesh):void
 		{
-			var i : uint;
-			var subIdx : uint;
-			var destGeom : Geometry;
-			var useSubMaterials : Boolean;
+			var i:uint;
+			var subIdx:uint;
+			var destGeom:Geometry;
+			var useSubMaterials:Boolean;
 			
 			destGeom = destMesh.geometry;
 			subIdx = destMesh.subMeshes.length;
@@ -159,15 +159,15 @@ package away3d.tools.commands
 			// i.e. if there is more than one material available.
 			useSubMaterials = (_geomVOs.length > 1);
 			
-			for (i=0; i<_geomVOs.length; i++) {
-				var s : uint;
-				var data : GeometryVO;
-				var subs : Vector.<ISubGeometry>;
+			for (i = 0; i < _geomVOs.length; i++) {
+				var s:uint;
+				var data:GeometryVO;
+				var subs:Vector.<ISubGeometry>;
 				
 				data = _geomVOs[i];
 				subs = GeomUtil.fromVectors(data.vertices, data.indices, data.uvs, data.normals, null, null, null);
 				
-				for (s=0; s<subs.length; s++) {
+				for (s = 0; s < subs.length; s++) {
 					destGeom.addSubGeometry(subs[s]);
 					
 					if (_keepMaterial && useSubMaterials)
@@ -184,21 +184,21 @@ package away3d.tools.commands
 		private function collect(mesh:Mesh, dispose:Boolean):void
 		{
 			if (mesh.geometry) {
-				var subIdx : uint;
-				var subGeometries : Vector.<ISubGeometry> = mesh.geometry.subGeometries;
-				var calc : uint;
-				for (subIdx = 0; subIdx<subGeometries.length; subIdx++){					 
-					var i : uint;
-					var len : uint;
-					var iIdx : uint, vIdx : uint, nIdx : uint, uIdx : uint;
-					var indexOffset : uint;
-					var subGeom : ISubGeometry;
-					var vo : GeometryVO;
-					var vertices : Vector.<Number>;
-					var normals : Vector.<Number>;
-					var vStride : uint, nStride : uint, uStride : uint;
-					var vOffs : uint, nOffs : uint, uOffs : uint;
-					var vd : Vector.<Number>, nd : Vector.<Number>, ud : Vector.<Number>;
+				var subIdx:uint;
+				var subGeometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
+				var calc:uint;
+				for (subIdx = 0; subIdx < subGeometries.length; subIdx++) {
+					var i:uint;
+					var len:uint;
+					var iIdx:uint, vIdx:uint, nIdx:uint, uIdx:uint;
+					var indexOffset:uint;
+					var subGeom:ISubGeometry;
+					var vo:GeometryVO;
+					var vertices:Vector.<Number>;
+					var normals:Vector.<Number>;
+					var vStride:uint, nStride:uint, uStride:uint;
+					var vOffs:uint, nOffs:uint, uOffs:uint;
+					var vd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
 					
 					subGeom = subGeometries[subIdx];
 					vd = subGeom.vertexData;
@@ -225,7 +225,7 @@ package away3d.tools.commands
 					nIdx = normals.length;
 					uIdx = vo.uvs.length;
 					len = subGeom.numVertices;
-					for (i=0; i<len; i++) {
+					for (i = 0; i < len; i++) {
 						// Position
 						calc = vOffs + i*vStride;
 						vertices[vIdx++] = vd[calc];
@@ -248,11 +248,11 @@ package away3d.tools.commands
 					indexOffset = vo.vertices.length/3;
 					iIdx = vo.indices.length;
 					len = subGeom.numTriangles;
-					for (i=0; i<len; i++) {
+					for (i = 0; i < len; i++) {
 						calc = i*3;
 						vo.indices[iIdx++] = subGeom.indexData[calc] + indexOffset;
-						vo.indices[iIdx++] = subGeom.indexData[calc+1] + indexOffset;
-						vo.indices[iIdx++] = subGeom.indexData[calc+2] + indexOffset;
+						vo.indices[iIdx++] = subGeom.indexData[calc + 1] + indexOffset;
+						vo.indices[iIdx++] = subGeom.indexData[calc + 2] + indexOffset;
 					}
 					
 					if (!_objectSpace) {
@@ -263,37 +263,34 @@ package away3d.tools.commands
 						vIdx = vo.vertices.length;
 						nIdx = vo.normals.length;
 						len = vertices.length;
-						for (i=0; i<len; i++) {
+						for (i = 0; i < len; i++) {
 							vo.vertices[vIdx++] = vertices[i];
 							vo.normals[nIdx++] = normals[i];
 						}
 					}
 				}
 				
-				if (dispose) {
+				if (dispose)
 					mesh.geometry.dispose();
-				}
 			}
 		}
 		
-		
-		private function getSubGeomData(material : MaterialBase) : GeometryVO
+		private function getSubGeomData(material:MaterialBase):GeometryVO
 		{
-			var data : GeometryVO;
+			var data:GeometryVO;
 			
 			if (_keepMaterial) {
-				var i : uint;
-				var len : uint;
+				var i:uint;
+				var len:uint;
 				
 				len = _geomVOs.length;
-				for (i=0; i<len; i++) {
+				for (i = 0; i < len; i++) {
 					if (_geomVOs[i].material == material) {
 						data = _geomVOs[i];
 						break;
 					}
 				}
-			}
-			else if (_geomVOs.length) {
+			} else if (_geomVOs.length) {
 				// If materials are not to be kept, all data can be
 				// put into a single VO, so return that one.
 				data = _geomVOs[0];
@@ -319,10 +316,10 @@ package away3d.tools.commands
 			var child:ObjectContainer3D;
 			var i:uint;
 			
-			if(object is Mesh)
+			if (object is Mesh)
 				collect(Mesh(object), _disposeSources);
 			
-			for(i = 0;i<object.numChildren;++i){
+			for (i = 0; i < object.numChildren; ++i) {
 				child = object.getChildAt(i);
 				parseContainer(child);
 			}
@@ -332,11 +329,15 @@ package away3d.tools.commands
 
 import away3d.materials.MaterialBase;
 
-class GeometryVO {
+class GeometryVO
+{
 	public var uvs:Vector.<Number>;
 	public var vertices:Vector.<Number>;
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
 	public var material:MaterialBase;
-	public function GeometryVO() {} 
+	
+	public function GeometryVO()
+	{
+	}
 }

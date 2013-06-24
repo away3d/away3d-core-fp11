@@ -12,7 +12,8 @@ package away3d.tools.helpers.data
 		private var _defaultInvVertexTransform:Matrix3D;
 		private var _defaultUVTransform:Matrix;
 		
-		public function ParticleGeometryTransform() {
+		public function ParticleGeometryTransform()
+		{
 		}
 		
 		public function set vertexTransform(value:Matrix3D):void
