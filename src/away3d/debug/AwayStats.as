@@ -19,12 +19,12 @@ package away3d.debug
 	import flash.utils.getTimer;
 	
 	use namespace arcane;
-
+	
 	/**
 	 * <p>Stats monitor for Away3D or general use in any project. The widget was designed to
 	 * display all the necessary data in ways that are easily readable, while maintaining a
 	 * tiny size.</p>
-	 * 
+	 *
 	 * <p>The following data is displayed by the widget, either graphically, through
 	 * text, or both.</p>
 	 * <ul>
@@ -36,19 +36,19 @@ package away3d.debug
 	 *   <li>Maximum RAM usage</li>
 	 *   <li>Number of polygons in scene</li>
 	 *   <li>Number of polygons last rendered (yellow in graph)</li>
-	 * </ul> 
-	 * 
+	 * </ul>
+	 *
 	 * <p>There are two display modes; standard and minimized, which are alternated by clicking
 	 * the button in the upper right corner, at runtime. The widget can also be configured to
 	 * start in minimized mode by setting the relevant constructor parameter.</p>
-	 * 
+	 *
 	 * <p>All data can be reset at any time, by clicking the lower part of the widget (where
 	 * the RAM and POLY counters are located. The average FPS can be reset separately by
 	 * clicking it's ²displayed value. Furthermore, the stage frame rate can be increased or
 	 * decreased by clicking the upper and lower parts of the graph, respectively. Clicking close
-	 * to the center will increment in small values, and further away will increase the steps. 
+	 * to the center will increment in small values, and further away will increase the steps.
 	 * The graph itself is only visible in standard (as opposed to minimized) display mode.</p>
-	 * 
+	 *
 	 * <p>The average FPS is calculated using one of two methods, configurable via constructor
 	 * parameters. By setting the meanDataLength to a non-zero value, the number of recorded
 	 * frame rate values on which the average is based can be configured. This has a tiny
@@ -57,112 +57,110 @@ package away3d.debug
 	 */
 	public class AwayStats extends Sprite
 	{
-		private var _views : Vector.<View3D>;
-		private var _timer : Timer;
-		private var _last_frame_timestamp : Number;
+		private var _views:Vector.<View3D>;
+		private var _timer:Timer;
+		private var _last_frame_timestamp:Number;
 		
-		private var _fps : uint;
-		private var _ram : Number;
-		private var _max_ram : Number;
-		private var _min_fps : uint;
-		private var _avg_fps : Number;
-		private var _max_fps : uint;
-		private var _tfaces : uint;
-		private var _rfaces : uint;
+		private var _fps:uint;
+		private var _ram:Number;
+		private var _max_ram:Number;
+		private var _min_fps:uint;
+		private var _avg_fps:Number;
+		private var _max_fps:uint;
+		private var _tfaces:uint;
+		private var _rfaces:uint;
 		
-		private var _num_frames : uint;
-		private var _fps_sum : uint;
+		private var _num_frames:uint;
+		private var _fps_sum:uint;
 		
-		private var _top_bar : Sprite;
-		private var _btm_bar : Sprite;
-		private var _btm_bar_hit : Sprite;
+		private var _top_bar:Sprite;
+		private var _btm_bar:Sprite;
+		private var _btm_bar_hit:Sprite;
 		
-		private var _data_format : TextFormat;
-		private var _label_format : TextFormat;
+		private var _data_format:TextFormat;
+		private var _label_format:TextFormat;
 		
-		private var _fps_bar : Shape;
-		private var _afps_bar : Shape;
-		private var _lfps_bar : Shape;
-		private var _hfps_bar : Shape;
-		private var _diagram : Sprite;
-		private var _dia_bmp : BitmapData;
+		private var _fps_bar:Shape;
+		private var _afps_bar:Shape;
+		private var _lfps_bar:Shape;
+		private var _hfps_bar:Shape;
+		private var _diagram:Sprite;
+		private var _dia_bmp:BitmapData;
 		
-		private var _mem_points : Array;
-		private var _mem_graph : Shape;
-		private var _updates : int;
+		private var _mem_points:Array;
+		private var _mem_graph:Shape;
+		private var _updates:int;
 		
-		private var _min_max_btn : Sprite;
+		private var _min_max_btn:Sprite;
 		
-		private var _fps_tf : TextField;
-		private var _afps_tf : TextField;
-		private var _ram_tf : TextField;
-		private var _poly_tf : TextField;
-		private var _swhw_tf : TextField;
+		private var _fps_tf:TextField;
+		private var _afps_tf:TextField;
+		private var _ram_tf:TextField;
+		private var _poly_tf:TextField;
+		private var _swhw_tf:TextField;
 		
-		private var _drag_dx : Number;
-		private var _drag_dy : Number;
-		private var _dragging : Boolean;
+		private var _drag_dx:Number;
+		private var _drag_dy:Number;
+		private var _dragging:Boolean;
 		
-		private var _mean_data : Array;
-		private var _mean_data_length : int;
+		private var _mean_data:Array;
+		private var _mean_data_length:int;
 		
-		private var _enable_reset : Boolean;
-		private var _enable_mod_fr : Boolean;
-		private var _transparent : Boolean;
-		private var _minimized : Boolean;
-		private var _showing_driv_info : Boolean;
+		private var _enable_reset:Boolean;
+		private var _enable_mod_fr:Boolean;
+		private var _transparent:Boolean;
+		private var _minimized:Boolean;
+		private var _showing_driv_info:Boolean;
 		
-		private static const _WIDTH : Number = 125;
-		private static const _MAX_HEIGHT : Number = 85;
-		private static const _MIN_HEIGHT : Number = 51;
-		private static const _UPPER_Y : Number = -1;
-		private static const _MID_Y : Number = 9;
-		private static const _LOWER_Y : Number = 19;
-		private static const _DIAG_HEIGHT : Number = _MAX_HEIGHT - 50;
-		private static const _BOTTOM_BAR_HEIGHT : Number = 31;
+		private static const _WIDTH:Number = 125;
+		private static const _MAX_HEIGHT:Number = 85;
+		private static const _MIN_HEIGHT:Number = 51;
+		private static const _UPPER_Y:Number = -1;
+		private static const _MID_Y:Number = 9;
+		private static const _LOWER_Y:Number = 19;
+		private static const _DIAG_HEIGHT:Number = _MAX_HEIGHT - 50;
+		private static const _BOTTOM_BAR_HEIGHT:Number = 31;
 		
-		private static const _POLY_COL : uint = 0xffcc00;
-		private static const _MEM_COL : uint = 0xff00cc;
-		
+		private static const _POLY_COL:uint = 0xffcc00;
+		private static const _MEM_COL:uint = 0xff00cc;
 		
 		// Singleton instance reference
-		private static var _INSTANCE : AwayStats;
-		
+		private static var _INSTANCE:AwayStats;
 		
 		/**
 		 * <p>Create an Away3D stats widget. The widget can be added to the stage
 		 * and positioned like any other display object. Once on the stage, you
 		 * can drag the widget to re-position it at runtime.</p>
-		 * 
+		 *
 		 * <p>If you pass a View3D instance, the widget will be able to display
 		 * the total number of faces in your scene, and the amount of faces that
 		 * were rendered during the last render() call. Views can also be registered
-		 * after construction using the registerView() method. Omit the view 
+		 * after construction using the registerView() method. Omit the view
 		 * constructor parameter to disable this feature altogether.</p>
-		 * 
+		 *
 		 * @param view A reference to your Away3D view. This is required if you
 		 * want the stats widget to display polycounts.
-		 * 
+		 *
 		 * @param minimized Defines whether the widget should start up in minimized
 		 * mode. By default, it is shown in full-size mode on launch.
-		 * 
+		 *
 		 * @param transparent Defines whether to omit the background plate and print
 		 * statistics directly on top of the underlying stage.
-		 * 
+		 *
 		 * @param meanDataLength The number of frames on which to base the average
 		 * frame rate calculation. The default value of zero indicates that all
 		 * frames since the last reset will be used.
-		 * 
+		 *
 		 * @param enableClickToReset Enables interaction allowing you to reset all
-		 * counters by clicking the bottom bar of the widget. When activated, you 
+		 * counters by clicking the bottom bar of the widget. When activated, you
 		 * can also click the average frame rate trace-out to reset just that one
 		 * value.
-		 * 
+		 *
 		 * @param enableModifyFramerate When enabled, allows you to click the upper
 		 * and lower parts of the graph area to increase and decrease SWF frame rate
 		 * respectively.
 		 */
-		public function AwayStats(view3d : View3D = null, minimized : Boolean = false, transparent : Boolean = false, meanDataLength : uint = 0, enableClickToReset : Boolean = true, enableModifyFrameRate : Boolean = true)
+		public function AwayStats(view3d:View3D = null, minimized:Boolean = false, transparent:Boolean = false, meanDataLength:uint = 0, enableClickToReset:Boolean = true, enableModifyFrameRate:Boolean = true)
 		{
 			super();
 			
@@ -176,14 +174,11 @@ package away3d.debug
 			if (view3d)
 				_views.push(view3d);
 			
-			
 			// Store instance for singleton access. Singleton status
 			// is not enforced, since the widget will work anyway.
-			if (_INSTANCE) {
+			if (_INSTANCE)
 				trace('Creating several statistics windows in one project. Is this intentional?');
-			}
 			_INSTANCE = this;
-			
 			
 			_fps = 0;
 			_num_frames = 0;
@@ -195,33 +190,33 @@ package away3d.debug
 			
 			_init();
 		}
-
-		public function get max_ram() : Number
+		
+		public function get max_ram():Number
 		{
 			return _max_ram;
 		}
-
-		public function get ram() : Number
+		
+		public function get ram():Number
 		{
 			return _ram;
 		}
-
-		public function get avg_fps() : Number
+		
+		public function get avg_fps():Number
 		{
 			return _avg_fps;
 		}
-
-		public function get max_fps() : uint
+		
+		public function get max_fps():uint
 		{
 			return _max_fps;
 		}
-
+		
 		public function get fps():int
 		{
 			return _fps;
 		}
 		
-		private function _init() : void
+		private function _init():void
 		{
 			_initMisc();
 			_initTopBar();
@@ -236,22 +231,15 @@ package away3d.debug
 			addEventListener(Event.REMOVED_FROM_STAGE, _onRemovedFromStage);
 		}
 		
-		
-		
-		
-		
-		
 		/**
 		 * Holds a reference to the stats widget (or if several have been created
 		 * during session, the one that was last instantiated.) Allows you to set
 		 * properties and register views from anywhere in your code.
 		 */
-		public static function get instance() : AwayStats
+		public static function get instance():AwayStats
 		{
-			return _INSTANCE ? _INSTANCE : _INSTANCE = new AwayStats();
+			return _INSTANCE? _INSTANCE : _INSTANCE = new AwayStats();
 		}
-		
-		
 		
 		/**
 		 * Add a view to the list of those that are taken into account when
@@ -260,12 +248,11 @@ package away3d.debug
 		 * your view, or when using several views, or when views are created and
 		 * destroyed dynamically at runtime.
 		 */
-		public function registerView(view3d : View3D) : void
+		public function registerView(view3d:View3D):void
 		{
-			if (view3d && _views.indexOf(view3d)<0)
+			if (view3d && _views.indexOf(view3d) < 0)
 				_views.push(view3d);
 		}
-		
 		
 		/**
 		 * Remove a view from the list of those that are taken into account when
@@ -273,21 +260,16 @@ package away3d.debug
 		 * the only one known to the stats widget, calling this will leave the
 		 * list empty, disabling poly count statistics altogether.
 		 */
-		public function unregisterView(view3d : View3D) : void
+		public function unregisterView(view3d:View3D):void
 		{
 			if (view3d) {
-				var idx : int = _views.indexOf(view3d);
+				var idx:int = _views.indexOf(view3d);
 				if (idx >= 0)
 					_views.splice(idx, 1);
 			}
 		}
 		
-		
-		
-		
-		
-		
-		private function _initMisc() : void
+		private function _initMisc():void
 		{
 			_timer = new Timer(200, 0);
 			_timer.addEventListener('timer', _onTimer);
@@ -295,29 +277,26 @@ package away3d.debug
 			_label_format = new TextFormat('_sans', 9, 0xffffff, true);
 			_data_format = new TextFormat('_sans', 9, 0xffffff, false);
 			
-			
-			if (_mean_data_length>0) {
-				var i : int;
+			if (_mean_data_length > 0) {
+				var i:int;
 				
 				_mean_data = [];
-				for (i=0; i<_mean_data_length;i++) {
+				for (i = 0; i < _mean_data_length; i++)
 					_mean_data[i] = 0.0;
-				}
 			}
 		}
-		
 		
 		/**
 		 * @private
 		 * Draw logo and create title textfield.
 		 */
-		private function _initTopBar() : void
+		private function _initTopBar():void
 		{
-			var logo : Shape;
-			var markers : Shape;
+			var logo:Shape;
+			var markers:Shape;
 			//var logo_tf : TextField;
-			var fps_label_tf : TextField;
-			var afps_label_tf : TextField;
+			var fps_label_tf:TextField;
+			var afps_label_tf:TextField;
 			
 			_top_bar = new Sprite;
 			_top_bar.graphics.beginFill(0, 0);
@@ -353,7 +332,6 @@ package away3d.debug
 			logo.graphics.lineTo(-8, 7);
 			_top_bar.addChild(logo);
 			
-			
 			// Color markers 
 			markers = new Shape;
 			markers.graphics.beginFill(0xffffff);
@@ -365,7 +343,7 @@ package away3d.debug
 			// CURRENT FPS
 			fps_label_tf = new TextField();
 			fps_label_tf.defaultTextFormat = _label_format;
-			fps_label_tf.autoSize = TextFieldAutoSize.LEFT; 
+			fps_label_tf.autoSize = TextFieldAutoSize.LEFT;
 			fps_label_tf.text = 'FR:';
 			fps_label_tf.x = 24;
 			fps_label_tf.y = 2;
@@ -400,7 +378,7 @@ package away3d.debug
 			
 			// Minimize / maximize button
 			_min_max_btn = new Sprite;
-			_min_max_btn.x = _WIDTH-8;
+			_min_max_btn.x = _WIDTH - 8;
 			_min_max_btn.y = 7;
 			_min_max_btn.graphics.beginFill(0, 0);
 			_min_max_btn.graphics.lineStyle(1, 0xefefef, 1, true);
@@ -412,13 +390,12 @@ package away3d.debug
 			_top_bar.addChild(_min_max_btn);
 		}
 		
-		
-		private function _initBottomBar() : void
+		private function _initBottomBar():void
 		{
-			var markers : Shape;
-			var ram_label_tf : TextField;
-			var poly_label_tf : TextField;
-			var swhw_label_tf : TextField;
+			var markers:Shape;
+			var ram_label_tf:TextField;
+			var poly_label_tf:TextField;
+			var swhw_label_tf:TextField;
 			
 			_btm_bar = new Sprite();
 			_btm_bar.graphics.beginFill(0, 0.2);
@@ -429,9 +406,8 @@ package away3d.debug
 			// affect interaction badly.)
 			_btm_bar_hit = new Sprite;
 			_btm_bar_hit.graphics.beginFill(0xffcc00, 0);
-			_btm_bar_hit.graphics.drawRect(0, 1, _WIDTH, _BOTTOM_BAR_HEIGHT-1);
+			_btm_bar_hit.graphics.drawRect(0, 1, _WIDTH, _BOTTOM_BAR_HEIGHT - 1);
 			addChild(_btm_bar_hit);
-			
 			
 			// Color markers
 			markers = new Shape;
@@ -484,7 +460,7 @@ package away3d.debug
 			// SOFTWARE RENDERER WARNING
 			swhw_label_tf = new TextField;
 			swhw_label_tf.defaultTextFormat = _label_format;
-            swhw_label_tf.autoSize = TextFieldAutoSize.LEFT;
+			swhw_label_tf.autoSize = TextFieldAutoSize.LEFT;
 			swhw_label_tf.text = 'DRIV:';
 			swhw_label_tf.x = 10;
 			swhw_label_tf.y = _LOWER_Y;
@@ -502,8 +478,7 @@ package away3d.debug
 			_btm_bar.addChild(_swhw_tf);
 		}
 		
-		
-		private function _initDiagrams() : void
+		private function _initDiagrams():void
 		{
 			
 			_dia_bmp = new BitmapData(_WIDTH, _DIAG_HEIGHT, true, 0);
@@ -549,17 +524,13 @@ package away3d.debug
 			_hfps_bar.y = _fps_bar.y;
 			addChild(_hfps_bar);
 			
-			
 			_mem_points = [];
 			_mem_graph = new Shape;
 			_mem_graph.y = _diagram.y + _diagram.height;
 			addChildAt(_mem_graph, 0);
 		}
 		
-		
-		
-		
-		private function _initInteraction() : void
+		private function _initInteraction():void
 		{
 			// Mouse down to drag on the title
 			_top_bar.addEventListener(MouseEvent.MOUSE_DOWN, _onTopBarMouseDown);
@@ -572,17 +543,13 @@ package away3d.debug
 			}
 			
 			// Framerate increase/decrease by clicking on the diagram
-			if (_enable_mod_fr) {
+			if (_enable_mod_fr)
 				_diagram.addEventListener(MouseEvent.CLICK, _onDiagramClick);
-			}
 		}
 		
-		
-		
-		
-		private function _redrawWindow() : void
+		private function _redrawWindow():void
 		{
-			var plate_height : Number;
+			var plate_height:Number;
 			
 			plate_height = _minimized? _MIN_HEIGHT : _MAX_HEIGHT;
 			
@@ -597,7 +564,7 @@ package away3d.debug
 			_min_max_btn.rotation = _minimized? 180 : 0;
 			
 			// Position counters
-			_btm_bar.y = plate_height-_BOTTOM_BAR_HEIGHT;
+			_btm_bar.y = plate_height - _BOTTOM_BAR_HEIGHT;
 			_btm_bar_hit.y = _btm_bar.y;
 			
 			// Hide/show diagram for minimized/maximized view respectively
@@ -613,66 +580,56 @@ package away3d.debug
 				_redrawMemGraph();
 		}
 		
-		
-		private function _redrawStats() : void
+		private function _redrawStats():void
 		{
-			var dia_y : int;
+			var dia_y:int;
 			
 			// Redraw counters
 			_fps_tf.text = _fps.toString().concat('/', int(stage.frameRate));
 			_afps_tf.text = Math.round(_avg_fps).toString();
 			_ram_tf.text = _getRamString(_ram).concat(' / ', _getRamString(_max_ram));
 			
-			
 			// Move entire diagram
 			_dia_bmp.scroll(1, 0);
-			
 			
 			// Only redraw polycount if there is a  view available
 			// or they won't have been calculated properly
 			if (_views.length > 0) {
-//				_poly_tf.text = _rfaces.toString().concat(' / ', _tfaces); // TODO: Total faces not yet available in 4.x
+				//				_poly_tf.text = _rfaces.toString().concat(' / ', _tfaces); // TODO: Total faces not yet available in 4.x
 				_poly_tf.text = _rfaces + "";
-
+				
 				// Plot rendered faces
-				dia_y = _dia_bmp.height - Math.floor(_rfaces/_tfaces * _dia_bmp.height);
-				_dia_bmp.setPixel32(1, dia_y, _POLY_COL+0xff000000);
-			}
-			else {
+				dia_y = _dia_bmp.height - Math.floor(_rfaces/_tfaces*_dia_bmp.height);
+				_dia_bmp.setPixel32(1, dia_y, _POLY_COL + 0xff000000);
+			} else
 				_poly_tf.text = 'n/a (no view)';
-			}
 			
 			// Show software (SW) or hardware (HW)
 			if (!_showing_driv_info) {
 				if (_views && _views.length && _views[0].renderer.stage3DProxy && _views[0].renderer.stage3DProxy.context3D) {
-					var di : String = _views[0].renderer.stage3DProxy.context3D.driverInfo;
+					var di:String = _views[0].renderer.stage3DProxy.context3D.driverInfo;
 					_swhw_tf.text = di.substr(0, di.indexOf(' '));
 					_showing_driv_info = true;
-				}
-				else {
+				} else
 					_swhw_tf.text = 'n/a (no view)';
-				}
 			}
 			
 			// Plot current framerate
-			dia_y = _dia_bmp.height - Math.floor(_fps/stage.frameRate * _dia_bmp.height);
+			dia_y = _dia_bmp.height - Math.floor(_fps/stage.frameRate*_dia_bmp.height);
 			_dia_bmp.setPixel32(1, dia_y, 0xffffffff);
 			
 			// Plot average framerate
-			dia_y = _dia_bmp.height - Math.floor(_avg_fps/stage.frameRate * _dia_bmp.height);
+			dia_y = _dia_bmp.height - Math.floor(_avg_fps/stage.frameRate*_dia_bmp.height);
 			_dia_bmp.setPixel32(1, dia_y, 0xff33bbff);
-			
 			
 			// Redraw diagrams
 			if (_minimized) {
 				_fps_bar.scaleX = Math.min(1, _fps/stage.frameRate);
-				_afps_bar.x = Math.min(1, _avg_fps/stage.frameRate) * _WIDTH;
-				_lfps_bar.x = Math.min(1, _min_fps/stage.frameRate) * _WIDTH;
-				_hfps_bar.x = Math.min(1, _max_fps/stage.frameRate) * _WIDTH;
-			}
-			else if (_updates%5 == 0) {
+				_afps_bar.x = Math.min(1, _avg_fps/stage.frameRate)*_WIDTH;
+				_lfps_bar.x = Math.min(1, _min_fps/stage.frameRate)*_WIDTH;
+				_hfps_bar.x = Math.min(1, _max_fps/stage.frameRate)*_WIDTH;
+			} else if (_updates%5 == 0)
 				_redrawMemGraph();
-			}
 			
 			// Move along regardless of whether the graph
 			// was updated this time around
@@ -681,21 +638,20 @@ package away3d.debug
 			_updates++;
 		}
 		
-		
-		private function _redrawMemGraph() : void
+		private function _redrawMemGraph():void
 		{
-			var i : int;
-			var g : Graphics;
-			var max_val : Number = 0;
+			var i:int;
+			var g:Graphics;
+			var max_val:Number = 0;
 			
 			// Redraw memory graph (only every 5th update)
 			_mem_graph.scaleY = 1;
 			g = _mem_graph.graphics;
 			g.clear();
 			g.lineStyle(.5, _MEM_COL, 1, true, LineScaleMode.NONE);
-			g.moveTo(5*(_mem_points.length-1), -_mem_points[_mem_points.length-1]);
-			for (i=_mem_points.length-1; i>=0; --i) {
-				if (_mem_points[i+1]==0 || _mem_points[i]==0) {
+			g.moveTo(5*(_mem_points.length - 1), -_mem_points[_mem_points.length - 1]);
+			for (i = _mem_points.length - 1; i >= 0; --i) {
+				if (_mem_points[i + 1] == 0 || _mem_points[i] == 0) {
 					g.moveTo(i*5, -_mem_points[i]);
 					continue;
 				}
@@ -705,31 +661,27 @@ package away3d.debug
 				if (_mem_points[i] > max_val)
 					max_val = _mem_points[i];
 			}
-			_mem_graph.scaleY = _dia_bmp.height / max_val;
+			_mem_graph.scaleY = _dia_bmp.height/max_val;
 		}
 		
-		
-		private function _getRamString(ram : Number) : String
+		private function _getRamString(ram:Number):String
 		{
-			var ram_unit : String = 'B';
+			var ram_unit:String = 'B';
 			
 			if (ram > 1048576) {
 				ram /= 1048576;
-				ram_unit = 'M'; 
-			}
-			else if (ram > 1024) {
+				ram_unit = 'M';
+			} else if (ram > 1024) {
 				ram /= 1024;
-				ram_unit = 'K'; 
+				ram_unit = 'K';
 			}
 			
 			return ram.toFixed(1) + ram_unit;
 		}
 		
-		
-		
-		public function reset() : void
+		public function reset():void
 		{
-			var i : int;
+			var i:int;
 			
 			// Reset all values
 			_updates = 0;
@@ -741,29 +693,24 @@ package away3d.debug
 			_max_ram = 0;
 			
 			// Reset RAM usage log
-			for (i=0; i<_WIDTH/5; i++) {
-				_mem_points[i]=0;
-			}
+			for (i = 0; i < _WIDTH/5; i++)
+				_mem_points[i] = 0;
 			
 			// Reset FPS log if any
 			if (_mean_data) {
-				for (i=0; i<_mean_data.length; i++) {
+				for (i = 0; i < _mean_data.length; i++)
 					_mean_data[i] = 0.0;
-				}
 			}
-			
-			
 			
 			// Clear diagram graphics
 			_mem_graph.graphics.clear();
 			_dia_bmp.fillRect(_dia_bmp.rect, 0);
 		}
 		
-		
-		private function _endDrag() : void
+		private function _endDrag():void
 		{
 			if (this.x < -_WIDTH)
-				this.x = -(_WIDTH-20);
+				this.x = -(_WIDTH - 20);
 			else if (this.x > stage.stageWidth)
 				this.x = stage.stageWidth - 20;
 			
@@ -777,27 +724,25 @@ package away3d.debug
 			this.x = Math.round(this.x);
 			this.y = Math.round(this.y);
 			
-			
-			_dragging = false; 
+			_dragging = false;
 			stage.removeEventListener(Event.MOUSE_LEAVE, _onMouseUpOrLeave);
 			stage.removeEventListener(MouseEvent.MOUSE_UP, _onMouseUpOrLeave);
 			stage.removeEventListener(MouseEvent.MOUSE_MOVE, _onMouseMove);
 		}
 		
-		
-		private function _onAddedToStage(ev : Event) : void
+		private function _onAddedToStage(ev:Event):void
 		{
 			_timer.start();
 			addEventListener(Event.ENTER_FRAME, _onEnterFrame);
 		}
 		
-		private function _onRemovedFromStage(ev : Event) : void
+		private function _onRemovedFromStage(ev:Event):void
 		{
 			_timer.stop();
 			removeEventListener(Event.ENTER_FRAME, _onTimer);
 		}
 		
-		private function _onTimer(ev : Event) : void
+		private function _onTimer(ev:Event):void
 		{
 			// Store current and max RAM
 			_ram = System.totalMemory;
@@ -814,23 +759,21 @@ package away3d.debug
 			
 			// Update polycount if views are available
 			if (_views.length > 0) {
-				var i : int;
-				
+				var i:int;
 				
 				// Sum up poly counts across all registered views
-				for (i=0; i<_views.length; i++) {
+				for (i = 0; i < _views.length; i++) {
 					_rfaces += _views[i].renderedFacesCount;
-					//_tfaces += 0;// TODO: total faces
+						//_tfaces += 0;// TODO: total faces
 				}
 			}
 			
 			_redrawStats();
 		}
 		
-		
-		private function _onEnterFrame(ev : Event) : void
+		private function _onEnterFrame(ev:Event):void
 		{
-			var time : Number = getTimer() - _last_frame_timestamp;
+			var time:Number = getTimer() - _last_frame_timestamp;
 			
 			// Calculate current FPS
 			_fps = Math.floor(1000/time);
@@ -839,7 +782,7 @@ package away3d.debug
 			// Update min/max fps
 			if (_fps > _max_fps)
 				_max_fps = _fps;
-			else if (_fps!=0 && _fps < _min_fps)
+			else if (_fps != 0 && _fps < _min_fps)
 				_min_fps = _fps;
 			
 			// If using a limited length log of frames
@@ -854,8 +797,7 @@ package away3d.debug
 				// Average = sum of all log entries over
 				// number of log entries.
 				_avg_fps = _fps_sum/_mean_data_length;
-			}
-			else {
+			} else {
 				// Regular average calculation, i.e. using
 				// a running sum since last reset
 				_num_frames++;
@@ -865,44 +807,42 @@ package away3d.debug
 			_last_frame_timestamp = getTimer();
 		}
 		
-		
-		private function _onDiagramClick(ev : MouseEvent) : void
+		private function _onDiagramClick(ev:MouseEvent):void
 		{
-			stage.frameRate -= Math.floor((_diagram.mouseY - _dia_bmp.height/2) / 5);
+			stage.frameRate -= Math.floor((_diagram.mouseY - _dia_bmp.height/2)/5);
 		}
 		
 		/**
 		 * @private
 		 * Reset just the average FPS counter.
 		 */
-		private function _onAverageFpsClick_reset(ev : MouseEvent) : void
+		private function _onAverageFpsClick_reset(ev:MouseEvent):void
 		{
 			if (!_dragging) {
-				var i : int;
+				var i:int;
 				
 				_num_frames = 0;
 				_fps_sum = 0;
 				
 				if (_mean_data) {
-					for (i=0; i<_mean_data.length; i++) {
+					for (i = 0; i < _mean_data.length; i++)
 						_mean_data[i] = 0.0;
-					}
 				}
 			}
 		}
 		
-		private function _onCountersClick_reset(ev : MouseEvent) : void
+		private function _onCountersClick_reset(ev:MouseEvent):void
 		{
 			reset();
 		}
 		
-		private function _onMinMaxBtnClick(ev : MouseEvent) : void
+		private function _onMinMaxBtnClick(ev:MouseEvent):void
 		{
 			_minimized = !_minimized;
 			_redrawWindow();
 		}
 		
-		private function _onTopBarMouseDown(ev : MouseEvent) : void
+		private function _onTopBarMouseDown(ev:MouseEvent):void
 		{
 			_drag_dx = this.mouseX;
 			_drag_dy = this.mouseY;
@@ -912,14 +852,14 @@ package away3d.debug
 			stage.addEventListener(Event.MOUSE_LEAVE, _onMouseUpOrLeave);
 		}
 		
-		private function _onMouseMove(ev : MouseEvent) : void
+		private function _onMouseMove(ev:MouseEvent):void
 		{
 			_dragging = true;
 			this.x = stage.mouseX - _drag_dx;
 			this.y = stage.mouseY - _drag_dy;
 		}
 		
-		private function _onMouseUpOrLeave(ev : Event) : void
+		private function _onMouseUpOrLeave(ev:Event):void
 		{
 			_endDrag();
 		}
