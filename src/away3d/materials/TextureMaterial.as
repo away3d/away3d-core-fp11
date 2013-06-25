@@ -9,12 +9,16 @@
 	use namespace arcane;
 	
 	/**
-	 * TextureMaterial is a material that uses a texture as the surface's diffuse colour.
+	 * TextureMaterial is a single-pass material that uses a texture to define the surface's diffuse reflection colour (albedo).
 	 */
 	public class TextureMaterial extends SinglePassMaterialBase
 	{
 		/**
 		 * Creates a new TextureMaterial.
+		 * @param texture The texture used for the material's albedo color.
+		 * @param smooth Indicates whether the texture should be filtered when sampled. Defaults to true.
+		 * @param repeat Indicates whether the texture should be tiled when sampled. Defaults to true.
+		 * @param mipmap Indicates whether or not any used textures should use mipmapping. Defaults to true.
 		 */
 		public function TextureMaterial(texture:Texture2DBase = null, smooth:Boolean = true, repeat:Boolean = true, mipmap:Boolean = true)
 		{
@@ -23,9 +27,13 @@
 			this.smooth = smooth;
 			this.repeat = repeat;
 			this.mipmap = mipmap;
-		
 		}
-		
+
+		/**
+		 * Specifies whether or not the UV coordinates should be animated using IRenderable's uvTransform matrix.
+		 *
+		 * @see IRenderable.uvTransform
+		 */
 		public function get animateUVs():Boolean
 		{
 			return _screenPass.animateUVs;

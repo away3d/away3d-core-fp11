@@ -44,7 +44,11 @@ package away3d.core.base
 		 * Indicates whether the renderable can cast shadows
 		 */
 		function get castsShadows():Boolean;
-		
+
+		/**
+		 * Provides a Matrix object to transform the uv coordinates, if the material supports it.
+		 * For TextureMaterial and TextureMultiPassMaterial, the animateUVs property should be set to true.
+		 */
 		function get uvTransform():Matrix;
 		
 		function get shaderPickingDetails():Boolean;

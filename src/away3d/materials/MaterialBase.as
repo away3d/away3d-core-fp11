@@ -25,28 +25,65 @@ package away3d.materials
 	
 	/**
 	 * MaterialBase forms an abstract base class for any material.
+	 * A material consists of several passes, each of which constitutes at least one render call. Several passes could
+	 * be used for special effects (render lighting for many lights in several passes, render an outline in a separate
+	 * pass) or to provide additional render-to-texture passes (rendering diffuse light to texture for texture-space
+	 * subsurface scattering, or rendering a depth map for specialized self-shadowing).
+	 *
+	 * Away3D provides default materials trough SinglePassMaterialBase and MultiPassMaterialBase, which use modular
+	 * methods to build the shader code. MaterialBase can be extended to build specific and high-performant custom
+	 * shaders, or entire new material frameworks.
 	 */
 	public class MaterialBase extends NamedAssetBase implements IAsset
 	{
-		private static var MATERIAL_ID_COUNT:uint = 0;
 		/**
-		 * An object to contain any extra data
+		 * A counter used to assign unique ids per material, which is used to sort per material while rendering.
+		 * This reduces state changes.
+		 */
+		private static var MATERIAL_ID_COUNT:uint = 0;
+
+		/**
+		 * An object to contain any extra data.
 		 */
 		public var extra:Object;
-		
-		// can be used by other renderers to determine how to render this particular material
-		// in practice, this can be checked by a custom EntityCollector
+
+		/**
+		 * A value that can be used by materials that only work with a given type of renderer. The renderer can test the
+		 * classification to choose which render path to use. For example, a deferred material could set this value so
+		 * that the deferred renderer knows not to take the forward rendering path.
+		 *
+		 * @private
+		 */
 		arcane var _classification:String;
-		
-		// this value is usually derived from other settings
+
+		/**
+		 * An id for this material used to sort the renderables by material, which reduces render state changes across
+		 * materials using the same Program3D.
+		 *
+		 * @private
+		 */
 		arcane var _uniqueId:uint;
-		
+
+		/**
+		 * An id for this material used to sort the renderables by shader program, which reduces Program3D state changes.
+		 *
+		 * @private
+		 */
 		arcane var _renderOrderId:int;
+
+		/**
+		 * The same as _renderOrderId, but applied to the depth shader passes.
+		 *
+		 * @private
+		 */
 		arcane var _depthPassId:int;
-		
+
 		private var _bothSides:Boolean;
 		private var _animationSet:IAnimationSet;
-		
+
+		/**
+		 * A list of material owners, renderables or custom Entities.
+		 */
 		private var _owners:Vector.<IMaterialOwner>;
 		
 		private var _alphaPremultiplied:Boolean;
@@ -84,12 +121,21 @@ package away3d.materials
 			
 			_uniqueId = MATERIAL_ID_COUNT++;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		public function get assetType():String
 		{
 			return AssetType.MATERIAL;
 		}
-		
+
+		/**
+		 * The light picker used by the material to provide lights to the material if it supports lighting.
+		 *
+		 * @see away3d.materials.lightpickers.LightPickerBase
+		 * @see away3d.materials.lightpickers.StaticLightPicker
+		 */
 		public function get lightPicker():LightPickerBase
 		{
 			return _lightPicker;
@@ -106,7 +152,7 @@ package away3d.materials
 		}
 		
 		/**
-		 * Indicates whether or not any used textures should use mipmapping.
+		 * Indicates whether or not any used textures should use mipmapping. Defaults to true.
 		 */
 		public function get mipmap():Boolean
 		{
@@ -134,7 +180,12 @@ package away3d.materials
 			for (var i:int = 0; i < _numPasses; ++i)
 				_passes[i].smooth = value;
 		}
-		
+
+		/**
+		 * The depth compare mode used to render the renderables using this material.
+		 *
+		 * @see flash.display3D.Context3D
+		 */
 		public function get depthCompareMode():String
 		{
 			return _depthCompareMode;
@@ -146,7 +197,8 @@ package away3d.materials
 		}
 		
 		/**
-		 * Indicates whether or not any used textures should be tiled.
+		 * Indicates whether or not any used textures should be tiled. If set to false, texture samples are clamped to
+		 * the texture's borders when the uv coordinates are outside the [0, 1] interval.
 		 */
 		public function get repeat():Boolean
 		{
@@ -161,8 +213,8 @@ package away3d.materials
 		}
 		
 		/**
-		 * Cleans up any resources used by the current object.
-		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
+		 * Cleans up resources owned by the material, including passes. Textures are not owned by the material since they
+		 * could be used by other materials and will not be disposed.
 		 */
 		public function dispose():void
 		{
@@ -178,7 +230,7 @@ package away3d.materials
 		}
 		
 		/**
-		 * Defines whether or not the material should perform backface culling.
+		 * Defines whether or not the material should cull triangles facing away from the camera.
 		 */
 		public function get bothSides():Boolean
 		{
@@ -241,9 +293,10 @@ package away3d.materials
 		{
 			return _blendMode != BlendMode.NORMAL;
 		}
-		
+
 		/**
-		 * The unique id assigned to the material by the MaterialLibrary.
+		 * An id for this material used to sort the renderables by material, which reduces render state changes across
+		 * materials using the same Program3D.
 		 */
 		public function get uniqueId():uint
 		{
@@ -259,22 +312,45 @@ package away3d.materials
 		{
 			return _numPasses;
 		}
-		
+
+		/**
+		 * Indicates that the depth pass uses transparency testing to discard pixels.
+		 *
+		 * @private
+		 */
 		arcane function hasDepthAlphaThreshold():Boolean
 		{
 			return _depthPass.alphaThreshold > 0;
 		}
-		
+
+		/**
+		 * Sets the render state for the depth pass that is independent of the rendered object. Used when rendering
+		 * depth or distances (fe: shadow maps, depth pre-pass).
+		 *
+		 * @param stage3DProxy The Stage3DProxy used for rendering.
+		 * @param camera The camera from which the scene is viewed.
+		 * @param distanceBased Whether or not the depth pass or distance pass should be activated. The distance pass
+		 * is required for shadow cube maps.
+		 *
+		 * @private
+		 */
 		arcane function activateForDepth(stage3DProxy:Stage3DProxy, camera:Camera3D, distanceBased:Boolean = false):void
 		{
 			_distanceBasedDepthRender = distanceBased;
-			
+
 			if (distanceBased)
 				_distancePass.activate(stage3DProxy, camera);
 			else
 				_depthPass.activate(stage3DProxy, camera);
 		}
-		
+
+		/**
+		 * Clears the render state for the depth pass.
+		 *
+		 * @param stage3DProxy The Stage3DProxy used for rendering.
+		 *
+		 * @private
+		 */
 		arcane function deactivateForDepth(stage3DProxy:Stage3DProxy):void
 		{
 			if (_distanceBasedDepthRender)
@@ -282,7 +358,18 @@ package away3d.materials
 			else
 				_depthPass.deactivate(stage3DProxy);
 		}
-		
+
+		/**
+		 * Renders a renderable using the depth pass.
+		 *
+		 * @param renderable The IRenderable instance that needs to be rendered.
+		 * @param stage3DProxy The Stage3DProxy used for rendering.
+		 * @param camera The camera from which the scene is viewed.
+		 * @param viewProjection The view-projection matrix used to project to the screen. This is not the same as
+		 * camera.viewProjection as it includes the scaling factors when rendering to textures.
+		 *
+		 * @private
+		 */
 		arcane function renderDepth(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			if (_distanceBasedDepthRender) {
@@ -295,14 +382,22 @@ package away3d.materials
 				_depthPass.render(renderable, stage3DProxy, camera, viewProjection);
 			}
 		}
-		
+
+		/**
+		 * Indicates whether or not the pass with the given index renders to texture or not.
+		 * @param index The index of the pass.
+		 * @return True if the pass renders to texture, false otherwise.
+		 *
+		 * @private
+		 */
 		arcane function passRendersToTexture(index:uint):Boolean
 		{
 			return _passes[index].renderToTexture;
 		}
 		
 		/**
-		 * Sets the render state for a pass that is independent of the rendered object.
+		 * Sets the render state for a pass that is independent of the rendered object. This needs to be called before
+		 * calling renderPass. Before activating a pass, the previously used pass needs to be deactivated.
 		 * @param index The index of the pass to activate.
 		 * @param context The Context3D object which is currently rendering.
 		 * @param camera The camera from which the scene is viewed.
@@ -312,22 +407,28 @@ package away3d.materials
 		{
 			_passes[index].activate(stage3DProxy, camera);
 		}
-		
+
+
 		/**
-		 * Clears the render state for a pass.
+		 * Clears the render state for a pass. This needs to be called before activating another pass.
 		 * @param index The index of the pass to deactivate.
-		 * @param context The Context3D object that is currently rendering.
+		 * @param stage3DProxy The Stage3DProxy used for rendering
+		 *
 		 * @private
 		 */
 		arcane function deactivatePass(index:uint, stage3DProxy:Stage3DProxy):void
 		{
 			_passes[index].deactivate(stage3DProxy);
 		}
-		
+
 		/**
-		 * Renders a renderable with a pass.
-		 * @param index The pass to render with.
-		 * @private
+		 * Renders the current pass. Before calling renderPass, activatePass needs to be called with the same index.
+		 * @param index The index of the pass used to render the renderable.
+		 * @param renderable The IRenderable object to draw.
+		 * @param stage3DProxy The Stage3DProxy object used for rendering.
+		 * @param entityCollector The EntityCollector object that contains the visible scene data.
+		 * @param viewProjection The view-projection matrix used to project to the screen. This is not the same as
+		 * camera.viewProjection as it includes the scaling factors when rendering to textures.
 		 */
 		arcane function renderPass(index:uint, renderable:IRenderable, stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, viewProjection:Matrix3D):void
 		{
@@ -394,6 +495,7 @@ package away3d.materials
 		
 		/**
 		 * A list of the IMaterialOwners that use this material
+		 *
 		 * @private
 		 */
 		arcane function get owners():Vector.<IMaterialOwner>
@@ -402,7 +504,7 @@ package away3d.materials
 		}
 		
 		/**
-		 * Updates the material
+		 * Performs any processing that needs to occur before any of its passes are used.
 		 *
 		 * @private
 		 */
@@ -412,7 +514,8 @@ package away3d.materials
 		}
 		
 		/**
-		 * Deactivates the material (in effect, its last pass)
+		 * Deactivates the last pass of the material.
+		 *
 		 * @private
 		 */
 		arcane function deactivate(stage3DProxy:Stage3DProxy):void
@@ -421,8 +524,11 @@ package away3d.materials
 		}
 		
 		/**
-		 * Marks the depth shader programs as invalid, so it will be recompiled before the next render.
-		 * @param triggerPass The pass triggering the invalidation, if any, so no infinite loop will occur.
+		 * Marks the shader programs for all passes as invalid, so they will be recompiled before the next use.
+		 * @param triggerPass The pass triggering the invalidation, if any. This is passed to prevent invalidating the
+		 * triggering pass, which would result in an infinite loop.
+		 *
+		 * @private
 		 */
 		arcane function invalidatePasses(triggerPass:MaterialPassBase):void
 		{
@@ -430,7 +536,10 @@ package away3d.materials
 			
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
-			
+
+			// test if the depth and distance passes support animating the animation set in the vertex shader
+			// if any object using this material fails to support accelerated animations for any of the passes,
+			// we should do everything on cpu (otherwise we have the cost of both gpu + cpu animations)
 			if (_animationSet) {
 				_animationSet.resetGPUCompatibility();
 				for each (owner in _owners) {
@@ -442,9 +551,14 @@ package away3d.materials
 			}
 			
 			for (var i:int = 0; i < _numPasses; ++i) {
+				// only invalidate the pass if it wasn't the triggering pass
 				if (_passes[i] != triggerPass)
 					_passes[i].invalidateShaderProgram(false);
+
 				// test if animation will be able to run on gpu BEFORE compiling materials
+				// test if the pass supports animating the animation set in the vertex shader
+				// if any object using this material fails to support accelerated animations for any of the passes,
+				// we should do everything on cpu (otherwise we have the cost of both gpu + cpu animations)
 				if (_animationSet) {
 					for each (owner in _owners) {
 						if (owner.animator)
@@ -453,7 +567,11 @@ package away3d.materials
 				}
 			}
 		}
-		
+
+		/**
+		 * Removes a pass from the material.
+		 * @param pass The pass to be removed.
+		 */
 		protected function removePass(pass:MaterialPassBase):void
 		{
 			_passes.splice(_passes.indexOf(pass), 1);
@@ -461,7 +579,7 @@ package away3d.materials
 		}
 		
 		/**
-		 * Clears all passes in the material.
+		 * Removes all passes from the material
 		 */
 		protected function clearPasses():void
 		{
@@ -488,7 +606,10 @@ package away3d.materials
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			invalidatePasses(null);
 		}
-		
+
+		/**
+		 * Listener for when a pass's shader code changes. It recalculates the render order id.
+		 */
 		private function onPassChange(event:Event):void
 		{
 			var mult:Number = 1;
@@ -509,7 +630,10 @@ package away3d.materials
 				mult *= 1000;
 			}
 		}
-		
+
+		/**
+		 * Listener for when the distance pass's shader code changes. It recalculates the depth pass id.
+		 */
 		private function onDistancePassChange(event:Event):void
 		{
 			var ids:Vector.<int> = _distancePass._program3Dids;
@@ -524,7 +648,10 @@ package away3d.materials
 				}
 			}
 		}
-		
+
+		/**
+		 * Listener for when the depth pass's shader code changes. It recalculates the depth pass id.
+		 */
 		private function onDepthPassChange(event:Event):void
 		{
 			var ids:Vector.<int> = _depthPass._program3Dids;

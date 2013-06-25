@@ -6,7 +6,7 @@ package away3d.materials
 	use namespace arcane;
 	
 	/**
-	 * SegmentMaterial is a material exclusively used to render wireframe object
+	 * SegmentMaterial is a material exclusively used to render wireframe objects
 	 *
 	 * @see away3d.entities.Lines
 	 */
@@ -15,7 +15,9 @@ package away3d.materials
 		private var _screenPass:SegmentPass;
 		
 		/**
-		 * Creates a new WireframeMaterial object.
+		 * Creates a new SegmentMaterial object.
+		 *
+		 * @param thickness The thickness of the wireframe lines.
 		 */
 		public function SegmentMaterial(thickness:Number = 1.25)
 		{

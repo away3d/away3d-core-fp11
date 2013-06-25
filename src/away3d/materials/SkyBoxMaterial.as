@@ -28,7 +28,7 @@ package away3d.materials
 		}
 		
 		/**
-		 * The CubeMap to use as the skybox.
+		 * The cube texture to use as the skybox.
 		 */
 		public function get cubeMap():CubeTextureBase
 		{

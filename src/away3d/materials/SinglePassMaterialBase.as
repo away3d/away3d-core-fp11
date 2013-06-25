@@ -21,8 +21,8 @@
 	use namespace arcane;
 	
 	/**
-	 * SinglePassMaterialBase forms an abstract base class for the default single-pass materials provided by Away3D, using material methods
-	 * to define their appearance.
+	 * SinglePassMaterialBase forms an abstract base class for the default single-pass materials provided by Away3D,
+	 * using material methods to define their appearance.
 	 */
 	public class SinglePassMaterialBase extends MaterialBase
 	{
@@ -30,7 +30,7 @@
 		private var _alphaBlending:Boolean;
 		
 		/**
-		 * Creates a new DefaultMaterialBase object.
+		 * Creates a new SinglePassMaterialBase object.
 		 */
 		public function SinglePassMaterialBase()
 		{
@@ -39,7 +39,8 @@
 		}
 		
 		/**
-		 * Whether or not to use fallOff and radius properties for lights.
+		 * Whether or not to use fallOff and radius properties for lights. This can be used to improve performance and
+		 * compatibility for constrained mode.
 		 */
 		public function get enableLightFallOff():Boolean
 		{
@@ -67,19 +68,28 @@
 			_depthPass.alphaThreshold = value;
 			_distancePass.alphaThreshold = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function set blendMode(value:String):void
 		{
 			super.blendMode = value;
 			_screenPass.setBlendMode(blendMode == BlendMode.NORMAL && requiresBlending? BlendMode.LAYER : blendMode);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function set depthCompareMode(value:String):void
 		{
 			super.depthCompareMode = value;
 			_screenPass.depthCompareMode = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activateForDepth(stage3DProxy:Stage3DProxy, camera:Camera3D, distanceBased:Boolean = false):void
 		{
 			if (distanceBased)
@@ -88,7 +98,13 @@
 				_depthPass.alphaMask = _screenPass.diffuseMethod.texture;
 			super.activateForDepth(stage3DProxy, camera, distanceBased);
 		}
-		
+
+		/**
+		 * Define which light source types to use for specular reflections. This allows choosing between regular lights
+		 * and/or light probes for specular reflections.
+		 *
+		 * @see away3d.materials.LightSources
+		 */
 		public function get specularLightSources():uint
 		{
 			return _screenPass.specularLightSources;
@@ -98,7 +114,13 @@
 		{
 			_screenPass.specularLightSources = value;
 		}
-		
+
+		/**
+		 * Define which light source types to use for diffuse reflections. This allows choosing between regular lights
+		 * and/or light probes for diffuse reflections.
+		 *
+		 * @see away3d.materials.LightSources
+		 */
 		public function get diffuseLightSources():uint
 		{
 			return _screenPass.diffuseLightSources;
@@ -108,20 +130,7 @@
 		{
 			_screenPass.diffuseLightSources = value;
 		}
-		
-		/**
-		 * The ColorTransform object to transform the colour of the material with.
-		 */
-		public function get colorTransform():ColorTransform
-		{
-			return _screenPass.colorTransform;
-		}
-		
-		public function set colorTransform(value:ColorTransform):void
-		{
-			_screenPass.colorTransform = value;
-		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -129,10 +138,22 @@
 		{
 			return super.requiresBlending || _alphaBlending || (_screenPass.colorTransform && _screenPass.colorTransform.alphaMultiplier < 1);
 		}
-		
+
 		/**
-		 * The method to perform ambient shading. Note that shading methods cannot
-		 * be reused across materials.
+		 * The ColorTransform object to transform the colour of the material with. Defaults to null.
+		 */
+		public function get colorTransform():ColorTransform
+		{
+			return _screenPass.colorTransform;
+		}
+
+		public function set colorTransform(value:ColorTransform):void
+		{
+			_screenPass.colorTransform = value;
+		}
+
+		/**
+		 * The method that provides the ambient lighting contribution. Defaults to BasicAmbientMethod.
 		 */
 		public function get ambientMethod():BasicAmbientMethod
 		{
@@ -145,8 +166,7 @@
 		}
 		
 		/**
-		 * The method to render shadows cast on this surface. Note that shading methods can not
-		 * be reused across materials.
+		 * The method used to render shadows cast on this surface, or null if no shadows are to be rendered. Defaults to null.
 		 */
 		public function get shadowMethod():ShadowMapMethodBase
 		{
@@ -159,8 +179,7 @@
 		}
 		
 		/**
-		 * The method to perform diffuse shading. Note that shading methods can not
-		 * be reused across materials.
+		 * The method that provides the diffuse lighting contribution. Defaults to BasicDiffuseMethod.
 		 */
 		public function get diffuseMethod():BasicDiffuseMethod
 		{
@@ -173,8 +192,7 @@
 		}
 		
 		/**
-		 * The method to generate the (tangent-space) normal. Note that shading methods can not
-		 * be reused across materials.
+		 * The method used to generate the per-pixel normals. Defaults to BasicNormalMethod.
 		 */
 		public function get normalMethod():BasicNormalMethod
 		{
@@ -187,8 +205,7 @@
 		}
 		
 		/**
-		 * The method to perform specular shading. Note that shading methods can not
-		 * be reused across materials.
+		 * The method that provides the specular lighting contribution. Defaults to BasicSpecularMethod.
 		 */
 		public function get specularMethod():BasicSpecularMethod
 		{
@@ -201,39 +218,58 @@
 		}
 		
 		/**
-		 * Adds a shading method to the end of the shader. Note that shading methods can
-		 * not be reused across materials.
+		 * Appends an "effect" shading method to the shader. Effect methods are those that do not influence the lighting
+		 * but modulate the shaded colour, used for fog, outlines, etc. The method will be applied to the result of the
+		 * methods added prior.
 		 */
 		public function addMethod(method:EffectMethodBase):void
 		{
 			_screenPass.addMethod(method);
 		}
-		
+
+		/**
+		 * The number of "effect" methods added to the material.
+		 */
 		public function get numMethods():int
 		{
 			return _screenPass.numMethods;
 		}
-		
+
+		/**
+		 * Queries whether a given effect method was added to the material.
+		 *
+		 * @param method The method to be queried.
+		 * @return true if the method was added to the material, false otherwise.
+		 */
 		public function hasMethod(method:EffectMethodBase):Boolean
 		{
 			return _screenPass.hasMethod(method);
 		}
-		
+
+		/**
+		 * Returns the method added at the given index.
+		 * @param index The index of the method to retrieve.
+		 * @return The method at the given index.
+		 */
 		public function getMethodAt(index:int):EffectMethodBase
 		{
 			return _screenPass.getMethodAt(index);
 		}
-		
+
 		/**
-		 * Adds a shading method to the end of a shader, at the specified index amongst
-		 * the methods in that section of the shader. Note that shading methods can not
-		 * be reused across materials.
+		 * Adds an effect method at the specified index amongst the methods already added to the material. Effect
+		 * methods are those that do not influence the lighting but modulate the shaded colour, used for fog, outlines,
+		 * etc. The method will be applied to the result of the methods with a lower index.
 		 */
 		public function addMethodAt(method:EffectMethodBase, index:int):void
 		{
 			_screenPass.addMethodAt(method, index);
 		}
-		
+
+		/**
+		 * Removes an effect method from the material.
+		 * @param method The method to be removed.
+		 */
 		public function removeMethod(method:EffectMethodBase):void
 		{
 			_screenPass.removeMethod(method);
@@ -248,9 +284,10 @@
 				return;
 			super.mipmap = value;
 		}
-		
+
 		/**
-		 * The tangent space normal map to influence the direction of the surface for each texel.
+		 * The normal map to modulate the direction of the surface for each texel. The default normal method expects
+		 * tangent-space normal maps, but others could expect object-space maps.
 		 */
 		public function get normalMap():Texture2DBase
 		{
@@ -263,8 +300,9 @@
 		}
 		
 		/**
-		 * A specular map that defines the strength of specular reflections for each texel in the red channel, and the gloss factor in the green channel.
-		 * You can use SpecularBitmapTexture if you want to easily set specular and gloss maps from greyscale images, but prepared images are preffered.
+		 * A specular map that defines the strength of specular reflections for each texel in the red channel,
+		 * and the gloss factor in the green channel. You can use SpecularBitmapTexture if you want to easily set
+		 * specular and gloss maps from grayscale images, but correctly authored images are preferred.
 		 */
 		public function get specularMap():Texture2DBase
 		{
@@ -280,7 +318,7 @@
 		}
 		
 		/**
-		 * The sharpness of the specular highlight.
+		 * The glossiness of the material (sharpness of the specular highlight).
 		 */
 		public function get gloss():Number
 		{
@@ -347,7 +385,7 @@
 		}
 		
 		/**
-		 * Indicate whether or not the material has transparency. If binary transparency is sufficient, for
+		 * Indicates whether or not the material has transparency. If binary transparency is sufficient, for
 		 * example when using textures of foliage, consider using alphaThreshold instead.
 		 */
 		public function get alphaBlending():Boolean
@@ -379,7 +417,10 @@
 				_screenPass._passesDirty = false;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function set lightPicker(value:LightPickerBase):void
 		{
 			super.lightPicker = value;

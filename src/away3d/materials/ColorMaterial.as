@@ -7,7 +7,7 @@ package away3d.materials
 	use namespace arcane;
 	
 	/**
-	 * ColorMaterial is a material that uses a flat colour as the surfaces diffuse.
+	 * ColorMaterial is a single-pass material that uses a flat color as the surface's diffuse reflection value.
 	 */
 	public class ColorMaterial extends SinglePassMaterialBase
 	{
@@ -45,7 +45,7 @@ package away3d.materials
 		}
 		
 		/**
-		 * The diffuse color of the surface.
+		 * The diffuse reflectivity color of the surface.
 		 */
 		public function get color():uint
 		{

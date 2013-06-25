@@ -7,7 +7,7 @@ package away3d.materials
 	use namespace arcane;
 	
 	/**
-	 * OcclusionMaterial is a ColorMaterial for an object, that hides all other objects behind itself.
+	 * OcclusionMaterial is a ColorMaterial for an object to prevents drawing anything that is placed behind it.
 	 */
 	public class OcclusionMaterial extends ColorMaterial
 	{
