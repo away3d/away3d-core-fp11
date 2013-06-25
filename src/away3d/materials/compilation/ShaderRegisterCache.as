@@ -29,6 +29,8 @@ package away3d.materials.compilation
 		
 		/**
 		 * Create a new ShaderRegisterCache object.
+		 *
+		 * @param profile The compatibility profile used by the renderer.
 		 */
 		public function ShaderRegisterCache(profile:String)
 		{
@@ -65,7 +67,10 @@ package away3d.materials.compilation
 				getFreeFragmentConstant();
 		
 		}
-		
+
+		/**
+		 * Disposes all resources used.
+		 */
 		public function dispose():void
 		{
 			_fragmentTempCache.dispose();
@@ -84,7 +89,8 @@ package away3d.materials.compilation
 		}
 		
 		/**
-		 * Marks a fragment temporary register as used, so it cannot be retrieved.
+		 * Marks a fragment temporary register as used, so it cannot be retrieved. The register won't be able to be used until removeUsage
+		 * has been called usageCount times again.
 		 * @param register The register to mark as used.
 		 * @param usageCount The amount of usages to add.
 		 */
@@ -103,7 +109,8 @@ package away3d.materials.compilation
 		}
 		
 		/**
-		 * Marks a vertex temporary register as used, so it cannot be retrieved.
+		 * Marks a vertex temporary register as used, so it cannot be retrieved. The register won't be able to be used
+		 * until removeUsage has been called usageCount times again.
 		 * @param register The register to mark as used.
 		 * @param usageCount The amount of usages to add.
 		 */
@@ -122,7 +129,8 @@ package away3d.materials.compilation
 		}
 		
 		/**
-		 * Retrieve an entire fragment temporary register that's still available.
+		 * Retrieve an entire fragment temporary register that's still available. The register won't be able to be used until removeUsage
+		 * has been called usageCount times again.
 		 */
 		public function getFreeFragmentVectorTemp():ShaderRegisterElement
 		{
@@ -223,7 +231,10 @@ package away3d.materials.compilation
 		{
 			_vertexAttributesOffset = value;
 		}
-		
+
+		/**
+		 * Indicates the start index from which to retrieve varying registers.
+		 */
 		public function get varyingsOffset():uint
 		{
 			return _varyingsOffset;
@@ -233,7 +244,10 @@ package away3d.materials.compilation
 		{
 			_varyingsOffset = value;
 		}
-		
+
+		/**
+		 * Indicates the start index from which to retrieve fragment constants.
+		 */
 		public function get fragmentConstantOffset():uint
 		{
 			return _fragmentConstantOffset;
@@ -275,12 +289,18 @@ package away3d.materials.compilation
 		{
 			return _numUsedStreams;
 		}
-		
+
+		/**
+		 * The amount of used texture slots.
+		 */
 		public function get numUsedTextures():uint
 		{
 			return _numUsedTextures;
 		}
-		
+
+		/**
+		 * The amount of used varying registers.
+		 */
 		public function get numUsedVaryings():uint
 		{
 			return _numUsedVaryings;

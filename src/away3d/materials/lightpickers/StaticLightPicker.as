@@ -7,16 +7,28 @@ package away3d.materials.lightpickers
 	import away3d.lights.LightBase;
 	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
-	
+
+	/**
+	 * StaticLightPicker is a light picker that provides a static set of lights. The lights can be reassigned, but
+	 * if the configuration changes (number of directional lights, point lights, etc), a material recompilation may
+	 * occur.
+	 */
 	public class StaticLightPicker extends LightPickerBase
 	{
 		private var _lights:Array;
-		
+
+		/**
+		 * Creates a new StaticLightPicker object.
+		 * @param lights The lights to be used for shading.
+		 */
 		public function StaticLightPicker(lights:Array)
 		{
 			this.lights = lights;
 		}
-		
+
+		/**
+		 * The lights used for shading.
+		 */
 		public function get lights():Array
 		{
 			return _lights;
@@ -78,14 +90,20 @@ package away3d.materials.lightpickers
 			// notify material lights have changed
 			dispatchEvent(new Event(Event.CHANGE));
 		}
-		
+
+		/**
+		 * Remove configuration change listeners on the lights.
+		 */
 		private function clearListeners():void
 		{
 			var len:uint = _lights.length;
 			for (var i:int = 0; i < len; ++i)
 				_lights[i].removeEventListener(LightEvent.CASTS_SHADOW_CHANGE, onCastShadowChange);
 		}
-		
+
+		/**
+		 * Notifies the material of a configuration change.
+		 */
 		private function onCastShadowChange(event:LightEvent):void
 		{
 			// TODO: Assign to special caster collections, just append it to the lights in SinglePass
@@ -100,7 +118,10 @@ package away3d.materials.lightpickers
 			
 			dispatchEvent(new Event(Event.CHANGE));
 		}
-		
+
+		/**
+		 * Called when a directional light's shadow casting configuration changes.
+		 */
 		private function updateDirectionalCasting(light:DirectionalLight):void
 		{
 			if (light.castsShadows) {
@@ -115,7 +136,10 @@ package away3d.materials.lightpickers
 				_directionalLights.push(light);
 			}
 		}
-		
+
+		/**
+		 * Called when a point light's shadow casting configuration changes.
+		 */
 		private function updatePointCasting(light:PointLight):void
 		{
 			if (light.castsShadows) {

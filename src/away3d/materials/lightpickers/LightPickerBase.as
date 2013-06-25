@@ -9,7 +9,14 @@ package away3d.materials.lightpickers
 	import flash.geom.*;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * LightPickerBase provides an abstract base clase for light picker classes. These classes are responsible for
+	 * feeding materials with relevant lights. Usually, StaticLightPicker can be used, but LightPickerBase can be
+	 * extended to provide more application-specific dynamic selection of lights.
+	 *
+	 * @see StaticLightPicker
+	 */
 	public class LightPickerBase extends NamedAssetBase implements IAsset
 	{
 		protected var _numPointLights:uint;
@@ -24,23 +31,32 @@ package away3d.materials.lightpickers
 		protected var _castingDirectionalLights:Vector.<DirectionalLight>;
 		protected var _lightProbes:Vector.<LightProbe>;
 		protected var _lightProbeWeights:Vector.<Number>;
-		
+
+		/**
+		 * Creates a new LightPickerBase object.
+		 */
 		public function LightPickerBase()
 		{
 		
 		}
-		
+
+		/**
+		 * Disposes resources used by the light picker.
+		 */
 		public function dispose():void
 		{
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		public function get assetType():String
 		{
 			return AssetType.LIGHT_PICKER;
 		}
 		
 		/**
-		 * The maximum amount of directional lights that will be provided
+		 * The maximum amount of directional lights that will be provided.
 		 */
 		public function get numDirectionalLights():uint
 		{
@@ -48,7 +64,7 @@ package away3d.materials.lightpickers
 		}
 		
 		/**
-		 * The maximum amount of point lights that will be provided
+		 * The maximum amount of point lights that will be provided.
 		 */
 		public function get numPointLights():uint
 		{
@@ -56,7 +72,7 @@ package away3d.materials.lightpickers
 		}
 		
 		/**
-		 * The maximum amount of directional lights that cast shadows
+		 * The maximum amount of directional lights that cast shadows.
 		 */
 		public function get numCastingDirectionalLights():uint
 		{
@@ -64,7 +80,7 @@ package away3d.materials.lightpickers
 		}
 		
 		/**
-		 * The amount of point lights that cast shadows
+		 * The amount of point lights that cast shadows.
 		 */
 		public function get numCastingPointLights():uint
 		{
@@ -72,43 +88,64 @@ package away3d.materials.lightpickers
 		}
 		
 		/**
-		 * The maximum amount of light probes that will be provided
+		 * The maximum amount of light probes that will be provided.
 		 */
 		public function get numLightProbes():uint
 		{
 			return _numLightProbes;
 		}
-		
+
+		/**
+		 * The collected point lights to be used for shading.
+		 */
 		public function get pointLights():Vector.<PointLight>
 		{
 			return _pointLights;
 		}
-		
+
+		/**
+		 * The collected directional lights to be used for shading.
+		 */
 		public function get directionalLights():Vector.<DirectionalLight>
 		{
 			return _directionalLights;
 		}
-		
+
+		/**
+		 * The collected point lights that cast shadows to be used for shading.
+		 */
 		public function get castingPointLights():Vector.<PointLight>
 		{
 			return _castingPointLights;
 		}
-		
+
+		/**
+		 * The collected directional lights that cast shadows to be used for shading.
+		 */
 		public function get castingDirectionalLights():Vector.<DirectionalLight>
 		{
 			return _castingDirectionalLights;
 		}
-		
+
+		/**
+		 * The collected light probes to be used for shading.
+		 */
 		public function get lightProbes():Vector.<LightProbe>
 		{
 			return _lightProbes;
 		}
-		
+
+		/**
+		 * The weights for each light probe, defining their influence on the object.
+		 */
 		public function get lightProbeWeights():Vector.<Number>
 		{
 			return _lightProbeWeights;
 		}
-		
+
+		/**
+		 * A collection of all the collected lights.
+		 */
 		public function get allPickedLights():Vector.<LightBase>
 		{
 			return _allPickedLights;
@@ -119,10 +156,13 @@ package away3d.materials.lightpickers
 		 */
 		public function collectLights(renderable:IRenderable, entityCollector:EntityCollector):void
 		{
-			entityCollector = entityCollector;
 			updateProbeWeights(renderable);
 		}
-		
+
+		/**
+		 * Updates the weights for the light probes, based on the renderable's position relative to them.
+		 * @param renderable The renderble for which to calculate the light probes' influence.
+		 */
 		private function updateProbeWeights(renderable:IRenderable):void
 		{
 			// todo: this will cause the same calculations to occur per SubMesh. See if this can be improved.

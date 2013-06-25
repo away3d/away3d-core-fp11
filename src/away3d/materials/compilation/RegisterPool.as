@@ -4,8 +4,11 @@ package away3d.materials.compilation
 	
 	/**
 	 * RegisterPool is used by the shader compilation process to keep track of which registers of a certain type are
-	 * currently used. Either entire registers can be requested and locked, or single components (x, y, z, w) of a
-	 * single register.
+	 * currently used and should not be allowed to be written to. Either entire registers can be requested and locked,
+	 * or single components (x, y, z, w) of a single register.
+	 * It is used by ShaderRegisterCache to track usages of individual register types.
+	 *
+	 * @see away3d.materials.compilation.ShaderRegisterCache
 	 */
 	internal class RegisterPool
 	{
@@ -24,9 +27,9 @@ package away3d.materials.compilation
 		
 		/**
 		 * Creates a new RegisterPool object.
-		 * @param regName The base name of the register type.
+		 * @param regName The base name of the register type ("ft" for fragment temporaries, "vc" for vertex constants, etc)
 		 * @param regCount The amount of available registers of this type.
-		 * @param persistent Whether or not registers, once reserved, can be freed again.
+		 * @param persistent Whether or not registers, once reserved, can be freed again. For example, temporaries are not persistent, but constants are.
 		 */
 		public function RegisterPool(regName:String, regCount:int, persistent:Boolean = true)
 		{
@@ -73,7 +76,8 @@ package away3d.materials.compilation
 		}
 		
 		/**
-		 * Marks a register as used, so it cannot be retrieved.
+		 * Marks a register as used, so it cannot be retrieved. The register won't be able to be used until removeUsage
+		 * has been called usageCount times again.
 		 * @param register The register to mark as used.
 		 * @param usageCount The amount of usages to add.
 		 */
@@ -99,7 +103,10 @@ package away3d.materials.compilation
 					throw new Error("More usages removed than exist!");
 			}
 		}
-		
+
+		/**
+		 * Disposes any resources used by the current RegisterPool object.
+		 */
 		public function dispose():void
 		{
 			_vectorRegisters = null;
@@ -122,7 +129,7 @@ package away3d.materials.compilation
 		}
 		
 		/**
-		 * Initializes all registers
+		 * Initializes all registers.
 		 */
 		private function initRegisters(regName:String, regCount:int):void
 		{

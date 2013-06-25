@@ -1,7 +1,10 @@
 package away3d.materials.compilation
 {
 	import away3d.arcane;
-	
+
+	/**
+	 * LightingShaderCompiler is a ShaderCompiler that generates code for passes performing shading only (no effect passes)
+	 */
 	public class LightingShaderCompiler extends ShaderCompiler
 	{
 		public var _pointLightFragmentConstants:Vector.<ShaderRegisterElement>;
@@ -12,23 +15,36 @@ package away3d.materials.compilation
 		private var _shadowRegister:ShaderRegisterElement;
 		
 		use namespace arcane;
-		
+
+		/**
+		 * Create a new LightingShaderCompiler object.
+		 * @param profile The compatibility profile of the renderer.
+		 */
 		public function LightingShaderCompiler(profile:String)
 		{
 			super(profile);
 		}
-		
+
+		/**
+		 * The starting index if the vertex constant to which light data needs to be uploaded.
+		 */
 		public function get lightVertexConstantIndex():int
 		{
 			return _lightVertexConstantIndex;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function initRegisterIndices():void
 		{
 			super.initRegisterIndices();
 			_lightVertexConstantIndex = -1;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function createNormalRegisters():void
 		{
 			// need to be created FIRST and in this order
@@ -54,12 +70,19 @@ package away3d.materials.compilation
 			_animatableAttributes.push(_sharedRegisters.normalInput.toString());
 			_animationTargetRegisters.push(_sharedRegisters.animatedNormal.toString());
 		}
-		
+
+		/**
+		 * Indicates whether or not lighting happens in tangent space. This is only the case if no world-space
+		 * dependencies exist.
+		 */
 		public function get tangentSpace():Boolean
 		{
 			return _numLightProbes == 0 && methodSetup._normalMethod.hasOutput && _methodSetup._normalMethod.tangentSpace;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function initLightData():void
 		{
 			super.initLightData();
@@ -74,7 +97,7 @@ package away3d.materials.compilation
 		}
 		
 		/**
-		 * Calculates register dependencies for commonly used data.
+		 * @inheritDoc
 		 */
 		override protected function calculateDependencies():void
 		{
@@ -82,7 +105,10 @@ package away3d.materials.compilation
 			if (!tangentSpace)
 				_dependencyCounter.addWorldSpaceDependencies(false);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function compileNormalCode():void
 		{
 			_sharedRegisters.normalFragment = _registerCache.getFreeFragmentVectorTemp();
@@ -120,13 +146,17 @@ package away3d.materials.compilation
 				_sharedRegisters.tangentVarying = _registerCache.getFreeVarying();
 			}
 		}
-		
+
+		/**
+		 * Generates code to retrieve the tangent space normal from the normal map
+		 */
 		private function compileTangentSpaceNormalMapCode():void
 		{
+			// normalize normal + tangent vector and generate (approximated) bitangent
 			_vertexCode += "nrm " + _sharedRegisters.animatedNormal + ".xyz, " + _sharedRegisters.animatedNormal + "\n" +
 				"nrm " + _sharedRegisters.animatedTangent + ".xyz, " + _sharedRegisters.animatedTangent + "\n";
 			_vertexCode += "crs " + _sharedRegisters.bitangent + ".xyz, " + _sharedRegisters.animatedNormal + ", " + _sharedRegisters.animatedTangent + "\n";
-			
+
 			_fragmentCode += _methodSetup._normalMethod.getFragmentCode(_methodSetup._normalMethodVO, _registerCache, _sharedRegisters.normalFragment);
 			
 			if (_methodSetup._normalMethodVO.needsView)
@@ -134,7 +164,10 @@ package away3d.materials.compilation
 			if (_methodSetup._normalMethodVO.needsGlobalFragmentPos || _methodSetup._normalMethodVO.needsGlobalVertexPos)
 				_registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function compileViewDirCode():void
 		{
 			var cameraPositionReg:ShaderRegisterElement = _registerCache.getFreeVertexConstant();
@@ -157,7 +190,10 @@ package away3d.materials.compilation
 			_fragmentCode += "nrm " + _sharedRegisters.viewDirFragment + ".xyz, " + _sharedRegisters.viewDirVarying + "\n" +
 				"mov " + _sharedRegisters.viewDirFragment + ".w,   " + _sharedRegisters.viewDirVarying + ".w 		\n";
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function compileLightingCode():void
 		{
 			if (_methodSetup._shadowMethod)
@@ -220,7 +256,10 @@ package away3d.materials.compilation
 			if (_methodSetup._shadowMethod)
 				_registerCache.removeFragmentTempUsage(_shadowRegister);
 		}
-		
+
+		/**
+		 * Provides the code to provide shadow mapping.
+		 */
 		private function compileShadowCode():void
 		{
 			if (_sharedRegisters.normalFragment)
@@ -232,7 +271,10 @@ package away3d.materials.compilation
 			_vertexCode += _methodSetup._shadowMethod.getVertexCode(_methodSetup._shadowMethodVO, _registerCache);
 			_fragmentCode += _methodSetup._shadowMethod.getFragmentCode(_methodSetup._shadowMethodVO, _registerCache, _shadowRegister);
 		}
-		
+
+		/**
+		 * Initializes constant registers to contain light data.
+		 */
 		private function initLightRegisters():void
 		{
 			// init these first so we're sure they're in sequence
@@ -268,7 +310,10 @@ package away3d.materials.compilation
 					_lightFragmentConstantIndex = _pointLightFragmentConstants[i].index*4;
 			}
 		}
-		
+
+		/**
+		 * Compiles the shading code for directional lights.
+		 */
 		private function compileDirectionalLightCode():void
 		{
 			var diffuseColorReg:ShaderRegisterElement;
@@ -309,7 +354,10 @@ package away3d.materials.compilation
 					_registerCache.removeVertexTempUsage(lightDirReg);
 			}
 		}
-		
+
+		/**
+		 * Compiles the shading code for point lights.
+		 */
 		private function compilePointLightCode():void
 		{
 			var diffuseColorReg:ShaderRegisterElement;
@@ -372,7 +420,10 @@ package away3d.materials.compilation
 				
 			}
 		}
-		
+
+		/**
+		 * Compiles shading code for light probes.
+		 */
 		private function compileLightProbeCode():void
 		{
 			var weightReg:String;

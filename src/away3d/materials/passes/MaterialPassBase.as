@@ -272,7 +272,10 @@ package away3d.materials.passes
 		{
 			return _needFragmentAnimation;
 		}
-		
+
+		/**
+		 * Indicates whether the pass requires
+		 */
 		public function get needUVAnimation():Boolean
 		{
 			return _needUVAnimation;

@@ -1,19 +1,30 @@
 package away3d.materials.compilation
 {
 	import away3d.arcane;
-	
+
+	/**
+	 * SuperShaderCompiler is a compiler that generates shaders that perform both lighting and "effects" through methods.
+	 * This is used by the single-pass materials.
+	 */
 	public class SuperShaderCompiler extends ShaderCompiler
 	{
 		public var _pointLightRegisters:Vector.<ShaderRegisterElement>;
 		public var _dirLightRegisters:Vector.<ShaderRegisterElement>;
 		
 		use namespace arcane;
-		
+
+		/**
+		 * Creates a new SuperShaderCompiler object.
+		 * @param profile The compatibility profile used by the renderer.
+		 */
 		public function SuperShaderCompiler(profile:String)
 		{
 			super(profile);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function initLightData():void
 		{
 			super.initLightData();
@@ -21,16 +32,19 @@ package away3d.materials.compilation
 			_pointLightRegisters = new Vector.<ShaderRegisterElement>(_numPointLights*3, true);
 			_dirLightRegisters = new Vector.<ShaderRegisterElement>(_numDirectionalLights*3, true);
 		}
-		
+
 		/**
-		 * Calculates register dependencies for commonly used data.
+		 * @inheritDoc
 		 */
 		override protected function calculateDependencies():void
 		{
 			super.calculateDependencies();
 			_dependencyCounter.addWorldSpaceDependencies(true);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function compileNormalCode():void
 		{
 			var normalMatrix:Vector.<ShaderRegisterElement> = new Vector.<ShaderRegisterElement>(3, true);
@@ -73,7 +87,10 @@ package away3d.materials.compilation
 			
 			_registerCache.removeVertexTempUsage(_sharedRegisters.animatedNormal);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function createNormalRegisters():void
 		{
 			if (_dependencyCounter.normalDependencies > 0) {
@@ -96,7 +113,11 @@ package away3d.materials.compilation
 				_animationTargetRegisters.push(_sharedRegisters.animatedTangent.toString());
 			}
 		}
-		
+
+		/**
+		 * Compiles the vertex shader code for tangent-space normal maps.
+		 * @param matrix The register containing the scene transformation matrix for normals.
+		 */
 		private function compileTangentVertexCode(matrix:Vector.<ShaderRegisterElement>):void
 		{
 			_sharedRegisters.tangentVarying = _registerCache.getFreeVarying();
@@ -125,7 +146,10 @@ package away3d.materials.compilation
 			
 			_registerCache.removeVertexTempUsage(_sharedRegisters.animatedTangent);
 		}
-		
+
+		/**
+		 * Compiles the fragment shader code for tangent-space normal maps.
+		 */
 		private function compileTangentNormalMapFragmentCode():void
 		{
 			var t:ShaderRegisterElement;
@@ -160,7 +184,10 @@ package away3d.materials.compilation
 			_registerCache.removeFragmentTempUsage(t);
 			_registerCache.removeFragmentTempUsage(n);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function compileViewDirCode():void
 		{
 			var cameraPositionReg:ShaderRegisterElement = _registerCache.getFreeVertexConstant();
@@ -176,7 +203,10 @@ package away3d.materials.compilation
 			
 			_registerCache.removeVertexTempUsage(_sharedRegisters.globalPositionVertex);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function compileLightingCode():void
 		{
 			var shadowReg:ShaderRegisterElement;
@@ -246,7 +276,10 @@ package away3d.materials.compilation
 					_registerCache.removeFragmentTempUsage(_sharedRegisters.viewDirFragment);
 			}
 		}
-		
+
+		/**
+		 * Initializes the registers containing the lighting data.
+		 */
 		private function initLightRegisters():void
 		{
 			// init these first so we're sure they're in sequence
@@ -266,7 +299,7 @@ package away3d.materials.compilation
 					_lightFragmentConstantIndex = _pointLightRegisters[i].index*4;
 			}
 		}
-		
+
 		private function compileDirectionalLightCode():void
 		{
 			var diffuseColorReg:ShaderRegisterElement;

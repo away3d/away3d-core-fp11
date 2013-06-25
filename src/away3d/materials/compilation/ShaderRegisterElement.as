@@ -58,9 +58,5 @@ package away3d.materials.compilation
 		{
 			return _index;
 		}
-	
-	/**
-	 * The register's component, if not the entire register is represented.
-	 */
 	}
 }
