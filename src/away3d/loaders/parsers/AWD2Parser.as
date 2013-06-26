@@ -1080,7 +1080,7 @@ package away3d.loaders.parsers
 				SinglePassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
 			else
 				MultiPassMaterialBase(mat).alphaThreshold = props.get(12, 0.0);
-			mat.repeat = props.get(13, true);
+			mat.repeat = props.get(13, false);
 			
 			finalizeAsset(mat, name);
 			
@@ -1187,7 +1187,7 @@ package away3d.loaders.parsers
 				MaterialBase(mat).bothSides = props.get(7, false);
 				MaterialBase(mat).alphaPremultiplied = props.get(8, false);
 				MaterialBase(mat).blendMode = blendModeDic[props.get(9, 0)];
-				MaterialBase(mat).repeat = props.get(13, true);
+				MaterialBase(mat).repeat = props.get(13, false);
 				
 				if (spezialType == 0) { // this is a SinglePassMaterial					
 					if (normalTexture)

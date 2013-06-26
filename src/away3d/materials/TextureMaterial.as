@@ -20,7 +20,7 @@
 		 * @param repeat Indicates whether the texture should be tiled when sampled. Defaults to true.
 		 * @param mipmap Indicates whether or not any used textures should use mipmapping. Defaults to true.
 		 */
-		public function TextureMaterial(texture:Texture2DBase = null, smooth:Boolean = true, repeat:Boolean = true, mipmap:Boolean = true)
+		public function TextureMaterial(texture:Texture2DBase = null, smooth:Boolean = true, repeat:Boolean = false, mipmap:Boolean = true)
 		{
 			super();
 			this.texture = texture;
