@@ -133,6 +133,7 @@ package away3d.tools.commands
 			
 			//collect receiver
 			collect(receiver, false);
+			receiver.geometry.dispose();
 			
 			//merge to receiver
 			merge(receiver, _disposeSources);
@@ -181,10 +182,10 @@ package away3d.tools.commands
 				
 			if (dispose)
 			{
-				trace("disposing" +toDispose.length)
 				for each (var m:Mesh in toDispose)
 				m.dispose();
 			}
+			toDispose = null;
 		}
 		
 		private function collect(mesh:Mesh, dispose:Boolean):void
@@ -251,7 +252,7 @@ package away3d.tools.commands
 					}
 					
 					// Copy over triangle indices
-					indexOffset = vo.vertices.length/3;
+					indexOffset = (!_objectSpace)? vo.vertices.length/3 :0;
 					iIdx = vo.indices.length;
 					len = subGeom.numTriangles;
 					for (i = 0; i < len; i++) {
