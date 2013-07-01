@@ -1,5 +1,6 @@
 package away3d.tools.utils
 {
+	import away3d.lights.LightBase;
 	import flash.utils.Dictionary;
 	
 	import away3d.entities.Entity;
@@ -259,6 +260,8 @@ package away3d.tools.utils
 		
 		private static function parseObjectBounds(oC:ObjectContainer3D, parentTransform:Matrix3D = null, resetBounds:Boolean = false):void
 		{
+			if (oC is LightBase) return; 
+			
 			var e:Entity = oC as Entity;
 			var corners:Vector.<Number>;
 			var mat:Matrix3D = oC.transform.clone();
