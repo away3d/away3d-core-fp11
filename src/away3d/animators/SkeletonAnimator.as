@@ -144,8 +144,9 @@ package away3d.animators
 		/**
 		 * Plays an animation state registered with the given name in the animation data set.
 		 *
-		 * @param stateName The data set name of the animation state to be played.
-		 * @param stateTransition An optional transition object that determines how the animator will transition from the currently active animation state.
+		 * @param name The data set name of the animation state to be played.
+		 * @param transition An optional transition object that determines how the animator will transition from the currently active animation state.
+		 * @param offset An option offset time (in milliseconds) that resets the state's internal clock to the absolute time of the animator plus the offset value. Required for non-looping animation states.
 		 */
 		public function play(name:String, transition:IAnimationTransition = null, offset:Number = NaN):void
 		{
