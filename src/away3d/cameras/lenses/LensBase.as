@@ -162,7 +162,7 @@ package away3d.cameras.lenses
 		
 		arcane function set aspectRatio(value:Number):void
 		{
-			if (_aspectRatio == value)
+			if (_aspectRatio == value || (value*0) != 0)
 				return;
 			_aspectRatio = value;
 			invalidateMatrix();

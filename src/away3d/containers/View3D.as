@@ -459,6 +459,7 @@
 			_hitField.width = value;
 			_width = value;
 			_aspectRatio = _width/_height;
+			_camera.lens.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
 			_renderer.viewWidth = value;
@@ -493,6 +494,7 @@
 			_hitField.height = value;
 			_height = value;
 			_aspectRatio = _width/_height;
+			_camera.lens.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
 			_renderer.viewHeight = value;
