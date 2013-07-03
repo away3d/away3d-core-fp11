@@ -130,7 +130,7 @@ package away3d.core.sort
 			if (!headB)
 				return head;
 			
-			while (head && headB) {
+			while (head != null && headB != null) {
 				
 				// first sort per render order id (reduces program3D switches),
 				// then on material id (reduces setting props),
