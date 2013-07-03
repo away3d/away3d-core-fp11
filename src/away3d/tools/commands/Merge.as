@@ -186,10 +186,10 @@ package away3d.tools.commands
 					m.geometry.dispose();
 					m.dispose();
 				}
+				
+				//dispose of the original receiver geometry
+				oldGeom.dispose();
 			}
-			
-			//dispose of the original receiver geometry
-			oldGeom.dispose();
 			
 			_toDispose = null;
 		}
