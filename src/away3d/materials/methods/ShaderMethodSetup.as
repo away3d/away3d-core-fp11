@@ -242,7 +242,10 @@ package away3d.materials.methods
 			if (!_methods.length)
 				return null;
 			
-			return EffectMethodBase(_methods[index].method);
+			if (!_methods[index])
+				return null;
+			
+			return _methods[index].method;
 		}
 		
 		public function get numMethods():int
