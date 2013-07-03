@@ -4,6 +4,15 @@ package away3d.loaders.parsers.utils
 	
 	public class ParserUtil
 	{
+		
+		/**
+		 * Returns a object as ByteArray, if possible.
+		 * 
+		 * @param data The object to return as ByteArray
+		 * 
+		 * @return The ByteArray or null
+		 *
+		 */
 		public static function toByteArray(data:*):ByteArray
 		{
 			if (data is Class)
@@ -15,6 +24,15 @@ package away3d.loaders.parsers.utils
 				return null;
 		}
 		
+		/**
+		 * Returns a object as String, if possible.
+		 * 
+		 * @param data The object to return as String
+		 * @param length The length of the returned String
+		 * 
+		 * @return The String or null
+		 *
+		 */
 		public static function toString(data:*, length:uint = 0):String
 		{
 			var ba:ByteArray;

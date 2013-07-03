@@ -59,8 +59,6 @@ package away3d.loaders.parsers
 		
 		/**
 		 * Creates a new AC3DParser object.
-		 * @param uri The url or id of the data or file to be parsed.
-		 * @param extra The holder for extra contextual data that the parser might need.
 		 */
 		
 		public function AC3DParser()

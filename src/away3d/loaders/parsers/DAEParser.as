@@ -77,7 +77,8 @@ package away3d.loaders.parsers
 		private static var _numInstances:uint = 0;
 		
 		/**
-		 * @param    configFlags    Bitfield to configure the parser. @see DAEParser.CONFIG_USE_GPU etc.
+		 * @param    configFlags    Bitfield to configure the parser. 
+		 * @see DAEParser.CONFIG_USE_GPU etc.
 		 */
 		public function DAEParser(configFlags:uint = 0)
 		{
@@ -124,6 +125,10 @@ package away3d.loaders.parsers
 			return false;
 		}
 		
+		
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length != 1)
@@ -142,6 +147,10 @@ package away3d.loaders.parsers
 				_parseState = DAEParserState.PARSE_MATERIALS;
 		}
 		
+		
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
 			_dependencyCount--;
@@ -150,6 +159,10 @@ package away3d.loaders.parsers
 				_parseState = DAEParserState.PARSE_MATERIALS;
 		}
 		
+		
+		/**
+		 * @inheritDoc
+		 */
 		protected override function proceedParsing():Boolean
 		{
 			if (!_defaultBitmapMaterial)
@@ -770,7 +783,6 @@ package away3d.loaders.parsers
 				else
 					mat = new ColorMultiPassMaterial(diffuse.color.rgb);
 			}
-			trace("mat = " + materialMode);
 			if (mat) {
 				if (materialMode < 2) {
 					SinglePassMaterialBase(mat).ambientMethod = new BasicAmbientMethod();

@@ -4,6 +4,9 @@ package away3d.events
 	
 	import flash.events.Event;
 	
+	/**
+	 * Dispatched whenever a ressource (asset) is parsed and created completly.
+	 */
 	public class AssetEvent extends Event
 	{
 		public static const ASSET_COMPLETE:String = "assetComplete";

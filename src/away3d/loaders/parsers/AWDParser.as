@@ -21,11 +21,21 @@ package away3d.loaders.parsers
 			super(ParserDataFormat.BINARY);
 		}
 		
+		/**
+		 * Indicates whether or not a given file extension is supported by the parser.
+		 * @param extension The file extension of a potential file to be parsed.
+		 * @return Whether or not the given file type is supported.
+		 */
 		public static function supportsType(suffix:String):Boolean
 		{
 			return (suffix.toLowerCase() == 'awd');
 		}
 		
+		/**
+		 * Tests whether a data block can be parsed by the parser.
+		 * @param data The data block to potentially be parsed.
+		 * @return Whether or not the given data is supported.
+		 */
 		public static function supportsData(data:*):Boolean
 		{
 			return (AWD1Parser.supportsData(data) || AWD2Parser.supportsData(data));

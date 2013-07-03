@@ -11,11 +11,21 @@ package away3d.loaders
 	use namespace arcane;
 	
 	/**
+	 * Dispatched when any asset finishes parsing. Also see specific events for each
+	 * individual asset type (meshes, materials et c.)
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
 	 * Dispatched when a full resource (including dependencies) finishes loading.
 	 *
 	 * @eventType away3d.events.LoaderEvent
 	 */
 	[Event(name="resourceComplete", type="away3d.events.LoaderEvent")]
+	
 	
 	/**
 	 * Dispatched when a single dependency (which may be the main file of a resource)
@@ -25,20 +35,43 @@ package away3d.loaders
 	 */
 	[Event(name="dependencyComplete", type="away3d.events.LoaderEvent")]
 	
+	
 	/**
-	 * Dispatched when an error occurs during loading.
+	 * Dispatched when an error occurs during loading. I
 	 *
 	 * @eventType away3d.events.LoaderEvent
 	 */
 	[Event(name="loadError", type="away3d.events.LoaderEvent")]
 	
+	
 	/**
-	 * Dispatched when any asset finishes parsing. Also see specific events for each
-	 * individual asset type (meshes, materials et c.)
+	 * Dispatched when an error occurs during parsing.
 	 *
+	 * @eventType away3d.events.ParserEvent
+	 */
+	[Event(name="parseError", type="away3d.events.ParserEvent")]
+	
+	
+	/**
+	 * Dispatched when a skybox asset has been costructed from a ressource.
+	 * 
 	 * @eventType away3d.events.AssetEvent
 	 */
-	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	[Event(name="skyboxComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a camera3d asset has been costructed from a ressource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="cameraComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a mesh asset has been costructed from a ressource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="meshComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a geometry asset has been constructed from a resource.
@@ -69,39 +102,19 @@ package away3d.loaders
 	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
 	
 	/**
-	 * Dispatched when an animation set has been constructed from a group of animation state resources.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
-	
-	/**
-	 * Dispatched when an animation state has been constructed from a group of animation node resources.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
-	
-	/**
-	 * Dispatched when an animation node has been constructed from a resource.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
-	
-	/**
-	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
-	
-	/**
 	 * Dispatched when a texture asset has been constructed from a resource.
 	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a texture projector asset has been constructed from a resource.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureProjectorComplete", type="away3d.events.AssetEvent")]
+	
 	
 	/**
 	 * Dispatched when a material asset has been constructed from a resource.
@@ -110,12 +123,77 @@ package away3d.loaders
 	 */
 	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
 	
+	
 	/**
 	 * Dispatched when a animator asset has been constructed from a resource.
 	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an animation set has been constructed from a group of animation state resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an animation state has been constructed from a group of animation node resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an animation node has been constructed from a resource.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an light asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="lightComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an light picker asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="lightPickerComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an effect method asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="effectMethodComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an shadow map method asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="shadowMapMethodComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when an image asset dimensions are not a power of 2
@@ -168,11 +246,30 @@ package away3d.loaders
 			_parseErrorHandlers = new Vector.<Function>();
 		}
 		
+		/**
+		 * Enables a specific parser. 
+		 * When no specific parser is set for a loading/parsing opperation, 
+		 * loader3d can autoselect the correct parser to use.
+		 * A parser must have been enabled, to be considered when autoselecting the parser.
+		 *
+		 * @param parserClass The parser class to enable.
+		 * 
+		 * @see away3d.loaders.parsers.Parsers
+		 */
 		public static function enableParser(parserClass:Class):void
 		{
 			SingleFileLoader.enableParser(parserClass);
 		}
 		
+		/**
+		 * Enables a list of parsers. 
+		 * When no specific parser is set for a loading/parsing opperation, 
+		 * AssetLoader can autoselect the correct parser to use.
+		 * A parser must have been enabled, to be considered when autoselecting the parser.
+		 *
+		 * @param parserClasses A Vector of parser classes to enable.
+		 * @see away3d.loaders.parsers.Parsers
+		 */
 		public static function enableParsers(parserClasses:Vector.<Class>):void
 		{
 			SingleFileLoader.enableParsers(parserClasses);
@@ -425,6 +522,10 @@ package away3d.loaders
 			}
 		}
 		
+		/**
+		 * Called when a dependency parsing failed, and dispatches a <code>ParserEvent.PARSE_ERROR</code>
+		 * @param event
+		 */
 		private function onParserError(event:ParserEvent):void
 		{
 			var handled:Boolean;

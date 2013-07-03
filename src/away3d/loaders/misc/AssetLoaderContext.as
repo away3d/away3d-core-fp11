@@ -48,9 +48,11 @@ package away3d.loaders.misc
 		
 		/**
 		 * MaterialMode defines, if the Parser should create SinglePass or MultiPass Materials
+		 * Options:
 		 * 0 (Default / undefined) - All Parsers will create SinglePassMaterials, but the AWD2.1parser will create Materials as they are defined in the file
 		 * 1 (Force SinglePass) - All Parsers create SinglePassMaterials
 		 * 2 (Force MultiPass) - All Parsers will create MultiPassMaterials
+		 * 
 		 */
 		public function get materialMode():uint
 		{

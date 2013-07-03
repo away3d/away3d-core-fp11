@@ -28,6 +28,9 @@ package away3d.loaders.parsers
 	
 	use namespace arcane;
 	
+	/**
+	 * Max3DSParser provides a parser for the 3ds data type.
+	 */
 	public class Max3DSParser extends ParserBase
 	{
 		private var _byteData:ByteArray;
@@ -47,12 +50,22 @@ package away3d.loaders.parsers
 			super(ParserDataFormat.BINARY);
 		}
 		
+		/**
+		 * Indicates whether or not a given file extension is supported by the parser.
+		 * @param extension The file extension of a potential file to be parsed.
+		 * @return Whether or not the given file type is supported.
+		 */
 		public static function supportsType(extension:String):Boolean
 		{
 			extension = extension.toLowerCase();
 			return extension == "3ds";
 		}
 		
+		/**
+		 * Tests whether a data block can be parsed by the parser.
+		 * @param data The data block to potentially be parsed.
+		 * @return Whether or not the given data is supported.
+		 */
 		public static function supportsData(data:*):Boolean
 		{
 			var ba:ByteArray;
@@ -67,6 +80,9 @@ package away3d.loaders.parsers
 			return false;
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length == 1) {
@@ -82,11 +98,17 @@ package away3d.loaders.parsers
 			}
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
 			// TODO: Implement
 		}
 		
+		/**
+		 * @inheritDoc
+		 */
 		protected override function proceedParsing():Boolean
 		{
 			if (!_byteData) {

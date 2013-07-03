@@ -23,11 +23,21 @@ package away3d.library
 	use namespace arcane;
 	
 	/**
+	 * Dispatched when any asset finishes parsing. Also see specific events for each
+	 * individual asset type (meshes, materials et c.)
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
 	 * Dispatched when a full resource (including dependencies) finishes loading.
 	 *
 	 * @eventType away3d.events.LoaderEvent
 	 */
 	[Event(name="resourceComplete", type="away3d.events.LoaderEvent")]
+	
 	
 	/**
 	 * Dispatched when a single dependency (which may be the main file of a resource)
@@ -37,20 +47,43 @@ package away3d.library
 	 */
 	[Event(name="dependencyComplete", type="away3d.events.LoaderEvent")]
 	
+	
 	/**
-	 * Dispatched when an error occurs during loading.
+	 * Dispatched when an error occurs during loading. I
 	 *
 	 * @eventType away3d.events.LoaderEvent
 	 */
 	[Event(name="loadError", type="away3d.events.LoaderEvent")]
 	
+	
 	/**
-	 * Dispatched when any asset finishes parsing. Also see specific events for each
-	 * individual asset type (meshes, materials et c.)
+	 * Dispatched when an error occurs during parsing.
 	 *
+	 * @eventType away3d.events.ParserEvent
+	 */
+	[Event(name="parseError", type="away3d.events.ParserEvent")]
+	
+	
+	/**
+	 * Dispatched when a skybox asset has been costructed from a ressource.
+	 * 
 	 * @eventType away3d.events.AssetEvent
 	 */
-	[Event(name="assetComplete", type="away3d.events.AssetEvent")]
+	[Event(name="skyboxComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a camera3d asset has been costructed from a ressource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="cameraComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a mesh asset has been costructed from a ressource.
+	 * 
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="meshComplete", type="away3d.events.AssetEvent")]
 	
 	/**
 	 * Dispatched when a geometry asset has been constructed from a resource.
@@ -81,39 +114,19 @@ package away3d.library
 	[Event(name="containerComplete", type="away3d.events.AssetEvent")]
 	
 	/**
-	 * Dispatched when an animation set has been constructed from a group of animation state resources.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
-	
-	/**
-	 * Dispatched when an animation state has been constructed from a group of animation node resources.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
-	
-	/**
-	 * Dispatched when an animation node has been constructed from a resource.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
-	
-	/**
-	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
-	 *
-	 * @eventType away3d.events.AssetEvent
-	 */
-	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
-	
-	/**
 	 * Dispatched when a texture asset has been constructed from a resource.
 	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
 	[Event(name="textureComplete", type="away3d.events.AssetEvent")]
+	
+	/**
+	 * Dispatched when a texture projector asset has been constructed from a resource.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="textureProjectorComplete", type="away3d.events.AssetEvent")]
+	
 	
 	/**
 	 * Dispatched when a material asset has been constructed from a resource.
@@ -122,6 +135,7 @@ package away3d.library
 	 */
 	[Event(name="materialComplete", type="away3d.events.AssetEvent")]
 	
+	
 	/**
 	 * Dispatched when a animator asset has been constructed from a resource.
 	 *
@@ -129,12 +143,70 @@ package away3d.library
 	 */
 	[Event(name="animatorComplete", type="away3d.events.AssetEvent")]
 	
+	
 	/**
-	 * Dispatched when an image assets dimensions are not a power of 2
+	 * Dispatched when an animation set has been constructed from a group of animation state resources.
 	 *
 	 * @eventType away3d.events.AssetEvent
 	 */
-	[Event(name="textureSizeError", type="away3d.events.AssetEvent")]
+	[Event(name="animationSetComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an animation state has been constructed from a group of animation node resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationStateComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an animation node has been constructed from a resource.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="animationNodeComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an animation state transition has been constructed from a group of animation node resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="stateTransitionComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an light asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="lightComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an light picker asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="lightPickerComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an effect method asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="effectMethodComplete", type="away3d.events.AssetEvent")]
+	
+	
+	/**
+	 * Dispatched when an shadow map method asset has been constructed from a resources.
+	 *
+	 * @eventType away3d.events.AssetEvent
+	 */
+	[Event(name="shadowMapMethodComplete", type="away3d.events.AssetEvent")]
+	
 	
 	/**
 	 * AssetLibraryBundle enforces a multiton pattern and is not intended to be instanced directly.

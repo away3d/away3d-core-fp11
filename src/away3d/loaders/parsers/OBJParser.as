@@ -1,7 +1,5 @@
 package away3d.loaders.parsers
 {
-	import flash.net.URLRequest;
-	
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
@@ -21,6 +19,8 @@ package away3d.loaders.parsers
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.GeomUtil;
+	
+	import flash.net.URLRequest;
 	
 	use namespace arcane;
 	
@@ -577,7 +577,7 @@ package away3d.loaders.parsers
 			
 			for (var i:uint = 0; i < materialDefinitions.length; ++i) {
 				
-				lines = materialDefinitions[i].split('\r').join("").split('\n');
+				lines = (materialDefinitions[i].split('\r') as Array).join("").split('\n');
 				
 				if (lines.length == 1)
 					lines = materialDefinitions[i].split(String.fromCharCode(13));

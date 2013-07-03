@@ -23,15 +23,15 @@ package away3d.loaders.parsers
 		 * The bundled parsers are:
 		 *
 		 * <ul>
-		 * <li>Away Data version 1 ASCII and version 2 binary (.awd). AWD1 BSP unsupported</li>
 		 * <li>AC3D (.ac)</li>
-		 * <li>Collada (.dae)</li>
-		 * <li>Quake 2 MD2 models (.md2)</li>
-		 * <li>Doom 3 MD5 meshes (.md5mesh)</li>
-		 * <li>Doom 3 MD5 animation clips (.md5anim)</li>
-		 * <li>Wavefront OBJ (.obj)</li>
+		 * <li>Away Data version 1 ASCII and version 2 binary (.awd). AWD1 BSP unsupported</li>
 		 * <li>3DMax (.3ds)</li>
 		 * <li>DXF (.dxf)</li>
+		 * <li>Quake 2 MD2 models (.md2)</li>
+		 * <li>Doom 3 MD5 animation clips (.md5anim)</li>
+		 * <li>Doom 3 MD5 meshes (.md5mesh)</li>
+		 * <li>Wavefront OBJ (.obj)</li>
+		 * <li>Collada (.dae)</li>
 		 * <li>Images (.jpg, .png)</li>
 		 * </ul>
 		 *

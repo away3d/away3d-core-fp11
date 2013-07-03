@@ -151,6 +151,15 @@ package away3d.loaders.parsers
 		}
 		
 		/**
+		 * Tests whether a data block can be parsed by the parser.
+		 * @param data The data block to potentially be parsed.
+		 * @return Whether or not the given data is supported.
+		 */
+		public static function supportsData(data:*):Boolean
+		{
+			return (ParserUtil.toString(data, 3) == 'AWD');
+		}
+		/**
 		 * @inheritDoc
 		 */
 		override arcane function resolveDependency(resourceDependency:ResourceDependency):void
@@ -238,15 +247,6 @@ package away3d.loaders.parsers
 			return newName;
 		}
 		
-		/**
-		 * Tests whether a data block can be parsed by the parser.
-		 * @param data The data block to potentially be parsed.
-		 * @return Whether or not the given data is supported.
-		 */
-		public static function supportsData(data:*):Boolean
-		{
-			return (ParserUtil.toString(data, 3) == 'AWD');
-		}
 		
 		/**
 		 * @inheritDoc

@@ -17,7 +17,7 @@ package away3d.loaders.parsers
 	// todo: create animation system, parse skeleton
 	
 	/**
-	 * AWDParser provides a parser for the md5mesh data type, providing the geometry of the md5 format.
+	 * MD5MeshParser provides a parser for the md5mesh data type, providing the geometry of the md5 format.
 	 *
 	 * todo: optimize
 	 */

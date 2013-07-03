@@ -75,8 +75,8 @@ package away3d.loaders.parsers
 		
 		/**
 		 * Creates a new MD2Parser object.
-		 * @param uri The url or id of the data or file to be parsed.
-		 * @param extra The holder for extra contextual data that the parser might need.
+		 * @param textureType The extension of the texture (e.g. jpg/png/...)
+		 * @param ignoreTexturePath If true, the path of the texture is ignored
 		 */
 		public function MD2Parser(textureType:String = "jpg", ignoreTexturePath:Boolean = true)
 		{
