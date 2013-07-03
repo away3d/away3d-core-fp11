@@ -17,7 +17,7 @@ package away3d.tools.commands
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;
 		private var _geomVOs:Vector.<GeometryVO>;
-		private var toDispose:Vector.<Mesh>;
+		private var _toDispose:Vector.<Mesh>;
 		
 		/**
 		 * @param     keepMaterial        [optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
@@ -90,6 +90,9 @@ package away3d.tools.commands
 			//collect receiver
 			collect(receiver, false);
 			
+			//dispose of the original receiver geometry
+			receiver.geometry.dispose();
+			
 			//merge to receiver
 			merge(receiver, _disposeSources);
 		}
@@ -114,6 +117,9 @@ package away3d.tools.commands
 			//collect receiver
 			collect(receiver, false);
 			
+			//dispose of the original receiver geometry
+			receiver.geometry.dispose();
+			
 			//merge to receiver
 			merge(receiver, _disposeSources);
 		}
@@ -133,6 +139,8 @@ package away3d.tools.commands
 			
 			//collect receiver
 			collect(receiver, false);
+			
+			//dispose of the original receiver geometry
 			receiver.geometry.dispose();
 			
 			//merge to receiver
@@ -141,7 +149,7 @@ package away3d.tools.commands
 		
 		private function reset():void
 		{
-			toDispose  = new Vector.<Mesh>();
+			_toDispose  = new Vector.<Mesh>();
 			_geomVOs = new Vector.<GeometryVO>();
 		}
 		
@@ -180,12 +188,13 @@ package away3d.tools.commands
 			if (_keepMaterial && !useSubMaterials && _geomVOs.length)
 				destMesh.material = _geomVOs[0].material;
 				
-			if (dispose)
-			{
-				for each (var m:Mesh in toDispose)
-				m.dispose();
+			if (dispose) {
+				for each (var m:Mesh in _toDispose) {
+					m.geometry.dispose();
+					m.dispose();
+				}
 			}
-			toDispose = null;
+			_toDispose = null;
 		}
 		
 		private function collect(mesh:Mesh, dispose:Boolean):void
@@ -277,7 +286,8 @@ package away3d.tools.commands
 					}
 				}
 				
-				if (dispose) toDispose.push(mesh);
+				if (dispose)
+					_toDispose.push(mesh);
 			}
 		}
 		
