@@ -107,7 +107,7 @@ package away3d.core.base
 			if (_jointIndexContext[contextIndex] != context || !_jointIndexBuffer[contextIndex]) {
 				_jointIndexBuffer[contextIndex] = context.createVertexBuffer(_numVertices, _jointsPerVertex);
 				_jointIndexContext[contextIndex] = context;
-				_jointWeightsInvalid[contextIndex] = true;
+				_jointIndicesInvalid[contextIndex] = true;
 			}
 			if (_jointIndicesInvalid[contextIndex]) {
 				_jointIndexBuffer[contextIndex].uploadFromVector(_numCondensedJoints > 0? _condensedJointIndexData : _jointIndexData, 0, _jointIndexData.length/_jointsPerVertex);
