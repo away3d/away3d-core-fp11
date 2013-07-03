@@ -272,14 +272,18 @@ package away3d.controllers
 				notifyUpdate();
 				
 				if (_wrapPanAngle) {
-					if (_panAngle < 0)
-						_panAngle = (_panAngle%360) + 360;
-					else
+					if (_panAngle < 0) {
+						_currentPanAngle += _panAngle%360 + 360 - _panAngle;
+						_panAngle = _panAngle%360 + 360;
+					} else {
+						_currentPanAngle += _panAngle%360 - _panAngle;
 						_panAngle = _panAngle%360;
+					}
 					
-					if (_panAngle - _currentPanAngle < -180)
+					while (_panAngle - _currentPanAngle < -180)
 						_currentPanAngle -= 360;
-					else if (_panAngle - _currentPanAngle > 180)
+					
+					while (_panAngle - _currentPanAngle > 180)
 						_currentPanAngle += 360;
 				}
 				
