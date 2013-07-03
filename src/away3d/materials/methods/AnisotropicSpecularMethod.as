@@ -8,20 +8,34 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * AnisotropicSpecularMethod provides a specular method resulting in anisotropic highlights. These are typical for
+	 * surfaces with microfacet details such as tiny grooves. In particular, this uses the Heidrich-Seidel distrubution.
+	 * The tangent vectors are used as the surface groove directions.
+	 */
 	public class AnisotropicSpecularMethod extends BasicSpecularMethod
 	{
+		/**
+		 * Creates a new AnisotropicSpecularMethod object.
+		 */
 		public function AnisotropicSpecularMethod()
 		{
 			super();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsTangents = true;
 			vo.needsView = true;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCodePerLight(vo:MethodVO, lightDirReg:ShaderRegisterElement, lightColReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
 		{
 			var code:String = "";

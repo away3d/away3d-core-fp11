@@ -21,14 +21,19 @@ package away3d.materials.methods
 		
 		/**
 		 * Creates a new GradientDiffuseMethod object.
-		 * @param gradient A texture that contains the light colour based on the angle. This can be used to change the light colour due to subsurface scattering when dot &lt; 0
+		 * @param gradient A texture that contains the light colour based on the angle. This can be used to change
+		 * the light colour due to subsurface scattering when the surface faces away from the light.
 		 */
 		public function GradientDiffuseMethod(gradient:Texture2DBase)
 		{
 			super();
 			_gradient = gradient;
 		}
-		
+
+		/**
+		 * A texture that contains the light colour based on the angle. This can be used to change the light colour
+		 * due to subsurface scattering when the surface faces away from the light.
+		 */
 		public function get gradient():Texture2DBase
 		{
 			return _gradient;
@@ -40,13 +45,19 @@ package away3d.materials.methods
 				invalidateShaderProgram();
 			_gradient = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
 			_gradientTextureRegister = null;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentPreLightingCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			var code:String = super.getFragmentPreLightingCode(vo, regCache);
@@ -57,7 +68,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCodePerLight(vo:MethodVO, lightDirReg:ShaderRegisterElement, lightColReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
 		{
 			var code:String = "";
@@ -92,7 +106,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function applyShadow(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			var t:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
@@ -101,7 +118,10 @@ package away3d.materials.methods
 				getTex2DSampleCode(vo, t, _gradientTextureRegister, _gradient, t, "clamp") +
 				"mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + t + "\n";
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			super.activate(vo, stage3DProxy);

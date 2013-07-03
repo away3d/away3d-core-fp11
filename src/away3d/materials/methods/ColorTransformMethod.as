@@ -10,8 +10,8 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * ColorTransformMethod provides a shading method that changes the colour of a material according to a ColorTransform
-	 * object.
+	 * ColorTransformMethod provides a shading method that changes the colour of a material analogous to a
+	 * ColorTransform object.
 	 */
 	public class ColorTransformMethod extends EffectMethodBase
 	{

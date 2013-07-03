@@ -50,7 +50,10 @@ package away3d.materials.methods
 			_scattering = 0.2;
 			_translucency = 1;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			super.initConstants(vo);
@@ -112,7 +115,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * The colour the light becomes inside the object.
+		 * The colour of the "insides" of the object, ie: the colour the light becomes after leaving the object.
 		 */
 		public function get scatterColor():uint
 		{
@@ -212,7 +215,10 @@ package away3d.materials.methods
 			data[index + 8] = _scattering;
 			data[index + 9] = _translucency;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 			var depthMap:Texture = _depthPass.getDepthMap(renderable, stage3DProxy);

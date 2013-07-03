@@ -18,7 +18,10 @@ package away3d.materials.methods
 		{
 			super();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var data:Vector.<Number> = vo.fragmentData;

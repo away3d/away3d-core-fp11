@@ -10,8 +10,8 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * CompositeSpecularMethod provides a base class for specular methods that wrap a specular method to alter the strength
-	 * of its calculated strength.
+	 * CompositeSpecularMethod provides a base class for specular methods that wrap a specular method to alter the
+	 * calculated specular reflection strength.
 	 */
 	public class CompositeSpecularMethod extends BasicSpecularMethod
 	{
@@ -29,12 +29,18 @@ package away3d.materials.methods
 			_baseMethod._modulateMethod = modulateMethod;
 			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			_baseMethod.initVO(vo);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			_baseMethod.initConstants(vo);
@@ -121,7 +127,10 @@ package away3d.materials.methods
 		{
 			_baseMethod.activate(vo, stage3DProxy);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function deactivate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			_baseMethod.deactivate(vo, stage3DProxy);
@@ -183,19 +192,28 @@ package away3d.materials.methods
 		{
 			_baseMethod.reset();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
 			_baseMethod.cleanCompilationData();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function set shadowRegister(value:ShaderRegisterElement):void
 		{
 			super.shadowRegister = value;
 			_baseMethod.shadowRegister = value;
 		}
-		
+
+		/**
+		 * Called when the base method's shader code is invalidated.
+		 */
 		private function onShaderInvalidated(event:ShadingMethodEvent):void
 		{
 			invalidateShaderProgram();

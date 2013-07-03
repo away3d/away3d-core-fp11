@@ -15,7 +15,7 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * ShadingMethodBase provides an abstract base method for shading methods, used by DefaultScreenPass to compile
+	 * ShadingMethodBase provides an abstract base method for shading methods, used by compiled passes to compile
 	 * the final shading program.
 	 */
 	public class ShadingMethodBase extends NamedAssetBase
@@ -31,17 +31,28 @@ package away3d.materials.methods
 		public function ShadingMethodBase() // needsNormals : Boolean, needsView : Boolean, needsGlobalPos : Boolean
 		{
 		}
-		
+
+		/**
+		 * Initializes the properties for a MethodVO, including register and texture indices.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 */
 		arcane function initVO(vo:MethodVO):void
 		{
 		
 		}
-		
+
+		/**
+		 * Initializes unchanging shader constants using the data from a MethodVO.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 */
 		arcane function initConstants(vo:MethodVO):void
 		{
 		
 		}
-		
+
+		/**
+		 * The shared registers created by the compiler and possibly used by methods.
+		 */
 		arcane function get sharedRegisters():ShaderRegisterData
 		{
 			return _sharedRegisters;
@@ -62,7 +73,6 @@ package away3d.materials.methods
 		
 		/**
 		 * Cleans up any resources used by the current object.
-		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
 		public function dispose():void
 		{
@@ -76,7 +86,10 @@ package away3d.materials.methods
 		{
 			return new MethodVO();
 		}
-		
+
+		/**
+		 * Resets the compilation state of the method.
+		 */
 		arcane function reset():void
 		{
 			cleanCompilationData();
@@ -92,6 +105,7 @@ package away3d.materials.methods
 		
 		/**
 		 * Get the vertex shader code for this method.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
 		 * @param regCache The register cache used during the compilation.
 		 * @private
 		 */
@@ -102,7 +116,9 @@ package away3d.materials.methods
 		
 		/**
 		 * Sets the render state for this method.
-		 * @param context The Context3D currently used for rendering.
+		 *
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
 		 * @private
 		 */
 		arcane function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
@@ -112,6 +128,11 @@ package away3d.materials.methods
 		
 		/**
 		 * Sets the render state for a single renderable.
+		 *
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param renderable The renderable currently being rendered.
+		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
+		 * @param camera The camera from which the scene is currently rendered.
 		 */
 		arcane function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
@@ -120,8 +141,8 @@ package away3d.materials.methods
 		
 		/**
 		 * Clears the render state for this method.
-		 * @param context The Context3D currently used for rendering.
-		 * @private
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
 		 */
 		arcane function deactivate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
@@ -130,8 +151,12 @@ package away3d.materials.methods
 		
 		/**
 		 * A helper method that generates standard code for sampling from a texture using the normal uv coordinates.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
 		 * @param targetReg The register in which to store the sampled colour.
 		 * @param inputReg The texture stream register.
+		 * @param texture The texture which will be assigned to the given slot.
+		 * @param uvReg An optional uv register if coordinates different from the primary uv coordinates are to be used.
+		 * @param forceWrap If true, texture wrapping is enabled regardless of the material setting.
 		 * @return The fragment code that performs the sampling.
 		 */
 		protected function getTex2DSampleCode(vo:MethodVO, targetReg:ShaderRegisterElement, inputReg:ShaderRegisterElement, texture:TextureProxyBase, uvReg:ShaderRegisterElement = null, forceWrap:String = null):String
@@ -149,7 +174,15 @@ package away3d.materials.methods
 			uvReg ||= _sharedRegisters.uvVarying;
 			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <2d," + filter + "," + format + wrap + ">\n";
 		}
-		
+
+		/**
+		 * A helper method that generates standard code for sampling from a cube texture.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param targetReg The register in which to store the sampled colour.
+		 * @param inputReg The texture stream register.
+		 * @param texture The cube map which will be assigned to the given slot.
+		 * @param uvReg The direction vector with which to sample the cube map.
+		 */
 		protected function getTexCubeSampleCode(vo:MethodVO, targetReg:ShaderRegisterElement, inputReg:ShaderRegisterElement, texture:TextureProxyBase, uvReg:ShaderRegisterElement):String
 		{
 			var filter:String;
@@ -163,7 +196,12 @@ package away3d.materials.methods
 			
 			return "tex " + targetReg + ", " + uvReg + ", " + inputReg + " <cube," + format + filter + ">\n";
 		}
-		
+
+		/**
+		 * Generates a texture format string for the sample instruction.
+		 * @param texture The texture for which to get the format string.
+		 * @return
+		 */
 		private function getFormatStringForTexture(texture:TextureProxyBase):String
 		{
 			switch (texture.format) {

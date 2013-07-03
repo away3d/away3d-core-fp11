@@ -25,13 +25,19 @@ package away3d.materials.methods
 			super();
 			this.wrapFactor = wrapFactor;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
 			_wrapDataRegister = null;
 		}
-		
+
+		/**
+		 * A factor to indicate the amount by which the light is allowed to wrap.
+		 */
 		public function get wrapFactor():Number
 		{
 			return _wrapFactor;
@@ -42,7 +48,10 @@ package away3d.materials.methods
 			_wrapFactor = value;
 			_wrapFactor = 1/(value + 1);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentPreLightingCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			var code:String = super.getFragmentPreLightingCode(vo, regCache);
@@ -52,7 +61,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCodePerLight(vo:MethodVO, lightDirReg:ShaderRegisterElement, lightColReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
 		{
 			var code:String = "";
@@ -86,7 +98,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			super.activate(vo, stage3DProxy);

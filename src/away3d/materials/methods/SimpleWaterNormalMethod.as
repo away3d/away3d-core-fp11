@@ -7,7 +7,10 @@ package away3d.materials.methods
 	import away3d.textures.Texture2DBase;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * SimpleWaterNormalMethod provides a basic normal map method to create water ripples by translating two wave normal maps.
+	 */
 	public class SimpleWaterNormalMethod extends BasicNormalMethod
 	{
 		private var _texture2:Texture2DBase;
@@ -17,14 +20,22 @@ package away3d.materials.methods
 		private var _water1OffsetY:Number = 0;
 		private var _water2OffsetX:Number = 0;
 		private var _water2OffsetY:Number = 0;
-		
+
+		/**
+		 * Creates a new SimpleWaterNormalMethod object.
+		 * @param waveMap1 A normal map containing one layer of a wave structure.
+		 * @param waveMap2 A normal map containing a second layer of a wave structure.
+		 */
 		public function SimpleWaterNormalMethod(waveMap1:Texture2DBase, waveMap2:Texture2DBase)
 		{
 			super();
 			normalMap = waveMap1;
 			secondaryNormalMap = waveMap2;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var index:int = vo.fragmentConstantsIndex;
@@ -33,14 +44,20 @@ package away3d.materials.methods
 			vo.fragmentData[index + 2] = 0;
 			vo.fragmentData[index + 3] = 1;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			super.initVO(vo);
 			
 			_useSecondNormalMap = normalMap != secondaryNormalMap;
 		}
-		
+
+		/**
+		 * The translation of the first wave layer along the X-axis.
+		 */
 		public function get water1OffsetX():Number
 		{
 			return _water1OffsetX;
@@ -50,7 +67,10 @@ package away3d.materials.methods
 		{
 			_water1OffsetX = value;
 		}
-		
+
+		/**
+		 * The translation of the first wave layer along the Y-axis.
+		 */
 		public function get water1OffsetY():Number
 		{
 			return _water1OffsetY;
@@ -60,7 +80,10 @@ package away3d.materials.methods
 		{
 			_water1OffsetY = value;
 		}
-		
+
+		/**
+		 * The translation of the second wave layer along the X-axis.
+		 */
 		public function get water2OffsetX():Number
 		{
 			return _water2OffsetX;
@@ -70,7 +93,10 @@ package away3d.materials.methods
 		{
 			_water2OffsetX = value;
 		}
-		
+
+		/**
+		 * The translation of the second wave layer along the Y-axis.
+		 */
 		public function get water2OffsetY():Number
 		{
 			return _water2OffsetY;
@@ -80,14 +106,20 @@ package away3d.materials.methods
 		{
 			_water2OffsetY = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function set normalMap(value:Texture2DBase):void
 		{
 			if (!value)
 				return;
 			super.normalMap = value;
 		}
-		
+
+		/**
+		 * A second normal map that will be combined with the first to create a wave-like animation pattern.
+		 */
 		public function get secondaryNormalMap():Texture2DBase
 		{
 			return _texture2;
@@ -97,19 +129,28 @@ package away3d.materials.methods
 		{
 			_texture2 = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
 			_normalTextureRegister2 = null;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function dispose():void
 		{
 			super.dispose();
 			_texture2 = null;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			super.activate(vo, stage3DProxy);
@@ -125,7 +166,10 @@ package away3d.materials.methods
 			if (_useSecondNormalMap >= 0)
 				stage3DProxy._context3D.setTextureAt(vo.texturesIndex + 1, _texture2.getTextureForStage3D(stage3DProxy));
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();

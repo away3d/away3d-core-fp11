@@ -15,21 +15,6 @@ package away3d.materials.methods
 	{
 		private var _useAmbientTexture:Boolean;
 		
-		arcane function get useAmbientTexture():Boolean
-		{
-			return _useAmbientTexture;
-		}
-		
-		arcane function set useAmbientTexture(value:Boolean):void
-		{
-			if (_useAmbientTexture == value)
-				return;
-			
-			_useAmbientTexture = value;
-			
-			invalidateShaderProgram();
-		}
-		
 		protected var _useTexture:Boolean;
 		internal var _totalLightColorReg:ShaderRegisterElement;
 		
@@ -51,19 +36,41 @@ package away3d.materials.methods
 		{
 			super();
 		}
+
+		/**
+		 * Set internally if the ambient method uses a texture.
+		 */
+		arcane function get useAmbientTexture():Boolean
+		{
+			return _useAmbientTexture;
+		}
+
+		arcane function set useAmbientTexture(value:Boolean):void
+		{
+			if (_useAmbientTexture == value)
+				return;
+
+			_useAmbientTexture = value;
+
+			invalidateShaderProgram();
+		}
 		
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsUV = _useTexture;
 			vo.needsNormals = vo.numLights > 0;
 		}
-		
+
+		/**
+		 * Forces the creation of the texture.
+		 * @param stage3DProxy The Stage3DProxy used by the renderer
+		 */
 		public function generateMip(stage3DProxy:Stage3DProxy):void
 		{
 			if (_useTexture)
 				_texture.getTextureForStage3D(stage3DProxy);
 		}
-		
+
 		/**
 		 * The alpha component of the diffuse reflection.
 		 */
@@ -144,7 +151,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * Copies the state from a BasicDiffuseMethod object into the current object.
+		 * @inheritDoc
 		 */
 		override public function copyFrom(method:ShadingMethodBase):void
 		{
@@ -155,7 +162,10 @@ package away3d.materials.methods
 			diffuseAlpha = diff.diffuseAlpha;
 			diffuseColor = diff.diffuseColor;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
@@ -311,7 +321,12 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * Generate the code that applies the calculated shadow to the diffuse light
+		 * @param vo The MethodVO object for which the compilation is currently happening.
+		 * @param regCache The register cache the compiler is currently using for the register management.
+		 */
 		protected function applyShadow(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			return "mul " + _totalLightColorReg + ".xyz, " + _totalLightColorReg + ", " + _shadowRegister + ".w\n";
@@ -345,7 +360,10 @@ package away3d.materials.methods
 			_diffuseG = ((_diffuseColor >> 8) & 0xff)/0xff;
 			_diffuseB = (_diffuseColor & 0xff)/0xff;
 		}
-		
+
+		/**
+		 * Set internally by the compiler, so the method knows the register containing the shadow calculation.
+		 */
 		arcane function set shadowRegister(value:ShaderRegisterElement):void
 		{
 			_shadowRegister = value;

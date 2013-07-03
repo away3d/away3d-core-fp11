@@ -12,7 +12,13 @@ package away3d.materials.methods
 	import flash.events.*;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * CascadeShadowMapMethod is a shadow map method to apply cascade shadow mapping on materials.
+	 * Must be used with a DirectionalLight with a CascadeShadowMapper assigned to its shadowMapper property.
+	 *
+	 * @see away3d.lights.shadowmaps.CascadeShadowMapper
+	 */
 	public class CascadeShadowMapMethod extends ShadowMapMethodBase
 	{
 		private var _baseMethod:SimpleShadowMapMethodBase;
@@ -22,6 +28,8 @@ package away3d.materials.methods
 		
 		/**
 		 * Creates a new CascadeShadowMapMethod object.
+		 *
+		 * @param shadowMethodBase The shadow map sampling method used to sample individual cascades (fe: HardShadowMapMethod, SoftShadowMapMethod)
 		 */
 		public function CascadeShadowMapMethod(shadowMethodBase:SimpleShadowMapMethodBase)
 		{
@@ -32,12 +40,19 @@ package away3d.materials.methods
 			_cascadeShadowMapper = _castingLight.shadowMapper as CascadeShadowMapper;
 			
 			if (!_cascadeShadowMapper)
-				throw new Error("NearShadowMapMethod requires a light that has a CascadeShadowMapper instance assigned to shadowMapper.");
+				throw new Error("CascadeShadowMapMethod requires a light that has a CascadeShadowMapper instance assigned to shadowMapper.");
 			
 			_cascadeShadowMapper.addEventListener(Event.CHANGE, onCascadeChange, false, 0, true);
 			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
 		}
-		
+
+		/**
+		 * The shadow map sampling method used to sample individual cascades. These are typically those used in conjunction
+		 * with a DirectionalShadowMapper.
+		 *
+		 * @see HardShadowMapMethod
+		 * @see SoftShadowMapMethod
+		 */
 		public function get baseMethod():SimpleShadowMapMethodBase
 		{
 			return _baseMethod;
@@ -52,7 +67,10 @@ package away3d.materials.methods
 			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			var tempVO:MethodVO = new MethodVO();
@@ -60,13 +78,19 @@ package away3d.materials.methods
 			vo.needsGlobalVertexPos = true;
 			vo.needsProjection = true;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function set sharedRegisters(value:ShaderRegisterData):void
 		{
 			super.sharedRegisters = value;
 			_baseMethod.sharedRegisters = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var fragmentData:Vector.<Number> = vo.fragmentData;
@@ -85,14 +109,20 @@ package away3d.materials.methods
 			vertexData[index + 1] = -.5;
 			vertexData[index + 2] = 0;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
 			_cascadeProjections = null;
 			_depthMapCoordVaryings = null;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function getVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			var code:String = "";
@@ -110,7 +140,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * Creates the registers for the cascades' projection coordinates.
+		 */
 		private function initProjectionsRegs(regCache:ShaderRegisterCache):void
 		{
 			_cascadeProjections = new Vector.<ShaderRegisterElement>(_cascadeShadowMapper.numCascades);
@@ -124,7 +157,10 @@ package away3d.materials.methods
 				regCache.getFreeVertexConstant();
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var numCascades:int = _cascadeShadowMapper.numCascades;
@@ -205,16 +241,25 @@ package away3d.materials.methods
 			
 			_baseMethod.activateForCascade(vo, stage3DProxy);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 		}
-		
+
+		/**
+		 * Called when the shadow mappers cascade configuration changes.
+		 */
 		private function onCascadeChange(event:Event):void
 		{
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * Called when the base method's shader code is invalidated.
+		 */
 		private function onShaderInvalidated(event:ShadingMethodEvent):void
 		{
 			invalidateShaderProgram();

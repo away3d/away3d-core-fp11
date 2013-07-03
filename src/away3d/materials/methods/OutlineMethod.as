@@ -8,7 +8,10 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * OutlineMethod provides a shading method to add outlines to an object.
+	 */
 	public class OutlineMethod extends EffectMethodBase
 	{
 		private var _outlinePass:OutlinePass;
@@ -27,7 +30,10 @@ package away3d.materials.methods
 			_outlinePass = new OutlinePass(outlineColor, outlineSize, showInnerLines, dedicatedWaterProofMesh);
 			_passes.push(_outlinePass);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsNormals = true;
@@ -73,16 +79,25 @@ package away3d.materials.methods
 		{
 			_outlinePass.outlineSize = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function reset():void
 		{
 			super.reset();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			return "";

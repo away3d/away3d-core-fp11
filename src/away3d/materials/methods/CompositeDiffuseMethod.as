@@ -11,31 +11,13 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * CompositeDiffuseMethod provides a base class for diffuse methods that wrap a diffuse method to alter the strength
-	 * of its calculated strength.
+	 * CompositeDiffuseMethod provides a base class for diffuse methods that wrap a diffuse method to alter the
+	 * calculated diffuse reflection strength.
 	 */
 	public class CompositeDiffuseMethod extends BasicDiffuseMethod
 	{
 		protected var _baseMethod:BasicDiffuseMethod;
-		
-		/**
-		 * The base diffuse method on which this method's shading is based.
-		 */
-		public function get baseMethod():BasicDiffuseMethod
-		{
-			return _baseMethod;
-		}
-		
-		public function set baseMethod(value:BasicDiffuseMethod):void
-		{
-			if (_baseMethod == value)
-				return;
-			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_baseMethod = value;
-			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
-			invalidateShaderProgram();
-		}
-		
+
 		/**
 		 * Creates a new WrapDiffuseMethod object.
 		 * @param modulateMethod The method which will add the code to alter the base method's strength. It needs to have the signature clampDiffuse(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String, in which t.w will contain the diffuse strength.
@@ -47,12 +29,36 @@ package away3d.materials.methods
 			_baseMethod._modulateMethod = modulateMethod;
 			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
-		
+
+		/**
+		 * The base diffuse method on which this method's shading is based.
+		 */
+		public function get baseMethod():BasicDiffuseMethod
+		{
+			return _baseMethod;
+		}
+
+		public function set baseMethod(value:BasicDiffuseMethod):void
+		{
+			if (_baseMethod == value)
+				return;
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = value;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+			invalidateShaderProgram();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			_baseMethod.initVO(vo);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			_baseMethod.initConstants(vo);
@@ -66,7 +72,10 @@ package away3d.materials.methods
 			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			_baseMethod.dispose();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function get alphaThreshold():Number
 		{
 			return _baseMethod.alphaThreshold;
@@ -160,7 +169,10 @@ package away3d.materials.methods
 		{
 			_baseMethod.activate(vo, stage3DProxy);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function deactivate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			_baseMethod.deactivate(vo, stage3DProxy);
@@ -189,7 +201,10 @@ package away3d.materials.methods
 		{
 			_baseMethod.reset();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
@@ -203,13 +218,19 @@ package away3d.materials.methods
 		{
 			super.sharedRegisters = _baseMethod.sharedRegisters = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function set shadowRegister(value:ShaderRegisterElement):void
 		{
 			super.shadowRegister = value;
 			_baseMethod.shadowRegister = value;
 		}
-		
+
+		/**
+		 * Called when the base method's shader code is invalidated.
+		 */
 		private function onShaderInvalidated(event:ShadingMethodEvent):void
 		{
 			invalidateShaderProgram();

@@ -17,23 +17,25 @@ package away3d.materials.methods
 		{
 			super();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		public function get assetType():String
 		{
 			return AssetType.EFFECTS_METHOD;
 		}
-		
+
 		/**
 		 * Get the fragment shader code that should be added after all per-light code. Usually composits everything to the target register.
+		 * @param vo The MethodVO object containing the method data for the currently compiled material pass.
 		 * @param regCache The register cache used during the compilation.
+		 * @param targetReg The register that will be containing the method's output.
 		 * @private
 		 */
 		arcane function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			throw new AbstractMethodError();
-			vo = vo;
-			regCache = regCache;
-			targetReg = targetReg;
 			return "";
 		}
 	}

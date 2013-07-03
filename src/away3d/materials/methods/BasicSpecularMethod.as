@@ -8,7 +8,8 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * BasicSpecularMethod provides the default shading method for Blinn-Phong specular highlights.
+	 * BasicSpecularMethod provides the default shading method for Blinn-Phong specular highlights (an optimized but approximated
+	 * version of Phong specularity).
 	 */
 	public class BasicSpecularMethod extends LightingMethodBase
 	{
@@ -34,7 +35,10 @@ package away3d.materials.methods
 		{
 			super();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsUV = _useTexture;
@@ -95,7 +99,7 @@ package away3d.materials.methods
 		/**
 		 * The bitmapData that encodes the specular highlight strength per texel in the red channel, and the sharpness
 		 * in the green channel. You can use SpecularBitmapTexture if you want to easily set specular and gloss maps
-		 * from greyscale images, but prepared images are preffered.
+		 * from grayscale images, but prepared images are preferred.
 		 */
 		public function get texture():Texture2DBase
 		{
@@ -113,7 +117,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * Copies the state from a BasicSpecularMethod object into the current object.
+		 * @inheritDoc
 		 */
 		override public function copyFrom(method:ShadingMethodBase):void
 		{
@@ -310,7 +314,10 @@ package away3d.materials.methods
 			_specularG = ((_specularColor >> 8) & 0xff)/0xff*_specular;
 			_specularB = (_specularColor & 0xff)/0xff*_specular;
 		}
-		
+
+		/**
+		 * Set internally by the compiler, so the method knows the register containing the shadow calculation.
+		 */
 		arcane function set shadowRegister(shadowReg:ShaderRegisterElement):void
 		{
 			_shadowRegister = shadowReg;

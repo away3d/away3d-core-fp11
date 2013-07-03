@@ -22,7 +22,7 @@ package away3d.materials.methods
 		/**
 		 * Creates a new PlanarReflectionMethod
 		 * @param texture The PlanarReflectionTexture used to render the reflected view.
-		 * @param alpha The reflectiveness of the surface.
+		 * @param alpha The reflectivity of the surface.
 		 */
 		public function PlanarReflectionMethod(texture:PlanarReflectionTexture, alpha:Number = 1)
 		{
@@ -41,7 +41,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * The reflectiveness of the surface.
+		 * The reflectivity of the surface.
 		 */
 		public function get alpha():Number
 		{
@@ -82,7 +82,10 @@ package away3d.materials.methods
 				invalidateShaderProgram();
 			_normalDisplacement = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			var index:int = vo.fragmentConstantsIndex;
@@ -98,7 +101,10 @@ package away3d.materials.methods
 				vo.fragmentData[uint(index + 7)] = .5 - _texture.textureRatioY*.5 + 1/_texture.height;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var textureReg:ShaderRegisterElement = regCache.getFreeTextureReg();

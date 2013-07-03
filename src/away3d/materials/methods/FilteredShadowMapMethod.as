@@ -7,7 +7,11 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * DitheredShadowMapMethod provides a softened shadowing technique by bilinearly interpolating shadow comparison
+	 * results of neighbouring pixels.
+	 */
 	public class FilteredShadowMapMethod extends SimpleShadowMapMethodBase
 	{
 		/**
@@ -19,7 +23,10 @@ package away3d.materials.methods
 		{
 			super(castingLight);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			super.initConstants(vo);
@@ -101,7 +108,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function activateForCascade(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			var size:int = _castingLight.shadowMapper.depthMapSize;
@@ -110,7 +120,10 @@ package away3d.materials.methods
 			data[index] = size;
 			data[index + 1] = 1/size;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function getCascadeFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, decodeRegister:ShaderRegisterElement, depthTexture:ShaderRegisterElement, depthProjection:ShaderRegisterElement, targetRegister:ShaderRegisterElement):String
 		{
 			var code:String;

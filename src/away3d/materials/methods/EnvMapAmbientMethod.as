@@ -26,7 +26,10 @@ package away3d.materials.methods
 			super();
 			_cubeTexture = envMap;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			super.initVO(vo);

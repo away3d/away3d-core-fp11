@@ -7,7 +7,10 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * HardShadowMapMethod provides the cheapest shadow map method by using a single tap without any filtering.
+	 */
 	public class HardShadowMapMethod extends SimpleShadowMapMethodBase
 	{
 		/**
@@ -41,7 +44,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function getPointFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var depthMapRegister:ShaderRegisterElement = regCache.getFreeTextureReg();
@@ -71,7 +77,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function getCascadeFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, decodeRegister:ShaderRegisterElement, depthTexture:ShaderRegisterElement, depthProjection:ShaderRegisterElement, targetRegister:ShaderRegisterElement):String
 		{
 			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
@@ -79,7 +88,10 @@ package away3d.materials.methods
 				"dp4 " + temp + ".z, " + temp + ", " + decodeRegister + "\n" +
 				"slt " + targetRegister + ".w, " + depthProjection + ".z, " + temp + ".z\n"; // 0 if in shadow
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function activateForCascade(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 		}

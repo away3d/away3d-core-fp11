@@ -6,7 +6,10 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * FogMethod provides a method to add distance-based fog to a material.
+	 */
 	public class FogMethod extends EffectMethodBase
 	{
 		private var _minDistance:Number = 0;
@@ -15,7 +18,13 @@ package away3d.materials.methods
 		private var _fogR:Number;
 		private var _fogG:Number;
 		private var _fogB:Number;
-		
+
+		/**
+		 * Creates a new FogMethod object.
+		 * @param minDistance The distance from which the fog starts appearing.
+		 * @param maxDistance The distance at which the fog is densest.
+		 * @param fogColor The colour of the fog.
+		 */
 		public function FogMethod(minDistance:Number, maxDistance:Number, fogColor:uint = 0x808080)
 		{
 			super();
@@ -23,12 +32,18 @@ package away3d.materials.methods
 			this.maxDistance = maxDistance;
 			this.fogColor = fogColor;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsProjection = true;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var data:Vector.<Number> = vo.fragmentData;
@@ -37,7 +52,10 @@ package away3d.materials.methods
 			data[index + 6] = 0;
 			data[index + 7] = 0;
 		}
-		
+
+		/**
+		 * The distance from which the fog starts appearing.
+		 */
 		public function get minDistance():Number
 		{
 			return _minDistance;
@@ -47,7 +65,10 @@ package away3d.materials.methods
 		{
 			_minDistance = value;
 		}
-		
+
+		/**
+		 * The distance at which the fog is densest.
+		 */
 		public function get maxDistance():Number
 		{
 			return _maxDistance;
@@ -57,7 +78,10 @@ package away3d.materials.methods
 		{
 			_maxDistance = value;
 		}
-		
+
+		/**
+		 * The colour of the fog.
+		 */
 		public function get fogColor():uint
 		{
 			return _fogColor;
@@ -70,7 +94,10 @@ package away3d.materials.methods
 			_fogG = ((value >> 8) & 0xff)/0xff;
 			_fogB = (value & 0xff)/0xff;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			var data:Vector.<Number> = vo.fragmentData;
@@ -81,7 +108,10 @@ package away3d.materials.methods
 			data[index + 4] = _minDistance;
 			data[index + 5] = 1/(_maxDistance - _minDistance);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var fogColor:ShaderRegisterElement = regCache.getFreeFragmentConstant();

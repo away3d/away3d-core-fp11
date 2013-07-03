@@ -9,7 +9,7 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * FresnelSpecularMethod provides a specular shading method that is stronger on shallow view angles.
+	 * FresnelSpecularMethod provides a specular shading method that causes stronger highlights on grazing view angles.
 	 */
 	public class FresnelSpecularMethod extends CompositeSpecularMethod
 	{
@@ -21,7 +21,7 @@ package away3d.materials.methods
 		/**
 		 * Creates a new FresnelSpecularMethod object.
 		 * @param basedOnSurface Defines whether the fresnel effect should be based on the view angle on the surface (if true), or on the angle between the light and the view.
-		 * @param baseSpecularMethod
+		 * @param baseSpecularMethod The specular method to which the fresnel equation. Defaults to BasicSpecularMethod.
 		 */
 		public function FresnelSpecularMethod(basedOnSurface:Boolean = true, baseSpecularMethod:BasicSpecularMethod = null)
 		{
@@ -29,7 +29,10 @@ package away3d.materials.methods
 			super(modulateSpecular, baseSpecularMethod);
 			_incidentLight = !basedOnSurface;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var index:int = vo.secondaryFragmentConstantsIndex;
@@ -54,7 +57,10 @@ package away3d.materials.methods
 			
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * The power used in the Fresnel equation. Higher values make the fresnel effect more pronounced. Defaults to 5.
+		 */
 		public function get fresnelPower():Number
 		{
 			return _fresnelPower;
@@ -64,7 +70,10 @@ package away3d.materials.methods
 		{
 			_fresnelPower = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
@@ -109,15 +118,14 @@ package away3d.materials.methods
 		/**
 		 * Applies the fresnel effect to the specular strength.
 		 *
+		 * @param vo The MethodVO object containing the method data for the currently compiled material pass.
 		 * @param target The register containing the specular strength in the "w" component, and the half-vector/reflection vector in "xyz".
 		 * @param regCache The register cache used for the shader compilation.
+		 * @param sharedRegisters The shared registers created by the compiler.
 		 * @return The AGAL fragment code for the method.
 		 */
 		private function modulateSpecular(vo:MethodVO, target:ShaderRegisterElement, regCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
-			vo = vo;
-			regCache = regCache;
-			
 			var code:String;
 			
 			code = "dp3 " + target + ".y, " + sharedRegisters.viewDirFragment + ".xyz, " + (_incidentLight? target + ".xyz\n" : sharedRegisters.normalFragment + ".xyz\n") +   // dot(V, H)

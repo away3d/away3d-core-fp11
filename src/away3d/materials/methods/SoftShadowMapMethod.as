@@ -8,7 +8,10 @@ package away3d.materials.methods
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * SoftShadowMapMethod provides a soft shadowing technique by randomly distributing sample points.
+	 */
 	public class SoftShadowMapMethod extends SimpleShadowMapMethodBase
 	{
 		private var _range:Number = 1;
@@ -17,6 +20,9 @@ package away3d.materials.methods
 		
 		/**
 		 * Creates a new BasicDiffuseMethod object.
+		 *
+		 * @param castingLight The light casting the shadows
+		 * @param numSamples The amount of samples to take for dithering. Minimum 1, maximum 32.
 		 */
 		public function SoftShadowMapMethod(castingLight:DirectionalLight, numSamples:int = 5, range:Number = 1)
 		{
@@ -25,7 +31,11 @@ package away3d.materials.methods
 			this.numSamples = numSamples;
 			this.range = range;
 		}
-		
+
+		/**
+		 * The amount of samples to take for dithering. Minimum 1, maximum 32. The actual maximum may depend on the
+		 * complexity of the shader.
+		 */
 		public function get numSamples():int
 		{
 			return _numSamples;
@@ -42,7 +52,10 @@ package away3d.materials.methods
 			_offsets = PoissonLookup.getDistribution(_numSamples);
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * The range in the shadow map in which to distribute the samples.
+		 */
 		public function get range():Number
 		{
 			return _range;
@@ -52,7 +65,10 @@ package away3d.materials.methods
 		{
 			_range = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			super.initConstants(vo);
@@ -60,7 +76,10 @@ package away3d.materials.methods
 			vo.fragmentData[vo.fragmentConstantsIndex + 8] = 1/_numSamples;
 			vo.fragmentData[vo.fragmentConstantsIndex + 9] = 0;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			super.activate(vo, stage3DProxy);
@@ -82,8 +101,6 @@ package away3d.materials.methods
 			var depthMapRegister:ShaderRegisterElement = regCache.getFreeTextureReg();
 			var decReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			var dataReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			// TODO: not used
-			dataReg = dataReg;
 			var customDataReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
 			
 			vo.fragmentConstantsIndex = decReg.index*4;
@@ -91,7 +108,16 @@ package away3d.materials.methods
 			
 			return getSampleCode(regCache, depthMapRegister, decReg, targetReg, customDataReg);
 		}
-		
+
+		/**
+		 * Adds the code for another tap to the shader code.
+		 * @param uv The uv register for the tap.
+		 * @param texture The texture register containing the depth map.
+		 * @param decode The register containing the depth map decoding data.
+		 * @param target The target register to add the tap comparison result.
+		 * @param regCache The register cache managing the registers.
+		 * @return
+		 */
 		private function addSample(uv:ShaderRegisterElement, texture:ShaderRegisterElement, decode:ShaderRegisterElement, target:ShaderRegisterElement, regCache:ShaderRegisterCache):String
 		{
 			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
@@ -100,7 +126,10 @@ package away3d.materials.methods
 				"slt " + uv + ".w, " + _depthMapCoordReg + ".z, " + temp + ".z\n" + // 0 if in shadow
 				"add " + target + ".w, " + target + ".w, " + uv + ".w\n";
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function activateForCascade(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			super.activate(vo, stage3DProxy);
@@ -119,7 +148,10 @@ package away3d.materials.methods
 				data[uint(index + len + 1)] = 0;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function getCascadeFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, decodeRegister:ShaderRegisterElement, depthTexture:ShaderRegisterElement, depthProjection:ShaderRegisterElement, targetRegister:ShaderRegisterElement):String
 		{
 			_depthMapCoordReg = depthProjection;
@@ -129,7 +161,15 @@ package away3d.materials.methods
 			
 			return getSampleCode(regCache, depthTexture, decodeRegister, targetRegister, dataReg);
 		}
-		
+
+		/**
+		 * Get the actual shader code for shadow mapping
+		 * @param regCache The register cache managing the registers.
+		 * @param depthTexture The texture register containing the depth map.
+		 * @param decodeRegister The register containing the depth map decoding data.
+		 * @param targetReg The target register to add the shadow coverage.
+		 * @param dataReg The register containing additional data.
+		 */
 		private function getSampleCode(regCache:ShaderRegisterCache, depthTexture:ShaderRegisterElement, decodeRegister:ShaderRegisterElement, targetRegister:ShaderRegisterElement, dataReg:ShaderRegisterElement):String
 		{
 			var uvReg:ShaderRegisterElement;

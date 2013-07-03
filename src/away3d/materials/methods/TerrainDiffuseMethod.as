@@ -10,7 +10,11 @@ package away3d.materials.methods
 	import flash.display3D.Context3D;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * TerrainDiffuseMethod provides a diffuse method that uses different tiled textures with alpha masks to create a
+	 * large surface with high detail and less apparent tiling.
+	 */
 	public class TerrainDiffuseMethod extends BasicDiffuseMethod
 	{
 		private var _blendingTexture:Texture2DBase;
@@ -19,9 +23,9 @@ package away3d.materials.methods
 		private var _tileData:Array;
 		
 		/**
-		 *
+		 * Creates a new TerrainDiffuseMethod.
 		 * @param splatTextures An array of Texture2DProxyBase containing the detailed textures to be tiled.
-		 * @param blendData The texture containing the blending data. The red, green, and blue channels contain the blending values for each of the textures in splatTextures, respectively.
+		 * @param blendingTexture The texture containing the blending data. The red, green, and blue channels contain the blending values for each of the textures in splatTextures, respectively.
 		 * @param tileData The amount of times each splat texture needs to be tiled. The first entry in the array applies to the base texture, the others to the splats. If omitted, the default value of 50 is assumed for each.
 		 */
 		public function TerrainDiffuseMethod(splatTextures:Array, blendingTexture:Texture2DBase, tileData:Array)
@@ -34,7 +38,10 @@ package away3d.materials.methods
 			if (_numSplattingLayers > 4)
 				throw new Error("More than 4 splatting layers is not supported!");
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var data:Vector.<Number> = vo.fragmentData;
@@ -47,7 +54,10 @@ package away3d.materials.methods
 					data[uint(index + i - 4)] = _tileData? _tileData[i + 1] : 50;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentPostLightingCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var code:String = "";
@@ -116,7 +126,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			var context:Context3D = stage3DProxy._context3D;
@@ -129,13 +142,19 @@ package away3d.materials.methods
 			for (i = 0; i < _numSplattingLayers; ++i)
 				context.setTextureAt(i + texIndex, _splats[i].getTextureForStage3D(stage3DProxy));
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function set alphaThreshold(value:Number):void
 		{
 			if (value > 0)
 				throw new Error("Alpha threshold not supported for TerrainDiffuseMethod");
 		}
-		
+
+		/**
+		 * Gets the sample code for a single splat.
+		 */
 		protected function getSplatSampleCode(vo:MethodVO, targetReg:ShaderRegisterElement, inputReg:ShaderRegisterElement, texture:TextureProxyBase, uvReg:ShaderRegisterElement = null):String
 		{
 			uvReg ||= _sharedRegisters.uvVarying;

@@ -9,7 +9,7 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * CelDiffuseMethod provides a shading method to add specular cel (cartoon) shading.
+	 * CelDiffuseMethod provides a shading method to add diffuse cel (cartoon) shading.
 	 */
 	public class CelDiffuseMethod extends CompositeDiffuseMethod
 	{
@@ -20,7 +20,7 @@ package away3d.materials.methods
 		/**
 		 * Creates a new CelDiffuseMethod object.
 		 * @param levels The amount of shadow gradations.
-		 * @param baseDiffuseMethod An optional diffuse method on which the cartoon shading is based. If ommitted, BasicDiffuseMethod is used.
+		 * @param baseDiffuseMethod An optional diffuse method on which the cartoon shading is based. If omitted, BasicDiffuseMethod is used.
 		 */
 		public function CelDiffuseMethod(levels:uint = 3, baseDiffuseMethod:BasicDiffuseMethod = null)
 		{
@@ -28,7 +28,10 @@ package away3d.materials.methods
 			
 			_levels = levels;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var data:Vector.<Number> = vo.fragmentData;
@@ -37,7 +40,10 @@ package away3d.materials.methods
 			data[index + 1] = 1;
 			data[index + 2] = 0;
 		}
-		
+
+		/**
+		 * The amount of shadow gradations.
+		 */
 		public function get levels():uint
 		{
 			return _levels;
@@ -94,16 +100,14 @@ package away3d.materials.methods
 		
 		/**
 		 * Snaps the diffuse shading of the wrapped method to one of the levels.
+		 * @param vo The MethodVO used to compile the current shader.
 		 * @param t The register containing the diffuse strength in the "w" component.
 		 * @param regCache The register cache used for the shader compilation.
+		 * @param sharedRegisters The shared register data for this shader.
 		 * @return The AGAL fragment code for the method.
 		 */
 		private function clampDiffuse(vo:MethodVO, t:ShaderRegisterElement, regCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String
 		{
-			vo = vo;
-			regCache = regCache;
-			sharedRegisters = sharedRegisters;
-			
 			return "mul " + t + ".w, " + t + ".w, " + _dataReg + ".x\n" +
 				"frc " + t + ".z, " + t + ".w\n" +
 				"sub " + t + ".y, " + t + ".w, " + t + ".z\n" +

@@ -9,7 +9,7 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * CelSpecularMethod provides a shading method to add diffuse cel (cartoon) shading.
+	 * CelSpecularMethod provides a shading method to add specular cel (cartoon) shading.
 	 */
 	public class CelSpecularMethod extends CompositeSpecularMethod
 	{
@@ -77,8 +77,10 @@ package away3d.materials.methods
 		
 		/**
 		 * Snaps the specular shading strength of the wrapped method to zero or one, depending on whether or not it exceeds the specularCutOff
+		 * @param vo The MethodVO used to compile the current shader.
 		 * @param t The register containing the specular strength in the "w" component, and either the half-vector or the reflection vector in "xyz".
 		 * @param regCache The register cache used for the shader compilation.
+		 * @param sharedRegisters The shared register data for this shader.
 		 * @return The AGAL fragment code for the method.
 		 */
 		private function clampSpecular(methodVO:MethodVO, target:ShaderRegisterElement, regCache:ShaderRegisterCache, sharedRegisters:ShaderRegisterData):String

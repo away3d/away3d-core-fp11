@@ -10,7 +10,11 @@ package away3d.materials.methods
 	import flash.display3D.Context3D;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * FresnelEnvMapMethod provides a method to add fresnel-based reflectivity to an object using cube maps, which gets
+	 * stronger as the viewing angle becomes more grazing.
+	 */
 	public class FresnelEnvMapMethod extends EffectMethodBase
 	{
 		private var _cubeTexture:CubeTextureBase;
@@ -18,26 +22,40 @@ package away3d.materials.methods
 		private var _normalReflectance:Number = 0;
 		private var _alpha:Number;
 		private var _mask:Texture2DBase;
-		
+
+		/**
+		 * Creates an FresnelEnvMapMethod object.
+		 * @param envMap The environment map containing the reflected scene.
+		 * @param alpha The reflectivity of the material.
+		 */
 		public function FresnelEnvMapMethod(envMap:CubeTextureBase, alpha:Number = 1)
 		{
 			super();
 			_cubeTexture = envMap;
 			_alpha = alpha;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsNormals = true;
 			vo.needsView = true;
 			vo.needsUV = _mask != null;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			vo.fragmentData[vo.fragmentConstantsIndex + 3] = 1;
 		}
-		
+
+		/**
+		 * An optional texture to modulate the reflectivity of the surface.
+		 */
 		public function get mask():Texture2DBase
 		{
 			return _mask;
@@ -51,7 +69,10 @@ package away3d.materials.methods
 			}
 			_mask = value;
 		}
-		
+
+		/**
+		 * The power used in the Fresnel equation. Higher values make the fresnel effect more pronounced. Defaults to 5.
+		 */
 		public function get fresnelPower():Number
 		{
 			return _fresnelPower;
@@ -63,7 +84,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * The cube environment map to use for the diffuse lighting.
+		 * The cubic environment map containing the reflected scene.
 		 */
 		public function get envMap():CubeTextureBase
 		{
@@ -81,7 +102,10 @@ package away3d.materials.methods
 		override public function dispose():void
 		{
 		}
-		
+
+		/**
+		 * The reflectivity of the surface.
+		 */
 		public function get alpha():Number
 		{
 			return _alpha;
@@ -104,7 +128,10 @@ package away3d.materials.methods
 		{
 			_normalReflectance = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			var data:Vector.<Number> = vo.fragmentData;
@@ -117,7 +144,10 @@ package away3d.materials.methods
 			if (_mask)
 				context.setTextureAt(vo.texturesIndex + 1, _mask.getTextureForStage3D(stage3DProxy));
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var dataRegister:ShaderRegisterElement = regCache.getFreeFragmentConstant();

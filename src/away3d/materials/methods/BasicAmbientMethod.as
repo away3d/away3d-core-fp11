@@ -13,7 +13,6 @@ package away3d.materials.methods
 	/**
 	 * BasicAmbientMethod provides the default shading method for uniform ambient lighting.
 	 */
-	
 	public class BasicAmbientMethod extends ShadingMethodBase
 	{
 		protected var _useTexture:Boolean;
@@ -35,12 +34,18 @@ package away3d.materials.methods
 		{
 			super();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsUV = _useTexture;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			vo.fragmentData[vo.fragmentConstantsIndex + 3] = 1;
@@ -91,7 +96,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * Copies the state from a BasicAmbientMethod object into the current object.
+		 * @inheritDoc
 		 */
 		override public function copyFrom(method:ShadingMethodBase):void
 		{
@@ -99,7 +104,10 @@ package away3d.materials.methods
 			ambient = diff.ambient;
 			ambientColor = diff.ambientColor;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
@@ -146,7 +154,10 @@ package away3d.materials.methods
 			_ambientG = ((_ambientColor >> 8) & 0xff)/0xff*_ambient*_lightAmbientG;
 			_ambientB = (_ambientColor & 0xff)/0xff*_ambient*_lightAmbientB;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 			updateAmbient();

@@ -8,16 +8,16 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * ColorMatrixMethod provides a shading method that changes the colour of a material according to a ColorMatrixFilter
-	 * object.
+	 * ColorMatrixMethod provides a shading method that changes the colour of a material analogous to a ColorMatrixFilter.
 	 */
 	public class ColorMatrixMethod extends EffectMethodBase
 	{
-		//private var _data:Vector.<Number>;
 		private var _matrix:Array;
 		
 		/**
 		 * Creates a new ColorTransformMethod.
+		 *
+		 * @param matrix An array of 20 items for 4 x 5 color transform.
 		 */
 		public function ColorMatrixMethod(matrix:Array)
 		{
@@ -29,7 +29,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * The ColorMatrixFilter object to transform the color of the material.
+		 * The 4 x 5 matrix to transform the color of the material.
 		 */
 		public function get colorMatrix():Array
 		{

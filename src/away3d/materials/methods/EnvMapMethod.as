@@ -10,20 +10,31 @@ package away3d.materials.methods
 	import flash.display3D.Context3D;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * EnvMapMethod provides a material method to perform reflection mapping using cube maps.
+	 */
 	public class EnvMapMethod extends EffectMethodBase
 	{
 		private var _cubeTexture:CubeTextureBase;
 		private var _alpha:Number;
 		private var _mask:Texture2DBase;
-		
+
+		/**
+		 * Creates an EnvMapMethod object.
+		 * @param envMap The environment map containing the reflected scene.
+		 * @param alpha The reflectivity of the surface.
+		 */
 		public function EnvMapMethod(envMap:CubeTextureBase, alpha:Number = 1)
 		{
 			super();
 			_cubeTexture = envMap;
 			_alpha = alpha;
 		}
-		
+
+		/**
+		 * An optional texture to modulate the reflectivity of the surface.
+		 */
 		public function get mask():Texture2DBase
 		{
 			return _mask;
@@ -37,7 +48,10 @@ package away3d.materials.methods
 			}
 			_mask = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsNormals = true;
@@ -46,7 +60,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * The cube environment map to use for the diffuse lighting.
+		 * The cubic environment map containing the reflected scene.
 		 */
 		public function get envMap():CubeTextureBase
 		{
@@ -66,7 +80,7 @@ package away3d.materials.methods
 		}
 		
 		/**
-		 * The reflectiveness of the surface
+		 * The reflectivity of the surface.
 		 */
 		public function get alpha():Number
 		{
@@ -77,7 +91,10 @@ package away3d.materials.methods
 		{
 			_alpha = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			var context:Context3D = stage3DProxy._context3D;
@@ -86,7 +103,10 @@ package away3d.materials.methods
 			if (_mask)
 				context.setTextureAt(vo.texturesIndex + 1, _mask.getTextureForStage3D(stage3DProxy));
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var dataRegister:ShaderRegisterElement = regCache.getFreeFragmentConstant();

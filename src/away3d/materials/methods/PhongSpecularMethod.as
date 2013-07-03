@@ -1,13 +1,13 @@
-/**
- *
- */
 package away3d.materials.methods
 {
 	import away3d.*;
 	import away3d.materials.compilation.*;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * PhongSpecularMethod provides a specular method that provides Phong highlights.
+	 */
 	public class PhongSpecularMethod extends BasicSpecularMethod
 	{
 		/**
@@ -17,7 +17,10 @@ package away3d.materials.methods
 		{
 			super();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCodePerLight(vo:MethodVO, lightDirReg:ShaderRegisterElement, lightColReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
 		{
 			var code:String = "";

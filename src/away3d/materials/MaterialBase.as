@@ -603,6 +603,7 @@ package away3d.materials
 			pass.smooth = _smooth;
 			pass.repeat = _repeat;
 			pass.lightPicker = _lightPicker;
+			pass.bothSides = _bothSides;
 			pass.addEventListener(Event.CHANGE, onPassChange);
 			invalidatePasses(null);
 		}

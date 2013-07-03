@@ -42,7 +42,10 @@ package away3d.materials.methods
 			_projector = projector;
 			_mode = mode;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var index:int = vo.fragmentConstantsIndex;
@@ -52,7 +55,10 @@ package away3d.materials.methods
 			data[index + 2] = 1.0;
 			data[index + 3] = 1.0;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
@@ -139,7 +145,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 			_projMatrix.copyFrom(_projector.viewProjection);

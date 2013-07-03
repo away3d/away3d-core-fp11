@@ -9,8 +9,11 @@ package away3d.materials.methods
 	use namespace arcane;
 	
 	/**
-	 * Allows the use of an additional texture to specify the alpha value of the material. When used with the secondary uv
-	 * set, it allows for a tiled main texture with independently varying alpha (useful for water etc).
+	 * FresnelPlanarReflectionMethod provides a method to add fresnel-based planar reflections from a
+	 * PlanarReflectionTexture object.to a surface, which get stronger as the viewing angle becomes more grazing. This
+	 * method can be used for (near-)planar objects such as mirrors or water.
+	 *
+	 * @see away3d.textures.PlanarReflectionTexture
 	 */
 	public class FresnelPlanarReflectionMethod extends EffectMethodBase
 	{
@@ -19,14 +22,24 @@ package away3d.materials.methods
 		private var _normalDisplacement:Number = 0;
 		private var _normalReflectance:Number = 0;
 		private var _fresnelPower:Number = 5;
-		
+
+		/**
+		 * Creates a new FresnelPlanarReflectionMethod object.
+		 * @param texture The PlanarReflectionTexture containing a render of the mirrored scene.
+		 * @param alpha The maximum reflectivity of the surface.
+		 *
+		 * @see away3d.textures.PlanarReflectionTexture
+		 */
 		public function FresnelPlanarReflectionMethod(texture:PlanarReflectionTexture, alpha:Number = 1)
 		{
 			super();
 			_texture = texture;
 			_alpha = alpha;
 		}
-		
+
+		/**
+		 * The reflectivity of the surface.
+		 */
 		public function get alpha():Number
 		{
 			return _alpha;
@@ -36,7 +49,10 @@ package away3d.materials.methods
 		{
 			_alpha = value;
 		}
-		
+
+		/**
+		 * The power used in the Fresnel equation. Higher values make the fresnel effect more pronounced. Defaults to 5.
+		 */
 		public function get fresnelPower():Number
 		{
 			return _fresnelPower;
@@ -59,14 +75,22 @@ package away3d.materials.methods
 		{
 			_normalReflectance = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsProjection = true;
 			vo.needsNormals = true;
 			vo.needsView = true;
 		}
-		
+
+		/**
+		 * The PlanarReflectionTexture containing a render of the mirrored scene.
+		 *
+		 * @see away3d.textures.PlanarReflectionTexture
+		 */
 		public function get texture():PlanarReflectionTexture
 		{
 			return _texture;
@@ -76,7 +100,10 @@ package away3d.materials.methods
 		{
 			_texture = value;
 		}
-		
+
+		/**
+		 * The amount of displacement caused by per-pixel normals.
+		 */
 		public function get normalDisplacement():Number
 		{
 			return _normalDisplacement;
@@ -90,7 +117,10 @@ package away3d.materials.methods
 				invalidateShaderProgram();
 			_normalDisplacement = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
@@ -105,7 +135,10 @@ package away3d.materials.methods
 				vo.fragmentData[vo.fragmentConstantsIndex + 7] = .5 - _texture.textureRatioX*.5 + 1/_texture.width;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var textureReg:ShaderRegisterElement = regCache.getFreeTextureReg();

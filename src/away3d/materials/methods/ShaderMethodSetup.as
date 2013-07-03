@@ -6,7 +6,10 @@ package away3d.materials.methods
 	import flash.events.EventDispatcher;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * ShaderMethodSetup contains the method configuration for an entire material.
+	 */
 	public class ShaderMethodSetup extends EventDispatcher
 	{
 		arcane var _colorTransformMethod:ColorTransformMethod;
@@ -22,7 +25,10 @@ package away3d.materials.methods
 		arcane var _specularMethod:BasicSpecularMethod;
 		arcane var _specularMethodVO:MethodVO;
 		arcane var _methods:Vector.<MethodVOSet>;
-		
+
+		/**
+		 * Creates a new ShaderMethodSetup object.
+		 */
 		public function ShaderMethodSetup()
 		{
 			_methods = new Vector.<MethodVOSet>();
@@ -39,17 +45,26 @@ package away3d.materials.methods
 			_diffuseMethodVO = _diffuseMethod.createMethodVO();
 			_specularMethodVO = _specularMethod.createMethodVO();
 		}
-		
+
+		/**
+		 * Called when any method's code is invalidated.
+		 */
 		private function onShaderInvalidated(event:ShadingMethodEvent):void
 		{
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * Invalidates the material's shader code.
+		 */
 		private function invalidateShaderProgram():void
 		{
 			dispatchEvent(new ShadingMethodEvent(ShadingMethodEvent.SHADER_INVALIDATED));
 		}
-		
+
+		/**
+		 *  The method used to generate the per-pixel normals.
+		 */
 		public function get normalMethod():BasicNormalMethod
 		{
 			return _normalMethod;
@@ -72,7 +87,10 @@ package away3d.materials.methods
 			if (value)
 				invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * The method that provides the ambient lighting contribution.
+		 */
 		public function get ambientMethod():BasicAmbientMethod
 		{
 			return _ambientMethod;
@@ -93,7 +111,10 @@ package away3d.materials.methods
 			if (value)
 				invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * The method used to render shadows cast on this surface, or null if no shadows are to be rendered.
+		 */
 		public function get shadowMethod():ShadowMapMethodBase
 		{
 			return _shadowMethod;
@@ -111,11 +132,11 @@ package away3d.materials.methods
 				_shadowMethodVO = null;
 			invalidateShaderProgram();
 		}
-		
+
 		/**
-		 * The method to perform diffuse shading.
+		 * The method that provides the diffuse lighting contribution.
 		 */
-		public function get diffuseMethod():BasicDiffuseMethod
+		 public function get diffuseMethod():BasicDiffuseMethod
 		{
 			return _diffuseMethod;
 		}
@@ -188,7 +209,10 @@ package away3d.materials.methods
 			} else
 				_colorTransformMethodVO = null;
 		}
-		
+
+		/**
+		 * Disposes the object.
+		 */
 		public function dispose():void
 		{
 			clearListeners(_normalMethod);
@@ -202,7 +226,10 @@ package away3d.materials.methods
 			
 			_methods = null;
 		}
-		
+
+		/**
+		 * Removes all listeners from a method.
+		 */
 		private function clearListeners(method:ShadingMethodBase):void
 		{
 			if (method)
@@ -219,7 +246,13 @@ package away3d.materials.methods
 			method.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * Queries whether a given effect method was added to the material.
+		 *
+		 * @param method The method to be queried.
+		 * @return true if the method was added to the material, false otherwise.
+		 */
 		public function hasMethod(method:EffectMethodBase):Boolean
 		{
 			return getMethodSetForMethod(method) != null;
@@ -236,7 +269,12 @@ package away3d.materials.methods
 			method.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * Returns the method added at the given index.
+		 * @param index The index of the method to retrieve.
+		 * @return The method at the given index.
+		 */
 		public function getMethodAt(index:int):EffectMethodBase
 		{
 			if (index > _methods.length - 1)
@@ -244,7 +282,10 @@ package away3d.materials.methods
 			
 			return _methods[index].method;
 		}
-		
+
+		/**
+		 * The number of "effect" methods added to the material.
+		 */
 		public function get numMethods():int
 		{
 			return _methods.length;

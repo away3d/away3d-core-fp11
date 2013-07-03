@@ -7,7 +7,10 @@ package away3d.materials.methods
 	import away3d.textures.CubeTextureBase;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * RefractionEnvMapMethod provides a method to add refracted transparency based on cube maps.
+	 */
 	public class RefractionEnvMapMethod extends EffectMethodBase
 	{
 		private var _envMap:CubeTextureBase;
@@ -18,8 +21,15 @@ package away3d.materials.methods
 		private var _useDispersion:Boolean;
 		private var _refractionIndex:Number;
 		private var _alpha:Number = 1;
-		
-		// example values for dispersion: dispersionR : Number = -0.03, dispersionG : Number = -0.01, dispersionB : Number = .0015
+
+		/**
+		 * Creates a new RefractionEnvMapMethod object. Example values for dispersion are: dispersionR: -0.03, dispersionG: -0.01, dispersionB: = .0015
+		 * @param envMap The environment map containing the refracted scene.
+		 * @param refractionIndex The refractive index of the material.
+		 * @param dispersionR The amount of chromatic dispersion of the red channel. Defaults to 0 (none).
+		 * @param dispersionG The amount of chromatic dispersion of the green channel. Defaults to 0 (none).
+		 * @param dispersionB The amount of chromatic dispersion of the blue channel. Defaults to 0 (none).
+		 */
 		public function RefractionEnvMapMethod(envMap:CubeTextureBase, refractionIndex:Number = .1, dispersionR:Number = 0, dispersionG:Number = 0, dispersionB:Number = 0)
 		{
 			super();
@@ -30,7 +40,10 @@ package away3d.materials.methods
 			_useDispersion = !(_dispersionR == _dispersionB && _dispersionR == _dispersionG);
 			_refractionIndex = refractionIndex;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var index:int = vo.fragmentConstantsIndex;
@@ -39,7 +52,10 @@ package away3d.materials.methods
 			data[index + 5] = 0;
 			data[index + 7] = 1;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsNormals = true;
@@ -58,7 +74,10 @@ package away3d.materials.methods
 		{
 			_envMap = value;
 		}
-		
+
+		/**
+		 * The refractive index of the material.
+		 */
 		public function get refractionIndex():Number
 		{
 			return _refractionIndex;
@@ -68,7 +87,10 @@ package away3d.materials.methods
 		{
 			_refractionIndex = value;
 		}
-		
+
+		/**
+		 * The amount of chromatic dispersion of the red channel. Defaults to 0 (none).
+		 */
 		public function get dispersionR():Number
 		{
 			return _dispersionR;
@@ -84,7 +106,10 @@ package away3d.materials.methods
 				_useDispersion = useDispersion;
 			}
 		}
-		
+
+		/**
+		 * The amount of chromatic dispersion of the green channel. Defaults to 0 (none).
+		 */
 		public function get dispersionG():Number
 		{
 			return _dispersionG;
@@ -100,7 +125,10 @@ package away3d.materials.methods
 				_useDispersion = useDispersion;
 			}
 		}
-		
+
+		/**
+		 * The amount of chromatic dispersion of the blue channel. Defaults to 0 (none).
+		 */
 		public function get dispersionB():Number
 		{
 			return _dispersionB;
@@ -116,7 +144,11 @@ package away3d.materials.methods
 				_useDispersion = useDispersion;
 			}
 		}
-		
+
+		/**
+		 * The amount of transparency of the object. Warning: the alpha applies to the refracted color, not the actual
+		 * material. A value of 1 will make it appear fully transparent.
+		 */
 		public function get alpha():Number
 		{
 			return _alpha;
@@ -126,7 +158,10 @@ package away3d.materials.methods
 		{
 			_alpha = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			var index:int = vo.fragmentConstantsIndex;
@@ -139,7 +174,10 @@ package away3d.materials.methods
 			data[index + 3] = _alpha;
 			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _envMap.getTextureForStage3D(stage3DProxy));
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			// todo: data2.x could use common reg, so only 1 reg is used

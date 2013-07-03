@@ -12,18 +12,28 @@ package away3d.materials.methods
 	import flash.geom.*;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * SimpleShadowMapMethodBase provides an abstract method for simple (non-wrapping) shadow map methods.
+	 */
 	public class SimpleShadowMapMethodBase extends ShadowMapMethodBase
 	{
 		protected var _depthMapCoordReg:ShaderRegisterElement;
 		protected var _usePoint:Boolean;
-		
+
+		/**
+		 * Creates a new SimpleShadowMapMethodBase object.
+		 * @param castingLight The light used to cast shadows.
+		 */
 		public function SimpleShadowMapMethodBase(castingLight:LightBase)
 		{
 			_usePoint = castingLight is PointLight;
 			super(castingLight);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initVO(vo:MethodVO):void
 		{
 			vo.needsView = true;
@@ -31,7 +41,10 @@ package away3d.materials.methods
 			vo.needsGlobalFragmentPos = _usePoint;
 			vo.needsNormals = vo.numLights > 0;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function initConstants(vo:MethodVO):void
 		{
 			var fragmentData:Vector.<Number> = vo.fragmentData;
@@ -73,25 +86,43 @@ package away3d.materials.methods
 		{
 			_depthMapCoordReg = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
 			
 			_depthMapCoordReg = null;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function getVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			return _usePoint? getPointVertexCode(vo, regCache) : getPlanarVertexCode(vo, regCache);
 		}
-		
+
+		/**
+		 * Gets the vertex code for shadow mapping with a point light.
+		 *
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param regCache The register cache used during the compilation.
+		 */
 		protected function getPointVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			vo.vertexConstantsIndex = -1;
 			return "";
 		}
-		
+
+		/**
+		 * Gets the vertex code for shadow mapping with a planar shadow map (fe: directional lights).
+		 *
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param regCache The register cache used during the compilation.
+		 */
 		protected function getPlanarVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
 			var code:String = "";
@@ -113,7 +144,10 @@ package away3d.materials.methods
 			
 			return code;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function getFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			var code:String = _usePoint? getPointFragmentCode(vo, regCache, targetReg) : getPlanarFragmentCode(vo, regCache, targetReg);
@@ -121,31 +155,52 @@ package away3d.materials.methods
 				"sat " + targetReg + ".w, " + targetReg + ".w\n";
 			return code;
 		}
-		
+
+		/**
+		 * Gets the fragment code for shadow mapping with a planar shadow map.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param regCache The register cache used during the compilation.
+		 * @param targetReg The register to contain the shadow coverage
+		 * @return
+		 */
 		protected function getPlanarFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			throw new AbstractMethodError();
-			vo = vo;
-			regCache = regCache;
-			targetReg = targetReg;
 			return "";
 		}
-		
+
+		/**
+		 * Gets the fragment code for shadow mapping with a point light.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param regCache The register cache used during the compilation.
+		 * @param targetReg The register to contain the shadow coverage
+		 * @return
+		 */
 		protected function getPointFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
 			throw new AbstractMethodError();
-			vo = vo;
-			regCache = regCache;
-			targetReg = targetReg;
 			return "";
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 			if (!_usePoint)
 				DirectionalShadowMapper(_shadowMapper).depthProjection.copyRawDataTo(vo.vertexData, vo.vertexConstantsIndex + 4, true);
 		}
-		
+
+		/**
+		 * Gets the fragment code for combining this method with a cascaded shadow map method.
+		 * @param vo The MethodVO object linking this method with the pass currently being compiled.
+		 * @param regCache The register cache used during the compilation.
+		 * @param decodeRegister The register containing the data to decode the shadow map depth value.
+		 * @param depthTexture The texture containing the shadow map.
+		 * @param depthProjection The projection of the fragment relative to the light.
+		 * @param targetRegister The register to contain the shadow coverage
+		 * @return
+		 */
 		arcane function getCascadeFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, decodeRegister:ShaderRegisterElement, depthTexture:ShaderRegisterElement, depthProjection:ShaderRegisterElement, targetRegister:ShaderRegisterElement):String
 		{
 			throw new Error("This shadow method is incompatible with cascade shadows");
@@ -176,7 +231,10 @@ package away3d.materials.methods
 			}
 			stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _castingLight.shadowMapper.depthMap.getTextureForStage3D(stage3DProxy));
 		}
-		
+
+		/**
+		 * Sets the method state for cascade shadow mapping.
+		 */
 		arcane function activateForCascade(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
 			throw new Error("This shadow method is incompatible with cascade shadows");
