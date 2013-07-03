@@ -17,6 +17,7 @@ package away3d.tools.commands
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;
 		private var _geomVOs:Vector.<GeometryVO>;
+		private var toDispose:Vector.<Mesh>;
 		
 		/**
 		 * @param     keepMaterial        [optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
@@ -86,14 +87,11 @@ package away3d.tools.commands
 			//collect container meshes
 			parseContainer(objectContainer);
 			
-			if (!_geomVOs.length)
-				return;
-			
 			//collect receiver
-			collect(receiver, true);
+			collect(receiver, false);
 			
 			//merge to receiver
-			merge(receiver);
+			merge(receiver, _disposeSources);
 		}
 		
 		/**
@@ -114,10 +112,10 @@ package away3d.tools.commands
 				collect(meshes[i], _disposeSources);
 			
 			//collect receiver
-			collect(receiver, true);
+			collect(receiver, false);
 			
 			//merge to receiver
-			merge(receiver);
+			merge(receiver, _disposeSources);
 		}
 		
 		/**
@@ -134,18 +132,20 @@ package away3d.tools.commands
 			collect(mesh, _disposeSources);
 			
 			//collect receiver
-			collect(receiver, true);
+			collect(receiver, false);
+			receiver.geometry.dispose();
 			
 			//merge to receiver
-			merge(receiver);
+			merge(receiver, _disposeSources);
 		}
 		
 		private function reset():void
 		{
+			toDispose  = new Vector.<Mesh>();
 			_geomVOs = new Vector.<GeometryVO>();
 		}
 		
-		private function merge(destMesh:Mesh):void
+		private function merge(destMesh:Mesh, dispose:Boolean):void
 		{
 			var i:uint;
 			var subIdx:uint;
@@ -179,6 +179,13 @@ package away3d.tools.commands
 			
 			if (_keepMaterial && !useSubMaterials && _geomVOs.length)
 				destMesh.material = _geomVOs[0].material;
+				
+			if (dispose)
+			{
+				for each (var m:Mesh in toDispose)
+				m.dispose();
+			}
+			toDispose = null;
 		}
 		
 		private function collect(mesh:Mesh, dispose:Boolean):void
@@ -245,7 +252,7 @@ package away3d.tools.commands
 					}
 					
 					// Copy over triangle indices
-					indexOffset = vo.vertices.length/3;
+					indexOffset = (!_objectSpace)? vo.vertices.length/3 :0;
 					iIdx = vo.indices.length;
 					len = subGeom.numTriangles;
 					for (i = 0; i < len; i++) {
@@ -270,8 +277,7 @@ package away3d.tools.commands
 					}
 				}
 				
-				if (dispose)
-					mesh.geometry.dispose();
+				if (dispose) toDispose.push(mesh);
 			}
 		}
 		
