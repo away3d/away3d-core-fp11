@@ -20,11 +20,11 @@ package away3d.tools.commands
 		private var _toDispose:Vector.<Mesh>;
 		
 		/**
-		 * @param     keepMaterial        [optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
-		 * If set to false and receiver object has multiple materials, the last material found in mesh1 submeshes is applied to mesh2 submeshes.
-		 * @param     disposeSources    [optional] Boolean. Defines if mesh2 (or sources meshes in case applyToContainer is used) are kept untouched or disposed. Default is false.
-		 * If keepMaterial is true, only geometry and eventual ObjectContainers3D are cleared from memory.
-		 * @param     objectSpace        [optional] Boolean. Defines if mesh2 is merge using its objectSpace or worldspace. Default is false.
+		 * @param    keepMaterial    [optional]    Determines if the merged object uses the recevier mesh material information or keeps its source material(s). Defaults to false.
+		 * If false and receiver object has multiple materials, the last material found in receiver submeshes is applied to the merged submesh(es).
+		 * @param    disposeSources  [optional]    Determines if the mesh and geometry source(s) used for the merging are disposed. Defaults to false.
+		 * If true, only receiver geometry and resulting mesh are kept in  memory.
+		 * @param    objectSpace     [optional]    Determines if source mesh(es) is/are merged using objectSpace or worldspace. Defaults to false.
 		 */
 		function Merge(keepMaterial:Boolean = false, disposeSources:Boolean = false, objectSpace:Boolean = false):void
 		{
@@ -34,7 +34,7 @@ package away3d.tools.commands
 		}
 		
 		/**
-		 * Defines if the mesh(es) sources used for the merging are kept or disposed.
+		 * Determines if the mesh and geometry source(s) used for the merging are disposed. Defaults to false.
 		 */
 		public function set disposeSources(b:Boolean):void
 		{
@@ -47,7 +47,7 @@ package away3d.tools.commands
 		}
 		
 		/**
-		 * Defines if mesh2 will be merged using its own material information.
+		 * Determines if the material source(s) used for the merging are disposed. Defaults to false.
 		 */
 		public function set keepMaterial(b:Boolean):void
 		{
@@ -60,7 +60,7 @@ package away3d.tools.commands
 		}
 		
 		/**
-		 * Defines if mesh2 is merged using its objectSpace.
+		 * Determines if source mesh(es) is/are merged using objectSpace or worldspace. Defaults to false.
 		 */
 		public function set objectSpace(b:Boolean):void
 		{
@@ -75,8 +75,8 @@ package away3d.tools.commands
 		/**
 		 * Merges all the children of a container into a single Mesh. If no Mesh object is found, method returns the receiver without modification.
 		 *
-		 * @param     receiver            The Mesh that will receive the merged contents of the container.
-		 * @param     objectContainer    The ObjectContainer3D holding meshes to merge as one mesh.
+		 * @param    receiver           The Mesh to receive the merged contents of the container.
+		 * @param    objectContainer    The ObjectContainer3D holding the meshes to be mergd.
 		 *
 		 * @return The merged Mesh instance.
 		 */
@@ -90,9 +90,6 @@ package away3d.tools.commands
 			//collect receiver
 			collect(receiver, false);
 			
-			//dispose of the original receiver geometry
-			receiver.geometry.dispose();
-			
 			//merge to receiver
 			merge(receiver, _disposeSources);
 		}
@@ -100,8 +97,8 @@ package away3d.tools.commands
 		/**
 		 * Merges all the meshes found in the Vector.&lt;Mesh&gt; into a single Mesh.
 		 *
-		 * @param     receiver            The Mesh that will receive the merged contents of the meshes.
-		 * @param     meshes                Vector.&lt;Mesh&gt;. A series of Meshes to be merged with the reciever mesh.
+		 * @param    receiver    The Mesh to receive the merged contents of the meshes.
+		 * @param    meshes      A series of Meshes to be merged with the reciever mesh.
 		 */
 		public function applyToMeshes(receiver:Mesh, meshes:Vector.<Mesh>):void
 		{
@@ -117,18 +114,15 @@ package away3d.tools.commands
 			//collect receiver
 			collect(receiver, false);
 			
-			//dispose of the original receiver geometry
-			receiver.geometry.dispose();
-			
 			//merge to receiver
 			merge(receiver, _disposeSources);
 		}
 		
 		/**
-		 *  Merge 2 meshes into one. It is recommand to use apply when 2 meshes are to be merged. If more need to be merged, use either applyToMeshes or applyToContainer methods.
+		 *  Merges 2 meshes into one. It is recommand to use apply when 2 meshes are to be merged. If more need to be merged, use either applyToMeshes or applyToContainer methods.
 		 *
-		 * @param     receiver            The Mesh that will receive the merged contents of both meshes.
-		 * @param     mesh                The Mesh that will be merged with the receiver mesh
+		 * @param    receiver    The Mesh to receive the merged contents of both meshes.
+		 * @param    mesh        The Mesh to be merged with the receiver mesh
 		 */
 		public function apply(receiver:Mesh, mesh:Mesh):void
 		{
@@ -139,9 +133,6 @@ package away3d.tools.commands
 			
 			//collect receiver
 			collect(receiver, false);
-			
-			//dispose of the original receiver geometry
-			receiver.geometry.dispose();
 			
 			//merge to receiver
 			merge(receiver, _disposeSources);
@@ -157,10 +148,12 @@ package away3d.tools.commands
 		{
 			var i:uint;
 			var subIdx:uint;
+			var oldGeom:Geometry
 			var destGeom:Geometry;
 			var useSubMaterials:Boolean;
 			
-			destGeom = destMesh.geometry;
+			oldGeom = destMesh.geometry;
+			destGeom = destMesh.geometry = new Geometry();
 			subIdx = destMesh.subMeshes.length;
 			
 			// Only apply materials directly to sub-meshes if necessary,
@@ -194,6 +187,10 @@ package away3d.tools.commands
 					m.dispose();
 				}
 			}
+			
+			//dispose of the original receiver geometry
+			oldGeom.dispose();
+			
 			_toDispose = null;
 		}
 		
