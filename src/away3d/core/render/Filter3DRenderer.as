@@ -2,18 +2,14 @@
  */
 package away3d.core.render
 {
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.filters.Filter3DBase;
-	import away3d.filters.tasks.Filter3DTaskBase;
+	import away3d.cameras.*;
+	import away3d.core.managers.*;
+	import away3d.filters.*;
+	import away3d.filters.tasks.*;
 	
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.VertexBuffer3D;
-	import flash.display3D.textures.Texture;
-	import flash.events.Event;
+	import flash.display3D.*;
+	import flash.display3D.textures.*;
+	import flash.events.*;
 	
 	public class Filter3DRenderer
 	{
@@ -141,6 +137,7 @@ package away3d.core.render
 				context.setProgram(task.getProgram3D(stage3DProxy));
 				context.clear(0.0, 0.0, 0.0, 0.0);
 				task.activate(stage3DProxy, camera3D, depthTexture);
+				context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 				context.drawTriangles(indexBuffer, 0, 2);
 				task.deactivate(stage3DProxy);
 			}
