@@ -239,10 +239,7 @@ package away3d.materials.methods
 		
 		public function getMethodAt(index:int):EffectMethodBase
 		{
-			if (!_methods.length)
-				return null;
-			
-			if (!_methods[index])
+			if (index > _methods.length - 1)
 				return null;
 			
 			return _methods[index].method;
