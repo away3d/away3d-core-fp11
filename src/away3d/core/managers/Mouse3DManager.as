@@ -85,25 +85,8 @@ package away3d.core.managers
 					if (view.getBounds(view.parent).contains(view.mouseX + view.x, view.mouseY + view.y)) {
 						if (!_collidingViewObjects)
 							_collidingViewObjects = new Vector.<PickingCollisionVO>(_viewCount);
-						_collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
+						_collidingObject = _collidingViewObjects[_view3Ds[view]] = _mousePicker.getViewCollision(view.mouseX, view.mouseY, view);
 					}
-				}
-			}
-		}
-		
-		private function updateSharedContextCollider():void
-		{
-			_collidingObject = null;
-			// Get the top-most view colliding object
-			var distance:Number = Infinity;
-			var view:View3D;
-			for (var v:int = _viewCount - 1; v >= 0; v--) {
-				view = _view3DLookup[v];
-				if (_collidingViewObjects[v] && (view.layeredView || _collidingViewObjects[v].rayEntryDistance < distance)) {
-					distance = _collidingViewObjects[v].rayEntryDistance;
-					_collidingObject = _collidingViewObjects[v];
-					if (view.layeredView)
-						break;
 				}
 			}
 		}
@@ -116,8 +99,21 @@ package away3d.core.managers
 			var dispatcher:ObjectContainer3D;
 			
 			// If multiple view are used, determine the best hit based on the depth intersection.
-			if (_collidingViewObjects)
-				updateSharedContextCollider();
+			if (_collidingViewObjects) {
+				_collidingObject = null;
+				// Get the top-most view colliding object
+				var distance:Number = Infinity;
+				var view:View3D;
+				for (var v:int = _viewCount - 1; v >= 0; v--) {
+					view = _view3DLookup[v];
+					if (_collidingViewObjects[v] && (view.layeredView || _collidingViewObjects[v].rayEntryDistance < distance)) {
+						distance = _collidingViewObjects[v].rayEntryDistance;
+						_collidingObject = _collidingViewObjects[v];
+						if (view.layeredView)
+							break;
+					}
+				}
+			}
 			
 			// If colliding object has changed, queue over/out events.
 			if (_collidingObject != _previousCollidingObject) {
@@ -243,7 +239,7 @@ package away3d.core.managers
 		
 		private function reThrowEvent(event:MouseEvent):void
 		{
-			if (!_activeView || (_activeView && _activeView.shareContext))
+			if (!_activeView || (_activeView && !_activeView.shareContext))
 				return;
 			
 			for (var v:* in _view3Ds) {
@@ -313,10 +309,8 @@ package away3d.core.managers
 		
 		private function onClick(event:MouseEvent):void
 		{
-			if (_collidingObject && _collidingUpObject == _collidingDownObject) {
+			if (_collidingObject) {
 				queueDispatch(_mouseClick, event);
-				_collidingUpObject = null;
-				_collidingDownObject = null;
 			} else
 				reThrowEvent(event);
 			_updateDirty = true;
@@ -324,7 +318,7 @@ package away3d.core.managers
 		
 		private function onDoubleClick(event:MouseEvent):void
 		{
-			if (_collidingObject && _collidingUpObject == _collidingDownObject)
+			if (_collidingObject)
 				queueDispatch(_mouseDoubleClick, event);
 			else
 				reThrowEvent(event);
@@ -335,13 +329,9 @@ package away3d.core.managers
 		{
 			_activeView = (event.currentTarget as View3D);
 			updateCollider(_activeView); // ensures collision check is done with correct mouse coordinates on mobile
-			if (_collidingViewObjects) { // If multiple view are used, determine the best hit based on the depth intersection.
-				updateSharedContextCollider();
-			}
 			if (_collidingObject) {
 				queueDispatch(_mouseDown, event);
-				_collidingUpObject = null;
-				_collidingDownObject = _collidingObject;
+				_previousCollidingObject = _collidingObject;
 			} else
 				reThrowEvent(event);
 			_updateDirty = true;
@@ -351,7 +341,7 @@ package away3d.core.managers
 		{
 			if (_collidingObject) {
 				queueDispatch(_mouseUp, event);
-				_collidingUpObject = _collidingObject;
+				_previousCollidingObject = _collidingObject;
 			} else
 				reThrowEvent(event);
 			_updateDirty = true;
