@@ -19,9 +19,10 @@ package away3d.materials.passes
 	use namespace arcane;
 	
 	/**
-	 * DefaultScreenPass is a shader pass that uses shader methods to compile a complete program.
+	 * LightingPass is a shader pass that uses shader methods to compile a complete program. It only includes the lighting
+	 * methods. It's used by multipass materials to accumulate lighting passes.
 	 *
-	 * @see away3d.materials.methods.ShadingMethodBase
+	 * @see away3d.materials.MultiPassMaterialBase
 	 */
 	
 	public class LightingPass extends CompiledPass
@@ -37,14 +38,19 @@ package away3d.materials.passes
 		private var _maxLights:int = 3;
 		
 		/**
-		 * Creates a new DefaultScreenPass objects.
+		 * Creates a new LightingPass objects.
+		 *
+		 * @param material The material to which this pass belongs.
 		 */
 		public function LightingPass(material:MaterialBase)
 		{
 			super(material);
 		}
-		
-		// these need to be set before the light picker is assigned
+
+		/**
+		 * Indicates the offset in the light picker's directional light vector for which to start including lights.
+		 * This needs to be set before the light picker is assigned.
+		 */
 		public function get directionalLightsOffset():uint
 		{
 			return _directionalLightsOffset;
@@ -54,7 +60,11 @@ package away3d.materials.passes
 		{
 			_directionalLightsOffset = value;
 		}
-		
+
+		/**
+		 * Indicates the offset in the light picker's point light vector for which to start including lights.
+		 * This needs to be set before the light picker is assigned.
+		 */
 		public function get pointLightsOffset():uint
 		{
 			return _pointLightsOffset;
@@ -64,7 +74,11 @@ package away3d.materials.passes
 		{
 			_pointLightsOffset = value;
 		}
-		
+
+		/**
+		 * Indicates the offset in the light picker's light probes vector for which to start including lights.
+		 * This needs to be set before the light picker is assigned.
+		 */
 		public function get lightProbesOffset():uint
 		{
 			return _lightProbesOffset;
@@ -74,13 +88,19 @@ package away3d.materials.passes
 		{
 			_lightProbesOffset = value;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function createCompiler(profile:String):ShaderCompiler
 		{
 			_maxLights = profile == "baselineConstrained"? 1 : 3;
 			return new LightingShaderCompiler(profile);
 		}
-		
+
+		/**
+		 * Indicates whether or not shadow casting lights need to be included.
+		 */
 		public function get includeCasters():Boolean
 		{
 			return _includeCasters;
@@ -93,7 +113,10 @@ package away3d.materials.passes
 			_includeCasters = value;
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateLights():void
 		{
 			super.updateLights();
@@ -116,18 +139,33 @@ package away3d.materials.passes
 			}
 		
 		}
-		
+
+		/**
+		 * Calculates the amount of directional lights this material will support.
+		 * @param numDirectionalLights The maximum amount of directional lights to support.
+		 * @return The amount of directional lights this material will support, bounded by the amount necessary.
+		 */
 		private function calculateNumDirectionalLights(numDirectionalLights:uint):int
 		{
 			return Math.min(numDirectionalLights - _directionalLightsOffset, _maxLights);
 		}
-		
+
+		/**
+		 * Calculates the amount of point lights this material will support.
+		 * @param numDirectionalLights The maximum amount of point lights to support.
+		 * @return The amount of point lights this material will support, bounded by the amount necessary.
+		 */
 		private function calculateNumPointLights(numPointLights:uint):int
 		{
 			var numFree:int = _maxLights - _numDirectionalLights;
 			return Math.min(numPointLights - _pointLightsOffset, numFree);
 		}
-		
+
+		/**
+		 * Calculates the amount of light probes this material will support.
+		 * @param numDirectionalLights The maximum amount of light probes to support.
+		 * @return The amount of light probes this material will support, bounded by the amount necessary.
+		 */
 		private function calculateNumProbes(numLightProbes:uint):int
 		{
 			var numChannels:int;
@@ -139,19 +177,28 @@ package away3d.materials.passes
 			// 4 channels available
 			return Math.min(numLightProbes - _lightProbesOffset, int(4/numChannels));
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateShaderProperties():void
 		{
 			super.updateShaderProperties();
 			_tangentSpace = LightingShaderCompiler(_compiler).tangentSpace;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateRegisterIndices():void
 		{
 			super.updateRegisterIndices();
 			_lightVertexConstantIndex = LightingShaderCompiler(_compiler).lightVertexConstantIndex;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			renderable.inverseSceneTransform.copyRawDataTo(_inverseSceneMatrix);
@@ -183,22 +230,25 @@ package away3d.materials.passes
 				_vertexConstantData[_cameraPositionIndex + 2] = pos.z;
 			}
 		}
-		
+
+		/**
+		 * Indicates whether any light probes are used to contribute to the specular shading.
+		 */
 		private function usesProbesForSpecular():Boolean
 		{
 			return _numLightProbes > 0 && (_specularLightSources & LightSources.PROBES) != 0;
 		}
-		
+
+		/**
+		 * Indicates whether any light probes are used to contribute to the diffuse shading.
+		 */
 		private function usesProbesForDiffuse():Boolean
 		{
 			return _numLightProbes > 0 && (_diffuseLightSources & LightSources.PROBES) != 0;
 		}
-		
-		/*
-		 * Updates the lights data for the render state.
-		 * @param lights The lights selected to shade the current object.
-		 * @param numLights The amount of lights available.
-		 * @param maxLights The maximum amount of lights supported.
+
+		/**
+		 * @inheritDoc
 		 */
 		override protected function updateLightConstants():void
 		{
@@ -340,7 +390,10 @@ package away3d.materials.passes
 					_fragmentConstantData[k] = 0;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateProbes(stage3DProxy:Stage3DProxy):void
 		{
 			var context:Context3D = stage3DProxy._context3D;

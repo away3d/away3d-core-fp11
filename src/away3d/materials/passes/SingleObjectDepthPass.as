@@ -65,7 +65,10 @@ package away3d.materials.passes
 				_textures = null;
 			}
 		}
-		
+
+		/**
+		 * Updates the projection textures used to contain the depth renders.
+		 */
 		private function updateProjectionTextures():void
 		{
 			if (_textures) {
@@ -107,8 +110,6 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animationCode:String):String
 		{
-			// TODO: not used
-			animationCode = animationCode;
 			var code:String = "";
 			
 			// encode float -> rgba
@@ -120,10 +121,11 @@ package away3d.materials.passes
 			
 			return code;
 		}
-		
+
 		/**
 		 * Gets the depth maps rendered for this object from all lights.
-		 * @param renderable The renderable for which to retrieve the depth maps
+		 * @param renderable The renderable for which to retrieve the depth maps.
+		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
 		 * @return A list of depth map textures for all supported lights.
 		 */
 		arcane function getDepthMap(renderable:IRenderable, stage3DProxy:Stage3DProxy):Texture

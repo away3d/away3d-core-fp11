@@ -11,7 +11,10 @@
 	import flash.geom.Matrix3D;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * SegmentPass is a material pass that draws wireframe segments.
+	 */
 	public class SegmentPass extends MaterialPassBase
 	{
 		protected static const ONE_VECTOR:Vector.<Number> = Vector.<Number>([ 1, 1, 1, 1 ]);
@@ -22,7 +25,9 @@
 		private var _thickness:Number;
 		
 		/**
-		 * Creates a new WireframePass object.
+		 * Creates a new SegmentPass object.
+		 *
+		 * @param thickness the thickness of the segments to be drawn.
 		 */
 		public function SegmentPass(thickness:Number)
 		{
@@ -105,7 +110,6 @@
 		 */
 		arcane override function getFragmentCode(animationCode:String):String
 		{
-			animationCode = animationCode;
 			return "mov oc, v0\n";
 		}
 		
@@ -115,7 +119,6 @@
 		 */
 		arcane override function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
-			viewProjection = viewProjection;
 			var context:Context3D = stage3DProxy._context3D;
 			_calcMatrix.copyFrom(renderable.sourceEntity.sceneTransform);
 			_calcMatrix.append(camera.inverseSceneTransform);

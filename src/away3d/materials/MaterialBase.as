@@ -184,7 +184,7 @@ package away3d.materials
 		/**
 		 * The depth compare mode used to render the renderables using this material.
 		 *
-		 * @see flash.display3D.Context3D
+		 * @see flash.display3D.Context3DCompareMode
 		 */
 		public function get depthCompareMode():String
 		{
@@ -399,7 +399,7 @@ package away3d.materials
 		 * Sets the render state for a pass that is independent of the rendered object. This needs to be called before
 		 * calling renderPass. Before activating a pass, the previously used pass needs to be deactivated.
 		 * @param index The index of the pass to activate.
-		 * @param context The Context3D object which is currently rendering.
+		 * @param stage3DProxy The Stage3DProxy object which is currently used for rendering.
 		 * @param camera The camera from which the scene is viewed.
 		 * @private
 		 */

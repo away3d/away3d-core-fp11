@@ -22,30 +22,38 @@ package away3d.materials.passes
 	use namespace arcane;
 	
 	/**
-	 * DefaultScreenPass is a shader pass that uses shader methods to compile a complete program.
+	 * SuperShaderPass is a shader pass that uses shader methods to compile a complete program. It includes all methods
+	 * associated with a material.
 	 *
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
-	
 	public class SuperShaderPass extends CompiledPass
 	{
 		private var _includeCasters:Boolean = true;
 		private var _ignoreLights:Boolean;
 		
 		/**
-		 * Creates a new DefaultScreenPass objects.
+		 * Creates a new SuperShaderPass objects.
+		 *
+		 * @param material The material to which this material belongs.
 		 */
 		public function SuperShaderPass(material:MaterialBase)
 		{
 			super(material);
 			_needFragmentAnimation = true;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function createCompiler(profile:String):ShaderCompiler
 		{
 			return new SuperShaderCompiler(profile);
 		}
-		
+
+		/**
+		 * Indicates whether lights that cast shadows should be included in the pass.
+		 */
 		public function get includeCasters():Boolean
 		{
 			return _includeCasters;
@@ -58,9 +66,9 @@ package away3d.materials.passes
 			_includeCasters = value;
 			invalidateShaderProgram();
 		}
-		
+
 		/**
-		 * The ColorTransform object to transform the colour of the material with.
+		 * The ColorTransform object to transform the colour of the material with. Defaults to null.
 		 */
 		public function get colorTransform():ColorTransform
 		{
@@ -78,7 +86,10 @@ package away3d.materials.passes
 				colorTransformMethod = _methodSetup._colorTransformMethod = null;
 			}
 		}
-		
+
+		/**
+		 * The ColorTransformMethod object to transform the colour of the material with. Defaults to null.
+		 */
 		public function get colorTransformMethod():ColorTransformMethod
 		{
 			return _methodSetup.colorTransformMethod;
@@ -88,46 +99,68 @@ package away3d.materials.passes
 		{
 			_methodSetup.colorTransformMethod = value;
 		}
-		
+
 		/**
-		 * Adds a shading method to the end of the shader. Note that shading methods can
-		 * not be reused across materials.
+		 * Appends an "effect" shading method to the shader. Effect methods are those that do not influence the lighting
+		 * but modulate the shaded colour, used for fog, outlines, etc. The method will be applied to the result of the
+		 * methods added prior.
 		 */
 		public function addMethod(method:EffectMethodBase):void
 		{
 			_methodSetup.addMethod(method);
 		}
-		
+
+		/**
+		 * The number of "effect" methods added to the material.
+		 */
 		public function get numMethods():int
 		{
 			return _methodSetup.numMethods;
 		}
-		
+
+		/**
+		 * Queries whether a given effect method was added to the material.
+		 *
+		 * @param method The method to be queried.
+		 * @return true if the method was added to the material, false otherwise.
+		 */
 		public function hasMethod(method:EffectMethodBase):Boolean
 		{
 			return _methodSetup.hasMethod(method);
 		}
-		
+
+		/**
+		 * Returns the method added at the given index.
+		 * @param index The index of the method to retrieve.
+		 * @return The method at the given index.
+		 */
 		public function getMethodAt(index:int):EffectMethodBase
 		{
 			return _methodSetup.getMethodAt(index);
 		}
-		
+
 		/**
-		 * Adds a shading method to the end of a shader, at the specified index amongst
-		 * the methods in that section of the shader. Note that shading methods can not
-		 * be reused across materials.
+		 * Adds an effect method at the specified index amongst the methods already added to the material. Effect
+		 * methods are those that do not influence the lighting but modulate the shaded colour, used for fog, outlines,
+		 * etc. The method will be applied to the result of the methods with a lower index.
 		 */
 		public function addMethodAt(method:EffectMethodBase, index:int):void
 		{
 			_methodSetup.addMethodAt(method, index);
 		}
-		
+
+		/**
+		 * Removes an effect method from the material.
+		 * @param method The method to be removed.
+		 */
 		public function removeMethod(method:EffectMethodBase):void
 		{
 			_methodSetup.removeMethod(method);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateLights():void
 		{
 			//			super.updateLights();
@@ -192,7 +225,10 @@ package away3d.materials.passes
 				set.method.deactivate(set.data, stage3DProxy);
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function addPassesFromMethods():void
 		{
 			super.addPassesFromMethods();
@@ -204,17 +240,26 @@ package away3d.materials.passes
 			for (var i:uint = 0; i < methods.length; ++i)
 				addPasses(methods[i].method.passes);
 		}
-		
+
+		/**
+		 * Indicates whether any light probes are used to contribute to the specular shading.
+		 */
 		private function usesProbesForSpecular():Boolean
 		{
 			return _numLightProbes > 0 && (_specularLightSources & LightSources.PROBES) != 0;
 		}
-		
+
+		/**
+		 * Indicates whether any light probes are used to contribute to the diffuse shading.
+		 */
 		private function usesProbesForDiffuse():Boolean
 		{
 			return _numLightProbes > 0 && (_diffuseLightSources & LightSources.PROBES) != 0;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateMethodConstants():void
 		{
 			super.updateMethodConstants();
@@ -226,12 +271,9 @@ package away3d.materials.passes
 			for (var i:uint = 0; i < len; ++i)
 				methods[i].method.initConstants(methods[i].data);
 		}
-		
+
 		/**
-		 * Updates the lights data for the render state.
-		 * @param lights The lights selected to shade the current object.
-		 * @param numLights The amount of lights available.
-		 * @param maxLights The maximum amount of lights supported.
+		 * @inheritDoc
 		 */
 		override protected function updateLightConstants():void
 		{
@@ -319,7 +361,10 @@ package away3d.materials.passes
 					_fragmentConstantData[k] = 0;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateProbes(stage3DProxy:Stage3DProxy):void
 		{
 			var probe:LightProbe;
@@ -347,7 +392,11 @@ package away3d.materials.passes
 			_fragmentConstantData[_probeWeightsIndex + 2] = weights[2];
 			_fragmentConstantData[_probeWeightsIndex + 3] = weights[3];
 		}
-		
+
+		/**
+		 * Indicates whether lights should be ignored in this pass. This is used when only effect methods are rendered in
+		 * a multipass material.
+		 */
 		arcane function set ignoreLights(ignoreLights:Boolean):void
 		{
 			_ignoreLights = ignoreLights;

@@ -16,7 +16,8 @@ package away3d.materials.passes
 	use namespace arcane;
 	
 	/**
-	 * DefaultScreenPass is a shader pass that uses shader methods to compile a complete program.
+	 * ShadowCasterPass is a shader pass that uses shader methods to compile a complete program. It only draws the lighting
+	 * contribution for a single shadow-casting light.
 	 *
 	 * @see away3d.materials.methods.ShadingMethodBase
 	 */
@@ -28,18 +29,26 @@ package away3d.materials.passes
 		private var _inverseSceneMatrix:Vector.<Number> = new Vector.<Number>();
 		
 		/**
-		 * Creates a new DefaultScreenPass objects.
+		 * Creates a new ShadowCasterPass objects.
+		 *
+		 * @param material The material to which this pass belongs.
 		 */
 		public function ShadowCasterPass(material:MaterialBase)
 		{
 			super(material);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function createCompiler(profile:String):ShaderCompiler
 		{
 			return new LightingShaderCompiler(profile);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateLights():void
 		{
 			super.updateLights();
@@ -56,19 +65,28 @@ package away3d.materials.passes
 				invalidateShaderProgram();
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateShaderProperties():void
 		{
 			super.updateShaderProperties();
 			_tangentSpace = LightingShaderCompiler(_compiler).tangentSpace;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateRegisterIndices():void
 		{
 			super.updateRegisterIndices();
 			_lightVertexConstantIndex = LightingShaderCompiler(_compiler).lightVertexConstantIndex;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			renderable.inverseSceneTransform.copyRawDataTo(_inverseSceneMatrix);
@@ -100,12 +118,9 @@ package away3d.materials.passes
 				_vertexConstantData[_cameraPositionIndex + 2] = pos.z;
 			}
 		}
-		
+
 		/**
-		 * Updates the lights data for the render state.
-		 * @param lights The lights selected to shade the current object.
-		 * @param numLights The amount of lights available.
-		 * @param maxLights The maximum amount of lights supported.
+		 * @inheritDoc
 		 */
 		override protected function updateLightConstants():void
 		{
@@ -186,17 +201,26 @@ package away3d.materials.passes
 				_fragmentConstantData[k++] = pointLight._fallOffFactor;
 			}
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function usesProbes():Boolean
 		{
 			return false;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function usesLights():Boolean
 		{
 			return true;
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override protected function updateProbes(stage3DProxy:Stage3DProxy):void
 		{
 		}

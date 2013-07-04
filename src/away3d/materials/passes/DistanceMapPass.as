@@ -14,14 +14,20 @@
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
-	
+	/**
+	 * DistanceMapPass is a pass that writes distance values to a depth map as a 32-bit value exploded over the 4 texture channels.
+	 * This is used to render omnidirectional shadow maps.
+	 */
 	public class DistanceMapPass extends MaterialPassBase
 	{
 		private var _fragmentData:Vector.<Number>;
 		private var _vertexData:Vector.<Number>;
 		private var _alphaThreshold:Number;
 		private var _alphaMask:Texture2DBase;
-		
+
+		/**
+		 * Creates a new DistanceMapPass object.
+		 */
 		public function DistanceMapPass()
 		{
 			super();
@@ -58,7 +64,11 @@
 			_alphaThreshold = value;
 			_fragmentData[8] = _alphaThreshold;
 		}
-		
+
+		/**
+		 * A texture providing alpha data to be able to prevent semi-transparent pixels to write to the alpha mask.
+		 * Usually the diffuse texture when alphaThreshold is used.
+		 */
 		public function get alphaMask():Texture2DBase
 		{
 			return _alphaMask;

@@ -19,7 +19,12 @@ package away3d.materials.passes
 	import flash.utils.Dictionary;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * OutlinePass is a pass that offsets a mesh and draws it in a single colour. This is a pass provided by OutlineMethod.
+	 *
+	 * @see away3d.materials.methods.OutlineMethod
+	 */
 	public class OutlinePass extends MaterialPassBase
 	{
 		private var _outlineColor:uint;
@@ -28,13 +33,13 @@ package away3d.materials.passes
 		private var _showInnerLines:Boolean;
 		private var _outlineMeshes:Dictionary;
 		private var _dedicatedMeshes:Boolean;
-		
+
 		/**
-		 *
-		 * @param outlineColor
-		 * @param outlineSize
-		 * @param showInnerLines
-		 * @param dedicatedMeshes Create a Mesh specifically for the outlines. This is only useful if the outlines of the existing mesh appear fragmented due to discontinuities in the normals.
+		 * Creates a new OutlinePass object.
+		 * @param outlineColor The colour of the outline stroke
+		 * @param outlineSize The size of the outline stroke
+		 * @param showInnerLines Indicates whether or not strokes should be potentially drawn over the existing model.
+		 * @param dedicatedWaterProofMesh Used to stitch holes appearing due to mismatching normals for overlapping vertices. Warning: this will create a new mesh that is incompatible with animations!
 		 */
 		public function OutlinePass(outlineColor:uint = 0x000000, outlineSize:Number = 20, showInnerLines:Boolean = true, dedicatedMeshes:Boolean = false)
 		{
@@ -59,8 +64,7 @@ package away3d.materials.passes
 		}
 		
 		/**
-		 * Clears mesh.
-		 * TODO: have Object3D broadcast dispose event, so this can be handled automatically?
+		 * Clears the dedicated mesh associated with a Mesh object to free up memory.
 		 */
 		public function clearDedicatedMesh(mesh:Mesh):void
 		{
@@ -69,7 +73,10 @@ package away3d.materials.passes
 					disposeDedicated(mesh.subMeshes[i]);
 			}
 		}
-		
+
+		/**
+		 * Disposes a single dedicated sub-mesh.
+		 */
 		private function disposeDedicated(keySubMesh:Object):void
 		{
 			var mesh:Mesh;
@@ -78,7 +85,10 @@ package away3d.materials.passes
 			mesh.dispose();
 			delete _dedicatedMeshes[keySubMesh];
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override public function dispose():void
 		{
 			super.dispose();
@@ -88,7 +98,12 @@ package away3d.materials.passes
 					disposeDedicated(key);
 			}
 		}
-		
+
+		/**
+		 * Indicates whether or not strokes should be potentially drawn over the existing model.
+		 * Set this to true to draw outlines for geometry overlapping in the view, useful to achieve a cel-shaded drawing outline.
+		 * Setting this to false will only cause the outline to appear around the 2D projection of the geometry.
+		 */
 		public function get showInnerLines():Boolean
 		{
 			return _showInnerLines;
@@ -98,7 +113,10 @@ package away3d.materials.passes
 		{
 			_showInnerLines = value;
 		}
-		
+
+		/**
+		 * The colour of the outline.
+		 */
 		public function get outlineColor():uint
 		{
 			return _outlineColor;
@@ -111,7 +129,10 @@ package away3d.materials.passes
 			_colorData[1] = ((value >> 8) & 0xff)/0xff;
 			_colorData[2] = (value & 0xff)/0xff;
 		}
-		
+
+		/**
+		 * The size of the outline.
+		 */
 		public function get outlineSize():Number
 		{
 			return _offsetData[0];
@@ -143,8 +164,6 @@ package away3d.materials.passes
 		 */
 		arcane override function getFragmentCode(animationCode:String):String
 		{
-			// TODO: not used
-			animationCode = animationCode;
 			return "mov oc, fc0\n";
 		}
 		
@@ -163,14 +182,20 @@ package away3d.materials.passes
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _colorData, 1);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _offsetData, 1);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function deactivate(stage3DProxy:Stage3DProxy):void
 		{
 			super.deactivate(stage3DProxy);
 			if (!_showInnerLines)
 				stage3DProxy._context3D.setDepthTest(true, Context3DCompareMode.LESS);
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var mesh:Mesh, dedicatedRenderable:IRenderable;
@@ -196,8 +221,13 @@ package away3d.materials.passes
 				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 			}
 		}
-		
-		// creates a new mesh in which all vertices are unique
+
+		/**
+		 * Creates a new mesh in which vertices with the same position are collapsed into a single vertex. This
+		 * will prevent gaps appearing where vertex normals are different for a seemingly single vertex.
+		 *
+		 * @param source The ISubGeometry object for which to generate a dedicated mesh.
+		 */
 		private function createDedicatedMesh(source:ISubGeometry):Mesh
 		{
 			var mesh:Mesh = new Mesh(new Geometry(), null);

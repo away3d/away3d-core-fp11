@@ -25,7 +25,11 @@ package away3d.materials.passes
 	import flash.geom.Matrix3D;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * CompiledPass forms an abstract base class for the default compiled pass materials provided by Away3D,
+	 * using material methods to define their appearance.
+	 */
 	public class CompiledPass extends MaterialPassBase
 	{
 		arcane var _passes:Vector.<MaterialPassBase>;
@@ -74,14 +78,22 @@ package away3d.materials.passes
 		protected var _enableLightFallOff:Boolean = true;
 		
 		private var _forceSeparateMVP:Boolean;
-		
+
+		/**
+		 * Creates a new CompiledPass object.
+		 * @param material The material to which this pass belongs.
+		 */
 		public function CompiledPass(material:MaterialBase)
 		{
 			_material = material;
 			
 			init();
 		}
-		
+
+		/**
+		 * Whether or not to use fallOff and radius properties for lights. This can be used to improve performance and
+		 * compatibility for constrained mode.
+		 */
 		public function get enableLightFallOff():Boolean
 		{
 			return _enableLightFallOff;
@@ -93,7 +105,12 @@ package away3d.materials.passes
 				invalidateShaderProgram(true);
 			_enableLightFallOff = value;
 		}
-		
+
+		/**
+		 * Indicates whether the screen projection should be calculated by forcing a separate scene matrix and
+		 * view-projection matrix. This is used to prevent rounding errors when using multiple passes with different
+		 * projection code.
+		 */
 		public function get forceSeparateMVP():Boolean
 		{
 			return _forceSeparateMVP;
@@ -103,17 +120,26 @@ package away3d.materials.passes
 		{
 			_forceSeparateMVP = value;
 		}
-		
+
+		/**
+		 * The amount of point lights that need to be supported.
+		 */
 		arcane function get numPointLights():uint
 		{
 			return _numPointLights;
 		}
-		
+
+		/**
+		 * The amount of directional lights that need to be supported.
+		 */
 		arcane function get numDirectionalLights():uint
 		{
 			return _numDirectionalLights;
 		}
-		
+
+		/**
+		 * The amount of light probes that need to be supported.
+		 */
 		arcane function get numLightProbes():uint
 		{
 			return _numLightProbes;
@@ -130,6 +156,8 @@ package away3d.materials.passes
 		
 		/**
 		 * Resets the compilation state.
+		 *
+		 * @param profile The compatibility profile used by the renderer.
 		 */
 		private function reset(profile:String):void
 		{
@@ -138,7 +166,10 @@ package away3d.materials.passes
 			initConstantData();
 			cleanUp();
 		}
-		
+
+		/**
+		 * Updates the amount of used register indices.
+		 */
 		private function updateUsedOffsets():void
 		{
 			_numUsedVertexConstants = _compiler.numUsedVertexConstants;
@@ -148,7 +179,10 @@ package away3d.materials.passes
 			_numUsedVaryings = _compiler.numUsedVaryings;
 			_numUsedFragmentConstants = _compiler.numUsedFragmentConstants;
 		}
-		
+
+		/**
+		 * Initializes the unchanging constant data for this material.
+		 */
 		private function initConstantData():void
 		{
 			_vertexConstantData.length = _numUsedVertexConstants*4;
@@ -162,7 +196,11 @@ package away3d.materials.passes
 			
 			updateMethodConstants();
 		}
-		
+
+		/**
+		 * Initializes the compiler for this pass.
+		 * @param profile The compatibility profile used by the renderer.
+		 */
 		protected function initCompiler(profile:String):void
 		{
 			_compiler = createCompiler(profile);
@@ -181,12 +219,19 @@ package away3d.materials.passes
 			_compiler.enableLightFallOff = _enableLightFallOff;
 			_compiler.compile();
 		}
-		
+
+		/**
+		 * Factory method to create a concrete compiler object for this pass.
+		 * @param profile The compatibility profile used by the renderer.
+		 */
 		protected function createCompiler(profile:String):ShaderCompiler
 		{
 			throw new AbstractMethodError();
 		}
-		
+
+		/**
+		 * Copies the shader's properties from the compiler.
+		 */
 		protected function updateShaderProperties():void
 		{
 			_animatableAttributes = _compiler.animatableAttributes;
@@ -204,7 +249,10 @@ package away3d.materials.passes
 			updateRegisterIndices();
 			updateUsedOffsets();
 		}
-		
+
+		/**
+		 * Updates the indices for various registers.
+		 */
 		protected function updateRegisterIndices():void
 		{
 			_uvBufferIndex = _compiler.uvBufferIndex;
@@ -221,7 +269,10 @@ package away3d.materials.passes
 			_lightProbeDiffuseIndices = _compiler.lightProbeDiffuseIndices;
 			_lightProbeSpecularIndices = _compiler.lightProbeSpecularIndices;
 		}
-		
+
+		/**
+		 * Indicates whether the output alpha value should remain unchanged compared to the material's original alpha.
+		 */
 		public function get preserveAlpha():Boolean
 		{
 			return _preserveAlpha;
@@ -234,7 +285,10 @@ package away3d.materials.passes
 			_preserveAlpha = value;
 			invalidateShaderProgram();
 		}
-		
+
+		/**
+		 * Indicate whether UV coordinates need to be animated using the renderable's transformUV matrix.
+		 */
 		public function get animateUVs():Boolean
 		{
 			return _animateUVs;
@@ -256,9 +310,10 @@ package away3d.materials.passes
 				return;
 			super.mipmap = value;
 		}
-		
+
 		/**
-		 * The tangent space normal map to influence the direction of the surface for each texel.
+		 * The normal map to modulate the direction of the surface for each texel. The default normal method expects
+		 * tangent-space normal maps, but others could expect object-space maps.
 		 */
 		public function get normalMap():Texture2DBase
 		{
@@ -269,7 +324,10 @@ package away3d.materials.passes
 		{
 			_methodSetup._normalMethod.normalMap = value;
 		}
-		
+
+		/**
+		 * The method used to generate the per-pixel normals. Defaults to BasicNormalMethod.
+		 */
 		public function get normalMethod():BasicNormalMethod
 		{
 			return _methodSetup.normalMethod;
@@ -279,7 +337,10 @@ package away3d.materials.passes
 		{
 			_methodSetup.normalMethod = value;
 		}
-		
+
+		/**
+		 * The method that provides the ambient lighting contribution. Defaults to BasicAmbientMethod.
+		 */
 		public function get ambientMethod():BasicAmbientMethod
 		{
 			return _methodSetup.ambientMethod;
@@ -289,7 +350,10 @@ package away3d.materials.passes
 		{
 			_methodSetup.ambientMethod = value;
 		}
-		
+
+		/**
+		 * The method used to render shadows cast on this surface, or null if no shadows are to be rendered. Defaults to null.
+		 */
 		public function get shadowMethod():ShadowMapMethodBase
 		{
 			return _methodSetup.shadowMethod;
@@ -299,7 +363,10 @@ package away3d.materials.passes
 		{
 			_methodSetup.shadowMethod = value;
 		}
-		
+
+		/**
+		 * The method that provides the diffuse lighting contribution. Defaults to BasicDiffuseMethod.
+		 */
 		public function get diffuseMethod():BasicDiffuseMethod
 		{
 			return _methodSetup.diffuseMethod;
@@ -309,7 +376,10 @@ package away3d.materials.passes
 		{
 			_methodSetup.diffuseMethod = value;
 		}
-		
+
+		/**
+		 * The method that provides the specular lighting contribution. Defaults to BasicSpecularMethod.
+		 */
 		public function get specularMethod():BasicSpecularMethod
 		{
 			return _methodSetup.specularMethod;
@@ -319,7 +389,10 @@ package away3d.materials.passes
 		{
 			_methodSetup.specularMethod = value;
 		}
-		
+
+		/**
+		 * Initializes the pass.
+		 */
 		private function init():void
 		{
 			_methodSetup = new ShaderMethodSetup();
@@ -338,7 +411,7 @@ package away3d.materials.passes
 		}
 		
 		/**
-		 * Marks the shader program as invalid, so it will be recompiled before the next render.
+		 * @inheritDoc
 		 */
 		arcane override function invalidateShaderProgram(updateMaterial:Boolean = true):void
 		{
@@ -362,7 +435,10 @@ package away3d.materials.passes
 			
 			super.invalidateShaderProgram(updateMaterial);
 		}
-		
+
+		/**
+		 * Adds any possible passes needed by the used methods.
+		 */
 		protected function addPassesFromMethods():void
 		{
 			if (_methodSetup._normalMethod && _methodSetup._normalMethod.hasOutput)
@@ -378,7 +454,9 @@ package away3d.materials.passes
 		}
 		
 		/**
-		 * Adds passes to the list.
+		 * Adds internal passes to the material.
+		 *
+		 * @param passes The passes to add.
 		 */
 		protected function addPasses(passes:Vector.<MaterialPassBase>):void
 		{
@@ -393,7 +471,10 @@ package away3d.materials.passes
 				_passes.push(passes[i]);
 			}
 		}
-		
+
+		/**
+		 * Initializes the default UV transformation matrix.
+		 */
 		protected function initUVTransformData():void
 		{
 			_vertexConstantData[_uvTransformIndex] = 1;
@@ -405,7 +486,10 @@ package away3d.materials.passes
 			_vertexConstantData[_uvTransformIndex + 6] = 0;
 			_vertexConstantData[_uvTransformIndex + 7] = 0;
 		}
-		
+
+		/**
+		 * Initializes commonly required constant values.
+		 */
 		protected function initCommonsData():void
 		{
 			_fragmentConstantData[_commonsDataIndex] = .5;
@@ -413,13 +497,19 @@ package away3d.materials.passes
 			_fragmentConstantData[_commonsDataIndex + 2] = 1/255;
 			_fragmentConstantData[_commonsDataIndex + 3] = 1;
 		}
-		
+
+		/**
+		 * Cleans up the after compiling.
+		 */
 		protected function cleanUp():void
 		{
 			_compiler.dispose();
 			_compiler = null;
 		}
-		
+
+		/**
+		 * Updates method constants if they have changed.
+		 */
 		protected function updateMethodConstants():void
 		{
 			if (_methodSetup._normalMethod)
@@ -433,17 +523,26 @@ package away3d.materials.passes
 			if (_methodSetup._shadowMethod)
 				_methodSetup._shadowMethod.initConstants(_methodSetup._shadowMethodVO);
 		}
-		
+
+		/**
+		 * Updates constant data render state used by the lights. This method is optional for subclasses to implement.
+		 */
 		protected function updateLightConstants():void
 		{
-		
+		    // up to subclasses to optionally implement
 		}
-		
+
+		/**
+		 * Updates constant data render state used by the light probes. This method is optional for subclasses to implement.
+		 */
 		protected function updateProbes(stage3DProxy:Stage3DProxy):void
 		{
 		
 		}
-		
+
+		/**
+		 * Called when any method's shader code is invalidated.
+		 */
 		private function onShaderInvalidated(event:ShadingMethodEvent):void
 		{
 			invalidateShaderProgram();
@@ -520,10 +619,10 @@ package away3d.materials.passes
 			}
 			
 			_ambientLightR = _ambientLightG = _ambientLightB = 0;
-			
+
 			if (usesLights())
 				updateLightConstants();
-			
+
 			if (usesProbes())
 				updateProbes(stage3DProxy);
 			
@@ -570,12 +669,18 @@ package away3d.materials.passes
 			renderable.activateVertexBuffer(0, stage3DProxy);
 			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
 		}
-		
+
+		/**
+		 * Indicates whether the shader uses any light probes.
+		 */
 		protected function usesProbes():Boolean
 		{
 			return _numLightProbes > 0 && ((_diffuseLightSources | _specularLightSources) & LightSources.PROBES) != 0;
 		}
-		
+
+		/**
+		 * Indicates whether the shader uses any lights.
+		 */
 		protected function usesLights():Boolean
 		{
 			return (_numPointLights > 0 || _numDirectionalLights > 0) && ((_diffuseLightSources | _specularLightSources) & LightSources.LIGHTS) != 0;
@@ -597,13 +702,13 @@ package away3d.materials.passes
 			if (_usingSpecularMethod)
 				_methodSetup._specularMethod.deactivate(_methodSetup._specularMethodVO, stage3DProxy);
 		}
-		
-		//		override protected function updateLights() : void
-		//		{
-		//			for (var i : int = 0; i < _passes.length; ++i)
-		//				_passes[i].lightPicker = _lightPicker;
-		//		}
-		
+
+		/**
+		 * Define which light source types to use for specular reflections. This allows choosing between regular lights
+		 * and/or light probes for specular reflections.
+		 *
+		 * @see away3d.materials.LightSources
+		 */
 		public function get specularLightSources():uint
 		{
 			return _specularLightSources;
@@ -613,7 +718,13 @@ package away3d.materials.passes
 		{
 			_specularLightSources = value;
 		}
-		
+
+		/**
+		 * Define which light source types to use for diffuse reflections. This allows choosing between regular lights
+		 * and/or light probes for diffuse reflections.
+		 *
+		 * @see away3d.materials.LightSources
+		 */
 		public function get diffuseLightSources():uint
 		{
 			return _diffuseLightSources;

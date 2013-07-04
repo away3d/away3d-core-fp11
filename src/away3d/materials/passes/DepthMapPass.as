@@ -13,13 +13,20 @@
 	import flash.geom.Matrix3D;
 	
 	use namespace arcane;
-	
+
+	/**
+	 * DepthMapPass is a pass that writes depth values to a depth map as a 32-bit value exploded over the 4 texture channels.
+	 * This is used to render shadow maps, depth maps, etc.
+	 */
 	public class DepthMapPass extends MaterialPassBase
 	{
 		private var _data:Vector.<Number>;
 		private var _alphaThreshold:Number = 0;
 		private var _alphaMask:Texture2DBase;
-		
+
+		/**
+		 * Creates a new DepthMapPass object.
+		 */
 		public function DepthMapPass()
 		{
 			super();
@@ -53,7 +60,11 @@
 			_alphaThreshold = value;
 			_data[8] = _alphaThreshold;
 		}
-		
+
+		/**
+		 * A texture providing alpha data to be able to prevent semi-transparent pixels to write to the alpha mask.
+		 * Usually the diffuse texture when alphaThreshold is used.
+		 */
 		public function get alphaMask():Texture2DBase
 		{
 			return _alphaMask;

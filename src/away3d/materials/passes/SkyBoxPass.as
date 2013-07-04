@@ -81,7 +81,10 @@ package away3d.materials.passes
 			return "tex ft0, v0, fs0 <cube," + format + "linear,clamp" + mip + ">	\n" +
 				"mov oc, ft0							\n";
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
 		override arcane function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var context:Context3D = stage3DProxy._context3D;

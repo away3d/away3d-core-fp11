@@ -27,11 +27,8 @@ package away3d.materials.passes
 	use namespace arcane;
 	
 	/**
-	 * MaterialPassBase provides an abstract base class for material shader passes.
-	 *
-	 * Vertex stream index 0 is reserved for vertex positions.
-	 * Vertex shader constants index 0-3 are reserved for projections, constant 4 for viewport positioning
-	 * Vertex shader constant index 4 is reserved for render-to-texture scaling
+	 * MaterialPassBase provides an abstract base class for material shader passes. A material pass constitutes at least
+	 * a render call per required renderable.
 	 */
 	public class MaterialPassBase extends EventDispatcher
 	{
@@ -93,7 +90,7 @@ package away3d.materials.passes
 		/**
 		 * Creates a new MaterialPassBase object.
 		 *
-		 * @param renderToTexture
+		 * @param renderToTexture Indicates whether this pass is a render-to-texture pass.
 		 */
 		public function MaterialPassBase(renderToTexture:Boolean = false)
 		{
@@ -188,7 +185,12 @@ package away3d.materials.passes
 		{
 			_bothSides = value;
 		}
-		
+
+		/**
+		 * The depth compare mode used to render the renderables using this material.
+		 *
+		 * @see flash.display3D.Context3DCompareMode
+		 */
 		public function get depthCompareMode():String
 		{
 			return _depthCompareMode;
@@ -198,9 +200,9 @@ package away3d.materials.passes
 		{
 			_depthCompareMode = value;
 		}
-		
+
 		/**
-		 * The animation used to add vertex code to the shader code.
+		 * Returns the animation data set adding animations to the material.
 		 */
 		public function get animationSet():IAnimationSet
 		{
@@ -262,7 +264,10 @@ package away3d.materials.passes
 		{
 			return _numUsedVaryings;
 		}
-		
+
+		/**
+		 * The amount of used fragment constants in the fragment code. Used by the animation code generation to know from which index on registers are available.
+		 */
 		public function get numUsedFragmentConstants():uint
 		{
 			return _numUsedFragmentConstants;
@@ -274,7 +279,7 @@ package away3d.materials.passes
 		}
 
 		/**
-		 * Indicates whether the pass requires
+		 * Indicates whether the pass requires any UV animatin code.
 		 */
 		public function get needUVAnimation():Boolean
 		{
@@ -300,17 +305,33 @@ package away3d.materials.passes
 		{
 			throw new AbstractMethodError();
 		}
-		
+
+		/**
+		 * Returns the vertex AGAL code for the material.
+		 */
 		arcane function getVertexCode():String
 		{
 			throw new AbstractMethodError();
 		}
-		
+
+		/**
+		 * Returns the fragment AGAL code for the material.
+		 */
 		arcane function getFragmentCode(fragmentAnimatorCode:String):String
 		{
 			throw new AbstractMethodError();
 		}
-		
+
+		/**
+		 * The blend mode to use when drawing this renderable. The following blend modes are supported:
+		 * <ul>
+		 * <li>BlendMode.NORMAL: No blending, unless the material inherently needs it</li>
+		 * <li>BlendMode.LAYER: Force blending. This will draw the object the same as NORMAL, but without writing depth writes.</li>
+		 * <li>BlendMode.MULTIPLY</li>
+		 * <li>BlendMode.ADD</li>
+		 * <li>BlendMode.ALPHA</li>
+		 * </ul>
+		 */
 		public function setBlendMode(value:String):void
 		{
 			switch (value) {
@@ -343,12 +364,16 @@ package away3d.materials.passes
 					throw new ArgumentError("Unsupported blend mode!");
 			}
 		}
-		
+
+		/**
+		 * Sets the render state for the pass that is independent of the rendered object. This needs to be called before
+		 * calling renderPass. Before activating a pass, the previously used pass needs to be deactivated.
+		 * @param stage3DProxy The Stage3DProxy object which is currently used for rendering.
+		 * @param camera The camera from which the scene is viewed.
+		 * @private
+		 */
 		arcane function activate(stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
-			// TODO: not used
-			camera = camera;
-			
 			var contextIndex:int = stage3DProxy._stage3DIndex;
 			var context:Context3D = stage3DProxy._context3D;
 			
@@ -386,9 +411,10 @@ package away3d.materials.passes
 				_oldRect = stage3DProxy.scissorRect;
 			}
 		}
-		
+
 		/**
-		 * Turns off streams starting from a certain offset
+		 * Clears the render state for the pass. This needs to be called before activating another pass.
+		 * @param stage3DProxy The Stage3DProxy used for rendering
 		 *
 		 * @private
 		 */
@@ -465,7 +491,13 @@ package away3d.materials.passes
 			}
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);
 		}
-		
+
+		/**
+		 * The light picker used by the material to provide lights to the material if it supports lighting.
+		 *
+		 * @see away3d.materials.lightpickers.LightPickerBase
+		 * @see away3d.materials.lightpickers.StaticLightPicker
+		 */
 		arcane function get lightPicker():LightPickerBase
 		{
 			return _lightPicker;
@@ -480,18 +512,28 @@ package away3d.materials.passes
 				_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
 			updateLights();
 		}
-		
+
+		/**
+		 * Called when the light picker's configuration changes.
+		 */
 		private function onLightsChange(event:Event):void
 		{
 			updateLights();
 		}
-		
-		// need to implement if pass is light-dependent
+
+		/**
+		 * Implemented by subclasses if the pass uses lights to update the shader.
+		 */
 		protected function updateLights():void
 		{
 		
 		}
-		
+
+		/**
+		 * Indicates whether visible textures (or other pixels) used by this material have
+		 * already been premultiplied. Toggle this if you are seeing black halos around your
+		 * blended alpha edges.
+		 */
 		public function get alphaPremultiplied():Boolean
 		{
 			return _alphaPremultiplied;
