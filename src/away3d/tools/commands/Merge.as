@@ -85,7 +85,7 @@ package away3d.tools.commands
 			reset();
 			
 			//collect container meshes
-			parseContainer(objectContainer);
+			parseContainer(receiver, objectContainer);
 			
 			//collect receiver
 			collect(receiver, false);
@@ -109,7 +109,8 @@ package away3d.tools.commands
 			
 			//collect meshes in vector
 			for (var i:uint = 0; i < meshes.length; i++)
-				collect(meshes[i], _disposeSources);
+				if (meshes[i] != receiver)
+					collect(meshes[i], _disposeSources);
 			
 			//collect receiver
 			collect(receiver, false);
@@ -324,17 +325,17 @@ package away3d.tools.commands
 			return data;
 		}
 		
-		private function parseContainer(object:ObjectContainer3D):void
+		private function parseContainer(receiver:Mesh, object:ObjectContainer3D):void
 		{
 			var child:ObjectContainer3D;
 			var i:uint;
 			
-			if (object is Mesh)
+			if (object is Mesh && object != receiver)
 				collect(Mesh(object), _disposeSources);
 			
 			for (i = 0; i < object.numChildren; ++i) {
 				child = object.getChildAt(i);
-				parseContainer(child);
+				parseContainer(receiver, child);
 			}
 		}
 	}
