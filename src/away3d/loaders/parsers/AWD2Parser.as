@@ -2008,7 +2008,7 @@ package away3d.loaders.parsers
 			switch (typeCommand) {
 				case 1:
 					var targetID:uint = props.get(1, 0);
-					var returnedArrayTarget:Array = getAssetByID(targetID, [AssetType.LIGHT]); //for no only light is requested!!!!
+					var returnedArrayTarget:Array = getAssetByID(targetID, [AssetType.LIGHT, AssetType.TEXTURE_PROJECTOR]); //for no only light is requested!!!!
 					if ((!returnedArrayTarget[0]) && (targetID != 0)) {
 						_blocks[blockID].addError("Could not find the light (ID = " + targetID + " ( for this CommandBock!");
 						return;
