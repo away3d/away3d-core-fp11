@@ -32,12 +32,11 @@ package away3d.primitives
 		
 		public function set color(value:uint):void
 		{
-			var numSegments:uint = _segments.length;
-			
 			_color = value;
 			
-			for (var i:int = 0; i < numSegments; ++i)
-				_segments[i].startColor = _segments[i].endColor = value;
+			for each (var segRef:Object in _segments) {
+				segRef.segment.startColor = segRef.segment.endColor = value;
+			}
 		}
 		
 		public function get thickness():Number
@@ -47,12 +46,11 @@ package away3d.primitives
 		
 		public function set thickness(value:Number):void
 		{
-			var numSegments:uint = _segments.length;
-			
 			_thickness = value;
 			
-			for (var i:int = 0; i < numSegments; ++i)
-				_segments[i].thickness = _segments[i].thickness = value;
+			for each (var segRef:Object in _segments) {
+				segRef.segment.thickness = segRef.segment.thickness = value;
+			}
 		}
 		
 		override public function removeAllSegments():void
@@ -88,9 +86,8 @@ package away3d.primitives
 		{
 			var segment:Segment;
 			var s:Vector3D, e:Vector3D;
-			
-			if (_segments.length > index) {
-				segment = _segments[index];
+
+			if ((segment = getSegment(index)) != null) {
 				s = segment.start;
 				e = segment.end;
 				s.x = v0.x;
@@ -99,7 +96,7 @@ package away3d.primitives
 				e.x = v1.x;
 				e.y = v1.y;
 				e.z = v1.z;
-				_segments[index].updateSegment(s, e, null, _color, _color, _thickness);
+				segment.updateSegment(s, e, null, _color, _color, _thickness);
 			} else
 				addSegment(new LineSegment(v0.clone(), v1.clone(), _color, _color, _thickness));
 		}
