@@ -63,9 +63,10 @@ package away3d.materials.methods
 			var code:String = super.getFragmentPreLightingCode(vo, regCache);
 			_isFirstLight = true;
 			
-			_gradientTextureRegister = regCache.getFreeTextureReg();
-			vo.secondaryTexturesIndex = _gradientTextureRegister.index;
-			
+			if (vo.numLights > 0) {
+				_gradientTextureRegister = regCache.getFreeTextureReg();
+				vo.secondaryTexturesIndex = _gradientTextureRegister.index;
+			}
 			return code;
 		}
 
