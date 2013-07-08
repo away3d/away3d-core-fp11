@@ -53,10 +53,20 @@ package away3d.materials.passes
 		{
 			super.updateLights();
 			
-			var numPointLights:int = _lightPicker.numCastingPointLights > 0? 1 : 0;
-			var numDirectionalLights:int = _lightPicker.numCastingDirectionalLights > 0? 1 : 0;
+			var numPointLights:int;
+			var numDirectionalLights:int;
+			
+			if (_lightPicker) {
+				numPointLights = _lightPicker.numCastingPointLights > 0? 1 : 0;
+				numDirectionalLights = _lightPicker.numCastingDirectionalLights > 0? 1 : 0;
+			} else {
+				numPointLights = 0;
+				numDirectionalLights = 0;
+			}
+			
 			_numLightProbes = 0;
-			if (numPointLights == numDirectionalLights)
+			
+			if (numPointLights + numDirectionalLights > 1)
 				throw new Error("Must have exactly one light!");
 			
 			if (numPointLights != _numPointLights || numDirectionalLights != _numDirectionalLights) {
