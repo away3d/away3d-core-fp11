@@ -324,7 +324,9 @@ package away3d.core.partition
 			
 			_entityWorldBounds = new Vector.<Number>();
 			
-			while ((object = iterator.next())) {
+			object = iterator.next();
+			
+			while (object) {
 				var entity:Entity = object as Entity;
 				if (entity && staticIntersects(entity, minBounds, maxBounds)) {
 					var node:EntityNode = entity.getEntityPartitionNode();
@@ -333,6 +335,7 @@ package away3d.core.partition
 						++numAdded;
 					}
 				}
+				object = iterator.next();
 			}
 			
 			updateNumEntities(_numEntities + numAdded);
