@@ -869,6 +869,11 @@ package away3d.loaders.parsers
 						newShadowMapper = new CascadeShadowMapper(props.get(12, 3));
 				}
 			}
+			if ((lightType != 2) && (lightType != 1)){
+				_blocks[blockID].addError("Unsuported lighttype = "+lightType);
+				return
+				
+			}
 			light.color = props.get(3, 0xffffff);
 			light.specular = props.get(4, 1.0);
 			light.diffuse = props.get(5, 1.0);
@@ -942,8 +947,10 @@ package away3d.loaders.parsers
 			} else if (par_id > 0)
 				_blocks[blockID].addError("Could not find a parent for this Camera");
 			camera.name = name;
-			props = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8});
+			props = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8, 101:_propsNrType, 102:_propsNrType});
 			camera.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
+			camera.lens.near = props.get(101, 20);
+			camera.lens.far = props.get(102, 3000);
 			camera.extra = parseUserAttributes();
 			finalizeAsset(camera, name);
 			
@@ -1600,9 +1607,8 @@ package away3d.loaders.parsers
 			var methodType:uint = _newBlockBytes.readUnsignedShort();
 			var shadowMethod:ShadowMapMethodBase;
 			var props:AWDProperties = parseProperties({1:BADDR, 2:BADDR, 3:BADDR, 101:_propsNrType, 102:_propsNrType, 103:_propsNrType, 201:UINT32, 202:UINT32, 301:UINT16, 302:UINT16, 401:UINT8, 402:UINT8, 601:COLOR, 602:COLOR, 701:BOOL, 702:BOOL, 801:MTX4x4});
-			
 			var targetID:uint;
-			var returnedArray:Array
+			var returnedArray:Array;
 			switch (methodType) {
 				case 1001: //CascadeShadowMapMethod
 					targetID = props.get(1, 0);
