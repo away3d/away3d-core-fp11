@@ -1,4 +1,4 @@
-Copyright 2011 Alexander Zadorozhny & Rob Bateman
+Copyright 2013 The Away Foundation (http://www.theawayfoundation.org)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
