@@ -173,8 +173,10 @@ package away3d.core.traverse
 		 */
 		public function clear():void
 		{
-			_entryPoint = _camera.scenePosition;
-			_cameraForward = _camera.forwardVector;
+			if (_camera) {
+				_entryPoint = _camera.scenePosition;
+				_cameraForward = _camera.forwardVector;
+			}
 			_cullPlanes = _customCullPlanes? _customCullPlanes : (_camera? _camera.frustumPlanes : null);
 			_numCullPlanes = _cullPlanes? _cullPlanes.length : 0;
 			_numTriangles = _numMouseEnableds = 0;
