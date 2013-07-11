@@ -8,8 +8,8 @@ package away3d.controllers
 	
 	/**
 	 * Extended camera used to hover round a specified target object.
-	 * 
-	 * @see	away3d.containers.View3D
+	 *
+	 * @see    away3d.containers.View3D
 	 */
 	public class FirstPersonController extends ControllerBase
 	{
@@ -23,14 +23,17 @@ package away3d.controllers
 		private var _steps:uint = 8;
 		private var _walkIncrement:Number = 0;
 		private var _strafeIncrement:Number = 0;
+		private var _wrapPanAngle:Boolean = false;
+		
+		public var fly:Boolean = false;
 		
 		/**
 		 * Fractional step taken each time the <code>hover()</code> method is called. Defaults to 8.
-		 * 
+		 *
 		 * Affects the speed at which the <code>tiltAngle</code> and <code>panAngle</code> resolve to their targets.
-		 * 
-		 * @see	#tiltAngle
-		 * @see	#panAngle
+		 *
+		 * @see    #tiltAngle
+		 * @see    #panAngle
 		 */
 		public function get steps():uint
 		{
@@ -39,7 +42,7 @@ package away3d.controllers
 		
 		public function set steps(val:uint):void
 		{
-			val = (val<1)? 1 : val;
+			val = (val < 1)? 1 : val;
 			
 			if (_steps == val)
 				return;
@@ -89,8 +92,8 @@ package away3d.controllers
 		
 		/**
 		 * Minimum bounds for the <code>tiltAngle</code>. Defaults to -90.
-		 * 
-		 * @see	#tiltAngle
+		 *
+		 * @see    #tiltAngle
 		 */
 		public function get minTiltAngle():Number
 		{
@@ -109,8 +112,8 @@ package away3d.controllers
 		
 		/**
 		 * Maximum bounds for the <code>tiltAngle</code>. Defaults to 90.
-		 * 
-		 * @see	#tiltAngle
+		 *
+		 * @see    #tiltAngle
 		 */
 		public function get maxTiltAngle():Number
 		{
@@ -127,10 +130,29 @@ package away3d.controllers
 			tiltAngle = Math.max(_minTiltAngle, Math.min(_maxTiltAngle, _tiltAngle));
 		}
 		
+		
+		/**
+		 * Defines whether the value of the pan angle wraps when over 360 degrees or under 0 degrees. Defaults to false.
+		 */
+		public function get wrapPanAngle():Boolean
+		{
+			return _wrapPanAngle;
+		}
+		
+		public function set wrapPanAngle(val:Boolean):void
+		{
+			if (_wrapPanAngle == val)
+				return;
+			
+			_wrapPanAngle = val;
+			
+			notifyUpdate();
+		}
+		
 		/**
 		 * Creates a new <code>HoverController</code> object.
 		 */
-		public function FirstPersonController(targetObject:Entity = null, panAngle:Number = 0, tiltAngle:Number = 90, minTiltAngle:Number = -90, maxTiltAngle:Number = 90, steps:uint = 8)
+		public function FirstPersonController(targetObject:Entity = null, panAngle:Number = 0, tiltAngle:Number = 90, minTiltAngle:Number = -90, maxTiltAngle:Number = 90, steps:uint = 8, wrapPanAngle:Boolean = false)
 		{
 			super(targetObject);
 			
@@ -139,6 +161,7 @@ package away3d.controllers
 			this.minTiltAngle = minTiltAngle;
 			this.maxTiltAngle = maxTiltAngle;
 			this.steps = steps;
+			this.wrapPanAngle = wrapPanAngle;
 			
 			//values passed in contrustor are applied immediately
 			_currentPanAngle = _panAngle;
@@ -147,32 +170,44 @@ package away3d.controllers
 		
 		/**
 		 * Updates the current tilt angle and pan angle values.
-		 * 
+		 *
 		 * Values are calculated using the defined <code>tiltAngle</code>, <code>panAngle</code> and <code>steps</code> variables.
-		 * 
-		 * @see	#tiltAngle
-		 * @see	#panAngle
-		 * @see	#steps
+		 *
+		 * @param interpolate   If the update to a target pan- or tiltAngle is interpolated. Default is true.
+		 *
+		 * @see    #tiltAngle
+		 * @see    #panAngle
+		 * @see    #steps
 		 */
-		public override function update():void
+		public override function update(interpolate:Boolean = true):void
 		{
 			if (_tiltAngle != _currentTiltAngle || _panAngle != _currentPanAngle) {
 				
 				notifyUpdate();
 				
-				if (_panAngle < 0)
-					panAngle = (_panAngle % 360) + 360;
-				else
-					panAngle = _panAngle % 360;
+				if (_wrapPanAngle) {
+					if (_panAngle < 0) {
+						_currentPanAngle += _panAngle%360 + 360 - _panAngle;
+						_panAngle = _panAngle%360 + 360;
+					} else {
+						_currentPanAngle += _panAngle%360 - _panAngle;
+						_panAngle = _panAngle%360;
+					}
+					
+					while (_panAngle - _currentPanAngle < -180)
+						_currentPanAngle -= 360;
+					
+					while (_panAngle - _currentPanAngle > 180)
+						_currentPanAngle += 360;
+				}
 				
-				if (panAngle - _currentPanAngle < -180)
-					panAngle += 360;
-				else if (panAngle - _currentPanAngle > 180)
-					panAngle -= 360;
-				
-				_currentTiltAngle += (_tiltAngle - _currentTiltAngle)/(steps + 1);
-				_currentPanAngle += (_panAngle - _currentPanAngle)/(steps + 1);
-				
+				if (interpolate) {
+					_currentTiltAngle += (_tiltAngle - _currentTiltAngle)/(steps + 1);
+					_currentPanAngle += (_panAngle - _currentPanAngle)/(steps + 1);
+				} else {
+					_currentTiltAngle = _tiltAngle;
+					_currentPanAngle = _panAngle;
+				}
 				
 				//snap coords if angle differences are close
 				if ((Math.abs(tiltAngle - _currentTiltAngle) < 0.01) && (Math.abs(_panAngle - _currentPanAngle) < 0.01)) {
@@ -185,8 +220,12 @@ package away3d.controllers
 			targetObject.rotationY = _currentPanAngle;
 			
 			if (_walkIncrement) {
-				targetObject.x += _walkIncrement*Math.sin(panAngle*MathConsts.DEGREES_TO_RADIANS);
-				targetObject.z += _walkIncrement*Math.cos(panAngle*MathConsts.DEGREES_TO_RADIANS);
+				if (fly)
+					targetObject.moveForward(_walkIncrement);
+				else {
+					targetObject.x += _walkIncrement*Math.sin(_panAngle*MathConsts.DEGREES_TO_RADIANS);
+					targetObject.z += _walkIncrement*Math.cos(_panAngle*MathConsts.DEGREES_TO_RADIANS);
+				}
 				_walkIncrement = 0;
 			}
 			
@@ -194,7 +233,7 @@ package away3d.controllers
 				targetObject.moveRight(_strafeIncrement);
 				_strafeIncrement = 0;
 			}
-			
+		
 		}
 		
 		public function incrementWalk(val:Number):void
@@ -207,7 +246,6 @@ package away3d.controllers
 			notifyUpdate();
 		}
 		
-		
 		public function incrementStrafe(val:Number):void
 		{
 			if (val == 0)
@@ -217,6 +255,6 @@ package away3d.controllers
 			
 			notifyUpdate();
 		}
-
+	
 	}
 }

@@ -1,255 +1,220 @@
 package away3d.materials.methods
 {
-	import away3d.arcane;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.events.ShadingMethodEvent;
-	import away3d.materials.passes.MaterialPassBase;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
-	import away3d.textures.Texture2DBase;
-
+	import away3d.*;
+	import away3d.core.managers.*;
+	import away3d.events.*;
+	import away3d.materials.compilation.*;
+	import away3d.materials.passes.*;
+	import away3d.textures.*;
+	
 	use namespace arcane;
-
+	
 	/**
-	 * CompositeSpecularMethod provides a base class for specular methods that wrap a specular method to alter the strength
-	 * of its calculated strength.
+	 * CompositeSpecularMethod provides a base class for specular methods that wrap a specular method to alter the
+	 * calculated specular reflection strength.
 	 */
 	public class CompositeSpecularMethod extends BasicSpecularMethod
 	{
-		private var _baseSpecularMethod : BasicSpecularMethod;
-
+		private var _baseMethod:BasicSpecularMethod;
+		
 		/**
 		 * Creates a new WrapSpecularMethod object.
 		 * @param modulateMethod The method which will add the code to alter the base method's strength. It needs to have the signature modSpecular(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String, in which t.w will contain the specular strength and t.xyz will contain the half-vector or the reflection vector.
 		 * @param baseSpecularMethod The base specular method on which this method's shading is based.
 		 */
-		public function CompositeSpecularMethod(modulateMethod : Function, baseSpecularMethod : BasicSpecularMethod = null)
+		public function CompositeSpecularMethod(modulateMethod:Function, baseSpecularMethod:BasicSpecularMethod = null)
 		{
 			super();
-			_baseSpecularMethod = baseSpecularMethod || new BasicSpecularMethod();
-			_baseSpecularMethod._modulateMethod = modulateMethod;
-			_baseSpecularMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-		}
-
-		override arcane function initVO(vo : MethodVO) : void
-		{
-			_baseSpecularMethod.initVO(vo);
-		}
-
-		override arcane function initConstants(vo : MethodVO) : void
-		{
-			_baseSpecularMethod.initConstants(vo);
+			_baseMethod = baseSpecularMethod || new BasicSpecularMethod();
+			_baseMethod._modulateMethod = modulateMethod;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function get gloss() : Number
+		override arcane function initVO(vo:MethodVO):void
 		{
-			return _baseSpecularMethod.gloss;
-		}
-
-		override public function set gloss(value : Number) : void
-		{
-			_baseSpecularMethod.gloss = value;
+			_baseMethod.initVO(vo);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function get specular() : Number
+		override arcane function initConstants(vo:MethodVO):void
 		{
-			return _baseSpecularMethod.specular;
+			_baseMethod.initConstants(vo);
 		}
-
-		override public function set specular(value : Number) : void
+		
+		/**
+		 * The base specular method on which this method's shading is based.
+		 */
+		public function get baseMethod():BasicSpecularMethod
 		{
-			_baseSpecularMethod.specular = value;
+			return _baseMethod;
+		}
+		
+		public function set baseMethod(value:BasicSpecularMethod):void
+		{
+			if (_baseMethod == value)
+				return;
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = value;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+			invalidateShaderProgram();
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function get shadingModel() : String
+		override public function get gloss():Number
 		{
-			return _baseSpecularMethod.shadingModel;
+			return _baseMethod.gloss;
 		}
 		
-		override public function set shadingModel(value : String) : void
+		override public function set gloss(value:Number):void
 		{
-			_baseSpecularMethod.shadingModel = value;
+			_baseMethod.gloss = value;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function get passes() : Vector.<MaterialPassBase>
+		override public function get specular():Number
 		{
-			return _baseSpecularMethod.passes;
+			return _baseMethod.specular;
+		}
+		
+		override public function set specular(value:Number):void
+		{
+			_baseMethod.specular = value;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function get passes():Vector.<MaterialPassBase>
+		{
+			return _baseMethod.passes;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function dispose():void
+		{
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod.dispose();
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function get texture():Texture2DBase
+		{
+			return _baseMethod.texture;
+		}
+		
+		override public function set texture(value:Texture2DBase):void
+		{
+			_baseMethod.texture = value;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
+		{
+			_baseMethod.activate(vo, stage3DProxy);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose() : void
+		arcane override function deactivate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
-			_baseSpecularMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_baseSpecularMethod.dispose();
+			_baseMethod.deactivate(vo, stage3DProxy);
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override public function get texture() : Texture2DBase
+		override arcane function set sharedRegisters(value:ShaderRegisterData):void
 		{
-			return _baseSpecularMethod.texture;
+			super.sharedRegisters = _baseMethod.sharedRegisters = value;
 		}
-
-		override public function set texture(value : Texture2DBase) : void
-		{
-			_baseSpecularMethod.texture = value;
-		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
+		override arcane function getVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
-			_baseSpecularMethod.activate(vo, stage3DProxy);
+			return _baseMethod.getVertexCode(vo, regCache);
 		}
-
-		arcane override function deactivate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
-		{
-			_baseSpecularMethod.deactivate(vo, stage3DProxy);
-		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function get normalFragmentReg() : ShaderRegisterElement
+		override arcane function getFragmentPreLightingCode(vo:MethodVO, regCache:ShaderRegisterCache):String
 		{
-			return _baseSpecularMethod.normalFragmentReg;
+			return _baseMethod.getFragmentPreLightingCode(vo, regCache);
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
+		override arcane function getFragmentCodePerLight(vo:MethodVO, lightDirReg:ShaderRegisterElement, lightColReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
 		{
-			_normalFragmentReg = _baseSpecularMethod.normalFragmentReg = value;
+			return _baseMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
 		}
-
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
-		{
-			_baseSpecularMethod.globalPosReg = _globalPosReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseSpecularMethod.UVFragmentReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseSpecularMethod.secondaryUVFragmentReg = _secondaryUVFragmentReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_viewDirFragmentReg = _baseSpecularMethod.viewDirFragmentReg = value;
-		}
-
-		arcane override function set projectionReg(value : ShaderRegisterElement) : void
-		{
-			_projectionReg = _baseSpecularMethod.projectionReg = value;
-		}
-
-		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_viewDirVaryingReg = _baseSpecularMethod.viewDirVaryingReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
-		{
-			return _baseSpecularMethod.getVertexCode(vo, regCache);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
-		{
-			return _baseSpecularMethod.getFragmentPreLightingCode(vo, regCache);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
-		{
-			return _baseSpecularMethod.getFragmentCodePerLight(vo, lightIndex, lightDirReg, lightColReg, regCache);
-		}
-
+		
 		/**
 		 * @inheritDoc
 		 * @return
 		 */
-		arcane override function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerProbe(vo:MethodVO, cubeMapReg:ShaderRegisterElement, weightRegister:String, regCache:ShaderRegisterCache):String
 		{
-			return _baseSpecularMethod.getFragmentCodePerProbe(vo, lightIndex, cubeMapReg, weightRegister, regCache);
+			return _baseMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function getFragmentPostLightingCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
+		{
+			return _baseMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		arcane override function reset():void
+		{
+			_baseMethod.reset();
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
-		{
-			return _baseSpecularMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		arcane override function reset() : void
-		{
-			_baseSpecularMethod.reset();
-		}
-
-		arcane override function cleanCompilationData() : void
+		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
-			_baseSpecularMethod.cleanCompilationData();
+			_baseMethod.cleanCompilationData();
 		}
 
-		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function set shadowRegister(value:ShaderRegisterElement):void
 		{
 			super.shadowRegister = value;
-			_baseSpecularMethod.shadowRegister = value;
+			_baseMethod.shadowRegister = value;
 		}
 
-		override arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
-		{
-			super.tangentVaryingReg = value;
-			_baseSpecularMethod.tangentVaryingReg = value;
-		}
-
-		private function onShaderInvalidated(event : ShadingMethodEvent) : void
+		/**
+		 * Called when the base method's shader code is invalidated.
+		 */
+		private function onShaderInvalidated(event:ShadingMethodEvent):void
 		{
 			invalidateShaderProgram();
 		}

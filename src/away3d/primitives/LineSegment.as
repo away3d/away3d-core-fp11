@@ -1,16 +1,15 @@
 ﻿package away3d.primitives
 {
 	import away3d.primitives.data.Segment;
-
+	
 	import flash.geom.Vector3D;
-
+	
 	/**
 	 * A Line Segment primitive.
 	 */
-	public class LineSegment extends Segment {
+	public class LineSegment extends Segment
+	{
 		
-		// TODO not used
-		// private var _index:uint;
 		public const TYPE:String = "line";
 		
 		/**
@@ -25,6 +24,6 @@
 		{
 			super(v0, v1, null, color0, color1, thickness);
 		}
-		 
+	
 	}
 }

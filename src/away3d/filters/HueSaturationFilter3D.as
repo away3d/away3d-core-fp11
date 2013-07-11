@@ -6,7 +6,7 @@ package away3d.filters
 	{
 		private var _hslTask:Filter3DHueSaturationTask;
 		
-		public function HueSaturationFilter3D(saturation:Number = 1,r:Number = 1,g:Number = 1,b:Number = 1)
+		public function HueSaturationFilter3D(saturation:Number = 1, r:Number = 1, g:Number = 1, b:Number = 1)
 		{
 			super();
 			
@@ -25,7 +25,8 @@ package away3d.filters
 		
 		public function set saturation(value:Number):void
 		{
-			if (_hslTask.saturation == value) return;
+			if (_hslTask.saturation == value)
+				return;
 			_hslTask.saturation = value;
 		}
 		
@@ -36,7 +37,8 @@ package away3d.filters
 		
 		public function set r(value:Number):void
 		{
-			if (_hslTask.r == value) return;
+			if (_hslTask.r == value)
+				return;
 			_hslTask.r = value;
 		}
 		
@@ -47,7 +49,8 @@ package away3d.filters
 		
 		public function set b(value:Number):void
 		{
-			if (_hslTask.b == value) return;
+			if (_hslTask.b == value)
+				return;
 			_hslTask.b = value;
 		}
 		
@@ -58,7 +61,8 @@ package away3d.filters
 		
 		public function set g(value:Number):void
 		{
-			if (_hslTask.g == value) return;
+			if (_hslTask.g == value)
+				return;
 			_hslTask.g = value;
 		}
 	}

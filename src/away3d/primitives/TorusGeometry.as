@@ -1,48 +1,44 @@
 package away3d.primitives
 {
 	import away3d.arcane;
-	import away3d.core.base.SubGeometry;
-
+	import away3d.core.base.CompactSubGeometry;
+	
 	use namespace arcane;
-
+	
 	/**
 	 * A UV Cylinder primitive mesh.
 	 */
 	public class TorusGeometry extends PrimitiveBase
 	{
-		protected var _radius : Number;
-		protected var _tubeRadius : Number;
-		protected var _segmentsR : uint;
-		protected var _segmentsT : uint;
-		protected var _yUp : Boolean;
-		private var _rawVertexPositions:Vector.<Number>;
-		private var _rawVertexNormals:Vector.<Number>;
-		private var _rawVertexTangents:Vector.<Number>;
-		private var _rawUvs:Vector.<Number>;
+		protected var _radius:Number;
+		protected var _tubeRadius:Number;
+		protected var _segmentsR:uint;
+		protected var _segmentsT:uint;
+		protected var _yUp:Boolean;
+		private var _rawVertexData:Vector.<Number>;
 		private var _rawIndices:Vector.<uint>;
 		private var _nextVertexIndex:uint;
 		private var _currentIndex:uint;
 		private var _currentTriangleIndex:uint;
 		private var _numVertices:uint;
-		private var _numTriangles:uint;
-
-		private function addVertex(px:Number, py:Number, pz:Number,
-								   nx:Number, ny:Number, nz:Number,
-								   tx:Number, ty:Number, tz:Number):void
+		private var _vertexStride:uint;
+		private var _vertexOffset:int;
+		
+		private function addVertex(px:Number, py:Number, pz:Number, nx:Number, ny:Number, nz:Number, tx:Number, ty:Number, tz:Number):void
 		{
-			var compVertInd:uint = _nextVertexIndex * 3; // current component vertex index
-			_rawVertexPositions[compVertInd]     = px;
-			_rawVertexPositions[compVertInd + 1] = py;
-			_rawVertexPositions[compVertInd + 2] = pz;
-			_rawVertexNormals[compVertInd]       = nx;
-			_rawVertexNormals[compVertInd + 1]   = ny;
-			_rawVertexNormals[compVertInd + 2]   = nz;
-			_rawVertexTangents[compVertInd]      = tx;
-			_rawVertexTangents[compVertInd + 1]  = ty;
-			_rawVertexTangents[compVertInd + 2]  = tz;
+			var compVertInd:uint = _vertexOffset + _nextVertexIndex*_vertexStride; // current component vertex index
+			_rawVertexData[compVertInd++] = px;
+			_rawVertexData[compVertInd++] = py;
+			_rawVertexData[compVertInd++] = pz;
+			_rawVertexData[compVertInd++] = nx;
+			_rawVertexData[compVertInd++] = ny;
+			_rawVertexData[compVertInd++] = nz;
+			_rawVertexData[compVertInd++] = tx;
+			_rawVertexData[compVertInd++] = ty;
+			_rawVertexData[compVertInd] = tz;
 			_nextVertexIndex++;
 		}
-
+		
 		private function addTriangleClockWise(cwVertexIndex0:uint, cwVertexIndex1:uint, cwVertexIndex2:uint):void
 		{
 			_rawIndices[_currentIndex++] = cwVertexIndex0;
@@ -50,78 +46,96 @@ package away3d.primitives
 			_rawIndices[_currentIndex++] = cwVertexIndex2;
 			_currentTriangleIndex++;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target : SubGeometry) : void
+		protected override function buildGeometry(target:CompactSubGeometry):void
 		{
 			var i:uint, j:uint;
 			var x:Number, y:Number, z:Number, nx:Number, ny:Number, nz:Number, revolutionAngleR:Number, revolutionAngleT:Number;
-
+			var numTriangles:uint;
 			// reset utility variables
 			_numVertices = 0;
-			_numTriangles = 0;
 			_nextVertexIndex = 0;
 			_currentIndex = 0;
 			_currentTriangleIndex = 0;
-
+			_vertexStride = target.vertexStride;
+			_vertexOffset = target.vertexOffset;
+			
 			// evaluate target number of vertices, triangles and indices
-			_numVertices = (_segmentsT + 1) * (_segmentsR + 1); // segmentsT + 1 because of closure, segmentsR + 1 because of closure
-			_numTriangles = _segmentsT * _segmentsR * 2; // each level has segmentR quads, each of 2 triangles
-
+			_numVertices = (_segmentsT + 1)*(_segmentsR + 1); // segmentsT + 1 because of closure, segmentsR + 1 because of closure
+			numTriangles = _segmentsT*_segmentsR*2; // each level has segmentR quads, each of 2 triangles
+			
 			// need to initialize raw arrays or can be reused?
 			if (_numVertices == target.numVertices) {
-				_rawVertexPositions = target.vertexData;
-				_rawVertexNormals = target.vertexNormalData;
-				_rawVertexTangents = target.vertexTangentData;
-				_rawIndices = target.indexData;
+				_rawVertexData = target.vertexData;
+				_rawIndices = target.indexData || new Vector.<uint>(numTriangles*3, true);
+			} else {
+				var numVertComponents:uint = _numVertices*_vertexStride;
+				_rawVertexData = new Vector.<Number>(numVertComponents, true);
+				_rawIndices = new Vector.<uint>(numTriangles*3, true);
+				invalidateUVs();
 			}
-			else {
-				var numVertComponents:uint = _numVertices * 3;
-				_rawVertexPositions = new Vector.<Number>(numVertComponents, true);
-				_rawVertexNormals = new Vector.<Number>(numVertComponents, true);
-				_rawVertexTangents = new Vector.<Number>(numVertComponents, true);
-				_rawIndices = new Vector.<uint>(_numTriangles * 3, true);
-			}
-
+			
 			// evaluate revolution steps
-			var revolutionAngleDeltaR:Number = 2 * Math.PI / _segmentsR;
-			var revolutionAngleDeltaT:Number = 2 * Math.PI / _segmentsT;
-
+			var revolutionAngleDeltaR:Number = 2*Math.PI/_segmentsR;
+			var revolutionAngleDeltaT:Number = 2*Math.PI/_segmentsT;
+			
+			var comp1:Number, comp2:Number;
+			var t1:Number, t2:Number, n1:Number, n2:Number;
+			var startIndex:uint;
+			
 			// surface
 			var a:uint, b:uint, c:uint, d:uint, length:Number;
-
-			for(j = 0; j <= _segmentsT; ++j)
-			{
-				for(i = 0; i <= _segmentsR; ++i)
-				{
+			
+			for (j = 0; j <= _segmentsT; ++j) {
+				
+				startIndex = _vertexOffset + _nextVertexIndex*_vertexStride;
+				
+				for (i = 0; i <= _segmentsR; ++i) {
 					// revolution vertex
-					revolutionAngleR = i * revolutionAngleDeltaR;
-					revolutionAngleT = j * revolutionAngleDeltaT;
+					revolutionAngleR = i*revolutionAngleDeltaR;
+					revolutionAngleT = j*revolutionAngleDeltaT;
 					
 					length = Math.cos(revolutionAngleT);
-					nx = length * Math.cos(revolutionAngleR);
-					ny = length * Math.sin(revolutionAngleR);
+					nx = length*Math.cos(revolutionAngleR);
+					ny = length*Math.sin(revolutionAngleR);
 					nz = Math.sin(revolutionAngleT);
 					
-					x = _radius * Math.cos(revolutionAngleR) + _tubeRadius * nx;
-					y = _radius * Math.sin(revolutionAngleR) + _tubeRadius * ny;
-					z = _tubeRadius * nz;
+					x = _radius*Math.cos(revolutionAngleR) + _tubeRadius*nx;
+					y = _radius*Math.sin(revolutionAngleR) + _tubeRadius*ny;
+					z = (j == _segmentsT)? 0 : _tubeRadius*nz;
 					
+					if (_yUp) {
+						n1 = -nz;
+						n2 = ny;
+						t1 = 0;
+						t2 = (length? nx/length : x/_radius);
+						comp1 = -z;
+						comp2 = y;
+						
+					} else {
+						n1 = ny;
+						n2 = nz;
+						t1 = (length? nx/length : x/_radius);
+						t2 = 0;
+						comp1 = y;
+						comp2 = z;
+					}
 					
-					if(_yUp)
-						addVertex(x, -z, y,
-								  nx, -nz, ny,
-								  -(length? ny/length : y/_radius), 0, (length? nx/length : x/_radius));
-					else
-						addVertex(x, y, z,
-								  nx, ny, nz,
-								  -(length? ny/length : y/_radius), (length? nx/length : x/_radius), 0);
-
+					if (i == _segmentsR) {
+						addVertex(x, _rawVertexData[startIndex + 1], _rawVertexData[startIndex + 2],
+							nx, n1, n2,
+							-(length? ny/length : y/_radius), t1, t2);
+					} else {
+						addVertex(x, comp1, comp2,
+							nx, n1, n2,
+							-(length? ny/length : y/_radius), t1, t2);
+					}
+					
 					// close triangle
-					if(i > 0 && j > 0)
-					{
+					if (i > 0 && j > 0) {
 						a = _nextVertexIndex - 1; // current
 						b = _nextVertexIndex - 2; // previous
 						c = b - _segmentsR - 1; // previous of last level
@@ -131,57 +145,60 @@ package away3d.primitives
 					}
 				}
 			}
-
+			
 			// build real data from raw data
-			target.updateVertexData(_rawVertexPositions);
-			target.updateVertexNormalData(_rawVertexNormals);
-			target.updateVertexTangentData(_rawVertexTangents);
+			target.updateData(_rawVertexData);
 			target.updateIndexData(_rawIndices);
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildUVs(target : SubGeometry) : void
+		protected override function buildUVs(target:CompactSubGeometry):void
 		{
 			var i:int, j:int;
-
+			var data:Vector.<Number>;
+			var stride:int = target.UVStride;
+			var offset:int = target.UVOffset;
+			var skip:int = target.UVStride - 2;
+			
 			// evaluate num uvs
-			var numUvs:uint = _numVertices * 2;
-
+			var numUvs:uint = _numVertices*stride;
+			
 			// need to initialize raw array or can be reused?
 			if (target.UVData && numUvs == target.UVData.length)
-				_rawUvs = target.UVData;
-			else
-				_rawUvs = new Vector.<Number>(numUvs, true);
+				data = target.UVData;
+			else {
+				data = new Vector.<Number>(numUvs, true);
+				invalidateGeometry();
+			}
 			
 			// current uv component index
-			var currentUvCompIndex:uint = 0;
+			var currentUvCompIndex:uint = offset;
 			
 			// surface
-			for(j = 0; j <= _segmentsT; ++j)
-			{
-				for(i = 0; i <= _segmentsR; ++i)
-				{
+			for (j = 0; j <= _segmentsT; ++j) {
+				for (i = 0; i <= _segmentsR; ++i) {
 					// revolution vertex
-					_rawUvs[currentUvCompIndex++] = i / _segmentsR;
-					_rawUvs[currentUvCompIndex++] = j / _segmentsT;
+					data[currentUvCompIndex++] = ( i/_segmentsR )*target.scaleU;
+					data[currentUvCompIndex++] = ( j/_segmentsT )*target.scaleV;
+					currentUvCompIndex += skip;
 				}
 			}
-
+			
 			// build real data from raw data
-			target.updateUVData(_rawUvs);
+			target.updateData(data);
 		}
 		
 		/**
 		 * The radius of the torus.
 		 */
-		public function get radius() : Number
+		public function get radius():Number
 		{
 			return _radius;
 		}
 		
-		public function set radius(value : Number) : void
+		public function set radius(value:Number):void
 		{
 			_radius = value;
 			invalidateGeometry();
@@ -190,12 +207,12 @@ package away3d.primitives
 		/**
 		 * The radius of the inner tube of the torus.
 		 */
-		public function get tubeRadius() : Number
+		public function get tubeRadius():Number
 		{
 			return _tubeRadius;
 		}
 		
-		public function set tubeRadius(value : Number) : void
+		public function set tubeRadius(value:Number):void
 		{
 			_tubeRadius = value;
 			invalidateGeometry();
@@ -204,12 +221,12 @@ package away3d.primitives
 		/**
 		 * Defines the number of horizontal segments that make up the torus. Defaults to 16.
 		 */
-		public function get segmentsR() : uint
+		public function get segmentsR():uint
 		{
 			return _segmentsR;
 		}
 		
-		public function set segmentsR(value : uint) : void
+		public function set segmentsR(value:uint):void
 		{
 			_segmentsR = value;
 			invalidateGeometry();
@@ -219,12 +236,12 @@ package away3d.primitives
 		/**
 		 * Defines the number of vertical segments that make up the torus. Defaults to 8.
 		 */
-		public function get segmentsT() : uint
+		public function get segmentsT():uint
 		{
 			return _segmentsT;
 		}
 		
-		public function set segmentsT(value : uint) : void
+		public function set segmentsT(value:uint):void
 		{
 			_segmentsT = value;
 			invalidateGeometry();
@@ -234,12 +251,12 @@ package away3d.primitives
 		/**
 		 * Defines whether the torus poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function get yUp() : Boolean
+		public function get yUp():Boolean
 		{
 			return _yUp;
 		}
 		
-		public function set yUp(value : Boolean) : void
+		public function set yUp(value:Boolean):void
 		{
 			_yUp = value;
 			invalidateGeometry();
@@ -253,7 +270,7 @@ package away3d.primitives
 		 * @param segmentsT Defines the number of vertical segments that make up the torus.
 		 * @param yUp Defines whether the torus poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function TorusGeometry(radius : Number = 50, tubeRadius : Number = 50, segmentsR : uint = 16, segmentsT : uint = 8, yUp : Boolean = true)
+		public function TorusGeometry(radius:Number = 50, tubeRadius:Number = 50, segmentsR:uint = 16, segmentsT:uint = 8, yUp:Boolean = true)
 		{
 			super();
 			

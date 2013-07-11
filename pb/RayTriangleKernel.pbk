@@ -67,7 +67,7 @@ kernel RayTriangleKernel
 				float distanceToPlane = -( dot( normal, rayStartPoint ) + D );
 				t = distanceToPlane / nDotV;
 			}
-			// evaluate ray-triangle intersectionw
+			// evaluate ray-triangle intersection
 			if( t > 0.0 ) { // if ray-plane intersection exists
 				float3 intersection = rayStartPoint + t * rayDirection;
 				float3 R = intersection - p0;

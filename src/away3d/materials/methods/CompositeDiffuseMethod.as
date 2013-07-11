@@ -3,261 +3,235 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.events.ShadingMethodEvent;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterData;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.Texture2DBase;
-
+	
 	use namespace arcane;
-
+	
 	/**
-	 * CompositeDiffuseMethod provides a base class for diffuse methods that wrap a diffuse method to alter the strength
-	 * of its calculated strength.
+	 * CompositeDiffuseMethod provides a base class for diffuse methods that wrap a diffuse method to alter the
+	 * calculated diffuse reflection strength.
 	 */
 	public class CompositeDiffuseMethod extends BasicDiffuseMethod
 	{
-		private var _baseDiffuseMethod : BasicDiffuseMethod;
+		protected var _baseMethod:BasicDiffuseMethod;
 
 		/**
 		 * Creates a new WrapDiffuseMethod object.
 		 * @param modulateMethod The method which will add the code to alter the base method's strength. It needs to have the signature clampDiffuse(t : ShaderRegisterElement, regCache : ShaderRegisterCache) : String, in which t.w will contain the diffuse strength.
 		 * @param baseDiffuseMethod The base diffuse method on which this method's shading is based.
 		 */
-		public function CompositeDiffuseMethod(modulateMethod : Function = null, baseDiffuseMethod : BasicDiffuseMethod = null)
+		public function CompositeDiffuseMethod(modulateMethod:Function = null, baseDiffuseMethod:BasicDiffuseMethod = null)
 		{
-			_baseDiffuseMethod = baseDiffuseMethod || new BasicDiffuseMethod();
-			_baseDiffuseMethod._modulateMethod = modulateMethod;
-			_baseDiffuseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = baseDiffuseMethod || new BasicDiffuseMethod();
+			_baseMethod._modulateMethod = modulateMethod;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
 		}
 
-		override arcane function initVO(vo : MethodVO) : void
+		/**
+		 * The base diffuse method on which this method's shading is based.
+		 */
+		public function get baseMethod():BasicDiffuseMethod
 		{
-			_baseDiffuseMethod.initVO(vo);
+			return _baseMethod;
 		}
 
-		override arcane function initConstants(vo : MethodVO) : void
+		public function set baseMethod(value:BasicDiffuseMethod):void
 		{
-			_baseDiffuseMethod.initConstants(vo);
+			if (_baseMethod == value)
+				return;
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod = value;
+			_baseMethod.addEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated, false, 0, true);
+			invalidateShaderProgram();
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function dispose() : void
+		override arcane function initVO(vo:MethodVO):void
 		{
-			_baseDiffuseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
-			_baseDiffuseMethod.dispose();
-		}
-
-        override public function get alphaThreshold() : Number
-        {
-            return _baseDiffuseMethod.alphaThreshold;
-        }
-
-        override public function set alphaThreshold(value : Number) : void
-        {
-            _baseDiffuseMethod.alphaThreshold = value;
-        }
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function get texture() : Texture2DBase
-		{
-			return _baseDiffuseMethod.texture;
+			_baseMethod.initVO(vo);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function set texture(value : Texture2DBase) : void
+		override arcane function initConstants(vo:MethodVO):void
 		{
-			_baseDiffuseMethod.texture = value;
+			_baseMethod.initConstants(vo);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function dispose():void
+		{
+			_baseMethod.removeEventListener(ShadingMethodEvent.SHADER_INVALIDATED, onShaderInvalidated);
+			_baseMethod.dispose();
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override public function get diffuseAlpha() : Number
+		override public function get alphaThreshold():Number
 		{
-			return _baseDiffuseMethod.diffuseAlpha;
+			return _baseMethod.alphaThreshold;
 		}
-
+		
+		override public function set alphaThreshold(value:Number):void
+		{
+			_baseMethod.alphaThreshold = value;
+		}
+		
 		/**
 		 * @inheritDoc
 		 */
-		override public function get diffuseColor() : uint
+		override public function get texture():Texture2DBase
 		{
-			return _baseDiffuseMethod.diffuseColor;
+			return _baseMethod.texture;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override public function set diffuseColor(diffuseColor : uint) : void
+		override public function set texture(value:Texture2DBase):void
 		{
-			_baseDiffuseMethod.diffuseColor = diffuseColor;
+			_baseMethod.texture = value;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override public function set diffuseAlpha(value : Number) : void
+		override public function get diffuseAlpha():Number
 		{
-			_baseDiffuseMethod.diffuseAlpha = value;
+			return _baseMethod.diffuseAlpha;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPreLightingCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
+		override public function get diffuseColor():uint
 		{
-			return _baseDiffuseMethod.getFragmentPreLightingCode(vo, regCache);
+			return _baseMethod.diffuseColor;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentCodePerLight(vo : MethodVO, lightIndex : int, lightDirReg : ShaderRegisterElement, lightColReg : ShaderRegisterElement, regCache : ShaderRegisterCache) : String
+		override public function set diffuseColor(diffuseColor:uint):void
 		{
-			var code : String = _baseDiffuseMethod.getFragmentCodePerLight(vo, lightIndex, lightDirReg, lightColReg, regCache);
-			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
+			_baseMethod.diffuseColor = diffuseColor;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override public function set diffuseAlpha(value:Number):void
+		{
+			_baseMethod.diffuseAlpha = value;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function getFragmentPreLightingCode(vo:MethodVO, regCache:ShaderRegisterCache):String
+		{
+			return _baseMethod.getFragmentPreLightingCode(vo, regCache);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function getFragmentCodePerLight(vo:MethodVO, lightDirReg:ShaderRegisterElement, lightColReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
+		{
+			var code:String = _baseMethod.getFragmentCodePerLight(vo, lightDirReg, lightColReg, regCache);
+			_totalLightColorReg = _baseMethod._totalLightColorReg;
 			return code;
 		}
-
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function getFragmentCodePerProbe(vo : MethodVO, lightIndex : int, cubeMapReg : ShaderRegisterElement, weightRegister : String, regCache : ShaderRegisterCache) : String
+		arcane override function getFragmentCodePerProbe(vo:MethodVO, cubeMapReg:ShaderRegisterElement, weightRegister:String, regCache:ShaderRegisterCache):String
 		{
-			var code : String = _baseDiffuseMethod.getFragmentCodePerProbe(vo, lightIndex, cubeMapReg, weightRegister, regCache);
-			_totalLightColorReg = _baseDiffuseMethod._totalLightColorReg;
+			var code:String = _baseMethod.getFragmentCodePerProbe(vo, cubeMapReg, weightRegister, regCache);
+			_totalLightColorReg = _baseMethod._totalLightColorReg;
 			return code;
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
+		override arcane function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
-			_baseDiffuseMethod.activate(vo, stage3DProxy);
-		}
-
-		arcane override function deactivate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
-		{
-			_baseDiffuseMethod.deactivate(vo, stage3DProxy);
+			_baseMethod.activate(vo, stage3DProxy);
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getVertexCode(vo : MethodVO, regCache : ShaderRegisterCache) : String
+		arcane override function deactivate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
-			return _baseDiffuseMethod.getVertexCode(vo, regCache);
+			_baseMethod.deactivate(vo, stage3DProxy);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function getVertexCode(vo:MethodVO, regCache:ShaderRegisterCache):String
+		{
+			return _baseMethod.getVertexCode(vo, regCache);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function getFragmentPostLightingCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
+		{
+			return _baseMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function reset():void
+		{
+			_baseMethod.reset();
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getFragmentPostLightingCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
-		{
-			return _baseDiffuseMethod.getFragmentPostLightingCode(vo, regCache, targetReg);
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function reset() : void
-		{
-			_baseDiffuseMethod.reset();
-		}
-
-
-		arcane override function cleanCompilationData() : void
+		arcane override function cleanCompilationData():void
 		{
 			super.cleanCompilationData();
-			_baseDiffuseMethod.cleanCompilationData();
+			_baseMethod.cleanCompilationData();
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function set sharedRegisters(value:ShaderRegisterData):void
+		{
+			super.sharedRegisters = _baseMethod.sharedRegisters = value;
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function set globalPosReg(value : ShaderRegisterElement) : void
+		override arcane function set shadowRegister(value:ShaderRegisterElement):void
 		{
-			_baseDiffuseMethod.globalPosReg = _globalPosReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set UVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.UVFragmentReg = _uvFragmentReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set secondaryUVFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.secondaryUVFragmentReg = _secondaryUVFragmentReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get viewDirFragmentReg() : ShaderRegisterElement
-		{
-			return _viewDirFragmentReg;
-		}
-
-		override arcane function set viewDirFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.viewDirFragmentReg = _viewDirFragmentReg = value;
-		}
-
-		override public function set viewDirVaryingReg(value : ShaderRegisterElement) : void
-		{
-			_viewDirVaryingReg = _baseDiffuseMethod.viewDirVaryingReg = value;
-		}
-
-
-		arcane override function set projectionReg(value : ShaderRegisterElement) : void
-		{
-			_projectionReg = _baseDiffuseMethod.projectionReg = value;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function get normalFragmentReg() : ShaderRegisterElement
-		{
-			return _normalFragmentReg;
-		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override arcane function set normalFragmentReg(value : ShaderRegisterElement) : void
-		{
-			_baseDiffuseMethod.normalFragmentReg = _normalFragmentReg = value;
-		}
-
-		override arcane function set shadowRegister(value : ShaderRegisterElement) : void
-		{
-
 			super.shadowRegister = value;
-			_baseDiffuseMethod.shadowRegister = value;
+			_baseMethod.shadowRegister = value;
 		}
 
-
-		override arcane function set tangentVaryingReg(value : ShaderRegisterElement) : void
-		{
-			super.tangentVaryingReg = value;
-			_baseDiffuseMethod.tangentVaryingReg = value;
-		}
-
-		private function onShaderInvalidated(event : ShadingMethodEvent) : void
+		/**
+		 * Called when the base method's shader code is invalidated.
+		 */
+		private function onShaderInvalidated(event:ShadingMethodEvent):void
 		{
 			invalidateShaderProgram();
 		}

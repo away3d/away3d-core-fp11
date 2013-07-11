@@ -1,62 +1,74 @@
 package away3d.loaders.parsers
 {
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.library.assets.AssetType;
-	import away3d.library.assets.IAsset;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.ColorMaterial;
-	import away3d.materials.DefaultMaterialBase;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.textures.BitmapTexture;
-	import away3d.textures.Texture2DBase;
-	
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
 	import flash.utils.Endian;
 	
+	import away3d.arcane;
+	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
+	import away3d.entities.Mesh;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.loaders.misc.ResourceDependency;
+	import away3d.loaders.parsers.utils.ParserUtil;
+	import away3d.materials.ColorMaterial;
+	import away3d.materials.ColorMultiPassMaterial;
+	import away3d.materials.MaterialBase;
+	import away3d.materials.MultiPassMaterialBase;
+	import away3d.materials.SinglePassMaterialBase;
+	import away3d.materials.TextureMaterial;
+	import away3d.materials.TextureMultiPassMaterial;
+	import away3d.materials.utils.DefaultMaterialManager;
+	import away3d.textures.Texture2DBase;
+	import away3d.tools.utils.GeomUtil;
+	
 	use namespace arcane;
-
+	
+	/**
+	 * Max3DSParser provides a parser for the 3ds data type.
+	 */
 	public class Max3DSParser extends ParserBase
 	{
-		private var _byteData : ByteArray;
+		private var _byteData:ByteArray;
 		
-		private var _textures : Object;
-		private var _materials : Object;
-		private var _unfinalized_objects : Object;
+		private var _textures:Object;
+		private var _materials:Object;
+		private var _unfinalized_objects:Object;
 		
-		private var _cur_obj_end : uint;
-		private var _cur_obj : ObjectVO;
+		private var _cur_obj_end:uint;
+		private var _cur_obj:ObjectVO;
 		
-		private var _cur_mat_end : uint;
-		private var _cur_mat : MaterialVO;
-		
+		private var _cur_mat_end:uint;
+		private var _cur_mat:MaterialVO;
 		
 		public function Max3DSParser()
 		{
 			super(ParserDataFormat.BINARY);
 		}
 		
-		
-		
-		public static function supportsType(extension : String) : Boolean
+		/**
+		 * Indicates whether or not a given file extension is supported by the parser.
+		 * @param extension The file extension of a potential file to be parsed.
+		 * @return Whether or not the given file type is supported.
+		 */
+		public static function supportsType(extension:String):Boolean
 		{
 			extension = extension.toLowerCase();
 			return extension == "3ds";
 		}
 		
-		
-		public static function supportsData(data : *) : Boolean
+		/**
+		 * Tests whether a data block can be parsed by the parser.
+		 * @param data The data block to potentially be parsed.
+		 * @return Whether or not the given data is supported.
+		 */
+		public static function supportsData(data:*):Boolean
 		{
-			var ba : ByteArray;
+			var ba:ByteArray;
 			
 			ba = ParserUtil.toByteArray(data);
 			if (ba) {
@@ -68,15 +80,17 @@ package away3d.loaders.parsers
 			return false;
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function resolveDependency(resourceDependency:ResourceDependency):void
 		{
 			if (resourceDependency.assets.length == 1) {
-				var asset : IAsset;
+				var asset:IAsset;
 				
 				asset = resourceDependency.assets[0];
 				if (asset.assetType == AssetType.TEXTURE) {
-					var tex : TextureVO;
+					var tex:TextureVO;
 					
 					tex = _textures[resourceDependency.id];
 					tex.texture = asset as Texture2DBase;
@@ -84,13 +98,17 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		arcane override function resolveDependencyFailure(resourceDependency:ResourceDependency):void
 		{
 			// TODO: Implement
 		}
 		
-		
+		/**
+		 * @inheritDoc
+		 */
 		protected override function proceedParsing():Boolean
 		{
 			if (!_byteData) {
@@ -103,7 +121,6 @@ package away3d.loaders.parsers
 				_unfinalized_objects = {};
 			}
 			
-			
 			// TODO: With this construct, the loop will run no-op for as long
 			// as there is time once file has finished reading. Consider a nice
 			// way to stop loop when byte array is empty, without putting it in
@@ -113,9 +130,8 @@ package away3d.loaders.parsers
 				
 				// If we are currently working on an object, and the most recent chunk was
 				// the last one in that object, finalize the current object.
-				if (_cur_mat && _byteData.position >= _cur_mat_end) {
+				if (_cur_mat && _byteData.position >= _cur_mat_end)
 					finalizeCurrentMaterial();
-				}
 				else if (_cur_obj && _byteData.position >= _cur_obj_end) {
 					// Can't finalize at this point, because we have to wait until the full
 					// animation section has been parsed for any potential pivot definitions
@@ -123,16 +139,16 @@ package away3d.loaders.parsers
 					_cur_obj_end = uint.MAX_VALUE;
 					_cur_obj = null;
 				}
-			
+				
 				if (_byteData.bytesAvailable) {
-					var cid : uint;
-					var len : uint;
-					var end : uint;
+					var cid:uint;
+					var len:uint;
+					var end:uint;
 					
 					cid = _byteData.readUnsignedShort();
 					len = _byteData.readUnsignedInt();
-					end = _byteData.position + (len-6);
-				
+					end = _byteData.position + (len - 6);
+					
 					switch (cid) {
 						case 0x4D4D: // MAIN3DS
 						case 0x3D3D: // EDIT3DS
@@ -185,17 +201,16 @@ package away3d.loaders.parsers
 						case 0xB002: // Object animation (including pivot)
 							parseObjectAnimation(end);
 							break;
-                                                
+						
 						case 0x4150: // Smoothing groups
 							parseSmoothingGroups();
-							break;	
+							break;
 						
 						default:
 							// Skip this (unknown) chunk
-							_byteData.position += (len-6);
+							_byteData.position += (len - 6);
 							break;
 					}
-					
 					
 					// Pause parsing if there were any dependencies found during this
 					// iteration (i.e. if there are any dependencies that need to be
@@ -207,44 +222,40 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			
 			// More parsing is required if the entire byte array has not yet
 			// been read, or if there is a currently non-finalized object in
 			// the pipeline.
-			if (_byteData.bytesAvailable || _cur_obj || _cur_mat) {
+			if (_byteData.bytesAvailable || _cur_obj || _cur_mat)
 				return MORE_TO_PARSE;
-			}
 			else {
-				var name : String;
+				var name:String;
 				
 				// Finalize any remaining objects before ending.
 				for (name in _unfinalized_objects) {
-					var obj : ObjectContainer3D;
+					var obj:ObjectContainer3D;
 					obj = constructObject(_unfinalized_objects[name]);
-					if (obj) {
+					if (obj)
 						finalizeAsset(obj, name);
-					}
 				}
 				
 				return PARSING_DONE;
 			}
 		}
 		
-		
-		private function parseMaterial() : MaterialVO
+		private function parseMaterial():MaterialVO
 		{
-			var mat : MaterialVO;
+			var mat:MaterialVO;
 			
 			mat = new MaterialVO();
 			
 			while (_byteData.position < _cur_mat_end) {
-				var cid : uint;
-				var len : uint;
-				var end : uint;
+				var cid:uint;
+				var len:uint;
+				var end:uint;
 				
 				cid = _byteData.readUnsignedShort();
 				len = _byteData.readUnsignedInt();
-				end = _byteData.position + (len-6);
+				end = _byteData.position + (len - 6);
 				
 				switch (cid) {
 					case 0xA000: // Material name
@@ -284,16 +295,15 @@ package away3d.loaders.parsers
 			return mat;
 		}
 		
-		
-		private function parseTexture(end : uint) : TextureVO
+		private function parseTexture(end:uint):TextureVO
 		{
-			var tex : TextureVO;
+			var tex:TextureVO;
 			
 			tex = new TextureVO();
 			
 			while (_byteData.position < end) {
-				var cid : uint;
-				var len : uint;
+				var cid:uint;
+				var len:uint;
 				
 				cid = _byteData.readUnsignedShort();
 				len = _byteData.readUnsignedInt();
@@ -302,10 +312,10 @@ package away3d.loaders.parsers
 					case 0xA300:
 						tex.url = readNulTermString();
 						break;
-						
+					
 					default:
 						// Skip this unknown texture sub-chunk
-						_byteData.position += (len-6);
+						_byteData.position += (len - 6);
 						break;
 				}
 			}
@@ -316,20 +326,19 @@ package away3d.loaders.parsers
 			return tex;
 		}
 		
-		
-		private function parseVertexList() : void
+		private function parseVertexList():void
 		{
-			var i : uint;
-			var len : uint;
-			var count : uint;
+			var i:uint;
+			var len:uint;
+			var count:uint;
 			
 			count = _byteData.readUnsignedShort();
 			_cur_obj.verts = new Vector.<Number>(count*3, true);
 			
 			i = 0;
 			len = _cur_obj.verts.length;
-			while (i<len) {
-				var x : Number, y : Number, z : Number;
+			while (i < len) {
+				var x:Number, y:Number, z:Number;
 				
 				x = _byteData.readFloat();
 				y = _byteData.readFloat();
@@ -341,12 +350,11 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		
-		private function parseFaceList() : void
+		private function parseFaceList():void
 		{
-			var i : uint;
-			var len : uint;
-			var count : uint;
+			var i:uint;
+			var len:uint;
+			var count:uint;
 			
 			count = _byteData.readUnsignedShort();
 			_cur_obj.indices = new Vector.<uint>(count*3, true);
@@ -354,11 +362,11 @@ package away3d.loaders.parsers
 			i = 0;
 			len = _cur_obj.indices.length;
 			while (i < len) {
-				var i0 : uint, i1 : uint, i2 : uint;
+				var i0:uint, i1:uint, i2:uint;
 				
-				i0 = _byteData.readUnsignedShort(); 
-				i1 = _byteData.readUnsignedShort(); 
-				i2 = _byteData.readUnsignedShort(); 
+				i0 = _byteData.readUnsignedShort();
+				i1 = _byteData.readUnsignedShort();
+				i2 = _byteData.readUnsignedShort();
 				
 				_cur_obj.indices[i++] = i0;
 				_cur_obj.indices[i++] = i2;
@@ -367,24 +375,25 @@ package away3d.loaders.parsers
 				// Skip "face info", irrelevant in Away3D
 				_byteData.position += 2;
 			}
-                        
-                        _cur_obj.smoothingGroups = new Vector.<uint>(count, true);
+			
+			_cur_obj.smoothingGroups = new Vector.<uint>(count, true);
 		}
 		
-		private function parseSmoothingGroups():void {
-			var len:uint = _cur_obj.indices.length / 3;
+		private function parseSmoothingGroups():void
+		{
+			var len:uint = _cur_obj.indices.length/3;
 			var i:uint = 0;
 			while (i < len) {
 				_cur_obj.smoothingGroups[i] = _byteData.readUnsignedInt();
 				i++;
 			}
-		}		
-
-		private function parseUVList() : void
+		}
+		
+		private function parseUVList():void
 		{
-			var i : uint;
-			var len : uint;
-			var count : uint;
+			var i:uint;
+			var len:uint;
+			var count:uint;
 			
 			count = _byteData.readUnsignedShort();
 			_cur_obj.uvs = new Vector.<Number>(count*2, true);
@@ -397,42 +406,39 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		
-		private function parseFaceMaterialList() : void
+		private function parseFaceMaterialList():void
 		{
-			var mat : String;
-			var count : uint;
-			var i : uint;
-			var faces : Vector.<uint>;
-				
+			var mat:String;
+			var count:uint;
+			var i:uint;
+			var faces:Vector.<uint>;
+			
 			mat = readNulTermString();
 			count = _byteData.readUnsignedShort();
 			
 			faces = new Vector.<uint>(count, true);
 			i = 0;
-			while (i<faces.length) {
+			while (i < faces.length)
 				faces[i++] = _byteData.readUnsignedShort();
-			}
 			
 			_cur_obj.materials.push(mat);
 			_cur_obj.materialFaces[mat] = faces;
 		}
 		
-		
-		private function parseObjectAnimation(end : Number) : void
+		private function parseObjectAnimation(end:Number):void
 		{
-			var vo : ObjectVO;
-			var obj : ObjectContainer3D;
-			var pivot : Vector3D;
-			var name : String;
-			var hier : int;
+			var vo:ObjectVO;
+			var obj:ObjectContainer3D;
+			var pivot:Vector3D;
+			var name:String;
+			var hier:int;
 			
 			// Pivot defaults to origin
 			pivot = new Vector3D;
 			
 			while (_byteData.position < end) {
-				var cid : uint;
-				var len : uint;
+				var cid:uint;
+				var len:uint;
 				
 				cid = _byteData.readUnsignedShort();
 				len = _byteData.readUnsignedInt();
@@ -451,7 +457,7 @@ package away3d.loaders.parsers
 						break;
 					
 					default:
-						_byteData.position += (len-6);
+						_byteData.position += (len - 6);
 						break;
 				}
 			}
@@ -463,24 +469,22 @@ package away3d.loaders.parsers
 				vo = _unfinalized_objects[name];
 				obj = constructObject(vo, pivot);
 				
-				if (obj) {
+				if (obj)
 					finalizeAsset(obj, vo.name);
-				}
 				
 				delete _unfinalized_objects[name];
 			}
 		}
 		
-		
-		private function constructObject(obj : ObjectVO, pivot : Vector3D = null) : ObjectContainer3D
+		private function constructObject(obj:ObjectVO, pivot:Vector3D = null):ObjectContainer3D
 		{
 			if (obj.type == AssetType.MESH) {
-				var i : uint;
-				var subs : Vector.<SubGeometry>;
-				var geom : Geometry;
-				var mat : MaterialBase;
-				var mesh : Mesh;
-				var mtx : Matrix3D;
+				var i:uint;
+				var subs:Vector.<ISubGeometry>;
+				var geom:Geometry;
+				var mat:MaterialBase;
+				var mesh:Mesh;
+				var mtx:Matrix3D;
 				var vertices:Vector.<VertexVO>;
 				var faces:Vector.<FaceVO>;
 				
@@ -488,50 +492,49 @@ package away3d.loaders.parsers
 					trace('The Away3D 3DS parser does not support multiple materials per mesh at this point.');
 				
 				// Ignore empty objects
-				if (!obj.indices || obj.indices.length==0)
+				if (!obj.indices || obj.indices.length == 0)
 					return null;
 				
-				vertices = new Vector.<VertexVO>(obj.verts.length / 3, false);
-				faces = new Vector.<FaceVO>(obj.indices.length / 3, true);
+				vertices = new Vector.<VertexVO>(obj.verts.length/3, false);
+				faces = new Vector.<FaceVO>(obj.indices.length/3, true);
 				
 				prepareData(vertices, faces, obj);
 				applySmoothGroups(vertices, faces);
 				
-				obj.verts = new Vector.<Number>(vertices.length * 3, true);
+				obj.verts = new Vector.<Number>(vertices.length*3, true);
 				for (i = 0; i < vertices.length; i++) {
-					obj.verts[i * 3] = vertices[i].x;
-					obj.verts[i * 3 + 1] = vertices[i].y;
-					obj.verts[i * 3 + 2] = vertices[i].z;
+					obj.verts[i*3] = vertices[i].x;
+					obj.verts[i*3 + 1] = vertices[i].y;
+					obj.verts[i*3 + 2] = vertices[i].z;
 				}
-				obj.indices = new Vector.<uint>(faces.length * 3, true);
+				obj.indices = new Vector.<uint>(faces.length*3, true);
 				for (i = 0; i < faces.length; i++) {
-					obj.indices[i * 3] = faces[i].a;
-					obj.indices[i * 3 + 1] = faces[i].b;
-					obj.indices[i * 3 + 2] = faces[i].c;
+					obj.indices[i*3] = faces[i].a;
+					obj.indices[i*3 + 1] = faces[i].b;
+					obj.indices[i*3 + 2] = faces[i].c;
 				}
 				
 				if (obj.uvs) {
 					// If the object had UVs to start with, use UVs generated by
 					// smoothing group splitting algorithm. Otherwise those UVs
 					// will be nonsense and should be skipped.
-					obj.uvs = new Vector.<Number>(vertices.length * 2, true);
+					obj.uvs = new Vector.<Number>(vertices.length*2, true);
 					for (i = 0; i < vertices.length; i++) {
-						obj.uvs[i * 2] = vertices[i].u;
-						obj.uvs[i * 2 + 1] = vertices[i].v;
+						obj.uvs[i*2] = vertices[i].u;
+						obj.uvs[i*2 + 1] = vertices[i].v;
 					}
 				}
-		
+				
 				geom = new Geometry();
 				
 				// Construct sub-geometries (potentially splitting buffers)
 				// and add them to geometry.
-				subs = constructSubGeometries(obj.verts, obj.indices, obj.uvs, null, null, null, null);
-				for (i=0; i<subs.length; i++) {
+				subs = GeomUtil.fromVectors(obj.verts, obj.indices, obj.uvs, null, null, null, null);
+				for (i = 0; i < subs.length; i++)
 					geom.subGeometries.push(subs[i]);
-				}
 				
-				if (obj.materials.length>0) {
-					var mname : String;
+				if (obj.materials.length > 0) {
+					var mname:String;
 					mname = obj.materials[0];
 					mat = _materials[mname].material;
 				}
@@ -542,7 +545,7 @@ package away3d.loaders.parsers
 					if (obj.transform) {
 						// If a transform was found while parsing the
 						// object chunk, use it to find the local pivot vector
-						var dat : Vector.<Number> = obj.transform.concat();
+						var dat:Vector.<Number> = obj.transform.concat();
 						dat[12] = 0;
 						dat[13] = 0;
 						dat[14] = 0;
@@ -578,14 +581,15 @@ package away3d.loaders.parsers
 			// If reached, unknown
 			return null;
 		}
-
-		private function prepareData(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>, obj:ObjectVO):void {
+		
+		private function prepareData(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>, obj:ObjectVO):void
+		{
 			// convert raw ObjectVO's data to structured VertexVO and FaceVO
 			var i:int;
 			var j:int;
 			var k:int;
 			var len:int = obj.verts.length;
-			for (i = 0, j = 0, k = 0; i < len;) {
+			for (i = 0, j = 0, k = 0; i < len; ) {
 				var v:VertexVO = new VertexVO;
 				v.x = obj.verts[i++];
 				v.y = obj.verts[i++];
@@ -597,7 +601,7 @@ package away3d.loaders.parsers
 				vertices[k++] = v;
 			}
 			len = obj.indices.length;
-			for (i = 0, k = 0; i < len;) {
+			for (i = 0, k = 0; i < len; ) {
 				var f:FaceVO = new FaceVO();
 				f.a = obj.indices[i++];
 				f.b = obj.indices[i++];
@@ -607,11 +611,12 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		private function applySmoothGroups(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>):void {
+		private function applySmoothGroups(vertices:Vector.<VertexVO>, faces:Vector.<FaceVO>):void
+		{
 			// clone vertices according to following rule:
 			// clone if vertex's in faces from groups 1+2 and 3
 			// don't clone if vertex's in faces from groups 1+2, 3 and 1+3
-
+			
 			var i:int;
 			var j:int;
 			var k:int;
@@ -622,13 +627,12 @@ package away3d.loaders.parsers
 			
 			// extract groups data for vertices
 			var vGroups:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>(numVerts, true);
-			for (i = 0; i < numVerts; i++) {
+			for (i = 0; i < numVerts; i++)
 				vGroups[i] = new Vector.<uint>;
-			}
 			for (i = 0; i < numFaces; i++) {
 				var face:FaceVO = FaceVO(faces[i]);
 				for (j = 0; j < 3; j++) {
-					var groups:Vector.<uint> = vGroups[(j == 0) ? face.a : ((j == 1) ? face.b : face.c)];
+					var groups:Vector.<uint> = vGroups[(j == 0)? face.a : ((j == 1)? face.b : face.c)];
 					var group:uint = face.smoothGroup;
 					for (k = groups.length - 1; k >= 0; k--) {
 						if ((group & groups[k]) > 0) {
@@ -643,7 +647,8 @@ package away3d.loaders.parsers
 			// clone vertices
 			var vClones:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>(numVerts, true);
 			for (i = 0; i < numVerts; i++) {
-				if ((len = vGroups[i].length) < 1) continue;
+				if ((len = vGroups[i].length) < 1)
+					continue;
 				var clones:Vector.<uint> = new Vector.<uint>(len, true);
 				vClones[i] = clones;
 				clones[0] = i;
@@ -660,26 +665,29 @@ package away3d.loaders.parsers
 				}
 			}
 			numVerts = vertices.length;
-
+			
 			for (i = 0; i < numFaces; i++) {
 				face = FaceVO(faces[i]);
 				group = face.smoothGroup;
 				for (j = 0; j < 3; j++) {
-					k = (j == 0) ? face.a : ((j == 1) ? face.b : face.c);
+					k = (j == 0)? face.a : ((j == 1)? face.b : face.c);
 					groups = vGroups[k];
 					len = groups.length;
 					clones = vClones[k];
 					for (l = 0; l < len; l++) {
 						if (((group == 0) && (groups[l] == 0)) ||
-								((group & groups[l]) > 0)) {
+							((group & groups[l]) > 0)) {
 							var index:uint = clones[l];
 							if (group == 0) {
 								// vertex is unique if no smoothGroup found
 								groups.splice(l, 1);
 								clones.splice(l, 1);
 							}
-							if (j == 0) face.a = index; else
-							if (j == 1) face.b = index; else
+							if (j == 0)
+								face.a = index;
+							else if (j == 1)
+								face.b = index;
+							else
 								face.c = index;
 							l = len;
 						}
@@ -688,20 +696,25 @@ package away3d.loaders.parsers
 			}
 		}
 		
-		
-		private function finalizeCurrentMaterial() : void
+		private function finalizeCurrentMaterial():void
 		{
-			var mat : DefaultMaterialBase;
-			
-			if (_cur_mat.colorMap) {
-				mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+			var mat:MaterialBase;
+			if (materialMode < 2) {
+				if (_cur_mat.colorMap)
+					mat = new TextureMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+				else
+					mat = new ColorMaterial(_cur_mat.diffuseColor);
+				SinglePassMaterialBase(mat).ambientColor = _cur_mat.ambientColor;
+				SinglePassMaterialBase(mat).specularColor = _cur_mat.specularColor;
+			} else {
+				if (_cur_mat.colorMap)
+					mat = new TextureMultiPassMaterial(_cur_mat.colorMap.texture || DefaultMaterialManager.getDefaultTexture());
+				else
+					mat = new ColorMultiPassMaterial(_cur_mat.diffuseColor);
+				MultiPassMaterialBase(mat).ambientColor = _cur_mat.ambientColor;
+				MultiPassMaterialBase(mat).specularColor = _cur_mat.specularColor;
 			}
-			else {
-				mat = new ColorMaterial(_cur_mat.diffuseColor);
-			}
 			
-			mat.ambientColor = _cur_mat.ambientColor;
-			mat.specularColor = _cur_mat.specularColor;
 			mat.bothSides = _cur_mat.twoSided;
 			
 			finalizeAsset(mat, _cur_mat.name);
@@ -712,23 +725,20 @@ package away3d.loaders.parsers
 			_cur_mat = null;
 		}
 		
-		
-		private function readNulTermString() : String
+		private function readNulTermString():String
 		{
-			var chr : uint;
-			var str : String = new String();
+			var chr:uint;
+			var str:String = new String();
 			
-			while ((chr = _byteData.readUnsignedByte()) > 0) {
+			while ((chr = _byteData.readUnsignedByte()) > 0)
 				str += String.fromCharCode(chr);
-			}
 			
 			return str;
 		}
 		
-		
-		private function readTransform() : Vector.<Number>
+		private function readTransform():Vector.<Number>
 		{
-			var data : Vector.<Number>;
+			var data:Vector.<Number>;
 			
 			data = new Vector.<Number>(16, true);
 			
@@ -759,21 +769,20 @@ package away3d.loaders.parsers
 			return data;
 		}
 		
-		
-		private function readColor() : uint
+		private function readColor():uint
 		{
-			var cid : uint;
-			var len : uint;
-			var r : uint, g : uint, b : uint;
+			var cid:uint;
+			var len:uint;
+			var r:uint, g:uint, b:uint;
 			
 			cid = _byteData.readUnsignedShort();
 			len = _byteData.readUnsignedInt();
 			
 			switch (cid) {
 				case 0x0010: // Floats
-					r = _byteData.readFloat() * 255;
-					g = _byteData.readFloat() * 255;
-					b = _byteData.readFloat() * 255;
+					r = _byteData.readFloat()*255;
+					g = _byteData.readFloat()*255;
+					b = _byteData.readFloat()*255;
 					break;
 				case 0x0011: // 24-bit color
 					r = _byteData.readUnsignedByte();
@@ -781,54 +790,68 @@ package away3d.loaders.parsers
 					b = _byteData.readUnsignedByte();
 					break;
 				default:
-					_byteData.position += (len-6);
+					_byteData.position += (len - 6);
 					break;
 			}
 			
-			return (r<<16) | (g<<8) | b;
+			return (r << 16) | (g << 8) | b;
 		}
 	}
 }
 
-import flash.geom.Vector3D;
 import away3d.materials.MaterialBase;
 import away3d.textures.Texture2DBase;
 
+import flash.geom.Vector3D;
+
 internal class TextureVO
 {
-	public var url : String;
-	public var texture : Texture2DBase;
+	public var url:String;
+	public var texture:Texture2DBase;
+	
+	public function TextureVO()
+	{
+	}
 }
 
 internal class MaterialVO
 {
-	public var name : String;
-	public var ambientColor : uint;
-	public var diffuseColor : uint;
-	public var specularColor : uint;
-	public var twoSided : Boolean;
-	public var colorMap : TextureVO;
-	public var specularMap : TextureVO;
-	public var material : MaterialBase;
+	public var name:String;
+	public var ambientColor:uint;
+	public var diffuseColor:uint;
+	public var specularColor:uint;
+	public var twoSided:Boolean;
+	public var colorMap:TextureVO;
+	public var specularMap:TextureVO;
+	public var material:MaterialBase;
+	
+	public function MaterialVO()
+	{
+	}
 }
 
 internal class ObjectVO
 {
-	public var name : String;
-	public var type : String;
-	public var pivotX : Number;
-	public var pivotY : Number;
-	public var pivotZ : Number;
-	public var transform : Vector.<Number>;
-	public var verts : Vector.<Number>;
-	public var indices : Vector.<uint>;
-	public var uvs : Vector.<Number>;
-	public var materialFaces : Object;
-	public var materials : Vector.<String>;
+	public var name:String;
+	public var type:String;
+	public var pivotX:Number;
+	public var pivotY:Number;
+	public var pivotZ:Number;
+	public var transform:Vector.<Number>;
+	public var verts:Vector.<Number>;
+	public var indices:Vector.<uint>;
+	public var uvs:Vector.<Number>;
+	public var materialFaces:Object;
+	public var materials:Vector.<String>;
 	public var smoothingGroups:Vector.<uint>;
+	
+	public function ObjectVO()
+	{
+	}
 }
 
-internal class VertexVO {
+internal class VertexVO
+{
 	public var x:Number;
 	public var y:Number;
 	public var z:Number;
@@ -836,11 +859,20 @@ internal class VertexVO {
 	public var v:Number;
 	public var normal:Vector3D;
 	public var tangent:Vector3D;
+	
+	public function VertexVO()
+	{
+	}
 }
 
-internal class FaceVO {
+internal class FaceVO
+{
 	public var a:uint;
 	public var b:uint;
 	public var c:uint;
 	public var smoothGroup:uint;
+	
+	public function FaceVO()
+	{
+	}
 }

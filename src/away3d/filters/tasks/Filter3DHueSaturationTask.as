@@ -28,7 +28,8 @@ package away3d.filters.tasks
 		
 		public function set saturation(value:Number):void
 		{
-			if (_saturation == value) return;
+			if (_saturation == value)
+				return;
 			_saturation = value;
 			
 			updateConstants();
@@ -41,7 +42,8 @@ package away3d.filters.tasks
 		
 		public function set r(value:Number):void
 		{
-			if (_r == value) return;
+			if (_r == value)
+				return;
 			_r = value;
 			
 			updateConstants();
@@ -54,7 +56,8 @@ package away3d.filters.tasks
 		
 		public function set b(value:Number):void
 		{
-			if (_b == value) return;
+			if (_b == value)
+				return;
 			_b = value;
 			
 			updateConstants();
@@ -67,13 +70,14 @@ package away3d.filters.tasks
 		
 		public function set g(value:Number):void
 		{
-			if (_g == value) return;
+			if (_g == value)
+				return;
 			_g = value;
 			
 			updateConstants();
 		}
 		
-		override protected function getFragmentCode() : String
+		override protected function getFragmentCode():String
 		{
 			/**
 			 * Some reference so I don't go crazy
@@ -95,7 +99,7 @@ package away3d.filters.tasks
 			//_____________________________________________________________________
 			//	Texture
 			//_____________________________________________________________________
-			return 	"tex ft0, v0, fs0 <2d,linear,clamp>	\n" +
+			return "tex ft0, v0, fs0 <2d,linear,clamp>	\n" +
 				
 				//_____________________________________________________________________
 				//	Color Multiplier
@@ -122,7 +126,7 @@ package away3d.filters.tasks
 				"mov oc, ft0			        \n";
 		}
 		
-		override public function activate(stage3DProxy : Stage3DProxy, camera3D : Camera3D, depthTexture : Texture) : void
+		override public function activate(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:Texture):void
 		{
 			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _rgbData, 2);
 		}
@@ -130,10 +134,10 @@ package away3d.filters.tasks
 		protected function updateConstants():void
 		{
 			_rgbData = Vector.<Number>([
-				0.3,            0.59,           0.11,       0,
-				1-_saturation,  _saturation,    0,          0,
-				r,              g,              b,          0
-			]);
+				0.3, 0.59, 0.11, 0,
+				1 - _saturation, _saturation, 0, 0,
+				r, g, b, 0
+				]);
 		}
 	}
 }

@@ -1,54 +1,58 @@
 package away3d.filters.tasks
 {
+	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
-
+	
+	import flash.display3D.Context3D;
+	
 	import flash.display3D.Context3DProgramType;
-
+	
 	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
-
+	
+	use namespace arcane;
+	
 	public class Filter3DCompositeTask extends Filter3DTaskBase
 	{
-		private var _data : Vector.<Number>;
-		private var _overlayTexture : TextureBase;
-		private var _blendMode : String;
-
-		public function Filter3DCompositeTask(blendMode : String, exposure : Number = 1)
+		private var _data:Vector.<Number>;
+		private var _overlayTexture:TextureBase;
+		private var _blendMode:String;
+		
+		public function Filter3DCompositeTask(blendMode:String, exposure:Number = 1)
 		{
 			super();
 			_data = Vector.<Number>([ exposure, 0, 0, 0 ]);
 			_blendMode = blendMode;
 		}
-
-		public function get overlayTexture() : TextureBase
+		
+		public function get overlayTexture():TextureBase
 		{
 			return _overlayTexture;
 		}
-
-		public function set overlayTexture(value : TextureBase) : void
+		
+		public function set overlayTexture(value:TextureBase):void
 		{
 			_overlayTexture = value;
 		}
-
-		public function get exposure() : Number
+		
+		public function get exposure():Number
 		{
 			return _data[0];
 		}
-
-		public function set exposure(value : Number) : void
+		
+		public function set exposure(value:Number):void
 		{
 			_data[0] = value;
 		}
-
-
-		override protected function getFragmentCode() : String
+		
+		override protected function getFragmentCode():String
 		{
-			var code : String;
-			var op : String;
-			code = 	"tex ft0, v0, fs0 <2d,linear,clamp>	\n" +
-					"tex ft1, v0, fs1 <2d,linear,clamp>	\n" +
-					"mul ft0, ft0, fc0.x				\n";
+			var code:String;
+			var op:String;
+			code = "tex ft0, v0, fs0 <2d,linear,clamp>	\n" +
+				"tex ft1, v0, fs1 <2d,linear,clamp>	\n" +
+				"mul ft0, ft0, fc0.x				\n";
 			switch (_blendMode) {
 				case "multiply":
 					op = "mul";
@@ -60,7 +64,7 @@ package away3d.filters.tasks
 					op = "sub";
 					break;
 				case "normal":
-						// for debugging purposes
+					// for debugging purposes
 					op = "mov";
 					break;
 				default:
@@ -72,16 +76,17 @@ package away3d.filters.tasks
 				code += "mov oc, ft0						\n";
 			return code;
 		}
-
-		override public function activate(stage3DProxy : Stage3DProxy, camera3D : Camera3D, depthTexture : Texture) : void
+		
+		override public function activate(stage3DProxy:Stage3DProxy, camera3D:Camera3D, depthTexture:Texture):void
 		{
-			stage3DProxy.context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 1);
-			stage3DProxy.setTextureAt(1, _overlayTexture);
+			var context:Context3D = stage3DProxy._context3D;
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 1);
+			context.setTextureAt(1, _overlayTexture);
 		}
-
-		override public function deactivate(stage3DProxy : Stage3DProxy) : void
+		
+		override public function deactivate(stage3DProxy:Stage3DProxy):void
 		{
-			stage3DProxy.setTextureAt(1, null);
+			stage3DProxy._context3D.setTextureAt(1, null);
 		}
 	}
 }

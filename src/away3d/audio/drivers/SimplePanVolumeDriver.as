@@ -5,18 +5,18 @@ package away3d.audio.drivers
 	import flash.events.Event;
 	import flash.geom.*;
 	import flash.media.*;
-
+	
 	/**
 	 * The Simple pan/volume Sound3D driver will alter the pan and volume properties on the
 	 * sound transform object of a regular flash.media.Sound3D representation of the sound. This
 	 * is very efficient, but has the drawback that it can only reflect azimuth and distance,
-	 * and will disregard elevation. You'll be able to hear whether a   
-	*/
+	 * and will disregard elevation. You'll be able to hear whether a
+	 */
 	public class SimplePanVolumeDriver extends AbstractSound3DDriver implements ISound3DDriver
 	{
-		private var _sound_chan : SoundChannel;
-		private var _pause_position : Number;
-		private var _st3D : SoundTransform3D;
+		private var _sound_chan:SoundChannel;
+		private var _pause_position:Number;
+		private var _st3D:SoundTransform3D;
 		
 		public function SimplePanVolumeDriver()
 		{
@@ -26,14 +26,13 @@ package away3d.audio.drivers
 			_st3D = new SoundTransform3D();
 		}
 		
-		
-		public function play() : void
+		public function play():void
 		{
-			var pos : Number;
+			var pos:Number;
 			
 			if (!_src)
 				throw new Error('SimplePanVolumeDriver.play(): No sound source to play.');
-				
+			
 			_playing = true;
 			
 			// Update sound transform first. This has not happened while
@@ -47,8 +46,7 @@ package away3d.audio.drivers
 			_sound_chan.addEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 		}
 		
-		
-		public function pause() : void
+		public function pause():void
 		{
 			_paused = true;
 			_pause_position = _sound_chan.position;
@@ -56,32 +54,25 @@ package away3d.audio.drivers
 			_sound_chan.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 		}
 		
-		
-		public function stop() : void
+		public function stop():void
 		{
 			_sound_chan.stop();
 			_sound_chan.removeEventListener(Event.SOUND_COMPLETE, onSoundComplete);
 		}
 		
-		
-		
-		
-		
-		public override function set volume(val:Number) : void
+		public override function set volume(val:Number):void
 		{
 			_volume = val;
 			_st3D.volume = val;
 		}
 		
-		
-		public override function set scale(val:Number) : void
+		public override function set scale(val:Number):void
 		{
 			_scale = val;
 			_st3D.scale = scale;
 		}
 		
-		
-		public override function updateReferenceVector(v:Vector3D) : void
+		public override function updateReferenceVector(v:Vector3D):void
 		{
 			super.updateReferenceVector(v);
 			
@@ -90,20 +81,16 @@ package away3d.audio.drivers
 				_updateSoundTransform();
 		}
 		
-		
-		
-		
-		private function _updateSoundTransform() : void
+		private function _updateSoundTransform():void
 		{
 			
-			_st3D.updateFromVector3D( _ref_v );
+			_st3D.updateFromVector3D(_ref_v);
 			
 			if (_sound_chan)
 				_sound_chan.soundTransform = _st3D.soundTransform;
 		}
 		
-		
-		private function onSoundComplete(ev : Event) : void
+		private function onSoundComplete(ev:Event):void
 		{
 			this.dispatchEvent(ev.clone());
 		}

@@ -11,6 +11,7 @@ package away3d.materials.utils
 		private static var _defaultTextureBitmapData:BitmapData;
 		private static var _defaultMaterial:TextureMaterial;
 		private static var _defaultTexture:BitmapTexture;
+		
 		//private static var _defaultMaterialRenderables:Vector.<IMaterialOwner> = new Vector.<IMaterialOwner>();
 		
 		public static function getDefaultMaterial(renderable:IMaterialOwner = null):TextureMaterial
@@ -42,14 +43,15 @@ package away3d.materials.utils
 			
 			//create chekerboard
 			var i:uint, j:uint;
-			for (i=0; i<8; i++) {
-				for (j=0; j<8; j++) {
+			for (i = 0; i < 8; i++) {
+				for (j = 0; j < 8; j++) {
 					if ((j & 1) ^ (i & 1))
 						_defaultTextureBitmapData.setPixel(i, j, 0XFFFFFF);
 				}
 			}
 			
 			_defaultTexture = new BitmapTexture(_defaultTextureBitmapData);
+			_defaultTexture.name = "defaultTexture";
 		}
 		
 		private static function createDefaultMaterial():void
@@ -57,6 +59,7 @@ package away3d.materials.utils
 			_defaultMaterial = new TextureMaterial(_defaultTexture);
 			_defaultMaterial.mipmap = false;
 			_defaultMaterial.smooth = false;
+			_defaultMaterial.name = "defaultMaterial";
 		}
 	}
 }

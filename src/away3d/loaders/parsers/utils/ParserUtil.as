@@ -1,22 +1,41 @@
 package away3d.loaders.parsers.utils
 {
 	import flash.utils.ByteArray;
-
+	
 	public class ParserUtil
 	{
-		public static function toByteArray(data : *) : ByteArray
+		
+		/**
+		 * Returns a object as ByteArray, if possible.
+		 * 
+		 * @param data The object to return as ByteArray
+		 * 
+		 * @return The ByteArray or null
+		 *
+		 */
+		public static function toByteArray(data:*):ByteArray
 		{
 			if (data is Class)
 				data = new data();
 			
 			if (data is ByteArray)
 				return data;
-			else return null;
+			else
+				return null;
 		}
 		
-		public static function toString(data : *, length : uint = 0) : String
+		/**
+		 * Returns a object as String, if possible.
+		 * 
+		 * @param data The object to return as String
+		 * @param length The length of the returned String
+		 * 
+		 * @return The String or null
+		 *
+		 */
+		public static function toString(data:*, length:uint = 0):String
 		{
-			var ba : ByteArray;
+			var ba:ByteArray;
 			
 			length ||= uint.MAX_VALUE;
 			

@@ -1,7 +1,11 @@
 package away3d.core.pick
 {
 	import flash.geom.*;
-
+	
+	import away3d.tools.utils.GeomUtil;
+	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubMesh;
+	
 	/**
 	 * An abstract base class for all picking collider classes. It should not be instantiated directly.
 	 */
@@ -9,37 +13,52 @@ package away3d.core.pick
 	{
 		protected var rayPosition:Vector3D;
 		protected var rayDirection:Vector3D;
-
-		protected function getCollisionNormal( indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint ):Vector3D {
+		
+		public function PickingColliderBase()
+		{
+		
+		}
+		
+		protected function getCollisionNormal(indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint):Vector3D
+		{
 			var normal:Vector3D = new Vector3D();
-			var i0:uint = indexData[ triangleIndex ] * 3;
-			var i1:uint = indexData[ triangleIndex + 1 ] * 3;
-			var i2:uint = indexData[ triangleIndex + 2 ] * 3;
-			var p0:Vector3D = new Vector3D( vertexData[ i0 ], vertexData[ i0 + 1 ], vertexData[ i0 + 2 ] );
-			var p1:Vector3D = new Vector3D( vertexData[ i1 ], vertexData[ i1 + 1 ], vertexData[ i1 + 2 ] );
-			var p2:Vector3D = new Vector3D( vertexData[ i2 ], vertexData[ i2 + 1 ], vertexData[ i2 + 2 ] );
-			var side0:Vector3D = p1.subtract( p0 );
-			var side1:Vector3D = p2.subtract( p0 );
-			normal = side0.crossProduct( side1 );
+			var i0:uint = indexData[ triangleIndex ]*3;
+			var i1:uint = indexData[ triangleIndex + 1 ]*3;
+			var i2:uint = indexData[ triangleIndex + 2 ]*3;
+			var p0:Vector3D = new Vector3D(vertexData[ i0 ], vertexData[ i0 + 1 ], vertexData[ i0 + 2 ]);
+			var p1:Vector3D = new Vector3D(vertexData[ i1 ], vertexData[ i1 + 1 ], vertexData[ i1 + 2 ]);
+			var p2:Vector3D = new Vector3D(vertexData[ i2 ], vertexData[ i2 + 1 ], vertexData[ i2 + 2 ]);
+			var side0:Vector3D = p1.subtract(p0);
+			var side1:Vector3D = p2.subtract(p0);
+			normal = side0.crossProduct(side1);
 			normal.normalize();
 			return normal;
 		}
-
-		protected function getCollisionUV( indexData:Vector.<uint>, uvData:Vector.<Number>, triangleIndex:uint, v:Number, w:Number, u:Number ):Point {
+		
+		protected function getCollisionUV(indexData:Vector.<uint>, uvData:Vector.<Number>, triangleIndex:uint, v:Number, w:Number, u:Number, uvOffset:uint, uvStride:uint):Point
+		{
 			var uv:Point = new Point();
-			var uvIndex:Number = indexData[ triangleIndex ] * 2;
-			var uv0:Vector3D = new Vector3D( uvData[ uvIndex ], uvData[ uvIndex + 1 ] );
-			triangleIndex++;
-			uvIndex = indexData[ triangleIndex ] * 2;
-			var uv1:Vector3D = new Vector3D( uvData[ uvIndex ], uvData[ uvIndex + 1 ] );
-			triangleIndex++;
-			uvIndex = indexData[ triangleIndex ] * 2;
-			var uv2:Vector3D = new Vector3D( uvData[ uvIndex ], uvData[ uvIndex + 1 ] );
-			uv.x = u * uv0.x + v * uv1.x + w * uv2.x;
-			uv.y = u * uv0.y + v * uv1.y + w * uv2.y;
+			var uIndex:uint = indexData[ triangleIndex ]*uvStride + uvOffset;
+			var uv0:Vector3D = new Vector3D(uvData[ uIndex ], uvData[ uIndex + 1 ]);
+			uIndex = indexData[ triangleIndex + 1 ]*uvStride + uvOffset;
+			var uv1:Vector3D = new Vector3D(uvData[ uIndex ], uvData[ uIndex + 1 ]);
+			uIndex = indexData[ triangleIndex + 2 ]*uvStride + uvOffset;
+			var uv2:Vector3D = new Vector3D(uvData[ uIndex ], uvData[ uIndex + 1 ]);
+			uv.x = u*uv0.x + v*uv1.x + w*uv2.x;
+			uv.y = u*uv0.y + v*uv1.y + w*uv2.y;
 			return uv;
 		}
-
+		
+		protected function getMeshSubgeometryIndex(subGeometry:SubGeometry):uint
+		{
+			return GeomUtil.getMeshSubgeometryIndex(subGeometry);
+		}
+		
+		protected function getMeshSubMeshIndex(subMesh:SubMesh):uint
+		{
+			return GeomUtil.getMeshSubMeshIndex(subMesh);
+		}
+		
 		/**
 		 * @inheritDoc
 		 */

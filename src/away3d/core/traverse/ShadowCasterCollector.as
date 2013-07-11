@@ -4,11 +4,14 @@ package away3d.core.traverse
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.entities.Entity;
+	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
-
+	import away3d.lights.LightProbe;
+	import away3d.lights.PointLight;
+	import away3d.materials.MaterialBase;
+	
 	use namespace arcane;
-
-
+	
 	/**
 	 * The EntityCollector class is a traverser for scene partitions that collects all scene graph entities that are
 	 * considered potientially visible.
@@ -23,37 +26,50 @@ package away3d.core.traverse
 		 */
 		public function ShadowCasterCollector()
 		{
+			super();
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function applySkyBox(renderable : IRenderable) : void
-		{
-		}
-
+		
 		/**
 		 * Adds an IRenderable object to the potentially visible objects.
 		 * @param renderable The IRenderable object to add.
 		 */
-		override public function applyRenderable(renderable : IRenderable) : void
+		override public function applyRenderable(renderable:IRenderable):void
 		{
 			// the test for material is temporary, you SHOULD be hammered with errors if you try to render anything without a material
-			if (renderable.castsShadows && renderable.material) {
-				_numOpaques++;
-				var item : RenderableListItem = _renderableListItemPool.getItem();
+			var material:MaterialBase = renderable.material;
+			var entity:Entity = renderable.sourceEntity;
+			if (renderable.castsShadows && material) {
+				var item:RenderableListItem = _renderableListItemPool.getItem();
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
-				item.zIndex = renderable.zIndex;
-				item.renderOrderId = renderable.material._uniqueId;
+				item.cascaded = false;
+				var dx:Number = _entryPoint.x - entity.x;
+				var dy:Number = _entryPoint.y - entity.y;
+				var dz:Number = _entryPoint.z - entity.z;
+				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z;
+				item.renderSceneTransform = renderable.getRenderSceneTransform(_camera);
+				item.renderOrderId = material._depthPassId;
 				_opaqueRenderableHead = item;
 			}
 		}
-
-		/**
-		 * @inheritDoc
-		 */
-		override public function applyUnknownLight(light : LightBase) : void
+		
+		override public function applyUnknownLight(light:LightBase):void
+		{
+		}
+		
+		override public function applyDirectionalLight(light:DirectionalLight):void
+		{
+		}
+		
+		override public function applyPointLight(light:PointLight):void
+		{
+		}
+		
+		override public function applyLightProbe(light:LightProbe):void
+		{
+		}
+		
+		override public function applySkyBox(renderable:IRenderable):void
 		{
 		}
 	}

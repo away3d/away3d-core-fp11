@@ -1,603 +1,405 @@
 package away3d.tools.commands
 {
 	import away3d.arcane;
+	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
+	import away3d.core.base.ISubGeometry;
 	import away3d.entities.Mesh;
-	import away3d.materials.MaterialBase;
-	import away3d.tools.helpers.MeshHelper;
-	import away3d.tools.utils.Bounds;
+	import away3d.tools.utils.GeomUtil;
 	
-	import flash.geom.Vector3D;
+	import flash.geom.Matrix3D;
+	
 	use namespace arcane;
 	
 	public class Mirror
 	{
-		public static const X_AXIS:String = "x";
-		public static const MAX_BOUND_X:String = "x+";
-		public static const MIN_BOUND_X:String = "x-";
+		public static const X_AXIS:int = 1; // 001
+		public static const Y_AXIS:int = 2; // 010
+		public static const Z_AXIS:int = 4; // 100
 		
-		public static const Y_AXIS:String = "y";
-		public static const MAX_BOUND_Y:String = "y+";
-		public static const MIN_BOUND_Y:String = "y-";
+		public static const MIN_BOUND:String = 'min';
+		public static const MAX_BOUND:String = 'max';
+		public static const CENTER:String = 'center';
 		
-		public static const Z_AXIS:String = "z";
-		public static const MAX_BOUND_Z:String = "z+";
-		public static const MIN_BOUND_Z:String = "z-";
+		private var _recenter:Boolean;
+		private var _duplicate:Boolean;
+		private var _axis:int;
+		private var _offset:String;
+		private var _additionalOffset:Number;
+		private var _scaleTransform:Matrix3D;
+		private var _fullTransform:Matrix3D;
+		private var _centerTransform:Matrix3D;
+		private var _flipWinding:Boolean;
 		
-		private static const LIMIT:uint = 196605;
-		
-		private static var _axes:Array = [	X_AXIS, MAX_BOUND_X, MIN_BOUND_X,
-														Y_AXIS, MAX_BOUND_Y, MIN_BOUND_Y,
-														Z_AXIS, MAX_BOUND_Z, MIN_BOUND_Z];
-		
-		 
-		/*
-		* Mirrors one or more Geometry objects found into an ObjectContainer.
-		* 
-		* @param	 obj			The ObjectContainer3D to be mirrored
-		* @param	 axis			The axis to mirror around. A string X_AXIS ("x"), MAX_BOUND_X ("x+"), MIN_BOUND_X ("x-"), Y_AXIS ("y"), MAX_BOUND_Y ("y+"), MIN_BOUND_Y ("y-"), Z_AXIS ("z"), MAX_BOUND_Z ("z+"), MIN_BOUND_Z ("z-"). 
-		* @param	 recenter	[optional]	Recenter the geometry. Applies only to meshes with geometries. Default is false.
-		* @param	 duplicate	[optional]	Duplicate the model geometry along a given axis or simply mirrors the geometry. Default is true.
-		*/
-		
-		public static function apply(obj:ObjectContainer3D, axis:String, recenter:Boolean = false, duplicate:Boolean = true):void
+		public function Mirror(recenter:Boolean = false, duplicate:Boolean = true):void
 		{
-			axis = axis.toLowerCase();
-			 
-			if(Mirror.validate(axis)){
-				
-				var child:ObjectContainer3D;
-				
-				if(obj is Mesh &&  obj.numChildren == 0 && Mesh(obj).geometry)
-					Mirror.build( Mesh(obj), axis, recenter, duplicate);
-					 
-				for(var i:uint = 0;i<obj.numChildren;++i){
-					child = ObjectContainer3D(obj).getChildAt(i);
-					Mirror.apply(child, axis, recenter, duplicate);
-				}
-				 
-			} else {
-				throw new Error("Invalid axis parameter: "+Mirror._axes.toString());
+			_recenter = recenter;
+			_duplicate = duplicate;
+		}
+		
+		public function set recenter(b:Boolean):void
+		{
+			_recenter = b;
+		}
+		
+		public function get recenter():Boolean
+		{
+			return _recenter;
+		}
+		
+		public function set duplicate(b:Boolean):void
+		{
+			_duplicate = b;
+		}
+		
+		public function get duplicate():Boolean
+		{
+			return _duplicate;
+		}
+		
+		/**
+		 * Clones a Mesh and mirrors the cloned mesh. returns the cloned (and mirrored) mesh.
+		 * @param mesh the mesh to clone and mirror.
+		 * @param axis the axis to mirror the mesh.
+		 * @param offset can be MIN_BOUND, MAX_BOUND or CENTER.
+		 * @param additionalOffset if MIN_BOUND or MAX_BOUND is selected as offset, this addional offset can be added.
+		 */
+		public function getMirroredClone(mesh:Mesh, axis:int, offset:String = CENTER, additionalOffset:Number = 0):Mesh
+		{
+			_axis = axis;
+			_offset = offset;
+			_additionalOffset = additionalOffset;
+			
+			//var originalDuplicateMode:Boolean = _duplicate;
+			_duplicate = false;
+			
+			var newMesh:Mesh = Mesh(mesh.clone());
+			initTransforms(newMesh.bounds);
+			applyToMesh(newMesh, true);
+			_duplicate = false;
+			
+			return newMesh;
+		}
+		
+		/**
+		 * Clones a ObjectContainer3D and all its children and mirrors the cloned Objects. returns the cloned (and mirrored) ObjectContainer3D.
+		 * @param mesh the ObjectContainer3D to clone and mirror.
+		 * @param axis the axis to mirror the ObjectContainer3D.
+		 * @param offset can be MIN_BOUND, MAX_BOUND or CENTER.
+		 * @param additionalOffset if MIN_BOUND or MAX_BOUND is selected as offset, this additional offset can be added.
+		 */
+		public function getMirroredCloneContainer(ctr:ObjectContainer3D, axis:int, offset:String = CENTER, additionalOffset:Number = 0):ObjectContainer3D
+		{
+			var meshes:Vector.<Mesh> = new Vector.<Mesh>();
+			_axis = axis;
+			_offset = offset;
+			_additionalOffset = additionalOffset;
+			
+			//var originalDuplicateMode:Boolean = _duplicate; //store the _duplicateMode, because for this function we want to set it to false, but want to restore it later
+			_duplicate = false;
+			
+			var newObjectContainer:ObjectContainer3D = ObjectContainer3D(ctr.clone());
+			
+			// Collect ctr (if it's a mesh) and all it's
+			// mesh children to a flat list.
+			if (newObjectContainer is Mesh)
+				meshes.push(Mesh(newObjectContainer));
+			
+			collectMeshChildren(newObjectContainer, meshes);
+			
+			var len:uint = meshes.length;
+			for (var i:uint = 0; i < len; i++) {
+				initTransforms(meshes[i].bounds);
+				applyToMesh(meshes[i], true);
+			}
+			_duplicate = false;
+			
+			return newObjectContainer;
+		}
+		
+		/**
+		 * Mirror a Mesh along a given Axis.
+		 * @param mesh the mesh to mirror.
+		 * @param axis the axis to mirror the mesh.
+		 * @param offset can be MIN_BOUND, MAX_BOUND or CENTER.
+		 * @param additionalOffset if MIN_BOUND or MAX_BOUND is selected as offset, this addional offset can be added.
+		 */
+		public function apply(mesh:Mesh, axis:int, offset:String = CENTER, additionalOffset:Number = 0):void
+		{
+			_axis = axis;
+			_offset = offset;
+			_additionalOffset = additionalOffset;
+			
+			initTransforms(mesh.bounds);
+			applyToMesh(mesh);
+		}
+		
+		/**
+		 * Mirror a ObjectContainer3d, and all its children along a given Axis.
+		 * @param ctr the ObjectContainer3d to mirror.
+		 * @param axis the axis to mirror the ObjectContainer3d.
+		 * @param offset can be MIN_BOUND, MAX_BOUND or CENTER.
+		 * @param additionalOffset if MIN_BOUND or MAX_BOUND is selected as offset, this addional offset can be added.
+		 */
+		public function applyToContainer(ctr:ObjectContainer3D, axis:int, offset:String = CENTER, additionalOffset:Number = 0):void
+		{
+			var len:uint;
+			_axis = axis;
+			_offset = offset;
+			_additionalOffset = additionalOffset;
+			
+			// Collect ctr (if it's a mesh) and all it's
+			// mesh children to a flat list.
+			var meshes:Vector.<Mesh> = new Vector.<Mesh>();
+			
+			if (ctr is Mesh)
+				meshes.push(Mesh(ctr));
+			
+			collectMeshChildren(ctr, meshes);
+			len = meshes.length;
+			
+			for (var i:uint = 0; i < len; i++) {
+				initTransforms(meshes[i].bounds);
+				applyToMesh(meshes[i]);
 			}
 		}
-		 
-		private static function validate( axis:String):Boolean
+		
+		private function applyToMesh(mesh:Mesh, keepOld:Boolean = false):void
 		{
-			for(var i:int =0;i<Mirror._axes.length;++i)
-				if(axis == Mirror._axes[i]) return true;
-				
-			return false;
+			var geom:Geometry = mesh.geometry;
+			var newGeom:Geometry = new Geometry();
+			var len:uint = geom.subGeometries.length;
+			
+			for (var i:uint = 0; i < len; i++)
+				applyToSubGeom(geom.subGeometries[i], newGeom, keepOld);
+			
+			mesh.geometry = newGeom;
 		}
 		
-		private static function getNextAvailableSubGeometry(index:uint, vectors:Array, materials:Vector.<MaterialBase>):int
-		{ 
-			var mat:MaterialBase = materials[index];
-			var i:uint = (index*5)+5;
-			var len:uint = vectors.length;
-			if(i > len) return -1;
-			
-			for (i; i<len; i+=5)
-				if(mat == materials[i/5] && Vector.<uint>(vectors[i+1]).length < LIMIT) return i;
-			
-			return -1;
-		}
-		
-		private static function buildVector(len:uint):Vector.<Number>
-		{ 
-			var v:Vector.<Number> = new Vector.<Number>();
+		private function applyToSubGeom(subGeom:ISubGeometry, geometry:Geometry, keepOld:Boolean):void
+		{
 			var i:uint;
-			while (i < len) v[i++] = 0.0;
-			return v;
-		}
-		 
-		private static function build(mesh:Mesh, axis:String, recenter:Boolean, duplicate:Boolean = true):void
-		{ 
-				if(duplicate && (mesh.rotationX != 0 || mesh.rotationY != 0 || mesh.rotationZ != 0) ) 
-					MeshHelper.applyRotations(mesh);
-				 
-				Bounds.getMeshBounds(mesh);
-				var minX:Number = Bounds.minX;
-				var minY:Number = Bounds.minY;
-				var minZ:Number = Bounds.minZ;
-				var maxX:Number = Bounds.maxX;
-				var maxY:Number = Bounds.maxY;
-				var maxZ:Number = Bounds.maxZ;
-				
-				var offset:Number;
-				var doubleOffset:Number;
-				var posi:Vector3D = mesh.position;
-				
-				switch(axis){
-					
-						case  X_AXIS:
-							offset = posi.x / mesh.scaleX;
-							doubleOffset = offset*2;
-							break;
-						case MIN_BOUND_X:
-						case MAX_BOUND_X:
-							offset = Math.abs(minX)+maxX;
-							offset /= mesh.scaleX;
-							break;
-						
-						case Y_AXIS:
-							offset = posi.y / mesh.scaleY;
-							doubleOffset = offset*2;
-							break;
-						case MIN_BOUND_Y:
-						case MAX_BOUND_Y:
-							offset =   Math.abs(maxY)+maxY;
-							offset /= mesh.scaleY;
-							break;
-						
-						case Z_AXIS:
-							offset = posi.z / mesh.scaleZ;
-							doubleOffset = offset*2;
-							break;
-						case MIN_BOUND_Z:
-						case MAX_BOUND_Z:
-							offset = Math.abs(minZ)+maxZ;
-							offset /= mesh.scaleZ;
-							
-				}
-			 
-				var geometry:Geometry = mesh.geometry;
-				var geometries:Vector.<SubGeometry> = geometry.subGeometries;
-				var numSubGeoms:uint = geometries.length;
-				
-				if(duplicate){
-					var materials:Vector.<MaterialBase> = new Vector.<MaterialBase>();
-					for (i = 0; i<mesh.subMeshes.length; ++i)
-						materials.push(mesh.subMeshes[i].material);
-						
-					var matCount:uint = materials.length;
-				}
-				
-				var sourceVerts:Vector.<Number>;
-				var sourceIndices:Vector.<uint>;
-				var sourceUVs:Vector.<Number>;
-				var sourceNormals:Vector.<Number>;
-				var sourceTangents:Vector.<Number>;
-				
-				var x:Number;
-				var y:Number;
-				var z:Number;
-				var u:Number;
-				var v:Number;
-				var nx:Number;
-				var ny:Number;
-				var nz:Number;
-				var tx:Number;
-				var ty:Number;
-				var tz:Number;
-				
-				var i:uint;
-				var j:uint;
-				var vectors:Array = [];
-				var sub_geom:SubGeometry;
-				 
-				 for (i = 0; i<numSubGeoms; ++i){					 
-					 
-					sub_geom = geometries[i];
-					sourceVerts = sub_geom.vertexData;
-					sourceIndices = sub_geom.indexData;
-					sourceUVs = sub_geom.UVData;
-
-					try{
-						sourceNormals = sub_geom.vertexNormalData;
-						if(sourceNormals){
-							sub_geom.autoDeriveVertexNormals = false;
-						} else{
-							sourceNormals = buildVector(sourceVerts.length);
-							sub_geom.autoDeriveVertexNormals = true;
-						}
-					} catch(e:Error) {
-						sub_geom.autoDeriveVertexNormals = true;
-						sourceNormals = buildVector(sourceVerts.length);
-					}
-					
-					try{
-						sourceTangents = sub_geom.vertexTangentData;
-						if(sourceTangents){
-							sub_geom.autoDeriveVertexTangents = false;
-						} else{
-							sourceTangents = buildVector(sourceVerts.length);
-							sub_geom.autoDeriveVertexTangents = true;
-						}
-					} catch(e:Error) {
-						sub_geom.autoDeriveVertexTangents = true;
-						sourceTangents = buildVector(sourceVerts.length);
-					}
-					 
-					sourceVerts.fixed = false;
-					sourceIndices.fixed = false;
-					sourceUVs.fixed = false;
-					sourceNormals.fixed = false;
-					sourceTangents.fixed = false;
-					 
-					vectors.push(sourceVerts, sourceIndices, sourceUVs, sourceNormals, sourceTangents);
-				} 
-				 
-				var destverts:Vector.<Number> = vectors[0];
-				var destindices:Vector.<uint> = vectors[1];
-				var destuvs:Vector.<Number> = vectors[2];
-				var destnormals:Vector.<Number> = vectors[3];
-				var desttangents:Vector.<Number> = vectors[4];
-				
-				var indexVector:uint;
-				var isFace:int = 0;
-				var val:Number;
-				var indLoop:uint;
-				var destIndV:uint;
-				var destIndUV:uint;
-				var xindex:uint;
-				var xindex1:uint;
-				var xindex2:uint;
-				var uindex:uint;
-				var uindex1:uint;
-				var ind:uint;
-				var nextID:int;
-				
-				for (i = 0; i<numSubGeoms; ++i){
-					 
-					indexVector = i*5;
-					sourceVerts = vectors[indexVector];
-					sourceIndices = vectors[indexVector+1];
-					sourceUVs = vectors[indexVector+2];
-					sourceNormals = vectors[indexVector+3];
-					sourceTangents = vectors[indexVector+4];
-					
-					/*if(duplicate || (i > 0 && materials[i] != materials[i-1])){
-						destverts = sourceVerts;
-						destindices = sourceIndices;
-						destuvs = sourceUVs;
-						destnormals = sourceNormals;
-						desttangents = sourceTangents;
-					}*/
-						
-					indLoop = sourceIndices.length;
-					for (j = 0; j<indLoop; ++j){
-						
-						xindex = sourceIndices[j]*3;
-						uindex = sourceIndices[j]<<1;
-						
-						if(duplicate){
-							
-							if(destverts.length == LIMIT){
-								isFace = 0;
-								
-								if(i != materials.length-1) nextID = getNextAvailableSubGeometry(i, vectors, materials);
-								
-								if(materials.length == 1 || nextID == -1){
-									destverts = new Vector.<Number>();
-									destindices = new Vector.<uint>();
-									destuvs = new Vector.<Number>();
-									destnormals = new Vector.<Number>();
-									desttangents = new Vector.<Number>();
-									vectors.push(destverts,destindices,destuvs,destnormals,desttangents);
-									sub_geom = new SubGeometry();
-									geometry.addSubGeometry(sub_geom);
-									materials.push(materials[i]);
-									matCount++;
-								} else {
-									destverts = vectors[nextID];
-									destindices = vectors[nextID+1];
-									destuvs = vectors[nextID+2];
-									destnormals = vectors[nextID+3];
-									desttangents = vectors[nextID+4];
-								}
-							}
-							
-							isFace++;
-							
-							 
-							destindices.push(destverts.length/3);
-							destuvs.push(sourceUVs[uindex], sourceUVs[uindex+1]);
-							destnormals.push(sourceNormals[xindex], sourceNormals[xindex+1], sourceNormals[xindex+2]);
-							desttangents.push(sourceTangents[xindex],sourceTangents[xindex+1],sourceTangents[xindex+2]);
-							
-							switch(axis){
-								 
-								case X_AXIS:
-									val = (offset>0)? -sourceVerts[xindex] - doubleOffset : -sourceVerts[xindex] + -doubleOffset;
-									if(recenter){
-										if(val > maxX) maxX = val;
-										if(val< minX) minX = val;
-									}
-									destverts.push( val, sourceVerts[xindex+1], sourceVerts[xindex+2]);
-									destnormals[destnormals.length-3] *=-1;
-									desttangents[desttangents.length-3] *=-1;
-									break;
-									
-								case MIN_BOUND_X:
-									val = -sourceVerts[xindex] - offset;
-									if(recenter && val< minX) minX = val;
-									destverts.push( val, sourceVerts[xindex+1], sourceVerts[xindex+2]);
-									destnormals[destnormals.length-3] *=-1;
-									desttangents[desttangents.length-3] *=-1;
-									break;
-									
-								case MAX_BOUND_X:
-									val = -sourceVerts[xindex] + offset;
-									if(recenter && val> maxX) maxX = val;
-									destverts.push(val, sourceVerts[xindex+1], sourceVerts[xindex+2]);
-									destnormals[destnormals.length-3] *=-1;
-									desttangents[desttangents.length-3] *=-1;
-									break;
-								
-								
-								
-								case Y_AXIS:
-									val = (offset>0)? -sourceVerts[xindex+1] - doubleOffset : -sourceVerts[xindex+1] + -doubleOffset;
-									if(recenter){
-										if(val > maxY) maxY = val;
-										if(val< minY) minY = val;
-									}
-									destverts.push( sourceVerts[xindex], val, sourceVerts[xindex+2]);
-									destnormals[destnormals.length-2] *=-1;
-									desttangents[desttangents.length-2] *=-1;
-									break;
-									
-								case MIN_BOUND_Y:
-									val = -sourceVerts[xindex+1] - offset;
-									if(recenter && val< minY) minY = val;
-									destverts.push( sourceVerts[xindex], val, sourceVerts[xindex+2]);
-									destnormals[destnormals.length-2] *=-1;
-									desttangents[desttangents.length-2] *=-1;
-									break;
-									
-								case MAX_BOUND_Y:
-									val = -sourceVerts[xindex+1] + offset;
-									if(recenter && val> maxY) maxY = val;
-									destverts.push( sourceVerts[xindex], val, sourceVerts[xindex+2]);
-									destnormals[destnormals.length-2] *=-1;
-									desttangents[desttangents.length-2] *=-1;
-									break;
-								
-								
-								
-								case Z_AXIS:
-									val = (offset>0)? -sourceVerts[xindex+2] - doubleOffset : -sourceVerts[xindex+2] + -doubleOffset;
-									if(recenter){
-										if(val > maxZ) maxZ = val;
-										if(val< minZ) minZ = val;
-									}
-									destverts.push( sourceVerts[xindex], sourceVerts[xindex+1], val);
-									destnormals[destnormals.length-1] *=-1;
-									desttangents[desttangents.length-1] *=-1;
-									break;
-									
-								case MIN_BOUND_Z:
-									val = -sourceVerts[xindex+2] - offset;
-									if(recenter && val< minZ) minZ = val;
-									destverts.push( sourceVerts[xindex], sourceVerts[xindex+1], val);
-									destnormals[destnormals.length-1] *=-1;
-									desttangents[desttangents.length-1] *=-1;
-									break;
-									
-								case MAX_BOUND_Z:
-									val = -sourceVerts[xindex+2] - offset;
-									if(recenter && val > maxZ) maxZ = val;
-									destverts.push( sourceVerts[xindex], sourceVerts[xindex+1], val);
-									destnormals[destnormals.length-1] *=-1;
-									desttangents[desttangents.length-1] *=-1;
-									 
-							}
-							
-							
-							if(isFace == 3){
-								isFace = 0;
-								
-								destIndV = destverts.length;
-								destIndUV = destuvs.length;
-								
-								u = destuvs[destIndUV-2];
-								v = destuvs[destIndUV-1];
-								
-								destuvs[destIndUV-2] = destuvs[destIndUV-4];
-								destuvs[destIndUV-1] = destuvs[destIndUV-3];
-								
-								destuvs[destIndUV-4] = u;
-								destuvs[destIndUV-3] = v;
-								 
-								x = destverts[destIndV-3];
-								y = destverts[destIndV-2];
-								z = destverts[destIndV-1];
-								
-								nx = destnormals[destIndV-3];
-								ny = destnormals[destIndV-2];
-								nz = destnormals[destIndV-1];
-								
-								tx = desttangents[destIndV-3];
-								ty = desttangents[destIndV-2];
-								tz = desttangents[destIndV-1]; 
-								
-								destverts[destIndV-3] = destverts[destIndV-6];
-								destverts[destIndV-2] = destverts[destIndV-5];
-								destverts[destIndV-1] = destverts[destIndV-4];
-								
-								destnormals[destIndV-3] = destnormals[destIndV-6];
-								destnormals[destIndV-2] = destnormals[destIndV-5];
-								destnormals[destIndV-1] = destnormals[destIndV-4];
-								
-								desttangents[destIndV-3] = desttangents[destIndV-6];
-								desttangents[destIndV-2] = desttangents[destIndV-5];
-								desttangents[destIndV-1] = desttangents[destIndV-4];
-								
-								destverts[destIndV-6] = x;
-								destverts[destIndV-5] = y;
-								destverts[destIndV-4] = z;
-								
-								destnormals[destIndV-6] = nx;
-								destnormals[destIndV-5] = ny;
-								destnormals[destIndV-4] = nz;
-								
-								desttangents[destIndV-6] = tx;
-								desttangents[destIndV-5] = ty;
-								desttangents[destIndV-4] = tz;
-								 
-							}  
-							 
-						} else {
-							 
-							  switch(axis){
-								
-								case X_AXIS:
-									sourceVerts[xindex] = -sourceVerts[xindex] - doubleOffset;
-									sourceNormals[xindex] *=-1;
-									sourceTangents[xindex] *=-1;
-									break;
-								case MIN_BOUND_X:
-									sourceVerts[xindex] = -sourceVerts[xindex] - offset;
-									sourceNormals[xindex] *=-1;
-									sourceTangents[xindex] *=-1;
-									break;
-								case MAX_BOUND_X:
-									sourceVerts[xindex] = -sourceVerts[xindex] + offset;
-									sourceNormals[xindex] *=-1;
-									sourceTangents[xindex] *=-1;
-									break;
-								
-								case Y_AXIS:
-									sourceVerts[xindex+1] = -sourceVerts[xindex+1] - doubleOffset;
-									sourceNormals[xindex+1] *=-1;
-									sourceTangents[xindex+1] *=-1;
-									break;
-								case MIN_BOUND_Y:
-									sourceVerts[xindex+1] = -sourceVerts[xindex+1] - offset;
-									sourceNormals[xindex+1] *=-1;
-									sourceTangents[xindex+1] *=-1;
-									break;
-								
-								case MAX_BOUND_Y:
-									sourceVerts[xindex+1] = -sourceVerts[xindex+1] + offset;
-									sourceNormals[xindex+1] *=-1;
-									sourceTangents[xindex+1] *=-1;
-									break;
-								 
-								case Z_AXIS:
-									sourceVerts[xindex+2] = -sourceVerts[xindex+2] - doubleOffset;
-									sourceNormals[xindex+2] *=-1;
-									sourceTangents[xindex+2] *=-1;
-									break;
-								
-								case MIN_BOUND_Z:
-									sourceVerts[xindex+2] = -sourceVerts[xindex+2] - offset;
-									sourceNormals[xindex+2] *=-1;
-									sourceTangents[xindex+2] *=-1;
-									break;
-								
-								case MAX_BOUND_Z:
-									sourceVerts[xindex+2] = -sourceVerts[xindex+2] + offset;
-									sourceNormals[xindex+2] *=-1;
-									sourceTangents[xindex+2] *=-1;
-							} 
-							
-							
-							if(isFace == 3){
-								isFace = 0;
-								 
-								xindex1 = sourceIndices[j-1]*3;
-								xindex2 = sourceIndices[j-2]*3;
-								 
-								uindex = sourceIndices[j-1]<<1;
-								uindex1 = sourceIndices[j-2]<<1;
-								 
-								x = sourceVerts[xindex1];
-								y = sourceVerts[xindex1+1];
-								z = sourceVerts[xindex1+2];
-								
-								nx = sourceNormals[xindex1];
-								ny = sourceNormals[xindex1+1];
-								nz = sourceNormals[xindex1+2];
-								 
-								tx = sourceTangents[xindex1];
-								ty = sourceTangents[xindex1+1];
-								tz = sourceTangents[xindex1+2];
-								
-								sourceVerts[xindex1] = sourceVerts[xindex2];
-								sourceVerts[xindex1+1] = sourceVerts[xindex2+1];
-								sourceVerts[xindex1+2] = sourceVerts[xindex2+2];
-								
-								sourceNormals[xindex1] = sourceNormals[xindex2];
-								sourceNormals[xindex1+1] = sourceNormals[xindex2+1];
-								sourceNormals[xindex1+2] = sourceNormals[xindex2+2];
-								
-								sourceTangents[xindex1] = sourceTangents[xindex2];
-								sourceTangents[xindex1+1] = sourceTangents[xindex2+1];
-								sourceTangents[xindex1+2] = sourceTangents[xindex2+2];
-								
-								sourceVerts[xindex2] = x;
-								sourceVerts[xindex2+1] = y;
-								sourceVerts[xindex2+2] = z;
-								
-								sourceNormals[xindex2] = nx;
-								sourceNormals[xindex2+1] = ny;
-								sourceNormals[xindex2+2] = nz;
-								
-								sourceTangents[xindex2] = tx;
-								sourceTangents[xindex2+1] = ty;
-								sourceTangents[xindex2+2] = tz;
-								
-								u = sourceUVs[uindex];
-								v = sourceUVs[uindex+1];
-								
-								sourceUVs[uindex] = sourceUVs[uindex1];
-								sourceUVs[uindex+1] = sourceUVs[uindex1+1];
-								
-								sourceUVs[uindex1] = u;
-								sourceUVs[uindex1+1] = v;
-							} 
-							 
-						} 
-						
-					}
-				}
+			var len:uint;
+			var indices:Vector.<uint>;
+			var vertices:Vector.<Number>;
+			var normals:Vector.<Number>;
+			var uvs:Vector.<Number>;
+			var newSubGeoms:Vector.<ISubGeometry>;
 			
-			geometries = geometry.subGeometries;
-			numSubGeoms = geometries.length;
+			var vIdx:uint, nIdx:uint, uIdx:uint;
+			var vd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
+			var vStride:uint, nStride:uint, uStride:uint;
+			var vOffs:uint, nOffs:uint, uOffs:uint;
 			
-			for (i = 0; i<numSubGeoms; ++i){
-				indexVector = i*5;
-				sub_geom = SubGeometry(geometry.subGeometries[i]);
-				sub_geom.updateVertexData(vectors[indexVector]);
-				sub_geom.updateUVData(vectors[indexVector+2]);
+			vertices = new Vector.<Number>();
+			normals = new Vector.<Number>();
+			uvs = new Vector.<Number>();
+			
+			if (keepOld) {
+				indices = subGeom.indexData.concat();
 				
-				if(duplicate){
-					sub_geom.updateIndexData(vectors[indexVector+1]);
+				vd = subGeom.vertexData.concat();
+				nd = subGeom.vertexNormalData.concat();
+				ud = subGeom.UVData.concat();
+				
+			} else {
+				indices = subGeom.indexData;
+				vd = subGeom.vertexData;
+				nd = subGeom.vertexNormalData;
+				ud = subGeom.UVData;
+			}
+			
+			indices.fixed = false;
+			vOffs = subGeom.vertexOffset;
+			nOffs = subGeom.vertexNormalOffset;
+			uOffs = subGeom.UVOffset;
+			vStride = subGeom.vertexStride;
+			nStride = subGeom.vertexNormalStride;
+			uStride = subGeom.UVStride;
+			
+			vIdx = nIdx = uIdx = 0;
+			len = subGeom.numVertices;
+			
+			for (i = 0; i < len; i++) {
+				vertices[vIdx++] = vd[vOffs + i*vStride + 0];
+				vertices[vIdx++] = vd[vOffs + i*vStride + 1];
+				vertices[vIdx++] = vd[vOffs + i*vStride + 2];
+				
+				normals[nIdx++] = nd[nOffs + i*nStride + 0];
+				normals[nIdx++] = nd[nOffs + i*nStride + 1];
+				normals[nIdx++] = nd[nOffs + i*nStride + 2];
+				
+				uvs[uIdx++] = ud[uOffs + i*uStride + 0];
+				uvs[uIdx++] = ud[uOffs + i*uStride + 1];
+			}
+			
+			var indexOffset:uint = 0;
+			
+			if (_duplicate) {
+				//var indexOffset : uint;
+				var flippedVertices:Vector.<Number> = new Vector.<Number>();
+				var flippedNormals:Vector.<Number> = new Vector.<Number>();
+				
+				_fullTransform.transformVectors(vertices, flippedVertices);
+				_scaleTransform.transformVectors(normals, flippedNormals);
+				
+				// Copy vertex attributes
+				len = subGeom.numVertices;
+				for (i = 0; i < len; i++) {
+					vertices[len*3 + i*3 + 0] = flippedVertices[i*3 + 0];
+					vertices[len*3 + i*3 + 1] = flippedVertices[i*3 + 1];
+					vertices[len*3 + i*3 + 2] = flippedVertices[i*3 + 2];
+					
+					normals[len*3 + i*3 + 0] = flippedNormals[i*3 + 0];
+					normals[len*3 + i*3 + 1] = flippedNormals[i*3 + 1];
+					normals[len*3 + i*3 + 2] = flippedNormals[i*3 + 2];
+					
+					uvs[len*2 + i*2 + 0] = uvs[i*2 + 0];
+					uvs[len*2 + i*2 + 1] = uvs[i*2 + 1];
+				}
+				// Copy indices
+				len = indices.length;
+				indexOffset = subGeom.numVertices;
+				
+				if (_flipWinding) {
+					for (i = 0; i < len; i += 3) {
+						indices[len + i + 0] = indices[i + 2] + indexOffset;
+						indices[len + i + 1] = indices[i + 1] + indexOffset;
+						indices[len + i + 2] = indices[i + 0] + indexOffset;
+					}
 					
 				} else {
-					sourceIndices = vectors[indexVector+1];
-					indLoop = sourceIndices.length;
-					for (j = 0; j<indLoop; j+=3){
-						ind = sourceIndices[j];
-						sourceIndices[j] = sourceIndices[j+1];
-						sourceIndices[j+1] = ind;
+					for (i = 0; i < len; i += 3) {
+						indices[len + i + 0] = indices[i + 0] + indexOffset;
+						indices[len + i + 1] = indices[i + 1] + indexOffset;
+						indices[len + i + 2] = indices[i + 2] + indexOffset;
 					}
-					sub_geom.updateIndexData(sourceIndices);
 				}
 				
-				sub_geom.updateVertexNormalData(vectors[indexVector+3]);
-				sub_geom.updateVertexTangentData(vectors[indexVector+4]);
-			}
-			
-			vectors = null;
-			 
-			if(duplicate){
-				var matind:uint = 0;
-				for (i = matCount; i<mesh.subMeshes.length; ++i){
-					if(MaterialBase(materials[matind]) != null)
-						mesh.subMeshes[i].material = materials[matind];
-						
-					matind++;
+			} else {
+				
+				len = indices.length;
+				var oldindicies:Vector.<uint> = indices.concat();
+				
+				if (_flipWinding) {
+					for (i = 0; i < len; i += 3) {
+						indices[i + 0] = oldindicies[i + 2];
+						indices[i + 1] = oldindicies[i + 1];
+						indices[i + 2] = oldindicies[i + 0];
+					}
 				}
+				
+				_fullTransform.transformVectors(vertices, vertices);
+				_scaleTransform.transformVectors(normals, normals);
 			}
-
-			if(recenter)
-				MeshHelper.applyPosition(mesh, (minX+maxX)*.5, (minY+maxY)*.5, (minZ+maxZ)*.5);
 			
+			if (_recenter)
+				_centerTransform.transformVectors(vertices, vertices);
+			
+			newSubGeoms = GeomUtil.fromVectors(vertices, indices, uvs, normals, null, null, null);
+			len = newSubGeoms.length;
+			
+			for (i = 0; i < len; i++)
+				geometry.addSubGeometry(newSubGeoms[i]);
 		}
 		
+		private function initTransforms(bounds:BoundingVolumeBase):void
+		{
+			var ox:Number, oy:Number, oz:Number;
+			var sx:Number, sy:Number, sz:Number;
+			//var addx : Number, addy : Number, addz : Number;
+			
+			if (!_scaleTransform) {
+				_scaleTransform = new Matrix3D();
+				_fullTransform = new Matrix3D();
+			}
+			
+			// Scale factors
+			_fullTransform.identity();
+			_scaleTransform.identity();
+			sx = (_axis & X_AXIS)? -1 : 1;
+			sy = (_axis & Y_AXIS)? -1 : 1;
+			sz = (_axis & Z_AXIS)? -1 : 1;
+			
+			_fullTransform.appendScale(sx, sy, sz);
+			_scaleTransform.appendScale(sx, sy, sz);
+			switch (_offset) {
+				
+				case MIN_BOUND:
+					ox = (_axis & X_AXIS)? 2*bounds.min.x : 0;
+					oy = (_axis & Y_AXIS)? 2*bounds.min.y : 0;
+					oz = (_axis & Z_AXIS)? 2*bounds.min.z : 0;
+					break;
+				
+				case MAX_BOUND:
+					ox = (_axis & X_AXIS)? 2*bounds.max.x : 0;
+					oy = (_axis & Y_AXIS)? 2*bounds.max.y : 0;
+					oz = (_axis & Z_AXIS)? 2*bounds.max.z : 0;
+					break;
+				
+				default:
+					ox = oy = oz = 0;
+			}
+			
+			if (_additionalOffset > 0) {
+				
+				if (ox > 0)
+					ox += (_axis & X_AXIS)? _additionalOffset : 0;
+				
+				if (ox < 0)
+					ox -= (_axis & X_AXIS)? _additionalOffset : 0;
+				
+				if (oy > 0)
+					oy += (_axis & Y_AXIS)? _additionalOffset : 0;
+				
+				if (oy < 0)
+					oy -= (_axis & Y_AXIS)? _additionalOffset : 0;
+				
+				if (oz > 0)
+					oz += (_axis & Z_AXIS)? _additionalOffset : 0;
+				
+				if (oz < 0)
+					oz -= (_axis & Z_AXIS)? _additionalOffset : 0;
+				
+			}
+			// Full transform contains both offset and scale, and is the one
+			// to use for vertices. Normals should not be affected the same
+			// way (i.e. not be offset) which is why these are separate.
+			_fullTransform.appendTranslation(ox, oy, oz);
+			
+			if (_recenter) {
+				if (!_centerTransform)
+					_centerTransform = new Matrix3D();
+				
+				var recenterX:Number = 0;
+				var recenterY:Number = 0;
+				var recenterZ:Number = 0;
+				
+				if (ox == 0)
+					recenterX = ((bounds.min.x + bounds.max.x)/2)* -1;
+				if (oy == 0)
+					recenterY = ((bounds.min.y + bounds.max.y)/2)* -1;
+				if (oz == 0)
+					recenterZ = ((bounds.min.z + bounds.max.z)/2)* -1;
+				
+				_centerTransform.identity();
+				_centerTransform.appendTranslation(-ox*.5 + recenterX, -oy*.5 + recenterY, -oz*.5 + recenterZ);
+				
+			}
+			
+			_flipWinding = !((sx*sy*sz) > 0);
+		}
+		
+		private function collectMeshChildren(ctr:ObjectContainer3D, meshes:Vector.<Mesh>):void
+		{
+			for (var i:uint = 0; i < ctr.numChildren; i++) {
+				var child:ObjectContainer3D = ctr.getChildAt(i);
+				if (child is Mesh)
+					meshes.push(Mesh(child));
+				
+				collectMeshChildren(child, meshes);
+			}
+		}
 	}
 }

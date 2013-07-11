@@ -4,15 +4,15 @@ package away3d.controllers
 	import away3d.containers.*;
 	import away3d.entities.*;
 	import away3d.core.math.*;
-
+	
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
 	
 	/**
 	 * Extended camera used to hover round a specified target object.
-	 * 
-	 * @see	away3d.containers.View3D
+	 *
+	 * @see    away3d.containers.View3D
 	 */
 	public class HoverController extends LookAtController
 	{
@@ -32,11 +32,11 @@ package away3d.controllers
 		
 		/**
 		 * Fractional step taken each time the <code>hover()</code> method is called. Defaults to 8.
-		 * 
+		 *
 		 * Affects the speed at which the <code>tiltAngle</code> and <code>panAngle</code> resolve to their targets.
-		 * 
-		 * @see	#tiltAngle
-		 * @see	#panAngle
+		 *
+		 * @see    #tiltAngle
+		 * @see    #panAngle
 		 */
 		public function get steps():uint
 		{
@@ -45,6 +45,8 @@ package away3d.controllers
 		
 		public function set steps(val:uint):void
 		{
+			val = (val < 1)? 1 : val;
+			
 			if (_steps == val)
 				return;
 			
@@ -113,8 +115,8 @@ package away3d.controllers
 		
 		/**
 		 * Minimum bounds for the <code>panAngle</code>. Defaults to -Infinity.
-		 * 
-		 * @see	#panAngle
+		 *
+		 * @see    #panAngle
 		 */
 		public function get minPanAngle():Number
 		{
@@ -133,8 +135,8 @@ package away3d.controllers
 		
 		/**
 		 * Maximum bounds for the <code>panAngle</code>. Defaults to Infinity.
-		 * 
-		 * @see	#panAngle
+		 *
+		 * @see    #panAngle
 		 */
 		public function get maxPanAngle():Number
 		{
@@ -153,8 +155,8 @@ package away3d.controllers
 		
 		/**
 		 * Minimum bounds for the <code>tiltAngle</code>. Defaults to -90.
-		 * 
-		 * @see	#tiltAngle
+		 *
+		 * @see    #tiltAngle
 		 */
 		public function get minTiltAngle():Number
 		{
@@ -173,8 +175,8 @@ package away3d.controllers
 		
 		/**
 		 * Maximum bounds for the <code>tiltAngle</code>. Defaults to 90.
-		 * 
-		 * @see	#tiltAngle
+		 *
+		 * @see    #tiltAngle
 		 */
 		public function get maxTiltAngle():Number
 		{
@@ -193,8 +195,8 @@ package away3d.controllers
 		
 		/**
 		 * Fractional difference in distance between the horizontal camera orientation and vertical camera orientation. Defaults to 2.
-		 * 
-		 * @see	#distance
+		 *
+		 * @see    #distance
 		 */
 		public function get yFactor():Number
 		{
@@ -254,34 +256,44 @@ package away3d.controllers
 		
 		/**
 		 * Updates the current tilt angle and pan angle values.
-		 * 
+		 *
 		 * Values are calculated using the defined <code>tiltAngle</code>, <code>panAngle</code> and <code>steps</code> variables.
-		 * 
-		 * @see	#tiltAngle
-		 * @see	#panAngle
-		 * @see	#steps
+		 *
+		 * @param interpolate   If the update to a target pan- or tiltAngle is interpolated. Default is true.
+		 *
+		 * @see    #tiltAngle
+		 * @see    #panAngle
+		 * @see    #steps
 		 */
-		public override function update():void
+		public override function update(interpolate:Boolean = true):void
 		{
 			if (_tiltAngle != _currentTiltAngle || _panAngle != _currentPanAngle) {
 				
 				notifyUpdate();
 				
 				if (_wrapPanAngle) {
-					if (_panAngle < 0)
-						_panAngle = (_panAngle % 360) + 360;
-					else
-						_panAngle = _panAngle % 360;
+					if (_panAngle < 0) {
+						_currentPanAngle += _panAngle%360 + 360 - _panAngle;
+						_panAngle = _panAngle%360 + 360;
+					} else {
+						_currentPanAngle += _panAngle%360 - _panAngle;
+						_panAngle = _panAngle%360;
+					}
 					
-					if (_panAngle - _currentPanAngle < -180)
+					while (_panAngle - _currentPanAngle < -180)
 						_currentPanAngle -= 360;
-					else if (_panAngle - _currentPanAngle > 180)
+					
+					while (_panAngle - _currentPanAngle > 180)
 						_currentPanAngle += 360;
 				}
 				
-				_currentTiltAngle += (_tiltAngle - _currentTiltAngle)/(steps + 1);
-				_currentPanAngle += (_panAngle - _currentPanAngle)/(steps + 1);
-				
+				if (interpolate) {
+					_currentTiltAngle += (_tiltAngle - _currentTiltAngle)/(steps + 1);
+					_currentPanAngle += (_panAngle - _currentPanAngle)/(steps + 1);
+				} else {
+					_currentPanAngle = _panAngle;
+					_currentTiltAngle = _tiltAngle;
+				}
 				
 				//snap coords if angle differences are close
 				if ((Math.abs(tiltAngle - _currentTiltAngle) < 0.01) && (Math.abs(_panAngle - _currentPanAngle) < 0.01)) {
@@ -290,7 +302,7 @@ package away3d.controllers
 				}
 			}
 			
-			var pos:Vector3D = (lookAtObject)? lookAtObject.position : (lookAtPosition)? lookAtPosition: _origin;
+			var pos:Vector3D = (lookAtObject)? lookAtObject.position : (lookAtPosition)? lookAtPosition : _origin;
 			targetObject.x = pos.x + distance*Math.sin(_currentPanAngle*MathConsts.DEGREES_TO_RADIANS)*Math.cos(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS);
 			targetObject.z = pos.z + distance*Math.cos(_currentPanAngle*MathConsts.DEGREES_TO_RADIANS)*Math.cos(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS);
 			targetObject.y = pos.y + distance*Math.sin(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS)*yFactor;

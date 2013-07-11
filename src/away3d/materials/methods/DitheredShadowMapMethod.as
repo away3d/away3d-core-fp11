@@ -3,90 +3,139 @@ package away3d.materials.methods
 	import away3d.arcane;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.lights.DirectionalLight;
-	import away3d.materials.methods.MethodVO;
-	import away3d.materials.utils.ShaderRegisterCache;
-	import away3d.materials.utils.ShaderRegisterElement;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.textures.BitmapTexture;
-
+	
 	import flash.display.BitmapData;
-
+	
 	use namespace arcane;
-
-	public class DitheredShadowMapMethod extends ShadowMapMethodBase
+	
+	/**
+	 * DitheredShadowMapMethod provides a soft shadowing technique by randomly distributing sample points differently for each fragment.
+	 */
+	public class DitheredShadowMapMethod extends SimpleShadowMapMethodBase
 	{
-		private static var _grainTexture : BitmapTexture;
-		private static var _grainUsages : int;
-		private static var _grainBitmapData : BitmapData;
-		private var _highRes : Boolean;
-		private var _depthMapSize : int;
-		private var _range : Number = 1;
-
+		private static var _grainTexture:BitmapTexture;
+		private static var _grainUsages:int;
+		private static var _grainBitmapData:BitmapData;
+		private var _depthMapSize:int;
+		private var _range:Number = 1;
+		private var _numSamples:int;
+		
 		/**
 		 * Creates a new DitheredShadowMapMethod object.
+		 * @param castingLight The light casting the shadows
+		 * @param numSamples The amount of samples to take for dithering. Minimum 1, maximum 24.
 		 */
-		public function DitheredShadowMapMethod(castingLight : DirectionalLight, highRes : Boolean = false)
+		public function DitheredShadowMapMethod(castingLight:DirectionalLight, numSamples:int = 4)
 		{
-			// todo: implement for point lights
 			super(castingLight);
-
-			// area to sample in texture space
-			_depthMapSize = castingLight.shadowMapper.depthMapSize;
-
-			_highRes = highRes;
-
+			
+			_depthMapSize = _castingLight.shadowMapper.depthMapSize;
+			
+			this.numSamples = numSamples;
+			
 			++_grainUsages;
-
-			if (!_grainTexture) {
+			
+			if (!_grainTexture)
 				initGrainTexture();
-			}
 		}
 
-		override arcane function initConstants(vo : MethodVO) : void
+		/**
+		 * The amount of samples to take for dithering. Minimum 1, maximum 24. The actual maximum may depend on the
+		 * complexity of the shader.
+		 */
+		public function get numSamples():int
+		{
+			return _numSamples;
+		}
+		
+		public function set numSamples(value:int):void
+		{
+			_numSamples = value;
+			if (_numSamples < 1)
+				_numSamples = 1;
+			else if (_numSamples > 24)
+				_numSamples = 24;
+			invalidateShaderProgram();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function initVO(vo:MethodVO):void
+		{
+			super.initVO(vo);
+			vo.needsProjection = true;
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function initConstants(vo:MethodVO):void
 		{
 			super.initConstants(vo);
-
-			var fragmentData : Vector.<Number> = vo.fragmentData;
-			var index : int = vo.fragmentConstantsIndex;
-			fragmentData[index + 8] = _highRes? 1/8 : 1/4;
-			fragmentData[index + 9] = _range/_depthMapSize;
-			fragmentData[index + 10] = .5;
+			
+			var fragmentData:Vector.<Number> = vo.fragmentData;
+			var index:int = vo.fragmentConstantsIndex;
+			fragmentData[index + 8] = 1/_numSamples;
 		}
 
-		public function get range() : Number
+		/**
+		 * The range in the shadow map in which to distribute the samples.
+		 */
+		public function get range():Number
 		{
-			return _range;
+			return _range*2;
 		}
-
-		public function set range(value : Number) : void
+		
+		public function set range(value:Number):void
 		{
-			_range = value;
+			_range = value/2;
 		}
 
-		private function initGrainTexture() : void
+		/**
+		 * Creates a texture containing the dithering noise texture.
+		 */
+		private function initGrainTexture():void
 		{
 			_grainBitmapData = new BitmapData(64, 64, false);
-			var vec : Vector.<uint> = new Vector.<uint>();
-			var len : uint = 4096;
-			var step : Number = 1/(_depthMapSize*_range);
-			var inv : Number = 1-step;
-			var r : Number,  g : Number;
-
-			for (var i : uint = 0; i < len; ++i) {
-				r = 2*(Math.random() - .5)*inv;
-				g = 2*(Math.random() - .5)*inv;
-				if (r < 0) r -= step;
-				else r += step;
-				if (g < 0) g -= step;
-				else g += step;
-
-				vec[i] = (((r*.5 + .5)*0xff) << 16) | (((g*.5 + .5)*0xff) << 8);
+			var vec:Vector.<uint> = new Vector.<uint>();
+			var len:uint = 4096;
+			var step:Number = 1/(_depthMapSize*_range);
+			var r:Number, g:Number;
+			
+			for (var i:uint = 0; i < len; ++i) {
+				r = 2*(Math.random() - .5);
+				g = 2*(Math.random() - .5);
+				if (r < 0)
+					r -= step;
+				else
+					r += step;
+				if (g < 0)
+					g -= step;
+				else
+					g += step;
+				if (r > 1)
+					r = 1;
+				else if (r < -1)
+					r = -1;
+				if (g > 1)
+					g = 1;
+				else if (g < -1)
+					g = -1;
+				vec[i] = (int((r*.5 + .5)*0xff) << 16) | (int((g*.5 + .5)*0xff) << 8);
 			}
-
+			
 			_grainBitmapData.setVector(_grainBitmapData.rect, vec);
 			_grainTexture = new BitmapTexture(_grainBitmapData);
 		}
 
-		override public function dispose() : void
+		/**
+		 * @inheritDoc
+		 */
+		override public function dispose():void
 		{
 			if (--_grainUsages == 0) {
 				_grainTexture.dispose();
@@ -95,121 +144,167 @@ package away3d.materials.methods
 			}
 		}
 
-		arcane override function activate(vo : MethodVO, stage3DProxy : Stage3DProxy) : void
+		/**
+		 * @inheritDoc
+		 */
+		arcane override function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
-			super.activate(vo,  stage3DProxy);
-			vo.fragmentData[vo.fragmentConstantsIndex+9] = _range/_depthMapSize;
-            stage3DProxy.setTextureAt(vo.texturesIndex+1, _grainTexture.getTextureForStage3D(stage3DProxy));
+			super.activate(vo, stage3DProxy);
+			var data:Vector.<Number> = vo.fragmentData;
+			var index:uint = vo.fragmentConstantsIndex;
+			data[index + 9] = (stage3DProxy.width - 1)/63;
+			data[index + 10] = (stage3DProxy.height - 1)/63;
+			data[index + 11] = 2*_range/_depthMapSize;
+			stage3DProxy._context3D.setTextureAt(vo.texturesIndex + 1, _grainTexture.getTextureForStage3D(stage3DProxy));
 		}
 
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getPlanarFragmentCode(vo : MethodVO, regCache : ShaderRegisterCache, targetReg : ShaderRegisterElement) : String
+		override protected function getPlanarFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, targetReg:ShaderRegisterElement):String
 		{
-			var depthMapRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
-			var grainRegister : ShaderRegisterElement = regCache.getFreeTextureReg();
-			var decReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			var dataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			var customDataReg : ShaderRegisterElement = regCache.getFreeFragmentConstant();
-			var depthCol : ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
-			var uvReg : ShaderRegisterElement;
-			var code : String = "";
+			var depthMapRegister:ShaderRegisterElement = regCache.getFreeTextureReg();
+			var decReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var dataReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			var customDataReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
 
 			vo.fragmentConstantsIndex = decReg.index*4;
-
-			regCache.addFragmentTempUsages(depthCol, 1);
-
-			uvReg = regCache.getFreeFragmentVectorTemp();
-
-			code += // keep grain in uvReg.xy
-					"div " + uvReg + ", " + _depthMapCoordReg + ", " + customDataReg + ".y\n" +
-					"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
-					"sub " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".zz\n" + 	// uv-.5
-					"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +      // 2*(uv-.5)
-					"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".y\n" +
-					"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
-
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"slt " + targetReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-
-					"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-
-					"mov " + uvReg+".xy, " + uvReg+".yx\n" +
-					"neg " + uvReg+".x, " + uvReg+".x\n" +
-
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-					"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-
-					"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-					"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-					"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-					"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-					"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-					"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n";
-
-			if (_highRes) {
-					// reseed
-				code +=	"div " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + customDataReg + ".y\n" +
-						"tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n" +
-						"sub " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".zz\n" +
-						"add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".xy\n" +
-						"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".y\n" +
-						"add " + uvReg+".z, " + _depthMapCoordReg+".z, " + dataReg+".x\n" +     // offset by epsilon
-
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-						"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-
-						"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-						"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-
-						"mov " + uvReg+".xy, " + uvReg+".yx\n" +
-						"neg " + uvReg+".x, " + uvReg+".x\n" +
-
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-						"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n" +
-						"sub " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-
-						"neg " + uvReg+".xy, " + uvReg+".xy\n" +
-						"add " + uvReg+".xy, " + uvReg+".xy, " + _depthMapCoordReg+".xy\n" +
-						"tex " + depthCol + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
-						"dp4 " + depthCol+".z, " + depthCol + ", " + decReg + "\n" +
-						"slt " + uvReg+".w, " + uvReg+".z, " + depthCol+".z\n" +    // 0 if in shadow
-						"add " + targetReg+".w, " + targetReg+".w, " + uvReg+".w\n";
-			}
-
-			regCache.removeFragmentTempUsage(depthCol);
-
-			code += "mul " + targetReg+".w, " + targetReg+".w, " + customDataReg+".x\n";  // average
-
 			vo.texturesIndex = depthMapRegister.index;
 
+			return getSampleCode(regCache, customDataReg, depthMapRegister, decReg, targetReg);
+		}
+
+		/**
+		 * Get the actual shader code for shadow mapping
+		 * @param regCache The register cache managing the registers.
+		 * @param depthMapRegister The texture register containing the depth map.
+		 * @param decReg The register containing the depth map decoding data.
+		 * @param targetReg The target register to add the shadow coverage.
+		 */
+		private function getSampleCode(regCache:ShaderRegisterCache, customDataReg:ShaderRegisterElement, depthMapRegister:ShaderRegisterElement, decReg:ShaderRegisterElement, targetReg:ShaderRegisterElement):String
+		{
+			var code:String = "";
+			var grainRegister:ShaderRegisterElement = regCache.getFreeTextureReg();
+			var uvReg:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			var numSamples:int = _numSamples;
+			regCache.addFragmentTempUsages(uvReg, 1);
+			
+			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			
+			var projectionReg:ShaderRegisterElement = _sharedRegisters.projectionFragment;
+			
+			code += "div " + uvReg + ", " + projectionReg + ", " + projectionReg + ".w\n" +
+				"mul " + uvReg + ".xy, " + uvReg + ".xy, " + customDataReg + ".yz\n";
+			
+			while (numSamples > 0) {
+				if (numSamples == _numSamples)
+					code += "tex " + uvReg + ", " + uvReg + ", " + grainRegister + " <2d,nearest,repeat,mipnone>\n";
+				else
+					code += "tex " + uvReg + ", " + uvReg + ".zwxy, " + grainRegister + " <2d,nearest,repeat,mipnone>\n";
+				
+				// keep grain in uvReg.zw
+				code += "sub " + uvReg + ".zw, " + uvReg + ".xy, fc0.xx\n" + // uv-.5
+					"mul " + uvReg + ".zw, " + uvReg + ".zw, " + customDataReg + ".w\n"; // (tex unpack scale and tex scale in one)
+				
+				// first sample
+				
+				if (numSamples == _numSamples) {
+					// first sample
+					code += "add " + uvReg + ".xy, " + uvReg + ".zw, " + _depthMapCoordReg + ".xy\n" +
+						"tex " + temp + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+						"dp4 " + temp + ".z, " + temp + ", " + decReg + "\n" +
+						"slt " + targetReg + ".w, " + _depthMapCoordReg + ".z, " + temp + ".z\n"; // 0 if in shadow
+				} else
+					code += addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				
+				if (numSamples > 4) {
+					code += "add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".zw\n" +
+						addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				}
+				
+				if (numSamples > 1) {
+					code += "sub " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + uvReg + ".zw\n" +
+						addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				}
+				
+				if (numSamples > 5) {
+					code += "sub " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".zw\n" +
+						addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				}
+				
+				if (numSamples > 2) {
+					code += "neg " + uvReg + ".w, " + uvReg + ".w\n"; // will be rotated 90 degrees when being accessed as wz
+					
+					code += "add " + uvReg + ".xy, " + uvReg + ".wz, " + _depthMapCoordReg + ".xy\n" +
+						addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				}
+				
+				if (numSamples > 6) {
+					code += "add " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".wz\n" +
+						addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				}
+				
+				if (numSamples > 3) {
+					code += "sub " + uvReg + ".xy, " + _depthMapCoordReg + ".xy, " + uvReg + ".wz\n" +
+						addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				}
+				
+				if (numSamples > 7) {
+					code += "sub " + uvReg + ".xy, " + uvReg + ".xy, " + uvReg + ".wz\n" +
+						addSample(uvReg, depthMapRegister, decReg, targetReg, regCache);
+				}
+				
+				numSamples -= 8;
+			}
+			
+			regCache.removeFragmentTempUsage(uvReg);
+			code += "mul " + targetReg + ".w, " + targetReg + ".w, " + customDataReg + ".x\n"; // average
 			return code;
+		}
+
+		/**
+		 * Adds the code for another tap to the shader code.
+		 * @param uvReg The uv register for the tap.
+		 * @param depthMapRegister The texture register containing the depth map.
+		 * @param decReg The register containing the depth map decoding data.
+		 * @param targetReg The target register to add the tap comparison result.
+		 * @param regCache The register cache managing the registers.
+		 * @return
+		 */
+		private function addSample(uvReg:ShaderRegisterElement, depthMapRegister:ShaderRegisterElement, decReg:ShaderRegisterElement, targetReg:ShaderRegisterElement, regCache:ShaderRegisterCache):String
+		{
+			var temp:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
+			return "tex " + temp + ", " + uvReg + ", " + depthMapRegister + " <2d,nearest,clamp,mipnone>\n" +
+				"dp4 " + temp + ".z, " + temp + ", " + decReg + "\n" +
+				"slt " + temp + ".z, " + _depthMapCoordReg + ".z, " + temp + ".z\n" + // 0 if in shadow
+				"add " + targetReg + ".w, " + targetReg + ".w, " + temp + ".z\n";
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function activateForCascade(vo:MethodVO, stage3DProxy:Stage3DProxy):void
+		{
+			var data:Vector.<Number> = vo.fragmentData;
+			var index:uint = vo.secondaryFragmentConstantsIndex;
+			data[index] = 1/_numSamples;
+			data[index + 1] = (stage3DProxy.width - 1)/63;
+			data[index + 2] = (stage3DProxy.height - 1)/63;
+			data[index + 3] = 2*_range/_depthMapSize;
+			stage3DProxy._context3D.setTextureAt(vo.texturesIndex + 1, _grainTexture.getTextureForStage3D(stage3DProxy));
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function getCascadeFragmentCode(vo:MethodVO, regCache:ShaderRegisterCache, decodeRegister:ShaderRegisterElement, depthTexture:ShaderRegisterElement, depthProjection:ShaderRegisterElement, targetRegister:ShaderRegisterElement):String
+		{
+			_depthMapCoordReg = depthProjection;
+			
+			var dataReg:ShaderRegisterElement = regCache.getFreeFragmentConstant();
+			vo.secondaryFragmentConstantsIndex = dataReg.index*4;
+			
+			return getSampleCode(regCache, dataReg, depthTexture, decodeRegister, targetRegister);
 		}
 	}
 }

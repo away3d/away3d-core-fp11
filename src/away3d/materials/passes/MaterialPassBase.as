@@ -1,7 +1,7 @@
 package away3d.materials.passes
 {
+	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.IAnimationSet;
-	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
@@ -12,166 +12,204 @@ package away3d.materials.passes
 	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.LightPickerBase;
 	
+	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
-	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
+	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
-
+	
 	use namespace arcane;
-
+	
 	/**
-	 * MaterialPassBase provides an abstract base class for material shader passes.
+	 * MaterialPassBase provides an abstract base class for material shader passes. A material pass constitutes at least
+	 * a render call per required renderable.
 	 */
 	public class MaterialPassBase extends EventDispatcher
 	{
-		protected var _material : MaterialBase;
-		protected var _animationSet : IAnimationSet;
+		protected var _material:MaterialBase;
+		protected var _animationSet:IAnimationSet;
 		
-		arcane var _program3Ds : Vector.<Program3D> = new Vector.<Program3D>(8);
-		arcane var _program3Dids : Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
+		arcane var _program3Ds:Vector.<Program3D> = new Vector.<Program3D>(8);
+		arcane var _program3Dids:Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
 		private var _context3Ds:Vector.<Context3D> = new Vector.<Context3D>(8);
-
+		
 		// agal props. these NEED to be set by subclasses!
 		// todo: can we perhaps figure these out manually by checking read operations in the bytecode, so other sources can be safely updated?
-		protected var _numUsedStreams : uint;
-		protected var _numUsedTextures : uint;
-		protected var _numUsedVertexConstants : uint;
-		protected var _numUsedFragmentConstants : uint;
-
-		protected var _smooth : Boolean = true;
-		protected var _repeat : Boolean = false;
-		protected var _mipmap : Boolean = true;
-		protected var _depthCompareMode:String = Context3DCompareMode.LESS;
-
-		private var _bothSides : Boolean;
-
-		protected var _numPointLights : uint;
-		protected var _numDirectionalLights : uint;
-		protected var _numLightProbes : uint;
-		protected var _animatableAttributes : Array = ["va0"];
-		protected var _animationTargetRegisters : Array = ["vt0"];
+		protected var _numUsedStreams:uint;
+		protected var _numUsedTextures:uint;
+		protected var _numUsedVertexConstants:uint;
+		protected var _numUsedFragmentConstants:uint;
+		protected var _numUsedVaryings:uint;
+		
+		protected var _smooth:Boolean = true;
+		protected var _repeat:Boolean = false;
+		protected var _mipmap:Boolean = true;
+		protected var _depthCompareMode:String = Context3DCompareMode.LESS_EQUAL;
+		
+		protected var _blendFactorSource:String = Context3DBlendFactor.ONE;
+		protected var _blendFactorDest:String = Context3DBlendFactor.ZERO;
+		
+		protected var _enableBlending:Boolean;
+		
+		private var _bothSides:Boolean;
+		
+		protected var _lightPicker:LightPickerBase;
+		protected var _animatableAttributes:Vector.<String> = Vector.<String>(["va0"]);
+		protected var _animationTargetRegisters:Vector.<String> = Vector.<String>(["vt0"]);
+		protected var _shadedTarget:String = "ft0";
 		
 		// keep track of previously rendered usage for faster cleanup of old vertex buffer streams and textures
-		private static var _previousUsedStreams : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
-		private static var _previousUsedTexs : Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
-		protected var _defaultCulling : String = Context3DTriangleFace.BACK;
-
-		private var _renderToTexture : Boolean;
-		private var _oldTarget : TextureBase;
-		private var _oldSurface : int;
-		private var _oldDepthStencil : Boolean;
-		private var _oldRect : Rectangle;
-		private static var _rttData : Vector.<Number>;
-
-		protected var _alphaPremultiplied : Boolean;
-
+		private static var _previousUsedStreams:Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
+		private static var _previousUsedTexs:Vector.<int> = Vector.<int>([0, 0, 0, 0, 0, 0, 0, 0]);
+		protected var _defaultCulling:String = Context3DTriangleFace.BACK;
+		
+		private var _renderToTexture:Boolean;
+		
+		// render state mementos for render-to-texture passes
+		private var _oldTarget:TextureBase;
+		private var _oldSurface:int;
+		private var _oldDepthStencil:Boolean;
+		private var _oldRect:Rectangle;
+		
+		protected var _alphaPremultiplied:Boolean;
+		protected var _needFragmentAnimation:Boolean;
+		protected var _needUVAnimation:Boolean;
+		protected var _UVTarget:String;
+		protected var _UVSource:String;
+		
+		protected var _writeDepth:Boolean = true;
+		
+		public var animationRegisterCache:AnimationRegisterCache;
+		
 		/**
 		 * Creates a new MaterialPassBase object.
+		 *
+		 * @param renderToTexture Indicates whether this pass is a render-to-texture pass.
 		 */
-		public function MaterialPassBase(renderToTexture : Boolean = false)
+		public function MaterialPassBase(renderToTexture:Boolean = false)
 		{
 			_renderToTexture = renderToTexture;
 			_numUsedStreams = 1;
 			_numUsedVertexConstants = 5;
-			if (!_rttData) _rttData = new <Number>[1, 1, 1, 1];
 		}
-
+		
 		/**
 		 * The material to which this pass belongs.
 		 */
-		public function get material() : MaterialBase
+		public function get material():MaterialBase
 		{
 			return _material;
 		}
-
-		public function set material(value : MaterialBase) : void
+		
+		public function set material(value:MaterialBase):void
 		{
 			_material = value;
 		}
-
+		
+		/**
+		 * Indicate whether this pass should write to the depth buffer or not. Ignored when blending is enabled.
+		 */
+		public function get writeDepth():Boolean
+		{
+			return _writeDepth;
+		}
+		
+		public function set writeDepth(value:Boolean):void
+		{
+			_writeDepth = value;
+		}
+		
 		/**
 		 * Defines whether any used textures should use mipmapping.
 		 */
-		public function get mipmap() : Boolean
+		public function get mipmap():Boolean
 		{
 			return _mipmap;
 		}
-
-		public function set mipmap(value : Boolean) : void
+		
+		public function set mipmap(value:Boolean):void
 		{
-			if (_mipmap == value) return;
+			if (_mipmap == value)
+				return;
 			_mipmap = value;
 			invalidateShaderProgram();
 		}
-
+		
 		/**
 		 * Defines whether smoothing should be applied to any used textures.
 		 */
-		public function get smooth() : Boolean
+		public function get smooth():Boolean
 		{
 			return _smooth;
 		}
-
-		public function set smooth(value : Boolean) : void
+		
+		public function set smooth(value:Boolean):void
 		{
-			if (_smooth == value) return;
+			if (_smooth == value)
+				return;
 			_smooth = value;
 			invalidateShaderProgram();
 		}
-
+		
 		/**
 		 * Defines whether textures should be tiled.
 		 */
-		public function get repeat() : Boolean
+		public function get repeat():Boolean
 		{
 			return _repeat;
 		}
-
-		public function set repeat(value : Boolean) : void
+		
+		public function set repeat(value:Boolean):void
 		{
-			if (_repeat == value) return;
+			if (_repeat == value)
+				return;
 			_repeat = value;
 			invalidateShaderProgram();
 		}
-
+		
 		/**
 		 * Defines whether or not the material should perform backface culling.
 		 */
-		public function get bothSides() : Boolean
+		public function get bothSides():Boolean
 		{
 			return _bothSides;
 		}
-
-		public function set bothSides(value : Boolean) : void
+		
+		public function set bothSides(value:Boolean):void
 		{
 			_bothSides = value;
 		}
-		
-		public function get depthCompareMode() : String
+
+		/**
+		 * The depth compare mode used to render the renderables using this material.
+		 *
+		 * @see flash.display3D.Context3DCompareMode
+		 */
+		public function get depthCompareMode():String
 		{
 			return _depthCompareMode;
 		}
-
-		public function set depthCompareMode(value : String) : void
+		
+		public function set depthCompareMode(value:String):void
 		{
 			_depthCompareMode = value;
 		}
 
 		/**
-		 * The animation used to add vertex code to the shader code.
+		 * Returns the animation data set adding animations to the material.
 		 */
-		public function get animationSet() : IAnimationSet
+		public function get animationSet():IAnimationSet
 		{
 			return _animationSet;
 		}
-
-		public function set animationSet(value : IAnimationSet) : void
+		
+		public function set animationSet(value:IAnimationSet):void
 		{
 			if (_animationSet == value)
 				return;
@@ -180,223 +218,331 @@ package away3d.materials.passes
 			
 			invalidateShaderProgram();
 		}
-
+		
 		/**
 		 * Specifies whether this pass renders to texture
 		 */
-		public function get renderToTexture() : Boolean
+		public function get renderToTexture():Boolean
 		{
 			return _renderToTexture;
 		}
-
+		
 		/**
 		 * Cleans up any resources used by the current object.
 		 * @param deep Indicates whether other resources should be cleaned up, that could potentially be shared across different instances.
 		 */
-		public function dispose() : void
+		public function dispose():void
 		{
-			for (var i : uint = 0; i < 8; ++i) {
-				if (_program3Ds[i]) AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
+			if (_lightPicker)
+				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+			
+			for (var i:uint = 0; i < 8; ++i) {
+				if (_program3Ds[i]) {
+					AGALProgram3DCache.getInstanceFromIndex(i).freeProgram3D(_program3Dids[i]);
+					_program3Ds[i] = null;
+				}
 			}
 		}
-
-// AGAL RELATED STUFF
-
+		
 		/**
 		 * The amount of used vertex streams in the vertex code. Used by the animation code generation to know from which index on streams are available.
 		 */
-		public function get numUsedStreams() : uint
+		public function get numUsedStreams():uint
 		{
 			return _numUsedStreams;
 		}
-
+		
 		/**
 		 * The amount of used vertex constants in the vertex code. Used by the animation code generation to know from which index on registers are available.
 		 */
-		public function get numUsedVertexConstants() : uint
+		public function get numUsedVertexConstants():uint
 		{
 			return _numUsedVertexConstants;
 		}
+		
+		public function get numUsedVaryings():uint
+		{
+			return _numUsedVaryings;
+		}
 
+		/**
+		 * The amount of used fragment constants in the fragment code. Used by the animation code generation to know from which index on registers are available.
+		 */
+		public function get numUsedFragmentConstants():uint
+		{
+			return _numUsedFragmentConstants;
+		}
+		
+		public function get needFragmentAnimation():Boolean
+		{
+			return _needFragmentAnimation;
+		}
+
+		/**
+		 * Indicates whether the pass requires any UV animatin code.
+		 */
+		public function get needUVAnimation():Boolean
+		{
+			return _needUVAnimation;
+		}
+		
 		/**
 		 * Sets up the animation state. This needs to be called before render()
 		 *
 		 * @private
 		 */
-		arcane function updateAnimationState(renderable : IRenderable, stage3DProxy : Stage3DProxy) : void
+		arcane function updateAnimationState(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
-			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams);
+			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams, camera);
 		}
-
+		
 		/**
-		 * Renders an object to the current render target5.
+		 * Renders an object to the current render target.
 		 *
 		 * @private
 		 */
-		arcane function render(renderable : IRenderable, stage3DProxy : Stage3DProxy, camera : Camera3D, lightPicker : LightPickerBase) : void
-		{
-			var context : Context3D = stage3DProxy._context3D;
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, renderable.getModelViewProjectionUnsafe(), true);
-			stage3DProxy.setSimpleVertexBuffer(0, renderable.getVertexBuffer(stage3DProxy), Context3DVertexBufferFormat.FLOAT_3, renderable.vertexBufferOffset);
-			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
-		}
-
-		arcane function getVertexCode(code:String) : String
+		arcane function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			throw new AbstractMethodError();
 		}
 
-		arcane function getFragmentCode() : String
+		/**
+		 * Returns the vertex AGAL code for the material.
+		 */
+		arcane function getVertexCode():String
 		{
 			throw new AbstractMethodError();
 		}
 
-		arcane function activate(stage3DProxy : Stage3DProxy, camera : Camera3D, textureRatioX : Number, textureRatioY : Number) : void
+		/**
+		 * Returns the fragment AGAL code for the material.
+		 */
+		arcane function getFragmentCode(fragmentAnimatorCode:String):String
 		{
-			var contextIndex : int = stage3DProxy._stage3DIndex;
-			var context : Context3D = stage3DProxy._context3D;
+			throw new AbstractMethodError();
+		}
 
+		/**
+		 * The blend mode to use when drawing this renderable. The following blend modes are supported:
+		 * <ul>
+		 * <li>BlendMode.NORMAL: No blending, unless the material inherently needs it</li>
+		 * <li>BlendMode.LAYER: Force blending. This will draw the object the same as NORMAL, but without writing depth writes.</li>
+		 * <li>BlendMode.MULTIPLY</li>
+		 * <li>BlendMode.ADD</li>
+		 * <li>BlendMode.ALPHA</li>
+		 * </ul>
+		 */
+		public function setBlendMode(value:String):void
+		{
+			switch (value) {
+				case BlendMode.NORMAL:
+					_blendFactorSource = Context3DBlendFactor.ONE;
+					_blendFactorDest = Context3DBlendFactor.ZERO;
+					_enableBlending = false;
+					break;
+				case BlendMode.LAYER:
+					_blendFactorSource = Context3DBlendFactor.SOURCE_ALPHA;
+					_blendFactorDest = Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA;
+					_enableBlending = true;
+					break;
+				case BlendMode.MULTIPLY:
+					_blendFactorSource = Context3DBlendFactor.ZERO;
+					_blendFactorDest = Context3DBlendFactor.SOURCE_COLOR;
+					_enableBlending = true;
+					break;
+				case BlendMode.ADD:
+					_blendFactorSource = Context3DBlendFactor.SOURCE_ALPHA;
+					_blendFactorDest = Context3DBlendFactor.ONE;
+					_enableBlending = true;
+					break;
+				case BlendMode.ALPHA:
+					_blendFactorSource = Context3DBlendFactor.ZERO;
+					_blendFactorDest = Context3DBlendFactor.SOURCE_ALPHA;
+					_enableBlending = true;
+					break;
+				default:
+					throw new ArgumentError("Unsupported blend mode!");
+			}
+		}
+
+		/**
+		 * Sets the render state for the pass that is independent of the rendered object. This needs to be called before
+		 * calling renderPass. Before activating a pass, the previously used pass needs to be deactivated.
+		 * @param stage3DProxy The Stage3DProxy object which is currently used for rendering.
+		 * @param camera The camera from which the scene is viewed.
+		 * @private
+		 */
+		arcane function activate(stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		{
+			var contextIndex:int = stage3DProxy._stage3DIndex;
+			var context:Context3D = stage3DProxy._context3D;
+			
+			context.setDepthTest(_writeDepth && !_enableBlending, _depthCompareMode);
+			if (_enableBlending)
+				context.setBlendFactors(_blendFactorSource, _blendFactorDest);
+			
 			if (_context3Ds[contextIndex] != context || !_program3Ds[contextIndex]) {
 				_context3Ds[contextIndex] = context;
 				updateProgram(stage3DProxy);
 				dispatchEvent(new Event(Event.CHANGE));
 			}
-
-			var prevUsed : int = _previousUsedStreams[contextIndex];
-			var i : uint;
-			for (i = _numUsedStreams; i < prevUsed; ++i) {
-				stage3DProxy.setSimpleVertexBuffer(i, null, null, 0);
-			}
-
+			
+			var prevUsed:int = _previousUsedStreams[contextIndex];
+			var i:uint;
+			for (i = _numUsedStreams; i < prevUsed; ++i)
+				context.setVertexBufferAt(i, null);
+			
 			prevUsed = _previousUsedTexs[contextIndex];
-
+			
 			for (i = _numUsedTextures; i < prevUsed; ++i)
-				stage3DProxy.setTextureAt(i, null);
-
+				context.setTextureAt(i, null);
+			
 			if (_animationSet && !_animationSet.usesCPU)
 				_animationSet.activate(stage3DProxy, this);
 			
-			stage3DProxy.setProgram(_program3Ds[contextIndex]);
-
+			context.setProgram(_program3Ds[contextIndex]);
+			
 			context.setCulling(_bothSides? Context3DTriangleFace.NONE : _defaultCulling);
-
+			
 			if (_renderToTexture) {
-				_rttData[0] = 1;
-				_rttData[1] = 1;
 				_oldTarget = stage3DProxy.renderTarget;
 				_oldSurface = stage3DProxy.renderSurfaceSelector;
 				_oldDepthStencil = stage3DProxy.enableDepthAndStencil;
 				_oldRect = stage3DProxy.scissorRect;
 			}
-			else {
-				_rttData[0] = textureRatioX;
-				_rttData[1] = textureRatioY;
-				stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _rttData, 1);
-			}
 		}
 
 		/**
-		 * Turns off streams starting from a certain offset
+		 * Clears the render state for the pass. This needs to be called before activating another pass.
+		 * @param stage3DProxy The Stage3DProxy used for rendering
 		 *
 		 * @private
 		 */
-		arcane function deactivate(stage3DProxy : Stage3DProxy) : void
+		arcane function deactivate(stage3DProxy:Stage3DProxy):void
 		{
-			var index : uint = stage3DProxy._stage3DIndex;
+			var index:uint = stage3DProxy._stage3DIndex;
 			_previousUsedStreams[index] = _numUsedStreams;
 			_previousUsedTexs[index] = _numUsedTextures;
-
+			
 			if (_animationSet && !_animationSet.usesCPU)
 				_animationSet.deactivate(stage3DProxy, this);
-
+			
 			if (_renderToTexture) {
 				// kindly restore state
 				stage3DProxy.setRenderTarget(_oldTarget, _oldDepthStencil, _oldSurface);
 				stage3DProxy.scissorRect = _oldRect;
 			}
 			
-			stage3DProxy._context3D.setDepthTest( true, Context3DCompareMode.LESS );
+			stage3DProxy._context3D.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 		}
-
+		
 		/**
 		 * Marks the shader program as invalid, so it will be recompiled before the next render.
 		 *
 		 * @param updateMaterial Indicates whether the invalidation should be performed on the entire material. Should always pass "true" unless it's called from the material itself.
 		 */
-		arcane function invalidateShaderProgram(updateMaterial : Boolean = true) : void
+		arcane function invalidateShaderProgram(updateMaterial:Boolean = true):void
 		{
-			for (var i : uint = 0; i < 8; ++i)
+			for (var i:uint = 0; i < 8; ++i)
 				_program3Ds[i] = null;
-
+			
 			if (_material && updateMaterial)
 				_material.invalidatePasses(this);
 		}
-
+		
 		/**
 		 * Compiles the shader program.
 		 * @param polyOffsetReg An optional register that contains an amount by which to inflate the model (used in single object depth map rendering).
 		 */
-		arcane function updateProgram(stage3DProxy : Stage3DProxy) : void
+		arcane function updateProgram(stage3DProxy:Stage3DProxy):void
 		{
-			var animatorCode : String = "";
+			var animatorCode:String = "";
+			var UVAnimatorCode:String = "";
+			var fragmentAnimatorCode:String = "";
+			var vertexCode:String = getVertexCode();
 			
 			if (_animationSet && !_animationSet.usesCPU) {
-				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters);
+				animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters, stage3DProxy.profile);
+				if (_needFragmentAnimation)
+					fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget, stage3DProxy.profile);
+				if (_needUVAnimation)
+					UVAnimatorCode = _animationSet.getAGALUVCode(this, _UVSource, _UVTarget);
+				_animationSet.doneAGALCode(this);
 			} else {
-				var len : uint = _animatableAttributes.length;
-	
+				var len:uint = _animatableAttributes.length;
+				
 				// simply write attributes to targets, do not animate them
 				// projection will pick up on targets[0] to do the projection
-				for (var i : uint = 0; i < len; ++i)
+				for (var i:uint = 0; i < len; ++i)
 					animatorCode += "mov " + _animationTargetRegisters[i] + ", " + _animatableAttributes[i] + "\n";
+				if (_needUVAnimation)
+					UVAnimatorCode = "mov " + _UVTarget + "," + _UVSource + "\n";
 			}
 			
-			var vertexCode : String = getVertexCode(animatorCode);
-			var fragmentCode : String = getFragmentCode();
+			vertexCode = animatorCode + UVAnimatorCode + vertexCode;
+			
+			var fragmentCode:String = getFragmentCode(fragmentAnimatorCode);
 			if (Debug.active) {
-				trace ("Compiling AGAL Code:");
-				trace ("--------------------");
-				trace (vertexCode);
-				trace ("--------------------");
-				trace (fragmentCode);
+				trace("Compiling AGAL Code:");
+				trace("--------------------");
+				trace(vertexCode);
+				trace("--------------------");
+				trace(fragmentCode);
 			}
 			AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode);
-			//_programInvalids[stage3DProxy.stage3DIndex] = false;
 		}
 
-		arcane function get numPointLights() : uint
+		/**
+		 * The light picker used by the material to provide lights to the material if it supports lighting.
+		 *
+		 * @see away3d.materials.lightpickers.LightPickerBase
+		 * @see away3d.materials.lightpickers.StaticLightPicker
+		 */
+		arcane function get lightPicker():LightPickerBase
 		{
-			return _numPointLights;
+			return _lightPicker;
 		}
-
-		arcane function set numPointLights(value : uint) : void
+		
+		arcane function set lightPicker(value:LightPickerBase):void
 		{
-			_numPointLights = value;
+			if (_lightPicker)
+				_lightPicker.removeEventListener(Event.CHANGE, onLightsChange);
+			_lightPicker = value;
+			if (_lightPicker)
+				_lightPicker.addEventListener(Event.CHANGE, onLightsChange);
+			updateLights();
 		}
 
-		arcane function get numDirectionalLights() : uint
+		/**
+		 * Called when the light picker's configuration changes.
+		 */
+		private function onLightsChange(event:Event):void
 		{
-			return _numDirectionalLights;
+			updateLights();
 		}
 
-		arcane function set numDirectionalLights(value : uint) : void
+		/**
+		 * Implemented by subclasses if the pass uses lights to update the shader.
+		 */
+		protected function updateLights():void
 		{
-			_numDirectionalLights = value;
+		
 		}
 
-		arcane function set numLightProbes(value : uint) : void
-		{
-			_numLightProbes = value;
-		}
-
-		public function get alphaPremultiplied() : Boolean
+		/**
+		 * Indicates whether visible textures (or other pixels) used by this material have
+		 * already been premultiplied. Toggle this if you are seeing black halos around your
+		 * blended alpha edges.
+		 */
+		public function get alphaPremultiplied():Boolean
 		{
 			return _alphaPremultiplied;
 		}
-
-		public function set alphaPremultiplied(value : Boolean) : void
+		
+		public function set alphaPremultiplied(value:Boolean):void
 		{
 			_alphaPremultiplied = value;
+			invalidateShaderProgram(false);
 		}
 	}
 }

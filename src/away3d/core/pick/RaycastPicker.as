@@ -9,7 +9,7 @@ package away3d.core.pick
 	import away3d.core.traverse.EntityCollector;
 	import away3d.core.traverse.RaycastCollector;
 	import away3d.entities.Entity;
-
+	
 	use namespace arcane;
 	
 	/**
@@ -20,7 +20,7 @@ package away3d.core.pick
 	public class RaycastPicker implements IPicker
 	{
 		// TODO: add option of finding best hit?
-
+		
 		private var _findClosestCollision:Boolean;
 		private var _raycastCollector:RaycastCollector = new RaycastCollector();
 		private var _ignoredEntities:Array = new Array();
@@ -45,16 +45,17 @@ package away3d.core.pick
 		
 		/**
 		 * Creates a new <code>RaycastPicker</code> object.
-		 * 
+		 *
 		 * @param findClosestCollision Determines whether the picker searches for the closest bounds collision along the ray,
 		 * or simply returns the first collision encountered Defaults to false.
 		 */
-		public function RaycastPicker( findClosestCollision:Boolean ) {
-
+		public function RaycastPicker(findClosestCollision:Boolean)
+		{
+			
 			_findClosestCollision = findClosestCollision;
 			_entities = new Vector.<Entity>();
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -62,20 +63,20 @@ package away3d.core.pick
 		{
 			//cast ray through the collection of entities on the view
 			var collector:EntityCollector = view.entityCollector;
-			var i:uint;
-
-			if( collector.numMouseEnableds == 0 )
+			//var i:uint;
+			
+			if (collector.numMouseEnableds == 0)
 				return null;
-
+			
 			//update ray
-			var rayPosition:Vector3D = view.unproject( x, y, 0 );
-			var rayDirection:Vector3D = view.unproject( x, y, 1 );
-			rayDirection = rayDirection.subtract( rayPosition );
-
+			var rayPosition:Vector3D = view.unproject(x, y, 0);
+			var rayDirection:Vector3D = view.unproject(x, y, 1);
+			rayDirection = rayDirection.subtract(rayPosition);
+			
 			// Perform ray-bounds collision checks.
 			_numEntities = 0;
-			var node : EntityListItem = collector.entityHead;
-			var entity : Entity;
+			var node:EntityListItem = collector.entityHead;
+			var entity:Entity;
 			while (node) {
 				entity = node.entity;
 				
@@ -85,19 +86,19 @@ package away3d.core.pick
 				}
 				
 				// If collision detected, store in new data set.
-				if( entity.isVisible && entity.isIntersectingRay(rayPosition, rayDirection ))
+				if (entity.isVisible && entity.isIntersectingRay(rayPosition, rayDirection))
 					_entities[_numEntities++] = entity;
 				
 				node = node.next;
 			}
 			
 			//early out if no collisions detected
-			if( !_numEntities )
+			if (!_numEntities)
 				return null;
 			
 			return getPickingCollisionVO();
 		}
-
+		
 		/**
 		 * @inheritDoc
 		 */
@@ -114,8 +115,8 @@ package away3d.core.pick
 			scene.traversePartitions(_raycastCollector);
 			
 			_numEntities = 0;
-			var node : EntityListItem = _raycastCollector.entityHead;
-			var entity : Entity;
+			var node:EntityListItem = _raycastCollector.entityHead;
+			var entity:Entity;
 			while (node) {
 				entity = node.entity;
 				
@@ -130,8 +131,23 @@ package away3d.core.pick
 			}
 			
 			//early out if no collisions detected
-			if( !_numEntities )
+			if (!_numEntities)
 				return null;
+			
+			return getPickingCollisionVO();
+		}
+		
+		public function getEntityCollision(position:Vector3D, direction:Vector3D, entities:Vector.<Entity>):PickingCollisionVO
+		{
+			position = position;
+			direction = direction;
+			_numEntities = 0;
+			
+			var entity:Entity;
+			for each (entity in entities) {
+				if (entity.isIntersectingRay(position, direction))
+					_entities[_numEntities++] = entity;
+			}
 			
 			return getPickingCollisionVO();
 		}
@@ -143,47 +159,48 @@ package away3d.core.pick
 		
 		private function isIgnored(entity:Entity):Boolean
 		{
-			if (_onlyMouseEnabled && (!entity._ancestorsAllowMouseEnabled ||!entity.mouseEnabled))
+			if (_onlyMouseEnabled && (!entity._ancestorsAllowMouseEnabled || !entity.mouseEnabled))
 				return true;
 			
 			var ignoredEntity:Entity;
-			for each (ignoredEntity in _ignoredEntities)
+			for each (ignoredEntity in _ignoredEntities) {
 				if (ignoredEntity == entity)
 					return true;
+			}
 			
 			return false;
 		}
 		
-		private function sortOnNearT( entity1:Entity, entity2:Entity ):Number
+		private function sortOnNearT(entity1:Entity, entity2:Entity):Number
 		{
-			return entity1.pickingCollisionVO.rayEntryDistance > entity2.pickingCollisionVO.rayEntryDistance ? 1 : -1;
+			return entity1.pickingCollisionVO.rayEntryDistance > entity2.pickingCollisionVO.rayEntryDistance? 1 : -1;
 		}
 		
 		private function getPickingCollisionVO():PickingCollisionVO
 		{
 			// trim before sorting
 			_entities.length = _numEntities;
-
+			
 			// Sort entities from closest to furthest.
-			_entities = _entities.sort( sortOnNearT );
-
+			_entities = _entities.sort(sortOnNearT);
+			
 			// ---------------------------------------------------------------------
 			// Evaluate triangle collisions when needed.
 			// Replaces collision data provided by bounds collider with more precise data.
 			// ---------------------------------------------------------------------
-
+			
 			var shortestCollisionDistance:Number = Number.MAX_VALUE;
 			var bestCollisionVO:PickingCollisionVO;
 			var pickingCollisionVO:PickingCollisionVO;
 			var entity:Entity;
 			var i:uint;
 			
-			for( i = 0; i < _numEntities; ++i ) {
+			for (i = 0; i < _numEntities; ++i) {
 				entity = _entities[i];
 				pickingCollisionVO = entity._pickingCollisionVO;
-				if(entity.pickingCollider) {
+				if (entity.pickingCollider) {
 					// If a collision exists, update the collision data and stop all checks.
-					if( (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) && entity.collidesBefore(shortestCollisionDistance, _findClosestCollision) ) {
+					if ((bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) && entity.collidesBefore(shortestCollisionDistance, _findClosestCollision)) {
 						shortestCollisionDistance = pickingCollisionVO.rayEntryDistance;
 						bestCollisionVO = pickingCollisionVO;
 						if (!_findClosestCollision) {
@@ -191,31 +208,34 @@ package away3d.core.pick
 							return pickingCollisionVO;
 						}
 					}
-				}
-				else if (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) { // A bounds collision with no triangle collider stops all checks.
+				} else if (bestCollisionVO == null || pickingCollisionVO.rayEntryDistance < bestCollisionVO.rayEntryDistance) { // A bounds collision with no triangle collider stops all checks.
 					// Note: a bounds collision with a ray origin inside its bounds is ONLY ever used
 					// to enable the detection of a corresponsding triangle collision.
 					// Therefore, bounds collisions with a ray origin inside its bounds can be ignored
 					// if it has been established that there is NO triangle collider to test
-					if( !pickingCollisionVO.rayOriginIsInsideBounds ) {
-						updateLocalPosition( pickingCollisionVO );
+					if (!pickingCollisionVO.rayOriginIsInsideBounds) {
+						updateLocalPosition(pickingCollisionVO);
 						return pickingCollisionVO;
 					}
 				}
 			}
-
+			
 			return bestCollisionVO;
 		}
-
-		private function updateLocalPosition(pickingCollisionVO : PickingCollisionVO) : void
+		
+		private function updateLocalPosition(pickingCollisionVO:PickingCollisionVO):void
 		{
-			var collisionPos : Vector3D = pickingCollisionVO.localPosition ||= new Vector3D();
-			var rayDir : Vector3D = pickingCollisionVO.localRayDirection;
-			var rayPos : Vector3D = pickingCollisionVO.localRayPosition;
-			var t : Number = pickingCollisionVO.rayEntryDistance;
+			var collisionPos:Vector3D = pickingCollisionVO.localPosition ||= new Vector3D();
+			var rayDir:Vector3D = pickingCollisionVO.localRayDirection;
+			var rayPos:Vector3D = pickingCollisionVO.localRayPosition;
+			var t:Number = pickingCollisionVO.rayEntryDistance;
 			collisionPos.x = rayPos.x + t*rayDir.x;
 			collisionPos.y = rayPos.y + t*rayDir.y;
 			collisionPos.z = rayPos.z + t*rayDir.z;
+		}
+		
+		public function dispose():void
+		{
 		}
 	}
 }

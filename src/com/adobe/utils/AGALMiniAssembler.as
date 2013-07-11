@@ -109,7 +109,7 @@ package com.adobe.utils
 			initregmap(version, ignorelimits); 
 			
 			var lines:Array = source.replace( /[\f\n\r\v]+/g, "\n" ).split( "\n" );
-			var nest:int = 0;
+			//var nest:int = 0;
 			var nops:int = 0;
 			var i:int;
 			var lng:int = lines.length;

@@ -1,38 +1,32 @@
 package away3d.tools.commands
 {
-	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.entities.Mesh;
-	import away3d.materials.MaterialBase;
+	import away3d.containers.*;
+	import away3d.core.base.*;
+	import away3d.entities.*;
+	import away3d.materials.*;
+	import away3d.tools.utils.*;
 	
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
-
 	/**
-	*  Class Merge merges two or more static meshes into one.<code>Merge</code>
-	*/
-	public class Merge{
+	 *  Class Merge merges two or more static meshes into one.<code>Merge</code>
+	 */
+	public class Merge
+	{
 		
-		private const LIMIT:uint = 196605;
-		private var _baseReceiver:Mesh;
+		//private const LIMIT:uint = 196605;
 		private var _objectSpace:Boolean;
 		private var _keepMaterial:Boolean;
 		private var _disposeSources:Boolean;
-		private var _holder:Vector3D;
-		private var _v:Vector3D;
-		private var _vn:Vector3D;
-		private var _vectorsSource:Vector.<DataSubGeometry>;
-		   
-		/**
-		* @param	 keepMaterial		[optional] Boolean. Defines if the merged object uses the mesh1 material information or keeps its material(s). Default is false.
-		* If set to false and receiver object has multiple materials, the last material found in mesh1 submeshes is applied to mesh2 submeshes. 
-		* @param	 disposeSources	[optional] Boolean. Defines if mesh2 (or sources meshes in case applyToContainer is used) are kept untouched or disposed. Default is false.
-		* If keepMaterial is true, only geometry and eventual ObjectContainers3D are cleared from memory.
-		* @param	 objectSpace		[optional] Boolean. Defines if mesh2 is merge using its objectSpace or worldspace. Default is false.
-		*/
+		private var _geomVOs:Vector.<GeometryVO>;
+		private var _toDispose:Vector.<Mesh>;
 		
-		function Merge(keepMaterial:Boolean = false, disposeSources:Boolean = false, objectSpace:Boolean = false ):void
+		/**
+		 * @param    keepMaterial    [optional]    Determines if the merged object uses the recevier mesh material information or keeps its source material(s). Defaults to false.
+		 * If false and receiver object has multiple materials, the last material found in receiver submeshes is applied to the merged submesh(es).
+		 * @param    disposeSources  [optional]    Determines if the mesh and geometry source(s) used for the merging are disposed. Defaults to false.
+		 * If true, only receiver geometry and resulting mesh are kept in  memory.
+		 * @param    objectSpace     [optional]    Determines if source mesh(es) is/are merged using objectSpace or worldspace. Defaults to false.
+		 */
+		function Merge(keepMaterial:Boolean = false, disposeSources:Boolean = false, objectSpace:Boolean = false):void
 		{
 			_keepMaterial = keepMaterial;
 			_disposeSources = disposeSources;
@@ -40,8 +34,8 @@ package away3d.tools.commands
 		}
 		
 		/**
-		* Defines if the mesh(es) sources used for the merging are kept or disposed.
-		*/
+		 * Determines if the mesh and geometry source(s) used for the merging are disposed. Defaults to false.
+		 */
 		public function set disposeSources(b:Boolean):void
 		{
 			_disposeSources = b;
@@ -51,9 +45,10 @@ package away3d.tools.commands
 		{
 			return _disposeSources;
 		}
+		
 		/**
-		* Defines if mesh2 will be merged using its own material information.
-		*/
+		 * Determines if the material source(s) used for the merging are disposed. Defaults to false.
+		 */
 		public function set keepMaterial(b:Boolean):void
 		{
 			_keepMaterial = b;
@@ -65,8 +60,8 @@ package away3d.tools.commands
 		}
 		
 		/**
-		* Defines if mesh2 is merged using its objectSpace.
-		*/
+		 * Determines if source mesh(es) is/are merged using objectSpace or worldspace. Defaults to false.
+		 */
 		public function set objectSpace(b:Boolean):void
 		{
 			_objectSpace = b;
@@ -78,431 +73,285 @@ package away3d.tools.commands
 		}
 		
 		/**
-		*  Merges all the children of a container as one single Mesh.
-		* 	The first Mesh child encountered becomes the receiver. This is mesh that is returned.
-		* 	If no Mesh object is found, class returns null.
-		* @param	 objectContainer The ObjectContainer3D holding meshes to merge as one mesh.
-		* @param	 name [optional]  As the class picks the first mesh it finds, the name is applied to the merged mesh.
-		*
-		* @return The merged Mesh instance renamed to the name parameter if one was provided.
-		*/
-		public function applyToContainer(object:ObjectContainer3D, name:String = ""):Mesh
+		 * Merges all the children of a container into a single Mesh. If no Mesh object is found, method returns the receiver without modification.
+		 *
+		 * @param    receiver           The Mesh to receive the merged contents of the container.
+		 * @param    objectContainer    The ObjectContainer3D holding the meshes to be mergd.
+		 *
+		 * @return The merged Mesh instance.
+		 */
+		public function applyToContainer(receiver:Mesh, objectContainer:ObjectContainer3D):void
 		{
-			initHolders();
-			_baseReceiver = new Mesh(new Geometry(), null);
-			_baseReceiver.position = object.position;
+			reset();
 			
-			parseContainer(object);
-			merge(_baseReceiver);
-			if(name != "") _baseReceiver.name = name;
+			//collect container meshes
+			parseContainer(receiver, objectContainer);
 			
-			if(_disposeSources){
-
-				if(object is Mesh && Mesh(object).geometry)
-					Mesh(object).geometry.dispose();
-				
-				object = null;
-			}
-				
+			//collect receiver
+			collect(receiver, false);
 			
-			return _baseReceiver;
+			//merge to receiver
+			merge(receiver, _disposeSources);
 		}
 		
 		/**
-		*  Merges all the meshes found into the Vector.&lt;Mesh&gt; parameter with the receiver Mesh.
-		* @param	 receiver 	Mesh. The Mesh receiver.
-		* @param	 meshes		Vector.&lt;Mesh&gt;. A series of Meshes to be merged with the reciever mesh.
-		*
-		* @return The merged receiver Mesh instance.
-		*/
-		public function applyToMeshes(receiver:Mesh, meshes:Vector.<Mesh>):Mesh
+		 * Merges all the meshes found in the Vector.&lt;Mesh&gt; into a single Mesh.
+		 *
+		 * @param    receiver    The Mesh to receive the merged contents of the meshes.
+		 * @param    meshes      A series of Meshes to be merged with the reciever mesh.
+		 */
+		public function applyToMeshes(receiver:Mesh, meshes:Vector.<Mesh>):void
 		{
-			initHolders();
+			reset();
 			
-			for(var i:uint = 0;i<meshes.length;i++)
-				collect(meshes[i]);
-			 
-			merge(receiver);
-
-			if(_disposeSources){
-				for(i = 0;i<meshes.length;i++){
-					meshes[i].geometry.dispose();
-					meshes[i] = null;
-				}
-			}
-
-			return receiver;
+			if (!meshes.length)
+				return;
+			
+			//collect meshes in vector
+			for (var i:uint = 0; i < meshes.length; i++)
+				if (meshes[i] != receiver)
+					collect(meshes[i], _disposeSources);
+			
+			//collect receiver
+			collect(receiver, false);
+			
+			//merge to receiver
+			merge(receiver, _disposeSources);
 		}
-		 
+		
 		/**
-		*  Merge 2 meshes into one. It is recommand to use apply when 2 meshes are to be merged. If more need to be merged, use either applyToMeshes or applyToContainer methods.
-		* @param	 mesh1				Mesh. The receiver object that will hold both meshes information.
-		* @param	 mesh2				Mesh. The Mesh object to be merge with mesh1.
-		*/
-		public function apply(mesh1:Mesh, mesh2:Mesh):void
+		 *  Merges 2 meshes into one. It is recommand to use apply when 2 meshes are to be merged. If more need to be merged, use either applyToMeshes or applyToContainer methods.
+		 *
+		 * @param    receiver    The Mesh to receive the merged contents of both meshes.
+		 * @param    mesh        The Mesh to be merged with the receiver mesh
+		 */
+		public function apply(receiver:Mesh, mesh:Mesh):void
 		{
-			initHolders();
-			collect(mesh2);
-			merge(mesh1);
+			reset();
+			
+			//collect mesh
+			collect(mesh, _disposeSources);
+			
+			//collect receiver
+			collect(receiver, false);
+			
+			//merge to receiver
+			merge(receiver, _disposeSources);
 		}
 		
-		private function initHolders():void
+		private function reset():void
 		{
-			_vectorsSource= new Vector.<DataSubGeometry>();
-			_baseReceiver = null;
-			if(!_objectSpace && !_v){
-				_holder = new Vector3D();
-				_v = new Vector3D();
-				_vn = new Vector3D();
-			}
+			_toDispose  = new Vector.<Mesh>();
+			_geomVOs = new Vector.<GeometryVO>();
 		}
 		
-		private function merge(destMesh:Mesh):void
+		private function merge(destMesh:Mesh, dispose:Boolean):void
 		{
-			var j : uint;
-			var i : uint;
-			var vecLength : uint;
-			var subGeom : SubGeometry;
-			var ds:DataSubGeometry;
+			var i:uint;
+			var subIdx:uint;
+			var oldGeom:Geometry
+			var destGeom:Geometry;
+			var useSubMaterials:Boolean;
 			
-			var geometry:Geometry = destMesh.geometry;
-			var geometries:Vector.<SubGeometry> = geometry.subGeometries;
-			var numSubGeoms:uint = geometries.length;
+			oldGeom = destMesh.geometry;
+			destGeom = destMesh.geometry = new Geometry();
+			subIdx = destMesh.subMeshes.length;
 			
-			var vertices:Vector.<Number>;
-			var normals:Vector.<Number>;
-			var indices:Vector.<uint>;
-			var uvs:Vector.<Number>;
-			var vectors:Vector.<DataSubGeometry> = new Vector.<DataSubGeometry>();
+			// Only apply materials directly to sub-meshes if necessary,
+			// i.e. if there is more than one material available.
+			useSubMaterials = (_geomVOs.length > 1);
 			
-			//empty mesh receiver case
-			if(numSubGeoms == 0){
-				subGeom = new SubGeometry();
-				subGeom.autoDeriveVertexNormals = true;
-				subGeom.autoDeriveVertexTangents = false;
-				vertices = new Vector.<Number>();
-				normals = new Vector.<Number>();
-				indices = new Vector.<uint>();
-				uvs = new Vector.<Number>();
-						
-				subGeom.updateVertexData(vertices);
-				subGeom.updateIndexData(indices);
-				subGeom.updateUVData(uvs);
-				subGeom.updateVertexNormalData(normals);
-				geometry.addSubGeometry(subGeom);
-				numSubGeoms = 1;
-			}
-			
-			for (i = 0; i<numSubGeoms; ++i){					 
-				vertices = geometries[i].vertexData;
-				normals = geometries[i].vertexNormalData;
-				indices = geometries[i].indexData;
-				uvs = geometries[i].UVData;
+			for (i = 0; i < _geomVOs.length; i++) {
+				var s:uint;
+				var data:GeometryVO;
+				var subs:Vector.<ISubGeometry>;
 				
-				vertices.fixed = false;
-				normals.fixed = false;
-				indices.fixed = false;
-				uvs.fixed = false;
+				data = _geomVOs[i];
+				subs = GeomUtil.fromVectors(data.vertices, data.indices, data.uvs, data.normals, null, null, null);
 				
-				ds = new DataSubGeometry();
-				ds.vertices = vertices;
-				ds.indices = indices;
-				ds.uvs = uvs;
-				ds.normals = normals;
-				ds.material = (destMesh.subMeshes[i].material)? destMesh.subMeshes[i].material : destMesh.material; 
-				
-				ds.subGeometry = SubGeometry(geometries[i]);
-				
-				vectors.push(ds);
-			}
-			
-			var nvertices:Vector.<Number>;
-			var nindices:Vector.<uint>;
-			var nuvs:Vector.<Number>;
-			var nnormals:Vector.<Number>;
-			nvertices = ds.vertices;
-			nindices = ds.indices;
-			nuvs = ds.uvs;
-			nnormals = ds.normals;
-			
-			var activeMaterial:MaterialBase = ds.material;
-			
-			numSubGeoms = _vectorsSource.length;
-			 
-			var index:uint;
-			var indexY:uint;
-			var indexZ:uint;
-			var indexuv:uint;
-			
-			var destDs:DataSubGeometry;
-			var rotate:Boolean;
-			var scale:Boolean = (destMesh.scaleX != 1 || destMesh.scaleY != 1 || destMesh.scaleZ != 1);
-			 
-			for (i = 0; i < numSubGeoms; ++i){
-				ds = _vectorsSource[i];
-				subGeom = ds.subGeometry;
-				vertices = ds.vertices;
-				normals = ds.normals;
-				indices = ds.indices;
-				uvs = ds.uvs;
-				
-				if(_keepMaterial && ds.material){
-					destDs = getDestSubgeom(vectors, ds);
-					if(!destDs){
-						destDs = _vectorsSource[i];
-						subGeom = new SubGeometry();
-						destDs.subGeometry = subGeom;
-						
-						if(!_objectSpace){
-						 	vecLength = destDs.vertices.length;
-							rotate = ( destDs.mesh.rotationX != 0 || destDs.mesh.rotationY != 0 || destDs.mesh.rotationZ != 0);
-							 
-							for (j = 0; j < vecLength;j+=3){
-								indexY = j+1;
-								indexZ = indexY+1;
-								_v.x = destDs.vertices[j];
-								_v.y = destDs.vertices[indexY];
-								_v.z = destDs.vertices[indexZ];
-								 
-								if(rotate){
-									_vn.x = destDs.normals[j];
-									_vn.y = destDs.normals[indexY];
-									_vn.z = destDs.normals[indexZ];
-									_vn = applyRotations(_vn, destDs.transform);
-									destDs.normals[j] = _vn.x;
-									destDs.normals[indexY] = _vn.y;
-									destDs.normals[indexZ] = _vn.z;
-								}
-								
-								_v = destDs.transform.transformVector(_v);
-								
-								if(scale){
-									destDs.vertices[j] = _v.x/destMesh.scaleX;
-									destDs.vertices[indexY] = _v.y/destMesh.scaleY;
-									destDs.vertices[indexZ] = _v.z/destMesh.scaleZ;
-								 
-								} else {
-									destDs.vertices[j] = _v.x;
-									destDs.vertices[indexY] = _v.y;
-									destDs.vertices[indexZ] = _v.z;
-								}
-									
-							}
-						}
-						vectors.push(destDs);
-						continue;
-					}
+				for (s = 0; s < subs.length; s++) {
+					destGeom.addSubGeometry(subs[s]);
 					
-					activeMaterial = destDs.material;
-					nvertices = destDs.vertices;
-					nnormals = destDs.normals;
-					nindices = destDs.indices;
-					nuvs = destDs.uvs;
+					if (_keepMaterial && useSubMaterials)
+						destMesh.subMeshes[subIdx].material = data.material;
+					
+					subIdx++;
 				}
-
-				vecLength = indices.length;
+			}
+			
+			if (_keepMaterial && !useSubMaterials && _geomVOs.length)
+				destMesh.material = _geomVOs[0].material;
 				
-				rotate = (ds.mesh.rotationX != 0 || ds.mesh.rotationY != 0 || ds.mesh.rotationZ != 0);
-				 
-				for (j = 0; j < vecLength;++j){
-					 
-					if(nvertices.length+9 > LIMIT && nindices.length % 3 == 0){
-
-						destDs = new DataSubGeometry();
+			if (dispose) {
+				for each (var m:Mesh in _toDispose) {
+					m.geometry.dispose();
+					m.dispose();
+				}
+				
+				//dispose of the original receiver geometry
+				oldGeom.dispose();
+			}
+			
+			_toDispose = null;
+		}
+		
+		private function collect(mesh:Mesh, dispose:Boolean):void
+		{
+			if (mesh.geometry) {
+				var subIdx:uint;
+				var subGeometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
+				var calc:uint;
+				for (subIdx = 0; subIdx < subGeometries.length; subIdx++) {
+					var i:uint;
+					var len:uint;
+					var iIdx:uint, vIdx:uint, nIdx:uint, uIdx:uint;
+					var indexOffset:uint;
+					var subGeom:ISubGeometry;
+					var vo:GeometryVO;
+					var vertices:Vector.<Number>;
+					var normals:Vector.<Number>;
+					var vStride:uint, nStride:uint, uStride:uint;
+					var vOffs:uint, nOffs:uint, uOffs:uint;
+					var vd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
+					
+					subGeom = subGeometries[subIdx];
+					vd = subGeom.vertexData;
+					vStride = subGeom.vertexStride;
+					vOffs = subGeom.vertexOffset;
+					nd = subGeom.vertexNormalData;
+					nStride = subGeom.vertexNormalStride;
+					nOffs = subGeom.vertexNormalOffset;
+					ud = subGeom.UVData;
+					uStride = subGeom.UVStride;
+					uOffs = subGeom.UVOffset;
+					
+					// Get (or create) a VO for this material
+					vo = getSubGeomData(mesh.subMeshes[subIdx].material || mesh.material);
+					
+					// Vertices and normals are copied to temporary vectors, to be transformed
+					// before concatenated onto those of the data. This is unnecessary if no
+					// transformation will be performed, i.e. for object space merging.
+					vertices = (_objectSpace)? vo.vertices : new Vector.<Number>();
+					normals = (_objectSpace)? vo.normals : new Vector.<Number>();
+					
+					// Copy over vertex attributes
+					vIdx = vertices.length;
+					nIdx = normals.length;
+					uIdx = vo.uvs.length;
+					len = subGeom.numVertices;
+					for (i = 0; i < len; i++) {
+						// Position
+						calc = vOffs + i*vStride;
+						vertices[vIdx++] = vd[calc];
+						vertices[vIdx++] = vd[calc + 1];
+						vertices[vIdx++] = vd[calc + 2];
 						
-						nvertices = destDs.vertices = new Vector.<Number>();
-						nnormals = destDs.normals = new Vector.<Number>();
-						nindices = destDs.indices = new Vector.<uint>();
-						nuvs = destDs.uvs = new Vector.<Number>();
- 
-						destDs.material = activeMaterial; 
-						destDs.subGeometry = new SubGeometry();
-						destDs.transform = ds.transform;
-						destDs.mesh = ds.mesh;
-						ds = destDs;
-						ds.addSub = true;
-						vectors.push(ds);
+						// Normal
+						calc = nOffs + i*nStride;
+						normals[nIdx++] = nd[calc];
+						normals[nIdx++] = nd[calc + 1];
+						normals[nIdx++] = nd[calc + 2];
+						
+						// UV
+						calc = uOffs + i*uStride;
+						vo.uvs[uIdx++] = ud[calc];
+						vo.uvs[uIdx++] = ud[calc + 1];
 					}
 					
-					index = indices[j]*3;
-					indexuv = indices[j]*2;
-					nindices.push(nvertices.length/3);
-					indexY = index+1;
-					indexZ = indexY+1;
+					// Copy over triangle indices
+					indexOffset = (!_objectSpace)? vo.vertices.length/3 :0;
+					iIdx = vo.indices.length;
+					len = subGeom.numTriangles;
+					for (i = 0; i < len; i++) {
+						calc = i*3;
+						vo.indices[iIdx++] = subGeom.indexData[calc] + indexOffset;
+						vo.indices[iIdx++] = subGeom.indexData[calc + 1] + indexOffset;
+						vo.indices[iIdx++] = subGeom.indexData[calc + 2] + indexOffset;
+					}
 					
-					if(_objectSpace){
+					if (!_objectSpace) {
+						mesh.sceneTransform.transformVectors(vertices, vertices);
+						mesh.sceneTransform.transformVectors(normals, normals);
 						
-						nvertices.push(vertices[index], vertices[indexY], vertices[indexZ]);
-						 
-					} else {
-
-						_v.x = vertices[index];
-						_v.y = vertices[indexY];
-						_v.z = vertices[indexZ];
-						
-						if(rotate) {
-							_vn.x = normals[index];
-							_vn.y = normals[indexY];
-							_vn.z = normals[indexZ];
-							_vn = applyRotations(_vn, ds.transform);
-							nnormals.push(_vn.x, _vn.y, _vn.z);
-						}
-						 
-						_v = ds.transform.transformVector(_v);
-						
-						if(scale){
-							nvertices.push(_v.x/destMesh.scaleX, _v.y/destMesh.scaleY, _v.z/destMesh.scaleZ);
-						} else{
-							nvertices.push(_v.x, _v.y, _v.z);
+						// Copy vertex data from temporary (transformed) vectors
+						vIdx = vo.vertices.length;
+						nIdx = vo.normals.length;
+						len = vertices.length;
+						for (i = 0; i < len; i++) {
+							vo.vertices[vIdx++] = vertices[i];
+							vo.normals[nIdx++] = normals[i];
 						}
 					}
-					
-					if(_objectSpace || !rotate)
-						nnormals.push(normals[index], normals[indexY], normals[indexZ]);
-					
-					nuvs.push(uvs[indexuv], uvs[indexuv+1]);
-				} 
-			}
-			
-			for (i = 0; i < vectors.length; ++i){
-				ds = vectors[i];
-				if(ds.vertices.length == 0) continue;
-				subGeom = ds.subGeometry;
-
-				if(ds.normals && ds.normals.length>0 && ds.normals.length == ds.vertices.length){
-					subGeom.autoDeriveVertexNormals = false;
-					subGeom.updateVertexNormalData(ds.normals);
-				} else {
-					subGeom.autoDeriveVertexNormals = true;
 				}
 				
-				subGeom.updateVertexData(ds.vertices);
-				subGeom.updateIndexData(ds.indices);
-				subGeom.updateUVData(ds.uvs);
-				 
-				if(ds.addSub || !isSubGeomAdded(geometry.subGeometries, subGeom))
-					geometry.addSubGeometry(subGeom);
+				if (dispose)
+					_toDispose.push(mesh);
+			}
+		}
+		
+		private function getSubGeomData(material:MaterialBase):GeometryVO
+		{
+			var data:GeometryVO;
+			
+			if (_keepMaterial) {
+				var i:uint;
+				var len:uint;
 				
-				if(destMesh.material != ds.material)
-					destMesh.subMeshes[destMesh.subMeshes.length-1].material = ds.material;
-				
-				if(_disposeSources && ds.mesh){
-					if(_keepMaterial){
-						ds.mesh.geometry.dispose();
-					} else if(ds.material != destMesh.material){
-						ds.mesh.dispose();
-						if (ds.material) ds.material.dispose();
+				len = _geomVOs.length;
+				for (i = 0; i < len; i++) {
+					if (_geomVOs[i].material == material) {
+						data = _geomVOs[i];
+						break;
 					}
-					ds.mesh = null;
 				}
-				ds = null;
+			} else if (_geomVOs.length) {
+				// If materials are not to be kept, all data can be
+				// put into a single VO, so return that one.
+				data = _geomVOs[0];
 			}
 			
-			for (i = 0; i < _vectorsSource.length; ++i)
-				_vectorsSource[i] = null;
+			// No data (for this material) found, create new.
+			if (!data) {
+				data = new GeometryVO();
+				data.vertices = new Vector.<Number>();
+				data.normals = new Vector.<Number>();
+				data.uvs = new Vector.<Number>();
+				data.indices = new Vector.<uint>();
+				data.material = material;
 				
-			vectors = _vectorsSource = null;
-			
-			if(geometry.subGeometries[0].vertexData.length == 0 && geometry.subGeometries[0].indexData.length == 0)
-				geometry.removeSubGeometry(geometry.subGeometries[0]);
-		}
-		
-		private function isSubGeomAdded(subGeometries:Vector.<SubGeometry>, subGeom:SubGeometry):Boolean
-		{
-			for (var i:uint = 0; i<subGeometries.length; ++i)
-				if(subGeometries[i] == subGeom) return true;
-				
-			return false;
-		}
-		 
-		private function collect(m:Mesh):void
-		{
-			var ds:DataSubGeometry;
-			var geom:Geometry = m.geometry;
-			var geoms:Vector.<SubGeometry> = geom.subGeometries;
-			
-			if(geoms.length == 0) return;
-			 
-			for (var i:uint = 0; i<geoms.length; ++i){					 
-				ds = new DataSubGeometry();
-				ds.vertices = SubGeometry(geoms[i]).vertexData.concat();
-				ds.indices = SubGeometry(geoms[i]).indexData.concat();
-				ds.uvs = SubGeometry(geoms[i]).UVData.concat();
-				ds.normals = SubGeometry(geoms[i]).vertexNormalData.concat();
-				ds.vertices.fixed = false;
-				ds.normals.fixed = false;
-				ds.indices.fixed = false;
-				ds.uvs.fixed = false;
-				ds.material = (m.subMeshes[i].material)? m.subMeshes[i].material : m.material;
-				ds.subGeometry = SubGeometry(geoms[i]);
-				ds.transform = m.transform;
-				ds.mesh = m;
-				
-				_vectorsSource.push(ds);
-			}
-		}
-		
-		private function getDestSubgeom(v:Vector.<DataSubGeometry>, ds:DataSubGeometry):DataSubGeometry
-		{
-			var targetDs:DataSubGeometry;
-			var len:uint = v.length-1;
-			for (var i:int = len; i>-1; --i){
-				if(v[i].material == ds.material){
-					targetDs = v[i];
-					return targetDs;
-				}
+				_geomVOs.push(data);
 			}
 			
-			return null;
+			return data;
 		}
 		
-		private function parseContainer(object:ObjectContainer3D):void
+		private function parseContainer(receiver:Mesh, object:ObjectContainer3D):void
 		{
 			var child:ObjectContainer3D;
 			var i:uint;
 			
-			if(object is Mesh && object.numChildren == 0)
-				collect(Mesh(object));
+			if (object is Mesh && object != receiver)
+				collect(Mesh(object), _disposeSources);
 			
-			for(i = 0;i<object.numChildren;++i){
+			for (i = 0; i < object.numChildren; ++i) {
 				child = object.getChildAt(i);
-				if(child!=_baseReceiver)
-					parseContainer(child);
+				parseContainer(receiver, child);
 			}
 		}
-		
-		private function applyRotations(v:Vector3D, t:Matrix3D):Vector3D
-		{
-			_holder.x = v.x;
-			_holder.y = v.y;
-			_holder.z = v.z;
-			
-			_holder = t.deltaTransformVector(_holder);
-			
-			v.x = _holder.x;
-			v.y = _holder.y;
-			v.z = _holder.z;
-			
-			return v;
-		}
-		 
 	}
 }
 
-import away3d.core.base.SubGeometry;
-import away3d.entities.Mesh;
 import away3d.materials.MaterialBase;
 
-import flash.geom.Matrix3D;
-
-class DataSubGeometry {
+class GeometryVO
+{
 	public var uvs:Vector.<Number>;
 	public var vertices:Vector.<Number>;
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
-	public var subGeometry:SubGeometry;
 	public var material:MaterialBase;
-	public var transform:Matrix3D;
-	public var mesh:Mesh;
-	public var addSub:Boolean;
+	
+	public function GeometryVO()
+	{
+	}
 }

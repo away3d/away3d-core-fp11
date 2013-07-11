@@ -5,7 +5,7 @@
 	import away3d.loaders.parsers.ParserBase;
 	
 	import flash.net.URLRequest;
-
+	
 	use namespace arcane;
 	
 	/**
@@ -15,20 +15,19 @@
 	 */
 	public class ResourceDependency
 	{
-		private var _id : String;
-		private var _req : URLRequest;
-		private var _assets : Vector.<IAsset>;
-		private var _parentParser : ParserBase;
-		private var _data : *;
-		private var _retrieveAsRawData : Boolean;
-		private var _suppressAssetEvents : Boolean;
-		private var _dependencies : Vector.<ResourceDependency>;
+		private var _id:String;
+		private var _req:URLRequest;
+		private var _assets:Vector.<IAsset>;
+		private var _parentParser:ParserBase;
+		private var _data:*;
+		private var _retrieveAsRawData:Boolean;
+		private var _suppressAssetEvents:Boolean;
+		private var _dependencies:Vector.<ResourceDependency>;
 		
-		arcane var loader : SingleFileLoader;
-		arcane var success : Boolean;
+		arcane var loader:SingleFileLoader;
+		arcane var success:Boolean;
 		
-		
-		public function ResourceDependency(id : String, req : URLRequest, data : *, parentParser : ParserBase, retrieveAsRawData : Boolean = false, suppressAssetEvents : Boolean = false)
+		public function ResourceDependency(id:String, req:URLRequest, data:*, parentParser:ParserBase, retrieveAsRawData:Boolean = false, suppressAssetEvents:Boolean = false)
 		{
 			_id = id;
 			_req = req;
@@ -41,57 +40,49 @@
 			_dependencies = new Vector.<ResourceDependency>();
 		}
 		
-		
-		public function get id() : String
+		public function get id():String
 		{
 			return _id;
 		}
 		
-		
-		public function get assets() : Vector.<IAsset>
+		public function get assets():Vector.<IAsset>
 		{
 			return _assets;
 		}
 		
-		
-		public function get dependencies() : Vector.<ResourceDependency>
+		public function get dependencies():Vector.<ResourceDependency>
 		{
 			return _dependencies;
 		}
 		
-		
-		public function get request() : URLRequest
+		public function get request():URLRequest
 		{
 			return _req;
 		}
 		
-		
-		public function get retrieveAsRawData() : Boolean
+		public function get retrieveAsRawData():Boolean
 		{
 			return _retrieveAsRawData;
 		}
 		
-		
-		public function get suppresAssetEvents() : Boolean
+		public function get suppresAssetEvents():Boolean
 		{
 			return _suppressAssetEvents;
 		}
 		
-		
 		/**
 		 * The data containing the dependency to be parsed, if the resource was already loaded.
 		 */
-		public function get data() : *
+		public function get data():*
 		{
 			return _data;
 		}
 		
-		
 		/**
 		 * @private
 		 * Method to set data after having already created the dependency object, e.g. after load.
-		*/
-		arcane function setData(data : *) : void
+		 */
+		arcane function setData(data:*):void
 		{
 			_data = data;
 		}
@@ -99,7 +90,7 @@
 		/**
 		 * The parser which is dependent on this ResourceDependency object.
 		 */
-		public function get parentParser() : ParserBase
+		public function get parentParser():ParserBase
 		{
 			return _parentParser;
 		}
@@ -109,17 +100,30 @@
 		 * ImageResource would be assigned to a Mesh instance as a BitmapMaterial, a scene graph object would be added
 		 * to its intended parent. The dependency should be a member of the dependencies property.
 		 */
-		public function resolve() : void
+		public function resolve():void
 		{
-			if (_parentParser) _parentParser.resolveDependency(this);
+			if (_parentParser)
+				_parentParser.resolveDependency(this);
 		}
 		
 		/**
 		 * Resolve a dependency failure. For example, map loading failure from a 3d file
 		 */
-		public function resolveFailure() : void
+		public function resolveFailure():void
 		{
-			if (_parentParser) _parentParser.resolveDependencyFailure(this);
+			if (_parentParser)
+				_parentParser.resolveDependencyFailure(this);
 		}
+		
+		/**
+		 * Resolve the dependencies name
+		 */
+		public function resolveName(asset:IAsset):String
+		{
+			if (_parentParser)
+				return _parentParser.resolveDependencyName(this, asset);
+			return asset.name;
+		}
+	
 	}
 }
