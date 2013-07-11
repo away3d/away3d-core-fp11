@@ -102,7 +102,7 @@ package away3d.controllers
 			
 			if (_targetObject) {
 				
-				if (_lookAtPosition)
+				if (_lookAtPosition) {
 					_targetObject.lookAt(_lookAtPosition, _upAxis);
 				} else if (_lookAtObject) {
 					_targetObject.lookAt(_lookAtObject.scene ? _lookAtObject.scenePosition : _lookAtObject.position, _upAxis);
