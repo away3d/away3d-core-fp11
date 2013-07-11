@@ -166,3 +166,48 @@
 - Fix for incorrect thickness value being get/set on Segment. Closes #392
 - Fixed single frame glitch for ambient light on startup of a scene. Closes #410
 - Fix to MeshHelper class for correctly handling CompactSubGeometry classes. Closes #444
+
+4.1.2
+- Upgraded AWD parser to version 2.1
+- Added SphereMaker Command
+- Fix to animation errors and container mismatches on Collada parser (Closes #428 & #445)
+- Fix for using second normal on SimpleWaterNormalMethod. Closes #558.
+- Fixes to memory leaks around animators (Closes #562)
+- Moved interleaveBuffers() method from away3d.utils.GeometryUtil to away3d.tools.utils.GeomUtils and removed away3d.utils.GeometryUtil
+- Removed dummy COLLADA_ROOT_ container from Collada parser
+- Fix to operation of PerspectiveOffCenterLens
+- Fix State reseting when device loss experienced for animations
+- Added Basic 3D multitouch support
+- Extend LookAtController and HoverController to allow upAxis to be defined
+- Update Epsilon value in Shadow Methods to be the equivalent of inverse-distance for both point and directional lights
+- Re-worked getContainerBounds method to work with translations and rotations of nested containers and entities.
+- Added bounds for Segment Sets
+- Fixes to Geometry primitive normals
+- Fixes to various AssetLoader issues and parser inconsistencies
+- Orthographic lens fixed to work with sharedcontext views
+- Various fixes to SegmentSet, added support for multiple buffers
+- Picking fixes for sharedcontext views
+- Added ParticleRotateToPositionNode in particle animators
+
+4.1.3
+- Fix issue with Segment thickness when sciccorRect is set in a view
+- Fixed Bounds.getMeshBounds()
+- Fixed index setting of ParticleFollowState
+- Fix for sharing context collider with overlapping views
+
+4.1.4 (Gold)
+- Added baseDependency getter to AssetLoader
+- New Wireframe regular polygon primitive
+- Added getCenter() method to Bounds
+- Updated geometry primitives to use scaleU and scaleV
+- Code formatting and cleaning
+- ASDoc updates in comments
+- Updated Bounds to ignore lights
+- Fix to unproject (closes #446)
+- Add wrapPanAngle to FirstPersonController
+- Fix to Wireframe geomtry primitive properties and geometry updates
+- Fix for runtime error when removing a lightpicker from a material with a shadow method
+- Fix to GradientDiffuseMethod to stop material from disappearing when no lights are applied
+- Get rid of compilation warnings in ViewVolume
+- Fix for incorrect sorting with blended entities (Closes #605)
+- Fix to Loader3D when automatically adding root objects to the scene from an AWD file
