@@ -296,9 +296,11 @@ package away3d.materials.passes
 		
 		public function set animateUVs(value:Boolean):void
 		{
+			if (_animateUVs == value)
+				return;
+			
 			_animateUVs = value;
-			if ((value && !_animateUVs) || (!value && _animateUVs))
-				invalidateShaderProgram();
+			invalidateShaderProgram();
 		}
 		
 		/**
