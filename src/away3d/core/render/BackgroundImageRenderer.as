@@ -117,11 +117,23 @@ package away3d.core.render
 				new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, getFragmentCode())
 				);
 			
-			_vertexBuffer.uploadFromVector(Vector.<Number>([    -1, -1, 0, 1,
-				1, -1, 1, 1,
-				1, 1, 1, 0,
-				-1, 1, 0, 0
-				]), 0, 4);
+			var w:Number = 2;
+			var h:Number = 2;
+			var x:Number = -1;
+			var y:Number = 1;
+			
+			if (_stage3DProxy.scissorRect) {
+				x = (_stage3DProxy.scissorRect.x * 2 - _stage3DProxy.viewPort.width) / _stage3DProxy.viewPort.width;
+				y = (_stage3DProxy.scissorRect.y * 2 - _stage3DProxy.viewPort.height) / _stage3DProxy.viewPort.height * -1;
+				w = 2 / (_stage3DProxy.viewPort.width / _stage3DProxy.scissorRect.width);
+				h = 2 / (_stage3DProxy.viewPort.height / _stage3DProxy.scissorRect.height);
+			}
+			
+			_vertexBuffer.uploadFromVector(Vector.<Number>([x, y-h, 0, 1,
+			x+w, y-h, 1, 1,
+			x+w, y, 1, 0,
+			x, y, 0, 0
+			]), 0, 4);
 		}
 		
 		public function get texture():Texture2DBase
