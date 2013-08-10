@@ -112,13 +112,13 @@ package away3d.loaders.parsers
 			
 			_byteData = getByteData();
 			if (!_startedParsing) {
+				_byteData.position = 0;
 				if (_byteData.readUTFBytes(3) == 'ATF') {
 					_byteData.position = 0;
 					asset = new ATFTexture(_byteData);
 					finalizeAsset(asset, _fileName);
 					return PARSING_DONE;
 				} else {
-					_byteData.position = 0;
 					_loader = new Loader();
 					_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadComplete);
 					_loader.loadBytes(_byteData);
