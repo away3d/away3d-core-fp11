@@ -82,7 +82,7 @@ package away3d.loaders.parsers
 			var readLength:Number=100;
 			if (ba.length<100)
 				readLength=ba.length
-				return false
+					
 			if (ba) {
 				ba.position = 0;
 				str1 = ba.readUTFBytes(2);
