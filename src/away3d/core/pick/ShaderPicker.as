@@ -205,7 +205,7 @@ package away3d.core.pick
 				
 				_potentialFound = true;
 				
-				_context.setCulling(renderable.material.bothSides? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
+				_context.setCulling((renderable.material && renderable.material.bothSides)? Context3DTriangleFace.NONE : Context3DTriangleFace.BACK);
 				
 				_interactives[_interactiveId++] = renderable;
 				// color code so that reading from bitmapdata will contain the correct value
