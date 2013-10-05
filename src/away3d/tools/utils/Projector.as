@@ -36,7 +36,7 @@ package away3d.tools.utils
 		private static var _uv:UV;
 		
 		private static const PI:Number = Math.PI;
-		private static const DOUBLEPI:Number = Math.PI << 1;
+		private static const DOUBLEPI:Number = Math.PI * 2;
 		
 		/**
 		 * Class remaps the uv data of a mesh
