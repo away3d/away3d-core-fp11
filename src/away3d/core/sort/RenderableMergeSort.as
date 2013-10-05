@@ -67,7 +67,7 @@ package away3d.core.sort
 			if (!headB)
 				return head;
 			
-			while (head && headB) {
+			while (head && headB && head != null && headB != null) {
 				if (head.zIndex < headB.zIndex) {
 					l = head;
 					head = head.next;
