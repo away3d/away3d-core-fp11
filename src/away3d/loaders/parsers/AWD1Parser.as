@@ -1,5 +1,9 @@
 package away3d.loaders.parsers
 {
+	import flash.geom.Matrix3D;
+	import flash.net.URLRequest;
+	import flash.utils.ByteArray;
+	
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.CompactSubGeometry;
@@ -11,10 +15,6 @@ package away3d.loaders.parsers
 	import away3d.materials.TextureMultiPassMaterial;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
-	
-	import flash.geom.Matrix3D;
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
 	
 	use namespace arcane;
 	
@@ -79,13 +79,17 @@ package away3d.loaders.parsers
 			var str2:String;
 			
 			ba = ParserUtil.toByteArray(data);
+			var readLength:Number=100;
+			if (ba.length<100)
+				readLength=ba.length
+					
 			if (ba) {
 				ba.position = 0;
 				str1 = ba.readUTFBytes(2);
-				str2 = ba.readUTFBytes(100);
+				str2 = ba.readUTFBytes(readLength);
 			} else {
 				str1 = (data is String)? String(data).substr(0, 5) : null;
-				str2 = (data is String)? String(data).substr(0, 100) : null;
+				str2 = (data is String)? String(data).substr(0, readLength) : null;
 			}
 			if ((str1 == '//') && (str2.indexOf("#v:") != -1))
 				return true;

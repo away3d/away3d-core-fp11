@@ -541,12 +541,12 @@ package away3d.loaders.parsers
 			var props:AWDProperties = parseProperties({1:_geoNrType, 2:_geoNrType});
 			var geoScaleU:Number = props.get(1, 1);
 			var geoScaleV:Number = props.get(2, 1);
+			var sub_geoms:Vector.<ISubGeometry> = new Vector.<ISubGeometry>;
 			// Loop through sub meshes
 			var subs_parsed:uint = 0;
 			while (subs_parsed < num_subs) {
 				var i:uint;
 				var sm_len:uint, sm_end:uint;
-				var sub_geoms:Vector.<ISubGeometry>;
 				var w_indices:Vector.<Number>;
 				var weights:Vector.<Number>;
 				
@@ -1540,7 +1540,7 @@ package away3d.loaders.parsers
 					effectMethodReturn = new ProjectiveTextureMethod(returnedArray[1], blendModeDic[props.get(401, 10)]);
 					break;
 				case 406: //RimLightMethod
-					effectMethodReturn = new RimLightMethod(props.get(601, 0xffffff), props.get(101, 0.4), props.get(101, 2)); //blendMode
+					effectMethodReturn = new RimLightMethod(props.get(601, 0xffffff), props.get(101, 0.4), props.get(102, 2));
 					break;
 				case 407: //AlphaMaskMethod
 					targetID = props.get(1, 0);
