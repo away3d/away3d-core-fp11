@@ -68,7 +68,7 @@ package away3d.filters.tasks
 		public function set exposure(exposure:Number):void
 		{
 			_exposure = exposure;
-			_data[4] = 1 + _exposure/10;
+			_data[3] = 1 + _exposure / 10;
 		}
 	}
 }

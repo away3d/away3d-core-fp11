@@ -3,12 +3,8 @@ package away3d.textures
 	import flash.display3D.Context3DTextureFormat;
 	import flash.utils.ByteArray;
 	
-	/**
-	 * @author simo
-	 */
 	public class ATFData
 	{
-		
 		public static const TYPE_NORMAL:int = 0x0;
 		public static const TYPE_CUBE:int = 0x1;
 		
@@ -18,17 +14,18 @@ package away3d.textures
 		public var height:int;
 		public var numTextures:int;
 		public var data:ByteArray;
-		public var totalBytes:int;
 		
 		/** Create a new instance by parsing the given byte array. */
 		public function ATFData(data:ByteArray)
 		{
-			
 			var sign:String = data.readUTFBytes(3);
 			if (sign != "ATF")
 				throw new Error("ATF parsing error, unknown format " + sign);
 			
-			this.totalBytes = (data.readUnsignedByte() << 16) + (data.readUnsignedByte() << 8) + data.readUnsignedByte();
+			if (data[6] == 255)
+				data.position = 12; // new file version
+			else
+				data.position = 6; // old file version
 			
 			var tdata:uint = data.readUnsignedByte();
 			var _type:int = tdata >> 7; // UB[1]
