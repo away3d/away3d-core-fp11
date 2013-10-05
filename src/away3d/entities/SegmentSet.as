@@ -303,7 +303,7 @@
 			
 			subSet.vertexBufferDirty = true;
 			
-			_boundsInvalid = true;
+			invalidateBounds();
 		}
 		
 		arcane function get hasData():Boolean
@@ -330,8 +330,6 @@
 			_activeSubSet = subSet;
 			_numIndices = subSet.numIndices;
 			
-			var vertexBuffer:VertexBuffer3D = subSet.vertexBuffer;
-			
 			if (subSet.vertexContext3D != stage3DProxy.context3D || subSet.vertexBufferDirty) {
 				subSet.vertexBuffer = stage3DProxy._context3D.createVertexBuffer(subSet.numVertices, 11);
 				subSet.vertexBuffer.uploadFromVector(subSet.vertices, 0, subSet.numVertices);
@@ -339,7 +337,9 @@
 				subSet.vertexContext3D = stage3DProxy.context3D;
 			}
 			
+			var vertexBuffer:VertexBuffer3D = subSet.vertexBuffer;
 			var context3d:Context3D = stage3DProxy._context3D;
+			
 			context3d.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 			context3d.setVertexBufferAt(1, vertexBuffer, 3, Context3DVertexBufferFormat.FLOAT_3);
 			context3d.setVertexBufferAt(2, vertexBuffer, 6, Context3DVertexBufferFormat.FLOAT_1);
