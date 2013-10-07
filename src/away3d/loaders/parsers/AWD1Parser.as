@@ -77,13 +77,14 @@ package away3d.loaders.parsers
 			var ba:ByteArray;
 			var str1:String;
 			var str2:String;
+			var readLength:Number = 100;
 			
 			ba = ParserUtil.toByteArray(data);
-			var readLength:Number=100;
-			if (ba.length<100)
-				readLength=ba.length
-					
+			
 			if (ba) {
+				if (ba.length<100)
+					readLength = ba.length;
+					
 				ba.position = 0;
 				str1 = ba.readUTFBytes(2);
 				str2 = ba.readUTFBytes(readLength);
