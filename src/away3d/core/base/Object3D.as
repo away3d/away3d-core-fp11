@@ -795,9 +795,9 @@ package away3d.core.base
 			
 			var vec:Vector3D = m.decompose()[1];
 			
-			_rotationX = vec.x;
-			_rotationY = vec.y;
-			_rotationZ = vec.z;
+			_rotationX += vec.x;
+			_rotationY += vec.y;
+			_rotationZ += vec.z;
 			
 			invalidateRotation();
 		}
