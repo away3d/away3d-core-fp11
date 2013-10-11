@@ -14,7 +14,11 @@ package away3d.cameras.lenses
 		private var _focalLengthInv:Number;
 		private var _yMax:Number;
 		private var _xMax:Number;
+		private var _coordinateSystem:int;
 		
+		public static const COORDINATE_SYSTEM_LEFT_HANDED:int = 1;
+		public static const COORDINATE_SYSTEM_RIGHT_HANDED:int = -1;
+
 		/**
 		 * Creates a new PerspectiveLens object.
 		 *
@@ -23,6 +27,7 @@ package away3d.cameras.lenses
 		public function PerspectiveLens(fieldOfView:Number = 60)
 		{
 			super();
+			this.coordinateSystem = COORDINATE_SYSTEM_LEFT_HANDED;
 			this.fieldOfView = fieldOfView;
 		}
 		
@@ -97,7 +102,24 @@ package away3d.cameras.lenses
 			clone._near = _near;
 			clone._far = _far;
 			clone._aspectRatio = _aspectRatio;
+			clone._coordinateSystem = _coordinateSystem;
 			return clone;
+		}
+		
+		/**
+		 * The handedness of the coordinate system projection.
+		 * The default is COORDINATE_SYSTEM_LEFT_HANDED.
+		 */
+		public function get coordinateSystem():int
+		{
+			return _coordinateSystem;
+		}
+
+		public function set coordinateSystem(value:int):void
+		{
+			if (value == _coordinateSystem) return;
+			_coordinateSystem = value;
+			invalidateMatrix();
 		}
 		
 		/**
@@ -150,6 +172,12 @@ package away3d.cameras.lenses
 				raw[uint(14)] = -2*_far*_near/(_far - _near);
 			}
 			
+			if (_coordinateSystem == COORDINATE_SYSTEM_RIGHT_HANDED)
+			{
+				// Switch projection transform from left to right handed.
+				raw[uint(5)] = -raw[uint(5)];
+			}
+
 			_matrix.copyRawDataFrom(raw);
 			
 			var yMaxFar:Number = _far*_focalLengthInv;
