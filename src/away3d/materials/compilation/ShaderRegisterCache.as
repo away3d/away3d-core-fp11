@@ -150,8 +150,9 @@ package away3d.materials.compilation
 		 */
 		public function getFreeVarying():ShaderRegisterElement
 		{
+			var result:ShaderRegisterElement = _varyingCache.requestFreeVectorReg()
 			++_numUsedVaryings;
-			return _varyingCache.requestFreeVectorReg();
+			return result;
 		}
 		
 		/**
@@ -159,8 +160,9 @@ package away3d.materials.compilation
 		 */
 		public function getFreeFragmentConstant():ShaderRegisterElement
 		{
+			var result:ShaderRegisterElement = _fragmentConstantsCache.requestFreeVectorReg();
 			++_numUsedFragmentConstants;
-			return _fragmentConstantsCache.requestFreeVectorReg();
+			return result;
 		}
 		
 		/**
@@ -168,8 +170,9 @@ package away3d.materials.compilation
 		 */
 		public function getFreeVertexConstant():ShaderRegisterElement
 		{
+			var result:ShaderRegisterElement = _vertexConstantsCache.requestFreeVectorReg();
 			++_numUsedVertexConstants;
-			return _vertexConstantsCache.requestFreeVectorReg();
+			return result;
 		}
 		
 		/**
@@ -193,8 +196,9 @@ package away3d.materials.compilation
 		 */
 		public function getFreeVertexAttribute():ShaderRegisterElement
 		{
+			var result:ShaderRegisterElement = _vertexAttributesCache.requestFreeVectorReg();
 			++_numUsedStreams;
-			return _vertexAttributesCache.requestFreeVectorReg();
+			return result;
 		}
 		
 		/**
@@ -202,8 +206,9 @@ package away3d.materials.compilation
 		 */
 		public function getFreeTextureReg():ShaderRegisterElement
 		{
+			var result:ShaderRegisterElement = _textureCache.requestFreeVectorReg();
 			++_numUsedTextures;
-			return _textureCache.requestFreeVectorReg();
+			return result;
 		}
 		
 		/**
