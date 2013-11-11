@@ -130,11 +130,14 @@ package away3d.animators
 		 */
 		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
-			var context:Context3D = stage3DProxy.context3D;
-			var offset:int = _animationRegisterCache.vertexAttributesOffset;
-			var used:int = _animationRegisterCache.numUsedStreams;
-			for (var i:int = offset; i < used; i++)
-				context.setVertexBufferAt(i, null);
+			if (_animationRegisterCache)
+			{
+				var context:Context3D = stage3DProxy.context3D;
+				var offset:int = _animationRegisterCache.vertexAttributesOffset;
+				var used:int = _animationRegisterCache.numUsedStreams;
+				for (var i:int = offset; i < used; i++)
+					context.setVertexBufferAt(i, null);
+			}
 		}
 		
 		/**
