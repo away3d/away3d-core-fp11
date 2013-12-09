@@ -115,7 +115,7 @@ package away3d.animators.states
 			}
 			
 			_prePos.copyFrom(_targetPos);
-			_targetEuler.copyFrom(_targetEuler);
+			_preEuler.copyFrom(_targetEuler);
 			animationSubGeometry.previousTime = currentTime;
 		}
 		
