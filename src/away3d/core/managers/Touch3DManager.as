@@ -207,6 +207,9 @@ package away3d.core.managers
 		{
 			
 			var touch:TouchPoint = _touchPointFromId[ event.touchPointID ];
+			
+			if (!touch) return;
+			
 			touch.x = event.stageX;
 			touch.y = event.stageY;
 			
@@ -221,6 +224,8 @@ package away3d.core.managers
 		{
 			
 			var touch:TouchPoint = _touchPointFromId[ event.touchPointID ];
+			
+			if (!touch) return;
 			
 			_collidingObject = _collidingObjectFromTouchId[ touch.id ];
 			if (_collidingObject)
