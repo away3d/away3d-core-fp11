@@ -1,6 +1,8 @@
 package away3d.cameras.lenses
 {
 	import away3d.arcane;
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Plane3D;
 	import away3d.events.LensEvent;
 	
@@ -84,7 +86,8 @@ package away3d.cameras.lenses
 		{
 			invalidateMatrix();
 		}
-		
+
+		private static const signCalculationVector:Vector3D = new Vector3D();
 		override protected function updateMatrix():void
 		{
 			_matrix.copyFrom(_baseLens.matrix);
@@ -95,13 +98,22 @@ package away3d.cameras.lenses
 			var cw:Number = -_plane.d + .05;
 			var signX:Number = cx >= 0? 1 : -1;
 			var signY:Number = cy >= 0? 1 : -1;
-			var p:Vector3D = new Vector3D(signX, signY, 1, 1);
-			var inverse:Matrix3D = _matrix.clone();
+			var p:Vector3D = signCalculationVector;
+			p.x = signX;
+			p.y = signY;
+			p.z = 1;
+			p.w = 1;
+			var inverse:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+			inverse.copyFrom(_matrix);
 			inverse.invert();
-			var q:Vector3D = inverse.transformVector(p);
+			var q:Vector3D = Matrix3DUtils.transformVector(inverse,p,Matrix3DUtils.CALCULATION_VECTOR3D);
 			_matrix.copyRowTo(3, p);
 			var a:Number = (q.x*p.x + q.y*p.y + q.z*p.z + q.w*p.w)/(cx*q.x + cy*q.y + cz*q.z + cw*q.w);
-			_matrix.copyRowFrom(2, new Vector3D(cx*a, cy*a, cz*a, cw*a));
+			p.x = cx*a;
+			p.y = cy*a;
+			p.z = cz*a;
+			p.w = cw*a;
+			_matrix.copyRowFrom(2, p);
 		}
 	}
 }

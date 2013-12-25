@@ -185,7 +185,7 @@ package away3d.textures
 			_camera.transform = _matrix;
 			_lens.baseLens = camera.lens;
 			_lens.aspectRatio = _viewWidth/_viewHeight;
-			_lens.plane = transformPlane(_plane, _matrix);
+			_lens.plane = transformPlane(_plane, _matrix, _lens.plane);
 		}
 		
 		private function isCameraBehindPlane(camera:Camera3D):Boolean
@@ -193,20 +193,19 @@ package away3d.textures
 			return camera.x*_plane.a + camera.y*_plane.b + camera.z*_plane.c + _plane.d < 0;
 		}
 		
-		private function transformPlane(plane:Plane3D, matrix:Matrix3D):Plane3D
+		private function transformPlane(plane:Plane3D, matrix:Matrix3D, result:Plane3D = null):Plane3D
 		{
+			if(!result) result = new Plane3D();
 			// actually transposed inverseSceneTransform is used, but since sceneTransform is already the inverse of the inverse
 			var rawData:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var a:Number = plane.a, b:Number = plane.b, c:Number = plane.c, d:Number = plane.d;
 			matrix.copyRawDataTo(rawData);
-			var transf:Plane3D = new Plane3D(
-				a*rawData[0] + b*rawData[1] + c*rawData[2] + d*rawData[3],
-				a*rawData[4] + b*rawData[5] + c*rawData[6] + d*rawData[7],
-				a*rawData[8] + b*rawData[9] + c*rawData[10] + d*rawData[11],
-				-(a*rawData[12] + b*rawData[13] + c*rawData[14] + d*rawData[15])
-				);
-			transf.normalize();
-			return transf;
+			result.a = a*rawData[0] + b*rawData[1] + c*rawData[2] + d*rawData[3],
+			result.b = a*rawData[4] + b*rawData[5] + c*rawData[6] + d*rawData[7],
+			result.c = a*rawData[8] + b*rawData[9] + c*rawData[10] + d*rawData[11],
+			result.d = -(a*rawData[12] + b*rawData[13] + c*rawData[14] + d*rawData[15])
+			result.normalize();
+			return result;
 		}
 		
 		private function updateSize(width:Number, height:Number):void

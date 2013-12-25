@@ -4,6 +4,8 @@ package away3d.events
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.materials.MaterialBase;
 	
 	import flash.events.Event;
@@ -228,9 +230,26 @@ package away3d.events
 		public function get scenePosition():Vector3D
 		{
 			if (object is ObjectContainer3D)
-				return ObjectContainer3D(object).sceneTransform.transformVector(localPosition);
+				return Matrix3DUtils.transformVector(ObjectContainer3D(object).sceneTransform,localPosition);
 			else
 				return localPosition;
+		}
+
+		/**
+		 * The position in scene space where the event took place
+		 * @param v destination Vector3D
+		 * @return
+		 */
+		public function getScenePosition(v:Vector3D = null):Vector3D {
+			if(!v) v = new Vector3D();
+			if (object is ObjectContainer3D) {
+				Matrix3DUtils.transformVector(ObjectContainer3D(object).sceneTransform,localPosition,v);
+			}else{
+				v.x = localPosition.x;
+				v.y = localPosition.y;
+				v.z = localPosition.z;
+			}
+			return v;
 		}
 		
 		/**
@@ -239,11 +258,29 @@ package away3d.events
 		public function get sceneNormal():Vector3D
 		{
 			if (object is ObjectContainer3D) {
-				var sceneNormal:Vector3D = ObjectContainer3D(object).sceneTransform.deltaTransformVector(localNormal);
+				var sceneNormal:Vector3D = Matrix3DUtils.deltaTransformVector(ObjectContainer3D(object).sceneTransform,localNormal);
 				sceneNormal.normalize();
 				return sceneNormal;
 			} else
 				return localNormal;
+		}
+
+		/**
+		 * The normal in scene space where the event took place
+		 * @param v destination Vector3D
+		 * @return
+		 */
+		public function getSceneNormal(v:Vector3D = null):Vector3D {
+			if(!v) v = new Vector3D();
+			if (object is ObjectContainer3D) {
+				Matrix3DUtils.deltaTransformVector(ObjectContainer3D(object).sceneTransform,localNormal, v);
+				v.normalize();
+			} else {
+				v.x = localNormal.x;
+				v.y = localNormal.y;
+				v.z = localNormal.z;
+			}
+			return v;
 		}
 	}
 }

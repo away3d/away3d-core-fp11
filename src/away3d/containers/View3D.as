@@ -847,11 +847,12 @@
 		 * @param sX The absolute x coordinate in 2D relative to View3D, representing the screenX coordinate.
 		 * @param sY The absolute y coordinate in 2D relative to View3D, representing the screenY coordinate.
 		 * @param sZ The distance into the screen, representing the screenZ coordinate.
+		 * @param v the destination Vector3D object
 		 * @return The scene position of the given screen coordinates.
 		 */
-		public function unproject(sX:Number, sY:Number, sZ:Number):Vector3D
+		public function unproject(sX:Number, sY:Number, sZ:Number, v:Vector3D = null):Vector3D
 		{
-			return _camera.unproject((sX*2 - _width)/_stage3DProxy.width, (sY*2 - _height)/_stage3DProxy.height, sZ);
+			return _camera.unproject((sX*2 - _width)/_stage3DProxy.width, (sY*2 - _height)/_stage3DProxy.height, sZ, v);
 		}
 		
 		/**

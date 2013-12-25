@@ -19,6 +19,8 @@ package away3d.core.pick
 	 */
 	public class RaycastPicker implements IPicker
 	{
+		private static const tempRayPosition:Vector3D = new Vector3D();
+		private static const tempRayDirection:Vector3D = new Vector3D();
 		// TODO: add option of finding best hit?
 		
 		private var _findClosestCollision:Boolean;
@@ -29,7 +31,7 @@ package away3d.core.pick
 		protected var _entities:Vector.<Entity>;
 		protected var _numEntities:uint;
 		protected var _hasCollisions:Boolean;
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -55,7 +57,7 @@ package away3d.core.pick
 			_findClosestCollision = findClosestCollision;
 			_entities = new Vector.<Entity>();
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -69,10 +71,12 @@ package away3d.core.pick
 				return null;
 			
 			//update ray
-			var rayPosition:Vector3D = view.unproject(x, y, 0);
-			var rayDirection:Vector3D = view.unproject(x, y, 1);
-			rayDirection = rayDirection.subtract(rayPosition);
-			
+			var rayPosition:Vector3D = view.unproject(x, y, 0, tempRayPosition);
+			var rayDirection:Vector3D = view.unproject(x, y, 1, tempRayDirection);
+			rayDirection.x = rayDirection.x - rayPosition.x;
+			rayDirection.y = rayDirection.y - rayPosition.y;
+			rayDirection.z = rayDirection.z - rayPosition.z;
+
 			// Perform ray-bounds collision checks.
 			_numEntities = 0;
 			var node:EntityListItem = collector.entityHead;

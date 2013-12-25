@@ -4,6 +4,7 @@ package away3d.tools.utils
 	import away3d.cameras.lenses.PerspectiveLens;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.Mesh;
 	import away3d.materials.ColorMaterial;
 	import away3d.primitives.PlaneGeometry;
@@ -243,8 +244,7 @@ package away3d.tools.utils
 			
 			intersect();
 			
-			// TODO: Optimize this? Matrix3D.transformVector() creates a new vector - unnuecessary.
-			localIntersect = _object3d.parent.inverseSceneTransform.transformVector(_intersect);
+			localIntersect = Matrix3DUtils.transformVector(_object3d.parent.inverseSceneTransform,_intersect);
 			
 			if (_offsetCenter == null) {
 				_object3d.x = localIntersect.x;
@@ -380,7 +380,7 @@ package away3d.tools.utils
 		
 		private function intersect(x:Number = NaN, y:Number = NaN):void
 		{
-			var pMouse:Vector3D = (isNaN(x) && isNaN(y))? _view.unproject(_view.mouseX, _view.mouseY, 1) : _view.unproject(x, y, 1);
+			var pMouse:Vector3D = (isNaN(x) && isNaN(y))? _view.unproject(_view.mouseX, _view.mouseY, 1, Matrix3DUtils.CALCULATION_VECTOR3D) : _view.unproject(x, y, 1, Matrix3DUtils.CALCULATION_VECTOR3D);
 			
 			var cam:Vector3D = _view.camera.position;
 			var d0:Number = _np.x*cam.x + _np.y*cam.y + _np.z*cam.z - _d;

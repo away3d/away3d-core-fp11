@@ -1,5 +1,8 @@
 package away3d.cameras
 {
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Matrix3DUtils;
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	
@@ -225,9 +228,9 @@ package away3d.cameras
 			
 			if (!value)
 				throw new Error("Lens cannot be null!");
-			
+
 			_lens.removeEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
-			
+
 			_lens = value;
 			
 			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onLensMatrixChanged);
@@ -255,11 +258,12 @@ package away3d.cameras
 		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
 		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
 		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
+		 * @param v The destination Vector3D object
 		 * @return The scene position of the given screen coordinates.
 		 */
-		public function unproject(nX:Number, nY:Number, sZ:Number):Vector3D
+		public function unproject(nX:Number, nY:Number, sZ:Number, v:Vector3D = null):Vector3D
 		{
-			return sceneTransform.transformVector(lens.unproject(nX, nY, sZ));
+			return Matrix3DUtils.transformVector(sceneTransform, lens.unproject(nX, nY, sZ, v), v)
 		}
 		
 		/**
@@ -268,22 +272,24 @@ package away3d.cameras
 		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
 		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
 		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
+		 * @param v The destination Vector3D object
 		 * @return The ray from the camera to the scene space position of the given screen coordinates.
 		 */
-		public function getRay(nX:Number, nY:Number, sZ:Number):Vector3D
+		public function getRay(nX:Number, nY:Number, sZ:Number, v:Vector3D = null):Vector3D
 		{
-			return sceneTransform.deltaTransformVector(lens.unproject(nX, nY, sZ));
+			return Matrix3DUtils.deltaTransformVector(sceneTransform,lens.unproject(nX, nY, sZ, v), v);
 		}
 		
 		/**
 		 * Calculates the normalised position in screen space of the given scene position.
 		 *
 		 * @param point3d the position vector of the scene coordinates to be projected.
+		 * @param v The destination Vector3D object
 		 * @return The normalised screen position of the given scene coordinates.
 		 */
-		public function project(point3d:Vector3D):Vector3D
+		public function project(point3d:Vector3D, v:Vector3D = null):Vector3D
 		{
-			return lens.project(inverseSceneTransform.transformVector(point3d));
+			return lens.project(Matrix3DUtils.transformVector(inverseSceneTransform,point3d,v), v);
 		}
 	}
 }

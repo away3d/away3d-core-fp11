@@ -9,7 +9,8 @@ package away3d.animators.states
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.MathConsts;
-	
+	import away3d.core.math.Matrix3DUtils;
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Orientation3D;
 	import flash.geom.Vector3D;
@@ -37,7 +38,7 @@ package away3d.animators.states
 		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			// TODO: not used
-			animationSubGeometry = animationSubGeometry;
+//			animationSubGeometry = animationSubGeometry;
 			
 			var comps:Vector.<Vector3D>;
 			if (_billboardAxis) {
@@ -50,7 +51,7 @@ package away3d.animators.states
 				
 				//create a quick inverse projection matrix
 				_matrix.copyFrom(renderable.sceneTransform);
-				comps = _matrix.decompose(Orientation3D.AXIS_ANGLE);
+				comps = Matrix3DUtils.decompose(_matrix, Orientation3D.AXIS_ANGLE);
 				_matrix.copyColumnFrom(0, right);
 				_matrix.copyColumnFrom(1, _billboardAxis);
 				_matrix.copyColumnFrom(2, look);
@@ -62,7 +63,7 @@ package away3d.animators.states
 				_matrix.append(camera.inverseSceneTransform);
 				
 				//decompose using axis angle rotations
-				comps = _matrix.decompose(Orientation3D.AXIS_ANGLE);
+				comps = Matrix3DUtils.decompose(_matrix, Orientation3D.AXIS_ANGLE);
 				
 				//recreate the matrix with just the rotation data
 				_matrix.identity();

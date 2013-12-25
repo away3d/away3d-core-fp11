@@ -5,6 +5,8 @@ package away3d.core.render
 	import away3d.core.base.IRenderable;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
@@ -162,7 +164,7 @@ package away3d.core.render
 			_skyboxTempVector.z = 1;
 			_skyboxTempVector.w = 0;
 
-			_skyboxTempVector = _tempSkyboxMatrix.transformVector(_skyboxTempVector);
+			Matrix3DUtils.transformVector(_tempSkyboxMatrix,_skyboxTempVector, _skyboxTempVector);
 			_skyboxTempVector.normalize();
 
 			var angle:Number = Math.acos(_skyboxTempVector.x*(cx/length) + _skyboxTempVector.y*(cy/length) + _skyboxTempVector.z*(cz/length));
@@ -181,7 +183,7 @@ package away3d.core.render
 			p.w = 1;
 			_tempSkyboxMatrix.copyFrom(_skyboxProjection);
 			_tempSkyboxMatrix.invert();
-			var q:Vector3D = _tempSkyboxMatrix.transformVector(p);
+			var q:Vector3D = Matrix3DUtils.transformVector(_tempSkyboxMatrix,p,Matrix3DUtils.CALCULATION_VECTOR3D);
 			_skyboxProjection.copyRowTo(3, p);
 			var a:Number = (q.x*p.x + q.y*p.y + q.z*p.z + q.w*p.w)/(cx*q.x + cy*q.y + cz*q.z + cw*q.w);
 			_skyboxTempVector.x = cx*a;

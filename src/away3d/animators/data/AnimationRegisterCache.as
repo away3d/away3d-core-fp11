@@ -1,6 +1,7 @@
 package away3d.animators.data
 {
 	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	
@@ -236,7 +237,8 @@ package away3d.animators.data
 		
 		public function setVertexConstFromMatrix(index:int, matrix:Matrix3D):void
 		{
-			var rawData:Vector.<Number> = matrix.rawData;
+			var rawData:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			matrix.copyRawDataTo(rawData);
 			var _index:int = (index - _vertexConstantOffset)*4;
 			vertexConstantData[_index++] = rawData[0];
 			vertexConstantData[_index++] = rawData[4];

@@ -10,6 +10,7 @@ package away3d.entities
 	import away3d.core.base.SubMesh;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.RenderableNode;
 	import away3d.core.pick.IPickingCollider;
@@ -18,6 +19,7 @@ package away3d.entities
 	import flash.display3D.IndexBuffer3D;
 	import flash.geom.Matrix;
 	import flash.geom.Matrix3D;
+	import flash.geom.Orientation3D;
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -274,10 +276,10 @@ package away3d.entities
 			
 			return _pickingCollisionVO.renderable != null;
 		}
-		
+
 		public function getRenderSceneTransform(camera:Camera3D):Matrix3D
 		{
-			var comps:Vector.<Vector3D> = camera.sceneTransform.decompose();
+			var comps:Vector.<Vector3D> = Matrix3DUtils.decompose(camera.sceneTransform);
 			var scale:Vector3D = comps[2];
 			comps[0] = scenePosition;
 			scale.x = _width*_scaleX;

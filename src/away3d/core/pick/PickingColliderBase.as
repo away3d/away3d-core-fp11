@@ -21,7 +21,6 @@ package away3d.core.pick
 		
 		protected function getCollisionNormal(indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint):Vector3D
 		{
-			var normal:Vector3D = new Vector3D();
 			var i0:uint = indexData[ triangleIndex ]*3;
 			var i1:uint = indexData[ triangleIndex + 1 ]*3;
 			var i2:uint = indexData[ triangleIndex + 2 ]*3;
@@ -30,7 +29,7 @@ package away3d.core.pick
 			var p2:Vector3D = new Vector3D(vertexData[ i2 ], vertexData[ i2 + 1 ], vertexData[ i2 + 2 ]);
 			var side0:Vector3D = p1.subtract(p0);
 			var side1:Vector3D = p2.subtract(p0);
-			normal = side0.crossProduct(side1);
+			var normal:Vector3D = side0.crossProduct(side1);
 			normal.normalize();
 			return normal;
 		}
@@ -39,13 +38,16 @@ package away3d.core.pick
 		{
 			var uv:Point = new Point();
 			var uIndex:uint = indexData[ triangleIndex ]*uvStride + uvOffset;
-			var uv0:Vector3D = new Vector3D(uvData[ uIndex ], uvData[ uIndex + 1 ]);
+			var uv0x:Number = uvData[ uIndex ];
+			var uv0y:Number = uvData[ uIndex +1 ];
 			uIndex = indexData[ triangleIndex + 1 ]*uvStride + uvOffset;
-			var uv1:Vector3D = new Vector3D(uvData[ uIndex ], uvData[ uIndex + 1 ]);
+			var uv1x:Number = uvData[ uIndex ];
+			var uv1y:Number = uvData[ uIndex +1 ];
 			uIndex = indexData[ triangleIndex + 2 ]*uvStride + uvOffset;
-			var uv2:Vector3D = new Vector3D(uvData[ uIndex ], uvData[ uIndex + 1 ]);
-			uv.x = u*uv0.x + v*uv1.x + w*uv2.x;
-			uv.y = u*uv0.y + v*uv1.y + w*uv2.y;
+			var uv2x:Number = uvData[ uIndex ];
+			var uv2y:Number = uvData[ uIndex +1 ];
+			uv.x = u*uv0x + v*uv1x + w*uv2x;
+			uv.y = u*uv0y + v*uv1y + w*uv2y;
 			return uv;
 		}
 		

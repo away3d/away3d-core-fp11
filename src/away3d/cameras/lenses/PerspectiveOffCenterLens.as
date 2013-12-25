@@ -1,7 +1,8 @@
 package away3d.cameras.lenses
 {
 	import away3d.core.math.*;
-	
+	import away3d.core.math.Matrix3DUtils;
+
 	import flash.geom.Vector3D;
 	
 	/**
@@ -99,16 +100,21 @@ package away3d.cameras.lenses
 		 * @param nX The normalised x coordinate in screen space, -1 corresponds to the left edge of the viewport, 1 to the right.
 		 * @param nY The normalised y coordinate in screen space, -1 corresponds to the top edge of the viewport, 1 to the bottom.
 		 * @param sZ The z coordinate in screen space, representing the distance into the screen.
+		 * @param v The destination Vector3D object
 		 * @return The scene position relative to the camera of the given screen coordinates.
 		 */
-		override public function unproject(nX:Number, nY:Number, sZ:Number):Vector3D
+		override public function unproject(nX:Number, nY:Number, sZ:Number, v:Vector3D = null):Vector3D
 		{
-			var v:Vector3D = new Vector3D(nX, -nY, sZ, 1.0);
-			
+			if(!v) v = new Vector3D();
+			v.x = nX;
+			v.y = -nY;
+			v.z = sZ;
+			v.w = 1;
+
 			v.x *= sZ;
 			v.y *= sZ;
 			
-			v = unprojectionMatrix.transformVector(v);
+			Matrix3DUtils.transformVector(unprojectionMatrix, v, v);
 			
 			//z is unaffected by transform
 			v.z = sZ;

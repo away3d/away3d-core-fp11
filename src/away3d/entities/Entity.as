@@ -3,6 +3,7 @@ package away3d.entities
 	import away3d.arcane;
 	import away3d.bounds.*;
 	import away3d.containers.*;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.*;
 	import away3d.core.pick.*;
 	import away3d.errors.*;
@@ -298,8 +299,8 @@ package away3d.entities
 		public function isIntersectingRay(rayPosition:Vector3D, rayDirection:Vector3D):Boolean
 		{
 			// convert ray to entity space
-			var localRayPosition:Vector3D = inverseSceneTransform.transformVector(rayPosition);
-			var localRayDirection:Vector3D = inverseSceneTransform.deltaTransformVector(rayDirection);
+			var localRayPosition:Vector3D = Matrix3DUtils.transformVector(inverseSceneTransform,rayPosition);
+			var localRayDirection:Vector3D = Matrix3DUtils.deltaTransformVector(inverseSceneTransform, rayDirection);
 			
 			// check for ray-bounds collision
 			var rayEntryDistance:Number = bounds.rayIntersection(localRayPosition, localRayDirection, pickingCollisionVO.localNormal ||= new Vector3D());

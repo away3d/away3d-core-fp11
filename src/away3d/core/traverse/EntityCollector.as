@@ -7,6 +7,8 @@ package away3d.core.traverse
 	import away3d.core.data.EntityListItemPool;
 	import away3d.core.data.RenderableListItem;
 	import away3d.core.data.RenderableListItemPool;
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Plane3D;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Entity;
@@ -82,7 +84,7 @@ package away3d.core.traverse
 		{
 			_camera = value;
 			_entryPoint = _camera.scenePosition;
-			_cameraForward = _camera.forwardVector;
+			_cameraForward = Matrix3DUtils.getForward(_camera.transform, _cameraForward);
 			_cullPlanes = _camera.frustumPlanes;
 		}
 		
@@ -175,7 +177,7 @@ package away3d.core.traverse
 		{
 			if (_camera) {
 				_entryPoint = _camera.scenePosition;
-				_cameraForward = _camera.forwardVector;
+				_cameraForward = Matrix3DUtils.getForward(_camera.transform, _cameraForward);
 			}
 			_cullPlanes = _customCullPlanes? _customCullPlanes : (_camera? _camera.frustumPlanes : null);
 			_numCullPlanes = _cullPlanes? _cullPlanes.length : 0;

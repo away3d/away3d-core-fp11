@@ -3,10 +3,12 @@ package away3d.core.base
 	import away3d.arcane;
 	import away3d.controllers.*;
 	import away3d.core.math.*;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.events.*;
 	import away3d.library.assets.*;
 	
 	import flash.geom.Matrix3D;
+	import flash.geom.Orientation3D;
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -430,14 +432,14 @@ package away3d.core.base
 		public function set transform(val:Matrix3D):void
 		{
 			//ridiculous matrix error
-			if (!val.rawData[uint(0)]) {
-				var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-				val.copyRawDataTo(raw);
+			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			val.copyRawDataTo(raw);
+			if (!raw[uint(0)]) {
 				raw[uint(0)] = _smallestNumber;
 				val.copyRawDataFrom(raw);
 			}
 			
-			var elements:Vector.<Vector3D> = val.decompose();
+			var elements:Vector.<Vector3D> = Matrix3DUtils.decompose(val);
 			var vec:Vector3D;
 			
 			vec = elements[0];
@@ -504,6 +506,17 @@ package away3d.core.base
 			
 			invalidatePosition();
 		}
+
+		/**
+		 * Defines the position of the 3d object, relative to the local coordinates of the parent <code>ObjectContainer3D</code>.
+		 * @param v the destination Vector3D
+		 * @return
+		 */
+		public function getPosition(v:Vector3D = null):Vector3D {
+			if(!v) v = new Vector3D();
+			transform.copyColumnTo(3, v);
+			return v;
+		}
 		
 		/**
 		 *
@@ -550,7 +563,7 @@ package away3d.core.base
 			
 			return director;
 		}
-		
+
 		/**
 		 *
 		 */
@@ -795,7 +808,10 @@ package away3d.core.base
 			
 			transform = transform;
 		}
-		
+
+		private static var tempAxeX:Vector3D;
+		private static var tempAxeY:Vector3D;
+		private static var tempAxeZ:Vector3D;
 		/**
 		 * Rotates the 3d object around to face a point defined relative to the local coordinates of the parent <code>ObjectContainer3D</code>.
 		 *
@@ -804,21 +820,41 @@ package away3d.core.base
 		 */
 		public function lookAt(target:Vector3D, upAxis:Vector3D = null):void
 		{
-			var yAxis:Vector3D, zAxis:Vector3D, xAxis:Vector3D;
+			if(!tempAxeX) tempAxeX = new Vector3D();
+			if(!tempAxeY) tempAxeY = new Vector3D();
+			if(!tempAxeZ) tempAxeZ = new Vector3D();
+			var xAxis:Vector3D = tempAxeX;
+			var yAxis:Vector3D = tempAxeY;
+			var zAxis:Vector3D = tempAxeZ;
+
 			var raw:Vector.<Number>;
 			
 			upAxis ||= Vector3D.Y_AXIS;
-			
-			zAxis = target.subtract(position);
+
+			if (_transformDirty) {
+				updateTransform();
+			}
+
+			zAxis.x = target.x - _x;
+			zAxis.y = target.y - _y;
+			zAxis.z = target.z - _z;
 			zAxis.normalize();
-			
-			xAxis = upAxis.crossProduct(zAxis);
+
+			xAxis.x = upAxis.y*zAxis.z - upAxis.z*zAxis.y;
+			xAxis.y = upAxis.z*zAxis.x - upAxis.x*zAxis.z;
+			xAxis.z = upAxis.x*zAxis.y - upAxis.y*zAxis.x;
 			xAxis.normalize();
 			
-			if (xAxis.length < .05)
-				xAxis = upAxis.crossProduct(Vector3D.Z_AXIS);
-			
-			yAxis = zAxis.crossProduct(xAxis);
+			if (xAxis.length < .05) {
+				xAxis.x = upAxis.y;
+				xAxis.y = upAxis.x;
+				xAxis.z = 0;
+				xAxis.normalize();
+			}
+
+			yAxis.x = zAxis.y*xAxis.z - zAxis.z*xAxis.y;
+			yAxis.y = zAxis.z*xAxis.x - zAxis.x*xAxis.z;
+			yAxis.z = zAxis.x*xAxis.y - zAxis.y*xAxis.x;
 			
 			raw = Matrix3DUtils.RAW_DATA_CONTAINER;
 			
