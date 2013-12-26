@@ -47,7 +47,7 @@ package away3d.core.pick
 			_rayTriangleKernel.data.rayStartPoint.value = [ rayPosition.x, rayPosition.y, rayPosition.z ];
 			_rayTriangleKernel.data.rayDirection.value = [ rayDirection.x, rayDirection.y, rayDirection.z ];
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -83,7 +83,7 @@ package away3d.core.pick
 			// run kernel.
 			var shaderJob:ShaderJob = new ShaderJob(_rayTriangleKernel, _kernelOutputBuffer, indexBufferDims.x, indexBufferDims.y);
 			shaderJob.start(true);
-			
+
 			// find a proper collision from pb's output
 			var i:uint;
 			var t:Number;
@@ -100,24 +100,22 @@ package away3d.core.pick
 						break;
 				}
 			}
-			
+
 			// Detect collision
 			if (collisionTriangleIndex >= 0) {
-				
 				pickingCollisionVO.rayEntryDistance = shortestCollisionDistance;
-				cx = rayPosition.x + shortestCollisionDistance*rayDirection.x;
-				cy = rayPosition.y + shortestCollisionDistance*rayDirection.y;
-				cz = rayPosition.z + shortestCollisionDistance*rayDirection.z;
-				pickingCollisionVO.localPosition = new Vector3D(cx, cy, cz);
-				pickingCollisionVO.localNormal = getCollisionNormal(indexData, vertexData, collisionTriangleIndex);
+				if(pickingCollisionVO.localPosition == null) pickingCollisionVO.localPosition = new Vector3D();
+				pickingCollisionVO.localPosition.x = rayPosition.x + shortestCollisionDistance*rayDirection.x;
+				pickingCollisionVO.localPosition.y = rayPosition.y + shortestCollisionDistance*rayDirection.y;
+				pickingCollisionVO.localPosition.z = rayPosition.z + shortestCollisionDistance*rayDirection.z;
+				pickingCollisionVO.localNormal = getCollisionNormal(indexData, vertexData, collisionTriangleIndex, pickingCollisionVO.localNormal);
 				v = _kernelOutputBuffer[ collisionTriangleIndex + 1 ]; // barycentric coord 1
 				w = _kernelOutputBuffer[ collisionTriangleIndex + 2 ]; // barycentric coord 2
 				u = 1.0 - v - w;
-				pickingCollisionVO.uv = getCollisionUV(indexData, uvData, collisionTriangleIndex, v, w, u, 0, 2);
-				
+				pickingCollisionVO.uv = getCollisionUV(indexData, uvData, collisionTriangleIndex, v, w, u, 0, 2, pickingCollisionVO.uv);
 				return true;
 			}
-			
+
 			return false;
 		}
 		

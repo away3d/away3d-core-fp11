@@ -1,7 +1,6 @@
 package away3d.cameras
 {
 	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Matrix3DUtils;
 
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -11,7 +10,6 @@ package away3d.cameras
 	import away3d.bounds.NullBounds;
 	import away3d.cameras.lenses.LensBase;
 	import away3d.cameras.lenses.PerspectiveLens;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Plane3D;
 	import away3d.core.partition.CameraNode;
 	import away3d.core.partition.EntityNode;

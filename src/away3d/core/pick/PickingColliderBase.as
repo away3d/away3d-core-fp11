@@ -19,24 +19,30 @@ package away3d.core.pick
 		
 		}
 		
-		protected function getCollisionNormal(indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint):Vector3D
+		protected function getCollisionNormal(indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint, normal:Vector3D = null):Vector3D
 		{
 			var i0:uint = indexData[ triangleIndex ]*3;
 			var i1:uint = indexData[ triangleIndex + 1 ]*3;
 			var i2:uint = indexData[ triangleIndex + 2 ]*3;
-			var p0:Vector3D = new Vector3D(vertexData[ i0 ], vertexData[ i0 + 1 ], vertexData[ i0 + 2 ]);
-			var p1:Vector3D = new Vector3D(vertexData[ i1 ], vertexData[ i1 + 1 ], vertexData[ i1 + 2 ]);
-			var p2:Vector3D = new Vector3D(vertexData[ i2 ], vertexData[ i2 + 1 ], vertexData[ i2 + 2 ]);
-			var side0:Vector3D = p1.subtract(p0);
-			var side1:Vector3D = p2.subtract(p0);
-			var normal:Vector3D = side0.crossProduct(side1);
+
+			var side0x:Number = vertexData[ i1 ] - vertexData[ i0 ];
+			var side0y:Number = vertexData[ i1 + 1] - vertexData[ i0 + 1];
+			var side0z:Number = vertexData[ i1 + 2] - vertexData[ i0 + 2];
+			var side1x:Number = vertexData[ i2 ] - vertexData[ i0 ];
+			var side1y:Number = vertexData[ i2 + 1] - vertexData[ i0 + 1];
+			var side1z:Number = vertexData[ i2 + 2] - vertexData[ i0 + 2];
+
+			if(!normal) normal = new Vector3D();
+			normal.x = side0y*side1z - side0z*side1y;
+			normal.y = side0z*side1x - side0x*side1z;
+			normal.z = side0x*side1y - side0y*side1x;
+			normal.w = 1;
 			normal.normalize();
 			return normal;
 		}
 		
-		protected function getCollisionUV(indexData:Vector.<uint>, uvData:Vector.<Number>, triangleIndex:uint, v:Number, w:Number, u:Number, uvOffset:uint, uvStride:uint):Point
+		protected function getCollisionUV(indexData:Vector.<uint>, uvData:Vector.<Number>, triangleIndex:uint, v:Number, w:Number, u:Number, uvOffset:uint, uvStride:uint, uv:Point = null):Point
 		{
-			var uv:Point = new Point();
 			var uIndex:uint = indexData[ triangleIndex ]*uvStride + uvOffset;
 			var uv0x:Number = uvData[ uIndex ];
 			var uv0y:Number = uvData[ uIndex +1 ];
@@ -46,6 +52,7 @@ package away3d.core.pick
 			uIndex = indexData[ triangleIndex + 2 ]*uvStride + uvOffset;
 			var uv2x:Number = uvData[ uIndex ];
 			var uv2y:Number = uvData[ uIndex +1 ];
+			if(!uv) uv = new Point();
 			uv.x = u*uv0x + v*uv1x + w*uv2x;
 			uv.y = u*uv0y + v*uv1y + w*uv2y;
 			return uv;

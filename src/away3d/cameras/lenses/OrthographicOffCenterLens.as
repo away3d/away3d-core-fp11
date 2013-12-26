@@ -1,7 +1,6 @@
 package away3d.cameras.lenses
 {
 	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Matrix3DUtils;
 	
 	import flash.geom.Vector3D;
 	
