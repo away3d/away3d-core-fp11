@@ -311,7 +311,7 @@
 		 */
 		public function removeMethod(method:EffectMethodBase):void
 		{
-			if (_effectsPass)
+			if (!_effectsPass)
 				return;
 			_effectsPass.removeMethod(method);
 			
