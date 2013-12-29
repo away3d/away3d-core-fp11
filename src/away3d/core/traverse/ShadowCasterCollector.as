@@ -9,7 +9,9 @@ package away3d.core.traverse
 	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
 	import away3d.materials.MaterialBase;
-	
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 	
 	/**
@@ -43,9 +45,10 @@ package away3d.core.traverse
 				item.renderable = renderable;
 				item.next = _opaqueRenderableHead;
 				item.cascaded = false;
-				var dx:Number = _entryPoint.x - entity.x;
-				var dy:Number = _entryPoint.y - entity.y;
-				var dz:Number = _entryPoint.z - entity.z;
+				var entityScenePos:Vector3D = entity.scenePosition;
+				var dx:Number = _entryPoint.x - entityScenePos.x;
+				var dy:Number = _entryPoint.y - entityScenePos.y;
+				var dz:Number = _entryPoint.z - entityScenePos.z;
 				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z;
 				item.renderSceneTransform = renderable.getRenderSceneTransform(_camera);
 				item.renderOrderId = material._depthPassId;

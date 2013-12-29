@@ -238,9 +238,10 @@ package away3d.core.traverse
 				item.materialId = material._uniqueId;
 				item.renderOrderId = material._renderOrderId;
 				item.cascaded = false;
-				var dx:Number = _entryPoint.x - entity.x;
-				var dy:Number = _entryPoint.y - entity.y;
-				var dz:Number = _entryPoint.z - entity.z;
+				var entityScenePos:Vector3D = entity.scenePosition;
+				var dx:Number = _entryPoint.x - entityScenePos.x;
+				var dy:Number = _entryPoint.y - entityScenePos.y;
+				var dz:Number = _entryPoint.z - entityScenePos.z;
 				// project onto camera's z-axis
 				item.zIndex = dx*_cameraForward.x + dy*_cameraForward.y + dz*_cameraForward.z + entity.zOffset;
 				item.renderSceneTransform = renderable.getRenderSceneTransform(_camera);
