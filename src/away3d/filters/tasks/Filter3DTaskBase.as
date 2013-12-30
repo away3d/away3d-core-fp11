@@ -8,7 +8,9 @@ package away3d.filters.tasks
 	import away3d.errors.AbstractMethodError;
 	
 	import com.adobe.utils.AGALMiniAssembler;
-	
+
+	import flash.display3D.Context3D;
+
 	import flash.display3D.Context3DProgramType;
 	
 	import flash.display3D.Context3DTextureFormat;
@@ -19,7 +21,7 @@ package away3d.filters.tasks
 	public class Filter3DTaskBase
 	{
 		protected var _mainInputTexture:Texture;
-		
+		protected var _mainInputTextureContext:Context3D;
 		protected var _scaledTextureWidth:int = -1;
 		protected var _scaledTextureHeight:int = -1;
 		protected var _textureWidth:int = -1;
@@ -27,6 +29,7 @@ package away3d.filters.tasks
 		private var _textureDimensionsInvalid:Boolean = true;
 		private var _program3DInvalid:Boolean = true;
 		private var _program3D:Program3D;
+		private var _program3DContext:Context3D;
 		private var _target:Texture;
 		private var _requireDepthRender:Boolean;
 		protected var _textureScale:int = 0;
@@ -75,6 +78,7 @@ package away3d.filters.tasks
 				return;
 			_textureWidth = value;
 			_scaledTextureWidth = _textureWidth >> _textureScale;
+			if(_scaledTextureWidth < 1) _scaledTextureWidth = 1;
 			_textureDimensionsInvalid = true;
 		}
 		
@@ -89,11 +93,16 @@ package away3d.filters.tasks
 				return;
 			_textureHeight = value;
 			_scaledTextureHeight = _textureHeight >> _textureScale;
+			if(_scaledTextureHeight < 1) _scaledTextureHeight = 1;
 			_textureDimensionsInvalid = true;
 		}
 		
 		public function getMainInputTexture(stage:Stage3DProxy):Texture
 		{
+			if(stage.context3D!=_mainInputTextureContext){
+				_textureDimensionsInvalid = true;
+			}
+
 			if (_textureDimensionsInvalid)
 				updateTextures(stage);
 			
@@ -106,6 +115,7 @@ package away3d.filters.tasks
 				_mainInputTexture.dispose();
 			if (_program3D)
 				_program3D.dispose();
+			_program3DContext = null;
 		}
 		
 		protected function invalidateProgram3D():void
@@ -117,7 +127,8 @@ package away3d.filters.tasks
 		{
 			if (_program3D)
 				_program3D.dispose();
-			_program3D = stage.context3D.createProgram();
+			_program3DContext = stage.context3D;
+			_program3D = _program3DContext.createProgram();
 			_program3D.upload(new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, getVertexCode()),
 				new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, getFragmentCode()));
 			_program3DInvalid = false;
@@ -139,14 +150,18 @@ package away3d.filters.tasks
 		{
 			if (_mainInputTexture)
 				_mainInputTexture.dispose();
-			
-			_mainInputTexture = stage.context3D.createTexture(_scaledTextureWidth, _scaledTextureHeight, Context3DTextureFormat.BGRA, true);
+			_mainInputTextureContext = stage.context3D;
+			_mainInputTexture = _mainInputTextureContext.createTexture(_scaledTextureWidth, _scaledTextureHeight, Context3DTextureFormat.BGRA, true);
 			
 			_textureDimensionsInvalid = false;
 		}
 		
 		public function getProgram3D(stage3DProxy:Stage3DProxy):Program3D
 		{
+			if(_program3DContext != stage3DProxy.context3D) {
+				_program3DInvalid = true;
+			}
+
 			if (_program3DInvalid)
 				updateProgram3D(stage3DProxy);
 			return _program3D;

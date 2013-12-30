@@ -4,6 +4,7 @@ package away3d.core.render
 {
 	import away3d.cameras.*;
 	import away3d.core.managers.*;
+	import away3d.events.Stage3DEvent;
 	import away3d.filters.*;
 	import away3d.filters.tasks.*;
 	
@@ -27,8 +28,13 @@ package away3d.core.render
 		public function Filter3DRenderer(stage3DProxy:Stage3DProxy)
 		{
 			_stage3DProxy = stage3DProxy;
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DRecreated);
 			_rttManager = RTTBufferManager.getInstance(stage3DProxy);
 			_rttManager.addEventListener(Event.RESIZE, onRTTResize);
+		}
+
+		private function onContext3DRecreated(event:Stage3DEvent):void {
+			_filterSizesInvalid = true;
 		}
 		
 		private function onRTTResize(event:Event):void
@@ -161,6 +167,7 @@ package away3d.core.render
 		{
 			_rttManager.removeEventListener(Event.RESIZE, onRTTResize);
 			_rttManager = null;
+			_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DRecreated);
 			_stage3DProxy = null;
 		}
 	}

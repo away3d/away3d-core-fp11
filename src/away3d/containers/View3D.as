@@ -208,17 +208,24 @@
 		
 		public function set stage3DProxy(stage3DProxy:Stage3DProxy):void
 		{
-			if (_stage3DProxy)
+			if (_stage3DProxy) {
 				_stage3DProxy.removeEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
-			
+				_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DRecreated);
+			}
+
 			_stage3DProxy = stage3DProxy;
 			
 			_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
-			
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DRecreated);
+
 			_renderer.stage3DProxy = _depthRenderer.stage3DProxy = _stage3DProxy;
 			
 			_globalPosDirty = true;
 			_backBufferInvalid = true;
+		}
+
+		private function onContext3DRecreated(event:Stage3DEvent):void {
+			_depthTextureInvalid = true;
 		}
 		
 		/**
@@ -604,7 +611,7 @@
 							_height = 2048;
 					}
 					
-					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias, true);
+					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias);
 					_backBufferInvalid = false;
 				} else {
 					width = stage.stageWidth;
@@ -797,6 +804,7 @@
 		public function dispose():void
 		{
 			_stage3DProxy.removeEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
+			_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DRecreated);
 			if (!shareContext)
 				_stage3DProxy.dispose();
 			_renderer.dispose();
@@ -920,7 +928,7 @@
 			if (!_stage3DProxy) {
 				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
 				_stage3DProxy.addEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
-				
+				_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContext3DRecreated);
 			}
 			
 			_globalPosDirty = true;

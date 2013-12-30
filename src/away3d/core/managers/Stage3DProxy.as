@@ -14,7 +14,7 @@ package away3d.core.managers
 	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.geom.Rectangle;
-	
+
 	use namespace arcane;
 	
 	[Event(name="enterFrame", type="flash.events.Event")]
@@ -33,7 +33,7 @@ package away3d.core.managers
 	public class Stage3DProxy extends EventDispatcher
 	{
 		private static var _frameEventDriver:Shape = new Shape();
-		
+
 		arcane var _context3D:Context3D;
 		arcane var _stage3DIndex:int = -1;
 		
@@ -46,6 +46,7 @@ package away3d.core.managers
 		private var _backBufferHeight:int;
 		private var _antiAlias:int;
 		private var _enableDepthAndStencil:Boolean;
+		private var _backBufferEnableDepthAndStencil:Boolean = true;
 		private var _contextRequested:Boolean;
 		//private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
 		//private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
@@ -120,7 +121,7 @@ package away3d.core.managers
 			_stage3DManager = stage3DManager;
 			_viewPort = new Rectangle();
 			_enableDepthAndStencil = true;
-			
+
 			// whatever happens, be sure this has highest priority
 			_stage3D.addEventListener(Event.CONTEXT3D_CREATE, onContext3DUpdate, false, 1000, false);
 			requestContext(forceSoftware, profile);
@@ -143,7 +144,7 @@ package away3d.core.managers
 			_stage3DManager = null;
 			_stage3DIndex = -1;
 		}
-		
+
 		/**
 		 * Configures the back buffer associated with the Stage3D object.
 		 * @param backBufferWidth The width of the backbuffer.
@@ -151,8 +152,10 @@ package away3d.core.managers
 		 * @param antiAlias The amount of anti-aliasing to use.
 		 * @param enableDepthAndStencil Indicates whether the back buffer contains a depth and stencil buffer.
 		 */
-		public function configureBackBuffer(backBufferWidth:int, backBufferHeight:int, antiAlias:int, enableDepthAndStencil:Boolean):void
+		public function configureBackBuffer(backBufferWidth:int, backBufferHeight:int, antiAlias:int):void
 		{
+			if(backBufferWidth<50) backBufferWidth = 50;
+			if(backBufferHeight<50) backBufferHeight = 50;
 			var oldWidth:uint = _backBufferWidth;
 			var oldHeight:uint = _backBufferHeight;
 			
@@ -163,10 +166,9 @@ package away3d.core.managers
 				notifyViewportUpdated();
 			
 			_antiAlias = antiAlias;
-			_enableDepthAndStencil = enableDepthAndStencil;
-			
+
 			if (_context3D)
-				_context3D.configureBackBuffer(backBufferWidth, backBufferHeight, antiAlias, enableDepthAndStencil);
+				_context3D.configureBackBuffer(backBufferWidth, backBufferHeight, antiAlias, _backBufferEnableDepthAndStencil);
 		}
 		
 		/*
@@ -216,7 +218,7 @@ package away3d.core.managers
 				return;
 			
 			if (_backBufferDirty) {
-				configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+				configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias);
 				_backBufferDirty = false;
 			}
 			
@@ -381,10 +383,11 @@ package away3d.core.managers
 		{
 			if (_viewPort.width == width)
 				return;
-			
+
+			if(width<50) width = 50;
 			_backBufferWidth = _viewPort.width = width;
 			_backBufferDirty = true;
-			
+
 			notifyViewportUpdated();
 		}
 		
@@ -400,7 +403,8 @@ package away3d.core.managers
 		{
 			if (_viewPort.height == height)
 				return;
-			
+
+			if(height<50) height = 50;
 			_backBufferHeight = _viewPort.height = height;
 			_backBufferDirty = true;
 			
@@ -517,12 +521,12 @@ package away3d.core.managers
 				_context3D.enableErrorChecking = Debug.active;
 				
 				_usesSoftwareRendering = (_context3D.driverInfo.indexOf('Software') == 0);
-				
+
 				// Only configure back buffer if width and height have been set,
 				// which they may not have been if View3D.render() has yet to be
 				// invoked for the first time.
 				if (_backBufferWidth && _backBufferHeight)
-					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _enableDepthAndStencil);
+					_context3D.configureBackBuffer(_backBufferWidth, _backBufferHeight, _antiAlias, _backBufferEnableDepthAndStencil);
 				
 				// Dispatch the appropriate event depending on whether context was
 				// created for the first time or recreated after a device loss.
@@ -598,6 +602,15 @@ package away3d.core.managers
 			if (!_context3D)
 				return;
 			_context3D.clear(0, 0, 0, 1, 1, 0, Context3DClearMask.DEPTH);
+		}
+
+		public function get backBufferEnableDepthAndStencil():Boolean {
+			return _backBufferEnableDepthAndStencil;
+		}
+
+		public function set backBufferEnableDepthAndStencil(value:Boolean):void {
+			_backBufferEnableDepthAndStencil = value;
+			_backBufferDirty = true;
 		}
 	}
 }

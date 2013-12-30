@@ -1,5 +1,6 @@
 package away3d.core.managers
 {
+	import away3d.events.Stage3DEvent;
 	import away3d.tools.utils.TextureUtils;
 	
 	import flash.display3D.Context3D;
@@ -40,8 +41,9 @@ package away3d.core.managers
 			_renderToTextureRect = new Rectangle();
 			
 			_stage3DProxy = stage3DProxy;
+			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContextRecreated);
 		}
-		
+
 		public static function getInstance(stage3DProxy:Stage3DProxy):RTTBufferManager
 		{
 			if (!stage3DProxy)
@@ -155,6 +157,7 @@ package away3d.core.managers
 		public function dispose():void
 		{
 			delete _instances[_stage3DProxy];
+			_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContextRecreated);
 			if (_indexBuffer) {
 				_indexBuffer.dispose();
 				_renderToScreenVertexBuffer.dispose();
@@ -163,6 +166,14 @@ package away3d.core.managers
 				_renderToTextureVertexBuffer = null;
 				_indexBuffer = null;
 			}
+		}
+
+
+		private function onContextRecreated(event:Stage3DEvent):void {
+			_indexBuffer = null;
+			_renderToTextureVertexBuffer = null;
+			_renderToScreenVertexBuffer = null;
+			updateRTTBuffers();
 		}
 		
 		// todo: place all this in a separate model, since it's used all over the place
@@ -174,7 +185,7 @@ package away3d.core.managers
 			var textureVerts:Vector.<Number>;
 			var screenVerts:Vector.<Number>;
 			var x:Number, y:Number;
-			
+
 			_renderToTextureVertexBuffer ||= context.createVertexBuffer(4, 5);
 			_renderToScreenVertexBuffer ||= context.createVertexBuffer(4, 5);
 			
