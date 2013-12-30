@@ -277,21 +277,27 @@ package away3d.core.math {
 			var a:Number = raw[0];
 			var e:Number = raw[1];
 			var i:Number = raw[2];
+			var m:Number = raw[3];
 			var b:Number = raw[4];
 			var f:Number = raw[5];
 			var j:Number = raw[6];
+			var n:Number = raw[7];
 			var c:Number = raw[8];
 			var g:Number = raw[9];
 			var k:Number = raw[10];
+			var o:Number = raw[11];
 			var d:Number = raw[12];
 			var h:Number = raw[13];
 			var l:Number = raw[14];
+			var p:Number = raw[15];
+
 			var x:Number = vector.x;
 			var y:Number = vector.y;
 			var z:Number = vector.z;
 			result.x = a * x + b * y + c * z + d;
 			result.y = e * x + f * y + g * z + h;
 			result.z = i * x + j * y + k * z + l;
+			result.w = m * x + n * y + o * z + p;
 			return result;
 		}
 
@@ -302,18 +308,22 @@ package away3d.core.math {
 			var a:Number = raw[0];
 			var e:Number = raw[1];
 			var i:Number = raw[2];
+			var m:Number = raw[3];
 			var b:Number = raw[4];
 			var f:Number = raw[5];
 			var j:Number = raw[6];
+			var n:Number = raw[7];
 			var c:Number = raw[8];
 			var g:Number = raw[9];
 			var k:Number = raw[10];
+			var o:Number = raw[11];
 			var x:Number = vector.x;
 			var y:Number = vector.y;
 			var z:Number = vector.z;
 			result.x = a * x + b * y + c * z;
 			result.y = e * x + f * y + g * z;
 			result.z = i * x + j * y + k * z;
+			result.w = m * x + n * y + o * z;
 			return result;
 		}
 	}
