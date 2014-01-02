@@ -483,8 +483,11 @@ package away3d.core.base
 		
 		public function set pivotPoint(pivot:Vector3D):void
 		{
-			_pivotPoint = pivot.clone();
-			
+			if(!_pivotPoint) _pivotPoint = new Vector3D();
+			_pivotPoint.x = pivot.x;
+			_pivotPoint.y = pivot.y;
+			_pivotPoint.z = pivot.z;
+
 			invalidatePivot();
 		}
 		
@@ -692,7 +695,7 @@ package away3d.core.base
 		 */
 		public function movePivot(dx:Number, dy:Number, dz:Number):void
 		{
-			_pivotPoint ||= new Vector3D();
+			if(!_pivotPoint) _pivotPoint = new Vector3D();
 			_pivotPoint.x += dx;
 			_pivotPoint.y += dy;
 			_pivotPoint.z += dz;
@@ -921,16 +924,26 @@ package away3d.core.base
 			_rot.x = _rotationX;
 			_rot.y = _rotationY;
 			_rot.z = _rotationZ;
-			
-			_sca.x = _scaleX;
-			_sca.y = _scaleY;
-			_sca.z = _scaleZ;
-			
-			_transform.recompose(_transformComponents);
-			
+
 			if (!_pivotZero) {
-				_transform.prependTranslation(-_pivotPoint.x, -_pivotPoint.y, -_pivotPoint.z);
+				_sca.x = 1;
+				_sca.y = 1;
+				_sca.z = 1;
+
+				_transform.recompose(_transformComponents);
 				_transform.appendTranslation(_pivotPoint.x, _pivotPoint.y, _pivotPoint.z);
+				_transform.prependTranslation(-_pivotPoint.x, -_pivotPoint.y, -_pivotPoint.z);
+				_transform.prependScale(_scaleX, _scaleY, _scaleZ);
+
+				_sca.x = _scaleX;
+				_sca.y = _scaleY;
+				_sca.z = _scaleZ;
+			}else{
+				_sca.x = _scaleX;
+				_sca.y = _scaleY;
+				_sca.z = _scaleZ;
+
+				_transform.recompose(_transformComponents);
 			}
 			
 			_transformDirty = false;
