@@ -7,6 +7,7 @@ package away3d.core.render
 	import com.adobe.utils.AGALMiniAssembler;
 	
 	import flash.display3D.Context3D;
+	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
@@ -97,6 +98,7 @@ package away3d.core.render
 			if (!_vertexBuffer)
 				initBuffers(context);
 			
+			context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			context.setProgram(_program3d);
 			context.setTextureAt(0, _texture.getTextureForStage3D(_stage3DProxy));
 			context.setVertexBufferAt(0, _vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);

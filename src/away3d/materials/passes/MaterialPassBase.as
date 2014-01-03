@@ -432,7 +432,11 @@ package away3d.materials.passes
 				stage3DProxy.setRenderTarget(_oldTarget, _oldDepthStencil, _oldSurface);
 				stage3DProxy.scissorRect = _oldRect;
 			}
-			
+
+			if(_enableBlending) {
+				stage3DProxy._context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+			}
+
 			stage3DProxy._context3D.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 		}
 		

@@ -335,6 +335,7 @@
 			if (subSet.vertexContext3D != stage3DProxy.context3D || subSet.vertexBufferDirty) {
 				subSet.vertexBuffer = stage3DProxy._context3D.createVertexBuffer(subSet.numVertices, 11);
 				subSet.vertexBuffer.uploadFromVector(subSet.vertices, 0, subSet.numVertices);
+				vertexBuffer = subSet.vertexBuffer;
 				subSet.vertexBufferDirty = false;
 				subSet.vertexContext3D = stage3DProxy.context3D;
 			}
