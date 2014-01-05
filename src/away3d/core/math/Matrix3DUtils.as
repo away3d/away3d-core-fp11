@@ -326,5 +326,11 @@ package away3d.core.math {
 			result.w = m * x + n * y + o * z;
 			return result;
 		}
+
+		public static function getTranslation(transform:Matrix3D, result:Vector3D = null):Vector3D {
+			if(!result) result = new Vector3D();
+			transform.copyColumnTo(3, result);
+			return result;
+		}
 	}
 }

@@ -1,9 +1,12 @@
 package away3d.controllers
 {
 	import away3d.containers.*;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.*;
 	import away3d.events.*;
-	
+
+	import flash.geom.Matrix3D;
+
 	import flash.geom.Vector3D;
 	
 	/**
@@ -17,7 +20,7 @@ package away3d.controllers
 		protected var _lookAtObject:ObjectContainer3D;
 		protected var _origin:Vector3D = new Vector3D(0.0, 0.0, 0.0);
 		protected var _upAxis:Vector3D = Vector3D.Y_AXIS;
-
+		private var _pos:Vector3D = new Vector3D();
 		/**
 		 * Creates a new <code>LookAtController</code> object.
 		 */
@@ -101,11 +104,26 @@ package away3d.controllers
 			interpolate = interpolate; // prevents unused warning
 			
 			if (_targetObject) {
-				
 				if (_lookAtPosition) {
 					_targetObject.lookAt(_lookAtPosition, _upAxis);
 				} else if (_lookAtObject) {
-					_targetObject.lookAt(_lookAtObject.scene ? _lookAtObject.scenePosition : _lookAtObject.position, _upAxis);
+					if(_targetObject.parent && _lookAtObject.parent) {
+						if(_targetObject.parent != _lookAtObject.parent) {// different spaces
+							_pos.x = _lookAtObject.scenePosition.x;
+							_pos.y = _lookAtObject.scenePosition.y;
+							_pos.z = _lookAtObject.scenePosition.z;
+							Matrix3DUtils.transformVector(_targetObject.parent.inverseSceneTransform, _pos, _pos);
+						}else{//one parent
+							Matrix3DUtils.getTranslation(_lookAtObject.transform, _pos);
+						}
+					}else if(_lookAtObject.scene){
+						_pos.x = _lookAtObject.scenePosition.x;
+						_pos.y = _lookAtObject.scenePosition.y;
+						_pos.z = _lookAtObject.scenePosition.z;
+					}else{
+						Matrix3DUtils.getTranslation(_lookAtObject.transform, _pos);
+					}
+					_targetObject.lookAt(_pos, _upAxis);
 				}
 			}
 		}

@@ -29,6 +29,7 @@ package away3d.controllers
 		private var _steps:uint = 8;
 		private var _yFactor:Number = 2;
 		private var _wrapPanAngle:Boolean = false;
+		private var _pos:Vector3D = new Vector3D();
 		
 		/**
 		 * Fractional step taken each time the <code>hover()</code> method is called. Defaults to 8.
@@ -301,12 +302,39 @@ package away3d.controllers
 					_currentPanAngle = _panAngle;
 				}
 			}
-			
-			var pos:Vector3D = (lookAtObject)? lookAtObject.position : (lookAtPosition)? lookAtPosition : _origin;
-			targetObject.x = pos.x + distance*Math.sin(_currentPanAngle*MathConsts.DEGREES_TO_RADIANS)*Math.cos(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS);
-			targetObject.z = pos.z + distance*Math.cos(_currentPanAngle*MathConsts.DEGREES_TO_RADIANS)*Math.cos(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS);
-			targetObject.y = pos.y + distance*Math.sin(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS)*yFactor;
-			
+
+			if(!_targetObject) return;
+
+			if (_lookAtPosition) {
+				_pos.x = _lookAtPosition.x;
+				_pos.y = _lookAtPosition.y;
+				_pos.z = _lookAtPosition.z;
+			} else if (_lookAtObject) {
+				if(_targetObject.parent && _lookAtObject.parent) {
+					if(_targetObject.parent != _lookAtObject.parent) {// different spaces
+						_pos.x = _lookAtObject.scenePosition.x;
+						_pos.y = _lookAtObject.scenePosition.y;
+						_pos.z = _lookAtObject.scenePosition.z;
+						Matrix3DUtils.transformVector(_targetObject.parent.inverseSceneTransform, _pos, _pos);
+					}else{//one parent
+						Matrix3DUtils.getTranslation(_lookAtObject.transform, _pos);
+					}
+				}else if(_lookAtObject.scene){
+					_pos.x = _lookAtObject.scenePosition.x;
+					_pos.y = _lookAtObject.scenePosition.y;
+					_pos.z = _lookAtObject.scenePosition.z;
+				}else{
+					Matrix3DUtils.getTranslation(_lookAtObject.transform, _pos);
+				}
+			}else{
+				_pos.x = _origin.x;
+				_pos.y = _origin.y;
+				_pos.z = _origin.z;
+			}
+
+			_targetObject.x = _pos.x + _distance*Math.sin(_currentPanAngle*MathConsts.DEGREES_TO_RADIANS)*Math.cos(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS);
+			_targetObject.z = _pos.z + _distance*Math.cos(_currentPanAngle*MathConsts.DEGREES_TO_RADIANS)*Math.cos(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS);
+			_targetObject.y = _pos.y + _distance*Math.sin(_currentTiltAngle*MathConsts.DEGREES_TO_RADIANS)*_yFactor;
 			super.update();
 		}
 	}
