@@ -729,7 +729,7 @@
 		/**
 		 * The maximum total number of lights provided by the light picker.
 		 */
-		private function get numLights():int
+		protected function get numLights():int
 		{
 			return _lightPicker? _lightPicker.numLightProbes + _lightPicker.numDirectionalLights + _lightPicker.numPointLights +
 				_lightPicker.numCastingDirectionalLights + _lightPicker.numCastingPointLights : 0;

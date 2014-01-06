@@ -39,6 +39,7 @@ package away3d.materials
 		public function set animateUVs(value:Boolean):void
 		{
 			_animateUVs = value;
+			invalidateScreenPasses();
 		}
 		
 		/**
@@ -71,8 +72,19 @@ package away3d.materials
 		override protected function updateScreenPasses():void
 		{
 			super.updateScreenPasses();
-			if (_effectsPass)
+
+			if(_effectsPass && numLights == 0) {
 				_effectsPass.animateUVs = _animateUVs;
+			}
+			if(_casterLightPass) {
+				_casterLightPass.animateUVs = _animateUVs;
+			}
+			if(_nonCasterLightPasses) {
+				var length:uint = _nonCasterLightPasses.length;
+				for(var i:uint = 0; i<length; i++) {
+					_nonCasterLightPasses[i].animateUVs = _animateUVs;
+				}
+			}
 		}
 	}
 }
