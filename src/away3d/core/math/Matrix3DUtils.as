@@ -332,5 +332,32 @@ package away3d.core.math {
 			transform.copyColumnTo(3, result);
 			return result;
 		}
+
+		public static function deltaTransformVectors(matrix:Matrix3D, vin:Vector.<Number>, vout:Vector.<Number>):void {
+			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+			matrix.copyRawDataTo(raw);
+			var a:Number = raw[0];
+			var e:Number = raw[1];
+			var i:Number = raw[2];
+			var m:Number = raw[3];
+			var b:Number = raw[4];
+			var f:Number = raw[5];
+			var j:Number = raw[6];
+			var n:Number = raw[7];
+			var c:Number = raw[8];
+			var g:Number = raw[9];
+			var k:Number = raw[10];
+			var o:Number = raw[11];
+			var outIndex:uint = 0;
+			var length:Number = vin.length;
+			for(var index:uint = 0; index<length; index+=3) {
+				var x:Number = vin[index];
+				var y:Number = vin[index+1];
+				var z:Number = vin[index+2];
+				vout[outIndex++] = a * x + b * y + c * z;
+				vout[outIndex++] = e * x + f * y + g * z;
+				vout[outIndex++] = i * x + j * y + k * z;
+			}
+		}
 	}
 }

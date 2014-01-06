@@ -2,6 +2,7 @@ package away3d.tools.commands
 {
 	import away3d.containers.*;
 	import away3d.core.base.*;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.*;
 	import away3d.materials.*;
 	import away3d.tools.utils.*;
@@ -271,7 +272,7 @@ package away3d.tools.commands
 					
 					if (!_objectSpace) {
 						mesh.sceneTransform.transformVectors(vertices, vertices);
-						mesh.sceneTransform.transformVectors(normals, normals);
+						Matrix3DUtils.deltaTransformVectors(mesh.sceneTransform,normals, normals);
 						
 						// Copy vertex data from temporary (transformed) vectors
 						vIdx = vo.vertices.length;
