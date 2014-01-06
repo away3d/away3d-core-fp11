@@ -152,15 +152,19 @@ package away3d.bounds
 			var maxX:Number, maxY:Number, maxZ:Number;
 			
 			if (numSubGeoms > 0) {
+				var subGeom:ISubGeometry = subGeoms[0];
+				var vertices:Vector.<Number> = subGeom.vertexData;
+				var i:uint = subGeom.vertexOffset;
+				minX = maxX = vertices[i];
+				minY = maxY = vertices[i + 1];
+				minZ = maxZ = vertices[i + 2];
+
 				var j:uint = 0;
-				minX = minY = minZ = Number.POSITIVE_INFINITY;
-				maxX = maxY = maxZ = Number.NEGATIVE_INFINITY;
-				
 				while (j < numSubGeoms) {
-					var subGeom:ISubGeometry = subGeoms[j++];
-					var vertices:Vector.<Number> = subGeom.vertexData;
+					subGeom = subGeoms[j++];
+					vertices = subGeom.vertexData;
 					var vertexDataLen:uint = vertices.length;
-					var i:uint = subGeom.vertexOffset;
+					i = subGeom.vertexOffset;
 					var stride:uint = subGeom.vertexStride;
 					
 					while (i < vertexDataLen) {
