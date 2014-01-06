@@ -65,6 +65,12 @@ package away3d.stereo
 		
 		override public function render():void
 		{
+			//if context3D has Disposed by the OS,don't render at this frame
+			if (!stage3DProxy.recoverFromDisposal()) {
+				_backBufferInvalid = true;
+				return;
+			}
+
 			if (_stereoEnabled) {
 				// reset or update render settings
 				if (_backBufferInvalid)
