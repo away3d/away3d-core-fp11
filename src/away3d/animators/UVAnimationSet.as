@@ -26,9 +26,12 @@ package away3d.animators
 		 */
 		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
 		{
-			_agalCode = "mov " + targetRegisters[0] + ", " + sourceRegisters[0] + "\n";
-			
-			return "";
+			var len:uint = targetRegisters.length;
+			_agalCode = "";
+			for(var i:uint = 0; i<len; i++) {
+				_agalCode += "mov " + targetRegisters[i] + ", " + sourceRegisters[i] + "\n";
+			}
+			return _agalCode;
 		}
 		
 		/**
@@ -64,8 +67,8 @@ package away3d.animators
 			var idConstant:int = pass.numUsedVertexConstants;
 			var uvTranslateReg:String = "vc" + (idConstant);
 			var uvTransformReg:String = "vc" + (idConstant + 4);
-			
-			_agalCode += "mov " + tempUV + ", " + UVSource + "\n";
+
+			_agalCode = "mov " + tempUV + ", " + UVSource + "\n";
 			_agalCode += "sub " + tempUV + ".xy, " + tempUV + ".xy, " + uvTranslateReg + ".zw \n";
 			_agalCode += "m44 " + tempUV + ", " + tempUV + ", " + uvTransformReg + "\n";
 			_agalCode += "add " + tempUV + ".xy, " + tempUV + ".xy, " + uvTranslateReg + ".xy \n";
