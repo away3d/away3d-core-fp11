@@ -178,7 +178,7 @@ package away3d.materials.passes
 			// do not write depth if not drawing inner lines (will cause the overdraw to hide inner lines)
 			if (!_showInnerLines)
 				context.setDepthTest(false, Context3DCompareMode.LESS);
-			
+			context.setCulling(_defaultCulling);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _colorData, 1);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _offsetData, 1);
 		}
