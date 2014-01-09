@@ -360,6 +360,11 @@ package away3d.materials.passes
 					_blendFactorDest = Context3DBlendFactor.SOURCE_ALPHA;
 					_enableBlending = true;
 					break;
+				case BlendMode.SCREEN:
+					_blendFactorSource = Context3DBlendFactor.ONE;
+					_blendFactorDest = Context3DBlendFactor.ONE_MINUS_SOURCE_COLOR;
+					_enableBlending = true;
+					break;
 				default:
 					throw new ArgumentError("Unsupported blend mode!");
 			}

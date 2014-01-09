@@ -603,7 +603,7 @@
 				if (_effectsPass) {
 					_effectsPass.ignoreLights = true;
 					_effectsPass.depthCompareMode = Context3DCompareMode.LESS_EQUAL;
-					_effectsPass.setBlendMode(BlendMode.LAYER);
+					_effectsPass.setBlendMode(BlendMode.SCREEN);
 					_effectsPass.forceSeparateMVP = forceSeparateMVP;
 				}
 			} else if (_effectsPass) {
