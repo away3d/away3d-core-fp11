@@ -181,8 +181,6 @@ package away3d.core.math {
 			return target;
 		}
 
-
-
 		public static function decompose(sourceMatrix:Matrix3D, orientationStyle:String = "eulerAngles"):Vector.<Vector3D> {
 			var raw:Vector.<Number> = RAW_DATA_CONTAINER;
 			sourceMatrix.copyRawDataTo(raw);
@@ -210,6 +208,10 @@ package away3d.core.math {
 			var scaleY:Number = ty;
 			var scaleZ:Number = tz;
 
+			if (a*(f*k - j*g) - e*(b*k - j*c) + i*(b*g - f*c) < 0) {
+				scaleZ = -scaleZ;
+			}
+
 			a = a / scaleX;
 			e = e / scaleX;
 			i = i / scaleX;
@@ -224,7 +226,9 @@ package away3d.core.math {
 			if (orientationStyle == Orientation3D.EULER_ANGLES) {
 				tx = Math.atan2(j, k);
 				ty = Math.atan2(-i, Math.sqrt(a * a + e * e));
-				tz = Math.atan2(e, a);
+				var s1:Number = Math.sin(tx);
+				var c1:Number = Math.cos(tx);
+				tz = Math.atan2(s1*c-c1*b, c1*f - s1*g);
 			} else if (orientationStyle == Orientation3D.AXIS_ANGLE) {
 				tw = Math.acos((a + f + k - 1) / 2);
 				var len:Number = Math.sqrt((j - g) * (j - g) + (c - i) * (c - i) + (e - b) * (e - b));
