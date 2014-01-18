@@ -160,7 +160,7 @@ package away3d.core.render
 				_filters[i].textureHeight = _rttManager.textureHeight;
 			}
 			
-			_filterSizesInvalid = true;
+			_filterSizesInvalid = false;
 		}
 		
 		public function dispose():void
