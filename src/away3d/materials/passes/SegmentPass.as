@@ -3,6 +3,7 @@
 	import away3d.arcane;
 	import away3d.cameras.Camera3D;
 	import away3d.core.base.IRenderable;
+	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.SegmentSet;
 	
@@ -63,7 +64,7 @@
 				"add vt4.x, vt0.z, vc7.z			\n" + // Q0.z + ( -Camera.near )
 				"sub vt4.y, vt0.z, vt1.z			\n" + // Q0.z - Q1.z
 				
-				// fix divide by zero for horizontal lines	
+				// fix divide by zero for horizontal lines
 				"seq vt4.z, vt4.y vc6.x			\n" + // offset = (Q0.z - Q1.z)==0 ? 1 : 0
 				"add vt4.y, vt4.y, vt4.z			\n" + // ( Q0.z - Q1.z ) + offset
 				
@@ -155,7 +156,16 @@
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 7, _constants);
 			
 			// projection matrix
-			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.lens.matrix, true);
+			if (!stage3DProxy.renderTarget)
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.lens.matrix, true);
+			else
+			{
+				//TODO: to find a better way
+				_calcMatrix.copyFrom(camera.lens.matrix);
+				var rttBufferManager:RTTBufferManager = RTTBufferManager.getInstance(stage3DProxy);
+				_calcMatrix.appendScale(rttBufferManager.textureRatioX, rttBufferManager.textureRatioY, 1);
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, _calcMatrix, true);
+			}
 		}
 		
 		/**
