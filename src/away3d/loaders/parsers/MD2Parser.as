@@ -1,23 +1,18 @@
 package away3d.loaders.parsers
 {
-	import flash.net.URLRequest;
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
-	import flash.utils.Endian;
+	import away3d.*;
+	import away3d.animators.*;
+	import away3d.animators.nodes.*;
+	import away3d.core.base.*;
+	import away3d.entities.*;
+	import away3d.loaders.misc.*;
+	import away3d.loaders.parsers.utils.*;
+	import away3d.materials.*;
+	import away3d.materials.utils.*;
+	import away3d.textures.*;
 	
-	import away3d.arcane;
-	import away3d.animators.VertexAnimationSet;
-	import away3d.animators.nodes.VertexClipNode;
-	import away3d.core.base.CompactSubGeometry;
-	import away3d.core.base.Geometry;
-	import away3d.entities.Mesh;
-	import away3d.loaders.misc.ResourceDependency;
-	import away3d.loaders.parsers.utils.ParserUtil;
-	import away3d.materials.MaterialBase;
-	import away3d.materials.TextureMaterial;
-	import away3d.materials.TextureMultiPassMaterial;
-	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.textures.Texture2DBase;
+	import flash.net.*;
+	import flash.utils.*;
 	
 	use namespace arcane;
 	
@@ -57,6 +52,7 @@ package away3d.loaders.parsers
 		private var _uvIndices:Vector.<Number>;
 		private var _indices:Vector.<uint>;
 		private var _vertIndices:Vector.<Number>;
+		private var _indexMap:Dictionary = new Dictionary(true);
 		
 		// the current subgeom being built
 		private var _animationSet:VertexAnimationSet = new VertexAnimationSet();
@@ -348,9 +344,9 @@ package away3d.loaders.parsers
 			var index:int = findIndex(vertexIndex, uvIndex);
 			
 			if (index == -1) {
-				_indices.push(_vertIndices.length);
+				_indices.push((_indexMap[vertexIndex] ||= new Dictionary(true))[uvIndex] = _vertIndices.length);
 				_vertIndices.push(vertexIndex);
-				_uvIndices.push(uvIndex);
+				_uvIndices.push(uvIndex);	
 			} else
 				_indices.push(index);
 		}
@@ -363,12 +359,8 @@ package away3d.loaders.parsers
 		 */
 		private function findIndex(vertexIndex:uint, uvIndex:uint):int
 		{
-			var len:uint = _vertIndices.length;
-			
-			for (var i:uint = 0; i < len; ++i) {
-				if (_vertIndices[i] == vertexIndex && _uvIndices[i] == uvIndex)
-					return i;
-			}
+			if (_indexMap[vertexIndex] != null && _indexMap[vertexIndex][uvIndex] != null)
+				return _indexMap[vertexIndex][uvIndex];
 			
 			return -1;
 		}

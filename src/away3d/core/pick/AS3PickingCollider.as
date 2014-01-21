@@ -46,7 +46,7 @@ package away3d.core.pick
 			var vertexData:Vector.<Number> = subMesh.vertexData;
 			var uvData:Vector.<Number> = subMesh.UVData;
 			var collisionTriangleIndex:int = -1;
-			var bothSides:Boolean = subMesh.material.bothSides;
+			var bothSides:Boolean = (subMesh.material && subMesh.material.bothSides);
 			
 			var vertexStride:uint = subMesh.vertexStride;
 			var vertexOffset:uint = subMesh.vertexOffset;

@@ -1,15 +1,12 @@
 package away3d.core.base
 {
-	import away3d.arcane;
+	import away3d.*;
 	import away3d.controllers.*;
 	import away3d.core.math.*;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.events.*;
 	import away3d.library.assets.*;
 	
-	import flash.geom.Matrix3D;
-	import flash.geom.Orientation3D;
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -807,9 +804,16 @@ package away3d.core.base
 		 */
 		public function rotate(axis:Vector3D, angle:Number):void
 		{
-			transform.prependRotation(angle, axis);
+			var m:Matrix3D = new Matrix3D();
+			m.prependRotation(angle, axis);
 			
-			transform = transform;
+			var vec:Vector3D = m.decompose()[1];
+			
+			_rotationX += vec.x;
+			_rotationY += vec.y;
+			_rotationZ += vec.z;
+			
+			invalidateRotation();
 		}
 
 		private static var tempAxeX:Vector3D;

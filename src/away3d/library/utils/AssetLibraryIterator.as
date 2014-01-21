@@ -51,7 +51,7 @@ package away3d.library.utils
 		
 		private function filter(assetTypeFilter:String, namespaceFilter:String, filterFunc:Function):void
 		{
-			if (assetTypeFilter || namespaceFilter) {
+			if (assetTypeFilter || namespaceFilter || filterFunc != null) {
 				var idx:uint;
 				var asset:IAsset;
 				
@@ -73,8 +73,9 @@ package away3d.library.utils
 					
 					_filtered[idx++] = asset;
 				}
-			} else
+			} else {
 				_filtered = _assets;
+			}
 		}
 	}
 }

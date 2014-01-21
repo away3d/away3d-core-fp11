@@ -211,3 +211,12 @@
 - Get rid of compilation warnings in ViewVolume
 - Fix for incorrect sorting with blended entities (Closes #605)
 - Fix to Loader3D when automatically adding root objects to the scene from an AWD file
+
+4.1.5
+- Fix to SegmentSet bounds calculations. Closes #610
+- Added support for new ATF format. Closes #615
+- Fix to background image when using a scissorRect. Closes #622
+- Optimisation to MD2 parser. Closes #631
+- Fix to pitch/roll/yaw/rotate for scaled objects. Closes #626
+- Fix on filter method for custom filterFunc. Closes #619
+- Added support for 4096x4096 textures. Closes #647
