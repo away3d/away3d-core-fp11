@@ -120,32 +120,27 @@ package away3d.materials.passes
 		override protected function updateLights():void
 		{
 			super.updateLights();
-			var numDirectionalLights:int;
-			var numPointLights:int;
-			var numLightProbes:int;
+			var numDirectionalLights:int = _numDirectionalLights;
+			var numPointLights:int = _numPointLights;
+			var numLightProbes:int = _numLightProbes;
 			
 			if (_lightPicker) {
-				numDirectionalLights = calculateNumDirectionalLights(_lightPicker.numDirectionalLights);
-				numPointLights = calculateNumPointLights(_lightPicker.numPointLights);
-				numLightProbes = calculateNumProbes(_lightPicker.numLightProbes);
+				_numDirectionalLights = calculateNumDirectionalLights(_lightPicker.numDirectionalLights);
+				_numPointLights = calculateNumPointLights(_lightPicker.numPointLights);
+				_numLightProbes = calculateNumProbes(_lightPicker.numLightProbes);
 				
 				if (_includeCasters) {
-					numPointLights += _lightPicker.numCastingPointLights;
-					numDirectionalLights += _lightPicker.numCastingDirectionalLights;
+					_numPointLights += _lightPicker.numCastingPointLights;
+					_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
 				}
 			} else {
-				numDirectionalLights = 0;
-				numPointLights = 0;
-				numLightProbes = 0;
+				_numDirectionalLights = 0;
+				_numPointLights = 0;
+				_numLightProbes = 0;
 			}
 			
 			
-			if (numPointLights != _numPointLights ||
-				numDirectionalLights != _numDirectionalLights ||
-				numLightProbes != _numLightProbes) {
-				_numPointLights = numPointLights;
-				_numDirectionalLights = numDirectionalLights;
-				_numLightProbes = numLightProbes;
+			if (numPointLights != _numPointLights || numDirectionalLights != _numDirectionalLights || numLightProbes != _numLightProbes) {
 				invalidateShaderProgram();
 			}
 		
