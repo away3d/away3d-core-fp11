@@ -55,27 +55,26 @@ package away3d.animators
 		 */
 		public function play(name:String, transition:IAnimationTransition = null, offset:Number = NaN):void
 		{
-			if (_activeAnimationName == name)
-				return;
-			
-			_activeAnimationName = name;
-			
-			//TODO: implement transitions in vertex animator
-			
-			if (!_animationSet.hasAnimation(name))
-				throw new Error("Animation root node " + name + " not found!");
-			
-			_activeNode = _animationSet.getAnimation(name);
-			
-			_activeState = getAnimationState(_activeNode);
-			
-			if (updatePosition) {
-				//update straight away to reset position deltas
-				_activeState.update(_absoluteTime);
-				_activeState.positionDelta;
+			if (_activeAnimationName != name) {
+				_activeAnimationName = name;
+				
+				//TODO: implement transitions in vertex animator
+				
+				if (!_animationSet.hasAnimation(name))
+					throw new Error("Animation root node " + name + " not found!");
+				
+				_activeNode = _animationSet.getAnimation(name);
+				
+				_activeState = getAnimationState(_activeNode);
+				
+				if (updatePosition) {
+					//update straight away to reset position deltas
+					_activeState.update(_absoluteTime);
+					_activeState.positionDelta;
+				}
+				
+				_activeVertexState = _activeState as IVertexAnimationState;
 			}
-			
-			_activeVertexState = _activeState as IVertexAnimationState;
 			
 			start();
 			

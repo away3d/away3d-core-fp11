@@ -150,30 +150,29 @@ package away3d.animators
 		 */
 		public function play(name:String, transition:IAnimationTransition = null, offset:Number = NaN):void
 		{
-			if (_activeAnimationName == name)
-				return;
-			
-			_activeAnimationName = name;
-			
-			if (!_animationSet.hasAnimation(name))
-				throw new Error("Animation root node " + name + " not found!");
-			
-			if (transition && _activeNode) {
-				//setup the transition
-				_activeNode = transition.getAnimationNode(this, _activeNode, _animationSet.getAnimation(name), _absoluteTime);
-				_activeNode.addEventListener(AnimationStateEvent.TRANSITION_COMPLETE, onTransitionComplete);
-			} else
-				_activeNode = _animationSet.getAnimation(name);
-			
-			_activeState = getAnimationState(_activeNode);
-			
-			if (updatePosition) {
-				//update straight away to reset position deltas
-				_activeState.update(_absoluteTime);
-				_activeState.positionDelta;
+			if (_activeAnimationName != name) {
+				_activeAnimationName = name;
+				
+				if (!_animationSet.hasAnimation(name))
+					throw new Error("Animation root node " + name + " not found!");
+				
+				if (transition && _activeNode) {
+					//setup the transition
+					_activeNode = transition.getAnimationNode(this, _activeNode, _animationSet.getAnimation(name), _absoluteTime);
+					_activeNode.addEventListener(AnimationStateEvent.TRANSITION_COMPLETE, onTransitionComplete);
+				} else
+					_activeNode = _animationSet.getAnimation(name);
+				
+				_activeState = getAnimationState(_activeNode);
+				
+				if (updatePosition) {
+					//update straight away to reset position deltas
+					_activeState.update(_absoluteTime);
+					_activeState.positionDelta;
+				}
+				
+				_activeSkeletonState = _activeState as ISkeletonAnimationState;
 			}
-			
-			_activeSkeletonState = _activeState as ISkeletonAnimationState;
 			
 			start();
 			
