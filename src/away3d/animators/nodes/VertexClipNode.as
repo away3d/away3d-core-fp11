@@ -66,14 +66,16 @@ package away3d.animators.nodes
 				_totalDelta.z += delta.z;
 			}
 			
-			if (_numFrames > 1 && (_stitchFinalFrame || !_looping)) {
+			if (_stitchFinalFrame && _looping) {
 				_totalDuration += _durations[_numFrames - 1];
-				p1 = _translations[0];
-				p2 = _translations[1];
-				delta = p2.subtract(p1);
-				_totalDelta.x += delta.x;
-				_totalDelta.y += delta.y;
-				_totalDelta.z += delta.z;
+				if (_numFrames > 1) {
+					p1 = _translations[0];
+					p2 = _translations[1];
+					delta = p2.subtract(p1);
+					_totalDelta.x += delta.x;
+					_totalDelta.y += delta.y;
+					_totalDelta.z += delta.z;
+				}
 			}
 		}
 	}

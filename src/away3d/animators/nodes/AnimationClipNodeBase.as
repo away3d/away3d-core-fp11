@@ -111,7 +111,7 @@ package away3d.animators.nodes
 		{
 			_stitchDirty = false;
 			
-			_lastFrame = (_stitchFinalFrame)? _numFrames : _numFrames - 1;
+			_lastFrame = (_looping && _stitchFinalFrame)? _numFrames : _numFrames - 1;
 			
 			_totalDuration = 0;
 			_totalDelta.x = 0;
