@@ -573,7 +573,7 @@ package away3d.loaders.parsers
 		 * Initializes the parsing of data.
 		 * @param frameLimit The maximum duration of a parsing session.
 		 */
-		private function startParsing(frameLimit:Number):void
+		protected function startParsing(frameLimit:Number):void
 		{
 			_frameLimit = frameLimit;
 			_timer = new Timer(_frameLimit, 0);

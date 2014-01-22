@@ -107,17 +107,24 @@ package away3d.loaders.parsers
 		/**
 		 * @inheritDoc
 		 */
+		protected override function startParsing(frameLimit:Number):void
+		{
+			super.startParsing(frameLimit);
+			
+			_byteData = ParserUtil.toByteArray(_data);
+			_byteData.position = 0;
+			_byteData.endian = Endian.LITTLE_ENDIAN;
+			
+			_textures = {};
+			_materials = {};
+			_unfinalized_objects = {};
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
 		protected override function proceedParsing():Boolean
 		{
-			if (!_byteData) {
-				_byteData = ParserUtil.toByteArray(_data);
-				_byteData.position = 0;
-				_byteData.endian = Endian.LITTLE_ENDIAN;
-				
-				_textures = {};
-				_materials = {};
-				_unfinalized_objects = {};
-			}
 			
 			// TODO: With this construct, the loop will run no-op for as long
 			// as there is time once file has finished reading. Consider a nice
