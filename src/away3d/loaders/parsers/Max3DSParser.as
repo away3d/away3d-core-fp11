@@ -635,7 +635,7 @@ package away3d.loaders.parsers
 					var groups:Vector.<uint> = vGroups[(j == 0)? face.a : ((j == 1)? face.b : face.c)];
 					var group:uint = face.smoothGroup;
 					for (k = groups.length - 1; k >= 0; k--) {
-						if ((group & groups[k]) > 0) {
+						if (!group || (group & groups[k]) > 0) {
 							group |= groups[k];
 							groups.splice(k, 1);
 							k = groups.length - 1;
