@@ -205,7 +205,7 @@
 - Updated Bounds to ignore lights
 - Fix to unproject (closes #446)
 - Add wrapPanAngle to FirstPersonController
-- Fix to Wireframe geomtry primitive properties and geometry updates
+- Fix to Wireframe geometry primitive properties and geometry updates
 - Fix for runtime error when removing a lightpicker from a material with a shadow method
 - Fix to GradientDiffuseMethod to stop material from disappearing when no lights are applied
 - Get rid of compilation warnings in ViewVolume
@@ -220,3 +220,25 @@
 - Fix to pitch/roll/yaw/rotate for scaled objects. Closes #626
 - Fix on filter method for custom filterFunc. Closes #619
 - Added support for 4096x4096 textures. Closes #647
+
+4.1.6
+- Memory optimisations for internal Matrix3D and Vector3D use
+- Fix to zIndex calculation on Entities with non-root parent. Closes #659
+- Fix for removing effects methods on a multipass material. Closes #671
+- Updated context loss handling for views with 3D filters. Closes #669
+- Corrected pivot point calculation for scaled meshes. Closes #650
+- Fix for background texture renderer when using BlendMode on a Mesh. Closes #569
+- Fix for controller using targets with non-root parent. Closes #377
+- Compatibility fix for UV animation applied to a multipass material. Closes #553
+- Stability update to StereoView3D. Closes #466
+- Compatibility fix to calling Merge.apply() to meshes with lit materials. Closes #624
+- Compatibility fix for SpriteSheetAnimator applied to materials with shadows enabled. Closes #617
+- Enable doublesided meshes to be used with OutlineMethod. Closes #604
+- Visual discrepancy fix between single pass and multipass materials when using fog effects method. Closes #596
+- Fix to filtered shadow method when using cascading shadows
+- Fix to segment set rendering when using 3d filters
+- Fix to multipass material when using multiple point lights
+- Added useSmoothingGroups option in 3DS parser to allow smoothing on files with no smoothing group data
+- Fix for play method on animators to restart stopped animations when playing the same state
+- Fix to duration property for non-looping animations
+- Updates to AWD and 3DS parser to allow class instance reuse on multiple assets.
