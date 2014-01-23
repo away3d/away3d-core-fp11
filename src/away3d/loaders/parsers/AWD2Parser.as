@@ -37,7 +37,6 @@ package away3d.loaders.parsers
 		//set to "true" to have some traces in the Console
 		private var _debug:Boolean = false;
 		private var _byteData:ByteArray;
-		private var _startedParsing:Boolean;
 		private var _cur_block_id:uint;
 		private var _blocks:Vector.<AWDBlock>;
 		private var _newBlockBytes:ByteArray;
@@ -57,9 +56,8 @@ package away3d.loaders.parsers
 		
 		private var _streaming:Boolean;
 		
-		private var _texture_users:Object = {};
+		private var _texture_users:Object;
 		
-		private var _parsed_header:Boolean;
 		private var _body:ByteArray;
 		
 		private var _defaultTexture:BitmapTexture;
@@ -107,11 +105,7 @@ package away3d.loaders.parsers
 		 */
 		public function AWD2Parser()
 		{
-			super(ParserDataFormat.BINARY);
-			
-			_blocks = new Vector.<AWDBlock>();
-			_blocks[0] = new AWDBlock();
-			_blocks[0].data = null; // Zero address means null in AWD			
+			super(ParserDataFormat.BINARY);		
 			
 			blendModeDic = new Vector.<String>(); // used to translate ints to blendMode-strings
 			blendModeDic.push(BlendMode.NORMAL);
@@ -136,7 +130,6 @@ package away3d.loaders.parsers
 			_depthSizeDic.push(512);
 			_depthSizeDic.push(2048);
 			_depthSizeDic.push(1024);
-			_version = []; // will contain 2 int (major-version, minor-version) for awd-version-check
 		}
 		
 		/**
@@ -251,38 +244,49 @@ package away3d.loaders.parsers
 		/**
 		 * @inheritDoc
 		 */
-		protected override function proceedParsing():Boolean
+		protected override function startParsing(frameLimit:Number):void
 		{
-			if (!_startedParsing) {
-				_byteData = getByteData();
-				_startedParsing = true;
+			super.startParsing(frameLimit);
+			
+			_texture_users = {};
+			
+			_byteData = getByteData();
+			
+			_blocks = new Vector.<AWDBlock>();
+			_blocks[0] = new AWDBlock();
+			_blocks[0].data = null; // Zero address means null in AWD
+			
+			_version = []; // will contain 2 int (major-version, minor-version) for awd-version-check
+			
+			//parse header
+			_byteData.endian = Endian.LITTLE_ENDIAN;
+			
+			// Parse header and decompress body if needed
+			parseHeader();
+			switch (_compression) {
+				case DEFLATE:
+					_body = new ByteArray();
+					_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
+					_body.uncompress();
+					break;
+				case LZMA:
+					_body = new ByteArray();
+					_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
+					_body.uncompress(COMPRESSIONMODE_LZMA);
+					break;
+				case UNCOMPRESSED:
+					_body = _byteData;
+					break;
 			}
 			
-			if (!_parsed_header) {
-				_byteData.endian = Endian.LITTLE_ENDIAN;
-				
-				// Parse header and decompress body if needed
-				parseHeader();
-				switch (_compression) {
-					case DEFLATE:
-						_body = new ByteArray();
-						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
-						_body.uncompress();
-						break;
-					case LZMA:
-						_body = new ByteArray();
-						_byteData.readBytes(_body, 0, _byteData.bytesAvailable);
-						_body.uncompress(COMPRESSIONMODE_LZMA);
-						break;
-					case UNCOMPRESSED:
-						_body = _byteData;
-						break;
-				}
-				
-				_body.endian = Endian.LITTLE_ENDIAN;
-				_parsed_header = true;
-			}
-			
+			_body.endian = Endian.LITTLE_ENDIAN;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		protected override function proceedParsing():Boolean
+		{	
 			while (_body.bytesAvailable > 0 && !parsingPaused && hasTime())
 				parseNextBlock();
 			
