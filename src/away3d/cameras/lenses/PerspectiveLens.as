@@ -1,8 +1,8 @@
 package away3d.cameras.lenses
 {
-	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.*;
 	
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 	
 	/**
 	 * The PerspectiveLens object provides a projection matrix that projects 3D geometry with perspective distortion.
@@ -14,21 +14,19 @@ package away3d.cameras.lenses
 		private var _focalLengthInv:Number;
 		private var _yMax:Number;
 		private var _xMax:Number;
-		private var _coordinateSystem:int;
-		
-		public static const COORDINATE_SYSTEM_LEFT_HANDED:int = 1;
-		public static const COORDINATE_SYSTEM_RIGHT_HANDED:int = -1;
+		private var _coordinateSystem:uint;
 
 		/**
 		 * Creates a new PerspectiveLens object.
 		 *
 		 * @param fieldOfView The vertical field of view of the projection.
 		 */
-		public function PerspectiveLens(fieldOfView:Number = 60)
+		public function PerspectiveLens(fieldOfView:Number = 60, coordinateSystem = CoordinateSystem.LEFT_HANDED)
 		{
 			super();
-			this.coordinateSystem = COORDINATE_SYSTEM_LEFT_HANDED;
+			
 			this.fieldOfView = fieldOfView;
+			this.coordinateSystem = coordinateSystem;
 		}
 		
 		/**
@@ -112,18 +110,20 @@ package away3d.cameras.lenses
 		}
 		
 		/**
-		 * The handedness of the coordinate system projection.
-		 * The default is COORDINATE_SYSTEM_LEFT_HANDED.
+		 * The handedness of the coordinate system projection. The default is LEFT_HANDED.
 		 */
-		public function get coordinateSystem():int
+		public function get coordinateSystem():uint
 		{
 			return _coordinateSystem;
 		}
 
-		public function set coordinateSystem(value:int):void
+		public function set coordinateSystem(value:uint):void
 		{
-			if (value == _coordinateSystem) return;
+			if (value == _coordinateSystem)
+				return;
+			
 			_coordinateSystem = value;
+			
 			invalidateMatrix();
 		}
 		
@@ -176,12 +176,10 @@ package away3d.cameras.lenses
 					raw[uint(6)] = raw[uint(7)] = raw[uint(12)] = raw[uint(13)] = raw[uint(15)] = 0;
 				raw[uint(14)] = -2*_far*_near/(_far - _near);
 			}
-			
-			if (_coordinateSystem == COORDINATE_SYSTEM_RIGHT_HANDED)
-			{
-				// Switch projection transform from left to right handed.
+
+			// Switch projection transform from left to right handed.
+			if (_coordinateSystem == CoordinateSystem.RIGHT_HANDED)
 				raw[uint(5)] = -raw[uint(5)];
-			}
 
 			_matrix.copyRawDataFrom(raw);
 			
