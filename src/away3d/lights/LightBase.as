@@ -150,14 +150,14 @@ package away3d.lights
 			updateAmbient();
 		}
 		
+		/**
+		 * The ambient emission color of the light. Default value is <code>0xffffff</code>.
+		 */
 		public function get ambientColor():uint
 		{
 			return _ambientColor;
 		}
 		
-		/**
-		 * The ambient emission colour of the light. Default value is <code>0xffffff</code>.
-		 */
 		public function set ambientColor(value:uint):void
 		{
 			_ambientColor = value;
@@ -173,6 +173,7 @@ package away3d.lights
 		
 		/**
 		 * Gets the optimal projection matrix to render a light-based depth map for a single object.
+		 *
 		 * @param renderable The IRenderable object to render to a depth map.
 		 * @param target An optional target Matrix3D object. If not provided, an instance will be created.
 		 * @return A Matrix3D object containing the projection transformation.

@@ -10,7 +10,6 @@
 	/**
 	 * Class Elevation generates (and becomes) a mesh from an heightmap.
 	 */
-	
 	public class Elevation extends Mesh
 	{
 		private var _segmentsW:uint;

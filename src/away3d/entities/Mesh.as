@@ -72,7 +72,7 @@
 		}
 		
 		/**
-		 * Defines the animator of the mesh. Act on the mesh's geometry.  Default value is <code>null</code>.
+		 * Defines the animator of the mesh. Act on the mesh's geometry. Default value is <code>null</code>.
 		 */
 		public function get animator():IAnimator
 		{
