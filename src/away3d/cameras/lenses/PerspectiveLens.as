@@ -21,7 +21,7 @@ package away3d.cameras.lenses
 		 *
 		 * @param fieldOfView The vertical field of view of the projection.
 		 */
-		public function PerspectiveLens(fieldOfView:Number = 60, coordinateSystem = CoordinateSystem.LEFT_HANDED)
+		public function PerspectiveLens(fieldOfView:Number = 60, coordinateSystem:uint = 0)
 		{
 			super();
 			
