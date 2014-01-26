@@ -232,9 +232,13 @@ package away3d.core.math {
 			} else if (orientationStyle == Orientation3D.AXIS_ANGLE) {
 				tw = Math.acos((a + f + k - 1) / 2);
 				var len:Number = Math.sqrt((j - g) * (j - g) + (c - i) * (c - i) + (e - b) * (e - b));
-				tx = (j - g) / len;
-				ty = (c - i) / len;
-				tz = (e - b) / len;
+				if(len!=0) {
+					tx = (j - g) / len;
+					ty = (c - i) / len;
+					tz = (e - b) / len;
+				} else {
+					tx = ty = tz = 0;
+				}
 			} else {//Orientation3D.QUATERNION
 				var tr:Number = a + f + k;
 				if (tr > 0) {
