@@ -229,13 +229,7 @@ package away3d.core.math {
 				var s1:Number = Math.sin(tx);
 				var c1:Number = Math.cos(tx);
 				tz = Math.atan2(s1*c-c1*b, c1*f - s1*g);
-			} else if (orientationStyle == Orientation3D.AXIS_ANGLE) {
-				tw = Math.acos((a + f + k - 1) / 2);
-				var len:Number = Math.sqrt((j - g) * (j - g) + (c - i) * (c - i) + (e - b) * (e - b));
-				tx = (j - g) / len;
-				ty = (c - i) / len;
-				tz = (e - b) / len;
-			} else {//Orientation3D.QUATERNION
+			} else {
 				var tr:Number = a + f + k;
 				if (tr > 0) {
 					tw = Math.sqrt(1 + tr) / 2;
@@ -257,6 +251,20 @@ package away3d.core.math {
 					tx = (c + i) / (4 * tz);
 					ty = (j + g) / (4 * tz);
 					tw = (e - b) / (4 * tz);
+				}
+
+				if (orientationStyle == Orientation3D.AXIS_ANGLE) {
+					var sinhalfangle:Number = Math.sqrt(tx*tx + ty*ty+tz*tz);
+					tw = 2.0 * Math.atan2( sinhalfangle, tw);
+					if (sinhalfangle) {
+						tx = tx / sinhalfangle;
+						ty = ty / sinhalfangle;
+						tz = tz / sinhalfangle;
+					} else {
+						tx = 0;
+						ty = 0;
+						tz = 1;
+					}
 				}
 			}
 
