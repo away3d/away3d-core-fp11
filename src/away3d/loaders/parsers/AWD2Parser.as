@@ -399,11 +399,11 @@ package away3d.loaders.parsers
 			if ((_version[0] == 2) && (_version[1] == 1)) {
 				switch (type) {
 					case 11:
-						parsePrimitves(_cur_block_id);
+						parsePrimitve(_cur_block_id);
 						isParsed = true;
 						break;
 					case 31:
-						parseSkyBoxInstance(_cur_block_id);
+						parseSkyBox(_cur_block_id);
 						isParsed = true;
 						break;
 					case 41:
@@ -447,11 +447,11 @@ package away3d.loaders.parsers
 						isParsed = true;
 						break;
 					case 113:
-						parseVertexAnimationSet(_cur_block_id);
+						parseAnimationSet(_cur_block_id);
 						isParsed = true;
 						break;
 					case 122:
-						parseAnimatorSet(_cur_block_id);
+						parseAnimator(_cur_block_id);
 						isParsed = true;
 						break;
 					case 253:
@@ -643,7 +643,7 @@ package away3d.loaders.parsers
 		}
 		
 		//Block ID = 11
-		private function parsePrimitves(blockID:uint):void
+		private function parsePrimitve(blockID:uint):void
 		{
 			var name:String;
 			var geom:Geometry;
@@ -819,7 +819,7 @@ package away3d.loaders.parsers
 		}
 		
 		//Block ID 31
-		private function parseSkyBoxInstance(blockID:uint):void
+		private function parseSkyBox(blockID:uint):void
 		{
 			var name:String = parseVarStr();
 			var cubeTexAddr:uint = _newBlockBytes.readUnsignedInt();
@@ -1858,28 +1858,28 @@ package away3d.loaders.parsers
 		}
 		
 		//BlockID 113
-		private function parseVertexAnimationSet(blockID:uint):void
+		private function parseAnimationSet(blockID:uint):void
 		{
 			var poseBlockAdress:int
 			var outputString:String = "";
 			var name:String = parseVarStr();
-			var num_frames:uint = _newBlockBytes.readUnsignedShort();
+			var num_clips:uint = _newBlockBytes.readUnsignedShort();
 			var props:AWDProperties = parseProperties({1:UINT16});
-			var frames_parsed:uint = 0;
+			var clips_parsed:uint = 0;
 			var skeletonFrames:Vector.<SkeletonClipNode> = new Vector.<SkeletonClipNode>;
 			var vertexFrames:Vector.<VertexClipNode> = new Vector.<VertexClipNode>;
-			while (frames_parsed < num_frames) {
+			while (clips_parsed < num_clips) {
 				poseBlockAdress = _newBlockBytes.readUnsignedInt();
 				var returnedArray:Array = getAssetByID(poseBlockAdress, [AssetType.ANIMATION_NODE]);
 				if (!returnedArray[0])
-					_blocks[blockID].addError("Could not find the AnimationClipNode Nr " + frames_parsed + " ( " + poseBlockAdress + " ) for this AnimationSet");
+					_blocks[blockID].addError("Could not find the AnimationClipNode Nr " + clips_parsed + " ( " + poseBlockAdress + " ) for this AnimationSet");
 				else {
 					if (returnedArray[1] is VertexClipNode)
 						vertexFrames.push(returnedArray[1])
 					if (returnedArray[1] is SkeletonClipNode)
 						skeletonFrames.push(returnedArray[1])
 				}
-				frames_parsed++;
+				clips_parsed++;
 			}
 			if ((vertexFrames.length == 0) && (skeletonFrames.length == 0)) {
 				_blocks[blockID].addError("Could not create this AnimationSet, because it contains no animations");
@@ -1936,7 +1936,7 @@ package away3d.loaders.parsers
 		}
 		
 		//BlockID 122
-		private function parseAnimatorSet(blockID:uint):void
+		private function parseAnimator(blockID:uint):void
 		{
 			var targetMesh:Mesh;
 			var animSetBlockAdress:int
