@@ -1559,7 +1559,7 @@ package away3d.loaders.parsers
 					if (!returnedArray[0])
 						_blocks[blockID].addError("Could not find the EnvMap (ID = " + targetID + " ) for this RefractionEnvMapMethod");
 					effectMethodReturn = new RefractionEnvMapMethod(returnedArray[1], props.get(101, 0.1), props.get(102, 0.01), props.get(103, 0.01), props.get(104, 0.01));
-					RefractionEnvMapMethod(effectMethodReturn).alpha = props.get(104, 1);
+					RefractionEnvMapMethod(effectMethodReturn).alpha = props.get(105, 1);
 					break;
 				case 409: //OutlineMethod
 					effectMethodReturn = new OutlineMethod(props.get(601, 0x00000000), props.get(101, 1), props.get(701, true), props.get(702, false));
