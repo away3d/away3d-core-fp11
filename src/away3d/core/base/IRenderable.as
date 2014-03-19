@@ -16,7 +16,7 @@ package away3d.core.base
 		/**
 		 * The transformation matrix that transforms from model to world space.
 		 */
-		function get sceneTransform():Matrix3D;
+		//function get sceneTransform():Matrix3D;
 		
 		/**
 		 * The transformation matrix that transforms from model to world space, adapted with any special operations needed to render.

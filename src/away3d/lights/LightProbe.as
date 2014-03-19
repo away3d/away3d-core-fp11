@@ -1,14 +1,13 @@
 package away3d.lights
 {
-	import away3d.arcane;
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.bounds.NullBounds;
-	import away3d.core.base.IRenderable;
-	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.LightProbeNode;
-	import away3d.textures.CubeTextureBase;
+	import away3d.*;
+	import away3d.bounds.*;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.partition.*;
+	import away3d.textures.*;
 	
-	import flash.geom.Matrix3D;
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -73,7 +72,7 @@ package away3d.lights
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
+		override arcane function getObjectProjectionMatrix(renderable:IRenderable, camera:Camera3D, target:Matrix3D = null):Matrix3D
 		{
 			// TODO: not used
 			renderable = renderable;

@@ -1,18 +1,14 @@
 ﻿package away3d.lights
 {
-	import away3d.arcane;
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.bounds.NullBounds;
-	import away3d.core.base.IRenderable;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.partition.DirectionalLightNode;
-	import away3d.core.partition.EntityNode;
-	import away3d.lights.shadowmaps.DirectionalShadowMapper;
-	import away3d.lights.shadowmaps.ShadowMapperBase;
+	import away3d.*;
+	import away3d.bounds.*;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.math.*;
+	import away3d.core.partition.*;
+	import away3d.lights.shadowmaps.*;
 	
-	import flash.geom.Matrix3D;
-	
-	import flash.geom.Vector3D;
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -112,13 +108,13 @@
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
+		override arcane function getObjectProjectionMatrix(renderable:IRenderable, camera:Camera3D, target:Matrix3D = null):Matrix3D
 		{
 			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 			var bounds:BoundingVolumeBase = renderable.sourceEntity.bounds;
 			var m:Matrix3D = new Matrix3D();
 			
-			m.copyFrom(renderable.sceneTransform);
+			m.copyFrom(renderable.getRenderSceneTransform(camera));
 			m.append(inverseSceneTransform);
 			
 			if (!_projAABBPoints)

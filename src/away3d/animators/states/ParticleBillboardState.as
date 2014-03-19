@@ -42,7 +42,7 @@ package away3d.animators.states
 			
 			var comps:Vector.<Vector3D>;
 			if (_billboardAxis) {
-				var pos:Vector3D = renderable.sceneTransform.position;
+				var pos:Vector3D = renderable.getRenderSceneTransform(camera).position;
 				var look:Vector3D = camera.sceneTransform.position.subtract(pos);
 				var right:Vector3D = look.crossProduct(_billboardAxis);
 				right.normalize();
@@ -50,7 +50,7 @@ package away3d.animators.states
 				look.normalize();
 				
 				//create a quick inverse projection matrix
-				_matrix.copyFrom(renderable.sceneTransform);
+				_matrix.copyFrom(renderable.getRenderSceneTransform(camera));
 				comps = Matrix3DUtils.decompose(_matrix, Orientation3D.AXIS_ANGLE);
 				_matrix.copyColumnFrom(0, right);
 				_matrix.copyColumnFrom(1, _billboardAxis);
@@ -59,7 +59,7 @@ package away3d.animators.states
 				_matrix.appendRotation(-comps[1].w*MathConsts.RADIANS_TO_DEGREES, comps[1]);
 			} else {
 				//create a quick inverse projection matrix
-				_matrix.copyFrom(renderable.sceneTransform);
+				_matrix.copyFrom(renderable.getRenderSceneTransform(camera));
 				_matrix.append(camera.inverseSceneTransform);
 				
 				//decompose using axis angle rotations

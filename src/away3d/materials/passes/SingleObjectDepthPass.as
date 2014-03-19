@@ -164,7 +164,7 @@ package away3d.materials.passes
 			// local position = enough
 			light = lights[0];
 			
-			matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable]);
+			matrix = light.getObjectProjectionMatrix(renderable, camera, _projections[renderable]);
 			
 			// todo: use texture proxy?
 			var target:Texture = _textures[contextIndex][renderable] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);

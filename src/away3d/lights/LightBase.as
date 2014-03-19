@@ -1,16 +1,16 @@
 package away3d.lights
 {
-	import away3d.arcane;
-	import away3d.core.base.IRenderable;
-	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.LightNode;
-	import away3d.entities.Entity;
-	import away3d.errors.AbstractMethodError;
-	import away3d.events.LightEvent;
-	import away3d.library.assets.AssetType;
-	import away3d.lights.shadowmaps.ShadowMapperBase;
+	import away3d.*;
+	import away3d.cameras.*;
+	import away3d.core.base.*;
+	import away3d.core.partition.*;
+	import away3d.entities.*;
+	import away3d.errors.*;
+	import away3d.events.*;
+	import away3d.library.assets.*;
+	import away3d.lights.shadowmaps.*;
 	
-	import flash.geom.Matrix3D;
+	import flash.geom.*;
 	
 	use namespace arcane;
 	
@@ -178,7 +178,7 @@ package away3d.lights
 		 * @param target An optional target Matrix3D object. If not provided, an instance will be created.
 		 * @return A Matrix3D object containing the projection transformation.
 		 */
-		arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
+		arcane function getObjectProjectionMatrix(renderable:IRenderable, camera:Camera3D, target:Matrix3D = null):Matrix3D
 		{
 			throw new AbstractMethodError();
 		}
