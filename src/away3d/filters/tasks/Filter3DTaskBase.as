@@ -2,35 +2,29 @@
  */
 package away3d.filters.tasks
 {
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.debug.Debug;
-	import away3d.errors.AbstractMethodError;
+	import com.adobe.utils.*;
 	
-	import com.adobe.utils.AGALMiniAssembler;
-
-	import flash.display3D.Context3D;
-
-	import flash.display3D.Context3DProgramType;
+	import away3d.cameras.*;
+	import away3d.core.managers.*;
+	import away3d.debug.*;
+	import away3d.errors.*;
 	
-	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.Program3D;
-	
-	import flash.display3D.textures.Texture;
+	import flash.display3D.*;
+	import flash.display3D.textures.*;
 	
 	public class Filter3DTaskBase
 	{
-		protected var _mainInputTexture:Texture;
+		protected var _mainInputTexture:TextureBase;
 		protected var _mainInputTextureContext:Context3D;
 		protected var _scaledTextureWidth:int = -1;
 		protected var _scaledTextureHeight:int = -1;
 		protected var _textureWidth:int = -1;
 		protected var _textureHeight:int = -1;
-		private var _textureDimensionsInvalid:Boolean = true;
+		protected var _textureDimensionsInvalid:Boolean = true;
 		private var _program3DInvalid:Boolean = true;
 		private var _program3D:Program3D;
 		private var _program3DContext:Context3D;
-		private var _target:Texture;
+		private var _target:TextureBase;
 		private var _requireDepthRender:Boolean;
 		protected var _textureScale:int = 0;
 		
@@ -57,12 +51,12 @@ package away3d.filters.tasks
 			_textureDimensionsInvalid = true;
 		}
 		
-		public function get target():Texture
+		public function get target():TextureBase
 		{
 			return _target;
 		}
 		
-		public function set target(value:Texture):void
+		public function set target(value:TextureBase):void
 		{
 			_target = value;
 		}
@@ -97,7 +91,7 @@ package away3d.filters.tasks
 			_textureDimensionsInvalid = true;
 		}
 		
-		public function getMainInputTexture(stage:Stage3DProxy):Texture
+		public function getMainInputTexture(stage:Stage3DProxy):TextureBase
 		{
 			if(stage.context3D!=_mainInputTextureContext){
 				_textureDimensionsInvalid = true;

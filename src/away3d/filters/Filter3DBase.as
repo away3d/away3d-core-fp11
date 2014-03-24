@@ -1,10 +1,10 @@
 package away3d.filters
 {
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.filters.tasks.Filter3DTaskBase;
+	import away3d.cameras.*;
+	import away3d.core.managers.*;
+	import away3d.filters.tasks.*;
 	
-	import flash.display3D.textures.Texture;
+	import flash.display3D.textures.*;
 	
 	public class Filter3DBase
 	{
@@ -34,7 +34,7 @@ package away3d.filters
 			return _tasks;
 		}
 		
-		public function getMainInputTexture(stage3DProxy:Stage3DProxy):Texture
+		public function getMainInputTexture(stage3DProxy:Stage3DProxy):TextureBase
 		{
 			return _tasks[0].getMainInputTexture(stage3DProxy);
 		}

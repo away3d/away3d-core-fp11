@@ -1,41 +1,25 @@
 ﻿package away3d.containers
 {
 	
-	import away3d.core.managers.Touch3DManager;
-	import away3d.events.Scene3DEvent;
+	import away3d.*;
+	import away3d.cameras.*;
+	import away3d.cameras.lenses.*;
+	import away3d.core.managers.*;
+	import away3d.core.pick.*;
+	import away3d.core.render.*;
+	import away3d.core.traverse.*;
+	import away3d.events.*;
+	import away3d.filters.*;
+	import away3d.textures.*;
 	
-	import flash.display.Sprite;
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DTextureFormat;
-	import flash.display3D.textures.Texture;
-	import flash.events.ContextMenuEvent;
-	import flash.events.Event;
-	import flash.geom.Point;
-	import flash.geom.Rectangle;
-	import flash.geom.Transform;
-	import flash.geom.Vector3D;
-	import flash.net.URLRequest;
-	import flash.net.navigateToURL;
-	import flash.ui.ContextMenu;
-	import flash.ui.ContextMenuItem;
-	import flash.utils.getTimer;
-	
-	import away3d.Away3D;
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Mouse3DManager;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DManager;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.pick.IPicker;
-	import away3d.core.render.DefaultRenderer;
-	import away3d.core.render.DepthRenderer;
-	import away3d.core.render.Filter3DRenderer;
-	import away3d.core.render.RendererBase;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.events.CameraEvent;
-	import away3d.events.Stage3DEvent;
-	import away3d.textures.Texture2DBase;
+	import flash.display.*;
+	import flash.display3D.*;
+	import flash.display3D.textures.*;
+	import flash.events.*;
+	import flash.geom.*;
+	import flash.net.*;
+	import flash.ui.*;
+	import flash.utils.*;
 	
 	use namespace arcane;
 	
@@ -61,6 +45,7 @@
 		protected var _touch3DManager:Touch3DManager;
 		
 		protected var _renderer:RendererBase;
+		protected var _cubeRenderer:RendererBase;
 		private var _depthRenderer:DepthRenderer;
 		private var _addedToStage:Boolean;
 		
@@ -94,6 +79,9 @@
 		private var _depthPrepass:Boolean;
 		private var _profile:String;
 		private var _layeredView:Boolean = false;
+		private var _cameras:Vector.<Camera3D>;
+		private var _lenses:Vector.<PerspectiveLens>;
+		private var _container:ObjectContainer3D;
 		
 		private function viewSource(e:ContextMenuEvent):void
 		{
@@ -297,12 +285,12 @@
 			throw new Error("filters is not supported in View3D. Use filters3d instead.");
 		}
 		
-		public function get filters3d():Array
+		public function get filters3d():Vector.<Filter3DBase>
 		{
 			return _filter3DRenderer? _filter3DRenderer.filters : null;
 		}
 		
-		public function set filters3d(value:Array):void
+		public function set filters3d(value:Vector.<Filter3DBase>):void
 		{
 			if (value && value.length == 0)
 				value = null;
@@ -667,27 +655,42 @@
 			
 			updateViewSizeData();
 			
-			_entityCollector.clear();
-			
-			// collect stuff to render
-			_scene.traversePartitions(_entityCollector);
-			
-			// update picking
-			_mouse3DManager.updateCollider(this);
-			_touch3DManager.updateCollider();
-			
-			if (_requireDepthRender)
-				renderSceneDepthToTexture(_entityCollector);
-			
-			// todo: perform depth prepass after light update and before final render
-			if (_depthPrepass)
-				renderDepthPrepass(_entityCollector);
-			
-			_renderer.clearOnRender = !_depthPrepass;
+			if (!_filter3DRenderer || !_stage3DProxy._context3D || !(_filter3DRenderer.getMainInputTexture(_stage3DProxy) is CubeTexture)) {
+				_entityCollector.clear();
+				
+				// collect stuff to render
+				_scene.traversePartitions(_entityCollector);	
+				
+				// update picking
+				_mouse3DManager.updateCollider(this);
+				_touch3DManager.updateCollider();
+				
+				if (_requireDepthRender)
+					renderSceneDepthToTexture(_entityCollector);
+				
+				// todo: perform depth prepass after light update and before final render
+				if (_depthPrepass)
+					renderDepthPrepass(_entityCollector);
+				
+				_renderer.clearOnRender = !_depthPrepass;
+			}
 			
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
-				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
-				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
+				var targetTexture:TextureBase = _filter3DRenderer.getMainInputTexture(_stage3DProxy);
+				if (targetTexture is CubeTexture) {
+					if (!_cameras)
+						initCameras();
+					
+					scene.partition.updateEntities();
+					_container.transform = _camera.transform;
+					for (var i:uint = 0; i < 6; ++i)
+						renderSurface(i, scene, targetTexture);
+					
+					_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
+				} else {
+					_renderer.render(_entityCollector, targetTexture, _rttBufferManager.renderToTextureRect);
+					_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
+				}
 			} else {
 				_renderer.shareContext = _shareContext;
 				if (_shareContext)
@@ -704,9 +707,10 @@
 				_mouse3DManager.fireMouseEvents();
 				_touch3DManager.fireTouchEvents();
 			}
-			
-			// clean up data for this render
-			_entityCollector.cleanUp();
+			if (!_filter3DRenderer || !_stage3DProxy._context3D || !(_filter3DRenderer.getMainInputTexture(_stage3DProxy) is CubeTexture)) {
+				// clean up data for this render
+				_entityCollector.cleanUp();	
+			}
 			
 			// register that a view has been rendered
 			stage3DProxy.bufferClear = false;
@@ -968,6 +972,57 @@
 			}
 			
 			_viewportDirty = true;
+		}
+		
+		private function renderSurface(surfaceIndex:uint, scene:Scene3D, targetTexture:TextureBase):void
+		{
+			var camera:Camera3D = _cameras[surfaceIndex];
+			
+			camera.lens.near = _camera.lens.near;
+			camera.lens.far = _camera.lens.far;
+			
+			_entityCollector.camera = camera;
+			_entityCollector.clear();
+			scene.traversePartitions(_entityCollector);
+			
+			_cubeRenderer.render(_entityCollector, targetTexture, null, surfaceIndex);
+			
+			_entityCollector.cleanUp();
+		}
+		
+		private function initCameras():void
+		{
+			_cameras = new Vector.<Camera3D>();
+			_lenses = new Vector.<PerspectiveLens>();
+			_container = new ObjectContainer3D();
+			scene.addChild(_container);
+			// posX, negX, posY, negY, posZ, negZ
+			addCamera(0, 90, 0);
+			addCamera(0, -90, 0);
+			addCamera(-90, 0, 0);
+			addCamera(90, 0, 0);
+			addCamera(0, 0, 0);
+			addCamera(0, 180, 0);
+			
+			_cubeRenderer = new DefaultRenderer();
+			_cubeRenderer.stage3DProxy = stage3DProxy;
+			_cubeRenderer.shareContext = shareContext;
+			_cubeRenderer.backgroundAlpha = 0;
+		}
+		
+		private function addCamera(rotationX:Number, rotationY:Number, rotationZ:Number):void
+		{
+			var cam:Camera3D = new Camera3D();
+			cam.position = new Vector3D(0,0,0);
+			_container.addChild(cam);
+			cam.rotationX = rotationX;
+			cam.rotationY = rotationY;
+			cam.rotationZ = rotationZ;
+			cam.lens.near = .01;
+			PerspectiveLens(cam.lens).fieldOfView = 90;
+			_lenses.push(PerspectiveLens(cam.lens));
+			cam.lens.aspectRatio = 1;
+			_cameras.push(cam);
 		}
 		
 		// dead ends:

@@ -44,8 +44,7 @@ package away3d.core.partition
 		 */
 		public function traverse(traverser:PartitionTraverser):void
 		{
-			if (_updatesMade)
-				updateEntities();
+			updateEntities();
 			
 			++PartitionTraverser._collectionMark;
 			
@@ -109,8 +108,11 @@ package away3d.core.partition
 		/**
 		 * Updates all entities that were marked for update.
 		 */
-		private function updateEntities():void
+		public function updateEntities():void
 		{
+			if (!_updatesMade)
+				return;
+				
 			var node:EntityNode = _updateQueue;
 			var targetNode:NodeBase;
 			var t:EntityNode;

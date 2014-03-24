@@ -41,9 +41,9 @@ package away3d.filters
 		
 		override public function setRenderTargets(mainTarget:Texture, stage3DProxy:Stage3DProxy):void
 		{
-			_brightPassTask.target = _hBlurTask.getMainInputTexture(stage3DProxy);
-			_hBlurTask.target = _vBlurTask.getMainInputTexture(stage3DProxy);
-			_vBlurTask.target = _compositeTask.getMainInputTexture(stage3DProxy);
+			_brightPassTask.target = _hBlurTask.getMainInputTexture(stage3DProxy) as Texture;
+			_hBlurTask.target = _vBlurTask.getMainInputTexture(stage3DProxy) as Texture;
+			_vBlurTask.target = _compositeTask.getMainInputTexture(stage3DProxy) as Texture;
 			// use bright pass's input as composite's input
 			_compositeTask.overlayTexture = _brightPassTask.getMainInputTexture(stage3DProxy);
 			

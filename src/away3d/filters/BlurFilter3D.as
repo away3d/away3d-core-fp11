@@ -20,8 +20,8 @@ package away3d.filters
 		public function BlurFilter3D(blurX:uint = 3, blurY:uint = 3, stepSize:int = -1)
 		{
 			super();
-			addTask(_hBlurTask = new Filter3DHBlurTask(blurX, stepSize));
-			addTask(_vBlurTask = new Filter3DVBlurTask(blurY, stepSize));
+			addTask(_hBlurTask = new Filter3DHBlurTask(blurX, stepSize)) as Texture;
+			addTask(_vBlurTask = new Filter3DVBlurTask(blurY, stepSize)) as Texture;
 		}
 		
 		public function get blurX():uint
@@ -61,7 +61,7 @@ package away3d.filters
 		
 		override public function setRenderTargets(mainTarget:Texture, stage3DProxy:Stage3DProxy):void
 		{
-			_hBlurTask.target = _vBlurTask.getMainInputTexture(stage3DProxy);
+			_hBlurTask.target = _vBlurTask.getMainInputTexture(stage3DProxy) as Texture;
 			super.setRenderTargets(mainTarget, stage3DProxy);
 		}
 	}

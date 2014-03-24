@@ -124,7 +124,7 @@ package away3d.filters
 		override public function setRenderTargets(mainTarget:Texture, stage3DProxy:Stage3DProxy):void
 		{
 			super.setRenderTargets(mainTarget, stage3DProxy);
-			_hDofTask.target = _vDofTask.getMainInputTexture(stage3DProxy);
+			_hDofTask.target = _vDofTask.getMainInputTexture(stage3DProxy) as Texture;
 		}
 	}
 }

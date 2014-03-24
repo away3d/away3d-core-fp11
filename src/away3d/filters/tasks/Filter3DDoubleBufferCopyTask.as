@@ -1,27 +1,25 @@
 package away3d.filters.tasks
 {
-	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.core.managers.Stage3DProxy;
+	import away3d.*;
+	import away3d.cameras.*;
+	import away3d.core.managers.*;
 	
-	import flash.display.BitmapData;
-	
-	import flash.display3D.Context3DTextureFormat;
-	
-	import flash.display3D.textures.Texture;
+	import flash.display.*;
+	import flash.display3D.*;
+	import flash.display3D.textures.*;
 	
 	use namespace arcane;
 	
 	public class Filter3DDoubleBufferCopyTask extends Filter3DTaskBase
 	{
-		private var _secondaryInputTexture:Texture;
+		private var _secondaryInputTexture:TextureBase;
 		
 		public function Filter3DDoubleBufferCopyTask()
 		{
 			super();
 		}
 		
-		public function get secondaryInputTexture():Texture
+		public function get secondaryInputTexture():TextureBase
 		{
 			return _secondaryInputTexture;
 		}
@@ -41,8 +39,8 @@ package away3d.filters.tasks
 			_secondaryInputTexture = stage.context3D.createTexture(_textureWidth >> _textureScale, _textureHeight >> _textureScale, Context3DTextureFormat.BGRA, true);
 			
 			var dummy:BitmapData = new BitmapData(_textureWidth >> _textureScale, _textureHeight >> _textureScale, false, 0);
-			_mainInputTexture.uploadFromBitmapData(dummy);
-			_secondaryInputTexture.uploadFromBitmapData(dummy);
+			(_mainInputTexture as Texture).uploadFromBitmapData(dummy);
+			(_secondaryInputTexture as Texture).uploadFromBitmapData(dummy);
 			dummy.dispose();
 		}
 		
@@ -54,7 +52,7 @@ package away3d.filters.tasks
 		
 		private function swap():void
 		{
-			var tmp:Texture = _secondaryInputTexture;
+			var tmp:TextureBase = _secondaryInputTexture;
 			_secondaryInputTexture = _mainInputTexture;
 			_mainInputTexture = tmp;
 		}
