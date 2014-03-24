@@ -368,9 +368,14 @@ package away3d.core.base
 			return data;
 		}
 		
-		public function fromVectors(verts:Vector.<Number>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>):void
+		public function fromVectors(verts:Vector.<Number>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, secondaryUVs:Vector.<Number>=null):void
 		{
 			var vertLen:int = verts.length/3*13;
+			if (!secondaryUVs) 
+				secondaryUVs=uvs;
+			else
+				if (secondaryUVs.length != uvs.length) 
+					secondaryUVs=uvs;
 			
 			var index:int = 0;
 			var v:int = 0;
@@ -408,9 +413,8 @@ package away3d.core.base
 				if (uvs && uvs.length) {
 					data[index++] = uvs[u];
 					data[index++] = uvs[u + 1];
-					// use same secondary uvs as primary
-					data[index++] = uvs[u++];
-					data[index++] = uvs[u++];
+					data[index++] = secondaryUVs[u++];
+					data[index++] = secondaryUVs[u++];
 				} else {
 					data[index++] = 0;
 					data[index++] = 0;

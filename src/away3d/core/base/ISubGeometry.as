@@ -167,7 +167,7 @@ package away3d.core.base
 		
 		function set autoDeriveVertexTangents(value:Boolean):void;
 		
-		function fromVectors(vertices:Vector.<Number>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>):void;
+		function fromVectors(vertices:Vector.<Number>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, secondaryUVs:Vector.<Number>=null ):void;
 		
 		function get vertexPositionData():Vector.<Number>;
 	}

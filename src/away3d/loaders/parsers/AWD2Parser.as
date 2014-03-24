@@ -606,12 +606,16 @@ package away3d.loaders.parsers
 						weights = new Vector.<Number>();
 						while (_newBlockBytes.position < str_end)
 							weights[idx++] = readNumber(_accuracyGeo);
+					} else if (str_type == 8) {
+						var secondaryUVs:Vector.<Number> = new Vector.<Number>();
+						while (_newBlockBytes.position < str_end)
+							secondaryUVs[idx++] = readNumber(_accuracyGeo);
 					} else
 						_newBlockBytes.position = str_end;
 				}
 				parseUserAttributes(); // Ignore sub-mesh attributes for now
 				
-				sub_geoms = GeomUtil.fromVectors(verts, indices, uvs, normals, null, weights, w_indices);
+				sub_geoms = GeomUtil.fromVectors(verts, indices, uvs, normals, null, weights, w_indices, secondaryUVs);
 				
 				var scaleU:Number = subProps.get(1, 1);
 				var scaleV:Number = subProps.get(2, 1);

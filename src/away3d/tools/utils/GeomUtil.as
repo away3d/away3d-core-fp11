@@ -14,7 +14,7 @@ package away3d.tools.utils
 		 * Build a list of sub-geometries from raw data vectors, splitting them up in
 		 * such a way that they won't exceed buffer length limits.
 		 */
-		public static function fromVectors(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>, triangleOffset:int = 0):Vector.<ISubGeometry>
+		public static function fromVectors(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>,secondaryUVs:Vector.<Number>=null):Vector.<ISubGeometry>
 		{
 			const LIMIT_VERTS:uint = 3*0xffff;
 			const LIMIT_INDICES:uint = 15*0xffff;
@@ -36,11 +36,15 @@ package away3d.tools.utils
 			if (jointIndices && !jointIndices.length)
 				jointIndices = null;
 			
+			if (secondaryUVs && !secondaryUVs.length) 
+				secondaryUVs = null;
+			
 			if ((indices.length >= LIMIT_INDICES) || (verts.length >= LIMIT_VERTS)) {
 				var i:uint, len:uint, outIndex:uint, j:uint;
 				var splitVerts:Vector.<Number> = new Vector.<Number>();
 				var splitIndices:Vector.<uint> = new Vector.<uint>();
 				var splitUvs:Vector.<Number> = (uvs != null)? new Vector.<Number>() : null;
+				var splitSecondaryUVs:Vector.<Number> = (secondaryUVs != null)? new Vector.<Number>() : null;
 				var splitNormals:Vector.<Number> = (normals != null)? new Vector.<Number>() : null;
 				var splitTangents:Vector.<Number> = (tangents != null)? new Vector.<Number>() : null;
 				var splitWeights:Vector.<Number> = (weights != null)? new Vector.<Number>() : null;
@@ -63,10 +67,11 @@ package away3d.tools.utils
 					splitIndex = splitVerts.length + 6;
 					
 					if (( (outIndex + 2) >= LIMIT_INDICES) || (splitIndex >= LIMIT_VERTS)) {
-						subs.push(constructSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices, triangleOffset));
+						subs.push(constructSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices, secondaryUVs));
 						splitVerts = new Vector.<Number>();
 						splitIndices = new Vector.<uint>();
 						splitUvs = (uvs != null)? new Vector.<Number>() : null;
+						splitSecondaryUVs = (secondaryUVs != null)? new Vector.<Number>() : null;
 						splitNormals = (normals != null)? new Vector.<Number>() : null;
 						splitTangents = (tangents != null)? new Vector.<Number>() : null;
 						splitWeights = (weights != null)? new Vector.<Number>() : null;
@@ -115,6 +120,15 @@ package away3d.tools.utils
 								splitUvs[sv] = uvs[ov];
 							}
 							
+							if (secondaryUVs) {
+								su = splitIndex*2 + 0;
+								sv = splitIndex*2 + 1;
+								ou = originalIndex*2 + 0;
+								ov = originalIndex*2 + 1;
+								
+								splitSecondaryUVs[su] = secondaryUVs[ou];
+								splitSecondaryUVs[sv] = secondaryUVs[ov];
+							}
 							if (normals) {
 								splitNormals[s0] = normals[o0];
 								splitNormals[s1] = normals[o1];
@@ -152,11 +166,11 @@ package away3d.tools.utils
 				
 				if (splitVerts.length > 0) {
 					// More was added in the last iteration of the loop.
-					subs.push(constructSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices, triangleOffset));
+					subs.push(constructSubGeometry(splitVerts, splitIndices, splitUvs, splitNormals, splitTangents, splitWeights, splitJointIndices, splitSecondaryUVs));
 				}
 				
 			} else
-				subs.push(constructSubGeometry(verts, indices, uvs, normals, tangents, weights, jointIndices, triangleOffset));
+				subs.push(constructSubGeometry(verts, indices, uvs, normals, tangents, weights, jointIndices, secondaryUVs));
 			
 			return subs;
 		}
@@ -164,7 +178,7 @@ package away3d.tools.utils
 		/**
 		 * Build a sub-geometry from data vectors.
 		 */
-		public static function constructSubGeometry(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>, triangleOffset:int):CompactSubGeometry
+		public static function constructSubGeometry(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>, secondaryUVs:Vector.<Number>):CompactSubGeometry
 		{
 			var sub:CompactSubGeometry;
 			
@@ -180,9 +194,10 @@ package away3d.tools.utils
 				sub = new CompactSubGeometry();
 			
 			sub.updateIndexData(indices);
-			sub.fromVectors(verts, uvs, normals, tangents);
+			sub.fromVectors(verts, uvs, normals, tangents, secondaryUVs);
 			return sub;
 		}
+		
 		
 		/*
 		 * Combines a set of separate raw buffers into an interleaved one, compatible
