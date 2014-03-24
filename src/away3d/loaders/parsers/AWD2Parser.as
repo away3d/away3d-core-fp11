@@ -35,7 +35,7 @@ package away3d.loaders.parsers
 	public class AWD2Parser extends ParserBase
 	{
 		//set to "true" to have some traces in the Console
-		private var _debug:Boolean = false;
+		private var _debug:Boolean = true;
 		private var _byteData:ByteArray;
 		private var _cur_block_id:uint;
 		private var _blocks:Vector.<AWDBlock>;
@@ -1381,15 +1381,17 @@ package away3d.loaders.parsers
 							if (!returnedArray[0])
 								_blocks[blockID].addError("Could not find the SecoundNormalMap (ID = " + targetID + " ) for this SimpleWaterNormalMethod");
 							if (spezialType == 0) {
-								if (!SinglePassMaterialBase(mat).normalMap)
+								if (!SinglePassMaterialBase(mat).normalMap){
 									_blocks[blockID].addError("Could not find a normal Map on this Material to use with this SimpleWaterNormalMethod");
-								SinglePassMaterialBase(mat).normalMap = returnedArray[1];
+									SinglePassMaterialBase(mat).normalMap = returnedArray[1];
+								}
 								SinglePassMaterialBase(mat).normalMethod = new SimpleWaterNormalMethod(SinglePassMaterialBase(mat).normalMap, returnedArray[1]);
 							}
 							if (spezialType == 1) {
-								if (!MultiPassMaterialBase(mat).normalMap)
+								if (!MultiPassMaterialBase(mat).normalMap){
 									_blocks[blockID].addError("Could not find a normal Map on this Material to use with this SimpleWaterNormalMethod");
-								MultiPassMaterialBase(mat).normalMap = returnedArray[1];
+									MultiPassMaterialBase(mat).normalMap = returnedArray[1];
+								}
 								MultiPassMaterialBase(mat).normalMethod = new SimpleWaterNormalMethod(MultiPassMaterialBase(mat).normalMap, returnedArray[1]);
 							}
 							debugString += " | SimpleWaterNormalMethod | Second-NormalTexture-Name = " + Texture2DBase(returnedArray[1]).name;
