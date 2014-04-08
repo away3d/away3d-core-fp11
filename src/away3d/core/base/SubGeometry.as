@@ -305,7 +305,7 @@
 			return _uvs;
 		}
 		
-		public function get secondaryUVData():Vector.<Number>
+		override public function get SecondaryUVData():Vector.<Number>
 		{
 			return _secondaryUvs;
 		}
@@ -384,8 +384,10 @@
 			updateUVData(uvs);
 			updateVertexNormalData(normals);
 			updateVertexTangentData(tangents);
-			if (secondaryUVs)
-				updateSecondaryUVData(secondaryUVs)
+			if (secondaryUVs && secondaryUVs.length){
+				updateSecondaryUVData(secondaryUVs);				
+				hasSecondaryUVs = true;
+			}
 		}
 		
 		override protected function updateVertexNormals(target:Vector.<Number>):Vector.<Number>

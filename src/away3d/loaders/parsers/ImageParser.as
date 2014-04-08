@@ -8,6 +8,9 @@ package away3d.loaders.parsers
 	import away3d.textures.BitmapTexture;
 	import away3d.textures.Texture2DBase;
 	import away3d.tools.utils.TextureUtils;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	import away3d.textures.ATFCubeTexture;
 	
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
@@ -97,7 +100,7 @@ package away3d.loaders.parsers
 		 */
 		protected override function proceedParsing():Boolean
 		{
-			var asset:Texture2DBase;
+			var asset:IAsset;
 			if (_data is Bitmap) {
 				asset = new BitmapTexture(Bitmap(_data).bitmapData);
 				finalizeAsset(asset, _fileName);
@@ -113,10 +116,23 @@ package away3d.loaders.parsers
 			_byteData = getByteData();
 			if (!_startedParsing) {
 				_byteData.position = 0;
-				if (_byteData.readUTFBytes(3) == 'ATF') {
-					_byteData.position = 0;
-					asset = new ATFTexture(_byteData);
-					finalizeAsset(asset, _fileName);
+				if (_byteData.readUTFBytes(3) == 'ATF') {	
+					_byteData.position = 6;							
+					var tdata:uint = _byteData.readUnsignedByte();
+					var _type:int = tdata >> 7; // UB[1]		
+					_byteData.position = 0;			
+					switch (_type) {
+						case 0:
+							asset = new ATFTexture(_byteData);
+							break;
+						case 1:
+							asset = new ATFCubeTexture(_byteData);
+							break;						
+						default:
+							throw new Error("Invalid ATF type");
+					}
+					if (asset){
+						finalizeAsset(asset, _fileName);}
 					return PARSING_DONE;
 				} else {
 					_loader = new Loader();

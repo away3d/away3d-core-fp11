@@ -31,6 +31,7 @@ package away3d.core.base
 		protected var _autoDeriveVertexNormals:Boolean = true;
 		protected var _autoDeriveVertexTangents:Boolean = true;
 		protected var _autoGenerateUVs:Boolean = false;
+		protected var _hasSecondaryUVs:Boolean = false;
 		private var _useFaceWeights:Boolean = false;
 		protected var _vertexNormalsDirty:Boolean = true;
 		protected var _vertexTangentsDirty:Boolean = true;
@@ -61,6 +62,19 @@ package away3d.core.base
 		{
 			_autoGenerateUVs = value;
 			_uvsDirty = value;
+		}
+		
+		/**
+		 * Defines whether the secondaryUV is set with different values than the main UV
+		 */
+		public function get hasSecondaryUVs():Boolean
+		{
+			return _hasSecondaryUVs;
+		}
+		
+		public function set hasSecondaryUVs(value:Boolean):void
+		{
+			_hasSecondaryUVs = value;
 		}
 		
 		/**
@@ -522,11 +536,15 @@ package away3d.core.base
 			throw new AbstractMethodError();
 		}
 		
-		public function get vertexStride():uint
+		public function get SecondaryUVData():Vector.<Number>
 		{
 			throw new AbstractMethodError();
 		}
 		
+		public function get vertexStride():uint
+		{
+			throw new AbstractMethodError();
+		}
 		public function get vertexNormalStride():uint
 		{
 			throw new AbstractMethodError();

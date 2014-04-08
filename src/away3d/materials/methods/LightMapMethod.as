@@ -73,7 +73,14 @@ package away3d.materials.methods
 			_blendMode = value;
 			invalidateShaderProgram();
 		}
-
+		
+		/**
+		 * Return true if the LightMap should use the secondary UV
+		 */
+		public function get useSecondaryUV():Boolean
+		{
+			return _useSecondaryUV;
+		}
 		/**
 		 * The texture containing the light map.
 		 */
