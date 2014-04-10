@@ -892,7 +892,7 @@ package away3d.loaders.parsers
 					mesh.subMeshes[i].material = materials[Math.min(materials.length - 1, i)];
 			}
 			if ((_version[0] == 2) && (_version[1] == 1)) {
-				var props:Object = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8, 5:BOOL, 901:_propsNrType, 902:_propsNrType});
+				var props:Object = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8, 5:BOOL, 6:_propsNrType, 7:_propsNrType});
 				mesh.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
 				mesh.castsShadows = props.get(5, true);
 				var uvTransform:Array=props.get(6, new Array());
@@ -910,7 +910,7 @@ package away3d.loaders.parsers
 						subMesh.offsetU=uvTransform[uvCnt+4];
 						subMesh.offsetV=uvTransform[uvCnt+5];
 						subMesh.scaleU=uvTransform[uvCnt];
-						subMesh.scaleV=uvTransform[uvCnt+2];
+						subMesh.scaleV=uvTransform[uvCnt+3];
 						//subMesh.uvRotation=0.0;//todo: set uvTransform by matrix, or get the correct rotation
 						if (uvCnt<uvTransform.length){
 							uvCnt+=6;
