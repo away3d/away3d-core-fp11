@@ -37,72 +37,37 @@ package away3d.animators.nodes
 		 */
 		public static const V_AXIS:String = "y";
 		
-		private var _cycle:Number;
-		private var _scale:Number;
-		private var _axis:String;
+		
+		public static const LINEAR_EASE:int = 1;
+		public static const SINE_EASE:int = 2;
+		
+		public static const UV_CYCLE:String = "UVCycle";
+		public static const UV_SCALE:String = "UVSclae";
+		
+		arcane var _cycle:Number;
+		arcane var _scale:Number;
+		arcane var _axis:String;
+		arcane var _formula:int;
 		
 		/**
 		 * Creates a new <code>ParticleTimeNode</code>
 		 *
 		 * @param               mode            Defines whether the mode of operation acts on local properties of a particle or global properties of the node.
-		 * @param    [optional] cycle           Defines whether the time track is in loop mode. Defaults to false.
-		 * @param    [optional] scale           Defines whether the time track is in loop mode. Defaults to false.
-		 * @param    [optional] axis            Defines whether the time track is in loop mode. Defaults to false.
+		 * @param    [optional] cycle           Defines the time in a loop when in global mode. Defaults to 1.
+		 * @param    [optional] scale           Defines scale when in global mode. Defaults to 1. If you want to use scale in local mode, set it a value other than 1.
+		 * @param    [optional] axis            Defines the axis. Defaults to x.
+		 * @param    [optional] formula         Defines the formula. Defaults to 1.
 		 */
-		public function ParticleUVNode(mode:uint, cycle:Number = 1, scale:Number = 1, axis:String = "x")
+		public function ParticleUVNode(mode:uint, cycle:Number = 1, scale:Number = 1, axis:String = "x", formula:int = 1)
 		{
-			super("ParticleUV", mode, 4, ParticleAnimationSet.POST_PRIORITY + 1);
+			super("ParticleUV", mode, 2, ParticleAnimationSet.POST_PRIORITY + 1);
 			
 			_stateClass = ParticleUVState;
 			
 			_cycle = cycle;
 			_scale = scale;
 			_axis = axis;
-			
-			updateUVData();
-		}
-		
-		/**
-		 *
-		 */
-		public function get cycle():Number
-		{
-			return _cycle;
-		}
-		
-		public function set cycle(value:Number):void
-		{
-			_cycle = value;
-			
-			updateUVData();
-		}
-		
-		/**
-		 *
-		 */
-		public function get scale():Number
-		{
-			return _scale;
-		}
-		
-		public function set scale(value:Number):void
-		{
-			_scale = value;
-			
-			updateUVData();
-		}
-		
-		/**
-		 *
-		 */
-		public function get axis():String
-		{
-			return _axis;
-		}
-		
-		public function set axis(value:String):void
-		{
-			_axis = value;
+			_formula = formula;
 		}
 		
 		/**
@@ -114,22 +79,30 @@ package away3d.animators.nodes
 			var code:String = "";
 			
 			if (animationRegisterCache.needUVAnimation) {
-				var uvConst:ShaderRegisterElement = animationRegisterCache.getFreeVertexConstant();
-				animationRegisterCache.setRegisterIndex(this, UV_INDEX, uvConst.index);
+				var UVValue:ShaderRegisterElement = (_mode == ParticlePropertiesMode.GLOBAL)? animationRegisterCache.getFreeVertexConstant() : animationRegisterCache.getFreeVertexAttribute();
+				animationRegisterCache.setRegisterIndex(this, UV_INDEX, UVValue.index);
 				
 				var axisIndex:Number = _axis == "x"? 0 :
 					_axis == "y"? 1 :
 					2;
 				var target:ShaderRegisterElement = new ShaderRegisterElement(animationRegisterCache.uvTarget.regName, animationRegisterCache.uvTarget.index, axisIndex);
 				
-				var sin:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
+				var temp:ShaderRegisterElement = animationRegisterCache.getFreeVertexSingleTemp();
 				
 				if (_scale != 1)
-					code += "mul " + target + "," + target + "," + uvConst + ".y\n";
+					code += "mul " + target + "," + target + "," + UVValue + ".y\n";
 				
-				code += "mul " + sin + "," + animationRegisterCache.vertexTime + "," + uvConst + ".x\n";
-				code += "sin " + sin + "," + sin + "\n";
-				code += "add " + target + "," + target + "," + sin + "\n";
+				switch(_formula)
+				{
+					case SINE_EASE:
+						code += "mul " + temp + "," + animationRegisterCache.vertexTime + "," + UVValue + ".x\n";
+						code += "sin " + temp + "," + temp + "\n";
+						break;
+					case LINEAR_EASE:
+					default:
+						code += "mul " + temp + "," + animationRegisterCache.vertexTime + "," + UVValue + ".x\n";
+				}
+				code += "add " + target + "," + target + "," + temp + "\n";
 			}
 			
 			return code;
@@ -143,17 +116,36 @@ package away3d.animators.nodes
 			return animator.getAnimationState(this) as ParticleUVState;
 		}
 		
-		private function updateUVData():void
-		{
-			_uvData = new Vector3D(Math.PI*2/_cycle, _scale, 0, 0);
-		}
-		
 		/**
 		 * @inheritDoc
 		 */
 		override arcane function processAnimationSetting(particleAnimationSet:ParticleAnimationSet):void
 		{
 			particleAnimationSet.hasUVNode = true;
+		}
+		
+		/**
+		 * @inheritDoc
+		 */
+		override arcane function generatePropertyOfOneParticle(param:ParticleProperties):void
+		{
+			if (!param.hasOwnProperty(UV_CYCLE) || !(param[UV_CYCLE] is Number))
+				throw new Error("there is no " + UV_CYCLE + " in param!");
+			var cycle:Number = param[UV_CYCLE];
+			var scale:Number = 1;
+			if (param.hasOwnProperty(UV_SCALE) && (param[UV_SCALE] is Number))
+				scale = param[UV_SCALE];
+				
+			switch(_formula)
+			{
+				case SINE_EASE:
+					_oneData[0] = Math.PI * 2 / cycle;
+					break;
+				case LINEAR_EASE:
+				default:
+					_oneData[0] = 1 / cycle;
+			}
+			_oneData[1] = scale;
 		}
 	}
 }
