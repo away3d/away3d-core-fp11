@@ -1,7 +1,7 @@
 package away3d.materials.passes
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.textures.CubeTextureBase;
@@ -92,7 +92,7 @@ package away3d.materials.passes
 			_vertexData[0] = pos.x;
 			_vertexData[1] = pos.y;
 			_vertexData[2] = pos.z;
-			_vertexData[4] = _vertexData[5] = _vertexData[6] = camera.lens.far/Math.sqrt(3);
+			_vertexData[4] = _vertexData[5] = _vertexData[6] = camera.projection.far/Math.sqrt(3);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _vertexData, 2);
 			renderable.activateVertexBuffer(0, stage3DProxy);

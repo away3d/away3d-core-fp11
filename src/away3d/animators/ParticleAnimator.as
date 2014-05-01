@@ -1,5 +1,7 @@
 package away3d.animators
 {
+	import away3d.entities.Camera3D;
+
 	import flash.display3D.*;
 	import flash.utils.*;
 	

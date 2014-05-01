@@ -14,7 +14,7 @@ package away3d.loaders.parsers
 	import away3d.animators.nodes.AnimationNodeBase;
 	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.debug.Debug;
@@ -265,7 +265,7 @@ package away3d.loaders.parsers
 		{
 			var vec:Vector3D = new Vector3D();
 			var i:uint;
-			for each (var sub:CompactSubGeometry in geometry.subGeometries) {
+			for each (var sub:TriangleSubGeometry in geometry.subGeometries) {
 				var vertexData:Vector.<Number> = sub.vertexData;
 				
 				for (i = sub.vertexOffset; i < vertexData.length; i += sub.vertexStride) {
@@ -283,7 +283,7 @@ package away3d.loaders.parsers
 		
 		private function applySkinController(geometry:Geometry, mesh:DAEMesh, skin:DAESkin, skeleton:Skeleton):void
 		{
-			var sub:CompactSubGeometry;
+			var sub:TriangleSubGeometry;
 			var skinned_sub_geom:SkinnedSubGeometry;
 			var primitive:DAEPrimitive;
 			var jointIndices:Vector.<Number>;
@@ -291,7 +291,7 @@ package away3d.loaders.parsers
 			var i:uint, j:uint, k:uint, l:int;
 			
 			for (i = 0; i < geometry.subGeometries.length; i++) {
-				sub = CompactSubGeometry(geometry.subGeometries[i]);
+				sub = TriangleSubGeometry(geometry.subGeometries[i]);
 				primitive = mesh.primitives[i];
 				jointIndices = new Vector.<Number>(skin.maxBones*primitive.vertices.length, true);
 				jointWeights = new Vector.<Number>(skin.maxBones*primitive.vertices.length, true);
@@ -415,7 +415,7 @@ package away3d.loaders.parsers
 			var targets:Vector.<Geometry> = new Vector.<Geometry>();
 			base = getGeometryByName(morph.source);
 			var vertexData:Vector.<Number>;
-			var sub:CompactSubGeometry;
+			var sub:TriangleSubGeometry;
 			var startWeight:Number = 1.0;
 			var i:uint, j:uint, k:uint;
 			var geometry:Geometry;
@@ -430,7 +430,7 @@ package away3d.loaders.parsers
 			}
 			
 			for (i = 0; i < base.subGeometries.length; i++) {
-				sub = CompactSubGeometry(base.subGeometries[i]);
+				sub = TriangleSubGeometry(base.subGeometries[i]);
 				vertexData = sub.vertexData.concat();
 				for (var v:int = 0; v < vertexData.length/13; v++) {
 					j = sub.vertexOffset + v*sub.vertexStride;
@@ -849,7 +849,7 @@ package away3d.loaders.parsers
 		{
 			var geometry:Geometry = new Geometry();
 			for (var i:uint = 0; i < mesh.primitives.length; i++) {
-				var sub:CompactSubGeometry = translatePrimitive(mesh, mesh.primitives[i]);
+				var sub:TriangleSubGeometry = translatePrimitive(mesh, mesh.primitives[i]);
 				if (sub)
 					geometry.addSubGeometry(sub);
 			}
@@ -857,9 +857,9 @@ package away3d.loaders.parsers
 			return geometry;
 		}
 		
-		private function translatePrimitive(mesh:DAEMesh, primitive:DAEPrimitive, reverseTriangles:Boolean = true, autoDeriveVertexNormals:Boolean = true, autoDeriveVertexTangents:Boolean = true):CompactSubGeometry
+		private function translatePrimitive(mesh:DAEMesh, primitive:DAEPrimitive, reverseTriangles:Boolean = true, autoDeriveVertexNormals:Boolean = true, autoDeriveVertexTangents:Boolean = true):TriangleSubGeometry
 		{
-			var sub:CompactSubGeometry = new CompactSubGeometry();
+			var sub:TriangleSubGeometry = new TriangleSubGeometry();
 			var indexData:Vector.<uint> = new Vector.<uint>();
 			var data:Vector.<Number> = new Vector.<Number>();
 			var faces:Vector.<DAEFace> = primitive.create(mesh);

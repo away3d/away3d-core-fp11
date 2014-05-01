@@ -2,7 +2,7 @@ package away3d.tools.helpers
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.Object3D;
@@ -150,8 +150,8 @@ package away3d.tools.helpers
 					normals[nOffs + j*nStride + 2] = holder.z;
 				}
 				
-				if (subGeom is CompactSubGeometry)
-					CompactSubGeometry(subGeom).updateData(vertices);
+				if (subGeom is TriangleSubGeometry)
+					TriangleSubGeometry(subGeom).updateData(vertices);
 				else {
 					SubGeometry(subGeom).updateVertexData(vertices);
 					SubGeometry(subGeom).updateVertexNormalData(normals);
@@ -219,8 +219,8 @@ package away3d.tools.helpers
 					vertices[vOffs + j*vStride + 2] *= scaleZ;
 				}
 				
-				if (subGeom is CompactSubGeometry)
-					CompactSubGeometry(subGeom).updateData(vertices);
+				if (subGeom is TriangleSubGeometry)
+					TriangleSubGeometry(subGeom).updateData(vertices);
 				else
 					SubGeometry(subGeom).updateVertexData(vertices);
 			}
@@ -285,8 +285,8 @@ package away3d.tools.helpers
 					vertices[vOffs + j*vStride + 2] += dz;
 				}
 				
-				if (subGeom is CompactSubGeometry)
-					CompactSubGeometry(subGeom).updateData(vertices);
+				if (subGeom is TriangleSubGeometry)
+					TriangleSubGeometry(subGeom).updateData(vertices);
 				else
 					SubGeometry(subGeom).updateVertexData(vertices);
 			}
@@ -387,8 +387,8 @@ package away3d.tools.helpers
 					
 				}
 				
-				if (subGeom is CompactSubGeometry)
-					CompactSubGeometry(subGeom).updateData(subGeom.vertexData);
+				if (subGeom is TriangleSubGeometry)
+					TriangleSubGeometry(subGeom).updateData(subGeom.vertexData);
 				else {
 					SubGeometry(subGeom).updateIndexData(indices);
 					SubGeometry(subGeom).updateVertexNormalData(normals);
@@ -545,7 +545,7 @@ package away3d.tools.helpers
 				return meshes;
 			}
 			
-			if (geometries[0] is CompactSubGeometry)
+			if (geometries[0] is TriangleSubGeometry)
 				return splitMeshCsg(mesh, disposeSource);
 			
 			var vertices:Vector.<Number>;
@@ -635,18 +635,18 @@ package away3d.tools.helpers
 			var subGeom:ISubGeometry;
 			
 			var nGeom:Geometry;
-			var nSubGeom:CompactSubGeometry;
+			var nSubGeom:TriangleSubGeometry;
 			var nm:Mesh;
 			
 			var nMeshMat:MaterialBase;
 			
 			for (var i:uint = 0; i < numSubGeoms; ++i) {
-				subGeom = CompactSubGeometry(geometries[i]);
+				subGeom = TriangleSubGeometry(geometries[i]);
 				
 				nGeom = new Geometry();
 				nm = new Mesh(nGeom, mesh.subMeshes[i].material? mesh.subMeshes[i].material : nMeshMat);
 				
-				nSubGeom = new CompactSubGeometry();
+				nSubGeom = new TriangleSubGeometry();
 				nSubGeom.updateData(subGeom.vertexData);
 				nSubGeom.updateIndexData(subGeom.indexData);
 				

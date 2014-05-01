@@ -2,9 +2,11 @@ package away3d.bounds
 {
 	import away3d.arcane;
 	import away3d.core.base.*;
+	import away3d.core.math.Box;
 	import away3d.core.math.Plane3D;
+	import away3d.entities.IEntity;
 	import away3d.errors.*;
-	import away3d.primitives.*;
+	import away3d.prefabs.*;
 	
 	import flash.geom.*;
 	
@@ -15,35 +17,34 @@ package away3d.bounds
 	 */
 	public class BoundingVolumeBase
 	{
-		protected var _min:Vector3D;
-		protected var _max:Vector3D;
+		protected var _aabb:Box;
+
 		protected var _aabbPoints:Vector.<Number> = new Vector.<Number>();
 		protected var _aabbPointsDirty:Boolean = true;
-		protected var _boundingRenderable:WireframePrimitiveBase;
-		
+		protected var _boundingEntity:IEntity;
+
 		/**
-		 * The maximum extreme of the bounds
+		 * Creates a new <code>BoundingVolumeBase</code> object
 		 */
-		public function get max():Vector3D
+		public function BoundingVolumeBase()
 		{
-			return _max;
+			_aabb = new Box();
 		}
-		
+
 		/**
-		 * The minimum extreme of the bounds
+		 * Box
 		 */
-		public function get min():Vector3D
+		public function get aabb():Box
 		{
-			return _min;
+			return _aabb;
 		}
-		
+
 		/**
 		 * Returns a vector of values representing the concatenated cartesian triplet of the 8 axial extremities of the bounding volume.
 		 */
 		public function get aabbPoints():Vector.<Number>
 		{
-			if (_aabbPointsDirty)
-				updateAABBPoints();
+			if (_aabbPointsDirty) updateAABBPoints();
 			
 			return _aabbPoints;
 		}
@@ -54,35 +55,26 @@ package away3d.bounds
 		 *
 		 * @see away3d.entities.Entity#showBounds
 		 */
-		public function get boundingRenderable():WireframePrimitiveBase
+		public function get boundingEntity():IEntity
 		{
-			if (!_boundingRenderable) {
-				_boundingRenderable = createBoundingRenderable();
-				updateBoundingRenderable();
+			if (!_boundingEntity) {
+				_boundingEntity = createBoundingEntity();
+				updateBoundingEntity();
 			}
 			
-			return _boundingRenderable;
+			return _boundingEntity;
 		}
-		
-		/**
-		 * Creates a new <code>BoundingVolumeBase</code> object
-		 */
-		public function BoundingVolumeBase()
-		{
-			_min = new Vector3D();
-			_max = new Vector3D();
-		}
-		
+
 		/**
 		 * Sets the bounds to zero size.
 		 */
 		public function nullify():void
 		{
-			_min.x = _min.y = _min.z = 0;
-			_max.x = _max.y = _max.z = 0;
+			_aabb.x = _aabb.y = _aabb.z = 0;
+			_aabb.width = _aabb.height = _aabb.depth = 0;
 			_aabbPointsDirty = true;
-			if (_boundingRenderable)
-				updateBoundingRenderable();
+			if (_boundingEntity)
+				updateBoundingEntity();
 		}
 		
 		/**
@@ -90,9 +82,8 @@ package away3d.bounds
 		 */
 		public function disposeRenderable():void
 		{
-			if (_boundingRenderable)
-				_boundingRenderable.dispose();
-			_boundingRenderable = null;
+			if (_boundingEntity) _boundingEntity.dispose();
+			_boundingEntity = null;
 		}
 		
 		/**
@@ -217,15 +208,15 @@ package away3d.bounds
 		 */
 		public function fromExtremes(minX:Number, minY:Number, minZ:Number, maxX:Number, maxY:Number, maxZ:Number):void
 		{
-			_min.x = minX;
-			_min.y = minY;
-			_min.z = minZ;
-			_max.x = maxX;
-			_max.y = maxY;
-			_max.z = maxZ;
+			_aabb.x = minX;
+			_aabb.y = maxY;
+			_aabb.z = minZ;
+			_aabb.width = maxX - minX;
+			_aabb.height = maxY - minY;
+			_aabb.depth = maxZ - minZ;
 			_aabbPointsDirty = true;
-			if (_boundingRenderable)
-				updateBoundingRenderable();
+			if (_boundingEntity)
+				updateBoundingEntity();
 		}
 		
 		/**
@@ -244,14 +235,7 @@ package away3d.bounds
 		 */
 		public function overlaps(bounds:BoundingVolumeBase):Boolean
 		{
-			var min:Vector3D = bounds._min;
-			var max:Vector3D = bounds._max;
-			return _max.x > min.x &&
-				_min.x < max.x &&
-				_max.y > min.y &&
-				_min.y < max.y &&
-				_max.z > min.z &&
-				_min.z < max.z;
+			return _aabb.intersects(bounds.aabb);
 		}
 		
 		/*public function classifyAgainstPlane(plane : Plane3D) : int
@@ -279,9 +263,6 @@ package away3d.bounds
 		 */
 		public function rayIntersection(position:Vector3D, direction:Vector3D, targetNormal:Vector3D):Number
 		{
-			position = position;
-			direction = direction;
-			targetNormal = targetNormal;
 			return -1;
 		}
 		
@@ -293,14 +274,18 @@ package away3d.bounds
 		 */
 		public function containsPoint(position:Vector3D):Boolean
 		{
-			position = position;
 			return false;
 		}
 		
 		protected function updateAABBPoints():void
 		{
-			var maxX:Number = _max.x, maxY:Number = _max.y, maxZ:Number = _max.z;
-			var minX:Number = _min.x, minY:Number = _min.y, minZ:Number = _min.z;
+			var minX:Number = _aabb.x;
+			var minY:Number = _aabb.y - _aabb.height;
+			var minZ:Number = _aabb.z;
+			var maxX:Number = _aabb.x + _aabb.width;
+			var maxY:Number = _aabb.y;
+			var maxZ:Number = _aabb.z + _aabb.depth;
+
 			_aabbPoints[0] = minX;
 			_aabbPoints[1] = minY;
 			_aabbPoints[2] = minZ;
@@ -325,15 +310,16 @@ package away3d.bounds
 			_aabbPoints[21] = maxX;
 			_aabbPoints[22] = maxY;
 			_aabbPoints[23] = maxZ;
+
 			_aabbPointsDirty = false;
 		}
 		
-		protected function updateBoundingRenderable():void
+		protected function updateBoundingEntity():void
 		{
 			throw new AbstractMethodError();
 		}
 		
-		protected function createBoundingRenderable():WireframePrimitiveBase
+		protected function createBoundingEntity():IEntity
 		{
 			throw new AbstractMethodError();
 		}

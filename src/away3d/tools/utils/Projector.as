@@ -229,8 +229,8 @@ package away3d.tools.utils
 						}
 				}
 				
-				if (sub_geom is CompactSubGeometry)
-					CompactSubGeometry(sub_geom).updateData(uvs);
+				if (sub_geom is TriangleSubGeometry)
+					TriangleSubGeometry(sub_geom).updateData(uvs);
 				else
 					SubGeometry(sub_geom).updateUVData(uvs);
 			}
@@ -303,8 +303,8 @@ package away3d.tools.utils
 					
 				}
 				
-				if (sub_geom is CompactSubGeometry)
-					CompactSubGeometry(sub_geom).updateData(uvs);
+				if (sub_geom is TriangleSubGeometry)
+					TriangleSubGeometry(sub_geom).updateData(uvs);
 				else
 					SubGeometry(sub_geom).updateUVData(uvs);
 				
@@ -357,8 +357,8 @@ package away3d.tools.utils
 					uvs[uvIndex + 1] = _uv.v;
 				}
 				
-				if (sub_geom is CompactSubGeometry)
-					CompactSubGeometry(sub_geom).updateData(uvs);
+				if (sub_geom is TriangleSubGeometry)
+					TriangleSubGeometry(sub_geom).updateData(uvs);
 				else
 					SubGeometry(sub_geom).updateUVData(uvs);
 			}

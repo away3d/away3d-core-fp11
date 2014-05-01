@@ -27,7 +27,7 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		public function testMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			var t:Number;
 			var i0:uint, i1:uint, i2:uint;

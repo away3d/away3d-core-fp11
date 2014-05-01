@@ -2,12 +2,12 @@
 {
 	
 	import away3d.*;
-	import away3d.cameras.*;
-	import away3d.cameras.lenses.*;
+	import away3d.projections.*;
 	import away3d.core.managers.*;
 	import away3d.core.pick.*;
 	import away3d.core.render.*;
 	import away3d.core.traverse.*;
+	import away3d.entities.Camera3D;
 	import away3d.events.*;
 	import away3d.filters.*;
 	import away3d.textures.*;
@@ -80,7 +80,7 @@
 		private var _profile:String;
 		private var _layeredView:Boolean = false;
 		private var _cameras:Vector.<Camera3D>;
-		private var _lenses:Vector.<PerspectiveLens>;
+		private var _lenses:Vector.<away3d.projections.PerspectiveProjection>;
 		private var _container:ObjectContainer3D;
 		
 		private function viewSource(e:ContextMenuEvent):void
@@ -454,7 +454,7 @@
 			_hitField.width = value;
 			_width = value;
 			_aspectRatio = _width/_height;
-			_camera.lens.aspectRatio = _aspectRatio;
+			_camera.projection.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
 			_renderer.viewWidth = value;
@@ -489,7 +489,7 @@
 			_hitField.height = value;
 			_height = value;
 			_aspectRatio = _width/_height;
-			_camera.lens.aspectRatio = _aspectRatio;
+			_camera.projection.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
 			_renderer.viewHeight = value;
@@ -747,16 +747,16 @@
 		
 		protected function updateViewSizeData():void
 		{
-			_camera.lens.aspectRatio = _aspectRatio;
+			_camera.projection.aspectRatio = _aspectRatio;
 			
 			if (_scissorRectDirty) {
 				_scissorRectDirty = false;
-				_camera.lens.updateScissorRect(_scissorRect.x, _scissorRect.y, _scissorRect.width, _scissorRect.height);
+				_camera.projection.updateScissorRect(_scissorRect.x, _scissorRect.y, _scissorRect.width, _scissorRect.height);
 			}
 			
 			if (_viewportDirty) {
 				_viewportDirty = false;
-				_camera.lens.updateViewport(_stage3DProxy.viewPort.x, _stage3DProxy.viewPort.y, _stage3DProxy.viewPort.width, _stage3DProxy.viewPort.height);
+				_camera.projection.updateViewport(_stage3DProxy.viewPort.x, _stage3DProxy.viewPort.y, _stage3DProxy.viewPort.width, _stage3DProxy.viewPort.height);
 			}
 			
 			if (_filter3DRenderer || _renderer.renderToTexture) {
@@ -978,8 +978,8 @@
 		{
 			var camera:Camera3D = _cameras[surfaceIndex];
 			
-			camera.lens.near = _camera.lens.near;
-			camera.lens.far = _camera.lens.far;
+			camera.projection.near = _camera.projection.near;
+			camera.projection.far = _camera.projection.far;
 			
 			_entityCollector.camera = camera;
 			_entityCollector.clear();
@@ -993,7 +993,7 @@
 		private function initCameras():void
 		{
 			_cameras = new Vector.<Camera3D>();
-			_lenses = new Vector.<PerspectiveLens>();
+			_lenses = new Vector.<away3d.projections.PerspectiveProjection>();
 			_container = new ObjectContainer3D();
 			scene.addChild(_container);
 			// posX, negX, posY, negY, posZ, negZ
@@ -1018,10 +1018,10 @@
 			cam.rotationX = rotationX;
 			cam.rotationY = rotationY;
 			cam.rotationZ = rotationZ;
-			cam.lens.near = .01;
-			PerspectiveLens(cam.lens).fieldOfView = 90;
-			_lenses.push(PerspectiveLens(cam.lens));
-			cam.lens.aspectRatio = 1;
+			cam.projection.near = .01;
+			away3d.projections.PerspectiveProjection(cam.projection).fieldOfView = 90;
+			_lenses.push(away3d.projections.PerspectiveProjection(cam.projection));
+			cam.projection.aspectRatio = 1;
 			_cameras.push(cam);
 		}
 		

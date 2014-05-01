@@ -1,7 +1,7 @@
 ﻿package away3d.debug.data
 {
 	import away3d.entities.SegmentSet;
-	import away3d.primitives.LineSegment;
+	import away3d.prefabs.LineSegment;
 	
 	import flash.geom.Vector3D;
 	

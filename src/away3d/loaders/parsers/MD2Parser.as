@@ -56,7 +56,7 @@ package away3d.loaders.parsers
 		
 		// the current subgeom being built
 		private var _animationSet:VertexAnimationSet = new VertexAnimationSet();
-		private var _firstSubGeom:CompactSubGeometry;
+		private var _firstSubGeom:TriangleSubGeometry;
 		private var _uvs:Vector.<Number>;
 		private var _finalUV:Vector.<Number>;
 		
@@ -373,7 +373,7 @@ package away3d.loaders.parsers
 			var sx:Number, sy:Number, sz:Number;
 			var tx:Number, ty:Number, tz:Number;
 			var geometry:Geometry;
-			var subGeom:CompactSubGeometry;
+			var subGeom:TriangleSubGeometry;
 			var vertLen:uint = _vertIndices.length;
 			var fvertices:Vector.<Number>;
 			var tvertices:Vector.<Number>;
@@ -385,7 +385,7 @@ package away3d.loaders.parsers
 			_byteData.position = _offsetFrames;
 			
 			for (i = 0; i < _numFrames; i++) {
-				subGeom = new CompactSubGeometry();
+				subGeom = new TriangleSubGeometry();
 				_firstSubGeom ||= subGeom;
 				geometry = new Geometry();
 				geometry.addSubGeometry(subGeom);
@@ -473,7 +473,7 @@ package away3d.loaders.parsers
 		
 		private function createDefaultSubGeometry():void
 		{
-			var sub:CompactSubGeometry = new CompactSubGeometry();
+			var sub:TriangleSubGeometry = new TriangleSubGeometry();
 			sub.updateData(_firstSubGeom.vertexData);
 			sub.updateIndexData(_indices);
 			_geometry.addSubGeometry(sub);

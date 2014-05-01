@@ -9,7 +9,7 @@ package away3d.animators
 	import away3d.core.managers.*;
 	import away3d.materials.*;
 	import away3d.materials.passes.*;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	
 	import flash.display3D.Context3DProgramType;
 	import flash.utils.getTimer;

@@ -1,8 +1,8 @@
 package away3d.lights.shadowmaps
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.FreeMatrixLens;
+	import away3d.entities.Camera3D;
+	import away3d.projections.FreeMatrixProjection;
 	import away3d.containers.Scene3D;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.math.Plane3D;
@@ -22,7 +22,7 @@ package away3d.lights.shadowmaps
 		
 		protected var _lightOffset:Number = 10000;
 		protected var _matrix:Matrix3D;
-		protected var _overallDepthLens:FreeMatrixLens;
+		protected var _overallDepthLens:FreeMatrixProjection;
 		protected var _snap:Number = 64;
 		
 		protected var _cullPlanes:Vector.<Plane3D>;
@@ -33,7 +33,7 @@ package away3d.lights.shadowmaps
 		{
 			super();
 			_cullPlanes = new Vector.<Plane3D>();
-			_overallDepthLens = new FreeMatrixLens();
+			_overallDepthLens = new FreeMatrixProjection();
 			_overallDepthCamera = new Camera3D(_overallDepthLens);
 			_localFrustum = new Vector.<Number>(8*3);
 			_matrix = new Matrix3D();
@@ -110,7 +110,7 @@ package away3d.lights.shadowmaps
 		
 		override protected function updateDepthProjection(viewCamera:Camera3D):void
 		{
-			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners, _matrix);
+			updateProjectionFromFrustumCorners(viewCamera, viewCamera.projection.frustumCorners, _matrix);
 			_overallDepthLens.matrix = _matrix;
 			updateCullPlanes(viewCamera);
 		}

@@ -1,7 +1,7 @@
 package away3d.filters.tasks
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
 	
 	import flash.display3D.Context3D;
@@ -125,8 +125,8 @@ package away3d.filters.tasks
 		override public function activate(stage3DProxy:Stage3DProxy, camera:Camera3D, depthTexture:Texture):void
 		{
 			var context:Context3D = stage3DProxy._context3D;
-			var n:Number = camera.lens.near;
-			var f:Number = camera.lens.far;
+			var n:Number = camera.projection.near;
+			var f:Number = camera.projection.far;
 			
 			_data[6] = f/(f - n);
 			_data[7] = -n*_data[6];

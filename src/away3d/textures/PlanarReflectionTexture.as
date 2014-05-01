@@ -1,8 +1,8 @@
 package away3d.textures
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.ObliqueNearPlaneLens;
+	import away3d.entities.Camera3D;
+	import away3d.projections.ObliqueNearPlaneLens;
 	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
@@ -50,7 +50,7 @@ package away3d.textures
 			super(2, 2);
 			_camera = new Camera3D();
 			_lens = new ObliqueNearPlaneLens(null, null);
-			_camera.lens = _lens;
+			_camera.projection = _lens;
 			_matrix = new Matrix3D();
 			_vector = new Vector3D();
 			_plane = new Plane3D();
@@ -183,7 +183,7 @@ package away3d.textures
 			_matrix.prepend(camera.sceneTransform);
 			_matrix.prependScale(1, -1, 1);
 			_camera.transform = _matrix;
-			_lens.baseLens = camera.lens;
+			_lens.baseProjection = camera.projection;
 			_lens.aspectRatio = _viewWidth/_viewHeight;
 			_lens.plane = transformPlane(_plane, _matrix, _lens.plane);
 		}

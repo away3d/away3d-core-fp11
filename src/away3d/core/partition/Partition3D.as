@@ -1,9 +1,10 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
+	import away3d.core.base.Object3D;
 	import away3d.core.traverse.PartitionTraverser;
-	import away3d.entities.Entity;
-	
+	import away3d.entities.IEntity;
+
 	use namespace arcane;
 	
 	/**
@@ -25,15 +26,9 @@ package away3d.core.partition
 		{
 			_rootNode = rootNode || new NullNode();
 		}
-		
-		public function get showDebugBounds():Boolean
-		{
-			return _rootNode.showDebugBounds;
-		}
-		
-		public function set showDebugBounds(value:Boolean):void
-		{
-			_rootNode.showDebugBounds = value;
+
+		public function get rootNode():NodeBase{
+			return _rootNode;
 		}
 		
 		/**
@@ -44,10 +39,10 @@ package away3d.core.partition
 		 */
 		public function traverse(traverser:PartitionTraverser):void
 		{
-			updateEntities();
-			
-			++PartitionTraverser._collectionMark;
-			
+			if(_updatesMade) {
+				updateEntities();
+			}
+
 			_rootNode.acceptTraverser(traverser);
 		}
 		
@@ -56,9 +51,9 @@ package away3d.core.partition
 		 * object's bounding box, upon the next traversal.
 		 * @param entity The entity to be updated in the tree.
 		 */
-		arcane function markForUpdate(entity:Entity):void
+		arcane function markForUpdate(entity:Object3D):void
 		{
-			var node:EntityNode = entity.getEntityPartitionNode();
+			var node:EntityNode = entity.partitionNode;
 			// already marked to be updated
 			var t:EntityNode = _updateQueue;
 			
@@ -80,9 +75,9 @@ package away3d.core.partition
 		 * Removes an entity from the partition tree.
 		 * @param entity The entity to be removed.
 		 */
-		arcane function removeEntity(entity:Entity):void
+		arcane function removeEntity(entity:Object3D):void
 		{
-			var node:EntityNode = entity.getEntityPartitionNode();
+			var node:EntityNode = entity.partitionNode;
 			var t:EntityNode;
 			
 			node.removeFromParent();

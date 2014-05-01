@@ -5,7 +5,7 @@ package away3d.loaders.parsers
 	import flash.utils.Dictionary;
 	
 	import away3d.arcane;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.entities.Mesh;
 	import away3d.entities.SegmentSet;
@@ -13,7 +13,7 @@ package away3d.loaders.parsers
 	import away3d.materials.ColorMaterial;
 	import away3d.materials.ColorMultiPassMaterial;
 	import away3d.materials.MaterialBase;
-	import away3d.primitives.LineSegment;
+	import away3d.prefabs.LineSegment;
 	
 	use namespace arcane;
 	
@@ -48,7 +48,7 @@ package away3d.loaders.parsers
 		private var _vertices:Vector.<Number>;
 		private var _uvs:Vector.<Number>;
 		private var _indices:Vector.<uint>;
-		private var _subGeometry:CompactSubGeometry;
+		private var _subGeometry:TriangleSubGeometry;
 		
 		private var _polyLines:Vector.<Vector3D>;
 		private var _polyLinesIndices:Vector.<int>;
@@ -429,7 +429,7 @@ package away3d.loaders.parsers
 				} else {
 					// glad we keeped track. Lets reuse this mesh.
 					_activeMesh = _meshesDic[_meshName];
-					_subGeometry = CompactSubGeometry(_activeMesh.geometry.subGeometries[_activeMesh.geometry.subGeometries.length - 1]);
+					_subGeometry = TriangleSubGeometry(_activeMesh.geometry.subGeometries[_activeMesh.geometry.subGeometries.length - 1]);
 					_vertices = _subGeometry.vertexData;
 					_uvs = _subGeometry.UVData;
 					_indices = _subGeometry.indexData;
@@ -500,7 +500,7 @@ package away3d.loaders.parsers
 		
 		private function addSubGeometry(geom:Geometry):void
 		{
-			_subGeometry = new CompactSubGeometry();
+			_subGeometry = new TriangleSubGeometry();
 			_subGeometry.autoDeriveVertexNormals = true;
 			_subGeometry.autoDeriveVertexTangents = true;
 			geom.addSubGeometry(_subGeometry);

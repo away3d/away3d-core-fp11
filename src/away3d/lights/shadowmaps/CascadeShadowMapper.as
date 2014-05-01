@@ -1,9 +1,9 @@
 package away3d.lights.shadowmaps
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.FreeMatrixLens;
-	import away3d.cameras.lenses.LensBase;
+	import away3d.entities.Camera3D;
+	import away3d.projections.FreeMatrixProjection;
+	import away3d.projections.ProjectionBase;
 	import away3d.containers.Scene3D;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.render.DepthRenderer;
@@ -25,7 +25,7 @@ package away3d.lights.shadowmaps
 		
 		private var _numCascades:int;
 		private var _depthCameras:Vector.<Camera3D>;
-		private var _depthLenses:Vector.<FreeMatrixLens>;
+		private var _depthLenses:Vector.<FreeMatrixProjection>;
 		
 		private var _texOffsetsX:Vector.<Number>;
 		private var _texOffsetsY:Vector.<Number>;
@@ -80,11 +80,11 @@ package away3d.lights.shadowmaps
 			_texOffsetsX = new <Number>[-1, 1, -1, 1];
 			_texOffsetsY = new <Number>[1, 1, -1, -1];
 			_scissorRects = new Vector.<Rectangle>(4, true);
-			_depthLenses = new Vector.<FreeMatrixLens>();
+			_depthLenses = new Vector.<FreeMatrixProjection>();
 			_depthCameras = new Vector.<Camera3D>();
 			
 			for (i = 0; i < _numCascades; ++i) {
-				_depthLenses[i] = new FreeMatrixLens();
+				_depthLenses[i] = new FreeMatrixProjection();
 				_depthCameras[i] = new Camera3D(_depthLenses[i]);
 			}
 		}
@@ -150,11 +150,11 @@ package away3d.lights.shadowmaps
 		override protected function updateDepthProjection(viewCamera:Camera3D):void
 		{
 			var matrix:Matrix3D;
-			var lens:LensBase = viewCamera.lens;
+			var lens:ProjectionBase = viewCamera.projection;
 			var lensNear:Number = lens.near;
 			var lensRange:Number = lens.far - lensNear;
 			
-			updateProjectionFromFrustumCorners(viewCamera, viewCamera.lens.frustumCorners, _matrix);
+			updateProjectionFromFrustumCorners(viewCamera, viewCamera.projection.frustumCorners, _matrix);
 			_matrix.appendScale(.96, .96, 1);
 			_overallDepthLens.matrix = _matrix;
 			updateCullPlanes(viewCamera);

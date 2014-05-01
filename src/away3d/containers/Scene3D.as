@@ -1,10 +1,11 @@
 package away3d.containers
 {
 	import away3d.arcane;
+	import away3d.core.base.Object3D;
 	import away3d.core.partition.NodeBase;
 	import away3d.core.partition.Partition3D;
 	import away3d.core.traverse.PartitionTraverser;
-	import away3d.entities.Entity;
+	import away3d.entities.IEntity;
 	import away3d.events.Scene3DEvent;
 	
 	import flash.events.EventDispatcher;
@@ -21,15 +22,17 @@ package away3d.containers
 	 */
 	public class Scene3D extends EventDispatcher
 	{
+		private var _expandedPartitions:Vector.<Partition3D> = new Vector.<Partition3D>();
+		private var _partitions:Vector.<Partition3D> = new Vector.<Partition3D>();
+
 		arcane var _sceneGraphRoot:ObjectContainer3D;
-		private var _partitions:Vector.<Partition3D>;
-		
+		arcane var _collectionMark:uint = 0;
+
 		/**
 		 * Creates a new Scene3D object.
 		 */
 		public function Scene3D()
 		{
-			_partitions = new Vector.<Partition3D>();
 			_sceneGraphRoot = new ObjectContainer3D();
 			_sceneGraphRoot.scene = this;
 			_sceneGraphRoot._isRoot = true;
@@ -124,56 +127,48 @@ package away3d.containers
 		 * When an entity is added to the scene, or to one of its children, add it to the partition tree.
 		 * @private
 		 */
-		arcane function registerEntity(entity:Entity):void
+		arcane function registerEntity(object:Object3D):void
 		{
-			var partition:Partition3D = entity.implicitPartition;
-			addPartitionUnique(partition);
-			
-			partition.markForUpdate(entity);
+			if (object.partition)
+				this.iRegisterPartition(object.partition);
+
+			if (object.isEntity)
+				object.assignedPartition.iMarkForUpdate(object);
 		}
 		
 		/**
 		 * When an entity is removed from the scene, or from one of its children, remove it from its former partition tree.
 		 * @private
 		 */
-		arcane function unregisterEntity(entity:Entity):void
+		arcane function unregisterEntity(object:Object3D):void
 		{
-			entity.implicitPartition.removeEntity(entity);
+			if (object.partition)
+				this.iUnregisterPartition(object.partition);
+
+			if (object.isEntity)
+				object.assignedPartition.iRemoveEntity(object);
 		}
-		
-		/**
-		 * When an entity has moved or changed size, update its position in its partition tree.
-		 */
-		arcane function invalidateEntityBounds(entity:Entity):void
-		{
-			entity.implicitPartition.markForUpdate(entity);
-		}
-		
+
 		/**
 		 * When a partition is assigned to an object somewhere in the scene graph, add the partition to the list if it isn't in there yet
 		 */
-		arcane function registerPartition(entity:Entity):void
+		arcane function registerPartition(partition:Partition3D):void
 		{
-			addPartitionUnique(entity.implicitPartition);
+			_expandedPartitions.push(partition);
+			if (_partitions.indexOf(partition) == -1)
+				_partitions.push(partition);
 		}
 		
 		/**
 		 * When a partition is removed from an object somewhere in the scene graph, remove the partition from the list
 		 */
-		arcane function unregisterPartition(entity:Entity):void
+		arcane function unregisterPartition(partition:Partition3D):void
 		{
-			// todo: wait... is this even correct?
-			// shouldn't we check the number of children in implicitPartition and remove partition if 0?
-			entity.implicitPartition.removeEntity(entity);
-		}
-		
-		/**
-		 * Add a partition if it's not in the list
-		 */
-		protected function addPartitionUnique(partition:Partition3D):void
-		{
-			if (_partitions.indexOf(partition) == -1)
-				_partitions.push(partition);
+			_expandedPartitions.splice(_expandedPartitions.indexOf(partition), 1);
+
+			//if no more partition references found, remove from partitions array
+			if (_expandedPartitions.indexOf(partition) == -1)
+				_partitions.splice(_partitions.indexOf(partition), 1);
 		}
 	}
 }

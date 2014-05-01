@@ -3,7 +3,7 @@ package away3d.materials.passes
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.AGALProgram3DCache;
 	import away3d.core.managers.Stage3DProxy;

@@ -4,7 +4,7 @@ package away3d.core.traverse
 	import away3d.containers.Scene3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.partition.NodeBase;
-	import away3d.entities.Entity;
+	import away3d.entities.IEntity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
@@ -92,7 +92,7 @@ package away3d.core.traverse
 		/**
 		 * Registers an entity for use.
 		 */
-		public function applyEntity(entity:Entity):void
+		public function applyEntity(entity:IEntity):void
 		{
 			throw new AbstractMethodError();
 		}

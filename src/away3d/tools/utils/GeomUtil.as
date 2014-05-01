@@ -1,7 +1,7 @@
 package away3d.tools.utils
 {
 	import away3d.arcane;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.core.base.SubMesh;
@@ -178,9 +178,9 @@ package away3d.tools.utils
 		/**
 		 * Build a sub-geometry from data vectors.
 		 */
-		public static function constructSubGeometry(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>, secondaryUVs:Vector.<Number>):CompactSubGeometry
+		public static function constructSubGeometry(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>, secondaryUVs:Vector.<Number>):TriangleSubGeometry
 		{
-			var sub:CompactSubGeometry;
+			var sub:TriangleSubGeometry;
 			
 			if (weights && jointIndices) {
 				// If there were weights and joint indices defined, this
@@ -191,7 +191,7 @@ package away3d.tools.utils
 				SkinnedSubGeometry(sub).updateJointIndexData(jointIndices);
 				
 			} else
-				sub = new CompactSubGeometry();
+				sub = new TriangleSubGeometry();
 			
 			sub.updateIndexData(indices);
 			sub.fromVectors(verts, uvs, normals, tangents, secondaryUVs);

@@ -1,7 +1,7 @@
 package away3d.events
 {
-	import away3d.core.base.ISubGeometry;
-	
+	import away3d.core.base.SubGeometryBase;
+
 	import flash.events.Event;
 	
 	/**
@@ -23,14 +23,14 @@ package away3d.events
 		
 		public static const BOUNDS_INVALID:String = "BoundsInvalid";
 		
-		private var _subGeometry:ISubGeometry;
+		private var _subGeometry:SubGeometryBase;
 		
 		/**
 		 * Create a new GeometryEvent
 		 * @param type The event type.
 		 * @param subGeometry An optional SubGeometry object that is the subject of this event.
 		 */
-		public function GeometryEvent(type:String, subGeometry:ISubGeometry = null):void
+		public function GeometryEvent(type:String, subGeometry:SubGeometryBase = null):void
 		{
 			super(type, false, false);
 			_subGeometry = subGeometry;
@@ -39,7 +39,7 @@ package away3d.events
 		/**
 		 * The SubGeometry object that is the subject of this event, if appropriate.
 		 */
-		public function get subGeometry():ISubGeometry
+		public function get subGeometry():SubGeometryBase
 		{
 			return _subGeometry;
 		}

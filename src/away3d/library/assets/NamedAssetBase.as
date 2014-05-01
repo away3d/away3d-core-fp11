@@ -1,6 +1,7 @@
 package away3d.library.assets
 {
 	import away3d.arcane;
+	import away3d.errors.AbstractMethodError;
 	import away3d.events.AssetEvent;
 	
 	import flash.events.EventDispatcher;
@@ -9,6 +10,7 @@ package away3d.library.assets
 	
 	public class NamedAssetBase extends EventDispatcher
 	{
+		public static var ID_COUNT:int = 0;
 		private var _originalName:String;
 		private var _namespace:String;
 		private var _name:String;
@@ -19,6 +21,8 @@ package away3d.library.assets
 		
 		public function NamedAssetBase(name:String = null)
 		{
+			_id = (NamedAssetBase.ID_COUNT++).toString();
+
 			if (name == null)
 				name = 'null';
 			
@@ -27,7 +31,15 @@ package away3d.library.assets
 			
 			updateFullPath();
 		}
-		
+
+		/**
+		 *
+		 */
+		public function get assetType():String
+		{
+			throw new AbstractMethodError();
+		}
+
 		/**
 		 * The original name used for this asset in the resource (e.g. file) in which
 		 * it was found. This may not be the same as <code>name</code>, which may
@@ -42,12 +54,7 @@ package away3d.library.assets
 		{
 			return _id;
 		}
-		
-		public function set id(newID:String):void
-		{
-			_id = newID;
-		}
-		
+
 		public function get name():String
 		{
 			return _name;

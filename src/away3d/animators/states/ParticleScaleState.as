@@ -6,7 +6,7 @@ package away3d.animators.states
 	import flash.display3D.Context3DVertexBufferFormat;
 	
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.core.base.IRenderable;

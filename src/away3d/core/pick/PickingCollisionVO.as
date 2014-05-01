@@ -2,6 +2,7 @@ package away3d.core.pick
 {
 	
 	import away3d.core.base.IRenderable;
+	import away3d.core.base.Object3D;
 	import away3d.entities.*;
 	
 	import flash.geom.*;
@@ -15,9 +16,9 @@ package away3d.core.pick
 	public class PickingCollisionVO
 	{
 		/**
-		 * The entity to which this collision object belongs.
+		 * The Object3D to which this collision object belongs.
 		 */
-		public var entity:Entity;
+		public var object:Object3D;
 		
 		/**
 		 * The local position of the collision on the entity's surface.
@@ -84,11 +85,11 @@ package away3d.core.pick
 		/**
 		 * Creates a new <code>PickingCollisionVO</code> object.
 		 *
-		 * @param entity The entity to which this collision object belongs.
+		 * @param object The Object3D to which this collision object belongs.
 		 */
-		function PickingCollisionVO(entity:Entity)
+		function PickingCollisionVO(object:Object3D)
 		{
-			this.entity = entity;
+			this.object = object;
 		}
 	
 	}

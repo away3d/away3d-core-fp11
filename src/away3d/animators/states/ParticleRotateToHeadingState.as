@@ -5,7 +5,7 @@ package away3d.animators.states
 	import away3d.animators.nodes.ParticleRotateToHeadingNode;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.ParticleAnimator;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	

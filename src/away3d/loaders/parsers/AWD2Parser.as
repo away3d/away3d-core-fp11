@@ -26,13 +26,13 @@ package away3d.loaders.parsers
 	import away3d.animators.nodes.SkeletonClipNode;
 	import away3d.animators.nodes.UVClipNode;
 	import away3d.animators.nodes.VertexClipNode;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.LensBase;
-	import away3d.cameras.lenses.OrthographicLens;
-	import away3d.cameras.lenses.OrthographicOffCenterLens;
-	import away3d.cameras.lenses.PerspectiveLens;
+	import away3d.entities.Camera3D;
+	import away3d.projections.ProjectionBase;
+	import away3d.projections.OrthographicProjection;
+	import away3d.projections.OrthographicOffCenterProjection;
+	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubMesh;
@@ -91,14 +91,14 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.SubsurfaceScatteringDiffuseMethod;
 	import away3d.materials.methods.WrapDiffuseMethod;
 	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.primitives.CapsuleGeometry;
-	import away3d.primitives.ConeGeometry;
-	import away3d.primitives.CubeGeometry;
-	import away3d.primitives.CylinderGeometry;
-	import away3d.primitives.PlaneGeometry;
-	import away3d.primitives.SkyBox;
-	import away3d.primitives.SphereGeometry;
-	import away3d.primitives.TorusGeometry;
+	import away3d.prefabs.CapsuleGeometry;
+	import away3d.prefabs.ConeGeometry;
+	import away3d.prefabs.CubeGeometry;
+	import away3d.prefabs.CylinderGeometry;
+	import away3d.prefabs.PlaneGeometry;
+	import away3d.prefabs.SkyBox;
+	import away3d.prefabs.SphereGeometry;
+	import away3d.prefabs.TorusGeometry;
 	import away3d.textures.ATFCubeTexture;
 	import away3d.textures.ATFTexture;
 	import away3d.textures.BitmapCubeTexture;
@@ -820,7 +820,7 @@ package away3d.loaders.parsers
 			// in AWD version 2.1 we read the Container properties
 			if ((_version[0] == 2) && (_version[1] == 1)) {
 				var props:Object = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8});
-				ctr.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
+				ctr.pivot = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
 			}
 			// in other versions we do not read the Container properties
 			else
@@ -1033,20 +1033,20 @@ package away3d.loaders.parsers
 			var mtx:Matrix3D = parseMatrix3D();
 			var name:String = parseVarStr();
 			var parentName:String = "Root (TopLevel)";
-			var lens:LensBase;
+			var lens:ProjectionBase;
 			_newBlockBytes.readUnsignedByte(); //set as active camera
 			_newBlockBytes.readShort(); //lengthof lenses - not used yet
 			var lenstype:uint = _newBlockBytes.readShort();
 			var props:AWDProperties = parseProperties({101:_propsNrType, 102:_propsNrType, 103:_propsNrType, 104:_propsNrType});
 			switch (lenstype) {
 				case 5001:
-					lens = new PerspectiveLens(props.get(101, 60));
+					lens = new PerspectiveProjection(props.get(101, 60));
 					break;
 				case 5002:
-					lens = new OrthographicLens(props.get(101, 500));
+					lens = new OrthographicProjection(props.get(101, 500));
 					break;
 				case 5003:
-					lens = new OrthographicOffCenterLens(props.get(101, -400), props.get(102, 400), props.get(103, -300), props.get(104, 300));
+					lens = new OrthographicOffCenterProjection(props.get(101, -400), props.get(102, 400), props.get(103, -300), props.get(104, 300));
 					break;
 				default:
 					trace("unsupportedLenstype");
@@ -1063,8 +1063,8 @@ package away3d.loaders.parsers
 			camera.name = name;
 			props = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8, 101:_propsNrType, 102:_propsNrType});
 			camera.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
-			camera.lens.near = props.get(101, 20);
-			camera.lens.far = props.get(102, 3000);
+			camera.projection.near = props.get(101, 20);
+			camera.projection.far = props.get(102, 3000);
 			camera.extra = parseUserAttributes();
 			finalizeAsset(camera, name);
 			
@@ -1092,7 +1092,7 @@ package away3d.loaders.parsers
 			textureProjector.fieldOfView = _newBlockBytes.readFloat();
 			textureProjector.transform = mtx;
 			var props:AWDProperties = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8});
-			textureProjector.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
+			textureProjector.pivot = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
 			textureProjector.extra = parseUserAttributes();
 			finalizeAsset(textureProjector, name);
 			
@@ -1889,7 +1889,7 @@ package away3d.loaders.parsers
 			var str_len:Number;
 			var str_end:Number;
 			var geometry:Geometry;
-			var subGeom:CompactSubGeometry;
+			var subGeom:TriangleSubGeometry;
 			var idx:int = 0;
 			var clip:VertexClipNode = new VertexClipNode();
 			var indices:Vector.<uint>;
@@ -1944,7 +1944,7 @@ package away3d.loaders.parsers
 								verts[idx++] = y;
 								verts[idx++] = z;
 							}
-							subGeom = new CompactSubGeometry();
+							subGeom = new TriangleSubGeometry();
 							subGeom.fromVectors(verts, uvs[subMeshParsed], null, null);
 							subGeom.updateIndexData(indices);
 							subGeom.vertexNormalData;
@@ -2143,7 +2143,7 @@ package away3d.loaders.parsers
 			}
 			if (targetObject) {
 				props = parseProperties({1:_matrixNrType, 2:_matrixNrType, 3:_matrixNrType, 4:UINT8});
-				targetObject.pivotPoint = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
+				targetObject.pivot = new Vector3D(props.get(1, 0), props.get(2, 0), props.get(3, 0));
 				targetObject.extra = parseUserAttributes();
 			}
 			_blocks[blockID].data = targetObject

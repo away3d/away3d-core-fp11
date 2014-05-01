@@ -1,7 +1,7 @@
 package away3d.stereo
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
 	import away3d.core.render.RendererBase;
@@ -102,7 +102,7 @@ package away3d.stereo
 			_entityCollector.clear();
 			
 			_camera = cam;
-			_camera.lens.aspectRatio = _aspectRatio;
+			_camera.projection.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
 			
 			updateViewSizeData();
@@ -125,7 +125,7 @@ package away3d.stereo
 			
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
-				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
+				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
 				if (!_shareContext)
 					_stage3DProxy._context3D.present();
 			} else {

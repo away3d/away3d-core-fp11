@@ -1,7 +1,7 @@
 ﻿package away3d.materials.passes
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
@@ -182,7 +182,7 @@
 			var context:Context3D = stage3DProxy._context3D;
 			super.activate(stage3DProxy, camera);
 			
-			var f:Number = camera.lens.far;
+			var f:Number = camera.projection.far;
 			
 			f = 1/(2*f*f);
 			// sqrt(f*f+f*f) is largest possible distance for any frustum, so we need to divide by it. Rarely a tight fit, but with 32 bits precision, it's enough.

@@ -1,9 +1,9 @@
 package away3d.entities
 {
 	import away3d.arcane;
-	import away3d.cameras.lenses.PerspectiveLens;
+	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.events.LensEvent;
+	import away3d.events.ProjectionEvent;
 	import away3d.library.assets.AssetType;
 	import away3d.textures.Texture2DBase;
 	
@@ -22,7 +22,7 @@ package away3d.entities
 	 */
 	public class TextureProjector extends ObjectContainer3D
 	{
-		private var _lens:PerspectiveLens;
+		private var _lens:PerspectiveProjection;
 		private var _viewProjectionInvalid:Boolean = true;
 		private var _viewProjection:Matrix3D = new Matrix3D();
 		private var _texture:Texture2DBase;
@@ -34,8 +34,8 @@ package away3d.entities
 		 */
 		public function TextureProjector(texture:Texture2DBase)
 		{
-			_lens = new PerspectiveLens();
-			_lens.addEventListener(LensEvent.MATRIX_CHANGED, onInvalidateLensMatrix, false, 0, true);
+			_lens = new PerspectiveProjection();
+			_lens.addEventListener(ProjectionEvent.MATRIX_CHANGED, onInvalidateLensMatrix, false, 0, true);
 			_texture = texture;
 			_lens.aspectRatio = texture.width/texture.height;
 			rotationX = -90;
@@ -114,7 +114,7 @@ package away3d.entities
 			_viewProjectionInvalid = true;
 		}
 		
-		private function onInvalidateLensMatrix(event:LensEvent):void
+		private function onInvalidateLensMatrix(event:ProjectionEvent):void
 		{
 			_viewProjectionInvalid = true;
 		}

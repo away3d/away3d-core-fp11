@@ -1,8 +1,8 @@
 package away3d.lights.shadowmaps
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.PerspectiveLens;
+	import away3d.entities.Camera3D;
+	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.Scene3D;
 	import away3d.core.render.DepthRenderer;
 	import away3d.lights.PointLight;
@@ -18,7 +18,7 @@ package away3d.lights.shadowmaps
 	public class CubeMapShadowMapper extends ShadowMapperBase
 	{
 		private var _depthCameras:Vector.<Camera3D>;
-		private var _lenses:Vector.<PerspectiveLens>;
+		private var _lenses:Vector.<PerspectiveProjection>;
 		private var _needsRender:Vector.<Boolean>;
 		
 		public function CubeMapShadowMapper()
@@ -34,7 +34,7 @@ package away3d.lights.shadowmaps
 		private function initCameras():void
 		{
 			_depthCameras = new Vector.<Camera3D>();
-			_lenses = new Vector.<PerspectiveLens>();
+			_lenses = new Vector.<PerspectiveProjection>();
 			// posX, negX, posY, negY, posZ, negZ
 			addCamera(0, 90, 0);
 			addCamera(0, -90, 0);
@@ -50,10 +50,10 @@ package away3d.lights.shadowmaps
 			cam.rotationX = rotationX;
 			cam.rotationY = rotationY;
 			cam.rotationZ = rotationZ;
-			cam.lens.near = .01;
-			PerspectiveLens(cam.lens).fieldOfView = 90;
-			_lenses.push(PerspectiveLens(cam.lens));
-			cam.lens.aspectRatio = 1;
+			cam.projection.near = .01;
+			PerspectiveProjection(cam.projection).fieldOfView = 90;
+			_lenses.push(PerspectiveProjection(cam.projection));
+			cam.projection.aspectRatio = 1;
 			_depthCameras.push(cam);
 		}
 		

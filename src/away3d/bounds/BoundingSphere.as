@@ -2,7 +2,7 @@ package away3d.bounds
 {
 	import away3d.arcane;
 	import away3d.core.math.*;
-	import away3d.primitives.*;
+	import away3d.prefabs.*;
 	
 	import flash.geom.*;
 	
@@ -79,8 +79,8 @@ package away3d.bounds
 			_min.y = _centerY - radius;
 			_min.z = _centerZ - radius;
 			_aabbPointsDirty = true;
-			if (_boundingRenderable)
-				updateBoundingRenderable();
+			if (_boundingEntity)
+				updateBoundingEntity();
 		}
 		
 		// TODO: fromGeometry can probably be updated a lot
@@ -158,20 +158,20 @@ package away3d.bounds
 			return distance <= _radius;
 		}
 		
-		override protected function updateBoundingRenderable():void
+		override protected function updateBoundingEntity():void
 		{
 			var sc:Number = _radius;
 			if (sc == 0)
 				sc = 0.001;
-			_boundingRenderable.scaleX = sc;
-			_boundingRenderable.scaleY = sc;
-			_boundingRenderable.scaleZ = sc;
-			_boundingRenderable.x = _centerX;
-			_boundingRenderable.y = _centerY;
-			_boundingRenderable.z = _centerZ;
+			_boundingEntity.scaleX = sc;
+			_boundingEntity.scaleY = sc;
+			_boundingEntity.scaleZ = sc;
+			_boundingEntity.x = _centerX;
+			_boundingEntity.y = _centerY;
+			_boundingEntity.z = _centerZ;
 		}
 		
-		override protected function createBoundingRenderable():WireframePrimitiveBase
+		override protected function createBoundingEntity():WireframePrimitiveBase
 		{
 			return new WireframeSphere(1, 16, 12, 0xffffff, 0.5);
 		}

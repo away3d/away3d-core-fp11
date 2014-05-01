@@ -1,7 +1,7 @@
 package away3d.lights.shadowmaps
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	
 	use namespace arcane;
 	
@@ -35,7 +35,7 @@ package away3d.lights.shadowmaps
 		
 		override protected function updateDepthProjection(viewCamera:Camera3D):void
 		{
-			var corners:Vector.<Number> = viewCamera.lens.frustumCorners;
+			var corners:Vector.<Number> = viewCamera.projection.frustumCorners;
 			
 			for (var i:int = 0; i < 12; ++i) {
 				var v:Number = corners[i];

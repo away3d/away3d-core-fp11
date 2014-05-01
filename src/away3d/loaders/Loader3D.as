@@ -10,7 +10,7 @@ package away3d.loaders
 	import away3d.lights.*;
 	import away3d.loaders.misc.*;
 	import away3d.loaders.parsers.*;
-	import away3d.primitives.*;
+	import away3d.prefabs.*;
 	
 	import flash.events.*;
 	import flash.net.*;

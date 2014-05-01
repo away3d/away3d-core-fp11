@@ -4,7 +4,7 @@ package away3d.animators
 	import away3d.animators.data.*;
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.core.math.*;
@@ -551,14 +551,14 @@ package away3d.animators
 	}
 }
 
-import away3d.core.base.CompactSubGeometry;
+import away3d.core.base.TriangleSubGeometry;
 
 class SubGeomAnimationState
 {
 	public var animatedVertexData:Vector.<Number>;
 	public var dirty:Boolean = true;
 	
-	public function SubGeomAnimationState(subGeom:CompactSubGeometry)
+	public function SubGeomAnimationState(subGeom:TriangleSubGeometry)
 	{
 		animatedVertexData = subGeom.vertexData.concat();
 	}

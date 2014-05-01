@@ -3,7 +3,7 @@ package away3d.tools.helpers
 	import away3d.arcane;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
@@ -33,7 +33,7 @@ package away3d.tools.helpers
 				mesh.geometry.addSubGeometry(subGeom);
 				
 			} else {
-				if (mesh.geometry.subGeometries[0] is CompactSubGeometry)
+				if (mesh.geometry.subGeometries[0] is TriangleSubGeometry)
 					mesh.geometry.convertToSeparateBuffers();
 			}
 			
@@ -584,7 +584,7 @@ package away3d.tools.helpers
 		{
 			var subGeoms:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
 			
-			if (subGeoms[0] is CompactSubGeometry)
+			if (subGeoms[0] is TriangleSubGeometry)
 				throw new Error("Convert to CompactSubGeometry using mesh.geometry.convertToSeparateBuffers() ");
 			
 			var indices:Vector.<uint>;
@@ -629,7 +629,7 @@ package away3d.tools.helpers
 		{
 			var subGeoms:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
 			
-			if (subGeoms[0] is CompactSubGeometry)
+			if (subGeoms[0] is TriangleSubGeometry)
 				throw new Error("Convert to CompactSubGeometry using mesh.geometry.convertToSeparateBuffers() ");
 			
 			if (subGeomIndice > subGeoms.length - 1)

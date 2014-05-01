@@ -7,7 +7,7 @@ package away3d.loaders.parsers
 	
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
@@ -453,11 +453,11 @@ package away3d.loaders.parsers
 				}
 			}
 			
-			var sub_geom:CompactSubGeometry;
+			var sub_geom:TriangleSubGeometry;
 			var geom:Geometry = mesh.geometry;
 			
 			for (i = 0; i < subGeomsData.length; i += 3) {
-				sub_geom = new CompactSubGeometry();
+				sub_geom = new TriangleSubGeometry();
 				sub_geom.fromVectors(subGeomsData[i], subGeomsData[i + 2], null, null);
 				sub_geom.updateIndexData(subGeomsData[i + 1]);
 				geom.addSubGeometry(sub_geom);

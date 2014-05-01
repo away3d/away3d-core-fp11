@@ -1,8 +1,8 @@
 package away3d.textures
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.PerspectiveLens;
+	import away3d.entities.Camera3D;
+	import away3d.projections.PerspectiveProjection;
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
 	import away3d.core.managers.Stage3DProxy;
@@ -29,7 +29,7 @@ package away3d.textures
 		private var _renderer:RendererBase;
 		private var _entityCollector:EntityCollector;
 		private var _cameras:Vector.<Camera3D>;
-		private var _lenses:Vector.<PerspectiveLens>;
+		private var _lenses:Vector.<PerspectiveProjection>;
 		private var _nearPlaneDistance:Number = .01;
 		private var _farPlaneDistance:Number = 2000;
 		private var _position:Vector3D;
@@ -147,8 +147,8 @@ package away3d.textures
 		{
 			var camera:Camera3D = _cameras[surfaceIndex];
 			
-			camera.lens.near = _nearPlaneDistance;
-			camera.lens.far = _farPlaneDistance;
+			camera.projection.near = _nearPlaneDistance;
+			camera.projection.far = _farPlaneDistance;
 			camera.position = position;
 			
 			_entityCollector.camera = camera;
@@ -170,7 +170,7 @@ package away3d.textures
 		private function initCameras():void
 		{
 			_cameras = new Vector.<Camera3D>();
-			_lenses = new Vector.<PerspectiveLens>();
+			_lenses = new Vector.<PerspectiveProjection>();
 			// posX, negX, posY, negY, posZ, negZ
 			addCamera(0, 90, 0);
 			addCamera(0, -90, 0);
@@ -186,10 +186,10 @@ package away3d.textures
 			cam.rotationX = rotationX;
 			cam.rotationY = rotationY;
 			cam.rotationZ = rotationZ;
-			cam.lens.near = .01;
-			PerspectiveLens(cam.lens).fieldOfView = 90;
-			_lenses.push(PerspectiveLens(cam.lens));
-			cam.lens.aspectRatio = 1;
+			cam.projection.near = .01;
+			PerspectiveProjection(cam.projection).fieldOfView = 90;
+			_lenses.push(PerspectiveProjection(cam.projection));
+			cam.projection.aspectRatio = 1;
 			_cameras.push(cam);
 		}
 	}

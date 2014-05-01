@@ -9,7 +9,7 @@ package away3d.materials
 	/**
 	 * SkyBoxMaterial is a material exclusively used to render skyboxes
 	 *
-	 * @see away3d.primitives.SkyBox
+	 * @see away3d.prefabs.SkyBox
 	 */
 	public class SkyBoxMaterial extends MaterialBase
 	{

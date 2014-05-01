@@ -4,7 +4,7 @@ package away3d.animators
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.core.math.MathConsts;

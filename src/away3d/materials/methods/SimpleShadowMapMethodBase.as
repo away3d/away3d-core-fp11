@@ -4,6 +4,7 @@ package away3d.materials.methods
 	import away3d.cameras.*;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
+	import away3d.entities.Camera3D;
 	import away3d.errors.*;
 	import away3d.lights.*;
 	import away3d.lights.shadowmaps.*;

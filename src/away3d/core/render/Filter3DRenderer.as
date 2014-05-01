@@ -4,6 +4,7 @@ package away3d.core.render
 {
 	import away3d.cameras.*;
 	import away3d.core.managers.*;
+	import away3d.entities.Camera3D;
 	import away3d.events.*;
 	import away3d.filters.*;
 	import away3d.filters.tasks.*;

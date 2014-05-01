@@ -3,7 +3,7 @@ package away3d.bounds
 	
 	import away3d.arcane;
 	import away3d.core.math.*;
-	import away3d.primitives.*;
+	import away3d.prefabs.*;
 	
 	import flash.geom.*;
 	
@@ -241,17 +241,17 @@ package away3d.bounds
 			return target;
 		}
 		
-		override protected function updateBoundingRenderable():void
+		override protected function updateBoundingEntity():void
 		{
-			_boundingRenderable.scaleX = Math.max(_halfExtentsX*2, 0.001);
-			_boundingRenderable.scaleY = Math.max(_halfExtentsY*2, 0.001);
-			_boundingRenderable.scaleZ = Math.max(_halfExtentsZ*2, 0.001);
-			_boundingRenderable.x = _centerX;
-			_boundingRenderable.y = _centerY;
-			_boundingRenderable.z = _centerZ;
+			_boundingEntity.scaleX = Math.max(_halfExtentsX*2, 0.001);
+			_boundingEntity.scaleY = Math.max(_halfExtentsY*2, 0.001);
+			_boundingEntity.scaleZ = Math.max(_halfExtentsZ*2, 0.001);
+			_boundingEntity.x = _centerX;
+			_boundingEntity.y = _centerY;
+			_boundingEntity.z = _centerZ;
 		}
 		
-		override protected function createBoundingRenderable():WireframePrimitiveBase
+		override protected function createBoundingEntity():WireframePrimitiveBase
 		{
 			return new WireframeCube(1, 1, 1, 0xffffff, 0.5);
 		}

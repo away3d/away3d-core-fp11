@@ -46,10 +46,10 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		public function testMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			_activePickingCollider = (subMesh.numTriangles > triangleThreshold)? _pbPickingCollider : _as3PickingCollider;
-			return _activePickingCollider.testSubMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance);
+			return _activePickingCollider.testMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance);
 		}
 	}
 }

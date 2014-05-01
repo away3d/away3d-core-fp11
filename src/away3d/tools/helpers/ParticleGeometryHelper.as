@@ -1,7 +1,7 @@
 package away3d.tools.helpers
 {
 	import away3d.core.base.ParticleGeometry;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.ParticleData;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
@@ -25,7 +25,7 @@ package away3d.tools.helpers
 			var indicesVector:Vector.<Vector.<uint>> = new Vector.<Vector.<uint>>();
 			var vertexCounters:Vector.<uint> = new Vector.<uint>();
 			var particles:Vector.<ParticleData> = new Vector.<ParticleData>();
-			var subGeometries:Vector.<CompactSubGeometry> = new Vector.<CompactSubGeometry>();
+			var subGeometries:Vector.<TriangleSubGeometry> = new Vector.<TriangleSubGeometry>();
 			var numParticles:uint = geometries.length;
 			
 			var sourceSubGeometries:Vector.<ISubGeometry>;
@@ -34,7 +34,7 @@ package away3d.tools.helpers
 			var vertices:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var vertexCounter:uint;
-			var subGeometry:CompactSubGeometry;
+			var subGeometry:TriangleSubGeometry;
 			var i:int;
 			var j:int;
 			var sub2SubMap:Vector.<int> = new Vector.<int>;
@@ -53,7 +53,7 @@ package away3d.tools.helpers
 						sub2SubMap.push(subGeometries.length);
 						verticesVector.push(new Vector.<Number>);
 						indicesVector.push(new Vector.<uint>);
-						subGeometries.push(new CompactSubGeometry());
+						subGeometries.push(new TriangleSubGeometry());
 						vertexCounters.push(0);
 					}
 					
@@ -65,7 +65,7 @@ package away3d.tools.helpers
 						sub2SubMap[srcIndex] = subGeometries.length;
 						verticesVector.push(new Vector.<Number>);
 						indicesVector.push(new Vector.<uint>);
-						subGeometries.push(new CompactSubGeometry());
+						subGeometries.push(new TriangleSubGeometry());
 						vertexCounters.push(0);
 					}
 					
@@ -88,7 +88,7 @@ package away3d.tools.helpers
 					
 					var k:int;
 					var tempLen:int;
-					var compact:CompactSubGeometry = sourceSubGeometry as CompactSubGeometry;
+					var compact:TriangleSubGeometry = sourceSubGeometry as TriangleSubGeometry;
 					var product:uint;
 					var sourceVertices:Vector.<Number>;
 					

@@ -6,8 +6,8 @@ package away3d.core.partition
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.core.traverse.SceneIterator;
 	import away3d.entities.Entity;
-	import away3d.primitives.WireframeCube;
-	import away3d.primitives.WireframePrimitiveBase;
+	import away3d.prefabs.WireframeCube;
+	import away3d.prefabs.WireframePrimitiveBase;
 	
 	import flash.geom.Vector3D;
 	

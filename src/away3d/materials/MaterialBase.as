@@ -2,7 +2,7 @@ package away3d.materials
 {
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;

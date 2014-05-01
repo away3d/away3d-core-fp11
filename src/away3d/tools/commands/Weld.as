@@ -2,7 +2,7 @@ package away3d.tools.commands
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.math.MathConsts;
@@ -108,19 +108,19 @@ package away3d.tools.commands
 		private function applyToGeom(geom:Geometry):int
 		{
 			var removedVertsCnt:int = 0;
-			var outSubGeom:CompactSubGeometry;
+			var outSubGeom:TriangleSubGeometry;
 			
 			for (var i:uint = 0; i < geom.subGeometries.length; i++) {
 				var subGeom:ISubGeometry = geom.subGeometries[i];
 				
 				// TODO: Remove this check when ISubGeometry can always
 				// be updated using a single unified method (from vectors.)
-				if (subGeom is CompactSubGeometry)
-					removedVertsCnt += applyToSubGeom(subGeom, CompactSubGeometry(subGeom));
+				if (subGeom is TriangleSubGeometry)
+					removedVertsCnt += applyToSubGeom(subGeom, TriangleSubGeometry(subGeom));
 				
 				else {
 					
-					outSubGeom = new CompactSubGeometry();
+					outSubGeom = new TriangleSubGeometry();
 					removedVertsCnt += applyToSubGeom(subGeom, outSubGeom);
 					
 					geom.removeSubGeometry(subGeom);
@@ -131,7 +131,7 @@ package away3d.tools.commands
 			return removedVertsCnt;
 		}
 		
-		private function applyToSubGeom(subGeom:ISubGeometry, outSubGeom:CompactSubGeometry):int
+		private function applyToSubGeom(subGeom:ISubGeometry, outSubGeom:TriangleSubGeometry):int
 		{
 			var maxNormalIdx:int = 0;
 			var oldVerticleCount:uint = subGeom.numVertices;

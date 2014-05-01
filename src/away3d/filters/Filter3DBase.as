@@ -2,6 +2,7 @@ package away3d.filters
 {
 	import away3d.cameras.*;
 	import away3d.core.managers.*;
+	import away3d.entities.Camera3D;
 	import away3d.filters.tasks.*;
 	
 	import flash.display3D.textures.*;

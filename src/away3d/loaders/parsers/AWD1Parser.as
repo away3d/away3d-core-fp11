@@ -6,7 +6,7 @@ package away3d.loaders.parsers
 	
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.CompactSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
 	import away3d.entities.Mesh;
 	import away3d.loaders.misc.ResourceDependency;
@@ -334,13 +334,13 @@ package away3d.loaders.parsers
 			if (geo.m)
 				mRef = geo.m.split(",");
 			
-			var sub_geom:CompactSubGeometry;
+			var sub_geom:TriangleSubGeometry;
 			var geom:Geometry = mesh.geometry;
 			
 			for (j = 0; j < aRef.length; j += 6) {
 				
 				if (indices.length + 3 > LIMIT) {
-					sub_geom = new CompactSubGeometry();
+					sub_geom = new TriangleSubGeometry();
 					sub_geom.updateIndexData(indices);
 					sub_geom.fromVectors(vertices, uvs, null, null);
 					geom.addSubGeometry(sub_geom);
@@ -387,7 +387,7 @@ package away3d.loaders.parsers
 				uvs[uindex++] = 1 - parseFloat(au[1]);
 			}
 			
-			sub_geom = new CompactSubGeometry();
+			sub_geom = new TriangleSubGeometry();
 			sub_geom.updateIndexData(indices);
 			sub_geom.fromVectors(vertices, uvs, null, null);
 			geom.addSubGeometry(sub_geom);

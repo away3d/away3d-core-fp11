@@ -3,8 +3,8 @@ package away3d.core.partition
 	import away3d.arcane;
 	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.PartitionTraverser;
-	import away3d.entities.Entity;
-	
+	import away3d.entities.IEntity;
+
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -19,7 +19,7 @@ package away3d.core.partition
 	 */
 	public class EntityNode extends NodeBase
 	{
-		private var _entity:Entity;
+		private var _entity:IEntity;
 		
 		/**
 		 * The link to the next object in the list to be updated
@@ -31,7 +31,7 @@ package away3d.core.partition
 		 * Creates a new EntityNode object.
 		 * @param entity The Entity to be contained in this leaf node.
 		 */
-		public function EntityNode(entity:Entity)
+		public function EntityNode(entity:IEntity)
 		{
 			super();
 			_entity = entity;
@@ -41,7 +41,7 @@ package away3d.core.partition
 		/**
 		 * The entity contained in this leaf node.
 		 */
-		public function get entity():Entity
+		public function get entity():IEntity
 		{
 			return _entity;
 		}
@@ -82,6 +82,10 @@ package away3d.core.partition
 				return false;
 			
 			return _entity.isIntersectingRay(rayPosition, rayDirection);
+		}
+
+		public function createBoundsPrimitive():IEntity {
+			return _entity.bounds.boundingEntity;
 		}
 	
 	}

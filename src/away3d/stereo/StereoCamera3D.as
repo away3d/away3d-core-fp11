@@ -1,8 +1,8 @@
 package away3d.stereo
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
-	import away3d.cameras.lenses.LensBase;
+	import away3d.entities.Camera3D;
+	import away3d.projections.ProjectionBase;
 	
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -23,7 +23,7 @@ package away3d.stereo
 		private var _rightCamDirty:Boolean = true;
 		private var _focusPointDirty:Boolean = true;
 		
-		public function StereoCamera3D(lens:LensBase = null)
+		public function StereoCamera3D(lens:ProjectionBase = null)
 		{
 			super(lens);
 			
@@ -35,12 +35,12 @@ package away3d.stereo
 			_focusPoint = new Vector3D();
 		}
 		
-		override public function set lens(value:LensBase):void
+		override public function set lens(value:ProjectionBase):void
 		{
-			_leftCam.lens = value;
-			_rightCam.lens = value;
+			_leftCam.projection = value;
+			_rightCam.projection = value;
 			
-			super.lens = value;
+			super.projection = value;
 		}
 		
 		public function get leftCamera():Camera3D

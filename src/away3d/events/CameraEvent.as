@@ -5,7 +5,7 @@ package away3d.events
 {
 	import flash.events.Event;
 	
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	
 	public class CameraEvent extends Event
 	{

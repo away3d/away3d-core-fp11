@@ -1,7 +1,8 @@
 package away3d.core.pick
 {
 	import away3d.core.base.SubMesh;
-	
+	import away3d.entities.IEntity;
+
 	import flash.geom.Vector3D;
 	
 	/**
@@ -19,15 +20,16 @@ package away3d.core.pick
 		 * @param localDirection The position vector in local coordinates
 		 * @param localPosition The direction vector in local coordinates
 		 */
-		function setLocalRay(localPosition:Vector3D, localDirection:Vector3D):void
+		function setLocalRay(localPosition:Vector3D, localDirection:Vector3D):void;
 		
 		/**
 		 * Tests a <code>SubMesh</code> object for a collision with the picking ray.
 		 *
-		 * @param subMesh The <code>SubMesh</code> instance to be tested.
+		 * @param entity The entity instance to be tested.
 		 * @param pickingCollisionVO The collision object used to store the collision results
 		 * @param shortestCollisionDistance The current value of the shortest distance to a detected collision along the ray.
+		 * @param findClosest
 		 */
-		function testSubMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		function testMeshCollision(entity:IEntity, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, findCloses:Boolean):Boolean;
 	}
 }

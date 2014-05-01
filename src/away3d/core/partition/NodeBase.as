@@ -1,13 +1,13 @@
 package away3d.core.partition
 {
 	import away3d.core.math.Plane3D;
-	
+	import away3d.entities.IEntity;
+
 	import flash.geom.Vector3D;
 	
 	import away3d.arcane;
 	import away3d.core.traverse.PartitionTraverser;
-	import away3d.entities.Entity;
-	import away3d.primitives.WireframePrimitiveBase;
+	import away3d.prefabs.WireframePrimitiveBase;
 	
 	use namespace arcane;
 	
@@ -22,11 +22,14 @@ package away3d.core.partition
 	 */
 	public class NodeBase
 	{
+		private var _boundsChildrenVisible:Boolean;
+		private var _explicitBoundsVisible:Boolean;
+		private var _implicitBoundsVisible:Boolean;
 		arcane var _parent:NodeBase;
 		protected var _childNodes:Vector.<NodeBase>;
 		protected var _numChildNodes:uint;
-		protected var _debugPrimitive:WireframePrimitiveBase;
-		
+		protected var _boundsPrimitive:IEntity;
+
 		arcane var _numEntities:int;
 		arcane var _collectionMark:uint;
 		
@@ -37,27 +40,37 @@ package away3d.core.partition
 		{
 			_childNodes = new Vector.<NodeBase>();
 		}
-		
-		public function get showDebugBounds():Boolean
+
+		public function get boundsVisible():Boolean
 		{
-			return _debugPrimitive != null;
+			return _explicitBoundsVisible;
 		}
-		
-		public function set showDebugBounds(value:Boolean):void
+
+		public function set boundsVisible(value:Boolean):void
 		{
-			if (Boolean(_debugPrimitive) == value)
-				return;
-			
-			if (value)
-				_debugPrimitive = createDebugBounds();
-			else {
-				_debugPrimitive.dispose();
-				_debugPrimitive = null;
-			}
-			
-			for (var i:uint = 0; i < _numChildNodes; ++i)
-				_childNodes[i].showDebugBounds = value;
+			if (_explicitBoundsVisible == value) return;
+
+			_explicitBoundsVisible = value;
+
+			updateImplicitBoundsVisible(_parent? _parent.boundsChildrenVisible : false);
+
 		}
+
+		public function get boundsChildrenVisible():Boolean
+		{
+			return _boundsChildrenVisible;
+		}
+
+		public function set boundsChildrenVisible(value:Boolean):void
+		{
+			if (_boundsChildrenVisible == value)	return;
+
+			_boundsChildrenVisible = value;
+
+			for (var i:Number = 0; i < _numChildNodes; ++i)
+				_childNodes[i].updateImplicitBoundsVisible(_boundsChildrenVisible);
+		}
+
 		
 		/**
 		 * The parent node. Null if this node is the root.
@@ -79,7 +92,8 @@ package away3d.core.partition
 			node._parent = this;
 			_numEntities += node._numEntities;
 			_childNodes[_numChildNodes++] = node;
-			node.showDebugBounds = _debugPrimitive != null;
+
+			node.updateImplicitBoundsVisible(this.boundsChildrenVisible);
 			
 			// update numEntities in the tree
 			var numEntities:int = node._numEntities;
@@ -112,7 +126,19 @@ package away3d.core.partition
 				node._numEntities -= numEntities;
 			while ((node = node._parent) != null);
 		}
-		
+
+		arcane function updateImplicitBoundsVisible(value:Boolean):void
+		{
+			if (_implicitBoundsVisible == _explicitBoundsVisible || value) return;
+
+			_implicitBoundsVisible = _explicitBoundsVisible || value;
+
+			updateEntityBounds();
+
+			for (var i:Number = 0; i < _numChildNodes; ++i)
+				_childNodes[i].updateImplicitBoundsVisible(this._boundsChildrenVisible);
+		}
+
 		/**
 		 * Tests if the current node is at least partly inside the frustum.
 		 * @param viewProjectionRaw The raw data of the view projection matrix
@@ -121,8 +147,6 @@ package away3d.core.partition
 		 */
 		public function isInFrustum(planes:Vector.<Plane3D>, numPlanes:int):Boolean
 		{
-			planes = planes;
-			numPlanes = numPlanes;
 			return true;
 		}
 		
@@ -135,17 +159,19 @@ package away3d.core.partition
 		 */
 		public function isIntersectingRay(rayPosition:Vector3D, rayDirection:Vector3D):Boolean
 		{
-			rayPosition = rayPosition;
-			rayDirection = rayDirection;
+			return true;
+		}
+
+		public function isCastingShadow():Boolean
+		{
 			return true;
 		}
 		
 		/**
 		 * Finds the partition that contains (or should contain) the given entity.
 		 */
-		public function findPartitionForEntity(entity:Entity):NodeBase
+		public function findPartitionForEntity(entity:IEntity):NodeBase
 		{
-			entity = entity;
 			return this;
 		}
 		
@@ -161,20 +187,19 @@ package away3d.core.partition
 		 */
 		public function acceptTraverser(traverser:PartitionTraverser):void
 		{
-			if (_numEntities == 0 && !_debugPrimitive)
-				return;
+			if (_numEntities == 0 && !_implicitBoundsVisible) return;
 			
 			if (traverser.enterNode(this)) {
 				var i:uint;
 				while (i < _numChildNodes)
 					_childNodes[i++].acceptTraverser(traverser);
-				
-				if (_debugPrimitive)
-					traverser.applyRenderable(_debugPrimitive);
+
+				if (_implicitBoundsVisible)
+					_boundsPrimitive.partitionNode.acceptTraverser(traverser);
 			}
 		}
 		
-		protected function createDebugBounds():WireframePrimitiveBase
+		protected function createBoundsPrimitive():IEntity
 		{
 			return null;
 		}
@@ -183,15 +208,18 @@ package away3d.core.partition
 		{
 			return _numEntities;
 		}
-		
-		protected function updateNumEntities(value:int):void
+
+		arcane function updateEntityBounds():void
 		{
-			var diff:int = value - _numEntities;
-			var node:NodeBase = this;
-			
-			do
-				node._numEntities += diff;
-			while ((node = node._parent) != null);
+			if (_boundsPrimitive) {
+				_boundsPrimitive.dispose();
+				_boundsPrimitive = null;
+			}
+
+			if (_implicitBoundsVisible)	{
+				_boundsPrimitive = createBoundsPrimitive();
+			}
 		}
+
 	}
 }

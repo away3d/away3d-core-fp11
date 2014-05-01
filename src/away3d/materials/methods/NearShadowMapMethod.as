@@ -4,6 +4,7 @@ package away3d.materials.methods
 	import away3d.cameras.*;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
+	import away3d.entities.Camera3D;
 	import away3d.events.*;
 	import away3d.lights.shadowmaps.*;
 	import away3d.materials.compilation.*;
@@ -172,8 +173,8 @@ package away3d.materials.methods
 		arcane override function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 			// todo: move this to activate (needs camera)
-			var near:Number = camera.lens.near;
-			var d:Number = camera.lens.far - near;
+			var near:Number = camera.projection.near;
+			var d:Number = camera.projection.far - near;
 			var maxDistance:Number = _nearShadowMapper.coverageRatio;
 			var minDistance:Number = maxDistance*(1 - _fadeRatio);
 			

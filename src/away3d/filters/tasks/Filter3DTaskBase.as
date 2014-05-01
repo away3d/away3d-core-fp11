@@ -2,6 +2,8 @@
  */
 package away3d.filters.tasks
 {
+	import away3d.entities.Camera3D;
+
 	import com.adobe.utils.*;
 	
 	import away3d.cameras.*;

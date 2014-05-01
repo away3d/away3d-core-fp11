@@ -14,7 +14,7 @@ package away3d.core.base
 	 * it provides joint indices and weights.
 	 * Important! Joint indices need to be pre-multiplied by 3, since they index the matrix array (and each matrix has 3 float4 elements)
 	 */
-	public class SkinnedSubGeometry extends CompactSubGeometry
+	public class SkinnedSubGeometry extends TriangleSubGeometry
 	{
 		private var _bufferFormat:String;
 		private var _jointWeightsData:Vector.<Number>;

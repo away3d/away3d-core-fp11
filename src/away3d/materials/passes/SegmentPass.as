@@ -1,7 +1,7 @@
 ﻿package away3d.materials.passes
 {
 	import away3d.arcane;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
@@ -149,7 +149,7 @@
 				_constants[0] = _thickness/Math.min(stage3DProxy.width, stage3DProxy.height);
 			
 			// value to convert distance from camera to model length per pixel width
-			_constants[2] = camera.lens.near;
+			_constants[2] = camera.projection.near;
 			
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, ONE_VECTOR);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 6, FRONT_VECTOR);
@@ -157,11 +157,11 @@
 			
 			// projection matrix
 			if (!stage3DProxy.renderTarget)
-				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.lens.matrix, true);
+				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, camera.projection.matrix, true);
 			else
 			{
 				//TODO: to find a better way
-				_calcMatrix.copyFrom(camera.lens.matrix);
+				_calcMatrix.copyFrom(camera.projection.matrix);
 				var rttBufferManager:RTTBufferManager = RTTBufferManager.getInstance(stage3DProxy);
 				_calcMatrix.appendScale(rttBufferManager.textureRatioX, rttBufferManager.textureRatioY, 1);
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, _calcMatrix, true);

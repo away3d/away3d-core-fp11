@@ -4,15 +4,15 @@
 	import away3d.animators.IAnimator;
 	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
-	import away3d.cameras.Camera3D;
+	import away3d.entities.Camera3D;
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.RenderableNode;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.SegmentMaterial;
-	import away3d.primitives.LineSegment;
-	import away3d.primitives.data.Segment;
+	import away3d.prefabs.LineSegment;
+	import away3d.prefabs.data.Segment;
 	import away3d.library.assets.AssetType;
 	
 	import flash.display3D.Context3D;
@@ -601,7 +601,7 @@
 
 final class SegRef
 {
-	import away3d.primitives.data.Segment;
+	import away3d.prefabs.data.Segment;
 	
 	public var index:uint;
 	public var subSetIndex:uint;
