@@ -2,6 +2,7 @@ package away3d.controllers
 {
 	import away3d.arcane;
 	import away3d.containers.*;
+	import away3d.core.base.Object3D;
 	import away3d.entities.*;
 	import away3d.core.math.*;
 	
@@ -235,7 +236,7 @@ package away3d.controllers
 		/**
 		 * Creates a new <code>HoverController</code> object.
 		 */
-		public function HoverController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null, panAngle:Number = 0, tiltAngle:Number = 90, distance:Number = 1000, minTiltAngle:Number = -90, maxTiltAngle:Number = 90, minPanAngle:Number = NaN, maxPanAngle:Number = NaN, steps:uint = 8, yFactor:Number = 2, wrapPanAngle:Boolean = false)
+		public function HoverController(targetObject:Object3D = null, lookAtObject:ObjectContainer3D = null, panAngle:Number = 0, tiltAngle:Number = 90, distance:Number = 1000, minTiltAngle:Number = -90, maxTiltAngle:Number = 90, minPanAngle:Number = NaN, maxPanAngle:Number = NaN, steps:uint = 8, yFactor:Number = 2, wrapPanAngle:Boolean = false)
 		{
 			super(targetObject, lookAtObject);
 			

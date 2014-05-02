@@ -1,9 +1,8 @@
-package away3d.prefabs {
+package away3d.entities {
+	import away3d.prefabs.*;
 
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
-	import away3d.bounds.BoundingVolumeBase;
-	import away3d.bounds.NullBounds;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.IRenderable;
 	import away3d.core.base.Object3D;
@@ -122,11 +121,11 @@ package away3d.prefabs {
 			collectRenderable(renderer);
 		}
 
-		public function addRenderable(renderable:IRenderable):IRenderable {
+		override public function addRenderable(renderable:IRenderable):IRenderable {
 			return null;
 		}
 
-		public function removeRenderable(renderable:IRenderable):IRenderable {
+		override public function removeRenderable(renderable:IRenderable):IRenderable {
 			return null;
 		}
 

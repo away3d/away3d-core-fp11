@@ -3,7 +3,7 @@ package away3d.core.base {
 	 * IRenderable is an interface for classes that are used in the rendering pipeline to render the
 	 * contents of a partition
 	 */
-	public interface IRenderable extends IMaterialOwner {
+	public interface IRenderable {
 		function get next():IRenderable;
 
 		function get materialID():int;

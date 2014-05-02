@@ -3,9 +3,9 @@ package away3d.materials {
 	import away3d.library.assets.IAsset;
 
 	public interface IMaterial extends IAsset {
-		function get width():String;
+		function get width():Number;
 
-		function get height():String;
+		function get height():Number;
 
 		function get requiresBlending():String;
 

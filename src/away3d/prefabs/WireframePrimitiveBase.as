@@ -2,7 +2,7 @@ package away3d.prefabs
 {
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
-	import away3d.entities.SegmentSet;
+	import away3d.entities.LineSegment;
 	import away3d.errors.AbstractMethodError;
 	import away3d.prefabs.data.Segment;
 	
@@ -10,7 +10,7 @@ package away3d.prefabs
 	
 	use namespace arcane;
 	
-	public class WireframePrimitiveBase extends SegmentSet
+	public class WireframePrimitiveBase extends away3d.entities.LineSegment
 	{
 		private var _geomDirty:Boolean = true;
 		private var _color:uint;

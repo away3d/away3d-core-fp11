@@ -1,11 +1,11 @@
 ﻿package away3d.debug.data
 {
-	import away3d.entities.SegmentSet;
+	import away3d.entities.LineSegment;
 	import away3d.prefabs.LineSegment;
 	
 	import flash.geom.Vector3D;
 	
-	public class TridentLines extends SegmentSet
+	public class TridentLines extends away3d.entities.LineSegment
 	{
 		public function TridentLines(vectors:Vector.<Vector.<Vector3D>>, colors:Vector.<uint>):void
 		{

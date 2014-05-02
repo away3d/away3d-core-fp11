@@ -1,8 +1,8 @@
 package away3d.controllers
 {
 	import away3d.containers.ObjectContainer3D;
-	import away3d.entities.Entity;
-	
+	import away3d.core.base.Object3D;
+
 	import flash.geom.Vector3D;
 	
 	/**
@@ -41,7 +41,7 @@ package away3d.controllers
 		 */
 		public var positionOffset:Vector3D = new Vector3D(0, 500, -1000);
 		
-		public function SpringController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null, stiffness:Number = 1, mass:Number = 40, damping:Number = 4)
+		public function SpringController(targetObject:Object3D = null, lookAtObject:ObjectContainer3D = null, stiffness:Number = 1, mass:Number = 40, damping:Number = 4)
 		{
 			super(targetObject, lookAtObject);
 			

@@ -1,9 +1,9 @@
 package away3d.controllers
 {
 	import away3d.arcane;
-	import away3d.core.math.*;
-	import away3d.entities.*;
-	
+	import away3d.core.base.Object3D;
+	import away3d.core.math.MathConsts;
+
 	use namespace arcane;
 	
 	/**
@@ -152,7 +152,7 @@ package away3d.controllers
 		/**
 		 * Creates a new <code>HoverController</code> object.
 		 */
-		public function FirstPersonController(targetObject:Entity = null, panAngle:Number = 0, tiltAngle:Number = 90, minTiltAngle:Number = -90, maxTiltAngle:Number = 90, steps:uint = 8, wrapPanAngle:Boolean = false)
+		public function FirstPersonController(targetObject:Object3D = null, panAngle:Number = 0, tiltAngle:Number = 90, minTiltAngle:Number = -90, maxTiltAngle:Number = 90, steps:uint = 8, wrapPanAngle:Boolean = false)
 		{
 			super(targetObject);
 			

@@ -1,7 +1,7 @@
 package away3d.controllers
 {
 	import away3d.arcane;
-	import away3d.entities.*;
+	import away3d.core.base.Object3D;
 	import away3d.errors.AbstractMethodError;
 	
 	use namespace arcane;
@@ -9,34 +9,34 @@ package away3d.controllers
 	public class ControllerBase
 	{
 		protected var _autoUpdate:Boolean = true;
-		protected var _targetObject:Entity;
+		protected var _targetObject:Object3D;
 		
 		protected function notifyUpdate():void
 		{
-			if (_targetObject && _targetObject.implicitPartition && _autoUpdate)
-				_targetObject.implicitPartition.markForUpdate(_targetObject);
+			if (_targetObject && _targetObject.assignedPartition && _autoUpdate)
+				_targetObject.assignedPartition.markForUpdate(_targetObject);
 		}
 		
 		/**
 		 * Target object on which the controller acts. Defaults to null.
 		 */
-		public function get targetObject():Entity
+		public function get targetObject():Object3D
 		{
 			return _targetObject;
 		}
 		
-		public function set targetObject(val:Entity):void
+		public function set targetObject(val:Object3D):void
 		{
 			if (_targetObject == val)
 				return;
 			
 			if (_targetObject && _autoUpdate)
-				_targetObject._controller = null;
+				_targetObject.controller = null;
 			
 			_targetObject = val;
 			
 			if (_targetObject && _autoUpdate)
-				_targetObject._controller = this;
+				_targetObject.controller = this;
 			
 			notifyUpdate();
 		}
@@ -58,9 +58,9 @@ package away3d.controllers
 			
 			if (_targetObject) {
 				if (_autoUpdate)
-					_targetObject._controller = this;
+					_targetObject.controller = this;
 				else
-					_targetObject._controller = null;
+					_targetObject.controller = null;
 			}
 		}
 		
@@ -69,7 +69,7 @@ package away3d.controllers
 		 *
 		 * @param    targetObject    The 3D object on which to act.
 		 */
-		public function ControllerBase(targetObject:Entity = null):void
+		public function ControllerBase(targetObject:Object3D = null):void
 		{
 			this.targetObject = targetObject;
 		}

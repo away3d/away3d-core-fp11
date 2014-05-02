@@ -1,8 +1,8 @@
 package away3d.controllers
 {
 	import away3d.containers.ObjectContainer3D;
-	import away3d.entities.Entity;
-	
+	import away3d.core.base.Object3D;
+
 	/**
 	 * Controller used to follow behind an object on the XZ plane, with an optional
 	 * elevation (tiltAngle).
@@ -11,7 +11,7 @@ package away3d.controllers
 	 */
 	public class FollowController extends HoverController
 	{
-		public function FollowController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null, tiltAngle:Number = 45, distance:Number = 700)
+		public function FollowController(targetObject:Object3D = null, lookAtObject:ObjectContainer3D = null, tiltAngle:Number = 45, distance:Number = 700)
 		{
 			super(targetObject, lookAtObject, 0, tiltAngle, distance);
 		}

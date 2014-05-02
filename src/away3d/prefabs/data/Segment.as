@@ -1,7 +1,7 @@
 package away3d.prefabs.data
 {
 	import away3d.arcane;
-	import away3d.entities.SegmentSet;
+	import away3d.entities.LineSegment;
 	
 	import flash.geom.Vector3D;
 	
@@ -9,7 +9,7 @@ package away3d.prefabs.data
 	
 	public class Segment
 	{
-		arcane var _segmentsBase:SegmentSet;
+		arcane var _segmentsBase:LineSegment;
 		arcane var _thickness:Number;
 		arcane var _start:Vector3D;
 		arcane var _end:Vector3D;
@@ -162,7 +162,7 @@ package away3d.prefabs.data
 			_subSetIndex = ind;
 		}
 		
-		arcane function set segmentsBase(segBase:SegmentSet):void
+		arcane function set segmentsBase(segBase:LineSegment):void
 		{
 			_segmentsBase = segBase;
 		}

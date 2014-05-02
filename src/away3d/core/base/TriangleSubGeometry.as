@@ -12,7 +12,6 @@ package away3d.core.base
 
 	public class TriangleSubGeometry extends SubGeometryBase
 	{
-		public static const VERTEX_DATA:String = "vertices";
 		public static const POSITION_DATA:String = "positions";
 		public static const NORMAL_DATA:String = "vertexNormals";
 		public static const TANGENT_DATA:String = "vertexTangents";
@@ -107,53 +106,53 @@ package away3d.core.base
 			notifyJointIndicesUpdate();
 		}
 
-		protected function UpdateStrideOffset()
+		override protected function updateStrideOffset():void
 		{
 			if (_concatenateArrays) {
-				_offset[TriangleSubGeometry.VERTEX_DATA] = 0;
+				_offset[VERTEX_DATA] = 0;
 
 				//always have positions
-				_offset[TriangleSubGeometry.POSITION_DATA] = 0;
+				_offset[POSITION_DATA] = 0;
 				var stride:Number = 3;
 
 				if (_vertexNormals != null) {
-					_offset[TriangleSubGeometry.NORMAL_DATA] = stride;
+					_offset[NORMAL_DATA] = stride;
 					stride += 3;
 				}
 
 				if (_vertexTangents != null) {
-					_offset[TriangleSubGeometry.TANGENT_DATA] = stride;
+					_offset[TANGENT_DATA] = stride;
 					stride += 3;
 				}
 
 				if (_uvs != null) {
-					_offset[TriangleSubGeometry.UV_DATA] = stride;
+					_offset[UV_DATA] = stride;
 					stride += 2;
 				}
 
 				if (_secondaryUVs != null) {
-					_offset[TriangleSubGeometry.SECONDARY_UV_DATA] = stride;
+					_offset[SECONDARY_UV_DATA] = stride;
 					stride += 2;
 				}
 
 				if (_jointIndices != null) {
-					_offset[TriangleSubGeometry.JOINT_INDEX_DATA] = stride;
+					_offset[JOINT_INDEX_DATA] = stride;
 					stride += _jointsPerVertex;
 				}
 
 				if (_jointWeights != null) {
-					_offset[TriangleSubGeometry.JOINT_WEIGHT_DATA] = stride;
+					_offset[JOINT_WEIGHT_DATA] = stride;
 					stride += _jointsPerVertex;
 				}
 
-				_stride[TriangleSubGeometry.VERTEX_DATA] = stride;
-				_stride[TriangleSubGeometry.POSITION_DATA] = stride;
-				_stride[TriangleSubGeometry.NORMAL_DATA] = stride;
-				_stride[TriangleSubGeometry.TANGENT_DATA] = stride;
-				_stride[TriangleSubGeometry.UV_DATA] = stride;
-				_stride[TriangleSubGeometry.SECONDARY_UV_DATA] = stride;
-				_stride[TriangleSubGeometry.JOINT_INDEX_DATA] = stride;
-				_stride[TriangleSubGeometry.JOINT_WEIGHT_DATA] = stride;
+				_stride[VERTEX_DATA] = stride;
+				_stride[POSITION_DATA] = stride;
+				_stride[NORMAL_DATA] = stride;
+				_stride[TANGENT_DATA] = stride;
+				_stride[UV_DATA] = stride;
+				_stride[SECONDARY_UV_DATA] = stride;
+				_stride[JOINT_INDEX_DATA] = stride;
+				_stride[JOINT_WEIGHT_DATA] = stride;
 
 				var len:Number = _numVertices*stride;
 
@@ -163,21 +162,21 @@ package away3d.core.base
 					_vertices.length = len;
 
 			} else {
-				_offset[TriangleSubGeometry.POSITION_DATA] = 0;
-				_offset[TriangleSubGeometry.NORMAL_DATA] = 0;
-				_offset[TriangleSubGeometry.TANGENT_DATA] = 0;
-				_offset[TriangleSubGeometry.UV_DATA] = 0;
-				_offset[TriangleSubGeometry.SECONDARY_UV_DATA] = 0;
-				_offset[TriangleSubGeometry.JOINT_INDEX_DATA] = 0;
-				_offset[TriangleSubGeometry.JOINT_WEIGHT_DATA] = 0;
+				_offset[POSITION_DATA] = 0;
+				_offset[NORMAL_DATA] = 0;
+				_offset[TANGENT_DATA] = 0;
+				_offset[UV_DATA] = 0;
+				_offset[SECONDARY_UV_DATA] = 0;
+				_offset[JOINT_INDEX_DATA] = 0;
+				_offset[JOINT_WEIGHT_DATA] = 0;
 
-				_stride[TriangleSubGeometry.POSITION_DATA] = 3;
-				_stride[TriangleSubGeometry.NORMAL_DATA] = 3;
-				_stride[TriangleSubGeometry.TANGENT_DATA] = 3;
-				_stride[TriangleSubGeometry.UV_DATA] = 2;
-				_stride[TriangleSubGeometry.SECONDARY_UV_DATA] = 2;
-				_stride[TriangleSubGeometry.JOINT_INDEX_DATA] = _jointsPerVertex;
-				_stride[TriangleSubGeometry.JOINT_WEIGHT_DATA] = _jointsPerVertex;
+				_stride[POSITION_DATA] = 3;
+				_stride[NORMAL_DATA] = 3;
+				_stride[TANGENT_DATA] = 3;
+				_stride[UV_DATA] = 2;
+				_stride[SECONDARY_UV_DATA] = 2;
+				_stride[JOINT_INDEX_DATA] = _jointsPerVertex;
+				_stride[JOINT_WEIGHT_DATA] = _jointsPerVertex;
 			}
 
 			_strideOffsetDirty = false;
@@ -471,7 +470,7 @@ package away3d.core.base
 			_numVertices = _positions.length/3;
 
 			if (_concatenateArrays) {
-				var len:Number = _numVertices*getStride(TriangleSubGeometry.VERTEX_DATA);
+				var len:Number = _numVertices*getStride(VERTEX_DATA);
 
 				if (_vertices == null)
 					_vertices = new Vector.<Number>(len);
@@ -479,8 +478,8 @@ package away3d.core.base
 					_vertices.length = len;
 
 				i = 0;
-				index = getOffset(TriangleSubGeometry.POSITION_DATA);
-				stride = getStride(TriangleSubGeometry.POSITION_DATA);
+				index = getOffset(POSITION_DATA);
+				stride = getStride(POSITION_DATA);
 				positions = _vertices;
 
 				while (i < values.length) {
@@ -530,8 +529,8 @@ package away3d.core.base
 
 				if (values != null && _concatenateArrays) {
 					i = 0;
-					index = getOffset(TriangleSubGeometry.NORMAL_DATA);
-					stride = getStride(TriangleSubGeometry.NORMAL_DATA);
+					index = getOffset(NORMAL_DATA);
+					stride = getStride(NORMAL_DATA);
 					normals = _vertices;
 
 					while (i < values.length) {
@@ -554,8 +553,8 @@ package away3d.core.base
 				if (_faceNormalsDirty)
 					updateFaceNormals();
 
-				offset = getOffset(TriangleSubGeometry.NORMAL_DATA);
-				stride = getStride(TriangleSubGeometry.NORMAL_DATA);
+				offset = getOffset(NORMAL_DATA);
+				stride = getStride(NORMAL_DATA);
 
 				//autoderived normals
 				normals = _concatenateArrays? _vertices : _vertexNormals;
@@ -654,8 +653,8 @@ package away3d.core.base
 
 				if (values != null && _concatenateArrays) {
 					i = 0;
-					index = getOffset(TriangleSubGeometry.TANGENT_DATA);
-					stride = getStride(TriangleSubGeometry.TANGENT_DATA);
+					index = getOffset(TANGENT_DATA);
+					stride = getStride(TANGENT_DATA);
 					tangents = _vertices;
 
 					while (i < values.length) {
@@ -678,8 +677,8 @@ package away3d.core.base
 				if (_faceTangentsDirty)
 					updateFaceTangents();
 
-				offset = getOffset(TriangleSubGeometry.TANGENT_DATA);
-				stride = getStride(TriangleSubGeometry.TANGENT_DATA);
+				offset = getOffset(TANGENT_DATA);
+				stride = getStride(TANGENT_DATA);
 
 				//autoderived tangents
 				tangents = _concatenateArrays? _vertices : _vertexTangents;
@@ -777,8 +776,8 @@ package away3d.core.base
 
 				if (values != null && _concatenateArrays) {
 					i = 0;
-					index = getOffset(TriangleSubGeometry.UV_DATA);
-					stride = getStride(TriangleSubGeometry.UV_DATA);
+					index = getOffset(UV_DATA);
+					stride = getStride(UV_DATA);
 					uvs = _vertices;
 
 					while (i < values.length) {
@@ -798,8 +797,8 @@ package away3d.core.base
 						_strideOffsetDirty = true;
 				}
 
-				offset = getOffset(TriangleSubGeometry.UV_DATA);
-				stride = getStride(TriangleSubGeometry.UV_DATA);
+				offset = getOffset(UV_DATA);
+				stride = getStride(UV_DATA);
 
 				//autoderived uvs
 				uvs = _concatenateArrays? _vertices : _uvs;
@@ -851,8 +850,8 @@ package away3d.core.base
 			_secondaryUVs = values;
 
 			if (values != null && _concatenateArrays) {
-				offset = getOffset(TriangleSubGeometry.SECONDARY_UV_DATA);
-				stride = getStride(TriangleSubGeometry.SECONDARY_UV_DATA);
+				offset = getOffset(SECONDARY_UV_DATA);
+				stride = getStride(SECONDARY_UV_DATA);
 
 				i = 0;
 				index = offset;
@@ -888,8 +887,8 @@ package away3d.core.base
 			_jointIndices = values;
 
 			if (values != null) {
-				offset = getOffset(TriangleSubGeometry.JOINT_INDEX_DATA);
-				stride = getStride(TriangleSubGeometry.JOINT_INDEX_DATA);
+				offset = getOffset(JOINT_INDEX_DATA);
+				stride = getStride(JOINT_INDEX_DATA);
 				if (_useCondensedIndices) {
 					i = 0;
 					j = 0;
@@ -956,8 +955,8 @@ package away3d.core.base
 			_jointWeights = values;
 
 			if (values != null && _concatenateArrays) {
-				offset = getOffset(TriangleSubGeometry.JOINT_WEIGHT_DATA);
-				stride = getStride(TriangleSubGeometry.JOINT_WEIGHT_DATA);
+				offset = getOffset(JOINT_WEIGHT_DATA);
+				stride = getStride(JOINT_WEIGHT_DATA);
 
 				i = 0;
 				index = offset;
@@ -997,7 +996,7 @@ package away3d.core.base
 		}
 
 		/**
-		 * Updates the face indices of the TriangleSubGeometry.
+		 * Updates the face indices of the
 		 *
 		 * @param indices The face indices to upload.
 		 */
@@ -1152,13 +1151,13 @@ package away3d.core.base
 				invTranspose.transpose();
 			}
 
-			var vi0:Number = getOffset(TriangleSubGeometry.POSITION_DATA);
-			var ni0:Number = getOffset(TriangleSubGeometry.NORMAL_DATA);
-			var ti0:Number = getOffset(TriangleSubGeometry.TANGENT_DATA);
+			var vi0:Number = getOffset(POSITION_DATA);
+			var ni0:Number = getOffset(NORMAL_DATA);
+			var ti0:Number = getOffset(TANGENT_DATA);
 
-			var vStride:Number = getStride(TriangleSubGeometry.POSITION_DATA);
-			var nStride:Number = getStride(TriangleSubGeometry.NORMAL_DATA);
-			var tStride:Number = getStride(TriangleSubGeometry.TANGENT_DATA);
+			var vStride:Number = getStride(POSITION_DATA);
+			var nStride:Number = getStride(NORMAL_DATA);
+			var tStride:Number = getStride(TANGENT_DATA);
 
 			for (i = 0; i < len; ++i) {
 				i1 = vi0 + 1;
@@ -1367,7 +1366,7 @@ package away3d.core.base
 			_positionsDirty = true;
 
 			if (!_positionsUpdated)
-				_positionsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TriangleSubGeometry.POSITION_DATA);
+				_positionsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, POSITION_DATA);
 
 			dispatchEvent(_positionsUpdated);
 		}
@@ -1380,7 +1379,7 @@ package away3d.core.base
 			_vertexNormalsDirty = true;
 
 			if (!_normalsUpdated)
-				_normalsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TriangleSubGeometry.NORMAL_DATA);
+				_normalsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, NORMAL_DATA);
 
 			dispatchEvent(_normalsUpdated);
 		}
@@ -1393,7 +1392,7 @@ package away3d.core.base
 			_vertexTangentsDirty = true;
 
 			if (!_tangentsUpdated)
-				_tangentsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TriangleSubGeometry.TANGENT_DATA);
+				_tangentsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TANGENT_DATA);
 
 			dispatchEvent(_tangentsUpdated);
 		}
@@ -1406,7 +1405,7 @@ package away3d.core.base
 			_uvsDirty = true;
 
 			if (!_uvsUpdated)
-				_uvsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TriangleSubGeometry.UV_DATA);
+				_uvsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, UV_DATA);
 
 			dispatchEvent(_uvsUpdated);
 		}
@@ -1419,7 +1418,7 @@ package away3d.core.base
 			_secondaryUVsDirty = true;
 
 			if (!_secondaryUVsUpdated)
-				_secondaryUVsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TriangleSubGeometry.SECONDARY_UV_DATA);
+				_secondaryUVsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, SECONDARY_UV_DATA);
 
 			dispatchEvent(_secondaryUVsUpdated);
 		}
@@ -1432,7 +1431,7 @@ package away3d.core.base
 			_jointIndicesDirty = true;
 
 			if (!_jointIndicesUpdated)
-				_jointIndicesUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TriangleSubGeometry.JOINT_INDEX_DATA);
+				_jointIndicesUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, JOINT_INDEX_DATA);
 
 			dispatchEvent(_jointIndicesUpdated);
 		}
@@ -1445,7 +1444,7 @@ package away3d.core.base
 			_jointWeightsDirty = true;
 
 			if (!_jointWeightsUpdated)
-				_jointWeightsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TriangleSubGeometry.JOINT_WEIGHT_DATA);
+				_jointWeightsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, JOINT_WEIGHT_DATA);
 
 			dispatchEvent(_jointWeightsUpdated);
 		}

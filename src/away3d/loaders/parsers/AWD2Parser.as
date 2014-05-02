@@ -96,7 +96,7 @@ package away3d.loaders.parsers
 	import away3d.prefabs.CubeGeometry;
 	import away3d.prefabs.CylinderGeometry;
 	import away3d.prefabs.PlaneGeometry;
-	import away3d.prefabs.SkyBox;
+	import away3d.entities.SkyBox;
 	import away3d.prefabs.SphereGeometry;
 	import away3d.prefabs.TorusGeometry;
 	import away3d.textures.ATFCubeTexture;

@@ -1,6 +1,6 @@
 ﻿package away3d.debug
 {
-	import away3d.entities.SegmentSet;
+	import away3d.entities.LineSegment;
 	import away3d.prefabs.LineSegment;
 	
 	import flash.geom.Vector3D;
@@ -15,7 +15,7 @@
 	 * @param    colorXZ                [optional] uint. Default is 0x00FF00.
 	 */
 	
-	public class WireframeAxesGrid extends SegmentSet
+	public class WireframeAxesGrid extends away3d.entities.LineSegment
 	{
 		private static const PLANE_ZY:String = "zy";
 		private static const PLANE_XY:String = "xy";

@@ -1,6 +1,7 @@
 package away3d.controllers
 {
 	import away3d.containers.*;
+	import away3d.core.base.Object3D;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.*;
 	import away3d.events.*;
@@ -24,7 +25,7 @@ package away3d.controllers
 		/**
 		 * Creates a new <code>LookAtController</code> object.
 		 */
-		public function LookAtController(targetObject:Entity = null, lookAtObject:ObjectContainer3D = null)
+		public function LookAtController(targetObject:Object3D = null, lookAtObject:ObjectContainer3D = null)
 		{
 			super(targetObject);
 			

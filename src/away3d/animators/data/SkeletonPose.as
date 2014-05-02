@@ -39,7 +39,7 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.SKELETON_POSE;
 		}

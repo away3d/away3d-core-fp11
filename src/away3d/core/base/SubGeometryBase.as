@@ -9,7 +9,7 @@ package away3d.core.base {
 	use namespace  arcane;
 
 	public class SubGeometryBase extends NamedAssetBase {
-
+		public static const VERTEX_DATA:String = "vertices";
 
 		protected var _strideOffsetDirty:Boolean = true;
 		protected var _indices:Vector.<uint>;

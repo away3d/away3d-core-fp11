@@ -420,7 +420,7 @@ package away3d.loaders
 						obj = Camera3D(ev.asset);
 						break;
 					case AssetType.SEGMENT_SET:
-						obj = SegmentSet(ev.asset);
+						obj = away3d.entities.LineSegment(ev.asset);
 						break;
 				}
 				

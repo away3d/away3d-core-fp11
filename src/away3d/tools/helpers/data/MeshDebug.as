@@ -4,7 +4,7 @@ package away3d.tools.helpers.data
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.entities.Mesh;
-	import away3d.entities.SegmentSet;
+	import away3d.entities.LineSegment;
 	import away3d.prefabs.LineSegment;
 	
 	import flash.geom.Vector3D;
@@ -13,7 +13,7 @@ package away3d.tools.helpers.data
 	 * MeshDebug, holds the data for the MeshDebugger class
 	 */
 	
-	public class MeshDebug extends SegmentSet
+	public class MeshDebug extends away3d.entities.LineSegment
 	{
 		
 		private var _normal:Vector3D = new Vector3D();

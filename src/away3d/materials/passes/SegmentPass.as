@@ -5,7 +5,7 @@
 	import away3d.core.base.IRenderable;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.entities.SegmentSet;
+	import away3d.entities.LineSegment;
 	
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
@@ -124,9 +124,9 @@
 			_calcMatrix.copyFrom(renderable.sourceEntity.sceneTransform);
 			_calcMatrix.append(camera.inverseSceneTransform);
 			
-			var subSetCount:uint = SegmentSet(renderable).subSetCount;
+			var subSetCount:uint = LineSegment(renderable).subSetCount;
 			
-			if (SegmentSet(renderable).hasData) {
+			if (LineSegment(renderable).hasData) {
 				for (var i:uint = 0; i < subSetCount; ++i) {
 					renderable.activateVertexBuffer(i, stage3DProxy);
 					context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 8, _calcMatrix, true);

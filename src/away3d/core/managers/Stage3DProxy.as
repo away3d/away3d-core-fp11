@@ -1,6 +1,8 @@
 package away3d.core.managers
 {
 	import away3d.arcane;
+	import away3d.core.data.IndexData;
+	import away3d.core.data.VertexData;
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
 	
@@ -9,6 +11,7 @@ package away3d.core.managers
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DClearMask;
 	import flash.display3D.Context3DRenderMode;
+	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.events.Event;
@@ -473,7 +476,64 @@ package away3d.core.managers
 		{
 			_bufferClear = newBufferClear;
 		}
-		
+
+		/**
+		 * Assigns an attribute stream
+		 *
+		 * @param index The attribute stream index for the vertex shader
+		 * @param buffer
+		 * @param offset
+		 * @param stride
+		 * @param format
+		 */
+		public function activateBuffer(index:int, buffer:VertexData, offset:Number, format:String):void
+		{
+			if (!buffer.stage3Ds[_stage3DIndex])
+				buffer.stage3Ds[_stage3DIndex] = this;
+
+			if (!buffer.buffers[_stage3DIndex]) {
+				buffer.buffers[_stage3DIndex] = _context3D.createVertexBuffer(buffer.data.length/buffer.dataPerVertex, buffer.dataPerVertex);
+				buffer.invalid[_stage3DIndex] = true;
+			}
+
+			if (buffer.invalid[_stage3DIndex]) {
+				buffer.buffers[_stage3DIndex].uploadFromVector(buffer.data, 0, buffer.data.length/buffer.dataPerVertex);
+				buffer.invalid[_stage3DIndex] = false;
+			}
+
+			_context3D.setVertexBufferAt(index, buffer.buffers[_stage3DIndex], offset, format);
+		}
+
+		public function disposeVertexData(buffer:VertexData):void
+		{
+			buffer.buffers[_stage3DIndex].dispose();
+			buffer.buffers[_stage3DIndex] = null;
+		}
+
+		public function getIndexBuffer(buffer:IndexData):IndexBuffer3D
+		{
+			if (!buffer.stage3Ds[_stage3DIndex])
+				buffer.stage3Ds[_stage3DIndex] = this;
+
+			if (!buffer.buffers[_stage3DIndex]) {
+				buffer.buffers[_stage3DIndex] = _context3D.createIndexBuffer(buffer.data.length/3);
+				buffer.invalid[_stage3DIndex] = true;
+			}
+
+			if (buffer.invalid[_stage3DIndex]) {
+				buffer.buffers[_stage3DIndex].uploadFromVector(buffer.data, 0, buffer.data.length/3);
+				buffer.invalid[_stage3DIndex] = false;
+			}
+
+			return buffer.buffers[_stage3DIndex];
+		}
+
+		public function disposeIndexData(buffer:IndexData):void
+		{
+			buffer.buffers[_stage3DIndex].dispose();
+			buffer.buffers[_stage3DIndex] = null;
+		}
+
 		/*
 		 * Access to fire mouseevents across multiple layered view3D instances
 		 */

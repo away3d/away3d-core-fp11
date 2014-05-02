@@ -404,105 +404,14 @@ package away3d.loaders.parsers
 		protected function finalizeAsset(asset:IAsset, name:String = null):void
 		{
 			var type_event:String;
-			var type_name:String;
-			
+
 			if (name != null)
 				asset.name = name;
-			
-			switch (asset.assetType) {
-				case AssetType.LIGHT_PICKER:
-					type_name = 'lightPicker';
-					type_event = AssetEvent.LIGHTPICKER_COMPLETE;
-					break;
-				case AssetType.LIGHT:
-					type_name = 'light';
-					type_event = AssetEvent.LIGHT_COMPLETE;
-					break;
-				case AssetType.ANIMATOR:
-					type_name = 'animator';
-					type_event = AssetEvent.ANIMATOR_COMPLETE;
-					break;
-				case AssetType.ANIMATION_SET:
-					type_name = 'animationSet';
-					type_event = AssetEvent.ANIMATION_SET_COMPLETE;
-					break;
-				case AssetType.ANIMATION_STATE:
-					type_name = 'animationState';
-					type_event = AssetEvent.ANIMATION_STATE_COMPLETE;
-					break;
-				case AssetType.ANIMATION_NODE:
-					type_name = 'animationNode';
-					type_event = AssetEvent.ANIMATION_NODE_COMPLETE;
-					break;
-				case AssetType.STATE_TRANSITION:
-					type_name = 'stateTransition';
-					type_event = AssetEvent.STATE_TRANSITION_COMPLETE;
-					break;
-				case AssetType.TEXTURE:
-					type_name = 'texture';
-					type_event = AssetEvent.TEXTURE_COMPLETE;
-					break;
-				case AssetType.TEXTURE_PROJECTOR:
-					type_name = 'textureProjector';
-					type_event = AssetEvent.TEXTURE_PROJECTOR_COMPLETE;
-					break;
-				case AssetType.CONTAINER:
-					type_name = 'container';
-					type_event = AssetEvent.CONTAINER_COMPLETE;
-					break;
-				case AssetType.GEOMETRY:
-					type_name = 'geometry';
-					type_event = AssetEvent.GEOMETRY_COMPLETE;
-					break;
-				case AssetType.MATERIAL:
-					type_name = 'material';
-					type_event = AssetEvent.MATERIAL_COMPLETE;
-					break;
-				case AssetType.MESH:
-					type_name = 'mesh';
-					type_event = AssetEvent.MESH_COMPLETE;
-					break;
-				case AssetType.SKELETON:
-					type_name = 'skeleton';
-					type_event = AssetEvent.SKELETON_COMPLETE;
-					break;
-				case AssetType.SKELETON_POSE:
-					type_name = 'skelpose';
-					type_event = AssetEvent.SKELETON_POSE_COMPLETE;
-					break;
-				case AssetType.ENTITY:
-					type_name = 'entity';
-					type_event = AssetEvent.ENTITY_COMPLETE;
-					break;
-				case AssetType.SKYBOX:
-					type_name = 'skybox';
-					type_event = AssetEvent.SKYBOX_COMPLETE;
-					break;
-				case AssetType.CAMERA:
-					type_name = 'camera';
-					type_event = AssetEvent.CAMERA_COMPLETE;
-					break;
-				case AssetType.SEGMENT_SET:
-					type_name = 'segmentSet';
-					type_event = AssetEvent.SEGMENT_SET_COMPLETE;
-					break;
-				case AssetType.EFFECTS_METHOD:
-					type_name = 'effectsMethod';
-					type_event = AssetEvent.EFFECTMETHOD_COMPLETE;
-					break;
-				case AssetType.SHADOW_MAP_METHOD:
-					type_name = 'effectsMethod';
-					type_event = AssetEvent.SHADOWMAPMETHOD_COMPLETE;
-					break;
-				default:
-					throw new Error('Unhandled asset type ' + asset.assetType + '. Report as bug!');
-					break;
-			};
 			
 			// If the asset has no name, give it
 			// a per-type default name.
 			if (!asset.name)
-				asset.name = type_name;
+				asset.name = asset.assetType;
 			
 			dispatchEvent(new AssetEvent(AssetEvent.ASSET_COMPLETE, asset));
 			dispatchEvent(new AssetEvent(type_event, asset));

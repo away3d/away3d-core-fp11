@@ -84,9 +84,8 @@ package away3d.core.partition
 			return _entity.isIntersectingRay(rayPosition, rayDirection);
 		}
 
-		public function createBoundsPrimitive():IEntity {
+		override protected function createBoundsPrimitive():IEntity {
 			return _entity.bounds.boundingEntity;
 		}
-	
 	}
 }

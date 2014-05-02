@@ -3,8 +3,8 @@ package away3d.core.render {
 	import away3d.core.base.LineSubMesh;
 	import away3d.core.sort.IEntitySorter;
 	import away3d.core.traverse.ICollector;
-	import away3d.entities.Sprite3D;
-	import away3d.prefabs.SkyBox;
+	import away3d.entities.Billboard;
+	import away3d.entities.SkyBox;
 
 	import flash.events.IEventDispatcher;
 	import flash.geom.Rectangle;
@@ -30,7 +30,7 @@ package away3d.core.render {
 		 *
 		 * @param sprite
 		 */
-		function applyBillboard(sprite:Sprite3D):void;
+		function applyBillboard(sprite:Billboard):void;
 
 		/**
 		 *

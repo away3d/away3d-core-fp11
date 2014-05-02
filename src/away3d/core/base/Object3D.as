@@ -1592,14 +1592,14 @@ package away3d.core.base
 			_sceneTransformDirty = false;
 		}
 
-		arcane function addRenderable(renderable:IRenderable):IRenderable
+		public function addRenderable(renderable:IRenderable):IRenderable
 		{
 			_renderables.push(renderable);
 			return renderable;
 		}
 
 
-		arcane function removeRenderable(renderable:IRenderable):IRenderable
+		public function removeRenderable(renderable:IRenderable):IRenderable
 		{
 			var index:Number = _renderables.indexOf(renderable);
 			_renderables.splice(index, 1);
