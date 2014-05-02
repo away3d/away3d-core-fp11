@@ -1,6 +1,7 @@
 package away3d.core.base {
 	import away3d.animators.IAnimator;
 	import away3d.core.math.UVTransform;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.render.IRenderer;
 	import away3d.library.assets.IAsset;
 	import away3d.materials.IMaterial;

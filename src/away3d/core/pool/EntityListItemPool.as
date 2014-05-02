@@ -1,4 +1,4 @@
-package away3d.core.data
+package away3d.core.pool
 {
 	
 	public class EntityListItemPool

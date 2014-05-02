@@ -1,5 +1,12 @@
 package away3d.animators
 {
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.TriangleSubMeshRenderable;
+	import away3d.errors.AbstractMethodError;
+	import away3d.materials.passes.MaterialPassBase;
+
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.geom.Vector3D;
@@ -44,7 +51,7 @@ package away3d.animators
 	 *
 	 * @see away3d.animators.AnimationSetBase
 	 */
-	public class AnimatorBase extends NamedAssetBase implements IAsset
+	public class AnimatorBase extends NamedAssetBase implements IAnimator
 	{
 		private var _broadcaster:Sprite = new Sprite();
 		private var _isPlaying:Boolean;
@@ -73,8 +80,12 @@ package away3d.animators
 		public function getAnimationState(node:AnimationNodeBase):AnimationStateBase
 		{
 			var className:Class = node.stateClass;
-			
-			return _animationStates[node] ||= new className(this, node);
+			var uID:String = node.id;
+
+			if (_animationStates[uID] == null)
+				_animationStates[uID] = new className(this, node);
+
+			return _animationStates[uID];
 		}
 		
 		public function getAnimationStateByName(name:String):AnimationStateBase
@@ -341,9 +352,23 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.ANIMATOR;
 		}
+		/**
+		 * @inheritDoc
+		 */
+		public function clone():IAnimator
+		{
+			throw new AbstractMethodError();
+		}
+
+		public function getRenderableSubGeometry(renderable:IRenderable, sourceSubGeometry:SubGeometryBase):SubGeometryBase
+		{
+			//nothing to do here
+			return sourceSubGeometry;
+		}
+
 	}
 }

@@ -7,6 +7,7 @@ package away3d.animators
 	import away3d.animators.transitions.IAnimationTransition;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
+	import away3d.core.pool.IRenderable;
 	import away3d.materials.*;
 	import away3d.materials.passes.*;
 	import away3d.entities.Camera3D;

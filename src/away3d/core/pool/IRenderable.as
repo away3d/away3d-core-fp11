@@ -1,4 +1,4 @@
-package away3d.core.base {
+package away3d.core.pool {
 	/**
 	 * IRenderable is an interface for classes that are used in the rendering pipeline to render the
 	 * contents of a partition
@@ -6,11 +6,19 @@ package away3d.core.base {
 	public interface IRenderable {
 		function get next():IRenderable;
 
-		function get materialID():int;
+		function set next(value:IRenderable):void;
+
+		function get materialId():int;
+
+		function set materialId(value:int):void;
 
 		function get renderOrderId():int;
 
+		function set renderOrderId(value:int):void;
+
 		function get zIndex():Number;
+
+		function set zIndex(value:Number):void;
 
 		function dispose():void;
 

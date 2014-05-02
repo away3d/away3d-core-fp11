@@ -1,7 +1,7 @@
 package away3d.core.traverse
 {
 	import away3d.arcane;
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.partition.NodeBase;
 	import away3d.lights.LightBase;
 	

@@ -5,7 +5,7 @@ package away3d.core.pick
 	import away3d.arcane;
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
-	import away3d.core.data.EntityListItem;
+	import away3d.core.pool.EntityListItem;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.core.traverse.RaycastCollector;
 	import away3d.entities.Entity;

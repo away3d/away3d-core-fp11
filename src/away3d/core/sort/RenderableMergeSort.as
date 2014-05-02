@@ -1,7 +1,7 @@
 package away3d.core.sort
 {
 	import away3d.arcane;
-	import away3d.core.data.RenderableListItem;
+	import away3d.core.pool.RenderableListItem;
 	import away3d.core.traverse.EntityCollector;
 	
 	use namespace arcane;

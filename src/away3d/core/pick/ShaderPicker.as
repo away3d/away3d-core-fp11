@@ -4,7 +4,7 @@ package away3d.core.pick
 	import away3d.cameras.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
-	import away3d.core.data.*;
+	import away3d.core.pool.*;
 	import away3d.core.managers.*;
 	import away3d.core.math.*;
 	import away3d.core.traverse.*;

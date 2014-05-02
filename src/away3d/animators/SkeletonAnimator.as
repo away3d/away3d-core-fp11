@@ -4,6 +4,7 @@ package away3d.animators
 	import away3d.animators.data.*;
 	import away3d.animators.states.*;
 	import away3d.animators.transitions.*;
+	import away3d.core.pool.IRenderable;
 	import away3d.entities.Camera3D;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;

@@ -1,11 +1,16 @@
 package away3d.animators
 {
-	import away3d.animators.nodes.*;
-	import away3d.errors.*;
-	import away3d.library.assets.*;
-	
-	import flash.utils.*;
-	
+	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.errors.AbstractMethodError;
+	import away3d.errors.AnimationSetError;
+	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
+	import away3d.library.assets.NamedAssetBase;
+	import away3d.materials.passes.MaterialPassBase;
+
+	import flash.utils.Dictionary;
+
 	/**
 	 * Provides an abstract base class for data set classes that hold animation data for use in animator classes.
 	 *
@@ -48,7 +53,7 @@ package away3d.animators
 		
 		/**
 		 * Indicates whether the properties of the animation data contained within the set combined with
-		 * the vertex registers aslready in use on shading materials allows the animation data to utilise
+		 * the vertex registers already in use on shading materials allows the animation data to utilise
 		 * GPU calls.
 		 */
 		public function get usesCPU():Boolean
@@ -71,11 +76,58 @@ package away3d.animators
 		{
 			_usesCPU = true;
 		}
-		
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType():String
+		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase)
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		public function doneAGALCode(pass:MaterialPassBase):void
+		{
+			throw new AbstractMethodError();
+		}
+
+		/**
+		 * @inheritDoc
+		 */
+		override public function get assetType():String
 		{
 			return AssetType.ANIMATION_SET;
 		}

@@ -3,7 +3,7 @@ package away3d.materials.passes
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometry;
 	import away3d.core.base.SubMesh;

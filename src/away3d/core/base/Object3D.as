@@ -3,6 +3,7 @@ package away3d.core.base
 	import away3d.arcane;
 	import away3d.bounds.AxisAlignedBoundingBox;
 	import away3d.bounds.BoundingVolumeBase;
+	import away3d.core.pool.IRenderable;
 	import away3d.entities.Camera3D;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;

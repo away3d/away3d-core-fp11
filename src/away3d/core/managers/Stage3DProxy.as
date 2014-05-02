@@ -1,8 +1,8 @@
 package away3d.core.managers
 {
 	import away3d.arcane;
-	import away3d.core.data.IndexData;
-	import away3d.core.data.VertexData;
+	import away3d.core.pool.IndexData;
+	import away3d.core.pool.VertexData;
 	import away3d.debug.Debug;
 	import away3d.events.Stage3DEvent;
 	

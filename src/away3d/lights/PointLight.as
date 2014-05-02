@@ -3,7 +3,7 @@ package away3d.lights
 	import away3d.arcane;
 	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.PointLightNode;

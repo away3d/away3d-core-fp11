@@ -2,8 +2,8 @@ package away3d.core.render
 {
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
-	import away3d.core.base.IRenderable;
-	import away3d.core.data.RenderableListItem;
+	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableListItem;
 	import away3d.core.math.Plane3D;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Entity;

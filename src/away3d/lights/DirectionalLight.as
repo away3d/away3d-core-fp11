@@ -3,7 +3,7 @@
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.bounds.NullBounds;
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.DirectionalLightNode;
 	import away3d.core.partition.EntityNode;

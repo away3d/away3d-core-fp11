@@ -2,8 +2,8 @@ package away3d.core.traverse {
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
 	import away3d.containers.Scene3D;
-	import away3d.core.data.EntityListItem;
-	import away3d.core.data.EntityListItemPool;
+	import away3d.core.pool.EntityListItem;
+	import away3d.core.pool.EntityListItemPool;
 	import away3d.core.math.Plane3D;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.IEntity;

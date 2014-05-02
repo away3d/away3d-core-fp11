@@ -1,8 +1,8 @@
 package away3d.core.traverse
 {
 	import away3d.arcane;
-	import away3d.core.base.IRenderable;
-	import away3d.core.data.RenderableListItem;
+	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableListItem;
 	import away3d.entities.Entity;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;

@@ -1,6 +1,6 @@
 package away3d.animators
 {
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.entities.Mesh;
 
@@ -16,7 +16,7 @@ package away3d.animators
 		 */
 		function get animationSet():IAnimationSet;
 		
-		function getRenderableSubGeometry(renderable:IRenderable, sourceSubGeometry:SubGeometryBase):void;
+		function getRenderableSubGeometry(renderable:IRenderable, sourceSubGeometry:SubGeometryBase):SubGeometryBase;
 
 		/**
 		 * Used by the mesh object to which the animator is applied, registers the owner for internal use.

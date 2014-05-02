@@ -6,7 +6,7 @@ package away3d.animators.states
 	import away3d.animators.nodes.ParticleBillboardNode;
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.MathConsts;
 	import away3d.core.math.Matrix3DUtils;

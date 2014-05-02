@@ -1,6 +1,6 @@
 package away3d.core.partition
 {
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.Entity;
 	

@@ -4,7 +4,7 @@ package away3d.entities {
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.base.Object3D;
 	import away3d.core.math.UVTransform;
 	import away3d.core.partition.EntityNode;

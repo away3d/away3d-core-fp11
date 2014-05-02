@@ -2,7 +2,7 @@ package away3d.core.traverse
 {
 	import away3d.arcane;
 	import away3d.containers.Scene3D;
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.IEntity;
 	import away3d.errors.AbstractMethodError;

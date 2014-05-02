@@ -1,7 +1,7 @@
 package away3d.core.pick
 {
 	
-	import away3d.core.base.IRenderable;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.base.Object3D;
 	import away3d.entities.*;
 	
