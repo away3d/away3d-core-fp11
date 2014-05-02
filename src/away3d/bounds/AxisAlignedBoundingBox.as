@@ -2,11 +2,15 @@ package away3d.bounds
 {
 	
 	import away3d.arcane;
-	import away3d.core.math.*;
-	import away3d.prefabs.*;
-	
-	import flash.geom.*;
-	
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Plane3D;
+	import away3d.core.math.PlaneClassification;
+	import away3d.entities.IEntity;
+
+	import flash.geom.Matrix3D;
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 	
 	/**
@@ -187,7 +191,7 @@ package away3d.bounds
 		override public function clone():BoundingVolumeBase
 		{
 			var clone:AxisAlignedBoundingBox = new AxisAlignedBoundingBox();
-			clone.fromExtremes(_min.x, _min.y, _min.z, _max.x, _max.y, _max.z);
+			clone.fromExtremes(_aabb.x, _aabb.y + _aabb.height, _aabb.z, _aabb.x + _aabb.width, _aabb.y, _aabb.z + _aabb.depth);
 			return clone;
 		}
 		
@@ -215,29 +219,29 @@ package away3d.bounds
 		public function closestPointToPoint(point:Vector3D, target:Vector3D = null):Vector3D
 		{
 			var p:Number;
+
 			target ||= new Vector3D();
-			
 			p = point.x;
-			if (p < _min.x)
-				p = _min.x;
-			if (p > _max.x)
-				p = _max.x;
+			if (p < _aabb.x)
+				p = _aabb.x;
+			if (p > _aabb.x + _aabb.width)
+				p = _aabb.x + _aabb.width;
 			target.x = p;
-			
+
 			p = point.y;
-			if (p < _min.y)
-				p = _min.y;
-			if (p > _max.y)
-				p = _max.y;
+			if (p < _aabb.y + _aabb.height)
+				p = _aabb.y + _aabb.height;
+			if (p > _aabb.y)
+				p = _aabb.y;
 			target.y = p;
-			
+
 			p = point.z;
-			if (p < _min.z)
-				p = _min.z;
-			if (p > _max.z)
-				p = _max.z;
+			if (p < _aabb.z)
+				p = _aabb.z;
+			if (p > _aabb.z + _aabb.depth)
+				p = _aabb.z + _aabb.depth;
 			target.z = p;
-			
+
 			return target;
 		}
 		
@@ -251,9 +255,9 @@ package away3d.bounds
 			_boundingEntity.z = _centerZ;
 		}
 		
-		override protected function createBoundingEntity():WireframePrimitiveBase
+		override protected function createBoundingEntity():IEntity
 		{
-			return new WireframeCube(1, 1, 1, 0xffffff, 0.5);
+			return null;//new WireframeCube(1, 1, 1, 0xffffff, 0.5);
 		}
 		
 		override public function classifyToPlane(plane:Plane3D):int
@@ -315,13 +319,11 @@ package away3d.bounds
 			_halfExtentsX = hx*m11 + hy*m12 + hz*m13;
 			_halfExtentsY = hx*m21 + hy*m22 + hz*m23;
 			_halfExtentsZ = hx*m31 + hy*m32 + hz*m33;
-			
-			_min.x = _centerX - _halfExtentsX;
-			_min.y = _centerY - _halfExtentsY;
-			_min.z = _centerZ - _halfExtentsZ;
-			_max.x = _centerX + _halfExtentsX;
-			_max.y = _centerY + _halfExtentsY;
-			_max.z = _centerZ + _halfExtentsZ;
+
+			_aabb.width = _aabb.height = _aabb.depth = _halfExtentsX*2;
+			_aabb.x = _centerX - _halfExtentsX;
+			_aabb.y = _centerY + _halfExtentsY;
+			_aabb.z = _centerZ - _halfExtentsZ;
 
 			_aabbPointsDirty = true;
 		}

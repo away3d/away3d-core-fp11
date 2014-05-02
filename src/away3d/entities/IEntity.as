@@ -15,21 +15,39 @@ package away3d.entities {
 	public interface IEntity extends IAsset {
 		function get x():Number;
 
+		function set x(value:Number):void;
+
 		function get y():Number;
+
+		function set y(value:Number):void;
 
 		function get z():Number;
 
+		function set z(value:Number):void;
+
 		function get rotationX():Number;
+
+		function set rotationX(value:Number):void;
 
 		function get rotationY():Number;
 
+		function set rotationY(value:Number):void;
+
 		function get rotationZ():Number;
+
+		function set rotationZ(value:Number):void;
 
 		function get scaleX():Number;
 
+		function set scaleX(value:Number):void;
+
 		function get scaleY():Number;
 
+		function set scaleY(value:Number):void;
+
 		function get scaleZ():Number;
+
+		function set scaleZ(value:Number):void;
 
 		function get bounds():BoundingVolumeBase;
 

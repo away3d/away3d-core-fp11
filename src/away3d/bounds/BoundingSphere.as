@@ -2,6 +2,7 @@ package away3d.bounds
 {
 	import away3d.arcane;
 	import away3d.core.math.*;
+	import away3d.entities.IEntity;
 	import away3d.prefabs.*;
 	
 	import flash.geom.*;
@@ -72,12 +73,10 @@ package away3d.bounds
 			_centerY = center.y;
 			_centerZ = center.z;
 			_radius = radius;
-			_max.x = _centerX + radius;
-			_max.y = _centerY + radius;
-			_max.z = _centerZ + radius;
-			_min.x = _centerX - radius;
-			_min.y = _centerY - radius;
-			_min.z = _centerZ - radius;
+			_aabb.width = _aabb.height = _aabb.depth = radius*2;
+			_aabb.x = _centerX - radius;
+			_aabb.y = _centerY + radius;
+			_aabb.z = _centerZ - radius;
 			_aabbPointsDirty = true;
 			if (_boundingEntity)
 				updateBoundingEntity();
@@ -171,9 +170,9 @@ package away3d.bounds
 			_boundingEntity.z = _centerZ;
 		}
 		
-		override protected function createBoundingEntity():WireframePrimitiveBase
+		override protected function createBoundingEntity():IEntity
 		{
-			return new WireframeSphere(1, 16, 12, 0xffffff, 0.5);
+			return null;//new WireframeSphere(1, 16, 12, 0xffffff, 0.5);
 		}
 		
 		override public function classifyToPlane(plane:Plane3D):int
@@ -234,14 +233,11 @@ package away3d.bounds
 			var ry:Number = m21 + m22 + m23;
 			var rz:Number = m31 + m32 + m33;
 			_radius = r*Math.sqrt(rx*rx + ry*ry + rz*rz);
-			
-			_min.x = _centerX - _radius;
-			_min.y = _centerY - _radius;
-			_min.z = _centerZ - _radius;
-			
-			_max.x = _centerX + _radius;
-			_max.y = _centerY + _radius;
-			_max.z = _centerZ + _radius;
+
+			_aabb.width = _aabb.height = _aabb.depth = _radius*2;
+			_aabb.x = _centerX - _radius;
+			_aabb.y = _centerY + _radius;
+			_aabb.z = _centerZ - _radius;
 		}
 	}
 }

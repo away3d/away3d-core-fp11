@@ -1,10 +1,10 @@
 package away3d.bounds
 {
-	import away3d.core.base.*;
+	import away3d.core.base.Geometry;
 	import away3d.core.math.Plane3D;
 	import away3d.core.math.PlaneClassification;
-	import away3d.prefabs.*;
-	
+	import away3d.entities.IEntity;
+
 	import flash.geom.*;
 	
 	/**
@@ -14,15 +14,13 @@ package away3d.bounds
 	public class NullBounds extends BoundingVolumeBase
 	{
 		private var _alwaysIn:Boolean;
-		private var _renderable:WireframePrimitiveBase;
-		
-		public function NullBounds(alwaysIn:Boolean = true, renderable:WireframePrimitiveBase = null)
+
+		public function NullBounds(alwaysIn:Boolean = true)
 		{
 			super();
 			_alwaysIn = alwaysIn;
-			_renderable = renderable;
-			_max.x = _max.y = _max.z = Number.POSITIVE_INFINITY;
-			_min.x = _min.y = _min.z = _alwaysIn? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY;
+			_aabb.width = _aabb.height = _aabb.depth = Number.POSITIVE_INFINITY;
+			_aabb.x = _aabb.y = _aabb.z = _alwaysIn? Number.NEGATIVE_INFINITY/2 : Number.POSITIVE_INFINITY;
 		}
 		
 		override public function clone():BoundingVolumeBase
@@ -30,9 +28,9 @@ package away3d.bounds
 			return new NullBounds(_alwaysIn);
 		}
 		
-		override protected function createBoundingEntity():WireframePrimitiveBase
+		override protected function createBoundingEntity():IEntity
 		{
-			return _renderable || new WireframeSphere(100, 16, 12, 0xffffff, 0.5);
+			return null;//_renderable || new WireframeSphere(100, 16, 12, 0xffffff, 0.5);
 		}
 		
 		/**
@@ -40,8 +38,6 @@ package away3d.bounds
 		 */
 		override public function isInFrustum(planes:Vector.<Plane3D>, numPlanes:int):Boolean
 		{
-			planes = planes;
-			numPlanes = numPlanes;
 			return _alwaysIn;
 		}
 		
@@ -68,13 +64,11 @@ package away3d.bounds
 		
 		override public function classifyToPlane(plane:Plane3D):int
 		{
-			plane = plane;
 			return PlaneClassification.INTERSECT;
 		}
 		
 		override public function transformFrom(bounds:BoundingVolumeBase, matrix:Matrix3D):void
 		{
-			matrix = matrix;
 			_alwaysIn = NullBounds(bounds)._alwaysIn;
 		}
 	}

@@ -1,26 +1,44 @@
 ﻿package away3d.containers
 {
-	
-	import away3d.*;
-	import away3d.projections.*;
-	import away3d.core.managers.*;
-	import away3d.core.pick.*;
-	import away3d.core.render.*;
-	import away3d.core.traverse.*;
+	import away3d.Away3D;
+	import away3d.arcane;
+	import away3d.core.managers.Mouse3DManager;
+	import away3d.core.managers.RTTBufferManager;
+	import away3d.core.managers.Stage3DManager;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.managers.Touch3DManager;
+	import away3d.core.pick.IPicker;
+	import away3d.core.render.DefaultRenderer;
+	import away3d.core.render.DepthRenderer;
+	import away3d.core.render.Filter3DRenderer;
+	import away3d.core.render.RendererBase;
+	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Camera3D;
-	import away3d.events.*;
-	import away3d.filters.*;
-	import away3d.textures.*;
-	
-	import flash.display.*;
-	import flash.display3D.*;
-	import flash.display3D.textures.*;
-	import flash.events.*;
-	import flash.geom.*;
-	import flash.net.*;
-	import flash.ui.*;
-	import flash.utils.*;
-	
+	import away3d.events.CameraEvent;
+	import away3d.events.Scene3DEvent;
+	import away3d.events.Stage3DEvent;
+	import away3d.filters.Filter3DBase;
+	import away3d.projections.PerspectiveProjection;
+	import away3d.textures.Texture2DBase;
+
+	import flash.display.Sprite;
+	import flash.display3D.Context3D;
+	import flash.display3D.Context3DTextureFormat;
+	import flash.display3D.textures.CubeTexture;
+	import flash.display3D.textures.Texture;
+	import flash.display3D.textures.TextureBase;
+	import flash.events.ContextMenuEvent;
+	import flash.events.Event;
+	import flash.geom.Point;
+	import flash.geom.Rectangle;
+	import flash.geom.Transform;
+	import flash.geom.Vector3D;
+	import flash.net.URLRequest;
+	import flash.net.navigateToURL;
+	import flash.ui.ContextMenu;
+	import flash.ui.ContextMenuItem;
+	import flash.utils.getTimer;
+
 	use namespace arcane;
 	
 	public class View3D extends Sprite
@@ -80,7 +98,7 @@
 		private var _profile:String;
 		private var _layeredView:Boolean = false;
 		private var _cameras:Vector.<Camera3D>;
-		private var _lenses:Vector.<away3d.projections.PerspectiveProjection>;
+		private var _lenses:Vector.<PerspectiveProjection>;
 		private var _container:ObjectContainer3D;
 		
 		private function viewSource(e:ContextMenuEvent):void

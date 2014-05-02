@@ -1,15 +1,18 @@
 package away3d.bounds
 {
 	import away3d.arcane;
-	import away3d.core.base.*;
+	import away3d.core.base.Geometry;
+	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.math.Box;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.IEntity;
-	import away3d.errors.*;
-	import away3d.prefabs.*;
-	
-	import flash.geom.*;
-	
+	import away3d.errors.AbstractMethodError;
+
+	import flash.geom.Matrix3D;
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 	
 	/**
@@ -137,44 +140,49 @@ package away3d.bounds
 		 */
 		public function fromGeometry(geometry:Geometry):void
 		{
-			var subGeoms:Vector.<ISubGeometry> = geometry.subGeometries;
+			var subGeoms:Vector.<SubGeometryBase> = geometry.subGeometries;
+			var subGeom:SubGeometryBase;
 			var numSubGeoms:uint = subGeoms.length;
+			var boundingPositions:Vector.<Number>;
 			var minX:Number, minY:Number, minZ:Number;
 			var maxX:Number, maxY:Number, maxZ:Number;
-			
-			if (numSubGeoms > 0) {
-				var subGeom:ISubGeometry = subGeoms[0];
-				var vertices:Vector.<Number> = subGeom.vertexData;
-				var i:uint = subGeom.vertexOffset;
-				minX = maxX = vertices[i];
-				minY = maxY = vertices[i + 1];
-				minZ = maxZ = vertices[i + 2];
+			var i:int;
+			var j:int;
+			var p:Number;
 
-				var j:uint = 0;
-				while (j < numSubGeoms) {
-					subGeom = subGeoms[j++];
-					vertices = subGeom.vertexData;
-					var vertexDataLen:uint = vertices.length;
-					i = subGeom.vertexOffset;
-					var stride:uint = subGeom.vertexStride;
-					
-					while (i < vertexDataLen) {
-						var v:Number = vertices[i];
-						if (v < minX)
-							minX = v;
-						else if (v > maxX)
-							maxX = v;
-						v = vertices[i + 1];
-						if (v < minY)
-							minY = v;
-						else if (v > maxY)
-							maxY = v;
-						v = vertices[i + 2];
-						if (v < minZ)
-							minZ = v;
-						else if (v > maxZ)
-							maxZ = v;
-						i += stride;
+			if (numSubGeoms > 0) {
+				i = 0;
+				subGeom = subGeoms[0];
+				boundingPositions = subGeom.getBoundingPositions();
+				minX = maxX = boundingPositions[i];
+				minY = maxY = boundingPositions[i + 1];
+				minZ = maxZ = boundingPositions[i + 2];
+
+				j = numSubGeoms;
+				while (j--) {
+					subGeom = subGeoms[j];
+					boundingPositions = subGeom.getBoundingPositions();
+					i = boundingPositions.length;
+					while (i--) {
+						p = boundingPositions[i];
+						if (p < minX)
+							minX = p;
+						else if (p > maxX)
+							maxX = p;
+
+						p = boundingPositions[i + 1];
+
+						if (p < minY)
+							minY = p;
+						else if (p > maxY)
+							maxY = p;
+
+						p = boundingPositions[i + 2];
+
+						if (p < minZ)
+							minZ = p;
+						else if (p > maxZ)
+							maxZ = p;
 					}
 				}
 				

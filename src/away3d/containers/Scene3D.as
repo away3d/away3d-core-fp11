@@ -34,8 +34,8 @@ package away3d.containers
 		public function Scene3D()
 		{
 			_sceneGraphRoot = new ObjectContainer3D();
-			_sceneGraphRoot.scene = this;
-			_sceneGraphRoot._isRoot = true;
+			_sceneGraphRoot.setScene(this);
+			_sceneGraphRoot.isRoot = true;
 			_sceneGraphRoot.partition = new Partition3D(new NodeBase());
 		}
 		
@@ -72,7 +72,7 @@ package away3d.containers
 			dispatchEvent(new Scene3DEvent(Scene3DEvent.PARTITION_CHANGED, _sceneGraphRoot));
 		}
 		
-		public function contains(child:ObjectContainer3D):Boolean
+		public function contains(child:Object3D):Boolean
 		{
 			return _sceneGraphRoot.contains(child);
 		}
@@ -82,7 +82,7 @@ package away3d.containers
 		 * @param child The child to be added to the scene
 		 * @return A reference to the added child.
 		 */
-		public function addChild(child:ObjectContainer3D):ObjectContainer3D
+		public function addChild(child:Object3D):Object3D
 		{
 			return _sceneGraphRoot.addChild(child);
 		}
@@ -91,7 +91,7 @@ package away3d.containers
 		 * Removes a child from the scene's root.
 		 * @param child The child to be removed from the scene.
 		 */
-		public function removeChild(child:ObjectContainer3D):void
+		public function removeChild(child:Object3D):void
 		{
 			_sceneGraphRoot.removeChild(child);
 		}
@@ -110,7 +110,7 @@ package away3d.containers
 		 * @param index The index for the child to be retrieved.
 		 * @return The child with the given index
 		 */
-		public function getChildAt(index:uint):ObjectContainer3D
+		public function getChildAt(index:uint):Object3D
 		{
 			return _sceneGraphRoot.getChildAt(index);
 		}
@@ -130,10 +130,10 @@ package away3d.containers
 		arcane function registerEntity(object:Object3D):void
 		{
 			if (object.partition)
-				this.iRegisterPartition(object.partition);
+				registerPartition(object.partition);
 
 			if (object.isEntity)
-				object.assignedPartition.iMarkForUpdate(object);
+				object.assignedPartition.markForUpdate(object);
 		}
 		
 		/**
@@ -143,10 +143,10 @@ package away3d.containers
 		arcane function unregisterEntity(object:Object3D):void
 		{
 			if (object.partition)
-				this.iUnregisterPartition(object.partition);
+				unregisterPartition(object.partition);
 
 			if (object.isEntity)
-				object.assignedPartition.iRemoveEntity(object);
+				object.assignedPartition.removeEntity(object);
 		}
 
 		/**
