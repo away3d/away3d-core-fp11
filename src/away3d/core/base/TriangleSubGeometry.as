@@ -1,6 +1,7 @@
 package away3d.core.base
 {
 	import away3d.arcane;
+	import away3d.core.TriangleSubMesh;
 	import away3d.events.SubGeometryEvent;
 
 	import flash.display3D.Context3DVertexBufferFormat;

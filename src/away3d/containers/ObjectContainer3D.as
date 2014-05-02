@@ -71,7 +71,7 @@ package away3d.containers
 		private var _children:Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
 		arcane var isRoot:Boolean;
 
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.CONTAINER;
 		}

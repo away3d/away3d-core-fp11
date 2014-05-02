@@ -271,7 +271,7 @@
 			return clone;
 		}
 
-		public function getSubMeshFromSubGeometry(subGeometry:SubGeometry):ISubMesh
+		public function getSubMeshFromSubGeometry(subGeometry:TriangleSubGeometry):ISubMesh
 		{
 			return this._subMeshes[this._geometry.subGeometries.indexOf(subGeometry)];
 		}
