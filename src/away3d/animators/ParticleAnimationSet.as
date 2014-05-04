@@ -1,17 +1,26 @@
 package away3d.animators
 {
-	import flash.display3D.*;
-	import flash.utils.*;
-	
-	import away3d.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	import away3d.core.base.*;
-	import away3d.core.base.data.*;
-	import away3d.core.managers.*;
-	import away3d.entities.*;
-	import away3d.materials.passes.*;
-	
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.animators.data.ParticleAnimationData;
+	import away3d.animators.data.ParticleProperties;
+	import away3d.animators.data.ParticlePropertiesMode;
+	import away3d.animators.nodes.AnimationNodeBase;
+	import away3d.animators.nodes.ParticleNodeBase;
+	import away3d.animators.nodes.ParticleTimeNode;
+	import away3d.arcane;
+	import away3d.core.base.ISubMesh;
+	import away3d.core.base.ParticleGeometry;
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.data.ParticleData;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.entities.Mesh;
+	import away3d.materials.passes.MaterialPassBase;
+
+	import flash.display3D.Context3D;
+
+	import flash.utils.Dictionary;
+
 	use namespace arcane;
 	
 	/**
@@ -120,7 +129,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 			_animationRegisterCache = pass.animationRegisterCache;
 		}
@@ -128,7 +137,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 			if (_animationRegisterCache)
 			{
@@ -143,7 +152,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
 		{
 			//grab animationRegisterCache from the materialpassbase or create a new one if the first time
 			_animationRegisterCache = pass.animationRegisterCache ||= new AnimationRegisterCache(profile);
@@ -193,7 +202,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
+		override public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
 		{
 			var code:String = "";
 			if (hasUVNode) {
@@ -211,7 +220,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
 		{
 			return _animationRegisterCache.getColorCombinationCode(shadedTarget);
 		}
@@ -219,7 +228,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function doneAGALCode(pass:MaterialPassBase):void
+		override public function doneAGALCode(pass:MaterialPassBase):void
 		{
 			_animationRegisterCache.setDataLength();
 			
@@ -252,6 +261,19 @@ package away3d.animators
 			
 			super.dispose();
 		}
+
+		public function getAnimationSubGeometry(subMesh:ISubMesh):AnimationSubGeometry
+		{
+			var mesh:Mesh = subMesh.parentMesh;
+			var animationSubGeometry:AnimationSubGeometry = (mesh.shareAnimationGeometry)? _animationSubGeometries[subMesh.subGeometry.id] : _animationSubGeometries[subMesh.id];
+
+			if (animationSubGeometry)
+				return animationSubGeometry;
+
+			generateAnimationSubGeometries(mesh);
+
+			return (mesh.shareAnimationGeometry)? _animationSubGeometries[subMesh.subGeometry.id] : _animationSubGeometries[subMesh.id];
+		}
 		
 		/** @private */
 		arcane function generateAnimationSubGeometries(mesh:Mesh):void
@@ -267,8 +289,8 @@ package away3d.animators
 			var i:int, j:int;
 			var animationSubGeometry:AnimationSubGeometry;
 			var newAnimationSubGeometry:Boolean;
-			var subGeometry:ISubGeometry;
-			var subMesh:SubMesh;
+			var subGeometry:SubGeometryBase;
+			var subMesh:ISubMesh;
 			var localNode:ParticleNodeBase;
 			
 			for (i = 0; i < mesh.subMeshes.length; i++) {
@@ -278,14 +300,17 @@ package away3d.animators
 					animationSubGeometry = _animationSubGeometries[subGeometry];
 					
 					if (animationSubGeometry) {
-						subMesh.animationSubGeometry = animationSubGeometry;
 						continue;
 					}
 				}
 				
-				animationSubGeometry = subMesh.animationSubGeometry = new AnimationSubGeometry();
-				if (mesh.shareAnimationGeometry)
+				animationSubGeometry = new AnimationSubGeometry();
+				if (mesh.shareAnimationGeometry) {
 					_animationSubGeometries[subGeometry] = animationSubGeometry;
+				}else{
+					_animationSubGeometries[subMesh.id] = animationSubGeometry;
+				}
+
 				
 				newAnimationSubGeometry = true;
 				
@@ -336,7 +361,7 @@ package away3d.animators
 					//find the target animationSubGeometry
 					for each (subMesh in mesh.subMeshes) {
 						if (subMesh.subGeometry == particle.subGeometry) {
-							animationSubGeometry = subMesh.animationSubGeometry;
+							animationSubGeometry = (mesh.shareAnimationGeometry)? _animationSubGeometries[subMesh.subGeometry.id] : _animationSubGeometries[subMesh.id];
 							break;
 						}
 					}

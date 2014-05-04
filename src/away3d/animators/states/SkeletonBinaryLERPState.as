@@ -1,9 +1,11 @@
 package away3d.animators.states
 {
-	import away3d.animators.IAnimator;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonBinaryLERPNode;
+
 	import flash.geom.*;
 	
 	/**
@@ -38,7 +40,7 @@ package away3d.animators.states
 			_skeletonPoseDirty = true;
 		}
 		
-		function SkeletonBinaryLERPState(animator:IAnimator, skeletonAnimationNode:SkeletonBinaryLERPNode)
+		function SkeletonBinaryLERPState(animator:AnimatorBase, skeletonAnimationNode:SkeletonBinaryLERPNode)
 		{
 			super(animator, skeletonAnimationNode);
 			

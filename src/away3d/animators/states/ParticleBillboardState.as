@@ -5,8 +5,8 @@ package away3d.animators.states
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.ParticleBillboardNode;
 	import away3d.arcane;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.MathConsts;
 	import away3d.core.math.Matrix3DUtils;
@@ -35,14 +35,14 @@ package away3d.animators.states
 			billboardAxis = particleNode._billboardAxis;
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			// TODO: not used
 //			animationSubGeometry = animationSubGeometry;
 			
 			var comps:Vector.<Vector3D>;
 			if (_billboardAxis) {
-				var pos:Vector3D = renderable.sceneTransform.position;
+				var pos:Vector3D = renderable.sourceEntity.sceneTransform.position;
 				var look:Vector3D = camera.sceneTransform.position.subtract(pos);
 				var right:Vector3D = look.crossProduct(_billboardAxis);
 				right.normalize();
@@ -50,7 +50,7 @@ package away3d.animators.states
 				look.normalize();
 				
 				//create a quick inverse projection matrix
-				_matrix.copyFrom(renderable.sceneTransform);
+				_matrix.copyFrom(renderable.sourceEntity.sceneTransform);
 				comps = Matrix3DUtils.decompose(_matrix, Orientation3D.AXIS_ANGLE);
 				_matrix.copyColumnFrom(0, right);
 				_matrix.copyColumnFrom(1, _billboardAxis);
@@ -59,7 +59,7 @@ package away3d.animators.states
 				_matrix.appendRotation(-comps[1].w*MathConsts.RADIANS_TO_DEGREES, comps[1]);
 			} else {
 				//create a quick inverse projection matrix
-				_matrix.copyFrom(renderable.sceneTransform);
+				_matrix.copyFrom(renderable.sourceEntity.sceneTransform);
 				_matrix.append(camera.inverseSceneTransform);
 				
 				//decompose using axis angle rotations

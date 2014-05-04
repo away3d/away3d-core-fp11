@@ -1,9 +1,9 @@
 package away3d.animators.states
 {
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.UVAnimationFrame;
+	import away3d.animators.nodes.UVClipNode;
+
 	public class UVClipState extends AnimationClipState implements IUVAnimationState
 	{
 		private var _frames:Vector.<UVAnimationFrame>;
@@ -33,7 +33,7 @@ package away3d.animators.states
 			return _nextUVFrame;
 		}
 		
-		function UVClipState(animator:IAnimator, uvClipNode:UVClipNode)
+		function UVClipState(animator:AnimatorBase, uvClipNode:UVClipNode)
 		{
 			super(animator, uvClipNode);
 			

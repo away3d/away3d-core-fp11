@@ -2,11 +2,11 @@ package away3d.animators.states
 {
 	import away3d.arcane;
 	import away3d.animators.data.ParticleAnimationData;
-	
+	import away3d.core.pool.RenderableBase;
+
 	import flash.utils.Dictionary;
 	import flash.geom.Vector3D;
-	
-	import away3d.core.pool.IRenderable;
+
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.entities.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
@@ -41,7 +41,7 @@ package away3d.animators.states
 			return _needUpdateTime;
 		}
 		
-		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 		
 		}

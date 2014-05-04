@@ -1,13 +1,15 @@
 package away3d.animators.states
 {
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonNaryLERPNode;
 	import away3d.arcane;
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	import away3d.core.math.*;
-	
-	import flash.geom.*;
-	
+	import away3d.core.math.Quaternion;
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 	
 	/**
@@ -21,7 +23,7 @@ package away3d.animators.states
 		private var _blendWeights:Vector.<Number> = new Vector.<Number>();
 		private var _inputs:Vector.<ISkeletonAnimationState> = new Vector.<ISkeletonAnimationState>();
 		
-		function SkeletonNaryLERPState(animator:IAnimator, skeletonAnimationNode:SkeletonNaryLERPNode)
+		function SkeletonNaryLERPState(animator:AnimatorBase, skeletonAnimationNode:SkeletonNaryLERPNode)
 		{
 			super(animator, skeletonAnimationNode);
 			

@@ -5,9 +5,11 @@ package away3d.animators
 	import away3d.animators.states.ISpriteSheetAnimationState;
 	import away3d.animators.states.SpriteSheetAnimationState;
 	import away3d.animators.transitions.IAnimationTransition;
+	import away3d.core.TriangleSubMesh;
 	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.materials.*;
 	import away3d.materials.passes.*;
 	import away3d.entities.Camera3D;
@@ -113,12 +115,8 @@ package away3d.animators
 		 */
 		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
-			var material:MaterialBase = renderable.material;
+			var material:MaterialBase = (renderable as TriangleSubMeshRenderable).material;
 			if (!material || !material is TextureMaterial)
-				return;
-			
-			var subMesh:SubMesh = renderable as SubMesh;
-			if (!subMesh)
 				return;
 			
 			//because textures are already uploaded, we can't offset the uv's yet
@@ -185,12 +183,12 @@ package away3d.animators
 				_mapDirty = false;
 		
 		}
-		
-		public function testGPUCompatibility(pass:MaterialPassBase):void
+
+		override public function testGPUCompatibility(pass:MaterialPassBase):void
 		{
 		}
-		
-		public function clone():IAnimator
+
+		override public function clone():IAnimator
 		{
 			return new SpriteSheetAnimator(_spriteSheetAnimationSet);
 		}

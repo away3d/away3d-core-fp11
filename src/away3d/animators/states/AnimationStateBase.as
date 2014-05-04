@@ -1,10 +1,10 @@
 package away3d.animators.states
 {
-	import away3d.animators.*;
-	import away3d.animators.nodes.*;
-	
-	import flash.geom.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.nodes.AnimationNodeBase;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 *
 	 */
@@ -16,7 +16,7 @@ package away3d.animators.states
 		
 		protected var _time:int;
 		protected var _startTime:int;
-		protected var _animator:IAnimator;
+		protected var _animator:AnimatorBase;
 		
 		/**
 		 * Returns a 3d vector representing the translation delta of the animating entity for the current timestep of animation
@@ -29,7 +29,7 @@ package away3d.animators.states
 			return _rootDelta;
 		}
 		
-		function AnimationStateBase(animator:IAnimator, animationNode:AnimationNodeBase)
+		function AnimationStateBase(animator:AnimatorBase, animationNode:AnimationNodeBase)
 		{
 			_animator = animator;
 			_animationNode = animationNode;

@@ -148,7 +148,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function getAnimationState(animator:IAnimator):ParticleColorState
+		public function getAnimationState(animator:AnimatorBase):ParticleColorState
 		{
 			return animator.getAnimationState(this) as ParticleColorState;
 		}

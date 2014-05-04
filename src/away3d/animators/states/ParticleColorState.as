@@ -1,5 +1,7 @@
 package away3d.animators.states
 {
+	import away3d.core.pool.RenderableBase;
+
 	import flash.geom.ColorTransform;
 	
 	import away3d.animators.data.ParticlePropertiesMode;
@@ -11,7 +13,6 @@ package away3d.animators.states
 	import away3d.entities.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleColorNode;
 	import away3d.animators.ParticleAnimator;
@@ -116,7 +117,7 @@ package away3d.animators.states
 			updateColorData();
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			// TODO: not used
 			renderable = renderable;

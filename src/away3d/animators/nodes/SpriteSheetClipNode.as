@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.states.*;
-	import away3d.animators.data.*;
-	
+	import away3d.animators.data.SpriteSheetAnimationFrame;
+	import away3d.animators.states.SpriteSheetAnimationState;
+
 	/**
 	 * A SpriteSheetClipNode containing time-based animation data as individual sprite sheet animation frames.
 	 */

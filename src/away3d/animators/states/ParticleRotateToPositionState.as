@@ -1,18 +1,21 @@
 package away3d.animators.states
 {
-	import away3d.*;
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	import away3d.cameras.*;
-	import away3d.core.base.*;
-	import away3d.core.managers.*;
-	import away3d.core.pool.IRenderable;
+	import away3d.animators.ParticleAnimator;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.AnimationSubGeometry;
+	import away3d.animators.data.ParticlePropertiesMode;
+	import away3d.animators.nodes.ParticleRotateToPositionNode;
+	import away3d.arcane;
+	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 
-	import flash.display3D.*;
-	import flash.geom.*;
-	
+	import flash.display3D.Context3DVertexBufferFormat;
+
+	import flash.geom.Matrix3D;
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 	
 	/**
@@ -46,18 +49,18 @@ package away3d.animators.states
 			_position = _particleRotateToPositionNode._position;
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotateToPositionNode.POSITION_INDEX);
 			
 			if (animationRegisterCache.hasBillboard) {
-				_matrix.copyFrom(renderable.sceneTransform);
+				_matrix.copyFrom(renderable.sourceEntity.sceneTransform);
 				_matrix.append(camera.inverseSceneTransform);
 				animationRegisterCache.setVertexConstFromMatrix(animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotateToPositionNode.MATRIX_INDEX), _matrix);
 			}
 			
 			if (_particleRotateToPositionNode.mode == ParticlePropertiesMode.GLOBAL) {
-				_offset = renderable.inverseSceneTransform.transformVector(_position);
+				_offset = renderable.sourceEntity.inverseSceneTransform.transformVector(_position);
 				animationRegisterCache.setVertexConst(index, _offset.x, _offset.y, _offset.z);
 			} else
 				animationSubGeometry.activateVertexBuffer(index, _particleRotateToPositionNode.dataOffset, stage3DProxy, Context3DVertexBufferFormat.FLOAT_3);

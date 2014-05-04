@@ -45,7 +45,7 @@ package away3d.core.base
 
 		private var _useCondensedIndices:Boolean;
 		private var _condensedJointIndices:Vector.<Number>;
-		private var _condensedIndexLookUp:Vector.<Number>;
+		private var _condensedIndexLookUp:Vector.<uint>;
 		private var _numCondensedJoints:Number;
 
 		private var _jointsPerVertex:Number;
@@ -427,7 +427,7 @@ package away3d.core.base
 			return _numCondensedJoints;
 		}
 
-		public function get condensedIndexLookUp():Vector.<Number>
+		public function get condensedIndexLookUp():Vector.<uint>
 		{
 			if (_jointIndicesDirty)
 				updateJointIndices(_jointIndices);
@@ -901,7 +901,7 @@ package away3d.core.base
 					if (!_concatenateArrays)
 						_condensedJointIndices = new Vector.<Number>(values.length);
 
-					_condensedIndexLookUp = new Vector.<Number>();
+					_condensedIndexLookUp = new Vector.<uint>();
 
 					while (i < values.length) {
 						for (j = 0; j < _jointsPerVertex; j++) {

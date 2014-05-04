@@ -5,8 +5,8 @@ package away3d.animators
 	import away3d.animators.transitions.*;
 	import away3d.arcane;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.entities.Camera3D;
-	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.core.math.MathConsts;
 	import away3d.materials.*;
@@ -115,10 +115,8 @@ package away3d.animators
 		 */
 		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
-			var material:TextureMaterial = renderable.material as TextureMaterial;
-			var subMesh:SubMesh = renderable as SubMesh;
-			
-			if (!material || !subMesh)
+			var material:MaterialBase = (renderable as TriangleSubMeshRenderable).material;
+			if (!material)
 				return;
 			
 			if (autoTranslate) {
@@ -199,14 +197,14 @@ package away3d.animators
 		 * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
 		 * Needs to be called if gpu code is potentially required.
 		 */
-		public function testGPUCompatibility(pass:MaterialPassBase):void
+		override public function testGPUCompatibility(pass:MaterialPassBase):void
 		{
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function clone():IAnimator
+		override public function clone():IAnimator
 		{
 			return new UVAnimator(_uvAnimationSet);
 		}

@@ -1,14 +1,16 @@
 package away3d.animators.nodes
 {
-	import away3d.*;
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.states.*;
-	import away3d.materials.compilation.*;
-	import away3d.materials.passes.*;
-	
-	import flash.geom.*;
-	
+	import away3d.animators.ParticleAnimationSet;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.ParticleProperties;
+	import away3d.animators.data.ParticlePropertiesMode;
+	import away3d.animators.states.ParticleInitialColorState;
+	import away3d.arcane;
+	import away3d.materials.compilation.ShaderRegisterElement;
+	import away3d.materials.passes.MaterialPassBase;
+
+	import flash.geom.ColorTransform;
+
 	use namespace arcane;
 	
 	public class ParticleInitialColorNode extends ParticleNodeBase

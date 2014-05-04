@@ -6,8 +6,8 @@ package away3d.animators.states
 	import away3d.animators.data.ColorSegmentPoint;
 	import away3d.animators.nodes.ParticleSegmentedColorNode;
 	import away3d.arcane;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	
 	import flash.geom.ColorTransform;
@@ -101,7 +101,7 @@ package away3d.animators.states
 			updateColorData();
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			if (animationRegisterCache.needFragmentAnimation) {
 				if (_numSegmentPoint > 0)

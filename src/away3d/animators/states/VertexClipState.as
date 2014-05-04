@@ -1,9 +1,10 @@
 package away3d.animators.states
 {
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.VertexAnimator;
+	import away3d.animators.nodes.VertexClipNode;
 	import away3d.core.base.Geometry;
-	import away3d.animators.*;
-	import away3d.animators.nodes.*;
-	
+
 	/**
 	 *
 	 */
@@ -36,7 +37,7 @@ package away3d.animators.states
 			return _nextGeometry;
 		}
 		
-		function VertexClipState(animator:IAnimator, vertexClipNode:VertexClipNode)
+		function VertexClipState(animator:AnimatorBase, vertexClipNode:VertexClipNode)
 		{
 			super(animator, vertexClipNode);
 			

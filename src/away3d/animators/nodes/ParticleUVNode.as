@@ -111,7 +111,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function getAnimationState(animator:IAnimator):ParticleUVState
+		public function getAnimationState(animator:AnimatorBase):ParticleUVState
 		{
 			return animator.getAnimationState(this) as ParticleUVState;
 		}

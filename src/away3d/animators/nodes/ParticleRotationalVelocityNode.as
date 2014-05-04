@@ -1,14 +1,16 @@
 package away3d.animators.nodes
 {
-	import flash.geom.*;
-	
-	import away3d.*;
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.states.*;
-	import away3d.materials.compilation.*;
-	import away3d.materials.passes.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.AnimationRegisterCache;
+	import away3d.animators.data.ParticleProperties;
+	import away3d.animators.data.ParticlePropertiesMode;
+	import away3d.animators.states.ParticleRotationalVelocityState;
+	import away3d.arcane;
+	import away3d.materials.compilation.ShaderRegisterElement;
+	import away3d.materials.passes.MaterialPassBase;
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 	
 	/**
@@ -129,7 +131,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function getAnimationState(animator:IAnimator):ParticleRotationalVelocityState
+		public function getAnimationState(animator:AnimatorBase):ParticleRotationalVelocityState
 		{
 			return animator.getAnimationState(this) as ParticleRotationalVelocityState;
 		}

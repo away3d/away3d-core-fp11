@@ -1,11 +1,15 @@
 package away3d.animators.states
 {
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	
-	import flash.geom.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.IAnimator;
+	import away3d.animators.SkeletonAnimator;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonClipNode;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 *
 	 */
@@ -41,7 +45,7 @@ package away3d.animators.states
 			return _nextPose;
 		}
 		
-		function SkeletonClipState(animator:IAnimator, skeletonClipNode:SkeletonClipNode)
+		function SkeletonClipState(animator:AnimatorBase, skeletonClipNode:SkeletonClipNode)
 		{
 			super(animator, skeletonClipNode);
 			

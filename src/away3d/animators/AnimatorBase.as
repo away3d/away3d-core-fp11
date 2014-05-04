@@ -348,7 +348,16 @@ package away3d.animators
 		public function dispose():void
 		{
 		}
-		
+
+		/**
+		 * @inheritDoc
+		 */
+		public function testGPUCompatibility(pass:MaterialPassBase):void
+		{
+			throw new AbstractMethodError();
+		}
+
+
 		/**
 		 * @inheritDoc
 		 */

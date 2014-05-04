@@ -1,14 +1,14 @@
 package away3d.animators.states
 {
 	import away3d.animators.data.ParticlePropertiesMode;
+	import away3d.core.pool.RenderableBase;
+
 	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.geom.Vector3D;
-	
+
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleUVNode;
 	import away3d.animators.ParticleAnimator;
@@ -35,7 +35,7 @@ package away3d.animators.states
 			_scale = particleUVNode._scale;
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			if (animationRegisterCache.needUVAnimation) {
 				var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleUVNode.UV_INDEX);

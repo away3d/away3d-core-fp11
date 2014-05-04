@@ -87,7 +87,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase)
+		public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 			throw new AbstractMethodError();
 		}

@@ -1,17 +1,23 @@
 package away3d.animators
 {
+	import away3d.animators.data.VertexAnimationMode;
+	import away3d.animators.states.IVertexAnimationState;
+	import away3d.animators.transitions.IAnimationTransition;
 	import away3d.arcane;
-	import away3d.animators.states.*;
-	import away3d.animators.transitions.*;
-	import away3d.animators.data.*;
+	import away3d.core.TriangleSubMesh;
+	import away3d.core.base.Geometry;
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableBase;
+	import away3d.core.pool.TriangleSubMeshRenderable;
+	import away3d.core.pool.VertexDataPool;
 	import away3d.entities.Camera3D;
-	import away3d.core.base.*;
-	import away3d.core.managers.*;
-	import away3d.materials.passes.*;
-	
-	import flash.display3D.*;
-	
+	import away3d.materials.passes.MaterialPassBase;
+
+	import flash.display3D.Context3DProgramType;
+
 	use namespace arcane;
 	
 	/**
@@ -45,7 +51,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function clone():IAnimator
+		override public function clone():IAnimator
 		{
 			return new VertexAnimator(_vertexAnimationSet);
 		}
@@ -99,7 +105,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
+		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
 			// todo: add code for when running on cpu
 			
@@ -110,8 +116,8 @@ package away3d.animators
 			}
 			
 			// this type of animation can only be SubMesh
-			var subMesh:SubMesh = SubMesh(renderable);
-			var subGeom:ISubGeometry;
+			var subMesh:TriangleSubMesh = renderable as TriangleSubMesh;
+			var subGeom:SubGeometryBase;
 			var i:uint;
 			var len:uint = _numPoses;
 			
@@ -119,35 +125,32 @@ package away3d.animators
 			
 			if (_blendMode == VertexAnimationMode.ABSOLUTE) {
 				i = 1;
-				subGeom = _poses[uint(0)].subGeometries[subMesh._index];
-				// set the base sub-geometry so the material can simply pick up on this data
-				if (subGeom)
-					subMesh.subGeometry = subGeom;
-			} else
+			} else {
 				i = 0;
-			
+			}
+
 			for (; i < len; ++i) {
-				subGeom = _poses[i].subGeometries[subMesh._index] || subMesh.subGeometry;
-				
-				subGeom.activateVertexBuffer(vertexStreamOffset++, stage3DProxy);
+				subGeom = _poses[i].subGeometries[subMesh.index] || subMesh.subGeometry;
+
+				stage3DProxy.activateBuffer(vertexStreamOffset++, VertexDataPool.getItem(subGeom, renderable.getIndexData(), TriangleSubGeometry.POSITION_DATA), subGeom.getOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 				
 				if (_vertexAnimationSet.useNormals)
-					subGeom.activateVertexNormalBuffer(vertexStreamOffset++, stage3DProxy);
+					stage3DProxy.activateBuffer(vertexStreamOffset++, VertexDataPool.getItem(subGeom, renderable.getIndexData(), TriangleSubGeometry.NORMAL_DATA), subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
 				
 			}
 		}
 		
-		private function setNullPose(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int):void
+		private function setNullPose(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int):void
 		{
 			stage3DProxy._context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, vertexConstantOffset, _weights, 1);
 			
 			if (_blendMode == VertexAnimationMode.ABSOLUTE) {
 				var len:uint = _numPoses;
 				for (var i:uint = 1; i < len; ++i) {
-					renderable.activateVertexBuffer(vertexStreamOffset++, stage3DProxy);
+					stage3DProxy.activateBuffer(vertexStreamOffset++, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 					
 					if (_vertexAnimationSet.useNormals)
-						renderable.activateVertexNormalBuffer(vertexStreamOffset++, stage3DProxy);
+						stage3DProxy.activateBuffer(vertexStreamOffset++, renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
 				}
 			}
 			// todo: set temp data for additive?
@@ -157,8 +160,17 @@ package away3d.animators
 		 * Verifies if the animation will be used on cpu. Needs to be true for all passes for a material to be able to use it on gpu.
 		 * Needs to be called if gpu code is potentially required.
 		 */
-		public function testGPUCompatibility(pass:MaterialPassBase):void
+		override public function testGPUCompatibility(pass:MaterialPassBase):void
 		{
+		}
+
+		override public function getRenderableSubGeometry(renderable:IRenderable, sourceSubGeometry:SubGeometryBase):SubGeometryBase
+		{
+			if (_blendMode == VertexAnimationMode.ABSOLUTE && _poses.length) {
+				return _poses[0].subGeometries[(renderable as TriangleSubMeshRenderable).subMesh.index] || sourceSubGeometry;
+			}
+			//nothing to do here
+			return sourceSubGeometry;
 		}
 	}
 }

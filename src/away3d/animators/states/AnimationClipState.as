@@ -1,9 +1,9 @@
 package away3d.animators.states
 {
-	import away3d.animators.*;
-	import away3d.animators.nodes.*;
-	import away3d.events.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.nodes.AnimationClipNodeBase;
+	import away3d.events.AnimationStateEvent;
+
 	/**
 	 *
 	 */
@@ -56,7 +56,7 @@ package away3d.animators.states
 			return _nextFrame;
 		}
 		
-		function AnimationClipState(animator:IAnimator, animationClipNode:AnimationClipNodeBase)
+		function AnimationClipState(animator:AnimatorBase, animationClipNode:AnimationClipNodeBase)
 		{
 			super(animator, animationClipNode);
 			

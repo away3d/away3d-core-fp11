@@ -28,7 +28,7 @@ package away3d.core.pool {
 		public function TriangleSubMeshRenderable(pool:RenderablePool, subMesh:TriangleSubMesh, level:Number = 0, indexOffset:Number = 0) {
 			super(pool, subMesh.parentMesh, subMesh, level, indexOffset);
 
-			subMesh = subMesh;
+			this.subMesh = subMesh;
 		}
 
 		/**

@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.*;
-	import away3d.animators.states.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.states.SkeletonBinaryLERPState;
+
 	/**
 	 * A skeleton animation node that uses two animation node inputs to blend a lineraly interpolated output of a skeleton pose.
 	 */
@@ -29,7 +29,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function getAnimationState(animator:IAnimator):SkeletonBinaryLERPState
+		public function getAnimationState(animator:AnimatorBase):SkeletonBinaryLERPState
 		{
 			return animator.getAnimationState(this) as SkeletonBinaryLERPState;
 		}

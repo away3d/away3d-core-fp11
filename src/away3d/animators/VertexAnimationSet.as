@@ -69,7 +69,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
 		{
 			if (_blendMode == VertexAnimationMode.ABSOLUTE)
 				return getAbsoluteAGALCode(pass, sourceRegisters, targetRegisters);
@@ -80,7 +80,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 			_uploadNormals = Boolean(_useNormals[pass]);
 			_uploadTangents = Boolean(_useTangents[pass]);
@@ -89,7 +89,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 			var index:int = _streamIndices[pass];
 			var context:Context3D = stage3DProxy._context3D;
@@ -103,7 +103,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
 		{
 			return "";
 		}
@@ -111,7 +111,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
+		override public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
 		{
 			return "mov " + UVTarget + "," + UVSource + "\n";
 		}
@@ -119,7 +119,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function doneAGALCode(pass:MaterialPassBase):void
+		override public function doneAGALCode(pass:MaterialPassBase):void
 		{
 		
 		}

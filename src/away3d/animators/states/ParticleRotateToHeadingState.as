@@ -5,8 +5,8 @@ package away3d.animators.states
 	import away3d.animators.nodes.ParticleRotateToHeadingNode;
 	import away3d.animators.nodes.ParticleNodeBase;
 	import away3d.animators.ParticleAnimator;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	
 	import flash.geom.Matrix3D;
@@ -28,10 +28,10 @@ package away3d.animators.states
 			super(animator, particleNode);
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			if (animationRegisterCache.hasBillboard) {
-				_matrix.copyFrom(renderable.sceneTransform);
+				_matrix.copyFrom(renderable.sourceEntity.sceneTransform);
 				_matrix.append(camera.inverseSceneTransform);
 				animationRegisterCache.setVertexConstFromMatrix(animationRegisterCache.getRegisterIndex(_animationNode, ParticleRotateToHeadingNode.MATRIX_INDEX), _matrix);
 			}

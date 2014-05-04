@@ -4,8 +4,8 @@ package away3d.animators.states {
 	import away3d.animators.data.AnimationSubGeometry;
 	import away3d.animators.nodes.ParticleSegmentedScaleNode;
 	import away3d.animators.ParticleAnimator;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import flash.geom.Vector3D;
 	
@@ -83,7 +83,7 @@ package away3d.animators.states {
 			updateScaleData();
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D) : void
 		{
 			animationRegisterCache.setVertexConstFromVector(animationRegisterCache.getRegisterIndex(_animationNode, ParticleSegmentedScaleNode.START_INDEX), _scaleData);
 		}

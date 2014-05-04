@@ -1,10 +1,10 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.states.*;
-	import away3d.core.base.*;
-	
-	import flash.geom.*;
-	
+	import away3d.animators.states.VertexClipState;
+	import away3d.core.base.Geometry;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 * A vertex animation node containing time-based animation data as individual geometry obejcts.
 	 */

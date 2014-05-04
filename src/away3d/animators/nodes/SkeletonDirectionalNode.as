@@ -1,8 +1,8 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.*;
-	import away3d.animators.states.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.states.SkeletonDirectionalState;
+
 	/**
 	 * A skeleton animation node that uses four directional input poses with an input direction to blend a linearly interpolated output of a skeleton pose.
 	 */
@@ -36,7 +36,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function getAnimationState(animator:IAnimator):SkeletonDirectionalState
+		public function getAnimationState(animator:AnimatorBase):SkeletonDirectionalState
 		{
 			return animator.getAnimationState(this) as SkeletonDirectionalState;
 		}

@@ -1,10 +1,11 @@
 package away3d.animators.states
 {
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.SpriteSheetAnimator;
+	import away3d.animators.data.SpriteSheetAnimationFrame;
+	import away3d.animators.nodes.SpriteSheetClipNode;
 	import away3d.arcane;
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	
+
 	use namespace arcane;
 	
 	public class SpriteSheetAnimationState extends AnimationClipState implements ISpriteSheetAnimationState
@@ -17,7 +18,7 @@ package away3d.animators.states
 		private var _backAndForth:Boolean;
 		private var _forcedFrame:Boolean;
 		
-		function SpriteSheetAnimationState(animator:IAnimator, clipNode:SpriteSheetClipNode)
+		function SpriteSheetAnimationState(animator:AnimatorBase, clipNode:SpriteSheetClipNode)
 		{
 			super(animator, clipNode);
 			

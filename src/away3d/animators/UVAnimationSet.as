@@ -24,7 +24,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
+		override public function getAGALVertexCode(pass:MaterialPassBase, sourceRegisters:Vector.<String>, targetRegisters:Vector.<String>, profile:String):String
 		{
 			var len:uint = targetRegisters.length;
 			_agalCode = "";
@@ -37,14 +37,14 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function activate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
+		override public function deactivate(stage3DProxy:Stage3DProxy, pass:MaterialPassBase):void
 		{
 			var context:Context3D = stage3DProxy.context3D;
 			context.setVertexBufferAt(0, null);
@@ -53,7 +53,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
+		override public function getAGALFragmentCode(pass:MaterialPassBase, shadedTarget:String, profile:String):String
 		{
 			return "";
 		}
@@ -61,7 +61,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
+		override public function getAGALUVCode(pass:MaterialPassBase, UVSource:String, UVTarget:String):String
 		{
 			var tempUV:String = "vt" + UVSource.substring(2, 3);
 			var idConstant:int = pass.numUsedVertexConstants;
@@ -81,7 +81,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function doneAGALCode(pass:MaterialPassBase):void
+		override public function doneAGALCode(pass:MaterialPassBase):void
 		{
 		}
 	}

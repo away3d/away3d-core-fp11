@@ -1,5 +1,7 @@
 package away3d.animators.states
 {
+	import away3d.core.pool.RenderableBase;
+
 	import flash.geom.Matrix3D;
 	
 	import away3d.animators.data.ParticlePropertiesMode;
@@ -10,7 +12,6 @@ package away3d.animators.states
 	import away3d.entities.Camera3D;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.data.AnimationSubGeometry;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.animators.nodes.ParticleOrbitNode;
 	import away3d.animators.ParticleAnimator;
@@ -111,7 +112,7 @@ package away3d.animators.states
 			updateOrbitData();
 		}
 		
-		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, animationSubGeometry:AnimationSubGeometry, animationRegisterCache:AnimationRegisterCache, camera:Camera3D):void
 		{
 			var index:int = animationRegisterCache.getRegisterIndex(_animationNode, ParticleOrbitNode.ORBIT_INDEX);
 			

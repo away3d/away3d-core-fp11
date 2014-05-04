@@ -1,11 +1,13 @@
 package away3d.animators.states
 {
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.nodes.*;
-	
-	import flash.geom.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.JointPose;
+	import away3d.animators.data.Skeleton;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.nodes.SkeletonDirectionalNode;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 *
 	 */
@@ -46,7 +48,7 @@ package away3d.animators.states
 			return _direction;
 		}
 		
-		function SkeletonDirectionalState(animator:IAnimator, skeletonAnimationNode:SkeletonDirectionalNode)
+		function SkeletonDirectionalState(animator:AnimatorBase, skeletonAnimationNode:SkeletonDirectionalNode)
 		{
 			super(animator, skeletonAnimationNode);
 			

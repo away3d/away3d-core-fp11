@@ -1,9 +1,9 @@
 package away3d.animators.nodes
 {
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.states.SkeletonNaryLERPState;
 	import away3d.arcane;
-	import away3d.animators.*;
-	import away3d.animators.states.*;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -58,7 +58,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function getAnimationState(animator:IAnimator):SkeletonNaryLERPState
+		public function getAnimationState(animator:AnimatorBase):SkeletonNaryLERPState
 		{
 			return animator.getAnimationState(this) as SkeletonNaryLERPState;
 		}

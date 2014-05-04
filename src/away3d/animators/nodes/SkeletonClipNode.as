@@ -1,11 +1,11 @@
 package away3d.animators.nodes
 {
-	import away3d.animators.*;
-	import away3d.animators.data.*;
-	import away3d.animators.states.*;
-	
-	import flash.geom.*;
-	
+	import away3d.animators.AnimatorBase;
+	import away3d.animators.data.SkeletonPose;
+	import away3d.animators.states.SkeletonClipState;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 * A skeleton animation node containing time-based animation data as individual skeleton poses.
 	 */
@@ -54,7 +54,7 @@ package away3d.animators.nodes
 		/**
 		 * @inheritDoc
 		 */
-		public function getAnimationState(animator:IAnimator):SkeletonClipState
+		public function getAnimationState(animator:AnimatorBase):SkeletonClipState
 		{
 			return animator.getAnimationState(this) as SkeletonClipState;
 		}
