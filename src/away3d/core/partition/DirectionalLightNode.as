@@ -1,42 +1,32 @@
 package away3d.core.partition
 {
-	import away3d.core.traverse.PartitionTraverser;
-	import away3d.lights.DirectionalLight;
-	
+	import away3d.core.traverse.ICollector;
+	import away3d.entities.IEntity;
+
 	/**
 	 * LightNode is a space partitioning leaf node that contains a LightBase object.
 	 */
 	public class DirectionalLightNode extends EntityNode
 	{
-		private var _light:DirectionalLight;
+		private var _light:IEntity;
 		
 		/**
 		 * Creates a new LightNode object.
-		 * @param light The light to be contained in the node.
+		 * @param directionalLight The light to be contained in the node.
 		 */
-		public function DirectionalLightNode(directionalLight:DirectionalLight)
+		public function DirectionalLightNode(directionalLight:IEntity)
 		{
 			super(directionalLight);
-			_light = light;
+			_light = directionalLight;
 		}
-		
-		/**
-		 * The light object contained in this node.
-		 */
-		public function get light():DirectionalLight
-		{
-			return _light;
-		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		override public function acceptTraverser(traverser:PartitionTraverser):void
+		override public function acceptTraverser(traverser:ICollector):void
 		{
-			if (traverser.enterNode(this)) {
-				super.acceptTraverser(traverser);
-				traverser.applyDirectionalLight(_light);
-			}
+			//do not run frustum checks on lights
+			traverser.applyDirectionalLight(_light);
 		}
 	}
 }

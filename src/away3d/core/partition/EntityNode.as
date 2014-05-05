@@ -2,6 +2,7 @@ package away3d.core.partition
 {
 	import away3d.arcane;
 	import away3d.core.math.Plane3D;
+	import away3d.core.traverse.ICollector;
 	import away3d.core.traverse.PartitionTraverser;
 	import away3d.entities.IEntity;
 
@@ -49,7 +50,7 @@ package away3d.core.partition
 		/**
 		 * @inheritDoc
 		 */
-		override public function acceptTraverser(traverser:PartitionTraverser):void
+		override public function acceptTraverser(traverser:ICollector):void
 		{
 			traverser.applyEntity(_entity);
 		}

@@ -2,9 +2,6 @@ package away3d.lights
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.pool.IRenderable;
-	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.LightNode;
 	import away3d.entities.Camera3D;
 	import away3d.entities.IEntity;
 	import away3d.errors.AbstractMethodError;

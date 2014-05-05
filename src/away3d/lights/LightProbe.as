@@ -3,7 +3,6 @@ package away3d.lights
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.bounds.NullBounds;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.LightProbeNode;
 	import away3d.core.render.IRenderer;
@@ -15,7 +14,7 @@ package away3d.lights
 	
 	use namespace arcane;
 	
-	public class LightProbe extends LightBase
+	public class LightProbe extends LightBase implements IEntity
 	{
 		private var _diffuseMap:CubeTextureBase;
 		private var _specularMap:CubeTextureBase;

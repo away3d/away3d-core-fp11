@@ -6,11 +6,7 @@ package away3d.core.traverse
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.IEntity;
 	import away3d.errors.AbstractMethodError;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.LightProbe;
-	import away3d.lights.PointLight;
-	
+
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -69,22 +65,22 @@ package away3d.core.traverse
 		/**
 		 * Passes a light to be processed by the traverser.
 		 */
-		public function applyUnknownLight(light:LightBase):void
+		public function applyUnknownLight(light:IEntity):void
 		{
 			throw new AbstractMethodError();
 		}
 		
-		public function applyDirectionalLight(light:DirectionalLight):void
+		public function applyDirectionalLight(light:IEntity):void
 		{
 			throw new AbstractMethodError();
 		}
 		
-		public function applyPointLight(light:PointLight):void
+		public function applyPointLight(light:IEntity):void
 		{
 			throw new AbstractMethodError();
 		}
 		
-		public function applyLightProbe(light:LightProbe):void
+		public function applyLightProbe(light:IEntity):void
 		{
 			throw new AbstractMethodError();
 		}

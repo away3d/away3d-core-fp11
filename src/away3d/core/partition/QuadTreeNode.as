@@ -3,8 +3,8 @@ package away3d.core.partition
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.math.Plane3D;
-	import away3d.entities.Entity;
-	
+	import away3d.entities.IEntity;
+
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -63,11 +63,11 @@ package away3d.core.partition
 			return true;
 		}
 		
-		override public function findPartitionForEntity(entity:Entity):NodeBase
+		override public function findPartitionForEntity(entity:IEntity):NodeBase
 		{
-			var bounds:BoundingVolumeBase = entity.worldBounds;
-			var min:Vector3D = bounds.min;
-			var max:Vector3D = bounds.max;
+			var bounds:BoundingVolumeBase = entity.bounds;
+			var min:Vector3D = bounds.aabb.min;
+			var max:Vector3D = bounds.aabb.max;
 			return findPartitionForBounds(min.x, min.z, max.x, max.z);
 		}
 		

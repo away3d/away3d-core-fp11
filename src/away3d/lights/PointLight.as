@@ -22,7 +22,7 @@ package away3d.lights
 	/**
 	 * PointLight represents an omni-directional light. The light is emitted from a given position in the scene.
 	 */
-	public class PointLight extends LightBase
+	public class PointLight extends LightBase implements IEntity
 	{
 		//private static var _pos : Vector3D = new Vector3D();
 		arcane var _radius:Number = 90000;
