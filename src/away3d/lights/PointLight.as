@@ -3,10 +3,14 @@ package away3d.lights
 	import away3d.arcane;
 	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
+	import away3d.core.math.Box;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.PointLightNode;
+	import away3d.core.render.IRenderer;
+	import away3d.entities.Camera3D;
+	import away3d.entities.IEntity;
 	import away3d.lights.shadowmaps.CubeMapShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	
@@ -103,7 +107,7 @@ package away3d.lights
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getDefaultBoundingVolume():BoundingVolumeBase
+		protected function getDefaultBoundingVolume():BoundingVolumeBase
 		{
 			return new BoundingSphere();
 		}
@@ -111,29 +115,31 @@ package away3d.lights
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
+		override arcane function getObjectProjectionMatrix(entity:IEntity, camera:Camera3D, target:Matrix3D = null):Matrix3D
 		{
 			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			var bounds:BoundingVolumeBase = renderable.sourceEntity.bounds;
+			var bounds:BoundingVolumeBase = entity.bounds;
 			var m:Matrix3D = new Matrix3D();
 			
 			// todo: do not use lookAt on Light
-			m.copyFrom(renderable.sceneTransform);
+			m.copyFrom(entity.getRenderSceneTransform(camera));
 			m.append(_parent.inverseSceneTransform);
 			lookAt(m.position);
 			
-			m.copyFrom(renderable.sceneTransform);
+			m.copyFrom(entity.getRenderSceneTransform(camera));
 			m.append(inverseSceneTransform);
-			m.copyColumnTo(3, _pos);
-			
-			var v1:Vector3D = m.deltaTransformVector(bounds.min);
-			var v2:Vector3D = m.deltaTransformVector(bounds.max);
-			var z:Number = _pos.z;
+
+			var box:Box = bounds.aabb;
+			var v1:Vector3D = m.deltaTransformVector(new Vector3D(box.left, box.bottom, box.front));
+			var v2:Vector3D = m.deltaTransformVector(new Vector3D(box.right, box.top, box.back));
+
 			var d1:Number = v1.x*v1.x + v1.y*v1.y + v1.z*v1.z;
 			var d2:Number = v2.x*v2.x + v2.y*v2.y + v2.z*v2.z;
 			var d:Number = Math.sqrt(d1 > d2? d1 : d2);
-			var zMin:Number, zMax:Number;
-			
+			var zMin:Number;
+			var zMax:Number;
+
+			var z:Number = m.rawData[14];
 			zMin = z - d;
 			zMax = z + d;
 			
@@ -150,6 +156,11 @@ package away3d.lights
 			target.prepend(m);
 			
 			return target;
+		}
+
+		public function collectRenderables(renderer:IRenderer):void
+		{
+			//nothing to do here
 		}
 	}
 }

@@ -3,6 +3,7 @@ package away3d.lights.shadowmaps
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
 	import away3d.projections.FreeMatrixProjection;
+	import away3d.projections.IProjection;
 	import away3d.projections.ProjectionBase;
 	import away3d.containers.Scene3D;
 	import away3d.core.math.Matrix3DUtils;
@@ -150,7 +151,7 @@ package away3d.lights.shadowmaps
 		override protected function updateDepthProjection(viewCamera:Camera3D):void
 		{
 			var matrix:Matrix3D;
-			var lens:ProjectionBase = viewCamera.projection;
+			var lens:IProjection = viewCamera.projection;
 			var lensNear:Number = lens.near;
 			var lensRange:Number = lens.far - lensNear;
 			

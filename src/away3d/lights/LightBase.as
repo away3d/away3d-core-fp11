@@ -5,6 +5,8 @@ package away3d.lights
 	import away3d.core.pool.IRenderable;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.LightNode;
+	import away3d.entities.Camera3D;
+	import away3d.entities.IEntity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.LightEvent;
 	import away3d.library.assets.AssetType;
@@ -174,11 +176,12 @@ package away3d.lights
 		/**
 		 * Gets the optimal projection matrix to render a light-based depth map for a single object.
 		 *
-		 * @param renderable The IRenderable object to render to a depth map.
+		 * @param entity The IEntity object to render to a depth map.
+		 * @param camera The Camera3D object
 		 * @param target An optional target Matrix3D object. If not provided, an instance will be created.
 		 * @return A Matrix3D object containing the projection transformation.
 		 */
-		arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
+		arcane function getObjectProjectionMatrix(entity:IEntity, camera:Camera3D, target:Matrix3D = null):Matrix3D
 		{
 			throw new AbstractMethodError();
 		}

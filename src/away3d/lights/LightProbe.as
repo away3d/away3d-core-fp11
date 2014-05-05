@@ -6,6 +6,9 @@ package away3d.lights
 	import away3d.core.pool.IRenderable;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.LightProbeNode;
+	import away3d.core.render.IRenderer;
+	import away3d.entities.Camera3D;
+	import away3d.entities.IEntity;
 	import away3d.textures.CubeTextureBase;
 	
 	import flash.geom.Matrix3D;
@@ -64,7 +67,7 @@ package away3d.lights
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getDefaultBoundingVolume():BoundingVolumeBase
+		protected function getDefaultBoundingVolume():BoundingVolumeBase
 		{
 			// todo: consider if this can be culled?
 			return new NullBounds();
@@ -73,14 +76,15 @@ package away3d.lights
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
+		override arcane function getObjectProjectionMatrix(entity:IEntity, camera:Camera3D, target:Matrix3D = null):Matrix3D
 		{
-			// TODO: not used
-			renderable = renderable;
-			target = target;
-			
 			throw new Error("Object projection matrices are not supported for LightProbe objects!");
 			return null;
+		}
+
+		public function collectRenderables(renderer:IRenderer):void
+		{
+			//nothing to do here
 		}
 	}
 }

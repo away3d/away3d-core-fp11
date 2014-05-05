@@ -3,10 +3,11 @@
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.bounds.NullBounds;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.DirectionalLightNode;
 	import away3d.core.partition.EntityNode;
+	import away3d.core.render.IRenderer;
+	import away3d.entities.Camera3D;
 	import away3d.entities.IEntity;
 	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
@@ -79,7 +80,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		override protected function getDefaultBoundingVolume():BoundingVolumeBase
+		protected function getDefaultBoundingVolume():BoundingVolumeBase
 		{
 			// directional lights are to be considered global, hence always in view
 			return new NullBounds();
@@ -106,17 +107,24 @@
 		{
 			return new DirectionalShadowMapper();
 		}
-		
+
+		/**
+		 * @protected
+		 */
+		override protected function createEntityPartitionNode():EntityNode
+		{
+			return new DirectionalLightNode(this);
+		}
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
+		override arcane function getObjectProjectionMatrix(entity:IEntity, camera:Camera3D, target:Matrix3D = null):Matrix3D
 		{
 			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-			var bounds:BoundingVolumeBase = renderable.sourceEntity.bounds;
+			var bounds:BoundingVolumeBase = entity.bounds;
 			var m:Matrix3D = new Matrix3D();
 			
-			m.copyFrom(renderable.sceneTransform);
+			m.copyFrom(entity.getRenderSceneTransform(camera));
 			m.append(inverseSceneTransform);
 			
 			if (!_projAABBPoints)
@@ -162,6 +170,11 @@
 			target.prepend(m);
 			
 			return target;
+		}
+
+		public function collectRenderables(renderer:IRenderer):void
+		{
+			//nothing to do here
 		}
 	}
 }
