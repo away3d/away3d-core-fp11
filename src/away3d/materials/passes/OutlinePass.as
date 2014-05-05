@@ -1,23 +1,23 @@
 package away3d.materials.passes
 {
 	import away3d.arcane;
-	import away3d.entities.Camera3D;
+	import away3d.core.TriangleSubMesh;
 	import away3d.core.base.Geometry;
-	import away3d.core.pool.IRenderable;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.pool.RenderableBase;
+	import away3d.core.pool.TriangleSubMeshRenderable;
+	import away3d.entities.Camera3D;
 	import away3d.entities.Mesh;
-	
+
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTriangleFace;
 	import flash.geom.Matrix3D;
 	import flash.utils.Dictionary;
-	
+
 	use namespace arcane;
 
 	/**
@@ -196,29 +196,31 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
-			var mesh:Mesh, dedicatedRenderable:IRenderable;
+			var mesh:Mesh;
+			var dedicatedRenderable:RenderableBase;
 			
 			var context:Context3D = stage3DProxy._context3D;
 			var matrix3D:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			matrix3D.copyFrom(renderable.getRenderSceneTransform(camera));
+			matrix3D.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
 			matrix3D.append(viewProjection);
 			
 			if (_dedicatedMeshes) {
-				mesh = _outlineMeshes[renderable] ||= createDedicatedMesh(SubMesh(renderable).subGeometry);
-				dedicatedRenderable = mesh.subMeshes[0];
+				mesh = _outlineMeshes[renderable] ||= createDedicatedMesh(renderable);
+
+				dedicatedRenderable = new TriangleSubMeshRenderable(null,mesh.subMeshes[0] as TriangleSubMesh);
 				
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
-				dedicatedRenderable.activateVertexBuffer(0, stage3DProxy);
-				dedicatedRenderable.activateVertexNormalBuffer(1, stage3DProxy);
-				context.drawTriangles(dedicatedRenderable.getIndexBuffer(stage3DProxy), 0, dedicatedRenderable.numTriangles);
+				stage3DProxy.activateBuffer(0, dedicatedRenderable.getVertexData(TriangleSubGeometry.POSITION_DATA), dedicatedRenderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				stage3DProxy.activateBuffer(1, dedicatedRenderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), dedicatedRenderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+				context.drawTriangles(stage3DProxy.getIndexBuffer(dedicatedRenderable.getIndexData()), 0, dedicatedRenderable.numTriangles);
 			} else {
-				renderable.activateVertexNormalBuffer(1, stage3DProxy);
+				stage3DProxy.activateBuffer(1, renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
 				
 				context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix3D, true);
-				renderable.activateVertexBuffer(0, stage3DProxy);
-				context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
+				stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 			}
 		}
 
@@ -228,13 +230,14 @@ package away3d.materials.passes
 		 *
 		 * @param source The ISubGeometry object for which to generate a dedicated mesh.
 		 */
-		private function createDedicatedMesh(source:ISubGeometry):Mesh
+		private function createDedicatedMesh(source:RenderableBase):Mesh
 		{
 			var mesh:Mesh = new Mesh(new Geometry(), null);
-			var dest:SubGeometry = new SubGeometry();
+			var dest:TriangleSubGeometry = new TriangleSubGeometry(true);
+			//TODO: test OutlinePass
 			var indexLookUp:Array = [];
-			var srcIndices:Vector.<uint> = source.indexData;
-			var srcVertices:Vector.<Number> = source.vertexData;
+			var srcIndices:Vector.<uint> = source.getIndexData().data;
+			var srcVertices:Vector.<Number> = source.getVertexData(TriangleSubGeometry.POSITION_DATA).data;
 			var dstIndices:Vector.<uint> = new Vector.<uint>();
 			var dstVertices:Vector.<Number> = new Vector.<Number>();
 			var index:int;
@@ -244,14 +247,12 @@ package away3d.materials.passes
 			var vertexCount:int;
 			var len:int = srcIndices.length;
 			var maxIndex:int;
-			var stride:int = source.vertexStride;
-			var offset:int = source.vertexOffset;
-			
+
 			for (var i:int = 0; i < len; ++i) {
-				index = offset + srcIndices[i]*stride;
-				x = srcVertices[index];
-				y = srcVertices[index + 1];
-				z = srcVertices[index + 2];
+				index = srcIndices[i];
+				x = srcVertices[index*3];
+				y = srcVertices[index*3 + 1];
+				z = srcVertices[index*3 + 2];
 				key = x.toPrecision(5) + "/" + y.toPrecision(5) + "/" + z.toPrecision(5);
 				
 				if (indexLookUp[key])
@@ -269,9 +270,8 @@ package away3d.materials.passes
 				dstIndices[indexCount++] = index;
 			}
 			
-			dest.autoDeriveVertexNormals = true;
-			dest.updateVertexData(dstVertices);
-			dest.updateIndexData(dstIndices);
+			dest.updatePositions(dstVertices);
+			dest.updateIndices(dstIndices);
 			mesh.geometry.addSubGeometry(dest);
 			return mesh;
 		}

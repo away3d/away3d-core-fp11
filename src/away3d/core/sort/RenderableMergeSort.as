@@ -1,7 +1,7 @@
 package away3d.core.sort
 {
 	import away3d.arcane;
-	import away3d.core.pool.RenderableListItem;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.traverse.EntityCollector;
 	
 	use namespace arcane;
@@ -20,20 +20,11 @@ package away3d.core.sort
 		public function RenderableMergeSort()
 		{
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		public function sort(collector:EntityCollector):void
+
+		public function sortBlendedRenderables(head:IRenderable):IRenderable
 		{
-			collector.opaqueRenderableHead = mergeSortByMaterial(collector.opaqueRenderableHead);
-			collector.blendedRenderableHead = mergeSortByDepth(collector.blendedRenderableHead);
-		}
-		
-		private function mergeSortByDepth(head:RenderableListItem):RenderableListItem
-		{
-			var headB:RenderableListItem;
-			var fast:RenderableListItem, slow:RenderableListItem;
+			var headB:IRenderable;
+			var fast:IRenderable, slow:IRenderable;
 			
 			if (!head || !head.next)
 				return head;
@@ -54,13 +45,13 @@ package away3d.core.sort
 			slow.next = null;
 			
 			// recurse
-			head = mergeSortByDepth(head);
-			headB = mergeSortByDepth(headB);
+			head = sortBlendedRenderables(head);
+			headB = sortBlendedRenderables(headB);
 			
 			// merge sublists while respecting order
-			var result:RenderableListItem;
-			var curr:RenderableListItem;
-			var l:RenderableListItem;
+			var result:IRenderable;
+			var curr:IRenderable;
+			var l:IRenderable;
 			
 			if (!head)
 				return headB;
@@ -92,10 +83,10 @@ package away3d.core.sort
 			return result;
 		}
 		
-		private function mergeSortByMaterial(head:RenderableListItem):RenderableListItem
+		public function sortOpaqueRenderables(head:IRenderable):IRenderable
 		{
-			var headB:RenderableListItem;
-			var fast:RenderableListItem, slow:RenderableListItem;
+			var headB:IRenderable;
+			var fast:IRenderable, slow:IRenderable;
 			
 			if (!head || !head.next)
 				return head;
@@ -116,13 +107,13 @@ package away3d.core.sort
 			slow.next = null;
 			
 			// recurse
-			head = mergeSortByMaterial(head);
-			headB = mergeSortByMaterial(headB);
+			head = sortOpaqueRenderables(head);
+			headB = sortOpaqueRenderables(headB);
 			
 			// merge sublists while respecting order
-			var result:RenderableListItem;
-			var curr:RenderableListItem;
-			var l:RenderableListItem;
+			var result:IRenderable;
+			var curr:IRenderable;
+			var l:IRenderable;
 			var cmp:int;
 			
 			if (!head)

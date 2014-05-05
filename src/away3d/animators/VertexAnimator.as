@@ -105,7 +105,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
 			// todo: add code for when running on cpu
 			

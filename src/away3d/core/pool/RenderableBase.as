@@ -96,7 +96,7 @@ package away3d.core.pool {
 		 */
 		public function RenderableBase(pool:RenderablePool, sourceEntity:IEntity, materialOwner:IMaterialOwner, level:Number = 0, indexOffset:Number = 0) {
 			//store a reference to the pool for later disposal
-			pool = pool;
+			this.pool = pool;
 
 			//reference to level of overflow
 			_level = level;

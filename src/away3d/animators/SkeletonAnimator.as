@@ -192,7 +192,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
 			// do on request of globalProperties
 			if (_globalPropertiesDirty)

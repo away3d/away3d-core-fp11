@@ -83,7 +83,6 @@ package away3d.core.render
 		protected var _width:Number;
 		protected var _height:Number;
 
-		protected var _antiAlias:uint;
 		protected var _renderToTexture:Boolean;
 		protected var _textureRatioX:Number = 1;
 		protected var _textureRatioY:Number = 1;
@@ -538,16 +537,6 @@ package away3d.core.render
 		{
 			return _backgroundImageRenderer;
 		}
-
-		public function get antiAlias():uint
-		{
-			return _antiAlias;
-		}
-		
-		public function set antiAlias(antiAlias:uint):void
-		{
-			_antiAlias = antiAlias;
-		}
 		
 		arcane function get textureRatioX():Number
 		{
@@ -713,6 +702,16 @@ package away3d.core.render
 
 		public function get renderableSorter():IEntitySorter {
 			return _renderableSorter;
+		}
+
+		public function get depthPrepass():Boolean
+		{
+			return _depthPrepass;
+		}
+
+		public function set depthPrepass(value:Boolean):void
+		{
+			_depthPrepass = value;
 		}
 	}
 }

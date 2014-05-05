@@ -1,16 +1,16 @@
 ﻿package away3d.materials.passes
 {
 	import away3d.arcane;
-	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
+	import away3d.core.base.LineSubGeometry;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.entities.LineSegment;
-	
+	import away3d.core.pool.RenderableBase;
+	import away3d.entities.Camera3D;
+
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.geom.Matrix3D;
-	
+
 	use namespace arcane;
 
 	/**
@@ -32,12 +32,12 @@
 		 */
 		public function SegmentPass(thickness:Number)
 		{
+			super();
+
 			_calcMatrix = new Matrix3D();
 			
 			_thickness = thickness;
 			_constants[1] = 1/255;
-			
-			super();
 		}
 		
 		/**
@@ -118,21 +118,19 @@
 		 * @inheritDoc
 		 * todo: keep maps in dictionary per renderable
 		 */
-		arcane override function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var context:Context3D = stage3DProxy._context3D;
 			_calcMatrix.copyFrom(renderable.sourceEntity.sceneTransform);
 			_calcMatrix.append(camera.inverseSceneTransform);
-			
-			var subSetCount:uint = LineSegment(renderable).subSetCount;
-			
-			if (LineSegment(renderable).hasData) {
-				for (var i:uint = 0; i < subSetCount; ++i) {
-					renderable.activateVertexBuffer(i, stage3DProxy);
-					context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 8, _calcMatrix, true);
-					context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
-				}
-			}
+			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 8, _calcMatrix, true);
+
+			stage3DProxy.activateBuffer(0, renderable.getVertexData(LineSubGeometry.START_POSITION_DATA), renderable.getVertexOffset(LineSubGeometry.START_POSITION_DATA), LineSubGeometry.POSITION_FORMAT);
+			stage3DProxy.activateBuffer(1, renderable.getVertexData(LineSubGeometry.END_POSITION_DATA), renderable.getVertexOffset(LineSubGeometry.END_POSITION_DATA), LineSubGeometry.POSITION_FORMAT);
+			stage3DProxy.activateBuffer(2, renderable.getVertexData(LineSubGeometry.THICKNESS_DATA), renderable.getVertexOffset(LineSubGeometry.THICKNESS_DATA), LineSubGeometry.THICKNESS_FORMAT);
+			stage3DProxy.activateBuffer(3, renderable.getVertexData(LineSubGeometry.COLOR_DATA), renderable.getVertexOffset(LineSubGeometry.COLOR_DATA), LineSubGeometry.COLOR_FORMAT);
+
+			context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
 		
 		/**

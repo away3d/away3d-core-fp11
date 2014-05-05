@@ -1,6 +1,8 @@
 package away3d.materials.passes
 {
 	import away3d.arcane;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -588,21 +590,26 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var i:uint;
 			var context:Context3D = stage3DProxy._context3D;
-			if (_uvBufferIndex >= 0)
-				renderable.activateUVBuffer(_uvBufferIndex, stage3DProxy);
+			if (this._uvBufferIndex >= 0)
+				stage3DProxy.activateBuffer(_uvBufferIndex, renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
+
 			if (_secondaryUVBufferIndex >= 0)
-				renderable.activateSecondaryUVBuffer(_secondaryUVBufferIndex, stage3DProxy);
+				stage3DProxy.activateBuffer(_secondaryUVBufferIndex, renderable.getVertexData(TriangleSubGeometry.SECONDARY_UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.SECONDARY_UV_DATA), TriangleSubGeometry.SECONDARY_UV_FORMAT);
+
 			if (_normalBufferIndex >= 0)
-				renderable.activateVertexNormalBuffer(_normalBufferIndex, stage3DProxy);
+				stage3DProxy.activateBuffer(_normalBufferIndex, renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+
+
 			if (_tangentBufferIndex >= 0)
-				renderable.activateVertexTangentBuffer(_tangentBufferIndex, stage3DProxy);
-			
+				stage3DProxy.activateBuffer(_tangentBufferIndex, renderable.getVertexData(TriangleSubGeometry.TANGENT_DATA), renderable.getVertexOffset(TriangleSubGeometry.TANGENT_DATA), TriangleSubGeometry.TANGENT_FORMAT);
+
+
 			if (_animateUVs) {
-				var uvTransform:Matrix = renderable.uvTransform;
+				var uvTransform:Matrix = renderable.materialOwner.uvTransform.matrix;
 				if (uvTransform) {
 					_vertexConstantData[_uvTransformIndex] = uvTransform.a;
 					_vertexConstantData[_uvTransformIndex + 1] = uvTransform.b;
@@ -629,17 +636,17 @@ package away3d.materials.passes
 				updateProbes(stage3DProxy);
 			
 			if (_sceneMatrixIndex >= 0) {
-				renderable.getRenderSceneTransform(camera).copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
+				renderable.sourceEntity.getRenderSceneTransform(camera).copyRawDataTo(_vertexConstantData, _sceneMatrixIndex, true);
 				viewProjection.copyRawDataTo(_vertexConstantData, 0, true);
 			} else {
 				var matrix3D:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-				matrix3D.copyFrom(renderable.getRenderSceneTransform(camera));
+				matrix3D.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
 				matrix3D.append(viewProjection);
 				matrix3D.copyRawDataTo(_vertexConstantData, 0, true);
 			}
 			
 			if (_sceneNormalMatrixIndex >= 0)
-				renderable.inverseSceneTransform.copyRawDataTo(_vertexConstantData, _sceneNormalMatrixIndex, false);
+				renderable.sourceEntity.inverseSceneTransform.copyRawDataTo(_vertexConstantData, _sceneNormalMatrixIndex, false);
 			
 			if (_usesNormals)
 				_methodSetup._normalMethod.setRenderState(_methodSetup._normalMethodVO, renderable, stage3DProxy, camera);
@@ -667,9 +674,9 @@ package away3d.materials.passes
 			
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 0, _vertexConstantData, _numUsedVertexConstants);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentConstantData, _numUsedFragmentConstants);
-			
-			renderable.activateVertexBuffer(0, stage3DProxy);
-			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
+
+			stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+			context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
 
 		/**

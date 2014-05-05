@@ -1,13 +1,14 @@
 package away3d.core.render
 {
 	import away3d.arcane;
+	import away3d.core.managers.RTTBufferManager;
+	import away3d.core.managers.Stage3DManager;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
-	import away3d.core.pool.RenderableListItem;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.filters.Filter3DBase;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
@@ -16,6 +17,7 @@ package away3d.core.render
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;
 	import flash.geom.Rectangle;
@@ -29,26 +31,103 @@ package away3d.core.render
 	 */
 	public class DefaultRenderer extends RendererBase
 	{
-		private static var RTT_PASSES:int = 1;
-		private static var SCREEN_PASSES:int = 2;
-		private static var ALL_PASSES:int = 3;
+		protected var _requireDepthRender:Boolean;
+
+		private static const RTT_PASSES:int = 1;
+		private static const SCREEN_PASSES:int = 2;
+		private static const ALL_PASSES:int = 3;
+
 		private var _activeMaterial:MaterialBase;
 		private var _distanceRenderer:DepthRenderer;
 		private var _depthRenderer:DepthRenderer;
 		private var _skyboxProjection:Matrix3D = new Matrix3D();
+
 		private var _tempSkyboxMatrix:Matrix3D = new Matrix3D();
 		private var _skyboxTempVector:Vector3D = new Vector3D();
+		protected var filter3DRenderer:Filter3DRenderer;
+		protected var depthRender:Texture;
+
+		private var _forceSoftware:Boolean;
+		private var _profile:String;
+		private var _antiAlias:Number;
+
+		public function get antiAlias():Number
+		{
+			return _antiAlias;
+		}
+
+		public function set antiAlias(value:Number):void
+		{
+			if (_antiAlias == value)
+				return;
+
+			_antiAlias = value;
+
+			_backBufferInvalid = true;
+		}
+
+		/**
+		 *
+		 * @returns {*}
+		 */
+		public function get filters3d():Vector.<Filter3DBase>
+		{
+			return filter3DRenderer? filter3DRenderer.filters : null;
+		}
+		public function set filters3d(value:Vector.<Filter3DBase>):void
+		{
+			if (value && value.length == 0)
+				value = null;
+	
+			if (filter3DRenderer && !value) {
+				filter3DRenderer.dispose();
+				filter3DRenderer = null;
+			} else if (!filter3DRenderer && value) {
+				filter3DRenderer = new Filter3DRenderer(_stage3DProxy);
+				filter3DRenderer.filters = value;
+			}
+	
+			if (filter3DRenderer) {
+				filter3DRenderer.filters = value;
+				_requireDepthRender = filter3DRenderer.requireDepthRender;
+			} else {
+				_requireDepthRender = false;
+	
+				if (depthRender) {
+					depthRender.dispose();
+					depthRender = null;
+				}
+			}
+		}
 
 		/**
 		 * Creates a new DefaultRenderer object.
 		 * @param antiAlias The amount of anti-aliasing to use.
 		 * @param renderMode The render mode to use.
 		 */
-		public function DefaultRenderer()
+		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline")
 		{
 			super();
 			_depthRenderer = new DepthRenderer();
 			_distanceRenderer = new DepthRenderer(false, true);
+
+			if (_stage3DProxy == null)
+				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
+
+			_forceSoftware = forceSoftware;
+			_profile = profile;
+
+			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
+
+			if (_width == 0)
+				width = stage.innerWidth;
+			else
+				_pRttBufferManager.viewWidth = _width;
+
+			if (_height == 0)
+				height = window.innerHeight;
+			else
+				_pRttBufferManager.viewHeight = _height;
 		}
 
 		arcane override function set stage3DProxy(value:Stage3DProxy):void

@@ -1,6 +1,8 @@
 ﻿package away3d.materials.passes
 {
 	import away3d.arcane;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -148,7 +150,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var context:Context3D = stage3DProxy._context3D;
 			var pos:Vector3D = camera.scenePosition;
@@ -158,20 +160,20 @@
 			_vertexData[2] = pos.z;
 			_vertexData[3] = 1;
 			
-			var sceneTransform:Matrix3D = renderable.getRenderSceneTransform(camera);
+			var sceneTransform:Matrix3D = renderable.sourceEntity.getRenderSceneTransform(camera);
 			
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 5, sceneTransform, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 9, _vertexData, 1);
 			
 			if (_alphaThreshold > 0)
-				renderable.activateUVBuffer(1, stage3DProxy);
+				stage3DProxy.activateBuffer(1, renderable.getVertexData(TriangleSubGeometry.SECONDARY_UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.SECONDARY_UV_DATA), TriangleSubGeometry.SECONDARY_UV_FORMAT);
 			
 			var matrix:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			matrix.copyFrom(sceneTransform);
 			matrix.append(viewProjection);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
-			renderable.activateVertexBuffer(0, stage3DProxy);
-			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
+			stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+			context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
 		
 		/**

@@ -91,14 +91,14 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.SubsurfaceScatteringDiffuseMethod;
 	import away3d.materials.methods.WrapDiffuseMethod;
 	import away3d.materials.utils.DefaultMaterialManager;
-	import away3d.prefabs.CapsuleGeometry;
-	import away3d.prefabs.ConeGeometry;
-	import away3d.prefabs.CubeGeometry;
-	import away3d.prefabs.CylinderGeometry;
-	import away3d.prefabs.PlaneGeometry;
+	import away3d.prefabs.PrimitiveCapsulePrefab;
+	import away3d.prefabs.PrimitiveConePrefab;
+	import away3d.prefabs.PrimitiveCubePrefab;
+	import away3d.prefabs.PrimitiveCylinderPrefab;
+	import away3d.prefabs.PrimitivePlanePrefab;
 	import away3d.entities.Skybox;
-	import away3d.prefabs.SphereGeometry;
-	import away3d.prefabs.TorusGeometry;
+	import away3d.prefabs.PrimitiveSpherePrefab;
+	import away3d.prefabs.PrimitiveTorusPrefab;
 	import away3d.textures.ATFCubeTexture;
 	import away3d.textures.ATFTexture;
 	import away3d.textures.BitmapCubeTexture;
@@ -626,7 +626,7 @@ package away3d.loaders.parsers
 			var props:AWDProperties = parseProperties({1:_geoNrType, 2:_geoNrType});
 			var geoScaleU:Number = props.get(1, 1);
 			var geoScaleV:Number = props.get(2, 1);
-			var sub_geoms:Vector.<ISubGeometry> = new Vector.<ISubGeometry>;
+			var sub_geom:TriangleSubGeometry;
 			// Loop through sub meshes
 			var subs_parsed:uint = 0;
 			while (subs_parsed < num_subs) {
@@ -698,8 +698,21 @@ package away3d.loaders.parsers
 						_newBlockBytes.position = str_end;
 				}
 				parseUserAttributes(); // Ignore sub-mesh attributes for now
-				
-				sub_geoms = GeomUtil.fromVectors(verts, indices, uvs, normals, tangents, weights, w_indices, secondaryUVs);
+
+				sub_geom = new TriangleSubGeometry(true);
+				if (weights)
+					sub_geom.jointsPerVertex = weights.length/(verts.length/3);
+				if (normals)
+					sub_geom.autoDeriveNormals = false;
+				if (uvs)
+					sub_geom.autoDeriveUVs = false;
+				sub_geom.updateIndices(indices);
+				sub_geom.updatePositions(verts);
+				sub_geom.updateVertexNormals(normals);
+				sub_geom.updateUVs(uvs);
+				sub_geom.updateVertexTangents(null);
+				sub_geom.updateJointWeights(weights);
+				sub_geom.updateJointIndices(w_indices);
 				
 				var scaleU:Number = subProps.get(1, 1);
 				var scaleV:Number = subProps.get(2, 1);
@@ -709,13 +722,14 @@ package away3d.loaders.parsers
 					scaleU = geoScaleU/scaleU;
 					scaleV = geoScaleV/scaleV;
 				}
-				for (i = 0; i < sub_geoms.length; i++) {
-					if (setSubUVs)
-						sub_geoms[i].scaleUV(scaleU, scaleV);
-					geom.addSubGeometry(sub_geoms[i]);
-						// TODO: Somehow map in-sub to out-sub indices to enable look-up
-						// when creating meshes (and their material assignments.)
-				}
+				if (setSubUVs)
+					sub_geom.scaleUV(scaleU, scaleV);
+
+				geom.addSubGeometry(sub_geom);
+
+				// TODO: Somehow map in-sub to out-sub indices to enable look-up
+				// when creating meshes (and their material assignments.)
+
 				subs_parsed++;
 			}
 			if ((geoScaleU != 1) || (geoScaleV != 1))
@@ -725,8 +739,7 @@ package away3d.loaders.parsers
 			_blocks[blockID].data = geom;
 			
 			if (_debug)
-				trace("Parsed a TriangleGeometry: Name = " + name + "| SubGeometries = " + sub_geoms.length);
-		
+				trace("Parsed a TriangleGeometry: Name = " + name + "| Id = " + sub_geom.id);
 		}
 		
 		//Block ID = 11
@@ -748,32 +761,32 @@ package away3d.loaders.parsers
 			switch (primType) {
 				// to do, not all properties are set on all primitives
 				case 1:
-					geom = new PlaneGeometry(props.get(101, 100), props.get(102, 100), props.get(301, 1), props.get(302, 1), props.get(701, true), props.get(702, false));
+					geom = new PrimitivePlanePrefab(props.get(101, 100), props.get(102, 100), props.get(301, 1), props.get(302, 1), props.get(701, true), props.get(702, false));
 					break;
 				case 2:
-					geom = new CubeGeometry(props.get(101, 100), props.get(102, 100), props.get(103, 100), props.get(301, 1), props.get(302, 1), props.get(303, 1), props.get(701, true));
+					geom = new PrimitiveCubePrefab(props.get(101, 100), props.get(102, 100), props.get(103, 100), props.get(301, 1), props.get(302, 1), props.get(303, 1), props.get(701, true));
 					break;
 				case 3:
-					geom = new SphereGeometry(props.get(101, 50), props.get(301, 16), props.get(302, 12), props.get(701, true));
+					geom = new PrimitiveSpherePrefab(props.get(101, 50), props.get(301, 16), props.get(302, 12), props.get(701, true));
 					break;
 				case 4:
-					geom = new CylinderGeometry(props.get(101, 50), props.get(102, 50), props.get(103, 100), props.get(301, 16), props.get(302, 1), true, true, true); // bool701, bool702, bool703, bool704);
+					geom = new PrimitiveCylinderPrefab(props.get(101, 50), props.get(102, 50), props.get(103, 100), props.get(301, 16), props.get(302, 1), true, true, true); // bool701, bool702, bool703, bool704);
 					if (!props.get(701, true))
-						CylinderGeometry(geom).topClosed = false;
+						PrimitiveCylinderPrefab(geom).topClosed = false;
 					if (!props.get(702, true))
-						CylinderGeometry(geom).bottomClosed = false;
+						PrimitiveCylinderPrefab(geom).bottomClosed = false;
 					if (!props.get(703, true))
-						CylinderGeometry(geom).yUp = false;
+						PrimitiveCylinderPrefab(geom).yUp = false;
 					
 					break;
 				case 5:
-					geom = new ConeGeometry(props.get(101, 50), props.get(102, 100), props.get(301, 16), props.get(302, 1), props.get(701, true), props.get(702, true));
+					geom = new PrimitiveConePrefab(props.get(101, 50), props.get(102, 100), props.get(301, 16), props.get(302, 1), props.get(701, true), props.get(702, true));
 					break;
 				case 6:
-					geom = new CapsuleGeometry(props.get(101, 50), props.get(102, 100), props.get(301, 16), props.get(302, 15), props.get(701, true));
+					geom = new PrimitiveCapsulePrefab(props.get(101, 50), props.get(102, 100), props.get(301, 16), props.get(302, 15), props.get(701, true));
 					break;
 				case 7:
-					geom = new TorusGeometry(props.get(101, 50), props.get(102, 50), props.get(301, 16), props.get(302, 8), props.get(701, true));
+					geom = new PrimitiveTorusPrefab(props.get(101, 50), props.get(102, 50), props.get(301, 16), props.get(302, 8), props.get(701, true));
 					break;
 				default:
 					geom = new Geometry();

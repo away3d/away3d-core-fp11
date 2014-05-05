@@ -4,6 +4,7 @@ package away3d.prefabs {
 	import away3d.core.base.LineSubGeometry;
 	import away3d.core.base.Object3D;
 	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
 	import away3d.library.assets.AssetType;

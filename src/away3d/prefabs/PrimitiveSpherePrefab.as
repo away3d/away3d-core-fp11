@@ -8,7 +8,7 @@ package away3d.prefabs
 	/**
 	 * A UV Sphere primitive mesh.
 	 */
-	public class SphereGeometry extends PrefabBase
+	public class PrimitiveSpherePrefab extends PrefabBase
 	{
 		private var _radius:Number;
 		private var _segmentsW:uint;
@@ -22,7 +22,7 @@ package away3d.prefabs
 		 * @param segmentsH Defines the number of vertical segments that make up the sphere.
 		 * @param yUp Defines whether the sphere poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function SphereGeometry(radius:Number = 50, segmentsW:uint = 16, segmentsH:uint = 12, yUp:Boolean = true)
+		public function PrimitiveSpherePrefab(radius:Number = 50, segmentsW:uint = 16, segmentsH:uint = 12, yUp:Boolean = true)
 		{
 			super();
 			

@@ -5,6 +5,7 @@ package away3d.animators
 	import away3d.animators.transitions.*;
 	import away3d.arcane;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.entities.Camera3D;
 	import away3d.core.managers.*;
@@ -113,7 +114,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:IRenderable, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
+		override public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
 		{
 			var material:MaterialBase = (renderable as TriangleSubMeshRenderable).material;
 			if (!material)

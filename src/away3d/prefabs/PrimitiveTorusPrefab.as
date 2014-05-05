@@ -8,7 +8,7 @@ package away3d.prefabs
 	/**
 	 * A UV Cylinder primitive mesh.
 	 */
-	public class TorusGeometry extends PrefabBase
+	public class PrimitiveTorusPrefab extends PrefabBase
 	{
 		protected var _radius:Number;
 		protected var _tubeRadius:Number;
@@ -270,7 +270,7 @@ package away3d.prefabs
 		 * @param segmentsT Defines the number of vertical segments that make up the torus.
 		 * @param yUp Defines whether the torus poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function TorusGeometry(radius:Number = 50, tubeRadius:Number = 50, segmentsR:uint = 16, segmentsT:uint = 8, yUp:Boolean = true)
+		public function PrimitiveTorusPrefab(radius:Number = 50, tubeRadius:Number = 50, segmentsR:uint = 16, segmentsT:uint = 8, yUp:Boolean = true)
 		{
 			super();
 			

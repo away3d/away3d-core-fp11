@@ -1,8 +1,11 @@
 package away3d.materials.passes
 {
+	import away3d.animators.AnimationSetBase;
+	import away3d.animators.AnimatorBase;
 	import away3d.animators.data.AnimationRegisterCache;
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.AGALProgram3DCache;
@@ -33,7 +36,7 @@ package away3d.materials.passes
 	public class MaterialPassBase extends EventDispatcher
 	{
 		protected var _material:MaterialBase;
-		protected var _animationSet:IAnimationSet;
+		protected var _animationSet:AnimationSetBase;
 		
 		arcane var _program3Ds:Vector.<Program3D> = new Vector.<Program3D>(8);
 		arcane var _program3Dids:Vector.<int> = Vector.<int>([-1, -1, -1, -1, -1, -1, -1, -1]);
@@ -204,12 +207,12 @@ package away3d.materials.passes
 		/**
 		 * Returns the animation data set adding animations to the material.
 		 */
-		public function get animationSet():IAnimationSet
+		public function get animationSet():AnimationSetBase
 		{
 			return _animationSet;
 		}
 		
-		public function set animationSet(value:IAnimationSet):void
+		public function set animationSet(value:AnimationSetBase):void
 		{
 			if (_animationSet == value)
 				return;
@@ -291,9 +294,9 @@ package away3d.materials.passes
 		 *
 		 * @private
 		 */
-		arcane function updateAnimationState(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		arcane function updateAnimationState(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
-			renderable.animator.setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams, camera);
+			(renderable.materialOwner.animator as AnimatorBase).setRenderState(stage3DProxy, renderable, _numUsedVertexConstants, _numUsedStreams, camera);
 		}
 		
 		/**
@@ -301,7 +304,7 @@ package away3d.materials.passes
 		 *
 		 * @private
 		 */
-		arcane function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		arcane function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			throw new AbstractMethodError();
 		}

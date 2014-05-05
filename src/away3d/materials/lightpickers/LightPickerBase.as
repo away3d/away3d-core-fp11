@@ -3,6 +3,7 @@ package away3d.materials.lightpickers
 	import away3d.*;
 	import away3d.core.base.*;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableBase;
 	import away3d.core.traverse.*;
 	import away3d.library.assets.*;
 	import away3d.lights.*;
@@ -51,7 +52,7 @@ package away3d.materials.lightpickers
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.LIGHT_PICKER;
 		}
@@ -155,7 +156,7 @@ package away3d.materials.lightpickers
 		/**
 		 * Updates set of lights for a given renderable and EntityCollector. Always call super.collectLights() after custom overridden code.
 		 */
-		public function collectLights(renderable:IRenderable, entityCollector:EntityCollector):void
+		public function collectLights(renderable:RenderableBase, entityCollector:EntityCollector):void
 		{
 			updateProbeWeights(renderable);
 		}
@@ -164,9 +165,9 @@ package away3d.materials.lightpickers
 		 * Updates the weights for the light probes, based on the renderable's position relative to them.
 		 * @param renderable The renderble for which to calculate the light probes' influence.
 		 */
-		private function updateProbeWeights(renderable:IRenderable):void
+		private function updateProbeWeights(renderable:RenderableBase):void
 		{
-			// todo: this will cause the same calculations to occur per SubMesh. See if this can be improved.
+			// todo: this will cause the same calculations to occur per TriangleSubMesh. See if this can be improved.
 			var objectPos:Vector3D = renderable.sourceEntity.scenePosition;
 			var lightPos:Vector3D;
 			var rx:Number = objectPos.x, ry:Number = objectPos.y, rz:Number = objectPos.z;

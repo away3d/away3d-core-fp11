@@ -7,7 +7,7 @@ package away3d.tools.utils
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.Mesh;
 	import away3d.materials.ColorMaterial;
-	import away3d.prefabs.PlaneGeometry;
+	import away3d.prefabs.PrimitivePlanePrefab;
 	
 	import flash.geom.Vector3D;
 	
@@ -159,9 +159,9 @@ package away3d.tools.utils
 				_blue.bothSides = true;
 				_red.alpha = _green.alpha = _blue.alpha = .5;
 				
-				_planeXZ = new Mesh(new PlaneGeometry(size, size, 2, 2, true), _red);
-				_planeXY = new Mesh(new PlaneGeometry(size, size, 2, 2, false), _green);
-				_planeZY = new Mesh(new PlaneGeometry(size, size, 2, 2, false), _blue);
+				_planeXZ = new Mesh(new PrimitivePlanePrefab(size, size, 2, 2, true), _red);
+				_planeXY = new Mesh(new PrimitivePlanePrefab(size, size, 2, 2, false), _green);
+				_planeZY = new Mesh(new PrimitivePlanePrefab(size, size, 2, 2, false), _blue);
 				
 				_planeZY.rotationY = 90;
 				_planesContainer = new ObjectContainer3D();

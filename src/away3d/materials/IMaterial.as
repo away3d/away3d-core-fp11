@@ -7,9 +7,9 @@ package away3d.materials {
 
 		function get height():Number;
 
-		function get requiresBlending():String;
+		function get requiresBlending():Boolean;
 
-		function get materialId():int;
+		function get materialId():Number;
 
 		function get renderOrderId():int;
 

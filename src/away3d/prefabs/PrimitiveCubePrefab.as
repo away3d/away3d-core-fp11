@@ -8,7 +8,7 @@ package away3d.prefabs
 	/**
 	 * A Cube primitive mesh.
 	 */
-	public class CubeGeometry extends PrefabBase
+	public class PrimitiveCubePrefab extends PrefabBase
 	{
 		private var _width:Number;
 		private var _height:Number;
@@ -29,7 +29,7 @@ package away3d.prefabs
 		 * @param segmentsD The number of segments that make up the cube along the Z-axis.
 		 * @param tile6 The type of uv mapping to use. When true, a texture will be subdivided in a 2x3 grid, each used for a single face. When false, the entire image is mapped on each face.
 		 */
-		public function CubeGeometry(width:Number = 100, height:Number = 100, depth:Number = 100, segmentsW:uint = 1, segmentsH:uint = 1, segmentsD:uint = 1, tile6:Boolean = true)
+		public function PrimitiveCubePrefab(width:Number = 100, height:Number = 100, depth:Number = 100, segmentsW:uint = 1, segmentsH:uint = 1, segmentsD:uint = 1, tile6:Boolean = true)
 		{
 			super();
 			

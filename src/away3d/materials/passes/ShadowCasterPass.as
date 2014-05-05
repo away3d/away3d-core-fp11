@@ -1,6 +1,7 @@
 package away3d.materials.passes
 {
 	import away3d.arcane;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -97,9 +98,9 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		override arcane function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
-			renderable.inverseSceneTransform.copyRawDataTo(_inverseSceneMatrix);
+			renderable.sourceEntity.inverseSceneTransform.copyRawDataTo(_inverseSceneMatrix);
 			
 			if (_tangentSpace && _cameraPositionIndex >= 0) {
 				var pos:Vector3D = camera.scenePosition;

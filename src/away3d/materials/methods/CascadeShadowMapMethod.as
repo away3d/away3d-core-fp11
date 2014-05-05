@@ -1,8 +1,6 @@
 package away3d.materials.methods
 {
 	import away3d.*;
-	import away3d.cameras.*;
-	import away3d.core.base.*;
 	import away3d.core.managers.*;
 	import away3d.core.pool.IRenderable;
 	import away3d.entities.Camera3D;
@@ -10,9 +8,9 @@ package away3d.materials.methods
 	import away3d.lights.*;
 	import away3d.lights.shadowmaps.*;
 	import away3d.materials.compilation.*;
-	
+
 	import flash.events.*;
-	
+
 	use namespace arcane;
 
 	/**

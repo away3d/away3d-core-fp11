@@ -1,6 +1,8 @@
 package away3d.materials.passes
 {
 	import away3d.arcane;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -19,7 +21,7 @@ package away3d.materials.passes
 	/**
 	 * SkyBoxPass provides a material pass exclusively used to render sky boxes from a cube texture.
 	 */
-	public class SkyBoxPass extends MaterialPassBase
+	public class SkyboxPass extends MaterialPassBase
 	{
 		private var _cubeTexture:CubeTextureBase;
 		private var _vertexData:Vector.<Number>;
@@ -27,7 +29,7 @@ package away3d.materials.passes
 		/**
 		 * Creates a new SkyBoxPass object.
 		 */
-		public function SkyBoxPass()
+		public function SkyboxPass()
 		{
 			super();
 			mipmap = false;
@@ -85,7 +87,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		override arcane function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		override arcane function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var context:Context3D = stage3DProxy._context3D;
 			var pos:Vector3D = camera.scenePosition;
@@ -95,8 +97,8 @@ package away3d.materials.passes
 			_vertexData[4] = _vertexData[5] = _vertexData[6] = camera.projection.far/Math.sqrt(3);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _vertexData, 2);
-			renderable.activateVertexBuffer(0, stage3DProxy);
-			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
+			stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+			context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
 		
 		/**

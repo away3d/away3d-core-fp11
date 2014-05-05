@@ -1,7 +1,10 @@
 package away3d.materials
 {
+	import away3d.animators.AnimationSetBase;
+	import away3d.animators.AnimatorBase;
 	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.pool.IRenderable;
@@ -65,6 +68,13 @@ package away3d.materials
 		arcane var _uniqueId:uint;
 
 		/**
+		 * An id for this material used to sort the renderables by shader program, which reduces Program state changes.
+		 *
+		 * @private
+		 */
+		arcane var _materialId:Number;
+
+		/**
 		 * An id for this material used to sort the renderables by shader program, which reduces Program3D state changes.
 		 *
 		 * @private
@@ -79,7 +89,7 @@ package away3d.materials
 		arcane var _depthPassId:int;
 
 		private var _bothSides:Boolean;
-		private var _animationSet:IAnimationSet;
+		private var _animationSet:AnimationSetBase;
 
 		/**
 		 * A list of material owners, renderables or custom Entities.
@@ -99,16 +109,22 @@ package away3d.materials
 		
 		protected var _depthPass:DepthMapPass;
 		protected var _distancePass:DistanceMapPass;
-		
 		protected var _lightPicker:LightPickerBase;
+
 		private var _distanceBasedDepthRender:Boolean;
 		private var _depthCompareMode:String = Context3DCompareMode.LESS_EQUAL;
-		
+
+		protected var _width:Number = 1;
+		protected var _height:Number = 1;
+
+
 		/**
 		 * Creates a new MaterialBase object.
 		 */
 		public function MaterialBase()
 		{
+			_materialId = Number(id);
+
 			_owners = new Vector.<IMaterialOwner>();
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
@@ -128,6 +144,16 @@ package away3d.materials
 		override public function get assetType():String
 		{
 			return AssetType.MATERIAL;
+		}
+
+		public function get width():Number
+		{
+			return _width;
+		}
+
+		public function get height():Number
+		{
+			return _height;
 		}
 
 		/**
@@ -370,14 +396,14 @@ package away3d.materials
 		 *
 		 * @private
 		 */
-		arcane function renderDepth(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		arcane function renderDepth(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			if (_distanceBasedDepthRender) {
-				if (renderable.animator)
+				if (renderable.materialOwner.animator)
 					_distancePass.updateAnimationState(renderable, stage3DProxy, camera);
 				_distancePass.render(renderable, stage3DProxy, camera, viewProjection);
 			} else {
-				if (renderable.animator)
+				if (renderable.materialOwner.animator)
 					_depthPass.updateAnimationState(renderable, stage3DProxy, camera);
 				_depthPass.render(renderable, stage3DProxy, camera, viewProjection);
 			}
@@ -430,14 +456,14 @@ package away3d.materials
 		 * @param viewProjection The view-projection matrix used to project to the screen. This is not the same as
 		 * camera.viewProjection as it includes the scaling factors when rendering to textures.
 		 */
-		arcane function renderPass(index:uint, renderable:IRenderable, stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, viewProjection:Matrix3D):void
+		arcane function renderPass(index:uint, renderable:RenderableBase, stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, viewProjection:Matrix3D):void
 		{
 			if (_lightPicker)
 				_lightPicker.collectLights(renderable, entityCollector);
 			
 			var pass:MaterialPassBase = _passes[index];
 			
-			if (renderable.animator)
+			if (renderable.materialOwner.animator)
 				pass.updateAnimationState(renderable, stage3DProxy, entityCollector.camera);
 			
 			pass.render(renderable, stage3DProxy, entityCollector.camera, viewProjection);
@@ -455,16 +481,23 @@ package away3d.materials
 		 *
 		 * @private
 		 */
-		arcane function addOwner(owner:IMaterialOwner):void
+		public function addOwner(owner:IMaterialOwner):void
 		{
 			_owners.push(owner);
-			
+
+			var animationSet:AnimationSetBase;
+			var animator:AnimatorBase = owner.animator as AnimatorBase;
+
+			if (animator) {
+				animationSet = animator.animationSet as AnimationSetBase;
+			}
+
 			if (owner.animator) {
-				if (_animationSet && owner.animator.animationSet != _animationSet)
-					throw new Error("A Material instance cannot be shared across renderables with different animator libraries");
+				if (_animationSet && animationSet != _animationSet)
+					throw new Error("A Material instance cannot be shared across material owners with different animation sets");
 				else {
-					if (_animationSet != owner.animator.animationSet) {
-						_animationSet = owner.animator.animationSet;
+					if (_animationSet != animationSet) {
+						_animationSet = animationSet;
 						for (var i:int = 0; i < _numPasses; ++i)
 							_passes[i].animationSet = _animationSet;
 						_depthPass.animationSet = _animationSet;
@@ -480,7 +513,7 @@ package away3d.materials
 		 * @param owner
 		 * @private
 		 */
-		arcane function removeOwner(owner:IMaterialOwner):void
+		public function removeOwner(owner:IMaterialOwner):void
 		{
 			_owners.splice(_owners.indexOf(owner), 1);
 			if (_owners.length == 0) {
@@ -532,6 +565,7 @@ package away3d.materials
 		 */
 		arcane function invalidatePasses(triggerPass:MaterialPassBase):void
 		{
+			var animator:AnimatorBase;
 			var owner:IMaterialOwner;
 			
 			_depthPass.invalidateShaderProgram();
@@ -543,9 +577,11 @@ package away3d.materials
 			if (_animationSet) {
 				_animationSet.resetGPUCompatibility();
 				for each (owner in _owners) {
-					if (owner.animator) {
-						owner.animator.testGPUCompatibility(_depthPass);
-						owner.animator.testGPUCompatibility(_distancePass);
+					animator = owner.animator as AnimatorBase;
+
+					if (animator) {
+						animator.testGPUCompatibility(_depthPass);
+						animator.testGPUCompatibility(_distancePass);
 					}
 				}
 			}
@@ -561,8 +597,9 @@ package away3d.materials
 				// we should do everything on cpu (otherwise we have the cost of both gpu + cpu animations)
 				if (_animationSet) {
 					for each (owner in _owners) {
-						if (owner.animator)
-							owner.animator.testGPUCompatibility(_passes[i]);
+						animator = owner.animator as AnimatorBase;
+						if (animator)
+							animator.testGPUCompatibility(_passes[i]);
 					}
 				}
 			}
@@ -666,6 +703,14 @@ package away3d.materials
 					j = len;
 				}
 			}
+		}
+
+		public function get materialId():Number {
+			return _materialId;
+		}
+
+		public function get renderOrderId():int {
+			return _renderOrderId;
 		}
 	}
 }

@@ -2,8 +2,11 @@ package away3d.animators
 {
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.TriangleSubMeshRenderable;
+	import away3d.entities.Camera3D;
 	import away3d.errors.AbstractMethodError;
 	import away3d.materials.passes.MaterialPassBase;
 
@@ -209,6 +212,11 @@ package away3d.animators
 		public function set playbackSpeed(value:Number):void
 		{
 			_playbackSpeed = value;
+		}
+
+		public function setRenderState(stage3DProxy:Stage3DProxy, renderable:RenderableBase, vertexConstantOffset:int, vertexStreamOffset:int, camera:Camera3D):void
+		{
+			throw new AbstractMethodError();
 		}
 		
 		/**

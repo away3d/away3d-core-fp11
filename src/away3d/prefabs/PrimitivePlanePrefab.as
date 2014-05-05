@@ -8,7 +8,7 @@ package away3d.prefabs
 	/**
 	 * A Plane primitive mesh.
 	 */
-	public class PlaneGeometry extends PrefabBase
+	public class PrimitivePlanePrefab extends PrefabBase
 	{
 		private var _segmentsW:uint;
 		private var _segmentsH:uint;
@@ -26,7 +26,7 @@ package away3d.prefabs
 		 * @param yUp Defines whether the normal vector of the plane should point along the Y-axis (true) or Z-axis (false).
 		 * @param doubleSided Defines whether the plane will be visible from both sides, with correct vertex normals.
 		 */
-		public function PlaneGeometry(width:Number = 100, height:Number = 100, segmentsW:uint = 1, segmentsH:uint = 1, yUp:Boolean = true, doubleSided:Boolean = false)
+		public function PrimitivePlanePrefab(width:Number = 100, height:Number = 100, segmentsW:uint = 1, segmentsH:uint = 1, yUp:Boolean = true, doubleSided:Boolean = false)
 		{
 			super();
 			

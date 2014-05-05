@@ -1,60 +1,33 @@
 package away3d.prefabs
 {
 	import away3d.arcane;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	
+	import away3d.prefabs.PrimitivePrefabBase;
+
 	use namespace arcane;
 	
 	/**
 	 * A Cylinder primitive mesh.
 	 */
-	public class CylinderGeometry extends PrefabBase
+	public class PrimitiveCylinderPrefab extends PrimitivePrefabBase
 	{
 		protected var _topRadius:Number;
 		protected var _bottomRadius:Number;
 		protected var _height:Number;
 		protected var _segmentsW:uint;
 		protected var _segmentsH:uint;
+
 		protected var _topClosed:Boolean;
 		protected var _bottomClosed:Boolean;
 		protected var _surfaceClosed:Boolean;
 		protected var _yUp:Boolean;
-		private var _rawData:Vector.<Number>;
-		private var _rawIndices:Vector.<uint>;
-		private var _nextVertexIndex:uint;
-		private var _currentIndex:uint;
-		private var _currentTriangleIndex:uint;
 		private var _numVertices:uint;
-		private var _stride:uint;
-		private var _vertexOffset:uint;
-		
-		private function addVertex(px:Number, py:Number, pz:Number, nx:Number, ny:Number, nz:Number, tx:Number, ty:Number, tz:Number):void
-		{
-			var compVertInd:uint = _vertexOffset + _nextVertexIndex*_stride; // current component vertex index
-			_rawData[compVertInd++] = px;
-			_rawData[compVertInd++] = py;
-			_rawData[compVertInd++] = pz;
-			_rawData[compVertInd++] = nx;
-			_rawData[compVertInd++] = ny;
-			_rawData[compVertInd++] = nz;
-			_rawData[compVertInd++] = tx;
-			_rawData[compVertInd++] = ty;
-			_rawData[compVertInd++] = tz;
-			_nextVertexIndex++;
-		}
-		
-		private function addTriangleClockWise(cwVertexIndex0:uint, cwVertexIndex1:uint, cwVertexIndex2:uint):void
-		{
-			_rawIndices[_currentIndex++] = cwVertexIndex0;
-			_rawIndices[_currentIndex++] = cwVertexIndex1;
-			_rawIndices[_currentIndex++] = cwVertexIndex2;
-			_currentTriangleIndex++;
-		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target:TriangleSubGeometry):void
+		protected override function buildGeometry(target:SubGeometryBase, geometryType:String):void
 		{
 			var i:uint, j:uint;
 			var x:Number, y:Number, z:Number, radius:Number, revolutionAngle:Number;
@@ -467,7 +440,7 @@ package away3d.prefabs
 		 * @param bottomClosed Defines whether the bottom end of the cylinder is closed (true) or open.
 		 * @param yUp Defines whether the cone poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
-		public function CylinderGeometry(topRadius:Number = 50, bottomRadius:Number = 50, height:Number = 100, segmentsW:uint = 16, segmentsH:uint = 1, topClosed:Boolean = true, bottomClosed:Boolean = true, surfaceClosed:Boolean = true, yUp:Boolean = true)
+		public function PrimitiveCylinderPrefab(topRadius:Number = 50, bottomRadius:Number = 50, height:Number = 100, segmentsW:uint = 16, segmentsH:uint = 1, topClosed:Boolean = true, bottomClosed:Boolean = true, surfaceClosed:Boolean = true, yUp:Boolean = true)
 		{
 			super();
 			

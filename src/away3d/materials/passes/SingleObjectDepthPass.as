@@ -1,6 +1,8 @@
 package away3d.materials.passes
 {
 	import away3d.arcane;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -146,7 +148,7 @@ package away3d.materials.passes
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function render(renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
+		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
 			var matrix:Matrix3D;
 			var contextIndex:int = stage3DProxy._stage3DIndex;
@@ -164,7 +166,7 @@ package away3d.materials.passes
 			// local position = enough
 			light = lights[0];
 			
-			matrix = light.getObjectProjectionMatrix(renderable, _projections[renderable]);
+			matrix = light.getObjectProjectionMatrix(renderable.sourceEntity, _projections[renderable]);
 			
 			// todo: use texture proxy?
 			var target:Texture = _textures[contextIndex][renderable] ||= context.createTexture(_textureSize, _textureSize, Context3DTextureFormat.BGRA, true);
@@ -173,9 +175,10 @@ package away3d.materials.passes
 			context.clear(1.0, 1.0, 1.0);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _enc, 2);
-			renderable.activateVertexBuffer(0, stage3DProxy);
-			renderable.activateVertexNormalBuffer(1, stage3DProxy);
-			context.drawTriangles(renderable.getIndexBuffer(stage3DProxy), 0, renderable.numTriangles);
+
+			stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+			stage3DProxy.activateBuffer(1, renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+			context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
 		
 		/**
