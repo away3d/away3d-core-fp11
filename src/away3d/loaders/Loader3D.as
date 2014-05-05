@@ -411,7 +411,7 @@ package away3d.loaders
 						obj = Mesh(ev.asset);
 						break;
 					case AssetType.SKYBOX:
-						obj = SkyBox(ev.asset);
+						obj = Skybox(ev.asset);
 						break;
 					case AssetType.TEXTURE_PROJECTOR:
 						obj = TextureProjector(ev.asset);

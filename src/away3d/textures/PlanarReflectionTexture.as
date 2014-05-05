@@ -146,7 +146,7 @@ package away3d.textures
 			_entityCollector.clear();
 			view.scene.traversePartitions(_entityCollector);
 			_renderer.stage3DProxy = view.stage3DProxy;
-			_renderer.render(_entityCollector, super.getTextureForStage3D(view.stage3DProxy), _scissorRect);
+			_renderer.renderScene(_entityCollector, super.getTextureForStage3D(view.stage3DProxy), _scissorRect);
 			
 			_entityCollector.cleanUp();
 			_isRendering = false;

@@ -63,27 +63,5 @@ package away3d.core.traverse
 		{
 			return node.isIntersectingRay(_rayPosition, _rayDirection);
 		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function applySkyBox(renderable:IRenderable):void
-		{
-		}
-		
-		/**
-		 * Adds an IRenderable object to the potentially visible objects.
-		 * @param renderable The IRenderable object to add.
-		 */
-		override public function applyRenderable(renderable:IRenderable):void
-		{
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override public function applyUnknownLight(light:LightBase):void
-		{
-		}
 	}
 }

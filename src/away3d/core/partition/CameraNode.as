@@ -1,8 +1,8 @@
 package away3d.core.partition
 {
+	import away3d.core.traverse.ICollector;
 	import away3d.entities.Camera3D;
-	import away3d.core.traverse.PartitionTraverser;
-	
+
 	/**
 	 * CameraNode is a space partitioning leaf node that contains a Camera3D object.
 	 */
@@ -20,7 +20,7 @@ package away3d.core.partition
 		/**
 		 * @inheritDoc
 		 */
-		override public function acceptTraverser(traverser:PartitionTraverser):void
+		override public function acceptTraverser(traverser:ICollector):void
 		{
 			// todo: dead end for now, if it has a debug mesh, then sure accept that
 		}

@@ -353,8 +353,8 @@
 			_renderer.backgroundG = ((_backgroundColor >> 8) & 0xff)/0xff;
 			_renderer.backgroundB = (_backgroundColor & 0xff)/0xff;
 			_renderer.backgroundAlpha = _backgroundAlpha;
-			_renderer.viewWidth = _width;
-			_renderer.viewHeight = _height;
+			_renderer.width = _width;
+			_renderer.height = _height;
 			
 			_backBufferInvalid = true;
 		}
@@ -475,7 +475,7 @@
 			_camera.projection.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
-			_renderer.viewWidth = value;
+			_renderer.width = value;
 			
 			_scissorRect.width = value;
 			
@@ -510,7 +510,7 @@
 			_camera.projection.aspectRatio = _aspectRatio;
 			_depthTextureInvalid = true;
 			
-			_renderer.viewHeight = value;
+			_renderer.height = value;
 			
 			_scissorRect.height = value;
 			
@@ -706,15 +706,15 @@
 					
 					_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
 				} else {
-					_renderer.render(_entityCollector, targetTexture, _rttBufferManager.renderToTextureRect);
+					_renderer.renderScene(_entityCollector, targetTexture, _rttBufferManager.renderToTextureRect);
 					_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
 				}
 			} else {
 				_renderer.shareContext = _shareContext;
 				if (_shareContext)
-					_renderer.render(_entityCollector, null, _scissorRect);
+					_renderer.renderScene(_entityCollector, null, _scissorRect);
 				else
-					_renderer.render(_entityCollector);
+					_renderer.renderScene(_entityCollector);
 				
 			}
 			
@@ -792,11 +792,11 @@
 			if (_filter3DRenderer || _renderer.renderToTexture) {
 				_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
 				_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
-				_depthRenderer.render(entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+				_depthRenderer.renderScene(entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 			} else {
 				_depthRenderer.textureRatioX = 1;
 				_depthRenderer.textureRatioY = 1;
-				_depthRenderer.render(entityCollector);
+				_depthRenderer.renderScene(entityCollector);
 			}
 			_depthRenderer.disableColor = false;
 		}
@@ -807,7 +807,7 @@
 				initDepthTexture(_stage3DProxy._context3D);
 			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
 			_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
-			_depthRenderer.render(entityCollector, _depthRender);
+			_depthRenderer.renderScene(entityCollector, _depthRender);
 		}
 		
 		private function initDepthTexture(context:Context3D):void
@@ -1003,7 +1003,7 @@
 			_entityCollector.clear();
 			scene.traversePartitions(_entityCollector);
 			
-			_cubeRenderer.render(_entityCollector, targetTexture, null, surfaceIndex);
+			_cubeRenderer.renderScene(_entityCollector, targetTexture, null, surfaceIndex);
 			
 			_entityCollector.cleanUp();
 		}

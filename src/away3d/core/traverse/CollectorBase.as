@@ -15,7 +15,7 @@ package away3d.core.traverse {
 		public var customCullPlanes:Vector.<Plane3D>;
 		public var cullPlanes:Vector.<Plane3D>;
 		public var numCullPlanes:Number = 0;
-		public var entityHead:EntityListItem;
+		protected var _entityHead:EntityListItem;
 		public var numEntities:Number = 0;
 		public var numInteractiveEntities:Number = 0;
 
@@ -40,7 +40,7 @@ package away3d.core.traverse {
 			numEntities = numInteractiveEntities = 0;
 			cullPlanes = customCullPlanes ? customCullPlanes : (_camera ? _camera.frustumPlanes : null);
 			numCullPlanes = cullPlanes ? cullPlanes.length : 0;
-			entityHead = null;
+			_entityHead = null;
 			entityListItemPool.freeAll();
 		}
 
@@ -64,14 +64,18 @@ package away3d.core.traverse {
 			var item:EntityListItem = entityListItemPool.getItem();
 			item.entity = entity;
 
-			item.next = entityHead;
-			entityHead = item;
+			item.next = _entityHead;
+			_entityHead = item;
 		}
 
 		public function applyLightProbe(entity:IEntity):void {
 		}
 
 		public function applyPointLight(entity:IEntity):void {
+		}
+
+		public function get entityHead():* {
+			return _entityHead;
 		}
 	}
 }

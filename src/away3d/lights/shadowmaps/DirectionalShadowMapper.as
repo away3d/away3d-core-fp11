@@ -81,7 +81,7 @@ package away3d.lights.shadowmaps
 			_casterCollector.cullPlanes = _cullPlanes;
 			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);
-			renderer.render(_casterCollector, target);
+			renderer.renderScene(_casterCollector, target);
 			_casterCollector.cleanUp();
 		}
 		

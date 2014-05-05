@@ -8,20 +8,19 @@ package away3d.entities {
 	import away3d.core.base.Object3D;
 	import away3d.core.math.UVTransform;
 	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.SkyBoxNode;
+	import away3d.core.partition.SkyboxNode;
 	import away3d.core.render.IRenderer;
-	import away3d.entities.IEntity;
 	import away3d.library.assets.AssetType;
 	import away3d.materials.IMaterial;
 
 	use namespace arcane;
 
 	/**
-	 * A SkyBox class is used to render a sky in the scene. It's always considered static and 'at infinity', and as
+	 * A Skybox class is used to render a sky in the scene. It's always considered static and 'at infinity', and as
 	 * such it's always centered at the camera's position and sized to exactly fit within the camera's frustum, ensuring
 	 * the sky box is always as large as possible without being clipped.
 	 */
-	public class SkyBox extends Object3D implements IEntity, IMaterialOwner
+	public class Skybox extends Object3D implements IEntity, IMaterialOwner
 	{
 		private var _uvTransform:UVTransform = new UVTransform();
 		private var _material:IMaterial;
@@ -37,7 +36,7 @@ package away3d.entities {
 		 *
 		 * @param material    The material with which to render the Skybox.
 		 */
-		public function SkyBox(material:IMaterial)
+		public function Skybox(material:IMaterial)
 		{
 			_isEntity = true;
 			this.material = material;
@@ -95,7 +94,7 @@ package away3d.entities {
 		 */
 		override protected function createEntityPartitionNode():EntityNode
 		{
-			return new SkyBoxNode(this);
+			return new SkyboxNode(this);
 		}
 		/**
 		 * @protected

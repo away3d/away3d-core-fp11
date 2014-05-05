@@ -96,7 +96,7 @@ package away3d.loaders.parsers
 	import away3d.prefabs.CubeGeometry;
 	import away3d.prefabs.CylinderGeometry;
 	import away3d.prefabs.PlaneGeometry;
-	import away3d.entities.SkyBox;
+	import away3d.entities.Skybox;
 	import away3d.prefabs.SphereGeometry;
 	import away3d.prefabs.TorusGeometry;
 	import away3d.textures.ATFCubeTexture;
@@ -937,7 +937,7 @@ package away3d.loaders.parsers
 			var returnedArrayCubeTex:Array = getAssetByID(cubeTexAddr, [AssetType.TEXTURE], "CubeTexture");
 			if ((!returnedArrayCubeTex[0]) && (cubeTexAddr != 0))
 				_blocks[blockID].addError("Could not find the Cubetexture (ID = " + cubeTexAddr + " ) for this SkyBox");
-			var asset:SkyBox = new SkyBox(returnedArrayCubeTex[1] as BitmapCubeTexture);
+			var asset:Skybox = new Skybox(returnedArrayCubeTex[1] as BitmapCubeTexture);
 			
 			parseProperties(null)
 			asset.extra = parseUserAttributes();

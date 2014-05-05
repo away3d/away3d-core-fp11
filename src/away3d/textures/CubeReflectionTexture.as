@@ -155,7 +155,7 @@ package away3d.textures
 			_entityCollector.clear();
 			scene.traversePartitions(_entityCollector);
 			
-			_renderer.render(_entityCollector, targetTexture, null, surfaceIndex);
+			_renderer.renderScene(_entityCollector, targetTexture, null, surfaceIndex);
 			
 			_entityCollector.cleanUp();
 		}

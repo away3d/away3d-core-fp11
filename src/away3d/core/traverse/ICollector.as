@@ -1,6 +1,6 @@
 package away3d.core.traverse {
-	import away3d.entities.Camera3D;
 	import away3d.core.partition.NodeBase;
+	import away3d.entities.Camera3D;
 	import away3d.entities.IEntity;
 
 	public interface ICollector {
@@ -15,5 +15,9 @@ package away3d.core.traverse {
 		function applyLightProbe(entity:IEntity):void;
 
 		function applyPointLight(entity:IEntity):void;
+
+		function get entityHead():*;
+
+		function get camera():Camera3D;
 	}
 }

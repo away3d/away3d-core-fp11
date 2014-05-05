@@ -1,5 +1,6 @@
 package away3d.core.sort
 {
+	import away3d.core.pool.IRenderable;
 	import away3d.core.traverse.EntityCollector;
 	
 	/**
@@ -8,10 +9,8 @@ package away3d.core.sort
 	 */
 	public interface IEntitySorter
 	{
-		/**
-		 * Sort the potentially visible data in an EntityCollector for rendering.
-		 * @param collector The EntityCollector object containing the potentially visible data.
-		 */
-		function sort(collector:EntityCollector):void;
+		function sortBlendedRenderables(head:IRenderable):IRenderable;
+
+		function sortOpaqueRenderables(head:IRenderable):IRenderable;
 	}
 }

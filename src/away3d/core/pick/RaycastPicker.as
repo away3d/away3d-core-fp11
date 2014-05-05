@@ -90,7 +90,7 @@ package away3d.core.pick
 			scene.traversePartitions(_raycastCollector);
 			
 			_numEntities = 0;
-			var node:EntityListItem = _raycastCollector.entityHead;
+			var node:EntityListItem = _raycastCollector._entityHead;
 			var entity:IEntity;
 			while (node) {
 				entity = node.entity;

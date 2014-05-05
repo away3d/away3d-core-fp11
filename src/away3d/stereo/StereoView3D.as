@@ -124,16 +124,16 @@ package away3d.stereo
 				renderDepthPrepass(_entityCollector);
 			
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
-				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+				_renderer.renderScene(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
 				if (!_shareContext)
 					_stage3DProxy._context3D.present();
 			} else {
 				_renderer.shareContext = _shareContext;
 				if (_shareContext)
-					_renderer.render(_entityCollector, texture, _scissorRect);
+					_renderer.renderScene(_entityCollector, texture, _scissorRect);
 				else
-					_renderer.render(_entityCollector, texture, _rttBufferManager.renderToTextureRect);
+					_renderer.renderScene(_entityCollector, texture, _rttBufferManager.renderToTextureRect);
 				
 			}
 			

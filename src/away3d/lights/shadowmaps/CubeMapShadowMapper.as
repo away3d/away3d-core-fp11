@@ -82,7 +82,7 @@ package away3d.lights.shadowmaps
 					_casterCollector.camera = _depthCameras[i];
 					_casterCollector.clear();
 					scene.traversePartitions(_casterCollector);
-					renderer.render(_casterCollector, target, null, i);
+					renderer.renderScene(_casterCollector, target, null, i);
 					_casterCollector.cleanUp();
 				}
 			}

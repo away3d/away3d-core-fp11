@@ -4,7 +4,7 @@ package away3d.core.render {
 	import away3d.core.sort.IEntitySorter;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.Billboard;
-	import away3d.entities.SkyBox;
+	import away3d.entities.Skybox;
 
 	import flash.events.IEventDispatcher;
 	import flash.geom.Rectangle;
@@ -42,7 +42,7 @@ package away3d.core.render {
 		 *
 		 * @param skybox
 		 */
-		function applySkybox(skybox:SkyBox):void;
+		function applySkybox(skybox:Skybox):void;
 
 		/**
 		 *
@@ -81,6 +81,6 @@ package away3d.core.render {
 		/**
 		 * @internal
 		 */
-		function get createEntityCollector():ICollector;
+		function createEntityCollector():ICollector;
 	}
 }

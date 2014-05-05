@@ -34,7 +34,7 @@ package away3d.materials
 	 * methods to build the shader code. MaterialBase can be extended to build specific and high-performant custom
 	 * shaders, or entire new material frameworks.
 	 */
-	public class MaterialBase extends NamedAssetBase implements IAsset
+	public class MaterialBase extends NamedAssetBase implements IAsset, IMaterial
 	{
 		/**
 		 * A counter used to assign unique ids per material, which is used to sort per material while rendering.
@@ -125,7 +125,7 @@ package away3d.materials
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.MATERIAL;
 		}
