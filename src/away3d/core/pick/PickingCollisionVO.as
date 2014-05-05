@@ -1,10 +1,9 @@
 package away3d.core.pick
 {
-	
-	import away3d.core.pool.IRenderable;
+
+	import away3d.core.base.IMaterialOwner;
 	import away3d.core.base.Object3D;
-	import away3d.entities.*;
-	
+
 	import flash.geom.*;
 	
 	/**
@@ -43,7 +42,7 @@ package away3d.core.pick
 		/**
 		 * The index of the subGeometry where the event took place.
 		 */
-		public var subGeometryIndex:uint;
+//		public var subGeometryIndex:uint;
 		
 		/**
 		 * The starting position of the colliding ray in local coordinates.
@@ -76,12 +75,12 @@ package away3d.core.pick
 		 * The distance along the ray from the starting position to the calculated intersection entry point with the entity.
 		 */
 		public var rayEntryDistance:Number;
-		
+
 		/**
-		 * The IRenderable associated with a collision.
+		 * The material ownwer associated with a collision.
 		 */
-		public var renderable:IRenderable;
-		
+		public var materialOwner:IMaterialOwner;
+
 		/**
 		 * Creates a new <code>PickingCollisionVO</code> object.
 		 *

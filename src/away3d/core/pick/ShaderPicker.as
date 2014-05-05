@@ -1,7 +1,6 @@
 package away3d.core.pick
 {
 	import away3d.arcane;
-	import away3d.cameras.*;
 	import away3d.containers.*;
 	import away3d.core.base.*;
 	import away3d.core.pool.*;
@@ -31,6 +30,9 @@ package away3d.core.pick
 	 */
 	public class ShaderPicker implements IPicker
 	{
+		private var _opaqueRenderableHead:RenderableBase;
+		private var _blendedRenderableHead:RenderableBase;
+		
 		private var _stage3DProxy:Stage3DProxy;
 		private var _context:Context3D;
 		private var _onlyMouseEnabled:Boolean = true;
@@ -42,14 +44,14 @@ package away3d.core.pick
 		private var _boundOffsetScale:Vector.<Number>;
 		private var _id:Vector.<Number>;
 		
-		private var _interactives:Vector.<IRenderable> = new Vector.<IRenderable>();
+		private var _interactives:Vector.<RenderableBase> = new Vector.<RenderableBase>();
 		private var _interactiveId:uint;
 		private var _hitColor:uint;
 		private var _projX:Number;
 		private var _projY:Number;
 		
-		private var _hitRenderable:IRenderable;
-		private var _hitEntity:Entity;
+		private var _hitRenderable:RenderableBase;
+		private var _hitEntity:IEntity;
 		private var _localHitPosition:Vector3D = new Vector3D();
 		private var _hitUV:Point = new Point();
 		private var _faceIndex:uint;
@@ -61,7 +63,8 @@ package away3d.core.pick
 		private var _rayDir:Vector3D = new Vector3D();
 		private var _potentialFound:Boolean;
 		private static const MOUSE_SCISSOR_RECT:Rectangle = new Rectangle(0, 0, 1, 1);
-		
+
+		private var _shaderPickingDetails:Boolean;
 		/**
 		 * @inheritDoc
 		 */
@@ -74,12 +77,17 @@ package away3d.core.pick
 		{
 			_onlyMouseEnabled = value;
 		}
-		
+
 		/**
 		 * Creates a new <code>ShaderPicker</code> object.
+		 *
+		 * @param shaderPickingDetails Determines whether the picker includes a second pass to calculate extra
+		 * properties such as uv and normal coordinates.
 		 */
-		public function ShaderPicker()
+		public function ShaderPicker(shaderPickingDetails:Boolean = false)
 		{
+			_shaderPickingDetails = shaderPickingDetails;
+
 			_id = new Vector.<Number>(4, true);
 			_viewportData = new Vector.<Number>(4, true); // first 2 contain scale, last 2 translation
 			_boundOffsetScale = new Vector.<Number>(8, true); // first 2 contain scale, last 2 translation
@@ -108,7 +116,11 @@ package away3d.core.pick
 			
 			// _potentialFound will be set to true if any object is actually rendered
 			_potentialFound = false;
-			
+
+			//reset head values
+			_blendedRenderableHead = null;
+			_opaqueRenderableHead = null;
+
 			draw(collector, null);
 			
 			// clear buffers
@@ -130,24 +142,24 @@ package away3d.core.pick
 			
 			_hitRenderable = _interactives[_hitColor - 1];
 			_hitEntity = _hitRenderable.sourceEntity;
-			if (_onlyMouseEnabled && (!_hitEntity._ancestorsAllowMouseEnabled || !_hitEntity.mouseEnabled))
+
+			if (_onlyMouseEnabled && !_hitEntity.isMouseEnabled)
 				return null;
 			
 			var _collisionVO:PickingCollisionVO = _hitEntity.pickingCollisionVO;
-			if (_hitRenderable.shaderPickingDetails) {
+			if (_shaderPickingDetails) {
 				getHitDetails(view.camera);
 				_collisionVO.localPosition = _localHitPosition;
 				_collisionVO.localNormal = _localHitNormal;
 				_collisionVO.uv = _hitUV;
 				_collisionVO.index = _faceIndex;
-				_collisionVO.subGeometryIndex = _subGeometryIndex;
-				
+//				_collisionVO.subGeometryIndex = _subGeometryIndex;
 			} else {
 				_collisionVO.localPosition = null;
 				_collisionVO.localNormal = null;
 				_collisionVO.uv = null;
 				_collisionVO.index = 0;
-				_collisionVO.subGeometryIndex = 0;
+//				_collisionVO.subGeometryIndex = 0;
 			}
 			
 			return _collisionVO;
@@ -179,8 +191,9 @@ package away3d.core.pick
 			_context.setDepthTest(true, Context3DCompareMode.LESS);
 			_context.setProgram(_objectProgram3D);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _viewportData, 1);
-			drawRenderables(entityCollector.opaqueRenderableHead, camera);
-			drawRenderables(entityCollector.blendedRenderableHead, camera);
+//			drawRenderables(entityCollector.opaqueRenderableHead, camera);
+//			drawRenderables(entityCollector.blendedRenderableHead, camera);
+			//TODO: reimplement ShaderPicker inheriting from RendererBase
 		}
 		
 		/**
@@ -188,18 +201,16 @@ package away3d.core.pick
 		 * @param renderables The renderables to draw.
 		 * @param camera The camera for which to render.
 		 */
-		private function drawRenderables(item:RenderableListItem, camera:Camera3D):void
+		private function drawRenderables(renderable:RenderableBase, camera:Camera3D):void
 		{
 			var matrix:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			var renderable:IRenderable;
 			var viewProjection:Matrix3D = camera.viewProjection;
 			
-			while (item) {
-				renderable = item.renderable;
-				
+			while (renderable) {
+
 				// it's possible that the renderable was already removed from the scene
-				if (!renderable.sourceEntity.scene || (!renderable.mouseEnabled && _onlyMouseEnabled)) {
-					item = item.next;
+				if (!renderable.sourceEntity.scene || (!renderable.sourceEntity.isMouseEnabled && _onlyMouseEnabled)) {
+					renderable = renderable.next as RenderableBase;
 					continue;
 				}
 				
@@ -212,14 +223,14 @@ package away3d.core.pick
 				_id[1] = (_interactiveId >> 8)/255; // on green channel
 				_id[2] = (_interactiveId & 0xff)/255; // on blue channel
 				
-				matrix.copyFrom(renderable.getRenderSceneTransform(camera));
+				matrix.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
 				_context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _id, 1);
-				renderable.activateVertexBuffer(0, _stage3DProxy);
-				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
-				
-				item = item.next;
+				_stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				_context.drawTriangles(_stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+
+				renderable = renderable.next as RenderableBase;
 			}
 		}
 		
@@ -292,30 +303,32 @@ package away3d.core.pick
 		 */
 		private function getApproximatePosition(camera:Camera3D):void
 		{
-			var entity:Entity = _hitRenderable.sourceEntity;
+			var bounds:Box = this._hitRenderable.sourceEntity.bounds.aabb;
 			var col:uint;
 			var scX:Number, scY:Number, scZ:Number;
 			var offsX:Number, offsY:Number, offsZ:Number;
 			var localViewProjection:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-			localViewProjection.copyFrom(_hitRenderable.getRenderSceneTransform(camera));
+			localViewProjection.copyFrom(_hitRenderable.sourceEntity.getRenderSceneTransform(camera));
 			localViewProjection.append(camera.viewProjection);
 			if (!_triangleProgram3D)
 				initTriangleProgram3D();
-			
-			_boundOffsetScale[4] = 1/(scX = entity.maxX - entity.minX);
-			_boundOffsetScale[5] = 1/(scY = entity.maxY - entity.minY);
-			_boundOffsetScale[6] = 1/(scZ = entity.maxZ - entity.minZ);
-			_boundOffsetScale[0] = offsX = -entity.minX;
-			_boundOffsetScale[1] = offsY = -entity.minY;
-			_boundOffsetScale[2] = offsZ = -entity.minZ;
+
+			_boundOffsetScale[4] = 1/(scX = bounds.width);
+			_boundOffsetScale[5] = 1/(scY = bounds.height);
+			_boundOffsetScale[6] = 1/(scZ = bounds.depth);
+			_boundOffsetScale[0] = offsX = -bounds.x;
+			_boundOffsetScale[1] = offsY = -bounds.y;
+			_boundOffsetScale[2] = offsZ = -bounds.z;
 			
 			_context.setProgram(_triangleProgram3D);
 			_context.clear(0, 0, 0, 0, 1, 0, Context3DClearMask.DEPTH);
 			_context.setScissorRectangle(MOUSE_SCISSOR_RECT);
 			_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, localViewProjection, true);
 			_context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 5, _boundOffsetScale, 2);
-			_hitRenderable.activateVertexBuffer(0, _stage3DProxy);
-			_context.drawTriangles(_hitRenderable.getIndexBuffer(_stage3DProxy), 0, _hitRenderable.numTriangles);
+
+			_stage3DProxy.activateBuffer(0, _hitRenderable.getVertexData(TriangleSubGeometry.POSITION_DATA), _hitRenderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+			_context.drawTriangles(_stage3DProxy.getIndexBuffer(this._hitRenderable.getIndexData()), 0, _hitRenderable.numTriangles);
+
 			_context.drawToBitmapData(_bitmapData);
 			
 			col = _bitmapData.getPixel(0, 0);
@@ -332,47 +345,54 @@ package away3d.core.pick
 		 */
 		private function getPreciseDetails(camera:Camera3D):void
 		{
-			
-			var subGeom:ISubGeometry = SubMesh(_hitRenderable).subGeometry;
-			var indices:Vector.<uint> = subGeom.indexData;
-			var vertices:Vector.<Number> = subGeom.vertexData;
-			var len:int = indices.length;
+			var indices:Vector.<uint> = _hitRenderable.getIndexData().data;
+			var len:Number = indices.length;
 			var x1:Number, y1:Number, z1:Number;
 			var x2:Number, y2:Number, z2:Number;
 			var x3:Number, y3:Number, z3:Number;
-			var i:uint = 0, j:uint = 1, k:uint = 2;
-			var t1:uint, t2:uint, t3:uint;
+			var i:Number = 0, j:Number = 1, k:Number = 2;
+			var t1:Number, t2:Number, t3:Number;
 			var v0x:Number, v0y:Number, v0z:Number;
 			var v1x:Number, v1y:Number, v1z:Number;
 			var v2x:Number, v2y:Number, v2z:Number;
+			var ni1:Number, ni2:Number, ni3:Number;
+			var n1:Number, n2:Number, n3:Number, nLength:Number;
 			var dot00:Number, dot01:Number, dot02:Number, dot11:Number, dot12:Number;
 			var s:Number, t:Number, invDenom:Number;
-			var uvs:Vector.<Number> = subGeom.UVData;
-			var normals:Vector.<Number> = subGeom.faceNormals;
 			var x:Number = _localHitPosition.x, y:Number = _localHitPosition.y, z:Number = _localHitPosition.z;
 			var u:Number, v:Number;
-			var ui1:uint, ui2:uint, ui3:uint;
+			var ui1:Number, ui2:Number, ui3:Number;
 			var s0x:Number, s0y:Number, s0z:Number;
 			var s1x:Number, s1y:Number, s1z:Number;
 			var nl:Number;
-			var stride:int = subGeom.vertexStride;
-			var vertexOffset:int = subGeom.vertexOffset;
+
+			var positions:Vector.<Number> = _hitRenderable.getVertexData(TriangleSubGeometry.POSITION_DATA).data;
+			var positionStride:Number = _hitRenderable.getVertexData(TriangleSubGeometry.POSITION_DATA).dataPerVertex;
+			var positionOffset:Number = _hitRenderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA);
+
+			var uvs:Vector.<Number> = _hitRenderable.getVertexData(TriangleSubGeometry.UV_DATA).data;
+			var uvStride:Number = _hitRenderable.getVertexData(TriangleSubGeometry.UV_DATA).dataPerVertex;
+			var uvOffset:Number = _hitRenderable.getVertexOffset(TriangleSubGeometry.UV_DATA);
+
+			var normals:Vector.<Number> = _hitRenderable.getVertexData(TriangleSubGeometry.NORMAL_DATA).data;
+			var normalStride:Number = _hitRenderable.getVertexData(TriangleSubGeometry.NORMAL_DATA).dataPerVertex;
+			var normalOffset:Number = _hitRenderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA);
 			
 			updateRay(camera);
 			
 			while (i < len) {
-				t1 = vertexOffset + indices[i]*stride;
-				t2 = vertexOffset + indices[j]*stride;
-				t3 = vertexOffset + indices[k]*stride;
-				x1 = vertices[t1];
-				y1 = vertices[t1 + 1];
-				z1 = vertices[t1 + 2];
-				x2 = vertices[t2];
-				y2 = vertices[t2 + 1];
-				z2 = vertices[t2 + 2];
-				x3 = vertices[t3];
-				y3 = vertices[t3 + 1];
-				z3 = vertices[t3 + 2];
+				t1 = positionOffset + indices[i]*positionStride;
+				t2 = positionOffset + indices[j]*positionStride;
+				t3 = positionOffset + indices[k]*positionStride;
+				x1 = positions[t1];
+				y1 = positions[t1 + 1];
+				z1 = positions[t1 + 2];
+				x2 = positions[t2];
+				y2 = positions[t2 + 1];
+				z2 = positions[t2 + 2];
+				x3 = positions[t3];
+				y3 = positions[t3 + 1];
+				z3 = positions[t3 + 2];
 				
 				// if within bounds
 				if (!(    (x < x1 && x < x2 && x < x3) ||
@@ -403,9 +423,23 @@ package away3d.core.pick
 					
 					// if inside the current triangle, fetch details hit information
 					if (s >= 0 && t >= 0 && (s + t) <= 1) {
-						
+
+						ni1 = normalOffset + indices[i]*normalStride;
+						ni2 = normalOffset + indices[j]*normalStride;
+						ni3 = normalOffset + indices[k]*normalStride;
+
+						n1 = indices[ni1] + indices[ni2] + indices[ni3];
+						n2 = indices[ni1 + 1] + indices[ni2 + 1] + indices[ni3 + 1];
+						n3 = indices[ni1 + 2] + indices[ni2 + 2] + indices[ni3 + 2];
+
+						nLength = Math.sqrt(n1*n1 + n2*n2 + n3*n3);
+
+						n1 /= nLength;
+						n2 /= nLength;
+						n3 /= nLength;
+
 						// this is def the triangle, now calculate precise coords
-						getPrecisePosition(_hitRenderable.inverseSceneTransform, normals[i], normals[i + 1], normals[i + 2], x1, y1, z1);
+						getPrecisePosition(_hitRenderable.sourceEntity.inverseSceneTransform, n1, n2, n3, x1, y1, z1);
 						
 						v2x = _localHitPosition.x - x1;
 						v2y = _localHitPosition.y - y1;
@@ -444,7 +478,9 @@ package away3d.core.pick
 						_hitUV.y = v + t*(uvs[ui2 + 1] - v) + s*(uvs[ui3 + 1] - v);
 						
 						_faceIndex = i;
-						_subGeometryIndex = GeomUtil.getMeshSubMeshIndex(SubMesh(_hitRenderable));
+						//TODO add back subGeometryIndex value
+						//this._subGeometryIndex = away.utils.GeometryUtils.getMeshSubGeometryIndex(subGeom);
+//						_subGeometryIndex = GeomUtil.getMeshSubMeshIndex(SubMesh(_hitRenderable));
 						
 						return;
 					}

@@ -7,6 +7,7 @@
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.DirectionalLightNode;
 	import away3d.core.partition.EntityNode;
+	import away3d.entities.IEntity;
 	import away3d.lights.shadowmaps.DirectionalShadowMapper;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	
@@ -22,7 +23,7 @@
 	 * Although the position of the light does not impact its effect, it can be used along with lookAt to intuitively
 	 * create day cycles by orbiting the position around a center point and using lookAt at that position.
 	 */
-	public class DirectionalLight extends LightBase
+	public class DirectionalLight extends LightBase implements IEntity
 	{
 		private var _direction:Vector3D;
 		private var _tmpLookAt:Vector3D;
@@ -38,13 +39,10 @@
 		public function DirectionalLight(xDir:Number = 0, yDir:Number = -1, zDir:Number = 1)
 		{
 			super();
+
+			_isEntity = true;
 			direction = new Vector3D(xDir, yDir, zDir);
 			_sceneDirection = new Vector3D();
-		}
-		
-		override protected function createEntityPartitionNode():EntityNode
-		{
-			return new DirectionalLightNode(this);
 		}
 		
 		/**

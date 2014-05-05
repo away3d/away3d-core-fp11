@@ -1,11 +1,20 @@
 package away3d.core.pick
 {
-	import flash.geom.*;
-	
+	import away3d.core.base.ISubMesh;
+	import away3d.core.pool.BillboardRenderable;
+	import away3d.core.pool.RenderableBase;
+	import away3d.core.pool.RenderablePool;
+	import away3d.core.pool.TriangleSubMeshRenderable;
+	import away3d.entities.Billboard;
+	import away3d.entities.IEntity;
+	import away3d.entities.Mesh;
+	import away3d.errors.AbstractMethodError;
 	import away3d.tools.utils.GeomUtil;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
-	
+
+	import flash.geom.Point;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 * An abstract base class for all picking collider classes. It should not be instantiated directly.
 	 */
@@ -13,10 +22,14 @@ package away3d.core.pick
 	{
 		protected var rayPosition:Vector3D;
 		protected var rayDirection:Vector3D;
+
+		private var _billboardRenderablePool:RenderablePool;
+		private var _subMeshRenderablePool:RenderablePool;
 		
 		public function PickingColliderBase()
 		{
-		
+			_billboardRenderablePool = RenderablePool.getPool(BillboardRenderable);
+			_subMeshRenderablePool = RenderablePool.getPool(TriangleSubMeshRenderable);
 		}
 		
 		protected function getCollisionNormal(indexData:Vector.<uint>, vertexData:Vector.<Number>, triangleIndex:uint, normal:Vector3D = null):Vector3D
@@ -57,17 +70,15 @@ package away3d.core.pick
 			uv.y = u*uv0y + v*uv1y + w*uv2y;
 			return uv;
 		}
-		
-		protected function getMeshSubgeometryIndex(subGeometry:SubGeometry):uint
+
+		/**
+		 * @inheritDoc
+		 */
+		protected function testRenderableCollision(renderable:RenderableBase, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
-			return GeomUtil.getMeshSubgeometryIndex(subGeometry);
+			throw new AbstractMethodError();
 		}
-		
-		protected function getMeshSubMeshIndex(subMesh:SubMesh):uint
-		{
-			return GeomUtil.getMeshSubMeshIndex(subMesh);
-		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -76,5 +87,59 @@ package away3d.core.pick
 			rayPosition = localPosition;
 			rayDirection = localDirection;
 		}
+
+		/**
+		 * Tests a <code>Billboard</code> object for a collision with the picking ray.
+		 *
+		 * @param billboard The billboard instance to be tested.
+		 * @param pickingCollisionVO The collision object used to store the collision results
+		 * @param shortestCollisionDistance The current value of the shortest distance to a detected collision along the ray.
+		 * @param findClosest
+		 */
+		public function testBillboardCollision(billboard:Billboard, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		{
+			setLocalRay(pickingCollisionVO.localRayPosition, pickingCollisionVO.localRayDirection);
+			pickingCollisionVO.materialOwner = null;
+
+			if (testRenderableCollision(_billboardRenderablePool.getItem(billboard) as RenderableBase, pickingCollisionVO, shortestCollisionDistance)) {
+					shortestCollisionDistance = pickingCollisionVO.rayEntryDistance;
+					pickingCollisionVO.materialOwner = billboard;
+					return true;
+			}
+
+			return false;
+		}
+
+			/**
+			* Tests a <code>Mesh</code> object for a collision with the picking ray.
+			*
+			* @param entity The entity instance to be tested.
+			* @param pickingCollisionVO The collision object used to store the collision results
+			* @param shortestCollisionDistance The current value of the shortest distance to a detected collision along the ray.
+			* @param findClosest
+			*/
+			public function testMeshCollision(entity:IEntity, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, findClosest:Boolean):Boolean
+			{
+				setLocalRay(pickingCollisionVO.localRayPosition, pickingCollisionVO.localRayDirection);
+				pickingCollisionVO.materialOwner = null;
+				var subMesh:ISubMesh;
+
+				var mesh:Mesh = entity as Mesh;
+				if(!mesh) return false;
+
+				var len:Number = mesh.subMeshes.length;
+				for (var i:Number = 0; i < len; ++i) {
+					subMesh = mesh.subMeshes[i];
+
+					if (testRenderableCollision(_subMeshRenderablePool.getItem(subMesh) as RenderableBase, pickingCollisionVO, shortestCollisionDistance)) {
+						shortestCollisionDistance = pickingCollisionVO.rayEntryDistance;
+						pickingCollisionVO.materialOwner = subMesh;
+						if (!findClosest) {
+							return true;
+						}
+					}
+				}
+				return pickingCollisionVO.materialOwner != null;
+			}
 	}
 }

@@ -1,10 +1,10 @@
 package away3d.lights
 {
 	import away3d.arcane;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.LightNode;
-	import away3d.entities.Entity;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.LightEvent;
 	import away3d.library.assets.AssetType;
@@ -17,7 +17,7 @@ package away3d.lights
 	/**
 	 * LightBase provides an abstract base class for subtypes representing lights.
 	 */
-	public class LightBase extends Entity
+	public class LightBase extends ObjectContainer3D
 	{
 		private var _color:uint = 0xffffff;
 		private var _colorR:Number = 1;
@@ -53,12 +53,12 @@ package away3d.lights
 			super();
 		}
 		
-		public function get castsShadows():Boolean
+		override public function get castsShadows():Boolean
 		{
 			return _castsShadows;
 		}
-		
-		public function set castsShadows(value:Boolean):void
+
+		override public function set castsShadows(value:Boolean):void
 		{
 			if (_castsShadows == value)
 				return;
@@ -181,14 +181,6 @@ package away3d.lights
 		arcane function getObjectProjectionMatrix(renderable:IRenderable, target:Matrix3D = null):Matrix3D
 		{
 			throw new AbstractMethodError();
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		override protected function createEntityPartitionNode():EntityNode
-		{
-			return new LightNode(this);
 		}
 		
 		/**

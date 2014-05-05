@@ -1,12 +1,14 @@
 package away3d.core.pick
 {
-	import away3d.core.base.*;
-	
-	import flash.geom.*;
-	
+	import away3d.entities.Billboard;
+	import away3d.entities.IEntity;
+	import away3d.entities.Mesh;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 * Auto-selecting picking collider for entity objects. Used with the <code>RaycastPicker</code> picking object.
-	 * Chooses between pure AS3 picking and PixelBender picking based on a threshold property representing
+	 * Chooses between pure AS3 picking and PixelBender picking basesd on a threshold property repreenting
 	 * the number of triangles encountered in a <code>SubMesh</code> object over which PixelBender is used.
 	 *
 	 * @see away3d.entities.Entity#pickingCollider
@@ -46,10 +48,16 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		public function testMeshCollision(entity:IEntity, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number, findClosest:Boolean):Boolean
 		{
-			_activePickingCollider = (subMesh.numTriangles > triangleThreshold)? _pbPickingCollider : _as3PickingCollider;
-			return _activePickingCollider.testMeshCollision(subMesh, pickingCollisionVO, shortestCollisionDistance);
+			var mesh:Mesh = entity as Mesh;
+			_activePickingCollider = (mesh.numTriangles > triangleThreshold)? _pbPickingCollider : _as3PickingCollider;
+			return _activePickingCollider.testMeshCollision(mesh, pickingCollisionVO, shortestCollisionDistance, findClosest);
+		}
+
+		public function testBillboardCollision(billboard:Billboard, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean {
+			_activePickingCollider = (triangleThreshold < 2)? _pbPickingCollider : _as3PickingCollider;
+			return _activePickingCollider.testBillboardCollision(billboard, pickingCollisionVO, shortestCollisionDistance);
 		}
 	}
 }

@@ -1,6 +1,8 @@
 package away3d.core.pick
 {
+	import away3d.entities.Billboard;
 	import away3d.entities.IEntity;
+	import away3d.entities.Mesh;
 
 	import flash.geom.Vector3D;
 	
@@ -24,11 +26,11 @@ package away3d.core.pick
 		/**
 		 * Tests a <code>Billboard</code> object for a collision with the picking ray.
 		 *
-		 * @param entity The entity instance to be tested.
+		 * @param billboard The billboard instance to be tested.
 		 * @param pickingCollisionVO The collision object used to store the collision results
 		 * @param shortestCollisionDistance The current value of the shortest distance to a detected collision along the ray.
 		 */
-		function testBillboardCollision(entity:IEntity, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		function testBillboardCollision(billboard:Billboard, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 
 		/**
 		 * Tests a <code>SubMesh</code> object for a collision with the picking ray.

@@ -1,7 +1,11 @@
 package away3d.core.pick
 {
 	import away3d.core.base.*;
-	
+	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableBase;
+	import away3d.entities.IEntity;
+	import away3d.entities.Mesh;
+
 	import flash.display.*;
 	import flash.geom.*;
 	import flash.utils.*;
@@ -20,7 +24,7 @@ package away3d.core.pick
 		private var _findClosestCollision:Boolean;
 		
 		private var _rayTriangleKernel:Shader;
-		private var _lastSubMeshUploaded:SubMesh;
+		private var _lastRenderable:IRenderable;
 		private var _kernelOutputBuffer:Vector.<Number>;
 		
 		/**
@@ -51,18 +55,18 @@ package away3d.core.pick
 		/**
 		 * @inheritDoc
 		 */
-		public function testMeshCollision(subMesh:SubMesh, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
+		override protected function testRenderableCollision(renderable:RenderableBase, pickingCollisionVO:PickingCollisionVO, shortestCollisionDistance:Number):Boolean
 		{
 			var cx:Number, cy:Number, cz:Number;
 			var u:Number, v:Number, w:Number;
-			var indexData:Vector.<uint> = subMesh.indexData;
-			var vertexData:Vector.<Number> = subMesh.subGeometry.vertexPositionData;
-			var uvData:Vector.<Number> = subMesh.UVData;
+			var indexData:Vector.<uint> = renderable.getIndexData().data;
+			var vertexData:Vector.<Number> = renderable.getVertexData(TriangleSubGeometry.POSITION_DATA).data;
+			var uvData:Vector.<Number> = renderable.getVertexData(TriangleSubGeometry.UV_DATA).data;
 			var numericIndexData:Vector.<Number> = Vector.<Number>(indexData);
 			var indexBufferDims:Point = evaluateArrayAsGrid(numericIndexData);
 			
 			// if working on a clone, no need to resend data to pb
-			if (!_lastSubMeshUploaded || _lastSubMeshUploaded !== subMesh) {
+			if (!_lastRenderable || _lastRenderable !== renderable) {
 				// send vertices to pb
 				var duplicateVertexData:Vector.<Number> = vertexData.concat();
 				var vertexBufferDims:Point = evaluateArrayAsGrid(duplicateVertexData);
@@ -70,7 +74,7 @@ package away3d.core.pick
 				_rayTriangleKernel.data.vertexBuffer.height = vertexBufferDims.y;
 				_rayTriangleKernel.data.vertexBufferWidth.value = [ vertexBufferDims.x ];
 				_rayTriangleKernel.data.vertexBuffer.input = duplicateVertexData;
-				_rayTriangleKernel.data.bothSides.value = [ (subMesh.material && subMesh.material.bothSides)? 1.0 : 0.0 ];
+				_rayTriangleKernel.data.bothSides.value = [ (renderable.material && renderable.material.bothSides)? 1.0 : 0.0 ];
 				
 				// send indices to pb
 				_rayTriangleKernel.data.indexBuffer.width = indexBufferDims.x;
@@ -78,8 +82,8 @@ package away3d.core.pick
 				_rayTriangleKernel.data.indexBuffer.input = numericIndexData;
 			}
 			
-			_lastSubMeshUploaded = subMesh;
-			
+			_lastRenderable = renderable;
+
 			// run kernel.
 			var shaderJob:ShaderJob = new ShaderJob(_rayTriangleKernel, _kernelOutputBuffer, indexBufferDims.x, indexBufferDims.y);
 			shaderJob.start(true);

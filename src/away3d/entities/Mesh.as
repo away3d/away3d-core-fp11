@@ -27,7 +27,6 @@
 		private var _geometry:Geometry;
 		private var _material:IMaterial;
 		private var _animator:IAnimator;
-		private var _castsShadows:Boolean = true;
 		private var _shareAnimationGeometry:Boolean = true;
 
 		/**
@@ -381,6 +380,19 @@
 			var len:uint = _subMeshes.length;
 			for (var i:uint = 0; i < len; ++i)
 				_subMeshes[i].invalidateRenderableGeometry();
+		}
+
+		/**
+		 * Returns the triangles count
+		 */
+		public function get numTriangles():uint {
+			var len:uint = _subMeshes.length;
+			var count:uint = 0;
+			for(var i:uint = 0; i<len; i++) {
+				var subMesh:ISubMesh = _subMeshes[i];
+				count += subMesh.subGeometry.numTriangles;
+			}
+			return count;
 		}
 	}
 }
