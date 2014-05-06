@@ -5,6 +5,7 @@ package away3d.containers
 	import away3d.core.partition.NodeBase;
 	import away3d.core.partition.Partition3D;
 	import away3d.core.traverse.ICollector;
+	import away3d.entities.IEntity;
 	import away3d.events.Scene3DEvent;
 	
 	import flash.events.EventDispatcher;
@@ -52,8 +53,10 @@ package away3d.containers
 			
 			traverser.scene = this;
 			
-			while (i < len)
+			while (i < len) {
+				_collectionMark++;
 				_partitions[i++].traverse(traverser);
+			}
 		}
 		
 		/**
@@ -132,7 +135,7 @@ package away3d.containers
 				registerPartition(object.partition);
 
 			if (object.isEntity)
-				object.assignedPartition.markForUpdate(object);
+				object.assignedPartition.markForUpdate(object as IEntity);
 		}
 		
 		/**
@@ -145,7 +148,7 @@ package away3d.containers
 				unregisterPartition(object.partition);
 
 			if (object.isEntity)
-				object.assignedPartition.removeEntity(object);
+				object.assignedPartition.removeEntity(object as IEntity);
 		}
 
 		/**

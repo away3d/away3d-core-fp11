@@ -1,4 +1,5 @@
 package away3d.core.traverse {
+	import away3d.containers.Scene3D;
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.Camera3D;
 	import away3d.entities.IEntity;
@@ -23,5 +24,9 @@ package away3d.core.traverse {
 		function get entryPoint():Vector3D;
 
 		function get camera():Camera3D;
+
+		function get scene():Scene3D;
+
+		function set scene(scene:Scene3D):void;
 	}
 }

@@ -75,7 +75,7 @@ package away3d.core.partition
 		 * Removes an entity from the partition tree.
 		 * @param entity The entity to be removed.
 		 */
-		arcane function removeEntity(entity:Object3D):void
+		arcane function removeEntity(entity:IEntity):void
 		{
 			var node:EntityNode = entity.partitionNode;
 			var t:EntityNode;

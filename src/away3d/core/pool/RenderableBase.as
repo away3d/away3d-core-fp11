@@ -146,7 +146,7 @@ package away3d.core.pool {
 
 		arcane function fillIndexData(indexOffset:Number):void {
 			if (!_indexData)
-				_indexData = IndexDataPool.getItem(_subGeometry.id, _level);
+				_indexData = IndexDataPool.getItem(_subGeometry, _level, indexOffset);
 
 			_indexData.updateData(indexOffset, _subGeometry.indices, _subGeometry.numVertices);
 
