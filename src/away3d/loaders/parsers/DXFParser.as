@@ -1,20 +1,21 @@
 package away3d.loaders.parsers
 {
-	import flash.geom.Vector3D;
-	import flash.utils.ByteArray;
-	import flash.utils.Dictionary;
-	
 	import away3d.arcane;
-	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.entities.Mesh;
+	import away3d.core.base.LineSubGeometry;
+	import away3d.core.base.LineSubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.LineSegment;
+	import away3d.entities.Mesh;
 	import away3d.loaders.parsers.utils.ParserUtil;
 	import away3d.materials.ColorMaterial;
 	import away3d.materials.ColorMultiPassMaterial;
 	import away3d.materials.MaterialBase;
-	import away3d.prefabs.LineSegment;
-	
+	import away3d.materials.SegmentMaterial;
+
+	import flash.geom.Vector3D;
+	import flash.utils.Dictionary;
+
 	use namespace arcane;
 	
 	/**
@@ -62,7 +63,7 @@ package away3d.loaders.parsers
 		private var _lastMeshName:String = "";
 		private var _activeMesh:Mesh;
 		private var _blockType:String;
-		private var _segmentSet:away3d.entities.LineSegment;
+		private var _segmentSet:Mesh;
 		private var _segCount:uint;
 		
 		private var _colorTable:Array = [0x000000, 0xFF0000, 0xFFFF00, 0x00FF00, 0x00FFFF, 0x0000FF, 0xFF00FF, 0xFFFFFF, 0x414141, 0x808080, 0xFF0000, 0xFFAAAA, 0xBD0000, 0xBD7E7E, 0x810000, 0x815656, 0x680000, 0x684545, 0x4F0000, 0x4F3535, 0xFF3F00, 0xFFBFAA, 0xBD2E00, 0xBD8D7E, 0x811F00, 0x816056, 0x681900, 0x684E45, 0x4F1300, 0x4F3B35, 0xFF7F00, 0xFFD4AA, 0xBD5E00, 0xBD9D7E, 0x814000, 0x816B56, 0x683400, 0x685645, 0x4F2700, 0x4F4235, 0xFFBF00, 0xFFEAAA, 0xBD8D00, 0xBDAD7E, 0x816000, 0x817656, 0x684E00, 0x685F45, 0x4F3B00, 0x4F4935, 0xFFFF00, 0xFFFFAA, 0xBDBD00, 0xBDBD7E, 0x818100, 0x818156, 0x686800, 0x686845, 0x4F4F00, 0x4F4F35, 0xBFFF00, 0xEAFFAA, 0x8DBD00, 0xADBD7E, 0x608100, 0x768156, 0x4E6800, 0x5F6845, 0x3B4F00, 0x494F35, 0x7FFF00, 0xD4FFAA, 0x5EBD00, 0x9DBD7E, 0x408100, 0x6B8156, 0x346800, 0x566845, 0x274F00, 0x424F35, 0x3FFF00, 0xBFFFAA, 0x2EBD00, 0x8DBD7E, 0x1F8100, 0x608156, 0x196800, 0x4E6845, 0x134F00, 0x3B4F35, 0x00FF00, 0xAAFFAA, 0x00BD00, 0x7EBD7E, 0x008100, 0x568156, 0x006800, 0x456845, 0x004F00, 0x354F35, 0x00FF3F, 0xAAFFBF, 0x00BD2E, 0x7EBD8D, 0x00811F, 0x568160, 0x006819, 0x45684E, 0x004F13, 0x354F3B, 0x00FF7F, 0xAAFFD4, 0x00BD5E, 0x7EBD9D, 0x008140, 0x56816B, 0x006834, 0x456856, 0x004F27, 0x354F42, 0x00FFBF, 0xAAFFEA, 0x00BD8D, 0x7EBDAD, 0x008160, 0x568176, 0x00684E, 0x45685F, 0x004F3B, 0x354F49, 0x00FFFF, 0xAAFFFF, 0x00BDBD, 0x7EBDBD, 0x008181, 0x568181, 0x006868, 0x456868, 0x004F4F, 0x354F4F, 0x00BFFF, 0xAAEAFF, 0x008DBD, 0x7EADBD, 0x006081, 0x567681, 004E68, 0x455F68, 0x003B4F, 0x35494F, 0x007FFF, 0xAAD4FF, 0x005EBD, 0x7E9DBD, 0x004081, 0x566B81, 0x003468, 0x455668, 0x00274F, 0x35424F, 0x003FFF, 0xAABFFF, 0x002EBD, 0x7E8DBD, 0x001F81, 0x566081, 0x001968, 0x454E68, 0x00134F, 0x353B4F, 0x0000FF, 0xAAAAFF, 0x0000BD, 0x7E7EBD, 0x000081, 0x565681, 0x000068, 0x454568, 0x00004F, 0x35354F, 0x3F00FF, 0xBFAAFF, 0x2E00BD, 0x8D7EBD, 0x1F0081, 0x605681, 0x190068, 0x4E4568, 0x13004F, 0x3B354F, 0x7F00FF, 0xD4AAFF, 0x5E00BD, 0x9D7EBD, 0x400081, 0x6B5681, 0x340068, 0x564568, 0x27004F, 0x42354F, 0xBF00FF, 0xEEAAFF, 0x8D00BD, 0xAD7EBD, 0x600081, 0x765681, 0x4E0068, 0x5F4568, 0x3B004F, 0x49354F, 0xFF00FF, 0xFFAAFF, 0xBD00BD, 0xBD7EBD, 0x810081, 0x815681, 0x680068, 0x684568, 0x4F004F, 0x4F354F, 0xFF00BF, 0xFFAAEA, 0xBD008D, 0xBD7EAD, 0x810060, 0x815676, 0x68004E, 0x68455F, 0x4F003B, 0x4F3549, 0xFF007F, 0xFFAAD4, 0xBD005E, 0xBD7E9D, 0x810040, 0x81566B, 0x680034, 0x684556, 0x4F0027, 0x4F3542, 0xFF003F, 0xFFAABF, 0xBD002E, 0xBD7E8D, 0x81001F, 0x815660, 0x680019, 0x68454E, 0x4F0013, 0x4F353B, 0x333333, 0x505050, 0x696969, 0x828282, 0xBEBEBE, 0xFFFFFF];
@@ -430,17 +431,17 @@ package away3d.loaders.parsers
 					// glad we keeped track. Lets reuse this mesh.
 					_activeMesh = _meshesDic[_meshName];
 					_subGeometry = TriangleSubGeometry(_activeMesh.geometry.subGeometries[_activeMesh.geometry.subGeometries.length - 1]);
-					_vertices = _subGeometry.vertexData;
-					_uvs = _subGeometry.UVData;
-					_indices = _subGeometry.indexData;
+					_vertices = _subGeometry.positions;
+					_uvs = _subGeometry.uvs;
+					_indices = _subGeometry.indices;
 				}
 				
 			}
 			
 			if (_indices.length + 3 > LIMIT) {
-				_subGeometry.fromVectors(_vertices, _uvs, null, null);
-				_subGeometry.updateIndexData(_indices);
-				
+				_subGeometry.updatePositions(_vertices);
+				_subGeometry.updateUVs(_uvs);
+				_subGeometry.updateIndices(_indices);
 				addSubGeometry(_activeMesh.geometry);
 			}
 			
@@ -454,9 +455,9 @@ package away3d.loaders.parsers
 			if (_v2.x != _v3.x || _v2.y != _v3.y || _v2.z != _v3.z) {
 				
 				if (_indices.length + 3 > LIMIT) {
-					_subGeometry.fromVectors(_vertices, _uvs, null, null);
-					_subGeometry.updateIndexData(_indices);
-					
+					_subGeometry.updatePositions(_vertices);
+					_subGeometry.updateUVs(_uvs);
+					_subGeometry.updateIndices(_indices);
 					addSubGeometry(_activeMesh.geometry);
 					
 					ind = 0;
@@ -500,9 +501,9 @@ package away3d.loaders.parsers
 		
 		private function addSubGeometry(geom:Geometry):void
 		{
-			_subGeometry = new TriangleSubGeometry();
-			_subGeometry.autoDeriveVertexNormals = true;
-			_subGeometry.autoDeriveVertexTangents = true;
+			_subGeometry = new TriangleSubGeometry(true);
+			_subGeometry.autoDeriveNormals = true;
+			_subGeometry.autoDeriveTangents = true;
 			geom.addSubGeometry(_subGeometry);
 			
 			_vertices = new Vector.<Number>();
@@ -515,25 +516,27 @@ package away3d.loaders.parsers
 			_segCount += 11;
 			
 			if (!_segmentSet || _segCount > SETLIMIT) {
-				_segmentSet = new away3d.entities.LineSegment();
+				_segmentSet = new Mesh(new Geometry(),new SegmentMaterial());
 				finalizeAsset(_segmentSet);
 				_segCount = 11;
 			}
 			
 			var lineColor:uint = (!_itemColor || isNaN(_itemColor))? 0xCCCCCC : _itemColor;
-			var line:LineSegment = new LineSegment(_v0.clone(), _v1.clone());
-			line.startColor = lineColor;
-			line.endColor = lineColor;
-			
+			var line:LineSubGeometry = new LineSubGeometry();
+			line.updatePositions(Vector.<Number>([_v0.x, _v0.y, _v0.z]), Vector.<Number>([_v1.x, _v1.y, _v1.z]))
+			var lineColors:Vector.<Number> = Vector.<Number>([lineColor]);
+			line.updateColors(lineColors,lineColors);
+
 			_itemColor = NaN;
 			
-			_segmentSet.addSegment(line);
+			_segmentSet.geometry.addSubGeometry(line);
 		}
 		
 		private function finalizeMesh():void
 		{
-			_subGeometry.fromVectors(_vertices, _uvs, null, null);
-			_subGeometry.updateIndexData(_indices);
+			_subGeometry.updatePositions(_vertices);
+			_subGeometry.updateUVs(_uvs);
+			_subGeometry.updateIndices(_indices);
 			
 			finalizeAsset(_activeMesh);
 			

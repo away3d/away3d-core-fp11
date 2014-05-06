@@ -1,8 +1,8 @@
 package away3d.loaders
 {
 	import away3d.*;
-	import away3d.cameras.*;
 	import away3d.containers.*;
+	import away3d.core.base.Object3D;
 	import away3d.entities.*;
 	import away3d.events.*;
 	import away3d.library.*;
@@ -399,7 +399,7 @@ package away3d.loaders
 			if (ev.type == AssetEvent.ASSET_COMPLETE) {
 				// TODO: not used
 				// var type : String = ev.asset.assetType;
-				var obj:ObjectContainer3D;
+				var obj:Object3D;
 				switch (ev.asset.assetType) {
 					case AssetType.LIGHT:
 						obj = LightBase(ev.asset);
@@ -418,9 +418,6 @@ package away3d.loaders
 						break;
 					case AssetType.CAMERA:
 						obj = Camera3D(ev.asset);
-						break;
-					case AssetType.SEGMENT_SET:
-						obj = away3d.entities.LineSegment(ev.asset);
 						break;
 				}
 				

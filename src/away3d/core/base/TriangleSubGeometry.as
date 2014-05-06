@@ -464,7 +464,7 @@ package away3d.core.base
 
 			_positions = values;
 
-			if (_positions == null)
+			if (!_positions)
 				_positions = new Vector.<Number>();
 
 			_numVertices = _positions.length/3;

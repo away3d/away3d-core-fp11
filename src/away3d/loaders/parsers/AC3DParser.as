@@ -457,9 +457,10 @@ package away3d.loaders.parsers
 			var geom:Geometry = mesh.geometry;
 			
 			for (i = 0; i < subGeomsData.length; i += 3) {
-				sub_geom = new TriangleSubGeometry();
-				sub_geom.fromVectors(subGeomsData[i], subGeomsData[i + 2], null, null);
-				sub_geom.updateIndexData(subGeomsData[i + 1]);
+				sub_geom = new TriangleSubGeometry(true);
+				sub_geom.updatePositions(subGeomsData[i]);
+				sub_geom.updateUVs(subGeomsData[i + 2]);
+				sub_geom.updateIndices(subGeomsData[i + 1]);
 				geom.addSubGeometry(sub_geom);
 			}
 			

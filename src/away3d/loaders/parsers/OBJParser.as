@@ -2,7 +2,7 @@ package away3d.loaders.parsers
 {
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
@@ -339,7 +339,7 @@ package away3d.loaders.parsers
 			var face:FaceData;
 			var numFaces:uint = faces.length;
 			var numVerts:uint;
-			var subs:Vector.<ISubGeometry>;
+			var sub:TriangleSubGeometry;
 			
 			var vertices:Vector.<Number> = new Vector.<Number>();
 			var uvs:Vector.<Number> = new Vector.<Number>();
@@ -360,9 +360,14 @@ package away3d.loaders.parsers
 				}
 			}
 			if (vertices.length > 0) {
-				subs = GeomUtil.fromVectors(vertices, indices, uvs, normals, null, null, null);
-				for (i = 0; i < subs.length; i++)
-					geometry.addSubGeometry(subs[i]);
+				sub = new TriangleSubGeometry(true);
+				sub.autoDeriveNormals = normals.length? false : true;
+				sub.updateIndices(indices);
+				sub.updatePositions(vertices);
+				sub.updateVertexNormals(normals);
+				sub.updateUVs(uvs);
+
+				geometry.addSubGeometry(sub);
 			}
 		}
 		

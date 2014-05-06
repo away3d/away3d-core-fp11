@@ -385,10 +385,6 @@ package away3d.loaders.parsers
 			_byteData.position = _offsetFrames;
 			
 			for (i = 0; i < _numFrames; i++) {
-				subGeom = new TriangleSubGeometry();
-				_firstSubGeom ||= subGeom;
-				geometry = new Geometry();
-				geometry.addSubGeometry(subGeom);
 				tvertices = new Vector.<Number>();
 				fvertices = new Vector.<Number>(vertLen*3, true);
 				
@@ -413,13 +409,19 @@ package away3d.loaders.parsers
 					fvertices[k++] = tvertices[uint(_vertIndices[j]*3 + 2)];
 					fvertices[k++] = tvertices[uint(_vertIndices[j]*3 + 1)];
 				}
-				
-				subGeom.fromVectors(fvertices, _finalUV, null, null);
-				subGeom.updateIndexData(_indices);
-				subGeom.vertexNormalData;
-				subGeom.vertexTangentData;
-				subGeom.autoDeriveVertexNormals = false;
-				subGeom.autoDeriveVertexTangents = false;
+
+				subGeom = new TriangleSubGeometry(true);
+
+				if (!_firstSubGeom) _firstSubGeom = subGeom;
+
+				geometry = new Geometry();
+				geometry.addSubGeometry(subGeom);
+
+				subGeom.updatePositions(fvertices);
+				subGeom.updateUVs(_finalUV);
+				subGeom.updateIndices(_indices);
+				subGeom.autoDeriveNormals = false;
+				subGeom.autoDeriveTangents = false;
 				
 				var clip:VertexClipNode = _clipNodes[name];
 				
@@ -473,9 +475,10 @@ package away3d.loaders.parsers
 		
 		private function createDefaultSubGeometry():void
 		{
-			var sub:TriangleSubGeometry = new TriangleSubGeometry();
-			sub.updateData(_firstSubGeom.vertexData);
-			sub.updateIndexData(_indices);
+			var sub:TriangleSubGeometry = new TriangleSubGeometry(true);
+			sub.updatePositions(_firstSubGeom.positions);
+			sub.updateUVs(_firstSubGeom.uvs);
+			sub.updateIndices(_indices);
 			_geometry.addSubGeometry(sub);
 		}
 	

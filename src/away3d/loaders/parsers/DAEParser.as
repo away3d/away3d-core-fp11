@@ -1,5 +1,7 @@
 package away3d.loaders.parsers
 {
+	import away3d.core.base.TriangleSubGeometry;
+
 	import flash.display.BitmapData;
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
@@ -16,7 +18,6 @@ package away3d.loaders.parsers
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SkinnedSubGeometry;
 	import away3d.debug.Debug;
 	import away3d.entities.Mesh;
 	import away3d.loaders.misc.ResourceDependency;
@@ -41,6 +42,7 @@ package away3d.loaders.parsers
 	 */
 	public class DAEParser extends ParserBase
 	{
+		private static const NORMALIZED_METHOD:String = "NORMALIZED";
 		public static const CONFIG_USE_GPU:uint = 1;
 		public static const CONFIG_DEFAULT:uint = CONFIG_USE_GPU;
 		public static const PARSE_GEOMETRIES:uint = 1;
@@ -266,25 +268,25 @@ package away3d.loaders.parsers
 			var vec:Vector3D = new Vector3D();
 			var i:uint;
 			for each (var sub:TriangleSubGeometry in geometry.subGeometries) {
-				var vertexData:Vector.<Number> = sub.vertexData;
+				var positions:Vector.<Number> = sub.positions;
 				
-				for (i = sub.vertexOffset; i < vertexData.length; i += sub.vertexStride) {
-					vec.x = vertexData[i + 0];
-					vec.y = vertexData[i + 1];
-					vec.z = vertexData[i + 2];
+				for (i = 0; i < sub.numVertices; i++) {
+					vec.x = positions[i*3 + 0];
+					vec.y = positions[i*3 + 1];
+					vec.z = positions[i*3 + 2];
 					vec = skin.bind_shape_matrix.transformVector(vec);
-					vertexData[i + 0] = vec.x;
-					vertexData[i + 1] = vec.y;
-					vertexData[i + 2] = vec.z;
+					positions[i*3 + 0] = vec.x;
+					positions[i*3 + 1] = vec.y;
+					positions[i*3 + 2] = vec.z;
 				}
-				sub.updateData(vertexData);
+				sub.updatePositions(positions);
 			}
 		}
 		
 		private function applySkinController(geometry:Geometry, mesh:DAEMesh, skin:DAESkin, skeleton:Skeleton):void
 		{
 			var sub:TriangleSubGeometry;
-			var skinned_sub_geom:SkinnedSubGeometry;
+			var skinned_sub_geom:TriangleSubGeometry;
 			var primitive:DAEPrimitive;
 			var jointIndices:Vector.<Number>;
 			var jointWeights:Vector.<Number>;
@@ -313,11 +315,15 @@ package away3d.loaders.parsers
 					}
 				}
 				
-				skinned_sub_geom = new SkinnedSubGeometry(skin.maxBones);
-				skinned_sub_geom.updateData(sub.vertexData.concat());
-				skinned_sub_geom.updateIndexData(sub.indexData);
-				skinned_sub_geom.updateJointIndexData(jointIndices);
-				skinned_sub_geom.updateJointWeightsData(jointWeights);
+				skinned_sub_geom = new TriangleSubGeometry(true);
+				skinned_sub_geom.jointsPerVertex = skin.maxBones;
+				skinned_sub_geom.updatePositions(sub.positions);
+				skinned_sub_geom.updateUVs(sub.uvs);
+				skinned_sub_geom.updateVertexNormals(sub.vertexNormals);
+				skinned_sub_geom.updateVertexTangents(sub.vertexTangents);
+				skinned_sub_geom.updateIndices(sub.indices);
+				skinned_sub_geom.updateJointIndices(jointIndices);
+				skinned_sub_geom.updateJointWeights(jointWeights);
 				geometry.subGeometries[i] = skinned_sub_geom;
 				geometry.subGeometries[i].parentGeometry = geometry;
 			}
@@ -414,7 +420,7 @@ package away3d.loaders.parsers
 			
 			var targets:Vector.<Geometry> = new Vector.<Geometry>();
 			base = getGeometryByName(morph.source);
-			var vertexData:Vector.<Number>;
+
 			var sub:TriangleSubGeometry;
 			var startWeight:Number = 1.0;
 			var i:uint, j:uint, k:uint;
@@ -431,14 +437,15 @@ package away3d.loaders.parsers
 			
 			for (i = 0; i < base.subGeometries.length; i++) {
 				sub = TriangleSubGeometry(base.subGeometries[i]);
-				vertexData = sub.vertexData.concat();
-				for (var v:int = 0; v < vertexData.length/13; v++) {
-					j = sub.vertexOffset + v*sub.vertexStride;
-					vertexData[j] = morph.method == "NORMALIZED"? startWeight*sub.vertexData[j] : sub.vertexData[j];
+				var positions:Vector.<Number> = sub.positions.concat();
+				var numVertices:uint = sub.numVertices;
+				for (var v:int = 0; v < numVertices; v++) {
+					j = v*3;
+					positions[j] = morph.method == NORMALIZED_METHOD ? startWeight*sub.positions[j] : sub.positions[j];
 					for (k = 0; k < morph.targets.length; k++)
-						vertexData[j] += morph.weights[k]*targets[k].subGeometries[i].vertexData[j];
+						positions[j] += morph.weights[k]*(targets[k].subGeometries[i] as TriangleSubGeometry).positions[j];
 				}
-				sub.updateData(vertexData);
+				sub.updatePositions(positions);
 			}
 			
 			return base;
@@ -528,8 +535,8 @@ package away3d.loaders.parsers
 					clip = processSkinAnimation(controller.skin, mesh, skeleton);
 					clip.looping = true;
 					
-					weights = SkinnedSubGeometry(mesh.geometry.subGeometries[0]).jointIndexData.length;
-					jpv = weights/(mesh.geometry.subGeometries[0].vertexData.length/3);
+					weights = TriangleSubGeometry(mesh.geometry.subGeometries[0]).jointIndices.length;
+					jpv = weights/(mesh.geometry.subGeometries[0].vertices.length/3);
 					//anim = new SkeletonAnimation(skeleton, jpv);
 					
 					//var state:SkeletonAnimationState = SkeletonAnimationState(mesh.animationState);
@@ -859,9 +866,15 @@ package away3d.loaders.parsers
 		
 		private function translatePrimitive(mesh:DAEMesh, primitive:DAEPrimitive, reverseTriangles:Boolean = true, autoDeriveVertexNormals:Boolean = true, autoDeriveVertexTangents:Boolean = true):TriangleSubGeometry
 		{
-			var sub:TriangleSubGeometry = new TriangleSubGeometry();
+			var sub:TriangleSubGeometry = new TriangleSubGeometry(true);
 			var indexData:Vector.<uint> = new Vector.<uint>();
 			var data:Vector.<Number> = new Vector.<Number>();
+			var positions:Vector.<Number> = new Vector.<Number>();
+			var normals:Vector.<Number> = new Vector.<Number>();
+			var tangents:Vector.<Number> = new Vector.<Number>();
+			var uvs:Vector.<Number> = new Vector.<Number>();
+			var secondaryUVs:Vector.<Number> = new Vector.<Number>();
+
 			var faces:Vector.<DAEFace> = primitive.create(mesh);
 			var v:DAEVertex, f:DAEFace;
 			var i:uint, j:uint;
@@ -869,18 +882,20 @@ package away3d.loaders.parsers
 			// vertices, normals and uvs
 			for (i = 0; i < primitive.vertices.length; i++) {
 				v = primitive.vertices[i];
-				data.push(v.x, v.y, v.z);
-				data.push(v.nx, v.ny, v.nz);
-				data.push(0, 0, 0);
+				positions.push(v.x, v.y, v.z);
+				normals.push(v.nx, v.ny, v.nz);
+				tangents.push(0, 0, 0);
 				
 				if (v.numTexcoordSets > 0) {
-					data.push(v.uvx, 1.0 - v.uvy);
+					uvs.push(v.uvx, 1.0 - v.uvy);
 					if (v.numTexcoordSets > 1)
-						data.push(v.uvx2, 1.0 - v.uvy2);
+						secondaryUVs.push(v.uvx2, 1.0 - v.uvy2);
 					else
-						data.push(v.uvx, 1.0 - v.uvy);
-				} else
-					data.push(0, 0, 0, 0);
+						secondaryUVs.push(v.uvx, 1.0 - v.uvy);
+				} else {
+					uvs.push(0, 0);
+					secondaryUVs.push(0, 0);
+				}
 			}
 			
 			// triangles
@@ -895,11 +910,14 @@ package away3d.loaders.parsers
 			if (reverseTriangles)
 				indexData.reverse();
 			
-			sub.autoDeriveVertexNormals = autoDeriveVertexNormals;
-			sub.autoDeriveVertexTangents = autoDeriveVertexTangents;
-			sub.updateData(data);
-			sub.updateIndexData(indexData);
-			
+			sub.autoDeriveNormals = autoDeriveVertexNormals;
+			sub.autoDeriveTangents = autoDeriveVertexTangents;
+			sub.updateIndices(indexData);
+			sub.updatePositions(positions);
+			sub.updateUVs(uvs);
+			sub.updateSecondaryUVs(secondaryUVs);
+			sub.updateVertexNormals(normals);
+			sub.updateVertexTangents(tangents);
 			return sub;
 		}
 		

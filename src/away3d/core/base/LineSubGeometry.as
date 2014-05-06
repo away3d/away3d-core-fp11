@@ -37,26 +37,26 @@ package away3d.core.base {
 
 		override protected function updateStrideOffset():void
 		{
-			_offset[LineSubGeometry.VERTEX_DATA] = 0;
+			_offset[VERTEX_DATA] = 0;
 
 			var stride:Number = 0;
-			_offset[LineSubGeometry.START_POSITION_DATA] = stride;
+			_offset[START_POSITION_DATA] = stride;
 			stride += 3;
 
-			_offset[LineSubGeometry.END_POSITION_DATA] = stride;
+			_offset[END_POSITION_DATA] = stride;
 			stride += 3;
 
-			_offset[LineSubGeometry.THICKNESS_DATA] = stride;
+			_offset[THICKNESS_DATA] = stride;
 			stride += 1;
 
-			_offset[LineSubGeometry.COLOR_DATA] = stride;
+			_offset[COLOR_DATA] = stride;
 			stride += 4;
 
-			_stride[LineSubGeometry.VERTEX_DATA] = stride;
-			_stride[LineSubGeometry.START_POSITION_DATA] = stride;
-			_stride[LineSubGeometry.END_POSITION_DATA] = stride;
-			_stride[LineSubGeometry.THICKNESS_DATA] = stride;
-			_stride[LineSubGeometry.COLOR_DATA] = stride;
+			_stride[VERTEX_DATA] = stride;
+			_stride[START_POSITION_DATA] = stride;
+			_stride[END_POSITION_DATA] = stride;
+			_stride[THICKNESS_DATA] = stride;
+			_stride[COLOR_DATA] = stride;
 
 			var len:Number = _numVertices*stride;
 
@@ -195,7 +195,7 @@ package away3d.core.base {
 
 			_numVertices = _numSegments*4;
 
-			var lenV:Number = _numVertices*getStride(LineSubGeometry.VERTEX_DATA);
+			var lenV:Number = _numVertices*getStride(VERTEX_DATA);
 
 			if (_vertices == null)
 				_vertices = new Vector.<Number>(lenV);
@@ -204,8 +204,8 @@ package away3d.core.base {
 
 			i = 0;
 			j = 0;
-			index = getOffset(LineSubGeometry.START_POSITION_DATA);
-			stride = getStride(LineSubGeometry.START_POSITION_DATA);
+			index = getOffset(START_POSITION_DATA);
+			stride = getStride(START_POSITION_DATA);
 			positions = _vertices;
 			indices = new Vector.<uint>();
 
@@ -256,8 +256,8 @@ package away3d.core.base {
 			if (values != null) {
 				i = 0;
 				j = 0;
-				offset = getOffset(LineSubGeometry.THICKNESS_DATA);
-				stride = getStride(LineSubGeometry.THICKNESS_DATA);
+				offset = getOffset(THICKNESS_DATA);
+				stride = getStride(THICKNESS_DATA);
 				thickness = _vertices;
 
 				index = offset
@@ -313,8 +313,8 @@ package away3d.core.base {
 
 			i = 0;
 			j = 0;
-			offset = getOffset(LineSubGeometry.COLOR_DATA);
-			stride = getStride(LineSubGeometry.COLOR_DATA);
+			offset = getOffset(COLOR_DATA);
+			stride = getStride(COLOR_DATA);
 			colors = _vertices;
 
 			index = offset;
@@ -407,7 +407,7 @@ package away3d.core.base {
 			_thicknessDirty = true;
 
 			if (!_thicknessUpdated)
-				_thicknessUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, LineSubGeometry.THICKNESS_DATA);
+				_thicknessUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, THICKNESS_DATA);
 
 			dispatchEvent(_thicknessUpdated);
 		}
@@ -420,7 +420,7 @@ package away3d.core.base {
 			_colorsDirty = true;
 
 			if (!_colorUpdated)
-				_colorUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, LineSubGeometry.COLOR_DATA);
+				_colorUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, COLOR_DATA);
 
 			dispatchEvent(_colorUpdated);
 		}

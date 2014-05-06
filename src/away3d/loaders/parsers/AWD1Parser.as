@@ -1,5 +1,7 @@
 package away3d.loaders.parsers
 {
+	import away3d.materials.MaterialBase;
+
 	import flash.geom.Matrix3D;
 	import flash.net.URLRequest;
 	import flash.utils.ByteArray;
@@ -288,7 +290,7 @@ package away3d.loaders.parsers
 						else
 							mesh.material = new TextureMultiPassMaterial(DefaultMaterialManager.getDefaultTexture());
 						
-						mesh.material.bothSides = Boolean(ref.bothSides);
+						(mesh.material as MaterialBase).bothSides = Boolean(ref.bothSides);
 						
 						if (ref.material && ref.material != "")
 							addDependency(ref.name, new URLRequest(ref.material));
@@ -340,9 +342,10 @@ package away3d.loaders.parsers
 			for (j = 0; j < aRef.length; j += 6) {
 				
 				if (indices.length + 3 > LIMIT) {
-					sub_geom = new TriangleSubGeometry();
-					sub_geom.updateIndexData(indices);
-					sub_geom.fromVectors(vertices, uvs, null, null);
+					sub_geom = new TriangleSubGeometry(true);
+					sub_geom.updateIndices(indices);
+					sub_geom.updatePositions(vertices);
+					sub_geom.updateUVs(uvs);
 					geom.addSubGeometry(sub_geom);
 					
 					vertices = new Vector.<Number>();
@@ -387,9 +390,10 @@ package away3d.loaders.parsers
 				uvs[uindex++] = 1 - parseFloat(au[1]);
 			}
 			
-			sub_geom = new TriangleSubGeometry();
-			sub_geom.updateIndexData(indices);
-			sub_geom.fromVectors(vertices, uvs, null, null);
+			sub_geom = new TriangleSubGeometry(true);
+			sub_geom.updateIndices(indices);
+			sub_geom.updatePositions(vertices);
+			sub_geom.updateUVs(uvs);
 			geom.addSubGeometry(sub_geom);
 		}
 		

@@ -485,7 +485,7 @@ package away3d.loaders.parsers
 		{
 			if (obj.type == AssetType.MESH) {
 				var i:uint;
-				var subs:Vector.<ISubGeometry>;
+				var sub:TriangleSubGeometry;
 				var geom:Geometry;
 				var mat:MaterialBase;
 				var mesh:Mesh;
@@ -536,9 +536,12 @@ package away3d.loaders.parsers
 				
 				// Construct sub-geometries (potentially splitting buffers)
 				// and add them to geometry.
-				subs = GeomUtil.fromVectors(obj.verts, obj.indices, obj.uvs, null, null, null, null);
-				for (i = 0; i < subs.length; i++)
-					geom.subGeometries.push(subs[i]);
+				sub = new TriangleSubGeometry(true);
+				sub.updateIndices(obj.indices);
+				sub.updatePositions(obj.verts);
+				sub.updateUVs(obj.uvs);
+
+				geom.addSubGeometry(sub);
 				
 				if (obj.materials.length > 0) {
 					var mname:String;
