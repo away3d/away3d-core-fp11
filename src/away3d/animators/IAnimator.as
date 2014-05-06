@@ -3,13 +3,14 @@ package away3d.animators
 	import away3d.core.pool.IRenderable;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.entities.Mesh;
+	import away3d.library.assets.IAsset;
 
 	/**
 	 * Provides an interface for animator classes that control animation output from a data set subtype of <code>AnimationSetBase</code>.
 	 *
 	 * @see away3d.animators.IAnimationSet
 	 */
-	public interface IAnimator
+	public interface IAnimator extends IAsset
 	{
 		/**
 		 * Returns the animation data set in use by the animator.
@@ -36,7 +37,5 @@ package away3d.animators
 		 * Returns a shallow clone (re-using the same IAnimationSet) of this IAnimator.
 		 */
 		function clone():IAnimator;
-		
-		function dispose():void;
 	}
 }

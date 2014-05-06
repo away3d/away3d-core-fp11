@@ -5,7 +5,7 @@ package away3d.prefabs
 	/**
 	 * A UV RegularPolygon primitive mesh.
 	 */
-	public class PrimitivePolygonPrefab extends PrimitiveCylinderPrefab implements IAsset
+	public class PrimitivePolygonPrefab extends PrimitiveCylinderPrefab
 	{
 		
 		/**

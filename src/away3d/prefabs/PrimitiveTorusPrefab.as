@@ -3,14 +3,13 @@ package away3d.prefabs
 	import away3d.arcane;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.library.assets.IAsset;
 
 	use namespace arcane;
 	
 	/**
 	 * A UV Cylinder primitive mesh.
 	 */
-	public class PrimitiveTorusPrefab extends PrimitivePrefabBase implements IAsset
+	public class PrimitiveTorusPrefab extends PrimitivePrefabBase
 	{
 		protected var _radius:Number;
 		protected var _tubeRadius:Number;

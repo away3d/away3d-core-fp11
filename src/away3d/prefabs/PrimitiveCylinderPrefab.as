@@ -11,7 +11,7 @@ package away3d.prefabs
 	/**
 	 * A Cylinder primitive mesh.
 	 */
-	public class PrimitiveCylinderPrefab extends PrimitivePrefabBase implements IAsset
+	public class PrimitiveCylinderPrefab extends PrimitivePrefabBase
 	{
 		protected var _topRadius:Number;
 		protected var _bottomRadius:Number;

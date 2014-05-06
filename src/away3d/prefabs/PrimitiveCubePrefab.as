@@ -4,15 +4,13 @@ package away3d.prefabs
 	import away3d.core.base.LineSubGeometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.library.assets.IAsset;
-	import away3d.prefabs.PrimitivePrefabBase;
 
 	use namespace arcane;
 	
 	/**
 	 * A Cube primitive mesh.
 	 */
-	public class PrimitiveCubePrefab extends PrimitivePrefabBase implements IAsset
+	public class PrimitiveCubePrefab extends PrimitivePrefabBase
 	{
 		private var _width:Number;
 		private var _height:Number;

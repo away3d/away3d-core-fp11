@@ -2,6 +2,7 @@ package away3d.prefabs {
 	import away3d.arcane;
 	import away3d.core.base.Object3D;
 	import away3d.errors.AbstractMethodError;
+	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
 
 	use namespace arcane;
@@ -9,7 +10,7 @@ package away3d.prefabs {
 	/**
 	 * PrefabBase is an abstract base class for prefabs, which are prebuilt objects that allow easy cloning and updating
 	 */
-	public class PrefabBase extends NamedAssetBase {
+	public class PrefabBase extends NamedAssetBase implements IAsset{
 		protected var _objects:Vector.<Object3D> = new Vector.<Object3D>();
 
 		/**

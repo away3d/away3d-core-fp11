@@ -11,7 +11,7 @@ package away3d.prefabs
 	/**
 	 * A Plane primitive mesh.
 	 */
-	public class PrimitivePlanePrefab extends PrimitivePrefabBase implements IAsset
+	public class PrimitivePlanePrefab extends PrimitivePrefabBase
 	{
 		private var _segmentsW:uint;
 		private var _segmentsH:uint;

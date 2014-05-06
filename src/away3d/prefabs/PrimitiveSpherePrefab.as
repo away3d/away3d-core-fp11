@@ -11,7 +11,7 @@ package away3d.prefabs
 	/**
 	 * A UV Sphere primitive mesh.
 	 */
-	public class PrimitiveSpherePrefab extends PrimitivePrefabBase implements IAsset
+	public class PrimitiveSpherePrefab extends PrimitivePrefabBase
 	{
 		private var _radius:Number;
 		private var _segmentsW:uint;

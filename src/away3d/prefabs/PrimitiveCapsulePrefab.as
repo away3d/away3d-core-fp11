@@ -7,7 +7,7 @@ package away3d.prefabs
 	/**
 	 * A Capsule primitive.
 	 */
-	public class PrimitiveCapsulePrefab extends PrimitivePrefabBase implements IAsset
+	public class PrimitiveCapsulePrefab extends PrimitivePrefabBase
 	{
 		private var _radius:Number;
 		private var _height:Number;

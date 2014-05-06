@@ -13,7 +13,7 @@
 	/**
 	 * A NURBS primitive geometry.
 	 */
-	public class NURBSGeometry extends PrimitivePrefabBase implements IAsset
+	public class NURBSGeometry extends PrimitivePrefabBase
 	{
 		private var _controlNet:Vector.<NURBSVertex>;
 		private var _uOrder:Number;

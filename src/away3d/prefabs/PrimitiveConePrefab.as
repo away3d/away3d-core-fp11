@@ -5,7 +5,7 @@ package away3d.prefabs
 	/**
 	 * A UV Cone primitive mesh.
 	 */
-	public class PrimitiveConePrefab extends PrimitiveCylinderPrefab implements IAsset
+	public class PrimitiveConePrefab extends PrimitiveCylinderPrefab
 	{
 		
 		/**

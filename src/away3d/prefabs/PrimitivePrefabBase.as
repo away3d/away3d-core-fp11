@@ -8,10 +8,11 @@ package away3d.prefabs {
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
 	import away3d.library.assets.AssetType;
+	import away3d.library.assets.IAsset;
 	import away3d.materials.IMaterial;
 
 	use namespace arcane;
-	public class PrimitivePrefabBase extends PrefabBase {
+	public class PrimitivePrefabBase extends PrefabBase{
 
 		protected var _geomDirty:Boolean = true;
 		protected var _uvDirty:Boolean = true;
