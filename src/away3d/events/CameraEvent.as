@@ -9,7 +9,7 @@ package away3d.events
 	
 	public class CameraEvent extends Event
 	{
-		public static const LENS_CHANGED:String = "lensChanged";
+		public static const PROJECTION_CHANGED:String = "lensChanged";
 		
 		private var _camera:Camera3D;
 		

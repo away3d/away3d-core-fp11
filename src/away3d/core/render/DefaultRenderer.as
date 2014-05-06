@@ -102,7 +102,7 @@ package away3d.core.render
 			_profile = profile;
 		}
 
-		public function init(stage:Stage):void {
+		override public function init(stage:Stage):void {
 			if (_stage3DProxy == null)
 				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
 
@@ -119,7 +119,7 @@ package away3d.core.render
 				_rttBufferManager.viewHeight = _height;
 		}
 
-		arcane override function set stage3DProxy(value:Stage3DProxy):void
+		override public function set stage3DProxy(value:Stage3DProxy):void
 		{
 			super.stage3DProxy = value;
 			_distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;

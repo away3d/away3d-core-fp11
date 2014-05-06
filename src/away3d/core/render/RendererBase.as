@@ -1,9 +1,11 @@
 package away3d.core.render
 {
 	import away3d.arcane;
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.TriangleSubMesh;
 	import away3d.core.base.LineSubMesh;
 	import away3d.core.managers.RTTBufferManager;
+	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.pool.BillboardRenderable;
 	import away3d.core.pool.EntityListItem;
@@ -27,10 +29,12 @@ package away3d.core.render
 	import away3d.materials.IMaterial;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.utils.DefaultMaterialManager;
+	import away3d.projections.PerspectiveProjection;
 	import away3d.textures.Texture2DBase;
 	
 	import flash.display.BitmapData;
-	
+	import flash.display.Stage;
+
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
@@ -69,11 +73,14 @@ package away3d.core.render
 		protected var _backBufferInvalid:Boolean = true;
 		protected var _depthTextureInvalid:Boolean = true;
 		public var _depthPrepass:Boolean = false;
-		
+
+		private var _backgroundImageRenderer:BackgroundImageRenderer;
+		private var _background:Texture2DBase;
 		protected var _backgroundR:Number = 0;
 		protected var _backgroundG:Number = 0;
 		protected var _backgroundB:Number = 0;
 		protected var _backgroundAlpha:Number = 1;
+
 		protected var _shareContext:Boolean = false;
 		
 		protected var _renderTarget:TextureBase;
@@ -90,8 +97,6 @@ package away3d.core.render
 		private var _snapshotBitmapData:BitmapData;
 		private var _snapshotRequired:Boolean;
 
-		private var _backgroundImageRenderer:BackgroundImageRenderer;
-		private var _background:Texture2DBase;
 
 		protected var _rttViewProjectionMatrix:Matrix3D = new Matrix3D();
 
@@ -105,6 +110,8 @@ package away3d.core.render
 		protected var blendedRenderableHead:RenderableBase;
 		protected var _renderableSorter:IEntitySorter;
 		protected var _antiAlias:Number;
+
+		private var _entityCollector:ICollector;
 
 		public function get antiAlias():Number
 		{
@@ -189,7 +196,7 @@ package away3d.core.render
 			return _width;
 		}
 
-		public function set width(value:Number)
+		public function set width(value:Number):void
 		{
 			if (_width == value)
 				return;
@@ -247,6 +254,10 @@ package away3d.core.render
 
 			//default sorting algorithm
 			_renderableSorter = new RenderableMergeSort();
+		}
+
+		public function init(stage:Stage):void {
+
 		}
 		
 		public function createEntityCollector():ICollector
@@ -315,12 +326,12 @@ package away3d.core.render
 		 *
 		 * @private
 		 */
-		arcane function get stage3DProxy():Stage3DProxy
+		public function get stage3DProxy():Stage3DProxy
 		{
 			return _stage3DProxy;
 		}
-		
-		arcane function set stage3DProxy(value:Stage3DProxy):void
+
+		public function set stage3DProxy(value:Stage3DProxy):void
 		{
 			if (value == _stage3DProxy)
 				return;
@@ -393,6 +404,7 @@ package away3d.core.render
 
 		public function render(entityCollector:ICollector):void
 		{
+			_entityCollector = entityCollector;
 			this._viewportDirty = false;
 			this._scissorDirty = false;
 		}
@@ -730,5 +742,46 @@ package away3d.core.render
 		{
 			_depthPrepass = value;
 		}
+
+		private var _cameras:Vector.<Camera3D>;
+		private var _lenses:Vector.<PerspectiveProjection>;
+		private var _container:ObjectContainer3D;
+		protected var _cubeRenderer:RendererBase;
+
+		private function initCameras():void
+		{
+			_cameras = new Vector.<Camera3D>();
+			_lenses = new Vector.<PerspectiveProjection>();
+			_container = new ObjectContainer3D();
+			_entityCollector.scene.addChild(_container);
+			// posX, negX, posY, negY, posZ, negZ
+			addCamera(0, 90, 0);
+			addCamera(0, -90, 0);
+			addCamera(-90, 0, 0);
+			addCamera(90, 0, 0);
+			addCamera(0, 0, 0);
+			addCamera(0, 180, 0);
+
+			_cubeRenderer = new DefaultRenderer();
+			_cubeRenderer.stage3DProxy = stage3DProxy;
+			_cubeRenderer.shareContext = shareContext;
+			_cubeRenderer.backgroundAlpha = 0;
+		}
+
+		private function addCamera(rotationX:Number, rotationY:Number, rotationZ:Number):void
+		{
+			var cam:Camera3D = new Camera3D();
+			cam.position = new Vector3D(0,0,0);
+			_container.addChild(cam);
+			cam.rotationX = rotationX;
+			cam.rotationY = rotationY;
+			cam.rotationZ = rotationZ;
+			cam.projection.near = .01;
+			PerspectiveProjection(cam.projection).fieldOfView = 90;
+			_lenses.push(PerspectiveProjection(cam.projection));
+			cam.projection.aspectRatio = 1;
+			_cameras.push(cam);
+		}
+
 	}
 }

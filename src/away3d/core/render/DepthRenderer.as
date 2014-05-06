@@ -1,19 +1,18 @@
 package away3d.core.render
 {
 	import away3d.arcane;
-	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
-	import away3d.core.pool.RenderableListItem;
 	import away3d.core.math.Plane3D;
+	import away3d.core.pool.IRenderable;
 	import away3d.core.traverse.EntityCollector;
-	import away3d.entities.Entity;
+	import away3d.core.traverse.ICollector;
+	import away3d.entities.Camera3D;
 	import away3d.materials.MaterialBase;
-	
+
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Rectangle;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -50,20 +49,20 @@ package away3d.core.render
 		{
 			_disableColor = value;
 		}
-		
-		arcane override function set backgroundR(value:Number):void
+
+		public override function set backgroundR(value:Number):void
+		{
+		}
+
+		public override function set backgroundG(value:Number):void
 		{
 		}
 		
-		arcane override function set backgroundG(value:Number):void
+		public override function set backgroundB(value:Number):void
 		{
 		}
-		
-		arcane override function set backgroundB(value:Number):void
-		{
-		}
-		
-		arcane function renderCascades(entityCollector:EntityCollector, target:TextureBase, numCascades:uint, scissorRects:Vector.<Rectangle>, cameras:Vector.<Camera3D>):void
+
+		public function renderCascades(entityCollector:ICollector, target:TextureBase, numCascades:uint, scissorRects:Vector.<Rectangle>, cameras:Vector.<Camera3D>):void
 		{
 			_renderTarget = target;
 			_renderTargetSurface = 0;

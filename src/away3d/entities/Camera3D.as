@@ -233,7 +233,7 @@ package away3d.entities
 			_projection.removeEventListener(ProjectionEvent.MATRIX_CHANGED, onProjectionMatrixChange);
 			_projection = value;
 			_projection.addEventListener(ProjectionEvent.MATRIX_CHANGED, onProjectionMatrixChange);
-			dispatchEvent(new CameraEvent(CameraEvent.LENS_CHANGED, this));
+			dispatchEvent(new CameraEvent(CameraEvent.PROJECTION_CHANGED, this));
 		}
 		
 		/**

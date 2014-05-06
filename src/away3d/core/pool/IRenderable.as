@@ -22,8 +22,6 @@ package away3d.core.pool {
 
 		function set zIndex(value:Number):void;
 
-		function init(stage:Stage):void;
-
 		function dispose():void;
 
 		function invalidateGeometry():void;

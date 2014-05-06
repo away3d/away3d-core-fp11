@@ -25,6 +25,8 @@ package away3d.core.traverse {
 
 		function get camera():Camera3D;
 
+		function set camera(value:Camera3D):void;
+
 		function get scene():Scene3D;
 
 		function set scene(scene:Scene3D):void;
