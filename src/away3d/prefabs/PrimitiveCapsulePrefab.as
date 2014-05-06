@@ -2,11 +2,12 @@ package away3d.prefabs
 {
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	
+	import away3d.library.assets.IAsset;
+
 	/**
 	 * A Capsule primitive.
 	 */
-	public class PrimitiveCapsulePrefab extends PrimitivePrefabBase
+	public class PrimitiveCapsulePrefab extends PrimitivePrefabBase implements IAsset
 	{
 		private var _radius:Number;
 		private var _height:Number;

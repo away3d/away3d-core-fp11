@@ -353,7 +353,7 @@ package away3d.animators
 		/**
 		 * @inheritDoc
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 		}
 

@@ -40,6 +40,10 @@ package away3d.library.assets
 			throw new AbstractMethodError();
 		}
 
+		public function dispose():void {
+			throw new AbstractMethodError();
+		}
+
 		/**
 		 * The original name used for this asset in the resource (e.g. file) in which
 		 * it was found. This may not be the same as <code>name</code>, which may

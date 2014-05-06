@@ -242,7 +242,7 @@ package away3d.materials
 		 * Cleans up resources owned by the material, including passes. Textures are not owned by the material since they
 		 * could be used by other materials and will not be disposed.
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 			var i:uint;
 			

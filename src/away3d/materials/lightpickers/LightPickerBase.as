@@ -45,7 +45,7 @@ package away3d.materials.lightpickers
 		/**
 		 * Disposes resources used by the light picker.
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 		}
 

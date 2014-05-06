@@ -111,7 +111,7 @@ package away3d.textures
 		/**
 		 * @inheritDoc
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 			for (var i:int = 0; i < 8; ++i) {
 				if (_textures[i])

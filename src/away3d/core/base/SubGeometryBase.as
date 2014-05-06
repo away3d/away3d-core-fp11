@@ -119,7 +119,7 @@ package away3d.core.base {
 		/**
 		 *
 		 */
-		public function dispose():void {
+		override public function dispose():void {
 			_indices = null;
 			_vertices = null;
 		}

@@ -107,7 +107,7 @@ package away3d.animators.data
 		/**
 		 * @inheritDoc
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 			jointPoses.length = 0;
 		}

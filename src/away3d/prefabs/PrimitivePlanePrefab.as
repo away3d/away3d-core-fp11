@@ -1,14 +1,17 @@
 package away3d.prefabs
 {
 	import away3d.arcane;
+	import away3d.core.base.LineSubGeometry;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	
+	import away3d.library.assets.IAsset;
+
 	use namespace arcane;
 	
 	/**
 	 * A Plane primitive mesh.
 	 */
-	public class PrimitivePlanePrefab extends PrefabBase
+	public class PrimitivePlanePrefab extends PrimitivePrefabBase implements IAsset
 	{
 		private var _segmentsW:uint;
 		private var _segmentsH:uint;
@@ -21,8 +24,8 @@ package away3d.prefabs
 		 * Creates a new Plane object.
 		 * @param width The width of the plane.
 		 * @param height The height of the plane.
-		 * @param segmentsW The number of segments that make up the plane along the X-axis.
-		 * @param segmentsH The number of segments that make up the plane along the Y or Z-axis.
+		 * @param segmentsW The Number of segments that make up the plane along the X-axis.
+		 * @param segmentsH The Number of segments that make up the plane along the Y or Z-axis.
 		 * @param yUp Defines whether the normal vector of the plane should point along the Y-axis (true) or Z-axis (false).
 		 * @param doubleSided Defines whether the plane will be visible from both sides, with correct vertex normals.
 		 */
@@ -39,7 +42,7 @@ package away3d.prefabs
 		}
 		
 		/**
-		 * The number of segments that make up the plane along the X-axis. Defaults to 1.
+		 * The Number of segments that make up the plane along the X-axis. Defaults to 1.
 		 */
 		public function get segmentsW():uint
 		{
@@ -54,7 +57,7 @@ package away3d.prefabs
 		}
 		
 		/**
-		 * The number of segments that make up the plane along the Y or Z-axis, depending on whether yUp is true or
+		 * The Number of segments that make up the plane along the Y or Z-axis, depending on whether yUp is true or
 		 * false, respectively. Defaults to 1.
 		 */
 		public function get segmentsH():uint
@@ -128,145 +131,245 @@ package away3d.prefabs
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target:TriangleSubGeometry):void
+		protected override function buildGeometry(target:SubGeometryBase, geometryType:String):void
 		{
-			var data:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var x:Number, y:Number;
-			var numIndices:uint;
-			var base:uint;
-			var tw:uint = _segmentsW + 1;
-			var numVertices:uint = (_segmentsH + 1)*tw;
-			var stride:uint = target.vertexStride;
-			var skip:uint = stride - 9;
-			if (_doubleSided)
-				numVertices *= 2;
-			
-			numIndices = _segmentsH*_segmentsW*6;
-			if (_doubleSided)
-				numIndices <<= 1;
-			
-			if (numVertices == target.numVertices) {
-				data = target.vertexData;
-				indices = target.indexData || new Vector.<uint>(numIndices, true);
-			} else {
-				data = new Vector.<Number>(numVertices*stride, true);
-				indices = new Vector.<uint>(numIndices, true);
-				invalidateUVs();
-			}
-			
-			numIndices = 0;
-			var index:uint = target.vertexOffset;
-			for (var yi:uint = 0; yi <= _segmentsH; ++yi) {
-				for (var xi:uint = 0; xi <= _segmentsW; ++xi) {
-					x = (xi/_segmentsW - .5)*_width;
-					y = (yi/_segmentsH - .5)*_height;
-					
-					data[index++] = x;
-					if (_yUp) {
-						data[index++] = 0;
-						data[index++] = y;
-					} else {
-						data[index++] = y;
-						data[index++] = 0;
-					}
-					
-					data[index++] = 0;
-					if (_yUp) {
-						data[index++] = 1;
-						data[index++] = 0;
-					} else {
-						data[index++] = 0;
-						data[index++] = -1;
-					}
-					
-					data[index++] = 1;
-					data[index++] = 0;
-					data[index++] = 0;
-					
-					index += skip;
-					
-					// add vertex with same position, but with inverted normal & tangent
-					if (_doubleSided) {
-						for (var i:int = 0; i < 3; ++i) {
-							data[index] = data[index - stride];
-							++index;
+			var numIndices:Number;
+			var base:Number;
+			var tw:Number = _segmentsW + 1;
+			var numVertices:Number;
+
+			var vidx:Number, fidx:Number; // indices
+
+			var xi:Number;
+			var yi:Number;
+
+			if (geometryType == "triangleSubGeometry") {
+
+				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
+
+				var numVertices:Number = (_segmentsH + 1) * tw;
+				var positions:Vector.<Number>;
+				var normals:Vector.<Number>;
+				var tangents:Vector.<Number>;
+
+				if (_doubleSided)
+					numVertices *= 2;
+
+				numIndices = _segmentsH * _segmentsW * 6;
+
+				if (_doubleSided)
+					numIndices *= 2;
+
+				if (triangleGeometry.indices != null && numIndices == triangleGeometry.indices.length) {
+					indices = triangleGeometry.indices;
+				} else {
+					indices = new Vector.<uint>(numIndices);
+
+					invalidateUVs();
+				}
+
+				if (numVertices == triangleGeometry.numVertices) {
+					positions = triangleGeometry.positions;
+					normals = triangleGeometry.vertexNormals;
+					tangents = triangleGeometry.vertexTangents;
+				} else {
+					positions = new Vector.<Number>(numVertices * 3);
+					normals = new Vector.<Number>(numVertices * 3);
+					tangents = new Vector.<Number>(numVertices * 3);
+
+					invalidateUVs();
+				}
+
+				fidx = 0;
+
+				vidx = 0;
+
+				for (yi = 0; yi <= _segmentsH; ++yi) {
+
+					for (xi = 0; xi <= _segmentsW; ++xi) {
+						x = (xi / _segmentsW - .5) * _width;
+						y = (yi / _segmentsH - .5) * _height;
+
+						positions[vidx] = x;
+						if (_yUp) {
+							positions[vidx + 1] = 0;
+							positions[vidx + 2] = y;
+						} else {
+							positions[vidx + 1] = y;
+							positions[vidx + 2] = 0;
 						}
-						for (i = 0; i < 3; ++i) {
-							data[index] = -data[index - stride];
-							++index;
+
+						normals[vidx] = 0;
+
+						if (_yUp) {
+							normals[vidx + 1] = 1;
+							normals[vidx + 2] = 0;
+						} else {
+							normals[vidx + 1] = 0;
+							normals[vidx + 2] = -1;
 						}
-						for (i = 0; i < 3; ++i) {
-							data[index] = -data[index - stride];
-							++index;
-						}
-						index += skip;
-					}
-					
-					if (xi != _segmentsW && yi != _segmentsH) {
-						base = xi + yi*tw;
-						var mult:int = _doubleSided? 2 : 1;
-						
-						indices[numIndices++] = base*mult;
-						indices[numIndices++] = (base + tw)*mult;
-						indices[numIndices++] = (base + tw + 1)*mult;
-						indices[numIndices++] = base*mult;
-						indices[numIndices++] = (base + tw + 1)*mult;
-						indices[numIndices++] = (base + 1)*mult;
-						
+
+						tangents[vidx] = 1;
+						tangents[vidx + 1] = 0;
+						tangents[vidx + 2] = 0;
+
+						vidx += 3;
+
+						// add vertex with same position, but with inverted normal & tangent
 						if (_doubleSided) {
-							indices[numIndices++] = (base + tw + 1)*mult + 1;
-							indices[numIndices++] = (base + tw)*mult + 1;
-							indices[numIndices++] = base*mult + 1;
-							indices[numIndices++] = (base + 1)*mult + 1;
-							indices[numIndices++] = (base + tw + 1)*mult + 1;
-							indices[numIndices++] = base*mult + 1;
+
+							for (var i:Number = vidx; i < vidx + 3; ++i) {
+								positions[i] = positions[i - 3];
+								normals[i] = -normals[i - 3];
+								tangents[i] = -tangents[i - 3];
+							}
+
+							vidx += 3;
+
+						}
+
+						if (xi != _segmentsW && yi != _segmentsH) {
+
+							base = xi + yi * tw;
+							var mult:Number = _doubleSided ? 2 : 1;
+
+							indices[fidx++] = base * mult;
+							indices[fidx++] = (base + tw) * mult;
+							indices[fidx++] = (base + tw + 1) * mult;
+							indices[fidx++] = base * mult;
+							indices[fidx++] = (base + tw + 1) * mult;
+							indices[fidx++] = (base + 1) * mult;
+
+							if (_doubleSided) {
+
+								indices[fidx++] = (base + tw + 1) * mult + 1;
+								indices[fidx++] = (base + tw) * mult + 1;
+								indices[fidx++] = base * mult + 1;
+								indices[fidx++] = (base + 1) * mult + 1;
+								indices[fidx++] = (base + tw + 1) * mult + 1;
+								indices[fidx++] = base * mult + 1;
+
+							}
 						}
 					}
 				}
+
+				triangleGeometry.updateIndices(indices);
+
+				triangleGeometry.updatePositions(positions);
+				triangleGeometry.updateVertexNormals(normals);
+				triangleGeometry.updateVertexTangents(tangents);
+
+			} else if (geometryType == "lineSubGeometry") {
+				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
+
+				var numSegments:Number = (_segmentsH + 1) + tw;
+				var startPositions:Vector.<Number>;
+				var endPositions:Vector.<Number>;
+				var thickness:Vector.<Number>;
+
+				var hw:Number = _width / 2;
+				var hh:Number = _height / 2;
+
+
+				if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
+					startPositions = lineGeometry.startPositions;
+					endPositions = lineGeometry.endPositions;
+					thickness = lineGeometry.thickness;
+				} else {
+					startPositions = new Vector.<Number>(numSegments * 3);
+					endPositions = new Vector.<Number>(numSegments * 3);
+					thickness = new Vector.<Number>(numSegments);
+				}
+
+				fidx = 0;
+
+				vidx = 0;
+
+				for (yi = 0; yi <= _segmentsH; ++yi) {
+					startPositions[vidx] = -hw;
+					startPositions[vidx + 1] = 0;
+					startPositions[vidx + 2] = yi * _height - hh;
+
+					endPositions[vidx] = hw;
+					endPositions[vidx + 1] = 0;
+					endPositions[vidx + 2] = yi * _height - hh;
+
+					thickness[fidx++] = 1;
+
+					vidx += 3;
+				}
+
+
+				for (xi = 0; xi <= _segmentsW; ++xi) {
+					startPositions[vidx] = xi * _width - hw;
+					startPositions[vidx + 1] = 0;
+					startPositions[vidx + 2] = -hh;
+
+					endPositions[vidx] = xi * _width - hw;
+					endPositions[vidx + 1] = 0;
+					endPositions[vidx + 2] = hh;
+
+					thickness[fidx++] = 1;
+
+					vidx += 3;
+				}
+
+				// build real data from raw data
+				lineGeometry.updatePositions(startPositions, endPositions);
+				lineGeometry.updateThickness(thickness);
 			}
-			
-			target.updateData(data);
-			target.updateIndexData(indices);
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override protected function buildUVs(target:TriangleSubGeometry):void
+		override protected function buildUVs(target:SubGeometryBase, geometryType:String):void
 		{
-			var data:Vector.<Number>;
-			var stride:uint = target.UVStride;
-			var numUvs:uint = (_segmentsH + 1)*(_segmentsW + 1)*stride;
-			var skip:uint = stride - 2;
-			
-			if (_doubleSided)
-				numUvs *= 2;
-			
-			if (target.UVData && numUvs == target.UVData.length)
-				data = target.UVData;
-			else {
-				data = new Vector.<Number>(numUvs, true);
-				invalidateGeometry();
-			}
-			
-			var index:uint = target.UVOffset;
-			
-			for (var yi:uint = 0; yi <= _segmentsH; ++yi) {
-				for (var xi:uint = 0; xi <= _segmentsW; ++xi) {
-					data[index++] = (xi/_segmentsW)*target.scaleU;
-					data[index++] = (1 - yi/_segmentsH)*target.scaleV;
-					index += skip;
-					
-					if (_doubleSided) {
-						data[index++] = (xi/_segmentsW)*target.scaleU;
-						data[index++] = (1 - yi/_segmentsH)*target.scaleV;
-						index += skip;
+			var uvs:Vector.<Number>;
+			var numVertices:Number;
+
+			if (geometryType == "triangleSubGeometry") {
+
+				numVertices = ( _segmentsH + 1 ) * ( _segmentsW + 1 );
+
+				if (_doubleSided)
+					numVertices *= 2;
+
+				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
+
+				if (triangleGeometry.uvs && numVertices == triangleGeometry.numVertices) {
+					uvs = triangleGeometry.uvs;
+				} else {
+					uvs = new Vector.<Number>(numVertices * 2);
+					invalidateGeometry()
+				}
+
+				var index:Number = 0;
+
+				for (var yi:Number = 0; yi <= _segmentsH; ++yi) {
+
+					for (var xi:Number = 0; xi <= _segmentsW; ++xi) {
+						uvs[index] = (xi / _segmentsW) * triangleGeometry.scaleU;
+						uvs[index + 1] = (1 - yi / _segmentsH) * triangleGeometry.scaleV;
+						index += 2;
+
+						if (_doubleSided) {
+							uvs[index] = (xi / _segmentsW) * triangleGeometry.scaleU;
+							uvs[index + 1] = (1 - yi / _segmentsH) * triangleGeometry.scaleV;
+							index += 2;
+						}
 					}
 				}
+
+				triangleGeometry.updateUVs(uvs);
+
+
+			} else if (geometryType == "lineSubGeometry") {
+				//nothing to do here
 			}
-			
-			target.updateData(data);
 		}
 	}
 }

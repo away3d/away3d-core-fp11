@@ -32,7 +32,7 @@ package away3d.library.assets
 			_bitmapData = value;
 		}
 		
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.TEXTURE;
 		}
@@ -40,7 +40,7 @@ package away3d.library.assets
 		/**
 		 * Cleans up any resources used by the current object.
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 			_bitmapData.dispose();
 		}

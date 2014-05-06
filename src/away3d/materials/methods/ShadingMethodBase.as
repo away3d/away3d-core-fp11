@@ -74,7 +74,7 @@ package away3d.materials.methods
 		/**
 		 * Cleans up any resources used by the current object.
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 		
 		}

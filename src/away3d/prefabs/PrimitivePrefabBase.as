@@ -30,6 +30,10 @@ package away3d.prefabs {
 			return AssetType.PRIMITIVE_PREFAB;
 		}
 
+		override public function dispose():void {
+			_geometry.dispose();
+		}
+
 		/**
 		 * Creates a new PrimitiveBase object.
 		 * @param material The material with which to render the object

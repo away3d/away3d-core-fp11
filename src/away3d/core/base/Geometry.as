@@ -109,7 +109,7 @@ package away3d.core.base
 		/**
 		 * Clears all resources used by the Geometry object, including SubGeometries.
 		 */
-		public function dispose():void
+		override public function dispose():void
 		{
 			var numSubGeoms:uint = _subGeometries.length;
 			

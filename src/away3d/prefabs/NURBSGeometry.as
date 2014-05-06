@@ -1,7 +1,9 @@
 ﻿package away3d.prefabs
 {
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.arcane;
+	import away3d.library.assets.IAsset;
 	import away3d.prefabs.data.NURBSVertex;
 	
 	import flash.geom.Vector3D;
@@ -11,7 +13,7 @@
 	/**
 	 * A NURBS primitive geometry.
 	 */
-	public class NURBSGeometry extends PrefabBase
+	public class NURBSGeometry extends PrimitivePrefabBase implements IAsset
 	{
 		private var _controlNet:Vector.<NURBSVertex>;
 		private var _uOrder:Number;
@@ -400,17 +402,17 @@
 		 *  Rebuild the mesh as there is significant change to the structural parameters
 		 *
 		 */
-		override protected function buildGeometry(target:TriangleSubGeometry):void
+		override protected function buildGeometry(target:SubGeometryBase, geometryType:String):void
 		{
-			var data:Vector.<Number>;
-			var stride:int = target.vertexStride;
-			
+			var i:int;
+			var j:int;
+			var indices:Vector.<uint>;
+			var positions:Vector.<Number>;
+			var normals:Vector.<Number>;
+
 			_nplusc = _numUContolPoints + _uOrder;
 			_mplusc = _numVContolPoints + _vOrder;
-			
-			target.autoDeriveVertexNormals = true;
-			target.autoDeriveVertexTangents = true;
-			
+
 			// Generate the open uniform knot vectors if not already defined
 			if (_autoGenKnotSeq)
 				_uKnotSequence = knot(_numUContolPoints, _uOrder);
@@ -418,131 +420,132 @@
 				_vKnotSequence = knot(_numVContolPoints, _vOrder);
 			_uRange = (_uKnotSequence[_nplusc] - _uKnotSequence[1]);
 			_vRange = (_vKnotSequence[_mplusc] - _uKnotSequence[1]);
-			
-			// Define presets
-			var numVertices:int = (_uSegments + 1)*(_vSegments + 1);
-			var i:int;
-			//var icount:int = 0;
-			var j:int;
-			
-			var indices:Vector.<uint>;
-			var numIndices:uint = target.vertexOffset;
-			
-			if (numVertices == target.numVertices) {
-				data = target.vertexData;
-				indices = target.indexData;
-			} else {
-				data = new Vector.<Number>(numVertices*stride, true);
-				numIndices = (_uSegments)*(_vSegments)*6;
-				indices = new Vector.<uint>(numIndices, true);
-				invalidateUVs();
-			}
-			
-			// Iterate through the surface points (u=>0-1, v=>0-1)
-			var stepuinc:Number = 1/_uSegments;
-			var stepvinc:Number = 1/_vSegments;
-			
-			var vBase:int = 0;
-			var nV:Vector3D;
-			for (var vinc:Number = 0; vinc < (1 + (stepvinc/2)); vinc += stepvinc) {
-				for (var uinc:Number = 0; uinc < (1 + (stepuinc/2)); uinc += stepuinc) {
-					nV = nurbPoint(uinc, vinc);
-					
-					data[vBase] = nV.x;
-					data[uint(vBase + 1)] = nV.y;
-					data[uint(vBase + 2)] = nV.z;
-					vBase += stride;
+
+			if (geometryType == "triangleSubGeometry") {
+				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
+
+				// Define presets
+				var numVertices:int = (_uSegments + 1)*(_vSegments + 1);
+
+				if (numVertices == triangleGeometry.numVertices && triangleGeometry.indices!=null) {
+					indices = triangleGeometry.indices;
+					positions = triangleGeometry.positions;
+					normals = triangleGeometry.vertexNormals;
+				} else {
+					indices = new Vector.<uint>((_uSegments)*(_vSegments)*6);
+					positions = new Vector.<Number>(numVertices * 3);
+					normals = new Vector.<Number>(numVertices * 3);
+					invalidateUVs();
 				}
-			}
-			
-			// Render the mesh faces
-			var vPos:int = 0;
-			var iBase:int;
-			
-			for (i = 1; i <= _vSegments; i++) {
-				for (j = 1; j <= _uSegments; j++) {
-					if (_invert) {
-						indices[iBase++] = vPos;
-						indices[iBase++] = vPos + 1;
-						indices[iBase++] = vPos + _uSegments + 1;
-						
-						indices[iBase++] = vPos + _uSegments + 1;
-						indices[iBase++] = vPos + 1;
-						indices[iBase++] = vPos + _uSegments + 2;
-					} else {
-						indices[iBase++] = vPos + 1;
-						indices[iBase++] = vPos;
-						indices[iBase++] = vPos + _uSegments + 1;
-						
-						indices[iBase++] = vPos + 1;
-						indices[iBase++] = vPos + _uSegments + 1;
-						indices[iBase++] = vPos + _uSegments + 2;
+
+				// Iterate through the surface points (u=>0-1, v=>0-1)
+				var stepuinc:Number = 1/_uSegments;
+				var stepvinc:Number = 1/_vSegments;
+
+				var vBase:int = 0;
+				var nV:Vector3D;
+				for (var vinc:Number = 0; vinc < (1 + (stepvinc/2)); vinc += stepvinc) {
+					for (var uinc:Number = 0; uinc < (1 + (stepuinc/2)); uinc += stepuinc) {
+						nV = nurbPoint(uinc, vinc);
+						positions[vBase++] = nV.x;
+						positions[vBase++] = nV.y;
+						positions[vBase++] = nV.z;
+					}
+				}
+
+				// Render the mesh faces
+				var vPos:int = 0;
+				var iBase:int = 0
+
+				for (i = 1; i <= _vSegments; i++) {
+					for (j = 1; j <= _uSegments; j++) {
+						if (_invert) {
+							indices[iBase++] = vPos;
+							indices[iBase++] = vPos + 1;
+							indices[iBase++] = vPos + _uSegments + 1;
+
+							indices[iBase++] = vPos + _uSegments + 1;
+							indices[iBase++] = vPos + 1;
+							indices[iBase++] = vPos + _uSegments + 2;
+						} else {
+							indices[iBase++] = vPos + 1;
+							indices[iBase++] = vPos;
+							indices[iBase++] = vPos + _uSegments + 1;
+
+							indices[iBase++] = vPos + 1;
+							indices[iBase++] = vPos + _uSegments + 1;
+							indices[iBase++] = vPos + _uSegments + 2;
+						}
+						vPos++;
 					}
 					vPos++;
 				}
-				vPos++;
+
+				triangleGeometry.updateIndices(indices);
+				triangleGeometry.updatePositions(positions);
+				triangleGeometry.updateVertexNormals(normals);
+			}else if(geometryType == "lineSubGeometry") {
+				//TODO:
 			}
-			target.updateData(data);
-			target.updateIndexData(indices);
+
 		}
 		
 		/**
 		 *  Rebuild the UV coordinates as there is significant change to the structural parameters
 		 *
 		 */
-		override protected function buildUVs(target:TriangleSubGeometry):void
+		override protected function buildUVs(target:SubGeometryBase, geometryType:String):void
 		{
-			// Define presets
-			var data:Vector.<Number>;
-			var stride:uint = target.UVStride;
-			var numVertices:int = (_uSegments + 1)*(_vSegments + 1);
-			var uvLen:int = numVertices*stride;
 			var i:int;
 			var j:int;
-			
-			if (target.UVData && uvLen == target.UVData.length)
-				data = target.UVData;
-			else {
-				data = new Vector.<Number>(uvLen, true);
-				invalidateGeometry();
-			}
-			
-			var uvBase:int = target.UVOffset;
-			for (i = _vSegments; i >= 0; i--) {
-				for (j = _uSegments; j >= 0; j--) {
-					data[uint(uvBase)] = j/_uSegments;
-					data[uint(uvBase + 1)] = i/_vSegments;
-					uvBase += stride;
+			var uvs:Vector.<Number>;
+			var numVertices:int = (_uSegments + 1)*(_vSegments + 1);
+			var uvLen:int = numVertices;
+
+			if (geometryType == "triangleSubGeometry") {
+				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
+
+				if (numVertices == triangleGeometry.numVertices && triangleGeometry.uvs != null)
+					uvs = triangleGeometry.uvs;
+				else {
+					uvs = new Vector.<Number>(numVertices * 2);
 				}
+
+				var index:Number = 0;
+				for (i = _vSegments; i >= 0; i--) {
+					for (j = _uSegments; j >= 0; j--) {
+						uvs[index++] = j/_uSegments;
+						uvs[index++] = i/_vSegments;
+					}
+				}
+				triangleGeometry.updateUVs(uvs);
+				_rebuildUVs = false;
+
+			} else if (geometryType == "lineSubGeometry") {
 			}
-			target.updateData(data);
-			_rebuildUVs = false;
 		}
 		
 		/**
 		 *  Refresh the mesh without reconstructing all the supporting data. This should be used only
 		 *  when the control point positions change.
-		 *
 		 */
-		public function refreshNURBS():void
+		public function refreshNURBS(target:SubGeometryBase):void
 		{
 			var nV:Vector3D = new Vector3D();
-			var subGeom:TriangleSubGeometry = TriangleSubGeometry(subGeometries[0]);
-			var data:Vector.<Number> = subGeom.vertexData;
-			var len:int = data.length;
-			var vertexStride:int = subGeom.vertexStride;
-			var uvIndex:int = subGeom.UVOffset;
-			var uvStride:int = subGeom.UVStride;
-			
-			for (var vBase:uint = subGeom.vertexOffset; vBase < len; vBase += vertexStride) {
-				nurbPoint(data[uvIndex], data[uint(uvIndex + 1)], nV);
-				data[vBase] = nV.x;
-				data[uint(vBase + 1)] = nV.y;
-				data[uint(vBase + 2)] = nV.z;
-				uvIndex += uvStride;
+			var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
+			var positions:Vector.<Number> = triangleGeometry.positions;
+			var uvs:Vector.<Number> = triangleGeometry.uvs;
+			var uvIndex:uint = 0;
+			var numVertices:uint = triangleGeometry.numVertices;
+			var vBase:uint = 0;
+			for (var i:uint = 0; i < numVertices; i++) {
+				nurbPoint(uvs[uvIndex++], uvs[uvIndex++], nV);
+				positions[vBase++] = nV.x;
+				positions[vBase++] = nV.y;
+				positions[vBase++] = nV.z;
 			}
-			
-			subGeom.updateData(data);
+
+			triangleGeometry.updatePositions(positions);
 		}
 	}
 }

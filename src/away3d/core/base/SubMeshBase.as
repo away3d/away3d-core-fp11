@@ -81,7 +81,7 @@ package away3d.core.base {
 			_uvTransform = value;
 		}
 
-		public function dispose():void
+		override public function dispose():void
 		{
 			this.material = null;
 

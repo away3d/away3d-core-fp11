@@ -1,14 +1,17 @@
 package away3d.prefabs
 {
 	import away3d.arcane;
+	import away3d.core.base.LineSubGeometry;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	
+	import away3d.library.assets.IAsset;
+
 	use namespace arcane;
 	
 	/**
 	 * A UV Sphere primitive mesh.
 	 */
-	public class PrimitiveSpherePrefab extends PrefabBase
+	public class PrimitiveSpherePrefab extends PrimitivePrefabBase implements IAsset
 	{
 		private var _radius:Number;
 		private var _segmentsW:uint;
@@ -18,8 +21,8 @@ package away3d.prefabs
 		/**
 		 * Creates a new Sphere object.
 		 * @param radius The radius of the sphere.
-		 * @param segmentsW Defines the number of horizontal segments that make up the sphere.
-		 * @param segmentsH Defines the number of vertical segments that make up the sphere.
+		 * @param segmentsW Defines the Number of horizontal segments that make up the sphere.
+		 * @param segmentsH Defines the Number of vertical segments that make up the sphere.
 		 * @param yUp Defines whether the sphere poles should lay on the Y-axis (true) or on the Z-axis (false).
 		 */
 		public function PrimitiveSpherePrefab(radius:Number = 50, segmentsW:uint = 16, segmentsH:uint = 12, yUp:Boolean = true)
@@ -35,145 +38,262 @@ package away3d.prefabs
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildGeometry(target:TriangleSubGeometry):void
+		protected override function buildGeometry(target:SubGeometryBase, geometryType:String):void
 		{
-			var vertices:Vector.<Number>;
 			var indices:Vector.<uint>;
-			var i:uint, j:uint, triIndex:uint;
-			var numVerts:uint = (_segmentsH + 1)*(_segmentsW + 1);
-			var stride:uint = target.vertexStride;
-			var skip:uint = stride - 9;
-			
-			if (numVerts == target.numVertices) {
-				vertices = target.vertexData;
-				indices = target.indexData || new Vector.<uint>((_segmentsH - 1)*_segmentsW*6, true);
-			} else {
-				vertices = new Vector.<Number>(numVerts*stride, true);
-				indices = new Vector.<uint>((_segmentsH - 1)*_segmentsW*6, true);
-				invalidateGeometry();
-			}
-			
-			var startIndex:uint;
-			var index:uint = target.vertexOffset;
-			var comp1:Number, comp2:Number, t1:Number, t2:Number;
-			
-			for (j = 0; j <= _segmentsH; ++j) {
-				
-				startIndex = index;
-				
-				var horangle:Number = Math.PI*j/_segmentsH;
-				var z:Number = -_radius*Math.cos(horangle);
-				var ringradius:Number = _radius*Math.sin(horangle);
-				
-				for (i = 0; i <= _segmentsW; ++i) {
-					var verangle:Number = 2*Math.PI*i/_segmentsW;
-					var x:Number = ringradius*Math.cos(verangle);
-					var y:Number = ringradius*Math.sin(verangle);
-					var normLen:Number = 1/Math.sqrt(x*x + y*y + z*z);
-					var tanLen:Number = Math.sqrt(y*y + x*x);
-					
-					if (_yUp) {
-						t1 = 0;
-						t2 = tanLen > .007? x/tanLen : 0;
-						comp1 = -z;
-						comp2 = y;
-						
-					} else {
-						t1 = tanLen > .007? x/tanLen : 0;
-						t2 = 0;
-						comp1 = y;
-						comp2 = z;
-					}
-					
-					if (i == _segmentsW) {
-						vertices[index++] = vertices[startIndex];
-						vertices[index++] = vertices[startIndex + 1];
-						vertices[index++] = vertices[startIndex + 2];
-						vertices[index++] = vertices[startIndex + 3] + (x*normLen)*.5;
-						vertices[index++] = vertices[startIndex + 4] + ( comp1*normLen)*.5;
-						vertices[index++] = vertices[startIndex + 5] + (comp2*normLen)*.5;
-						vertices[index++] = tanLen > .007? -y/tanLen : 1;
-						vertices[index++] = t1;
-						vertices[index++] = t2;
-						
-					} else {
-						vertices[index++] = x;
-						vertices[index++] = comp1;
-						vertices[index++] = comp2;
-						vertices[index++] = x*normLen;
-						vertices[index++] = comp1*normLen;
-						vertices[index++] = comp2*normLen;
-						vertices[index++] = tanLen > .007? -y/tanLen : 1;
-						vertices[index++] = t1;
-						vertices[index++] = t2;
-					}
-					
-					if (i > 0 && j > 0) {
-						var a:int = (_segmentsW + 1)*j + i;
-						var b:int = (_segmentsW + 1)*j + i - 1;
-						var c:int = (_segmentsW + 1)*(j - 1) + i - 1;
-						var d:int = (_segmentsW + 1)*(j - 1) + i;
-						
-						if (j == _segmentsH) {
-							vertices[index - 9] = vertices[startIndex];
-							vertices[index - 8] = vertices[startIndex + 1];
-							vertices[index - 7] = vertices[startIndex + 2];
-							
-							indices[triIndex++] = a;
-							indices[triIndex++] = c;
-							indices[triIndex++] = d;
-							
-						} else if (j == 1) {
-							indices[triIndex++] = a;
-							indices[triIndex++] = b;
-							indices[triIndex++] = c;
-							
+			var positions:Vector.<Number>;
+			var normals:Vector.<Number>;
+			var tangents:Vector.<Number>;
+
+			var i:Number;
+			var j:Number;
+			var vidx:Number, fidx:Number; // indices
+
+			var comp1:Number;
+			var comp2:Number;
+			var numVertices:Number;
+
+
+			if (geometryType == "triangleSubGeometry") {
+
+				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
+
+				numVertices = (_segmentsH + 1) * (_segmentsW + 1);
+
+				if (numVertices == triangleGeometry.numVertices && triangleGeometry.indices != null) {
+					indices = triangleGeometry.indices;
+					positions = triangleGeometry.positions;
+					normals = triangleGeometry.vertexNormals;
+					tangents = triangleGeometry.vertexTangents;
+				} else {
+					indices = new Vector.<uint>((_segmentsH - 1) * _segmentsW * 6);
+					positions = new Vector.<Number>(numVertices * 3);
+					normals = new Vector.<Number>(numVertices * 3);
+					tangents = new Vector.<Number>(numVertices * 3);
+
+					invalidateUVs();
+				}
+
+				vidx = 0;
+				fidx = 0;
+
+				var startIndex:Number;
+				var t1:Number;
+				var t2:Number;
+
+				for (j = 0; j <= _segmentsH; ++j) {
+
+					startIndex = vidx;
+
+					var horangle:Number = Math.PI * j / _segmentsH;
+					var z:Number = -_radius * Math.cos(horangle);
+					var ringradius:Number = _radius * Math.sin(horangle);
+
+					for (i = 0; i <= _segmentsW; ++i) {
+						var verangle:Number = 2 * Math.PI * i / _segmentsW;
+						var x:Number = ringradius * Math.cos(verangle);
+						var y:Number = ringradius * Math.sin(verangle);
+						var normLen:Number = 1 / Math.sqrt(x * x + y * y + z * z);
+						var tanLen:Number = Math.sqrt(y * y + x * x);
+
+						if (_yUp) {
+
+							t1 = 0;
+							t2 = tanLen > .007 ? x / tanLen : 0;
+							comp1 = -z;
+							comp2 = y;
+
 						} else {
-							indices[triIndex++] = a;
-							indices[triIndex++] = b;
-							indices[triIndex++] = c;
-							indices[triIndex++] = a;
-							indices[triIndex++] = c;
-							indices[triIndex++] = d;
+							t1 = tanLen > .007 ? x / tanLen : 0;
+							t2 = 0;
+							comp1 = y;
+							comp2 = z;
+						}
+
+						if (i == _segmentsW) {
+							positions[vidx] = positions[startIndex];
+							positions[vidx + 1] = positions[startIndex + 1];
+							positions[vidx + 2] = positions[startIndex + 2];
+							normals[vidx] = normals[startIndex] + (x * normLen) * .5;
+							normals[vidx + 1] = normals[startIndex + 1] + ( comp1 * normLen) * .5;
+							normals[vidx + 2] = normals[startIndex + 2] + (comp2 * normLen) * .5;
+							tangents[vidx] = tanLen > .007 ? -y / tanLen : 1;
+							tangents[vidx + 1] = t1;
+							tangents[vidx + 2] = t2;
+
+						} else {
+
+							positions[vidx] = x;
+							positions[vidx + 1] = comp1;
+							positions[vidx + 2] = comp2;
+							normals[vidx] = x * normLen;
+							normals[vidx + 1] = comp1 * normLen;
+							normals[vidx + 2] = comp2 * normLen;
+							tangents[vidx] = tanLen > .007 ? -y / tanLen : 1;
+							tangents[vidx + 1] = t1;
+							tangents[vidx + 2] = t2;
+						}
+
+						if (i > 0 && j > 0) {
+
+							var a:Number = (_segmentsW + 1) * j + i;
+							var b:Number = (_segmentsW + 1) * j + i - 1;
+							var c:Number = (_segmentsW + 1) * (j - 1) + i - 1;
+							var d:Number = (_segmentsW + 1) * (j - 1) + i;
+
+							if (j == _segmentsH) {
+
+								positions[vidx] = positions[startIndex];
+								positions[vidx + 1] = positions[startIndex + 1];
+								positions[vidx + 2] = positions[startIndex + 2];
+
+								indices[fidx++] = a;
+								indices[fidx++] = c;
+								indices[fidx++] = d;
+
+							} else if (j == 1) {
+
+								indices[fidx++] = a;
+								indices[fidx++] = b;
+								indices[fidx++] = c;
+
+							} else {
+								indices[fidx++] = a;
+								indices[fidx++] = b;
+								indices[fidx++] = c;
+								indices[fidx++] = a;
+								indices[fidx++] = c;
+								indices[fidx++] = d;
+							}
+						}
+
+						vidx += 3;
+					}
+				}
+
+				triangleGeometry.updateIndices(indices);
+				triangleGeometry.updatePositions(positions);
+				triangleGeometry.updateVertexNormals(normals);
+				triangleGeometry.updateVertexTangents(tangents);
+
+			} else if (geometryType == "lineSubGeometry") {
+
+				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
+
+				var numSegments:Number = (_segmentsH - 1) * _segmentsW * 2;
+				var startPositions:Vector.<Number>;
+				var endPositions:Vector.<Number>;
+				var thickness:Vector.<Number>;
+
+				if (lineGeometry.indices != null && numSegments == lineGeometry.numSegments) {
+					startPositions = lineGeometry.startPositions;
+					endPositions = lineGeometry.endPositions;
+					thickness = lineGeometry.thickness;
+				} else {
+					startPositions = new Vector.<Number>(numSegments * 3);
+					endPositions = new Vector.<Number>(numSegments * 3);
+					thickness = new Vector.<Number>(numSegments);
+				}
+
+				vidx = 0;
+
+				fidx = 0;
+
+				for (j = 0; j <= _segmentsH; ++j) {
+
+					var horangle:Number = Math.PI * j / _segmentsH;
+					var z:Number = -_radius * Math.cos(horangle);
+					var ringradius:Number = _radius * Math.sin(horangle);
+
+					for (i = 0; i <= _segmentsW; ++i) {
+						var verangle:Number = 2 * Math.PI * i / _segmentsW;
+						var x:Number = ringradius * Math.cos(verangle);
+						var y:Number = ringradius * Math.sin(verangle);
+
+						if (_yUp) {
+							comp1 = -z;
+							comp2 = y;
+
+						} else {
+							comp1 = y;
+							comp2 = z;
+						}
+
+						if (i > 0 && j > 0) {
+							//horizonal lines
+							if (j < _segmentsH) {
+								endPositions[vidx] = x;
+								endPositions[vidx + 1] = comp1;
+								endPositions[vidx + 2] = comp2;
+
+								thickness[fidx++] = 1;
+
+								vidx += 3;
+							}
+
+							//vertical lines
+							startPositions[vidx] = endPositions[vidx - _segmentsW * 6];
+							startPositions[vidx + 1] = endPositions[vidx + 1 - _segmentsW * 6];
+							startPositions[vidx + 2] = endPositions[vidx + 2 - _segmentsW * 6];
+
+							endPositions[vidx] = x;
+							endPositions[vidx + 1] = comp1;
+							endPositions[vidx + 2] = comp2;
+
+							thickness[fidx++] = 1;
+
+							vidx += 3;
+						}
+
+						if (i < _segmentsW && j > 0 && j < _segmentsH) {
+							startPositions[vidx] = x;
+							startPositions[vidx + 1] = comp1;
+							startPositions[vidx + 2] = comp2;
 						}
 					}
-					
-					index += skip;
 				}
+
+				// build real data from raw data
+				lineGeometry.updatePositions(startPositions, endPositions);
+				lineGeometry.updateThickness(thickness);
 			}
-			
-			target.updateData(vertices);
-			target.updateIndexData(indices);
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
-		protected override function buildUVs(target:TriangleSubGeometry):void
+		protected override function buildUVs(target:SubGeometryBase, geometryType:String):void
 		{
-			var i:int, j:int;
-			var stride:uint = target.UVStride;
-			var numUvs:uint = (_segmentsH + 1)*(_segmentsW + 1)*stride;
-			var data:Vector.<Number>;
-			var skip:uint = stride - 2;
-			
-			if (target.UVData && numUvs == target.UVData.length)
-				data = target.UVData;
-			else {
-				data = new Vector.<Number>(numUvs, true);
-				invalidateGeometry();
-			}
-			
-			var index:int = target.UVOffset;
-			for (j = 0; j <= _segmentsH; ++j) {
-				for (i = 0; i <= _segmentsW; ++i) {
-					data[index++] = ( i/_segmentsW )*target.scaleU;
-					data[index++] = ( j/_segmentsH )*target.scaleV;
-					index += skip;
+			var i:Number, j:Number;
+			var numVertices:Number = (_segmentsH + 1) * (_segmentsW + 1);
+			var uvs:Vector.<Number>;
+
+
+			if (geometryType == "triangleSubGeometry") {
+
+				numVertices = (_segmentsH + 1) * (_segmentsW + 1);
+
+				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
+
+				if (numVertices == triangleGeometry.numVertices && triangleGeometry.uvs != null) {
+					uvs = triangleGeometry.uvs;
+				} else {
+					uvs = new Vector.<Number>(numVertices * 2);
 				}
+
+				var index:Number = 0;
+				for (j = 0; j <= _segmentsH; ++j) {
+					for (i = 0; i <= _segmentsW; ++i) {
+						uvs[index++] = ( i / _segmentsW ) * triangleGeometry.scaleU;
+						uvs[index++] = ( j / _segmentsH ) * triangleGeometry.scaleV;
+					}
+				}
+
+				triangleGeometry.updateUVs(uvs);
+
+			} else if (geometryType == "lineSubGeometry") {
+				//nothing to do here
 			}
-			
-			target.updateData(data);
 		}
 		
 		/**
@@ -191,7 +311,7 @@ package away3d.prefabs
 		}
 		
 		/**
-		 * Defines the number of horizontal segments that make up the sphere. Defaults to 16.
+		 * Defines the Number of horizontal segments that make up the sphere. Defaults to 16.
 		 */
 		public function get segmentsW():uint
 		{
@@ -206,7 +326,7 @@ package away3d.prefabs
 		}
 		
 		/**
-		 * Defines the number of vertical segments that make up the sphere. Defaults to 12.
+		 * Defines the Number of vertical segments that make up the sphere. Defaults to 12.
 		 */
 		public function get segmentsH():uint
 		{
