@@ -171,6 +171,7 @@ package away3d.core.base
 		private var _worldBoundsInvalid:Boolean = true;
 
 		protected var _pickingCollider:IPickingCollider;
+		arcane var _staticNode:Boolean;
 
 		protected var _renderables:Vector.<IRenderable> = new Vector.<IRenderable>();
 
@@ -388,6 +389,20 @@ package away3d.core.base
 		public function get parent():ObjectContainer3D
 		{
 			return _parent;
+		}
+
+		/**
+		 * Defines whether or not the object will be moved or animated at runtime. This property is used by some partitioning systems to improve performance.
+		 * Warning: if set to true, they may not be processed by certain partition systems using static visibility lists, unless they're specifically assigned to the visibility list.
+		 */
+		public function get staticNode():Boolean
+		{
+			return _staticNode;
+		}
+
+		public function set staticNode(value:Boolean):void
+		{
+			_staticNode = value;
 		}
 
 		public function get partition():Partition3D {

@@ -2,7 +2,6 @@ package away3d.bounds
 {
 	import away3d.arcane;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.math.Box;
 	import away3d.core.math.Plane3D;

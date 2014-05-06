@@ -2,11 +2,12 @@ package away3d.core.partition
 {
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
+	import away3d.core.math.Box;
 	import away3d.core.math.Plane3D;
-	import away3d.entities.Entity;
-	import away3d.prefabs.WireframeCube;
-	import away3d.prefabs.WireframePrimitiveBase;
-	
+	import away3d.entities.IEntity;
+	import away3d.entities.Mesh;
+	import away3d.prefabs.PrimitiveCubePrefab;
+
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -73,13 +74,14 @@ package away3d.core.partition
 			}
 		}
 		
-		override protected function createDebugBounds():WireframePrimitiveBase
+		override protected function createBoundsPrimitive():IEntity
 		{
-			var cube:WireframeCube = new WireframeCube(_quadSize, _quadSize, _quadSize);
-			cube.x = _centerX;
-			cube.y = _centerY;
-			cube.z = _centerZ;
-			return cube;
+			var cube:PrimitiveCubePrefab = new PrimitiveCubePrefab(_quadSize, _quadSize, _quadSize, 0x8080ff);
+			var mesh:Mesh = cube.getNewObject() as Mesh;
+			mesh.x = _centerX;
+			mesh.y = _centerY;
+			mesh.z = _centerZ;
+			return mesh;
 		}
 		
 		override public function isInFrustum(planes:Vector.<Plane3D>, numPlanes:int):Boolean
@@ -97,12 +99,17 @@ package away3d.core.partition
 			return true;
 		}
 		
-		override public function findPartitionForEntity(entity:Entity):NodeBase
+		override public function findPartitionForEntity(entity:IEntity):NodeBase
 		{
 			var bounds:BoundingVolumeBase = entity.worldBounds;
-			var min:Vector3D = bounds.min;
-			var max:Vector3D = bounds.max;
-			return findPartitionForBounds(min.x, min.y, min.z, max.x, max.y, max.z);
+			var aabb:Box = bounds.aabb;
+			var minX:Number = aabb.x;
+			var minY:Number = aabb.y - aabb.height;
+			var minZ:Number = aabb.z;
+			var maxX:Number = aabb.x + aabb.width;
+			var maxY:Number = aabb.y;
+			var maxZ:Number = aabb.z + aabb.depth;
+			return findPartitionForBounds(minX, minY, minZ, maxX, maxY, maxZ);
 		}
 		
 		// TODO: this can be done quicker through inversion

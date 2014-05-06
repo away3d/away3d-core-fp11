@@ -41,7 +41,7 @@ package away3d.core.math {
 		private var _z:Number
 
 		/**
-		 * The sum of the <code>z</code> and <code>height</code> properties.
+		 * The sum of the <code>z</code> and <code>depth</code> properties.
 		 */
 		public function get back():Number
 		{

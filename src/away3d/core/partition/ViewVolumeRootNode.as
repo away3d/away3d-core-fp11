@@ -1,9 +1,9 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
-	import away3d.core.traverse.PartitionTraverser;
-	import away3d.entities.Entity;
-	
+	import away3d.core.traverse.ICollector;
+	import away3d.entities.IEntity;
+
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -19,15 +19,16 @@ package away3d.core.partition
 		{
 			_viewVolumes = new Vector.<ViewVolume>();
 		}
-		
-		override public function set showDebugBounds(value:Boolean):void
-		{
-			super.showDebugBounds = value;
+
+
+		override public function set boundsVisible(value:Boolean):void {
+			super.boundsVisible = value;
 			if (_dynamicGrid)
-				_dynamicGrid.showDebugBounds = true;
+				_dynamicGrid.boundsVisible = true;
 		}
-		
-		override public function findPartitionForEntity(entity:Entity):NodeBase
+
+
+		override public function findPartitionForEntity(entity:IEntity):NodeBase
 		{
 			return _dynamicGrid? _dynamicGrid.findPartitionForEntity(entity) : this;
 		}
@@ -40,7 +41,7 @@ package away3d.core.partition
 		public function set dynamicGrid(value:DynamicGrid):void
 		{
 			_dynamicGrid = value;
-			_dynamicGrid.showDebugBounds = showDebugBounds;
+			_dynamicGrid.boundsVisible = boundsVisible;
 		}
 		
 		public function addViewVolume(viewVolume:ViewVolume):void
@@ -58,10 +59,10 @@ package away3d.core.partition
 				_viewVolumes.splice(index, 1);
 		}
 		
-		override public function acceptTraverser(traverser:PartitionTraverser):void
+		override public function acceptTraverser(traverser:ICollector):void
 		{
-			if (!(_activeVolume && _activeVolume.contains(traverser.entryPoint))) {
-				var volume:ViewVolume = getVolumeContaining(traverser.entryPoint);
+			if (!(_activeVolume && _activeVolume.contains(traverser.entityHead))) {
+				var volume:ViewVolume = getVolumeContaining(traverser.entityHead);
 				
 				if (!volume)
 					trace("WARNING: No view volume found for the current position.");

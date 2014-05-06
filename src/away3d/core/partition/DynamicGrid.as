@@ -2,6 +2,8 @@ package away3d.core.partition
 {
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
+	import away3d.core.math.Box;
+	import away3d.entities.IEntity;
 
 	import flash.geom.Vector3D;
 	
@@ -22,7 +24,7 @@ package away3d.core.partition
 		private var _cellWidth:Number;
 		private var _cellHeight:Number;
 		private var _cellDepth:Number;
-		private var _showDebugBounds:Boolean;
+		private var _boundsVisible:Boolean;
 		
 		public function DynamicGrid(minBounds:Vector3D, maxBounds:Vector3D, numCellsX:uint, numCellsY:uint, numCellsZ:uint)
 		{
@@ -99,19 +101,17 @@ package away3d.core.partition
 			return nodes;
 		}
 		
-		public function findPartitionForEntity(entity:Entity):NodeBase
+		public function findPartitionForEntity(entity:IEntity):NodeBase
 		{
 			var bounds:BoundingVolumeBase = entity.worldBounds;
-			var min:Vector3D = bounds.min;
-			var max:Vector3D = bounds.max;
-			
-			var minX:Number = min.x;
-			var minY:Number = min.y;
-			var minZ:Number = min.z;
-			var maxX:Number = max.x;
-			var maxY:Number = max.y;
-			var maxZ:Number = max.z;
-			
+			var aabb:Box = bounds.aabb;
+			var minX:Number = aabb.x;
+			var minY:Number = aabb.y - aabb.height;
+			var minZ:Number = aabb.z;
+			var maxX:Number = aabb.x + aabb.width;
+			var maxY:Number = aabb.y;
+			var maxZ:Number = aabb.z + aabb.depth;
+
 			var minIndexX:int = (minX - _minX)/_cellWidth;
 			var maxIndexX:int = (maxX - _minX)/_cellWidth;
 			var minIndexY:int = (minY - _minY)/_cellHeight;
@@ -160,17 +160,17 @@ package away3d.core.partition
 			return node;
 		}
 		
-		public function get showDebugBounds():Boolean
+		public function get boundsVisible():Boolean
 		{
-			return _showDebugBounds;
+			return _boundsVisible;
 		}
 		
-		public function set showDebugBounds(value:Boolean):void
+		public function set boundsVisible(value:Boolean):void
 		{
 			var numLeaves:uint = _leaves.length;
-			_showDebugBounds = showDebugBounds;
+			_boundsVisible = value;
 			for (var i:int = 0; i < numLeaves; ++i)
-				_leaves[i].showDebugBounds = value;
+				_leaves[i].boundsVisible = value;
 		}
 		
 		public function getCellsIntersecting(minBounds:Vector3D, maxBounds:Vector3D):Vector.<InvertedOctreeNode>

@@ -1,11 +1,13 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
+	import away3d.core.base.Object3D;
 	import away3d.core.math.Plane3D;
-	import away3d.core.traverse.PartitionTraverser;
-	import away3d.prefabs.WireframeCube;
-	import away3d.prefabs.WireframePrimitiveBase;
-	
+	import away3d.core.traverse.ICollector;
+	import away3d.entities.IEntity;
+	import away3d.entities.Mesh;
+	import away3d.prefabs.PrimitiveCubePrefab;
+
 	import flash.geom.Vector3D;
 	
 	/**
@@ -66,17 +68,18 @@ package away3d.core.partition
 			
 			return true;
 		}
-		
-		override protected function createDebugBounds():WireframePrimitiveBase
+
+		override protected function createBoundsPrimitive():IEntity
 		{
-			var cube:WireframeCube = new WireframeCube(_maxX - _minX, _maxY - _minY, _maxZ - _minZ, 0x8080ff);
-			cube.x = _centerX;
-			cube.y = _centerY;
-			cube.z = _centerZ;
-			return cube;
+			var cube:PrimitiveCubePrefab = new PrimitiveCubePrefab(_maxX - _minX, _maxY - _minY, _maxZ - _minZ, 0x8080ff);
+			var mesh:Mesh = cube.getNewObject() as Mesh;
+			mesh.x = _centerX;
+			mesh.y = _centerY;
+			mesh.z = _centerZ;
+			return mesh;
 		}
 		
-		override public function acceptTraverser(traverser:PartitionTraverser):void
+		override public function acceptTraverser(traverser:ICollector):void
 		{
 			super.acceptTraverser(traverser);
 			if (_parent)

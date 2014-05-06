@@ -23,7 +23,7 @@ package away3d.core.partition
 	{
 		private var _boundsChildrenVisible:Boolean;
 		private var _explicitBoundsVisible:Boolean;
-		private var _implicitBoundsVisible:Boolean;
+		protected var _implicitBoundsVisible:Boolean;
 		arcane var _parent:NodeBase;
 		protected var _childNodes:Vector.<NodeBase>;
 		protected var _numChildNodes:uint;
@@ -220,5 +220,14 @@ package away3d.core.partition
 			}
 		}
 
+		protected function updateNumEntities(value:int):void
+		{
+			var diff:int = value - _numEntities;
+			var node:NodeBase = this;
+
+			do
+				node._numEntities += diff;
+			while ((node = node._parent) != null);
+		}
 	}
 }

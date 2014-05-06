@@ -2,6 +2,7 @@ package away3d.core.partition
 {
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
+	import away3d.core.math.Box;
 	import away3d.core.math.Plane3D;
 	import away3d.entities.IEntity;
 
@@ -66,9 +67,14 @@ package away3d.core.partition
 		override public function findPartitionForEntity(entity:IEntity):NodeBase
 		{
 			var bounds:BoundingVolumeBase = entity.bounds;
-			var min:Vector3D = bounds.aabb.min;
-			var max:Vector3D = bounds.aabb.max;
-			return findPartitionForBounds(min.x, min.z, max.x, max.z);
+			var aabb:Box = bounds.aabb;
+
+			var minX:Number = aabb.x;
+			var minZ:Number = aabb.z;
+			var maxX:Number = aabb.x + aabb.width;
+			var maxZ:Number = aabb.z + aabb.depth;
+
+			return findPartitionForBounds(minX, minZ, maxX, maxZ);
 		}
 		
 		private function findPartitionForBounds(minX:Number, minZ:Number, maxX:Number, maxZ:Number):QuadTreeNode

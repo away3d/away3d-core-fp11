@@ -89,6 +89,10 @@ package away3d.entities {
 
 		function internalUpdate():void;
 
+		function get staticNode():Boolean;
+
+		function set staticNode(value:Boolean):void;
+
 		/**
 		 * The transformation matrix that transforms from model to world space, adapted with any special operations needed to render.
 		 * For example, assuring certain alignedness which is not inherent in the scene transform. By default, this would

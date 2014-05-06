@@ -2,7 +2,7 @@ package away3d.core.partition
 {
 	import away3d.arcane;
 	import away3d.core.base.Object3D;
-	import away3d.core.traverse.PartitionTraverser;
+	import away3d.core.traverse.ICollector;
 	import away3d.entities.IEntity;
 
 	use namespace arcane;
@@ -35,9 +35,9 @@ package away3d.core.partition
 		 * Sends a traverser through the partition tree.
 		 * @param traverser
 		 *
-		 * @see away3d.core.traverse.PartitionTraverser
+		 * @see away3d.core.traverse.ICollector
 		 */
-		public function traverse(traverser:PartitionTraverser):void
+		public function traverse(traverser:ICollector):void
 		{
 			if(_updatesMade) {
 				updateEntities();
@@ -51,7 +51,7 @@ package away3d.core.partition
 		 * object's bounding box, upon the next traversal.
 		 * @param entity The entity to be updated in the tree.
 		 */
-		arcane function markForUpdate(entity:Object3D):void
+		arcane function markForUpdate(entity:IEntity):void
 		{
 			var node:EntityNode = entity.partitionNode;
 			// already marked to be updated

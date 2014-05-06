@@ -3,12 +3,12 @@ package away3d.core.partition
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
-	import away3d.core.traverse.PartitionTraverser;
+	import away3d.core.traverse.ICollector;
 	import away3d.core.traverse.SceneIterator;
-	import away3d.entities.Entity;
-	import away3d.prefabs.WireframeCube;
-	import away3d.prefabs.WireframePrimitiveBase;
-	
+	import away3d.entities.IEntity;
+	import away3d.entities.Mesh;
+	import away3d.prefabs.PrimitiveCubePrefab;
+
 	import flash.geom.Vector3D;
 	
 	use namespace arcane;
@@ -65,16 +65,16 @@ package away3d.core.partition
 			return new Vector3D(_maxX, _maxY, _maxZ);
 		}
 		
-		override public function acceptTraverser(traverser:PartitionTraverser):void
+		override public function acceptTraverser(traverser:ICollector):void
 		{
 			if (traverser.enterNode(this)) {
-				if (_debugPrimitive)
-					traverser.applyRenderable(_debugPrimitive);
-				
+				if (_implicitBoundsVisible)
+					_boundsPrimitive.partitionNode.acceptTraverser(traverser);
+
 				if (!_active)
 					return;
 				
-				var entryPoint:Vector3D = traverser.entryPoint;
+				var entryPoint:Vector3D = traverser.entityHead;
 				
 				var cell:ViewCell = getCellContaining(entryPoint);
 				
@@ -93,14 +93,14 @@ package away3d.core.partition
 		
 		}
 		
-		public function addVisibleStatic(entity:Entity, indexX:uint = 0, indexY:uint = 0, indexZ:uint = 0):void
+		public function addVisibleStatic(entity:IEntity, indexX:uint = 0, indexY:uint = 0, indexZ:uint = 0):void
 		{
 			if (!entity.staticNode)
 				throw new Error("Entity being added as a visible static object must have static set to true");
 			
 			var index:int = getCellIndex(indexX, indexY, indexZ);
 			_cells[index].visibleStatics ||= new Vector.<EntityNode>();
-			_cells[index].visibleStatics.push(entity.getEntityPartitionNode());
+			_cells[index].visibleStatics.push(entity.partitionNode);
 			updateNumEntities(_numEntities + 1);
 		}
 		
@@ -112,13 +112,13 @@ package away3d.core.partition
 			updateNumEntities(_numEntities + 1);
 		}
 		
-		public function removeVisibleStatic(entity:Entity, indexX:uint = 0, indexY:uint = 0, indexZ:uint = 0):void
+		public function removeVisibleStatic(entity:IEntity, indexX:uint = 0, indexY:uint = 0, indexZ:uint = 0):void
 		{
 			var index:int = getCellIndex(indexX, indexY, indexZ);
 			var statics:Vector.<EntityNode> = _cells[index].visibleStatics;
 			if (!statics)
 				return;
-			index = statics.indexOf(entity.getEntityPartitionNode());
+			index = statics.indexOf(entity.partitionNode);
 			if (index >= 0)
 				statics.splice(index, 1);
 			updateNumEntities(_numEntities - 1);
@@ -269,13 +269,14 @@ package away3d.core.partition
 			return _cells[cellIndex];
 		}
 		
-		override protected function createDebugBounds():WireframePrimitiveBase
+		override protected function createBoundsPrimitive():IEntity
 		{
-			var cube:WireframeCube = new WireframeCube(_width, _height, _depth, 0xff0000);
-			cube.x = (_minX + _maxX)*.5;
-			cube.y = (_minY + _maxY)*.5;
-			cube.z = (_minZ + _maxZ)*.5;
-			return cube;
+			var cube:PrimitiveCubePrefab = new PrimitiveCubePrefab(_width, _height, _depth, 0xff0000);
+			var mesh:Mesh = cube.getNewObject() as Mesh;
+			mesh.x = (_minX + _maxX)*.5;
+			mesh.y = (_minY + _maxY)*.5;
+			mesh.z = (_minZ + _maxZ)*.5;
+			return mesh;
 		}
 		
 		/**
@@ -327,9 +328,9 @@ package away3d.core.partition
 			object = iterator.next();
 			
 			while (object) {
-				var entity:Entity = object as Entity;
+				var entity:IEntity = object as IEntity;
 				if (entity && staticIntersects(entity, minBounds, maxBounds)) {
-					var node:EntityNode = entity.getEntityPartitionNode();
+					var node:EntityNode = entity.partitionNode;
 					if (visibleStatics.indexOf(node) == -1) {
 						visibleStatics.push(node);
 						++numAdded;
@@ -350,7 +351,7 @@ package away3d.core.partition
 			updateNumEntities(_numEntities + cells.length);
 		}
 		
-		private function staticIntersects(entity:Entity, minBounds:Vector3D, maxBounds:Vector3D):Boolean
+		private function staticIntersects(entity:IEntity, minBounds:Vector3D, maxBounds:Vector3D):Boolean
 		{
 			entity.sceneTransform.transformVectors(entity.bounds.aabbPoints, _entityWorldBounds);
 			
