@@ -65,7 +65,7 @@ package away3d.lights.shadowmaps
 			_depthMap = depthMap;
 			if (_depthMap) {
 				_explicitDepthMap = true;
-				_depthMapSize = _depthMap.size;
+				_depthMapSize = _depthMap.width;
 			} else
 				_explicitDepthMap = false;
 		}

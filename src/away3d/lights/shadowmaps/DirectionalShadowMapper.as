@@ -82,7 +82,6 @@ package away3d.lights.shadowmaps
 			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);
 			renderer.renderScene(_casterCollector, target);
-			_casterCollector.cleanUp();
 		}
 		
 		protected function updateCullPlanes(viewCamera:Camera3D):void

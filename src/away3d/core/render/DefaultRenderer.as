@@ -15,6 +15,8 @@ package away3d.core.render
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
 
+	import flash.display.Stage;
+
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.Texture;
@@ -29,7 +31,7 @@ package away3d.core.render
 	 * The DefaultRenderer class provides the default rendering method. It renders the scene graph objects using the
 	 * materials assigned to them.
 	 */
-	public class DefaultRenderer extends RendererBase
+	public class DefaultRenderer extends RendererBase implements IRenderer
 	{
 		protected var _requireDepthRender:Boolean;
 
@@ -49,22 +51,8 @@ package away3d.core.render
 
 		private var _forceSoftware:Boolean;
 		private var _profile:String;
-		private var _antiAlias:Number;
 
-		public function get antiAlias():Number
-		{
-			return _antiAlias;
-		}
-
-		public function set antiAlias(value:Number):void
-		{
-			if (_antiAlias == value)
-				return;
-
-			_antiAlias = value;
-
-			_backBufferInvalid = true;
-		}
+		private var _stage:Stage;
 
 		/**
 		 *
@@ -110,24 +98,25 @@ package away3d.core.render
 			super();
 			_depthRenderer = new DepthRenderer();
 			_distanceRenderer = new DepthRenderer(false, true);
-
-			if (_stage3DProxy == null)
-				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
-
 			_forceSoftware = forceSoftware;
 			_profile = profile;
+		}
+
+		public function init(stage:Stage):void {
+			if (_stage3DProxy == null)
+				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
 
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 
 			if (_width == 0)
-				width = stage.innerWidth;
+				width = _stage.stageWidth;
 			else
-				_pRttBufferManager.viewWidth = _width;
+				_rttBufferManager.viewWidth = _width;
 
 			if (_height == 0)
-				height = window.innerHeight;
+				height = _stage.stageHeight;
 			else
-				_pRttBufferManager.viewHeight = _height;
+				_rttBufferManager.viewHeight = _height;
 		}
 
 		arcane override function set stage3DProxy(value:Stage3DProxy):void

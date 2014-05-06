@@ -104,6 +104,23 @@ package away3d.core.render
 		protected var opaqueRenderableHead:RenderableBase;
 		protected var blendedRenderableHead:RenderableBase;
 		protected var _renderableSorter:IEntitySorter;
+		protected var _antiAlias:Number;
+
+		public function get antiAlias():Number
+		{
+			return _antiAlias;
+		}
+
+		public function set antiAlias(value:Number):void
+		{
+			if (_antiAlias == value)
+				return;
+
+			_antiAlias = value;
+
+			_backBufferInvalid = true;
+		}
+
 		/**
 		 *
 		 */

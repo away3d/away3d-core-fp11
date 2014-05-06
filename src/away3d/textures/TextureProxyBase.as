@@ -40,7 +40,7 @@ package away3d.textures
 			return _format;
 		}
 		
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.TEXTURE;
 		}

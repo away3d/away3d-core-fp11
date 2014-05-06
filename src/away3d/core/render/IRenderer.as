@@ -58,25 +58,25 @@ package away3d.core.render {
 		 */
 		function render(entityCollector:ICollector):void;
 
-		/**
-		 * @internal
-		 */
 		function get backgroundR():Number;
 
-		/**
-		 * @internal
-		 */
+		function set backgroundR(value:Number):void;
+
 		function get backgroundG():Number;
 
-		/**
-		 * @internal
-		 */
+		function set backgroundG(value:Number):void;
+
 		function get backgroundB():Number;
 
-		/**
-		 * @internal
-		 */
+		function set backgroundB(value:Number):void;
+
 		function get backgroundAlpha():Number;
+
+		function set backgroundAlpha(value:Number):void;
+
+		function get antiAlias():Number
+
+		function set antiAlias(value:Number):void
 
 		/**
 		 * @internal
