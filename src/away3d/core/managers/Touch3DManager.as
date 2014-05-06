@@ -4,6 +4,7 @@ package away3d.core.managers
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
+	import away3d.core.base.Object3D;
 	import away3d.core.pick.IPicker;
 	import away3d.core.pick.PickingCollisionVO;
 	import away3d.core.pick.PickingType;
@@ -67,7 +68,7 @@ package away3d.core.managers
 			var i:uint;
 			var len:uint;
 			var event:TouchEvent3D;
-			var dispatcher:ObjectContainer3D;
+			var dispatcher:Object3D;
 			
 			for (i = 0; i < _numTouchPoints; ++i) {
 				_touchPoint = _touchPoints[ i ];
@@ -93,7 +94,7 @@ package away3d.core.managers
 				event = _queuedEvents[i];
 				dispatcher = event.object;
 				
-				while (dispatcher && !dispatcher._ancestorsAllowMouseEnabled)
+				while (dispatcher && !dispatcher.isMouseEnabled)
 					dispatcher = dispatcher.parent;
 				
 				if (dispatcher)
@@ -152,8 +153,8 @@ package away3d.core.managers
 			// 3D properties.
 			if (collider) {
 				// Object.
-				event.object = collider.entity;
-				event.renderable = collider.renderable;
+				event.object = collider.object;
+				event.materialOwner = collider.materialOwner;
 				// UV.
 				event.uv = collider.uv;
 				// Position.
@@ -162,9 +163,7 @@ package away3d.core.managers
 				event.localNormal = collider.localNormal? collider.localNormal.clone() : null;
 				// Face index.
 				event.index = collider.index;
-				// SubGeometryIndex.
-				event.subGeometryIndex = collider.subGeometryIndex;
-				
+
 			} else {
 				// Set all to null.
 				event.uv = null;

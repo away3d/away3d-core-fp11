@@ -3,6 +3,8 @@ package away3d.core.traverse {
 	import away3d.entities.Camera3D;
 	import away3d.entities.IEntity;
 
+	import flash.geom.Vector3D;
+
 	public interface ICollector {
 		function clear():void;
 
@@ -17,6 +19,8 @@ package away3d.core.traverse {
 		function applyPointLight(entity:IEntity):void;
 
 		function get entityHead():*;
+
+		function get entryPoint():Vector3D;
 
 		function get camera():Camera3D;
 	}

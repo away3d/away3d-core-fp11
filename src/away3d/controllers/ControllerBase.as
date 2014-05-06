@@ -2,6 +2,7 @@ package away3d.controllers
 {
 	import away3d.arcane;
 	import away3d.core.base.Object3D;
+	import away3d.entities.IEntity;
 	import away3d.errors.AbstractMethodError;
 	
 	use namespace arcane;
@@ -14,7 +15,7 @@ package away3d.controllers
 		protected function notifyUpdate():void
 		{
 			if (_targetObject && _targetObject.assignedPartition && _autoUpdate)
-				_targetObject.assignedPartition.markForUpdate(_targetObject);
+				_targetObject.assignedPartition.markForUpdate(_targetObject as IEntity);
 		}
 		
 		/**

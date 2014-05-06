@@ -8,7 +8,6 @@ package away3d.core.pick
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
 	import away3d.core.pool.EntityListItem;
-	import away3d.core.traverse.EntityCollector;
 	import away3d.core.traverse.RaycastCollector;
 
 	use namespace arcane;
@@ -90,7 +89,7 @@ package away3d.core.pick
 			scene.traversePartitions(_raycastCollector);
 			
 			_numEntities = 0;
-			var node:EntityListItem = _raycastCollector._entityHead;
+			var node:EntityListItem = _raycastCollector.entityHead;
 			var entity:IEntity;
 			while (node) {
 				entity = node.entity;

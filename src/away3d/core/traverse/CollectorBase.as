@@ -8,6 +8,8 @@ package away3d.core.traverse {
 	import away3d.core.partition.NodeBase;
 	import away3d.entities.IEntity;
 
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 
 	public class CollectorBase implements ICollector {
@@ -18,6 +20,7 @@ package away3d.core.traverse {
 		protected var _entityHead:EntityListItem;
 		public var numEntities:Number = 0;
 		public var numInteractiveEntities:Number = 0;
+		private var _entryPoint:Vector3D;
 
 		protected var entityListItemPool:EntityListItemPool;
 
@@ -33,6 +36,7 @@ package away3d.core.traverse {
 
 		public function set camera(camera:Camera3D):void {
 			_camera = camera;
+			_entryPoint = camera.scenePosition;
 			cullPlanes = _camera.frustumPlanes;
 		}
 
@@ -76,6 +80,10 @@ package away3d.core.traverse {
 
 		public function get entityHead():* {
 			return _entityHead;
+		}
+
+		public function get entryPoint():Vector3D {
+			return _entryPoint;
 		}
 	}
 }

@@ -4,8 +4,7 @@ package away3d.containers
 	import away3d.core.base.Object3D;
 	import away3d.core.partition.NodeBase;
 	import away3d.core.partition.Partition3D;
-	import away3d.core.traverse.PartitionTraverser;
-	import away3d.entities.IEntity;
+	import away3d.core.traverse.ICollector;
 	import away3d.events.Scene3DEvent;
 	
 	import flash.events.EventDispatcher;
@@ -46,7 +45,7 @@ package away3d.containers
 		 * @see away3d.core.traverse.PartitionTraverser
 		 * @see away3d.core.traverse.EntityCollector
 		 */
-		public function traversePartitions(traverser:PartitionTraverser):void
+		public function traversePartitions(traverser:ICollector):void
 		{
 			var i:uint;
 			var len:uint = _partitions.length;

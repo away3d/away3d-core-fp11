@@ -1,8 +1,8 @@
 ﻿package away3d.debug
 {
 	import away3d.entities.LineSegment;
-	import away3d.prefabs.LineSegment;
-	
+	import away3d.materials.SegmentMaterial;
+
 	import flash.geom.Vector3D;
 	
 	/**
@@ -15,7 +15,7 @@
 	 * @param    colorXZ                [optional] uint. Default is 0x00FF00.
 	 */
 	
-	public class WireframeAxesGrid extends away3d.entities.LineSegment
+	public class WireframeAxesGrid extends LineSegment
 	{
 		private static const PLANE_ZY:String = "zy";
 		private static const PLANE_XY:String = "xy";
@@ -23,7 +23,7 @@
 		
 		public function WireframeAxesGrid(subDivision:uint = 10, gridSize:uint = 100, thickness:Number = 1, colorXY:uint = 0x0000FF, colorZY:uint = 0xFF0000, colorXZ:uint = 0x00FF00)
 		{
-			super();
+			super(new SegmentMaterial(thickness), );
 			
 			if (subDivision == 0)
 				subDivision = 1;

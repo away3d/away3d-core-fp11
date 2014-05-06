@@ -1,12 +1,15 @@
 package away3d.bounds
 {
 	import away3d.arcane;
-	import away3d.core.math.*;
+	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.math.Plane3D;
+	import away3d.core.math.PlaneClassification;
 	import away3d.entities.IEntity;
-	import away3d.prefabs.*;
-	
-	import flash.geom.*;
-	
+
+	import flash.geom.Matrix3D;
+
+	import flash.geom.Vector3D;
+
 	use namespace arcane;
 	
 	/**

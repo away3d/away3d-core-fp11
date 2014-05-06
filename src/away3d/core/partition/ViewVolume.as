@@ -74,7 +74,7 @@ package away3d.core.partition
 				if (!_active)
 					return;
 				
-				var entryPoint:Vector3D = traverser.entityHead;
+				var entryPoint:Vector3D = traverser.entryPoint;
 				
 				var cell:ViewCell = getCellContaining(entryPoint);
 				

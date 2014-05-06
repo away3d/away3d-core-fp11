@@ -4,6 +4,8 @@ package away3d.events
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
+	import away3d.core.base.IMaterialOwner;
+	import away3d.core.base.Object3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.materials.MaterialBase;
 	
@@ -43,12 +45,12 @@ package away3d.events
 		/**
 		 * The 3d object inside which the event took place.
 		 */
-		public var object:ObjectContainer3D;
+		public var object:Object3D;
 		
 		/**
 		 * The renderable inside which the event took place.
 		 */
-		public var renderable:IRenderable;
+		public var materialOwner:IMaterialOwner;
 		
 		/**
 		 * The material of the 3d element inside which the event took place.
@@ -152,7 +154,7 @@ package away3d.events
 			
 			result.view = view;
 			result.object = object;
-			result.renderable = renderable;
+			result.materialOwner = materialOwner;
 			result.material = material;
 			result.uv = uv;
 			result.localPosition = localPosition;
