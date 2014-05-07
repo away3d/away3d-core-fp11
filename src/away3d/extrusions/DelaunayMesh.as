@@ -6,8 +6,7 @@ package away3d.extrusions
 {
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
+	import away3d.core.base.ISubMesh;
 	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
@@ -27,7 +26,7 @@ package away3d.extrusions
 		
 		private var _circle:Vector3D;
 		private var _vectors:Vector.<Vector3D>;
-		private var _subGeometry:SubGeometry;
+		private var _subGeometry:ISubMesh;
 		private var _sortProp:String;
 		private var _loopProp:String;
 		

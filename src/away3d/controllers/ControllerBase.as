@@ -15,7 +15,7 @@ package away3d.controllers
 		protected function notifyUpdate():void
 		{
 			if (_targetObject && _targetObject.assignedPartition && _autoUpdate)
-				_targetObject.assignedPartition.markForUpdate(_targetObject as IEntity);
+				_targetObject.assignedPartition.markForUpdate(_targetObject);
 		}
 		
 		/**

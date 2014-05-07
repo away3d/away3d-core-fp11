@@ -83,7 +83,6 @@ package away3d.lights.shadowmaps
 					_casterCollector.clear();
 					scene.traversePartitions(_casterCollector);
 					renderer.renderScene(_casterCollector, target, null, i);
-					_casterCollector.cleanUp();
 				}
 			}
 		}

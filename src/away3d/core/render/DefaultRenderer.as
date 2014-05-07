@@ -3,8 +3,9 @@ package away3d.core.render
 	import away3d.arcane;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
+	import away3d.core.pool.RenderableBase;
+	import away3d.core.traverse.ICollector;
 	import away3d.entities.Camera3D;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.traverse.EntityCollector;
@@ -14,8 +15,11 @@ package away3d.core.render
 	import away3d.lights.PointLight;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
+	import away3d.textures.RenderTexture;
+	import away3d.textures.TextureProxyBase;
 
 	import flash.display.Stage;
+	import flash.display3D.Context3D;
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
@@ -47,7 +51,7 @@ package away3d.core.render
 		private var _tempSkyboxMatrix:Matrix3D = new Matrix3D();
 		private var _skyboxTempVector:Vector3D = new Vector3D();
 		protected var filter3DRenderer:Filter3DRenderer;
-		protected var depthRender:Texture;
+		protected var depthRender:TextureProxyBase;
 
 		private var _forceSoftware:Boolean;
 		private var _profile:String;
@@ -125,21 +129,75 @@ package away3d.core.render
 			_distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
 		}
 
-		protected override function executeRender(entityCollector:EntityCollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
+
+		override public function render(entityCollector:ICollector):void {
+			super.render(entityCollector);
+
+			if(!_stage3DProxy.recoverFromDisposal()) {
+				_backBufferInvalid = true;
+				return;
+			}
+
+			if(_backBufferInvalid) {
+				updateBackBuffer();
+			}
+
+			if(_shareContext) {
+				_stage3DProxy.clearDepthBuffer();
+			}
+
+			if(filter3DRenderer) {
+				textureRatioX = _rttBufferManager.textureRatioX;
+				textureRatioY = _rttBufferManager.textureRatioY;
+			}else{
+				textureRatioX = 1;
+				textureRatioY = 1;
+			}
+
+			if(_requireDepthRender) {
+				renderSceneDepthToTexture(entityCollector as EntityCollector);
+			}
+
+			if(_depthPrepass) {
+				renderDepthPrepass(entityCollector as EntityCollector);
+			}
+
+			if (filter3DRenderer && _stage3DProxy.context3D) {
+				renderScene(entityCollector, filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+				filter3DRenderer.render(_stage3DProxy, entityCollector.camera, depthRender.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
+			} else {
+
+				if (_shareContext)
+					renderScene(entityCollector, null, _scissorRect);
+				else
+					renderScene(entityCollector);
+			}
+			
+			super.render(entityCollector);
+
+			if(!_shareContext) {
+				_stage3DProxy.present();
+			}
+
+			_stage3DProxy.bufferClear = false;
+		}
+
+		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
 		{
 			updateLights(entityCollector);
 
 			// otherwise RTT will interfere with other RTTs
 			if (target) {
-				drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, RTT_PASSES);
-				drawRenderables(entityCollector.blendedRenderableHead, entityCollector, RTT_PASSES);
+				drawRenderables(opaqueRenderableHead, entityCollector, RTT_PASSES);
+				drawRenderables(blendedRenderableHead, entityCollector, RTT_PASSES);
 			}
 
 			super.executeRender(entityCollector, target, scissorRect, surfaceSelector);
 		}
 
-		private function updateLights(entityCollector:EntityCollector):void
+		private function updateLights(collector:ICollector):void
 		{
+			var entityCollector:EntityCollector = collector as EntityCollector;
 			var dirLights:Vector.<DirectionalLight> = entityCollector.directionalLights;
 			var pointLights:Vector.<PointLight> = entityCollector.pointLights;
 			var len:uint, i:uint;
@@ -166,8 +224,9 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector:EntityCollector, target:TextureBase):void
+		override protected function draw(collector:ICollector, target:TextureBase):void
 		{
+			var entityCollector:EntityCollector = collector as EntityCollector;
 			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
 			if (entityCollector.skyBox) {
@@ -182,8 +241,8 @@ package away3d.core.render
 			_context.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 
 			var which:int = target? SCREEN_PASSES : ALL_PASSES;
-			drawRenderables(entityCollector.opaqueRenderableHead, entityCollector, which);
-			drawRenderables(entityCollector.blendedRenderableHead, entityCollector, which);
+			drawRenderables(opaqueRenderableHead, entityCollector, which);
+			drawRenderables(blendedRenderableHead, entityCollector, which);
 
 			_context.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
 
@@ -199,7 +258,7 @@ package away3d.core.render
 		 */
 		private function drawSkyBox(entityCollector:EntityCollector):void
 		{
-			var skyBox:IRenderable = entityCollector.skyBox;
+			var skyBox:RenderableBase = entityCollector.skyBox;
 			var material:MaterialBase = skyBox.material;
 			var camera:Camera3D = entityCollector.camera;
 
@@ -267,51 +326,103 @@ package away3d.core.render
 		 * @param renderables The renderables to draw.
 		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function drawRenderables(item:RenderableListItem, entityCollector:EntityCollector, which:int):void
+		private function drawRenderables(renderable:RenderableBase, collector:ICollector, which:int):void
 		{
+			var entityCollector:EntityCollector = collector as EntityCollector;
 			var numPasses:uint;
 			var j:uint;
 			var camera:Camera3D = entityCollector.camera;
-			var item2:RenderableListItem;
+			var renderable2:RenderableBase;
 
-			while (item) {
-				_activeMaterial = item.renderable.material;
+			while (renderable) {
+				_activeMaterial = renderable.material;
 				_activeMaterial.updateMaterial(_context);
 
 				numPasses = _activeMaterial.numPasses;
 				j = 0;
 
 				do {
-					item2 = item;
+					renderable2 = renderable;
 
 					var rttMask:int = _activeMaterial.passRendersToTexture(j)? 1 : 2;
 
 					if ((rttMask & which) != 0) {
 						_activeMaterial.activatePass(j, _stage3DProxy, camera);
 						do {
-							_activeMaterial.renderPass(j, item2.renderable, _stage3DProxy, entityCollector, _rttViewProjectionMatrix);
-							item2 = item2.next;
-						} while (item2 && item2.renderable.material == _activeMaterial);
+							_activeMaterial.renderPass(j, renderable2, _stage3DProxy, entityCollector, _rttViewProjectionMatrix);
+							renderable2 = renderable2.next as RenderableBase;
+						} while (renderable2 && renderable2.material == _activeMaterial);
 						_activeMaterial.deactivatePass(j, _stage3DProxy);
 					} else {
 						do
-							item2 = item2.next;
-						while (item2 && item2.renderable.material == _activeMaterial);
+							renderable2 = renderable2.next as RenderableBase;
+						while (renderable2 && renderable2.material == _activeMaterial);
 					}
 
 				} while (++j < numPasses);
 
-				item = item2;
+				renderable = renderable2;
 			}
 		}
 
-		arcane override function dispose():void
-		{
+		override public function dispose():void {
 			super.dispose();
 			_depthRenderer.dispose();
 			_distanceRenderer.dispose();
 			_depthRenderer = null;
 			_distanceRenderer = null;
+		}
+		protected function renderDepthPrepass(entityCollector:EntityCollector):void
+		{
+			_depthRenderer.disableColor = true;
+
+			if (filter3DRenderer) {
+				_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+				_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+				_depthRenderer.renderScene(entityCollector, filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+			} else {
+				_depthRenderer.textureRatioX = 1;
+				_depthRenderer.textureRatioY = 1;
+				_depthRenderer.renderScene(entityCollector);
+			}
+
+			_depthRenderer.disableColor = false;
+		}
+		
+		/**
+		 * Updates the backbuffer dimensions.
+		 */
+		protected function updateBackBuffer():void
+		{
+			// No reason trying to configure back buffer if there is no context available.
+			// Doing this anyway (and relying on _stageGL to cache width/height for
+			// context does get available) means usesSoftwareRendering won't be reliable.
+			if (_stage3DProxy.context3D && !_shareContext) {
+				if (_width && _height) {
+					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias);
+					_backBufferInvalid = false;
+				}
+			}
+		}
+
+		protected function renderSceneDepthToTexture(entityCollector:EntityCollector):void
+		{
+			if (_depthTextureInvalid || !_depthRenderer)
+				initDepthTexture(_stage3DProxy.context3D);
+
+			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+			_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+			_depthRenderer.renderScene(entityCollector, depthRender.getTextureForStage3D(_stage3DProxy));
+		}
+
+		private function initDepthTexture(context:Context3D):void
+		{
+			_depthTextureInvalid = false;
+
+			if (depthRender)
+				depthRender.dispose();
+
+			depthRender = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
 		}
 	}
 }

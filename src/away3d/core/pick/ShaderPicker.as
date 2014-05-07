@@ -100,7 +100,7 @@ package away3d.core.pick
 		 */
 		public function getViewCollision(x:Number, y:Number, view:View3D):PickingCollisionVO
 		{
-			var collector:EntityCollector = view.entityCollector;
+			var collector:EntityCollector = view.entityCollector as EntityCollector;
 			
 			_stage3DProxy = view.stage3DProxy;
 			

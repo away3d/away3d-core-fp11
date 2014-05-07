@@ -1,5 +1,6 @@
 ﻿package away3d.debug
 {
+	import away3d.containers.ObjectContainer3D;
 	import away3d.entities.LineSegment;
 	import away3d.materials.SegmentMaterial;
 
@@ -15,16 +16,16 @@
 	 * @param    colorXZ                [optional] uint. Default is 0x00FF00.
 	 */
 	
-	public class WireframeAxesGrid extends LineSegment
+	public class WireframeAxesGrid extends ObjectContainer3D
 	{
 		private static const PLANE_ZY:String = "zy";
 		private static const PLANE_XY:String = "xy";
 		private static const PLANE_XZ:String = "xz";
-		
+		private var material:SegmentMaterial;
 		public function WireframeAxesGrid(subDivision:uint = 10, gridSize:uint = 100, thickness:Number = 1, colorXY:uint = 0x0000FF, colorZY:uint = 0xFF0000, colorXZ:uint = 0x00FF00)
 		{
-			super(new SegmentMaterial(thickness), );
-			
+			material = new SegmentMaterial(thickness);
+
 			if (subDivision == 0)
 				subDivision = 1;
 			if (thickness <= 0)
@@ -39,12 +40,13 @@
 		
 		private function build(subDivision:uint, gridSize:uint, color:uint, thickness:Number, plane:String):void
 		{
+			//TODO:
 			var bound:Number = gridSize*.5;
 			var step:Number = gridSize/subDivision;
 			var v0:Vector3D = new Vector3D(0, 0, 0);
 			var v1:Vector3D = new Vector3D(0, 0, 0);
 			var inc:Number = -bound;
-			
+
 			while (inc <= bound) {
 				
 				switch (plane) {
@@ -55,7 +57,7 @@
 						v1.x = 0;
 						v1.y = inc;
 						v1.z = -bound;
-						addSegment(new LineSegment(v0, v1, color, color, thickness));
+						addChild(new LineSegment(material, v0, v1, thickness));
 						
 						v0.z = inc;
 						v0.x = 0;
@@ -63,7 +65,7 @@
 						v1.x = 0;
 						v1.y = -bound;
 						v1.z = inc;
-						addSegment(new LineSegment(v0, v1, color, color, thickness));
+						addChild(new LineSegment(material, v0, v1, thickness));
 						break;
 					
 					case PLANE_XY:
@@ -73,14 +75,14 @@
 						v1.x = -bound;
 						v1.y = inc;
 						v1.z = 0;
-						addSegment(new LineSegment(v0, v1, color, color, thickness));
+						addChild(new LineSegment(material, v0, v1, thickness));
 						v0.x = inc;
 						v0.y = bound;
 						v0.z = 0;
 						v1.x = inc;
 						v1.y = -bound;
 						v1.z = 0;
-						addSegment(new LineSegment(v0, v1, color, color, thickness));
+						addChild(new LineSegment(material, v0, v1, thickness));
 						break;
 					
 					default:
@@ -90,7 +92,7 @@
 						v1.x = -bound;
 						v1.y = 0;
 						v1.z = inc;
-						addSegment(new LineSegment(v0, v1, color, color, thickness));
+						addChild(new LineSegment(material, v0, v1, thickness));
 						
 						v0.x = inc;
 						v0.y = 0;
@@ -98,7 +100,7 @@
 						v1.x = inc;
 						v1.y = 0;
 						v1.z = -bound;
-						addSegment(new LineSegment(v0, v1, color, color, thickness));
+						addChild(new LineSegment(material, v0, v1, thickness));
 				}
 				
 				inc += step;

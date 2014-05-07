@@ -130,10 +130,7 @@ package away3d.lights.shadowmaps
 			_casterCollector.camera = _overallDepthCamera;
 			_casterCollector.clear();
 			scene.traversePartitions(_casterCollector);
-			
 			renderer.renderCascades(_casterCollector, target, _numCascades, _scissorRects, _depthCameras);
-			
-			_casterCollector.cleanUp();
 		}
 		
 		private function updateScissorRects():void

@@ -161,6 +161,7 @@ package away3d.animators
 			
 			//pass the particles data to the animator subGeometry
 			animatorSubGeometry.animationParticles = _particleAnimationSet.getAnimationSubGeometry(subMesh).animationParticles;
+			return animatorSubGeometry;
 		}
 	}
 

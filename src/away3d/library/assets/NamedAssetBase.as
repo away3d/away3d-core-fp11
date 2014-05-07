@@ -59,6 +59,11 @@ package away3d.library.assets
 			return _id;
 		}
 
+		public function set id(value:uint):void
+		{
+			_id = value;
+		}
+
 		public function get name():String
 		{
 			return _name;

@@ -35,7 +35,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		public function get assetType():String
+		override public function get assetType():String
 		{
 			return AssetType.SHADOW_MAP_METHOD;
 		}

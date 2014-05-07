@@ -135,7 +135,7 @@ package away3d.containers
 				registerPartition(object.partition);
 
 			if (object.isEntity)
-				object.assignedPartition.markForUpdate(object as IEntity);
+				object.assignedPartition.markForUpdate(object);
 		}
 		
 		/**

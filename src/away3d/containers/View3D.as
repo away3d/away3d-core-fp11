@@ -3,21 +3,15 @@
 	import away3d.Away3D;
 	import away3d.arcane;
 	import away3d.core.managers.Mouse3DManager;
-	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Touch3DManager;
 	import away3d.core.pick.IPicker;
-	import away3d.core.render.DefaultRenderer;
-	import away3d.core.render.DepthRenderer;
-	import away3d.core.render.Filter3DRenderer;
 	import away3d.core.render.IRenderer;
-	import away3d.core.render.RendererBase;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.Camera3D;
 	import away3d.events.CameraEvent;
 	import away3d.events.RendererEvent;
 	import away3d.events.Scene3DEvent;
-	import away3d.projections.PerspectiveProjection;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display.Sprite;
@@ -632,8 +626,8 @@
 			
 			_addedToStage = true;
 
-			_renderer
-			
+			_renderer.init(stage);
+
 			if (_shareContext)
 				_mouse3DManager.addViewLayer(this);
 		}
@@ -696,6 +690,14 @@
 		
 		override public function set scaleY(value:Number):void
 		{
+		}
+
+		public function get entityCollector():ICollector {
+			return _entityCollector;
+		}
+
+		public function set entityCollector(value:ICollector):void {
+			_entityCollector = value;
 		}
 	}
 }

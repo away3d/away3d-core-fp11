@@ -405,7 +405,7 @@ package away3d.library
 				_strategy.resolveConflict(asset, old, _assetDictionary[ns], _strategyPreference);
 			
 			//create unique-id (for now this is used in AwayBuilder only
-			asset.id = IDUtil.createUID();
+			asset.id = uint(IDUtil.createUID());
 			
 			// Add it
 			_assets.push(asset);

@@ -13,7 +13,7 @@ package away3d.core.traverse {
 	use namespace arcane;
 
 	public class CollectorBase implements ICollector {
-		public var scene:Scene3D;
+		private var _scene:Scene3D;
 		public var customCullPlanes:Vector.<Plane3D>;
 		public var cullPlanes:Vector.<Plane3D>;
 		public var numCullPlanes:Number = 0;
@@ -84,6 +84,14 @@ package away3d.core.traverse {
 
 		public function get entryPoint():Vector3D {
 			return _entryPoint;
+		}
+
+		public function get scene():Scene3D {
+			return _scene;
+		}
+
+		public function set scene(value:Scene3D):void {
+			_scene = value;
 		}
 	}
 }

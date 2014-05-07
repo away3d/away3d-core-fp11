@@ -83,7 +83,7 @@ package away3d.animators
 		public function getAnimationState(node:AnimationNodeBase):AnimationStateBase
 		{
 			var className:Class = node.stateClass;
-			var uID:String = node.id;
+			var uID:uint = node.id;
 
 			if (_animationStates[uID] == null)
 				_animationStates[uID] = new className(this, node);

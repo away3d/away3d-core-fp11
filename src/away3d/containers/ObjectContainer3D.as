@@ -68,7 +68,7 @@ package away3d.containers
 	public class ObjectContainer3D extends Object3D implements IAsset
 	{
 		private var _mouseChildren:Boolean = true;
-		private var _children:Vector.<ObjectContainer3D> = new Vector.<ObjectContainer3D>();
+		private var _children:Vector.<Object3D> = new Vector.<Object3D>();
 		arcane var isRoot:Boolean;
 
 		override public function get assetType():String
@@ -103,7 +103,7 @@ package away3d.containers
 			return _mouseChildren;
 		}
 
-		public function set mouseChildren(value:Boolean)
+		public function set mouseChildren(value:Boolean):void
 		{
 			if (_mouseChildren == value) return;
 
@@ -127,8 +127,8 @@ package away3d.containers
 			if (child == null)
 				throw new Error("Parameter child cannot be null.");
 
-			if (child._parent)
-				child._parent.removeChild(child);
+			if (child.parent)
+				child.parent.removeChild(child);
 
 			child.setParent(this);
 
@@ -239,7 +239,7 @@ package away3d.containers
 		 * @param index The index of the object to be retrieved.
 		 * @return The child object at the given index.
 		 */
-		public function getChildAt(index:uint):ObjectContainer3D
+		public function getChildAt(index:uint):Object3D
 		{
 			return _children[index];
 		}

@@ -3,7 +3,7 @@ package away3d.core.traverse
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
-	
+
 	use namespace arcane;
 	
 	public class SceneIterator
@@ -48,7 +48,7 @@ package away3d.core.traverse
 						if (_childIndex == _node.numChildren)
 							_traverseState = POST;
 						else {
-							_node = _node.getChildAt(_childIndex);
+							_node = _node.getChildAt(_childIndex) as ObjectContainer3D;
 							_traverseState = PRE;
 						}
 						break;

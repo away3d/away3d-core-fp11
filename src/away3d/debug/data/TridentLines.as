@@ -1,11 +1,12 @@
 ﻿package away3d.debug.data
 {
+	import away3d.containers.ObjectContainer3D;
 	import away3d.entities.LineSegment;
-	import away3d.prefabs.LineSegment;
-	
+	import away3d.materials.SegmentMaterial;
+
 	import flash.geom.Vector3D;
-	
-	public class TridentLines extends away3d.entities.LineSegment
+
+	public class TridentLines extends ObjectContainer3D
 	{
 		public function TridentLines(vectors:Vector.<Vector.<Vector3D>>, colors:Vector.<uint>):void
 		{
@@ -28,7 +29,8 @@
 				for (j = 0; j < letter.length; j += 2) {
 					v0 = letter[j];
 					v1 = letter[j + 1];
-					addSegment(new LineSegment(v0, v1, color, color, 1));
+					//TODO:
+					addChild(new LineSegment(new SegmentMaterial(), v0, v1, 1));
 				}
 			}
 		}

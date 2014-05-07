@@ -1,6 +1,7 @@
 package away3d.core.partition
 {
 	import away3d.arcane;
+	import away3d.core.base.Object3D;
 	import away3d.entities.IEntity;
 
 	use namespace arcane;
@@ -12,7 +13,7 @@ package away3d.core.partition
 			super(new ViewVolumeRootNode());
 		}
 		
-		override arcane function markForUpdate(entity:IEntity):void
+		override arcane function markForUpdate(entity:Object3D):void
 		{
 			// ignore if static, will be handled separately by visibility list
 			if (!entity.staticNode)

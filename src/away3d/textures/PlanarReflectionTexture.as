@@ -56,7 +56,7 @@ package away3d.textures
 			_plane = new Plane3D();
 			_scissorRect = new Rectangle();
 			_renderer = new DefaultRenderer();
-			_entityCollector = _renderer.createEntityCollector();
+			_entityCollector = _renderer.createEntityCollector() as EntityCollector;
 			initMockTexture();
 		}
 		
@@ -111,7 +111,7 @@ package away3d.textures
 		{
 			_renderer.dispose();
 			_renderer = value;
-			_entityCollector = _renderer.createEntityCollector();
+			_entityCollector = _renderer.createEntityCollector() as EntityCollector;
 		}
 		
 		/**
@@ -147,8 +147,6 @@ package away3d.textures
 			view.scene.traversePartitions(_entityCollector);
 			_renderer.stage3DProxy = view.stage3DProxy;
 			_renderer.renderScene(_entityCollector, super.getTextureForStage3D(view.stage3DProxy), _scissorRect);
-			
-			_entityCollector.cleanUp();
 			_isRendering = false;
 		}
 		

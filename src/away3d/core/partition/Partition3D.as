@@ -51,7 +51,7 @@ package away3d.core.partition
 		 * object's bounding box, upon the next traversal.
 		 * @param entity The entity to be updated in the tree.
 		 */
-		arcane function markForUpdate(entity:IEntity):void
+		arcane function markForUpdate(entity:Object3D):void
 		{
 			var node:EntityNode = entity.partitionNode;
 			// already marked to be updated

@@ -15,7 +15,9 @@ package away3d.library.assets
 		 * The id of the asset.
 		 */
 		function get id():uint;
-		
+
+		function set id(value:uint):void;
+
 		/**
 		 * The namespace of the asset. This allows several assets with the same name to coexist in different contexts.
 		 */

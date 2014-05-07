@@ -43,7 +43,7 @@ package away3d.textures
 		{
 			super(size);
 			_renderer = new DefaultRenderer();
-			_entityCollector = _renderer.createEntityCollector();
+			_entityCollector = _renderer.createEntityCollector() as EntityCollector;
 			_position = new Vector3D();
 			initMockTexture();
 			initCameras();
@@ -127,7 +127,7 @@ package away3d.textures
 		{
 			_renderer.dispose();
 			_renderer = value;
-			_entityCollector = _renderer.createEntityCollector();
+			_entityCollector = _renderer.createEntityCollector() as EntityCollector;
 		}
 		
 		/**
@@ -156,8 +156,6 @@ package away3d.textures
 			scene.traversePartitions(_entityCollector);
 			
 			_renderer.renderScene(_entityCollector, targetTexture, null, surfaceIndex);
-			
-			_entityCollector.cleanUp();
 		}
 		
 		private function initMockTexture():void

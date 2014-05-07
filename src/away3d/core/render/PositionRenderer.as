@@ -1,9 +1,9 @@
 package away3d.core.render
 {
-	import away3d.core.pool.IRenderable;
-	import away3d.core.pool.RenderableListItem;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.pool.RenderableBase;
 	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.traverse.EntityCollector;
+	import away3d.core.traverse.ICollector;
 	import away3d.debug.Debug;
 	
 	import com.adobe.utils.AGALMiniAssembler;
@@ -40,10 +40,9 @@ package away3d.core.render
 		/**
 		 * @inheritDoc
 		 */
-		override protected function draw(entityCollector:EntityCollector, target:TextureBase):void
+		override protected function draw(entityCollector:ICollector, target:TextureBase):void
 		{
-			var item:RenderableListItem;
-			var renderable:IRenderable;
+			var renderable:RenderableBase;
 			var matrix:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			var viewProjection:Matrix3D = entityCollector.camera.viewProjection;
 			
@@ -54,29 +53,27 @@ package away3d.core.render
 				initProgram3D(_context);
 			_context.setProgram(_program3D);
 			
-			item = entityCollector.opaqueRenderableHead;
-			while (item) {
-				renderable = item.renderable;
-				renderable.activateVertexBuffer(0, _stage3DProxy);
-				matrix.copyFrom(item.renderSceneTransform);
+			renderable = opaqueRenderableHead;
+			while (renderable) {
+				_stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				matrix.copyFrom(renderable.renderSceneTransform);
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
-				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
-				item = item.next;
+				_context.drawTriangles(_stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+				renderable = renderable.next as RenderableBase;
 			}
 			
 			if (!_renderBlended)
 				return;
 			
-			item = entityCollector.blendedRenderableHead;
-			while (item) {
-				renderable = item.renderable;
-				renderable.activateVertexBuffer(0, _stage3DProxy);
-				matrix.copyFrom(item.renderSceneTransform);
+			renderable = blendedRenderableHead;
+			while (renderable) {
+				_stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				matrix.copyFrom(renderable.renderSceneTransform);
 				matrix.append(viewProjection);
 				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
-				_context.drawTriangles(renderable.getIndexBuffer(_stage3DProxy), 0, renderable.numTriangles);
-				item = item.next;
+				_context.drawTriangles(_stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+				renderable = renderable.next as RenderableBase;
 			}
 		}
 		
