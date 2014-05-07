@@ -3,6 +3,7 @@ package away3d.materials.methods
 	import away3d.*;
 	import away3d.core.managers.*;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.events.*;
 	import away3d.lights.shadowmaps.*;
@@ -169,7 +170,7 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		arcane override function setRenderState(vo:MethodVO, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 			// todo: move this to activate (needs camera)
 			var near:Number = camera.projection.near;

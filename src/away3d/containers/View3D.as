@@ -6,6 +6,8 @@
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.managers.Touch3DManager;
 	import away3d.core.pick.IPicker;
+	import away3d.core.pick.PickingCollisionVO;
+	import away3d.core.pick.PickingCollisionVO;
 	import away3d.core.render.IRenderer;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.Camera3D;
@@ -67,14 +69,12 @@
 		private var _menu1:ContextMenuItem;
 		private var _ViewContextMenu:ContextMenu;
 		protected var _shareContext:Boolean = false;
-		protected var _scissorRect:Rectangle;
 		private var _scissorDirty:Boolean = true;
 		private var _viewportDirty:Boolean = true;
 		
 		private var _layeredView:Boolean = false;
-
 		public var forceMouseMove:Boolean;
-		
+
 		private function viewSource(e:ContextMenuEvent):void
 		{
 			var request:URLRequest = new URLRequest(_sourceURL);
@@ -362,7 +362,6 @@
 			_aspectRatio = _width/_height;
 			_camera.projection.aspectRatio = _aspectRatio;
 			_renderer.width = value;
-			_scissorRect.width = value;
 			_scissorDirty = true;
 		}
 		
@@ -389,7 +388,6 @@
 			_aspectRatio = _width/_height;
 			_camera.projection.aspectRatio = _aspectRatio;
 			_renderer.height = value;
-			_scissorRect.height = value;
 			_scissorDirty = true;
 		}
 		
@@ -496,9 +494,14 @@
 			}
 
 			if(!_shareContext) {
+				if(forceMouseMove && _mouse3DManager.activeView == this && !_mouse3DManager.updateDirty) {
+					_mouse3DManager.collidingObject = mousePicker.getViewCollision(mouseX, mouseY, this);
+				}
+
+				_mouse3DManager.fireMouseEvents(forceMouseMove);
 				// update picking
-				_mouse3DManager.updateCollider(this);
-				_touch3DManager.updateCollider();
+//				_mouse3DManager.updateCollider(this);
+//				_touch3DManager.updateCollider();
 			}
 
 			_entityCollector.clear();
@@ -507,12 +510,12 @@
 
 
 			_renderer.render(_entityCollector);
-
-			if (!_shareContext) {
-				// fire collected mouse events
-				_mouse3DManager.fireMouseEvents();
-				_touch3DManager.fireTouchEvents();
-			}
+//
+//			if (!_shareContext) {
+//				// fire collected mouse events
+//				_mouse3DManager.fireMouseEvents();
+//				_touch3DManager.fireTouchEvents();
+//			}
 		}
 
 		protected function updateTime():void
@@ -642,12 +645,6 @@
 		
 		private function onViewportUpdated(event:RendererEvent):void
 		{
-			if (_shareContext) {
-				_scissorRect.x = _globalPos.x - _renderer.viewPort.x;
-				_scissorRect.y = _globalPos.y - _renderer.viewPort.y;
-				_scissorDirty = true;
-			}
-			
 			_viewportDirty = true;
 		}
 
@@ -698,6 +695,24 @@
 
 		public function set entityCollector(value:ICollector):void {
 			_entityCollector = value;
+		}
+
+		// ---------------------------------------------------------------------
+		// Interface.
+		// ---------------------------------------------------------------------
+
+		public function updateCollider():void
+		{
+			if (!_shareContext) {
+				if (this == _mouse3DManager.activeView && (forceMouseMove || _mouse3DManager.updateDirty)) { // If forceMouseMove is off, and no 2D mouse events dirtied the update, don't update either.
+					_mouse3DManager.collidingObject = mousePicker.getViewCollision(mouseX, mouseY, this);
+				}
+			} else {
+				var collidingObject:PickingCollisionVO = mousePicker.getViewCollision(mouseX, mouseY, this);
+				if(_layeredView || !_mouse3DManager.collidingObject || collidingObject.rayEntryDistance<_mouse3DManager.collidingObject.rayEntryDistance) {
+					_mouse3DManager.collidingObject = collidingObject;
+				}
+			}
 		}
 	}
 }

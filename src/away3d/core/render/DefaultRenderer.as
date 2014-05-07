@@ -56,8 +56,6 @@ package away3d.core.render
 		private var _forceSoftware:Boolean;
 		private var _profile:String;
 
-		private var _stage:Stage;
-
 		/**
 		 *
 		 * @returns {*}
@@ -107,18 +105,18 @@ package away3d.core.render
 		}
 
 		override public function init(stage:Stage):void {
-			if (_stage3DProxy == null)
+			if (!_stage3DProxy)
 				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
 
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 
 			if (_width == 0)
-				width = _stage.stageWidth;
+				width = stage.stageWidth;
 			else
 				_rttBufferManager.viewWidth = _width;
 
 			if (_height == 0)
-				height = _stage.stageHeight;
+				height = stage.stageHeight;
 			else
 				_rttBufferManager.viewHeight = _height;
 		}

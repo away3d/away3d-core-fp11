@@ -64,8 +64,8 @@ package away3d.core.managers
 		private var _viewportUpdated:Stage3DEvent;
 		private var _viewportDirty:Boolean;
 		private var _bufferClear:Boolean;
-		private var _mouse3DManager:Mouse3DManager;
-		private var _touch3DManager:Touch3DManager;
+//		private var _mouse3DManager:Mouse3DManager;
+//		private var _touch3DManager:Touch3DManager;
 		
 		private function notifyViewportUpdated():void
 		{
@@ -246,8 +246,8 @@ package away3d.core.managers
 			
 			_activeProgram3D = null;
 			
-			if (_mouse3DManager)
-				_mouse3DManager.fireMouseEvents();
+//			if (_mouse3DManager)
+//				_mouse3DManager.fireMouseEvents();
 		}
 		
 		/**
@@ -537,25 +537,25 @@ package away3d.core.managers
 		/*
 		 * Access to fire mouseevents across multiple layered view3D instances
 		 */
-		public function get mouse3DManager():Mouse3DManager
-		{
-			return _mouse3DManager;
-		}
+//		public function get mouse3DManager():Mouse3DManager
+//		{
+//			return _mouse3DManager;
+//		}
+//
+//		public function set mouse3DManager(value:Mouse3DManager):void
+//		{
+//			_mouse3DManager = value;
+//		}
 		
-		public function set mouse3DManager(value:Mouse3DManager):void
-		{
-			_mouse3DManager = value;
-		}
-		
-		public function get touch3DManager():Touch3DManager
-		{
-			return _touch3DManager;
-		}
-		
-		public function set touch3DManager(value:Touch3DManager):void
-		{
-			_touch3DManager = value;
-		}
+//		public function get touch3DManager():Touch3DManager
+//		{
+//			return _touch3DManager;
+//		}
+//
+//		public function set touch3DManager(value:Touch3DManager):void
+//		{
+//			_touch3DManager = value;
+//		}
 		
 		/**
 		 * Frees the Context3D associated with this Stage3DProxy.

@@ -26,7 +26,6 @@ package away3d.core.pool {
 		private var _numTriangles:Number;
 		private var _concatenateArrays:Boolean;
 
-
 		public var JOINT_INDEX_FORMAT:String;
 		public var JOINT_WEIGHT_FORMAT:String;
 

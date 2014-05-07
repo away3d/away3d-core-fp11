@@ -3,6 +3,7 @@ package away3d.materials.methods
 	import away3d.*;
 	import away3d.core.managers.*;
 	import away3d.core.pool.IRenderable;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.events.*;
 	import away3d.library.assets.*;
@@ -134,7 +135,7 @@ package away3d.materials.methods
 		 * @param stage3DProxy The Stage3DProxy object currently used for rendering.
 		 * @param camera The camera from which the scene is currently rendered.
 		 */
-		arcane function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		arcane function setRenderState(vo:MethodVO, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 		
 		}

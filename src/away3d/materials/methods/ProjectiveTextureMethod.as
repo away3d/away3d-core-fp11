@@ -1,6 +1,7 @@
 package away3d.materials.methods
 {
 	import away3d.arcane;
+	import away3d.core.pool.RenderableBase;
 	import away3d.entities.Camera3D;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
@@ -149,10 +150,10 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		arcane override function setRenderState(vo:MethodVO, renderable:IRenderable, stage3DProxy:Stage3DProxy, camera:Camera3D):void
+		arcane override function setRenderState(vo:MethodVO, renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D):void
 		{
 			_projMatrix.copyFrom(_projector.viewProjection);
-			_projMatrix.prepend(renderable.getRenderSceneTransform(camera));
+			_projMatrix.prepend(renderable.sourceEntity.getRenderSceneTransform(camera));
 			_projMatrix.copyRawDataTo(vo.vertexData, vo.vertexConstantsIndex, true);
 		}
 		

@@ -364,7 +364,7 @@ package away3d.animators
 
 			var targetSubGeometry:TriangleSubGeometry;
 
-			if (!(targetSubGeometry = _morphedSubGeometry[sourceSubGeometry.id])) {
+			if (targetSubGeometry != _morphedSubGeometry[sourceSubGeometry.id]) {
 				//not yet stored
 				targetSubGeometry = _morphedSubGeometry[sourceSubGeometry.id] = sourceSubGeometry.clone();
 				//turn off auto calculations on the morphed geometry

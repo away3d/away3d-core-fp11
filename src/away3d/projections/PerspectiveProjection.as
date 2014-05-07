@@ -1,9 +1,9 @@
 package away3d.projections
 {
-	import away3d.core.math.*;
-	
-	import flash.geom.*;
-	
+	import away3d.core.math.Matrix3DUtils;
+
+	import flash.geom.Vector3D;
+
 	/**
 	 * The PerspectiveProjection object provides a projection matrix that projects 3D geometry with perspective distortion.
 	 */
