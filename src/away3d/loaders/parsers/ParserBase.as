@@ -414,7 +414,6 @@ package away3d.loaders.parsers
 				asset.name = asset.assetType;
 			
 			dispatchEvent(new AssetEvent(AssetEvent.ASSET_COMPLETE, asset));
-			dispatchEvent(new AssetEvent(type_event, asset));
 		}
 		
 		/**

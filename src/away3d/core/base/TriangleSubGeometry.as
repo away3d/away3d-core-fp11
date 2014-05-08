@@ -1330,6 +1330,7 @@ package away3d.core.base
 
 			var positions:Vector.<Number> = _positions
 			var uvs:Vector.<Number> = _uvs;
+			if(!uvs.length) return;
 
 			var len:uint = _indices.length;
 

@@ -512,12 +512,12 @@ package away3d.core.managers
 				buffer.stage3Ds[_stage3DIndex] = this;
 
 			if (!buffer.buffers[_stage3DIndex]) {
-				buffer.buffers[_stage3DIndex] = _context3D.createIndexBuffer(buffer.data.length/3);
+				buffer.buffers[_stage3DIndex] = _context3D.createIndexBuffer(buffer.data.length);
 				buffer.invalid[_stage3DIndex] = true;
 			}
 
 			if (buffer.invalid[_stage3DIndex]) {
-				buffer.buffers[_stage3DIndex].uploadFromVector(buffer.data, 0, buffer.data.length/3);
+				(buffer.buffers[_stage3DIndex] as IndexBuffer3D).uploadFromVector(buffer.data, 0, buffer.data.length);
 				buffer.invalid[_stage3DIndex] = false;
 			}
 

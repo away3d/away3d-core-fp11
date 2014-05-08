@@ -131,7 +131,7 @@ package away3d.core.render
 		override public function render(entityCollector:ICollector):void {
 			super.render(entityCollector);
 
-			if(!_stage3DProxy.recoverFromDisposal()) {
+			if(!_stage3DProxy || !_stage3DProxy.recoverFromDisposal()) {
 				_backBufferInvalid = true;
 				return;
 			}
@@ -183,13 +183,11 @@ package away3d.core.render
 		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
 		{
 			updateLights(entityCollector);
-
 			// otherwise RTT will interfere with other RTTs
 			if (target) {
 				drawRenderables(opaqueRenderableHead, entityCollector, RTT_PASSES);
 				drawRenderables(blendedRenderableHead, entityCollector, RTT_PASSES);
 			}
-
 			super.executeRender(entityCollector, target, scissorRect, surfaceSelector);
 		}
 
@@ -225,6 +223,9 @@ package away3d.core.render
 		override protected function draw(collector:ICollector, target:TextureBase):void
 		{
 			var entityCollector:EntityCollector = collector as EntityCollector;
+			if(!target) {
+				collectRenderables(entityCollector);
+			}
 			_context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
 			if (entityCollector.skyBox) {

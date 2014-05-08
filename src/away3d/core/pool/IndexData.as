@@ -12,7 +12,7 @@ package away3d.core.pool {
 		private var _dataDirty:Boolean = true;
 		public var invalid:Vector.<Boolean> = new Vector.<Boolean>(8);
 		public var stage3Ds:Vector.<Stage3DProxy> = new Vector.<Stage3DProxy>(8);
-		public var buffers:Vector.<IndexBuffer3D> = new Vector.<IndexBuffer3D>();
+		public var buffers:Array = [];
 		public var data:Vector.<uint>;
 		public var indexMappings:Vector.<uint>;
 		public var originalIndices:Vector.<uint>;
