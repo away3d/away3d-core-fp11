@@ -22,7 +22,7 @@ package away3d.core.pool {
 			_subGeometry.addEventListener(SubGeometryEvent.VERTICES_UPDATED, onVerticesUpdated);
 		}
 
-		public function updateData(originalIndices:Vector.<uint> = null, indexMappings:Vector.<uint> = null) {
+		public function updateData(originalIndices:Vector.<uint> = null, indexMappings:Vector.<uint> = null):void {
 			if(_dataDirty) {
 				_dataDirty = false;
 

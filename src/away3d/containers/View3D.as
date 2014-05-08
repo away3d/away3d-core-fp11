@@ -7,7 +7,7 @@
 	import away3d.core.managers.Touch3DManager;
 	import away3d.core.pick.IPicker;
 	import away3d.core.pick.PickingCollisionVO;
-	import away3d.core.pick.PickingCollisionVO;
+	import away3d.core.render.DefaultRenderer;
 	import away3d.core.render.IRenderer;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.Camera3D;
@@ -20,7 +20,6 @@
 	import flash.events.ContextMenuEvent;
 	import flash.events.Event;
 	import flash.geom.Point;
-	import flash.geom.Rectangle;
 	import flash.geom.Transform;
 	import flash.geom.Vector3D;
 	import flash.net.URLRequest;
@@ -119,10 +118,9 @@
 		
 		public function View3D(renderer:IRenderer, scene:Scene3D = null, camera:Camera3D = null)
 		{
-			super();
+			this.renderer = renderer;
 			this.scene = scene || new Scene3D();
 			this.camera = camera || new Camera3D();
-			this.renderer = renderer;
 
 			initHitField();
 			

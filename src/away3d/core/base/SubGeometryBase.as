@@ -46,7 +46,7 @@ package away3d.core.base {
 			return _concatenateArrays;
 		}
 
-		public function set concatenateArrays(value:Boolean) {
+		public function set concatenateArrays(value:Boolean):void {
 			if (_concatenateArrays == value)
 				return;
 

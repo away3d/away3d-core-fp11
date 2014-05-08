@@ -452,6 +452,105 @@ package away3d.core.base
 			return _positions;
 		}
 
+		public function updateVertexDataFromConcatenated(targetDataType:String, sourceData:Vector.<Number>, sourceOffset:uint, sourceDataPerVertex:uint, format:String):void{
+			var targetIndex:int;
+			var sourceIndex:int;
+			var stride:uint;
+			if(_concatenateArrays) {
+				var offset:uint = getOffset(targetDataType);
+				stride = getStride(targetDataType);
+				targetIndex = offset;
+				sourceIndex = sourceOffset;
+				var i:uint = 0;
+				if(format == Context3DVertexBufferFormat.FLOAT_1) {
+					for(i = 0; i<_numVertices; i++) {
+						_vertices[targetIndex] = sourceData[sourceIndex];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}else if(format == Context3DVertexBufferFormat.FLOAT_2) {
+					for(i = 0; i<_numVertices; i++) {
+						_vertices[targetIndex] = sourceData[sourceIndex];
+						_vertices[targetIndex+1] = sourceData[sourceIndex+1];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}else if(format == Context3DVertexBufferFormat.FLOAT_3) {
+					for(i = 0; i<_numVertices; i++) {
+						_vertices[targetIndex] = sourceData[sourceIndex];
+						_vertices[targetIndex+1] = sourceData[sourceIndex+1];
+						_vertices[targetIndex+2] = sourceData[sourceIndex+2];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}else if(format == Context3DVertexBufferFormat.FLOAT_4) {
+					for(i = 0; i<_numVertices; i++) {
+						_vertices[targetIndex] = sourceData[sourceIndex];
+						_vertices[targetIndex+1] = sourceData[sourceIndex+1];
+						_vertices[targetIndex+2] = sourceData[sourceIndex+2];
+						_vertices[targetIndex+3] = sourceData[sourceIndex+3];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}
+			}else{
+
+				var values:Vector.<Number>;
+				if(targetDataType == POSITION_DATA) {
+					values = _positions;
+				}else if(targetDataType == NORMAL_DATA) {
+					values = _vertexNormals;
+				}else if(targetDataType == UV_DATA) {
+					values = _uvs;
+				}else if(targetDataType == SECONDARY_UV_DATA) {
+					values = _secondaryUVs;
+				}else if(targetDataType == TANGENT_DATA) {
+					values = _vertexTangents;
+				}else if(targetDataType == JOINT_INDEX_DATA) {
+					values = _jointIndices;
+				}else if(targetDataType == JOINT_WEIGHT_DATA) {
+					values = _jointWeights;
+				}
+
+				targetIndex = 0;
+				stride = getStride(targetDataType);
+				sourceIndex = sourceOffset;
+				if(format == Context3DVertexBufferFormat.FLOAT_1) {
+					for(i = 0; i<_numVertices; i++) {
+						values[targetIndex] = sourceData[sourceIndex];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}else if(format == Context3DVertexBufferFormat.FLOAT_2) {
+					for(i = 0; i<_numVertices; i++) {
+						values[targetIndex] = sourceData[sourceIndex];
+						values[targetIndex+1] = sourceData[sourceIndex+1];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}else if(format == Context3DVertexBufferFormat.FLOAT_3) {
+					for(i = 0; i<_numVertices; i++) {
+						values[targetIndex] = sourceData[sourceIndex];
+						values[targetIndex+1] = sourceData[sourceIndex+1];
+						values[targetIndex+2] = sourceData[sourceIndex+2];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}else if(format == Context3DVertexBufferFormat.FLOAT_4) {
+					for(i = 0; i<_numVertices; i++) {
+						values[targetIndex] = sourceData[sourceIndex];
+						values[targetIndex+1] = sourceData[sourceIndex+1];
+						values[targetIndex+2] = sourceData[sourceIndex+2];
+						values[targetIndex+3] = sourceData[sourceIndex+3];
+						targetIndex+=stride;
+						sourceIndex+=sourceDataPerVertex;
+					}
+				}
+			}
+
+			notifyVerticesUpdate();
+		}
+
 		/**
 		 *
 		 */
@@ -994,6 +1093,7 @@ package away3d.core.base
 			_faceWeights = null;
 			_faceTangents = null;
 		}
+
 
 		/**
 		 * Updates the face indices of the

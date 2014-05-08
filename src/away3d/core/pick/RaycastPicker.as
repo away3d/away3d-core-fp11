@@ -191,6 +191,7 @@ package away3d.core.pick
 
 			var rayDir:Vector3D = pickingCollisionVO.localRayDirection;
 			var rayPos:Vector3D = pickingCollisionVO.localRayPosition;
+			if(!rayDir || !rayPos) return;
 			var t:Number = pickingCollisionVO.rayEntryDistance;
 			collisionPos.x = rayPos.x + t*rayDir.x;
 			collisionPos.y = rayPos.y + t*rayDir.y;

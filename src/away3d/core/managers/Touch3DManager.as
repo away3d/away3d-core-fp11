@@ -2,7 +2,6 @@ package away3d.core.managers
 {
 	
 	import away3d.arcane;
-	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.View3D;
 	import away3d.core.base.Object3D;
 	import away3d.core.pick.IPicker;

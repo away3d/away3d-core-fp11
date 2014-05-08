@@ -105,8 +105,8 @@ package away3d.core.render
 		}
 
 		override public function init(stage:Stage):void {
-			if (!_stage3DProxy)
-				_stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
+			if (!stage3DProxy)
+				stage3DProxy = Stage3DManager.getInstance(stage).getFreeStage3DProxy(_forceSoftware, _profile);
 
 			_rttBufferManager = RTTBufferManager.getInstance(_stage3DProxy);
 
@@ -225,24 +225,24 @@ package away3d.core.render
 		override protected function draw(collector:ICollector, target:TextureBase):void
 		{
 			var entityCollector:EntityCollector = collector as EntityCollector;
-			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+			_context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 
 			if (entityCollector.skyBox) {
 				if (_activeMaterial)
 					_activeMaterial.deactivate(_stage3DProxy);
 				_activeMaterial = null;
 
-				_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
+				_context3D.setDepthTest(false, Context3DCompareMode.ALWAYS);
 				drawSkyBox(entityCollector);
 			}
 
-			_context.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
+			_context3D.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 
 			var which:int = target? SCREEN_PASSES : ALL_PASSES;
 			drawRenderables(opaqueRenderableHead, entityCollector, which);
 			drawRenderables(blendedRenderableHead, entityCollector, which);
 
-			_context.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
+			_context3D.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
 
 			if (_activeMaterial)
 				_activeMaterial.deactivate(_stage3DProxy);
@@ -334,7 +334,7 @@ package away3d.core.render
 
 			while (renderable) {
 				_activeMaterial = renderable.material;
-				_activeMaterial.updateMaterial(_context);
+				_activeMaterial.updateMaterial(_context3D);
 
 				numPasses = _activeMaterial.numPasses;
 				j = 0;

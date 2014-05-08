@@ -58,7 +58,7 @@ package away3d.core.render
 		private var _triangleSubMeshRenderablePool:RenderablePool;
 		private var _lineSubMeshRenderablePool:RenderablePool;
 		
-		protected var _context:Context3D;
+		protected var _context3D:Context3D;
 		protected var _stage3DProxy:Stage3DProxy;
 
 		protected var camera:Camera3D;
@@ -160,7 +160,7 @@ package away3d.core.render
 			return _localPos.x;
 		}
 
-		public function set x(value:Number)
+		public function set x(value:Number):void
 		{
 			if (_localPos.x == value)
 				return;
@@ -178,7 +178,7 @@ package away3d.core.render
 			return _localPos.y;
 		}
 
-		public function set y(value:Number)
+		public function set y(value:Number):void
 		{
 			if (y == value)
 				return;
@@ -343,7 +343,7 @@ package away3d.core.render
 					_stage3DProxy.removeEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
 				}
 				_stage3DProxy = null;
-				_context = null;
+				_context3D = null;
 				return;
 			}
 			//else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
@@ -357,7 +357,7 @@ package away3d.core.render
 				_backgroundImageRenderer.stage3DProxy = value;
 			
 			if (value.context3D)
-				_context = value.context3D;
+				_context3D = value.context3D;
 		}
 
 		/**
@@ -416,9 +416,9 @@ package away3d.core.render
 		 * @param surfaceSelector The index of a CubeTexture's face to render to.
 		 * @param additionalClearMask Additional clear mask information, in case extra clear channels are to be omitted.
 		 */
-		arcane function renderScene(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:Number = 0)
+		arcane function renderScene(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:Number = 0):void
 		{
-			if (!_stage3DProxy || !_context || !entityCollector.entityHead)
+			if (!_stage3DProxy || !_context3D || !entityCollector.entityHead)
 				return;
 
 			_rttViewProjectionMatrix.copyFrom(entityCollector.camera.viewProjection);
@@ -428,12 +428,12 @@ package away3d.core.render
 
 			// clear buffers
 			for (var i:uint = 0; i < 8; ++i) {
-				_context.setVertexBufferAt(i, null);
-				_context.setTextureAt(i, null);
+				_context3D.setVertexBufferAt(i, null);
+				_context3D.setTextureAt(i, null);
 			}
 		}
 
-		protected function collectRenderables(entityCollector:ICollector)
+		protected function collectRenderables(entityCollector:ICollector):void
 		{
 			//reset head values
 			blendedRenderableHead = null;
@@ -477,9 +477,9 @@ package away3d.core.render
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
 			
 			if ((target || !_shareContext) && !_depthPrepass)
-				_context.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0);
+				_context3D.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0);
 
-			_context.setDepthTest(false, Context3DCompareMode.ALWAYS);
+			_context3D.setDepthTest(false, Context3DCompareMode.ALWAYS);
 
 			_stage3DProxy.scissorRect = scissorRect;
 
@@ -489,11 +489,11 @@ package away3d.core.render
 			draw(entityCollector, target);
 			
 			//line required for correct rendering when using away3d with starling. DO NOT REMOVE UNLESS STARLING INTEGRATION IS RETESTED!
-			_context.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
+			_context3D.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
 			
 			if (!_shareContext) {
 				if (_snapshotRequired && _snapshotBitmapData) {
-					_context.drawToBitmapData(_snapshotBitmapData);
+					_context3D.drawToBitmapData(_snapshotBitmapData);
 					_snapshotRequired = false;
 				}
 			}
@@ -528,7 +528,7 @@ package away3d.core.render
 		 */
 		private function onContextUpdate(event:Event):void
 		{
-			_context = _stage3DProxy.context3D;
+			_context3D = _stage3DProxy.context3D;
 		}
 		
 		public function get backgroundAlpha():Number

@@ -13,8 +13,10 @@ package away3d.core.pool {
 
 			var subGeometryDictionary:Object = VertexDataPool._pool[subGeometry.id] || (VertexDataPool._pool[subGeometry.id] = {});
 			var subGeometryData:Vector.<VertexData> = (subGeometryDictionary[dataType] || (subGeometryDictionary[dataType] = new Vector.<VertexData>()));
-
-			var vertexData:VertexData = subGeometryData[indexData.level] || (subGeometryData[indexData.level] = new VertexData(subGeometry, dataType));
+			if(subGeometryData.length<=indexData.level) {
+				subGeometryData[indexData.level] = new VertexData(subGeometry, dataType);
+			}
+			var vertexData:VertexData = subGeometryData[indexData.level];
 			vertexData.updateData(indexData.originalIndices, indexData.indexMappings);
 
 			return vertexData;

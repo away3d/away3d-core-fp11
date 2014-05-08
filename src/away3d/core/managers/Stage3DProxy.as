@@ -51,8 +51,6 @@ package away3d.core.managers
 		private var _enableDepthAndStencil:Boolean;
 		private var _backBufferEnableDepthAndStencil:Boolean = true;
 		private var _contextRequested:Boolean;
-		//private var _activeVertexBuffers : Vector.<VertexBuffer3D> = new Vector.<VertexBuffer3D>(8, true);
-		//private var _activeTextures : Vector.<TextureBase> = new Vector.<TextureBase>(8, true);
 		private var _renderTarget:TextureBase;
 		private var _renderSurfaceSelector:int;
 		private var _scissorRect:Rectangle;
@@ -64,9 +62,7 @@ package away3d.core.managers
 		private var _viewportUpdated:Stage3DEvent;
 		private var _viewportDirty:Boolean;
 		private var _bufferClear:Boolean;
-//		private var _mouse3DManager:Mouse3DManager;
-//		private var _touch3DManager:Touch3DManager;
-		
+
 		private function notifyViewportUpdated():void
 		{
 			if (_viewportDirty)

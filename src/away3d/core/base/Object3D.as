@@ -279,7 +279,7 @@ package away3d.core.base
 			return _height;
 		}
 
-		public function set height(val:Number)
+		public function set height(val:Number):void
 		{
 			if (_height == val)
 				return;

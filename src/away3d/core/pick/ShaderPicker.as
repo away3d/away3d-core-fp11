@@ -8,8 +8,7 @@ package away3d.core.pick
 	import away3d.core.math.*;
 	import away3d.core.traverse.*;
 	import away3d.entities.*;
-	import away3d.tools.utils.GeomUtil;
-	
+
 	import flash.display.*;
 	import flash.display3D.*;
 	import flash.display3D.textures.*;

@@ -73,9 +73,9 @@ package away3d.core.render
 //			_renderableSorter.sort(entityCollector);
 
 			_stage3DProxy.setRenderTarget(target, true, 0);
-			_context.clear(1, 1, 1, 1, 1, 0);
-			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-			_context.setDepthTest(true, Context3DCompareMode.LESS);
+			_context3D.clear(1, 1, 1, 1, 1, 0);
+			_context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+			_context3D.setDepthTest(true, Context3DCompareMode.LESS);
 			
 			var head:RenderableBase = opaqueRenderableHead;
 			var first:Boolean = true;
@@ -91,7 +91,7 @@ package away3d.core.render
 			_activeMaterial = null;
 			
 			//line required for correct rendering when using away3d with starling. DO NOT REMOVE UNLESS STARLING INTEGRATION IS RETESTED!
-			_context.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
+			_context3D.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
 			
 			_stage3DProxy.scissorRect = null;
 		}
@@ -135,12 +135,12 @@ package away3d.core.render
 			var entityCollector:EntityCollector = collector as EntityCollector;
 			collectRenderables(entityCollector);
 
-			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-			_context.setDepthTest(true, Context3DCompareMode.LESS);
+			_context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+			_context3D.setDepthTest(true, Context3DCompareMode.LESS);
 			drawRenderables(opaqueRenderableHead, entityCollector);
 			
 			if (_disableColor)
-				_context.setColorMask(false, false, false, false);
+				_context3D.setColorMask(false, false, false, false);
 			
 			if (_renderBlended)
 				drawRenderables(blendedRenderableHead, entityCollector);
@@ -149,7 +149,7 @@ package away3d.core.render
 				_activeMaterial.deactivateForDepth(_stage3DProxy);
 			
 			if (_disableColor)
-				_context.setColorMask(true, true, true, true);
+				_context3D.setColorMask(true, true, true, true);
 			
 			_activeMaterial = null;
 		}

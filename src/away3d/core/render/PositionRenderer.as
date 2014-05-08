@@ -46,20 +46,20 @@ package away3d.core.render
 			var matrix:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			var viewProjection:Matrix3D = entityCollector.camera.viewProjection;
 			
-			_context.setDepthTest(true, Context3DCompareMode.LESS);
-			_context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+			_context3D.setDepthTest(true, Context3DCompareMode.LESS);
+			_context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			
 			if (!_program3D)
-				initProgram3D(_context);
-			_context.setProgram(_program3D);
+				initProgram3D(_context3D);
+			_context3D.setProgram(_program3D);
 			
 			renderable = opaqueRenderableHead;
 			while (renderable) {
 				_stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 				matrix.copyFrom(renderable.renderSceneTransform);
 				matrix.append(viewProjection);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
-				_context.drawTriangles(_stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+				_context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, viewProjection, true);
+				_context3D.drawTriangles(_stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 				renderable = renderable.next as RenderableBase;
 			}
 			
@@ -71,8 +71,8 @@ package away3d.core.render
 				_stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 				matrix.copyFrom(renderable.renderSceneTransform);
 				matrix.append(viewProjection);
-				_context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
-				_context.drawTriangles(_stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
+				_context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
+				_context3D.drawTriangles(_stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 				renderable = renderable.next as RenderableBase;
 			}
 		}
