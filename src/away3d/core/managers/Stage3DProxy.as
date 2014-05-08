@@ -655,8 +655,7 @@ package away3d.core.managers
 		
 		public function clearDepthBuffer():void
 		{
-			if (!_context3D)
-				return;
+			if (!_context3D) return;
 			_context3D.clear(0, 0, 0, 1, 1, 0, Context3DClearMask.DEPTH);
 		}
 

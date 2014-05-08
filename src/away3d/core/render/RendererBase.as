@@ -147,7 +147,7 @@ package away3d.core.render
 		/**
 		 * A scissor rectangle equivalent of the view size and position.
 		 */
-		public function  get scissorRect():Rectangle
+		public function get scissorRect():Rectangle
 		{
 			return _scissorRect;
 		}
@@ -203,6 +203,7 @@ package away3d.core.render
 
 			_width = value;
 			_scissorRect.width = value;
+			_viewPort.width = value;
 
 			if (_rttBufferManager)
 				_rttBufferManager.viewWidth = value;
@@ -228,6 +229,7 @@ package away3d.core.render
 
 			_height = value;
 			_scissorRect.height = value;
+			_viewPort.height = value;
 
 			if (_rttBufferManager)
 				_rttBufferManager.viewHeight = value;
