@@ -1,6 +1,7 @@
 package away3d.stereo
 {
 	import away3d.arcane;
+	import away3d.core.render.IRenderer;
 	import away3d.entities.Camera3D;
 	import away3d.containers.Scene3D;
 	import away3d.containers.View3D;
@@ -18,10 +19,10 @@ package away3d.stereo
 		
 		private var _stereoEnabled:Boolean;
 		
-		public function StereoView3D(scene:Scene3D = null, camera:Camera3D = null, renderer:RendererBase = null, stereoRenderMethod:StereoRenderMethodBase = null)
+		public function StereoView3D(scene:Scene3D = null, camera:Camera3D = null, renderer:IRenderer = null, stereoRenderMethod:StereoRenderMethodBase = null)
 		{
-			super(scene, camera, renderer);
-			
+			super(renderer, scene, camera)
+
 			this.camera = camera;
 			
 			_stereoRenderer = new StereoRenderer(stereoRenderMethod);
@@ -66,35 +67,35 @@ package away3d.stereo
 		override public function render():void
 		{
 			//if context3D has Disposed by the OS,don't render at this frame
-			if (!stage3DProxy.recoverFromDisposal()) {
-				_backBufferInvalid = true;
-				return;
-			}
-
-			if (_stereoEnabled) {
-				// reset or update render settings
-				if (_backBufferInvalid)
-					updateBackBuffer();
-				
-				if (!_parentIsStage)
-					updateGlobalPos();
-				
-				updateTime();
-				
-				renderWithCamera(_stereoCam.leftCamera, _stereoRenderer.getLeftInputTexture(_stage3DProxy), true);
-				renderWithCamera(_stereoCam.rightCamera, _stereoRenderer.getRightInputTexture(_stage3DProxy), false);
-				
-				_stereoRenderer.render(_stage3DProxy);
-				
-				if (!_shareContext)
-					_stage3DProxy._context3D.present();
-				
-				// fire collected mouse events
-				_mouse3DManager.fireMouseEvents();
-			} else {
-				_camera = _stereoCam;
-				super.render();
-			}
+//			if (!stage3DProxy.recoverFromDisposal()) {
+//				_backBufferInvalid = true;
+//				return;
+//			}
+//
+//			if (_stereoEnabled) {
+//				// reset or update render settings
+//				if (_backBufferInvalid)
+//					updateBackBuffer();
+//
+//				if (!_parentIsStage)
+//					updateGlobalPos();
+//
+//				updateTime();
+//
+//				renderWithCamera(_stereoCam.leftCamera, _stereoRenderer.getLeftInputTexture(_stage3DProxy), true);
+//				renderWithCamera(_stereoCam.rightCamera, _stereoRenderer.getRightInputTexture(_stage3DProxy), false);
+//
+//				_stereoRenderer.render(_stage3DProxy);
+//
+//				if (!_shareContext)
+//					_stage3DProxy._context3D.present();
+//
+//				// fire collected mouse events
+//				_mouse3DManager.fireMouseEvents();
+//			} else {
+//				_camera = _stereoCam;
+//				super.render();
+//			}
 		}
 		
 		private function renderWithCamera(cam:Camera3D, texture:Texture, doMouse:Boolean):void
@@ -105,40 +106,40 @@ package away3d.stereo
 			_camera.projection.aspectRatio = _aspectRatio;
 			_entityCollector.camera = _camera;
 			
-			updateViewSizeData();
-			
-			// Always use RTT for stereo rendering
-			_renderer.textureRatioX = _rttBufferManager.textureRatioX;
-			_renderer.textureRatioY = _rttBufferManager.textureRatioY;
-			
-			// collect stuff to render
-			_scene.traversePartitions(_entityCollector);
-			
-			// update picking
-			if (doMouse)
-				_mouse3DManager.updateCollider(this);
-			
-			//			updateLights(_entityCollector);
-			
-			if (_requireDepthRender)
-				renderDepthPrepass(_entityCollector);
-			
-			if (_filter3DRenderer && _stage3DProxy._context3D) {
-				_renderer.renderScene(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
-				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
-				if (!_shareContext)
-					_stage3DProxy._context3D.present();
-			} else {
-				_renderer.shareContext = _shareContext;
-				if (_shareContext)
-					_renderer.renderScene(_entityCollector, texture, _scissorRect);
-				else
-					_renderer.renderScene(_entityCollector, texture, _rttBufferManager.renderToTextureRect);
-				
-			}
-			
-			// clean up data for this render
-			_entityCollector.cleanUp();
+//			updateViewSizeData();
+//
+//			// Always use RTT for stereo rendering
+//			_renderer.textureRatioX = _rttBufferManager.textureRatioX;
+//			_renderer.textureRatioY = _rttBufferManager.textureRatioY;
+//
+//			// collect stuff to render
+//			_scene.traversePartitions(_entityCollector);
+//
+//			// update picking
+//			if (doMouse)
+//				_mouse3DManager.updateCollider(this);
+//
+//			//			updateLights(_entityCollector);
+//
+//			if (_requireDepthRender)
+//				renderDepthPrepass(_entityCollector);
+//
+//			if (_filter3DRenderer && _stage3DProxy._context3D) {
+//				_renderer.renderScene(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+//				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
+//				if (!_shareContext)
+//					_stage3DProxy._context3D.present();
+//			} else {
+//				_renderer.shareContext = _shareContext;
+//				if (_shareContext)
+//					_renderer.renderScene(_entityCollector, texture, _scissorRect);
+//				else
+//					_renderer.renderScene(_entityCollector, texture, _rttBufferManager.renderToTextureRect);
+//
+//			}
+//
+//			// clean up data for this render
+//			_entityCollector.cleanUp();
 		}
 	}
 }

@@ -1,4 +1,5 @@
 package away3d.entities {
+	import away3d.core.partition.SkyBoxNode;
 	import away3d.prefabs.*;
 
 	import away3d.animators.IAnimator;
@@ -8,7 +9,6 @@ package away3d.entities {
 	import away3d.core.base.Object3D;
 	import away3d.core.math.UVTransform;
 	import away3d.core.partition.EntityNode;
-	import away3d.core.partition.SkyboxNode;
 	import away3d.core.render.IRenderer;
 	import away3d.library.assets.AssetType;
 	import away3d.materials.IMaterial;
@@ -20,7 +20,7 @@ package away3d.entities {
 	 * such it's always centered at the camera's position and sized to exactly fit within the camera's frustum, ensuring
 	 * the sky box is always as large as possible without being clipped.
 	 */
-	public class Skybox extends Object3D implements IEntity, IMaterialOwner
+	public class SkyBox extends Object3D implements IEntity, IMaterialOwner
 	{
 		private var _uvTransform:UVTransform = new UVTransform();
 		private var _material:IMaterial;
@@ -36,7 +36,7 @@ package away3d.entities {
 		 *
 		 * @param material    The material with which to render the Skybox.
 		 */
-		public function Skybox(material:IMaterial)
+		public function SkyBox(material:IMaterial)
 		{
 			_isEntity = true;
 			this.material = material;
@@ -94,7 +94,7 @@ package away3d.entities {
 		 */
 		override protected function createEntityPartitionNode():EntityNode
 		{
-			return new SkyboxNode(this);
+			return new SkyBoxNode(this);
 		}
 		/**
 		 * @protected

@@ -21,7 +21,7 @@ package away3d.materials.passes
 	/**
 	 * SkyBoxPass provides a material pass exclusively used to render sky boxes from a cube texture.
 	 */
-	public class SkyboxPass extends MaterialPassBase
+	public class SkyBoxPass extends MaterialPassBase
 	{
 		private var _cubeTexture:CubeTextureBase;
 		private var _vertexData:Vector.<Number>;
@@ -29,7 +29,7 @@ package away3d.materials.passes
 		/**
 		 * Creates a new SkyBoxPass object.
 		 */
-		public function SkyboxPass()
+		public function SkyBoxPass()
 		{
 			super();
 			mipmap = false;

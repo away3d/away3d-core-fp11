@@ -5,7 +5,7 @@ package away3d.core.render {
 	import away3d.core.sort.IEntitySorter;
 	import away3d.core.traverse.ICollector;
 	import away3d.entities.Billboard;
-	import away3d.entities.Skybox;
+	import away3d.entities.SkyBox;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display.Stage;
@@ -52,7 +52,7 @@ package away3d.core.render {
 		 *
 		 * @param skybox
 		 */
-		function applySkybox(skybox:Skybox):void;
+		function applySkybox(skybox:SkyBox):void;
 
 		/**
 		 *

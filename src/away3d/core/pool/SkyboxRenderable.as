@@ -1,7 +1,7 @@
 package away3d.core.pool {
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.entities.Skybox;
+	import away3d.entities.SkyBox;
 
 	public class SkyboxRenderable extends RenderableBase {
 		/**
@@ -20,7 +20,7 @@ package away3d.core.pool {
 		 * @param pool
 		 * @param skybox
 		 */
-		public function SkyboxRenderable(pool:RenderablePool, skybox:Skybox)
+		public function SkyboxRenderable(pool:RenderablePool, skybox:SkyBox)
 		{
 			super(pool, skybox, skybox);
 		}

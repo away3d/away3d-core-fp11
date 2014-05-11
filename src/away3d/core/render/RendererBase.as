@@ -21,7 +21,7 @@ package away3d.core.render
 	import away3d.entities.Billboard;
 	import away3d.entities.Camera3D;
 	import away3d.entities.IEntity;
-	import away3d.entities.Skybox;
+	import away3d.entities.SkyBox;
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.RendererEvent;
 	import away3d.events.Stage3DEvent;
@@ -684,7 +684,7 @@ package away3d.core.render
 		 *
 		 * @param skybox
 		 */
-		public function applySkybox(skybox:Skybox):void
+		public function applySkybox(skybox:SkyBox):void
 		{
 			applyRenderable(_skyboxRenderablePool.getItem(skybox) as RenderableBase);
 		}

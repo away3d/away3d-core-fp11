@@ -6,7 +6,7 @@ package away3d.core.partition
 	/**
 	 * SkyBoxNode is a space partitioning leaf node that contains a SkyBox object.
 	 */
-	public class SkyboxNode extends EntityNode
+	public class SkyBoxNode extends EntityNode
 	{
 		private var _skyBox:IEntity;
 		
@@ -14,7 +14,7 @@ package away3d.core.partition
 		 * Creates a new SkyBoxNode object.
 		 * @param skyBox The SkyBox to be contained in the node.
 		 */
-		public function SkyboxNode(skyBox:IEntity)
+		public function SkyBoxNode(skyBox:IEntity)
 		{
 			super(skyBox);
 			_skyBox = skyBox;

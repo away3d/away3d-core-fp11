@@ -2,6 +2,7 @@ package away3d.stereo
 {
 	import away3d.arcane;
 	import away3d.entities.Camera3D;
+	import away3d.projections.IProjection;
 	import away3d.projections.ProjectionBase;
 	
 	import flash.geom.Matrix3D;
@@ -35,7 +36,7 @@ package away3d.stereo
 			_focusPoint = new Vector3D();
 		}
 		
-		override public function set lens(value:ProjectionBase):void
+		override public function set projection(value:IProjection):void
 		{
 			_leftCam.projection = value;
 			_rightCam.projection = value;
