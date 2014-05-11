@@ -1,11 +1,10 @@
 package away3d.tools.utils
 {
 	import away3d.arcane;
+	import away3d.core.base.ISubMesh;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SkinnedSubGeometry;
-	import away3d.core.base.SubMesh;
-	
+
 	use namespace arcane;
 	
 	public class GeomUtil
@@ -14,12 +13,12 @@ package away3d.tools.utils
 		 * Build a list of sub-geometries from raw data vectors, splitting them up in
 		 * such a way that they won't exceed buffer length limits.
 		 */
-		public static function fromVectors(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>,secondaryUVs:Vector.<Number>=null):Vector.<ISubGeometry>
+		public static function fromVectors(verts:Vector.<Number>, indices:Vector.<uint>, uvs:Vector.<Number>, normals:Vector.<Number>, tangents:Vector.<Number>, weights:Vector.<Number>, jointIndices:Vector.<Number>,secondaryUVs:Vector.<Number>=null):Vector.<SubGeometryBase>
 		{
 			const LIMIT_VERTS:uint = 3*0xffff;
 			const LIMIT_INDICES:uint = 15*0xffff;
 			
-			var subs:Vector.<ISubGeometry> = new Vector.<ISubGeometry>();
+			var subs:Vector.<SubGeometryBase> = new Vector.<SubGeometryBase>();
 			
 			if (uvs && !uvs.length)
 				uvs = null;
@@ -186,15 +185,20 @@ package away3d.tools.utils
 				// If there were weights and joint indices defined, this
 				// is a skinned mesh and needs to be built from skinned
 				// sub-geometries.
-				sub = new SkinnedSubGeometry(weights.length/(verts.length/3));
-				SkinnedSubGeometry(sub).updateJointWeightsData(weights);
-				SkinnedSubGeometry(sub).updateJointIndexData(jointIndices);
+				sub.jointsPerVertex = weights.length/(verts.length/3);
+				sub.updateJointWeights(weights);
+				sub.updateJointIndices(jointIndices);
 				
-			} else
-				sub = new TriangleSubGeometry();
-			
-			sub.updateIndexData(indices);
-			sub.fromVectors(verts, uvs, normals, tangents, secondaryUVs);
+			} else {
+				sub = new TriangleSubGeometry(true);
+			}
+
+			sub.updateIndices(indices);
+			sub.updatePositions(verts);
+			sub.updateUVs(uvs);
+			sub.updateVertexNormals(normals);
+			sub.updateVertexTangents(tangents);
+			sub.updateSecondaryUVs(secondaryUVs);
 			return sub;
 		}
 		
@@ -244,10 +248,10 @@ package away3d.tools.utils
 		/*
 		 * returns the subGeometry index in its parent mesh subgeometries vector
 		 */
-		public static function getMeshSubgeometryIndex(subGeometry:ISubGeometry):uint
+		public static function getMeshSubgeometryIndex(subGeometry:SubGeometryBase):uint
 		{
 			var index:uint;
-			var subGeometries:Vector.<ISubGeometry> = subGeometry.parentGeometry.subGeometries;
+			var subGeometries:Vector.<SubGeometryBase> = subGeometry.parentGeometry.subGeometries;
 			for (var i:uint = 0; i < subGeometries.length; ++i) {
 				if (subGeometries[i] == subGeometry) {
 					index = i;
@@ -261,10 +265,10 @@ package away3d.tools.utils
 		/*
 		 * returns the subMesh index in its parent mesh subMeshes vector
 		 */
-		public static function getMeshSubMeshIndex(subMesh:SubMesh):uint
+		public static function getMeshSubMeshIndex(subMesh:ISubMesh):uint
 		{
 			var index:uint;
-			var subMeshes:Vector.<SubMesh> = subMesh.parentMesh.subMeshes;
+			var subMeshes:Vector.<ISubMesh> = subMesh.parentMesh.subMeshes;
 			for (var i:uint = 0; i < subMeshes.length; ++i) {
 				if (subMeshes[i] == subMesh) {
 					index = i;

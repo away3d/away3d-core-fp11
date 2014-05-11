@@ -1,14 +1,14 @@
 package away3d.materials.utils
 {
 	import away3d.arcane;
-	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Mesh;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.display.TriangleCulling;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -28,7 +28,7 @@ package away3d.materials.utils
 			bitmapData = bitmapData.clone();
 			
 			for (var i:uint = 0; i < mesh.subMeshes.length; ++i)
-				drawLines(lineColor, lineThickness, bitmapData, mesh.subMeshes[i].subGeometry);
+				drawLines(lineColor, lineThickness, bitmapData, mesh.subMeshes[i].subGeometry as TriangleSubGeometry);
 			
 			return bitmapData;
 		}
@@ -56,7 +56,7 @@ package away3d.materials.utils
 			bitmapData = new BitmapData(width, height, fillAlpha == 1? false : true, (fillAlpha << 24) | (fillColor & 0xffffff));
 			
 			for (var i:uint = 0; i < mesh.subMeshes.length; ++i)
-				drawLines(lineColor, lineThickness, bitmapData, mesh.subMeshes[i].subGeometry);
+				drawLines(lineColor, lineThickness, bitmapData, mesh.subMeshes[i].subGeometry as TriangleSubGeometry);
 			
 			return bitmapData;
 		}
@@ -64,15 +64,15 @@ package away3d.materials.utils
 		/**
 		 * Draws the actual lines.
 		 */
-		private static function drawLines(lineColor:uint, lineThickness:Number, bitmapData:BitmapData, subGeom:ISubGeometry):void
+		private static function drawLines(lineColor:uint, lineThickness:Number, bitmapData:BitmapData, subGeom:TriangleSubGeometry):void
 		{
 			var sprite:Sprite = new Sprite();
 			var g:Graphics = sprite.graphics;
-			var uvs:Vector.<Number> = subGeom.UVData;
+			var uvs:Vector.<Number> = subGeom.uvs;
 			var i:uint, len:uint = uvs.length;
 			var w:Number = bitmapData.width, h:Number = bitmapData.height;
 			var texSpaceUV:Vector.<Number> = new Vector.<Number>(len, true);
-			var indices:Vector.<uint> = subGeom.indexData;
+			var indices:Vector.<uint> = subGeom.indices;
 			var indexClone:Vector.<int>;
 			
 			do {

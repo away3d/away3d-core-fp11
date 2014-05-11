@@ -2,8 +2,8 @@ package away3d.extrusions
 {
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
+	import away3d.core.base.ISubMesh;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
@@ -16,7 +16,7 @@ package away3d.extrusions
 	{
 		private const LIMIT:uint = 196605;
 		private var _tmpVectors:Vector.<Number>;
-		private var _subGeometry:SubGeometry;
+		private var _subGeometry:TriangleSubGeometry;
 		private var _indice:uint;
 		private var _uva:UV;
 		private var _uvb:UV;
@@ -27,7 +27,7 @@ package away3d.extrusions
 		private var _vc:Vertex;
 		private var _vd:Vertex;
 		private var _uvs:Vector.<Number>;
-		private var _vertices:Vector.<Number>;
+		private var _positions:Vector.<Number>;
 		private var _indices:Vector.<uint>;
 		private var _geomDirty:Boolean = true;
 		
@@ -51,7 +51,7 @@ package away3d.extrusions
 		public function SkinExtrude(material:MaterialBase, profiles:Vector.<Vector.<Vector3D>>, subdivision:uint = 1, centerMesh:Boolean = false, closeShape:Boolean = false, coverAll:Boolean = false, flip:Boolean = false)
 		{
 			var geom:Geometry = new Geometry();
-			_subGeometry = new SubGeometry();
+			_subGeometry = new TriangleSubGeometry(false);
 			geom.addSubGeometry(_subGeometry);
 			super(geom, material);
 			
@@ -142,9 +142,16 @@ package away3d.extrusions
 				return;
 			
 			_centerMesh = val;
+
+			var minX:Number = bounds.aabb.x;
+			var minY:Number = bounds.aabb.y - bounds.aabb.height;
+			var minZ:Number = bounds.aabb.z;
+			var maxX:Number = bounds.aabb.x + bounds.aabb.width;
+			var maxY:Number = bounds.aabb.y;
+			var maxZ:Number = bounds.aabb.z + bounds.aabb.depth;
 			
-			if (_centerMesh && _subGeometry.vertexData.length > 0)
-				MeshHelper.applyPosition(this, (this.minX + this.maxX)*.5, (this.minY + this.maxY)*.5, (this.minZ + this.maxZ)*.5);
+			if (_centerMesh && _subGeometry.positions.length > 0)
+				MeshHelper.applyPosition(this, (minX + maxX)*.5, (minY + maxY)*.5, (minZ + maxZ)*.5);
 			else
 				invalidateGeometry();
 		}
@@ -194,12 +201,12 @@ package away3d.extrusions
 				extrude(_profiles[_profiles.length - 1], _profiles[0], (1/uvlength)*i, uvlength);
 			}
 			
-			_subGeometry.updateVertexData(_vertices);
-			_subGeometry.updateIndexData(_indices);
-			_subGeometry.updateUVData(_uvs);
+			_subGeometry.updatePositions(_positions);
+			_subGeometry.updateIndices(_indices);
+			_subGeometry.updateUVs(_uvs);
 			_uva = _uvb = _uvc = _uvd = null;
 			_va = _vb = _vc = _vd = null;
-			_uvs = _vertices = null;
+			_uvs = _positions = null;
 			_indices = null;
 		}
 		
@@ -268,35 +275,35 @@ package away3d.extrusions
 					_vd.y = _tmpVectors[vertIndice + 1];
 					_vd.z = _tmpVectors[vertIndice + 2];
 					
-					if (_vertices.length == LIMIT) {
-						_subGeometry.updateVertexData(_vertices);
-						_subGeometry.updateIndexData(_indices);
-						_subGeometry.updateUVData(_uvs);
+					if (_positions.length == LIMIT) {
+						_subGeometry.updatePositions(_positions);
+						_subGeometry.updateIndices(_indices);
+						_subGeometry.updateUVs(_uvs);
 						
-						_subGeometry = new SubGeometry();
+						_subGeometry = new TriangleSubGeometry(false);
 						this.geometry.addSubGeometry(_subGeometry);
-						_subGeometry.autoDeriveVertexNormals = true;
-						_subGeometry.autoDeriveVertexTangents = true;
+						_subGeometry.autoDeriveNormals = true;
+						_subGeometry.autoDeriveTangents = true;
 						_uvs = new Vector.<Number>();
-						_vertices = new Vector.<Number>();
+						_positions = new Vector.<Number>();
 						_indices = new Vector.<uint>();
 						_indice = 0;
 					}
 					
 					if (_flip) {
 						
-						_vertices.push(_va.x, _va.y, _va.z, _vb.x, _vb.y, _vb.z, _vc.x, _vc.y, _vc.z);
+						_positions.push(_va.x, _va.y, _va.z, _vb.x, _vb.y, _vb.z, _vc.x, _vc.y, _vc.z);
 						_uvs.push(_uva.u, _uva.v, _uvb.u, _uvb.v, _uvc.u, _uvc.v);
 						
-						_vertices.push(_va.x, _va.y, _va.z, _vc.x, _vc.y, _vc.z, _vd.x, _vd.y, _vd.z);
+						_positions.push(_va.x, _va.y, _va.z, _vc.x, _vc.y, _vc.z, _vd.x, _vd.y, _vd.z);
 						_uvs.push(_uva.u, _uva.v, _uvc.u, _uvc.v, _uvd.u, _uvd.v);
 						
 					} else {
 						
-						_vertices.push(_vb.x, _vb.y, _vb.z, _va.x, _va.y, _va.z, _vc.x, _vc.y, _vc.z);
+						_positions.push(_vb.x, _vb.y, _vb.z, _va.x, _va.y, _va.z, _vc.x, _vc.y, _vc.z);
 						_uvs.push(_uvb.u, _uvb.v, _uva.u, _uva.v, _uvc.u, _uvc.v);
 						
-						_vertices.push(_vc.x, _vc.y, _vc.z, _va.x, _va.y, _va.z, _vd.x, _vd.y, _vd.z);
+						_positions.push(_vc.x, _vc.y, _vc.z, _va.x, _va.y, _va.z, _vd.x, _vd.y, _vd.z);
 						_uvs.push(_uvc.u, _uvc.v, _uva.u, _uva.v, _uvd.u, _uvd.v);
 					}
 					
@@ -323,11 +330,11 @@ package away3d.extrusions
 			_vc = new Vertex(0, 0, 0);
 			_vd = new Vertex(0, 0, 0);
 			_uvs = new Vector.<Number>();
-			_vertices = new Vector.<Number>();
+			_positions = new Vector.<Number>();
 			_indices = new Vector.<uint>();
 			
-			_subGeometry.autoDeriveVertexNormals = true;
-			_subGeometry.autoDeriveVertexTangents = true;
+			_subGeometry.autoDeriveNormals = true;
+			_subGeometry.autoDeriveTangents = true;
 		}
 		
 		/**
@@ -355,7 +362,7 @@ package away3d.extrusions
 		/**
 		 * @inheritDoc
 		 */
-		override public function get subMeshes():Vector.<SubMesh>
+		override public function get subMeshes():Vector.<ISubMesh>
 		{
 			if (_geomDirty)
 				buildExtrude();

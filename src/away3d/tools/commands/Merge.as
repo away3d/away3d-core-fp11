@@ -2,6 +2,7 @@ package away3d.tools.commands
 {
 	import away3d.containers.*;
 	import away3d.core.base.*;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.entities.*;
 	import away3d.materials.*;
@@ -165,7 +166,7 @@ package away3d.tools.commands
 			for (i = 0; i < _geomVOs.length; i++) {
 				var s:uint;
 				var data:GeometryVO;
-				var subs:Vector.<ISubGeometry>;
+				var subs:Vector.<SubGeometryBase>;
 				
 				data = _geomVOs[i];
 				subs = GeomUtil.fromVectors(data.vertices, data.indices, data.uvs, data.normals, null, null, null);
@@ -200,34 +201,36 @@ package away3d.tools.commands
 		{
 			if (mesh.geometry) {
 				var subIdx:uint;
-				var subGeometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
+				var subGeometries:Vector.<SubGeometryBase> = mesh.geometry.subGeometries;
 				var calc:uint;
 				for (subIdx = 0; subIdx < subGeometries.length; subIdx++) {
 					var i:uint;
 					var len:uint;
 					var iIdx:uint, vIdx:uint, nIdx:uint, uIdx:uint;
 					var indexOffset:uint;
-					var subGeom:ISubGeometry;
+					var subGeom:TriangleSubGeometry;
 					var vo:GeometryVO;
 					var vertices:Vector.<Number>;
 					var normals:Vector.<Number>;
-					var vStride:uint, nStride:uint, uStride:uint;
-					var vOffs:uint, nOffs:uint, uOffs:uint;
-					var vd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
+					var pStride:uint, nStride:uint, uStride:uint;
+					var pOffs:uint, nOffs:uint, uOffs:uint;
+					var positions:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
 					
-					subGeom = subGeometries[subIdx];
-					vd = subGeom.vertexData;
-					vStride = subGeom.vertexStride;
-					vOffs = subGeom.vertexOffset;
-					nd = subGeom.vertexNormalData;
-					nStride = subGeom.vertexNormalStride;
-					nOffs = subGeom.vertexNormalOffset;
-					ud = subGeom.UVData;
-					uStride = subGeom.UVStride;
-					uOffs = subGeom.UVOffset;
+					subGeom = subGeometries[subIdx] as TriangleSubGeometry;
+					positions = subGeom.positions;
+					pStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+					pOffs = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+
+					nd = subGeom.vertexNormals;
+					nStride = subGeom.getStride(TriangleSubGeometry.NORMAL_DATA);
+					nOffs = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
+
+					ud = subGeom.uvs;
+					uStride = subGeom.getStride(TriangleSubGeometry.UV_DATA);
+					uOffs = subGeom.getOffset(TriangleSubGeometry.UV_DATA);
 					
 					// Get (or create) a VO for this material
-					vo = getSubGeomData(mesh.subMeshes[subIdx].material || mesh.material);
+					vo = getSubGeomData(mesh.subMeshes[subIdx].getExplicitMaterial() || mesh.material);
 					
 					// Vertices and normals are copied to temporary vectors, to be transformed
 					// before concatenated onto those of the data. This is unnecessary if no
@@ -242,10 +245,10 @@ package away3d.tools.commands
 					len = subGeom.numVertices;
 					for (i = 0; i < len; i++) {
 						// Position
-						calc = vOffs + i*vStride;
-						vertices[vIdx++] = vd[calc];
-						vertices[vIdx++] = vd[calc + 1];
-						vertices[vIdx++] = vd[calc + 2];
+						calc = pOffs + i*pStride;
+						vertices[vIdx++] = positions[calc];
+						vertices[vIdx++] = positions[calc + 1];
+						vertices[vIdx++] = positions[calc + 2];
 						
 						// Normal
 						calc = nOffs + i*nStride;
@@ -263,11 +266,12 @@ package away3d.tools.commands
 					indexOffset = (!_objectSpace)? vo.vertices.length/3 :0;
 					iIdx = vo.indices.length;
 					len = subGeom.numTriangles;
+					var indices:Vector.<uint> =  subGeom.indices;
 					for (i = 0; i < len; i++) {
 						calc = i*3;
-						vo.indices[iIdx++] = subGeom.indexData[calc] + indexOffset;
-						vo.indices[iIdx++] = subGeom.indexData[calc + 1] + indexOffset;
-						vo.indices[iIdx++] = subGeom.indexData[calc + 2] + indexOffset;
+						vo.indices[iIdx++] = indices[calc] + indexOffset;
+						vo.indices[iIdx++] = indices[calc + 1] + indexOffset;
+						vo.indices[iIdx++] = indices[calc + 2] + indexOffset;
 					}
 					
 					if (!_objectSpace) {
@@ -290,7 +294,7 @@ package away3d.tools.commands
 			}
 		}
 		
-		private function getSubGeomData(material:MaterialBase):GeometryVO
+		private function getSubGeomData(material:IMaterial):GeometryVO
 		{
 			var data:GeometryVO;
 			
@@ -335,13 +339,14 @@ package away3d.tools.commands
 				collect(Mesh(object), _disposeSources);
 			
 			for (i = 0; i < object.numChildren; ++i) {
-				child = object.getChildAt(i);
+				child = object.getChildAt(i) as ObjectContainer3D;
 				parseContainer(receiver, child);
 			}
 		}
 	}
 }
 
+import away3d.materials.IMaterial;
 import away3d.materials.MaterialBase;
 
 class GeometryVO
@@ -350,7 +355,7 @@ class GeometryVO
 	public var vertices:Vector.<Number>;
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
-	public var material:MaterialBase;
+	public var material:IMaterial;
 	
 	public function GeometryVO()
 	{

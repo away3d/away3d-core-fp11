@@ -64,7 +64,7 @@ package away3d.prefabs
 			var fidx:Number;
 			var numIndices:Number = 0;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
@@ -199,7 +199,7 @@ package away3d.prefabs
 			var i:Number, j:Number;
 			var uvs:Vector.<Number>;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 

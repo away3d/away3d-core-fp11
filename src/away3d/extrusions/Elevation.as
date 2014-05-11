@@ -1,7 +1,7 @@
 ﻿package away3d.extrusions
 {
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
 	
@@ -24,7 +24,7 @@
 		private var _maxElevation:uint;
 		protected var _geomDirty:Boolean = true;
 		protected var _uvDirty:Boolean = true;
-		private var _subGeometry:SubGeometry;
+		private var _subGeometry:TriangleSubGeometry;
 		
 		/**
 		 * @param    material        MaterialBase. The Mesh (Elevation) material
@@ -41,7 +41,7 @@
 		 */
 		public function Elevation(material:MaterialBase, heightMap:BitmapData, width:Number = 1000, height:Number = 100, depth:Number = 1000, segmentsW:uint = 30, segmentsH:uint = 30, maxElevation:uint = 255, minElevation:uint = 0, smoothMap:Boolean = false)
 		{
-			_subGeometry = new SubGeometry();
+			_subGeometry = new TriangleSubGeometry(false);
 			super(new Geometry(), material);
 			this.geometry.addSubGeometry(_subGeometry);
 			
@@ -116,23 +116,23 @@
 		/**
 		 * The width of the terrain plane.
 		 */
-		public function get width():Number
+		override public function get width():Number
 		{
 			return _width;
 		}
-		
-		public function set width(value:Number):void
+
+		override public function set width(value:Number):void
 		{
 			_width = value;
 			invalidateGeometry();
 		}
-		
-		public function get height():Number
+
+		override public function get height():Number
 		{
 			return _height;
 		}
-		
-		public function set height(value:Number):void
+
+		override public function set height(value:Number):void
 		{
 			_height = value;
 		}
@@ -140,12 +140,12 @@
 		/**
 		 * The depth of the terrain plane.
 		 */
-		public function get depth():Number
+		override public function get depth():Number
 		{
 			return _depth;
 		}
-		
-		public function set depth(value:Number):void
+
+		override public function set depth(value:Number):void
 		{
 			_depth = value;
 			invalidateGeometry();
@@ -265,7 +265,7 @@
 		
 		private function buildGeometry():void
 		{
-			var vertices:Vector.<Number>;
+			var positions:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var x:Number, z:Number;
 			var numInds:uint;
@@ -278,10 +278,10 @@
 			var y:Number;
 			
 			if (numVerts == _subGeometry.numVertices) {
-				vertices = _subGeometry.vertexData;
-				indices = _subGeometry.indexData;
+				positions = _subGeometry.positions;
+				indices = _subGeometry.indices;
 			} else {
-				vertices = new Vector.<Number>(numVerts*3, true);
+				positions = new Vector.<Number>(numVerts*3, true);
 				indices = new Vector.<uint>(_segmentsH*_segmentsW*6, true);
 			}
 			
@@ -298,9 +298,9 @@
 					col = _heightMap.getPixel(u, v) & 0xff;
 					y = (col > _maxElevation)? (_maxElevation/0xff)*_height : ((col < _minElevation)? (_minElevation/0xff)*_height : (col/0xff)*_height);
 					
-					vertices[numVerts++] = x;
-					vertices[numVerts++] = y;
-					vertices[numVerts++] = z;
+					positions[numVerts++] = x;
+					positions[numVerts++] = y;
+					positions[numVerts++] = z;
 					
 					if (xi != _segmentsW && zi != _segmentsH) {
 						base = xi + zi*tw;
@@ -314,10 +314,10 @@
 				}
 			}
 			
-			_subGeometry.autoDeriveVertexNormals = true;
-			_subGeometry.autoDeriveVertexTangents = true;
-			_subGeometry.updateVertexData(vertices);
-			_subGeometry.updateIndexData(indices);
+			_subGeometry.autoDeriveNormals = true;
+			_subGeometry.autoDeriveTangents = true;
+			_subGeometry.updatePositions(positions);
+			_subGeometry.updateIndices(indices);
 		}
 		
 		/**
@@ -328,8 +328,8 @@
 			var uvs:Vector.<Number> = new Vector.<Number>();
 			var numUvs:uint = (_segmentsH + 1)*(_segmentsW + 1)*2;
 			
-			if (_subGeometry.UVData && numUvs == _subGeometry.UVData.length)
-				uvs = _subGeometry.UVData;
+			if (_subGeometry.uvs && numUvs == _subGeometry.uvs.length)
+				uvs = _subGeometry.uvs;
 			else
 				uvs = new Vector.<Number>(numUvs, true);
 			
@@ -341,7 +341,7 @@
 				}
 			}
 			
-			_subGeometry.updateUVData(uvs);
+			_subGeometry.updateUVs(uvs);
 		}
 		
 		/**

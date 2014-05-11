@@ -2,9 +2,10 @@ package away3d.tools.helpers
 {
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.IMaterialOwner;
-	import away3d.core.base.SubMesh;
+	import away3d.core.base.ISubMesh;
 	import away3d.entities.Mesh;
 	import away3d.lights.LightBase;
+	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.StaticLightPicker;
 	
 	/**
@@ -87,18 +88,18 @@ package away3d.tools.helpers
 			var i:uint;
 			// TODO: not used
 			//	var j : uint;
-			
-			if (materialOwner.material) {
+			var material:MaterialBase = materialOwner.material as MaterialBase;
+			if (material) {
 				switch (_state) {
 					case 0:
-						picker = materialOwner.material.lightPicker as StaticLightPicker;
+						picker = material.lightPicker as StaticLightPicker;
 						if (!picker || picker.lights != _lightsArray)
-							materialOwner.material.lightPicker = new StaticLightPicker(_lightsArray);
+							material.lightPicker = new StaticLightPicker(_lightsArray);
 						break;
 					
 					case 1:
-						materialOwner.material.lightPicker ||= new StaticLightPicker([]);
-						picker = materialOwner.material.lightPicker as StaticLightPicker;
+						material.lightPicker ||= new StaticLightPicker([]);
+						picker = material.lightPicker as StaticLightPicker;
 						if (picker) {
 							aLights = picker.lights;
 							if (aLights && aLights.length > 0) {
@@ -123,8 +124,8 @@ package away3d.tools.helpers
 						break;
 					
 					case 2:
-						materialOwner.material.lightPicker ||= new StaticLightPicker([]);
-						picker = materialOwner.material.lightPicker as StaticLightPicker;
+						material.lightPicker ||= new StaticLightPicker([]);
+						picker = material.lightPicker as StaticLightPicker;
 						if (picker) {
 							aLights = picker.lights;
 							if (aLights) {
@@ -144,10 +145,8 @@ package away3d.tools.helpers
 		private static function parseMesh(mesh:Mesh):void
 		{
 			var i:uint;
-			var subMeshes:Vector.<SubMesh> = mesh.subMeshes;
-			
-			apply(mesh);
-			
+			var subMeshes:Vector.<ISubMesh> = mesh.subMeshes;
+
 			for (i = 0; i < subMeshes.length; ++i)
 				apply(subMeshes[i]);
 		}

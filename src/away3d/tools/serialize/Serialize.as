@@ -8,15 +8,14 @@ package away3d.tools.serialize
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.containers.Scene3D;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SkinnedSubGeometry;
-	import away3d.core.base.SubMesh;
+	import away3d.core.base.ISubMesh;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.lightpickers.StaticLightPicker;
-	
+
 	import flash.utils.getQualifiedClassName;
-	
+
 	use namespace arcane;
 	
 	public class Serialize
@@ -30,7 +29,7 @@ package away3d.tools.serialize
 		public static function serializeScene(scene:Scene3D, serializer:SerializerBase):void
 		{
 			for (var i:uint = 0; i < scene.numChildren; i++)
-				serializeObjectContainer(scene.getChildAt(i), serializer);
+				serializeObjectContainer(scene.getChildAt(i) as ObjectContainer3D, serializer);
 		}
 		
 		public static function serializeObjectContainer(objectContainer3D:ObjectContainer3D, serializer:SerializerBase):void
@@ -50,10 +49,10 @@ package away3d.tools.serialize
 				serializeAnimationState(mesh.animator, serializer);
 			
 			if (mesh.material)
-				serializeMaterial(mesh.material, serializer);
+				serializeMaterial(mesh.material as MaterialBase, serializer);
 			
 			if (mesh.subMeshes.length) {
-				for each (var subMesh:SubMesh in mesh.subMeshes)
+				for each (var subMesh:ISubMesh in mesh.subMeshes)
 					serializeSubMesh(subMesh, serializer);
 			}
 			serializeChildren(mesh as ObjectContainer3D, serializer);
@@ -73,13 +72,13 @@ package away3d.tools.serialize
 			serializer.endObject();
 		}
 		
-		public static function serializeSubMesh(subMesh:SubMesh, serializer:SerializerBase):void
+		public static function serializeSubMesh(subMesh:ISubMesh, serializer:SerializerBase):void
 		{
 			serializer.beginObject(classNameFromInstance(subMesh), null);
 			if (subMesh.material)
-				serializeMaterial(subMesh.material, serializer);
+				serializeMaterial(subMesh.material as MaterialBase, serializer);
 			if (subMesh.subGeometry)
-				serializeSubGeometry(subMesh.subGeometry, serializer);
+				serializeSubGeometry(subMesh.subGeometry as TriangleSubGeometry, serializer);
 			serializer.endObject();
 		}
 		
@@ -100,21 +99,20 @@ package away3d.tools.serialize
 			serializer.endObject();
 		}
 		
-		public static function serializeSubGeometry(subGeometry:ISubGeometry, serializer:SerializerBase):void
+		public static function serializeSubGeometry(subGeometry:TriangleSubGeometry, serializer:SerializerBase):void
 		{
 			serializer.beginObject(classNameFromInstance(subGeometry), null);
 			serializer.writeUint("numTriangles", subGeometry.numTriangles);
-			if (subGeometry.indexData)
-				serializer.writeUint("numIndices", subGeometry.indexData.length);
+			if (subGeometry.indices)
+				serializer.writeUint("numIndices", subGeometry.indices.length);
 			serializer.writeUint("numVertices", subGeometry.numVertices);
-			if (subGeometry.UVData)
-				serializer.writeUint("numUVs", subGeometry.UVData.length);
-			var skinnedSubGeometry:SkinnedSubGeometry = subGeometry as SkinnedSubGeometry;
-			if (skinnedSubGeometry) {
-				if (skinnedSubGeometry.jointWeightsData)
-					serializer.writeUint("numJointWeights", skinnedSubGeometry.jointWeightsData.length);
-				if (skinnedSubGeometry.jointIndexData)
-					serializer.writeUint("numJointIndexes", skinnedSubGeometry.jointIndexData.length);
+			if (subGeometry.uvs)
+				serializer.writeUint("numUVs", subGeometry.uvs.length);
+			if (subGeometry) {
+				if (subGeometry.jointWeights)
+					serializer.writeUint("numJointWeights", subGeometry.jointWeights.length);
+				if (subGeometry.jointIndices)
+					serializer.writeUint("numJointIndexes", subGeometry.jointIndices.length);
 			}
 			serializer.endObject();
 		}
@@ -157,7 +155,7 @@ package away3d.tools.serialize
 		private static function serializeChildren(parent:ObjectContainer3D, serializer:SerializerBase):void
 		{
 			for (var i:uint = 0; i < parent.numChildren; i++)
-				serializeObjectContainer(parent.getChildAt(i), serializer);
+				serializeObjectContainer(parent.getChildAt(i) as ObjectContainer3D, serializer);
 		}
 		
 		private static function classNameFromInstance(instance:*):String

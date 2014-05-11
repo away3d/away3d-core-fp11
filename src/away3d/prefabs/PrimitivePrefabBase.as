@@ -58,7 +58,7 @@ package away3d.prefabs {
 		public function get geometry():Geometry
 		{
 			validate();
-			return this._geometry;
+			return _geometry;
 		}
 
 		/**

@@ -3,8 +3,8 @@ package away3d.tools.utils
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Mesh;
 	
 	use namespace arcane;
@@ -107,7 +107,7 @@ package away3d.tools.utils
 				snap(Mesh(object3d));
 			
 			for (var i:uint = 0; i < object3d.numChildren; ++i) {
-				child = object3d.getChildAt(i);
+				child = object3d.getChildAt(i) as ObjectContainer3D;
 				parse(child, dovert);
 			}
 		}
@@ -115,29 +115,30 @@ package away3d.tools.utils
 		private function snap(mesh:Mesh):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
 			var numSubGeoms:int = geometries.length;
 			
-			var vertices:Vector.<Number>;
+			var positions:Vector.<Number>;
 			var j:uint;
 			var i:uint;
 			var vecLength:uint;
-			var subGeom:SubGeometry;
+			var subGeom:TriangleSubGeometry;
 			var stride:uint;
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				subGeom = SubGeometry(geometries[i]);
-				vertices = subGeom.vertexData;
-				vecLength = vertices.length;
-				stride = subGeom.vertexStride;
+				subGeom = geometries[i] as TriangleSubGeometry;
+				if(!subGeom) continue;
+				positions = subGeom.positions;
+				vecLength = positions.length;
+				stride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
 				
-				for (j = subGeom.vertexOffset; j < vecLength; j += stride) {
-					vertices[j] -= vertices[j]%_unit;
-					vertices[j + 1] -= vertices[j + 1]%_unit;
-					vertices[j + 2] -= vertices[j + 2]%_unit;
+				for (j = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA); j < vecLength; j += stride) {
+					positions[j] -= positions[j]%_unit;
+					positions[j + 1] -= positions[j + 1]%_unit;
+					positions[j + 2] -= positions[j + 2]%_unit;
 				}
 				
-				subGeom.updateVertexData(vertices);
+				subGeom.updatePositions(positions);
 			}
 		}
 	

@@ -283,7 +283,7 @@ package away3d.tools.helpers
 				debug(Mesh(object), scene, displayNormals, displayVertexNormals, displayTangents);
 			
 			for (var i:uint = 0; i < object.numChildren; ++i) {
-				child = object.getChildAt(i);
+				child = object.getChildAt(i) as ObjectContainer3D;
 				parse(child, scene, displayNormals, displayVertexNormals, displayTangents);
 			}
 		}

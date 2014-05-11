@@ -1,18 +1,16 @@
 package away3d.tools.utils
 {
-	import away3d.lights.LightBase;
-	import flash.utils.Dictionary;
-	
-	import away3d.entities.Entity;
-	
-	import flash.geom.Matrix3D;
-	
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.math.Box;
+	import away3d.entities.IEntity;
 	import away3d.entities.Mesh;
-	
+	import away3d.lights.LightBase;
+
+	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
-	
+	import flash.utils.Dictionary;
+
 	use namespace arcane;
 	
 	/**
@@ -212,7 +210,7 @@ package away3d.tools.utils
 			var containerBounds:Vector.<Number> = _containers[obj] ||= Vector.<Number>([Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity]);
 			
 			var child:ObjectContainer3D;
-			var isEntity:Entity = obj as Entity;
+			var isEntity:IEntity = obj as IEntity;
 			var containerTransform:Matrix3D = new Matrix3D();
 			
 			if (isEntity && parentTransform) {
@@ -228,7 +226,7 @@ package away3d.tools.utils
 			}
 			
 			for (var i:uint = 0; i < obj.numChildren; ++i) {
-				child = obj.getChildAt(i);
+				child = obj.getChildAt(i) as ObjectContainer3D;
 				parseObjectContainerBounds(child, containerTransform);
 			}
 			
@@ -262,17 +260,26 @@ package away3d.tools.utils
 		{
 			if (oC is LightBase) return; 
 			
-			var e:Entity = oC as Entity;
+			var e:IEntity = oC as IEntity;
 			var corners:Vector.<Number>;
 			var mat:Matrix3D = oC.transform.clone();
 			var cB:Vector.<Number> = _containers[oC];
+			var aabb:Box = e.bounds.aabb;
+
+			var minX:Number = aabb.x;
+			var minY:Number = aabb.y - aabb.height;
+			var minZ:Number = aabb.z;
+			var maxX:Number = aabb.x + aabb.width;
+			var maxY:Number = aabb.y;
+			var maxZ:Number = aabb.z + aabb.depth;
+			
 			if (e) {
-				if (isInfinite(e.minX) || isInfinite(e.minY) || isInfinite(e.minZ) ||
-					isInfinite(e.maxX) || isInfinite(e.maxY) || isInfinite(e.maxZ)) {
+				if (isInfinite(minX) || isInfinite(minY) || isInfinite(minZ) ||
+					isInfinite(maxX) || isInfinite(maxY) || isInfinite(maxZ)) {
 					return;
 				}
 				
-				corners = getBoundsCorners(e.minX, e.minY, e.minZ, e.maxX, e.maxY, e.maxZ);
+				corners = getBoundsCorners(minX, minY, minZ, maxX, maxY, maxZ);
 				if (parentTransform)
 					mat.append(parentTransform);
 			} else {

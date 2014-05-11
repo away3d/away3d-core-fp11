@@ -1,41 +1,48 @@
 package away3d.tools.helpers.data
 {
+	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Mesh;
-	import away3d.entities.LineSegment;
-	import away3d.prefabs.LineSegment;
-	
+	import away3d.prefabs.SegmentSetPrefab;
+	import away3d.prefabs.data.Segment;
+
 	import flash.geom.Vector3D;
-	
+
 	/**
 	 * MeshDebug, holds the data for the MeshDebugger class
 	 */
 	
-	public class MeshDebug extends away3d.entities.LineSegment
+	public class MeshDebug extends ObjectContainer3D
 	{
-		
 		private var _normal:Vector3D = new Vector3D();
 		private const VERTEXNORMALS:uint = 1;
 		private const TANGENTS:uint = 2;
+		private var segmentSet:SegmentSetPrefab;
 		
-		function MeshDebug()
+		public function MeshDebug()
 		{
+			initInstance();
+		}
+
+		private function initInstance():void {
+			segmentSet = new SegmentSetPrefab();
+			addChild(segmentSet.getNewObject());
 		}
 		
 		public function clearAll():void
 		{
-			super.removeAllSegments();
+			segmentSet.removeAllSegments();
 		}
 		
 		public function displayNormals(mesh:Mesh, color:uint = 0xFF3399, length:Number = 30):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
-			var vertices:Vector.<Number>;
+			var positions:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var index:uint;
 			var j:uint;
@@ -47,39 +54,40 @@ package away3d.tools.helpers.data
 			var l0:Vector3D = new Vector3D();
 			var l1:Vector3D = new Vector3D();
 			
-			var subGeom:SubGeometryBase;
+			var subGeom:TriangleSubGeometry;
 			var stride:uint;
 			var offset:uint;
 			var normalOffset:uint;
 			var tangentOffset:uint;
 			
 			for (var i:uint = 0; i < numSubGeoms; ++i) {
-				subGeom = SubGeometryBase(geometries[i]);
-				stride = subGeom.vertexStride;
-				offset = subGeom.vertexOffset;
-				normalOffset = subGeom.vertexNormalOffset;
-				tangentOffset = subGeom.vertexTangentOffset;
-				vertices = subGeom.vertexData;
-				indices = subGeom.indexData;
+				subGeom = geometries[i] as TriangleSubGeometry;
+				if(!subGeom) continue;
+				stride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+				offset = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				normalOffset = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
+				tangentOffset = subGeom.getOffset(TriangleSubGeometry.TANGENT_DATA);
+				positions = subGeom.positions;
+				indices = subGeom.indices;
 				
 				for (j = 0; j < indices.length; j += 3) {
 					
 					index = offset + indices[j]*stride;
-					v0.x = vertices[index];
-					v0.y = vertices[index + 1];
-					v0.z = vertices[index + 2];
+					v0.x = positions[index];
+					v0.y = positions[index + 1];
+					v0.z = positions[index + 2];
 					
 					index = offset + indices[j + 1]*stride;
 					
-					v1.x = vertices[index];
-					v1.y = vertices[index + 1];
-					v1.z = vertices[index + 2];
+					v1.x = positions[index];
+					v1.y = positions[index + 1];
+					v1.z = positions[index + 2];
 					
 					index = offset + indices[j + 2]*stride;
 					
-					v2.x = vertices[index];
-					v2.y = vertices[index + 1];
-					v2.z = vertices[index + 2];
+					v2.x = positions[index];
+					v2.y = positions[index + 1];
+					v2.z = positions[index + 2];
 					
 					calcNormal(v0, v1, v2);
 					
@@ -90,8 +98,8 @@ package away3d.tools.helpers.data
 					l1.x = l0.x + (_normal.x*length);
 					l1.y = l0.y + (_normal.y*length);
 					l1.z = l0.z + (_normal.z*length);
-					
-					addSegment(new LineSegment(l0, l1, color, color, 1));
+
+					segmentSet.addSegment(new Segment(l0, l1, 1, color, color));
 					
 				}
 			}
@@ -110,10 +118,10 @@ package away3d.tools.helpers.data
 		private function build(mesh:Mesh, type:uint, color:uint = 0x66CCFF, length:Number = 30):void
 		{
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
-			var vertices:Vector.<Number>;
+			var positions:Vector.<Number>;
 			var vectorTarget:Vector.<Number>;
 			
 			var indices:Vector.<uint>;
@@ -124,35 +132,36 @@ package away3d.tools.helpers.data
 			var v1:Vector3D = new Vector3D();
 			var v2:Vector3D = new Vector3D();
 			var l0:Vector3D = new Vector3D();
-			var subGeom:SubGeometryBase;
+			var subGeom:TriangleSubGeometry;
 			var stride:uint;
 			var offset:uint;
 			var offsettarget:uint;
 			
 			for (var i:uint = 0; i < numSubGeoms; ++i) {
-				subGeom = SubGeometryBase(geometries[i]);
-				stride = subGeom.vertexStride;
-				offset = subGeom.vertexOffset;
-				vertices = subGeom.vertexData;
-				offsettarget = subGeom.vertexNormalOffset;
+				subGeom = geometries[i] as TriangleSubGeometry;
+				if(!subGeom) continue;
+				stride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+				offset = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				positions = subGeom.positions;
+				offsettarget = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
 				
 				if (type == 2)
-					offsettarget = subGeom.vertexTangentOffset;
+					offsettarget = subGeom.getOffset(TriangleSubGeometry.TANGENT_DATA);
 				
 				try {
-					vectorTarget = (type == 1)? subGeom.vertexNormalData : subGeom.vertexTangentData;
+					vectorTarget = (type == 1)? subGeom.vertexNormals : subGeom.vertexTangents;
 				} catch (e:Error) {
 					continue;
 				}
 				
-				indices = subGeom.indexData;
+				indices = subGeom.indices;
 				
 				for (j = 0; j < indices.length; j += 3) {
 					
 					index = offset + indices[j]*stride;
-					v0.x = vertices[index];
-					v0.y = vertices[index + 1];
-					v0.z = vertices[index + 2];
+					v0.x = positions[index];
+					v0.y = positions[index + 1];
+					v0.z = positions[index + 2];
 					
 					index = offsettarget + indices[j]*stride;
 					
@@ -164,14 +173,14 @@ package away3d.tools.helpers.data
 					l0.x = v0.x + (_normal.x*length);
 					l0.y = v0.y + (_normal.y*length);
 					l0.z = v0.z + (_normal.z*length);
-					
-					addSegment(new LineSegment(v0, l0, color, color, 1));
+
+					segmentSet.addSegment(new Segment(v0, l0, 1, color, color));
 					
 					index = offset + indices[j + 1]*stride;
 					
-					v1.x = vertices[index];
-					v1.y = vertices[index + 1];
-					v1.z = vertices[index + 2];
+					v1.x = positions[index];
+					v1.y = positions[index + 1];
+					v1.z = positions[index + 2];
 					
 					index = offsettarget + indices[j + 1]*stride;
 					
@@ -183,14 +192,14 @@ package away3d.tools.helpers.data
 					l0.x = v1.x + (_normal.x*length);
 					l0.y = v1.y + (_normal.y*length);
 					l0.z = v1.z + (_normal.z*length);
-					
-					addSegment(new LineSegment(v1, l0, color, color, 1));
+
+					segmentSet.addSegment(new Segment(v1, l0, 1, color, color));
 					
 					index = offset + indices[j + 2]*stride;
 					
-					v2.x = vertices[index];
-					v2.y = vertices[index + 1];
-					v2.z = vertices[index + 2];
+					v2.x = positions[index];
+					v2.y = positions[index + 1];
+					v2.z = positions[index + 2];
 					
 					index = offsettarget + indices[j + 2]*stride;
 					
@@ -202,8 +211,8 @@ package away3d.tools.helpers.data
 					l0.x = v2.x + (_normal.x*length);
 					l0.y = v2.y + (_normal.y*length);
 					l0.z = v2.z + (_normal.z*length);
-					
-					addSegment(new LineSegment(v2, l0, color, color, 1));
+
+					segmentSet.addSegment(new Segment(v2, l0, 1, color, color));
 					
 				}
 			}

@@ -7,6 +7,7 @@ package away3d.extrusions
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.Geometry;
 	import away3d.core.base.ISubMesh;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
@@ -26,12 +27,12 @@ package away3d.extrusions
 		
 		private var _circle:Vector3D;
 		private var _vectors:Vector.<Vector3D>;
-		private var _subGeometry:ISubMesh;
+		private var _subGeometry:TriangleSubGeometry;
 		private var _sortProp:String;
 		private var _loopProp:String;
 		
 		private var _uvs:Vector.<Number>;
-		private var _vertices:Vector.<Number>;
+		private var _positions:Vector.<Number>;
 		private var _indices:Vector.<uint>;
 		private var _normals:Vector.<Number>;
 		private var _geomDirty:Boolean = true;
@@ -63,7 +64,7 @@ package away3d.extrusions
 		public function DelaunayMesh(material:MaterialBase, vectors:Vector.<Vector3D>, plane:String = PLANE_XZ, centerMesh:Boolean = false, flip:Boolean = false, smoothSurface:Boolean = true)
 		{
 			var geom:Geometry = new Geometry();
-			_subGeometry = new SubGeometry();
+			_subGeometry = new TriangleSubGeometry(false);
 			geom.addSubGeometry(_subGeometry);
 			super(geom, material);
 			
@@ -158,9 +159,16 @@ package away3d.extrusions
 				return;
 			
 			_centerMesh = val;
+
+			var minX:Number = bounds.aabb.x;
+			var minY:Number = bounds.aabb.y - bounds.aabb.height;
+			var minZ:Number = bounds.aabb.z;
+			var maxX:Number = bounds.aabb.x + bounds.aabb.width;
+			var maxY:Number = bounds.aabb.y;
+			var maxZ:Number = bounds.aabb.z + bounds.aabb.depth;
 			
-			if (_centerMesh && _subGeometry.vertexData.length > 0)
-				MeshHelper.applyPosition(this, (this.minX + this.maxX)*.5, (this.minY + this.maxY)*.5, (this.minZ + this.maxZ)*.5);
+			if (_centerMesh && _subGeometry.positions.length > 0)
+				MeshHelper.applyPosition(this, (minX + maxX)*.5, (minY + maxY)*.5, (minZ + maxZ)*.5);
 			else
 				invalidateGeometry();
 		}
@@ -187,7 +195,7 @@ package away3d.extrusions
 			_axis1Max = -Infinity;
 			
 			_uvs = new Vector.<Number>();
-			_vertices = new Vector.<Number>();
+			_positions = new Vector.<Number>();
 			_indices = new Vector.<uint>();
 			
 			_circle = new Vector3D();
@@ -198,49 +206,49 @@ package away3d.extrusions
 				_normal1 = new Vector3D(0.0, 0.0, 0.0);
 				_normal2 = new Vector3D(0.0, 0.0, 0.0);
 				_tmpNormal = new Vector3D(0.0, 0.0, 0.0);
-				_subGeometry.autoDeriveVertexNormals = false;
+				_subGeometry.autoDeriveNormals = false;
 				
 			} else
-				_subGeometry.autoDeriveVertexNormals = true;
-			_subGeometry.autoDeriveVertexTangents = true;
+				_subGeometry.autoDeriveNormals = true;
+			_subGeometry.autoDeriveTangents = true;
 		
 		}
 		
 		private function addFace(v0:Vector3D, v1:Vector3D, v2:Vector3D, uv0:UV, uv1:UV, uv2:UV):void
 		{
-			var subGeom:SubGeometry = _subGeometry;
+			var subGeom:TriangleSubGeometry = _subGeometry;
 			var uvs:Vector.<Number> = _uvs;
-			var vertices:Vector.<Number> = _vertices;
+			var positions:Vector.<Number> = _positions;
 			var indices:Vector.<uint> = _indices;
 			
 			if (_smoothSurface)
 				var normals:Vector.<Number> = _normals;
 			
-			if (vertices.length + 9 > LIMIT) {
-				subGeom.updateVertexData(vertices);
-				subGeom.updateIndexData(indices);
-				subGeom.updateUVData(uvs);
+			if (positions.length + 9 > LIMIT) {
+				subGeom.updatePositions(positions);
+				subGeom.updateIndices(indices);
+				subGeom.updateUVs(uvs);
 				
 				if (_smoothSurface)
-					subGeom.updateVertexNormalData(normals);
+					subGeom.updateVertexNormals(normals);
 				
 				this.geometry.addSubGeometry(subGeom);
 				
-				subGeom = _subGeometry = new SubGeometry();
-				subGeom.autoDeriveVertexTangents = true;
+				subGeom = _subGeometry = new TriangleSubGeometry(false);
+				subGeom.autoDeriveTangents = true;
 				
 				uvs = _uvs = new Vector.<Number>();
-				vertices = _vertices = new Vector.<Number>();
+				positions = _positions = new Vector.<Number>();
 				indices = _indices = new Vector.<uint>();
 				
 				if (!_smoothSurface)
-					subGeom.autoDeriveVertexNormals = true;
+					subGeom.autoDeriveNormals = true;
 				else {
-					subGeom.autoDeriveVertexNormals = false;
+					subGeom.autoDeriveNormals = false;
 					normals = _normals = new Vector.<Number>();
 				}
 				
-				subGeom.autoDeriveVertexTangents = true;
+				subGeom.autoDeriveTangents = true;
 			}
 			
 			var bv0:Boolean;
@@ -275,7 +283,7 @@ package away3d.extrusions
 						if (bv0 && bv1 && bv2)
 							break;
 						
-						if (!bv0 && vertices[vind] == v0.x && vertices[vindb] == v0.y && vertices[vindz] == v0.z) {
+						if (!bv0 && positions[vind] == v0.x && positions[vindb] == v0.y && positions[vindz] == v0.z) {
 							
 							_tmpNormal.x = normals[vind];
 							_tmpNormal.y = normals[vindb];
@@ -293,7 +301,7 @@ package away3d.extrusions
 							}
 						}
 						
-						if (!bv1 && vertices[vind] == v1.x && vertices[vindb] == v1.y && vertices[vindz] == v1.z) {
+						if (!bv1 && positions[vind] == v1.x && positions[vindb] == v1.y && positions[vindz] == v1.z) {
 							
 							_tmpNormal.x = normals[vind];
 							_tmpNormal.y = normals[vindb];
@@ -311,7 +319,7 @@ package away3d.extrusions
 							}
 						}
 						
-						if (!bv2 && vertices[vind] == v2.x && vertices[vindb] == v2.y && vertices[vindz] == v2.z) {
+						if (!bv2 && positions[vind] == v2.x && positions[vindb] == v2.y && positions[vindz] == v2.z) {
 							
 							_tmpNormal.x = normals[vind];
 							_tmpNormal.y = normals[vindb];
@@ -335,24 +343,24 @@ package away3d.extrusions
 			}
 			
 			if (!bv0) {
-				ind0 = vertices.length/3;
-				vertices.push(v0.x, v0.y, v0.z);
+				ind0 = positions.length/3;
+				positions.push(v0.x, v0.y, v0.z);
 				uvs.push(uv0.u, uv0.v);
 				if (_smoothSurface)
 					normals.push(_normal0.x, _normal0.y, _normal0.z);
 			}
 			
 			if (!bv1) {
-				ind1 = vertices.length/3;
-				vertices.push(v1.x, v1.y, v1.z);
+				ind1 = positions.length/3;
+				positions.push(v1.x, v1.y, v1.z);
 				uvs.push(uv1.u, uv1.v);
 				if (_smoothSurface)
 					normals.push(_normal1.x, _normal1.y, _normal1.z);
 			}
 			
 			if (!bv2) {
-				ind2 = vertices.length/3;
-				vertices.push(v2.x, v2.y, v2.z);
+				ind2 = positions.length/3;
+				positions.push(v2.x, v2.y, v2.z);
 				uvs.push(uv2.u, uv2.v);
 				if (_smoothSurface)
 					normals.push(_normal2.x, _normal2.y, _normal2.z);
@@ -577,7 +585,7 @@ package away3d.extrusions
 				}
 				
 				if (_smoothSurface)
-					_subGeometry.updateVertexNormalData(_normals);
+					_subGeometry.updateVertexNormals(_normals);
 				
 				for (i = 0; i < v.length; ++i)
 					v[i] = null;
@@ -591,7 +599,7 @@ package away3d.extrusions
 				v1 = _vectors[1];
 				v2 = _vectors[2];
 				
-				_vertices.push(v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+				_positions.push(v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
 				
 				uv0.u = (v0[_loopProp] + offW)/w;
 				uv0.v = 1 - (v0[_sortProp] + offH)/h;
@@ -609,12 +617,12 @@ package away3d.extrusions
 				else
 					_indices.push(0, 1, 2);
 				
-				_subGeometry.autoDeriveVertexNormals = true;
+				_subGeometry.autoDeriveNormals = true;
 			}
 			
-			_subGeometry.updateVertexData(_vertices);
-			_subGeometry.updateIndexData(_indices);
-			_subGeometry.updateUVData(_uvs);
+			_subGeometry.updatePositions(_positions);
+			_subGeometry.updateIndices(_indices);
+			_subGeometry.updateUVs(_uvs);
 		
 		}
 		
@@ -729,7 +737,7 @@ package away3d.extrusions
 		/**
 		 * @inheritDoc
 		 */
-		override public function get subMeshes():Vector.<SubMesh>
+		override public function get subMeshes():Vector.<ISubMesh>
 		{
 			if (_geomDirty)
 				buildExtrude();

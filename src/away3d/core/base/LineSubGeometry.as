@@ -181,18 +181,18 @@ package away3d.core.base {
 
 			_startPositions = startValues;
 
-			if (_startPositions == null)
+			if (!_startPositions) {
 				_startPositions = new Vector.<Number>();
+			}
 
 			_endPositions = endValues;
 
-			if (_endPositions == null)
+			if (!_endPositions) {
 				_endPositions = new Vector.<Number>();
+			}
 
 			_boundingPositionDirty = true;
-
 			_numSegments = _startPositions.length/3;
-
 			_numVertices = _numSegments*4;
 
 			var lenV:Number = _numVertices*getStride(VERTEX_DATA);
@@ -209,27 +209,28 @@ package away3d.core.base {
 			positions = _vertices;
 			indices = new Vector.<uint>();
 
-			while (i < startValues.length) {
-				values = (index/stride & 1)? endValues : startValues;
-				positions[index] = values[i];
-				positions[index + 1] = values[i + 1];
-				positions[index + 2] = values[i + 2];
+			if(startValues && endValues) {
+				while (i < startValues.length) {
+					values = (index/stride & 1)? endValues : startValues;
+					positions[index] = values[i];
+					positions[index + 1] = values[i + 1];
+					positions[index + 2] = values[i + 2];
 
-				values = (index/stride & 1)? startValues : endValues;
-				positions[index + 3] = values[i];
-				positions[index + 4] = values[i + 1];
-				positions[index + 5] = values[i + 2];
+					values = (index/stride & 1)? startValues : endValues;
+					positions[index + 3] = values[i];
+					positions[index + 4] = values[i + 1];
+					positions[index + 5] = values[i + 2];
 
-				if (++j == 4) {
-					var o:Number = index/stride - 3;
-					indices.push(o, o + 1, o + 2, o + 3, o + 2, o + 1);
-					j = 0;
-					i += 3;
+					if (++j == 4) {
+						var o:Number = index/stride - 3;
+						indices.push(o, o + 1, o + 2, o + 3, o + 2, o + 1);
+						j = 0;
+						i += 3;
+					}
+
+					index += stride;
 				}
-
-				index += stride;
 			}
-
 			updateIndices(indices);
 
 			invalidateBounds();

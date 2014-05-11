@@ -2,9 +2,9 @@ package away3d.tools.commands
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
 	import away3d.core.math.MathConsts;
 	import away3d.entities.Mesh;
 	
@@ -98,7 +98,7 @@ package away3d.tools.commands
 				removedVertCnt += applyToGeom(Mesh(obj).geometry);
 			
 			for (var i:uint = 0; i < obj.numChildren; ++i) {
-				child = obj.getChildAt(i);
+				child = obj.getChildAt(i) as ObjectContainer3D;
 				removedVertCnt += parse(child);
 			}
 			
@@ -111,18 +111,16 @@ package away3d.tools.commands
 			var outSubGeom:TriangleSubGeometry;
 			
 			for (var i:uint = 0; i < geom.subGeometries.length; i++) {
-				var subGeom:ISubGeometry = geom.subGeometries[i];
+				var subGeom:TriangleSubGeometry = geom.subGeometries[i] as TriangleSubGeometry;
+				if(!subGeom) continue;
 				
 				// TODO: Remove this check when ISubGeometry can always
 				// be updated using a single unified method (from vectors.)
-				if (subGeom is TriangleSubGeometry)
-					removedVertsCnt += applyToSubGeom(subGeom, TriangleSubGeometry(subGeom));
-				
-				else {
-					
-					outSubGeom = new TriangleSubGeometry();
+				if (subGeom.concatenateArrays) {
+					removedVertsCnt += applyToSubGeom(subGeom, subGeom);
+				} else {
+					outSubGeom = new TriangleSubGeometry(true);
 					removedVertsCnt += applyToSubGeom(subGeom, outSubGeom);
-					
 					geom.removeSubGeometry(subGeom);
 					geom.addSubGeometry(outSubGeom);
 				}
@@ -131,7 +129,7 @@ package away3d.tools.commands
 			return removedVertsCnt;
 		}
 		
-		private function applyToSubGeom(subGeom:ISubGeometry, outSubGeom:TriangleSubGeometry):int
+		private function applyToSubGeom(subGeom:TriangleSubGeometry, outSubGeom:TriangleSubGeometry):int
 		{
 			var maxNormalIdx:int = 0;
 			var oldVerticleCount:uint = subGeom.numVertices;
@@ -139,27 +137,29 @@ package away3d.tools.commands
 			var numOutIndices:uint = 0;
 			var searchStringFinal:String;
 			
-			var vStride:uint, nStride:uint, uStride:uint;
-			var vOffs:uint, nOffs:uint, uOffs:uint, sn:uint;
-			var vd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
+			var pStride:uint, nStride:uint, uStride:uint;
+			var pOffs:uint, nOffs:uint, uOffs:uint, sn:uint;
+			var pd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
 			var sharedNormalsDic:Dictionary = new Dictionary();
 			var outnormal:Vector3D = new Vector3D();
 			
-			vd = subGeom.vertexData;
-			vStride = subGeom.vertexStride;
-			vOffs = subGeom.vertexOffset;
-			nd = subGeom.vertexNormalData;
-			nStride = subGeom.vertexNormalStride;
-			nOffs = subGeom.vertexNormalOffset;
-			ud = subGeom.UVData;
-			uStride = subGeom.UVStride;
-			uOffs = subGeom.UVOffset;
+			pd = subGeom.positions;
+			pStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+			pOffs = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+
+			nd = subGeom.vertexNormals;
+			nStride = subGeom.getStride(TriangleSubGeometry.NORMAL_DATA);
+			nOffs = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
+
+			ud = subGeom.uvs;
+			uStride = subGeom.getStride(TriangleSubGeometry.UV_DATA);
+			uOffs = subGeom.getOffset(TriangleSubGeometry.UV_DATA);
 			
 			var sharedNormalIndices:Vector.<int> = new Vector.<int>();
-			var outVertices:Vector.<Number> = new Vector.<Number>();
+			var outPositions:Vector.<Number> = new Vector.<Number>();
 			var outNormals:Vector.<Number> = new Vector.<Number>();
 			var outUvs:Vector.<Number> = new Vector.<Number>();
-			var inIndices:Vector.<uint> = subGeom.indexData;
+			var inIndices:Vector.<uint> = subGeom.indices;
 			var outIndices:Vector.<uint> = new Vector.<uint>();
 			var oldTargetNormals:Vector.<Vector3D> = new Vector.<Vector3D>();
 			var sharedPointNormals:Vector.<Vector.<Vector3D>> = new Vector.<Vector.<Vector3D>>();
@@ -189,9 +189,9 @@ package away3d.tools.commands
 			for (i = 0; i < inLen; i++) {
 				origIndex = inIndices[i];
 				sharedNormalIndex = -1;
-				px = vd[vOffs + origIndex*vStride + 0];
-				py = vd[vOffs + origIndex*vStride + 1];
-				pz = vd[vOffs + origIndex*vStride + 2];
+				px = pd[pOffs + origIndex*pStride + 0];
+				py = pd[pOffs + origIndex*pStride + 1];
+				pz = pd[pOffs + origIndex*pStride + 2];
 				nx = nd[nOffs + origIndex*nStride + 0];
 				ny = nd[nOffs + origIndex*nStride + 1];
 				nz = nd[nOffs + origIndex*nStride + 2];
@@ -270,7 +270,7 @@ package away3d.tools.commands
 				}
 				// No vertex found, so create it
 				if (outIndex < 0) {
-					outIndex = outVertices.length/3;
+					outIndex = outPositions.length/3;
 					
 					if (sharedNormalIndex < 0) {
 						sharedNormalIndex = outIndex;
@@ -282,9 +282,9 @@ package away3d.tools.commands
 					sharedPointNormals[outIndex][0] = targetNormal;
 					usedVertices[searchStringFinal] = outIndex;
 					sharedNormalIndices[outIndex] = sharedNormalIndex;
-					outVertices[outIndex*3 + 0] = px;
-					outVertices[outIndex*3 + 1] = py;
-					outVertices[outIndex*3 + 2] = pz;
+					outPositions[outIndex*3 + 0] = px;
+					outPositions[outIndex*3 + 1] = py;
+					outPositions[outIndex*3 + 2] = pz;
 					outNormals[outIndex*3 + 0] = targetNormal.x;
 					outNormals[outIndex*3 + 1] = targetNormal.y;
 					outNormals[outIndex*3 + 2] = targetNormal.z;
@@ -303,7 +303,7 @@ package away3d.tools.commands
 				var sharedPointsfinalVectors:Vector.<Vector3D> = new Vector.<Vector3D>();
 				var foundVector:int;
 				var curIdx:int;
-				inLen = outVertices.length/3;
+				inLen = outPositions.length/3;
 				
 				for (i = 0; i < inLen; i++) {
 					outnormal = new Vector3D();
@@ -348,10 +348,11 @@ package away3d.tools.commands
 					outNormals[i*3 + 2] = outnormal.z;
 				}
 			}
-			
-			outSubGeom.fromVectors(outVertices, outUvs, outNormals, null);
-			outSubGeom.updateIndexData(outIndices);
-			
+
+			outSubGeom.updateIndices(outIndices);
+			outSubGeom.updatePositions(outPositions)
+			outSubGeom.updateUVs(outPositions)
+			outSubGeom.updateVertexNormals(outNormals)
 			return int(oldVerticleCount - outSubGeom.numVertices);
 		}
 	

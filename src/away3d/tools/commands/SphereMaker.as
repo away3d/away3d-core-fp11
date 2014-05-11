@@ -3,17 +3,13 @@ package away3d.tools.commands
 	import away3d.arcane;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.data.UV;
-	import away3d.core.base.data.Vertex;
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.math.Box;
 	import away3d.entities.Mesh;
-	import away3d.tools.utils.Bounds;
-	
+
 	import flash.geom.Vector3D;
-	import flash.utils.Dictionary;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -67,9 +63,16 @@ package away3d.tools.commands
 			if (_weight > 1)
 				_weight = 1;
 			if (_radiusMode == USE_BOUNDS_MAX) {
-				var meshBounds:BoundingVolumeBase = mesh.bounds;
-				var vectorMax:Vector3D = new Vector3D(meshBounds.max.x, meshBounds.max.y, meshBounds.max.z);
-				var vectorMin:Vector3D = new Vector3D(meshBounds.min.x, meshBounds.min.y, meshBounds.min.z);
+				var aabb:Box = mesh.bounds.aabb;
+				var minX:Number = aabb.x;
+				var minY:Number = aabb.y - aabb.height;
+				var minZ:Number = aabb.z;
+				var maxX:Number = aabb.x + aabb.width;
+				var maxY:Number = aabb.y;
+				var maxZ:Number = aabb.z + aabb.depth;
+
+				var vectorMax:Vector3D = new Vector3D(maxX, maxY, maxZ);
+				var vectorMin:Vector3D = new Vector3D(minX, minY, minZ);
 				var vectorMaxlength:Number = vectorMax.length;
 				var vectorMinlength:Number = vectorMin.length;
 				_radius = vectorMaxlength;
@@ -77,7 +80,7 @@ package away3d.tools.commands
 					_radius = vectorMinlength;
 			}
 			for (i = 0; i < mesh.geometry.subGeometries.length; i++)
-				spherizeSubGeom(mesh.geometry.subGeometries[i]);
+				spherizeSubGeom(mesh.geometry.subGeometries[i] as TriangleSubGeometry);
 		}
 		
 		private function parse(object:ObjectContainer3D):void
@@ -87,36 +90,37 @@ package away3d.tools.commands
 				apply(Mesh(object), _weight, _radiusMode, _radius);
 			
 			for (var i:uint = 0; i < object.numChildren; ++i) {
-				child = object.getChildAt(i);
+				child = object.getChildAt(i) as ObjectContainer3D;
 				parse(child);
 			}
 		}
 		
-		private function spherizeSubGeom(subGeom:ISubGeometry):void
+		private function spherizeSubGeom(subGeom:TriangleSubGeometry):void
 		{
+			if(!subGeom) return;
 			var i:uint;
 			var len:uint;
 			var vectorVert:Vector3D;
 			var vectorVertLength:Number;
 			var vectorNormal:Vector3D;
 			var vectordifference:Number;
-			var vd:Vector.<Number> = subGeom.vertexData;
-			var vStride:uint = subGeom.vertexStride;
-			var vOffs:uint = subGeom.vertexOffset;
-			var nd:Vector.<Number> = subGeom.vertexNormalData;
-			var nStride:uint = subGeom.vertexNormalStride;
-			var nOffs:uint = subGeom.vertexNormalOffset;
+			var pd:Vector.<Number> = subGeom.positions;
+			var pStride:uint = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+			var pOffs:uint = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+			var nd:Vector.<Number> = subGeom.vertexNormals;
+			var nStride:uint = subGeom.getStride(TriangleSubGeometry.NORMAL_DATA);
+			var nOffs:uint = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
 			len = subGeom.numVertices;
 			for (i = 0; i < len; i++) {
-				vectorVert = new Vector3D(vd[vOffs + i*vStride + 0], vd[vOffs + i*vStride + 1], vd[vOffs + i*vStride + 2]);
+				vectorVert = new Vector3D(pd[pOffs + i*pStride + 0], pd[pOffs + i*pStride + 1], pd[pOffs + i*pStride + 2]);
 				vectorVertLength = vectorVert.length;
 				vectorNormal = vectorVert.clone();
 				vectordifference = Number(_radius) - Number(vectorVertLength);
 				vectorNormal.normalize();
 				
-				vd[vOffs + i*vStride + 0] = vectorVert.x + ((vectorNormal.x*vectordifference)*_weight);
-				vd[vOffs + i*vStride + 1] = vectorVert.y + ((vectorNormal.y*vectordifference)*_weight);
-				vd[vOffs + i*vStride + 2] = vectorVert.z + ((vectorNormal.z*vectordifference)*_weight);
+				pd[pOffs + i*pStride + 0] = vectorVert.x + ((vectorNormal.x*vectordifference)*_weight);
+				pd[pOffs + i*pStride + 1] = vectorVert.y + ((vectorNormal.y*vectordifference)*_weight);
+				pd[pOffs + i*pStride + 2] = vectorVert.z + ((vectorNormal.z*vectordifference)*_weight);
 				nd[nOffs + i*nStride + 0] = 0 + (nd[nOffs + i*nStride + 0]*(1 - _weight) + (vectorNormal.x*_weight));
 				nd[nOffs + i*nStride + 1] = 0 + (nd[nOffs + i*nStride + 1]*(1 - _weight) + (vectorNormal.y*_weight));
 				nd[nOffs + i*nStride + 2] = 0 + (nd[nOffs + i*nStride + 2]*(1 - _weight) + (vectorNormal.z*_weight));

@@ -158,10 +158,18 @@ package away3d.tools.utils
 				_blue = new ColorMaterial(0x0000FF);
 				_blue.bothSides = true;
 				_red.alpha = _green.alpha = _blue.alpha = .5;
-				
-				_planeXZ = new Mesh(new PrimitivePlanePrefab(size, size, 2, 2, true), _red);
-				_planeXY = new Mesh(new PrimitivePlanePrefab(size, size, 2, 2, false), _green);
-				_planeZY = new Mesh(new PrimitivePlanePrefab(size, size, 2, 2, false), _blue);
+
+				var primitivePlaneXZ:PrimitivePlanePrefab = new PrimitivePlanePrefab(size, size, 2, 2, true);
+				_planeXZ = primitivePlaneXZ.getNewObject() as Mesh;
+				_planeXZ.material = _red;
+
+				var primitivePlane:PrimitivePlanePrefab = new PrimitivePlanePrefab(size, size, 2, 2, false);
+
+				_planeXY = primitivePlane.getNewObject() as Mesh;
+				_planeXY.material = _green;
+
+				_planeXY = primitivePlane.getNewObject() as Mesh;
+				_planeXY.material = _blue;
 				
 				_planeZY.rotationY = 90;
 				_planesContainer = new ObjectContainer3D();

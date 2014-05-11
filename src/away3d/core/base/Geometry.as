@@ -15,9 +15,6 @@ package away3d.core.base
 	 * normals, uvs, etc. It also contains a reference to an animation class, which defines how the geometry moves.
 	 * A Geometry object is assigned to a Mesh, a scene graph occurence of the geometry, which in turn assigns
 	 * the SubGeometries to its respective SubMesh objects.
-	 *
-	 *
-	 *
 	 * @see away3d.core.base.SubGeometry
 	 * @see away3d.scenegraph.Mesh
 	 */

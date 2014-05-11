@@ -4,7 +4,9 @@ package away3d.tools.commands
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
+	import away3d.core.math.Box;
 	import away3d.entities.Mesh;
 	import away3d.tools.utils.GeomUtil;
 	
@@ -172,23 +174,24 @@ package away3d.tools.commands
 			var len:uint = geom.subGeometries.length;
 			
 			for (var i:uint = 0; i < len; i++)
-				applyToSubGeom(geom.subGeometries[i], newGeom, keepOld);
+				applyToSubGeom(geom.subGeometries[i] as TriangleSubGeometry, newGeom, keepOld);
 			
 			mesh.geometry = newGeom;
 		}
 		
-		private function applyToSubGeom(subGeom:ISubGeometry, geometry:Geometry, keepOld:Boolean):void
+		private function applyToSubGeom(subGeom:TriangleSubGeometry, geometry:Geometry, keepOld:Boolean):void
 		{
+			if(!subGeom) return;
 			var i:uint;
 			var len:uint;
 			var indices:Vector.<uint>;
 			var vertices:Vector.<Number>;
 			var normals:Vector.<Number>;
 			var uvs:Vector.<Number>;
-			var newSubGeoms:Vector.<ISubGeometry>;
+			var newSubGeoms:Vector.<SubGeometryBase>;
 			
 			var vIdx:uint, nIdx:uint, uIdx:uint;
-			var vd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
+			var pd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
 			var vStride:uint, nStride:uint, uStride:uint;
 			var vOffs:uint, nOffs:uint, uOffs:uint;
 			
@@ -197,34 +200,34 @@ package away3d.tools.commands
 			uvs = new Vector.<Number>();
 			
 			if (keepOld) {
-				indices = subGeom.indexData.concat();
+				indices = subGeom.indices.concat();
 				
-				vd = subGeom.vertexData.concat();
-				nd = subGeom.vertexNormalData.concat();
-				ud = subGeom.UVData.concat();
+				pd = subGeom.positions;
+				nd = subGeom.vertexNormals;
+				ud = subGeom.uvs;
 				
 			} else {
-				indices = subGeom.indexData;
-				vd = subGeom.vertexData;
-				nd = subGeom.vertexNormalData;
-				ud = subGeom.UVData;
+				indices = subGeom.indices;
+				pd = subGeom.positions;
+				nd = subGeom.vertexNormals;
+				ud = subGeom.uvs;
 			}
 			
 			indices.fixed = false;
-			vOffs = subGeom.vertexOffset;
-			nOffs = subGeom.vertexNormalOffset;
-			uOffs = subGeom.UVOffset;
-			vStride = subGeom.vertexStride;
-			nStride = subGeom.vertexNormalStride;
-			uStride = subGeom.UVStride;
+			vOffs = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+			nOffs = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
+			uOffs = subGeom.getOffset(TriangleSubGeometry.UV_DATA);
+			vStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+			nStride = subGeom.getStride(TriangleSubGeometry.NORMAL_DATA);
+			uStride = subGeom.getStride(TriangleSubGeometry.UV_DATA);
 			
 			vIdx = nIdx = uIdx = 0;
 			len = subGeom.numVertices;
 			
 			for (i = 0; i < len; i++) {
-				vertices[vIdx++] = vd[vOffs + i*vStride + 0];
-				vertices[vIdx++] = vd[vOffs + i*vStride + 1];
-				vertices[vIdx++] = vd[vOffs + i*vStride + 2];
+				vertices[vIdx++] = pd[vOffs + i*vStride + 0];
+				vertices[vIdx++] = pd[vOffs + i*vStride + 1];
+				vertices[vIdx++] = pd[vOffs + i*vStride + 2];
 				
 				normals[nIdx++] = nd[nOffs + i*nStride + 0];
 				normals[nIdx++] = nd[nOffs + i*nStride + 1];
@@ -324,18 +327,26 @@ package away3d.tools.commands
 			
 			_fullTransform.appendScale(sx, sy, sz);
 			_scaleTransform.appendScale(sx, sy, sz);
+
+			var aabb:Box = bounds.aabb;
+			var minX:Number = aabb.x;
+			var minY:Number = aabb.y - aabb.height;
+			var minZ:Number = aabb.z;
+			var maxX:Number = aabb.x + aabb.width;
+			var maxY:Number = aabb.y;
+			var maxZ:Number = aabb.z + aabb.depth;
+
 			switch (_offset) {
-				
 				case MIN_BOUND:
-					ox = (_axis & X_AXIS)? 2*bounds.min.x : 0;
-					oy = (_axis & Y_AXIS)? 2*bounds.min.y : 0;
-					oz = (_axis & Z_AXIS)? 2*bounds.min.z : 0;
+					ox = (_axis & X_AXIS)? 2*minX : 0;
+					oy = (_axis & Y_AXIS)? 2*minY : 0;
+					oz = (_axis & Z_AXIS)? 2*minZ : 0;
 					break;
 				
 				case MAX_BOUND:
-					ox = (_axis & X_AXIS)? 2*bounds.max.x : 0;
-					oy = (_axis & Y_AXIS)? 2*bounds.max.y : 0;
-					oz = (_axis & Z_AXIS)? 2*bounds.max.z : 0;
+					ox = (_axis & X_AXIS)? 2*maxX : 0;
+					oy = (_axis & Y_AXIS)? 2*maxY : 0;
+					oz = (_axis & Z_AXIS)? 2*maxZ : 0;
 					break;
 				
 				default:
@@ -377,11 +388,11 @@ package away3d.tools.commands
 				var recenterZ:Number = 0;
 				
 				if (ox == 0)
-					recenterX = ((bounds.min.x + bounds.max.x)/2)* -1;
+					recenterX = ((minX + maxX)/2)* -1;
 				if (oy == 0)
-					recenterY = ((bounds.min.y + bounds.max.y)/2)* -1;
+					recenterY = ((minY + maxY)/2)* -1;
 				if (oz == 0)
-					recenterZ = ((bounds.min.z + bounds.max.z)/2)* -1;
+					recenterZ = ((minZ + maxZ)/2)* -1;
 				
 				_centerTransform.identity();
 				_centerTransform.appendTranslation(-ox*.5 + recenterX, -oy*.5 + recenterY, -oz*.5 + recenterZ);
@@ -394,7 +405,7 @@ package away3d.tools.commands
 		private function collectMeshChildren(ctr:ObjectContainer3D, meshes:Vector.<Mesh>):void
 		{
 			for (var i:uint = 0; i < ctr.numChildren; i++) {
-				var child:ObjectContainer3D = ctr.getChildAt(i);
+				var child:ObjectContainer3D = ctr.getChildAt(i) as ObjectContainer3D;
 				if (child is Mesh)
 					meshes.push(Mesh(child));
 				

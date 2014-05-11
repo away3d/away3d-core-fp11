@@ -3,7 +3,8 @@ package away3d.tools.commands
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.Mesh;
 	import away3d.tools.utils.GeomUtil;
 	
@@ -39,7 +40,7 @@ package away3d.tools.commands
 			_keepNormals = keepNormals;
 			
 			for (i = 0; i < geom.subGeometries.length; i++)
-				explodeSubGeom(geom.subGeometries[i], geom);
+				explodeSubGeom(geom.subGeometries[i] as TriangleSubGeometry, geom);
 		}
 		
 		/**
@@ -52,40 +53,43 @@ package away3d.tools.commands
 				apply(Mesh(object).geometry, _keepNormals);
 			
 			for (var i:uint = 0; i < object.numChildren; ++i) {
-				child = object.getChildAt(i);
+				child = object.getChildAt(i) as ObjectContainer3D;
 				parse(child);
 			}
 		}
 		
-		private function explodeSubGeom(subGeom:ISubGeometry, geom:Geometry):void
+		private function explodeSubGeom(subGeom:TriangleSubGeometry, geom:Geometry):void
 		{
+			if(!subGeom) return;
 			var i:uint;
 			var len:uint;
 			var inIndices:Vector.<uint>;
 			var outIndices:Vector.<uint>;
-			var vertices:Vector.<Number>;
+			var positions:Vector.<Number>;
 			var normals:Vector.<Number>;
 			var uvs:Vector.<Number>;
 			var vIdx:uint, uIdx:uint;
-			var outSubGeoms:Vector.<ISubGeometry>;
+			var outSubGeoms:Vector.<SubGeometryBase>;
 			
 			var vStride:uint, nStride:uint, uStride:uint;
 			var vOffs:uint, nOffs:uint, uOffs:uint;
 			var vd:Vector.<Number>, nd:Vector.<Number>, ud:Vector.<Number>;
 			
-			vd = subGeom.vertexData;
-			vStride = subGeom.vertexStride;
-			vOffs = subGeom.vertexOffset;
-			nd = subGeom.vertexNormalData;
-			nStride = subGeom.vertexNormalStride;
-			nOffs = subGeom.vertexNormalOffset;
-			ud = subGeom.UVData;
-			uStride = subGeom.UVStride;
-			uOffs = subGeom.UVOffset;
-			
-			inIndices = subGeom.indexData;
+			vd = subGeom.positions;
+			vStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+			vOffs = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+
+			nd = subGeom.vertexNormals;
+			nStride = subGeom.getStride(TriangleSubGeometry.NORMAL_DATA);
+			nOffs = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
+
+			ud = subGeom.uvs;
+			uStride = subGeom.getStride(TriangleSubGeometry.UV_DATA);
+			uOffs = subGeom.getOffset(TriangleSubGeometry.UV_DATA);
+
+			inIndices = subGeom.indices;
 			outIndices = new Vector.<uint>(inIndices.length, true);
-			vertices = new Vector.<Number>(inIndices.length*3, true);
+			positions = new Vector.<Number>(inIndices.length*3, true);
 			normals = new Vector.<Number>(inIndices.length*3, true);
 			uvs = new Vector.<Number>(inIndices.length*2, true);
 			
@@ -96,14 +100,14 @@ package away3d.tools.commands
 				var index:int;
 				
 				index = inIndices[i];
-				vertices[vIdx + 0] = vd[vOffs + index*vStride + 0];
-				vertices[vIdx + 1] = vd[vOffs + index*vStride + 1];
-				vertices[vIdx + 2] = vd[vOffs + index*vStride + 2];
+				positions[vIdx + 0] = vd[vOffs + index*vStride + 0];
+				positions[vIdx + 1] = vd[vOffs + index*vStride + 1];
+				positions[vIdx + 2] = vd[vOffs + index*vStride + 2];
 				
 				if (_keepNormals) {
-					normals[vIdx + 0] = vd[nOffs + index*nStride + 0];
-					normals[vIdx + 1] = vd[nOffs + index*nStride + 1];
-					normals[vIdx + 2] = vd[nOffs + index*nStride + 2];
+					normals[vIdx + 0] = nd[nOffs + index*nStride + 0];
+					normals[vIdx + 1] = nd[nOffs + index*nStride + 1];
+					normals[vIdx + 2] = nd[nOffs + index*nStride + 2];
 				} else
 					normals[vIdx + 0] = normals[vIdx + 1] = normals[vIdx + 2] = 0;
 				
@@ -115,11 +119,12 @@ package away3d.tools.commands
 				outIndices[i] = i;
 			}
 			
-			outSubGeoms = GeomUtil.fromVectors(vertices, outIndices, uvs, normals, null, null, null);
+			outSubGeoms = GeomUtil.fromVectors(positions, outIndices, uvs, normals, null, null, null);
 			geom.removeSubGeometry(subGeom);
 			for (i = 0; i < outSubGeoms.length; i++) {
-				outSubGeoms[i].autoDeriveVertexNormals = !_keepNormals;
-				geom.addSubGeometry(outSubGeoms[i]);
+				subGeom = outSubGeoms[i] as TriangleSubGeometry;
+				subGeom.autoDeriveNormals = !_keepNormals;
+				geom.addSubGeometry(subGeom);
 			}
 		}
 	}

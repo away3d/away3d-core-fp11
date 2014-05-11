@@ -60,7 +60,7 @@ package away3d.tools.utils
 				remapMesh(Mesh(obj));
 			
 			for (var i:uint = 0; i < obj.numChildren; ++i) {
-				child = obj.getChildAt(i);
+				child = obj.getChildAt(i) as ObjectContainer3D;
 				parse(child);
 			}
 		}
@@ -108,7 +108,7 @@ package away3d.tools.utils
 			}
 			
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
 			
 			if (_orientation == SPHERICAL) {
 				if (!_center)
@@ -128,10 +128,10 @@ package away3d.tools.utils
 				remapLinear(geometries, mesh.scenePosition);
 		}
 		
-		private static function remapLinear(geometries:Vector.<ISubGeometry>, position:Vector3D):void
+		private static function remapLinear(geometries:Vector.<SubGeometryBase>, position:Vector3D):void
 		{
 			var numSubGeoms:uint = geometries.length;
-			var sub_geom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			var vertices:Vector.<Number>;
 			var vertexOffset:int;
 			var vertexStride:int;
@@ -148,17 +148,17 @@ package away3d.tools.utils
 			var offsetV:Number;
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				sub_geom = geometries[i];
+				subGeom = geometries[i] as TriangleSubGeometry;
 				
-				vertices = sub_geom.vertexData
-				vertexOffset = sub_geom.vertexOffset;
-				vertexStride = sub_geom.vertexStride;
+				vertices = subGeom.positions
+				vertexOffset = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				vertexStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
 				
-				uvs = sub_geom.UVData;
-				uvOffset = sub_geom.UVOffset;
-				uvStride = sub_geom.UVStride;
+				uvs = subGeom.uvs;
+				uvOffset = subGeom.getOffset(TriangleSubGeometry.UV_DATA)
+				uvStride = subGeom.getStride(TriangleSubGeometry.UV_DATA)
 				
-				indices = sub_geom.indexData;
+				indices = subGeom.indices;
 				
 				numIndices = indices.length;
 				
@@ -228,21 +228,17 @@ package away3d.tools.utils
 							uvs[uvIndex + 1] = 1 - (vertices[vIndex + 2] + offsetV)/_height;
 						}
 				}
-				
-				if (sub_geom is TriangleSubGeometry)
-					TriangleSubGeometry(sub_geom).updateData(uvs);
-				else
-					SubGeometry(sub_geom).updateUVData(uvs);
+				subGeom.updateUVs(uvs);
 			}
 		}
 		
-		private static function remapCylindrical(geometries:Vector.<ISubGeometry>, position:Vector3D):void
+		private static function remapCylindrical(geometries:Vector.<SubGeometryBase>, position:Vector3D):void
 		{
 			var numSubGeoms:uint = geometries.length;
-			var sub_geom:ISubGeometry;
-			var vertices:Vector.<Number>;
-			var vertexOffset:int;
-			var vertexStride:int;
+			var subGeom:TriangleSubGeometry;
+			var positions:Vector.<Number>;
+			var positionOffset:int;
+			var positionStride:int;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
 			var uvOffset:int;
@@ -255,71 +251,64 @@ package away3d.tools.utils
 			var offset:Number;
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				sub_geom = geometries[i];
+				subGeom = geometries[i] as TriangleSubGeometry;
+				if(!subGeom) continue;
 				
-				vertices = sub_geom.vertexData
-				vertexOffset = sub_geom.vertexOffset;
-				vertexStride = sub_geom.vertexStride;
+				positions = subGeom.vertices
+				positionOffset = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				positionStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+
+				uvs = subGeom.uvs;
+				uvOffset = subGeom.getOffset(TriangleSubGeometry.UV_DATA);
+				uvStride = subGeom.getStride(TriangleSubGeometry.UV_DATA);
 				
-				uvs = sub_geom.UVData;
-				uvOffset = sub_geom.UVOffset;
-				uvStride = sub_geom.UVStride;
-				
-				indices = sub_geom.indexData;
+				indices = subGeom.indices;
 				
 				numIndices = indices.length;
 				
 				switch (_orientation) {
-					
 					case CYLINDRICAL_X:
-						
 						offset = _offsetW + position.x;
 						for (j = 0; j < numIndices; ++j) {
-							vIndex = vertexOffset + vertexStride*indices[j];
+							vIndex = positionOffset + positionStride*indices[j];
 							uvIndex = uvOffset + uvStride*indices[j];
-							uvs[uvIndex] = (vertices[vIndex] + offset)/_width;
-							uvs[uvIndex + 1] = (PI + Math.atan2(vertices[vIndex + 1], vertices[vIndex + 2]))/DOUBLEPI;
+							uvs[uvIndex] = (positions[vIndex] + offset)/_width;
+							uvs[uvIndex + 1] = (PI + Math.atan2(positions[vIndex + 1], positions[vIndex + 2]))/DOUBLEPI;
 						}
 						break;
 					
 					case CYLINDRICAL_Y:
 						offset = _offsetD + position.y;
 						for (j = 0; j < numIndices; ++j) {
-							vIndex = vertexOffset + vertexStride*indices[j];
+							vIndex = positionOffset + positionStride*indices[j];
 							uvIndex = uvOffset + uvStride*indices[j];
-							uvs[uvIndex] = (PI + Math.atan2(vertices[vIndex], vertices[vIndex + 2]))/DOUBLEPI;
-							uvs[uvIndex + 1] = 1 - (vertices[vIndex + 1] + offset)/_depth;
+							uvs[uvIndex] = (PI + Math.atan2(positions[vIndex], positions[vIndex + 2]))/DOUBLEPI;
+							uvs[uvIndex + 1] = 1 - (positions[vIndex + 1] + offset)/_depth;
 						}
 						break;
 					
 					case CYLINDRICAL_Z:
 						offset = _offsetW + position.z;
 						for (j = 0; j < numIndices; ++j) {
-							vIndex = vertexOffset + vertexStride*indices[j];
+							vIndex = positionOffset + positionStride*indices[j];
 							uvIndex = uvOffset + uvStride*indices[j];
-							uvs[uvIndex + 1] = (vertices[vIndex + 2] + offset)/_width;
-							uvs[uvIndex] = (PI + Math.atan2(vertices[vIndex + 1], vertices[vIndex]))/DOUBLEPI;
+							uvs[uvIndex + 1] = (positions[vIndex + 2] + offset)/_width;
+							uvs[uvIndex] = (PI + Math.atan2(positions[vIndex + 1], positions[vIndex]))/DOUBLEPI;
 						}
-					
 				}
-				
-				if (sub_geom is TriangleSubGeometry)
-					TriangleSubGeometry(sub_geom).updateData(uvs);
-				else
-					SubGeometry(sub_geom).updateUVData(uvs);
-				
+				subGeom.updateUVs(uvs);
 			}
 		}
 		
-		private static function remapSpherical(geometries:Vector.<ISubGeometry>, position:Vector3D):void
+		private static function remapSpherical(geometries:Vector.<SubGeometryBase>, position:Vector3D):void
 		{
 			position = position;
 			var numSubGeoms:uint = geometries.length;
-			var sub_geom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			
-			var vertices:Vector.<Number>;
-			var vertexOffset:int;
-			var vertexStride:int;
+			var positions:Vector.<Number>;
+			var positionOffset:int;
+			var positionStride:int;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
 			var uvOffset:int;
@@ -332,35 +321,31 @@ package away3d.tools.utils
 			var numIndices:uint;
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				sub_geom = geometries[i];
+				subGeom = geometries[i] as TriangleSubGeometry;
+				if(!subGeom) continue;
 				
-				vertices = sub_geom.vertexData
-				vertexOffset = sub_geom.vertexOffset;
-				vertexStride = sub_geom.vertexStride;
+				positions = subGeom.positions
+				positionOffset = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				positionStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
 				
-				uvs = sub_geom.UVData;
-				uvOffset = sub_geom.UVOffset;
-				uvStride = sub_geom.UVStride;
+				uvs = subGeom.uvs;
+				uvOffset = subGeom.getOffset(TriangleSubGeometry.UV_DATA);
+				uvStride = subGeom.getStride(TriangleSubGeometry.UV_DATA);
 				
-				indices = sub_geom.indexData;
-				
-				numIndices = indices.length;
-				
+				indices = subGeom.indices;
+
 				numIndices = indices.length;
 				
 				for (j = 0; j < numIndices; ++j) {
-					vIndex = vertexOffset + vertexStride*indices[j];
+					vIndex = positionOffset + positionStride*indices[j];
 					uvIndex = uvOffset + uvStride*indices[j];
 					
-					projectVertex(vertices[vIndex], vertices[vIndex + 1], vertices[vIndex + 2]);
+					projectVertex(positions[vIndex], positions[vIndex + 1], positions[vIndex + 2]);
 					uvs[uvIndex] = _uv.u;
 					uvs[uvIndex + 1] = _uv.v;
 				}
-				
-				if (sub_geom is TriangleSubGeometry)
-					TriangleSubGeometry(sub_geom).updateData(uvs);
-				else
-					SubGeometry(sub_geom).updateUVData(uvs);
+
+				subGeom.updateUVs(uvs);
 			}
 		}
 		

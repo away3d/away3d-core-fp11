@@ -90,7 +90,7 @@ package away3d.prefabs
 			// evaluate revolution steps
 			var revolutionAngleDelta:Number = 2 * Math.PI / _segmentsW;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
@@ -466,7 +466,7 @@ package away3d.prefabs
 			var revolutionAngle:Number;
 			var uvs:Vector.<Number>;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 

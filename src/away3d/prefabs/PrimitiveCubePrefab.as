@@ -172,71 +172,71 @@ package away3d.prefabs
 			var numVertices:Number;
 
 			// half cube dimensions
-			hw = _width/2;
-			hh = _height/2;
-			hd = _depth/2;
+			hw = _width / 2;
+			hh = _height / 2;
+			hd = _depth / 2;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
-				numVertices = ((_segmentsW + 1)*(_segmentsH + 1) + (_segmentsW + 1)*(_segmentsD + 1) + (_segmentsH + 1)*(_segmentsD + 1))*2;
+				numVertices = ((_segmentsW + 1) * (_segmentsH + 1) + (_segmentsW + 1) * (_segmentsD + 1) + (_segmentsH + 1) * (_segmentsD + 1)) * 2;
 
-				numIndices = ((_segmentsW*_segmentsH + _segmentsW*_segmentsD + _segmentsH*_segmentsD)*12);
+				numIndices = ((_segmentsW * _segmentsH + _segmentsW * _segmentsD + _segmentsH * _segmentsD) * 12);
 
 				if (numVertices == triangleGeometry.numVertices && triangleGeometry.indices != null) {
-						indices = triangleGeometry.indices;
-						positions = triangleGeometry.positions;
-						normals = triangleGeometry.vertexNormals;
-						tangents = triangleGeometry.vertexTangents;
-						} else {
-						indices = new Vector.<uint>(numIndices);
-						positions = new Vector.<Number>(numVertices*3);
-						normals = new Vector.<Number>(numVertices*3);
-						tangents = new Vector.<Number>(numVertices*3);
+					indices = triangleGeometry.indices;
+					positions = triangleGeometry.positions;
+					normals = triangleGeometry.vertexNormals;
+					tangents = triangleGeometry.vertexTangents;
+				} else {
+					indices = new Vector.<uint>(numIndices);
+					positions = new Vector.<Number>(numVertices * 3);
+					normals = new Vector.<Number>(numVertices * 3);
+					tangents = new Vector.<Number>(numVertices * 3);
 
-						invalidateUVs();
-						}
+					invalidateUVs();
+				}
 
 				vidx = 0;
 				fidx = 0;
 
 				// Segment dimensions
-				dw = _width/_segmentsW;
-				dh = _height/_segmentsH;
-				dd = _depth/_segmentsD;
+				dw = _width / _segmentsW;
+				dh = _height / _segmentsH;
+				dd = _depth / _segmentsD;
 
 				for (i = 0; i <= _segmentsW; i++) {
-							outer_pos = -hw + i*dw;
+					outer_pos = -hw + i * dw;
 
-							for (j = 0; j <= _segmentsH; j++) {
+					for (j = 0; j <= _segmentsH; j++) {
 						// front
-							positions[vidx] = outer_pos;
-							positions[vidx + 1] = -hh + j*dh;
-							positions[vidx + 2] = -hd;
-							normals[vidx] = 0;
-							normals[vidx + 1] = 0;
-							normals[vidx + 2] = -1;
-							tangents[vidx] = 1;
-							tangents[vidx + 1] = 0;
-							tangents[vidx + 2] = 0;
-							vidx += 3;
+						positions[vidx] = outer_pos;
+						positions[vidx + 1] = -hh + j * dh;
+						positions[vidx + 2] = -hd;
+						normals[vidx] = 0;
+						normals[vidx + 1] = 0;
+						normals[vidx + 2] = -1;
+						tangents[vidx] = 1;
+						tangents[vidx + 1] = 0;
+						tangents[vidx + 2] = 0;
+						vidx += 3;
 
 						// back
-							positions[vidx] = outer_pos;
-							positions[vidx + 1] = -hh + j*dh;
-							positions[vidx + 2] = hd;
-							normals[vidx] = 0;
-							normals[vidx + 1] = 0;
-							normals[vidx + 2] = 1;
-							tangents[vidx] = -1;
-							tangents[vidx + 1] = 0;
-							tangents[vidx + 2] = 0;
-							vidx += 3;
+						positions[vidx] = outer_pos;
+						positions[vidx + 1] = -hh + j * dh;
+						positions[vidx + 2] = hd;
+						normals[vidx] = 0;
+						normals[vidx + 1] = 0;
+						normals[vidx + 2] = 1;
+						tangents[vidx] = -1;
+						tangents[vidx + 1] = 0;
+						tangents[vidx + 2] = 0;
+						vidx += 3;
 
-							if (i && j) {
-							tl = 2*((i - 1)*(_segmentsH + 1) + (j - 1));
-							tr = 2*(i*(_segmentsH + 1) + (j - 1));
+						if (i && j) {
+							tl = 2 * ((i - 1) * (_segmentsH + 1) + (j - 1));
+							tr = 2 * (i * (_segmentsH + 1) + (j - 1));
 							bl = tl + 2;
 							br = tr + 2;
 
@@ -252,121 +252,121 @@ package away3d.prefabs
 							indices[fidx++] = tr + 1;
 							indices[fidx++] = bl + 1;
 							indices[fidx++] = tl + 1;
-							}
-					}
-					}
-
-					inc += 2*(_segmentsW + 1)*(_segmentsH + 1);
-
-					for (i = 0; i <= _segmentsW; i++) {
-								outer_pos = -hw + i*dw;
-
-								for (j = 0; j <= _segmentsD; j++) {
-							// top
-								positions[vidx] = outer_pos;
-								positions[vidx + 1] = hh;
-								positions[vidx + 2] = -hd + j*dd;
-								normals[vidx] = 0;
-								normals[vidx + 1] = 1;
-								normals[vidx + 2] = 0;
-								tangents[vidx] = 1;
-								tangents[vidx + 1] = 0;
-								tangents[vidx + 2] = 0;
-								vidx += 3;
-
-							// bottom
-								positions[vidx] = outer_pos;
-								positions[vidx + 1] = -hh;
-								positions[vidx + 2] = -hd + j*dd;
-								normals[vidx] = 0;
-								normals[vidx + 1] = -1;
-								normals[vidx + 2] = 0;
-								tangents[vidx] = 1;
-								tangents[vidx + 1] = 0;
-								tangents[vidx + 2] = 0;
-								vidx += 3;
-
-								if (i && j) {
-								tl = inc + 2*((i - 1)*(_segmentsD + 1) + (j - 1));
-								tr = inc + 2*(i*(_segmentsD + 1) + (j - 1));
-								bl = tl + 2;
-								br = tr + 2;
-
-								indices[fidx++] = tl;
-								indices[fidx++] = bl;
-								indices[fidx++] = br;
-								indices[fidx++] = tl;
-								indices[fidx++] = br;
-								indices[fidx++] = tr;
-								indices[fidx++] = tr + 1;
-								indices[fidx++] = br + 1;
-								indices[fidx++] = bl + 1;
-								indices[fidx++] = tr + 1;
-								indices[fidx++] = bl + 1;
-								indices[fidx++] = tl + 1;
-								}
 						}
+					}
+				}
+
+				inc += 2 * (_segmentsW + 1) * (_segmentsH + 1);
+
+				for (i = 0; i <= _segmentsW; i++) {
+					outer_pos = -hw + i * dw;
+
+					for (j = 0; j <= _segmentsD; j++) {
+						// top
+						positions[vidx] = outer_pos;
+						positions[vidx + 1] = hh;
+						positions[vidx + 2] = -hd + j * dd;
+						normals[vidx] = 0;
+						normals[vidx + 1] = 1;
+						normals[vidx + 2] = 0;
+						tangents[vidx] = 1;
+						tangents[vidx + 1] = 0;
+						tangents[vidx + 2] = 0;
+						vidx += 3;
+
+						// bottom
+						positions[vidx] = outer_pos;
+						positions[vidx + 1] = -hh;
+						positions[vidx + 2] = -hd + j * dd;
+						normals[vidx] = 0;
+						normals[vidx + 1] = -1;
+						normals[vidx + 2] = 0;
+						tangents[vidx] = 1;
+						tangents[vidx + 1] = 0;
+						tangents[vidx + 2] = 0;
+						vidx += 3;
+
+						if (i && j) {
+							tl = inc + 2 * ((i - 1) * (_segmentsD + 1) + (j - 1));
+							tr = inc + 2 * (i * (_segmentsD + 1) + (j - 1));
+							bl = tl + 2;
+							br = tr + 2;
+
+							indices[fidx++] = tl;
+							indices[fidx++] = bl;
+							indices[fidx++] = br;
+							indices[fidx++] = tl;
+							indices[fidx++] = br;
+							indices[fidx++] = tr;
+							indices[fidx++] = tr + 1;
+							indices[fidx++] = br + 1;
+							indices[fidx++] = bl + 1;
+							indices[fidx++] = tr + 1;
+							indices[fidx++] = bl + 1;
+							indices[fidx++] = tl + 1;
 						}
+					}
+				}
 
-						inc += 2*(_segmentsW + 1)*(_segmentsD + 1);
+				inc += 2 * (_segmentsW + 1) * (_segmentsD + 1);
 
-						for (i = 0; i <= _segmentsD; i++) {
-									outer_pos = hd - i*dd;
+				for (i = 0; i <= _segmentsD; i++) {
+					outer_pos = hd - i * dd;
 
-									for (j = 0; j <= _segmentsH; j++) {
-								// left
-									positions[vidx] = -hw;
-									positions[vidx+1] = -hh + j*dh;
-									positions[vidx+2] = outer_pos;
-									normals[vidx] = -1;
-									normals[vidx+1] = 0;
-									normals[vidx+2] = 0;
-									tangents[vidx] = 0;
-									tangents[vidx+1] = 0;
-									tangents[vidx+2] = -1;
-									vidx += 3;
+					for (j = 0; j <= _segmentsH; j++) {
+						// left
+						positions[vidx] = -hw;
+						positions[vidx + 1] = -hh + j * dh;
+						positions[vidx + 2] = outer_pos;
+						normals[vidx] = -1;
+						normals[vidx + 1] = 0;
+						normals[vidx + 2] = 0;
+						tangents[vidx] = 0;
+						tangents[vidx + 1] = 0;
+						tangents[vidx + 2] = -1;
+						vidx += 3;
 
-								// right
-									positions[vidx] = hw;
-									positions[vidx+1] = -hh + j*dh;
-									positions[vidx+2] = outer_pos;
-									normals[vidx] = 1;
-									normals[vidx+1] = 0;
-									normals[vidx+2] = 0;
-									tangents[vidx] = 0;
-									tangents[vidx+1] = 0;
-									tangents[vidx+2] = 1;
-									vidx += 3;
+						// right
+						positions[vidx] = hw;
+						positions[vidx + 1] = -hh + j * dh;
+						positions[vidx + 2] = outer_pos;
+						normals[vidx] = 1;
+						normals[vidx + 1] = 0;
+						normals[vidx + 2] = 0;
+						tangents[vidx] = 0;
+						tangents[vidx + 1] = 0;
+						tangents[vidx + 2] = 1;
+						vidx += 3;
 
-									if (i && j) {
-									tl = inc + 2*((i - 1)*(_segmentsH + 1) + (j - 1));
-									tr = inc + 2*(i*(_segmentsH + 1) + (j - 1));
-									bl = tl + 2;
-									br = tr + 2;
+						if (i && j) {
+							tl = inc + 2 * ((i - 1) * (_segmentsH + 1) + (j - 1));
+							tr = inc + 2 * (i * (_segmentsH + 1) + (j - 1));
+							bl = tl + 2;
+							br = tr + 2;
 
-									indices[fidx++] = tl;
-									indices[fidx++] = bl;
-									indices[fidx++] = br;
-									indices[fidx++] = tl;
-									indices[fidx++] = br;
-									indices[fidx++] = tr;
-									indices[fidx++] = tr + 1;
-									indices[fidx++] = br + 1;
-									indices[fidx++] = bl + 1;
-									indices[fidx++] = tr + 1;
-									indices[fidx++] = bl + 1;
-									indices[fidx++] = tl + 1;
-									}
-							}
-							}
+							indices[fidx++] = tl;
+							indices[fidx++] = bl;
+							indices[fidx++] = br;
+							indices[fidx++] = tl;
+							indices[fidx++] = br;
+							indices[fidx++] = tr;
+							indices[fidx++] = tr + 1;
+							indices[fidx++] = br + 1;
+							indices[fidx++] = bl + 1;
+							indices[fidx++] = tr + 1;
+							indices[fidx++] = bl + 1;
+							indices[fidx++] = tl + 1;
+						}
+					}
+				}
 
-							triangleGeometry.updateIndices(indices);
+				triangleGeometry.updateIndices(indices);
 
-							triangleGeometry.updatePositions(positions);
-							triangleGeometry.updateVertexNormals(normals);
-							triangleGeometry.updateVertexTangents(tangents);
+				triangleGeometry.updatePositions(positions);
+				triangleGeometry.updateVertexNormals(normals);
+				triangleGeometry.updateVertexTangents(tangents);
 
-							} else if (geometryType == GeometryType.LINE) {
+			} else if (geometryType == GeometryType.LINE) {
 				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
 
 				var numSegments:Number = _segmentsH * 4 + _segmentsW * 4 + _segmentsD * 4;
@@ -568,7 +568,7 @@ package away3d.prefabs
 			var du:Number, dv:Number;
 			var numVertices:Number;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				numVertices = ((_segmentsW + 1) * (_segmentsH + 1) + (_segmentsW + 1) * (_segmentsD + 1) + (_segmentsH + 1) * (_segmentsD + 1)) * 2;
 

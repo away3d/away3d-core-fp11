@@ -1,7 +1,7 @@
 ﻿package away3d.debug
 {
 	import away3d.containers.ObjectContainer3D;
-	import away3d.entities.LineSegment;
+	import away3d.prefabs.SegmentSetPrefab;
 	import away3d.materials.SegmentMaterial;
 
 	import flash.geom.Vector3D;
@@ -57,7 +57,7 @@
 						v1.x = 0;
 						v1.y = inc;
 						v1.z = -bound;
-						addChild(new LineSegment(material, v0, v1, thickness));
+//						addChild(new SegmentSetPrefab(material, v0, v1, thickness));
 						
 						v0.z = inc;
 						v0.x = 0;
@@ -65,7 +65,7 @@
 						v1.x = 0;
 						v1.y = -bound;
 						v1.z = inc;
-						addChild(new LineSegment(material, v0, v1, thickness));
+//						addChild(new SegmentSetPrefab(material, v0, v1, thickness));
 						break;
 					
 					case PLANE_XY:
@@ -75,14 +75,14 @@
 						v1.x = -bound;
 						v1.y = inc;
 						v1.z = 0;
-						addChild(new LineSegment(material, v0, v1, thickness));
+//						addChild(new SegmentSetPrefab(material, v0, v1, thickness));
 						v0.x = inc;
 						v0.y = bound;
 						v0.z = 0;
 						v1.x = inc;
 						v1.y = -bound;
 						v1.z = 0;
-						addChild(new LineSegment(material, v0, v1, thickness));
+//						addChild(new SegmentSetPrefab(material, v0, v1, thickness));
 						break;
 					
 					default:
@@ -92,7 +92,7 @@
 						v1.x = -bound;
 						v1.y = 0;
 						v1.z = inc;
-						addChild(new LineSegment(material, v0, v1, thickness));
+//						addChild(new SegmentSetPrefab(material, v0, v1, thickness));
 						
 						v0.x = inc;
 						v0.y = 0;
@@ -100,7 +100,7 @@
 						v1.x = inc;
 						v1.y = 0;
 						v1.z = -bound;
-						addChild(new LineSegment(material, v0, v1, thickness));
+//						addChild(new SegmentSetPrefab(material, v0, v1, thickness));
 				}
 				
 				inc += step;

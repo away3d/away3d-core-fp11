@@ -2,17 +2,17 @@ package away3d.extrusions
 {
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
+	import away3d.core.base.ISubMesh;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.utils.MultipleMaterials;
 	import away3d.tools.helpers.MeshHelper;
-	
+
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
-	
+
 	/**
 	 * Class for generating meshes with axial symmetry such as donuts, pipes, vases etc.
 	 */
@@ -45,7 +45,7 @@ package away3d.extrusions
 		private var _startRotationOffset:Number = 0;
 		
 		private var _geomDirty:Boolean = true;
-		private var _subGeometry:SubGeometry;
+		private var _subGeometry:TriangleSubGeometry;
 		private var _MaterialsSubGeometries:Vector.<SubGeometryList> = new Vector.<SubGeometryList>();
 		private var _maxIndProfile:uint;
 		private var _uva:UV;
@@ -92,7 +92,7 @@ package away3d.extrusions
 		public function LatheExtrude(material:MaterialBase = null, profile:Vector.<Vector3D> = null, axis:String = LatheExtrude.Y_AXIS, revolutions:Number = 1, subdivision:uint = 10, coverall:Boolean = true, centerMesh:Boolean = false, flip:Boolean = false, thickness:Number = 0, preciseThickness:Boolean = true, offsetRadius:Number = 0, materials:MultipleMaterials = null, ignoreSides:String = "", tweek:Object = null, smoothSurface:Boolean = true)
 		{
 			var geom:Geometry = new Geometry();
-			_subGeometry = new SubGeometry();
+			_subGeometry = new TriangleSubGeometry(false);
 			
 			if (!material && materials && materials.front)
 				material = materials.front;
@@ -341,7 +341,7 @@ package away3d.extrusions
 			
 			_centerMesh = val;
 			
-			if (_centerMesh && _subGeometry.vertexData.length > 0)
+			if (_centerMesh && _subGeometry.positions.length > 0)
 				MeshHelper.recenter(this);
 			else
 				invalidateGeometry();
@@ -417,7 +417,7 @@ package away3d.extrusions
 		/**
 		 * @inheritDoc
 		 */
-		override public function get subMeshes():Vector.<SubMesh>
+		override public function get subMeshes():Vector.<ISubMesh>
 		{
 			if (_geomDirty)
 				buildExtrude();
@@ -980,28 +980,28 @@ package away3d.extrusions
 				throw new Error("LatheExtrude error: the profile Vector.<Vector3D> must hold a mimimun of 2 vector3D's");
 			
 			if (_vertices.length > 0) {
-				_subGeometry.updateVertexData(_vertices);
-				_subGeometry.updateIndexData(_indices);
-				_subGeometry.updateUVData(_uvs);
+				_subGeometry.updateIndices(_indices);
+				_subGeometry.updatePositions(_vertices);
+				_subGeometry.updateUVs(_uvs);
 				if (_smoothSurface)
-					_subGeometry.updateVertexNormalData(_normals);
+					_subGeometry.updateVertexNormals(_normals);
 				this.geometry.addSubGeometry(_subGeometry);
 			}
 			
 			if (_MaterialsSubGeometries && _MaterialsSubGeometries.length > 0) {
 				var sglist:SubGeometryList;
-				var sg:SubGeometry;
+				var sg:TriangleSubGeometry;
 				for (i = 1; i < 6; ++i) {
 					sglist = _MaterialsSubGeometries[i];
-					sg = sglist.subGeometry;
+					sg = sglist.subGeometry as TriangleSubGeometry;
 					if (sg && sglist.vertices.length > 0) {
 						this.geometry.addSubGeometry(sg);
 						this.subMeshes[this.subMeshes.length - 1].material = sglist.material;
-						sg.updateVertexData(sglist.vertices);
-						sg.updateIndexData(sglist.indices);
-						sg.updateUVData(sglist.uvs);
+						sg.updatePositions(sglist.vertices);
+						sg.updateIndices(sglist.indices);
+						sg.updateUVs(sglist.uvs);
 						if (_smoothSurface)
-							sg.updateVertexNormalData(sglist.normals);
+							sg.updateVertexNormals(sglist.normals);
 					}
 				}
 			}
@@ -1039,7 +1039,7 @@ package away3d.extrusions
 		
 		private function addFace(v0:Vector3D, v1:Vector3D, v2:Vector3D, uv0:UV, uv1:UV, uv2:UV, subGeomInd:uint):void
 		{
-			var subGeom:SubGeometry;
+			var subGeom:TriangleSubGeometry;
 			var uvs:Vector.<Number>;
 			var normals:Vector.<Number>;
 			var vertices:Vector.<Number>;
@@ -1061,18 +1061,19 @@ package away3d.extrusions
 			}
 			
 			if (vertices.length + 9 > LIMIT) {
-				subGeom.updateVertexData(vertices);
-				subGeom.updateIndexData(indices);
-				subGeom.updateUVData(uvs);
-				if (_smoothSurface)
-					subGeom.updateVertexNormalData(normals);
+				subGeom.updatePositions(vertices);
+				subGeom.updateIndices(indices);
+				subGeom.updateUVs(uvs);
+				if (_smoothSurface) {
+					subGeom.updateVertexNormals(normals);
+				}
 				this.geometry.addSubGeometry(subGeom);
 				
 				if (subGeomInd > 0 && _MaterialsSubGeometries && _MaterialsSubGeometries[subGeomInd].subGeometry)
 					this.subMeshes[this.subMeshes.length - 1].material = _MaterialsSubGeometries[subGeomInd].material;
 				
-				subGeom = new SubGeometry();
-				subGeom.autoDeriveVertexTangents = true;
+				subGeom = new TriangleSubGeometry(false);
+				subGeom.autoDeriveTangents = true;
 				
 				if (_MaterialsSubGeometries && _MaterialsSubGeometries.length > 0) {
 					_MaterialsSubGeometries[subGeomInd].subGeometry = subGeom;
@@ -1086,7 +1087,7 @@ package away3d.extrusions
 					if (_smoothSurface)
 						_MaterialsSubGeometries[subGeomInd].normals = normals;
 					else
-						subGeom.autoDeriveVertexNormals = true;
+						subGeom.autoDeriveNormals = true;
 					
 					if (subGeomInd == 0) {
 						_subGeometry = subGeom;
@@ -1256,9 +1257,9 @@ package away3d.extrusions
 				_normal2 = new Vector3D(0.0, 0.0, 0.0);
 				_normalTmp = new Vector3D(0.0, 0.0, 0.0);
 			} else
-				_subGeometry.autoDeriveVertexNormals = true;
+				_subGeometry.autoDeriveNormals = true;
 			
-			_subGeometry.autoDeriveVertexTangents = true;
+			_subGeometry.autoDeriveTangents = true;
 			
 			if (_materials && _thickness > 0)
 				initSubGeometryList();
@@ -1452,7 +1453,7 @@ package away3d.extrusions
 				}
 			}
 			
-			var sg:SubGeometry;
+			var sg:TriangleSubGeometry;
 			var prop:String;
 			for (i = 1; i < 6; ++i) {
 				switch (i) {
@@ -1477,11 +1478,11 @@ package away3d.extrusions
 				
 				if (_materials[prop] && _MaterialsSubGeometries[i].subGeometry == null) {
 					sglist = _MaterialsSubGeometries[i];
-					sg = new SubGeometry();
+					sg = new TriangleSubGeometry(false);
 					sglist.material = _materials[prop];
 					sglist.subGeometry = sg;
-					sg.autoDeriveVertexNormals = true;
-					sg.autoDeriveVertexTangents = true;
+					sg.autoDeriveNormals = true;
+					sg.autoDeriveTangents = true;
 					
 				}
 			}
@@ -1490,7 +1491,7 @@ package away3d.extrusions
 	}
 }
 
-import away3d.core.base.SubGeometry;
+import away3d.core.base.TriangleSubGeometry;
 import away3d.materials.MaterialBase;
 
 import flash.geom.Point;
@@ -1502,7 +1503,7 @@ class SubGeometryList
 	public var vertices:Vector.<Number>;
 	public var normals:Vector.<Number>;
 	public var indices:Vector.<uint>;
-	public var subGeometry:SubGeometry;
+	public var subGeometry:TriangleSubGeometry;
 	public var material:MaterialBase;
 	
 	public function SubGeometryList()

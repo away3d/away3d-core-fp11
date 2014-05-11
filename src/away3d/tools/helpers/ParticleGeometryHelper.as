@@ -1,10 +1,10 @@
 package away3d.tools.helpers
 {
 	import away3d.core.base.ParticleGeometry;
+	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.ParticleData;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
 	import away3d.tools.helpers.data.ParticleGeometryTransform;
 	
 	import flash.geom.Matrix;
@@ -28,8 +28,8 @@ package away3d.tools.helpers
 			var subGeometries:Vector.<TriangleSubGeometry> = new Vector.<TriangleSubGeometry>();
 			var numParticles:uint = geometries.length;
 			
-			var sourceSubGeometries:Vector.<ISubGeometry>;
-			var sourceSubGeometry:ISubGeometry;
+			var sourceSubGeometries:Vector.<SubGeometryBase>;
+			var sourceSubGeometry:SubGeometryBase;
 			var numSubGeometries:uint;
 			var vertices:Vector.<Number>;
 			var indices:Vector.<uint>;
@@ -43,7 +43,8 @@ package away3d.tools.helpers
 			var tempNormal:Vector3D = new Vector3D;
 			var tempTangents:Vector3D = new Vector3D;
 			var tempUV:Point = new Point;
-			
+			var tempSecondaryUV:Point = new Point;
+
 			for (i = 0; i < numParticles; i++) {
 				sourceSubGeometries = geometries[i].subGeometries;
 				numSubGeometries = sourceSubGeometries.length;
@@ -53,7 +54,7 @@ package away3d.tools.helpers
 						sub2SubMap.push(subGeometries.length);
 						verticesVector.push(new Vector.<Number>);
 						indicesVector.push(new Vector.<uint>);
-						subGeometries.push(new TriangleSubGeometry());
+						subGeometries.push(new TriangleSubGeometry(true));
 						vertexCounters.push(0);
 					}
 					
@@ -65,7 +66,7 @@ package away3d.tools.helpers
 						sub2SubMap[srcIndex] = subGeometries.length;
 						verticesVector.push(new Vector.<Number>);
 						indicesVector.push(new Vector.<uint>);
-						subGeometries.push(new TriangleSubGeometry());
+						subGeometries.push(new TriangleSubGeometry(true));
 						vertexCounters.push(0);
 					}
 					
@@ -88,21 +89,21 @@ package away3d.tools.helpers
 					
 					var k:int;
 					var tempLen:int;
-					var compact:TriangleSubGeometry = sourceSubGeometry as TriangleSubGeometry;
 					var product:uint;
 					var sourceVertices:Vector.<Number>;
 					
-					if (compact) {
-						tempLen = compact.numVertices;
-						compact.numTriangles;
-						sourceVertices = compact.vertexData;
-						
+					if (sourceSubGeometry && sourceSubGeometry.concatenateArrays) {
+						tempLen = sourceSubGeometry.numVertices;
+						sourceSubGeometry.numTriangles;
+						sourceVertices = sourceSubGeometry.vertices;
+
 						if (transforms) {
 							var particleGeometryTransform:ParticleGeometryTransform = transforms[i];
 							var vertexTransform:Matrix3D = particleGeometryTransform.vertexTransform;
 							var invVertexTransform:Matrix3D = particleGeometryTransform.invVertexTransform;
 							var UVTransform:Matrix = particleGeometryTransform.UVTransform;
-							
+							var stride:uint = sourceSubGeometry.getStride(TriangleSubGeometry.POSITION_DATA);
+
 							for (k = 0; k < tempLen; k++) {
 								/*
 								 * 0 - 2: vertex position X, Y, Z
@@ -110,7 +111,8 @@ package away3d.tools.helpers
 								 * 6 - 8: tangent X, Y, Z
 								 * 9 - 10: U V
 								 * 11 - 12: Secondary U V*/
-								product = k*13;
+								product = k*stride;
+
 								tempVertex.x = sourceVertices[product];
 								tempVertex.y = sourceVertices[product + 1];
 								tempVertex.z = sourceVertices[product + 2];
@@ -122,18 +124,28 @@ package away3d.tools.helpers
 								tempTangents.z = sourceVertices[product + 8];
 								tempUV.x = sourceVertices[product + 9];
 								tempUV.y = sourceVertices[product + 10];
+
+								if(stride>11) {
+									tempSecondaryUV.x = sourceVertices[product + 11];
+									tempSecondaryUV.y = sourceVertices[product + 12];
+								}
+
 								if (vertexTransform) {
 									tempVertex = vertexTransform.transformVector(tempVertex);
 									tempNormal = invVertexTransform.deltaTransformVector(tempNormal);
 									tempTangents = invVertexTransform.deltaTransformVector(tempNormal);
 								}
-								if (UVTransform)
+								if (UVTransform) {
 									tempUV = UVTransform.transformPoint(tempUV);
+								}
 								//this is faster than that only push one data
 								vertices.push(tempVertex.x, tempVertex.y, tempVertex.z, tempNormal.x,
 									tempNormal.y, tempNormal.z, tempTangents.x, tempTangents.y,
-									tempTangents.z, tempUV.x, tempUV.y, sourceVertices[product + 11],
-									sourceVertices[product + 12]);
+									tempTangents.z, tempUV.x, tempUV.y);
+
+								if(stride > 11) {
+									vertices.push(tempSecondaryUV.x, tempSecondaryUV.y);
+								}
 							}
 						} else {
 							for (k = 0; k < tempLen; k++) {
@@ -149,8 +161,9 @@ package away3d.tools.helpers
 						//Todo
 					}
 					
-					var sourceIndices:Vector.<uint> = sourceSubGeometry.indexData;
+					var sourceIndices:Vector.<uint> = sourceSubGeometry.indices;
 					tempLen = sourceSubGeometry.numTriangles;
+
 					for (k = 0; k < tempLen; k++) {
 						product = k*3;
 						indices.push(sourceIndices[product] + vertexCounter, sourceIndices[product + 1] + vertexCounter, sourceIndices[product + 2] + vertexCounter);
@@ -161,12 +174,21 @@ package away3d.tools.helpers
 			var particleGeometry:ParticleGeometry = new ParticleGeometry();
 			particleGeometry.particles = particles;
 			particleGeometry.numParticles = numParticles;
-			
+			/** 0 - 2: vertex position X, Y, Z
+			 * 3 - 5: normal X, Y, Z
+			 * 6 - 8: tangent X, Y, Z
+			 * 9 - 10: U V
+			 * 11 - 12: Secondary U V*/
 			numParticles = subGeometries.length;
 			for (i = 0; i < numParticles; i++) {
+				vertices = verticesVector[i];
 				subGeometry = subGeometries[i];
-				subGeometry.updateData(verticesVector[i]);
-				subGeometry.updateIndexData(indicesVector[i]);
+				subGeometry.updateIndices(indicesVector[i]);
+				subGeometry.updateData(TriangleSubGeometry.POSITION_DATA, vertices, 0, subGeometry.getStride(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
+				subGeometry.updateData(TriangleSubGeometry.NORMAL_DATA, vertices, 3, subGeometry.getStride(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
+				subGeometry.updateData(TriangleSubGeometry.TANGENT_DATA, vertices, 6, subGeometry.getStride(TriangleSubGeometry.TANGENT_DATA), TriangleSubGeometry.TANGENT_FORMAT);
+				subGeometry.updateData(TriangleSubGeometry.UV_DATA, vertices, 9, subGeometry.getStride(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
+				subGeometry.updateData(TriangleSubGeometry.SECONDARY_UV_DATA, vertices, 11, subGeometry.getStride(TriangleSubGeometry.SECONDARY_UV_DATA), TriangleSubGeometry.SECONDARY_UV_FORMAT);
 				particleGeometry.addSubGeometry(subGeometry);
 			}
 			

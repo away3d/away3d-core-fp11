@@ -50,7 +50,7 @@ package away3d.prefabs
 			var startIndex:uint;
 			var comp1:Number, comp2:Number, t1:Number, t2:Number;
 			var numIndices:Number = 0;
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
 				// evaluate target number of vertices, triangles and indices

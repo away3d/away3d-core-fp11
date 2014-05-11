@@ -2,18 +2,19 @@
 {
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.SubGeometry;
-	import away3d.core.base.SubMesh;
+	import away3d.core.base.ISubMesh;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
 	import away3d.entities.Mesh;
+	import away3d.materials.IMaterial;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.utils.MultipleMaterials;
 	import away3d.tools.helpers.MeshHelper;
-	
+
 	import flash.geom.Point;
 	import flash.geom.Vector3D;
-	
+
 	public class LinearExtrude extends Mesh
 	{
 		public static const X_AXIS:String = "x";
@@ -40,7 +41,7 @@
 		private var _ignoreSides:String;
 		
 		private var _geomDirty:Boolean = true;
-		private var _subGeometry:SubGeometry;
+		private var _subGeometry:TriangleSubGeometry;
 		private var _MaterialsSubGeometries:Vector.<SubGeometryList>;
 		private var _uva:UV;
 		private var _uvb:UV;
@@ -53,7 +54,7 @@
 		// private var _vd:Vertex;
 		private var _maxIndProfile:uint;
 		private var _uvs:Vector.<Number>;
-		private var _vertices:Vector.<Number>;
+		private var _positions:Vector.<Number>;
 		private var _indices:Vector.<uint>;
 		private var _aVectors:Vector.<Vector3D>;
 		private var _baseMax:Number;
@@ -81,7 +82,7 @@
 		public function LinearExtrude(material:MaterialBase = null, vectors:Vector.<Vector3D> = null, axis:String = LinearExtrude.Y_AXIS, offset:Number = 10, subdivision:uint = 3, coverAll:Boolean = false, thickness:Number = 0, thicknessSubdivision:uint = 3, materials:MultipleMaterials = null, centerMesh:Boolean = false, closePath:Boolean = false, ignoreSides:String = "", flip:Boolean = false)
 		{
 			var geom:Geometry = new Geometry();
-			_subGeometry = new SubGeometry();
+			_subGeometry = new TriangleSubGeometry(false);
 			
 			if (!material && materials && materials.front)
 				material = materials.front;
@@ -120,25 +121,25 @@
 			
 			generate();
 			
-			if (_vertices.length > 0) {
-				_subGeometry.updateVertexData(_vertices);
-				_subGeometry.updateIndexData(_indices);
-				_subGeometry.updateUVData(_uvs);
+			if (_positions.length > 0) {
+				_subGeometry.updatePositions(_positions);
+				_subGeometry.updateIndices(_indices);
+				_subGeometry.updateUVs(_uvs);
 				this.geometry.addSubGeometry(_subGeometry);
 			}
 			
 			if (_MaterialsSubGeometries && _MaterialsSubGeometries.length > 0) {
 				var sglist:SubGeometryList;
-				var sg:SubGeometry;
+				var sg:TriangleSubGeometry;
 				for (var i:uint = 1; i < _MaterialsSubGeometries.length; ++i) {
 					sglist = _MaterialsSubGeometries[i];
-					sg = sglist.subGeometry;
-					if (sg && sglist.vertices.length > 0) {
+					sg = sglist.subGeometry as TriangleSubGeometry;
+					if (sg && sglist.positions.length > 0) {
 						this.geometry.addSubGeometry(sg);
 						this.subMeshes[this.subMeshes.length - 1].material = sglist.material;
-						sg.updateVertexData(sglist.vertices);
-						sg.updateIndexData(sglist.indices);
-						sg.updateUVData(sglist.uvs);
+						sg.updatePositions(sglist.positions);
+						sg.updateIndices(sglist.indices);
+						sg.updateUVs(sglist.uvs);
 					}
 				}
 			}
@@ -251,7 +252,7 @@
 			
 			_centerMesh = val;
 			
-			if (_centerMesh && _subGeometry.vertexData.length > 0)
+			if (_centerMesh && _subGeometry.positions.length > 0)
 				MeshHelper.recenter(this);
 			else
 				invalidateGeometry();
@@ -338,7 +339,7 @@
 		/**
 		 * @inheritDoc
 		 */
-		override public function get subMeshes():Vector.<SubMesh>
+		override public function get subMeshes():Vector.<ISubMesh>
 		{
 			if (_geomDirty)
 				buildExtrude();
@@ -346,11 +347,11 @@
 			return super.subMeshes;
 		}
 		
-		private function addFace(v0:Vertex, v1:Vertex, v2:Vertex, uv0:UV, uv1:UV, uv2:UV, mat:MaterialBase, invertU:Boolean = false):void
+		private function addFace(v0:Vertex, v1:Vertex, v2:Vertex, uv0:UV, uv1:UV, uv2:UV, mat:IMaterial, invertU:Boolean = false):void
 		{
-			var subGeom:SubGeometry;
+			var subGeom:TriangleSubGeometry;
 			var uvs:Vector.<Number>;
-			var vertices:Vector.<Number>;
+			var positions:Vector.<Number>;
 			// TODO: not used
 			// var normals:Vector.<Number>;
 			var indices:Vector.<uint>;
@@ -358,52 +359,52 @@
 			
 			if (_activeMaterial != mat && _materials) {
 				sglist = getSubGeometryListFromMaterial(mat);
-				_subGeometry = subGeom = sglist.subGeometry;
+				_subGeometry = subGeom = sglist.subGeometry as TriangleSubGeometry;
 				_uvs = uvs = sglist.uvs;
-				_vertices = vertices = sglist.vertices;
+				_positions = positions = sglist.positions;
 				_indices = indices = sglist.indices;
 			} else {
 				
 				subGeom = _subGeometry;
 				uvs = _uvs;
-				vertices = _vertices;
+				positions = _positions;
 				indices = _indices;
 			}
 			
-			if (vertices.length + 9 > LIMIT) {
-				subGeom.updateVertexData(vertices);
-				subGeom.updateIndexData(indices);
-				subGeom.updateUVData(uvs);
+			if (positions.length + 9 > LIMIT) {
+				subGeom.updatePositions(positions);
+				subGeom.updateIndices(indices);
+				subGeom.updateUVs(uvs);
 				this.geometry.addSubGeometry(subGeom);
 				this.subMeshes[this.subMeshes.length - 1].material = mat;
 				
-				subGeom = new SubGeometry();
-				subGeom.autoDeriveVertexTangents = true;
-				subGeom.autoDeriveVertexNormals = true;
+				subGeom = new TriangleSubGeometry(false);
+				subGeom.autoDeriveTangents = true;
+				subGeom.autoDeriveNormals = true;
 				
 				if (_MaterialsSubGeometries && _MaterialsSubGeometries.length > 1) {
 					sglist = getSubGeometryListFromMaterial(mat);
-					sglist.subGeometry = _subGeometry = subGeom;
+					sglist.subGeometry = _subGeometry = subGeom as TriangleSubGeometry;
 					sglist.uvs = _uvs = uvs = new Vector.<Number>();
-					sglist.vertices = _vertices = vertices = new Vector.<Number>();
+					sglist.positions = _positions = positions = new Vector.<Number>();
 					sglist.indices = _indices = indices = new Vector.<uint>();
 					
 				} else {
 					
 					_subGeometry = subGeom;
 					uvs = _uvs = new Vector.<Number>();
-					vertices = _vertices = new Vector.<Number>();
+					positions = _positions = new Vector.<Number>();
 					indices = _indices = new Vector.<uint>();
 				}
 			}
 			
-			var ind:uint = vertices.length/3;
+			var ind:uint = positions.length/3;
 			
 			if (invertU)
 				uvs.push(1 - uv0.u, uv0.v, 1 - uv1.u, uv1.v, 1 - uv2.u, uv2.v);
 			else
 				uvs.push(uv0.u, uv0.v, uv1.u, uv1.v, uv2.u, uv2.v);
-			vertices.push(v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+			positions.push(v0.x, v0.y, v0.z, v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
 			
 			indices.push(ind, ind + 1, ind + 2);
 		}
@@ -605,7 +606,7 @@
 			}
 			
 			var index:uint = 0;
-			var mat:MaterialBase;
+			var mat:IMaterial;
 			
 			if (_thickness > 0) {
 				var v1a:Vertex;
@@ -736,7 +737,7 @@
 			}
 		}
 		
-		private function addThicknessSubdivision(points1:Array, points2:Array, u1:Number, u2:Number, mat:MaterialBase):void
+		private function addThicknessSubdivision(points1:Array, points2:Array, u1:Number, u2:Number, mat:IMaterial):void
 		{
 			var i:uint;
 			var j:uint;
@@ -978,30 +979,30 @@
 			_varr2 = new Vector.<Vertex>();
 			_uvarr = new Vector.<UV>();
 			_uvs = new Vector.<Number>();
-			_vertices = new Vector.<Number>();
+			_positions = new Vector.<Number>();
 			_indices = new Vector.<uint>();
 			
 			if (_materials) {
 				_MaterialsSubGeometries = new Vector.<SubGeometryList>();
 				var sglist:SubGeometryList = new SubGeometryList();
 				_MaterialsSubGeometries.push(sglist);
-				sglist.subGeometry = new SubGeometry();
+				sglist.subGeometry = new TriangleSubGeometry(false);
 				_subGeometry = sglist.subGeometry;
 				
 				sglist.uvs = _uvs = new Vector.<Number>();
-				sglist.vertices = _vertices = new Vector.<Number>();
+				sglist.positions = _positions = new Vector.<Number>();
 				sglist.indices = _indices = new Vector.<uint>();
 				sglist.material = this.material;
 				if (sglist.material.name == null)
 					sglist.material.name = "baseMaterial";
 				
 			} else {
-				_subGeometry.autoDeriveVertexNormals = true;
-				_subGeometry.autoDeriveVertexTangents = true;
+				_subGeometry.autoDeriveNormals = true;
+				_subGeometry.autoDeriveTangents = true;
 			}
 		}
 		
-		private function getSubGeometryListFromMaterial(mat:MaterialBase):SubGeometryList
+		private function getSubGeometryListFromMaterial(mat:IMaterial):SubGeometryList
 		{
 			var sglist:SubGeometryList;
 			
@@ -1015,9 +1016,9 @@
 			if (!sglist) {
 				sglist = new SubGeometryList();
 				_MaterialsSubGeometries.push(sglist);
-				sglist.subGeometry = new SubGeometry();
+				sglist.subGeometry = new TriangleSubGeometry(false);
 				sglist.uvs = new Vector.<Number>();
-				sglist.vertices = new Vector.<Number>();
+				sglist.positions = new Vector.<Number>();
 				sglist.indices = new Vector.<uint>();
 				sglist.material = mat;
 			}
@@ -1039,7 +1040,8 @@
 	}
 }
 
-import away3d.core.base.SubGeometry;
+import away3d.core.base.TriangleSubGeometry;
+import away3d.materials.IMaterial;
 import away3d.materials.MaterialBase;
 
 import flash.geom.Point;
@@ -1048,10 +1050,10 @@ class SubGeometryList
 {
 	public var id:uint;
 	public var uvs:Vector.<Number>;
-	public var vertices:Vector.<Number>;
+	public var positions:Vector.<Number>;
 	public var indices:Vector.<uint>;
-	public var subGeometry:SubGeometry;
-	public var material:MaterialBase;
+	public var subGeometry:TriangleSubGeometry;
+	public var material:IMaterial;
 }
 
 class RenderSide

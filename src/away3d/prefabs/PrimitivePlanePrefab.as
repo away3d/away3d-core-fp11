@@ -145,7 +145,7 @@ package away3d.prefabs
 			var xi:Number;
 			var yi:Number;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
@@ -331,7 +331,7 @@ package away3d.prefabs
 			var uvs:Vector.<Number>;
 			var numVertices:Number;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				numVertices = ( _segmentsH + 1 ) * ( _segmentsW + 1 );
 

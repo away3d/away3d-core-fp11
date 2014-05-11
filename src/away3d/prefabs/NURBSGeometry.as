@@ -3,7 +3,6 @@
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.arcane;
-	import away3d.library.assets.IAsset;
 	import away3d.prefabs.data.NURBSVertex;
 	
 	import flash.geom.Vector3D;
@@ -502,7 +501,7 @@
 			var numVertices:int = (_uSegments + 1)*(_vSegments + 1);
 			var uvLen:int = numVertices;
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
 				if (numVertices == triangleGeometry.numVertices && triangleGeometry.uvs != null)

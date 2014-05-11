@@ -2,23 +2,23 @@ package away3d.tools.helpers
 {
 	import away3d.arcane;
 	import away3d.containers.ObjectContainer3D;
-	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.Geometry;
-	import away3d.core.base.ISubGeometry;
 	import away3d.core.base.Object3D;
-	import away3d.core.base.SubGeometry;
+	import away3d.core.base.SubGeometryBase;
+	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.base.data.UV;
 	import away3d.core.base.data.Vertex;
+	import away3d.core.math.Box;
 	import away3d.entities.Mesh;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.tools.utils.Bounds;
 	import away3d.tools.utils.GeomUtil;
-	
+
 	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 	import flash.utils.Dictionary;
-	
+
 	use namespace arcane;
 	
 	/**
@@ -38,7 +38,14 @@ package away3d.tools.helpers
 		{
 			var radius:Number;
 			try {
-				radius = Math.max((mesh.maxX - mesh.minX)*Object3D(mesh).scaleX, (mesh.maxY - mesh.minY)*Object3D(mesh).scaleY, (mesh.maxZ - mesh.minZ)*Object3D(mesh).scaleZ);
+				var aabb:Box = mesh.bounds.aabb;
+				var minX:Number = aabb.x;
+				var minY:Number = aabb.y - aabb.height;
+				var minZ:Number = aabb.z;
+				var maxX:Number = aabb.x + aabb.width;
+				var maxY:Number = aabb.y;
+				var maxZ:Number = aabb.z + aabb.depth;
+				radius = Math.max((maxX - minX)*Object3D(mesh).scaleX, (maxY - minY)*Object3D(mesh).scaleY, (maxZ - minZ)*Object3D(mesh).scaleZ);
 			} catch (e:Error) {
 				Bounds.getMeshBounds(mesh);
 				radius = Math.max((Bounds.maxX - Bounds.minX)*Object3D(mesh).scaleX, (Bounds.maxY - Bounds.minY)*Object3D(mesh).scaleY, (Bounds.maxZ - Bounds.minZ)*Object3D(mesh).scaleZ);
@@ -93,7 +100,7 @@ package away3d.tools.helpers
 				recenter(Mesh(obj), keepPosition);
 			
 			for (var i:uint = 0; i < ObjectContainer3D(obj).numChildren; ++i) {
-				child = ObjectContainer3D(obj).getChildAt(i);
+				child = ObjectContainer3D(obj).getChildAt(i) as ObjectContainer3D;
 				recenterContainer(child, keepPosition);
 			}
 		
@@ -107,36 +114,37 @@ package away3d.tools.helpers
 		{
 			var i:uint, j:uint, len:uint, vStride:uint, vOffs:uint, nStride:uint, nOffs:uint;
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
-			var vertices:Vector.<Number>;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
+			var positions:Vector.<Number>;
 			var normals:Vector.<Number>;
 			var numSubGeoms:uint = geometries.length;
-			var subGeom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			var t:Matrix3D = mesh.transform.clone();
 			t.appendScale(1/mesh.scaleX, 1/mesh.scaleY, 1/mesh.scaleZ);
 			var holder:Vector3D = new Vector3D();
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				subGeom = ISubGeometry(geometries[i]);
-				vertices = subGeom.vertexData;
-				vOffs = subGeom.vertexOffset;
-				vStride = subGeom.vertexStride;
-				normals = subGeom.vertexNormalData;
-				nOffs = subGeom.vertexNormalOffset;
-				nStride = subGeom.vertexNormalStride;
+				subGeom = TriangleSubGeometry(geometries[i]);
+				if(!subGeom) continue;
+				positions = subGeom.positions;
+				vOffs = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				vStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+				normals = subGeom.vertexNormals;
+				nOffs = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
+				nStride = subGeom.getStride(TriangleSubGeometry.NORMAL_DATA);
 				len = subGeom.numVertices;
 				
 				for (j = 0; j < len; j++) {
 					//verts
-					holder.x = vertices[vOffs + j*vStride + 0];
-					holder.y = vertices[vOffs + j*vStride + 1];
-					holder.z = vertices[vOffs + j*vStride + 2];
+					holder.x = positions[vOffs + j*vStride + 0];
+					holder.y = positions[vOffs + j*vStride + 1];
+					holder.z = positions[vOffs + j*vStride + 2];
 					
 					holder = t.deltaTransformVector(holder);
 					
-					vertices[vOffs + j*vStride + 0] = holder.x;
-					vertices[vOffs + j*vStride + 1] = holder.y;
-					vertices[vOffs + j*vStride + 2] = holder.z;
+					positions[vOffs + j*vStride + 0] = holder.x;
+					positions[vOffs + j*vStride + 1] = holder.y;
+					positions[vOffs + j*vStride + 2] = holder.z;
 					//norms
 					holder.x = normals[nOffs + j*nStride + 0];
 					holder.y = normals[nOffs + j*nStride + 1];
@@ -149,13 +157,8 @@ package away3d.tools.helpers
 					normals[nOffs + j*nStride + 1] = holder.y;
 					normals[nOffs + j*nStride + 2] = holder.z;
 				}
-				
-				if (subGeom is TriangleSubGeometry)
-					TriangleSubGeometry(subGeom).updateData(vertices);
-				else {
-					SubGeometry(subGeom).updateVertexData(vertices);
-					SubGeometry(subGeom).updateVertexNormalData(normals);
-				}
+				TriangleSubGeometry(subGeom).updatePositions(positions);
+				TriangleSubGeometry(subGeom).updateVertexNormals(normals);
 			}
 			
 			mesh.rotationX = mesh.rotationY = mesh.rotationZ = 0;
@@ -173,7 +176,7 @@ package away3d.tools.helpers
 				applyRotations(Mesh(obj));
 			
 			for (var i:uint = 0; i < ObjectContainer3D(obj).numChildren; ++i) {
-				child = ObjectContainer3D(obj).getChildAt(i);
+				child = ObjectContainer3D(obj).getChildAt(i) as ObjectContainer3D;
 				applyRotationsContainer(child);
 			}
 		
@@ -201,28 +204,26 @@ package away3d.tools.helpers
 			
 			var i:uint, j:uint, len:uint, vStride:uint, vOffs:uint;
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
-			var vertices:Vector.<Number>;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
+			var positions:Vector.<Number>;
 			var numSubGeoms:uint = geometries.length;
-			var subGeom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				subGeom = ISubGeometry(geometries[i]);
-				vOffs = subGeom.vertexOffset;
-				vStride = subGeom.vertexStride;
-				vertices = subGeom.vertexData;
+				subGeom = TriangleSubGeometry(geometries[i]);
+				if(!subGeom) continue;
+				vOffs = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				vStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+				positions = subGeom.positions;
 				len = subGeom.numVertices;
 				
 				for (j = 0; j < len; j++) {
-					vertices[vOffs + j*vStride + 0] *= scaleX;
-					vertices[vOffs + j*vStride + 1] *= scaleY;
-					vertices[vOffs + j*vStride + 2] *= scaleZ;
+					positions[vOffs + j*vStride + 0] *= scaleX;
+					positions[vOffs + j*vStride + 1] *= scaleY;
+					positions[vOffs + j*vStride + 2] *= scaleZ;
 				}
 				
-				if (subGeom is TriangleSubGeometry)
-					TriangleSubGeometry(subGeom).updateData(vertices);
-				else
-					SubGeometry(subGeom).updateVertexData(vertices);
+				subGeom.updatePositions(positions);
 			}
 			
 			mesh.scaleX = mesh.scaleY = mesh.scaleZ = 1;
@@ -251,7 +252,7 @@ package away3d.tools.helpers
 				applyScales(Mesh(obj), scaleX, scaleY, scaleZ, obj);
 			
 			for (var i:uint = 0; i < ObjectContainer3D(obj).numChildren; ++i) {
-				child = ObjectContainer3D(obj).getChildAt(i);
+				child = ObjectContainer3D(obj).getChildAt(i) as ObjectContainer3D;
 				applyScalesContainer(child, scaleX, scaleY, scaleZ, obj);
 			}
 		}
@@ -267,28 +268,26 @@ package away3d.tools.helpers
 		{
 			var i:uint, j:uint, len:uint, vStride:uint, vOffs:uint;
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
-			var vertices:Vector.<Number>;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
+			var positions:Vector.<Number>;
 			var numSubGeoms:uint = geometries.length;
-			var subGeom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				subGeom = ISubGeometry(geometries[i]);
-				vOffs = subGeom.vertexOffset;
-				vStride = subGeom.vertexStride;
-				vertices = subGeom.vertexData;
+				subGeom = TriangleSubGeometry(geometries[i]);
+				if(!subGeom) continue;
+				vOffs = subGeom.getOffset(TriangleSubGeometry.POSITION_DATA);
+				vStride = subGeom.getStride(TriangleSubGeometry.POSITION_DATA);
+				positions = subGeom.positions;
 				len = subGeom.numVertices;
 				
 				for (j = 0; j < len; j++) {
-					vertices[vOffs + j*vStride + 0] += dx;
-					vertices[vOffs + j*vStride + 1] += dy;
-					vertices[vOffs + j*vStride + 2] += dz;
+					positions[vOffs + j*vStride + 0] += dx;
+					positions[vOffs + j*vStride + 1] += dy;
+					positions[vOffs + j*vStride + 2] += dz;
 				}
 				
-				if (subGeom is TriangleSubGeometry)
-					TriangleSubGeometry(subGeom).updateData(vertices);
-				else
-					SubGeometry(subGeom).updateVertexData(vertices);
+				subGeom.updatePositions(positions);
 			}
 			
 			mesh.x -= dx;
@@ -324,7 +323,7 @@ package away3d.tools.helpers
 				invertFaces(Mesh(obj));
 			
 			for (var i:uint = 0; i < ObjectContainer3D(obj).numChildren; ++i) {
-				child = ObjectContainer3D(obj).getChildAt(i);
+				child = ObjectContainer3D(obj).getChildAt(i) as ObjectContainer3D;
 				invertFacesInContainer(child);
 			}
 		
@@ -339,32 +338,33 @@ package away3d.tools.helpers
 		{
 			var i:uint, j:uint, len:uint, tStride:uint, tOffs:uint, nStride:uint, nOffs:uint, uStride:uint, uOffs:uint;
 			var geometry:Geometry = mesh.geometry;
-			var geometries:Vector.<ISubGeometry> = geometry.subGeometries;
+			var geometries:Vector.<SubGeometryBase> = geometry.subGeometries;
 			var indices:Vector.<uint>;
 			var indicesC:Vector.<uint>;
 			var normals:Vector.<Number>;
 			var tangents:Vector.<Number>;
 			var uvs:Vector.<Number>;
 			var numSubGeoms:uint = geometries.length;
-			var subGeom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			
 			for (i = 0; i < numSubGeoms; ++i) {
-				subGeom = ISubGeometry(geometries[i]);
-				indices = subGeom.indexData;
-				indicesC = subGeom.indexData.concat();
+				subGeom = TriangleSubGeometry(geometries[i]);
+				if(!subGeom) continue;
+				indices = subGeom.indices;
+				indicesC = subGeom.indices.concat();
 				
-				normals = subGeom.vertexNormalData;
-				nOffs = subGeom.vertexNormalOffset;
-				nStride = subGeom.vertexNormalStride;
+				normals = subGeom.vertexNormals;
+				nOffs = subGeom.getOffset(TriangleSubGeometry.NORMAL_DATA);
+				nStride = subGeom.getStride(TriangleSubGeometry.NORMAL_DATA);
 				
-				uvs = subGeom.UVData;
-				uOffs = subGeom.UVOffset;
-				uStride = subGeom.UVStride;
+				uvs = subGeom.uvs;
+				uOffs = subGeom.getOffset(TriangleSubGeometry.UV_DATA);
+				uStride = subGeom.getStride(TriangleSubGeometry.UV_DATA);
 				len = subGeom.numVertices;
 				
-				tangents = subGeom.vertexTangentData;
-				tOffs = subGeom.vertexTangentOffset;
-				tStride = subGeom.vertexTangentStride;
+				tangents = subGeom.vertexTangents;
+				tOffs = subGeom.getOffset(TriangleSubGeometry.TANGENT_DATA);
+				tStride = subGeom.getStride(TriangleSubGeometry.TANGENT_DATA);
 				
 				for (i = 0; i < indices.length; i += 3) {
 					indices[i + 0] = indicesC[i + 2];
@@ -386,15 +386,10 @@ package away3d.tools.helpers
 						uvs[uOffs + j*uStride + 0] = 1 - uvs[uOffs + j*uStride + 0];
 					
 				}
-				
-				if (subGeom is TriangleSubGeometry)
-					TriangleSubGeometry(subGeom).updateData(subGeom.vertexData);
-				else {
-					SubGeometry(subGeom).updateIndexData(indices);
-					SubGeometry(subGeom).updateVertexNormalData(normals);
-					SubGeometry(subGeom).updateVertexTangentData(tangents);
-					SubGeometry(subGeom).updateUVData(uvs);
-				}
+				subGeom.updateIndices(indices);
+				subGeom.updateUVs(uvs);
+				subGeom.updateVertexNormals(normals);
+				subGeom.updateVertexTangents(tangents);
 			}
 		}
 		
@@ -416,12 +411,15 @@ package away3d.tools.helpers
 			var i:uint;
 			
 			if (useCompactSubGeometry) {
-				var subGeoms:Vector.<ISubGeometry> = GeomUtil.fromVectors(vertices, indices, uvs, null, null, null, null);
+				var subGeoms:Vector.<SubGeometryBase> = GeomUtil.fromVectors(vertices, indices, uvs, null, null, null, null);
 				var geometry:Geometry = new Geometry();
+				var subGeom:TriangleSubGeometry;
 				
 				for (i = 0; i < subGeoms.length; i++) {
-					subGeoms[i].autoDeriveVertexNormals = true;
-					subGeoms[i].autoDeriveVertexTangents = true;
+					subGeom = subGeoms[i] as TriangleSubGeometry;
+					if(!subGeom) continue;
+					subGeom.autoDeriveNormals = true;
+					subGeom.autoDeriveTangents = true;
 					geometry.addSubGeometry(subGeoms[i]);
 				}
 				
@@ -432,9 +430,9 @@ package away3d.tools.helpers
 					m.name = name;
 				return m;
 			} else {
-				var subGeom:SubGeometry = new SubGeometry();
-				subGeom.autoDeriveVertexNormals = true;
-				subGeom.autoDeriveVertexTangents = true;
+				subGeom = new TriangleSubGeometry(false);
+				subGeom.autoDeriveNormals = true;
+				subGeom.autoDeriveTangents = true;
 				geometry = new Geometry();
 				geometry.addSubGeometry(subGeom);
 				
@@ -444,7 +442,7 @@ package away3d.tools.helpers
 				if (name != "")
 					m.name = name;
 				
-				var nvertices:Vector.<Number> = new Vector.<Number>();
+				var npositions:Vector.<Number> = new Vector.<Number>();
 				var nuvs:Vector.<Number> = new Vector.<Number>();
 				var nindices:Vector.<uint> = new Vector.<uint>();
 				
@@ -469,29 +467,29 @@ package away3d.tools.helpers
 					vertex.y = vertices[ind + 1];
 					vertex.z = vertices[ind + 2];
 					
-					if (nvertices.length == LIMIT) {
-						subGeom.updateVertexData(nvertices);
-						subGeom.updateIndexData(nindices);
-						subGeom.updateUVData(nuvs);
+					if (npositions.length == LIMIT) {
+						subGeom.updateIndices(nindices);
+						subGeom.updatePositions(npositions);
+						subGeom.updateUVs(nuvs);
 						
 						if (shareVertices) {
 							dShared = null;
 							dShared = new Dictionary();
 						}
 						
-						subGeom = new SubGeometry();
-						subGeom.autoDeriveVertexNormals = true;
-						subGeom.autoDeriveVertexTangents = true;
+						subGeom = new TriangleSubGeometry(false);
+						subGeom.autoDeriveNormals = true;
+						subGeom.autoDeriveTangents = true;
 						geometry.addSubGeometry(subGeom);
 						
 						uvid = 0;
 						
-						nvertices = new Vector.<Number>();
+						npositions = new Vector.<Number>();
 						nindices = new Vector.<uint>();
 						nuvs = new Vector.<Number>();
 					}
 					
-					vind = nvertices.length/3;
+					vind = npositions.length/3;
 					uvind = indices[i]*2;
 					
 					if (shareVertices) {
@@ -506,7 +504,7 @@ package away3d.tools.helpers
 					}
 					
 					nindices[nindices.length] = vind;
-					nvertices.push(vertex.x, vertex.y, vertex.z);
+					npositions.push(vertex.x, vertex.y, vertex.z);
 					
 					if (!uvs || uvind > uvs.length - 2) {
 						nuvs.push(defaultUVS[uvid], defaultUVS[uvid + 1]);
@@ -516,12 +514,12 @@ package away3d.tools.helpers
 						nuvs.push(uvs[uvind], uvs[uvind + 1]);
 				}
 				
-				if (shareVertices)
+				if (shareVertices) {
 					dShared = null;
-				
-				subGeom.updateVertexData(nvertices);
-				subGeom.updateIndexData(nindices);
-				subGeom.updateUVData(nuvs);
+				}
+				subGeom.updateIndices(nindices);
+				subGeom.updatePositions(npositions);
+				subGeom.updateUVs(nuvs);
 				
 				return m;
 			}
@@ -537,7 +535,7 @@ package away3d.tools.helpers
 		public static function splitMesh(mesh:Mesh, disposeSource:Boolean = false):Vector.<Mesh>
 		{
 			var meshes:Vector.<Mesh> = new Vector.<Mesh>();
-			var geometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
+			var geometries:Vector.<SubGeometryBase> = mesh.geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
 			if (numSubGeoms == 1) {
@@ -548,51 +546,52 @@ package away3d.tools.helpers
 			if (geometries[0] is TriangleSubGeometry)
 				return splitMeshCsg(mesh, disposeSource);
 			
-			var vertices:Vector.<Number>;
+			var positions:Vector.<Number>;
 			var indices:Vector.<uint>;
 			var uvs:Vector.<Number>;
 			var normals:Vector.<Number>;
 			var tangents:Vector.<Number>;
-			var subGeom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			
 			var nGeom:Geometry;
-			var nSubGeom:SubGeometry;
+			var nSubGeom:TriangleSubGeometry;
 			var nm:Mesh;
 			
 			var nMeshMat:MaterialBase;
 			var j:uint = 0;
 			
 			for (var i:uint = 0; i < numSubGeoms; ++i) {
-				if (geometries[0] is SubGeometry)
-					subGeom = SubGeometry(geometries[i]);
+				subGeom = geometries[i] as TriangleSubGeometry;
+				if(!subGeom) continue;
 				
-				vertices = subGeom.vertexData;
-				indices = subGeom.indexData;
-				uvs = subGeom.UVData;
+				positions = subGeom.positions;
+				indices = subGeom.indices;
+				uvs = subGeom.uvs;
 				
 				try {
-					normals = subGeom.vertexNormalData;
-					subGeom.autoDeriveVertexNormals = false;
+					normals = subGeom.vertexNormals;
+					subGeom.autoDeriveNormals = false;
 				} catch (e:Error) {
-					subGeom.autoDeriveVertexNormals = true;
+					subGeom.autoDeriveNormals = true;
 					normals = new Vector.<Number>();
 					j = 0;
-					while (j < vertices.length)
+					while (j < positions.length) {
 						normals[j++] = 0.0;
+					}
 				}
 				
 				try {
-					tangents = subGeom.vertexTangentData;
-					subGeom.autoDeriveVertexTangents = false;
+					tangents = subGeom.vertexTangents;
+					subGeom.autoDeriveTangents = false;
 				} catch (e:Error) {
-					subGeom.autoDeriveVertexTangents = true;
+					subGeom.autoDeriveTangents = true;
 					tangents = new Vector.<Number>();
 					j = 0;
-					while (j < vertices.length)
+					while (j < positions.length)
 						tangents[j++] = 0.0;
 				}
 				
-				vertices.fixed = false;
+				positions.fixed = false;
 				indices.fixed = false;
 				uvs.fixed = false;
 				normals.fixed = false;
@@ -601,13 +600,12 @@ package away3d.tools.helpers
 				nGeom = new Geometry();
 				nm = new Mesh(nGeom, mesh.subMeshes[i].material? mesh.subMeshes[i].material : nMeshMat);
 				
-				nSubGeom = new SubGeometry();
-				nSubGeom.updateVertexData(vertices);
-				nSubGeom.updateIndexData(indices);
-				nSubGeom.updateUVData(uvs);
-				nSubGeom.updateVertexNormalData(normals);
-				nSubGeom.updateVertexTangentData(tangents);
-				
+				nSubGeom = new TriangleSubGeometry(false);
+				nSubGeom.updateIndices(indices);
+				nSubGeom.updatePositions(positions);
+				nSubGeom.updateUVs(uvs);
+				nSubGeom.updateVertexNormals(normals);
+				nSubGeom.updateVertexTangents(tangents);
 				nGeom.addSubGeometry(nSubGeom);
 				
 				meshes.push(nm);
@@ -622,7 +620,7 @@ package away3d.tools.helpers
 		private static function splitMeshCsg(mesh:Mesh, disposeSource:Boolean = false):Vector.<Mesh>
 		{
 			var meshes:Vector.<Mesh> = new Vector.<Mesh>();
-			var geometries:Vector.<ISubGeometry> = mesh.geometry.subGeometries;
+			var geometries:Vector.<SubGeometryBase> = mesh.geometry.subGeometries;
 			var numSubGeoms:uint = geometries.length;
 			
 			if (numSubGeoms == 1) {
@@ -632,7 +630,7 @@ package away3d.tools.helpers
 			
 			//var vertices:Vector.<Number>;
 			//var indices:Vector.<uint>;
-			var subGeom:ISubGeometry;
+			var subGeom:TriangleSubGeometry;
 			
 			var nGeom:Geometry;
 			var nSubGeom:TriangleSubGeometry;
@@ -642,22 +640,19 @@ package away3d.tools.helpers
 			
 			for (var i:uint = 0; i < numSubGeoms; ++i) {
 				subGeom = TriangleSubGeometry(geometries[i]);
-				
+				if(!subGeom) continue;
 				nGeom = new Geometry();
 				nm = new Mesh(nGeom, mesh.subMeshes[i].material? mesh.subMeshes[i].material : nMeshMat);
-				
-				nSubGeom = new TriangleSubGeometry();
-				nSubGeom.updateData(subGeom.vertexData);
-				nSubGeom.updateIndexData(subGeom.indexData);
-				
+				nSubGeom = new TriangleSubGeometry(true);
+				nSubGeom.updateIndices(subGeom.indices);
+				nSubGeom.updatePositions(subGeom.positions);
 				nGeom.addSubGeometry(nSubGeom);
-				
 				meshes.push(nm);
 			}
 			
-			if (disposeSource)
+			if (disposeSource) {
 				mesh = null;
-			
+			}
 			return meshes;
 		}
 	
