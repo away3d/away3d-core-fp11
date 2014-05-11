@@ -8,13 +8,17 @@ package away3d.core.pool {
 		}
 
 		public static function getItem(subGeometry:SubGeometryBase, level:uint, indexOffset:uint):IndexData {
-			var subGeometryData:Vector.<IndexData> = IndexDataPool._pool[subGeometry.id] || (IndexDataPool._pool[subGeometry.id] = new Vector.<IndexData>());
-			if(subGeometryData.length<=level) {
+			var subGeometryData:Vector.<IndexData> = _pool[subGeometry.id];
+			if(!subGeometryData) {
+				subGeometryData = _pool[subGeometry.id] = new Vector.<IndexData>();
+			}
+
+			if (level >= subGeometryData.length) {
 				subGeometryData[level] = new IndexData(level);
 			}
+
 			var indexData:IndexData = subGeometryData[level];
 			indexData.updateData(indexOffset, subGeometry.indices, subGeometry.numVertices);
-
 			return indexData;
 		}
 

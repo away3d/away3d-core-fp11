@@ -25,6 +25,16 @@ package away3d.core.base
 		public static const UV_FORMAT:String = Context3DVertexBufferFormat.FLOAT_2;
 		public static const SECONDARY_UV_FORMAT:String = Context3DVertexBufferFormat.FLOAT_2;
 
+		//Events
+		private static const positionsEvent:SubGeometryEvent = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, POSITION_DATA);
+		private static const normalsEvent:SubGeometryEvent = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, NORMAL_DATA);
+		private static const tangentsEvent:SubGeometryEvent = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TANGENT_DATA);
+		private static const uvsEvent:SubGeometryEvent = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, UV_DATA);
+		private static const secondaryUvsEvent:SubGeometryEvent = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, SECONDARY_UV_DATA);
+		private static const jointIndicesEvent:SubGeometryEvent = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, JOINT_INDEX_DATA);
+		private static const jointWeightsEvent:SubGeometryEvent = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, JOINT_WEIGHT_DATA);
+
+		//Dirty flags
 		private var _positionsDirty:Boolean = true;
 		private var _faceNormalsDirty:Boolean = true;
 		private var _faceTangentsDirty:Boolean = true;
@@ -62,28 +72,10 @@ package away3d.core.base
 		private var _scaleU:Number = 1;
 		private var _scaleV:Number = 1;
 
-		private var _positionsUpdated:SubGeometryEvent;
-		private var _normalsUpdated:SubGeometryEvent;
-		private var _tangentsUpdated:SubGeometryEvent;
-		private var _uvsUpdated:SubGeometryEvent;
-		private var _secondaryUVsUpdated:SubGeometryEvent;
-		private var _jointIndicesUpdated:SubGeometryEvent;
-		private var _jointWeightsUpdated:SubGeometryEvent;
-
-		/**
-		 *
-		 */
-		public function get scaleU():Number
+		public function TriangleSubGeometry(concatenatedArrays:Boolean)
 		{
-			return _scaleU;
-		}
-
-		/**
-		 *
-		 */
-		public function get scaleV():Number
-		{
-			return _scaleV;
+			super(concatenatedArrays);
+			_subMeshClass = TriangleSubMesh;
 		}
 
 		/**
@@ -182,9 +174,6 @@ package away3d.core.base
 			_strideOffsetDirty = false;
 		}
 
-		/**
-		 *
-		 */
 		public function get jointsPerVertex():Number
 		{
 			return _jointsPerVertex;
@@ -192,15 +181,13 @@ package away3d.core.base
 
 		public function set jointsPerVertex(value:Number):void
 		{
-			if (_jointsPerVertex == value)
-				return;
-
+			if (_jointsPerVertex == value) return;
 			_jointsPerVertex = value;
 
 			_strideOffsetDirty = true;
-
-			if (_concatenateArrays)
+			if (_concatenateArrays) {
 				notifyVerticesUpdate();
+			}
 		}
 
 		/**
@@ -275,11 +262,11 @@ package away3d.core.base
 			if (_vertexNormalsDirty)
 				updateVertexNormals(_vertexNormals);
 
-			if (_vertexTangentsDirty)
-				updateVertexTangents(_vertexTangents);
-
 			if (_uvsDirty)
 				updateUVs(_uvs);
+
+			if (_vertexTangentsDirty)
+				updateVertexTangents(_vertexTangents);
 
 			if (_secondaryUVsDirty)
 				updateSecondaryUVs(_secondaryUVs);
@@ -435,14 +422,7 @@ package away3d.core.base
 			return _condensedIndexLookUp;
 		}
 
-		/**
-		 *
-		 */
-		public function TriangleSubGeometry(concatenatedArrays:Boolean)
-		{
-			super(concatenatedArrays);
-			_subMeshClass = TriangleSubMesh;
-		}
+
 
 		override public function getBoundingPositions():Vector.<Number>
 		{
@@ -452,7 +432,9 @@ package away3d.core.base
 			return _positions;
 		}
 
-		public function updateVertexDataFromConcatenated(targetDataType:String, sourceData:Vector.<Number>, sourceOffset:uint, sourceDataPerVertex:uint, format:String):void{
+		public function updateData(targetDataType:String, sourceData:Vector.<Number>, sourceOffset:uint, sourceDataPerVertex:uint, format:String):void{
+			if(sourceOffset>=sourceDataPerVertex) return;
+
 			var targetIndex:int;
 			var sourceIndex:int;
 			var stride:uint;
@@ -563,12 +545,13 @@ package away3d.core.base
 
 			_positions = values;
 
-			if (!_positions)
+			if (!_positions) {
 				_positions = new Vector.<Number>();
+			}
 
 			_numVertices = _positions.length/3;
 
-			if (_concatenateArrays) {
+			if (_concatenateArrays && values) {
 				var len:Number = _numVertices*getStride(VERTEX_DATA);
 
 				if (_vertices == null)
@@ -747,10 +730,9 @@ package away3d.core.base
 						_strideOffsetDirty = true;
 				}
 
-
 				_vertexTangents = values;
 
-				if (values != null && _concatenateArrays) {
+				if (values && _concatenateArrays) {
 					i = 0;
 					index = getOffset(TANGENT_DATA);
 					stride = getStride(TANGENT_DATA);
@@ -864,7 +846,7 @@ package away3d.core.base
 			var uvs:Vector.<Number>;
 
 			if (!_autoDeriveUVs) {
-				if ((_uvs == null || values == null) && (_uvs != null || values != null)) {
+				if ((!_uvs || !values) && (_uvs != null || values != null)) {
 					if (_concatenateArrays)
 						notifyVerticesUpdate();
 					else
@@ -887,20 +869,21 @@ package away3d.core.base
 				}
 
 			} else {
-				if (_uvs == null) {
+				if (!_uvs) {
 					_uvs = new Vector.<Number>(_positions.length*2/3);
 
-					if (_concatenateArrays)
+					if (_concatenateArrays) {
 						notifyVerticesUpdate();
-					else
+					}else {
 						_strideOffsetDirty = true;
+					}
 				}
 
 				offset = getOffset(UV_DATA);
 				stride = getStride(UV_DATA);
 
 				//autoderived uvs
-				uvs = _concatenateArrays? _vertices : _uvs;
+				uvs = _concatenateArrays ? _vertices : _uvs;
 
 				i = 0;
 				index = offset;
@@ -1196,15 +1179,12 @@ package away3d.core.base
 			var index:Number;
 			var offset:Number;
 			var stride:Number;
-			var positions:Vector.<Number>;
-
-			positions = _positions;
+			var positions:Vector.<Number> = _positions;
+			if(!positions) return;
 
 			var len:uint = positions.length;
-
 			offset = 0;
 			stride = 3;
-
 			i = 0;
 			index = offset;
 			while (i < len) {
@@ -1330,12 +1310,15 @@ package away3d.core.base
 
 			var positions:Vector.<Number> = _positions
 			var uvs:Vector.<Number> = _uvs;
-			if(!uvs.length) return;
-
+			if(!uvs || !uvs.length) {
+				_autoDeriveUVs = true;
+				updateUVs(_uvs);
+			}
 			var len:uint = _indices.length;
 
-			if (_faceTangents == null)
+			if (!_faceTangents) {
 				_faceTangents = new Vector.<Number>(len);
+			}
 
 			while (i < len) {
 				index1 = _indices[i];
@@ -1381,8 +1364,6 @@ package away3d.core.base
 			var j:Number = 0;
 			var k:Number = 0;
 			var index:Number;
-			var offset:Number;
-			var stride:Number;
 
 			var x1:Number, x2:Number, x3:Number;
 			var y1:Number, y2:Number, y3:Number;
@@ -1396,11 +1377,13 @@ package away3d.core.base
 
 			var len:uint = _indices.length;
 
-			if (_faceNormals == null)
+			if (!_faceNormals) {
 				_faceNormals = new Vector.<Number>(len);
+			}
 
-			if (_useFaceWeights && _faceWeights == null)
+			if (_useFaceWeights && !_faceWeights) {
 				_faceWeights = new Vector.<Number>(len/3);
+			}
 
 			while (i < len) {
 				index = _indices[i++]*3;
@@ -1429,10 +1412,7 @@ package away3d.core.base
 
 				if (_useFaceWeights) {
 					var w:Number = d*10000;
-
-					if (w < 1)
-						w = 1;
-
+					if (w < 1) w = 1;
 					_faceWeights[k++] = w;
 				}
 
@@ -1461,93 +1441,61 @@ package away3d.core.base
 
 		private function notifyPositionsUpdate():void
 		{
-			if (_positionsDirty)
-				return;
-
+			if (_positionsDirty) return;
 			_positionsDirty = true;
-
-			if (!_positionsUpdated)
-				_positionsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, POSITION_DATA);
-
-			dispatchEvent(_positionsUpdated);
+			dispatchEvent(positionsEvent);
 		}
 
 		private function notifyNormalsUpdate():void
 		{
-			if (_vertexNormalsDirty)
-				return;
-
+			if (_vertexNormalsDirty) return;
 			_vertexNormalsDirty = true;
-
-			if (!_normalsUpdated)
-				_normalsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, NORMAL_DATA);
-
-			dispatchEvent(_normalsUpdated);
+			dispatchEvent(normalsEvent);
 		}
 
 		private function notifyTangentsUpdate():void
 		{
-			if (_vertexTangentsDirty)
-				return;
-
+			if (_vertexTangentsDirty) return;
 			_vertexTangentsDirty = true;
-
-			if (!_tangentsUpdated)
-				_tangentsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, TANGENT_DATA);
-
-			dispatchEvent(_tangentsUpdated);
+			dispatchEvent(tangentsEvent);
 		}
 
 		private function notifyUVsUpdate():void
 		{
-			if (_uvsDirty)
-				return;
-
+			if (_uvsDirty) return;
 			_uvsDirty = true;
-
-			if (!_uvsUpdated)
-				_uvsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, UV_DATA);
-
-			dispatchEvent(_uvsUpdated);
+			dispatchEvent(uvsEvent);
 		}
 
 		private function notifySecondaryUVsUpdate():void
 		{
-			if (_secondaryUVsDirty)
-				return;
-
+			if (_secondaryUVsDirty) return;
 			_secondaryUVsDirty = true;
-
-			if (!_secondaryUVsUpdated)
-				_secondaryUVsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, SECONDARY_UV_DATA);
-
-			dispatchEvent(_secondaryUVsUpdated);
+			dispatchEvent(secondaryUvsEvent);
 		}
 
 		private function notifyJointIndicesUpdate():void
 		{
-			if (_jointIndicesDirty)
-				return;
-
+			if (_jointIndicesDirty) return;
 			_jointIndicesDirty = true;
-
-			if (!_jointIndicesUpdated)
-				_jointIndicesUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, JOINT_INDEX_DATA);
-
-			dispatchEvent(_jointIndicesUpdated);
+			dispatchEvent(jointIndicesEvent);
 		}
 
 		private function notifyJointWeightsUpdate():void
 		{
-			if (_jointWeightsDirty)
-				return;
-
+			if (_jointWeightsDirty) return;
 			_jointWeightsDirty = true;
+			dispatchEvent(jointWeightsEvent);
+		}
 
-			if (!_jointWeightsUpdated)
-				_jointWeightsUpdated = new SubGeometryEvent(SubGeometryEvent.VERTICES_UPDATED, JOINT_WEIGHT_DATA);
+		public function get scaleU():Number
+		{
+			return _scaleU;
+		}
 
-			dispatchEvent(_jointWeightsUpdated);
+		public function get scaleV():Number
+		{
+			return _scaleV;
 		}
 	}
 }

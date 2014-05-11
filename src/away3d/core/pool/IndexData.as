@@ -1,15 +1,10 @@
 package away3d.core.pool {
 	import away3d.core.managers.Stage3DProxy;
 
-	import flash.display.Stage3D;
-	import flash.display3D.IndexBuffer3D;
-	import flash.geom.Vector3D;
-
 	public class IndexData {
 		private static const LIMIT_VERTS:uint = 0xffff;
 		private static const LIMIT_INDICES:uint = 0xffffff;
 
-		private var _dataDirty:Boolean = true;
 		public var invalid:Vector.<Boolean> = new Vector.<Boolean>(8);
 		public var stage3Ds:Vector.<Stage3DProxy> = new Vector.<Stage3DProxy>(8);
 		public var buffers:Array = [];
@@ -18,6 +13,8 @@ package away3d.core.pool {
 		public var originalIndices:Vector.<uint>;
 		public var offset:uint;
 		public var level:uint;
+
+		private var _dataDirty:Boolean = true;
 
 		public function IndexData(level:uint) {
 			this.level = level;
@@ -47,8 +44,9 @@ package away3d.core.pool {
 
 					i = indexMappings.length;
 
-					while (i--)
+					while (i--){
 						indexMappings[i] = -1;
+					}
 
 					var originalIndex:Number;
 					var splitIndex:Number;
@@ -111,10 +109,9 @@ package away3d.core.pool {
 		private function disposeBuffers():void
 		{
 			for (var i:uint = 0; i < 8; ++i) {
-				if (buffers[i]) {
-					buffers[i].dispose();
-					buffers[i] = null;
-				}
+				if (!buffers[i]) continue;
+				buffers[i].dispose();
+				buffers[i] = null;
 			}
 		}
 
@@ -123,8 +120,9 @@ package away3d.core.pool {
 		 */
 		private function invalidateBuffers():void
 		{
-			for (var i:uint = 0; i < 8; ++i)
+			for (var i:uint = 0; i < 8; ++i) {
 				invalid[i] = true;
+			}
 		}
 
 		/**
@@ -134,10 +132,11 @@ package away3d.core.pool {
 		 */
 		private function setData(value:Vector.<uint>):void
 		{
-			if (value && value.length != value.length)
+			if (value && value.length != value.length) {
 				disposeBuffers();
-			else
+			} else {
 				invalidateBuffers();
+			}
 
 			data = value;
 		}

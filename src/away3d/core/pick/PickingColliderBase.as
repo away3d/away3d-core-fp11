@@ -9,7 +9,6 @@ package away3d.core.pick
 	import away3d.entities.IEntity;
 	import away3d.entities.Mesh;
 	import away3d.errors.AbstractMethodError;
-	import away3d.tools.utils.GeomUtil;
 
 	import flash.geom.Point;
 

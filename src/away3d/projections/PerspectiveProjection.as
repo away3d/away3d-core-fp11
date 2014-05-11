@@ -93,11 +93,13 @@ package away3d.projections
 		
 		override public function clone():ProjectionBase
 		{
-			var clone:PerspectiveProjection = new PerspectiveProjection(_fieldOfView);
-			clone._near = _near;
-			clone._far = _far;
-			clone._aspectRatio = _aspectRatio;
-			clone._coordinateSystem = _coordinateSystem;
+			var clone:PerspectiveProjection = new PerspectiveProjection(_fieldOfView, _coordinateSystem);
+			clone.near = _near;
+			clone.far = _far;
+			clone.aspectRatio = _aspectRatio;
+			clone.hFieldOfView = _hFieldOfView;
+			clone.preserveAspectRatio = _preserveAspectRatio;
+			clone.preserveFocalLength = _preserveFocalLength;
 			return clone;
 		}
 
@@ -108,20 +110,19 @@ package away3d.projections
 		{
 			var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 
-			if(_preserveFocalLength) {
-				if(_preserveAspectRatio) {
+			if (_preserveFocalLength) {
+				if (_preserveAspectRatio)
 					_hFocalLength = _focalLength;
-				}
 
-				_fieldOfView = Math.atan(0.5*_scissorRect.height/_focalLength)*360/Math.PI;
-				_hFieldOfView = Math.atan(0.5*_scissorRect.width/_hFocalLength)*360/Math.PI;
-			}else{
-				_focalLength = 0.5*_scissorRect.height/Math.tan(_fieldOfView*Math.PI/360);
+				_fieldOfView = Math.atan(0.5 * _scissorRect.height / _focalLength) * 360 / Math.PI;
+				_hFieldOfView = Math.atan(0.5 * _scissorRect.width / _hFocalLength) * 360 / Math.PI;
+			} else {
+				_focalLength = 0.5 * _scissorRect.height / Math.tan(_fieldOfView * Math.PI / 360);
 
 				if (_preserveAspectRatio)
 					_hFocalLength = _focalLength;
 				else
-					_hFocalLength = 0.5*_scissorRect.width/Math.tan(_hFieldOfView*Math.PI/360);
+					_hFocalLength = 0.5 * _scissorRect.width / Math.tan(_hFieldOfView * Math.PI / 360);
 			}
 
 			var tanMinX:Number = -_originX/_hFocalLength;

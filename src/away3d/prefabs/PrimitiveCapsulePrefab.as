@@ -165,7 +165,7 @@ package away3d.prefabs
 				triangleGeometry.updatePositions(positions);
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
-			}else if(geometryType == "lineSubGeometry") {
+			}else if(geometryType == GeometryType.LINE) {
 				//TODO:
 			}
 		}
@@ -179,7 +179,7 @@ package away3d.prefabs
 			var uvs:Vector.<Number>;
 
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 

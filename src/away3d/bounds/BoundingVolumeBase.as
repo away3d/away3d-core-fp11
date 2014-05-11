@@ -153,41 +153,43 @@ package away3d.bounds
 				i = 0;
 				subGeom = subGeoms[0];
 				boundingPositions = subGeom.getBoundingPositions();
-				minX = maxX = boundingPositions[i];
-				minY = maxY = boundingPositions[i + 1];
-				minZ = maxZ = boundingPositions[i + 2];
+				if(boundingPositions && boundingPositions.length > 0) {
+					minX = maxX = boundingPositions[i];
+					minY = maxY = boundingPositions[i + 1];
+					minZ = maxZ = boundingPositions[i + 2];
 
-				j = numSubGeoms;
-				while (j--) {
-					subGeom = subGeoms[j];
-					boundingPositions = subGeom.getBoundingPositions();
-					i = boundingPositions.length;
-					while (i--) {
-						p = boundingPositions[i];
-						if (p < minX)
-							minX = p;
-						else if (p > maxX)
-							maxX = p;
+					j = numSubGeoms;
+					while (j--) {
+						subGeom = subGeoms[j];
+						boundingPositions = subGeom.getBoundingPositions();
+						i = boundingPositions.length;
+						while (i--) {
+							p = boundingPositions[i];
+							if (p < minX)
+								minX = p;
+							else if (p > maxX)
+								maxX = p;
 
-						p = boundingPositions[i + 1];
+							p = boundingPositions[i + 1];
 
-						if (p < minY)
-							minY = p;
-						else if (p > maxY)
-							maxY = p;
+							if (p < minY)
+								minY = p;
+							else if (p > maxY)
+								maxY = p;
 
-						p = boundingPositions[i + 2];
+							p = boundingPositions[i + 2];
 
-						if (p < minZ)
-							minZ = p;
-						else if (p > maxZ)
-							maxZ = p;
+							if (p < minZ)
+								minZ = p;
+							else if (p > maxZ)
+								maxZ = p;
+						}
 					}
 				}
-				
 				fromExtremes(minX, minY, minZ, maxX, maxY, maxZ);
-			} else
+			} else {
 				fromExtremes(0, 0, 0, 0, 0, 0);
+			}
 		}
 		
 		/**

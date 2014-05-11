@@ -185,7 +185,7 @@ package away3d.prefabs
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
 
-			} else if (geometryType == "lineSubGeometry") {
+			} else if (geometryType == GeometryType.LINE) {
 				//TODO
 			}
 		}
@@ -225,7 +225,7 @@ package away3d.prefabs
 				// build real data from raw data
 				triangleGeometry.updateUVs(uvs);
 
-			} else if (geometryType == "lineSubGeometry") {
+			} else if (geometryType == GeometryType.LINE) {
 				//nothing to do here
 			}
 		}

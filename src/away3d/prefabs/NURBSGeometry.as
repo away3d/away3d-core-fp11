@@ -421,7 +421,7 @@
 			_uRange = (_uKnotSequence[_nplusc] - _uKnotSequence[1]);
 			_vRange = (_vKnotSequence[_mplusc] - _uKnotSequence[1]);
 
-			if (geometryType == "triangleSubGeometry") {
+			if (geometryType == GeometryType.TRIANGLES) {
 				var triangleGeometry:TriangleSubGeometry = target as TriangleSubGeometry;
 
 				// Define presets
@@ -484,7 +484,7 @@
 				triangleGeometry.updateIndices(indices);
 				triangleGeometry.updatePositions(positions);
 				triangleGeometry.updateVertexNormals(normals);
-			}else if(geometryType == "lineSubGeometry") {
+			}else if(geometryType == GeometryType.LINE) {
 				//TODO:
 			}
 
@@ -521,7 +521,7 @@
 				triangleGeometry.updateUVs(uvs);
 				_rebuildUVs = false;
 
-			} else if (geometryType == "lineSubGeometry") {
+			} else if (geometryType == GeometryType.LINE) {
 			}
 		}
 		

@@ -361,6 +361,7 @@
 			_camera.projection.aspectRatio = _aspectRatio;
 			_renderer.width = value;
 			_scissorDirty = true;
+			_viewportDirty = true;
 		}
 		
 		/**
@@ -387,6 +388,7 @@
 			_camera.projection.aspectRatio = _aspectRatio;
 			_renderer.height = value;
 			_scissorDirty = true;
+			_viewportDirty = true;
 		}
 		
 		override public function set x(value:Number):void

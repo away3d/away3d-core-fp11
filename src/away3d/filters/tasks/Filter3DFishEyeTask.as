@@ -1,6 +1,5 @@
 package away3d.filters.tasks
 {
-	import away3d.cameras.*;
 	import away3d.core.managers.*;
 	import away3d.core.math.*;
 	import away3d.entities.Camera3D;

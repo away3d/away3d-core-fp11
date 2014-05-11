@@ -12,12 +12,23 @@ package away3d.core.pool {
 	use namespace arcane;
 
 	public class RenderableBase implements IRenderable {
+		public var JOINT_INDEX_FORMAT:String;
+		public var JOINT_WEIGHT_FORMAT:String;
+
+		public var cascaded:Boolean;
+		public var renderSceneTransform:Matrix3D;
+		public var sourceEntity:IEntity;
+		public var materialOwner:IMaterialOwner;
+		public var material:MaterialBase;
+		public var pool:RenderablePool;
+
+		protected var _vertexDataDirty:Object = {};
+
 		private var _subGeometry:SubGeometryBase;
 		private var _geometryDirty:Boolean = true;
 		private var _indexData:IndexData;
 		private var _indexDataDirty:Boolean;
 		private var _vertexData:Object = {};
-		protected var _vertexDataDirty:Object = {};
 		private var _vertexOffset:Object = {};
 
 		private var _level:Number;
@@ -26,28 +37,10 @@ package away3d.core.pool {
 		private var _numTriangles:Number;
 		private var _concatenateArrays:Boolean;
 
-		public var JOINT_INDEX_FORMAT:String;
-		public var JOINT_WEIGHT_FORMAT:String;
-
 		private var _next:IRenderable;
-
 		private var _materialId:int;
-
 		private var _renderOrderId:int;
-
 		private var _zIndex:Number;
-
-		public var cascaded:Boolean;
-
-		public var renderSceneTransform:Matrix3D;
-
-		public var sourceEntity:IEntity;
-
-		public var materialOwner:IMaterialOwner;
-
-		public var material:MaterialBase;
-
-		public var pool:RenderablePool;
 
 		public function get overflow():RenderableBase {
 			if (_geometryDirty)
@@ -144,8 +137,9 @@ package away3d.core.pool {
 		}
 
 		arcane function fillIndexData(indexOffset:Number):void {
-			if (!_indexData)
+			if (!_indexData) {
 				_indexData = IndexDataPool.getItem(_subGeometry, _level, indexOffset);
+			}
 
 			_indexData.updateData(indexOffset, _subGeometry.indices, _subGeometry.numVertices);
 
@@ -171,8 +165,7 @@ package away3d.core.pool {
 
 		private function updateGeometry():void {
 			if (_subGeometry) {
-				if (_level == 0)
-					_subGeometry.removeEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
+				_subGeometry.removeEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
 				_subGeometry.removeEventListener(SubGeometryEvent.VERTICES_UPDATED, onVerticesUpdated);
 			}
 
@@ -181,8 +174,7 @@ package away3d.core.pool {
 			_concatenateArrays = _subGeometry.concatenateArrays;
 
 			if (_subGeometry) {
-				if (_level == 0)
-					_subGeometry.addEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
+				_subGeometry.addEventListener(SubGeometryEvent.INDICES_UPDATED, onIndicesUpdated);
 				_subGeometry.addEventListener(SubGeometryEvent.VERTICES_UPDATED, onVerticesUpdated);
 			}
 
@@ -192,7 +184,7 @@ package away3d.core.pool {
 				_indexData = null;
 			}
 
-			for (var dataType in _vertexData) {
+			for (var dataType:* in _vertexData) {
 				//(<VertexData> _vertexData[dataType]).dispose(); //TODO where is a good place to dispose?
 				_vertexData[dataType] = null;
 			}

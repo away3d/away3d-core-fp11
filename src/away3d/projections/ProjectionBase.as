@@ -188,7 +188,7 @@ package away3d.projections
 
 		public function set aspectRatio(value:Number):void
 		{
-			if (_aspectRatio == value || (value*0) != 0)
+			if (_aspectRatio == value)
 				return;
 			_aspectRatio = value;
 			invalidateMatrix();
@@ -208,13 +208,13 @@ package away3d.projections
 		}
 
 		/**
-		 * Updates the matrix
+		 * Updates the projection matrix and frustum corners
 		 */
 		protected function updateMatrix():void
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		public function updateScissorRect(x:Number, y:Number, width:Number, height:Number):void
 		{
 			_scissorRect.x = x;

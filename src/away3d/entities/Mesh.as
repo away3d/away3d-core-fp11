@@ -58,8 +58,9 @@
 
 		public function set animator(value:IAnimator):void
 		{
-			if (_animator)
+			if (_animator) {
 				_animator.removeOwner(this);
+			}
 
 			_animator = value;
 
@@ -119,8 +120,9 @@
 
 				var subGeoms:Vector.<SubGeometryBase> = _geometry.subGeometries;
 
-				for (i = 0; i < subGeoms.length; ++i)
+				for (i = 0; i < subGeoms.length; ++i) {
 					addSubMesh(subGeoms[i]);
+				}
 			}
 		}
 

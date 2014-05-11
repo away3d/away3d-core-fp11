@@ -38,7 +38,7 @@ package away3d.prefabs {
 		 * Creates a new PrimitiveBase object.
 		 * @param material The material with which to render the object
 		 */
-		public function PrimitivePrefabBase(material:IMaterial = null, geometryType:String = "triangleSubGeometry")
+		public function PrimitivePrefabBase(material:IMaterial = null, geometryType:String = GeometryType.TRIANGLES)
 		{
 			_geometry = new Geometry();
 			_material = material;
@@ -134,15 +134,16 @@ package away3d.prefabs {
 			if (_subGeometry)
 				_geometry.removeSubGeometry(_subGeometry);
 
-			if (_geometryType == "triangleSubGeometry") {
+			if (_geometryType == GeometryType.TRIANGLES) {
 				var triangleGeometry:TriangleSubGeometry = new TriangleSubGeometry(true);
 				triangleGeometry.autoDeriveNormals = false;
 				triangleGeometry.autoDeriveTangents = false;
 				triangleGeometry.autoDeriveUVs = false;
 				_geometry.addSubGeometry(triangleGeometry);
 				_subGeometry = triangleGeometry;
-			} else if (_geometryType == "lineSubGeometry") {
-				_geometry.addSubGeometry(_subGeometry = new LineSubGeometry());
+			} else if (_geometryType == GeometryType.LINE) {
+				_subGeometry = new LineSubGeometry()
+				_geometry.addSubGeometry(_subGeometry);
 			}
 
 			_geometryTypeDirty = false;
@@ -155,7 +156,6 @@ package away3d.prefabs {
 		private function updateGeometry():void
 		{
 			buildGeometry(_subGeometry, _geometryType);
-
 			_geomDirty = false;
 		}
 
@@ -165,7 +165,6 @@ package away3d.prefabs {
 		private function updateUVs():void
 		{
 			buildUVs(_subGeometry, _geometryType);
-
 			_uvDirty = false;
 		}
 

@@ -4,7 +4,6 @@ package away3d.prefabs
 	import away3d.core.base.LineSubGeometry;
 	import away3d.core.base.SubGeometryBase;
 	import away3d.core.base.TriangleSubGeometry;
-	import away3d.library.assets.IAsset;
 
 	use namespace arcane;
 	
@@ -53,6 +52,12 @@ package away3d.prefabs
 			var comp2:Number;
 			var numVertices:Number;
 
+			var horangle:Number;
+			var z:Number;
+			var ringradius:Number;
+			var verangle:Number;
+			var x:Number;
+			var y:Number;
 
 			if (geometryType == "triangleSubGeometry") {
 
@@ -85,14 +90,14 @@ package away3d.prefabs
 
 					startIndex = vidx;
 
-					var horangle:Number = Math.PI * j / _segmentsH;
-					var z:Number = -_radius * Math.cos(horangle);
-					var ringradius:Number = _radius * Math.sin(horangle);
+					horangle = Math.PI * j / _segmentsH;
+					z = -_radius * Math.cos(horangle);
+					ringradius = _radius * Math.sin(horangle);
 
 					for (i = 0; i <= _segmentsW; ++i) {
-						var verangle:Number = 2 * Math.PI * i / _segmentsW;
-						var x:Number = ringradius * Math.cos(verangle);
-						var y:Number = ringradius * Math.sin(verangle);
+						verangle = 2 * Math.PI * i / _segmentsW;
+						x = ringradius * Math.cos(verangle);
+						y = ringradius * Math.sin(verangle);
 						var normLen:Number = 1 / Math.sqrt(x * x + y * y + z * z);
 						var tanLen:Number = Math.sqrt(y * y + x * x);
 
@@ -176,7 +181,7 @@ package away3d.prefabs
 				triangleGeometry.updateVertexNormals(normals);
 				triangleGeometry.updateVertexTangents(tangents);
 
-			} else if (geometryType == "lineSubGeometry") {
+			} else if (geometryType == GeometryType.LINE) {
 
 				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
 
@@ -201,14 +206,14 @@ package away3d.prefabs
 
 				for (j = 0; j <= _segmentsH; ++j) {
 
-					var horangle:Number = Math.PI * j / _segmentsH;
-					var z:Number = -_radius * Math.cos(horangle);
-					var ringradius:Number = _radius * Math.sin(horangle);
+					horangle = Math.PI * j / _segmentsH;
+					z = -_radius * Math.cos(horangle);
+					ringradius = _radius * Math.sin(horangle);
 
 					for (i = 0; i <= _segmentsW; ++i) {
-						var verangle:Number = 2 * Math.PI * i / _segmentsW;
-						var x:Number = ringradius * Math.cos(verangle);
-						var y:Number = ringradius * Math.sin(verangle);
+						verangle = 2 * Math.PI * i / _segmentsW;
+						x = ringradius * Math.cos(verangle);
+						y = ringradius * Math.sin(verangle);
 
 						if (_yUp) {
 							comp1 = -z;
@@ -291,7 +296,7 @@ package away3d.prefabs
 
 				triangleGeometry.updateUVs(uvs);
 
-			} else if (geometryType == "lineSubGeometry") {
+			} else if (geometryType == GeometryType.LINE) {
 				//nothing to do here
 			}
 		}

@@ -102,6 +102,8 @@ package away3d.core.base {
 			return _stride[dataType];
 		}
 
+
+
 		/**
 		 *
 		 */

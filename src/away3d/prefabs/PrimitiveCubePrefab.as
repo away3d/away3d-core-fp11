@@ -366,7 +366,7 @@ package away3d.prefabs
 							triangleGeometry.updateVertexNormals(normals);
 							triangleGeometry.updateVertexTangents(tangents);
 
-							} else if (geometryType == "lineSubGeometry") {
+							} else if (geometryType == GeometryType.LINE) {
 				var lineGeometry:LineSubGeometry = target as LineSubGeometry;
 
 				var numSegments:Number = _segmentsH * 4 + _segmentsW * 4 + _segmentsD * 4;
@@ -655,7 +655,7 @@ package away3d.prefabs
 
 				triangleGeometry.updateUVs(uvs);
 
-			} else if (geometryType == "lineSubGeometry") {
+			} else if (geometryType == GeometryType.LINE) {
 				//nothing to do here
 			}
 		}

@@ -18,8 +18,7 @@ package away3d.loaders.parsers
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.textures.Texture2DBase;
-	import away3d.tools.utils.GeomUtil;
-	
+
 	import flash.net.URLRequest;
 	
 	use namespace arcane;

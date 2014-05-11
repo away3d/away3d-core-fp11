@@ -394,7 +394,7 @@ package away3d.animators
 			var jointIndices:Vector.<Number> = sourceSubGeometry.jointIndices;
 			var jointWeights:Vector.<Number> = sourceSubGeometry.jointWeights;
 
-			var targetSubGeometry = this._morphedSubGeometry[sourceSubGeometry.id];
+			var targetSubGeometry:TriangleSubGeometry = _morphedSubGeometry[sourceSubGeometry.id];
 
 			var targetPositions:Vector.<Number> = targetSubGeometry.positions;
 			var targetNormals:Vector.<Number> = targetSubGeometry.vertexNormals;

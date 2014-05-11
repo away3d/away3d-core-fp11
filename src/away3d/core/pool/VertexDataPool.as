@@ -8,14 +8,24 @@ package away3d.core.pool {
 		}
 
 		public static function getItem(subGeometry:SubGeometryBase, indexData:IndexData, dataType:String):VertexData {
-			if (subGeometry.concatenateArrays)
+			if (subGeometry.concatenateArrays) {
 				dataType = SubGeometryBase.VERTEX_DATA;
+			}
 
-			var subGeometryDictionary:Object = VertexDataPool._pool[subGeometry.id] || (VertexDataPool._pool[subGeometry.id] = {});
-			var subGeometryData:Vector.<VertexData> = (subGeometryDictionary[dataType] || (subGeometryDictionary[dataType] = new Vector.<VertexData>()));
-			if(subGeometryData.length<=indexData.level) {
+			var subGeometryDictionary:Object = _pool[subGeometry.id];
+			if(!subGeometryDictionary) {
+				subGeometryDictionary = _pool[subGeometry.id] = {};
+			}
+
+			var subGeometryData:Vector.<VertexData> = subGeometryDictionary[dataType];
+			if(!subGeometryData) {
+				subGeometryData = subGeometryDictionary[dataType] = new Vector.<VertexData>();
+			}
+
+			if (subGeometryData.length <= indexData.level) {
 				subGeometryData[indexData.level] = new VertexData(subGeometry, dataType);
 			}
+
 			var vertexData:VertexData = subGeometryData[indexData.level];
 			vertexData.updateData(indexData.originalIndices, indexData.indexMappings);
 
