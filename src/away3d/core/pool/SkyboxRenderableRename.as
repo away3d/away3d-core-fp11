@@ -3,7 +3,7 @@ package away3d.core.pool {
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.entities.SkyBox;
 
-	public class SkyboxRenderable extends RenderableBase {
+	public class SkyboxRenderableRename extends RenderableBase {
 		/**
 		 *
 		 */
@@ -20,7 +20,7 @@ package away3d.core.pool {
 		 * @param pool
 		 * @param skybox
 		 */
-		public function SkyboxRenderable(pool:RenderablePool, skybox:SkyBox)
+		public function SkyboxRenderableRename(pool:RenderablePool, skybox:SkyBox)
 		{
 			super(pool, skybox, skybox);
 		}
@@ -33,10 +33,10 @@ package away3d.core.pool {
 		 */
 		override protected function getSubGeometry():SubGeometryBase
 		{
-			var geometry:TriangleSubGeometry = SkyboxRenderable._geometry;
+			var geometry:TriangleSubGeometry = _geometry;
 
 			if (!geometry) {
-				geometry = SkyboxRenderable._geometry = new TriangleSubGeometry(true);
+				geometry = _geometry = new TriangleSubGeometry(true);
 				geometry.autoDeriveNormals = false;
 				geometry.autoDeriveTangents = false;
 				geometry.updateIndices(Vector.<uint>([0, 1, 2, 2, 3, 0, 6, 5, 4, 4, 7, 6, 2, 6, 7, 7, 3, 2, 4, 5, 1, 1, 0, 4, 4, 0, 3, 3, 7, 4, 2, 1, 5, 5, 6, 2]));

@@ -1,7 +1,5 @@
 package away3d.entities {
 	import away3d.core.partition.SkyBoxNode;
-	import away3d.prefabs.*;
-
 	import away3d.animators.IAnimator;
 	import away3d.arcane;
 	import away3d.core.base.IMaterialOwner;

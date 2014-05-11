@@ -12,7 +12,7 @@ package away3d.core.render
 	import away3d.core.pool.LineSubMeshRenderable;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.RenderablePool;
-	import away3d.core.pool.SkyboxRenderable;
+	import away3d.core.pool.SkyboxRenderableRename;
 	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.core.sort.IEntitySorter;
 	import away3d.core.sort.RenderableMergeSort;
@@ -248,7 +248,7 @@ package away3d.core.render
 			super();
 
 			_billboardRenderablePool = RenderablePool.getPool(BillboardRenderable);
-			_skyboxRenderablePool = RenderablePool.getPool(SkyboxRenderable);
+			_skyboxRenderablePool = RenderablePool.getPool(SkyboxRenderableRename);
 			_triangleSubMeshRenderablePool = RenderablePool.getPool(TriangleSubMeshRenderable);
 			_lineSubMeshRenderablePool = RenderablePool.getPool(LineSubMeshRenderable);
 
