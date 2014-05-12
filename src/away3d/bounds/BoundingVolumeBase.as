@@ -162,7 +162,7 @@ package away3d.bounds
 					while (j--) {
 						subGeom = subGeoms[j];
 						boundingPositions = subGeom.getBoundingPositions();
-						i = boundingPositions.length;
+						i = boundingPositions.length-2;
 						while (i--) {
 							p = boundingPositions[i];
 							if (p < minX)

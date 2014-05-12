@@ -420,7 +420,7 @@ package away3d.core.render
 		 */
 		arcane function renderScene(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:Number = 0):void
 		{
-			if (!_stage3DProxy || !_context3D || !entityCollector.entityHead)
+			if (!_stage3DProxy || !_context3D)
 				return;
 
 			_rttViewProjectionMatrix.copyFrom(entityCollector.camera.viewProjection);

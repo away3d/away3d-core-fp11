@@ -105,9 +105,6 @@ package away3d.core.partition
 		 */
 		public function updateEntities():void
 		{
-			if (!_updatesMade)
-				return;
-				
 			var node:EntityNode = _updateQueue;
 			var targetNode:NodeBase;
 			var t:EntityNode;
