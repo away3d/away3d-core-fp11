@@ -297,7 +297,7 @@ package away3d.animators
 				subMesh = mesh.subMeshes[i];
 				subGeometry = subMesh.subGeometry;
 				if (mesh.shareAnimationGeometry) {
-					animationSubGeometry = _animationSubGeometries[subGeometry];
+					animationSubGeometry = _animationSubGeometries[subGeometry.id];
 					
 					if (animationSubGeometry) {
 						continue;
@@ -306,7 +306,7 @@ package away3d.animators
 				
 				animationSubGeometry = new AnimationSubGeometry();
 				if (mesh.shareAnimationGeometry) {
-					_animationSubGeometries[subGeometry] = animationSubGeometry;
+					_animationSubGeometries[subGeometry.id] = animationSubGeometry;
 				}else{
 					_animationSubGeometries[subMesh.id] = animationSubGeometry;
 				}

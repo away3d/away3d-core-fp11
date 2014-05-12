@@ -162,7 +162,11 @@ package away3d.core.render
 
 			if (filter3DRenderer && _stage3DProxy.context3D) {
 				renderScene(entityCollector, filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
-				filter3DRenderer.render(_stage3DProxy, entityCollector.camera, depthRender.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
+				if(depthRender) {
+					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, depthRender.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
+				}else{
+					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, null, _shareContext);
+				}
 			} else {
 
 				if (_shareContext)

@@ -11,6 +11,7 @@ package away3d.animators
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.pool.IRenderable;
 	import away3d.core.pool.RenderableBase;
+	import away3d.core.pool.TriangleSubMeshRenderable;
 	import away3d.entities.Camera3D;
 	import away3d.materials.passes.MaterialPassBase;
 
@@ -79,7 +80,7 @@ package away3d.animators
 		{
 			var animationRegisterCache:AnimationRegisterCache = _particleAnimationSet._animationRegisterCache;
 			
-			var subMesh:ISubMesh = renderable as ISubMesh;
+			var subMesh:ISubMesh = (renderable as TriangleSubMeshRenderable).subMesh;
 			var state:ParticleStateBase;
 			
 			if (!subMesh)

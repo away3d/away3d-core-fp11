@@ -118,15 +118,8 @@ package away3d.entities {
 			collectRenderable(renderer);
 		}
 
-		override public function addRenderable(renderable:IRenderable):IRenderable {
-			return null;
-		}
-
-		override public function removeRenderable(renderable:IRenderable):IRenderable {
-			return null;
-		}
-
-		public function collectRenderable(renderable:IRenderer):void {
+		public function collectRenderable(renderer:IRenderer):void {
+			renderer.applySkybox(this);
 		}
 	}
 }

@@ -68,9 +68,10 @@ package away3d.core.render
 			if (!_filters)
 				return;
 			
-			for (var i:int = 0; i < _filters.length; ++i)
+			for (var i:int = 0; i < _filters.length; ++i) {
 				_requireDepthRender ||= Boolean(_filters[i].requireDepthRender);
-			
+			}
+
 			_filterSizesInvalid = true;
 		}
 		

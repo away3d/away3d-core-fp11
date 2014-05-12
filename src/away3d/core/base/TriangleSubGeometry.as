@@ -61,7 +61,7 @@ package away3d.core.base
 		private var _jointsPerVertex:Number;
 
 		private var _autoDeriveNormals:Boolean = true;
-		private var _autoDeriveTangents:Boolean = true;
+		private var _autoDeriveTangents:Boolean = false;
 		private var _autoDeriveUVs:Boolean = false;
 		private var _useFaceWeights:Boolean = false;
 
@@ -75,6 +75,11 @@ package away3d.core.base
 		public function TriangleSubGeometry(concatenatedArrays:Boolean)
 		{
 			super(concatenatedArrays);
+			//from compactgeometry
+			if(concatenatedArrays) {
+				_autoDeriveNormals = false;
+				_autoDeriveTangents = false;
+			}
 			_subMeshClass = TriangleSubMesh;
 		}
 
@@ -573,7 +578,7 @@ package away3d.core.base
 			}
 
 			if (_autoDeriveNormals)
-				notifyNormalsUpdate();
+			notifyNormalsUpdate();
 
 			if (_autoDeriveTangents)
 				notifyTangentsUpdate();
