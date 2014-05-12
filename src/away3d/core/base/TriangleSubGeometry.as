@@ -75,11 +75,6 @@ package away3d.core.base
 		public function TriangleSubGeometry(concatenatedArrays:Boolean)
 		{
 			super(concatenatedArrays);
-			//from compactgeometry
-			if(concatenatedArrays) {
-				_autoDeriveNormals = false;
-				_autoDeriveTangents = false;
-			}
 			_subMeshClass = TriangleSubMesh;
 		}
 

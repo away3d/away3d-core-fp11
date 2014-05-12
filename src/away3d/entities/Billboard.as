@@ -117,7 +117,7 @@ package away3d.entities
 
 			_isEntity = true;
 
-			material = material;
+			this.material = material;
 
 			_billboardWidth = material.width;
 			_billboardHeight = material.height;

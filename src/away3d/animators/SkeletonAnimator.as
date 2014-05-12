@@ -158,35 +158,37 @@ package away3d.animators
 		 */
 		public function play(name:String, transition:IAnimationTransition = null, offset:Number = NaN):void
 		{
-			if (_activeAnimationName != name) {
-				_activeAnimationName = name;
-				
-				if (!_animationSet.hasAnimation(name))
-					throw new Error("Animation root node " + name + " not found!");
-				
-				if (transition && _activeNode) {
-					//setup the transition
-					_activeNode = transition.getAnimationNode(this, _activeNode, _animationSet.getAnimation(name), _absoluteTime);
-					_activeNode.addEventListener(AnimationStateEvent.TRANSITION_COMPLETE, onTransitionComplete);
-				} else
-					_activeNode = _animationSet.getAnimation(name);
-				
-				_activeState = getAnimationState(_activeNode);
-				
-				if (updatePosition) {
-					//update straight away to reset position deltas
-					_activeState.update(_absoluteTime);
-					_activeState.positionDelta;
-				}
-				
-				_activeSkeletonState = _activeState as ISkeletonAnimationState;
+			if (_activeAnimationName == name)
+				return;
+
+			_activeAnimationName = name;
+
+			if (!_animationSet.hasAnimation(name))
+				throw new Error("Animation root node " + name + " not found!");
+
+			if (transition && _activeNode) {
+				//setup the transition
+				_activeNode = transition.getAnimationNode(this, _activeNode, _animationSet.getAnimation(name), _absoluteTime);
+				_activeNode.addEventListener(AnimationStateEvent.TRANSITION_COMPLETE, onTransitionComplete);
+			} else
+				_activeNode = _animationSet.getAnimation(name);
+
+			_activeState = getAnimationState(_activeNode);
+
+			if (updatePosition) {
+				//update straight away to reset position deltas
+				_activeState.update(_absoluteTime);
+				_activeState.positionDelta;
 			}
-			
+
+			_activeSkeletonState = _activeState as ISkeletonAnimationState;
+
 			start();
-			
+
 			//apply a time offset if specified
-			if (!isNaN(offset))
+			if (!isNaN(offset)) {
 				reset(name, offset);
+			}
 		}
 		
 		/**
@@ -362,9 +364,8 @@ package away3d.animators
 			if (!_animationSet.usesCPU)
 				return sourceSubGeometry;
 
-			var targetSubGeometry:TriangleSubGeometry;
-
-			if (targetSubGeometry != _morphedSubGeometry[sourceSubGeometry.id]) {
+			var targetSubGeometry:TriangleSubGeometry = _morphedSubGeometry[sourceSubGeometry.id];
+			if (!targetSubGeometry) {
 				//not yet stored
 				targetSubGeometry = _morphedSubGeometry[sourceSubGeometry.id] = sourceSubGeometry.clone();
 				//turn off auto calculations on the morphed geometry
@@ -385,7 +386,7 @@ package away3d.animators
 		 */
 		public function morphSubGeometry(renderable:TriangleSubMeshRenderable, sourceSubGeometry:TriangleSubGeometry):void
 		{
-			this._morphedSubGeometryDirty[sourceSubGeometry.id] = false;
+			_morphedSubGeometryDirty[sourceSubGeometry.id] = false;
 
 			var sourcePositions:Vector.<Number> = sourceSubGeometry.positions;
 			var sourceNormals:Vector.<Number> = sourceSubGeometry.vertexNormals;
@@ -401,7 +402,8 @@ package away3d.animators
 			var targetTangents:Vector.<Number> = targetSubGeometry.vertexTangents;
 			
 			var index:uint = 0;
-			var j:uint, k:uint;
+			var j:uint = 0;
+			var k:uint = 0;
 			var vx:Number, vy:Number, vz:Number;
 			var nx:Number, ny:Number, nz:Number;
 			var tx:Number, ty:Number, tz:Number;
@@ -462,7 +464,7 @@ package away3d.animators
 						tz += weight*(m31*tangX + m32*tangY + m33*tangZ);
 						++k;
 					} else {
-						j += uint(_jointsPerVertex - k);
+						j += _jointsPerVertex - k;
 						k = _jointsPerVertex;
 					}
 				}
@@ -477,7 +479,7 @@ package away3d.animators
 				targetTangents[index + 1] = ty;
 				targetTangents[index + 2] = tz;
 				
-				index = 3;
+				index += 3;
 			}
 
 			targetSubGeometry.updatePositions(targetPositions);
@@ -515,7 +517,10 @@ package away3d.animators
 				globalPoses.length = len;
 			
 			for (var i:uint = 0; i < len; ++i) {
-				globalJointPose = globalPoses[i] ||= new JointPose();
+				globalJointPose = globalPoses[i];
+				if(!globalJointPose) {
+					globalJointPose = globalPoses[i] = new JointPose();
+				}
 				joint = joints[i];
 				parentIndex = joint.parentIndex;
 				pose = jointPoses[i];

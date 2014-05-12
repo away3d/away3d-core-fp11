@@ -189,7 +189,7 @@ package away3d.entities
 		/**
 		 * @inheritDoc
 		 */
-		override protected function invalidateSceneTransform():void
+		override public function invalidateSceneTransform():void
 		{
 			super.invalidateSceneTransform();
 			

@@ -9,14 +9,14 @@ package away3d.animators.transitions
 	 */
 	public class CrossfadeTransitionState extends SkeletonBinaryLERPState
 	{
-		private var _skeletonAnimationNode:CrossfadeTransitionNode;
+		private var _crossfadeTransitionNode:CrossfadeTransitionNode;
 		private var _animationStateTransitionComplete:AnimationStateEvent;
 		
 		function CrossfadeTransitionState(animator:AnimatorBase, skeletonAnimationNode:CrossfadeTransitionNode)
 		{
 			super(animator, skeletonAnimationNode);
 			
-			_skeletonAnimationNode = skeletonAnimationNode;
+			_crossfadeTransitionNode = skeletonAnimationNode;
 		}
 		
 		/**
@@ -24,11 +24,11 @@ package away3d.animators.transitions
 		 */
 		override protected function updateTime(time:int):void
 		{
-			blendWeight = Math.abs(time - _skeletonAnimationNode.startBlend)/(1000*_skeletonAnimationNode.blendSpeed);
+			blendWeight = Math.abs(time - _crossfadeTransitionNode.startBlend)/(1000*_crossfadeTransitionNode.blendSpeed);
 			
 			if (blendWeight >= 1) {
 				blendWeight = 1;
-				_skeletonAnimationNode.dispatchEvent(_animationStateTransitionComplete ||= new AnimationStateEvent(AnimationStateEvent.TRANSITION_COMPLETE, _animator, this, _skeletonAnimationNode));
+				_crossfadeTransitionNode.dispatchEvent(_animationStateTransitionComplete ||= new AnimationStateEvent(AnimationStateEvent.TRANSITION_COMPLETE, _animator, this, _crossfadeTransitionNode));
 			}
 			
 			super.updateTime(time);

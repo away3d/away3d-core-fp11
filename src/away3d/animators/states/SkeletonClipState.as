@@ -122,7 +122,8 @@ package away3d.animators.states
 				throw new Error("joint counts don't match!");
 			
 			for (var i:uint = 0; i < numJoints; ++i) {
-				endPose = endPoses[i] ||= new JointPose();
+				endPose = endPoses[i];
+				if(!endPose) endPose = endPoses[i] = new JointPose();
 				pose1 = currentPose[i];
 				pose2 = nextPose[i];
 				p1 = pose1.translation;

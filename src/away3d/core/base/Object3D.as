@@ -1476,7 +1476,7 @@ package away3d.core.base
 		/**
 		 * @protected
 		 */
-		protected function invalidateSceneTransform():void
+		public function invalidateSceneTransform():void
 		{
 			_sceneTransformDirty = !_ignoreTransform;
 			_inverseSceneTransformDirty = !_ignoreTransform;

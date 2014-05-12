@@ -157,7 +157,7 @@ package away3d.loaders.parsers
 					
 					//_geometry.animation = _animation;
 					//					_mesh.animationController = _animationController;
-					
+
 					finalizeAsset(_geometry);
 					finalizeAsset(_mesh);
 					finalizeAsset(_skeleton);
@@ -376,7 +376,6 @@ package away3d.loaders.parsers
 				uvs[v1] = vertex.t;
 			}
 
-
 			subGeom.jointsPerVertex = this._maxJointCount;
 			subGeom.updateIndices(indices);
 			subGeom.updatePositions(vertices);
@@ -384,6 +383,8 @@ package away3d.loaders.parsers
 			subGeom.updateJointIndices(jointIndices);
 			subGeom.updateJointWeights(jointWeights);
 			// cause explicit updates
+			subGeom.autoDeriveTangents = true;
+			subGeom.autoDeriveNormals = true;
 			subGeom.vertexNormals;
 			subGeom.vertexTangents;
 			// turn auto updates off because they may be animated and set explicitly

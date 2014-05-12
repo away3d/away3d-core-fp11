@@ -308,7 +308,7 @@ package away3d.containers
 		/**
 		 * @protected
 		 */
-		override protected function invalidateSceneTransform():void
+		override public function invalidateSceneTransform():void
 		{
 			super.invalidateSceneTransform();
 
