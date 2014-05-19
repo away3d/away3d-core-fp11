@@ -1,6 +1,7 @@
 ﻿package away3d.materials
 {
 	import away3d.arcane;
+	import away3d.materials.compilation.ShaderState;
 	import away3d.entities.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.materials.lightpickers.LightPickerBase;
@@ -10,6 +11,7 @@
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
+	import away3d.materials.passes.DeferredPass;
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 	

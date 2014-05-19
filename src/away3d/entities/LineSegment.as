@@ -213,6 +213,7 @@
 		public function collectRenderable(renderer:IRenderer):void
 		{
 			//TODO
+//			renderer.applyLineSubMesh()
 		}
 	}
 }

@@ -2,14 +2,12 @@ package away3d.materials
 {
 	import away3d.animators.AnimationSetBase;
 	import away3d.animators.AnimatorBase;
-	import away3d.animators.IAnimationSet;
 	import away3d.arcane;
-	import away3d.core.pool.RenderableBase;
-	import away3d.entities.Camera3D;
 	import away3d.core.base.IMaterialOwner;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.pool.RenderableBase;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.entities.Camera3D;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
 	import away3d.library.assets.NamedAssetBase;
@@ -17,13 +15,13 @@ package away3d.materials
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.DistanceMapPass;
 	import away3d.materials.passes.MaterialPassBase;
-	
+
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.events.Event;
 	import flash.geom.Matrix3D;
-	
+
 	use namespace arcane;
 	
 	/**

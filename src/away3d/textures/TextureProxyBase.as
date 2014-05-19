@@ -39,6 +39,12 @@ package away3d.textures
 		{
 			return _format;
 		}
+
+		public function set format(value:String):void {
+			if(_format == value) return;
+			_format = value;
+			invalidateContent();
+		}
 		
 		override public function get assetType():String
 		{

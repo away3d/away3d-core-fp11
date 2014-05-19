@@ -31,7 +31,7 @@ package away3d.core.render
 	import away3d.materials.utils.DefaultMaterialManager;
 	import away3d.projections.PerspectiveProjection;
 	import away3d.textures.Texture2DBase;
-	
+
 	import flash.display.BitmapData;
 	import flash.display.Stage;
 
@@ -46,7 +46,7 @@ package away3d.core.render
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
-	
+
 	/**
 	 * RendererBase forms an abstract base class for classes that are used in the rendering pipeline to render geometry
 	 * to the back buffer or a texture.
@@ -57,19 +57,19 @@ package away3d.core.render
 		private var _skyboxRenderablePool:RenderablePool;
 		private var _triangleSubMeshRenderablePool:RenderablePool;
 		private var _lineSubMeshRenderablePool:RenderablePool;
-		
+
 		protected var _context3D:Context3D;
 		protected var _stage3DProxy:Stage3DProxy;
 
 		protected var camera:Camera3D;
 		arcane var _entryPoint:Vector3D;
 		protected var cameraForward:Vector3D;
-	
+
 		protected var _rttBufferManager:RTTBufferManager;
 		private var _viewPort:Rectangle = new Rectangle();
 		private var _viewportDirty:Boolean;
 		private var _scissorDirty:Boolean;
-	
+
 		protected var _backBufferInvalid:Boolean = true;
 		protected var _depthTextureInvalid:Boolean = true;
 		public var _depthPrepass:Boolean = false;
@@ -82,10 +82,10 @@ package away3d.core.render
 		protected var _backgroundAlpha:Number = 1;
 
 		protected var _shareContext:Boolean = false;
-		
+
 		protected var _renderTarget:TextureBase;
 		protected var _renderTargetSurface:int;
-		
+
 		// only used by renderers that need to render geometry to textures
 		protected var _width:Number;
 		protected var _height:Number;
@@ -112,6 +112,7 @@ package away3d.core.render
 		protected var _antiAlias:Number;
 
 		private var _entityCollector:ICollector;
+		private var _wantsBestResolution:Boolean = true;
 
 		public function get antiAlias():Number
 		{
@@ -187,7 +188,7 @@ package away3d.core.render
 
 			updateGlobalPos();
 		}
-		
+
 		/**
 		 *
 		 */
@@ -239,7 +240,7 @@ package away3d.core.render
 
 			notifyScissorUpdate();
 		}
-		
+
 		/**
 		 * Creates a new RendererBase object.
 		 */
@@ -261,12 +262,12 @@ package away3d.core.render
 		public function init(stage:Stage):void {
 
 		}
-		
+
 		public function createEntityCollector():ICollector
 		{
 			return new EntityCollector();
 		}
-		
+
 		arcane function get renderToTexture():Boolean
 		{
 			return _renderToTexture;
@@ -288,7 +289,7 @@ package away3d.core.render
 			_backgroundR = value;
 			_backBufferInvalid = true;
 		}
-		
+
 		/**
 		 * The background color's green component, used when clearing.
 		 *
@@ -305,7 +306,7 @@ package away3d.core.render
 			_backgroundG = value;
 			_backBufferInvalid = true;
 		}
-		
+
 		/**
 		 * The background color's blue component, used when clearing.
 		 *
@@ -322,7 +323,7 @@ package away3d.core.render
 			_backgroundB = value;
 			_backBufferInvalid = true;
 		}
-		
+
 		/**
 		 * The Stage3DProxy that will provide the Context3D used for rendering.
 		 *
@@ -337,7 +338,7 @@ package away3d.core.render
 		{
 			if (value == _stage3DProxy)
 				return;
-			
+
 			if (!value) {
 				if (_stage3DProxy) {
 					_stage3DProxy.removeEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
@@ -349,7 +350,7 @@ package away3d.core.render
 				return;
 			}
 			//else if (_stage3DProxy) throw new Error("A Stage3D instance was already assigned!");
-			
+
 			_stage3DProxy = value;
 			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_CREATED, onContextUpdate);
 			_stage3DProxy.addEventListener(Stage3DEvent.CONTEXT3D_RECREATED, onContextUpdate);
@@ -357,7 +358,7 @@ package away3d.core.render
 
 			if (_backgroundImageRenderer)
 				_backgroundImageRenderer.stage3DProxy = value;
-			
+
 			if (value.context3D)
 				_context3D = value.context3D;
 		}
@@ -397,7 +398,7 @@ package away3d.core.render
 			_stage3DProxy.removeEventListener(Stage3DEvent.VIEWPORT_UPDATED, onViewportUpdated);
 
 			_stage3DProxy = null;
-			
+
 			if (_backgroundImageRenderer) {
 				_backgroundImageRenderer.dispose();
 				_backgroundImageRenderer = null;
@@ -472,12 +473,12 @@ package away3d.core.render
 		{
 			_renderTarget = target;
 			_renderTargetSurface = surfaceSelector;
-			
+
 			if (_renderToTexture)
 				executeRenderToTexturePass(entityCollector);
-			
+
 			_stage3DProxy.setRenderTarget(target, true, surfaceSelector);
-			
+
 			if ((target || !_shareContext) && !_depthPrepass)
 				_context3D.clear(_backgroundR, _backgroundG, _backgroundB, _backgroundAlpha, 1, 0);
 
@@ -487,12 +488,12 @@ package away3d.core.render
 
 			if (_backgroundImageRenderer)
 				_backgroundImageRenderer.render();
-			
+
 			draw(entityCollector, target);
-			
+
 			//line required for correct rendering when using away3d with starling. DO NOT REMOVE UNLESS STARLING INTEGRATION IS RETESTED!
 			_context3D.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
-			
+
 			if (!_shareContext) {
 				if (_snapshotRequired && _snapshotBitmapData) {
 					_context3D.drawToBitmapData(_snapshotBitmapData);
@@ -510,12 +511,12 @@ package away3d.core.render
 			_snapshotRequired = true;
 			_snapshotBitmapData = bmd;
 		}
-		
+
 		protected function executeRenderToTexturePass(entityCollector:ICollector):void
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		/**
 		 * Performs the actual drawing of geometry to the target.
 		 * @param entityCollector The EntityCollector object containing the potentially visible geometry.
@@ -524,7 +525,7 @@ package away3d.core.render
 		{
 			throw new AbstractMethodError();
 		}
-		
+
 		/**
 		 * Assign the context once retrieved
 		 */
@@ -532,34 +533,34 @@ package away3d.core.render
 		{
 			_context3D = _stage3DProxy.context3D;
 		}
-		
+
 		public function get backgroundAlpha():Number
 		{
 			return _backgroundAlpha;
 		}
-		
+
 		public function set backgroundAlpha(value:Number):void
 		{
 			_backgroundAlpha = value;
 		}
-		
+
 		public function get background():Texture2DBase
 		{
 			return _background;
 		}
-		
+
 		public function set background(value:Texture2DBase):void
 		{
 			if (_backgroundImageRenderer && !value) {
 				_backgroundImageRenderer.dispose();
 				_backgroundImageRenderer = null;
 			}
-			
+
 			if (!_backgroundImageRenderer && value)
 				_backgroundImageRenderer = new BackgroundImageRenderer(_stage3DProxy);
-			
+
 			_background = value;
-			
+
 			if (_backgroundImageRenderer)
 				_backgroundImageRenderer.texture = value;
 		}
@@ -568,22 +569,22 @@ package away3d.core.render
 		{
 			return _backgroundImageRenderer;
 		}
-		
+
 		arcane function get textureRatioX():Number
 		{
 			return _textureRatioX;
 		}
-		
+
 		arcane function set textureRatioX(value:Number):void
 		{
 			_textureRatioX = value;
 		}
-		
+
 		arcane function get textureRatioY():Number
 		{
 			return _textureRatioY;
 		}
-		
+
 		arcane function set textureRatioY(value:Number):void
 		{
 			_textureRatioY = value;
@@ -694,7 +695,7 @@ package away3d.core.render
 		 * @param renderable
 		 * @protected
 		 */
-		private function applyRenderable(renderable:RenderableBase):void
+		protected function applyRenderable(renderable:RenderableBase):void
 		{
 			var material:IMaterial = renderable.materialOwner.material;
 			var entity:IEntity = renderable.sourceEntity;
@@ -785,5 +786,12 @@ package away3d.core.render
 			_cameras.push(cam);
 		}
 
+		public function get wantsBestResolution():Boolean {
+			return _wantsBestResolution;
+		}
+
+		public function set wantsBestResolution(value:Boolean):void {
+			_wantsBestResolution = value;
+		}
 	}
 }

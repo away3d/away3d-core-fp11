@@ -97,16 +97,15 @@ package away3d.core.base
 		private var _depth:Number;
 		private var _height:Number;
 		private var _width:Number;
+		private var _explicitPartition:Partition3D;
+		private var _partitionNode:EntityNode;
 
 		protected var _scene:Scene3D;
 		protected var _parent:ObjectContainer3D;
 		protected var _sceneTransform:Matrix3D = new Matrix3D();
 		protected var _sceneTransformDirty:Boolean = true;
 		protected var _isEntity:Boolean;
-
-		private var _explicitPartition:Partition3D;
 		protected var _implicitPartition:Partition3D;
-		private var _partitionNode:EntityNode;
 
 		private var _sceneTransformChanged:Object3DEvent;
 		private var _sceneChanged:Object3DEvent;
@@ -604,7 +603,7 @@ package away3d.core.base
 
 		public function get shaderPickingDetails():Boolean
 		{
-			return this._shaderPickingDetails;
+			return _shaderPickingDetails;
 		}
 
 		public function get boundsVisible():Boolean
@@ -1521,7 +1520,7 @@ package away3d.core.base
 		protected function updateImplicitPartition(value:Partition3D):void
 		{
 			// assign parent implicit partition if no explicit one is given
-			_implicitPartition = this._explicitPartition || value;
+			_implicitPartition = _explicitPartition || value;
 		}
 
 		/**

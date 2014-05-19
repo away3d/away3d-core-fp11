@@ -20,10 +20,6 @@ package away3d.core.render {
 
 		function set shareContext(value:Boolean):void;
 
-		function get x():Number;
-
-		function get y():Number;
-
 		function get width():Number;
 
 		function set width(value:Number):void;
@@ -68,6 +64,21 @@ package away3d.core.render {
 		 */
 		function render(entityCollector:ICollector):void;
 
+		function set backgroundAlpha(value:Number):void;
+
+		function get antiAlias():Number
+
+		function set antiAlias(value:Number):void
+
+		function init(stage:Stage):void;
+
+		function get stage3DProxy():Stage3DProxy;
+
+		/**
+		 * @internal
+		 */
+		function createEntityCollector():ICollector;
+
 		function get background():Texture2DBase;
 
 		function set background(value:Texture2DBase):void;
@@ -85,20 +96,5 @@ package away3d.core.render {
 		function set backgroundB(value:Number):void;
 
 		function get backgroundAlpha():Number;
-
-		function set backgroundAlpha(value:Number):void;
-
-		function get antiAlias():Number
-
-		function set antiAlias(value:Number):void
-
-		function init(stage:Stage):void;
-
-		function get stage3DProxy():Stage3DProxy;
-
-		/**
-		 * @internal
-		 */
-		function createEntityCollector():ICollector;
 	}
 }

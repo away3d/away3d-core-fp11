@@ -82,11 +82,11 @@ package away3d.core.managers
 			_usages = null;
 		}
 		
-		public function setProgram3D(pass:MaterialPassBase, vertexCode:String, fragmentCode:String):void
+		public function setProgram3D(pass:MaterialPassBase, vertexCode:String, fragmentCode:String, version:int = 1):void
 		{
 			var stageIndex:int = _stage3DProxy._stage3DIndex;
 			var program:Program3D;
-			var key:String = getKey(vertexCode, fragmentCode);
+			var key:String = getKey(vertexCode, fragmentCode, version);
 			
 			if (_program3Ds[key] == null) {
 				_keys[_currentId] = key;
@@ -95,8 +95,8 @@ package away3d.core.managers
 				++_currentId;
 				program = _stage3DProxy._context3D.createProgram();
 				
-				var vertexByteCode:ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode);
-				var fragmentByteCode:ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, fragmentCode);
+				var vertexByteCode:ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.VERTEX, vertexCode, version);
+				var fragmentByteCode:ByteArray = new AGALMiniAssembler(Debug.active).assemble(Context3DProgramType.FRAGMENT, fragmentCode, version);
 				
 				program.upload(vertexByteCode, fragmentByteCode);
 				
@@ -131,9 +131,9 @@ package away3d.core.managers
 			_ids[key] = -1;
 		}
 		
-		private function getKey(vertexCode:String, fragmentCode:String):String
+		private function getKey(vertexCode:String, fragmentCode:String, version:int = 1):String
 		{
-			return vertexCode + "---" + fragmentCode;
+			return vertexCode + "---" + fragmentCode + "---" + version;
 		}
 	}
 }

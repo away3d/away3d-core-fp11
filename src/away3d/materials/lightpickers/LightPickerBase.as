@@ -1,8 +1,6 @@
 package away3d.materials.lightpickers
 {
 	import away3d.*;
-	import away3d.core.base.*;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.traverse.*;
 	import away3d.library.assets.*;
