@@ -11,6 +11,8 @@ package away3d.core.render
 	import away3d.core.pool.EntityListItem;
 	import away3d.core.pool.LineSubMeshRenderable;
 	import away3d.core.pool.RenderableBase;
+	import away3d.core.pool.RenderableBase;
+	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.RenderablePool;
 	import away3d.core.pool.SkyBoxRenderable;
 	import away3d.core.pool.TriangleSubMeshRenderable;
@@ -408,8 +410,8 @@ package away3d.core.render
 		public function render(entityCollector:ICollector):void
 		{
 			_entityCollector = entityCollector;
-			this._viewportDirty = false;
-			this._scissorDirty = false;
+			_viewportDirty = false;
+			_scissorDirty = false;
 		}
 
 		/**
@@ -429,11 +431,7 @@ package away3d.core.render
 
 			executeRender(entityCollector, target, scissorRect, surfaceSelector);
 
-			// clear buffers
-			for (var i:uint = 0; i < 8; ++i) {
-				_context3D.setVertexBufferAt(i, null);
-				_context3D.setTextureAt(i, null);
-			}
+			_stage3DProxy.clearBuffers();
 		}
 
 		protected function collectRenderables(entityCollector:ICollector):void
@@ -717,20 +715,25 @@ package away3d.core.render
 			//store reference to scene transform
 			renderable.renderSceneTransform = renderable.sourceEntity.getRenderSceneTransform(camera);
 
-			if (material.requiresBlending) {
-				renderable.next = blendedRenderableHead;
-				blendedRenderableHead = renderable;
-			} else {
-				renderable.next = opaqueRenderableHead;
-				opaqueRenderableHead = renderable;
-			}
+			applyMaterial(renderable, material);
 
 			_numTriangles += renderable.numTriangles;
 
 			//handle any overflow for renderables with data that exceeds GPU limitations
 			if (renderable.overflow)
 				applyRenderable(renderable.overflow);
+		}
+
+		protected function applyMaterial(renderable:RenderableBase, material:IMaterial):void
+		{
+			if (material.requiresBlending) {
+				renderable.next = blendedRenderableHead;
+				blendedRenderableHead = renderable;
+			}else{
+				renderable.next = opaqueRenderableHead;
+				opaqueRenderableHead = renderable;
 			}
+		}
 
 		public function get renderableSorter():IEntitySorter {
 			return _renderableSorter;

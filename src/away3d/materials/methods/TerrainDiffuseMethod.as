@@ -78,7 +78,7 @@ package away3d.materials.methods
 			} else
 				albedo = targetReg;
 			
-			if (!_useTexture)
+			if (!_useDiffuseTexture)
 				throw new Error("TerrainDiffuseMethod requires a diffuse texture!");
 			_diffuseInputRegister = regCache.getFreeTextureReg();
 			vo.texturesIndex = _diffuseInputRegister.index;
@@ -94,7 +94,7 @@ package away3d.materials.methods
 			var uvReg:ShaderRegisterElement = _sharedRegisters.uvVarying;
 			
 			code += "mul " + uv + ", " + uvReg + ", " + scaleRegister + ".x\n" +
-				getSplatSampleCode(vo, albedo, _diffuseInputRegister, texture, uv);
+				getSplatSampleCode(vo, albedo, _diffuseInputRegister, diffuseTexture, uv);
 			
 			var blendValues:ShaderRegisterElement = regCache.getFreeFragmentVectorTemp();
 			regCache.addFragmentTempUsages(blendValues, 1);

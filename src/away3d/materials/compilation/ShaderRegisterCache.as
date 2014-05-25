@@ -1,6 +1,7 @@
 package away3d.materials.compilation
 {
-	
+	import flash.display3D.Context3DProfile;
+
 	/**
 	 * ShaderRegister Cache provides the usage management system for all registers during shading compilation.
 	 */
@@ -42,15 +43,30 @@ package away3d.materials.compilation
 		 */
 		public function reset():void
 		{
-			_fragmentTempCache = new RegisterPool("ft", 8, false);
-			_vertexTempCache = new RegisterPool("vt", 8, false);
-			_varyingCache = new RegisterPool("v", 8);
-			_textureCache = new RegisterPool("fs", 8);
-			_vertexAttributesCache = new RegisterPool("va", 8);
-			_fragmentConstantsCache = new RegisterPool("fc", 28);
-			_vertexConstantsCache = new RegisterPool("vc", 128);
-			_fragmentOutputRegister = new ShaderRegisterElement("oc", -1);
-			_vertexOutputRegister = new ShaderRegisterElement("op", -1);
+			if (_profile == Context3DProfile.STANDARD)
+			{
+				_fragmentTempCache = new RegisterPool("ft", 16, false);
+				_vertexTempCache = new RegisterPool("vt", 26, false);
+				_varyingCache = new RegisterPool("v", 10);
+				_textureCache = new RegisterPool("fs", 8);
+				_vertexAttributesCache = new RegisterPool("va", 8);
+				_fragmentConstantsCache = new RegisterPool("fc", 64);
+				_vertexConstantsCache = new RegisterPool("vc", 250);
+				_fragmentOutputRegister = new ShaderRegisterElement("oc", -1);
+				_vertexOutputRegister = new ShaderRegisterElement("op", -1);
+			}
+			else
+			{
+				_fragmentTempCache = new RegisterPool("ft", 8, false);
+				_vertexTempCache = new RegisterPool("vt", 8, false);
+				_varyingCache = new RegisterPool("v", 8);
+				_textureCache = new RegisterPool("fs", 8);
+				_vertexAttributesCache = new RegisterPool("va", 8);
+				_fragmentConstantsCache = new RegisterPool("fc", 28);
+				_vertexConstantsCache = new RegisterPool("vc", 128);
+				_fragmentOutputRegister = new ShaderRegisterElement("oc", -1);
+				_vertexOutputRegister = new ShaderRegisterElement("op", -1);
+			}
 			_numUsedVertexConstants = 0;
 			_numUsedStreams = 0;
 			_numUsedTextures = 0;

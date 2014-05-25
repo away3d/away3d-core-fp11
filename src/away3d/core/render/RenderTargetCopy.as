@@ -14,6 +14,7 @@ package away3d.core.render {
 	use namespace arcane;
 
 	public class RenderTargetCopy {
+		//TODO: support of different stage3ds
 		private var program:Program3D;
 		private var vertexBuffer:VertexBuffer3D;
 		private var indexBuffer:IndexBuffer3D;

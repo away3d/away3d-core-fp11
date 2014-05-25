@@ -23,8 +23,9 @@
 	public class DepthMapPass extends MaterialPassBase
 	{
 		private var _data:Vector.<Number>;
-		private var _alphaThreshold:Number = 0;
+		private var _alphaThreshold:Number = 1;
 		private var _alphaMask:Texture2DBase;
+		private var _alphaMaskChannel:String = "w";
 
 		/**
 		 * Creates a new DepthMapPass object.
@@ -32,9 +33,9 @@
 		public function DepthMapPass()
 		{
 			super();
-			_data = Vector.<Number>([    1.0, 255.0, 65025.0, 16581375.0,
+			_data = Vector.<Number>([1.0, 255.0, 65025.0, 16581375.0,
 				1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0,
-				0.0, 0.0, 0.0, 0.0]);
+				0.0, 0.0, 0.0, 1]);
 		}
 		
 		/**
@@ -55,10 +56,10 @@
 				value = 1;
 			if (value == _alphaThreshold)
 				return;
-			
+
 			if (value == 0 || _alphaThreshold == 0)
 				invalidateShaderProgram();
-			
+
 			_alphaThreshold = value;
 			_data[8] = _alphaThreshold;
 		}
@@ -134,12 +135,12 @@
 						format = "";
 				}
 				codeF += "tex ft3, v1, fs0 <2d," + filter + "," + format + wrap + ">\n" +
-					"sub ft3.w, ft3.w, fc2.x\n" +
-					"kil ft3.w\n";
+					"sub ft3."+_alphaMaskChannel+", ft3."+_alphaMaskChannel+", fc2.x\n" +
+					"kil ft3."+_alphaMaskChannel+"\n";
 			}
 			
 			codeF += "sub oc, ft0, ft1		\n";
-			
+
 			return codeF;
 		}
 		
@@ -148,7 +149,7 @@
 		 */
 		arcane override function render(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void
 		{
-			if (this._alphaThreshold > 0)
+			if (_alphaThreshold > 0)
 				stage3DProxy.activateBuffer(1, renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
 
 			var context:Context3D = stage3DProxy._context3D;
@@ -174,6 +175,16 @@
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 3);
 			} else
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 2);
+		}
+
+		public function get alphaMaskChannel():String {
+			return _alphaMaskChannel;
+		}
+
+		public function set alphaMaskChannel(value:String):void {
+			if(_alphaMaskChannel == value) return;
+			_alphaMaskChannel = value;
+			invalidateShaderProgram();
 		}
 	}
 }

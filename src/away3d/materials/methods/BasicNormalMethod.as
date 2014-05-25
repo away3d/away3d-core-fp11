@@ -18,6 +18,14 @@ package away3d.materials.methods
 		protected var _normalTextureRegister:ShaderRegisterElement;
 
 		/**
+		 * if you want to use compressed normalmaps, it highly recommended to encode them as texture with alpha channel
+		 * in green channel you need to store X value
+		 * in alpha channgel you need to store Y value
+		 * Away3D restores the z value inside GPU program
+		 */
+		private var _useAlphaCompression:Boolean = false;
+
+		/**
 		 * Creates a new BasicNormalMethod object.
 		 */
 		public function BasicNormalMethod()
@@ -72,8 +80,13 @@ package away3d.materials.methods
 				(value && _texture && (value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format))) {
 				invalidateShaderProgram();
 			}
+
 			_useTexture = Boolean(value);
 			_texture = value;
+
+			if(_texture && _texture.format == COMPRESSED_ALPHA) {
+				_useAlphaCompression = true;
+			}
 		}
 
 		/**
@@ -111,9 +124,32 @@ package away3d.materials.methods
 		{
 			_normalTextureRegister = regCache.getFreeTextureReg();
 			vo.texturesIndex = _normalTextureRegister.index;
-			return getTex2DSampleCode(vo, targetReg, _normalTextureRegister, _texture) +
-				"sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _sharedRegisters.commons + ".xxx	\n" +
-				"nrm " + targetReg + ".xyz, " + targetReg + ".xyz							\n";
+			var code:String = "";
+			code += getTex2DSampleCode(vo, targetReg, _normalTextureRegister, _texture);
+			if(_useAlphaCompression) {
+				code += "add " + targetReg + ".xy, " + targetReg + ".yw, " + targetReg + ".yw\n"
+				code += "sub " + targetReg + ".xy, " + targetReg + ".xy, " + _sharedRegisters.commons + ".ww\n"
+				code += "mul " + targetReg + ".zw, " + targetReg + ".xy, " + targetReg + ".xy\n"
+				code += "add " + targetReg + ".w, " + targetReg + ".w, " + targetReg + ".z\n"
+				code += "sub " + targetReg + ".z, " + _sharedRegisters.commons + ".w, " + targetReg + ".w\n"
+				code += "sqt " + targetReg + ".z, " + targetReg + ".z\n"
+			}else{
+				code += "add " + targetReg + ".xyz, " + targetReg + ".xyz, " + targetReg + ".xyz\n";
+				code += "sub " + targetReg + ".xyz, " + targetReg + ".xyz, " + _sharedRegisters.commons + ".www\n";
+				code += "nrm " + targetReg + ".xyz, " + targetReg + ".xyz\n";
+			}
+
+			return code;
+		}
+
+		public function get useAlphaCompression():Boolean {
+			return _useAlphaCompression;
+		}
+
+		public function set useAlphaCompression(value:Boolean):void {
+			if(_useAlphaCompression == value) return;
+			_useAlphaCompression = value;
+			invalidateShaderProgram();
 		}
 	}
 }

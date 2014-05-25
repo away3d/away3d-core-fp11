@@ -21,6 +21,10 @@ package away3d.materials.methods
 	 */
 	public class ShadingMethodBase extends NamedAssetBase
 	{
+		protected static const DXT1:String = "dxt1,";
+		protected static const DXT5:String = "dxt5,";
+		protected static const COMPRESSED_ALPHA:String = "compressedAlpha";
+
 		protected var _sharedRegisters:ShaderRegisterData;
 		protected var _passes:Vector.<MaterialPassBase>;
 		
@@ -207,10 +211,10 @@ package away3d.materials.methods
 		{
 			switch (texture.format) {
 				case Context3DTextureFormat.COMPRESSED:
-					return "dxt1,";
+					return DXT1;
 					break;
-				case "compressedAlpha":
-					return "dxt5,";
+				case COMPRESSED_ALPHA:
+					return DXT5;
 					break;
 				default:
 					return "";

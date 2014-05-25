@@ -26,6 +26,7 @@
 		private var _vertexData:Vector.<Number>;
 		private var _alphaThreshold:Number;
 		private var _alphaMask:Texture2DBase;
+		private var _alphaMaskChannel:String = "w";
 
 		/**
 		 * Creates a new DistanceMapPass object.
@@ -138,8 +139,8 @@
 						format = "";
 				}
 				code += "tex ft3, v1, fs0 <2d," + filter + "," + format + wrap + ">\n" +
-					"sub ft3.w, ft3.w, fc2.x\n" +
-					"kil ft3.w\n";
+					"sub ft3."+_alphaMaskChannel+", ft3."+_alphaMaskChannel+", fc2.x\n" +
+					"kil ft3."+_alphaMaskChannel+"\n";
 			}
 			
 			code += "sub oc, ft0, ft1		\n";
@@ -198,6 +199,16 @@
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentData, 3);
 			} else
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _fragmentData, 2);
+		}
+
+		public function get alphaMaskChannel():String {
+			return _alphaMaskChannel;
+		}
+
+		public function set alphaMaskChannel(value:String):void {
+			if(_alphaMaskChannel == value) return;
+			_alphaMaskChannel = value;
+			invalidateShaderProgram();
 		}
 	}
 }

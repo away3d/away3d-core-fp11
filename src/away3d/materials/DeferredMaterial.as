@@ -1,6 +1,4 @@
 package away3d.materials {
-	import away3d.core.render.deferred.*;
-	import away3d.materials.MaterialBase;
 	import away3d.materials.passes.DeferredPass;
 	import away3d.textures.Texture2DBase;
 

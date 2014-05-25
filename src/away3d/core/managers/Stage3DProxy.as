@@ -229,7 +229,17 @@ package away3d.core.managers
 			
 			_bufferClear = true;
 		}
-		
+
+		/**
+		 * Clear buffers state
+		 */
+		public function clearBuffers():void {
+			var i:uint = 0;
+			for (i = 0; i < 8; ++i) {
+				_context3D.setVertexBufferAt(i, null);
+				_context3D.setTextureAt(i, null);
+			}
+		}
 		/*
 		 * Display the back rendering buffer
 		 */

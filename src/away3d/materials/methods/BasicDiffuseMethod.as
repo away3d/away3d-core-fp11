@@ -15,13 +15,15 @@ package away3d.materials.methods
 	{
 		private var _useAmbientTexture:Boolean;
 		
-		protected var _useTexture:Boolean;
+		protected var _useDiffuseTexture:Boolean;
 		internal var _totalLightColorReg:ShaderRegisterElement;
 		
 		// TODO: are these registers at all necessary to be members?
 		protected var _diffuseInputRegister:ShaderRegisterElement;
-		
-		private var _texture:Texture2DBase;
+		protected var _opacityInputRegister:ShaderRegisterElement;
+
+		private var _diffuseTexture:Texture2DBase;
+		private var _opacityTexture:Texture2DBase;
 		private var _diffuseColor:uint = 0xffffff;
 		private var _diffuseR:Number = 1, _diffuseG:Number = 1, _diffuseB:Number = 1, _diffuseA:Number = 1;
 		protected var _shadowRegister:ShaderRegisterElement;
@@ -57,7 +59,7 @@ package away3d.materials.methods
 		
 		override arcane function initVO(vo:MethodVO):void
 		{
-			vo.needsUV = _useTexture;
+			vo.needsUV = _useDiffuseTexture;
 			vo.needsNormals = vo.numLights > 0;
 		}
 
@@ -67,8 +69,8 @@ package away3d.materials.methods
 		 */
 		public function generateMip(stage3DProxy:Stage3DProxy):void
 		{
-			if (_useTexture)
-				_texture.getTextureForStage3D(stage3DProxy);
+			if (_useDiffuseTexture)
+				_diffuseTexture.getTextureForStage3D(stage3DProxy);
 		}
 
 		/**
@@ -101,20 +103,20 @@ package away3d.materials.methods
 		/**
 		 * The bitmapData to use to define the diffuse reflection color per texel.
 		 */
-		public function get texture():Texture2DBase
+		public function get diffuseTexture():Texture2DBase
 		{
-			return _texture;
+			return _diffuseTexture;
 		}
 		
-		public function set texture(value:Texture2DBase):void
+		public function set diffuseTexture(value:Texture2DBase):void
 		{
-			if (Boolean(value) != _useTexture ||
-				(value && _texture && (value.hasMipMaps != _texture.hasMipMaps || value.format != _texture.format))) {
+			if (Boolean(value) != _useDiffuseTexture ||
+				(value && _diffuseTexture && (value.hasMipMaps != _diffuseTexture.hasMipMaps || value.format != _diffuseTexture.format))) {
 				invalidateShaderProgram();
 			}
 			
-			_useTexture = Boolean(value);
-			_texture = value;
+			_useDiffuseTexture = Boolean(value);
+			_diffuseTexture = value;
 		}
 		
 		/**
@@ -147,7 +149,7 @@ package away3d.materials.methods
 		 */
 		override public function dispose():void
 		{
-			_texture = null;
+			_diffuseTexture = null;
 		}
 		
 		/**
@@ -157,7 +159,7 @@ package away3d.materials.methods
 		{
 			var diff:BasicDiffuseMethod = BasicDiffuseMethod(method);
 			alphaThreshold = diff.alphaThreshold;
-			texture = diff.texture;
+			diffuseTexture = diff.diffuseTexture;
 			useAmbientTexture = diff.useAmbientTexture;
 			diffuseAlpha = diff.diffuseAlpha;
 			diffuseColor = diff.diffuseColor;
@@ -172,6 +174,7 @@ package away3d.materials.methods
 			_shadowRegister = null;
 			_totalLightColorReg = null;
 			_diffuseInputRegister = null;
+			_opacityInputRegister = null;
 		}
 		
 		/**
@@ -267,6 +270,7 @@ package away3d.materials.methods
 		{
 			var code:String = "";
 			var albedo:ShaderRegisterElement;
+			var opacityMap:ShaderRegisterElement;
 			var cutOffReg:ShaderRegisterElement;
 			
 			// incorporate input from ambient
@@ -278,21 +282,38 @@ package away3d.materials.methods
 			} else
 				albedo = targetReg;
 			
-			if (_useTexture) {
+			if (_useDiffuseTexture) {
 				_diffuseInputRegister = regCache.getFreeTextureReg();
 				vo.texturesIndex = _diffuseInputRegister.index;
-				code += getTex2DSampleCode(vo, albedo, _diffuseInputRegister, _texture);
-				if (_alphaThreshold > 0) {
-					cutOffReg = regCache.getFreeFragmentConstant();
-					vo.fragmentConstantsIndex = cutOffReg.index*4;
-					code += "sub " + albedo + ".w, " + albedo + ".w, " + cutOffReg + ".x\n" +
-						"kil " + albedo + ".w\n" +
-						"add " + albedo + ".w, " + albedo + ".w, " + cutOffReg + ".x\n";
-				}
+				code += getTex2DSampleCode(vo, albedo, _diffuseInputRegister, _diffuseTexture);
+
 			} else {
 				_diffuseInputRegister = regCache.getFreeFragmentConstant();
 				vo.fragmentConstantsIndex = _diffuseInputRegister.index*4;
 				code += "mov " + albedo + ", " + _diffuseInputRegister + "\n";
+			}
+
+			if (_alphaThreshold > 0) {
+				cutOffReg = regCache.getFreeFragmentConstant();
+				vo.fragmentConstantsIndex = cutOffReg.index*4;
+
+				if(_useDiffuseTexture && (!_opacityTexture || _opacityTexture == _diffuseTexture)) {
+					code += "sub " + albedo + ".w, " + albedo + ".w, " + cutOffReg + ".x\n" +
+							"kil " + albedo + ".w\n" +
+							"add " + albedo + ".w, " + albedo + ".w, " + cutOffReg + ".x\n";
+				}else if(_opacityTexture && _opacityTexture!=_diffuseTexture) {
+					_opacityInputRegister = regCache.getFreeTextureReg();
+					opacityMap = regCache.getFreeFragmentVectorTemp();
+					regCache.addFragmentTempUsages(opacityMap, 1);
+					code += getTex2DSampleCode(vo, opacityMap, _opacityInputRegister, _opacityTexture);
+					code += "sub " + opacityMap + ".x, " + opacityMap + ".x, " + cutOffReg + ".x\n" +
+							"kil " + opacityMap + ".x\n" +
+							"add " + opacityMap + ".x, " + opacityMap + ".x, " + cutOffReg + ".x\n";
+
+					regCache.removeFragmentTempUsage(opacityMap);
+				}
+
+
 			}
 			
 			if (vo.numLights == 0)
@@ -307,7 +328,7 @@ package away3d.materials.methods
 					"add " + targetReg + ".xyz, " + albedo + ", " + targetReg + "\n";
 			} else {
 				code += "add " + targetReg + ".xyz, " + _totalLightColorReg + ", " + targetReg + "\n";
-				if (_useTexture) {
+				if (_useDiffuseTexture) {
 					code += "mul " + targetReg + ".xyz, " + albedo + ", " + targetReg + "\n" +
 						"mov " + targetReg + ".w, " + albedo + ".w\n";
 				} else {
@@ -337,10 +358,11 @@ package away3d.materials.methods
 		 */
 		override arcane function activate(vo:MethodVO, stage3DProxy:Stage3DProxy):void
 		{
-			if (_useTexture) {
-				stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _texture.getTextureForStage3D(stage3DProxy));
-				if (_alphaThreshold > 0)
+			if (_useDiffuseTexture) {
+				stage3DProxy._context3D.setTextureAt(vo.texturesIndex, _diffuseTexture.getTextureForStage3D(stage3DProxy));
+				if (_alphaThreshold > 0) {
 					vo.fragmentData[vo.fragmentConstantsIndex] = _alphaThreshold;
+				}
 			} else {
 				var index:int = vo.fragmentConstantsIndex;
 				var data:Vector.<Number> = vo.fragmentData;
@@ -348,6 +370,10 @@ package away3d.materials.methods
 				data[index + 1] = _diffuseG;
 				data[index + 2] = _diffuseB;
 				data[index + 3] = _diffuseA;
+			}
+
+			if(_alphaThreshold>0 && _opacityTexture && _opacityTexture!=_diffuseTexture) {
+				stage3DProxy._context3D.setTextureAt(vo.texturesIndex+1, _opacityTexture.getTextureForStage3D(stage3DProxy));
 			}
 		}
 		
@@ -367,6 +393,24 @@ package away3d.materials.methods
 		arcane function set shadowRegister(value:ShaderRegisterElement):void
 		{
 			_shadowRegister = value;
+		}
+
+		public function get opacityTexture():Texture2DBase {
+			if(!_opacityTexture && _diffuseTexture) return _diffuseTexture
+			return _opacityTexture;
+		}
+
+		public function set opacityTexture(value:Texture2DBase):void {
+			if(_opacityTexture == value) return;
+			_opacityTexture = value;
+			invalidateShaderProgram();
+		}
+
+		public function get opacityChannel():String {
+			if(_opacityTexture && _opacityTexture != _diffuseTexture){
+				return "x";
+			}
+			return "w";
 		}
 	}
 }

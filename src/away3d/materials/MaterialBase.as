@@ -15,6 +15,7 @@ package away3d.materials
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.DistanceMapPass;
 	import away3d.materials.passes.MaterialPassBase;
+	import away3d.materials.passes.WorldNormalPass;
 
 	import flash.display.BlendMode;
 	import flash.display3D.Context3D;
@@ -104,9 +105,11 @@ package away3d.materials
 		protected var _mipmap:Boolean = true;
 		protected var _smooth:Boolean = true;
 		protected var _repeat:Boolean;
-		
+
+		//TODO: these passes can be moved to renderer as single object
 		protected var _depthPass:DepthMapPass;
 		protected var _distancePass:DistanceMapPass;
+		protected var _worldNormalPass:WorldNormalPass;
 		protected var _lightPicker:LightPickerBase;
 
 		private var _distanceBasedDepthRender:Boolean;
@@ -126,6 +129,7 @@ package away3d.materials
 			_owners = new Vector.<IMaterialOwner>();
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
+			_worldNormalPass = new WorldNormalPass();
 			_distancePass = new DistanceMapPass();
 			_depthPass.addEventListener(Event.CHANGE, onDepthPassChange);
 			_distancePass.addEventListener(Event.CHANGE, onDistancePassChange);
@@ -249,6 +253,7 @@ package away3d.materials
 			
 			_depthPass.dispose();
 			_distancePass.dispose();
+			_worldNormalPass.dispose();
 			_depthPass.removeEventListener(Event.CHANGE, onDepthPassChange);
 			_distancePass.removeEventListener(Event.CHANGE, onDistancePassChange);
 		}
@@ -267,9 +272,10 @@ package away3d.materials
 			
 			for (var i:int = 0; i < _numPasses; ++i)
 				_passes[i].bothSides = value;
-			
+
 			_depthPass.bothSides = value;
 			_distancePass.bothSides = value;
+			_worldNormalPass.bothSides = value;
 		}
 		
 		/**
@@ -407,6 +413,20 @@ package away3d.materials
 			}
 		}
 
+		arcane function activateForWorldNormal(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
+			_worldNormalPass.activate(stage3DProxy,camera);
+		}
+
+		arcane function renderWorldNormal(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void{
+			if (renderable.materialOwner.animator)
+				_worldNormalPass.updateAnimationState(renderable, stage3DProxy, camera);
+			_worldNormalPass.render(renderable, stage3DProxy, camera, viewProjection);
+		}
+
+		arcane function deactivateForWorldNormal(stage3DProxy:Stage3DProxy):void {
+			_worldNormalPass.deactivate(stage3DProxy);
+		}
+
 		/**
 		 * Indicates whether or not the pass with the given index renders to texture or not.
 		 * @param index The index of the pass.
@@ -500,6 +520,7 @@ package away3d.materials
 							_passes[i].animationSet = _animationSet;
 						_depthPass.animationSet = _animationSet;
 						_distancePass.animationSet = _animationSet;
+						_worldNormalPass.animationSet = _animationSet;
 						invalidatePasses(null);
 					}
 				}
@@ -520,6 +541,7 @@ package away3d.materials
 					_passes[i].animationSet = _animationSet;
 				_depthPass.animationSet = _animationSet;
 				_distancePass.animationSet = _animationSet;
+				_worldNormalPass.animationSet = _animationSet;
 				invalidatePasses(null);
 			}
 		}
@@ -568,6 +590,7 @@ package away3d.materials
 			
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
+			_worldNormalPass.invalidateShaderProgram();
 
 			// test if the depth and distance passes support animating the animation set in the vertex shader
 			// if any object using this material fails to support accelerated animations for any of the passes,
@@ -580,6 +603,7 @@ package away3d.materials
 					if (animator) {
 						animator.testGPUCompatibility(_depthPass);
 						animator.testGPUCompatibility(_distancePass);
+						animator.testGPUCompatibility(_worldNormalPass);
 					}
 				}
 			}

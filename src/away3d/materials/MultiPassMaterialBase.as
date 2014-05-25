@@ -89,6 +89,7 @@
 			_diffuseMethod.alphaThreshold = value;
 			_depthPass.alphaThreshold = value;
 			_distancePass.alphaThreshold = value;
+			_worldNormalPass.alphaThreshold = value;
 		}
 
 		/**
@@ -114,12 +115,31 @@
 		 */
 		arcane override function activateForDepth(stage3DProxy:Stage3DProxy, camera:Camera3D, distanceBased:Boolean = false):void
 		{
-			if (distanceBased)
-				_distancePass.alphaMask = _diffuseMethod.texture;
-			else
-				_depthPass.alphaMask = _diffuseMethod.texture;
-			
+			if (distanceBased){
+				_distancePass.alphaMask = diffuseMethod.opacityTexture;
+				_distancePass.alphaMaskChannel = _diffuseMethod.opacityChannel;
+				_distancePass.mipmap = _mipmap;
+				_distancePass.repeat = _repeat;
+				_distancePass.smooth = _smooth;
+			} else {
+				_depthPass.alphaMask = diffuseMethod.opacityTexture;
+				_depthPass.alphaMaskChannel = _diffuseMethod.opacityChannel;
+				_depthPass.mipmap = _mipmap;
+				_depthPass.repeat = _repeat;
+				_depthPass.smooth = _smooth;
+			}
 			super.activateForDepth(stage3DProxy, camera, distanceBased);
+		}
+
+		override arcane function activateForWorldNormal(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
+			_worldNormalPass.opacityMap = _diffuseMethod.opacityTexture;
+			_worldNormalPass.opacityChannel = _diffuseMethod.opacityChannel;
+			_worldNormalPass.normalMap = normalMap;
+			_worldNormalPass.specularIntensity = _specularMethod.specular;
+			_worldNormalPass.mipmap = _mipmap;
+			_worldNormalPass.repeat = _repeat;
+			_worldNormalPass.smooth = _smooth;
+			super.activateForWorldNormal(stage3DProxy, camera);
 		}
 
 		/**

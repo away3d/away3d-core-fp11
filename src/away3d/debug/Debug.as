@@ -5,6 +5,7 @@ package away3d.debug
 	public class Debug
 	{
 		public static var active:Boolean = false;
+		public static var showGBuffer:Boolean = false;
 		public static var warningsAsErrors:Boolean = false;
 		
 		public static function clear():void

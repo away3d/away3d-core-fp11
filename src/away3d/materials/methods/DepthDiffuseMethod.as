@@ -41,7 +41,7 @@ package away3d.materials.methods
 			var temp:ShaderRegisterElement;
 			var decReg:ShaderRegisterElement;
 			
-			if (!_useTexture)
+			if (!_useDiffuseTexture)
 				throw new Error("DepthDiffuseMethod requires texture!");
 			
 			// incorporate input from ambient
@@ -59,7 +59,7 @@ package away3d.materials.methods
 			vo.texturesIndex = _diffuseInputRegister.index;
 			decReg = regCache.getFreeFragmentConstant();
 			vo.fragmentConstantsIndex = decReg.index*4;
-			code += getTex2DSampleCode(vo, temp, _diffuseInputRegister, texture) +
+			code += getTex2DSampleCode(vo, temp, _diffuseInputRegister, diffuseTexture) +
 				"dp4 " + temp + ".x, " + temp + ", " + decReg + "\n" +
 				"mov " + temp + ".yz, " + temp + ".xx			\n" +
 				"mov " + temp + ".w, " + decReg + ".x\n" +

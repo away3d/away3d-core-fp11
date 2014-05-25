@@ -89,17 +89,17 @@ package away3d.materials.methods
 		/**
 		 * @inheritDoc
 		 */
-		override public function get texture():Texture2DBase
+		override public function get diffuseTexture():Texture2DBase
 		{
-			return _baseMethod.texture;
+			return _baseMethod.diffuseTexture;
 		}
 		
 		/**
 		 * @inheritDoc
 		 */
-		override public function set texture(value:Texture2DBase):void
+		override public function set diffuseTexture(value:Texture2DBase):void
 		{
-			_baseMethod.texture = value;
+			_baseMethod.diffuseTexture = value;
 		}
 		
 		/**

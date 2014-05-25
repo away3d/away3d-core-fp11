@@ -47,12 +47,12 @@ package away3d.materials
 		 */
 		public function get texture():Texture2DBase
 		{
-			return diffuseMethod.texture;
+			return diffuseMethod.diffuseTexture;
 		}
 		
 		public function set texture(value:Texture2DBase):void
 		{
-			diffuseMethod.texture = value;
+			diffuseMethod.diffuseTexture = value;
 		}
 		
 		/**

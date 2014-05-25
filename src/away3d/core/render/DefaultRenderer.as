@@ -46,12 +46,14 @@ package away3d.core.render
 		private var _activeMaterial:MaterialBase;
 		private var _distanceRenderer:DepthRenderer;
 		private var _depthRenderer:DepthRenderer;
+		private var _deferredLighting:Boolean = false;
 		private var _skyboxProjection:Matrix3D = new Matrix3D();
 
 		private var _tempSkyboxMatrix:Matrix3D = new Matrix3D();
 		private var _skyboxTempVector:Vector3D = new Vector3D();
 		protected var filter3DRenderer:Filter3DRenderer;
-		protected var depthRender:TextureProxyBase;
+		protected var sceneDepthTexture:TextureProxyBase;
+		protected var sceneNormalTexture:TextureProxyBase;
 
 		private var _forceSoftware:Boolean;
 		private var _profile:String;
@@ -83,9 +85,9 @@ package away3d.core.render
 			} else {
 				_requireDepthRender = false;
 	
-				if (depthRender) {
-					depthRender.dispose();
-					depthRender = null;
+				if (sceneDepthTexture) {
+					sceneDepthTexture.dispose();
+					sceneDepthTexture = null;
 				}
 			}
 		}
@@ -95,9 +97,10 @@ package away3d.core.render
 		 * @param antiAlias The amount of anti-aliasing to use.
 		 * @param renderMode The render mode to use.
 		 */
-		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline")
+		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline", deferredLighting:Boolean = false)
 		{
 			super();
+			_deferredLighting = deferredLighting;
 			_depthRenderer = new DepthRenderer();
 			_distanceRenderer = new DepthRenderer(false, true);
 			_forceSoftware = forceSoftware;
@@ -152,7 +155,7 @@ package away3d.core.render
 				textureRatioY = 1;
 			}
 
-			if(_requireDepthRender) {
+			if(_requireDepthRender || _deferredLighting) {
 				renderSceneDepthToTexture(entityCollector as EntityCollector);
 			}
 
@@ -162,13 +165,12 @@ package away3d.core.render
 
 			if (filter3DRenderer && _stage3DProxy.context3D) {
 				renderScene(entityCollector, filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
-				if(depthRender) {
-					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, depthRender.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
+				if(filter3DRenderer.requireDepthRender) {
+					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, sceneDepthTexture.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
 				}else{
 					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, null, _shareContext);
 				}
 			} else {
-
 				if (_shareContext)
 					renderScene(entityCollector, null, _scissorRect);
 				else
@@ -186,7 +188,8 @@ package away3d.core.render
 
 		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void
 		{
-			updateLights(entityCollector);
+			updateShadows(entityCollector);
+
 			// otherwise RTT will interfere with other RTTs
 			if (target) {
 				drawRenderables(opaqueRenderableHead, entityCollector, RTT_PASSES);
@@ -195,7 +198,7 @@ package away3d.core.render
 			super.executeRender(entityCollector, target, scissorRect, surfaceSelector);
 		}
 
-		private function updateLights(collector:ICollector):void
+		private function updateShadows(collector:ICollector):void
 		{
 			var entityCollector:EntityCollector = collector as EntityCollector;
 			var dirLights:Vector.<DirectionalLight> = entityCollector.directionalLights;
@@ -351,11 +354,17 @@ package away3d.core.render
 
 					if ((rttMask & which) != 0) {
 						_activeMaterial.activatePass(j, _stage3DProxy, camera);
+//						_activeMaterial.activateForWorldNormal(_stage3DProxy, camera);
+//						_activeMaterial.activateForDepth(_stage3DProxy, camera);
 						do {
 							_activeMaterial.renderPass(j, renderable2, _stage3DProxy, entityCollector, _rttViewProjectionMatrix);
+//							_activeMaterial.renderWorldNormal(renderable2, _stage3DProxy, camera, _rttViewProjectionMatrix);
+//							_activeMaterial.renderDepth(renderable2, _stage3DProxy, camera, _rttViewProjectionMatrix);
 							renderable2 = renderable2.next as RenderableBase;
 						} while (renderable2 && renderable2.material == _activeMaterial);
 						_activeMaterial.deactivatePass(j, _stage3DProxy);
+//						_activeMaterial.deactivateForWorldNormal(_stage3DProxy);
+//						_activeMaterial.deactivateForDepth(_stage3DProxy);
 					} else {
 						do
 							renderable2 = renderable2.next as RenderableBase;
@@ -375,6 +384,7 @@ package away3d.core.render
 			_depthRenderer = null;
 			_distanceRenderer = null;
 		}
+
 		protected function renderDepthPrepass(entityCollector:EntityCollector):void
 		{
 			_depthRenderer.disableColor = true;
@@ -413,19 +423,26 @@ package away3d.core.render
 			if (_depthTextureInvalid || !_depthRenderer)
 				initDepthTexture(_stage3DProxy.context3D);
 
-			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
-			_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
-			_depthRenderer.renderScene(entityCollector, depthRender.getTextureForStage3D(_stage3DProxy));
+			if(!_deferredLighting) {
+				_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+				_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+				_depthRenderer.renderScene(entityCollector, sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
+			}else{
+			}
 		}
 
 		private function initDepthTexture(context:Context3D):void
 		{
 			_depthTextureInvalid = false;
 
-			if (depthRender)
-				depthRender.dispose();
+			if (sceneDepthTexture)
+				sceneDepthTexture.dispose();
 
-			depthRender = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+			if(sceneNormalTexture)
+				sceneNormalTexture.dispose();
+
+			sceneDepthTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+			if(_deferredLighting) sceneNormalTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
 		}
 	}
 }

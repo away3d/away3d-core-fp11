@@ -70,12 +70,12 @@
 		 */
 		public function get texture():Texture2DBase
 		{
-			return _screenPass.diffuseMethod.texture;
+			return _screenPass.diffuseMethod.diffuseTexture;
 		}
 		
 		public function set texture(value:Texture2DBase):void
 		{
-			_screenPass.diffuseMethod.texture = value;
+			_screenPass.diffuseMethod.diffuseTexture = value;
 		}
 		
 		/**

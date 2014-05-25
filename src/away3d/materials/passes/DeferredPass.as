@@ -1,5 +1,4 @@
 package away3d.materials.passes {
-	import away3d.core.render.deferred.*;
 	import away3d.arcane;
 	import away3d.core.base.TriangleSubGeometry;
 	import away3d.core.managers.AGALProgram3DCache;
@@ -9,7 +8,6 @@ package away3d.materials.passes {
 	import away3d.debug.Debug;
 	import away3d.entities.Camera3D;
 	import away3d.materials.compilation.ShaderState;
-	import away3d.materials.passes.MaterialPassBase;
 	import away3d.textures.Texture2DBase;
 
 	import flash.display3D.Context3D;
@@ -125,11 +123,13 @@ package away3d.materials.passes {
 				_shader.freeLastVertexTemp();
 				_shader.freeLastVertexTemp();
 			} else {
-//				code += "mov vt" + normalTemp + ".w, vc" + _shader.getVertexConstant(COMMON_CONSTANT) + ".x\n";
 				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ", vt" + normalTemp + "\n";
 			}
 			_shader.freeLastVertexTemp();
 
+			_numUsedVaryings = _shader.numVaryings;
+			_numUsedVertexConstants = _shader.numVertexConstants;
+			_numUsedStreams = _shader.numAttributes;
 			return code;
 		}
 
@@ -210,12 +210,14 @@ package away3d.materials.passes {
 			}
 			_shader.freeLastFragmentTemp();
 
+			_numUsedTextures = _shader.numTextureRegisters;
+			_numUsedFragmentConstants = _shader.numFragmentConstants;
 			return code;
 		}
 
 		override arcane function invalidateShaderProgram(updateMaterial:Boolean = true):void {
 			_shader.clear();
-			super.arcane::invalidateShaderProgram(updateMaterial);
+			super.invalidateShaderProgram(updateMaterial);
 		}
 
 		override arcane function activate(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
@@ -255,21 +257,16 @@ package away3d.materials.passes {
 				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT), _specularColorData, 1);
 			}
 
-			_numUsedTextures = 0;
 			if (_shader.hasTexture(OPACITY_TEXTURE)) {
-				_numUsedTextures++;
 				context3D.setTextureAt(_shader.getTexture(OPACITY_TEXTURE), opacityMap.getTextureForStage3D(stage3DProxy));
 			}
 			if (_shader.hasTexture(NORMAL_TEXTURE)) {
-				_numUsedTextures++;
 				context3D.setTextureAt(_shader.getTexture(NORMAL_TEXTURE), normalMap.getTextureForStage3D(stage3DProxy));
 			}
 			if (_shader.hasTexture(DIFFUSE_TEXTURE)) {
-				_numUsedTextures++;
 				context3D.setTextureAt(_shader.getTexture(DIFFUSE_TEXTURE), diffuseMap.getTextureForStage3D(stage3DProxy));
 			}
 			if (_shader.hasTexture(SPECULAR_TEXTURE)) {
-				_numUsedTextures++;
 				context3D.setTextureAt(_shader.getTexture(SPECULAR_TEXTURE), specularMap.getTextureForStage3D(stage3DProxy));
 			}
 		}
@@ -289,22 +286,17 @@ package away3d.materials.passes {
 				context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT), renderable.sourceEntity.inverseSceneTransform);
 			}
 
-			_numUsedStreams = 1;
 			stage3DProxy.activateBuffer(_shader.getAttribute(POSITION_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 			if (_shader.hasAttribute(UV_ATTRIBUTE)) {
-				_numUsedStreams++;
 				stage3DProxy.activateBuffer(_shader.getAttribute(UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
 			}
 			if (_shader.hasAttribute(SECONDARY_UV_ATTRIBUTE)) {
-				_numUsedStreams++;
 				stage3DProxy.activateBuffer(_shader.getAttribute(SECONDARY_UV_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.SECONDARY_UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.SECONDARY_UV_DATA), TriangleSubGeometry.SECONDARY_UV_FORMAT);
 			}
 			if (_shader.hasAttribute(NORMAL_ATTRIBUTE)) {
-				_numUsedStreams++;
 				stage3DProxy.activateBuffer(_shader.getAttribute(NORMAL_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.NORMAL_DATA), renderable.getVertexOffset(TriangleSubGeometry.NORMAL_DATA), TriangleSubGeometry.NORMAL_FORMAT);
 			}
 			if (_shader.hasAttribute(TANGENT_ATTRIBUTE)) {
-				_numUsedStreams++;
 				stage3DProxy.activateBuffer(_shader.getAttribute(TANGENT_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.TANGENT_DATA), renderable.getVertexOffset(TriangleSubGeometry.TANGENT_DATA), TriangleSubGeometry.TANGENT_FORMAT);
 			}
 
@@ -321,8 +313,11 @@ package away3d.materials.passes {
 					(normalMap && normalMapUVChannel == TriangleSubGeometry.UV_DATA) || (diffuseMap && diffuseMapUVChannel == TriangleSubGeometry.UV_DATA);
 		}
 
+		/**
+		 * Overrided because of AGAL compilation version
+		 * @param stage3DProxy
+		 */
 		override arcane function updateProgram(stage3DProxy:Stage3DProxy):void {
-			//TODO: animators support
 			var animatorCode:String = "";
 			var UVAnimatorCode:String = "";
 			var fragmentAnimatorCode:String = "";
