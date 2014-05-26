@@ -90,6 +90,7 @@
 			_depthPass.alphaThreshold = value;
 			_distancePass.alphaThreshold = value;
 			_worldNormalPass.alphaThreshold = value;
+			_gBufferPass.alphaThreshold = value;
 		}
 
 		/**
@@ -140,6 +141,26 @@
 			_worldNormalPass.repeat = _repeat;
 			_worldNormalPass.smooth = _smooth;
 			super.activateForWorldNormal(stage3DProxy, camera);
+		}
+
+		override arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
+			_gBufferPass.diffuseMap = _diffuseMethod.diffuseTexture;
+			_gBufferPass.colorR = _diffuseMethod.diffuseR;
+			_gBufferPass.colorG = _diffuseMethod.diffuseG;
+			_gBufferPass.colorB = _diffuseMethod.diffuseB;
+			_gBufferPass.normalMap = _normalMethod.normalMap;
+			_gBufferPass.specularMap = _specularMethod.texture;
+			_gBufferPass.specularColorR = _specularMethod._specularR;
+			_gBufferPass.specularColorG = _specularMethod._specularG;
+			_gBufferPass.specularColorB = _specularMethod._specularB;
+			_gBufferPass.gloss = _specularMethod.gloss;
+			_gBufferPass.opacityMap = _diffuseMethod.opacityTexture;
+			_gBufferPass.opacityChannel = _diffuseMethod.opacityChannel;
+			_gBufferPass.specularIntensity = _specularMethod.specular;
+			_gBufferPass.mipmap = _mipmap;
+			_gBufferPass.repeat = _repeat;
+			_gBufferPass.smooth = _smooth;
+			super.activateForGBuffer(stage3DProxy, camera);
 		}
 
 		/**

@@ -412,5 +412,17 @@ package away3d.materials.methods
 			}
 			return "w";
 		}
+
+		public function get diffuseR():Number {
+			return ((_diffuseColor >> 16) & 0xff)/0xff;
+		}
+
+		public function get diffuseG():Number {
+			return ((_diffuseColor >> 8) & 0xff)/0xff;
+		}
+
+		public function get diffuseB():Number {
+			return (_diffuseColor & 0xff)/0xff;;
+		}
 	}
 }
