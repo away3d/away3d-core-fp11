@@ -43,7 +43,7 @@ package away3d.materials.passes {
 		private var _opacityMap:Texture2DBase;
 		private var _opacityChannel:String;
 		private var _normalMap:Texture2DBase;
-		private var _propertiesData:Vector.<Number> = new Vector.<Number>();
+		private var _propertiesData:Vector.<Number>;
 		private var _shader:ShaderState = new ShaderState();
 		private var _specularIntensity:int = 1;
 
@@ -194,6 +194,7 @@ package away3d.materials.passes {
 			}
 
 			if (_shader.hasFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT)) {
+				if(!_propertiesData) _propertiesData = new Vector.<Number>();
 				_propertiesData[0] = alphaThreshold;//used for opacity map
 				_propertiesData[1] = 1;//used for normal output and normal restoring and diffuse output
 				_propertiesData[2] = _specularIntensity;
@@ -281,6 +282,17 @@ package away3d.materials.passes {
 
 		public function set specularIntensity(value:int):void {
 			_specularIntensity = value;
+		}
+
+
+		override public function dispose():void {
+			_shader.clear();
+			normalMap = null;
+			opacityMap = null;
+			_shader.clear();
+			_shader = null;
+			_propertiesData = null;
+			super.dispose();
 		}
 	}
 }

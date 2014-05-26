@@ -70,9 +70,9 @@ package away3d.materials.passes {
 		public var alphaThreshold:Number = 0;
 
 		private var _depthData:Vector.<Number>;
-		private var _propertiesData:Vector.<Number> = new Vector.<Number>();
-		private var _diffuseColorData:Vector.<Number> = new Vector.<Number>();
-		private var _specularColorData:Vector.<Number> = new Vector.<Number>();
+		private var _propertiesData:Vector.<Number>;
+		private var _diffuseColorData:Vector.<Number>;
+		private var _specularColorData:Vector.<Number>;
 		private var _shader:ShaderState = new ShaderState();
 
 		private var _drawDepth:Boolean;
@@ -85,11 +85,6 @@ package away3d.materials.passes {
 			_drawWorldNormal = drawWorldNormal;
 			_drawAlbedo = drawAlbedo;
 			_drawSpecular = drawSpecular;
-
-			_depthData = Vector.<Number>([
-				1, 255, 65025, 16581375,
-				1 / 255, 1 / 255, 1 / 255, 0
-			]);
 		}
 
 		override arcane function getVertexCode():String {
@@ -99,38 +94,45 @@ package away3d.materials.passes {
 			code += "mov op, vt" + projectedPosTemp + "\n";
 			code += "mov v" + _shader.getVarying(PROJECTED_POSITION_VARYING) + ", vt" + projectedPosTemp + "\n";//projected position
 			_shader.freeLastVertexTemp();
-			code += "mov v" + _shader.getVarying(UV_VARYING) + ", va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";//uv channel
+
+			if (useUV) {
+				code += "mov v" + _shader.getVarying(UV_VARYING) + ", va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";//uv channel
+			}
+
 			if (useSecondaryUV) {
 				code += "mov v" + _shader.getVarying(SECONDARY_UV_VARYING) + ", va" + _shader.getAttribute(SECONDARY_UV_ATTRIBUTE) + "\n";//secondary uv channel
 			}
-			//normals
-			var normalTemp:int = _shader.getFreeVertexTemp();
-			code += "m33 vt" + normalTemp + ".xyz, va" + _shader.getAttribute(NORMAL_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT, 3) + "\n";
-			code += "nrm vt" + normalTemp + ".xyz, vt" + normalTemp + ".xyz\n";
-			code += "mov vt" + normalTemp + ".w, va" + _shader.getAttribute(NORMAL_ATTRIBUTE) + ".w\n";
-			if (normalMap) {
-				var tangentTemp:int = _shader.getFreeVertexTemp();
-				code += "m33 vt" + tangentTemp + ".xyz, va" + _shader.getAttribute(TANGENT_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT, 3) + "\n";
-				code += "nrm vt" + tangentTemp + ".xyz, vt" + tangentTemp + ".xyz\n";
-				var binormal:int = _shader.getFreeVertexTemp();
-				code += "crs vt" + binormal + ".xyz, vt" + normalTemp + ".xyz, vt" + tangentTemp + ".xyz\n";
-				code += "nrm vt" + binormal + ".xyz, vt" + binormal + ".xyz\n";
-				//transpose tbn
-				code += "mov v" + _shader.getVarying(TANGENT_VARYING) + ".xyzw, vt" + normalTemp + ".xyxw\n";
-				code += "mov v" + _shader.getVarying(TANGENT_VARYING) + ".x, vt" + tangentTemp + ".x\n";
-				code += "mov v" + _shader.getVarying(TANGENT_VARYING) + ".y, vt" + binormal + ".x\n";
-				code += "mov v" + _shader.getVarying(BINORMAL_VARYING) + ".xyzw, vt" + normalTemp + ".xyyw\n";
-				code += "mov v" + _shader.getVarying(BINORMAL_VARYING) + ".x, vt" + tangentTemp + ".y\n";
-				code += "mov v" + _shader.getVarying(BINORMAL_VARYING) + ".y, vt" + binormal + ".y\n";
-				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".xyzw, vt" + normalTemp + ".xyzw\n";
-				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".x, vt" + tangentTemp + ".z\n";
-				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".y, vt" + binormal + ".z\n";
+
+			if (_drawWorldNormal) {
+				//normals
+				var normalTemp:int = _shader.getFreeVertexTemp();
+				code += "m33 vt" + normalTemp + ".xyz, va" + _shader.getAttribute(NORMAL_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT, 3) + "\n";
+				code += "nrm vt" + normalTemp + ".xyz, vt" + normalTemp + ".xyz\n";
+				code += "mov vt" + normalTemp + ".w, va" + _shader.getAttribute(NORMAL_ATTRIBUTE) + ".w\n";
+				if (normalMap) {
+					var tangentTemp:int = _shader.getFreeVertexTemp();
+					code += "m33 vt" + tangentTemp + ".xyz, va" + _shader.getAttribute(TANGENT_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT, 3) + "\n";
+					code += "nrm vt" + tangentTemp + ".xyz, vt" + tangentTemp + ".xyz\n";
+					var binormal:int = _shader.getFreeVertexTemp();
+					code += "crs vt" + binormal + ".xyz, vt" + normalTemp + ".xyz, vt" + tangentTemp + ".xyz\n";
+					code += "nrm vt" + binormal + ".xyz, vt" + binormal + ".xyz\n";
+					//transpose tbn
+					code += "mov v" + _shader.getVarying(TANGENT_VARYING) + ".xyzw, vt" + normalTemp + ".xyxw\n";
+					code += "mov v" + _shader.getVarying(TANGENT_VARYING) + ".x, vt" + tangentTemp + ".x\n";
+					code += "mov v" + _shader.getVarying(TANGENT_VARYING) + ".y, vt" + binormal + ".x\n";
+					code += "mov v" + _shader.getVarying(BINORMAL_VARYING) + ".xyzw, vt" + normalTemp + ".xyyw\n";
+					code += "mov v" + _shader.getVarying(BINORMAL_VARYING) + ".x, vt" + tangentTemp + ".y\n";
+					code += "mov v" + _shader.getVarying(BINORMAL_VARYING) + ".y, vt" + binormal + ".y\n";
+					code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".xyzw, vt" + normalTemp + ".xyzw\n";
+					code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".x, vt" + tangentTemp + ".z\n";
+					code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".y, vt" + binormal + ".z\n";
+					_shader.freeLastVertexTemp();
+					_shader.freeLastVertexTemp();
+				} else {
+					code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ", vt" + normalTemp + "\n";
+				}
 				_shader.freeLastVertexTemp();
-				_shader.freeLastVertexTemp();
-			} else {
-				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ", vt" + normalTemp + "\n";
 			}
-			_shader.freeLastVertexTemp();
 
 			_numUsedVaryings = _shader.numVaryings;
 			_numUsedVertexConstants = _shader.numVertexConstants;
@@ -139,85 +141,97 @@ package away3d.materials.passes {
 		}
 
 		override arcane function getFragmentCode(fragmentAnimatorCode:String):String {
+			var outputRegister:int = 0;
 			var code:String = "";
-			var depthDataRegister:int = _shader.getFragmentConstant(DEPTH_FRAGMENT_CONSTANT, 2);
-			var screenPosVarying:int = _shader.getVarying(PROJECTED_POSITION_VARYING);
-			code += "div ft2, v" + screenPosVarying + ", v" + screenPosVarying + ".w\n";
-			code += "mul ft0, fc" + depthDataRegister + ", ft2.z\n";
-			code += "frc ft0, ft0\n";
-			code += "mul ft1, ft0.yzww, fc" + (depthDataRegister + 1) + "\n";
-			if (opacityMap) {
-				code += sampleTexture(opacityMap, opacityUVChannel, 3, _shader.getTexture(OPACITY_TEXTURE));
-				code += "sub ft3." + opacityChannel + ", ft3." + opacityChannel + ", fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".x\n";
-				code += "kil ft3." + opacityChannel + "\n";
-			}
-			code += "sub oc0, ft0, ft1\n";
-
-			//we have filled the depth, lets fill world normal
-			if (!normalMap) {
-				code += "nrm ft0.xyz, v" + _shader.getVarying(NORMAL_VARYING) + ".xyz\n";
-			} else {
-				//normal tangent space
-				var normalTS:int = _shader.getFreeFragmentTemp();
-				code += sampleTexture(normalMap, normalMapUVChannel, normalTS, _shader.getTexture(NORMAL_TEXTURE));
-				//if normal map used as DXT5 it means that normal map encoded in green and alpha channels for better compression quality, we need to restore it
-				if (normalMap.format == "compressedAlpha") {
-					code += "add ft" + normalTS + ".xy, ft" + normalTS + ".yw, ft" + normalTS + ".yw\n"
-					code += "sub ft" + normalTS + ".xy, ft" + normalTS + ".xy, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".yy\n"
-					code += "mul ft" + normalTS + ".zw, ft" + normalTS + ".xy, ft" + normalTS + ".xy\n"
-					code += "add ft" + normalTS + ".w, ft" + normalTS + ".w, ft" + normalTS + ".z\n"
-					code += "sub ft" + normalTS + ".z, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y, ft" + normalTS + ".w\n"
-					code += "sqt ft" + normalTS + ".z, ft" + normalTS + ".z\n"
-				} else {
-					code += "add ft" + normalTS + ".xyz, ft" + normalTS + ", ft" + normalTS + "\n";
-					code += "sub ft" + normalTS + ".xyz, ft" + normalTS + ", fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y\n";
+			if (_drawDepth) {
+				var depthDataRegister:int = _shader.getFragmentConstant(DEPTH_FRAGMENT_CONSTANT, 2);
+				var screenPosVarying:int = _shader.getVarying(PROJECTED_POSITION_VARYING);
+				code += "div ft2, v" + screenPosVarying + ", v" + screenPosVarying + ".w\n";
+				code += "mul ft0, fc" + depthDataRegister + ", ft2.z\n";
+				code += "frc ft0, ft0\n";
+				code += "mul ft1, ft0.yzww, fc" + (depthDataRegister + 1) + "\n";
+				if (opacityMap) {
+					code += sampleTexture(opacityMap, opacityUVChannel, 3, _shader.getTexture(OPACITY_TEXTURE));
+					code += "sub ft3." + opacityChannel + ", ft3." + opacityChannel + ", fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".x\n";
+					code += "kil ft3." + opacityChannel + "\n";
 				}
-				code += "nrm ft" + normalTS + ".xyz, ft" + normalTS + "\n";
-				var temp:int = _shader.getFreeFragmentTemp();
-				var normalOutput:int = _shader.getFreeFragmentTemp();
-				//TBN
-				code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(TANGENT_VARYING) + ".xyz\n";
-				code += "dp3 ft" + normalOutput + ".x, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
-				code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(BINORMAL_VARYING) + ".xyz\n";
-				code += "dp3 ft" + normalOutput + ".y, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
-				code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(NORMAL_VARYING) + ".xyz\n";
-				code += "dp3 ft" + normalOutput + ".z, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
-				code += "nrm ft" + normalOutput + ".xyz, ft" + normalOutput + "\n";
-				_shader.freeLastFragmentTemp();
-				_shader.freeLastFragmentTemp();
-				_shader.freeLastFragmentTemp();
+				code += "sub oc" + outputRegister + ", ft0, ft1\n";
+				outputRegister++;
 			}
-			//if do not draw specular, draw specular intesity to normalmap for deferred lighting
-			if(!_drawSpecular) {
-				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".xxx\n";
-			}else{
-				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y\n";
-			}
-			code += "mov oc1, ft" + normalOutput + "\n";
 
-			//color
-			var diffuseColor:int = _shader.getFreeFragmentTemp();
-			if (diffuseMap) {
-				code += sampleTexture(diffuseMap, diffuseMapUVChannel, diffuseColor, _shader.getTexture(DIFFUSE_TEXTURE));
-				code += "mov oc2, ft" + diffuseColor + "\n";
-			} else {
-				code += "mov oc2, fc" + _shader.getFragmentConstant(DIFFUSE_COLOR_CONSTANT) + "\n";
+			if (_drawWorldNormal) {
+				//we have filled the depth, lets fill world normal
+				if (!normalMap) {
+					code += "nrm ft0.xyz, v" + _shader.getVarying(NORMAL_VARYING) + ".xyz\n";
+				} else {
+					//normal tangent space
+					var normalTS:int = _shader.getFreeFragmentTemp();
+					code += sampleTexture(normalMap, normalMapUVChannel, normalTS, _shader.getTexture(NORMAL_TEXTURE));
+					//if normal map used as DXT5 it means that normal map encoded in green and alpha channels for better compression quality, we need to restore it
+					if (normalMap.format == "compressedAlpha") {
+						code += "add ft" + normalTS + ".xy, ft" + normalTS + ".yw, ft" + normalTS + ".yw\n"
+						code += "sub ft" + normalTS + ".xy, ft" + normalTS + ".xy, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".yy\n"
+						code += "mul ft" + normalTS + ".zw, ft" + normalTS + ".xy, ft" + normalTS + ".xy\n"
+						code += "add ft" + normalTS + ".w, ft" + normalTS + ".w, ft" + normalTS + ".z\n"
+						code += "sub ft" + normalTS + ".z, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y, ft" + normalTS + ".w\n"
+						code += "sqt ft" + normalTS + ".z, ft" + normalTS + ".z\n"
+					} else {
+						code += "add ft" + normalTS + ".xyz, ft" + normalTS + ", ft" + normalTS + "\n";
+						code += "sub ft" + normalTS + ".xyz, ft" + normalTS + ", fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y\n";
+					}
+					code += "nrm ft" + normalTS + ".xyz, ft" + normalTS + ".xyz\n";
+					var temp:int = _shader.getFreeFragmentTemp();
+					var normalOutput:int = _shader.getFreeFragmentTemp();
+					//TBN
+					code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(TANGENT_VARYING) + ".xyz\n";
+					code += "dp3 ft" + normalOutput + ".x, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
+					code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(BINORMAL_VARYING) + ".xyz\n";
+					code += "dp3 ft" + normalOutput + ".y, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
+					code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(NORMAL_VARYING) + ".xyz\n";
+					code += "dp3 ft" + normalOutput + ".z, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
+					code += "nrm ft" + normalOutput + ".xyz, ft" + normalOutput + ".xyz\n";
+					_shader.freeLastFragmentTemp();
+					_shader.freeLastFragmentTemp();
+					_shader.freeLastFragmentTemp();
+				}
+				//if do not draw specular, draw specular intesity to normalmap for deferred lighting
+				if (!_drawSpecular) {
+					code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".xxx\n";
+				} else {
+					code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y\n";
+				}
+				code += "mov oc" + outputRegister + ", ft" + normalOutput + "\n";
+				outputRegister++;
 			}
-			_shader.freeLastFragmentTemp();
 
-			//specular
-			var specularColor:int = _shader.getFreeFragmentTemp();
-			if (specularMap) {
-				code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
-				//specular intensity
-				code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".xxx\n";
-				//gloss
-				code += "mov ft" + specularColor + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".w\n";
-				code += "mov oc3, ft" + specularColor + "\n";
-			} else {
-				code += "mov oc3, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + "\n";
+			if (_drawAlbedo) {
+				var diffuseColor:int = _shader.getFreeFragmentTemp();
+				if (diffuseMap) {
+					code += sampleTexture(diffuseMap, diffuseMapUVChannel, diffuseColor, _shader.getTexture(DIFFUSE_TEXTURE));
+					code += "mov oc" + outputRegister + ", ft" + diffuseColor + "\n";
+				} else {
+					code += "mov oc" + outputRegister + ", fc" + _shader.getFragmentConstant(DIFFUSE_COLOR_CONSTANT) + "\n";
+				}
+				outputRegister++;
+				_shader.freeLastFragmentTemp();
 			}
-			_shader.freeLastFragmentTemp();
+
+			if (_drawSpecular) {
+				//specular
+				var specularColor:int = _shader.getFreeFragmentTemp();
+				if (specularMap) {
+					code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
+					//specular intensity
+					code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".xxx\n";
+					//gloss
+					code += "mov ft" + specularColor + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".w\n";
+					code += "mov oc" + outputRegister + ", ft" + specularColor + "\n";
+				} else {
+					code += "mov oc" + outputRegister + ", fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + "\n";
+				}
+				outputRegister++;
+				_shader.freeLastFragmentTemp();
+			}
 
 			_numUsedTextures = _shader.numTextureRegisters;
 			_numUsedFragmentConstants = _shader.numFragmentConstants;
@@ -233,9 +247,21 @@ package away3d.materials.passes {
 			var context3D:Context3D = stage3DProxy._context3D;
 			super.activate(stage3DProxy, camera);
 
+			if (!_depthData) {
+				_depthData = new Vector.<Number>();
+				_depthData[0] = 1;
+				_depthData[1] = 255;
+				_depthData[2] = 65025;
+				_depthData[3] = 16581375;
+				_depthData[4] = 1 / 255;
+				_depthData[5] = 1 / 255;
+				_depthData[6] = 1 / 255;
+				_depthData[7] = 0;
+			}
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(DEPTH_FRAGMENT_CONSTANT), _depthData, 2);
 
 			if (_shader.hasFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT)) {
+				if(!_propertiesData) _propertiesData = new Vector.<Number>();
 				_propertiesData[0] = alphaThreshold;//used for opacity map
 				_propertiesData[1] = 1;//used for normal output and normal restoring and diffuse output
 				_propertiesData[2] = 0;
@@ -244,6 +270,7 @@ package away3d.materials.passes {
 			}
 
 			if (_shader.hasFragmentConstant(DIFFUSE_COLOR_CONSTANT)) {
+				if(!_diffuseColorData) _diffuseColorData = new Vector.<Number>();
 				_diffuseColorData[0] = colorR;
 				_diffuseColorData[1] = colorG;
 				_diffuseColorData[2] = colorB;
@@ -252,6 +279,7 @@ package away3d.materials.passes {
 			}
 
 			if (_shader.hasFragmentConstant(SPECULAR_COLOR_CONSTANT)) {
+				if(!_specularColorData) _specularColorData = new Vector.<Number>();
 				if (specularMap) {
 					_specularColorData[0] = specularIntensity;
 					_specularColorData[1] = 0;
@@ -383,6 +411,62 @@ package away3d.materials.passes {
 			}
 			uvVarying = (textureUVChannel == TriangleSubGeometry.SECONDARY_UV_DATA) ? _shader.getVarying(SECONDARY_UV_VARYING) : _shader.getVarying(UV_VARYING);
 			return "tex ft" + targetTemp + ", v" + uvVarying + ", fs" + textureRegister + " <2d," + filter + "," + format + wrap + ">\n";
+		}
+
+		public function get drawDepth():Boolean {
+			return _drawDepth;
+		}
+
+		public function set drawDepth(value:Boolean):void {
+			if (_drawDepth == value) return;
+			_drawDepth = value;
+			invalidateShaderProgram();
+		}
+
+		public function get drawWorldNormal():Boolean {
+			return _drawWorldNormal;
+		}
+
+		public function set drawWorldNormal(value:Boolean):void {
+			if (_drawWorldNormal == value) return;
+			_drawWorldNormal = value;
+			invalidateShaderProgram();
+		}
+
+		public function get drawAlbedo():Boolean {
+			return _drawAlbedo;
+		}
+
+		public function set drawAlbedo(value:Boolean):void {
+			if (_drawAlbedo == value) return;
+			_drawAlbedo = value;
+			invalidateShaderProgram();
+		}
+
+		public function get drawSpecular():Boolean {
+			return _drawSpecular;
+		}
+
+		public function set drawSpecular(value:Boolean):void {
+			if (_drawSpecular == value) return;
+			_drawSpecular = value;
+			invalidateShaderProgram();
+		}
+
+
+		override public function dispose():void {
+			diffuseMap = null;
+			normalMap = null;
+			specularMap = null;
+			opacityMap = null;
+
+			_shader.clear();
+			_shader = null;
+			_depthData = null;
+			_propertiesData = null;
+			_diffuseColorData = null;
+			_specularColorData = null;
+			super.dispose();
 		}
 	}
 }

@@ -14,6 +14,7 @@ package away3d.materials
 	import away3d.materials.lightpickers.LightPickerBase;
 	import away3d.materials.passes.DepthMapPass;
 	import away3d.materials.passes.DistanceMapPass;
+	import away3d.materials.passes.GBufferPass;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.WorldNormalPass;
 
@@ -110,6 +111,8 @@ package away3d.materials
 		protected var _depthPass:DepthMapPass;
 		protected var _distancePass:DistanceMapPass;
 		protected var _worldNormalPass:WorldNormalPass;
+		protected var _gBufferPass:GBufferPass;
+
 		protected var _lightPicker:LightPickerBase;
 
 		private var _distanceBasedDepthRender:Boolean;
@@ -130,6 +133,7 @@ package away3d.materials
 			_passes = new Vector.<MaterialPassBase>();
 			_depthPass = new DepthMapPass();
 			_worldNormalPass = new WorldNormalPass();
+			_gBufferPass = new GBufferPass();
 			_distancePass = new DistanceMapPass();
 			_depthPass.addEventListener(Event.CHANGE, onDepthPassChange);
 			_distancePass.addEventListener(Event.CHANGE, onDistancePassChange);
@@ -254,6 +258,7 @@ package away3d.materials
 			_depthPass.dispose();
 			_distancePass.dispose();
 			_worldNormalPass.dispose();
+			_gBufferPass.dispose();
 			_depthPass.removeEventListener(Event.CHANGE, onDepthPassChange);
 			_distancePass.removeEventListener(Event.CHANGE, onDistancePassChange);
 		}
@@ -276,6 +281,7 @@ package away3d.materials
 			_depthPass.bothSides = value;
 			_distancePass.bothSides = value;
 			_worldNormalPass.bothSides = value;
+			_gBufferPass.bothSides = value;
 		}
 		
 		/**
@@ -427,6 +433,20 @@ package away3d.materials
 			_worldNormalPass.deactivate(stage3DProxy);
 		}
 
+		arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
+			_gBufferPass.activate(stage3DProxy,camera);
+		}
+
+		arcane function renderGBuffer(renderable:RenderableBase, stage3DProxy:Stage3DProxy, camera:Camera3D, viewProjection:Matrix3D):void{
+			if (renderable.materialOwner.animator)
+				_gBufferPass.updateAnimationState(renderable, stage3DProxy, camera);
+			_gBufferPass.render(renderable, stage3DProxy, camera, viewProjection);
+		}
+
+		arcane function deactivateGBuffer(stage3DProxy:Stage3DProxy):void {
+			_gBufferPass.deactivate(stage3DProxy);
+		}
+
 		/**
 		 * Indicates whether or not the pass with the given index renders to texture or not.
 		 * @param index The index of the pass.
@@ -521,6 +541,7 @@ package away3d.materials
 						_depthPass.animationSet = _animationSet;
 						_distancePass.animationSet = _animationSet;
 						_worldNormalPass.animationSet = _animationSet;
+						_gBufferPass.animationSet = _animationSet;
 						invalidatePasses(null);
 					}
 				}
@@ -542,6 +563,7 @@ package away3d.materials
 				_depthPass.animationSet = _animationSet;
 				_distancePass.animationSet = _animationSet;
 				_worldNormalPass.animationSet = _animationSet;
+				_gBufferPass.animationSet = _animationSet;
 				invalidatePasses(null);
 			}
 		}
@@ -591,6 +613,7 @@ package away3d.materials
 			_depthPass.invalidateShaderProgram();
 			_distancePass.invalidateShaderProgram();
 			_worldNormalPass.invalidateShaderProgram();
+			_gBufferPass.invalidateShaderProgram();
 
 			// test if the depth and distance passes support animating the animation set in the vertex shader
 			// if any object using this material fails to support accelerated animations for any of the passes,
@@ -604,6 +627,7 @@ package away3d.materials
 						animator.testGPUCompatibility(_depthPass);
 						animator.testGPUCompatibility(_distancePass);
 						animator.testGPUCompatibility(_worldNormalPass);
+						animator.testGPUCompatibility(_gBufferPass);
 					}
 				}
 			}
