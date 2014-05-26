@@ -123,7 +123,7 @@
 			super.activateForWorldNormal(stage3DProxy, camera);
 		}
 
-		override arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D):void {
+		override arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D, drawDepth:Boolean, drawWorldNormals:Boolean, drawAlbedo:Boolean = false, drawSpecular:Boolean = false):void {
 			_gBufferPass.diffuseMap = _screenPass.diffuseMethod.diffuseTexture;
 			_gBufferPass.colorR = _screenPass.diffuseMethod.diffuseR;
 			_gBufferPass.colorG = _screenPass.diffuseMethod.diffuseG;
@@ -140,7 +140,7 @@
 			_gBufferPass.mipmap = _mipmap;
 			_gBufferPass.repeat = _repeat;
 			_gBufferPass.smooth = _smooth;
-			super.activateForGBuffer(stage3DProxy, camera);
+			super.activateForGBuffer(stage3DProxy, camera, drawDepth, drawWorldNormals, drawAlbedo, drawSpecular);
 		}
 
 		/**

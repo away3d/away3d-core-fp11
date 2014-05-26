@@ -15,12 +15,14 @@ package away3d.core.render
 	import away3d.lights.PointLight;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
+	import away3d.materials.passes.GBufferPass;
 	import away3d.textures.RenderTexture;
 
 	import flash.display.Stage;
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3DProfile;
 	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;
@@ -35,8 +37,12 @@ package away3d.core.render
 	 */
 	public class DefaultRenderer extends RendererBase implements IRenderer
 	{
+		public static const FORWARD_LIGHTING:int = 0;
+		public static const MOBILE_DEFERRED_LIGHTING:int = 1;
+		public static const MRT_DEFERRED_LIGHTING:int = 2;
+		private var _lightMode:int = FORWARD_LIGHTING;
+
 		protected var _requireDepthRender:Boolean;
-		protected var _requireWorldNormalRender:Boolean;
 
 		private static const RTT_PASSES:int = 1;
 		private static const SCREEN_PASSES:int = 2;
@@ -44,6 +50,7 @@ package away3d.core.render
 
 		private var _activeMaterial:MaterialBase;
 		private var _worldNormalRenderer:WorldNormalRenderer;
+		private var _gbufferRenderer:GBufferRenderer;
 		private var _distanceRenderer:DepthRenderer;
 		private var _depthRenderer:DepthRenderer;
 		private var _deferredLighting:Boolean = false;
@@ -102,10 +109,11 @@ package away3d.core.render
 			super();
 			_depthRenderer = new DepthRenderer();
 			_worldNormalRenderer = new WorldNormalRenderer();
+			_gbufferRenderer = new GBufferRenderer();
 			_distanceRenderer = new DepthRenderer(false, true);
 			_forceSoftware = forceSoftware;
 			_profile = profile;
-			_deferredLighting = deferredLighting;
+			this.deferredLighting = deferredLighting;
 		}
 
 		override public function init(stage:Stage):void {
@@ -128,7 +136,7 @@ package away3d.core.render
 		override public function set stage3DProxy(value:Stage3DProxy):void
 		{
 			super.stage3DProxy = value;
-			_worldNormalRenderer.stage3DProxy = _distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
+			_gbufferRenderer.stage3DProxy = _worldNormalRenderer.stage3DProxy = _distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
 		}
 
 
@@ -156,12 +164,16 @@ package away3d.core.render
 				textureRatioY = 1;
 			}
 
-			if(_requireDepthRender || _deferredLighting) {
-				renderSceneDepthToTexture(entityCollector as EntityCollector);
-			}
+			if(_deferredLighting && _lightMode == MRT_DEFERRED_LIGHTING) {
+				renderGBuffer(entityCollector as EntityCollector);
+			}else{
+				if(_requireDepthRender || _deferredLighting) {
+					renderSceneDepthToTexture(entityCollector as EntityCollector);
+				}
 
-			if(_deferredLighting) {
-				renderSceneWorldNormalToTexture(entityCollector as EntityCollector);
+				if(_deferredLighting) {
+					renderSceneWorldNormalToTexture(entityCollector as EntityCollector);
+				}
 			}
 
 			if(_depthPrepass) {
@@ -381,9 +393,11 @@ package away3d.core.render
 			_depthRenderer.dispose();
 			_distanceRenderer.dispose();
 			_worldNormalRenderer.dispose();
+			_gbufferRenderer.dispose();
 			_depthRenderer = null;
 			_distanceRenderer = null;
 			_worldNormalRenderer = null;
+			_gbufferRenderer = null;
 		}
 
 		protected function renderDepthPrepass(entityCollector:EntityCollector):void
@@ -447,5 +461,47 @@ package away3d.core.render
 			_worldNormalRenderer.renderScene(entityCollector, sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
 		}
 
+		protected function renderGBuffer(entityCollector:EntityCollector):void {
+			if(!sceneDepthTexture) {
+				sceneDepthTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+			}else{
+				sceneDepthTexture.width = _rttBufferManager.textureWidth;
+				sceneDepthTexture.height = _rttBufferManager.textureHeight;
+			}
+
+			if(!sceneNormalTexture) {
+				sceneNormalTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+			}else{
+				sceneNormalTexture.width = _rttBufferManager.textureWidth;
+				sceneNormalTexture.height = _rttBufferManager.textureHeight;
+			}
+
+			_context3D.setRenderToTexture(sceneDepthTexture.getTextureForStage3D(stage3DProxy), true, _antiAlias, 0, 0);
+			_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(stage3DProxy), true, _antiAlias, 0, 1);
+
+			_gbufferRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+			_gbufferRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+			_gbufferRenderer.renderScene(entityCollector);
+
+			_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
+			_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
+			_context3D.setRenderToBackBuffer();
+		}
+
+		public function get deferredLighting():Boolean {
+			return _deferredLighting;
+		}
+
+		public function set deferredLighting(value:Boolean):void {
+			if(_deferredLighting == value) return;
+			_deferredLighting = value;
+			if(_deferredLighting && _profile == "standard") {
+				_lightMode = MRT_DEFERRED_LIGHTING;
+			}else if(deferredLighting) {
+				_lightMode = MOBILE_DEFERRED_LIGHTING;
+			}else{
+				_lightMode = FORWARD_LIGHTING;
+			}
+		}
 	}
 }

@@ -40,11 +40,11 @@ package away3d.core.render {
 
 			_context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
 			_context3D.setDepthTest(true, Context3DCompareMode.LESS);
+
 			drawRenderables(opaqueRenderableHead, entityCollector);
 
-
 			if (_activeMaterial)
-				_activeMaterial.deactivateForDepth(_stage3DProxy);
+				_activeMaterial.deactivateForWorldNormal(_stage3DProxy);
 
 			_activeMaterial = null;
 		}
@@ -60,7 +60,6 @@ package away3d.core.render {
 
 			while (renderable) {
 				_activeMaterial = renderable.material;
-
 				// otherwise this would result in depth rendered anyway because fragment shader kil is ignored
 				_activeMaterial.activateForWorldNormal(_stage3DProxy, camera);
 				renderable2 = renderable;
@@ -69,6 +68,7 @@ package away3d.core.render {
 					renderable2 = renderable2.next as RenderableBase;
 				} while (renderable2 && renderable2.material == _activeMaterial);
 				_activeMaterial.deactivateForWorldNormal(_stage3DProxy);
+				renderable = renderable2;
 			}
 		}
 	}
