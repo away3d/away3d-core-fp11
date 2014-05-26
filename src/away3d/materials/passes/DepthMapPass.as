@@ -23,7 +23,7 @@
 	public class DepthMapPass extends MaterialPassBase
 	{
 		private var _data:Vector.<Number>;
-		private var _alphaThreshold:Number = 1;
+		private var _alphaThreshold:Number = 0;
 		private var _alphaMask:Texture2DBase;
 		private var _alphaMaskChannel:String = "w";
 

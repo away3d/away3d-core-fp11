@@ -16,10 +16,8 @@ package away3d.core.render
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
 	import away3d.textures.RenderTexture;
-	import away3d.textures.TextureProxyBase;
 
 	import flash.display.Stage;
-	import flash.display3D.Context3D;
 
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
@@ -38,12 +36,14 @@ package away3d.core.render
 	public class DefaultRenderer extends RendererBase implements IRenderer
 	{
 		protected var _requireDepthRender:Boolean;
+		protected var _requireWorldNormalRender:Boolean;
 
 		private static const RTT_PASSES:int = 1;
 		private static const SCREEN_PASSES:int = 2;
 		private static const ALL_PASSES:int = 3;
 
 		private var _activeMaterial:MaterialBase;
+		private var _worldNormalRenderer:WorldNormalRenderer;
 		private var _distanceRenderer:DepthRenderer;
 		private var _depthRenderer:DepthRenderer;
 		private var _deferredLighting:Boolean = false;
@@ -52,8 +52,8 @@ package away3d.core.render
 		private var _tempSkyboxMatrix:Matrix3D = new Matrix3D();
 		private var _skyboxTempVector:Vector3D = new Vector3D();
 		protected var filter3DRenderer:Filter3DRenderer;
-		protected var sceneDepthTexture:TextureProxyBase;
-		protected var sceneNormalTexture:TextureProxyBase;
+		protected var sceneDepthTexture:RenderTexture;
+		protected var sceneNormalTexture:RenderTexture;
 
 		private var _forceSoftware:Boolean;
 		private var _profile:String;
@@ -85,7 +85,7 @@ package away3d.core.render
 			} else {
 				_requireDepthRender = false;
 	
-				if (sceneDepthTexture) {
+				if (!_deferredLighting && sceneDepthTexture) {
 					sceneDepthTexture.dispose();
 					sceneDepthTexture = null;
 				}
@@ -100,11 +100,12 @@ package away3d.core.render
 		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline", deferredLighting:Boolean = false)
 		{
 			super();
-			_deferredLighting = deferredLighting;
 			_depthRenderer = new DepthRenderer();
+			_worldNormalRenderer = new WorldNormalRenderer();
 			_distanceRenderer = new DepthRenderer(false, true);
 			_forceSoftware = forceSoftware;
 			_profile = profile;
+			_deferredLighting = deferredLighting;
 		}
 
 		override public function init(stage:Stage):void {
@@ -127,7 +128,7 @@ package away3d.core.render
 		override public function set stage3DProxy(value:Stage3DProxy):void
 		{
 			super.stage3DProxy = value;
-			_distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
+			_worldNormalRenderer.stage3DProxy = _distanceRenderer.stage3DProxy = _depthRenderer.stage3DProxy = value;
 		}
 
 
@@ -157,6 +158,10 @@ package away3d.core.render
 
 			if(_requireDepthRender || _deferredLighting) {
 				renderSceneDepthToTexture(entityCollector as EntityCollector);
+			}
+
+			if(_deferredLighting) {
+				renderSceneWorldNormalToTexture(entityCollector as EntityCollector);
 			}
 
 			if(_depthPrepass) {
@@ -354,17 +359,11 @@ package away3d.core.render
 
 					if ((rttMask & which) != 0) {
 						_activeMaterial.activatePass(j, _stage3DProxy, camera);
-//						_activeMaterial.activateForWorldNormal(_stage3DProxy, camera);
-//						_activeMaterial.activateForDepth(_stage3DProxy, camera);
 						do {
 							_activeMaterial.renderPass(j, renderable2, _stage3DProxy, entityCollector, _rttViewProjectionMatrix);
-//							_activeMaterial.renderWorldNormal(renderable2, _stage3DProxy, camera, _rttViewProjectionMatrix);
-//							_activeMaterial.renderDepth(renderable2, _stage3DProxy, camera, _rttViewProjectionMatrix);
 							renderable2 = renderable2.next as RenderableBase;
 						} while (renderable2 && renderable2.material == _activeMaterial);
 						_activeMaterial.deactivatePass(j, _stage3DProxy);
-//						_activeMaterial.deactivateForWorldNormal(_stage3DProxy);
-//						_activeMaterial.deactivateForDepth(_stage3DProxy);
 					} else {
 						do
 							renderable2 = renderable2.next as RenderableBase;
@@ -381,8 +380,10 @@ package away3d.core.render
 			super.dispose();
 			_depthRenderer.dispose();
 			_distanceRenderer.dispose();
+			_worldNormalRenderer.dispose();
 			_depthRenderer = null;
 			_distanceRenderer = null;
+			_worldNormalRenderer = null;
 		}
 
 		protected function renderDepthPrepass(entityCollector:EntityCollector):void
@@ -407,10 +408,11 @@ package away3d.core.render
 		 */
 		protected function updateBackBuffer():void
 		{
+			if(!_stage3DProxy.context3D) return;
 			// No reason trying to configure back buffer if there is no context available.
 			// Doing this anyway (and relying on _stageGL to cache width/height for
 			// context does get available) means usesSoftwareRendering won't be reliable.
-			if (_stage3DProxy.context3D && !_shareContext) {
+			if (!_shareContext) {
 				if (_width && _height) {
 					_stage3DProxy.configureBackBuffer(_width, _height, _antiAlias);
 					_backBufferInvalid = false;
@@ -420,29 +422,30 @@ package away3d.core.render
 
 		protected function renderSceneDepthToTexture(entityCollector:EntityCollector):void
 		{
-			if (_depthTextureInvalid || !_depthRenderer)
-				initDepthTexture(_stage3DProxy.context3D);
-
-			if(!_deferredLighting) {
-				_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
-				_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
-				_depthRenderer.renderScene(entityCollector, sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
+			if(!sceneDepthTexture) {
+				sceneDepthTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
 			}else{
+				sceneDepthTexture.width = _rttBufferManager.textureWidth;
+				sceneDepthTexture.height = _rttBufferManager.textureHeight;
 			}
+
+			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+			_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+			_depthRenderer.renderScene(entityCollector, sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
 		}
 
-		private function initDepthTexture(context:Context3D):void
-		{
-			_depthTextureInvalid = false;
+		protected function renderSceneWorldNormalToTexture(entityCollector:EntityCollector):void {
+			if(!sceneNormalTexture) {
+				sceneNormalTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+			}else{
+				sceneNormalTexture.width = _rttBufferManager.textureWidth;
+				sceneNormalTexture.height = _rttBufferManager.textureHeight;
+			}
 
-			if (sceneDepthTexture)
-				sceneDepthTexture.dispose();
-
-			if(sceneNormalTexture)
-				sceneNormalTexture.dispose();
-
-			sceneDepthTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
-			if(_deferredLighting) sceneNormalTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+			_worldNormalRenderer.textureRatioX = _rttBufferManager.textureRatioX;
+			_worldNormalRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+			_worldNormalRenderer.renderScene(entityCollector, sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
 		}
+
 	}
 }

@@ -5,13 +5,10 @@ package away3d.core.render
 	import away3d.core.TriangleSubMesh;
 	import away3d.core.base.LineSubMesh;
 	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DManager;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.pool.BillboardRenderable;
 	import away3d.core.pool.EntityListItem;
 	import away3d.core.pool.LineSubMeshRenderable;
-	import away3d.core.pool.RenderableBase;
-	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.RenderableBase;
 	import away3d.core.pool.RenderablePool;
 	import away3d.core.pool.SkyBoxRenderable;
@@ -27,7 +24,6 @@ package away3d.core.render
 	import away3d.errors.AbstractMethodError;
 	import away3d.events.RendererEvent;
 	import away3d.events.Stage3DEvent;
-	import away3d.events.Stage3DEvent;
 	import away3d.materials.IMaterial;
 	import away3d.materials.MaterialBase;
 	import away3d.materials.utils.DefaultMaterialManager;
@@ -36,7 +32,6 @@ package away3d.core.render
 
 	import flash.display.BitmapData;
 	import flash.display.Stage;
-
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.textures.TextureBase;
@@ -73,7 +68,6 @@ package away3d.core.render
 		private var _scissorDirty:Boolean;
 
 		protected var _backBufferInvalid:Boolean = true;
-		protected var _depthTextureInvalid:Boolean = true;
 		public var _depthPrepass:Boolean = false;
 
 		private var _backgroundImageRenderer:BackgroundImageRenderer;
@@ -212,7 +206,6 @@ package away3d.core.render
 				_rttBufferManager.viewWidth = value;
 
 			_backBufferInvalid = true;
-			_depthTextureInvalid = true;
 
 			notifyScissorUpdate();
 		}
@@ -238,7 +231,6 @@ package away3d.core.render
 				_rttBufferManager.viewHeight = value;
 
 			_backBufferInvalid = true;
-			_depthTextureInvalid = true;
 
 			notifyScissorUpdate();
 		}
