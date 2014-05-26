@@ -21,13 +21,16 @@ package away3d.core.render {
 		private var _fragmentCode:String;
 		private var _vertexCode:String;
 		private var _texturesData:Vector.<Number> = Vector.<Number>([0, 1, 2, 3]);
+		private var _targetsCount:int = 4;
+		//todo: implement AGAL1 version
 
 		public function RenderTargetCopy() {
 		}
 
 		public function draw(stage3DProxy:Stage3DProxy, targetsCount:uint = 4):void {
 			var context3D:Context3D = stage3DProxy.context3D;
-			if (!program) {
+			if (!program || _targetsCount!=targetsCount) {
+				_targetsCount = targetsCount;
 				compile();
 				var vertex:Vector.<Number> = Vector.<Number>(
 						[
@@ -83,15 +86,25 @@ package away3d.core.render {
 			_fragmentCode += "ife v1.y, fc0.x\n";
 			_fragmentCode += "tex ft0, v0, fs0 <2d,nearst,nomip,clamp>\n";
 			_fragmentCode += "eif\n";
-			_fragmentCode += "ife v1.x, fc0.y\n";
-			_fragmentCode += "tex ft0, v0, fs1 <2d,nearst,nomip,clamp>\n";
-			_fragmentCode += "eif\n";
-			_fragmentCode += "ife v1.x, fc0.z\n";
-			_fragmentCode += "tex ft0, v0, fs2 <2d,nearst,nomip,clamp>\n";
-			_fragmentCode += "eif\n";
-			_fragmentCode += "ife v1.x, fc0.w\n";
-			_fragmentCode += "tex ft0, v0, fs3 <2d,nearst,nomip,clamp>\n";
-			_fragmentCode += "eif\n";
+
+			if(_targetsCount>1) {
+				_fragmentCode += "ife v1.x, fc0.y\n";
+				_fragmentCode += "tex ft0, v0, fs1 <2d,nearst,nomip,clamp>\n";
+				_fragmentCode += "eif\n";
+			}
+
+			if(_targetsCount>2) {
+				_fragmentCode += "ife v1.x, fc0.z\n";
+				_fragmentCode += "tex ft0, v0, fs2 <2d,nearst,nomip,clamp>\n";
+				_fragmentCode += "eif\n";
+			}
+
+			if(_targetsCount>3) {
+				_fragmentCode += "ife v1.x, fc0.w\n";
+				_fragmentCode += "tex ft0, v0, fs3 <2d,nearst,nomip,clamp>\n";
+				_fragmentCode += "eif\n";
+			}
+
 			_fragmentCode += "mov oc, ft0\n";
 		}
 	}

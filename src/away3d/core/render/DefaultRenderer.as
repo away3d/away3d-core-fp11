@@ -3,26 +3,25 @@ package away3d.core.render
 	import away3d.arcane;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DManager;
-	import away3d.core.pool.RenderableBase;
-	import away3d.core.traverse.ICollector;
-	import away3d.entities.Camera3D;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
+	import away3d.core.pool.RenderableBase;
 	import away3d.core.traverse.EntityCollector;
+	import away3d.core.traverse.ICollector;
+	import away3d.debug.Debug;
+	import away3d.entities.Camera3D;
 	import away3d.filters.Filter3DBase;
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
 	import away3d.lights.shadowmaps.ShadowMapperBase;
 	import away3d.materials.MaterialBase;
-	import away3d.materials.passes.GBufferPass;
+	import away3d.textures.RectangleRenderTexture;
 	import away3d.textures.RenderTexture;
 
 	import flash.display.Stage;
-
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
-	import flash.display3D.Context3DProfile;
 	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;
@@ -58,6 +57,7 @@ package away3d.core.render
 
 		private var _tempSkyboxMatrix:Matrix3D = new Matrix3D();
 		private var _skyboxTempVector:Vector3D = new Vector3D();
+		private var _renderTargetToScreenCopy:RenderTargetCopy = new RenderTargetCopy();
 		protected var filter3DRenderer:Filter3DRenderer;
 		protected var sceneDepthTexture:RenderTexture;
 		protected var sceneNormalTexture:RenderTexture;
@@ -77,7 +77,7 @@ package away3d.core.render
 		{
 			if (value && value.length == 0)
 				value = null;
-	
+
 			if (filter3DRenderer && !value) {
 				filter3DRenderer.dispose();
 				filter3DRenderer = null;
@@ -85,13 +85,13 @@ package away3d.core.render
 				filter3DRenderer = new Filter3DRenderer(_stage3DProxy);
 				filter3DRenderer.filters = value;
 			}
-	
+
 			if (filter3DRenderer) {
 				filter3DRenderer.filters = value;
 				_requireDepthRender = filter3DRenderer.requireDepthRender;
 			} else {
 				_requireDepthRender = false;
-	
+
 				if (!_deferredLighting && sceneDepthTexture) {
 					sceneDepthTexture.dispose();
 					sceneDepthTexture = null;
@@ -167,7 +167,7 @@ package away3d.core.render
 			if(_deferredLighting && _lightMode == MRT_DEFERRED_LIGHTING) {
 				renderGBuffer(entityCollector as EntityCollector);
 			}else{
-				if(_requireDepthRender || _deferredLighting) {
+				if(_deferredLighting || _requireDepthRender) {
 					renderSceneDepthToTexture(entityCollector as EntityCollector);
 				}
 
@@ -193,8 +193,16 @@ package away3d.core.render
 				else
 					renderScene(entityCollector);
 			}
-			
 			super.render(entityCollector);
+
+			if(Debug.showGBuffer && _deferredLighting) {
+				if(!_renderTargetToScreenCopy) _renderTargetToScreenCopy = new RenderTargetCopy();
+				_context3D.setRenderToBackBuffer();
+				_context3D.setTextureAt(0,sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
+				_context3D.setTextureAt(1,sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
+				_renderTargetToScreenCopy.draw(_stage3DProxy,2);
+				_stage3DProxy.clearBuffers();
+			}
 
 			if(!_shareContext) {
 				_stage3DProxy.present();
@@ -217,6 +225,8 @@ package away3d.core.render
 
 		private function updateShadows(collector:ICollector):void
 		{
+			_depthRenderer.textureRatioX = 1;
+			_depthRenderer.textureRatioY = 1;
 			var entityCollector:EntityCollector = collector as EntityCollector;
 			var dirLights:Vector.<DirectionalLight> = entityCollector.directionalLights;
 			var pointLights:Vector.<PointLight> = entityCollector.pointLights;
@@ -416,7 +426,7 @@ package away3d.core.render
 
 			_depthRenderer.disableColor = false;
 		}
-		
+
 		/**
 		 * Updates the backbuffer dimensions.
 		 */
@@ -442,10 +452,9 @@ package away3d.core.render
 				sceneDepthTexture.width = _rttBufferManager.textureWidth;
 				sceneDepthTexture.height = _rttBufferManager.textureHeight;
 			}
-
 			_depthRenderer.textureRatioX = _rttBufferManager.textureRatioX;
 			_depthRenderer.textureRatioY = _rttBufferManager.textureRatioY;
-			_depthRenderer.renderScene(entityCollector, sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
+			_depthRenderer.renderScene(entityCollector, sceneDepthTexture.getTextureForStage3D(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 		}
 
 		protected function renderSceneWorldNormalToTexture(entityCollector:EntityCollector):void {
@@ -458,29 +467,29 @@ package away3d.core.render
 
 			_worldNormalRenderer.textureRatioX = _rttBufferManager.textureRatioX;
 			_worldNormalRenderer.textureRatioY = _rttBufferManager.textureRatioY;
-			_worldNormalRenderer.renderScene(entityCollector, sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
+			_worldNormalRenderer.renderScene(entityCollector, sceneNormalTexture.getTextureForStage3D(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 		}
 
 		protected function renderGBuffer(entityCollector:EntityCollector):void {
 			if(!sceneDepthTexture) {
-				sceneDepthTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+				sceneDepthTexture = new RectangleRenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
 			}else{
-				sceneDepthTexture.width = _rttBufferManager.textureWidth;
-				sceneDepthTexture.height = _rttBufferManager.textureHeight;
+				sceneDepthTexture.width = _width;
+				sceneDepthTexture.height = _height;
 			}
 
 			if(!sceneNormalTexture) {
-				sceneNormalTexture = new RenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
+				sceneNormalTexture = new RectangleRenderTexture(_rttBufferManager.textureWidth, _rttBufferManager.textureHeight);
 			}else{
-				sceneNormalTexture.width = _rttBufferManager.textureWidth;
-				sceneNormalTexture.height = _rttBufferManager.textureHeight;
+				sceneNormalTexture.width = _width;
+				sceneNormalTexture.height = _height;
 			}
 
-			_context3D.setRenderToTexture(sceneDepthTexture.getTextureForStage3D(stage3DProxy), true, _antiAlias, 0, 0);
-			_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(stage3DProxy), true, _antiAlias, 0, 1);
+			_context3D.setRenderToTexture(sceneDepthTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
+			_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
 
-			_gbufferRenderer.textureRatioX = _rttBufferManager.textureRatioX;
-			_gbufferRenderer.textureRatioY = _rttBufferManager.textureRatioY;
+			_gbufferRenderer.textureRatioX = 1;
+			_gbufferRenderer.textureRatioY = 1;
 			_gbufferRenderer.renderScene(entityCollector);
 
 			_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
