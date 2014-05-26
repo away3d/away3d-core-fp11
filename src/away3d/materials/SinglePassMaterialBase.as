@@ -11,7 +11,6 @@
 	import away3d.materials.methods.BasicSpecularMethod;
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
-	import away3d.materials.passes.DeferredPass;
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
 	

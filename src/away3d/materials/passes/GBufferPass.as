@@ -17,7 +17,7 @@ package away3d.materials.passes {
 
 	use namespace arcane;
 
-	public class DeferredPass extends MaterialPassBase {
+	public class GBufferPass extends MaterialPassBase {
 		//varyings
 		public static const UV_VARYING:String = "vUV";
 		public static const SECONDARY_UV_VARYING:String = "vSecondaryUV"
@@ -62,7 +62,6 @@ package away3d.materials.passes {
 		public var normalMapUVChannel:String = TriangleSubGeometry.UV_DATA;
 
 		public var specularMap:Texture2DBase;
-		public var specularPower:Number;
 		public var specularMapUVChannel:String = TriangleSubGeometry.UV_DATA;
 
 		public var opacityMap:Texture2DBase;
@@ -76,10 +75,16 @@ package away3d.materials.passes {
 		private var _specularColorData:Vector.<Number> = new Vector.<Number>();
 		private var _shader:ShaderState = new ShaderState();
 
-		public function DeferredPass() {
-			_numUsedStreams = 1;
-			_numUsedVertexConstants = 4;
-			_numUsedVaryings = 1;
+		private var _drawDepth:Boolean;
+		private var _drawWorldNormal:Boolean;
+		private var _drawAlbedo:Boolean;
+		private var _drawSpecular:Boolean;
+
+		public function GBufferPass(drawDepth:Boolean = true, drawWorldNormal:Boolean = true, drawAlbedo:Boolean = false, drawSpecular:Boolean = false) {
+			_drawDepth = drawDepth;
+			_drawWorldNormal = drawWorldNormal;
+			_drawAlbedo = drawAlbedo;
+			_drawSpecular = drawSpecular;
 
 			_depthData = Vector.<Number>([
 				1, 255, 65025, 16581375,
@@ -151,8 +156,6 @@ package away3d.materials.passes {
 			//we have filled the depth, lets fill world normal
 			if (!normalMap) {
 				code += "nrm ft0.xyz, v" + _shader.getVarying(NORMAL_VARYING) + ".xyz\n";
-				code += "mov ft0.w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".w\n";
-				code += "mov oc1, ft0\n";
 			} else {
 				//normal tangent space
 				var normalTS:int = _shader.getFreeFragmentTemp();
@@ -180,12 +183,18 @@ package away3d.materials.passes {
 				code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(NORMAL_VARYING) + ".xyz\n";
 				code += "dp3 ft" + normalOutput + ".z, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
 				code += "nrm ft" + normalOutput + ".xyz, ft" + normalOutput + "\n";
-				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y\n";
-				code += "mov oc1, ft" + normalOutput + "\n";
 				_shader.freeLastFragmentTemp();
 				_shader.freeLastFragmentTemp();
 				_shader.freeLastFragmentTemp();
 			}
+			//if do not draw specular, draw specular intesity to normalmap for deferred lighting
+			if(!_drawSpecular) {
+				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".xxx\n";
+			}else{
+				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".y\n";
+			}
+			code += "mov oc1, ft" + normalOutput + "\n";
+
 			//color
 			var diffuseColor:int = _shader.getFreeFragmentTemp();
 			if (diffuseMap) {
