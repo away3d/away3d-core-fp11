@@ -133,7 +133,7 @@ package away3d.materials.passes {
 				code += "nrm ft" + temp + ".xyz, v" + _shader.getVarying(NORMAL_VARYING) + ".xyz\n";
 				code += "dp3 ft" + normalOutput + ".z, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
 				code += "nrm ft" + normalOutput + ".xyz, ft" + normalOutput + ".xyz\n";
-				//specular intensity
+				//specular power
 				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".w\n";
 				code += "mov oc, ft" + normalOutput + "\n";
 				_shader.freeLastFragmentTemp();

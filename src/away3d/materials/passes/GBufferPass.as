@@ -34,11 +34,13 @@ package away3d.materials.passes {
 		//vertex constants
 		public static const PROJ_MATRIX_VERTEX_CONSTANT:String = "cvProj";
 		public static const WORLD_MATRIX_VERTEX_CONSTANT:String = "cvWorldMatrix";
+		public static const LINEAR_DEPTH_VERTEX_CONSTANT:String = "cvLinearDepth";
 		//fragment constants
 		public static const DEPTH_FRAGMENT_CONSTANT:String = "cfDepthData";
 		public static const PROPERTIES_FRAGMENT_CONSTANT:String = "cfPropertiesData";
 		public static const DIFFUSE_COLOR_CONSTANT:String = "cfDiffuseColor";
 		public static const SPECULAR_COLOR_CONSTANT:String = "cfSpecularColor";
+
 		//textures
 		public static const OPACITY_TEXTURE:String = "tOpacity";
 		public static const NORMAL_TEXTURE:String = "tNormal";
@@ -70,6 +72,7 @@ package away3d.materials.passes {
 		public var alphaThreshold:Number = 0;
 
 		private var _depthData:Vector.<Number>;
+		private var _linearDepth:Vector.<Number> = Vector.<Number>([1, 1, 0, 1]);
 		private var _propertiesData:Vector.<Number>;
 		private var _diffuseColorData:Vector.<Number>;
 		private var _specularColorData:Vector.<Number>;
@@ -93,7 +96,6 @@ package away3d.materials.passes {
 			code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VERTEX_CONSTANT, 4) + "\n";
 			code += "mov op, vt" + projectedPosTemp + "\n";
 			code += "mov v" + _shader.getVarying(PROJECTED_POSITION_VARYING) + ", vt" + projectedPosTemp + "\n";//projected position
-			_shader.freeLastVertexTemp();
 
 			if (useUV) {
 				code += "mov v" + _shader.getVarying(UV_VARYING) + ", va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";//uv channel
@@ -221,7 +223,7 @@ package away3d.materials.passes {
 				var specularColor:int = _shader.getFreeFragmentTemp();
 				if (specularMap) {
 					code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
-					//specular intensity
+					//specular power
 					code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".xxx\n";
 					//gloss
 					code += "mov ft" + specularColor + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_CONSTANT) + ".w\n";
@@ -247,6 +249,13 @@ package away3d.materials.passes {
 			var context3D:Context3D = stage3DProxy._context3D;
 			super.activate(stage3DProxy, camera);
 
+
+			if (_shader.hasVertexConstant(LINEAR_DEPTH_VERTEX_CONSTANT)) {
+				_linearDepth[0] = 1 / camera.projection.far;
+				_linearDepth[1] = 255 / camera.projection.far;
+				context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, _shader.getFragmentConstant(LINEAR_DEPTH_VERTEX_CONSTANT), _linearDepth, 1);
+			}
+
 			if (!_depthData) {
 				_depthData = new Vector.<Number>();
 				_depthData[0] = 1;
@@ -261,7 +270,7 @@ package away3d.materials.passes {
 			context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(DEPTH_FRAGMENT_CONSTANT), _depthData, 2);
 
 			if (_shader.hasFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT)) {
-				if(!_propertiesData) _propertiesData = new Vector.<Number>();
+				if (!_propertiesData) _propertiesData = new Vector.<Number>();
 				_propertiesData[0] = alphaThreshold;//used for opacity map
 				_propertiesData[1] = 1;//used for normal output and normal restoring and diffuse output
 				_propertiesData[2] = 0;
@@ -270,7 +279,7 @@ package away3d.materials.passes {
 			}
 
 			if (_shader.hasFragmentConstant(DIFFUSE_COLOR_CONSTANT)) {
-				if(!_diffuseColorData) _diffuseColorData = new Vector.<Number>();
+				if (!_diffuseColorData) _diffuseColorData = new Vector.<Number>();
 				_diffuseColorData[0] = colorR;
 				_diffuseColorData[1] = colorG;
 				_diffuseColorData[2] = colorB;
@@ -279,7 +288,7 @@ package away3d.materials.passes {
 			}
 
 			if (_shader.hasFragmentConstant(SPECULAR_COLOR_CONSTANT)) {
-				if(!_specularColorData) _specularColorData = new Vector.<Number>();
+				if (!_specularColorData) _specularColorData = new Vector.<Number>();
 				if (specularMap) {
 					_specularColorData[0] = specularIntensity;
 					_specularColorData[1] = 0;

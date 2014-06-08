@@ -208,10 +208,11 @@ package away3d.core.managers
 				x, y, u2, v2, 2,
 				-x, y, u1, v2, 3 ];
 			
-			screenVerts = new <Number>[        -1, -1, u1, v1, 0,
-				1, -1, u2, v1, 1,
-				1, 1, u2, v2, 2,
-				-1, 1, u1, v2, 3 ];
+			screenVerts = new <Number>[
+				-1, -1, 	u1, v1, 0,
+				1, -1, 	u2, v1, 1,
+				1, 1, 	u2, v2, 2,
+				-1, 1, 	u1, v2, 3 ];
 			
 			_renderToTextureVertexBuffer.uploadFromVector(textureVerts, 0, 4);
 			_renderToScreenVertexBuffer.uploadFromVector(screenVerts, 0, 4);

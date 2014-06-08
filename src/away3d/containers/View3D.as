@@ -179,7 +179,9 @@
 		
 		public function set layeredView(value:Boolean):void
 		{
+			if(_layeredView == value) return;
 			_layeredView = value;
+			if(_renderer) _renderer.layeredView = _layeredView;
 		}
 		
 		private function initHitField():void
@@ -237,6 +239,7 @@
 			_renderer.width = _width;
 			_renderer.height = _height;
 			_renderer.shareContext = _shareContext;
+			_renderer.layeredView = _layeredView;
 		}
 
 		private function onScissorUpdated(event:RendererEvent):void {
@@ -507,7 +510,6 @@
 			_entityCollector.clear();
 			// collect stuff to render
 			_scene.traversePartitions(_entityCollector);
-
 
 			_renderer.render(_entityCollector);
 //

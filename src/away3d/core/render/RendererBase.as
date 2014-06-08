@@ -59,6 +59,7 @@ package away3d.core.render
 		protected var _stage3DProxy:Stage3DProxy;
 
 		protected var camera:Camera3D;
+
 		arcane var _entryPoint:Vector3D;
 		protected var cameraForward:Vector3D;
 
@@ -109,6 +110,7 @@ package away3d.core.render
 
 		private var _entityCollector:ICollector;
 		private var _wantsBestResolution:Boolean = true;
+		private var _layeredView:Boolean;
 
 		public function get antiAlias():Number
 		{
@@ -787,6 +789,14 @@ package away3d.core.render
 
 		public function set wantsBestResolution(value:Boolean):void {
 			_wantsBestResolution = value;
+		}
+
+		public function get layeredView():Boolean {
+			return _layeredView;
+		}
+
+		public function set layeredView(value:Boolean):void {
+			_layeredView = value;
 		}
 	}
 }

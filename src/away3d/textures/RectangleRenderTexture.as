@@ -5,7 +5,7 @@ package away3d.textures {
 
 	public class RectangleRenderTexture extends RenderTexture {
 
-		public function RectangleRenderTexture(width:Number = 1, height:Number = 1, format:String = Context3DTextureFormat.RGBA_HALF_FLOAT) {
+		public function RectangleRenderTexture(width:Number = 1, height:Number = 1, format:String = Context3DTextureFormat.BGRA) {
 			super(width, height);
 			_format = format;
 		}

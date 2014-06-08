@@ -77,7 +77,7 @@ package away3d.containers
 		}
 
 
-		/**
+		 /**
 		 * Determines whether or not the children of the object are mouse, or user
 		 * input device, enabled. If an object is enabled, a user can interact with
 		 * it by using a mouse or user input device. The default is
@@ -314,7 +314,7 @@ package away3d.containers
 
 			var len:uint = _children.length;
 			for (var i:uint = 0; i < len; ++i)
-				_children[i++].invalidateSceneTransform();
+				_children[i].invalidateSceneTransform();
 		}
 
 		/**
@@ -338,7 +338,7 @@ package away3d.containers
 
 			var len:uint = _children.length;
 			for (var i:uint = 0; i < len; ++i)
-				_children[i].updateImplicitMouseEnabled(this._mouseChildren);
+				_children[i].updateImplicitMouseEnabled(_mouseChildren);
 		}
 
 		/**

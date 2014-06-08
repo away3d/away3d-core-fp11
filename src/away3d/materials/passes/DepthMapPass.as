@@ -8,12 +8,12 @@
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.textures.Texture2DBase;
-	
+
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFormat;
 	import flash.geom.Matrix3D;
-	
+
 	use namespace arcane;
 
 	/**
@@ -37,7 +37,7 @@
 				1.0/255.0, 1.0/255.0, 1.0/255.0, 0.0,
 				0.0, 0.0, 0.0, 1]);
 		}
-		
+
 		/**
 		 * The minimum alpha value for which pixels should be drawn. This is used for transparency that is either
 		 * invisible or entirely opaque, often used with textures for foliage, etc.
@@ -47,7 +47,7 @@
 		{
 			return _alphaThreshold;
 		}
-		
+
 		public function set alphaThreshold(value:Number):void
 		{
 			if (value < 0)
@@ -72,12 +72,12 @@
 		{
 			return _alphaMask;
 		}
-		
+
 		public function set alphaMask(value:Texture2DBase):void
 		{
 			_alphaMask = value;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -87,22 +87,22 @@
 			// project
 			code = "m44 vt1, vt0, vc0		\n" +
 				"mov op, vt1	\n";
-			
+
 			if (_alphaThreshold > 0) {
 				_numUsedTextures = 1;
 				_numUsedStreams = 2;
 				code += "mov v0, vt1\n" +
 					"mov v1, va1\n";
-				
+
 			} else {
 				_numUsedTextures = 0;
 				_numUsedStreams = 1;
 				code += "mov v0, vt1\n";
 			}
-			
+
 			return code;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -113,17 +113,17 @@
 				"mul ft0, fc0, ft2.z	\n" +
 				"frc ft0, ft0			\n" +
 				"mul ft1, ft0.yzww, fc1	\n";
-			
+
 			if (_alphaThreshold > 0) {
 				var wrap:String = _repeat ? "wrap" : "clamp";
 				var filter:String, format:String;
 				var enableMipMaps:Boolean = _mipmap && _alphaMask.hasMipMaps;
-				
+
 				if (_smooth)
 					filter = enableMipMaps ? "linear,miplinear" : "linear";
 				else
 					filter = enableMipMaps ? "nearest,mipnearest" : "nearest";
-				
+
 				switch (_alphaMask.format) {
 					case Context3DTextureFormat.COMPRESSED:
 						format = "dxt1,";
@@ -138,12 +138,12 @@
 					"sub ft3."+_alphaMaskChannel+", ft3."+_alphaMaskChannel+", fc2.x\n" +
 					"kil ft3."+_alphaMaskChannel+"\n";
 			}
-			
+
 			codeF += "sub oc, ft0, ft1		\n";
 
 			return codeF;
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -157,11 +157,11 @@
 			matrix.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
 			matrix.append(viewProjection);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, matrix, true);
-			
+
 			stage3DProxy.activateBuffer(0, renderable.getVertexData(TriangleSubGeometry.POSITION_DATA),  renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
 			context.drawTriangles(stage3DProxy.getIndexBuffer(renderable.getIndexData()), 0, renderable.numTriangles);
 		}
-		
+
 		/**
 		 * @inheritDoc
 		 */
@@ -169,7 +169,7 @@
 		{
 			var context:Context3D = stage3DProxy._context3D;
 			super.activate(stage3DProxy, camera);
-			
+
 			if (_alphaThreshold > 0) {
 				context.setTextureAt(0, _alphaMask.getTextureForStage3D(stage3DProxy));
 				context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, _data, 3);

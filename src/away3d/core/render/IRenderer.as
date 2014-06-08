@@ -96,5 +96,9 @@ package away3d.core.render {
 		function set backgroundB(value:Number):void;
 
 		function get backgroundAlpha():Number;
+
+		function set layeredView(value:Boolean):void;
+
+		function get layeredView():Boolean;
 	}
 }
