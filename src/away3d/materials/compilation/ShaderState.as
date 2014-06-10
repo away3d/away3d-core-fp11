@@ -4,8 +4,6 @@ package away3d.materials.compilation {
 		public var numAttributes:uint = 0;
 		public var numVertexConstants:uint = 0;
 		public var numFragmentConstants:uint = 0;
-		public var numFragmentTemps:uint = 0;
-		public var numVertexTemps:uint = 0;
 		public var numTextureRegisters:uint = 0;
 
 		private var varyingsMap:Object = {};
@@ -15,6 +13,9 @@ package away3d.materials.compilation {
 		private var fragmentConstantsMap:Object = {};
 		private var fragmentConstantsStride:Object = {};
 		private var textureMap:Object = {};
+		//
+		private var vertexTemps:Vector.<int> = new Vector.<int>(26, true);
+		private var fragmentTemps:Vector.<int> = new Vector.<int>(16, true);
 
 		public function clear():void {
 			varyingsMap = {};
@@ -29,9 +30,15 @@ package away3d.materials.compilation {
 			numAttributes = 0;
 			numVertexConstants = 0;
 			numFragmentConstants = 0;
-			numFragmentTemps = 0;
-			numVertexTemps = 0;
 			numTextureRegisters = 0;
+
+			var i:int = 0;
+			for (i = 0; i < 26; i++) {
+				vertexTemps[i] = 0;
+			}
+			for (i = 0; i < 16; i++) {
+				fragmentTemps[i] = 0;
+			}
 		}
 
 		public function getVarying(type:String):int {
@@ -45,21 +52,41 @@ package away3d.materials.compilation {
 		}
 
 		public function getFreeVertexTemp():int {
-			return numVertexTemps++;
+			var i:int = 0;
+			while (vertexTemps[i] != 0) {
+				i++;
+			}
+			vertexTemps[i] = 1;
+			return i;
 		}
 
-		public function freeLastVertexTemp():void {
-			numVertexTemps--;
-			if (numVertexTemps < 0) numVertexTemps = 0;
+		public function addVertexTempUsage(i:int, count:int = 1):void {
+			vertexTemps[i] += count;
+		}
+
+		public function removeVertexTempUsage(i:int):void {
+			var usageCount:int = vertexTemps[i] - 1;
+			if (usageCount < -1) usageCount = 0;
+			vertexTemps[i] = usageCount;
 		}
 
 		public function getFreeFragmentTemp():int {
-			return numFragmentTemps++;
+			var i:int = 0;
+			while (fragmentTemps[i] != 0) {
+				i++;
+			}
+			fragmentTemps[i] = 1;
+			return i;
 		}
 
-		public function freeLastFragmentTemp():void {
-			numFragmentTemps--;
-			if (numFragmentTemps < 0) numFragmentTemps = 0;
+		public function addFragmentTempUsage(i:int, count:int = 1):void {
+			fragmentTemps[i] += count;
+		}
+
+		public function removeFragmentTempUsage(i:int):void {
+			var usageCount:int = fragmentTemps[i] - 1;
+			if (usageCount < -1) usageCount = 0;
+			fragmentTemps[i] = usageCount;
 		}
 
 		public function getAttribute(type:String):int {

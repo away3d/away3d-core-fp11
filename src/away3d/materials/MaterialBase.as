@@ -435,7 +435,7 @@ package away3d.materials
 
 		arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D, drawDepth:Boolean, drawWorldNormals:Boolean, drawAlbedo:Boolean = false, drawSpecular:Boolean = false):void {
 			_gBufferPass.drawDepth = drawDepth;
-			_gBufferPass.drawWorldNormal = drawWorldNormals;
+			_gBufferPass.drawNormalDepth = drawWorldNormals;
 			_gBufferPass.drawAlbedo = drawAlbedo;
 			_gBufferPass.drawSpecular = drawSpecular;
 			_gBufferPass.activate(stage3DProxy,camera);

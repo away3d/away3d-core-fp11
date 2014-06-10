@@ -56,7 +56,7 @@ package away3d.materials.passes {
 			code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VERTEX_CONSTANT, 4) + "\n";
 			code += "mov op, vt" + projectedPosTemp + "\n";
 			code += "mov v" + _shader.getVarying(PROJECTED_POSITION_VARYING) + ", vt" + projectedPosTemp + "\n";//projected position
-			_shader.freeLastVertexTemp();
+			_shader.removeVertexTempUsage(projectedPosTemp);
 			code += "mov v" + _shader.getVarying(UV_VARYING) + ", va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";//uv channel
 			//normals
 			var normalTemp:int = _shader.getFreeVertexTemp();
@@ -80,12 +80,12 @@ package away3d.materials.passes {
 				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".xyzw, vt" + normalTemp + ".xyzw\n";
 				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".x, vt" + tangentTemp + ".z\n";
 				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ".y, vt" + binormal + ".z\n";
-				_shader.freeLastVertexTemp();
-				_shader.freeLastVertexTemp();
+				_shader.removeVertexTempUsage(binormal);
+				_shader.removeVertexTempUsage(tangentTemp);
 			} else {
 				code += "mov v" + _shader.getVarying(NORMAL_VARYING) + ", vt" + normalTemp + "\n";
 			}
-			_shader.freeLastVertexTemp();
+			_shader.removeVertexTempUsage(normalTemp);
 
 			_numUsedVaryings = _shader.numVaryings;
 			_numUsedVertexConstants = _shader.numVertexConstants;
@@ -136,9 +136,9 @@ package away3d.materials.passes {
 				//specular power
 				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".w\n";
 				code += "mov oc, ft" + normalOutput + "\n";
-				_shader.freeLastFragmentTemp();
-				_shader.freeLastFragmentTemp();
-				_shader.freeLastFragmentTemp();
+				_shader.removeFragmentTempUsage(normalOutput);
+				_shader.removeFragmentTempUsage(temp);
+				_shader.removeFragmentTempUsage(normalTS);
 			}
 
 			_numUsedTextures = _shader.numTextureRegisters;

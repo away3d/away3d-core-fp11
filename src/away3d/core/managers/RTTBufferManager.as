@@ -20,7 +20,8 @@ package away3d.core.managers
 		
 		private var _renderToTextureVertexBuffer:VertexBuffer3D;
 		private var _renderToScreenVertexBuffer:VertexBuffer3D;
-		
+		private var _renderRectToScreenVertexBuffer:VertexBuffer3D;
+
 		private var _indexBuffer:IndexBuffer3D;
 		private var _stage3DProxy:Stage3DProxy;
 		private var _viewWidth:int = -1;
@@ -131,6 +132,12 @@ package away3d.core.managers
 				updateRTTBuffers();
 			return _renderToScreenVertexBuffer;
 		}
+
+		public function get renderRectToScreenVertexBuffer():VertexBuffer3D {
+			if (_buffersInvalid)
+				updateRTTBuffers();
+			return _renderRectToScreenVertexBuffer;
+		}
 		
 		public function get indexBuffer():IndexBuffer3D
 		{
@@ -162,8 +169,10 @@ package away3d.core.managers
 				_indexBuffer.dispose();
 				_renderToScreenVertexBuffer.dispose();
 				_renderToTextureVertexBuffer.dispose();
+				_renderRectToScreenVertexBuffer.dispose();
 				_renderToScreenVertexBuffer = null;
 				_renderToTextureVertexBuffer = null;
+				_renderRectToScreenVertexBuffer = null;
 				_indexBuffer = null;
 			}
 		}
@@ -173,6 +182,7 @@ package away3d.core.managers
 			_indexBuffer = null;
 			_renderToTextureVertexBuffer = null;
 			_renderToScreenVertexBuffer = null;
+			_renderRectToScreenVertexBuffer = null;
 			updateRTTBuffers();
 		}
 		
@@ -184,11 +194,13 @@ package away3d.core.managers
 			var context:Context3D = _stage3DProxy.context3D;
 			var textureVerts:Vector.<Number>;
 			var screenVerts:Vector.<Number>;
+			var screenRectVerts:Vector.<Number>;
 			var x:Number, y:Number;
 
 			_renderToTextureVertexBuffer ||= context.createVertexBuffer(4, 5);
 			_renderToScreenVertexBuffer ||= context.createVertexBuffer(4, 5);
-			
+			_renderRectToScreenVertexBuffer ||= context.createVertexBuffer(4, 5);
+
 			if (!_indexBuffer) {
 				_indexBuffer = context.createIndexBuffer(6);
 				_indexBuffer.uploadFromVector(new <uint>[2, 1, 0, 3, 2, 0], 0, 6);
@@ -209,14 +221,21 @@ package away3d.core.managers
 				-x, y, u1, v2, 3 ];
 			
 			screenVerts = new <Number>[
-				-1, -1, 	u1, v1, 0,
+				-1, -1, u1, v1, 0,
 				1, -1, 	u2, v1, 1,
 				1, 1, 	u2, v2, 2,
 				-1, 1, 	u1, v2, 3 ];
-			
+
+			screenRectVerts = new <Number>[
+				-1, -1, 0, 1, 0,
+				1, -1, 	1, 1, 1,
+				1, 1, 	1, 0, 2,
+				-1, 1, 	0, 0, 3
+			];
+
 			_renderToTextureVertexBuffer.uploadFromVector(textureVerts, 0, 4);
 			_renderToScreenVertexBuffer.uploadFromVector(screenVerts, 0, 4);
-			
+			_renderRectToScreenVertexBuffer.uploadFromVector(screenRectVerts, 0, 4);
 			_buffersInvalid = false;
 		}
 	}

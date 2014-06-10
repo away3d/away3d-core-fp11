@@ -45,6 +45,7 @@ package away3d.materials.compilation
 		{
 			if (_profile == Context3DProfile.STANDARD)
 			{
+				//token 1024
 				_fragmentTempCache = new RegisterPool("ft", 16, false);
 				_vertexTempCache = new RegisterPool("vt", 26, false);
 				_varyingCache = new RegisterPool("v", 10);
@@ -57,6 +58,7 @@ package away3d.materials.compilation
 			}
 			else
 			{
+				//token 200
 				_fragmentTempCache = new RegisterPool("ft", 8, false);
 				_vertexTempCache = new RegisterPool("vt", 8, false);
 				_varyingCache = new RegisterPool("v", 8);

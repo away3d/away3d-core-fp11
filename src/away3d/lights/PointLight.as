@@ -1,10 +1,8 @@
 package away3d.lights
 {
 	import away3d.arcane;
-	import away3d.bounds.BoundingSphere;
 	import away3d.bounds.BoundingVolumeBase;
 	import away3d.core.math.Box;
-	import away3d.core.pool.IRenderable;
 	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.partition.EntityNode;
 	import away3d.core.partition.PointLightNode;
@@ -35,6 +33,8 @@ package away3d.lights
 		public function PointLight()
 		{
 			super();
+
+			_isEntity = true;
 			_fallOffFactor = 1/(_fallOff*_fallOff - _radius*_radius);
 		}
 		
@@ -102,14 +102,6 @@ package away3d.lights
 			//			_bounds.fromExtremes(-_fallOff, -_fallOff, -_fallOff, _fallOff, _fallOff, _fallOff);
 			_bounds.fromSphere(new Vector3D(), _fallOff);
 			_boundsInvalid = false;
-		}
-		
-		/**
-		 * @inheritDoc
-		 */
-		protected function getDefaultBoundingVolume():BoundingVolumeBase
-		{
-			return new BoundingSphere();
 		}
 		
 		/**
