@@ -40,7 +40,8 @@ package away3d.lights
 		arcane var _diffuseB:Number = 1;
 		
 		private var _castsShadows:Boolean;
-		
+		private var _deferred:Boolean;
+
 		private var _shadowMapper:ShadowMapperBase;
 		
 		/**
@@ -220,6 +221,18 @@ package away3d.lights
 		{
 			_shadowMapper = value;
 			_shadowMapper.light = this;
+		}
+
+		public function get deferred():Boolean
+		{
+			return _deferred;
+		}
+
+		public function set deferred(value:Boolean):void
+		{
+			if(_deferred == value) return;
+			_deferred = value;
+			dispatchEvent(new LightEvent(LightEvent.DEFERRED_CHANGE));
 		}
 	}
 }

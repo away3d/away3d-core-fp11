@@ -76,7 +76,9 @@ package away3d.materials.passes
 		protected var _numPointLights:uint;
 		protected var _numDirectionalLights:uint;
 		protected var _numLightProbes:uint;
-		
+		protected var _numDeferredPointLights:uint;
+		protected var _numDeferredDirectionalLights:uint;
+
 		protected var _enableLightFallOff:Boolean = true;
 		
 		private var _forceSeparateMVP:Boolean;
@@ -209,6 +211,10 @@ package away3d.materials.passes
 			_compiler.forceSeperateMVP = _forceSeparateMVP;
 			_compiler.numPointLights = _numPointLights;
 			_compiler.numDirectionalLights = _numDirectionalLights;
+			if(_material.requiresBlending) {
+				_compiler.numPointLights += _numDeferredPointLights;
+				_compiler.numDirectionalLights += _numDeferredDirectionalLights;
+			}
 			_compiler.numLightProbes = _numLightProbes;
 			_compiler.methodSetup = _methodSetup;
 			_compiler.diffuseLightSources = _diffuseLightSources;
@@ -692,7 +698,8 @@ package away3d.materials.passes
 		 */
 		protected function usesLights():Boolean
 		{
-			return (_numPointLights > 0 || _numDirectionalLights > 0) && ((_diffuseLightSources | _specularLightSources) & LightSources.LIGHTS) != 0;
+			return (_numPointLights > 0 || _numDirectionalLights > 0 || (_material.requiresBlending && (_numDeferredDirectionalLights>0 || _numDeferredPointLights > 0)))
+					&& ((_diffuseLightSources | _specularLightSources) & LightSources.LIGHTS) != 0;
 		}
 		
 		/**

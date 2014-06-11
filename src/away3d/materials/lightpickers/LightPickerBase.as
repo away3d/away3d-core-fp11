@@ -23,12 +23,16 @@ package away3d.materials.lightpickers
 		protected var _numDirectionalLights:uint;
 		protected var _numCastingPointLights:uint;
 		protected var _numCastingDirectionalLights:uint;
+		protected var _numDeferredDirectionalLights:uint;
+		protected var _numDeferredPointLights:uint;
 		protected var _numLightProbes:uint;
 		protected var _allPickedLights:Vector.<LightBase>;
 		protected var _pointLights:Vector.<PointLight>;
 		protected var _castingPointLights:Vector.<PointLight>;
 		protected var _directionalLights:Vector.<DirectionalLight>;
 		protected var _castingDirectionalLights:Vector.<DirectionalLight>;
+		protected var _deferredDirectionalLights:Vector.<DirectionalLight>;
+		protected var _deferredPointLights:Vector.<PointLight>;
 		protected var _lightProbes:Vector.<LightProbe>;
 		protected var _lightProbeWeights:Vector.<Number>;
 
@@ -193,6 +197,21 @@ package away3d.materials.lightpickers
 			for (i = 0; i < _numLightProbes; ++i)
 				_lightProbeWeights[i] *= total;
 		}
-	
+
+		public function get numDeferredDirectionalLights():uint {
+			return _numDeferredDirectionalLights;
+		}
+
+		public function get numDeferredPointLights():uint {
+			return _numDeferredPointLights;
+		}
+
+		public function get deferredDirectionalLights():Vector.<DirectionalLight> {
+			return _deferredDirectionalLights;
+		}
+
+		public function get deferredPointLights():Vector.<PointLight> {
+			return _deferredPointLights;
+		}
 	}
 }

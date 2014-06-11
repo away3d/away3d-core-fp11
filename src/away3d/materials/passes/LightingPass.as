@@ -95,6 +95,7 @@ package away3d.materials.passes
 		 */
 		override protected function createCompiler(profile:String):ShaderCompiler
 		{
+			//TODO: STANDARD profile support
 			_maxLights = profile == "baselineConstrained"? 1 : 3;
 			return new LightingShaderCompiler(profile);
 		}
@@ -126,10 +127,12 @@ package away3d.materials.passes
 			var numLightProbes:int = _numLightProbes;
 			
 			if (_lightPicker) {
+				_numDeferredDirectionalLights = 0;
+				_numDeferredPointLights = 0;
 				_numDirectionalLights = calculateNumDirectionalLights(_lightPicker.numDirectionalLights);
 				_numPointLights = calculateNumPointLights(_lightPicker.numPointLights);
 				_numLightProbes = calculateNumProbes(_lightPicker.numLightProbes);
-				
+
 				if (_includeCasters) {
 					_numPointLights += _lightPicker.numCastingPointLights;
 					_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
@@ -290,11 +293,11 @@ package away3d.materials.passes
 				for (i = 0; i < len; ++i) {
 					dirLight = dirLights[offset + i];
 					dirPos = dirLight.sceneDirection;
-					
+
 					_ambientLightR += dirLight._ambientR;
 					_ambientLightG += dirLight._ambientG;
 					_ambientLightB += dirLight._ambientB;
-					
+
 					if (_tangentSpace) {
 						var x:Number = -dirPos.x;
 						var y:Number = -dirPos.y;
@@ -349,6 +352,8 @@ package away3d.materials.passes
 				if (cast)
 					pointLights = _lightPicker.castingPointLights;
 				len = pointLights.length;
+				if (len > _numPointLights)
+					len = _numPointLights;
 				for (i = 0; i < len; ++i) {
 					pointLight = pointLights[offset + i];
 					dirPos = pointLight.scenePosition;

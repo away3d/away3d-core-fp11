@@ -168,7 +168,9 @@ package away3d.materials.passes
 				_numPointLights = _lightPicker.numPointLights;
 				_numDirectionalLights = _lightPicker.numDirectionalLights;
 				_numLightProbes = _lightPicker.numLightProbes;
-				
+				_numDeferredDirectionalLights = _lightPicker.numDeferredDirectionalLights;
+				_numDeferredPointLights = _lightPicker.numDeferredPointLights;
+
 				if (_includeCasters) {
 					_numPointLights += _lightPicker.numCastingPointLights;
 					_numDirectionalLights += _lightPicker.numCastingDirectionalLights;
@@ -287,7 +289,7 @@ package away3d.materials.passes
 			var numLightTypes:uint = _includeCasters? 2 : 1;
 			
 			k = _lightFragmentConstantIndex;
-			
+
 			for (var cast:int = 0; cast < numLightTypes; ++cast) {
 				var dirLights:Vector.<DirectionalLight> = cast? _lightPicker.castingDirectionalLights : _lightPicker.directionalLights;
 				len = dirLights.length;
@@ -295,6 +297,7 @@ package away3d.materials.passes
 				
 				for (i = 0; i < len; ++i) {
 					dirLight = dirLights[i];
+					if(!_material.requiresBlending && !cast && dirLight.deferred) continue;//skip deferred light
 					dirPos = dirLight.sceneDirection;
 					
 					_ambientLightR += dirLight._ambientR;
@@ -316,6 +319,34 @@ package away3d.materials.passes
 					_fragmentConstantData[k++] = dirLight._specularB;
 					_fragmentConstantData[k++] = 1;
 				}
+
+				if(!cast && _material.requiresBlending) {
+					var deferredDirectionalLights:Vector.<DirectionalLight> = _lightPicker.deferredDirectionalLights;
+					len = _lightPicker.numDeferredDirectionalLights;
+					for (i = 0; i < len; ++i) {
+						dirLight = deferredDirectionalLights[i];
+						dirPos = dirLight.sceneDirection;
+
+						_ambientLightR += dirLight._ambientR;
+						_ambientLightG += dirLight._ambientG;
+						_ambientLightB += dirLight._ambientB;
+
+						_fragmentConstantData[k++] = -dirPos.x;
+						_fragmentConstantData[k++] = -dirPos.y;
+						_fragmentConstantData[k++] = -dirPos.z;
+						_fragmentConstantData[k++] = 1;
+
+						_fragmentConstantData[k++] = dirLight._diffuseR;
+						_fragmentConstantData[k++] = dirLight._diffuseG;
+						_fragmentConstantData[k++] = dirLight._diffuseB;
+						_fragmentConstantData[k++] = 1;
+
+						_fragmentConstantData[k++] = dirLight._specularR;
+						_fragmentConstantData[k++] = dirLight._specularG;
+						_fragmentConstantData[k++] = dirLight._specularB;
+						_fragmentConstantData[k++] = 1;
+					}
+				}
 			}
 			
 			// more directional supported than currently picked, need to clamp all to 0
@@ -327,30 +358,58 @@ package away3d.materials.passes
 			
 			total = 0;
 			for (cast = 0; cast < numLightTypes; ++cast) {
-				var pointLights:Vector.<PointLight> = cast? _lightPicker.castingPointLights : _lightPicker.pointLights;
+				var pointLights:Vector.<PointLight> = cast ? _lightPicker.castingPointLights : _lightPicker.pointLights;
 				len = pointLights.length;
 				for (i = 0; i < len; ++i) {
 					pointLight = pointLights[i];
 					dirPos = pointLight.scenePosition;
-					
+
 					_ambientLightR += pointLight._ambientR;
 					_ambientLightG += pointLight._ambientG;
 					_ambientLightB += pointLight._ambientB;
-					
+
 					_fragmentConstantData[k++] = dirPos.x;
 					_fragmentConstantData[k++] = dirPos.y;
 					_fragmentConstantData[k++] = dirPos.z;
 					_fragmentConstantData[k++] = 1;
-					
+
 					_fragmentConstantData[k++] = pointLight._diffuseR;
 					_fragmentConstantData[k++] = pointLight._diffuseG;
 					_fragmentConstantData[k++] = pointLight._diffuseB;
 					_fragmentConstantData[k++] = pointLight._radius*pointLight._radius;
-					
+
 					_fragmentConstantData[k++] = pointLight._specularR;
 					_fragmentConstantData[k++] = pointLight._specularG;
 					_fragmentConstantData[k++] = pointLight._specularB;
 					_fragmentConstantData[k++] = pointLight._fallOffFactor;
+				}
+
+				if(!cast && _material.requiresBlending) {
+					var deferredPointLights:Vector.<PointLight> = _lightPicker.deferredPointLights;
+					len = _lightPicker.numDeferredPointLights;
+					for (i = 0; i < len; ++i) {
+						pointLight = deferredPointLights[i];
+						dirPos = pointLight.scenePosition;
+
+						_ambientLightR += pointLight._ambientR;
+						_ambientLightG += pointLight._ambientG;
+						_ambientLightB += pointLight._ambientB;
+
+						_fragmentConstantData[k++] = dirPos.x;
+						_fragmentConstantData[k++] = dirPos.y;
+						_fragmentConstantData[k++] = dirPos.z;
+						_fragmentConstantData[k++] = 1;
+
+						_fragmentConstantData[k++] = pointLight._diffuseR;
+						_fragmentConstantData[k++] = pointLight._diffuseG;
+						_fragmentConstantData[k++] = pointLight._diffuseB;
+						_fragmentConstantData[k++] = pointLight._radius*pointLight._radius;
+
+						_fragmentConstantData[k++] = pointLight._specularR;
+						_fragmentConstantData[k++] = pointLight._specularG;
+						_fragmentConstantData[k++] = pointLight._specularB;
+						_fragmentConstantData[k++] = pointLight._fallOffFactor;
+					}
 				}
 			}
 			

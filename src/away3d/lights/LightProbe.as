@@ -85,5 +85,12 @@ package away3d.lights
 		{
 			//nothing to do here
 		}
+
+		/**
+		 * not supported for deferred
+		 */
+		override public function get deferred():Boolean {
+			return false;
+		}
 	}
 }

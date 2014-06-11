@@ -5,7 +5,8 @@ package away3d.events
 	public class LightEvent extends Event
 	{
 		public static const CASTS_SHADOW_CHANGE:String = "castsShadowChange";
-		
+		public static const DEFERRED_CHANGE:String = "deferredChange";
+
 		public function LightEvent(type:String)
 		{
 			super(type);
