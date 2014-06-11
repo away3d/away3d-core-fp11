@@ -27,6 +27,8 @@ package away3d.core.traverse
 
 		public var _pNumLights:Number = 0;
 
+		private var _numDeferredDirectionalLights:Number = 0;
+		private var _numDeferredPointLights:Number = 0;
 		private var _numDirectionalLights:Number = 0;
 		private var _numPointLights:Number = 0;
 		private var _numLightProbes:Number = 0;
@@ -88,6 +90,9 @@ package away3d.core.traverse
 		override public function applyDirectionalLight(entity:IEntity):void
 		{
 			_directionalLights[ _numDirectionalLights++ ] = entity as DirectionalLight;
+			if((entity as DirectionalLight).deferred) {
+				_numDeferredDirectionalLights++;
+			}
 		}
 
 		/**
@@ -106,6 +111,9 @@ package away3d.core.traverse
 		override public function applyPointLight(entity:IEntity):void
 		{
 			_pointLights[ _numPointLights++ ] = entity as PointLight;
+			if((entity as PointLight).deferred) {
+				_numDeferredPointLights++;
+			}
 		}
 
 		/**
@@ -114,9 +122,10 @@ package away3d.core.traverse
 		override public function clear():void
 		{
 			super.clear();
-
 			_skybox = null;
 
+			_numDeferredDirectionalLights = 0;
+			_numDeferredPointLights = 0;
 			if (_pNumLights > 0)
 				_lights.length = _pNumLights = 0;
 
@@ -128,6 +137,14 @@ package away3d.core.traverse
 
 			if (_numLightProbes > 0)
 				_lightProbes.length = _numLightProbes = 0;
+		}
+
+		public function get numDeferredDirectionalLights():Number {
+			return _numDeferredDirectionalLights;
+		}
+
+		public function get numDeferredPointLights():Number {
+			return _numDeferredPointLights;
 		}
 	}
 }
