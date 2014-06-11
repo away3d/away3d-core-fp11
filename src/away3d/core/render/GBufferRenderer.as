@@ -15,8 +15,9 @@ package away3d.core.render {
 	public class GBufferRenderer {
 		private var _drawDepth:Boolean = true;
 		private var _drawWorldNormal:Boolean = true;
+		private var _drawPosition:Boolean = true;
 		private var _drawAlbedo:Boolean = false;
-		private var _drawSpecular:Boolean = true;
+		private var _drawSpecular:Boolean = false;
 
 		public function GBufferRenderer() {
 		}
@@ -33,7 +34,7 @@ package away3d.core.render {
 			while (renderable) {
 				activeMaterial = renderable.material;
 				// otherwise this would result in depth rendered anyway because fragment shader kil is ignored
-				activeMaterial.activateForGBuffer(stage3DProxy, camera, _drawDepth, _drawWorldNormal, _drawAlbedo, _drawSpecular);
+				activeMaterial.activateForGBuffer(stage3DProxy, camera, _drawDepth, _drawWorldNormal, _drawPosition, _drawAlbedo, _drawSpecular);
 				renderable2 = renderable;
 				do {
 					activeMaterial.renderGBuffer(renderable2, stage3DProxy, camera, projectionMatrix);
@@ -79,6 +80,14 @@ package away3d.core.render {
 
 		public function set drawDepth(value:Boolean):void {
 			_drawDepth = value;
+		}
+
+		public function get drawPosition():Boolean {
+			return _drawPosition;
+		}
+
+		public function set drawPosition(value:Boolean):void {
+			_drawPosition = value;
 		}
 	}
 }

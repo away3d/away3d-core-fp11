@@ -20,12 +20,10 @@ package away3d.core.traverse
 	public class EntityCollector extends CollectorBase
 	{
 		protected var _skybox:RenderableBase;
-		protected var _lights:Vector.<LightBase>;
+		protected var _deferredLights:Vector.<LightBase>;
 		private var _directionalLights:Vector.<DirectionalLight>;
 		private var _pointLights:Vector.<PointLight>;
 		private var _lightProbes:Vector.<LightProbe>;
-
-		public var _pNumLights:Number = 0;
 
 		private var _numDeferredDirectionalLights:Number = 0;
 		private var _numDeferredPointLights:Number = 0;
@@ -52,9 +50,9 @@ package away3d.core.traverse
 		/**
 		 *
 		 */
-		public function get lights():Vector.<LightBase>
+		public function get deferredLights():Vector.<LightBase>
 		{
-			return _lights;
+			return _deferredLights;
 		}
 
 		/**
@@ -77,7 +75,7 @@ package away3d.core.traverse
 		{
 			super();
 
-			_lights = new Vector.<LightBase>();
+			_deferredLights = new Vector.<LightBase>();
 			_directionalLights = new Vector.<DirectionalLight>();
 			_pointLights = new Vector.<PointLight>();
 			_lightProbes = new Vector.<LightProbe>();
@@ -91,7 +89,7 @@ package away3d.core.traverse
 		{
 			_directionalLights[ _numDirectionalLights++ ] = entity as DirectionalLight;
 			if((entity as DirectionalLight).deferred) {
-				_numDeferredDirectionalLights++;
+				_deferredLights[ _numDeferredDirectionalLights++ ] = entity as LightBase
 			}
 		}
 
@@ -112,7 +110,7 @@ package away3d.core.traverse
 		{
 			_pointLights[ _numPointLights++ ] = entity as PointLight;
 			if((entity as PointLight).deferred) {
-				_numDeferredPointLights++;
+				_deferredLights[ _numDeferredPointLights++ ] = entity as LightBase
 			}
 		}
 
@@ -126,8 +124,7 @@ package away3d.core.traverse
 
 			_numDeferredDirectionalLights = 0;
 			_numDeferredPointLights = 0;
-			if (_pNumLights > 0)
-				_lights.length = _pNumLights = 0;
+			_deferredLights.length = 0;
 
 			if (_numDirectionalLights > 0)
 				_directionalLights.length = _numDirectionalLights = 0;

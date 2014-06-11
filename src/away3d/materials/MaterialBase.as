@@ -433,9 +433,10 @@ package away3d.materials
 			_worldNormalPass.deactivate(stage3DProxy);
 		}
 
-		arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D, drawDepth:Boolean, drawWorldNormals:Boolean, drawAlbedo:Boolean = false, drawSpecular:Boolean = false):void {
+		arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D, drawDepth:Boolean, drawWorldNormals:Boolean, drawPosition:Boolean, drawAlbedo:Boolean = false, drawSpecular:Boolean = false):void {
 			_gBufferPass.drawDepth = drawDepth;
 			_gBufferPass.drawWorldNormal = drawWorldNormals;
+			_gBufferPass.drawWorldPosition = drawPosition;
 			_gBufferPass.drawAlbedo = drawAlbedo;
 			_gBufferPass.drawSpecular = drawSpecular;
 			_gBufferPass.activate(stage3DProxy,camera);

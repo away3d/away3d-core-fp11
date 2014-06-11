@@ -22,6 +22,8 @@ package away3d.core.render {
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProfile;
+	import flash.display3D.Context3DTextureFilter;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix3D;
@@ -60,16 +62,14 @@ package away3d.core.render {
 		protected var sceneDepthTexture:RenderTexture;
 		protected var sceneNormalTexture:RenderTexture;
 		protected var sceneWorldPositionTexture:RenderTexture;
-		protected var sceneSpecularTexture:RenderTexture;
 
 		private var lightAccumulation:RenderTexture;
 		private var lightAccumulationSpecular:RenderTexture;
-		private var _directionalLightRenderer:DirectionalLightRenderer;
-		private var _pointLightRenderer:PointLightRenderer;
 		private var _deferredMonochromeSpecular:Boolean = false;
 
 		private var _forceSoftware:Boolean;
 		private var _profile:String;
+		private var _lightRenderer:LightBufferRenderer;
 
 		/**
 		 *
@@ -175,23 +175,38 @@ package away3d.core.render {
 			sceneDepthTexture = updateScreenRenderTargetTexture(sceneDepthTexture);
 			if (_deferredLighting) {
 				sceneNormalTexture = updateScreenRenderTargetTexture(sceneNormalTexture);
-				sceneWorldPositionTexture = updateScreenRenderTargetTexture(sceneWorldPositionTexture);
-				sceneSpecularTexture = updateScreenRenderTargetTexture(sceneSpecularTexture);
+				sceneWorldPositionTexture = updateScreenRenderTargetTexture(sceneWorldPositionTexture, Context3DTextureFormat.RGBA_HALF_FLOAT);
 			}
 
 			if (_deferredLighting && hasMRTSupport) {
 				_context3D.setRenderToTexture(sceneDepthTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
 				_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
-				_context3D.setRenderToTexture(sceneWorldPositionTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 2);
-				_context3D.setRenderToTexture(sceneSpecularTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 3);
+
 				_context3D.clear();
 
+				_gbufferRenderer.drawAlbedo = false;
+				_gbufferRenderer.drawDepth = true;
+				_gbufferRenderer.drawSpecular = false;
+				_gbufferRenderer.drawWorldNormal = true;
+				_gbufferRenderer.drawPosition = false;
 				_gbufferRenderer.render(_stage3DProxy, opaqueRenderableHead, camera, _rttViewProjectionMatrix);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 2);
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 3);
+
+				_context3D.setRenderToTexture(sceneWorldPositionTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
+				_context3D.clear();
+				_gbufferRenderer.drawAlbedo = false;
+				_gbufferRenderer.drawDepth = false;
+				_gbufferRenderer.drawSpecular = false;
+				_gbufferRenderer.drawWorldNormal = false;
+				_gbufferRenderer.drawPosition = true;
+				_gbufferRenderer.render(_stage3DProxy, opaqueRenderableHead, camera, _rttViewProjectionMatrix);
+
+				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
+
 				_context3D.setRenderToBackBuffer();
 			} else {
 				if (_deferredLighting || _requireDepthRender) {
@@ -221,27 +236,21 @@ package away3d.core.render {
 				lightAccumulation = updateScreenRenderTargetTexture(lightAccumulation);
 				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
 
-				if (!_deferredMonochromeSpecular) {
-					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
-					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
-				}
+
+
+//				if (!_deferredMonochromeSpecular) {
+//					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
+//					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
+//				}
 
 				stage3DProxy.clearBuffers();
 				_context3D.clear();
 
-				updateFrustumCorners(camera);
-				//render
-				if (!_directionalLightRenderer) _directionalLightRenderer = new DirectionalLightRenderer();
-				_directionalLightRenderer.textureRatioX = _textureRatioX;
-				_directionalLightRenderer.textureRatioY = _textureRatioY;
-				_directionalLightRenderer.monochromeSpecular = _deferredMonochromeSpecular;
-				_directionalLightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture, sceneSpecularTexture);
-
-				if (!_pointLightRenderer) _pointLightRenderer = new PointLightRenderer();
-				_pointLightRenderer.textureRatioX = _textureRatioX;
-				_pointLightRenderer.textureRatioY = _textureRatioY;
-				_pointLightRenderer.monochromeSpecular = _deferredMonochromeSpecular;
-//				_pointLightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture, sceneSpecularTexture);
+				if (!_lightRenderer) _lightRenderer = new LightBufferRenderer();
+				_lightRenderer.textureRatioX = _textureRatioX;
+				_lightRenderer.textureRatioY = _textureRatioY;
+				_lightRenderer.monochromeSpecular = _deferredMonochromeSpecular;
+				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, sceneNormalTexture, sceneWorldPositionTexture);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
 //				if (!_deferredMonochromeSpecular) {
@@ -282,7 +291,7 @@ package away3d.core.render {
 					_context3D.setTextureAt(1, sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
 
 					numTextures++;
-					_context3D.setTextureAt(2, sceneWorldPositionTexture.getTextureForStage3D(_stage3DProxy));
+					_context3D.setTextureAt(2, lightAccumulation.getTextureForStage3D(_stage3DProxy));
 
 //					if (!_deferredMonochromeSpecular) {
 //						numTextures++;
@@ -301,19 +310,6 @@ package away3d.core.render {
 
 			_stage3DProxy.clearBuffers();
 			_stage3DProxy.bufferClear = false;
-		}
-
-		private static function updateFrustumCorners(camera:Camera3D):Vector.<Number> {
-			var j:uint;
-			var k:uint;
-			var frustumCorners:Vector.<Number> = camera.projection.frustumCorners;
-			while (j < 12) {
-				_frustumCorners[k++] = frustumCorners[j++];
-				_frustumCorners[k++] = frustumCorners[j++];
-				_frustumCorners[k++] = frustumCorners[j++];
-				_frustumCorners[k++] = 1;
-			}
-			return _frustumCorners;
 		}
 
 		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void {
@@ -542,7 +538,7 @@ package away3d.core.render {
 		/**
 		 * Updates rendertarget. It depends on profile type usage. if we have rectangle textures support
 		 */
-		private function updateScreenRenderTargetTexture(renderTarget:RenderTexture):RenderTexture {
+		private function updateScreenRenderTargetTexture(renderTarget:RenderTexture, format:String = Context3DTextureFormat.BGRA):RenderTexture {
 			var targetWidth:Number = _rttBufferManager.textureWidth;
 			var targetHeight:Number = _rttBufferManager.textureHeight;
 
@@ -554,7 +550,7 @@ package away3d.core.render {
 			var result:RenderTexture = renderTarget;
 			if ((!result && hasRectangleRenderTargetSupport) || (hasRectangleRenderTargetSupport && !(result is RectangleRenderTexture))) {
 				if (result) result.dispose();
-				result = new RectangleRenderTexture(targetWidth, targetHeight);
+				result = new RectangleRenderTexture(targetWidth, targetHeight, format);
 			} else if ((!result && !hasRectangleRenderTargetSupport) || (!hasRectangleRenderTargetSupport && !(result is RenderTexture))) {
 				if (result) result.dispose();
 				result = new RenderTexture(targetWidth, targetHeight);

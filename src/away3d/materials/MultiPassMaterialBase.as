@@ -143,7 +143,7 @@
 			super.activateForWorldNormal(stage3DProxy, camera);
 		}
 
-		override arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D, drawDepth:Boolean, drawWorldNormals:Boolean, drawAlbedo:Boolean = false, drawSpecular:Boolean = false):void {
+		override arcane function activateForGBuffer(stage3DProxy:Stage3DProxy, camera:Camera3D, drawDepth:Boolean, drawWorldNormals:Boolean, drawPosition:Boolean, drawAlbedo:Boolean = false, drawSpecular:Boolean = false):void {
 			_gBufferPass.diffuseMap = _diffuseMethod.diffuseTexture;
 			_gBufferPass.colorR = _diffuseMethod.diffuseR;
 			_gBufferPass.colorG = _diffuseMethod.diffuseG;
@@ -160,7 +160,7 @@
 			_gBufferPass.mipmap = _mipmap;
 			_gBufferPass.repeat = _repeat;
 			_gBufferPass.smooth = _smooth;
-			super.activateForGBuffer(stage3DProxy, camera, drawDepth, drawWorldNormals, drawAlbedo, drawSpecular);
+			super.activateForGBuffer(stage3DProxy, camera, drawDepth, drawWorldNormals, drawPosition, drawAlbedo, drawSpecular);
 		}
 
 		/**
@@ -699,7 +699,7 @@
 				numDirLights += _lightPicker.numCastingDirectionalLights;
 				numPointLights += _lightPicker.numCastingPointLights;
 			}
-			
+
 			_nonCasterLightPasses = new Vector.<LightingPass>();
 			while (dirLightOffset < numDirLights || pointLightOffset < numPointLights || probeOffset < numLightProbes) {
 				pass = new LightingPass(this);
@@ -720,7 +720,7 @@
 				pass.diffuseLightSources = _diffuseLightSources;
 				pass.specularLightSources = _specularLightSources;
 				_nonCasterLightPasses.push(pass);
-				
+
 				dirLightOffset += pass.numDirectionalLights;
 				pointLightOffset += pass.numPointLights;
 				probeOffset += pass.numLightProbes;

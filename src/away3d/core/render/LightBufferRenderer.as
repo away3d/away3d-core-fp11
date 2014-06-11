@@ -7,18 +7,26 @@ package away3d.core.render {
 	import away3d.lights.DirectionalLight;
 	import away3d.lights.LightBase;
 	import away3d.lights.PointLight;
+	import away3d.materials.compilation.ShaderRegisterCache;
+	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.compilation.ShaderState;
+	import away3d.textures.RectangleRenderTexture;
 	import away3d.textures.Texture2DBase;
 
 	import com.adobe.utils.AGALMiniAssembler;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
+	import flash.display3D.Context3DCompareMode;
+	import flash.display3D.Context3DProfile;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFilter;
+	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
+	import flash.display3D.textures.RectangleTexture;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -32,12 +40,14 @@ package away3d.core.render {
 
 		private static const AMBIENT_VALUES_FC:String = "cfAmbientValues";
 		private static const LIGHT_FC:String = "cfLightData";
+		private static const CAMERA_FC:String = "cfCameraData";
 		//texture
 		private static const WORLD_NORMAL_TEXTURE:String = "tWorldNormal";
-		private static const SPECULAR_TEXTURE:String = "tSpecular";
 		private static const POSITION_TEXTURE:String = "tPosition";
+		private static const DEPTH_TEXTURE:String = "tDepth";
 
 		private static const _ambientValuesFC:Vector.<Number> = new Vector.<Number>();
+		private static const _cameraFC:Vector.<Number> = new Vector.<Number>();
 		private static const _scaleValuesVC:Vector.<Number> = Vector.<Number>([0, 0, 1, 1]);
 
 		protected var programs:Vector.<Program3D>;
@@ -57,18 +67,26 @@ package away3d.core.render {
 		private var _lights:Vector.<LightBase>;
 		private var _numDirLights:uint = 0;
 		private var _numPointLights:uint = 0;
+		private var _specularEnabled:Boolean = true;
+
+		protected var _registerCache:ShaderRegisterCache;
+		private var _data:Vector.<Number>;
+		private var cameraPositionReg:ShaderRegisterElement;
+		private var ambientReg:ShaderRegisterElement;
 
 		public function LightBufferRenderer() {
+
 			initInstance();
 		}
 
 		private function initInstance():void {
+			_registerCache = new ShaderRegisterCache(Context3DProfile.STANDARD);
 			programs = new Vector.<Program3D>(8, true);
 			dirtyPrograms = new Vector.<Boolean>(8, true);
 			shaderStates = new Vector.<ShaderState>(8, true);
 		}
 
-		public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, normalTexture:Texture2DBase, positionTexture:Texture2DBase, specularTexture:Texture2DBase):void {
+		public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, normalTexture:Texture2DBase, positionTexture:Texture2DBase):void {
 			var i:int;
 			//store data from collector
 			_camera = entityCollector.camera;
@@ -91,8 +109,10 @@ package away3d.core.render {
 			}
 
 			//set point lights
-			if (entityCollector.numDeferredDirectionalLights !=  _numDirLights || entityCollector.numDeferredPointLights !=  _numPointLights) {
-				_lights = entityCollector.lights;
+			if (entityCollector.numDeferredDirectionalLights != _numDirLights || entityCollector.numDeferredPointLights != _numPointLights) {
+				_lights = entityCollector.deferredLights;
+				_numDirLights = entityCollector.numDeferredDirectionalLights;
+				_numPointLights = entityCollector.numDeferredPointLights;
 				dirtyPrograms[index] = true;
 			}
 
@@ -115,11 +135,7 @@ package away3d.core.render {
 
 			context3D.setTextureAt(_shader.getTexture(WORLD_NORMAL_TEXTURE), normalTexture.getTextureForStage3D(stage3DProxy));
 
-			if (_shader.hasTexture(SPECULAR_TEXTURE)) {
-				context3D.setTextureAt(_shader.getTexture(SPECULAR_TEXTURE), specularTexture.getTextureForStage3D(stage3DProxy));
-			}
-
-			if(_shader.hasTexture(POSITION_TEXTURE)) {
+			if (_shader.hasTexture(POSITION_TEXTURE)) {
 				context3D.setTextureAt(_shader.getTexture(POSITION_TEXTURE), positionTexture.getTextureForStage3D(stage3DProxy));
 			}
 
@@ -139,29 +155,33 @@ package away3d.core.render {
 				var posDir:Vector3D;
 				var radius:Number;
 				var falloff:Number;
-				if(light is PointLight) {
+				if (light is PointLight) {
 					radius = (light as PointLight)._radius;
 					falloff = (light as PointLight)._fallOffFactor;
 					posDir = light.scenePosition;
 					_lightData[k++] = posDir.x;
 					_lightData[k++] = posDir.y;
 					_lightData[k++] = posDir.z;
-				}else if(light is DirectionalLight) {
+				} else if (light is DirectionalLight) {
 					posDir = (light as DirectionalLight).sceneDirection;
-					_lightData[k++] = -posDir.x;
-					_lightData[k++] = -posDir.y;
-					_lightData[k++] = -posDir.z;
+					var dx:Number = posDir.x;
+					var dy:Number = posDir.y;
+					var dz:Number = posDir.z;
+					var nrm:Number = 1 / Math.sqrt(dx * dx + dy * dy + dz * dz);
+					_lightData[k++] = -posDir.x * nrm;
+					_lightData[k++] = -posDir.y * nrm;
+					_lightData[k++] = -posDir.z * nrm;
 				}
 
-				_lightData[k++] = radius;
+				_lightData[k++] = 1;
 				_lightData[k++] = light._diffuseR;
 				_lightData[k++] = light._diffuseG;
 				_lightData[k++] = light._diffuseB;
-				_lightData[k++] = falloff;
+				_lightData[k++] = radius;
 				_lightData[k++] = light._specularR;
 				_lightData[k++] = light._specularG;
 				_lightData[k++] = light._specularB;
-				_lightData[k++] = 1;
+				_lightData[k++] = falloff;
 
 				globalAmbientR += light._ambientR;
 				globalAmbientG += light._ambientG;
@@ -172,8 +192,16 @@ package away3d.core.render {
 				_ambientValuesFC[0] = globalAmbientR;
 				_ambientValuesFC[1] = globalAmbientG;
 				_ambientValuesFC[2] = globalAmbientB;
-				_ambientValuesFC[3] = 1;
+				_ambientValuesFC[3] = 100;//decode gloss
 				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(AMBIENT_VALUES_FC), _ambientValuesFC, _shader.getFragmentConstantStride(AMBIENT_VALUES_FC));
+			}
+
+			if (_shader.hasFragmentConstant(CAMERA_FC)) {
+				_cameraFC[0] = _camera.scenePosition.x;
+				_cameraFC[1] = _camera.scenePosition.y;
+				_cameraFC[2] = _camera.scenePosition.z;
+				_cameraFC[3] = 1;
+				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(CAMERA_FC), _cameraFC, _shader.getFragmentConstantStride(CAMERA_FC));
 			}
 
 			if (_shader.hasFragmentConstant(LIGHT_FC)) {
@@ -190,6 +218,47 @@ package away3d.core.render {
 
 		private function compileFragmentProgram():void {
 			_fragmentCode = "";
+
+			//normal
+			var normal:int = _shader.getFreeFragmentTemp();
+			_fragmentCode += "tex ft" + normal + ", v" + _shader.getVarying(UV_VARYING) + ", fs" + _shader.getTexture(WORLD_NORMAL_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
+
+			if (_specularEnabled) {
+				_fragmentCode += "mul ft" + normal + ".w, ft" + normal + ".w, fc" + _shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".w\n";//100
+				var position:int = _shader.getFreeFragmentTemp();
+				_fragmentCode += "tex ft" + position + ", v" + _shader.getVarying(UV_VARYING) + ", fs" + _shader.getTexture(POSITION_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
+			}
+
+			//diffuse
+			var lightValues:int = _shader.getFragmentConstant(LIGHT_FC, 3);
+
+			var lightDir:int = _shader.getFreeFragmentTemp();
+			_fragmentCode += "sub ft" + lightDir + ", fc" + lightValues + ", ft" + position + "\n";
+			_fragmentCode += "dp3 ft" + lightDir + ".w, ft" + lightDir + ", ft" + lightDir + "\n";
+			_fragmentCode += "sub ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 1) + ".w\n";
+			_fragmentCode += "mul ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w\n";
+			_fragmentCode += "sub ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w, ft" + lightDir + ".w\n";
+			_fragmentCode += "nrm ft" + lightDir + ".xyz, ft" + lightDir + ".xyz\n";
+
+			var diffuseLighting:int = _shader.getFreeFragmentTemp();
+			_fragmentCode += "dp3 ft" + diffuseLighting + ".x, ft" + lightDir + ", ft" + normal + ".xyz\n";
+			_fragmentCode += "sat ft" + diffuseLighting + ".x, ft" + diffuseLighting + ".x\n";
+			_fragmentCode += "mul ft" + diffuseLighting + ".x, ft" + diffuseLighting + ".x, ft" + lightDir + ".w\n";
+			_fragmentCode += "mul ft" + diffuseLighting + ".xyz, ft" + diffuseLighting + ".xxx, fc" + (lightValues + 1) + ".xyz\n";
+
+			if (_specularEnabled) {
+				var specular:int = _shader.getFreeFragmentTemp();
+				_fragmentCode += "sub ft" + specular + ", fc" + _shader.getFragmentConstant(CAMERA_FC) + ", ft" + position + "\n";
+				_fragmentCode += "nrm ft" + specular + ".xyz, ft" + specular + ".xyz\n";
+				_fragmentCode += "add ft" + specular + ".xyz, ft" + specular + ".xyz, fc" + lightValues + ".xyz\n";
+				_fragmentCode += "nrm ft" + specular + ".xyz, ft" + specular + "\n";
+				_fragmentCode += "dp3 ft" + specular + ".x, ft" + normal + ", ft" + specular + "\n";
+				_fragmentCode += "sat ft" + specular + ".x, ft" + specular + ".x\n";
+				_fragmentCode += "pow ft" + specular + ".x, ft" + specular + ".x, ft" + normal + ".w\n";
+				_fragmentCode += "mov oc, ft" + lightDir + ".wwww\n";
+			} else {
+				_fragmentCode += "mov oc, ft" + diffuseLighting + ".xyzz\n";
+			}
 		}
 
 		private function compileVertexProgram():void {
@@ -221,7 +290,11 @@ package away3d.core.render {
 		}
 
 		public function set monochromeSpecular(value:Boolean):void {
+			if (_monochromeSpecular == value) return;
 			_monochromeSpecular = value;
+			for (var i:uint = 0; i < 8; i++) {
+				dirtyPrograms[i] = true;
+			}
 		}
 	}
 }

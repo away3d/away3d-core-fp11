@@ -206,7 +206,7 @@ package away3d.materials.passes {
 				}
 				//if do not draw specular, draw specular intesity to normalmap for deferred lighting
 				if (!_drawSpecular) {
-					code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".xxx\n";
+					code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".w\n";
 				} else {
 					code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FC) + ".y\n";
 				}
@@ -236,7 +236,6 @@ package away3d.materials.passes {
 				var specularColor:int = _shader.getFreeFragmentTemp();
 				if (specularMap) {
 					code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
-					//specular power
 					code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".xxx\n";
 					//gloss
 					code += "mov ft" + specularColor + ".w, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".w\n";
@@ -299,12 +298,12 @@ package away3d.materials.passes {
 					_specularColorData[0] = specularIntensity;
 					_specularColorData[1] = 0;
 					_specularColorData[2] = 0;
-					_specularColorData[3] = gloss;
+					_specularColorData[3] = gloss/100;
 				} else {
 					_specularColorData[0] = specularColorR * specularIntensity;
 					_specularColorData[1] = specularColorG * specularIntensity;
 					_specularColorData[2] = specularColorB * specularIntensity;
-					_specularColorData[3] = gloss;
+					_specularColorData[3] = gloss/100;
 				}
 				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(SPECULAR_COLOR_FC), _specularColorData, 1);
 			}
@@ -469,6 +468,16 @@ package away3d.materials.passes {
 			invalidateShaderProgram();
 		}
 
+		public function get drawWorldPosition():Boolean {
+			return _drawWorldPosition;
+		}
+
+		public function set drawWorldPosition(value:Boolean):void {
+			if (_drawWorldPosition == value) return;
+			_drawWorldPosition = value;
+			invalidateShaderProgram();
+		}
+
 		override public function dispose():void {
 			diffuseMap = null;
 			normalMap = null;
@@ -483,5 +492,6 @@ package away3d.materials.passes {
 			_specularColorData = null;
 			super.dispose();
 		}
+
 	}
 }
