@@ -56,9 +56,12 @@ package away3d.core.render {
 		private var _renderTargetToScreenCopy:RenderTargetCopy = new RenderTargetCopy();
 
 		protected var filter3DRenderer:Filter3DRenderer;
+
 		protected var sceneDepthTexture:RenderTexture;
 		protected var sceneNormalTexture:RenderTexture;
+		protected var sceneWorldPositionTexture:RenderTexture;
 		protected var sceneSpecularTexture:RenderTexture;
+
 		private var lightAccumulation:RenderTexture;
 		private var lightAccumulationSpecular:RenderTexture;
 		private var _directionalLightRenderer:DirectionalLightRenderer;
@@ -172,20 +175,23 @@ package away3d.core.render {
 			sceneDepthTexture = updateScreenRenderTargetTexture(sceneDepthTexture);
 			if (_deferredLighting) {
 				sceneNormalTexture = updateScreenRenderTargetTexture(sceneNormalTexture);
+				sceneWorldPositionTexture = updateScreenRenderTargetTexture(sceneWorldPositionTexture);
 				sceneSpecularTexture = updateScreenRenderTargetTexture(sceneSpecularTexture);
 			}
 
 			if (_deferredLighting && hasMRTSupport) {
 				_context3D.setRenderToTexture(sceneDepthTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
 				_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
-				_context3D.setRenderToTexture(sceneSpecularTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 2);
-				_context3D.clear(1, 1, 1);//because of depth
+				_context3D.setRenderToTexture(sceneWorldPositionTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 2);
+				_context3D.setRenderToTexture(sceneSpecularTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 3);
+				_context3D.clear();
 
 				_gbufferRenderer.render(_stage3DProxy, opaqueRenderableHead, camera, _rttViewProjectionMatrix);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 2);
+				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 3);
 				_context3D.setRenderToBackBuffer();
 			} else {
 				if (_deferredLighting || _requireDepthRender) {
@@ -218,7 +224,8 @@ package away3d.core.render {
 				if (!_deferredMonochromeSpecular) {
 					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
 					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
-				}//else we will store specular in alpha channel of light accumulationbuffer
+				}
+
 				stage3DProxy.clearBuffers();
 				_context3D.clear();
 
@@ -234,12 +241,12 @@ package away3d.core.render {
 				_pointLightRenderer.textureRatioX = _textureRatioX;
 				_pointLightRenderer.textureRatioY = _textureRatioY;
 				_pointLightRenderer.monochromeSpecular = _deferredMonochromeSpecular;
-				_pointLightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture, sceneSpecularTexture);
+//				_pointLightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture, sceneSpecularTexture);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
-				if (!_deferredMonochromeSpecular) {
-					_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
-				}
+//				if (!_deferredMonochromeSpecular) {
+//					_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
+//				}
 				_context3D.setRenderToBackBuffer();
 			}
 
@@ -275,12 +282,12 @@ package away3d.core.render {
 					_context3D.setTextureAt(1, sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
 
 					numTextures++;
-					_context3D.setTextureAt(2, lightAccumulation.getTextureForStage3D(_stage3DProxy));
+					_context3D.setTextureAt(2, sceneWorldPositionTexture.getTextureForStage3D(_stage3DProxy));
 
-					if (!_deferredMonochromeSpecular) {
-						numTextures++;
-						_context3D.setTextureAt(3, lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy));
-					}
+//					if (!_deferredMonochromeSpecular) {
+//						numTextures++;
+//						_context3D.setTextureAt(3, lightAccumulation.getTextureForStage3D(_stage3DProxy));
+//					}
 				}
 
 				if (numTextures > 0) {

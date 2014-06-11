@@ -31,8 +31,8 @@ package away3d.materials.passes {
 		public static const TANGENT_ATTRIBUTE:String = "aTangent";
 		public static const UV_ATTRIBUTE:String = "aUV";
 		//vertex constants
-		public static const PROJ_MATRIX_VERTEX_CONSTANT:String = "cvProj";
-		public static const WORLD_MATRIX_VERTEX_CONSTANT:String = "cvWorldMatrix";
+		public static const PROJ_MATRIX_VC:String = "cvProj";
+		public static const WORLD_MATRIX_VC:String = "cvWorldMatrix";
 		//fragment constants
 		public static const PROPERTIES_FRAGMENT_CONSTANT:String = "cfPropertiesData";
 		//textures
@@ -53,19 +53,19 @@ package away3d.materials.passes {
 		override arcane function getVertexCode():String {
 			var code:String = "";
 			var projectedPosTemp:int = _shader.getFreeVertexTemp();
-			code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VERTEX_CONSTANT, 4) + "\n";
+			code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VC, 4) + "\n";
 			code += "mov op, vt" + projectedPosTemp + "\n";
 			code += "mov v" + _shader.getVarying(PROJECTED_POSITION_VARYING) + ", vt" + projectedPosTemp + "\n";//projected position
 			_shader.removeVertexTempUsage(projectedPosTemp);
 			code += "mov v" + _shader.getVarying(UV_VARYING) + ", va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";//uv channel
 			//normals
 			var normalTemp:int = _shader.getFreeVertexTemp();
-			code += "m33 vt" + normalTemp + ".xyz, va" + _shader.getAttribute(NORMAL_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT, 3) + "\n";
+			code += "m33 vt" + normalTemp + ".xyz, va" + _shader.getAttribute(NORMAL_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VC, 3) + "\n";
 			code += "nrm vt" + normalTemp + ".xyz, vt" + normalTemp + ".xyz\n";
 			code += "mov vt" + normalTemp + ".w, va" + _shader.getAttribute(NORMAL_ATTRIBUTE) + ".w\n";
 			if (normalMap) {
 				var tangentTemp:int = _shader.getFreeVertexTemp();
-				code += "m33 vt" + tangentTemp + ".xyz, va" + _shader.getAttribute(TANGENT_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT, 3) + "\n";
+				code += "m33 vt" + tangentTemp + ".xyz, va" + _shader.getAttribute(TANGENT_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(WORLD_MATRIX_VC, 3) + "\n";
 				code += "nrm vt" + tangentTemp + ".xyz, vt" + tangentTemp + ".xyz\n";
 				var binormal:int = _shader.getFreeVertexTemp();
 				code += "crs vt" + binormal + ".xyz, vt" + normalTemp + ".xyz, vt" + tangentTemp + ".xyz\n";
@@ -97,7 +97,7 @@ package away3d.materials.passes {
 			var code:String = "";
 			if (_opacityMap) {
 				code += sampleTexture(_opacityMap, 0, _shader.getTexture(OPACITY_MAP));
-				code += "sub ft0." + _opacityChannel + ", ft0." + _opacityChannel + ", fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".x\n";
+				code += "sub ft0." + _opacityChannel + ", ft0." + _opacityChannel + ", fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".z\n";
 				code += "kil ft0." + _opacityChannel + "\n";
 			}
 
@@ -134,7 +134,7 @@ package away3d.materials.passes {
 				code += "dp3 ft" + normalOutput + ".z, ft" + normalTS + ".xyz, ft" + temp + ".xyz\n";
 				code += "nrm ft" + normalOutput + ".xyz, ft" + normalOutput + ".xyz\n";
 				//specular power
-				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".w\n";
+				code += "mov ft" + normalOutput + ".w, fc" + _shader.getFragmentConstant(PROPERTIES_FRAGMENT_CONSTANT) + ".z\n";
 				code += "mov oc, ft" + normalOutput + "\n";
 				_shader.removeFragmentTempUsage(normalOutput);
 				_shader.removeFragmentTempUsage(temp);
@@ -155,10 +155,10 @@ package away3d.materials.passes {
 			var matrix3D:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
 			matrix3D.copyFrom(renderable.sourceEntity.getRenderSceneTransform(camera));
 			matrix3D.append(viewProjection);
-			context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _shader.getVertexConstant(PROJ_MATRIX_VERTEX_CONSTANT), matrix3D, true);
+			context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _shader.getVertexConstant(PROJ_MATRIX_VC), matrix3D, true);
 
-			if (_shader.hasVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT)) {
-				context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _shader.getVertexConstant(WORLD_MATRIX_VERTEX_CONSTANT), renderable.sourceEntity.inverseSceneTransform);
+			if (_shader.hasVertexConstant(WORLD_MATRIX_VC)) {
+				context3D.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, _shader.getVertexConstant(WORLD_MATRIX_VC), renderable.sourceEntity.inverseSceneTransform);
 			}
 
 			stage3DProxy.activateBuffer(_shader.getAttribute(POSITION_ATTRIBUTE), renderable.getVertexData(TriangleSubGeometry.POSITION_DATA), renderable.getVertexOffset(TriangleSubGeometry.POSITION_DATA), TriangleSubGeometry.POSITION_FORMAT);
