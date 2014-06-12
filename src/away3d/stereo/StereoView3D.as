@@ -125,7 +125,7 @@ package away3d.stereo
 			
 			if (_filter3DRenderer && _stage3DProxy._context3D) {
 				_renderer.render(_entityCollector, _filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
-				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender);
+				_filter3DRenderer.render(_stage3DProxy, camera, _depthRender, _shareContext);
 				if (!_shareContext)
 					_stage3DProxy._context3D.present();
 			} else {

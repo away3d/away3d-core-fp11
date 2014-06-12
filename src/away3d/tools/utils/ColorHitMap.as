@@ -207,4 +207,9 @@ class ColorObject
 	public var color:uint;
 	public var eventID:String;
 	public var listener:Function;
+	
+	public function ColorObject()
+	{
+		
+	}
 }
