@@ -48,6 +48,8 @@ package away3d.core.render {
 
 		private static const _ambientValuesFC:Vector.<Number> = new Vector.<Number>();
 		private static const _cameraFC:Vector.<Number> = new Vector.<Number>();
+		private static const _decodeValuesFC:Vector.<Number> = Vector.<Number>([1, 1 / 255, 1 / 65025, 1 / 16581375]);
+
 		private static const _scaleValuesVC:Vector.<Number> = Vector.<Number>([0, 0, 1, 1]);
 
 		protected var programs:Vector.<Program3D>;
@@ -180,7 +182,7 @@ package away3d.core.render {
 				_lightData[k++] = light._diffuseR;
 				_lightData[k++] = light._diffuseG;
 				_lightData[k++] = light._diffuseB;
-				_lightData[k++] = radius;
+				_lightData[k++] = radius*radius;
 				_lightData[k++] = light._specularR;
 				_lightData[k++] = light._specularG;
 				_lightData[k++] = light._specularB;
@@ -210,11 +212,11 @@ package away3d.core.render {
 			if (_shader.hasFragmentConstant(DECODE_FC)) {
 				var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
 				_camera.projection.matrix.copyRawDataTo(raw);
-
-				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(DECODE_FC), Vector.<Number>([
-					1, 1 / 255, 1 / 65025, 1 / 16581375,
-					_camera.projection.far, 0, raw[14], -raw[10]
-				]), _shader.getFragmentConstantStride(DECODE_FC));
+				_decodeValuesFC[4] = 0;
+				_decodeValuesFC[5] = 0;
+				_decodeValuesFC[6] = raw[14];
+				_decodeValuesFC[7] = -raw[10];
+				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(DECODE_FC), _decodeValuesFC, _shader.getFragmentConstantStride(DECODE_FC));
 			}
 
 			if (_shader.hasFragmentConstant(VIEW_TO_WORLD_FC)) {
@@ -238,7 +240,6 @@ package away3d.core.render {
 		private function compileFragmentProgram():void {
 			_fragmentCode = "";
 
-			//normal
 			var normal:int = _shader.getFreeFragmentTemp();
 			_fragmentCode += "tex ft" + normal + ", v" + _shader.getVarying(UV_VARYING) + ", fs" + _shader.getTexture(WORLD_NORMAL_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
 
@@ -256,7 +257,6 @@ package away3d.core.render {
 			_fragmentCode += "div ft" + depth + ".z, fc" + (decode + 1) + ".z, ft" + depth + ".z\n";
 			_fragmentCode += "mul ft" + depth + ".xyz, ft" + depth + ".z, v" + _shader.getVarying(POSITION_VARYING) + ".xyz\n";
 			_fragmentCode += "mov ft" + depth + ".w, v" + _shader.getVarying(POSITION_VARYING) + ".w\n";
-
 			_fragmentCode += "m44 ft" + depth + ", ft" + depth + ", fc" + _shader.getFragmentConstant(VIEW_TO_WORLD_FC, 4) + "\n";
 
 			var lightValues:int = _shader.getFragmentConstant(LIGHT_FC, 3);
@@ -265,7 +265,7 @@ package away3d.core.render {
 			_fragmentCode += "dp3 ft" + lightDir + ".w, ft" + lightDir + ", ft" + lightDir + "\n";
 			_fragmentCode += "sub ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 1) + ".w\n";
 			_fragmentCode += "mul ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w\n";
-			_fragmentCode += "sub ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w, ft" + lightDir + ".w\n";
+			_fragmentCode += "sub ft" + lightDir + ".w, fc" + lightValues + ".w, ft" + lightDir + ".w\n";
 			_fragmentCode += "nrm ft" + lightDir + ".xyz, ft" + lightDir + ".xyz\n";
 
 			var diffuseLighting:int = _shader.getFreeFragmentTemp();
@@ -276,14 +276,15 @@ package away3d.core.render {
 
 			if (_specularEnabled) {
 				var specular:int = _shader.getFreeFragmentTemp();
-				_fragmentCode += "sub ft" + specular + ", fc" + _shader.getFragmentConstant(CAMERA_FC) + ", ft" + position + "\n";
+				_fragmentCode += "sub ft" + specular + ", fc" + _shader.getFragmentConstant(CAMERA_FC) + ", ft" + depth + "\n";
 				_fragmentCode += "nrm ft" + specular + ".xyz, ft" + specular + ".xyz\n";
-				_fragmentCode += "add ft" + specular + ".xyz, ft" + specular + ".xyz, fc" + lightValues + ".xyz\n";
-				_fragmentCode += "nrm ft" + specular + ".xyz, ft" + specular + "\n";
+				_fragmentCode += "add ft" + specular + ".xyz, ft" + specular + ".xyz, ft" + lightDir + ".xyz\n";
+				_fragmentCode += "nrm ft" + specular + ".xyz, ft" + specular + ".xyz\n";
 				_fragmentCode += "dp3 ft" + specular + ".x, ft" + normal + ", ft" + specular + "\n";
 				_fragmentCode += "sat ft" + specular + ".x, ft" + specular + ".x\n";
-				_fragmentCode += "pow ft" + specular + ".x, ft" + specular + ".x, ft" + normal + ".w\n";
-				_fragmentCode += "mov oc, ft" + lightDir + ".xyzz\n";
+				_fragmentCode += "pow ft" + specular + ".x, ft" + specular + ".x, ft" + normal + ".w\n";//gloss
+				_fragmentCode += "mul ft" + specular + ".xyz, ft" + specular + ".xxx, fc" + (lightValues + 2) + ".xyz\n";
+				_fragmentCode += "mov oc, ft" + specular + ".xyzz\n";
 			} else {
 				_fragmentCode += "mov oc, ft" + diffuseLighting + ".xyzz\n";
 			}
