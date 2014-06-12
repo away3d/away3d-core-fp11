@@ -236,7 +236,7 @@ package away3d.core.render {
 				lightAccumulation = updateScreenRenderTargetTexture(lightAccumulation);
 				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
 
-
+				updateFrustumCorners(camera);
 
 //				if (!_deferredMonochromeSpecular) {
 //					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
@@ -250,7 +250,7 @@ package away3d.core.render {
 				_lightRenderer.textureRatioX = _textureRatioX;
 				_lightRenderer.textureRatioY = _textureRatioY;
 				_lightRenderer.monochromeSpecular = _deferredMonochromeSpecular;
-				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, sceneNormalTexture, sceneWorldPositionTexture);
+				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneWorldPositionTexture, sceneDepthTexture);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
 //				if (!_deferredMonochromeSpecular) {
@@ -310,6 +310,19 @@ package away3d.core.render {
 
 			_stage3DProxy.clearBuffers();
 			_stage3DProxy.bufferClear = false;
+		}
+
+		private static function updateFrustumCorners(camera:Camera3D):Vector.<Number> {
+			var j:uint;
+			var k:uint;
+			var frustumCorners:Vector.<Number> = camera.projection.frustumCorners;
+			while (j < 12) {
+				_frustumCorners[k++] = frustumCorners[j++];
+				_frustumCorners[k++] = frustumCorners[j++];
+				_frustumCorners[k++] = frustumCorners[j++];
+				_frustumCorners[k++] = 1;
+			}
+			return _frustumCorners;
 		}
 
 		override protected function executeRender(entityCollector:ICollector, target:TextureBase = null, scissorRect:Rectangle = null, surfaceSelector:int = 0):void {

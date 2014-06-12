@@ -2,6 +2,7 @@ package away3d.core.render {
 	import away3d.arcane;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
+	import away3d.core.math.Matrix3DUtils;
 	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Camera3D;
 	import away3d.lights.DirectionalLight;
@@ -10,23 +11,19 @@ package away3d.core.render {
 	import away3d.materials.compilation.ShaderRegisterCache;
 	import away3d.materials.compilation.ShaderRegisterElement;
 	import away3d.materials.compilation.ShaderState;
-	import away3d.textures.RectangleRenderTexture;
 	import away3d.textures.Texture2DBase;
 
 	import com.adobe.utils.AGALMiniAssembler;
 
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
-	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProfile;
 	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DTextureFilter;
-	import flash.display3D.Context3DTextureFormat;
 	import flash.display3D.Context3DVertexBufferFormat;
 	import flash.display3D.IndexBuffer3D;
 	import flash.display3D.Program3D;
 	import flash.display3D.VertexBuffer3D;
-	import flash.display3D.textures.RectangleTexture;
+	import flash.geom.Matrix3D;
 	import flash.geom.Vector3D;
 
 	use namespace arcane;
@@ -35,12 +32,16 @@ package away3d.core.render {
 		//attribute
 		private static const POSITION_ATTRIBUTE:String = "aPos";
 		private static const UV_ATTRIBUTE:String = "aUv";
+		private static const INDEX_FRUSTUM_ATTRIBUTE:String = "aIndex";
 		//varying
 		private static const UV_VARYING:String = "vUv";
+		private static const POSITION_VARYING:String = "vPos";
 
 		private static const AMBIENT_VALUES_FC:String = "cfAmbientValues";
 		private static const LIGHT_FC:String = "cfLightData";
 		private static const CAMERA_FC:String = "cfCameraData";
+		private static const DECODE_FC:String = "cfDecodeDepth";
+		private static const VIEW_TO_WORLD_FC:String = "cfWorld";
 		//texture
 		private static const WORLD_NORMAL_TEXTURE:String = "tWorldNormal";
 		private static const POSITION_TEXTURE:String = "tPosition";
@@ -86,7 +87,7 @@ package away3d.core.render {
 			shaderStates = new Vector.<ShaderState>(8, true);
 		}
 
-		public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, normalTexture:Texture2DBase, positionTexture:Texture2DBase):void {
+		public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, frustumCorners:Vector.<Number>, normalTexture:Texture2DBase, positionTexture:Texture2DBase, depthTexture:Texture2DBase = null):void {
 			var i:int;
 			//store data from collector
 			_camera = entityCollector.camera;
@@ -132,6 +133,7 @@ package away3d.core.render {
 			//in future, enable stencil test optimization in FlashPlayer 15, when we don't need to clear it each time
 			context3D.setVertexBufferAt(_shader.getAttribute(POSITION_ATTRIBUTE), vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context3D.setVertexBufferAt(_shader.getAttribute(UV_ATTRIBUTE), vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
+			context3D.setVertexBufferAt(_shader.getAttribute(INDEX_FRUSTUM_ATTRIBUTE), vertexBuffer, 4, Context3DVertexBufferFormat.FLOAT_1);
 
 			context3D.setTextureAt(_shader.getTexture(WORLD_NORMAL_TEXTURE), normalTexture.getTextureForStage3D(stage3DProxy));
 
@@ -139,10 +141,15 @@ package away3d.core.render {
 				context3D.setTextureAt(_shader.getTexture(POSITION_TEXTURE), positionTexture.getTextureForStage3D(stage3DProxy));
 			}
 
+			if (_shader.hasTexture(DEPTH_TEXTURE)) {
+				context3D.setTextureAt(_shader.getTexture(DEPTH_TEXTURE), depthTexture.getTextureForStage3D(stage3DProxy));
+			}
+
 			//VERTEX DATA
+			context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 0, frustumCorners, 4);
 			_scaleValuesVC[0] = _textureRatioX;
 			_scaleValuesVC[1] = _textureRatioY;
-			context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 0, _scaleValuesVC, 1);
+			context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _scaleValuesVC, 1);
 
 			//FRAGMENT DATA
 			var globalAmbientR:Number = 0;
@@ -204,6 +211,19 @@ package away3d.core.render {
 				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(CAMERA_FC), _cameraFC, _shader.getFragmentConstantStride(CAMERA_FC));
 			}
 
+			if (_shader.hasFragmentConstant(DECODE_FC)) {
+				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(DECODE_FC), Vector.<Number>([
+					1, 1 / 255, 1 / 65025, 1 / 16581375,
+					_camera.projection.far, 0, 0, 1
+				]), _shader.getFragmentConstantStride(DECODE_FC));
+			}
+
+			if (_shader.hasFragmentConstant(VIEW_TO_WORLD_FC)) {
+				var mat:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+				mat.copyFrom(_camera.sceneTransform);
+				context3D.setProgramConstantsFromMatrix(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(VIEW_TO_WORLD_FC), mat, true);
+			}
+
 			if (_shader.hasFragmentConstant(LIGHT_FC)) {
 				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(LIGHT_FC), _lightData, _shader.getFragmentConstantStride(LIGHT_FC));
 			}
@@ -230,15 +250,24 @@ package away3d.core.render {
 			}
 
 			//diffuse
-			var lightValues:int = _shader.getFragmentConstant(LIGHT_FC, 3);
+			var depth:int = _shader.getFreeFragmentTemp();
+			var decode:int = _shader.getFragmentConstant(DECODE_FC, 2);
+			_fragmentCode += "tex ft" + depth + ", v" + _shader.getVarying(UV_VARYING) + ", fs" + _shader.getTexture(DEPTH_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
+			_fragmentCode += "dp4 ft" + depth + ".z, ft" + depth + ", fc" + decode + "\n";
+			_fragmentCode += "mul ft" + depth + ".z, ft" + depth + ".z, fc" + (decode + 1) + ".x\n";
+			_fragmentCode += "mul ft" + depth + ".xyz, ft" + depth + ".z, v" + _shader.getVarying(POSITION_VARYING) + ".xyz\n";
+			_fragmentCode += "mov ft" + depth + ".w, v" + _shader.getVarying(POSITION_VARYING) + ".w\n";
 
+			_fragmentCode += "m44 ft" + depth + ", ft" + depth + ", fc" + _shader.getFragmentConstant(VIEW_TO_WORLD_FC, 4) + "\n";
+
+			var lightValues:int = _shader.getFragmentConstant(LIGHT_FC, 3);
 			var lightDir:int = _shader.getFreeFragmentTemp();
 			_fragmentCode += "sub ft" + lightDir + ", fc" + lightValues + ", ft" + position + "\n";
-			_fragmentCode += "dp3 ft" + lightDir + ".w, ft" + lightDir + ", ft" + lightDir + "\n";
-			_fragmentCode += "sub ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 1) + ".w\n";
-			_fragmentCode += "mul ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w\n";
-			_fragmentCode += "sub ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w, ft" + lightDir + ".w\n";
-			_fragmentCode += "nrm ft" + lightDir + ".xyz, ft" + lightDir + ".xyz\n";
+//			_fragmentCode += "dp3 ft" + lightDir + ".w, ft" + lightDir + ", ft" + lightDir + "\n";
+//			_fragmentCode += "sub ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 1) + ".w\n";
+//			_fragmentCode += "mul ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w\n";
+//			_fragmentCode += "sub ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w, ft" + lightDir + ".w\n";
+//			_fragmentCode += "nrm ft" + lightDir + ".xyz, ft" + lightDir + ".xyz\n";
 
 			var diffuseLighting:int = _shader.getFreeFragmentTemp();
 			_fragmentCode += "dp3 ft" + diffuseLighting + ".x, ft" + lightDir + ", ft" + normal + ".xyz\n";
@@ -255,7 +284,7 @@ package away3d.core.render {
 				_fragmentCode += "dp3 ft" + specular + ".x, ft" + normal + ", ft" + specular + "\n";
 				_fragmentCode += "sat ft" + specular + ".x, ft" + specular + ".x\n";
 				_fragmentCode += "pow ft" + specular + ".x, ft" + specular + ".x, ft" + normal + ".w\n";
-				_fragmentCode += "mov oc, ft" + lightDir + ".wwww\n";
+				_fragmentCode += "mov oc, ft" + position + ".xyzz\n";
 			} else {
 				_fragmentCode += "mov oc, ft" + diffuseLighting + ".xyzz\n";
 			}
@@ -264,9 +293,14 @@ package away3d.core.render {
 		private function compileVertexProgram():void {
 			_vertexCode = "";
 			_vertexCode += "mov op, va" + _shader.getAttribute(POSITION_ATTRIBUTE) + "\n";
+
 			_vertexCode += "mov vt0, va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";
-			_vertexCode += "mul vt0.xy, vt0.xy, vc0.xy\n";
+			_vertexCode += "mul vt0.xy, vt0.xy, vc4.xy\n";
 			_vertexCode += "mov v" + _shader.getVarying(UV_VARYING) + ", vt0\n";
+
+			_vertexCode += "mov vt0, vc[va" + _shader.getAttribute(INDEX_FRUSTUM_ATTRIBUTE) + ".x]\n";
+			_vertexCode += "div vt0.xyz, vt0.xyz, vt0.z\n";
+			_vertexCode += "mov v" + _shader.getVarying(POSITION_VARYING) + ", vt0\n";
 		}
 
 		public function get textureRatioX():Number {
