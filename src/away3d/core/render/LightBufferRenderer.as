@@ -92,22 +92,33 @@ package away3d.core.render {
         }
 
         public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, frustumCorners:Vector.<Number>, normalTexture:Texture2DBase, depthTexture:Texture2DBase = null):void {
-            if (_numDirLights == 0 && _numPointLights == 0) return;
-
             var i:int;
             var len:int;
             //store data from collector
             var camera:Camera3D = entityCollector.camera;
 
+            //set point lights
+            if (entityCollector.numDeferredDirectionalLights != _numDirLights || entityCollector.numDeferredPointLights != _numPointLights) {
+                _directionalLights = entityCollector.deferredDirectionalLights;
+                _pointLights = entityCollector.deferredPointLights;
+                _numDirLights = entityCollector.numDeferredDirectionalLights;
+                _numPointLights = entityCollector.numDeferredPointLights;
+                dirtyPrograms[index] = true;
+            }
+
+            if (_numDirLights == 0 && _numPointLights == 0) return;
+
+            var maxLightCountPerBatch:int = (hasMRTSupport) ? 18 : 7;
+            var numDirectionalPrograms:int = Math.ceil(_numDirLights / maxLightCountPerBatch);
+            var numPointPrograms:int = Math.ceil(_numPointLights / maxLightCountPerBatch);
+
             var rttBuffer:RTTBufferManager = RTTBufferManager.getInstance(stage3DProxy);
             var index:int = stage3DProxy.stage3DIndex;
             var context3D:Context3D = stage3DProxy.context3D;
-            var vertexBuffer:VertexBuffer3D = (hasMRTSupport) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
-            var indexBuffer:IndexBuffer3D = rttBuffer.indexBuffer;
 
             var programs:Vector.<Program3D> = programsCache[index];
             if (!programs) {
-                programs = programsCache[index] = new Vector.<Program3D>();
+                programs = programsCache[index] = new Vector.<Program3D>(numDirectionalPrograms + numPointPrograms, true);
                 programHash = new Vector.<String>();
                 dirtyPrograms[index] = true;
             }
@@ -116,31 +127,17 @@ package away3d.core.render {
                 context3Ds[index] = context3D;
                 len = programs.length;
                 for (i = 0; i < len; i++) {
+                    if (!programs[i]) continue;
                     programs[i].dispose();
+                    programs[i] = null;
                 }
-                programs.length = 0;
             }
 
             var shaders:Vector.<ShaderState> = shaderStates[index];
             if (!shaderStates[index]) {
-                shaders = shaderStates[index] = new Vector.<ShaderState>();
+                shaders = shaderStates[index] = new Vector.<ShaderState>(numDirectionalPrograms + numPointPrograms, true);
             }
 
-            //set point lights
-            if (entityCollector.numDeferredDirectionalLights != _numDirLights || entityCollector.numDeferredPointLights != _numPointLights) {
-                _directionalLights = entityCollector.deferredDirectionalLights;
-                _numDirLights = entityCollector.numDeferredDirectionalLights;
-                _numPointLights = entityCollector.numDeferredPointLights;
-                dirtyPrograms[index] = true;
-            }
-
-
-            //7
-            //tokens 200, 1024
-            //fc 28, 64
-            var maxLightCountPerBatch:int = (hasMRTSupport) ? 19 : 7;
-            var numDirectionalPrograms:Number = _numDirLights / 19;//(64-7)/3 constants
-            var numPointPrograms:Number = _numPointLights / 19;
             var shader:ShaderState;
             var lightCountToDraw:int;
             if (dirtyPrograms[index]) {
@@ -156,14 +153,15 @@ package away3d.core.render {
                     if (!shader) {
                         shader = shaders[batchIndex] = new ShaderState();
                     }
-                    batchIndex++;
+
                     shader.clear();
                     compileVertexProgram(shader);
                     compileDirectionalFragmentProgram(Math.min(maxLightCountPerBatch, lightCountToDraw), shader);
                     lightCountToDraw -= maxLightCountPerBatch;
                     program.upload(compiler.assemble(Context3DProgramType.VERTEX, _vertexCode, 2), compiler.assemble(Context3DProgramType.FRAGMENT, _fragmentCode, 2));
-                    programs.push(program);
-                    shaders.push(shader);
+                    programs[batchIndex] = program;
+                    shaders[batchIndex] = shader;
+                    batchIndex++;
                 }
 
                 lightCountToDraw = _numPointLights;
@@ -177,14 +175,13 @@ package away3d.core.render {
                         shader = shaders[batchIndex] = new ShaderState();
                     }
                     shader.clear();
-                    batchIndex++;
-                    shader.clear();
                     compileVertexProgram(shader);
                     compilePointFragmentProgram(Math.min(maxLightCountPerBatch, lightCountToDraw), shader);
                     lightCountToDraw -= maxLightCountPerBatch;
                     program.upload(compiler.assemble(Context3DProgramType.VERTEX, _vertexCode, 2), compiler.assemble(Context3DProgramType.FRAGMENT, _fragmentCode, 2));
-                    programs.push(program);
-                    shaders.push(shader);
+                    programs[batchIndex] = program;
+                    shaders[batchIndex] = shader;
+                    batchIndex++;
                 }
                 shader = null;
                 program = null;
@@ -192,6 +189,9 @@ package away3d.core.render {
             }
 
             shader = shaders[0];
+
+            var vertexBuffer:VertexBuffer3D = (hasMRTSupport) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
+            var indexBuffer:IndexBuffer3D = rttBuffer.indexBuffer;
             //in future, enable stencil test optimization in FlashPlayer 15, when we don't need to clear it each time
             context3D.setVertexBufferAt(shader.getAttribute(POSITION_ATTRIBUTE), vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
             context3D.setVertexBufferAt(shader.getAttribute(UV_ATTRIBUTE), vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
@@ -208,23 +208,24 @@ package away3d.core.render {
             context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
             for (i = 0; i < numDirectionalPrograms; i++) {
                 activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
-                activateDirectionalLightData(shader, context3D, offsetLight, Math.min(maxLightCountPerBatch, _numDirLights - offsetLight));
+                activateDirectionalLightData(shaders[i], context3D, offsetLight, Math.min(maxLightCountPerBatch, _numDirLights - offsetLight));
                 context3D.setProgram(programs[i]);
                 context3D.drawTriangles(indexBuffer, 0, 2);
                 drawCalls++;
-                if(drawCalls == 1) {
+                if (drawCalls == 1) {
                     context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE);
                 }
                 offsetLight += maxLightCountPerBatch;
             }
 
-            for (i = 0; i < numPointPrograms; i++) {
+            offsetLight = 0;
+            for (i = numDirectionalPrograms; i < numDirectionalPrograms+numPointPrograms; i++) {
                 activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
-                activatePointLightData(shader, context3D, offsetLight, Math.min(maxLightCountPerBatch, _numDirLights - offsetLight));
+                activatePointLightData(shaders[i], context3D, offsetLight, Math.min(maxLightCountPerBatch, _numPointLights - offsetLight));
                 context3D.setProgram(programs[i]);
                 context3D.drawTriangles(indexBuffer, 0, 2);
                 drawCalls++;
-                if(drawCalls == 1) {
+                if (drawCalls == 1) {
                     context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE);
                 }
                 offsetLight += maxLightCountPerBatch;
@@ -237,19 +238,17 @@ package away3d.core.render {
             context3D.setTextureAt(1, null);
         }
 
-        private function activatePointLightData(shader:ShaderState, context3D:Context3D, offsetLight:int, number:Number):void {
+        private function activatePointLightData(shader:ShaderState, context3D:Context3D, from:int, count:int):void {
             var globalAmbientR:Number = 0;
             var globalAmbientG:Number = 0;
             var globalAmbientB:Number = 0;
 
             var k:int = 0;
-            var len:int;
-            len = _numDirLights + _numPointLights;
             var i:int;
-            for (i = 0; i < len; i++) {
-                var light:LightBase = _directionalLights[i];
-                var radius:Number = (light as PointLight)._radius;
-                var falloff:Number = (light as PointLight)._fallOffFactor;
+            for (i = from; i < from+count; i++) {
+                var light:PointLight = _pointLights[i];
+                var radius:Number = light._radius;
+                var falloff:Number = light._fallOffFactor;
                 var posDir:Vector3D = light.scenePosition;
                 _lightData[k++] = posDir.x;
                 _lightData[k++] = posDir.y;
@@ -283,13 +282,13 @@ package away3d.core.render {
             }
         }
 
-        private function activateDirectionalLightData(shader:ShaderState, context3D:Context3D, from:int, to:int):void {
+        private function activateDirectionalLightData(shader:ShaderState, context3D:Context3D, from:int, count:int):void {
             var globalAmbientR:Number = 0;
             var globalAmbientG:Number = 0;
             var globalAmbientB:Number = 0;
 
             var k:int = 0;
-            for (var i:int = from; i < to; i++) {
+            for (var i:int = from; i < from+count; i++) {
                 var light:LightBase = _directionalLights[i];
                 var posDir:Vector3D = (light as DirectionalLight).sceneDirection;
                 var dx:Number = posDir.x;
@@ -425,7 +424,7 @@ package away3d.core.render {
                         _fragmentCode += "mul ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xxx, fc" + (lightValues + 2) + ".xyz\n";
                         _fragmentCode += "add ft" + accumulationSpecular + ".xyz, ft" + accumulationSpecular + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
                     } else {
-                        _fragmentCode += "add ft" + tempDiffuseCalculation + ".w, ft" + tempDiffuseCalculation + ".w, ft" + tempSpecularCalculation + ".x\n";
+                        _fragmentCode += "add ft" + accumulationDiffuse + ".w, ft" + accumulationDiffuse + ".w, ft" + tempSpecularCalculation + ".x\n";
                     }
                     shader.removeFragmentTempUsage(tempSpecularCalculation);
                 }
@@ -434,12 +433,12 @@ package away3d.core.render {
             }
 
             if (_coloredSpecularOutput && _diffuseEnabled) {
-                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
-                _fragmentCode += "mov oc1, ft" + tempSpecularCalculation + "\n";
+                _fragmentCode += "mov oc0, ft" + accumulationDiffuse + "\n";
+                _fragmentCode += "mov oc1, ft" + accumulationSpecular + "\n";
             } else if (_coloredSpecularOutput && !_diffuseEnabled) {
-                _fragmentCode += "mov oc0, ft" + tempSpecularCalculation + "\n";
+                _fragmentCode += "mov oc0, ft" + accumulationSpecular + "\n";
             } else {
-                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
+                _fragmentCode += "mov oc0, ft" + accumulationDiffuse + "\n";
             }
         }
 
@@ -501,19 +500,19 @@ package away3d.core.render {
                         _fragmentCode += "mul ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xxx, fc" + (lightOffset + 2) + ".xyz\n";
                         _fragmentCode += "add ft" + accumulationSpecular + ".xyz, ft" + accumulationSpecular + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
                     } else {
-                        _fragmentCode += "add ft" + tempDiffuseCalculation + ".w, ft" + tempDiffuseCalculation + ".w, ft" + tempSpecularCalculation + ".x\n";
+                        _fragmentCode += "add ft" + accumulationDiffuse + ".w, ft" + accumulationDiffuse + ".w, ft" + tempSpecularCalculation + ".x\n";
                     }
                     shader.removeFragmentTempUsage(tempSpecularCalculation);
                 }
             }
 
             if (_coloredSpecularOutput && _diffuseEnabled) {
-                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
-                _fragmentCode += "mov oc1, ft" + tempSpecularCalculation + "\n";
+                _fragmentCode += "mov oc0, ft" + accumulationDiffuse + "\n";
+                _fragmentCode += "mov oc1, ft" + accumulationSpecular + "\n";
             } else if (_coloredSpecularOutput && !_diffuseEnabled) {
-                _fragmentCode += "mov oc0, ft" + tempSpecularCalculation + "\n";
+                _fragmentCode += "mov oc0, ft" + accumulationSpecular + "\n";
             } else {
-                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
+                _fragmentCode += "mov oc0, ft" + accumulationDiffuse + ".wwww\n";
             }
         }
 

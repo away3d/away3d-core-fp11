@@ -23,7 +23,7 @@ package away3d.core.traverse
 	{
 		protected var _skybox:RenderableBase;
 		protected var _deferredDirectionalLights:Vector.<DirectionalLight>;
-		protected var _deferredPointLights:Vector.<PointLight>;
+        protected var _deferredPointLights:Vector.<PointLight>;
 		private var _directionalLights:Vector.<DirectionalLight>;
 		private var _pointLights:Vector.<PointLight>;
 		private var _lightProbes:Vector.<LightProbe>;
@@ -170,5 +170,9 @@ package away3d.core.traverse
 		public function get numDeferredPointLights():Number {
 			return _numDeferredPointLights;
 		}
-	}
+
+        public function get deferredPointLights():Vector.<PointLight> {
+            return _deferredPointLights;
+        }
+    }
 }
