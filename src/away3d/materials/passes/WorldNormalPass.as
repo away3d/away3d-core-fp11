@@ -258,7 +258,7 @@ package away3d.materials.passes {
 			var wrap:String = _repeat ? "wrap" : "clamp";
 			var filter:String;
 			var format:String;
-			var uvVarying:int
+			var uvVarying:int;
 			var enableMipMaps:Boolean;
 			enableMipMaps = _mipmap && texture.hasMipMaps;
 			if (_smooth) {

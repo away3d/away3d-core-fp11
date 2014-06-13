@@ -15,7 +15,7 @@ package away3d.core.render {
 	public class GBufferRenderer {
 		private var _drawDepth:Boolean = true;
 		private var _drawWorldNormal:Boolean = true;
-		private var _drawPosition:Boolean = true;
+		private var _drawPosition:Boolean = false;
 		private var _drawAlbedo:Boolean = false;
 		private var _drawSpecular:Boolean = false;
 

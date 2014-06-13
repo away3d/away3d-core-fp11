@@ -8,7 +8,9 @@ package away3d.core.traverse
 	import away3d.lights.LightProbe;
 	import away3d.lights.PointLight;
 
-	use namespace arcane;
+    import flash.geom.Point;
+
+    use namespace arcane;
 	
 	/**
 	 * The EntityCollector class is a traverser for scene partitions that collects all scene graph entities that are
@@ -20,13 +22,18 @@ package away3d.core.traverse
 	public class EntityCollector extends CollectorBase
 	{
 		protected var _skybox:RenderableBase;
-		protected var _deferredLights:Vector.<LightBase>;
+		protected var _deferredDirectionalLights:Vector.<DirectionalLight>;
+		protected var _deferredPointLights:Vector.<PointLight>;
 		private var _directionalLights:Vector.<DirectionalLight>;
 		private var _pointLights:Vector.<PointLight>;
 		private var _lightProbes:Vector.<LightProbe>;
 
 		private var _numDeferredDirectionalLights:Number = 0;
 		private var _numDeferredPointLights:Number = 0;
+        //if one of the light has colored specular, there will be created additional buffer for deffered lighting
+        private var _coloredSpecularDeferredLights:Boolean = false;
+        private var _hasSpecularDeferredLights:Boolean = false;
+        private var _hasDiffuseDeferredLights:Boolean = false;
 		private var _numDirectionalLights:Number = 0;
 		private var _numPointLights:Number = 0;
 		private var _numLightProbes:Number = 0;
@@ -50,9 +57,9 @@ package away3d.core.traverse
 		/**
 		 *
 		 */
-		public function get deferredLights():Vector.<LightBase>
+		public function get deferredDirectionalLights():Vector.<DirectionalLight>
 		{
-			return _deferredLights;
+			return _deferredDirectionalLights;
 		}
 
 		/**
@@ -75,7 +82,8 @@ package away3d.core.traverse
 		{
 			super();
 
-			_deferredLights = new Vector.<LightBase>();
+			_deferredDirectionalLights = new Vector.<DirectionalLight>();
+			_deferredPointLights = new Vector.<PointLight>();
 			_directionalLights = new Vector.<DirectionalLight>();
 			_pointLights = new Vector.<PointLight>();
 			_lightProbes = new Vector.<LightProbe>();
@@ -87,9 +95,11 @@ package away3d.core.traverse
 		 */
 		override public function applyDirectionalLight(entity:IEntity):void
 		{
-			_directionalLights[ _numDirectionalLights++ ] = entity as DirectionalLight;
-			if((entity as DirectionalLight).deferred) {
-				_deferredLights[ _numDeferredDirectionalLights++ ] = entity as LightBase
+            var directionalLight:DirectionalLight = entity as DirectionalLight;
+			_directionalLights[ _numDirectionalLights++ ] = directionalLight;
+			if(directionalLight.deferred) {
+				_deferredDirectionalLights[ _numDeferredDirectionalLights++ ] = directionalLight;
+                updateDeferredData(directionalLight);
 			}
 		}
 
@@ -108,13 +118,28 @@ package away3d.core.traverse
 		 */
 		override public function applyPointLight(entity:IEntity):void
 		{
-			_pointLights[ _numPointLights++ ] = entity as PointLight;
-			if((entity as PointLight).deferred) {
-				_deferredLights[ _numDeferredPointLights++ ] = entity as LightBase
+            var pointLight:PointLight = entity as PointLight;
+			_pointLights[ _numPointLights++ ] = pointLight;
+			if(pointLight.deferred) {
+				_deferredPointLights[ _numDeferredPointLights++ ] = pointLight;
+                updateDeferredData(pointLight);
 			}
 		}
 
-		/**
+        private function updateDeferredData(light:LightBase):void {
+            if(light.isColoredSpecular()) {
+                _coloredSpecularDeferredLights = true;
+            }
+            if(light.hasSpecularEmission()) {
+                _hasSpecularDeferredLights = true;
+            }
+
+            if(light.hasDiffuseEmission()) {
+                _hasDiffuseDeferredLights = true;
+            }
+        }
+
+        /**
 		 *
 		 */
 		override public function clear():void
@@ -122,9 +147,11 @@ package away3d.core.traverse
 			super.clear();
 			_skybox = null;
 
+            _coloredSpecularDeferredLights = false;
 			_numDeferredDirectionalLights = 0;
 			_numDeferredPointLights = 0;
-			_deferredLights.length = 0;
+			_deferredDirectionalLights.length = 0;
+            _deferredPointLights.length = 0;
 
 			if (_numDirectionalLights > 0)
 				_directionalLights.length = _numDirectionalLights = 0;

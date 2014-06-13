@@ -1,334 +1,595 @@
 package away3d.core.render {
-	import away3d.arcane;
-	import away3d.core.managers.RTTBufferManager;
-	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.math.Matrix3DUtils;
-	import away3d.core.traverse.EntityCollector;
-	import away3d.entities.Camera3D;
-	import away3d.lights.DirectionalLight;
-	import away3d.lights.LightBase;
-	import away3d.lights.PointLight;
-	import away3d.materials.compilation.ShaderRegisterCache;
-	import away3d.materials.compilation.ShaderState;
-	import away3d.textures.Texture2DBase;
+    import away3d.arcane;
+    import away3d.core.managers.RTTBufferManager;
+    import away3d.core.managers.Stage3DProxy;
+    import away3d.core.math.Matrix3DUtils;
+    import away3d.core.traverse.EntityCollector;
+    import away3d.entities.Camera3D;
+    import away3d.lights.DirectionalLight;
+    import away3d.lights.LightBase;
+    import away3d.lights.PointLight;
+    import away3d.materials.compilation.ShaderState;
+    import away3d.materials.compilation.ShaderState;
+    import away3d.materials.compilation.ShaderState;
+    import away3d.materials.compilation.ShaderState;
+    import away3d.textures.Texture2DBase;
 
-	import com.adobe.utils.AGALMiniAssembler;
+    import com.adobe.utils.AGALMiniAssembler;
 
-	import flash.display3D.Context3D;
-	import flash.display3D.Context3DBlendFactor;
-	import flash.display3D.Context3DProfile;
-	import flash.display3D.Context3DProgramType;
-	import flash.display3D.Context3DVertexBufferFormat;
-	import flash.display3D.IndexBuffer3D;
-	import flash.display3D.Program3D;
-	import flash.display3D.VertexBuffer3D;
-	import flash.geom.Matrix3D;
-	import flash.geom.Vector3D;
+    import flash.display.Shader;
 
-	use namespace arcane;
+    import flash.display3D.Context3D;
+    import flash.display3D.Context3DBlendFactor;
+    import flash.display3D.Context3DProgramType;
+    import flash.display3D.Context3DVertexBufferFormat;
+    import flash.display3D.IndexBuffer3D;
+    import flash.display3D.Program3D;
+    import flash.display3D.VertexBuffer3D;
+    import flash.geom.Matrix3D;
+    import flash.geom.Vector3D;
 
-	public class LightBufferRenderer {
-		//attribute
-		private static const POSITION_ATTRIBUTE:String = "aPos";
-		private static const UV_ATTRIBUTE:String = "aUv";
-		private static const INDEX_FRUSTUM_ATTRIBUTE:String = "aIndex";
-		//varying
-		private static const UV_VARYING:String = "vUv";
-		private static const POSITION_VARYING:String = "vPos";
+    use namespace arcane;
 
-		private static const AMBIENT_VALUES_FC:String = "cfAmbientValues";
-		private static const LIGHT_FC:String = "cfLightData";
-		private static const CAMERA_FC:String = "cfCameraData";
-		private static const DECODE_FC:String = "cfDecodeDepth";
-		private static const VIEW_TO_WORLD_FC:String = "cfWorld";
-		//texture
-		private static const WORLD_NORMAL_TEXTURE:String = "tWorldNormal";
-		private static const POSITION_TEXTURE:String = "tPosition";
-		private static const DEPTH_TEXTURE:String = "tDepth";
+    public class LightBufferRenderer {
+        private static const compiler:AGALMiniAssembler = new AGALMiniAssembler();
 
-		private static const _ambientValuesFC:Vector.<Number> = new Vector.<Number>();
-		private static const _cameraFC:Vector.<Number> = new Vector.<Number>();
-		private static const _decodeValuesFC:Vector.<Number> = Vector.<Number>([1, 1 / 255, 1 / 65025, 1 / 16581375]);
+        //attribute
+        private static const POSITION_ATTRIBUTE:String = "aPos";
+        private static const UV_ATTRIBUTE:String = "aUv";
+        private static const INDEX_FRUSTUM_ATTRIBUTE:String = "aIndex";
+        //varying
+        private static const UV_VARYING:String = "vUv";
+        private static const POSITION_VARYING:String = "vPos";
 
-		private static const _scaleValuesVC:Vector.<Number> = Vector.<Number>([0, 0, 1, 1]);
+        private static const AMBIENT_VALUES_FC:String = "cfAmbientValues";
+        private static const LIGHT_FC:String = "cfLightData";
+        private static const CAMERA_FC:String = "cfCameraData";
+        private static const DECODE_FC:String = "cfDecodeDepth";
+        private static const VIEW_TO_WORLD_FC:String = "cfWorld";
+        //texture
+        private static const WORLD_NORMAL_TEXTURE:String = "tWorldNormal";
+        private static const DEPTH_TEXTURE:String = "tDepth";
 
-		protected var programs:Vector.<Program3D>;
-		protected var dirtyPrograms:Vector.<Boolean>;
-		protected var shaderStates:Vector.<ShaderState>;
+        private static const _ambientValuesFC:Vector.<Number> = new Vector.<Number>();
+        private static const _cameraFC:Vector.<Number> = new Vector.<Number>();
+        private static const _decodeValuesFC:Vector.<Number> = Vector.<Number>([1, 1 / 255, 1 / 65025, 1 / 16581375]);
+        private static const _scaleValuesVC:Vector.<Number> = Vector.<Number>([0, 0, 1, 1]);
 
-		private var _vertexCode:String;
-		private var _fragmentCode:String;
-		private var _shader:ShaderState;
+        protected var programsCache:Vector.<Vector.<Program3D>>;
+        protected var context3Ds:Vector.<Context3D>;
+        protected var dirtyPrograms:Vector.<Boolean>;
+        protected var programHash:Vector.<String>;
+        protected var shaderStates:Vector.<Vector.<ShaderState>>;
 
-		private var _textureRatioX:Number = 1;
-		private var _textureRatioY:Number = 1;
-		private var _camera:Camera3D;
-		private var _monochromeSpecular:Boolean = false;
-		private var _lightData:Vector.<Number> = new Vector.<Number>();
+        private var _vertexCode:String;
+        private var _fragmentCode:String;
 
-		private var _lights:Vector.<LightBase>;
-		private var _numDirLights:uint = 0;
-		private var _numPointLights:uint = 0;
-		private var _specularEnabled:Boolean = true;
+        private var _textureRatioX:Number = 1;
+        private var _textureRatioY:Number = 1;
 
-		protected var _registerCache:ShaderRegisterCache;
+        private var _lightData:Vector.<Number> = new Vector.<Number>();
 
-		public function LightBufferRenderer() {
+        private var _directionalLights:Vector.<DirectionalLight>;
+        private var _pointLights:Vector.<PointLight>;
+        private var _numDirLights:uint = 0;
+        private var _numPointLights:uint = 0;
 
-			initInstance();
-		}
+        private var _specularEnabled:Boolean = true;
+        private var _coloredSpecularOutput:Boolean = false;
+        private var _diffuseEnabled:Boolean = true;
 
-		private function initInstance():void {
-			_registerCache = new ShaderRegisterCache(Context3DProfile.STANDARD);
-			programs = new Vector.<Program3D>(8, true);
-			dirtyPrograms = new Vector.<Boolean>(8, true);
-			shaderStates = new Vector.<ShaderState>(8, true);
-		}
+        private var _profile:String;
 
-		public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, frustumCorners:Vector.<Number>, normalTexture:Texture2DBase, positionTexture:Texture2DBase, depthTexture:Texture2DBase = null):void {
-			var i:int;
-			//store data from collector
-			_camera = entityCollector.camera;
+        public function LightBufferRenderer() {
+            initInstance();
+        }
 
-			var rttBuffer:RTTBufferManager = RTTBufferManager.getInstance(stage3DProxy);
-			var index:int = stage3DProxy.stage3DIndex;
-			var context3D:Context3D = stage3DProxy.context3D;
-			var vertexBuffer:VertexBuffer3D = (hasMRTSupport) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
-			var indexBuffer:IndexBuffer3D = rttBuffer.indexBuffer;
+        private function initInstance():void {
+            programsCache = new Vector.<Vector.<Program3D>>(8, true);
+            dirtyPrograms = new Vector.<Boolean>(8, true);
+            shaderStates = new Vector.<Vector.<ShaderState>>(8, true);
+            context3Ds = new Vector.<Context3D>(8, true);
+        }
 
-			var program:Program3D = programs[index];
-			if (!program) {
-				program = programs[index] = context3D.createProgram();
-				dirtyPrograms[index] = true;
-			}
+        public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, frustumCorners:Vector.<Number>, normalTexture:Texture2DBase, depthTexture:Texture2DBase = null):void {
+            if (_numDirLights == 0 && _numPointLights == 0) return;
 
-			_shader = shaderStates[index];
-			if (!_shader) {
-				_shader = shaderStates[index] = new ShaderState();
-			}
+            var i:int;
+            var len:int;
+            //store data from collector
+            var camera:Camera3D = entityCollector.camera;
 
-			//set point lights
-			if (entityCollector.numDeferredDirectionalLights != _numDirLights || entityCollector.numDeferredPointLights != _numPointLights) {
-				_lights = entityCollector.deferredLights;
-				_numDirLights = entityCollector.numDeferredDirectionalLights;
-				_numPointLights = entityCollector.numDeferredPointLights;
-				dirtyPrograms[index] = true;
-			}
+            var rttBuffer:RTTBufferManager = RTTBufferManager.getInstance(stage3DProxy);
+            var index:int = stage3DProxy.stage3DIndex;
+            var context3D:Context3D = stage3DProxy.context3D;
+            var vertexBuffer:VertexBuffer3D = (hasMRTSupport) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
+            var indexBuffer:IndexBuffer3D = rttBuffer.indexBuffer;
 
-			if (_numDirLights == 0 && _numPointLights == 0) return;
+            var programs:Vector.<Program3D> = programsCache[index];
+            if (!programs) {
+                programs = programsCache[index] = new Vector.<Program3D>();
+                programHash = new Vector.<String>();
+                dirtyPrograms[index] = true;
+            }
 
-			if (dirtyPrograms[index]) {
-				_shader.clear();
-				compileVertexProgram();
-				compileFragmentProgram();
-				program.upload((new AGALMiniAssembler()).assemble(Context3DProgramType.VERTEX, _vertexCode, 2),
-						(new AGALMiniAssembler()).assemble(Context3DProgramType.FRAGMENT, _fragmentCode, 2));
-				dirtyPrograms[index] = false;
-			}
+            if (context3Ds[index] != context3D) {
+                context3Ds[index] = context3D;
+                len = programs.length;
+                for (i = 0; i < len; i++) {
+                    programs[i].dispose();
+                }
+                programs.length = 0;
+            }
 
-			context3D.setProgram(program);
+            var shaders:Vector.<ShaderState> = shaderStates[index];
+            if (!shaderStates[index]) {
+                shaders = shaderStates[index] = new Vector.<ShaderState>();
+            }
 
-			//in future, enable stencil test optimization in FlashPlayer 15, when we don't need to clear it each time
-			context3D.setVertexBufferAt(_shader.getAttribute(POSITION_ATTRIBUTE), vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
-			context3D.setVertexBufferAt(_shader.getAttribute(UV_ATTRIBUTE), vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
-			context3D.setVertexBufferAt(_shader.getAttribute(INDEX_FRUSTUM_ATTRIBUTE), vertexBuffer, 4, Context3DVertexBufferFormat.FLOAT_1);
+            //set point lights
+            if (entityCollector.numDeferredDirectionalLights != _numDirLights || entityCollector.numDeferredPointLights != _numPointLights) {
+                _directionalLights = entityCollector.deferredDirectionalLights;
+                _numDirLights = entityCollector.numDeferredDirectionalLights;
+                _numPointLights = entityCollector.numDeferredPointLights;
+                dirtyPrograms[index] = true;
+            }
 
-			context3D.setTextureAt(_shader.getTexture(WORLD_NORMAL_TEXTURE), normalTexture.getTextureForStage3D(stage3DProxy));
 
-			if (_shader.hasTexture(POSITION_TEXTURE)) {
-				context3D.setTextureAt(_shader.getTexture(POSITION_TEXTURE), positionTexture.getTextureForStage3D(stage3DProxy));
-			}
+            //7
+            //tokens 200, 1024
+            //fc 28, 64
+            var maxLightCountPerBatch:int = (hasMRTSupport) ? 19 : 7;
+            var numDirectionalPrograms:Number = _numDirLights / 19;//(64-7)/3 constants
+            var numPointPrograms:Number = _numPointLights / 19;
+            var shader:ShaderState;
+            var lightCountToDraw:int;
+            if (dirtyPrograms[index]) {
+                var batchIndex:int = 0;
+                var program:Program3D;
+                lightCountToDraw = _numDirLights;
+                for (i = 0; i < numDirectionalPrograms; i++) {
+                    program = programs[batchIndex];
+                    if (!program) {
+                        program = programs[batchIndex] = context3D.createProgram();
+                    }
+                    shader = shaders[batchIndex];
+                    if (!shader) {
+                        shader = shaders[batchIndex] = new ShaderState();
+                    }
+                    batchIndex++;
+                    shader.clear();
+                    compileVertexProgram(shader);
+                    compileDirectionalFragmentProgram(Math.min(maxLightCountPerBatch, lightCountToDraw), shader);
+                    lightCountToDraw -= maxLightCountPerBatch;
+                    program.upload(compiler.assemble(Context3DProgramType.VERTEX, _vertexCode, 2), compiler.assemble(Context3DProgramType.FRAGMENT, _fragmentCode, 2));
+                    programs.push(program);
+                    shaders.push(shader);
+                }
 
-			if (_shader.hasTexture(DEPTH_TEXTURE)) {
-				context3D.setTextureAt(_shader.getTexture(DEPTH_TEXTURE), depthTexture.getTextureForStage3D(stage3DProxy));
-			}
+                lightCountToDraw = _numPointLights;
+                for (i = 0; i < numPointPrograms; i++) {
+                    program = programs[batchIndex];
+                    if (!program) {
+                        program = programs[batchIndex] = context3D.createProgram();
+                    }
+                    shader = shaders[batchIndex];
+                    if (!shader) {
+                        shader = shaders[batchIndex] = new ShaderState();
+                    }
+                    shader.clear();
+                    batchIndex++;
+                    shader.clear();
+                    compileVertexProgram(shader);
+                    compilePointFragmentProgram(Math.min(maxLightCountPerBatch, lightCountToDraw), shader);
+                    lightCountToDraw -= maxLightCountPerBatch;
+                    program.upload(compiler.assemble(Context3DProgramType.VERTEX, _vertexCode, 2), compiler.assemble(Context3DProgramType.FRAGMENT, _fragmentCode, 2));
+                    programs.push(program);
+                    shaders.push(shader);
+                }
+                shader = null;
+                program = null;
+                dirtyPrograms[index] = false;
+            }
 
-			//VERTEX DATA
-			context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 0, frustumCorners, 4);
-			_scaleValuesVC[0] = _textureRatioX;
-			_scaleValuesVC[1] = _textureRatioY;
-			context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _scaleValuesVC, 1);
+            shader = shaders[0];
+            //in future, enable stencil test optimization in FlashPlayer 15, when we don't need to clear it each time
+            context3D.setVertexBufferAt(shader.getAttribute(POSITION_ATTRIBUTE), vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
+            context3D.setVertexBufferAt(shader.getAttribute(UV_ATTRIBUTE), vertexBuffer, 2, Context3DVertexBufferFormat.FLOAT_2);
+            context3D.setVertexBufferAt(shader.getAttribute(INDEX_FRUSTUM_ATTRIBUTE), vertexBuffer, 4, Context3DVertexBufferFormat.FLOAT_1);
 
-			//FRAGMENT DATA
-			var globalAmbientR:Number = 0;
-			var globalAmbientG:Number = 0;
-			var globalAmbientB:Number = 0;
-			var k:int = 0;
-			var len:int = _numDirLights + _numPointLights;
-			for (i = 0; i < len; i++) {
-				var light:LightBase = _lights[i];
-				var posDir:Vector3D;
-				var radius:Number;
-				var falloff:Number;
-				if (light is PointLight) {
-					radius = (light as PointLight)._radius;
-					falloff = (light as PointLight)._fallOffFactor;
-					posDir = light.scenePosition;
-					_lightData[k++] = posDir.x;
-					_lightData[k++] = posDir.y;
-					_lightData[k++] = posDir.z;
-				} else if (light is DirectionalLight) {
-					posDir = (light as DirectionalLight).sceneDirection;
-					var dx:Number = posDir.x;
-					var dy:Number = posDir.y;
-					var dz:Number = posDir.z;
-					var nrm:Number = 1 / Math.sqrt(dx * dx + dy * dy + dz * dz);
-					_lightData[k++] = -posDir.x * nrm;
-					_lightData[k++] = -posDir.y * nrm;
-					_lightData[k++] = -posDir.z * nrm;
-				}
+            //VERTEX DATA
+            context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 0, frustumCorners, 4);
+            _scaleValuesVC[0] = _textureRatioX;
+            _scaleValuesVC[1] = _textureRatioY;
+            context3D.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, _scaleValuesVC, 1);
 
-				_lightData[k++] = 1;
-				_lightData[k++] = light._diffuseR;
-				_lightData[k++] = light._diffuseG;
-				_lightData[k++] = light._diffuseB;
-				_lightData[k++] = radius*radius;
-				_lightData[k++] = light._specularR;
-				_lightData[k++] = light._specularG;
-				_lightData[k++] = light._specularB;
-				_lightData[k++] = falloff;
+            var offsetLight:int = 0;
+            var drawCalls:int = 0;
+            context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
+            for (i = 0; i < numDirectionalPrograms; i++) {
+                activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
+                activateDirectionalLightData(shader, context3D, offsetLight, Math.min(maxLightCountPerBatch, _numDirLights - offsetLight));
+                context3D.setProgram(programs[i]);
+                context3D.drawTriangles(indexBuffer, 0, 2);
+                drawCalls++;
+                if(drawCalls == 1) {
+                    context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE);
+                }
+                offsetLight += maxLightCountPerBatch;
+            }
 
-				globalAmbientR += light._ambientR;
-				globalAmbientG += light._ambientG;
-				globalAmbientB += light._ambientB;
-			}
+            for (i = 0; i < numPointPrograms; i++) {
+                activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
+                activatePointLightData(shader, context3D, offsetLight, Math.min(maxLightCountPerBatch, _numDirLights - offsetLight));
+                context3D.setProgram(programs[i]);
+                context3D.drawTriangles(indexBuffer, 0, 2);
+                drawCalls++;
+                if(drawCalls == 1) {
+                    context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE);
+                }
+                offsetLight += maxLightCountPerBatch;
+            }
 
-			if (_shader.hasFragmentConstant(AMBIENT_VALUES_FC)) {
-				_ambientValuesFC[0] = globalAmbientR;
-				_ambientValuesFC[1] = globalAmbientG;
-				_ambientValuesFC[2] = globalAmbientB;
-				_ambientValuesFC[3] = 100;//decode gloss
-				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(AMBIENT_VALUES_FC), _ambientValuesFC, _shader.getFragmentConstantStride(AMBIENT_VALUES_FC));
-			}
+            context3D.setVertexBufferAt(0, null);
+            context3D.setVertexBufferAt(1, null);
+            context3D.setVertexBufferAt(2, null);
+            context3D.setTextureAt(0, null);
+            context3D.setTextureAt(1, null);
+        }
 
-			if (_shader.hasFragmentConstant(CAMERA_FC)) {
-				_cameraFC[0] = _camera.scenePosition.x;
-				_cameraFC[1] = _camera.scenePosition.y;
-				_cameraFC[2] = _camera.scenePosition.z;
-				_cameraFC[3] = 1;
-				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(CAMERA_FC), _cameraFC, _shader.getFragmentConstantStride(CAMERA_FC));
-			}
+        private function activatePointLightData(shader:ShaderState, context3D:Context3D, offsetLight:int, number:Number):void {
+            var globalAmbientR:Number = 0;
+            var globalAmbientG:Number = 0;
+            var globalAmbientB:Number = 0;
 
-			if (_shader.hasFragmentConstant(DECODE_FC)) {
-				var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
-				_camera.projection.matrix.copyRawDataTo(raw);
-				_decodeValuesFC[4] = 0;
-				_decodeValuesFC[5] = 0;
-				_decodeValuesFC[6] = raw[14];
-				_decodeValuesFC[7] = -raw[10];
-				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(DECODE_FC), _decodeValuesFC, _shader.getFragmentConstantStride(DECODE_FC));
-			}
+            var k:int = 0;
+            var len:int;
+            len = _numDirLights + _numPointLights;
+            var i:int;
+            for (i = 0; i < len; i++) {
+                var light:LightBase = _directionalLights[i];
+                var radius:Number = (light as PointLight)._radius;
+                var falloff:Number = (light as PointLight)._fallOffFactor;
+                var posDir:Vector3D = light.scenePosition;
+                _lightData[k++] = posDir.x;
+                _lightData[k++] = posDir.y;
+                _lightData[k++] = posDir.z;
 
-			if (_shader.hasFragmentConstant(VIEW_TO_WORLD_FC)) {
-				var mat:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
-				mat.copyFrom(_camera.sceneTransform);
-				context3D.setProgramConstantsFromMatrix(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(VIEW_TO_WORLD_FC), mat, true);
-			}
+                _lightData[k++] = 1;
+                _lightData[k++] = light._diffuseR;
+                _lightData[k++] = light._diffuseG;
+                _lightData[k++] = light._diffuseB;
+                _lightData[k++] = radius * radius;
+                _lightData[k++] = light._specularR;
+                _lightData[k++] = light._specularG;
+                _lightData[k++] = light._specularB;
+                _lightData[k++] = falloff;
 
-			if (_shader.hasFragmentConstant(LIGHT_FC)) {
-				context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(LIGHT_FC), _lightData, _shader.getFragmentConstantStride(LIGHT_FC));
-			}
+                globalAmbientR += light._ambientR;
+                globalAmbientG += light._ambientG;
+                globalAmbientB += light._ambientB;
+            }
 
-			context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
-			context3D.drawTriangles(indexBuffer, 0, 2);
+            if (shader.hasFragmentConstant(LIGHT_FC)) {
+                context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(LIGHT_FC), _lightData, shader.getFragmentConstantStride(LIGHT_FC));
+            }
 
-			context3D.setTextureAt(0, null);
-			context3D.setTextureAt(1, null);
-			context3D.setTextureAt(2, null);
-		}
+            if (shader.hasFragmentConstant(AMBIENT_VALUES_FC)) {
+                _ambientValuesFC[0] = globalAmbientR;
+                _ambientValuesFC[1] = globalAmbientG;
+                _ambientValuesFC[2] = globalAmbientB;
+                _ambientValuesFC[3] = 100;//decode gloss
+                context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(AMBIENT_VALUES_FC), _ambientValuesFC, shader.getFragmentConstantStride(AMBIENT_VALUES_FC));
+            }
+        }
 
-		private function compileFragmentProgram():void {
-			_fragmentCode = "";
+        private function activateDirectionalLightData(shader:ShaderState, context3D:Context3D, from:int, to:int):void {
+            var globalAmbientR:Number = 0;
+            var globalAmbientG:Number = 0;
+            var globalAmbientB:Number = 0;
 
-			var normal:int = _shader.getFreeFragmentTemp();
-			_fragmentCode += "tex ft" + normal + ", v" + _shader.getVarying(UV_VARYING) + ", fs" + _shader.getTexture(WORLD_NORMAL_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
+            var k:int = 0;
+            for (var i:int = from; i < to; i++) {
+                var light:LightBase = _directionalLights[i];
+                var posDir:Vector3D = (light as DirectionalLight).sceneDirection;
+                var dx:Number = posDir.x;
+                var dy:Number = posDir.y;
+                var dz:Number = posDir.z;
+                var nrm:Number = 1 / Math.sqrt(dx * dx + dy * dy + dz * dz);
+                _lightData[k++] = -posDir.x * nrm;
+                _lightData[k++] = -posDir.y * nrm;
+                _lightData[k++] = -posDir.z * nrm;
+                _lightData[k++] = 1;
+                _lightData[k++] = light._diffuseR;
+                _lightData[k++] = light._diffuseG;
+                _lightData[k++] = light._diffuseB;
+                _lightData[k++] = 0;
+                _lightData[k++] = light._specularR;
+                _lightData[k++] = light._specularG;
+                _lightData[k++] = light._specularB;
+                _lightData[k++] = 0;
 
-			if (_specularEnabled) {
-				_fragmentCode += "mul ft" + normal + ".w, ft" + normal + ".w, fc" + _shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".w\n";//100
-				var position:int = _shader.getFreeFragmentTemp();
-				_fragmentCode += "tex ft" + position + ", v" + _shader.getVarying(UV_VARYING) + ", fs" + _shader.getTexture(POSITION_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
-			}
+                globalAmbientR += light._ambientR;
+                globalAmbientG += light._ambientG;
+                globalAmbientB += light._ambientB;
+            }
 
-			var depth:int = _shader.getFreeFragmentTemp();
-			var decode:int = _shader.getFragmentConstant(DECODE_FC, 2);
-			_fragmentCode += "tex ft" + depth + ", v" + _shader.getVarying(UV_VARYING) + ", fs" + _shader.getTexture(DEPTH_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
-			_fragmentCode += "dp4 ft" + depth + ".z, ft" + depth + ", fc" + decode + "\n";
-			_fragmentCode += "add ft" + depth + ".z, ft" + depth + ".z, fc" + (decode + 1) + ".w\n";
-			_fragmentCode += "div ft" + depth + ".z, fc" + (decode + 1) + ".z, ft" + depth + ".z\n";
-			_fragmentCode += "mul ft" + depth + ".xyz, ft" + depth + ".z, v" + _shader.getVarying(POSITION_VARYING) + ".xyz\n";
-			_fragmentCode += "mov ft" + depth + ".w, v" + _shader.getVarying(POSITION_VARYING) + ".w\n";
-			_fragmentCode += "m44 ft" + depth + ", ft" + depth + ", fc" + _shader.getFragmentConstant(VIEW_TO_WORLD_FC, 4) + "\n";
+            if (shader.hasFragmentConstant(LIGHT_FC)) {
+                context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(LIGHT_FC), _lightData, shader.getFragmentConstantStride(LIGHT_FC));
+            }
 
-			var lightValues:int = _shader.getFragmentConstant(LIGHT_FC, 3);
-			var lightDir:int = _shader.getFreeFragmentTemp();
-			_fragmentCode += "sub ft" + lightDir + ", fc" + lightValues + ", ft" + depth + "\n";
-			_fragmentCode += "dp3 ft" + lightDir + ".w, ft" + lightDir + ", ft" + lightDir + "\n";
-			_fragmentCode += "sub ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 1) + ".w\n";
-			_fragmentCode += "mul ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w\n";
-			_fragmentCode += "sub ft" + lightDir + ".w, fc" + lightValues + ".w, ft" + lightDir + ".w\n";
-			_fragmentCode += "nrm ft" + lightDir + ".xyz, ft" + lightDir + ".xyz\n";
+            if (shader.hasFragmentConstant(AMBIENT_VALUES_FC)) {
+                _ambientValuesFC[0] = globalAmbientR;
+                _ambientValuesFC[1] = globalAmbientG;
+                _ambientValuesFC[2] = globalAmbientB;
+                _ambientValuesFC[3] = 100;//decode gloss
+                context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(AMBIENT_VALUES_FC), _ambientValuesFC, shader.getFragmentConstantStride(AMBIENT_VALUES_FC));
+            }
+        }
 
-			var diffuseLighting:int = _shader.getFreeFragmentTemp();
-			_fragmentCode += "dp3 ft" + diffuseLighting + ".x, ft" + lightDir + ", ft" + normal + ".xyz\n";
-			_fragmentCode += "sat ft" + diffuseLighting + ".x, ft" + diffuseLighting + ".x\n";
-			_fragmentCode += "mul ft" + diffuseLighting + ".x, ft" + diffuseLighting + ".x, ft" + lightDir + ".w\n";
-			_fragmentCode += "mul ft" + diffuseLighting + ".xyz, ft" + diffuseLighting + ".xxx, fc" + (lightValues + 1) + ".xyz\n";
+        private function activatePass(shader:ShaderState, camera:Camera3D, stage3DProxy:Stage3DProxy, normalTexture:Texture2DBase, depthTexture:Texture2DBase):void {
+            var context3D:Context3D = stage3DProxy.context3D;
+            context3D.setTextureAt(shader.getTexture(WORLD_NORMAL_TEXTURE), normalTexture.getTextureForStage3D(stage3DProxy));
+            if (shader.hasTexture(DEPTH_TEXTURE)) {
+                context3D.setTextureAt(shader.getTexture(DEPTH_TEXTURE), depthTexture.getTextureForStage3D(stage3DProxy));
+            }
+            //FRAGMENT GLOBAL VALUES
+            if (shader.hasFragmentConstant(CAMERA_FC)) {
+                _cameraFC[0] = camera.scenePosition.x;
+                _cameraFC[1] = camera.scenePosition.y;
+                _cameraFC[2] = camera.scenePosition.z;
+                _cameraFC[3] = 1;
+                context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(CAMERA_FC), _cameraFC, shader.getFragmentConstantStride(CAMERA_FC));
+            }
 
-			if (_specularEnabled) {
-				var specular:int = _shader.getFreeFragmentTemp();
-				_fragmentCode += "sub ft" + specular + ", fc" + _shader.getFragmentConstant(CAMERA_FC) + ", ft" + depth + "\n";
-				_fragmentCode += "nrm ft" + specular + ".xyz, ft" + specular + ".xyz\n";
-				_fragmentCode += "add ft" + specular + ".xyz, ft" + specular + ".xyz, ft" + lightDir + ".xyz\n";
-				_fragmentCode += "nrm ft" + specular + ".xyz, ft" + specular + ".xyz\n";
-				_fragmentCode += "dp3 ft" + specular + ".x, ft" + normal + ", ft" + specular + "\n";
-				_fragmentCode += "sat ft" + specular + ".x, ft" + specular + ".x\n";
-				_fragmentCode += "pow ft" + specular + ".x, ft" + specular + ".x, ft" + normal + ".w\n";//gloss
-				_fragmentCode += "mul ft" + specular + ".xyz, ft" + specular + ".xxx, fc" + (lightValues + 2) + ".xyz\n";
-				_fragmentCode += "mov oc, ft" + specular + ".xyzz\n";
-			} else {
-				_fragmentCode += "mov oc, ft" + diffuseLighting + ".xyzz\n";
-			}
-		}
+            if (shader.hasFragmentConstant(DECODE_FC)) {
+                var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
+                camera.projection.matrix.copyRawDataTo(raw);
+                _decodeValuesFC[4] = 0;
+                _decodeValuesFC[5] = 0;
+                _decodeValuesFC[6] = raw[14];
+                _decodeValuesFC[7] = -raw[10];
+                context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(DECODE_FC), _decodeValuesFC, shader.getFragmentConstantStride(DECODE_FC));
+            }
 
-		private function compileVertexProgram():void {
-			_vertexCode = "";
-			_vertexCode += "mov op, va" + _shader.getAttribute(POSITION_ATTRIBUTE) + "\n";
+            if (shader.hasFragmentConstant(VIEW_TO_WORLD_FC)) {
+                var mat:Matrix3D = Matrix3DUtils.CALCULATION_MATRIX;
+                mat.copyFrom(camera.sceneTransform);
+                context3D.setProgramConstantsFromMatrix(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(VIEW_TO_WORLD_FC), mat, true);
+            }
+        }
 
-			_vertexCode += "mov vt0, va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";
-			_vertexCode += "mul vt0.xy, vt0.xy, vc4.xy\n";
-			_vertexCode += "mov v" + _shader.getVarying(UV_VARYING) + ", vt0\n";
+        private function compilePointFragmentProgram(numLights:int, shader:ShaderState):void {
+            _fragmentCode = "";
 
-			_vertexCode += "mov vt0, vc[va" + _shader.getAttribute(INDEX_FRUSTUM_ATTRIBUTE) + ".x]\n";
-			_vertexCode += "div vt0.xyz, vt0.xyz, vt0.z\n";
-			_vertexCode += "mov v" + _shader.getVarying(POSITION_VARYING) + ", vt0\n";
-		}
+            var normal:int = shader.getFreeFragmentTemp();
+            _fragmentCode += "tex ft" + normal + ", v" + shader.getVarying(UV_VARYING) + ", fs" + shader.getTexture(WORLD_NORMAL_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
 
-		public function get textureRatioX():Number {
-			return _textureRatioX;
-		}
+            if (_specularEnabled) {
+                _fragmentCode += "mul ft" + normal + ".w, ft" + normal + ".w, fc" + shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".w\n";//100
+            }
 
-		public function set textureRatioX(value:Number):void {
-			_textureRatioX = value;
-		}
+            var depth:int = shader.getFreeFragmentTemp();
+            var decode:int = shader.getFragmentConstant(DECODE_FC, 2);
+            _fragmentCode += "tex ft" + depth + ", v" + shader.getVarying(UV_VARYING) + ", fs" + shader.getTexture(DEPTH_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
+            _fragmentCode += "dp4 ft" + depth + ".z, ft" + depth + ", fc" + decode + "\n";
+            _fragmentCode += "add ft" + depth + ".z, ft" + depth + ".z, fc" + (decode + 1) + ".w\n";
+            _fragmentCode += "div ft" + depth + ".z, fc" + (decode + 1) + ".z, ft" + depth + ".z\n";
+            _fragmentCode += "mul ft" + depth + ".xyz, ft" + depth + ".z, v" + shader.getVarying(POSITION_VARYING) + ".xyz\n";
+            _fragmentCode += "mov ft" + depth + ".w, v" + shader.getVarying(POSITION_VARYING) + ".w\n";
+            //TODO: can be done without matrix, just project on the camera view direction
+            _fragmentCode += "m44 ft" + depth + ", ft" + depth + ", fc" + shader.getFragmentConstant(VIEW_TO_WORLD_FC, 4) + "\n";
 
-		public function get textureRatioY():Number {
-			return _textureRatioY;
-		}
+            if (_diffuseEnabled) {
+                var accumulationDiffuse:int = shader.getFreeFragmentTemp();
+                _fragmentCode += "mov ft" + accumulationDiffuse + ".xyz, fc" + shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".xyz\n";
+                _fragmentCode += "mov ft" + accumulationDiffuse + ".w, fc" + (decode + 1) + ".x\n";
+            }
 
-		public function set textureRatioY(value:Number):void {
-			_textureRatioY = value;
-		}
+            if (_specularEnabled && _coloredSpecularOutput) {
+                var accumulationSpecular:int = shader.getFreeFragmentTemp();
+                _fragmentCode += "mov ft" + accumulationSpecular + ", fc" + (decode + 1) + ".xxxx\n";
+            }
 
-		public function get monochromeSpecular():Boolean {
-			return _monochromeSpecular;
-		}
+            var lightConstants:int = shader.getFragmentConstant(LIGHT_FC, numLights * 3);
+            for (var i:uint = 0; i < numLights; i++) {
+                var lightValues:int = lightConstants + i * 3;
+                var lightDir:int = shader.getFreeFragmentTemp();
+                _fragmentCode += "sub ft" + lightDir + ", fc" + lightValues + ", ft" + depth + "\n";
+                _fragmentCode += "dp3 ft" + lightDir + ".w, ft" + lightDir + ", ft" + lightDir + "\n";
+                _fragmentCode += "sub ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 1) + ".w\n";
+                _fragmentCode += "mul ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w\n";
+                _fragmentCode += "sub ft" + lightDir + ".w, fc" + lightValues + ".w, ft" + lightDir + ".w\n";
+                _fragmentCode += "nrm ft" + lightDir + ".xyz, ft" + lightDir + ".xyz\n";
 
-		public function set monochromeSpecular(value:Boolean):void {
-			if (_monochromeSpecular == value) return;
-			_monochromeSpecular = value;
-			for (var i:uint = 0; i < 8; i++) {
-				dirtyPrograms[i] = true;
-			}
-		}
-	}
+                if (_diffuseEnabled) {
+                    var tempDiffuseCalculation:int = shader.getFreeFragmentTemp();
+                    _fragmentCode += "dp3 ft" + tempDiffuseCalculation + ".x, ft" + lightDir + ", ft" + normal + ".xyz\n";
+                    _fragmentCode += "sat ft" + tempDiffuseCalculation + ".x, ft" + tempDiffuseCalculation + ".x\n";
+                    _fragmentCode += "mul ft" + tempDiffuseCalculation + ".x, ft" + tempDiffuseCalculation + ".x, ft" + lightDir + ".w\n";
+                    _fragmentCode += "mul ft" + tempDiffuseCalculation + ".xyz, ft" + tempDiffuseCalculation + ".xxx, fc" + (lightValues + 1) + ".xyz\n";
+                    _fragmentCode += "add ft" + accumulationDiffuse + ".xyz, ft" + accumulationDiffuse + ".xyz, ft" + tempDiffuseCalculation + ".xyz\n";
+                    shader.removeFragmentTempUsage(tempDiffuseCalculation);
+                }
+
+                if (_specularEnabled) {
+                    var tempSpecularCalculation:int = shader.getFreeFragmentTemp();
+                    _fragmentCode += "sub ft" + tempSpecularCalculation + ", fc" + shader.getFragmentConstant(CAMERA_FC) + ", ft" + depth + "\n";
+                    _fragmentCode += "nrm ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
+                    _fragmentCode += "add ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xyz, ft" + lightDir + ".xyz\n";
+                    _fragmentCode += "nrm ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
+                    _fragmentCode += "dp3 ft" + tempSpecularCalculation + ".x, ft" + normal + ", ft" + tempSpecularCalculation + "\n";
+                    _fragmentCode += "sat ft" + tempSpecularCalculation + ".x, ft" + tempSpecularCalculation + ".x\n";
+                    _fragmentCode += "pow ft" + tempSpecularCalculation + ".x, ft" + tempSpecularCalculation + ".x, ft" + normal + ".w\n";//gloss
+                    if (_coloredSpecularOutput) {
+                        _fragmentCode += "mul ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xxx, fc" + (lightValues + 2) + ".xyz\n";
+                        _fragmentCode += "add ft" + accumulationSpecular + ".xyz, ft" + accumulationSpecular + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
+                    } else {
+                        _fragmentCode += "add ft" + tempDiffuseCalculation + ".w, ft" + tempDiffuseCalculation + ".w, ft" + tempSpecularCalculation + ".x\n";
+                    }
+                    shader.removeFragmentTempUsage(tempSpecularCalculation);
+                }
+
+                shader.removeFragmentTempUsage(lightDir);
+            }
+
+            if (_coloredSpecularOutput && _diffuseEnabled) {
+                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
+                _fragmentCode += "mov oc1, ft" + tempSpecularCalculation + "\n";
+            } else if (_coloredSpecularOutput && !_diffuseEnabled) {
+                _fragmentCode += "mov oc0, ft" + tempSpecularCalculation + "\n";
+            } else {
+                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
+            }
+        }
+
+        private function compileDirectionalFragmentProgram(numDirectionals:uint, shader:ShaderState):void {
+            _fragmentCode = "";
+
+            var normal:int = shader.getFreeFragmentTemp();
+            _fragmentCode += "tex ft" + normal + ", v" + shader.getVarying(UV_VARYING) + ", fs" + shader.getTexture(WORLD_NORMAL_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
+            var decode:int = shader.getFragmentConstant(DECODE_FC, 2);
+
+            if (_specularEnabled) {
+                //restore gloss value
+                _fragmentCode += "mul ft" + normal + ".w, ft" + normal + ".w, fc" + shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".w\n";//100
+
+                var depth:int = shader.getFreeFragmentTemp();
+                _fragmentCode += "tex ft" + depth + ", v" + shader.getVarying(UV_VARYING) + ", fs" + shader.getTexture(DEPTH_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
+                _fragmentCode += "dp4 ft" + depth + ".z, ft" + depth + ", fc" + decode + "\n";
+                _fragmentCode += "add ft" + depth + ".z, ft" + depth + ".z, fc" + (decode + 1) + ".w\n";
+                _fragmentCode += "div ft" + depth + ".z, fc" + (decode + 1) + ".z, ft" + depth + ".z\n";
+                _fragmentCode += "mul ft" + depth + ".xyz, ft" + depth + ".z, v" + shader.getVarying(POSITION_VARYING) + ".xyz\n";
+                _fragmentCode += "mov ft" + depth + ".w, v" + shader.getVarying(POSITION_VARYING) + ".w\n";
+                //TODO: can be done without matrix, just project on the camera view direction
+                _fragmentCode += "m44 ft" + depth + ", ft" + depth + ", fc" + shader.getFragmentConstant(VIEW_TO_WORLD_FC, 4) + "\n";
+            }
+
+            if (_diffuseEnabled) {
+                var accumulationDiffuse:int = shader.getFreeFragmentTemp();
+                _fragmentCode += "mov ft" + accumulationDiffuse + ".xyz, fc" + shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".xyz\n";
+                _fragmentCode += "mov ft" + accumulationDiffuse + ".w, fc" + (decode + 1) + ".x\n";
+            }
+
+            if (_specularEnabled && _coloredSpecularOutput) {
+                var accumulationSpecular:int = shader.getFreeFragmentTemp();
+                _fragmentCode += "mov ft" + accumulationSpecular + ", fc" + (decode + 1) + ".xxxx\n";
+            }
+
+            var lightValues:int = shader.getFragmentConstant(LIGHT_FC, numDirectionals * 3);
+            for (var i:uint = 0; i < numDirectionals; i++) {
+                var lightOffset:int = lightValues + i * 3;
+                if (_diffuseEnabled) {
+                    var tempDiffuseCalculation:int = shader.getFreeFragmentTemp();
+                    _fragmentCode += "dp3 ft" + tempDiffuseCalculation + ".x, fc" + lightOffset + ", ft" + normal + ".xyz\n";
+                    _fragmentCode += "sat ft" + tempDiffuseCalculation + ".x, ft" + tempDiffuseCalculation + ".x\n";
+                    _fragmentCode += "mul ft" + tempDiffuseCalculation + ".xyz, ft" + tempDiffuseCalculation + ".xxx, fc" + (lightOffset + 1) + ".xyz\n";
+                    _fragmentCode += "add ft" + accumulationDiffuse + ".xyz, ft" + accumulationDiffuse + ".xyz, ft" + tempDiffuseCalculation + ".xyz\n";
+                    shader.removeFragmentTempUsage(tempDiffuseCalculation);
+                }
+
+                if (_specularEnabled) {
+                    var tempSpecularCalculation:int = shader.getFreeFragmentTemp();
+                    _fragmentCode += "sub ft" + tempSpecularCalculation + ", fc" + shader.getFragmentConstant(CAMERA_FC) + ", ft" + depth + "\n";
+                    _fragmentCode += "nrm ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
+                    _fragmentCode += "add ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xyz, fc" + lightOffset + ".xyz\n";
+                    _fragmentCode += "nrm ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
+                    _fragmentCode += "dp3 ft" + tempSpecularCalculation + ".x, ft" + normal + ", ft" + tempSpecularCalculation + "\n";
+                    _fragmentCode += "sat ft" + tempSpecularCalculation + ".x, ft" + tempSpecularCalculation + ".x\n";
+                    _fragmentCode += "pow ft" + tempSpecularCalculation + ".x, ft" + tempSpecularCalculation + ".x, ft" + normal + ".w\n";//gloss
+                    if (_coloredSpecularOutput) {
+                        _fragmentCode += "mul ft" + tempSpecularCalculation + ".xyz, ft" + tempSpecularCalculation + ".xxx, fc" + (lightOffset + 2) + ".xyz\n";
+                        _fragmentCode += "add ft" + accumulationSpecular + ".xyz, ft" + accumulationSpecular + ".xyz, ft" + tempSpecularCalculation + ".xyz\n";
+                    } else {
+                        _fragmentCode += "add ft" + tempDiffuseCalculation + ".w, ft" + tempDiffuseCalculation + ".w, ft" + tempSpecularCalculation + ".x\n";
+                    }
+                    shader.removeFragmentTempUsage(tempSpecularCalculation);
+                }
+            }
+
+            if (_coloredSpecularOutput && _diffuseEnabled) {
+                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
+                _fragmentCode += "mov oc1, ft" + tempSpecularCalculation + "\n";
+            } else if (_coloredSpecularOutput && !_diffuseEnabled) {
+                _fragmentCode += "mov oc0, ft" + tempSpecularCalculation + "\n";
+            } else {
+                _fragmentCode += "mov oc0, ft" + tempDiffuseCalculation + "\n";
+            }
+        }
+
+        private function compileVertexProgram(shader:ShaderState):void {
+            _vertexCode = "";
+            _vertexCode += "mov op, va" + shader.getAttribute(POSITION_ATTRIBUTE) + "\n";
+
+            _vertexCode += "mov vt0, va" + shader.getAttribute(UV_ATTRIBUTE) + "\n";
+            _vertexCode += "mul vt0.xy, vt0.xy, vc4.xy\n";
+            _vertexCode += "mov v" + shader.getVarying(UV_VARYING) + ", vt0\n";
+
+            _vertexCode += "mov vt0, vc[va" + shader.getAttribute(INDEX_FRUSTUM_ATTRIBUTE) + ".x]\n";
+            _vertexCode += "div vt0.xyz, vt0.xyz, vt0.z\n";
+            _vertexCode += "mov v" + shader.getVarying(POSITION_VARYING) + ", vt0\n";
+        }
+
+        public function get textureRatioX():Number {
+            return _textureRatioX;
+        }
+
+        public function set textureRatioX(value:Number):void {
+            _textureRatioX = value;
+        }
+
+        public function get textureRatioY():Number {
+            return _textureRatioY;
+        }
+
+        public function set textureRatioY(value:Number):void {
+            _textureRatioY = value;
+        }
+
+        public function get specularEnabled():Boolean {
+            return _specularEnabled;
+        }
+
+        public function set specularEnabled(value:Boolean):void {
+            if (_specularEnabled == value) return;
+            _specularEnabled = value;
+            invalidatePrograms();
+        }
+
+        public function get diffuseEnabled():Boolean {
+            return _diffuseEnabled;
+        }
+
+        public function set diffuseEnabled(value:Boolean):void {
+            if (_diffuseEnabled == value) return;
+            _diffuseEnabled = value;
+            invalidatePrograms();
+        }
+
+        public function get profile():String {
+            return _profile;
+        }
+
+        public function set profile(value:String):void {
+            if (_profile == value) return;
+            _profile = value;
+            invalidatePrograms();
+        }
+
+        public function get coloredSpecularOutput():Boolean {
+            return _coloredSpecularOutput;
+        }
+
+        public function set coloredSpecularOutput(value:Boolean):void {
+            if (_coloredSpecularOutput == value) return;
+            _coloredSpecularOutput = value;
+            invalidatePrograms();
+        }
+
+        private function invalidatePrograms():void {
+            for (var i:uint = 0; i < 8; i++) {
+                dirtyPrograms[i] = true;
+            }
+        }
+    }
 }

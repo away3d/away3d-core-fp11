@@ -201,6 +201,19 @@ package away3d.lights
 			_specularG = _colorG*_specular;
 			_specularB = _colorB*_specular;
 		}
+
+        public function isColoredSpecular():Boolean
+        {
+            return hasSpecularEmission && !(_specularR == _specularG && _specularR == _specularB);
+        }
+
+        public function hasDiffuseEmission():Boolean {
+            return (_diffuseR > 0 || _diffuseG > 0 || _diffuseB > 0);
+        }
+
+        public function hasSpecularEmission():Boolean {
+            return (_specularR > 0 || _specularG > 0 || _specularB > 0);
+        }
 		
 		/**
 		 * Updates the total diffuse components of the light.

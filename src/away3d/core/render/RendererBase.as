@@ -709,24 +709,19 @@ package away3d.core.render
 			//store reference to scene transform
 			renderable.renderSceneTransform = renderable.sourceEntity.getRenderSceneTransform(camera);
 
-			applyMaterial(renderable, material);
+            if (material.requiresBlending) {
+                renderable.next = blendedRenderableHead;
+                blendedRenderableHead = renderable;
+            }else{
+                renderable.next = opaqueRenderableHead;
+                opaqueRenderableHead = renderable;
+            }
 
 			_numTriangles += renderable.numTriangles;
 
 			//handle any overflow for renderables with data that exceeds GPU limitations
 			if (renderable.overflow)
 				applyRenderable(renderable.overflow);
-		}
-
-		protected function applyMaterial(renderable:RenderableBase, material:IMaterial):void
-		{
-			if (material.requiresBlending) {
-				renderable.next = blendedRenderableHead;
-				blendedRenderableHead = renderable;
-			}else{
-				renderable.next = opaqueRenderableHead;
-				opaqueRenderableHead = renderable;
-			}
 		}
 
 		public function get renderableSorter():IEntitySorter {

@@ -283,7 +283,7 @@ package away3d.core.base
 			if (_height == val)
 				return;
 
-			_height == val;
+			_height = val;
 
 			_scaleY = val/bounds.aabb.height;
 
