@@ -72,7 +72,6 @@ package away3d.core.render {
         private var _deferredLightingMode:Boolean = false;
         private var _deferredLightSpecular:Boolean = false;
         private var _deferredLightDiffuse:Boolean = false;
-        private var _deferredRenderableColoredSpecular:Boolean = false;
         private var _deferredColoredSpecularLighting:Boolean = false;
 
         /**
@@ -167,7 +166,11 @@ package away3d.core.render {
 			//setup camera for rendering required scene data
 			_rttViewProjectionMatrix.copyFrom(entityCollector.camera.viewProjection);
 
+            //update deferred rendering parameters
             _deferredLightingMode = entityCollector.numDeferredDirectionalLights>0 || entityCollector.numDeferredPointLights>0;
+            _deferredLightSpecular = entityCollector.hasSpecularDeferredLights;
+            _deferredLightDiffuse = entityCollector.hasDiffuseDeferredLights;
+            deferredColoredSpecularLighting = entityCollector.coloredSpecularDeferredLights;
 
 			_textureRatioX = 1;
 			_textureRatioY = 1;
@@ -220,13 +223,12 @@ package away3d.core.render {
 			if (_deferredLightingMode) {
 				lightAccumulation = updateScreenRenderTargetTexture(lightAccumulation);
 				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
-
 				updateFrustumCorners(camera);
 
-//				if (!_deferredMonochromeSpecular) {
-//					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
-//					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
-//				}
+				if (!_deferredColoredSpecularLighting) {
+					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
+					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
+				}
 
 				stage3DProxy.clearBuffers();
 				_context3D.clear();
@@ -237,12 +239,11 @@ package away3d.core.render {
 				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
-//				if (!_deferredMonochromeSpecular) {
-//					_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
-//				}
+				if (!_deferredColoredSpecularLighting) {
+					_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
+				}
 				_context3D.setRenderToBackBuffer();
 			}
-
 			_stage3DProxy.clearBuffers();
 
 			if (filter3DRenderer && _stage3DProxy.context3D) {
@@ -277,10 +278,10 @@ package away3d.core.render {
 					numTextures++;
 					_context3D.setTextureAt(2, lightAccumulation.getTextureForStage3D(_stage3DProxy));
 
-//					if (!_deferredMonochromeSpecular) {
-//						numTextures++;
-//						_context3D.setTextureAt(3, lightAccumulation.getTextureForStage3D(_stage3DProxy));
-//					}
+					if (!_deferredColoredSpecularLighting) {
+						numTextures++;
+						_context3D.setTextureAt(3, lightAccumulation.getTextureForStage3D(_stage3DProxy));
+					}
 				}
 
 				if (numTextures > 0) {
@@ -559,17 +560,11 @@ package away3d.core.render {
 		}
 
 		public function get hasRectangleRenderTargetSupport():Boolean {
-			if (_profile == Context3DProfile.STANDARD) {
-				return true;
-			}
-			return false;
+			return _profile == Context3DProfile.STANDARD;
 		}
 
 		public function get hasMRTSupport():Boolean {
-			if (_profile == Context3DProfile.STANDARD) {
-				return true;
-			}
-			return false;
+			return _profile == Context3DProfile.STANDARD;
 		}
 
 		public function get deferredLightingMode():Boolean {
@@ -579,5 +574,16 @@ package away3d.core.render {
 		public function set deferredLightingMode(value:Boolean):void {
 			_deferredLightingMode = value;
 		}
-	}
+
+        public function get deferredColoredSpecularLighting():Boolean {
+            return _deferredColoredSpecularLighting;
+        }
+
+        public function set deferredColoredSpecularLighting(value:Boolean):void {
+            _deferredColoredSpecularLighting = value;
+            if(!_deferredColoredSpecularLighting && lightAccumulationSpecular) {
+                lightAccumulationSpecular.dispose();
+            }
+        }
+    }
 }

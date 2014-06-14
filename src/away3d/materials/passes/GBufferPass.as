@@ -83,7 +83,7 @@ package away3d.materials.passes {
 		private var _drawAlbedo:Boolean;
 		private var _drawSpecular:Boolean;
 
-		public function GBufferPass(drawDepth:Boolean = true, drawWorldNormal:Boolean = true, drawWorldPosition:Boolean = true, drawAlbedo:Boolean = false, drawSpecular:Boolean = false) {
+		public function GBufferPass(drawDepth:Boolean = true, drawWorldNormal:Boolean = true, drawWorldPosition:Boolean = false, drawAlbedo:Boolean = false, drawSpecular:Boolean = false) {
 			_drawDepth = drawDepth;
 			_drawWorldNormal = drawWorldNormal;
 			_drawWorldPosition = drawWorldPosition;

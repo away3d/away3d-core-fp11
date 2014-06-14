@@ -600,7 +600,7 @@ package away3d.materials.passes
 		{
 			var i:uint;
 			var context:Context3D = stage3DProxy._context3D;
-			if (this._uvBufferIndex >= 0)
+			if (_uvBufferIndex >= 0)
 				stage3DProxy.activateBuffer(_uvBufferIndex, renderable.getVertexData(TriangleSubGeometry.UV_DATA), renderable.getVertexOffset(TriangleSubGeometry.UV_DATA), TriangleSubGeometry.UV_FORMAT);
 
 			if (_secondaryUVBufferIndex >= 0)

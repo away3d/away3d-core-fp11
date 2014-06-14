@@ -174,5 +174,17 @@ package away3d.core.traverse
         public function get deferredPointLights():Vector.<PointLight> {
             return _deferredPointLights;
         }
+
+        public function get coloredSpecularDeferredLights():Boolean {
+            return _coloredSpecularDeferredLights;
+        }
+
+        public function get hasSpecularDeferredLights():Boolean {
+            return _hasSpecularDeferredLights;
+        }
+
+        public function get hasDiffuseDeferredLights():Boolean {
+            return _hasDiffuseDeferredLights;
+        }
     }
 }
