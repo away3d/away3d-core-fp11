@@ -167,10 +167,10 @@ package away3d.core.render {
 			_rttViewProjectionMatrix.copyFrom(entityCollector.camera.viewProjection);
 
             //update deferred rendering parameters
-            _deferredLightingMode = entityCollector.numDeferredDirectionalLights>0 || entityCollector.numDeferredPointLights>0;
+            deferredLightingMode = entityCollector.numDeferredDirectionalLights>0 || entityCollector.numDeferredPointLights>0;
+            deferredColoredSpecularLighting = entityCollector.coloredSpecularDeferredLights;
             _deferredLightSpecular = entityCollector.hasSpecularDeferredLights;
             _deferredLightDiffuse = entityCollector.hasDiffuseDeferredLights;
-            deferredColoredSpecularLighting = entityCollector.coloredSpecularDeferredLights;
 
 			_textureRatioX = 1;
 			_textureRatioY = 1;
@@ -218,14 +218,14 @@ package away3d.core.render {
 				renderDepthPrepass(entityCollector as EntityCollector);
 			}
 
-			//calculate light and specular buffers
+			//calculate deferred lighting buffers
 			//TODO: downsampled lightbuffer support
 			if (_deferredLightingMode) {
 				lightAccumulation = updateScreenRenderTargetTexture(lightAccumulation);
 				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
 				updateFrustumCorners(camera);
 
-				if (!_deferredColoredSpecularLighting) {
+				if (_deferredColoredSpecularLighting) {
 					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
 					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
 				}
@@ -236,10 +236,13 @@ package away3d.core.render {
 				if (!_lightRenderer) _lightRenderer = new LightBufferRenderer();
 				_lightRenderer.textureRatioX = _textureRatioX;
 				_lightRenderer.textureRatioY = _textureRatioY;
+                _lightRenderer.diffuseEnabled = _deferredLightDiffuse;
+                _lightRenderer.specularEnabled = _deferredLightSpecular;
+                _lightRenderer.coloredSpecularOutput = _deferredColoredSpecularLighting;
 				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
-				if (!_deferredColoredSpecularLighting) {
+				if (_deferredColoredSpecularLighting) {
 					_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
 				}
 				_context3D.setRenderToBackBuffer();
@@ -278,9 +281,9 @@ package away3d.core.render {
 					numTextures++;
 					_context3D.setTextureAt(2, lightAccumulation.getTextureForStage3D(_stage3DProxy));
 
-					if (!_deferredColoredSpecularLighting) {
+					if (_deferredColoredSpecularLighting) {
 						numTextures++;
-						_context3D.setTextureAt(3, lightAccumulation.getTextureForStage3D(_stage3DProxy));
+						_context3D.setTextureAt(3, lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy));
 					}
 				}
 
@@ -573,6 +576,16 @@ package away3d.core.render {
 
 		public function set deferredLightingMode(value:Boolean):void {
 			_deferredLightingMode = value;
+            if(!_deferredLightingMode) {
+                if(lightAccumulation){
+                    lightAccumulation.dispose();
+                    lightAccumulation = null;
+                }
+                if(lightAccumulationSpecular) {
+                    lightAccumulationSpecular.dispose();
+                    lightAccumulationSpecular = null;
+                }
+            }
 		}
 
         public function get deferredColoredSpecularLighting():Boolean {
