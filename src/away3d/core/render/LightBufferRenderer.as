@@ -236,6 +236,7 @@ package away3d.core.render {
             context3D.setVertexBufferAt(2, null);
             context3D.setTextureAt(0, null);
             context3D.setTextureAt(1, null);
+            context3D.setTextureAt(2, null);
         }
 
         private function activatePointLightData(shader:ShaderState, context3D:Context3D, from:int, count:int):void {

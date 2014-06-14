@@ -17,8 +17,9 @@ package away3d.materials
 	import away3d.materials.passes.GBufferPass;
 	import away3d.materials.passes.MaterialPassBase;
 	import away3d.materials.passes.WorldNormalPass;
+    import away3d.textures.Texture2DBase;
 
-	import flash.display.BlendMode;
+    import flash.display.BlendMode;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DCompareMode;
 	import flash.events.Event;
@@ -121,6 +122,8 @@ package away3d.materials
 		protected var _width:Number = 1;
 		protected var _height:Number = 1;
 
+        arcane var diffuseDeferredLighting:Texture2DBase;
+        arcane var specularDeferredLighting:Texture2DBase;
 
 		/**
 		 * Creates a new MaterialBase object.

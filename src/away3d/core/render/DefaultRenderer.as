@@ -17,8 +17,9 @@ package away3d.core.render {
 	import away3d.materials.MaterialBase;
 	import away3d.textures.RectangleRenderTexture;
 	import away3d.textures.RenderTexture;
+    import away3d.textures.Texture2DBase;
 
-	import flash.display.Stage;
+    import flash.display.Stage;
 	import flash.display3D.Context3DBlendFactor;
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProfile;
@@ -222,12 +223,12 @@ package away3d.core.render {
 			//TODO: downsampled lightbuffer support
 			if (_deferredLightingMode) {
 				lightAccumulation = updateScreenRenderTargetTexture(lightAccumulation);
-				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
+				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, 0, 0, 0);
 				updateFrustumCorners(camera);
 
 				if (_deferredColoredSpecularLighting) {
 					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
-					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
+					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, 0, 0, 1);
 				}
 
 				stage3DProxy.clearBuffers();
@@ -241,10 +242,8 @@ package away3d.core.render {
                 _lightRenderer.coloredSpecularOutput = _deferredColoredSpecularLighting;
 				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture);
 
-				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
-				if (_deferredColoredSpecularLighting) {
-					_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
-				}
+				_context3D.setRenderToTexture(null, true, 0, 0, 0);
+				_context3D.setRenderToTexture(null, true, 0, 0, 1);
 				_context3D.setRenderToBackBuffer();
 			}
 			_stage3DProxy.clearBuffers();
@@ -281,7 +280,7 @@ package away3d.core.render {
 					numTextures++;
 					_context3D.setTextureAt(2, lightAccumulation.getTextureForStage3D(_stage3DProxy));
 
-					if (_deferredColoredSpecularLighting) {
+					if (_deferredColoredSpecularLighting && lightAccumulationSpecular) {
 						numTextures++;
 						_context3D.setTextureAt(3, lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy));
 					}
@@ -373,7 +372,7 @@ package away3d.core.render {
 			_context3D.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 
 			var which:int = target ? SCREEN_PASSES : ALL_PASSES;
-			drawRenderables(opaqueRenderableHead, entityCollector, which);
+			drawRenderables(opaqueRenderableHead, entityCollector, which, _deferredLightingMode);
 			drawRenderables(blendedRenderableHead, entityCollector, which);
 
 			_context3D.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
@@ -456,7 +455,7 @@ package away3d.core.render {
 		 * @param renderables The renderables to draw.
 		 * @param entityCollector The EntityCollector containing all potentially visible information.
 		 */
-		private function drawRenderables(renderable:RenderableBase, collector:ICollector, which:int):void {
+		private function drawRenderables(renderable:RenderableBase, collector:ICollector, which:int, useDeferredLighting:Boolean = false):void {
 			var entityCollector:EntityCollector = collector as EntityCollector;
 			var numPasses:uint;
 			var j:uint;
@@ -476,12 +475,23 @@ package away3d.core.render {
 					var rttMask:int = _activeMaterial.passRendersToTexture(j) ? 1 : 2;
 
 					if ((rttMask & which) != 0) {
+                        //todo: how to pass deffered lighting to supershaderpass and multimaterialpass
+                        if(useDeferredLighting) {
+                            _activeMaterial.diffuseDeferredLighting = lightAccumulation;
+                            if(_deferredColoredSpecularLighting) {
+                                _activeMaterial.specularDeferredLighting = lightAccumulationSpecular;
+                            }
+                        }
+
 						_activeMaterial.activatePass(j, _stage3DProxy, camera);
 						do {
 							_activeMaterial.renderPass(j, renderable2, _stage3DProxy, entityCollector, _rttViewProjectionMatrix);
 							renderable2 = renderable2.next as RenderableBase;
 						} while (renderable2 && renderable2.material == _activeMaterial);
 						_activeMaterial.deactivatePass(j, _stage3DProxy);
+
+                        _activeMaterial.diffuseDeferredLighting = null;
+                        _activeMaterial.specularDeferredLighting = null;
 					} else {
 						do
 							renderable2 = renderable2.next as RenderableBase;
