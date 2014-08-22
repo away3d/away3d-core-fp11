@@ -6,7 +6,8 @@ package away3d.core.render
 	import away3d.core.base.LineSubMesh;
 	import away3d.core.managers.RTTBufferManager;
 	import away3d.core.managers.Stage3DProxy;
-	import away3d.core.pool.BillboardRenderable;
+    import away3d.core.math.Matrix3DUtils;
+    import away3d.core.pool.BillboardRenderable;
 	import away3d.core.pool.EntityListItem;
 	import away3d.core.pool.LineSubMeshRenderable;
 	import away3d.core.pool.RenderableBase;
@@ -61,7 +62,7 @@ package away3d.core.render
 		protected var camera:Camera3D;
 
 		arcane var _entryPoint:Vector3D;
-		protected var cameraForward:Vector3D;
+		protected var cameraForward:Vector3D = new Vector3D();
 
 		protected var _rttBufferManager:RTTBufferManager;
 		private var _viewPort:Rectangle = new Rectangle();
@@ -441,7 +442,7 @@ package away3d.core.render
 			//set temp values for entry point and camera forward vector
 			camera = entityCollector.camera;
 			_entryPoint = camera.scenePosition;
-			cameraForward = camera.forwardVector;
+			Matrix3DUtils.getForward(camera.transform, cameraForward);
 
 			//iterate through all entities
 			while (item) {
@@ -687,6 +688,7 @@ package away3d.core.render
 		 * @param renderable
 		 * @protected
 		 */
+
 		protected function applyRenderable(renderable:RenderableBase):void
 		{
 			var material:IMaterial = renderable.materialOwner.material;
@@ -703,13 +705,16 @@ package away3d.core.render
 			renderable.cascaded = false;
 
 			// project onto camera's z-axis
-			position = _entryPoint.subtract(position);
-			renderable.zIndex = entity.zOffset + position.dotProduct(cameraForward);
+            var positionX:Number = _entryPoint.x - position.x;
+            var positionY:Number = _entryPoint.y - position.y;
+            var positionZ:Number = _entryPoint.z - position.z;
+            var dotProduct:Number = positionX * cameraForward.x + positionY * camera.y + positionZ * camera.z;
+            renderable.zIndex = entity.zOffset + dotProduct;
 
 			//store reference to scene transform
 			renderable.renderSceneTransform = renderable.sourceEntity.getRenderSceneTransform(camera);
 
-            if (material.requiresBlending) {
+            if (material.requiresBlending && blendedRenderableHead!=renderable) {
                 renderable.next = blendedRenderableHead;
                 blendedRenderableHead = renderable;
             }else{

@@ -856,22 +856,23 @@ package away3d.core.base
 		{
 			var localRayPosition:Vector3D = inverseSceneTransform.transformVector(rayPosition);
 			var localRayDirection:Vector3D = inverseSceneTransform.deltaTransformVector(rayDirection);
-			var pickingCollisionVO:PickingCollisionVO = pickingCollisionVO;
+			var collisionVO:PickingCollisionVO = pickingCollisionVO;
+			if (!collisionVO.localNormal){
+                collisionVO.localNormal = new Vector3D();
+            }
 
-			if (!pickingCollisionVO.localNormal)
-				pickingCollisionVO.localNormal = new Vector3D();
+			var rayEntryDistance:Number = bounds.rayIntersection(localRayPosition, localRayDirection, collisionVO.localNormal);
 
-			var rayEntryDistance:Number = bounds.rayIntersection(localRayPosition, localRayDirection, pickingCollisionVO.localNormal);
-
-			if (rayEntryDistance < 0)
+			if (rayEntryDistance < 0) {
 				return false;
+            }
 
-			pickingCollisionVO.rayEntryDistance = rayEntryDistance;
-			pickingCollisionVO.localRayPosition = localRayPosition;
-			pickingCollisionVO.localRayDirection = localRayDirection;
-			pickingCollisionVO.rayPosition = rayPosition;
-			pickingCollisionVO.rayDirection = rayDirection;
-			pickingCollisionVO.rayOriginIsInsideBounds = rayEntryDistance == 0;
+			collisionVO.rayEntryDistance = rayEntryDistance;
+			collisionVO.localRayPosition = localRayPosition;
+			collisionVO.localRayDirection = localRayDirection;
+			collisionVO.rayPosition = rayPosition;
+			collisionVO.rayDirection = rayDirection;
+			collisionVO.rayOriginIsInsideBounds = rayEntryDistance == 0;
 
 			return true;
 		}
@@ -1471,7 +1472,6 @@ package away3d.core.base
 			_worldBoundsInvalid = true;
 			if (isEntity) invalidatePartition();
 		}
-
 		/**
 		 * @protected
 		 */
@@ -1483,8 +1483,8 @@ package away3d.core.base
 
 			_worldBoundsInvalid = !_ignoreTransform;
 
-			if (isEntity)
-				invalidatePartition();
+//			if (isEntity)
+//				invalidatePartition();
 
 			if (_listenToSceneTransformChanged)
 				notifySceneTransformChange();

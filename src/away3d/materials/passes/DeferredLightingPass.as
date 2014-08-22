@@ -7,6 +7,7 @@ package away3d.materials.passes {
     import away3d.core.pool.RenderableBase;
     import away3d.debug.Debug;
     import away3d.entities.Camera3D;
+    import away3d.materials.MaterialBase;
     import away3d.materials.compilation.ShaderState;
     import away3d.textures.Texture2DBase;
 
@@ -21,6 +22,7 @@ package away3d.materials.passes {
         //varyings
         public static const UV_VARYING:String = "vUV";
         public static const SECONDARY_UV_VARYING:String = "vSecondaryUV";
+        public static const PROJ_POS_VARYING:String = "vProjPos";
         //attributes
         public static const POSITION_ATTRIBUTE:String = "aPos";
         public static const UV_ATTRIBUTE:String = "aUV";
@@ -35,6 +37,8 @@ package away3d.materials.passes {
         public static const OPACITY_TEXTURE:String = "tOpacity";
         public static const DIFFUSE_TEXTURE:String = "tDiffuse";
         public static const SPECULAR_TEXTURE:String = "tSpecular";
+        public static const ACCUMULATION_TEXTURE:String = "tAccumulation";
+        public static const ACCUMULATION_SPECULAR_TEXTURE:String = "tAccumulationSpecular";
 
         public var colorR:Number = 0.8;
         public var colorG:Number = 0.8;
@@ -45,6 +49,8 @@ package away3d.materials.passes {
         public var specularColorB:uint = 0;
         public var gloss:int = 50;
         public var specularIntensity:Number = 1;
+
+        private var hash:int;//TODO:
 
         public var diffuseMap:Texture2DBase;
         public var diffuseMapUVChannel:String = TriangleSubGeometry.UV_DATA;
@@ -65,7 +71,8 @@ package away3d.materials.passes {
         private var _specularColorData:Vector.<Number>;
         private var _shader:ShaderState = new ShaderState();
 
-        public function DeferredLightingPass() {
+        public function DeferredLightingPass(material:MaterialBase) {
+            _material = material;
         }
 
         override arcane function getVertexCode():String {
@@ -73,6 +80,7 @@ package away3d.materials.passes {
             var projectedPosTemp:int = _shader.getFreeVertexTemp();
             code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VC, 4) + "\n";
             code += "mov op, vt" + projectedPosTemp + "\n";
+            code += "mov v" + _shader.getVarying(PROJ_POS_VARYING) + ", vt" + projectedPosTemp + "\n";
             _shader.removeFragmentTempUsage(projectedPosTemp);
 
             if (useUV) {
@@ -98,22 +106,59 @@ package away3d.materials.passes {
                 code += "kil ft3." + opacityChannel + "\n";
             }
 
-            var diffuseLighting:int = _shader.getFreeFragmentTemp();
+            var renderTargetUv:int = _shader.getFreeFragmentTemp();
+            code += "mov ft" + renderTargetUv + ", v" + _shader.getVarying(PROJ_POS_VARYING) + "\n";
+            code += "div ft" + renderTargetUv + ", ft" + renderTargetUv + ", ft" + renderTargetUv + ".w\n";
 
-            if (diffuseMap) {
-                code += sampleTexture(diffuseMap, diffuseMapUVChannel, diffuseLighting, _shader.getTexture(DIFFUSE_TEXTURE));
-            } else {
-                code += "mov ft" + diffuseLighting + ", fc" + _shader.getFragmentConstant(DIFFUSE_COLOR_FC) + "\n";
-            }
+            code += "neg ft" + renderTargetUv + ".y, ft" + renderTargetUv + ".y\n";
+            code += "add ft" + renderTargetUv + ".xy, ft" + renderTargetUv + ".xy, fc" + _shader.getFragmentConstant(PROPERTIES_FC) + ".yy\n";
+            code += "mul ft" + renderTargetUv + ".xy, ft" + renderTargetUv + ".xy, fc" + _shader.getFragmentConstant(PROPERTIES_FC) + ".zz\n";
 
-            //specular
+
+            var diffuseColor:int = _shader.getFreeFragmentTemp();
             var specularColor:int = _shader.getFreeFragmentTemp();
-            if (specularMap) {
-                code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
-                code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".xxx\n";
-            } else {
-                code += "mov oc" + specularColor + ", fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + "\n";
+
+            code += "mov ft" + diffuseColor + ", fc" + _shader.getFragmentConstant(PROPERTIES_FC) + ".wwwy\n";//0,0,0,1
+            code += "mov ft" + specularColor + ", fc" + _shader.getFragmentConstant(PROPERTIES_FC) + ".wwww\n";//0,0,0,0
+            var accumulationSampleRegister:int;
+
+            if (_material.deferredData.useDiffuseLighting) {
+                if (diffuseMap) {
+                    code += sampleTexture(diffuseMap, diffuseMapUVChannel, diffuseColor, _shader.getTexture(DIFFUSE_TEXTURE));
+                } else {
+                    code += "mov ft" + diffuseColor + ", fc" + _shader.getFragmentConstant(DIFFUSE_COLOR_FC) + "\n";
+                }
+
+                accumulationSampleRegister = _shader.getFreeFragmentTemp();
+
+                code += "tex ft" + accumulationSampleRegister + ", ft" + renderTargetUv + ".xy, fs" + _shader.getTexture(ACCUMULATION_TEXTURE) + " <2d,linear, nearest>\n";
+                code += "mul ft" + diffuseColor + ".xyz, ft" + accumulationSampleRegister + ".xyz, ft" + diffuseColor + ".xyz\n";
+                _shader.removeFragmentTempUsage(accumulationSampleRegister);
             }
+
+            if (_material.deferredData.useSpecularLighting) {
+                if (specularMap) {
+                    code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
+                    code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".xxx\n";
+                } else {
+                    code += "mov ft" + specularColor + ", fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + "\n";
+                }
+
+                accumulationSampleRegister = _shader.getFreeFragmentTemp();
+
+                if (_material.deferredData.useDiffuseLighting) {
+                    code += "tex ft" + accumulationSampleRegister + ", ft" + renderTargetUv + ".xy, fs" + _shader.getTexture(ACCUMULATION_SPECULAR_TEXTURE) + " <2d,linear, nearest>\n";
+                    code += "mul ft" + specularColor + ".xyz, ft" + accumulationSampleRegister + ".xyz, ft" + specularColor + ".xyz\n";
+                } else {
+                    code += "tex ft" + accumulationSampleRegister + ", ft" + renderTargetUv + ".xy, fs" + _shader.getTexture(ACCUMULATION_TEXTURE) + " <2d,linear, nearest>\n";
+                    code += "mul ft" + specularColor + ".xyz, ft" + accumulationSampleRegister + ".www, ft" + specularColor + ".xyz\n";
+                }
+
+                _shader.removeFragmentTempUsage(accumulationSampleRegister);
+            }
+
+            code += "add oc, ft" + diffuseColor + ", ft" + specularColor + "\n";
+//            code += "mov oc, ft" + diffuseColor + "\n";
 
             _numUsedTextures = _shader.numTextureRegisters;
             _numUsedFragmentConstants = _shader.numFragmentConstants;
@@ -133,7 +178,8 @@ package away3d.materials.passes {
                 if (!_propertiesData) _propertiesData = new Vector.<Number>();
                 _propertiesData[0] = alphaThreshold;//used for opacity map
                 _propertiesData[1] = 1;//used for normal output and normal restoring and diffuse output
-                _propertiesData[2] = 0;
+                //todo support
+                _propertiesData[2] = 1 / 2;//z
                 _propertiesData[3] = 0;
                 context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(PROPERTIES_FC), _propertiesData, 1);
             }
@@ -153,12 +199,12 @@ package away3d.materials.passes {
                     _specularColorData[0] = specularIntensity;
                     _specularColorData[1] = 0;
                     _specularColorData[2] = 0;
-                    _specularColorData[3] = gloss/100;
+                    _specularColorData[3] = gloss / 100;
                 } else {
                     _specularColorData[0] = specularColorR * specularIntensity;
                     _specularColorData[1] = specularColorG * specularIntensity;
                     _specularColorData[2] = specularColorB * specularIntensity;
-                    _specularColorData[3] = gloss/100;
+                    _specularColorData[3] = gloss / 100;
                 }
                 context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, _shader.getFragmentConstant(SPECULAR_COLOR_FC), _specularColorData, 1);
             }
@@ -170,8 +216,17 @@ package away3d.materials.passes {
             if (_shader.hasTexture(DIFFUSE_TEXTURE)) {
                 context3D.setTextureAt(_shader.getTexture(DIFFUSE_TEXTURE), diffuseMap.getTextureForStage3D(stage3DProxy));
             }
+
             if (_shader.hasTexture(SPECULAR_TEXTURE)) {
                 context3D.setTextureAt(_shader.getTexture(SPECULAR_TEXTURE), specularMap.getTextureForStage3D(stage3DProxy));
+            }
+
+            if (_shader.hasTexture(ACCUMULATION_TEXTURE) && _material.deferredData.lightAccumulation) {
+                context3D.setTextureAt(_shader.getTexture(ACCUMULATION_TEXTURE), _material.deferredData.lightAccumulation.getTextureForStage3D(stage3DProxy));
+            }
+
+            if (_shader.hasTexture(ACCUMULATION_SPECULAR_TEXTURE) && _material.deferredData.lightAccumulationSpecular) {
+                context3D.setTextureAt(_shader.getTexture(ACCUMULATION_SPECULAR_TEXTURE), _material.deferredData.lightAccumulationSpecular.getTextureForStage3D(stage3DProxy));
             }
         }
 
@@ -205,47 +260,6 @@ package away3d.materials.passes {
         public function get useUV():Boolean {
             return (opacityMap && opacityUVChannel == TriangleSubGeometry.UV_DATA) || (specularMap && specularMapUVChannel == TriangleSubGeometry.UV_DATA) ||
                     (normalMap && normalMapUVChannel == TriangleSubGeometry.UV_DATA) || (diffuseMap && diffuseMapUVChannel == TriangleSubGeometry.UV_DATA);
-        }
-
-        /**
-         * Overrided because of AGAL compilation version
-         * @param stage3DProxy
-         */
-        override arcane function updateProgram(stage3DProxy:Stage3DProxy):void {
-            var animatorCode:String = "";
-            var UVAnimatorCode:String = "";
-            var fragmentAnimatorCode:String = "";
-            var vertexCode:String = getVertexCode();
-
-            if (_animationSet && !_animationSet.usesCPU) {
-                animatorCode = _animationSet.getAGALVertexCode(this, _animatableAttributes, _animationTargetRegisters, stage3DProxy.profile);
-                if (_needFragmentAnimation)
-                    fragmentAnimatorCode = _animationSet.getAGALFragmentCode(this, _shadedTarget, stage3DProxy.profile);
-                if (_needUVAnimation)
-                    UVAnimatorCode = _animationSet.getAGALUVCode(this, _UVSource, _UVTarget);
-                _animationSet.doneAGALCode(this);
-            } else {
-                var len:uint = _animatableAttributes.length;
-
-                // simply write attributes to targets, do not animate them
-                // projection will pick up on targets[0] to do the projection
-                for (var i:uint = 0; i < len; ++i)
-                    animatorCode += "mov " + _animationTargetRegisters[i] + ", " + _animatableAttributes[i] + "\n";
-                if (_needUVAnimation)
-                    UVAnimatorCode = "mov " + _UVTarget + "," + _UVSource + "\n";
-            }
-
-            vertexCode = animatorCode + UVAnimatorCode + vertexCode;
-
-            var fragmentCode:String = getFragmentCode(fragmentAnimatorCode);
-            if (Debug.active) {
-                trace("Compiling AGAL Code:");
-                trace("--------------------");
-                trace(vertexCode);
-                trace("--------------------");
-                trace(fragmentCode);
-            }
-            AGALProgram3DCache.getInstance(stage3DProxy).setProgram3D(this, vertexCode, fragmentCode, 2);
         }
 
         private function sampleTexture(texture:Texture2DBase, textureUVChannel:String, targetTemp:int, textureRegister:int):String {

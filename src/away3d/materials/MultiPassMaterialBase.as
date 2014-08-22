@@ -12,7 +12,8 @@
 	import away3d.materials.methods.EffectMethodBase;
 	import away3d.materials.methods.ShadowMapMethodBase;
 	import away3d.materials.passes.CompiledPass;
-	import away3d.materials.passes.LightingPass;
+    import away3d.materials.passes.DeferredLightingPass;
+    import away3d.materials.passes.LightingPass;
 	import away3d.materials.passes.ShadowCasterPass;
 	import away3d.materials.passes.SuperShaderPass;
 	import away3d.textures.Texture2DBase;
@@ -34,6 +35,7 @@
 	{
 		protected var _casterLightPass:ShadowCasterPass;
 		protected var _nonCasterLightPasses:Vector.<LightingPass>;
+        protected var _deferredLightPass:DeferredLightingPass;
 		protected var _effectsPass:SuperShaderPass;
 		
 		private var _alphaThreshold:Number = 0;
@@ -45,10 +47,10 @@
 		private var _diffuseMethod:BasicDiffuseMethod = new BasicDiffuseMethod();
 		private var _normalMethod:BasicNormalMethod = new BasicNormalMethod();
 		private var _specularMethod:BasicSpecularMethod = new BasicSpecularMethod();
-		
+
 		private var _screenPassesInvalid:Boolean = true;
 		private var _enableLightFallOff:Boolean = true;
-		
+
 		/**
 		 * Creates a new MultiPassMaterialBase object.
 		 */
@@ -493,6 +495,9 @@
 				addChildPassesFor(_effectsPass);
 				
 				addScreenPass(_casterLightPass);
+                if(_deferredLightPass) {
+                    addPass(_deferredLightPass);
+                }
 				if (_nonCasterLightPasses) {
 					for (i = 0; i < _nonCasterLightPasses.length; ++i)
 						addScreenPass(_nonCasterLightPasses[i]);
@@ -530,7 +535,6 @@
 						return true;
 				}
 			}
-			
 			return false;
 		}
 
@@ -587,10 +591,16 @@
 		{
 			// let the effects pass handle everything if there are no lights,
 			// or when there are effect methods applied after shading.
-			if (numLights == 0 || numMethods > 0)
+			if ((numLights == 0 && numDeferredLights == 0) || numMethods > 0)
 				initEffectsPass();
 			else if (_effectsPass && numMethods == 0)
 				removeEffectsPass();
+
+            if(numDeferredLights > 0) {
+                initDeferredLightingPass();
+            }else{
+                removeDeferredLightingPass();
+            }
 
 			// only use a caster light pass if shadows need to be rendered
 			if (_shadowMethod)
@@ -619,17 +629,27 @@
 				_casterLightPass.forceSeparateMVP = forceSeparateMVP;
 			}
 
-			if (_nonCasterLightPasses) {
+            if (_deferredLightPass) {
+                if (_casterLightPass) {
+                    _deferredLightPass.setBlendMode(BlendMode.ADD);
+                    _deferredLightPass.depthCompareMode = Context3DCompareMode.LESS_EQUAL;
+                } else {
+                    _deferredLightPass.setBlendMode(BlendMode.NORMAL);
+                    _deferredLightPass.depthCompareMode = depthCompareMode;
+                }
+            }
+
+            if (_nonCasterLightPasses) {
 				var firstAdditiveIndex:int = 0;
 
-				// if there's no caster light pass, the first non caster light pass will be the first
-				// and should use normal blending
-				if (!_casterLightPass) {
-					_nonCasterLightPasses[0].forceSeparateMVP = forceSeparateMVP;
-					_nonCasterLightPasses[0].setBlendMode(BlendMode.NORMAL);
-					_nonCasterLightPasses[0].depthCompareMode = depthCompareMode;
-					firstAdditiveIndex = 1;
-				}
+                // if there's no caster light pass, the first non caster light pass will be the first
+                // and should use normal blending
+                if (!_casterLightPass && !_deferredLightPass) {
+                    _nonCasterLightPasses[0].forceSeparateMVP = forceSeparateMVP;
+                    _nonCasterLightPasses[0].setBlendMode(BlendMode.NORMAL);
+                    _nonCasterLightPasses[0].depthCompareMode = depthCompareMode;
+                    firstAdditiveIndex = 1;
+                }
 
 				// all lighting passes following the first light pass should use additive blending
 				for (var i:int = firstAdditiveIndex; i < _nonCasterLightPasses.length; ++i) {
@@ -647,7 +667,7 @@
 					_effectsPass.setBlendMode(BlendMode.SCREEN);
 					_effectsPass.forceSeparateMVP = forceSeparateMVP;
 				}
-			} else if (_effectsPass) {
+			} else if (_effectsPass && !_deferredLightPass) {
 				// effects pass is the only pass, so it should just blend normally
 				_effectsPass.ignoreLights = false;
 				_effectsPass.depthCompareMode = depthCompareMode;
@@ -737,6 +757,34 @@
 			}
 			_nonCasterLightPasses = null;
 		}
+
+        private function removeDeferredLightingPass():void {
+            if(_deferredLightPass) {
+                removePass(_deferredLightPass);
+                _deferredLightPass.dispose();
+                _deferredLightPass = null;
+            }
+        }
+
+        private function initDeferredLightingPass():void {
+            _deferredLightPass ||= new DeferredLightingPass(this);
+            _deferredLightPass.diffuseMap = _diffuseMethod.diffuseTexture;
+            _deferredLightPass.colorR = _diffuseMethod.diffuseR;
+            _deferredLightPass.colorG = _diffuseMethod.diffuseG;
+            _deferredLightPass.colorB = _diffuseMethod.diffuseB;
+            _deferredLightPass.normalMap = _normalMethod.normalMap;
+            _deferredLightPass.specularMap = _specularMethod.texture;
+            _deferredLightPass.specularColorR = _specularMethod._specularR;
+            _deferredLightPass.specularColorG = _specularMethod._specularG;
+            _deferredLightPass.specularColorB = _specularMethod._specularB;
+            _deferredLightPass.gloss = _specularMethod.gloss;
+            _deferredLightPass.opacityMap = _diffuseMethod.opacityTexture;
+            _deferredLightPass.opacityChannel = _diffuseMethod.opacityChannel;
+            _deferredLightPass.specularIntensity = _specularMethod.specular;
+            _deferredLightPass.mipmap = _mipmap;
+            _deferredLightPass.repeat = _repeat;
+            _deferredLightPass.smooth = _smooth;
+        }
 		
 		private function removeEffectsPass():void
 		{
@@ -783,6 +831,13 @@
 		{
 			return _lightPicker? _lightPicker.numLightProbes + _lightPicker.numDirectionalLights + _lightPicker.numPointLights : 0;
 		}
+
+        /**
+         * The amount of deferred lights
+         */
+        private function get numDeferredLights():int {
+            return _lightPicker? _lightPicker.numDeferredDirectionalLights + _lightPicker.numDeferredPointLights : 0;
+        }
 
 		/**
 		 * Flags that the screen passes have become invalid.

@@ -21,7 +21,7 @@ package away3d.materials.passes {
 	public class WorldNormalPass extends MaterialPassBase {
 		//varyings
 		public static const UV_VARYING:String = "vUV";
-		public static const PROJECTED_POSITION_VARYING:String = "vProjPos";
+//		public static const PROJECTED_POSITION_VARYING:String = "vProjPos";
 		public static const NORMAL_VARYING:String = "vNormal";
 		public static const TANGENT_VARYING:String = "vTangent";
 		public static const BINORMAL_VARYING:String = "vBinormal";
@@ -55,7 +55,7 @@ package away3d.materials.passes {
 			var projectedPosTemp:int = _shader.getFreeVertexTemp();
 			code += "m44 vt" + projectedPosTemp + ", va" + _shader.getAttribute(POSITION_ATTRIBUTE) + ", vc" + _shader.getVertexConstant(PROJ_MATRIX_VC, 4) + "\n";
 			code += "mov op, vt" + projectedPosTemp + "\n";
-			code += "mov v" + _shader.getVarying(PROJECTED_POSITION_VARYING) + ", vt" + projectedPosTemp + "\n";//projected position
+//			code += "mov v" + _shader.getVarying(PROJECTED_POSITION_VARYING) + ", vt" + projectedPosTemp + "\n";//projected position
 			_shader.removeVertexTempUsage(projectedPosTemp);
 			code += "mov v" + _shader.getVarying(UV_VARYING) + ", va" + _shader.getAttribute(UV_ATTRIBUTE) + "\n";//uv channel
 			//normals

@@ -9,14 +9,9 @@ package away3d.core.render {
     import away3d.lights.LightBase;
     import away3d.lights.PointLight;
     import away3d.materials.compilation.ShaderState;
-    import away3d.materials.compilation.ShaderState;
-    import away3d.materials.compilation.ShaderState;
-    import away3d.materials.compilation.ShaderState;
     import away3d.textures.Texture2DBase;
 
     import com.adobe.utils.AGALMiniAssembler;
-
-    import flash.display.Shader;
 
     import flash.display3D.Context3D;
     import flash.display3D.Context3DBlendFactor;
@@ -30,7 +25,7 @@ package away3d.core.render {
 
     use namespace arcane;
 
-    public class LightBufferRenderer {
+    public class LightBufferRenderer implements ILightRenderer {
         private static const compiler:AGALMiniAssembler = new AGALMiniAssembler();
 
         //attribute
@@ -91,7 +86,7 @@ package away3d.core.render {
             context3Ds = new Vector.<Context3D>(8, true);
         }
 
-        public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, frustumCorners:Vector.<Number>, normalTexture:Texture2DBase, depthTexture:Texture2DBase = null):void {
+        public function render(stage3DProxy:Stage3DProxy, deferredData:DeferredData, entityCollector:EntityCollector, frustumCorners:Vector.<Number>):void {
             var i:int;
             var len:int;
             //store data from collector
@@ -108,7 +103,7 @@ package away3d.core.render {
 
             if (_numDirLights == 0 && _numPointLights == 0) return;
 
-            var maxLightCountPerBatch:int = (hasMRTSupport) ? 18 : 7;
+            var maxLightCountPerBatch:int = (deferredData.useMRT) ? 18 : 7;
             var numDirectionalPrograms:int = Math.ceil(_numDirLights / maxLightCountPerBatch);
             var numPointPrograms:int = Math.ceil(_numPointLights / maxLightCountPerBatch);
 
@@ -190,7 +185,8 @@ package away3d.core.render {
 
             shader = shaders[0];
 
-            var vertexBuffer:VertexBuffer3D = (hasMRTSupport) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
+            var vertexBuffer:VertexBuffer3D = (deferredData.useMRT) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
+
             var indexBuffer:IndexBuffer3D = rttBuffer.indexBuffer;
             //in future, enable stencil test optimization in FlashPlayer 15, when we don't need to clear it each time
             context3D.setVertexBufferAt(shader.getAttribute(POSITION_ATTRIBUTE), vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
@@ -207,7 +203,7 @@ package away3d.core.render {
             var drawCalls:int = 0;
             context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
             for (i = 0; i < numDirectionalPrograms; i++) {
-                activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
+                activatePass(shaders[i], camera, stage3DProxy, deferredData.sceneNormalTexture, deferredData.sceneDepthTexture);
                 activateDirectionalLightData(shaders[i], context3D, offsetLight, Math.min(maxLightCountPerBatch, _numDirLights - offsetLight));
                 context3D.setProgram(programs[i]);
                 context3D.drawTriangles(indexBuffer, 0, 2);
@@ -220,7 +216,7 @@ package away3d.core.render {
 
             offsetLight = 0;
             for (i = numDirectionalPrograms; i < numDirectionalPrograms+numPointPrograms; i++) {
-                activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
+                activatePass(shaders[i], camera, stage3DProxy, deferredData.sceneNormalTexture, deferredData.sceneDepthTexture);
                 activatePointLightData(shaders[i], context3D, offsetLight, Math.min(maxLightCountPerBatch, _numPointLights - offsetLight));
                 context3D.setProgram(programs[i]);
                 context3D.drawTriangles(indexBuffer, 0, 2);
@@ -399,6 +395,7 @@ package away3d.core.render {
                 _fragmentCode += "dp3 ft" + lightDir + ".w, ft" + lightDir + ", ft" + lightDir + "\n";
                 _fragmentCode += "sub ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 1) + ".w\n";
                 _fragmentCode += "mul ft" + lightDir + ".w, ft" + lightDir + ".w, fc" + (lightValues + 2) + ".w\n";
+                _fragmentCode += "sat ft" + lightDir + ".w, ft" + lightDir + ".w\n";
                 _fragmentCode += "sub ft" + lightDir + ".w, fc" + lightValues + ".w, ft" + lightDir + ".w\n";
                 _fragmentCode += "nrm ft" + lightDir + ".xyz, ft" + lightDir + ".xyz\n";
 

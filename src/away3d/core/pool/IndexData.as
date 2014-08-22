@@ -22,6 +22,8 @@ package away3d.core.pool {
 
 		public function updateData(offset:Number, indices:Vector.<uint>, numVertices:Number):void
 		{
+            if (!indices) return;
+
 			if (_dataDirty) {
 				_dataDirty = false;
 

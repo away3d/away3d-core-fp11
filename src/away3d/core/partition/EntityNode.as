@@ -67,9 +67,9 @@ package away3d.core.partition
 		
 		override public function isInFrustum(planes:Vector.<Plane3D>, numPlanes:int):Boolean
 		{
-			if (!_entity.isVisible)
+			if (!_entity.isVisible())
 				return false;
-			
+
 			return _entity.worldBounds.isInFrustum(planes, numPlanes);
 		}
 		

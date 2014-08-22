@@ -91,7 +91,7 @@ package away3d.core.pool {
 			this.pool = pool;
 
 			//reference to level of overflow
-			_level = level;
+            _level = level;
 
 			//reference to the offset on indices (if this is an overflow renderable)
 			_indexOffset = indexOffset;

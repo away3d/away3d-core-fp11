@@ -9,6 +9,10 @@ package away3d.materials {
 
 		function get requiresBlending():Boolean;
 
+        function set blendMode(value:String):void;
+
+        function get blendMode():String;
+
 		function get materialId():Number;
 
 		function get renderOrderId():int;

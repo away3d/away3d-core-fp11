@@ -56,17 +56,17 @@ package away3d.core.partition
 			var node:EntityNode = entity.partitionNode;
 			// already marked to be updated
 			var t:EntityNode = _updateQueue;
-			
+
 			// if already marked for update
 			while (t) {
 				if (node == t)
 					return;
-				
+
 				t = t._updateQueueNext;
 			}
-			
+
 			node._updateQueueNext = _updateQueue;
-			
+
 			_updateQueue = node;
 			_updatesMade = true;
 		}
@@ -112,24 +112,24 @@ package away3d.core.partition
 			// clear updateQueue early to allow for newly marked entity updates
 			_updateQueue = null;
 			_updatesMade = false;
-			
+
 			do {
 				targetNode = _rootNode.findPartitionForEntity(node.entity);
-				
+
 				// if changed, find and attach the mesh node to the best suited partition node
 				if (node.parent != targetNode) {
 					if (node)
 						node.removeFromParent();
-					
+
 					targetNode.addNode(node);
 				}
-				
+
 				t = node._updateQueueNext;
 				node._updateQueueNext = null;
-				
+
 				//call an internal update on the entity to fire any attached logic
 				node.entity.internalUpdate();
-				
+
 			} while ((node = t) != null);
 		}
 	}

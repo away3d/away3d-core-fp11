@@ -40,11 +40,11 @@ package away3d.core.render {
 	public class DefaultRenderer extends RendererBase implements IRenderer {
 		private static const _frustumCorners:Vector.<Number> = new Vector.<Number>();
 
-		protected var _requireDepthRender:Boolean;
+        private static const RTT_PASSES:int = 1;
+        private static const SCREEN_PASSES:int = 2;
+        private static const ALL_PASSES:int = 3;
 
-		private static const RTT_PASSES:int = 1;
-		private static const SCREEN_PASSES:int = 2;
-		private static const ALL_PASSES:int = 3;
+		protected var _requireDepthRender:Boolean;
 
 		private var _activeMaterial:MaterialBase;
 
@@ -59,21 +59,17 @@ package away3d.core.render {
 		private var _profile:String;
 
         protected var filter3DRenderer:Filter3DRenderer;
-        protected var sceneDepthTexture:RenderTexture;
-        //deferred lighting
-        protected var sceneNormalTexture:RenderTexture;
-        protected var lightAccumulation:RenderTexture;
-        protected var lightAccumulationSpecular:RenderTexture;
 
         private var _renderTargetToScreenCopy:RenderTargetCopy;
         private var _worldNormalRenderer:WorldNormalRenderer;
         private var _gbufferRenderer:GBufferRenderer;
-        private var _lightRenderer:LightBufferRenderer;
+        private var _lightRenderer:ILightRenderer;
 
-        private var _deferredLightingMode:Boolean = false;
-        private var _deferredLightSpecular:Boolean = false;
-        private var _deferredLightDiffuse:Boolean = false;
-        private var _deferredColoredSpecularLighting:Boolean = false;
+        //todo: thinking about the creation of DeferredLightingConfig class to accumulate these properties
+        //but it should be immutable, because passes can't change these values
+        //or move it to EntityCollector
+        private var _useDeferredLighting:Boolean = false;
+        private var _deferredData:DeferredData;
 
         /**
 		 *
@@ -101,9 +97,8 @@ package away3d.core.render {
 			} else {
 				_requireDepthRender = false;
 
-				if (!_deferredLightingMode && sceneDepthTexture) {
-					sceneDepthTexture.dispose();
-					sceneDepthTexture = null;
+				if (!_useDeferredLighting && _deferredData.sceneDepthTexture) {
+                    _deferredData.disposeDepthTexture();
 				}
 			}
 		}
@@ -115,6 +110,7 @@ package away3d.core.render {
 		 */
 		public function DefaultRenderer(forceSoftware:Boolean = false, profile:String = "baseline") {
 			super();
+            _deferredData = new DeferredData();
 			_depthRenderer = new DepthRenderer();
 			_worldNormalRenderer = new WorldNormalRenderer();
 			_gbufferRenderer = new GBufferRenderer();
@@ -167,45 +163,54 @@ package away3d.core.render {
 			//setup camera for rendering required scene data
 			_rttViewProjectionMatrix.copyFrom(entityCollector.camera.viewProjection);
 
-            //update deferred rendering parameters
-            deferredLightingMode = entityCollector.numDeferredDirectionalLights>0 || entityCollector.numDeferredPointLights>0;
-            deferredColoredSpecularLighting = entityCollector.coloredSpecularDeferredLights;
-            _deferredLightSpecular = entityCollector.hasSpecularDeferredLights;
-            _deferredLightDiffuse = entityCollector.hasDiffuseDeferredLights;
+            //update deferred rendering properties
+            _useDeferredLighting = entityCollector.numDeferredDirectionalLights > 0 || entityCollector.numDeferredPointLights > 0;
+            if(!_useDeferredLighting) {
+                _deferredData.disposeLightBuffers();
+            }
+
+            _deferredData.useColoredSpecular = entityCollector.coloredSpecularDeferredLights;
+            if(!_deferredData.useColoredSpecular) {
+                _deferredData.disposeLightSpecularBuffer();
+            }
+
+            _deferredData.useSpecularLighting = entityCollector.hasSpecularDeferredLights;
+            _deferredData.useDiffuseLighting = entityCollector.hasDiffuseDeferredLights;
+            _deferredData.useMRT = hasMRTSupport;
 
 			_textureRatioX = 1;
 			_textureRatioY = 1;
 			//if RectangleRenderTextures are not avaliable
-			if ((filter3DRenderer || _deferredLightingMode) && !hasRectangleRenderTargetSupport) {
+			if ((filter3DRenderer || _useDeferredLighting) && !hasRectangleRenderTargetSupport) {
 				_textureRatioX = _rttBufferManager.textureRatioX;
 				_textureRatioY = _rttBufferManager.textureRatioY;
 				_rttViewProjectionMatrix.appendScale(_textureRatioX, _textureRatioY, 1);
 			}
 
-			sceneDepthTexture = updateScreenRenderTargetTexture(sceneDepthTexture);
-			if (_deferredLightingMode) {
-				sceneNormalTexture = updateScreenRenderTargetTexture(sceneNormalTexture);
+			_deferredData.sceneDepthTexture = updateScreenRenderTargetTexture(_deferredData.sceneDepthTexture);
+			if (_useDeferredLighting) {
+                _deferredData.sceneNormalTexture = updateScreenRenderTargetTexture(_deferredData.sceneNormalTexture);
 			}
 
-			if (_deferredLightingMode && hasMRTSupport) {
-				_context3D.setRenderToTexture(sceneDepthTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
-				_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
+			if (_useDeferredLighting && hasMRTSupport) {
+				_context3D.setRenderToTexture(_deferredData.sceneDepthTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 0);
+				_context3D.setRenderToTexture(_deferredData.sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias, 0, 1);
 				_context3D.clear();
 
-				_gbufferRenderer.render(_stage3DProxy, opaqueRenderableHead, camera, _rttViewProjectionMatrix);
+				_gbufferRenderer.render(_stage3DProxy, _deferredData, opaqueRenderableHead, camera, _rttViewProjectionMatrix);
 
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 0);
 				_context3D.setRenderToTexture(null, true, _antiAlias, 0, 1);
 				_context3D.setRenderToBackBuffer();
 			} else {
-				if (_deferredLightingMode || _requireDepthRender) {
+				if (_useDeferredLighting || _requireDepthRender) {
 					_depthRenderer.textureRatioX = _textureRatioX;
 					_depthRenderer.textureRatioY = _textureRatioY;
-					_depthRenderer.renderScene(entityCollector, sceneDepthTexture.getTextureForStage3D(_stage3DProxy), _rttBufferManager.renderToTextureRect);
+					_depthRenderer.renderScene(entityCollector, _deferredData.sceneDepthTexture.getTextureForStage3D(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				}
 
-				if (_deferredLightingMode) {
-					_context3D.setRenderToTexture(sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias);
+				if (_useDeferredLighting) {
+					_context3D.setRenderToTexture(_deferredData.sceneNormalTexture.getTextureForStage3D(_stage3DProxy), true, _antiAlias);
 					_context3D.clear();
 					_context3D.setScissorRectangle(_rttBufferManager.renderToTextureRect);
 					_worldNormalRenderer.render(stage3DProxy, opaqueRenderableHead, entityCollector.camera, _rttViewProjectionMatrix);
@@ -220,27 +225,23 @@ package away3d.core.render {
 			}
 
 			//calculate deferred lighting buffers
-			//TODO: downsampled lightbuffer support
-			if (_deferredLightingMode) {
-				lightAccumulation = updateScreenRenderTargetTexture(lightAccumulation);
-				_context3D.setRenderToTexture(lightAccumulation.getTextureForStage3D(_stage3DProxy), true, 0, 0, 0);
+			if (_useDeferredLighting) {
+                _deferredData.lightAccumulation = updateScreenRenderTargetTexture(_deferredData.lightAccumulation);
+				_context3D.setRenderToTexture(_deferredData.lightAccumulation.getTextureForStage3D(_stage3DProxy), true, 0, 0, 0);
 				updateFrustumCorners(camera);
 
-				if (_deferredColoredSpecularLighting) {
-					lightAccumulationSpecular = updateScreenRenderTargetTexture(lightAccumulationSpecular);
-					_context3D.setRenderToTexture(lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, 0, 0, 1);
+				if (_deferredData.useColoredSpecular) {
+                    _deferredData.lightAccumulationSpecular = updateScreenRenderTargetTexture(_deferredData.lightAccumulationSpecular);
+					_context3D.setRenderToTexture(_deferredData.lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy), true, 0, 0, 1);
 				}
 
 				stage3DProxy.clearBuffers();
 				_context3D.clear();
 
-				if (!_lightRenderer) _lightRenderer = new LightBufferRenderer();
+				if (!_lightRenderer) _lightRenderer = new PointLightRenderer();
 				_lightRenderer.textureRatioX = _textureRatioX;
 				_lightRenderer.textureRatioY = _textureRatioY;
-                _lightRenderer.diffuseEnabled = _deferredLightDiffuse;
-                _lightRenderer.specularEnabled = _deferredLightSpecular;
-                _lightRenderer.coloredSpecularOutput = _deferredColoredSpecularLighting;
-				_lightRenderer.render(_stage3DProxy, entityCollector as EntityCollector, hasMRTSupport, _frustumCorners, sceneNormalTexture, sceneDepthTexture);
+				_lightRenderer.render(_stage3DProxy, _deferredData, entityCollector as EntityCollector, _frustumCorners);
 
 				_context3D.setRenderToTexture(null, true, 0, 0, 0);
 				_context3D.setRenderToTexture(null, true, 0, 0, 1);
@@ -251,7 +252,7 @@ package away3d.core.render {
 			if (filter3DRenderer && _stage3DProxy.context3D) {
 				renderScene(entityCollector, filter3DRenderer.getMainInputTexture(_stage3DProxy), _rttBufferManager.renderToTextureRect);
 				if (filter3DRenderer.requireDepthRender) {
-					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, sceneDepthTexture.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
+					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, _deferredData.sceneDepthTexture.getTextureForStage3D(_stage3DProxy) as Texture, _shareContext);
 				} else {
 					filter3DRenderer.render(_stage3DProxy, entityCollector.camera, null, _shareContext);
 				}
@@ -268,21 +269,21 @@ package away3d.core.render {
 				_context3D.setRenderToBackBuffer();
 				var numTextures:int = 0;
 
-				if (_deferredLightingMode || _requireDepthRender) {
-					_context3D.setTextureAt(0, sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
+				if (_useDeferredLighting || _requireDepthRender) {
+					_context3D.setTextureAt(0, _deferredData.sceneDepthTexture.getTextureForStage3D(_stage3DProxy));
 					numTextures++;
 				}
 
-				if (_deferredLightingMode) {
+				if (_useDeferredLighting) {
 					numTextures++;
-					_context3D.setTextureAt(1, sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
+					_context3D.setTextureAt(1, _deferredData.sceneNormalTexture.getTextureForStage3D(_stage3DProxy));
 
 					numTextures++;
-					_context3D.setTextureAt(2, lightAccumulation.getTextureForStage3D(_stage3DProxy));
+					_context3D.setTextureAt(2, _deferredData.lightAccumulation.getTextureForStage3D(_stage3DProxy));
 
-					if (_deferredColoredSpecularLighting && lightAccumulationSpecular) {
+					if (_deferredData.useColoredSpecular && _deferredData.lightAccumulationSpecular) {
 						numTextures++;
-						_context3D.setTextureAt(3, lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy));
+						_context3D.setTextureAt(3, _deferredData.lightAccumulationSpecular.getTextureForStage3D(_stage3DProxy));
 					}
 				}
 
@@ -372,7 +373,7 @@ package away3d.core.render {
 			_context3D.setDepthTest(true, Context3DCompareMode.LESS_EQUAL);
 
 			var which:int = target ? SCREEN_PASSES : ALL_PASSES;
-			drawRenderables(opaqueRenderableHead, entityCollector, which, _deferredLightingMode);
+			drawRenderables(opaqueRenderableHead, entityCollector, which, _useDeferredLighting);
 			drawRenderables(blendedRenderableHead, entityCollector, which);
 
 			_context3D.setDepthTest(false, Context3DCompareMode.LESS_EQUAL);
@@ -475,12 +476,8 @@ package away3d.core.render {
 					var rttMask:int = _activeMaterial.passRendersToTexture(j) ? 1 : 2;
 
 					if ((rttMask & which) != 0) {
-                        //todo: how to pass deffered lighting to supershaderpass and multimaterialpass
                         if(useDeferredLighting) {
-                            _activeMaterial.diffuseDeferredLighting = lightAccumulation;
-                            if(_deferredColoredSpecularLighting) {
-                                _activeMaterial.specularDeferredLighting = lightAccumulationSpecular;
-                            }
+                            _activeMaterial.deferredData = _deferredData;
                         }
 
 						_activeMaterial.activatePass(j, _stage3DProxy, camera);
@@ -490,8 +487,7 @@ package away3d.core.render {
 						} while (renderable2 && renderable2.material == _activeMaterial);
 						_activeMaterial.deactivatePass(j, _stage3DProxy);
 
-                        _activeMaterial.diffuseDeferredLighting = null;
-                        _activeMaterial.specularDeferredLighting = null;
+                        _activeMaterial.deferredData = null;
 					} else {
 						do
 							renderable2 = renderable2.next as RenderableBase;
@@ -579,34 +575,5 @@ package away3d.core.render {
 		public function get hasMRTSupport():Boolean {
 			return _profile == Context3DProfile.STANDARD;
 		}
-
-		public function get deferredLightingMode():Boolean {
-			return _deferredLightingMode;
-		}
-
-		public function set deferredLightingMode(value:Boolean):void {
-			_deferredLightingMode = value;
-            if(!_deferredLightingMode) {
-                if(lightAccumulation){
-                    lightAccumulation.dispose();
-                    lightAccumulation = null;
-                }
-                if(lightAccumulationSpecular) {
-                    lightAccumulationSpecular.dispose();
-                    lightAccumulationSpecular = null;
-                }
-            }
-		}
-
-        public function get deferredColoredSpecularLighting():Boolean {
-            return _deferredColoredSpecularLighting;
-        }
-
-        public function set deferredColoredSpecularLighting(value:Boolean):void {
-            _deferredColoredSpecularLighting = value;
-            if(!_deferredColoredSpecularLighting && lightAccumulationSpecular) {
-                lightAccumulationSpecular.dispose();
-            }
-        }
     }
 }

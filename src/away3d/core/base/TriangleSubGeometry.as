@@ -622,7 +622,7 @@ package away3d.core.base
 						index += stride;
 					}
 				}
-			} else {
+			} else if(_positions) {
 				if (_vertexNormals == null) {
 					_vertexNormals = new Vector.<Number>(_positions.length);
 
