@@ -204,7 +204,7 @@ package away3d.lights
 
         public function isColoredSpecular():Boolean
         {
-            return hasSpecularEmission() && !(_specularR == _specularG && _specularR == _specularB);
+            return _specularR > 0 || _specularG > 0 || _specularB > 0 && !(_specularR == _specularG && _specularR == _specularB);
         }
 
         public function hasDiffuseEmission():Boolean {

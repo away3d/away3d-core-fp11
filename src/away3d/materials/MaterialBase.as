@@ -6,8 +6,7 @@ package away3d.materials
 	import away3d.core.base.IMaterialOwner;
 	import away3d.core.managers.Stage3DProxy;
 	import away3d.core.pool.RenderableBase;
-    import away3d.core.render.DeferredData;
-    import away3d.core.traverse.EntityCollector;
+	import away3d.core.traverse.EntityCollector;
 	import away3d.entities.Camera3D;
 	import away3d.library.assets.AssetType;
 	import away3d.library.assets.IAsset;
@@ -123,7 +122,12 @@ package away3d.materials
 		protected var _width:Number = 1;
 		protected var _height:Number = 1;
 
-        arcane var deferredData:DeferredData;
+        arcane var lightAccumulation:Texture2DBase;
+        arcane var lightAccumulationSpecular:Texture2DBase;
+        arcane var useDeferredLighting:Boolean;
+        arcane var useDeferredSpecularLighting:Boolean;
+        arcane var useDeferredDiffuseLighting:Boolean;
+        arcane var useDeferredColoredSpecular:Boolean;
 
 		/**
 		 * Creates a new MaterialBase object.

@@ -122,7 +122,7 @@ package away3d.materials.passes {
             code += "mov ft" + specularColor + ", fc" + _shader.getFragmentConstant(PROPERTIES_FC) + ".wwww\n";//0,0,0,0
             var accumulationSampleRegister:int;
 
-            if (_material.deferredData.useDiffuseLighting) {
+            if (_material.useDeferredDiffuseLighting) {
                 if (diffuseMap) {
                     code += sampleTexture(diffuseMap, diffuseMapUVChannel, diffuseColor, _shader.getTexture(DIFFUSE_TEXTURE));
                 } else {
@@ -136,7 +136,7 @@ package away3d.materials.passes {
                 _shader.removeFragmentTempUsage(accumulationSampleRegister);
             }
 
-            if (_material.deferredData.useSpecularLighting) {
+            if (_material.useDeferredSpecularLighting) {
                 if (specularMap) {
                     code += sampleTexture(specularMap, specularMapUVChannel, specularColor, _shader.getTexture(SPECULAR_TEXTURE));
                     code += "mul ft" + specularColor + ".xyz, ft" + specularColor + ".xyz, fc" + _shader.getFragmentConstant(SPECULAR_COLOR_FC) + ".xxx\n";
@@ -146,7 +146,7 @@ package away3d.materials.passes {
 
                 accumulationSampleRegister = _shader.getFreeFragmentTemp();
 
-                if (_material.deferredData.useDiffuseLighting) {
+                if (_material.useDeferredColoredSpecular) {
                     code += "tex ft" + accumulationSampleRegister + ", ft" + renderTargetUv + ".xy, fs" + _shader.getTexture(ACCUMULATION_SPECULAR_TEXTURE) + " <2d,linear, nearest>\n";
                     code += "mul ft" + specularColor + ".xyz, ft" + accumulationSampleRegister + ".xyz, ft" + specularColor + ".xyz\n";
                 } else {
@@ -221,12 +221,12 @@ package away3d.materials.passes {
                 context3D.setTextureAt(_shader.getTexture(SPECULAR_TEXTURE), specularMap.getTextureForStage3D(stage3DProxy));
             }
 
-            if (_shader.hasTexture(ACCUMULATION_TEXTURE) && _material.deferredData.lightAccumulation) {
-                context3D.setTextureAt(_shader.getTexture(ACCUMULATION_TEXTURE), _material.deferredData.lightAccumulation.getTextureForStage3D(stage3DProxy));
+            if (_shader.hasTexture(ACCUMULATION_TEXTURE) && _material.lightAccumulation) {
+                context3D.setTextureAt(_shader.getTexture(ACCUMULATION_TEXTURE), _material.lightAccumulation.getTextureForStage3D(stage3DProxy));
             }
 
-            if (_shader.hasTexture(ACCUMULATION_SPECULAR_TEXTURE) && _material.deferredData.lightAccumulationSpecular) {
-                context3D.setTextureAt(_shader.getTexture(ACCUMULATION_SPECULAR_TEXTURE), _material.deferredData.lightAccumulationSpecular.getTextureForStage3D(stage3DProxy));
+            if (_shader.hasTexture(ACCUMULATION_SPECULAR_TEXTURE) && _material.lightAccumulationSpecular) {
+                context3D.setTextureAt(_shader.getTexture(ACCUMULATION_SPECULAR_TEXTURE), _material.lightAccumulationSpecular.getTextureForStage3D(stage3DProxy));
             }
         }
 

@@ -86,7 +86,7 @@ package away3d.core.render {
             context3Ds = new Vector.<Context3D>(8, true);
         }
 
-        public function render(stage3DProxy:Stage3DProxy, deferredData:DeferredData, entityCollector:EntityCollector, frustumCorners:Vector.<Number>):void {
+        public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, frustumCorners:Vector.<Number>, normalTexture:Texture2DBase, depthTexture:Texture2DBase = null):void {
             var i:int;
             var len:int;
             //store data from collector
@@ -103,7 +103,7 @@ package away3d.core.render {
 
             if (_numDirLights == 0 && _numPointLights == 0) return;
 
-            var maxLightCountPerBatch:int = (deferredData.useMRT) ? 18 : 7;
+            var maxLightCountPerBatch:int = (hasMRTSupport) ? 18 : 7;
             var numDirectionalPrograms:int = Math.ceil(_numDirLights / maxLightCountPerBatch);
             var numPointPrograms:int = Math.ceil(_numPointLights / maxLightCountPerBatch);
 
@@ -185,8 +185,7 @@ package away3d.core.render {
 
             shader = shaders[0];
 
-            var vertexBuffer:VertexBuffer3D = (deferredData.useMRT) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
-
+            var vertexBuffer:VertexBuffer3D = (hasMRTSupport) ? rttBuffer.renderRectToScreenVertexBuffer : rttBuffer.renderToTextureVertexBuffer;
             var indexBuffer:IndexBuffer3D = rttBuffer.indexBuffer;
             //in future, enable stencil test optimization in FlashPlayer 15, when we don't need to clear it each time
             context3D.setVertexBufferAt(shader.getAttribute(POSITION_ATTRIBUTE), vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
@@ -203,7 +202,7 @@ package away3d.core.render {
             var drawCalls:int = 0;
             context3D.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO);
             for (i = 0; i < numDirectionalPrograms; i++) {
-                activatePass(shaders[i], camera, stage3DProxy, deferredData.sceneNormalTexture, deferredData.sceneDepthTexture);
+                activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
                 activateDirectionalLightData(shaders[i], context3D, offsetLight, Math.min(maxLightCountPerBatch, _numDirLights - offsetLight));
                 context3D.setProgram(programs[i]);
                 context3D.drawTriangles(indexBuffer, 0, 2);
@@ -216,7 +215,7 @@ package away3d.core.render {
 
             offsetLight = 0;
             for (i = numDirectionalPrograms; i < numDirectionalPrograms+numPointPrograms; i++) {
-                activatePass(shaders[i], camera, stage3DProxy, deferredData.sceneNormalTexture, deferredData.sceneDepthTexture);
+                activatePass(shaders[i], camera, stage3DProxy, normalTexture, depthTexture);
                 activatePointLightData(shaders[i], context3D, offsetLight, Math.min(maxLightCountPerBatch, _numPointLights - offsetLight));
                 context3D.setProgram(programs[i]);
                 context3D.drawTriangles(indexBuffer, 0, 2);

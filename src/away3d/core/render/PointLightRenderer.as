@@ -29,8 +29,8 @@ package away3d.core.render {
     use namespace arcane;
 
     public class PointLightRenderer implements ILightRenderer {
-        private static const NUM_BATCHED_LIGHTS_STANDARD:int = 18;
-        private static const NUM_BATCHED_LIGHTS_BASELINE:int = 7;
+        private static const MAX_BATCHED_LIGHTS_STANDARD:int = 18;
+        private static const MAX_BATCHED_LIGHTS_BASELINE:int = 7;
 
         private static const compiler:AGALMiniAssembler = new AGALMiniAssembler();
 
@@ -42,6 +42,7 @@ package away3d.core.render {
         private static const UV_VARYING:String = "vUv";
         private static const POSITION_VARYING:String = "vPos";
 
+        private static const AMBIENT_VALUES_FC:String = "cfAmbientValues";
         private static const LIGHT_FC:String = "cfLightData";
         private static const CAMERA_FC:String = "cfCameraData";
         private static const DECODE_FC:String = "cfDecodeDepth";
@@ -50,6 +51,7 @@ package away3d.core.render {
         private static const WORLD_NORMAL_TEXTURE:String = "tWorldNormal";
         private static const DEPTH_TEXTURE:String = "tDepth";
 
+        private static const _ambientValuesFC:Vector.<Number> = new Vector.<Number>();
         private static const _cameraFC:Vector.<Number> = new Vector.<Number>();
         private static const _decodeValuesFC:Vector.<Number> = Vector.<Number>([1, 1 / 255, 1 / 65025, 1 / 16581375]);
         private static const _scaleValuesVC:Vector.<Number> = Vector.<Number>([0, 0, 1, 1]);
@@ -80,10 +82,13 @@ package away3d.core.render {
         private var _sphereVertexBuffer:VertexBuffer3D;
         private var _sphereIndex:IndexBuffer3D;
         private var _batchedSphereProgram:Program3D;
+        private var _globalAmbientR:Number = 0;
+        private var _globalAmbientG:Number = 0;
+        private var _globalAmbientB:Number = 0;
+
         private var _profile:String;
-        private var _previousNumDrawCalls:int = 0;
+
         private var _numBatchedLights:int = 0;
-        private var deferredStateHash:uint = 0;
 
         public function PointLightRenderer() {
             initInstance();
@@ -96,12 +101,14 @@ package away3d.core.render {
             context3Ds = new Vector.<Context3D>(8, true);
         }
 
-        public function render(stage3DProxy:Stage3DProxy, deferredData:DeferredData, entityCollector:EntityCollector, frustumCorners:Vector.<Number>):void {
+        private var previousNumPrograms:int = 0;
+
+        public function render(stage3DProxy:Stage3DProxy, entityCollector:EntityCollector, hasMRTSupport:Boolean, frustumCorners:Vector.<Number>, normalTexture:Texture2DBase, depthTexture:Texture2DBase = null):void {
             var i:int;
             var len:int;
+            //store data from collector
             var camera:Camera3D = entityCollector.camera;
             var index:int = stage3DProxy.stage3DIndex;
-
             //set point lights
             if (entityCollector.numDeferredPointLights != _numPointLights) {
                 _pointLights = entityCollector.deferredPointLights;
@@ -111,18 +118,16 @@ package away3d.core.render {
 
             if (_numPointLights == 0) return;
 
-            if (_numBatchedLights == 0) {
-                _numBatchedLights = (deferredData.useMRT) ? NUM_BATCHED_LIGHTS_STANDARD : NUM_BATCHED_LIGHTS_BASELINE;
+            if(_numBatchedLights == 0) {
+                _numBatchedLights = (hasMRTSupport) ? MAX_BATCHED_LIGHTS_STANDARD : MAX_BATCHED_LIGHTS_BASELINE;
             }
 
-            var hash:uint = deferredData.getHashForDeferredLighting();
             var numDrawCalls:int = Math.ceil(_numPointLights / _numBatchedLights);
-            if (_previousNumDrawCalls != numDrawCalls || deferredStateHash != hash) {
+            if (previousNumPrograms != numDrawCalls) {
+                previousNumPrograms = numDrawCalls;
                 programsCache[index] = null;
                 shaderStates[index] = null;
                 dirtyPrograms[index] = true;
-                _previousNumDrawCalls = numDrawCalls;
-                deferredStateHash = hash;
             }
 
             var context3D:Context3D = stage3DProxy.context3D;
@@ -168,6 +173,9 @@ package away3d.core.render {
                     compilePointFragmentProgram(_numPointLights % _numBatchedLights, shader);
                     program.upload(compiler.assemble(Context3DProgramType.VERTEX, _vertexCode, 2), compiler.assemble(Context3DProgramType.FRAGMENT, _fragmentCode, 2));
                 }
+
+                shader = null;
+                program = null;
                 dirtyPrograms[index] = false;
             }
 
@@ -189,7 +197,7 @@ package away3d.core.render {
                 context3D.setStencilReferenceValue(i + 1);
                 context3D.setStencilActions(Context3DTriangleFace.FRONT, Context3DCompareMode.ALWAYS, Context3DStencilAction.SET, Context3DStencilAction.SET, Context3DStencilAction.SET);
                 context3D.setColorMask(false, false, false, false);
-                renderStencil(context3D, Math.min(_numBatchedLights, _numPointLights - offsetLight));
+                renderStencil(context3D, camera, Math.min(_numBatchedLights, _numPointLights - offsetLight));
                 context3D.setStencilActions(Context3DTriangleFace.FRONT, Context3DCompareMode.EQUAL);
                 context3D.setColorMask(true, true, true, true);
 
@@ -197,18 +205,19 @@ package away3d.core.render {
                     program = programs[1];
                     shader = shaders[1];
                 }
-
-                renderLightBatch(shader, deferredData.useMRT, camera, stage3DProxy, deferredData.sceneNormalTexture, deferredData.sceneDepthTexture, program);
+                renderLightBatch(shader, hasMRTSupport, camera, stage3DProxy, normalTexture, depthTexture, program);
 
                 offsetLight += _numBatchedLights;
             }
             context3D.setStencilActions();
         }
 
-        private function renderStencil(context3D:Context3D, numSpheres:int):void {
+        private var cc:int = 0;
+
+        private function renderStencil(context3D:Context3D, camera:Camera3D, numSpheres:int):void {
             if (!_sphereVertexBuffer) {
-                _sphereVertexBuffer = context3D.createVertexBuffer(DeferredStencilSphere.numVertices * NUM_BATCHED_LIGHTS_STANDARD, 4);
-                _sphereVertexBuffer.uploadFromVector(DeferredStencilSphere.data, 0, DeferredStencilSphere.numVertices * NUM_BATCHED_LIGHTS_STANDARD);
+                _sphereVertexBuffer = context3D.createVertexBuffer(DeferredStencilSphere.numVertices * 18, 4);
+                _sphereVertexBuffer.uploadFromVector(DeferredStencilSphere.data, 0, DeferredStencilSphere.numVertices * 18);
             }
 
             if (!_sphereIndex) {
@@ -236,10 +245,9 @@ package away3d.core.render {
             code += "mov vt0.w, va0.w\n" +
                     "mov vt1, vc[va1.x]\n" +
                     "mul vt0.xyz, va0.xyz, vt1.w\n" +
-                // add position
                     "add vt0.xyz, vt0.xyz, vt1.xyz\n" +
-                // project
                     "m44 op, vt0, vc5\n";
+
             return code;
         }
 
@@ -249,6 +257,10 @@ package away3d.core.render {
         }
 
         private function activatePointLightData(from:int, count:int):void {
+            _globalAmbientR = 0;
+            _globalAmbientG = 0;
+            _globalAmbientB = 0;
+
             var k:int = 0;
             var stencilIndex:int = 0;
             var i:int;
@@ -274,6 +286,10 @@ package away3d.core.render {
                 _lightStencilData[stencilIndex++] = posDir.y;
                 _lightStencilData[stencilIndex++] = posDir.z;
                 _lightStencilData[stencilIndex++] = light.fallOff;
+
+                _globalAmbientR += light._ambientR;
+                _globalAmbientG += light._ambientG;
+                _globalAmbientB += light._ambientB;
             }
         }
 
@@ -290,6 +306,14 @@ package away3d.core.render {
                 context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(LIGHT_FC), _lightData, shader.getFragmentConstantStride(LIGHT_FC));
             }
 
+            if (shader.hasFragmentConstant(AMBIENT_VALUES_FC)) {
+                _ambientValuesFC[0] = _globalAmbientR;
+                _ambientValuesFC[1] = _globalAmbientG;
+                _ambientValuesFC[2] = _globalAmbientB;
+                _ambientValuesFC[3] = 100;//decode gloss
+                context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(AMBIENT_VALUES_FC), _ambientValuesFC, shader.getFragmentConstantStride(AMBIENT_VALUES_FC));
+            }
+
             //FRAGMENT GLOBAL VALUES
             if (shader.hasFragmentConstant(CAMERA_FC)) {
                 _cameraFC[0] = camera.scenePosition.x;
@@ -303,7 +327,7 @@ package away3d.core.render {
                 var raw:Vector.<Number> = Matrix3DUtils.RAW_DATA_CONTAINER;
                 camera.projection.matrix.copyRawDataTo(raw);
                 _decodeValuesFC[4] = 0;
-                _decodeValuesFC[5] = 100;//decode gloss
+                _decodeValuesFC[5] = 0;
                 _decodeValuesFC[6] = raw[14];
                 _decodeValuesFC[7] = -raw[10];
                 context3D.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, shader.getFragmentConstant(DECODE_FC), _decodeValuesFC, shader.getFragmentConstantStride(DECODE_FC));
@@ -340,13 +364,12 @@ package away3d.core.render {
             var normal:int = shader.getFreeFragmentTemp();
             _fragmentCode += "tex ft" + normal + ", v" + shader.getVarying(UV_VARYING) + ", fs" + shader.getTexture(WORLD_NORMAL_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
 
-            var depth:int = shader.getFreeFragmentTemp();
-            var decode:int = shader.getFragmentConstant(DECODE_FC, 2);
-
             if (_specularEnabled) {
-                _fragmentCode += "mul ft" + normal + ".w, ft" + normal + ".w, fc" + (decode + 1) + ".y\n";//100
+                _fragmentCode += "mul ft" + normal + ".w, ft" + normal + ".w, fc" + shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".w\n";//100
             }
 
+            var depth:int = shader.getFreeFragmentTemp();
+            var decode:int = shader.getFragmentConstant(DECODE_FC, 2);
             _fragmentCode += "tex ft" + depth + ", v" + shader.getVarying(UV_VARYING) + ", fs" + shader.getTexture(DEPTH_TEXTURE) + " <2d,nearst,nomip,clamp>\n";
             _fragmentCode += "dp4 ft" + depth + ".z, ft" + depth + ", fc" + decode + "\n";
             _fragmentCode += "add ft" + depth + ".z, ft" + depth + ".z, fc" + (decode + 1) + ".w\n";
@@ -358,7 +381,8 @@ package away3d.core.render {
 
             if (_diffuseEnabled) {
                 var accumulationDiffuse:int = shader.getFreeFragmentTemp();
-                _fragmentCode += "mov ft" + accumulationDiffuse + ".xyzw, fc" + (decode + 1) + ".x\n";
+                _fragmentCode += "mov ft" + accumulationDiffuse + ".xyz, fc" + shader.getFragmentConstant(AMBIENT_VALUES_FC) + ".xyz\n";
+                _fragmentCode += "mov ft" + accumulationDiffuse + ".w, fc" + (decode + 1) + ".x\n";
             }
 
             if (_specularEnabled && _coloredSpecularOutput) {
@@ -433,15 +457,19 @@ package away3d.core.render {
             _vertexCode += "mov v" + shader.getVarying(POSITION_VARYING) + ", vt0\n";
         }
 
-        private function getStencilVertexCode():String {
-            return  "mov vt0.w, va0.w\n" +
+        protected function getStencilVertexCode():String {
+            // scale by radius
+            return    "mov vt0.w, va0.w\n" +
                     "mul vt0.xyz, va0.xyz, vc8.w\n" +
+                // add position
                     "add vt0.xyz, vt0.xyz, vc8.xyz\n" +
+                // project
                     "m44 vt0, vt0, vc4\n" +
                     "mul op, vt0, vc9\n";
         }
 
-        private function getStencilFragmentCode():String {
+        protected function getStencilFragmentCode():String {
+            // just output something, stencil action is the only important thing
             return "mov oc, fc0";
         }
 
@@ -505,14 +533,6 @@ package away3d.core.render {
             for (var i:uint = 0; i < 8; i++) {
                 dirtyPrograms[i] = true;
             }
-        }
-
-        public function get numBatchedLights():int {
-            return _numBatchedLights;
-        }
-
-        public function set numBatchedLights(value:int):void {
-            _numBatchedLights = value;
         }
     }
 }
